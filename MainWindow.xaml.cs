@@ -88,7 +88,67 @@ namespace FormatX
       ApplyUiText();
       ApplyBackground();
       _ = RefreshDevices();
+      if (MainTabView != null) MainTabView.SelectionChanged += (_,__) => UpdateSidebarActive();
       StartWatch();
+    }
+
+    private void UpdateSidebarActive()
+    {
+      try
+      {
+        var fe = this.Content as FrameworkElement;
+        var tv = fe?.FindName("MainTabView") as Microsoft.UI.Xaml.Controls.TabView;
+        if (tv == null) return;
+        int idx = tv.SelectedIndex;
+        // Reset backgrounds of sidebar buttons
+        void Reset(string name)
+        {
+          try { var b = fe?.FindName(name) as Button; if (b!=null) b.ClearValue(Button.BackgroundProperty); } catch { }
+        }
+        Reset("SidebarIso"); Reset("SidebarFormat"); Reset("SidebarPartitions"); Reset("SidebarSecure"); Reset("SidebarHealth"); Reset("SidebarSettings");
+        string active = idx switch {0=>"SidebarIso",1=>"SidebarFormat",2=>"SidebarPartitions",3=>"SidebarSecure",4=>"SidebarHealth",5=>"SidebarSettings",_=>null};
+        if (active != null)
+        {
+          var ab = fe?.FindName(active) as Button;
+          if (ab != null)
+          {
+            ab.Background = (SolidColorBrush)Application.Current.Resources["AccentOrangeBrush"];
+          }
+        }
+      }
+      catch { }
+    }
+
+    private void AppTitleBar_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+      try
+      {
+        var pt = e.GetCurrentPoint(null);
+        if (pt.Properties.IsLeftButtonPressed) StartWindowDrag();
+      }
+      catch { }
+    }
+
+    private void AppTitleBar_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    {
+      try { BtnMax_Click(null, null); } catch { }
+    }
+
+    // Toast overlay: show for short duration
+    private async Task ShowToastOverlay(string msg)
+    {
+      try
+      {
+        var fe = this.Content as FrameworkElement;
+        var toastFE = fe?.FindName("ToastOverlay") as FrameworkElement;
+        var toastText = fe?.FindName("ToastText") as Microsoft.UI.Xaml.Controls.TextBlock;
+        if (toastFE == null || toastText == null) return;
+        toastText.Text = msg;
+        toastFE.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
+        await Task.Delay(1800);
+        toastFE.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
+      }
+      catch { }
     }
 
     private void SidebarNav_Click(object sender, RoutedEventArgs e)
@@ -306,7 +366,7 @@ namespace FormatX
       if (BtnApplySettings != null) BtnApplySettings.Content = hu ? "Alkalmaz" : "Apply";
       if (BtnCheckUpdate != null) BtnCheckUpdate.Content = hu ? "Frissítések keresése" : "Check for updates";
       if (BtnExportCsv != null) BtnExportCsv.Content = hu ? "Napló export (CSV)" : "Export log (CSV)";
-      if (TxtVersion != null) TxtVersion.Text = (hu ? "Verzió: " : "Version: ") + "v0.0.5";
+      if (TxtVersion != null) TxtVersion.Text = (hu ? "Verzió: " : "Version: ") + "v2.0";
       if (TxtFooter != null) TxtFooter.Text = ".NET 10 • WinUI 3 • MSIX";
     }
 
@@ -346,6 +406,7 @@ namespace FormatX
     {
       await LogService.LogAsync("iso_write", new { target = (TargetDrives?.SelectedItem as ComboBoxItem)?.Tag?.ToString(), iso = IsoPath?.Text });
       await ShowToast(_lang == AppLanguage.Hu ? "ISO írás: előkészítve" : "ISO write: prepared");
+      _ = ShowToastOverlay(_lang == AppLanguage.Hu ? "ISO írás: előkészítve" : "ISO write: prepared");
     }
 
     private async void Format_Click(object sender, RoutedEventArgs e)
@@ -365,6 +426,7 @@ namespace FormatX
           (p, t) => DispatcherQueue.TryEnqueue(() => SetProgress(p, (_lang==AppLanguage.Hu ? "Formázás" : "Formatting") + " - " + p + "%"))
         );
         Status.Text = _lang == AppLanguage.Hu ? "Formázás kész" : "Format done";
+        _ = ShowToastOverlay(_lang == AppLanguage.Hu ? "Formázás kész" : "Format done");
       } catch (Exception ex) { Status.Text = ex.Message; }
     }
 
@@ -382,6 +444,7 @@ namespace FormatX
         var prog = new Progress<int>(p => DispatcherQueue.TryEnqueue(() => SetProgress(p, (_lang == AppLanguage.Hu ? "Törlés " : "Erase ") + p + "%")));
         await new SecureEraseService().ClearDiskAsync(disk, full, prog);
         EraseResult.Text = _lang == AppLanguage.Hu ? "Törlés kész" : "Erase done";
+        _ = ShowToastOverlay(_lang == AppLanguage.Hu ? "Törlés kész" : "Erase done");
       } catch (Exception ex) { EraseResult.Text = ex.Message; }
     }
 
@@ -467,6 +530,7 @@ namespace FormatX
         ApplyUiText();
         ApplyBackground();
         await ShowToast(_lang == AppLanguage.Hu ? "Beállítások mentve" : "Settings saved");
+        _ = ShowToastOverlay(_lang == AppLanguage.Hu ? "Beállítások mentve" : "Settings saved");
       } catch { }
     }
 

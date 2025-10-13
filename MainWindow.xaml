@@ -20,7 +20,8 @@
     </Grid.ColumnDefinitions>
 
     <!-- Integrated Title Bar / Header -->
-    <Border x:Name="AppTitleBar" Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource PrimaryDarkBrush}" Padding="12" Height="48">
+    <Border x:Name="AppTitleBar" Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource PrimaryDarkBrush}" Padding="12" Height="48"
+            PointerPressed="AppTitleBar_PointerPressed" DoubleTapped="AppTitleBar_DoubleTapped">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto"/>
@@ -34,35 +35,25 @@
         </StackPanel>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="6">
-          <Button x:Name="BtnRefresh" Content="⟳" ToolTipService.ToolTip="Refresh" Click="Refresh_Click" Style="{StaticResource AccentButtonStyle}"/>
-          <Button x:Name="BtnMin" Content="▁" ToolTipService.ToolTip="Minimize" Click="BtnMin_Click" Style="{StaticResource WindowControlButtonStyle}"/>
-          <Button x:Name="BtnMax" Content="▢" ToolTipService.ToolTip="Maximize/Restore" Click="BtnMax_Click" Style="{StaticResource WindowControlButtonStyle}"/>
-          <Button x:Name="BtnClose" Content="✕" ToolTipService.ToolTip="Close" Click="BtnClose_Click" Style="{StaticResource WindowControlButtonStyle}"/>
+          <Button x:Name="BtnRefresh" Content="⟳" ToolTipService.ToolTip="Refresh" Click="Refresh_Click" Style="{StaticResource AccentButtonStyle}" AutomationProperties.Name="Refresh"/>
+          <Button x:Name="BtnMin" Content="▁" ToolTipService.ToolTip="Minimize" Click="BtnMin_Click" Style="{StaticResource WindowControlButtonStyle}" AutomationProperties.Name="Minimize"/>
+          <Button x:Name="BtnMax" Content="▢" ToolTipService.ToolTip="Maximize/Restore" Click="BtnMax_Click" Style="{StaticResource WindowControlButtonStyle}" AutomationProperties.Name="MaximizeRestore"/>
+          <Button x:Name="BtnClose" Content="✕" ToolTipService.ToolTip="Close" Click="BtnClose_Click" Style="{StaticResource WindowControlButtonStyle}" AutomationProperties.Name="Close"/>
         </StackPanel>
       </Grid>
     </Border>
 
     <!-- Left sidebar -->
     <Border Grid.Row="1" Grid.Column="0" Margin="12" Padding="8" Style="{StaticResource CardPanelStyle}" MinWidth="56" MaxWidth="260">
-      <StackPanel Spacing="8">
-        <Border Style="{StaticResource CardPanelStyle}" Padding="6">
-          <Button x:Name="SidebarIso" Content="ISO → USB" Tag="0" Click="SidebarNav_Click" HorizontalAlignment="Stretch" />
-        </Border>
-        <Border Style="{StaticResource CardPanelStyle}" Padding="6">
-          <Button x:Name="SidebarFormat" Content="Format" Tag="1" Click="SidebarNav_Click" HorizontalAlignment="Stretch" />
-        </Border>
-        <Border Style="{StaticResource CardPanelStyle}" Padding="6">
-          <Button x:Name="SidebarPartitions" Content="Partitions" Tag="2" Click="SidebarNav_Click" HorizontalAlignment="Stretch" />
-        </Border>
-        <Border Style="{StaticResource CardPanelStyle}" Padding="6">
-          <Button x:Name="SidebarSecure" Content="Secure Erase" Tag="3" Click="SidebarNav_Click" HorizontalAlignment="Stretch" />
-        </Border>
-        <Border Style="{StaticResource CardPanelStyle}" Padding="6">
-          <Button x:Name="SidebarHealth" Content="Disk Health" Tag="4" Click="SidebarNav_Click" HorizontalAlignment="Stretch" />
-        </Border>
-        <Border Style="{StaticResource CardPanelStyle}" Padding="6">
-          <Button x:Name="SidebarSettings" Content="Settings" Tag="5" Click="SidebarNav_Click" HorizontalAlignment="Stretch" />
-        </Border>
+      <StackPanel>
+        <TextBlock Text="Operations" Style="{StaticResource SidebarHeaderStyle}"/>
+        <Border Padding="6"><Button x:Name="SidebarIso" Content="ISO → USB" Tag="0" Click="SidebarNav_Click" Style="{StaticResource SidebarButtonStyle}" AutomationProperties.Name="ISO to USB" /></Border>
+        <Border Padding="6"><Button x:Name="SidebarFormat" Content="Format" Tag="1" Click="SidebarNav_Click" Style="{StaticResource SidebarButtonStyle}" AutomationProperties.Name="Format" /></Border>
+        <Border Padding="6"><Button x:Name="SidebarPartitions" Content="Partitions" Tag="2" Click="SidebarNav_Click" Style="{StaticResource SidebarButtonStyle}" AutomationProperties.Name="Partitions" /></Border>
+        <Border Padding="6"><Button x:Name="SidebarSecure" Content="Secure Erase" Tag="3" Click="SidebarNav_Click" Style="{StaticResource SidebarButtonStyle}" AutomationProperties.Name="Secure Erase" /></Border>
+        <TextBlock Text="System" Style="{StaticResource SidebarHeaderStyle}"/>
+        <Border Padding="6"><Button x:Name="SidebarHealth" Content="Disk Health" Tag="4" Click="SidebarNav_Click" Style="{StaticResource SidebarButtonStyle}" AutomationProperties.Name="Disk Health" /></Border>
+        <Border Padding="6"><Button x:Name="SidebarSettings" Content="Settings" Tag="5" Click="SidebarNav_Click" Style="{StaticResource SidebarButtonStyle}" AutomationProperties.Name="Settings" /></Border>
       </StackPanel>
     </Border>
 
@@ -85,7 +76,8 @@
 
           <StackPanel Orientation="Horizontal" Spacing="8">
             <TextBox x:Name="IsoPath" Width="300" PlaceholderText="Select ISO" Style="{StaticResource RoundedTextBoxStyle}"/>
-            <Button x:Name="BtnBrowseIso" Content="Browse..." Click="BrowseIso_Click" Style="{StaticResource AccentButtonStyle}"/>
+            <!-- Reuse background picker to allow quick background change from main UI -->
+            <Button x:Name="BtnBrowseIso" Content="Browse..." Click="PickBackground_Click" Style="{StaticResource AccentButtonStyle}" ToolTipService.ToolTip="Change background" AutomationProperties.Name="ChangeBackground"/>
           </StackPanel>
 
           <ComboBox x:Name="TargetDrives" Grid.Row="1" Width="220" Header="Target drive (removable)" Style="{StaticResource RoundedComboBoxStyle}"/>
@@ -223,7 +215,7 @@
 
           <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
           <TextBlock x:Name="TxtAbout" Text="Névjegy" FontWeight="SemiBold"/>
-          <TextBlock x:Name="TxtVersion" Text="Verzió: V.0,0,5" Foreground="{StaticResource MutedTextBrush}" />
+          <TextBlock x:Name="TxtVersion" Text="Verzió: v2.0" Foreground="{StaticResource MutedTextBrush}" />
           <StackPanel Spacing="4">
             <TextBlock Text="FormatX — © 2025 Hutóczky József (Games Tech). Minden jog fenntartva." TextWrapping="Wrap"/>
             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -245,6 +237,15 @@
         <ProgressBar x:Name="GlobalProgressBar" Width="420" Style="{StaticResource ThinProgressBarStyle}" Minimum="0" Maximum="100"/>
         <TextBlock x:Name="GlobalProgressText" Text="Készenlét" Foreground="{StaticResource MutedTextBrush}" VerticalAlignment="Center"/>
         <TextBlock x:Name="Status" Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource MutedTextBrush}"/>
+      </StackPanel>
+    </Border>
+
+    <!-- Toast overlay -->
+    <Border x:Name="ToastOverlay" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" Background="#00000000" IsHitTestVisible="False">
+      <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,64,24,0">
+        <Border Background="#DD111827" Padding="12" CornerRadius="8">
+          <TextBlock x:Name="ToastText" Foreground="White" />
+        </Border>
       </StackPanel>
     </Border>
   </Grid>
