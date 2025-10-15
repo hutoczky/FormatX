@@ -6,7 +6,7 @@ using Windows.Storage;
 
 namespace FormatX.Services
 {
-  public class ValidationResult { public bool IsValid; public string Reason = string.Empty; }
+  public class ValidationResult { public bool IsValid { get; set; } public string Reason { get; set; } = string.Empty; }
 
   public static class BackgroundValidator
   {
@@ -39,7 +39,7 @@ namespace FormatX.Services
     }
 
     // Back-compat: validate by path boolean
-    public static async Task<bool> ValidateAsync(string path)
+    public static async Task<bool> ValidateAsync(string? path)
     {
       try
       {

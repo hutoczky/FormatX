@@ -36,17 +36,27 @@ namespace FormatX
       this.Activated += MainWindow_Activated;
       this.Closed += (_, __) => StopWatch();
 
-      // Restore background on startup only if token exists
+      // Defer background restore until window activation to avoid race/COM issues
       try
       {
-        if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.ContainsKey(BackgroundTokenKey))
+        this.Activated += async (_, __) =>
         {
-          _ = RestoreBackgroundAsync();
-        }
+          try
+          {
+            if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.ContainsKey(BackgroundTokenKey))
+            {
+              await RestoreBackgroundAsync();
+            }
+          }
+          catch (Exception ex)
+          {
+            await LogService.LogAsync("background.restore.tokencheck.error", new { ex = ex.Message });
+          }
+        };
       }
       catch (Exception ex)
       {
-        _ = LogService.LogAsync("background.restore.tokencheck.error", new { ex = ex.Message });
+        _ = LogService.LogAsync("background.restore.hook.error", new { ex = ex.Message });
       }
 
       try
@@ -101,32 +111,45 @@ namespace FormatX
           _ = LogService.LogAsync("error.com.exception", cex); CrashHandler.Show(cex, "appwindow.get");
         }
 
-        this.ExtendsContentIntoTitleBar = true;
-        var drag = (this.Content as FrameworkElement)?.FindName("TitleDragRegion") as UIElement;
-        if (drag != null) this.SetTitleBar(drag);
-        var titleBar = appWindow?.TitleBar;
-        if (titleBar != null)
+        try
         {
-          try
+          // Only customize title bar if supported on this OS/device.
+          if (AppWindowTitleBar.IsCustomizationSupported() && appWindow != null)
           {
-            appWindow!.Title = "FormatX Pro";
-            titleBar.ExtendsContentIntoTitleBar = true;
-            titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 229, 231, 235);
-            titleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
-            titleBar.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+            this.ExtendsContentIntoTitleBar = true;
+            var drag = (this.Content as FrameworkElement)?.FindName("TitleDragRegion") as UIElement;
+            if (drag != null) this.SetTitleBar(drag);
+
+            var titleBar = appWindow.TitleBar;
+            if (titleBar != null)
+            {
+              appWindow.Title = "FormatX Pro";
+              titleBar.ExtendsContentIntoTitleBar = true;
+              titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 229, 231, 235);
+              titleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+              titleBar.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+            }
           }
-          catch (InvalidOperationException ioex)
+          else
           {
-            _ = LogService.LogAsync("winrt.titlebar.invalid", new { ioex.Message });
+            // Fallback: don't extend into title bar; keep system default to avoid InvalidOperationException
+            this.ExtendsContentIntoTitleBar = false;
           }
-          catch (System.Runtime.InteropServices.COMException cex)
-          {
-            _ = LogService.LogAsync("error.com.exception", cex);
-          }
-          catch (Exception innerEx)
-          {
-            _ = LogService.LogAsync("error.catch", new { ctx = "titlebar.apply", innerEx = innerEx.Message });
-          }
+        }
+        catch (InvalidOperationException ioex)
+        {
+          _ = LogService.LogAsync("winrt.titlebar.invalid", new { ioex.Message });
+          this.ExtendsContentIntoTitleBar = false;
+        }
+        catch (System.Runtime.InteropServices.COMException cex)
+        {
+          _ = LogService.LogAsync("error.com.exception", cex);
+          this.ExtendsContentIntoTitleBar = false;
+        }
+        catch (Exception innerEx)
+        {
+          _ = LogService.LogAsync("error.catch", new { ctx = "titlebar.apply", innerEx = innerEx.Message });
+          this.ExtendsContentIntoTitleBar = false;
         }
       }
 
@@ -359,6 +382,12 @@ namespace FormatX
         // Read path from LocalSettings
         var obj = Windows.Storage.ApplicationData.Current.LocalSettings.Values[BackgroundTokenKey];
         var path = obj?.ToString();
+        if (string.IsNullOrWhiteSpace(path) || !System.IO.File.Exists(path))
+        {
+          await LogService.LogAsync("error.background.filemissing", path ?? "<null>");
+          Windows.Storage.ApplicationData.Current.LocalSettings.Values.Remove(BackgroundTokenKey);
+          return;
+        }
         if (!await BackgroundValidator.ValidateAsync(path)) return;
 
         try
@@ -381,18 +410,15 @@ namespace FormatX
         }
         catch (System.Runtime.InteropServices.COMException cex)
         {
-          await LogService.LogAsync("background.restore.set.comexception", cex);
-          CrashHandler.Show(cex, "background.restore");
+          await LogService.LogAsync("background.restore.set.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
         }
         catch (InvalidOperationException ioex)
         {
           await LogService.LogAsync("background.restore.set.invalidop", new { ioex.Message });
-          CrashHandler.Show(ioex, "background.restore");
         }
         catch (Exception ex)
         {
           await LogService.LogAsync("background.restore.set.error", new { ex = ex.Message });
-          CrashHandler.Show(ex, "background.restore");
         }
       }
       catch (Exception ex)
@@ -413,24 +439,32 @@ namespace FormatX
 
     private async void BrowseIso_Click(object sender, RoutedEventArgs e)
     {
+      if (_isBrowsing)
+      {
+        try { await LogService.LogAsync("dbg.picker.concurrent", new { type = "iso" }); } catch { }
+        return;
+      }
+      _isBrowsing = true;
       try
       {
-        // Inline picker to guarantee hwnd init and per-request behavior
-        var picker = new Windows.Storage.Pickers.FileOpenPicker();
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-        picker.FileTypeFilter.Clear();
-        picker.FileTypeFilter.Add(".iso");
-        var f = await picker.PickSingleFileAsync();
-        if (f == null) { await LogService.LogAsync("iso.pick.cancel", new { }); return; }
-
-        if (f != null)
+        // Try WinRT picker via service (handles HWND init); fallback to Win32 COM dialog on failure
+        var sel = await PickerService.PickIsoFileAsync(this);
+        if (sel == null)
         {
-          var valid = IsoValidator.Validate(f);
-          if (!valid.IsValid) { await LogService.LogAsync("error.iso.invalidext", f.Path); CrashHandler.Show(new Exception(valid.Reason)); return; }
-          await LogService.LogAsync("iso.selected", f.Path);
-          if (IsoPath != null) IsoPath.Text = f.Path; else _ = LogService.LogAsync("iso.textbox.null", new { file = f.Path });
-          Services.SettingsService.Current.LastIsoPath = f.Path;
+          // Fallback to Win32 COM-based picker (works when elevated/unpackaged)
+          var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+          var path = FormatX.Interop.Win32FileDialog.ShowOpenFileDialog(hwnd, new[] { ("ISO", "*.iso") }, "iso");
+          if (string.IsNullOrWhiteSpace(path)) { await LogService.LogAsync("iso.pick.cancel", new { via = "win32" }); return; }
+          sel = await Windows.Storage.StorageFile.GetFileFromPathAsync(path);
+        }
+
+        if (sel != null)
+        {
+          var valid = IsoValidator.Validate(sel);
+          if (!valid.IsValid) { await LogService.LogAsync("error.iso.invalidext", sel.Path); CrashHandler.Show(new Exception(valid.Reason)); return; }
+          await LogService.LogAsync("iso.selected", sel.Path);
+          if (IsoPath != null) IsoPath.Text = sel.Path; else _ = LogService.LogAsync("iso.textbox.null", new { file = sel.Path });
+          Services.SettingsService.Current.LastIsoPath = sel.Path;
         }
       }
       catch (System.Runtime.InteropServices.COMException cex)
@@ -443,6 +477,7 @@ namespace FormatX
         await LogService.LogAsync("error.iso.picker", ex);
         CrashHandler.Show(ex, "iso.picker");
       }
+      finally { _isBrowsing = false; }
     }
 
     private async void WriteIso_Click(object sender, RoutedEventArgs e)
@@ -888,23 +923,12 @@ namespace FormatX
 
     private async void OnBrowseBackgroundClick(object sender, RoutedEventArgs e)
     {
-      if (_isBrowsing) return; // prevent double-run
+      if (_isBrowsing) { try { await LogService.LogAsync("dbg.picker.concurrent", new { type = "image" }); } catch { } return; } // prevent double-run
       _isBrowsing = true;
       try
       {
         await LogService.LogAsync("background.pick.open", new { });
-        var picker = new Windows.Storage.Pickers.FileOpenPicker();
-        picker.FileTypeFilter.Add(".jpg");
-        picker.FileTypeFilter.Add(".jpeg");
-        picker.FileTypeFilter.Add(".png");
-        picker.FileTypeFilter.Add(".bmp");
-        picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
-        picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
-
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-
-        var file = await picker.PickSingleFileAsync();
+        var file = await PickerService.PickImageFileAsync(this);
         var statusBlock = Status ?? ((this.Content as FrameworkElement)?.FindName("StatusText") as TextBlock) ?? ((this.Content as FrameworkElement)?.FindName("TextBlockStatus") as TextBlock);
         if (file != null)
         {
@@ -948,8 +972,38 @@ namespace FormatX
         }
         else
         {
-          if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.cancel");
-          await LogService.LogAsync("background.set.cancel", "User cancelled");
+          // Fallback to Win32 picker
+          var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+          var path = FormatX.Interop.Win32FileDialog.ShowOpenFileDialog(hwnd,
+            new[] { ("Images", "*.jpg;*.jpeg;*.png;*.bmp"), ("JPG", "*.jpg;*.jpeg"), ("PNG", "*.png"), ("BMP", "*.bmp") });
+          if (!string.IsNullOrWhiteSpace(path))
+          {
+            var f = await Windows.Storage.StorageFile.GetFileFromPathAsync(path);
+            if (f != null)
+            {
+              var valid = await BackgroundValidator.ValidateAsync(f);
+              if (!valid.IsValid)
+              {
+                if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.error");
+                await LogService.LogAsync("error.background.validate", valid.Reason);
+                CrashHandler.Show(new Exception(valid.Reason));
+              }
+              else
+              {
+                Application.Current.Resources["AppBackgroundBrush"] = new ImageBrush { ImageSource = new BitmapImage(new Uri(f.Path)), Stretch = Stretch.UniformToFill };
+                Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace(BackgroundTokenKey, f);
+                Windows.Storage.ApplicationData.Current.LocalSettings.Values[BackgroundTokenKey] = f.Path;
+                Services.SettingsService.Current.CustomBackgroundPath = f.Path;
+                if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.success");
+                await LogService.LogAsync("background.set.success", f.Path);
+              }
+            }
+          }
+          else
+          {
+            if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.cancel");
+            await LogService.LogAsync("background.set.cancel", "User cancelled");
+          }
         }
       }
       catch (System.Runtime.InteropServices.COMException cex)

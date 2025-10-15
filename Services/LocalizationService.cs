@@ -10,13 +10,13 @@ namespace FormatX.Services
             ["hu"] = new()
             {
                 ["menu.format"] = "Formázás",
-                ["menu.drives"] = "Lemez egységek",
+                ["menu.drives"] = "Lemezegységek",
                 ["menu.erase"] = "Biztonságos törlés",
                 ["menu.settings"] = "Beállítások",
 
                 ["title.app"] = "FormatX Pro | Verzió: 2.0",
                 ["title.format"] = "Formázás",
-                ["title.drives"] = "Lemez egységek",
+                ["title.drives"] = "Lemezegységek",
                 ["title.erase"] = "Biztonságos törlés",
                 ["title.settings"] = "Beállítások",
 
@@ -29,12 +29,14 @@ namespace FormatX.Services
 
                 ["settings.language"] = "Nyelv",
                 ["settings.theme"] = "Téma",
-                ["settings.theme.default"] = "Rendszer (Default)",
+                ["settings.theme.default"] = "Rendszer (Alapértelmezett)",
                 ["settings.background"] = "Háttérkép (JPG/PNG/BMP)",
                 ["settings.bg.hint"] = "Válassz beépített képet vagy saját fájlt.",
                 ["settings.about"] = "Névjegy",
                 ["settings.version"] = "Verzió: 2.0",
-                ["settings.devline"] = "FormatTech – © 2025 Hudacsek József (GamesTech)",
+                ["settings.devline"] = "FormatTech © 2025 Hudacsek József (GamesTech)",
+
+                ["iso.placeholder"] = "Válassz ISO-t",
 
                 ["error.lang.unsupported"] = "A kiválasztott nyelv nem érhetõ el.",
                 ["error.crash.title"] = "Váratlan hiba",
@@ -91,7 +93,7 @@ namespace FormatX.Services
                 ["settings.bg.hint"] = "Choose a built-in image or your own file.",
                 ["settings.about"] = "About",
                 ["settings.version"] = "Version: 2.0",
-                ["settings.devline"] = "FormatTech – © 2025 Hudacsek József (GamesTech)",
+                ["settings.devline"] = "FormatTech © 2025 Hudacsek József (GamesTech)",
 
                 ["error.lang.unsupported"] = "The selected language is not available.",
                 ["error.crash.title"] = "Unexpected error",
@@ -122,9 +124,6 @@ namespace FormatX.Services
                 ["operation.erase.done"] = "Erase done",
                 ["eta.prefix"] = "ETA:",
                 ["crash.dialog.openFolder"] = "Open log folder",
-                ["background.set.success"] = "Background set",
-                ["background.set.cancel"] = "Background canceled",
-                ["background.set.error"] = "Failed to set background",
                 ["crash.dialog.title"] = "An error occurred",
             }
         };

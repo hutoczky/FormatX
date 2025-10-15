@@ -1,0 +1,22 @@
+# Ignore VS and build artifacts
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.userprefs
+*.csproj.user
+
+# NuGet
+*.nupkg
+packages/
+
+# Logs and dumps
+*.dmp
+*.log
+logs/
+
+# Rider/JetBrains
+.idea/
+*.DotSettings.user

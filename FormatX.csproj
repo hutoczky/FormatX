@@ -30,6 +30,17 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <!-- Emit portable PDBs for Release builds to enable symbol loading when debugging -->
+    <!-- Use embedded PDBs so symbols are always available next to the assembly -->
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <!-- Embed sources into PDB to improve Just My Code stepping in optimized builds -->
+    <EmbedAllSources>true</EmbedAllSources>
+    <!-- Temporarily disable optimizations so VS loads symbols with Just My Code enabled -->
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(PublishSingleFile)'=='true'">
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
