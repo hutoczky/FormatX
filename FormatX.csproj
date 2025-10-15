@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+    <UseWinUI>true</UseWinUI>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
+    <Platforms>x64;x86;arm64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-x86;win-arm64</RuntimeIdentifiers>
+
+    <!-- MSIX packaging -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <WinAppSdkResourceIndexMode>PRIFile</WinAppSdkResourceIndexMode>
+    <GenerateAppxPackageOnBuild>false</GenerateAppxPackageOnBuild>
+    <IncludePriFile>true</IncludePriFile>
+    <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PublishTrimmed>false</PublishTrimmed>
+    <DebugType>portable</DebugType>
+  
+    <ApplicationIcon>Assets\Icons\FX.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(PublishSingleFile)'=='true'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.250930001-experimental1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="System.Management" Version="10.0.0-rc.1.25451.107" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Assets\**\*.*" Pack="true" PackagePath="Assets\" />
+    <None Include="Package.appxmanifest" />
+  </ItemGroup>
+
+  <Target Name="CleanWinAppSdkExpandPri" BeforeTargets="WinAppSDKExpandPriContent">
+    <RemoveDir Directories="$(IntermediateOutputPath)WinAppSDKExpandPriContent" />
+    <RemoveDir Directories="$(BaseIntermediateOutputPath)WinAppSDKExpandPriContent" />
+  </Target>
+</Project>

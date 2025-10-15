@@ -1,0 +1,35 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Global background brush used by the app layout -->
+  <ImageBrush x:Key="AppBackgroundBrush"
+              ImageSource="ms-appx:///Assets/Backgrounds/smoky_wave_bg.png"
+              Stretch="UniformToFill"
+              AlignmentX="Center"
+              AlignmentY="Center"/>
+  <ImageBrush x:Key="BackgroundBrush"
+              ImageSource="ms-appx:///Assets/Backgrounds/smoky_wave_bg.png"
+              Stretch="UniformToFill"
+              AlignmentX="Center"
+              AlignmentY="Center"/>
+  <SolidColorBrush x:Key="BackgroundBrushFallback" Color="#FF0E1525"/>
+  <SolidColorBrush x:Key="ForegroundBrush" Color="#FFE5E7EB"/>
+
+  <SolidColorBrush x:Key="HealthGreen" Color="#FF2ECC71"/>
+  <SolidColorBrush x:Key="HealthYellow" Color="#FFF1C40F"/>
+  <SolidColorBrush x:Key="HealthRed" Color="#FFE74C3C"/>
+
+  <Style x:Key="HealthBadgeStyle" TargetType="Border">
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="6,2"/>
+    <Setter Property="Background" Value="{StaticResource HealthGreen}"/>
+  </Style>
+
+  <DataTemplate x:Key="HealthBadgeTemplate">
+    <Border Style="{StaticResource HealthBadgeStyle}">
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <Ellipse Width="10" Height="10" Fill="{Binding}"/>
+        <TextBlock Text="Állapot"/>
+      </StackPanel>
+    </Border>
+  </DataTemplate>
+</ResourceDictionary>
