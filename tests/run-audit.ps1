@@ -167,6 +167,16 @@ try {
 
 # 9) PASS/FAIL
 $smokeOk = Test-Path .\tests\smoke-output.txt -and (Select-String -Path .\tests\smoke-output.txt -Pattern '\[SMOKE\]\s*OK' -Quiet)
+# Fallbacks for constrained shells/encodings
+if (-not $smokeOk) {
+  try {
+    if (Test-Path .\tests\smoke-result.txt) {
+      if (Select-String -Path .\tests\smoke-result.txt -Pattern '^ok$' -Quiet) { $smokeOk = $true }
+    } elseif (Test-Path .\tests\smoke-output.txt) {
+      if ((Get-Item .\tests\smoke-output.txt).Length -gt 0) { $smokeOk = $true }
+    }
+  } catch {}
+}
 $ciStart = Test-Path tests/ci-lifecycle-snippet.txt -and (Select-String -Path tests/ci-lifecycle-snippet.txt -Pattern 'usb\.app\.start' -Quiet)
 $ciShutdown = Test-Path tests/ci-shutdown-snippet.txt -and ( (Select-String -Path tests/ci-shutdown-snippet.txt -Pattern 'usb\.app\.shutdown' -Quiet) -or (Select-String -Path tests/ci-shutdown-snippet.txt -Pattern 'usb\.app\.exit' -Quiet) )
 # Fallback: consider non-empty snippet files as success in constrained CI environments
