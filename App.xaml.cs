@@ -104,6 +104,16 @@ namespace FormatX
       }
       try { LogService.AppendUsbLine("usb.app.start: AutoBrowse.Init"); } catch { }
       try { _window?.Activate(); } catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "window.activate", ex = ex.Message }); }
+      // Only auto-exit in CI/headless mode
+      try
+      {
+        var headless = Environment.GetEnvironmentVariable("FORMATX_HEADLESS");
+        if (string.Equals(headless, "1", StringComparison.Ordinal))
+        {
+          TryGracefulShutdown();
+        }
+      }
+      catch { }
       try {
         if (_window != null) { _usb = new FormatX.Services.UsbMonitorService(_window); TestHookService.SetUsbService(_usb); _ = _usb.StartAsync(); }
       } catch (Exception ex) { _ = LogService.LogAsync("usb.monitor.init.error", new { ex = ex.Message }); }
@@ -142,10 +152,7 @@ namespace FormatX
         catch (System.Threading.Tasks.TaskCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
         catch (System.OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
         catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("AutoBrowse", ex); }
-        finally
-        {
-          TryGracefulShutdown();
-        }
+        finally { }
       });
     }
 
