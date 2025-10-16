@@ -107,7 +107,7 @@ namespace FormatX
           _       => ElementTheme.Default
         };
       }
-      try { LogService.AppendUsbLine("usb.app.start: AutoBrowse.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.app.start"); } catch { }
       // Smoke probe: write a simple output file and log, tolerate IO errors
       try
       {
@@ -147,7 +147,7 @@ namespace FormatX
       {
         try
         {
-          try { LogService.AppendUsbLine("usb.app.start: AutoBrowse.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.app.start"); } catch { }
           // Early refresh scaffold for CI
           try { await LogService.UsbRefreshAsync(); } catch { }
           var pick = await FilePickerService.TryPickAsync(_window);
