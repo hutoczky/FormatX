@@ -23,14 +23,16 @@
   <data name="settings.version" xml:space="preserve"><value>Verzió: 2.0</value></data>
   <data name="iso.placeholder" xml:space="preserve"><value>Válassz ISO-t</value></data>
   <data name="ISO_Select" xml:space="preserve"><value>ISO kiválasztása</value></data>
+  <data name="ISO_Browse" xml:space="preserve"><value>Tallózás</value></data>
   <data name="USB_Target" xml:space="preserve"><value>Cél meghajtó</value></data>
+  <data name="USB_Refresh" xml:space="preserve"><value>Frissítés</value></data>
   <data name="USB_Write" xml:space="preserve"><value>ISO írás</value></data>
   <data name="USB_Verify" xml:space="preserve"><value>USB ellenőrzés</value></data>
-  <data name="USB_Scheme" xml:space="preserve"><value>Partíciós séma</value></data>
+  <data name="USB_Scheme" xml:space="preserve"><value>Partíciós séma (GPT/MBR)</value></data>
   <data name="USB_WriteScheme" xml:space="preserve"><value>Írási séma</value></data>
-  <data name="DiskHealth_BytesToScan" xml:space="preserve"><value>Ellenőrzendő bájtok</value></data>
-  <data name="DiskHealth_SurfaceScan" xml:space="preserve"><value>Felszíni ellenőrzés</value></data>
-  <data name="DiskHealth_SMARTQuery" xml:space="preserve"><value>SMART gyors lekérdezés</value></data>
+  <data name="DiskHealth_Bytes" xml:space="preserve"><value>Ellenőrzendő bájtok</value></data>
+  <data name="DiskHealth_Surface" xml:space="preserve"><value>Felszíni ellenőrzés</value></data>
+  <data name="DiskHealth_SMART" xml:space="preserve"><value>SMART gyors lekérdezés</value></data>
   <data name="HealthStatus_Good" xml:space="preserve"><value>Állapot: Jó</value></data>
   <data name="Btn_Start" xml:space="preserve"><value>Indítás</value></data>
   <data name="Btn_BackDrives" xml:space="preserve"><value>Meghajtókhoz</value></data>
@@ -39,6 +41,15 @@
   <data name="SecureErase_1Pass" xml:space="preserve"><value>1 átírás</value></data>
   <data name="SecureErase_2Pass" xml:space="preserve"><value>2 átírás</value></data>
   <data name="SecureErase_3Pass" xml:space="preserve"><value>3 átírás</value></data>
+  <data name="SecureErase_1" xml:space="preserve"><value>1 átírás</value></data>
+  <data name="SecureErase_2" xml:space="preserve"><value>2 átírás</value></data>
+  <data name="SecureErase_3" xml:space="preserve"><value>3 átírás</value></data>
+  <data name="Tooltip_GenericAction" xml:space="preserve"><value>Kattintás a művelet elindításához</value></data>
+  <data name="Tooltip_FileBrowse" xml:space="preserve"><value>Tallózz helyi ISO fájlhoz</value></data>
+  <data name="Tooltip_SelectDrive" xml:space="preserve"><value>Válassz meghajtót a listából a művelethez</value></data>
+  <data name="Helper_USB_Scheme" xml:space="preserve"><value>Válaszd ki a partíciós sémát (GPT/MBR) a kompatibilitáshoz.</value></data>
+  <data name="Helper_TargetDrive" xml:space="preserve"><value>Csak eltávolítható cél meghajtót válassz a biztonság érdekében.</value></data>
+  <data name="Helper_ISO_Select" xml:space="preserve"><value>Válassz egy ISO lemezképfájlt a helyi meghajtóról.</value></data>
   <data name="Pro_Onboarding_Title" xml:space="preserve"><value>Miért éri meg a Pro?</value></data>
   <data name="Pro_Onboarding_Bullet1" xml:space="preserve"><value>Részletes SMART riportok és megbízható írás</value></data>
   <data name="Pro_Onboarding_Bullet2" xml:space="preserve"><value>Több átírási mód és biztonságos törlés</value></data>

@@ -556,26 +556,27 @@ namespace FormatX
       try
       {
         if (Health_DriveCombo != null) Health_DriveCombo.Header = LocalizationService.T("ui.health.drive.header");
-        var scanBox = (this.Content as FrameworkElement)?.FindName("BytesToScan") as TextBox;
+        var scanBox = (this.Content as FrameworkElement)?.FindName("ScanBytes") as TextBox;
         if (scanBox != null)
         {
-          scanBox.PlaceholderText = LocalizationService.T("DiskHealth_BytesToScan");
-          ToolTipService.SetToolTip(scanBox, "A vizsgálat során átvizsgálandó bájtok száma");
-          AutomationProperties.SetName(scanBox, "Ellenőrzendő bájtok");
+          scanBox.Header = LocalizationService.T("DiskHealth_Bytes");
+          scanBox.PlaceholderText = LocalizationService.T("DiskHealth_Bytes");
+          ToolTipService.SetToolTip(scanBox, LocalizationService.T("DiskHealth_Bytes"));
+          AutomationProperties.SetName(scanBox, LocalizationService.T("DiskHealth_Bytes"));
         }
         var btnSurf = (this.Content as FrameworkElement)?.FindName("BtnSurfaceScan") as Button;
         if (btnSurf != null)
         {
-          btnSurf.Content = LocalizationService.T("DiskHealth_SurfaceScan");
-          ToolTipService.SetToolTip(btnSurf, "Lemez felületi hibáinak keresése");
-          AutomationProperties.SetName(btnSurf, "Felszíni ellenőrzés");
+          btnSurf.Content = LocalizationService.T("DiskHealth_Surface");
+          ToolTipService.SetToolTip(btnSurf, LocalizationService.T("Tooltip_SurfaceScan"));
+          AutomationProperties.SetName(btnSurf, LocalizationService.T("DiskHealth_Surface"));
         }
         var btnSmart = (this.Content as FrameworkElement)?.FindName("BtnSmartQuery") as Button;
         if (btnSmart != null)
         {
-          btnSmart.Content = LocalizationService.T("DiskHealth_SMARTQuery");
-          ToolTipService.SetToolTip(btnSmart, "Meghajtó SMART állapotának lekérése");
-          AutomationProperties.SetName(btnSmart, "SMART gyors lekérdezés");
+          btnSmart.Content = LocalizationService.T("DiskHealth_SMART");
+          ToolTipService.SetToolTip(btnSmart, LocalizationService.T("Tooltip_SMARTQuery"));
+          AutomationProperties.SetName(btnSmart, LocalizationService.T("DiskHealth_SMART"));
         }
       }
       catch { }
@@ -601,7 +602,7 @@ namespace FormatX
       if (BtnCheckUpdate != null) BtnCheckUpdate.Content = hu ? "Frissítések keresése" : "Check for updates";
       if (BtnExportCsv != null) BtnExportCsv.Content = LocalizationService.T("common.exportCsv");
       if (TxtVersion != null) TxtVersion.Text = LocalizationService.T("settings.version");
-      if (TxtFooter != null) TxtFooter.Text = ".NET 10 • WinUI 3 • MSIX";
+      if (TxtFooter != null) TxtFooter.Text = LocalizationService.T("Footer_Tagline");
       if (TxtAbout != null) TxtAbout.Text = LocalizationService.T("settings.about");
       var devLine = LocalizationService.T("settings.devline");
       // find developer line textblock (first in stack after TxtVersion)

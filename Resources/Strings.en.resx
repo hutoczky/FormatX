@@ -52,14 +52,16 @@
   <data name="settings.version" xml:space="preserve"><value>Version: 2.0</value></data>
   <data name="iso.placeholder" xml:space="preserve"><value>Select ISO</value></data>
   <data name="ISO_Select" xml:space="preserve"><value>Select ISO</value></data>
-  <data name="USB_Target" xml:space="preserve"><value>USB target</value></data>
-  <data name="USB_Write" xml:space="preserve"><value>Write ISO to USB</value></data>
+  <data name="ISO_Browse" xml:space="preserve"><value>Browse</value></data>
+  <data name="USB_Target" xml:space="preserve"><value>Target drive (removable)</value></data>
+  <data name="USB_Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="USB_Write" xml:space="preserve"><value>Write ISO</value></data>
   <data name="USB_Verify" xml:space="preserve"><value>Verify USB</value></data>
-  <data name="USB_Scheme" xml:space="preserve"><value>Partition scheme</value></data>
+  <data name="USB_Scheme" xml:space="preserve"><value>Partition scheme (GPT/MBR)</value></data>
   <data name="USB_WriteScheme" xml:space="preserve"><value>Write scheme</value></data>
-  <data name="DiskHealth_BytesToScan" xml:space="preserve"><value>Bytes to scan</value></data>
-  <data name="DiskHealth_SurfaceScan" xml:space="preserve"><value>Surface scan</value></data>
-  <data name="DiskHealth_SMARTQuery" xml:space="preserve"><value>SMART quick query</value></data>
+  <data name="DiskHealth_Bytes" xml:space="preserve"><value>Bytes to scan</value></data>
+  <data name="DiskHealth_Surface" xml:space="preserve"><value>Surface scan</value></data>
+  <data name="DiskHealth_SMART" xml:space="preserve"><value>SMART quick query</value></data>
   <data name="HealthStatus_Good" xml:space="preserve"><value>Status: Good</value></data>
   <data name="Btn_Start" xml:space="preserve"><value>Start</value></data>
   <data name="Btn_BackDrives" xml:space="preserve"><value>Back to drives</value></data>
@@ -68,6 +70,15 @@
   <data name="SecureErase_1Pass" xml:space="preserve"><value>1 pass</value></data>
   <data name="SecureErase_2Pass" xml:space="preserve"><value>2 passes</value></data>
   <data name="SecureErase_3Pass" xml:space="preserve"><value>3 passes</value></data>
+  <data name="SecureErase_1" xml:space="preserve"><value>1 pass</value></data>
+  <data name="SecureErase_2" xml:space="preserve"><value>2 passes</value></data>
+  <data name="SecureErase_3" xml:space="preserve"><value>3 passes</value></data>
+  <data name="Tooltip_GenericAction" xml:space="preserve"><value>Click to start the action</value></data>
+  <data name="Tooltip_FileBrowse" xml:space="preserve"><value>Browse for a local ISO file</value></data>
+  <data name="Tooltip_SelectDrive" xml:space="preserve"><value>Select a drive from the list for the operation</value></data>
+  <data name="Helper_USB_Scheme" xml:space="preserve"><value>Select the partition scheme (GPT/MBR) for compatibility.</value></data>
+  <data name="Helper_TargetDrive" xml:space="preserve"><value>For safety, select only a removable target drive.</value></data>
+  <data name="Helper_ISO_Select" xml:space="preserve"><value>Choose an ISO disk image from your local drive.</value></data>
   <data name="Pro_Onboarding_Title" xml:space="preserve"><value>Why upgrade to Pro?</value></data>
   <data name="Pro_Onboarding_Bullet1" xml:space="preserve"><value>Detailed SMART reports and reliable writes</value></data>
   <data name="Pro_Onboarding_Bullet2" xml:space="preserve"><value>Multiple overwrite modes and secure erase</value></data>
