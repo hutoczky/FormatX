@@ -58,14 +58,31 @@ namespace FormatX
         var t = Type.GetType("Microsoft.WindowsAppSDK.AppModel.DynamicDependency.Bootstrap, Microsoft.WindowsAppSDK", throwOnError: false);
         if (t != null)
         {
-          var initWithVer = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, new Type[] { typeof(uint) });
           var initNoArg   = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, Type.EmptyTypes);
-          if (initWithVer != null) initWithVer.Invoke(null, new object[] { 0x00010800u }); // 1.8
-          else initNoArg?.Invoke(null, null);
+          var initWithVer = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, new Type[] { typeof(uint) });
+          // Prefer parameterless overload (WinAppSDK 1.2+ incl. 2.x) to avoid version mismatch
+          if (initNoArg != null) initNoArg.Invoke(null, null);
+          else if (initWithVer != null)
+          {
+            // Derive a safe minimum version from assembly, fallback to 0
+            uint ver = 0u;
+            try
+            {
+              var asm = t.Assembly?.GetName()?.Version;
+              if (asm != null)
+              {
+                // pack major.minor into 0xMMMMmm00 (Bootstrap expects M.m)
+                ver = (uint)((asm.Major << 16) | (asm.Minor << 8));
+              }
+            }
+            catch { }
+            initWithVer.Invoke(null, new object[] { ver });
+          }
         }
       }
-      catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogAsync("error.com.exception", new { ctx = "bootstrap", cex.Message, cex.HResult }); }
-      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "bootstrap", ex = ex.Message }); }
+      catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogUsbWinrtErrorAsync("Bootstrap.Initialize", cex); }
+      catch (InvalidOperationException ioex) { _ = LogService.LogUsbWinrtErrorAsync("Bootstrap.Initialize", ioex); }
+      catch (Exception ex) { _ = LogService.LogUsbWinrtErrorAsync("Bootstrap.Initialize", ex); }
 
       // Language: prefer saved setting; default HU
       try
