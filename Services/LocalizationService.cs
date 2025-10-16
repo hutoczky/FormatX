@@ -13,6 +13,8 @@ namespace FormatX.Services
         {
             ["hu"] = new()
             {
+                ["status.refresh.skipped.energysaver"] = "Energiatakarékos mód – frissítés kihagyva",
+                ["status.drives.refreshed"] = "Meghajtók frissítve",
                 ["menu.format"] = "Formázás",
                 ["menu.drives"] = "Lemezegységek",
                 ["menu.erase"] = "Biztonságos törlés",
@@ -84,6 +86,8 @@ namespace FormatX.Services
                 ["title.settings"] = "Settings",
 
                 ["status.ready"] = "Idle",
+                ["status.refresh.skipped.energysaver"] = "Energy Saver – refresh skipped",
+                ["status.drives.refreshed"] = "Drives refreshed",
                 ["common.apply"] = "Apply",
                 ["common.validate"] = "Validate",
                 ["common.browse"] = "Browse",
@@ -113,7 +117,6 @@ namespace FormatX.Services
                 ["error.background.emptyfile"] = "Empty file",
                 ["error.iso.invalidext"] = "Invalid ISO extension",
                 ["error.iso.picker"] = "ISO picker error",
-                ["common.browse"] = "Browse...",
                 ["systemdrive.blocked"] = "Selected drive is a system drive (disabled).",
                 ["secureerase.systemdrive.warning"] = "System drive cannot be securely erased.",
                 ["dialog.confirm.title"] = "Confirmation",

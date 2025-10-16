@@ -1,0 +1,20 @@
+Audit run: 2025-10-16 15:40:53
+Branch: fix/ui-i18n-and-final-fixes
+SHA: f9c6b28
+Smoke output:
+
+D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH>"C:\Program Files\PowerShell\7-preview\pwsh.exe" -ExecutionPolicy Bypass -File .\tests\smoke-test.ps1  
+[SMOKE] OK
+
+Dev UI audit snippets:
+
+Energy Saver UI audit snippets:
+
+CI run lifecycle snippets:
+
+2025-10-16T15:40:15.5133036+02:00	usb.app.start: AutoBrowse.Init
+2025-10-16T15:40:15.7327590+02:00	usb.app.start: Smoke.Init
+2025-10-16T15:40:15.8044374+02:00	usb.app.start: AutoBrowse.Init
+
+
+Errors logged in CI:

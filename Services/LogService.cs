@@ -110,15 +110,30 @@ namespace FormatX.Services
       try
       {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        using var fs = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 4096, FileOptions.WriteThrough);
+        // Laptop optimization: avoid WriteThrough and explicit Flush when Energy Saver is ON
+        bool saverOn = IsEnergySaverOn();
+        var opts = saverOn ? FileOptions.Asynchronous : FileOptions.WriteThrough;
+        using var fs = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 8192, opts);
         var bytes = System.Text.Encoding.UTF8.GetBytes(text);
         await fs.WriteAsync(bytes, 0, bytes.Length);
-        await fs.FlushAsync();
+        if (!saverOn)
+        {
+          await fs.FlushAsync();
+        }
       }
       catch
       {
         try { await FileUtil.AppendAllTextRetryAsync(path, text); } catch { }
       }
+    }
+
+    private static bool IsEnergySaverOn()
+    {
+      try
+      {
+        return Windows.System.Power.PowerManager.EnergySaverStatus == Windows.System.Power.EnergySaverStatus.On;
+      }
+      catch { return false; }
     }
 
     public static async Task<string> ExportCsvAsync(string destCsv)

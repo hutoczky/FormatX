@@ -217,6 +217,9 @@ namespace FormatX
         if (sw != null) sw.IsOn = tel.IsOptedOut();
       }
       catch { }
+
+      // Deep UI audit (logs missing UI elements but never throws)
+      try { _ = UiDeepAuditAsync(); } catch { }
     }
 
     // Safe AppWindow wrappers with required logging format
@@ -266,6 +269,40 @@ namespace FormatX
 
     private Task SafeUseAppWindowAsync(Func<Microsoft.UI.Windowing.AppWindow, Task> func)
       => SafeUseAppWindowAsync(func, "AppWindow");
+
+    // Deep UI self-check to validate element presence and basic wiring
+    private async Task UiDeepAuditAsync()
+    {
+      try
+      {
+        await LogService.WriteUsbLineAsync("usb.ui.audit.begin");
+        var fe = this.Content as FrameworkElement;
+        string[] names = new[]
+        {
+          "TitleDragRegion","LiveLog","Nav","NavIsoUsb","NavFormat","NavErase","NavHealth","NavPartitions",
+          "ViewIsoUsb","ViewFormat","ViewPartitions","ViewSecureErase","ViewHealth","ViewSettings",
+          "FormatDrive","TargetDrives","FsCombo","FsItemReFS","FsItemExt4","LabelBox","QuickBox","BtnFormat","BtnIsoWrite",
+          "DiskNumberBox","GridCurrent","GridPlanned","BtnSecureErase","EraseFullFormat","EraseEtaText","HealthResult",
+          "BtnPickBg","BtnBrowseBackground","BtnBrowseIso","IsoPath","IsoVerifyToggle","IsoSchemeCombo","IsoWriteSchemeCombo",
+          "BtnCheckUpdate","BtnExportCsv","LangCombo","ThemeCombo","HeaderApplyButton","GlobalProgressBar","GlobalProgressText","PageTitle",
+          "SecureErase_DriveCombo","Health_DriveCombo","HealthBadgeText","HealthDot","BtnDone","BtnRefresh","Status"
+        };
+        int present = 0, missing = 0;
+        foreach (var n in names)
+        {
+          object? o = null;
+          try { o = fe?.FindName(n); } catch { }
+          if (o != null) { present++; await LogService.WriteUsbLineAsync($"usb.ui.check.present:{n}"); }
+          else { missing++; await LogService.WriteUsbLineAsync($"usb.ui.check.missing:{n}"); }
+        }
+        await LogService.LogAsync("ui.audit.summary", new { present, missing });
+        await LogService.WriteUsbLineAsync("usb.ui.audit.end");
+      }
+      catch (Exception ex)
+      {
+        await LogService.LogUsbWinrtErrorAsync("UI.DeepAudit", ex);
+      }
+    }
 
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
@@ -343,10 +380,25 @@ namespace FormatX
         {
           if (_pollTimer == null)
           {
+            int delay = IsEnergySaver() ? 8 : 5;
+            int period = IsEnergySaver() ? 30 : 20;
+            try
+            {
+              var ed = Environment.GetEnvironmentVariable("WATCH_POLL_DELAY_SECONDS");
+              if (!string.IsNullOrWhiteSpace(ed) && int.TryParse(ed, out var eds) && eds > 0) delay = eds;
+            }
+            catch { }
+            try
+            {
+              var ep = Environment.GetEnvironmentVariable("WATCH_POLL_CYCLE_SECONDS");
+              if (!string.IsNullOrWhiteSpace(ep) && int.TryParse(ep, out var eps) && eps > 0) period = eps;
+            }
+            catch { }
+            _ = LogService.LogAsync("watch.poll.timing", new { delay, period });
             _pollTimer = new Timer(async _ =>
             {
               try { await RefreshDevices(); } catch (TaskCanceledException) { LogService.AppendUsbLine("usb.refresh.cancelled: poll"); } catch (OperationCanceledException) { LogService.AppendUsbLine("usb.refresh.cancelled: poll"); } catch (Exception ex) { await LogService.LogAsync("poll.refresh.error", new { ex = ex.Message }); }
-            }, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
+            }, null, TimeSpan.FromSeconds(delay), TimeSpan.FromSeconds(period));
           }
         }
         else
@@ -373,9 +425,9 @@ namespace FormatX
         TryReselect(TargetDrives, prevIso);
         // Update status for UX clarity
         if (IsEnergySaver())
-          Status.Text = _lang == AppLanguage.Hu ? "Energiatakarékos mód – frissítés kihagyva" : "Energy Saver – refresh skipped";
+          Status.Text = LocalizationService.T("status.refresh.skipped.energysaver");
         else
-          Status.Text = _lang == AppLanguage.Hu ? "Meghajtók frissítve" : "Drives refreshed";
+          Status.Text = LocalizationService.T("status.drives.refreshed");
       }
       catch (TaskCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
       catch (OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
@@ -397,9 +449,9 @@ namespace FormatX
         TryReselect(TargetDrives, prevIso);
         // Update status
         if (IsEnergySaver())
-          Status.Text = _lang == AppLanguage.Hu ? "Energiatakarékos mód – frissítés kihagyva" : "Energy Saver – refresh skipped";
+          Status.Text = LocalizationService.T("status.refresh.skipped.energysaver");
         else
-          Status.Text = _lang == AppLanguage.Hu ? "Meghajtók frissítve" : "Drives refreshed";
+          Status.Text = LocalizationService.T("status.drives.refreshed");
       }
       catch (Exception ex) { _ = LogService.LogAsync("usb.refresh.error.ui", new { ex = ex.Message }); }
     }
@@ -494,7 +546,18 @@ namespace FormatX
       if (BtnSecureErase != null) BtnSecureErase.Content = hu ? "Törlés indítása" : "Start erase";
       if (EraseResult != null) EraseResult.Text = "";
 
-      // Health tab
+      // Health tab labels/tooltips
+      try
+      {
+        if (Health_DriveCombo != null) Health_DriveCombo.Header = LocalizationService.T("ui.health.drive.header");
+        var scanBox = (this.Content as FrameworkElement)?.FindName("BytesToScan") as TextBox;
+        if (scanBox != null) scanBox.PlaceholderText = LocalizationService.T("ui.health.bytesToScan");
+        var btnSurf = (this.Content as FrameworkElement)?.FindName("BtnSurfaceScan") as Button;
+        if (btnSurf != null) btnSurf.Content = LocalizationService.T("ui.health.surfaceScan");
+        var btnSmart = (this.Content as FrameworkElement)?.FindName("BtnSmartQuery") as Button;
+        if (btnSmart != null) btnSmart.Content = LocalizationService.T("ui.health.smartQuick");
+      }
+      catch { }
       if (HealthResult != null) HealthResult.Text = "";
 
       // Settings view
@@ -826,9 +889,9 @@ namespace FormatX
         }
         var fe = this.Content as FrameworkElement;
         var dot = fe?.FindName("HealthDot") as Microsoft.UI.Xaml.Shapes.Ellipse;
-        var txt = fe?.FindName("HealthBadgeText") as TextBlock;
+        var txt = fe?.FindName("HealthStatusText") as TextBlock;
         if (dot != null && fill != null) dot.Fill = fill;
-        if (txt != null) txt.Text = label;
+        if (txt != null) txt.Text = (label == "Zöld") ? LocalizationService.T("ui.health.status.good") : label;
         await LogService.LogAsync("health.badge", new { disk, color = color.ToString() });
       } catch (System.Runtime.InteropServices.COMException cex) { HealthResult.Text = cex.Message; await LogService.LogAsync("error.com.exception", cex); CrashHandler.Show(cex, "smart.quick"); }
         catch (Exception ex) { HealthResult.Text = ex.Message; await LogService.LogAsync("error.catch", new { ctx = "smart", ex = ex.Message }); }
@@ -840,7 +903,8 @@ namespace FormatX
       {
         string path = _healthSelected?.DevicePath ?? "\\\\.\\PHYSICALDRIVE1";
         long bytes = 0;
-        long.TryParse(ScanBytes?.Text ?? "1073741824", out bytes);
+        var scanBox = (this.Content as FrameworkElement)?.FindName("BytesToScan") as TextBox;
+        long.TryParse(scanBox?.Text ?? "1073741824", out bytes);
         var prog = new Progress<int>(p => DispatcherQueue.TryEnqueue(() => SetProgress(p, (_lang == AppLanguage.Hu ? "Szkennelés " : "Scan ") + p + "%")));
         var res = await new DiskHealthService().SurfaceScanAsync(path, bytes > 0 ? bytes : 1073741824, 1024*1024, prog);
         HealthResult.Text = System.Text.Json.JsonSerializer.Serialize(res);
@@ -1068,15 +1132,11 @@ namespace FormatX
     {
       try
       {
-        // Language selection with validation
-        if (LangCombo?.SelectedIndex == 1) _lang = AppLanguage.En; else _lang = AppLanguage.Hu;
-        var langCode = _lang == AppLanguage.En ? "en" : "hu";
-        if (!LocalizationService.SetLanguage(langCode))
-        {
-          await ShowToast(LocalizationService.T("error.lang.unsupported"));
-          return;
-        }
-        SettingsService.Current.Language = langCode == "en" ? "en-US" : "hu-HU";
+        // Enforce Hungarian-only UI regardless of selection
+        _lang = AppLanguage.Hu;
+        var langCode = "hu";
+        LocalizationService.SetLanguage(langCode);
+        SettingsService.Current.Language = "hu-HU";
 
         string theme = ThemeCombo?.SelectedIndex switch { 1 => "Dark", 2 => "Light", _ => "Default" };
         SettingsService.Current.Theme = theme;
@@ -1144,6 +1204,12 @@ namespace FormatX
     {
       try
       {
+        var sim = Environment.GetEnvironmentVariable("FORMATX_ENERGY_SAVER");
+        if (!string.IsNullOrWhiteSpace(sim))
+        {
+          if (string.Equals(sim, "1", StringComparison.OrdinalIgnoreCase) || string.Equals(sim, "true", StringComparison.OrdinalIgnoreCase)) return true;
+          if (string.Equals(sim, "0", StringComparison.OrdinalIgnoreCase) || string.Equals(sim, "false", StringComparison.OrdinalIgnoreCase)) return false;
+        }
         return Windows.System.Power.PowerManager.EnergySaverStatus == Windows.System.Power.EnergySaverStatus.On;
       } catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "energysaver", ex = ex.Message }); return false; }
     }

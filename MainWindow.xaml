@@ -4,328 +4,345 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="using:Microsoft.UI.Xaml.Controls"
     xmlns:converters="using:FormatX.Converters">
-  <Grid Background="{StaticResource AppBackgroundBrush}">
-    <Grid.Resources>
-      <ThemeShadow x:Key="AppCardShadow"/>
-      <ThemeShadow x:Key="AppFooterShadow"/>
-      <converters:LogLevelToBrushConverter x:Key="LogLevelToBrush"/>
-      <Style TargetType="TextBlock">
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Foreground" Value="#FFFFFFFF"/>
-      </Style>
-      <Style TargetType="Button">
-        <Setter Property="FontSize" Value="14"/>
-      </Style>
-      <Style TargetType="ComboBox">
-        <Setter Property="FontSize" Value="14"/>
-      </Style>
-      <Style TargetType="TextBox">
-        <Setter Property="FontSize" Value="14"/>
-      </Style>
-    </Grid.Resources>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="Auto"/>
-    </Grid.RowDefinitions>
+    <Grid Background="{StaticResource AppBackgroundBrush}">
+        <Grid.Resources>
+            <ThemeShadow x:Key="AppCardShadow"/>
+            <ThemeShadow x:Key="AppFooterShadow"/>
+            <converters:LogLevelToBrushConverter x:Key="LogLevelToBrush"/>
+            <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Foreground" Value="#FFFFFFFF"/>
+            </Style>
+            <Style TargetType="Button">
+                <Setter Property="FontSize" Value="14"/>
+            </Style>
+            <Style TargetType="ComboBox">
+                <Setter Property="FontSize" Value="14"/>
+            </Style>
+            <Style TargetType="TextBox">
+                <Setter Property="FontSize" Value="14"/>
+            </Style>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-    <!-- Custom Title Bar -->
-    <Border Grid.Row="0" Background="#1A000000" Height="40" Padding="8,0" CornerRadius="8" Margin="8,8,8,0">
-      <Grid>
-        <Grid x:Name="TitleDragRegion" VerticalAlignment="Center">
-          <TextBlock x:Name="TitleText" Text="FormatX Pro | Verzió: 2.0" Opacity="0.9"/>
-        </Grid>
-      </Grid>
-    </Border>
-
-    <!-- Main card with NavigationView -->
-    <Border Grid.Row="1" CornerRadius="16" Margin="12" Background="#14000000" Shadow="{StaticResource AppCardShadow}" Translation="0,0,32" BorderBrush="#33FFFFFF" BorderThickness="1">
-      <ui:NavigationView x:Name="Nav" IsSettingsVisible="False" IsPaneOpen="True" PaneDisplayMode="Left" SelectionChanged="Nav_SelectionChanged">
-        <ui:NavigationView.MenuItems>
-          <ui:NavigationViewItem x:Name="NavIsoUsb" Content="ISO → USB" Tag="iso">
-            <ui:NavigationViewItem.Icon>
-              <FontIcon Glyph="&#xE8B5;"/> <!-- Download -->
-            </ui:NavigationViewItem.Icon>
-          </ui:NavigationViewItem>
-          <ui:NavigationViewItem x:Name="NavFormat" Content="Formázás" Tag="format">
-            <ui:NavigationViewItem.Icon>
-              <FontIcon Glyph="&#xE15E;"/> <!-- Repair -->
-            </ui:NavigationViewItem.Icon>
-          </ui:NavigationViewItem>
-          <ui:NavigationViewItem x:Name="NavHealth" Content="Lemez egységek" Tag="health">
-            <ui:NavigationViewItem.Icon>
-              <FontIcon Glyph="&#xEDA2;"/> <!-- Hard drive -->
-            </ui:NavigationViewItem.Icon>
-          </ui:NavigationViewItem>
-          <ui:NavigationViewItem x:Name="NavErase" Content="Biztonságos törlés" Tag="erase">
-            <ui:NavigationViewItem.Icon>
-              <FontIcon Glyph="&#xE74D;"/> <!-- Delete -->
-            </ui:NavigationViewItem.Icon>
-          </ui:NavigationViewItem>
-          <ui:NavigationViewItem x:Name="NavSettings" Content="Beállítások" Tag="settings">
-            <ui:NavigationViewItem.Icon>
-              <FontIcon Glyph="&#xE713;"/> <!-- Settings -->
-            </ui:NavigationViewItem.Icon>
-          </ui:NavigationViewItem>
-          <!-- Hidden item kept to retain partition handlers -->
-          <ui:NavigationViewItem x:Name="NavPartitions" Content="Partíciók" Tag="part" Visibility="Collapsed" />
-        </ui:NavigationView.MenuItems>
-
-        <Grid x:Name="ContentHost" Padding="8">
-          <!-- Header row with title and actions -->
-          <Grid RowSpacing="8">
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- Custom Title Bar -->
+        <Border Grid.Row="0" Background="#1A000000" Height="40" Padding="8,0" CornerRadius="8" Margin="8,8,8,0">
             <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-              </Grid.ColumnDefinitions>
-              <TextBlock x:Name="PageTitle" Text="Beállítások" FontSize="22" FontWeight="Bold" Margin="8,8,8,0"/>
-              <Button x:Name="HeaderApplyButton" Grid.Column="2" Margin="0,8,8,0" Content="Alkalmaz" Click="ApplySettings_Click" Visibility="Collapsed"/>
+                <Grid x:Name="TitleDragRegion" VerticalAlignment="Center">
+                    <TextBlock x:Name="TitleText" Text="FormatX Pro | Verzió: 2.0" Opacity="0.9"/>
+                </Grid>
             </Grid>
+        </Border>
 
-            <!-- Pages -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <Grid>
-              <!-- ISO → USB (hidden) -->
-              <Grid x:Name="ViewIsoUsb" Visibility="Collapsed" Padding="16" ColumnSpacing="16" RowSpacing="12">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="380"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+        <!-- Main card with NavigationView -->
+        <Border Grid.Row="1" CornerRadius="16" Margin="12" Background="#14000000" Shadow="{StaticResource AppCardShadow}" Translation="0,0,32" BorderBrush="#33FFFFFF" BorderThickness="1">
+            <ui:NavigationView x:Name="Nav" IsSettingsVisible="False" IsPaneOpen="True" PaneDisplayMode="Left" SelectionChanged="Nav_SelectionChanged">
+                <ui:NavigationView.MenuItems>
+                    <ui:NavigationViewItem x:Name="NavIsoUsb" Content="ISO → USB" Tag="iso">
+                        <ui:NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE8B5;"/>
+                            <!-- Download -->
+                        </ui:NavigationViewItem.Icon>
+                    </ui:NavigationViewItem>
+                    <ui:NavigationViewItem x:Name="NavFormat" Content="Lemez formázása" Tag="format">
+                        <ui:NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE15E;"/>
+                            <!-- Repair -->
+                        </ui:NavigationViewItem.Icon>
+                    </ui:NavigationViewItem>
+                    <ui:NavigationViewItem x:Name="NavHealth" Content="Lemez állapota" Tag="health">
+                        <ui:NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xEDA2;"/>
+                            <!-- Hard drive -->
+                        </ui:NavigationViewItem.Icon>
+                    </ui:NavigationViewItem>
+                    <ui:NavigationViewItem x:Name="NavErase" Content="Biztonságos törlés" Tag="erase">
+                        <ui:NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE74D;"/>
+                            <!-- Delete -->
+                        </ui:NavigationViewItem.Icon>
+                    </ui:NavigationViewItem>
+                    <ui:NavigationViewItem x:Name="NavSettings" Content="Beállítások" Tag="settings">
+                        <ui:NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE713;"/>
+                            <!-- Settings -->
+                        </ui:NavigationViewItem.Icon>
+                    </ui:NavigationViewItem>
+                    <!-- Hidden item kept to retain partition handlers -->
+                    <ui:NavigationViewItem x:Name="NavPartitions" Content="Partíciók" Tag="part" Visibility="Collapsed"/>
+                </ui:NavigationView.MenuItems>
 
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <TextBox x:Name="IsoPath" Width="300"/>
-                  <Button x:Name="BtnBrowseIso" Click="BrowseIso_Click"/>
-                </StackPanel>
+                <Grid x:Name="ContentHost" Padding="8">
+                    <!-- Header row with title and actions -->
+                    <Grid RowSpacing="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="PageTitle" Text="Beállítások" FontSize="22" FontWeight="Bold" Margin="8,8,8,0"/>
+                            <Button x:Name="HeaderApplyButton" Grid.Column="2" Margin="0,8,8,0" Content="Alkalmaz" Click="ApplySettings_Click" Visibility="Collapsed"/>
+                        </Grid>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
-                  <ComboBox x:Name="TargetDrives" Width="220" Header="Target drive" ItemsSource="{Binding IsoDrives}" DisplayMemberPath="Label" SelectedValuePath="Letter"/>
-                  <Button Content="Frissítés" Click="DrivesRefresh_Click" />
-                </StackPanel>
-                <Button Grid.Row="2" x:Name="BtnIsoWrite" Content="Write ISO" Click="WriteIso_Click" Width="120"/>
-                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
-                  <ComboBox x:Name="IsoWriteSchemeCombo" Width="120" Header="Séma">
-                    <ComboBoxItem Content="GPT" IsSelected="True"/>
-                    <ComboBoxItem Content="MBR"/>
-                  </ComboBox>
-                  <ToggleButton x:Name="IsoVerifyToggle" Content="Verify" IsChecked="True"/>
-                </StackPanel>
+                        <!-- Pages -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <Grid>
+                                <!-- ISO → USB (hidden) -->
+                                <Grid x:Name="ViewIsoUsb" Visibility="Collapsed" Padding="16" ColumnSpacing="16" RowSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="380"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
 
-                <TextBox x:Name="LogBox" Grid.Row="3" Grid.ColumnSpan="2" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-              </Grid>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBox x:Name="IsoPath" Width="300" Header="ISO fájl"/>
+                                        <Button x:Name="BtnBrowseIso" Content="Tallózás..." Click="BrowseIso_Click"/>
+                                    </StackPanel>
 
-              <!-- Format -->
-              <Grid x:Name="ViewFormat" Padding="16" ColumnSpacing="16" RowSpacing="12" Visibility="Collapsed">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="300"/>
-                  <ColumnDefinition Width="200"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+                                        <ComboBox x:Name="TargetDrives" Width="220" Header="Célmeghajtó" ItemsSource="{Binding IsoDrives}" DisplayMemberPath="Label" SelectedValuePath="Letter"/>
+                                        <Button Content="Frissítés" Click="DrivesRefresh_Click"/>
+                                    </StackPanel>
+                                    <Button Grid.Row="2" x:Name="BtnIsoWrite" Content="ISO kiírása" Click="WriteIso_Click" Width="120"/>
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+                                        <ComboBox x:Name="IsoWriteSchemeCombo" Width="120" Header="Partíciós séma">
+                                            <ComboBoxItem Content="GPT" IsSelected="True"/>
+                                            <ComboBoxItem Content="MBR"/>
+                                        </ComboBox>
+                                        <ToggleButton x:Name="IsoVerifyToggle" Content="Ellenőrzés" IsChecked="True"/>
+                                    </StackPanel>
 
-                <Grid Grid.Column="0" Width="300">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                  </Grid.ColumnDefinitions>
-                  <ComboBox x:Name="FormatDrive" Grid.Column="0" Header="Meghajtó" Margin="0,0,8,0" SelectionChanged="FormatDrive_SelectionChanged" ItemsSource="{Binding FormatDrives}" DisplayMemberPath="Label" SelectedValuePath="Letter"/>
-                  <Button Grid.Column="1" Content="Frissítés" Click="DrivesRefresh_Click"/>
-                </Grid>
-                <ComboBox x:Name="FsCombo" Grid.Column="1" Header="Fájlrendszer" Width="180" Margin="8,0,0,0" SelectionChanged="FsCombo_SelectionChanged">
-                  <ComboBoxItem Content="NTFS"/>
-                  <ComboBoxItem Content="FAT32"/>
-                  <ComboBoxItem Content="exFAT"/>
-                  <ComboBoxItem x:Name="FsItemReFS" Content="ReFS"/>
-                  <ComboBoxItem x:Name="FsItemExt4" Content="ext4 (Linux)"/>
-                </ComboBox>
-                <TextBox x:Name="LabelBox" Grid.Row="1" Grid.Column="0" Header="Címke" Width="260" MaxLength="32" TextChanging="LabelBox_TextChanging"/>
-                <CheckBox x:Name="QuickBox" Grid.Row="1" Grid.Column="1" Content="Gyors formázás" IsChecked="True" VerticalAlignment="Center"/>
-                <Button Grid.Row="2" Grid.Column="0" x:Name="BtnFormat" Content="Formázás" Click="Format_Click" Width="120"/>
-              </Grid>
+                                    <TextBox x:Name="LogBox" Grid.Row="3" Grid.ColumnSpan="2" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" Header="Napló"/>
+                                </Grid>
 
-              <!-- Partitions (hidden) -->
-              <Grid x:Name="ViewPartitions" Padding="16" ColumnSpacing="16" RowSpacing="12" Visibility="Collapsed">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="*"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="*"/>
-                  <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+                                <!-- Format -->
+                                <Grid x:Name="ViewFormat" Padding="16" ColumnSpacing="16" RowSpacing="12" Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="300"/>
+                                        <ColumnDefinition Width="200"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
-                  <TextBox x:Name="DiskNumberBox" Header="Lemez sorszám" Width="160"/>
-                  <ComboBox x:Name="IsoSchemeCombo" Header="Séma" SelectedIndex="0" Width="140">
-                    <ComboBoxItem Content="GPT"/>
-                    <ComboBoxItem Content="MBR"/>
-                  </ComboBox>
-                  <Button x:Name="BtnLoadPartitions" Content="Betöltés" Click="LoadPartitions_Click" Style="{StaticResource AccentButtonStyle}"/>
-                </StackPanel>
+                                    <Grid Grid.Column="0" Width="300">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="FormatDrive" Grid.Column="0" Header="Meghajtó" Margin="0,0,8,0" SelectionChanged="FormatDrive_SelectionChanged" ItemsSource="{Binding FormatDrives}" DisplayMemberPath="Label" SelectedValuePath="Letter"/>
+                                        <Button Grid.Column="1" Content="Frissítés" Click="DrivesRefresh_Click"/>
+                                    </Grid>
+                                    <ComboBox x:Name="FsCombo" Grid.Column="1" Header="Fájlrendszer" Width="180" Margin="8,0,0,0" SelectionChanged="FsCombo_SelectionChanged">
+                                        <ComboBoxItem Content="NTFS"/>
+                                        <ComboBoxItem Content="FAT32"/>
+                                        <ComboBoxItem Content="exFAT"/>
+                                        <ComboBoxItem x:Name="FsItemReFS" Content="ReFS"/>
+                                        <ComboBoxItem x:Name="FsItemExt4" Content="ext4 (Linux)"/>
+                                    </ComboBox>
+                                    <TextBox x:Name="LabelBox" Grid.Row="1" Grid.Column="0" Header="Meghajtó címkéje" Width="260" MaxLength="32" TextChanging="LabelBox_TextChanging"/>
+                                    <CheckBox x:Name="QuickBox" Grid.Row="1" Grid.Column="1" Content="Gyorsformázás" IsChecked="True" VerticalAlignment="Center"/>
+                                    <Button Grid.Row="2" Grid.Column="0" x:Name="BtnFormat" Content="Formázás indítása" Click="Format_Click" Width="160"/>
+                                </Grid>
 
-                <Grid Grid.Row="1" ColumnSpacing="16">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                  </Grid.ColumnDefinitions>
-                  <StackPanel>
-                    <TextBlock Text="Jelenlegi állapot" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                    <GridView x:Name="GridCurrent" IsItemClickEnabled="False" SelectionMode="None">
-                      <GridView.ItemTemplate>
-                        <DataTemplate>
-                          <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding Index}" Width="28"/>
-                            <TextBlock Text="{Binding Type}" Width="120"/>
-                            <TextBlock Text="{Binding SizeDisplay}" Width="100"/>
-                            <TextBlock Text="{Binding FileSystem}" Width="80"/>
-                            <TextBlock Text="{Binding DriveLetter}" Width="60"/>
-                            <TextBlock Text="{Binding Label}"/>
-                          </StackPanel>
-                        </DataTemplate>
-                      </GridView.ItemTemplate>
-                    </GridView>
-                  </StackPanel>
+                                <!-- Partitions (hidden) -->
+                                <Grid x:Name="ViewPartitions" Padding="16" ColumnSpacing="16" RowSpacing="12" Visibility="Collapsed">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                  <StackPanel Grid.Column="1">
-                    <TextBlock Text="Tervezett változás" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                    <GridView x:Name="GridPlanned" IsItemClickEnabled="False" SelectionMode="None"/>
-                  </StackPanel>
-                </Grid>
+                                    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
+                                        <TextBox x:Name="DiskNumberBox" Header="Lemez sorszáma" Width="160"/>
+                                        <ComboBox x:Name="IsoSchemeCombo" Header="Partíciós séma" SelectedIndex="0" Width="140">
+                                            <ComboBoxItem Content="GPT"/>
+                                            <ComboBoxItem Content="MBR"/>
+                                        </ComboBox>
+                                        <Button x:Name="BtnLoadPartitions" Content="Partíciók betöltése" Click="LoadPartitions_Click" Style="{StaticResource AccentButtonStyle}"/>
+                                    </StackPanel>
 
-                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
-                  <Button x:Name="BtnApplyPartitionPlan" Content="Művelet megerősítése" Style="{StaticResource AccentButtonStyle}" Click="ApplyPartitionPlan_Click"/>
-                  <Button x:Name="BtnRollback" Content="Visszaállítás" Click="RollbackPartition_Click"/>
-                  <ProgressBar x:Name="PartProgress" Width="320" Height="6" IsIndeterminate="False" Visibility="Collapsed"/>
-                  <TextBlock x:Name="PartProgressText" VerticalAlignment="Center" Visibility="Collapsed"/>
-                </StackPanel>
-              </Grid>
+                                    <Grid Grid.Row="1" ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Jelenlegi partíciók" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                            <GridView x:Name="GridCurrent" IsItemClickEnabled="False" SelectionMode="None">
+                                                <GridView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock Text="{Binding Index}" Width="28"/>
+                                                            <TextBlock Text="{Binding Type}" Width="120"/>
+                                                            <TextBlock Text="{Binding SizeDisplay}" Width="100"/>
+                                                            <TextBlock Text="{Binding FileSystem}" Width="80"/>
+                                                            <TextBlock Text="{Binding DriveLetter}" Width="60"/>
+                                                            <TextBlock Text="{Binding Label}"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </GridView.ItemTemplate>
+                                            </GridView>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Tervezett partíciók" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                                            <GridView x:Name="GridPlanned" IsItemClickEnabled="False" SelectionMode="None"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
+                                        <Button x:Name="BtnApplyPartitionPlan" Content="Módosítások alkalmazása" Style="{StaticResource AccentButtonStyle}" Click="ApplyPartitionPlan_Click"/>
+                                        <Button x:Name="BtnRollback" Content="Visszaállítás" Click="RollbackPartition_Click"/>
+                                        <ProgressBar x:Name="PartProgress" Width="320" Height="6" IsIndeterminate="False" Visibility="Collapsed"/>
+                                        <TextBlock x:Name="PartProgressText" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                    </StackPanel>
+                                </Grid>
 
               <!-- Secure Erase -->
               <StackPanel x:Name="ViewSecureErase" Padding="16" Spacing="8" Visibility="Collapsed" RequestedTheme="Dark">
-                <TextBlock Text="Target disk"/>
-                <ComboBox x:Name="SecureErase_DriveCombo" Width="420" DisplayMemberPath="Display" SelectedValuePath="DevicePath" SelectionChanged="SecureErase_DriveCombo_SelectionChanged"/>
-                <CheckBox x:Name="EraseFullFormat" Content="Full format (slower)" IsChecked="True"/>
+                <TextBlock Text="Célmeghajtó"/>
+                <ComboBox x:Name="SecureErase_DriveCombo" x:Uid="ui.secure.target"
+                          Width="420"
+                          DisplayMemberPath="Display"
+                          SelectedValuePath="DevicePath"
+                          SelectionChanged="SecureErase_DriveCombo_SelectionChanged"
+                          AutomationProperties.Name="Célmeghajtó"
+                          ToolTipService.ToolTip="Válaszd ki a törlendő fizikai lemezt"/>
+                <CheckBox x:Name="EraseFullFormat" x:Uid="ui.secure.fullFormat" Content="Teljes formázás (lassabb)" IsChecked="True"
+                          AutomationProperties.Name="Teljes formázás"
+                          ToolTipService.ToolTip="Lassabb, de alaposabb felülírás"/>
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                  <Button x:Name="BtnErase1" Content="1 menet" Style="{StaticResource AccentButtonStyle}" Click="ErasePass_Click" Tag="1"/>
-                  <Button x:Name="BtnErase2" Content="2 menet" Style="{StaticResource AccentButtonStyle}" Click="ErasePass_Click" Tag="2"/>
-                  <Button x:Name="BtnErase3" Content="3 menet" Style="{StaticResource AccentButtonStyle}" Click="ErasePass_Click" Tag="3"/>
+                  <Button x:Name="BtnErase1" x:Uid="ui.secure.pass1" Content="1 átírás" Style="{StaticResource AccentButtonStyle}" Click="ErasePass_Click" Tag="1"
+                          AutomationProperties.Name="1 átírás"/>
+                  <Button x:Name="BtnErase2" x:Uid="ui.secure.pass2" Content="2 átírás" Style="{StaticResource AccentButtonStyle}" Click="ErasePass_Click" Tag="2"
+                          AutomationProperties.Name="2 átírás"/>
+                  <Button x:Name="BtnErase3" x:Uid="ui.secure.pass3" Content="3 átírás" Style="{StaticResource AccentButtonStyle}" Click="ErasePass_Click" Tag="3"
+                          AutomationProperties.Name="3 átírás"/>
                 </StackPanel>
-                <Button x:Name="BtnSecureErase" Content="Start erase" Width="160" Click="SecureErase_Click" Visibility="Collapsed"/>
+                <Button x:Name="BtnSecureErase" Content="Törlés indítása" Width="160" Click="SecureErase_Click" Visibility="Collapsed"/>
                 <TextBlock x:Name="EraseResult" TextWrapping="Wrap"/>
                 <TextBlock x:Name="EraseEtaText" Opacity="0.8"/>
               </StackPanel>
 
-              <!-- Disk Health -->
-              <StackPanel x:Name="ViewHealth" Padding="16" Spacing="8" Visibility="Collapsed">
-                <ComboBox x:Name="Health_DriveCombo" Width="420" DisplayMemberPath="Display" SelectedValuePath="DevicePath" SelectionChanged="Health_DriveCombo_SelectionChanged"/>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <TextBox x:Name="ScanBytes" Width="220" PlaceholderText="Bytes to scan (e.g. 1073741824)"/>
-                  <Button Content="Surface scan" Click="SurfaceScan_Click"/>
-                </StackPanel>
-                <Button Content="SMART quick query" Width="220" Click="SmartQuick_Click"/>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <Border x:Name="HealthBadge" Style="{StaticResource HealthBadgeStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                      <Ellipse x:Name="HealthDot" Width="12" Height="12" Fill="{StaticResource HealthGreen}"/>
-                      <TextBlock x:Name="HealthBadgeText" Text="Zöld"/>
-                    </StackPanel>
-                  </Border>
-                </StackPanel>
-                <TextBlock x:Name="HealthResult" TextWrapping="Wrap"/>
-              </StackPanel>
+                                <!-- Disk Health -->
+                                <StackPanel x:Name="ViewHealth" Padding="16" Spacing="8" Visibility="Collapsed">
+                                    <ComboBox x:Name="Health_DriveCombo" Header="Vizsgálandó lemez" Width="420" DisplayMemberPath="Display" SelectedValuePath="DevicePath" SelectionChanged="Health_DriveCombo_SelectionChanged"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBox x:Name="ScanBytes" Width="220" PlaceholderText="Vizsgálandó bájtok (pl. 1073741824)"/>
+                                        <Button Content="Felületellenőrzés" Click="SurfaceScan_Click"/>
+                                    </StackPanel>
+                                    <Button Content="S.M.A.R.T. gyors lekérdezés" Width="220" Click="SmartQuick_Click"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Border x:Name="HealthBadge" Style="{StaticResource HealthBadgeStyle}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Ellipse x:Name="HealthDot" Width="12" Height="12" Fill="{StaticResource HealthGreen}"/>
+                                                <TextBlock x:Name="HealthBadgeText" Text="Kiváló"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock x:Name="HealthResult" TextWrapping="Wrap"/>
+                                </StackPanel>
 
-              <!-- Settings -->
-              <StackPanel x:Name="ViewSettings" Padding="16" Spacing="8" Visibility="Collapsed">
-                <TextBlock x:Name="TxtLanguage" Text="Nyelv" FontWeight="SemiBold"/>
-                <ComboBox x:Name="LangCombo" SelectedIndex="0">
-                  <ComboBoxItem Content="Magyar" />
-                  <ComboBoxItem Content="English" />
-                </ComboBox>
+                                <!-- Settings -->
+                                <StackPanel x:Name="ViewSettings" Padding="16" Spacing="8" Visibility="Collapsed">
+                                    <TextBlock x:Name="TxtLanguage" Text="Nyelv" FontWeight="SemiBold"/>
+                                    <ComboBox x:Name="LangCombo" SelectedIndex="0">
+                                        <ComboBoxItem Content="Magyar"/>
+                                        <ComboBoxItem Content="English"/>
+                                    </ComboBox>
 
-                <TextBlock x:Name="TxtTheme" Text="Téma" Margin="0,12,0,0" FontWeight="SemiBold"/>
-                <ComboBox x:Name="ThemeCombo" SelectedIndex="0">
-                  <ComboBoxItem x:Name="ThemeItemDefault" Content="Rendszer (Default)" />
-                  <ComboBoxItem x:Name="ThemeItemDark" Content="Sötét" />
-                  <ComboBoxItem x:Name="ThemeItemLight" Content="Világos" />
-                </ComboBox>
-                <TextBlock x:Name="ThemeDefaultHint" Opacity="0.7" Text="Alap: Rendszer" />
+                                    <TextBlock x:Name="TxtTheme" Text="Téma" Margin="0,12,0,0" FontWeight="SemiBold"/>
+                                    <ComboBox x:Name="ThemeCombo" SelectedIndex="0">
+                                        <ComboBoxItem x:Name="ThemeItemDefault" Content="Rendszer alapértelmezett"/>
+                                        <ComboBoxItem x:Name="ThemeItemDark" Content="Sötét"/>
+                                        <ComboBoxItem x:Name="ThemeItemLight" Content="Világos"/>
+                                    </ComboBox>
+                                    <TextBlock x:Name="ThemeDefaultHint" Opacity="0.7" Text="Alapértelmezett: A rendszer beállítását követi."/>
 
-                <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
-                <TextBlock x:Name="TxtBackground" Text="Háttérkép (JPG/PNG)"/>
-                <Button x:Name="BtnPickBg" Content="Háttér kiválasztása..." Click="PickBackground_Click"/>
-                <TextBlock x:Name="TxtBgHint" Text="Új háttér azonnal érvényesül; útvonal mentésre kerül."/>
+                                    <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
+                                    <TextBlock x:Name="TxtBackground" Text="Háttérkép (JPG/PNG)"/>
+                                    <Button x:Name="BtnPickBg" Content="Háttérkép kiválasztása..." Click="PickBackground_Click"/>
+                                    <TextBlock x:Name="TxtBgHint" Text="Az új háttérkép azonnal érvénybe lép, az elérési út mentésre kerül."/>
 
-                <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
-                <TextBlock x:Name="TxtAbout" Text="Névjegy" FontWeight="SemiBold"/>
-                <TextBlock x:Name="TxtVersion" Text="Verzió: 2.0" />
-                <StackPanel Spacing="4">
-                  <TextBlock Text="FormatTech – © 2025 Hudacsek József (GamesTech)" TextWrapping="Wrap"/>
-                  <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button x:Name="BtnCheckUpdate" Content="Frissítés" Click="CheckUpdates_Click"/>
-                    <Button x:Name="BtnExportCsv" Content="Napló export (CSV)" Click="ExportCsv_Click"/>
-                  </StackPanel>
-                </StackPanel>
+                                    <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
+                                    <TextBlock x:Name="TxtAbout" Text="Névjegy" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="TxtVersion" Text="Verzió: 2.0"/>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="FormatTech – © 2025 Hudacsek József (GamesTech)" TextWrapping="Wrap"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Button x:Name="BtnCheckUpdate" Content="Frissítések keresése" Click="CheckUpdates_Click"/>
+                                            <Button x:Name="BtnExportCsv" Content="Napló exportálása (CSV)" Click="ExportCsv_Click"/>
+                                        </StackPanel>
+                                    </StackPanel>
 
-                <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
-                <TextBlock Text="Licenc és Telemetria" FontWeight="SemiBold"/>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <TextBox x:Name="LicenseKeyBox" Width="280" PlaceholderText="Licenckulcs"/>
-                  <Button x:Name="BtnActivateOnline" Content="Aktiválás (online)" Click="ActivateLicense_Click"/>
-                  <Button x:Name="BtnActivateOffline" Content="Aktiválás (offline)" Click="ActivateLicenseOffline_Click"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                  <TextBlock Text="Telemetria (opt-out)" VerticalAlignment="Center"/>
-                  <ToggleSwitch x:Name="TelemetryOptOutSwitch" Toggled="TelemetryOptOut_Toggled"/>
-                </StackPanel>
+                                    <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
+                                    <TextBlock Text="Licenc és Telemetria" FontWeight="SemiBold"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBox x:Name="LicenseKeyBox" Width="280" PlaceholderText="Licenckulcs megadása"/>
+                                        <Button x:Name="BtnActivateOnline" Content="Aktiválás (online)" Click="ActivateLicense_Click"/>
+                                        <Button x:Name="BtnActivateOffline" Content="Aktiválás (offline)" Click="ActivateLicenseOffline_Click"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Telemetria engedélyezése (adatgyűjtés a fejlesztéshez)" VerticalAlignment="Center"/>
+                                        <ToggleSwitch x:Name="TelemetryOptOutSwitch" Toggled="TelemetryOptOut_Toggled"/>
+                                    </StackPanel>
 
-                <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
-                <TextBlock Text="Telepítő" FontWeight="SemiBold"/>
-                <Button x:Name="BtnBuildMsix" Content="MSIX Build (placeholder)" Click="BuildMsix_Click" Width="220"/>
+                                    <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
+                                    <TextBlock Text="Telepítő" FontWeight="SemiBold"/>
+                                    <Button x:Name="BtnBuildMsix" Content="MSIX telepítő készítése" Click="BuildMsix_Click" Width="220"/>
 
-                <TextBlock x:Name="TxtFooter" Text=".NET 10 Preview • WinUI 3 • MSIX"/>
+                                    <TextBlock x:Name="TxtFooter" Text=".NET 10 Preview • WinUI 3 • MSIX"/>
 
-                <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
-                <TextBlock Text="Élő napló (usb.*)" FontWeight="SemiBold"/>
-                <ListView x:Name="LiveLog" Height="160">
-                  <ListView.ItemTemplate>
-                    <DataTemplate>
-                      <TextBlock Text="{Binding Text}" Foreground="{Binding Level, Converter={StaticResource LogLevelToBrush}}"/>
-                    </DataTemplate>
-                  </ListView.ItemTemplate>
-                </ListView>
-              </StackPanel>
-            </Grid>
-            </ScrollViewer>
-          </Grid>
-        </Grid>
-      </ui:NavigationView>
-    </Border>
+                                    <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
+                                    <TextBlock Text="Élő napló (usb.*)" FontWeight="SemiBold"/>
+                                    <ListView x:Name="LiveLog" Height="160">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Text}" Foreground="{Binding Level, Converter={StaticResource LogLevelToBrush}}"/>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </StackPanel>
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </ui:NavigationView>
+        </Border>
 
-    <!-- Bottom status row -->
-    <Border Grid.Row="2" Background="#88000000" Padding="12" CornerRadius="12" Shadow="{StaticResource AppFooterShadow}" Translation="0,0,16" Margin="12,0,12,12">
-      <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-        <ProgressBar x:Name="GlobalProgressBar" Width="420" Height="6" Minimum="0" Maximum="100"/>
-        <TextBlock x:Name="GlobalProgressText" Text="Készenlét" VerticalAlignment="Center"/>
-        <TextBlock x:Name="Status" Margin="12,0,0,0" VerticalAlignment="Center"/>
-        <Button x:Name="BtnRefresh" Content="Refresh" Visibility="Collapsed" Click="Refresh_Click" Margin="12,0,0,0"/>
-        <Button x:Name="BtnDone" Content="Kész" Margin="12,0,0,0"/>
-      </StackPanel>
-    </Border>
-  </Grid>
+        <!-- Bottom status row -->
+        <Border Grid.Row="2" Background="#88000000" Padding="12" CornerRadius="12" Shadow="{StaticResource AppFooterShadow}" Translation="0,0,16" Margin="12,0,12,12">
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <ProgressBar x:Name="GlobalProgressBar" Width="420" Height="6" Minimum="0" Maximum="100"/>
+                <TextBlock x:Name="GlobalProgressText" Text="Készenlét" VerticalAlignment="Center"/>
+                <TextBlock x:Name="Status" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                <Button x:Name="BtnRefresh" Content="Frissítés" Visibility="Collapsed" Click="Refresh_Click" Margin="12,0,0,0"/>
+                <Button x:Name="BtnDone" Content="Kész" Margin="12,0,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
 </Window>
+

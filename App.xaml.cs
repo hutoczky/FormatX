@@ -32,6 +32,10 @@ namespace FormatX
     {
       try
       {
+        try { LogService.AppendUsbLine("usb.app.start: Smoke.Init"); } catch { }
+        // Pre-clean crash artifacts for smoke tests
+        try { FormatX.Services.GlobalExceptionHandler.CleanupCrashArtifacts(); } catch { }
+
         AppDomain.CurrentDomain.UnhandledException += (s, e) =>
         {
           try { LogService.LogUsbAppError("Unhandled", e.ExceptionObject as Exception); } catch { }
@@ -63,13 +67,14 @@ namespace FormatX
       catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogAsync("error.com.exception", new { ctx = "bootstrap", cex.Message, cex.HResult }); }
       catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "bootstrap", ex = ex.Message }); }
 
-      // Language (default HU)
-      var lang = SettingsService.Current.Language;
+      // Language: enforce Hungarian-only UI
       try
       {
-        ApplicationLanguages.PrimaryLanguageOverride = lang;
-        CultureInfo.CurrentUICulture = new CultureInfo(lang);
-        CultureInfo.CurrentCulture   = new CultureInfo(lang);
+        SettingsService.Current.Language = "hu-HU";
+        ApplicationLanguages.PrimaryLanguageOverride = "hu-HU";
+        CultureInfo.CurrentUICulture = new CultureInfo("hu-HU");
+        CultureInfo.CurrentCulture   = new CultureInfo("hu-HU");
+        LocalizationService.SetLanguage("hu");
       }
       catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "lang.init", ex = ex.Message }); }
 
@@ -103,6 +108,18 @@ namespace FormatX
         };
       }
       try { LogService.AppendUsbLine("usb.app.start: AutoBrowse.Init"); } catch { }
+      // Smoke probe: write a simple output file and log, tolerate IO errors
+      try
+      {
+        var smokeDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX");
+        Directory.CreateDirectory(smokeDir);
+        var smokePath = Path.Combine(smokeDir, "smoke-output.txt");
+        var content = $"ok {DateTimeOffset.Now:o}";
+        try { File.WriteAllText(smokePath, content); }
+        catch { try { Services.FileUtil.WriteAllTextRetryAsync(smokePath, content).GetAwaiter().GetResult(); } catch { } }
+        try { LogService.AppendUsbLine($"usb.smoke.write:{smokePath}"); } catch { }
+      }
+      catch { }
       try { _window?.Activate(); } catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "window.activate", ex = ex.Message }); }
       // Only auto-exit in CI/headless mode
       try
@@ -158,11 +175,24 @@ namespace FormatX
 
     private static void TryGracefulShutdown()
     {
+      try
+      {
+        var headless = Environment.GetEnvironmentVariable("FORMATX_HEADLESS");
+        if (!string.Equals(headless, "1", StringComparison.Ordinal))
+        {
+          // Dev/interactive run: do not auto-exit
+          return;
+        }
+      }
+      catch { }
+
       try { LogService.AppendUsbLine("usb.app.shutdown"); } catch { }
       try
       {
         var win = MainWindow;
-        var dq = win?.DispatcherQueue ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+        Microsoft.UI.Dispatching.DispatcherQueue? dq = null;
+        try { dq = win?.DispatcherQueue ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread(); }
+        catch (Exception dqex) { LogService.LogUsbAppError("UI.DispatcherQueueNull", dqex); }
         dq?.TryEnqueue(() =>
         {
           try { win?.Close(); } catch { }

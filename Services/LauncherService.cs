@@ -17,12 +17,14 @@ namespace FormatX.Services
         if (AppSettings.DisableStoreRedirect)
         {
           try { await LogService.WriteUsbLineAsync($"usb.store.prompt.skipped:{uri.Scheme}"); } catch { }
+          try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
           return false;
         }
         var win = App.MainWindow as Window;
         if (win == null || App.IsMainWindowClosed)
         {
           try { await LogService.WriteUsbLineAsync($"usb.store.prompt.skipped:{uri.Scheme}"); } catch { }
+          try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
           return false;
         }
         return await UiThread.RunOnUIThreadAsync(win, async () =>
@@ -37,6 +39,7 @@ namespace FormatX.Services
                 {
                   await LogService.LogUsbWinrtErrorAsync("Launcher:LaunchFailed", new InvalidOperationException(Sanitize(uri.ToString())));
                   try { await LogService.WriteUsbLineAsync($"usb.store.prompt.skipped:{uri.Scheme}"); } catch { }
+                  try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
                 }
                 return ok;
               }
@@ -68,18 +71,21 @@ namespace FormatX.Services
                   var psi = new ProcessStartInfo(full) { UseShellExecute = true };
                   Process.Start(psi);
                   try { await LogService.WriteUsbLineAsync($"usb.launch.fallback:{uri.Scheme}:{full}"); } catch { }
+                  try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
                   return true;
                 }
                 catch (Exception ex2)
                 {
                   await LogService.LogUsbWinrtErrorAsync("Launcher.FallbackStart", ex2);
                   try { await LogService.WriteUsbLineAsync($"usb.store.prompt.skipped:{uri.Scheme}"); } catch { }
+                  try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
                   return false;
                 }
               }
             }
 
             try { await LogService.WriteUsbLineAsync($"usb.store.prompt.skipped:{uri.Scheme}"); } catch { }
+            try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
             // Optional UX: small dialog informing no handler (safe to ignore failures)
             try
             {
@@ -102,18 +108,21 @@ namespace FormatX.Services
           {
             await LogService.LogUsbWinrtErrorAsync("Launcher.COMException", cex);
             try { await LogService.WriteUsbLineAsync($"usb.store.prompt.skipped:{uri.Scheme}"); } catch { }
+            try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
             return false;
           }
           catch (InvalidOperationException ioex)
           {
             await LogService.LogUsbWinrtErrorAsync("Launcher.InvalidOperation", ioex);
             try { await LogService.WriteUsbLineAsync($"usb.store.prompt.skipped:{uri.Scheme}"); } catch { }
+            try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
             return false;
           }
           catch (Exception ex)
           {
             await LogService.LogUsbWinrtErrorAsync("Launcher.Exception", ex);
             try { await LogService.WriteUsbLineAsync($"usb.store.prompt.skipped:{uri.Scheme}"); } catch { }
+            try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
             return false;
           }
         });
@@ -122,6 +131,7 @@ namespace FormatX.Services
       {
         try { await LogService.WriteUsbLineAsync($"usb.winrt.error:Launcher:{ex.GetType().Name}:{Sanitize(ex.Message)}"); } catch { }
         try { await LogService.WriteUsbLineAsync($"usb.store.prompt.skipped:{uri.Scheme}"); } catch { }
+        try { await LogService.WriteUsbLineAsync($"usb.store.skipped:{uri.Scheme}"); } catch { }
         return false;
       }
     }

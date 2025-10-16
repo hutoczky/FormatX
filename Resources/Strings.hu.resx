@@ -22,6 +22,21 @@
   <data name="settings.about" xml:space="preserve"><value>Nevjegy</value></data>
   <data name="settings.version" xml:space="preserve"><value>Verzio: 2.0</value></data>
   <data name="iso.placeholder" xml:space="preserve"><value>Valassz ISO-t</value></data>
+  <data name="ui.health.bytesToScan" xml:space="preserve"><value>Ellenőrzendő bájtok</value></data>
+  <data name="ui.health.surfaceScan" xml:space="preserve"><value>Felszíni ellenőrzés</value></data>
+  <data name="ui.health.smartQuick" xml:space="preserve"><value>SMART gyors lekérdezés</value></data>
+  <data name="ui.health.status.good" xml:space="preserve"><value>Állapot: Jó</value></data>
+  <data name="ui.health.details" xml:space="preserve"><value>Részletek</value></data>
+  <data name="ui.health.drive.header" xml:space="preserve"><value>Vizsgálandó lemez</value></data>
+  <data name="ui.secure.target" xml:space="preserve"><value>Célmeghajtó</value></data>
+  <data name="ui.secure.fullFormat" xml:space="preserve"><value>Teljes formázás (lassabb)</value></data>
+  <data name="ui.secure.pass1" xml:space="preserve"><value>1 átírás</value></data>
+  <data name="ui.secure.pass2" xml:space="preserve"><value>2 átírás</value></data>
+  <data name="ui.secure.pass3" xml:space="preserve"><value>3 átírás</value></data>
+  <data name="common.exit" xml:space="preserve"><value>Kilépés</value></data>
+  <data name="common.selectdrive" xml:space="preserve"><value>Meghajtó kiválasztása</value></data>
+  <data name="status.drives.refreshed" xml:space="preserve"><value>Meghajtók frissítve</value></data>
+  <data name="status.refresh.skipped.energysaver" xml:space="preserve"><value>Energiatakarékos mód – frissítés kihagyva</value></data>
   <data name="dialog.confirm.title" xml:space="preserve"><value>Megerosites</value></data>
   <data name="dialog.confirm.content" xml:space="preserve"><value>Biztosan vegrehajtja a muveletet?</value></data>
   <data name="dialog.confirm.yes" xml:space="preserve"><value>Igen</value></data>
