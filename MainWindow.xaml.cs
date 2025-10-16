@@ -574,10 +574,11 @@ namespace FormatX
         var scanBox = (this.Content as FrameworkElement)?.FindName("BytesToScan") as TextBox;
         if (scanBox != null)
         {
-          scanBox.Header = LocalizationService.T("DiskHealth_Bytes");
-          scanBox.PlaceholderText = LocalizationService.T("DiskHealth_Bytes");
-          ToolTipService.SetToolTip(scanBox, LocalizationService.T("DiskHealth_Bytes"));
-          AutomationProperties.SetName(scanBox, LocalizationService.T("DiskHealth_Bytes"));
+          var hdr = LocalizationService.T("DiskHealth_Bytes");
+          scanBox.Header = hdr;
+          scanBox.PlaceholderText = LocalizationService.T("DiskHealth_Bytes_Placeholder");
+          ToolTipService.SetToolTip(scanBox, hdr);
+          AutomationProperties.SetName(scanBox, hdr);
         }
         var btnSurf = (this.Content as FrameworkElement)?.FindName("BtnSurfaceScan") as Button;
         if (btnSurf != null)
@@ -603,6 +604,7 @@ namespace FormatX
       }
       catch { }
       if (HealthResult != null) HealthResult.Text = "";
+      try { var hs = (this.Content as FrameworkElement)?.FindName("HealthStatusText") as TextBlock; if (hs != null) hs.Text = LocalizationService.T("ui.health.status.unknown"); } catch { }
 
       // Settings view
       if (TxtLanguage != null) TxtLanguage.Text = LocalizationService.T("settings.language");
@@ -937,7 +939,13 @@ namespace FormatX
         HealthResult.Text = res?.ToString();
 
         Brush? fill = Application.Current.Resources.ContainsKey("HealthYellow") ? Application.Current.Resources["HealthYellow"] as Brush : null;
-        string labelKey = "HealthStatus_Good";
+        string labelKey = color switch
+        {
+            DiskHealthService.HealthStatus.Green => "HealthStatus_Good",
+            DiskHealthService.HealthStatus.Red => "HealthStatus_Bad",
+            DiskHealthService.HealthStatus.Yellow => "HealthStatus_Warn",
+            _ => "HealthStatus_Unknown"
+        };
         switch (color)
         {
           case DiskHealthService.HealthStatus.Green:

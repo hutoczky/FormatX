@@ -64,6 +64,7 @@
   <data name="ui.health.surfaceScan" xml:space="preserve"><value>Felszíni ellenőrzés</value></data>
   <data name="ui.health.smartQuick" xml:space="preserve"><value>SMART gyors lekérdezés</value></data>
   <data name="ui.health.status.good" xml:space="preserve"><value>Állapot: Jó</value></data>
+  <data name="ui.health.status.unknown" xml:space="preserve"><value>Állapot: Ismeretlen</value></data>
   <data name="ui.health.details" xml:space="preserve"><value>Részletek</value></data>
   <data name="ui.health.drive.header" xml:space="preserve"><value>Vizsgálandó lemez</value></data>
   <data name="ui.secure.target" xml:space="preserve"><value>Célmeghajtó</value></data>

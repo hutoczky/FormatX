@@ -8,6 +8,7 @@
   <data name="ui.health.surfaceScan" xml:space="preserve"><value>Surface scan</value></data>
   <data name="ui.health.smartQuick" xml:space="preserve"><value>SMART quick query</value></data>
   <data name="ui.health.status.good" xml:space="preserve"><value>Status: Good</value></data>
+  <data name="ui.health.status.unknown" xml:space="preserve"><value>Status: Unknown</value></data>
   <data name="ui.health.details" xml:space="preserve"><value>Details</value></data>
   <data name="ui.health.drive.header" xml:space="preserve"><value>Drive to scan</value></data>
   <data name="ui.secure.target" xml:space="preserve"><value>Target disk</value></data>
@@ -61,6 +62,7 @@
   <data name="USB_Scheme" xml:space="preserve"><value>Partition scheme (GPT/MBR)</value></data>
   <data name="USB_WriteScheme" xml:space="preserve"><value>Write scheme</value></data>
   <data name="DiskHealth_Bytes" xml:space="preserve"><value>Bytes to scan</value></data>
+  <data name="DiskHealth_Bytes_Placeholder" xml:space="preserve"><value>Bytes to scan (e.g., 1073741824)</value></data>
   <data name="DiskHealth_Surface" xml:space="preserve"><value>Surface scan</value></data>
   <data name="DiskHealth_SMART" xml:space="preserve"><value>SMART quick query</value></data>
   <data name="HealthStatus_Good" xml:space="preserve"><value>Status: Good</value></data>
