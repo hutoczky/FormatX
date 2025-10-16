@@ -10,6 +10,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI;
+using Microsoft.UI.Xaml.Automation;
 using Windows.Devices.Enumeration;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
@@ -86,16 +87,16 @@ namespace FormatX
       _ = RefreshDevices();
       // Initial drive lists for VM: ISO only removable, Format all drives
       try { _ = _drivesVm.RefreshDrivesAsync(this.DispatcherQueue, null, null, includeFixedForIso: false); } catch { }
-      StartWatch();
+      try { StartWatch(); } catch (Exception ex) { _ = LogService.LogUsbWinrtErrorAsync("DeviceWatcher.Init", ex); }
 
       // Setup custom title bar drag region and integrate with system title bar
       try
       {
-        if (!DispatcherQueue.HasThreadAccess)
+        if (DispatcherQueue == null || !DispatcherQueue.HasThreadAccess)
         {
-          DispatcherQueue.TryEnqueue(() => {
+          try { DispatcherQueue?.TryEnqueue(() => {
             try { InitializeTitleBar(); } catch (Exception initEx) { _ = LogService.LogAsync("error.catch", new { ctx = "titlebar.init.dispatch", initEx = initEx.Message }); }
-          });
+          }); } catch { }
         }
         else
         {
@@ -161,9 +162,7 @@ namespace FormatX
           if (_isClosing || _isClosed || FormatX.App.IsMainWindowClosed) return;
           try
           {
-            Microsoft.UI.Dispatching.DispatcherQueue? dq = null;
-            try { dq = this.DispatcherQueue; }
-            catch (Exception dqex) { LogService.LogUsbAppError("UI.DispatcherQueueNull", dqex); return; }
+            var dq = this.DispatcherQueue;
             if (dq == null) { LogService.LogUsbAppError("UI.DispatcherQueueNull", new NullReferenceException("DispatcherQueue null")); return; }
             if (!dq.TryEnqueue(() =>
             {
@@ -287,7 +286,10 @@ namespace FormatX
           "BtnCheckUpdate","BtnExportCsv","LangCombo","ThemeCombo","HeaderApplyButton","GlobalProgressBar","GlobalProgressText","PageTitle",
           "SecureErase_DriveCombo","Health_DriveCombo","HealthStatusText","HealthDot","BtnDone","BtnRefresh","Status",
           // Disk Health new controls
-          "BtnSurfaceScan","BtnSmartQuery","BytesToScan","BtnHealthDetails"
+          "BtnSurfaceScan","BtnSmartQuery","BytesToScan","BtnHealthDetails",
+          // Additional audit names per spec
+          "BtnEnergySaver","BtnSelectDrive","BtnExit","Btn_Start","Btn_BackDrives",
+          "ISO_Select","USB_Target","USB_Write","USB_Verify","USB_Scheme","USB_WriteScheme"
         };
         int present = 0, missing = 0;
         foreach (var n in names)
@@ -524,21 +526,20 @@ namespace FormatX
       // ISO tab
       if (IsoPath != null) IsoPath.PlaceholderText = LocalizationService.T("iso.placeholder");
       if (BtnBrowseIso != null) BtnBrowseIso.Content = LocalizationService.T("common.browse");
-      if (IsoVerifyToggle != null) IsoVerifyToggle.Content = hu ? "Ellenőrzés" : "Verify";
-      if (TargetDrives != null) TargetDrives.Header = hu ? "Cél meghajtó (eltávolítható)" : "Target drive (removable)";
-      if (IsoSchemeCombo != null) IsoSchemeCombo.Header = hu ? "Séma" : "Scheme";
-      if (IsoWriteSchemeCombo != null) IsoWriteSchemeCombo.Header = hu ? "Séma" : "Scheme";
-      if (IsoVerifyToggle != null) IsoVerifyToggle.Content = hu ? "Ellenőrzés" : "Verify";
-      if (BtnIsoWrite != null) BtnIsoWrite.Content = hu ? "ISO írás" : "Write ISO";
+      if (IsoVerifyToggle != null) IsoVerifyToggle.Content = LocalizationService.T("ui.iso.verify");
+      if (TargetDrives != null) TargetDrives.Header = LocalizationService.T("ui.iso.target");
+      if (IsoSchemeCombo != null) IsoSchemeCombo.Header = LocalizationService.T("ui.iso.scheme");
+      if (IsoWriteSchemeCombo != null) IsoWriteSchemeCombo.Header = LocalizationService.T("ui.iso.scheme");
+      if (BtnIsoWrite != null) BtnIsoWrite.Content = LocalizationService.T("ui.iso.write");
 
       // Format tab
-      if (FormatDrive != null) FormatDrive.Header = hu ? "Meghajtó" : "Drive";
-      if (FsCombo != null) FsCombo.Header = hu ? "Fájlrendszer" : "File system";
+      if (FormatDrive != null) FormatDrive.Header = LocalizationService.T("ui.format.drive");
+      if (FsCombo != null) FsCombo.Header = LocalizationService.T("ui.format.fs");
       if (FsItemReFS != null) FsItemReFS.Content = "ReFS";
       if (FsItemExt4 != null) FsItemExt4.Content = "ext4 (Linux)";
-      if (LabelBox != null) LabelBox.Header = hu ? "Címke" : "Label";
-      if (QuickBox != null) QuickBox.Content = hu ? "Gyors formázás" : "Quick format";
-      if (BtnFormat != null) BtnFormat.Content = hu ? "Formázás" : "Format";
+      if (LabelBox != null) LabelBox.Header = LocalizationService.T("ui.format.label");
+      if (QuickBox != null) QuickBox.Content = LocalizationService.T("ui.format.quick");
+      if (BtnFormat != null) BtnFormat.Content = LocalizationService.T("ui.format.start");
 
       // Partitions tab
       if (DiskNumberBox != null) DiskNumberBox.Header = hu ? "Lemez" : "Disk";
@@ -553,11 +554,26 @@ namespace FormatX
       {
         if (Health_DriveCombo != null) Health_DriveCombo.Header = LocalizationService.T("ui.health.drive.header");
         var scanBox = (this.Content as FrameworkElement)?.FindName("BytesToScan") as TextBox;
-        if (scanBox != null) scanBox.PlaceholderText = LocalizationService.T("ui.health.bytesToScan");
+        if (scanBox != null)
+        {
+          scanBox.PlaceholderText = LocalizationService.T("DiskHealth_BytesToScan");
+          ToolTipService.SetToolTip(scanBox, "A vizsgálat során átvizsgálandó bájtok száma");
+          AutomationProperties.SetName(scanBox, "Ellenőrzendő bájtok");
+        }
         var btnSurf = (this.Content as FrameworkElement)?.FindName("BtnSurfaceScan") as Button;
-        if (btnSurf != null) btnSurf.Content = LocalizationService.T("ui.health.surfaceScan");
+        if (btnSurf != null)
+        {
+          btnSurf.Content = LocalizationService.T("DiskHealth_SurfaceScan");
+          ToolTipService.SetToolTip(btnSurf, "Lemez felületi hibáinak keresése");
+          AutomationProperties.SetName(btnSurf, "Felszíni ellenőrzés");
+        }
         var btnSmart = (this.Content as FrameworkElement)?.FindName("BtnSmartQuery") as Button;
-        if (btnSmart != null) btnSmart.Content = LocalizationService.T("ui.health.smartQuick");
+        if (btnSmart != null)
+        {
+          btnSmart.Content = LocalizationService.T("DiskHealth_SMARTQuery");
+          ToolTipService.SetToolTip(btnSmart, "Meghajtó SMART állapotának lekérése");
+          AutomationProperties.SetName(btnSmart, "SMART gyors lekérdezés");
+        }
       }
       catch { }
       if (HealthResult != null) HealthResult.Text = "";
@@ -578,7 +594,7 @@ namespace FormatX
       if (ThemeItemDark != null) ThemeItemDark.Content = hu ? "Sötét" : "Dark";
       if (TxtBackground != null) TxtBackground.Text = LocalizationService.T("settings.background");
       if (TxtBgHint != null) TxtBgHint.Text = LocalizationService.T("settings.bg.hint");
-      if (BtnPickBg != null) BtnPickBg.Content = LocalizationService.T("common.browse");
+      if (BtnPickBg != null) BtnPickBg.Content = LocalizationService.T("ui.settings.pickbg");
       if (BtnCheckUpdate != null) BtnCheckUpdate.Content = hu ? "Frissítések keresése" : "Check for updates";
       if (BtnExportCsv != null) BtnExportCsv.Content = LocalizationService.T("common.exportCsv");
       if (TxtVersion != null) TxtVersion.Text = LocalizationService.T("settings.version");
@@ -881,7 +897,7 @@ namespace FormatX
         HealthResult.Text = res?.ToString();
 
         Brush? fill = Application.Current.Resources.ContainsKey("HealthYellow") ? Application.Current.Resources["HealthYellow"] as Brush : null;
-        string label = "Sárga";
+        string label = LocalizationService.T("HealthStatus_Good");
         switch (color)
         {
           case DiskHealthService.HealthStatus.Green:
@@ -893,7 +909,7 @@ namespace FormatX
         var dot = fe?.FindName("HealthDot") as Microsoft.UI.Xaml.Shapes.Ellipse;
         var txt = fe?.FindName("HealthStatusText") as TextBlock;
         if (dot != null && fill != null) dot.Fill = fill;
-        if (txt != null) txt.Text = (label == "Zöld") ? LocalizationService.T("ui.health.status.good") : label;
+        if (txt != null) txt.Text = (label == "Zöld") ? LocalizationService.T("HealthStatus_Good") : (label == "Piros" ? "Állapot: Rossz" : "Állapot: Közepes");
         await LogService.LogAsync("health.badge", new { disk, color = color.ToString() });
       } catch (System.Runtime.InteropServices.COMException cex) { HealthResult.Text = cex.Message; await LogService.LogAsync("error.com.exception", cex); CrashHandler.Show(cex, "smart.quick"); }
         catch (Exception ex) { HealthResult.Text = ex.Message; await LogService.LogAsync("error.catch", new { ctx = "smart", ex = ex.Message }); }
@@ -1134,11 +1150,20 @@ namespace FormatX
     {
       try
       {
-        // Enforce Hungarian-only UI regardless of selection
-        _lang = AppLanguage.Hu;
-        var langCode = "hu";
+        // Language from settings combo (0: HU, 1: EN)
+        var selIdx = LangCombo?.SelectedIndex ?? 0;
+        var langCode = selIdx == 1 ? "en" : "hu";
+        _lang = (langCode == "en") ? AppLanguage.En : AppLanguage.Hu;
         LocalizationService.SetLanguage(langCode);
-        SettingsService.Current.Language = "hu-HU";
+        var culture = langCode == "en" ? "en-US" : "hu-HU";
+        try
+        {
+          Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = culture;
+          System.Globalization.CultureInfo.CurrentUICulture = new System.Globalization.CultureInfo(culture);
+          System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo(culture);
+        }
+        catch { }
+        SettingsService.Current.Language = culture;
 
         string theme = ThemeCombo?.SelectedIndex switch { 1 => "Dark", 2 => "Light", _ => "Default" };
         SettingsService.Current.Theme = theme;
@@ -1259,11 +1284,11 @@ namespace FormatX
       string title = tag switch
       {
         "iso" => hu ? "ISO → USB" : "ISO → USB",
-        "format" => hu ? "Formázás" : "Format",
+        "format" => LocalizationService.T("title.format"),
         "part" => hu ? "Partíciók" : "Partitions",
-        "erase" => hu ? "Biztonságos törlés" : "Secure Erase",
-        "health" => hu ? "Lemez egészség" : "Disk Health",
-        _ => hu ? "Beállítások" : "Settings"
+        "erase" => LocalizationService.T("title.erase"),
+        "health" => LocalizationService.T("title.drives"),
+        _ => LocalizationService.T("title.settings")
       };
       PageTitle.Text = title;
 

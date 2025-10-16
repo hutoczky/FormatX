@@ -15,12 +15,15 @@
             </Style>
             <Style TargetType="Button">
                 <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Margin" Value="{StaticResource FormControlMargin}"/>
             </Style>
             <Style TargetType="ComboBox">
                 <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Margin" Value="{StaticResource FormControlMargin}"/>
             </Style>
             <Style TargetType="TextBox">
                 <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Margin" Value="{StaticResource FormControlMargin}"/>
             </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
@@ -89,8 +92,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="PageTitle" Text="Beállítások" FontSize="22" FontWeight="Bold" Margin="8,8,8,0"/>
-                            <Button x:Name="HeaderApplyButton" Grid.Column="2" Margin="0,8,8,0" Content="Alkalmaz" Click="ApplySettings_Click" Visibility="Collapsed"/>
+              <TextBlock x:Name="PageTitle" Text="Beállítások" FontSize="22" FontWeight="Bold" Margin="8,8,8,0"/>
+              <Button x:Name="HeaderApplyButton" Grid.Column="2" Margin="0,8,8,0" Content="Alkalmaz" Click="ApplySettings_Click" Visibility="Collapsed" Style="{StaticResource AccentButtonStyle}"/>
                         </Grid>
 
                         <!-- Pages -->
@@ -111,20 +114,20 @@
 
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <TextBox x:Name="IsoPath" Width="300" Header="ISO fájl"/>
-                                        <Button x:Name="BtnBrowseIso" Content="Tallózás..." Click="BrowseIso_Click"/>
+                                        <Button x:Name="BtnBrowseIso" Content="Tallózás..." Click="BrowseIso_Click" Style="{StaticResource ActionButtonStyle}"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
                                         <ComboBox x:Name="TargetDrives" Width="220" Header="Célmeghajtó" ItemsSource="{Binding IsoDrives}" DisplayMemberPath="Label" SelectedValuePath="Letter"/>
-                                        <Button Content="Frissítés" Click="DrivesRefresh_Click"/>
+                  <Button Content="Frissítés" Click="DrivesRefresh_Click" Style="{StaticResource ActionButtonStyle}"/>
                                     </StackPanel>
-                                    <Button Grid.Row="2" x:Name="BtnIsoWrite" Content="ISO kiírása" Click="WriteIso_Click" Width="120"/>
-                                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+                <Button Grid.Row="2" x:Name="BtnIsoWrite" Content="ISO kiírása" Click="WriteIso_Click" Style="{StaticResource AccentButtonStyle}"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left" VerticalAlignment="Center">
                                         <ComboBox x:Name="IsoWriteSchemeCombo" Width="120" Header="Partíciós séma">
                                             <ComboBoxItem Content="GPT" IsSelected="True"/>
                                             <ComboBoxItem Content="MBR"/>
                                         </ComboBox>
-                                        <ToggleButton x:Name="IsoVerifyToggle" Content="Ellenőrzés" IsChecked="True"/>
+                  <ToggleButton x:Name="IsoVerifyToggle" Content="Ellenőrzés" IsChecked="True" Style="{StaticResource ActionToggleStyle}"/>
                                     </StackPanel>
 
                                     <TextBox x:Name="LogBox" Grid.Row="3" Grid.ColumnSpan="2" AcceptsReturn="True" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" Header="Napló"/>
@@ -143,13 +146,13 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <Grid Grid.Column="0" Width="300">
+                <Grid Grid.Column="0" Width="300" VerticalAlignment="Center">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <ComboBox x:Name="FormatDrive" Grid.Column="0" Header="Meghajtó" Margin="0,0,8,0" SelectionChanged="FormatDrive_SelectionChanged" ItemsSource="{Binding FormatDrives}" DisplayMemberPath="Label" SelectedValuePath="Letter"/>
-                                        <Button Grid.Column="1" Content="Frissítés" Click="DrivesRefresh_Click"/>
+                  <ComboBox x:Name="FormatDrive" Grid.Column="0" Header="Meghajtó" Margin="0,0,8,0" SelectionChanged="FormatDrive_SelectionChanged" ItemsSource="{Binding FormatDrives}" DisplayMemberPath="Label" SelectedValuePath="Letter"/>
+                  <Button Grid.Column="1" Content="Frissítés" Click="DrivesRefresh_Click" Style="{StaticResource ActionButtonStyle}"/>
                                     </Grid>
                                     <ComboBox x:Name="FsCombo" Grid.Column="1" Header="Fájlrendszer" Width="180" Margin="8,0,0,0" SelectionChanged="FsCombo_SelectionChanged">
                                         <ComboBoxItem Content="NTFS"/>
@@ -160,7 +163,7 @@
                                     </ComboBox>
                                     <TextBox x:Name="LabelBox" Grid.Row="1" Grid.Column="0" Header="Meghajtó címkéje" Width="260" MaxLength="32" TextChanging="LabelBox_TextChanging"/>
                                     <CheckBox x:Name="QuickBox" Grid.Row="1" Grid.Column="1" Content="Gyorsformázás" IsChecked="True" VerticalAlignment="Center"/>
-                                    <Button Grid.Row="2" Grid.Column="0" x:Name="BtnFormat" Content="Formázás indítása" Click="Format_Click" Width="160"/>
+                <Button Grid.Row="2" Grid.Column="0" x:Name="BtnFormat" Content="Formázás indítása" Click="Format_Click" Style="{StaticResource AccentButtonStyle}"/>
                                 </Grid>
 
                                 <!-- Partitions (hidden) -->
@@ -215,7 +218,7 @@
 
                                     <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
                                         <Button x:Name="BtnApplyPartitionPlan" Content="Módosítások alkalmazása" Style="{StaticResource AccentButtonStyle}" Click="ApplyPartitionPlan_Click"/>
-                                        <Button x:Name="BtnRollback" Content="Visszaállítás" Click="RollbackPartition_Click"/>
+                                        <Button x:Name="BtnRollback" Content="Visszaállítás" Click="RollbackPartition_Click" Style="{StaticResource ActionButtonStyle}"/>
                                         <ProgressBar x:Name="PartProgress" Width="320" Height="6" IsIndeterminate="False" Visibility="Collapsed"/>
                                         <TextBlock x:Name="PartProgressText" VerticalAlignment="Center" Visibility="Collapsed"/>
                                     </StackPanel>
@@ -234,7 +237,7 @@
                 <CheckBox x:Name="EraseFullFormat" x:Uid="ui.secure.fullFormat" Content="Teljes formázás (lassabb)" IsChecked="True"
                           AutomationProperties.Name="Teljes formázás"
                           ToolTipService.ToolTip="Lassabb, de alaposabb felülírás"/>
-                <StackPanel Orientation="Horizontal" Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                   <Button x:Name="BtnErase1" x:Uid="ui.secure.pass1" Content="1 átírás" Style="{StaticResource AccentButtonStyle}" Click="ErasePass_Click" Tag="1"
                           AutomationProperties.Name="1 átírás"/>
                   <Button x:Name="BtnErase2" x:Uid="ui.secure.pass2" Content="2 átírás" Style="{StaticResource AccentButtonStyle}" Click="ErasePass_Click" Tag="2"
@@ -250,16 +253,19 @@
                                 <!-- Disk Health -->
                                 <StackPanel x:Name="ViewHealth" Padding="16" Spacing="8" Visibility="Collapsed">
                                     <ComboBox x:Name="Health_DriveCombo" Header="Vizsgálandó lemez" Width="420" DisplayMemberPath="Display" SelectedValuePath="DevicePath" SelectionChanged="Health_DriveCombo_SelectionChanged"/>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                         <TextBox x:Name="ScanBytes" Width="220" PlaceholderText="Vizsgálandó bájtok (pl. 1073741824)"/>
-                                        <Button Content="Felületellenőrzés" Click="SurfaceScan_Click"/>
+                                        <Button x:Name="BtnSurfaceScan" Content="Felületellenőrzés" Click="SurfaceScan_Click" Style="{StaticResource ActionButtonStyle}"/>
                                     </StackPanel>
-                                    <Button Content="S.M.A.R.T. gyors lekérdezés" Width="220" Click="SmartQuick_Click"/>
+                                    <Button x:Name="BtnSmartQuery" Content="S.M.A.R.T. gyors lekérdezés" Width="220" Click="SmartQuick_Click" Style="{StaticResource ActionButtonStyle}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Border x:Name="HealthBadge" Style="{StaticResource HealthBadgeStyle}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <Ellipse x:Name="HealthDot" Width="12" Height="12" Fill="{StaticResource HealthGreen}"/>
-                                                <TextBlock x:Name="HealthBadgeText" Text="Kiváló"/>
+                                                <TextBlock x:Name="HealthStatusText" Text="Állapot: Jó"/>
+                                                <Button x:Name="BtnHealthDetails" Content="Részletek" Style="{StaticResource ActionButtonStyle}" Margin="8,0,0,0"
+                                                        ToolTipService.ToolTip="Részletes SMART és felületi adatok megtekintése"
+                                                        AutomationProperties.Name="Részletek"/>
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>
@@ -284,7 +290,7 @@
 
                                     <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
                                     <TextBlock x:Name="TxtBackground" Text="Háttérkép (JPG/PNG)"/>
-                                    <Button x:Name="BtnPickBg" Content="Háttérkép kiválasztása..." Click="PickBackground_Click"/>
+                <Button x:Name="BtnPickBg" Content="Háttérkép kiválasztása..." Click="PickBackground_Click" Style="{StaticResource ActionButtonStyle}"/>
                                     <TextBlock x:Name="TxtBgHint" Text="Az új háttérkép azonnal érvénybe lép, az elérési út mentésre kerül."/>
 
                                     <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
@@ -293,8 +299,8 @@
                                     <StackPanel Spacing="4">
                                         <TextBlock Text="FormatTech – © 2025 Hudacsek József (GamesTech)" TextWrapping="Wrap"/>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <Button x:Name="BtnCheckUpdate" Content="Frissítések keresése" Click="CheckUpdates_Click"/>
-                                            <Button x:Name="BtnExportCsv" Content="Napló exportálása (CSV)" Click="ExportCsv_Click"/>
+                    <Button x:Name="BtnCheckUpdate" Content="Frissítések keresése" Click="CheckUpdates_Click" Style="{StaticResource ActionButtonStyle}"/>
+                    <Button x:Name="BtnExportCsv" Content="Napló exportálása (CSV)" Click="ExportCsv_Click" Style="{StaticResource ActionButtonStyle}"/>
                                         </StackPanel>
                                     </StackPanel>
 
@@ -312,7 +318,7 @@
 
                                     <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
                                     <TextBlock Text="Telepítő" FontWeight="SemiBold"/>
-                                    <Button x:Name="BtnBuildMsix" Content="MSIX telepítő készítése" Click="BuildMsix_Click" Width="220"/>
+                <Button x:Name="BtnBuildMsix" Content="MSIX telepítő készítése" Click="BuildMsix_Click" Width="220" Style="{StaticResource ActionButtonStyle}"/>
 
                                     <TextBlock x:Name="TxtFooter" Text=".NET 10 Preview • WinUI 3 • MSIX"/>
 
@@ -339,8 +345,8 @@
                 <ProgressBar x:Name="GlobalProgressBar" Width="420" Height="6" Minimum="0" Maximum="100"/>
                 <TextBlock x:Name="GlobalProgressText" Text="Készenlét" VerticalAlignment="Center"/>
                 <TextBlock x:Name="Status" Margin="12,0,0,0" VerticalAlignment="Center"/>
-                <Button x:Name="BtnRefresh" Content="Frissítés" Visibility="Collapsed" Click="Refresh_Click" Margin="12,0,0,0"/>
-                <Button x:Name="BtnDone" Content="Kész" Margin="12,0,0,0"/>
+                <Button x:Name="BtnRefresh" Content="Frissítés" Visibility="Collapsed" Click="Refresh_Click" Margin="12,0,0,0" Style="{StaticResource ActionButtonStyle}"/>
+                <Button x:Name="BtnDone" Content="Kész" Margin="12,0,0,0" Style="{StaticResource ActionButtonStyle}"/>
             </StackPanel>
         </Border>
     </Grid>

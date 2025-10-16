@@ -10,6 +10,22 @@
         <!-- Pull in custom theme resources -->
         <ResourceDictionary Source="Themes/ThemeResources.xaml" />
       </ResourceDictionary.MergedDictionaries>
+      <!-- Global typography and base styles -->
+      <FontFamily x:Key="AppFontFamily">Segoe UI</FontFamily>
+      <Style TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      </Style>
+      <Style TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+      </Style>
+      <Style TargetType="TextBox">
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+      </Style>
+      <Style TargetType="ComboBox">
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+      </Style>
     </ResourceDictionary>
   </Application.Resources>
 </Application>

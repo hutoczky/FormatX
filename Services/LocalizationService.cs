@@ -75,14 +75,14 @@ namespace FormatX.Services
                 ["error.iso.invalidext"] = "Invalid ISO extension",
                 ["error.background.validate"] = "Background validation error",
                 ["menu.format"] = "Format",
-                ["menu.drives"] = "Drives",
-                ["menu.erase"] = "Secure Erase",
+                ["menu.drives"] = "Disk health",
+                ["menu.erase"] = "Secure erase",
                 ["menu.settings"] = "Settings",
 
                 ["title.app"] = "FormatX Pro | Version: 2.0",
                 ["title.format"] = "Format",
-                ["title.drives"] = "Drives",
-                ["title.erase"] = "Secure Erase",
+                ["title.drives"] = "Disk health",
+                ["title.erase"] = "Secure erase",
                 ["title.settings"] = "Settings",
 
                 ["status.ready"] = "Idle",
@@ -132,6 +132,16 @@ namespace FormatX.Services
                 ["eta.prefix"] = "ETA:",
                 ["crash.dialog.openFolder"] = "Open log folder",
                 ["crash.dialog.title"] = "An error occurred",
+                ["ui.iso.verify"] = "Verify",
+                ["ui.iso.scheme"] = "Partition scheme",
+                ["ui.iso.write"] = "Write ISO",
+                ["ui.iso.target"] = "Target drive (removable)",
+                ["ui.format.drive"] = "Drive",
+                ["ui.format.fs"] = "File system",
+                ["ui.format.label"] = "Label",
+                ["ui.format.quick"] = "Quick format",
+                ["ui.format.start"] = "Start format",
+                ["ui.settings.pickbg"] = "Select background…",
             }
         };
 

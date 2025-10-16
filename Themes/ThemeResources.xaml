@@ -24,6 +24,18 @@
     <Setter Property="Background" Value="{StaticResource HealthGreen}"/>
   </Style>
 
+  <!-- Toggle style to match secondary action buttons -->
+  <Style x:Key="ActionToggleStyle" TargetType="ToggleButton">
+    <Setter Property="MinWidth" Value="{StaticResource DefaultButtonMinWidth}"/>
+    <Setter Property="Padding" Value="12,8"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Background" Value="#22000000"/>
+    <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+    <Setter Property="BorderBrush" Value="#33FFFFFF"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+  </Style>
+
   <DataTemplate x:Key="HealthBadgeTemplate">
     <Border Style="{StaticResource HealthBadgeStyle}">
       <StackPanel Orientation="Horizontal" Spacing="6">
@@ -32,4 +44,51 @@
       </StackPanel>
     </Border>
   </DataTemplate>
+
+  <!-- Unified UI design tokens -->
+  <Thickness x:Key="FormControlMargin">0,4,0,4</Thickness>
+  <x:Double x:Key="DefaultButtonMinWidth">140</x:Double>
+
+  <!-- Accent button style used across the app -->
+  <Style x:Key="AccentButtonStyle" TargetType="Button">
+    <Setter Property="MinWidth" Value="{StaticResource DefaultButtonMinWidth}"/>
+    <Setter Property="Padding" Value="12,8"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Background" Value="{ThemeResource AccentFillColorDefaultBrush}"/>
+    <Setter Property="Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}"/>
+    <Setter Property="BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+  </Style>
+
+  <!-- Secondary action button style -->
+  <Style x:Key="ActionButtonStyle" TargetType="Button">
+    <Setter Property="MinWidth" Value="{StaticResource DefaultButtonMinWidth}"/>
+    <Setter Property="Padding" Value="12,8"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Background" Value="#22000000"/>
+    <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
+    <Setter Property="BorderBrush" Value="#33FFFFFF"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+  </Style>
+
+  <!-- Form field label style for consistent appearance -->
+  <Style x:Key="FormLabelTextBlockStyle" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="Opacity" Value="0.9"/>
+    <Setter Property="Margin" Value="{StaticResource FormControlMargin}"/>
+  </Style>
+
+  <!-- TextBox default style tweaks for spacing -->
+  <Style TargetType="TextBox">
+    <Setter Property="Margin" Value="{StaticResource FormControlMargin}"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+  </Style>
+
+  <!-- ComboBox default style tweaks for spacing -->
+  <Style TargetType="ComboBox">
+    <Setter Property="Margin" Value="{StaticResource FormControlMargin}"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+  </Style>
 </ResourceDictionary>
