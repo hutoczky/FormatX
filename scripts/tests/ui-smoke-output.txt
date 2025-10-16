@@ -1,1 +1,2 @@
-UI-SMOKE PASS: True
+UI-SMOKE PASS: False
+Missing: usb.installer.verify.

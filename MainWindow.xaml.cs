@@ -157,7 +157,30 @@ namespace FormatX
         if (lv != null) lv.ItemsSource = _logger.Items;
         LogService.OnUsbLineAppended += (line) =>
         {
-          try { DispatcherQueue.TryEnqueue(() => { _logger.Add(line); lv?.ScrollIntoView(_logger.Items[^1]); }); } catch { }
+          try
+          {
+            // Skip if window is closing/closed to avoid DispatcherQueue access throws
+            if (_isClosed || FormatX.App.IsMainWindowClosed) return;
+            // Access DispatcherQueue inside try because getter may throw when window is torn down
+            var dq = this.DispatcherQueue;
+            dq?.TryEnqueue(() =>
+            {
+              try
+              {
+                _logger.Add(line);
+                if (lv != null && _logger.Items.Count > 0)
+                {
+                  var last = _logger.Items[^1];
+                  lv.ScrollIntoView(last);
+                }
+              }
+              catch { }
+            });
+          }
+          catch (Exception ex)
+          {
+            _ = LogService.LogUsbAppErrorAsync("UI.LiveLog", ex);
+          }
         };
       }
       catch { }

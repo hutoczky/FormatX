@@ -1,207 +1,26 @@
-==== usb.log (last 200 lines) ====
-2025-10-16T12:50:14.7533395+02:00	usb.refresh.cancelled
-2025-10-16T12:50:14.7606451+02:00	usb.watcher.stopped	{"status":"Stopped"}
-2025-10-16T12:52:05.6526463+02:00	usb.background.change:fail:
-2025-10-16T12:52:05.7882399+02:00	usb.refresh
-2025-10-16T12:52:06.5289218+02:00	usb.watcher.start	{}
-2025-10-16T12:52:06.5365762+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
-2025-10-16T12:52:06.5373333+02:00	usb.partition.scaffold: Smoke.Init
-2025-10-16T12:52:06.5808796+02:00	usb.watcher.enum	{}
-2025-10-16T12:52:06.8582096+02:00	usb.sanitize.scaffold: Smoke.Init
-2025-10-16T12:52:11.3769994+02:00	usb.refresh
-2025-10-16T12:52:31.3792424+02:00	usb.refresh
-2025-10-16T12:53:11.2147248+02:00	usb.refresh.cancelled
-2025-10-16T12:53:11.2175382+02:00	usb.refresh.cancelled
-2025-10-16T12:53:11.2317658+02:00	usb.watcher.stopped	{"status":"Stopped"}
-2025-10-16T12:53:51.6847937+02:00	usb.background.change:fail:
-2025-10-16T12:53:52.1743122+02:00	usb.refresh
-2025-10-16T12:53:53.0007834+02:00	usb.watcher.start	{}
-2025-10-16T12:53:53.0096746+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
-2025-10-16T12:53:53.0104197+02:00	usb.partition.scaffold: Smoke.Init
-2025-10-16T12:53:53.0309434+02:00	usb.sanitize.scaffold: Smoke.Init
-2025-10-16T12:53:53.0705154+02:00	usb.watcher.enum	{}
-2025-10-16T12:53:53.0712120+02:00	usb.refresh
-2025-10-16T12:53:53.3893726+02:00	usb.refresh.cancelled
-2025-10-16T12:53:53.3915936+02:00	usb.winrt.error:Smoke.Refresh:InvalidOperationException:simulated
-2025-10-16T12:53:55.9395914+02:00	usb.refresh
-2025-10-16T12:53:55.9692758+02:00	usb.refresh.cancelled
-2025-10-16T12:53:55.9740338+02:00	usb.refresh.cancelled
-2025-10-16T12:53:56.0621349+02:00	usb.watcher.stopped	{"status":"Stopped"}
-2025-10-16T12:54:05.6813936+02:00	usb.winrt.error:Smoke.Launcher:InvalidOperationException:simulated
-2025-10-16T12:54:05.7101437+02:00	usb.store.prompt.skipped:invalid
-2025-10-16T12:54:05.7216281+02:00	usb.partition.scaffold
-2025-10-16T12:54:05.7551514+02:00	usb.partition.precheck:ok
-2025-10-16T12:54:05.7982100+02:00	usb.partition.dryrun
-2025-10-16T12:54:05.8218125+02:00	usb.sanitize.precheck:Nist:0
-2025-10-16T12:54:05.8367350+02:00	usb.sanitize.execute.begin:Nist:0
-2025-10-16T12:54:05.8457904+02:00	usb.sanitize.nist.begin:0
-2025-10-16T12:54:06.0472396+02:00	usb.sanitize.nist.done
-2025-10-16T12:54:06.0490550+02:00	usb.sanitize.execute.ok
-2025-10-16T12:54:06.0889941+02:00	usb.sanitize.verify:Nist:0:9e178f65
-2025-10-16T12:54:06.4874831+02:00	usb.winrt.error:Sanitize.Report:Exception:Welcome to QuestPDF! 👋   QuestPDF is an open-source library committed to long-term sustainability and continuous improvement.   To maintain high-quality development and support while keeping the library free for most users, we use a fair pricing model where only larger organizations help by providing necessary funding for the project.   If your organization’s annual gross revenue exceeds $1M USD, a Commercial License is required for production use (you can freely evaluate and test QuestPDF in non-production environments at no cost). In that case, please share this information with your team or management. By purchasing a license, you directly contribute to the ongoing development and reliability of QuestPDF.   For details on the license types and determining which applies to you, please visit: https://www.questpdf.com/license/   We trust our users. To continue, no license key is needed. Instead, simply select and configure the appropriate license in your code. For example, if you qualify for the Community license, add:   > QuestPDF.Settings.License = LicenseType.Community;   Thank you for supporting QuestPDF! ❤️ By choosing the right license, you help ensure that our project remains transparent, sustainable, and continuously improving for everyone. 🚀
-2025-10-16T12:54:06.4957158+02:00	usb.image.capture.begin:Scaffold:C:\
-2025-10-16T12:54:06.5598080+02:00	usb.image.capture.ok:C:\Users\hutoc\AppData\Local\Temp\fx_scaffold.wim
-2025-10-16T12:54:06.5692159+02:00	usb.image.apply.begin:Scaffold:E:
-2025-10-16T12:54:06.6377578+02:00	usb.image.apply.ok
-2025-10-16T12:54:06.6561895+02:00	usb.iso.write.begin:1/2:A.iso
-2025-10-16T12:54:06.6633534+02:00	usb.winrt.error:IsoUsb.WriteQueue:FileNotFoundException:Could not find file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\bin\x64\Release\net10.0-windows10.0.22621.0\A.iso'.
-2025-10-16T12:54:06.6756949+02:00	usb.automation.job.begin:fx_job.json
-2025-10-16T12:54:06.7467979+02:00	usb.automation.job.ok
-2025-10-16T12:54:06.7560987+02:00	usb.diagnostics.smart.begin:0
-2025-10-16T12:54:06.8443326+02:00	usb.diagnostics.smart.ok
-2025-10-16T12:54:06.8507410+02:00	usb.clone.begin
-2025-10-16T12:54:06.9218858+02:00	usb.clone.ok
-2025-10-16T12:54:06.9307327+02:00	usb.installer.build.begin
-2025-10-16T12:54:06.9954815+02:00	usb.installer.build.ok:C:\Users\hutoc\AppData\Local\FormatX\msix\FormatX_20251016_125406.msix
-2025-10-16T12:54:10.0989958+02:00	usb.refresh
-2025-10-16T12:54:30.0975401+02:00	usb.refresh
-2025-10-16T12:54:43.6115456+02:00	usb.background.change:fail:
-2025-10-16T12:58:12.3859675+02:00	usb.background.change:fail:
-2025-10-16T12:58:12.5517144+02:00	usb.refresh
-2025-10-16T12:58:13.4041559+02:00	usb.watcher.start	{}
-2025-10-16T12:58:13.4132086+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
-2025-10-16T12:58:13.4140366+02:00	usb.partition.scaffold: Smoke.Init
-2025-10-16T12:58:13.4264806+02:00	usb.sanitize.scaffold: Smoke.Init
-2025-10-16T12:58:13.4291766+02:00	usb.image.scaffold: Smoke.Init
-2025-10-16T12:58:13.4650477+02:00	usb.watcher.enum	{}
-2025-10-16T12:58:18.2421937+02:00	usb.refresh
-2025-10-16T12:58:49.4253097+02:00	usb.background.change:fail:
-2025-10-16T12:58:49.5777912+02:00	usb.refresh
-2025-10-16T12:58:50.3984916+02:00	usb.watcher.start	{}
-2025-10-16T12:58:50.4077094+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
-2025-10-16T12:58:50.4086740+02:00	usb.partition.scaffold: Smoke.Init
-2025-10-16T12:58:50.4246468+02:00	usb.sanitize.scaffold: Smoke.Init
-2025-10-16T12:58:50.4276639+02:00	usb.image.scaffold: Smoke.Init
-2025-10-16T12:58:50.4634817+02:00	usb.watcher.enum	{}
-2025-10-16T12:58:55.1971712+02:00	usb.refresh
-2025-10-16T12:59:14.2280047+02:00	usb.background.change:fail:
-2025-10-16T12:59:14.6767660+02:00	usb.refresh
-2025-10-16T12:59:14.6952636+02:00	usb.refresh
-2025-10-16T12:59:15.4464728+02:00	usb.watcher.start	{}
-2025-10-16T12:59:15.5006014+02:00	usb.watcher.enum	{}
-2025-10-16T13:01:14.2521370+02:00	usb.background.change:fail:
-2025-10-16T13:01:14.7315820+02:00	usb.refresh
-2025-10-16T13:01:15.7777371+02:00	usb.watcher.start	{}
-2025-10-16T13:01:15.7855293+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
-2025-10-16T13:01:15.7867080+02:00	usb.partition.scaffold: Smoke.Init
-2025-10-16T13:01:15.8097146+02:00	usb.sanitize.scaffold: Smoke.Init
-2025-10-16T13:01:15.8132713+02:00	usb.image.scaffold: Smoke.Init
-2025-10-16T13:01:15.8605926+02:00	usb.refresh
-2025-10-16T13:01:15.8677340+02:00	usb.refresh.cancelled
-2025-10-16T13:01:15.8731616+02:00	usb.watcher.enum	{}
-2025-10-16T13:01:15.8735833+02:00	usb.winrt.error:Smoke.Refresh:InvalidOperationException:simulated
-2025-10-16T13:01:19.5431033+02:00	usb.refresh
-2025-10-16T13:01:19.5922339+02:00	usb.refresh.cancelled
-2025-10-16T13:01:19.6159145+02:00	usb.refresh.cancelled
-2025-10-16T13:01:19.6314435+02:00	usb.watcher.stopped	{"status":"Stopped"}
-2025-10-16T13:01:20.5752285+02:00	usb.refresh
-2025-10-16T13:01:30.4321879+02:00	usb.winrt.error:Smoke.Launcher:InvalidOperationException:simulated
-2025-10-16T13:01:30.4504046+02:00	usb.store.prompt.skipped:invalid
-2025-10-16T13:01:30.4580203+02:00	usb.partition.scaffold
-2025-10-16T13:01:30.4849940+02:00	usb.partition.precheck:ok
-2025-10-16T13:01:30.5274116+02:00	usb.partition.dryrun
-2025-10-16T13:01:30.5510813+02:00	usb.sanitize.precheck:Nist:0
-2025-10-16T13:01:30.5642016+02:00	usb.sanitize.execute.begin:Nist:0
-2025-10-16T13:01:30.5696866+02:00	usb.sanitize.nist.begin:0
-2025-10-16T13:01:30.7807995+02:00	usb.sanitize.nist.done
-2025-10-16T13:01:30.7832711+02:00	usb.sanitize.execute.ok
-2025-10-16T13:01:30.8359265+02:00	usb.sanitize.verify:Nist:0:9e178f65
-2025-10-16T13:01:31.3817972+02:00	usb.winrt.error:Sanitize.Report:Exception:Welcome to QuestPDF! 👋   QuestPDF is an open-source library committed to long-term sustainability and continuous improvement.   To maintain high-quality development and support while keeping the library free for most users, we use a fair pricing model where only larger organizations help by providing necessary funding for the project.   If your organization’s annual gross revenue exceeds $1M USD, a Commercial License is required for production use (you can freely evaluate and test QuestPDF in non-production environments at no cost). In that case, please share this information with your team or management. By purchasing a license, you directly contribute to the ongoing development and reliability of QuestPDF.   For details on the license types and determining which applies to you, please visit: https://www.questpdf.com/license/   We trust our users. To continue, no license key is needed. Instead, simply select and configure the appropriate license in your code. For example, if you qualify for the Community license, add:   > QuestPDF.Settings.License = LicenseType.Community;   Thank you for supporting QuestPDF! ❤️ By choosing the right license, you help ensure that our project remains transparent, sustainable, and continuously improving for everyone. 🚀
-2025-10-16T13:01:31.3911491+02:00	usb.image.capture.begin:Scaffold:C:\
-2025-10-16T13:01:31.4500826+02:00	usb.image.capture.ok:C:\Users\hutoc\AppData\Local\Temp\fx_scaffold.wim
-2025-10-16T13:01:31.4617693+02:00	usb.image.apply.begin:Scaffold:E:
-2025-10-16T13:01:31.5265372+02:00	usb.image.apply.ok
-2025-10-16T13:01:31.5434654+02:00	usb.iso.write.begin:1/2:A.iso
-2025-10-16T13:01:31.5651225+02:00	usb.winrt.error:IsoUsb.WriteQueue:FileNotFoundException:Could not find file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\bin\x64\Debug\net10.0-windows10.0.22621.0\A.iso'.
-2025-10-16T13:01:31.5772733+02:00	usb.automation.job.begin:fx_job.json
-2025-10-16T13:01:31.6506054+02:00	usb.automation.job.ok
-2025-10-16T13:01:31.6582983+02:00	usb.diagnostics.smart.begin:0
-2025-10-16T13:01:31.7394237+02:00	usb.diagnostics.smart.ok
-2025-10-16T13:01:31.7445004+02:00	usb.clone.begin
-2025-10-16T13:01:31.8011077+02:00	usb.clone.ok
-2025-10-16T13:01:31.8119869+02:00	usb.installer.build.begin
-2025-10-16T13:01:31.8692639+02:00	usb.installer.build.ok:C:\Users\hutoc\AppData\Local\FormatX\msix\FormatX_20251016_130131.msix
-2025-10-16T13:08:52.9682027+02:00	usb.background.change:fail:
-2025-10-16T13:08:53.1348331+02:00	usb.refresh
-2025-10-16T13:08:53.9484339+02:00	usb.watcher.start	{}
-2025-10-16T13:08:53.9592164+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
-2025-10-16T13:08:53.9600348+02:00	usb.partition.scaffold: Smoke.Init
-2025-10-16T13:08:53.9723064+02:00	usb.sanitize.scaffold: Smoke.Init
-2025-10-16T13:08:53.9771680+02:00	usb.image.scaffold: Smoke.Init
-2025-10-16T13:08:53.9971725+02:00	usb.app.start: AutoBrowse.Init
-2025-10-16T13:08:54.0013453+02:00	usb.refresh
-2025-10-16T13:08:54.0101805+02:00	usb.watcher.enum	{}
-2025-10-16T13:08:54.5031481+02:00	usb.winrt.error:FilePicker:COMException:
-2025-10-16T13:08:54.5066252+02:00	usb.image.cancelled
-2025-10-16T13:08:54.5096399+02:00	usb.app.exit: AutoBrowse.Done
-2025-10-16T13:08:54.5125838+02:00	usb.app.shutdown
-2025-10-16T13:08:56.2044407+02:00	usb.refresh.cancelled
-2025-10-16T13:08:56.2080158+02:00	usb.refresh.cancelled
-2025-10-16T13:08:56.2161443+02:00	usb.watcher.stopped	{"status":"Stopped"}
-2025-10-16T13:09:30.3306759+02:00	usb.background.change:fail:
-2025-10-16T13:09:30.4675990+02:00	usb.refresh
-2025-10-16T13:09:31.2681187+02:00	usb.watcher.start	{}
-2025-10-16T13:09:31.3260184+02:00	usb.watcher.enum	{}
-2025-10-16T13:11:11.3892731+02:00	usb.background.change:fail:
-2025-10-16T13:11:11.5567548+02:00	usb.refresh
-2025-10-16T13:11:12.4242158+02:00	usb.watcher.start	{}
-2025-10-16T13:11:12.4322031+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
-2025-10-16T13:11:12.4332948+02:00	usb.partition.scaffold: Smoke.Init
-2025-10-16T13:11:12.4448047+02:00	usb.sanitize.scaffold: Smoke.Init
-2025-10-16T13:11:12.4487338+02:00	usb.image.scaffold: Smoke.Init
-2025-10-16T13:11:12.4920271+02:00	usb.watcher.enum	{}
-2025-10-16T13:11:12.4924213+02:00	usb.app.start: AutoBrowse.Init
-2025-10-16T13:11:12.4935191+02:00	usb.refresh
-2025-10-16T13:11:12.4963613+02:00	usb.refresh
-2025-10-16T13:11:12.4982241+02:00	usb.refresh.cancelled
-2025-10-16T13:11:12.5022938+02:00	usb.winrt.error:Smoke.Refresh:InvalidOperationException:simulated
-2025-10-16T13:11:12.5537435+02:00	usb.refresh
-2025-10-16T13:11:12.6083894+02:00	usb.refresh.cancelled
-2025-10-16T13:11:12.6324202+02:00	usb.refresh.cancelled
-2025-10-16T13:11:12.9855777+02:00	usb.winrt.error:FilePicker:COMException:
-2025-10-16T13:11:12.9896782+02:00	usb.image.cancelled
-2025-10-16T13:11:12.9938843+02:00	usb.app.exit: AutoBrowse.Done
-2025-10-16T13:11:12.9978858+02:00	usb.app.shutdown
-2025-10-16T13:11:15.3462668+02:00	usb.watcher.stopped	{"status":"Stopped"}
-2025-10-16T13:11:15.5896909+02:00	usb.winrt.error:Smoke.Launcher:InvalidOperationException:simulated
-2025-10-16T13:11:15.6124956+02:00	usb.store.prompt.skipped:invalid
-2025-10-16T13:11:15.6187681+02:00	usb.partition.scaffold
-2025-10-16T13:11:15.6459652+02:00	usb.partition.precheck:ok
-2025-10-16T13:11:15.6993340+02:00	usb.partition.dryrun
-2025-10-16T13:11:15.7263790+02:00	usb.sanitize.precheck:Nist:0
-2025-10-16T13:11:15.7413274+02:00	usb.sanitize.execute.begin:Nist:0
-2025-10-16T13:11:15.7483563+02:00	usb.sanitize.nist.begin:0
-2025-10-16T13:11:15.9815732+02:00	usb.sanitize.nist.done
-2025-10-16T13:11:15.9854535+02:00	usb.sanitize.execute.ok
-2025-10-16T13:11:16.0388652+02:00	usb.sanitize.verify:Nist:0:9e178f65
-2025-10-16T13:11:16.2900425+02:00	usb.winrt.error:Sanitize.Report:Exception:Welcome to QuestPDF! 👋   QuestPDF is an open-source library committed to long-term sustainability and continuous improvement.   To maintain high-quality development and support while keeping the library free for most users, we use a fair pricing model where only larger organizations help by providing necessary funding for the project.   If your organization’s annual gross revenue exceeds $1M USD, a Commercial License is required for production use (you can freely evaluate and test QuestPDF in non-production environments at no cost). In that case, please share this information with your team or management. By purchasing a license, you directly contribute to the ongoing development and reliability of QuestPDF.   For details on the license types and determining which applies to you, please visit: https://www.questpdf.com/license/   We trust our users. To continue, no license key is needed. Instead, simply select and configure the appropriate license in your code. For example, if you qualify for the Community license, add:   > QuestPDF.Settings.License = LicenseType.Community;   Thank you for supporting QuestPDF! ❤️ By choosing the right license, you help ensure that our project remains transparent, sustainable, and continuously improving for everyone. 🚀
-2025-10-16T13:11:16.3030935+02:00	usb.image.capture.begin:Scaffold:C:\
-2025-10-16T13:11:16.3722860+02:00	usb.image.capture.ok:C:\Users\hutoc\AppData\Local\Temp\fx_scaffold.wim
-2025-10-16T13:11:16.3863703+02:00	usb.image.apply.begin:Scaffold:E:
-2025-10-16T13:11:16.4493868+02:00	usb.image.apply.ok
-2025-10-16T13:11:16.4694166+02:00	usb.iso.write.begin:1/2:A.iso
-2025-10-16T13:11:16.4942033+02:00	usb.winrt.error:IsoUsb.WriteQueue:FileNotFoundException:Could not find file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\bin\x64\Debug\net10.0-windows10.0.22621.0\A.iso'.
-2025-10-16T13:11:16.5075096+02:00	usb.automation.job.begin:fx_job.json
-2025-10-16T13:18:34.9093048+02:00	usb.background.change:fail:
-2025-10-16T13:18:35.0515026+02:00	usb.refresh
-2025-10-16T13:18:35.9054296+02:00	usb.watcher.start	{}
-2025-10-16T13:18:35.9165826+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
-2025-10-16T13:18:35.9173361+02:00	usb.partition.scaffold: Smoke.Init
-2025-10-16T13:18:35.9330678+02:00	usb.sanitize.scaffold: Smoke.Init
-2025-10-16T13:18:35.9382967+02:00	usb.image.scaffold: Smoke.Init
-2025-10-16T13:18:35.9572873+02:00	usb.app.start: AutoBrowse.Init
-2025-10-16T13:18:35.9616769+02:00	usb.refresh
-2025-10-16T13:18:35.9684823+02:00	usb.watcher.enum	{}
-2025-10-16T13:18:36.4100316+02:00	usb.winrt.error:FilePicker:COMException:
-2025-10-16T13:18:36.4139395+02:00	usb.image.cancelled
-2025-10-16T13:18:36.4170502+02:00	usb.app.exit: AutoBrowse.Done
-2025-10-16T13:18:36.4202043+02:00	usb.app.shutdown
-2025-10-16T13:18:38.2040553+02:00	usb.refresh.cancelled
-2025-10-16T13:18:38.2071467+02:00	usb.refresh.cancelled
-2025-10-16T13:18:38.2157747+02:00	usb.watcher.stopped	{"status":"Stopped"}
 
-==== crash files ====
-<none>
-
-==== ui-smoke ====
-<pending>
+D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH>"C:\Program Files\PowerShell\7-preview\pwsh.exe" -ExecutionPolicy Bypass -File .\tests\smoke-test.ps1  
+[SMOKE] Start: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\bin\Release\net10.0-windows10.0.22621.0\win-x64\publish\FormatX.exe
+[SMOKE] policy prefix not found (non-fatal)
+[SMOKE] telemetry prefix not found (non-fatal)
+Out-File: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-test.ps1:223
+Line |
+ 223 |   last 200 lines) ====" | Out-File -FilePath $out -Encoding UTF8 -Force
+     |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | The process cannot access the file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-output.txt' because it is being used by another process.
+Out-File: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-test.ps1:224
+Line |
+ 224 |  $last | Out-File -FilePath $out -Append -Encoding UTF8 -Force
+     |          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | The process cannot access the file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-output.txt' because it is being used by another process.
+Out-File: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-test.ps1:225
+Line |
+ 225 |   h files ====" | Out-File -FilePath $out -Append -Encoding UTF8 -Force
+     |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | The process cannot access the file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-output.txt' because it is being used by another process.
+Out-File: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-test.ps1:226
+Line |
+ 226 |    { "<none>" | Out-File -FilePath $out -Append -Encoding UTF8 -Force }
+     |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | The process cannot access the file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-output.txt' because it is being used by another process.
+[SMOKE] OK

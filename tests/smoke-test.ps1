@@ -201,7 +201,16 @@ try { $null = $proc.ExitCode } catch {}
 
 # Assert graceful exit
 if ($proc.ExitCode -ne 0) {
-  try { ("[SMOKE] non-zero exit (non-fatal in CI): " + $proc.ExitCode) | Out-File -FilePath (Join-Path $PSScriptRoot 'smoke-output.txt') -Append -Encoding UTF8 } catch {}
+  # Only treat non-zero exit as non-fatal if graceful shutdown was logged
+  $logFile = Get-UsbLogPath -Dir $logDir
+  $tailCheck = if (Test-Path $logFile) { Get-Content $logFile -Tail 500 -ErrorAction SilentlyContinue } else { @() }
+  $hasShutdownLog = ($tailCheck | Select-String -SimpleMatch 'usb.app.shutdown' -Quiet)
+  if ($hasShutdownLog) {
+    try { ("[SMOKE] non-zero exit (non-fatal in CI): " + $proc.ExitCode) | Out-File -FilePath (Join-Path $PSScriptRoot 'smoke-output.txt') -Append -Encoding UTF8 } catch {}
+  }
+  else {
+    Fail-And-Exit ("unexpected exit code without shutdown log: " + $proc.ExitCode)
+  }
 }
 
 $crash = if (Test-Path $crashDir) { Get-ChildItem $crashDir -Filter "crash_*.json" | Sort-Object LastWriteTime -Descending | Select-Object -First 1 } else { $null }
