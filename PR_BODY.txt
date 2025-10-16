@@ -1,0 +1,32 @@
+Summary
+- Branch: fix/ui-clarity-and-stability
+- Scope: crash hardening (WinRT/COM), bilingual UI clarity (hu/en), UI audit whitelist update, visual unification (rounded buttons), and verification.
+- Key fixes:
+  * Guarded WinAppSDK Bootstrap.Initialize to prevent 0xC000027B.
+  * Added WinRtGuard to DeviceWatcher, File/Folder pickers and image loads with area-aware logging.
+  * Default timeouts and cancellation handling for long-running WinRT calls.
+  * DispatcherQueue and UI null guards; TryGracefulShutdown gated by FORMATX_HEADLESS.
+  * All user-visible strings moved to Strings.hu/Strings.en resources and ApplyUiText used.
+  * Health status chip bound to localized HealthStatus_* keys and implemented as non-interactive chip.
+  * UI audit whitelist updated; audit emits usb.ui.audit.begin/end and usb.ui.check.present/missing safely.
+  * Theme: shared Button style with CornerRadius=8 applied across app.
+- Verification performed
+  * dotnet restore/build: success
+  * dotnet publish -c Release -r win-x64 -p:Platform=x64: success
+  * tests/run-audit.ps1 and tests/smoke-test.ps1: PASS
+  * tests/final-result.txt: PASS
+- Artifacts (in tests/):
+  tests/final-result.txt
+  tests/AUDIT_RUN_SUMMARY.txt
+  tests/ui-missing-all.txt
+  tests/dev-ui-audit-snippet.txt
+  tests/energy-ui-audit-snippet.txt
+  tests/ci-ui-audit-snippet.txt
+  tests/smoke-output.txt
+  tests/latest-usb-run-ci.log
+  tests/ui-screenshot.png
+  AUDIT_NOTE.md
+  DeepVerify.md
+- Next steps and notes
+  * Remote was configured in CI; pushed branch fix/ui-clarity-and-stability.
+  * If further WinRT/COM issues appear, attach LocalAppData\\FormatX\\logs and I will extend guards and fallbacks.
