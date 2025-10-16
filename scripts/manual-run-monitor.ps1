@@ -1,5 +1,7 @@
 param(
-  [switch]$Release
+  [switch]$Release,
+  [ValidateSet('x64','x86','arm64')]
+  [string]$Platform = 'x64'
 )
 
 $ErrorActionPreference = 'SilentlyContinue'
@@ -7,8 +9,8 @@ $VerbosePreference = 'SilentlyContinue'
 
 # 1) Build
 $cfg = if ($Release) { 'Release' } else { 'Debug' }
-Write-Host "[MANUAL] dotnet build -c $cfg" -ForegroundColor Cyan
-& dotnet build -c $cfg | Out-Null
+Write-Host "[MANUAL] dotnet build -c $cfg -p:Platform=$Platform" -ForegroundColor Cyan
+& dotnet build -c $cfg -p:Platform=$Platform | Out-Null
 
 # 2) Resolve exe path (x64)
 $tfm = 'net10.0-windows10.0.22621.0'

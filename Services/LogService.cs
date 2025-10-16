@@ -110,16 +110,11 @@ namespace FormatX.Services
       try
       {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        // Laptop optimization: avoid WriteThrough and explicit Flush when Energy Saver is ON
-        bool saverOn = IsEnergySaverOn();
-        var opts = saverOn ? FileOptions.Asynchronous : FileOptions.WriteThrough;
-        using var fs = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 8192, opts);
+        // Avoid any WinRT calls here; keep logging robust even before bootstrap.
+        using var fs = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 8192, FileOptions.Asynchronous);
         var bytes = System.Text.Encoding.UTF8.GetBytes(text);
         await fs.WriteAsync(bytes, 0, bytes.Length);
-        if (!saverOn)
-        {
-          await fs.FlushAsync();
-        }
+        await fs.FlushAsync();
       }
       catch
       {
@@ -131,9 +126,12 @@ namespace FormatX.Services
     {
       try
       {
-        return Windows.System.Power.PowerManager.EnergySaverStatus == Windows.System.Power.EnergySaverStatus.On;
+        var env = Environment.GetEnvironmentVariable("FORMATX_ENERGY_SAVER");
+        if (string.Equals(env, "1", StringComparison.OrdinalIgnoreCase) || string.Equals(env, "true", StringComparison.OrdinalIgnoreCase)) return true;
+        if (string.Equals(env, "0", StringComparison.OrdinalIgnoreCase) || string.Equals(env, "false", StringComparison.OrdinalIgnoreCase)) return false;
       }
-      catch { return false; }
+      catch { }
+      return false; // do not query WinRT here
     }
 
     public static async Task<string> ExportCsvAsync(string destCsv)

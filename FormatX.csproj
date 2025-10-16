@@ -40,6 +40,7 @@
     <DebugSymbols>false</DebugSymbols>
     <Deterministic>true</Deterministic>
     <EmbedAllSources>false</EmbedAllSources>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PublishSingleFile)'=='true'">
@@ -57,6 +58,20 @@
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
     <PackageReference Include="QuestPDF" Version="2025.12.0-alpha2" />
   </ItemGroup>
+
+  <!-- Exclude Windows App Runtime auto-initializer sources added by package to avoid double bootstrap (0xC000027B) -->
+  <ItemGroup>
+    <Compile Remove="**\WindowsAppRuntimeAutoInitializer.cs" />
+    <Compile Remove="**\UndockedRegFreeWinRT-AutoInitializer.cs" />
+  </ItemGroup>
+
+  <Target Name="RemoveWinAppRuntimeAutoInit" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Compile Remove="@(Compile)" Condition="'%(Compile.Filename)' == 'WindowsAppRuntimeAutoInitializer'" />
+      <Compile Remove="@(Compile)" Condition="'%(Compile.Filename)' == 'UndockedRegFreeWinRT-AutoInitializer'" />
+    </ItemGroup>
+    <Message Text="[FormatX] Removed Windows App Runtime auto-initializer sources to avoid double bootstrap." Importance="High" />
+  </Target>
 
   <ItemGroup>
     <None Include="Assets\**\*.*" Pack="true" PackagePath="Assets\" />
