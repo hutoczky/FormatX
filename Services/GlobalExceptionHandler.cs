@@ -30,6 +30,7 @@ namespace FormatX.Services
       try
       {
         var ex = e.Exception;
+        try { await LogService.LogUsbAppErrorAsync("App", ex); } catch { }
         await LogService.WriteUsbLineAsync($"usb.winrt.error:Global:{ex.GetType().Name}:{Sanitize(ex.Message)}");
         await WriteCrashLastExitAsync(ex);
         e.Handled = true;
@@ -43,6 +44,7 @@ namespace FormatX.Services
       {
         if (e.ExceptionObject is Exception ex)
         {
+          try { await LogService.LogUsbAppErrorAsync("Unhandled", ex); } catch { }
           await LogService.WriteUsbLineAsync($"usb.winrt.error:Global:{ex.GetType().Name}:{Sanitize(ex.Message)}");
           await WriteCrashLastExitAsync(ex);
         }
@@ -57,6 +59,7 @@ namespace FormatX.Services
         var ex = e.Exception?.Flatten();
         if (ex != null)
         {
+          try { await LogService.LogUsbAppErrorAsync("Task", ex); } catch { }
           await LogService.WriteUsbLineAsync($"usb.winrt.error:Global:{ex.GetType().Name}:{Sanitize(ex.Message)}");
           await WriteCrashLastExitAsync(ex);
         }

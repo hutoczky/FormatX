@@ -74,66 +74,77 @@ namespace FormatX.Services
 
     public static async Task GeneratePdfAsync(string path, SanitizeReport report)
     {
-      Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-      var (app, ver) = GetAppInfo();
-      string build = TryGitHash();
-      string timestamp = report.Timestamp;
-
-      Document.Create(container =>
+      try
       {
-        container.Page(page =>
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        var (app, ver) = GetAppInfo();
+        string build = TryGitHash();
+        string timestamp = report.Timestamp;
+
+        Document.Create(container =>
         {
-          page.Margin(36);
-          page.Header().Row(row =>
+          container.Page(page =>
           {
-            row.RelativeItem().Column(col =>
+            page.Margin(36);
+            page.Header().Row(row =>
             {
-              col.Item().Text(app).SemiBold().FontSize(16);
-              col.Item().Text($"Verzió: {ver} • Build: {build}").FontSize(10);
-              col.Item().Text($"Idõ: {timestamp}").FontSize(10);
-            });
-          });
-
-          page.Content().Column(col =>
-          {
-            col.Spacing(8);
-            col.Item().Border(1).Padding(8).Column(sum =>
-            {
-              sum.Spacing(4);
-              sum.Item().Text("Összegzés").Bold();
-              sum.Item().Text($"Mód: {report.Mode}");
-              sum.Item().Text($"Verify: {(report.VerifyOk?"OK":"FAIL")}");
-              sum.Item().Text($"Hash: {report.Hash}");
-              sum.Item().Text($"Gép: {report.Machine} • Felhasználó: {report.User}");
-            });
-
-            // Events table from events.jsonl (subset for PDF)
-            col.Item().Element(e =>
-            {
-              var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "logs");
-              var jsonl = Path.Combine(logDir, "events.jsonl");
-              var rows = File.Exists(jsonl) ? File.ReadLines(jsonl).Take(300).Select(ParseEventRow).ToList() : new System.Collections.Generic.List<(string,string,string,string,string)>();
-              e.Table(t =>
+              row.RelativeItem().Column(col =>
               {
-                t.ColumnsDefinition(c => { c.RelativeColumn(2); c.RelativeColumn(2); c.RelativeColumn(2); c.RelativeColumn(2); c.RelativeColumn(6); });
-                t.Header(h => { h.Cell().Text("Idõ"); h.Cell().Text("Mûvelet"); h.Cell().Text("Objektum"); h.Cell().Text("Eredmény"); h.Cell().Text("Részletek"); });
-                foreach (var r in rows)
-                {
-                  t.Cell().Text(r.Item1);
-                  t.Cell().Text(r.Item2);
-                  t.Cell().Text(r.Item3);
-                  t.Cell().Text(r.Item4);
-                  t.Cell().Text(r.Item5);
-                }
+                col.Item().Text(app).SemiBold().FontSize(16);
+                col.Item().Text($"Verzió: {ver} • Build: {build}").FontSize(10);
+                col.Item().Text($"Idõ: {timestamp}").FontSize(10);
               });
             });
+
+            page.Content().Column(col =>
+            {
+              col.Spacing(8);
+              col.Item().Border(1).Padding(8).Column(sum =>
+              {
+                sum.Spacing(4);
+                sum.Item().Text("Összegzés").Bold();
+                sum.Item().Text($"Mód: {report.Mode}");
+                sum.Item().Text($"Verify: {(report.VerifyOk?"OK":"FAIL")}");
+                sum.Item().Text($"Hash: {report.Hash}");
+                sum.Item().Text($"Gép: {report.Machine} • Felhasználó: {report.User}");
+              });
+
+              // Events table from events.jsonl (subset for PDF)
+              col.Item().Element(e =>
+              {
+                var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "logs");
+                var jsonl = Path.Combine(logDir, "events.jsonl");
+                var rows = File.Exists(jsonl) ? File.ReadLines(jsonl).Take(300).Select(ParseEventRow).ToList() : new System.Collections.Generic.List<(string,string,string,string,string)>();
+                e.Table(t =>
+                {
+                  t.ColumnsDefinition(c => { c.RelativeColumn(2); c.RelativeColumn(2); c.RelativeColumn(2); c.RelativeColumn(2); c.RelativeColumn(6); });
+                  t.Header(h => { h.Cell().Text("Idõ"); h.Cell().Text("Mûvelet"); h.Cell().Text("Objektum"); h.Cell().Text("Eredmény"); h.Cell().Text("Részletek"); });
+                  foreach (var r in rows)
+                  {
+                    t.Cell().Text(r.Item1);
+                    t.Cell().Text(r.Item2);
+                    t.Cell().Text(r.Item3);
+                    t.Cell().Text(r.Item4);
+                    t.Cell().Text(r.Item5);
+                  }
+                });
+              });
+            });
+
+            page.Footer().AlignCenter().Text("FormatX riport").FontSize(10).Light();
           });
+        }).GeneratePdf(path);
 
-          page.Footer().AlignCenter().Text("FormatX riport").FontSize(10).Light();
-        });
-      }).GeneratePdf(path);
-
-      await LogService.LogAsync("report.pdf", new { path });
+        await LogService.LogAsync("report.pdf", new { path });
+      }
+      catch (FileNotFoundException fnf)
+      {
+        try { await LogService.LogUsbAppErrorAsync("PDF", fnf); } catch { }
+      }
+      catch (Exception ex)
+      {
+        try { await LogService.LogUsbAppErrorAsync("PDF", ex); } catch { }
+      }
 
       static (string, string, string, string, string) ParseEventRow(string ln)
       {

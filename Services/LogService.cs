@@ -60,6 +60,9 @@ namespace FormatX.Services
     public static Task LogUsbWinrtErrorAsync(string api, Exception ex)
       => WriteUsbLineAsync($"usb.winrt.error:{api}:{ex.GetType().Name}:{Sanitize(ex.Message)}");
 
+    public static Task LogUsbAppErrorAsync(string type, Exception ex)
+      => WriteUsbLineAsync($"usb.app.error:{type}:{ex.GetType().Name}:{Sanitize(ex.Message)}");
+
     // Required by spec: simple callback-friendly appender
     public static void AppendUsbLine(string line)
     {

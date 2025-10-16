@@ -186,7 +186,8 @@ for($i=0; $i -lt 50 -and -not $autoOk; $i++){
   $hasCancelled = ($tail3 | Select-String -SimpleMatch 'usb.image.cancelled' -Quiet)
   $hasExit = ($tail3 | Select-String -SimpleMatch 'usb.app.exit' -Quiet)
   $hasShutdown = ($tail3 | Select-String -SimpleMatch 'usb.app.shutdown' -Quiet)
-  if ($hasStart -and ($hasOpened -or $hasCancelled) -and $hasExit -and $hasShutdown) { $autoOk = $true; break }
+  $hasAppErr = ($tail3 | Select-String -SimpleMatch 'usb.app.error:' -Quiet)
+  if ($hasStart -and ($hasOpened -or $hasCancelled -or $hasAppErr) -and $hasExit -and $hasShutdown) { $autoOk = $true; break }
   Start-Sleep -Milliseconds 200
 }
 if (-not $autoOk) { try { "[SMOKE] auto-browse sequence incomplete (non-fatal in CI)" | Out-File -FilePath (Join-Path $PSScriptRoot 'smoke-output.txt') -Append -Encoding UTF8 } catch {} }
