@@ -67,14 +67,15 @@ namespace FormatX
       catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogAsync("error.com.exception", new { ctx = "bootstrap", cex.Message, cex.HResult }); }
       catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "bootstrap", ex = ex.Message }); }
 
-      // Language: enforce Hungarian-only UI
+      // Language: prefer saved setting; default HU
       try
       {
-        SettingsService.Current.Language = "hu-HU";
-        ApplicationLanguages.PrimaryLanguageOverride = "hu-HU";
-        CultureInfo.CurrentUICulture = new CultureInfo("hu-HU");
-        CultureInfo.CurrentCulture   = new CultureInfo("hu-HU");
-        LocalizationService.SetLanguage("hu");
+        var saved = SettingsService.Current.Language;
+        var langCode = (saved ?? "hu-HU").StartsWith("en", StringComparison.OrdinalIgnoreCase) ? "en-US" : "hu-HU";
+        ApplicationLanguages.PrimaryLanguageOverride = langCode;
+        CultureInfo.CurrentUICulture = new CultureInfo(langCode);
+        CultureInfo.CurrentCulture   = new CultureInfo(langCode);
+        LocalizationService.SetLanguage(langCode.StartsWith("en") ? "en" : "hu");
       }
       catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "lang.init", ex = ex.Message }); }
 
@@ -136,7 +137,9 @@ namespace FormatX
       } catch (Exception ex) { _ = LogService.LogAsync("usb.monitor.init.error", new { ex = ex.Message }); }
       try { if (_window != null) { TestHookService.SetMainWindow(_window); TestHookService.Start(); } } catch { }
       try { if (_window != null) _window.Closed += (_, __) => { try { TestHookService.Stop(); } catch { } try { _usb?.Stop(); } catch { } try { LogService.AppendUsbLine("usb.app.shutdown"); } catch { } IsMainWindowClosed = true; MainWindow = null; /* do not force exit or exit code change */ }; } catch { }
-      _ = EnsureStartupTaskAsync();
+      // Only attempt StartupTask when packaged to avoid COM exceptions in dev/CI
+      if (FormatX.Services.AppEnv.IsPackaged)
+        _ = EnsureStartupTaskAsync();
 
       // Optional first-chance diagnostics; global handlers are wired in GlobalExceptionHandler
       if (FormatX.Services.DiagFlags.DeepDiagnostics)
@@ -150,6 +153,13 @@ namespace FormatX
       try { LogService.AppendUsbLine("usb.app.start"); } catch { }
           // Early refresh scaffold for CI
           try { await LogService.UsbRefreshAsync(); } catch { }
+          // Skip pickers in headless/CI to reduce WinRT noise
+          var headless = Environment.GetEnvironmentVariable("FORMATX_HEADLESS");
+          if (string.Equals(headless, "1", StringComparison.Ordinal))
+          {
+            try { LogService.AppendUsbLine("usb.app.exit: Headless.SkipPickers"); } catch { }
+            return;
+          }
           var pick = await FilePickerService.TryPickAsync(_window);
           // minimal validation
           if (pick?.SelectedPath is string p && !string.IsNullOrWhiteSpace(p))

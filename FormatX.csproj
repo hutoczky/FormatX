@@ -60,6 +60,8 @@
 
   <ItemGroup>
     <None Include="Assets\**\*.*" Pack="true" PackagePath="Assets\" />
+    <Page Remove="Themes\AppTheme.xaml" />
+    <Page Remove="Themes\Controls.xaml" />
     <None Include=".github\workflows\release-pipeline.yml" />
     <None Include="Package.appxmanifest" />
     <EmbeddedResource Include="Resources\Strings.resx">
@@ -81,6 +83,15 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Themes\AppTheme.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Themes\Controls.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
   </ItemGroup>
 
   <Target Name="CleanWinAppSdkExpandPri" BeforeTargets="WinAppSDKExpandPriContent">

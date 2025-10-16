@@ -21,10 +21,11 @@
   <data name="settings.bg.hint" xml:space="preserve"><value>Válassz beépített képet vagy saját fájlt.</value></data>
   <data name="settings.about" xml:space="preserve"><value>Névjegy</value></data>
   <data name="settings.version" xml:space="preserve"><value>Verzió: 2.0</value></data>
+  <data name="settings.devline" xml:space="preserve"><value>FormatTech — © 2025 Hudacsek József (GamesTech)</value></data>
   <data name="iso.placeholder" xml:space="preserve"><value>Válassz ISO-t</value></data>
   <data name="ISO_Select" xml:space="preserve"><value>ISO kiválasztása</value></data>
   <data name="ISO_Browse" xml:space="preserve"><value>Tallózás</value></data>
-  <data name="USB_Target" xml:space="preserve"><value>Cél meghajtó</value></data>
+  <data name="USB_Target" xml:space="preserve"><value>Cél meghajtó (eltávolítható)</value></data>
   <data name="USB_Refresh" xml:space="preserve"><value>Frissítés</value></data>
   <data name="USB_Write" xml:space="preserve"><value>ISO írás</value></data>
   <data name="USB_Verify" xml:space="preserve"><value>USB ellenőrzés</value></data>
@@ -34,6 +35,8 @@
   <data name="DiskHealth_Surface" xml:space="preserve"><value>Felszíni ellenőrzés</value></data>
   <data name="DiskHealth_SMART" xml:space="preserve"><value>SMART gyors lekérdezés</value></data>
   <data name="HealthStatus_Good" xml:space="preserve"><value>Állapot: Jó</value></data>
+  <data name="HealthStatus_Bad" xml:space="preserve"><value>Állapot: Rossz</value></data>
+  <data name="HealthStatus_Warn" xml:space="preserve"><value>Állapot: Figyelmeztetés</value></data>
   <data name="Btn_Start" xml:space="preserve"><value>Indítás</value></data>
   <data name="Btn_BackDrives" xml:space="preserve"><value>Meghajtókhoz</value></data>
   <data name="Btn_SelectDrive" xml:space="preserve"><value>Meghajtó kiválasztása</value></data>
@@ -87,4 +90,21 @@
   <data name="background.set.error" xml:space="preserve"><value>Hatter beallitasa sikertelen</value></data>
   <data name="s.mode.block" xml:space="preserve"><value>Ez a funkcio S-modban nem erheto el.</value></data>
   <data name="Footer_Tagline" xml:space="preserve"><value>FormatX Pro — professzionális meghajtókezelés</value></data>
+  <data name="part.current" xml:space="preserve"><value>Jelenlegi partíciók</value></data>
+  <data name="part.planned" xml:space="preserve"><value>Tervezett partíciók</value></data>
+  <data name="part.diskNumber" xml:space="preserve"><value>Lemez sorszáma</value></data>
+  <data name="part.scheme" xml:space="preserve"><value>Partíciós séma</value></data>
+  <data name="part.load" xml:space="preserve"><value>Partíciók betöltése</value></data>
+  <data name="part.apply" xml:space="preserve"><value>Módosítások alkalmazása</value></data>
+  <data name="part.rollback" xml:space="preserve"><value>Visszaállítás</value></data>
+  <data name="settings.theme.hint" xml:space="preserve"><value>Alapértelmezett: a rendszer beállítását követi.</value></data>
+  <data name="settings.licenseTelemetry" xml:space="preserve"><value>Licenc és Telemetria</value></data>
+  <data name="license.placeholder" xml:space="preserve"><value>Licenckulcs megadása</value></data>
+  <data name="license.activate.online" xml:space="preserve"><value>Aktiválás (online)</value></data>
+  <data name="license.activate.offline" xml:space="preserve"><value>Aktiválás (offline)</value></data>
+  <data name="telemetry.label" xml:space="preserve"><value>Telemetria engedélyezése (adatgyűjtés a fejlesztéshez)</value></data>
+  <data name="installer.section" xml:space="preserve"><value>Telepítő</value></data>
+  <data name="installer.buildMsix" xml:space="preserve"><value>MSIX telepítő készítése</value></data>
+  <data name="live.log.title" xml:space="preserve"><value>Élő napló (usb.*)</value></data>
+  <data name="common.done" xml:space="preserve"><value>Kész</value></data>
 </root>

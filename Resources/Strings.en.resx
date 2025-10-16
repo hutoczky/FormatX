@@ -50,6 +50,7 @@
   <data name="settings.bg.hint" xml:space="preserve"><value>Choose a built-in image or your own file.</value></data>
   <data name="settings.about" xml:space="preserve"><value>About</value></data>
   <data name="settings.version" xml:space="preserve"><value>Version: 2.0</value></data>
+  <data name="settings.devline" xml:space="preserve"><value>FormatTech — © 2025 Hudacsek József (GamesTech)</value></data>
   <data name="iso.placeholder" xml:space="preserve"><value>Select ISO</value></data>
   <data name="ISO_Select" xml:space="preserve"><value>Select ISO</value></data>
   <data name="ISO_Browse" xml:space="preserve"><value>Browse</value></data>
@@ -63,6 +64,8 @@
   <data name="DiskHealth_Surface" xml:space="preserve"><value>Surface scan</value></data>
   <data name="DiskHealth_SMART" xml:space="preserve"><value>SMART quick query</value></data>
   <data name="HealthStatus_Good" xml:space="preserve"><value>Status: Good</value></data>
+  <data name="HealthStatus_Bad" xml:space="preserve"><value>Status: Bad</value></data>
+  <data name="HealthStatus_Warn" xml:space="preserve"><value>Status: Warning</value></data>
   <data name="Btn_Start" xml:space="preserve"><value>Start</value></data>
   <data name="Btn_BackDrives" xml:space="preserve"><value>Back to drives</value></data>
   <data name="Btn_SelectDrive" xml:space="preserve"><value>Select drive</value></data>
@@ -101,4 +104,21 @@
   <data name="background.set.error" xml:space="preserve"><value>Failed to set background</value></data>
   <data name="s.mode.block" xml:space="preserve"><value>This feature requires full desktop capabilities and is unavailable in S-mode.</value></data>
   <data name="Footer_Tagline" xml:space="preserve"><value>FormatX Pro — professional drive management</value></data>
+  <data name="part.current" xml:space="preserve"><value>Current partitions</value></data>
+  <data name="part.planned" xml:space="preserve"><value>Planned partitions</value></data>
+  <data name="part.diskNumber" xml:space="preserve"><value>Disk number</value></data>
+  <data name="part.scheme" xml:space="preserve"><value>Partition scheme</value></data>
+  <data name="part.load" xml:space="preserve"><value>Load partitions</value></data>
+  <data name="part.apply" xml:space="preserve"><value>Apply changes</value></data>
+  <data name="part.rollback" xml:space="preserve"><value>Rollback</value></data>
+  <data name="settings.theme.hint" xml:space="preserve"><value>Default: follows system setting.</value></data>
+  <data name="settings.licenseTelemetry" xml:space="preserve"><value>License and Telemetry</value></data>
+  <data name="license.placeholder" xml:space="preserve"><value>Enter license key</value></data>
+  <data name="license.activate.online" xml:space="preserve"><value>Activate (online)</value></data>
+  <data name="license.activate.offline" xml:space="preserve"><value>Activate (offline)</value></data>
+  <data name="telemetry.label" xml:space="preserve"><value>Enable telemetry (usage data for development)</value></data>
+  <data name="installer.section" xml:space="preserve"><value>Installer</value></data>
+  <data name="installer.buildMsix" xml:space="preserve"><value>Build MSIX installer</value></data>
+  <data name="live.log.title" xml:space="preserve"><value>Live log (usb.*)</value></data>
+  <data name="common.done" xml:space="preserve"><value>Done</value></data>
 </root>

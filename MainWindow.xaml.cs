@@ -289,7 +289,9 @@ namespace FormatX
           "BtnSurfaceScan","BtnSmartQuery","BytesToScan","BtnHealthDetails",
           // Additional audit names per spec
           "BtnEnergySaver","BtnSelectDrive","BtnExit","Btn_Start","Btn_BackDrives",
-          "ISO_Select","USB_Target","USB_Write","USB_Verify","USB_Scheme","USB_WriteScheme"
+          "ISO_Select","USB_Target","USB_Write","USB_Verify","USB_Scheme","USB_WriteScheme",
+          // Helpers
+          "HelperIsoSelect","HelperTargetDrive","HelperUsbScheme","LblSecureTarget","LblCurrentPartitions","LblPlannedPartitions"
         };
         int present = 0, missing = 0;
         foreach (var n in names)
@@ -342,12 +344,12 @@ namespace FormatX
           await UiThread.RunOnUIThreadAsync(this, () =>
           {
             try { _watcher = DeviceInformation.CreateWatcher(DeviceClass.PortableStorageDevice); }
-            catch (Exception ex) { LogService.AppendUsbLine($"usb.winrt.error: {ex.GetType().Name} {ex.Message}"); return Task.CompletedTask; }
+            catch (Exception ex) { LogService.AppendUsbLine($"usb.winrt.error:DeviceWatcher.Create:{ex.GetType().Name}"); return Task.CompletedTask; }
             _watcher.Added += (_, __) => DispatcherQueue.TryEnqueue(async () => await RefreshDevices());
             _watcher.Removed += (_, __) => DispatcherQueue.TryEnqueue(async () => await RefreshDevices());
             _watcher.Updated += (_, __) => DispatcherQueue.TryEnqueue(async () => await RefreshDevices());
             try { _watcher.Start(); }
-            catch (Exception ex2) { LogService.AppendUsbLine($"usb.winrt.error: {ex2.GetType().Name} {ex2.Message}"); }
+            catch (Exception ex2) { LogService.AppendUsbLine($"usb.winrt.error:DeviceWatcher.Start:{ex2.GetType().Name}"); }
             return Task.CompletedTask;
           });
         }, CancellationToken.None, LogService.AppendUsbLine).GetAwaiter().GetResult();
@@ -527,36 +529,49 @@ namespace FormatX
       if (_titleText != null) _titleText.Text = LocalizationService.T("title.app");
 
       // ISO tab (bilingual)
-      if (IsoPath != null) IsoPath.PlaceholderText = LocalizationService.T("ISO_Select");
-      if (BtnBrowseIso != null) { BtnBrowseIso.Content = LocalizationService.T("ISO_Select"); ToolTipService.SetToolTip(BtnBrowseIso, _lang==AppLanguage.Hu?"ISO fájl kiválasztása":"Select an ISO file"); }
-      if (IsoVerifyToggle != null) { IsoVerifyToggle.Content = LocalizationService.T("USB_Verify"); ToolTipService.SetToolTip(IsoVerifyToggle, _lang==AppLanguage.Hu?"Kiírt USB ellenőrzése":"Verify written USB"); }
-      if (TargetDrives != null) { TargetDrives.Header = LocalizationService.T("USB_Target"); ToolTipService.SetToolTip(TargetDrives, _lang==AppLanguage.Hu?"Cél USB meghajtó kiválasztása":"Select target USB drive"); }
-      if (IsoSchemeCombo != null) { IsoSchemeCombo.Header = LocalizationService.T("USB_Scheme"); ToolTipService.SetToolTip(IsoSchemeCombo, _lang==AppLanguage.Hu?"Partíciós séma":"Partition scheme"); }
-      if (IsoWriteSchemeCombo != null) { IsoWriteSchemeCombo.Header = LocalizationService.T("USB_WriteScheme"); ToolTipService.SetToolTip(IsoWriteSchemeCombo, _lang==AppLanguage.Hu?"Írási séma":"Write scheme"); }
-      if (BtnIsoWrite != null) { BtnIsoWrite.Content = LocalizationService.T("USB_Write"); ToolTipService.SetToolTip(BtnIsoWrite, _lang==AppLanguage.Hu?"ISO kiírása USB-re":"Write ISO to USB"); }
+      if (IsoPath != null) { IsoPath.PlaceholderText = LocalizationService.T("ISO_Select"); AutomationProperties.SetHelpText(IsoPath, LocalizationService.T("Helper_ISO_Select")); }
+      if (BtnBrowseIso != null) { BtnBrowseIso.Content = LocalizationService.T("ISO_Browse"); ToolTipService.SetToolTip(BtnBrowseIso, LocalizationService.T("Tooltip_FileBrowse")); AutomationProperties.SetName(BtnBrowseIso, LocalizationService.T("ISO_Browse")); AutomationProperties.SetHelpText(BtnBrowseIso, LocalizationService.T("Tooltip_FileBrowse")); }
+      if (IsoVerifyToggle != null) { IsoVerifyToggle.Content = LocalizationService.T("USB_Verify"); ToolTipService.SetToolTip(IsoVerifyToggle, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(IsoVerifyToggle, LocalizationService.T("USB_Verify")); }
+      if (TargetDrives != null) { TargetDrives.Header = LocalizationService.T("USB_Target"); ToolTipService.SetToolTip(TargetDrives, LocalizationService.T("Tooltip_SelectDrive")); AutomationProperties.SetName(TargetDrives, LocalizationService.T("USB_Target")); }
+      if (IsoSchemeCombo != null) { IsoSchemeCombo.Header = LocalizationService.T("USB_Scheme"); ToolTipService.SetToolTip(IsoSchemeCombo, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(IsoSchemeCombo, LocalizationService.T("USB_Scheme")); }
+      if (IsoWriteSchemeCombo != null) { IsoWriteSchemeCombo.Header = LocalizationService.T("USB_WriteScheme"); ToolTipService.SetToolTip(IsoWriteSchemeCombo, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(IsoWriteSchemeCombo, LocalizationService.T("USB_WriteScheme")); }
+      if (BtnIsoWrite != null) { BtnIsoWrite.Content = LocalizationService.T("USB_Write"); ToolTipService.SetToolTip(BtnIsoWrite, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnIsoWrite, LocalizationService.T("USB_Write")); }
+      var helperIso = (this.Content as FrameworkElement)?.FindName("HelperIsoSelect") as TextBlock; if (helperIso != null) helperIso.Text = LocalizationService.T("Helper_ISO_Select");
+      var helperTarget = (this.Content as FrameworkElement)?.FindName("HelperTargetDrive") as TextBlock; if (helperTarget != null) helperTarget.Text = LocalizationService.T("Helper_TargetDrive");
+      var helperScheme = (this.Content as FrameworkElement)?.FindName("HelperUsbScheme") as TextBlock; if (helperScheme != null) helperScheme.Text = LocalizationService.T("Helper_USB_Scheme");
 
       // Format tab
-      if (FormatDrive != null) { FormatDrive.Header = LocalizationService.T("ui.format.drive"); ToolTipService.SetToolTip(FormatDrive, _lang==AppLanguage.Hu?"Formázandó meghajtó":"Drive to format"); }
-      if (FsCombo != null) { FsCombo.Header = LocalizationService.T("ui.format.fs"); ToolTipService.SetToolTip(FsCombo, _lang==AppLanguage.Hu?"Fájlrendszer":"File system"); }
+      if (FormatDrive != null) { FormatDrive.Header = LocalizationService.T("ui.format.drive"); ToolTipService.SetToolTip(FormatDrive, LocalizationService.T("Tooltip_SelectDrive")); AutomationProperties.SetName(FormatDrive, LocalizationService.T("ui.format.drive")); }
+      if (FsCombo != null) { FsCombo.Header = LocalizationService.T("ui.format.fs"); ToolTipService.SetToolTip(FsCombo, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(FsCombo, LocalizationService.T("ui.format.fs")); }
       if (FsItemReFS != null) FsItemReFS.Content = "ReFS";
       if (FsItemExt4 != null) FsItemExt4.Content = "ext4 (Linux)";
-      if (LabelBox != null) { LabelBox.Header = LocalizationService.T("ui.format.label"); ToolTipService.SetToolTip(LabelBox, _lang==AppLanguage.Hu?"Címke":"Label"); }
-      if (QuickBox != null) { QuickBox.Content = LocalizationService.T("ui.format.quick"); ToolTipService.SetToolTip(QuickBox, _lang==AppLanguage.Hu?"Gyors formázás":"Quick format"); }
-      if (BtnFormat != null) { BtnFormat.Content = LocalizationService.T("ui.format.start"); ToolTipService.SetToolTip(BtnFormat, _lang==AppLanguage.Hu?"Formázás indítása":"Start format"); }
+      if (LabelBox != null) { LabelBox.Header = LocalizationService.T("ui.format.label"); ToolTipService.SetToolTip(LabelBox, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(LabelBox, LocalizationService.T("ui.format.label")); }
+      if (QuickBox != null) { QuickBox.Content = LocalizationService.T("ui.format.quick"); ToolTipService.SetToolTip(QuickBox, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(QuickBox, LocalizationService.T("ui.format.quick")); }
+      if (BtnFormat != null) { BtnFormat.Content = LocalizationService.T("ui.format.start"); ToolTipService.SetToolTip(BtnFormat, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnFormat, LocalizationService.T("ui.format.start")); }
 
       // Partitions tab
-      if (DiskNumberBox != null) DiskNumberBox.Header = hu ? "Lemez" : "Disk";
+      if (DiskNumberBox != null) DiskNumberBox.Header = LocalizationService.T("part.diskNumber");
+      if (IsoSchemeCombo != null) IsoSchemeCombo.Header = LocalizationService.T("part.scheme");
+      var lblCur = (this.Content as FrameworkElement)?.FindName("LblCurrentPartitions") as TextBlock; if (lblCur != null) lblCur.Text = LocalizationService.T("part.current");
+      var lblPln = (this.Content as FrameworkElement)?.FindName("LblPlannedPartitions") as TextBlock; if (lblPln != null) lblPln.Text = LocalizationService.T("part.planned");
+      if (BtnLoadPartitions != null) { BtnLoadPartitions.Content = LocalizationService.T("part.load"); ToolTipService.SetToolTip(BtnLoadPartitions, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnLoadPartitions, LocalizationService.T("part.load")); }
+      if (BtnApplyPartitionPlan != null) { BtnApplyPartitionPlan.Content = LocalizationService.T("part.apply"); ToolTipService.SetToolTip(BtnApplyPartitionPlan, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnApplyPartitionPlan, LocalizationService.T("part.apply")); }
+      if (BtnRollback != null) { BtnRollback.Content = LocalizationService.T("part.rollback"); ToolTipService.SetToolTip(BtnRollback, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnRollback, LocalizationService.T("part.rollback")); }
 
       // Secure Erase tab
-      if (EraseFullFormat != null) EraseFullFormat.Content = hu ? "Teljes formázás (lassabb)" : "Full format (slower)";
-      if (BtnSecureErase != null) BtnSecureErase.Content = hu ? "Törlés indítása" : "Start erase";
+      var _lblSecureTarget = (this.Content as FrameworkElement)?.FindName("LblSecureTarget") as TextBlock; if (_lblSecureTarget != null) _lblSecureTarget.Text = LocalizationService.T("ui.secure.target");
+      if (EraseFullFormat != null) { EraseFullFormat.Content = LocalizationService.T("ui.secure.fullFormat"); ToolTipService.SetToolTip(EraseFullFormat, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(EraseFullFormat, LocalizationService.T("ui.secure.fullFormat")); }
+      if (BtnSecureErase != null) { BtnSecureErase.Content = hu ? "Törlés indítása" : "Start erase"; ToolTipService.SetToolTip(BtnSecureErase, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnSecureErase, hu?"Törlés indítása":"Start erase"); }
+      if (BtnErase1 != null) { BtnErase1.Content = LocalizationService.T("SecureErase_1"); ToolTipService.SetToolTip(BtnErase1, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnErase1, LocalizationService.T("SecureErase_1")); }
+      if (BtnErase2 != null) { BtnErase2.Content = LocalizationService.T("SecureErase_2"); ToolTipService.SetToolTip(BtnErase2, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnErase2, LocalizationService.T("SecureErase_2")); }
+      if (BtnErase3 != null) { BtnErase3.Content = LocalizationService.T("SecureErase_3"); ToolTipService.SetToolTip(BtnErase3, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnErase3, LocalizationService.T("SecureErase_3")); }
       if (EraseResult != null) EraseResult.Text = "";
 
       // Health tab labels/tooltips
       try
       {
-        if (Health_DriveCombo != null) Health_DriveCombo.Header = LocalizationService.T("ui.health.drive.header");
-        var scanBox = (this.Content as FrameworkElement)?.FindName("ScanBytes") as TextBox;
+        if (Health_DriveCombo != null) { Health_DriveCombo.Header = LocalizationService.T("ui.health.drive.header"); ToolTipService.SetToolTip(Health_DriveCombo, LocalizationService.T("Tooltip_SelectDrive")); AutomationProperties.SetName(Health_DriveCombo, LocalizationService.T("ui.health.drive.header")); }
+        var scanBox = (this.Content as FrameworkElement)?.FindName("BytesToScan") as TextBox;
         if (scanBox != null)
         {
           scanBox.Header = LocalizationService.T("DiskHealth_Bytes");
@@ -578,6 +593,13 @@ namespace FormatX
           ToolTipService.SetToolTip(btnSmart, LocalizationService.T("Tooltip_SMARTQuery"));
           AutomationProperties.SetName(btnSmart, LocalizationService.T("DiskHealth_SMART"));
         }
+        var btnHealthDetails = (this.Content as FrameworkElement)?.FindName("BtnHealthDetails") as Button;
+        if (btnHealthDetails != null)
+        {
+          btnHealthDetails.Content = LocalizationService.T("ui.health.details");
+          ToolTipService.SetToolTip(btnHealthDetails, LocalizationService.T("Tooltip_GenericAction"));
+          AutomationProperties.SetName(btnHealthDetails, LocalizationService.T("ui.health.details"));
+        }
       }
       catch { }
       if (HealthResult != null) HealthResult.Text = "";
@@ -598,20 +620,34 @@ namespace FormatX
       if (ThemeItemDark != null) ThemeItemDark.Content = hu ? "Sötét" : "Dark";
       if (TxtBackground != null) TxtBackground.Text = LocalizationService.T("settings.background");
       if (TxtBgHint != null) TxtBgHint.Text = LocalizationService.T("settings.bg.hint");
-      if (BtnPickBg != null) BtnPickBg.Content = LocalizationService.T("ui.settings.pickbg");
+      if (ThemeDefaultHint != null) ThemeDefaultHint.Text = LocalizationService.T("settings.theme.hint");
+      if (BtnPickBg != null) { BtnPickBg.Content = LocalizationService.T("ui.settings.pickbg"); ToolTipService.SetToolTip(BtnPickBg, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(BtnPickBg, LocalizationService.T("ui.settings.pickbg")); }
+      // Additional buttons and actions
+      var btnIsoRefresh = (this.Content as FrameworkElement)?.FindName("BtnDrivesRefresh") as Button; if (btnIsoRefresh != null) { btnIsoRefresh.Content = LocalizationService.T("USB_Refresh"); ToolTipService.SetToolTip(btnIsoRefresh, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(btnIsoRefresh, LocalizationService.T("USB_Refresh")); }
+      var btnFmtRefresh = (this.Content as FrameworkElement)?.FindName("BtnRefresh") as Button; if (btnFmtRefresh != null) { ToolTipService.SetToolTip(btnFmtRefresh, LocalizationService.T("Tooltip_GenericAction")); AutomationProperties.SetName(btnFmtRefresh, hu?"Frissítés":"Refresh"); }
       if (BtnCheckUpdate != null) BtnCheckUpdate.Content = hu ? "Frissítések keresése" : "Check for updates";
       if (BtnExportCsv != null) BtnExportCsv.Content = LocalizationService.T("common.exportCsv");
       if (TxtVersion != null) TxtVersion.Text = LocalizationService.T("settings.version");
       if (TxtFooter != null) TxtFooter.Text = LocalizationService.T("Footer_Tagline");
       if (TxtAbout != null) TxtAbout.Text = LocalizationService.T("settings.about");
       var devLine = LocalizationService.T("settings.devline");
-      // find developer line textblock (first in stack after TxtVersion)
-      // already static in XAML; no change needed
+      var devLineBlock = (this.Content as FrameworkElement)?.FindName("TxtDevLine") as TextBlock; if (devLineBlock != null) devLineBlock.Text = devLine;
+      // licensing & telemetry section
+      if (TxtLicenseTelemetry != null) TxtLicenseTelemetry.Text = LocalizationService.T("settings.licenseTelemetry");
+      if (LicenseKeyBox != null) LicenseKeyBox.PlaceholderText = LocalizationService.T("license.placeholder");
+      if (BtnActivateOnline != null) { BtnActivateOnline.Content = LocalizationService.T("license.activate.online"); ToolTipService.SetToolTip(BtnActivateOnline, LocalizationService.T("Tooltip_GenericAction")); }
+      if (BtnActivateOffline != null) { BtnActivateOffline.Content = LocalizationService.T("license.activate.offline"); ToolTipService.SetToolTip(BtnActivateOffline, LocalizationService.T("Tooltip_GenericAction")); }
+      if (TxtTelemetry != null) TxtTelemetry.Text = LocalizationService.T("telemetry.label");
+      if (TxtInstaller != null) TxtInstaller.Text = LocalizationService.T("installer.section");
+      if (BtnBuildMsix != null) { BtnBuildMsix.Content = LocalizationService.T("installer.buildMsix"); ToolTipService.SetToolTip(BtnBuildMsix, LocalizationService.T("Tooltip_GenericAction")); }
+      if (TxtLiveLog != null) TxtLiveLog.Text = LocalizationService.T("live.log.title");
 
       // Update header/title for current view
       var currentTag = (Nav.SelectedItem as NavigationViewItem)?.Tag?.ToString() ?? "settings";
       UpdateHeaderForTag(currentTag);
       ValidateSelectedFormatDrive();
+      if (BtnDone != null) BtnDone.Content = LocalizationService.T("common.done");
+      if (BtnRefresh != null) BtnRefresh.Content = LocalizationService.T("USB_Refresh");
     }
 
     private void ApplyBackground()
@@ -901,19 +937,21 @@ namespace FormatX
         HealthResult.Text = res?.ToString();
 
         Brush? fill = Application.Current.Resources.ContainsKey("HealthYellow") ? Application.Current.Resources["HealthYellow"] as Brush : null;
-        string label = LocalizationService.T("HealthStatus_Good");
+        string labelKey = "HealthStatus_Good";
         switch (color)
         {
           case DiskHealthService.HealthStatus.Green:
-            fill = Application.Current.Resources.ContainsKey("HealthGreen") ? Application.Current.Resources["HealthGreen"] as Brush : fill; label = "Zöld"; break;
+            fill = Application.Current.Resources.ContainsKey("HealthGreen") ? Application.Current.Resources["HealthGreen"] as Brush : fill; labelKey = "HealthStatus_Good"; break;
           case DiskHealthService.HealthStatus.Red:
-            fill = Application.Current.Resources.ContainsKey("HealthRed") ? Application.Current.Resources["HealthRed"] as Brush : fill; label = "Piros"; break;
+            fill = Application.Current.Resources.ContainsKey("HealthRed") ? Application.Current.Resources["HealthRed"] as Brush : fill; labelKey = "HealthStatus_Bad"; break;
+          case DiskHealthService.HealthStatus.Yellow:
+            labelKey = "HealthStatus_Warn"; break;
         }
         var fe = this.Content as FrameworkElement;
         var dot = fe?.FindName("HealthDot") as Microsoft.UI.Xaml.Shapes.Ellipse;
         var txt = fe?.FindName("HealthStatusText") as TextBlock;
         if (dot != null && fill != null) dot.Fill = fill;
-        if (txt != null) txt.Text = (label == "Zöld") ? LocalizationService.T("HealthStatus_Good") : (label == "Piros" ? "Állapot: Rossz" : "Állapot: Közepes");
+        if (txt != null) txt.Text = LocalizationService.T(labelKey);
         await LogService.LogAsync("health.badge", new { disk, color = color.ToString() });
       } catch (System.Runtime.InteropServices.COMException cex) { HealthResult.Text = cex.Message; await LogService.LogAsync("error.com.exception", cex); CrashHandler.Show(cex, "smart.quick"); }
         catch (Exception ex) { HealthResult.Text = ex.Message; await LogService.LogAsync("error.catch", new { ctx = "smart", ex = ex.Message }); }
