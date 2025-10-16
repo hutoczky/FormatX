@@ -52,8 +52,8 @@
   <data name="settings.version" xml:space="preserve"><value>Version: 2.0</value></data>
   <data name="iso.placeholder" xml:space="preserve"><value>Select ISO</value></data>
   <data name="ISO_Select" xml:space="preserve"><value>Select ISO</value></data>
-  <data name="USB_Target" xml:space="preserve"><value>Target USB</value></data>
-  <data name="USB_Write" xml:space="preserve"><value>Write USB</value></data>
+  <data name="USB_Target" xml:space="preserve"><value>USB target</value></data>
+  <data name="USB_Write" xml:space="preserve"><value>Write ISO to USB</value></data>
   <data name="USB_Verify" xml:space="preserve"><value>Verify USB</value></data>
   <data name="USB_Scheme" xml:space="preserve"><value>Partition scheme</value></data>
   <data name="USB_WriteScheme" xml:space="preserve"><value>Write scheme</value></data>
@@ -68,6 +68,13 @@
   <data name="SecureErase_1Pass" xml:space="preserve"><value>1 pass</value></data>
   <data name="SecureErase_2Pass" xml:space="preserve"><value>2 passes</value></data>
   <data name="SecureErase_3Pass" xml:space="preserve"><value>3 passes</value></data>
+  <data name="Pro_Onboarding_Title" xml:space="preserve"><value>Why upgrade to Pro?</value></data>
+  <data name="Pro_Onboarding_Bullet1" xml:space="preserve"><value>Detailed SMART reports and reliable writes</value></data>
+  <data name="Pro_Onboarding_Bullet2" xml:space="preserve"><value>Multiple overwrite modes and secure erase</value></data>
+  <data name="Pro_Onboarding_Bullet3" xml:space="preserve"><value>Audited logging and enterprise support</value></data>
+  <data name="Pro_Onboarding_CTA" xml:space="preserve"><value>See Pro features</value></data>
+  <data name="Tooltip_SurfaceScan" xml:space="preserve"><value>Search for surface errors</value></data>
+  <data name="Tooltip_SMARTQuery" xml:space="preserve"><value>Get drive SMART status</value></data>
   <data name="dialog.confirm.title" xml:space="preserve"><value>Confirmation</value></data>
   <data name="dialog.confirm.content" xml:space="preserve"><value>Are you sure you want to proceed?</value></data>
   <data name="dialog.confirm.yes" xml:space="preserve"><value>Yes</value></data>
@@ -82,4 +89,5 @@
   <data name="background.set.cancel" xml:space="preserve"><value>Background canceled</value></data>
   <data name="background.set.error" xml:space="preserve"><value>Failed to set background</value></data>
   <data name="s.mode.block" xml:space="preserve"><value>This feature requires full desktop capabilities and is unavailable in S-mode.</value></data>
+  <data name="Footer_Tagline" xml:space="preserve"><value>FormatX Pro — professional drive management</value></data>
 </root>

@@ -9,6 +9,8 @@
         <controls:XamlControlsResources />
         <!-- Pull in custom theme resources -->
         <ResourceDictionary Source="Themes/ThemeResources.xaml" />
+        <ResourceDictionary Source="Themes/AppTheme.xaml" />
+        <ResourceDictionary Source="Themes/Controls.xaml" />
       </ResourceDictionary.MergedDictionaries>
       <!-- Global typography and base styles -->
       <FontFamily x:Key="AppFontFamily">Segoe UI</FontFamily>

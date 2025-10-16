@@ -23,8 +23,8 @@
   <data name="settings.version" xml:space="preserve"><value>Verzió: 2.0</value></data>
   <data name="iso.placeholder" xml:space="preserve"><value>Válassz ISO-t</value></data>
   <data name="ISO_Select" xml:space="preserve"><value>ISO kiválasztása</value></data>
-  <data name="USB_Target" xml:space="preserve"><value>Cél USB</value></data>
-  <data name="USB_Write" xml:space="preserve"><value>USB írás</value></data>
+  <data name="USB_Target" xml:space="preserve"><value>Cél meghajtó</value></data>
+  <data name="USB_Write" xml:space="preserve"><value>ISO írás</value></data>
   <data name="USB_Verify" xml:space="preserve"><value>USB ellenőrzés</value></data>
   <data name="USB_Scheme" xml:space="preserve"><value>Partíciós séma</value></data>
   <data name="USB_WriteScheme" xml:space="preserve"><value>Írási séma</value></data>
@@ -39,6 +39,13 @@
   <data name="SecureErase_1Pass" xml:space="preserve"><value>1 átírás</value></data>
   <data name="SecureErase_2Pass" xml:space="preserve"><value>2 átírás</value></data>
   <data name="SecureErase_3Pass" xml:space="preserve"><value>3 átírás</value></data>
+  <data name="Pro_Onboarding_Title" xml:space="preserve"><value>Miért éri meg a Pro?</value></data>
+  <data name="Pro_Onboarding_Bullet1" xml:space="preserve"><value>Részletes SMART riportok és megbízható írás</value></data>
+  <data name="Pro_Onboarding_Bullet2" xml:space="preserve"><value>Több átírási mód és biztonságos törlés</value></data>
+  <data name="Pro_Onboarding_Bullet3" xml:space="preserve"><value>Auditált naplózás és vállalati támogatás</value></data>
+  <data name="Pro_Onboarding_CTA" xml:space="preserve"><value>Tovább a Pro funkciókra</value></data>
+  <data name="Tooltip_SurfaceScan" xml:space="preserve"><value>Lemez felületi hibáinak keresése</value></data>
+  <data name="Tooltip_SMARTQuery" xml:space="preserve"><value>Meghajtó SMART állapotának lekérése</value></data>
   <data name="ui.health.bytesToScan" xml:space="preserve"><value>Ellenőrzendő bájtok</value></data>
   <data name="ui.health.surfaceScan" xml:space="preserve"><value>Felszíni ellenőrzés</value></data>
   <data name="ui.health.smartQuick" xml:space="preserve"><value>SMART gyors lekérdezés</value></data>
@@ -68,4 +75,5 @@
   <data name="background.set.cancel" xml:space="preserve"><value>Hatter visszavonva</value></data>
   <data name="background.set.error" xml:space="preserve"><value>Hatter beallitasa sikertelen</value></data>
   <data name="s.mode.block" xml:space="preserve"><value>Ez a funkcio S-modban nem erheto el.</value></data>
+  <data name="Footer_Tagline" xml:space="preserve"><value>FormatX Pro — professzionális meghajtókezelés</value></data>
 </root>
