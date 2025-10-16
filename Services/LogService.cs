@@ -15,6 +15,8 @@ namespace FormatX.Services
     private static readonly string UsbPath = Path.Combine(LogDir, "usb.log");
     private static readonly string RunUsbPath = Path.Combine(LogDir, $"usb_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.log");
 
+    public static string GetCurrentRunUsbPath() => RunUsbPath;
+
     public static async Task LogAsync(string kind, object data)
     {
       try
@@ -43,8 +45,8 @@ namespace FormatX.Services
       {
         Directory.CreateDirectory(LogDir);
         var text = $"{DateTimeOffset.Now:o}\t{line}" + Environment.NewLine;
-        await FileUtil.AppendAllTextRetryAsync(UsbPath, text);
-        await FileUtil.AppendAllTextRetryAsync(RunUsbPath, text);
+        await AppendWithFlushAsync(UsbPath, text);
+        await AppendWithFlushAsync(RunUsbPath, text);
         try { OnUsbLineAppended?.Invoke(line); } catch { }
       }
       catch { }
@@ -77,6 +79,22 @@ namespace FormatX.Services
     public static Task UsbRefreshErrorAsync(string details) => WriteUsbLineAsync($"usb.refresh.error:{details}");
     public static Task UsbRefreshCancelledAsync() => WriteUsbLineAsync("usb.refresh.cancelled");
     public static Task UsbRefreshSkippedEnergySaverAsync() => WriteUsbLineAsync("usb.refresh.skipped.energysaver");
+
+    private static async Task AppendWithFlushAsync(string path, string text)
+    {
+      try
+      {
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        using var fs = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 4096, FileOptions.WriteThrough);
+        var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+        await fs.WriteAsync(bytes, 0, bytes.Length);
+        await fs.FlushAsync();
+      }
+      catch
+      {
+        try { await FileUtil.AppendAllTextRetryAsync(path, text); } catch { }
+      }
+    }
 
     public static async Task<string> ExportCsvAsync(string destCsv)
     {

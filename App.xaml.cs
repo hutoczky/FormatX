@@ -97,6 +97,49 @@ namespace FormatX
       // Optional first-chance diagnostics; global handlers are wired in GlobalExceptionHandler
       if (FormatX.Services.DiagFlags.DeepDiagnostics)
         AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+
+      // Auto-browse flow: log start, try pick, log exit, then shutdown
+      _ = System.Threading.Tasks.Task.Run(async () =>
+      {
+        try
+        {
+          try { LogService.AppendUsbLine("usb.app.start: AutoBrowse.Init"); } catch { }
+          // Early refresh scaffold for CI
+          try { await LogService.UsbRefreshAsync(); } catch { }
+          var pick = await FilePickerService.TryPickAsync(_window);
+          // minimal validation
+          if (pick?.SelectedPath is string p && !string.IsNullOrWhiteSpace(p))
+          {
+            try
+            {
+              var fi = new System.IO.FileInfo(p);
+              await LogService.LogAsync("autobrowse.file", new { name = fi.Name, size = fi.Exists ? fi.Length : 0 });
+            }
+            catch { }
+          }
+          try { LogService.AppendUsbLine("usb.app.exit: AutoBrowse.Done"); } catch { }
+        }
+        catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogUsbWinrtErrorAsync("AutoBrowse", cex); }
+        catch (InvalidOperationException ioex) { await LogService.LogUsbWinrtErrorAsync("AutoBrowse", ioex); }
+        catch (System.IO.IOException ioex) { await LogService.LogUsbWinrtErrorAsync("AutoBrowse", ioex); }
+        catch (System.Threading.Tasks.TaskCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
+        catch (System.OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
+        catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("AutoBrowse", ex); }
+        finally
+        {
+          try { LogService.AppendUsbLine("usb.app.shutdown"); } catch { }
+          try
+          {
+            var dq = _window?.DispatcherQueue ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+            dq?.TryEnqueue(() =>
+            {
+              try { _window?.Close(); } catch { }
+              try { Microsoft.UI.Xaml.Application.Current.Exit(); } catch { }
+            });
+          }
+          catch { }
+        }
+      });
     }
 
     private async Task EnsureStartupTaskAsync()

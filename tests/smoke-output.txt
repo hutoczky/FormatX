@@ -1,47 +1,4 @@
 ==== usb.log (last 200 lines) ====
-2025-10-16T10:23:58.5593526+02:00	usb.licensing.activate.begin
-2025-10-16T10:23:58.6400136+02:00	usb.licensing.dev.override
-2025-10-16T10:23:58.6412215+02:00	usb.licensing.activate.ok
-2025-10-16T10:23:58.6642004+02:00	usb.licensing.valid:dev
-2025-10-16T12:17:44.2031110+02:00	usb.background.change:fail:
-2025-10-16T12:17:44.8030668+02:00	usb.refresh
-2025-10-16T12:17:44.8233671+02:00	usb.refresh
-2025-10-16T12:17:45.9436771+02:00	usb.watcher.start	{}
-2025-10-16T12:17:46.0075321+02:00	usb.watcher.enum	{}
-2025-10-16T12:17:50.6885627+02:00	usb.refresh
-2025-10-16T12:18:10.6823866+02:00	usb.refresh
-2025-10-16T12:18:31.6595372+02:00	usb.refresh
-2025-10-16T12:18:47.3574698+02:00	usb.refresh.cancelled
-2025-10-16T12:18:47.3604270+02:00	usb.refresh.cancelled
-2025-10-16T12:18:47.3680350+02:00	usb.watcher.stopped	{"status":"Stopped"}
-2025-10-16T12:20:38.6059847+02:00	usb.background.change:fail:
-2025-10-16T12:20:38.7712480+02:00	usb.refresh
-2025-10-16T12:20:38.7884022+02:00	usb.refresh
-2025-10-16T12:20:39.6446927+02:00	usb.watcher.start	{}
-2025-10-16T12:20:39.6992967+02:00	usb.watcher.enum	{}
-2025-10-16T12:20:44.4829359+02:00	usb.refresh
-2025-10-16T12:21:04.4755379+02:00	usb.refresh
-2025-10-16T12:21:22.3333185+02:00	usb.background.change:fail:
-2025-10-16T12:21:22.4892071+02:00	usb.refresh
-2025-10-16T12:21:22.5056794+02:00	usb.refresh
-2025-10-16T12:21:23.3032498+02:00	usb.watcher.start	{}
-2025-10-16T12:21:23.3601236+02:00	usb.watcher.enum	{}
-2025-10-16T12:21:28.1521318+02:00	usb.refresh
-2025-10-16T12:21:48.1469480+02:00	usb.refresh
-2025-10-16T12:22:08.1532092+02:00	usb.refresh
-2025-10-16T12:22:28.1442961+02:00	usb.refresh
-2025-10-16T12:22:48.1445607+02:00	usb.refresh
-2025-10-16T12:23:08.1474447+02:00	usb.refresh
-2025-10-16T12:23:28.1398740+02:00	usb.refresh
-2025-10-16T12:23:48.1422449+02:00	usb.refresh
-2025-10-16T12:24:08.1473815+02:00	usb.refresh
-2025-10-16T12:24:28.1484345+02:00	usb.refresh
-2025-10-16T12:24:37.6924715+02:00	usb.refresh.cancelled
-2025-10-16T12:24:37.6948781+02:00	usb.refresh.cancelled
-2025-10-16T12:24:37.7014375+02:00	usb.watcher.stopped	{"status":"Stopped"}
-2025-10-16T12:24:39.3368073+02:00	usb.refresh.cancelled
-2025-10-16T12:24:39.3397594+02:00	usb.refresh.cancelled
-2025-10-16T12:24:39.3487352+02:00	usb.watcher.stopped	{"status":"Stopped"}
 2025-10-16T12:27:13.0467910+02:00	usb.background.change:fail:
 2025-10-16T12:27:13.5268848+02:00	usb.refresh
 2025-10-16T12:27:13.5432068+02:00	usb.refresh
@@ -178,6 +135,70 @@
 2025-10-16T12:58:50.4276639+02:00	usb.image.scaffold: Smoke.Init
 2025-10-16T12:58:50.4634817+02:00	usb.watcher.enum	{}
 2025-10-16T12:58:55.1971712+02:00	usb.refresh
+2025-10-16T12:59:14.2280047+02:00	usb.background.change:fail:
+2025-10-16T12:59:14.6767660+02:00	usb.refresh
+2025-10-16T12:59:14.6952636+02:00	usb.refresh
+2025-10-16T12:59:15.4464728+02:00	usb.watcher.start	{}
+2025-10-16T12:59:15.5006014+02:00	usb.watcher.enum	{}
+2025-10-16T13:01:14.2521370+02:00	usb.background.change:fail:
+2025-10-16T13:01:14.7315820+02:00	usb.refresh
+2025-10-16T13:01:15.7777371+02:00	usb.watcher.start	{}
+2025-10-16T13:01:15.7855293+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T13:01:15.7867080+02:00	usb.partition.scaffold: Smoke.Init
+2025-10-16T13:01:15.8097146+02:00	usb.sanitize.scaffold: Smoke.Init
+2025-10-16T13:01:15.8132713+02:00	usb.image.scaffold: Smoke.Init
+2025-10-16T13:01:15.8605926+02:00	usb.refresh
+2025-10-16T13:01:15.8677340+02:00	usb.refresh.cancelled
+2025-10-16T13:01:15.8731616+02:00	usb.watcher.enum	{}
+2025-10-16T13:01:15.8735833+02:00	usb.winrt.error:Smoke.Refresh:InvalidOperationException:simulated
+2025-10-16T13:01:19.5431033+02:00	usb.refresh
+2025-10-16T13:01:19.5922339+02:00	usb.refresh.cancelled
+2025-10-16T13:01:19.6159145+02:00	usb.refresh.cancelled
+2025-10-16T13:01:19.6314435+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T13:01:20.5752285+02:00	usb.refresh
+2025-10-16T13:01:30.4321879+02:00	usb.winrt.error:Smoke.Launcher:InvalidOperationException:simulated
+2025-10-16T13:01:30.4504046+02:00	usb.store.prompt.skipped:invalid
+2025-10-16T13:01:30.4580203+02:00	usb.partition.scaffold
+2025-10-16T13:01:30.4849940+02:00	usb.partition.precheck:ok
+2025-10-16T13:01:30.5274116+02:00	usb.partition.dryrun
+2025-10-16T13:01:30.5510813+02:00	usb.sanitize.precheck:Nist:0
+2025-10-16T13:01:30.5642016+02:00	usb.sanitize.execute.begin:Nist:0
+2025-10-16T13:01:30.5696866+02:00	usb.sanitize.nist.begin:0
+2025-10-16T13:01:30.7807995+02:00	usb.sanitize.nist.done
+2025-10-16T13:01:30.7832711+02:00	usb.sanitize.execute.ok
+2025-10-16T13:01:30.8359265+02:00	usb.sanitize.verify:Nist:0:9e178f65
+2025-10-16T13:01:31.3817972+02:00	usb.winrt.error:Sanitize.Report:Exception:Welcome to QuestPDF! 👋   QuestPDF is an open-source library committed to long-term sustainability and continuous improvement.   To maintain high-quality development and support while keeping the library free for most users, we use a fair pricing model where only larger organizations help by providing necessary funding for the project.   If your organization’s annual gross revenue exceeds $1M USD, a Commercial License is required for production use (you can freely evaluate and test QuestPDF in non-production environments at no cost). In that case, please share this information with your team or management. By purchasing a license, you directly contribute to the ongoing development and reliability of QuestPDF.   For details on the license types and determining which applies to you, please visit: https://www.questpdf.com/license/   We trust our users. To continue, no license key is needed. Instead, simply select and configure the appropriate license in your code. For example, if you qualify for the Community license, add:   > QuestPDF.Settings.License = LicenseType.Community;   Thank you for supporting QuestPDF! ❤️ By choosing the right license, you help ensure that our project remains transparent, sustainable, and continuously improving for everyone. 🚀
+2025-10-16T13:01:31.3911491+02:00	usb.image.capture.begin:Scaffold:C:\
+2025-10-16T13:01:31.4500826+02:00	usb.image.capture.ok:C:\Users\hutoc\AppData\Local\Temp\fx_scaffold.wim
+2025-10-16T13:01:31.4617693+02:00	usb.image.apply.begin:Scaffold:E:
+2025-10-16T13:01:31.5265372+02:00	usb.image.apply.ok
+2025-10-16T13:01:31.5434654+02:00	usb.iso.write.begin:1/2:A.iso
+2025-10-16T13:01:31.5651225+02:00	usb.winrt.error:IsoUsb.WriteQueue:FileNotFoundException:Could not find file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\bin\x64\Debug\net10.0-windows10.0.22621.0\A.iso'.
+2025-10-16T13:01:31.5772733+02:00	usb.automation.job.begin:fx_job.json
+2025-10-16T13:01:31.6506054+02:00	usb.automation.job.ok
+2025-10-16T13:01:31.6582983+02:00	usb.diagnostics.smart.begin:0
+2025-10-16T13:01:31.7394237+02:00	usb.diagnostics.smart.ok
+2025-10-16T13:01:31.7445004+02:00	usb.clone.begin
+2025-10-16T13:01:31.8011077+02:00	usb.clone.ok
+2025-10-16T13:01:31.8119869+02:00	usb.installer.build.begin
+2025-10-16T13:01:31.8692639+02:00	usb.installer.build.ok:C:\Users\hutoc\AppData\Local\FormatX\msix\FormatX_20251016_130131.msix
+2025-10-16T13:08:52.9682027+02:00	usb.background.change:fail:
+2025-10-16T13:08:53.1348331+02:00	usb.refresh
+2025-10-16T13:08:53.9484339+02:00	usb.watcher.start	{}
+2025-10-16T13:08:53.9592164+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T13:08:53.9600348+02:00	usb.partition.scaffold: Smoke.Init
+2025-10-16T13:08:53.9723064+02:00	usb.sanitize.scaffold: Smoke.Init
+2025-10-16T13:08:53.9771680+02:00	usb.image.scaffold: Smoke.Init
+2025-10-16T13:08:53.9971725+02:00	usb.app.start: AutoBrowse.Init
+2025-10-16T13:08:54.0013453+02:00	usb.refresh
+2025-10-16T13:08:54.0101805+02:00	usb.watcher.enum	{}
+2025-10-16T13:08:54.5031481+02:00	usb.winrt.error:FilePicker:COMException:
+2025-10-16T13:08:54.5066252+02:00	usb.image.cancelled
+2025-10-16T13:08:54.5096399+02:00	usb.app.exit: AutoBrowse.Done
+2025-10-16T13:08:54.5125838+02:00	usb.app.shutdown
+2025-10-16T13:08:56.2044407+02:00	usb.refresh.cancelled
+2025-10-16T13:08:56.2080158+02:00	usb.refresh.cancelled
+2025-10-16T13:08:56.2161443+02:00	usb.watcher.stopped	{"status":"Stopped"}
 
 ==== crash files ====
 <none>

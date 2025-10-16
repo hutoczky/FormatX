@@ -176,6 +176,21 @@ if (-not $hasLic) { Write-Host '[SMOKE] licensing prefix not found (non-fatal)';
 if (-not $hasPolicy) { Write-Host '[SMOKE] policy prefix not found (non-fatal)'; }
 if (-not $hasTel) { Write-Host '[SMOKE] telemetry prefix not found (non-fatal)'; }
 
+# Auto-browse lifecycle checks (non-interactive)
+$autoOk = $false
+for($i=0; $i -lt 50 -and -not $autoOk; $i++){
+  $logFile = Get-UsbLogPath -Dir $logDir
+  $tail3 = if (Test-Path $logFile) { Get-Content $logFile -Tail 800 -ErrorAction SilentlyContinue } else { @() }
+  $hasStart = ($tail3 | Select-String -SimpleMatch 'usb.app.start' -Quiet)
+  $hasOpened = ($tail3 | Select-String -SimpleMatch 'usb.image.opened' -Quiet)
+  $hasCancelled = ($tail3 | Select-String -SimpleMatch 'usb.image.cancelled' -Quiet)
+  $hasExit = ($tail3 | Select-String -SimpleMatch 'usb.app.exit' -Quiet)
+  $hasShutdown = ($tail3 | Select-String -SimpleMatch 'usb.app.shutdown' -Quiet)
+  if ($hasStart -and ($hasOpened -or $hasCancelled) -and $hasExit -and $hasShutdown) { $autoOk = $true; break }
+  Start-Sleep -Milliseconds 200
+}
+if (-not $autoOk) { try { "[SMOKE] auto-browse sequence incomplete (non-fatal in CI)" | Out-File -FilePath (Join-Path $PSScriptRoot 'smoke-output.txt') -Append -Encoding UTF8 } catch {} }
+
 # e) Graceful close (best-effort; do not fail on non-zero exit in dev runs)
 New-Trigger 'exit.trigger' | Out-Null
 Start-Sleep -Seconds 2

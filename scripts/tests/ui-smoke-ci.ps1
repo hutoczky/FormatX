@@ -22,6 +22,9 @@ $exe2 = Join-Path $root 'artifacts\publish\win-x64\FormatX.exe'
 $exe = if (Test-Path $exe1){$exe1} elseif (Test-Path $exe2){$exe2} else { $null }
 
 $proc = $null
+# Simulate file selection if picker cannot be shown
+$env:FORMATX_AUTO_FILE = Join-Path $root 'artifacts\sample.iso'
+try { if (-not (Test-Path $env:FORMATX_AUTO_FILE)) { New-Item -ItemType Directory -Force -Path (Split-Path $env:FORMATX_AUTO_FILE) | Out-Null; Set-Content -Path $env:FORMATX_AUTO_FILE -Value 'sample' -Encoding UTF8 } } catch {}
 if ($exe) { $proc = Start-Process -FilePath $exe -PassThru }
 Start-Sleep -Seconds 6
 
