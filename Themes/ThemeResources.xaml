@@ -123,4 +123,12 @@
     <Setter Property="Margin" Value="{StaticResource FormControlMargin}"/>
     <Setter Property="HorizontalAlignment" Value="Left"/>
   </Style>
+
+  <!-- Base Button style to unify visuals across the app -->
+  <Style TargetType="Button">
+    <Setter Property="MinWidth" Value="{StaticResource DefaultButtonMinWidth}"/>
+    <Setter Property="Padding" Value="12,8"/>
+    <Setter Property="CornerRadius" Value="{StaticResource ButtonCornerRadius}"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+  </Style>
 </ResourceDictionary>

@@ -54,7 +54,7 @@ namespace FormatX.Services
             var f = await UiThread.RunOnUIThreadAsync(window, () => StorageFile.GetFileFromPathAsync(path).AsTask());
             await LogService.LogAsync($"{logKey}.selected", new { result = f?.Path });
             return f;
-          }, CancellationToken.None, LogService.AppendUsbLine);
+          }, CancellationToken.None, LogService.AppendUsbLine, "Picker.Win32.File");
         }
 
         // WinRT picker on UI thread
@@ -80,7 +80,7 @@ namespace FormatX.Services
               if (file == null) { try { await LogService.LogAsync($"{logKey}.cancel", new { }); } catch { } return (StorageFile?)null; }
               await LogService.LogAsync($"{logKey}.selected", new { result = file?.Path });
               return file;
-            }, CancellationToken.None, LogService.AppendUsbLine);
+            }, CancellationToken.None, LogService.AppendUsbLine, "Picker.WinRT.File");
           }
           catch (Exception ex) { await LogService.LogAsync($"{logKey}.exception", new { kind = "General", ex = ex.Message }); return null; }
         }).ConfigureAwait(false);
@@ -112,7 +112,7 @@ namespace FormatX.Services
             var pickedFolder = await UiThread.RunOnUIThreadAsync(window, () => StorageFolder.GetFolderFromPathAsync(path).AsTask());
             await LogService.LogAsync("picker.folder.win32", new { result = pickedFolder?.Path });
             return pickedFolder;
-          }, CancellationToken.None, LogService.AppendUsbLine);
+          }, CancellationToken.None, LogService.AppendUsbLine, "Picker.Win32.Folder");
         }
         return await RunOnUIThreadAsync(window, async () =>
         {
@@ -128,7 +128,7 @@ namespace FormatX.Services
               var folder = await picker.PickSingleFolderAsync().AsTask().ConfigureAwait(false);
               await LogService.LogAsync("picker.folder", new { result = folder?.Path });
               return folder;
-            }, CancellationToken.None, LogService.AppendUsbLine);
+            }, CancellationToken.None, LogService.AppendUsbLine, "Picker.WinRT.Folder");
           }
           catch (Exception ex) { await LogService.LogAsync("picker.folder.error.ui", new { ex = ex.Message }); return null; }
         }).ConfigureAwait(false);

@@ -352,7 +352,7 @@ namespace FormatX
             catch (Exception ex2) { LogService.AppendUsbLine($"usb.winrt.error:DeviceWatcher.Start:{ex2.GetType().Name}"); }
             return Task.CompletedTask;
           });
-        }, CancellationToken.None, LogService.AppendUsbLine).GetAwaiter().GetResult();
+        }, CancellationToken.None, LogService.AppendUsbLine, "DeviceWatcher").GetAwaiter().GetResult();
       }
       catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "DeviceWatcher.Start", ex = ex.Message }); }
     }
@@ -372,7 +372,7 @@ namespace FormatX
                 if (_watcher.Status == DeviceWatcherStatus.Started || _watcher.Status == DeviceWatcherStatus.EnumerationCompleted) _watcher.Stop();
                 return Task.CompletedTask;
               });
-            }, CancellationToken.None, LogService.AppendUsbLine).GetAwaiter().GetResult();
+            }, CancellationToken.None, LogService.AppendUsbLine, "DeviceWatcher.Stop").GetAwaiter().GetResult();
           } catch (Exception ex) { _ = LogService.LogUsbWinrtErrorAsync("DeviceWatcher.Stop", ex); }
         }
       }
