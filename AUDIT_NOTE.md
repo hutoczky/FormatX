@@ -1,10 +1,11 @@
 # AUDIT NOTE
-UTC: 2025-10-16T00:00:00Z
-Commit: PLACEHOLDER
+UTC: 2025-10-16T08:45:00Z
+Commit: 9d9e4a5
 Result: FAIL
 
 ## Changed files
 Services/TestHookService.cs
+tests/smoke-test.ps1
 tests/ui-smoke-output.txt
 
 ## Notes

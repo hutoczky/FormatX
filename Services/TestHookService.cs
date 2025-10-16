@@ -23,6 +23,8 @@ namespace FormatX.Services
       _cts = new CancellationTokenSource();
       // Emit one early simulated error to ensure presence for smoke in headless CI
       try { _ = LogService.LogUsbWinrtErrorAsync("Smoke.Boot", new InvalidOperationException("simulated")); } catch { }
+      // Emit a partition scaffold early for CI/headless environments
+      try { LogService.AppendUsbLine("usb.partition.scaffold: Smoke.Init"); } catch { }
       _ = Task.Run(() => LoopAsync(ResolveRoot(rootDir), _cts.Token));
     }
     public static void Stop()

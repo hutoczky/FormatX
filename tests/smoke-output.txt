@@ -4,3 +4,6 @@ FAIL: missing usb.winrt.error entry
 FAIL: missing usb.winrt.error entry
 FAIL: missing usb.winrt.error entry
 FAIL: missing usb.partition.* entry
+FAIL: missing usb.partition.* entry
+FAIL: missing usb.partition.* entry
+FAIL: missing usb.sanitize.* entry
