@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Threading;
 using Microsoft.UI.Xaml;
 
 namespace FormatX.Services
@@ -27,7 +28,7 @@ namespace FormatX.Services
         if (window != null)
         {
           // Real picker; guard with WinRT/COM handling
-          try
+          var result = await WinRtGuard.SafeExecuteAsync(async _ =>
           {
             var picker = new Windows.Storage.Pickers.FileOpenPicker();
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
@@ -47,13 +48,8 @@ namespace FormatX.Services
               await LogService.WriteUsbLineAsync("usb.image.cancelled");
               return null;
             }
-          }
-          catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogUsbWinrtErrorAsync("FilePicker", cex); }
-          catch (InvalidOperationException ioex) { await LogService.LogUsbWinrtErrorAsync("FilePicker", ioex); }
-          catch (IOException ioex) { await LogService.LogUsbWinrtErrorAsync("FilePicker", ioex); }
-          catch (TaskCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
-          catch (OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
-          catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("FilePicker", ex); }
+          }, CancellationToken.None, LogService.AppendUsbLine, area: "FilePicker");
+          if (result != null) return result;
         }
 
         // Fallback: no selection

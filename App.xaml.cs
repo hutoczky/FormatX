@@ -13,6 +13,7 @@ using WinRT.Interop;
 using System.Security.Cryptography;
 using FormatX.Views;
 using Windows.ApplicationModel;
+using System.Linq;
 
 namespace FormatX
 {
@@ -49,40 +50,8 @@ namespace FormatX
         };
       }
       catch { }
-
-      try { FormatX.Services.GlobalExceptionHandler.WireUp(); } catch { }
       // COM/WinRT wrappers are initialized in Program.Main
-      // Optional: Bootstrap Windows App SDK in UNPACKAGED mode (no-op if packaged or missing)
-      try
-      {
-        var t = Type.GetType("Microsoft.WindowsAppSDK.AppModel.DynamicDependency.Bootstrap, Microsoft.WindowsAppSDK", throwOnError: false);
-        if (t != null)
-        {
-          var initNoArg   = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, Type.EmptyTypes);
-          var initWithVer = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, new Type[] { typeof(uint) });
-          // Prefer parameterless overload (WinAppSDK 1.2+ incl. 2.x) to avoid version mismatch
-          if (initNoArg != null) initNoArg.Invoke(null, null);
-          else if (initWithVer != null)
-          {
-            // Derive a safe minimum version from assembly, fallback to 0
-            uint ver = 0u;
-            try
-            {
-              var asm = t.Assembly?.GetName()?.Version;
-              if (asm != null)
-              {
-                // pack major.minor into 0xMMMMmm00 (Bootstrap expects M.m)
-                ver = (uint)((asm.Major << 16) | (asm.Minor << 8));
-              }
-            }
-            catch { }
-            initWithVer.Invoke(null, new object[] { ver });
-          }
-        }
-      }
-      catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogUsbWinrtErrorAsync("Bootstrap.Initialize", cex); }
-      catch (InvalidOperationException ioex) { _ = LogService.LogUsbWinrtErrorAsync("Bootstrap.Initialize", ioex); }
-      catch (Exception ex) { _ = LogService.LogUsbWinrtErrorAsync("Bootstrap.Initialize", ex); }
+      // Bootstrap is handled once in Program.cs only.
 
       // Language: prefer saved setting; default HU
       try
@@ -95,6 +64,21 @@ namespace FormatX
         LocalizationService.SetLanguage(langCode.StartsWith("en") ? "en" : "hu");
       }
       catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "lang.init", ex = ex.Message }); }
+
+      // Headless guard: skip creating window when FORMATX_HEADLESS=1
+      try
+      {
+        var headless = Environment.GetEnvironmentVariable("FORMATX_HEADLESS");
+        if (string.Equals(headless, "1", StringComparison.Ordinal))
+        {
+          try { LogService.AppendUsbLine("usb.app.info:HeadlessMode"); } catch { }
+          try { LogService.WriteUsbLine("usb.app.info:MainWindowSkipped"); } catch { }
+          try { LogService.WriteUsbLine("usb.app.info:Exit(0)"); } catch { }
+          Environment.Exit(0);
+          return; // safety
+        }
+      }
+      catch { }
 
       try
       {
@@ -125,7 +109,7 @@ namespace FormatX
           _       => ElementTheme.Default
         };
       }
-      try { LogService.AppendUsbLine("usb.app.start"); } catch { }
+      // app start already logged above; avoid duplicate
       // Smoke probe: write a simple output file and log, tolerate IO errors
       try
       {
@@ -138,14 +122,37 @@ namespace FormatX
         try { LogService.AppendUsbLine($"usb.smoke.write:{smokePath}"); } catch { }
       }
       catch { }
-      try { _window?.Activate(); } catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "window.activate", ex = ex.Message }); }
-      // Only auto-exit in CI/headless mode
+      // DispatcherQueue guard before Activate
+      try
+      {
+        var dq = _window?.DispatcherQueue ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+        if (dq == null)
+        {
+          try { LogService.AppendUsbLine("usb.app.error:UI.DispatcherQueueNull"); } catch { }
+          try { LogService.AppendUsbLine("usb.app.info:MainWindowSkipped"); } catch { }
+          try { LogService.WriteUsbLine("usb.app.info:Exit(0)"); } catch { }
+          Environment.Exit(0);
+          return; // safety
+        }
+        _window?.Activate();
+        try { LogService.WriteUsbLine("usb.app.info:MainWindowActivated"); } catch { }
+      }
+      catch (Exception ex)
+      {
+        _ = LogService.LogAsync("error.catch", new { ctx = "window.activate", ex = ex.Message });
+      }
+      // Only auto-exit in CI/headless mode; never auto-exit in developer runs
       try
       {
         var headless = Environment.GetEnvironmentVariable("FORMATX_HEADLESS");
         if (string.Equals(headless, "1", StringComparison.Ordinal))
         {
+          try { LogService.AppendUsbLine("usb.app.exit:Headless.AutoExit"); } catch { }
           TryGracefulShutdown();
+        }
+        else
+        {
+          try { LogService.AppendUsbLine("usb.app.info:Interactive.Run"); } catch { }
         }
       }
       catch { }
@@ -153,7 +160,20 @@ namespace FormatX
         if (_window != null) { _usb = new FormatX.Services.UsbMonitorService(_window); TestHookService.SetUsbService(_usb); _ = _usb.StartAsync(); }
       } catch (Exception ex) { _ = LogService.LogAsync("usb.monitor.init.error", new { ex = ex.Message }); }
       try { if (_window != null) { TestHookService.SetMainWindow(_window); TestHookService.Start(); } } catch { }
-      try { if (_window != null) _window.Closed += (_, __) => { try { TestHookService.Stop(); } catch { } try { _usb?.Stop(); } catch { } try { LogService.AppendUsbLine("usb.app.shutdown"); } catch { } IsMainWindowClosed = true; MainWindow = null; /* do not force exit or exit code change */ }; } catch { }
+      try
+      {
+        if (_window != null)
+        {
+          _window.Closed += (_, __) =>
+          {
+            try { TestHookService.Stop(); } catch { }
+            try { _usb?.Stop(); } catch { }
+            try { LogService.AppendUsbLine("usb.app.window.closed"); } catch { }
+            IsMainWindowClosed = true; MainWindow = null; // do not force process exit
+          };
+        }
+      }
+      catch { }
       // Only attempt StartupTask when packaged to avoid COM exceptions in dev/CI
       if (FormatX.Services.AppEnv.IsPackaged)
         _ = EnsureStartupTaskAsync();
@@ -167,7 +187,7 @@ namespace FormatX
       {
         try
         {
-      try { LogService.AppendUsbLine("usb.app.start"); } catch { }
+      try { LogService.AppendUsbLine("usb.autobrowse.start"); } catch { }
           // Early refresh scaffold for CI
           try { await LogService.UsbRefreshAsync(); } catch { }
           // Skip pickers in headless/CI to reduce WinRT noise
@@ -207,6 +227,7 @@ namespace FormatX
         var headless = Environment.GetEnvironmentVariable("FORMATX_HEADLESS");
         if (!string.Equals(headless, "1", StringComparison.Ordinal))
         {
+          try { LogService.AppendUsbLine("usb.app.info:Shutdown.SkipInteractive"); } catch { }
           // Dev/interactive run: do not auto-exit
           return;
         }

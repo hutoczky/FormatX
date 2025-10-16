@@ -64,14 +64,14 @@ namespace FormatX.Services
 
       try
       {
-        // TODO: Event-based API limits wrapping; using UI-thread adapter + guarded creation/start
+        // Event-based API: wrap creation/start with WinRtGuard and UI-thread marshal
         await WinRtGuard.SafeExecuteAsync(async _ =>
         {
           await UiThread.RunOnUIThreadAsync(_window, () =>
           {
             try { _watcher = DeviceInformation.CreateWatcher(DeviceClass.PortableStorageDevice); }
-            catch (System.Runtime.InteropServices.COMException cex) { LogService.AppendUsbLine($"usb.winrt.error: {cex.GetType().Name} {cex.Message}"); return Task.CompletedTask; }
-            catch (InvalidOperationException ioex) { LogService.AppendUsbLine($"usb.winrt.error: {ioex.GetType().Name} {ioex.Message}"); return Task.CompletedTask; }
+            catch (System.Runtime.InteropServices.COMException cex) { LogService.AppendUsbLine($"usb.winrt.error:DeviceWatcher.Create:{cex.GetType().Name}:{cex.Message}"); return Task.CompletedTask; }
+            catch (InvalidOperationException ioex) { LogService.AppendUsbLine($"usb.winrt.error:DeviceWatcher.Create:{ioex.GetType().Name}:{ioex.Message}"); return Task.CompletedTask; }
 
             _watcher.Added += Watcher_Added;
             _watcher.Removed += Watcher_Removed;
@@ -79,11 +79,11 @@ namespace FormatX.Services
             _watcher.Stopped += Watcher_Stopped;
             _watcher.EnumerationCompleted += Watcher_EnumerationCompleted;
             try { _watcher.Start(); }
-            catch (System.Runtime.InteropServices.COMException cex) { LogService.AppendUsbLine($"usb.winrt.error: {cex.GetType().Name} {cex.Message}"); }
-            catch (InvalidOperationException ioex) { LogService.AppendUsbLine($"usb.winrt.error: {ioex.GetType().Name} {ioex.Message}"); }
+            catch (System.Runtime.InteropServices.COMException cex) { LogService.AppendUsbLine($"usb.winrt.error:DeviceWatcher.Start:{cex.GetType().Name}:{cex.Message}"); }
+            catch (InvalidOperationException ioex) { LogService.AppendUsbLine($"usb.winrt.error:DeviceWatcher.Start:{ioex.GetType().Name}:{ioex.Message}"); }
             return Task.CompletedTask;
           });
-        }, CancellationToken.None, LogService.AppendUsbLine);
+        }, CancellationToken.None, LogService.AppendUsbLine, area: "DeviceWatcher");
         await LogAsync("usb.watcher.start", new { });
       }
       catch (System.Runtime.InteropServices.COMException cex)
