@@ -24,38 +24,61 @@ namespace FormatX.Services
     // Overloads targeting a specific Window
     public static async Task RunOnUIThreadAsync(Window? win, Action action)
     {
-      if (win == null) { try { await LogService.LogUsbWinrtErrorAsync("UiThread.Action", new InvalidOperationException("Dispatcher window unavailable")); } catch { } throw new InvalidOperationException("UI dispatcher is not available"); }
-      if (win.DispatcherQueue.HasThreadAccess) { SafeInvoke(action, "UiThread.Action"); return; }
+      var dq = TryGetDispatcher(win, "UiThread.Action");
+      if (dq == null) { /* no-op in teardown/headless */ return; }
+      bool has = false; try { has = dq.HasThreadAccess; } catch { has = false; }
+      if (has) { SafeInvoke(action, "UiThread.Action"); return; }
       var tcs = new TaskCompletionSource();
-      win.DispatcherQueue.TryEnqueue(() => { SafeInvoke(action, "UiThread.Action"); tcs.TrySetResult(); });
+      if (!dq.TryEnqueue(() => { SafeInvoke(action, "UiThread.Action"); tcs.TrySetResult(); })) tcs.TrySetResult();
       await tcs.Task.ConfigureAwait(false);
     }
 
     public static async Task RunOnUIThreadAsync(Window? win, Func<Task> func)
     {
-      if (win == null) { try { await LogService.LogUsbWinrtErrorAsync("UiThread.FuncTask", new InvalidOperationException("Dispatcher window unavailable")); } catch { } throw new InvalidOperationException("UI dispatcher is not available"); }
-      if (win.DispatcherQueue.HasThreadAccess) { await SafeInvokeAsync(func, "UiThread.FuncTask"); return; }
+      var dq = TryGetDispatcher(win, "UiThread.FuncTask");
+      if (dq == null) { /* no-op in teardown/headless */ return; }
+      bool has = false; try { has = dq.HasThreadAccess; } catch { has = false; }
+      if (has) { await SafeInvokeAsync(func, "UiThread.FuncTask"); return; }
       var tcs = new TaskCompletionSource();
-      win.DispatcherQueue.TryEnqueue(async () => { await SafeInvokeAsync(func, "UiThread.FuncTask"); tcs.TrySetResult(); });
+      if (!dq.TryEnqueue(async () => { await SafeInvokeAsync(func, "UiThread.FuncTask"); tcs.TrySetResult(); })) tcs.TrySetResult();
       await tcs.Task.ConfigureAwait(false);
     }
 
     public static async Task<T> RunOnUIThreadAsync<T>(Window? win, Func<T> func)
     {
-      if (win == null) { try { await LogService.LogUsbWinrtErrorAsync("UiThread.FuncT", new InvalidOperationException("Dispatcher window unavailable")); } catch { } throw new InvalidOperationException("UI dispatcher is not available"); }
-      if (win.DispatcherQueue.HasThreadAccess) { return SafeInvoke(func, "UiThread.FuncT"); }
+      var dq = TryGetDispatcher(win, "UiThread.FuncT");
+      if (dq == null) { return default!; }
+      bool has = false; try { has = dq.HasThreadAccess; } catch { has = false; }
+      if (has) { return SafeInvoke(func, "UiThread.FuncT"); }
       var tcs = new TaskCompletionSource<T>();
-      win.DispatcherQueue.TryEnqueue(() => { tcs.TrySetResult(SafeInvoke(func, "UiThread.FuncT")); });
+      if (!dq.TryEnqueue(() => { tcs.TrySetResult(SafeInvoke(func, "UiThread.FuncT")); })) return default!;
       return await tcs.Task.ConfigureAwait(false);
     }
 
     public static async Task<T> RunOnUIThreadAsync<T>(Window? win, Func<Task<T>> func)
     {
-      if (win == null) { try { await LogService.LogUsbWinrtErrorAsync("UiThread.FuncTaskT", new InvalidOperationException("Dispatcher window unavailable")); } catch { } throw new InvalidOperationException("UI dispatcher is not available"); }
-      if (win.DispatcherQueue.HasThreadAccess) { return await SafeInvokeAsync(func, "UiThread.FuncTaskT"); }
+      var dq = TryGetDispatcher(win, "UiThread.FuncTaskT");
+      if (dq == null) { return default!; }
+      bool has = false; try { has = dq.HasThreadAccess; } catch { has = false; }
+      if (has) { return await SafeInvokeAsync(func, "UiThread.FuncTaskT"); }
       var tcs = new TaskCompletionSource<T>();
-      win.DispatcherQueue.TryEnqueue(async () => { tcs.TrySetResult(await SafeInvokeAsync(func, "UiThread.FuncTaskT")); });
+      if (!dq.TryEnqueue(async () => { tcs.TrySetResult(await SafeInvokeAsync(func, "UiThread.FuncTaskT")); })) return default!;
       return await tcs.Task.ConfigureAwait(false);
+    }
+
+    private static Microsoft.UI.Dispatching.DispatcherQueue? TryGetDispatcher(Window? win, string api)
+    {
+      if (win == null)
+      {
+        try { LogService.LogUsbAppErrorAsync(api, new InvalidOperationException("Dispatcher window unavailable")).GetAwaiter().GetResult(); } catch { }
+        return null;
+      }
+      try { return win.DispatcherQueue; }
+      catch (Exception ex)
+      {
+        try { LogService.LogUsbAppErrorAsync("UI.DispatcherQueueNull", ex).GetAwaiter().GetResult(); } catch { }
+        return null;
+      }
     }
 
     private static void SafeInvoke(Action action, string api)

@@ -63,6 +63,28 @@ namespace FormatX.Services
     public static Task LogUsbAppErrorAsync(string type, Exception ex)
       => WriteUsbLineAsync($"usb.app.error:{type}:{ex.GetType().Name}:{Sanitize(ex.Message)}");
 
+    // Synchronous helper per deep-verify patch to log app errors and brief stack
+    public static void LogUsbAppError(string type, Exception? ex)
+    {
+      try
+      {
+        var header = $"usb.app.error:{type}:{ex?.GetType().Name ?? "Unknown"}:{Sanitize(ex?.Message)}";
+        AppendUsbLine(header);
+        var stack = ex?.StackTrace;
+        if (!string.IsNullOrWhiteSpace(stack))
+        {
+          try
+          {
+            var lines = stack.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var snippet = string.Join(" | ", lines.Length > 3 ? lines[..3] : lines);
+            AppendUsbLine("usb.app.error.stack: " + snippet);
+          }
+          catch { }
+        }
+      }
+      catch { }
+    }
+
     // Required by spec: simple callback-friendly appender
     public static void AppendUsbLine(string line)
     {
