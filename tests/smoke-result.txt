@@ -1,1 +1,1 @@
-missing usb.winrt.error entry
+missing usb.partition.* entry

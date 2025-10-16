@@ -2,3 +2,5 @@
 FAIL: missing usb.refresh entry
 FAIL: missing usb.winrt.error entry
 FAIL: missing usb.winrt.error entry
+FAIL: missing usb.winrt.error entry
+FAIL: missing usb.partition.* entry

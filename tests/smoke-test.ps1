@@ -22,6 +22,17 @@ function Fail-And-Exit($msg){
   exit 1
 }
 
+function Get-UsbLogPath {
+  param([string]$Dir)
+  try {
+    $main = Join-Path $Dir 'usb.log'
+    if (Test-Path $main) { return $main }
+    $scoped = Get-ChildItem -Path $Dir -Filter 'usb_*.log' -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if ($scoped) { return $scoped.FullName }
+  } catch {}
+  return (Join-Path $Dir 'usb.log')
+}
+
 function New-Trigger {
   param([string]$Name)
   $repo = Split-Path -Parent $PSScriptRoot
@@ -37,7 +48,7 @@ $proc = Start-Process -FilePath $AppExe -PassThru
 Start-Sleep -Seconds 2
 
 $logDir = Join-Path $env:LOCALAPPDATA "FormatX\logs"
-$logFile = Join-Path $logDir "usb.log"
+$logFile = Get-UsbLogPath -Dir $logDir
 $crashDir = Join-Path $env:LOCALAPPDATA "FormatX\crash"
 
 # Clean up any previous crash_* artifacts from earlier runs to avoid false failures
@@ -49,14 +60,32 @@ try {
 } catch {}
 
 $deadline = (Get-Date).AddSeconds(12)
-while(-not (Test-Path $logFile) -and (Get-Date) -lt $deadline){ Start-Sleep -Milliseconds 250 }
+while((Get-Date) -lt $deadline){
+  $logFile = Get-UsbLogPath -Dir $logDir
+  if (Test-Path $logFile) { break }
+  Start-Sleep -Milliseconds 250
+}
+if (-not (Test-Path $logFile)) {
+  try { "[SMOKE] usb.log not found; will continue with best-effort." | Out-File -FilePath (Join-Path $PSScriptRoot 'smoke-output.txt') -Append -Encoding UTF8 } catch {}
+}
 
-# b) Trigger refresh hook and assert
+# b) Trigger refresh hook and assert (with retries up to 5s)
 New-Trigger 'refresh.trigger' | Out-Null
-Start-Sleep -Seconds 1
-$tail = if (Test-Path $logFile) { Get-Content $logFile -Tail 200 -ErrorAction SilentlyContinue } else { @() }
-$okRefresh = ($tail | Select-String -SimpleMatch "usb.refresh" -Quiet) -or ($tail | Select-String -SimpleMatch "usb.refresh.skipped.energysaver" -Quiet)
-if (-not $okRefresh) { Fail-And-Exit 'missing usb.refresh entry' }
+function Test-UsbHasRefresh {
+  param([string[]]$Lines)
+  return (($Lines | Select-String -SimpleMatch 'usb.refresh' -Quiet) -or ($Lines | Select-String -SimpleMatch 'usb.refresh.skipped.energysaver' -Quiet))
+}
+$okRefresh = $false
+for($i=0; $i -lt 25 -and -not $okRefresh; $i++){
+  $logFile = Get-UsbLogPath -Dir $logDir
+  $tail = if (Test-Path $logFile) { Get-Content $logFile -Tail 400 -ErrorAction SilentlyContinue } else { @() }
+  $okRefresh = Test-UsbHasRefresh -Lines $tail
+  if (-not $okRefresh) { Start-Sleep -Milliseconds 200 }
+}
+if (-not $okRefresh) {
+  try { "[SMOKE] refresh not observed; last log path: $logFile" | Out-File -FilePath (Join-Path $PSScriptRoot 'smoke-output.txt') -Append -Encoding UTF8 } catch {}
+  Fail-And-Exit 'missing usb.refresh entry'
+}
 
 # c) Toggle watcher 5x
 1..5 | ForEach-Object {
@@ -85,8 +114,13 @@ Start-Sleep -Seconds 1
 if ($proc.HasExited) { Fail-And-Exit 'app exited unexpectedly during picker/launcher hooks' }
 
 # verify presence of WinRT error hardening and cancellation lines in usb.log
-$tail2 = if (Test-Path $logFile) { Get-Content $logFile -Tail 600 -ErrorAction SilentlyContinue } else { @() }
-$hasWinrtErr = ($tail2 | Select-String -SimpleMatch 'usb.winrt.error:' -Quiet)
+$hasWinrtErr = $false
+for($i=0; $i -lt 25 -and -not $hasWinrtErr; $i++){
+  $logFile = Get-UsbLogPath -Dir $logDir
+  $tail2 = if (Test-Path $logFile) { Get-Content $logFile -Tail 800 -ErrorAction SilentlyContinue } else { @() }
+  $hasWinrtErr = ($tail2 | Select-String -SimpleMatch 'usb.winrt.error:' -Quiet)
+  if (-not $hasWinrtErr) { Start-Sleep -Milliseconds 200 }
+}
 $hasCancelled = ($tail2 | Select-String -SimpleMatch 'usb.refresh.cancelled' -Quiet)
 $hasPartition = ($tail2 | Select-String -SimpleMatch 'usb.partition.' -Quiet)
 $hasSanitize = ($tail2 | Select-String -SimpleMatch 'usb.sanitize.' -Quiet)
@@ -128,11 +162,19 @@ if ($crash) { Fail-And-Exit ("crash detected: " + $crash.FullName) }
 
 # f) smoke-output.txt
 $out = Join-Path $PSScriptRoot 'smoke-output.txt'
+$logFile = Get-UsbLogPath -Dir $logDir
 $last = if (Test-Path $logFile) { Get-Content $logFile -Tail 200 } else { @() }
 "==== usb.log (last 200 lines) ====" | Out-File -FilePath $out -Encoding UTF8 -Force
 $last | Out-File -FilePath $out -Append -Encoding UTF8 -Force
 "`n==== crash files ====" | Out-File -FilePath $out -Append -Encoding UTF8 -Force
 if ($crash) { $crash.FullName | Out-File -FilePath $out -Append -Encoding UTF8 -Force } else { "<none>" | Out-File -FilePath $out -Append -Encoding UTF8 -Force }
+
+# Write latest usb log tail to tests/latest-usb-log-lines.txt for CI collection
+try {
+  $repo = Split-Path -Parent $PSScriptRoot
+  $tailOut = Join-Path $repo 'tests\latest-usb-log-lines.txt'
+  if (Test-Path $logFile) { Get-Content $logFile -Tail 200 | Out-File -FilePath $tailOut -Encoding UTF8 -Force } else { '<none>' | Out-File -FilePath $tailOut -Encoding UTF8 -Force }
+} catch {}
 
 # UI smoke follow-up (best-effort)
 try {

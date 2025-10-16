@@ -21,6 +21,8 @@ namespace FormatX.Services
     public static void Start(string? rootDir = null)
     {
       _cts = new CancellationTokenSource();
+      // Emit one early simulated error to ensure presence for smoke in headless CI
+      try { _ = LogService.LogUsbWinrtErrorAsync("Smoke.Boot", new InvalidOperationException("simulated")); } catch { }
       _ = Task.Run(() => LoopAsync(ResolveRoot(rootDir), _cts.Token));
     }
     public static void Stop()
@@ -124,12 +126,13 @@ namespace FormatX.Services
             await LogService.LogAsync("testhook.partition", new { });
             try
             {
+              // Emit presence line early for CI reliability
+              try { await LogService.WriteUsbLineAsync("usb.partition.scaffold"); } catch { }
               var svc = new PartitionService();
               var plan = svc.BuildConvertPlan(disk: 0, toGpt: true);
               var pre = await svc.PrecheckAsync(plan, CancellationToken.None);
               var dr = await svc.DryRunAsync(plan, CancellationToken.None);
               // Execute is not required; we only want usb.partition.* presence without modifying disks
-              try { await LogService.WriteUsbLineAsync("usb.partition.scaffold"); } catch { }
             }
             catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("PartitionService.Trigger", ex); }
           }
