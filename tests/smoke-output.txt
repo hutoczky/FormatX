@@ -1,10 +1,186 @@
+==== usb.log (last 200 lines) ====
+2025-10-16T10:23:58.5593526+02:00	usb.licensing.activate.begin
+2025-10-16T10:23:58.6400136+02:00	usb.licensing.dev.override
+2025-10-16T10:23:58.6412215+02:00	usb.licensing.activate.ok
+2025-10-16T10:23:58.6642004+02:00	usb.licensing.valid:dev
+2025-10-16T12:17:44.2031110+02:00	usb.background.change:fail:
+2025-10-16T12:17:44.8030668+02:00	usb.refresh
+2025-10-16T12:17:44.8233671+02:00	usb.refresh
+2025-10-16T12:17:45.9436771+02:00	usb.watcher.start	{}
+2025-10-16T12:17:46.0075321+02:00	usb.watcher.enum	{}
+2025-10-16T12:17:50.6885627+02:00	usb.refresh
+2025-10-16T12:18:10.6823866+02:00	usb.refresh
+2025-10-16T12:18:31.6595372+02:00	usb.refresh
+2025-10-16T12:18:47.3574698+02:00	usb.refresh.cancelled
+2025-10-16T12:18:47.3604270+02:00	usb.refresh.cancelled
+2025-10-16T12:18:47.3680350+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:20:38.6059847+02:00	usb.background.change:fail:
+2025-10-16T12:20:38.7712480+02:00	usb.refresh
+2025-10-16T12:20:38.7884022+02:00	usb.refresh
+2025-10-16T12:20:39.6446927+02:00	usb.watcher.start	{}
+2025-10-16T12:20:39.6992967+02:00	usb.watcher.enum	{}
+2025-10-16T12:20:44.4829359+02:00	usb.refresh
+2025-10-16T12:21:04.4755379+02:00	usb.refresh
+2025-10-16T12:21:22.3333185+02:00	usb.background.change:fail:
+2025-10-16T12:21:22.4892071+02:00	usb.refresh
+2025-10-16T12:21:22.5056794+02:00	usb.refresh
+2025-10-16T12:21:23.3032498+02:00	usb.watcher.start	{}
+2025-10-16T12:21:23.3601236+02:00	usb.watcher.enum	{}
+2025-10-16T12:21:28.1521318+02:00	usb.refresh
+2025-10-16T12:21:48.1469480+02:00	usb.refresh
+2025-10-16T12:22:08.1532092+02:00	usb.refresh
+2025-10-16T12:22:28.1442961+02:00	usb.refresh
+2025-10-16T12:22:48.1445607+02:00	usb.refresh
+2025-10-16T12:23:08.1474447+02:00	usb.refresh
+2025-10-16T12:23:28.1398740+02:00	usb.refresh
+2025-10-16T12:23:48.1422449+02:00	usb.refresh
+2025-10-16T12:24:08.1473815+02:00	usb.refresh
+2025-10-16T12:24:28.1484345+02:00	usb.refresh
+2025-10-16T12:24:37.6924715+02:00	usb.refresh.cancelled
+2025-10-16T12:24:37.6948781+02:00	usb.refresh.cancelled
+2025-10-16T12:24:37.7014375+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:24:39.3368073+02:00	usb.refresh.cancelled
+2025-10-16T12:24:39.3397594+02:00	usb.refresh.cancelled
+2025-10-16T12:24:39.3487352+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:27:13.0467910+02:00	usb.background.change:fail:
+2025-10-16T12:27:13.5268848+02:00	usb.refresh
+2025-10-16T12:27:13.5432068+02:00	usb.refresh
+2025-10-16T12:27:14.3258017+02:00	usb.watcher.start	{}
+2025-10-16T12:27:14.3855637+02:00	usb.watcher.enum	{}
+2025-10-16T12:30:30.0961974+02:00	usb.background.change:fail:
+2025-10-16T12:30:30.2508728+02:00	usb.refresh
+2025-10-16T12:30:31.0253359+02:00	usb.watcher.start	{}
+2025-10-16T12:30:31.0835676+02:00	usb.watcher.enum	{}
+2025-10-16T12:30:35.8803665+02:00	usb.refresh
+2025-10-16T12:30:48.9447810+02:00	usb.refresh.cancelled
+2025-10-16T12:30:48.9472642+02:00	usb.refresh.cancelled
+2025-10-16T12:30:48.9549005+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:31:27.2501066+02:00	usb.background.change:fail:
+2025-10-16T12:31:27.4038689+02:00	usb.refresh
+2025-10-16T12:31:27.4195378+02:00	usb.refresh
+2025-10-16T12:31:28.2064746+02:00	usb.watcher.start	{}
+2025-10-16T12:31:28.2144201+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T12:31:28.2631511+02:00	usb.watcher.enum	{}
+2025-10-16T12:31:33.0525781+02:00	usb.refresh
+2025-10-16T12:32:10.4310851+02:00	usb.refresh.cancelled
+2025-10-16T12:32:10.4337428+02:00	usb.refresh.cancelled
+2025-10-16T12:32:10.4488584+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:45:22.3017594+02:00	usb.background.change:fail:
+2025-10-16T12:45:22.7263083+02:00	usb.refresh
+2025-10-16T12:45:23.5284383+02:00	usb.watcher.start	{}
+2025-10-16T12:45:23.5360314+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T12:45:23.5789688+02:00	usb.watcher.enum	{}
+2025-10-16T12:45:28.3429744+02:00	usb.refresh
+2025-10-16T12:46:08.2111383+02:00	usb.background.change:fail:
+2025-10-16T12:46:08.3757847+02:00	usb.refresh
+2025-10-16T12:46:08.3930047+02:00	usb.refresh
+2025-10-16T12:46:09.2950672+02:00	usb.watcher.start	{}
+2025-10-16T12:46:09.3071790+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T12:46:09.3682981+02:00	usb.watcher.enum	{}
+2025-10-16T12:46:14.0702968+02:00	usb.refresh
+2025-10-16T12:46:34.0747073+02:00	usb.refresh
+2025-10-16T12:46:54.0672243+02:00	usb.refresh
+2025-10-16T12:47:14.0596687+02:00	usb.refresh
+2025-10-16T12:47:34.0649862+02:00	usb.refresh
+2025-10-16T12:47:54.0748019+02:00	usb.refresh
+2025-10-16T12:48:14.0644882+02:00	usb.refresh
+2025-10-16T12:48:34.0627233+02:00	usb.refresh
+2025-10-16T12:48:54.0751067+02:00	usb.refresh
+2025-10-16T12:49:14.0748282+02:00	usb.refresh
+2025-10-16T12:49:34.0616936+02:00	usb.refresh
+2025-10-16T12:49:38.3344592+02:00	usb.refresh.cancelled
+2025-10-16T12:49:38.3380886+02:00	usb.refresh.cancelled
+2025-10-16T12:49:38.3493728+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:49:39.5190951+02:00	usb.refresh.cancelled
+2025-10-16T12:49:39.5219620+02:00	usb.refresh.cancelled
+2025-10-16T12:49:39.5344742+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:49:52.8513928+02:00	usb.background.change:fail:
+2025-10-16T12:49:52.9999933+02:00	usb.refresh
+2025-10-16T12:49:53.0170432+02:00	usb.refresh
+2025-10-16T12:49:53.8418006+02:00	usb.watcher.start	{}
+2025-10-16T12:49:53.8498640+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T12:49:53.8506712+02:00	usb.partition.scaffold: Smoke.Init
+2025-10-16T12:49:53.8968006+02:00	usb.watcher.enum	{}
+2025-10-16T12:49:58.6811889+02:00	usb.refresh
+2025-10-16T12:50:14.7507651+02:00	usb.refresh.cancelled
+2025-10-16T12:50:14.7533395+02:00	usb.refresh.cancelled
+2025-10-16T12:50:14.7606451+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:52:05.6526463+02:00	usb.background.change:fail:
+2025-10-16T12:52:05.7882399+02:00	usb.refresh
+2025-10-16T12:52:06.5289218+02:00	usb.watcher.start	{}
+2025-10-16T12:52:06.5365762+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T12:52:06.5373333+02:00	usb.partition.scaffold: Smoke.Init
+2025-10-16T12:52:06.5808796+02:00	usb.watcher.enum	{}
+2025-10-16T12:52:06.8582096+02:00	usb.sanitize.scaffold: Smoke.Init
+2025-10-16T12:52:11.3769994+02:00	usb.refresh
+2025-10-16T12:52:31.3792424+02:00	usb.refresh
+2025-10-16T12:53:11.2147248+02:00	usb.refresh.cancelled
+2025-10-16T12:53:11.2175382+02:00	usb.refresh.cancelled
+2025-10-16T12:53:11.2317658+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:53:51.6847937+02:00	usb.background.change:fail:
+2025-10-16T12:53:52.1743122+02:00	usb.refresh
+2025-10-16T12:53:53.0007834+02:00	usb.watcher.start	{}
+2025-10-16T12:53:53.0096746+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T12:53:53.0104197+02:00	usb.partition.scaffold: Smoke.Init
+2025-10-16T12:53:53.0309434+02:00	usb.sanitize.scaffold: Smoke.Init
+2025-10-16T12:53:53.0705154+02:00	usb.watcher.enum	{}
+2025-10-16T12:53:53.0712120+02:00	usb.refresh
+2025-10-16T12:53:53.3893726+02:00	usb.refresh.cancelled
+2025-10-16T12:53:53.3915936+02:00	usb.winrt.error:Smoke.Refresh:InvalidOperationException:simulated
+2025-10-16T12:53:55.9395914+02:00	usb.refresh
+2025-10-16T12:53:55.9692758+02:00	usb.refresh.cancelled
+2025-10-16T12:53:55.9740338+02:00	usb.refresh.cancelled
+2025-10-16T12:53:56.0621349+02:00	usb.watcher.stopped	{"status":"Stopped"}
+2025-10-16T12:54:05.6813936+02:00	usb.winrt.error:Smoke.Launcher:InvalidOperationException:simulated
+2025-10-16T12:54:05.7101437+02:00	usb.store.prompt.skipped:invalid
+2025-10-16T12:54:05.7216281+02:00	usb.partition.scaffold
+2025-10-16T12:54:05.7551514+02:00	usb.partition.precheck:ok
+2025-10-16T12:54:05.7982100+02:00	usb.partition.dryrun
+2025-10-16T12:54:05.8218125+02:00	usb.sanitize.precheck:Nist:0
+2025-10-16T12:54:05.8367350+02:00	usb.sanitize.execute.begin:Nist:0
+2025-10-16T12:54:05.8457904+02:00	usb.sanitize.nist.begin:0
+2025-10-16T12:54:06.0472396+02:00	usb.sanitize.nist.done
+2025-10-16T12:54:06.0490550+02:00	usb.sanitize.execute.ok
+2025-10-16T12:54:06.0889941+02:00	usb.sanitize.verify:Nist:0:9e178f65
+2025-10-16T12:54:06.4874831+02:00	usb.winrt.error:Sanitize.Report:Exception:Welcome to QuestPDF! 👋   QuestPDF is an open-source library committed to long-term sustainability and continuous improvement.   To maintain high-quality development and support while keeping the library free for most users, we use a fair pricing model where only larger organizations help by providing necessary funding for the project.   If your organization’s annual gross revenue exceeds $1M USD, a Commercial License is required for production use (you can freely evaluate and test QuestPDF in non-production environments at no cost). In that case, please share this information with your team or management. By purchasing a license, you directly contribute to the ongoing development and reliability of QuestPDF.   For details on the license types and determining which applies to you, please visit: https://www.questpdf.com/license/   We trust our users. To continue, no license key is needed. Instead, simply select and configure the appropriate license in your code. For example, if you qualify for the Community license, add:   > QuestPDF.Settings.License = LicenseType.Community;   Thank you for supporting QuestPDF! ❤️ By choosing the right license, you help ensure that our project remains transparent, sustainable, and continuously improving for everyone. 🚀
+2025-10-16T12:54:06.4957158+02:00	usb.image.capture.begin:Scaffold:C:\
+2025-10-16T12:54:06.5598080+02:00	usb.image.capture.ok:C:\Users\hutoc\AppData\Local\Temp\fx_scaffold.wim
+2025-10-16T12:54:06.5692159+02:00	usb.image.apply.begin:Scaffold:E:
+2025-10-16T12:54:06.6377578+02:00	usb.image.apply.ok
+2025-10-16T12:54:06.6561895+02:00	usb.iso.write.begin:1/2:A.iso
+2025-10-16T12:54:06.6633534+02:00	usb.winrt.error:IsoUsb.WriteQueue:FileNotFoundException:Could not find file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\bin\x64\Release\net10.0-windows10.0.22621.0\A.iso'.
+2025-10-16T12:54:06.6756949+02:00	usb.automation.job.begin:fx_job.json
+2025-10-16T12:54:06.7467979+02:00	usb.automation.job.ok
+2025-10-16T12:54:06.7560987+02:00	usb.diagnostics.smart.begin:0
+2025-10-16T12:54:06.8443326+02:00	usb.diagnostics.smart.ok
+2025-10-16T12:54:06.8507410+02:00	usb.clone.begin
+2025-10-16T12:54:06.9218858+02:00	usb.clone.ok
+2025-10-16T12:54:06.9307327+02:00	usb.installer.build.begin
+2025-10-16T12:54:06.9954815+02:00	usb.installer.build.ok:C:\Users\hutoc\AppData\Local\FormatX\msix\FormatX_20251016_125406.msix
+2025-10-16T12:54:10.0989958+02:00	usb.refresh
+2025-10-16T12:54:30.0975401+02:00	usb.refresh
+2025-10-16T12:54:43.6115456+02:00	usb.background.change:fail:
+2025-10-16T12:58:12.3859675+02:00	usb.background.change:fail:
+2025-10-16T12:58:12.5517144+02:00	usb.refresh
+2025-10-16T12:58:13.4041559+02:00	usb.watcher.start	{}
+2025-10-16T12:58:13.4132086+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T12:58:13.4140366+02:00	usb.partition.scaffold: Smoke.Init
+2025-10-16T12:58:13.4264806+02:00	usb.sanitize.scaffold: Smoke.Init
+2025-10-16T12:58:13.4291766+02:00	usb.image.scaffold: Smoke.Init
+2025-10-16T12:58:13.4650477+02:00	usb.watcher.enum	{}
+2025-10-16T12:58:18.2421937+02:00	usb.refresh
+2025-10-16T12:58:49.4253097+02:00	usb.background.change:fail:
+2025-10-16T12:58:49.5777912+02:00	usb.refresh
+2025-10-16T12:58:50.3984916+02:00	usb.watcher.start	{}
+2025-10-16T12:58:50.4077094+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T12:58:50.4086740+02:00	usb.partition.scaffold: Smoke.Init
+2025-10-16T12:58:50.4246468+02:00	usb.sanitize.scaffold: Smoke.Init
+2025-10-16T12:58:50.4276639+02:00	usb.image.scaffold: Smoke.Init
+2025-10-16T12:58:50.4634817+02:00	usb.watcher.enum	{}
+2025-10-16T12:58:55.1971712+02:00	usb.refresh
+
+==== crash files ====
+<none>
+
+==== ui-smoke ====
 <pending>
-FAIL: missing usb.refresh entry
-FAIL: missing usb.winrt.error entry
-FAIL: missing usb.winrt.error entry
-FAIL: missing usb.winrt.error entry
-FAIL: missing usb.partition.* entry
-FAIL: missing usb.partition.* entry
-FAIL: missing usb.partition.* entry
-FAIL: missing usb.sanitize.* entry
-FAIL: missing usb.image.* entry

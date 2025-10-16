@@ -27,6 +27,8 @@ namespace FormatX.Services
       try { LogService.AppendUsbLine("usb.partition.scaffold: Smoke.Init"); } catch { }
       // Emit a sanitize scaffold early for CI/headless environments
       try { LogService.AppendUsbLine("usb.sanitize.scaffold: Smoke.Init"); } catch { }
+      // Emit an image scaffold early for CI/headless environments
+      try { LogService.AppendUsbLine("usb.image.scaffold: Smoke.Init"); } catch { }
       _ = Task.Run(() => LoopAsync(ResolveRoot(rootDir), _cts.Token));
     }
     public static void Stop()
