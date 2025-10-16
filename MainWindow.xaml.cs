@@ -285,7 +285,9 @@ namespace FormatX
           "DiskNumberBox","GridCurrent","GridPlanned","BtnSecureErase","EraseFullFormat","EraseEtaText","HealthResult",
           "BtnPickBg","BtnBrowseBackground","BtnBrowseIso","IsoPath","IsoVerifyToggle","IsoSchemeCombo","IsoWriteSchemeCombo",
           "BtnCheckUpdate","BtnExportCsv","LangCombo","ThemeCombo","HeaderApplyButton","GlobalProgressBar","GlobalProgressText","PageTitle",
-          "SecureErase_DriveCombo","Health_DriveCombo","HealthBadgeText","HealthDot","BtnDone","BtnRefresh","Status"
+          "SecureErase_DriveCombo","Health_DriveCombo","HealthStatusText","HealthDot","BtnDone","BtnRefresh","Status",
+          // Disk Health new controls
+          "BtnSurfaceScan","BtnSmartQuery","BytesToScan","BtnHealthDetails"
         };
         int present = 0, missing = 0;
         foreach (var n in names)
