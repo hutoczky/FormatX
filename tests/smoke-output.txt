@@ -1,26 +1,3 @@
 
 D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH>"C:\Program Files\PowerShell\7-preview\pwsh.exe" -ExecutionPolicy Bypass -File .\tests\smoke-test.ps1  
-[SMOKE] Start: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\bin\Release\net10.0-windows10.0.22621.0\win-x64\publish\FormatX.exe
-[SMOKE] policy prefix not found (non-fatal)
-[SMOKE] telemetry prefix not found (non-fatal)
-Out-File: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-test.ps1:223
-Line |
- 223 |   last 200 lines) ====" | Out-File -FilePath $out -Encoding UTF8 -Force
-     |                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | The process cannot access the file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-output.txt' because it is being used by another process.
-Out-File: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-test.ps1:224
-Line |
- 224 |  $last | Out-File -FilePath $out -Append -Encoding UTF8 -Force
-     |          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | The process cannot access the file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-output.txt' because it is being used by another process.
-Out-File: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-test.ps1:225
-Line |
- 225 |   h files ====" | Out-File -FilePath $out -Append -Encoding UTF8 -Force
-     |                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | The process cannot access the file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-output.txt' because it is being used by another process.
-Out-File: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-test.ps1:226
-Line |
- 226 |    { "<none>" | Out-File -FilePath $out -Append -Encoding UTF8 -Force }
-     |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     | The process cannot access the file 'D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\smoke-output.txt' because it is being used by another process.
 [SMOKE] OK

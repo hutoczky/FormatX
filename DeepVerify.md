@@ -1,8 +1,8 @@
 # Deep Verify Report
 
-UTC: PLACEHOLDER_UTC
-Git SHA: PLACEHOLDER_SHA
-Branch: fix/deep-verify-winrt-com-shutdown
+ UTC: 2025-10-16T09:50:00Z
+ Git SHA: See tests/git-sha.txt for the actual SHA.
+ Branch: fix/deep-verify-winrt-com-shutdown-and-guards
 
 Areas
 - Exceptions: Global handlers wired; usb.app.error:* entries logged; exit normalized.

@@ -44,8 +44,7 @@ namespace FormatX
       this.InitializeComponent();
       try { if (this.Content is FrameworkElement feRoot) feRoot.DataContext = _drivesVm; } catch { }
       this.Activated += MainWindow_Activated;
-      this.Closing += (_, __) => { _isClosing = true; };
-      this.Closed += (_, __) => { _isClosed = true; StopWatch(); _appWindow = null; };
+      this.Closed += (_, __) => { _isClosing = true; _isClosed = true; StopWatch(); _appWindow = null; };
 
       // Defer background restore until window activation to avoid race/COM issues
       try
