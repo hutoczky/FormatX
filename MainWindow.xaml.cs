@@ -272,9 +272,9 @@ namespace FormatX
     // Deep UI self-check to validate element presence and basic wiring
     private async Task UiDeepAuditAsync()
     {
+      LogService.AppendUsbLine("usb.ui.audit.begin");
       try
       {
-        await LogService.WriteUsbLineAsync("usb.ui.audit.begin");
         var fe = this.Content as FrameworkElement;
         string[] names = new[]
         {
@@ -300,11 +300,14 @@ namespace FormatX
           else { missing++; await LogService.WriteUsbLineAsync($"usb.ui.check.missing:{n}"); }
         }
         await LogService.LogAsync("ui.audit.summary", new { present, missing });
-        await LogService.WriteUsbLineAsync("usb.ui.audit.end");
       }
       catch (Exception ex)
       {
         await LogService.LogUsbWinrtErrorAsync("UI.DeepAudit", ex);
+      }
+      finally
+      {
+        try { LogService.AppendUsbLine("usb.ui.audit.end"); } catch { }
       }
     }
 
@@ -523,23 +526,23 @@ namespace FormatX
       var _titleText = (this.Content as FrameworkElement)?.FindName("TitleText") as TextBlock;
       if (_titleText != null) _titleText.Text = LocalizationService.T("title.app");
 
-      // ISO tab
-      if (IsoPath != null) IsoPath.PlaceholderText = LocalizationService.T("iso.placeholder");
-      if (BtnBrowseIso != null) BtnBrowseIso.Content = LocalizationService.T("common.browse");
-      if (IsoVerifyToggle != null) IsoVerifyToggle.Content = LocalizationService.T("ui.iso.verify");
-      if (TargetDrives != null) TargetDrives.Header = LocalizationService.T("ui.iso.target");
-      if (IsoSchemeCombo != null) IsoSchemeCombo.Header = LocalizationService.T("ui.iso.scheme");
-      if (IsoWriteSchemeCombo != null) IsoWriteSchemeCombo.Header = LocalizationService.T("ui.iso.scheme");
-      if (BtnIsoWrite != null) BtnIsoWrite.Content = LocalizationService.T("ui.iso.write");
+      // ISO tab (bilingual)
+      if (IsoPath != null) IsoPath.PlaceholderText = LocalizationService.T("ISO_Select");
+      if (BtnBrowseIso != null) { BtnBrowseIso.Content = LocalizationService.T("ISO_Select"); ToolTipService.SetToolTip(BtnBrowseIso, _lang==AppLanguage.Hu?"ISO fájl kiválasztása":"Select an ISO file"); }
+      if (IsoVerifyToggle != null) { IsoVerifyToggle.Content = LocalizationService.T("USB_Verify"); ToolTipService.SetToolTip(IsoVerifyToggle, _lang==AppLanguage.Hu?"Kiírt USB ellenőrzése":"Verify written USB"); }
+      if (TargetDrives != null) { TargetDrives.Header = LocalizationService.T("USB_Target"); ToolTipService.SetToolTip(TargetDrives, _lang==AppLanguage.Hu?"Cél USB meghajtó kiválasztása":"Select target USB drive"); }
+      if (IsoSchemeCombo != null) { IsoSchemeCombo.Header = LocalizationService.T("USB_Scheme"); ToolTipService.SetToolTip(IsoSchemeCombo, _lang==AppLanguage.Hu?"Partíciós séma":"Partition scheme"); }
+      if (IsoWriteSchemeCombo != null) { IsoWriteSchemeCombo.Header = LocalizationService.T("USB_WriteScheme"); ToolTipService.SetToolTip(IsoWriteSchemeCombo, _lang==AppLanguage.Hu?"Írási séma":"Write scheme"); }
+      if (BtnIsoWrite != null) { BtnIsoWrite.Content = LocalizationService.T("USB_Write"); ToolTipService.SetToolTip(BtnIsoWrite, _lang==AppLanguage.Hu?"ISO kiírása USB-re":"Write ISO to USB"); }
 
       // Format tab
-      if (FormatDrive != null) FormatDrive.Header = LocalizationService.T("ui.format.drive");
-      if (FsCombo != null) FsCombo.Header = LocalizationService.T("ui.format.fs");
+      if (FormatDrive != null) { FormatDrive.Header = LocalizationService.T("ui.format.drive"); ToolTipService.SetToolTip(FormatDrive, _lang==AppLanguage.Hu?"Formázandó meghajtó":"Drive to format"); }
+      if (FsCombo != null) { FsCombo.Header = LocalizationService.T("ui.format.fs"); ToolTipService.SetToolTip(FsCombo, _lang==AppLanguage.Hu?"Fájlrendszer":"File system"); }
       if (FsItemReFS != null) FsItemReFS.Content = "ReFS";
       if (FsItemExt4 != null) FsItemExt4.Content = "ext4 (Linux)";
-      if (LabelBox != null) LabelBox.Header = LocalizationService.T("ui.format.label");
-      if (QuickBox != null) QuickBox.Content = LocalizationService.T("ui.format.quick");
-      if (BtnFormat != null) BtnFormat.Content = LocalizationService.T("ui.format.start");
+      if (LabelBox != null) { LabelBox.Header = LocalizationService.T("ui.format.label"); ToolTipService.SetToolTip(LabelBox, _lang==AppLanguage.Hu?"Címke":"Label"); }
+      if (QuickBox != null) { QuickBox.Content = LocalizationService.T("ui.format.quick"); ToolTipService.SetToolTip(QuickBox, _lang==AppLanguage.Hu?"Gyors formázás":"Quick format"); }
+      if (BtnFormat != null) { BtnFormat.Content = LocalizationService.T("ui.format.start"); ToolTipService.SetToolTip(BtnFormat, _lang==AppLanguage.Hu?"Formázás indítása":"Start format"); }
 
       // Partitions tab
       if (DiskNumberBox != null) DiskNumberBox.Header = hu ? "Lemez" : "Disk";

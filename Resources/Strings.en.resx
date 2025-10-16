@@ -19,10 +19,24 @@
   <data name="common.selectdrive" xml:space="preserve"><value>Select a drive</value></data>
   <data name="status.drives.refreshed" xml:space="preserve"><value>Drives refreshed</value></data>
   <data name="status.refresh.skipped.energysaver" xml:space="preserve"><value>Energy Saver - refresh skipped</value></data>
+  <data name="ui.iso.scheme" xml:space="preserve"><value>Partition scheme</value></data>
+  <data name="ui.iso.verify" xml:space="preserve"><value>Verify</value></data>
+  <data name="ui.iso.write" xml:space="preserve"><value>Write ISO</value></data>
+  <data name="ui.iso.target" xml:space="preserve"><value>Target drive (removable)</value></data>
+  <data name="ui.format.drive" xml:space="preserve"><value>Drive</value></data>
+  <data name="ui.format.fs" xml:space="preserve"><value>File system</value></data>
+  <data name="ui.format.label" xml:space="preserve"><value>Label</value></data>
+  <data name="ui.format.quick" xml:space="preserve"><value>Quick format</value></data>
+  <data name="ui.format.start" xml:space="preserve"><value>Start format</value></data>
+  <data name="ui.settings.pickbg" xml:space="preserve"><value>Select background...</value></data>
   <data name="menu.format" xml:space="preserve"><value>Format</value></data>
-  <data name="menu.drives" xml:space="preserve"><value>Drives</value></data>
-  <data name="menu.erase" xml:space="preserve"><value>Secure Erase</value></data>
+  <data name="menu.drives" xml:space="preserve"><value>Disk health</value></data>
+  <data name="menu.erase" xml:space="preserve"><value>Secure erase</value></data>
   <data name="menu.settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="title.format" xml:space="preserve"><value>Format</value></data>
+  <data name="title.drives" xml:space="preserve"><value>Disk health</value></data>
+  <data name="title.erase" xml:space="preserve"><value>Secure erase</value></data>
+  <data name="title.settings" xml:space="preserve"><value>Settings</value></data>
   <data name="title.app" xml:space="preserve"><value>FormatX Pro | Version: 2.0</value></data>
   <data name="status.ready" xml:space="preserve"><value>Idle</value></data>
   <data name="common.apply" xml:space="preserve"><value>Apply</value></data>
@@ -37,6 +51,23 @@
   <data name="settings.about" xml:space="preserve"><value>About</value></data>
   <data name="settings.version" xml:space="preserve"><value>Version: 2.0</value></data>
   <data name="iso.placeholder" xml:space="preserve"><value>Select ISO</value></data>
+  <data name="ISO_Select" xml:space="preserve"><value>Select ISO</value></data>
+  <data name="USB_Target" xml:space="preserve"><value>Target USB</value></data>
+  <data name="USB_Write" xml:space="preserve"><value>Write USB</value></data>
+  <data name="USB_Verify" xml:space="preserve"><value>Verify USB</value></data>
+  <data name="USB_Scheme" xml:space="preserve"><value>Partition scheme</value></data>
+  <data name="USB_WriteScheme" xml:space="preserve"><value>Write scheme</value></data>
+  <data name="DiskHealth_BytesToScan" xml:space="preserve"><value>Bytes to scan</value></data>
+  <data name="DiskHealth_SurfaceScan" xml:space="preserve"><value>Surface scan</value></data>
+  <data name="DiskHealth_SMARTQuery" xml:space="preserve"><value>SMART quick query</value></data>
+  <data name="HealthStatus_Good" xml:space="preserve"><value>Status: Good</value></data>
+  <data name="Btn_Start" xml:space="preserve"><value>Start</value></data>
+  <data name="Btn_BackDrives" xml:space="preserve"><value>Back to drives</value></data>
+  <data name="Btn_SelectDrive" xml:space="preserve"><value>Select drive</value></data>
+  <data name="Btn_Exit" xml:space="preserve"><value>Exit</value></data>
+  <data name="SecureErase_1Pass" xml:space="preserve"><value>1 pass</value></data>
+  <data name="SecureErase_2Pass" xml:space="preserve"><value>2 passes</value></data>
+  <data name="SecureErase_3Pass" xml:space="preserve"><value>3 passes</value></data>
   <data name="dialog.confirm.title" xml:space="preserve"><value>Confirmation</value></data>
   <data name="dialog.confirm.content" xml:space="preserve"><value>Are you sure you want to proceed?</value></data>
   <data name="dialog.confirm.yes" xml:space="preserve"><value>Yes</value></data>
