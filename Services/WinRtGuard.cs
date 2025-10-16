@@ -11,7 +11,7 @@ namespace FormatX.Services
     /// </summary>
     public static class WinRtGuard
     {
-        private const int DefaultTimeoutSeconds = 20;
+        private const int DefaultTimeoutSeconds = 5;
 
         public static async Task<T?> SafeExecuteAsync<T>(Func<CancellationToken, Task<T>> func, CancellationToken ct, Action<string> appendUsbLine, string area = "Guard")
         {
