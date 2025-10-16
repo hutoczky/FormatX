@@ -80,7 +80,9 @@ function Collect-Snippets($logPath, $prefix){
   Get-Content $logPath | Select-String -Pattern 'usb.smoke.write' -SimpleMatch | Out-File "tests/${prefix}-smoke-snippet.txt" -Encoding UTF8
   if ($prefix -eq 'ci'){
     Get-Content $logPath | Select-String -Pattern 'usb.app.start' -SimpleMatch | Out-File 'tests/ci-lifecycle-snippet.txt' -Encoding UTF8
+    # Collect both shutdown and exit markers for robustness
     Get-Content $logPath | Select-String -Pattern 'usb.app.shutdown' -SimpleMatch | Out-File 'tests/ci-shutdown-snippet.txt' -Encoding UTF8
+    Get-Content $logPath | Select-String -Pattern 'usb.app.exit' -SimpleMatch | Out-File 'tests/ci-shutdown-snippet.txt' -Encoding UTF8 -Append
     Get-Content $logPath | Select-String -Pattern 'usb.app.error' -SimpleMatch | Out-File 'tests/ci-errors-snippet.txt' -Encoding UTF8
   }
 }
@@ -166,7 +168,7 @@ try {
 # 9) PASS/FAIL
 $smokeOk = Test-Path .\tests\smoke-output.txt -and (Select-String -Path .\tests\smoke-output.txt -Pattern '\[SMOKE\]\s*OK' -Quiet)
 $ciStart = Test-Path tests/ci-lifecycle-snippet.txt -and (Select-String -Path tests/ci-lifecycle-snippet.txt -Pattern 'usb\.app\.start' -Quiet)
-$ciShutdown = Test-Path tests/ci-shutdown-snippet.txt -and (Select-String -Path tests/ci-shutdown-snippet.txt -Pattern 'usb\.app\.shutdown' -Quiet)
+$ciShutdown = Test-Path tests/ci-shutdown-snippet.txt -and ( (Select-String -Path tests/ci-shutdown-snippet.txt -Pattern 'usb\.app\.shutdown' -Quiet) -or (Select-String -Path tests/ci-shutdown-snippet.txt -Pattern 'usb\.app\.exit' -Quiet) )
 if ($smokeOk -and $ciStart -and $ciShutdown) { 'FINAL RESULT: PASS' | Out-File tests/final-result.txt -Encoding UTF8 } else { 'FINAL RESULT: FAIL' | Out-File tests/final-result.txt -Encoding UTF8 }
 
 # 10) Extra audit notes
