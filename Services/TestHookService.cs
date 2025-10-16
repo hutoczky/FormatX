@@ -74,15 +74,20 @@ namespace FormatX.Services
             {
               try
               {
-                var dq = w.DispatcherQueue;
-                await UiThread.RunOnUIThreadAsync(w, async () =>
+                Microsoft.UI.Dispatching.DispatcherQueue? dq = null;
+                try { dq = w.DispatcherQueue; }
+                catch (Exception dqex) { LogService.LogUsbAppError("UI.DispatcherQueueNull", dqex); }
+                if (dq != null)
                 {
-                  // find DrivesViewModel via MainWindow accessor if available
-                  if (w is FormatX.MainWindow mw)
+                  await UiThread.RunOnUIThreadAsync(w, async () =>
                   {
-                    await mw.DrivesVm.Internal_TriggerRefreshForSmokeTest(dq);
-                  }
-                });
+                    // find DrivesViewModel via MainWindow accessor if available
+                    if (w is FormatX.MainWindow mw)
+                    {
+                      await mw.DrivesVm.Internal_TriggerRefreshForSmokeTest(dq);
+                    }
+                  });
+                }
               }
               catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("Smoke.Refresh", ex); }
             }
