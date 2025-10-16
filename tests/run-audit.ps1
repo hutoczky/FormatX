@@ -138,7 +138,7 @@ Collect-Snippets $cilog 'ci'
 Write-Info 'Aggregate summary'
 $summary = @()
 $summary += "Audit run: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-$summary += 'Branch: fix/ui-i18n-and-final-fixes'
+$summary += 'Branch: fix/ui-visual-i18n-unify'
 $sha = (git rev-parse --short HEAD) 2>$null
 $summary += "SHA: $sha"
 "$sha" | Out-File tests/git-sha.txt -Encoding UTF8
@@ -173,7 +173,7 @@ if ($smokeOk -and $ciStart -and $ciShutdown) { 'FINAL RESULT: PASS' | Out-File t
 @(
   "AUDIT NOTE",
   "UTC: $(Get-Date -Date (Get-Date).ToUniversalTime() -Format 'yyyy-MM-dd HH:mm:ss')",
-  "Branch: fix/ui-i18n-and-final-fixes",
+  "Branch: fix/ui-visual-i18n-unify",
   "SHA: $sha",
   "PASS: $([System.IO.File]::ReadAllText('tests/final-result.txt').Contains('PASS'))"
 ) | Out-File AUDIT_NOTE.md -Encoding UTF8
