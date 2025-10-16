@@ -1,5 +1,5 @@
 DeepVerify
 - UI audit snippets present: True
 - Energy Saver polling detected: True
-- Lifecycle start found: 
-- Lifecycle shutdown found: 
+- Lifecycle start found: True
+- Lifecycle shutdown found: True
