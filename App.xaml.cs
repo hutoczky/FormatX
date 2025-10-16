@@ -32,7 +32,7 @@ namespace FormatX
     {
       try
       {
-        try { LogService.AppendUsbLine("usb.app.start: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.app.start"); } catch { }
         // Pre-clean crash artifacts for smoke tests
         try { FormatX.Services.GlobalExceptionHandler.CleanupCrashArtifacts(); } catch { }
 
@@ -135,7 +135,7 @@ namespace FormatX
         if (_window != null) { _usb = new FormatX.Services.UsbMonitorService(_window); TestHookService.SetUsbService(_usb); _ = _usb.StartAsync(); }
       } catch (Exception ex) { _ = LogService.LogAsync("usb.monitor.init.error", new { ex = ex.Message }); }
       try { if (_window != null) { TestHookService.SetMainWindow(_window); TestHookService.Start(); } } catch { }
-      try { if (_window != null) _window.Closed += (_, __) => { try { TestHookService.Stop(); } catch { } try { _usb?.Stop(); } catch { } IsMainWindowClosed = true; MainWindow = null; /* do not force exit or exit code change */ }; } catch { }
+      try { if (_window != null) _window.Closed += (_, __) => { try { TestHookService.Stop(); } catch { } try { _usb?.Stop(); } catch { } try { LogService.AppendUsbLine("usb.app.shutdown"); } catch { } IsMainWindowClosed = true; MainWindow = null; /* do not force exit or exit code change */ }; } catch { }
       _ = EnsureStartupTaskAsync();
 
       // Optional first-chance diagnostics; global handlers are wired in GlobalExceptionHandler
