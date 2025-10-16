@@ -30,6 +30,22 @@ namespace FormatX
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+      try
+      {
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        {
+          try { LogService.LogUsbAppError("Unhandled", e.ExceptionObject as Exception); } catch { }
+          TryGracefulShutdown();
+        };
+        TaskScheduler.UnobservedTaskException += (s, e) =>
+        {
+          try { LogService.LogUsbAppError("Task", e.Exception); } catch { }
+          try { e.SetObserved(); } catch { }
+          TryGracefulShutdown();
+        };
+      }
+      catch { }
+
       try { FormatX.Services.GlobalExceptionHandler.WireUp(); } catch { }
       // COM/WinRT wrappers are initialized in Program.Main
       // Optional: Bootstrap Windows App SDK in UNPACKAGED mode (no-op if packaged or missing)
@@ -86,6 +102,7 @@ namespace FormatX
           _       => ElementTheme.Default
         };
       }
+      try { LogService.AppendUsbLine("usb.app.start: AutoBrowse.Init"); } catch { }
       try { _window?.Activate(); } catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "window.activate", ex = ex.Message }); }
       try {
         if (_window != null) { _usb = new FormatX.Services.UsbMonitorService(_window); TestHookService.SetUsbService(_usb); _ = _usb.StartAsync(); }
@@ -127,19 +144,25 @@ namespace FormatX
         catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("AutoBrowse", ex); }
         finally
         {
-          try { LogService.AppendUsbLine("usb.app.shutdown"); } catch { }
-          try
-          {
-            var dq = _window?.DispatcherQueue ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
-            dq?.TryEnqueue(() =>
-            {
-              try { _window?.Close(); } catch { }
-              try { Microsoft.UI.Xaml.Application.Current.Exit(); } catch { }
-            });
-          }
-          catch { }
+          TryGracefulShutdown();
         }
       });
+    }
+
+    private static void TryGracefulShutdown()
+    {
+      try { LogService.AppendUsbLine("usb.app.shutdown"); } catch { }
+      try
+      {
+        var win = MainWindow;
+        var dq = win?.DispatcherQueue ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+        dq?.TryEnqueue(() =>
+        {
+          try { win?.Close(); } catch { }
+          try { Microsoft.UI.Xaml.Application.Current.Exit(); } catch { }
+        });
+      }
+      catch { }
     }
 
     private async Task EnsureStartupTaskAsync()

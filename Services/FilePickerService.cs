@@ -66,5 +66,35 @@ namespace FormatX.Services
         return null;
       }
     }
+
+    // Overload to match patch spec
+    public static async Task<string?> TryPickFileAsync(IntPtr? hwnd = null)
+    {
+      try
+      {
+        try
+        {
+          var picker = new global::Windows.Storage.Pickers.FileOpenPicker();
+          if (hwnd.HasValue) WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd.Value);
+          var file = await picker.PickSingleFileAsync();
+          if (file != null) return file.Path;
+          LogService.AppendUsbLine("usb.image.cancelled");
+          return null;
+        }
+        catch (System.Runtime.InteropServices.COMException comEx)
+        {
+          LogService.LogUsbAppError("FilePicker", comEx);
+        }
+
+        var fallback = Environment.GetEnvironmentVariable("FORMATX_AUTO_FILE");
+        if (!string.IsNullOrEmpty(fallback) && File.Exists(fallback)) return fallback;
+        return null;
+      }
+      catch (Exception ex)
+      {
+        LogService.LogUsbAppError("FilePicker", ex);
+        return null;
+      }
+    }
   }
 }

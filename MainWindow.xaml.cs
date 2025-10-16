@@ -35,6 +35,7 @@ namespace FormatX
     private volatile bool _isClosed = false;
     private readonly FormatX.ViewModels.LoggerViewModel _logger = new();
     private Timer? _pollTimer; // laptop-friendly polling fallback when watcher is disabled
+    private volatile bool _isClosing = false;
 
     internal DrivesViewModel DrivesVm => _drivesVm;
 
@@ -43,6 +44,7 @@ namespace FormatX
       this.InitializeComponent();
       try { if (this.Content is FrameworkElement feRoot) feRoot.DataContext = _drivesVm; } catch { }
       this.Activated += MainWindow_Activated;
+      this.Closing += (_, __) => { _isClosing = true; };
       this.Closed += (_, __) => { _isClosed = true; StopWatch(); _appWindow = null; };
 
       // Defer background restore until window activation to avoid race/COM issues
@@ -157,29 +159,34 @@ namespace FormatX
         if (lv != null) lv.ItemsSource = _logger.Items;
         LogService.OnUsbLineAppended += (line) =>
         {
+          if (_isClosing || _isClosed || FormatX.App.IsMainWindowClosed) return;
           try
           {
-            // Skip if window is closing/closed to avoid DispatcherQueue access throws
-            if (_isClosed || FormatX.App.IsMainWindowClosed) return;
-            // Access DispatcherQueue inside try because getter may throw when window is torn down
-            var dq = this.DispatcherQueue;
-            dq?.TryEnqueue(() =>
+            Microsoft.UI.Dispatching.DispatcherQueue? dq = null;
+            try { dq = this.DispatcherQueue; }
+            catch (Exception dqex) { LogService.LogUsbAppError("UI.DispatcherQueueNull", dqex); return; }
+            if (dq == null) { LogService.LogUsbAppError("UI.DispatcherQueueNull", new NullReferenceException("DispatcherQueue null")); return; }
+            if (!dq.TryEnqueue(() =>
             {
               try
               {
                 _logger.Add(line);
-                if (lv != null && _logger.Items.Count > 0)
+                if (lv != null && _logger.Items != null && _logger.Items.Count > 0)
                 {
                   var last = _logger.Items[^1];
                   lv.ScrollIntoView(last);
                 }
               }
-              catch { }
-            });
+              catch (Exception uiex) { LogService.LogUsbAppError("UI.LiveLog", uiex); }
+            }))
+            {
+              // Could not enqueue; log and drop
+              LogService.LogUsbAppError("UI.DispatcherQueueAccess", new InvalidOperationException("TryEnqueue failed"));
+            }
           }
           catch (Exception ex)
           {
-            _ = LogService.LogUsbAppErrorAsync("UI.LiveLog", ex);
+            LogService.LogUsbAppError("UI.DispatcherQueueAccess", ex);
           }
         };
       }

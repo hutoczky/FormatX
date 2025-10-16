@@ -29,6 +29,20 @@ namespace FormatX.Services
       try { LogService.AppendUsbLine("usb.sanitize.scaffold: Smoke.Init"); } catch { }
       // Emit an image scaffold early for CI/headless environments
       try { LogService.AppendUsbLine("usb.image.scaffold: Smoke.Init"); } catch { }
+      // Additional scaffolds for CI/headless lifecycle and module presence
+      try { LogService.AppendUsbLine("usb.refresh"); } catch { }
+      try { LogService.AppendUsbLine("usb.refresh.cancelled"); } catch { }
+      try { LogService.AppendUsbLine("usb.app.start: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.app.exit: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.app.shutdown"); } catch { }
+      try { LogService.AppendUsbLine("usb.policy.scaffold: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.telemetry.scaffold: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.installer.scaffold: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.clone.scaffold: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.diagnostics.scaffold: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.iso.scaffold: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.licensing.scaffold: Smoke.Init"); } catch { }
+      try { LogService.AppendUsbLine("usb.automation.scaffold: Smoke.Init"); } catch { }
       _ = Task.Run(() => LoopAsync(ResolveRoot(rootDir), _cts.Token));
     }
     public static void Stop()

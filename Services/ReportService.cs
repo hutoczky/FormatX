@@ -139,11 +139,11 @@ namespace FormatX.Services
       }
       catch (FileNotFoundException fnf)
       {
-        try { await LogService.LogUsbAppErrorAsync("PDF", fnf); } catch { }
+        try { LogService.LogUsbAppError("Resource", fnf); } catch { }
       }
       catch (Exception ex)
       {
-        try { await LogService.LogUsbAppErrorAsync("PDF", ex); } catch { }
+        try { LogService.LogUsbAppError("PDF", ex); } catch { }
       }
 
       static (string, string, string, string, string) ParseEventRow(string ln)
