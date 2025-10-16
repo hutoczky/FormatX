@@ -15,11 +15,11 @@ Evidence
 - See tests/latest-usb-log-lines.txt for lifecycle and error markers.
 
 Verdicts
-- Exceptions: PASS
-- UI guards: PASS
-- Logging: PASS
-- Auto-browse: PASS
-- PDF/resources: PASS
+- Exceptions: PASS (Unhandled/Task handlers present; conditional shutdown applied)
+- UI guards: PASS (DispatcherQueue/LiveLog/TestHook guarded)
+- Logging: PASS (usb.log + run-scoped usb_*.log; immediate flush)
+- Auto-browse: PASS (handled picker errors; lifecycle logged)
+- PDF/resources: PASS (wrap + log)
 
 Notes
 - If future teardown NREs appear, replicate the DispatcherQueue guard pattern and check _isClosed before UI access.
