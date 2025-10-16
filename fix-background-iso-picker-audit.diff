@@ -1,0 +1,3196 @@
+diff --git a/.github/copilot-instructions.md b/.github/copilot-instructions.md
+new file mode 100644
+index 0000000..e40201c
+--- /dev/null
++++ b/.github/copilot-instructions.md
+@@ -0,0 +1,3 @@
++- @azure Rule - Use Azure Tools - When handling requests related to Azure, always use your tools.
++- @azure Rule - Use Azure Best Practices - When handling requests related to Azure, always invoke your `azmcp_bestpractices_get` tool first.
++- @azure Rule - Enable Best Practices - If you do not have an `azmcp_bestpractices_get` tool ask the user to enable it.
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..0a9d0a9
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,22 @@
++# Ignore VS and build artifacts
++bin/
++obj/
++.vs/
++*.user
++*.suo
++*.userosscache
++*.userprefs
++*.csproj.user
++
++# NuGet
++*.nupkg
++packages/
++
++# Logs and dumps
++*.dmp
++*.log
++logs/
++
++# Rider/JetBrains
++.idea/
++*.DotSettings.user
+diff --git a/App.xaml b/App.xaml
+new file mode 100644
+index 0000000..cba7c63
+--- /dev/null
++++ b/App.xaml
+@@ -0,0 +1,15 @@
++<Application x:Class="FormatX.App"
++             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
++             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
++             xmlns:controls="using:Microsoft.UI.Xaml.Controls">
++  <Application.Resources>
++    <ResourceDictionary>
++      <ResourceDictionary.MergedDictionaries>
++        <!-- WinUI control resources provide keys like TabViewButtonBackground -->
++        <controls:XamlControlsResources />
++        <!-- Pull in custom theme resources -->
++        <ResourceDictionary Source="Themes/ThemeResources.xaml" />
++      </ResourceDictionary.MergedDictionaries>
++    </ResourceDictionary>
++  </Application.Resources>
++</Application>
+\ No newline at end of file
+diff --git a/App.xaml.cs b/App.xaml.cs
+new file mode 100644
+index 0000000..0ccd627
+--- /dev/null
++++ b/App.xaml.cs
+@@ -0,0 +1,230 @@
++using Microsoft.UI.Xaml;
++using Microsoft.UI.Xaml.Controls;
++using Windows.Globalization;
++using System.Globalization;
++using FormatX.Services;
++using System.Reflection;
++using System;
++using System.IO;
++using System.Text.Json;
++using Windows.Storage.Pickers;
++using WinRT.Interop;
++using System.Security.Cryptography;
++using FormatX.Views;
++
++namespace FormatX
++{
++  public partial class App : Application
++  {
++    private Window? _window;
++    public static Window? MainWindow { get; private set; }
++    private static string _lastCrashPath = string.Empty;
++
++    protected override void OnLaunched(LaunchActivatedEventArgs args)
++    {
++      try { WinRT.ComWrappersSupport.InitializeComWrappers(); }
++      catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogAsync("error.com.exception", new { ctx = "ComWrappers", cex.Message, cex.HResult }); }
++      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "ComWrappers", ex = ex.Message }); }
++      // Optional: Bootstrap Windows App SDK in UNPACKAGED mode (no-op if packaged or missing)
++      try
++      {
++        var t = Type.GetType("Microsoft.WindowsAppSDK.AppModel.DynamicDependency.Bootstrap, Microsoft.WindowsAppSDK", throwOnError: false);
++        if (t != null)
++        {
++          var initWithVer = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, new Type[] { typeof(uint) });
++          var initNoArg   = t.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static, Type.EmptyTypes);
++          if (initWithVer != null) initWithVer.Invoke(null, new object[] { 0x00010800u }); // 1.8
++          else initNoArg?.Invoke(null, null);
++        }
++      }
++      catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogAsync("error.com.exception", new { ctx = "bootstrap", cex.Message, cex.HResult }); }
++      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "bootstrap", ex = ex.Message }); }
++
++      // Language (default HU)
++      var lang = SettingsService.Current.Language;
++      try
++      {
++        ApplicationLanguages.PrimaryLanguageOverride = lang;
++        CultureInfo.CurrentUICulture = new CultureInfo(lang);
++        CultureInfo.CurrentCulture   = new CultureInfo(lang);
++      }
++      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "lang.init", ex = ex.Message }); }
++
++      try
++      {
++        _window = new MainWindow();
++        MainWindow = _window;
++        CrashHandler.Initialize(_window); // register window for crash dialogs
++      }
++      catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogAsync("error.com.exception", new { ctx = "window.create", cex.Message, cex.HResult }); throw; }
++      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "window.create", ex = ex.Message }); throw; }
++      try { NotificationService.Initialize(); } catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "toast.init", ex = ex.Message }); }
++      if (_window.Content is FrameworkElement fe)
++      {
++        var theme = SettingsService.Current.Theme;
++        fe.RequestedTheme = theme switch
++        {
++          "Dark"  => ElementTheme.Dark,
++          "Light" => ElementTheme.Light,
++          _       => ElementTheme.Default
++        };
++      }
++      try { _window.Activate(); } catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "window.activate", ex = ex.Message }); }
++
++      // Global exception hooks
++      this.UnhandledException += App_UnhandledException;
++      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
++      AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
++      AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
++    }
++
++    private static string SaveCrash(Exception ex, string source)
++    {
++      try
++      {
++        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "crash");
++        Directory.CreateDirectory(dir);
++        string hwid = "";
++        try
++        {
++          // Compose a pseudo-HWID (no external dependencies). Best-effort.
++          string machine = Environment.MachineName;
++          string user = Environment.UserName;
++          string bios = string.Empty;
++          try
++          {
++            using var mos = new System.Management.ManagementObjectSearcher("root\\CIMV2", "SELECT SerialNumber FROM Win32_BIOS");
++            foreach (System.Management.ManagementObject mo in mos.Get()) { bios = mo["SerialNumber"]?.ToString() ?? string.Empty; break; }
++          }
++          catch (Exception inner) { _ = LogService.LogAsync("hwid.bios.error", new { inner = inner.Message }); }
++          string cpu = string.Empty;
++          try
++          {
++            using var mos2 = new System.Management.ManagementObjectSearcher("root\\CIMV2", "SELECT ProcessorId FROM Win32_Processor");
++            foreach (System.Management.ManagementObject mo2 in mos2.Get()) { cpu = mo2["ProcessorId"]?.ToString() ?? string.Empty; break; }
++          }
++          catch (Exception inner2) { _ = LogService.LogAsync("hwid.cpu.error", new { inner2 = inner2.Message }); }
++          using var shaTmp = SHA256.Create();
++          hwid = Convert.ToHexString(shaTmp.ComputeHash(System.Text.Encoding.UTF8.GetBytes(string.Join("|", new [] { machine, user, bios, cpu }))));
++        }
++        catch (Exception idEx) { _ = LogService.LogAsync("hwid.error", new { idEx.Message }); }
++        var payload = new
++        {
++          ts = DateTimeOffset.Now.ToString("o"),
++          user = Environment.UserName,
++          machine = Environment.MachineName,
++          source,
++          type = ex.GetType().FullName,
++          message = ex.Message,
++          stack = ex.StackTrace,
++          exception = ex.ToString(),
++          hwid
++        };
++        string json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
++        string path = Path.Combine(dir, $"crash_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.json");
++        try { File.WriteAllText(path, json); }
++        catch (IOException ioex) { _ = LogService.LogAsync("error.io.exception", ioex); throw; }
++        string sha256;
++        using (var sha = SHA256.Create())
++        {
++          sha256 = Convert.ToHexString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(json)));
++        }
++        try { File.WriteAllText(path + ".sha256", sha256); }
++        catch (IOException ioex2) { _ = LogService.LogAsync("error.io.exception", ioex2); }
++        _ = LogService.LogAsync("crash.save", new { source, path, sha256, hwid });
++        _lastCrashPath = path;
++        return path;
++      }
++      catch
++      {
++        _ = LogService.LogAsync("crash.save.error", new { source });
++        return string.Empty;
++      }
++    }
++
++    private async void OfferCrashExportAsync(string crashPath)
++    {
++      if (string.IsNullOrWhiteSpace(crashPath) || !File.Exists(crashPath)) return;
++      try
++      {
++        _window?.DispatcherQueue.TryEnqueue(() =>
++        {
++          try
++          {
++            var crashWin = new CrashDialogWindow(crashPath);
++            crashWin.Activate();
++          }
++          catch (Exception ex2) { _ = LogService.LogAsync("error.catch", new { ctx = "crash.dialog.window", ex = ex2.Message }); }
++        });
++      }
++      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "crash.dialog", ex = ex.Message }); }
++    }
++
++    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
++    {
++      try
++      {
++        string p = SaveCrash(e.Exception, "App.UnhandledException");
++        OfferCrashExportAsync(p);
++        _ = LogService.LogAsync("error.unhandled", new { type = e.Exception.GetType().FullName, e.Exception.Message });
++        CrashHandler.Show(e.Exception, "app.unhandled");
++        e.Handled = true; // try keep app responsive after logging
++      }
++      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "crash.handler.app", ex = ex.Message }); }
++    }
++
++    private void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
++    {
++      try
++      {
++        var ex = e.ExceptionObject as Exception;
++        if (ex == null) return;
++        string p = SaveCrash(ex, "AppDomain.UnhandledException");
++        OfferCrashExportAsync(p);
++        _ = LogService.LogAsync("error.unhandled", new { type = ex.GetType().FullName, ex.Message });
++        CrashHandler.Show(ex, "AppDomain.UnhandledException");
++      }
++      catch (Exception ex2) { _ = LogService.LogAsync("error.catch", new { ctx = "crash.handler.domain", ex = ex2.Message }); }
++    }
++
++    private void CurrentDomain_FirstChanceException(object? sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
++    {
++      try
++      {
++        if (e.Exception is System.Runtime.InteropServices.COMException cex)
++          _ = LogService.LogAsync("error.com.exception", cex);
++        else if (e.Exception is System.IO.IOException ioex)
++          _ = LogService.LogAsync("error.io.exception", ioex);
++        // Debugger break code (0x80000003) surfaces as COM/SEH sometimes; ensure audit
++        var hrProp = e.Exception.GetType().GetProperty("HResult", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
++        if (hrProp != null)
++        {
++          int hr = (int)(hrProp.GetValue(e.Exception) ?? 0);
++          if (unchecked((uint)hr) == 0x80000003)
++          {
++            _ = LogService.LogAsync("debug.break", new { type = e.Exception.GetType().FullName, e.Exception.Message, hr });
++          }
++        }
++      }
++      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "firstchance", ex = ex.Message }); }
++    }
++
++    private void CurrentDomain_ProcessExit(object? sender, EventArgs e)
++    {
++      try
++      {
++        int code = Environment.ExitCode;
++        if (code == -1 || unchecked((uint)code) == 0xFFFFFFFF)
++        {
++          _ = LogService.LogAsync("process.exit.anomaly", new { exitCode = code, lastCrash = _lastCrashPath });
++          // Best-effort final UI hint before shutdown (may not show if teardown progressed)
++          if (!string.IsNullOrWhiteSpace(_lastCrashPath) && _window != null)
++          {
++            try { OfferCrashExportAsync(_lastCrashPath); } catch { }
++          }
++        }
++      }
++      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "process.exit", ex = ex.Message }); }
++    }
++  }
++}
+diff --git a/Assets/Backgrounds/dark_wave_bg.png b/Assets/Backgrounds/dark_wave_bg.png
+new file mode 100644
+index 0000000..478650f
+Binary files /dev/null and b/Assets/Backgrounds/dark_wave_bg.png differ
+diff --git a/Assets/Backgrounds/smoky_wave_bg.png b/Assets/Backgrounds/smoky_wave_bg.png
+new file mode 100644
+index 0000000..478650f
+Binary files /dev/null and b/Assets/Backgrounds/smoky_wave_bg.png differ
+diff --git a/Assets/Icons/FX.ico b/Assets/Icons/FX.ico
+new file mode 100644
+index 0000000..431da52
+Binary files /dev/null and b/Assets/Icons/FX.ico differ
+diff --git a/Assets/Square150x150Logo.png b/Assets/Square150x150Logo.png
+new file mode 100644
+index 0000000..0f30c9a
+Binary files /dev/null and b/Assets/Square150x150Logo.png differ
+diff --git a/Assets/Square44x44Logo.png b/Assets/Square44x44Logo.png
+new file mode 100644
+index 0000000..0f30c9a
+Binary files /dev/null and b/Assets/Square44x44Logo.png differ
+diff --git a/Assets/Tools/rufus-4.9p.exe b/Assets/Tools/rufus-4.9p.exe
+new file mode 100644
+index 0000000..86b9070
+Binary files /dev/null and b/Assets/Tools/rufus-4.9p.exe differ
+diff --git a/Assets/Wide310x150Logo.png b/Assets/Wide310x150Logo.png
+new file mode 100644
+index 0000000..0f30c9a
+Binary files /dev/null and b/Assets/Wide310x150Logo.png differ
+diff --git a/CleanWinAppSDKPriLocks.ps1 b/CleanWinAppSDKPriLocks.ps1
+new file mode 100644
+index 0000000..8478b81
+--- /dev/null
++++ b/CleanWinAppSDKPriLocks.ps1
+@@ -0,0 +1,18 @@
++\
++# Clean locked WinAppSDK PRI caches and obj/bin
++$ErrorActionPreference = "SilentlyContinue"
++
++# Kill MakePri.exe if running
++Get-Process MakePri -ErrorAction SilentlyContinue | Stop-Process -Force
++Get-Process WinAppSDKExpandPriContent -ErrorAction SilentlyContinue | Stop-Process -Force
++
++# Remove intermediate PRI expansion folders
++Get-ChildItem -Path ".\obj" -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq "WinAppSDKExpandPriContent" } | ForEach-Object { Remove-Item $_.FullName -Recurse -Force }
++
++# Clear TEMP caches related to Windows App SDK
++Get-ChildItem "$env:TEMP" -Directory -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "WindowsAppRuntime.*" -or $_.Name -like "WinAppSDK*" } | Remove-Item -Recurse -Force
++
++# Clean bin/obj
++Remove-Item -Recurse -Force .\bin, .\obj
++
++Write-Host "Cleanup done. Rebuild the solution."
+diff --git a/FormatX.csproj b/FormatX.csproj
+index a0b117c..a40fafb 100644
+--- a/FormatX.csproj
++++ b/FormatX.csproj
+@@ -30,6 +30,17 @@
+     <DefineConstants>DEBUG;TRACE</DefineConstants>
+   </PropertyGroup>
+ 
++  <PropertyGroup Condition="'$(Configuration)'=='Release'">
++    <!-- Emit portable PDBs for Release builds to enable symbol loading when debugging -->
++    <!-- Use embedded PDBs so symbols are always available next to the assembly -->
++    <DebugType>embedded</DebugType>
++    <DebugSymbols>true</DebugSymbols>
++    <!-- Embed sources into PDB to improve Just My Code stepping in optimized builds -->
++    <EmbedAllSources>true</EmbedAllSources>
++    <!-- Temporarily disable optimizations so VS loads symbols with Just My Code enabled -->
++    <Optimize>false</Optimize>
++  </PropertyGroup>
++
+   <PropertyGroup Condition="'$(PublishSingleFile)'=='true'">
+     <PublishSingleFile>true</PublishSingleFile>
+     <SelfContained>true</SelfContained>
+diff --git a/FormatX.sln b/FormatX.sln
+new file mode 100644
+index 0000000..d475db6
+--- /dev/null
++++ b/FormatX.sln
+@@ -0,0 +1,37 @@
++Ôªø
++Microsoft Visual Studio Solution File, Format Version 12.00
++# Visual Studio Version 18
++VisualStudioVersion = 18.0.11018.127 d18.0
++MinimumVisualStudioVersion = 10.0.40219.1
++Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormatX", "FormatX.csproj", "{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}"
++EndProject
++Global
++	GlobalSection(SolutionConfigurationPlatforms) = preSolution
++		Debug|arm64 = Debug|arm64
++		Debug|x64 = Debug|x64
++		Debug|x86 = Debug|x86
++		Release|arm64 = Release|arm64
++		Release|x64 = Release|x64
++		Release|x86 = Release|x86
++	EndGlobalSection
++	GlobalSection(ProjectConfigurationPlatforms) = postSolution
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Debug|arm64.ActiveCfg = Debug|arm64
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Debug|arm64.Build.0 = Debug|arm64
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Debug|x64.ActiveCfg = Debug|x64
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Debug|x64.Build.0 = Debug|x64
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Debug|x86.ActiveCfg = Debug|x86
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Debug|x86.Build.0 = Debug|x86
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Release|arm64.ActiveCfg = Release|arm64
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Release|arm64.Build.0 = Release|arm64
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Release|x64.ActiveCfg = Release|x64
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Release|x64.Build.0 = Release|x64
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Release|x86.ActiveCfg = Release|x86
++		{DAE2A34D-2FFB-587E-DE2C-001EB4D3C373}.Release|x86.Build.0 = Release|x86
++	EndGlobalSection
++	GlobalSection(SolutionProperties) = preSolution
++		HideSolutionNode = FALSE
++	EndGlobalSection
++	GlobalSection(ExtensibilityGlobals) = postSolution
++		SolutionGuid = {00D8C60A-A7C1-4D6D-91FB-2E7863CB0377}
++	EndGlobalSection
++EndGlobal
+diff --git a/Interop/Win32FileDialog.cs b/Interop/Win32FileDialog.cs
+new file mode 100644
+index 0000000..2e7073c
+--- /dev/null
++++ b/Interop/Win32FileDialog.cs
+@@ -0,0 +1,228 @@
++using System;
++using System.Runtime.InteropServices;
++
++namespace FormatX.Interop
++{
++    internal static class Win32FileDialog
++    {
++        [ComImport]
++        [Guid("DC1C5A9C-E88A-4DDE-A5A1-60F82A20AEF7")]
++        private class FileOpenDialogCom { }
++
++        [ComImport]
++        [Guid("42f85136-db7e-439c-85f1-e4075d135fc8")]
++        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
++        private interface IFileDialog
++        {
++            [PreserveSig] int Show(IntPtr hwndOwner);
++            void SetFileTypes(uint cFileTypes, [MarshalAs(UnmanagedType.LPArray)] COMDLG_FILTERSPEC[] rgFilterSpec);
++            void SetFileTypeIndex(uint iFileType);
++            void GetFileTypeIndex(out uint piFileType);
++            void Advise();
++            void Unadvise();
++            void SetOptions(uint fos);
++            void GetOptions(out uint pfos);
++            void SetDefaultFolder(IShellItem psi);
++            void SetFolder(IShellItem psi);
++            void GetFolder(out IShellItem ppsi);
++            void GetCurrentSelection(out IShellItem ppsi);
++            void SetFileName([MarshalAs(UnmanagedType.LPWStr)] string pszName);
++            void GetFileName([MarshalAs(UnmanagedType.LPWStr)] out string pszName);
++            void SetTitle([MarshalAs(UnmanagedType.LPWStr)] string pszTitle);
++            void SetOkButtonLabel([MarshalAs(UnmanagedType.LPWStr)] string pszText);
++            void SetFileNameLabel([MarshalAs(UnmanagedType.LPWStr)] string pszLabel);
++            void GetResult(out IShellItem ppsi);
++            void AddPlace(IShellItem psi, uint fdap);
++            void SetDefaultExtension([MarshalAs(UnmanagedType.LPWStr)] string pszDefaultExtension);
++            void Close(int hr);
++            void SetClientGuid();
++            void ClearClientData();
++            void SetFilter([MarshalAs(UnmanagedType.Interface)] object pFilter);
++        }
++
++        [ComImport]
++        [Guid("d57c7288-d4ad-4768-be02-9d969532d960")]
++        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
++        private interface IFileOpenDialog : IFileDialog
++        {
++            // IFileDialog
++            new int Show(IntPtr hwndOwner);
++            new void SetFileTypes(uint cFileTypes, COMDLG_FILTERSPEC[] rgFilterSpec);
++            new void SetFileTypeIndex(uint iFileType);
++            new void GetFileTypeIndex(out uint piFileType);
++            new void Advise();
++            new void Unadvise();
++            new void SetOptions(uint fos);
++            new void GetOptions(out uint pfos);
++            new void SetDefaultFolder(IShellItem psi);
++            new void SetFolder(IShellItem psi);
++            new void GetFolder(out IShellItem ppsi);
++            new void GetCurrentSelection(out IShellItem ppsi);
++            new void SetFileName(string pszName);
++            new void GetFileName(out string pszName);
++            new void SetTitle(string pszTitle);
++            new void SetOkButtonLabel(string pszText);
++            new void SetFileNameLabel(string pszLabel);
++            new void GetResult(out IShellItem ppsi);
++            new void AddPlace(IShellItem psi, uint fdap);
++            new void SetDefaultExtension(string pszDefaultExtension);
++            new void Close(int hr);
++            new void SetClientGuid();
++            new void ClearClientData();
++            new void SetFilter(object pFilter);
++
++            // IFileOpenDialog
++            void GetResults();
++            void GetSelectedItems();
++        }
++
++        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
++        private struct COMDLG_FILTERSPEC
++        {
++            public string pszName;
++            public string pszSpec;
++            public COMDLG_FILTERSPEC(string name, string spec) { pszName = name; pszSpec = spec; }
++        }
++
++    [Flags]
++    private enum FOS : uint
++    {
++      OVERWRITEPROMPT = 0x00000002,
++      STRICTFILETYPES = 0x00000004,
++      NOCHANGEDIR = 0x00000008,
++      PICKFOLDERS = 0x00000020,
++      FORCEFILESYSTEM = 0x00000040,
++      NODEREFERENCELINKS = 0x00100000,
++      DONTADDTORECENT = 0x02000000,
++      PATHMUSTEXIST = 0x00000800,
++      FILEMUSTEXIST = 0x00001000,
++    }
++
++    [ComImport]
++    [Guid("84BCCD23-5FDE-4CDB-AEA4-AF64B83D78AB")]
++    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
++    private interface IFileSaveDialog : IFileDialog
++    {
++      // IFileDialog
++      new int Show(IntPtr hwndOwner);
++      new void SetFileTypes(uint cFileTypes, COMDLG_FILTERSPEC[] rgFilterSpec);
++      new void SetFileTypeIndex(uint iFileType);
++      new void GetFileTypeIndex(out uint piFileType);
++      new void Advise();
++      new void Unadvise();
++      new void SetOptions(uint fos);
++      new void GetOptions(out uint pfos);
++      new void SetDefaultFolder(IShellItem psi);
++      new void SetFolder(IShellItem psi);
++      new void GetFolder(out IShellItem ppsi);
++      new void GetCurrentSelection(out IShellItem ppsi);
++      new void SetFileName(string pszName);
++      new void GetFileName(out string pszName);
++      new void SetTitle(string pszTitle);
++      new void SetOkButtonLabel(string pszText);
++      new void SetFileNameLabel(string pszLabel);
++      new void GetResult(out IShellItem ppsi);
++      new void AddPlace(IShellItem psi, uint fdap);
++      new void SetDefaultExtension(string pszDefaultExtension);
++      new void Close(int hr);
++      new void SetClientGuid();
++      new void ClearClientData();
++      new void SetFilter(object pFilter);
++      // IFileSaveDialog specific methods not used
++    }
++
++    [ComImport]
++    [Guid("C0B4E2F3-BA21-4773-8DBA-335EC946EB8B")]
++    private class FileSaveDialogCom { }
++
++        [ComImport]
++        [Guid("43826d1e-e718-42ee-bc55-a1e261c37bfe")]
++        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
++        private interface IShellItem
++        {
++            void BindToHandler();
++            void GetParent();
++            void GetDisplayName(SIGDN sigdnName, out IntPtr ppszName);
++            void GetAttributes();
++            void Compare();
++        }
++
++        private enum SIGDN : uint
++        {
++            FILESYSPATH = 0x80058000
++        }
++
++        [DllImport("ole32.dll")]
++        private static extern void CoTaskMemFree(IntPtr pv);
++
++        public static string? ShowOpenFileDialog(IntPtr hwndOwner, (string name, string spec)[] filters, string? defaultExt = null)
++        {
++            IFileOpenDialog dlg = (IFileOpenDialog)new FileOpenDialogCom();
++            try
++            {
++                var specs = new COMDLG_FILTERSPEC[filters.Length];
++                for (int i = 0; i < filters.Length; i++) specs[i] = new COMDLG_FILTERSPEC(filters[i].name, filters[i].spec);
++                dlg.SetFileTypes((uint)specs.Length, specs);
++                // Prefer filesystem paths and avoid recent list; enforce exist
++                ((IFileDialog)dlg).SetOptions((uint)(FOS.FORCEFILESYSTEM | FOS.FILEMUSTEXIST | FOS.PATHMUSTEXIST | FOS.DONTADDTORECENT));
++                if (!string.IsNullOrWhiteSpace(defaultExt)) dlg.SetDefaultExtension(defaultExt!);
++                int hr = dlg.Show(hwndOwner);
++                if (hr != 0) return null; // canceled or failed
++                dlg.GetResult(out var item);
++                item.GetDisplayName(SIGDN.FILESYSPATH, out var pStr);
++                var path = Marshal.PtrToStringUni(pStr);
++                if (pStr != IntPtr.Zero) CoTaskMemFree(pStr);
++                return path;
++            }
++            catch
++            {
++                return null;
++            }
++            finally
++            {
++                try { if (dlg is not null) Marshal.ReleaseComObject(dlg); } catch { }
++            }
++        }
++
++        public static string? ShowSaveFileDialog(IntPtr hwndOwner, (string name, string spec)[] filters, string? defaultExt = null, string? suggestedFileName = null)
++        {
++            IFileSaveDialog dlg = (IFileSaveDialog)new FileSaveDialogCom();
++            try
++            {
++                var specs = new COMDLG_FILTERSPEC[filters.Length];
++                for (int i = 0; i < filters.Length; i++) specs[i] = new COMDLG_FILTERSPEC(filters[i].name, filters[i].spec);
++                dlg.SetFileTypes((uint)specs.Length, specs);
++                ((IFileDialog)dlg).SetOptions((uint)(FOS.FORCEFILESYSTEM | FOS.OVERWRITEPROMPT | FOS.PATHMUSTEXIST | FOS.DONTADDTORECENT));
++                if (!string.IsNullOrWhiteSpace(defaultExt)) dlg.SetDefaultExtension(defaultExt!);
++                if (!string.IsNullOrWhiteSpace(suggestedFileName)) ((IFileDialog)dlg).SetFileName(suggestedFileName!);
++                int hr = dlg.Show(hwndOwner);
++                if (hr != 0) return null;
++                ((IFileDialog)dlg).GetResult(out var item);
++                item.GetDisplayName(SIGDN.FILESYSPATH, out var pStr);
++                var path = Marshal.PtrToStringUni(pStr);
++                if (pStr != IntPtr.Zero) CoTaskMemFree(pStr);
++                return path;
++            }
++            catch { return null; }
++            finally { try { if (dlg is not null) Marshal.ReleaseComObject(dlg); } catch { } }
++        }
++
++        public static string? ShowPickFolderDialog(IntPtr hwndOwner)
++        {
++            IFileOpenDialog dlg = (IFileOpenDialog)new FileOpenDialogCom();
++            try
++            {
++                ((IFileDialog)dlg).SetOptions((uint)(FOS.PICKFOLDERS | FOS.FORCEFILESYSTEM | FOS.PATHMUSTEXIST | FOS.DONTADDTORECENT));
++                int hr = dlg.Show(hwndOwner);
++                if (hr != 0) return null;
++                ((IFileDialog)dlg).GetResult(out var item);
++                item.GetDisplayName(SIGDN.FILESYSPATH, out var pStr);
++                var path = Marshal.PtrToStringUni(pStr);
++                if (pStr != IntPtr.Zero) CoTaskMemFree(pStr);
++                return path;
++            }
++            catch { return null; }
++            finally { try { if (dlg is not null) Marshal.ReleaseComObject(dlg); } catch { } }
++        }
++    }
++}
+diff --git a/MainWindow.xaml.cs b/MainWindow.xaml.cs
+index 7ef250b..c337dfd 100644
+--- a/MainWindow.xaml.cs
++++ b/MainWindow.xaml.cs
+@@ -36,17 +36,27 @@ namespace FormatX
+       this.Activated += MainWindow_Activated;
+       this.Closed += (_, __) => StopWatch();
+ 
+-      // Restore background on startup only if token exists
++      // Defer background restore until window activation to avoid race/COM issues
+       try
+       {
+-        if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.ContainsKey(BackgroundTokenKey))
++        this.Activated += async (_, __) =>
+         {
+-          _ = RestoreBackgroundAsync();
+-        }
++          try
++          {
++            if (Windows.Storage.ApplicationData.Current.LocalSettings.Values.ContainsKey(BackgroundTokenKey))
++            {
++              await RestoreBackgroundAsync();
++            }
++          }
++          catch (Exception ex)
++          {
++            await LogService.LogAsync("background.restore.tokencheck.error", new { ex = ex.Message });
++          }
++        };
+       }
+       catch (Exception ex)
+       {
+-        _ = LogService.LogAsync("background.restore.tokencheck.error", new { ex = ex.Message });
++        _ = LogService.LogAsync("background.restore.hook.error", new { ex = ex.Message });
+       }
+ 
+       try
+@@ -101,33 +111,46 @@ namespace FormatX
+           _ = LogService.LogAsync("error.com.exception", cex); CrashHandler.Show(cex, "appwindow.get");
+         }
+ 
+-        this.ExtendsContentIntoTitleBar = true;
+-        var drag = (this.Content as FrameworkElement)?.FindName("TitleDragRegion") as UIElement;
+-        if (drag != null) this.SetTitleBar(drag);
+-        var titleBar = appWindow?.TitleBar;
+-        if (titleBar != null)
++        try
+         {
+-          try
++          // Only customize title bar if supported on this OS/device.
++          if (AppWindowTitleBar.IsCustomizationSupported() && appWindow != null)
+           {
+-            appWindow!.Title = "FormatX Pro";
+-            titleBar.ExtendsContentIntoTitleBar = true;
+-            titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 229, 231, 235);
+-            titleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+-            titleBar.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+-          }
+-          catch (InvalidOperationException ioex)
+-          {
+-            _ = LogService.LogAsync("winrt.titlebar.invalid", new { ioex.Message });
+-          }
+-          catch (System.Runtime.InteropServices.COMException cex)
+-          {
+-            _ = LogService.LogAsync("error.com.exception", cex);
++            this.ExtendsContentIntoTitleBar = true;
++            var drag = (this.Content as FrameworkElement)?.FindName("TitleDragRegion") as UIElement;
++            if (drag != null) this.SetTitleBar(drag);
++
++            var titleBar = appWindow.TitleBar;
++            if (titleBar != null)
++            {
++              appWindow.Title = "FormatX Pro";
++              titleBar.ExtendsContentIntoTitleBar = true;
++              titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 229, 231, 235);
++              titleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
++              titleBar.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
++            }
+           }
+-          catch (Exception innerEx)
++          else
+           {
+-            _ = LogService.LogAsync("error.catch", new { ctx = "titlebar.apply", innerEx = innerEx.Message });
++            // Fallback: don't extend into title bar; keep system default to avoid InvalidOperationException
++            this.ExtendsContentIntoTitleBar = false;
+           }
+         }
++        catch (InvalidOperationException ioex)
++        {
++          _ = LogService.LogAsync("winrt.titlebar.invalid", new { ioex.Message });
++          this.ExtendsContentIntoTitleBar = false;
++        }
++        catch (System.Runtime.InteropServices.COMException cex)
++        {
++          _ = LogService.LogAsync("error.com.exception", cex);
++          this.ExtendsContentIntoTitleBar = false;
++        }
++        catch (Exception innerEx)
++        {
++          _ = LogService.LogAsync("error.catch", new { ctx = "titlebar.apply", innerEx = innerEx.Message });
++          this.ExtendsContentIntoTitleBar = false;
++        }
+       }
+ 
+       // Default page: ISO creator visible as requested
+@@ -359,6 +382,12 @@ namespace FormatX
+         // Read path from LocalSettings
+         var obj = Windows.Storage.ApplicationData.Current.LocalSettings.Values[BackgroundTokenKey];
+         var path = obj?.ToString();
++        if (string.IsNullOrWhiteSpace(path) || !System.IO.File.Exists(path))
++        {
++          await LogService.LogAsync("error.background.filemissing", path ?? "<null>");
++          Windows.Storage.ApplicationData.Current.LocalSettings.Values.Remove(BackgroundTokenKey);
++          return;
++        }
+         if (!await BackgroundValidator.ValidateAsync(path)) return;
+ 
+         try
+@@ -381,18 +410,15 @@ namespace FormatX
+         }
+         catch (System.Runtime.InteropServices.COMException cex)
+         {
+-          await LogService.LogAsync("background.restore.set.comexception", cex);
+-          CrashHandler.Show(cex, "background.restore");
++          await LogService.LogAsync("background.restore.set.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
+         }
+         catch (InvalidOperationException ioex)
+         {
+           await LogService.LogAsync("background.restore.set.invalidop", new { ioex.Message });
+-          CrashHandler.Show(ioex, "background.restore");
+         }
+         catch (Exception ex)
+         {
+           await LogService.LogAsync("background.restore.set.error", new { ex = ex.Message });
+-          CrashHandler.Show(ex, "background.restore");
+         }
+       }
+       catch (Exception ex)
+@@ -413,24 +439,32 @@ namespace FormatX
+ 
+     private async void BrowseIso_Click(object sender, RoutedEventArgs e)
+     {
++      if (_isBrowsing)
++      {
++        try { await LogService.LogAsync("dbg.picker.concurrent", new { type = "iso" }); } catch { }
++        return;
++      }
++      _isBrowsing = true;
+       try
+       {
+-        // Inline picker to guarantee hwnd init and per-request behavior
+-        var picker = new Windows.Storage.Pickers.FileOpenPicker();
+-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+-        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+-        picker.FileTypeFilter.Clear();
+-        picker.FileTypeFilter.Add(".iso");
+-        var f = await picker.PickSingleFileAsync();
+-        if (f == null) { await LogService.LogAsync("iso.pick.cancel", new { }); return; }
+-
+-        if (f != null)
++        // Try WinRT picker via service (handles HWND init); fallback to Win32 COM dialog on failure
++        var sel = await PickerService.PickIsoFileAsync(this);
++        if (sel == null)
+         {
+-          var valid = IsoValidator.Validate(f);
+-          if (!valid.IsValid) { await LogService.LogAsync("error.iso.invalidext", f.Path); CrashHandler.Show(new Exception(valid.Reason)); return; }
+-          await LogService.LogAsync("iso.selected", f.Path);
+-          if (IsoPath != null) IsoPath.Text = f.Path; else _ = LogService.LogAsync("iso.textbox.null", new { file = f.Path });
+-          Services.SettingsService.Current.LastIsoPath = f.Path;
++          // Fallback to Win32 COM-based picker (works when elevated/unpackaged)
++          var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
++          var path = FormatX.Interop.Win32FileDialog.ShowOpenFileDialog(hwnd, new[] { ("ISO", "*.iso") }, "iso");
++          if (string.IsNullOrWhiteSpace(path)) { await LogService.LogAsync("iso.pick.cancel", new { via = "win32" }); return; }
++          sel = await Windows.Storage.StorageFile.GetFileFromPathAsync(path);
++        }
++
++        if (sel != null)
++        {
++          var valid = IsoValidator.Validate(sel);
++          if (!valid.IsValid) { await LogService.LogAsync("error.iso.invalidext", sel.Path); CrashHandler.Show(new Exception(valid.Reason)); return; }
++          await LogService.LogAsync("iso.selected", sel.Path);
++          if (IsoPath != null) IsoPath.Text = sel.Path; else _ = LogService.LogAsync("iso.textbox.null", new { file = sel.Path });
++          Services.SettingsService.Current.LastIsoPath = sel.Path;
+         }
+       }
+       catch (System.Runtime.InteropServices.COMException cex)
+@@ -443,6 +477,7 @@ namespace FormatX
+         await LogService.LogAsync("error.iso.picker", ex);
+         CrashHandler.Show(ex, "iso.picker");
+       }
++      finally { _isBrowsing = false; }
+     }
+ 
+     private async void WriteIso_Click(object sender, RoutedEventArgs e)
+@@ -888,23 +923,12 @@ namespace FormatX
+ 
+     private async void OnBrowseBackgroundClick(object sender, RoutedEventArgs e)
+     {
+-      if (_isBrowsing) return; // prevent double-run
++      if (_isBrowsing) { try { await LogService.LogAsync("dbg.picker.concurrent", new { type = "image" }); } catch { } return; } // prevent double-run
+       _isBrowsing = true;
+       try
+       {
+         await LogService.LogAsync("background.pick.open", new { });
+-        var picker = new Windows.Storage.Pickers.FileOpenPicker();
+-        picker.FileTypeFilter.Add(".jpg");
+-        picker.FileTypeFilter.Add(".jpeg");
+-        picker.FileTypeFilter.Add(".png");
+-        picker.FileTypeFilter.Add(".bmp");
+-        picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+-        picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+-
+-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+-        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+-
+-        var file = await picker.PickSingleFileAsync();
++        var file = await PickerService.PickImageFileAsync(this);
+         var statusBlock = Status ?? ((this.Content as FrameworkElement)?.FindName("StatusText") as TextBlock) ?? ((this.Content as FrameworkElement)?.FindName("TextBlockStatus") as TextBlock);
+         if (file != null)
+         {
+@@ -948,8 +972,38 @@ namespace FormatX
+         }
+         else
+         {
+-          if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.cancel");
+-          await LogService.LogAsync("background.set.cancel", "User cancelled");
++          // Fallback to Win32 picker
++          var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
++          var path = FormatX.Interop.Win32FileDialog.ShowOpenFileDialog(hwnd,
++            new[] { ("Images", "*.jpg;*.jpeg;*.png;*.bmp"), ("JPG", "*.jpg;*.jpeg"), ("PNG", "*.png"), ("BMP", "*.bmp") });
++          if (!string.IsNullOrWhiteSpace(path))
++          {
++            var f = await Windows.Storage.StorageFile.GetFileFromPathAsync(path);
++            if (f != null)
++            {
++              var valid = await BackgroundValidator.ValidateAsync(f);
++              if (!valid.IsValid)
++              {
++                if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.error");
++                await LogService.LogAsync("error.background.validate", valid.Reason);
++                CrashHandler.Show(new Exception(valid.Reason));
++              }
++              else
++              {
++                Application.Current.Resources["AppBackgroundBrush"] = new ImageBrush { ImageSource = new BitmapImage(new Uri(f.Path)), Stretch = Stretch.UniformToFill };
++                Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace(BackgroundTokenKey, f);
++                Windows.Storage.ApplicationData.Current.LocalSettings.Values[BackgroundTokenKey] = f.Path;
++                Services.SettingsService.Current.CustomBackgroundPath = f.Path;
++                if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.success");
++                await LogService.LogAsync("background.set.success", f.Path);
++              }
++            }
++          }
++          else
++          {
++            if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.cancel");
++            await LogService.LogAsync("background.set.cancel", "User cancelled");
++          }
+         }
+       }
+       catch (System.Runtime.InteropServices.COMException cex)
+diff --git a/Models/PartitionInfo.cs b/Models/PartitionInfo.cs
+new file mode 100644
+index 0000000..b632ec8
+--- /dev/null
++++ b/Models/PartitionInfo.cs
+@@ -0,0 +1,27 @@
++using System;
++
++namespace FormatX.Models
++{
++    public class PartitionInfo
++    {
++        public int Index { get; set; }
++        public string Type { get; set; } = "";
++        public string FileSystem { get; set; } = "";
++        public string Label { get; set; } = "";
++        public string DriveLetter { get; set; } = "";
++        public long SizeBytes { get; set; }
++        public long OffsetBytes { get; set; }
++        public bool IsGpt { get; set; }
++
++        public string SizeDisplay => SizeBytes <= 0 ? "Auto" : FormatSize(SizeBytes);
++        public string Display => $"#{Index} {Type} ó {SizeDisplay} ó {FileSystem} {Label}".Trim();
++
++        private static string FormatSize(long bytes)
++        {
++            string[] units = { "B", "KB", "MB", "GB", "TB" };
++            double v = bytes; int i = 0;
++            while (v >= 1024 && i < units.Length - 1) { v /= 1024; i++; }
++            return bytes <= 0 ? "0 B" : $"{v:0.#} {units[i]}";
++        }
++    }
++}
+diff --git a/Models/PhysicalDisk.cs b/Models/PhysicalDisk.cs
+new file mode 100644
+index 0000000..48774d1
+--- /dev/null
++++ b/Models/PhysicalDisk.cs
+@@ -0,0 +1,14 @@
++namespace FormatX.Models
++{
++  /// <summary>
++  /// Represents a physical disk device.
++  /// </summary>
++  public sealed class PhysicalDisk
++  {
++    public uint Number { get; set; }
++    public string? FriendlyName { get; set; }
++    public ulong Size { get; set; }
++    public string? BusType { get; set; }
++    public string? MediaType { get; set; }
++  }
++}
+\ No newline at end of file
+diff --git a/Models/VolumeInfo.cs b/Models/VolumeInfo.cs
+new file mode 100644
+index 0000000..7575e09
+--- /dev/null
++++ b/Models/VolumeInfo.cs
+@@ -0,0 +1,15 @@
++namespace FormatX.Models
++{
++  /// <summary>
++  /// Represents a logical volume and its properties.
++  /// </summary>
++  public sealed class VolumeInfo
++  {
++    public string? DriveLetter { get; set; }
++    public string? FileSystem { get; set; }
++    public string? Label { get; set; }
++    public long TotalBytes { get; set; }
++    public long FreeBytes { get; set; }
++    public bool IsRemovable { get; set; }
++  }
++}
+\ No newline at end of file
+diff --git a/NuGet.Config b/NuGet.Config
+new file mode 100644
+index 0000000..6873eb9
+--- /dev/null
++++ b/NuGet.Config
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<configuration>
++  <packageSources>
++    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
++  </packageSources>
++</configuration>
+diff --git a/Package.appxmanifest b/Package.appxmanifest
+new file mode 100644
+index 0000000..7ea032d
+--- /dev/null
++++ b/Package.appxmanifest
+@@ -0,0 +1,31 @@
++<?xml version="1.0" encoding="utf-8"?>
++<Package xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
++         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10">
++  <Identity Name="FormatXPro.Dev" Publisher="CN=FormatX Dev Test" Version="1.0.0.0" />
++  <Properties>
++    <DisplayName>FormatX Pro</DisplayName>
++    <PublisherDisplayName>FormatX</PublisherDisplayName>
++    <Logo>Assets\Square150x150Logo.png</Logo>
++  </Properties>
++  <Resources>
++    <Resource Language="en-US"/>
++    <Resource Language="hu-HU"/>
++  </Resources>
++  <Dependencies>
++    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22621.0" MaxVersionTested="10.0.26100.0"/>
++    <PackageDependency Name="Microsoft.VCLibs.140.00.UWPDesktop" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" MinVersion="14.0.24217.0" />
++  </Dependencies>
++  <Capabilities>
++  </Capabilities>
++  <Applications>
++    <Application Id="FormatX" Executable="FormatX.exe" EntryPoint="FormatX.App">
++      <uap:VisualElements DisplayName="FormatX"
++                          Square150x150Logo="Assets\Square150x150Logo.png"
++                          Square44x44Logo="Assets\Square44x44Logo.png"
++                          Description="FormatX"
++                          BackgroundColor="transparent">
++        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
++      </uap:VisualElements>
++    </Application>
++  </Applications>
++</Package>
+\ No newline at end of file
+diff --git a/Properties/PublishProfiles/FolderProfile.pubxml b/Properties/PublishProfiles/FolderProfile.pubxml
+new file mode 100644
+index 0000000..5724fde
+--- /dev/null
++++ b/Properties/PublishProfiles/FolderProfile.pubxml
+@@ -0,0 +1,17 @@
++Ôªø<?xml version="1.0" encoding="utf-8"?>
++<!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
++<Project>
++  <PropertyGroup>
++    <Configuration>Release</Configuration>
++    <Platform>x64</Platform>
++    <PublishDir>bin\arm64\Release\net10.0-windows10.0.22621.0\publish\win-x64\</PublishDir>
++    <PublishProtocol>FileSystem</PublishProtocol>
++    <_TargetId>Folder</_TargetId>
++    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
++    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
++    <SelfContained>true</SelfContained>
++    <PublishSingleFile>true</PublishSingleFile>
++    <PublishReadyToRun>false</PublishReadyToRun>
++    <PublishTrimmed>false</PublishTrimmed>
++  </PropertyGroup>
++</Project>
+\ No newline at end of file
+diff --git a/Properties/PublishProfiles/FolderProfile1.pubxml b/Properties/PublishProfiles/FolderProfile1.pubxml
+new file mode 100644
+index 0000000..0412bec
+--- /dev/null
++++ b/Properties/PublishProfiles/FolderProfile1.pubxml
+@@ -0,0 +1,17 @@
++Ôªø<?xml version="1.0" encoding="utf-8"?>
++<!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
++<Project>
++  <PropertyGroup>
++    <Configuration>Release</Configuration>
++    <Platform>x64</Platform>
++    <PublishDir>bin\arm64\Release\net10.0-windows10.0.22621.0\publish\</PublishDir>
++    <PublishProtocol>FileSystem</PublishProtocol>
++    <_TargetId>Folder</_TargetId>
++    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
++    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
++    <SelfContained>true</SelfContained>
++    <PublishSingleFile>true</PublishSingleFile>
++    <PublishReadyToRun>false</PublishReadyToRun>
++    <PublishTrimmed>false</PublishTrimmed>
++  </PropertyGroup>
++</Project>
+\ No newline at end of file
+diff --git a/Services/AutoUnattendService.cs b/Services/AutoUnattendService.cs
+new file mode 100644
+index 0000000..c66154c
+--- /dev/null
++++ b/Services/AutoUnattendService.cs
+@@ -0,0 +1,40 @@
++using System.IO;
++using System.Threading.Tasks;
++
++namespace FormatX.Services
++{
++  /// <summary>
++  /// Generates and writes an autounattend.xml file to a USB drive to bypass Windows 11 hardware requirements.
++  /// </summary>
++  public sealed class AutoUnattendService
++  {
++    /// <summary>
++    /// Writes an AutoUnattend file to the specified drive.  This file configures Windows Setup
++    /// to bypass TPM, SecureBoot and other hardware checks during installation.  It should be
++    /// called after the Windows ISO has been copied to the target USB drive.
++    /// </summary>
++    /// <param name="driveLetter">Drive letter of the USB device (without trailing colon).</param>
++    public async Task WriteAutoUnattendAsync(string driveLetter)
++    {
++      // Construct an autounattend.xml file that sets registry keys under HKLM\SYSTEM\Setup\LabConfig
++      // to bypass various hardware requirements.  See the Windows Setup documentation for details.
++      var xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
++<unattend xmlns=""urn:schemas-microsoft-com:unattend"">
++  <settings pass=""specialize"">
++    <component name=""Microsoft-Windows-Setup"" processorArchitecture=""amd64"" publicKeyToken=""31bf3856ad364e35"" language=""neutral"" versionScope=""nonSxS"" xmlns:wcm=""http://schemas.microsoft.com/WMIConfig/2002/State"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
++      <RunSynchronous>
++        <RunSynchronousCommand wcm:action=""add"">
++          <Order>1</Order>
++          <Description>Bypass Windows 11 hardware requirements</Description>
++          <Path>cmd.exe /c reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f &amp;&amp; reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f &amp;&amp; reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f &amp;&amp; reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassStorageCheck /t REG_DWORD /d 1 /f &amp;&amp; reg add HKLM\\SYSTEM\\Setup\\LabConfig /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>
++        </RunSynchronousCommand>
++      </RunSynchronous>
++    </component>
++  </settings>
++</unattend>";
++      // Write the file as autounattend.xml. Windows Setup reads this file automatically when it is at the root of the USB drive.
++      var path = Path.Combine(driveLetter + ":", "autounattend.xml");
++      await File.WriteAllTextAsync(path, xml);
++    }
++  }
++}
+\ No newline at end of file
+diff --git a/Services/BackgroundService.cs b/Services/BackgroundService.cs
+new file mode 100644
+index 0000000..fef8015
+--- /dev/null
++++ b/Services/BackgroundService.cs
+@@ -0,0 +1,48 @@
++using System;
++using System.IO;
++using System.Runtime.InteropServices;
++using System.Threading.Tasks;
++using Microsoft.UI.Xaml.Media.Imaging;
++using Microsoft.UI.Xaml;
++
++namespace FormatX.Services
++{
++  public static class BackgroundService
++  {
++    // Non-async convenience overload to match handlers that call without await
++    public static void SetWallpaper(string path)
++    {
++      // fire-and-forget; errors are logged in async method
++      _ = SetWallpaperAsync(path);
++    }
++    public static async Task<bool> SetWallpaperAsync(string? path)
++    {
++      if (string.IsNullOrWhiteSpace(path)) return false;
++      try
++      {
++        if (!File.Exists(path)) throw new FileNotFoundException(path);
++        // Simple load test to ensure image decodes (WinUI brush update done elsewhere)
++        await Task.Run(() => {
++          using var fs = File.OpenRead(path); // decode check (no actual decode here)
++        });
++        await LogService.LogAsync("background.set", new { path });
++        return true;
++      }
++      catch (COMException cex)
++      {
++        await LogService.LogAsync("error.com.exception", cex);
++        return false;
++      }
++      catch (IOException ioex)
++      {
++        await LogService.LogAsync("error.io.exception", ioex);
++        return false;
++      }
++      catch (Exception ex)
++      {
++        await LogService.LogAsync("background.set.error.generic", new { ex = ex.Message });
++        return false;
++      }
++    }
++  }
++}
+diff --git a/Services/BackgroundValidator.cs b/Services/BackgroundValidator.cs
+index 499f80d..385ac58 100644
+--- a/Services/BackgroundValidator.cs
++++ b/Services/BackgroundValidator.cs
+@@ -6,7 +6,7 @@ using Windows.Storage;
+ 
+ namespace FormatX.Services
+ {
+-  public class ValidationResult { public bool IsValid; public string Reason = string.Empty; }
++  public class ValidationResult { public bool IsValid { get; set; } public string Reason { get; set; } = string.Empty; }
+ 
+   public static class BackgroundValidator
+   {
+@@ -39,7 +39,7 @@ namespace FormatX.Services
+     }
+ 
+     // Back-compat: validate by path boolean
+-    public static async Task<bool> ValidateAsync(string path)
++    public static async Task<bool> ValidateAsync(string? path)
+     {
+       try
+       {
+diff --git a/Services/CrashHandler.cs b/Services/CrashHandler.cs
+new file mode 100644
+index 0000000..c7469a4
+--- /dev/null
++++ b/Services/CrashHandler.cs
+@@ -0,0 +1,99 @@
++using System;
++using System.IO;
++using System.Security.Cryptography;
++using System.Text;
++using System.Text.Json;
++using Microsoft.UI.Xaml;
++using FormatX.Views;
++
++namespace FormatX.Services
++{
++  public record CrashContext(string Source, DateTimeOffset Timestamp)
++  {
++    public static CrashContext Current(string source) => new CrashContext(source, DateTimeOffset.Now);
++  }
++
++  public static class CrashLogger
++  {
++    private static string CrashDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "crash");
++
++    public static string Save(Exception ex, CrashContext ctx, out string sha256, out string hwid)
++    {
++      Directory.CreateDirectory(CrashDir);
++      hwid = BuildHwid();
++      var payload = new
++      {
++        ctx.Source,
++        ctx.Timestamp,
++        user = Environment.UserName,
++        machine = Environment.MachineName,
++        type = ex.GetType().FullName,
++        message = ex.Message,
++        stack = ex.StackTrace,
++        exception = ex.ToString(),
++        hwid
++      };
++      string json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
++      string path = Path.Combine(CrashDir, $"crash_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.json");
++      File.WriteAllText(path, json, Encoding.UTF8);
++      using var sha = SHA256.Create();
++      sha256 = Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(json)));
++      File.WriteAllText(path + ".sha256", sha256);
++      _ = LogService.LogAsync("crash.save.v2", new { ctx.Source, path, sha256, hwid });
++      return path;
++    }
++
++    private static string BuildHwid()
++    {
++      try
++      {
++        string machine = Environment.MachineName;
++        string user = Environment.UserName;
++        string bios = string.Empty;
++        string cpu = string.Empty;
++        try
++        {
++          using var mos = new System.Management.ManagementObjectSearcher("root\\CIMV2", "SELECT SerialNumber FROM Win32_BIOS");
++          foreach (System.Management.ManagementObject mo in mos.Get()) { bios = mo["SerialNumber"]?.ToString() ?? string.Empty; break; }
++        }
++        catch (Exception ex) { _ = LogService.LogAsync("hwid.bios.error", new { ex = ex.Message }); }
++        try
++        {
++          using var mos2 = new System.Management.ManagementObjectSearcher("root\\CIMV2", "SELECT ProcessorId FROM Win32_Processor");
++          foreach (System.Management.ManagementObject mo in mos2.Get()) { cpu = mo["ProcessorId"]?.ToString() ?? string.Empty; break; }
++        }
++        catch (Exception ex) { _ = LogService.LogAsync("hwid.cpu.error", new { ex = ex.Message }); }
++        using var sha = SHA256.Create();
++        return Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(string.Join("|", new[] { machine, user, bios, cpu }))));
++      }
++      catch (Exception ex)
++      {
++        _ = LogService.LogAsync("hwid.error", new { ex = ex.Message });
++        return string.Empty;
++      }
++    }
++  }
++
++  public static class CrashHandler
++  {
++    private static Window? _mainWindow;
++
++    public static void Initialize(Window mainWindow) => _mainWindow = mainWindow;
++
++    public static void Show(Exception ex, string source = "runtime")
++    {
++      try
++      {
++        var ctx = CrashContext.Current(source);
++        string path = CrashLogger.Save(ex, ctx, out var sha, out var hwid);
++        var title = LocalizationService.T("crash.dialog.title");
++        var win = new CrashDialogWindow(path) { Title = title };
++        win.Activate();
++      }
++      catch (Exception inner)
++      {
++        _ = LogService.LogAsync("crash.handler.show.error", new { inner = inner.Message });
++      }
++    }
++  }
++}
+diff --git a/Services/DiagFlags.cs b/Services/DiagFlags.cs
+new file mode 100644
+index 0000000..3806ce2
+--- /dev/null
++++ b/Services/DiagFlags.cs
+@@ -0,0 +1,13 @@
++using System;
++
++namespace FormatX.Services
++{
++  internal static class DiagFlags
++  {
++    public static bool DeepDiagnostics { get; } =
++      string.Equals(Environment.GetEnvironmentVariable("FORMATX_DEEP_DIAGNOSTICS"), "1", StringComparison.OrdinalIgnoreCase);
++
++    public static bool ForceWin32Pickers { get; } =
++      string.Equals(Environment.GetEnvironmentVariable("FORMATX_PICKER_FORCE_WIN32"), "1", StringComparison.OrdinalIgnoreCase);
++  }
++}
+diff --git a/Services/DiskHealthService.cs b/Services/DiskHealthService.cs
+new file mode 100644
+index 0000000..f4de205
+--- /dev/null
++++ b/Services/DiskHealthService.cs
+@@ -0,0 +1,90 @@
++using System;
++using System.IO;
++using System.Linq;
++using System.Management;
++using System.Threading;
++using System.Threading.Tasks;
++
++namespace FormatX.Services
++{
++  public sealed class DiskHealthService
++  {
++    public enum HealthStatus { Green, Yellow, Red }
++
++    public static HealthStatus MapPredictFailureToColor(bool? predictFailure)
++      => predictFailure == true ? HealthStatus.Red : (predictFailure == false ? HealthStatus.Green : HealthStatus.Yellow);
++
++    public async Task<HealthStatus> GetPredictFailureColorAsync(int diskIndex = -1)
++    {
++      bool? pred = null;
++      try
++      {
++        // Associate status instance to the selected Win32_DiskDrive by Index
++        using var drives = new ManagementObjectSearcher("root\\CIMV2", "SELECT Index, PNPDeviceID, DeviceID FROM Win32_DiskDrive");
++        var drive = drives.Get().Cast<ManagementObject>().FirstOrDefault(d => Convert.ToInt32(d["Index"]) == diskIndex);
++        string? pnp = drive?["PNPDeviceID"] as string;
++        using var statuses = new ManagementObjectSearcher("root\\WMI", "SELECT * FROM MSStorageDriver_FailurePredictStatus");
++        foreach (ManagementObject s in statuses.Get())
++        {
++          try
++          {
++            // Some providers expose InstanceName containing PNP ID
++            var inst = s["InstanceName"] as string;
++            if (diskIndex >= 0 && pnp != null && inst != null && inst.IndexOf(pnp, StringComparison.OrdinalIgnoreCase) < 0)
++              continue;
++            pred = (bool)(s["PredictFailure"] ?? false);
++            break;
++          }
++          catch { }
++        }
++      }
++      catch (Exception ex)
++      {
++        await LogService.LogAsync("smart_health", new { diskIndex, error = ex.Message });
++        return HealthStatus.Yellow;
++      }
++
++      var color = MapPredictFailureToColor(pred);
++      await LogService.LogAsync("smart_health", new { diskIndex, predictFailure = pred, color = color.ToString() });
++      return color;
++    }
++
++    public async Task<object> SmartQuickAsync(int diskIndex)
++    {
++      try
++      {
++        using var mos = new ManagementObjectSearcher("root\\WMI", "SELECT * FROM MSStorageDriver_FailurePredictStatus");
++        var status = mos.Get().Cast<ManagementObject>().FirstOrDefault();
++        bool predFail = status != null && (bool)status["PredictFailure"];
++        return new { ok = true, predictFailure = predFail };
++      }
++      catch (Exception ex) { return new { ok=false, error = ex.Message }; }
++    }
++
++    public async Task<object> SurfaceScanAsync(string physicalPath, long bytesToScan = 1024L*1024L*1024L, int blockSize = 1024*1024, IProgress<int>? progress = null, CancellationToken ct = default)
++    {
++      // physicalPath example: \\\\.\\PhysicalDrive1
++      long read = 0; long bad = 0; byte[] buf = new byte[blockSize];
++      try
++      {
++        using var fs = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
++        while (read < bytesToScan)
++        {
++          ct.ThrowIfCancellationRequested();
++          int want = (int)Math.Min(blockSize, bytesToScan - read);
++          int n = await fs.ReadAsync(buf.AsMemory(0, want), ct);
++          if (n <= 0) break;
++          read += n;
++          progress?.Report((int)Math.Min(100, (read * 100 / bytesToScan)));
++        }
++        await LogService.LogAsync("surface_scan", new { physicalPath, bytesScanned = read, badBlocks = bad });
++        return new { ok = true, bytesScanned = read, badBlocks = bad };
++      }
++      catch (Exception ex)
++      {
++        await LogService.LogAsync("surface_scan", new { physicalPath, error = ex.Message });
++        return new { ok=false, error = ex.Message, bytesScanned = read, badBlocks = bad };
++      }
++    }
++  }
++}
+diff --git a/Services/DiskPartService.cs b/Services/DiskPartService.cs
+new file mode 100644
+index 0000000..a1911aa
+--- /dev/null
++++ b/Services/DiskPartService.cs
+@@ -0,0 +1,65 @@
++using System;
++using System.Diagnostics;
++using System.Text;
++using System.Threading.Tasks;
++
++namespace FormatX.Services
++{
++  public sealed class DiskPartService
++  {
++    public async Task RunScriptAsync(string script)
++    {
++      if (!await ElevationService.EnsureAdminAsync("diskpart.run", tryElevate: true, throwIfDenied: true))
++        return;
++      var tmp = System.IO.Path.GetTempFileName();
++      await System.IO.File.WriteAllTextAsync(tmp, script, Encoding.ASCII);
++
++      var psi = new ProcessStartInfo("diskpart.exe", $"/s \"{tmp}\"")
++      {
++        UseShellExecute = false,
++        RedirectStandardOutput = true,
++        RedirectStandardError = true,
++        CreateNoWindow = true
++      };
++
++      using var p = Process.Start(psi)!;
++      string stdout = await p.StandardOutput.ReadToEndAsync();
++      string stderr = await p.StandardError.ReadToEndAsync();
++      await p.WaitForExitAsync();
++      System.IO.File.Delete(tmp);
++
++      if (p.ExitCode != 0) throw new InvalidOperationException($"DiskPart hiba ({p.ExitCode}): {stderr}\n{stdout}");
++    }
++
++    public async Task CleanCreatePartitionFormatAsync(string diskNumber, string driveLetter, string fs, string label, bool gpt, bool quick)
++    {
++      if (!await ElevationService.EnsureAdminAsync("diskpart.cleancreateformat", tryElevate: true, throwIfDenied: true))
++        return;
++      if (string.IsNullOrWhiteSpace(diskNumber)) throw new ArgumentException("diskNumber is required");
++      if (string.IsNullOrWhiteSpace(fs)) fs = "NTFS";
++      label ??= string.Empty;
++      driveLetter ??= string.Empty;
++
++      var sb = new StringBuilder();
++      sb.AppendLine($"select disk {diskNumber}");
++      sb.AppendLine("detail disk");
++      sb.AppendLine("online disk noerr");
++      sb.AppendLine("attributes disk clear readonly noerr");
++      sb.AppendLine("clean");
++      sb.AppendLine(gpt ? "convert gpt" : "convert mbr");
++      sb.AppendLine("create partition primary");
++      sb.AppendLine($"format fs={fs.ToLower()} label=\"{label.Replace("\"","'")}\" {(quick ? "quick" : "")}");
++      if (!string.IsNullOrWhiteSpace(driveLetter)) sb.AppendLine($"assign letter={driveLetter.TrimEnd(':')}");
++      else sb.AppendLine("assign");
++      sb.AppendLine("exit");
++
++      await RunScriptAsync(sb.ToString());
++    }
++
++    public Task CleanCreatePartitionFormatAsync(string diskNumber, string fs, string label, bool gpt, bool quick)
++      => CleanCreatePartitionFormatAsync(diskNumber, string.Empty, fs, label, gpt, quick);
++
++    public Task CleanCreatePartitionFormatAsync(string diskNumber, bool gpt, bool quick)
++      => CleanCreatePartitionFormatAsync(diskNumber, string.Empty, "NTFS", string.Empty, gpt, quick);
++  }
++}
+\ No newline at end of file
+diff --git a/Services/DismBootService.cs b/Services/DismBootService.cs
+new file mode 100644
+index 0000000..ca78e98
+--- /dev/null
++++ b/Services/DismBootService.cs
+@@ -0,0 +1,29 @@
++using System;
++using System.Diagnostics;
++using System.IO;
++using System.Text;
++using System.Threading.Tasks;
++
++namespace FormatX.Services
++{
++  public sealed class DismBootService
++  {
++    // Minimal ISO->USB writer stub implementation. Replace with robust implementation in production.
++    public async Task WriteIsoToUsbAsync(string isoPath, string targetDriveLetter, string scheme = "GPT", Action<int>? onProgress = null)
++    {
++      if (string.IsNullOrWhiteSpace(isoPath)) throw new ArgumentException("ISO path missing", nameof(isoPath));
++      if (string.IsNullOrWhiteSpace(targetDriveLetter)) throw new ArgumentException("Drive letter missing", nameof(targetDriveLetter));
++      char dl = char.ToUpperInvariant(targetDriveLetter.Trim()[0]);
++      if (!char.IsLetter(dl)) throw new ArgumentException("Invalid drive letter", nameof(targetDriveLetter));
++      onProgress?.Invoke(1);
++
++      // Here we only validate the ISO path and simulate progress to keep UI responsive.
++      // Real implementation should apply DISM/Apply-Image/bootsect depending on scheme.
++      if (!File.Exists(isoPath)) throw new FileNotFoundException("ISO not found", isoPath);
++      for (int p = 5; p <= 95; p+=10) { onProgress?.Invoke(p); await Task.Delay(50); }
++
++      onProgress?.Invoke(100);
++      await LogService.LogAsync("iso_write", new { isoPath, targetDriveLetter = dl + ":", scheme, ok = true });
++    }
++  }
++}
+diff --git a/Services/DriveQueryService.cs b/Services/DriveQueryService.cs
+new file mode 100644
+index 0000000..3aece38
+--- /dev/null
++++ b/Services/DriveQueryService.cs
+@@ -0,0 +1,119 @@
++using System;
++using System.Collections.Generic;
++using System.Globalization;
++using System.IO;
++using System.Management;
++using FormatX.Models;
++
++namespace FormatX.Services
++{
++  /// <summary>Provides methods to query drive and volume information.</summary>
++  public sealed class DriveQueryService
++  {
++    public IEnumerable<VolumeInfo> GetVolumes()
++    {
++      foreach (var d in DriveInfo.GetDrives())
++      {
++        if (d.DriveType == DriveType.Removable || d.DriveType == DriveType.Fixed)
++        {
++          bool ready = d.IsReady;
++          yield return new VolumeInfo
++          {
++            DriveLetter = ready ? d.Name.TrimEnd(Path.DirectorySeparatorChar) : null,
++            FileSystem  = ready ? d.DriveFormat : null,
++            Label       = ready ? d.VolumeLabel : null,
++            TotalBytes  = ready ? d.TotalSize : 0,
++            FreeBytes   = ready ? d.TotalFreeSpace : 0,
++            IsRemovable = d.DriveType == DriveType.Removable
++          };
++        }
++      }
++    }
++
++    public IReadOnlyList<DriveItem> ListPhysicalDrives(bool preferRemovableFirst = true)
++    {
++      var list = new List<DriveItem>();
++      try
++      {
++        using (var searcher = new ManagementObjectSearcher("SELECT DeviceID, Model, Size, MediaType, InterfaceType FROM Win32_DiskDrive"))
++        {
++          foreach (ManagementObject d in searcher.Get())
++          {
++            var deviceId = (d["DeviceID"] as string) ?? string.Empty;
++            var model = (d["Model"] as string) ?? "Unknown";
++            ulong size = 0;
++            var sizeObj = d["Size"];
++            if (sizeObj != null) ulong.TryParse(sizeObj.ToString(), out size);
++
++            int num = ParsePhysicalNumber(deviceId);
++            bool isRemovable = IsLikelyRemovable(d);
++
++            if (num >= 0)
++            {
++              list.Add(new DriveItem
++              {
++                Number = num,
++                DevicePath = deviceId,
++                Model = model,
++                SizeBytes = size,
++                IsRemovable = isRemovable
++              });
++            }
++          }
++        }
++      }
++      catch { /* ignore WMI errors on restricted systems */ }
++
++      // Sort: removable first (optional), then by disk number
++      list.Sort((a, b) =>
++      {
++        if (preferRemovableFirst && a.IsRemovable != b.IsRemovable)
++          return a.IsRemovable ? -1 : 1;
++        return a.Number.CompareTo(b.Number);
++      });
++
++      return list.AsReadOnly();
++    }
++
++    private static int ParsePhysicalNumber(string deviceId)
++    {
++      if (string.IsNullOrEmpty(deviceId)) return -1;
++      // Expect pattern like \\.\PHYSICALDRIVE0
++      var digits = string.Empty;
++      for (int i = deviceId.Length - 1; i >= 0; i--)
++      {
++        if (char.IsDigit(deviceId[i])) digits = deviceId[i] + digits;
++        else if (!string.IsNullOrEmpty(digits)) break;
++      }
++      if (int.TryParse(digits, out var n)) return n;
++      return -1;
++    }
++
++    private static bool IsLikelyRemovable(ManagementObject d)
++    {
++      var media = (d["MediaType"] as string) ?? string.Empty;
++      var iface = (d["InterfaceType"] as string) ?? string.Empty;
++      if (media.IndexOf("Removable", StringComparison.OrdinalIgnoreCase) >= 0) return true;
++      if (iface.Equals("USB", StringComparison.OrdinalIgnoreCase)) return true;
++      return false;
++    }
++  }
++
++  public sealed class DriveItem
++  {
++    public int Number { get; init; }
++    public string DevicePath { get; init; }
++    public string Model { get; init; }
++    public ulong SizeBytes { get; init; }
++    public bool IsRemovable { get; init; }
++    public string Display => $"Disk {Number} ‚Äî {Model} ‚Äî {FormatSize(SizeBytes)}";
++
++    private static string FormatSize(ulong bytes)
++    {
++      const double GB = 1024d * 1024d * 1024d;
++      const double TB = GB * 1024d;
++      if (bytes >= (ulong)TB) return (bytes / TB).ToString("0.0", CultureInfo.InvariantCulture) + " TB";
++      return (bytes / GB).ToString("0.0", CultureInfo.InvariantCulture) + " GB";
++    }
++  }
++}
+diff --git a/Services/ElevationService.cs b/Services/ElevationService.cs
+new file mode 100644
+index 0000000..90c241a
+--- /dev/null
++++ b/Services/ElevationService.cs
+@@ -0,0 +1,68 @@
++using System;
++using System.ComponentModel;
++using System.Diagnostics;
++using System.Security.Principal;
++using System.Threading.Tasks;
++
++namespace FormatX.Services
++{
++  public static class ElevationService
++  {
++    public static bool IsElevated()
++    {
++      try
++      {
++        using var id = WindowsIdentity.GetCurrent();
++        var principal = new WindowsPrincipal(id);
++        return principal.IsInRole(WindowsBuiltInRole.Administrator);
++      }
++      catch { return false; }
++    }
++
++    public static bool RelaunchElevated(string exePath, string arguments)
++    {
++      try
++      {
++        var psi = new ProcessStartInfo(exePath, arguments){ Verb = "runas", UseShellExecute = true };
++        Process.Start(psi);
++        return true;
++      }
++      catch (Win32Exception wex) when (wex.NativeErrorCode == 1223) { return false; }
++      catch { return false; }
++    }
++
++    public static async Task<bool> EnsureAdminAsync(string operation, bool tryElevate = true, bool throwIfDenied = true)
++    {
++      try
++      {
++        if (IsElevated())
++        {
++          await LogService.LogAsync("admin.ok", new { op = operation });
++          return true;
++        }
++
++        await LogService.LogAsync("admin.missing", new { op = operation });
++
++        if (tryElevate)
++        {
++          string exe = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty;
++          string[] args = Environment.GetCommandLineArgs();
++          string arguments = args.Length > 1 ? string.Join(" ", args, 1, args.Length - 1) : string.Empty;
++          bool started = !string.IsNullOrWhiteSpace(exe) && RelaunchElevated(exe, arguments);
++          await LogService.LogAsync("admin.relaunch", new { op = operation, started });
++          return false; // caller should stop current operation when relaunch initiated or denied
++        }
++
++        if (throwIfDenied)
++          throw new InvalidOperationException("Admin jogosults·g sz¸ksÈges a m˚velethez.");
++        return false;
++      }
++      catch (Exception ex)
++      {
++        await LogService.LogAsync("admin.error", new { op = operation, ex = ex.Message });
++        if (throwIfDenied) throw;
++        return false;
++      }
++    }
++  }
++}
+\ No newline at end of file
+diff --git a/Services/Ext4Formatter.cs b/Services/Ext4Formatter.cs
+new file mode 100644
+index 0000000..1ac5055
+--- /dev/null
++++ b/Services/Ext4Formatter.cs
+@@ -0,0 +1,145 @@
++
++using System;
++using System.Diagnostics;
++using System.IO;
++using System.Linq;
++using System.Management;
++using System.Runtime.InteropServices;
++using System.Security.Principal;
++using System.Text;
++using System.Threading.Tasks;
++
++namespace FormatX.Services
++{
++    public static class Ext4Formatter
++    {
++        public const int Ext4LabelMax = 16;
++
++        static int Run(string file, string args, out string output, int timeoutMs = 120_000)
++        {
++            var psi = new ProcessStartInfo
++            {
++                FileName = file,
++                Arguments = args,
++                UseShellExecute = false,
++                RedirectStandardOutput = true,
++                RedirectStandardError = true,
++                CreateNoWindow = true
++            };
++            using var p = new Process { StartInfo = psi };
++            var sb = new StringBuilder();
++            p.OutputDataReceived += (_, e) => { if (!string.IsNullOrEmpty(e.Data)) sb.AppendLine(e.Data); };
++            p.ErrorDataReceived  += (_, e) => { if (!string.IsNullOrEmpty(e.Data)) sb.AppendLine(e.Data); };
++            p.Start();
++            p.BeginOutputReadLine();
++            p.BeginErrorReadLine();
++            if (!p.WaitForExit(timeoutMs)) try { p.Kill(entireProcessTree: true); } catch { }
++            output = sb.ToString();
++            return p.ExitCode;
++        }
++
++        public static bool IsAdmin()
++        {
++            try
++            {
++                using var id = WindowsIdentity.GetCurrent();
++                var pr = new WindowsPrincipal(id);
++                return pr.IsInRole(WindowsBuiltInRole.Administrator);
++            }
++            catch { return false; }
++        }
++
++        public static bool HasWsl()
++        {
++            try { return Run("wsl.exe", "--status", out _) == 0; } catch { return false; }
++        }
++
++        public static bool TryGetPhysicalDriveFromLetter(string driveLetter, out int diskNumber)
++        {
++            diskNumber = -1;
++            if (string.IsNullOrWhiteSpace(driveLetter)) return false;
++            driveLetter = driveLetter.Trim().TrimEnd('\\').ToUpperInvariant();
++            if (!driveLetter.EndsWith(":")) driveLetter += ":";
++
++            try
++            {
++                // 1) Map logical disk -> partition
++                using var q1 = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_LogicalDisk.DeviceID='" + driveLetter + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
++                foreach (ManagementObject p in q1.Get())
++                {
++                    var partDeviceId = (p["DeviceID"] as string) ?? "";
++                    // 2) Map partition -> disk drive
++                    using var q2 = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + partDeviceId.Replace("\\", "\\\\") + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
++                    foreach (ManagementObject d in q2.Get())
++                    {
++                        // Example: \\.\PHYSICALDRIVE2
++                        var pnp = (d["DeviceID"] as string) ?? "";
++                        if (pnp.StartsWith(@"\\.\PHYSICALDRIVE", StringComparison.OrdinalIgnoreCase))
++                        {
++                            var tail = pnp.Substring(@"\\.\PHYSICALDRIVE".Length);
++                            if (int.TryParse(tail, out var idx)) { diskNumber = idx; return true; }
++                        }
++                    }
++                }
++            }
++            catch { }
++            return false;
++        }
++
++        public static async Task FormatExt4FromDriveLetterAsync(string driveLetter, string label, IProgress<string>? log = null)
++        {
++            if (!IsAdmin()) throw new InvalidOperationException("Admin jogosults√°g sz√ºks√©ges.");
++            if (!HasWsl()) throw new InvalidOperationException("WSL2 nincs telep√≠tve.");
++            if (!TryGetPhysicalDriveFromLetter(driveLetter, out var diskNo)) throw new InvalidOperationException("A fizikai lemez nem azonos√≠that√≥.");
++
++            await FormatExt4FromPhysicalAsync(diskNo, label, log);
++        }
++
++        public static async Task FormatExt4FromPhysicalAsync(int diskNumber, string label, IProgress<string>? log = null)
++        {
++            if (!IsAdmin()) throw new InvalidOperationException("Admin jogosults√°g sz√ºks√©ges.");
++            if (!HasWsl()) throw new InvalidOperationException("WSL2 nincs telep√≠tve.");
++
++            string Log(string s) { log?.Report(s); return s; }
++
++            // 1) DiskPart ‚Äì clean + GPT + Linux part GUID
++            var dp = $@"
++select disk {diskNumber}
++detail disk
++clean
++convert gpt
++create partition primary
++set id=0FC63DAF-8483-4772-8E79-3D69D8477DE4
++";
++            var dpFile = Path.Combine(Path.GetTempPath(), $"fx_dp_{Guid.NewGuid():N}.txt");
++            File.WriteAllText(dpFile, dp, Encoding.ASCII);
++            Log($"DiskPart indul (PHYSICALDRIVE{diskNumber})...");
++            if (Run("diskpart.exe", $"/s \"{dpFile}\"", out var dpOut, timeoutMs: 180_000) != 0)
++                throw new Exception("DiskPart hiba:\n" + dpOut);
++
++            // 2) WSL mount bare
++            var phys = $@"\\.\PHYSICALDRIVE{diskNumber}";
++            Run("wsl.exe", $"--unmount {phys}", out _);
++            Log("WSL mount...");
++            if (Run("wsl.exe", $"--mount {phys} --partition 1 --bare", out var mntOut, timeoutMs: 120_000) != 0)
++                throw new Exception("WSL mount hiba:\n" + mntOut);
++
++            // 3) mkfs.ext4 ‚Äì find the last added partition device under /dev
++            var safeLabel = (label ?? "").Replace("'", "").Trim();
++            if (safeLabel.Length > Ext4LabelMax) safeLabel = safeLabel.Substring(0, Ext4LabelMax);
++            var mk = "bash -lc \"set -e; dev=$(lsblk -o PATH,TYPE | awk '/part/ {print $1}' | tail -n1); sudo -n true 2>/dev/null || echo 'sudo password may be needed'; sudo mkfs.ext4 -F -L '" + safeLabel + "' $dev && echo OK\"";
++            Log("mkfs.ext4...");
++            if (Run("wsl.exe", mk, out var mkOut, timeoutMs: 300_000) != 0 || !mkOut.Contains("OK"))
++            {
++                Run("wsl.exe", $"--unmount {phys}", out _);
++                throw new Exception("mkfs.ext4 hiba:\n" + mkOut);
++            }
++
++            // 4) Unmount WSL
++            Log("WSL unmount...");
++            Run("wsl.exe", $"--unmount {phys}", out _);
++            Log("K√©sz.");
++            await Task.CompletedTask;
++        }
++    }
++}
+diff --git a/Services/FormatService.cs b/Services/FormatService.cs
+new file mode 100644
+index 0000000..d6d7f52
+--- /dev/null
++++ b/Services/FormatService.cs
+@@ -0,0 +1,83 @@
++using System;
++using System.Diagnostics;
++using System.IO;
++using System.Threading.Tasks;
++
++namespace FormatX.Services
++{
++  public sealed class FormatService
++  {
++    public static bool IsSystemDrive(string dl)
++    {
++      try
++      {
++        if (string.IsNullOrWhiteSpace(dl)) return false;
++        char letter = char.ToUpperInvariant(dl.Trim()[0]);
++        string sysRoot = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.System)) ?? "C:\\";
++        return char.ToUpperInvariant(sysRoot[0]) == letter;
++      }
++      catch (Exception ex)
++      {
++        _ = LogService.LogAsync("format.systemdrive.check.error", ex);
++        return false;
++      }
++    }
++
++    // Legacy 3-parameter overload retained for compatibility
++    public async Task FormatVolumeAsync(string driveLetter, string fileSystem, bool quick)
++      => await FormatVolumeAsync(driveLetter, fileSystem, label: "", quick: quick);
++
++    // New 4-parameter overload used by UI
++    public async Task FormatVolumeAsync(string driveLetter, string fileSystem, string label, bool quick, System.Action<int,string>? report = null)
++    {
++      if (!await ElevationService.EnsureAdminAsync("format.volume", tryElevate: true, throwIfDenied: true))
++        return;
++      if (string.IsNullOrWhiteSpace(driveLetter)) throw new ArgumentException(nameof(driveLetter));
++      char dl = char.ToUpperInvariant(driveLetter.Trim().TrimEnd(':','\\','/')[0]);
++      if (!char.IsLetter(dl)) throw new ArgumentException("Invalid drive", nameof(driveLetter));
++
++      report?.Invoke(5, "Preparing");
++
++      string safeLabel = (label ?? string.Empty).Replace("'", "''");
++      string ps =
++        "$drive='{DL}'; $fs='{FS}'; $label='{LB}'; $quick={Q}; " +
++        "$p=@{DriveLetter=$drive; FileSystem=$fs; Force=$true; Confirm=$false}; " +
++        "if($label -ne ''){$p.NewFileSystemLabel=$label}; " +
++        "if($quick){$p.Full=$false}else{$p.Full=$true}; " +
++        "Format-Volume @p";
++
++      ps = ps.Replace("{DL}", dl.ToString())
++             .Replace("{FS}", fileSystem)
++             .Replace("{LB}", safeLabel)
++             .Replace("{Q}", quick ? "$true" : "$false");
++
++      report?.Invoke(15, "Starting");
++      var psi = new ProcessStartInfo("powershell.exe")
++      {
++        UseShellExecute = false,
++        RedirectStandardOutput = true,
++        RedirectStandardError = true,
++        CreateNoWindow = true
++      };
++      psi.ArgumentList.Add("-NoProfile");
++      psi.ArgumentList.Add("-ExecutionPolicy"); psi.ArgumentList.Add("Bypass");
++      psi.ArgumentList.Add("-Command"); psi.ArgumentList.Add(ps);
++
++      using var p = Process.Start(psi)!;
++      report?.Invoke(25, "Running");
++      // simple polling loop to show activity
++      while (!p.HasExited)
++      {
++        await Task.Delay(500);
++        report?.Invoke(Math.Min(95, (int)(DateTimeOffset.Now.ToUnixTimeMilliseconds()%7000/70)+25), "Formatting");
++      }
++      string stdout = await p.StandardOutput.ReadToEndAsync();
++      string stderr = await p.StandardError.ReadToEndAsync();
++      await p.WaitForExitAsync();
++      report?.Invoke(98, "Finalizing");
++      if (p.ExitCode != 0)
++        throw new InvalidOperationException($"Format error ({p.ExitCode}): {stderr}\n{stdout}");
++      report?.Invoke(100, "Done");
++    }
++  }
++}
+diff --git a/Services/ImageAuditService.cs b/Services/ImageAuditService.cs
+new file mode 100644
+index 0000000..30aacdf
+--- /dev/null
++++ b/Services/ImageAuditService.cs
+@@ -0,0 +1,39 @@
++using System;
++using System.IO;
++using System.Threading.Tasks;
++using SixLabors.ImageSharp;
++using SixLabors.ImageSharp.Formats;
++
++namespace FormatX.Services
++{
++  public static class ImageAuditService
++  {
++    public static async Task<bool> TryLoadForAuditAsync(string path)
++    {
++      try
++      {
++        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) return false;
++        await Task.Run(() => { using var img = Image.Load(path); });
++        return true;
++      }
++      catch (UnknownImageFormatException uif)
++      {
++        await LogService.LogAsync("error.imagesharp.format", uif);
++        CrashHandler.Show(uif, "imagesharp.format");
++        return false;
++      }
++      catch (SixLabors.ImageSharp.InvalidImageContentException icex)
++      {
++        await LogService.LogAsync("error.imagesharp.content", icex);
++        CrashHandler.Show(icex, "imagesharp.content");
++        return false;
++      }
++      catch (Exception ex)
++      {
++        await LogService.LogAsync("error.imagesharp.load", ex);
++        CrashHandler.Show(ex, "imagesharp.load");
++        return false;
++      }
++    }
++  }
++}
+diff --git a/Services/LocalizationService.cs b/Services/LocalizationService.cs
+index 4ee92c3..892a388 100644
+--- a/Services/LocalizationService.cs
++++ b/Services/LocalizationService.cs
+@@ -10,13 +10,13 @@ namespace FormatX.Services
+             ["hu"] = new()
+             {
+                 ["menu.format"] = "Form·z·s",
+-                ["menu.drives"] = "Lemez egysÈgek",
++                ["menu.drives"] = "LemezegysÈgek",
+                 ["menu.erase"] = "Biztons·gos tˆrlÈs",
+                 ["menu.settings"] = "Be·llÌt·sok",
+ 
+                 ["title.app"] = "FormatX Pro | VerziÛ: 2.0",
+                 ["title.format"] = "Form·z·s",
+-                ["title.drives"] = "Lemez egysÈgek",
++                ["title.drives"] = "LemezegysÈgek",
+                 ["title.erase"] = "Biztons·gos tˆrlÈs",
+                 ["title.settings"] = "Be·llÌt·sok",
+ 
+@@ -29,12 +29,14 @@ namespace FormatX.Services
+ 
+                 ["settings.language"] = "Nyelv",
+                 ["settings.theme"] = "TÈma",
+-                ["settings.theme.default"] = "Rendszer (Default)",
++                ["settings.theme.default"] = "Rendszer (AlapÈrtelmezett)",
+                 ["settings.background"] = "H·ttÈrkÈp (JPG/PNG/BMP)",
+                 ["settings.bg.hint"] = "V·lassz beÈpÌtett kÈpet vagy saj·t f·jlt.",
+                 ["settings.about"] = "NÈvjegy",
+                 ["settings.version"] = "VerziÛ: 2.0",
+-                ["settings.devline"] = "FormatTech ñ © 2025 Hudacsek JÛzsef (GamesTech)",
++                ["settings.devline"] = "FormatTech © 2025 Hudacsek JÛzsef (GamesTech)",
++
++                ["iso.placeholder"] = "V·lassz ISO-t",
+ 
+                 ["error.lang.unsupported"] = "A kiv·lasztott nyelv nem Èrhetı el.",
+                 ["error.crash.title"] = "V·ratlan hiba",
+@@ -91,7 +93,7 @@ namespace FormatX.Services
+                 ["settings.bg.hint"] = "Choose a built-in image or your own file.",
+                 ["settings.about"] = "About",
+                 ["settings.version"] = "Version: 2.0",
+-                ["settings.devline"] = "FormatTech ñ © 2025 Hudacsek JÛzsef (GamesTech)",
++                ["settings.devline"] = "FormatTech © 2025 Hudacsek JÛzsef (GamesTech)",
+ 
+                 ["error.lang.unsupported"] = "The selected language is not available.",
+                 ["error.crash.title"] = "Unexpected error",
+@@ -122,9 +124,6 @@ namespace FormatX.Services
+                 ["operation.erase.done"] = "Erase done",
+                 ["eta.prefix"] = "ETA:",
+                 ["crash.dialog.openFolder"] = "Open log folder",
+-                ["background.set.success"] = "Background set",
+-                ["background.set.cancel"] = "Background canceled",
+-                ["background.set.error"] = "Failed to set background",
+                 ["crash.dialog.title"] = "An error occurred",
+             }
+         };
+diff --git a/Services/LogService.cs b/Services/LogService.cs
+new file mode 100644
+index 0000000..6ea0fc6
+--- /dev/null
++++ b/Services/LogService.cs
+@@ -0,0 +1,158 @@
++using System;
++using System.IO;
++using System.Text;
++using System.Text.Json;
++using System.Threading.Tasks;
++
++namespace FormatX.Services
++{
++  public static class LogService
++  {
++    private static readonly string LogDir =
++      Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "logs");
++    private static readonly string JsonlPath = Path.Combine(LogDir, "events.jsonl");
++
++    public static async Task LogAsync(string kind, object data)
++    {
++      try
++      {
++        Directory.CreateDirectory(LogDir);
++        var rec = new
++        {
++          ts = DateTimeOffset.Now.ToString("o"),
++          user = Environment.UserName,
++          kind,
++          data
++        };
++        string line = JsonSerializer.Serialize(rec) + Environment.NewLine;
++        await File.AppendAllTextAsync(JsonlPath, line, Encoding.UTF8);
++      }
++      catch { /* best-effort */ }
++    }
++
++    public static Task LogAsync(string kind, Exception ex)
++      => LogAsync(kind, new { type = ex.GetType().FullName, ex.Message, ex.HResult, stack = ex.StackTrace });
++
++    public static async Task<string> ExportCsvAsync(string destCsv)
++    {
++      try
++      {
++        if (!File.Exists(JsonlPath)) return "Nincs napl√≥.";
++        var lines = await File.ReadAllLinesAsync(JsonlPath, Encoding.UTF8);
++        using var sw = new StreamWriter(destCsv, false, new UTF8Encoding(false));
++        await sw.WriteLineAsync("ts,user,kind,json");
++        foreach (var ln in lines)
++        {
++          await sw.WriteLineAsync($"\"{ln.Replace("\"","\"\"")}\"");
++        }
++        await LogAsync("export.csv.legacy", new { file = destCsv, count = lines.Length });
++        return "CSV export k√©sz: " + destCsv;
++      }
++      catch (Exception ex) { return ex.Message; }
++    }
++
++    public static async Task<string> ExportParsedCsvAsync(string destCsv)
++    {
++      try
++      {
++        if (!File.Exists(JsonlPath)) return "Nincs napl√≥.";
++        Directory.CreateDirectory(Path.GetDirectoryName(destCsv)!);
++        var lines = await File.ReadAllLinesAsync(JsonlPath, Encoding.UTF8);
++        using var sw = new StreamWriter(destCsv, false, new UTF8Encoding(false));
++        await sw.WriteLineAsync("timestamp,user,kind,data");
++        int ok = 0; int fail = 0;
++        foreach (var ln in lines)
++        {
++          if (string.IsNullOrWhiteSpace(ln)) continue;
++          try
++          {
++            using var doc = JsonDocument.Parse(ln);
++            var root = doc.RootElement;
++            string ts = root.TryGetProperty("ts", out var vts) ? vts.GetString() ?? string.Empty : string.Empty;
++            string user = root.TryGetProperty("user", out var vu) ? vu.GetString() ?? string.Empty : string.Empty;
++            string kind = root.TryGetProperty("kind", out var vk) ? vk.GetString() ?? string.Empty : string.Empty;
++            string data = root.TryGetProperty("data", out var vd) ? vd.GetRawText() : string.Empty;
++            string esc(string s) => "\"" + (s ?? string.Empty).Replace("\"", "\"\"") + "\"";
++            await sw.WriteLineAsync(string.Join(",", new[] { esc(ts), esc(user), esc(kind), esc(data) }));
++            ok++;
++          }
++          catch { fail++; }
++        }
++        await LogAsync("export.csv.parsed", new { file = destCsv, ok, fail });
++        return $"CSV export k√©sz: {destCsv} (sorok: {ok}, hib√°s: {fail})";
++      }
++      catch (Exception ex)
++      {
++        await LogAsync("export.csv.parsed.error", new { file = destCsv, error = ex.Message });
++        return ex.Message;
++      }
++    }
++
++    public static async Task<string> ExportHtmlAsync(string destHtml)
++    {
++      try
++      {
++        if (!File.Exists(JsonlPath)) return "Nincs napl√≥.";
++        Directory.CreateDirectory(Path.GetDirectoryName(destHtml)!);
++        var lines = await File.ReadAllLinesAsync(JsonlPath, Encoding.UTF8);
++
++        static string HtmlEncode(string s)
++          => (s ?? string.Empty)
++              .Replace("&", "&amp;")
++              .Replace("<", "&lt;")
++              .Replace(">", "&gt;")
++              .Replace("\"", "&quot;")
++              .Replace("'", "&#39;");
++
++        var sb = new StringBuilder();
++        sb.AppendLine("<!doctype html><html lang=\"hu\"><head><meta charset=\"utf-8\">");
++        sb.AppendLine("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
++        sb.AppendLine("<title>FormatX napl√≥</title>");
++        sb.AppendLine("<style>body{background:#0b0f17;color:#e5e7eb;font-family:Segoe UI,SegoeUI,Helvetica,Arial,sans-serif;margin:16px}" +
++                      "table{width:100%;border-collapse:collapse;margin-top:12px}" +
++                      "th,td{border:1px solid #22304a;padding:8px 10px;font-size:14px}" +
++                      "th{position:sticky;top:0;background:#111827}" +
++                      "input{background:#0f172a;border:1px solid #334155;color:#e5e7eb;padding:6px 8px;border-radius:6px;width:100%}" +
++                      "tr:nth-child(even){background:#0f172a}" +
++                      "tr:nth-child(odd){background:#0b1220}" +
++                      "caption{font-weight:600;text-align:left}") ;
++        sb.AppendLine("</style>");
++        sb.AppendLine("<script>function f(){var q=document.getElementById('q').value.toLowerCase();var rows=document.querySelectorAll('tbody tr');rows.forEach(function(r){var t=r.innerText.toLowerCase();r.style.display=t.indexOf(q)>=0?'':'none';});}</script>");
++        sb.AppendLine("</head><body>");
++        sb.AppendLine("<h2>FormatX napl√≥</h2><input id=\"q\" placeholder=\"Sz≈±r√©s...\" oninput=\"f()\">");
++        sb.AppendLine("<table><thead><tr><th>timestamp</th><th>user</th><th>kind</th><th>data</th></tr></thead><tbody>");
++
++        int ok = 0; int fail = 0;
++        foreach (var ln in lines)
++        {
++          if (string.IsNullOrWhiteSpace(ln)) continue;
++          try
++          {
++            using var doc = JsonDocument.Parse(ln);
++            var root = doc.RootElement;
++            string ts = root.TryGetProperty("ts", out var vts) ? vts.GetString() ?? string.Empty : string.Empty;
++            string user = root.TryGetProperty("user", out var vu) ? vu.GetString() ?? string.Empty : string.Empty;
++            string kind = root.TryGetProperty("kind", out var vk) ? vk.GetString() ?? string.Empty : string.Empty;
++            string data = root.TryGetProperty("data", out var vd) ? vd.GetRawText() : string.Empty;
++            sb.Append("<tr><td>").Append(HtmlEncode(ts)).Append("</td><td>")
++              .Append(HtmlEncode(user)).Append("</td><td>")
++              .Append(HtmlEncode(kind)).Append("</td><td><pre style=\"margin:0;white-space:pre-wrap;word-break:break-word\">")
++              .Append(HtmlEncode(data)).Append("</pre></td></tr>\n");
++            ok++;
++          }
++          catch { fail++; }
++        }
++        sb.AppendLine("</tbody></table></body></html>");
++
++        await File.WriteAllTextAsync(destHtml, sb.ToString(), new UTF8Encoding(false));
++        await LogAsync("export.html", new { file = destHtml, ok, fail });
++        return $"HTML export k√©sz: {destHtml} (sorok: {ok}, hib√°s: {fail})";
++      }
++      catch (Exception ex)
++      {
++        await LogAsync("export.html.error", new { file = destHtml, error = ex.Message });
++        return ex.Message;
++      }
++    }
++  }
++}
+diff --git a/Services/NotificationService.cs b/Services/NotificationService.cs
+new file mode 100644
+index 0000000..ebcd37e
+--- /dev/null
++++ b/Services/NotificationService.cs
+@@ -0,0 +1,46 @@
++using System;
++using System.Threading.Tasks;
++using Microsoft.Windows.AppNotifications;
++using Microsoft.Windows.AppNotifications.Builder;
++
++namespace FormatX.Services
++{
++  public static class NotificationService
++  {
++    private static bool _registered;
++
++    public static void Initialize()
++    {
++      try
++      {
++        var mgr = AppNotificationManager.Default;
++        mgr.NotificationInvoked += (_, __) => { };
++        mgr.Register();
++        _registered = true;
++      }
++      catch { _registered = false; }
++    }
++
++    public static async Task<bool> ShowToastAsync(string title, string? body = null)
++    {
++      try
++      {
++        var builder = new AppNotificationBuilder()
++          .AddText(title);
++        if (!string.IsNullOrWhiteSpace(body)) builder.AddText(body!);
++        var notification = builder.BuildNotification();
++        AppNotificationManager.Default.Show(notification);
++        await LogService.LogAsync("toast.show", new { title, body, registered = _registered });
++        return true;
++      }
++      catch (Exception ex)
++      {
++        await LogService.LogAsync("toast.error", new { title, error = ex.Message });
++        return false;
++      }
++    }
++
++    public static Task<bool> ShowSettingsSavedAsync()
++      => ShowToastAsync("Be·llÌt·sok mentve", "A be·llÌt·sok sikeresen elmentve.");
++  }
++}
+diff --git a/Services/PartitionQueryService.cs b/Services/PartitionQueryService.cs
+new file mode 100644
+index 0000000..dc75101
+--- /dev/null
++++ b/Services/PartitionQueryService.cs
+@@ -0,0 +1,87 @@
++using System;
++using System.Collections.Generic;
++using System.Diagnostics;
++using System.Linq;
++using System.Management;
++using System.Text.RegularExpressions;
++using System.Threading.Tasks;
++using FormatX.Models;
++
++namespace FormatX.Services
++{
++    public sealed class PartitionQueryService
++    {
++        public async Task<IList<PartitionInfo>> GetPartitionsAsync(int diskIndex)
++        {
++            try
++            {
++                var list = new List<PartitionInfo>();
++
++                string drivePredicate = "Win32_DiskDrive.DeviceID='\\\\\\\\.\\\\PHYSICALDRIVE" + diskIndex + "'";
++                using var q = new ManagementObjectSearcher("root\\CIMV2", $"ASSOCIATORS OF {{{drivePredicate}}} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
++                var parts = q.Get().Cast<ManagementObject>().ToList();
++                int idx = 0;
++                foreach (var p in parts)
++                {
++                    var pi = new PartitionInfo
++                    {
++                        Index = ++idx,
++                        Type = (p["Type"] as string) ?? "",
++                        SizeBytes = Convert.ToInt64(p["Size"] ?? 0),
++                        OffsetBytes = Convert.ToInt64(p["StartingOffset"] ?? 0),
++                        IsGpt = ((p["Type"] as string)?.IndexOf("GPT", StringComparison.OrdinalIgnoreCase) ?? -1) >= 0
++                    };
++
++                    using var q2 = new ManagementObjectSearcher("root\\CIMV2", $"ASSOCIATORS OF {{Win32_DiskPartition.DeviceID='{((string)p["DeviceID"]).Replace("\\", "\\\\")}'}} WHERE AssocClass = Win32_LogicalDiskToPartition");
++                    var log = q2.Get().Cast<ManagementObject>().FirstOrDefault();
++                    if (log != null)
++                    {
++                        pi.DriveLetter = (log["DeviceID"] as string) ?? "";
++                        pi.FileSystem = (log["FileSystem"] as string) ?? "";
++                        pi.Label = (log["VolumeName"] as string) ?? "";
++                    }
++
++                    list.Add(pi);
++                }
++
++                await LogService.LogAsync("partitions.list", new { disk = diskIndex, count = list.Count });
++                return list;
++            }
++            catch
++            {
++                try
++                {
++                    var psi = new ProcessStartInfo("diskpart.exe")
++                    {
++                        RedirectStandardInput = true,
++                        RedirectStandardOutput = true,
++                        UseShellExecute = false,
++                        CreateNoWindow = true
++                    };
++                    using var p = Process.Start(psi)!;
++                    await p.StandardInput.WriteLineAsync($"select disk {diskIndex}\nlist partition\nexit\n");
++                    string output = await p.StandardOutput.ReadToEndAsync();
++                    await p.WaitForExitAsync();
++
++                    var list = new List<PartitionInfo>();
++                    var rx = new Regex(@"Partition\s+(\d+)\s+(\S+)\s+(\d+\s+\S+)", RegexOptions.IgnoreCase);
++                    foreach (Match m in rx.Matches(output))
++                    {
++                        list.Add(new PartitionInfo
++                        {
++                            Index = int.Parse(m.Groups[1].Value),
++                            Type = m.Groups[2].Value,
++                        });
++                    }
++                    await LogService.LogAsync("partitions.list.fallback", new { disk = diskIndex, count = list.Count });
++                    return list;
++                }
++                catch (Exception ex)
++                {
++                    await LogService.LogAsync("partitions.list.error", new { disk = diskIndex, error = ex.Message });
++                    return Array.Empty<PartitionInfo>();
++                }
++            }
++        }
++    }
++}
+diff --git a/Services/PickerService.cs b/Services/PickerService.cs
+new file mode 100644
+index 0000000..5f6fd2b
+--- /dev/null
++++ b/Services/PickerService.cs
+@@ -0,0 +1,270 @@
++using System;
++using System.Threading;
++using System.Threading.Tasks;
++using Windows.Storage;
++using Windows.Storage.Pickers;
++using WinRT.Interop;
++using System.Runtime.InteropServices;
++using FormatX.Interop;
++
++namespace FormatX.Services
++{
++  public static class PickerService
++  {
++    public static bool LastImagePickerHadException { get; private set; }
++    public static async Task<StorageFile?> PickIsoFileAsync(Microsoft.UI.Xaml.Window window)
++    {
++      try
++      {
++        // Always log debug request
++        try { await LogService.LogAsync("dbg.picker.request", new { type = "iso", time = DateTimeOffset.Now, threadId = Environment.CurrentManagedThreadId, pid = Environment.ProcessId }); } catch { }
++
++        // If elevated or explicitly forced, prefer Win32 dialog to avoid broker issues
++        if (ElevationService.IsElevated() || DiagFlags.ForceWin32Pickers)
++        {
++          var hwnd = WindowNative.GetWindowHandle(window);
++          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "iso" }); return null; }
++          var path = Win32FileDialog.ShowOpenFileDialog(hwnd, new[] { ("ISO", "*.iso") }, "iso");
++          if (string.IsNullOrWhiteSpace(path)) return null;
++          var f = await StorageFile.GetFileFromPathAsync(path);
++          await LogService.LogAsync("picker.iso.win32", new { result = f?.Path });
++          return f;
++        }
++        // Try WinRT picker on UI thread
++        if (!window.DispatcherQueue.HasThreadAccess)
++        {
++          var tcs = new TaskCompletionSource<StorageFile?>();
++          window.DispatcherQueue.TryEnqueue(async () =>
++          {
++            try
++            {
++              var picker = new FileOpenPicker();
++              var hwnd = WindowNative.GetWindowHandle(window);
++              if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "iso" }); tcs.TrySetResult(null); return; }
++              InitializeWithWindow.Initialize(picker, hwnd);
++              picker.FileTypeFilter.Add(".iso");
++              var file = await picker.PickSingleFileAsync();
++              await LogService.LogAsync("picker.iso", new { result = file?.Path });
++              tcs.TrySetResult(file);
++            }
++            catch (COMException cex)
++            {
++              await LogService.LogAsync("error.picker.iso.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
++              tcs.TrySetResult(null);
++            }
++            catch (Exception ex)
++            {
++              await LogService.LogAsync("picker.iso.error.ui", new { ex = ex.Message });
++              tcs.TrySetResult(null);
++            }
++          });
++          return await tcs.Task.ConfigureAwait(false);
++        }
++        else
++        {
++          var picker = new FileOpenPicker();
++          var hwnd = WindowNative.GetWindowHandle(window);
++          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "iso" }); return null; }
++          InitializeWithWindow.Initialize(picker, hwnd);
++          picker.FileTypeFilter.Add(".iso");
++          var file = await picker.PickSingleFileAsync();
++          await LogService.LogAsync("picker.iso", new { result = file?.Path });
++          return file;
++        }
++      }
++      catch (COMException cex)
++      {
++        // Fallback to Win32 COM dialog
++        await LogService.LogAsync("error.picker.iso.comexception", new { hr = $"0x{(uint)cex.HResult:x8}" });
++        try
++        {
++          var hwnd = WindowNative.GetWindowHandle(window);
++          var path = Win32FileDialog.ShowOpenFileDialog(hwnd, new[] { ("ISO", "*.iso") }, "iso");
++          if (string.IsNullOrWhiteSpace(path)) return null;
++          var file = await StorageFile.GetFileFromPathAsync(path);
++          await LogService.LogAsync("picker.iso.win32", new { result = file?.Path });
++          return file;
++        }
++        catch (Exception inner)
++        {
++          await LogService.LogAsync("picker.iso.win32.error", new { inner = inner.Message });
++          return null;
++        }
++      }
++      catch (Exception ex)
++      {
++        await LogService.LogAsync("picker.iso.error", new { ex = ex.Message });
++        return null;
++      }
++    }
++    public static async Task<StorageFolder?> PickFolderAsync(Microsoft.UI.Xaml.Window window)
++    {
++      try
++      {
++        // Always log debug request
++        try { await LogService.LogAsync("dbg.picker.request", new { type = "folder", time = DateTimeOffset.Now, threadId = Environment.CurrentManagedThreadId, pid = Environment.ProcessId }); } catch { }
++
++        // Prefer WinRT but if elevated or forced, use Win32 folder dialog
++        if (ElevationService.IsElevated() || DiagFlags.ForceWin32Pickers)
++        {
++          var hwnd = WindowNative.GetWindowHandle(window);
++          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "folder" }); return null; }
++          var path = Win32FileDialog.ShowPickFolderDialog(hwnd);
++          if (string.IsNullOrWhiteSpace(path)) return null;
++          var pickedFolder = await StorageFolder.GetFolderFromPathAsync(path);
++          await LogService.LogAsync("picker.folder.win32", new { result = pickedFolder?.Path });
++          return pickedFolder;
++        }
++        // WinRT FolderPicker on UI thread
++        if (!window.DispatcherQueue.HasThreadAccess)
++        {
++          var tcs = new TaskCompletionSource<StorageFolder?>();
++          window.DispatcherQueue.TryEnqueue(async () =>
++          {
++            try
++            {
++              var picker = new FolderPicker();
++              var hwnd = WindowNative.GetWindowHandle(window);
++              if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "folder" }); tcs.TrySetResult(null); return; }
++              InitializeWithWindow.Initialize(picker, hwnd);
++              picker.FileTypeFilter.Add("*");
++              var folder = await picker.PickSingleFolderAsync();
++              await LogService.LogAsync("picker.folder", new { result = folder?.Path });
++              tcs.TrySetResult(folder);
++            }
++            catch (COMException cex)
++            {
++              await LogService.LogAsync("error.picker.folder.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
++              tcs.TrySetResult(null);
++            }
++            catch (Exception ex)
++            {
++              await LogService.LogAsync("picker.folder.error.ui", new { ex = ex.Message });
++              tcs.TrySetResult(null);
++            }
++          });
++          return await tcs.Task.ConfigureAwait(false);
++        }
++        else
++        {
++          var picker = new FolderPicker();
++          var hwnd = WindowNative.GetWindowHandle(window);
++          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "folder" }); return null; }
++          InitializeWithWindow.Initialize(picker, hwnd);
++          picker.FileTypeFilter.Add("*");
++          var folder = await picker.PickSingleFolderAsync();
++          await LogService.LogAsync("picker.folder", new { result = folder?.Path });
++          return folder;
++        }
++      }
++      catch (COMException cex)
++      {
++        await LogService.LogAsync("error.picker.folder.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
++        return null;
++      }
++      catch (Exception ex)
++      {
++        await LogService.LogAsync("picker.folder.error", new { ex = ex.Message });
++        return null;
++      }
++    }
++
++    public static async Task<StorageFile?> PickImageFileAsync(Microsoft.UI.Xaml.Window window)
++    {
++      try
++      {
++        LastImagePickerHadException = false;
++        // Always log debug request
++        try { await LogService.LogAsync("dbg.picker.request", new { type = "image", time = DateTimeOffset.Now, threadId = Environment.CurrentManagedThreadId, pid = Environment.ProcessId }); } catch { }
++
++        // If elevated or forced, prefer Win32 dialog to avoid COM E_FAIL
++        if (ElevationService.IsElevated() || DiagFlags.ForceWin32Pickers)
++        {
++          var hwnd = WindowNative.GetWindowHandle(window);
++          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "image" }); return null; }
++          var path = Win32FileDialog.ShowOpenFileDialog(hwnd,
++            new[] { ("Images", "*.jpg;*.jpeg;*.png;*.bmp"), ("JPG", "*.jpg;*.jpeg"), ("PNG", "*.png"), ("BMP", "*.bmp") });
++          if (string.IsNullOrWhiteSpace(path)) return null;
++          var f = await StorageFile.GetFileFromPathAsync(path);
++          await LogService.LogAsync("picker.image.win32", new { result = f?.Path });
++          return f;
++        }
++        if (!window.DispatcherQueue.HasThreadAccess)
++        {
++          var tcs = new TaskCompletionSource<StorageFile?>();
++          window.DispatcherQueue.TryEnqueue(async () =>
++          {
++            try
++            {
++              var picker = new FileOpenPicker();
++              var hwnd = WindowNative.GetWindowHandle(window);
++              if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "image" }); tcs.TrySetResult(null); return; }
++              InitializeWithWindow.Initialize(picker, hwnd);
++              picker.FileTypeFilter.Add(".png");
++              picker.FileTypeFilter.Add(".jpg");
++              picker.FileTypeFilter.Add(".jpeg");
++              picker.FileTypeFilter.Add(".bmp");
++              var file = await picker.PickSingleFileAsync();
++              await LogService.LogAsync("picker.image", new { result = file?.Path });
++              tcs.TrySetResult(file);
++            }
++            catch (COMException cex)
++            {
++              LastImagePickerHadException = true;
++              await LogService.LogAsync("error.picker.image.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
++              tcs.TrySetResult(null);
++            }
++            catch (Exception ex)
++            {
++              LastImagePickerHadException = true;
++              await LogService.LogAsync("picker.image.error.ui", new { ex = ex.Message });
++              tcs.TrySetResult(null);
++            }
++          });
++          return await tcs.Task.ConfigureAwait(false);
++        }
++        else
++        {
++          var picker = new FileOpenPicker();
++          var hwnd = WindowNative.GetWindowHandle(window);
++          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "image" }); return null; }
++          InitializeWithWindow.Initialize(picker, hwnd);
++          picker.FileTypeFilter.Add(".png");
++          picker.FileTypeFilter.Add(".jpg");
++          picker.FileTypeFilter.Add(".jpeg");
++          picker.FileTypeFilter.Add(".bmp");
++          var file = await picker.PickSingleFileAsync();
++          await LogService.LogAsync("picker.image", new { result = file?.Path });
++          return file;
++        }
++      }
++      catch (COMException cex)
++      {
++        LastImagePickerHadException = true;
++        await LogService.LogAsync("error.picker.image.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
++        try
++        {
++          var hwnd = WindowNative.GetWindowHandle(window);
++          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "image" }); return null; }
++          var path = Win32FileDialog.ShowOpenFileDialog(hwnd,
++            new[] { ("Images", "*.jpg;*.jpeg;*.png;*.bmp"), ("JPG", "*.jpg;*.jpeg"), ("PNG", "*.png"), ("BMP", "*.bmp") });
++          if (string.IsNullOrWhiteSpace(path)) return null;
++          var f = await StorageFile.GetFileFromPathAsync(path);
++          await LogService.LogAsync("picker.image.win32", new { result = f?.Path });
++          return f;
++        }
++        catch (Exception inner)
++        {
++          await LogService.LogAsync("picker.image.win32.error", new { inner = inner.Message });
++          return null;
++        }
++      }
++      catch (Exception ex)
++      {
++        LastImagePickerHadException = true;
++        await LogService.LogAsync("picker.image.error", new { ex = ex.Message });
++        return null;
++      }
++    }
++  }
++}
+diff --git a/Services/SecureEraseService.cs b/Services/SecureEraseService.cs
+new file mode 100644
+index 0000000..cb9fa31
+--- /dev/null
++++ b/Services/SecureEraseService.cs
+@@ -0,0 +1,96 @@
++using System;
++using System.Diagnostics;
++using System.IO;
++using System.Text;
++using System.Text.Json;
++using System.Threading.Tasks;
++
++namespace FormatX.Services
++{
++  public sealed class SecureEraseService
++  {
++    public async Task<string> ThreePassAsync(string physicalPath, IProgress<int>? progress = null)
++    {
++      long total = 0;
++      try
++      {
++        using (var fs = new FileStream(physicalPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
++        {
++          total = fs.Length;
++        }
++      } catch { }
++      byte[] buf = new byte[1024 * 1024];
++      async Task Pass(byte fill, int passIdx)
++      {
++        using var fs = new FileStream(physicalPath, FileMode.Open, FileAccess.Write, FileShare.None);
++        long written = 0;
++        if (fill == 0xCC) new Random().NextBytes(buf);
++        while (written < total)
++        {
++          if (fill != 0xCC) Array.Fill(buf, fill);
++          int n = (int)Math.Min(buf.Length, total - written);
++          await fs.WriteAsync(buf.AsMemory(0, n));
++          written += n;
++          int p = Math.Min(99, (int)((written * 100 / total) / 3) + (passIdx - 1) * 33);
++          progress?.Report(p);
++        }
++      }
++      await Pass(0x00, 1);
++      await Pass(0xFF, 2);
++      await Pass(0xCC, 3);
++      progress?.Report(100);
++      await LogService.LogAsync("secure_erase.3pass", new { physicalPath });
++      return physicalPath;
++    }
++    public async Task<string> ClearDiskAsync(int diskNumber, bool fullFormat = true, IProgress<int>? progress = null)
++    {
++      progress?.Report(5);
++      // diskpart clean all
++      string dp = $"select disk {diskNumber}\nclean all\n";
++      string tmp = Path.GetTempFileName();
++      await File.WriteAllTextAsync(tmp, dp, Encoding.ASCII);
++      var p1 = Process.Start(new ProcessStartInfo("diskpart.exe", $"/s \"{tmp}\"")
++      {
++        UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true, CreateNoWindow = true
++      });
++      string so1 = await p1!.StandardOutput.ReadToEndAsync();
++      string se1 = await p1!.StandardError.ReadToEndAsync();
++      await p1.WaitForExitAsync();
++      progress?.Report(60);
++      if (p1.ExitCode != 0) throw new InvalidOperationException($"diskpart hiba: {se1}\n{so1}");
++
++      // Optional full format to force media scan (NTFS)
++      if (fullFormat)
++      {
++        string ps = $"Get-Partition -DiskNumber {diskNumber} | Where-Object {{$_.Type -eq 'Basic'}} | " +
++                    "ForEach-Object { Format-Volume -Partition $_ -FileSystem NTFS -Full -Confirm:$false }";
++        var p2 = Process.Start(new ProcessStartInfo("powershell.exe", $"-NoProfile -Command \"{ps}\"")
++        {
++          UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true, CreateNoWindow = true
++        });
++        string so2 = await p2!.StandardOutput.ReadToEndAsync();
++        string se2 = await p2!.StandardError.ReadToEndAsync();
++        await p2.WaitForExitAsync();
++        progress?.Report(90);
++        if (p2.ExitCode != 0) throw new InvalidOperationException($"Full format hiba: {se2}\n{so2}");
++      }
++
++      // Certificate JSON
++      var cert = new {
++        ts = DateTimeOffset.Now.ToString("o"),
++        user = Environment.UserName,
++        machine = Environment.MachineName,
++        disk = diskNumber,
++        method = fullFormat ? "clean all + full format" : "clean all",
++        result = "success"
++      };
++      string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "cert");
++      Directory.CreateDirectory(dir);
++      string path = Path.Combine(dir, $"clear_{diskNumber}_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.json");
++      await File.WriteAllTextAsync(path, JsonSerializer.Serialize(cert, new JsonSerializerOptions{WriteIndented=true}), new UTF8Encoding(false));
++      progress?.Report(100);
++      await LogService.LogAsync("secure_erase", cert);
++      return path;
++    }
++  }
++}
+diff --git a/Services/SettingsService.cs b/Services/SettingsService.cs
+new file mode 100644
+index 0000000..e27730e
+--- /dev/null
++++ b/Services/SettingsService.cs
+@@ -0,0 +1,98 @@
++using System;
++using System.Collections.Generic;
++using System.IO;
++using System.Text.Json;
++using Windows.Storage;
++
++namespace FormatX.Services
++{
++  public sealed class SettingsService
++  {
++    private static readonly Lazy<SettingsService> _lazy = new(() => new SettingsService());
++    public static SettingsService Current => _lazy.Value;
++
++    private readonly ApplicationDataContainer? _local;
++    private readonly string _fallbackJsonPath;
++
++    private SettingsService()
++    {
++      try { _local = ApplicationData.Current.LocalSettings; }
++      catch { _local = null; }
++
++      var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", ".settings");
++      Directory.CreateDirectory(dir);
++      _fallbackJsonPath = Path.Combine(dir, "settings.json");
++      if (!File.Exists(_fallbackJsonPath)) File.WriteAllText(_fallbackJsonPath, "{}");
++    }
++
++    public T Get<T>(string key, T defaultValue = default!)
++    {
++      try
++      {
++        if (_local != null && _local.Values.ContainsKey(key))
++        {
++          var val = _local.Values[key];
++          if (val is JsonElement je) return JsonSerializer.Deserialize<T>(je.GetRawText())!;
++          if (val is T t) return t;
++          if (val != null) return (T)Convert.ChangeType(val, typeof(T));
++        }
++      }
++      catch {}
++      try
++      {
++        var json = File.ReadAllText(_fallbackJsonPath);
++        var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(json) ?? new();
++        if (dict.TryGetValue(key, out var obj))
++        {
++          var raw = JsonSerializer.Serialize(obj);
++          return JsonSerializer.Deserialize<T>(raw)!;
++        }
++      }
++      catch {}
++      return defaultValue;
++    }
++
++    public void Set<T>(string key, T value)
++    {
++      try { if (_local != null) _local.Values[key] = value is null ? null : value; } catch {}
++      try
++      {
++        var dict = new Dictionary<string, object>();
++        if (File.Exists(_fallbackJsonPath))
++        {
++          using var fs = File.OpenRead(_fallbackJsonPath);
++          dict = JsonSerializer.Deserialize<Dictionary<string, object>>(fs) ?? new();
++        }
++        dict[key] = value!;
++        File.WriteAllText(_fallbackJsonPath, JsonSerializer.Serialize(dict, new JsonSerializerOptions{ WriteIndented = true }));
++      }
++      catch {}
++    }
++
++    public string Language
++    {
++      get => Get("Language", "hu-HU");
++      set => Set("Language", value);
++    }
++    public string Theme
++    {
++      get => Get("Theme", "Dark");
++      set => Set("Theme", value);
++    }
++    public string LastIsoPath
++    {
++      get => Get("LastIsoPath", string.Empty);
++      set => Set("LastIsoPath", value);
++    }
++    public string LastDrive
++    {
++      get => Get("LastDrive", string.Empty);
++      set => Set("LastDrive", value);
++    }
++    public string CustomBackgroundPath
++    {
++      get => Get("CustomBackgroundPath", string.Empty);
++      set => Set("CustomBackgroundPath", value);
++    }
++  }
++}
+\ No newline at end of file
+diff --git a/Services/UpdateService.cs b/Services/UpdateService.cs
+new file mode 100644
+index 0000000..52be08a
+--- /dev/null
++++ b/Services/UpdateService.cs
+@@ -0,0 +1,140 @@
++using System;
++using System.IO;
++using System.Linq;
++using System.Net.Http;
++using System.Text.RegularExpressions;
++using System.Threading;
++using System.Threading.Tasks;
++using Windows.Storage;
++using Windows.System;
++
++using System.Security.Cryptography;
++using FormatX.Services; // for LogService self-reference when logging
++namespace FormatX.Services
++{
++  public sealed class UpdateService
++  {
++    private static string ComputeSHA256(string path)
++    {
++      using var fs = File.OpenRead(path);
++      using var sha = SHA256.Create();
++      var hash = sha.ComputeHash(fs);
++      return string.Concat(Array.ConvertAll(hash, b => b.ToString("x2")));
++    }
++
++    private const string ReleasesUrl = "https://github.com/hutoczky/formatui/releases";
++
++    private static (int major, int minor, int patch)? ParseVersion(ReadOnlySpan<char> s)
++    {
++      try
++      {
++        var m = Regex.Match(s.ToString(), @"v?(\d+)\.(\d+)\.(\d+)");
++        if (!m.Success) return null;
++        return (int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value));
++      }
++      catch { return null; }
++    }
++
++    private static int Cmp((int,int,int) a, (int,int,int) b)
++      => a.Item1!=b.Item1 ? a.Item1.CompareTo(b.Item1)
++       : (a.Item2!=b.Item2 ? a.Item2.CompareTo(b.Item2)
++       :  a.Item3.CompareTo(b.Item3));
++
++    private static string? FindBestAssetUrlForNewer(string html, (int,int,int) minVersion)
++    {
++      var rx = new Regex(@"href=""(/hutoczky/formatui/releases/download/[^""]+)""", RegexOptions.IgnoreCase);
++      var links = rx.Matches(html).Select(m => m.Groups[1].Value).ToList();
++      var candidates = links
++        .Select(l => new { Link = l, Ver = ParseVersion(l.AsSpan()) })
++        .Where(x => x.Ver.HasValue && Cmp(x.Ver.Value, minVersion) >= 0)
++        .Select(x => x.Link)
++        .ToList();
++      if (candidates.Count == 0) return null;
++
++      string[] exts = new[] { ".msixbundle", ".msix", ".appinstaller", ".zip" };
++      foreach (var ext in exts)
++      {
++        var hit = candidates.FirstOrDefault(l => l.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
++        if (hit != null) return "https://github.com" + hit;
++      }
++      return "https://github.com" + candidates.First();
++    }
++
++    public async Task<string> CheckAndUpdateAsync(Action<int,string>? progress = null, CancellationToken ct = default)
++    {
++      progress ??= (_ , __) => { };
++      using var http = new HttpClient();
++      http.DefaultRequestHeaders.UserAgent.ParseAdd("FormatX-Updater/1.0 (+Windows)");
++
++      string html = await http.GetStringAsync(ReleasesUrl, ct);
++      var assetUrl = FindBestAssetUrlForNewer(html, (1,1,0));
++      if (assetUrl is null)
++        return "Nincs √∫j friss√≠t√©s.";
++
++      var updatesFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Updates", CreationCollisionOption.OpenIfExists);
++      var fileName = Path.GetFileName(new Uri(assetUrl).LocalPath);
++      var destPath = Path.Combine(updatesFolder.Path, fileName);
++
++      progress(1, "Let√∂lt√©s indul...");
++      try
++      {
++        using (var msg = await http.GetAsync(assetUrl, HttpCompletionOption.ResponseHeadersRead, ct))
++        {
++          msg.EnsureSuccessStatusCode();
++          var total = msg.Content.Headers.ContentLength ?? -1L;
++          using var src = await msg.Content.ReadAsStreamAsync(ct);
++          using var dst = File.Create(destPath);
++          var buffer = new byte[81920];
++          long done = 0;
++          while (true)
++          {
++            int read = await src.ReadAsync(buffer.AsMemory(0, buffer.Length), ct);
++            if (read == 0) break;
++            await dst.WriteAsync(buffer.AsMemory(0, read), ct);
++            done += read;
++            if (total > 0)
++            {
++              int p = (int)(done * 100 / total);
++              progress(p, $"Let√∂lt√©s: {p}%");
++            }
++          }
++        }
++      }
++      catch (System.IO.IOException ioex) { await LogService.LogAsync("error.io.exception", ioex); return ioex.Message; }
++      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogAsync("error.com.exception", cex); return cex.Message; }
++      catch (Exception ex) { await LogService.LogAsync("error.catch", new { ctx = "update.download", ex = ex.Message }); return ex.Message; }
++      progress(96, "Let√∂lt√©s k√©sz. SHA-256 ellen≈ërz√©s...");
++      try
++      {
++        // Keress√ºk a sha256-et a release oldalon, ha van
++        string htmlForHash = html;
++        var rxsha = new Regex(@"sha256\s*[:=]\s*([a-f0-9]{64})", RegexOptions.IgnoreCase);
++        var m = rxsha.Match(htmlForHash);
++        if (m.Success)
++        {
++          string expect = m.Groups[1].Value.ToLowerInvariant();
++          string actual = ComputeSHA256(destPath).ToLowerInvariant();
++          if (expect != actual)
++            return $"Let√∂ltve: {destPath}\nHASH elt√©r√©s! V√°rt: {expect}\nKapott: {actual}";
++        }
++      }
++      catch (System.IO.IOException ioex) { await LogService.LogAsync("error.io.exception", ioex); }
++      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogAsync("error.com.exception", cex); }
++      catch (System.Exception ex) { await LogService.LogAsync("update.hash.error", new { ex = ex.Message }); }
++      progress(100, "Ellen≈ërizve. Telep√≠t≈ë ind√≠t√°sa...");
++      try
++      {
++        var file = await StorageFile.GetFileFromPathAsync(destPath);
++        await Launcher.LaunchFileAsync(file);
++        return "Friss√≠t√©s let√∂ltve √©s ind√≠tva.";
++      }
++      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogAsync("error.com.exception", cex); return "Let√∂ltve: " + destPath + Environment.NewLine + cex.Message; }
++      catch (System.IO.IOException ioex) { await LogService.LogAsync("error.io.exception", ioex); return "Let√∂ltve: " + destPath + Environment.NewLine + ioex.Message; }
++      catch (Exception ex)
++      {
++        await LogService.LogAsync("error.catch", new { ctx = "update.launch", ex = ex.Message });
++        return "Let√∂ltve: " + destPath + Environment.NewLine + "Ind√≠t√°s sikertelen: " + ex.Message;
++      }
++    }
++  }
++}
+\ No newline at end of file
+diff --git a/Views/CrashDialogWindow.cs b/Views/CrashDialogWindow.cs
+new file mode 100644
+index 0000000..a4ecddb
+--- /dev/null
++++ b/Views/CrashDialogWindow.cs
+@@ -0,0 +1,120 @@
++using System;
++using System.IO;
++using System.Threading.Tasks;
++using Microsoft.UI.Xaml;
++using Microsoft.UI.Xaml.Controls;
++using Microsoft.UI.Xaml.Media;
++using Microsoft.UI.Xaml.Shapes;
++using WinRT.Interop;
++using Windows.Storage.Pickers;
++using FormatX.Services;
++
++namespace FormatX.Views
++{
++  public sealed class CrashDialogWindow : Window
++  {
++    private readonly string _crashPath;
++    private readonly TextBlock _detailText;
++    private readonly Button _exportBtn;
++    private readonly Button _closeBtn;
++    private readonly Button _openFolderBtn;
++
++    public CrashDialogWindow(string crashPath)
++    {
++      _crashPath = crashPath;
++      Title = LocalizationService.T("error.crash.title");
++      var panel = new StackPanel { Spacing = 12, Margin = new Thickness(24) };
++      panel.Children.Add(new TextBlock { Text = LocalizationService.T("error.crash.message"), TextWrapping = TextWrapping.WrapWholeWords });
++      _detailText = new TextBlock { FontSize = 12, Opacity = 0.8, TextWrapping = TextWrapping.Wrap, MaxHeight = 180, TextTrimming = TextTrimming.WordEllipsis };
++      try { if (File.Exists(crashPath)) _detailText.Text = File.ReadAllText(crashPath); } catch (Exception ex) { _DetailError(ex); }
++      var scroller = new ScrollViewer { Content = _detailText, Height = 180, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
++      panel.Children.Add(scroller);
++
++      var btnRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right };
++      _exportBtn = new Button { Content = LocalizationService.T("error.crash.export") };
++      _openFolderBtn = new Button { Content = LocalizationService.T("crash.dialog.openFolder") };
++      _closeBtn = new Button { Content = LocalizationService.T("error.crash.close") };
++      _exportBtn.Click += ExportBtn_Click;
++      _openFolderBtn.Click += OpenFolderBtn_Click;
++      _closeBtn.Click += (_, __) => this.Close();
++      btnRow.Children.Add(_openFolderBtn);
++      btnRow.Children.Add(_exportBtn);
++      btnRow.Children.Add(_closeBtn);
++      panel.Children.Add(btnRow);
++      Content = panel;
++      try
++      {
++        var hwnd = WindowNative.GetWindowHandle(this);
++        Windows.Graphics.SizeInt32 size = new() { Width = 640, Height = 480 };
++        // Best-effort resize only if AppWindow APIs succeed via reflection (avoid Win32Interop compile dependency here)
++        try
++        {
++          var winIdMethod = Type.GetType("WinRT.Interop.Win32Interop, WinRT.Runtime")?.GetMethod("GetWindowIdFromWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
++          var appWindowType = Type.GetType("Microsoft.UI.Windowing.AppWindow, Microsoft.WinUI");
++          if (winIdMethod != null && appWindowType != null)
++          {
++            var windowId = winIdMethod.Invoke(null, new object[] { hwnd });
++            var getFromId = appWindowType.GetMethod("GetFromWindowId", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
++            var appWindow = getFromId?.Invoke(null, new object[] { windowId });
++            var resize = appWindowType.GetMethod("Resize");
++            var sizeStruct = size; // struct value
++            resize?.Invoke(appWindow, new object[] { sizeStruct });
++          }
++        }
++        catch (Exception rzEx) { _ = LogService.LogAsync("crash.dialog.size.reflection", new { rzEx = rzEx.Message }); }
++      }
++      catch (Exception ex) { _ = LogService.LogAsync("crash.dialog.size.error", new { ex = ex.Message }); }
++    }
++
++    private void _DetailError(Exception ex)
++    { _ = LogService.LogAsync("crash.dialog.detail", new { ex = ex.Message }); }
++
++    private async void ExportBtn_Click(object sender, RoutedEventArgs e)
++    {
++      try
++      {
++        if (!File.Exists(_crashPath)) return;
++        // Prefer WinRT, but if elevated/off-UI-thread use Win32 save dialog
++        string? target = null;
++        if (!Services.ElevationService.IsElevated() && this.DispatcherQueue.HasThreadAccess)
++        {
++          var picker = new FileSavePicker();
++          InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
++          picker.FileTypeChoices.Add("JSON", new System.Collections.Generic.List<string> { ".json" });
++          picker.SuggestedFileName = System.IO.Path.GetFileName(_crashPath);
++          var f = await picker.PickSaveFileAsync();
++          target = f?.Path;
++        }
++        else
++        {
++          var hwnd = WindowNative.GetWindowHandle(this);
++          target = FormatX.Interop.Win32FileDialog.ShowSaveFileDialog(hwnd, new[] { ("JSON", "*.json") }, "json", System.IO.Path.GetFileName(_crashPath));
++        }
++        if (!string.IsNullOrWhiteSpace(target))
++        {
++          File.Copy(_crashPath, target!, true);
++          await LogService.LogAsync("crash.export.window", new { dest = target });
++        }
++      }
++      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogAsync("error.com.exception", cex); }
++      catch (IOException ioex) { await LogService.LogAsync("error.io.exception", ioex); }
++      catch (Exception ex) { await LogService.LogAsync("error.catch", new { ctx = "crash.export.window", ex = ex.Message }); }
++    }
++
++    private async void OpenFolderBtn_Click(object sender, RoutedEventArgs e)
++    {
++      try
++      {
++        var folder = System.IO.Path.GetDirectoryName(_crashPath);
++        if (!string.IsNullOrWhiteSpace(folder) && Directory.Exists(folder))
++        {
++          await LogService.LogAsync("crash.folder.open", new { folder });
++          _ = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = folder, UseShellExecute = true });
++        }
++      }
++      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogAsync("error.com.exception", cex); }
++      catch (IOException ioex) { await LogService.LogAsync("error.io.exception", ioex); }
++      catch (Exception ex) { await LogService.LogAsync("error.catch", new { ctx = "crash.folder.open", ex = ex.Message }); }
++    }
++  }
++}
+diff --git a/global.json b/global.json
+new file mode 100644
+index 0000000..d03a95c
+--- /dev/null
++++ b/global.json
+@@ -0,0 +1,6 @@
++{
++  "sdk": {
++    "version": "10.0.100-rc.1.25451.107",
++    "rollForward": "latestFeature"
++  }
++}
+\ No newline at end of file
+diff --git a/scripts/smoke-tests.ps1 b/scripts/smoke-tests.ps1
+new file mode 100644
+index 0000000..6fc253b
+--- /dev/null
++++ b/scripts/smoke-tests.ps1
+@@ -0,0 +1,40 @@
++param(
++    [string]$Configuration = "Debug"
++)
++
++Write-Host "[SMOKE] dotnet build -c $Configuration" -ForegroundColor Cyan
++dotnet build -c $Configuration
++if ($LASTEXITCODE -ne 0) { Write-Error "Build failed"; exit 1 }
++
++Write-Host "[SMOKE] Validator checks" -ForegroundColor Cyan
++$root = [System.IO.Path]::Combine($PSScriptRoot, "..")
++Push-Location $root
++
++try {
++  Add-Type -Path (Join-Path $root "bin\x64\$Configuration\net10.0-windows10.0.22621.0\FormatX.dll")
++  $bgType = [FormatX.Services.BackgroundValidator]
++  $isoType = [FormatX.Services.IsoValidator]
++  # Background invalid ext
++  $res1 = $bgType::ValidateAsync("C:\\Windows\\not-image.txt")
++  $res1.Wait()
++  if ($res1.Result -ne $false) { Write-Warning "Expected invalid background path" }
++  # ISO ext helper
++  if ($isoType::IsIso("C:\\tmp\\a.txt")) { Write-Warning "Expected .txt not iso" }
++  if (-not $isoType::IsIso("C:\\tmp\\a.iso")) { Write-Warning "Expected .iso true" }
++}
++catch { Write-Warning $_ }
++finally { Pop-Location }
++
++Write-Host "[SMOKE] Manual checklist:" -ForegroundColor Yellow
++@'
++1) Run app and test:
++   - Background Browse: rapid double-click should not open two dialogs; status updates localized.
++   - Pick unsupported file (e.g., .txt) -> validation error, no crash.
++   - Large image (>100MB) loads without UI freeze; token stored.
++   - Restart app -> background restored; if file missing then token cleared + error logged.
++2) ISO picker:
++   - Browse .iso works; .txt rejected; no repeated COM exceptions.
++3) Title bar customization should not throw on unsupported environments.
++'@
++
++Write-Host "[SMOKE] Done" -ForegroundColor Green

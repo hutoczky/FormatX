@@ -15,29 +15,29 @@ namespace FormatX.Interop
         private interface IFileDialog
         {
             [PreserveSig] int Show(IntPtr hwndOwner);
-            void SetFileTypes(uint cFileTypes, [MarshalAs(UnmanagedType.LPArray)] COMDLG_FILTERSPEC[] rgFilterSpec);
-            void SetFileTypeIndex(uint iFileType);
-            void GetFileTypeIndex(out uint piFileType);
-            void Advise();
-            void Unadvise();
-            void SetOptions(uint fos);
-            void GetOptions(out uint pfos);
-            void SetDefaultFolder(IShellItem psi);
-            void SetFolder(IShellItem psi);
-            void GetFolder(out IShellItem ppsi);
-            void GetCurrentSelection(out IShellItem ppsi);
-            void SetFileName([MarshalAs(UnmanagedType.LPWStr)] string pszName);
-            void GetFileName([MarshalAs(UnmanagedType.LPWStr)] out string pszName);
-            void SetTitle([MarshalAs(UnmanagedType.LPWStr)] string pszTitle);
-            void SetOkButtonLabel([MarshalAs(UnmanagedType.LPWStr)] string pszText);
-            void SetFileNameLabel([MarshalAs(UnmanagedType.LPWStr)] string pszLabel);
-            void GetResult(out IShellItem ppsi);
-            void AddPlace(IShellItem psi, uint fdap);
-            void SetDefaultExtension([MarshalAs(UnmanagedType.LPWStr)] string pszDefaultExtension);
-            void Close(int hr);
-            void SetClientGuid();
-            void ClearClientData();
-            void SetFilter([MarshalAs(UnmanagedType.Interface)] object pFilter);
+            [PreserveSig] int SetFileTypes(uint cFileTypes, [MarshalAs(UnmanagedType.LPArray)] COMDLG_FILTERSPEC[] rgFilterSpec);
+            [PreserveSig] int SetFileTypeIndex(uint iFileType);
+            [PreserveSig] int GetFileTypeIndex(out uint piFileType);
+            [PreserveSig] int Advise(IntPtr pfde, out uint pdwCookie);
+            [PreserveSig] int Unadvise(uint dwCookie);
+            [PreserveSig] int SetOptions(uint fos);
+            [PreserveSig] int GetOptions(out uint pfos);
+            [PreserveSig] int SetDefaultFolder(IShellItem psi);
+            [PreserveSig] int SetFolder(IShellItem psi);
+            [PreserveSig] int GetFolder(out IShellItem ppsi);
+            [PreserveSig] int GetCurrentSelection(out IShellItem ppsi);
+            [PreserveSig] int SetFileName([MarshalAs(UnmanagedType.LPWStr)] string pszName);
+            [PreserveSig] int GetFileName([MarshalAs(UnmanagedType.LPWStr)] out string pszName);
+            [PreserveSig] int SetTitle([MarshalAs(UnmanagedType.LPWStr)] string pszTitle);
+            [PreserveSig] int SetOkButtonLabel([MarshalAs(UnmanagedType.LPWStr)] string pszText);
+            [PreserveSig] int SetFileNameLabel([MarshalAs(UnmanagedType.LPWStr)] string pszLabel);
+            [PreserveSig] int GetResult(out IShellItem ppsi);
+            [PreserveSig] int AddPlace(IShellItem psi, uint fdap);
+            [PreserveSig] int SetDefaultExtension([MarshalAs(UnmanagedType.LPWStr)] string pszDefaultExtension);
+            [PreserveSig] int Close(int hr);
+            [PreserveSig] int SetClientGuid(ref Guid guid);
+            [PreserveSig] int ClearClientData();
+            [PreserveSig] int SetFilter([MarshalAs(UnmanagedType.Interface)] object pFilter);
         }
 
         [ComImport]
@@ -45,33 +45,33 @@ namespace FormatX.Interop
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         private interface IFileOpenDialog : IFileDialog
         {
-            // IFileDialog
+            // IFileDialog (redeclare with PreserveSig to keep vtable aligned)
             new int Show(IntPtr hwndOwner);
-            new void SetFileTypes(uint cFileTypes, COMDLG_FILTERSPEC[] rgFilterSpec);
-            new void SetFileTypeIndex(uint iFileType);
-            new void GetFileTypeIndex(out uint piFileType);
-            new void Advise();
-            new void Unadvise();
-            new void SetOptions(uint fos);
-            new void GetOptions(out uint pfos);
-            new void SetDefaultFolder(IShellItem psi);
-            new void SetFolder(IShellItem psi);
-            new void GetFolder(out IShellItem ppsi);
-            new void GetCurrentSelection(out IShellItem ppsi);
-            new void SetFileName(string pszName);
-            new void GetFileName(out string pszName);
-            new void SetTitle(string pszTitle);
-            new void SetOkButtonLabel(string pszText);
-            new void SetFileNameLabel(string pszLabel);
-            new void GetResult(out IShellItem ppsi);
-            new void AddPlace(IShellItem psi, uint fdap);
-            new void SetDefaultExtension(string pszDefaultExtension);
-            new void Close(int hr);
-            new void SetClientGuid();
-            new void ClearClientData();
-            new void SetFilter(object pFilter);
+            new int SetFileTypes(uint cFileTypes, COMDLG_FILTERSPEC[] rgFilterSpec);
+            new int SetFileTypeIndex(uint iFileType);
+            new int GetFileTypeIndex(out uint piFileType);
+            new int Advise(IntPtr pfde, out uint pdwCookie);
+            new int Unadvise(uint dwCookie);
+            new int SetOptions(uint fos);
+            new int GetOptions(out uint pfos);
+            new int SetDefaultFolder(IShellItem psi);
+            new int SetFolder(IShellItem psi);
+            new int GetFolder(out IShellItem ppsi);
+            new int GetCurrentSelection(out IShellItem ppsi);
+            new int SetFileName(string pszName);
+            new int GetFileName(out string pszName);
+            new int SetTitle(string pszTitle);
+            new int SetOkButtonLabel(string pszText);
+            new int SetFileNameLabel(string pszLabel);
+            new int GetResult(out IShellItem ppsi);
+            new int AddPlace(IShellItem psi, uint fdap);
+            new int SetDefaultExtension(string pszDefaultExtension);
+            new int Close(int hr);
+            new int SetClientGuid(ref Guid guid);
+            new int ClearClientData();
+            new int SetFilter(object pFilter);
 
-            // IFileOpenDialog
+            // IFileOpenDialog specific
             void GetResults();
             void GetSelectedItems();
         }
@@ -103,32 +103,32 @@ namespace FormatX.Interop
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     private interface IFileSaveDialog : IFileDialog
     {
-      // IFileDialog
+      // IFileDialog (redeclare)
       new int Show(IntPtr hwndOwner);
-      new void SetFileTypes(uint cFileTypes, COMDLG_FILTERSPEC[] rgFilterSpec);
-      new void SetFileTypeIndex(uint iFileType);
-      new void GetFileTypeIndex(out uint piFileType);
-      new void Advise();
-      new void Unadvise();
-      new void SetOptions(uint fos);
-      new void GetOptions(out uint pfos);
-      new void SetDefaultFolder(IShellItem psi);
-      new void SetFolder(IShellItem psi);
-      new void GetFolder(out IShellItem ppsi);
-      new void GetCurrentSelection(out IShellItem ppsi);
-      new void SetFileName(string pszName);
-      new void GetFileName(out string pszName);
-      new void SetTitle(string pszTitle);
-      new void SetOkButtonLabel(string pszText);
-      new void SetFileNameLabel(string pszLabel);
-      new void GetResult(out IShellItem ppsi);
-      new void AddPlace(IShellItem psi, uint fdap);
-      new void SetDefaultExtension(string pszDefaultExtension);
-      new void Close(int hr);
-      new void SetClientGuid();
-      new void ClearClientData();
-      new void SetFilter(object pFilter);
-      // IFileSaveDialog specific methods not used
+      new int SetFileTypes(uint cFileTypes, COMDLG_FILTERSPEC[] rgFilterSpec);
+      new int SetFileTypeIndex(uint iFileType);
+      new int GetFileTypeIndex(out uint piFileType);
+      new int Advise(IntPtr pfde, out uint pdwCookie);
+      new int Unadvise(uint dwCookie);
+      new int SetOptions(uint fos);
+      new int GetOptions(out uint pfos);
+      new int SetDefaultFolder(IShellItem psi);
+      new int SetFolder(IShellItem psi);
+      new int GetFolder(out IShellItem ppsi);
+      new int GetCurrentSelection(out IShellItem ppsi);
+      new int SetFileName(string pszName);
+      new int GetFileName(out string pszName);
+      new int SetTitle(string pszTitle);
+      new int SetOkButtonLabel(string pszText);
+      new int SetFileNameLabel(string pszLabel);
+      new int GetResult(out IShellItem ppsi);
+      new int AddPlace(IShellItem psi, uint fdap);
+      new int SetDefaultExtension(string pszDefaultExtension);
+      new int Close(int hr);
+      new int SetClientGuid(ref Guid guid);
+      new int ClearClientData();
+      new int SetFilter(object pFilter);
+      // Additional IFileSaveDialog methods not used
     }
 
     [ComImport]
@@ -152,6 +152,12 @@ namespace FormatX.Interop
             FILESYSPATH = 0x80058000
         }
 
+        private enum FDAP : uint
+        {
+            BOTTOM = 0x00000000,
+            TOP = 0x00000001,
+        }
+
         [DllImport("ole32.dll")]
         private static extern void CoTaskMemFree(IntPtr pv);
 
@@ -162,7 +168,7 @@ namespace FormatX.Interop
             {
                 var specs = new COMDLG_FILTERSPEC[filters.Length];
                 for (int i = 0; i < filters.Length; i++) specs[i] = new COMDLG_FILTERSPEC(filters[i].name, filters[i].spec);
-                dlg.SetFileTypes((uint)specs.Length, specs);
+                ((IFileDialog)dlg).SetFileTypes((uint)specs.Length, specs);
                 // Prefer filesystem paths and avoid recent list; enforce exist
                 ((IFileDialog)dlg).SetOptions((uint)(FOS.FORCEFILESYSTEM | FOS.FILEMUSTEXIST | FOS.PATHMUSTEXIST | FOS.DONTADDTORECENT));
                 if (!string.IsNullOrWhiteSpace(defaultExt)) dlg.SetDefaultExtension(defaultExt!);
@@ -191,7 +197,7 @@ namespace FormatX.Interop
             {
                 var specs = new COMDLG_FILTERSPEC[filters.Length];
                 for (int i = 0; i < filters.Length; i++) specs[i] = new COMDLG_FILTERSPEC(filters[i].name, filters[i].spec);
-                dlg.SetFileTypes((uint)specs.Length, specs);
+                ((IFileDialog)dlg).SetFileTypes((uint)specs.Length, specs);
                 ((IFileDialog)dlg).SetOptions((uint)(FOS.FORCEFILESYSTEM | FOS.OVERWRITEPROMPT | FOS.PATHMUSTEXIST | FOS.DONTADDTORECENT));
                 if (!string.IsNullOrWhiteSpace(defaultExt)) dlg.SetDefaultExtension(defaultExt!);
                 if (!string.IsNullOrWhiteSpace(suggestedFileName)) ((IFileDialog)dlg).SetFileName(suggestedFileName!);

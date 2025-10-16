@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+  <Bundle Name="FormatX Installer" 
+          Version="1.0.0.0" 
+          Manufacturer="YourCompany" 
+          UpgradeCode="22222222-2222-2222-2222-222222222222">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
+
+    <Chain>
+      <!-- Optional dependencies examples (commented for self-contained publish) -->
+      <!--
+      <ExePackage Id="DotNetDesktopRuntime" SourceFile="dotnet-hosting.exe" Vital="yes" Compressed="yes"
+                  DetectCondition="RegistrySearch for dotnet if installed" />
+      <ExePackage Id="VCRedist" SourceFile="vc_redist.x64.exe" Vital="no" Compressed="yes"/>
+      -->
+      <MsiPackage Id="FormatXMsi" SourceFile="$(var.MsiPath)" DisplayInternalUI="no" Visible="no" Compressed="yes"/>
+    </Chain>
+  </Bundle>
+</Wix>

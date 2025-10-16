@@ -8,9 +8,12 @@ namespace FormatX.Services
 {
   public static class LogService
   {
+    public static event Action<string>? OnUsbLineAppended;
     private static readonly string LogDir =
       Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "logs");
     private static readonly string JsonlPath = Path.Combine(LogDir, "events.jsonl");
+    private static readonly string UsbPath = Path.Combine(LogDir, "usb.log");
+    private static readonly string RunUsbPath = Path.Combine(LogDir, $"usb_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.log");
 
     public static async Task LogAsync(string kind, object data)
     {
@@ -32,6 +35,48 @@ namespace FormatX.Services
 
     public static Task LogAsync(string kind, Exception ex)
       => LogAsync(kind, new { type = ex.GetType().FullName, ex.Message, ex.HResult, stack = ex.StackTrace });
+
+    // Central USB log helpers (exact lines for smoke checks)
+    public static async Task WriteUsbLineAsync(string line)
+    {
+      try
+      {
+        Directory.CreateDirectory(LogDir);
+        var text = $"{DateTimeOffset.Now:o}\t{line}" + Environment.NewLine;
+        await FileUtil.AppendAllTextRetryAsync(UsbPath, text);
+        await FileUtil.AppendAllTextRetryAsync(RunUsbPath, text);
+        try { OnUsbLineAppended?.Invoke(line); } catch { }
+      }
+      catch { }
+    }
+
+    public static void WriteUsbLine(string line)
+    {
+      try { WriteUsbLineAsync(line).GetAwaiter().GetResult(); } catch { }
+    }
+
+    public static Task LogUsbWinrtErrorAsync(string api, Exception ex)
+      => WriteUsbLineAsync($"usb.winrt.error:{api}:{ex.GetType().Name}:{Sanitize(ex.Message)}");
+
+    // Required by spec: simple callback-friendly appender
+    public static void AppendUsbLine(string line)
+    {
+      try { WriteUsbLineAsync(line).GetAwaiter().GetResult(); } catch { }
+    }
+
+    private static string Sanitize(string? s)
+      => (s ?? string.Empty).Replace('\r', ' ').Replace('\n', ' ').Trim();
+
+    public static Task UsbUpdatedAsync(string deviceId)
+      => WriteUsbLineAsync($"usb.updated:{deviceId}");
+
+    public static Task UsbRemovedAsync(string deviceId)
+      => WriteUsbLineAsync($"usb.removed:{deviceId}");
+
+    public static Task UsbRefreshAsync() => WriteUsbLineAsync("usb.refresh");
+    public static Task UsbRefreshErrorAsync(string details) => WriteUsbLineAsync($"usb.refresh.error:{details}");
+    public static Task UsbRefreshCancelledAsync() => WriteUsbLineAsync("usb.refresh.cancelled");
+    public static Task UsbRefreshSkippedEnergySaverAsync() => WriteUsbLineAsync("usb.refresh.skipped.energysaver");
 
     public static async Task<string> ExportCsvAsync(string destCsv)
     {

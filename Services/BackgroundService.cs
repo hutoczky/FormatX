@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 
 namespace FormatX.Services
 {
@@ -25,22 +26,41 @@ namespace FormatX.Services
         await Task.Run(() => {
           using var fs = File.OpenRead(path); // decode check (no actual decode here)
         });
+        // Live brush update
+        try
+        {
+          if (Application.Current?.Resources != null)
+          {
+            var uri = new Uri(path, UriKind.Absolute);
+            Application.Current.Resources["AppBackgroundBrush"] = new ImageBrush { ImageSource = new BitmapImage(uri), Stretch = Stretch.UniformToFill };
+          }
+        }
+        catch (Exception ex)
+        {
+          LogService.AppendUsbLine($"usb.background.change:fail:{ex.Message}");
+          await LogService.LogAsync("background.apply.error", ex);
+          return false;
+        }
+        LogService.AppendUsbLine($"usb.background.change:ok:{path}");
         await LogService.LogAsync("background.set", new { path });
         return true;
       }
       catch (COMException cex)
       {
-        await LogService.LogAsync("error.com.exception", cex);
+        LogService.AppendUsbLine($"usb.background.change:fail:{cex.Message}");
+        await LogService.LogUsbWinrtErrorAsync("BackgroundService.SetWallpaperAsync", cex);
         return false;
       }
       catch (IOException ioex)
       {
+        LogService.AppendUsbLine($"usb.background.change:fail:{ioex.Message}");
         await LogService.LogAsync("error.io.exception", ioex);
         return false;
       }
       catch (Exception ex)
       {
-        await LogService.LogAsync("background.set.error.generic", new { ex = ex.Message });
+        LogService.AppendUsbLine($"usb.background.change:fail:{ex.Message}");
+        await LogService.LogUsbWinrtErrorAsync("BackgroundService.SetWallpaperAsync", ex);
         return false;
       }
     }

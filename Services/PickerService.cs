@@ -11,260 +11,144 @@ namespace FormatX.Services
 {
   public static class PickerService
   {
+    // Serialize pick requests across the app to avoid concurrent WinRT broker usage
+    private static readonly SemaphoreSlim _gate = new(1, 1);
     public static bool LastImagePickerHadException { get; private set; }
-    public static async Task<StorageFile?> PickIsoFileAsync(Microsoft.UI.Xaml.Window window)
+    // Win32 pickers only when unpackaged/elevated/forced; Store/MSIX path uses WinRT
+    private static bool ShouldUseWin32Pickers => ElevationService.IsElevated() || DiagFlags.ForceWin32Pickers || !AppEnv.IsPackaged;
+    private static Task<T> RunOnUIThreadAsync<T>(Microsoft.UI.Xaml.Window window, Func<T> func)
+      => UiThread.RunOnUIThreadAsync<T>(window, func);
+
+    private static Task<T> RunOnUIThreadAsync<T>(Microsoft.UI.Xaml.Window window, Func<Task<T>> func)
+      => UiThread.RunOnUIThreadAsync<T>(window, func);
+
+    private static void SafeLogSync(string evt, object data)
     {
+      try { LogService.LogAsync(evt, data).ConfigureAwait(false).GetAwaiter().GetResult(); }
+      catch { }
+    }
+
+    // Unified file picker entry point
+    public static async Task<StorageFile?> PickFileAsync(Microsoft.UI.Xaml.Window window, string[] extensions, string logKey)
+    {
+      if (FormatX.App.IsMainWindowClosed) return null;
+      if (extensions is null || extensions.Length == 0)
+        extensions = new[] { "*" };
       try
       {
-        // Always log debug request
-        try { await LogService.LogAsync("dbg.picker.request", new { type = "iso", time = DateTimeOffset.Now, threadId = Environment.CurrentManagedThreadId, pid = Environment.ProcessId }); } catch { }
+        if (!await _gate.WaitAsync(0).ConfigureAwait(false)) { try { await LogService.LogAsync("dbg.picker.concurrent", new { type = logKey }); } catch { } return null; }
+        try { await LogService.LogAsync($"{logKey}.request", new { time = DateTimeOffset.Now, threadId = Environment.CurrentManagedThreadId, pid = Environment.ProcessId }); } catch { }
 
-        // If elevated or explicitly forced, prefer Win32 dialog to avoid broker issues
-        if (ElevationService.IsElevated() || DiagFlags.ForceWin32Pickers)
+        // Prefer Win32 dialogs for stability, also when elevated or explicitly forced
+        if (ShouldUseWin32Pickers)
         {
           var hwnd = WindowNative.GetWindowHandle(window);
-          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "iso" }); return null; }
-          var path = Win32FileDialog.ShowOpenFileDialog(hwnd, new[] { ("ISO", "*.iso") }, "iso");
-          if (string.IsNullOrWhiteSpace(path)) return null;
-          var f = await StorageFile.GetFileFromPathAsync(path);
-          await LogService.LogAsync("picker.iso.win32", new { result = f?.Path });
-          return f;
-        }
-        // Try WinRT picker on UI thread
-        if (!window.DispatcherQueue.HasThreadAccess)
-        {
-          var tcs = new TaskCompletionSource<StorageFile?>();
-          window.DispatcherQueue.TryEnqueue(async () =>
+          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { logKey }); return null; }
+          // Build Win32 filter: one combined pattern line
+          var masks = string.Join(';', Array.ConvertAll(extensions, e => e.StartsWith('.') ? "*" + e : e));
+          var path = Win32FileDialog.ShowOpenFileDialog(hwnd, new[] { ("Files", masks) }, logKey);
+          if (string.IsNullOrWhiteSpace(path)) { try { await LogService.LogAsync($"{logKey}.cancel", new { }); } catch { } return null; }
+          // WinRT StorageFile access must be marshaled and guarded
+          return await WinRtGuard.SafeExecuteAsync(async ct2 =>
           {
-            try
-            {
-              var picker = new FileOpenPicker();
-              var hwnd = WindowNative.GetWindowHandle(window);
-              if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "iso" }); tcs.TrySetResult(null); return; }
-              InitializeWithWindow.Initialize(picker, hwnd);
-              picker.FileTypeFilter.Add(".iso");
-              var file = await picker.PickSingleFileAsync();
-              await LogService.LogAsync("picker.iso", new { result = file?.Path });
-              tcs.TrySetResult(file);
-            }
-            catch (COMException cex)
-            {
-              await LogService.LogAsync("error.picker.iso.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
-              tcs.TrySetResult(null);
-            }
-            catch (Exception ex)
-            {
-              await LogService.LogAsync("picker.iso.error.ui", new { ex = ex.Message });
-              tcs.TrySetResult(null);
-            }
-          });
-          return await tcs.Task.ConfigureAwait(false);
+            var f = await UiThread.RunOnUIThreadAsync(window, () => StorageFile.GetFileFromPathAsync(path).AsTask());
+            await LogService.LogAsync($"{logKey}.selected", new { result = f?.Path });
+            return f;
+          }, CancellationToken.None, LogService.AppendUsbLine);
         }
-        else
+
+        // WinRT picker on UI thread
+        return await RunOnUIThreadAsync(window, async () =>
         {
-          var picker = new FileOpenPicker();
-          var hwnd = WindowNative.GetWindowHandle(window);
-          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "iso" }); return null; }
-          InitializeWithWindow.Initialize(picker, hwnd);
-          picker.FileTypeFilter.Add(".iso");
-          var file = await picker.PickSingleFileAsync();
-          await LogService.LogAsync("picker.iso", new { result = file?.Path });
-          return file;
-        }
+          try
+          {
+            // Create + initialize exactly once per invocation on UI thread
+            var picker = new FileOpenPicker();
+            var hwnd = WindowNative.GetWindowHandle(window);
+            if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { logKey }); return null; }
+            InitializeWithWindow.Initialize(picker, hwnd);
+            picker.FileTypeFilter.Clear();
+            foreach (var ext in extensions)
+            {
+              var norm = ext?.Trim(); if (string.IsNullOrWhiteSpace(norm)) continue;
+              if (!norm.StartsWith('.')) norm = "." + norm.TrimStart('*');
+              picker.FileTypeFilter.Add(norm);
+            }
+            return await WinRtGuard.SafeExecuteAsync(async ct2 =>
+            {
+              var file = await picker.PickSingleFileAsync().AsTask().ConfigureAwait(false);
+              if (file == null) { try { await LogService.LogAsync($"{logKey}.cancel", new { }); } catch { } return (StorageFile?)null; }
+              await LogService.LogAsync($"{logKey}.selected", new { result = file?.Path });
+              return file;
+            }, CancellationToken.None, LogService.AppendUsbLine);
+          }
+          catch (Exception ex) { await LogService.LogAsync($"{logKey}.exception", new { kind = "General", ex = ex.Message }); return null; }
+        }).ConfigureAwait(false);
       }
-      catch (COMException cex)
-      {
-        // Fallback to Win32 COM dialog
-        await LogService.LogAsync("error.picker.iso.comexception", new { hr = $"0x{(uint)cex.HResult:x8}" });
-        try
-        {
-          var hwnd = WindowNative.GetWindowHandle(window);
-          var path = Win32FileDialog.ShowOpenFileDialog(hwnd, new[] { ("ISO", "*.iso") }, "iso");
-          if (string.IsNullOrWhiteSpace(path)) return null;
-          var file = await StorageFile.GetFileFromPathAsync(path);
-          await LogService.LogAsync("picker.iso.win32", new { result = file?.Path });
-          return file;
-        }
-        catch (Exception inner)
-        {
-          await LogService.LogAsync("picker.iso.win32.error", new { inner = inner.Message });
-          return null;
-        }
-      }
-      catch (Exception ex)
-      {
-        await LogService.LogAsync("picker.iso.error", new { ex = ex.Message });
-        return null;
-      }
+      finally { try { _gate.Release(); } catch { } }
+    }
+
+    public static async Task<StorageFile?> PickIsoFileAsync(Microsoft.UI.Xaml.Window window)
+    {
+      return await PickFileAsync(window, new[] { ".iso" }, "iso");
     }
     public static async Task<StorageFolder?> PickFolderAsync(Microsoft.UI.Xaml.Window window)
     {
+      if (FormatX.App.IsMainWindowClosed) return null;
       try
       {
-        // Always log debug request
+        if (!await _gate.WaitAsync(0).ConfigureAwait(false)) { try { await LogService.LogAsync("dbg.picker.concurrent", new { type = "folder" }); } catch { } return null; }
         try { await LogService.LogAsync("dbg.picker.request", new { type = "folder", time = DateTimeOffset.Now, threadId = Environment.CurrentManagedThreadId, pid = Environment.ProcessId }); } catch { }
 
-        // Prefer WinRT but if elevated or forced, use Win32 folder dialog
-        if (ElevationService.IsElevated() || DiagFlags.ForceWin32Pickers)
+        // Prefer Win32 folder dialog by default, and when elevated/forced
+        if (ShouldUseWin32Pickers)
         {
           var hwnd = WindowNative.GetWindowHandle(window);
           if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "folder" }); return null; }
           var path = Win32FileDialog.ShowPickFolderDialog(hwnd);
           if (string.IsNullOrWhiteSpace(path)) return null;
-          var pickedFolder = await StorageFolder.GetFolderFromPathAsync(path);
-          await LogService.LogAsync("picker.folder.win32", new { result = pickedFolder?.Path });
-          return pickedFolder;
-        }
-        // WinRT FolderPicker on UI thread
-        if (!window.DispatcherQueue.HasThreadAccess)
-        {
-          var tcs = new TaskCompletionSource<StorageFolder?>();
-          window.DispatcherQueue.TryEnqueue(async () =>
+          return await WinRtGuard.SafeExecuteAsync(async ct2 =>
           {
-            try
-            {
-              var picker = new FolderPicker();
-              var hwnd = WindowNative.GetWindowHandle(window);
-              if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "folder" }); tcs.TrySetResult(null); return; }
-              InitializeWithWindow.Initialize(picker, hwnd);
-              picker.FileTypeFilter.Add("*");
-              var folder = await picker.PickSingleFolderAsync();
-              await LogService.LogAsync("picker.folder", new { result = folder?.Path });
-              tcs.TrySetResult(folder);
-            }
-            catch (COMException cex)
-            {
-              await LogService.LogAsync("error.picker.folder.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
-              tcs.TrySetResult(null);
-            }
-            catch (Exception ex)
-            {
-              await LogService.LogAsync("picker.folder.error.ui", new { ex = ex.Message });
-              tcs.TrySetResult(null);
-            }
-          });
-          return await tcs.Task.ConfigureAwait(false);
+            var pickedFolder = await UiThread.RunOnUIThreadAsync(window, () => StorageFolder.GetFolderFromPathAsync(path).AsTask());
+            await LogService.LogAsync("picker.folder.win32", new { result = pickedFolder?.Path });
+            return pickedFolder;
+          }, CancellationToken.None, LogService.AppendUsbLine);
         }
-        else
+        return await RunOnUIThreadAsync(window, async () =>
         {
-          var picker = new FolderPicker();
-          var hwnd = WindowNative.GetWindowHandle(window);
-          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "folder" }); return null; }
-          InitializeWithWindow.Initialize(picker, hwnd);
-          picker.FileTypeFilter.Add("*");
-          var folder = await picker.PickSingleFolderAsync();
-          await LogService.LogAsync("picker.folder", new { result = folder?.Path });
-          return folder;
-        }
+          try
+          {
+            var picker = new FolderPicker();
+            var hwnd = WindowNative.GetWindowHandle(window);
+            if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "folder" }); return null; }
+            InitializeWithWindow.Initialize(picker, hwnd);
+            picker.FileTypeFilter.Add("*");
+            return await WinRtGuard.SafeExecuteAsync(async ct2 =>
+            {
+              var folder = await picker.PickSingleFolderAsync().AsTask().ConfigureAwait(false);
+              await LogService.LogAsync("picker.folder", new { result = folder?.Path });
+              return folder;
+            }, CancellationToken.None, LogService.AppendUsbLine);
+          }
+          catch (Exception ex) { await LogService.LogAsync("picker.folder.error.ui", new { ex = ex.Message }); return null; }
+        }).ConfigureAwait(false);
       }
-      catch (COMException cex)
-      {
-        await LogService.LogAsync("error.picker.folder.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
-        return null;
-      }
+      catch (COMException cex) { await LogService.LogUsbWinrtErrorAsync("FolderPicker.PickSingleFolderAsync", cex); return null; }
       catch (Exception ex)
       {
         await LogService.LogAsync("picker.folder.error", new { ex = ex.Message });
         return null;
       }
+      finally { try { _gate.Release(); } catch { } }
     }
 
     public static async Task<StorageFile?> PickImageFileAsync(Microsoft.UI.Xaml.Window window)
     {
-      try
-      {
-        LastImagePickerHadException = false;
-        // Always log debug request
-        try { await LogService.LogAsync("dbg.picker.request", new { type = "image", time = DateTimeOffset.Now, threadId = Environment.CurrentManagedThreadId, pid = Environment.ProcessId }); } catch { }
-
-        // If elevated or forced, prefer Win32 dialog to avoid COM E_FAIL
-        if (ElevationService.IsElevated() || DiagFlags.ForceWin32Pickers)
-        {
-          var hwnd = WindowNative.GetWindowHandle(window);
-          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "image" }); return null; }
-          var path = Win32FileDialog.ShowOpenFileDialog(hwnd,
-            new[] { ("Images", "*.jpg;*.jpeg;*.png;*.bmp"), ("JPG", "*.jpg;*.jpeg"), ("PNG", "*.png"), ("BMP", "*.bmp") });
-          if (string.IsNullOrWhiteSpace(path)) return null;
-          var f = await StorageFile.GetFileFromPathAsync(path);
-          await LogService.LogAsync("picker.image.win32", new { result = f?.Path });
-          return f;
-        }
-        if (!window.DispatcherQueue.HasThreadAccess)
-        {
-          var tcs = new TaskCompletionSource<StorageFile?>();
-          window.DispatcherQueue.TryEnqueue(async () =>
-          {
-            try
-            {
-              var picker = new FileOpenPicker();
-              var hwnd = WindowNative.GetWindowHandle(window);
-              if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "image" }); tcs.TrySetResult(null); return; }
-              InitializeWithWindow.Initialize(picker, hwnd);
-              picker.FileTypeFilter.Add(".png");
-              picker.FileTypeFilter.Add(".jpg");
-              picker.FileTypeFilter.Add(".jpeg");
-              picker.FileTypeFilter.Add(".bmp");
-              var file = await picker.PickSingleFileAsync();
-              await LogService.LogAsync("picker.image", new { result = file?.Path });
-              tcs.TrySetResult(file);
-            }
-            catch (COMException cex)
-            {
-              LastImagePickerHadException = true;
-              await LogService.LogAsync("error.picker.image.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
-              tcs.TrySetResult(null);
-            }
-            catch (Exception ex)
-            {
-              LastImagePickerHadException = true;
-              await LogService.LogAsync("picker.image.error.ui", new { ex = ex.Message });
-              tcs.TrySetResult(null);
-            }
-          });
-          return await tcs.Task.ConfigureAwait(false);
-        }
-        else
-        {
-          var picker = new FileOpenPicker();
-          var hwnd = WindowNative.GetWindowHandle(window);
-          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "image" }); return null; }
-          InitializeWithWindow.Initialize(picker, hwnd);
-          picker.FileTypeFilter.Add(".png");
-          picker.FileTypeFilter.Add(".jpg");
-          picker.FileTypeFilter.Add(".jpeg");
-          picker.FileTypeFilter.Add(".bmp");
-          var file = await picker.PickSingleFileAsync();
-          await LogService.LogAsync("picker.image", new { result = file?.Path });
-          return file;
-        }
-      }
-      catch (COMException cex)
-      {
-        LastImagePickerHadException = true;
-        await LogService.LogAsync("error.picker.image.comexception", new { hr = $"0x{(uint)cex.HResult:x8}", cex.Message });
-        try
-        {
-          var hwnd = WindowNative.GetWindowHandle(window);
-          if (hwnd == IntPtr.Zero) { await LogService.LogAsync("error.picker.nohwnd", new { type = "image" }); return null; }
-          var path = Win32FileDialog.ShowOpenFileDialog(hwnd,
-            new[] { ("Images", "*.jpg;*.jpeg;*.png;*.bmp"), ("JPG", "*.jpg;*.jpeg"), ("PNG", "*.png"), ("BMP", "*.bmp") });
-          if (string.IsNullOrWhiteSpace(path)) return null;
-          var f = await StorageFile.GetFileFromPathAsync(path);
-          await LogService.LogAsync("picker.image.win32", new { result = f?.Path });
-          return f;
-        }
-        catch (Exception inner)
-        {
-          await LogService.LogAsync("picker.image.win32.error", new { inner = inner.Message });
-          return null;
-        }
-      }
-      catch (Exception ex)
-      {
-        LastImagePickerHadException = true;
-        await LogService.LogAsync("picker.image.error", new { ex = ex.Message });
-        return null;
-      }
+      if (FormatX.App.IsMainWindowClosed) return null;
+      LastImagePickerHadException = false;
+      var file = await PickFileAsync(window, new[] { ".png", ".jpg", ".jpeg", ".bmp" }, "image");
+      LastImagePickerHadException = file == null; // best-effort signal if not selected due to exception/cancel
+      return file;
     }
   }
 }

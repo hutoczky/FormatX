@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="FormatX" Language="1038" Version="1.0.0.0" Manufacturer="YourCompany" UpgradeCode="11111111-1111-1111-1111-111111111111">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine"/>
+    <MediaTemplate/>
+
+    <MajorUpgrade Schedule="afterInstallInitialize" DowngradeErrorMessage="A telepített verzió újabb."/>
+
+    <Property Id="ARPCONTACT" Value="YourCompany"/>
+    <Property Id="ARPURLINFOABOUT" Value="https://example.com/formatx"/>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="FormatX"/>
+      </Directory>
+    </Directory>
+
+    <ComponentGroup Id="AppFiles">
+      <!-- Filled by Heat (HarvestedFiles.wxs) using -cg AppFiles -->
+    </ComponentGroup>
+
+    <Feature Id="MainFeature" Title="FormatX" Level="1">
+      <ComponentGroupRef Id="AppFiles"/>
+    </Feature>
+
+  </Product>
+</Wix>

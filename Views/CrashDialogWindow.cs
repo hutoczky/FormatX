@@ -49,16 +49,18 @@ namespace FormatX.Views
         // Best-effort resize only if AppWindow APIs succeed via reflection (avoid Win32Interop compile dependency here)
         try
         {
-          var winIdMethod = Type.GetType("WinRT.Interop.Win32Interop, WinRT.Runtime")?.GetMethod("GetWindowIdFromWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-          var appWindowType = Type.GetType("Microsoft.UI.Windowing.AppWindow, Microsoft.WinUI");
+          System.Reflection.MethodInfo? winIdMethod = Type
+            .GetType("WinRT.Interop.Win32Interop, WinRT.Runtime")?
+            .GetMethod("GetWindowIdFromWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+          Type? appWindowType = Type.GetType("Microsoft.UI.Windowing.AppWindow, Microsoft.WinUI");
           if (winIdMethod != null && appWindowType != null)
           {
-            var windowId = winIdMethod.Invoke(null, new object[] { hwnd });
+            object? windowId = winIdMethod.Invoke(null, new object[] { hwnd });
             var getFromId = appWindowType.GetMethod("GetFromWindowId", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            var appWindow = getFromId?.Invoke(null, new object[] { windowId });
+            object? appWindow = getFromId?.Invoke(null, new object[] { windowId! });
             var resize = appWindowType.GetMethod("Resize");
             var sizeStruct = size; // struct value
-            resize?.Invoke(appWindow, new object[] { sizeStruct });
+            if (appWindow != null && resize != null) resize.Invoke(appWindow, new object[] { sizeStruct });
           }
         }
         catch (Exception rzEx) { _ = LogService.LogAsync("crash.dialog.size.reflection", new { rzEx = rzEx.Message }); }
@@ -74,22 +76,10 @@ namespace FormatX.Views
       try
       {
         if (!File.Exists(_crashPath)) return;
-        // Prefer WinRT, but if elevated/off-UI-thread use Win32 save dialog
+        // Always use Win32 save dialog for maximum compatibility
         string? target = null;
-        if (!Services.ElevationService.IsElevated() && this.DispatcherQueue.HasThreadAccess)
-        {
-          var picker = new FileSavePicker();
-          InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
-          picker.FileTypeChoices.Add("JSON", new System.Collections.Generic.List<string> { ".json" });
-          picker.SuggestedFileName = System.IO.Path.GetFileName(_crashPath);
-          var f = await picker.PickSaveFileAsync();
-          target = f?.Path;
-        }
-        else
-        {
-          var hwnd = WindowNative.GetWindowHandle(this);
-          target = FormatX.Interop.Win32FileDialog.ShowSaveFileDialog(hwnd, new[] { ("JSON", "*.json") }, "json", System.IO.Path.GetFileName(_crashPath));
-        }
+        var hwnd = WindowNative.GetWindowHandle(this);
+        target = FormatX.Interop.Win32FileDialog.ShowSaveFileDialog(hwnd, new[] { ("JSON", "*.json") }, "json", System.IO.Path.GetFileName(_crashPath));
         if (!string.IsNullOrWhiteSpace(target))
         {
           File.Copy(_crashPath, target!, true);

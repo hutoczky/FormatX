@@ -1,0 +1,3 @@
+This file should list all files that contain Windows.* / WinRT / System.Management / COMException references that were guarded or require manual review.
+TODO: Expand during PR review if any remaining references are found.
+- Services/UsbMonitorService.cs (event-driven watcher; guarded via adapter + try/catch; TODO comments left)

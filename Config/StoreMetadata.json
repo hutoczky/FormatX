@@ -1,0 +1,7 @@
+{
+  "PrivacyPolicyUrl": "https://example.com/formatx/privacy",
+  "Listing": {
+    "DefaultLanguage": "en-US",
+    "SupportedLanguages": ["en-US", "hu-HU"]
+  }
+}

@@ -1,0 +1,126 @@
+name: Release RC Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'release/*'
+
+jobs:
+  build-and-publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        run: dotnet build -c Release --no-restore
+      - name: Publish + WiX bundle (unsigned)
+        shell: pwsh
+        run: |
+          ./scripts/publish-and-package.ps1 -RID win-x64 -OutDir ./artifacts -Configuration Release
+      - name: Upload unsigned artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-setup
+          path: |
+            artifacts/bundle/FormatX-Setup.exe
+            artifacts/msi/FormatX.msi
+            artifacts/publish/win-x64/**
+
+  sign:
+    runs-on: windows-latest
+    needs: build-and-publish
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: unsigned-setup
+          path: ./artifacts
+      - name: Sign Setup.exe (optional)
+        if: ${{ secrets.CERT_THUMBPRINT != '' }}
+        shell: pwsh
+        run: |
+          ./scripts/sign/sign-and-timestamp.ps1 -Thumbprint $env:CERT_THUMBPRINT -File ./artifacts/bundle/FormatX-Setup.exe
+        env:
+          CERT_THUMBPRINT: ${{ secrets.CERT_THUMBPRINT }}
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-setup
+          path: |
+            artifacts/bundle/FormatX-Setup.exe
+            artifacts/msi/FormatX.msi
+
+  smoke:
+    runs-on: windows-latest
+    needs: sign
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed-setup
+          path: ./artifacts
+      - name: Run UI smoke CI
+        shell: pwsh
+        run: |
+          ./scripts/tests/ui-smoke-ci.ps1
+      - name: Run deep smoke
+        shell: pwsh
+        run: |
+          ./tests/smoke-test.ps1
+      - name: Upload smoke outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-outputs
+          path: |
+            tests/smoke-output.txt
+            tests/ui-smoke-output.txt
+            $env:LOCALAPPDATA/FormatX/logs/usb.log
+
+  wack:
+    runs-on: windows-latest
+    needs: sign
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed-setup
+          path: ./artifacts
+      - name: WACK (optional)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          ./scripts/ci/wack-runner.ps1 -InputPath ./artifacts/bundle/FormatX-Setup.exe
+      - name: Upload WACK results
+        uses: actions/upload-artifact@v4
+        with:
+          name: wack-results
+          path: |
+            tests/wack-expected.txt
+            tests/wack-results.txt
+
+  release:
+    runs-on: windows-latest
+    needs: [smoke]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed-setup
+          path: ./artifacts
+      - name: Create RC1 release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: RC1
+          name: FormatX RC1
+          draft: false
+          prerelease: true
+          files: |
+            artifacts/bundle/FormatX-Setup.exe
+            artifacts/msi/FormatX.msi
+            tests/smoke-output.txt
+            tests/ui-smoke-output.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -15,6 +15,7 @@ using Windows.Storage.Pickers;
 using WinRT.Interop;
 using FormatX.Services;
 using Microsoft.Windows.AppNotifications;
+using FormatX.ViewModels;
 
 namespace FormatX
 {
@@ -29,12 +30,20 @@ namespace FormatX
     private DeviceWatcher? _watcher;
     private bool _isBrowsing = false;
     private const string BackgroundTokenKey = "backgroundToken";
+    private readonly DrivesViewModel _drivesVm = new();
+    private Microsoft.UI.Windowing.AppWindow? _appWindow;
+    private volatile bool _isClosed = false;
+    private readonly FormatX.ViewModels.LoggerViewModel _logger = new();
+    private Timer? _pollTimer; // laptop-friendly polling fallback when watcher is disabled
+
+    internal DrivesViewModel DrivesVm => _drivesVm;
 
     public MainWindow()
     {
       this.InitializeComponent();
+      try { if (this.Content is FrameworkElement feRoot) feRoot.DataContext = _drivesVm; } catch { }
       this.Activated += MainWindow_Activated;
-      this.Closed += (_, __) => StopWatch();
+      this.Closed += (_, __) => { _isClosed = true; StopWatch(); _appWindow = null; };
 
       // Defer background restore until window activation to avoid race/COM issues
       try
@@ -74,6 +83,8 @@ namespace FormatX
       ApplyUiText();
       ApplyBackground();
       _ = RefreshDevices();
+      // Initial drive lists for VM: ISO only removable, Format all drives
+      try { _ = _drivesVm.RefreshDrivesAsync(this.DispatcherQueue, null, null, includeFixedForIso: false); } catch { }
       StartWatch();
 
       // Setup custom title bar drag region and integrate with system title bar
@@ -90,67 +101,66 @@ namespace FormatX
           InitializeTitleBar();
         }
       }
-      catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogAsync("error.com.exception", cex); CrashHandler.Show(cex, "titlebar.init"); }
+      catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogUsbWinrtErrorAsync("AppWindow.Init", cex); CrashHandler.Show(cex, "titlebar.init"); }
       catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "titlebar", ex = ex.Message }); }
 
-      void InitializeTitleBar()
+      async void InitializeTitleBar()
       {
-        var hwnd = WindowNative.GetWindowHandle(this);
-        var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
-        AppWindow? appWindow = null;
         try
         {
-          appWindow = AppWindow.GetFromWindowId(windowId);
-        }
-        catch (InvalidOperationException ioex)
-        {
-          _ = LogService.LogAsync("winrt.appwindow.invalid", new { ioex.Message });
-        }
-        catch (System.Runtime.InteropServices.COMException cex)
-        {
-          _ = LogService.LogAsync("error.com.exception", cex); CrashHandler.Show(cex, "appwindow.get");
-        }
-
-        try
-        {
-          // Only customize title bar if supported on this OS/device.
-          if (AppWindowTitleBar.IsCustomizationSupported() && appWindow != null)
+          await UiThread.RunOnUIThreadAsync(this, () =>
           {
-            this.ExtendsContentIntoTitleBar = true;
-            var drag = (this.Content as FrameworkElement)?.FindName("TitleDragRegion") as UIElement;
-            if (drag != null) this.SetTitleBar(drag);
+            var hwnd = WindowNative.GetWindowHandle(this);
+            var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
+            AppWindow? appWindow = null;
+            try { appWindow = AppWindow.GetFromWindowId(windowId); }
+            catch (InvalidOperationException ioex) { _ = LogService.LogUsbWinrtErrorAsync("AppWindow.GetFromWindowId", ioex); }
+            catch (System.Runtime.InteropServices.COMException cex) { _ = LogService.LogUsbWinrtErrorAsync("AppWindow.GetFromWindowId", cex); }
 
-            var titleBar = appWindow.TitleBar;
-            if (titleBar != null)
+            try
             {
-              appWindow.Title = "FormatX Pro";
-              titleBar.ExtendsContentIntoTitleBar = true;
-              titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 229, 231, 235);
-              titleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
-              titleBar.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+              if (AppWindowTitleBar.IsCustomizationSupported() && appWindow != null)
+              {
+                this.ExtendsContentIntoTitleBar = true;
+                var drag = (this.Content as FrameworkElement)?.FindName("TitleDragRegion") as UIElement;
+                if (drag != null) this.SetTitleBar(drag);
+
+                var titleBar = appWindow.TitleBar;
+                if (titleBar != null)
+                {
+                  appWindow.Title = "FormatX Pro";
+                  titleBar.ExtendsContentIntoTitleBar = true;
+                  titleBar.ButtonForegroundColor = Microsoft.UI.Colors.White;
+                  titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+                  titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+                }
+                _appWindow = appWindow;
+              }
+              else
+              {
+                this.ExtendsContentIntoTitleBar = false;
+              }
             }
-          }
-          else
-          {
-            // Fallback: don't extend into title bar; keep system default to avoid InvalidOperationException
-            this.ExtendsContentIntoTitleBar = false;
-          }
+            catch (Exception innerEx)
+            {
+              _ = LogService.LogUsbWinrtErrorAsync("TitleBar.Apply", innerEx);
+              this.ExtendsContentIntoTitleBar = false;
+            }
+          });
         }
-        catch (InvalidOperationException ioex)
+        catch { }
+
+      // Bind LiveLog and subscribe to usb.* events
+      try
+      {
+        var lv = (this.Content as FrameworkElement)?.FindName("LiveLog") as ListView;
+        if (lv != null) lv.ItemsSource = _logger.Items;
+        LogService.OnUsbLineAppended += (line) =>
         {
-          _ = LogService.LogAsync("winrt.titlebar.invalid", new { ioex.Message });
-          this.ExtendsContentIntoTitleBar = false;
-        }
-        catch (System.Runtime.InteropServices.COMException cex)
-        {
-          _ = LogService.LogAsync("error.com.exception", cex);
-          this.ExtendsContentIntoTitleBar = false;
-        }
-        catch (Exception innerEx)
-        {
-          _ = LogService.LogAsync("error.catch", new { ctx = "titlebar.apply", innerEx = innerEx.Message });
-          this.ExtendsContentIntoTitleBar = false;
-        }
+          try { DispatcherQueue.TryEnqueue(() => { _logger.Add(line); lv?.ScrollIntoView(_logger.Items[^1]); }); } catch { }
+        };
+      }
+      catch { }
       }
 
       // Default page: ISO creator visible as requested
@@ -169,7 +179,64 @@ namespace FormatX
         btnBrowseBackground.Click -= OnBrowseBackgroundClick;
         btnBrowseBackground.Click += OnBrowseBackgroundClick;
       }
+
+      // Initialize telemetry opt-out switch state
+      try
+      {
+        var tel = new TelemetryService();
+        var sw = (this.Content as FrameworkElement)?.FindName("TelemetryOptOutSwitch") as ToggleSwitch;
+        if (sw != null) sw.IsOn = tel.IsOptedOut();
+      }
+      catch { }
     }
+
+    // Safe AppWindow wrappers with required logging format
+    private void SafeUseAppWindow(Action<Microsoft.UI.Windowing.AppWindow> action, string api)
+    {
+      try
+      {
+        if (_isClosed || FormatX.App.IsMainWindowClosed) return;
+        var aw = _appWindow;
+        if (aw == null) return;
+        if (!DispatcherQueue.HasThreadAccess)
+        {
+          DispatcherQueue.TryEnqueue(() => { try { action(aw); } catch (Exception ex) { _ = LogService.LogUsbWinrtErrorAsync(api, ex); } });
+        }
+        else
+        {
+          action(aw);
+        }
+      }
+      catch (Exception ex) { _ = LogService.LogUsbWinrtErrorAsync(api, ex); }
+    }
+
+    private async Task SafeUseAppWindowAsync(Func<Microsoft.UI.Windowing.AppWindow, Task> func, string api)
+    {
+      try
+      {
+        if (_isClosed || FormatX.App.IsMainWindowClosed) return;
+        var aw = _appWindow;
+        if (aw == null) return;
+        if (!DispatcherQueue.HasThreadAccess)
+        {
+          var tcs = new TaskCompletionSource();
+          DispatcherQueue.TryEnqueue(async () => { try { await func(aw); } catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync(api, ex); } finally { tcs.TrySetResult(); } });
+          await tcs.Task.ConfigureAwait(false);
+        }
+        else
+        {
+          await func(aw);
+        }
+      }
+      catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync(api, ex); }
+    }
+
+    // Overloads required by spec
+    private void SafeUseAppWindow(Action<Microsoft.UI.Windowing.AppWindow> action)
+      => SafeUseAppWindow(action, "AppWindow");
+
+    private Task SafeUseAppWindowAsync(Func<Microsoft.UI.Windowing.AppWindow, Task> func)
+      => SafeUseAppWindowAsync(func, "AppWindow");
 
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
@@ -183,17 +250,36 @@ namespace FormatX
 
     private void StartWatch()
     {
-      if (IsEnergySaver()) { _ = LogService.LogAsync("watch.skip.energysaver", new { }); return; }
       try
       {
+        // Prefer polling on laptops (energy saver) or unpackaged/elevated contexts to reduce WinRT exceptions
+        bool forceEnable = string.Equals(Environment.GetEnvironmentVariable("FORMATX_FORCE_WATCHER"), "1", StringComparison.OrdinalIgnoreCase);
+        bool skipWatcher = IsEnergySaver() || FormatX.Services.AppEnv.IsElevated || !FormatX.Services.AppEnv.IsPackaged;
+        if (!forceEnable && skipWatcher)
+        {
+          _ = LogService.LogAsync("watch.poll.enabled", new { energysaver = IsEnergySaver(), elevated = FormatX.Services.AppEnv.IsElevated, packaged = FormatX.Services.AppEnv.IsPackaged });
+          EnsurePolling(start: true);
+          return;
+        }
+
+        // Start DeviceWatcher guarded
         if (_watcher != null && (_watcher.Status == DeviceWatcherStatus.Started || _watcher.Status == DeviceWatcherStatus.EnumerationCompleted)) return;
-        _watcher = DeviceInformation.CreateWatcher(DeviceClass.PortableStorageDevice);
-        _watcher.Added += (_, __) => DispatcherQueue.TryEnqueue(async () => await RefreshDevices());
-        _watcher.Removed += (_, __) => DispatcherQueue.TryEnqueue(async () => await RefreshDevices());
-        _watcher.Updated += (_, __) => DispatcherQueue.TryEnqueue(async () => await RefreshDevices());
-        _watcher.Start();
+        WinRtGuard.SafeExecuteAsync(async _ =>
+        {
+          await UiThread.RunOnUIThreadAsync(this, () =>
+          {
+            try { _watcher = DeviceInformation.CreateWatcher(DeviceClass.PortableStorageDevice); }
+            catch (Exception ex) { LogService.AppendUsbLine($"usb.winrt.error: {ex.GetType().Name} {ex.Message}"); return Task.CompletedTask; }
+            _watcher.Added += (_, __) => DispatcherQueue.TryEnqueue(async () => await RefreshDevices());
+            _watcher.Removed += (_, __) => DispatcherQueue.TryEnqueue(async () => await RefreshDevices());
+            _watcher.Updated += (_, __) => DispatcherQueue.TryEnqueue(async () => await RefreshDevices());
+            try { _watcher.Start(); }
+            catch (Exception ex2) { LogService.AppendUsbLine($"usb.winrt.error: {ex2.GetType().Name} {ex2.Message}"); }
+            return Task.CompletedTask;
+          });
+        }, CancellationToken.None, LogService.AppendUsbLine).GetAwaiter().GetResult();
       }
-      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "watch.start", ex = ex.Message }); }
+      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "DeviceWatcher.Start", ex = ex.Message }); }
     }
 
     private void StopWatch()
@@ -204,36 +290,111 @@ namespace FormatX
         {
           try
           {
-            if (_watcher.Status == DeviceWatcherStatus.Started || _watcher.Status == DeviceWatcherStatus.EnumerationCompleted) _watcher.Stop();
-          } catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "watch.stop.inner", ex = ex.Message }); }
+            WinRtGuard.SafeExecuteAsync(async _ =>
+            {
+              await UiThread.RunOnUIThreadAsync(this, () =>
+              {
+                if (_watcher.Status == DeviceWatcherStatus.Started || _watcher.Status == DeviceWatcherStatus.EnumerationCompleted) _watcher.Stop();
+                return Task.CompletedTask;
+              });
+            }, CancellationToken.None, LogService.AppendUsbLine).GetAwaiter().GetResult();
+          } catch (Exception ex) { _ = LogService.LogUsbWinrtErrorAsync("DeviceWatcher.Stop", ex); }
         }
       }
       catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "watch.stop", ex = ex.Message }); }
       finally { _watcher = null; }
+      EnsurePolling(start: false);
+    }
+
+    private void EnsurePolling(bool start)
+    {
+      try
+      {
+        if (start)
+        {
+          if (_pollTimer == null)
+          {
+            _pollTimer = new Timer(async _ =>
+            {
+              try { await RefreshDevices(); } catch (TaskCanceledException) { LogService.AppendUsbLine("usb.refresh.cancelled: poll"); } catch (OperationCanceledException) { LogService.AppendUsbLine("usb.refresh.cancelled: poll"); } catch (Exception ex) { await LogService.LogAsync("poll.refresh.error", new { ex = ex.Message }); }
+            }, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
+          }
+        }
+        else
+        {
+          _pollTimer?.Dispose();
+          _pollTimer = null;
+        }
+      }
+      catch (Exception ex) { _ = LogService.LogAsync("poll.ensure.error", new { ex = ex.Message }); }
     }
 
     private async Task RefreshDevices()
     {
+      if (_isClosed) return;
       try
       {
-        var vols = new DriveQueryService().GetVolumes();
-        void FillCombo(ComboBox combo)
-        {
-          combo?.Items?.Clear();
-          if (vols == null) return;
-          foreach (var v in vols)
-          {
-            var label = $"{v.DriveLetter} – {v.Label} • {v.FileSystem} • {(v.TotalBytes / (1024*1024*1024))} GB";
-            combo?.Items?.Add(new ComboBoxItem { Content = label, Tag = v.DriveLetter });
-          }
-          if ((combo?.Items?.Count ?? 0) > 0) combo.SelectedIndex = 0;
-        }
-        if (TargetDrives != null) FillCombo(TargetDrives);
-        if (FormatDrive != null) FillCombo(FormatDrive);
-        // PartitionDrive removed from UI
-      } catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "devices.refresh", ex = ex.Message }); }
+        string? prevFormat = GetSelectedDriveLetter(FormatDrive);
+        string? prevIso = GetSelectedDriveLetter(TargetDrives);
+        // ISO: only removable; Format: allow fixed too
+        try { await _drivesVm.RefreshDrivesAsync(this.DispatcherQueue, prevFormat, prevIso, includeFixedForIso: false); }
+        catch (TaskCanceledException) { await LogService.UsbRefreshCancelledAsync(); return; }
+        catch (OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); return; }
+        TryReselect(FormatDrive, prevFormat);
+        TryReselect(TargetDrives, prevIso);
+        // Update status for UX clarity
+        if (IsEnergySaver())
+          Status.Text = _lang == AppLanguage.Hu ? "Energiatakarékos mód – frissítés kihagyva" : "Energy Saver – refresh skipped";
+        else
+          Status.Text = _lang == AppLanguage.Hu ? "Meghajtók frissítve" : "Drives refreshed";
+      }
+      catch (TaskCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
+      catch (OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); }
+      catch (Exception ex) { _ = LogService.LogAsync("error.catch", new { ctx = "devices.refresh", ex = ex.Message }); }
       ValidateSelectedFormatDrive();
-      await Task.CompletedTask;
+    }
+
+    // UI: refresh button click handler (wired from XAML)
+    private async void DrivesRefresh_Click(object sender, RoutedEventArgs e)
+    {
+      if (_isClosed) return;
+      try
+      {
+        string? prevFormat = GetSelectedDriveLetter(FormatDrive);
+        string? prevIso = GetSelectedDriveLetter(TargetDrives);
+        await _drivesVm.RefreshDrivesAsync(this.DispatcherQueue, prevFormat, prevIso, includeFixedForIso: false);
+        // Optionally reselect previous items if still present
+        TryReselect(FormatDrive, prevFormat);
+        TryReselect(TargetDrives, prevIso);
+        // Update status
+        if (IsEnergySaver())
+          Status.Text = _lang == AppLanguage.Hu ? "Energiatakarékos mód – frissítés kihagyva" : "Energy Saver – refresh skipped";
+        else
+          Status.Text = _lang == AppLanguage.Hu ? "Meghajtók frissítve" : "Drives refreshed";
+      }
+      catch (Exception ex) { _ = LogService.LogAsync("usb.refresh.error.ui", new { ex = ex.Message }); }
+    }
+
+    private static void TryReselect(ComboBox? combo, string? letter)
+    {
+      try
+      {
+        if (combo == null || string.IsNullOrWhiteSpace(letter)) return;
+        combo.SelectedValue = letter;
+      }
+      catch { }
+    }
+
+    private static string? GetSelectedDriveLetter(ComboBox? combo)
+    {
+      try
+      {
+        if (combo == null) return null;
+        var val = combo.SelectedValue?.ToString();
+        if (!string.IsNullOrWhiteSpace(val)) return val;
+        return (combo.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+      }
+      catch { return null; }
     }
 
     private void SetProgress(int value, string text)
@@ -374,6 +535,7 @@ namespace FormatX
 
     private async Task RestoreBackgroundAsync()
     {
+      if (_isClosed) return;
       try
       {
         // Only proceed if token exists in LocalSettings
@@ -449,14 +611,7 @@ namespace FormatX
       {
         // Try WinRT picker via service (handles HWND init); fallback to Win32 COM dialog on failure
         var sel = await PickerService.PickIsoFileAsync(this);
-        if (sel == null)
-        {
-          // Fallback to Win32 COM-based picker (works when elevated/unpackaged)
-          var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-          var path = FormatX.Interop.Win32FileDialog.ShowOpenFileDialog(hwnd, new[] { ("ISO", "*.iso") }, "iso");
-          if (string.IsNullOrWhiteSpace(path)) { await LogService.LogAsync("iso.pick.cancel", new { via = "win32" }); return; }
-          sel = await Windows.Storage.StorageFile.GetFileFromPathAsync(path);
-        }
+        if (sel == null) { await LogService.LogAsync("iso.pick.cancel", new { via = "picker" }); return; }
 
         if (sel != null)
         {
@@ -469,8 +624,8 @@ namespace FormatX
       }
       catch (System.Runtime.InteropServices.COMException cex)
       {
-        await LogService.LogAsync("error.iso.picker", cex);
-        CrashHandler.Show(cex, "iso.picker");
+        await LogService.LogAsync("error.iso.picker.com", cex);
+        await TryWin32IsoPickerAsync();
       }
       catch (Exception ex)
       {
@@ -480,10 +635,44 @@ namespace FormatX
       finally { _isBrowsing = false; }
     }
 
+    private async Task TryWin32IsoPickerAsync()
+    {
+        try
+        {
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            var path = FormatX.Interop.Win32FileDialog.ShowOpenFileDialog(hwnd, new[] { ("ISO", "*.iso") }, "iso");
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                await LogService.LogAsync("iso.pick.cancel.win32", new { });
+                return;
+            }
+            var sel = await UiThread.RunOnUIThreadAsync(this, () => Windows.Storage.StorageFile.GetFileFromPathAsync(path).AsTask());
+            if (sel != null)
+            {
+                var valid = IsoValidator.Validate(sel);
+                if (!valid.IsValid)
+                {
+                    await LogService.LogAsync("error.iso.invalidext.win32", sel.Path);
+                    CrashHandler.Show(new Exception(valid.Reason));
+                    return;
+                }
+                await LogService.LogAsync("iso.selected.win32", sel.Path);
+                if (IsoPath != null) IsoPath.Text = sel.Path;
+                Services.SettingsService.Current.LastIsoPath = sel.Path;
+            }
+        }
+        catch (Exception ex)
+        {
+            await LogService.LogAsync("error.iso.picker.win32", ex);
+            CrashHandler.Show(ex, "iso.picker.win32");
+        }
+    }
+
     private async void WriteIso_Click(object sender, RoutedEventArgs e)
     {
+      if (FormatX.Services.SModeService.IsSMode()) { Status.Text = (_lang==AppLanguage.Hu ? "Ez a funkció S-módban nem érhető el." : "This feature is unavailable in S-mode."); return; }
       if (!await EnsureAdminForCriticalOpAsync("raw.write.iso")) return;
-      await LogService.LogAsync("iso_write", new { target = (TargetDrives?.SelectedItem as ComboBoxItem)?.Tag?.ToString(), iso = IsoPath?.Text });
+      await LogService.LogAsync("iso_write", new { target = GetSelectedDriveLetter(TargetDrives), iso = IsoPath?.Text });
       await ShowToast(_lang == AppLanguage.Hu ? "ISO írás: előkészítve" : "ISO write: prepared");
       Status.Text = LocalizationService.T("iso.write.prepared");
     }
@@ -493,13 +682,23 @@ namespace FormatX
       try
       {
         if (!await EnsureAdminForCriticalOpAsync("format.volume")) return;
-        string? dl = (FormatDrive?.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        string? dl = GetSelectedDriveLetter(FormatDrive);
+        if (string.IsNullOrWhiteSpace(dl))
+        {
+          Status.Text = _lang == AppLanguage.Hu ? "Válassz meghajtót" : "Select a drive";
+          return;
+        }
+        if (FormatService.IsSystemDrive(dl))
+        {
+          Status.Text = LocalizationService.T("systemdrive.blocked");
+          return;
+        }
         string fs = (FsCombo?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "NTFS";
         string label = LabelBox?.Text ?? "";
         bool quick = QuickBox?.IsChecked ?? true;
 
         await new FormatService().FormatVolumeAsync(
-          dl ?? "C:",
+          dl!,
           fs,
           label,
           quick,
@@ -511,6 +710,7 @@ namespace FormatX
 
     private async void Partition_Click(object sender, RoutedEventArgs e)
     {
+      if (FormatX.Services.SModeService.IsSMode()) { Status.Text = (_lang==AppLanguage.Hu ? "Ez a funkció S-módban nem érhető el." : "This feature is unavailable in S-mode."); return; }
       if (!await EnsureAdminForCriticalOpAsync("diskpart.partition")) return;
       await ShowToast(_lang == AppLanguage.Hu ? "Partíció művelet (stub)" : "Partition action (stub)");
     }
@@ -586,17 +786,18 @@ namespace FormatX
         var res = await svc.SmartQuickAsync(disk);
         HealthResult.Text = res?.ToString();
 
-        Brush fill = Application.Current.Resources["HealthYellow"] as Brush;
+        Brush? fill = Application.Current.Resources.ContainsKey("HealthYellow") ? Application.Current.Resources["HealthYellow"] as Brush : null;
         string label = "Sárga";
         switch (color)
         {
           case DiskHealthService.HealthStatus.Green:
-            fill = Application.Current.Resources["HealthGreen"] as Brush; label = "Zöld"; break;
+            fill = Application.Current.Resources.ContainsKey("HealthGreen") ? Application.Current.Resources["HealthGreen"] as Brush : fill; label = "Zöld"; break;
           case DiskHealthService.HealthStatus.Red:
-            fill = Application.Current.Resources["HealthRed"] as Brush; label = "Piros"; break;
+            fill = Application.Current.Resources.ContainsKey("HealthRed") ? Application.Current.Resources["HealthRed"] as Brush : fill; label = "Piros"; break;
         }
-        var dot = ((FrameworkElement)this.Content!).FindName("HealthDot") as Microsoft.UI.Xaml.Shapes.Ellipse;
-        var txt = ((FrameworkElement)this.Content!).FindName("HealthBadgeText") as TextBlock;
+        var fe = this.Content as FrameworkElement;
+        var dot = fe?.FindName("HealthDot") as Microsoft.UI.Xaml.Shapes.Ellipse;
+        var txt = fe?.FindName("HealthBadgeText") as TextBlock;
         if (dot != null && fill != null) dot.Fill = fill;
         if (txt != null) txt.Text = label;
         await LogService.LogAsync("health.badge", new { disk, color = color.ToString() });
@@ -632,13 +833,62 @@ namespace FormatX
     {
       try
       {
-        var dir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "logs");
-        System.IO.Directory.CreateDirectory(dir);
-        var filePath = System.IO.Path.Combine(dir, $"export_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.csv");
-        await LogService.ExportCsvAsync(filePath);
-        Status.Text = (_lang == AppLanguage.Hu ? "Exportálva: " : "Exported: ") + filePath;
+        var outDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "reports");
+        System.IO.Directory.CreateDirectory(outDir);
+        var res = await ReportService.GenerateFromLogAsync(outDir);
+        Status.Text = (_lang == AppLanguage.Hu ? "Exportálva: " : "Exported: ") + System.IO.Path.GetFileName(res.Csv) + ", " + System.IO.Path.GetFileName(res.Pdf);
       }
       catch (Exception ex) { Status.Text = ex.Message; await LogService.LogAsync("error.catch", new { ctx = "export.csv", ex = ex.Message }); }
+    }
+
+    // === Sprint 6 – Licensing & Telemetry & Installer ===
+    private async void ActivateLicense_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        var keyBox = (this.Content as FrameworkElement)?.FindName("LicenseKeyBox") as TextBox;
+        string key = keyBox?.Text ?? string.Empty;
+        var svc = new LicensingService();
+        var ok = await svc.ActivateAsync(key, offline: false, CancellationToken.None);
+        Status.Text = ok ? ( _lang==AppLanguage.Hu ? "Licenc aktiválva" : "License activated" ) : ( _lang==AppLanguage.Hu ? "Aktiválás sikertelen" : "Activation failed" );
+      }
+      catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("UI.ActivateLicense", ex); }
+    }
+
+    private async void ActivateLicenseOffline_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        var keyBox = (this.Content as FrameworkElement)?.FindName("LicenseKeyBox") as TextBox;
+        string key = keyBox?.Text ?? string.Empty;
+        var svc = new LicensingService();
+        var ok = await svc.ActivateAsync(key, offline: true, CancellationToken.None);
+        Status.Text = ok ? ( _lang==AppLanguage.Hu ? "Licenc (offline) aktiválva" : "License (offline) activated" ) : ( _lang==AppLanguage.Hu ? "Aktiválás sikertelen" : "Activation failed" );
+      }
+      catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("UI.ActivateLicenseOffline", ex); }
+    }
+
+    private async void TelemetryOptOut_Toggled(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        bool opt = (sender as ToggleSwitch)?.IsOn ?? false;
+        await new TelemetryService().SetOptOutAsync(opt);
+        Status.Text = opt ? ( _lang==AppLanguage.Hu ? "Telemetria kikapcsolva" : "Telemetry opted-out" ) : ( _lang==AppLanguage.Hu ? "Telemetria engedélyezve" : "Telemetry enabled" );
+      }
+      catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("UI.TelemetryOptOut", ex); }
+    }
+
+    private async void BuildMsix_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        await LogService.WriteUsbLineAsync("usb.installer.ui.begin");
+        var ok = await new InstallerPackagingService().BuildMsixAsync(null, CancellationToken.None);
+        await LogService.WriteUsbLineAsync(ok ? "usb.installer.ui.ok" : "usb.installer.ui.fail");
+        Status.Text = ok ? ( _lang==AppLanguage.Hu ? "MSIX elkészült (placeholder)" : "MSIX built (placeholder)" ) : ( _lang==AppLanguage.Hu ? "MSIX hiba" : "MSIX error" );
+      }
+      catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("UI.BuildMsix", ex); }
     }
 
     private void FsCombo_SelectionChanged(object sender, SelectionChangedEventArgs e) => ApplyMaxAndSanitize(LabelBox, FsCombo);
@@ -748,8 +998,9 @@ namespace FormatX
     {
       try
       {
-        string? dl = (FormatDrive?.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-        bool isSystem = FormatService.IsSystemDrive(dl ?? string.Empty);
+        string? dl = GetSelectedDriveLetter(FormatDrive);
+        bool noSelection = string.IsNullOrWhiteSpace(dl);
+        bool isSystem = !noSelection && FormatService.IsSystemDrive(dl ?? string.Empty);
         if (isSystem)
         {
           Status.Text = LocalizationService.T("systemdrive.blocked");
@@ -760,8 +1011,12 @@ namespace FormatX
           }
           catch (Exception ttex) { _ = LogService.LogAsync("error.catch", new { ctx = "tooltip.systemdrive", ttex = ttex.Message }); }
         }
-        if (BtnFormat != null) BtnFormat.IsEnabled = !isSystem;
-        if (BtnDone != null) BtnDone.IsEnabled = !isSystem;
+        if (noSelection)
+        {
+          Status.Text = _lang == AppLanguage.Hu ? "Válassz meghajtót" : "Select a drive";
+        }
+        if (BtnFormat != null) BtnFormat.IsEnabled = !isSystem && !noSelection;
+        if (BtnDone != null) BtnDone.IsEnabled = !isSystem && !noSelection;
         if (!isSystem)
         {
           try
@@ -771,7 +1026,7 @@ namespace FormatX
           }
           catch (Exception clrtex) { _ = LogService.LogAsync("error.catch", new { ctx = "tooltip.clear", clrtex = clrtex.Message }); }
         }
-        return !isSystem;
+        return !isSystem && !noSelection;
       }
       catch (Exception ex)
       {
@@ -886,12 +1141,12 @@ namespace FormatX
 
       switch (tag)
       {
-        case "iso": ViewIsoUsb.Visibility = Visibility.Visible; break;
-        case "format": ViewFormat.Visibility = Visibility.Visible; break;
-        case "part": ViewPartitions.Visibility = Visibility.Visible; break;
-        case "erase": ViewSecureErase.Visibility = Visibility.Visible; break;
-        case "health": ViewHealth.Visibility = Visibility.Visible; break;
-        default: ViewSettings.Visibility = Visibility.Visible; break;
+        case "iso": if (ViewIsoUsb != null) ViewIsoUsb.Visibility = Visibility.Visible; break;
+        case "format": if (ViewFormat != null) ViewFormat.Visibility = Visibility.Visible; break;
+        case "part": if (ViewPartitions != null) ViewPartitions.Visibility = Visibility.Visible; break;
+        case "erase": if (ViewSecureErase != null) ViewSecureErase.Visibility = Visibility.Visible; break;
+        case "health": if (ViewHealth != null) ViewHealth.Visibility = Visibility.Visible; break;
+        default: if (ViewSettings != null) ViewSettings.Visibility = Visibility.Visible; break;
       }
 
       UpdateHeaderForTag(tag);
@@ -923,6 +1178,7 @@ namespace FormatX
 
     private async void OnBrowseBackgroundClick(object sender, RoutedEventArgs e)
     {
+      if (_isClosed) return;
       if (_isBrowsing) { try { await LogService.LogAsync("dbg.picker.concurrent", new { type = "image" }); } catch { } return; } // prevent double-run
       _isBrowsing = true;
       try
@@ -944,8 +1200,8 @@ namespace FormatX
             }
             // Set global brush immediately
             Application.Current.Resources["AppBackgroundBrush"] = new ImageBrush { ImageSource = new BitmapImage(new Uri(file.Path)), Stretch = Stretch.UniformToFill };
-            // Persist token and path
-            Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace(BackgroundTokenKey, file);
+            // Persist token and path (only if packaged to avoid COM exceptions)
+            try { if (AppEnv.IsPackaged) Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace(BackgroundTokenKey, file); } catch { }
             Windows.Storage.ApplicationData.Current.LocalSettings.Values[BackgroundTokenKey] = file.Path;
             Services.SettingsService.Current.CustomBackgroundPath = file.Path;
             if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.success");
@@ -961,7 +1217,8 @@ namespace FormatX
           {
             if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.error");
             await LogService.LogAsync("error.background.invalidop", new { ioex.Message });
-            CrashHandler.Show(ioex);
+            // WinRT picker failed, try Win32 fallback
+            await TryWin32BackgroundPickerAsync();
           }
           catch (Exception ex)
           {
@@ -970,41 +1227,7 @@ namespace FormatX
             CrashHandler.Show(ex);
           }
         }
-        else
-        {
-          // Fallback to Win32 picker
-          var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-          var path = FormatX.Interop.Win32FileDialog.ShowOpenFileDialog(hwnd,
-            new[] { ("Images", "*.jpg;*.jpeg;*.png;*.bmp"), ("JPG", "*.jpg;*.jpeg"), ("PNG", "*.png"), ("BMP", "*.bmp") });
-          if (!string.IsNullOrWhiteSpace(path))
-          {
-            var f = await Windows.Storage.StorageFile.GetFileFromPathAsync(path);
-            if (f != null)
-            {
-              var valid = await BackgroundValidator.ValidateAsync(f);
-              if (!valid.IsValid)
-              {
-                if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.error");
-                await LogService.LogAsync("error.background.validate", valid.Reason);
-                CrashHandler.Show(new Exception(valid.Reason));
-              }
-              else
-              {
-                Application.Current.Resources["AppBackgroundBrush"] = new ImageBrush { ImageSource = new BitmapImage(new Uri(f.Path)), Stretch = Stretch.UniformToFill };
-                Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace(BackgroundTokenKey, f);
-                Windows.Storage.ApplicationData.Current.LocalSettings.Values[BackgroundTokenKey] = f.Path;
-                Services.SettingsService.Current.CustomBackgroundPath = f.Path;
-                if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.success");
-                await LogService.LogAsync("background.set.success", f.Path);
-              }
-            }
-          }
-          else
-          {
-            if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.cancel");
-            await LogService.LogAsync("background.set.cancel", "User cancelled");
-          }
-        }
+        else { return; }
       }
       catch (System.Runtime.InteropServices.COMException cex)
       {
@@ -1018,7 +1241,7 @@ namespace FormatX
         var statusBlock = Status ?? ((this.Content as FrameworkElement)?.FindName("TextBlockStatus") as TextBlock);
         if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.error");
         await LogService.LogAsync("error.background.invalidop", new { ioex.Message });
-        CrashHandler.Show(ioex);
+        await TryWin32BackgroundPickerAsync();
       }
       catch (Exception ex)
       {
@@ -1027,6 +1250,55 @@ namespace FormatX
         await LogService.LogAsync("error.catch", new { ctx = "background.picker", ex = ex.Message });
       }
       finally { _isBrowsing = false; }
+    }
+
+    private async Task TryWin32BackgroundPickerAsync()
+    {
+        if (_isClosed) return;
+        var statusBlock = Status ?? ((this.Content as FrameworkElement)?.FindName("TextBlockStatus") as TextBlock);
+        try
+        {
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            var path = FormatX.Interop.Win32FileDialog.ShowOpenFileDialog(hwnd,
+                new[] { ("Images", "*.jpg;*.jpeg;*.png;*.bmp"), ("JPG", "*.jpg;*.jpeg"), ("PNG", "*.png"), ("BMP", "*.bmp") });
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.cancel");
+                await LogService.LogAsync("background.set.cancel.win32", "User cancelled");
+                return;
+            }
+
+            var f = await UiThread.RunOnUIThreadAsync(this, () => Windows.Storage.StorageFile.GetFileFromPathAsync(path).AsTask());
+            if (f == null)
+            {
+                if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.error");
+                await LogService.LogAsync("error.background.win32.nullfile", new { path });
+                return;
+            }
+
+            var valid = await BackgroundValidator.ValidateAsync(f);
+            if (!valid.IsValid)
+            {
+                if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.error");
+                await LogService.LogAsync("error.background.validate.win32", valid.Reason);
+                CrashHandler.Show(new Exception(valid.Reason));
+                return;
+            }
+
+            Application.Current.Resources["AppBackgroundBrush"] = new ImageBrush { ImageSource = new BitmapImage(new Uri(f.Path)), Stretch = Stretch.UniformToFill };
+                try { if (AppEnv.IsPackaged) Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace(BackgroundTokenKey, f); } catch { }
+            Windows.Storage.ApplicationData.Current.LocalSettings.Values[BackgroundTokenKey] = f.Path;
+            Services.SettingsService.Current.CustomBackgroundPath = f.Path;
+            if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.success");
+            await LogService.LogAsync("background.set.success.win32", f.Path);
+        }
+        catch (Exception ex)
+        {
+            if (statusBlock != null) statusBlock.Text = LocalizationService.T("background.set.error");
+            await LogService.LogAsync("error.catch", new { ctx = "background.picker.win32", ex = ex.Message });
+            CrashHandler.Show(ex);
+        }
     }
 
     // Removed duplicate caption button handlers; native buttons are used

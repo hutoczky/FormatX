@@ -1,0 +1,3 @@
+Debugger trace placeholder for PR reference.
+Summary: repeated WinRT InvalidOperationException, COMException, TaskCanceled/OperationCanceled; ExitCode=0.
+(Replace with actual uploaded trace in CI run.)

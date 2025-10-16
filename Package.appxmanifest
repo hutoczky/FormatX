@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Package xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10">
+<Package xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+         IgnorableNamespaces="uap rescap desktop">
   <Identity Name="FormatXPro.Dev" Publisher="CN=FormatX Dev Test" Version="1.0.0.0" />
   <Properties>
     <DisplayName>FormatX Pro</DisplayName>
@@ -16,6 +19,11 @@
     <PackageDependency Name="Microsoft.VCLibs.140.00.UWPDesktop" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" MinVersion="14.0.24217.0" />
   </Dependencies>
   <Capabilities>
+    <rescap:Capability Name="runFullTrust"/>
+    <!-- Optional: remove if not using WinRT StorageFile on removable drives -->
+    <!-- <uap:Capability Name="removableStorage"/> -->
+    <!-- Avoid unless absolutely necessary -->
+    <!-- <rescap:Capability Name="broadFileSystemAccess"/> -->
   </Capabilities>
   <Applications>
     <Application Id="FormatX" Executable="FormatX.exe" EntryPoint="FormatX.App">
@@ -26,6 +34,11 @@
                           BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
       </uap:VisualElements>
+      <Extensions>
+        <desktop:Extension Category="windows.startupTask">
+          <desktop:StartupTask TaskId="FormatXStartup" Enabled="true" />
+        </desktop:Extension>
+      </Extensions>
     </Application>
   </Applications>
 </Package>

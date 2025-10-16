@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="menu.format" xml:space="preserve"><value>Formazas</value></data>
+  <data name="menu.drives" xml:space="preserve"><value>Lemezegysegek</value></data>
+  <data name="menu.erase" xml:space="preserve"><value>Biztonsagos torles</value></data>
+  <data name="menu.settings" xml:space="preserve"><value>Beallitasok</value></data>
+  <data name="title.app" xml:space="preserve"><value>FormatX Pro | Verzio: 2.0</value></data>
+  <data name="status.ready" xml:space="preserve"><value>Keszenlet</value></data>
+  <data name="common.apply" xml:space="preserve"><value>Alkalmaz</value></data>
+  <data name="common.validate" xml:space="preserve"><value>Ervenyesites</value></data>
+  <data name="common.browse" xml:space="preserve"><value>Tallozas</value></data>
+  <data name="common.exportCsv" xml:space="preserve"><value>Naplo export (CSV)</value></data>
+  <data name="settings.language" xml:space="preserve"><value>Nyelv</value></data>
+  <data name="settings.theme" xml:space="preserve"><value>Tema</value></data>
+  <data name="settings.theme.default" xml:space="preserve"><value>Rendszer (Alapertelemezett)</value></data>
+  <data name="settings.background" xml:space="preserve"><value>Hatterkep (JPG/PNG/BMP)</value></data>
+  <data name="settings.bg.hint" xml:space="preserve"><value>Valassz beepitett kepet vagy sajat fajlt.</value></data>
+  <data name="settings.about" xml:space="preserve"><value>Nevjegy</value></data>
+  <data name="settings.version" xml:space="preserve"><value>Verzio: 2.0</value></data>
+  <data name="iso.placeholder" xml:space="preserve"><value>Valassz ISO-t</value></data>
+  <data name="dialog.confirm.title" xml:space="preserve"><value>Megerosites</value></data>
+  <data name="dialog.confirm.content" xml:space="preserve"><value>Biztosan vegrehajtja a muveletet?</value></data>
+  <data name="dialog.confirm.yes" xml:space="preserve"><value>Igen</value></data>
+  <data name="dialog.confirm.no" xml:space="preserve"><value>Megse</value></data>
+  <data name="systemdrive.blocked" xml:space="preserve"><value>A kijelolt meghajto rendszermeghajto (tiltva).</value></data>
+  <data name="partitions.apply.done" xml:space="preserve"><value>Particios terv alkalmazva</value></data>
+  <data name="partitions.rollback.applied" xml:space="preserve"><value>Visszaallitas vegrehajtva</value></data>
+  <data name="partitions.rollback.none" xml:space="preserve"><value>Nincs rollback mentes</value></data>
+  <data name="operation.format.done" xml:space="preserve"><value>Formazas kesz</value></data>
+  <data name="operation.erase.done" xml:space="preserve"><value>Torles kesz</value></data>
+  <data name="background.set.success" xml:space="preserve"><value>Hatter beallitva</value></data>
+  <data name="background.set.cancel" xml:space="preserve"><value>Hatter visszavonva</value></data>
+  <data name="background.set.error" xml:space="preserve"><value>Hatter beallitasa sikertelen</value></data>
+  <data name="s.mode.block" xml:space="preserve"><value>Ez a funkcio S-modban nem erheto el.</value></data>
+</root>

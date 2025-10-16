@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System;
+using Microsoft.UI.Xaml;
 
 using System.Security.Cryptography;
 using FormatX.Services; // for LogService self-reference when logging
@@ -65,13 +66,17 @@ namespace FormatX.Services
       progress ??= (_ , __) => { };
       using var http = new HttpClient();
       http.DefaultRequestHeaders.UserAgent.ParseAdd("FormatX-Updater/1.0 (+Windows)");
-
-      string html = await http.GetStringAsync(ReleasesUrl, ct);
+      string html = string.Empty;
+      try { html = await http.GetStringAsync(ReleasesUrl, ct); }
+      catch (TaskCanceledException) { await LogService.UsbRefreshCancelledAsync(); return "Canceled"; }
+      catch (OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); return "Canceled"; }
       var assetUrl = FindBestAssetUrlForNewer(html, (1,1,0));
       if (assetUrl is null)
         return "Nincs új frissítés.";
 
-      var updatesFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Updates", CreationCollisionOption.OpenIfExists);
+      // WinRT ApplicationData access must be on UI thread
+      StorageFolder? updatesFolder = await WinRtGuard.SafeExecuteAsync(async ct2 => await UiThread.RunOnUIThreadAsync(FormatX.App.MainWindow as Window, () => ApplicationData.Current.LocalFolder.CreateFolderAsync("Updates", CreationCollisionOption.OpenIfExists).AsTask()), ct, LogService.AppendUsbLine);
+      if (updatesFolder == null) return "Update folder error";
       var fileName = Path.GetFileName(new Uri(assetUrl).LocalPath);
       var destPath = Path.Combine(updatesFolder.Path, fileName);
 
@@ -88,7 +93,10 @@ namespace FormatX.Services
           long done = 0;
           while (true)
           {
-            int read = await src.ReadAsync(buffer.AsMemory(0, buffer.Length), ct);
+            int read = 0;
+            try { read = await src.ReadAsync(buffer.AsMemory(0, buffer.Length), ct); }
+            catch (OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); return "Canceled"; }
+            
             if (read == 0) break;
             await dst.WriteAsync(buffer.AsMemory(0, read), ct);
             done += read;
@@ -100,8 +108,11 @@ namespace FormatX.Services
           }
         }
       }
+      catch (TaskCanceledException) { await LogService.UsbRefreshCancelledAsync(); return "Canceled"; }
+      catch (OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); return "Canceled"; }
+      
       catch (System.IO.IOException ioex) { await LogService.LogAsync("error.io.exception", ioex); return ioex.Message; }
-      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogAsync("error.com.exception", cex); return cex.Message; }
+      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogUsbWinrtErrorAsync("Update.Download", cex); return cex.Message; }
       catch (Exception ex) { await LogService.LogAsync("error.catch", new { ctx = "update.download", ex = ex.Message }); return ex.Message; }
       progress(96, "Letöltés kész. SHA-256 ellenőrzés...");
       try
@@ -119,16 +130,33 @@ namespace FormatX.Services
         }
       }
       catch (System.IO.IOException ioex) { await LogService.LogAsync("error.io.exception", ioex); }
-      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogAsync("error.com.exception", cex); }
+      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogUsbWinrtErrorAsync("Update.HashCheck", cex); }
       catch (System.Exception ex) { await LogService.LogAsync("update.hash.error", new { ex = ex.Message }); }
       progress(100, "Ellenőrizve. Telepítő indítása...");
       try
       {
-        var file = await StorageFile.GetFileFromPathAsync(destPath);
-        await Launcher.LaunchFileAsync(file);
+        StorageFile? file = await WinRtGuard.SafeExecuteAsync(async ct2 =>
+        {
+          var win = FormatX.App.MainWindow as Window;
+          if (win != null && !FormatX.App.IsMainWindowClosed)
+          {
+            return await UiThread.RunOnUIThreadAsync(win, () => StorageFile.GetFileFromPathAsync(destPath).AsTask());
+          }
+          else
+          {
+            return await StorageFile.GetFileFromPathAsync(destPath);
+          }
+        }, ct, LogService.AppendUsbLine);
+        if (file != null)
+        {
+          try { await LauncherService.TryLaunchUriOrLocalFallbackAsync(new Uri(file.Path), AppSettings.GetFallbackForProtocol("invalid")); }
+          catch (System.Exception ex) { await LogService.LogUsbWinrtErrorAsync("Launcher.LaunchFileAsync", ex); }
+        }
         return "Frissítés letöltve és indítva.";
       }
-      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogAsync("error.com.exception", cex); return "Letöltve: " + destPath + Environment.NewLine + cex.Message; }
+      catch (TaskCanceledException) { await LogService.UsbRefreshCancelledAsync(); return "Canceled"; }
+      catch (OperationCanceledException) { await LogService.UsbRefreshCancelledAsync(); return "Canceled"; }
+      catch (System.Runtime.InteropServices.COMException cex) { await LogService.LogUsbWinrtErrorAsync("Launcher.LaunchFileAsync", cex); return "Letöltve: " + destPath + Environment.NewLine + cex.Message; }
       catch (System.IO.IOException ioex) { await LogService.LogAsync("error.io.exception", ioex); return "Letöltve: " + destPath + Environment.NewLine + ioex.Message; }
       catch (Exception ex)
       {

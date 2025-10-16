@@ -21,24 +21,29 @@ namespace FormatX.Services
     {
       Directory.CreateDirectory(CrashDir);
       hwid = BuildHwid();
+      int hresult = ex.HResult;
       var payload = new
       {
+        kind = "last-exit",
         ctx.Source,
         ctx.Timestamp,
         user = Environment.UserName,
         machine = Environment.MachineName,
         type = ex.GetType().FullName,
         message = ex.Message,
+        hresult = $"0x{(uint)hresult:x8}",
         stack = ex.StackTrace,
         exception = ex.ToString(),
+        inner = ex.InnerException?.ToString(),
         hwid
       };
       string json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
-      string path = Path.Combine(CrashDir, $"crash_{DateTimeOffset.Now:yyyyMMdd_HHmmss}.json");
-      File.WriteAllText(path, json, Encoding.UTF8);
+      string path = Path.Combine(CrashDir, "last-exit.json");
+      try { FileUtil.AtomicWriteAsync(path, json).GetAwaiter().GetResult(); }
+      catch (Exception ioex) { _ = LogService.LogAsync("crash.save.io.error", new { error = ioex.Message }); }
       using var sha = SHA256.Create();
       sha256 = Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(json)));
-      File.WriteAllText(path + ".sha256", sha256);
+      try { FileUtil.AtomicWriteAsync(path + ".sha256", sha256).GetAwaiter().GetResult(); } catch (Exception ioex2) { _ = LogService.LogAsync("crash.save.sha.error", new { error = ioex2.Message }); }
       _ = LogService.LogAsync("crash.save.v2", new { ctx.Source, path, sha256, hwid });
       return path;
     }
@@ -77,6 +82,9 @@ namespace FormatX.Services
   public static class CrashHandler
   {
     private static Window? _mainWindow;
+    private static readonly object _gate = new();
+    private static DateTimeOffset _lastShownAt;
+    private static string? _lastSha;
 
     public static void Initialize(Window mainWindow) => _mainWindow = mainWindow;
 
@@ -84,11 +92,42 @@ namespace FormatX.Services
     {
       try
       {
+        if (FormatX.App.IsMainWindowClosed) return;
         var ctx = CrashContext.Current(source);
-        string path = CrashLogger.Save(ex, ctx, out var sha, out var hwid);
+        var path = CrashLogger.Save(ex, ctx, out var sha, out var hwid);
+        // De-dup within a short window to avoid dialog spam from cascaded errors
+        lock (_gate)
+        {
+          if (_lastSha == sha && (DateTimeOffset.Now - _lastShownAt) < TimeSpan.FromSeconds(5))
+          {
+            _ = LogService.LogAsync("crash.skip.duplicate", new { sha });
+            return;
+          }
+          _lastSha = sha; _lastShownAt = DateTimeOffset.Now;
+        }
         var title = LocalizationService.T("crash.dialog.title");
-        var win = new CrashDialogWindow(path) { Title = title };
-        win.Activate();
+
+        // Ensure window creation/activation happens on UI thread
+        try
+        {
+          if (_mainWindow != null)
+          {
+            _ = UiThread.RunOnUIThreadAsync(_mainWindow, () =>
+            {
+              var win = new CrashDialogWindow(path) { Title = title };
+              win.Activate();
+            });
+          }
+          else
+          {
+            var win = new CrashDialogWindow(path) { Title = title };
+            win.Activate();
+          }
+        }
+        catch (Exception mx)
+        {
+          _ = LogService.LogAsync("crash.handler.marshal.error", new { mx = mx.Message });
+        }
       }
       catch (Exception inner)
       {

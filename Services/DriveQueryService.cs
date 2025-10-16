@@ -102,8 +102,8 @@ namespace FormatX.Services
   public sealed class DriveItem
   {
     public int Number { get; init; }
-    public string DevicePath { get; init; }
-    public string Model { get; init; }
+    public string DevicePath { get; init; } = string.Empty;
+    public string Model { get; init; } = "Unknown";
     public ulong SizeBytes { get; init; }
     public bool IsRemovable { get; init; }
     public string Display => $"Disk {Number} — {Model} — {FormatSize(SizeBytes)}";

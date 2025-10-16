@@ -2,11 +2,13 @@
     x:Class="FormatX.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ui="using:Microsoft.UI.Xaml.Controls">
+    xmlns:ui="using:Microsoft.UI.Xaml.Controls"
+    xmlns:converters="using:FormatX.Converters">
   <Grid Background="{StaticResource AppBackgroundBrush}">
     <Grid.Resources>
       <ThemeShadow x:Key="AppCardShadow"/>
       <ThemeShadow x:Key="AppFooterShadow"/>
+      <converters:LogLevelToBrushConverter x:Key="LogLevelToBrush"/>
       <Style TargetType="TextBlock">
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Foreground" Value="#FFFFFFFF"/>
@@ -107,7 +109,10 @@
                   <Button x:Name="BtnBrowseIso" Click="BrowseIso_Click"/>
                 </StackPanel>
 
-                <ComboBox x:Name="TargetDrives" Grid.Row="1" Width="220" Header="Target drive (removable)"/>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+                  <ComboBox x:Name="TargetDrives" Width="220" Header="Target drive" ItemsSource="{Binding IsoDrives}" DisplayMemberPath="Label" SelectedValuePath="Letter"/>
+                  <Button Content="Frissítés" Click="DrivesRefresh_Click" />
+                </StackPanel>
                 <Button Grid.Row="2" x:Name="BtnIsoWrite" Content="Write ISO" Click="WriteIso_Click" Width="120"/>
                 <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
                   <ComboBox x:Name="IsoWriteSchemeCombo" Width="120" Header="Séma">
@@ -133,8 +138,15 @@
                   <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <ComboBox x:Name="FormatDrive" Grid.Column="0" Header="Meghajtó" Width="260" SelectionChanged="FormatDrive_SelectionChanged"/>
-                <ComboBox x:Name="FsCombo" Grid.Column="1" Header="Fájlrendszer" Width="160" SelectionChanged="FsCombo_SelectionChanged">
+                <Grid Grid.Column="0" Width="300">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <ComboBox x:Name="FormatDrive" Grid.Column="0" Header="Meghajtó" Margin="0,0,8,0" SelectionChanged="FormatDrive_SelectionChanged" ItemsSource="{Binding FormatDrives}" DisplayMemberPath="Label" SelectedValuePath="Letter"/>
+                  <Button Grid.Column="1" Content="Frissítés" Click="DrivesRefresh_Click"/>
+                </Grid>
+                <ComboBox x:Name="FsCombo" Grid.Column="1" Header="Fájlrendszer" Width="180" Margin="8,0,0,0" SelectionChanged="FsCombo_SelectionChanged">
                   <ComboBoxItem Content="NTFS"/>
                   <ComboBoxItem Content="FAT32"/>
                   <ComboBoxItem Content="exFAT"/>
@@ -270,7 +282,33 @@
                   </StackPanel>
                 </StackPanel>
 
+                <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
+                <TextBlock Text="Licenc és Telemetria" FontWeight="SemiBold"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBox x:Name="LicenseKeyBox" Width="280" PlaceholderText="Licenckulcs"/>
+                  <Button x:Name="BtnActivateOnline" Content="Aktiválás (online)" Click="ActivateLicense_Click"/>
+                  <Button x:Name="BtnActivateOffline" Content="Aktiválás (offline)" Click="ActivateLicenseOffline_Click"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Text="Telemetria (opt-out)" VerticalAlignment="Center"/>
+                  <ToggleSwitch x:Name="TelemetryOptOutSwitch" Toggled="TelemetryOptOut_Toggled"/>
+                </StackPanel>
+
+                <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
+                <TextBlock Text="Telepítő" FontWeight="SemiBold"/>
+                <Button x:Name="BtnBuildMsix" Content="MSIX Build (placeholder)" Click="BuildMsix_Click" Width="220"/>
+
                 <TextBlock x:Name="TxtFooter" Text=".NET 10 Preview • WinUI 3 • MSIX"/>
+
+                <Border Height="1" Margin="0,8,0,8" Background="{ThemeResource DividerStrokeColorDefault}"/>
+                <TextBlock Text="Élő napló (usb.*)" FontWeight="SemiBold"/>
+                <ListView x:Name="LiveLog" Height="160">
+                  <ListView.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Text}" Foreground="{Binding Level, Converter={StaticResource LogLevelToBrush}}"/>
+                    </DataTemplate>
+                  </ListView.ItemTemplate>
+                </ListView>
               </StackPanel>
             </Grid>
             </ScrollViewer>

@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Reflection;
+using System.Resources;
 
 namespace FormatX.Services
 {
     public static class LocalizationService
     {
+        private static readonly ResourceManager _resx = new("FormatX.Resources.Strings", Assembly.GetExecutingAssembly());
         private static readonly Dictionary<string, Dictionary<string, string>> _dict = new()
         {
             ["hu"] = new()
@@ -141,6 +145,14 @@ namespace FormatX.Services
         public static string T(string key)
         {
             if (string.IsNullOrWhiteSpace(key)) return key;
+            try
+            {
+                var ci = new CultureInfo(CurrentLanguage == "en" ? "en-US" : "hu-HU");
+                var s = _resx.GetString(key, ci);
+                if (!string.IsNullOrEmpty(s)) return s!;
+            }
+            catch { }
+
             var lang = CurrentLanguage;
             if (_dict.TryGetValue(lang, out var map) && map.TryGetValue(key, out var val)) return val;
             if (_dict.TryGetValue("hu", out var hun) && hun.TryGetValue(key, out var def)) return def;

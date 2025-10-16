@@ -3,9 +3,10 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
     <UseWinUI>true</UseWinUI>
+    <StartupObject>FormatX.Startup</StartupObject>
     <Nullable>enable</Nullable>
-    <LangVersion>preview</LangVersion>
-    <EnablePreviewFeatures>true</EnablePreviewFeatures>
+    <LangVersion>latestmajor</LangVersion>
+    <EnablePreviewFeatures>false</EnablePreviewFeatures>
     <Platforms>x64;x86;arm64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64</RuntimeIdentifiers>
 
@@ -20,6 +21,8 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <PublishTrimmed>false</PublishTrimmed>
     <DebugType>portable</DebugType>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <NoWarn>NETSDK1206</NoWarn>
   
     <ApplicationIcon>Assets\Icons\FX.ico</ApplicationIcon>
   </PropertyGroup>
@@ -28,17 +31,15 @@
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <!-- Emit portable PDBs for Release builds to enable symbol loading when debugging -->
-    <!-- Use embedded PDBs so symbols are always available next to the assembly -->
+    <Optimize>true</Optimize>
     <DebugType>embedded</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-    <!-- Embed sources into PDB to improve Just My Code stepping in optimized builds -->
-    <EmbedAllSources>true</EmbedAllSources>
-    <!-- Temporarily disable optimizations so VS loads symbols with Just My Code enabled -->
-    <Optimize>false</Optimize>
+    <DebugSymbols>false</DebugSymbols>
+    <Deterministic>true</Deterministic>
+    <EmbedAllSources>false</EmbedAllSources>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PublishSingleFile)'=='true'">
@@ -52,13 +53,34 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.250930001-experimental1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="System.Management" Version="10.0.0-rc.1.25451.107" />
+    <PackageReference Include="System.Management" Version="10.0.0-rc.2.25502.107" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+    <PackageReference Include="QuestPDF" Version="2025.12.0-alpha2" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Assets\**\*.*" Pack="true" PackagePath="Assets\" />
+    <None Include=".github\workflows\release-pipeline.yml" />
     <None Include="Package.appxmanifest" />
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <LogicalName>FormatX.Resources.Strings.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Strings.en.resx">
+      <LogicalName>FormatX.Resources.Strings.en.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Strings.hu.resx">
+      <LogicalName>FormatX.Resources.Strings.hu.resources</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <Target Name="CleanWinAppSdkExpandPri" BeforeTargets="WinAppSDKExpandPriContent">
