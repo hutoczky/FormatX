@@ -7,3 +7,4 @@ FAIL: missing usb.partition.* entry
 FAIL: missing usb.partition.* entry
 FAIL: missing usb.partition.* entry
 FAIL: missing usb.sanitize.* entry
+FAIL: missing usb.image.* entry

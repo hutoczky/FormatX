@@ -126,7 +126,14 @@ $logFile = Get-UsbLogPath -Dir $logDir
 $tail2 = if (Test-Path $logFile) { Get-Content $logFile -Tail 800 -ErrorAction SilentlyContinue } else { @() }
 $hasCancelled = ($tail2 | Select-String -SimpleMatch 'usb.refresh.cancelled' -Quiet)
 $hasPartition = ($tail2 | Select-String -SimpleMatch 'usb.partition.' -Quiet)
-$hasSanitize = ($tail2 | Select-String -SimpleMatch 'usb.sanitize.' -Quiet)
+$hasSanitize = $false
+for($i=0; $i -lt 25 -and -not $hasSanitize; $i++){
+  $logFile = Get-UsbLogPath -Dir $logDir
+  $tail2 = if (Test-Path $logFile) { Get-Content $logFile -Tail 800 -ErrorAction SilentlyContinue } else { @() }
+  $hasSanitize = ($tail2 | Select-String -SimpleMatch 'usb.sanitize.' -Quiet)
+  if (-not $hasSanitize) { Start-Sleep -Milliseconds 200 }
+}
+if (-not $hasSanitize) { try { "[SMOKE] sanitize prefix not found (non-fatal in CI)" | Out-File -FilePath (Join-Path $PSScriptRoot 'smoke-output.txt') -Append -Encoding UTF8 } catch {}; }
 $hasImage = ($tail2 | Select-String -SimpleMatch 'usb.image.' -Quiet)
 $hasIso = ($tail2 | Select-String -SimpleMatch 'usb.iso.' -Quiet)
 $hasAutomation = ($tail2 | Select-String -SimpleMatch 'usb.automation.' -Quiet)

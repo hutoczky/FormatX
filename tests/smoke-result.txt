@@ -1,1 +1,1 @@
-missing usb.sanitize.* entry
+missing usb.image.* entry
