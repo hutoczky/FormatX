@@ -9,7 +9,8 @@ $ErrorActionPreference = 'Continue'
 $env:FORMATX_TAKE_SCREENSHOT = "1"
 $env:FORMATX_AUTOCLOSE_SECONDS = "$AutoCloseSeconds"
 Remove-Item env:FORMATX_HEADLESS -ErrorAction SilentlyContinue
-Remove-Item env:FORMATX_CI -ErrorAction SilentlyContinue
+# Force non-blocking behavior for verification to avoid MessageBox on bootstrap failure
+$env:FORMATX_CI = "1"
 
 $artifactDir = Join-Path $PSScriptRoot '..' | Join-Path -ChildPath 'artifacts'
 New-Item -Path $artifactDir -ItemType Directory -Force | Out-Null
