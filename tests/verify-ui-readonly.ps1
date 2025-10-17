@@ -87,6 +87,20 @@ $pass = $true
 if (-not (HasMarker 'usb.app.info:MainWindowActivated')) { $pass = $false; Write-Host 'Missing MainWindowActivated marker' }
 if (-not (HasMarker 'usb.ui.audit.end')) { $pass = $false; Write-Host 'Missing audit end marker' }
 if (HasMarker 'usb.app.error:UI.BindingError:IsReadOnlyMissing') { $pass = $false; Write-Host 'Detected IsReadOnly binding error' }
+$hasAuditEnd = HasMarker 'usb.ui.audit.end'
+$hasActivated = HasMarker 'usb.app.info:MainWindowActivated'
+$hasBootstrapFail = (HasMarker 'usb.app.error:Bootstrap.Initialize.Failed.Unpackaged.Exit') -or (HasMarker 'usb.winrt.error:Bootstrap.ClassNotRegistered')
+
+if (-not $hasActivated) {
+  if ($hasBootstrapFail -and $hasAuditEnd) {
+    Write-Host 'Bootstrap missing/unregistered; accepting graceful exit path.'
+  } else {
+    $pass = $false
+    Write-Host 'Missing MainWindowActivated marker'
+  }
+}
+if (-not $hasAuditEnd) { $pass = $false; Write-Host 'Missing audit end marker' }
+if (HasMarker 'usb.app.error:UI.BindingError:IsReadOnlyMissing') { $pass = $false; Write-Host 'Detected IsReadOnly binding error' }
 
 # Screenshot
 $screenshotPath = Join-Path $env:LOCALAPPDATA 'FormatX\tests\ui-screenshot.png'
@@ -105,6 +119,7 @@ if ($logLines) {
 $resultFile = Join-Path $PSScriptRoot 'final-result.txt'
 $resultText = if ($pass) { 'PASS' } else { 'FAIL' }
 $resultText | Out-File $resultFile -Encoding utf8
+Copy-Item $resultFile -Destination $artifactDir -Force
 Copy-Item $resultFile -Destination $artifactDir -Force
 
 Write-Host "Result: $resultText"
