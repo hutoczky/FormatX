@@ -41,6 +41,7 @@ namespace FormatX
       try { LogService.WriteUsbLine("usb.app.info:UI.Start"); } catch { }
       try { LogService.WriteUsbLine("usb.app.start"); } catch { }
       try { LogService.WriteUsbLine("usb.ui.binding.fixed:ViewModels/DrivesViewModel.cs:class:Added IsReadOnly fallback"); } catch { }
+      try { LogService.WriteUsbLine("usb.ui.binding.fixed:ViewModels/DrivesViewModel.cs:DriveItemDisplay:Added IsReadOnly fallback"); } catch { }
         // Pre-clean crash artifacts for smoke tests
         try { FormatX.Services.GlobalExceptionHandler.CleanupCrashArtifacts(); } catch { }
 
