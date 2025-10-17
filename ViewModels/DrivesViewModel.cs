@@ -13,6 +13,8 @@ namespace FormatX.ViewModels
   {
     public string Letter { get; init; } = string.Empty; // e.g. "E:"
     public string Label { get; init; } = string.Empty;  // display text
+    // Fallback property to satisfy XAML bindings that expect IsReadOnly
+    public bool IsReadOnly { get; } = true;
     public override string ToString() => Label;
   }
 
@@ -20,6 +22,8 @@ namespace FormatX.ViewModels
   {
     public ObservableCollection<DriveItemDisplay> FormatDrives { get; } = new();
     public ObservableCollection<DriveItemDisplay> IsoDrives { get; } = new();
+    // Fallback property to satisfy XAML/window-level bindings to IsReadOnly
+    public bool IsReadOnly { get; } = true;
 
     private readonly SemaphoreSlim _gate = new(1, 1);
     private CancellationTokenSource? _cts;

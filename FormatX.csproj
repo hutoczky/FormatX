@@ -77,6 +77,7 @@
     <Page Remove="Themes\AppTheme.xaml" />
     <Page Remove="Themes\Controls.xaml" />
     <None Include=".github\workflows\release-pipeline.yml" />
+    <None Include=".github\workflows\verify-and-sign.yml" />
     <None Include="Package.appxmanifest" />
     <EmbeddedResource Include="Resources\Strings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

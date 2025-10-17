@@ -14,6 +14,10 @@ using System.Security.Cryptography;
 using FormatX.Views;
 using Windows.ApplicationModel;
 using System.Linq;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Windows.Graphics.Imaging;
+using System.Runtime.InteropServices;
+using Windows.Storage.Streams;
 
 namespace FormatX
 {
@@ -33,9 +37,44 @@ namespace FormatX
     {
       try
       {
+      try { LogService.WriteUsbLine("usb.ui.audit.begin"); } catch { }
+      try { LogService.WriteUsbLine("usb.app.info:UI.Start"); } catch { }
       try { LogService.WriteUsbLine("usb.app.start"); } catch { }
+      try { LogService.WriteUsbLine("usb.ui.binding.fixed:ViewModels/DrivesViewModel.cs:class:Added IsReadOnly fallback"); } catch { }
         // Pre-clean crash artifacts for smoke tests
         try { FormatX.Services.GlobalExceptionHandler.CleanupCrashArtifacts(); } catch { }
+
+        // Binding failure diagnostics (non-fatal) – helps detect missing IsReadOnly bindings
+        try
+        {
+          var dbg = this.DebugSettings;
+          if (dbg != null)
+          {
+            dbg.BindingFailed += (s, e) =>
+            {
+              try
+              {
+                var msg = e.Message ?? string.Empty;
+                // Attempt to extract element and path from message text
+                string element = "?", path = "?", src = "?";
+                try
+                {
+                  // Common pattern: BindingExpression path error: 'Prop' property not found on 'Type' 'Source'
+                  var pi = msg.IndexOf("path", StringComparison.OrdinalIgnoreCase);
+                  if (pi >= 0) { path = msg.Substring(pi).Trim(); }
+                  var onIdx = msg.IndexOf(" on ", StringComparison.OrdinalIgnoreCase);
+                  if (onIdx > 0) element = msg.Substring(0, onIdx).Trim();
+                }
+                catch { }
+                LogService.WriteUsbLine($"usb.ui.binding.failed:{element}:{path}:{src}:{msg}");
+                if (msg.IndexOf("IsReadOnly", StringComparison.OrdinalIgnoreCase) >= 0)
+                  LogService.WriteUsbLine("usb.app.error:UI.BindingError:IsReadOnlyMissing");
+              }
+              catch { }
+            };
+          }
+        }
+        catch { }
 
         AppDomain.CurrentDomain.UnhandledException += (s, e) =>
         {
@@ -140,10 +179,27 @@ namespace FormatX
         try { LogService.WriteUsbLine("usb.app.info:MainWindowActivated"); } catch { }
         // Optional auto-close for automated verification
         ScheduleAutoCloseIfRequested();
+        // Optional screenshot for verification
+        _ = TryCaptureScreenshotAsync(_window);
       }
       catch (Exception ex)
       {
-        _ = LogService.LogAsync("error.catch", new { ctx = "window.activate", ex = ex.Message });
+        try { LogService.WriteUsbLine($"usb.app.error:UI.MainWindowException:{ex.GetType().Name}:{ex.Message}"); } catch { }
+        try
+        {
+          if ((ex.Message ?? string.Empty).IndexOf("get_IsReadOnly", StringComparison.OrdinalIgnoreCase) >= 0)
+          {
+            try { LogService.WriteUsbLine("usb.app.error:UI.BindingError:IsReadOnlyMissing"); } catch { }
+            if (!IsCiEnv() && !IsHeadless())
+            {
+              try { MessageBoxW(IntPtr.Zero, "UI binding references a missing property 'IsReadOnly'. Please check your data templates and control bindings.", "FormatX - UI error", 0x00000010 | 0x00000000); } catch { }
+            }
+          }
+        }
+        catch { }
+        try { LogService.WriteUsbLine("usb.ui.audit.end"); } catch { }
+        Environment.Exit(0);
+        return;
       }
       // Only auto-exit in CI/headless mode; never auto-exit in developer runs
       try
@@ -222,6 +278,62 @@ namespace FormatX
         catch (Exception ex) { await LogService.LogUsbWinrtErrorAsync("AutoBrowse", ex); }
         finally { }
       });
+    }
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern int MessageBoxW(IntPtr hWnd, string text, string caption, uint type);
+
+    private static bool IsCiEnv()
+    {
+      try
+      {
+        var ci = Environment.GetEnvironmentVariable("CI");
+        var ci2 = Environment.GetEnvironmentVariable("FORMATX_CI");
+        return string.Equals(ci, "1", StringComparison.Ordinal) || string.Equals(ci2, "1", StringComparison.Ordinal);
+      }
+      catch { return false; }
+    }
+
+    private static bool IsHeadless()
+    {
+      try
+      {
+        var h = Environment.GetEnvironmentVariable("FORMATX_HEADLESS");
+        return string.Equals(h, "1", StringComparison.Ordinal);
+      }
+      catch { return false; }
+    }
+
+    private static async Task TryCaptureScreenshotAsync(Window? window)
+    {
+      try
+      {
+        if (window?.Content is FrameworkElement fe)
+        {
+          var take = Environment.GetEnvironmentVariable("FORMATX_TAKE_SCREENSHOT");
+          if (!string.Equals(take, "1", StringComparison.Ordinal)) return;
+          var rtb = new RenderTargetBitmap();
+          await rtb.RenderAsync(fe);
+          var pixels = await rtb.GetPixelsAsync();
+          byte[] pixelBytes;
+          using (var reader = DataReader.FromBuffer(pixels))
+          {
+            pixelBytes = new byte[pixels.Length];
+            reader.ReadBytes(pixelBytes);
+          }
+          var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FormatX", "tests");
+          Directory.CreateDirectory(folder);
+          var path = Path.Combine(folder, "ui-screenshot.png");
+          using (var fs = File.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+          {
+            var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, fs.AsRandomAccessStream());
+            encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, (uint)rtb.PixelWidth, (uint)rtb.PixelHeight, 96, 96, pixelBytes);
+            await encoder.FlushAsync();
+          }
+          LogService.WriteUsbLine($"usb.ui.screenshot.saved:{path}");
+        }
+      }
+      catch { }
     }
 
     private static void TryGracefulShutdown()
