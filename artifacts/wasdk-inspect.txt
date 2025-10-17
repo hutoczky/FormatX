@@ -1,0 +1,12 @@
+=== Windows App Runtime / Windows App SDK Inspection ===
+Timestamp: 2025-10-17T20:34:11.8645257+02:00
+Machine: GAMESTECH User: hutoc
+OS: Microsoft Windows NT 10.0.27971.0
+Arch: OS64=True ProcArch=AMD64 ProcArchWow=
+\n-- Registry: HKLM:SOFTWARE\Microsoft\WindowsAppRuntime --
+\n-- Registry: HKLM:SOFTWARE\Microsoft\WindowsAppRuntime\Runtime --
+\n-- Registry: WOW6432Node (if present) --
+\n-- Appx Packages (WindowsAppRuntime) --
+\n-- Appx Packages (WindowsAppSDK) --
+\n-- Winget (if available) --
+\nDone. Output saved to D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\tests\..\artifacts\wasdk-inspect.txt

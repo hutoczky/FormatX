@@ -1,0 +1,51 @@
+name: UI Verify
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+
+jobs:
+  verify-ui:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 (preview)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          include-prerelease: true
+
+      - name: Install Windows App Runtime (if needed)
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File tests/install-wasdk.ps1 -AllUsers -Quiet
+
+      - name: Build Debug
+        shell: pwsh
+        run: |
+          dotnet build .\FormatX.csproj -c Debug
+
+      - name: Run interactive UI verification (auto-close)
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File tests/verify-ui-readonly.ps1 -ProjectPath .\FormatX.csproj -AutoCloseSeconds 12
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-verify-artifacts
+          path: |
+            artifacts/**
+            tests/final-result.txt
+
+      - name: Enforce PASS
+        if: always()
+        shell: pwsh
+        run: |
+          if (-not (Test-Path artifacts/final-result.txt)) { Write-Error 'Missing final-result.txt'; exit 1 }
+          $res = Get-Content artifacts/final-result.txt -Raw
+          if ($res -notmatch 'PASS') { Write-Error "UI verification failed: $res"; exit 1 }
