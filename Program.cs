@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using Microsoft.Win32;
 using System.Reflection;
 using Microsoft.UI.Xaml;
 using System.Runtime.InteropServices;
@@ -105,6 +106,9 @@ namespace FormatX
       // 2) COM/WinRT marshalling once (after bootstrap)
       try { WinRT.ComWrappersSupport.InitializeComWrappers(); } catch { }
 
+      // 2.1) Optional simulator/SDK/hypervisor checks (non-blocking in CI)
+      try { CheckSimulatorRequirementsIfRequested(); } catch { }
+
       // Optional lightweight self-tests (no external runner). Set FORMATX_SELFTEST=1 to run.
       try
       {
@@ -169,6 +173,61 @@ namespace FormatX
         var ci2 = Environment.GetEnvironmentVariable("FORMATX_CI");
         return string.Equals(ci, "1", StringComparison.Ordinal) || string.Equals(ci2, "1", StringComparison.Ordinal);
       }
+      catch { return false; }
+    }
+
+    // Simulator intent: enable by setting FORMATX_SIMULATOR=1; we check Windows SDK presence and Hypervisor availability.
+    private static void CheckSimulatorRequirementsIfRequested()
+    {
+      try
+      {
+        var sim = Environment.GetEnvironmentVariable("FORMATX_SIMULATOR");
+        if (!string.Equals(sim, "1", StringComparison.Ordinal)) return;
+        try { FormatX.Services.LogService.WriteUsbLine("usb.sys.info:Simulator.Check.Begin"); } catch { }
+
+        bool sdkOk = HasWindowsSdkInstalled();
+        if (!sdkOk)
+        {
+          try { FormatX.Services.LogService.WriteUsbLine("usb.sys.error:WindowsSDK.Missing"); } catch { }
+          if (!IsCi())
+          {
+            try { MessageBoxW(IntPtr.Zero, "Windows SDK is required for simulator tooling. Please install the Windows 10/11 SDK.", "FormatX - Simulator", 0x00000030 /* MB_ICONWARNING */ | 0x00000000); } catch { }
+          }
+        }
+
+        bool hvOk = IsHypervisorPresent();
+        if (!hvOk)
+        {
+          try { FormatX.Services.LogService.WriteUsbLine("usb.sys.error:Hypervisor.NotRunning"); } catch { }
+          if (!IsCi())
+          {
+            try { MessageBoxW(IntPtr.Zero, "Windows Hypervisor Platform not detected. Enable Hyper-V / Hypervisor Platform and restart.", "FormatX - Simulator", 0x00000030 | 0x00000000); } catch { }
+          }
+        }
+        if (sdkOk && hvOk) { try { FormatX.Services.LogService.WriteUsbLine("usb.sys.info:Simulator.Check.Ok"); } catch { } }
+      }
+      catch { }
+    }
+
+    private static bool HasWindowsSdkInstalled()
+    {
+      try
+      {
+        using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows Kits\Installed Roots", writable: false);
+        if (key == null) return false;
+        var kitsRoot = key.GetValue("KitsRoot10") as string;
+        return !string.IsNullOrEmpty(kitsRoot);
+      }
+      catch { return false; }
+    }
+
+    [DllImport("kernel32.dll")]
+    private static extern bool IsProcessorFeaturePresent(uint ProcessorFeature);
+    private const uint PF_HYPERVISOR_PRESENT = 18;
+    private const uint PF_VIRT_FIRMWARE_ENABLED = 21;
+    private static bool IsHypervisorPresent()
+    {
+      try { return IsProcessorFeaturePresent(PF_HYPERVISOR_PRESENT) || IsProcessorFeaturePresent(PF_VIRT_FIRMWARE_ENABLED); }
       catch { return false; }
     }
 

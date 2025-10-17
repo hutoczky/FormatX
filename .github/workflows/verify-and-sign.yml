@@ -1,0 +1,54 @@
+name: Verify and Sign
+on:
+  push:
+    branches: [ fix/full-wasdk-bootstrap-finalize-signing ]
+  pull_request:
+    branches: [ fix/full-wasdk-bootstrap-finalize-signing ]
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        mode: [ dev, headless, energy ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore
+      - name: Verify (CI-safe)
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File tests/verify-bootstrap-ci.ps1 -Mode ${{ matrix.mode }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-${{ matrix.mode }}
+          path: |
+            artifacts
+            tests/final-result.txt
+
+  sign:
+    needs: verify
+    if: ${{ success() }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Build Release
+        run: dotnet publish -c Release -r win-x64
+      - name: Sign and publish
+        shell: pwsh
+        env:
+          SIGNING_PFX: ${{ secrets.SIGNING_PFX }}
+          SIGNING_PFX_PASSWORD: ${{ secrets.SIGNING_PFX_PASSWORD }}
+        run: pwsh -File ci/signing/sign-and-publish.ps1
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed
+          path: artifacts
