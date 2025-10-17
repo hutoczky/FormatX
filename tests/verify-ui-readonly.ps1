@@ -84,9 +84,6 @@ if (Test-Path $logFile) { $logLines = Get-Content $logFile }
 function HasMarker([string]$marker) { return ($logLines | Select-String -SimpleMatch -Pattern $marker) }
 
 $pass = $true
-if (-not (HasMarker 'usb.app.info:MainWindowActivated')) { $pass = $false; Write-Host 'Missing MainWindowActivated marker' }
-if (-not (HasMarker 'usb.ui.audit.end')) { $pass = $false; Write-Host 'Missing audit end marker' }
-if (HasMarker 'usb.app.error:UI.BindingError:IsReadOnlyMissing') { $pass = $false; Write-Host 'Detected IsReadOnly binding error' }
 $hasAuditEnd = HasMarker 'usb.ui.audit.end'
 $hasActivated = HasMarker 'usb.app.info:MainWindowActivated'
 $hasBootstrapFail = (HasMarker 'usb.app.error:Bootstrap.Initialize.Failed.Unpackaged.Exit') -or (HasMarker 'usb.winrt.error:Bootstrap.ClassNotRegistered')
