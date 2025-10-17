@@ -33,7 +33,7 @@ namespace FormatX
     {
       try
       {
-      try { LogService.AppendUsbLine("usb.app.start"); } catch { }
+      try { LogService.WriteUsbLine("usb.app.start"); } catch { }
         // Pre-clean crash artifacts for smoke tests
         try { FormatX.Services.GlobalExceptionHandler.CleanupCrashArtifacts(); } catch { }
 
@@ -71,7 +71,7 @@ namespace FormatX
         var headless = Environment.GetEnvironmentVariable("FORMATX_HEADLESS");
         if (string.Equals(headless, "1", StringComparison.Ordinal))
         {
-          try { LogService.AppendUsbLine("usb.app.info:HeadlessMode"); } catch { }
+          try { LogService.WriteUsbLine("usb.app.info:HeadlessMode"); } catch { }
           try { LogService.WriteUsbLine("usb.app.info:MainWindowSkipped"); } catch { }
           try { LogService.WriteUsbLine("usb.app.info:Exit(0)"); } catch { }
           Environment.Exit(0);
@@ -128,8 +128,8 @@ namespace FormatX
         var dq = _window?.DispatcherQueue ?? Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
         if (dq == null)
         {
-          try { LogService.AppendUsbLine("usb.app.error:UI.DispatcherQueueNull"); } catch { }
-          try { LogService.AppendUsbLine("usb.app.info:MainWindowSkipped"); } catch { }
+          try { LogService.WriteUsbLine("usb.app.error:UI.DispatcherQueueNull"); } catch { }
+          try { LogService.WriteUsbLine("usb.app.info:MainWindowSkipped"); } catch { }
           try { LogService.WriteUsbLine("usb.app.info:Exit(0)"); } catch { }
           Environment.Exit(0);
           return; // safety
@@ -147,12 +147,12 @@ namespace FormatX
         var headless = Environment.GetEnvironmentVariable("FORMATX_HEADLESS");
         if (string.Equals(headless, "1", StringComparison.Ordinal))
         {
-          try { LogService.AppendUsbLine("usb.app.exit:Headless.AutoExit"); } catch { }
+          try { LogService.WriteUsbLine("usb.app.exit:Headless.AutoExit"); } catch { }
           TryGracefulShutdown();
         }
         else
         {
-          try { LogService.AppendUsbLine("usb.app.info:Interactive.Run"); } catch { }
+          try { LogService.WriteUsbLine("usb.app.info:Interactive.Run"); } catch { }
         }
       }
       catch { }

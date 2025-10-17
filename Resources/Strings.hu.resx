@@ -23,6 +23,19 @@
   <data name="settings.version" xml:space="preserve"><value>Verzió: 2.0</value></data>
   <data name="settings.devline" xml:space="preserve"><value>FormatTech — © 2025 Hudacsek József (GamesTech)</value></data>
   <data name="iso.placeholder" xml:space="preserve"><value>Válassz ISO-t</value></data>
+  <!-- Titles -->
+  <data name="title.format" xml:space="preserve"><value>Formázás</value></data>
+  <data name="title.drives" xml:space="preserve"><value>Lemez állapot</value></data>
+  <data name="title.erase" xml:space="preserve"><value>Biztonságos törlés</value></data>
+  <data name="title.settings" xml:space="preserve"><value>Beállítások</value></data>
+  <!-- Format tab -->
+  <data name="ui.format.drive" xml:space="preserve"><value>Meghajtó</value></data>
+  <data name="ui.format.fs" xml:space="preserve"><value>Fájlrendszer</value></data>
+  <data name="ui.format.label" xml:space="preserve"><value>Címke</value></data>
+  <data name="ui.format.quick" xml:space="preserve"><value>Gyors formázás</value></data>
+  <data name="ui.format.start" xml:space="preserve"><value>Formázás indítása</value></data>
+  <!-- Settings helpers -->
+  <data name="ui.settings.pickbg" xml:space="preserve"><value>Háttér kiválasztása…</value></data>
   <data name="ISO_Select" xml:space="preserve"><value>ISO kiválasztása</value></data>
   <data name="ISO_Browse" xml:space="preserve"><value>Tallózás</value></data>
   <data name="USB_Target" xml:space="preserve"><value>Cél meghajtó (eltávolítható)</value></data>
@@ -31,12 +44,14 @@
   <data name="USB_Verify" xml:space="preserve"><value>USB ellenőrzés</value></data>
   <data name="USB_Scheme" xml:space="preserve"><value>Partíciós séma (GPT/MBR)</value></data>
   <data name="USB_WriteScheme" xml:space="preserve"><value>Írási séma</value></data>
-  <data name="DiskHealth_Bytes" xml:space="preserve"><value>Ellenőrzendő bájtok</value></data>
-  <data name="DiskHealth_Surface" xml:space="preserve"><value>Felszíni ellenőrzés</value></data>
+  <data name="DiskHealth_Bytes" xml:space="preserve"><value>Ellenőrzendő bájtok (pl. 1073741824)</value></data>
+  <data name="DiskHealth_Bytes_Placeholder" xml:space="preserve"><value>Ellenőrzendő bájtok (pl. 1073741824)</value></data>
+  <data name="DiskHealth_Surface" xml:space="preserve"><value>Felületi vizsgálat</value></data>
   <data name="DiskHealth_SMART" xml:space="preserve"><value>SMART gyors lekérdezés</value></data>
   <data name="HealthStatus_Good" xml:space="preserve"><value>Állapot: Jó</value></data>
   <data name="HealthStatus_Bad" xml:space="preserve"><value>Állapot: Rossz</value></data>
   <data name="HealthStatus_Warn" xml:space="preserve"><value>Állapot: Figyelmeztetés</value></data>
+  <data name="HealthStatus_Unknown" xml:space="preserve"><value>Állapot: Ismeretlen</value></data>
   <data name="Btn_Start" xml:space="preserve"><value>Indítás</value></data>
   <data name="Btn_BackDrives" xml:space="preserve"><value>Meghajtókhoz</value></data>
   <data name="Btn_SelectDrive" xml:space="preserve"><value>Meghajtó kiválasztása</value></data>
@@ -60,8 +75,8 @@
   <data name="Pro_Onboarding_CTA" xml:space="preserve"><value>Tovább a Pro funkciókra</value></data>
   <data name="Tooltip_SurfaceScan" xml:space="preserve"><value>Lemez felületi hibáinak keresése</value></data>
   <data name="Tooltip_SMARTQuery" xml:space="preserve"><value>Meghajtó SMART állapotának lekérése</value></data>
-  <data name="ui.health.bytesToScan" xml:space="preserve"><value>Ellenőrzendő bájtok</value></data>
-  <data name="ui.health.surfaceScan" xml:space="preserve"><value>Felszíni ellenőrzés</value></data>
+  <data name="ui.health.bytesToScan" xml:space="preserve"><value>Ellenőrzendő bájtok (pl. 1073741824)</value></data>
+  <data name="ui.health.surfaceScan" xml:space="preserve"><value>Felületi vizsgálat</value></data>
   <data name="ui.health.smartQuick" xml:space="preserve"><value>SMART gyors lekérdezés</value></data>
   <data name="ui.health.status.good" xml:space="preserve"><value>Állapot: Jó</value></data>
   <data name="ui.health.status.unknown" xml:space="preserve"><value>Állapot: Ismeretlen</value></data>
@@ -69,27 +84,27 @@
   <data name="ui.health.drive.header" xml:space="preserve"><value>Vizsgálandó lemez</value></data>
   <data name="ui.secure.target" xml:space="preserve"><value>Célmeghajtó</value></data>
   <data name="ui.secure.fullFormat" xml:space="preserve"><value>Teljes formázás (lassabb)</value></data>
-  <data name="ui.secure.pass1" xml:space="preserve"><value>1 átírás</value></data>
-  <data name="ui.secure.pass2" xml:space="preserve"><value>2 átírás</value></data>
-  <data name="ui.secure.pass3" xml:space="preserve"><value>3 átírás</value></data>
+  <data name="ui.secure.pass1" xml:space="preserve"><value>1 menet (egyszeres felülírás)</value></data>
+  <data name="ui.secure.pass2" xml:space="preserve"><value>2 menet (kétszeres felülírás)</value></data>
+  <data name="ui.secure.pass3" xml:space="preserve"><value>3 menet (háromszoros felülírás)</value></data>
   <data name="common.exit" xml:space="preserve"><value>Kilépés</value></data>
   <data name="common.selectdrive" xml:space="preserve"><value>Meghajtó kiválasztása</value></data>
   <data name="status.drives.refreshed" xml:space="preserve"><value>Meghajtók frissítve</value></data>
   <data name="status.refresh.skipped.energysaver" xml:space="preserve"><value>Energiatakarékos mód – frissítés kihagyva</value></data>
-  <data name="dialog.confirm.title" xml:space="preserve"><value>Megerosites</value></data>
-  <data name="dialog.confirm.content" xml:space="preserve"><value>Biztosan vegrehajtja a muveletet?</value></data>
+  <data name="dialog.confirm.title" xml:space="preserve"><value>Megerősítés</value></data>
+  <data name="dialog.confirm.content" xml:space="preserve"><value>Biztosan végrehajtja a műveletet?</value></data>
   <data name="dialog.confirm.yes" xml:space="preserve"><value>Igen</value></data>
-  <data name="dialog.confirm.no" xml:space="preserve"><value>Megse</value></data>
-  <data name="systemdrive.blocked" xml:space="preserve"><value>A kijelolt meghajto rendszermeghajto (tiltva).</value></data>
-  <data name="partitions.apply.done" xml:space="preserve"><value>Particios terv alkalmazva</value></data>
-  <data name="partitions.rollback.applied" xml:space="preserve"><value>Visszaallitas vegrehajtva</value></data>
-  <data name="partitions.rollback.none" xml:space="preserve"><value>Nincs rollback mentes</value></data>
-  <data name="operation.format.done" xml:space="preserve"><value>Formazas kesz</value></data>
-  <data name="operation.erase.done" xml:space="preserve"><value>Torles kesz</value></data>
-  <data name="background.set.success" xml:space="preserve"><value>Hatter beallitva</value></data>
-  <data name="background.set.cancel" xml:space="preserve"><value>Hatter visszavonva</value></data>
-  <data name="background.set.error" xml:space="preserve"><value>Hatter beallitasa sikertelen</value></data>
-  <data name="s.mode.block" xml:space="preserve"><value>Ez a funkcio S-modban nem erheto el.</value></data>
+  <data name="dialog.confirm.no" xml:space="preserve"><value>Mégse</value></data>
+  <data name="systemdrive.blocked" xml:space="preserve"><value>A kijelölt meghajtó rendszermeghajtó (tiltva).</value></data>
+  <data name="partitions.apply.done" xml:space="preserve"><value>Partíciós terv alkalmazva</value></data>
+  <data name="partitions.rollback.applied" xml:space="preserve"><value>Visszaállítás végrehajtva</value></data>
+  <data name="partitions.rollback.none" xml:space="preserve"><value>Nincs visszaállítási mentés</value></data>
+  <data name="operation.format.done" xml:space="preserve"><value>Formázás kész</value></data>
+  <data name="operation.erase.done" xml:space="preserve"><value>Törlés kész</value></data>
+  <data name="background.set.success" xml:space="preserve"><value>Háttér beállítva</value></data>
+  <data name="background.set.cancel" xml:space="preserve"><value>Háttér visszavonva</value></data>
+  <data name="background.set.error" xml:space="preserve"><value>Háttér beállítása sikertelen</value></data>
+  <data name="s.mode.block" xml:space="preserve"><value>Ez a funkció S-módban nem érhető el.</value></data>
   <data name="Footer_Tagline" xml:space="preserve"><value>FormatX Pro — professzionális meghajtókezelés</value></data>
   <data name="part.current" xml:space="preserve"><value>Jelenlegi partíciók</value></data>
   <data name="part.planned" xml:space="preserve"><value>Tervezett partíciók</value></data>
@@ -108,4 +123,12 @@
   <data name="installer.buildMsix" xml:space="preserve"><value>MSIX telepítő készítése</value></data>
   <data name="live.log.title" xml:space="preserve"><value>Élő napló (usb.*)</value></data>
   <data name="common.done" xml:space="preserve"><value>Kész</value></data>
+  <!-- ISO flow -->
+  <data name="iso.write.prepared" xml:space="preserve"><value>ISO → USB előkészítve</value></data>
+
+  <!-- Magyarázó súgók -->
+  <data name="help.secure.erase.mode" xml:space="preserve"><value>Válaszd ki, hány menetben történjen a felülírás. Több menet = hosszabb idő, nagyobb adatbiztonság.</value></data>
+  <data name="help.secure.fullformat" xml:space="preserve"><value>Teljes formázás: a teljes meghajtó tartalma ellenőrzötten törlődik (lassabb, de alaposabb).</value></data>
+  <data name="help.health.bytes" xml:space="preserve"><value>Add meg, hány bájtot vizsgáljon a felületi teszt. Nagy érték lassíthatja a műveletet.</value></data>
+  <data name="help.health.smart" xml:space="preserve"><value>SMART gyors lekérdezés: a meghajtó önellenőrző adatai alapján becsült állapot.</value></data>
 </root>

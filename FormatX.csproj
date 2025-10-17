@@ -27,6 +27,17 @@
     <ApplicationIcon>Assets\Icons\FX.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <!-- Ensure PlatformTarget matches RuntimeIdentifier to avoid NETSDK1032 during publish/build -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)'=='win-x64'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(RuntimeIdentifier)'=='win-x86'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(RuntimeIdentifier)'=='win-arm64'">
+    <PlatformTarget>ARM64</PlatformTarget>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -59,19 +70,7 @@
     <PackageReference Include="QuestPDF" Version="2025.12.0-alpha2" />
   </ItemGroup>
 
-  <!-- Exclude Windows App Runtime auto-initializer sources added by package to avoid double bootstrap (0xC000027B) -->
-  <ItemGroup>
-    <Compile Remove="**\WindowsAppRuntimeAutoInitializer.cs" />
-    <Compile Remove="**\UndockedRegFreeWinRT-AutoInitializer.cs" />
-  </ItemGroup>
-
-  <Target Name="RemoveWinAppRuntimeAutoInit" BeforeTargets="CoreCompile">
-    <ItemGroup>
-      <Compile Remove="@(Compile)" Condition="'%(Compile.Filename)' == 'WindowsAppRuntimeAutoInitializer'" />
-      <Compile Remove="@(Compile)" Condition="'%(Compile.Filename)' == 'UndockedRegFreeWinRT-AutoInitializer'" />
-    </ItemGroup>
-    <Message Text="[FormatX] Removed Windows App Runtime auto-initializer sources to avoid double bootstrap." Importance="High" />
-  </Target>
+  <!-- Use WinAppSDK auto-initializer for self-contained debug runs -->
 
   <ItemGroup>
     <None Include="Assets\**\*.*" Pack="true" PackagePath="Assets\" />

@@ -822,10 +822,10 @@ namespace FormatX
 
     private async void WriteIso_Click(object sender, RoutedEventArgs e)
     {
-      if (FormatX.Services.SModeService.IsSMode()) { Status.Text = (_lang==AppLanguage.Hu ? "Ez a funkció S-módban nem érhető el." : "This feature is unavailable in S-mode."); return; }
+      if (FormatX.Services.SModeService.IsSMode()) { Status.Text = LocalizationService.T("s.mode.block"); return; }
       if (!await EnsureAdminForCriticalOpAsync("raw.write.iso")) return;
       await LogService.LogAsync("iso_write", new { target = GetSelectedDriveLetter(TargetDrives), iso = IsoPath?.Text });
-      await ShowToast(_lang == AppLanguage.Hu ? "ISO írás: előkészítve" : "ISO write: prepared");
+      await ShowToast(LocalizationService.T("iso.write.prepared"));
       Status.Text = LocalizationService.T("iso.write.prepared");
     }
 
@@ -862,7 +862,7 @@ namespace FormatX
 
     private async void Partition_Click(object sender, RoutedEventArgs e)
     {
-      if (FormatX.Services.SModeService.IsSMode()) { Status.Text = (_lang==AppLanguage.Hu ? "Ez a funkció S-módban nem érhető el." : "This feature is unavailable in S-mode."); return; }
+      if (FormatX.Services.SModeService.IsSMode()) { Status.Text = LocalizationService.T("s.mode.block"); return; }
       if (!await EnsureAdminForCriticalOpAsync("diskpart.partition")) return;
       await ShowToast(_lang == AppLanguage.Hu ? "Partíció művelet (stub)" : "Partition action (stub)");
     }

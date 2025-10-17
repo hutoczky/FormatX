@@ -1,31 +1,30 @@
-2025-10-16T19:59:27.4626290+02:00	usb.background.change:fail:
-2025-10-16T19:59:27.6079591+02:00	usb.refresh
-2025-10-16T19:59:28.1548893+02:00	usb.telemetry.optout:true
-2025-10-16T19:59:28.1646689+02:00	usb.app.start: AutoBrowse.Init
-2025-10-16T19:59:28.1682183+02:00	usb.winrt.error:UI.TelemetryOptOut:COMException:
-2025-10-16T19:59:28.3667232+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
-2025-10-16T19:59:28.3675231+02:00	usb.partition.scaffold: Smoke.Init
-2025-10-16T19:59:28.3720169+02:00	usb.sanitize.scaffold: Smoke.Init
-2025-10-16T19:59:28.3760603+02:00	usb.image.scaffold: Smoke.Init
-2025-10-16T19:59:28.3792614+02:00	usb.refresh
-2025-10-16T19:59:28.3825673+02:00	usb.refresh.cancelled
-2025-10-16T19:59:28.3845759+02:00	usb.app.start: Smoke.Init
-2025-10-16T19:59:28.3869618+02:00	usb.app.exit: Smoke.Init
-2025-10-16T19:59:28.3891049+02:00	usb.app.shutdown
-2025-10-16T19:59:28.3913894+02:00	usb.policy.scaffold: Smoke.Init
-2025-10-16T19:59:28.3936151+02:00	usb.telemetry.scaffold: Smoke.Init
-2025-10-16T19:59:28.3961232+02:00	usb.installer.scaffold: Smoke.Init
-2025-10-16T19:59:28.3989974+02:00	usb.clone.scaffold: Smoke.Init
-2025-10-16T19:59:28.4013947+02:00	usb.diagnostics.scaffold: Smoke.Init
-2025-10-16T19:59:28.4037264+02:00	usb.iso.scaffold: Smoke.Init
-2025-10-16T19:59:28.4071526+02:00	usb.licensing.scaffold: Smoke.Init
-2025-10-16T19:59:28.4094153+02:00	usb.automation.scaffold: Smoke.Init
-2025-10-16T19:59:28.4303424+02:00	usb.app.start: AutoBrowse.Init
-2025-10-16T19:59:28.4335131+02:00	usb.refresh
-2025-10-16T19:59:28.8008180+02:00	usb.winrt.error:FilePicker:COMException:
-2025-10-16T19:59:28.8040960+02:00	usb.image.cancelled
-2025-10-16T19:59:28.8070476+02:00	usb.app.exit: AutoBrowse.Done
-2025-10-16T19:59:33.2256375+02:00	usb.refresh
-2025-10-16T19:59:53.2084306+02:00	usb.refresh
-2025-10-16T20:00:02.6472448+02:00	usb.refresh.cancelled
-2025-10-16T20:00:02.6495883+02:00	usb.refresh.cancelled
+2025-10-16T21:27:44.3723402+02:00	usb.background.change:fail:
+2025-10-16T21:27:44.3963932+02:00	usb.refresh
+2025-10-16T21:27:44.5160360+02:00	usb.telemetry.optout:true
+2025-10-16T21:27:44.5187537+02:00	usb.app.start: AutoBrowse.Init
+2025-10-16T21:27:44.5204676+02:00	usb.winrt.error:UI.TelemetryOptOut:COMException:
+2025-10-16T21:27:44.5853589+02:00	usb.winrt.error:Smoke.Boot:InvalidOperationException:simulated
+2025-10-16T21:27:44.5889804+02:00	usb.sanitize.scaffold: Smoke.Init
+2025-10-16T21:27:44.5914475+02:00	usb.image.scaffold: Smoke.Init
+2025-10-16T21:27:44.5937901+02:00	usb.refresh
+2025-10-16T21:27:44.5957822+02:00	usb.refresh.cancelled
+2025-10-16T21:27:44.5973380+02:00	usb.app.start: Smoke.Init
+2025-10-16T21:27:44.5988268+02:00	usb.app.exit: Smoke.Init
+2025-10-16T21:27:44.6004899+02:00	usb.app.shutdown
+2025-10-16T21:27:44.6018249+02:00	usb.policy.scaffold: Smoke.Init
+2025-10-16T21:27:44.6032149+02:00	usb.telemetry.scaffold: Smoke.Init
+2025-10-16T21:27:44.6047983+02:00	usb.installer.scaffold: Smoke.Init
+2025-10-16T21:27:44.6063260+02:00	usb.clone.scaffold: Smoke.Init
+2025-10-16T21:27:44.6082168+02:00	usb.diagnostics.scaffold: Smoke.Init
+2025-10-16T21:27:44.6098121+02:00	usb.iso.scaffold: Smoke.Init
+2025-10-16T21:27:44.6116110+02:00	usb.licensing.scaffold: Smoke.Init
+2025-10-16T21:27:44.6133981+02:00	usb.automation.scaffold: Smoke.Init
+2025-10-16T21:27:44.6193956+02:00	usb.app.start: AutoBrowse.Init
+2025-10-16T21:27:44.6217239+02:00	usb.refresh
+2025-10-16T21:27:44.9070569+02:00	usb.winrt.error:FilePicker:COMException:
+2025-10-16T21:27:44.9101547+02:00	usb.image.cancelled
+2025-10-16T21:27:44.9122431+02:00	usb.app.exit: AutoBrowse.Done
+2025-10-16T21:27:49.5426424+02:00	usb.refresh
+2025-10-16T21:28:39.9260039+02:00	usb.refresh
+2025-10-16T21:28:48.9080969+02:00	usb.refresh.cancelled
+2025-10-16T21:28:48.9091974+02:00	usb.refresh.cancelled
