@@ -16,6 +16,7 @@ namespace FormatX
     public static void Main()
     {
       try { FormatX.Services.LogService.WriteUsbLine("usb.app.process.entry"); } catch { }
+      try { FormatX.Services.LogService.WriteUsbLine("usb.ui.audit.begin"); } catch { }
       // 0) Global exception handler wiring as early as possible
       try { FormatX.Services.GlobalExceptionHandler.WireUp(); } catch { }
 
@@ -25,7 +26,7 @@ namespace FormatX
       try
       {
         var env = Environment.GetEnvironmentVariable("FORMATX_SKIP_WASDK_BOOTSTRAP");
-        if (string.Equals(env, "1", StringComparison.Ordinal) || Debugger.IsAttached)
+        if (string.Equals(env, "1", StringComparison.Ordinal))
         {
           skip = true;
           try { FormatX.Services.LogService.WriteUsbLine("usb.app.bootstrap.skip:EnvOrDebugger"); } catch { }
@@ -43,16 +44,62 @@ namespace FormatX
           try { FormatX.Services.LogService.WriteUsbLine("usb.winrt.error:Bootstrap.ClassNotRegistered"); } catch { }
           try
           {
-            MessageBoxW(IntPtr.Zero,
-              "Windows App Runtime is not installed or not registered. Please install the correct version.",
-              "FormatX - Startup error",
-              0x00000010 /* MB_ICONERROR */ | 0x00000000 /* MB_OK */);
+            if (!IsCi())
+            {
+              MessageBoxW(IntPtr.Zero,
+                "Windows App Runtime is not installed or not registered. Please install the correct version.",
+                "FormatX - Startup error",
+                0x00000010 /* MB_ICONERROR */ | 0x00000000 /* MB_OK */);
+              TryOpenRuntimeHelp();
+            }
           }
           catch { }
+          try { FormatX.Services.LogService.WriteUsbLine("usb.ui.audit.end"); } catch { }
           Environment.Exit(0);
           return;
         }
-        // For other errors, continue to Application.Start per spec
+        // Any other bootstrap failure for UNPACKAGED app will cause native crash (0xC000027B). Exit gracefully.
+        if (!bootOk && !FormatX.Services.AppEnv.IsPackaged)
+        {
+          try { FormatX.Services.LogService.WriteUsbLine("usb.app.error:Bootstrap.Initialize.Failed.Unpackaged.Exit"); } catch { }
+          try
+          {
+            if (!IsCi())
+            {
+              MessageBoxW(IntPtr.Zero,
+                "Windows App Runtime could not be initialized. The app is running unpackaged, so UI cannot start without bootstrap.\nPlease install/repair the Windows App Runtime and try again.",
+                "FormatX - Startup error",
+                0x00000010 /* MB_ICONERROR */ | 0x00000000 /* MB_OK */);
+              TryOpenRuntimeHelp();
+            }
+          }
+          catch { }
+          try { FormatX.Services.LogService.WriteUsbLine("usb.ui.audit.end"); } catch { }
+          Environment.Exit(0);
+          return;
+        }
+      }
+      else
+      {
+        // Skip requested explicitly. If unpackaged, starting WinUI without bootstrap will crash with 0xC000027B.
+        if (!FormatX.Services.AppEnv.IsPackaged)
+        {
+          try { FormatX.Services.LogService.WriteUsbLine("usb.app.error:Bootstrap.Skipped.Unpackaged.Exit"); } catch { }
+          try
+          {
+            if (!IsCi())
+            {
+              MessageBoxW(IntPtr.Zero,
+                "Bootstrap skipped by environment (FORMATX_SKIP_WASDK_BOOTSTRAP=1) and app is unpackaged.\nCannot start UI without Windows App Runtime bootstrap.",
+                "FormatX - Startup",
+                0x00000010 /* MB_ICONERROR */ | 0x00000000 /* MB_OK */);
+            }
+          }
+          catch { }
+          try { FormatX.Services.LogService.WriteUsbLine("usb.ui.audit.end"); } catch { }
+          Environment.Exit(0);
+          return;
+        }
       }
 
       // 2) COM/WinRT marshalling once (after bootstrap)
@@ -77,12 +124,52 @@ namespace FormatX
       catch (Exception ex)
       {
         try { FormatX.Services.LogService.WriteUsbLine($"usb.app.error:Application.Start:{ex.GetType().Name}:{ex.Message}"); } catch { }
+        try { if (!IsCi()) MessageBoxW(IntPtr.Zero, $"Application failed to start UI. {ex.GetType().Name}: {ex.Message}", "FormatX - Startup error", 0x00000010 | 0x00000000); } catch { }
+        try { FormatX.Services.LogService.WriteUsbLine("usb.ui.audit.end"); } catch { }
         Environment.Exit(0);
         return; // do not rethrow to avoid hard crash during debug
       }
       try { FormatX.Services.LogService.WriteUsbLine("usb.app.process.afterStart"); } catch { }
 
       // No explicit Bootstrap.Shutdown(); let App.xaml.cs handle lifecycle if it initialized.
+    }
+
+    private static void TryOpenRuntimeHelp()
+    {
+      try
+      {
+        // Open official Windows App SDK download page
+        if (!IsCi())
+        {
+          Process.Start(new ProcessStartInfo
+          {
+            FileName = "https://aka.ms/windowsappsdk/Stable",
+            UseShellExecute = true
+          });
+        }
+      }
+      catch { }
+      try
+      {
+        var exeDir = AppContext.BaseDirectory;
+        var helpPath = System.IO.Path.Combine(exeDir, "runtime-help.txt");
+        var text = "Windows App Runtime is required to run this app in unpackaged mode.\r\n" +
+                   "Download: https://aka.ms/windowsappsdk/Stable\r\n" +
+                   "Alternatively, run the packaged (MSIX) build.";
+        System.IO.File.WriteAllText(helpPath, text);
+      }
+      catch { }
+    }
+
+    private static bool IsCi()
+    {
+      try
+      {
+        var ci = Environment.GetEnvironmentVariable("CI");
+        var ci2 = Environment.GetEnvironmentVariable("FORMATX_CI");
+        return string.Equals(ci, "1", StringComparison.Ordinal) || string.Equals(ci2, "1", StringComparison.Ordinal);
+      }
+      catch { return false; }
     }
 
     private static volatile int _lastBootstrapHresult = 0;
@@ -120,6 +207,8 @@ namespace FormatX
               }
             }
           }
+          // Also try by simple name from installed GAC/Probing
+          try { System.Reflection.Assembly.Load("Microsoft.WindowsAppRuntime.Bootstrap.Net"); FormatX.Services.LogService.WriteUsbLine("usb.app.bootstrap.info:AssemblyLoaded"); } catch { }
         }
         catch { }
 
@@ -142,6 +231,7 @@ namespace FormatX
         // Try multiple Initialize overloads across WinAppSDK versions
         var methods = t.GetMethods(BindingFlags.Public | BindingFlags.Static)
                        .Where(m => string.Equals(m.Name, "Initialize", StringComparison.Ordinal))
+                       .OrderBy(m => m.GetParameters().Length)
                        .ToArray();
         if (methods.Length == 0)
         {
@@ -150,6 +240,15 @@ namespace FormatX
         }
 
         Exception? lastInitEx = null;
+        // Determine desired version tag from environment; fallback to experimental/preview probes
+        string? envTag = null;
+        try { envTag = Environment.GetEnvironmentVariable("FORMATX_WASDK_TAG"); } catch { }
+        string[] tagCandidates = string.IsNullOrWhiteSpace(envTag)
+          ? new[] { "experimental", "preview" }
+          : new[] { envTag! };
+        const uint MajorMinor_2_0 = (2u << 16) | 0u;
+        const uint MajorMinor_1_0 = (1u << 16) | 0u;
+
         foreach (var m in methods)
         {
           var ps = m.GetParameters();
@@ -160,11 +259,57 @@ namespace FormatX
             {
               args = Array.Empty<object?>();
             }
+
+        // If all attempts above failed, try explicit 1.x majorMinor overload as a last resort
+        if (lastInitEx != null)
+        {
+          try
+          {
+            var mi = methods.FirstOrDefault(x => x.GetParameters().Length == 1 && x.GetParameters()[0].ParameterType == typeof(uint));
+            if (mi != null)
+            {
+              FormatX.Services.LogService.WriteUsbLine("usb.winrt.info:Bootstrap.Initialize.Try:uint:1x");
+              mi.Invoke(null, new object?[] { MajorMinor_1_0 });
+              lastInitEx = null;
+            }
+          }
+          catch (Exception ex1) { lastInitEx = ex1; }
+        }
             else if (ps.Length == 1 && ps[0].ParameterType == typeof(uint))
             {
-              // e.g. Initialize(0x00020000) for WinAppSDK 2.0; value is MajorMinor version
-              const uint MajorMinor_2_0 = (2u << 16) | 0u;
               args = new object?[] { MajorMinor_2_0 };
+            }
+            else if (ps.Length == 2 && ps[0].ParameterType == typeof(uint) && ps[1].ParameterType == typeof(string))
+            {
+              // Newer overload: Initialize(majorMinor, versionTagString)
+              // Try env-provided tag first, then common tags
+              Exception? lastTagEx = null;
+              foreach (var tag in tagCandidates)
+              {
+                try
+                {
+                  FormatX.Services.LogService.WriteUsbLine($"usb.winrt.info:Bootstrap.Initialize.Try:uint,string:{tag}");
+                  m.Invoke(null, new object?[] { MajorMinor_2_0, tag });
+                  lastInitEx = null;
+                  lastTagEx = null;
+                  args = null; // indicate success
+                  break;
+                }
+                catch (Exception tex)
+                {
+                  lastTagEx = tex;
+                  continue;
+                }
+              }
+              if (lastTagEx != null)
+              {
+                throw lastTagEx; // will be handled by catch blocks below
+              }
+              if (args == null)
+              {
+                // success path executed above
+                break;
+              }
             }
             else if (ps.Length == 2 && ps[0].ParameterType == typeof(uint) && ps[1].ParameterType == typeof(uint))
             {

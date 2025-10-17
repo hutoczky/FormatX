@@ -74,6 +74,7 @@ namespace FormatX
           try { LogService.WriteUsbLine("usb.app.info:HeadlessMode"); } catch { }
           try { LogService.WriteUsbLine("usb.app.info:MainWindowSkipped"); } catch { }
           try { LogService.WriteUsbLine("usb.app.info:Exit(0)"); } catch { }
+          try { LogService.WriteUsbLine("usb.ui.audit.end"); } catch { }
           Environment.Exit(0);
           return; // safety
         }
@@ -131,11 +132,14 @@ namespace FormatX
           try { LogService.WriteUsbLine("usb.app.error:UI.DispatcherQueueNull"); } catch { }
           try { LogService.WriteUsbLine("usb.app.info:MainWindowSkipped"); } catch { }
           try { LogService.WriteUsbLine("usb.app.info:Exit(0)"); } catch { }
+          try { LogService.WriteUsbLine("usb.ui.audit.end"); } catch { }
           Environment.Exit(0);
           return; // safety
         }
         _window?.Activate();
         try { LogService.WriteUsbLine("usb.app.info:MainWindowActivated"); } catch { }
+        // Optional auto-close for automated verification
+        ScheduleAutoCloseIfRequested();
       }
       catch (Exception ex)
       {
@@ -235,6 +239,7 @@ namespace FormatX
       catch { }
 
       try { LogService.AppendUsbLine("usb.app.shutdown"); } catch { }
+      try { LogService.WriteUsbLine("usb.ui.audit.end"); } catch { }
       try
       {
         var win = MainWindow;
@@ -246,6 +251,23 @@ namespace FormatX
           try { win?.Close(); } catch { }
           try { Microsoft.UI.Xaml.Application.Current.Exit(); } catch { }
         });
+      }
+      catch { }
+    }
+
+    private void ScheduleAutoCloseIfRequested()
+    {
+      try
+      {
+        var secondsStr = Environment.GetEnvironmentVariable("FORMATX_AUTOCLOSE_SECONDS");
+        if (int.TryParse(secondsStr, out var sec) && sec > 0)
+        {
+          LogService.WriteUsbLine($"usb.app.info:AutoClose.Scheduled:{sec}s");
+          _ = Task.Delay(TimeSpan.FromSeconds(sec)).ContinueWith(_ =>
+          {
+            try { TryGracefulShutdown(); } catch { }
+          });
+        }
       }
       catch { }
     }

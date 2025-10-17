@@ -126,10 +126,4 @@
   <data name="common.done" xml:space="preserve"><value>Done</value></data>
   <!-- ISO flow -->
   <data name="iso.write.prepared" xml:space="preserve"><value>ISO → USB prepared</value></data>
-  <!-- Format tab -->
-  <data name="ui.format.drive" xml:space="preserve"><value>Drive</value></data>
-  <data name="ui.format.fs" xml:space="preserve"><value>File system</value></data>
-  <data name="ui.format.label" xml:space="preserve"><value>Label</value></data>
-  <data name="ui.format.quick" xml:space="preserve"><value>Quick format</value></data>
-  <data name="ui.format.start" xml:space="preserve"><value>Start format</value></data>
 </root>

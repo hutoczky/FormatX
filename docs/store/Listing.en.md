@@ -16,3 +16,6 @@ Screenshots (3–5):
 
 Keywords (?7):
 disk, usb, iso, partition, smart, erase, windows
+
+Troubleshooting:
+- Windows App Runtime / UI startup issues: see `../troubleshooting.md`.

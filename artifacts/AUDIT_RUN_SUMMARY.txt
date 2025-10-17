@@ -1,0 +1,4 @@
+Mode: headless
+ExitCode: 0
+Exe: D:\Format ui project\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\FormatX_Pro_FIXED_DriveCombos_v4a_PATCH\bin\x64\Debug\net10.0-windows10.0.22621.0\FormatX.exe
+LogTail: present

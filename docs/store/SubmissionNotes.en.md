@@ -12,3 +12,6 @@ Safety:
 - No driver installation.
 - No elevation in the Store channel.
 - All sensitive operations require explicit confirmation.
+
+Troubleshooting:
+- Windows App Runtime / UI startup issues: see `../troubleshooting.md`.
