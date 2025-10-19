@@ -1,0 +1,228 @@
+:root{
+  --bg: #050611;
+  --text: #d8eaff;
+  --muted: #9fb8d1;
+  --primary: #00eaff;
+  --primary-2:#7c4dff;
+  --accent: #00ffc6;
+  --glass: rgba(12,18,34,0.6);
+  --glass-strong: rgba(12,18,34,0.8);
+  --border: rgba(160,220,255,0.18);
+  --shadow: 0 10px 30px rgba(0,0,0,.4);
+}
+
+* { box-sizing: border-box }
+html,body { height: 100% }
+html { scroll-behavior: smooth }
+body{
+  margin:0;
+  font-family: "Exo", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(0,234,255,.15), transparent 60%), var(--bg);
+  overflow-x: hidden;
+}
+
+.wrap{ width:min(1100px, 92%); margin-inline:auto }
+
+.site-header{
+  position: sticky; top:0; z-index:40;
+  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(6,10,24,.8), rgba(6,10,24,.35));
+  border-bottom: 1px solid var(--border);
+}
+.site-header .wrap{ display:flex; align-items:center; justify-content:space-between; padding: 12px 0 }
+
+.brand{ display:flex; align-items:center; gap:.6rem; color:var(--text); text-decoration:none; font-family:"Orbitron", sans-serif; font-weight:700; letter-spacing:.06em }
+.brand .logo{ filter: drop-shadow(0 0 12px rgba(0,234,255,.35)) }
+.brand-text{ font-size:1.05rem }
+
+.nav a{ color:var(--muted); margin-left:1rem; text-decoration:none; transition:.2s color }
+.nav a:hover{ color:var(--primary) }
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:.5rem; padding:.7rem 1rem; border-radius:12px;
+  border:1px solid var(--border); background:linear-gradient(180deg, rgba(12,18,34,.8), rgba(12,18,34,.4));
+  color:var(--text); text-decoration:none; box-shadow: var(--shadow);
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  will-change: transform;
+}
+.btn:hover{ transform: translateY(-1px); border-color: rgba(0,234,255,.4) }
+.btn.small{ padding:.5rem .8rem; border-radius:10px; font-size:.9rem }
+.btn.primary{
+  background:
+    radial-gradient(120px 40px at 20% 0%, rgba(0,234,255,.22), transparent 60%),
+    linear-gradient(180deg, rgba(0,234,255,.18), rgba(124,77,255,.18)),
+    linear-gradient(180deg, rgba(12,18,34,.9), rgba(12,18,34,.5));
+  border-color: rgba(0,234,255,.45);
+}
+.btn.ghost{ background: linear-gradient(180deg, rgba(12,18,34,.7), rgba(12,18,34,.3)) }
+
+/* Háttér rétegek */
+.bg{ position: fixed; inset:0; z-index:-1; overflow:hidden }
+.stars{
+  position:absolute; inset:-100px; pointer-events:none; opacity:.6;
+  background:
+    radial-gradient(1px 1px at 20% 30%, #9fd7ff 50%, transparent 51%),
+    radial-gradient(1px 1px at 60% 70%, #b4e1ff 50%, transparent 51%),
+    radial-gradient(1px 1px at 80% 20%, #c9f3ff 50%, transparent 51%),
+    radial-gradient(1px 1px at 35% 80%, #a7ecff 50%, transparent 51%),
+    radial-gradient(1px 1px at 10% 60%, #9fd7ff 50%, transparent 51%);
+  animation: drift 60s linear infinite;
+}
+.stars.delay{ animation-duration: 110s; opacity:.35; filter: blur(.3px) }
+
+.grid{
+  --c1: rgba(0,234,255,.12);
+  position:absolute; inset:0; pointer-events:none; opacity:.65;
+  background:
+    linear-gradient(to right, var(--c1) 1px, transparent 1px) 0 0/ 50px 50px,
+    linear-gradient(to bottom, var(--c1) 1px, transparent 1px) 0 0/ 50px 50px;
+  transform: perspective(800px) rotateX(65deg) translateY(30%);
+  transform-origin: 50% 0%;
+  filter: drop-shadow(0 30px 40px rgba(0,0,0,.6));
+  animation: grid-glow 6s ease-in-out infinite;
+}
+
+@keyframes drift{
+  from{ transform: translate3d(0,0,0) }
+  to{ transform: translate3d(-300px,-120px,0) }
+}
+@keyframes grid-glow{
+  0%,100%{ opacity:.65 }
+  50%{ opacity:.85 }
+}
+
+/* Hős szekció */
+.hero{ padding: 9rem 0 5rem; text-align:center }
+.title{ font-family:"Orbitron", sans-serif; font-weight:800; font-size: clamp(2rem, 5vw, 4rem); line-height:1.05; margin: 0 0 1rem }
+.title-top{ display:block; color: var(--muted); font-size: .6em; letter-spacing:.2em; text-transform:uppercase }
+.title-focus{
+  background: linear-gradient(90deg, var(--primary), var(--primary-2));
+  -webkit-background-clip: text; background-clip:text; color:transparent;
+  text-shadow: 0 0 22px rgba(0,234,255,.25);
+  position: relative;
+}
+.subtitle{ color:var(--muted); font-size: clamp(1rem, 2.4vw, 1.2rem); margin: 0 auto 1.5rem; max-width: 800px }
+.cta-row{ display:flex; gap: .8rem; justify-content:center; flex-wrap:wrap; margin-top:.6rem }
+
+.hud{
+  margin-top:1.5rem; display:flex; gap:.8rem; justify-content:center; align-items:center; color:#a8c5dc;
+  font-family: "Orbitron", sans-serif; font-size:.8rem; letter-spacing:.12em; text-transform:uppercase;
+}
+.hud .dot{ width:8px; height:8px; border-radius:12px; display:inline-block; background:#456; box-shadow: 0 0 0 0 rgba(0,234,255,0); }
+.hud .dot.on{ background: var(--accent); box-shadow: 0 0 14px 2px rgba(0,255,198,.45) }
+.hud .sep{ width:1px; height:10px; background:var(--border); display:inline-block; }
+
+/* Kártyák */
+.features{ padding: 3rem 0 2rem }
+.section-title{ font-family:"Orbitron"; letter-spacing:.12em; text-transform:uppercase; color:#cbe6ff; text-align:center; margin:0 0 1.8rem }
+.cards{
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:1rem;
+}
+.card{
+  background:
+    radial-gradient(400px 120px at 0 -20%, rgba(0,234,255,.12), transparent 60%),
+    linear-gradient(180deg, rgba(12,18,34,.9), rgba(12,18,34,.55));
+  border:1px solid var(--border); border-radius:16px; padding:1.1rem; box-shadow: var(--shadow);
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+  will-change: transform;
+}
+.card:hover{ transform: translateY(-3px); border-color: rgba(0,234,255,.35); box-shadow: 0 20px 50px rgba(0,0,0,.45) }
+.card h3{ margin:.2rem 0 .4rem }
+.card p{ margin:0 0 .6rem; color: var(--muted) }
+.chip{ display:inline-block; padding:.2rem .5rem; border:1px solid rgba(0,234,255,.3); border-radius:999px; font-size:.75rem; color:#bfefff }
+
+/* Demó */
+.demo{ padding: 3rem 0 }
+.demo-desc{ text-align:center; color:var(--muted); margin:-.6rem 0 1.2rem }
+.demo-grid{ display:grid; grid-template-columns:1fr; gap:1rem }
+.panel{
+  background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+  border:1px solid var(--border); border-radius:16px; padding:1rem; box-shadow: var(--shadow);
+}
+.panel label{ display:block; font-family:"Orbitron"; font-size:.8rem; color:#b6d5ef; letter-spacing:.12em; text-transform:uppercase; margin-bottom:.5rem }
+textarea{
+  width:100%; min-height:180px; background: rgba(3, 8, 20, .65); border:1px solid rgba(160,220,255,.2);
+  border-radius:12px; color:var(--text); padding:.8rem; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  outline:none; box-shadow: inset 0 0 0 1px rgba(0,234,255,.06);
+}
+pre{
+  margin:0; white-space:pre-wrap; word-break:break-word; min-height:180px; background: rgba(3, 8, 20, .65);
+  border:1px solid rgba(160,220,255,.2); border-radius:12px; padding:.8rem; color:#e8f7ff; position:relative;
+}
+.demo-actions{ display:flex; gap:.6rem; justify-content:center; margin-top:.6rem }
+
+@media (min-width: 860px){
+  .demo-grid{ grid-template-columns:1fr 1fr }
+}
+
+/* Rólunk + CTA */
+.about{ padding: 3rem 0 }
+.about p{ color: var(--muted); max-width: 72ch; margin: 0 auto; text-align:center }
+
+.cta{ padding: 3rem 0 4rem; text-align:center }
+
+/* Lábléc */
+.site-footer{ border-top:1px solid var(--border); background: linear-gradient(180deg, rgba(6,10,24,.35), rgba(6,10,24,.75)); }
+.site-footer .wrap{ display:flex; align-items:center; justify-content:space-between; padding: 1rem 0; color:#a8c5dc }
+.site-footer a{ color:#a8c5dc; text-decoration:none }
+.site-footer a:hover{ color: var(--primary) }
+
+/* Betöltő (warp-core) */
+#preloader{
+  position: fixed; inset:0; display:grid; place-items:center; background: radial-gradient(700px 240px at 50% 40%, rgba(0, 234, 255, .08), transparent 70%), var(--bg);
+  z-index: 1000; transition: opacity .5s ease, visibility .5s ease;
+}
+#preloader.hidden{ opacity:0; visibility:hidden }
+.warp-core{ position:relative; width:160px; height:160px; display:grid; place-items:center; }
+.warp-core .ring{
+  position:absolute; border-radius:50%;
+  border: 2px solid rgba(0,234,255,.4);
+  box-shadow: inset 0 0 30px rgba(0,234,255,.18), 0 0 30px rgba(124,77,255,.18);
+  animation: pulse 2.6s ease-in-out infinite, rotate 12s linear infinite;
+}
+.r1{ width:140px; height:140px }
+.r2{ width:110px; height:110px; animation-duration: 2.2s, 10s; border-color: rgba(124,77,255,.5) }
+.r3{ width:80px; height:80px; animation-duration: 1.8s, 8s }
+.core-glow{
+  width:26px; height:26px; border-radius:50%;
+  background: radial-gradient(circle at 50% 40%, #fff, #00eaff 40%, rgba(0,234,255,.05) 60%);
+  box-shadow: 0 0 25px 6px rgba(0,234,255,.6), 0 0 60px 18px rgba(124,77,255,.35);
+  animation: throb 2.2s ease-in-out infinite;
+}
+.scanline{
+  position:absolute; inset:0; background: repeating-linear-gradient( to bottom, rgba(255,255,255,.04) 0 2px, transparent 2px 4px );
+  mix-blend-mode: screen; border-radius:50%; filter: blur(.2px);
+  animation: scan 3.2s linear infinite;
+}
+.preloader-label{
+  margin-top: .8rem; color:#a8c5dc; font-family:"Orbitron"; font-size:.8rem; letter-spacing:.18em; text-transform:uppercase;
+  text-shadow: 0 0 14px rgba(0,234,255,.25);
+}
+@keyframes rotate{ to{ transform: rotate(360deg) } }
+@keyframes pulse{
+  0%,100%{ transform: scale(1) }
+  50%{ transform: scale(1.05) }
+}
+@keyframes throb{
+  0%,100%{ filter: drop-shadow(0 0 8px rgba(0,234,255,.5)) }
+  50%{ filter: drop-shadow(0 0 18px rgba(0,234,255,.9)) }
+}
+@keyframes scan{
+  0%{ clip-path: inset(0 0 90% 0) }
+  100%{ clip-path: inset(90% 0 0 0) }
+}
+
+/* Scroll-reveal */
+.reveal{ opacity:0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.visible{ opacity:1; transform:none }
+
+/* Warp effekt (demó gomb) */
+.warp{
+  animation: warp 900ms cubic-bezier(.2,.6,.2,1);
+  transform-origin:center;
+}
+@keyframes warp{
+  0%{ filter: blur(0px); transform: translateZ(0) scale(1) }
+  40%{ filter: blur(2px) brightness(1.2); transform: perspective(600px) translateZ(140px) scale(1.04) }
+  100%{ filter: blur(0px) brightness(1); transform: translateZ(0) scale(1) }
