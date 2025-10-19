@@ -1,6 +1,24 @@
 // Dátum a láblécben
 document.getElementById("year").textContent = new Date().getFullYear().toString();
 
+// Global image fallback handler
+window.handleImageError = function(img) {
+  if (!img || img.dataset.fallbackApplied) return;
+  img.dataset.fallbackApplied = 'true';
+  
+  // Create a clean SVG placeholder
+  const svg = [
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">',
+    '<rect width="100%" height="100%" fill="#030814"/>',
+    '<text x="50%" y="50%" fill="#00eaff" font-size="24" text-anchor="middle" dominant-baseline="middle">',
+    'Kép hamarosan',
+    '</text>',
+    '</svg>'
+  ].join('');
+  
+  img.src = 'data:image/svg+xml;base64,' + btoa(svg);
+};
+
 // Theme Toggle
 (function initTheme(){
   const themeToggle = document.getElementById("theme-toggle");
