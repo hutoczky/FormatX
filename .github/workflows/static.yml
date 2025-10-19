@@ -1,4 +1,5 @@
 name: Deploy FormatX to GitHub Pages
+
 on:
   push:
     branches: ["master"]
@@ -11,6 +12,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write   # needed for artifact cleanup
 
 concurrency:
   group: "pages"
@@ -23,10 +25,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+
+      # Avoid creating multiple artifacts when re-running the same run
       - name: Upload Pages artifact (docs/)
+        if: ${{ github.run_attempt == 1 }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
+
+      # Cleanup duplicate 'github-pages' artifacts in this run, keep only the newest
+      - name: Cleanup duplicate 'github-pages' artifacts
+        if: ${{ always() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run_id = context.runId;
+            const { data } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id
+            });
+            const pages = data.artifacts
+              .filter(a => a.name === 'github-pages' && !a.expired)
+              .sort((a,b)=> new Date(b.created_at) - new Date(a.created_at));
+            core.info(`Found ${pages.length} 'github-pages' artifacts in this run`);
+            for (const a of pages.slice(1)) {
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: a.id
+              });
+              core.info(`Deleted duplicate artifact id=${a.id}`);
+            }
 
   deploy:
     name: Deploy to GitHub Pages
