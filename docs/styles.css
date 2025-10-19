@@ -11,6 +11,31 @@
   --shadow: 0 10px 30px rgba(0,0,0,.4);
 }
 
+/* Light theme */
+:root[data-theme="light"]{
+  --bg: #e8f2ff;
+  --text: #1a2841;
+  --muted: #4a5f7f;
+  --primary: #0099cc;
+  --primary-2:#5a3fbf;
+  --accent: #00b38f;
+  --glass: rgba(255,255,255,0.7);
+  --glass-strong: rgba(255,255,255,0.9);
+  --border: rgba(0,100,160,0.2);
+  --shadow: 0 10px 30px rgba(0,0,0,.1);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 * { box-sizing: border-box }
 html,body { height: 100% }
 html { scroll-behavior: smooth }
@@ -38,6 +63,20 @@ body{
 
 .nav a{ color:var(--muted); margin-left:1rem; text-decoration:none; transition:.2s color }
 .nav a:hover{ color:var(--primary) }
+
+/* Theme toggle button */
+.theme-toggle{
+  margin-left: 1rem; padding: .5rem; border-radius: 8px; border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+  color: var(--text); cursor: pointer; display: inline-flex; align-items: center;
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.theme-toggle:hover{ transform: translateY(-1px); border-color: rgba(0,234,255,.4) }
+.theme-toggle .icon-sun{ display: none }
+.theme-toggle .icon-moon{ display: block }
+:root[data-theme="light"] .theme-toggle .icon-sun{ display: block }
+:root[data-theme="light"] .theme-toggle .icon-moon{ display: none }
+
 .btn{
   display:inline-flex; align-items:center; justify-content:center;
   gap:.5rem; padding:.7rem 1rem; border-radius:12px;
@@ -93,7 +132,31 @@ body{
 }
 
 /* Hős szekció */
-.hero{ padding: 9rem 0 5rem; text-align:center }
+.hero{ padding: 9rem 0 5rem; text-align:center; position: relative }
+/* LCARS-style decorative strips */
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 2rem;
+  left: 0;
+  width: 120px;
+  height: 8px;
+  background: linear-gradient(90deg, var(--primary), transparent);
+  border-radius: 0 4px 4px 0;
+  opacity: 0.6;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 2rem;
+  right: 0;
+  width: 120px;
+  height: 8px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+  border-radius: 4px 0 0 4px;
+  opacity: 0.6;
+}
+
 .title{ font-family:"Orbitron", sans-serif; font-weight:800; font-size: clamp(2rem, 5vw, 4rem); line-height:1.05; margin: 0 0 1rem }
 .title-top{ display:block; color: var(--muted); font-size: .6em; letter-spacing:.2em; text-transform:uppercase }
 .title-focus{
@@ -102,6 +165,41 @@ body{
   text-shadow: 0 0 22px rgba(0,234,255,.25);
   position: relative;
 }
+/* Subtle glitch effect on title */
+@media (prefers-reduced-motion: no-preference) {
+  .title-focus::before,
+  .title-focus::after {
+    content: attr(data-typing);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    opacity: 0;
+  }
+  .title-focus::before {
+    animation: glitch-1 3s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+  }
+  .title-focus::after {
+    animation: glitch-2 2.5s infinite;
+    clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+  }
+}
+@keyframes glitch-1 {
+  0%, 95% { opacity: 0; transform: translate(0) }
+  96% { opacity: 0.8; transform: translate(2px, 1px) }
+  97% { opacity: 0; transform: translate(-2px, -1px) }
+}
+@keyframes glitch-2 {
+  0%, 97% { opacity: 0; transform: translate(0) }
+  98% { opacity: 0.8; transform: translate(-2px, 1px) }
+  99% { opacity: 0; transform: translate(2px, -1px) }
+}
+
 .subtitle{ color:var(--muted); font-size: clamp(1rem, 2.4vw, 1.2rem); margin: 0 auto 1.5rem; max-width: 800px }
 .cta-row{ display:flex; gap: .8rem; justify-content:center; flex-wrap:wrap; margin-top:.6rem }
 
@@ -161,6 +259,110 @@ pre{
 .about p{ color: var(--muted); max-width: 72ch; margin: 0 auto; text-align:center }
 
 .cta{ padding: 3rem 0 4rem; text-align:center }
+
+/* Pro Gallery */
+.pro-gallery{ padding: 3rem 0 }
+.gallery-grid{
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;
+}
+.gallery-item{
+  position: relative; border-radius: 12px; overflow: hidden; cursor: pointer;
+  border: 1px solid var(--border); background: var(--glass-strong);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.gallery-item:hover{
+  transform: translateY(-3px); border-color: rgba(0,234,255,.35);
+  box-shadow: 0 20px 50px rgba(0,0,0,.45);
+}
+.gallery-item img{
+  width: 100%; height: auto; display: block; object-fit: cover; aspect-ratio: 16/9;
+  background: linear-gradient(135deg, rgba(0,234,255,.05), rgba(124,77,255,.05));
+}
+.gallery-caption{
+  padding: .8rem; font-size: .85rem; color: var(--muted); text-align: center;
+  font-family: "Orbitron", sans-serif; letter-spacing: .08em;
+}
+
+/* Lightbox */
+.lightbox{
+  position: fixed; inset: 0; z-index: 100; display: none; align-items: center;
+  justify-content: center; background: rgba(0,0,0,.92); backdrop-filter: blur(8px);
+}
+.lightbox.active{ display: flex }
+.lightbox-content{
+  position: relative; max-width: 90vw; max-height: 90vh; display: flex;
+  flex-direction: column; align-items: center;
+}
+.lightbox-image{
+  max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 8px;
+  box-shadow: 0 20px 80px rgba(0,0,0,.6);
+}
+.lightbox-caption{
+  margin-top: 1rem; color: var(--text); font-size: 1rem; text-align: center;
+  font-family: "Orbitron", sans-serif;
+}
+.lightbox-close{
+  position: absolute; top: 1.5rem; right: 1.5rem; padding: .8rem; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--glass-strong); color: var(--text); cursor: pointer;
+  transition: transform .15s ease, border-color .2s ease;
+  z-index: 101;
+}
+.lightbox-close:hover{ transform: scale(1.1); border-color: rgba(0,234,255,.5) }
+.lightbox-nav{
+  position: absolute; top: 50%; transform: translateY(-50%); padding: 1rem;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--glass-strong);
+  color: var(--text); cursor: pointer; transition: transform .15s ease, border-color .2s ease;
+  z-index: 101;
+}
+.lightbox-nav:hover{ border-color: rgba(0,234,255,.5) }
+.lightbox-prev{ left: 1.5rem }
+.lightbox-next{ right: 1.5rem }
+
+/* Download & Docs sections */
+.download{ padding: 3rem 0 }
+.download-grid{
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;
+}
+.download-card{
+  background:
+    radial-gradient(400px 120px at 0 -20%, rgba(0,234,255,.12), transparent 60%),
+    linear-gradient(180deg, rgba(12,18,34,.9), rgba(12,18,34,.55));
+  border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; text-align: center;
+  text-decoration: none; color: var(--text); box-shadow: var(--shadow);
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+  display: flex; flex-direction: column; align-items: center; gap: .6rem;
+}
+.download-card:hover{
+  transform: translateY(-3px); border-color: rgba(0,234,255,.35);
+  box-shadow: 0 20px 50px rgba(0,0,0,.45);
+}
+.download-icon{
+  color: var(--primary); margin-bottom: .5rem;
+}
+.download-card h3{ margin: 0; font-family: "Orbitron", sans-serif }
+.download-card p{ margin: 0; color: var(--muted); font-size: .9rem }
+
+.docs{ padding: 3rem 0 }
+.docs-grid{
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;
+  max-width: 600px; margin: 0 auto;
+}
+.docs-card{
+  background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+  border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; text-align: center;
+  text-decoration: none; color: var(--text); box-shadow: var(--shadow);
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+  display: flex; flex-direction: column; align-items: center; gap: .6rem;
+}
+.docs-card:hover{
+  transform: translateY(-3px); border-color: rgba(0,234,255,.35);
+  box-shadow: 0 20px 50px rgba(0,0,0,.45);
+}
+.docs-icon{
+  color: var(--primary); margin-bottom: .3rem;
+}
+.docs-card h3{ margin: 0; font-family: "Orbitron", sans-serif; font-size: 1rem }
+.docs-card p{ margin: 0; color: var(--muted); font-size: .85rem }
 
 /* Lábléc */
 .site-footer{ border-top:1px solid var(--border); background: linear-gradient(180deg, rgba(6,10,24,.35), rgba(6,10,24,.75)); }

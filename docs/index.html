@@ -61,9 +61,26 @@
         </a>
         <nav class="nav">
           <a href="#features">Funkciók</a>
+          <a href="#pro">Pro verzió</a>
           <a href="#demo">Demó</a>
-          <a href="#about">Rólunk</a>
-          <a href="#cta" class="btn small">Kezdjük</a>
+          <a href="#download">Letöltés</a>
+          <a href="#docs">Dokumentumok</a>
+          <button id="theme-toggle" class="theme-toggle" aria-label="Téma váltása" aria-pressed="false">
+            <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
         </nav>
       </div>
     </header>
@@ -118,6 +135,47 @@
         </div>
       </section>
 
+      <section id="pro" class="pro-gallery reveal">
+        <div class="wrap">
+          <h2 class="section-title">Pro verzió — képernyőképek</h2>
+          <p class="demo-desc">Kattints a képekre a nagyításhoz</p>
+          <div class="gallery-grid" data-gallery="pro">
+            <article class="gallery-item">
+              <img src="./assets/pro/pro-iso-usb.webp" alt="ISO és USB kezelés" loading="lazy" />
+              <div class="gallery-caption">ISO és USB kezelés</div>
+            </article>
+            <article class="gallery-item">
+              <img src="./assets/pro/pro-format.webp" alt="Formázási beállítások" loading="lazy" />
+              <div class="gallery-caption">Formázási beállítások</div>
+            </article>
+            <article class="gallery-item">
+              <img src="./assets/pro/pro-partitions.webp" alt="Partíció kezelés" loading="lazy" />
+              <div class="gallery-caption">Partíció kezelés</div>
+            </article>
+            <article class="gallery-item">
+              <img src="./assets/pro/pro-disk-health.webp" alt="Lemez állapot" loading="lazy" />
+              <div class="gallery-caption">Lemez állapot</div>
+            </article>
+            <article class="gallery-item">
+              <img src="./assets/pro/pro-secure-wipe.webp" alt="Biztonságos törlés" loading="lazy" />
+              <div class="gallery-caption">Biztonságos törlés</div>
+            </article>
+            <article class="gallery-item">
+              <img src="./assets/pro/pro-settings-help.webp" alt="Beállítások és súgó" loading="lazy" />
+              <div class="gallery-caption">Beállítások és súgó</div>
+            </article>
+            <article class="gallery-item">
+              <img src="./assets/pro/pro-settings.webp" alt="Beállítások" loading="lazy" />
+              <div class="gallery-caption">Beállítások</div>
+            </article>
+            <article class="gallery-item">
+              <img src="./assets/pro/pro-about-modal.webp" alt="Névjegy" loading="lazy" />
+              <div class="gallery-caption">Névjegy</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section id="demo" class="demo reveal">
         <div class="wrap">
           <h2 class="section-title">Élő demó</h2>
@@ -136,6 +194,62 @@
             <button id="format-btn" class="btn primary">Formáz</button>
             <button id="minify-btn" class="btn ghost">Tömörít</button>
             <button id="warp-btn" class="btn ghost">Warp effekt</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="download" class="download reveal">
+        <div class="wrap">
+          <h2 class="section-title">Letöltés</h2>
+          <p class="demo-desc">Töltsd le a FormatX legújabb verzióját</p>
+          <div class="download-grid">
+            <a href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/FormatX_Installer_v1015.exe" class="download-card" download>
+              <svg class="download-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <h3>Telepítő</h3>
+              <p>FormatX Installer v1.0.15</p>
+              <div class="chip">EXE</div>
+            </a>
+            <a href="https://github.com/hutoczky/formatui/releases/tag/v1.0.4" class="download-card" target="_blank" rel="noopener noreferrer">
+              <svg class="download-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
+              </svg>
+              <h3>Kiadási oldal</h3>
+              <p>Teljes verzióinformációk</p>
+              <div class="chip">v1.0.4</div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="docs" class="docs reveal">
+        <div class="wrap">
+          <h2 class="section-title">Dokumentumok</h2>
+          <div class="docs-grid">
+            <a href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/README.txt" class="docs-card" download>
+              <svg class="docs-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <h3>README</h3>
+              <p>Használati útmutató</p>
+            </a>
+            <a href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/LICENSE.txt" class="docs-card" download>
+              <svg class="docs-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <h3>LICENSE</h3>
+              <p>Licenc információk</p>
+            </a>
           </div>
         </div>
       </section>
@@ -170,6 +284,30 @@
         </div>
       </div>
     </footer>
+
+    <!-- Lightbox modal -->
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+      <button class="lightbox-close" aria-label="Bezárás">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <button class="lightbox-nav lightbox-prev" aria-label="Előző">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <button class="lightbox-nav lightbox-next" aria-label="Következő">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+      <div class="lightbox-content">
+        <img class="lightbox-image" src="" alt="" />
+        <div class="lightbox-caption"></div>
+      </div>
+    </div>
 
     <script src="./script.js"></script>
     <noscript>
