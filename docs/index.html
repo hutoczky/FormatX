@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FormatX — Formázás a jövőből</title>
+    <meta name="description" content="FormatX: jövőálló, bővíthető formázó rendszer. Gyors, moduláris, CLI és webes felülettel." />
+    <meta property="og:title" content="FormatX — Formázás a jövőből" />
+    <meta property="og:description" content="Jövőidéző (Star Trek) megjelenés, finom animációk, villámgyors élmény." />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#0df" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..800&family=Exo:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- Betöltési animáció (warp-mag) -->
+    <div id="preloader" aria-hidden="true">
+      <div class="warp-core">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+        <div class="core-glow"></div>
+        <div class="scanline"></div>
+      </div>
+      <div class="preloader-label">Initializing FormatX…</div>
+    </div>
+
+    <!-- Világháttér (csillagmező + rács) -->
+    <div class="bg">
+      <div class="stars layer"></div>
+      <div class="stars layer delay"></div>
+      <div class="grid"></div>
+    </div>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="#home" aria-label="Ugrás a kezdőszekcióra">
+          <!-- Inline logó -->
+          <svg class="logo" width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="g" x1="0" x2="1">
+                <stop offset="0%" stop-color="#00eaff"/>
+                <stop offset="100%" stop-color="#7c4dff"/>
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <rect x="10" y="10" width="44" height="44" rx="6" ry="6" fill="none" stroke="url(#g)" stroke-width="2.5" filter="url(#glow)"/>
+            <path d="M18 40 L32 18 L46 40 Z" fill="url(#g)" opacity="0.9"/>
+            <rect x="28" y="28" width="8" height="16" fill="#0ff" opacity="0.75"/>
+          </svg>
+          <span class="brand-text">FormatX</span>
+        </a>
+        <nav class="nav">
+          <a href="#features">Funkciók</a>
+          <a href="#demo">Demó</a>
+          <a href="#about">Rólunk</a>
+          <a href="#cta" class="btn small">Kezdjük</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="home" class="main">
+      <section class="hero reveal">
+        <div class="wrap">
+          <h1 class="title">
+            <span class="title-top">Formázás a</span>
+            <span class="title-focus" data-typing="jövőből.">jövőből.</span>
+          </h1>
+          <p class="subtitle">Gyors. Moduláris. Bővíthető. Starfleet-esztétika, földi teljesítmény.</p>
+          <div class="cta-row">
+            <a href="#cta" class="btn primary">Letöltés</a>
+            <a href="#features" class="btn ghost">Funkciók</a>
+          </div>
+          <div class="status hud">
+            <span class="dot on"></span> Warp mag: online
+            <span class="sep"></span>
+            <span class="dot on"></span> Telemetria: zöld
+            <span class="sep"></span>
+            <span class="dot"></span> Kísérleti modulok: 3 elérhető
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="features reveal">
+        <div class="wrap">
+          <h2 class="section-title">Miért a FormatX?</h2>
+          <div class="cards">
+            <article class="card">
+              <h3>Villámgyors</h3>
+              <p>Optimalizált mag, amely nagy adathalmazokat is valós idő közelében formáz.</p>
+              <div class="chip">Latency < 5ms</div>
+            </article>
+            <article class="card">
+              <h3>Bővíthető</h3>
+              <p>Moduláris plug-in rendszer — csak csatlakoztasd a saját feldolgozód.</p>
+              <div class="chip">Plugins</div>
+            </article>
+            <article class="card">
+              <h3>CLI és Web UI</h3>
+              <p>Fejlesztőbarát parancssor és elegáns böngészős felület.</p>
+              <div class="chip">Dual Interface</div>
+            </article>
+            <article class="card">
+              <h3>Nyílt forrás</h3>
+              <p>Átlátható, ellenőrizhető, közösség által hajtott fejlesztés.</p>
+              <div class="chip">OSS</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="demo" class="demo reveal">
+        <div class="wrap">
+          <h2 class="section-title">Élő demó</h2>
+          <p class="demo-desc">Írj be néhány sort, és nézd meg a FormatX élő formázását.</p>
+          <div class="demo-grid">
+            <div class="panel input">
+              <label for="demo-input">Bemenet</label>
+              <textarea id="demo-input" placeholder='{"nev":"Zora","rang":"Lt.","szakasz":[1,2,3]}'></textarea>
+            </div>
+            <div class="panel output">
+              <label for="demo-output">Kimenet</label>
+              <pre id="demo-output" aria-live="polite">{}</pre>
+            </div>
+          </div>
+          <div class="demo-actions">
+            <button id="format-btn" class="btn primary">Formáz</button>
+            <button id="minify-btn" class="btn ghost">Tömörít</button>
+            <button id="warp-btn" class="btn ghost">Warp effekt</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="about reveal">
+        <div class="wrap">
+          <h2 class="section-title">Rólunk</h2>
+          <p>
+            A FormatX célja, hogy a fejlesztők kezébe adjon egy gyors és bővíthető formázó eszközt, amely egyszerre
+            öröm és erő. A megjelenés a sci-fi világát idézi, miközben a felület akadálymentes és reszponzív.
+          </p>
+        </div>
+      </section>
+
+      <section id="cta" class="cta reveal">
+        <div class="wrap">
+          <h2 class="section-title">Készen állsz?</h2>
+          <p>Csatlakozz a küldetéshez. Töltsd le, és indítsd be a hajtóműveket.</p>
+          <div class="cta-row">
+            <a class="btn primary" href="#" aria-disabled="true">Letöltés (hamarosan)</a>
+            <a class="btn ghost" href="#" aria-disabled="true">Dokumentáció (hamarosan)</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <div class="foot-left">© <span id="year"></span> FormatX</div>
+        <div class="foot-right">
+          <a href="#home">Vissza a tetejére</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./script.js"></script>
+    <noscript>
+      <style>
+        #preloader { display:none !important; }
+        .reveal { opacity: 1 !important; transform: none !important; }
+      </style>
+    </noscript>
+  </body>
+</html>
