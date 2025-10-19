@@ -1,73 +1,37 @@
-name: Deploy static site to GitHub Pages
+name: Deploy static content to Pages
 
 on:
   push:
-    branches: [ "master" ]
-    paths:
-      - "docs/**"
-      - ".github/workflows/static.yml"
+    branches: [ master ]
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
-  actions: write
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build (prepare Pages artifact)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout (with LFS)
-        uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact (docs/)
-        id: upload
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-          name: site-${{ github.run_id }}
-
-      - name: Cleanup duplicate artifacts in this run
-        if: ${{ always() }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const run_id = context.runId;
-            const { data } = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner, repo: context.repo.repo, run_id
-            });
-            const keep = `site-${run_id}`;
-            const toDelete = data.artifacts
-              .filter(a => !a.expired && a.name !== keep)
-              .sort((a,b)=> new Date(a.created_at) - new Date(b.created_at));
-            for (const a of toDelete) {
-              await github.rest.actions.deleteArtifact({
-                owner: context.repo.owner, repo: context.repo.repo, artifact_id: a.id
-              });
-              core.info(`Deleted artifact: ${a.name} (${a.id})`);
-            }
-
   deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact (publish docs folder)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: site-${{ github.run_id }}
