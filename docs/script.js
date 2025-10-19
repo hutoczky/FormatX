@@ -1,10 +1,35 @@
 // Dátum a láblécben
 document.getElementById("year").textContent = new Date().getFullYear().toString();
 
+// URL restoration for GitHub Pages SPA fallback
+(function restoreCleanURL() {
+  const search = window.location.search;
+  // Check if the URL starts with ?/ (GitHub Pages fallback format)
+  if (search && search.startsWith('?/')) {
+    const path = search.slice(1); // Remove the leading ?
+    const hash = window.location.hash;
+    const cleanURL = window.location.pathname + path + hash;
+    // Use replaceState to update the URL without reloading
+    window.history.replaceState(null, '', cleanURL);
+  }
+})();
+
 // Global image fallback handler
 window.handleImageError = function(img) {
   if (!img || img.dataset.fallbackApplied) return;
   img.dataset.fallbackApplied = 'true';
+  
+  // Mark the parent gallery-item as missing
+  const galleryItem = img.closest('.gallery-item');
+  if (galleryItem) {
+    galleryItem.classList.add('missing');
+    // Update the caption to show "Kép feltöltés alatt"
+    const caption = galleryItem.querySelector('.gallery-caption');
+    if (caption && !caption.dataset.originalText) {
+      caption.dataset.originalText = caption.textContent;
+      caption.textContent = 'Kép feltöltés alatt';
+    }
+  }
   
   // Create a clean SVG placeholder
   const svg = [
