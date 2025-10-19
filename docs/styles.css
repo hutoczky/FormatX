@@ -282,6 +282,17 @@ pre{
   padding: .8rem; font-size: .85rem; color: var(--muted); text-align: center;
   font-family: "Orbitron", sans-serif; letter-spacing: .08em;
 }
+/* Missing image state */
+.gallery-item.missing {
+  border-color: rgba(255,200,100,.25);
+}
+.gallery-item.missing img {
+  opacity: 0.5;
+}
+.gallery-item.missing .gallery-caption {
+  color: #ffc864;
+  font-weight: 600;
+}
 
 /* Lightbox */
 .lightbox{
