@@ -1,6 +1,34 @@
 // Dátum a láblécben
 document.getElementById("year").textContent = new Date().getFullYear().toString();
 
+// Theme Toggle
+(function initTheme(){
+  const themeToggle = document.getElementById("theme-toggle");
+  if (!themeToggle) return;
+
+  // Get initial theme from localStorage or system preference
+  const getInitialTheme = () => {
+    const stored = localStorage.getItem("fx-theme");
+    if (stored) return stored;
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  };
+
+  const setTheme = (theme) => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("fx-theme", theme);
+    themeToggle.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
+  };
+
+  // Apply initial theme
+  setTheme(getInitialTheme());
+
+  // Toggle on click
+  themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme") || "dark";
+    setTheme(current === "dark" ? "light" : "dark");
+  });
+})();
+
 // Betöltő elrejtése, kis késleltetéssel a hatás kedvéért
 window.addEventListener("load", () => {
   const pre = document.getElementById("preloader");
@@ -109,3 +137,108 @@ style.textContent = `
 `;
 
 document.head.appendChild(style);
+
+// Lightbox functionality
+(function initLightbox(){
+  const lightbox = document.getElementById("lightbox");
+  if (!lightbox) return;
+
+  const lightboxImg = lightbox.querySelector(".lightbox-image");
+  const lightboxCaption = lightbox.querySelector(".lightbox-caption");
+  const closeBtn = lightbox.querySelector(".lightbox-close");
+  const prevBtn = lightbox.querySelector(".lightbox-prev");
+  const nextBtn = lightbox.querySelector(".lightbox-next");
+
+  let currentGallery = [];
+  let currentIndex = 0;
+
+  // Find all gallery items
+  const galleryContainer = document.querySelector('[data-gallery="pro"]');
+  if (!galleryContainer) return;
+
+  const galleryItems = Array.from(galleryContainer.querySelectorAll('.gallery-item'));
+
+  const openLightbox = (index) => {
+    currentGallery = galleryItems;
+    currentIndex = index;
+    updateLightbox();
+    lightbox.classList.add("active");
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeLightbox = () => {
+    lightbox.classList.remove("active");
+    lightbox.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  };
+
+  const updateLightbox = () => {
+    if (!currentGallery[currentIndex]) return;
+    const item = currentGallery[currentIndex];
+    const img = item.querySelector("img");
+    const caption = item.querySelector(".gallery-caption");
+
+    lightboxImg.src = img.src;
+    lightboxImg.alt = img.alt;
+    lightboxCaption.textContent = caption ? caption.textContent : "";
+
+    // Update navigation visibility
+    prevBtn.style.display = currentIndex > 0 ? "block" : "none";
+    nextBtn.style.display = currentIndex < currentGallery.length - 1 ? "block" : "none";
+  };
+
+  const showPrev = () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      updateLightbox();
+    }
+  };
+
+  const showNext = () => {
+    if (currentIndex < currentGallery.length - 1) {
+      currentIndex++;
+      updateLightbox();
+    }
+  };
+
+  // Event listeners
+  galleryItems.forEach((item, index) => {
+    item.addEventListener("click", () => openLightbox(index));
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openLightbox(index);
+      }
+    });
+    // Make items keyboard accessible
+    item.setAttribute("tabindex", "0");
+    item.setAttribute("role", "button");
+  });
+
+  closeBtn.addEventListener("click", closeLightbox);
+  prevBtn.addEventListener("click", showPrev);
+  nextBtn.addEventListener("click", showNext);
+
+  // Close on background click
+  lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  // Keyboard navigation
+  document.addEventListener("keydown", (e) => {
+    if (!lightbox.classList.contains("active")) return;
+
+    switch(e.key) {
+      case "Escape":
+        closeLightbox();
+        break;
+      case "ArrowLeft":
+        showPrev();
+        break;
+      case "ArrowRight":
+        showNext();
+        break;
+    }
+  });
+})();
