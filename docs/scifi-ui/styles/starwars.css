@@ -1,5 +1,5 @@
 /* Star Wars — HUD: holografikus kék, rács overlay, Aurebesh hangulat.
-   Többrétegű csillagmező + scanlines; boot: forgó holo-gyűrű. */
+   Csillagmező + scanlines; folyamatos adatfolyam és holo “sweep” a háttérben. */
 :root{
   --bg:#05070c; --text:#e6fbff; --holo:#60e5ff; --holo2:#94f6ff;
   --grid: rgba(96,229,255,.14); --border: rgba(96,229,255,.25);
@@ -7,22 +7,38 @@
 }
 *{ box-sizing:border-box } html,body{ height:100% }
 body{ margin:0; background: var(--bg); color: var(--text); font-family:"Aurebesh","Share Tech Mono","Orbitron",ui-monospace,monospace; position:relative; overflow-x:hidden }
+
 /* Csillagmező + scanlines */
 body::before, body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:-2 }
 body::before{ background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.6), transparent 50%), radial-gradient(2px 2px at 35% 55%, rgba(255,255,255,.35), transparent 50%); animation: stars-move 70s linear infinite; opacity:.8 }
 body::after{ background: repeating-linear-gradient(0deg, rgba(96,229,255,.08) 0 1px, transparent 1px 4px); mix-blend-mode: screen; opacity:.16; animation: scanlines 6s linear infinite }
 @keyframes stars-move{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-1200px) } }
-@keyframes scanlines{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-3px) }
-}
+@keyframes scanlines{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-3px) } }
 
 /* Holografikus képernyőkeret (grid overlay) */
-.chrome{ position:fixed; inset:0; pointer-events:none; z-index:1; background: linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px, linear-gradient(to bottom, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px; opacity:.35 }
+.chrome{ background: linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px, linear-gradient(to bottom, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px; opacity:.35 }
 
+/* NAV / CTA */
 nav{ background: rgba(5,10,18,.55); border-bottom:1px solid var(--border); backdrop-filter: blur(6px); box-shadow: 0 0 20px rgba(96,229,255,.10) inset }
 nav button, .panel .btn, .quick-links a, .download-card{ appearance:none; border:1px solid var(--border); border-radius:8px; padding:.6rem .95rem; background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25)); color: var(--holo2); text-shadow: 0 0 8px rgba(96,229,255,.6); text-decoration:none }
 .download-card small{ color: var(--holo2) }
 .mirror{ color: var(--holo2) }
 .features .box{ background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 0 24px rgba(96,229,255,.12) inset }
+
+/* Telemetria: adatfolyam oszlopok + holografikus “sweep” */
+.telemetry{
+  background:
+    repeating-linear-gradient(90deg, rgba(96,229,255,.055) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(180deg, rgba(96,229,255,.05) 0 6px, transparent 6px 22px);
+  animation: sw-stream-x 9s linear infinite;
+}
+@keyframes sw-stream-x{ 0%{ background-position: 0 0, 0 0 } 100%{ background-position: -320px 0, 0 0 } }
+.telemetry::after{
+  content:""; position:fixed; left:-25%; top:0; width:35%; height:100%;
+  background: linear-gradient(90deg, rgba(96,229,255,.0), rgba(96,229,255,.20), rgba(96,229,255,.0));
+  filter: blur(10px); opacity:.35; mix-blend-mode: screen; animation: holo-sweep 2.8s linear infinite;
+}
+@keyframes holo-sweep{ 0%{ left:-25% } 100%{ left:100% } }
 
 /* Loader — hologram aktiválás */
 #loader{ background: radial-gradient(60% 80% at 50% 50%, rgba(6,12,20,.9), rgba(6,12,20,.6)); backdrop-filter: blur(6px) }
