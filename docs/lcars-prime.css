@@ -273,7 +273,7 @@ body.theme-lcars .screen.list .dot {
   }
 }
 
-html:not([data-tab-visible="true"]) html[data-franchise-theme="lcars"] .screen.main-hud::before,
-html:not([data-tab-visible="true"]) body.theme-lcars .screen.main-hud::before {
+html[data-franchise-theme="lcars"]:not([data-tab-visible="true"]) .screen.main-hud::before,
+body.theme-lcars html:not([data-tab-visible="true"]) .screen.main-hud::before {
   animation-play-state: paused !important;
 }
