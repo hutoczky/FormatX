@@ -1,47 +1,49 @@
+/* LCARS Prime — minimal, calm LCARS look scoped to LCARS theme only */
+:root { /* no global changes here */ }
+
+/* Scope: either html[data-franchise-theme="lcars"] or body.theme-lcars */
 html[data-franchise-theme="lcars"], body.theme-lcars {
   --rail-h: 24px;
   --rail-h-sm: 20px;
-  --focus-ring: #FFFFFF;
+  --focus-ring: var(--lcars-cyan, #7EC8FF);
+  background-color: var(--lcars-ink, #0B0F18);
+  color: var(--text, #E8ECFF);
 }
 
-/* Base surface and text (LCARS muted palette already comes from themes.css) */
-html[data-franchise-theme="lcars"], body.theme-lcars {
-  background-color: var(--lcars-ink);
-  color: var(--text, #E8F2FF);
-}
-
-/* Minimal, single top rail. Remove all mosaic, glow, and elbow decorations */
+/* Header: single calm top rail; no glass, no elbows, no mosaic */
 html[data-franchise-theme="lcars"] .site-header,
 body.theme-lcars .site-header {
-  background: transparent;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-top: 14px; /* space for rail */
 }
-html[data-franchise-theme="lcars"] .site-header::before,
+
 html[data-franchise-theme="lcars"] .site-header::after,
-body.theme-lcars .site-header::before,
 body.theme-lcars .site-header::after {
   content: "";
-  display: block;
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 6px;
   height: var(--rail-h);
-  margin-top: 8px;
   border-radius: 14px;
-  background: var(--lcars-peach); /* flat pastel fill */
+  background: var(--lcars-peach);   /* flat pastel */
   box-shadow: 0 2px 0 rgba(0,0,0,.45) inset;
 }
-/* No secondary accent rail */
-hhtml[data-franchise-theme="lcars"] .site-header::before,
-body.theme-lcars .site-header::before { display: none !important; }
 
-/* Hide any decorative elbow/left rail */
-hhtml[data-franchise-theme="lcars"] .lcars-rail-left,
+/* Hide decorative elbows/rails if present elsewhere */
+html[data-franchise-theme="lcars"] .lcars-rail-left,
 body.theme-lcars .lcars-rail-left { display: none !important; }
 
-/* Navigation: flat text links + tiny left accent tick. No pills, no borders */
-hhtml[data-franchise-theme="lcars"] .site-header .nav,
+/* Navigation: flat links + tiny accent tick on the left; no pills/borders */
+html[data-franchise-theme="lcars"] .site-header .nav,
 body.theme-lcars .site-header .nav {
-  position: relative;
-  background: transparent;
-  box-shadow: none;
-  border: 0;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
   overflow-x: auto;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
@@ -51,9 +53,9 @@ html[data-franchise-theme="lcars"] .nav a,
 body.theme-lcars .nav a {
   display: inline-flex;
   align-items: center;
-  gap: .6rem;
   position: relative;
-  padding: .48rem .9rem .48rem 1.2rem; /* room for the tick */
+  gap: .6rem;
+  padding: .48rem .9rem .48rem 1.2rem; /* room for tick */
   margin: .14rem .2rem;
   background: transparent !important;
   border: 0 !important;
@@ -66,27 +68,35 @@ body.theme-lcars .nav a {
   outline: none;
   transition: transform .12s ease, color .12s ease;
 }
-hhtml[data-franchise-theme="lcars"] .nav a::before,
+
+html[data-franchise-theme="lcars"] .nav a::before,
 body.theme-lcars .nav a::before {
   content: "";
   position: absolute;
-  left: .4rem; top: 50%; transform: translateY(-50%);
-  width: 6px; height: 60%; border-radius: 4px;
+  left: .4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 60%;
+  border-radius: 4px;
   background: linear-gradient(180deg, var(--lcars-amber), var(--lcars-rose));
 }
-hhtml[data-franchise-theme="lcars"] .nav a:hover,
+
+html[data-franchise-theme="lcars"] .nav a:hover,
 body.theme-lcars .nav a:hover { transform: translateY(-1px); }
-hhtml[data-franchise-theme="lcars"] .nav a:focus-visible,
-body.theme-lcars .nav a:focus-visible { outline: 2px solid var(--lcars-cyan); outline-offset: 2px; }
+
+html[data-franchise-theme="lcars"] .nav a:focus-visible,
+body.theme-lcars .nav a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
 
 /* Hide COMMS dock for the Prime baseline */
-hhtml[data-franchise-theme="lcars"] .lcars-comms,
-hhtml[data-franchise-theme="lcars"] .comms-dock,
-body.theme-lcars .lcars-comms,
+html[data-franchise-theme="lcars"] .comms-dock,
 body.theme-lcars .comms-dock { display: none !important; }
 
-/* Hero: typography only + very subtle vertical pinstripes */
-hhtml[data-franchise-theme="lcars"] .hero,
+/* Hero: typography-only with very subtle vertical pinstripes */
+html[data-franchise-theme="lcars"] .hero,
 body.theme-lcars .hero {
   background-image: repeating-linear-gradient(
     to right,
@@ -98,8 +108,22 @@ body.theme-lcars .hero {
 }
 
 /* Disable animated bridge overlay entirely for LCARS */
-hhtml[data-franchise-theme="lcars"] .bridge-screens,
+html[data-franchise-theme="lcars"] .bridge-screens,
 body.theme-lcars .bridge-screens { display: none !important; }
+
+/* Buttons: ensure contrast and clarity */
+html[data-franchise-theme="lcars"] .btn.primary,
+body.theme-lcars .btn.primary {
+  background: var(--lcars-cyan);
+  color: #051018;
+  border: 0;
+}
+html[data-franchise-theme="lcars"] .btn.ghost,
+body.theme-lcars .btn.ghost {
+  background: transparent;
+  color: var(--text);
+  border: 2px solid rgba(255,255,255,.18);
+}
 
 /* Mobile: thinner rail */
 @media (max-width: 768px){
