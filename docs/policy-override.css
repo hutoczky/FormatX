@@ -1,0 +1,7 @@
+/* Policy override: fully disable intro/flag overlay */
+.intro,
+.intro::before,
+.intro::after {
+  display: none !important;
+  animation: none !important;
+}
