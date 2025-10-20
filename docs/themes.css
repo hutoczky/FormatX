@@ -1,0 +1,445 @@
+/* ============================================
+   FormatX Multi-Theme System
+   Four franchise-inspired themes:
+   1. LCARS (default - Star Trek inspired)
+   2. Cyberpunk 2077
+   3. Star Wars
+   4. Stargate
+   ============================================ */
+
+/* LCARS Theme (Default - already in styles.css) */
+/* This theme uses the existing variables */
+
+/* ============================================
+   CYBERPUNK 2077 THEME
+   ============================================ */
+:root[data-franchise-theme="cyberpunk"] {
+  --bg: #0a0a0f;
+  --text: #fcee0a;
+  --muted: #ff006e;
+  --primary: #00fff9;
+  --primary-2: #ff006e;
+  --accent: #fcee0a;
+  --glass: rgba(10, 10, 15, 0.7);
+  --glass-strong: rgba(10, 10, 15, 0.9);
+  --border: rgba(0, 255, 249, 0.3);
+  --shadow: 0 10px 30px rgba(255, 0, 110, 0.4);
+}
+
+:root[data-franchise-theme="cyberpunk"] body {
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(255, 0, 110, 0.2), transparent 60%), var(--bg);
+}
+
+:root[data-franchise-theme="cyberpunk"] .bg .grid {
+  --c1: rgba(0, 255, 249, 0.15);
+}
+
+:root[data-franchise-theme="cyberpunk"] .hero::before {
+  background: linear-gradient(90deg, var(--primary), transparent);
+}
+
+:root[data-franchise-theme="cyberpunk"] .hero::after {
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+
+/* Cyberpunk glitch animation */
+:root[data-franchise-theme="cyberpunk"] .title-focus {
+  animation: cyberpunk-glitch 0.3s ease-in-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes cyberpunk-glitch {
+    0% { transform: translate(0); opacity: 1; }
+    20% { transform: translate(-2px, 2px); opacity: 0.8; }
+    40% { transform: translate(2px, -2px); opacity: 0.9; }
+    60% { transform: translate(-2px, -2px); opacity: 0.8; }
+    80% { transform: translate(2px, 2px); opacity: 0.9; }
+    100% { transform: translate(0); opacity: 1; }
+  }
+}
+
+/* ============================================
+   STAR WARS THEME
+   ============================================ */
+:root[data-franchise-theme="starwars"] {
+  --bg: #000000;
+  --text: #ffe81f;
+  --muted: #4bd5ee;
+  --primary: #ffe81f;
+  --primary-2: #4bd5ee;
+  --accent: #ff3f00;
+  --glass: rgba(0, 0, 0, 0.7);
+  --glass-strong: rgba(0, 0, 0, 0.9);
+  --border: rgba(255, 232, 31, 0.3);
+  --shadow: 0 10px 30px rgba(255, 63, 0, 0.4);
+}
+
+:root[data-franchise-theme="starwars"] body {
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(255, 232, 31, 0.15), transparent 60%), var(--bg);
+}
+
+:root[data-franchise-theme="starwars"] .bg .stars {
+  opacity: 0.9;
+  background:
+    radial-gradient(1px 1px at 20% 30%, #ffe81f 50%, transparent 51%),
+    radial-gradient(1px 1px at 60% 70%, #4bd5ee 50%, transparent 51%),
+    radial-gradient(1px 1px at 80% 20%, #ffffff 50%, transparent 51%),
+    radial-gradient(1px 1px at 35% 80%, #ffe81f 50%, transparent 51%),
+    radial-gradient(1px 1px at 10% 60%, #4bd5ee 50%, transparent 51%);
+}
+
+:root[data-franchise-theme="starwars"] .bg .grid {
+  display: none;
+}
+
+:root[data-franchise-theme="starwars"] .hero::before {
+  background: linear-gradient(90deg, var(--primary), transparent);
+}
+
+:root[data-franchise-theme="starwars"] .hero::after {
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+
+/* Star Wars hyperspace animation */
+:root[data-franchise-theme="starwars"] .title-focus {
+  animation: hyperspace 1s ease-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes hyperspace {
+    0% {
+      transform: scale(0.5) translateZ(-500px);
+      opacity: 0;
+      filter: blur(10px);
+    }
+    50% {
+      opacity: 0.5;
+      filter: blur(5px);
+    }
+    100% {
+      transform: scale(1) translateZ(0);
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+}
+
+/* ============================================
+   STARGATE THEME
+   ============================================ */
+:root[data-franchise-theme="stargate"] {
+  --bg: #0d1821;
+  --text: #87ceeb;
+  --muted: #6c8fa1;
+  --primary: #00bfff;
+  --primary-2: #4169e1;
+  --accent: #1e90ff;
+  --glass: rgba(13, 24, 33, 0.7);
+  --glass-strong: rgba(13, 24, 33, 0.9);
+  --border: rgba(0, 191, 255, 0.3);
+  --shadow: 0 10px 30px rgba(0, 191, 255, 0.4);
+}
+
+:root[data-franchise-theme="stargate"] body {
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(0, 191, 255, 0.2), transparent 60%), var(--bg);
+}
+
+:root[data-franchise-theme="stargate"] .bg .grid {
+  --c1: rgba(0, 191, 255, 0.2);
+}
+
+:root[data-franchise-theme="stargate"] .hero::before {
+  background: linear-gradient(90deg, var(--primary), transparent);
+  height: 6px;
+  border-radius: 3px;
+}
+
+:root[data-franchise-theme="stargate"] .hero::after {
+  background: linear-gradient(90deg, transparent, var(--accent));
+  height: 6px;
+  border-radius: 3px;
+}
+
+/* Stargate ripple animation */
+:root[data-franchise-theme="stargate"] .title-focus {
+  animation: stargate-ripple 1.2s ease-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes stargate-ripple {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+      filter: blur(5px);
+    }
+    30% {
+      transform: scale(1.1);
+      opacity: 0.7;
+    }
+    60% {
+      transform: scale(0.95);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+}
+
+/* ============================================
+   THEME INTRO ANIMATIONS
+   ============================================ */
+
+/* LCARS Swipe Animation */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-franchise-theme="lcars"] .reveal.visible,
+  :root:not([data-franchise-theme]) .reveal.visible {
+    animation: lcars-swipe 0.6s ease-out;
+  }
+
+  @keyframes lcars-swipe {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+}
+
+/* Cyberpunk Glitch Animation for reveals */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-franchise-theme="cyberpunk"] .reveal.visible {
+    animation: cyberpunk-reveal 0.5s ease-out;
+  }
+
+  @keyframes cyberpunk-reveal {
+    0% {
+      transform: translate(-5px, 5px);
+      opacity: 0;
+      filter: blur(3px);
+    }
+    25% {
+      transform: translate(5px, -5px);
+      opacity: 0.3;
+    }
+    50% {
+      transform: translate(-3px, 3px);
+      opacity: 0.6;
+    }
+    75% {
+      transform: translate(3px, -3px);
+      opacity: 0.8;
+    }
+    100% {
+      transform: translate(0, 0);
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+}
+
+/* Star Wars Hyperspace Animation for reveals */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-franchise-theme="starwars"] .reveal.visible {
+    animation: starwars-reveal 0.8s ease-out;
+  }
+
+  @keyframes starwars-reveal {
+    0% {
+      transform: scale(0.5) translateY(50px);
+      opacity: 0;
+      filter: blur(8px);
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+}
+
+/* Stargate Ripple Animation for reveals */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-franchise-theme="stargate"] .reveal.visible {
+    animation: stargate-reveal 0.7s ease-out;
+  }
+
+  @keyframes stargate-reveal {
+    0% {
+      transform: scale(0.9) translateY(20px);
+      opacity: 0;
+      filter: blur(4px);
+    }
+    40% {
+      transform: scale(1.05) translateY(-5px);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+}
+
+/* ============================================
+   THEME SELECTOR STYLES
+   ============================================ */
+.theme-selector {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--glass-strong);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.theme-selector.minimized {
+  transform: translateY(calc(100% - 60px));
+}
+
+.theme-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.theme-selector-title {
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0;
+}
+
+.theme-selector-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.theme-selector-toggle:hover {
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+.theme-selector-toggle svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
+.theme-selector.minimized .theme-selector-toggle svg {
+  transform: rotate(180deg);
+}
+
+.theme-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.theme-option {
+  background: linear-gradient(180deg, rgba(12, 18, 34, 0.6), rgba(12, 18, 34, 0.3));
+  border: 2px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-family: "Exo", sans-serif;
+  font-size: 0.9rem;
+  text-align: left;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-option:hover {
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.theme-option.active {
+  border-color: var(--primary);
+  background: linear-gradient(180deg, rgba(0, 234, 255, 0.2), rgba(0, 234, 255, 0.1));
+  box-shadow: 0 0 15px rgba(0, 234, 255, 0.3);
+}
+
+.theme-option.active::after {
+  content: "✓";
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary);
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Theme-specific button colors */
+:root[data-franchise-theme="cyberpunk"] .theme-option.active {
+  border-color: #00fff9;
+  background: linear-gradient(180deg, rgba(0, 255, 249, 0.2), rgba(255, 0, 110, 0.1));
+  box-shadow: 0 0 15px rgba(0, 255, 249, 0.3);
+}
+
+:root[data-franchise-theme="starwars"] .theme-option.active {
+  border-color: #ffe81f;
+  background: linear-gradient(180deg, rgba(255, 232, 31, 0.2), rgba(75, 213, 238, 0.1));
+  box-shadow: 0 0 15px rgba(255, 232, 31, 0.3);
+}
+
+:root[data-franchise-theme="stargate"] .theme-option.active {
+  border-color: #00bfff;
+  background: linear-gradient(180deg, rgba(0, 191, 255, 0.2), rgba(65, 105, 225, 0.1));
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .theme-selector {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .theme-selector,
+  .theme-selector-toggle svg,
+  .theme-option {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  :root[data-franchise-theme] .title-focus,
+  :root[data-franchise-theme] .reveal.visible {
+    animation: none !important;
+  }
+}
