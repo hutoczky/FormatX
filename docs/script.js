@@ -1,6 +1,30 @@
 // Dátum a láblécben
 document.getElementById("year").textContent = new Date().getFullYear().toString();
 
+// Tab visibility pause for animations (performance optimization)
+(function handleTabVisibility() {
+  document.addEventListener("visibilitychange", () => {
+    const bridgeScreens = document.querySelector('.bridge-screens');
+    if (bridgeScreens) {
+      if (document.hidden) {
+        bridgeScreens.style.animationPlayState = 'paused';
+        // Pause all child animations
+        const animatedElements = bridgeScreens.querySelectorAll('*');
+        animatedElements.forEach(el => {
+          el.style.animationPlayState = 'paused';
+        });
+      } else {
+        bridgeScreens.style.animationPlayState = 'running';
+        // Resume all child animations
+        const animatedElements = bridgeScreens.querySelectorAll('*');
+        animatedElements.forEach(el => {
+          el.style.animationPlayState = 'running';
+        });
+      }
+    }
+  });
+})();
+
 // URL restoration for GitHub Pages SPA fallback
 (function restoreCleanURL() {
   const search = window.location.search;

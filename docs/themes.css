@@ -31,6 +31,14 @@
   --grid: linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
           linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
   --grid-size: 22px 22px;
+  
+  /* Authentic LCARS color palette (muted tones) - global fallback */
+  --lcars-amber: #FF9E66;
+  --lcars-peach: #F7BFA4;
+  --lcars-rose: #E08AA3;
+  --lcars-lilac: #C9B3FF;
+  --lcars-cyan: #7EC8FF;
+  --lcars-ink: #0B0F18;
 }
 
 /* LCARS (Star Trek SNW ihletés) – alapértelmezett */
@@ -50,6 +58,14 @@ body.theme-lcars {
 
   --panel: rgba(13,15,26,var(--panel-alpha));
   --outline: rgba(255,255,255,0.06);
+  
+  /* Authentic LCARS color palette (muted tones) */
+  --lcars-amber: #FF9E66;
+  --lcars-peach: #F7BFA4;
+  --lcars-rose: #E08AA3;
+  --lcars-lilac: #C9B3FF;
+  --lcars-cyan: #7EC8FF;
+  --lcars-ink: #0B0F18;
 }
 
 /* Cyberpunk 2077 ihletés */
