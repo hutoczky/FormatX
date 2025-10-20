@@ -1,0 +1,416 @@
+/* ============================================
+   FormatX Multi-Theme System
+   Themes: LCARS, Cyberpunk 2077, Star Wars, Stargate
+   ============================================ */
+
+/* ============================================
+   THEME: LCARS (Default - Star Trek inspired)
+   ============================================ */
+:root[data-franchise-theme="lcars"],
+:root:not([data-franchise-theme]) {
+  --bg: #050611;
+  --text: #d8eaff;
+  --muted: #9fb8d1;
+  --primary: #00eaff;
+  --primary-2: #7c4dff;
+  --accent: #00ffc6;
+  --glass: rgba(12,18,34,0.6);
+  --glass-strong: rgba(12,18,34,0.8);
+  --border: rgba(160,220,255,0.18);
+  --shadow: 0 10px 30px rgba(0,0,0,.4);
+  
+  /* Theme-specific colors */
+  --theme-glow: rgba(0,234,255,0.25);
+  --theme-ring-1: rgba(0,234,255,0.4);
+  --theme-ring-2: rgba(124,77,255,0.5);
+  --theme-ring-3: rgba(0,234,255,0.4);
+  --theme-core: #00eaff;
+  --theme-scanline: rgba(255,255,255,0.04);
+}
+
+/* ============================================
+   THEME: Cyberpunk 2077
+   ============================================ */
+:root[data-franchise-theme="cyberpunk"] {
+  --bg: #0a0a0f;
+  --text: #fcee09;
+  --muted: #d4af37;
+  --primary: #ff003c;
+  --primary-2: #00f0ff;
+  --accent: #fcee09;
+  --glass: rgba(10,10,15,0.6);
+  --glass-strong: rgba(10,10,15,0.85);
+  --border: rgba(252,238,9,0.2);
+  --shadow: 0 10px 30px rgba(255,0,60,.3);
+  
+  /* Theme-specific colors */
+  --theme-glow: rgba(255,0,60,0.35);
+  --theme-ring-1: rgba(255,0,60,0.5);
+  --theme-ring-2: rgba(0,240,255,0.6);
+  --theme-ring-3: rgba(252,238,9,0.5);
+  --theme-core: #ff003c;
+  --theme-scanline: rgba(255,0,60,0.08);
+}
+
+/* ============================================
+   THEME: Star Wars
+   ============================================ */
+:root[data-franchise-theme="starwars"] {
+  --bg: #000000;
+  --text: #ffe81f;
+  --muted: #c9b037;
+  --primary: #0d6efd;
+  --primary-2: #dc3545;
+  --accent: #ffe81f;
+  --glass: rgba(0,0,0,0.7);
+  --glass-strong: rgba(0,0,0,0.9);
+  --border: rgba(255,232,31,0.25);
+  --shadow: 0 10px 30px rgba(13,110,253,.4);
+  
+  /* Theme-specific colors */
+  --theme-glow: rgba(13,110,253,0.45);
+  --theme-ring-1: rgba(13,110,253,0.6);
+  --theme-ring-2: rgba(220,53,69,0.6);
+  --theme-ring-3: rgba(255,232,31,0.5);
+  --theme-core: #0d6efd;
+  --theme-scanline: rgba(255,232,31,0.06);
+}
+
+/* ============================================
+   THEME: Stargate
+   ============================================ */
+:root[data-franchise-theme="stargate"] {
+  --bg: #0b1621;
+  --text: #c5e8ff;
+  --muted: #7ea8c7;
+  --primary: #4d9fff;
+  --primary-2: #ff6b35;
+  --accent: #00d4ff;
+  --glass: rgba(11,22,33,0.65);
+  --glass-strong: rgba(11,22,33,0.85);
+  --border: rgba(77,159,255,0.2);
+  --shadow: 0 10px 30px rgba(0,100,180,.35);
+  
+  /* Theme-specific colors */
+  --theme-glow: rgba(77,159,255,0.3);
+  --theme-ring-1: rgba(77,159,255,0.5);
+  --theme-ring-2: rgba(255,107,53,0.5);
+  --theme-ring-3: rgba(0,212,255,0.4);
+  --theme-core: #4d9fff;
+  --theme-scanline: rgba(77,159,255,0.05);
+}
+
+/* ============================================
+   Light Theme Variants (for light mode toggle)
+   ============================================ */
+:root[data-theme="light"][data-franchise-theme="lcars"],
+:root[data-theme="light"]:not([data-franchise-theme]) {
+  --bg: #e8f2ff;
+  --text: #1a2841;
+  --muted: #4a5f7f;
+  --primary: #0099cc;
+  --primary-2: #5a3fbf;
+  --accent: #00b38f;
+  --glass: rgba(255,255,255,0.7);
+  --glass-strong: rgba(255,255,255,0.9);
+  --border: rgba(0,100,160,0.2);
+  --shadow: 0 10px 30px rgba(0,0,0,.1);
+}
+
+:root[data-theme="light"][data-franchise-theme="cyberpunk"] {
+  --bg: #fff5e6;
+  --text: #1a1a00;
+  --muted: #665500;
+  --primary: #ff0044;
+  --primary-2: #00ccdd;
+  --accent: #ffdd00;
+  --glass: rgba(255,245,230,0.8);
+  --glass-strong: rgba(255,245,230,0.95);
+  --border: rgba(255,0,68,0.25);
+  --shadow: 0 10px 30px rgba(255,0,60,.15);
+}
+
+:root[data-theme="light"][data-franchise-theme="starwars"] {
+  --bg: #faf8f3;
+  --text: #2b2400;
+  --muted: #7a6200;
+  --primary: #1a7fd8;
+  --primary-2: #c82333;
+  --accent: #d4af37;
+  --glass: rgba(250,248,243,0.8);
+  --glass-strong: rgba(250,248,243,0.95);
+  --border: rgba(13,110,253,0.3);
+  --shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+:root[data-theme="light"][data-franchise-theme="stargate"] {
+  --bg: #e3f2fd;
+  --text: #01263d;
+  --muted: #1e5a7d;
+  --primary: #2196f3;
+  --primary-2: #ff5722;
+  --accent: #00bcd4;
+  --glass: rgba(227,242,253,0.8);
+  --glass-strong: rgba(227,242,253,0.95);
+  --border: rgba(33,150,243,0.25);
+  --shadow: 0 10px 30px rgba(0,0,0,.12);
+}
+
+/* ============================================
+   Theme-specific intro animations
+   ============================================ */
+
+/* LCARS Intro */
+@keyframes lcars-warp {
+  0% { transform: scale(0.8) translateZ(0); opacity: 0; filter: blur(8px); }
+  40% { transform: scale(1.05) translateZ(0); opacity: 0.8; filter: blur(2px); }
+  100% { transform: scale(1) translateZ(0); opacity: 1; filter: blur(0); }
+}
+
+/* Cyberpunk Intro */
+@keyframes cyberpunk-glitch {
+  0%, 100% { transform: translate(0) scale(1); opacity: 0; }
+  5% { transform: translate(-2px, 2px) scale(1.01); opacity: 0.3; }
+  10% { transform: translate(2px, -2px) scale(0.99); opacity: 0.6; }
+  15% { transform: translate(-1px, 1px) scale(1.01); opacity: 0.9; }
+  20%, 95% { transform: translate(0) scale(1); opacity: 1; }
+  96% { transform: translate(1px, -1px) scale(1); opacity: 1; }
+  97% { transform: translate(-1px, 1px) scale(1); opacity: 1; }
+}
+
+/* Star Wars Intro */
+@keyframes starwars-crawl {
+  0% { transform: perspective(400px) rotateX(25deg) translateY(100%) scale(1.5); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: perspective(400px) rotateX(25deg) translateY(-20%) scale(0.8); opacity: 1; }
+}
+
+/* Stargate Intro */
+@keyframes stargate-chevron {
+  0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+
+/* Apply intro animation to preloader based on theme */
+:root[data-franchise-theme="lcars"] #preloader .warp-core,
+:root:not([data-franchise-theme]) #preloader .warp-core {
+  animation: lcars-warp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+:root[data-franchise-theme="cyberpunk"] #preloader .warp-core {
+  animation: cyberpunk-glitch 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+:root[data-franchise-theme="starwars"] #preloader .warp-core {
+  animation: starwars-crawl 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+:root[data-franchise-theme="stargate"] #preloader .warp-core {
+  animation: stargate-chevron 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Theme-specific warp core colors */
+:root[data-franchise-theme="lcars"] .warp-core .ring,
+:root:not([data-franchise-theme]) .warp-core .ring {
+  border-color: var(--theme-ring-1);
+  box-shadow: inset 0 0 30px var(--theme-glow), 0 0 30px var(--theme-glow);
+}
+
+:root[data-franchise-theme="lcars"] .warp-core .r2,
+:root:not([data-franchise-theme]) .warp-core .r2 {
+  border-color: var(--theme-ring-2);
+}
+
+:root[data-franchise-theme="lcars"] .warp-core .r3,
+:root:not([data-franchise-theme]) .warp-core .r3 {
+  border-color: var(--theme-ring-3);
+}
+
+:root[data-franchise-theme="cyberpunk"] .warp-core .ring {
+  border-color: var(--theme-ring-1);
+  box-shadow: inset 0 0 25px var(--theme-glow), 0 0 25px var(--theme-glow);
+}
+
+:root[data-franchise-theme="cyberpunk"] .warp-core .r2 {
+  border-color: var(--theme-ring-2);
+}
+
+:root[data-franchise-theme="cyberpunk"] .warp-core .r3 {
+  border-color: var(--theme-ring-3);
+}
+
+:root[data-franchise-theme="starwars"] .warp-core .ring {
+  border-color: var(--theme-ring-1);
+  box-shadow: inset 0 0 28px var(--theme-glow), 0 0 28px var(--theme-glow);
+}
+
+:root[data-franchise-theme="starwars"] .warp-core .r2 {
+  border-color: var(--theme-ring-2);
+}
+
+:root[data-franchise-theme="starwars"] .warp-core .r3 {
+  border-color: var(--theme-ring-3);
+}
+
+:root[data-franchise-theme="stargate"] .warp-core .ring {
+  border-color: var(--theme-ring-1);
+  box-shadow: inset 0 0 32px var(--theme-glow), 0 0 32px var(--theme-glow);
+}
+
+:root[data-franchise-theme="stargate"] .warp-core .r2 {
+  border-color: var(--theme-ring-2);
+}
+
+:root[data-franchise-theme="stargate"] .warp-core .r3 {
+  border-color: var(--theme-ring-3);
+}
+
+/* Core glow - theme specific */
+.warp-core .core-glow {
+  background: radial-gradient(circle at 50% 40%, #fff, var(--theme-core) 40%, transparent 60%);
+  box-shadow: 0 0 25px 6px var(--theme-glow), 0 0 60px 18px var(--theme-glow);
+}
+
+/* Scanline - theme specific */
+.warp-core .scanline {
+  background: repeating-linear-gradient(to bottom, var(--theme-scanline) 0 2px, transparent 2px 4px);
+}
+
+/* Theme-specific preloader labels */
+:root[data-franchise-theme="lcars"] .preloader-label::after,
+:root:not([data-franchise-theme]) .preloader-label::after {
+  content: " — LCARS Online";
+}
+
+:root[data-franchise-theme="cyberpunk"] .preloader-label::after {
+  content: " — Jacking In...";
+}
+
+:root[data-franchise-theme="starwars"] .preloader-label::after {
+  content: " — A long time ago...";
+}
+
+:root[data-franchise-theme="stargate"] .preloader-label::after {
+  content: " — Chevrons Locked";
+}
+
+/* ============================================
+   Theme Selector Styles
+   ============================================ */
+.theme-selector {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.theme-selector-button {
+  padding: .5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-family: "Orbitron", sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.theme-selector-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0,234,255,.4);
+}
+
+.theme-selector-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.theme-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 200px;
+  background: var(--glass-strong);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
+  z-index: 50;
+}
+
+.theme-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s ease;
+  font-size: 0.9rem;
+}
+
+.theme-option:hover {
+  background: rgba(0,234,255,0.1);
+}
+
+.theme-option.active {
+  background: rgba(0,234,255,0.15);
+  border-left: 3px solid var(--primary);
+}
+
+.theme-option-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  transition: all .2s ease;
+}
+
+.theme-option.active .theme-option-indicator {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+}
+
+.theme-option-label {
+  flex: 1;
+  font-family: "Orbitron", sans-serif;
+  letter-spacing: 0.06em;
+}
+
+/* ============================================
+   Reduced Motion Support
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-franchise-theme] #preloader .warp-core {
+    animation: none !important;
+  }
+  
+  .warp-core .ring {
+    animation: none !important;
+  }
+  
+  .theme-selector-button,
+  .theme-dropdown,
+  .theme-option {
+    transition: none !important;
+  }
+}
