@@ -44,13 +44,8 @@
     }
   }
 
-  function intro(theme) {
-    const o = document.createElement('div');
-    o.className = `intro intro--${theme}`;
-    document.body.appendChild(o);
-    const timeout = setTimeout(() => o.remove(), 1500);
-    o.addEventListener('animationend', () => { clearTimeout(timeout); o.remove(); }, { once: true });
-  }
+  // Intro overlay letiltva (policy/jogi okokból) – no-op
+  function intro(theme) { return; }
 
   function buildSwitcher(current) {
     const wrap = document.createElement('div');
@@ -78,7 +73,7 @@
       const val = e.target.value;
       applyTheme(val);
       saveTheme(val);
-      intro(val);
+      // intro(val);  // szándékosan kikapcsolva
     });
 
     wrap.appendChild(label);
@@ -99,6 +94,7 @@
     const theme = getSavedTheme();
     applyTheme(theme);
     buildSwitcher(theme);
-    intro(theme);
+
+    // intro(theme); // szándékosan kikapcsolva
   });
 })();
