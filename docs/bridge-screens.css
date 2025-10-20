@@ -1,0 +1,176 @@
+/* LCARS bridge-like animated background panels
+   Colors inherit from existing theme variables. */
+
+.bridge-screens {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-areas:
+    "strip strip strip"
+    "hud   hud   list"
+    "eq    wave  list";
+  grid-template-rows: 70px 1fr 180px;
+  grid-template-columns: 2fr 1.2fr 0.8fr;
+  gap: 18px;
+  padding: 18px;
+}
+
+.bridge-screens .screen {
+  background: rgba(6, 12, 24, 0.35);
+  border: 1px solid rgba(0, 234, 255, 0.22);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .25) inset, 0 4px 22px rgba(0, 234, 255, .08);
+  overflow: hidden;
+  position: relative;
+}
+
+/* 1) Top status strip: moving multicolor blocks */
+.screen.top-strip { grid-area: strip; }
+.screen.top-strip::before {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--primary) 0 24px,
+      transparent 24px 28px
+    ),
+    repeating-linear-gradient(
+      to right,
+      var(--accent) 0 18px,
+      transparent 18px 24px
+    ),
+    repeating-linear-gradient(
+      to right,
+      var(--primary-2) 0 14px,
+      transparent 14px 18px
+    );
+  mix-blend-mode: screen;
+  animation: strip-shift 26s linear infinite;
+  opacity: .7;
+}
+@keyframes strip-shift {
+  0% { background-position: 0 0, -120px 0, 90px 0; }
+  100% { background-position: 1280px 0, 1160px 0, 980px 0; }
+}
+
+/* 2) Central HUD radar */
+.screen.main-hud { grid-area: hud; }
+.screen.main-hud svg {
+  width: 100%; height: 100%;
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(0,234,255,.35));
+}
+.hud-ring { fill: none; stroke: rgba(0,234,255,.4); }
+.hud-ring.thick { stroke-width: 2.5; }
+.hud-ring.faint { stroke: rgba(0,234,255,.18); stroke-dasharray: 4 6; }
+
+.hud-grid { stroke: rgba(0,234,255,.12); stroke-width: 1; }
+
+.hud-sweep {
+  stroke: var(--primary);
+  stroke-width: 2.2;
+  transform-origin: 50% 50%;
+  animation: hud-rotate 6s linear infinite;
+  filter: drop-shadow(0 0 6px var(--primary));
+}
+@keyframes hud-rotate { to { transform: rotate(360deg); } }
+
+.hud-pulse {
+  fill: #fff;
+  transform-origin: 50% 50%;
+  animation: hud-pulse 2.4s ease-in-out infinite;
+  opacity: .85;
+  filter: drop-shadow(0 0 12px rgba(0,234,255,.55));
+}
+@keyframes hud-pulse {
+  0%,100% { transform: scale(.95); }
+  50% { transform: scale(1.1); }
+}
+
+/* 3) Waveform scope */
+.screen.wave { grid-area: wave; }
+.screen.wave svg { width: 100%; height: 100%; display: block; }
+.wave-path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 8 12;
+  animation: wave-run 2.6s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(255, 209, 102, .6));
+}
+@keyframes wave-run { to { stroke-dashoffset: -200; } }
+
+/* 4) Equalizer bars */
+.screen.eq { grid-area: eq; display: grid; align-items: end; grid-auto-flow: column; grid-auto-columns: minmax(6px, 1fr); gap: 6px; padding: 10px; }
+.eq .bar {
+  height: 30%;
+  background: linear-gradient(180deg, var(--primary), var(--primary-2));
+  box-shadow: 0 0 12px rgba(0,234,255,.35);
+  border-radius: 4px 4px 0 0;
+  animation: equalize 950ms ease-in-out infinite;
+  transform-origin: bottom center;
+  opacity: .9;
+}
+.eq .bar:nth-child(odd) { animation-duration: 1100ms; }
+.eq .bar:nth-child(3n) { animation-duration: 820ms; }
+.eq .bar:nth-child(5n) { animation-duration: 1250ms; }
+@keyframes equalize {
+  0%,100% { transform: scaleY(.25); }
+  45%     { transform: scaleY(.96); }
+  60%     { transform: scaleY(.6); }
+}
+
+/* 5) Vertical data list with scanning highlight */
+.screen.list { grid-area: list; }
+.list::before, .list::after {
+  content:"";
+  position:absolute; left:0; right:0; height:22%;
+  background: linear-gradient(90deg, transparent, rgba(0,234,255,.15), transparent);
+  filter: blur(1px);
+}
+.list::before { top:-22%; animation: scan-down 6s linear infinite; }
+.list::after  { bottom:-22%; animation: scan-up   6s linear infinite; animation-delay: -2.2s; }
+@keyframes scan-down { to { transform: translateY(122%); } }
+@keyframes scan-up   { to { transform: translateY(-122%); } }
+
+.list .col {
+  position:absolute; top:0; bottom:0; width: calc(33.333% - 12px);
+  background:
+    repeating-linear-gradient(to bottom, rgba(0,234,255,.28) 0 1px, transparent 1px 21px);
+  border-right: 1px solid rgba(0,234,255,.2);
+}
+.list .col:nth-child(1) { left: 0; }
+.list .col:nth-child(2) { left: calc(33.333% + 6px); }
+.list .col:nth-child(3) { right: 0; border-right: 0; }
+
+/* blinking dots in list */
+.list .dot {
+  position: absolute; left: 10px; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(255,209,102,.85);
+  animation: dot-blink 1.6s ease-in-out infinite;
+}
+@keyframes dot-blink { 0%,100%{opacity:.25} 50%{opacity:1} }
+
+/* 6) Simple starship-like schematic (neutral, non-branded) */
+.screen.schematic { position: absolute; width: 34%; aspect-ratio: 16/9; right: 24px; top: 24px; opacity: .7; }
+.screen.schematic svg { width: 100%; height: 100%; display: block; }
+.ship-stroke { fill: none; stroke: var(--primary); stroke-width: 2; filter: drop-shadow(0 0 6px rgba(0,234,255,.35)); }
+.ship-fill   { fill: rgba(0,234,255,.18); stroke: var(--primary); stroke-width: 1; }
+
+/* Responsiveness */
+@media (max-width: 1100px) {
+  .bridge-screens {
+    grid-template-areas:
+      "strip"
+      "hud"
+      "wave"
+      "eq"
+      "list";
+    grid-template-rows: 60px auto 180px 140px 240px;
+    grid-template-columns: 1fr;
+  }
+  .screen.schematic { position: absolute; right: 12px; top: 12px; width: 42%; }
+}
