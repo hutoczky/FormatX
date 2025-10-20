@@ -32,13 +32,13 @@
           linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
   --grid-size: 22px 22px;
   
-  /* Authentic LCARS color palette (muted tones) - global fallback */
+  /* Authentic LCARS color palette (muted tones) - global fallback V2 */
+  --lcars-ink: #0B0F18;
   --lcars-amber: #FF9E66;
   --lcars-peach: #F7BFA4;
   --lcars-rose: #E08AA3;
   --lcars-lilac: #C9B3FF;
   --lcars-cyan: #7EC8FF;
-  --lcars-ink: #0B0F18;
 }
 
 /* LCARS (Star Trek SNW ihletés) – alapértelmezett */
@@ -47,25 +47,26 @@ body.theme-lcars {
   --text: #e8ecff;
   --muted: #aeb6d9;
 
-  --primary: #66e0ff;
-  --primary-2: #d379ff;
-  --accent: #ffd166;
+  /* Updated to use muted LCARS palette for primary/accent */
+  --primary: #7EC8FF;
+  --primary-2: #C9B3FF;
+  --accent: #FF9E66;
 
-  --accent-1: #ff9966;
-  --accent-2: #d379ff;
-  --accent-3: #66e0ff;
-  --accent-4: #ffd166;
+  --accent-1: #FF9E66;
+  --accent-2: #E08AA3;
+  --accent-3: #7EC8FF;
+  --accent-4: #F7BFA4;
 
   --panel: rgba(13,15,26,var(--panel-alpha));
   --outline: rgba(255,255,255,0.06);
   
-  /* Authentic LCARS color palette (muted tones) */
+  /* Authentic LCARS color palette (muted tones) - V2 */
+  --lcars-ink: #0B0F18;
   --lcars-amber: #FF9E66;
   --lcars-peach: #F7BFA4;
   --lcars-rose: #E08AA3;
   --lcars-lilac: #C9B3FF;
   --lcars-cyan: #7EC8FF;
-  --lcars-ink: #0B0F18;
 }
 
 /* Cyberpunk 2077 ihletés */

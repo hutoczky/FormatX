@@ -14,14 +14,14 @@
   grid-template-columns: 2fr 1.2fr 0.8fr;
   gap: 18px;
   padding: 18px;
-  padding-top: 38px; /* 6-10px breathing room below top rail (28px + 10px) */
+  padding-top: 44px; /* Increased from 38px to 44px for 10-12px breathing room below dual rails (24px + 4px + ~16px) */
 }
 
 .bridge-screens .screen {
-  background: rgba(6, 12, 24, 0.3); /* Reduced from 0.35 (~14% reduction) */
-  border: 1px solid rgba(0, 234, 255, 0.19); /* Reduced from 0.22 (~14% reduction) */
+  background: rgba(6, 12, 24, 0.25); /* Reduced from 0.3 (~17% reduction) */
+  border: 1px solid rgba(0, 234, 255, 0.16); /* Reduced from 0.19 (~16% reduction) */
   border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, .25) inset, 0 4px 22px rgba(0, 234, 255, .07); /* Reduced glow */
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .2) inset, 0 4px 22px rgba(0, 234, 255, .05); /* Reduced glow further */
   overflow: hidden;
   position: relative;
   will-change: transform; /* Performance hint */
@@ -49,8 +49,8 @@
       transparent 14px 18px
     );
   mix-blend-mode: screen;
-  animation: strip-shift 30s linear infinite; /* Slower: 26s -> 30s (~15% slower) */
-  opacity: .6; /* Reduced from .7 (~14% reduction) */
+  animation: strip-shift 32s linear infinite; /* Slower: 30s -> 32s (~7% slower for total ~20% reduction) */
+  opacity: .55; /* Reduced from .6 (~8% reduction for total ~20% reduction) */
   will-change: background-position;
 }
 @keyframes strip-shift {
@@ -75,7 +75,7 @@
   stroke: var(--primary);
   stroke-width: 2.2;
   transform-origin: 50% 50%;
-  animation: hud-rotate 7s linear infinite; /* Slower: 6s -> 7s (~17% slower) */
+  animation: hud-rotate 8s linear infinite; /* Slower: 7s -> 8s (~14% slower for total ~20% reduction) */
   filter: drop-shadow(0 0 6px var(--primary));
   will-change: transform;
 }
@@ -84,8 +84,8 @@
 .hud-pulse {
   fill: #fff;
   transform-origin: 50% 50%;
-  animation: hud-pulse 2.8s ease-in-out infinite; /* Slower: 2.4s -> 2.8s (~17% slower) */
-  opacity: .72; /* Reduced from .85 (~15% reduction) */
+  animation: hud-pulse 3.2s ease-in-out infinite; /* Slower: 2.8s -> 3.2s (~14% slower for total ~20% reduction) */
+  opacity: .68; /* Reduced from .72 (~6% reduction for total ~20% reduction) */
   filter: drop-shadow(0 0 12px rgba(0,234,255,.55));
   will-change: transform;
 }
@@ -102,7 +102,7 @@
   stroke: var(--accent);
   stroke-width: 2;
   stroke-dasharray: 8 12;
-  animation: wave-run 3s linear infinite; /* Slower: 2.6s -> 3s (~15% slower) */
+  animation: wave-run 3.4s linear infinite; /* Slower: 3s -> 3.4s (~13% slower for total ~20% reduction) */
   filter: drop-shadow(0 0 6px rgba(255, 209, 102, .6));
   will-change: stroke-dashoffset;
 }
@@ -115,14 +115,14 @@
   background: linear-gradient(180deg, var(--primary), var(--primary-2));
   box-shadow: 0 0 12px rgba(0,234,255,.35);
   border-radius: 4px 4px 0 0;
-  animation: equalize 1100ms ease-in-out infinite; /* Slower: 950ms -> 1100ms (~16% slower) */
+  animation: equalize 1260ms ease-in-out infinite; /* Slower: 1100ms -> 1260ms (~15% slower for total ~20% reduction) */
   transform-origin: bottom center;
-  opacity: .77; /* Reduced from .9 (~14% reduction) */
+  opacity: .72; /* Reduced from .77 (~6% reduction for total ~20% reduction) */
   will-change: transform;
 }
-.eq .bar:nth-child(odd) { animation-duration: 1270ms; } /* Slower: 1100ms -> 1270ms */
-.eq .bar:nth-child(3n) { animation-duration: 950ms; } /* Slower: 820ms -> 950ms */
-.eq .bar:nth-child(5n) { animation-duration: 1440ms; } /* Slower: 1250ms -> 1440ms */
+.eq .bar:nth-child(odd) { animation-duration: 1450ms; } /* Slower: 1270ms -> 1450ms (~14% slower) */
+.eq .bar:nth-child(3n) { animation-duration: 1090ms; } /* Slower: 950ms -> 1090ms (~15% slower) */
+.eq .bar:nth-child(5n) { animation-duration: 1650ms; } /* Slower: 1440ms -> 1650ms (~15% slower) */
 @keyframes equalize {
   0%,100% { transform: scaleY(.25); }
   45%     { transform: scaleY(.96); }
@@ -134,12 +134,12 @@
 .list::before, .list::after {
   content:"";
   position:absolute; left:0; right:0; height:22%;
-  background: linear-gradient(90deg, transparent, rgba(0,234,255,.13), transparent); /* Reduced from .15 */
+  background: linear-gradient(90deg, transparent, rgba(0,234,255,.11), transparent); /* Reduced from .13 (~15% reduction) */
   filter: blur(1px);
   will-change: transform;
 }
-.list::before { top:-22%; animation: scan-down 7s linear infinite; } /* Slower: 6s -> 7s */
-.list::after  { bottom:-22%; animation: scan-up   7s linear infinite; animation-delay: -2.2s; } /* Slower: 6s -> 7s */
+.list::before { top:-22%; animation: scan-down 8s linear infinite; } /* Slower: 7s -> 8s (~14% slower for total ~20% reduction) */
+.list::after  { bottom:-22%; animation: scan-up   8s linear infinite; animation-delay: -2.4s; } /* Slower: 7s -> 8s */
 @keyframes scan-down { to { transform: translateY(122%); } }
 @keyframes scan-up   { to { transform: translateY(-122%); } }
 
@@ -158,7 +158,7 @@
   position: absolute; left: 10px; width: 6px; height: 6px; border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 8px rgba(255,209,102,.85);
-  animation: dot-blink 1.85s ease-in-out infinite; /* Slower: 1.6s -> 1.85s (~16% slower) */
+  animation: dot-blink 2.1s ease-in-out infinite; /* Slower: 1.85s -> 2.1s (~14% slower for total ~20% reduction) */
   will-change: opacity;
 }
 @keyframes dot-blink { 0%,100%{opacity:.25} 50%{opacity:1} }
@@ -186,7 +186,21 @@
 
 /* Extra breathing room under LCARS strip */
 @media (min-width: 860px){
-  .bridge-screens{ padding-top: 26px; }
+  .bridge-screens{ padding-top: 44px; } /* Updated to match new breathing room */
+}
+
+/* Pause animations when tab is hidden (performance + battery saving) */
+html:not([data-tab-visible="true"]) .bridge-screens .screen::before,
+html:not([data-tab-visible="true"]) .bridge-screens .screen::after,
+html:not([data-tab-visible="true"]) .screen.top-strip::before,
+html:not([data-tab-visible="true"]) .hud-sweep,
+html:not([data-tab-visible="true"]) .hud-pulse,
+html:not([data-tab-visible="true"]) .wave-path,
+html:not([data-tab-visible="true"]) .eq .bar,
+html:not([data-tab-visible="true"]) .list::before,
+html:not([data-tab-visible="true"]) .list::after,
+html:not([data-tab-visible="true"]) .list .dot {
+  animation-play-state: paused !important;
 }
 
 /* Comprehensive reduced motion support - disable ALL animations */

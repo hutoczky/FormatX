@@ -1,141 +1,182 @@
-/* LCARS header strip + menu + communications dock
-   Authentic LCARS styling with elbow rail and segmented bars */
+/* ========================================
+   LCARS V2 Header - Clean Dual Rail Design
+   Scoped to html[data-franchise-theme="lcars"] or body.theme-lcars
+   ======================================== */
 
-.site-header {
+/* Scope all LCARS-specific styles to the LCARS theme */
+body.theme-lcars .site-header,
+html[data-franchise-theme="lcars"] .site-header {
   position: sticky;
   top: 0;
   z-index: 60;
   margin-bottom: 0;
-  padding-left: 90px; /* Space for elbow rail */
+  /* Create space for elbow rail on desktop */
+  padding-left: 90px;
+  backdrop-filter: blur(8px);
+  background: transparent;
+  border-bottom: none;
 }
 
-.site-header .wrap {
+body.theme-lcars .site-header .wrap,
+html[data-franchise-theme="lcars"] .site-header .wrap {
   position: relative;
+  padding: 8px 0;
 }
 
-/* LCARS left vertical elbow rail */
-.site-header::before {
+/* ========================================
+   LCARS Left Vertical Elbow Rail
+   ======================================== */
+body.theme-lcars .site-header::before,
+html[data-franchise-theme="lcars"] .site-header::before {
   content: "";
   position: fixed;
   left: 0;
   top: 0;
   width: 80px;
-  height: calc(100vh); /* Full viewport height */
-  max-height: 200px; /* Limit height for aesthetic */
-  background: linear-gradient(180deg, 
-    var(--lcars-peach, #F7BFA4) 0%, 
-    var(--lcars-peach, #F7BFA4) 100%);
-  border-radius: 0 0 28px 0; /* Rounded bottom-right corner (elbow) */
+  height: 180px;
+  background: var(--lcars-peach, #F7BFA4);
+  border-radius: 0 0 28px 0;
   pointer-events: none;
   z-index: 59;
   box-shadow: 
     inset -2px -2px 8px rgba(0, 0, 0, 0.2),
-    0 4px 12px rgba(247, 191, 164, 0.3);
+    0 4px 12px rgba(247, 191, 164, 0.15);
 }
 
-/* Top horizontal rail with segmented bars */
-.site-header::after {
+/* ========================================
+   LCARS Dual Rails (Primary + Accent)
+   Clean continuous design, no mosaic
+   ======================================== */
+body.theme-lcars .site-header::after,
+html[data-franchise-theme="lcars"] .site-header::after {
   content: "";
   position: absolute;
-  left: -90px; /* Compensate for padding */
+  left: 80px;
   right: 0;
   top: 0;
-  height: 28px;
+  height: 24px;
   pointer-events: none;
   z-index: -1;
-  background:
-    /* Segmented continuous bars with gaps */
-    linear-gradient(90deg,
-      transparent 0px 80px, /* Space for elbow */
-      var(--lcars-amber, #FF9E66) 80px 220px,
-      transparent 220px 228px,
-      var(--lcars-rose, #E08AA3) 228px 360px,
-      transparent 360px 368px,
-      var(--lcars-lilac, #C9B3FF) 368px 500px,
-      transparent 500px 508px,
-      var(--lcars-cyan, #7EC8FF) 508px 640px,
-      transparent 640px 648px,
-      var(--lcars-peach, #F7BFA4) 648px 100%
-    );
-  border-radius: 0 28px 0 0; /* Rounded top-right, sharp elbow join */
+  background: var(--lcars-amber, #FF9E66);
+  border-radius: 0 12px 12px 0;
   box-shadow:
-    inset 0 -2px 8px rgba(0, 0, 0, 0.15),
-    0 2px 10px rgba(255, 158, 102, 0.25);
+    inset 0 -2px 6px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(255, 158, 102, 0.2);
 }
 
-/* LCARS paddle-style nav links */
-.site-header .nav a {
+/* Thin accent rail below primary */
+body.theme-lcars .site-header .wrap::before,
+html[data-franchise-theme="lcars"] .site-header .wrap::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  right: 0;
+  top: 28px;
+  height: 4px;
+  pointer-events: none;
+  z-index: -1;
+  background: var(--lcars-rose, #E08AA3);
+  border-radius: 0 2px 2px 0;
+  box-shadow: inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ========================================
+   LCARS Navigation Paddles
+   Authentic elongated paddles with accent blocks
+   ======================================== */
+body.theme-lcars .site-header .nav,
+html[data-franchise-theme="lcars"] .site-header .nav {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+body.theme-lcars .site-header .nav a,
+html[data-franchise-theme="lcars"] .site-header .nav a {
   display: inline-flex;
   align-items: center;
   padding: 0;
-  margin-left: 0.8rem;
+  margin: 0;
   border-radius: 20px;
   border: none;
   background: var(--lcars-cyan, #7EC8FF);
   color: transparent; /* Hide original text */
   text-decoration: none;
+  font-family: "Orbitron", sans-serif;
   font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
   box-shadow: 
     inset -2px -2px 6px rgba(0, 0, 0, 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.15);
+    0 2px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   position: relative;
-  min-height: 28px; /* Ensure proper height */
+  min-height: 26px;
+  cursor: pointer;
 }
 
-/* 12px accent block on left */
-.site-header .nav a::before {
+/* 12px accent block on left - amber to rose gradient */
+body.theme-lcars .site-header .nav a::before,
+html[data-franchise-theme="lcars"] .site-header .nav a::before {
   content: "";
   display: block;
-  width: 12px;
+  width: 10px;
   height: 100%;
-  background: var(--lcars-amber, #FF9E66);
+  background: linear-gradient(180deg, var(--lcars-amber, #FF9E66), var(--lcars-rose, #E08AA3));
   border-radius: 20px 0 0 20px;
   box-shadow: inset -1px 0 3px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
   position: absolute;
   left: 0;
   top: 0;
 }
 
-/* Paddle label */
-.site-header .nav a::after {
+/* Paddle label using data-label attribute */
+body.theme-lcars .site-header .nav a::after,
+html[data-franchise-theme="lcars"] .site-header .nav a::after {
   content: attr(data-label);
-  padding: 0.4rem 0.9rem 0.4rem 0.6rem;
+  padding: 0.4rem 0.8rem 0.4rem 0.5rem;
+  padding-left: calc(10px + 0.5rem); /* Account for accent block */
   display: block;
   color: var(--lcars-ink, #0B0F18);
+  white-space: nowrap;
   position: absolute;
-  left: 12px;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
-  white-space: nowrap;
 }
 
-.site-header .nav a:hover {
+/* Hover effect - lift and color change */
+body.theme-lcars .site-header .nav a:hover,
+html[data-franchise-theme="lcars"] .site-header .nav a:hover {
   background: var(--lcars-lilac, #C9B3FF);
   transform: translateY(-1px);
   box-shadow: 
     inset -2px -2px 6px rgba(0, 0, 0, 0.25),
-    0 4px 12px rgba(201, 179, 255, 0.4);
+    0 4px 10px rgba(201, 179, 255, 0.3);
 }
 
-/* Focus outline for accessibility */
-.site-header .nav a:focus {
+/* Strong focus outline for keyboard users (accessibility) */
+body.theme-lcars .site-header .nav a:focus,
+html[data-franchise-theme="lcars"] .site-header .nav a:focus {
   outline: 2px solid var(--lcars-amber, #FF9E66);
   outline-offset: 2px;
 }
 
-/* Theme toggle button - LCARS paddle style */
-.theme-toggle {
+/* ========================================
+   Theme Toggle Button - LCARS Paddle Style
+   ======================================== */
+body.theme-lcars .theme-toggle,
+html[data-franchise-theme="lcars"] .theme-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.8rem;
-  padding: 0.4rem 0.7rem;
-  border-radius: 16px;
+  margin: 0;
+  padding: 0.4rem 0.65rem;
+  border-radius: 14px;
   border: none;
   background: var(--lcars-rose, #E08AA3);
   color: var(--lcars-ink, #0B0F18);
@@ -143,27 +184,36 @@
   transition: background-color 0.2s ease, transform 0.15s ease;
   box-shadow: 
     inset -2px -2px 6px rgba(0, 0, 0, 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.15);
+    0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.theme-toggle:hover {
+body.theme-lcars .theme-toggle:hover,
+html[data-franchise-theme="lcars"] .theme-toggle:hover {
   background: var(--lcars-amber, #FF9E66);
   transform: translateY(-1px);
+  box-shadow: 
+    inset -2px -2px 6px rgba(0, 0, 0, 0.25),
+    0 4px 10px rgba(255, 158, 102, 0.25);
 }
 
-.theme-toggle:focus {
+body.theme-lcars .theme-toggle:focus,
+html[data-franchise-theme="lcars"] .theme-toggle:focus {
   outline: 2px solid var(--lcars-cyan, #7EC8FF);
   outline-offset: 2px;
 }
 
-/* Communications dock - LCARS flat blocks with separators */
-.comms-dock {
+
+/* ========================================
+   Communications Dock - LCARS Flat Blocks
+   ======================================== */
+body.theme-lcars .comms-dock,
+html[data-franchise-theme="lcars"] .comms-dock {
   display: inline-flex;
   align-items: center;
   gap: 0;
-  margin-left: 1rem;
+  margin-left: 0.8rem;
   padding: 0;
-  border-radius: 18px;
+  border-radius: 16px;
   border: none;
   background: transparent;
   color: var(--lcars-ink, #0B0F18);
@@ -172,99 +222,162 @@
   position: relative;
 }
 
-.comms-dock .tag {
+body.theme-lcars .comms-dock .tag,
+html[data-franchise-theme="lcars"] .comms-dock .tag {
   font-family: "Orbitron", sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 0.35rem 0.7rem;
+  padding: 0.35rem 0.65rem;
   background: var(--lcars-peach, #F7BFA4);
   color: var(--lcars-ink, #0B0F18);
-  border-radius: 18px 0 0 18px;
+  border-radius: 16px 0 0 16px;
   box-shadow: inset -2px -2px 6px rgba(0, 0, 0, 0.2);
   position: relative;
 }
 
-.comms-dock .status {
+/* Fine separator between tag and status */
+body.theme-lcars .comms-dock .tag::after,
+html[data-franchise-theme="lcars"] .comms-dock .tag::after {
+  content: "•";
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--lcars-ink, #0B0F18);
+  font-size: 0.5rem;
+  opacity: 0.6;
+}
+
+body.theme-lcars .comms-dock .status,
+html[data-franchise-theme="lcars"] .comms-dock .status {
   font-family: "Orbitron", sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 0.35rem 0.7rem;
+  padding: 0.35rem 0.65rem;
   background: var(--lcars-cyan, #7EC8FF);
   color: var(--lcars-ink, #0B0F18);
-  border-radius: 0 18px 18px 0;
+  border-radius: 0 16px 16px 0;
   border: none;
   box-shadow: inset -2px -2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.comms-dock .status.ok {
   text-shadow: none;
 }
 
-/* Mini-scope - remove for LCARS flat block style */
-.comms-dock .mini-scope {
+body.theme-lcars .comms-dock .status.ok,
+html[data-franchise-theme="lcars"] .comms-dock .status.ok {
+  text-shadow: none;
+}
+
+/* Hide any mini-scope element (not part of clean LCARS design) */
+body.theme-lcars .comms-dock .mini-scope,
+html[data-franchise-theme="lcars"] .comms-dock .mini-scope {
   display: none;
 }
 
-/* Mobile responsiveness */
+/* ========================================
+   Mobile Responsiveness (≤768px)
+   ======================================== */
 @media (max-width: 768px) {
-  .comms-dock {
+  body.theme-lcars .comms-dock,
+  html[data-franchise-theme="lcars"] .comms-dock {
     display: none;
   }
   
-  .site-header {
+  body.theme-lcars .site-header,
+  html[data-franchise-theme="lcars"] .site-header {
     padding-left: 70px;
   }
   
-  .site-header::before {
-    width: 60px; /* Narrower elbow on mobile */
-    max-height: 150px;
+  body.theme-lcars .site-header .wrap,
+  html[data-franchise-theme="lcars"] .site-header .wrap {
+    overflow-x: hidden;
   }
   
-  .site-header::after {
-    left: -70px;
-    height: 20px; /* Reduced height */
-    background:
-      linear-gradient(90deg,
-        transparent 0px 60px,
-        var(--lcars-amber, #FF9E66) 60px 180px,
-        transparent 180px 186px,
-        var(--lcars-cyan, #7EC8FF) 186px 100%
-      );
+  body.theme-lcars .site-header .nav,
+  html[data-franchise-theme="lcars"] .site-header .nav {
+    gap: 0.4rem;
+    flex-wrap: wrap;
   }
   
-  .site-header .nav a {
-    font-size: 0.7rem;
-    margin-left: 0.4rem;
+  body.theme-lcars .site-header::before,
+  html[data-franchise-theme="lcars"] .site-header::before {
+    width: 60px;
+    max-height: 140px;
   }
   
-  .site-header .nav a::after {
+  body.theme-lcars .site-header::after,
+  html[data-franchise-theme="lcars"] .site-header::after {
+    left: 60px;
+    height: 18px;
+    border-radius: 0 10px 10px 0;
+  }
+  
+  body.theme-lcars .site-header .wrap::before,
+  html[data-franchise-theme="lcars"] .site-header .wrap::before {
+    top: 22px;
+    height: 3px;
+  }
+  
+  body.theme-lcars .site-header .nav a,
+  html[data-franchise-theme="lcars"] .site-header .nav a {
+    font-size: 0.65rem;
+    min-height: 24px;
+  }
+  
+  body.theme-lcars .site-header .nav a::before,
+  html[data-franchise-theme="lcars"] .site-header .nav a::before {
+    width: 8px;
+  }
+  
+  body.theme-lcars .site-header .nav a::after,
+  html[data-franchise-theme="lcars"] .site-header .nav a::after {
     padding: 0.3rem 0.6rem 0.3rem 0.4rem;
+    padding-left: calc(8px + 0.4rem);
+  }
+  
+  body.theme-lcars .theme-toggle,
+  html[data-franchise-theme="lcars"] .theme-toggle {
+    padding: 0.35rem 0.55rem;
   }
 }
 
-/* Tablet adjustments */
+/* Tablet adjustments (769px - 980px) */
 @media (max-width: 980px) and (min-width: 769px) {
-  .site-header {
+  body.theme-lcars .site-header,
+  html[data-franchise-theme="lcars"] .site-header {
     padding-left: 80px;
   }
   
-  .site-header::before {
+  body.theme-lcars .site-header::before,
+  html[data-franchise-theme="lcars"] .site-header::before {
     width: 70px;
-    max-height: 180px;
+    max-height: 160px;
   }
   
-  .site-header::after {
-    left: -80px;
+  body.theme-lcars .site-header::after,
+  html[data-franchise-theme="lcars"] .site-header::after {
+    left: 70px;
   }
 }
 
-/* Reduced motion - disable animations */
+/* ========================================
+   Reduced Motion Support
+   ======================================== */
 @media (prefers-reduced-motion: reduce) {
-  .comms-dock .mini-scope .trace {
-    animation: none !important;
+  body.theme-lcars .site-header .nav a,
+  html[data-franchise-theme="lcars"] .site-header .nav a,
+  body.theme-lcars .theme-toggle,
+  html[data-franchise-theme="lcars"] .theme-toggle {
+    transition: none !important;
+  }
+  
+  body.theme-lcars .site-header .nav a:hover,
+  html[data-franchise-theme="lcars"] .site-header .nav a:hover,
+  body.theme-lcars .theme-toggle:hover,
+  html[data-franchise-theme="lcars"] .theme-toggle:hover {
+    transform: none !important;
   }
 }
