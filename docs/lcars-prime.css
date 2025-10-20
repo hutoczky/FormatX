@@ -1,0 +1,108 @@
+html[data-franchise-theme="lcars"], body.theme-lcars {
+  --rail-h: 24px;
+  --rail-h-sm: 20px;
+  --focus-ring: #FFFFFF;
+}
+
+/* Base surface and text (LCARS muted palette already comes from themes.css) */
+html[data-franchise-theme="lcars"], body.theme-lcars {
+  background-color: var(--lcars-ink);
+  color: var(--text, #E8F2FF);
+}
+
+/* Minimal, single top rail. Remove all mosaic, glow, and elbow decorations */
+html[data-franchise-theme="lcars"] .site-header,
+body.theme-lcars .site-header {
+  background: transparent;
+}
+html[data-franchise-theme="lcars"] .site-header::before,
+html[data-franchise-theme="lcars"] .site-header::after,
+body.theme-lcars .site-header::before,
+body.theme-lcars .site-header::after {
+  content: "";
+  display: block;
+  height: var(--rail-h);
+  margin-top: 8px;
+  border-radius: 14px;
+  background: var(--lcars-peach); /* flat pastel fill */
+  box-shadow: 0 2px 0 rgba(0,0,0,.45) inset;
+}
+/* No secondary accent rail */
+hhtml[data-franchise-theme="lcars"] .site-header::before,
+body.theme-lcars .site-header::before { display: none !important; }
+
+/* Hide any decorative elbow/left rail */
+hhtml[data-franchise-theme="lcars"] .lcars-rail-left,
+body.theme-lcars .lcars-rail-left { display: none !important; }
+
+/* Navigation: flat text links + tiny left accent tick. No pills, no borders */
+hhtml[data-franchise-theme="lcars"] .site-header .nav,
+body.theme-lcars .site-header .nav {
+  position: relative;
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+html[data-franchise-theme="lcars"] .nav a,
+body.theme-lcars .nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  position: relative;
+  padding: .48rem .9rem .48rem 1.2rem; /* room for the tick */
+  margin: .14rem .2rem;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: inherit;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 800;
+  text-decoration: none;
+  outline: none;
+  transition: transform .12s ease, color .12s ease;
+}
+hhtml[data-franchise-theme="lcars"] .nav a::before,
+body.theme-lcars .nav a::before {
+  content: "";
+  position: absolute;
+  left: .4rem; top: 50%; transform: translateY(-50%);
+  width: 6px; height: 60%; border-radius: 4px;
+  background: linear-gradient(180deg, var(--lcars-amber), var(--lcars-rose));
+}
+hhtml[data-franchise-theme="lcars"] .nav a:hover,
+body.theme-lcars .nav a:hover { transform: translateY(-1px); }
+hhtml[data-franchise-theme="lcars"] .nav a:focus-visible,
+body.theme-lcars .nav a:focus-visible { outline: 2px solid var(--lcars-cyan); outline-offset: 2px; }
+
+/* Hide COMMS dock for the Prime baseline */
+hhtml[data-franchise-theme="lcars"] .lcars-comms,
+hhtml[data-franchise-theme="lcars"] .comms-dock,
+body.theme-lcars .lcars-comms,
+body.theme-lcars .comms-dock { display: none !important; }
+
+/* Hero: typography only + very subtle vertical pinstripes */
+hhtml[data-franchise-theme="lcars"] .hero,
+body.theme-lcars .hero {
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(255,255,255,.045) 0 1px,
+    transparent 1px 48px
+  );
+  background-blend-mode: normal;
+  border-radius: 12px;
+}
+
+/* Disable animated bridge overlay entirely for LCARS */
+hhtml[data-franchise-theme="lcars"] .bridge-screens,
+body.theme-lcars .bridge-screens { display: none !important; }
+
+/* Mobile: thinner rail */
+@media (max-width: 768px){
+  html[data-franchise-theme="lcars"] .site-header::after,
+  body.theme-lcars .site-header::after { height: var(--rail-h-sm); }
+}
