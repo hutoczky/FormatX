@@ -291,6 +291,17 @@ html[data-franchise-theme="lcars"] .comms-dock .mini-scope {
     padding-left: 70px;
   }
   
+  body.theme-lcars .site-header .wrap,
+  html[data-franchise-theme="lcars"] .site-header .wrap {
+    overflow-x: hidden;
+  }
+  
+  body.theme-lcars .site-header .nav,
+  html[data-franchise-theme="lcars"] .site-header .nav {
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  
   body.theme-lcars .site-header::before,
   html[data-franchise-theme="lcars"] .site-header::before {
     width: 60px;
@@ -310,11 +321,6 @@ html[data-franchise-theme="lcars"] .comms-dock .mini-scope {
     height: 3px;
   }
   
-  body.theme-lcars .site-header .nav,
-  html[data-franchise-theme="lcars"] .site-header .nav {
-    gap: 0.4rem;
-  }
-  
   body.theme-lcars .site-header .nav a,
   html[data-franchise-theme="lcars"] .site-header .nav a {
     font-size: 0.65rem;
@@ -329,6 +335,7 @@ html[data-franchise-theme="lcars"] .comms-dock .mini-scope {
   body.theme-lcars .site-header .nav a::after,
   html[data-franchise-theme="lcars"] .site-header .nav a::after {
     padding: 0.3rem 0.6rem 0.3rem 0.4rem;
+    padding-left: calc(8px + 0.4rem);
   }
   
   body.theme-lcars .theme-toggle,
