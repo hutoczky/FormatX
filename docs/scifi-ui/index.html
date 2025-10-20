@@ -3,53 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sci‑Fi UI</title>
-  <meta name="description" content="Moduláris sci‑fi UI: Star Trek LCARS, Star Wars holografikus HUD, Cyberpunk 2077 neon‑glitch. Témaváltó gombokkal, animált hátterekkel és boot effektekkel.">
+  <title>Sci‑Fi UI — In‑universe kijelző</title>
+  <meta name="description" content="Star Trek LCARS, Star Wars holografikus HUD és Cyberpunk 2077 neon‑glitch témák. Témaváltó gombok, animált háttér és boot effektek.">
   <link id="theme-stylesheet" rel="stylesheet" href="styles/lcars.css">
   <script src="scripts/theme-switcher.js" defer></script>
+  <style>
+    /* Téma-független alap; a vizuált a témák CSS-e adja */
+    .wrap { width: min(1100px, 94%); margin-inline: auto; }
+    nav { position: sticky; top: 0; z-index: 10; }
+    nav .wrap { display: flex; gap: .6rem; align-items: center; padding: .6rem 0; flex-wrap: wrap; }
+
+    main.wrap { padding: 1rem 0 2rem; }
+    .quick-links { margin: .5rem 0 1rem; }
+    .quick-links a { margin-right: 12px; font-weight: 700; text-decoration: none; }
+    .panel { display: flex; gap: .6rem; flex-wrap: wrap; margin: 1rem 0; }
+    .btn { text-decoration: none; display: inline-block; }
+
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .9rem; }
+    .features .box { text-align: center; padding: 1rem; }
+
+    .footer-row { display: flex; align-items: center; justify-content: space-between; padding: .9rem 0; }
+
+    /* Letöltések blokk (téma-kompatibilis grid) */
+    .downloads { margin-top: 1.6rem; }
+    .downloads h2 { margin: .2rem 0 1rem; font-size: 1.35rem; letter-spacing: .02em; }
+    .download-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .9rem; }
+    .download-card { display: block; padding: 1rem 1.1rem; border-radius: 12px; text-decoration: none; border: 1px solid currentColor; opacity: .96 }
+    .download-card small { display: block; opacity: .85; margin-top: .35rem; font-size: .92rem }
+    .mirror { display: block; margin-top: .45rem; font-size: .9rem; text-decoration: underline; }
+
+    /* Képernyő-keret — a témák tovább dekorálják */
+    .screen { position: relative; min-height: 100dvh; }
+    .screen .chrome { pointer-events: none; position: fixed; inset: 0; z-index: 1; }
+    .content { position: relative; z-index: 2; }
+
+    /* Loader overlay — a konkrét kinézetet a témák adják */
+    #loader { position: fixed; inset: 0; opacity: 0; pointer-events: none; transition: opacity .35s ease; display: flex; align-items: center; justify-content: center; z-index: 9999 }
+    #loader.show { opacity: 1; pointer-events: auto }
+    #loader .loader-content { text-align: center }
+    #loader .loader-visual { margin: 0 auto .8rem }
+  </style>
 </head>
 <body>
-  <!-- Betöltési overlay; a téma CSS-e adja meg a megjelenést -->
-  <div id="loader" aria-hidden="true">
-    <div class="loader-content" role="status" aria-live="polite" aria-label="Betöltés…">
-      <div class="loader-visual"><span></span><span></span><span></span><span></span></div>
-      <div class="loader-text">Betöltés…</div>
+  <!-- In‑universe kijelző keret (téma-specifikusan díszítve) -->
+  <div class="screen">
+    <div class="chrome" aria-hidden="true"></div>
+
+    <!-- Betöltési overlay; a téma CSS-e adja a konkrét kinézetet -->
+    <div id="loader" aria-hidden="true">
+      <div class="loader-content" role="status" aria-live="polite" aria-label="Betöltés…">
+        <div class="loader-visual"><span></span><span></span><span></span><span></span></div>
+        <div class="loader-text">Betöltés…</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <nav aria-label="Téma váltása">
+        <div class="wrap">
+          <button type="button" data-theme="lcars">STAR TREK</button>
+          <button type="button" data-theme="starwars">STAR WARS</button>
+          <button type="button" data-theme="cyberpunk">CYBERPUNK</button>
+        </div>
+      </nav>
+
+      <main class="wrap">
+        <h1 data-glitch="Formázás a jövőből">Formázás a jövőből</h1>
+        <p>Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
+
+        <!-- Régi főoldal hivatkozások -->
+        <p class="quick-links">
+          <a href="../#download">LETÖLTÉS</a>
+          <a href="../#features">FUNKCIÓK</a>
+          <a href="../#docs">DOKUMENTUMOK</a>
+        </p>
+
+        <!-- Közvetlen letöltések (stabil) + az általad adott ideiglenes tükrök -->
+        <section id="downloads" class="downloads" aria-label="Közvetlen letöltések">
+          <h2>Letöltések</h2>
+          <div class="download-list">
+            <a class="download-card" href="https://github.com/hutoczky/FormatX/releases/latest/download/FormatX_Installer_v1015.exe" download rel="noopener" target="_blank">
+              FormatX telepítő (v1015)
+              <small>Windows .exe • Kiadás: latest</small>
+            </a>
+            <a class="mirror" href="https://release-assets.githubusercontent.com/github-production-release-asset/1043816801/d8e77454-a94a-4c9b-b230-4e634e2ceb3f?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-10-19T16%3A23%3A10Z&rscd=attachment%3B+filename%3DFormatX_Installer_v1015.exe&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-10-19T15%3A22%3A39Z&ske=2025-10-19T16%3A23%3A10Z&sks=b&skv=2018-11-09&sig=6x3rWdebsr8MVS6YTt9DsPlZkmAXPyA%2BB7xqPiOVkIU%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc2MDg5MTU1OSwibmJmIjoxNzYwODg3OTU5LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.Pf5VmVW7yeVRi5pOcJurLLgfWjxvOzsKh8dCL-jbinQ&response-content-disposition=attachment%3B%20filename%3DFormatX_Installer_v1015.exe&response-content-type=application%2Foctet-stream" rel="noopener" target="_blank">Tükör (ideiglenes)</a>
+
+            <a class="download-card" href="https://github.com/hutoczky/FormatX/releases/latest/download/README.txt" rel="noopener" target="_blank">
+              README.txt
+              <small>Kiindulási információk • latest</small>
+            </a>
+            <a class="mirror" href="https://release-assets.githubusercontent.com/github-production-release-asset/1043816801/53344169-1a08-4b3e-bdec-7966104c0a7b?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-10-19T16%3A29%3A03Z&rscd=attachment%3B+filename%3DREADME.txt&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-10-19T15%3A28%3A58Z&ske=2025-10-19T16%3A29%3A03Z&sks=b&skv=2018-11-09&sig=ty54nykHOParjZVnU%2BYkuFge7jbyvHXkCh3yO7g8gU0%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc2MDg4ODMwNCwibmJmIjoxNzYwODg4MDA0LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.Ox211_w6DBF8YQmKC-MF4dsLqYqy6gCUlrztHXuFLvs&response-content-disposition=attachment%3B%20filename%3DREADME.txt&response-content-type=application%2Foctet-stream" rel="noopener" target="_blank">Tükör (ideiglenes)</a>
+
+            <a class="download-card" href="https://github.com/hutoczky/FormatX/releases/latest/download/LICENSE.txt" rel="noopener" target="_blank">
+              LICENSE.txt
+              <small>Licencfeltételek • latest</small>
+            </a>
+            <a class="mirror" href="https://release-assets.githubusercontent.com/github-production-release-asset/1043816801/7322927d-f42a-4df3-a592-d0095395cde9?sp=r&sv=2018-11-09&sr=b&spr=https&se=2025-10-19T16%3A06%3A50Z&rscd=attachment%3B+filename%3DLICENSE.txt&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2025-10-19T15%3A06%3A25Z&ske=2025-10-19T16%3A06%3A50Z&sks=b&skv=2018-11-09&sig=YmJ%2FeeOGs4r157xnXU4kjw2A427ne5Qb5aKiXQFBiB8%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc2MDg4ODMyOSwibmJmIjoxNzYwODg4MDI5LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.RzeiB-2dAgARIMMrv5kD7LRvC_hSJZ8Im85JC_LkTHA&response-content-disposition=attachment%3B%20filename%3DLICENSE.txt&response-content-type=application%2Foctet-stream" rel="noopener" target="_blank">Tükör (ideiglenes)</a>
+          </div>
+        </section>
+
+        <section class="features" aria-label="Funkciók">
+          <div class="box">Villámgyors</div>
+          <div class="box">Bővíthető</div>
+          <div class="box">Web UI</div>
+          <div class="box">Nyílt forrás</div>
+        </section>
+      </main>
+
+      <footer>
+        <div class="wrap footer-row">
+          <div>© <span id="year"></span> Sci‑Fi UI</div>
+          <div><a href="#">Vissza a tetejére</a></div>
+        </div>
+      </footer>
     </div>
   </div>
-
-  <nav aria-label="Téma váltása">
-    <div class="wrap">
-      <button type="button" data-theme="lcars">STAR TREK</button>
-      <button type="button" data-theme="starwars">STAR WARS</button>
-      <button type="button" data-theme="cyberpunk">CYBERPUNK</button>
-    </div>
-  </nav>
-
-  <main class="wrap">
-    <h1 data-glitch="Formázás a jövőből">Formázás a jövőből</h1>
-    <p>Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
-
-    <!-- Megtartott főoldal-hivatkozások -->
-    <p class="quick-links">
-      <a href="../#download">LETÖLTÉS</a>
-      <a href="../#features">FUNKCIÓK</a>
-      <a href="../#docs">DOKUMENTUMOK</a>
-    </p>
-
-    <section class="features" aria-label="Funkciók">
-      <div class="box">Villámgyors</div>
-      <div class="box">Bővíthető</div>
-      <div class="box">Web UI</div>
-      <div class="box">Nyílt forrás</div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="wrap footer-row">
-      <div>© <span id="year"></span> Sci‑Fi UI</div>
-      <div><a href="#">Vissza a tetejére</a></div>
-    </div>
-  </footer>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear().toString();
