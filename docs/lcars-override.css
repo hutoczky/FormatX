@@ -1,0 +1,97 @@
+/* LCARS override (loads last) to enable and style the animated center console strictly for LCARS */
+
+/* 1) Visibility guards */
+html[data-franchise-theme="lcars"] .bridge-screens,
+body.theme-lcars .bridge-screens { display: grid !important; }
+
+/* Keep overlay disabled for other themes like Cyberpunk 2077 */
+html[data-franchise-theme="cyberpunk"] .bridge-screens,
+body.theme-cyberpunk .bridge-screens,
+html[data-franchise-theme="cp2077"] .bridge-screens,
+body.theme-cp2077 .bridge-screens { display: none !important; }
+
+/* 2) Replace legacy radar HUD with LCARS wave bands under LCARS */
+html[data-franchise-theme="lcars"] .screen.main-hud > svg,
+body.theme-lcars .screen.main-hud > svg { display: none !important; }
+
+/* Animated wave bands background (data-URI SVG), horizontal pan */
+html[data-franchise-theme="lcars"] .screen.main-hud::before,
+body.theme-lcars .screen.main-hud::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 12px;
+  background-color: rgba(6, 10, 18, .65);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 400'><rect width='1600' height='400' fill='none'/><path d='M0 200 C 220 150 420 250 640 200 S 1060 150 1280 200 S 1480 250 1600 200' stroke='%237EC8FF' stroke-width='5' fill='none' opacity='0.95'/><path d='M0 245 C 220 195 420 295 640 245 S 1060 195 1280 245 S 1480 295 1600 245' stroke='%23FFCE66' stroke-width='4' fill='none' opacity='0.9'/><path d='M0 290 C 220 240 420 340 640 290 S 1060 240 1280 290 S 1480 340 1600 290' stroke='%23E08AA3' stroke-width='3.5' fill='none' opacity='0.85'/></svg>");
+  background-repeat: repeat-x;
+  background-size: 1600px 100%;
+  background-position: 0 50%;
+  animation: lcars-wave-pan 26s linear infinite;
+  box-shadow:
+    inset 0 0 0 1px rgba(126,200,255,.22),
+    inset 0 16px 28px rgba(0,0,0,.28),
+    0 0 24px rgba(0,234,255,.08);
+}
+
+/* Console grid + thin bezel overlay */
+html[data-franchise-theme="lcars"] .screen.main-hud::after,
+body.theme-lcars .screen.main-hud::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 12px;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.12)),
+    repeating-linear-gradient(
+      to right,
+      rgba(126,200,255,.10) 0 1px,
+      transparent 1px 28px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(126,200,255,.08) 0 1px,
+      transparent 1px 24px
+    );
+  box-shadow:
+    inset 0 0 0 2px rgba(0,234,255,.18),
+    inset 0 0 0 1px rgba(126,200,255,.25),
+    0 6px 32px rgba(0,0,0,.35);
+}
+
+@keyframes lcars-wave-pan { 0% { background-position: 0 50%; } 100% { background-position: -1600px 50%; } }
+
+/* 3) Harmonize side panels for LCARS palette */
+html[data-franchise-theme="lcars"] .wave-path,
+body.theme-lcars .wave-path { stroke: var(--lcars-amber, #FFCE66); filter: drop-shadow(0 0 6px rgba(255, 206, 102, .5)); }
+
+html[data-franchise-theme="lcars"] .eq .bar,
+body.theme-lcars .eq .bar {
+  background: linear-gradient(180deg, var(--lcars-cyan, #7EC8FF), var(--lcars-cyan-2, #00EAFF));
+  box-shadow: 0 0 10px rgba(0,234,255,.25);
+  opacity: .78;
+}
+
+html[data-franchise-theme="lcars"] .list::before,
+html[data-franchise-theme="lcars"] .list::after,
+body.theme-lcars .list::before,
+body.theme-lcars .list::after {
+  background: linear-gradient(90deg, transparent, rgba(126,200,255,.12), transparent);
+}
+
+html[data-franchise-theme="lcars"] .list .col,
+body.theme-lcars .list .col {
+  background: repeating-linear-gradient(
+    to bottom, rgba(126,200,255,.26) 0 1px, transparent 1px 21px
+  );
+  border-right: 1px solid rgba(126,200,255,.22);
+}
+
+/* 4) Pause/Reduced motion support */
+html:not([data-tab-visible="true"]) .screen.main-hud::before { animation-play-state: paused !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-franchise-theme="lcars"] .screen.main-hud::before,
+  body.theme-lcars .screen.main-hud::before { animation: none !important; }
+}
