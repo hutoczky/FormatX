@@ -1,0 +1,153 @@
+/* LCARS UI enhancements - cinematic header strip and communications dock */
+
+/* 1. LCARS segmented strip under header */
+.site-header::after {
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--primary) 0 22px,
+      transparent 22px 28px
+    ),
+    repeating-linear-gradient(
+      to right,
+      var(--accent) 0 14px,
+      transparent 14px 22px
+    );
+  filter: blur(0.3px);
+  box-shadow: 0 0 18px rgba(0, 234, 255, 0.25);
+  border-radius: 0 0 8px 8px;
+  opacity: 0.85;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 2. LCARS pill-shaped navigation buttons */
+.nav a {
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  background: linear-gradient(180deg, rgba(0, 234, 255, 0.08), rgba(0, 234, 255, 0.02));
+  border: 1px solid var(--border);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.nav a:hover {
+  background: linear-gradient(180deg, rgba(0, 234, 255, 0.18), rgba(0, 234, 255, 0.08));
+  border-color: rgba(0, 234, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.nav a:active {
+  background: var(--primary);
+  color: var(--bg);
+  transform: translateY(0);
+}
+
+/* 3. Communications dock container */
+.comms-dock {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+  border: 1px solid var(--border);
+  margin-left: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.comms-dock:hover {
+  border-color: rgba(0, 234, 255, 0.35);
+}
+
+/* Mini waveform scope */
+.mini-scope {
+  width: 32px;
+  height: 20px;
+  display: block;
+}
+
+.mini-scope path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 40 20;
+  stroke-dashoffset: 0;
+  animation: scope-trace 2.4s linear infinite;
+  will-change: stroke-dashoffset;
+  filter: drop-shadow(0 0 4px rgba(255, 209, 102, 0.5));
+}
+
+@keyframes scope-trace {
+  to {
+    stroke-dashoffset: -60;
+  }
+}
+
+/* Status label */
+.status-label {
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(255, 209, 102, 0.35);
+}
+
+/* 4. Accessibility: Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .site-header::after {
+    animation: none;
+  }
+  
+  .mini-scope path {
+    animation: none;
+    stroke-dashoffset: 0;
+    will-change: auto;
+  }
+  
+  .nav a {
+    transition: none;
+  }
+}
+
+/* 5. Z-index layering */
+.site-header {
+  z-index: 40;
+  position: relative;
+}
+
+.site-header::after {
+  z-index: -1;
+}
+
+/* 6. Responsive adjustments */
+@media (max-width: 768px) {
+  .comms-dock {
+    display: none;
+  }
+  
+  .site-header::after {
+    height: 16px;
+    bottom: -16px;
+  }
+}
+
+@media (max-width: 580px) {
+  .nav a {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.7rem;
+    margin-left: 0.5rem;
+  }
+  
+  .site-header::after {
+    height: 14px;
+    bottom: -14px;
+  }
+}
