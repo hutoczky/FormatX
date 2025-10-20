@@ -1,0 +1,176 @@
+/* LCARS Console Deck — big top display + five angled sub-panels
+   Uses existing theme variables: --primary, --primary-2, --accent, --text, --border, --glass, --glass-strong */
+
+.console-deck{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+  width: min(1100px, 94vw);
+  display: grid;
+  grid-template-rows: 220px 122px;
+  gap: 14px;
+  pointer-events: none; /* decorative */
+  z-index: 20;
+}
+
+/* Big top console */
+.console.big{
+  position: relative;
+  height: 100%;
+  border-radius: 18px;
+  background: rgba(8,14,26,.48);
+  border: 1px solid rgba(0, 234, 255, .22);
+  box-shadow: 0 18px 40px rgba(0,0,0,.35), inset 0 0 32px rgba(0,234,255,.06);
+  overflow: hidden;
+}
+.console.big::before{
+  /* inner LCARS rounded bezel */
+  content:"";
+  position: absolute; inset: 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,234,255,.22);
+  box-shadow: inset 0 0 24px rgba(0,234,255,.08);
+}
+
+/* Top display content: lanes + block clusters + scope */
+.big .lanes{
+  position: absolute; left: 20px; right: 20px; top: 20px; height: 90px;
+  display: grid; grid-auto-rows: 20px; gap: 10px;
+}
+.lane{
+  position: relative; overflow: hidden; border-radius: 10px;
+  background: linear-gradient(180deg, rgba(10,18,34,.65), rgba(10,18,34,.35));
+  border: 1px solid rgba(0,234,255,.18);
+}
+.lane .flow{
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,209,102,.0), rgba(255,209,102,.18), rgba(255,209,102,.0)),
+    repeating-linear-gradient(90deg, rgba(255,209,102,.35) 0 6px, transparent 6px 12px);
+  mix-blend-mode: screen;
+  animation: lane-scan 8s linear infinite;
+  opacity: .9;
+}
+.lane.amber .flow{ filter: drop-shadow(0 0 6px rgba(255,209,102,.35)); }
+.lane.cyan  .flow{
+  background:
+    linear-gradient(90deg, rgba(0,234,255,.0), rgba(0,234,255,.18), rgba(0,234,255,.0)),
+    repeating-linear-gradient(90deg, rgba(0,234,255,.35) 0 6px, transparent 6px 12px);
+  filter: drop-shadow(0 0 6px rgba(0,234,255,.35));
+}
+@keyframes lane-scan { to { transform: translateX(-40%); } }
+
+.big .blocks{
+  position: absolute; left: 20px; right: 20px; bottom: 20px; height: 58px;
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;
+}
+.block{
+  background: linear-gradient(180deg, rgba(12,18,34,.75), rgba(12,18,34,.4));
+  border: 1px solid rgba(0,234,255,.18);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.block .cells{
+  position: absolute; inset: 6px;
+  display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px;
+}
+.cell{
+  height: 10px; border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 70%, #fff 0%);
+  box-shadow: 0 0 8px rgba(255,209,102,.35);
+  opacity: .85;
+  animation: cell-blink 1800ms ease-in-out infinite;
+}
+.cell.alt{
+  background: color-mix(in srgb, var(--primary) 80%, #fff 0%);
+  box-shadow: 0 0 8px rgba(0,234,255,.35);
+  animation-duration: 1300ms;
+}
+.cell:nth-child(3n){ animation-duration: 900ms; }
+.cell:nth-child(4n){ animation-duration: 1400ms; }
+@keyframes cell-blink { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+/* Embedded scope on big display */
+.big .scope{
+  position: absolute; right: 24px; top: 22px; width: 36%;
+  height: 86px; border-radius: 10px;
+  border: 1px solid rgba(0,234,255,.18);
+  background: linear-gradient(180deg, rgba(10,18,34,.6), rgba(10,18,34,.35));
+  overflow: hidden;
+}
+.big .scope svg{ width: 100%; height: 100%; display: block; }
+.big .scope .trace{
+  fill: none; stroke: var(--accent); stroke-width: 2;
+  stroke-dasharray: 10 14;
+  animation: scope-run 2.8s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(255,209,102,.55));
+}
+@keyframes scope-run { to { stroke-dashoffset: -220; } }
+
+/* Row of five sub consoles */
+.console-row{
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+.console.small{
+  position: relative; height: 100%;
+  border-radius: 14px;
+  background: rgba(8,14,26,.48);
+  border: 1px solid rgba(0, 234, 255, .22);
+  box-shadow: 0 14px 28px rgba(0,0,0,.3), inset 0 0 24px rgba(0,234,255,.06);
+  overflow: hidden;
+  transform-origin: bottom center;
+}
+.small.tilt-left  { transform: perspective(800px) rotateX(6deg) rotateY(-4deg); }
+.small.tilt-right { transform: perspective(800px) rotateX(6deg) rotateY( 4deg); }
+.small.tilt-mid   { transform: perspective(800px) rotateX(6deg); }
+
+.small .mini{
+  position: absolute; inset: 8px; border-radius: 10px;
+  border: 1px solid rgba(0,234,255,.18);
+  background: linear-gradient(180deg, rgba(10,18,34,.6), rgba(10,18,34,.35));
+  overflow: hidden;
+}
+.mini .rows{ position:absolute; left:8px; right:8px; top:8px; height: 34px; display:grid; gap:6px; }
+.mini .row{
+  height: 14px; border-radius: 8px; position:relative; overflow:hidden;
+  border: 1px solid rgba(0,234,255,.14);
+  background: linear-gradient(180deg, rgba(12,18,34,.7), rgba(12,18,34,.4));
+}
+.mini .row::after{
+  content:""; position:absolute; inset:0;
+  background: repeating-linear-gradient(90deg, rgba(255,209,102,.4) 0 10px, transparent 10px 18px);
+  animation: row-scan 5s linear infinite;
+  mix-blend-mode: screen; opacity:.8;
+}
+@keyframes row-scan { to { transform: translateX(-35%); } }
+
+.mini .bars{ position:absolute; left:8px; right:8px; bottom:10px; height: 36px; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(4px,1fr); gap:6px; align-items:end; }
+.mini .bar{
+  height: 30%;
+  background: linear-gradient(180deg, var(--primary), var(--primary-2));
+  box-shadow: 0 0 8px rgba(0,234,255,.35);
+  border-radius: 4px 4px 0 0;
+  animation: mini-eq 900ms ease-in-out infinite;
+  transform-origin: bottom;
+}
+.mini .bar:nth-child(odd){ animation-duration: 1100ms; }
+.mini .bar:nth-child(3n){ animation-duration: 760ms; }
+@keyframes mini-eq {
+  0%,100% { transform: scaleY(.25); }
+  45%     { transform: scaleY(.95); }
+  60%     { transform: scaleY(.6); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .lane .flow, .mini .row::after, .mini .bar, .big .scope .trace, .cell { animation: none !important; }
+}
+
+/* Hide on small screens if crowded */
+@media (max-width: 960px){
+  .console-deck{ display:none; }
+}
