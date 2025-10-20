@@ -79,6 +79,20 @@ window.addEventListener("load", () => {
   setTimeout(() => pre.classList.add("hidden"), 850);
 });
 
+// Bridge screens: pause animations when tab is hidden (performance)
+(function initBridgeScreensPause() {
+  const bridgeScreens = document.querySelector(".bridge-screens");
+  if (!bridgeScreens) return;
+  
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      bridgeScreens.classList.add("paused");
+    } else {
+      bridgeScreens.classList.remove("paused");
+    }
+  });
+})();
+
 // Gépelés-animáció a fő címhez
 (function typingEffect(){
   const el = document.querySelector(".title-focus");

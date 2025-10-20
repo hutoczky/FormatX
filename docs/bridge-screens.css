@@ -14,13 +14,19 @@
   grid-template-columns: 2fr 1.2fr 0.8fr;
   gap: 18px;
   padding: 18px;
+  z-index: 0;
+}
+
+/* Pause animations when tab is backgrounded */
+.bridge-screens.paused * {
+  animation-play-state: paused !important;
 }
 
 .bridge-screens .screen {
-  background: rgba(6, 12, 24, 0.35);
+  background: rgba(6, 12, 24, 0.25);
   border: 1px solid rgba(0, 234, 255, 0.22);
   border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, .25) inset, 0 4px 22px rgba(0, 234, 255, .08);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .20) inset, 0 3px 18px rgba(0, 234, 255, .07);
   overflow: hidden;
   position: relative;
 }
@@ -47,8 +53,8 @@
       transparent 14px 18px
     );
   mix-blend-mode: screen;
-  animation: strip-shift 26s linear infinite;
-  opacity: .7;
+  animation: strip-shift 30s linear infinite;
+  opacity: .55;
 }
 @keyframes strip-shift {
   0% { background-position: 0 0, -120px 0, 90px 0; }
@@ -60,7 +66,7 @@
 .screen.main-hud svg {
   width: 100%; height: 100%;
   display: block;
-  filter: drop-shadow(0 0 8px rgba(0,234,255,.35));
+  filter: drop-shadow(0 0 6px rgba(0,234,255,.3));
 }
 .hud-ring { fill: none; stroke: rgba(0,234,255,.4); }
 .hud-ring.thick { stroke-width: 2.5; }
@@ -72,8 +78,9 @@
   stroke: var(--primary);
   stroke-width: 2.2;
   transform-origin: 50% 50%;
-  animation: hud-rotate 6s linear infinite;
+  animation: hud-rotate 7s linear infinite;
   filter: drop-shadow(0 0 6px var(--primary));
+  will-change: transform;
 }
 @keyframes hud-rotate { to { transform: rotate(360deg); } }
 
@@ -82,7 +89,7 @@
   transform-origin: 50% 50%;
   animation: hud-pulse 2.4s ease-in-out infinite;
   opacity: .85;
-  filter: drop-shadow(0 0 12px rgba(0,234,255,.55));
+  filter: drop-shadow(0 0 10px rgba(0,234,255,.5));
 }
 @keyframes hud-pulse {
   0%,100% { transform: scale(.95); }
@@ -98,7 +105,8 @@
   stroke-width: 2;
   stroke-dasharray: 8 12;
   animation: wave-run 2.6s linear infinite;
-  filter: drop-shadow(0 0 6px rgba(255, 209, 102, .6));
+  filter: drop-shadow(0 0 5px rgba(255, 209, 102, .5));
+  will-change: stroke-dashoffset;
 }
 @keyframes wave-run { to { stroke-dashoffset: -200; } }
 
@@ -107,15 +115,16 @@
 .eq .bar {
   height: 30%;
   background: linear-gradient(180deg, var(--primary), var(--primary-2));
-  box-shadow: 0 0 12px rgba(0,234,255,.35);
+  box-shadow: 0 0 10px rgba(0,234,255,.3);
   border-radius: 4px 4px 0 0;
-  animation: equalize 950ms ease-in-out infinite;
+  animation: equalize 1100ms ease-in-out infinite;
   transform-origin: bottom center;
   opacity: .9;
+  will-change: transform;
 }
-.eq .bar:nth-child(odd) { animation-duration: 1100ms; }
-.eq .bar:nth-child(3n) { animation-duration: 820ms; }
-.eq .bar:nth-child(5n) { animation-duration: 1250ms; }
+.eq .bar:nth-child(odd) { animation-duration: 1265ms; }
+.eq .bar:nth-child(3n) { animation-duration: 943ms; }
+.eq .bar:nth-child(5n) { animation-duration: 1438ms; }
 @keyframes equalize {
   0%,100% { transform: scaleY(.25); }
   45%     { transform: scaleY(.96); }
@@ -155,9 +164,9 @@
 @keyframes dot-blink { 0%,100%{opacity:.25} 50%{opacity:1} }
 
 /* 6) Simple starship-like schematic (neutral, non-branded) */
-.screen.schematic { position: absolute; width: 34%; aspect-ratio: 16/9; right: 24px; top: 24px; opacity: .7; }
+.screen.schematic { position: absolute; width: 34%; aspect-ratio: 16/9; right: 24px; top: 24px; opacity: .6; }
 .screen.schematic svg { width: 100%; height: 100%; display: block; }
-.ship-stroke { fill: none; stroke: var(--primary); stroke-width: 2; filter: drop-shadow(0 0 6px rgba(0,234,255,.35)); }
+.ship-stroke { fill: none; stroke: var(--primary); stroke-width: 2; filter: drop-shadow(0 0 5px rgba(0,234,255,.3)); }
 .ship-fill   { fill: rgba(0,234,255,.18); stroke: var(--primary); stroke-width: 1; }
 
 /* Responsiveness */
@@ -173,4 +182,57 @@
     grid-template-columns: 1fr;
   }
   .screen.schematic { position: absolute; right: 12px; top: 12px; width: 42%; }
+}
+
+/* Mobile layout: simpler, less busy */
+@media (max-width: 720px) {
+  .bridge-screens {
+    grid-template-rows: 48px auto 180px 140px 240px;
+    gap: 12px;
+    padding: 12px;
+  }
+  .screen.top-strip {
+    height: 48px;
+  }
+  .screen.schematic {
+    display: none;
+  }
+  /* Reduce EQ bar density - hide odd bars for simpler appearance */
+  .eq .bar:nth-child(odd) {
+    display: none;
+  }
+  .eq {
+    gap: 8px;
+  }
+}
+
+/* Accessibility: respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .bridge-screens * {
+    animation: none !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
+  .screen.top-strip::before {
+    animation: none;
+  }
+  .hud-sweep {
+    animation: none;
+  }
+  .hud-pulse {
+    animation: none;
+  }
+  .wave-path {
+    animation: none;
+  }
+  .eq .bar {
+    animation: none;
+  }
+  .list::before,
+  .list::after {
+    animation: none;
+  }
+  .list .dot {
+    animation: none;
+  }
 }

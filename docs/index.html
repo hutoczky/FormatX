@@ -14,6 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..800&family=Exo:wght@300;400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./bridge-screens.css" />
   </head>
   <body>
     <!-- Betöltési animáció (warp-mag) -->
@@ -33,6 +34,57 @@
       <div class="stars layer"></div>
       <div class="stars layer delay"></div>
       <div class="grid"></div>
+      
+      <!-- LCARS Bridge Screens Overlay -->
+      <div class="bridge-screens">
+        <div class="screen top-strip"></div>
+        <div class="screen main-hud">
+          <svg viewBox="0 0 400 400" aria-hidden="true">
+            <circle class="hud-ring thick" cx="200" cy="200" r="140"/>
+            <circle class="hud-ring" cx="200" cy="200" r="100"/>
+            <circle class="hud-ring faint" cx="200" cy="200" r="60"/>
+            <line class="hud-grid" x1="200" y1="60" x2="200" y2="340"/>
+            <line class="hud-grid" x1="60" y1="200" x2="340" y2="200"/>
+            <line class="hud-sweep" x1="200" y1="200" x2="200" y2="60"/>
+            <circle class="hud-pulse" cx="200" cy="200" r="8"/>
+          </svg>
+        </div>
+        <div class="screen wave">
+          <svg viewBox="0 0 400 200" preserveAspectRatio="none" aria-hidden="true">
+            <path class="wave-path" d="M0,100 Q50,50 100,100 T200,100 T300,100 T400,100"/>
+          </svg>
+        </div>
+        <div class="screen eq">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+        <div class="screen list">
+          <div class="col"></div>
+          <div class="col"></div>
+          <div class="col"></div>
+          <div class="dot" style="top:15%;"></div>
+          <div class="dot" style="top:35%; left:38%;"></div>
+          <div class="dot" style="top:55%; left:72%;"></div>
+          <div class="dot" style="top:75%;"></div>
+        </div>
+        <div class="screen schematic">
+          <svg viewBox="0 0 160 90" aria-hidden="true">
+            <ellipse class="ship-fill" cx="80" cy="45" rx="35" ry="15"/>
+            <path class="ship-stroke" d="M50,45 L20,40 M50,45 L20,50 M110,45 L140,40 M110,45 L140,50"/>
+            <rect class="ship-fill" x="70" y="30" width="20" height="30" rx="2"/>
+          </svg>
+        </div>
+      </div>
     </div>
 
     <header class="site-header">
