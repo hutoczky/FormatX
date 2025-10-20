@@ -17,6 +17,7 @@
     nav .wrap{ display:flex; gap:.5rem; align-items:center; padding:.6rem 0; flex-wrap: wrap }
     main.wrap{ padding: 1rem 0 2rem }
     .panel{ display:flex; gap:.5rem; flex-wrap:wrap; margin: 1rem 0 }
+    .panel a{ text-decoration:none; }
     .features{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .8rem }
     .features .box{ border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align:center }
     footer{ border-top: 1px solid var(--border); margin-top: 2rem }
@@ -37,8 +38,9 @@
     <h1>Formázás a jövőből</h1>
     <p>Gyors. Moduláris. Bővíthető. Azonos szerkezet, eltérő sci‑fi stílusok.</p>
     <div class="panel">
-      <button type="button">Letöltés</button>
-      <button type="button">Funkciók</button>
+      <a href="../#download" class="btn" data-link="download">Letöltés</a>
+      <a href="../#features" class="btn" data-link="features">Funkciók</a>
+      <a href="../#docs" class="btn" data-link="docs">Dokumentumok</a>
     </div>
     <section class="features" aria-label="Funkciók">
       <div class="box">Villámgyors</div>
