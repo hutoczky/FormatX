@@ -107,9 +107,11 @@ body.theme-lcars .hero {
   border-radius: 12px;
 }
 
-/* Disable animated bridge overlay entirely for LCARS */
+/* Re-enable animated bridge overlay for LCARS with custom console styling */
 html[data-franchise-theme="lcars"] .bridge-screens,
-body.theme-lcars .bridge-screens { display: none !important; }
+body.theme-lcars .bridge-screens { 
+  display: grid !important;
+}
 
 /* Buttons: ensure contrast and clarity */
 html[data-franchise-theme="lcars"] .btn.primary,
@@ -129,4 +131,149 @@ body.theme-lcars .btn.ghost {
 @media (max-width: 768px){
   html[data-franchise-theme="lcars"] .site-header::after,
   body.theme-lcars .site-header::after { height: var(--rail-h-sm); }
+}
+
+/* ============================================================
+   LCARS Console-Style Bridge Screen Overlay
+   ============================================================ */
+
+/* Hide existing radar/sweep SVG in main-hud for LCARS */
+html[data-franchise-theme="lcars"] .screen.main-hud svg,
+body.theme-lcars .screen.main-hud svg {
+  display: none;
+}
+
+/* Transform main-hud into LCARS console with wave bands animation */
+html[data-franchise-theme="lcars"] .screen.main-hud,
+body.theme-lcars .screen.main-hud {
+  background: rgba(11, 15, 24, 0.85);
+  border: 2px solid rgba(126, 200, 255, 0.3);
+  box-shadow: 
+    0 0 20px rgba(126, 200, 255, 0.15) inset,
+    0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ::before - Animated wave bands using data-URI SVG */
+html[data-franchise-theme="lcars"] .screen.main-hud::before,
+body.theme-lcars .screen.main-hud::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="400" viewBox="0 0 1600 400"><defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M0,200 Q200,150 400,200 T800,200 T1200,200 T1600,200" fill="none" stroke="%237EC8FF" stroke-width="2" opacity="0.6" filter="url(%23glow)"/><path d="M0,220 Q200,180 400,220 T800,220 T1200,220 T1600,220" fill="none" stroke="%23FF9E66" stroke-width="2.5" opacity="0.7" filter="url(%23glow)"/><path d="M0,240 Q200,210 400,240 T800,240 T1200,240 T1600,240" fill="none" stroke="%23E08AA3" stroke-width="2" opacity="0.5" filter="url(%23glow)"/></svg>');
+  background-size: 1600px 100%;
+  background-position: 0 center;
+  background-repeat: repeat-x;
+  animation: lcars-wave-scroll 25s linear infinite;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  will-change: background-position;
+}
+
+@keyframes lcars-wave-scroll {
+  from { background-position: 0 center; }
+  to { background-position: 1600px center; }
+}
+
+/* ::after - Console grid/segmentation overlay */
+html[data-franchise-theme="lcars"] .screen.main-hud::after,
+body.theme-lcars .screen.main-hud::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  background: 
+    repeating-linear-gradient(
+      to right,
+      rgba(126, 200, 255, 0.08) 0 1px,
+      transparent 1px 28px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(126, 200, 255, 0.06) 0 1px,
+      transparent 1px 28px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(126, 200, 255, 0.03) 0%,
+      transparent 50%,
+      rgba(126, 200, 255, 0.03) 100%
+    );
+  border: 1px solid rgba(126, 200, 255, 0.25);
+  border-radius: 10px;
+  pointer-events: none;
+  box-shadow: 
+    0 0 15px rgba(126, 200, 255, 0.2) inset;
+}
+
+/* Adjust side panels for LCARS console palette */
+
+/* Top strip - LCARS color segments */
+html[data-franchise-theme="lcars"] .screen.top-strip::before,
+body.theme-lcars .screen.top-strip::before {
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--lcars-cyan) 0 24px,
+      transparent 24px 28px
+    ),
+    repeating-linear-gradient(
+      to right,
+      var(--lcars-amber) 0 18px,
+      transparent 18px 24px
+    ),
+    repeating-linear-gradient(
+      to right,
+      var(--lcars-rose) 0 14px,
+      transparent 14px 18px
+    );
+  opacity: 0.5;
+}
+
+/* Equalizer bars - LCARS amber/cyan gradient */
+html[data-franchise-theme="lcars"] .screen.eq .bar,
+body.theme-lcars .screen.eq .bar {
+  background: linear-gradient(180deg, var(--lcars-amber), var(--lcars-rose));
+  box-shadow: 0 0 8px rgba(255, 158, 102, 0.3);
+  opacity: 0.65;
+}
+
+/* Wave scope - LCARS amber wave */
+html[data-franchise-theme="lcars"] .screen.wave .wave-path,
+body.theme-lcars .screen.wave .wave-path {
+  stroke: var(--lcars-amber);
+  filter: drop-shadow(0 0 5px rgba(255, 158, 102, 0.5));
+}
+
+/* List panel - LCARS cyan accents */
+html[data-franchise-theme="lcars"] .screen.list .col,
+body.theme-lcars .screen.list .col {
+  background:
+    repeating-linear-gradient(to bottom, rgba(126, 200, 255, 0.25) 0 1px, transparent 1px 21px);
+  border-right: 1px solid rgba(126, 200, 255, 0.18);
+}
+
+html[data-franchise-theme="lcars"] .screen.list::before,
+body.theme-lcars .screen.list::before,
+html[data-franchise-theme="lcars"] .screen.list::after,
+body.theme-lcars .screen.list::after {
+  background: linear-gradient(90deg, transparent, rgba(126, 200, 255, 0.1), transparent);
+}
+
+html[data-franchise-theme="lcars"] .screen.list .dot,
+body.theme-lcars .screen.list .dot {
+  background: var(--lcars-amber);
+  box-shadow: 0 0 6px rgba(255, 158, 102, 0.7);
+}
+
+/* Ensure animations pause on reduced motion and hidden tab for LCARS */
+@media (prefers-reduced-motion: reduce) {
+  html[data-franchise-theme="lcars"] .screen.main-hud::before,
+  body.theme-lcars .screen.main-hud::before {
+    animation: none !important;
+    background-position: 0 center;
+  }
+}
+
+html[data-franchise-theme="lcars"]:not([data-tab-visible="true"]) .screen.main-hud::before,
+body.theme-lcars html:not([data-tab-visible="true"]) .screen.main-hud::before {
+  animation-play-state: paused !important;
 }

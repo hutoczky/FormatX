@@ -1,6 +1,4 @@
-/* LCARS theme guard: disable animated overlay in LCARS Prime */
-html[data-franchise-theme="lcars"] .bridge-screens,
-body.theme-lcars .bridge-screens { display: none !important; }
+/* LCARS theme guard removed - overlay now enabled for LCARS with custom styling */
 
 /* LCARS bridge-like animated background panels
    Colors inherit from existing theme variables. */
