@@ -14,6 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..800&family=Exo:wght@300;400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./bridge-screens.css" />
   </head>
   <body>
     <!-- Betöltési animáció (warp-mag) -->
@@ -33,6 +34,75 @@
       <div class="stars layer"></div>
       <div class="stars layer delay"></div>
       <div class="grid"></div>
+
+      <!-- Animated LCARS-like bridge screens overlay -->
+      <div class="bridge-screens" aria-hidden="true">
+        <div class="screen top-strip"></div>
+
+        <div class="screen main-hud">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <g class="hud-grid">
+              <line x1="0" y1="50" x2="100" y2="50"></line>
+              <line x1="50" y1="0" x2="50" y2="100"></line>
+            </g>
+            <circle class="hud-ring thick" cx="50" cy="50" r="38" />
+            <circle class="hud-ring faint" cx="50" cy="50" r="30" />
+            <circle class="hud-ring faint" cx="50" cy="50" r="22" />
+            <circle class="hud-ring faint" cx="50" cy="50" r="14" />
+            <line class="hud-sweep" x1="50" y1="50" x2="92" y2="50" />
+            <circle class="hud-pulse" cx="50" cy="50" r="1.6" />
+          </svg>
+
+          <div class="screen schematic">
+            <svg viewBox="0 0 200 110" aria-hidden="true">
+              <ellipse class="ship-fill" cx="80" cy="55" rx="38" ry="26"></ellipse>
+              <ellipse class="ship-stroke" cx="80" cy="55" rx="38" ry="26"></ellipse>
+              <rect class="ship-fill" x="110" y="48" width="40" height="14" rx="6"></rect>
+              <rect class="ship-stroke" x="110" y="48" width="40" height="14" rx="6"></rect>
+              <rect class="ship-fill" x="130" y="28" width="54" height="10" rx="5"></rect>
+              <rect class="ship-stroke" x="130" y="28" width="54" height="10" rx="5"></rect>
+              <rect class="ship-fill" x="130" y="72" width="54" height="10" rx="5"></rect>
+              <rect class="ship-stroke" x="130" y="72" width="54" height="10" rx="5"></rect>
+            </svg>
+          </div>
+        </div>
+
+        <div class="screen eq">
+          <!-- ~40 dynamic bars -->
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+
+        <div class="screen wave">
+          <svg viewBox="0 0 600 200" preserveAspectRatio="none">
+            <path class="wave-path" d="M0,100
+              C40,80 80,120 120,100
+              S200,120 240,100
+              S320,80 360,100
+              S440,120 480,100
+              S560,80 600,100" />
+          </svg>
+        </div>
+
+        <div class="screen list">
+          <div class="col"></div>
+          <div class="col"></div>
+          <div class="col"></div>
+          <span class="dot" style="top:18px;"></span>
+          <span class="dot" style="top:96px; left: 18px;"></span>
+          <span class="dot" style="top:164px; left: 22px;"></span>
+          <span class="dot" style="top:46px; left: calc(33.333% + 24px);"></span>
+          <span class="dot" style="top:128px; left: calc(33.333% + 10px);"></span>
+          <span class="dot" style="top:78px; right: 24px;"></span>
+          <span class="dot" style="top:152px; right: 16px;"></span>
+        </div>
+      </div>
     </div>
 
     <header class="site-header">
@@ -210,7 +280,7 @@
               <svg class="download-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y1="3"></line>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
               <h3>Telepítő</h3>
               <p>FormatX Installer v1.0.15</p>
@@ -220,7 +290,7 @@
               <svg class="download-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
                 <polyline points="10 17 15 12 10 7"></polyline>
-                <line x1="15" y1="12" x2="3" y1="12"></line>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
               </svg>
               <h3>Kiadási oldal</h3>
               <p>Teljes verzióinformációk</p>
