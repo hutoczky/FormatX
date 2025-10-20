@@ -3,7 +3,14 @@ document.getElementById("year").textContent = new Date().getFullYear().toString(
 
 // Tab visibility pause for animations (performance optimization)
 (function handleTabVisibility() {
+  // Set initial state
+  document.documentElement.setAttribute('data-tab-visible', !document.hidden);
+  
   document.addEventListener("visibilitychange", () => {
+    // Update data attribute for CSS-based pause control
+    document.documentElement.setAttribute('data-tab-visible', !document.hidden);
+    
+    // Legacy support for inline style approach
     const bridgeScreens = document.querySelector('.bridge-screens');
     if (bridgeScreens) {
       if (document.hidden) {
