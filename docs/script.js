@@ -6,7 +6,7 @@ document.getElementById("year").textContent = new Date().getFullYear().toString(
   // Set initial state
   document.documentElement.setAttribute('data-tab-visible', !document.hidden);
   
-  document.addEventListener("visibilitychange", () => {
+document.addEventListener("visibilitychange", () => {
     // Update data attribute for CSS-based pause control
     document.documentElement.setAttribute('data-tab-visible', !document.hidden);
     
@@ -72,7 +72,9 @@ window.handleImageError = function(img) {
     '</svg>'
   ].join('');
   
-  img.src = 'data:image/svg+xml;base64,' + btoa(svg);
+  // Proper base64 encoding for unicode
+  const encoded = btoa(unescape(encodeURIComponent(svg)));
+  img.src = 'data:image/svg+xml;base64,' + encoded;
 };
 
 // Theme Toggle
@@ -107,7 +109,7 @@ window.handleImageError = function(img) {
 window.addEventListener("load", () => {
   const pre = document.getElementById("preloader");
   // Minimum 800ms megjelenítés
-  setTimeout(() => pre.classList.add("hidden"), 850);
+  if (pre) setTimeout(() => pre.classList.add("hidden"), 850);
 });
 
 // Gépelés-animáció a fő címhez
@@ -209,7 +211,6 @@ style.textContent = `
   #demo-output .bool { color: #ff9ac1 }
   #demo-output .null { color: #8ea6b8 }
 `;
-
 document.head.appendChild(style);
 
 // Lightbox functionality
@@ -318,443 +319,343 @@ document.head.appendChild(style);
 })();
 
 // Deep Search (Mélykutatás) - In-page search with no HTML template changes
-(function initDeepSearch() {
-  // Inject search UI container
-  const searchContainer = document.createElement('div');
-  searchContainer.id = 'deep-search';
-  searchContainer.className = 'deep-search-container';
-  searchContainer.setAttribute('role', 'search');
-  searchContainer.setAttribute('aria-label', 'Oldalon belüli keresés');
-  searchContainer.style.cssText = `
-    position: fixed;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10000;
-    background: linear-gradient(135deg, rgba(0, 10, 30, 0.98), rgba(10, 20, 50, 0.98));
-    border: 2px solid #00eaff;
-    border-radius: 12px;
-    padding: 16px 20px;
-    min-width: 450px;
-    max-width: 90vw;
-    box-shadow: 0 8px 32px rgba(0, 234, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
-    transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: 'Exo', sans-serif;
+(function initDeepSearch(){
+  // Inject styles (alap + LCARS scope)
+  const s = document.createElement('style');
+  s.textContent = `
+  .site-header .nav .site-search { position: relative; display: inline-flex; align-items: center; margin-left: .5rem; }
+  .site-header .nav .site-search input[type="search"]{
+    width: 11.5rem; max-width: 42vw; padding: .48rem .7rem;
+    border-radius: 12px; border: 1px solid rgba(255,255,255,.16);
+    background: rgba(0,0,0,.18); color: inherit; outline: none;
+    transition: width .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .site-header .nav .site-search input[type="search"]::placeholder{ opacity: .6; }
+  .site-header .nav .site-search input[type="search"]:focus{
+    width: 16rem; background: rgba(0,0,0,.24); box-shadow: 0 0 0 2px rgba(0,234,255,.25);
+  }
+  .site-header .nav .search-results{
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0; max-height: 60vh; overflow: auto;
+    background: rgba(8,12,20,.96); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.35); padding: .4rem; display: none; z-index: 1200;
+  }
+  .site-header .nav .search-results[aria-expanded="true"]{ display: block; }
+  .site-header .nav .search-results .result{
+    display: grid; grid-template-columns: 1.2rem 1fr; gap: .6rem; align-items: start;
+    padding: .42rem .5rem; border-radius: 8px; color: inherit; text-decoration: none;
+  }
+  .site-header .nav .search-results .result:hover,
+  .site-header .nav .search-results .result[aria-selected="true"]{
+    background: rgba(0,234,255,.12);
+  }
+  .site-header .nav .search-results .result .icn{
+    width: .9rem; height: .9rem; border-radius: 4px; margin-top: .15rem;
+    background: linear-gradient(180deg, #00eaff, #7c4dff); opacity: .8;
+  }
+  .site-header .nav .search-results .result .title{ font-weight: 700; letter-spacing: .02em; }
+  .site-header .nav .search-results .result .text{ opacity: .8; font-size: .9em; }
+  .site-header .nav .search-results mark{ background: rgba(255,209,102,.28); color: inherit; padding: 0 .05em; border-radius: 3px; }
+  /* LCARS scope finomítások */
+  html[data-franchise-theme="lcars"] .site-header .nav .site-search input[type="search"],
+  body.theme-lcars .site-header .nav .site-search input[type="search"]{
+    border-color: rgba(255,255,255,.12);
+    background: rgba(5,10,18,.18);
+  }
+  html[data-franchise-theme="lcars"] .site-header .nav .site-search input[type="search"]:focus,
+  body.theme-lcars .site-header .nav .site-search input[type="search"]:focus{
+    box-shadow: 0 0 0 2px var(--lcars-cyan, #7EC8FF);
+    background: rgba(5,10,18,.24);
+  }
+  html[data-franchise-theme="lcars"] .site-header .nav .search-results,
+  body.theme-lcars .site-header .nav .search-results{
+    background: var(--lcars-ink, #0B0F18);
+    border-color: rgba(255,255,255,.14);
+  }
   `;
+  document.head.appendChild(s);
 
-  searchContainer.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <div style="flex: 1; position: relative;">
-        <input 
-          type="text" 
-          id="deep-search-input" 
-          placeholder="Keresés az oldalon... (Ctrl+K)"
-          aria-label="Keresési kifejezés"
-          style="
-            width: 100%;
-            padding: 10px 40px 10px 12px;
-            background: rgba(0, 20, 40, 0.8);
-            border: 1px solid #00eaff;
-            border-radius: 6px;
-            color: #00eaff;
-            font-size: 15px;
-            font-family: 'Exo', sans-serif;
-            outline: none;
-            transition: all 0.2s;
-          "
-        />
-        <button 
-          id="deep-search-clear"
-          aria-label="Keresés törlése"
-          style="
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #00eaff;
-            cursor: pointer;
-            padding: 4px;
-            display: none;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-          "
-        >✕</button>
-      </div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <span 
-          id="deep-search-counter" 
-          style="
-            color: #b0ffea;
-            font-size: 13px;
-            min-width: 60px;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.2s;
-          "
-          aria-live="polite"
-          aria-atomic="true"
-        ></span>
-        <button 
-          id="deep-search-prev" 
-          aria-label="Előző találat"
-          disabled
-          style="
-            background: rgba(0, 234, 255, 0.1);
-            border: 1px solid #00eaff;
-            border-radius: 4px;
-            color: #00eaff;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
-            opacity: 0.5;
-          "
-        >↑</button>
-        <button 
-          id="deep-search-next" 
-          aria-label="Következő találat"
-          disabled
-          style="
-            background: rgba(0, 234, 255, 0.1);
-            border: 1px solid #00eaff;
-            border-radius: 4px;
-            color: #00eaff;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
-            opacity: 0.5;
-          "
-        >↓</button>
-        <button 
-          id="deep-search-close" 
-          aria-label="Keresés bezárása"
-          style="
-            background: rgba(255, 107, 107, 0.2);
-            border: 1px solid #ff6b6b;
-            border-radius: 4px;
-            color: #ff6b6b;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
-          "
-        >✕</button>
-      </div>
-    </div>
+  const nav = document.querySelector('.site-header .nav');
+  if (!nav) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'site-search';
+  wrap.setAttribute('role', 'search');
+  wrap.innerHTML = `
+    <input id="site-search-input" type="search" placeholder="Keresés…" autocomplete="off" aria-label="Keresés a lapon" />
+    <div id="site-search-results" class="search-results" role="listbox" aria-expanded="false" aria-label="Keresési találatok"></div>
   `;
-
-  document.body.appendChild(searchContainer);
-
-  // Inject styles for highlights
-  const highlightStyle = document.createElement('style');
-  highlightStyle.textContent = `
-    .deep-search-highlight {
-      background-color: rgba(255, 255, 0, 0.4);
-      color: inherit;
-      padding: 2px 0;
-      border-radius: 2px;
-      transition: background-color 0.2s;
-    }
-    .deep-search-highlight.active {
-      background-color: rgba(255, 165, 0, 0.6);
-      box-shadow: 0 0 8px rgba(255, 165, 0, 0.8);
-    }
-    #deep-search-input:focus {
-      border-color: #7c4dff;
-      box-shadow: 0 0 0 2px rgba(124, 77, 255, 0.2);
-    }
-    #deep-search-prev:not(:disabled):hover,
-    #deep-search-next:not(:disabled):hover {
-      background: rgba(0, 234, 255, 0.2);
-      transform: scale(1.05);
-    }
-    #deep-search-prev:not(:disabled),
-    #deep-search-next:not(:disabled) {
-      opacity: 1;
-      cursor: pointer;
-    }
-    #deep-search-close:hover {
-      background: rgba(255, 107, 107, 0.3);
-      transform: scale(1.05);
-    }
-    #deep-search-clear:hover {
-      opacity: 1;
-    }
-    .deep-search-container.active {
-      top: 20px;
-    }
-  `;
-  document.head.appendChild(highlightStyle);
-
-  // Search state
-  let searchTerm = '';
-  let matches = [];
-  let currentMatchIndex = -1;
-  let isSearchActive = false;
-
-  // Get references to UI elements
-  const searchInput = document.getElementById('deep-search-input');
-  const searchCounter = document.getElementById('deep-search-counter');
-  const prevBtn = document.getElementById('deep-search-prev');
-  const nextBtn = document.getElementById('deep-search-next');
-  const closeBtn = document.getElementById('deep-search-close');
-  const clearBtn = document.getElementById('deep-search-clear');
-
-  // Elements to exclude from search
-  const excludeSelectors = [
-    'script',
-    'style',
-    'noscript',
-    '#preloader',
-    '#deep-search',
-    '.lightbox',
-    'svg'
-  ];
-
-  // Get all text nodes in the document
-  function getTextNodes(element) {
-    const textNodes = [];
-    const walker = document.createTreeWalker(
-      element,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: function(node) {
-          // Skip empty or whitespace-only nodes
-          if (!node.nodeValue.trim()) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          // Skip excluded elements
-          let parent = node.parentElement;
-          while (parent) {
-            if (excludeSelectors.some(selector => parent.matches?.(selector))) {
-              return NodeFilter.FILTER_REJECT;
-            }
-            parent = parent.parentElement;
-          }
-          return NodeFilter.FILTER_ACCEPT;
-        }
-      }
-    );
-
-    while (walker.nextNode()) {
-      textNodes.push(walker.currentNode);
-    }
-    return textNodes;
+  const toggle = nav.querySelector('#theme-toggle');
+  if (toggle && toggle.parentElement === nav) {
+    toggle.insertAdjacentElement('afterend', wrap);
+  } else {
+    nav.appendChild(wrap);
   }
 
-  // Clear all highlights
-  function clearHighlights() {
-    const highlights = document.querySelectorAll('.deep-search-highlight');
-    highlights.forEach(highlight => {
-      const parent = highlight.parentNode;
-      parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
-      parent.normalize(); // Merge adjacent text nodes
-    });
-    matches = [];
-    currentMatchIndex = -1;
-  }
+  const input = wrap.querySelector('#site-search-input');
+  const resultsEl = wrap.querySelector('#site-search-results');
 
-  // Highlight all matches
-  function highlightMatches(term) {
-    if (!term || term.length < 2) {
-      clearHighlights();
-      updateUI();
+  const normalize = (s) => (s || "")
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  const index = [];
+  const push = (title, text, href, type) => {
+    const nt = normalize(title);
+    const nx = normalize(text);
+    index.push({ title, text, href, nt, nx, type });
+  };
+
+  document.querySelectorAll('section .section-title').forEach(h => {
+    const section = h.closest('section');
+    if (!section) return;
+    const title = h.textContent.trim();
+    const desc = section.querySelector('.demo-desc, p')?.textContent?.trim() || '';
+    push(title, desc, `#${section.id || ''}`, 'section');
+  });
+
+  document.querySelectorAll('#features .card').forEach(card => {
+    const title = card.querySelector('h3')?.textContent?.trim() || 'Funkció';
+    const text = card.querySelector('p')?.textContent?.trim() || '';
+    push(title, text, '#features', 'card');
+  });
+
+  document.querySelectorAll('[data-gallery="pro"] .gallery-item').forEach(item => {
+    const caption = item.querySelector('.gallery-caption')?.textContent?.trim() || '';
+    const imgAlt = item.querySelector('img')?.alt?.trim() || '';
+    const text = [caption, imgAlt].filter(Boolean).join(' — ');
+    push(caption || imgAlt || 'Galéria elem', text, '#pro', 'gallery');
+  });
+
+  document.querySelectorAll('#download .download-card').forEach(a => {
+    const title = a.querySelector('h3')?.textContent?.trim() || 'Letöltés';
+    const text = a.querySelector('p')?.textContent?.trim() || '';
+    const href = a.getAttribute('href') || '#download';
+    push(title, text, href, 'download');
+  });
+
+  document.querySelectorAll('#docs .docs-card').forEach a => {
+    const title = a.querySelector('h3')?.textContent?.trim() || 'Dokumentum';
+    const text = a.querySelector('p')?.textContent?.trim() || '';
+    const href = a.getAttribute('href') || '#docs';
+    push(title, text, href, 'doc');
+  });
+
+  const scoreItem = (item, qTokens, qRaw) => {
+    let s = 0;
+    if (item.nt.includes(qRaw)) s += 12;
+    if (item.nx.includes(qRaw)) s += 6;
+
+    for (const t of qTokens) {
+      if (!t) continue;
+      if (item.nt.includes(t)) s += 8;
+      if (item.nx.includes(t)) s += 3;
+      if (item.nt.startsWith(t)) s += 2;
+    }
+    switch(item.type){
+      case 'section': s += 2; break;
+      case 'download': s += 1; break;
+    }
+    return s;
+  };
+
+  const highlight = (text, tokens) => {
+    if (!text) return '';
+    let out = text;
+    const uniq = Array.from(new Set(tokens.filter(Boolean))).sort((a,b)=>b.length-a.length);
+    for (const tok of uniq) {
+      const esc = tok.replace(/[.*+?^${}()|[\\]]/g, '\\$&');
+      out = out.replace(new RegExp(`(${esc})`, 'gi'), '<mark>$1</mark>');
+    }
+    return out;
+  };
+
+  const render = (items, tokens) => {
+    resultsEl.innerHTML = '';
+    if (!items.length) {
+      resultsEl.setAttribute('aria-expanded', 'false');
       return;
     }
-
-    clearHighlights();
-    matches = [];
-
-    const textNodes = getTextNodes(document.body);
-    const searchRegex = new RegExp(escapeRegex(term), 'gi');
-
-    textNodes.forEach(node => {
-      const text = node.nodeValue;
-      const matches_in_node = [];
-      let match;
-
-      while ((match = searchRegex.exec(text)) !== null) {
-        matches_in_node.push({
-          start: match.index,
-          end: match.index + match[0].length,
-          text: match[0]
-        });
-      }
-
-      if (matches_in_node.length > 0) {
-        const fragment = document.createDocumentFragment();
-        let lastIndex = 0;
-
-        matches_in_node.forEach(m => {
-          // Add text before match
-          if (m.start > lastIndex) {
-            fragment.appendChild(document.createTextNode(text.substring(lastIndex, m.start)));
-          }
-
-          // Add highlighted match
-          const highlight = document.createElement('mark');
-          highlight.className = 'deep-search-highlight';
-          highlight.textContent = text.substring(m.start, m.end);
-          fragment.appendChild(highlight);
-          matches.push(highlight);
-
-          lastIndex = m.end;
-        });
-
-        // Add remaining text
-        if (lastIndex < text.length) {
-          fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
-        }
-
-        node.parentNode.replaceChild(fragment, node);
-      }
+    const frag = document.createDocumentFragment();
+    items.slice(0, 8).forEach((it, i) => {
+      const a = document.createElement('a');
+      a.className = 'result';
+      a.setAttribute('role', 'option');
+      a.setAttribute('data-index', String(i));
+      a.href = it.href || '#';
+      a.innerHTML = `
+        <span class="icn" aria-hidden="true"></span>
+        <span class="meta">
+          <div class="title">${highlight(it.title, tokens)}</div>
+          <div class="text">${highlight(it.text, tokens)}</div>
+        </span>
+      `;
+      frag.appendChild(a);
     });
+    resultsEl.appendChild(frag);
+    resultsEl.setAttribute('aria-expanded', 'true');
+    activeIndex = -1;
+  };
 
-    if (matches.length > 0) {
-      currentMatchIndex = 0;
-      scrollToMatch(0);
+  let activeIndex = -1;
+
+  const moveActive = (dir) => {
+    const items = Array.from(resultsEl.querySelectorAll('.result'));
+    if (!items.length) return;
+    activeIndex = (activeIndex + dir + items.length) % items.length;
+    items.forEach(el => el.setAttribute('aria-selected', 'false'));
+    items[activeIndex].setAttribute('aria-selected', 'true');
+    items[activeIndex].scrollIntoView({ block: 'nearest' });
+  };
+
+  const openActive = () => {
+    const el = resultsEl.querySelector(`.result[aria-selected="true"]`) || resultsEl.querySelector('.result');
+    if (el) {
+      window.location.href = el.getAttribute('href') || '#';
+      resultsEl.setAttribute('aria-expanded', 'false');
+      input.blur();
     }
+  };
 
-    updateUI();
-  }
-
-  // Escape special regex characters
-  function escapeRegex(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
-
-  // Scroll to specific match
-  function scrollToMatch(index) {
-    if (index < 0 || index >= matches.length) return;
-
-    // Remove active class from all matches
-    matches.forEach(m => m.classList.remove('active'));
-
-    // Add active class to current match
-    const match = matches[index];
-    match.classList.add('active');
-
-    // Scroll to match with offset for fixed header
-    const rect = match.getBoundingClientRect();
-    const offset = 100; // Account for header
-    
-    if (rect.top < offset || rect.bottom > window.innerHeight) {
-      match.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const handleQuery = (q) => {
+    const qn = normalize(q).trim();
+    if (!qn) {
+      resultsEl.setAttribute('aria-expanded', 'false');
+      resultsEl.innerHTML = '';
+      return;
     }
+    const tokens = qn.split(/\s+/).filter(Boolean);
+    const scored = index
+      .map(item => ({ item, s: scoreItem(item, tokens, qn) }))
+      .filter(x => x.s > 0)
+      .sort((a,b) => b.s - a.s)
+      .map(x => x.item);
+    render(scored, tokens);
+  };
 
-    currentMatchIndex = index;
-    updateUI();
-  }
-
-  // Update UI state
-  function updateUI() {
-    if (matches.length > 0) {
-      searchCounter.textContent = `${currentMatchIndex + 1} / ${matches.length}`;
-      searchCounter.style.opacity = '1';
-      prevBtn.disabled = false;
-      nextBtn.disabled = false;
-    } else if (searchTerm.length >= 2) {
-      searchCounter.textContent = 'Nincs találat';
-      searchCounter.style.opacity = '1';
-      prevBtn.disabled = true;
-      nextBtn.disabled = true;
-    } else {
-      searchCounter.textContent = '';
-      searchCounter.style.opacity = '0';
-      prevBtn.disabled = true;
-      nextBtn.disabled = true;
-    }
-
-    clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
-  }
-
-  // Show search UI
-  function showSearch() {
-    isSearchActive = true;
-    searchContainer.classList.add('active');
-    searchInput.focus();
-    searchInput.select();
-  }
-
-  // Hide search UI
-  function hideSearch() {
-    isSearchActive = false;
-    searchContainer.classList.remove('active');
-    clearHighlights();
-    searchInput.value = '';
-    searchTerm = '';
-    updateUI();
-  }
-
-  // Event listeners
-  searchInput.addEventListener('input', (e) => {
-    searchTerm = e.target.value;
-    highlightMatches(searchTerm);
-  });
-
-  searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (e.shiftKey) {
-        goToPrevious();
-      } else {
-        goToNext();
-      }
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      hideSearch();
+  input.addEventListener('input', (e) => handleQuery(e.target.value));
+  input.addEventListener('keydown', (e) => {
+    switch (e.key) {
+      case 'ArrowDown': e.preventDefault(); moveActive(1); break;
+      case 'ArrowUp': e.preventDefault(); moveActive(-1); break;
+      case 'Enter': e.preventDefault(); openActive(); break;
+      case 'Escape':
+        resultsEl.setAttribute('aria-expanded', 'false');
+        input.blur();
+        break;
     }
   });
 
-  prevBtn.addEventListener('click', goToPrevious);
-  nextBtn.addEventListener('click', goToNext);
-  closeBtn.addEventListener('click', hideSearch);
-  clearBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    searchTerm = '';
-    highlightMatches('');
-    searchInput.focus();
-  });
-
-  function goToNext() {
-    if (matches.length === 0) return;
-    const nextIndex = (currentMatchIndex + 1) % matches.length;
-    scrollToMatch(nextIndex);
-  }
-
-  function goToPrevious() {
-    if (matches.length === 0) return;
-    const prevIndex = currentMatchIndex - 1 < 0 ? matches.length - 1 : currentMatchIndex - 1;
-    scrollToMatch(prevIndex);
-  }
-
-  // Global keyboard shortcut (Ctrl+K or Ctrl+F)
   document.addEventListener('keydown', (e) => {
-    // Don't trigger if user is typing in an input/textarea (except our search)
-    const isInputFocused = document.activeElement.tagName === 'INPUT' || 
-                          document.activeElement.tagName === 'TEXTAREA';
-    
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+    const target = e.target;
+    const isMod = e.ctrlKey || e.metaKey;
+    const isEditing = (target && (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.isContentEditable
+    ));
+    if (isEditing) return;
+
+    if (e.key === '/' || (isMod && (e.key.toLowerCase() === 'k'))) {
       e.preventDefault();
-      if (isSearchActive) {
-        hideSearch();
-      } else {
-        showSearch();
-      }
-    } else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-      // Only override browser's Ctrl+F if our search is already active
-      if (isSearchActive) {
-        e.preventDefault();
-        searchInput.focus();
-        searchInput.select();
-      }
+      input.focus();
+      input.select();
     }
   });
 
-  // Initialize UI state
-  updateUI();
+  document.addEventListener('click', (e) => {
+    if (!wrap.contains(e.target)) {
+      resultsEl.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+
+/* ============ LCARS overlay enable + central console waves ============ */
+(function enableLcarsOverlay(){
+  const css = `
+  /* Ensure overlay visible only in LCARS; keep it hidden in CP2077/Cyberpunk */
+  html[data-franchise-theme="lcars"] .bridge-screens,
+  body.theme-lcars .bridge-screens { display: grid !important; }
+  html[data-franchise-theme="cyberpunk"] .bridge-screens,
+  body.theme-cyberpunk .bridge-screens,
+  html[data-franchise-theme="cp2077"] .bridge-screens,
+  body.theme-cp2077 .bridge-screens { display: none !important; }
+
+  /* Hide legacy radar HUD inside main-hud under LCARS */
+  html[data-franchise-theme="lcars"] .screen.main-hud > svg,
+  body.theme-lcars .screen.main-hud > svg { display: none !important; }
+
+  /* Animated wave bands (data-URI SVG) scrolling horizontally */
+  html[data-franchise-theme="lcars"] .screen.main-hud::before,
+  body.theme-lcars .screen.main-hud::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 12px;
+    background-color: rgba(6, 10, 18, .65);
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 400'><rect width='1600' height='400' fill='none'/><path d='M0 200 C 220 150 420 250 640 200 S 1060 150 1280 200 S 1480 250 1600 200' stroke='%237EC8FF' stroke-width='5' fill='none' opacity='0.95'/><path d='M0 245 C 220 195 420 295 640 245 S 1060 195 1280 245 S 1480 295 1600 245' stroke='%23FFCE66' stroke-width='4' fill='none' opacity='0.9'/><path d='M0 290 C 220 240 420 340 640 290 S 1060 240 1280 290 S 1480 340 1600 290' stroke='%23E08AA3' stroke-width='3.5' fill='none' opacity='0.85'/></svg>");
+    background-repeat: repeat-x;
+    background-size: 1600px 100%;
+    background-position: 0 50%;
+    animation: lcars-wave-pan 26s linear infinite;
+    box-shadow:
+      inset 0 0 0 1px rgba(126,200,255,.22),
+      inset 0 16px 28px rgba(0,0,0,.28),
+      0 0 24px rgba(0,234,255,.08);
+  }
+
+  /* Console grid + bezel overlay */
+  html[data-franchise-theme="lcars"] .screen.main-hud::after,
+  body.theme-lcars .screen.main-hud::after {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 12px;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.12)),
+      repeating-linear-gradient(
+        to right,
+        rgba(126,200,255,.10) 0 1px,
+        transparent 1px 28px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        rgba(126,200,255,.08) 0 1px,
+        transparent 1px 24px
+      );
+    box-shadow:
+      inset 0 0 0 2px rgba(0,234,255,.18),
+      inset 0 0 0 1px rgba(126,200,255,.25),
+      0 6px 32px rgba(0,0,0,.35);
+  }
+
+  @keyframes lcars-wave-pan { 0%{ background-position: 0 50%; } 100%{ background-position: -1600px 50%; } }
+
+  /* Harmonize side panels under LCARS */
+  html[data-franchise-theme="lcars"] .wave-path,
+  body.theme-lcars .wave-path { stroke: var(--lcars-amber, #FFCE66); filter: drop-shadow(0 0 6px rgba(255,206,102,.5)); }
+  html[data-franchise-theme="lcars"] .eq .bar,
+  body.theme-lcars .eq .bar { background: linear-gradient(180deg, var(--lcars-cyan, #7EC8FF), var(--lcars-cyan-2, #00EAFF)); box-shadow: 0 0 10px rgba(0,234,255,.25); opacity: .78; }
+  html[data-franchise-theme="lcars"] .list::before,
+  html[data-franchise-theme="lcars"] .list::after,
+  body.theme-lcars .list::before,
+  body.theme-lcars .list::after { background: linear-gradient(90deg, transparent, rgba(126,200,255,.12), transparent); }
+  html[data-franchise-theme="lcars"] .list .col,
+  body.theme-lcars .list .col { background: repeating-linear-gradient(to bottom, rgba(126,200,255,.26) 0 1px, transparent 1px 21px); border-right: 1px solid rgba(126,200,255,.22); }
+
+  /* Pause the wave animation when tab hidden */
+  html:not([data-tab-visible="true"]) .screen.main-hud::before { animation-play-state: paused !important; }
+
+  /* Reduced motion: disable */
+  @media (prefers-reduced-motion: reduce){
+    html[data-franchise-theme="lcars"] .screen.main-hud::before,
+    body.theme-lcars .screen.main-hud::before { animation: none !important; }
+  }
+  `;
+  const st = document.createElement('style');
+  st.setAttribute('data-lcars-console', 'true');
+  st.textContent = css;
+  document.head.appendChild(st);
 })();
