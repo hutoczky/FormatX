@@ -242,3 +242,67 @@ html:not([data-tab-visible="true"]) .list .dot {
     opacity: 0.6;
   }
 }
+
+/* ========================================
+   LCARS Hero Graphic - Refined Display
+   Scoped to LCARS theme only
+   ======================================== */
+/* Hide hero LCARS panel by default */
+.hero-lcars-panel {
+  display: none;
+}
+
+/* Show only in LCARS theme */
+body.theme-lcars .hero-lcars-panel,
+html[data-franchise-theme="lcars"] .hero-lcars-panel {
+  display: block;
+  position: absolute;
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 4/3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body.theme-lcars .hero-lcars-panel svg,
+html[data-franchise-theme="lcars"] .hero-lcars-panel svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Animate the sweep line */
+body.theme-lcars .lcars-sweep,
+html[data-franchise-theme="lcars"] .lcars-sweep {
+  transform-origin: 50% 50%;
+  animation: lcars-sweep-rotate 8s linear infinite;
+}
+
+@keyframes lcars-sweep-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Pause sweep animation when tab is hidden */
+html:not([data-tab-visible="true"]) .lcars-sweep {
+  animation-play-state: paused !important;
+}
+
+/* Disable sweep animation for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .lcars-sweep {
+    animation: none !important;
+  }
+}
+
+/* Hide original radar/ship on LCARS theme */
+body.theme-lcars .screen.main-hud,
+body.theme-lcars .screen.schematic,
+html[data-franchise-theme="lcars"] .screen.main-hud,
+html[data-franchise-theme="lcars"] .screen.schematic {
+  display: none;
+}
