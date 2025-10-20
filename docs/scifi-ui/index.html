@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sci-Fi UI Themes Demo</title>
+  <link rel="stylesheet" id="theme-stylesheet" href="styles/lcars.css">
+  <style>
+    *{ margin:0; padding:0; box-sizing:border-box }
+    body{ min-height:100vh; display:flex; flex-direction:column; line-height:1.6 }
+    nav{ padding:1.2rem 0 }
+    nav .wrap{ max-width:1200px; margin:0 auto; padding:0 1.5rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; position:relative }
+    nav h1{ font-size:1.8rem; font-weight:900; letter-spacing:.08em }
+    nav .theme-buttons{ display:flex; gap:.8rem; flex-wrap:wrap }
+    main{ flex:1; max-width:1200px; margin:0 auto; padding:2rem 1.5rem; width:100% }
+    main .panel{ margin-bottom:2rem }
+    main .panel h2{ font-size:1.5rem; margin-bottom:1rem; font-weight:700 }
+    main .panel p{ margin-bottom:1rem; line-height:1.7 }
+    .features{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem; margin-top:2rem }
+    .features .box{ padding:1.5rem; transition: transform .2s }
+    .features .box:hover{ transform:translateY(-2px) }
+    .features .box h3{ font-size:1.2rem; margin-bottom:.6rem; font-weight:700 }
+    .features .box p{ font-size:.95rem; opacity:.9 }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="wrap">
+      <h1>SCI-FI UI THEMES</h1>
+      <div class="theme-buttons">
+        <button data-theme="lcars">LCARS</button>
+        <button data-theme="starwars">Star Wars</button>
+        <button data-theme="cyberpunk">Cyberpunk</button>
+      </div>
+    </div>
+  </nav>
+  <main>
+    <div class="panel">
+      <h2>Welcome to the Sci-Fi UI Theme Switcher</h2>
+      <p>Experience three distinct futuristic interface themes inspired by iconic science fiction universes. Switch between themes using the buttons above to see how the design transforms.</p>
+      <button>Explore Features</button>
+    </div>
+    <div class="features">
+      <div class="box">
+        <h3>Star Trek LCARS</h3>
+        <p>The Library Computer Access/Retrieval System from Star Trek: The Next Generation. Features bold colors, rounded corners, and characteristic rail elements.</p>
+      </div>
+      <div class="box">
+        <h3>Star Wars HUD</h3>
+        <p>Holographic display interface inspired by Star Wars technology. Includes grid overlays, glowing cyan accents, and translucent panels.</p>
+      </div>
+      <div class="box">
+        <h3>Cyberpunk 2077</h3>
+        <p>Neon-soaked glitch aesthetic from Night City. Features vibrant magenta and cyan colors with animated glow effects and dashed borders.</p>
+      </div>
+    </div>
+  </main>
+  <script src="scripts/theme-switcher.js"></script>
+</body>
+</html>
