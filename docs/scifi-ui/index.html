@@ -2,47 +2,25 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sci-Fi UI</title>
-  <meta name="description" content="Moduláris sci‑fi UI: Star Trek LCARS, Star Wars HUD, Cyberpunk 2077 glitch. Téma-váltás gombokkal." />
   <link id="theme-stylesheet" rel="stylesheet" href="styles/lcars.css">
   <script src="scripts/theme-switcher.js" defer></script>
-  <style>
-    :root { --border: rgba(160,220,255,.16); --wrap: min(1100px, 94%); }
-    *,*::before,*::after{ box-sizing: border-box }
-    html,body{ height:100% }
-    body{ margin:0 }
-    .wrap{ width: var(--wrap); margin-inline:auto }
-    nav{ position: sticky; top:0; z-index: 10; background: rgba(0,0,0,.2); backdrop-filter: blur(6px); border-bottom: 1px solid var(--border) }
-    nav .wrap{ display:flex; gap:.5rem; align-items:center; padding:.6rem 0; flex-wrap: wrap }
-    main.wrap{ padding: 1rem 0 2rem }
-    .panel{ display:flex; gap:.5rem; flex-wrap:wrap; margin: 1rem 0 }
-    .panel a{ text-decoration:none; }
-    .features{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .8rem }
-    .features .box{ border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align:center }
-    footer{ border-top: 1px solid var(--border); margin-top: 2rem }
-    footer .wrap{ display:flex; align-items:center; justify-content:space-between; padding: .9rem 0 }
-    .sr-only{ position:absolute!important; width:1px;height:1px; padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0 }
-  </style>
 </head>
 <body>
-  <nav aria-label="Téma váltása">
-    <div class="wrap">
-      <span class="sr-only" id="theme-label">Téma választó</span>
-      <button type="button" data-theme="lcars" aria-describedby="theme-label">Star Trek</button>
-      <button type="button" data-theme="starwars" aria-describedby="theme-label">Star Wars</button>
-      <button type="button" data-theme="cyberpunk" aria-describedby="theme-label">Cyberpunk</button>
-    </div>
+  <nav>
+    <button onclick="switchTheme('lcars')">STAR TREK</button>
+    <button onclick="switchTheme('starwars')">STAR WARS</button>
+    <button onclick="switchTheme('cyberpunk')">CYBERPUNK</button>
   </nav>
-  <main class="wrap">
+  <main>
     <h1>Formázás a jövőből</h1>
-    <p>Gyors. Moduláris. Bővíthető. Azonos szerkezet, eltérő sci‑fi stílusok.</p>
+    <p>Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
     <div class="panel">
-      <a href="../#download" class="btn" data-link="download">Letöltés</a>
-      <a href="../#features" class="btn" data-link="features">Funkciók</a>
-      <a href="../#docs" class="btn" data-link="docs">Dokumentumok</a>
+      <a href="../#download">LETÖLTÉS</a>
+      <a href="../#features">FUNKCIÓK</a>
+      <a href="../#docs">DOKUMENTUMOK</a>
     </div>
-    <section class="features" aria-label="Funkciók">
+    <section class="features">
       <div class="box">Villámgyors</div>
       <div class="box">Bővíthető</div>
       <div class="box">Web UI</div>
@@ -50,13 +28,8 @@
     </section>
   </main>
   <footer>
-    <div class="wrap">
-      <div>© <span id="year"></span> Sci‑Fi UI</div>
-      <div><a href="#">Vissza a tetejére</a></div>
-    </div>
+    <p>© 2023 Sci-Fi UI</p>
+    <a href="#">Vissza a tetejére</a>
   </footer>
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear().toString();
-  </script>
 </body>
 </html>
