@@ -1,5 +1,5 @@
 /* Cyberpunk 2077 — neon (magenta/cián/sárga), OCR‑A hangulat, glitch/scan.
-   Neon‑shift háttér + grid; boot: scan‑bar panel. */
+   Neon‑shift háttér + grid; folyamatos diagonális adatáram + finom villódzás. */
 :root{
   --bg:#0b0b12; --text:#e9ecff; --neon:#00fff5; --magenta:#ff00b8; --yellow:#ffea00;
   --border: rgba(0,255,245,.28); --panel: rgba(10,12,24,.55);
@@ -7,11 +7,20 @@
 *{ box-sizing:border-box } html,body{ height:100% }
 body{ margin:0; background: var(--bg); color: var(--text); font-family:"OCR A","OCR A Std","Audiowide","Exo 2",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; position:relative; overflow-x:hidden }
 /* Neon shift + grid */
-body::before{ content:""; position:fixed; inset:0; z-index:-2; pointer-events:none; background: linear-gradient(120deg, rgba(255,0,184,.12), transparent 40%), linear-gradient(300deg, rgba(0,255,245,.12), transparent 40%), linear-gradient(0deg, rgba(10,12,24,.85), rgba(10,12,24,.85)), repeating-linear-gradient(0deg, rgba(0,255,245,.06) 0 1px, transparent 1px 4px); animation: neon-shift 6s ease-in-out infinite; filter: saturate(1.1) }
+body::before{
+  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    linear-gradient(120deg, rgba(255,0,184,.12), transparent 40%),
+    linear-gradient(300deg, rgba(0,255,245,.12), transparent 40%),
+    linear-gradient(0deg, rgba(10,12,24,.85), rgba(10,12,24,.85)),
+    repeating-linear-gradient(0deg, rgba(0,255,245,.06) 0 1px, transparent 1px 4px);
+  animation: neon-shift 6s ease-in-out infinite;
+  filter: saturate(1.1);
+}
 @keyframes neon-shift{ 0%,100%{ filter:hue-rotate(0deg) } 50%{ filter:hue-rotate(18deg) } }
 
 /* Futurisztikus képernyőkeret (neon perem) */
-.chrome::before{ content:""; position:fixed; inset:10px; border:1px solid var(--border); border-radius:16px; box-shadow: 0 0 18px rgba(0,255,245,.25), inset 0 0 18px rgba(255,0,184,.15); pointer-events:none; }
+.chrome::before{ content:""; position:fixed; inset:10px; border:1px solid var(--border); border-radius:16px; box-shadow: 0 0 18px rgba(0,255,245,.25), inset 0 0 18px rgba(255,0,184,.15); pointer-events:none }
 
 nav{ background: linear-gradient(90deg, rgba(255,0,184,.18), rgba(0,255,245,.18)); border-bottom: 1px solid var(--border); backdrop-filter: blur(6px) }
 nav button, .panel .btn, .quick-links a, .download-card{
@@ -33,6 +42,18 @@ h1{ position:relative; text-shadow: 0 0 10px rgba(0,255,245,.4), 0 0 20px rgba(2
   @keyframes glitchShift{ 0%{transform:translate(0,0)} 20%{transform:translate(1px,-1px)} 40%{transform:translate(-1px,1px)} 60%{transform:translate(1px,1px)} 80%{transform:translate(-1px,-1px)} 100%{transform:translate(0,0)} }
   h1{ animation: glitchShift 3.2s ease-in-out infinite }
 }
+
+/* Telemetria: diagonális neon adatáram + finom villódzás */
+.telemetry{
+  background:
+    linear-gradient(120deg, rgba(255,0,184,.10), rgba(0,255,245,.08) 60%, rgba(255,234,0,.08)),
+    repeating-linear-gradient(120deg, rgba(0,255,245,.06) 0 2px, transparent 2px 22px);
+  background-size: 200% 200%, 120% 120%;
+  animation: cp-stream 7.5s linear infinite, cp-flicker 3.8s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes cp-stream{ 0%{ background-position: 0% 0%, 0% 0% } 100%{ background-position: 200% 200%, 120% 120% } }
+@keyframes cp-flicker{ 0%,100%{ opacity: .32 } 50%{ opacity: .42 } }
 
 /* Loader: scan‑bar panel */
 #loader{ background: linear-gradient(180deg, rgba(10,12,24,.9), rgba(10,12,24,.65)); backdrop-filter: blur(6px) }
