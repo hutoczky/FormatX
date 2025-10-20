@@ -1,0 +1,307 @@
+/* ============================================
+   Multi-Theme Support for FormatX Docs
+   ============================================
+   Four franchise-inspired themes:
+   1. LCARS (Star Trek) - default
+   2. Cyberpunk 2077
+   3. Star Wars
+   4. Stargate
+   ============================================ */
+
+/* ============================================
+   Theme 1: LCARS (Star Trek) - Default
+   ============================================ */
+:root[data-theme="lcars"],
+:root:not([data-theme]) {
+  --bg: #050611;
+  --text: #d8eaff;
+  --muted: #9fb8d1;
+  --primary: #00eaff;
+  --primary-2: #7c4dff;
+  --accent: #00ffc6;
+  --glass: rgba(12,18,34,0.6);
+  --glass-strong: rgba(12,18,34,0.8);
+  --border: rgba(160,220,255,0.18);
+  --shadow: 0 10px 30px rgba(0,0,0,.4);
+}
+
+/* ============================================
+   Theme 2: Cyberpunk 2077
+   ============================================ */
+:root[data-theme="cyberpunk"] {
+  --bg: #0a0014;
+  --text: #f0e6ff;
+  --muted: #b89fc8;
+  --primary: #ff00ff;
+  --primary-2: #00ffff;
+  --accent: #ffff00;
+  --glass: rgba(20,0,40,0.6);
+  --glass-strong: rgba(20,0,40,0.8);
+  --border: rgba(255,0,255,0.25);
+  --shadow: 0 10px 30px rgba(255,0,255,.3);
+}
+
+/* Cyberpunk specific: neon glow effects */
+:root[data-theme="cyberpunk"] .brand .logo {
+  filter: drop-shadow(0 0 15px rgba(255,0,255,.6)) drop-shadow(0 0 25px rgba(0,255,255,.3));
+}
+
+:root[data-theme="cyberpunk"] .hero::before {
+  background: linear-gradient(90deg, var(--primary), transparent);
+}
+
+:root[data-theme="cyberpunk"] .hero::after {
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+
+:root[data-theme="cyberpunk"] .grid {
+  --c1: rgba(255,0,255,.15);
+  animation: grid-glow-cyberpunk 4s ease-in-out infinite;
+}
+
+@keyframes grid-glow-cyberpunk {
+  0%,100%{ opacity:.7 }
+  50%{ opacity:.95 }
+}
+
+:root[data-theme="cyberpunk"] .warp-core .ring {
+  border-color: rgba(255,0,255,.5);
+  box-shadow: inset 0 0 30px rgba(255,0,255,.25), 0 0 30px rgba(0,255,255,.25);
+}
+
+:root[data-theme="cyberpunk"] .warp-core .r2 {
+  border-color: rgba(0,255,255,.6);
+}
+
+:root[data-theme="cyberpunk"] .core-glow {
+  background: radial-gradient(circle at 50% 40%, #fff, #ff00ff 40%, rgba(255,0,255,.05) 60%);
+  box-shadow: 0 0 25px 6px rgba(255,0,255,.7), 0 0 60px 18px rgba(0,255,255,.4);
+}
+
+/* ============================================
+   Theme 3: Star Wars
+   ============================================ */
+:root[data-theme="starwars"] {
+  --bg: #000000;
+  --text: #ffe81f;
+  --muted: #c4a747;
+  --primary: #ffe81f;
+  --primary-2: #4a90e2;
+  --accent: #ff3333;
+  --glass: rgba(0,0,0,0.7);
+  --glass-strong: rgba(0,0,0,0.9);
+  --border: rgba(255,232,31,0.25);
+  --shadow: 0 10px 30px rgba(255,232,31,.2);
+}
+
+/* Star Wars specific: classic gold glow */
+:root[data-theme="starwars"] .brand .logo {
+  filter: drop-shadow(0 0 12px rgba(255,232,31,.5));
+}
+
+:root[data-theme="starwars"] body {
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(255,232,31,.08), transparent 60%), var(--bg);
+}
+
+:root[data-theme="starwars"] .hero::before {
+  background: linear-gradient(90deg, var(--primary), transparent);
+}
+
+:root[data-theme="starwars"] .hero::after {
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+
+:root[data-theme="starwars"] .grid {
+  --c1: rgba(255,232,31,.1);
+}
+
+:root[data-theme="starwars"] .warp-core .ring {
+  border-color: rgba(255,232,31,.5);
+  box-shadow: inset 0 0 30px rgba(255,232,31,.2), 0 0 30px rgba(74,144,226,.2);
+}
+
+:root[data-theme="starwars"] .warp-core .r2 {
+  border-color: rgba(74,144,226,.6);
+}
+
+:root[data-theme="starwars"] .core-glow {
+  background: radial-gradient(circle at 50% 40%, #fff, #ffe81f 40%, rgba(255,232,31,.05) 60%);
+  box-shadow: 0 0 25px 6px rgba(255,232,31,.6), 0 0 60px 18px rgba(74,144,226,.3);
+}
+
+/* ============================================
+   Theme 4: Stargate
+   ============================================ */
+:root[data-theme="stargate"] {
+  --bg: #0d1117;
+  --text: #c9d1d9;
+  --muted: #8b949e;
+  --primary: #58a6ff;
+  --primary-2: #79c0ff;
+  --accent: #ffa657;
+  --glass: rgba(13,17,23,0.6);
+  --glass-strong: rgba(13,17,23,0.8);
+  --border: rgba(88,166,255,0.2);
+  --shadow: 0 10px 30px rgba(0,0,0,.4);
+}
+
+/* Stargate specific: blue chevron glow */
+:root[data-theme="stargate"] .brand .logo {
+  filter: drop-shadow(0 0 12px rgba(88,166,255,.4));
+}
+
+:root[data-theme="stargate"] body {
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(88,166,255,.1), transparent 60%), var(--bg);
+}
+
+:root[data-theme="stargate"] .hero::before {
+  background: linear-gradient(90deg, var(--primary), transparent);
+}
+
+:root[data-theme="stargate"] .hero::after {
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+
+:root[data-theme="stargate"] .grid {
+  --c1: rgba(88,166,255,.12);
+  animation: grid-glow-stargate 8s ease-in-out infinite;
+}
+
+@keyframes grid-glow-stargate {
+  0%,100%{ opacity:.6 }
+  50%{ opacity:.75 }
+}
+
+:root[data-theme="stargate"] .warp-core .ring {
+  border-color: rgba(88,166,255,.5);
+  box-shadow: inset 0 0 30px rgba(88,166,255,.2), 0 0 30px rgba(255,166,87,.15);
+}
+
+:root[data-theme="stargate"] .warp-core .r2 {
+  border-color: rgba(255,166,87,.5);
+}
+
+:root[data-theme="stargate"] .core-glow {
+  background: radial-gradient(circle at 50% 40%, #fff, #58a6ff 40%, rgba(88,166,255,.05) 60%);
+  box-shadow: 0 0 25px 6px rgba(88,166,255,.6), 0 0 60px 18px rgba(255,166,87,.3);
+}
+
+/* ============================================
+   Theme-Specific Preloader Animations
+   ============================================ */
+
+/* Cyberpunk: glitchy flickering effect */
+:root[data-theme="cyberpunk"] #preloader {
+  background: radial-gradient(700px 240px at 50% 40%, rgba(255, 0, 255, .12), transparent 70%), var(--bg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-theme="cyberpunk"] .preloader-label {
+    animation: glitch-text 0.3s ease-in-out infinite;
+  }
+  
+  @keyframes glitch-text {
+    0%, 90% { transform: translate(0) }
+    92% { transform: translate(-2px, 1px) }
+    94% { transform: translate(2px, -1px) }
+    96% { transform: translate(-1px, 2px) }
+    98% { transform: translate(1px, -2px) }
+  }
+}
+
+/* Star Wars: classic crawl-inspired */
+:root[data-theme="starwars"] #preloader {
+  background: radial-gradient(700px 240px at 50% 40%, rgba(255, 232, 31, .08), transparent 70%), var(--bg);
+}
+
+:root[data-theme="starwars"] .preloader-label {
+  color: var(--primary);
+  text-shadow: 0 0 14px rgba(255,232,31,.35);
+}
+
+/* Stargate: chevron lock effect */
+:root[data-theme="stargate"] #preloader {
+  background: radial-gradient(700px 240px at 50% 40%, rgba(88, 166, 255, .1), transparent 70%), var(--bg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-theme="stargate"] .warp-core .ring {
+    animation: pulse 2.6s ease-in-out infinite, rotate 12s linear infinite, chevron-lock 3s ease-in-out infinite;
+  }
+  
+  @keyframes chevron-lock {
+    0%, 80% { opacity: 1 }
+    85% { opacity: 0.3 }
+    90%, 100% { opacity: 1 }
+  }
+}
+
+/* ============================================
+   Theme Selector Styles
+   ============================================ */
+.theme-selector-container {
+  position: relative;
+  margin-left: 1rem;
+}
+
+.theme-selector {
+  padding: .5rem; 
+  border-radius: 8px; 
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+  color: var(--text); 
+  cursor: pointer; 
+  display: inline-flex; 
+  align-items: center;
+  gap: 0.3rem;
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.theme-selector:hover {
+  transform: translateY(-1px); 
+  border-color: rgba(0,234,255,.4);
+}
+
+.theme-selector-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================
+   Reduced Motion Support
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] * ,
+  :root[data-theme] *::before,
+  :root[data-theme] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  :root[data-theme] .grid {
+    animation: none !important;
+  }
+  
+  :root[data-theme] .stars {
+    animation: none !important;
+  }
+  
+  :root[data-theme] .warp-core .ring {
+    animation: none !important;
+  }
+  
+  :root[data-theme] .core-glow {
+    animation: none !important;
+  }
+  
+  :root[data-theme] .scanline {
+    animation: none !important;
+  }
+  
+  :root[data-theme] .preloader-label {
+    animation: none !important;
+  }
+}
