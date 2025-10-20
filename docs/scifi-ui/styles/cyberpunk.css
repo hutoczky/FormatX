@@ -1,0 +1,53 @@
+/* Cyberpunk 2077 — Neon glitch (neon színek, glitch anim, OCR-A jellegű betű) */
+:root{
+  --bg:#0b0b12; --text:#e9ecff; --neon:#00fff5; --magenta:#ff00b8; --yellow:#ffea00;
+  --border: rgba(0,255,245,.28)
+}
+html,body{
+  background: var(--bg); color: var(--text);
+  font-family: "OCR A", "OCR A Std", "Audiowide", "Exo 2", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+a{ color: var(--neon) }
+/* Neon top bar */
+nav{
+  background: linear-gradient(90deg, rgba(255,0,184,.18), rgba(0,255,245,.18));
+  border-bottom: 1px solid var(--border)
+}
+/* Gombok */
+nav button, .panel .btn{
+  appearance:none; border:1px solid var(--border); border-radius: 10px; padding:.55rem .9rem;
+  background:
+    radial-gradient(120px 40px at 20% 0%, rgba(0,255,245,.22), transparent 60%),
+    linear-gradient(180deg, rgba(255,0,184,.18), rgba(0,255,245,.18)),
+    linear-gradient(180deg, rgba(10,12,24,.9), rgba(10,12,24,.5));
+  color: var(--text); text-shadow: 0 0 10px rgba(0,255,245,.55);
+  text-decoration:none; display:inline-block
+}
+.features .box{
+  background: rgba(10,12,24,.55); border: 1px dashed var(--border); border-radius: 12px;
+  box-shadow: 0 0 18px rgba(255,0,184,.18) inset
+}
+/* Glitch cím effekt biztonságos módon */
+h1{
+  position: relative; text-shadow:
+    0 0 10px rgba(0,255,245,.4),
+    0 0 20px rgba(255,0,184,.3);
+}
+@media (prefers-reduced-motion: no-preference){
+  h1::after, h1::before{
+    content: attr(data-glitch);
+    position:absolute; left:0; top:0; width:100%; overflow:hidden; pointer-events:none;
+    clip-path: inset(0 0 0 0)
+  }
+  h1::before{ color: var(--magenta); transform: translate(1px, 0) }
+  h1::after { color: var(--neon); transform: translate(-1px, 0) }
+  @keyframes glitchShift{
+    0%{ transform: translate(0,0) }
+    20%{ transform: translate(1px, -1px) }
+    40%{ transform: translate(-1px, 1px) }
+    60%{ transform: translate(1px, 1px) }
+    80%{ transform: translate(-1px, -1px) }
+    100%{ transform: translate(0,0) }
+  }
+  h1{ animation: glitchShift 3.6s ease-in-out infinite }
+}
