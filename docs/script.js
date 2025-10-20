@@ -434,7 +434,7 @@ document.head.appendChild(style);
     push(title, text, href, 'download');
   });
 
-  document.querySelectorAll('#docs .docs-card').forEach a => {
+  document.querySelectorAll('#docs .docs-card').forEach((a) => {
     const title = a.querySelector('h3')?.textContent?.trim() || 'Dokumentum';
     const text = a.querySelector('p')?.textContent?.trim() || '';
     const href = a.getAttribute('href') || '#docs';
