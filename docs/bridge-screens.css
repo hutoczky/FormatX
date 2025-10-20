@@ -174,3 +174,8 @@
   }
   .screen.schematic { position: absolute; right: 12px; top: 12px; width: 42%; }
 }
+
+/* Extra breathing room under LCARS strip */
+@media (min-width: 860px){
+  .bridge-screens{ padding-top: 26px; }
+}
