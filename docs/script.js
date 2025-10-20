@@ -316,3 +316,445 @@ document.head.appendChild(style);
     }
   });
 })();
+
+// Deep Search (Mélykutatás) - In-page search with no HTML template changes
+(function initDeepSearch() {
+  // Inject search UI container
+  const searchContainer = document.createElement('div');
+  searchContainer.id = 'deep-search';
+  searchContainer.className = 'deep-search-container';
+  searchContainer.setAttribute('role', 'search');
+  searchContainer.setAttribute('aria-label', 'Oldalon belüli keresés');
+  searchContainer.style.cssText = `
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    background: linear-gradient(135deg, rgba(0, 10, 30, 0.98), rgba(10, 20, 50, 0.98));
+    border: 2px solid #00eaff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 450px;
+    max-width: 90vw;
+    box-shadow: 0 8px 32px rgba(0, 234, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Exo', sans-serif;
+  `;
+
+  searchContainer.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="flex: 1; position: relative;">
+        <input 
+          type="text" 
+          id="deep-search-input" 
+          placeholder="Keresés az oldalon... (Ctrl+K)"
+          aria-label="Keresési kifejezés"
+          style="
+            width: 100%;
+            padding: 10px 40px 10px 12px;
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid #00eaff;
+            border-radius: 6px;
+            color: #00eaff;
+            font-size: 15px;
+            font-family: 'Exo', sans-serif;
+            outline: none;
+            transition: all 0.2s;
+          "
+        />
+        <button 
+          id="deep-search-clear"
+          aria-label="Keresés törlése"
+          style="
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #00eaff;
+            cursor: pointer;
+            padding: 4px;
+            display: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+          "
+        >✕</button>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <span 
+          id="deep-search-counter" 
+          style="
+            color: #b0ffea;
+            font-size: 13px;
+            min-width: 60px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+          "
+          aria-live="polite"
+          aria-atomic="true"
+        ></span>
+        <button 
+          id="deep-search-prev" 
+          aria-label="Előző találat"
+          disabled
+          style="
+            background: rgba(0, 234, 255, 0.1);
+            border: 1px solid #00eaff;
+            border-radius: 4px;
+            color: #00eaff;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            opacity: 0.5;
+          "
+        >↑</button>
+        <button 
+          id="deep-search-next" 
+          aria-label="Következő találat"
+          disabled
+          style="
+            background: rgba(0, 234, 255, 0.1);
+            border: 1px solid #00eaff;
+            border-radius: 4px;
+            color: #00eaff;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            opacity: 0.5;
+          "
+        >↓</button>
+        <button 
+          id="deep-search-close" 
+          aria-label="Keresés bezárása"
+          style="
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            border-radius: 4px;
+            color: #ff6b6b;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+          "
+        >✕</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(searchContainer);
+
+  // Inject styles for highlights
+  const highlightStyle = document.createElement('style');
+  highlightStyle.textContent = `
+    .deep-search-highlight {
+      background-color: rgba(255, 255, 0, 0.4);
+      color: inherit;
+      padding: 2px 0;
+      border-radius: 2px;
+      transition: background-color 0.2s;
+    }
+    .deep-search-highlight.active {
+      background-color: rgba(255, 165, 0, 0.6);
+      box-shadow: 0 0 8px rgba(255, 165, 0, 0.8);
+    }
+    #deep-search-input:focus {
+      border-color: #7c4dff;
+      box-shadow: 0 0 0 2px rgba(124, 77, 255, 0.2);
+    }
+    #deep-search-prev:not(:disabled):hover,
+    #deep-search-next:not(:disabled):hover {
+      background: rgba(0, 234, 255, 0.2);
+      transform: scale(1.05);
+    }
+    #deep-search-prev:not(:disabled),
+    #deep-search-next:not(:disabled) {
+      opacity: 1;
+      cursor: pointer;
+    }
+    #deep-search-close:hover {
+      background: rgba(255, 107, 107, 0.3);
+      transform: scale(1.05);
+    }
+    #deep-search-clear:hover {
+      opacity: 1;
+    }
+    .deep-search-container.active {
+      top: 20px;
+    }
+  `;
+  document.head.appendChild(highlightStyle);
+
+  // Search state
+  let searchTerm = '';
+  let matches = [];
+  let currentMatchIndex = -1;
+  let isSearchActive = false;
+
+  // Get references to UI elements
+  const searchInput = document.getElementById('deep-search-input');
+  const searchCounter = document.getElementById('deep-search-counter');
+  const prevBtn = document.getElementById('deep-search-prev');
+  const nextBtn = document.getElementById('deep-search-next');
+  const closeBtn = document.getElementById('deep-search-close');
+  const clearBtn = document.getElementById('deep-search-clear');
+
+  // Elements to exclude from search
+  const excludeSelectors = [
+    'script',
+    'style',
+    'noscript',
+    '#preloader',
+    '#deep-search',
+    '.lightbox',
+    'svg'
+  ];
+
+  // Get all text nodes in the document
+  function getTextNodes(element) {
+    const textNodes = [];
+    const walker = document.createTreeWalker(
+      element,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: function(node) {
+          // Skip empty or whitespace-only nodes
+          if (!node.nodeValue.trim()) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          // Skip excluded elements
+          let parent = node.parentElement;
+          while (parent) {
+            if (excludeSelectors.some(selector => parent.matches?.(selector))) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            parent = parent.parentElement;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+
+    while (walker.nextNode()) {
+      textNodes.push(walker.currentNode);
+    }
+    return textNodes;
+  }
+
+  // Clear all highlights
+  function clearHighlights() {
+    const highlights = document.querySelectorAll('.deep-search-highlight');
+    highlights.forEach(highlight => {
+      const parent = highlight.parentNode;
+      parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+      parent.normalize(); // Merge adjacent text nodes
+    });
+    matches = [];
+    currentMatchIndex = -1;
+  }
+
+  // Highlight all matches
+  function highlightMatches(term) {
+    if (!term || term.length < 2) {
+      clearHighlights();
+      updateUI();
+      return;
+    }
+
+    clearHighlights();
+    matches = [];
+
+    const textNodes = getTextNodes(document.body);
+    const searchRegex = new RegExp(escapeRegex(term), 'gi');
+
+    textNodes.forEach(node => {
+      const text = node.nodeValue;
+      const matches_in_node = [];
+      let match;
+
+      while ((match = searchRegex.exec(text)) !== null) {
+        matches_in_node.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          text: match[0]
+        });
+      }
+
+      if (matches_in_node.length > 0) {
+        const fragment = document.createDocumentFragment();
+        let lastIndex = 0;
+
+        matches_in_node.forEach(m => {
+          // Add text before match
+          if (m.start > lastIndex) {
+            fragment.appendChild(document.createTextNode(text.substring(lastIndex, m.start)));
+          }
+
+          // Add highlighted match
+          const highlight = document.createElement('mark');
+          highlight.className = 'deep-search-highlight';
+          highlight.textContent = text.substring(m.start, m.end);
+          fragment.appendChild(highlight);
+          matches.push(highlight);
+
+          lastIndex = m.end;
+        });
+
+        // Add remaining text
+        if (lastIndex < text.length) {
+          fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+        }
+
+        node.parentNode.replaceChild(fragment, node);
+      }
+    });
+
+    if (matches.length > 0) {
+      currentMatchIndex = 0;
+      scrollToMatch(0);
+    }
+
+    updateUI();
+  }
+
+  // Escape special regex characters
+  function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // Scroll to specific match
+  function scrollToMatch(index) {
+    if (index < 0 || index >= matches.length) return;
+
+    // Remove active class from all matches
+    matches.forEach(m => m.classList.remove('active'));
+
+    // Add active class to current match
+    const match = matches[index];
+    match.classList.add('active');
+
+    // Scroll to match with offset for fixed header
+    const rect = match.getBoundingClientRect();
+    const offset = 100; // Account for header
+    
+    if (rect.top < offset || rect.bottom > window.innerHeight) {
+      match.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    currentMatchIndex = index;
+    updateUI();
+  }
+
+  // Update UI state
+  function updateUI() {
+    if (matches.length > 0) {
+      searchCounter.textContent = `${currentMatchIndex + 1} / ${matches.length}`;
+      searchCounter.style.opacity = '1';
+      prevBtn.disabled = false;
+      nextBtn.disabled = false;
+    } else if (searchTerm.length >= 2) {
+      searchCounter.textContent = 'Nincs találat';
+      searchCounter.style.opacity = '1';
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+    } else {
+      searchCounter.textContent = '';
+      searchCounter.style.opacity = '0';
+      prevBtn.disabled = true;
+      nextBtn.disabled = true;
+    }
+
+    clearBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
+  }
+
+  // Show search UI
+  function showSearch() {
+    isSearchActive = true;
+    searchContainer.classList.add('active');
+    searchInput.focus();
+    searchInput.select();
+  }
+
+  // Hide search UI
+  function hideSearch() {
+    isSearchActive = false;
+    searchContainer.classList.remove('active');
+    clearHighlights();
+    searchInput.value = '';
+    searchTerm = '';
+    updateUI();
+  }
+
+  // Event listeners
+  searchInput.addEventListener('input', (e) => {
+    searchTerm = e.target.value;
+    highlightMatches(searchTerm);
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        goToPrevious();
+      } else {
+        goToNext();
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      hideSearch();
+    }
+  });
+
+  prevBtn.addEventListener('click', goToPrevious);
+  nextBtn.addEventListener('click', goToNext);
+  closeBtn.addEventListener('click', hideSearch);
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchTerm = '';
+    highlightMatches('');
+    searchInput.focus();
+  });
+
+  function goToNext() {
+    if (matches.length === 0) return;
+    const nextIndex = (currentMatchIndex + 1) % matches.length;
+    scrollToMatch(nextIndex);
+  }
+
+  function goToPrevious() {
+    if (matches.length === 0) return;
+    const prevIndex = currentMatchIndex - 1 < 0 ? matches.length - 1 : currentMatchIndex - 1;
+    scrollToMatch(prevIndex);
+  }
+
+  // Global keyboard shortcut (Ctrl+K or Ctrl+F)
+  document.addEventListener('keydown', (e) => {
+    // Don't trigger if user is typing in an input/textarea (except our search)
+    const isInputFocused = document.activeElement.tagName === 'INPUT' || 
+                          document.activeElement.tagName === 'TEXTAREA';
+    
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      if (isSearchActive) {
+        hideSearch();
+      } else {
+        showSearch();
+      }
+    } else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      // Only override browser's Ctrl+F if our search is already active
+      if (isSearchActive) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
+  });
+
+  // Initialize UI state
+  updateUI();
+})();
