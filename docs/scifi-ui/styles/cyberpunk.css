@@ -1,0 +1,17 @@
+/* Cyberpunk 2077 — Neon Glitch */
+:root{ --bg:#0b0b12; --text:#e9ecff; --neon:#00fff5; --magenta:#ff00b8; --yellow:#ffea00; --border: rgba(0,255,245,.28) }
+html,body{ background: var(--bg); color: var(--text); font-family: "Audiowide", "Exo 2", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif }
+nav{ background: linear-gradient(90deg, rgba(255,0,184,.18), rgba(0,255,245,.18)); border-bottom: 1px solid var(--border) }
+nav button{ appearance:none; border:1px solid var(--border); border-radius: 10px; padding:.55rem .9rem; background:
+  radial-gradient(120px 40px at 20% 0%, rgba(0,255,245,.22), transparent 60%),
+  linear-gradient(180deg, rgba(255,0,184,.18), rgba(0,255,245,.18)),
+  linear-gradient(180deg, rgba(10,12,24,.9), rgba(10,12,24,.5));
+  color: var(--text); text-shadow: 0 0 10px rgba(0,255,245,.55)
+}
+main .panel button{ appearance:none; border:1px solid var(--border); border-radius: 10px; padding:.55rem .9rem; background: rgba(10,12,24,.55); color: var(--text) }
+.features .box{ background: rgba(10,12,24,.55); border: 1px dashed var(--border); border-radius: 12px; box-shadow: 0 0 18px rgba(255,0,184,.18) inset }
+/* glitch pulse */
+@media (prefers-reduced-motion: no-preference){
+  nav{ animation: glow 3.8s ease-in-out infinite }
+  @keyframes glow{ 0%,100%{ filter: hue-rotate(0deg) } 50%{ filter: hue-rotate(15deg) } }
+}

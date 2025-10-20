@@ -1,0 +1,11 @@
+/* Star Wars — Holographic HUD */
+:root{ --bg:#05070c; --text:#e6fbff; --holo:#60e5ff; --holo2:#94f6ff; --amber:#ffc766; --grid: rgba(96,229,255,.14); --border: rgba(96,229,255,.25) }
+html,body{ background: var(--bg); color: var(--text); font-family: "Aurebesh", "Share Tech Mono", "Orbitron", ui-monospace, monospace }
+nav{ background: rgba(5,10,18,.55); border-bottom: 1px solid var(--border); box-shadow: 0 0 20px rgba(96,229,255,.10) inset }
+nav .wrap{ position: relative }
+nav .wrap::after{ content:""; position:absolute; inset:0; background:
+  linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px,
+  linear-gradient(to bottom, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px; opacity:.5; pointer-events:none }
+nav button{ appearance:none; border:1px solid var(--border); border-radius: 8px; padding:.55rem .9rem; background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25)); color: var(--holo2); text-shadow: 0 0 8px rgba(96,229,255,.6) }
+main .panel button{ appearance:none; border:1px solid var(--border); border-radius: 8px; padding:.55rem .9rem; background: rgba(10,20,28,.35); color: var(--holo); text-shadow: 0 0 8px rgba(96,229,255,.6) }
+.features .box{ background: rgba(8,12,20,.36); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 0 24px rgba(96,229,255,.12) inset }
