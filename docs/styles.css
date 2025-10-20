@@ -11,19 +11,7 @@
   --shadow: 0 10px 30px rgba(0,0,0,.4);
 }
 
-/* Light theme */
-:root[data-theme="light"]{
-  --bg: #e8f2ff;
-  --text: #1a2841;
-  --muted: #4a5f7f;
-  --primary: #0099cc;
-  --primary-2:#5a3fbf;
-  --accent: #00b38f;
-  --glass: rgba(255,255,255,0.7);
-  --glass-strong: rgba(255,255,255,0.9);
-  --border: rgba(0,100,160,0.2);
-  --shadow: 0 10px 30px rgba(0,0,0,.1);
-}
+/* Theme-specific styles are now in themes.css */
 
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
@@ -64,18 +52,7 @@ body{
 .nav a{ color:var(--muted); margin-left:1rem; text-decoration:none; transition:.2s color }
 .nav a:hover{ color:var(--primary) }
 
-/* Theme toggle button */
-.theme-toggle{
-  margin-left: 1rem; padding: .5rem; border-radius: 8px; border: 1px solid var(--border);
-  background: linear-gradient(180deg, var(--glass-strong), var(--glass));
-  color: var(--text); cursor: pointer; display: inline-flex; align-items: center;
-  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
-}
-.theme-toggle:hover{ transform: translateY(-1px); border-color: rgba(0,234,255,.4) }
-.theme-toggle .icon-sun{ display: none }
-.theme-toggle .icon-moon{ display: block }
-:root[data-theme="light"] .theme-toggle .icon-sun{ display: block }
-:root[data-theme="light"] .theme-toggle .icon-moon{ display: none }
+/* Theme selector styles are now in themes.css */
 
 .btn{
   display:inline-flex; align-items:center; justify-content:center;

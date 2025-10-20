@@ -44,33 +44,8 @@ window.handleImageError = function(img) {
   img.src = 'data:image/svg+xml;base64,' + btoa(svg);
 };
 
-// Theme Toggle
-(function initTheme(){
-  const themeToggle = document.getElementById("theme-toggle");
-  if (!themeToggle) return;
-
-  // Get initial theme from localStorage or system preference
-  const getInitialTheme = () => {
-    const stored = localStorage.getItem("fx-theme");
-    if (stored) return stored;
-    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-  };
-
-  const setTheme = (theme) => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("fx-theme", theme);
-    themeToggle.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
-  };
-
-  // Apply initial theme
-  setTheme(getInitialTheme());
-
-  // Toggle on click
-  themeToggle.addEventListener("click", () => {
-    const current = document.documentElement.getAttribute("data-theme") || "dark";
-    setTheme(current === "dark" ? "light" : "dark");
-  });
-})();
+// Theme handling is now done by theme-loader.js
+// The multi-theme selector replaces the old light/dark toggle
 
 // Betöltő elrejtése, kis késleltetéssel a hatás kedvéért
 window.addEventListener("load", () => {
