@@ -14,6 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..800&family=Exo:wght@300;400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./lcars-ui.css" />
     <link rel="stylesheet" href="./bridge-screens.css" />
   </head>
   <body>
@@ -151,6 +152,13 @@
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
           </button>
+          <div class="comms-dock" aria-label="Kommunikációs kijelző">
+            <span class="tag">COMMS</span>
+            <svg class="mini-scope" viewBox="0 0 120 24" preserveAspectRatio="none" aria-hidden="true">
+              <path class="trace" d="M0 12 C 10 4, 20 20, 30 12 S 50 4, 60 12 S 80 20, 90 12 S 110 4, 120 12" />
+            </svg>
+            <span class="status ok">ONLINE</span>
+          </div>
         </nav>
       </div>
     </header>
@@ -274,7 +282,7 @@
       <section id="download" class="download reveal">
         <div class="wrap">
           <h2 class="section-title">Letöltés</h2>
-          <p class="demo-desc">Töltsd le a FormatX legújabb verzióját</p>
+        <p class="demo-desc">Töltsd le a FormatX legújabb verzióját</p>
           <div class="download-grid">
             <a href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/FormatX_Installer_v1015.exe" class="download-card" download>
               <svg class="download-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -339,8 +347,8 @@
           <h2 class="section-title">Készen állsz?</h2>
           <p>Csatlakozz a küldetéshez. Töltsd le, és indítsd be a hajtóműveket.</p>
           <div class="cta-row">
-            <a class="btn primary" href="#" aria-disabled="true">Letöltés (hamarosan)</a>
-            <a class="btn ghost" href="#" aria-disabled="true">Dokumentáció (hamarosan)</a>
+            <a href="#" class="btn primary" aria-disabled="true">Letöltés (hamarosan)</a>
+            <a href="#" class="btn ghost" aria-disabled="true">Dokumentáció (hamarosan)</a>
           </div>
         </div>
       </section>
