@@ -1,5 +1,5 @@
 /* Star Trek — LCARS: fekete háttér, narancs–lila sávok, lekerekített panelek, Eurostile hangulat.
-   Animált rail + csillagköd háttér, LCARS boot sávok. */
+   Animált rail + csillagköd, LCARS boot sávok, folyamatos telemetria a háttérben. */
 :root{
   --bg:#0b0f18; --text:#eaf3ff; --muted:#b9cde3;
   --rail:#F7BFA4; --rail2:#E08AA3; --accent:#7EC8FF; --amber:#FFCE66;
@@ -19,7 +19,7 @@ body::before{
     radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.18), transparent 50%);
   animation: nebula-drift 40s linear infinite;
 }
-@keyframes nebula-drift{ 0%{transform:translate3d(0,0,0)} 50%{transform:translate3d(-1.5rem,.8rem,0)} 100%{transform:translate3d(0,0,0)} }
+@keyframes nebula-drift{ 0%{transform:translate3d(0,0,0)} 50%{transform:translate3d(-1.2rem,.6rem,0)} 100%{transform:translate3d(0,0,0)} }
 
 /* Képernyő “chrome” — LCARS felső sínek */
 .chrome::before, .chrome::after{
@@ -27,9 +27,7 @@ body::before{
   background: var(--rail); box-shadow: inset 0 -2px 6px rgba(0,0,0,.25);
   animation: rail-flow 5.5s ease-in-out infinite;
 }
-.chrome::after{
-  height:4px; margin-top:26px; background: var(--rail2); border-radius: 2px; opacity:.95; animation:none
-}
+.chrome::after{ height:4px; margin-top:26px; background: var(--rail2); border-radius: 2px; opacity:.95; animation:none }
 @keyframes rail-flow{ 0%,100%{ filter:hue-rotate(0deg) brightness(1) } 50%{ filter:hue-rotate(-10deg) brightness(1.1) } }
 
 nav{ backdrop-filter: blur(6px); background: linear-gradient(180deg, rgba(10,14,24,.72), rgba(10,14,24,.38)); border-bottom:0 }
@@ -39,6 +37,26 @@ nav button, .panel .btn, .quick-links a, .download-card{
 .download-card small{ color:#051018 }
 .mirror{ color:var(--accent) }
 .features .box{ background: var(--panel); border:1px solid var(--border); border-radius:12px; box-shadow: inset 0 10px 30px rgba(0,0,0,.18), 0 0 0 1px rgba(247,191,164,.05) }
+
+/* Folyamatos “process” telemetria a háttérben */
+.telemetry{
+  background:
+    repeating-linear-gradient(0deg, rgba(247,191,164,.05) 0 2px, transparent 2px 22px),
+    repeating-linear-gradient(90deg, rgba(224,138,163,.03) 0 6px, transparent 6px 30px);
+  animation: lcars-process-x 8s linear infinite;
+}
+@keyframes lcars-process-x{
+  0%{ background-position: 0 0, 0 0 }
+  100%{ background-position: 240px 0, 0 0 }
+}
+/* Jobb oldali adatcsatornák (sikló sávok) */
+.telemetry::after{
+  content:""; position:fixed; right:8px; top:8%; width:260px; height:84%;
+  border-radius:16px; background: linear-gradient(180deg, rgba(126,200,255,.10), rgba(224,138,163,.06));
+  box-shadow: inset 0 0 0 1px rgba(126,200,255,.12); mix-blend-mode: screen; opacity:.45;
+  animation: lcars-stream 6.5s ease-in-out infinite;
+}
+@keyframes lcars-stream{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-18px) } }
 
 /* Loader — LCARS boot sávok */
 #loader{ background: linear-gradient(180deg, rgba(5,8,14,.86), rgba(5,8,14,.65)); backdrop-filter: blur(6px) }
