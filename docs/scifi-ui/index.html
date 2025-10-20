@@ -2,34 +2,57 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8">
-  <title>Sci-Fi UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sci‑Fi UI</title>
+  <meta name="description" content="Moduláris sci‑fi UI: Star Trek LCARS, Star Wars holografikus HUD, Cyberpunk 2077 neon‑glitch. Témaváltó gombokkal, animált hátterekkel és boot effektekkel.">
   <link id="theme-stylesheet" rel="stylesheet" href="styles/lcars.css">
   <script src="scripts/theme-switcher.js" defer></script>
 </head>
 <body>
-  <nav>
-    <button onclick="switchTheme('lcars')">STAR TREK</button>
-    <button onclick="switchTheme('starwars')">STAR WARS</button>
-    <button onclick="switchTheme('cyberpunk')">CYBERPUNK</button>
+  <!-- Betöltési overlay; a téma CSS-e adja meg a megjelenést -->
+  <div id="loader" aria-hidden="true">
+    <div class="loader-content" role="status" aria-live="polite" aria-label="Betöltés…">
+      <div class="loader-visual"><span></span><span></span><span></span><span></span></div>
+      <div class="loader-text">Betöltés…</div>
+    </div>
+  </div>
+
+  <nav aria-label="Téma váltása">
+    <div class="wrap">
+      <button type="button" data-theme="lcars">STAR TREK</button>
+      <button type="button" data-theme="starwars">STAR WARS</button>
+      <button type="button" data-theme="cyberpunk">CYBERPUNK</button>
+    </div>
   </nav>
-  <main>
-    <h1>Formázás a jövőből</h1>
+
+  <main class="wrap">
+    <h1 data-glitch="Formázás a jövőből">Formázás a jövőből</h1>
     <p>Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
-    <div class="panel">
+
+    <!-- Megtartott főoldal-hivatkozások -->
+    <p class="quick-links">
       <a href="../#download">LETÖLTÉS</a>
       <a href="../#features">FUNKCIÓK</a>
       <a href="../#docs">DOKUMENTUMOK</a>
-    </div>
-    <section class="features">
+    </p>
+
+    <section class="features" aria-label="Funkciók">
       <div class="box">Villámgyors</div>
       <div class="box">Bővíthető</div>
       <div class="box">Web UI</div>
       <div class="box">Nyílt forrás</div>
     </section>
   </main>
+
   <footer>
-    <p>© 2023 Sci-Fi UI</p>
-    <a href="#">Vissza a tetejére</a>
+    <div class="wrap footer-row">
+      <div>© <span id="year"></span> Sci‑Fi UI</div>
+      <div><a href="#">Vissza a tetejére</a></div>
+    </div>
   </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear().toString();
+  </script>
 </body>
 </html>

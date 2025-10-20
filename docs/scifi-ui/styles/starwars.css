@@ -1,32 +1,32 @@
-/* Star Wars — Holografikus HUD (sötét háttér, kék holo, Aurebesh jellegű betű) */
-:root{
-  --bg:#05070c; --text:#e6fbff; --holo:#60e5ff; --holo2:#94f6ff;
-  --grid: rgba(96,229,255,.14); --border: rgba(96,229,255,.25)
+/* Star Wars — Holografikus HUD ihletés: sötét mélyűr, kék holo, rácsvonalak, Aurebesh‑szerű tipó
+   Többrétegű csillagmező + scanline overlay, hologram-aktiválás a betöltőn. */
+:root{ --bg:#05070c; --text:#e6fbff; --holo:#60e5ff; --holo2:#94f6ff; --grid: rgba(96,229,255,.14); --border: rgba(96,229,255,.25); --panel: rgba(8,12,20,.36) }
+*{ box-sizing:border-box } html,body{ height:100% }
+body{ margin:0; background: var(--bg); color: var(--text); font-family: "Aurebesh","Share Tech Mono","Orbitron",ui-monospace,monospace; position:relative; overflow-x:hidden }
+/* Csillagmező + scanlines */
+body::before,body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:-2 }
+body::before{ background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.6), transparent 50%), radial-gradient(2px 2px at 35% 55%, rgba(255,255,255,.35), transparent 50%); animation: stars-move 70s linear infinite; opacity:.8 }
+body::after{ background: repeating-linear-gradient(0deg, rgba(96,229,255,.08) 0 1px, transparent 1px 4px); mix-blend-mode: screen; opacity:.16; animation: scanlines 6s linear infinite }
+@keyframes stars-move{ 0%{ transform:translateY(0) } 100%{ transform:translateY(-1200px) }
+@keyframes scanlines{ 0%{ transform:translateY(0) } 100%{ transform:translateY(-3px) }
 }
-html,body{
-  background: var(--bg); color: var(--text);
-  font-family: "Aurebesh", "Share Tech Mono", "Orbitron", ui-monospace, monospace;
-}
-a{ color: var(--holo2) }
-nav{
-  background: rgba(5,10,18,.55); border-bottom: 1px solid var(--border);
-  box-shadow: 0 0 20px rgba(96,229,255,.10) inset
-}
-nav .wrap{ position: relative }
-nav .wrap::after{
-  content:""; position:absolute; inset:0; background:
-    linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px,
-    linear-gradient(to bottom, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px;
-  opacity:.5; pointer-events:none
-}
-/* Nav és CTA */
-nav button, .panel .btn{
-  appearance:none; border:1px solid var(--border); border-radius: 8px; padding:.55rem .9rem;
-  background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25));
-  color: var(--holo2); text-shadow: 0 0 8px rgba(96,229,255,.6);
-  text-decoration:none; display:inline-block
-}
-.features .box{
-  background: rgba(8,12,20,.36); border: 1px solid var(--border); border-radius: 12px;
-  box-shadow: 0 0 24px rgba(96,229,255,.12) inset
-}
+
+.wrap{ width:min(1100px,94%); margin-inline:auto }
+nav{ position:sticky; top:0; z-index:10; background: rgba(5,10,18,.55); border-bottom:1px solid var(--border); backdrop-filter: blur(6px); box-shadow: 0 0 20px rgba(96,229,255,.10) inset }
+nav .wrap{ display:flex; gap:.6rem; align-items:center; padding:.6rem 0; flex-wrap:wrap; position:relative }
+nav .wrap::after{ content:""; position:absolute; inset:0; pointer-events:none; opacity:.5; background: linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px, linear-gradient(to bottom, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px }
+nav button,.panel .btn{ appearance:none; border:1px solid var(--border); border-radius:8px; padding:.6rem .95rem; background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25)); color: var(--holo2); text-shadow: 0 0 8px rgba(96,229,255,.6); text-decoration:none; display:inline-block }
+main.wrap{ padding:1rem 0 2rem }
+.features{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.9rem }
+.features .box{ background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 0 24px rgba(96,229,255,.12) inset; padding:1rem; text-align:center }
+footer{ border-top:1px solid var(--border); margin-top:2rem }
+.footer-row{ display:flex; align-items:center; justify-content:space-between; padding:.9rem 0 }
+
+/* Hologram-aktiválás loader */
+#loader{ position:fixed; inset:0; background: radial-gradient(60% 80% at 50% 50%, rgba(6,12,20,.9), rgba(6,12,20,.6)); backdrop-filter: blur(6px); opacity:0; pointer-events:none; transition: opacity .35s ease; display:flex; align-items:center; justify-content:center; z-index:9999 }
+#loader.show{ opacity:1; pointer-events:auto }
+#loader .loader-content{ text-align:center; color:var(--holo2) }
+#loader .loader-visual{ width:160px; height:160px; border-radius:50%; background: conic-gradient(from 0deg, rgba(96,229,255,.0), rgba(96,229,255,.6) 30%, rgba(96,229,255,.0) 60%), radial-gradient(closest-side, rgba(6,12,20,1) 68%, transparent 70%), radial-gradient(closest-side, rgba(96,229,255,.25) 0, transparent 70%); box-shadow: 0 0 24px rgba(96,229,255,.3), 0 0 120px rgba(96,229,255,.15) inset; animation: holo-spin 2.4s linear infinite; margin:0 auto .8rem }
+#loader .loader-visual span{ display:none }
+@keyframes holo-spin{ 0%{ transform: rotate(0deg) } 100%{ transform: rotate(360deg) } }
+.quick-links a{ color: var(--holo2); text-decoration:none } .quick-links a:hover{ text-decoration:underline }

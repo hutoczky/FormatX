@@ -1,33 +1,62 @@
-/* Star Trek — LCARS (fekete háttér, narancs–lila panelek, lekerekített gombok, Eurostile jellegű betű) */
+/* Star Trek — LCARS ihletés: fekete háttér, narancs–lila panelek, lekerekített panelek, Eurostile‑szerű tipó
+   Animált LCARS „rail” és csillagköd, boot sávok a betöltő overlayen. */
 :root{
   --bg:#0b0f18; --text:#eaf3ff; --muted:#b9cde3;
-  --rail:#f7bfa4; --rail2:#e08aa3; --accent:#7ec8ff; --amber:#ffce66;
-  --border: rgba(126,200,255,.22)
+  --rail:#F7BFA4; --rail2:#E08AA3; --accent:#7EC8FF; --amber:#FFCE66;
+  --border: rgba(126,200,255,.22); --panel: rgba(10,14,24,.55)
 }
-html,body{
-  background: var(--bg); color: var(--text);
-  font-family: "Eurostile", "Orbitron", "Exo 2", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+*{ box-sizing:border-box }
+html,body{ height:100% }
+body{
+  margin:0; background: var(--bg); color: var(--text);
+  font-family: "Eurostile","Orbitron","Exo 2",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  position:relative; overflow-x:hidden;
 }
-a{ color: inherit }
-nav{ background: transparent; border-bottom: 0 }
-nav .wrap{ position: relative }
+/* LCARS köd + csillagok */
+body::before{
+  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(1100px 520px at 8% -8%, rgba(224,138,163,.16), transparent 60%),
+    radial-gradient(900px 460px at 115% 15%, rgba(247,191,164,.12), transparent 60%),
+    radial-gradient(700px 360px at 50% 120%, rgba(126,200,255,.10), transparent 60%),
+    radial-gradient(2px 2px at 20% 40%, rgba(255,255,255,.35), transparent 50%),
+    radial-gradient(2px 2px at 60% 70%, rgba(255,255,255,.28), transparent 50%),
+    radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.18), transparent 50%);
+  animation: nebula-drift 40s linear infinite;
+}
+@keyframes nebula-drift{ 0%{transform:translate3d(0,0,0)} 50%{transform:translate3d(-1.5rem,.8rem,0)} 100%{transform:translate3d(0,0,0)} }
+
+.wrap{ width:min(1100px,94%); margin-inline:auto }
+nav{
+  position:sticky; top:0; z-index:10; backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, rgba(10,14,24,.72), rgba(10,14,24,.38));
+}
+nav .wrap{ display:flex; gap:.6rem; align-items:center; padding:.6rem 0; flex-wrap:wrap; position:relative }
 nav::after{
-  content:""; display:block; height: 22px; background: var(--rail);
+  content:""; display:block; height:22px; background: var(--rail);
   border-radius: 12px; box-shadow: inset 0 -2px 6px rgba(0,0,0,.25);
+  animation: rail-flow 5.5s ease-in-out infinite;
 }
-nav .wrap::before{
-  content:""; position:absolute; left:0; right:0; height:4px; background: var(--rail2);
-  margin-top: 26px; border-radius: 2px
-}
-/* Nav/CTA gombok */
-nav button, .panel .btn{
-  appearance:none; border:0; border-radius: 18px; padding:.55rem .9rem;
-  font-weight:800; letter-spacing:.08em; text-transform:uppercase;
-  background: var(--accent); color:#051018;
-  box-shadow: 0 2px 8px rgba(126,200,255,.25); text-decoration:none; display:inline-block
-}
-nav button:hover, .panel .btn:hover{ transform: translateY(-1px) }
-.features .box{
-  background: rgba(6,12,24,.28); border: 1px solid var(--border); border-radius: 12px;
-  box-shadow: inset 0 10px 30px rgba(0,0,0,.18)
-}
+nav .wrap::before{ content:""; position:absolute; left:0; right:0; height:4px; background: var(--rail2); margin-top:26px; border-radius:2px }
+@keyframes rail-flow{ 0%,100%{ filter:hue-rotate(0deg) brightness(1) } 50%{ filter:hue-rotate(-10deg) brightness(1.1) } }
+
+nav button,.panel .btn{ appearance:none; border:0; border-radius:18px; padding:.6rem .95rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; background: var(--accent); color:#051018; box-shadow: 0 2px 8px rgba(126,200,255,.25); text-decoration:none; display:inline-block }
+nav button:hover,.panel .btn:hover{ transform: translateY(-1px) }
+main.wrap{ padding:1rem 0 2rem }
+.features{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.9rem }
+.features .box{ background: var(--panel); border:1px solid var(--border); border-radius:12px; box-shadow: inset 0 10px 30px rgba(0,0,0,.18), 0 0 0 1px rgba(247,191,164,.05); padding:1rem; text-align:center }
+footer{ border-top:1px solid var(--border); margin-top:2rem }
+.footer-row{ display:flex; align-items:center; justify-content:space-between; padding:.9rem 0 }
+
+/* LCARS boot loader */
+#loader{ position:fixed; inset:0; background:linear-gradient(180deg, rgba(5,8,14,.86), rgba(5,8,14,.65)); backdrop-filter: blur(6px); opacity:0; pointer-events:none; transition: opacity .35s ease; display:flex; align-items:center; justify-content:center; z-index:9999 }
+#loader.show{ opacity:1; pointer-events:auto }
+#loader .loader-content{ text-align:center; color:var(--muted) }
+#loader .loader-visual{ width:min(560px,86vw); margin:0 auto .8rem; display:grid; gap:.5rem }
+#loader .loader-visual span{ display:block; height:16px; border-radius:12px; background: linear-gradient(90deg, var(--rail), var(--rail2)); box-shadow: inset 0 -2px 6px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.06); animation: lcars-scan 1.6s ease-in-out infinite }
+#loader .loader-visual span:nth-child(2){ animation-delay:.2s } #loader .loader-visual span:nth-child(3){ animation-delay:.4s } #loader .loader-visual span:nth-child(4){ animation-delay:.6s }
+@keyframes lcars-scan{ 0%,100%{ filter:brightness(1) } 50%{ filter:brightness(1.25) } }
+
+/* Link sor finom hangolása a téma színvilágához */
+.quick-links a{ color: var(--accent); text-decoration:none }
+.quick-links a:hover{ text-decoration:underline }
