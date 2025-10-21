@@ -1,0 +1,250 @@
+/* Base CSS - Reset, Layout, Components (theme-independent) */
+
+/* CSS Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+input, button, textarea, select {
+  font: inherit;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+/* Layout utilities */
+.wrap {
+  width: min(1100px, 94%);
+  margin-inline: auto;
+}
+
+.screen {
+  position: relative;
+  min-height: 100dvh;
+}
+
+.screen .telemetry {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.screen .chrome {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Navigation */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+nav .wrap {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.6rem 0;
+  flex-wrap: wrap;
+}
+
+nav button {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+nav button:hover {
+  transform: translateY(-1px);
+}
+
+nav button:active {
+  transform: translateY(0);
+}
+
+/* Main content */
+main.wrap {
+  padding: 1.2rem 0 2.4rem;
+}
+
+.quick-links {
+  margin: 0.7rem 0 1.1rem;
+}
+
+.quick-links a {
+  margin-right: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.panel {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.btn {
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+/* Features grid */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+}
+
+.features .box {
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Downloads section */
+.downloads {
+  position: relative;
+}
+
+.downloads .download-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.4rem;
+  margin-top: 0.6rem;
+}
+
+.downloads .download-card {
+  display: block;
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.4;
+  padding: 1.15rem 1.3rem;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.downloads .download-card:hover {
+  transform: translateY(-2px);
+}
+
+.downloads .download-card strong {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+/* Footer */
+.footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 0;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Preloader overlay */
+#preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.35s ease;
+}
+
+#preloader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#preloader .preloader-content {
+  text-align: center;
+  max-width: min(600px, 90vw);
+}
+
+/* Background animation layers */
+.anim-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.anim-layer.active {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .wrap {
+    width: min(100%, 94%);
+  }
+  
+  .features {
+    grid-template-columns: 1fr;
+  }
+  
+  .downloads .download-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print styles */
+@media print {
+  nav, footer, #preloader, .telemetry, .chrome, .anim-layer {
+    display: none;
+  }
+  
+  .screen {
+    min-height: auto;
+  }
+}

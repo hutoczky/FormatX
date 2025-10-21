@@ -61,3 +61,22 @@ h1{ position:relative; text-shadow: 0 0 10px rgba(0,255,245,.4), 0 0 20px rgba(2
 #loader .loader-visual{ position:relative; width:min(640px,86vw); height:120px; border:1px solid var(--border); border-radius:14px; box-shadow: 0 0 24px rgba(0,255,245,.25), inset 0 0 24px rgba(255,0,184,.15); overflow:hidden }
 #loader .loader-visual::after{ content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; background: linear-gradient(90deg, rgba(255,0,184,.0), rgba(255,0,184,.22), rgba(0,255,245,.22), rgba(0,255,245,.0)); filter: blur(6px); animation: scan-move 1.6s linear infinite }
 @keyframes scan-move{ 0%{ left:-40% } 100%{ left:100% } }
+
+/* Download cards */
+.downloads .download-card {
+  border: 1px solid rgba(0,255,245,.28);
+  background: linear-gradient(180deg, rgba(10,12,18,.62), rgba(12,14,22,.48));
+  color: var(--text, #e9ecff);
+}
+.downloads .download-card strong {
+  color: var(--neon, #00fff5);
+}
+.downloads .download-card small {
+  color: rgba(255,255,255,.82);
+}
+.downloads .download-card:hover,
+.downloads .download-card:focus {
+  border-color: rgba(255,0,184,.9);
+  box-shadow: 0 10px 36px rgba(255,0,184,.06), 0 0 28px rgba(0,255,245,.06) inset;
+  outline: 2px solid rgba(255,0,184,.12);
+}

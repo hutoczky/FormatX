@@ -146,3 +146,18 @@ nav button:hover, .panel .btn:hover, .quick-links a:hover{ transform:translateY(
 @media (max-width: 600px){
   .content::before{ left:4%; right:4%; top:10%; bottom:16% }
 }
+
+/* Download cards */
+.downloads .download-card {
+  border: 1px solid rgba(96,229,255,.25);
+  background: linear-gradient(180deg, rgba(8,12,20,.62), rgba(8,12,20,.42));
+  color: #94f6ff;
+}
+.downloads .download-card small {
+  color: rgba(148,246,255,.86);
+}
+.downloads .download-card:hover,
+.downloads .download-card:focus {
+  border-color: #94f6ff;
+  box-shadow: 0 12px 28px rgba(96,229,255,.10), 0 0 18px rgba(96,229,255,.06) inset;
+}

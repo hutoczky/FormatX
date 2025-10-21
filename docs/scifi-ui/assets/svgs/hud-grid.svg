@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" aria-hidden="true">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(96,229,255,0.15)" stroke-width="0.5"/>
+    </pattern>
+    <linearGradient id="fade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(96,229,255,0.3);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgba(96,229,255,0.05);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Grid background -->
+  <rect width="1200" height="800" fill="url(#grid)" opacity="0.6"/>
+  
+  <!-- Corner reticles -->
+  <g stroke="rgba(96,229,255,0.4)" stroke-width="2" fill="none">
+    <!-- Top-left -->
+    <path d="M 50 50 L 80 50 M 50 50 L 50 80"/>
+    <circle cx="50" cy="50" r="8" opacity="0.5"/>
+    
+    <!-- Top-right -->
+    <path d="M 1150 50 L 1120 50 M 1150 50 L 1150 80"/>
+    <circle cx="1150" cy="50" r="8" opacity="0.5"/>
+    
+    <!-- Bottom-left -->
+    <path d="M 50 750 L 80 750 M 50 750 L 50 720"/>
+    <circle cx="50" cy="750" r="8" opacity="0.5"/>
+    
+    <!-- Bottom-right -->
+    <path d="M 1150 750 L 1120 750 M 1150 750 L 1150 720"/>
+    <circle cx="1150" cy="750" r="8" opacity="0.5"/>
+  </g>
+  
+  <!-- Scanning line (animated) -->
+  <line x1="0" y1="400" x2="1200" y2="400" stroke="url(#fade)" stroke-width="1" opacity="0.7">
+    <animate attributeName="y1" values="0;800;0" dur="8s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="0;800;0" dur="8s" repeatCount="indefinite"/>
+  </line>
+  
+  <!-- Crosshair center -->
+  <g stroke="rgba(96,229,255,0.3)" stroke-width="1" fill="none">
+    <circle cx="600" cy="400" r="30" opacity="0.4"/>
+    <circle cx="600" cy="400" r="45" opacity="0.3"/>
+    <path d="M 600 350 L 600 370 M 600 430 L 600 450 M 550 400 L 570 400 M 630 400 L 650 400"/>
+  </g>
+</svg>
