@@ -21,7 +21,7 @@ body::before{
 }
 @keyframes nebula-drift{ 0%{transform:translate3d(0,0,0)} 50%{transform:translate3d(-1.2rem,.6rem,0)} 100%{transform:translate3d(0,0,0)} }
 
-/* Képernyő “chrome” — LCARS felső sínek */
+/* Képernyő "chrome" — LCARS felső sínek + íves panelek */
 .chrome::before, .chrome::after{
   content:""; position:fixed; left:0; right:0; height:22px; z-index:1; pointer-events:none;
   background: var(--rail); box-shadow: inset 0 -2px 6px rgba(0,0,0,.25);
@@ -29,14 +29,32 @@ body::before{
 }
 .chrome::after{ height:4px; margin-top:26px; background: var(--rail2); border-radius: 2px; opacity:.95; animation:none }
 @keyframes rail-flow{ 0%,100%{ filter:hue-rotate(0deg) brightness(1) } 50%{ filter:hue-rotate(-10deg) brightness(1.1) } }
+/* LCARS íves rail panelek és halvány grid overlay */
+.chrome{
+  background: 
+    repeating-linear-gradient(0deg, rgba(247,191,164,.02) 0 2px, transparent 2px 30px),
+    repeating-linear-gradient(90deg, rgba(224,138,163,.02) 0 4px, transparent 4px 40px),
+    linear-gradient(90deg, var(--rail) 0 6px, transparent 6px),
+    linear-gradient(90deg, transparent calc(100% - 6px), var(--rail2) calc(100% - 6px));
+  opacity: .28;
+}
 
 nav{ backdrop-filter: blur(6px); background: linear-gradient(180deg, rgba(10,14,24,.72), rgba(10,14,24,.38)); border-bottom:0 }
-nav button, .panel .btn, .quick-links a, .download-card{
-  appearance:none; border:0; border-radius:18px; padding:.6rem .95rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; background:var(--accent); color:#051018; text-decoration:none; box-shadow:0 2px 8px rgba(126,200,255,.25)
+nav button, .panel .btn, .quick-links a{
+  appearance:none; border:0; border-radius:18px; padding:.6rem .95rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; background:var(--accent); color:#051018; text-decoration:none; box-shadow:0 2px 8px rgba(126,200,255,.25); transition: all 0.2s ease
 }
-.download-card small{ color:#051018 }
+nav button:hover, nav button:focus, .panel .btn:hover, .panel .btn:focus, .quick-links a:hover, .quick-links a:focus{ box-shadow: 0 4px 12px rgba(126,200,255,.4); transform: translateY(-1px) }
+nav button:focus, .panel .btn:focus, .quick-links a:focus{ outline: 2px solid var(--accent); outline-offset: 2px }
 .mirror{ color:var(--accent) }
 .features .box{ background: var(--panel); border:1px solid var(--border); border-radius:12px; box-shadow: inset 0 10px 30px rgba(0,0,0,.18), 0 0 0 1px rgba(247,191,164,.05) }
+
+/* Download section */
+.download-list{ display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin: 1rem 0 }
+@media (max-width: 700px){ .download-list{ grid-template-columns: 1fr } }
+.download-card{ display: block; width: 100%; white-space: normal; word-break: break-word; padding: 1rem; background: linear-gradient(180deg, rgba(10,14,24,.65), rgba(10,14,24,.45)); border: 2px solid var(--border); border-radius: 18px; color: var(--accent); text-decoration: none; font-weight: 700; box-shadow: inset 0 6px 20px rgba(0,0,0,.15), 0 0 0 1px rgba(126,200,255,.08); transition: all 0.2s ease }
+.download-card:hover, .download-card:focus{ transform: translateY(-2px); border-color: var(--rail); box-shadow: inset 0 6px 20px rgba(0,0,0,.15), 0 4px 12px rgba(247,191,164,.2), 0 0 0 1px var(--rail) }
+.download-card:focus{ outline: 2px solid var(--accent); outline-offset: 2px }
+.download-card small{ display: block; margin-top: 0.4rem; color: var(--muted); font-size: 0.85em; font-weight: 400 }
 
 /* Folyamatos “process” telemetria a háttérben */
 .telemetry{
