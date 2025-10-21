@@ -1,7 +1,36 @@
 (function(){
   const pre=document.getElementById('preloader'); if(!pre) return;
+  pre.setAttribute('role','status'); pre.setAttribute('aria-live','polite');
   const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const assets=['styles/base.css','styles/themes.css','styles/lcars.css','styles/starwars.css','styles/cyberpunk.css','assets/svgs/hud-grid.svg'];
-  let done=0; function tick(){done++; const now=Math.min(100,Math.round(done/assets.length*100)); pre.setAttribute('aria-valuenow',String(now));}
-  Promise.all(assets.map(u=>fetch(u,{cache:'force-cache'}).then(r=>{tick();return r.ok;}).catch(()=>{tick();}))).then(()=>new Promise(res=>setTimeout(res,prefersReduced?100:600))).finally(()=>{pre.hidden=true; document.dispatchEvent(new CustomEvent('preloader:done'));});
+  const assets=['styles/base.css','styles/themes.css','styles/lcars.css','styles/starwars.css','styles/cyberpunk.css','assets/svgs/hud-grid.svg','assets/svgs/lcars-panels.svg','assets/svgs/hologram-activation.svg'];
+  let progress=0;
+  const jitter=()=>Math.random()*8+2;
+  function updateProgress(val){
+    progress=Math.min(100,val);
+    pre.setAttribute('aria-valuenow',String(Math.round(progress)));
+  }
+  function hidePreloader(delay){
+    setTimeout(()=>{
+      pre.hidden=true;
+      pre.setAttribute('aria-hidden','true');
+      document.dispatchEvent(new CustomEvent('preloader:done'));
+    }, delay);
+  }
+  function tickHandler(){
+    progress+=jitter();
+    if(progress>=100){
+      clearInterval(tick);
+      updateProgress(100);
+      hidePreloader(400);
+    } else{
+      updateProgress(progress);
+    }
+  }
+  if(prefersReduced){
+    updateProgress(100);
+    hidePreloader(100);
+    return;
+  }
+  const tick=setInterval(tickHandler,80);
+  Promise.all(assets.map(u=>fetch(u,{cache:'force-cache'}).then(r=>r.ok).catch(()=>false)));
 })();

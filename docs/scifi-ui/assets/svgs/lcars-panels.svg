@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+ copilot/implement-sci-fi-ui-demo-another-one
+<svg viewBox="0 0 1200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LCARS panels placeholder">
+  <rect x="0" y="0" width="280" height="60" rx="30" fill="#FF9A3C" opacity="0.9"/>
+  <rect x="300" y="0" width="220" height="60" rx="14" fill="#8C6AFF" opacity="0.8"/>
+  <rect x="540" y="0" width="420" height="60" rx="14" fill="#FF9A3C" opacity="0.7"/>
+  <title>LCARS panel placeholder bars</title>
+</svg>
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <!-- LCARS-style panel placeholder (original work) -->
   <defs>
@@ -20,3 +27,4 @@
     <rect x="10" y="160" width="140" height="30" rx="15" />
   </g>
 </svg>
+ master
