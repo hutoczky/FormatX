@@ -1,67 +1,108 @@
-/* Star Trek — LCARS: fekete háttér, narancs–lila sávok, lekerekített panelek, Eurostile hangulat.
-   Animált rail + csillagköd, LCARS boot sávok, folyamatos telemetria a háttérben. */
+/* Star Trek — LCARS: Okudagram instrument panel (responsive, holographic)
+   - Black background, amber/cyan accents
+   - Top rails, thin inner cyan frame
+   - Central main panel + right SCAN column + bottom MODE SELECT bar
+   - Subtle background telemetry
+   - Responsive layout (panels reflow/hide on narrow screens)
+*/
 :root{
-  --bg:#0b0f18; --text:#eaf3ff; --muted:#b9cde3;
-  --rail:#F7BFA4; --rail2:#E08AA3; --accent:#7EC8FF; --amber:#FFCE66;
-  --border: rgba(126,200,255,.22); --panel: rgba(10,14,24,.55);
+  --bg:#080a11; --text:#eaf3ff; --muted:#b9cde3;
+  --amber:#ffc94d; --peach:#f6c9a6; --rose:#e096b3; --cyan:#7ec8ff; --cyan-soft:#a6ddff;
+  --panel: rgba(12,16,26,.55); --border: rgba(126,200,255,.22); --glass: rgba(6,10,16,.72);
 }
 *{ box-sizing:border-box } html,body{ height:100% }
-body{ margin:0; background:var(--bg); color:var(--text); font-family:"Eurostile","Orbitron","Exo 2",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; position:relative; overflow-x:hidden }
-/* Holografikus köd + csillagok */
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:"Eurostile","Microgramma","Orbitron","Exo 2",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  letter-spacing:.01em; position:relative; overflow-x:hidden;
+}
+/* Nebula + faint stars */
 body::before{
   content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
   background:
-    radial-gradient(1100px 520px at 8% -8%, rgba(224,138,163,.16), transparent 60%),
-    radial-gradient(900px 460px at 115% 15%, rgba(247,191,164,.12), transparent 60%),
-    radial-gradient(700px 360px at 50% 120%, rgba(126,200,255,.10), transparent 60%),
+    radial-gradient(1100px 520px at 8% -8%, rgba(224,138,163,.15), transparent 60%),
+    radial-gradient(900px 460px at 115% 15%, rgba(247,191,164,.10), transparent 60%),
+    radial-gradient(700px 360px at 50% 120%, rgba(126,200,255,.08), transparent 60%),
     radial-gradient(2px 2px at 20% 40%, rgba(255,255,255,.35), transparent 50%),
     radial-gradient(2px 2px at 60% 70%, rgba(255,255,255,.28), transparent 50%),
     radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.18), transparent 50%);
-  animation: nebula-drift 40s linear infinite;
+  animation: nebula-drift 40s linear infinite; filter: saturate(.9);
 }
 @keyframes nebula-drift{ 0%{transform:translate3d(0,0,0)} 50%{transform:translate3d(-1.2rem,.6rem,0)} 100%{transform:translate3d(0,0,0)} }
 
-/* Képernyő “chrome” — LCARS felső sínek */
-.chrome::before, .chrome::after{
-  content:""; position:fixed; left:0; right:0; height:22px; z-index:1; pointer-events:none;
-  background: var(--rail); box-shadow: inset 0 -2px 6px rgba(0,0,0,.25);
-  animation: rail-flow 5.5s ease-in-out infinite;
+/* Top rails + inner cyan frame */
+.chrome{ position:fixed; inset:0; pointer-events:none; z-index:1 }
+.chrome::before, .chrome::after{ content:""; position:fixed; left:0; right:0; pointer-events:none }
+.chrome::before{ top:0; height:22px; background: var(--amber); box-shadow: inset 0 -2px 6px rgba(0,0,0,.35) }
+.chrome::after{ top:26px; height:4px; background: var(--rose); border-radius:2px; opacity:.95 }
+/* inner frame */
+.chrome + .content::before{
+  content:""; position:fixed; inset:clamp(6px,1vw,10px); border-radius:14px; pointer-events:none; z-index:1;
+  box-shadow: 0 0 0 1px rgba(126,200,255,.22), inset 0 0 0 1px rgba(10,16,26,.4);
+  mix-blend-mode: screen; opacity:.6;
 }
-.chrome::after{ height:4px; margin-top:26px; background: var(--rail2); border-radius: 2px; opacity:.95; animation:none }
-@keyframes rail-flow{ 0%,100%{ filter:hue-rotate(0deg) brightness(1) } 50%{ filter:hue-rotate(-10deg) brightness(1.1) } }
 
-nav{ backdrop-filter: blur(6px); background: linear-gradient(180deg, rgba(10,14,24,.72), rgba(10,14,24,.38)); border-bottom:0 }
-nav button, .panel .btn, .quick-links a, .download-card{
-  appearance:none; border:0; border-radius:18px; padding:.6rem .95rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; background:var(--accent); color:#051018; text-decoration:none; box-shadow:0 2px 8px rgba(126,200,255,.25)
+/* Main bezel + SCAN column + MODE SELECT bar */
+.content::after{
+  content:""; position:fixed; left:7%; right:28%; top:13%; bottom:16%;
+  border-radius:16px; pointer-events:none; z-index:1;
+  background: radial-gradient(120% 140% at 50% 50%, rgba(8,12,18,.6), rgba(8,12,18,.35));
+  box-shadow: 0 0 0 1px rgba(126,200,255,.20), inset 0 0 24px rgba(126,200,255,.08);
 }
-.download-card small{ color:#051018 }
-.mirror{ color:var(--accent) }
-.features .box{ background: var(--panel); border:1px solid var(--border); border-radius:12px; box-shadow: inset 0 10px 30px rgba(0,0,0,.18), 0 0 0 1px rgba(247,191,164,.05) }
+.telemetry::before{
+  content:""; position:fixed; right:7%; top:13%; bottom:16%; width:18%;
+  border-radius:16px; pointer-events:none; z-index:1;
+  background: radial-gradient(120% 140% at 50% 50%, rgba(8,12,18,.6), rgba(8,12,18,.35));
+  box-shadow: 0 0 0 1px rgba(126,200,255,.20), inset 0 0 24px rgba(126,200,255,.08);
+}
+.telemetry::after{
+  content:"MODE SELECT   R2-5"; position:fixed; left:7%; right:7%; bottom:8%; height:28px;
+  border-radius:12px; pointer-events:none; z-index:1;
+  background: linear-gradient(180deg, rgba(8,12,18,.7), rgba(8,12,18,.45));
+  box-shadow: 0 0 0 1px rgba(126,200,255,.18), inset 0 0 18px rgba(126,200,255,.06);
+  color: var(--amber); font: 800 11px/28px "Eurostile","Microgramma",ui-sans-serif; letter-spacing:.15em; text-align:center;
+}
 
-/* Folyamatos “process” telemetria a háttérben */
+/* NAV — LCARS chips */
+nav{ backdrop-filter: blur(6px); background: linear-gradient(180deg, var(--glass), rgba(12,16,26,.35)); border-bottom: 0 }
+nav .wrap{ padding-block:.6rem }
+nav button, .panel .btn, .quick-links a{
+  appearance:none; border:0; border-radius:18px; padding:.62rem 1.05rem;
+  font-weight:900; letter-spacing:.08em; text-transform:uppercase;
+  background:var(--amber); color:#06101a; text-decoration:none;
+  box-shadow: inset 0 -2px 6px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.05);
+  transition: transform .12s ease, filter .12s ease;
+}
+nav button:hover, .panel .btn:hover, .quick-links a:hover{ transform:translateY(-1px); filter:brightness(1.06) }
+
+/* Feature boxes */
+.features .box{ background: var(--panel); border-radius: 12px; box-shadow: inset 0 12px 36px rgba(0,0,0,.25), 0 0 0 1px var(--border) }
+
+/* Telemetry background */
 .telemetry{
+  position:fixed; inset:0; pointer-events:none; z-index:0;
   background:
     repeating-linear-gradient(0deg, rgba(247,191,164,.05) 0 2px, transparent 2px 22px),
-    repeating-linear-gradient(90deg, rgba(224,138,163,.03) 0 6px, transparent 6px 30px);
-  animation: lcars-process-x 8s linear infinite;
+    repeating-linear-gradient(90deg, rgba(126,200,255,.05) 0 6px, transparent 6px 30px);
+  animation: lcars-process-x 8s linear infinite; mix-blend-mode: screen; opacity:.5;
 }
-@keyframes lcars-process-x{
-  0%{ background-position: 0 0, 0 0 }
-  100%{ background-position: 240px 0, 0 0 }
-}
-/* Jobb oldali adatcsatornák (sikló sávok) */
-.telemetry::after{
-  content:""; position:fixed; right:8px; top:8%; width:260px; height:84%;
-  border-radius:16px; background: linear-gradient(180deg, rgba(126,200,255,.10), rgba(224,138,163,.06));
-  box-shadow: inset 0 0 0 1px rgba(126,200,255,.12); mix-blend-mode: screen; opacity:.45;
-  animation: lcars-stream 6.5s ease-in-out infinite;
-}
-@keyframes lcars-stream{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-18px) } }
+@keyframes lcars-process-x{ 0%{ background-position: 0 0, 0 0 } 100%{ background-position: 240px 0, 0 0 } }
 
-/* Loader — LCARS boot sávok */
-#loader{ background: linear-gradient(180deg, rgba(5,8,14,.86), rgba(5,8,14,.65)); backdrop-filter: blur(6px) }
+/* Titles */
+h1{ font-weight:900; text-transform:uppercase; letter-spacing:.06em; text-shadow: 0 -1px 0 rgba(255,255,255,.06), 0 0 24px rgba(126,200,255,.15) }
+
+/* Loader */
+#loader{ background: linear-gradient(180deg, rgba(5,8,14,.88), rgba(5,8,14,.65)); backdrop-filter: blur(6px) }
 #loader .loader-content{ color: var(--muted) }
 #loader .loader-visual{ width:min(560px,86vw); display:grid; gap:.5rem }
-#loader .loader-visual span{ display:block; height:16px; border-radius:12px; background: linear-gradient(90deg, var(--rail), var(--rail2)); box-shadow: inset 0 -2px 6px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.06); animation: lcars-scan 1.6s ease-in-out infinite }
+#loader .loader-visual span{ display:block; height:16px; border-radius:12px; background: linear-gradient(90deg, rgba(255,0,184,.12), rgba(255,0,184,.18)); box-shadow: inset 0 -2px 6px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.05); animation: lcars-scan 1.6s ease-in-out infinite }
 #loader .loader-visual span:nth-child(2){ animation-delay:.2s } #loader .loader-visual span:nth-child(3){ animation-delay:.4s } #loader .loader-visual span:nth-child(4){ animation-delay:.6s }
 @keyframes lcars-scan{ 0%,100%{ filter:brightness(1) } 50%{ filter:brightness(1.25) } }
+
+/* Responsive tweaks */
+@media (max-width: 1200px){ .content::after{ left:6%; right:26%; top:12%; bottom:14% } .telemetry::before{ right:6%; width:20% } }
+@media (max-width: 900px){ .content::after{ left:5%; right:5%; top:12%; bottom:16% } .telemetry::before{ display:none } .telemetry::after{ left:5%; right:5% } .chrome::before{ height:18px } .chrome::after{ top:22px } }
+@media (max-width: 600px){ .chrome::before{ height:14px } .chrome::after{ top:18px; height:3px } .content::after{ left:4%; right:4%; top:12%; bottom:18% } .telemetry::after{ bottom:6%; height:26px; font-size:10px; letter-spacing:.12em } }
+
+/* Links */
+a{ color: var(--cyan-soft) } a:hover{ color: var(--cyan) }
