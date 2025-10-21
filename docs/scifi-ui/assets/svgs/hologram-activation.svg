@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <!-- Hologram activation effect placeholder (original work) -->
+  <defs>
+    <radialGradient id="holo-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#2EE6FF;stop-opacity:0.6" />
+      <stop offset="50%" style="stop-color:#90F0FF;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#2EE6FF;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <g opacity="0.25">
+    <!-- Central hologram circle -->
+    <circle cx="100" cy="100" r="60" fill="url(#holo-glow)" />
+    <!-- Scanning rings -->
+    <circle cx="100" cy="100" r="40" fill="none" stroke="#2EE6FF" stroke-width="0.5" opacity="0.6">
+      <animate attributeName="r" from="40" to="80" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.6" to="0" dur="2s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="100" cy="100" r="40" fill="none" stroke="#90F0FF" stroke-width="0.5" opacity="0.6">
+      <animate attributeName="r" from="40" to="80" dur="2s" begin="1s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.6" to="0" dur="2s" begin="1s" repeatCount="indefinite" />
+    </circle>
+    <!-- Center dot -->
+    <circle cx="100" cy="100" r="3" fill="#2EE6FF" />
+  </g>
+</svg>
