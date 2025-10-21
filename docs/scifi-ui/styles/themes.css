@@ -8,3 +8,4 @@
 .fx.glitch-overlay{position:fixed;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.3}
 @media (prefers-reduced-motion:reduce){[data-anim]{animation:none!important;transition:none!important}}
 :where(a,button,.chip,.pill):focus-visible{outline:3px solid color-mix(in oklab,var(--accent),#fff 10%);outline-offset:3px;border-radius:12px}
+:where(.switcher .btn,.theme):focus-visible{outline:2px solid color-mix(in oklab,var(--accent),#fff 20%);outline-offset:2px}
