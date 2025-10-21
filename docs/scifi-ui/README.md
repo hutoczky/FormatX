@@ -194,15 +194,19 @@ document.addEventListener('theme:changed', (e) => {
 All visual assets are created with CSS and SVG:
 
 - **hud-grid.svg**: Minimal Star Wars-style HUD grid (original work)
+- **lcars-panels.svg**: Placeholder LCARS panel elements (original work)
+- **hologram-activation.svg**: Placeholder hologram circles (original work)
 - **CSS animations**: All effects implemented in pure CSS
 - **Fonts**: System font stacks used (no external fonts loaded)
 
 ### Fonts Used
 
 System fallbacks (no licensing required):
-- LCARS: `"Eurostile", "Microgramma", "Orbitron", "Exo 2", system-ui`
-- Star Wars: `"Share Tech Mono", "Orbitron", ui-monospace`
-- Cyberpunk: `"OCR A", "Audiowide", "Exo 2", system-ui`
+- LCARS: `"Eurostile", "Segoe UI", system-ui, Roboto, Arial, sans-serif`
+- Star Wars: `"Orbitron", "Roboto Mono", ui-monospace, system-ui, monospace`
+- Cyberpunk: `"OCR-A", "VT323", ui-monospace, monospace`
+
+**Note**: Font preload tags in `index.html` are commented out pending licensed font acquisition.
 
 ### No Unlicensed IP
 
