@@ -1,4 +1,9 @@
 /* Reset + alap komponensek (JS nélkül is működő) */
+/* Font preloads: Activate once licensed fonts are added */
+/* @font-face { font-family: 'Eurostile'; src: url('/docs/scifi-ui/assets/fonts/Eurostile.woff2') format('woff2'); font-weight:600; font-style:normal; font-display:swap; } */
+/* @font-face { font-family: 'Orbitron'; src: url('/docs/scifi-ui/assets/fonts/Orbitron.woff2') format('woff2'); font-weight:600; font-style:normal; font-display:swap; } */
+/* @font-face { font-family: 'OCR-A'; src: url('/docs/scifi-ui/assets/fonts/OCR-A.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; } */
+
 *,*::before,*::after{box-sizing:border-box}
 :root{
   --bg:#080a0d;--text:#e9eefc;--muted:#9fb3bf;
