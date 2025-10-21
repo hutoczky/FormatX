@@ -1,46 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" aria-hidden="true">
-  <defs>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(96,229,255,0.15)" stroke-width="0.5"/>
-    </pattern>
-    <linearGradient id="fade" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:rgba(96,229,255,0.3);stop-opacity:1" />
-      <stop offset="100%" style="stop-color:rgba(96,229,255,0.05);stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  
-  <!-- Grid background -->
-  <rect width="1200" height="800" fill="url(#grid)" opacity="0.6"/>
-  
-  <!-- Corner reticles -->
-  <g stroke="rgba(96,229,255,0.4)" stroke-width="2" fill="none">
-    <!-- Top-left -->
-    <path d="M 50 50 L 80 50 M 50 50 L 50 80"/>
-    <circle cx="50" cy="50" r="8" opacity="0.5"/>
-    
-    <!-- Top-right -->
-    <path d="M 1150 50 L 1120 50 M 1150 50 L 1150 80"/>
-    <circle cx="1150" cy="50" r="8" opacity="0.5"/>
-    
-    <!-- Bottom-left -->
-    <path d="M 50 750 L 80 750 M 50 750 L 50 720"/>
-    <circle cx="50" cy="750" r="8" opacity="0.5"/>
-    
-    <!-- Bottom-right -->
-    <path d="M 1150 750 L 1120 750 M 1150 750 L 1150 720"/>
-    <circle cx="1150" cy="750" r="8" opacity="0.5"/>
-  </g>
-  
-  <!-- Scanning line (animated) -->
-  <line x1="0" y1="400" x2="1200" y2="400" stroke="url(#fade)" stroke-width="1" opacity="0.7">
-    <animate attributeName="y1" values="0;800;0" dur="8s" repeatCount="indefinite"/>
-    <animate attributeName="y2" values="0;800;0" dur="8s" repeatCount="indefinite"/>
-  </line>
-  
-  <!-- Crosshair center -->
-  <g stroke="rgba(96,229,255,0.3)" stroke-width="1" fill="none">
-    <circle cx="600" cy="400" r="30" opacity="0.4"/>
-    <circle cx="600" cy="400" r="45" opacity="0.3"/>
-    <path d="M 600 350 L 600 370 M 600 430 L 600 450 M 550 400 L 570 400 M 630 400 L 650 400"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <g stroke="#2EE6FF" stroke-opacity=".25" stroke-width=".3">
+    <g id="grid">
+      <g id="h">
+        <line x1="0" y1="10" x2="100" y2="10"/>
+        <line x1="0" y1="20" x2="100" y2="20"/>
+        <line x1="0" y1="30" x2="100" y2="30"/>
+        <line x1="0" y1="40" x2="100" y2="40"/>
+        <line x1="0" y1="50" x2="100" y2="50"/>
+        <line x1="0" y1="60" x2="100" y2="60"/>
+        <line x1="0" y1="70" x2="100" y2="70"/>
+        <line x1="0" y1="80" x2="100" y2="80"/>
+        <line x1="0" y1="90" x2="100" y2="90"/>
+      </g>
+      <g id="v">
+        <line x1="10" y1="0" x2="10" y2="100"/>
+        <line x1="20" y1="0" x2="20" y2="100"/>
+        <line x1="30" y1="0" x2="30" y2="100"/>
+        <line x1="40" y1="0" x2="40" y2="100"/>
+        <line x1="50" y1="0" x2="50" y2="100"/>
+        <line x1="60" y1="0" x2="60" y2="100"/>
+        <line x1="70" y1="0" x2="70" y2="100"/>
+        <line x1="80" y1="0" x2="80" y2="100"/>
+        <line x1="90" y1="0" x2="90" y2="100"/>
+      </g>
+    </g>
   </g>
 </svg>
