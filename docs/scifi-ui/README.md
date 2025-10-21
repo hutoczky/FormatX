@@ -123,17 +123,25 @@ npx lighthouse http://localhost:8000/scifi-ui/ --view
 
 ### Lighthouse Thresholds (CI)
 
-- Performance: ≥ 90%
-- Accessibility: ≥ 95%
-- Best Practices: ≥ 95%
-- SEO: ≥ 90%
+The CI workflow enforces these thresholds:
+- **Performance**: ≥ 90%
+- **Accessibility**: ≥ 95%
+- **Best Practices**: ≥ 95%
+- **SEO**: ≥ 90%
 
-Run Lighthouse CI:
+**Core Web Vitals:**
+- LCP (Largest Contentful Paint): < 2.5s
+- CLS (Cumulative Layout Shift): < 0.10
+- TTFB (Time to First Byte): < 600ms
+
+Run Lighthouse CI locally:
 
 ```bash
 npm install -g @lhci/cli
 lhci autorun
 ```
+
+View results in `.lighthouseci/` directory after running.
 
 ## 🔧 JavaScript Modules
 
@@ -189,28 +197,44 @@ document.addEventListener('theme:changed', (e) => {
 
 ## 📄 Assets & Licenses
 
-### Created Assets
+### Asset Inventory
 
-All visual assets are created with CSS and SVG:
+All assets in `docs/scifi-ui/assets/`:
 
-- **hud-grid.svg**: Minimal Star Wars-style HUD grid (original work)
-- **CSS animations**: All effects implemented in pure CSS
-- **Fonts**: System font stacks used (no external fonts loaded)
+**SVG Files:**
+- `svgs/hud-grid.svg` — Star Wars-style HUD grid overlay (original work)
+- `svgs/lcars-panels.svg` — LCARS-style panel decorations (original work)
+- `svgs/hologram-activation.svg` — Holographic activation effect (original work)
 
-### Fonts Used
+**Placeholder Directories (with .gitkeep):**
+- `images/` — Reserved for WebP/AVIF optimized images
+- `fonts/` — Reserved for licensed fonts (currently using system stacks)
+- `audio/` — Reserved for optional ambient sounds
 
-System fallbacks (no licensing required):
-- LCARS: `"Eurostile", "Microgramma", "Orbitron", "Exo 2", system-ui`
-- Star Wars: `"Share Tech Mono", "Orbitron", ui-monospace`
-- Cyberpunk: `"OCR A", "Audiowide", "Exo 2", system-ui`
+### License Status
 
-### No Unlicensed IP
+✅ **All assets are original placeholders** created specifically for this demo
+✅ **No unlicensed IP used** — No trademarked logos, copyrighted imagery, or proprietary content
+✅ **System font stacks** — No external fonts loaded; commented preload examples in index.html
 
-This demo does **NOT** include:
-- Trademarked logos or symbols
-- Copyrighted imagery from films/shows
-- Licensed sound effects or music
-- Proprietary typefaces
+**Fonts:**
+- LCARS: `"Eurostile", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif`
+- Star Wars: `"Orbitron", "Roboto Mono", ui-monospace, system-ui, monospace`
+- Cyberpunk: `"OCR-A", "VT323", ui-monospace, monospace`
+
+**Font Setup Instructions:**
+When licensed fonts are available:
+1. Add woff2 files to `assets/fonts/`
+2. Uncomment preload tags in `index.html` `<head>`
+3. Add `@font-face` declarations in respective theme CSS files
+4. Update README with font licenses
+
+### What This Demo Does NOT Include
+
+- ❌ Trademarked logos or symbols
+- ❌ Copyrighted imagery from films/shows
+- ❌ Licensed sound effects or music
+- ❌ Proprietary typefaces
 
 All designs are inspired aesthetics created from scratch.
 
