@@ -1,48 +1,148 @@
-/* Star Wars — HUD: holografikus kék, rács overlay, Aurebesh hangulat.
-   Csillagmező + scanlines; folyamatos adatfolyam és holo “sweep” a háttérben. */
+/* Star Wars — Imperial Star Destroyer HUD (labels refined, responsive, holographic)
+   - Egységes, jól olvasható feliratok:
+     MAIN CONSOLE (bal felső), SCAN RESULTS (jobb oszlop tetején)
+   - Látható műszerfal‑szélek, holografikus rács, csillagmező + scanlines + holo sweep
+*/
 :root{
   --bg:#05070c; --text:#e6fbff; --holo:#60e5ff; --holo2:#94f6ff;
-  --grid: rgba(96,229,255,.14); --border: rgba(96,229,255,.25);
+  --grid: rgba(96,229,255,.14); --border: rgba(96,229,255,.28);
   --panel: rgba(8,12,20,.36);
+  /* egységes label-stílus */
+  --label-bg: rgba(6,12,20,.72);
+  --label-border: rgba(96,229,255,.26);
+  --label-text: var(--holo2);
+  --label-font: 800 10px/1 "Orbitron",ui-monospace;
+  --label-ls: .16em;
 }
 *{ box-sizing:border-box } html,body{ height:100% }
-body{ margin:0; background: var(--bg); color: var(--text); font-family:"Aurebesh","Share Tech Mono","Orbitron",ui-monospace,monospace; position:relative; overflow-x:hidden }
+body{
+  margin:0; background: var(--bg); color: var(--text);
+  font-family:"Aurebesh","Share Tech Mono","Orbitron",ui-monospace,monospace;
+  position:relative; overflow-x:hidden;
+}
 
 /* Csillagmező + scanlines */
-body::before, body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:-2 }
-body::before{ background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.6), transparent 50%), radial-gradient(2px 2px at 35% 55%, rgba(255,255,255,.35), transparent 50%); animation: stars-move 70s linear infinite; opacity:.8 }
-body::after{ background: repeating-linear-gradient(0deg, rgba(96,229,255,.08) 0 1px, transparent 1px 4px); mix-blend-mode: screen; opacity:.16; animation: scanlines 6s linear infinite }
+body::before, body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:-3 }
+body::before{
+  background:
+    radial-gradient(1px 1px at 12% 28%, rgba(255,255,255,.9), transparent 50%),
+    radial-gradient(1px 1px at 28% 68%, rgba(255,255,255,.7), transparent 50%),
+    radial-gradient(1px 1px at 72% 52%, rgba(255,255,255,.8), transparent 50%),
+    radial-gradient(1px 1px at 82% 18%, rgba(255,255,255,.6), transparent 50%),
+    radial-gradient(1px 1px at 44% 78%, rgba(255,255,255,.7), transparent 50%);
+  animation: stars-move 120s linear infinite; opacity:.8;
+}
+body::after{
+  background: repeating-linear-gradient(0deg, rgba(96,229,255,.08) 0 1px, transparent 1px 4px);
+  mix-blend-mode: screen; opacity:.16; animation: scanlines 6s linear infinite;
+}
 @keyframes stars-move{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-1200px) } }
 @keyframes scanlines{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-3px) } }
 
-/* Holografikus képernyőkeret (grid overlay) */
-.chrome{ background: linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px, linear-gradient(to bottom, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px; opacity:.35 }
+/* Látható külső BEZEL — panel-szélek */
+.screen::before{
+  content:""; position:fixed; inset:clamp(4px,1vw,10px); z-index:-2; pointer-events:none;
+  border-radius:12px;
+  box-shadow:
+    0 0 0 1px rgba(96,229,255,.22),
+    inset 0 0 0 1px rgba(6,12,20,.55),
+    0 18px 60px rgba(0,0,0,.45);
+}
+
+/* Holografikus rács overlay */
+.chrome{
+  position:fixed; inset:0; pointer-events:none; z-index:-1;
+  background:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px,
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px;
+  opacity:.30;
+}
+
+/* Főpanel + jobb SCAN oszlop */
+.content::before{
+  content:""; position:fixed; left:clamp(5%,6vw,6%); right:clamp(24%,26vw,26%); top:clamp(10%,12vh,12%); bottom:clamp(12%,14vh,14%);
+  border:1px solid var(--border); border-radius:10px; pointer-events:none; z-index:0;
+  background: radial-gradient(120% 140% at 50% 50%, rgba(6,12,20,.55), rgba(6,12,20,.35));
+  box-shadow: 0 0 30px rgba(96,229,255,.10), inset 0 0 20px rgba(96,229,255,.07);
+}
+.content::after{
+  content:""; position:fixed; right:clamp(5%,6vw,6%); top:clamp(10%,12vh,12%); bottom:clamp(12%,14vh,14%); width:clamp(16%,18vw,18%);
+  border:1px solid var(--border); border-radius:10px; pointer-events:none; z-index:0;
+  background: radial-gradient(120% 140% at 50% 50%, rgba(6,12,20,.60), rgba(6,12,20,.35));
+  box-shadow: 0 0 30px rgba(96,229,255,.10), inset 0 0 20px rgba(96,229,255,.07);
+}
+
+/* Egységes, jól olvasható feliratok (MAIN + SCAN) */
+.screen::after{
+  content:"MAIN CONSOLE"; position:fixed; left:calc(5% + 14px); top:calc(10% + 10px); z-index:2; pointer-events:none;
+  padding:.28rem .5rem; border-radius:8px; background:var(--label-bg);
+  box-shadow: 0 0 0 1px var(--label-border) inset; color:var(--label-text);
+  font: var(--label-font); letter-spacing:var(--label-ls);
+}
+/* SCAN RESULTS címke a jobb panel tetején */
+nav::before{
+  content:"SCAN RESULTS"; position:fixed; right:calc(5% + 14px); top:calc(10% + 10px); z-index:2; pointer-events:none;
+  padding:.28rem .5rem; border-radius:8px; background:var(--label-bg);
+  box-shadow: 0 0 0 1px var(--label-border) inset; color:var(--label-text);
+  font: var(--label-font); letter-spacing:var(--label-ls);
+}
 
 /* NAV / CTA */
-nav{ background: rgba(5,10,18,.55); border-bottom:1px solid var(--border); backdrop-filter: blur(6px); box-shadow: 0 0 20px rgba(96,229,255,.10) inset }
-nav button, .panel .btn, .quick-links a, .download-card{ appearance:none; border:1px solid var(--border); border-radius:8px; padding:.6rem .95rem; background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25)); color: var(--holo2); text-shadow: 0 0 8px rgba(96,229,255,.6); text-decoration:none }
-.download-card small{ color: var(--holo2) }
-.mirror{ color: var(--holo2) }
-.features .box{ background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 0 24px rgba(96,229,255,.12) inset }
+nav{
+  background: rgba(5,10,18,.55); border-bottom:1px solid var(--border);
+  backdrop-filter: blur(6px); box-shadow: 0 0 20px rgba(96,229,255,.10) inset;
+}
+nav button, .panel .btn, .quick-links a{
+  appearance:none; border:1px solid var(--border); border-radius:8px; padding:.6rem .95rem;
+  background: linear-gradient(180deg, rgba(10,20,28,.6), rgba(8,12,20,.35));
+  color: var(--text); text-shadow: 0 0 10px rgba(96,229,255,.35); text-decoration:none;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+nav button:hover, .panel .btn:hover, .quick-links a:hover{ transform:translateY(-1px); border-color: var(--holo2); box-shadow: 0 0 20px rgba(96,229,255,.15) }
 
-/* Telemetria: adatfolyam oszlopok + holografikus “sweep” */
-.telemetry{
+/* Feature panelek */
+.features .box{
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 0 24px rgba(96,229,255,.12) inset; color:var(--holo2);
+}
+
+/* Telemetria + holo sweep */
+.screen .telemetry{
   background:
     repeating-linear-gradient(90deg, rgba(96,229,255,.055) 0 1px, transparent 1px 18px),
     repeating-linear-gradient(180deg, rgba(96,229,255,.05) 0 6px, transparent 6px 22px);
-  animation: sw-stream-x 9s linear infinite;
+  animation: sw-stream-x 9s linear infinite; mix-blend-mode: screen;
 }
 @keyframes sw-stream-x{ 0%{ background-position: 0 0, 0 0 } 100%{ background-position: -320px 0, 0 0 } }
-.telemetry::after{
+.screen .telemetry::before{
   content:""; position:fixed; left:-25%; top:0; width:35%; height:100%;
-  background: linear-gradient(90deg, rgba(96,229,255,.0), rgba(96,229,255,.20), rgba(96,229,255,.0));
+  background: linear-gradient(90deg, rgba(96,229,255,0), rgba(96,229,255,.20), rgba(96,229,255,0));
   filter: blur(10px); opacity:.35; mix-blend-mode: screen; animation: holo-sweep 2.8s linear infinite;
 }
 @keyframes holo-sweep{ 0%{ left:-25% } 100%{ left:100% } }
 
-/* Loader — hologram aktiválás */
+/* Loader */
 #loader{ background: radial-gradient(60% 80% at 50% 50%, rgba(6,12,20,.9), rgba(6,12,20,.6)); backdrop-filter: blur(6px) }
 #loader .loader-content{ color: var(--holo2) }
-#loader .loader-visual{ width:160px; height:160px; border-radius:50%; background: conic-gradient(from 0deg, rgba(96,229,255,.0), rgba(96,229,255,.6) 30%, rgba(96,229,255,.0) 60%), radial-gradient(closest-side, rgba(6,12,20,1) 68%, transparent 70%), radial-gradient(closest-side, rgba(96,229,255,.25) 0, transparent 70%); box-shadow: 0 0 24px rgba(96,229,255,.3), 0 0 120px rgba(96,229,255,.15) inset; animation: holo-spin 2.4s linear infinite }
+#loader .loader-visual{ width:160px; height:160px; border-radius:50%; background: conic-gradient(from 0deg, rgba(96,229,255,.0), rgba(96,229,255,.6) 30%, rgba(96,229,255,.0) 60%), radial-gradient(closest-side, rgba(96,229,255,.1), rgba(96,229,255,.0)); animation: holo-spin 1.6s linear infinite }
 #loader .loader-visual span{ display:none }
 @keyframes holo-spin{ 0%{ transform: rotate(0deg) } 100%{ transform: rotate(360deg) } }
+
+/* Reduced motion */
+@media (prefers-reduced-motion:reduce){ body::before, .screen .telemetry, .screen .telemetry::before{ animation:none } }
+
+/* Reszponzív töréspontok */
+@media (max-width: 1100px){
+  .content::before{ left:5%; right:24%; top:11%; bottom:13% }
+  .content::after{ right:5%; width:20% }
+  nav::before{ right:calc(5% + 14px); top:calc(11% + 10px) }
+  .screen::after{ left:calc(5% + 14px); top:calc(11% + 10px) }
+}
+@media (max-width: 900px){
+  .content::before{ left:5%; right:5%; top:11%; bottom:14% }
+  .content::after{ display:none } /* nincs jobb oszlop mobilon */
+  nav::before{ display:none }     /* elrejteni a SCAN címkét is */
+}
+@media (max-width: 600px){
+  .content::before{ left:4%; right:4%; top:10%; bottom:16% }
+}
