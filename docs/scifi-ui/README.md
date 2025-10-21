@@ -123,16 +123,32 @@ npx lighthouse http://localhost:8000/scifi-ui/ --view
 
 ### Lighthouse Thresholds (CI)
 
-- Performance: ≥ 90%
-- Accessibility: ≥ 95%
-- Best Practices: ≥ 95%
-- SEO: ≥ 90%
+The CI enforces these specific performance thresholds:
+
+| Metric | Threshold | Description |
+|--------|-----------|-------------|
+| **LCP** (Largest Contentful Paint) | < 2.5s | Time to render largest content element |
+| **CLS** (Cumulative Layout Shift) | < 0.10 | Visual stability score |
+| **TTFB** (Time to First Byte) | < 600ms | Server response time |
+| Performance Score | ≥ 90% | Overall performance rating |
+| Accessibility Score | ≥ 95% | WCAG compliance and a11y features |
+| Best Practices Score | ≥ 95% | Security, standards compliance |
+| SEO Score | ≥ 90% | Search engine optimization |
 
 Run Lighthouse CI:
 
 ```bash
 npm install -g @lhci/cli
 lhci autorun
+```
+
+Run single Lighthouse audit:
+
+```bash
+npx lighthouse http://localhost:8000/scifi-ui/ \
+  --view \
+  --preset=desktop \
+  --only-categories=performance,accessibility,best-practices,seo
 ```
 
 ## 🔧 JavaScript Modules
@@ -189,11 +205,28 @@ document.addEventListener('theme:changed', (e) => {
 
 ## 📄 Assets & Licenses
 
+### Asset License Matrix
+
+| Asset Type | Location | Status | License | Notes |
+|------------|----------|--------|---------|-------|
+| **SVG Graphics** | `assets/svgs/` | ✅ Included | Original work | Created from scratch |
+| `hud-grid.svg` | `assets/svgs/` | ✅ Included | Original work | Star Wars-style HUD grid (placeholder) |
+| `lcars-panels.svg` | `assets/svgs/` | ✅ Included | Original work | LCARS-style side panels (placeholder) |
+| `hologram-activation.svg` | `assets/svgs/` | ✅ Included | Original work | Holographic UI element (placeholder) |
+| **Fonts** | `assets/fonts/` | ⏳ Placeholder | TBD | System fallbacks currently used |
+| Eurostile | `assets/fonts/Eurostile.woff2` | ❌ Not included | Commercial | Requires license acquisition |
+| Orbitron | `assets/fonts/Orbitron.woff2` | ⏳ Can add | SIL OFL 1.1 | Free to use, attribution required |
+| OCR-A | `assets/fonts/OCR-A.woff2` | ⏳ Can add | Public domain | Free to use |
+| **Images** | `assets/images/` | ⏳ Placeholder | N/A | WebP/AVIF optimized when added |
+| **Audio** | `assets/audio/` | ⏳ Placeholder | N/A | Optional ambient sounds |
+
 ### Created Assets
 
 All visual assets are created with CSS and SVG:
 
 - **hud-grid.svg**: Minimal Star Wars-style HUD grid (original work)
+- **lcars-panels.svg**: LCARS-style decorative panels (original work)
+- **hologram-activation.svg**: Holographic UI activation element (original work)
 - **CSS animations**: All effects implemented in pure CSS
 - **Fonts**: System font stacks used (no external fonts loaded)
 
@@ -203,6 +236,13 @@ System fallbacks (no licensing required):
 - LCARS: `"Eurostile", "Microgramma", "Orbitron", "Exo 2", system-ui`
 - Star Wars: `"Share Tech Mono", "Orbitron", ui-monospace`
 - Cyberpunk: `"OCR A", "Audiowide", "Exo 2", system-ui`
+
+**To add licensed fonts:**
+1. Acquire proper licenses for commercial fonts (e.g., Eurostile)
+2. Place `.woff2` files in `assets/fonts/`
+3. Uncomment font preload tags in `index.html`
+4. Uncomment `@font-face` declarations in `styles/base.css`
+5. Update this asset matrix with license details
 
 ### No Unlicensed IP
 
@@ -282,20 +322,33 @@ lhci autorun
 
 ## 📝 Acceptance Checklist
 
-- [x] Demo works from `/docs` with redirect active
-- [x] Available at `https://hutoczky.github.io/FormatX/scifi-ui/`
-- [x] Live theme swapping without page reload
-- [x] CustomEvent dispatched on theme change
-- [x] Theme selection persisted to localStorage
-- [x] Preloader runs with accessible progress bar
-- [x] Animation controller activates background layers
-- [x] Reduced motion preference honored
-- [x] Visual parity with mockups (±5%)
-- [x] Lighthouse CI workflow configured
-- [x] Accessibility thresholds met (axe/Lighthouse)
-- [x] No unlicensed IP used
-- [x] Complete directory structure with .gitkeep files
-- [x] Comprehensive documentation
+Use this checklist for PR reviews and deployment verification:
+
+- [ ] docs/index.html redirect created and repository Pages set to main:/docs
+- [ ] File structure committed as specified
+- [ ] Theme CSS files contain the exact HEX values and keyframes
+- [ ] theme-switcher: dispatches event and persists to localStorage
+- [ ] preloader preloads critical resources and dispatches preloader:done
+- [ ] anim-controller starts per-theme animations after preloader:done
+- [ ] prefers-reduced-motion and ARIA attributes verified
+- [ ] README includes asset list and licenses
+- [ ] CI runs and Lighthouse thresholds are met
+
+### Additional Verification
+
+- [ ] Demo works from `/docs` with redirect active
+- [ ] Available at `https://hutoczky.github.io/FormatX/scifi-ui/`
+- [ ] Live theme swapping without page reload
+- [ ] CustomEvent dispatched on theme change
+- [ ] Theme selection persisted to localStorage
+- [ ] Preloader runs with accessible progress bar
+- [ ] Animation controller activates background layers
+- [ ] Reduced motion preference honored
+- [ ] Lighthouse CI workflow configured
+- [ ] Accessibility thresholds met (axe/Lighthouse)
+- [ ] No unlicensed IP used
+- [ ] Complete directory structure with .gitkeep files
+- [ ] Comprehensive documentation
 
 ## 📞 Support
 
