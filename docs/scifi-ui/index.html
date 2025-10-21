@@ -8,6 +8,8 @@
   <link id="theme-stylesheet" rel="stylesheet" href="styles/lcars.css" />
   <link id="theme-overrides" rel="stylesheet" href="styles/overrides.css?v=3" />
   <script src="scripts/theme-switcher.js" defer></script>
+  <!-- ÚJ: egyképes loader vezérlő -->
+  <script src="scripts/loader.js" defer></script>
   <style>
     /* Téma‑független alap; a vizuált a témák CSS‑e adja */
     .wrap { width: min(1100px, 94%); margin-inline: auto; }
@@ -31,11 +33,11 @@
     .screen .chrome    { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
     .content           { position: relative; z-index: 2; }
 
-    /* Loader overlay — a konkrét kinézetet a témák adják */
+    /* Loader overlay — EGY kép témánként */
     #loader { position: fixed; inset: 0; opacity: 0; pointer-events: none; transition: opacity .35s ease; display: flex; align-items: center; justify-content: center; z-index: 9999 }
     #loader.show { opacity: 1; pointer-events: auto }
     #loader .loader-content { text-align: center }
-    #loader .loader-visual { margin: 0 auto .8rem }
+    #loader img.loader-visual { display:block; max-width: min(760px, 90vw); height: auto; margin: 0 auto .8rem; }
 
     /* Fallback hotfix — akkor is szétszedi a "pill" gomb-stílust, ha a overrides.css még cache-ből jön */
     .downloads .download-list{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:1.4rem; margin-top:.6rem }
@@ -53,10 +55,10 @@
     <div class="telemetry" aria-hidden="true"></div>
     <div class="chrome" aria-hidden="true"></div>
 
-    <!-- Betöltési overlay; a téma CSS-e adja a konkrét kinézetet -->
+    <!-- Betöltési overlay: egy darab kép témánként -->
     <div id="loader" aria-hidden="true">
       <div class="loader-content" role="status" aria-live="polite" aria-label="Betöltés…">
-        <div class="loader-visual"><span></span><span></span><span></span><span></span></div>
+        <img id="loader-image" class="loader-visual" alt="Betöltés…" />
         <div class="loader-text">Betöltés…</div>
       </div>
     </div>
@@ -81,27 +83,27 @@
           <a href="../#docs">DOKUMENTUMOK</a>
         </p>
 
-        <!-- Közvetlen letöltések: FormatX Light (hutoczky/formatui v1.0.4) -->
+        <!-- Közvetlen letöltések -->
         <section id="downloads" class="downloads" aria-label="Közvetlen letöltések">
           <h2>Letöltések</h2>
           <div class="download-list" role="list">
-            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/FormatX_Installer_v1015.exe" download rel="noopener noreferrer" target="_blank" title="FormatX Light telepítő (v1.0.4) - Windows .exe" aria-label="FormatX Light telepítő (v1.0.4) letöltése Windows .exe">
+            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/FormatX_Installer_v1015.exe" download rel="noopener noreferrer" target="_blank">
               <strong>FormatX Light telepítő (v1.0.4)</strong>
               <small>Windows .exe • hutoczky/formatui v1.0.4</small>
             </a>
-            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/README.txt" rel="noopener noreferrer" target="_blank" title="README — kiindulási információk" aria-label="README megnyitása új lapon">
+            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/README.txt" rel="noopener noreferrer" target="_blank" title="README — kiindulási információk">
               <strong>README.txt</strong>
               <small>Kiindulási információk • hutoczky/formatui v1.0.4</small>
             </a>
-            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/LICENSE.txt" rel="noopener noreferrer" target="_blank" title="Licencfeltételek" aria-label="Licencfeltételek megnyitása új lapon">
+            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/LICENSE.txt" rel="noopener noreferrer" target="_blank" title="Licencfeltételek">
               <strong>LICENSE.txt</strong>
               <small>Licencfeltételek • hutoczky/formatui v1.0.4</small>
             </a>
-            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/WindowsAppRuntimeInstall-x64.exe" rel="noopener noreferrer" target="_blank" title="Windows App Runtime (x64) telepítő" aria-label="Windows App Runtime (x64) telepítő letöltése">
+            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/WindowsAppRuntimeInstall-x64.exe" rel="noopener noreferrer" target="_blank">
               <strong>Windows App Runtime (x64)</strong>
               <small>Microsoft telepítő • hutoczky/formatui v1.0.4</small>
             </a>
-            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/windowsdesktop-runtime-10.0.0-rc.1.25451.107-win-x64.exe" rel="noopener noreferrer" target="_blank" title=".NET Desktop Runtime 10.0 (x64) telepítő" aria-label=".NET Desktop Runtime 10.0 (x64) telepítő letöltése">
+            <a class="download-card" role="listitem" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/windowsdesktop-runtime-10.0.0-rc.1.25451.107-win-x64.exe" rel="noopener noreferrer" target="_blank">
               <strong>.NET Desktop Runtime 10.0 (x64)</strong>
               <small>Microsoft telepítő • hutoczky/formatui v1.0.4</small>
             </a>
