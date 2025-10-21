@@ -1,10 +1,11 @@
-:root[data-theme="starwars"]{--bg:#061118;--text:#dffcff;--muted:#9be4f1;--accent:#2EE6FF;--accent-2:#90F0FF;--border:#2EE6FF;--panel:#0c2a3740;--card:#0d2e3a66;--grid-glow:rgba(46,230,255,0.08)}
+:root[data-theme="starwars"]{--bg:#061118;--text:#dffcff;--muted:#9be4f1;--sw-main:#2EE6FF;--sw-accent:#90F0FF;--accent:#2EE6FF;--accent-2:#90F0FF;--border:#2EE6FF;--panel:#0c2a3740;--card:#0d2e3a66;--grid-glow:rgba(46,230,255,0.08)}
 :root[data-theme="starwars"] body{background:radial-gradient(1200px 600px at 50% -10%,#0f2a3a 0%,#061118 45%) fixed,#061118;font-family:"Orbitron","Roboto Mono",ui-monospace,system-ui,monospace;letter-spacing:.06em}
 :root[data-theme="starwars"] .brand{font-family:"Orbitron","Roboto Mono",ui-monospace,system-ui,monospace;letter-spacing:.06em;text-shadow:0 0 18px #73ffff55,0 0 3px #72ffff}
 :root[data-theme="starwars"] .panel,:root[data-theme="starwars"] .card,:root[data-theme="starwars"] .chip{border-color:color-mix(in oklab,var(--accent),#000 35%);box-shadow:0 0 0 1px rgba(255,255,255,.05) inset,0 0 22px #6df6ff22,inset 0 0 26px #6df6ff11}
 :root[data-theme="starwars"] .fx.holo-grid{opacity:.28;mix-blend-mode:screen;filter:drop-shadow(0 0 6px var(--grid-glow))}
-:root[data-theme="starwars"] .fx.holo-grid .hud-line{stroke:#2EE6FF;stroke-opacity:.35;stroke-width:.3;stroke-dasharray:6 8;stroke-dashoffset:0;animation:hud-dash 2s linear infinite}
-@keyframes hud-dash{to{stroke-dashoffset:-14}}
+:root[data-theme="starwars"] .fx.holo-grid .hud-line{stroke:#2EE6FF;stroke-opacity:.35;stroke-width:.3;stroke-dasharray:6 8;stroke-dashoffset:0;animation:sw-grid 2s linear infinite}
+@keyframes sw-grid{to{stroke-dashoffset:-14}}
+:root[data-theme="starwars"] .progress .bar{background:linear-gradient(90deg,rgba(46,230,255,0.12),rgba(144,240,255,0.06))}
 :root[data-theme="starwars"] .preloader__lcars .preloader__bar{background:linear-gradient(90deg,#2EE6FF,#0AA1C4)}
 :root[data-theme="starwars"] .preloader__label{color:#bff5ff}
 :root[data-theme="starwars"] .brand::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,transparent 30%, rgba(144,240,255,.18) 45%, transparent 60%);animation:holo-sheen 1.8s ease-in-out infinite;mask:linear-gradient(#000,#000)}

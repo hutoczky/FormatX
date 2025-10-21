@@ -14,6 +14,9 @@ on:
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,3 +42,70 @@ jobs:
           name: lighthouse-results
           path: .lighthouseci/
           retention-days: 30
+
+      - name: Comment PR with Lighthouse results
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Find the latest manifest file
+            const lhciDir = '.lighthouseci';
+            const files = fs.readdirSync(lhciDir);
+            const manifestFile = files.find(f => f.startsWith('manifest') && f.endsWith('.json'));
+            
+            if (!manifestFile) {
+              console.log('No manifest file found');
+              return;
+            }
+            
+            const manifest = JSON.parse(fs.readFileSync(path.join(lhciDir, manifestFile), 'utf8'));
+            const lhr = JSON.parse(fs.readFileSync(manifest[0].jsonPath, 'utf8'));
+            
+            const scores = {
+              performance: Math.round(lhr.categories.performance.score * 100),
+              accessibility: Math.round(lhr.categories.accessibility.score * 100),
+              bestPractices: Math.round(lhr.categories['best-practices'].score * 100),
+              seo: Math.round(lhr.categories.seo.score * 100)
+            };
+            
+            const vitals = {
+              lcp: lhr.audits['largest-contentful-paint'].numericValue,
+              cls: lhr.audits['cumulative-layout-shift'].numericValue,
+              ttfb: lhr.audits['server-response-time'].numericValue
+            };
+            
+            const body = `## 🚦 Lighthouse CI Results
+            
+            | Category | Score |
+            |----------|-------|
+            | 🎨 Performance | ${scores.performance}% |
+            | ♿ Accessibility | ${scores.accessibility}% |
+            | ✅ Best Practices | ${scores.bestPractices}% |
+            | 🔍 SEO | ${scores.seo}% |
+            
+            ### Core Web Vitals
+            
+            | Metric | Value | Threshold |
+            |--------|-------|-----------|
+            | LCP | ${(vitals.lcp / 1000).toFixed(2)}s | < 2.5s |
+            | CLS | ${vitals.cls.toFixed(3)} | < 0.10 |
+            | TTFB | ${vitals.ttfb.toFixed(0)}ms | < 600ms |
+            
+            ${scores.performance >= 90 && scores.accessibility >= 95 && scores.bestPractices >= 95 && scores.seo >= 90 ? '✅ All thresholds passed!' : '❌ Some thresholds failed. Please review and fix.'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Notify Pages deployment
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          echo "✅ Merged to master! GitHub Pages will serve the demo from /docs at:"
+          echo "   https://hutoczky.github.io/FormatX/scifi-ui/"

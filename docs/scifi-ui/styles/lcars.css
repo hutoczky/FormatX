@@ -1,4 +1,7 @@
-:root[data-theme="lcars"]{--bg:#070809;--text:#ffe7b6;--muted:#ffc977;--accent:#FF9A3C;--accent-2:#8C6AFF;--border:#FF9A3C;--panel:#1a12030e;--card:#ff99000f;--panel-glow:rgba(255,154,60,0.12);--progress-dur:1.6s}
+:root[data-theme="lcars"]{--bg:#070809;--text:#ffe7b6;--muted:#ffc977;--lcars-main:#FF9A3C;--lcars-accent:#8C6AFF;--accent:#FF9A3C;--accent-2:#8C6AFF;--border:#FF9A3C;--panel:#1a12030e;--card:#ff99000f;--panel-glow:rgba(255,154,60,0.12);--progress-dur:1.6s}
 :root[data-theme="lcars"] body{background:radial-gradient(1200px 600px at 50% -10%,#161008 0%,#070809 45%) fixed,#070809;font-family:"Eurostile","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-weight:600}
 :root[data-theme="lcars"] .brand{font-family:"Eurostile","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-weight:600;letter-spacing:.1em}
 :root[data-theme="lcars"] .panel,:root[data-theme="lcars"] .card,:root[data-theme="lcars"] .chip{box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 10px 30px rgba(0,0,0,.45),0 0 40px var(--panel-glow) inset}
+:root[data-theme="lcars"] .progress .bar{background:linear-gradient(90deg,#FF9A3C,#FFD79A)}
+:root[data-theme="lcars"] .progress .bar.active{animation:lcars-sheen 1.6s linear infinite}
+@keyframes lcars-sheen{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
