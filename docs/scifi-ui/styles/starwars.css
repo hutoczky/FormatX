@@ -10,8 +10,8 @@ body{ margin:0; background: var(--bg); color: var(--text); font-family:"Aurebesh
 
 /* Csillagmező + scanlines */
 body::before, body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:-2 }
-body::before{ background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.6), transparent 50%), radial-gradient(2px 2px at 35% 55%, rgba(255,255,255,.35), transparent 50%); animation: stars-move 70s linear infinite; opacity:.8 }
-body::after{ background: repeating-linear-gradient(0deg, rgba(96,229,255,.08) 0 1px, transparent 1px 4px); mix-blend-mode: screen; opacity:.16; animation: scanlines 6s linear infinite }
+body::before{ background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.6), transparent 50%), radial-gradient(2px 2px at 35% 55%, rgba(255,255,255,.35), transparent 50%); animation: stars-move 90s linear infinite; opacity:.75 }
+body::after{ background: repeating-linear-gradient(0deg, rgba(96,229,255,.06) 0 1px, transparent 1px 4px); mix-blend-mode: screen; opacity:.12; animation: scanlines 8s linear infinite }
 @keyframes stars-move{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-1200px) } }
 @keyframes scanlines{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-3px) } }
 
@@ -20,7 +20,7 @@ body::after{ background: repeating-linear-gradient(0deg, rgba(96,229,255,.08) 0 
 
 /* NAV / CTA */
 nav{ background: rgba(5,10,18,.55); border-bottom:1px solid var(--border); backdrop-filter: blur(6px); box-shadow: 0 0 20px rgba(96,229,255,.10) inset }
-nav button, .panel .btn, .quick-links a, .download-card{ appearance:none; border:1px solid var(--border); border-radius:8px; padding:.6rem .95rem; background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25)); color: var(--holo2); text-shadow: 0 0 8px rgba(96,229,255,.6); text-decoration:none }
+nav button, .panel .btn, .quick-links a, .download-card{ appearance:none; border:1px solid var(--border); border-radius:8px; padding:.6rem .95rem; background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25)); color: var(--holo2); text-shadow: 0 0 6px rgba(96,229,255,.45); text-decoration:none }
 .download-card small{ color: var(--holo2) }
 .mirror{ color: var(--holo2) }
 .features .box{ background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 0 24px rgba(96,229,255,.12) inset }
@@ -33,10 +33,19 @@ nav button, .panel .btn, .quick-links a, .download-card{ appearance:none; border
   animation: sw-stream-x 9s linear infinite;
 }
 @keyframes sw-stream-x{ 0%{ background-position: 0 0, 0 0 } 100%{ background-position: -320px 0, 0 0 } }
+.telemetry::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 20%, rgba(96,229,255,.04) 40%, transparent 60%, rgba(96,229,255,.03) 80%, transparent 100%);
+  opacity: .6;
+  animation: ring-pulse 12s ease-in-out infinite;
+}
+@keyframes ring-pulse { 0%, 100% { opacity: .5; transform: scale(1); } 50% { opacity: .7; transform: scale(1.05); } }
 .telemetry::after{
   content:""; position:fixed; left:-25%; top:0; width:35%; height:100%;
-  background: linear-gradient(90deg, rgba(96,229,255,.0), rgba(96,229,255,.20), rgba(96,229,255,.0));
-  filter: blur(10px); opacity:.35; mix-blend-mode: screen; animation: holo-sweep 2.8s linear infinite;
+  background: linear-gradient(90deg, rgba(96,229,255,.0), rgba(96,229,255,.18), rgba(96,229,255,.0));
+  filter: blur(10px); opacity:.3; mix-blend-mode: screen; animation: holo-sweep 2.8s linear infinite;
 }
 @keyframes holo-sweep{ 0%{ left:-25% } 100%{ left:100% } }
 
@@ -46,3 +55,45 @@ nav button, .panel .btn, .quick-links a, .download-card{ appearance:none; border
 #loader .loader-visual{ width:160px; height:160px; border-radius:50%; background: conic-gradient(from 0deg, rgba(96,229,255,.0), rgba(96,229,255,.6) 30%, rgba(96,229,255,.0) 60%), radial-gradient(closest-side, rgba(6,12,20,1) 68%, transparent 70%), radial-gradient(closest-side, rgba(96,229,255,.25) 0, transparent 70%); box-shadow: 0 0 24px rgba(96,229,255,.3), 0 0 120px rgba(96,229,255,.15) inset; animation: holo-spin 2.4s linear infinite }
 #loader .loader-visual span{ display:none }
 @keyframes holo-spin{ 0%{ transform: rotate(0deg) } 100%{ transform: rotate(360deg) } }
+
+/* ========== OVERRIDE: Download Cards — Block Layout & Airy Spacing ========== */
+.download-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.2rem;
+  margin: 1rem 0;
+}
+
+.download-card {
+  display: block !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  padding: 1.1rem 1.2rem;
+  border-radius: 12px;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.download-card:hover,
+.download-card:focus {
+  transform: translateY(-3px);
+  border-color: var(--holo);
+  box-shadow: 0 0 24px rgba(96,229,255,.25) inset, 0 4px 16px rgba(96,229,255,.2);
+}
+
+.download-card strong {
+  display: block;
+  color: var(--holo2);
+  font-size: 1.05em;
+  margin-bottom: 0.4rem;
+  text-shadow: 0 0 6px rgba(96,229,255,.5);
+}
+
+.download-card small {
+  display: block;
+  color: var(--holo2);
+  opacity: 0.85;
+  font-size: 0.85em;
+  line-height: 1.4;
+}
