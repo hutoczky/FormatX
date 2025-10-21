@@ -27,8 +27,9 @@ jobs:
         run: npm install -g @lhci/cli@0.13.x
 
       - name: Run Lighthouse CI
+        id: lighthouse
         run: |
-          lhci autorun
+          lhci autorun --rc=lighthouserc.json
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
@@ -39,3 +40,37 @@ jobs:
           name: lighthouse-results
           path: .lighthouseci/
           retention-days: 30
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const resultsPath = '.lighthouseci';
+            let comment = '## 🏠 Lighthouse CI Results\n\n';
+            comment += '✅ All Lighthouse checks passed!\n\n';
+            comment += '### Thresholds\n';
+            comment += '- LCP < 2.5s\n';
+            comment += '- CLS < 0.10\n';
+            comment += '- TTFB < 600ms\n\n';
+            comment += '📊 Full results uploaded as artifacts.\n\n';
+            comment += '🌐 **GitHub Pages**: Will be available at `https://hutoczky.github.io/FormatX/scifi-ui/` after merge to main';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Echo Pages config on merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "================================================"
+          echo "GitHub Pages Configuration"
+          echo "================================================"
+          echo "Source: main branch → /docs folder"
+          echo "URL: https://hutoczky.github.io/FormatX/scifi-ui/"
+          echo "Root redirect: /docs/index.html → scifi-ui/"
+          echo "================================================"
