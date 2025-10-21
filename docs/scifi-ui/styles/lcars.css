@@ -1,7 +1,130 @@
-:root[data-theme="lcars"]{--bg:#070809;--text:#ffe7b6;--muted:#ffc977;--accent:#FF9A3C;--accent-2:#8C6AFF;--border:#FF9A3C;--panel:#1a12030e;--card:#ff99000f;--panel-glow:rgba(255,154,60,0.12);--lcars-main:#FF9A3C;--lcars-accent:#8C6AFF;--progress-dur:1.6s}
-:root[data-theme="lcars"] body{background:radial-gradient(1200px 600px at 50% -10%,#161008 0%,#070809 45%) fixed,#070809;font-family:"Eurostile","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-weight:600}
-:root[data-theme="lcars"] .brand{font-family:"Eurostile","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-weight:600;letter-spacing:.1em}
-:root[data-theme="lcars"] .panel,:root[data-theme="lcars"] .card,:root[data-theme="lcars"] .chip{box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 10px 30px rgba(0,0,0,.45),0 0 40px var(--panel-glow) inset}
-:root[data-theme="lcars"] .progress .bar{background:linear-gradient(90deg,#FF9A3C,#FFD79A)}
-:root[data-theme="lcars"] .preloader__lcars .preloader__bar{background:linear-gradient(90deg,#FF9A3C,#FFD79A);animation:lcars-sheen 1.6s linear infinite}
-@keyframes lcars-sheen{0%{opacity:.8}50%{opacity:1}100%{opacity:.8}}
+/* LCARS (Star Trek) — véglegesített megjelenés a referenciakép alapján */
+:root[data-theme="lcars"]{
+  /* Alapszínek */
+  --bg:#070809; 
+  --text:#ffe7b6;
+  --muted:#ffc977;
+  --accent:#FF9A3C;
+  --accent-2:#8C6AFF;
+  --border:#FF9A3C;
+  --panel:#1a12030e;
+  --card:#ff99000f;
+  --panel-glow:rgba(255,154,60,0.12);
+  --progress-dur:1.6s;
+}
+
+/* Háttér és betű */
+:root[data-theme="lcars"] body{
+  background:
+    radial-gradient(1200px 600px at 50% -10%,#161008 0%,#070809 45%) fixed,
+    #070809;
+  color:var(--text);
+  font-family:"Eurostile","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  letter-spacing:.02em;
+}
+
+/* Hero cím – karakteres borostyán fény */
+:root[data-theme="lcars"] .brand{
+  position:relative;
+  color:var(--accent);
+  text-shadow:
+    0 0 12px #ff9d00aa,
+    0 0 1px #000;
+  font-weight:800;
+  letter-spacing:.10em;
+}
+
+/* Progress – borostyán átmenet LCARS sapkával */
+:root[data-theme="lcars"] .progress .bar{
+  background:linear-gradient(90deg,#FF9A3C,#FFD79A);
+  animation:fill var(--progress-dur) cubic-bezier(.2,.9,.2,1) infinite;
+}
+:root[data-theme="lcars"] .preloader__lcars .preloader__bar{
+  background:linear-gradient(90deg,#FF9A3C,#FFD79A);
+  animation:lcars-sheen 1.6s linear infinite;
+}
+@keyframes lcars-sheen{0%{opacity:.85}50%{opacity:1}100%{opacity:.85}}
+
+/* Téma-váltó kapszulák */
+:root[data-theme="lcars"] .switcher .theme{
+  border:2px solid var(--border);
+  color:#ffd089;
+  background:transparent;
+  border-radius:999px;
+}
+:root[data-theme="lcars"] .switcher .theme[aria-pressed="true"]{
+  background:linear-gradient(180deg,var(--accent),color-mix(in oklab,var(--accent),black 30%));
+  color:#141518;
+}
+
+/* LCARS sín-elemek (a képen lévő oldalsó sínek) */
+:root[data-theme="lcars"] .lcars-rails .rail{background:#ff9900;opacity:.9;filter:drop-shadow(0 0 8px rgba(255,153,0,.4))}
+:root[data-theme="lcars"] .lcars-rails .rail-b,
+:root[data-theme="lcars"] .lcars-rails .rail-c{background:#d45588}
+
+/* Panelek – dupla kontúr, erős LCARS körívek */
+:root[data-theme="lcars"] .panel{
+  background:var(--panel);
+  border:2px solid var(--border);
+  border-radius:28px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.02) inset,
+    0 0 0 3px rgba(255,154,60,.12) inset,
+    0 10px 30px rgba(0,0,0,.45),
+    0 0 40px var(--panel-glow);
+  padding:22px;
+}
+:root[data-theme="lcars"] .panel>h2{
+  color:var(--accent);
+  font:800 26px/1.2 "Eurostile","Segoe UI",system-ui,Arial,sans-serif;
+  letter-spacing:.06em;
+}
+
+/* Kártyák – belső keret és LCARS-sarkok */
+:root[data-theme="lcars"] .card{
+  background:var(--card);
+  border:2px solid color-mix(in oklab,var(--border),#000 22%);
+  border-radius:20px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+}
+
+/* Chip-ek és gombok a képen látható színekkel */
+:root[data-theme="lcars"] .chip{
+  border:2px solid var(--border);
+  border-radius:999px;
+  padding:10px 16px;
+  color:#1a1203;
+  background:linear-gradient(180deg,#ffbe66,#FF9A3C);
+  text-shadow:0 1px 0 rgba(255,255,255,.15);
+}
+:root[data-theme="lcars"] .chip[href="#funkciok"]{
+  background:linear-gradient(90deg,#FF9A3C,#ffbe66);
+}
+:root[data-theme="lcars"] .chip[href="#dokumentumok"]{
+  color:#2b1230;
+  border-color:var(--accent-2);
+  background:linear-gradient(180deg,#d08fff,#8C6AFF);
+}
+:root[data-theme="lcars"] .chip.hollow{
+  color:#ffd089;
+  background:transparent;
+  border-style:solid;
+}
+
+/* „Pill” akciógombok */
+:root[data-theme="lcars"] .pill{
+  border:2px solid var(--border);
+  border-radius:999px;
+  color:#1a1203;
+  background:linear-gradient(180deg,#ffd089,#FF9A3C);
+}
+:root[data-theme="lcars"] .pill.ghost{
+  color:#ffd089;
+  background:transparent;
+  border-color:#ffb35a;
+  border-style:dashed;
+}
+
+/* Lábléc – bal oldalt cyan copyright, jobb oldalt narancs link */
+:root[data-theme="lcars"] .footer .copy{color:#39d3ff}
+:root[data-theme="lcars"] .footer .to-top{color:#FF9A3C;border-bottom:2px solid color-mix(in oklab,var(--accent),#fff 10%)}
