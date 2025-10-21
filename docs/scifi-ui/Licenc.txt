@@ -1,0 +1,6 @@
+Sci‑Fi UI (docs/scifi-ui) – Helyi licencfeltételek (HU)
+
+Ez a demó NEM nyílt forráskódú; ingyenesen letölthető és telepíthető. A teljes licencszöveg a kiadásban érhető el:
+https://github.com/hutoczky/formatui/releases/download/v1.0.4/LICENSE.txt
+
+Támogatás/hibajelentés: https://github.com/hutoczky/FormatX/issues
