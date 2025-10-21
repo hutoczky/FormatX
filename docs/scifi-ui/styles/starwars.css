@@ -8,24 +8,33 @@
 *{ box-sizing:border-box } html,body{ height:100% }
 body{ margin:0; background: var(--bg); color: var(--text); font-family:"Aurebesh","Share Tech Mono","Orbitron",ui-monospace,monospace; position:relative; overflow-x:hidden }
 
-/* Csillagmező + scanlines */
+/* Csillagmező + scanlines — dinamikusabb */
 body::before, body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:-2 }
-body::before{ background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,.7), transparent 50%), radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.6), transparent 50%), radial-gradient(2px 2px at 35% 55%, rgba(255,255,255,.35), transparent 50%); animation: stars-move 70s linear infinite; opacity:.8 }
-body::after{ background: repeating-linear-gradient(0deg, rgba(96,229,255,.08) 0 1px, transparent 1px 4px); mix-blend-mode: screen; opacity:.16; animation: scanlines 6s linear infinite }
-@keyframes stars-move{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-1200px) } }
-@keyframes scanlines{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-3px) } }
+body::before{ background: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.8), transparent 50%), radial-gradient(1px 1px at 60% 80%, rgba(255,255,255,.75), transparent 50%), radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,.7), transparent 50%), radial-gradient(2px 2px at 35% 55%, rgba(255,255,255,.45), transparent 50%), radial-gradient(1px 1px at 15% 70%, rgba(255,255,255,.6), transparent 50%), radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,.5), transparent 50%), radial-gradient(2px 2px at 45% 15%, rgba(255,255,255,.4), transparent 50%); animation: stars-move 80s linear infinite; opacity:.85 }
+body::after{ background: repeating-linear-gradient(0deg, rgba(96,229,255,.08) 0 1px, transparent 1px 4px); mix-blend-mode: screen; opacity:.12; animation: scanlines 8s linear infinite }
+@keyframes stars-move{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-1400px) } }
+@keyframes scanlines{ 0%{ transform: translateY(0) } 100%{ transform: translateY(-4px) } }
 
 /* Holografikus képernyőkeret (grid overlay) */
 .chrome{ background: linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px, linear-gradient(to bottom, var(--grid) 1px, transparent 1px) 0 0/ 40px 40px; opacity:.35 }
 
 /* NAV / CTA */
 nav{ background: rgba(5,10,18,.55); border-bottom:1px solid var(--border); backdrop-filter: blur(6px); box-shadow: 0 0 20px rgba(96,229,255,.10) inset }
-nav button, .panel .btn, .quick-links a, .download-card{ appearance:none; border:1px solid var(--border); border-radius:8px; padding:.6rem .95rem; background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25)); color: var(--holo2); text-shadow: 0 0 8px rgba(96,229,255,.6); text-decoration:none }
-.download-card small{ color: var(--holo2) }
+nav button, .panel .btn, .quick-links a{ appearance:none; border:1px solid var(--border); border-radius:8px; padding:.6rem .95rem; background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25)); color: var(--holo2); text-shadow: 0 0 6px rgba(96,229,255,.5); text-decoration:none; transition: all 0.2s ease }
+nav button:hover, nav button:focus, .panel .btn:hover, .panel .btn:focus, .quick-links a:hover, .quick-links a:focus{ box-shadow: 0 0 16px rgba(96,229,255,.3); transform: translateY(-1px) }
+nav button:focus, .panel .btn:focus, .quick-links a:focus{ outline: 2px solid var(--holo); outline-offset: 2px }
 .mirror{ color: var(--holo2) }
 .features .box{ background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 0 24px rgba(96,229,255,.12) inset }
 
-/* Telemetria: adatfolyam oszlopok + holografikus “sweep” */
+/* Download section */
+.download-list{ display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin: 1rem 0 }
+@media (max-width: 700px){ .download-list{ grid-template-columns: 1fr } }
+.download-card{ display: block; width: 100%; white-space: normal; word-break: break-word; padding: 1rem; background: linear-gradient(180deg, rgba(10,20,28,.55), rgba(10,20,28,.25)); border: 1px solid var(--border); border-radius: 8px; color: var(--holo2); text-decoration: none; text-shadow: 0 0 4px rgba(96,229,255,.4); box-shadow: 0 0 16px rgba(96,229,255,.08) inset; transition: all 0.2s ease }
+.download-card:hover, .download-card:focus{ transform: translateY(-2px); box-shadow: 0 0 24px rgba(96,229,255,.18) inset, 0 4px 12px rgba(96,229,255,.15); border-color: var(--holo) }
+.download-card:focus{ outline: 2px solid var(--holo); outline-offset: 2px }
+.download-card small{ display: block; margin-top: 0.4rem; color: rgba(230,251,255,.7); font-size: 0.85em }
+
+/* Telemetria: adatfolyam + holografikus "sweep" körpályán + HUD gyűrűk */
 .telemetry{
   background:
     repeating-linear-gradient(90deg, rgba(96,229,255,.055) 0 1px, transparent 1px 18px),
@@ -33,12 +42,21 @@ nav button, .panel .btn, .quick-links a, .download-card{ appearance:none; border
   animation: sw-stream-x 9s linear infinite;
 }
 @keyframes sw-stream-x{ 0%{ background-position: 0 0, 0 0 } 100%{ background-position: -320px 0, 0 0 } }
-.telemetry::after{
-  content:""; position:fixed; left:-25%; top:0; width:35%; height:100%;
-  background: linear-gradient(90deg, rgba(96,229,255,.0), rgba(96,229,255,.20), rgba(96,229,255,.0));
-  filter: blur(10px); opacity:.35; mix-blend-mode: screen; animation: holo-sweep 2.8s linear infinite;
+/* Radiális holografikus sweep (körmozgás) */
+.telemetry::before{
+  content:""; position:fixed; top:50%; left:50%; width:600px; height:600px; margin:-300px 0 0 -300px;
+  background: conic-gradient(from 0deg, rgba(96,229,255,.0), rgba(96,229,255,.15) 15%, rgba(96,229,255,.0) 30%);
+  border-radius:50%; filter: blur(20px); opacity:.4; mix-blend-mode: screen; animation: holo-rotate 12s linear infinite; pointer-events:none;
 }
-@keyframes holo-sweep{ 0%{ left:-25% } 100%{ left:100% } }
+@keyframes holo-rotate{ 0%{ transform: rotate(0deg) } 100%{ transform: rotate(360deg) } }
+/* Concentric HUD gyűrűk (halvány) */
+.telemetry::after{
+  content:""; position:fixed; top:50%; left:50%; width:500px; height:500px; margin:-250px 0 0 -250px;
+  border-radius:50%; 
+  background: radial-gradient(circle, transparent 48%, rgba(96,229,255,.12) 48.5%, rgba(96,229,255,.12) 49%, transparent 49.5%), radial-gradient(circle, transparent 68%, rgba(96,229,255,.08) 68.5%, rgba(96,229,255,.08) 69%, transparent 69.5%), radial-gradient(circle, transparent 88%, rgba(96,229,255,.06) 88.5%, rgba(96,229,255,.06) 89%, transparent 89.5%);
+  opacity:.5; mix-blend-mode: screen; pointer-events:none; animation: hud-pulse 8s ease-in-out infinite;
+}
+@keyframes hud-pulse{ 0%,100%{ opacity:.5; transform:scale(1) } 50%{ opacity:.65; transform:scale(1.02) } }
 
 /* Loader — hologram aktiválás */
 #loader{ background: radial-gradient(60% 80% at 50% 50%, rgba(6,12,20,.9), rgba(6,12,20,.6)); backdrop-filter: blur(6px) }

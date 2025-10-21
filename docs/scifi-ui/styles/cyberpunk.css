@@ -23,15 +23,24 @@ body::before{
 .chrome::before{ content:""; position:fixed; inset:10px; border:1px solid var(--border); border-radius:16px; box-shadow: 0 0 18px rgba(0,255,245,.25), inset 0 0 18px rgba(255,0,184,.15); pointer-events:none }
 
 nav{ background: linear-gradient(90deg, rgba(255,0,184,.18), rgba(0,255,245,.18)); border-bottom: 1px solid var(--border); backdrop-filter: blur(6px) }
-nav button, .panel .btn, .quick-links a, .download-card{
+nav button, .panel .btn, .quick-links a{
   appearance:none; border:1px solid var(--border); border-radius:10px; padding:.6rem .95rem;
   background: radial-gradient(120px 40px at 20% 0%, rgba(0,255,245,.22), transparent 60%), linear-gradient(180deg, rgba(255,0,184,.18), rgba(0,255,245,.18)), linear-gradient(180deg, rgba(10,12,24,.9), rgba(10,12,24,.5));
-  color: var(--text); text-shadow: 0 0 10px rgba(0,255,245,.55); text-decoration:none
+  color: var(--text); text-shadow: 0 0 10px rgba(0,255,245,.55); text-decoration:none; transition: all 0.2s ease
 }
-.download-card small{ color: var(--text) }
+nav button:hover, nav button:focus, .panel .btn:hover, .panel .btn:focus, .quick-links a:hover, .quick-links a:focus{ box-shadow: 0 0 20px rgba(255,0,184,.3), 0 4px 12px rgba(0,255,245,.2); transform: translateY(-1px) }
+nav button:focus, .panel .btn:focus, .quick-links a:focus{ outline: 2px solid var(--neon); outline-offset: 2px }
 .mirror{ color: var(--neon) }
 
 .features .box{ background: var(--panel); border: 1px dashed var(--border); border-radius: 12px; box-shadow: 0 0 18px rgba(255,0,184,.18) inset }
+
+/* Download section */
+.download-list{ display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin: 1rem 0 }
+@media (max-width: 700px){ .download-list{ grid-template-columns: 1fr } }
+.download-card{ display: block; width: 100%; white-space: normal; word-break: break-word; padding: 1rem; background: linear-gradient(180deg, rgba(10,12,24,.85), rgba(10,12,24,.65)); border: 1px solid var(--border); border-radius: 10px; color: var(--text); text-decoration: none; text-shadow: 0 0 6px rgba(0,255,245,.35); box-shadow: 0 0 16px rgba(255,0,184,.12) inset; transition: all 0.2s ease }
+.download-card:hover, .download-card:focus{ transform: translateY(-2px); border-color: var(--magenta); box-shadow: 0 0 24px rgba(255,0,184,.25) inset, 0 4px 16px rgba(255,0,184,.2); text-shadow: 0 0 10px var(--magenta) }
+.download-card:focus{ outline: 2px solid var(--neon); outline-offset: 2px }
+.download-card small{ display: block; margin-top: 0.4rem; color: rgba(233,236,255,.75); font-size: 0.85em }
 
 /* Cím glitch (biztonságos, CSS rétegelt eltolás) */
 h1{ position:relative; text-shadow: 0 0 10px rgba(0,255,245,.4), 0 0 20px rgba(255,0,184,.3) }
@@ -43,15 +52,31 @@ h1{ position:relative; text-shadow: 0 0 10px rgba(0,255,245,.4), 0 0 20px rgba(2
   h1{ animation: glitchShift 3.2s ease-in-out infinite }
 }
 
-/* Telemetria: diagonális neon adatáram + finom villódzás */
+/* Telemetria: diagonális neon sweep + code rain textúra + chromatic aberration */
 .telemetry{
   background:
     linear-gradient(120deg, rgba(255,0,184,.10), rgba(0,255,245,.08) 60%, rgba(255,234,0,.08)),
-    repeating-linear-gradient(120deg, rgba(0,255,245,.06) 0 2px, transparent 2px 22px);
-  background-size: 200% 200%, 120% 120%;
+    repeating-linear-gradient(120deg, rgba(0,255,245,.06) 0 2px, transparent 2px 22px),
+    repeating-linear-gradient(180deg, rgba(0,255,245,.02) 0 1px, transparent 1px 8px);
+  background-size: 200% 200%, 120% 120%, 100% 100%;
   animation: cp-stream 7.5s linear infinite, cp-flicker 3.8s ease-in-out infinite;
   mix-blend-mode: screen;
 }
+@keyframes cp-stream{ 0%{ background-position: 0% 0%, 0% 0%, 0 0 } 100%{ background-position: 200% 200%, 120% 120%, 0 -120px } }
+@keyframes cp-flicker{ 0%,100%{ opacity: .32 } 50%{ opacity: .42 } }
+/* Diagonális neon sweep (erősebb glitch hatás) */
+.telemetry::before{
+  content:""; position:fixed; left:-50%; top:-50%; width:100%; height:200%;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,0,184,.25) 48%, rgba(0,255,245,.25) 52%, transparent 60%);
+  filter: blur(15px); opacity:.4; mix-blend-mode: screen; animation: neon-sweep 8s linear infinite; pointer-events:none;
+}
+@keyframes neon-sweep{ 0%{ transform: translate(-100%, -100%) } 100%{ transform: translate(100%, 100%) } }
+/* Chromatic aberration hatás a .chrome kereten */
+.chrome::before{ 
+  filter: drop-shadow(2px 0 1px rgba(255,0,184,.25)) drop-shadow(-2px 0 1px rgba(0,255,245,.25)); 
+  animation: aberration-pulse 4s ease-in-out infinite;
+}
+@keyframes aberration-pulse{ 0%,100%{ filter: drop-shadow(2px 0 1px rgba(255,0,184,.25)) drop-shadow(-2px 0 1px rgba(0,255,245,.25)) } 50%{ filter: drop-shadow(3px 0 2px rgba(255,0,184,.35)) drop-shadow(-3px 0 2px rgba(0,255,245,.35)) } }
 @keyframes cp-stream{ 0%{ background-position: 0% 0%, 0% 0% } 100%{ background-position: 200% 200%, 120% 120% } }
 @keyframes cp-flicker{ 0%,100%{ opacity: .32 } 50%{ opacity: .42 } }
 
