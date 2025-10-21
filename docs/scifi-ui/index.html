@@ -15,7 +15,7 @@
   <link id="theme-css" rel="stylesheet" href="styles/lcars.css" />
   <style>
     :root{--pad:18px;--max:1100px}
-    body{margin:0;background:#080a0d;color:#e9eefc;font:600 16px/1.35 "Segoe UI",system-ui,Roboto,Arial,sans-serif}
+    body{margin:0;background:#080a0d;color:#e9eefc;font:600 16px/1.35 \"Segoe UI\",system-ui,Roboto,Arial,sans-serif}
     .topbar{position:sticky;top:0;z-index:10;padding:16px 20px 10px;background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.35) 60%,transparent)}
     .switcher{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
     .switcher button{border-radius:999px;border:2px solid #FF9A3C;background:transparent;color:#ffd089;padding:8px 14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
@@ -25,7 +25,7 @@
     .progress .cap{position:absolute;top:2px;right:2px;bottom:2px;width:50px;border-radius:0 22px 22px 0;background:linear-gradient(180deg,#181a1e,#0f1216);border-left:2px solid #7a4a00}
     @keyframes fill{0%{transform:translateX(-100%)}100%{transform:translateX(0)}}
     h1,h2{margin:0}
-    .brand{position:relative;font:900 clamp(34px,6.5vw,66px)/1.05 "Segoe UI",system-ui,Roboto,Arial,sans-serif;letter-spacing:.1em;color:#FF9A3C;text-shadow:0 0 12px #ff9d00aa,0 0 1px #000}
+    .brand{position:relative;font:900 clamp(34px,6.5vw,66px)/1.05 \"Segoe UI\",system-ui,Roboto,Arial,sans-serif;letter-spacing:.1em;color:#FF9A3C;text-shadow:0 0 12px #ff9d00aa,0 0 1px #000}
     .chips{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px}
     .chip{border:2px solid #FF9A3C;border-radius:999px;padding:10px 16px;text-transform:uppercase;font-weight:900;letter-spacing:.12em;background:transparent;color:#ffd089}
     .container{max-width:var(--max);margin:20px auto 60px;padding:0 20px;position:relative}
@@ -63,6 +63,7 @@
     <div class="chips" role="navigation" aria-label="Gyors linkek">
       <a class="chip" href="#letoltesek">LETÖLTÉS</a>
       <a class="chip" href="#funkciok">FUNKCIÓK</a>
+      <a class="chip" href="#leiras">LEÍRÁS</a>
       <a class="chip" href="#dokumentumok">DOKUMENTUMOK</a>
     </div>
   </section>
@@ -81,7 +82,7 @@
           <p class="muted">Windows app • hutoczky/formatx</p>
           <div class="actions">
             <button class="pill ghost">Villámgyors</button>
-            <a class="pill primary" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/FormatX_Installer_v1015.exe" target="_blank" rel="noopener" download>Letöltés</a>
+            <a class="pill primary" href="https://github.com/hutoczky/formatui/releases/latest/download/FormatX_Installer_v1015.exe" target="_blank" rel="noopener" download>Letöltés</a>
           </div>
         </article>
         <article class="card">
@@ -89,7 +90,7 @@
           <p class="muted">Kiinduló információk</p>
           <div class="actions">
             <button class="pill ghost">Bővíthető</button>
-            <a class="pill primary" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/README.txt" target="_blank" rel="noopener">Megnyitás</a>
+            <a class="pill primary" href="https://github.com/hutoczky/formatui/releases/latest/download/README.txt" target="_blank" rel="noopener">Megnyitás</a>
           </div>
         </article>
         <article class="card">
@@ -97,7 +98,7 @@
           <p class="muted">Felhasználási feltételek</p>
           <div class="actions">
             <button class="pill ghost">Információ</button>
-            <a class="pill primary" href="https://github.com/hutoczky/formatui/releases/download/v1.0.4/LICENSE.txt" target="_blank" rel="noopener">Megnyitás</a>
+            <a class="pill primary" href="https://github.com/hutoczky/formatui/releases/latest/download/LICENSE.txt" target="_blank" rel="noopener">Megnyitás</a>
           </div>
         </article>
       </div>
@@ -115,6 +116,34 @@
         <li>Azonos eszközök, eltérő stílusok</li>
         <li>3 téma: Star Trek, Star Wars, Cyberpunk</li>
         <li>Neon, hologram, glitch, scanline és LCARS elemek</li>
+      </ul>
+    </section>
+
+    <section id="leiras" class="panel" aria-labelledby="h-leiras">
+      <h2 id="h-leiras">Program leírása</h2>
+      <p>Windowsos lemezkezelő és telepítő eszköz laptopokra optimalizálva.</p>
+
+      <h3>Újdonságok</h3>
+      <ul class="features">
+        <li>Partíciók a Formázás menü alatt (külön ikon), közvetlen lemezválasztással és terv alkalmazással.</li>
+        <li>Moduláris témarendszer (BlueWave, Midnight, Forest, Solar) azonnali váltással, saját téma‑importtal.</li>
+        <li>Megbízható fájlválasztó: WinUI picker + Win32 + WinForms fallback, a legutóbbi könyvtár megjegyzésével.</li>
+      </ul>
+
+      <h3>Főbb funkciók</h3>
+      <ul class="features">
+        <li>ISO → USB: ISO kiválasztás, célmeghajtó, séma (GPT/MBR), opcionális ellenőrzés.</li>
+        <li>Formázás: NTFS/FAT32/exFAT/ReFS, címke, gyors formázás.</li>
+        <li>Partíciók: lemez kiválasztás, terv készítés (Primary/EFI/MSR), fájlrendszer és címke, betűjel; gyors opció; előnézet; terv alkalmazása és visszaállítása.</li>
+        <li>Lemez egységek: S.M.A.R.T. diagnosztika és gyors lekérdezés, felület szkennelés; riport és export (CSV/HTML, ZIP).</li>
+        <li>Biztonságos törlés: 1–3 menetes törlés, haladás és ETA.</li>
+        <li>Témák: beépített csomagok (BlueWave, Midnight, Forest, Solar), saját téma‑import; azonnali váltás.</li>
+        <li>Háttér: egyedi háttér beállítása (JPG/PNG).</li>
+        <li>Laptop mód: háttér‑figyelők és intenzív műveletek szüneteltetése akkumulátoron.</li>
+        <li>Naplózás: egyetlen naplófájl; legutóbbi esemény felülírással; export (CSV/HTML).</li>
+        <li>Beállítások: élő alkalmazás és értesítések.</li>
+        <li>Diagnosztika: automatikus kivétel‑naplózás, ideiglenes őrszemek WinRT/COM hívások körül.</li>
+        <li>Üzemmódok: offline és auditált működés.</li>
       </ul>
     </section>
 
