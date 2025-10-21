@@ -123,6 +123,14 @@ npx lighthouse http://localhost:8000/scifi-ui/ --view
 
 ### Lighthouse Thresholds (CI)
 
+The CI workflow enforces the following Lighthouse thresholds:
+
+**Core Web Vitals:**
+- LCP (Largest Contentful Paint): < 2.5s
+- CLS (Cumulative Layout Shift): < 0.10
+- TTFB (Time to First Byte): < 600ms
+
+**Lighthouse Categories:**
 - Performance: ≥ 90%
 - Accessibility: ≥ 95%
 - Best Practices: ≥ 95%
@@ -134,6 +142,8 @@ Run Lighthouse CI:
 npm install -g @lhci/cli
 lhci autorun
 ```
+
+The CI workflow runs automatically on pull requests and pushes to main/master branches that modify files under `docs/scifi-ui/`.
 
 ## 🔧 JavaScript Modules
 
@@ -160,27 +170,34 @@ document.addEventListener('theme:changed', (e) => {
 ### preloader.js
 
 **Behavior:**
-- Preloads critical CSS/SVG assets
+- Adds `role="status"` and `aria-live="polite"` to preloader container
+- Preloads critical CSS/SVG assets via `fetch()` with `cache:'force-cache'`
 - Shows LCARS-style boot bar with `role="progressbar"`
-- Respects `prefers-reduced-motion` (simplified indicator)
+- Respects `prefers-reduced-motion` (100ms shortcut to completion)
 - Updates `aria-valuenow` as resources load
-- Hides and dispatches `CustomEvent('preloader:done')` on completion
+- Sets `aria-hidden="true"` and hides preloader on completion
+- Dispatches `CustomEvent('preloader:done')` when finished
 
 **Accessible Features:**
 - ARIA progressbar with live value updates
+- `role="status"` and `aria-live="polite"` for screen reader announcements
 - Visual boot animation (LCARS style)
-- Status text for screen readers
-- Reduced motion support
+- Reduced motion support with fast completion
 
 ### anim-controller.js
 
 **Behavior:**
 - Manages background SVG/CSS layers per theme
-- Star Wars: HUD grid overlay with animated scanning line
+- Star Wars: HUD grid overlay with animated scanning line (2s linear animation)
 - Cyberpunk: Neon noise overlay with shift animation
 - LCARS: Minimal/none (clean interface)
 - Applies gentle pointer parallax after preloader (disabled for reduced-motion)
 - Listens for `theme:changed` and `preloader:done` events
+- Activates theme-specific animations:
+  - LCARS: 1.6s cubic-bezier(.2,.9,.2,1) transitions
+  - Star Wars: 1.8s ease-in-out with HUD class activation
+  - Cyberpunk: 1.2s steps(6,end) with 'glitch' class
+- Sets loader-sample `.bar` width to 100% and adds 'active' class on preloader:done
 
 **Parallax:**
 - Smooth lerp-based movement
@@ -194,25 +211,37 @@ document.addEventListener('theme:changed', (e) => {
 All visual assets are created with CSS and SVG:
 
 - **hud-grid.svg**: Minimal Star Wars-style HUD grid (original work)
+- **lcars-panels.svg**: LCARS-style decorative panels placeholder (original work)
+- **hologram-activation.svg**: Holographic activation effect placeholder (original work)
 - **CSS animations**: All effects implemented in pure CSS
 - **Fonts**: System font stacks used (no external fonts loaded)
+
+### Asset Inventory
+
+- **SVG Files**: 3 original placeholder files (hud-grid, lcars-panels, hologram-activation)
+- **Images**: Empty directory with .gitkeep (ready for WebP/AVIF assets)
+- **Fonts**: Empty directory with .gitkeep; using system font stacks
+- **Audio**: Empty directory with .gitkeep (optional ambient sounds)
 
 ### Fonts Used
 
 System fallbacks (no licensing required):
-- LCARS: `"Eurostile", "Microgramma", "Orbitron", "Exo 2", system-ui`
-- Star Wars: `"Share Tech Mono", "Orbitron", ui-monospace`
-- Cyberpunk: `"OCR A", "Audiowide", "Exo 2", system-ui`
+- LCARS: `"Eurostile", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif`
+- Star Wars: `"Orbitron", "Roboto Mono", ui-monospace, system-ui, monospace`
+- Cyberpunk: `"OCR-A", "VT323", ui-monospace, monospace`
+
+**Font Preloading**: Font preload tags are commented in `index.html` until licensed fonts are added. See commented examples for woff2 format.
 
 ### No Unlicensed IP
 
 This demo does **NOT** include:
-- Trademarked logos or symbols
+- Trademarked logos or symbols (e.g., Starfleet insignia, Star Wars emblems)
 - Copyrighted imagery from films/shows
 - Licensed sound effects or music
 - Proprietary typefaces
+- Star Trek ship designs (enterprise.svg removed in commit 4)
 
-All designs are inspired aesthetics created from scratch.
+All designs are inspired aesthetics created from scratch using generic geometric shapes and color schemes.
 
 ## ✅ Testing Steps
 
