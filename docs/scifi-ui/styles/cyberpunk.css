@@ -1,63 +1,9 @@
-/* Cyberpunk 2077 — neon (magenta/cián/sárga), OCR‑A hangulat, glitch/scan.
-   Neon‑shift háttér + grid; folyamatos diagonális adatáram + finom villódzás. */
-:root{
-  --bg:#0b0b12; --text:#e9ecff; --neon:#00fff5; --magenta:#ff00b8; --yellow:#ffea00;
-  --border: rgba(0,255,245,.28); --panel: rgba(10,12,24,.55);
-}
-*{ box-sizing:border-box } html,body{ height:100% }
-body{ margin:0; background: var(--bg); color: var(--text); font-family:"OCR A","OCR A Std","Audiowide","Exo 2",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; position:relative; overflow-x:hidden }
-/* Neon shift + grid */
-body::before{
-  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
-  background:
-    linear-gradient(120deg, rgba(255,0,184,.12), transparent 40%),
-    linear-gradient(300deg, rgba(0,255,245,.12), transparent 40%),
-    linear-gradient(0deg, rgba(10,12,24,.85), rgba(10,12,24,.85)),
-    repeating-linear-gradient(0deg, rgba(0,255,245,.06) 0 1px, transparent 1px 4px);
-  animation: neon-shift 6s ease-in-out infinite;
-  filter: saturate(1.1);
-}
-@keyframes neon-shift{ 0%,100%{ filter:hue-rotate(0deg) } 50%{ filter:hue-rotate(18deg) } }
-
-/* Futurisztikus képernyőkeret (neon perem) */
-.chrome::before{ content:""; position:fixed; inset:10px; border:1px solid var(--border); border-radius:16px; box-shadow: 0 0 18px rgba(0,255,245,.25), inset 0 0 18px rgba(255,0,184,.15); pointer-events:none }
-
-nav{ background: linear-gradient(90deg, rgba(255,0,184,.18), rgba(0,255,245,.18)); border-bottom: 1px solid var(--border); backdrop-filter: blur(6px) }
-nav button, .panel .btn, .quick-links a, .download-card{
-  appearance:none; border:1px solid var(--border); border-radius:10px; padding:.6rem .95rem;
-  background: radial-gradient(120px 40px at 20% 0%, rgba(0,255,245,.22), transparent 60%), linear-gradient(180deg, rgba(255,0,184,.18), rgba(0,255,245,.18)), linear-gradient(180deg, rgba(10,12,24,.9), rgba(10,12,24,.5));
-  color: var(--text); text-shadow: 0 0 10px rgba(0,255,245,.55); text-decoration:none
-}
-.download-card small{ color: var(--text) }
-.mirror{ color: var(--neon) }
-
-.features .box{ background: var(--panel); border: 1px dashed var(--border); border-radius: 12px; box-shadow: 0 0 18px rgba(255,0,184,.18) inset }
-
-/* Cím glitch (biztonságos, CSS rétegelt eltolás) */
-h1{ position:relative; text-shadow: 0 0 10px rgba(0,255,245,.4), 0 0 20px rgba(255,0,184,.3) }
-@media (prefers-reduced-motion:no-preference){
-  h1::before, h1::after{ content: attr(data-glitch); position:absolute; inset:0; pointer-events:none }
-  h1::before{ color: var(--magenta); transform: translate(1px,0) }
-  h1::after { color: var(--neon);    transform: translate(-1px,0) }
-  @keyframes glitchShift{ 0%{transform:translate(0,0)} 20%{transform:translate(1px,-1px)} 40%{transform:translate(-1px,1px)} 60%{transform:translate(1px,1px)} 80%{transform:translate(-1px,-1px)} 100%{transform:translate(0,0)} }
-  h1{ animation: glitchShift 3.2s ease-in-out infinite }
-}
-
-/* Telemetria: diagonális neon adatáram + finom villódzás */
-.telemetry{
-  background:
-    linear-gradient(120deg, rgba(255,0,184,.10), rgba(0,255,245,.08) 60%, rgba(255,234,0,.08)),
-    repeating-linear-gradient(120deg, rgba(0,255,245,.06) 0 2px, transparent 2px 22px);
-  background-size: 200% 200%, 120% 120%;
-  animation: cp-stream 7.5s linear infinite, cp-flicker 3.8s ease-in-out infinite;
-  mix-blend-mode: screen;
-}
-@keyframes cp-stream{ 0%{ background-position: 0% 0%, 0% 0% } 100%{ background-position: 200% 200%, 120% 120% } }
-@keyframes cp-flicker{ 0%,100%{ opacity: .32 } 50%{ opacity: .42 } }
-
-/* Loader: scan‑bar panel */
-#loader{ background: linear-gradient(180deg, rgba(10,12,24,.9), rgba(10,12,24,.65)); backdrop-filter: blur(6px) }
-#loader .loader-content{ color: var(--neon) }
-#loader .loader-visual{ position:relative; width:min(640px,86vw); height:120px; border:1px solid var(--border); border-radius:14px; box-shadow: 0 0 24px rgba(0,255,245,.25), inset 0 0 24px rgba(255,0,184,.15); overflow:hidden }
-#loader .loader-visual::after{ content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; background: linear-gradient(90deg, rgba(255,0,184,.0), rgba(255,0,184,.22), rgba(0,255,245,.22), rgba(0,255,245,.0)); filter: blur(6px); animation: scan-move 1.6s linear infinite }
-@keyframes scan-move{ 0%{ left:-40% } 100%{ left:100% } }
+:root[data-theme="cyberpunk"]{--bg:#0a0010;--text:#ffe990;--muted:#ff86e6;--panel:#ff00ff14;--card:#ff00ff24;--magenta:#FF2EC0;--cyan:#00E5FF;--yellow:#FFD500;--accent:#FF2EC0;--accent-2:#FFD500;--border:#FF2EC0}
+:root[data-theme="cyberpunk"] body{background:radial-gradient(1200px 600px at 50% -10%,#1a0024 0%,#0a0010 45%) fixed,#0a0010;filter:contrast(1.06) saturate(1.25);font-family:"OCR-A","VT323",ui-monospace,monospace}
+:root[data-theme="cyberpunk"] .brand{font-family:"OCR-A","VT323",ui-monospace,monospace;color:var(--yellow);text-shadow:0 0 6px rgba(255,46,192,.35),0 0 2px #000,0 0 16px rgba(0,229,255,.25)}
+:root[data-theme="cyberpunk"] .panel,:root[data-theme="cyberpunk"] .card,:root[data-theme="cyberpunk"] .chip{border-color:color-mix(in oklab,var(--magenta),#000 35%);box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 0 40px #ff00ff22,inset 0 0 30px #ff00ff11}
+@keyframes cp-glitch{0%{clip-path:inset(0 0 0 0);transform:translateX(0)}10%{clip-path:inset(0 0 85% 0);transform:translateX(-2px)}20%{clip-path:inset(80% 0 0 0);transform:translateX(1px)}30%{clip-path:inset(10% 0 60% 0);transform:translateX(-1px)}40%{clip-path:inset(60% 0 20% 0);transform:translateX(2px)}50%{clip-path:inset(0 0 0 0);transform:translateX(0)}60%{clip-path:inset(0 0 70% 0);transform:translateX(2px)}70%{clip-path:inset(65% 0 0 0);transform:translateX(-2px)}80%{clip-path:inset(20% 0 40% 0);transform:translateX(1px)}100%{clip-path:inset(0 0 0 0);transform:translateX(0)}}
+@keyframes huePulse{0%{filter:hue-rotate(0)}50%{filter:hue-rotate(12deg)}100%{filter:hue-rotate(0)}}
+:root[data-theme="cyberpunk"] .brand[data-glitch="on"]{animation:cp-glitch 800ms steps(6) infinite, huePulse 800ms linear infinite}
+:root[data-theme="cyberpunk"] .preloader__lcars .preloader__bar{background:linear-gradient(90deg,#FF2EC0,#9b0bb0)}
+:root[data-theme="cyberpunk"] .preloader__label{color:#ffe990}

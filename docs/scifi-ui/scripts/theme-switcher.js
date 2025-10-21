@@ -1,36 +1,12 @@
 (function(){
-  const STORAGE_KEY = 'sci-fi-ui-theme';
-  const THEMES = ['lcars','starwars','cyberpunk'];
-  const link = document.getElementById('theme-stylesheet');
-  const loader = document.getElementById('loader');
-  let cssLoadTimer;
-
-  function showLoader(){ if(loader){ loader.classList.add('show'); document.body.classList.add('loading'); } }
-  function hideLoader(){ if(loader){ loader.classList.remove('show'); document.body.classList.remove('loading'); } }
-
-  function apply(theme){
-    if(!THEMES.includes(theme)) theme = 'lcars';
-    showLoader();
-    link.setAttribute('href', `styles/${theme}.css`);
-    try{ localStorage.setItem(STORAGE_KEY, theme); }catch(_){ }
-    document.documentElement.setAttribute('data-theme', theme);
-
-    const onLoaded = ()=>{ hideLoader(); link.removeEventListener('load', onLoaded, {once:true}); if(cssLoadTimer){ clearTimeout(cssLoadTimer); cssLoadTimer=null; } };
-    link.addEventListener('load', onLoaded, {once:true});
-    cssLoadTimer = setTimeout(onLoaded, 1200);
-  }
-
-  document.addEventListener('DOMContentLoaded', ()=>{
-    let initial = 'lcars';
-    try{ const s = localStorage.getItem(STORAGE_KEY); if(s && THEMES.includes(s)) initial = s; }catch(_){ }
-    apply(initial);
-    document.querySelectorAll('nav [data-theme]').forEach(btn=>{
-      btn.addEventListener('click', ()=>apply(btn.getAttribute('data-theme')));
-      btn.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); btn.click(); }});
-      btn.setAttribute('role','button'); btn.tabIndex=0;
-    });
-  });
-
-  // Inline kompatibilitás
-  window.switchTheme = (t)=>apply(t);
+  const THEMES={lcars:'styles/lcars.css',starwars:'styles/starwars.css',cyberpunk:'styles/cyberpunk.css'};
+  const STORAGE_KEY='scifi-theme';
+  const root=document.documentElement;
+  const linkEl=document.getElementById('theme-css');
+  const brand=document.getElementById('brand');
+  function setPressed(btn,on){btn.setAttribute('aria-pressed',String(on));btn.setAttribute('aria-selected',String(on));}
+  function toggleGlitch(theme){if(!brand)return; if(theme==='cyberpunk'){brand.setAttribute('data-glitch','on');}else{brand.removeAttribute('data-glitch');}}
+  function setTheme(name){if(!THEMES[name])return; linkEl.setAttribute('href',THEMES[name]); root.setAttribute('data-theme',name); try{localStorage.setItem(STORAGE_KEY,name);}catch(e){}; toggleGlitch(name); document.querySelectorAll('.switcher .theme').forEach(b=>setPressed(b,b.dataset.theme===name)); document.dispatchEvent(new CustomEvent('theme:changed',{detail:{theme:name}}));}
+  let start='lcars'; try{const saved=localStorage.getItem(STORAGE_KEY); if(saved&&THEMES[saved]) start=saved;}catch(e){}; setTheme(start);
+  document.querySelectorAll('.switcher .theme').forEach(btn=>{btn.addEventListener('click',()=>setTheme(btn.dataset.theme)); btn.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTheme(btn.dataset.theme);}})});
 })();
