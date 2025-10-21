@@ -54,6 +54,30 @@ h1{ position:relative; text-shadow: 0 0 10px rgba(0,255,245,.4), 0 0 20px rgba(2
 }
 @keyframes cp-stream{ 0%{ background-position: 0% 0%, 0% 0% } 100%{ background-position: 200% 200%, 120% 120% } }
 @keyframes cp-flicker{ 0%,100%{ opacity: .32 } 50%{ opacity: .42 } }
+/* Code rain texture overlay */
+.telemetry::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,255,245,.02) 3px 4px, transparent 4px 8px);
+  opacity: .5;
+  animation: code-rain 15s linear infinite;
+}
+@keyframes code-rain { 0% { transform: translateY(0); } 100% { transform: translateY(50px); } }
+/* Glitch sweep */
+.telemetry::after {
+  content: "";
+  position: fixed;
+  top: -20%;
+  left: -30%;
+  width: 40%;
+  height: 140%;
+  background: linear-gradient(90deg, transparent, rgba(255,0,184,.15), rgba(0,255,245,.15), transparent);
+  filter: blur(8px);
+  opacity: .4;
+  animation: glitch-sweep 4.5s ease-in-out infinite;
+}
+@keyframes glitch-sweep { 0%, 100% { left: -30%; opacity: 0; } 20% { opacity: .4; } 80% { opacity: .4; } 100% { left: 100%; opacity: 0; } }
 
 /* Loader: scan‑bar panel */
 #loader{ background: linear-gradient(180deg, rgba(10,12,24,.9), rgba(10,12,24,.65)); backdrop-filter: blur(6px) }
@@ -61,3 +85,46 @@ h1{ position:relative; text-shadow: 0 0 10px rgba(0,255,245,.4), 0 0 20px rgba(2
 #loader .loader-visual{ position:relative; width:min(640px,86vw); height:120px; border:1px solid var(--border); border-radius:14px; box-shadow: 0 0 24px rgba(0,255,245,.25), inset 0 0 24px rgba(255,0,184,.15); overflow:hidden }
 #loader .loader-visual::after{ content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; background: linear-gradient(90deg, rgba(255,0,184,.0), rgba(255,0,184,.22), rgba(0,255,245,.22), rgba(0,255,245,.0)); filter: blur(6px); animation: scan-move 1.6s linear infinite }
 @keyframes scan-move{ 0%{ left:-40% } 100%{ left:100% } }
+
+/* ========== OVERRIDE: Download Cards — Block Layout & Airy Spacing ========== */
+.download-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.2rem;
+  margin: 1rem 0;
+}
+
+.download-card {
+  display: block !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  padding: 1.1rem 1.2rem;
+  border-radius: 10px;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.download-card:hover,
+.download-card:focus {
+  transform: translateY(-3px);
+  border-color: var(--magenta);
+  box-shadow: 0 0 24px rgba(255,0,184,.3) inset, 0 4px 16px rgba(0,255,245,.2);
+  background: radial-gradient(120px 40px at 20% 0%, rgba(255,0,184,.28), transparent 60%), linear-gradient(180deg, rgba(255,0,184,.18), rgba(0,255,245,.18)), linear-gradient(180deg, rgba(10,12,24,.9), rgba(10,12,24,.5));
+}
+
+.download-card strong {
+  display: block;
+  color: var(--neon);
+  font-size: 1.05em;
+  margin-bottom: 0.4rem;
+  text-shadow: 0 0 8px rgba(0,255,245,.5);
+}
+
+.download-card small {
+  display: block;
+  color: var(--text);
+  opacity: 0.9;
+  font-size: 0.85em;
+  line-height: 1.4;
+}
