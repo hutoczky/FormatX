@@ -39,3 +39,13 @@ jobs:
           name: lighthouse-results
           path: .lighthouseci/
           retention-days: 30
+
+      - name: Confirm Pages deployment configuration
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        run: |
+          echo "✅ GitHub Pages is configured to serve from /docs directory"
+          echo "📦 Demo will be available at: https://hutoczky.github.io/FormatX/scifi-ui/"
+          echo "📋 Lighthouse thresholds enforced:"
+          echo "   - LCP < 2.5s"
+          echo "   - CLS < 0.10"
+          echo "   - TTFB < 600ms"

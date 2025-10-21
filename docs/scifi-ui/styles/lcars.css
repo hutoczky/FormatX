@@ -2,3 +2,6 @@
 :root[data-theme="lcars"] body{background:radial-gradient(1200px 600px at 50% -10%,#161008 0%,#070809 45%) fixed,#070809;font-family:"Eurostile","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-weight:600}
 :root[data-theme="lcars"] .brand{font-family:"Eurostile","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-weight:600;letter-spacing:.1em}
 :root[data-theme="lcars"] .panel,:root[data-theme="lcars"] .card,:root[data-theme="lcars"] .chip{box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 10px 30px rgba(0,0,0,.45),0 0 40px var(--panel-glow) inset}
+:root[data-theme="lcars"] .progress .bar{background:linear-gradient(90deg,#FF9A3C,#FFD79A)}
+:root[data-theme="lcars"] .preloader__lcars .preloader__bar{background:linear-gradient(90deg,#FF9A3C,#FFD79A);animation:fill var(--progress-dur) cubic-bezier(.2,.9,.2,1) infinite,lcars-sheen 1.6s linear infinite}
+@keyframes lcars-sheen{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}

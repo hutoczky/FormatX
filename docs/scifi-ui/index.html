@@ -10,6 +10,10 @@
         content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; media-src 'self'; connect-src 'self'">
   <link rel="preload" as="style" href="styles/base.css" />
   <link rel="preload" as="style" href="styles/themes.css" />
+  <!-- Example font preloads (uncomment when licensed fonts are added) -->
+  <!-- <link rel="preload" href="assets/fonts/Eurostile.woff2" as="font" type="font/woff2" crossorigin> -->
+  <!-- <link rel="preload" href="assets/fonts/Orbitron.woff2" as="font" type="font/woff2" crossorigin> -->
+  <!-- <link rel="preload" href="assets/fonts/OCR-A.woff2" as="font" type="font/woff2" crossorigin> -->
   <link rel="stylesheet" href="styles/base.css" />
   <link rel="stylesheet" href="styles/themes.css" />
   <link id="theme-css" rel="stylesheet" href="styles/lcars.css" />
@@ -37,7 +41,7 @@
   <div class="fx fx-vignette" aria-hidden="true"></div>
   <div id="theme-layers" aria-hidden="true"></div>
 
-  <div id="preloader" class="preloader" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+  <div id="preloader" class="preloader" role="status" aria-live="polite" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
     <div class="preloader__lcars">
       <div class="preloader__bar"></div>
       <div class="preloader__cap"></div>

@@ -123,10 +123,16 @@ npx lighthouse http://localhost:8000/scifi-ui/ --view
 
 ### Lighthouse Thresholds (CI)
 
+**Category Scores:**
 - Performance: ≥ 90%
 - Accessibility: ≥ 95%
 - Best Practices: ≥ 95%
 - SEO: ≥ 90%
+
+**Core Web Vitals:**
+- LCP (Largest Contentful Paint): < 2.5s
+- CLS (Cumulative Layout Shift): < 0.10
+- TTFB (Time to First Byte): < 600ms
 
 Run Lighthouse CI:
 
