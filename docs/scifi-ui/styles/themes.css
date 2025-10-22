@@ -2,9 +2,21 @@
 [data-theme="lcars"]{--accent:#FF9A3C;--accent-2:#8C6AFF;--border:#FF9A3C}
 [data-theme="starwars"]{--accent:#2EE6FF;--accent-2:#90F0FF;--border:#2EE6FF}
 [data-theme="cyberpunk"]{--accent:#FF2EC0;--accent-2:#FFD500;--border:#FF2EC0}
-.switcher .theme[data-theme="starwars"]{border-color:#2EE6FF;color:#bfe9ff}
-.switcher .theme[data-theme="cyberpunk"]{border-color:#FF2EC0;color:#ffe88a}
+
+/* Theme switcher chips - uniform styling across all themes */
+.switcher .theme{
+  border-width:3px;
+  padding:9px 18px;
+  font-weight:900;
+  letter-spacing:.14em;
+}
+.switcher .theme[data-theme="starwars"]{border-color:#FF9A3C;color:#ffd089}
+.switcher .theme[data-theme="cyberpunk"]{border-color:#FF9A3C;color:#ffd089}
 .fx.holo-grid{position:fixed;inset:0;opacity:.25;mix-blend-mode:screen;pointer-events:none}
 .fx.glitch-overlay{position:fixed;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.3}
-@media (prefers-reduced-motion:reduce){[data-anim]{animation:none!important;transition:none!important}}
+@media (prefers-reduced-motion:reduce){
+  [data-anim]{animation:none!important;transition:none!important}
+  .progress .bar{animation:none!important}
+  .preloader__bar{animation:none!important}
+}
 :where(a,button,.chip,.pill):focus-visible{outline:3px solid color-mix(in oklab,var(--accent),#fff 10%);outline-offset:3px;border-radius:12px}
