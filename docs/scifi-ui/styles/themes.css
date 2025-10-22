@@ -85,3 +85,23 @@
   font-weight:800; letter-spacing:.02em;
   background:transparent; color:#e8ddcf;
 }
+
+/* --- HERO PRIMARY CHIPS — FORCE FILLED PER THE MOCKS --- */
+:root[data-theme="lcars"] .hero .chips .chip{
+  background:linear-gradient(180deg, var(--amber), color-mix(in oklab, var(--amber), #000 18%)) !important;
+  color:#1a1203 !important; border-color:var(--amber) !important;
+}
+:root[data-theme="lcars"] .hero .chips .chip:nth-child(3){
+  background:linear-gradient(180deg, var(--magenta), color-mix(in oklab, var(--magenta), #000 15%)) !important;
+  color:#1b0f1e !important; border-color:var(--magenta) !important;
+}
+
+:root[data-theme="starwars"] .hero .chips .chip{
+  background:linear-gradient(180deg, var(--cyan), color-mix(in oklab, var(--cyan), #000 25%)) !important;
+  color:#0b1a21 !important; border-color:var(--cyan) !important;
+}
+
+:root[data-theme="cyberpunk"] .hero .chips .chip{
+  background:linear-gradient(180deg, #FF2EC0, color-mix(in oklab, #FF2EC0, #000 20%)) !important;
+  color:#1a0b18 !important; border-color:#FF2EC0 !important;
+}
