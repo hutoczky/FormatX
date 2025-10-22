@@ -51,10 +51,10 @@
   </div>
 
   <header class="topbar" role="banner">
-    <nav class="switcher" aria-label="Téma választó" role="tablist">
-      <button role="tab" aria-selected="true" aria-pressed="true" data-theme="lcars" class="btn theme">STAR TREK</button>
-      <button role="tab" aria-selected="false" aria-pressed="false" data-theme="starwars" class="btn theme">STAR WARS</button>
-      <button role="tab" aria-selected="false" aria-pressed="false" data-theme="cyberpunk" class="btn theme">CYBERPUNK</button>
+    <nav class="switcher" aria-label="Téma választó" role="group">
+      <button aria-pressed="true" data-theme="lcars" class="btn theme">STAR TREK</button>
+      <button aria-pressed="false" data-theme="starwars" class="btn theme">STAR WARS</button>
+      <button aria-pressed="false" data-theme="cyberpunk" class="btn theme">CYBERPUNK</button>
     </nav>
   </header>
 
@@ -169,6 +169,6 @@
 
   <script defer src="scripts/preloader.js"></script>
   <script defer src="scripts/theme-switcher.js"></script>
-  <script defer src="scripts/anim-controller.js"></script>
+  <script defer src="scripts/animation-controller.js"></script>
 </body>
 </html>

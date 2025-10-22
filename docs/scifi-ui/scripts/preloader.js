@@ -1,5 +1,6 @@
 (function(){
   const pre=document.getElementById('preloader'); if(!pre) return;
+  const bar=pre.querySelector('.preloader__bar');
   pre.setAttribute('role','status'); pre.setAttribute('aria-live','polite');
   const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const assets=['styles/base.css','styles/themes.css','styles/lcars.css','styles/starwars.css','styles/cyberpunk.css','assets/svgs/hud-grid.svg','assets/svgs/lcars-panels.svg','assets/svgs/hologram-activation.svg'];
@@ -8,6 +9,7 @@
   function updateProgress(val){
     progress=Math.min(100,val);
     pre.setAttribute('aria-valuenow',String(Math.round(progress)));
+    if(bar) bar.style.setProperty('--w',`${progress}%`);
   }
   function hidePreloader(delay){
     setTimeout(()=>{

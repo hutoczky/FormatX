@@ -18,7 +18,7 @@
     if(theme==='cyberpunk'){document.body.classList.add('glitch');}else{document.body.classList.remove('glitch');}
   }
   activate(document.documentElement.getAttribute('data-theme')||'lcars');
-  document.addEventListener('theme:changed',e=>{activate(e.detail.theme)});
+  document.addEventListener('themechange',e=>{activate(e.detail.theme)});
   document.addEventListener('preloader:done',()=>{
     if(progressBar){progressBar.style.width='100%'; progressBar.classList.add('active');}
     if(prefersReduced) return; 
