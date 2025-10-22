@@ -1,7 +1,7 @@
-:root{--cyan:#6df6ff;--magenta:#ff00ff;--yellow:#ffd400}
-[data-theme="lcars"]{--accent:#FF9A3C;--accent-2:#8C6AFF;--border:#FF9A3C}
-[data-theme="starwars"]{--accent:#2EE6FF;--accent-2:#90F0FF;--border:#2EE6FF}
-[data-theme="cyberpunk"]{--accent:#FF2EC0;--accent-2:#FFD500;--border:#FF2EC0}
+:root{--cyan:#6df6ff;--magenta:#ff00ff;--yellow:#ffd400;--border-w-theme:3px}
+[data-theme="lcars"]{--accent:#FF9A3C;--accent-2:#8C6AFF;--border:#FF9A3C;--border-w:3px}
+[data-theme="starwars"]{--accent:#2EE6FF;--accent-2:#90F0FF;--border:#2EE6FF;--border-w:2px}
+[data-theme="cyberpunk"]{--accent:#FF2EC0;--accent-2:#FFD500;--border:#FF2EC0;--border-w:2px}
 .switcher .theme[data-theme="starwars"]{border-color:#2EE6FF;color:#bfe9ff}
 .switcher .theme[data-theme="cyberpunk"]{border-color:#FF2EC0;color:#ffe88a}
 .fx.holo-grid{position:fixed;inset:0;opacity:.25;mix-blend-mode:screen;pointer-events:none}
