@@ -1,5 +1,6 @@
 :root[data-theme="cyberpunk"]{--bg:#0a0010;--text:#ffe990;--muted:#ff86e6;--panel:#ff00ff14;--card:#ff00ff24;--cp-magenta:#FF2EC0;--cp-cyan:#00E5FF;--cp-yellow:#FFD500;--magenta:#FF2EC0;--cyan:#00E5FF;--yellow:#FFD500;--accent:#FF2EC0;--accent-2:#FFD500;--border:#FF2EC0}
 :root[data-theme="cyberpunk"] body{background:radial-gradient(1200px 600px at 50% -10%,#1a0024 0%,#0a0010 45%) fixed,#0a0010;filter:contrast(1.06) saturate(1.25);font-family:"OCR-A","VT323",ui-monospace,monospace}
+:root[data-theme="cyberpunk"] .switcher .theme{border-radius:999px}
 :root[data-theme="cyberpunk"] .brand{font-family:"OCR-A","VT323",ui-monospace,monospace;color:var(--yellow);text-shadow:0 0 6px rgba(255,46,192,.35),0 0 2px #000,0 0 16px rgba(0,229,255,.25)}
 :root[data-theme="cyberpunk"] .panel,:root[data-theme="cyberpunk"] .card,:root[data-theme="cyberpunk"] .chip{border-color:color-mix(in oklab,var(--magenta),#000 35%);box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 0 40px #ff00ff22,inset 0 0 30px #ff00ff11}
 :root[data-theme="cyberpunk"] .progress .bar{background:linear-gradient(90deg,var(--cp-cyan),#8c2eff)}

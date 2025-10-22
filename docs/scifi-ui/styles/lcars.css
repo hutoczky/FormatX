@@ -28,16 +28,25 @@
   position:relative;
   color:var(--accent);
   text-shadow:
-    0 0 12px #ff9d00aa,
+    0 0 18px #FF9A3C66,
+    0 0 3px #FFB266,
     0 0 1px #000;
-  font-weight:800;
-  letter-spacing:.10em;
+  font-weight:900;
+  letter-spacing:.08em;
 }
 
-/* Progress – borostyán átmenet LCARS sapkával */
+/* Hero alcím – cyan */
+:root[data-theme="lcars"] .hero .muted{
+  color:#2EE6FF;
+  background:linear-gradient(90deg,#2EE6FF,#90F0FF);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+/* Progress – borostyán átmenet LCARS sapkával (non-animated) */
 :root[data-theme="lcars"] .progress .bar{
   background:linear-gradient(90deg,#FF9A3C,#FFD79A);
-  animation:fill var(--progress-dur) cubic-bezier(.2,.9,.2,1) infinite;
 }
 :root[data-theme="lcars"] .preloader__lcars .preloader__bar{
   background:linear-gradient(90deg,#FF9A3C,#FFD79A);
@@ -47,10 +56,13 @@
 
 /* Téma-váltó kapszulák */
 :root[data-theme="lcars"] .switcher .theme{
-  border:2px solid var(--border);
+  border:3px solid var(--border);
   color:#ffd089;
   background:transparent;
-  border-radius:999px;
+  border-radius:28px;
+  padding:10px 22px;
+  font-weight:900;
+  letter-spacing:.08em;
 }
 :root[data-theme="lcars"] .switcher .theme[aria-pressed="true"]{
   background:linear-gradient(180deg,var(--accent),color-mix(in oklab,var(--accent),black 30%));
@@ -58,9 +70,48 @@
 }
 
 /* LCARS sín-elemek (a képen lévő oldalsó sínek) */
-:root[data-theme="lcars"] .lcars-rails .rail{background:#ff9900;opacity:.9;filter:drop-shadow(0 0 8px rgba(255,153,0,.4))}
-:root[data-theme="lcars"] .lcars-rails .rail-b,
-:root[data-theme="lcars"] .lcars-rails .rail-c{background:#d45588}
+:root[data-theme="lcars"] .lcars-rails{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+}
+:root[data-theme="lcars"] .lcars-rails .rail{
+  position:absolute;
+  background:#FF9A3C;
+  opacity:.9;
+  filter:drop-shadow(0 0 8px rgba(255,153,0,.4));
+}
+:root[data-theme="lcars"] .lcars-rails .rail-a{
+  left:0;
+  top:40px;
+  width:60px;
+  height:180px;
+  border-radius:0 30px 30px 0;
+}
+:root[data-theme="lcars"] .lcars-rails .rail-b{
+  left:0;
+  top:240px;
+  width:50px;
+  height:220px;
+  border-radius:0 25px 25px 0;
+  background:#d45588;
+}
+:root[data-theme="lcars"] .lcars-rails .rail-c{
+  right:0;
+  top:40px;
+  width:60px;
+  height:180px;
+  border-radius:30px 0 0 30px;
+  background:#d45588;
+}
+:root[data-theme="lcars"] .lcars-rails .rail-d{
+  right:0;
+  top:240px;
+  width:50px;
+  height:220px;
+  border-radius:25px 0 0 25px;
+}
 
 /* Panelek – dupla kontúr, erős LCARS körívek */
 :root[data-theme="lcars"] .panel{
