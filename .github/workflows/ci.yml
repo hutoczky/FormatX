@@ -46,8 +46,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
-            const resultsPath = '.lighthouseci';
             let comment = '## 🏠 Lighthouse CI Results\n\n';
             comment += '✅ All Lighthouse checks passed!\n\n';
             comment += '### Thresholds\n';
@@ -55,7 +53,7 @@ jobs:
             comment += '- CLS < 0.10\n';
             comment += '- TTFB < 600ms\n\n';
             comment += '📊 Full results uploaded as artifacts.\n\n';
-            comment += '🌐 **GitHub Pages**: Will be available at `https://hutoczky.github.io/FormatX/scifi-ui/` after merge to main';
+            comment += '🌐 **GitHub Pages**: Will be available at `https://hutoczky.github.io/FormatX/scifi-ui/` after merge to master';
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -65,12 +63,12 @@ jobs:
             });
 
       - name: Echo Pages config on merge
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           echo "================================================"
           echo "GitHub Pages Configuration"
           echo "================================================"
-          echo "Source: main branch → /docs folder"
+          echo "Source: master branch → /docs folder"
           echo "URL: https://hutoczky.github.io/FormatX/scifi-ui/"
           echo "Root redirect: /docs/index.html → scifi-ui/"
           echo "================================================"
