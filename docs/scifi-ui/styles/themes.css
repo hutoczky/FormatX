@@ -7,4 +7,4 @@
 .fx.holo-grid{position:fixed;inset:0;opacity:.25;mix-blend-mode:screen;pointer-events:none}
 .fx.glitch-overlay{position:fixed;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.3}
 @media (prefers-reduced-motion:reduce){[data-anim]{animation:none!important;transition:none!important}}
-:where(a,button,.chip,.pill):focus-visible{outline:3px solid color-mix(in oklab,var(--accent),#fff 10%);outline-offset:3px;border-radius:12px}
+:where(a,button,.chip,.pill):focus-visible{outline:3px solid color-mix(in oklab,var(--accent),#fff 12%);outline-offset:3px;border-radius:12px}
