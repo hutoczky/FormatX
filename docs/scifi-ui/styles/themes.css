@@ -1,10 +1,87 @@
-:root{--cyan:#6df6ff;--magenta:#ff00ff;--yellow:#ffd400}
-[data-theme="lcars"]{--accent:#FF9A3C;--accent-2:#8C6AFF;--border:#FF9A3C}
-[data-theme="starwars"]{--accent:#2EE6FF;--accent-2:#90F0FF;--border:#2EE6FF}
-[data-theme="cyberpunk"]{--accent:#FF2EC0;--accent-2:#FFD500;--border:#FF2EC0}
-.switcher .theme[data-theme="starwars"]{border-color:#2EE6FF;color:#bfe9ff}
-.switcher .theme[data-theme="cyberpunk"]{border-color:#FF2EC0;color:#ffe88a}
-.fx.holo-grid{position:fixed;inset:0;opacity:.25;mix-blend-mode:screen;pointer-events:none}
-.fx.glitch-overlay{position:fixed;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.3}
-@media (prefers-reduced-motion:reduce){[data-anim]{animation:none!important;transition:none!important}}
-:where(a,button,.chip,.pill):focus-visible{outline:3px solid color-mix(in oklab,var(--accent),#fff 10%);outline-offset:3px;border-radius:12px}
+:root{
+  --cyan:#2EE6FF;
+  --cyan-soft:#90F0FF;
+  --amber:#FF9A3C;
+  --amber-hi:#FFD79A;
+  --magenta:#8C6AFF;
+
+  /* Capsule geometry */
+  --chip-border:3px;
+  --chip-radius:999px;
+  --chip-pad-y:10px;
+  --chip-pad-x:18px;
+}
+
+/* Per-theme accents */
+[data-theme="lcars"]    { --accent:var(--amber);   --accent-2:var(--magenta); --border:var(--amber) }
+[data-theme="starwars"] { --accent:var(--cyan);    --accent-2:var(--cyan-soft); --border:var(--cyan) }
+[data-theme="cyberpunk"]{ --accent:#FF2EC0;        --accent-2:#FFD500; --border:#FF2EC0 }
+
+/* Theme switcher: thicker outline, consistent padding */
+.switcher .theme{
+  display:inline-flex; align-items:center; justify-content:center;
+  border:var(--chip-border) solid color-mix(in oklab, var(--border), #000 20%);
+  border-radius:var(--chip-radius);
+  padding:var(--chip-pad-y) var(--chip-pad-x);
+  font-weight:800; letter-spacing:.02em;
+  background:transparent; color:#e9e1d6;
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset;
+}
+.switcher .theme + .theme{ margin-left:12px }
+
+/* Selected theme's chip is filled; others outlined */
+:root[data-theme="lcars"] .switcher .theme[data-theme="lcars"]{
+  background:linear-gradient(180deg, var(--amber), color-mix(in oklab, var(--amber), #000 18%));
+  border-color:var(--amber); color:#141518; text-shadow:0 1px 0 rgba(255,255,255,.15);
+}
+:root[data-theme="lcars"] .switcher .theme[data-theme="starwars"]{ border-color:var(--amber); color:#ffdebf }
+:root[data-theme="lcars"] .switcher .theme[data-theme="cyberpunk"]{ border-color:var(--magenta); color:#ffe8ff }
+
+:root[data-theme="starwars"] .switcher .theme[data-theme="starwars"]{
+  background:linear-gradient(180deg, var(--cyan), color-mix(in oklab, var(--cyan), #000 25%));
+  border-color:var(--cyan); color:#0b1a21; text-shadow:0 1px 0 rgba(255,255,255,.12);
+}
+:root[data-theme="starwars"] .switcher .theme[data-theme="lcars"]{ border-color:var(--cyan); color:#c6f3ff }
+:root[data-theme="starwars"] .switcher .theme[data-theme="cyberpunk"]{ border-color:var(--cyan-soft); color:#d7f8ff }
+
+:root[data-theme="cyberpunk"] .switcher .theme[data-theme="cyberpunk"]{
+  background:linear-gradient(180deg, #FF2EC0, color-mix(in oklab, #FF2EC0, #000 20%));
+  border-color:#FF2EC0; color:#1a0b18; text-shadow:0 1px 0 rgba(255,255,255,.12);
+}
+:root[data-theme="cyberpunk"] .switcher .theme[data-theme="lcars"]{ border-color:#FF2EC0; color:#ffd0f1 }
+:root[data-theme="cyberpunk"] .switcher .theme[data-theme="starwars"]{ border-color:#20E0FF; color:#c8fbff }
+
+/* Hover/active micro feedback */
+.switcher .theme:hover{ filter:saturate(1.05) brightness(1.02) }
+.switcher .theme:active{ transform:translateY(1px) }
+
+/* Decorative layers (safe) */
+.fx.holo-grid{ position:fixed; inset:0; opacity:.22; mix-blend-mode:screen; pointer-events:none }
+.fx.glitch-overlay{ position:fixed; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:.25 }
+
+/* Motion safety guards */
+@media (prefers-reduced-motion:reduce){
+  [data-anim]{ animation:none!important; transition:none!important }
+}
+.reduce-motion, .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after{
+  animation:none!important; transition:none!important
+}
+
+/* Ensure hero decorative progress never animates (all themes) */
+.hero .progress .bar{ animation:none!important }
+
+/* Focus rings */
+:where(a,button,.chip,.pill):focus-visible{
+  outline:3px solid color-mix(in oklab, var(--accent), #fff 8%);
+  outline-offset:3px; border-radius:12px;
+}
+
+/* Shared CTA/capsule base */
+.chip,.pill{
+  display:inline-flex; align-items:center; justify-content:center;
+  border:var(--chip-border) solid color-mix(in oklab, var(--border), #000 18%);
+  border-radius:var(--chip-radius);
+  padding:var(--chip-pad-y) var(--chip-pad-x);
+  font-weight:800; letter-spacing:.02em;
+  background:transparent; color:#e8ddcf;
+}
