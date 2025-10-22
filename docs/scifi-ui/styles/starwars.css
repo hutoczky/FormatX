@@ -147,7 +147,9 @@
 }
 
 /* HUD grid overlay - strengthened */
-:root[data-theme="starwars"] .fx.holo-grid{
+:root[data-theme="starwars"] .fx.holo-grid,
+:root[data-theme="starwars"] .fx-holo-grid{
+  display:block;
   opacity:.35;
   mix-blend-mode:screen;
   filter:drop-shadow(0 0 6px var(--grid-glow));
@@ -183,6 +185,7 @@
 }
 
 @media (prefers-reduced-motion:reduce){
-  :root[data-theme="starwars"] .fx.holo-grid{animation:none}
+  :root[data-theme="starwars"] .fx.holo-grid,
+  :root[data-theme="starwars"] .fx-holo-grid{animation:none}
   :root[data-theme="starwars"] .brand::after{animation:none}
 }
