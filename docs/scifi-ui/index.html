@@ -10,11 +10,6 @@
         content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; media-src 'self'; connect-src 'self'">
   <link rel="preload" as="style" href="styles/base.css" />
   <link rel="preload" as="style" href="styles/themes.css" />
-  <!-- Font preloads (to be activated when licensed fonts are available)
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/Eurostile-Bold.woff2" crossorigin />
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/Orbitron-Bold.woff2" crossorigin />
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/OCR-A.woff2" crossorigin />
-  -->
   <link rel="stylesheet" href="styles/base.css" />
   <link rel="stylesheet" href="styles/themes.css" />
   <link id="theme-css" rel="stylesheet" href="styles/lcars.css" />
@@ -63,11 +58,10 @@
       <div class="cap"></div>
     </div>
     <h2 class="brand" id="brand">FORMÁZÁS A JÖVŐBŐL</h2>
-    <p class="muted" style="opacity:.85">Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
+    <p class="brand-sub">Gyors. Moduláris. Bővíthető.<br>Azonos eszközök, eltérő stílusok.</p>
     <div class="chips" role="navigation" aria-label="Gyors linkek">
       <a class="chip" href="#letoltesek">LETÖLTÉS</a>
       <a class="chip" href="#funkciok">FUNKCIÓK</a>
-      <a class="chip" href="#leiras">LEÍRÁS</a>
       <a class="chip" href="#dokumentumok">DOKUMENTUMOK</a>
     </div>
   </section>
@@ -76,40 +70,59 @@
     <div class="lcars-rails" aria-hidden="true">
       <span class="rail rail-a"></span><span class="rail rail-b"></span>
       <span class="rail rail-c"></span><span class="rail rail-d"></span>
+      <!-- kiegészítő LCARS “lemezek” a mock szerint -->
+      <span class="plate p1"></span>
+      <span class="plate p2"></span>
+      <span class="plate p3"></span>
     </div>
 
-    <section id="letoltesek" class="panel" aria-labelledby="h-let">
+    <section id="letoltesek" class="panel downloads" aria-labelledby="h-let">
       <h2 id="h-let">Letöltések</h2>
-      <div class="grid">
+      <div class="downloads-grid">
+        <!-- 1. sor: teljes szélesség -->
         <article class="card">
-          <h3>FormatX Light telepítő</h3>
-          <p class="muted">Windows app • hutoczky/formatx</p>
+          <h3>FormatX Light telepítő v1.0.4</h3>
+          <p class="muted">Windows app • hutoczky/formatx v1.0.4</p>
           <div class="actions">
-            <button class="pill ghost">Villámgyors</button>
-            <a class="pill primary" href="https://github.com/hutoczky/formatui/releases/latest/download/FormatX_Installer_v1015.exe" target="_blank" rel="noopener" download>Letöltés</a>
+            <span class="chip hollow">Villámgyors</span>
+            <a class="pill" href="https://github.com/hutoczky/formatui/releases/latest/download/FormatX_Installer_v1015.exe" target="_blank" rel="noopener" download>Letöltés</a>
           </div>
         </article>
+
+        <!-- 2. sor: bal nagy -->
+        <article class="card">
+          <h3>Windows App Runtime (x64)</h3>
+          <p class="muted">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
+        </article>
+        <!-- 2. sor: jobb kicsi -->
         <article class="card">
           <h3>README.txt</h3>
           <p class="muted">Kiinduló információk</p>
           <div class="actions">
-            <button class="pill ghost">Bővíthető</button>
-            <a class="pill primary" href="https://github.com/hutoczky/formatui/releases/latest/download/README.txt" target="_blank" rel="noopener">Megnyitás</a>
+            <a class="pill" href="https://github.com/hutoczky/formatui/releases/latest/download/README.txt" target="_blank" rel="noopener">Megnyitás</a>
           </div>
         </article>
+
+        <!-- 3. sor: bal nagy -->
         <article class="card">
-          <h3>Licenc.txt</h3>
-          <p class="muted">Felhasználási feltételek</p>
+          <h3>.NET Desktop Runtime 10.0 (x64)</h3>
+          <p class="muted">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
+        </article>
+        <!-- 3. sor: jobb kicsi -->
+        <article class="card">
+          <h3>Web UI</h3>
+          <p class="muted">Böngészős felület</p>
           <div class="actions">
-            <button class="pill ghost">Információ</button>
-            <a class="pill primary" href="https://github.com/hutoczky/formatui/releases/latest/download/LICENSE.txt" target="_blank" rel="noopener">Megnyitás</a>
+            <a class="pill" href="https://hutoczky.github.io/FormatX/scifi-ui/" target="_blank" rel="noopener">Megnyitás</a>
           </div>
         </article>
       </div>
-      <div class="chip-row">
-        <span class="chip hollow">Villámgyors</span>
-        <span class="chip hollow">Bővíthető</span>
-        <span class="chip hollow">Web UI</span>
+
+      <!-- CTA sor a panel alatt -->
+      <div class="cta-row">
+        <span class="chip cta-speed">Villámgyors</span>
+        <span class="chip cta-ext">Bővíthető</span>
+        <a class="chip cta-web" href="https://hutoczky.github.io/FormatX/scifi-ui/" target="_blank" rel="noopener">Web UI</a>
       </div>
     </section>
 
@@ -123,34 +136,6 @@
       </ul>
     </section>
 
-    <section id="leiras" class="panel" aria-labelledby="h-leiras">
-      <h2 id="h-leiras">Program leírása</h2>
-      <p>Windowsos lemezkezelő és telepítő eszköz laptopokra optimalizálva.</p>
-
-      <h3>Újdonságok</h3>
-      <ul class="features">
-        <li>Partíciók a Formázás menü alatt (külön ikon), közvetlen lemezválasztással és terv alkalmazással.</li>
-        <li>Moduláris témarendszer (BlueWave, Midnight, Forest, Solar) azonnali váltással, saját téma‑importtal.</li>
-        <li>Megbízható fájlválasztó: WinUI picker + Win32 + WinForms fallback, a legutóbbi könyvtár megjegyzésével.</li>
-      </ul>
-
-      <h3>Főbb funkciók</h3>
-      <ul class="features">
-        <li>ISO → USB: ISO kiválasztás, célmeghajtó, séma (GPT/MBR), opcionális ellenőrzés.</li>
-        <li>Formázás: NTFS/FAT32/exFAT/ReFS, címke, gyors formázás.</li>
-        <li>Partíciók: lemez kiválasztás, terv készítés (Primary/EFI/MSR), fájlrendszer és címke, betűjel; gyors opció; előnézet; terv alkalmazása és visszaállítása.</li>
-        <li>Lemez egységek: S.M.A.R.T. diagnosztika és gyors lekérdezés, felület szkennelés; riport és export (CSV/HTML, ZIP).</li>
-        <li>Biztonságos törlés: 1–3 menetes törlés, haladás és ETA.</li>
-        <li>Témák: beépített csomagok (BlueWave, Midnight, Forest, Solar), saját téma‑import; azonnali váltás.</li>
-        <li>Háttér: egyedi háttér beállítása (JPG/PNG).</li>
-        <li>Laptop mód: háttér‑figyelők és intenzív műveletek szüneteltetése akkumulátoron.</li>
-        <li>Naplózás: egyetlen naplófájl; legutóbbi esemény felülírással; export (CSV/HTML).</li>
-        <li>Beállítások: élő alkalmazás és értesítések.</li>
-        <li>Diagnosztika: automatikus kivétel‑naplózás, ideiglenes őrszemek WinRT/COM hívások körül.</li>
-        <li>Üzemmódok: offline és auditált működés.</li>
-      </ul>
-    </section>
-
     <section id="dokumentumok" class="panel" aria-labelledby="h-doc">
       <h2 id="h-doc">Dokumentumok</h2>
       <p>API leírás, komponenskönyvtár és témázási útmutató.</p>
@@ -158,7 +143,7 @@
   </main>
 
   <footer class="footer" role="contentinfo">
-    <div class="copy">© 2025 Sci‑Fi UI</div>
+    <div class="copy">© 2023 SCI‑FI UI</div>
     <a class="to-top" href="#top">Vissza a tetejére</a>
   </footer>
 
