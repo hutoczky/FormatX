@@ -25,7 +25,7 @@ img{max-width:100%;height:auto}
 .hero{max-width:var(--max);margin:40px auto 12px;padding:0 20px;text-align:center}
 .progress{position:relative;height:44px;max-width:620px;margin:0 auto 18px;border-radius:24px;background:#0b0d10;box-shadow:inset 0 0 0 2px rgba(0,0,0,.55);overflow:hidden}
 .progress .bar{position:absolute;inset:2px 52px 2px 2px;border-radius:22px 0 0 22px;background:linear-gradient(90deg,#ffa726,#cc6f00);transition:none;width:0;animation:fill var(--progress-dur) cubic-bezier(.2,.9,.2,1) infinite}
-.progress .cap{position:absolute;top:2px;right:2px;bottom:2px;width:50px;border-radius:0 22px 22px 0;background:linear-gradient(180deg,#181a1e,#0f1216);}
+.progress .cap{position:absolute;top:2px;right:2px;bottom:2px;width:50px;border-radius:0 22px 22px 0;background:linear-gradient(180deg,#181a1e,#0f1216);border-left:2px solid rgba(122,74,0,.5)}
 @keyframes fill{0%{transform:translateX(-100%)}100%{transform:translateX(0)}}
 .brand{margin:0 0 12px;font:900 clamp(34px,6.5vw,66px)/1.05 "Segoe UI",system-ui,Roboto,Arial,sans-serif;letter-spacing:.1em;color:var(--accent-2);text-shadow:0 0 12px #ff9d00aa,0 0 1px #000}
 .chips{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px}
@@ -54,8 +54,8 @@ img{max-width:100%;height:auto}
 .preloader{position:fixed;inset:0;display:grid;place-items:center;background:#070809;z-index:1000}
 .preloader[hidden]{display:none}
 .preloader__lcars{position:relative;height:44px;max-width:520px;width:80%;border-radius:24px;background:#0b0d10;box-shadow:inset 0 0 0 2px rgba(0,0,0,.55)}
-.preloader__lcars .preloader__bar{position:absolute;inset:2px 52px 2px 2px;border-radius:22px 0 0 22px;background:linear-gradient(90deg,#ffa726,#cc6f00);animation:fill var(--progress-dur) cubic-bezier(.2,.9,.2,1) infinite}
-.preloader__lcars .preloader__cap{position:absolute;top:2px;right:2px;bottom:2px;width:50px;border-radius:0 22px 22px 0;background:linear-gradient(180deg,#181a1e,#0f1216)}
+.preloader__lcars .preloader__bar{position:absolute;inset:2px 52px 2px 2px;border-radius:22px 0 0 22px;background:linear-gradient(90deg,#ffa726,#cc6f00);animation:fill var(--progress-dur) cubic-bezier(.2,.9,.2,1) infinite;width:var(--w,0)}
+.preloader__lcars .preloader__cap{position:absolute;top:2px;right:2px;bottom:2px;width:50px;border-radius:0 22px 22px 0;background:linear-gradient(180deg,#181a1e,#0f1216);border-left:2px solid rgba(122,74,0,.5)}
 .preloader__label{margin-top:16px;color:#ffd089;text-align:center}
 @keyframes fill{0%{transform:translateX(-100%)}100%{transform:translateX(0)}}
 @media (prefers-reduced-motion:reduce){.fx-noise,.fx-scanlines{animation:none}.preloader__lcars .preloader__bar,.progress .bar{animation:none}}

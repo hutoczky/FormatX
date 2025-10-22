@@ -28,7 +28,7 @@ docs/scifi-ui/
 ├── scripts/
 │   ├── theme-switcher.js   # Theme switching with CustomEvent
 │   ├── preloader.js        # LCARS boot animation
-│   └── anim-controller.js  # Background layers & parallax
+│   └── animation-controller.js  # Background layers & parallax
 ├── manifests/
 │   └── themes.json         # Theme metadata
 └── README.md               # This file
@@ -141,10 +141,10 @@ lhci autorun
 
 **Behavior:**
 - Swaps `link#theme-css` href between theme stylesheets
-- Persists selection to `localStorage` (key: `scifi-theme`)
+- Persists selection to `localStorage` (key: `scifi-ui.theme`)
 - Sets `data-theme` attribute on `documentElement`
-- Updates button `aria-pressed`/`aria-selected` states
-- Dispatches `CustomEvent('theme:changed', {detail: {theme: name}})`
+- Updates button `aria-pressed` states
+- Dispatches `CustomEvent('themechange', {detail: {theme: name}})`
 
 **Usage:**
 ```javascript
@@ -152,7 +152,7 @@ lhci autorun
 window.setTheme('starwars');
 
 // Listen for theme changes
-document.addEventListener('theme:changed', (e) => {
+document.addEventListener('themechange', (e) => {
   console.log('Theme changed to:', e.detail.theme);
 });
 ```
@@ -162,6 +162,7 @@ document.addEventListener('theme:changed', (e) => {
 **Behavior:**
 - Preloads critical CSS/SVG assets
 - Shows LCARS-style boot bar with `role="progressbar"`
+- Updates bar width via CSS custom property `--w`
 - Respects `prefers-reduced-motion` (simplified indicator)
 - Updates `aria-valuenow` as resources load
 - Hides and dispatches `CustomEvent('preloader:done')` on completion
@@ -172,7 +173,7 @@ document.addEventListener('theme:changed', (e) => {
 - Status text for screen readers
 - Reduced motion support
 
-### anim-controller.js
+### animation-controller.js
 
 **Behavior:**
 - Manages background SVG/CSS layers per theme
@@ -180,7 +181,7 @@ document.addEventListener('theme:changed', (e) => {
 - Cyberpunk: Neon noise overlay with shift animation
 - LCARS: Minimal/none (clean interface)
 - Applies gentle pointer parallax after preloader (disabled for reduced-motion)
-- Listens for `theme:changed` and `preloader:done` events
+- Listens for `themechange` and `preloader:done` events
 
 **Parallax:**
 - Smooth lerp-based movement
