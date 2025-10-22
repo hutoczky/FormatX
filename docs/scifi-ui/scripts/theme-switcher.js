@@ -1,13 +1,1 @@
-(function(){
-  const THEMES={lcars:'styles/lcars.css',starwars:'styles/starwars.css',cyberpunk:'styles/cyberpunk.css'};
-  const STORAGE_KEY='scifi-ui.theme';
-  const root=document.documentElement;
-  const linkEl=document.getElementById('theme-css');
-  const brand=document.getElementById('brand');
-  function setPressed(btn,on){btn.setAttribute('aria-pressed',String(on));}
-  function toggleGlitch(theme){if(!brand)return; if(theme==='cyberpunk'){brand.setAttribute('data-glitch','on');}else{brand.removeAttribute('data-glitch');}}
-  function setTheme(name){if(!THEMES[name])return; linkEl.setAttribute('href',THEMES[name]); root.setAttribute('data-theme',name); try{localStorage.setItem(STORAGE_KEY,name);}catch(e){}; toggleGlitch(name); document.querySelectorAll('.switcher .theme').forEach(b=>setPressed(b,b.dataset.theme===name)); document.dispatchEvent(new CustomEvent('themechange',{detail:{theme:name}}));}
-  let start='lcars'; try{const saved=localStorage.getItem(STORAGE_KEY); if(saved&&THEMES[saved]) start=saved;}catch(e){}; setTheme(start);
-  document.querySelectorAll('.switcher .theme').forEach(btn=>{btn.addEventListener('click',()=>setTheme(btn.dataset.theme)); btn.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTheme(btn.dataset.theme);}})});
-  window.setTheme=setTheme;
-})();
+(() => { const root = document.documentElement; const btns = Array.from(document.querySelectorAll('.switcher .theme')); const link = document.getElementById('theme-css'); const KEY = 'scifi-ui.theme'; const saved = localStorage.getItem(KEY); if (saved) { apply(saved, false); } btns.forEach(b => { b.addEventListener('click', () => apply(b.dataset.theme, true)); b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); apply(b.dataset.theme, true); } }); }); function apply(theme, persist) { if (!theme) return; root.setAttribute('data-theme', theme); if (link) { link.href = `styles/${theme}.css`; } btns.forEach(b => { const on = b.dataset.theme === theme; b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.setAttribute('aria-selected', on ? 'true' : 'false'); }); if (persist) localStorage.setItem(KEY, theme); document.dispatchEvent(new CustomEvent('themechange', { detail: { theme } })); } })();
