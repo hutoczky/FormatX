@@ -1,0 +1,304 @@
+/* ===== Alapok ===== */
+:root {
+  --font-title: "Orbitron", system-ui, sans-serif;
+  --font-ui: "Rajdhani", system-ui, sans-serif;
+  --font-mono: "Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --bg: #0b0e12;
+  --fg: #cfe5ff;
+  --muted: #91a7c0;
+
+  --accent: #ffa000;   /* LCARS narancs */
+  --accent-2: #ff7a00; /* LCARS narancs sötét */
+  --accent-3: #c25093; /* LCARS lila */
+
+  --panel: #0b0e12;
+  --panel-line: #ffa000;
+
+  --scanlines: 0;
+  --vignette: 0.0;
+  --noise: 0.02;
+
+  --radius: 30px;
+  --radius-xl: 36px;
+  --radius-pill: 999px;
+
+  --focus-ring: 3px solid #31d2ff;
+}
+
+* { box-sizing: border-box }
+html, body { height: 100% }
+body {
+  margin: 0; color: var(--fg); background: var(--bg);
+  font-family: var(--font-ui); font-size: 18px; line-height: 1.45; letter-spacing: .2px;
+}
+
+.container { width: min(1200px, 92vw); margin: 0 auto }
+.site-header { padding: 1rem 0 .5rem }
+.theme-switch { display: flex; gap: .8rem; flex-wrap: wrap }
+
+/* ===== LCARS külső héj + dekor ===== */
+.shell {
+  position: relative;
+  padding: 2.25rem 1rem 3rem;
+  border-radius: var(--radius-xl);
+  border: 3px solid var(--panel-line);
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--panel) 92%, black) 0%,
+      color-mix(in oklab, var(--panel) 96%, black) 100%);
+  box-shadow:
+    inset 0 0 0 6px color-mix(in oklab, var(--panel-line) 16%, transparent),
+    0 0 64px color-mix(in oklab, var(--accent) 12%, transparent);
+  overflow: hidden;
+}
+.decor { position: absolute; inset: 0 auto 0 0; pointer-events: none }
+.decor-left {
+  width: 56px; left: -30px; top: 22px; bottom: 22px;
+  background:
+    linear-gradient(#f07d00, #f07d00) 0 0/100% 24% no-repeat,
+    linear-gradient(#a63f8b, #a63f8b) 0 45%/100% 16% no-repeat,
+    linear-gradient(#ff9a00, #ff9a00) 0 82%/100% 18% no-repeat;
+  border-radius: 12px;
+  filter: drop-shadow(0 0 6px #f07d00aa);
+}
+.decor-right {
+  right: -30px; left: auto; width: 56px; top: 25%;
+  height: 50%;
+  background:
+    linear-gradient(#f07d00, #f07d00) 0 0/100% 44% no-repeat,
+    linear-gradient(#a63f8b, #a63f8b) 0 55%/100% 20% no-repeat;
+  border-radius: 12px;
+  filter: drop-shadow(0 0 6px #a63f8baa);
+}
+@media (max-width: 980px) { .decor { display: none } }
+
+/* ===== Hős sáv ===== */
+.hero { margin: 1.25rem 0 2rem }
+.title {
+  font-family: var(--font-title);
+  font-weight: 900;
+  font-size: clamp(3rem, 8vw, 5.2rem);
+  letter-spacing: 2px;
+  margin: 0 0 .35rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  text-shadow:
+    0 0 0 currentColor,
+    0 0 24px color-mix(in oklab, var(--accent) 40%, transparent);
+}
+.subtitle {
+  font-family: var(--font-mono);
+  color: #67d6f0;
+  margin: 0 0 1.15rem;
+}
+.cta-row { display: flex; gap: .85rem; flex-wrap: wrap }
+
+/* ===== Pills (gombok/chipek) ===== */
+.pill {
+  --pill-bg: color-mix(in oklab, var(--accent) 26%, #0c0f13);
+  --pill-bd: color-mix(in oklab, var(--accent) 80%, white);
+  --pill-fg: #0c0f13;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: .72rem 1.15rem .66rem; gap: .5ch;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--pill-bd);
+  color: var(--pill-fg);
+  background: linear-gradient(180deg, var(--pill-bg), color-mix(in oklab, var(--pill-bg) 80%, black));
+  font-weight: 800; letter-spacing: .8px; text-transform: uppercase; text-decoration: none;
+  transition: transform .08s ease, box-shadow .2s ease;
+}
+.pill:hover { transform: translateY(-1px); box-shadow: 0 6px 20px color-mix(in oklab, var(--accent) 25%, transparent) }
+.pill:active { transform: translateY(0) scale(.98) }
+.pill:focus-visible { outline: var(--focus-ring); outline-offset: 2px }
+.pill.sm { padding: .55rem .95rem; font-size: .92rem }
+.pill.md { padding: .6rem 1.05rem; font-size: 1rem }
+.pill.lg { padding: .85rem 1.25rem; font-size: 1.05rem }
+
+.pill.alt   { --pill-bg: color-mix(in oklab, var(--accent-2) 34%, #0c0f13); --pill-bd: color-mix(in oklab, var(--accent-2) 86%, white) }
+.pill.accent{ --pill-bg: color-mix(in oklab, var(--accent-3) 38%, #0c0f13); --pill-bd: color-mix(in oklab, var(--accent-3) 86%, white) }
+
+.theme-switch button[aria-pressed="true"] {
+  outline: 4px solid color-mix(in oklab, var(--accent) 60%, white);
+  outline-offset: 2px;
+}
+
+/* ===== LCARS stílusú belső panel ===== */
+.panel {
+  margin-top: 1.6rem;
+  padding: 1rem .85rem 1.25rem;
+  border: 3px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--panel) 95%, black);
+  position: relative;
+}
+.panel::before {
+  content: ""; position: absolute; inset: .95rem; border-radius: calc(var(--radius) * .9);
+  border: 2px solid color-mix(in oklab, var(--panel-line) 60%, transparent);
+  pointer-events: none;
+}
+.panel-title {
+  margin: .1rem 1.1rem .9rem;
+  font-family: var(--font-title);
+  font-size: clamp(1.2rem, 2.5vw, 1.65rem);
+  letter-spacing: 1px;
+  color: var(--accent);
+}
+
+/* ===== Letöltés kártyák rácsa ===== */
+.download-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+  padding: 0 1.1rem 1rem;
+}
+.card {
+  border: 2px solid color-mix(in oklab, var(--panel-line) 70%, transparent);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--panel) 92%, black);
+  padding: .95rem 1.1rem .9rem;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--panel-line) 18%, transparent);
+}
+.card h3 { margin: 0 0 .3rem; font-weight: 800; letter-spacing: .6px }
+.card .meta { margin: 0; color: #9ab3c9; font-family: var(--font-mono) }
+
+.span-12 { grid-column: span 12 }
+.span-8  { grid-column: span 12 }
+.span-4  { grid-column: span 12 }
+@media (min-width: 880px) {
+  .span-8 { grid-column: span 8 }
+  .span-4 { grid-column: span 4 }
+}
+
+/* ===== Alsó chipek és lábléc ===== */
+.chips { display: flex; gap: .85rem; padding: .25rem 1.1rem 0; flex-wrap: wrap }
+.footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem 0 3rem; font-family: var(--font-mono);
+}
+.back-to-top {
+  color: var(--accent); text-decoration: none;
+  border-bottom: 2px solid color-mix(in oklab, var(--accent) 70%, transparent);
+  padding-bottom: .15rem;
+}
+.back-to-top:focus-visible { outline: var(--focus-ring); outline-offset: 3px }
+
+/* ===== Kisegítő ===== */
+.sr-only { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+
+/* ===== Fedvény effektek ===== */
+#fx-scanlines, #fx-vignette, #fx-noise { pointer-events: none; position: fixed; inset: 0; z-index: 1 }
+#fx-scanlines {
+  opacity: var(--scanlines);
+  background:
+    repeating-linear-gradient(to bottom, rgba(255,255,255,.03) 0px, rgba(255,255,255,.03) 1px, transparent 2px, transparent 4px),
+    repeating-linear-gradient(to right,  rgba(255,255,255,.01) 0px, rgba(255,255,255,.01) 1px, transparent 2px, transparent 4px);
+  mix-blend-mode: screen;
+}
+#fx-vignette { opacity: var(--vignette); background: radial-gradient(120% 120% at 50% 50%, transparent 40%, rgba(0,0,0,.7) 80%) }
+#fx-noise {
+  opacity: var(--noise);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px; mix-blend-mode: overlay;
+}
+
+/* ===== TÉMÁK ===== */
+/* 1) LCARS (Star Trek) */
+.theme-lcars {
+  --bg: #0a0c0f; --fg: #ffe3a6; --muted: #8ad4e9;
+  --accent: #ffa000; --accent-2: #ff7a00; --accent-3: #c25093;
+  --panel: #0a0c0f; --panel-line: #ffa000;
+  --scanlines: 0; --vignette: .12; --noise: .03;
+}
+.theme-lcars .subtitle { color: #66d2e6 }
+.theme-lcars .title { text-shadow: 0 0 30px #ff9a00a6 }
+
+/* 2) Hologram (Star Wars) */
+.theme-holo {
+  --bg: #061018; --fg: #bdf4ff; --muted: #7bd0e0;
+  --accent: #9ff6ff; --accent-2: #5dc9f7; --accent-3: #7ff3ff;
+  --panel: #08131c; --panel-line: #3fd2ff;
+  --scanlines: .28; --vignette: .28; --noise: .08;
+}
+.theme-holo .title {
+  color: #9ff6ff;
+  text-shadow:
+    0 0 6px #a4ffff,
+    0 0 18px #64e5ff,
+    0 0 40px #2fd6ff;
+}
+.theme-holo .shell,
+.theme-holo .panel,
+.theme-holo .card {
+  border-color: color-mix(in oklab, var(--panel-line) 86%, white);
+  box-shadow:
+    inset 0 0 0 2px color-mix(in oklab, var(--panel-line) 24%, transparent),
+    0 0 22px color-mix(in oklab, var(--panel-line) 35%, transparent),
+    0 0 60px color-mix(in oklab, var(--panel-line) 10%, transparent);
+  backdrop-filter: blur(.5px);
+}
+.theme-holo .pill {
+  --pill-fg: #001017;
+  --pill-bg: color-mix(in oklab, var(--panel-line) 40%, #001018);
+  --pill-bd: color-mix(in oklab, var(--panel-line) 95%, white);
+  background: color-mix(in oklab, #001018 90%, transparent);
+  box-shadow: 0 0 14px color-mix(in oklab, var(--panel-line) 35%, transparent);
+}
+
+/* 3) Cyberpunk (neon + glitch) */
+.theme-cyber {
+  --bg: #0a0013; --fg: #ffd9ff; --muted: #c2a8ff;
+  --accent: #ffd400; --accent-2: #ff00a8; --accent-3: #00d8ff;
+  --panel: #14001f; --panel-line: #ff00a8;
+  --scanlines: .35; --vignette: .45; --noise: .10;
+}
+.theme-cyber .title {
+  color: #ffd400;
+  position: relative;
+  text-shadow:
+    0 0 3px #ffd400, 0 0 10px #ff9d00,
+    0 0 22px #ff00a8, 0 0 36px #00cfff;
+}
+.theme-cyber .title::after {
+  content: attr(data-glitch);
+  position: absolute; inset: 0; color: #00eaff; opacity: .55;
+  mix-blend-mode: screen;
+  clip-path: polygon(0 8%, 100% 6%, 100% 22%, 0 24%);
+  transform: translate(.02em, -.01em);
+  animation: glitch 2.8s infinite steps(2, end);
+}
+@keyframes glitch {
+  0%, 90%, 100% { clip-path: polygon(0 8%, 100% 6%, 100% 22%, 0 24%); transform: translate(.01em, 0) }
+  20% { clip-path: polygon(0 58%, 100% 56%, 100% 70%, 0 72%); transform: translate(-.02em, .01em) }
+  40% { clip-path: polygon(0 28%, 100% 26%, 100% 40%, 0 42%); transform: translate(.03em, -.01em) }
+  60% { clip-path: polygon(0 88%, 100% 86%, 100% 100%, 0 100%); transform: translate(-.01em, 0) }
+}
+.theme-cyber .panel, .theme-cyber .card {
+  border-color: color-mix(in oklab, var(--panel-line) 80%, white);
+  box-shadow:
+    inset 0 0 0 1px #00eaff55,
+    0 0 18px #ff00a855,
+    0 0 42px #00eaff33;
+}
+.theme-cyber .pill {
+  --pill-fg: #170016;
+  --pill-bg: color-mix(in oklab, var(--accent-2) 38%, #0a0013);
+  --pill-bd: color-mix(in oklab, var(--accent-2) 93%, white);
+  box-shadow: 0 0 16px #ff00a866, inset 0 0 10px #00eaff33;
+}
+.theme-cyber .pill.accent {
+  --pill-bg: color-mix(in oklab, var(--accent-3) 40%, #0a0013);
+  --pill-bd: color-mix(in oklab, var(--accent-3) 96%, white);
+}
+
+/* Tipográfia */
+h1, h2, h3 { text-transform: uppercase }
+
+/* Kisegítő beállítások */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important }
+}
+@media (max-width: 520px) {
+  .subtitle { font-size: .95rem }
+  .footer { flex-direction: column; gap: .5rem }
+}
