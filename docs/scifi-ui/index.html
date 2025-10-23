@@ -1,152 +1,91 @@
 <!doctype html>
-<html lang="hu" data-theme="lcars">
+<html lang="hu">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sci‑Fi UI — Formázás a jövőből</title>
-  <meta name="color-scheme" content="dark light" />
-  <meta name="theme-color" content="#0b0c0f" />
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; media-src 'self'; connect-src 'self'">
-  <link rel="preload" as="style" href="styles/base.css?v=f8637445" />
-  <link rel="preload" as="style" href="styles/themes.css?v=f8637445" />
-  <link rel="stylesheet" href="styles/base.css?v=f8637445" />
-  <link rel="stylesheet" href="styles/themes.css?v=f8637445" />
-  <link id="theme-css" rel="stylesheet" href="styles/lcars.css?v=f8637445" />
-  <style>
-    :root{--pad:18px;--max:1100px}
-    body{
-      margin:0;background:#080a0d;color:#e9eefc;
-      font:600 16px/1.35 "Segoe UI",system-ui,Roboto,Arial,sans-serif
-    }
-    .topbar{
-      position:sticky;top:0;z-index:10;padding:16px 20px 10px;
-      background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.35) 60%,transparent)
-    }
-    .switcher{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-    .hero{max-width:var(--max);margin:36px auto 14px;padding:0 20px;text-align:center}
-    h1,h2{margin:0}
-    .container{max-width:var(--max);margin:20px auto 60px;padding:0 20px;position:relative}
-    /* HOTFIX: hero chips filled using theme accents (until caches expire) */
-    :root .hero .chips .chip{
-      background:linear-gradient(180deg, var(--accent), color-mix(in oklab, var(--accent), #000 20%)) !important;
-      color:#111 !important; border-color:var(--accent) !important;
-    }
-    :root[data-theme="lcars"] .hero .chips .chip:nth-child(3){
-      background:linear-gradient(180deg, var(--magenta), color-mix(in oklab, var(--magenta), #000 15%)) !important;
-      color:#1b0f1e !important; border-color:var(--magenta) !important;
-    }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Formázás a jövőből — Sci‑Fi UI</title>
+    <meta name="description" content="Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/site.css">
 </head>
-<body>
-  <div class="fx fx-scanlines" aria-hidden="true"></div>
-  <div class="fx fx-noise" aria-hidden="true"></div>
-  <div class="fx fx-vignette" aria-hidden="true"></div>
-  <div id="theme-layers" aria-hidden="true"></div>
+<body class="theme-lcars">
+    <div id="fx-scanlines" aria-hidden="true"></div>
+    <div id="fx-vignette" aria-hidden="true"></div>
+    <div id="fx-noise" aria-hidden="true"></div>
 
-  <div id="preloader" class="preloader" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-    <div class="preloader__lcars">
-      <div class="preloader__bar"></div>
-      <div class="preloader__cap"></div>
-    </div>
-    <div class="preloader__label">Rendszer inicializálás…</div>
-  </div>
+    <header class="site-header container">
+      <nav class="theme-switch">
+        <button class="pill sm" data-theme="lcars" aria-pressed="true">STAR TREK</button>
+        <button class="pill sm" data-theme="holo">STAR WARS</button>
+        <button class="pill sm" data-theme="cyber">CYBERPUNK</button>
+      </nav>
+    </header>
 
-  <header class="topbar" role="banner">
-    <nav class="switcher" aria-label="Téma választó" role="group">
-      <button aria-pressed="true" data-theme="lcars" class="btn theme">STAR TREK</button>
-      <button aria-pressed="false" data-theme="starwars" class="btn theme">STAR WARS</button>
-      <button aria-pressed="false" data-theme="cyberpunk" class="btn theme">CYBERPUNK</button>
-    </nav>
-  </header>
+    <main class="container shell">
+      <section class="hero">
+        <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
+        <p class="subtitle">Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
+        <div class="cta-row">
+          <a href="#downloads" class="pill lg">LETÖLTÉS</a>
+          <a href="#features" class="pill lg alt">FUNKCIÓK</a>
+          <a href="#docs" class="pill lg accent">DOKUMENTUMOK</a>
+        </div>
+      </section>
 
-  <section class="hero">
-    <h2 class="brand" id="brand">FORMÁZÁS A JÖVŐBŐL</h2>
-    <p class="brand-sub">Gyors. Moduláris. Bővíthető.<br>Azonos eszközök, eltérő stílusok.</p>
-    <div class="chips" role="navigation" aria-label="Gyors linkek">
-      <a class="chip" href="#letoltesek">LETÖLTÉS</a>
-      <a class="chip" href="#funkciok">FUNKCIÓK</a>
-      <a class="chip" href="#dokumentumok">DOKUMENTUMOK</a>
-    </div>
-  </section>
+      <section id="downloads" class="panel">
+        <h2 class="panel-title">Letöltések</h2>
+        <div class="download-grid">
+          <article class="card">
+            <h3>FormatX Light telepítő v1.0.4</h3>
+            <p class="meta">Windows app • hutoczky/formatx v1.0.4</p>
+          </article>
 
-  <main class="container" id="main" role="main">
-    <div class="lcars-rails" aria-hidden="true">
-      <span class="rail rail-a"></span><span class="rail rail-b"></span>
-      <span class="rail rail-c"></span><span class="rail rail-d"></span>
-      <span class="plate p1"></span>
-      <span class="plate p2"></span>
-      <span class="plate p3"></span>
-    </div>
+          <article class="card">
+            <h3>Windows App Runtime (x64)</h3>
+            <p class="meta">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
+          </article>
 
-    <section id="letoltesek" class="panel downloads" aria-labelledby="h-let">
-      <h2 id="h-let">Letöltések</h2>
-      <div class="downloads-grid">
-        <article class="card">
-          <h3>FormatX Light telepítő v1.0.4</h3>
-          <p class="muted">Windows app • hutoczky/formatx v1.0.4</p>
-          <div class="actions">
-            <span class="chip hollow">Villámgyors</span>
-            <a class="pill" href="https://github.com/hutoczky/formatui/releases/latest/download/FormatX_Installer_v1015.exe" target="_blank" rel="noopener" download>Letöltés</a>
-          </div>
-        </article>
-        <article class="card">
-          <h3>Windows App Runtime (x64)</h3>
-          <p class="muted">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
-        </article>
-        <article class="card">
-          <h3>README.txt</h3>
-          <p class="muted">Kiinduló információk</p>
-          <div class="actions">
-            <a class="pill" href="https://github.com/hutoczky/formatui/releases/latest/download/README.txt" target="_blank" rel="noopener">Megnyitás</a>
-          </div>
-        </article>
-        <article class="card">
-          <h3>.NET Desktop Runtime 10.0 (x64)</h3>
-          <p class="muted">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
-        </article>
-        <article class="card">
-          <h3>Web UI</h3>
-          <p class="muted">Böngészős felület</p>
-          <div class="actions">
-            <a class="pill" href="https://hutoczky.github.io/FormatX/scifi-ui/" target="_blank" rel="noopener">Megnyitás</a>
-          </div>
-        </article>
-      </div>
-      <div class="cta-row">
-        <span class="chip cta-speed">Villámgyors</span>
-        <span class="chip cta-ext">Bővíthető</span>
-        <a class="chip cta-web" href="https://hutoczky.github.io/FormatX/scifi-ui/" target="_blank" rel="noopener">Web UI</a>
-      </div>
-    </section>
+          <article class="card">
+            <h3>README.txt</h3>
+            <p class="meta">Kiinduló információk • hutoczky/formatx</p>
+          </article>
 
-    <section id="funkciok" class="panel" aria-labelledby="h-func">
-      <h2 id="h-func">Funkciók</h2>
-      <ul class="features">
-        <li>Gyors • Moduláris • Bővíthető</li>
-        <li>Azonos eszközök, eltérő stílusok</li>
-        <li>3 téma: Star Trek, Star Wars, Cyberpunk</li>
-        <li>Neon, hologram, glitch, scanline és LCARS elemek</li>
-      </ul>
-    </section>
+          <article class="card">
+            <h3>.NET Desktop Runtime 10.0 (x64)</h3>
+            <p class="meta">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
+          </article>
 
-    <section id="dokumentumok" class="panel" aria-labelledby="h-doc">
-      <h2 id="h-doc">Dokumentumok</h2>
-      <p>API leírás, komponenskönyvtár és témázási útmutató.</p>
-    </section>
-  </main>
+          <article class="card">
+            <h3>Web UI</h3>
+            <p class="meta">Böngészőben futó felület • demo</p>
+          </article>
+        </div>
 
-  <footer class="footer" role="contentinfo">
-    <div class="copy">© 2023 SCI‑FI UI</div>
-    <a class="to-top" href="#top">Vissza a tetejére</a>
-  </footer>
+        <div class="chips">
+          <span class="pill md">Villámgyors</span>
+          <span class="pill md alt">Bővíthető</span>
+          <span class="pill md accent">Web UI</span>
+        </div>
+      </section>
 
-  <noscript>
-    <p style="text-align:center;padding:12px">A JavaScript extra effektekhez kell; az oldal JS nélkül is használható LCARS témában.</p>
-  </noscript>
+      <section id="features" class="sr-only" aria-hidden="true">
+        <h2>Funkciók</h2>
+        <p>Ide jöhetnek a részletes funkciók (helyőrző).</p>
+      </section>
 
-  <script defer src="scripts/preloader.js"></script>
-  <script defer src="scripts/theme-switcher.js?v=f8637445"></script>
-  <script defer src="scripts/animation-controller.js"></script>
-</body>
-</html>
+      <section id="docs" class="sr-only" aria-hidden="true">
+        <h2>Dokumentumok</h2>
+        <p>Ide jöhetnek a dokumentációs hivatkozások (helyőrző).</p>
+      </section>
+    </main>
+
+    <footer class="container footer">
+      <div class="copyright">© 2025 SCI‑FI UI</div>
+      <a href="#top" class="back-to-top">Vissza a tetejére</a>
+    </footer>
+
+    <script src="./scripts/site.js"></script>
+  </body>
+  </html>
