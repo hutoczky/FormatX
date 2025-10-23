@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Cyberpunk betöltő</title>
+  <desc id="d">Forgó hatszög pár neon rózsaszín és cián körvonallal, glitch villanásokkal.</desc>
+  <defs>
+    <filter id="neon-pink" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="neon-cyan" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g transform="translate(100,30)">
+    <g>
+      <polygon points="22,0 11,19 -11,19 -22,0 -11,-19 11,-19"
+               fill="none" stroke="#ff00a8" stroke-width="4" filter="url(#neon-pink)">
+        <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="1.4s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="22,0 11,19 -11,19 -22,0 -11,-19 11,-19"
+               fill="none" stroke="#00eaff" stroke-width="2.5" filter="url(#neon-cyan)">
+        <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="1.4s" repeatCount="indefinite"/>
+      </polygon>
+    </g>
+    <rect x="-26" y="-3" width="52" height="6" fill="#ffd400" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;1;0" keyTimes="0;0.6;0.62;1" dur="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="-10;-3;8;-10" keyTimes="0;0.4;0.41;1" dur="1.8s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+</svg>
