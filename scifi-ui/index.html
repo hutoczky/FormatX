@@ -1,171 +1,103 @@
 <!doctype html>
-<html lang="hu" data-page="scifi-ui">
+<html lang="hu">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FormatX — Sci‑Fi UI</title>
-  <meta name="description" content="Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok. Star Trek, Star Wars, Cyberpunk témák." />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%2300d2ff'/%3E%3Cpath d='M12 33h40M12 23h40M12 43h28' stroke='%23111' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E" />
-  <style>
-    :root{
-      --bg: #0c0f12;
-      --panel: #0f141a;
-      --text: #d7f8ff;
-      --muted: #8fb6c3;
-      --acc1: #59e1ff;  /* main */
-      --acc2: #1fd0ff;  /* glow */
-      --pillText: #051118;
-    }
-    /* Star Wars (amber) */
-    body.theme-starwars{ --bg:#0b0a09; --panel:#12100f; --text:#ffe3a6; --muted:#ffbd6b; --acc1:#ff9600; --acc2:#ffcc66; --pillText:#1b0f00; }
-    /* Star Trek (cyan) */
-    body.theme-startrek{ --bg:#081016; --panel:#0c1219; --text:#b7f1ff; --muted:#7dd7ef; --acc1:#00d2ff; --acc2:#6df0ff; --pillText:#03131b; }
-    /* Cyberpunk (magenta/cyan) */
-    body.theme-cyberpunk{ --bg:#0a0012; --panel:#14001f; --text:#ffb5ff; --muted:#ff64d9; --acc1:#ff29b8; --acc2:#00e1ff; --pillText:#220014; }
-
-    /* Base layout */
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:radial-gradient(1200px 600px at 70% -10%, rgba(255,255,255,0.06), transparent 60%),
-                       radial-gradient(900px 600px at 10% 110%, rgba(255,255,255,0.04), transparent 60%), var(--bg);
-         color:var(--text); font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;}
-    /* subtle CRT/scanlines */
-    body:before{content:""; position:fixed; inset:0; pointer-events:none; background:
-      repeating-linear-gradient(to bottom, rgba(255,255,255,.06), rgba(255,255,255,.06) 1px, transparent 2px, transparent 3px);
-      opacity:.05; mix-blend-mode:screen}
-
-    a{color:inherit}
-
-    .wrap{max-width:1100px; margin:0 auto; padding:40px 20px 80px}
-
-    header{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-start; margin-bottom:28px}
-    .theme-btn{border:1.5px solid color-mix(in oklab, var(--acc1), black 25%); color:var(--acc1); background:linear-gradient(180deg, transparent, rgba(255,255,255,.04));
-      padding:10px 16px; border-radius:12px; letter-spacing:.08em; font-weight:700; text-transform:uppercase;
-      box-shadow:0 0 0 1px rgba(255,255,255,.04) inset, 0 0 16px color-mix(in oklab, var(--acc2), transparent 80%);
-      cursor:pointer; transition:transform .08s ease, box-shadow .2s ease, background .2s ease}
-    .theme-btn:hover{transform:translateY(-1px); box-shadow:0 0 0 1px rgba(255,255,255,.07) inset, 0 0 26px color-mix(in oklab, var(--acc2), transparent 60%)}
-
-    .hero{padding:18px 0 10px}
-    .title{font-weight:900; font-size:clamp(36px, 6vw, 72px); letter-spacing:.02em; margin:0 0 10px; text-shadow:0 0 22px color-mix(in oklab, var(--acc2), transparent 70%), 0 0 2px var(--acc2)}
-    .subtitle{color:var(--muted); font-size:1.1rem; margin:0 0 18px}
-
-    .cta{display:flex; gap:10px; flex-wrap:wrap; margin:16px 0 24px}
-    .pill{display:inline-flex; align-items:center; gap:10px; padding:12px 18px; border-radius:14px; border:1.5px solid var(--acc1); color:var(--pillText);
-      background:linear-gradient(180deg, color-mix(in oklab, var(--acc1), white 20%), color-mix(in oklab, var(--acc1), black 12%)); text-shadow:none; font-weight:800;
-      box-shadow:0 0 18px color-mix(in oklab, var(--acc2), transparent 70%); text-transform:uppercase; letter-spacing:.06em}
-
-    .panel{border:1.5px solid color-mix(in oklab, var(--acc1), black 20%); border-radius:18px; padding:20px; background:
-      linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)), var(--panel);
-      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset, 0 0 24px color-mix(in oklab, var(--acc2), transparent 85%)}
-
-    h2{margin:8px 0 14px; font-weight:800; font-size:1.6rem; letter-spacing:.03em}
-
-    .downloads{display:grid; grid-template-columns:1fr; gap:14px}
-    @media (min-width:760px){ .downloads{grid-template-columns:1fr 1fr} }
-
-    .card{border:1.5px solid color-mix(in oklab, var(--acc1), black 18%); border-radius:14px; padding:14px 16px; background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.08));
-      display:flex; justify-content:space-between; align-items:center; gap:10px}
-    .card h3{margin:0; font-size:1.05rem}
-    .card p{margin:4px 0 0; color:var(--muted); font-size:.9rem}
-    .badge{border:1px dashed color-mix(in oklab, var(--acc1), black 10%); border-radius:10px; padding:8px 12px; color:var(--acc1)}
-
-    footer{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:30px; color:var(--muted)}
-    .back-top{color:var(--text); border-bottom:2px solid color-mix(in oklab, var(--acc1), white 10%); padding-bottom:2px}
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Formázás a jövőből — Sci‑Fi UI</title>
+  <meta name="description" content="Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.">
+  <link rel="icon" href="./favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0a0c0f">
+  <link rel="stylesheet" href="./styles/site.css">
 </head>
-<body class="theme-startrek">
-  <div class="wrap">
-    <header>
-      <button class="theme-btn" data-theme="startrek">Star Trek</button>
-      <button class="theme-btn" data-theme="starwars">Star Wars</button>
-      <button class="theme-btn" data-theme="cyberpunk">Cyberpunk</button>
-    </header>
+<body id="top" class="theme-lcars">
+  <!-- Fedvény effektek -->
+  <div id="fx-scanlines" aria-hidden="true"></div>
+  <div id="fx-vignette" aria-hidden="true"></div>
+  <div id="fx-noise" aria-hidden="true"></div>
+
+  <header class="site-header container">
+    <nav class="theme-switch" aria-label="Téma választó">
+      <button class="pill sm" data-theme="lcars" aria-pressed="true">STAR TREK</button>
+      <button class="pill sm" data-theme="holo">STAR WARS</button>
+      <button class="pill sm" data-theme="cyber">CYBERPUNK</button>
+    </nav>
+  </header>
+
+  <main class="container shell">
+    <!-- LCARS oldalsó díszítő elemek -->
+    <i class="decor decor-left" aria-hidden="true"></i>
+    <i class="decor decor-right" aria-hidden="true"></i>
 
     <section class="hero">
-      <h1 class="title">FORMÁZÁS A JÖVŐBŐL</h1>
+      <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
       <p class="subtitle">Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
-      <div class="cta">
-        <a class="pill" href="#letoltesek">Letöltés</a>
-        <a class="pill" href="#funkciok">Funkciók</a>
-        <a class="pill" href="#dokumentumok">Dokumentumok</a>
+      <div class="cta-row">
+        <a href="#downloads" class="pill lg">LETÖLTÉS</a>
+        <a href="#features" class="pill lg alt">FUNKCIÓK</a>
+        <a href="#docs" class="pill lg accent">DOKUMENTUMOK</a>
       </div>
     </section>
 
-    <section id="letoltesek" class="panel">
-      <h2>Letöltések</h2>
-      <div class="downloads">
-        <div class="card">
-          <div>
-            <h3>FormatX Light telepítő v1.0.4</h3>
-            <p>Windows app · hutoczky/formatx v1.0.4</p>
-          </div>
-          <a class="badge" href="#">.exe</a>
-        </div>
-        <div class="card">
-          <div>
-            <h3>Windows App Runtime (x64)</h3>
-            <p>Microsoft telepítő · hutoczky/formatx v1.0.4</p>
-          </div>
-          <a class="badge" href="#">Letöltés</a>
-        </div>
-        <div class="card">
-          <div>
-            <h3>README.txt</h3>
-            <p>Kiinduló információk</p>
-          </div>
-          <a class="badge" href="https://github.com/hutoczky/FormatX#readme" target="_blank" rel="noopener">Megnyitás</a>
-        </div>
-        <div class="card">
-          <div>
-            <h3>.NET Desktop Runtime 10.0 (x64)</h3>
-            <p>Microsoft telepítő · hutoczky/formatx v1.0.4</p>
-          </div>
-          <a class="badge" href="#">Letöltés</a>
-        </div>
-        <div class="card">
-          <div>
-            <h3>Web UI</h3>
-            <p>Böngészős felület</p>
-          </div>
-          <a class="badge" href="#">Megnyitás</a>
-        </div>
+    <section id="downloads" class="panel">
+      <h2 class="panel-title">Letöltések</h2>
+
+      <div class="download-grid">
+        <article class="card span-12">
+          <h3>FormatX Light telepítő v1.0.4</h3>
+          <p class="meta">Windows app • hutoczky/formatx v1.0.4</p>
+        </article>
+
+        <article class="card span-8">
+          <h3>Windows App Runtime (x64)</h3>
+          <p class="meta">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
+        </article>
+
+        <article class="card span-4">
+          <h3>README.txt</h3>
+          <p class="meta">Kiinduló információk • hutoczky/formatx</p>
+        </article>
+
+        <article class="card span-8">
+          <h3>.NET Desktop Runtime 10.0 (x64)</h3>
+          <p class="meta">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
+        </article>
+
+        <article class="card span-4">
+          <h3>Web UI</h3>
+          <p class="meta">Böngészőben futó felület • demo</p>
+        </article>
+      </div>
+
+      <div class="chips">
+        <span class="pill md">Villámgyors</span>
+        <span class="pill md alt">Bővíthető</span>
+        <span class="pill md accent">Web UI</span>
       </div>
     </section>
 
-    <section id="funkciok" class="panel" style="margin-top:18px">
-      <h2>Villámgyors • Bővíthető • Web UI</h2>
-      <p style="color:var(--muted)">A felület három különböző sci‑fi témát támogat: Star Trek, Star Wars és Cyberpunk. A választott téma elmentésre kerül a böngészőben.</p>
+    <section id="features" class="sr-only" aria-hidden="true">
+      <h2>Funkciók</h2>
+      <p>Ide jöhetnek a részletes funkciók (helyőrző).</p>
     </section>
 
-    <footer>
-      <div>© 2025 Sci‑Fi UI</div>
-      <a class="back-top" href="#top" id="backTop">Vissza a tetejére</a>
-    </footer>
-  </div>
+    <section id="docs" class="sr-only" aria-hidden="true">
+      <h2>Dokumentumok</h2>
+      <p>Ide jöhetnek a dokumentációs hivatkozások (helyőrző).</p>
+    </section>
+  </main>
 
-<script>
-(function(){
-  const root = document.body;
-  const key = 'fx-theme';
-  function apply(theme){
-    root.classList.remove('theme-startrek','theme-starwars','theme-cyberpunk');
-    root.classList.add('theme-'+theme);
-    try{ localStorage.setItem(key, theme);}catch(e){}
-  }
-  // init
-  const saved = (localStorage.getItem(key)||'startrek');
-  apply(saved);
+  <footer class="container footer">
+    <div class="copyright">© 2023 SCI‑FI UI</div>
+    <a href="#top" class="back-to-top">Vissza a tetejére</a>
+  </footer>
 
-  document.querySelectorAll('.theme-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      apply(btn.dataset.theme);
-    })
-  });
+  <noscript>
+    A téma‑váltás JavaScriptet igényel. JS nélkül a “STAR TREK” téma aktív.
+  </noscript>
 
-  document.getElementById('backTop').addEventListener('click', function(e){
-    e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'});
-  });
-})();
-</script>
+  <script defer src="./scripts/site.js"></script>
 </body>
 </html>
