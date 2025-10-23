@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Hologram betöltő</title>
+  <desc id="d">Körgyűrű szaggatott vonallal és kékes fényudvarral forog.</desc>
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9ff6ff"/>
+      <stop offset="100%" stop-color="#2fd6ff"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="c1"/>
+      <feColorMatrix in="c1" type="matrix" values="0 0 0 0 0.62  0 0 0 0 0.96  0 0 0 0 1  0 0 0 1 0"/>
+      <feMerge>
+        <feMergeNode/><feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g transform="translate(100,30)">
+    <circle r="18" fill="none" stroke="#0b1620" stroke-width="8"/>
+    <circle r="18" fill="none" stroke="url(#lg)" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="28 22" filter="url(#glow)">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle r="3" fill="#9ff6ff" filter="url(#glow)">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="1.2s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="2.5;3.5;2.5" dur="0.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>
