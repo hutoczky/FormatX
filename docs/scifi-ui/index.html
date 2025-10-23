@@ -1,91 +1,97 @@
 <!doctype html>
 <html lang="hu">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Formázás a jövőből — Sci‑Fi UI</title>
-    <meta name="description" content="Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles/site.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Formázás a jövőből — Sci‑Fi UI</title>
+  <meta name="description" content="Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles/site.css">
 </head>
 <body class="theme-lcars">
-    <div id="fx-scanlines" aria-hidden="true"></div>
-    <div id="fx-vignette" aria-hidden="true"></div>
-    <div id="fx-noise" aria-hidden="true"></div>
+  <!-- Fedvény effektek -->
+  <div id="fx-scanlines" aria-hidden="true"></div>
+  <div id="fx-vignette" aria-hidden="true"></div>
+  <div id="fx-noise" aria-hidden="true"></div>
 
-    <header class="site-header container">
-      <nav class="theme-switch">
-        <button class="pill sm" data-theme="lcars" aria-pressed="true">STAR TREK</button>
-        <button class="pill sm" data-theme="holo">STAR WARS</button>
-        <button class="pill sm" data-theme="cyber">CYBERPUNK</button>
-      </nav>
-    </header>
+  <header class="site-header container">
+    <nav class="theme-switch" aria-label="Téma választó">
+      <button class="pill sm" data-theme="lcars" aria-pressed="true">STAR TREK</button>
+      <button class="pill sm" data-theme="holo">STAR WARS</button>
+      <button class="pill sm" data-theme="cyber">CYBERPUNK</button>
+    </nav>
+  </header>
 
-    <main class="container shell">
-      <section class="hero">
-        <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
-        <p class="subtitle">Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
-        <div class="cta-row">
-          <a href="#downloads" class="pill lg">LETÖLTÉS</a>
-          <a href="#features" class="pill lg alt">FUNKCIÓK</a>
-          <a href="#docs" class="pill lg accent">DOKUMENTUMOK</a>
-        </div>
-      </section>
+  <main class="container shell">
+    <!-- LCARS oldalsó díszítő elemek -->
+    <i class="decor decor-left" aria-hidden="true"></i>
+    <i class="decor decor-right" aria-hidden="true"></i>
 
-      <section id="downloads" class="panel">
-        <h2 class="panel-title">Letöltések</h2>
-        <div class="download-grid">
-          <article class="card">
-            <h3>FormatX Light telepítő v1.0.4</h3>
-            <p class="meta">Windows app • hutoczky/formatx v1.0.4</p>
-          </article>
+    <section class="hero">
+      <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
+      <p class="subtitle">Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
+      <div class="cta-row">
+        <a href="#downloads" class="pill lg">LETÖLTÉS</a>
+        <a href="#features" class="pill lg alt">FUNKCIÓK</a>
+        <a href="#docs" class="pill lg accent">DOKUMENTUMOK</a>
+      </div>
+    </section>
 
-          <article class="card">
-            <h3>Windows App Runtime (x64)</h3>
-            <p class="meta">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
-          </article>
+    <section id="downloads" class="panel">
+      <h2 class="panel-title">Letöltések</h2>
 
-          <article class="card">
-            <h3>README.txt</h3>
-            <p class="meta">Kiinduló információk • hutoczky/formatx</p>
-          </article>
+      <div class="download-grid">
+        <article class="card span-12">
+          <h3>FormatX Light telepítő v1.0.4</h3>
+          <p class="meta">Windows app • hutoczky/formatx v1.0.4</p>
+        </article>
 
-          <article class="card">
-            <h3>.NET Desktop Runtime 10.0 (x64)</h3>
-            <p class="meta">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
-          </article>
+        <article class="card span-8">
+          <h3>Windows App Runtime (x64)</h3>
+          <p class="meta">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
+        </article>
 
-          <article class="card">
-            <h3>Web UI</h3>
-            <p class="meta">Böngészőben futó felület • demo</p>
-          </article>
-        </div>
+        <article class="card span-4">
+          <h3>README.txt</h3>
+          <p class="meta">Kiinduló információk • hutoczky/formatx</p>
+        </article>
 
-        <div class="chips">
-          <span class="pill md">Villámgyors</span>
-          <span class="pill md alt">Bővíthető</span>
-          <span class="pill md accent">Web UI</span>
-        </div>
-      </section>
+        <article class="card span-8">
+          <h3>.NET Desktop Runtime 10.0 (x64)</h3>
+          <p class="meta">Microsoft telepítő • hutoczky/formatx v1.0.4</p>
+        </article>
 
-      <section id="features" class="sr-only" aria-hidden="true">
-        <h2>Funkciók</h2>
-        <p>Ide jöhetnek a részletes funkciók (helyőrző).</p>
-      </section>
+        <article class="card span-4">
+          <h3>Web UI</h3>
+          <p class="meta">Böngészőben futó felület • demo</p>
+        </article>
+      </div>
 
-      <section id="docs" class="sr-only" aria-hidden="true">
-        <h2>Dokumentumok</h2>
-        <p>Ide jöhetnek a dokumentációs hivatkozások (helyőrző).</p>
-      </section>
-    </main>
+      <div class="chips">
+        <span class="pill md">Villámgyors</span>
+        <span class="pill md alt">Bővíthető</span>
+        <span class="pill md accent">Web UI</span>
+      </div>
+    </section>
 
-    <footer class="container footer">
-      <div class="copyright">© 2025 SCI‑FI UI</div>
-      <a href="#top" class="back-to-top">Vissza a tetejére</a>
-    </footer>
+    <section id="features" class="sr-only" aria-hidden="true">
+      <h2>Funkciók</h2>
+      <p>Ide jöhetnek a részletes funkciók (helyőrző).</p>
+    </section>
 
-    <script src="./scripts/site.js"></script>
-  </body>
-  </html>
+    <section id="docs" class="sr-only" aria-hidden="true">
+      <h2>Dokumentumok</h2>
+      <p>Ide jöhetnek a dokumentációs hivatkozások (helyőrző).</p>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <div class="copyright">© 2023 SCI‑FI UI</div>
+    <a href="#top" class="back-to-top">Vissza a tetejére</a>
+  </footer>
+
+  <script src="./scripts/site.js"></script>
+</body>
+</html>
