@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="hu" data-theme="trek">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Formázás a jövőből</title>
+    <meta name="description" content="Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok." />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rajdhani:wght@400;600;700&family=Oxanium:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="decor decor-back"></div>
+    <div class="decor decor-overlay"></div>
+
+    <main class="frame">
+      <nav class="chips" aria-label="Téma kiválasztása">
+        <button class="chip" data-set-theme="trek" aria-pressed="true">Star Trek</button>
+        <button class="chip" data-set-theme="wars" aria-pressed="false">Star Wars</button>
+        <button class="chip" data-set-theme="punk" aria-pressed="false">Cyberpunk</button>
+      </nav>
+
+      <header class="hero">
+        <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
+        <p class="kicker">Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
+        <div class="cta-row">
+          <a class="cta" href="#letoltesek">Letöltés</a>
+          <a class="cta" href="#funkciok">Funkciók</a>
+          <a class="cta" href="#doksik">Dokumentumok</a>
+        </div>
+      </header>
+
+      <section id="letoltesek" class="panel">
+        <div class="panel-title"><h2>Letöltések</h2></div>
+
+        <div class="cards">
+          <article class="card">
+            <h3>FormatX Light telepítő v1.0.4</h3>
+            <p>Windows app · hutoczky/formatx v1.0.4</p>
+          </article>
+
+          <article class="card">
+            <h3>Windows App Runtime (x64)</h3>
+            <p>Microsoft telepítő · hutoczky/formatx v1.0.4</p>
+          </article>
+
+          <article class="card small">
+            <h3>README.txt</h3>
+            <p>Kiinduló információk · hutoczky/formatx</p>
+          </article>
+
+          <article class="card">
+            <h3>.NET Desktop Runtime 10.0 (x64)</h3>
+            <p>Microsoft telepítő · hutoczky/formatx v1.0.4</p>
+          </article>
+
+          <article class="card small">
+            <h3>Web UI</h3>
+            <p>Böngészős felület</p>
+          </article>
+        </div>
+
+        <div class="pill-row">
+          <a class="pill" href="#villam">Villámgyors</a>
+          <a class="pill" href="#bovitheto">Bővíthető</a>
+          <a class="pill" href="#webui">Web UI</a>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="copy">© 2023 Sci‑Fi UI</div>
+        <a class="to-top" href="#">Vissza a tetejére</a>
+      </footer>
+    </main>
+
+    <script src="./theme.js"></script>
+  </body>
+</html>
