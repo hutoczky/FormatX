@@ -1,0 +1,4 @@
+/* Ugyanaz a kiegészítő stílus a nem-doksis csomaghoz */
+.loader-demo { display: flex; align-items: center; justify-content: center; min-height: 120px; }
+.loader-demo figure { margin: 0; text-align: center; }
+.loader-demo img { height: 72px; }
