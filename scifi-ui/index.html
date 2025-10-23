@@ -6,30 +6,34 @@
     <title>Formázás a jövőből</title>
     <meta name="description" content="Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok." />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rajdhani:wght@400;600;700&family=Oxanium:wght@600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20251023c" />
   </head>
   <body>
-    <div class="decor decor-back"></div>
-    <div class="decor decor-overlay"></div>
+    <!-- Dekoratív rétegek -->
+    <div class="decor decor-back" aria-hidden="true"></div>
+    <div class="decor decor-overlay" aria-hidden="true"></div>
 
     <main class="frame">
-      <nav class="chips" aria-label="Téma kiválasztása">
-        <button class="chip" data-set-theme="trek" aria-pressed="true">Star Trek</button>
-        <button class="chip" data-set-theme="wars" aria-pressed="false">Star Wars</button>
-        <button class="chip" data-set-theme="punk" aria-pressed="false">Cyberpunk</button>
+      <!-- Téma-választó kapszulák -->
+      <nav class="chips" aria-label="Téma választó" role="group">
+        <button class="chip" data-set-theme="trek" aria-pressed="true">STAR TREK</button>
+        <button class="chip" data-set-theme="wars" aria-pressed="false">STAR WARS</button>
+        <button class="chip" data-set-theme="punk" aria-pressed="false">CYBERPUNK</button>
       </nav>
 
+      <!-- Hero -->
       <header class="hero">
         <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
         <p class="kicker">Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
-        <div class="cta-row">
-          <a class="cta" href="#letoltesek">Letöltés</a>
-          <a class="cta" href="#funkciok">Funkciók</a>
-          <a class="cta" href="#doksik">Dokumentumok</a>
+        <div class="cta-row" role="navigation" aria-label="Gyors hivatkozások">
+          <a class="cta cta-a" href="#letoltesek">LETÖLTÉS</a>
+          <a class="cta cta-b" href="#funkciok">FUNKCIÓK</a>
+          <a class="cta cta-c" href="#doksik">DOKUMENTUMOK</a>
         </div>
       </header>
 
+      <!-- Fő panel -->
       <section id="letoltesek" class="panel">
         <div class="panel-title"><h2>Letöltések</h2></div>
 
@@ -67,12 +71,12 @@
         </div>
       </section>
 
-      <footer class="footer">
-        <div class="copy">© 2023 Sci‑Fi UI</div>
+      <footer class="footer" role="contentinfo">
+        <div class="copy">© 2023 SCI‑FI UI</div>
         <a class="to-top" href="#">Vissza a tetejére</a>
       </footer>
     </main>
 
-    <script src="./theme.js"></script>
+    <script src="./theme.js?v=20251023c"></script>
   </body>
 </html>
