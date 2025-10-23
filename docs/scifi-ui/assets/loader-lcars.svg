@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">LCARS betöltő</title>
+  <desc id="d">Három, lekerekített sáv változó szélességgel, hullámszerű mozgással.</desc>
+  <defs>
+    <filter id="g" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/><feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="10" y="10" rx="8" ry="8" height="12" width="30" fill="#f07d00" filter="url(#g)">
+    <animate attributeName="width" values="30;180;30" dur="1.6s" begin="0s" repeatCount="indefinite" keySplines=".4 0 .2 1" calcMode="spline"/>
+  </rect>
+  <rect x="10" y="26" rx="8" ry="8" height="12" width="30" fill="#a63f8b" filter="url(#g)">
+    <animate attributeName="width" values="30;160;30" dur="1.6s" begin=".15s" repeatCount="indefinite" keySplines=".4 0 .2 1" calcMode="spline"/>
+  </rect>
+  <rect x="10" y="42" rx="8" ry="8" height="12" width="30" fill="#ff9a00" filter="url(#g)">
+    <animate attributeName="width" values="30;140;30" dur="1.6s" begin=".3s" repeatCount="indefinite" keySplines=".4 0 .2 1" calcMode="spline"/>
+  </rect>
+</svg>
