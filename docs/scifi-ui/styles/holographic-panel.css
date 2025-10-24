@@ -10,6 +10,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  margin-inline: var(--panel-safe, clamp(14px, 2.4vw, 20px));
+}
+
+/* Fix: Panel should span full width when inside .download-grid */
+.download-grid > .holographic-panel {
+  grid-column: 1 / -1;
 }
 
 .holo-content {
@@ -58,6 +65,23 @@
 .holo-lcars .holo-label {
   color: #ff9a00;
   text-shadow: 0 0 8px rgba(255, 160, 0, 0.6);
+}
+
+/* LCARS label localization: Override to show Hungarian text */
+.theme-lcars .holo-lcars .holo-label {
+  font-size: 0;
+  position: relative;
+  white-space: nowrap;
+}
+
+.theme-lcars .holo-lcars .holo-label::before {
+  content: "SZUBTÉR TELEMETRIA";
+  font-family: var(--font-mono, monospace);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  opacity: 0.9;
+  display: inline-block;
 }
 
 /* LCARS Radar sweep animation */
