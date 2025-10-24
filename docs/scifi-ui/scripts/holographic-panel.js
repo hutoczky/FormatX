@@ -201,6 +201,15 @@
     } else {
       licenseElement.parentNode.appendChild(panel);
     }
+
+    // Safety: If panel ended up inside .download-grid, move it after the grid
+    const grid = panel.closest('.download-grid');
+    if (grid) {
+      // Move panel after the grid
+      grid.insertAdjacentElement('afterend', panel);
+      // Fallback: ensure it spans full width if it somehow stays in grid
+      panel.style.gridColumn = '1 / -1';
+    }
   }
 
   /**
