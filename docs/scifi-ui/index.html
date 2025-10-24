@@ -14,6 +14,9 @@
   <link rel="stylesheet" href="./styles/holographic-panel.css">
 </head>
 <body id="top" class="theme-lcars">
+  <!-- Skip link for keyboard accessibility -->
+  <a href="#main-content" class="skip-link">Ugrás a tartalomhoz</a>
+
   <!-- Fedvény effektek -->
   <div id="fx-scanlines" aria-hidden="true"></div>
   <div id="fx-vignette" aria-hidden="true"></div>
@@ -27,7 +30,7 @@
     </nav>
   </header>
 
-  <main class="container shell">
+  <main id="main-content" class="container shell">
     <!-- LCARS oldalsó díszítő elemek -->
     <i class="decor decor-left" aria-hidden="true"></i>
     <i class="decor decor-right" aria-hidden="true"></i>
@@ -63,9 +66,9 @@
       </div>
 
       <div class="chips">
-        <span class="pill md">Villámgyors</span>
-        <span class="pill md alt">Bővíthető</span>
-        <span class="pill md accent">Licenc</span>
+        <button class="pill md" tabindex="0" aria-label="Villámgyors">Villámgyors</button>
+        <button class="pill md alt" tabindex="0" aria-label="Bővíthető">Bővíthető</button>
+        <button class="pill md accent" tabindex="0" aria-label="Licenc">Licenc</button>
       </div>
     </section>
 

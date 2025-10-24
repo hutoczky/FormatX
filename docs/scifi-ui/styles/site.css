@@ -23,14 +23,41 @@
   --radius-xl: 36px;
   --radius-pill: 999px;
 
-  --focus-ring: 3px solid #31d2ff;
+  --focus-ring: 2px solid #ffa000;
+  --focus-offset: 4px;
+  
+  /* Responsive typography */
+  --font-size-base: clamp(16px, 1.5vw, 18px);
+  --font-size-hero: clamp(2.5rem, 8vw, 5.2rem);
 }
 
 * { box-sizing: border-box }
 html, body { height: 100% }
 body {
   margin: 0; color: var(--fg); background: var(--bg);
-  font-family: var(--font-ui); font-size: 18px; line-height: 1.45; letter-spacing: .2px;
+  font-family: var(--font-ui); font-size: var(--font-size-base); line-height: 1.45; letter-spacing: .2px;
+}
+
+/* ===== Skip Link ===== */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 1rem 2rem;
+  background: var(--accent);
+  color: #000;
+  text-decoration: none;
+  font-weight: 700;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }
 
 .container { width: min(1200px, 92vw); margin: 0 auto }
@@ -47,9 +74,8 @@ body {
     linear-gradient(180deg,
       color-mix(in oklab, var(--panel) 92%, black) 0%,
       color-mix(in oklab, var(--panel) 96%, black) 100%);
-  box-shadow:
-    inset 0 0 0 6px color-mix(in oklab, var(--panel-line) 16%, transparent),
-    0 0 64px color-mix(in oklab, var(--accent) 12%, transparent);
+  filter: drop-shadow(0 0 32px color-mix(in oklab, var(--accent) 15%, transparent));
+  box-shadow: inset 0 0 0 6px color-mix(in oklab, var(--panel-line) 16%, transparent);
   overflow: hidden;
 }
 .decor { position: absolute; inset: 0 auto 0 0; pointer-events: none }
@@ -78,7 +104,7 @@ body {
 .title {
   font-family: var(--font-title);
   font-weight: 900;
-  font-size: clamp(3rem, 8vw, 5.2rem);
+  font-size: var(--font-size-hero);
   letter-spacing: 2px;
   margin: 0 0 .35rem;
   color: var(--accent);
@@ -86,11 +112,14 @@ body {
   text-shadow:
     0 0 0 currentColor,
     0 0 24px color-mix(in oklab, var(--accent) 40%, transparent);
+  word-break: break-word;
+  hyphens: auto;
 }
 .subtitle {
   font-family: var(--font-mono);
   color: #67d6f0;
   margin: 0 0 1.15rem;
+  font-size: clamp(0.9rem, 2vw, 1rem);
 }
 .cta-row { display: flex; gap: .85rem; flex-wrap: wrap }
 
@@ -106,11 +135,16 @@ body {
   color: var(--pill-fg);
   background: linear-gradient(180deg, var(--pill-bg), color-mix(in oklab, var(--pill-bg) 80%, black));
   font-weight: 800; letter-spacing: .8px; text-transform: uppercase; text-decoration: none;
-  transition: transform .08s ease, box-shadow .2s ease;
+  transition: transform .08s ease;
+  cursor: pointer;
 }
-.pill:hover { transform: translateY(-1px); box-shadow: 0 6px 20px color-mix(in oklab, var(--accent) 25%, transparent) }
+.pill:hover { transform: translateY(-1px); filter: brightness(1.1); }
 .pill:active { transform: translateY(0) scale(.98) }
-.pill:focus-visible { outline: var(--focus-ring); outline-offset: 2px }
+.pill:focus-visible { 
+  outline: var(--focus-ring); 
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 4px rgba(255, 160, 0, 0.3);
+}
 .pill.sm { padding: .55rem .95rem; font-size: .92rem }
 .pill.md { padding: .6rem 1.05rem; font-size: 1rem }
 .pill.lg { padding: .85rem 1.25rem; font-size: 1.05rem }
@@ -121,6 +155,12 @@ body {
 .theme-switch button[aria-pressed="true"] {
   outline: 4px solid color-mix(in oklab, var(--accent) 60%, white);
   outline-offset: 2px;
+}
+
+.theme-switch button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 4px rgba(255, 160, 0, 0.3);
 }
 
 /* ===== LCARS stílusú belső panel ===== */
@@ -158,13 +198,30 @@ body {
   background: color-mix(in oklab, var(--panel) 92%, black);
   padding: .95rem 1.1rem .9rem;
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--panel-line) 18%, transparent);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform .08s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+.card:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 4px rgba(255, 160, 0, 0.3), inset 0 0 0 1px color-mix(in oklab, var(--panel-line) 18%, transparent);
 }
 .card h3 { margin: 0 0 .3rem; font-weight: 800; letter-spacing: .6px }
-.card .meta { margin: 0; color: #9ab3c9; font-family: var(--font-mono) }
+.card .meta { margin: 0; color: #b5cde0; font-family: var(--font-mono); font-size: 0.95rem; }
 
 .span-12 { grid-column: span 12 }
+.span-6  { grid-column: span 12 }
 .span-8  { grid-column: span 12 }
 .span-4  { grid-column: span 12 }
+@media (min-width: 640px) {
+  .span-6 { grid-column: span 6 }
+}
 @media (min-width: 880px) {
   .span-8 { grid-column: span 8 }
   .span-4 { grid-column: span 4 }
@@ -181,7 +238,11 @@ body {
   border-bottom: 2px solid color-mix(in oklab, var(--accent) 70%, transparent);
   padding-bottom: .15rem;
 }
-.back-to-top:focus-visible { outline: var(--focus-ring); outline-offset: 3px }
+.back-to-top:focus-visible { 
+  outline: var(--focus-ring); 
+  outline-offset: var(--focus-offset);
+  box-shadow: 0 0 0 4px rgba(255, 160, 0, 0.3);
+}
 
 /* ===== Kisegítő ===== */
 .sr-only { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
@@ -224,17 +285,14 @@ body {
   color: #9ff6ff;
   text-shadow:
     0 0 6px #a4ffff,
-    0 0 18px #64e5ff,
-    0 0 40px #2fd6ff;
+    0 0 18px #64e5ff;
 }
 .theme-holo .shell,
 .theme-holo .panel,
 .theme-holo .card {
   border-color: color-mix(in oklab, var(--panel-line) 86%, white);
-  box-shadow:
-    inset 0 0 0 2px color-mix(in oklab, var(--panel-line) 24%, transparent),
-    0 0 22px color-mix(in oklab, var(--panel-line) 35%, transparent),
-    0 0 60px color-mix(in oklab, var(--panel-line) 10%, transparent);
+  filter: drop-shadow(0 0 22px color-mix(in oklab, var(--panel-line) 35%, transparent));
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--panel-line) 24%, transparent);
   backdrop-filter: blur(.5px);
 }
 .theme-holo .pill {
@@ -242,7 +300,7 @@ body {
   --pill-bg: color-mix(in oklab, var(--panel-line) 40%, #001018);
   --pill-bd: color-mix(in oklab, var(--panel-line) 95%, white);
   background: color-mix(in oklab, #001018 90%, transparent);
-  box-shadow: 0 0 14px color-mix(in oklab, var(--panel-line) 35%, transparent);
+  filter: drop-shadow(0 0 14px color-mix(in oklab, var(--panel-line) 35%, transparent));
 }
 
 /* 3) Cyberpunk (neon + glitch) */
@@ -256,8 +314,7 @@ body {
   color: #ffd400;
   position: relative;
   text-shadow:
-    0 0 3px #ffd400, 0 0 10px #ff9d00,
-    0 0 22px #ff00a8, 0 0 36px #00cfff;
+    0 0 3px #ffd400, 0 0 10px #ff9d00;
 }
 .theme-cyber .title::after {
   content: attr(data-glitch);
@@ -275,16 +332,15 @@ body {
 }
 .theme-cyber .panel, .theme-cyber .card {
   border-color: color-mix(in oklab, var(--panel-line) 80%, white);
-  box-shadow:
-    inset 0 0 0 1px #00eaff55,
-    0 0 18px #ff00a855,
-    0 0 42px #00eaff33;
+  filter: drop-shadow(0 0 18px #ff00a855) drop-shadow(0 0 42px #00eaff33);
+  box-shadow: inset 0 0 0 1px #00eaff55;
 }
 .theme-cyber .pill {
   --pill-fg: #170016;
   --pill-bg: color-mix(in oklab, var(--accent-2) 38%, #0a0013);
   --pill-bd: color-mix(in oklab, var(--accent-2) 93%, white);
-  box-shadow: 0 0 16px #ff00a866, inset 0 0 10px #00eaff33;
+  filter: drop-shadow(0 0 16px #ff00a866);
+  box-shadow: inset 0 0 10px #00eaff33;
 }
 .theme-cyber .pill.accent {
   --pill-bg: color-mix(in oklab, var(--accent-3) 40%, #0a0013);
@@ -294,11 +350,127 @@ body {
 /* Tipográfia */
 h1, h2, h3 { text-transform: uppercase }
 
+/* Lists and figures */
+ul {
+  line-height: 1.6;
+  color: var(--fg);
+}
+li {
+  margin: 0.4rem 0;
+}
+strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+.loader-demo figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.loader-demo figcaption {
+  text-align: center;
+}
+
+/* Theme-specific focus rings */
+.theme-lcars {
+  --focus-ring: 2px solid #ffa000;
+}
+.theme-holo {
+  --focus-ring: 2px solid #3fd2ff;
+}
+.theme-cyber {
+  --focus-ring: 2px solid #ff00a8;
+}
+
+.theme-holo .pill:focus-visible,
+.theme-holo .card:focus-visible,
+.theme-holo .back-to-top:focus-visible {
+  box-shadow: 0 0 0 4px rgba(63, 210, 255, 0.3);
+}
+
+.theme-cyber .pill:focus-visible,
+.theme-cyber .card:focus-visible,
+.theme-cyber .back-to-top:focus-visible {
+  box-shadow: 0 0 0 4px rgba(255, 0, 168, 0.3);
+}
+
 /* Kisegítő beállítások */
 @media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Disable heavy glow effects for reduced motion */
+  .shell {
+    filter: none !important;
+    box-shadow: inset 0 0 0 6px color-mix(in oklab, var(--panel-line) 16%, transparent) !important;
+  }
+  
+  .title {
+    text-shadow: none !important;
+  }
+  
+  .decor-left,
+  .decor-right {
+    filter: none !important;
+  }
+  
+  .panel, .card {
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--panel-line) 18%, transparent) !important;
+  }
+  
+  .pill:hover {
+    filter: none !important;
+    transform: none !important;
+  }
+  
+  .card:hover {
+    filter: none !important;
+    transform: none !important;
+  }
+  
+  #fx-scanlines,
+  #fx-vignette,
+  #fx-noise {
+    display: none !important;
+  }
+  
+  /* Theme-specific glow reductions */
+  .theme-holo .shell,
+  .theme-holo .panel,
+  .theme-holo .card,
+  .theme-cyber .shell,
+  .theme-cyber .panel,
+  .theme-cyber .card {
+    filter: none !important;
+  }
+  
+  .theme-holo .pill,
+  .theme-cyber .pill {
+    filter: none !important;
+  }
+  
+  .theme-cyber .title::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
 }
 @media (max-width: 520px) {
   .subtitle { font-size: .95rem }
   .footer { flex-direction: column; gap: .5rem }
+  .container { width: min(1200px, 95vw); }
+}
+@media (max-width: 360px) {
+  body {
+    font-size: 15px;
+  }
+  .title {
+    font-size: 2rem;
+    letter-spacing: 1px;
+  }
 }
