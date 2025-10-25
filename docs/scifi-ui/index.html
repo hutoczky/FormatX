@@ -9,6 +9,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0c0f">
+
+  <!-- Early theme bootstrap: állítsuk be a témát az első festés előtt (URL > localStorage) -->
+  <script>
+    (function () {
+      try {
+        var THEMES = ['lcars','holo','cyber'];
+        var t = null;
+        try {
+          var u = new URL(window.location.href);
+          var q = (u.searchParams.get('theme') || '').toLowerCase();
+          if (THEMES.indexOf(q) >= 0) t = q;
+        } catch (e) {}
+        if (!t) {
+          try {
+            var s = (localStorage.getItem('scifi-ui:theme') || '').toLowerCase();
+            if (THEMES.indexOf(s) >= 0) t = s;
+          } catch (e) {}
+        }
+        if (t) document.documentElement.classList.add('theme-' + t);
+      } catch (e) {}
+    })();
+  </script>
+
   <link rel="stylesheet" href="./styles/site.css">
   <link rel="stylesheet" href="./styles/loaders.css">
   <link rel="stylesheet" href="./styles/holographic-panel.css">
@@ -17,12 +40,22 @@
   <link rel="stylesheet" href="./styles/readability.css">
   <link rel="stylesheet" href="./styles/cyberpunk.css">
   <!-- Hologram headline 3D/glow booster + végső témafelülírások: ABSZOLÚT UTOLSÓNAK -->
-  <link rel="stylesheet" href="./styles/holo-title-3d.css">
+  <link rel="stylesheet" href="./styles/holo-title-3d.css?v=20251025-anim2">
   <link rel="stylesheet" href="./styles/theme-overrides.css">
   <!-- LCARS 3D címeffekt — mindig a legvégén, hogy mindent felülírjon LCARS-ben -->
-  <link rel="stylesheet" href="./styles/lcars-title-3d.css?v=20251025-strong3d">
+  <link rel="stylesheet" href="./styles/lcars-title-3d.css?v=20251025-anim2">
+  <!-- ÚJ: Splash overlay stílusok (témánkénti üdvözlőkép) -->
+  <link rel="stylesheet" href="./styles/splash.css?v=20251025-splash1">
 </head>
 <body id="top" class="theme-lcars">
+  <!-- Üdvözlő splash overlay (első festéskor látszik, majd elhalványul) -->
+  <div id="splash" aria-live="polite" aria-label="Üdvözlő animáció">
+    <div class="splash-panel">
+      <div class="art" role="img" aria-label="Üdvözlő grafika"></div>
+      <div class="caption">Üdvözöl az LCARS konzol</div>
+    </div>
+  </div>
+
   <!-- Fedvény effektek -->
   <div id="fx-scanlines" aria-hidden="true"></div>
   <div id="fx-vignette" aria-hidden="true"></div>
@@ -149,5 +182,7 @@
 
   <script defer src="./scripts/site.js"></script>
   <script defer src="./scripts/holographic-panel.js"></script>
+  <!-- ÚJ: Splash vezérlés (elrejtés betöltés után, témafelirat) -->
+  <script defer src="./scripts/splash.js?v=20251025-splash1"></script>
 </body>
 </html>
