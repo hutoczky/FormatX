@@ -1,0 +1,92 @@
+/* Final theme overrides to match mockups precisely (LCARS / HOLO / CYBER).
+   Load this LAST so it wins over all earlier styles. */
+
+/* ========== LCARS (Star Trek) — mock 1 ========== */
+.theme-lcars {
+  --accent:   #FF9E00;
+  --accent-2: #D86F00;
+  --accent-3: #B85CA0;
+  --panel-line: #FF9E00;
+}
+
+/* Hero: telt borostyán cím, cián alcím */
+.theme-lcars .title {
+  color: #FFB000 !important;
+  text-shadow:
+    0 1px 0 rgba(45,20,0,.35),
+    0 0 6px rgba(255,160,0,.18);
+}
+.theme-lcars .subtitle { color: #57CDE8 !important }
+
+/* Pills: kapszulák (borostyán/magenta/lilac) */
+.theme-lcars .pill {
+  border-radius: 22px;
+  border: 0;
+  color: #0A0D12;
+  background: linear-gradient(180deg, #FFB54A, #FF9E00);
+  box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 0 2px rgba(0,0,0,.06) inset;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.theme-lcars .pill.alt {
+  background: linear-gradient(180deg, #EA8CB5, #C25A97);
+  color: #0A0D12;
+}
+.theme-lcars .pill.accent {
+  background: linear-gradient(180deg, #F7C98A, #E7A85A);
+  color: #0A0D12;
+}
+
+/* Panelek/kártyák: vékony borostyán kontúr, nagy sugár */
+.theme-lcars .shell,
+.theme-lcars .panel,
+.theme-lcars .card {
+  border: 2px solid #FF9E00;
+  border-radius: 22px;
+  background: color-mix(in oklab, #0b0e12 94%, #FF9E00);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,158,0,.14),
+    0 0 24px rgba(255,158,0,.10);
+}
+.theme-lcars .panel-title { color: #FFB000 }
+
+/* ========== HOLOGRAM (Star Wars) — mock 2 ========== */
+.theme-holo {
+  --scanlines: .30;
+  --vignette:  .30;
+  --noise:     .10;
+  --panel-line: #3FD2FF;
+}
+
+/* CTA gombok: tömör cián kapszulák sötét felirattal */
+.theme-holo .pill {
+  border-radius: 16px;
+  border: 2px solid #7FE9FF;
+  color: #07141D;
+  background: linear-gradient(180deg, #9FF6FF, #64E5FF);
+  text-shadow: 0 1px 0 rgba(255,255,255,.35);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.18),
+    0 2px 12px rgba(100,229,255,.25);
+  letter-spacing: .08em;
+}
+
+/* Panelek/kártyák: visszafogott cián ragyogás, kerek sarkok */
+.theme-holo .shell,
+.theme-holo .panel,
+.theme-holo .card {
+  border: 2px solid color-mix(in oklab, var(--panel-line) 86%, white);
+  border-radius: 16px;
+  background: color-mix(in oklab, #08131c 92%, black);
+  box-shadow:
+    inset 0 0 0 1px rgba(100,229,255,.18),
+    0 0 18px rgba(63,210,255,.26);
+}
+.theme-holo .panel-title { color: #9FF6FF }
+
+/* ========== CYBERPUNK — mock 3 (harmonizálás) ========== */
+/* A részletes cyberpunk.css már kezeli a neon/glitch stílust,
+   itt csak apró finomítás: */
+.theme-cyber .title { letter-spacing: 2.2px }
+.theme-cyber .panel,
+.theme-cyber .card { border-radius: 18px }
