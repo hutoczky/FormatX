@@ -1,153 +1,154 @@
-/* Sci‑Fi UI — Cyberpunk theme visual overhaul (matches the mock)
-   Goals:
-   - Bold yellow headline with gritty scanline + RGB glitch shards
-   - Cyan subtitle/body highlights
-   - Magenta/cyan neon borders for panels/cards/pills
-   - Stronger CRT scanlines + noise while keeping text legible
+/* Sci‑Fi UI — Cyberpunk theme (mock-accurate)
+   Csak a CYBERPUNK témát érinti.
+   - Sárga, „gritty + glitch” főcím
+   - Cián alcím
+   - Magenta keretek + finom cián belső fény
+   - Szögletesebb neon „pill” gombok
+   - Erősebb CRT/scanline zajréteg
 */
 
-/* Heavier global overlays for cyber only (overrides anything before) */
+/* Alapszínek és fedvények (csak cyber) */
 .theme-cyber {
-  --scanlines: .42; /* stronger lines */
-  --vignette:  .38;
+  --scanlines: .44;     /* erősebb vonalak */
+  --vignette:  .40;
   --noise:     .12;
 
   --bg: #0a0013;
   --fg: #ffd9ff;
   --muted: #f0caff;
 
-  --accent:   #ffd400; /* headline yellow */
-  --accent-2: #ff00a8; /* magenta */
-  --accent-3: #00eaff; /* cyan */
+  --accent:   #ffd400;  /* sárga (headline) */
+  --accent-2: #ff00a8;  /* magenta (keretek) */
+  --accent-3: #00eaff;  /* cián (alcím, fókusz) */
 
-  --panel: #14001f;
+  --panel: #14001f;     /* belső felület sötét lila */
   --panel-line: #ff00a8;
 }
 
-/* Headline: gritty yellow with chromatic glitch slices */
+body.theme-cyber { background-color: var(--bg); }
+
+/* HERO — sárga „gritty + glitch” cím */
 .theme-cyber .title {
-  color: #ffd400;
-  letter-spacing: 2.2px;
-  -webkit-text-stroke: 1px rgba(22, 0, 24, .55);
+  /* Kapcsoljuk ki a gradient/hologram hátteret, legyen tömör sárga */
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+
+  color: var(--accent) !important;
+  letter-spacing: 2.4px;
+  -webkit-text-stroke: 1px rgba(22,0,24,.62);
   text-shadow:
     0 1px 0 rgba(10,0,16,.55),
     0 0 2px #ffb300,
     0 0 8px #ffb300,
-    0 0 18px #ff00a8aa,
-    0 0 36px #00eaff66;
+    0 0 18px rgba(255,0,168,.68),
+    0 0 36px rgba(0,234,255,.40);
   position: relative;
   isolation: isolate;
 }
 
-/* Thin scanline sheen layered on the headline for gritty effect */
+/* Vékony scanline „sheen” a címen */
 .theme-cyber .title::before {
   content: "";
   position: absolute; inset: 0;
-  pointer-events: none; mix-blend-mode: screen; opacity: .35;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: .35;
   background:
     repeating-linear-gradient(
       to bottom,
-      rgba(255, 255, 255, .06) 0px,
-      rgba(255, 255, 255, .06) 1px,
+      rgba(255,255,255,.06) 0px,
+      rgba(255,255,255,.06) 1px,
       transparent 2px,
       transparent 4px
     );
   filter: blur(.4px);
 }
 
-/* Dual‑color glitch shards (cyan + amber) that sweep subtly */
+/* Vízszintes glitch-sávok, RGB „shards” */
 .theme-cyber .title::after {
   content: attr(data-glitch);
   position: absolute; inset: 0;
   pointer-events: none;
   mix-blend-mode: screen;
-  color: #00eaff;
-  opacity: .38;
-  clip-path: polygon(0 8%, 100% 6%, 100% 22%, 0 24%);
-  transform: translate(.02em, -.01em);
-  animation: cyber-glitch 3.4s steps(2, end) infinite;
+  color: var(--accent-3);
+  opacity: .40;
+  clip-path: polygon(0 8%,100% 6%,100% 22%,0 24%);
+  transform: translate(.02em,-.01em);
+  animation: cyber-glitch 3.6s steps(2,end) infinite;
 }
 @keyframes cyber-glitch {
-  0%, 100% { clip-path: polygon(0 8%,100% 6%,100% 22%,0 24%); transform: translate(.01em, 0) }
-  18%      { clip-path: polygon(0 28%,100% 26%,100% 40%,0 42%); transform: translate(-.02em, .01em) }
-  36%      { clip-path: polygon(0 58%,100% 56%,100% 70%,0 72%); transform: translate(.03em, -.01em) }
-  54%      { clip-path: polygon(0 78%,100% 76%,100% 88%,0 90%); transform: translate(-.015em, .005em) }
-  72%      { clip-path: polygon(0 18%,100% 16%,100% 30%,0 32%); transform: translate(.02em, -.01em) }
+  0%,100%{clip-path:polygon(0 8%,100% 6%,100% 22%,0 24%);transform:translate(.01em,0)}
+  18%    {clip-path:polygon(0 28%,100% 26%,100% 40%,0 42%);transform:translate(-.02em,.01em)}
+  36%    {clip-path:polygon(0 58%,100% 56%,100% 70%,0 72%);transform:translate(.03em,-.01em)}
+  54%    {clip-path:polygon(0 78%,100% 76%,100% 88%,0 90%);transform:translate(-.015em,.005em)}
+  72%    {clip-path:polygon(0 18%,100% 16%,100% 30%,0 32%);transform:translate(.02em,-.01em)}
 }
 
-/* Subtitle/body cyan and tighter letter spacing like the mock */
+/* Alcím — cián, szorosabb betűköz, finom árnyék */
 .theme-cyber .subtitle {
-  color: #00eaff;
-  letter-spacing: 1px;
-  text-shadow: 0 1px 0 rgba(0, 20, 28, .6);
+  color: var(--accent-3);
+  letter-spacing: 1.1px;
+  text-shadow: 0 1px 0 rgba(0,20,28,.6);
 }
 
-/* Panel shell + panels/cards: magenta neon frame with inner cyan glow */
+/* Külső héj és panelek/kártyák — magenta keret + cián belső fény */
 .theme-cyber .shell {
   box-shadow:
-    inset 0 0 0 6px color-mix(in oklab, var(--panel-line) 12%, transparent),
-    0 0 64px color-mix(in oklab, var(--accent-2) 22%, transparent);
+    inset 0 0 0 6px rgba(255,0,168,.12),
+    0 0 64px rgba(255,0,168,.22);
 }
+
 .theme-cyber .panel,
 .theme-cyber .card {
-  border: 2px solid #ff00a8;
+  border: 2px solid var(--accent-2);
   border-radius: 18px;
   background: color-mix(in oklab, var(--panel) 92%, black);
   box-shadow:
-    inset 0 0 0 1px #00eaff26,
-    0 0 12px #ff00a84d,
-    0 0 28px #00eaff26;
+    inset 0 0 0 1px rgba(0,234,255,.15),
+    0 0 12px rgba(255,0,168,.32),
+    0 0 28px rgba(0,234,255,.16);
 }
 
-/* Panel titles: yellow headline style but smaller */
+/* Panelcím — kicsinyített „headline” karakter */
 .theme-cyber .panel-title {
-  color: #ffd400;
+  color: var(--accent);
   -webkit-text-stroke: .6px rgba(22,0,24,.55);
-  text-shadow:
-    0 1px 0 rgba(10,0,16,.45),
-    0 0 6px #ffb300;
+  text-shadow: 0 1px 0 rgba(10,0,16,.45), 0 0 6px #ffb300;
 }
 
-/* Cards: headings cyan/amber like the mock */
-.theme-cyber .card h3 { color: #ffd400; letter-spacing: 1px }
-.theme-cyber .card .meta { color: #00eaff; letter-spacing: .6px }
+/* Kártya szövegek */
+.theme-cyber .card h3   { color: var(--accent);   letter-spacing: 1px; }
+.theme-cyber .card .meta{ color: var(--accent-3); letter-spacing: .6px; }
 
-/* Pills: rectangular neon chips with magenta border and cyan/yellow variants */
+/* „Pill” gombok — szögletesebb, magenta keret, sárga/cián variánsok */
 .theme-cyber .pill {
-  --pill-fg: #ffe9ff;
-  --pill-bd: #ff00a8;
-  --pill-bg: color-mix(in oklab, #0a0013 92%, transparent);
-  border-radius: 12px; /* mock: kevésbé kerek */
+  --pill-bd: var(--accent-2);
+  --pill-fg: #ffe7a8;                       /* sárgás felirat, mint a mockon */
   border: 2px solid var(--pill-bd);
+  border-radius: 12px;
   color: var(--pill-fg);
-  background: linear-gradient(180deg,
-    color-mix(in oklab, #ff00a8 8%, #0a0013),
-    color-mix(in oklab, #ff00a8 2%, #0a0013));
+  background: linear-gradient(180deg, rgba(255,0,168,.08), rgba(255,0,168,.02));
   box-shadow:
-    inset 0 0 0 1px #00eaff44,
-    0 0 10px #ff00a84d;
+    inset 0 0 0 1px rgba(0,234,255,.26),
+    0 0 10px rgba(255,0,168,.30);
   letter-spacing: 1.2px;
 }
-.theme-cyber .pill.alt {
-  --pill-bd: #ff00a8;
-  --pill-fg: #ffd400;
-}
-.theme-cyber .pill.accent {
-  --pill-bd: #00eaff;
-  --pill-fg: #00eaff;
-}
+.theme-cyber .pill.alt    { --pill-fg: var(--accent); }
+.theme-cyber .pill.accent { --pill-fg: var(--accent-3); --pill-bd: var(--accent-3); }
 
-/* Theme switch buttons (top): cyan/magenta borders and active outline */
-.theme-cyber .theme-switch .pill { --pill-bd: #00eaff; --pill-fg: #00eaff }
+/* Téma kapcsolók — cián keret; aktív magenta kiemeléssel */
+.theme-cyber .theme-switch .pill { --pill-bd: var(--accent-3); --pill-fg: var(--accent-3); }
 .theme-cyber .theme-switch button[aria-pressed="true"] {
-  outline: 3px solid #ff00a8; outline-offset: 2px;
+  outline: 3px solid var(--accent-2);
+  outline-offset: 2px;
 }
 
-/* Footer cyan and “back to top” spacing like mock */
-.theme-cyber .footer { color: #00eaff }
-.theme-cyber .back-to-top { border-bottom-color: #00eaff; color: #00eaff }
+/* Footer — cián copyright, sárga vissza a tetejére */
+.theme-cyber .footer       { color: var(--accent-3); }
+.theme-cyber .back-to-top  { color: var(--accent); border-bottom-color: var(--accent); }
 
-/* Extra: screen‑wide CRT grain/flicker overlay just for cyber */
+/* Teljes képernyős CRT szemcsézettség / flicker (csak cyber) */
 body.theme-cyber::before {
   content: "";
   position: fixed; inset: 0; z-index: 1; pointer-events: none;
@@ -162,16 +163,16 @@ body.theme-cyber::before {
   mix-blend-mode: overlay;
 }
 @keyframes crt-flicker {
-  0%, 100% { opacity: .18; filter: saturate(1) }
-  50%      { opacity: .30; filter: saturate(1.15) }
+  0%,100% { opacity: .18; filter: saturate(1) }
+  50%     { opacity: .30; filter: saturate(1.15) }
 }
 
-/* Small screens: tone down glow a bit */
+/* Kis kijelzőkön kicsit kevesebb glow a címen */
 @media (max-width: 560px) {
   .theme-cyber .title {
     text-shadow:
       0 1px 0 rgba(10,0,16,.55),
       0 0 2px #ffb300,
-      0 0 10px #ff00a899;
+      0 0 10px rgba(255,0,168,.60);
   }
 }
