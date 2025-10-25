@@ -1,0 +1,92 @@
+/* Sci‑Fi UI — Theme Splash Overlay (animated welcome)
+   - Fullscreen overlay shown on initial load, fades out automatically
+   - Theme-specific art using existing loader SVGs
+   - Accessible fallback, respects reduced motion and forced colors
+*/
+
+#splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(140% 100% at 50% 0%, rgba(0,0,0,.85) 0%, rgba(0,0,0,.70) 60%, rgba(0,0,0,.55) 100%);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .6s ease-out, visibility 0s linear .6s;
+}
+
+#splash.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+#splash .splash-panel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 1.2rem;
+  padding: clamp(16px, 3.2vw, 36px);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+  box-shadow: 0 20px 60px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.06);
+  animation: panel-pop .5s ease-out;
+}
+
+@keyframes panel-pop { from { transform: translateY(12px) scale(.985); opacity: .6 } to { transform: translateY(0) scale(1); opacity: 1 } }
+
+#splash .art {
+  width: min(72vw, 720px);
+  height: min(28vw, 280px);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,.45));
+  animation: art-float 3.6s ease-in-out infinite;
+}
+
+@keyframes art-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+
+#splash .caption {
+  font-family: "Orbitron", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-size: clamp(14px, 2.2vw, 18px);
+  opacity: .86;
+}
+
+/* Subtle scanlines on the whole splash */
+#splash::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient( to bottom, rgba(255,255,255,.04) 0 1px, transparent 1px 3px );
+  mix-blend-mode: overlay;
+  opacity: .25;
+  animation: scanlines 5s linear infinite;
+}
+@keyframes scanlines { from { background-position-y: 0 } to { background-position-y: 100% } }
+
+/* Theme variants: use existing loader SVGs as hero art */
+.theme-lcars #splash .art { background-image: url('../assets/loader-lcars.svg'); }
+.theme-holo  #splash .art { background-image: url('../assets/loader-holo.svg'); }
+.theme-cyber #splash .art { background-image: url('../assets/loader-cyber.svg'); }
+
+theme-lcars #splash .caption { color: #FFC24D }
+theme-holo  #splash .caption { color: #9BEAFF }
+theme-cyber #splash .caption { color: #D7B6FF }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  #splash .art,
+  #splash::after { animation: none !important }
+}
+
+/* Forced colors: keep it legible */
+@media (forced-colors: active) {
+  #splash { background: Canvas !important }
+  #splash .splash-panel { background: Canvas; box-shadow: none; border: 1px solid CanvasText }
+  #splash .art { background: none; width: auto; height: auto }
+  #splash .caption { color: CanvasText }
+}
