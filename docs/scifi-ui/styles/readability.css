@@ -1,0 +1,39 @@
+/* Sci‑Fi UI — Readability overrides (focus on legible text)
+   Target: Hologram (Star Wars) theme
+   - Reduce excessive glow
+   - Add subtle text stroke for clarity
+   - Increase contrast for headings and meta text
+   - Lower global overlays a bit for readability */
+
+/* Lower full-screen overlays to make text crisper */
+.theme-holo {
+  --scanlines: .18;  /* was .28 */
+  --vignette:  .22;  /* was .28 */
+  --noise:     .06;  /* was .08 */
+}
+
+/* Headline: crisp edge, restrained glow */
+.theme-holo .title {
+  color: #e8fbff;
+  -webkit-text-stroke: 1px rgba(0,32,48,.60);
+  text-shadow:
+    0 0 2px rgba(100,229,255,.45),
+    0 1px 0 rgba(0,24,36,.55);
+}
+
+/* Subtitle: brighter tone + thin shadow against dark bg */
+.theme-holo .subtitle {
+  color: #d6f6ff;
+  text-shadow: 0 1px 0 rgba(0,24,36,.55);
+}
+
+/* Panel titles: subtle outline and soft inner glow */
+.theme-holo .panel-title {
+  color: #dff8ff;
+  -webkit-text-stroke: .6px rgba(0,32,48,.55);
+  text-shadow: 0 0 2px rgba(100,229,255,.30);
+}
+
+/* Card headings and metadata: improved contrast */
+.theme-holo .card h3 { color: #e8fbff; }
+.theme-holo .card .meta { color: #cdefff; }
