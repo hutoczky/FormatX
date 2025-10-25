@@ -1,0 +1,22 @@
+/* FormatX | Sci‑Fi UI | Inner text indentation (responsive)
+   Adds safe left/right padding to the main shell and panel sections.
+   The margin value scales with viewport size via clamp(). */
+
+:root {
+  --fx-indent: clamp(16px, 3.5vw, 64px);
+}
+
+/* Main content wrapper */
+.shell {
+  padding-inline: var(--fx-indent);
+}
+
+/* Section panels with decorative borders */
+.panel {
+  padding-inline: var(--fx-indent);
+}
+
+/* Optional utility for extra indent on specific blocks */
+.indent-lg {
+  padding-inline: calc(var(--fx-indent) * 1.5);
+}
