@@ -1,0 +1,48 @@
+/* Sci‑Fi UI — LCARS title 3D (matte bevel + depth, no neon)
+   Scope: ONLY the LCARS theme headline (.theme-lcars .title) */
+
+.theme-lcars .title {
+  position: relative;
+  isolation: isolate;
+
+  /* Beveled amber fill inside glyphs (matte LCARS look) */
+  background:
+    linear-gradient(180deg,
+      #FFC24D 0%,
+      #FFAE16 38%,
+      #FF9E00 66%,
+      #E68800 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+
+  /* Depth extrusion via tight hard shadows (flat console feel) */
+  text-shadow:
+    0  1px 0 rgba(45,20,0,.60),
+    0  2px 0 rgba(45,20,0,.58),
+    0  3px 0 rgba(45,20,0,.56),
+    0  4px 0 rgba(45,20,0,.54),
+    0  5px 0 rgba(45,20,0,.52),
+    /* very subtle outer softness to avoid razor edges on dark bg */
+    0  0   2px rgba(255,180,60,.18);
+}
+
+/* Gentle top highlight ribbon — keeps the matte feel */
+.theme-lcars .title::before {
+  content: "";
+  position: absolute;
+  inset: .06em 0 -.12em 0;
+  pointer-events: none;
+  opacity: .16;
+  filter: blur(2.5px);
+  background: linear-gradient(180deg,
+    rgba(255,200,100,.35),
+    rgba(255,158,0,0));
+  mix-blend-mode: screen;
+}
+
+/* Respect reduced motion (no animations here, but keep hook) */
+@media (prefers-reduced-motion: reduce) {
+  .theme-lcars .title,
+  .theme-lcars .title::before { animation: none !important }
+}
