@@ -1,99 +1,177 @@
-/* Cyberpunk – neon magenta + teal, with optional glitch on title */
-:root[data-theme="cyberpunk"]{
-  --bg:#120012; --text:#ffeefb; --muted:#ffbde6;
-  --accent:#FF2EC0; --accent-2:#25F3FF; --border:#FF2EC0;
-  --panel:#190019; --card:#160016;
-  --panel-glow:rgba(255,46,192,0.12);
+/* Sci‑Fi UI — Cyberpunk theme visual overhaul (matches the mock)
+   Goals:
+   - Bold yellow headline with gritty scanline + RGB glitch shards
+   - Cyan subtitle/body highlights
+   - Magenta/cyan neon borders for panels/cards/pills
+   - Stronger CRT scanlines + noise while keeping text legible
+*/
 
-  --panel-border:2px; --panel-inner:2px;
-  --panel-radius:20px; --panel-inner-radius:14px;
+/* Heavier global overlays for cyber only (overrides anything before) */
+.theme-cyber {
+  --scanlines: .42; /* stronger lines */
+  --vignette:  .38;
+  --noise:     .12;
+
+  --bg: #0a0013;
+  --fg: #ffd9ff;
+  --muted: #f0caff;
+
+  --accent:   #ffd400; /* headline yellow */
+  --accent-2: #ff00a8; /* magenta */
+  --accent-3: #00eaff; /* cyan */
+
+  --panel: #14001f;
+  --panel-line: #ff00a8;
 }
 
-/* Background */
-:root[data-theme="cyberpunk"] body{
-  background:
-    radial-gradient(1100px 520px at 48% -10%, #2a002a 0%, #120012 48%) fixed,
-    #120012;
-  color:var(--text);
-  font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
-}
-
-/* Brand – neon with optional glitch (controlled by JS via data-glitch) */
-:root[data-theme="cyberpunk"] .brand{
-  color:#FFD84C;
+/* Headline: gritty yellow with chromatic glitch slices */
+.theme-cyber .title {
+  color: #ffd400;
+  letter-spacing: 2.2px;
+  -webkit-text-stroke: 1px rgba(22, 0, 24, .55);
   text-shadow:
-    0 0 2px #000,
-    0 0 8px #FFED83,
-    0 0 22px #FF2EC0,
-    0 0 34px #FF2EC0;
-  font-weight:900; letter-spacing:.08em;
-  position:relative;
-}
-:root[data-theme="cyberpunk"] .brand[data-glitch="on"]::after{
-  content:attr(id); /* visual only; JS toggles data-glitch */
-  position:absolute; inset:0; left:1px; top:-1px;
-  color:#25F3FF; mix-blend-mode:screen; clip-path:inset(0 0 60% 0);
-  text-shadow:0 0 8px #25F3FF, 0 0 18px #25F3FF;
-  animation:glitch-scan 1.8s linear infinite;
-}
-@keyframes glitch-scan{
-  0%{ transform:translateX(0) }
-  20%{ transform:translateX(-1px) }
-  40%{ transform:translateX(1px) }
-  60%{ transform:translateX(-2px) }
-  80%{ transform:translateX(2px) }
-  100%{ transform:translateX(0) }
-}
-.reduce-motion .brand::after{ animation:none!important }
-
-/* Hero progress – static neon blend */
-:root[data-theme="cyberpunk"] .hero .progress{ max-width:560px; margin:28px auto 10px }
-:root[data-theme="cyberpunk"] .hero .progress .bar{
-  height:16px; border-radius:999px;
-  background:linear-gradient(90deg, #FF2EC0 0%, #31F0FF 100%);
-  box-shadow:0 0 0 3px rgba(0,0,0,.45) inset, 0 4px 18px rgba(255,46,192,.25);
-  animation:none!important;
+    0 1px 0 rgba(10,0,16,.55),
+    0 0 2px #ffb300,
+    0 0 8px #ffb300,
+    0 0 18px #ff00a8aa,
+    0 0 36px #00eaff66;
+  position: relative;
+  isolation: isolate;
 }
 
-/* Panels – neon magenta outline */
-:root[data-theme="cyberpunk"] .panel{
-  background:var(--panel);
-  border:var(--panel-border) solid var(--border);
-  border-radius:var(--panel-radius);
+/* Thin scanline sheen layered on the headline for gritty effect */
+.theme-cyber .title::before {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none; mix-blend-mode: screen; opacity: .35;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, .06) 0px,
+      rgba(255, 255, 255, .06) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+  filter: blur(.4px);
+}
+
+/* Dual‑color glitch shards (cyan + amber) that sweep subtly */
+.theme-cyber .title::after {
+  content: attr(data-glitch);
+  position: absolute; inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  color: #00eaff;
+  opacity: .38;
+  clip-path: polygon(0 8%, 100% 6%, 100% 22%, 0 24%);
+  transform: translate(.02em, -.01em);
+  animation: cyber-glitch 3.4s steps(2, end) infinite;
+}
+@keyframes cyber-glitch {
+  0%, 100% { clip-path: polygon(0 8%,100% 6%,100% 22%,0 24%); transform: translate(.01em, 0) }
+  18%      { clip-path: polygon(0 28%,100% 26%,100% 40%,0 42%); transform: translate(-.02em, .01em) }
+  36%      { clip-path: polygon(0 58%,100% 56%,100% 70%,0 72%); transform: translate(.03em, -.01em) }
+  54%      { clip-path: polygon(0 78%,100% 76%,100% 88%,0 90%); transform: translate(-.015em, .005em) }
+  72%      { clip-path: polygon(0 18%,100% 16%,100% 30%,0 32%); transform: translate(.02em, -.01em) }
+}
+
+/* Subtitle/body cyan and tighter letter spacing like the mock */
+.theme-cyber .subtitle {
+  color: #00eaff;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 0 rgba(0, 20, 28, .6);
+}
+
+/* Panel shell + panels/cards: magenta neon frame with inner cyan glow */
+.theme-cyber .shell {
   box-shadow:
-    0 0 0 1px rgba(255,255,255,.03) inset,
-    0 12px 32px rgba(0,0,0,.55),
-    0 0 36px var(--panel-glow);
-  padding:20px 22px; position:relative;
+    inset 0 0 0 6px color-mix(in oklab, var(--panel-line) 12%, transparent),
+    0 0 64px color-mix(in oklab, var(--accent-2) 22%, transparent);
 }
-:root[data-theme="cyberpunk"] .panel::after{
-  content:""; position:absolute; inset:10px;
-  border:var(--panel-inner) solid color-mix(in oklab, var(--accent), #000 28%);
-  border-radius:var(--panel-inner-radius); pointer-events:none;
-}
-:root[data-theme="cyberpunk"] .panel>h2{
-  color:#FF7BDA; font:800 26px/1.2 "Segoe UI",system-ui,Arial,sans-serif; letter-spacing:.04em;
+.theme-cyber .panel,
+.theme-cyber .card {
+  border: 2px solid #ff00a8;
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--panel) 92%, black);
+  box-shadow:
+    inset 0 0 0 1px #00eaff26,
+    0 0 12px #ff00a84d,
+    0 0 28px #00eaff26;
 }
 
-/* Downloads grid – same layout */
-:root[data-theme="cyberpunk"] .downloads-grid{
-  display:grid; grid-template-columns:2fr 1fr; gap:18px; margin-top:14px;
+/* Panel titles: yellow headline style but smaller */
+.theme-cyber .panel-title {
+  color: #ffd400;
+  -webkit-text-stroke: .6px rgba(22,0,24,.55);
+  text-shadow:
+    0 1px 0 rgba(10,0,16,.45),
+    0 0 6px #ffb300;
 }
-:root[data-theme="cyberpunk"] .downloads-grid > .card{
-  background:var(--card);
-  border:2px solid color-mix(in oklab, var(--accent), #000 22%);
-  border-radius:16px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
-  padding:14px 16px;
-}
-:root[data-theme="cyberpunk"] .downloads-grid > .card:nth-child(1){ grid-column:1 / -1 }
-:root[data-theme="cyberpunk"] .downloads-grid > .card:nth-child(2){ grid-column:1 }
-:root[data-theme="cyberpunk"] .downloads-grid > .card:nth-child(3){ grid-column:2 }
-:root[data-theme="cyberpunk"] .downloads-grid > .card:nth-child(4){ grid-column:1 }
-:root[data-theme="cyberpunk"] .downloads-grid > .card:nth-child(5){ grid-column:2 }
 
-/* Footer */
-:root[data-theme="cyberpunk"] .footer{ display:flex; align-items:center; justify-content:space-between; padding:18px 6px }
-:root[data-theme="cyberpunk"] .footer .copy{ color:#25F3FF }
-:root[data-theme="cyberpunk"] .footer .to-top{
-  color:#FF2EC0; border-bottom:2px solid color-mix(in oklab, #FF2EC0, #fff 10%);
+/* Cards: headings cyan/amber like the mock */
+.theme-cyber .card h3 { color: #ffd400; letter-spacing: 1px }
+.theme-cyber .card .meta { color: #00eaff; letter-spacing: .6px }
+
+/* Pills: rectangular neon chips with magenta border and cyan/yellow variants */
+.theme-cyber .pill {
+  --pill-fg: #ffe9ff;
+  --pill-bd: #ff00a8;
+  --pill-bg: color-mix(in oklab, #0a0013 92%, transparent);
+  border-radius: 12px; /* mock: kevésbé kerek */
+  border: 2px solid var(--pill-bd);
+  color: var(--pill-fg);
+  background: linear-gradient(180deg,
+    color-mix(in oklab, #ff00a8 8%, #0a0013),
+    color-mix(in oklab, #ff00a8 2%, #0a0013));
+  box-shadow:
+    inset 0 0 0 1px #00eaff44,
+    0 0 10px #ff00a84d;
+  letter-spacing: 1.2px;
+}
+.theme-cyber .pill.alt {
+  --pill-bd: #ff00a8;
+  --pill-fg: #ffd400;
+}
+.theme-cyber .pill.accent {
+  --pill-bd: #00eaff;
+  --pill-fg: #00eaff;
+}
+
+/* Theme switch buttons (top): cyan/magenta borders and active outline */
+.theme-cyber .theme-switch .pill { --pill-bd: #00eaff; --pill-fg: #00eaff }
+.theme-cyber .theme-switch button[aria-pressed="true"] {
+  outline: 3px solid #ff00a8; outline-offset: 2px;
+}
+
+/* Footer cyan and “back to top” spacing like mock */
+.theme-cyber .footer { color: #00eaff }
+.theme-cyber .back-to-top { border-bottom-color: #00eaff; color: #00eaff }
+
+/* Extra: screen‑wide CRT grain/flicker overlay just for cyber */
+body.theme-cyber::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    repeating-linear-gradient(to bottom,
+      rgba(255,255,255,.02) 0px,
+      rgba(255,255,255,.02) 1px,
+      transparent 2px,
+      transparent 4px),
+    linear-gradient(0deg, rgba(255,0,168,.03), rgba(0,234,255,.03));
+  animation: crt-flicker 4s ease-in-out infinite;
+  mix-blend-mode: overlay;
+}
+@keyframes crt-flicker {
+  0%, 100% { opacity: .18; filter: saturate(1) }
+  50%      { opacity: .30; filter: saturate(1.15) }
+}
+
+/* Small screens: tone down glow a bit */
+@media (max-width: 560px) {
+  .theme-cyber .title {
+    text-shadow:
+      0 1px 0 rgba(10,0,16,.55),
+      0 0 2px #ffb300,
+      0 0 10px #ff00a899;
+  }
 }
