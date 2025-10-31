@@ -86,13 +86,16 @@ body {
   text-shadow:
     0 0 0 currentColor,
     0 0 24px color-mix(in oklab, var(--accent) 40%, transparent);
+  text-align: center;
 }
 .subtitle {
   font-family: var(--font-mono);
   color: #67d6f0;
   margin: 0 0 1.15rem;
+  text-align: center;
+  margin-inline: auto;
 }
-.cta-row { display: flex; gap: .85rem; flex-wrap: wrap }
+.cta-row { display: flex; gap: .85rem; flex-wrap: wrap; justify-content: center; }
 
 /* ===== Pills (gombok/chipek) ===== */
 .pill {
@@ -143,6 +146,12 @@ body {
   font-size: clamp(1.2rem, 2.5vw, 1.65rem);
   letter-spacing: 1px;
   color: var(--accent);
+}
+.panel .intro {
+  text-align: center;
+  max-width: 70ch;
+  margin-inline: auto;
+  padding: 0 1.1rem;
 }
 
 /* ===== Letöltés kártyák rácsa ===== */
