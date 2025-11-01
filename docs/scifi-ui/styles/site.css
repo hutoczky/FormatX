@@ -302,3 +302,20 @@ h1, h2, h3 { text-transform: uppercase }
   .subtitle { font-size: .95rem }
   .footer { flex-direction: column; gap: .5rem }
 }
+
+/* ===== Fine-tuning for Sci-Fi UI readability and spacing (PR #57 follow-up) ===== */
+:root { --safe-inline: clamp(1.25rem, 4vw, 3rem); --hero-max: 72ch; --title-maxch: 18ch; }
+.shell { padding-inline: var(--safe-inline) !important; }
+.hero  { padding-inline: var(--safe-inline) !important; text-align: center !important; }
+.title, .subtitle { margin-inline: auto !important; text-align: center !important; }
+.subtitle { max-width: var(--hero-max); }
+.title    { max-width: min(100%, var(--title-maxch)); }
+.cta-row { display: flex; justify-content: center; }
+
+/* Fine‑tuning on small screens */
+@media (max-width: 640px) {
+  :root { --safe-inline: clamp(1.4rem, 7vw, 3.25rem); }
+  .hero  { padding-top: clamp(0.9rem, 4vw, 1.6rem); }
+  .subtitle { font-size: clamp(.95rem, 2.9vw, 1.05rem); }
+  .title { letter-spacing: clamp(1px, .3vw, 2px); }
+}
