@@ -302,3 +302,57 @@ h1, h2, h3 { text-transform: uppercase }
   .subtitle { font-size: .95rem }
   .footer { flex-direction: column; gap: .5rem }
 }
+
+/* ===== Responsive safe spacing and centering ===== */
+:root {
+  --safe-inline: clamp(1rem, 3vw, 2rem);
+  --panel-safe: clamp(1rem, 2.5vw, 1.5rem);
+  --card-safe: clamp(.95rem, 2vw, 1.3rem);
+}
+
+.shell {
+  padding-inline: var(--safe-inline);
+}
+
+.hero {
+  text-align: center;
+}
+
+.title {
+  margin-inline: auto;
+}
+
+.subtitle {
+  margin-inline: auto;
+}
+
+.cta-row {
+  display: flex;
+  justify-content: center;
+}
+
+.panel {
+  padding: var(--panel-safe) var(--panel-safe) calc(var(--panel-safe) + .25rem);
+}
+
+.panel::before {
+  inset: calc(var(--panel-safe) - .05rem);
+}
+
+.panel-title {
+  margin: .1rem var(--panel-safe) .9rem;
+}
+
+.download-grid {
+  padding: 0 var(--panel-safe) var(--panel-safe);
+}
+
+.card {
+  padding: var(--card-safe) calc(var(--card-safe) + .2rem) var(--card-safe);
+}
+
+@media (max-width: 520px) {
+  .hero {
+    padding-inline: clamp(1.25rem, 4vw, 2rem);
+  }
+}
