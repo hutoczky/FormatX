@@ -3,14 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Formázás a jövőből — Sci‑Fi UI</title>
-  <meta name="description" content="Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.">
+  <title>Formázás a jövőből — FormatX</title>
+  <meta name="description" content="Modern rendszerkarbantartó GUI formázáshoz, USB-készítéshez, diagnosztikához és Linux / Bazzite workflow-khoz.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0c0f">
 
-  <!-- Early theme bootstrap: állítsuk be a témát az első festés előtt (URL > localStorage) -->
   <script>
     (function () {
       try {
@@ -36,186 +35,181 @@
   <link rel="stylesheet" href="./styles/loaders.css">
   <link rel="stylesheet" href="./styles/holographic-panel.css">
   <link rel="stylesheet" href="./styles/indent.css">
-  <!-- Olvashatósági és Cyberpunk felülírások: MINDIG UTOLSÓNAK -->
   <link rel="stylesheet" href="./styles/readability.css">
   <link rel="stylesheet" href="./styles/cyberpunk.css">
-  <!-- Hologram headline 3D/glow booster + végső témafelülírások: ABSZOLÚT UTOLSÓNAK -->
   <link rel="stylesheet" href="./styles/holo-title-3d.css?v=20251025-blue1">
   <link rel="stylesheet" href="./styles/theme-overrides.css">
-  <!-- LCARS 3D címeffekt — mindig a legvégén, hogy mindent felülírjon LCARS-ben -->
   <link rel="stylesheet" href="./styles/lcars-title-3d.css?v=20251025-anim2">
-  <!-- ÚJ: Splash overlay stílusok (témánkénti üdvözlőkép) -->
   <link rel="stylesheet" href="./styles/splash.css?v=20251025-splash1">
 </head>
 <body id="top" class="theme-lcars">
-  <!-- Üdvözlő splash overlay (első festéskor látszik, majd elhalványul) -->
   <div id="splash" aria-live="polite" aria-label="Üdvözlő animáció">
     <div class="splash-panel">
       <div class="art" role="img" aria-label="Üdvözlő grafika"></div>
-      <div class="caption">Üdvözöl az LCARS konzol</div>
+      <div class="caption">Üdvözöl a Holo Deck konzol</div>
     </div>
   </div>
 
-  <!-- Fedvény effektek -->
   <div id="fx-scanlines" aria-hidden="true"></div>
   <div id="fx-vignette" aria-hidden="true"></div>
   <div id="fx-noise" aria-hidden="true"></div>
 
   <header class="site-header container">
     <nav class="theme-switch" aria-label="Téma választó">
-      <button class="pill sm" data-theme="lcars" aria-pressed="true">STAR TREK</button>
-      <button class="pill sm" data-theme="holo">STAR WARS</button>
-      <button class="pill sm" data-theme="cyber">CYBERPUNK</button>
+      <button class="pill sm" data-theme="lcars" aria-pressed="true">HOLO DECK</button>
+      <button class="pill sm" data-theme="holo">GALACTIC CORE</button>
+      <button class="pill sm" data-theme="cyber">NEON GRID</button>
     </nav>
   </header>
 
   <main class="container shell">
-    <!-- LCARS oldalsó díszítő elemek -->
     <i class="decor decor-left" aria-hidden="true"></i>
     <i class="decor decor-right" aria-hidden="true"></i>
 
     <section class="hero">
       <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
-      <p class="subtitle">Gyors. Moduláris. Bővíthető. Azonos eszközök, eltérő stílusok.</p>
+      <p class="subtitle">Modern rendszerkarbantartó GUI formázáshoz, USB-készítéshez, diagnosztikához és Linux / Bazzite workflow-khoz.</p>
       <div class="cta-row">
-        <a href="#downloads" class="pill lg">LETÖLTÉS</a>
-        <a href="#features" class="pill lg alt">FUNKCIÓK</a>
-        <a href="#docs" class="pill lg accent">DOKUMENTÁCIÓ</a>
+        <a href="#downloads" class="pill lg">LIGHT LETÖLTÉSE</a>
+        <a href="#features" class="pill lg alt">FUNKCIÓK MEGTEKINTÉSE</a>
+        <a href="#docs" class="pill lg accent">PRO DOKUMENTÁCIÓ</a>
       </div>
     </section>
 
     <section id="downloads" class="panel">
-      <h2 class="panel-title">Letöltések</h2>
+      <h2 class="panel-title">FormatX Light</h2>
 
       <div class="download-grid">
         <a class="card span-12" href="https://github.com/hutoczky/formatui/releases/latest/download/FormatX_Installer_v1015.exe" target="_blank" rel="noopener">
-          <h3>FormatX Light telepítő</h3>
-          <p class="meta">Windows app • hutoczky/formatui</p>
+          <h3>Light letöltése</h3>
+          <p class="meta">Ingyenes Windows kiadás • hutoczky/formatui</p>
         </a>
 
         <a class="card span-6" href="https://github.com/hutoczky/formatui/releases/latest/download/README.txt" target="_blank" rel="noopener">
-          <h3>README.txt</h3>
-          <p class="meta">Kiinduló információk • hutoczky/formatui</p>
+          <h3>Release megnyitása</h3>
+          <p class="meta">Kiinduló információk és csomagtartalom</p>
         </a>
 
-        <a class="card span-6" href="https://github.com/hutoczky/formatui/releases/latest/download/LICENSE.txt" target="_blank" rel="noopener">
-          <h3>Licenc</h3>
-          <p class="meta">Licencfeltételek • LICENSE.txt</p>
+        <a class="card span-6" href="https://github.com/hutoczky/formatui" target="_blank" rel="noopener">
+          <h3>GitHub megnyitása</h3>
+          <p class="meta">Forráskód, issue-k és kiadások</p>
         </a>
       </div>
 
       <div class="chips">
-        <span class="pill md">Villámgyors</span>
-        <span class="pill md alt">Bővíthető</span>
-        <span class="pill md accent">Licenc</span>
+        <span class="pill md">Ingyenes</span>
+        <span class="pill md alt">Windows</span>
+        <span class="pill md accent">Modern GUI</span>
       </div>
 
       <div class="card span-12" style="margin-top:1.5rem">
-        <p><strong>Program leírás</strong></p>
-        <p><strong>FormatX Light</strong> — lemezek és USB eszközök kezelése.</p>
+        <p><strong>FormatX Light</strong></p>
+        <p>Ingyenes Windows verzió alap rendszereszközökkel, modern grafikus felülettel.</p>
 
         <ul>
-          <!-- Verzió sor eltávolítva -->
           <li><strong>Futtatási mód:</strong> Asztali (unpackaged)</li>
           <li><strong>Környezet:</strong> .NET 8.0.21</li>
-          <li><strong>Rendszer:</strong> Microsoft Windows 10.0.27971</li>
+          <li><strong>Platform:</strong> Windows</li>
         </ul>
-
-        <h3>Fő funkciók</h3>
-        <ul>
-          <li>ISO → USB írás (ellenőrzés opcióval)</li>
-          <li>Gyors / Teljes formázás (NTFS/FAT32/exFAT/ReFS)</li>
-          <li>Partíció‑terv előkészítés (később bővíthető)</li>
-          <li>Biztonságos törlés (1–3 menet), ETA kijelzéssel</li>
-          <li>SMART / felület szkennelés és állapot jelzés</li>
-          <li>Riport / Log export (HTML/ZIP)</li>
-          <li>Laptop mód: energiatakarékos figyelés és kisebb háttér terhelés</li>
-          <li>Unpackaged módban WinRT kikapcsolható, WMI/Win32 fallback fut</li>
-        </ul>
-
-        <p><em>Megjegyzés:</em> rendszerszintű műveletekhez admin jog szükséges.</p>
       </div>
     </section>
 
-    <!-- Betöltő ikonok előnézet -->
+    <section id="pro" class="panel">
+      <h2 class="panel-title">FormatX Suite Pro</h2>
+      <p><strong>FormatX Suite Pro – Linux / Bazzite Edition</strong></p>
+      <p>A FormatX Suite Pro egy prémium Linux / Bazzite rendszerkarbantartó központ, amely egyetlen modern grafikus felületen egyesíti a lemezformázást, USB-készítést, partíciókezelést, kétpaneles fájlkezelést, rendszerfelügyeletet, diagnosztikát, naplózást, biztonságos shellt és AI-alapú segítséget.</p>
+      <p>A rendszer célja, hogy a terminálban végzett bonyolult műveleteket átlátható, vizuális és biztonságos workflow-val váltsa ki. A kritikus műveletek, például formázás vagy partíciómódosítás, külön megerősítést igényelnek, és minden fontos művelet naplózásra kerül.</p>
+      <p>A Pro kiadás Bazzite/Linux környezetre optimalizált, de cross-platform irányban készül Windows, Linux és macOS rendszerekhez, x86_64 és ARM64 / aarch64 architektúrák támogatásával.</p>
+    </section>
+
+    <section id="features" class="panel">
+      <h2 class="panel-title">Funkciók</h2>
+      <div class="download-grid">
+        <div class="card span-6"><h3>Lemezformázás</h3><p>Biztonságos eszközazonosítás, fájlrendszer-választás és megerősítéses formázási workflow.</p></div>
+        <div class="card span-6"><h3>USB készítő</h3><p>ISO képfájlokból bootolható USB meghajtó készítése ellenőrzéssel és naplózással.</p></div>
+        <div class="card span-6"><h3>Partíciókezelés</h3><p>Partíciók áttekintése, műveleti terv készítése és biztonságos alkalmazása.</p></div>
+        <div class="card span-6"><h3>Kétpaneles fájlkezelő</h3><p>Klasszikus kétpaneles fájlműveletek másoláshoz, mozgatáshoz, törléshez és mappakezeléshez.</p></div>
+        <div class="card span-6"><h3>Rendszerfelügyelet</h3><p>Élő CPU, RAM, hálózat, tárhely, hőmérséklet és Bazzite-specifikus állapotfigyelés.</p></div>
+        <div class="card span-6"><h3>Diagnosztika</h3><p>Rendszerállapot, meghajtók, jogosultságok, Flatpak, rpm-ostree, Distrobox, Steam / Proton és GPU / Vulkan ellenőrzés.</p></div>
+        <div class="card span-6"><h3>Naplózás</h3><p>Műveleti események, hibák, figyelmeztetések és veszélyes műveletek naplózása.</p></div>
+        <div class="card span-6"><h3>Biztonságos shell</h3><p>Profil alapú rendszerparancsok és védett műveletek kontrollált futtatása.</p></div>
+        <div class="card span-6"><h3>AI asszisztens</h3><p>Hibamagyarázat, naplóelemzés és rendszerdiagnosztikai javaslatok.</p></div>
+        <div class="card span-6"><h3>Hordozható telepítő</h3><p>Pendrive-ra, külső meghajtóra vagy egyéni célmappába telepíthető FormatX csomag.</p></div>
+      </div>
+    </section>
+
+    <section id="workflow" class="panel">
+      <h2 class="panel-title">Biztonságos workflow</h2>
+      <p>A FormatX Suite Pro minden kritikus művelet előtt megjeleníti a kiválasztott eszköz nevét, azonosítóját, méretét, modelljét és a művelet következményét. A veszélyes műveletek, például a formázás vagy partíciómódosítás, kézi megerősítést igényelnek.</p>
+      <div class="card span-12" style="margin-top:1rem">
+        <p><strong>A folytatáshoz írd be:</strong></p>
+        <p><code>TÖRLÉS /dev/sdb</code></p>
+      </div>
+      <p>Ez segít megelőzni a véletlen adatvesztést és átláthatóvá teszi a rendszerkarbantartási folyamatot.</p>
+    </section>
+
+    <section id="live-data" class="panel">
+      <h2 class="panel-title">Élő rendszeradatok</h2>
+      <p>A FormatX Suite Pro rendszerfelügyeleti modulja valós, élő rendszeradatokat használ. A CPU, RAM, hálózat, tárhely, USB eszközök, hőmérsékleti adatok és Bazzite-specifikus állapotok a rendszerből kerülnek kiolvasásra. Ha egy adat nem érhető el, a program N/A vagy Nem elérhető állapotot jelenít meg, nem hamis demo értéket.</p>
+    </section>
+
+    <section id="cross-platform" class="panel">
+      <h2 class="panel-title">Cross-platform és hordozható működés</h2>
+      <p>A FormatX Suite Pro célja, hogy Windows, Linux / Bazzite és macOS rendszereken is használható legyen. A hordozható telepítő képes pendrive-ra, külső SSD-re vagy egyéni célmappába telepíteni a programot.</p>
+      <p>A felhasználó csak három fő indítót lát:</p>
+      <ul>
+        <li>Start-FormatX-Windows.exe</li>
+        <li>Start-FormatX-Linux.sh</li>
+        <li>Start-FormatX-macOS.command</li>
+      </ul>
+      <p>Az indítók automatikusan felismerik a rendszer és a CPU architektúra típusát, például x86_64 vagy ARM64 / aarch64, majd a megfelelő buildet indítják.</p>
+    </section>
+
     <section id="loaders" class="panel">
       <h2 class="panel-title">Betöltő ikonok</h2>
       <div class="download-grid">
         <div class="card span-4 loader-demo">
           <figure>
-            <img src="./assets/loader-lcars.svg" width="200" height="60" alt="LCARS betöltő animáció">
-            <figcaption class="meta">LCARS betöltő</figcaption>
+            <img src="./assets/loader-lcars.svg" width="200" height="60" alt="Holo Deck betöltő animáció">
+            <figcaption class="meta">Holo Deck betöltő</figcaption>
           </figure>
         </div>
         <div class="card span-4 loader-demo">
           <figure>
-            <img src="./assets/loader-holo.svg" width="200" height="60" alt="Hologram betöltő animáció">
-            <figcaption class="meta">Hologram betöltő</figcaption>
+            <img src="./assets/loader-holo.svg" width="200" height="60" alt="Galactic Core betöltő animáció">
+            <figcaption class="meta">Galactic Core betöltő</figcaption>
           </figure>
         </div>
         <div class="card span-4 loader-demo">
           <figure>
-            <img src="./assets/loader-cyber.svg" width="200" height="60" alt="Cyberpunk betöltő animáció">
-            <figcaption class="meta">Cyberpunk betöltő</figcaption>
+            <img src="./assets/loader-cyber.svg" width="200" height="60" alt="Neon Grid betöltő animáció">
+            <figcaption class="meta">Neon Grid betöltő</figcaption>
           </figure>
         </div>
       </div>
     </section>
 
-    <!-- Leírás szekció (a képernyőképen látható tartalommal) -->
     <section id="docs" class="panel">
       <h2 class="panel-title">Dokumentáció</h2>
-
       <p><strong>FormatX Suite Pro – Linux / Bazzite Edition</strong></p>
-
-      <p>A FormatX Suite Pro egy modern, prémium Linux / Bazzite rendszerkarbantartó és eszközkezelő központ. Célja, hogy a formázás, USB-készítés, partíciókezelés, fájlműveletek, rendszerfelügyelet, diagnosztika, naplózás és biztonságos shell funkciók egyetlen átlátható grafikus felületen legyenek elérhetők.</p>
-
-      <p>Az alkalmazás Bazzite/Linux környezetre optimalizált, de cross-platform működésre készül Windows, Linux és macOS rendszerekhez. A rendszer képes felismerni az aktuális operációs rendszert és CPU architektúrát, például x86_64 vagy ARM64, majd automatikusan a megfelelő indítót és csomagot használja.</p>
-
-      <p>A FormatX Suite Pro nem statikus vagy demo adatokat jelenít meg: a rendszerfelügyeleti modul valódi, élő adatokat olvas ki a rendszerből. A CPU, RAM, hálózat, tárhely, hőmérséklet, USB eszközök, Flatpak, rpm-ostree, Distrobox, Steam / Proton és Bazzite-specifikus állapotok valós rendszerforrások alapján jelennek meg.</p>
-
-      <p>A program egyik fő célja, hogy a terminálban végzett bonyolult rendszerkarbantartási műveletek helyett biztonságos, vizuális és jól követhető workflow-t adjon. A veszélyes műveletek, például formázás vagy partíciómódosítás, külön megerősítést igényelnek, és minden kritikus művelet naplózásra kerül.</p>
-
-      <h3>Fő funkciók</h3>
-      <ul>
-        <li>Lemezformázás biztonsági ellenőrzéssel</li>
-        <li>Bootolható USB készítő</li>
-        <li>Partíciókezelés műveleti tervvel</li>
-        <li>Kétpaneles fájlkezelő</li>
-        <li>Élő rendszerfelügyelet HUD nézettel</li>
-        <li>Valós hálózati aktivitás grafikon</li>
-        <li>Diagnosztikai rendszerellenőrzés</li>
-        <li>Műveleti naplózás</li>
-        <li>Biztonságos shell profil alapú parancsokkal</li>
-        <li>AI asszisztens hibaértelmezéshez és naplóelemzéshez</li>
-        <li>Bazzite / Linux profil</li>
-        <li>Flatpak, rpm-ostree, Distrobox, Steam / Proton állapotfigyelés</li>
-        <li>Hordozható telepítő pendrive-ra vagy egyéni célmappába</li>
-        <li>Windows, Linux és macOS indítók</li>
-        <li>x86_64 és ARM64 / aarch64 támogatás</li>
-      </ul>
-
-      <p>A FormatX Suite Pro célja, hogy egy erős, látványos, mégis átlátható Pro eszközt adjon kezdő és haladó Linux/Bazzite felhasználóknak, technikusoknak és power usereknek.</p>
-    </section>
-
-    <section id="features" class="sr-only" aria-hidden="true">
-      <h2>Funkciók</h2>
-      <p>Ide jöhetnek a részletes funkciók (helyőrző).</p>
+      <p>A FormatX Suite Pro egy prémium Linux / Bazzite rendszerkarbantartó központ, amely egyetlen modern grafikus felületen egyesíti a lemezformázást, USB-készítést, partíciókezelést, kétpaneles fájlkezelést, rendszerfelügyeletet, diagnosztikát, naplózást, biztonságos shellt és AI-alapú segítséget.</p>
+      <p>A rendszer célja, hogy a terminálban végzett bonyolult műveleteket átlátható, vizuális és biztonságos workflow-val váltsa ki. A kritikus műveletek, például formázás vagy partíciómódosítás, külön megerősítést igényelnek, és minden fontos művelet naplózásra kerül.</p>
+      <p>A Pro kiadás Bazzite/Linux környezetre optimalizált, de cross-platform irányban készül Windows, Linux és macOS rendszerekhez, x86_64 és ARM64 / aarch64 architektúrák támogatásával.</p>
+      <p>A FormatX Suite Pro rendszerfelügyeleti modulja valós, élő rendszeradatokat használ. A CPU, RAM, hálózat, tárhely, USB eszközök, hőmérsékleti adatok és Bazzite-specifikus állapotok a rendszerből kerülnek kiolvasásra. Ha egy adat nem érhető el, a program N/A vagy Nem elérhető állapotot jelenít meg, nem hamis demo értéket.</p>
     </section>
   </main>
 
   <footer class="container footer">
-    <div class="copyright">© 2023 SCI‑FI UI</div>
+    <div class="copyright">© 2026 FormatX Project<br>Developed by Hutóczky József</div>
     <a href="#top" class="back-to-top">Vissza a tetejére</a>
   </footer>
 
   <noscript>
-    A téma‑váltás JavaScriptet igényel. JS nélkül a “STAR TREK” téma aktív.
+    A téma‑váltás JavaScriptet igényel. JS nélkül a “HOLO DECK” téma aktív.
   </noscript>
 
   <script defer src="./scripts/site.js"></script>
   <script defer src="./scripts/holographic-panel.js"></script>
-  <!-- ÚJ: Splash vezérlés (elrejtés betöltés után, témafelirat) -->
   <script defer src="./scripts/splash.js?v=splash-1p5s"></script>
 </body>
 </html>
