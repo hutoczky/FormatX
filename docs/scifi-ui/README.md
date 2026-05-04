@@ -1,6 +1,6 @@
 # Sci-Fi UI Demo
 
-A production-ready, accessible, and performant demonstration of three science fiction user interface themes: **LCARS** (Star Trek), **Star Wars** holographic HUD, and **Cyberpunk** neon aesthetics.
+A production-ready, accessible, and performant demonstration of three science fiction user interface themes: **Holo Deck**, **Galactic Core** holographic HUD, and **Neon Grid** neon aesthetics.
 
 ## 🎯 Goals
 
@@ -36,21 +36,21 @@ docs/scifi-ui/
 
 ## 🎨 Themes
 
-### LCARS (Star Trek)
+### Holo Deck
 - **Default theme**
 - Rounded orange/amber panels with magenta accents
 - LCARS side rails and header plate
 - Subtle sheen and glow effects
 - Hero progress bar with darker right cap
 
-### Star Wars
+### Galactic Core
 - Holographic cyan/teal color palette
 - Animated HUD grid overlay
 - Bluish glow and reticle/HUD lines
 - Orbitron/Michroma font family aesthetic
 - Scanning line animations
 
-### Cyberpunk
+### Neon Grid
 - Neon magenta/cyan/yellow palette
 - Pixel/mono title with glitch effects
 - Steps-based micro-glitch animation

@@ -1,8 +1,9 @@
 (function () {
+  // Internal key → display name: lcars = Holo Deck, holo = Galactic Core, cyber = Neon Grid
   const CAPTIONS = {
-    lcars: 'Üdvözöl az LCARS konzol',
-    holo:  'Üdvözöl a Hologram HUD',
-    cyber: 'Üdvözöl a CyberDeck'
+    lcars: 'Üdvözöl a Holo Deck konzol',
+    holo:  'Üdvözöl a Galactic Core HUD',
+    cyber: 'Üdvözöl a Neon Grid'
   };
   const THEMES = ['lcars','holo','cyber'];
   let hidden = false;
