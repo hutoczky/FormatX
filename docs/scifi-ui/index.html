@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0c0f">
+  <meta name="formatx-billing-api-base" content="/api">
 
   <script>
     (function () {
@@ -133,50 +134,49 @@
         </div>
         <div class="card span-4">
           <h3>Fizetés és előfizetés</h3>
-          <p class="meta">Külső checkout • havi / éves előfizetés • enterprise ajánlat</p>
-          <p>A fizetés biztonságos külső checkout oldalon történik, a banki és kártyaadatokat nem a FormatX oldal kezeli.</p>
-          <a class="pill lg accent card-cta" href="#payment">ELŐFIZETÉSI FOLYAMAT</a>
+          <p class="meta">Biztonságos külső checkout • havi vagy éves előfizetés</p>
+          <p>A FormatX Suite Pro céges előfizetése biztonságos külső checkout rendszeren keresztül történik. A FormatX oldal nem kezel és nem tárol bankkártyaadatokat vagy közvetlen banki információkat.</p>
+          <a class="pill lg accent card-cta" href="#payment">ELŐFIZETÉS INDÍTÁSA</a>
         </div>
       </div>
 
       <div class="download-grid" style="margin-top:1rem">
         <div class="card span-4">
           <h3>Business Lite</h3>
-          <p class="meta">Havi vagy éves előfizetés</p>
-          <p>Kisebb üzemeltetési környezetekhez és induló csapatokhoz.</p>
-          <a class="pill lg card-cta" href="?plan=business-lite#payment" aria-label="Business Lite előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
+          <p class="meta">19 900 Ft / hó • 199 000 Ft / év</p>
+          <p>1 technikus • max. 10 gép • belépő vállalati csomag.</p>
+          <a class="pill lg card-cta billing-plan-trigger" href="#payment" data-plan="business_lite" aria-label="Business Lite előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
         </div>
         <div class="card span-4">
           <h3>Business Pro</h3>
-          <p class="meta">Havi vagy éves előfizetés</p>
-          <p>Haladó felügyelethez, több géphez és kibővített támogatáshoz.</p>
-          <a class="pill lg card-cta" href="?plan=business-pro#payment" aria-label="Business Pro előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
+          <p class="meta">49 900 Ft / hó • 499 000 Ft / év</p>
+          <p>3 technikus • max. 50 gép • haladó vállalati felügyelet.</p>
+          <a class="pill lg card-cta billing-plan-trigger" href="#payment" data-plan="business_pro" aria-label="Business Pro előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
         </div>
         <div class="card span-4">
           <h3>Technician Team</h3>
-          <p class="meta">Havi vagy éves előfizetés</p>
-          <p>Szerviz, üzemeltetői és többfelhasználós csapatmunkára optimalizálva.</p>
-          <a class="pill lg card-cta" href="?plan=technician-team#payment" aria-label="Technician Team előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
+          <p class="meta">99 900 Ft / hó • 999 000 Ft / év</p>
+          <p>5 technikus • max. 150 gép • többfelhasználós üzemeltetéshez.</p>
+          <a class="pill lg card-cta billing-plan-trigger" href="#payment" data-plan="technician_team" aria-label="Technician Team előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
         </div>
       </div>
 
       <div class="download-grid" style="margin-top:1rem">
         <div class="card span-8">
           <h3>Céges árazás</h3>
-          <p class="meta">Havi díj • gépenkénti elszámolás</p>
+          <p class="meta">Backend-validált csomagárak • 2 hónap kedvezmény éves számlázásnál</p>
           <ul>
-            <li><strong>1–10 gép:</strong> 2 990 Ft / gép / hó</li>
-            <li><strong>11–50 gép:</strong> 1 990 Ft / gép / hó</li>
-            <li><strong>51–150 gép:</strong> 1 490 Ft / gép / hó</li>
-            <li><strong>151–500 gép:</strong> 990 Ft / gép / hó</li>
-            <li><strong>500+ gép:</strong> egyedi ár</li>
+            <li><strong>Business Lite:</strong> 19 900 Ft / hó • 199 000 Ft / év</li>
+            <li><strong>Business Pro:</strong> 49 900 Ft / hó • 499 000 Ft / év</li>
+            <li><strong>Technician Team:</strong> 99 900 Ft / hó • 999 000 Ft / év</li>
+            <li><strong>Enterprise:</strong> 199 000 Ft / hó-tól • egyedi ajánlat</li>
           </ul>
         </div>
         <div class="card span-4">
           <h3>Enterprise</h3>
           <p class="meta">Egyedi ajánlat • dedikált onboarding • nagyvállalati skálázás</p>
           <p>Nagyobb környezethez és egyedi megfelelőségi igényekhez személyre szabott ajánlat érhető el.</p>
-          <a class="pill lg accent card-cta" href="?plan=enterprise#payment">EGYEDI AJÁNLAT KÉRÉSE</a>
+          <a class="pill lg accent card-cta" href="./support.html">EGYEDI AJÁNLAT KÉRÉSE</a>
         </div>
       </div>
     </section>
@@ -255,26 +255,49 @@
       <p>A Light és Pro tartalom külön szerepel, így a vállalati ügyfelek gyorsan megtalálják a számukra fontos adatokat.</p>
       <div id="payment" class="card span-12" style="margin-top:1rem">
         <h3>Fizetés és előfizetés</h3>
-        <p>A FormatX Suite Pro céges előfizetése biztonságos külső checkout rendszeren keresztül történik. A fizetés során a banki és kártyaadatokat nem a FormatX oldal kezeli, hanem a külső fizetési szolgáltató biztonságos checkout oldala.</p>
-        <p><strong>Elérhető fizetési módok:</strong></p>
+        <p>A FormatX Suite Pro céges előfizetése biztonságos külső checkout rendszeren keresztül történik. A FormatX oldal nem kezel és nem tárol bankkártyaadatokat vagy közvetlen banki információkat. A fizetést a kiválasztott fizetési szolgáltató biztonságos checkout oldala kezeli.</p>
+        <p><strong>Elérhető:</strong></p>
         <ul>
           <li>havi előfizetés</li>
           <li>éves előfizetés kedvezménnyel</li>
           <li>Enterprise esetén egyedi ajánlat</li>
         </ul>
-        <p><strong>Checkout folyamat:</strong></p>
-        <ol>
-          <li>Csomagválasztás.</li>
-          <li>Havi vagy éves ciklus kiválasztása.</li>
-          <li>Céges adatok megadása.</li>
-          <li>Átirányítás a biztonságos külső checkout oldalra.</li>
-          <li>Sikeres fizetés után licencaktiválás hitelesített webhook esemény alapján.</li>
-        </ol>
-        <p>A FormatX oldal nem tárol bankkártyaadatokat és nem kezel közvetlen banki információkat. A fizetés biztonságos, külső checkout szolgáltatón keresztül történik.</p>
-        <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem;">
-          <a class="pill lg" href="?plan=business-pro#payment" aria-label="FormatX Suite Pro előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
-          <a class="pill lg accent" href="?plan=enterprise#payment" aria-label="Enterprise egyedi ajánlat kérése">EGYEDI AJÁNLAT KÉRÉSE</a>
-        </div>
+        <form id="billing-form" class="download-grid" style="margin-top:1rem; gap:1rem;">
+          <div class="card span-4">
+            <h4>Csomag és ciklus</h4>
+            <label for="billing-plan">Csomag</label><br>
+            <select id="billing-plan" name="plan_id" style="width:100%; margin:.4rem 0 1rem; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);">
+              <option value="business_lite">Business Lite</option>
+              <option value="business_pro" selected>Business Pro</option>
+              <option value="technician_team">Technician Team</option>
+            </select>
+            <label for="billing-cycle">Számlázási ciklus</label><br>
+            <select id="billing-cycle" name="billing_cycle" style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);">
+              <option value="monthly">havi előfizetés</option>
+              <option value="annual">éves előfizetés kedvezménnyel</option>
+            </select>
+          </div>
+          <div class="card span-8">
+            <h4>Céges adatok</h4>
+            <div class="download-grid" style="gap:1rem;">
+              <div class="span-4"><label for="company-name">Cégnév</label><br><input id="company-name" name="company_name" type="text" required style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
+              <div class="span-4"><label for="contact-name">Kapcsolattartó neve</label><br><input id="contact-name" name="contact_name" type="text" required style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
+              <div class="span-4"><label for="contact-email">Email</label><br><input id="contact-email" name="email" type="email" required style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
+              <div class="span-8"><label for="billing-address">Számlázási cím</label><br><input id="billing-address" name="billing_address" type="text" required style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
+              <div class="span-4"><label for="tax-number">Adószám (ha szükséges)</label><br><input id="tax-number" name="tax_number" type="text" style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
+            </div>
+          </div>
+          <div class="card span-12">
+            <p>A frontend csak a kiválasztott csomagot, a számlázási ciklust és a céges adatokat küldi a Cloudflare Worker API felé. A checkout session létrehozása, az ár validálása, a webhook ellenőrzése és a licenc aktiválása a backendben történik.</p>
+            <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem; align-items:center;">
+              <button class="pill lg" type="submit">ELŐFIZETÉS INDÍTÁSA</button>
+              <a class="pill lg accent" href="./support.html" aria-label="Enterprise egyedi ajánlat kérése">EGYEDI AJÁNLAT KÉRÉSE</a>
+              <a class="pill lg alt" href="./terms.html">ÁSZF / Terms</a>
+              <a class="pill lg alt" href="./privacy.html">Privacy</a>
+            </div>
+            <p id="billing-feedback" class="meta" style="margin-top:1rem; min-height:1.25rem;"></p>
+          </div>
+        </form>
       </div>
     </section>
   </main>
@@ -291,5 +314,6 @@
   <script defer src="./scripts/site.js"></script>
   <script defer src="./scripts/holographic-panel.js"></script>
   <script defer src="./scripts/splash.js?v=splash-1p5s"></script>
+  <script defer src="./scripts/billing.js"></script>
 </body>
 </html>

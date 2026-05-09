@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Billing environment files
+.env
+.env.*
+!.env.example
+billing-worker/.dev.vars
+billing-worker/.wrangler/

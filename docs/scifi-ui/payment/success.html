@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="formatx-billing-api-base" content="/api">
+  <title>Fizetés sikeres — FormatX Suite Pro</title>
+  <link rel="stylesheet" href="../styles/site.css">
+</head>
+<body class="theme-lcars">
+  <main class="container shell">
+    <section class="panel">
+      <h1 class="panel-title">Fizetés feldolgozása</h1>
+      <div class="card span-12">
+        <p id="payment-status-message">A fizetés feldolgozás alatt van. A licenc aktiválása néhány másodpercet vehet igénybe.</p>
+        <ul id="payment-status-details"></ul>
+        <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem;">
+          <a class="pill lg" href="../index.html#payment">VISSZA AZ ÁRAZÁSHOZ</a>
+          <a class="pill lg alt" href="../support.html">KAPCSOLATFELVÉTEL</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    (async function () {
+      const apiMeta = document.querySelector('meta[name="formatx-billing-api-base"]');
+      const apiBase = (apiMeta && apiMeta.content ? apiMeta.content : '/api').replace(/\/$/, '');
+      const statusMessage = document.getElementById('payment-status-message');
+      const details = document.getElementById('payment-status-details');
+      const sessionId = new URL(window.location.href).searchParams.get('session_id');
+      if (!sessionId) {
+        statusMessage.textContent = 'Hiányzó session azonosító. A fizetés állapota nem kérdezhető le.';
+        return;
+      }
+      try {
+        const response = await fetch(`${apiBase}/session-status?session_id=${encodeURIComponent(sessionId)}`);
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Nem sikerült lekérdezni a session állapotát.');
+        statusMessage.textContent = result.message;
+        details.innerHTML = '';
+        [['Csomag', result.plan_name], ['Fizetési ciklus', result.billing_cycle], ['Licenckulcs', result.license_key || 'még nincs aktiválva']].forEach(([label, value]) => {
+          const li = document.createElement('li');
+          li.textContent = `${label}: ${value}`;
+          details.appendChild(li);
+        });
+      } catch (error) {
+        statusMessage.textContent = error.message || 'A session állapota jelenleg nem elérhető.';
+      }
+    })();
+  </script>
+</body>
+</html>
