@@ -12,7 +12,7 @@
     "passed": false,
     "auditId": "bootup-time",
     "level": "warn",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "JavaScript execution time",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/bootup-time/"
   },
@@ -29,7 +29,7 @@
     "passed": false,
     "auditId": "color-contrast",
     "level": "error",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Background and foreground colors do not have a sufficient contrast ratio.",
     "auditDocumentationLink": "https://dequeuniversity.com/rules/axe/4.8/color-contrast"
   },
@@ -46,7 +46,7 @@
     "passed": false,
     "auditId": "csp-xss",
     "level": "error",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Ensure CSP is effective against XSS attacks",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/best-practices/csp-xss/"
   },
@@ -63,7 +63,7 @@
     "passed": false,
     "auditId": "dom-size",
     "level": "warn",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Avoids an excessive DOM size",
     "auditDocumentationLink": "https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations"
   },
@@ -80,7 +80,7 @@
     "passed": false,
     "auditId": "errors-in-console",
     "level": "error",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Browser errors were logged to the console",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/best-practices/errors-in-console/"
   },
@@ -97,7 +97,7 @@
     "passed": false,
     "auditId": "installable-manifest",
     "level": "error",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Web app manifest or service worker do not meet the installability requirements",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/pwa/installable-manifest/"
   },
@@ -114,7 +114,7 @@
     "passed": false,
     "auditId": "mainthread-work-breakdown",
     "level": "warn",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Minimizes main-thread work",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/mainthread-work-breakdown/"
   },
@@ -131,7 +131,7 @@
     "passed": false,
     "auditId": "maskable-icon",
     "level": "error",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Manifest doesn't have a maskable icon",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/pwa/maskable-icon-audit/"
   },
@@ -148,7 +148,7 @@
     "passed": false,
     "auditId": "non-composited-animations",
     "level": "error",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Avoid non-composited animations",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/non-composited-animations/"
   },
@@ -165,7 +165,7 @@
     "passed": false,
     "auditId": "render-blocking-resources",
     "level": "warn",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Eliminate render-blocking resources",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/render-blocking-resources/"
   },
@@ -182,7 +182,7 @@
     "passed": false,
     "auditId": "splash-screen",
     "level": "error",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Is not configured for a custom splash screen",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/pwa/splash-screen/"
   },
@@ -199,7 +199,7 @@
     "passed": false,
     "auditId": "themed-omnibox",
     "level": "error",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Does not set a theme color for the address bar.",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/pwa/themed-omnibox/"
   },
@@ -216,7 +216,7 @@
     "passed": false,
     "auditId": "total-byte-weight",
     "level": "error",
-    "url": "http://localhost:36941/scifi-ui/index.html",
+    "url": "http://localhost:36261/scifi-ui/index.html",
     "auditTitle": "Avoids enormous network payloads",
     "auditDocumentationLink": "https://developer.chrome.com/docs/lighthouse/performance/total-byte-weight/"
   }
