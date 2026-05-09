@@ -161,6 +161,7 @@ body {
 }
 .card h3 { margin: 0 0 .3rem; font-weight: 800; letter-spacing: .6px }
 .card .meta { margin: 0; color: #9ab3c9; font-family: var(--font-mono) }
+.card-cta { display: inline-block; margin-top: .75rem }
 
 .span-12 { grid-column: span 12 }
 .span-8  { grid-column: span 12 }
