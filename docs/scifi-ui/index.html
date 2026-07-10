@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0c0f">
   <meta name="formatx-billing-api-base" content="/api">
+  <meta name="formatx-payment-confirmation-endpoint" content="">
 
   <script>
     (function () {
@@ -44,6 +45,7 @@
   <link rel="stylesheet" href="./styles/splash.css?v=20251025-splash1">
 </head>
 <body id="top" class="theme-lcars">
+  <a class="skip-link" href="#main-content">Ugrás a tartalomhoz</a>
   <div id="splash" aria-live="polite" aria-label="Üdvözlő animáció">
     <div class="splash-panel">
       <div class="art" role="img" aria-label="Üdvözlő grafika"></div>
@@ -63,17 +65,17 @@
     </nav>
   </header>
 
-  <main class="container shell">
+  <main id="main-content" class="container shell">
     <i class="decor decor-left" aria-hidden="true"></i>
     <i class="decor decor-right" aria-hidden="true"></i>
 
     <section class="hero">
       <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
-      <p class="subtitle">Modern rendszerkarbantartó GUI formázáshoz, USB-készítéshez, diagnosztikához és Linux / Bazzite workflow-khoz.</p>
+      <p class="subtitle">Rendszerkarbantartó GUI formázáshoz, USB-készítéshez és diagnosztikához — Windows, Linux / Bazzite rendszerekre.</p>
       <div class="cta-row">
         <a href="#downloads" class="pill lg">LIGHT LETÖLTÉSE</a>
-        <a href="#features" class="pill lg alt">FUNKCIÓK MEGTEKINTÉSE</a>
-        <a href="#docs" class="pill lg accent">PRO DOKUMENTÁCIÓ</a>
+        <a href="#pro" class="pill lg alt">PRO ELŐFIZETÉS</a>
+        <a href="#features" class="pill lg accent">FUNKCIÓK</a>
       </div>
     </section>
 
@@ -117,9 +119,7 @@
 
     <section id="pro" class="panel">
       <h2 class="panel-title">FormatX Suite Pro</h2>
-      <p><strong>FormatX Suite Pro – céges előfizetés biztonságos külső checkouttal</strong></p>
-      <p>A FormatX Suite Pro a prémium kiadás modern rendszerkarbantartó, diagnosztikai és vállalati workflow funkciókkal.</p>
-      <p>A céges előfizetés gépszám alapú, havi vagy éves ciklussal választható, és sikeres fizetés után a licenc webhook alapján aktiválódik.</p>
+      <p>Prémium kiadás céges előfizetéssel: diagnosztika, workflow-automatizálás és skálázható licencelés. Havi vagy éves számlázással, 2 hónap kedvezmény éves csomagoknál.</p>
 
       <div class="download-grid" style="margin-top:1rem">
         <div class="card span-8">
@@ -133,10 +133,10 @@
           </ul>
         </div>
         <div class="card span-4">
-          <h3>Fizetés és előfizetés</h3>
-          <p class="meta">Biztonságos külső checkout • havi vagy éves előfizetés</p>
-          <p>A FormatX Suite Pro céges előfizetése biztonságos külső checkout rendszeren keresztül történik. A FormatX oldal nem kezel és nem tárol bankkártyaadatokat vagy közvetlen banki információkat.</p>
-          <a class="pill lg accent card-cta" href="#payment">ELŐFIZETÉS INDÍTÁSA</a>
+          <h3>Enterprise</h3>
+          <p class="meta">Egyedi ajánlat • dedikált onboarding • nagyvállalati skálázás</p>
+          <p>Egyedi megfelelőségi igényekhez és nagyobb gépparkhoz személyre szabott ajánlat.</p>
+          <a class="pill lg accent card-cta" href="./support.html">EGYEDI AJÁNLAT KÉRÉSE</a>
         </div>
       </div>
 
@@ -158,25 +158,6 @@
           <p class="meta">99 900 Ft / hó • 999 000 Ft / év</p>
           <p>5 technikus • max. 150 gép • többfelhasználós üzemeltetéshez.</p>
           <a class="pill lg card-cta billing-plan-trigger" href="#payment" data-plan="technician_team" aria-label="Technician Team előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
-        </div>
-      </div>
-
-      <div class="download-grid" style="margin-top:1rem">
-        <div class="card span-8">
-          <h3>Céges árazás</h3>
-          <p class="meta">Backend-validált csomagárak • 2 hónap kedvezmény éves számlázásnál</p>
-          <ul>
-            <li><strong>Business Lite:</strong> 19 900 Ft / hó • 199 000 Ft / év</li>
-            <li><strong>Business Pro:</strong> 49 900 Ft / hó • 499 000 Ft / év</li>
-            <li><strong>Technician Team:</strong> 99 900 Ft / hó • 999 000 Ft / év</li>
-            <li><strong>Enterprise:</strong> 199 000 Ft / hó-tól • egyedi ajánlat</li>
-          </ul>
-        </div>
-        <div class="card span-4">
-          <h3>Enterprise</h3>
-          <p class="meta">Egyedi ajánlat • dedikált onboarding • nagyvállalati skálázás</p>
-          <p>Nagyobb környezethez és egyedi megfelelőségi igényekhez személyre szabott ajánlat érhető el.</p>
-          <a class="pill lg accent card-cta" href="./support.html">EGYEDI AJÁNLAT KÉRÉSE</a>
         </div>
       </div>
     </section>
@@ -249,62 +230,294 @@
     </section>
 
     <section id="docs" class="panel">
-      <h2 class="panel-title">Dokumentáció</h2>
-      <p><strong>FormatX Suite Pro dokumentáció és előfizetési információk</strong></p>
-      <p>Ez a szekció a FormatX Suite Pro csomagjaihoz, a külső checkout folyamathoz és a webhook alapú licencaktiváláshoz kapcsolódó információkat tartalmazza.</p>
-      <p>A Light és Pro tartalom külön szerepel, így a vállalati ügyfelek gyorsan megtalálják a számukra fontos adatokat.</p>
-      <div id="payment" class="card span-12" style="margin-top:1rem">
-        <h3>Fizetés és előfizetés</h3>
-        <p>A FormatX Suite Pro céges előfizetése biztonságos külső checkout rendszeren keresztül történik. A FormatX oldal nem kezel és nem tárol bankkártyaadatokat vagy közvetlen banki információkat. A fizetést a kiválasztott fizetési szolgáltató biztonságos checkout oldala kezeli.</p>
-        <p><strong>Elérhető:</strong></p>
-        <ul>
-          <li>havi előfizetés</li>
-          <li>éves előfizetés kedvezménnyel</li>
-          <li>Enterprise esetén egyedi ajánlat</li>
-        </ul>
-        <form id="billing-form" class="download-grid" style="margin-top:1rem; gap:1rem;">
-          <div class="card span-4">
-            <h4>Csomag és ciklus</h4>
-            <label for="billing-plan">Csomag</label><br>
-            <select id="billing-plan" name="plan_id" style="width:100%; margin:.4rem 0 1rem; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);">
-              <option value="business_lite">Business Lite</option>
-              <option value="business_pro" selected>Business Pro</option>
-              <option value="technician_team">Technician Team</option>
-            </select>
-            <label for="billing-cycle">Számlázási ciklus</label><br>
-            <select id="billing-cycle" name="billing_cycle" style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);">
-              <option value="monthly">havi előfizetés</option>
-              <option value="annual">éves előfizetés kedvezménnyel</option>
-            </select>
+      <h2 class="panel-title">Demo checkout</h2>
+      <div id="payment" class="card span-12 checkout-card">
+        <div class="checkout-intro">
+          <div>
+            <p class="checkout-kicker">1. LÉPÉS // megrendelés részletei</p>
+            <h3>Előfizetés indítása</h3>
+            <p>Válassz csomagot és számlázási ciklust, add meg a céges adatokat, majd erősítsd meg a megrendelést. A megadott adatok kizárólag a böngészőben maradnak — nincs élő terhelés.</p>
           </div>
-          <div class="card span-8">
-            <h4>Céges adatok</h4>
-            <div class="download-grid" style="gap:1rem;">
-              <div class="span-4"><label for="company-name">Cégnév</label><br><input id="company-name" name="company_name" type="text" required style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
-              <div class="span-4"><label for="contact-name">Kapcsolattartó neve</label><br><input id="contact-name" name="contact_name" type="text" required style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
-              <div class="span-4"><label for="contact-email">Email</label><br><input id="contact-email" name="email" type="email" required style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
-              <div class="span-8"><label for="billing-address">Számlázási cím</label><br><input id="billing-address" name="billing_address" type="text" required style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
-              <div class="span-4"><label for="tax-number">Adószám (ha szükséges)</label><br><input id="tax-number" name="tax_number" type="text" style="width:100%; margin:.4rem 0 0; padding:.75rem; border-radius:14px; background:#111823; color:#fff; border:1px solid rgba(255,255,255,.16);"></div>
+          <div class="checkout-status" aria-label="Checkout állapot">
+            <span class="checkout-status-pill">Demo mód</span>
+            <span class="checkout-status-pill">Éves díjnál 2 hó kedvezmény</span>
+            <span class="checkout-status-pill">Fogadó cím privát marad</span>
+          </div>
+        </div>
+
+        <div class="checkout-layout">
+          <aside class="checkout-summary" aria-labelledby="checkout-summary-title">
+            <div class="checkout-block">
+              <h4 id="checkout-summary-title">Rendelés összegzés</h4>
+              <p class="meta">Az összegzés a választott csomag és fizetési mód alapján azonnal frissül.</p>
+              <dl class="summary-list">
+                <div>
+                  <dt>Csomag</dt>
+                  <dd id="summary-plan-name">Business Pro</dd>
+                </div>
+                <div>
+                  <dt>Számlázás</dt>
+                  <dd id="summary-cycle">Havi előfizetés</dd>
+                </div>
+                <div>
+                  <dt>Most fizetendő</dt>
+                  <dd id="summary-price">49 900 Ft / hó</dd>
+                </div>
+                <div>
+                  <dt>Pénznem</dt>
+                  <dd id="summary-currency">HUF</dd>
+                </div>
+                <div>
+                  <dt>Csapat</dt>
+                  <dd id="summary-team">3 technikus • 50 gépig</dd>
+                </div>
+                <div>
+                  <dt>Fizetési mód</dt>
+                  <dd id="summary-method">Kártya demo</dd>
+                </div>
+                <div>
+                  <dt>Rendelési azonosító</dt>
+                  <dd id="summary-reference">FX-DEMO-000000</dd>
+                </div>
+                <div>
+                  <dt>Megtakarítás</dt>
+                  <dd id="summary-savings">Éves csomag esetén 2 hónap kedvezmény</dd>
+                </div>
+              </dl>
             </div>
-          </div>
-          <div class="card span-12">
-            <p>A frontend csak a kiválasztott csomagot, a számlázási ciklust és a céges adatokat küldi a Cloudflare Worker API felé. A checkout session létrehozása, az ár validálása, a webhook ellenőrzése és a licenc aktiválása a backendben történik.</p>
-            <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem; align-items:center;">
-              <button class="pill lg" type="submit">ELŐFIZETÉS INDÍTÁSA</button>
-              <a class="pill lg accent" href="./support.html" aria-label="Enterprise egyedi ajánlat kérése">EGYEDI AJÁNLAT KÉRÉSE</a>
-              <a class="pill lg alt" href="./terms.html">ÁSZF / Terms</a>
-              <a class="pill lg alt" href="./privacy.html">Privacy</a>
+
+            <div class="checkout-block">
+              <h4>Mit tartalmaz</h4>
+              <ul class="checkout-list">
+                <li>Prémium diagnosztika és részletes naplózás</li>
+                <li>Licenc- és eszközkezelés több technikus számára</li>
+                <li>AI segítség, auditálható műveleti előzményekkel</li>
+                <li>Enterprise igény esetén külön onboarding és ajánlatkérés</li>
+              </ul>
             </div>
-            <p id="billing-feedback" class="meta" style="margin-top:1rem; min-height:1.25rem;"></p>
+
+            <div class="checkout-block checkout-trust">
+              <h4>Biztonság és támogatás</h4>
+              <p class="meta">A bemutató checkout nem indít valódi kártyaterhelést, nem ment kártyaszámot, és kizárólag helyi validációt futtat.</p>
+              <p class="meta">A fizetés utáni visszajelző űrlap csak nyilvános űrlapvégpontra vagy szerveroldali végpontra köthető rá; a fogadó e-mail-címnek a szolgáltató vagy backend privát beállításában kell maradnia.</p>
+            </div>
+          </aside>
+
+          <div class="checkout-main">
+            <form id="billing-form" class="checkout-form" novalidate>
+              <div class="checkout-form-grid">
+                <fieldset class="field-group span-12">
+                  <legend>Fizetési mód</legend>
+                  <div class="choice-grid">
+                    <label class="choice-card">
+                      <input type="radio" name="payment_method" value="card" checked>
+                      <span class="choice-copy">
+                        <span class="choice-title">Kártya demo</span>
+                        <span class="choice-meta">Teszt jellegű kártyaadatok helyi ellenőrzése</span>
+                      </span>
+                    </label>
+                    <label class="choice-card">
+                      <input type="radio" name="payment_method" value="transfer">
+                      <span class="choice-copy">
+                        <span class="choice-title">Banki átutalás</span>
+                        <span class="choice-meta">QR / banki átutalás utáni visszajelző űrlappal</span>
+                      </span>
+                    </label>
+                    <label class="choice-card">
+                      <input type="radio" name="payment_method" value="invoice">
+                      <span class="choice-copy">
+                        <span class="choice-title">Beszerzési igény</span>
+                        <span class="choice-meta">PO / jóváhagyási folyamat előkészítése</span>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <div class="field span-6">
+                  <label for="billing-plan">Csomag</label>
+                  <select id="billing-plan" name="plan_id">
+                    <option value="business_lite">Business Lite</option>
+                    <option value="business_pro" selected>Business Pro</option>
+                    <option value="technician_team">Technician Team</option>
+                  </select>
+                </div>
+
+                <div class="field span-6">
+                  <label for="billing-cycle">Számlázási ciklus</label>
+                  <select id="billing-cycle" name="billing_cycle">
+                    <option value="monthly">Havi előfizetés</option>
+                    <option value="annual">Éves előfizetés kedvezménnyel</option>
+                  </select>
+                </div>
+
+                <div class="field span-6">
+                  <label for="company-name">Cégnév</label>
+                  <input id="company-name" name="company_name" type="text" autocomplete="organization" required>
+                </div>
+
+                <div class="field span-6">
+                  <label for="contact-name">Kapcsolattartó neve</label>
+                  <input id="contact-name" name="contact_name" type="text" autocomplete="name" required>
+                </div>
+
+                <div class="field span-6">
+                  <label for="contact-email">Kapcsolattartó e-mail</label>
+                  <input id="contact-email" name="email" type="email" autocomplete="email" inputmode="email" required>
+                </div>
+
+                <div class="field span-6">
+                  <label for="billing-address">Számlázási cím</label>
+                  <input id="billing-address" name="billing_address" type="text" autocomplete="street-address" required>
+                </div>
+
+                <div class="field span-6">
+                  <label for="tax-number">Adószám / VAT ID</label>
+                  <input id="tax-number" name="tax_number" type="text" autocomplete="off" placeholder="12345678-1-42">
+                </div>
+
+                <div class="field span-6">
+                  <label for="purchase-order">PO / belső azonosító</label>
+                  <input id="purchase-order" name="purchase_order" type="text" autocomplete="off" placeholder="PL. FX-2026-042">
+                </div>
+
+                <fieldset class="field-group span-12 card-fields">
+                  <legend>Kártyaadatok demóhoz</legend>
+                  <p class="field-hint">Minta adatokkal is kitölthető. Az értékek nem hagyják el a böngészőt.</p>
+                  <div class="checkout-form-grid nested-grid">
+                    <div class="field span-12">
+                      <label for="card-name">Kártyabirtokos neve</label>
+                      <input id="card-name" name="card_name" type="text" autocomplete="cc-name" data-card-field required>
+                    </div>
+                    <div class="field span-6">
+                      <label for="card-number">Kártyaszám</label>
+                      <input id="card-number" name="card_number" type="text" autocomplete="cc-number" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242" data-card-field required>
+                    </div>
+                    <div class="field span-3">
+                      <label for="card-expiry">Lejárat</label>
+                      <input id="card-expiry" name="card_expiry" type="text" autocomplete="cc-exp" inputmode="numeric" maxlength="5" placeholder="MM/ÉÉ" data-card-field required>
+                    </div>
+                    <div class="field span-3">
+                      <label for="card-cvc">CVC</label>
+                      <input id="card-cvc" name="card_cvc" type="text" autocomplete="cc-csc" inputmode="numeric" maxlength="4" placeholder="123" data-card-field required>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <div class="field field-checkbox span-12">
+                  <label for="billing-consent">
+                    <input id="billing-consent" name="billing_consent" type="checkbox" required>
+                    Tudomásul veszem, hogy ez egy demo checkout: a fizetés nem indul el, a kártyaadatok nem kerülnek elküldésre, az átutalási visszajelzéshez pedig külön, publikus űrlapvégpont vagy backend szükséges.
+                  </label>
+                </div>
+              </div>
+
+              <div class="checkout-actions">
+                <button class="pill lg" id="billing-submit" type="submit">DEMO FIZETÉS JÓVÁHAGYÁSA</button>
+                <a class="pill lg accent" href="./support.html" aria-label="Enterprise egyedi ajánlat kérése">EGYEDI AJÁNLAT KÉRÉSE</a>
+                <a class="pill lg alt" href="./terms.html">ÁSZF / Terms</a>
+                <a class="pill lg alt" href="./privacy.html">Privacy</a>
+              </div>
+
+              <p id="billing-feedback" class="meta checkout-feedback" aria-live="polite"></p>
+            </form>
+
+            <section id="payment-confirmation" class="checkout-confirmation" aria-labelledby="payment-confirmation-title">
+              <div class="checkout-block">
+                <div class="checkout-confirmation-header">
+                  <div>
+                    <p class="checkout-kicker">2. lépés // fizetés utáni visszajelzés</p>
+                    <h4 id="payment-confirmation-title">Átutalási visszajelző űrlap</h4>
+                  </div>
+                  <span id="payment-confirmation-badge" class="checkout-status-pill">Nincs összekötve</span>
+                </div>
+                <p class="meta">Ha a banki vagy QR-kódos utalást már elindítottad, itt küldheted el a rendelési azonosítót, a saját elérhetőségedet és a tranzakciós hivatkozást. A fogadó e-mail-cím nem jelenik meg az oldalon; azt a háttérszolgáltatásban kell privátan beállítani.</p>
+              </div>
+
+              <form id="payment-confirmation-form" class="checkout-form" novalidate>
+                <div class="checkout-form-grid">
+                  <div class="field span-4">
+                    <label for="confirmation-order-id">Rendelési / referencia azonosító</label>
+                    <input id="confirmation-order-id" name="order_reference" type="text" autocomplete="off" required>
+                  </div>
+
+                  <div class="field span-4">
+                    <label for="confirmation-plan">Csomag és ciklus</label>
+                    <input id="confirmation-plan" name="selected_plan" type="text" autocomplete="off" readonly>
+                  </div>
+
+                  <div class="field span-2">
+                    <label for="confirmation-currency">Pénznem</label>
+                    <input id="confirmation-currency" name="currency" type="text" autocomplete="off" readonly>
+                  </div>
+
+                  <div class="field span-2">
+                    <label for="confirmation-amount">Összeg</label>
+                    <input id="confirmation-amount" name="amount" type="text" autocomplete="off" readonly>
+                  </div>
+
+                  <div class="field span-6">
+                    <label for="confirmation-payer-name">Utaló neve</label>
+                    <input id="confirmation-payer-name" name="payer_name" type="text" autocomplete="name" required>
+                  </div>
+
+                  <div class="field span-6">
+                    <label for="confirmation-buyer-email">Vásárló e-mail-címe</label>
+                    <input id="confirmation-buyer-email" name="buyer_email" type="email" autocomplete="email" inputmode="email" required>
+                  </div>
+
+                  <div class="field span-6">
+                    <label for="confirmation-transfer-reference">Utalási közlemény / tranzakciós hivatkozás</label>
+                    <input id="confirmation-transfer-reference" name="transfer_reference" type="text" autocomplete="off" required>
+                  </div>
+
+                  <div class="field span-6">
+                    <label for="confirmation-contact-channel">Visszajelzési csatorna</label>
+                    <select id="confirmation-contact-channel" name="contact_channel">
+                      <option value="email" selected>E-mail válasz</option>
+                      <option value="phone">Telefonos egyeztetés</option>
+                      <option value="none">Nem kérek külön visszajelzést</option>
+                    </select>
+                  </div>
+
+                  <div class="field span-12">
+                    <label for="confirmation-message">Opciós üzenet</label>
+                    <textarea id="confirmation-message" name="message" rows="4" placeholder="Például: mikor indult az utalás, milyen néven érkezik, kell-e külön számlázási egyeztetés."></textarea>
+                  </div>
+
+                  <div class="field field-checkbox span-12">
+                    <label for="confirmation-consent">
+                      <input id="confirmation-consent" name="confirmation_consent" type="checkbox" required>
+                      Hozzájárulok, hogy a megadott adatokat kizárólag a fizetés beazonosításához és a rendelés visszaigazolásához használják fel. Tudomásul veszem, hogy a statikus oldal önmagában nem tud privát fogadó címre e-mailt küldeni.
+                    </label>
+                  </div>
+                </div>
+
+                <p id="payment-confirmation-status" class="meta confirmation-endpoint-status" aria-live="polite"></p>
+
+                <div class="checkout-actions">
+                  <button class="pill lg accent" id="payment-confirmation-submit" type="submit">VISSZAJELZÉS ELKÜLDÉSE</button>
+                  <a class="pill lg alt" href="#payment">1. LÉPÉSHEZ VISSZA</a>
+                </div>
+
+                <p id="payment-confirmation-feedback" class="meta checkout-feedback" aria-live="polite"></p>
+              </form>
+            </section>
           </div>
-        </form>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="container footer">
-    <div class="copyright">© 2026 FormatX Project<br>Developed by Hutóczky József</div>
-    <a href="#top" class="back-to-top">Vissza a tetejére</a>
+    <div class="footer-row">
+      <div class="copyright">© 2026 FormatX Project — Hutóczky József</div>
+      <nav class="footer-nav" aria-label="Jogi és support linkek">
+        <a href="./support.html">Support</a>
+        <a href="./terms.html">ÁSZF</a>
+        <a href="./privacy.html">Privacy</a>
+        <a href="#top" class="back-to-top">↑ Tetejére</a>
+      </nav>
+    </div>
   </footer>
 
   <noscript>
