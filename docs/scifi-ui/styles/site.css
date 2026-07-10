@@ -163,12 +163,238 @@ body {
 .card .meta { margin: 0; color: #9ab3c9; font-family: var(--font-mono) }
 .card-cta { display: inline-block; margin-top: .75rem }
 
+/* ===== Checkout ===== */
+.checkout-card {
+  margin-top: 1rem;
+  padding: 1.2rem;
+}
+.checkout-kicker {
+  margin: 0 0 .55rem;
+  font-family: var(--font-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.checkout-intro {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.checkout-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  justify-content: flex-end;
+}
+.checkout-status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: .45rem .85rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--panel-line) 65%, transparent);
+  background: color-mix(in oklab, var(--panel) 88%, var(--panel-line));
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: .82rem;
+}
+.checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+.checkout-summary,
+.checkout-form {
+  display: grid;
+  gap: 1rem;
+}
+.checkout-block,
+.field-group,
+.field,
+.field-checkbox {
+  border: 1px solid color-mix(in oklab, var(--panel-line) 56%, transparent);
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--panel) 94%, black);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--panel-line) 14%, transparent);
+}
+.checkout-block,
+.field-group,
+.field-checkbox {
+  padding: 1rem;
+}
+.checkout-block h4,
+.field-group legend {
+  margin: 0 0 .4rem;
+  font-size: 1rem;
+  letter-spacing: .08em;
+}
+.checkout-block h4 { text-transform: uppercase }
+.summary-list {
+  margin: .9rem 0 0;
+  display: grid;
+  gap: .75rem;
+}
+.summary-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  padding-bottom: .65rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--panel-line) 24%, transparent);
+}
+.summary-list div:last-child { border-bottom: 0; padding-bottom: 0 }
+.summary-list dt {
+  color: var(--muted);
+  font-size: .92rem;
+}
+.summary-list dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 800;
+}
+.checkout-list {
+  margin: .85rem 0 0;
+  padding-left: 1.15rem;
+}
+.checkout-list li + li { margin-top: .45rem }
+.checkout-trust p + p { margin-top: .65rem }
+.checkout-form-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1rem;
+}
+.nested-grid {
+  padding-top: .85rem;
+}
+.field {
+  grid-column: span 12;
+  padding: .9rem 1rem 1rem;
+}
+.field label,
+.field-group legend,
+.field-checkbox label {
+  font-weight: 700;
+}
+.field label {
+  display: inline-block;
+  margin-bottom: .45rem;
+}
+.field input,
+.field select {
+  width: 100%;
+  min-height: 3rem;
+  padding: .75rem .9rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--panel-line) 44%, transparent);
+  background: color-mix(in oklab, var(--panel) 88%, #061018);
+  color: var(--fg);
+  font: inherit;
+}
+.field input::placeholder { color: color-mix(in oklab, var(--muted) 75%, transparent) }
+.field input:focus-visible,
+.field select:focus-visible,
+.choice-card input:focus-visible + .choice-copy,
+.field-checkbox input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+.field input[aria-invalid="true"],
+.field select[aria-invalid="true"] {
+  border-color: #ff7d7d;
+  box-shadow: 0 0 0 1px rgba(255, 125, 125, .18);
+}
+.field-hint {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: .9rem;
+}
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: .85rem;
+  margin-top: .9rem;
+}
+.choice-card {
+  display: block;
+}
+.choice-card input {
+  position: absolute;
+  opacity: 0.0001;
+  pointer-events: none;
+}
+.choice-copy {
+  display: grid;
+  gap: .2rem;
+  min-height: 100%;
+  padding: .95rem 1rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--panel-line) 44%, transparent);
+  background: color-mix(in oklab, var(--panel) 92%, black);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .08s ease;
+}
+.choice-card:hover .choice-copy { transform: translateY(-1px) }
+.choice-card input:checked + .choice-copy {
+  border-color: color-mix(in oklab, var(--panel-line) 90%, white);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--panel-line) 22%, transparent),
+    0 0 20px color-mix(in oklab, var(--panel-line) 18%, transparent);
+}
+.choice-title {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.choice-meta {
+  color: var(--muted);
+  font-size: .92rem;
+}
+.field-checkbox label {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  cursor: pointer;
+}
+.field-checkbox input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: .2rem;
+  accent-color: var(--accent);
+}
+.checkout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: center;
+}
+.checkout-feedback {
+  min-height: 1.5rem;
+  padding-left: .1rem;
+}
+.checkout-feedback[data-state="error"] {
+  color: #ffb1b1;
+}
+.checkout-feedback[data-state="success"] {
+  color: #9fffd9;
+}
+.card-fields[hidden] { display: none }
+
 .span-12 { grid-column: span 12 }
 .span-8  { grid-column: span 12 }
 .span-4  { grid-column: span 12 }
+.span-6  { grid-column: span 12 }
+.span-3  { grid-column: span 12 }
 @media (min-width: 880px) {
   .span-8 { grid-column: span 8 }
+  .span-6 { grid-column: span 6 }
   .span-4 { grid-column: span 4 }
+  .span-3 { grid-column: span 3 }
+  .checkout-layout {
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    align-items: start;
+  }
 }
 
 /* ===== Alsó chipek és lábléc ===== */
@@ -302,4 +528,11 @@ h1, h2, h3 { text-transform: uppercase }
 @media (max-width: 520px) {
   .subtitle { font-size: .95rem }
   .footer { flex-direction: column; gap: .5rem }
+  .checkout-card { padding: 1rem }
+  .checkout-intro { flex-direction: column }
+  .choice-grid { grid-template-columns: minmax(0, 1fr) }
+  .field,
+  .field-group,
+  .field-checkbox,
+  .checkout-block { padding-inline: .9rem }
 }
