@@ -205,8 +205,13 @@ body {
   grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
+.checkout-main {
+  display: grid;
+  gap: 1rem;
+}
 .checkout-summary,
-.checkout-form {
+.checkout-form,
+.checkout-confirmation {
   display: grid;
   gap: 1rem;
 }
@@ -282,7 +287,8 @@ body {
   margin-bottom: .45rem;
 }
 .field input,
-.field select {
+.field select,
+.field textarea {
   width: 100%;
   min-height: 3rem;
   padding: .75rem .9rem;
@@ -292,18 +298,28 @@ body {
   color: var(--fg);
   font: inherit;
 }
+.field textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
 .field input::placeholder { color: color-mix(in oklab, var(--muted) 75%, transparent) }
 .field input:focus-visible,
 .field select:focus-visible,
+.field textarea:focus-visible,
 .choice-card input:focus-visible + .choice-copy,
 .field-checkbox input:focus-visible {
   outline: var(--focus-ring);
   outline-offset: 2px;
 }
 .field input[aria-invalid="true"],
-.field select[aria-invalid="true"] {
+.field select[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
   border-color: #ff7d7d;
   box-shadow: 0 0 0 1px rgba(255, 125, 125, .18);
+}
+.field input[readonly] {
+  color: color-mix(in oklab, var(--fg) 85%, white);
+  background: color-mix(in oklab, var(--panel) 92%, #10202c);
 }
 .field-hint {
   margin: 0;
@@ -369,6 +385,12 @@ body {
   gap: .75rem;
   align-items: center;
 }
+.pill:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+  transform: none;
+  box-shadow: none;
+}
 .checkout-feedback {
   min-height: 1.5rem;
   padding-left: .1rem;
@@ -376,7 +398,27 @@ body {
 .checkout-feedback[data-state="error"] {
   color: #ffb1b1;
 }
+.checkout-feedback[data-state="info"] {
+  color: #bdefff;
+}
 .checkout-feedback[data-state="success"] {
+  color: #9fffd9;
+}
+.checkout-confirmation-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.confirmation-endpoint-status {
+  min-height: 1.5rem;
+  padding-left: .1rem;
+  color: var(--muted);
+}
+.confirmation-endpoint-status[data-state="disabled"] {
+  color: #ffd39d;
+}
+.confirmation-endpoint-status[data-state="ready"] {
   color: #9fffd9;
 }
 .card-fields[hidden] { display: none }
@@ -394,6 +436,12 @@ body {
   .checkout-layout {
     grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
     align-items: start;
+  }
+}
+@media (max-width: 640px) {
+  .checkout-confirmation-header,
+  .checkout-intro {
+    flex-direction: column;
   }
 }
 

@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0c0f">
   <meta name="formatx-billing-api-base" content="/api">
+  <meta name="formatx-payment-confirmation-endpoint" content="">
 
   <script>
     (function () {
@@ -263,6 +264,7 @@
           <div class="checkout-status" aria-label="Checkout információk">
             <span class="checkout-status-pill">Böngészőn belüli demo</span>
             <span class="checkout-status-pill">Éves díjnál 2 hónap kedvezmény</span>
+            <span class="checkout-status-pill">Fogadó cím privát marad</span>
             <span class="checkout-status-pill">Billentyűzettel is bejárható</span>
           </div>
         </div>
@@ -286,12 +288,20 @@
                   <dd id="summary-price">49 900 Ft / hó</dd>
                 </div>
                 <div>
+                  <dt>Pénznem</dt>
+                  <dd id="summary-currency">HUF</dd>
+                </div>
+                <div>
                   <dt>Csapat</dt>
                   <dd id="summary-team">3 technikus • 50 gépig</dd>
                 </div>
                 <div>
                   <dt>Fizetési mód</dt>
                   <dd id="summary-method">Kártya demo</dd>
+                </div>
+                <div>
+                  <dt>Rendelési azonosító</dt>
+                  <dd id="summary-reference">FX-DEMO-000000</dd>
                 </div>
                 <div>
                   <dt>Megtakarítás</dt>
@@ -312,127 +322,211 @@
 
             <div class="checkout-block checkout-trust">
               <h4>Biztonság és támogatás</h4>
-              <p class="meta">A bemutató űrlap nem küld adatot fizetési szolgáltatóhoz, nem ment kártyaszámot, és kizárólag helyi validációt futtat.</p>
-              <p class="meta">Kérdés esetén nyisd meg az ÁSZF-et, a privacy oldalt vagy kérj enterprise visszahívást.</p>
+              <p class="meta">A bemutató checkout nem indít valódi kártyaterhelést, nem ment kártyaszámot, és kizárólag helyi validációt futtat.</p>
+              <p class="meta">A fizetés utáni visszajelző űrlap csak nyilvános űrlapvégpontra vagy szerveroldali végpontra köthető rá; a fogadó e-mail-címnek a szolgáltató vagy backend privát beállításában kell maradnia.</p>
             </div>
           </aside>
 
-          <form id="billing-form" class="checkout-form" novalidate>
-            <div class="checkout-form-grid">
-              <fieldset class="field-group span-12">
-                <legend>Fizetési mód</legend>
-                <div class="choice-grid">
-                  <label class="choice-card">
-                    <input type="radio" name="payment_method" value="card" checked>
-                    <span class="choice-copy">
-                      <span class="choice-title">Kártya demo</span>
-                      <span class="choice-meta">Teszt jellegű kártyaadatok helyi ellenőrzése</span>
-                    </span>
-                  </label>
-                  <label class="choice-card">
-                    <input type="radio" name="payment_method" value="transfer">
-                    <span class="choice-copy">
-                      <span class="choice-title">Banki átutalás</span>
-                      <span class="choice-meta">Díjbekérő és aktiválási e-mail szimuláció</span>
-                    </span>
-                  </label>
-                  <label class="choice-card">
-                    <input type="radio" name="payment_method" value="invoice">
-                    <span class="choice-copy">
-                      <span class="choice-title">Beszerzési igény</span>
-                      <span class="choice-meta">PO / jóváhagyási folyamat előkészítése</span>
-                    </span>
+          <div class="checkout-main">
+            <form id="billing-form" class="checkout-form" novalidate>
+              <div class="checkout-form-grid">
+                <fieldset class="field-group span-12">
+                  <legend>Fizetési mód</legend>
+                  <div class="choice-grid">
+                    <label class="choice-card">
+                      <input type="radio" name="payment_method" value="card" checked>
+                      <span class="choice-copy">
+                        <span class="choice-title">Kártya demo</span>
+                        <span class="choice-meta">Teszt jellegű kártyaadatok helyi ellenőrzése</span>
+                      </span>
+                    </label>
+                    <label class="choice-card">
+                      <input type="radio" name="payment_method" value="transfer">
+                      <span class="choice-copy">
+                        <span class="choice-title">Banki átutalás</span>
+                        <span class="choice-meta">QR / banki átutalás utáni visszajelző űrlappal</span>
+                      </span>
+                    </label>
+                    <label class="choice-card">
+                      <input type="radio" name="payment_method" value="invoice">
+                      <span class="choice-copy">
+                        <span class="choice-title">Beszerzési igény</span>
+                        <span class="choice-meta">PO / jóváhagyási folyamat előkészítése</span>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <div class="field span-6">
+                  <label for="billing-plan">Csomag</label>
+                  <select id="billing-plan" name="plan_id">
+                    <option value="business_lite">Business Lite</option>
+                    <option value="business_pro" selected>Business Pro</option>
+                    <option value="technician_team">Technician Team</option>
+                  </select>
+                </div>
+
+                <div class="field span-6">
+                  <label for="billing-cycle">Számlázási ciklus</label>
+                  <select id="billing-cycle" name="billing_cycle">
+                    <option value="monthly">Havi előfizetés</option>
+                    <option value="annual">Éves előfizetés kedvezménnyel</option>
+                  </select>
+                </div>
+
+                <div class="field span-6">
+                  <label for="company-name">Cégnév</label>
+                  <input id="company-name" name="company_name" type="text" autocomplete="organization" required>
+                </div>
+
+                <div class="field span-6">
+                  <label for="contact-name">Kapcsolattartó neve</label>
+                  <input id="contact-name" name="contact_name" type="text" autocomplete="name" required>
+                </div>
+
+                <div class="field span-6">
+                  <label for="contact-email">Kapcsolattartó e-mail</label>
+                  <input id="contact-email" name="email" type="email" autocomplete="email" inputmode="email" required>
+                </div>
+
+                <div class="field span-6">
+                  <label for="billing-address">Számlázási cím</label>
+                  <input id="billing-address" name="billing_address" type="text" autocomplete="street-address" required>
+                </div>
+
+                <div class="field span-6">
+                  <label for="tax-number">Adószám / VAT ID</label>
+                  <input id="tax-number" name="tax_number" type="text" autocomplete="off" placeholder="12345678-1-42">
+                </div>
+
+                <div class="field span-6">
+                  <label for="purchase-order">PO / belső azonosító</label>
+                  <input id="purchase-order" name="purchase_order" type="text" autocomplete="off" placeholder="PL. FX-2026-042">
+                </div>
+
+                <fieldset class="field-group span-12 card-fields">
+                  <legend>Kártyaadatok demóhoz</legend>
+                  <p class="field-hint">Minta adatokkal is kitölthető. Az értékek nem hagyják el a böngészőt.</p>
+                  <div class="checkout-form-grid nested-grid">
+                    <div class="field span-12">
+                      <label for="card-name">Kártyabirtokos neve</label>
+                      <input id="card-name" name="card_name" type="text" autocomplete="cc-name" data-card-field required>
+                    </div>
+                    <div class="field span-6">
+                      <label for="card-number">Kártyaszám</label>
+                      <input id="card-number" name="card_number" type="text" autocomplete="cc-number" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242" data-card-field required>
+                    </div>
+                    <div class="field span-3">
+                      <label for="card-expiry">Lejárat</label>
+                      <input id="card-expiry" name="card_expiry" type="text" autocomplete="cc-exp" inputmode="numeric" maxlength="5" placeholder="MM/ÉÉ" data-card-field required>
+                    </div>
+                    <div class="field span-3">
+                      <label for="card-cvc">CVC</label>
+                      <input id="card-cvc" name="card_cvc" type="text" autocomplete="cc-csc" inputmode="numeric" maxlength="4" placeholder="123" data-card-field required>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <div class="field field-checkbox span-12">
+                  <label for="billing-consent">
+                    <input id="billing-consent" name="billing_consent" type="checkbox" required>
+                    Tudomásul veszem, hogy ez egy demo checkout: a fizetés nem indul el, a kártyaadatok nem kerülnek elküldésre, az átutalási visszajelzéshez pedig külön, publikus űrlapvégpont vagy backend szükséges.
                   </label>
                 </div>
-              </fieldset>
-
-              <div class="field span-6">
-                <label for="billing-plan">Csomag</label>
-                <select id="billing-plan" name="plan_id">
-                  <option value="business_lite">Business Lite</option>
-                  <option value="business_pro" selected>Business Pro</option>
-                  <option value="technician_team">Technician Team</option>
-                </select>
               </div>
 
-              <div class="field span-6">
-                <label for="billing-cycle">Számlázási ciklus</label>
-                <select id="billing-cycle" name="billing_cycle">
-                  <option value="monthly">Havi előfizetés</option>
-                  <option value="annual">Éves előfizetés kedvezménnyel</option>
-                </select>
+              <div class="checkout-actions">
+                <button class="pill lg" id="billing-submit" type="submit">DEMO FIZETÉS JÓVÁHAGYÁSA</button>
+                <a class="pill lg accent" href="./support.html" aria-label="Enterprise egyedi ajánlat kérése">EGYEDI AJÁNLAT KÉRÉSE</a>
+                <a class="pill lg alt" href="./terms.html">ÁSZF / Terms</a>
+                <a class="pill lg alt" href="./privacy.html">Privacy</a>
               </div>
 
-              <div class="field span-6">
-                <label for="company-name">Cégnév</label>
-                <input id="company-name" name="company_name" type="text" autocomplete="organization" required>
-              </div>
+              <p id="billing-feedback" class="meta checkout-feedback" aria-live="polite"></p>
+            </form>
 
-              <div class="field span-6">
-                <label for="contact-name">Kapcsolattartó neve</label>
-                <input id="contact-name" name="contact_name" type="text" autocomplete="name" required>
-              </div>
-
-              <div class="field span-6">
-                <label for="contact-email">Kapcsolattartó e-mail</label>
-                <input id="contact-email" name="email" type="email" autocomplete="email" inputmode="email" required>
-              </div>
-
-              <div class="field span-6">
-                <label for="billing-address">Számlázási cím</label>
-                <input id="billing-address" name="billing_address" type="text" autocomplete="street-address" required>
-              </div>
-
-              <div class="field span-6">
-                <label for="tax-number">Adószám / VAT ID</label>
-                <input id="tax-number" name="tax_number" type="text" autocomplete="off" placeholder="12345678-1-42">
-              </div>
-
-              <div class="field span-6">
-                <label for="purchase-order">PO / belső azonosító</label>
-                <input id="purchase-order" name="purchase_order" type="text" autocomplete="off" placeholder="PL. FX-2026-042">
-              </div>
-
-              <fieldset class="field-group span-12 card-fields">
-                <legend>Kártyaadatok demóhoz</legend>
-                <p class="field-hint">Minta adatokkal is kitölthető. Az értékek nem hagyják el a böngészőt.</p>
-                <div class="checkout-form-grid nested-grid">
-                  <div class="field span-12">
-                    <label for="card-name">Kártyabirtokos neve</label>
-                    <input id="card-name" name="card_name" type="text" autocomplete="cc-name" data-card-field required>
+            <section id="payment-confirmation" class="checkout-confirmation" aria-labelledby="payment-confirmation-title">
+              <div class="checkout-block">
+                <div class="checkout-confirmation-header">
+                  <div>
+                    <p class="checkout-kicker">2. lépés // fizetés utáni visszajelzés</p>
+                    <h4 id="payment-confirmation-title">Átutalási visszajelző űrlap</h4>
                   </div>
+                  <span id="payment-confirmation-badge" class="checkout-status-pill">Nincs összekötve</span>
+                </div>
+                <p class="meta">Ha a banki vagy QR-kódos utalást már elindítottad, itt küldheted el a rendelési azonosítót, a saját elérhetőségedet és a tranzakciós hivatkozást. A fogadó e-mail-cím nem jelenik meg az oldalon; azt a háttérszolgáltatásban kell privátan beállítani.</p>
+              </div>
+
+              <form id="payment-confirmation-form" class="checkout-form" novalidate>
+                <div class="checkout-form-grid">
+                  <div class="field span-4">
+                    <label for="confirmation-order-id">Rendelési / referencia azonosító</label>
+                    <input id="confirmation-order-id" name="order_reference" type="text" autocomplete="off" required>
+                  </div>
+
+                  <div class="field span-4">
+                    <label for="confirmation-plan">Csomag és ciklus</label>
+                    <input id="confirmation-plan" name="selected_plan" type="text" autocomplete="off" readonly>
+                  </div>
+
+                  <div class="field span-2">
+                    <label for="confirmation-currency">Pénznem</label>
+                    <input id="confirmation-currency" name="currency" type="text" autocomplete="off" readonly>
+                  </div>
+
+                  <div class="field span-2">
+                    <label for="confirmation-amount">Összeg</label>
+                    <input id="confirmation-amount" name="amount" type="text" autocomplete="off" readonly>
+                  </div>
+
                   <div class="field span-6">
-                    <label for="card-number">Kártyaszám</label>
-                    <input id="card-number" name="card_number" type="text" autocomplete="cc-number" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242" data-card-field required>
+                    <label for="confirmation-payer-name">Utaló neve</label>
+                    <input id="confirmation-payer-name" name="payer_name" type="text" autocomplete="name" required>
                   </div>
-                  <div class="field span-3">
-                    <label for="card-expiry">Lejárat</label>
-                    <input id="card-expiry" name="card_expiry" type="text" autocomplete="cc-exp" inputmode="numeric" maxlength="5" placeholder="MM/ÉÉ" data-card-field required>
+
+                  <div class="field span-6">
+                    <label for="confirmation-buyer-email">Vásárló e-mail-címe</label>
+                    <input id="confirmation-buyer-email" name="buyer_email" type="email" autocomplete="email" inputmode="email" required>
                   </div>
-                  <div class="field span-3">
-                    <label for="card-cvc">CVC</label>
-                    <input id="card-cvc" name="card_cvc" type="text" autocomplete="cc-csc" inputmode="numeric" maxlength="4" placeholder="123" data-card-field required>
+
+                  <div class="field span-6">
+                    <label for="confirmation-transfer-reference">Utalási közlemény / tranzakciós hivatkozás</label>
+                    <input id="confirmation-transfer-reference" name="transfer_reference" type="text" autocomplete="off" required>
+                  </div>
+
+                  <div class="field span-6">
+                    <label for="confirmation-contact-channel">Visszajelzési csatorna</label>
+                    <select id="confirmation-contact-channel" name="contact_channel">
+                      <option value="email" selected>E-mail válasz</option>
+                      <option value="phone">Telefonos egyeztetés</option>
+                      <option value="none">Nem kérek külön visszajelzést</option>
+                    </select>
+                  </div>
+
+                  <div class="field span-12">
+                    <label for="confirmation-message">Opciós üzenet</label>
+                    <textarea id="confirmation-message" name="message" rows="4" placeholder="Például: mikor indult az utalás, milyen néven érkezik, kell-e külön számlázási egyeztetés."></textarea>
+                  </div>
+
+                  <div class="field field-checkbox span-12">
+                    <label for="confirmation-consent">
+                      <input id="confirmation-consent" name="confirmation_consent" type="checkbox" required>
+                      Hozzájárulok, hogy a megadott adatokat kizárólag a fizetés beazonosításához és a rendelés visszaigazolásához használják fel. Tudomásul veszem, hogy a statikus oldal önmagában nem tud privát fogadó címre e-mailt küldeni.
+                    </label>
                   </div>
                 </div>
-              </fieldset>
 
-              <div class="field field-checkbox span-12">
-                <label for="billing-consent">
-                  <input id="billing-consent" name="billing_consent" type="checkbox" required>
-                  Tudomásul veszem, hogy ez egy demo checkout: a fizetés nem indul el, a kártyaadatok nem kerülnek elküldésre, és a licenc csak szemléltető visszajelzést ad.
-                </label>
-              </div>
-            </div>
+                <p id="payment-confirmation-status" class="meta confirmation-endpoint-status" aria-live="polite"></p>
 
-            <div class="checkout-actions">
-              <button class="pill lg" id="billing-submit" type="submit">DEMO FIZETÉS JÓVÁHAGYÁSA</button>
-              <a class="pill lg accent" href="./support.html" aria-label="Enterprise egyedi ajánlat kérése">EGYEDI AJÁNLAT KÉRÉSE</a>
-              <a class="pill lg alt" href="./terms.html">ÁSZF / Terms</a>
-              <a class="pill lg alt" href="./privacy.html">Privacy</a>
-            </div>
+                <div class="checkout-actions">
+                  <button class="pill lg accent" id="payment-confirmation-submit" type="submit">VISSZAJELZÉS ELKÜLDÉSE</button>
+                  <a class="pill lg alt" href="#payment">1. LÉPÉSHEZ VISSZA</a>
+                </div>
 
-            <p id="billing-feedback" class="meta checkout-feedback" aria-live="polite"></p>
-          </form>
+                <p id="payment-confirmation-feedback" class="meta checkout-feedback" aria-live="polite"></p>
+              </form>
+            </section>
+          </div>
         </div>
       </div>
     </section>
