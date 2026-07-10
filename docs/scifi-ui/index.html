@@ -45,6 +45,7 @@
   <link rel="stylesheet" href="./styles/splash.css?v=20251025-splash1">
 </head>
 <body id="top" class="theme-lcars">
+  <a class="skip-link" href="#main-content">Ugrás a tartalomhoz</a>
   <div id="splash" aria-live="polite" aria-label="Üdvözlő animáció">
     <div class="splash-panel">
       <div class="art" role="img" aria-label="Üdvözlő grafika"></div>
@@ -64,17 +65,17 @@
     </nav>
   </header>
 
-  <main class="container shell">
+  <main id="main-content" class="container shell">
     <i class="decor decor-left" aria-hidden="true"></i>
     <i class="decor decor-right" aria-hidden="true"></i>
 
     <section class="hero">
       <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
-      <p class="subtitle">Modern rendszerkarbantartó GUI formázáshoz, USB-készítéshez, diagnosztikához és Linux / Bazzite workflow-khoz.</p>
+      <p class="subtitle">Rendszerkarbantartó GUI formázáshoz, USB-készítéshez és diagnosztikához — Windows, Linux / Bazzite rendszerekre.</p>
       <div class="cta-row">
         <a href="#downloads" class="pill lg">LIGHT LETÖLTÉSE</a>
-        <a href="#features" class="pill lg alt">FUNKCIÓK MEGTEKINTÉSE</a>
-        <a href="#docs" class="pill lg accent">PRO DOKUMENTÁCIÓ</a>
+        <a href="#pro" class="pill lg alt">PRO ELŐFIZETÉS</a>
+        <a href="#features" class="pill lg accent">FUNKCIÓK</a>
       </div>
     </section>
 
@@ -118,9 +119,7 @@
 
     <section id="pro" class="panel">
       <h2 class="panel-title">FormatX Suite Pro</h2>
-      <p><strong>FormatX Suite Pro – céges előfizetés interaktív demo checkouttal</strong></p>
-      <p>A FormatX Suite Pro a prémium kiadás modern rendszerkarbantartó, diagnosztikai és vállalati workflow funkciókkal.</p>
-      <p>A céges előfizetés gépszám alapú, havi vagy éves ciklussal választható. Az alábbi checkout felület egy biztonságos bemutató: kliensoldali ellenőrzést ad, de nem továbbít és nem tárol élő fizetési adatot.</p>
+      <p>Prémium kiadás céges előfizetéssel: diagnosztika, workflow-automatizálás és skálázható licencelés. Havi vagy éves számlázással, 2 hónap kedvezmény éves csomagoknál.</p>
 
       <div class="download-grid" style="margin-top:1rem">
         <div class="card span-8">
@@ -134,10 +133,10 @@
           </ul>
         </div>
         <div class="card span-4">
-          <h3>Fizetés és előfizetés</h3>
-          <p class="meta">Demo checkout • havi vagy éves előfizetés</p>
-          <p>Az új checkout szekció holografikus rendelésösszegzést, fizetési mód választót és demó kártyaellenőrzést ad. A megadott adatok kizárólag a böngészőben maradnak.</p>
-          <a class="pill lg accent card-cta" href="#payment">CHECKOUT ELŐNÉZET</a>
+          <h3>Enterprise</h3>
+          <p class="meta">Egyedi ajánlat • dedikált onboarding • nagyvállalati skálázás</p>
+          <p>Egyedi megfelelőségi igényekhez és nagyobb gépparkhoz személyre szabott ajánlat.</p>
+          <a class="pill lg accent card-cta" href="./support.html">EGYEDI AJÁNLAT KÉRÉSE</a>
         </div>
       </div>
 
@@ -159,25 +158,6 @@
           <p class="meta">99 900 Ft / hó • 999 000 Ft / év</p>
           <p>5 technikus • max. 150 gép • többfelhasználós üzemeltetéshez.</p>
           <a class="pill lg card-cta billing-plan-trigger" href="#payment" data-plan="technician_team" aria-label="Technician Team előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
-        </div>
-      </div>
-
-      <div class="download-grid" style="margin-top:1rem">
-        <div class="card span-8">
-          <h3>Céges árazás</h3>
-          <p class="meta">Backend-validált csomagárak • 2 hónap kedvezmény éves számlázásnál</p>
-          <ul>
-            <li><strong>Business Lite:</strong> 19 900 Ft / hó • 199 000 Ft / év</li>
-            <li><strong>Business Pro:</strong> 49 900 Ft / hó • 499 000 Ft / év</li>
-            <li><strong>Technician Team:</strong> 99 900 Ft / hó • 999 000 Ft / év</li>
-            <li><strong>Enterprise:</strong> 199 000 Ft / hó-tól • egyedi ajánlat</li>
-          </ul>
-        </div>
-        <div class="card span-4">
-          <h3>Enterprise</h3>
-          <p class="meta">Egyedi ajánlat • dedikált onboarding • nagyvállalati skálázás</p>
-          <p>Nagyobb környezethez és egyedi megfelelőségi igényekhez személyre szabott ajánlat érhető el.</p>
-          <a class="pill lg accent card-cta" href="./support.html">EGYEDI AJÁNLAT KÉRÉSE</a>
         </div>
       </div>
     </section>
@@ -250,22 +230,18 @@
     </section>
 
     <section id="docs" class="panel">
-      <h2 class="panel-title">Dokumentáció</h2>
-      <p><strong>FormatX Suite Pro dokumentáció és előfizetési információk</strong></p>
-      <p>Ez a szekció a FormatX Suite Pro csomagjaihoz és a kliensoldali demo checkout folyamathoz kapcsolódó információkat tartalmazza.</p>
-      <p>A Light és Pro tartalom külön szerepel, így a vállalati ügyfelek gyorsan megtalálják a számukra fontos adatokat.</p>
+      <h2 class="panel-title">Demo checkout</h2>
       <div id="payment" class="card span-12 checkout-card">
         <div class="checkout-intro">
           <div>
-            <p class="checkout-kicker">Demo checkout // nincs élő terhelés</p>
-            <h3>Fizetés és előfizetés</h3>
-            <p>A lenti felület a végső rendelési élményt modellezi: csomagválasztás, rendelésösszegzés, fizetési módok és kliensoldali kártyaellenőrzés egyetlen, reszponzív sci-fi panelben.</p>
+            <p class="checkout-kicker">1. LÉPÉS // megrendelés részletei</p>
+            <h3>Előfizetés indítása</h3>
+            <p>Válassz csomagot és számlázási ciklust, add meg a céges adatokat, majd erősítsd meg a megrendelést. A megadott adatok kizárólag a böngészőben maradnak — nincs élő terhelés.</p>
           </div>
-          <div class="checkout-status" aria-label="Checkout információk">
-            <span class="checkout-status-pill">Böngészőn belüli demo</span>
-            <span class="checkout-status-pill">Éves díjnál 2 hónap kedvezmény</span>
+          <div class="checkout-status" aria-label="Checkout állapot">
+            <span class="checkout-status-pill">Demo mód</span>
+            <span class="checkout-status-pill">Éves díjnál 2 hó kedvezmény</span>
             <span class="checkout-status-pill">Fogadó cím privát marad</span>
-            <span class="checkout-status-pill">Billentyűzettel is bejárható</span>
           </div>
         </div>
 
@@ -533,8 +509,15 @@
   </main>
 
   <footer class="container footer">
-    <div class="copyright">© 2026 FormatX Project<br>Developed by Hutóczky József</div>
-    <a href="#top" class="back-to-top">Vissza a tetejére</a>
+    <div class="footer-row">
+      <div class="copyright">© 2026 FormatX Project — Hutóczky József</div>
+      <nav class="footer-nav" aria-label="Jogi és support linkek">
+        <a href="./support.html">Support</a>
+        <a href="./terms.html">ÁSZF</a>
+        <a href="./privacy.html">Privacy</a>
+        <a href="#top" class="back-to-top">↑ Tetejére</a>
+      </nav>
+    </div>
   </footer>
 
   <noscript>
