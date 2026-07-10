@@ -82,6 +82,24 @@ npx http-server docs -p 8000
 # Then visit: http://localhost:8000/scifi-ui/
 ```
 
+## 🔐 Payment Confirmation Endpoint
+
+The checkout includes a Hungarian transfer confirmation form for manual QR / bank transfers.
+
+- The static site should contain only a **public form endpoint URL**.
+- Configure that URL in `/home/runner/work/FormatX/FormatX/docs/scifi-ui/index.html` with the `formatx-payment-confirmation-endpoint` meta tag, or inject the same public URL during deployment.
+- Keep the **recipient email address private** in the Formspree dashboard or in server-side environment variables.
+- Do **not** commit recipient emails, API keys, webhook secrets, or other credentials to the repository.
+- With the default empty configuration the form stays disabled and clearly tells buyers that delivery is not connected yet.
+
+Example public endpoint:
+
+```html
+<meta name="formatx-payment-confirmation-endpoint" content="https://formspree.io/f/your-public-form-id">
+```
+
+If you use your own serverless endpoint, accept a JSON `POST` from the static page and forward/store the notification server-side, where the private recipient address is configured.
+
 ## ♿ Accessibility
 
 ### Features
@@ -250,6 +268,13 @@ All designs are inspired aesthetics created from scratch.
    - [ ] Test on mobile viewport (320px+)
    - [ ] Verify layout adapts correctly
    - [ ] Check touch interactions work
+
+6. **Payment Confirmation Form**
+   - [ ] Select the transfer payment method and verify the summary shows the generated order reference and HUF amount
+   - [ ] Check that the confirmation form is keyboard-usable and prefilled with plan, cycle, currency, and amount
+   - [ ] Confirm the default disabled state shows the honest Hungarian “not connected yet” message
+   - [ ] Re-test with `?theme=holo` to ensure readable styling and focus states
+   - [ ] If a public endpoint is configured locally, verify the request goes only to that public URL and that no recipient email appears in page source or client-side config
 
 ### Automated Testing
 
