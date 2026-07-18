@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="hu" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="FormatX Suite Pro licencvásárlás valódi Revolut Pro fizetési linkkel és QR-kóddal.">
+  <meta name="theme-color" content="#050a10">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https://quickchart.io; connect-src 'self'; form-action 'none'">
+  <meta name="formatx-billing-api-base" content="/api">
+  <title>Revolut fizetés | FormatX Suite Pro</title>
+  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
+  <link rel="stylesheet" href="./styles/checkout.css?v=20260718-revolut1">
+  <script defer src="./scripts/site.js?v=20260718-v92"></script>
+  <script defer src="./scripts/checkout.js?v=20260718-revolut1"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
+  <header class="site-header">
+    <div class="header-inner legal-header-inner">
+      <a class="brand" href="./index.html" aria-label="FormatX Suite Pro főoldal">
+        <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
+        <span><strong>FormatX Suite Pro</strong><small>Revolut Pro fizetés</small></span>
+      </a>
+      <a class="legal-home-link" href="./index.html#pro">Vissza a licencekhez</a>
+      <div class="theme-control" role="group" aria-label="Megjelenés">
+        <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="checkout-page">
+    <section class="content-width checkout-hero">
+      <p class="eyebrow">VALÓDI HUF-FIZETÉS</p>
+      <h1>Revolut Pro fizetési link és QR-kód</h1>
+      <p>A kiválasztott csomaghoz fix összegű Revolut checkout-link tartozik. A fizetés egyszeri díj, nem automatikusan megújuló terhelés.</p>
+    </section>
+
+    <section class="content-width checkout-layout" aria-labelledby="checkout-title">
+      <aside class="checkout-summary">
+        <p class="eyebrow">RENDELÉS</p>
+        <h2 id="checkout-title">Összegzés</h2>
+        <dl>
+          <div><dt>Csomag</dt><dd id="summary-plan">Business Pro</dd></div>
+          <div><dt>Időtartam</dt><dd id="summary-cycle">Havi hozzáférés</dd></div>
+          <div><dt>Fizetendő</dt><dd id="summary-price">49 900 Ft</dd></div>
+          <div><dt>Technikus</dt><dd id="summary-team">3</dd></div>
+          <div><dt>Géplimit</dt><dd id="summary-devices">50</dd></div>
+          <div><dt>Azonosító</dt><dd id="summary-reference">—</dd></div>
+        </dl>
+        <p class="checkout-note">A licenc a Revolut tranzakció kézi ellenőrzése után aktiválódik.</p>
+      </aside>
+
+      <div class="checkout-main">
+        <form id="checkout-form" class="checkout-form" novalidate>
+          <div class="form-heading">
+            <p class="eyebrow">1. LÉPÉS</p>
+            <h2>Rendelési adatok</h2>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              <span>Csomag</span>
+              <select id="plan-id" name="plan_id" required>
+                <option value="business_lite">Business Lite</option>
+                <option value="business_pro">Business Pro</option>
+                <option value="technician_team">Technician Team</option>
+              </select>
+            </label>
+            <label>
+              <span>Hozzáférési idő</span>
+              <select id="billing-cycle" name="billing_cycle" required>
+                <option value="monthly">1 hónap — egyszeri fizetés</option>
+                <option value="annual">1 év — egyszeri fizetés</option>
+              </select>
+            </label>
+            <label>
+              <span>Cégnév vagy tevékenységnév</span>
+              <input id="company-name" name="company_name" autocomplete="organization" required>
+            </label>
+            <label>
+              <span>Kapcsolattartó neve</span>
+              <input id="contact-name" name="contact_name" autocomplete="name" required>
+            </label>
+            <label>
+              <span>E-mail-cím</span>
+              <input id="contact-email" name="email" type="email" autocomplete="email" required>
+            </label>
+            <label>
+              <span>Számlázási cím</span>
+              <input id="billing-address" name="billing_address" autocomplete="street-address" required>
+            </label>
+            <label>
+              <span>Adószám — opcionális</span>
+              <input id="tax-number" name="tax_number" autocomplete="off">
+            </label>
+            <label>
+              <span>Belső hivatkozás — opcionális</span>
+              <input id="purchase-order" name="purchase_order" autocomplete="off">
+            </label>
+          </div>
+
+          <label class="consent-row">
+            <input id="checkout-consent" name="checkout_consent" type="checkbox" required>
+            <span>Elfogadom a <a href="./terms.html" target="_blank" rel="noopener">felhasználási feltételeket</a> és az <a href="./privacy.html" target="_blank" rel="noopener">adatkezelési tájékoztatót</a>. Tudomásul veszem, hogy ez egyszeri Revolut Pro fizetés, és a licenc kézi ellenőrzés után aktiválódik.</span>
+          </label>
+
+          <div class="checkout-actions">
+            <button id="checkout-submit" class="button primary" type="submit" disabled>Fizetési kapcsolat ellenőrzése…</button>
+            <a class="button secondary" href="./index.html#pro">Mégsem</a>
+          </div>
+          <p id="checkout-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+
+        <section id="payment-panel" class="payment-panel" hidden aria-labelledby="payment-panel-title">
+          <div class="form-heading">
+            <p class="eyebrow">2. LÉPÉS</p>
+            <h2 id="payment-panel-title">Revolut fizetés</h2>
+          </div>
+          <div class="payment-grid">
+            <img id="payment-qr" width="260" height="260" alt="Revolut fizetési QR-kód">
+            <div>
+              <p><strong>A QR-kód és a gomb ugyanazt a fix összegű Revolut checkout oldalt nyitja meg.</strong></p>
+              <p id="payment-reference" class="reference-box"></p>
+              <p>Fizetés után térj vissza erre az oldalra, és küldd el a tranzakció hivatkozását.</p>
+              <div class="checkout-actions">
+                <a id="payment-open" class="button primary" href="#" target="_blank" rel="noopener noreferrer">Revolut fizetés megnyitása</a>
+                <button id="payment-reset" class="button secondary" type="button">Új rendelés</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <form id="confirmation-form" class="checkout-form" hidden novalidate>
+          <div class="form-heading">
+            <p class="eyebrow">3. LÉPÉS</p>
+            <h2>Fizetés visszajelzése</h2>
+          </div>
+          <p>A visszajelzés nem aktivál automatikusan licencet. Az adminisztrátor előbb ellenőrzi a Revolut Pro tranzakciót.</p>
+          <div class="form-grid">
+            <label>
+              <span>Rendelési azonosító</span>
+              <input id="confirmation-order-reference" name="order_reference" readonly required>
+            </label>
+            <label>
+              <span>Utaló neve</span>
+              <input id="confirmation-payer-name" name="payer_name" autocomplete="name" required>
+            </label>
+            <label>
+              <span>Vásárló e-mail-címe</span>
+              <input id="confirmation-email" name="buyer_email" type="email" autocomplete="email" required>
+            </label>
+            <label>
+              <span>Revolut tranzakció hivatkozása</span>
+              <input id="confirmation-transaction" name="transfer_reference" autocomplete="off" required>
+            </label>
+            <label class="span-full">
+              <span>Megjegyzés — opcionális</span>
+              <textarea id="confirmation-message" name="message" rows="4"></textarea>
+            </label>
+          </div>
+          <label class="consent-row">
+            <input name="confirmation_consent" type="checkbox" required>
+            <span>Hozzájárulok, hogy az adatokat a fizetés beazonosításához és a licenc aktiválásához kezeljék.</span>
+          </label>
+          <div class="checkout-actions">
+            <button id="confirmation-submit" class="button primary" type="submit">Fizetés visszajelzése</button>
+          </div>
+          <p id="confirmation-feedback" class="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="content-width footer-inner">
+      <div class="footer-brand">
+        <img src="./assets/images/formatx-icon.png" width="36" height="36" alt="">
+        <span><strong>FormatX Suite Pro</strong><small>© 2026 Hutóczky József</small></span>
+      </div>
+      <nav aria-label="Jogi és támogatási linkek">
+        <a href="./support.html">Támogatás</a>
+        <a href="./terms.html">Felhasználási feltételek</a>
+        <a href="./privacy.html">Adatvédelem</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
