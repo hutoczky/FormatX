@@ -1,87 +1,25 @@
-/* Sci‑Fi UI — LCARS title 3D (readability-first)
-   - Solid color fallback for non-supporting browsers
-   - Gradient bevel only when background-clip:text is supported
-   - Softer AO + thin stroke for crisper edges */
-
-theme-lcars .title {
+/* LCARS főcím — stabil, éles, olvashatóság-központú változat. */
+.theme-lcars .title {
   position: relative;
   isolation: isolate;
-
-  /* Fallback: solid LCARS amber for maximum readability */
-  color: #FFE07F;
-  /* Optional thin outline where supported (ignored elsewhere) */
-  -webkit-text-stroke: .6px rgba(20,10,0,.45);
+  color: #ffd37a;
+  -webkit-text-fill-color: currentColor;
+  -webkit-text-stroke: .4px rgba(20, 10, 0, .45);
   text-rendering: optimizeLegibility;
-
-  /* Lighter extrude (kept 3D, reduced darkness for contrast) */
+  background: none;
   text-shadow:
-    0 1px 0 rgba(45,20,0,.52),
-    0 2px 0 rgba(45,20,0,.50),
-    0 3px 0 rgba(45,20,0,.48),
-    0 4px 0 rgba(45,20,0,.46),
-    0 5px 0 rgba(45,20,0,.44),
-    0 6px 0 rgba(45,20,0,.42),
-    0 7px 0 rgba(45,20,0,.40),
-    0 8px 0 rgba(45,20,0,.38),
-    /* softer base occlusion for readability */
-    0 10px 8px rgba(0,0,0,.22),
-    /* subtle local separation from background */
-    0 0 2px rgba(0,0,0,.10);
+    0 1px 0 rgba(55, 24, 0, .54),
+    0 2px 0 rgba(55, 24, 0, .48),
+    0 3px 0 rgba(55, 24, 0, .42),
+    0 5px 8px rgba(0, 0, 0, .24),
+    0 0 10px rgba(255, 178, 46, .18);
 }
 
-/* Top highlight ribbon — subtle, keeps matte console look */
-.theme-lcars .title::before {
-  content: "";
-  position: absolute;
-  inset: .05em 0 -.10em 0;
-  pointer-events: none;
-  opacity: .18;
-  filter: blur(1.8px);
-  background: linear-gradient(180deg,
-    rgba(255,220,150,.38),
-    rgba(255,168,40,0));
-  mix-blend-mode: screen;
-}
-
-/* Bottom inner rim — toned down for better contrast */
+.theme-lcars .title::before,
 .theme-lcars .title::after {
-  content: "";
-  position: absolute;
-  inset: -.05em 0 0 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.16));
-  mix-blend-mode: multiply;
-  opacity: .7;
+  content: none;
 }
 
-/* Enable gradient bevel ONLY when text-clip is supported */
-@supports (-webkit-background-clip: text) or (background-clip: text) {
-  .theme-lcars .title {
-    background: linear-gradient(
-      180deg,
-      #FFECAA 0%,   /* brighter crown */
-      #FFD264 26%,
-      #FFB431 54%,
-      #D07A00 84%,  /* not too dark toe */
-      #B46200 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-
-    /* Robust cross-browser transparency for clipped fill */
-    -webkit-text-fill-color: transparent;
-    color: transparent !important;
-  }
-}
-
-/* Respect reduced motion (hook left for parity) */
-@media (prefers-reduced-motion: reduce) {
-  .theme-lcars .title,
-  .theme-lcars .title::before,
-  .theme-lcars .title::after { animation: none !important }
-}
-
-/* Windows High Contrast / Forced Colors — ensure readability */
 @media (forced-colors: active) {
   .theme-lcars .title {
     color: CanvasText !important;

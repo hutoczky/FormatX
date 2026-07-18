@@ -1,77 +1,230 @@
-/* Final theme overrides to match mockups precisely (LCARS / HOLO / CYBER).
-   Load this LAST so it wins over all earlier styles. */
+/* Stabil, olvashatóság-központú témakorrekciók.
+   Utolsó általános témafájl: megszünteti a vibrálást és a színcsatornák összeadását. */
 
-/* ========== LCARS (Star Trek) ========== */
+:root {
+  color-scheme: dark;
+}
+
+/* A teljes képernyős zaj- és scanline-rétegek nagy frissítésű kijelzőn vibrálást okoztak. */
+#fx-scanlines,
+#fx-noise {
+  opacity: 0 !important;
+  mix-blend-mode: normal !important;
+  animation: none !important;
+}
+
+#fx-vignette {
+  opacity: .08 !important;
+  animation: none !important;
+}
+
+/* Folyamatos animáció helyett stabil, éles megjelenés. */
+body::before,
+.title::before,
+.title::after,
+.holographic-panel *,
+.holographic-panel *::before,
+.holographic-panel *::after {
+  animation: none !important;
+}
+
+body::before {
+  content: none !important;
+  opacity: 0 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+/* ========== LCARS ========== */
 .theme-lcars {
-  --accent:   #FF9E00; --accent-2: #D86F00; --accent-3: #B85CA0;
-  --panel-line: #FF9E00;
+  --accent: #ffb22e;
+  --accent-2: #e9821d;
+  --accent-3: #cf72ad;
+  --panel-line: #ffb22e;
+  --scanlines: 0;
+  --vignette: .06;
+  --noise: 0;
 }
+
 .theme-lcars .title {
-  color: #FFB000 !important;
-  text-shadow: 0 1px 0 rgba(45,20,0,.35), 0 0 6px rgba(255,160,0,.18);
+  color: #ffd37a !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+  -webkit-text-stroke: .4px rgba(20, 10, 0, .45);
+  text-shadow: 0 2px 0 rgba(60, 24, 0, .55), 0 0 10px rgba(255, 178, 46, .22) !important;
+  transform: none !important;
 }
-.theme-lcars .subtitle { color: #57CDE8 !important }
+
+.theme-lcars .title::before,
+.theme-lcars .title::after {
+  content: none !important;
+}
+
+.theme-lcars .subtitle { color: #75ddf2 !important; }
 .theme-lcars .pill {
-  border-radius: 22px; border: 0; color: #0A0D12;
-  background: linear-gradient(180deg, #FFB54A, #FF9E00);
-  box-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 0 2px rgba(0,0,0,.06) inset;
-  letter-spacing: .08em; text-transform: uppercase;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  color: #0a0d12;
+  background: linear-gradient(180deg, #ffc15c, #f59a18);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .25), inset 0 0 0 1px rgba(255, 255, 255, .12);
+  letter-spacing: .08em;
 }
-/* Slightly darker lilac for better contrast on dark bg */
-.theme-lcars .pill.alt {
-  background: linear-gradient(180deg, #D979AB, #B0558E);
-  color: #0A0D12;
-}
-.theme-lcars .pill.accent {
-  background: linear-gradient(180deg, #F7C98A, #E7A85A);
-  color: #0A0D12;
-}
-/* Panels/cards: thin amber border, large radius, soft inner inset */
+.theme-lcars .pill.alt { background: linear-gradient(180deg, #dc8fbb, #b75d96); }
+.theme-lcars .pill.accent { background: linear-gradient(180deg, #ffd59e, #eeb36e); }
 .theme-lcars .shell,
 .theme-lcars .panel,
 .theme-lcars .card {
-  border: 2px solid #FF9E00;
+  border: 2px solid #ffad25;
   border-radius: 22px;
-  background: color-mix(in oklab, #0b0e12 94%, #FF9E00);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,158,0,.14),
-    0 0 24px rgba(255,158,0,.10);
+  background: #0d1117;
+  box-shadow: inset 0 0 0 1px rgba(255, 173, 37, .10), 0 0 18px rgba(255, 173, 37, .08);
 }
-.theme-lcars .panel-title { color: #FFB000 }
+.theme-lcars .panel-title { color: #ffc257; }
 
-/* ========== HOLOGRAM (Star Wars) ========== */
+/* ========== HOLOGRAM ========== */
 .theme-holo {
-  --scanlines: .30; --vignette: .30; --noise: .10; --panel-line: #3FD2FF;
+  --scanlines: 0;
+  --vignette: .08;
+  --noise: 0;
+  --panel-line: #55d7f5;
+  --fg: #d7f8ff;
+  --muted: #93d9e8;
 }
-.theme-holo .pill {
-  border-radius: 16px; border: 2px solid #7FE9FF; color: #07141D;
-  background: linear-gradient(180deg, #9FF6FF, #64E5FF);
-  text-shadow: 0 1px 0 rgba(255,255,255,.35);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), 0 2px 12px rgba(100,229,255,.25);
-  letter-spacing: .08em;
-}
-.theme-holo .shell, .theme-holo .panel, .theme-holo .card {
-  border: 2px solid color-mix(in oklab, var(--panel-line) 86%, white);
-  border-radius: 16px; background: color-mix(in oklab, #08131c 92%, black);
-  box-shadow: inset 0 0 0 1px rgba(100,229,255,.18), 0 0 18px rgba(63,210,255,.26);
-}
-.theme-holo .panel-title { color: #9FF6FF }
 
-/* ========== CYBERPUNK (harmonizálás + glow boost) ========== */
+.theme-holo .title {
+  color: #a9efff !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 2px 0 rgba(0, 43, 60, .75), 0 0 12px rgba(85, 215, 245, .28) !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.theme-holo .title::before,
+.theme-holo .title::after {
+  content: none !important;
+  mix-blend-mode: normal !important;
+}
+
+.theme-holo .pill {
+  border-radius: 16px;
+  border: 2px solid #8cecff;
+  color: #06151d;
+  background: linear-gradient(180deg, #b6f5ff, #67d6ee);
+  text-shadow: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18), 0 2px 10px rgba(85, 215, 245, .16);
+}
+.theme-holo .shell,
+.theme-holo .panel,
+.theme-holo .card {
+  border: 2px solid #55d7f5;
+  border-radius: 16px;
+  background: #091720;
+  box-shadow: inset 0 0 0 1px rgba(85, 215, 245, .12), 0 0 16px rgba(85, 215, 245, .10);
+  backdrop-filter: none !important;
+}
+.theme-holo .panel-title { color: #a9efff; }
+
+/* ========== CYBERPUNK ========== */
+.theme-cyber {
+  --scanlines: 0;
+  --vignette: .10;
+  --noise: 0;
+  --fg: #ffe6ff;
+  --muted: #d9bdec;
+}
+
 .theme-cyber .title {
-  letter-spacing: 2.2px;
-  /* rare, subtle extra glitch pulses */
-  animation: cyber-glitch-boost 6s steps(1,end) infinite;
+  color: #ffe05a !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+  -webkit-text-stroke: .6px rgba(28, 0, 30, .70);
+  text-shadow: 0 2px 0 rgba(20, 0, 24, .70), 0 0 10px rgba(255, 212, 0, .25) !important;
+  transform: none !important;
+  filter: none !important;
 }
+
+.theme-cyber .title::before,
+.theme-cyber .title::after,
+.theme-cyber .holo-label[data-glitch]::before {
+  content: none !important;
+  opacity: 0 !important;
+  mix-blend-mode: normal !important;
+}
+
 .theme-cyber .panel,
-.theme-cyber .card {
-  border-radius: 18px;
-  /* slightly stronger neon aura to stand out against noisy bg */
-  box-shadow: 0 0 22px rgba(255,0,180,.22), 0 0 14px rgba(0,255,255,.15);
+.theme-cyber .card,
+.theme-cyber .shell {
+  background: #15031e;
+  border-color: #ee4bb1;
+  box-shadow: inset 0 0 0 1px rgba(73, 218, 244, .10), 0 0 14px rgba(238, 75, 177, .10) !important;
 }
-@keyframes cyber-glitch-boost {
-  0%, 96%, 100% { transform: none; text-shadow: none; filter: none }
-  2%  { transform: translateX(.7px); text-shadow: -1px 0 #ff00b4, 1px 0 #00f0ff }
-  48% { transform: translateX(-.6px); text-shadow: -1px 0 #ff00b4, 1px 0 #00f0ff }
-  78% { transform: translateX(.9px); text-shadow: -1px 0 #ff00b4, 1px 0 #00f0ff }
+
+/* A mozgáscsökkentés beállítást minden témában teljesen tiszteletben tartjuk. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+/* A régi demo checkout ne villanjon fel a JavaScript indulása előtt. */
+.card-fields,
+#payment-confirmation,
+.choice-card:has(input[value="transfer"]),
+.choice-card:has(input[value="invoice"]) {
+  display: none !important;
+}
+
+.checkout-layout:has(input[value="card"]) .choice-card:has(input[value="card"]) .choice-title,
+.checkout-layout:has(input[value="card"]) .choice-card:has(input[value="card"]) .choice-meta,
+.checkout-layout:has(input[value="card"]) #summary-method,
+.checkout-layout:has(input[value="card"]) #billing-submit,
+.checkout-layout:has(input[value="card"]) .field-checkbox label,
+.checkout-layout:has(input[value="card"]) .checkout-trust p {
+  font-size: 0 !important;
+}
+
+.checkout-layout:has(input[value="card"]) .choice-card:has(input[value="card"]) .choice-title::after {
+  content: "Stripe Checkout + QR-kód";
+  font-size: 1rem;
+}
+
+.checkout-layout:has(input[value="card"]) .choice-card:has(input[value="card"]) .choice-meta::after {
+  content: "Éles fizetés a Stripe biztonságos oldalán.";
+  font-size: .92rem;
+}
+
+.checkout-layout:has(input[value="card"]) #summary-method::after {
+  content: "Stripe Checkout + QR-kód";
+  font-size: 1rem;
+}
+
+.checkout-layout:has(input[value="card"]) #billing-submit::after {
+  content: "FIZETÉSI KAPCSOLAT ELLENŐRZÉSE…";
+  font-size: 1.05rem;
+}
+
+.checkout-layout:has(input[value="card"]) .field-checkbox label::after {
+  content: "Elfogadom az ÁSZF-et és az adatkezelési tájékoztatót. A fizetés a Stripe biztonságos felületén történik.";
+  font-size: 1rem;
+}
+
+.checkout-layout:has(input[value="card"]) .field-checkbox input {
+  font-size: 1rem !important;
+}
+
+.checkout-layout:has(input[value="card"]) .checkout-trust::after {
+  content: "A weboldal nem kér és nem tárol bankkártyaadatokat. Az éles checkout csak teljes szerveroldali konfiguráció után engedélyezett.";
+  display: block;
+  font-size: .92rem;
+  color: var(--muted);
 }
