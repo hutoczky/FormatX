@@ -273,19 +273,19 @@
       '<p class="eyebrow">BUSINESS LITE</p>',
       '<h3>19 900 Ft / hó</h3>',
       '<p>1 technikus, legfeljebb 10 gép. Éves díj: 199 000 Ft.</p>',
-      '<a class="text-link" href="./checkout.html?plan=business_lite&cycle=monthly">Revolut fizetés</a>',
+      '<a class="text-link" href="./checkout.html?plan=business_lite&cycle=monthly">Banki átutalás</a>',
       '</article>',
       '<article>',
       '<p class="eyebrow">BUSINESS PRO</p>',
       '<h3>49 900 Ft / hó</h3>',
       '<p>3 technikus, legfeljebb 50 gép. Éves díj: 499 000 Ft.</p>',
-      '<a class="text-link" href="./checkout.html?plan=business_pro&cycle=monthly">Revolut fizetés</a>',
+      '<a class="text-link" href="./checkout.html?plan=business_pro&cycle=monthly">Banki átutalás</a>',
       '</article>',
       '<article>',
       '<p class="eyebrow">TECHNICIAN TEAM</p>',
       '<h3>99 900 Ft / hó</h3>',
       '<p>5 technikus, legfeljebb 150 gép. Éves díj: 999 000 Ft.</p>',
-      '<a class="text-link" href="./checkout.html?plan=technician_team&cycle=monthly">Revolut fizetés</a>',
+      '<a class="text-link" href="./checkout.html?plan=technician_team&cycle=monthly">Banki átutalás</a>',
       '</article>'
     ].join('');
   }
