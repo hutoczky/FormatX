@@ -25,6 +25,16 @@
     }
   };
 
+  const STATIC_ACCOUNT = {
+    holder: 'Hutóczky József',
+    local_huf_account: '30200014-19913410-90015751',
+    iban: 'HU06302000141991341090015751',
+    eur_iban: 'HU06302000141991341090015751',
+    bic: 'REVOHUHB',
+    correspondent_bic: 'CHASDEFX'
+  };
+  const SUPPORT_EMAIL = 'hutoczky@gmail.com';
+
   const apiMeta = document.querySelector('meta[name="formatx-billing-api-base"]');
   const apiBase = String(apiMeta ? apiMeta.content : '').trim().replace(/\/+$/, '');
 
@@ -59,6 +69,7 @@
 
   let liveReady = false;
   let paymentData = null;
+  let backendMode = 'checking';
   let orderReference = createOrderReference();
 
   applyQuerySelection();
@@ -131,21 +142,38 @@
     if (orderInput) orderInput.value = orderReference;
   }
 
+  function enableStaticMode(reason) {
+    backendMode = 'static';
+    liveReady = true;
+    submitButton.disabled = false;
+    submitButton.textContent = 'Fix összegű átutalási QR előkészítése';
+    setFeedback(
+      feedback,
+      'Közvetlen GitHub Pages mód aktív. A QR a beépített, ellenőrzött bankszámlaadatokkal készül; a fizetés és a licencellenőrzés kézi. ' + (reason || ''),
+      'success'
+    );
+  }
+
   async function verifyBackend() {
     liveReady = false;
     submitButton.disabled = true;
     submitButton.textContent = 'Bankszámla ellenőrzése…';
 
     try {
+      const controller = typeof AbortController === 'function' ? new AbortController() : null;
+      const timer = controller ? window.setTimeout(function () { controller.abort(); }, 4000) : null;
       const response = await fetch(apiUrl('/health'), {
         headers: { Accept: 'application/json' },
-        cache: 'no-store'
+        cache: 'no-store',
+        signal: controller ? controller.signal : undefined
       });
+      if (timer !== null) window.clearTimeout(timer);
       if (!response.ok) throw new Error('HTTP ' + response.status);
       const result = await response.json();
       if (!result || result.provider !== 'bank_transfer' || result.mode !== 'live' || result.live_ready !== true) {
         throw new Error('A banki átutalási backend nincs teljesen konfigurálva.');
       }
+      backendMode = 'api';
       liveReady = true;
       submitButton.disabled = false;
       submitButton.textContent = 'Fix összegű átutalási QR előkészítése';
@@ -156,10 +184,8 @@
           : 'A banki átutalási kapcsolat aktív.',
         'success'
       );
-    } catch (error) {
-      submitButton.disabled = true;
-      submitButton.textContent = 'Banki átutalás nincs konfigurálva';
-      setFeedback(feedback, 'A fizetés le van tiltva: ' + (error instanceof Error ? error.message : 'ismeretlen hiba'), 'error');
+    } catch (_) {
+      enableStaticMode('A szerveres rendeléskövetés jelenleg nem elérhető.');
     }
   }
 
@@ -179,27 +205,61 @@
     };
   }
 
+  function buildPaytoUri(account, amount, reference) {
+    const params = new URLSearchParams();
+    params.set('amount', 'HUF:' + amount);
+    params.set('receiver-name', account.holder);
+    params.set('message', 'FormatX ' + reference);
+    params.set('instruction', reference);
+    return 'payto://iban/' + account.bic + '/' + account.iban + '?' + params.toString();
+  }
+
+  function createStaticCheckout() {
+    return {
+      session_id: orderReference,
+      order_reference: orderReference,
+      payment_provider: 'bank_transfer',
+      payment_mode: 'live',
+      amount_huf: selectedAmount(),
+      currency: 'HUF',
+      account: STATIC_ACCOUNT,
+      payto_uri: buildPaytoUri(STATIC_ACCOUNT, selectedAmount(), orderReference),
+      qvik: false,
+      qr_format: 'payto-rfc8905',
+      manual_verification_required: true,
+      order_tracking_ready: false,
+      automatic_renewal: false
+    };
+  }
+
   async function createCheckout() {
-    const response = await fetch(apiUrl('/create-checkout-session'), {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(checkoutPayload())
-    });
-    const result = await response.json().catch(function () { return {}; });
-    if (!response.ok) throw new Error(result.error || 'HTTP ' + response.status);
-    if (result.payment_provider !== 'bank_transfer' || result.payment_mode !== 'live') {
-      throw new Error('Nem éles banki átutalási válasz érkezett.');
+    if (backendMode === 'static') return createStaticCheckout();
+
+    try {
+      const response = await fetch(apiUrl('/create-checkout-session'), {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(checkoutPayload())
+      });
+      const result = await response.json().catch(function () { return {}; });
+      if (!response.ok) throw new Error(result.error || 'HTTP ' + response.status);
+      if (result.payment_provider !== 'bank_transfer' || result.payment_mode !== 'live') {
+        throw new Error('Nem éles banki átutalási válasz érkezett.');
+      }
+      if (result.order_reference !== orderReference) {
+        throw new Error('A rendelési azonosító eltér.');
+      }
+      if (!result.payto_uri || !result.account || result.amount_huf !== selectedAmount()) {
+        throw new Error('A fizetési adatok hiányosak vagy az összeg eltér.');
+      }
+      return result;
+    } catch (_) {
+      enableStaticMode('A rendelés most közvetlen, statikus módban folytatódik.');
+      return createStaticCheckout();
     }
-    if (result.order_reference !== orderReference) {
-      throw new Error('A rendelési azonosító eltér.');
-    }
-    if (!result.payto_uri || !result.account || result.amount_huf !== selectedAmount()) {
-      throw new Error('A fizetési adatok hiányosak vagy az összeg eltér.');
-    }
-    return result;
   }
 
   function buildCopyText(result) {
@@ -264,6 +324,27 @@
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  function openStaticConfirmationEmail(payload) {
+    const subject = 'FormatX fizetési visszajelzés – ' + orderReference;
+    const body = [
+      'FormatX fizetési visszajelzés',
+      '',
+      'Rendelési azonosító: ' + orderReference,
+      'Csomag: ' + selectedPlan().name,
+      'Időtartam: ' + (selectedCycle() === 'annual' ? '1 év' : '1 hónap'),
+      'Összeg: ' + formatPrice(selectedAmount()),
+      'Utaló neve: ' + String(payload.payer_name || ''),
+      'Vásárló e-mail-címe: ' + String(payload.buyer_email || ''),
+      'Banki tranzakció hivatkozása: ' + String(payload.transfer_reference || ''),
+      'Megjegyzés: ' + String(payload.message || ''),
+      '',
+      'A banki tranzakciót és a közleményt kérem kézzel ellenőrizni.'
+    ].join('\n');
+    window.location.href = 'mailto:' + SUPPORT_EMAIL
+      + '?subject=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(body);
+  }
+
   async function submitConfirmation() {
     if (!confirmationForm.checkValidity()) {
       confirmationForm.reportValidity();
@@ -275,6 +356,11 @@
     payload.billing_cycle = selectedCycle();
     payload.amount_huf = String(selectedAmount());
     payload.currency = 'HUF';
+
+    if (backendMode === 'static') {
+      openStaticConfirmationEmail(payload);
+      return { static_email: true };
+    }
 
     const response = await fetch(apiUrl('/payment-confirmation'), {
       method: 'POST',
@@ -312,7 +398,7 @@
     }
 
     submitButton.disabled = true;
-    submitButton.textContent = 'Rendelés rögzítése…';
+    submitButton.textContent = 'Rendelés előkészítése…';
     setFeedback(feedback, 'A fix HUF-összegű átutalási adatok előkészítése folyamatban van…', '');
 
     try {
@@ -338,17 +424,19 @@
     event.preventDefault();
     const button = document.getElementById('confirmation-submit');
     button.disabled = true;
-    setFeedback(confirmationFeedback, 'A visszajelzés rögzítése folyamatban van…', '');
+    setFeedback(confirmationFeedback, 'A visszajelzés előkészítése folyamatban van…', '');
 
     try {
-      await submitConfirmation();
+      const result = await submitConfirmation();
       setFeedback(
         confirmationFeedback,
-        'A visszajelzés rögzítve lett. A licenc a beérkezett banki átutalás kézi ellenőrzése után aktiválódik.',
+        result.static_email
+          ? 'A levelezőprogram megnyílt az előre kitöltött visszajelzéssel. Az e-mailt még el kell küldeni.'
+          : 'A visszajelzés rögzítve lett. A licenc a beérkezett banki átutalás kézi ellenőrzése után aktiválódik.',
         'success'
       );
     } catch (error) {
-      setFeedback(confirmationFeedback, 'A visszajelzés nem rögzíthető: ' + (error instanceof Error ? error.message : 'ismeretlen hiba'), 'error');
+      setFeedback(confirmationFeedback, 'A visszajelzés nem készíthető elő: ' + (error instanceof Error ? error.message : 'ismeretlen hiba'), 'error');
     } finally {
       button.disabled = false;
     }
