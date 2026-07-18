@@ -1,0 +1,67 @@
+name: Diagnose Lighthouse thresholds
+
+on:
+  push:
+    branches:
+      - agent/fix-visible-language-switch
+    paths:
+      - ".github/workflows/diagnose-lighthouse.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: agent/fix-visible-language-switch
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: Collect one report
+        run: lhci collect --config=lighthouserc.json --numberOfRuns=1
+
+      - name: Write compact metrics
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          reports = sorted(Path('.lighthouseci').glob('lhr-*.json'))
+          if not reports:
+              raise SystemExit('No Lighthouse report found')
+          data = json.loads(reports[-1].read_text(encoding='utf-8'))
+          categories = data['categories']
+          audits = data['audits']
+          lines = [
+              f"performance={categories['performance']['score']}",
+              f"accessibility={categories['accessibility']['score']}",
+              f"best_practices={categories['best-practices']['score']}",
+              f"seo={categories['seo']['score']}",
+              f"lcp_ms={audits['largest-contentful-paint']['numericValue']}",
+              f"cls={audits['cumulative-layout-shift']['numericValue']}",
+              f"ttfb_ms={audits['server-response-time']['numericValue']}",
+              f"tbt_ms={audits['total-blocking-time']['numericValue']}",
+              f"fcp_ms={audits['first-contentful-paint']['numericValue']}",
+              f"speed_index_ms={audits['speed-index']['numericValue']}",
+          ]
+          Path('lighthouse-summary.txt').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          print('\n'.join(lines))
+          PY
+
+      - name: Upload metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-threshold-diagnosis
+          path: lighthouse-summary.txt
+          retention-days: 7
