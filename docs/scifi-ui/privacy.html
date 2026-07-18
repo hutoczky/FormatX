@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="A FormatX Suite Pro weboldal adatkezelési tájékoztatója.">
+  <meta name="description" content="A FormatX Suite Pro weboldal és Revolut Pro licencvásárlás adatkezelési tájékoztatója.">
   <meta name="theme-color" content="#050a10">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'none'">
   <title>Adatvédelem | FormatX Suite Pro</title>
@@ -31,24 +31,32 @@
     <article class="content-width legal-document">
       <p class="eyebrow">JOGI INFORMÁCIÓ</p>
       <h1>Adatvédelem</h1>
-      <p class="legal-lead">A nyilvános FormatX weboldal nem kér és nem tárol bankkártyaadatot, licenckulcsot vagy kliensoldali hozzáférési tokent.</p>
+      <p class="legal-lead">A FormatX weboldal nem kér és nem tárol bankkártyaszámot, lejárati adatot vagy CVC-kódot. A tényleges fizetést a Revolut kezeli.</p>
 
       <section>
-        <h2>A weboldal működése</h2>
-        <p>A megjelenési mód választását a böngésző helyi tárhelye őrizheti meg. Ez az adat az adott böngészőben marad, és nem kerül a FormatX szerverére.</p>
-        <p>A legújabb kiadás megjelenítéséhez az oldal egy alkalommal lekéri a nyilvános GitHub Releases metaadatot. A kéréshez a weboldal nem használ tokent. A GitHub a saját adatvédelmi feltételei szerint kezelheti a hozzá érkező hálózati adatokat.</p>
+        <h2>Rendelési adatok</h2>
+        <p>A rendelés rögzítéséhez a weboldal céges vagy tevékenységi nevet, kapcsolattartói nevet, e-mail-címet, számlázási címet, opcionális adószámot és belső hivatkozást kezelhet.</p>
+        <p>Az adatokat a rendelés nyilvántartásához, a fizetés beazonosításához, a licenc aktiválásához, a számlázási egyeztetéshez és az ügyfélszolgálati kapcsolattartáshoz használjuk.</p>
       </section>
 
       <section>
-        <h2>Letöltés és hibajelentés</h2>
-        <p>A programcsomag a GitHub Releases szolgáltatásból tölthető le. A GitHubon beküldött hibajelentésekre a GitHub adatvédelmi szabályai vonatkoznak. Hibajelentésben ne ossz meg jelszót, privát kulcsot, tokent vagy más bizalmas adatot.</p>
+        <h2>Revolut fizetés és visszajelzés</h2>
+        <p>A fizetés a Revolut külső checkout oldalán történik. A QR-kép létrehozásához a weboldal a nyilvános Revolut fizetési linket elküldi a QuickChart QR-szolgáltatásnak. A QR-kód nem tartalmaz bankkártyaadatot vagy FormatX adatbázis-hozzáférést.</p>
+        <p>A fizetés visszajelzésekor a rendelési azonosító, az utaló neve, a vásárló e-mail-címe, a Revolut tranzakció hivatkozása és az opcionális megjegyzés kerülhet rögzítésre.</p>
       </section>
 
       <section>
-        <h2>Kapcsolódó oldalak</h2>
+        <h2>Helyi és külső szolgáltatások</h2>
+        <p>A megjelenési mód választását a böngésző helyi tárhelye őrizheti meg. A legújabb kiadás megjelenítéséhez az oldal lekérheti a nyilvános GitHub Releases metaadatot. A rendelési adatok a konfigurált Supabase adatbázisban tárolhatók.</p>
+      </section>
+
+      <section>
+        <h2>Éles indulási feltétel</h2>
+        <p><strong>A végleges értékesítés előtt ezt az oldalt teljes, jogilag ellenőrzött adatkezelői adatokkal, jogalapokkal, megőrzési időkkel, érintetti jogokkal és adatfeldolgozói felsorolással kell kiegészíteni.</strong></p>
         <div class="legal-actions">
-          <a class="button primary" href="./support.html">Támogatás és visszajelzés</a>
+          <a class="button primary" href="./checkout.html">Licencvásárlás</a>
           <a class="button secondary" href="./terms.html">Felhasználási feltételek</a>
+          <a class="button secondary" href="./support.html">Támogatás</a>
         </div>
       </section>
     </article>
