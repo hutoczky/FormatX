@@ -63,6 +63,25 @@ jobs:
           for key in ['performance', 'accessibility', 'best_practices', 'seo', 'lcp', 'cls', 'ttfb']:
               lines.append(f'{key}={statistics.median(row[key] for row in rows):.4f}')
 
+          lines.append('')
+          lines.append('FAILED ACCESSIBILITY AUDITS:')
+          report = reports[0]
+          refs = report['categories']['accessibility'].get('auditRefs', [])
+          for ref in refs:
+              audit = report['audits'].get(ref['id'], {})
+              audit_score = audit.get('score')
+              if audit_score is None or audit_score >= 1:
+                  continue
+              lines.append(f"- {ref['id']}: score={audit_score} title={audit.get('title', '')}")
+              details = audit.get('details', {})
+              for item in details.get('items', [])[:20]:
+                  node = item.get('node', {}) if isinstance(item, dict) else {}
+                  selector = node.get('selector') or node.get('snippet') or item.get('selector') or ''
+                  explanation = item.get('explanation') or node.get('explanation') or ''
+                  lines.append(f"  selector={selector}")
+                  if explanation:
+                      lines.append(f"  explanation={explanation}")
+
           failures = []
           for row in rows:
               if row['performance'] < 90: failures.append(f"run {row['run']} performance {row['performance']:.0f} < 90")
