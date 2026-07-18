@@ -1,31 +1,57 @@
 <!doctype html>
-<html lang="hu">
+<html lang="hu" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>ÁSZF — FormatX Suite Pro</title>
-  <link rel="stylesheet" href="./styles/site.css">
+  <meta name="description" content="A FormatX Suite Pro weboldal és letöltés felhasználási feltételei.">
+  <meta name="theme-color" content="#050a10">
+  <title>Felhasználási feltételek | FormatX Suite Pro</title>
+  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
+  <script defer src="./scripts/site.js?v=20260718-v92"></script>
 </head>
-<body class="theme-lcars">
-  <header class="site-header container">
-    <nav aria-label="Navigáció">
-      <a class="pill sm" href="./index.html">← Főoldal</a>
-    </nav>
-  </header>
-  <main class="container shell">
-    <section class="panel">
-      <h1 class="panel-title">Általános szerződési feltételek</h1>
-      <div class="card span-12">
-        <p>A FormatX Suite Pro előfizetése havi vagy éves számlázással, a kiválasztott üzleti csomag feltételei szerint történik. A fizetést a Stripe biztonságos Checkout felülete kezeli.</p>
-        <p>A teljes, végleges ÁSZF-ben közzé kell tenni többek között az üzemeltető valós adatait, a szolgáltatás tartalmát, a számlázás és megújulás szabályait, a felmondást, a hibás teljesítés kezelését és az ügyfélszolgálati elérhetőséget.</p>
-        <p><strong>Biztonsági állapot:</strong> az éles fizetési rendszer automatikusan tiltva marad mindaddig, amíg a végleges jogi dokumentumokat az üzemeltető nem hagyja jóvá a szerveroldali konfigurációban.</p>
-        <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem;">
-          <a class="pill lg" href="./index.html">← Főoldalra</a>
-          <a class="pill lg alt" href="./privacy.html">Adatkezelés</a>
-          <a class="pill lg alt" href="./support.html">Support</a>
-        </div>
+<body>
+  <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
+  <header class="site-header">
+    <div class="header-inner legal-header-inner">
+      <a class="brand" href="./index.html" aria-label="FormatX Suite Pro főoldal">
+        <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
+        <span><strong>FormatX Suite Pro</strong><small>Felhasználási feltételek</small></span>
+      </a>
+      <a class="legal-home-link" href="./index.html">Vissza a főoldalra</a>
+      <div class="theme-control" role="group" aria-label="Megjelenés">
+        <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
       </div>
-    </section>
+    </div>
+  </header>
+
+  <main id="main-content" class="legal-main">
+    <article class="content-width legal-document">
+      <p class="eyebrow">JOGI INFORMÁCIÓ</p>
+      <h1>Felhasználási feltételek</h1>
+      <p class="legal-lead">A weboldal a FormatX Suite Pro hivatalos projekt- és letöltési felülete. Nem működtet bankkártyás fizetést, és nem ígér automatikus licenckiadást.</p>
+
+      <section>
+        <h2>Programcsomag és licenc</h2>
+        <p>A letöltött csomag használatára a csomagban található licencfeltételek érvényesek. A próbaidő az alkalmazásban jelzett feltételekkel használható; Business és Owner hozzáféréshez külön jogosultság szükséges.</p>
+      </section>
+
+      <section>
+        <h2>Biztonságos használat</h2>
+        <p>A meghajtó- és rendszerkezelési műveletek adatvesztést okozhatnak. Művelet előtt ellenőrizd a célmeghajtót, készíts mentést, és csak olyan rendszeren dolgozz, amelyhez megfelelő jogosultságod van.</p>
+        <p>A letöltés sértetlenségét a közzétett SHA256 ellenőrzőösszeggel kell ellenőrizni. A programot kizárólag a hivatalos FormatX-Updates kiadásból töltsd le.</p>
+      </section>
+
+      <section>
+        <h2>Visszajelzés</h2>
+        <p>A nyilvános hibajegyek tartalma látható lehet mások számára. Ne küldj jelszót, tokent, privát kulcsot, teljes licenckulcsot vagy más bizalmas adatot.</p>
+        <div class="legal-actions">
+          <a class="button primary" href="./support.html">Támogatás megnyitása</a>
+          <a class="button secondary" href="./privacy.html">Adatvédelem</a>
+        </div>
+      </section>
+    </article>
   </main>
 </body>
 </html>

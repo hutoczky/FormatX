@@ -1,32 +1,56 @@
 <!doctype html>
-<html lang="hu">
+<html lang="hu" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Adatkezelés — FormatX Suite Pro</title>
-  <link rel="stylesheet" href="./styles/site.css">
+  <meta name="description" content="A FormatX Suite Pro weboldal adatkezelési tájékoztatója.">
+  <meta name="theme-color" content="#050a10">
+  <title>Adatvédelem | FormatX Suite Pro</title>
+  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
+  <script defer src="./scripts/site.js?v=20260718-v92"></script>
 </head>
-<body class="theme-lcars">
-  <header class="site-header container">
-    <nav aria-label="Navigáció">
-      <a class="pill sm" href="./index.html">← Főoldal</a>
-    </nav>
-  </header>
-  <main class="container shell">
-    <section class="panel">
-      <h1 class="panel-title">Adatkezelési tájékoztató</h1>
-      <div class="card span-12">
-        <p>A FormatX honlap nem kér be és nem tárol bankkártyaszámot, lejárati időt vagy CVC-kódot. Ezeket az adatokat kizárólag a Stripe biztonságos fizetési felülete kezeli.</p>
-        <p>A rendelés létrehozásához megadott céges, kapcsolattartási és számlázási adatok a fizetés feldolgozásához, a számlázáshoz, a licenc aktiválásához és az ügyféltámogatáshoz használhatók fel.</p>
-        <p>A végleges tájékoztatóban közzé kell tenni az adatkezelő valós adatait, a jogalapokat, a megőrzési időket, az adatfeldolgozókat, az érintetti jogokat és a kapcsolattartási lehetőségeket.</p>
-        <p><strong>Biztonsági állapot:</strong> az éles fizetés automatikusan tiltva marad, amíg a végleges adatkezelési dokumentum jóváhagyása nincs rögzítve a szerveroldali konfigurációban.</p>
-        <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem;">
-          <a class="pill lg" href="./index.html">← Főoldalra</a>
-          <a class="pill lg alt" href="./terms.html">ÁSZF</a>
-          <a class="pill lg alt" href="./support.html">Support</a>
-        </div>
+<body>
+  <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
+  <header class="site-header">
+    <div class="header-inner legal-header-inner">
+      <a class="brand" href="./index.html" aria-label="FormatX Suite Pro főoldal">
+        <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
+        <span><strong>FormatX Suite Pro</strong><small>Adatvédelem</small></span>
+      </a>
+      <a class="legal-home-link" href="./index.html">Vissza a főoldalra</a>
+      <div class="theme-control" role="group" aria-label="Megjelenés">
+        <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
       </div>
-    </section>
+    </div>
+  </header>
+
+  <main id="main-content" class="legal-main">
+    <article class="content-width legal-document">
+      <p class="eyebrow">JOGI INFORMÁCIÓ</p>
+      <h1>Adatvédelem</h1>
+      <p class="legal-lead">A nyilvános FormatX weboldal nem kér és nem tárol bankkártyaadatot, licenckulcsot vagy kliensoldali hozzáférési tokent.</p>
+
+      <section>
+        <h2>A weboldal működése</h2>
+        <p>A megjelenési mód választását a böngésző helyi tárhelye őrizheti meg. Ez az adat az adott böngészőben marad, és nem kerül a FormatX szerverére.</p>
+        <p>A legújabb kiadás megjelenítéséhez az oldal egy alkalommal lekéri a nyilvános GitHub Releases metaadatot. A kéréshez a weboldal nem használ tokent. A GitHub a saját adatvédelmi feltételei szerint kezelheti a hozzá érkező hálózati adatokat.</p>
+      </section>
+
+      <section>
+        <h2>Letöltés és hibajelentés</h2>
+        <p>A programcsomag a GitHub Releases szolgáltatásból tölthető le. A GitHubon beküldött hibajelentésekre a GitHub adatvédelmi szabályai vonatkoznak. Hibajelentésben ne ossz meg jelszót, privát kulcsot, tokent vagy más bizalmas adatot.</p>
+      </section>
+
+      <section>
+        <h2>Kapcsolódó oldalak</h2>
+        <div class="legal-actions">
+          <a class="button primary" href="./support.html">Támogatás és visszajelzés</a>
+          <a class="button secondary" href="./terms.html">Felhasználási feltételek</a>
+        </div>
+      </section>
+    </article>
   </main>
 </body>
 </html>

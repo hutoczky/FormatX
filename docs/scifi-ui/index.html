@@ -1,532 +1,253 @@
 <!doctype html>
-<html lang="hu">
+<html lang="hu" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Formázás a jövőből — FormatX</title>
-  <meta name="description" content="Modern rendszerkarbantartó GUI formázáshoz, USB-készítéshez, diagnosztikához és Linux / Bazzite workflow-khoz.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <meta name="theme-color" content="#0a0c0f">
-  <meta name="formatx-billing-api-base" content="/api">
-  <meta name="formatx-payment-confirmation-endpoint" content="">
-
-  <script>
-    (function () {
-      try {
-        var THEMES = ['lcars','holo','cyber'];
-        var t = null;
-        try {
-          var u = new URL(window.location.href);
-          var q = (u.searchParams.get('theme') || '').toLowerCase();
-          if (THEMES.indexOf(q) >= 0) t = q;
-        } catch (e) {}
-        if (!t) {
-          try {
-            var s = (localStorage.getItem('scifi-ui:theme') || '').toLowerCase();
-            if (THEMES.indexOf(s) >= 0) t = s;
-          } catch (e) {}
-        }
-        if (t) document.documentElement.classList.add('theme-' + t);
-      } catch (e) {}
-    })();
-  </script>
-
-  <link rel="stylesheet" href="./styles/site.css">
-  <link rel="stylesheet" href="./styles/loaders.css">
-  <link rel="stylesheet" href="./styles/holographic-panel.css">
-  <link rel="stylesheet" href="./styles/indent.css">
-  <link rel="stylesheet" href="./styles/readability.css">
-  <link rel="stylesheet" href="./styles/cyberpunk.css">
-  <link rel="stylesheet" href="./styles/holo-title-3d.css?v=20251025-blue1">
-  <link rel="stylesheet" href="./styles/theme-overrides.css">
-  <link rel="stylesheet" href="./styles/lcars-title-3d.css?v=20251025-anim2">
-  <link rel="stylesheet" href="./styles/splash.css?v=20251025-splash1">
+  <meta name="description" content="FormatX Suite Pro: cross-platform technikusi eszköztár meghajtókezeléshez, telepítéshez és valós rendszerdiagnosztikához.">
+  <meta name="theme-color" content="#050a10">
+  <meta property="og:title" content="FormatX Suite Pro">
+  <meta property="og:description" content="Valós rendszeradatok, biztonságos műveletek és egységes Windows, Linux / Bazzite és macOS csomag.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="./assets/images/formatx-technician-console.png">
+  <title>FormatX Suite Pro | Technikusoknak tervezve</title>
+  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
+  <link rel="preload" as="image" href="./assets/images/formatx-technician-console.png">
+  <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
+  <script defer src="./scripts/site.js?v=20260718-v92"></script>
 </head>
-<body id="top" class="theme-lcars">
-  <a class="skip-link" href="#main-content">Ugrás a tartalomhoz</a>
-  <div id="splash" aria-live="polite" aria-label="Üdvözlő animáció">
-    <div class="splash-panel">
-      <div class="art" role="img" aria-label="Üdvözlő grafika"></div>
-      <div class="caption">Üdvözöl a Holo Deck konzol</div>
+<body id="top">
+  <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="FormatX Suite Pro főoldal">
+        <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
+        <span><strong>FormatX Suite Pro</strong><small>Technician Console</small></span>
+      </a>
+
+      <button id="menu-toggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menü</button>
+
+      <nav id="primary-nav" class="primary-nav" aria-label="Fő navigáció">
+        <a href="#downloads">Letöltés</a>
+        <a href="#platforms">Platformok</a>
+        <a href="#features">Funkciók</a>
+        <a href="#pro">Pro licencek</a>
+        <a href="#about">Névjegy</a>
+        <div class="mobile-theme-control" role="group" aria-label="Mobil megjelenés">
+          <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
+          <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
+        </div>
+      </nav>
+
+      <div class="theme-control" role="group" aria-label="Megjelenés">
+        <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
+      </div>
     </div>
-  </div>
-
-  <div id="fx-scanlines" aria-hidden="true"></div>
-  <div id="fx-vignette" aria-hidden="true"></div>
-  <div id="fx-noise" aria-hidden="true"></div>
-
-  <header class="site-header container">
-    <nav class="theme-switch" aria-label="Téma választó">
-      <button class="pill sm" data-theme="lcars" aria-pressed="true">HOLO DECK</button>
-      <button class="pill sm" data-theme="holo">GALACTIC CORE</button>
-      <button class="pill sm" data-theme="cyber">NEON GRID</button>
-    </nav>
   </header>
 
-  <main id="main-content" class="container shell">
-    <i class="decor decor-left" aria-hidden="true"></i>
-    <i class="decor decor-right" aria-hidden="true"></i>
-
-    <section class="hero">
-      <h1 class="title" data-glitch="FORMÁZÁS A JÖVŐBŐL">FORMÁZÁS A JÖVŐBŐL</h1>
-      <p class="subtitle">Rendszerkarbantartó GUI formázáshoz, USB-készítéshez és diagnosztikához — Windows, Linux / Bazzite rendszerekre.</p>
-      <div class="cta-row">
-        <a href="#downloads" class="pill lg">LIGHT LETÖLTÉSE</a>
-        <a href="#pro" class="pill lg alt">PRO ELŐFIZETÉS</a>
-        <a href="#features" class="pill lg accent">FUNKCIÓK</a>
-      </div>
-    </section>
-
-    <section id="downloads" class="panel">
-      <h2 class="panel-title">FormatX Light</h2>
-
-      <div class="download-grid">
-        <a class="card span-12" href="https://github.com/hutoczky/formatui/releases/latest/download/FormatX_Installer_v1015.exe" target="_blank" rel="noopener">
-          <h3>Light letöltése</h3>
-          <p class="meta">Ingyenes Windows kiadás • hutoczky/formatui</p>
-        </a>
-
-        <a class="card span-6" href="https://github.com/hutoczky/formatui/releases/latest/download/README.txt" target="_blank" rel="noopener">
-          <h3>Release megnyitása</h3>
-          <p class="meta">Kiinduló információk és csomagtartalom</p>
-        </a>
-
-        <a class="card span-6" href="https://github.com/hutoczky/formatui" target="_blank" rel="noopener">
-          <h3>GitHub megnyitása</h3>
-          <p class="meta">Forráskód, issue-k és kiadások</p>
-        </a>
-      </div>
-
-      <div class="chips">
-        <span class="pill md">Ingyenes</span>
-        <span class="pill md alt">Windows</span>
-        <span class="pill md accent">Modern GUI</span>
-      </div>
-
-      <div class="card span-12" style="margin-top:1.5rem">
-        <p><strong>FormatX Light</strong></p>
-        <p>Ingyenes Windows verzió alap rendszereszközökkel, modern grafikus felülettel.</p>
-
-        <ul>
-          <li><strong>Futtatási mód:</strong> Asztali (unpackaged)</li>
-          <li><strong>Környezet:</strong> .NET 8.0.21</li>
-          <li><strong>Platform:</strong> Windows</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="pro" class="panel">
-      <h2 class="panel-title">FormatX Suite Pro</h2>
-      <p>Prémium kiadás céges előfizetéssel: diagnosztika, workflow-automatizálás és skálázható licencelés. Havi vagy éves számlázással, 2 hónap kedvezmény éves csomagoknál.</p>
-
-      <div class="download-grid" style="margin-top:1rem">
-        <div class="card span-8">
-          <h3>Mit tartalmaz a Pro</h3>
-          <p class="meta">Lemezkezelés • diagnosztika • naplózás • AI segítség</p>
-          <ul>
-            <li>Fejlett diagnosztika és rendszerfelügyelet</li>
-            <li>Biztonságos workflow és részletes naplózás</li>
-            <li>Céges használatra skálázható licencelés</li>
-            <li>Webhook alapú licencaktiválás és státuszkezelés</li>
-          </ul>
+  <main id="main-content">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-overlay" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="eyebrow">WINDOWS · LINUX / BAZZITE · macOS</p>
+        <h1 id="hero-title">FormatX Suite Pro</h1>
+        <p class="hero-copy">Meghajtókezelés, telepítés és valós rendszerdiagnosztika egy egységes, technikusi munkafelületen.</p>
+        <div class="hero-status" aria-label="Kiadási információk">
+          <span id="hero-version">V92</span>
+          <span>5 napos próbaidő</span>
+          <span>SHA256 ellenőrzés</span>
         </div>
-        <div class="card span-4">
-          <h3>Enterprise</h3>
-          <p class="meta">Egyedi ajánlat • dedikált onboarding • nagyvállalati skálázás</p>
-          <p>Egyedi megfelelőségi igényekhez és nagyobb gépparkhoz személyre szabott ajánlat.</p>
-          <a class="pill lg accent card-cta" href="./support.html">EGYEDI AJÁNLAT KÉRÉSE</a>
-        </div>
-      </div>
-
-      <div class="download-grid" style="margin-top:1rem">
-        <div class="card span-4">
-          <h3>Business Lite</h3>
-          <p class="meta">19 900 Ft / hó • 199 000 Ft / év</p>
-          <p>1 technikus • max. 10 gép • belépő vállalati csomag.</p>
-          <a class="pill lg card-cta billing-plan-trigger" href="#payment" data-plan="business_lite" aria-label="Business Lite előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
-        </div>
-        <div class="card span-4">
-          <h3>Business Pro</h3>
-          <p class="meta">49 900 Ft / hó • 499 000 Ft / év</p>
-          <p>3 technikus • max. 50 gép • haladó vállalati felügyelet.</p>
-          <a class="pill lg card-cta billing-plan-trigger" href="#payment" data-plan="business_pro" aria-label="Business Pro előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
-        </div>
-        <div class="card span-4">
-          <h3>Technician Team</h3>
-          <p class="meta">99 900 Ft / hó • 999 000 Ft / év</p>
-          <p>5 technikus • max. 150 gép • többfelhasználós üzemeltetéshez.</p>
-          <a class="pill lg card-cta billing-plan-trigger" href="#payment" data-plan="technician_team" aria-label="Technician Team előfizetés indítása">ELŐFIZETÉS INDÍTÁSA</a>
+        <div class="hero-actions">
+          <a id="hero-download" class="button primary" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip">V92 letöltése</a>
+          <a class="button secondary" href="#features">Funkciók áttekintése</a>
         </div>
       </div>
     </section>
 
-    <section id="features" class="panel">
-      <h2 class="panel-title">Funkciók</h2>
-      <div class="download-grid">
-        <div class="card span-6"><h3>Lemezformázás</h3><p>Biztonságos eszközazonosítás, fájlrendszer-választás és megerősítéses formázási workflow.</p></div>
-        <div class="card span-6"><h3>USB készítő</h3><p>ISO képfájlokból bootolható USB meghajtó készítése ellenőrzéssel és naplózással.</p></div>
-        <div class="card span-6"><h3>Partíciókezelés</h3><p>Partíciók áttekintése, műveleti terv készítése és biztonságos alkalmazása.</p></div>
-        <div class="card span-6"><h3>Kétpaneles fájlkezelő</h3><p>Klasszikus kétpaneles fájlműveletek másoláshoz, mozgatáshoz, törléshez és mappakezeléshez.</p></div>
-        <div class="card span-6"><h3>Rendszerfelügyelet</h3><p>Élő CPU, RAM, hálózat, tárhely, hőmérséklet és Bazzite-specifikus állapotfigyelés.</p></div>
-        <div class="card span-6"><h3>Diagnosztika</h3><p>Rendszerállapot, meghajtók, jogosultságok, Flatpak, rpm-ostree, Distrobox, Steam / Proton és GPU / Vulkan ellenőrzés.</p></div>
-        <div class="card span-6"><h3>Naplózás</h3><p>Műveleti események, hibák, figyelmeztetések és veszélyes műveletek naplózása.</p></div>
-        <div class="card span-6"><h3>Biztonságos shell</h3><p>Profil alapú rendszerparancsok és védett műveletek kontrollált futtatása.</p></div>
-        <div class="card span-6"><h3>AI asszisztens</h3><p>Hibamagyarázat, naplóelemzés és rendszerdiagnosztikai javaslatok.</p></div>
-        <div class="card span-6"><h3>Hordozható telepítő</h3><p>Pendrive-ra, külső meghajtóra vagy egyéni célmappába telepíthető FormatX csomag.</p></div>
+    <section class="release-strip" aria-label="Aktuális kiadás">
+      <div class="content-width release-strip-inner">
+        <div>
+          <span id="release-state-dot" class="release-dot" aria-hidden="true"></span>
+          <strong id="release-state">Ellenőrzött GitHub Release</strong>
+        </div>
+        <p><span id="release-name">FormatX Suite Pro V92</span> · <span id="release-published">2026. 07. 17.</span></p>
+        <a id="release-page-link" href="https://github.com/hutoczky/FormatX-Updates/releases/tag/v92" target="_blank" rel="noopener noreferrer">Kiadási oldal</a>
       </div>
     </section>
 
-    <section id="workflow" class="panel">
-      <h2 class="panel-title">Biztonságos workflow</h2>
-      <p>A FormatX Suite Pro minden kritikus művelet előtt megjeleníti a kiválasztott eszköz nevét, azonosítóját, méretét, modelljét és a művelet következményét. A veszélyes műveletek előtt kötelező a kézi megerősítés.</p>
-      <div class="card span-12" style="margin-top:1rem">
-        <p><strong>A folytatáshoz írd be:</strong></p>
-        <p><code>TÖRLÉS /dev/sdb</code></p>
-      </div>
-      <p>Ez segít megelőzni a véletlen adatvesztést és átláthatóvá teszi a rendszerkarbantartási folyamatot.</p>
-    </section>
-
-    <section id="live-data" class="panel">
-      <h2 class="panel-title">Élő rendszeradatok</h2>
-      <p>A FormatX Suite Pro rendszerfelügyeleti modulja valós, élő rendszeradatokat használ. A CPU, RAM, hálózat, tárhely, USB eszközök, hőmérsékleti adatok és Bazzite-specifikus állapotok a rendszerből kerülnek kiolvasásra. Ha egy adat nem érhető el, a program N/A vagy Nem elérhető állapotot jelenít meg.</p>
-    </section>
-
-    <section id="cross-platform" class="panel">
-      <h2 class="panel-title">Cross-platform és hordozható működés</h2>
-      <p>A FormatX Suite Pro célja, hogy Windows, Linux / Bazzite és macOS rendszereken is használható legyen. A hordozható telepítő képes pendrive-ra, külső SSD-re vagy egyéni célmappába is települni.</p>
-      <p>A felhasználó csak három fő indítót lát:</p>
-      <ul>
-        <li>Start-FormatX-Windows.exe</li>
-        <li>Start-FormatX-Linux.sh</li>
-        <li>Start-FormatX-macOS.command</li>
-      </ul>
-      <p>Az indítók automatikusan felismerik a rendszer és a CPU architektúra típusát, például x86_64 vagy ARM64 / aarch64, majd a megfelelő buildet indítják.</p>
-    </section>
-
-    <section id="loaders" class="panel">
-      <h2 class="panel-title">Betöltő ikonok</h2>
-      <div class="download-grid">
-        <div class="card span-4 loader-demo">
-          <figure>
-            <img src="./assets/loader-lcars.svg" width="200" height="60" alt="Holo Deck betöltő animáció">
-            <figcaption class="meta">Holo Deck betöltő</figcaption>
-          </figure>
-        </div>
-        <div class="card span-4 loader-demo">
-          <figure>
-            <img src="./assets/loader-holo.svg" width="200" height="60" alt="Galactic Core betöltő animáció">
-            <figcaption class="meta">Galactic Core betöltő</figcaption>
-          </figure>
-        </div>
-        <div class="card span-4 loader-demo">
-          <figure>
-            <img src="./assets/loader-cyber.svg" width="200" height="60" alt="Neon Grid betöltő animáció">
-            <figcaption class="meta">Neon Grid betöltő</figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
-
-    <section id="docs" class="panel">
-      <h2 class="panel-title">Demo checkout</h2>
-      <div id="payment" class="card span-12 checkout-card">
-        <div class="checkout-intro">
+    <section id="downloads" class="section-band">
+      <div class="content-width">
+        <div class="section-heading">
           <div>
-            <p class="checkout-kicker">1. LÉPÉS // megrendelés részletei</p>
-            <h3>Előfizetés indítása</h3>
-            <p>Válassz csomagot és számlázási ciklust, add meg a céges adatokat, majd erősítsd meg a megrendelést. A megadott adatok kizárólag a böngészőben maradnak — nincs élő terhelés.</p>
+            <p class="eyebrow">AKTUÁLIS STABIL KIADÁS</p>
+            <h2>Egy csomag, minden támogatott platform</h2>
           </div>
-          <div class="checkout-status" aria-label="Checkout állapot">
-            <span class="checkout-status-pill">Demo mód</span>
-            <span class="checkout-status-pill">Éves díjnál 2 hó kedvezmény</span>
-            <span class="checkout-status-pill">Fogadó cím privát marad</span>
-          </div>
+          <span class="section-mark" aria-hidden="true">01</span>
         </div>
 
-        <div class="checkout-layout">
-          <aside class="checkout-summary" aria-labelledby="checkout-summary-title">
-            <div class="checkout-block">
-              <h4 id="checkout-summary-title">Rendelés összegzés</h4>
-              <p class="meta">Az összegzés a választott csomag és fizetési mód alapján azonnal frissül.</p>
-              <dl class="summary-list">
-                <div>
-                  <dt>Csomag</dt>
-                  <dd id="summary-plan-name">Business Pro</dd>
-                </div>
-                <div>
-                  <dt>Számlázás</dt>
-                  <dd id="summary-cycle">Havi előfizetés</dd>
-                </div>
-                <div>
-                  <dt>Most fizetendő</dt>
-                  <dd id="summary-price">49 900 Ft / hó</dd>
-                </div>
-                <div>
-                  <dt>Pénznem</dt>
-                  <dd id="summary-currency">HUF</dd>
-                </div>
-                <div>
-                  <dt>Csapat</dt>
-                  <dd id="summary-team">3 technikus • 50 gépig</dd>
-                </div>
-                <div>
-                  <dt>Fizetési mód</dt>
-                  <dd id="summary-method">Kártya demo</dd>
-                </div>
-                <div>
-                  <dt>Rendelési azonosító</dt>
-                  <dd id="summary-reference">FX-DEMO-000000</dd>
-                </div>
-                <div>
-                  <dt>Megtakarítás</dt>
-                  <dd id="summary-savings">Éves csomag esetén 2 hónap kedvezmény</dd>
-                </div>
-              </dl>
+        <div class="download-layout">
+          <article class="download-primary">
+            <div class="download-title-row">
+              <img src="./assets/images/formatx-icon.png" width="72" height="72" alt="">
+              <div>
+                <p class="eyebrow">UNIVERZÁLIS ARCHÍVUM</p>
+                <h3 id="download-file-name">FormatX-Suite-Pro-V92.zip</h3>
+              </div>
             </div>
+            <p>A ZIP tartalmazza a Windows, Linux / Bazzite és macOS indítókat, a platformonkénti binárisokat, a QML felületet, a telepítőt és a frissítési metaadatokat.</p>
+            <dl class="release-facts">
+              <div><dt>Verzió</dt><dd id="download-version">V92</dd></div>
+              <div><dt>Méret</dt><dd id="download-size">715,76 MiB</dd></div>
+              <div><dt>Forrás</dt><dd>GitHub Releases</dd></div>
+              <div><dt>Csomag</dt><dd>Cross-platform</dd></div>
+            </dl>
+            <div class="download-actions">
+              <a id="download-primary" class="button primary" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip">Univerzális csomag letöltése</a>
+              <a id="download-release-page" class="button secondary" href="https://github.com/hutoczky/FormatX-Updates/releases/tag/v92" target="_blank" rel="noopener noreferrer">Kiadási részletek</a>
+            </div>
+          </article>
 
-            <div class="checkout-block">
-              <h4>Mit tartalmaz</h4>
-              <ul class="checkout-list">
-                <li>Prémium diagnosztika és részletes naplózás</li>
-                <li>Licenc- és eszközkezelés több technikus számára</li>
-                <li>AI segítség, auditálható műveleti előzményekkel</li>
-                <li>Enterprise igény esetén külön onboarding és ajánlatkérés</li>
-              </ul>
-            </div>
-
-            <div class="checkout-block checkout-trust">
-              <h4>Biztonság és támogatás</h4>
-              <p class="meta">A bemutató checkout nem indít valódi kártyaterhelést, nem ment kártyaszámot, és kizárólag helyi validációt futtat.</p>
-              <p class="meta">A fizetés utáni visszajelző űrlap csak nyilvános űrlapvégpontra vagy szerveroldali végpontra köthető rá; a fogadó e-mail-címnek a szolgáltató vagy backend privát beállításában kell maradnia.</p>
-            </div>
+          <aside class="integrity-panel" aria-labelledby="integrity-title">
+            <p class="eyebrow">FÁJLINTEGRITÁS</p>
+            <h3 id="integrity-title">SHA256</h3>
+            <code id="release-sha256">cbb518cf1edc9939df20d9dfa0bfe23b6e451b03fa1cea29e047af8382c93231</code>
+            <button id="copy-checksum" class="text-command" type="button">Ellenőrzőösszeg másolása</button>
+            <p id="release-api-note" class="muted" role="status">A linket a hivatalos FormatX-Updates kiadásból ellenőrizzük.</p>
+            <noscript><p class="muted">JavaScript nélkül a beépített, ellenőrzött V92 link használható.</p></noscript>
           </aside>
+        </div>
+      </div>
+    </section>
 
-          <div class="checkout-main">
-            <form id="billing-form" class="checkout-form" novalidate>
-              <div class="checkout-form-grid">
-                <fieldset class="field-group span-12">
-                  <legend>Fizetési mód</legend>
-                  <div class="choice-grid">
-                    <label class="choice-card">
-                      <input type="radio" name="payment_method" value="card" checked>
-                      <span class="choice-copy">
-                        <span class="choice-title">Kártya demo</span>
-                        <span class="choice-meta">Teszt jellegű kártyaadatok helyi ellenőrzése</span>
-                      </span>
-                    </label>
-                    <label class="choice-card">
-                      <input type="radio" name="payment_method" value="transfer">
-                      <span class="choice-copy">
-                        <span class="choice-title">Banki átutalás</span>
-                        <span class="choice-meta">QR / banki átutalás utáni visszajelző űrlappal</span>
-                      </span>
-                    </label>
-                    <label class="choice-card">
-                      <input type="radio" name="payment_method" value="invoice">
-                      <span class="choice-copy">
-                        <span class="choice-title">Beszerzési igény</span>
-                        <span class="choice-meta">PO / jóváhagyási folyamat előkészítése</span>
-                      </span>
-                    </label>
-                  </div>
-                </fieldset>
+    <section id="platforms" class="section-band alternate">
+      <div class="content-width">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">NATÍV PROFILOK</p>
+            <h2>A működés az operációs rendszerhez igazodik</h2>
+          </div>
+          <span class="section-mark" aria-hidden="true">02</span>
+        </div>
 
-                <div class="field span-6">
-                  <label for="billing-plan">Csomag</label>
-                  <select id="billing-plan" name="plan_id">
-                    <option value="business_lite">Business Lite</option>
-                    <option value="business_pro" selected>Business Pro</option>
-                    <option value="technician_team">Technician Team</option>
-                  </select>
-                </div>
+        <div class="platform-grid">
+          <article class="platform-card platform-windows">
+            <p class="platform-code">WIN</p>
+            <h3>Windows Edition</h3>
+            <p>Meghajtóbetűjelek, Windows fájlválasztó, natív rendszeradatok és x86_64 / ARM64 indítás.</p>
+            <code>Start-FormatX-Windows.exe</code>
+          </article>
+          <article class="platform-card platform-linux">
+            <p class="platform-code">LNX</p>
+            <h3>Linux / Bazzite Edition</h3>
+            <p>Flatpak, rpm-ostree, Steam / Proton, Wayland és Linux meghajtódiagnosztika.</p>
+            <code>Start-FormatX-Linux.sh</code>
+          </article>
+          <article class="platform-card platform-macos">
+            <p class="platform-code">MAC</p>
+            <h3>macOS Edition</h3>
+            <p>macOS könyvtárválasztás, platformhoz igazított útvonalak és Intel / Apple Silicon profil.</p>
+            <code>Start-FormatX-macOS.command</code>
+          </article>
+        </div>
+      </div>
+    </section>
 
-                <div class="field span-6">
-                  <label for="billing-cycle">Számlázási ciklus</label>
-                  <select id="billing-cycle" name="billing_cycle">
-                    <option value="monthly">Havi előfizetés</option>
-                    <option value="annual">Éves előfizetés kedvezménnyel</option>
-                  </select>
-                </div>
+    <section id="features" class="section-band">
+      <div class="content-width">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">TECHNICIAN TOOLKIT</p>
+            <h2>Átlátható, ellenőrizhető munkafolyamatok</h2>
+          </div>
+          <span class="section-mark" aria-hidden="true">03</span>
+        </div>
 
-                <div class="field span-6">
-                  <label for="company-name">Cégnév</label>
-                  <input id="company-name" name="company_name" type="text" autocomplete="organization" required>
-                </div>
+        <div class="feature-grid">
+          <article><span>01</span><h3>Meghajtókezelés</h3><p>Platformhelyes leltár, eszközazonosítás és megerősítés a kritikus műveletek előtt.</p></article>
+          <article><span>02</span><h3>Telepítő</h3><p>Szabványos célmappa-választás, előellenőrzés, újrapróbálás és ellenőrzött csomagtelepítés.</p></article>
+          <article><span>03</span><h3>Diagnosztika</h3><p>Valós CPU-, memória-, hálózati és tárhelyadatok; hiányzó mérésnél egyértelmű N/A állapot.</p></article>
+          <article><span>04</span><h3>Kétpaneles fájlkezelő</h3><p>Másolás, mozgatás, törlés és mappakezelés a gazdarendszer útvonalaihoz igazítva.</p></article>
+          <article><span>05</span><h3>Biztonságos shell</h3><p>Védett műveletek, jogosultsági megerősítés és naplózható parancsvégrehajtás.</p></article>
+          <article><span>06</span><h3>Frissítés</h3><p>Ed25519 és SHA256 ellenőrzés, napi három automatikus keresés és kézi ellenőrzés.</p></article>
+        </div>
+      </div>
+    </section>
 
-                <div class="field span-6">
-                  <label for="contact-name">Kapcsolattartó neve</label>
-                  <input id="contact-name" name="contact_name" type="text" autocomplete="name" required>
-                </div>
+    <section class="product-visual" aria-label="FormatX Technician Console képernyőkép">
+      <div class="content-width visual-copy">
+        <p class="eyebrow">VALÓS ADATOK, NEM DÍSZLET</p>
+        <h2>A rendszer csak azt állítja, amit mérni tud</h2>
+        <p>Ha egy szenzor, meghajtó vagy hálózati adatforrás nem érhető el, a felület nem talál ki értéket: N/A vagy „Nem elérhető” állapotot jelez.</p>
+      </div>
+    </section>
 
-                <div class="field span-6">
-                  <label for="contact-email">Kapcsolattartó e-mail</label>
-                  <input id="contact-email" name="email" type="email" autocomplete="email" inputmode="email" required>
-                </div>
+    <section id="pro" class="section-band alternate">
+      <div class="content-width">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">LICENCELÉS</p>
+            <h2>Öt nap próbaidő, utána választott Pro licenc</h2>
+          </div>
+          <span class="section-mark" aria-hidden="true">04</span>
+        </div>
 
-                <div class="field span-6">
-                  <label for="billing-address">Számlázási cím</label>
-                  <input id="billing-address" name="billing_address" type="text" autocomplete="street-address" required>
-                </div>
+        <div class="license-grid">
+          <article>
+            <p class="eyebrow">PRÓBAIDŐ</p>
+            <h3>5 nap</h3>
+            <p>Az első indításkor kezdődik. A próbaidő lejárata után aktiválható a választott licenc.</p>
+            <a class="text-link" href="#downloads">Csomag letöltése</a>
+          </article>
+          <article>
+            <p class="eyebrow">BUSINESS</p>
+            <h3>Csapatoknak</h3>
+            <p>Több gépes technikusi használat, diagnosztika, naplózás és frissítési jogosultság.</p>
+            <a class="text-link" href="./support.html?topic=business">Licencigény küldése</a>
+          </article>
+          <article>
+            <p class="eyebrow">OWNER</p>
+            <h3>Tulajdonosi hozzáférés</h3>
+            <p>Publikus csomagba nem kerülő adminisztrációs és kiadáskezelési funkciók.</p>
+            <a class="text-link" href="./support.html?topic=owner">Kapcsolatfelvétel</a>
+          </article>
+        </div>
+      </div>
+    </section>
 
-                <div class="field span-6">
-                  <label for="tax-number">Adószám / VAT ID</label>
-                  <input id="tax-number" name="tax_number" type="text" autocomplete="off" placeholder="12345678-1-42">
-                </div>
-
-                <div class="field span-6">
-                  <label for="purchase-order">PO / belső azonosító</label>
-                  <input id="purchase-order" name="purchase_order" type="text" autocomplete="off" placeholder="PL. FX-2026-042">
-                </div>
-
-                <fieldset class="field-group span-12 card-fields">
-                  <legend>Kártyaadatok demóhoz</legend>
-                  <p class="field-hint">Minta adatokkal is kitölthető. Az értékek nem hagyják el a böngészőt.</p>
-                  <div class="checkout-form-grid nested-grid">
-                    <div class="field span-12">
-                      <label for="card-name">Kártyabirtokos neve</label>
-                      <input id="card-name" name="card_name" type="text" autocomplete="cc-name" data-card-field required>
-                    </div>
-                    <div class="field span-6">
-                      <label for="card-number">Kártyaszám</label>
-                      <input id="card-number" name="card_number" type="text" autocomplete="cc-number" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242" data-card-field required>
-                    </div>
-                    <div class="field span-3">
-                      <label for="card-expiry">Lejárat</label>
-                      <input id="card-expiry" name="card_expiry" type="text" autocomplete="cc-exp" inputmode="numeric" maxlength="5" placeholder="MM/ÉÉ" data-card-field required>
-                    </div>
-                    <div class="field span-3">
-                      <label for="card-cvc">CVC</label>
-                      <input id="card-cvc" name="card_cvc" type="text" autocomplete="cc-csc" inputmode="numeric" maxlength="4" placeholder="123" data-card-field required>
-                    </div>
-                  </div>
-                </fieldset>
-
-                <div class="field field-checkbox span-12">
-                  <label for="billing-consent">
-                    <input id="billing-consent" name="billing_consent" type="checkbox" required>
-                    Tudomásul veszem, hogy ez egy demo checkout: a fizetés nem indul el, a kártyaadatok nem kerülnek elküldésre, az átutalási visszajelzéshez pedig külön, publikus űrlapvégpont vagy backend szükséges.
-                  </label>
-                </div>
-              </div>
-
-              <div class="checkout-actions">
-                <button class="pill lg" id="billing-submit" type="submit">DEMO FIZETÉS JÓVÁHAGYÁSA</button>
-                <a class="pill lg accent" href="./support.html" aria-label="Enterprise egyedi ajánlat kérése">EGYEDI AJÁNLAT KÉRÉSE</a>
-                <a class="pill lg alt" href="./terms.html">ÁSZF / Terms</a>
-                <a class="pill lg alt" href="./privacy.html">Privacy</a>
-              </div>
-
-              <p id="billing-feedback" class="meta checkout-feedback" aria-live="polite"></p>
-            </form>
-
-            <section id="payment-confirmation" class="checkout-confirmation" aria-labelledby="payment-confirmation-title">
-              <div class="checkout-block">
-                <div class="checkout-confirmation-header">
-                  <div>
-                    <p class="checkout-kicker">2. lépés // fizetés utáni visszajelzés</p>
-                    <h4 id="payment-confirmation-title">Átutalási visszajelző űrlap</h4>
-                  </div>
-                  <span id="payment-confirmation-badge" class="checkout-status-pill">Nincs összekötve</span>
-                </div>
-                <p class="meta">Ha a banki vagy QR-kódos utalást már elindítottad, itt küldheted el a rendelési azonosítót, a saját elérhetőségedet és a tranzakciós hivatkozást. A fogadó e-mail-cím nem jelenik meg az oldalon; azt a háttérszolgáltatásban kell privátan beállítani.</p>
-              </div>
-
-              <form id="payment-confirmation-form" class="checkout-form" novalidate>
-                <div class="checkout-form-grid">
-                  <div class="field span-4">
-                    <label for="confirmation-order-id">Rendelési / referencia azonosító</label>
-                    <input id="confirmation-order-id" name="order_reference" type="text" autocomplete="off" required>
-                  </div>
-
-                  <div class="field span-4">
-                    <label for="confirmation-plan">Csomag és ciklus</label>
-                    <input id="confirmation-plan" name="selected_plan" type="text" autocomplete="off" readonly>
-                  </div>
-
-                  <div class="field span-2">
-                    <label for="confirmation-currency">Pénznem</label>
-                    <input id="confirmation-currency" name="currency" type="text" autocomplete="off" readonly>
-                  </div>
-
-                  <div class="field span-2">
-                    <label for="confirmation-amount">Összeg</label>
-                    <input id="confirmation-amount" name="amount" type="text" autocomplete="off" readonly>
-                  </div>
-
-                  <div class="field span-6">
-                    <label for="confirmation-payer-name">Utaló neve</label>
-                    <input id="confirmation-payer-name" name="payer_name" type="text" autocomplete="name" required>
-                  </div>
-
-                  <div class="field span-6">
-                    <label for="confirmation-buyer-email">Vásárló e-mail-címe</label>
-                    <input id="confirmation-buyer-email" name="buyer_email" type="email" autocomplete="email" inputmode="email" required>
-                  </div>
-
-                  <div class="field span-6">
-                    <label for="confirmation-transfer-reference">Utalási közlemény / tranzakciós hivatkozás</label>
-                    <input id="confirmation-transfer-reference" name="transfer_reference" type="text" autocomplete="off" required>
-                  </div>
-
-                  <div class="field span-6">
-                    <label for="confirmation-contact-channel">Visszajelzési csatorna</label>
-                    <select id="confirmation-contact-channel" name="contact_channel">
-                      <option value="email" selected>E-mail válasz</option>
-                      <option value="phone">Telefonos egyeztetés</option>
-                      <option value="none">Nem kérek külön visszajelzést</option>
-                    </select>
-                  </div>
-
-                  <div class="field span-12">
-                    <label for="confirmation-message">Opciós üzenet</label>
-                    <textarea id="confirmation-message" name="message" rows="4" placeholder="Például: mikor indult az utalás, milyen néven érkezik, kell-e külön számlázási egyeztetés."></textarea>
-                  </div>
-
-                  <div class="field field-checkbox span-12">
-                    <label for="confirmation-consent">
-                      <input id="confirmation-consent" name="confirmation_consent" type="checkbox" required>
-                      Hozzájárulok, hogy a megadott adatokat kizárólag a fizetés beazonosításához és a rendelés visszaigazolásához használják fel. Tudomásul veszem, hogy a statikus oldal önmagában nem tud privát fogadó címre e-mailt küldeni.
-                    </label>
-                  </div>
-                </div>
-
-                <p id="payment-confirmation-status" class="meta confirmation-endpoint-status" aria-live="polite"></p>
-
-                <div class="checkout-actions">
-                  <button class="pill lg accent" id="payment-confirmation-submit" type="submit">VISSZAJELZÉS ELKÜLDÉSE</button>
-                  <a class="pill lg alt" href="#payment">1. LÉPÉSHEZ VISSZA</a>
-                </div>
-
-                <p id="payment-confirmation-feedback" class="meta checkout-feedback" aria-live="polite"></p>
-              </form>
-            </section>
+    <section id="about" class="section-band">
+      <div class="content-width about-layout">
+        <div>
+          <p class="eyebrow">NÉVJEGY</p>
+          <h2>FormatX Suite Pro</h2>
+        </div>
+        <div class="about-copy">
+          <p>A FormatX egy cross-platform technikusi alkalmazás meghajtókezeléshez, rendszerdiagnosztikához, telepítéshez és karbantartási műveletekhez. A közös QML felület platformonként natív adatforrásokat és útvonalkezelést használ.</p>
+          <div class="about-links">
+            <a href="https://github.com/hutoczky/FormatX" target="_blank" rel="noopener noreferrer">GitHub projekt</a>
+            <a href="https://github.com/hutoczky/FormatX-Updates/releases" target="_blank" rel="noopener noreferrer">Összes kiadás</a>
+            <a href="./support.html">Visszajelzés és támogatás</a>
           </div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="container footer">
-    <div class="footer-row">
-      <div class="copyright">© 2026 FormatX Project — Hutóczky József</div>
-      <nav class="footer-nav" aria-label="Jogi és support linkek">
-        <a href="./support.html">Support</a>
-        <a href="./terms.html">ÁSZF</a>
-        <a href="./privacy.html">Privacy</a>
-        <a href="#top" class="back-to-top">↑ Tetejére</a>
+  <footer class="site-footer">
+    <div class="content-width footer-inner">
+      <div class="footer-brand">
+        <img src="./assets/images/formatx-icon.png" width="36" height="36" alt="">
+        <span><strong>FormatX Suite Pro</strong><small>© 2026 Hutóczky József</small></span>
+      </div>
+      <nav aria-label="Jogi és támogatási linkek">
+        <a href="./support.html">Támogatás</a>
+        <a href="./terms.html">Felhasználási feltételek</a>
+        <a href="./privacy.html">Adatvédelem</a>
+        <a href="#top">Tetejére</a>
       </nav>
     </div>
   </footer>
 
-  <noscript>
-    A téma‑váltás JavaScriptet igényel. JS nélkül a “HOLO DECK” téma aktív.
-  </noscript>
-
-  <script defer src="./scripts/site.js"></script>
-  <script defer src="./scripts/holographic-panel.js"></script>
-  <script defer src="./scripts/splash.js?v=splash-1p5s"></script>
-  <script defer src="./scripts/billing.js"></script>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
