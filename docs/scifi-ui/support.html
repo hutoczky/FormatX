@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="FormatX Suite Pro támogatás, hibajelentés és licencigény.">
+  <meta name="description" content="FormatX Suite Pro visszajelzési űrlap hibajelentéshez, javaslathoz és licenckérdéshez.">
   <meta name="theme-color" content="#050a10">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'none'">
-  <title>Támogatás | FormatX Suite Pro</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action https://github.com">
+  <title>Visszajelzés | FormatX Suite Pro</title>
   <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
-  <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
-  <script defer src="./scripts/site.js?v=20260718-v92"></script>
+  <link rel="stylesheet" href="./styles/site.css?v=20260718-license-form">
+  <script defer src="./scripts/site.js?v=20260718-license-form"></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
@@ -17,7 +17,7 @@
     <div class="header-inner legal-header-inner">
       <a class="brand" href="./index.html" aria-label="FormatX Suite Pro főoldal">
         <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
-        <span><strong>FormatX Suite Pro</strong><small>Támogatás</small></span>
+        <span><strong>FormatX Suite Pro</strong><small>Visszajelzés</small></span>
       </a>
       <a class="legal-home-link" href="./index.html">Vissza a főoldalra</a>
       <div class="theme-control" role="group" aria-label="Megjelenés">
@@ -29,38 +29,76 @@
 
   <main id="main-content" class="legal-main">
     <article class="content-width legal-document">
-      <p class="eyebrow">SEGÍTSÉG ÉS VISSZAJELZÉS</p>
-      <h1>Támogatás</h1>
-      <p class="legal-lead">Hibajelentéshez, fejlesztési javaslathoz és licencigényhez válaszd a megfelelő nyilvános csatornát.</p>
+      <p class="eyebrow">VISSZAJELZÉS</p>
+      <h1>Mondd el, mit tapasztaltál</h1>
+      <p class="legal-lead">Az űrlap strukturált GitHub hibajegyet készít. Nem használ fizetős backendet, kliensoldali tokent vagy rejtett adatküldést.</p>
 
-      <div class="support-grid">
-        <section>
-          <p class="eyebrow">TECHNIKAI HIBA</p>
-          <h2>GitHub hibajegy</h2>
-          <p>Írd le az operációs rendszert, a FormatX verzióját, a pontos lépéseket és a kapott hibaüzenetet. Bizalmas adatot ne csatolj.</p>
-          <a class="button primary" href="https://github.com/hutoczky/FormatX/issues/new" target="_blank" rel="noopener noreferrer">Új hibajegy nyitása</a>
-        </section>
-        <section>
-          <p class="eyebrow">ISMERT HIBÁK</p>
-          <h2>Nyitott bejelentések</h2>
-          <p>Beküldés előtt ellenőrizd, hogy a jelenséget már jelentette-e más. A meglévő hibajegy kiegészíthető új reprodukciós adattal.</p>
-          <a class="button secondary" href="https://github.com/hutoczky/FormatX/issues" target="_blank" rel="noopener noreferrer">Hibajegyek megtekintése</a>
-        </section>
-        <section>
-          <p class="eyebrow">BUSINESS / OWNER</p>
-          <h2>Licencigény</h2>
-          <p>A licenctípust, a gépek számát és a kívánt felhasználási módot add meg. Licenckulcsot vagy gépazonosítót nyilvános hibajegybe ne írj.</p>
-          <a class="button secondary" href="https://github.com/hutoczky/FormatX/issues/new?title=Licencig%C3%A9ny%3A%20" target="_blank" rel="noopener noreferrer">Licencigény indítása</a>
-        </section>
-      </div>
+      <section class="feedback-section" aria-labelledby="feedback-title">
+        <div class="feedback-heading">
+          <div>
+            <p class="eyebrow">NYILVÁNOS BEJELENTÉS</p>
+            <h2 id="feedback-title">Visszajelzési űrlap</h2>
+          </div>
+          <a class="text-link" href="https://github.com/hutoczky/FormatX/issues" target="_blank" rel="noopener noreferrer">Korábbi bejelentések</a>
+        </div>
 
-      <section>
-        <h2>Gyors ellenőrzés hibajelentés előtt</h2>
-        <ol class="check-list">
-          <li>Ellenőrizd, hogy a legújabb stabil kiadást használod.</li>
-          <li>Hasonlítsd össze a letöltött ZIP SHA256 értékét a kiadási oldalon látható ellenőrzőösszeggel.</li>
-          <li>Csatold a releváns naplórészletet, de távolítsd el belőle a személyes vagy titkos adatokat.</li>
-        </ol>
+        <form id="feedback-form" class="feedback-form" action="https://github.com/hutoczky/FormatX/issues/new" method="get" target="_blank" rel="noopener noreferrer">
+          <div class="form-grid">
+            <label>
+              <span>Visszajelzés típusa</span>
+              <select id="feedback-category" required>
+                <option value="general">Általános visszajelzés</option>
+                <option value="bug">Technikai hiba</option>
+                <option value="feature">Fejlesztési javaslat</option>
+                <option value="license">Licenckérdés</option>
+              </select>
+            </label>
+            <label>
+              <span>Platform</span>
+              <select id="feedback-platform" required>
+                <option value="Windows">Windows</option>
+                <option value="Linux / Bazzite">Linux / Bazzite</option>
+                <option value="macOS">macOS</option>
+                <option value="Weboldal">Weboldal</option>
+                <option value="Több platform">Több platform</option>
+              </select>
+            </label>
+            <label>
+              <span>FormatX verzió</span>
+              <input id="feedback-version" type="text" inputmode="text" maxlength="24" placeholder="például V92">
+            </label>
+            <label id="feedback-plan-field" hidden>
+              <span>Érintett licenc</span>
+              <select id="feedback-plan">
+                <option value="trial">Trial · 5 nap</option>
+                <option value="business_lite">Business Lite</option>
+                <option value="business_pro">Business Pro</option>
+                <option value="technician_team">Technician Team</option>
+                <option value="enterprise">Enterprise</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span>Tárgy</span>
+            <input id="feedback-subject" name="title" type="text" minlength="5" maxlength="120" autocomplete="off" required>
+          </label>
+
+          <label>
+            <span>Leírás, lépések és tapasztalt eredmény</span>
+            <textarea id="feedback-message" name="body" rows="9" minlength="20" maxlength="3000" required></textarea>
+          </label>
+
+          <label class="privacy-confirmation">
+            <input type="checkbox" required>
+            <span>A szöveg nem tartalmaz licenckulcsot, jelszót, tokent, privát kulcsot vagy más bizalmas adatot.</span>
+          </label>
+
+          <div class="feedback-actions">
+            <button class="button primary" type="submit">Visszajelzés előkészítése</button>
+            <p id="feedback-status" role="status">A végleges beküldés a GitHub nyilvános hibajegyoldalán történik.</p>
+          </div>
+        </form>
       </section>
     </article>
   </main>

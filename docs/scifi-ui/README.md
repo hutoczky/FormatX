@@ -15,6 +15,12 @@ Az élő metaadat csak akkor írhatja felül a beépített V92 tartalékot, ha:
 
 API- vagy hálózati hiba esetén az ellenőrzött V92 URL és SHA256 marad látható.
 
+## Licencek és visszajelzés
+
+A licenckártyák a FormatX licencelő publikus alapbeállításait tükrözik: 5 napos Trial, Business Lite, Business Pro, Technician Team és Enterprise. A belső Test License és Owner Master típus nem jelenik meg nyilvános ajánlatként.
+
+A visszajelzési űrlap kliensoldali token és külön backend nélkül, szabványos GET paraméterekkel készíti elő a `hutoczky/FormatX` repository GitHub hibajegyoldalát. A weboldal önállóan nem küldi és nem tárolja az űrlap tartalmát.
+
 ## Helyi futtatás
 
 ```bash

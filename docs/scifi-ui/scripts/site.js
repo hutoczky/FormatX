@@ -24,6 +24,15 @@
     checksum: document.getElementById('release-sha256'),
     copyChecksum: document.getElementById('copy-checksum'),
     apiNote: document.getElementById('release-api-note'),
+    feedbackForm: document.getElementById('feedback-form'),
+    feedbackCategory: document.getElementById('feedback-category'),
+    feedbackPlatform: document.getElementById('feedback-platform'),
+    feedbackVersion: document.getElementById('feedback-version'),
+    feedbackPlanField: document.getElementById('feedback-plan-field'),
+    feedbackPlan: document.getElementById('feedback-plan'),
+    feedbackSubject: document.getElementById('feedback-subject'),
+    feedbackMessage: document.getElementById('feedback-message'),
+    feedbackStatus: document.getElementById('feedback-status'),
     toast: document.getElementById('toast')
   };
 
@@ -256,8 +265,80 @@
     }
   }
 
+  function selectedOptionText(select) {
+    if (!select || select.selectedIndex < 0) return 'Nincs megadva';
+    return select.options[select.selectedIndex].textContent.trim();
+  }
+
+  function updateFeedbackPlanVisibility() {
+    if (!elements.feedbackCategory || !elements.feedbackPlanField) return;
+    elements.feedbackPlanField.hidden = elements.feedbackCategory.value !== 'license';
+  }
+
+  function prefillFeedbackForm() {
+    if (!elements.feedbackForm || !elements.feedbackCategory) return;
+    const parameters = new URLSearchParams(window.location.search);
+    const topic = parameters.get('topic');
+    const knownTopics = ['general', 'bug', 'feature', 'license'];
+    if (knownTopics.includes(topic)) elements.feedbackCategory.value = topic;
+
+    const plan = parameters.get('plan');
+    if (plan && elements.feedbackPlan) {
+      const option = Array.from(elements.feedbackPlan.options).find(function (candidate) {
+        return candidate.value === plan;
+      });
+      if (option) {
+        elements.feedbackCategory.value = 'license';
+        elements.feedbackPlan.value = plan;
+      }
+    }
+    updateFeedbackPlanVisibility();
+  }
+
+  function prepareFeedbackSubmission() {
+    if (!elements.feedbackForm || !elements.feedbackSubject || !elements.feedbackMessage) return;
+    const originalSubject = elements.feedbackSubject.value.trim();
+    const originalMessage = elements.feedbackMessage.value.trim();
+    const category = selectedOptionText(elements.feedbackCategory);
+    const platform = selectedOptionText(elements.feedbackPlatform);
+    const version = elements.feedbackVersion && elements.feedbackVersion.value.trim()
+      ? elements.feedbackVersion.value.trim()
+      : 'Nincs megadva';
+    const plan = elements.feedbackCategory && elements.feedbackCategory.value === 'license'
+      ? selectedOptionText(elements.feedbackPlan)
+      : 'Nem releváns';
+
+    elements.feedbackSubject.value = '[' + category + '] ' + originalSubject;
+    elements.feedbackMessage.value = [
+      'Típus: ' + category,
+      'Platform: ' + platform,
+      'FormatX verzió: ' + version,
+      'Érintett licenc: ' + plan,
+      '',
+      'Leírás:',
+      originalMessage
+    ].join('\n');
+
+    if (elements.feedbackStatus) {
+      elements.feedbackStatus.textContent = 'A GitHub hibajegyoldal új lapon nyílik meg.';
+    }
+
+    window.setTimeout(function () {
+      elements.feedbackSubject.value = originalSubject;
+      elements.feedbackMessage.value = originalMessage;
+    }, 0);
+  }
+
+  function initialiseFeedbackForm() {
+    if (!elements.feedbackForm || !elements.feedbackCategory) return;
+    prefillFeedbackForm();
+    elements.feedbackCategory.addEventListener('change', updateFeedbackPlanVisibility);
+    elements.feedbackForm.addEventListener('submit', prepareFeedbackSubmission);
+  }
+
   initialiseTheme();
   initialiseMenu();
+  initialiseFeedbackForm();
   if (elements.copyChecksum) elements.copyChecksum.addEventListener('click', copyChecksum);
   loadLatestRelease();
 }());
