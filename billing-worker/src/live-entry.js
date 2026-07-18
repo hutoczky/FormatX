@@ -31,20 +31,6 @@ const PLAN_CATALOG = {
 };
 
 const BILLING_CYCLES = new Set(['monthly', 'annual']);
-const REVOLUT_LINK_KEYS = {
-  business_lite: {
-    monthly: 'REVOLUT_PAYMENT_LINK_BUSINESS_LITE_MONTHLY',
-    annual: 'REVOLUT_PAYMENT_LINK_BUSINESS_LITE_ANNUAL',
-  },
-  business_pro: {
-    monthly: 'REVOLUT_PAYMENT_LINK_BUSINESS_PRO_MONTHLY',
-    annual: 'REVOLUT_PAYMENT_LINK_BUSINESS_PRO_ANNUAL',
-  },
-  technician_team: {
-    monthly: 'REVOLUT_PAYMENT_LINK_TECHNICIAN_TEAM_MONTHLY',
-    annual: 'REVOLUT_PAYMENT_LINK_TECHNICIAN_TEAM_ANNUAL',
-  },
-};
 
 export default {
   async fetch(request, env, ctx) {
@@ -60,9 +46,11 @@ export default {
         const errors = getLiveConfigurationErrors(env);
         return jsonResponse({
           ok: errors.length === 0,
-          provider: 'revolut_pro',
+          provider: 'bank_transfer',
           mode: env.PAYMENT_MODE || 'live',
           live_ready: errors.length === 0,
+          qvik: false,
+          qr_format: 'payto-rfc8905',
           manual_verification_required: true,
           configuration_errors: errors.length,
         }, 200, corsHeaders);
@@ -80,7 +68,7 @@ export default {
         return await handleSessionStatus(url, env, corsHeaders);
       }
 
-      if (request.method === 'POST' && url.pathname === '/api/admin/approve-revolut-payment') {
+      if (request.method === 'POST' && url.pathname === '/api/admin/approve-bank-transfer') {
         return await handleApprovePayment(request, env, corsHeaders);
       }
 
@@ -105,7 +93,8 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
   const errors = getLiveConfigurationErrors(env);
   if (errors.length > 0) {
     return jsonResponse({
-      error: 'Az éles Revolut Pro fizetés nincs teljesen konfigurálva.',
+      error: 'A közvetlen banki átutalás nincs teljesen konfigurálva.',
+      details: errors,
     }, 503, corsHeaders);
   }
 
@@ -117,66 +106,75 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
 
   const plan = PLAN_CATALOG[payload.plan_id];
   const billingCycle = payload.billing_cycle;
-  const checkoutUrl = getRevolutPaymentLink(env, plan.id, billingCycle);
-  if (!isTrustedRevolutPaymentLink(checkoutUrl)) {
-    return jsonResponse({ error: 'Érvénytelen Revolut Pro fizetési link.' }, 503, corsHeaders);
-  }
-
-  const supabase = createSupabaseClient(env);
-  const company = await upsertCompany(supabase, payload);
-  const now = new Date().toISOString();
   const amount = getPlanAmount(plan, billingCycle);
   const orderReference = payload.order_reference.trim();
+  const account = getBankAccount(env);
+  const paytoUri = buildPaytoUri(account, amount, orderReference);
 
-  await supabase.upsert('subscriptions', [{
-    company_id: company.id,
-    plan_id: plan.id,
-    plan_name: plan.name,
-    billing_cycle: billingCycle,
-    amount_huf: amount,
-    currency: 'HUF',
-    max_technicians: plan.maxTechnicians,
-    max_devices: plan.maxDevices,
-    payment_provider: 'revolut_pro',
-    payment_mode: 'live',
-    provider_customer_id: null,
-    provider_subscription_id: null,
-    provider_checkout_session_id: orderReference,
-    checkout_url: checkoutUrl,
-    subscription_status: 'pending_payment',
-    payment_status: 'pending',
-    metadata: {
-      company_name: payload.company_name.trim(),
-      contact_name: payload.contact_name.trim(),
-      contact_email: payload.email.trim(),
-      billing_address: payload.billing_address.trim(),
-      tax_number: payload.tax_number?.trim() || null,
-      purchase_order: payload.purchase_order?.trim() || null,
-      order_reference: orderReference,
-      manual_verification_required: true,
-      automatic_renewal: false,
-    },
-    created_at: now,
-    updated_at: now,
-  }], 'provider_checkout_session_id');
+  if (hasSupabaseConfiguration(env)) {
+    const supabase = createSupabaseClient(env);
+    const company = await upsertCompany(supabase, payload);
+    const now = new Date().toISOString();
+
+    await supabase.upsert('subscriptions', [{
+      company_id: company.id,
+      plan_id: plan.id,
+      plan_name: plan.name,
+      billing_cycle: billingCycle,
+      amount_huf: amount,
+      currency: 'HUF',
+      max_technicians: plan.maxTechnicians,
+      max_devices: plan.maxDevices,
+      payment_provider: 'bank_transfer',
+      payment_mode: 'live',
+      provider_customer_id: null,
+      provider_subscription_id: null,
+      provider_checkout_session_id: orderReference,
+      checkout_url: paytoUri,
+      subscription_status: 'pending_payment',
+      payment_status: 'pending',
+      metadata: {
+        company_name: payload.company_name.trim(),
+        contact_name: payload.contact_name.trim(),
+        contact_email: payload.email.trim(),
+        billing_address: payload.billing_address.trim(),
+        tax_number: payload.tax_number?.trim() || null,
+        purchase_order: payload.purchase_order?.trim() || null,
+        order_reference: orderReference,
+        account_holder: account.holder,
+        account_iban: account.iban,
+        account_local_huf: account.local_huf_account,
+        automatic_renewal: false,
+        qvik: false,
+        qr_format: 'payto-rfc8905',
+      },
+      created_at: now,
+      updated_at: now,
+    }], 'provider_checkout_session_id');
+  }
 
   return jsonResponse({
     session_id: orderReference,
     order_reference: orderReference,
-    checkout_url: checkoutUrl,
-    payment_provider: 'revolut_pro',
+    payment_provider: 'bank_transfer',
     payment_mode: 'live',
     amount_huf: amount,
     currency: 'HUF',
+    account,
+    payto_uri: paytoUri,
+    qvik: false,
+    qr_format: 'payto-rfc8905',
     manual_verification_required: true,
+    order_tracking_ready: hasSupabaseConfiguration(env),
     automatic_renewal: false,
   }, 200, corsHeaders);
 }
 
 async function handlePaymentConfirmation(request, env, corsHeaders) {
-  const errors = getLiveConfigurationErrors(env);
-  if (errors.length > 0) {
-    return jsonResponse({ error: 'A fizetési visszajelző nincs konfigurálva.' }, 503, corsHeaders);
+  if (!hasSupabaseConfiguration(env)) {
+    return jsonResponse({
+      error: 'A fizetési visszajelzés adatbázisa nincs konfigurálva.',
+    }, 503, corsHeaders);
   }
 
   const payload = await readJson(request);
@@ -198,11 +196,11 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
     return jsonResponse({ error: 'A vásárlói e-mail nem egyezik a rendelésben megadott címmel.' }, 409, corsHeaders);
   }
 
-  const eventId = `revolut-pro-confirmation:${payload.order_reference.trim()}`;
+  const eventId = `bank-transfer-confirmation:${payload.order_reference.trim()}`;
   const now = new Date().toISOString();
   await supabase.upsert('payment_events', [{
     provider_event_id: eventId,
-    event_type: 'manual_payment_confirmation',
+    event_type: 'manual_bank_transfer_confirmation',
     status: 'awaiting_manual_review',
     payload: {
       ...payload,
@@ -222,9 +220,8 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
       ...(subscription.metadata || {}),
       payer_name: payload.payer_name.trim(),
       buyer_email: payload.buyer_email.trim(),
-      revolut_transaction_reference: payload.transfer_reference.trim(),
+      bank_transaction_reference: payload.transfer_reference.trim(),
       payment_reported_at: now,
-      contact_channel: payload.contact_channel || 'email',
       customer_message: payload.message?.trim() || null,
     },
     updated_at: now,
@@ -236,17 +233,20 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
     ok: true,
     order_reference: payload.order_reference.trim(),
     status: 'awaiting_manual_review',
-    message: 'A fizetési visszajelzés rögzítve lett. A licenc kézi Revolut-ellenőrzés után aktiválható.',
+    message: 'A fizetési visszajelzés rögzítve lett. A licenc a beérkezett átutalás kézi ellenőrzése után aktiválható.',
   }, 200, corsHeaders);
 }
 
 async function handleSessionStatus(url, env, corsHeaders) {
+  if (!hasSupabaseConfiguration(env)) {
+    return jsonResponse({ error: 'A rendeléskövetés nincs konfigurálva.' }, 503, corsHeaders);
+  }
+
   const orderReference = url.searchParams.get('session_id') || url.searchParams.get('order_reference');
   if (!orderReference) {
     return jsonResponse({ error: 'A session_id vagy order_reference kötelező.' }, 400, corsHeaders);
   }
 
-  ensureSupabaseConfiguration(env);
   const supabase = createSupabaseClient(env);
   const subscription = await supabase.selectSingle('subscriptions', {
     provider_checkout_session_id: ['eq', orderReference],
@@ -272,8 +272,8 @@ async function handleSessionStatus(url, env, corsHeaders) {
     valid_until: license?.valid_until ?? subscription.valid_until ?? null,
     manual_verification_required: !license,
     message: license
-      ? 'A Revolut-fizetés ellenőrzése megtörtént, a FormatX licenc aktív.'
-      : 'A fizetés vagy annak kézi ellenőrzése még folyamatban van.',
+      ? 'A banki átutalás ellenőrzése megtörtént, a FormatX licenc aktív.'
+      : 'Az átutalás vagy annak kézi ellenőrzése még folyamatban van.',
   }, 200, corsHeaders);
 }
 
@@ -283,16 +283,19 @@ async function handleApprovePayment(request, env, corsHeaders) {
     return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders);
   }
 
+  if (!hasSupabaseConfiguration(env)) {
+    return jsonResponse({ error: 'A Supabase kapcsolat nincs konfigurálva.' }, 503, corsHeaders);
+  }
+  ensureLicenseConfiguration(env);
+
   const payload = await readJson(request);
   if (!payload.order_reference?.trim()) {
     return jsonResponse({ error: 'Az order_reference kötelező.' }, 400, corsHeaders);
   }
-  if (!payload.revolut_transaction_id?.trim()) {
-    return jsonResponse({ error: 'A revolut_transaction_id kötelező.' }, 400, corsHeaders);
+  if (!payload.bank_transaction_id?.trim()) {
+    return jsonResponse({ error: 'A bank_transaction_id kötelező.' }, 400, corsHeaders);
   }
 
-  ensureSupabaseConfiguration(env);
-  ensureLicenseConfiguration(env);
   const supabase = createSupabaseClient(env);
   const subscription = await supabase.selectSingle('subscriptions', {
     provider_checkout_session_id: ['eq', payload.order_reference.trim()],
@@ -315,7 +318,7 @@ async function handleApprovePayment(request, env, corsHeaders) {
 
   const now = new Date().toISOString();
   const validUntil = computeValidUntil(subscription.billing_cycle);
-  const providerTransactionId = `revolut:${payload.revolut_transaction_id.trim()}`;
+  const providerTransactionId = `bank:${payload.bank_transaction_id.trim()}`;
   const licenseKey = await generateLicenseKey(
     env,
     subscription.provider_checkout_session_id,
@@ -331,7 +334,7 @@ async function handleApprovePayment(request, env, corsHeaders) {
     last_error: null,
     metadata: {
       ...(subscription.metadata || {}),
-      revolut_transaction_id: payload.revolut_transaction_id.trim(),
+      bank_transaction_id: payload.bank_transaction_id.trim(),
       payment_approved_at: now,
       payment_approved_by: 'admin',
     },
@@ -350,13 +353,13 @@ async function handleApprovePayment(request, env, corsHeaders) {
     billing_cycle: subscription.billing_cycle,
     max_technicians: subscription.max_technicians,
     max_devices: subscription.max_devices,
-    payment_provider: 'revolut_pro',
+    payment_provider: 'bank_transfer',
     provider_customer_id: null,
     provider_subscription_id: providerTransactionId,
     payment_status: 'paid',
     valid_until: validUntil,
     features: [
-      'revolut_pro_payment_link',
+      'direct_bank_transfer',
       'manual_payment_verification',
       `plan:${subscription.plan_id}`,
       `billing_cycle:${subscription.billing_cycle}`,
@@ -371,19 +374,19 @@ async function handleApprovePayment(request, env, corsHeaders) {
 
   await supabase.insert('license_activations', {
     license_id: license?.id ?? null,
-    verification_source: 'manual_revolut_pro_approval',
+    verification_source: 'manual_bank_transfer_approval',
     request_ip: request.headers.get('CF-Connecting-IP') || null,
     user_agent: request.headers.get('User-Agent') || 'cloudflare-worker',
     result: 'active',
   });
 
   await supabase.upsert('payment_events', [{
-    provider_event_id: `revolut-pro-approved:${payload.revolut_transaction_id.trim()}`,
-    event_type: 'manual_payment_approved',
+    provider_event_id: `bank-transfer-approved:${payload.bank_transaction_id.trim()}`,
+    event_type: 'manual_bank_transfer_approved',
     status: 'processed',
     payload: {
       order_reference: payload.order_reference.trim(),
-      revolut_transaction_id: payload.revolut_transaction_id.trim(),
+      bank_transaction_id: payload.bank_transaction_id.trim(),
       approved_at: now,
     },
     processed_at: now,
@@ -415,61 +418,68 @@ function validatePaymentConfirmation(payload) {
   if (!payload.order_reference?.trim()) return 'A rendelési azonosító kötelező.';
   if (!payload.payer_name?.trim()) return 'Az utaló neve kötelező.';
   if (!payload.buyer_email?.includes('@')) return 'Érvényes vásárlói e-mail-cím szükséges.';
-  if (!payload.transfer_reference?.trim()) return 'A Revolut tranzakció hivatkozása kötelező.';
+  if (!payload.transfer_reference?.trim()) return 'A banki tranzakció hivatkozása kötelező.';
   return null;
 }
 
 function getLiveConfigurationErrors(env) {
   const errors = [];
+  const account = getBankAccount(env);
 
   if (env.PAYMENT_MODE !== 'live') errors.push('PAYMENT_MODE');
-  if (env.PAYMENT_PROVIDER !== 'revolut_pro') errors.push('PAYMENT_PROVIDER');
-  if (env.REVOLUT_PRO_ACCOUNT_APPROVED !== 'true') errors.push('REVOLUT_PRO_ACCOUNT_APPROVED');
-  if (!isHttpsUrl(env.FRONTEND_URL)) errors.push('FRONTEND_URL');
-  if (!isHttpsUrl(env.WORKER_BASE_URL)) errors.push('WORKER_BASE_URL');
-  if (!isHttpsUrl(env.SUPABASE_URL)) errors.push('SUPABASE_URL');
-  if (!env.SUPABASE_SERVICE_ROLE_KEY) errors.push('SUPABASE_SERVICE_ROLE_KEY');
-  if (!env.SUPPORT_EMAIL || !String(env.SUPPORT_EMAIL).includes('@')) errors.push('SUPPORT_EMAIL');
-  if (env.LEGAL_DOCUMENTS_APPROVED !== 'true') errors.push('LEGAL_DOCUMENTS_APPROVED');
-  if (!env.MERCHANT_LEGAL_NAME) errors.push('MERCHANT_LEGAL_NAME');
-  if (!env.MERCHANT_ADDRESS) errors.push('MERCHANT_ADDRESS');
-  if (!env.MERCHANT_TAX_ID) errors.push('MERCHANT_TAX_ID');
-  if (!isHttpsUrl(env.TERMS_URL)) errors.push('TERMS_URL');
-  if (!isHttpsUrl(env.PRIVACY_URL)) errors.push('PRIVACY_URL');
-  if (!env.LICENSE_SECRET || String(env.LICENSE_SECRET).length < 32 || env.LICENSE_SECRET === 'change-me') errors.push('LICENSE_SECRET');
-  if (!env.ADMIN_DEBUG_TOKEN || String(env.ADMIN_DEBUG_TOKEN).length < 24) errors.push('ADMIN_DEBUG_TOKEN');
-
-  for (const planLinks of Object.values(REVOLUT_LINK_KEYS)) {
-    for (const key of Object.values(planLinks)) {
-      if (!isTrustedRevolutPaymentLink(env[key])) errors.push(key);
-    }
-  }
+  if (env.PAYMENT_PROVIDER !== 'bank_transfer') errors.push('PAYMENT_PROVIDER');
+  if (env.PAYMENT_ACCOUNT_CONFIRMED !== 'true') errors.push('PAYMENT_ACCOUNT_CONFIRMED');
+  if (!account.holder) errors.push('BANK_ACCOUNT_HOLDER');
+  if (!isValidIban(account.iban)) errors.push('BANK_IBAN_HUF');
+  if (!/^\d{8}-\d{8}-\d{8}$/.test(account.local_huf_account)) errors.push('BANK_LOCAL_HUF_ACCOUNT');
+  if (!isValidBic(account.bic)) errors.push('BANK_BIC');
+  if (!isValidBic(account.correspondent_bic)) errors.push('BANK_CORRESPONDENT_BIC');
 
   return errors;
 }
 
-function getRevolutPaymentLink(env, planId, billingCycle) {
-  const key = REVOLUT_LINK_KEYS[planId]?.[billingCycle];
-  return key ? String(env[key] || '').trim() : '';
+function getBankAccount(env) {
+  return {
+    holder: String(env.BANK_ACCOUNT_HOLDER || '').trim(),
+    local_huf_account: String(env.BANK_LOCAL_HUF_ACCOUNT || '').trim(),
+    iban: normaliseIban(env.BANK_IBAN_HUF || env.BANK_IBAN_EUR || ''),
+    eur_iban: normaliseIban(env.BANK_IBAN_EUR || env.BANK_IBAN_HUF || ''),
+    bic: String(env.BANK_BIC || '').trim().toUpperCase(),
+    correspondent_bic: String(env.BANK_CORRESPONDENT_BIC || '').trim().toUpperCase(),
+  };
 }
 
-function isTrustedRevolutPaymentLink(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:'
-      && url.hostname === 'checkout.revolut.com'
-      && url.pathname.startsWith('/payment-link/');
-  } catch (_) {
-    return false;
-  }
+function buildPaytoUri(account, amountHuf, orderReference) {
+  const params = new URLSearchParams();
+  params.set('amount', `HUF:${amountHuf}`);
+  params.set('receiver-name', account.holder);
+  params.set('message', `FormatX ${orderReference}`);
+  params.set('instruction', orderReference);
+  return `payto://iban/${account.bic}/${account.iban}?${params.toString()}`;
 }
 
-function isHttpsUrl(value) {
-  try {
-    return new URL(value).protocol === 'https:';
-  } catch (_) {
-    return false;
+function normaliseIban(value) {
+  return String(value || '').replace(/\s+/g, '').toUpperCase();
+}
+
+function isValidIban(value) {
+  const iban = normaliseIban(value);
+  if (!/^HU\d{26}$/.test(iban)) return false;
+  const rearranged = iban.slice(4) + iban.slice(0, 4);
+  let remainder = 0;
+
+  for (const character of rearranged) {
+    const digits = /\d/.test(character) ? character : String(character.charCodeAt(0) - 55);
+    for (const digit of digits) {
+      remainder = (remainder * 10 + Number(digit)) % 97;
+    }
   }
+
+  return remainder === 1;
+}
+
+function isValidBic(value) {
+  return /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(String(value || '').trim().toUpperCase());
 }
 
 function getPlanAmount(plan, billingCycle) {
@@ -516,10 +526,8 @@ function safeEqual(left, right) {
   return result === 0;
 }
 
-function ensureSupabaseConfiguration(env) {
-  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('A Supabase kapcsolat nincs konfigurálva.');
-  }
+function hasSupabaseConfiguration(env) {
+  return Boolean(env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 function ensureLicenseConfiguration(env) {
@@ -529,7 +537,10 @@ function ensureLicenseConfiguration(env) {
 }
 
 function createSupabaseClient(env) {
-  ensureSupabaseConfiguration(env);
+  if (!hasSupabaseConfiguration(env)) {
+    throw new Error('A Supabase kapcsolat nincs konfigurálva.');
+  }
+
   const baseUrl = String(env.SUPABASE_URL).replace(/\/$/, '');
   const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
