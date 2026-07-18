@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="FormatX Suite Pro licencvásárlás közvetlen, fix összegű banki átutalással és QR-kóddal.">
+  <meta name="description" content="FormatX Suite Pro licencvásárlás közvetlen, fix összegű HUF vagy EUR banki átutalással és QR-kóddal.">
   <meta name="theme-color" content="#050a10">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https://quickchart.io; connect-src 'self'; form-action 'none'">
   <meta name="formatx-billing-api-base" content="/api">
   <title>Banki átutalás | FormatX Suite Pro</title>
   <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
   <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
-  <link rel="stylesheet" href="./styles/checkout.css?v=20260718-bank1">
-  <link rel="stylesheet" href="./styles/bank-transfer.css?v=20260718-bank1">
+  <link rel="stylesheet" href="./styles/checkout.css?v=20260718-bank2">
+  <link rel="stylesheet" href="./styles/bank-transfer.css?v=20260718-bank2">
   <script defer src="./scripts/site.js?v=20260718-v92"></script>
-  <script defer src="./scripts/checkout.js?v=20260718-bank1"></script>
+  <script defer src="./scripts/checkout.js?v=20260718-eur1"></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
@@ -21,7 +21,7 @@
     <div class="header-inner legal-header-inner">
       <a class="brand" href="./index.html" aria-label="FormatX Suite Pro főoldal">
         <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
-        <span><strong>FormatX Suite Pro</strong><small>Közvetlen banki átutalás</small></span>
+        <span><strong>FormatX Suite Pro</strong><small>HUF / EUR banki átutalás</small></span>
       </a>
       <a class="legal-home-link" href="./index.html#pro">Vissza a licencekhez</a>
       <div class="theme-control" role="group" aria-label="Megjelenés">
@@ -33,9 +33,9 @@
 
   <main id="main-content" class="checkout-page">
     <section class="content-width checkout-hero">
-      <p class="eyebrow">FIX HUF-ÖSSZEGŰ ÁTUTALÁS</p>
+      <p class="eyebrow">FIX HUF VAGY EUR ÖSSZEG</p>
       <h1>Közvetlen banki átutalás QR-kóddal</h1>
-      <p>A kiválasztott csomag ára, a kedvezményezett IBAN-ja és az egyedi rendelési azonosító bekerül a QR-kódba. A QR RFC 8905 szerinti <code>payto:</code> adatot tartalmaz; nem qvik, ezért az automatikus mobilbanki kitöltés támogatása bankonként eltérhet.</p>
+      <p>HUF-fizetésnél RFC 8905 szerinti <code>payto:</code> QR, EUR-fizetésnél pedig EPC SEPA átutalási QR készül. A kiválasztott csomaghoz rögzített összeg és egyedi rendelési azonosító tartozik.</p>
     </section>
 
     <section class="content-width checkout-layout" aria-labelledby="checkout-title">
@@ -45,12 +45,13 @@
         <dl>
           <div><dt>Csomag</dt><dd id="summary-plan">Business Pro</dd></div>
           <div><dt>Időtartam</dt><dd id="summary-cycle">Havi hozzáférés</dd></div>
+          <div><dt>Deviza</dt><dd id="summary-currency">HUF</dd></div>
           <div><dt>Fizetendő</dt><dd id="summary-price">49 900 Ft</dd></div>
           <div><dt>Technikus</dt><dd id="summary-team">3</dd></div>
           <div><dt>Géplimit</dt><dd id="summary-devices">50</dd></div>
           <div><dt>Azonosító</dt><dd id="summary-reference">—</dd></div>
         </dl>
-        <p class="checkout-note">A licenc a beérkezett banki átutalás kézi ellenőrzése után aktiválódik. A közleményt változtatás nélkül add meg.</p>
+        <p class="checkout-note">A licenc a beérkezett banki átutalás kézi ellenőrzése után aktiválódik. Az összeget és a közleményt változtatás nélkül add meg.</p>
       </aside>
 
       <div class="checkout-main">
@@ -74,6 +75,13 @@
               <select id="billing-cycle" name="billing_cycle" required>
                 <option value="monthly">1 hónap — egyszeri fizetés</option>
                 <option value="annual">1 év — egyszeri fizetés</option>
+              </select>
+            </label>
+            <label>
+              <span>Fizetési deviza</span>
+              <select id="payment-currency" name="currency" required>
+                <option value="HUF">Magyar forint (HUF)</option>
+                <option value="EUR">Euró (EUR / SEPA)</option>
               </select>
             </label>
             <label>
@@ -122,14 +130,14 @@
           <div class="payment-grid">
             <img id="payment-qr" width="260" height="260" alt="Fix összegű banki átutalási adatok QR-kódja">
             <div>
-              <p><strong>A QR-kód a kiválasztott fix HUF-összeget, az IBAN-t és a közleményt tartalmazza.</strong></p>
-              <p class="payment-warning">Ez nem qvik-QR. A banki alkalmazás automatikus kitöltése nem garantált; mindig ellenőrizd az alábbi adatokat jóváhagyás előtt.</p>
+              <p><strong id="payment-qr-description">A QR-kód a kiválasztott fix összeget, az IBAN-t és a közleményt tartalmazza.</strong></p>
+              <p id="payment-warning" class="payment-warning">Mindig ellenőrizd az alábbi adatokat jóváhagyás előtt.</p>
               <dl class="bank-details">
                 <div><dt>Kedvezményezett</dt><dd id="payment-holder">—</dd></div>
-                <div><dt>HUF számlaszám</dt><dd id="payment-local-account">—</dd></div>
+                <div id="payment-local-account-row"><dt>HUF számlaszám</dt><dd id="payment-local-account">—</dd></div>
                 <div><dt>IBAN</dt><dd id="payment-iban">—</dd></div>
                 <div><dt>BIC / SWIFT</dt><dd id="payment-bic">—</dd></div>
-                <div><dt>Levelező bank BIC</dt><dd id="payment-correspondent-bic">—</dd></div>
+                <div><dt>Levelező bank BIC (ha kért)</dt><dd id="payment-correspondent-bic">—</dd></div>
                 <div><dt>Összeg</dt><dd id="payment-amount">—</dd></div>
               </dl>
               <p id="payment-reference" class="reference-box"></p>
