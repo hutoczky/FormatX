@@ -27,6 +27,26 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Build billing configuration
+        env:
+          FORMATX_BILLING_API_BASE: ${{ vars.FORMATX_BILLING_API_BASE }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          api_base = os.environ.get("FORMATX_BILLING_API_BASE", "").strip().rstrip("/")
+          if api_base and not api_base.startswith("https://"):
+              raise SystemExit("FORMATX_BILLING_API_BASE must use HTTPS")
+
+          target = Path("docs/scifi-ui/billing-config.json")
+          target.write_text(
+              json.dumps({"api_base": api_base}, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
       - name: Upload artifact (publish docs folder)
         uses: actions/upload-pages-artifact@v3
         with:
