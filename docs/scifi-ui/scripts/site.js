@@ -512,7 +512,7 @@
   function loadLanguageLayer() {
     if (document.querySelector('script[data-formatx-i18n]')) return;
     const script = document.createElement('script');
-    script.src = './scripts/i18n.js?v=20260718-bilingual-1';
+    script.src = './scripts/i18n.js?v=20260718-bilingual-3';
     script.async = false;
     script.dataset.formatxI18n = 'true';
     document.head.appendChild(script);
