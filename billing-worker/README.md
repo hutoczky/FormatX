@@ -1,19 +1,36 @@
 # FormatX Billing Worker
 
-Cloudflare Worker alapú, valódi Revolut Pro fizetési linkes checkout a FormatX Suite Pro oldalhoz.
+Cloudflare Worker alapú, közvetlen banki átutalásos checkout a FormatX Suite Pro oldalhoz.
 
-A Worker a `../docs` statikus tartalmát és a `/api/*` végpontokat egyetlen origin alatt szolgálja ki. A böngésző a kiválasztott csomaghoz tartozó, fix összegű Revolut Pro fizetési linkből QR-kódot készít.
+A Worker a `../docs` statikus tartalmát és a `/api/*` végpontokat egyetlen origin alatt szolgálja ki. A kiválasztott csomag árát szerveroldalon rögzíti, majd RFC 8905 szerinti `payto:` fizetési adatot ad vissza. A frontend ebből QR-kódot készít.
 
-## Fontos működési korlát
+## Fontos QR-korlát
 
-A Revolut Pro fizetési link nem Merchant API-integráció és nem automatikusan megújuló előfizetés.
+A generált QR **nem qvik-QR**. A qvik kereskedői QR-t csak megfelelően csatlakozott és tanúsított fizetési szolgáltató vagy aggregátor állíthatja elő.
 
-- A havi link egy havi hozzáférés egyszeri díja.
-- Az éves link egy éves hozzáférés egyszeri díja.
-- A Revolut Pro tranzakciót kézzel kell ellenőrizni.
-- A licencet csak kézi admin-jóváhagyás aktiválja.
+A `payto:` QR a következő adatokat tartalmazza:
 
-Ez a megoldás a Revolut Pro fizetésfogadási funkciójára épül. Személyes `revolut.me` linket nem fogad el.
+- kedvezményezett IBAN;
+- kedvezményezett neve;
+- BIC;
+- kiválasztott, fix HUF-összeg;
+- egyedi FormatX rendelési azonosító.
+
+A mobilbankok `payto:` támogatása eltérhet. Ezért a felület a QR mellett minden átutalási adatot kiír és másolhatóvá tesz. A vásárlónak jóváhagyás előtt ellenőriznie kell az adatokat.
+
+## Fix csomagárak
+
+| Csomag | Havi | Éves |
+|---|---:|---:|
+| Business Lite | 19 900 Ft | 199 000 Ft |
+| Business Pro | 49 900 Ft | 499 000 Ft |
+| Technician Team | 99 900 Ft | 999 000 Ft |
+
+Az összeget kizárólag a Worker választja ki a csomagazonosító és a számlázási ciklus alapján. A böngésző által küldött tetszőleges összeg nem használható.
+
+## Deviza
+
+A checkout jelenleg kizárólag HUF-fizetést enged. Az EUR IBAN konfigurálható, de EUR-fizetési mód csak külön, előre rögzített EUR árlista után kapcsolható be. Élő árfolyamból számított, változó összeg nincs használatban.
 
 ## Éles végpontok
 
@@ -21,47 +38,39 @@ Ez a megoldás a Revolut Pro fizetésfogadási funkciójára épül. Személyes 
 - `POST /api/create-checkout-session`
 - `POST /api/payment-confirmation`
 - `GET /api/session-status?session_id=FX-...`
-- `POST /api/admin/approve-revolut-payment`
+- `POST /api/admin/approve-bank-transfer`
 - `POST /api/license/verify`
 
-## A hat Revolut Pro fizetési link
+## Kötelező bankszámla-változók
 
-A Revolut app Pro részében hozz létre hat, HUF-ban rögzített összegű, újra felhasználható fizetési linket:
-
-| Változó | Összeg |
-|---|---:|
-| `REVOLUT_PAYMENT_LINK_BUSINESS_LITE_MONTHLY` | 19 900 Ft |
-| `REVOLUT_PAYMENT_LINK_BUSINESS_LITE_ANNUAL` | 199 000 Ft |
-| `REVOLUT_PAYMENT_LINK_BUSINESS_PRO_MONTHLY` | 49 900 Ft |
-| `REVOLUT_PAYMENT_LINK_BUSINESS_PRO_ANNUAL` | 499 000 Ft |
-| `REVOLUT_PAYMENT_LINK_TECHNICIAN_TEAM_MONTHLY` | 99 900 Ft |
-| `REVOLUT_PAYMENT_LINK_TECHNICIAN_TEAM_ANNUAL` | 999 000 Ft |
-
-A Worker csak ilyen alakú linket fogad el:
-
-```text
-https://checkout.revolut.com/payment-link/...
-```
-
-A személyes `revolut.me` link szándékosan tiltott.
-
-## Biztonsági működés
-
-A checkout csak akkor engedélyezett, ha minden kötelező feltétel teljesül:
-
-- `PAYMENT_PROVIDER=revolut_pro`
+- `PAYMENT_PROVIDER=bank_transfer`
 - `PAYMENT_MODE=live`
-- `REVOLUT_PRO_ACCOUNT_APPROVED=true`
-- mind a hat Revolut Pro fizetési link érvényes
-- Supabase kapcsolat aktív
-- `LICENSE_SECRET` legalább 32 karakter
-- `ADMIN_DEBUG_TOKEN` legalább 24 karakter
-- valós üzemeltetői és jogi adatok beállítva
-- `LEGAL_DOCUMENTS_APPROVED=true`
+- `PAYMENT_ACCOUNT_CONFIRMED=true`
+- `BANK_ACCOUNT_HOLDER`
+- `BANK_LOCAL_HUF_ACCOUNT`
+- `BANK_IBAN_HUF`
+- `BANK_IBAN_EUR`
+- `BANK_BIC`
+- `BANK_CORRESPONDENT_BIC`
 
-Hiányos konfigurációnál a Worker `503` választ ad, a frontend pedig letiltja a fizetési gombot.
+A Worker induláskor ellenőrzi:
 
-## Titkok
+- a magyar IBAN hosszát és MOD-97 ellenőrzőösszegét;
+- a belföldi, 24 számjegyű számlaszám formátumát;
+- a BIC-kódok szerkezetét;
+- a live fizetési módot és a számla megerősítését.
+
+## Supabase és licenckezelés
+
+A QR-kódos átutalási adatok Supabase nélkül is létrehozhatók. Az alábbi funkciókhoz viszont szükséges a Supabase kapcsolat:
+
+- rendelés rögzítése;
+- fizetési visszajelzés;
+- rendelési állapot lekérése;
+- kézi jóváhagyás;
+- licenckulcs létrehozása.
+
+Futtasd a `supabase-schema.sql` fájlt a Supabase SQL Editorban.
 
 A következőket Cloudflare secretként add meg:
 
@@ -71,25 +80,17 @@ npx wrangler secret put LICENSE_SECRET
 npx wrangler secret put ADMIN_DEBUG_TOKEN
 ```
 
-A fizetési linkek nem titkos API-kulcsok, de célszerű Cloudflare változóként kezelni őket.
-
-## Supabase
-
-Futtasd a `supabase-schema.sql` fájlt a Supabase SQL Editorban.
-
-A fizetés indításakor a Worker `pending_payment` állapotú rendelést rögzít. A vásárló fizetés után visszajelzést küld, amely `awaiting_manual_review` állapotba kerül.
-
 ## Kézi jóváhagyás
 
-Miután a Revolut Pro alkalmazásban ellenőrizted a tranzakciót, hívd meg:
+Miután a bankszámlán ellenőrizted a pontos összeget és a FormatX rendelési azonosítót, hívd meg:
 
 ```bash
-curl -X POST "https://SAJAT-WORKER/api/admin/approve-revolut-payment" \
+curl -X POST "https://SAJAT-WORKER/api/admin/approve-bank-transfer" \
   -H "Content-Type: application/json" \
   -H "X-Admin-Debug-Token: SAJAT_EROS_ADMIN_TOKEN" \
   -d '{
     "order_reference": "FX-20260718-ABC123",
-    "revolut_transaction_id": "REVOLUT_TRANZAKCIO_AZONOSITO"
+    "bank_transaction_id": "BANKI_TRANZAKCIO_AZONOSITO"
   }'
 ```
 
@@ -98,7 +99,7 @@ A jóváhagyás:
 1. fizetettnek jelöli a rendelést;
 2. létrehozza a licenckulcsot;
 3. beállítja az egyhavi vagy egyéves érvényességet;
-4. naplózza az admin-jóváhagyást.
+4. naplózza az adminisztrátori jóváhagyást.
 
 ## Telepítés
 
@@ -113,14 +114,16 @@ Ellenőrzés:
 https://SAJAT-WORKER/api/health
 ```
 
-Az éles állapot feltétele:
+A megfelelő alapválasz:
 
 ```json
 {
   "ok": true,
-  "provider": "revolut_pro",
+  "provider": "bank_transfer",
   "mode": "live",
   "live_ready": true,
+  "qvik": false,
+  "qr_format": "payto-rfc8905",
   "manual_verification_required": true
 }
 ```
