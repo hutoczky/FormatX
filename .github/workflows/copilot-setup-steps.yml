@@ -12,6 +12,7 @@ on:
 jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: Prefer a non-premium default model
         run: |
