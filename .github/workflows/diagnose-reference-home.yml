@@ -1,0 +1,78 @@
+name: Diagnose reference homepage
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - "docs/scifi-ui/**"
+      - ".github/workflows/diagnose-reference-home.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+      - name: Collect three Lighthouse runs
+        run: lhci collect --config=lighthouserc.json
+      - name: Print exact scores and failing thresholds
+        run: |
+          python3 - <<'PY'
+          import glob, json, statistics, sys
+
+          reports = []
+          for path in sorted(glob.glob('.lighthouseci/lhr-*.json')):
+              with open(path, encoding='utf-8') as fh:
+                  reports.append(json.load(fh))
+
+          if not reports:
+              raise SystemExit('No Lighthouse reports found')
+
+          def score(report, name):
+              return report['categories'][name]['score'] * 100
+
+          def value(report, audit):
+              return report['audits'][audit]['numericValue']
+
+          rows = []
+          for i, report in enumerate(reports, 1):
+              row = {
+                  'run': i,
+                  'performance': score(report, 'performance'),
+                  'accessibility': score(report, 'accessibility'),
+                  'best_practices': score(report, 'best-practices'),
+                  'seo': score(report, 'seo'),
+                  'lcp': value(report, 'largest-contentful-paint'),
+                  'cls': value(report, 'cumulative-layout-shift'),
+                  'ttfb': value(report, 'server-response-time'),
+              }
+              rows.append(row)
+              print('RUN {run}: performance={performance:.0f} accessibility={accessibility:.0f} best-practices={best_practices:.0f} seo={seo:.0f} LCP={lcp:.0f}ms CLS={cls:.4f} TTFB={ttfb:.0f}ms'.format(**row))
+
+          print('\nMEDIANS:')
+          for key in ['performance', 'accessibility', 'best_practices', 'seo', 'lcp', 'cls', 'ttfb']:
+              print(f'{key}={statistics.median(row[key] for row in rows):.4f}')
+
+          failures = []
+          for row in rows:
+              if row['performance'] < 90: failures.append(f"run {row['run']} performance {row['performance']:.0f} < 90")
+              if row['accessibility'] < 95: failures.append(f"run {row['run']} accessibility {row['accessibility']:.0f} < 95")
+              if row['best_practices'] < 95: failures.append(f"run {row['run']} best-practices {row['best_practices']:.0f} < 95")
+              if row['seo'] < 90: failures.append(f"run {row['run']} seo {row['seo']:.0f} < 90")
+              if row['lcp'] > 2500: failures.append(f"run {row['run']} LCP {row['lcp']:.0f}ms > 2500ms")
+              if row['cls'] > 0.1: failures.append(f"run {row['run']} CLS {row['cls']:.4f} > 0.1")
+              if row['ttfb'] > 600: failures.append(f"run {row['run']} TTFB {row['ttfb']:.0f}ms > 600ms")
+
+          if failures:
+              print('\nFAILURES:')
+              print('\n'.join('- ' + item for item in failures))
+              sys.exit(1)
+          PY
