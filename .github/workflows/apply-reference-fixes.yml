@@ -1,0 +1,66 @@
+name: Apply reference homepage fixes
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - ".github/workflows/apply-reference-fixes.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Apply accessibility and paint fixes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          html = Path('docs/scifi-ui/index.html')
+          text = html.read_text(encoding='utf-8')
+          text = text.replace('<a class="brand" href="#top" aria-label="FormatX Suite Pro">', '<a class="brand" href="#top">')
+          text = text.replace(
+              '<button id="menu-toggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">',
+              '<button id="menu-toggle" class="menu-toggle" type="button" aria-label="Menü / Menu" aria-expanded="false" aria-controls="main-nav">'
+          )
+          text = text.replace(
+              '<a id="qr-preview-link" class="qr-preview" href="./checkout.html?plan=business_pro&cycle=monthly&currency=HUF" aria-label="Checkout megnyitása">',
+              '<a id="qr-preview-link" class="qr-preview" href="./checkout.html?plan=business_pro&cycle=monthly&currency=HUF">'
+          )
+          marker = '  <link rel="stylesheet" href="./styles/reference-commerce.css?v=20260718-reference-commerce-1">\n'
+          extra = '  <link rel="stylesheet" href="./styles/reference-performance.css?v=20260718-reference-performance-1">\n'
+          if extra not in text:
+              text = text.replace(marker, marker + extra)
+          html.write_text(text, encoding='utf-8')
+
+          Path('docs/scifi-ui/styles/reference-performance.css').write_text('''/* Paint-cost reductions that preserve the reference composition. */
+          .topbar {
+            background: rgba(2, 7, 18, .97);
+            backdrop-filter: none;
+          }
+
+          .brand img,
+          .core-cube {
+            filter: none;
+          }
+
+          .particle {
+            animation: none;
+            opacity: .8;
+          }
+          ''', encoding='utf-8')
+          PY
+      - name: Commit fixes to PR branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/scifi-ui/index.html docs/scifi-ui/styles/reference-performance.css
+          git rm .github/workflows/apply-reference-fixes.yml
+          git commit -m "Fix reference homepage accessibility and paint cost"
+          git push origin HEAD:${{ github.head_ref }}
