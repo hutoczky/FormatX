@@ -36,7 +36,7 @@ jobs:
           node --check docs/scifi-ui/scripts/site.js
           node --check billing-worker/src/live-entry.js
 
-      - name: Validate site, payment data and 2041 visual system
+      - name: Validate site, payment data and 2041 reference visual system
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -66,6 +66,7 @@ jobs:
           site = (root / 'docs/scifi-ui/scripts/site.js').read_text(encoding='utf-8')
           checkout_css = (root / 'docs/scifi-ui/styles/checkout.css').read_text(encoding='utf-8')
           future_css = (root / 'docs/scifi-ui/styles/future-2041.css').read_text(encoding='utf-8')
+          reference_css = (root / 'docs/scifi-ui/styles/reference-2041.css').read_text(encoding='utf-8')
           checkout_html = (root / 'docs/scifi-ui/checkout.html').read_text(encoding='utf-8')
           home_html = (root / 'docs/scifi-ui/index.html').read_text(encoding='utf-8')
 
@@ -86,11 +87,20 @@ jobs:
               assert str(price) in checkout, price
               assert str(price) in worker, price
 
-          assert 'HUF / EUR banki fizetés' in site
+          assert 'HUF / EUR bank payment' in site
           assert 'Technician Interface // 2041' in home_html
           assert 'FORMATX CORE ENGINE' in home_html
           assert 'ZERO-FICTION TELEMETRY' in home_html
           assert 'future-2041.css' in home_html
+          assert 'reference-2041.css' in site
+          assert 'reference-exact' in site
+          assert 'ENTER THE SYSTEM' in site
+          assert 'WATCH SYSTEM DEMO' in site
+          assert 'CROSS PLATFORM' in site
+          assert 'MODULAR BY DESIGN' in site
+          assert 'SECURITY FIRST' in site
+          assert 'REAL-TIME CONTROL' in site
+          assert 'initialiseConnectedModules' in site
           assert 'initialiseHolographicCards' in site
 
           assert 'prefers-reduced-motion' in checkout_css
@@ -103,6 +113,12 @@ jobs:
           assert 'particle-float' in future_css
           assert 'mix-blend-mode' not in future_css
           assert future_css.count('{') == future_css.count('}')
+
+          assert 'prefers-reduced-motion' in reference_css
+          assert 'prefers-contrast: more' in reference_css
+          assert 'ref-particle' in reference_css
+          assert 'mix-blend-mode' not in reference_css
+          assert reference_css.count('{') == reference_css.count('}')
 
           iban = 'HU06302000141991341090015751'
           rearranged = iban[4:] + iban[:4]
@@ -125,5 +141,5 @@ jobs:
           assert len(epc.encode('utf-8')) <= 331
           assert epc.splitlines()[:4] == ['BCD', '001', '1', 'SCT']
 
-          print('FormatX checkout and 2041 site validation passed.')
+          print('FormatX checkout and exact 2041 reference validation passed.')
           PY
