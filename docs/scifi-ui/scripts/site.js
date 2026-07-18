@@ -17,7 +17,6 @@
     releaseName: document.getElementById('release-name'),
     releasePublished: document.getElementById('release-published'),
     releasePageLink: document.getElementById('release-page-link'),
-    downloadFileName: document.getElementById('download-file-name'),
     downloadVersion: document.getElementById('download-version'),
     downloadSize: document.getElementById('download-size'),
     downloadPrimary: document.getElementById('download-primary'),
@@ -186,7 +185,6 @@
     if (elements.releasePublished) elements.releasePublished.textContent = formatDate(release.publishedAt);
     setLink(elements.releasePageLink, release.pageUrl);
 
-    if (elements.downloadFileName) elements.downloadFileName.textContent = release.name;
     if (elements.downloadVersion) elements.downloadVersion.textContent = release.version;
     if (elements.downloadSize) elements.downloadSize.textContent = formatBytes(release.size);
     setLink(elements.downloadPrimary, release.url, release.version + ' univerzális csomag letöltése');
