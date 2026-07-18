@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="formatx-billing-api-base" content="/api">
   <title>Fizetés sikeres — FormatX Suite Pro</title>
   <link rel="stylesheet" href="../styles/site.css">
 </head>
@@ -12,7 +11,7 @@
     <section class="panel">
       <h1 class="panel-title">Fizetés feldolgozása</h1>
       <div class="card span-12">
-        <p id="payment-status-message">A fizetés feldolgozás alatt van. A licenc aktiválása néhány másodpercet vehet igénybe.</p>
+        <p id="payment-status-message">A Stripe fizetés ellenőrzése folyamatban van.</p>
         <ul id="payment-status-details"></ul>
         <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem;">
           <a class="pill lg" href="../index.html#payment">VISSZA AZ ÁRAZÁSHOZ</a>
@@ -23,28 +22,57 @@
   </main>
   <script>
     (async function () {
-      const apiMeta = document.querySelector('meta[name="formatx-billing-api-base"]');
-      const apiBase = (apiMeta && apiMeta.content ? apiMeta.content : '/api').replace(/\/$/, '');
+      'use strict';
+
       const statusMessage = document.getElementById('payment-status-message');
       const details = document.getElementById('payment-status-details');
       const sessionId = new URL(window.location.href).searchParams.get('session_id');
+
       if (!sessionId) {
-        statusMessage.textContent = 'Hiányzó session azonosító. A fizetés állapota nem kérdezhető le.';
+        statusMessage.textContent = 'Hiányzó Stripe session azonosító. A fizetés állapota nem kérdezhető le.';
         return;
       }
+
       try {
-        const response = await fetch(`${apiBase}/session-status?session_id=${encodeURIComponent(sessionId)}`);
+        const configResponse = await fetch('../billing-config.json', {
+          cache: 'no-store',
+          credentials: 'same-origin',
+        });
+        if (!configResponse.ok) {
+          throw new Error('A fizetési API konfigurációja nem tölthető be.');
+        }
+
+        const config = await configResponse.json();
+        const apiBase = typeof config.api_base === 'string' ? config.api_base.trim().replace(/\/$/, '') : '';
+        if (!apiBase.startsWith('https://')) {
+          throw new Error('Az éles fizetési API HTTPS címe nincs beállítva.');
+        }
+
+        const response = await fetch(`${apiBase}/session-status?session_id=${encodeURIComponent(sessionId)}`, {
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+          credentials: 'omit',
+        });
         const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Nem sikerült lekérdezni a session állapotát.');
+        if (!response.ok) throw new Error(result.error || 'Nem sikerült lekérdezni a Stripe session állapotát.');
+
         statusMessage.textContent = result.message;
-        details.innerHTML = '';
-        [['Csomag', result.plan_name], ['Fizetési ciklus', result.billing_cycle], ['Licenckulcs', result.license_key || 'még nincs aktiválva']].forEach(([label, value]) => {
+        details.replaceChildren();
+        [
+          ['Csomag', result.plan_name],
+          ['Fizetési ciklus', result.billing_cycle],
+          ['Fizetés állapota', result.payment_status],
+          ['Licenc állapota', result.license_active ? 'aktív' : 'feldolgozás alatt'],
+          ['Licenckulcs', result.license_key || 'még nincs aktiválva'],
+        ].forEach(([label, value]) => {
           const li = document.createElement('li');
-          li.textContent = `${label}: ${value}`;
+          li.textContent = `${label}: ${value || 'nincs adat'}`;
           details.appendChild(li);
         });
       } catch (error) {
-        statusMessage.textContent = error.message || 'A session állapota jelenleg nem elérhető.';
+        statusMessage.textContent = error instanceof Error
+          ? error.message
+          : 'A Stripe session állapota jelenleg nem érhető el.';
       }
     })();
   </script>
