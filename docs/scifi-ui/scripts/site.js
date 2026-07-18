@@ -51,7 +51,7 @@
     });
 
     const themeColor = document.querySelector('meta[name="theme-color"]');
-    if (themeColor) themeColor.content = selectedTheme === 'light' ? '#eaf0f3' : '#050a10';
+    if (themeColor) themeColor.content = selectedTheme === 'light' ? '#e8f2f8' : '#030711';
 
     if (persist) {
       try {
@@ -178,7 +178,7 @@
 
   function renderRelease(release) {
     if (elements.heroVersion) elements.heroVersion.textContent = release.version;
-    setLink(elements.heroDownload, release.url, release.version + ' letöltése');
+    setLink(elements.heroDownload, release.url);
 
     if (elements.releaseState) elements.releaseState.textContent = 'Élő GitHub Release ellenőrizve';
     if (elements.releaseDot) elements.releaseDot.classList.remove('warning');
@@ -263,36 +263,58 @@
     if (!grid) return;
 
     grid.innerHTML = [
-      '<article>',
+      '<article class="interactive-holo license-trial">',
       '<p class="eyebrow">PRÓBAIDŐ</p>',
-      '<h3>5 nap</h3>',
-      '<p>Az első indításkor kezdődik. A próbaidő lejárata után aktiválható a választott licenc.</p>',
+      '<h3>5 nap teljes hozzáférés</h3>',
+      '<p>Az első indításkor kezdődik. A próbaidő alatt megismerhető a cross-platform technikusi munkafolyamat.</p>',
       '<a class="text-link" href="#downloads">Csomag letöltése</a>',
       '</article>',
-      '<article>',
+      '<article class="interactive-holo license-lite">',
       '<p class="eyebrow">BUSINESS LITE</p>',
-      '<h3>19 900 Ft vagy 55 € / hó</h3>',
+      '<h3>19 900 Ft<br>vagy 55 € / hó</h3>',
       '<p>1 technikus, legfeljebb 10 gép. Éves díj: 199 000 Ft vagy 547 €.</p>',
-      '<a class="text-link" href="./checkout.html?plan=business_lite&cycle=monthly">HUF / EUR banki fizetés</a>',
+      '<a class="text-link" href="./checkout.html?plan=business_lite&cycle=monthly&currency=HUF">HUF / EUR banki fizetés</a>',
       '</article>',
-      '<article>',
+      '<article class="interactive-holo license-pro">',
       '<p class="eyebrow">BUSINESS PRO</p>',
-      '<h3>49 900 Ft vagy 137 € / hó</h3>',
+      '<h3>49 900 Ft<br>vagy 137 € / hó</h3>',
       '<p>3 technikus, legfeljebb 50 gép. Éves díj: 499 000 Ft vagy 1 373 €.</p>',
-      '<a class="text-link" href="./checkout.html?plan=business_pro&cycle=monthly">HUF / EUR banki fizetés</a>',
+      '<a class="text-link" href="./checkout.html?plan=business_pro&cycle=monthly&currency=HUF">HUF / EUR banki fizetés</a>',
       '</article>',
-      '<article>',
+      '<article class="interactive-holo license-team">',
       '<p class="eyebrow">TECHNICIAN TEAM</p>',
-      '<h3>99 900 Ft vagy 275 € / hó</h3>',
+      '<h3>99 900 Ft<br>vagy 275 € / hó</h3>',
       '<p>5 technikus, legfeljebb 150 gép. Éves díj: 999 000 Ft vagy 2 748 €.</p>',
-      '<a class="text-link" href="./checkout.html?plan=technician_team&cycle=monthly">HUF / EUR banki fizetés</a>',
+      '<a class="text-link" href="./checkout.html?plan=technician_team&cycle=monthly&currency=HUF">HUF / EUR banki fizetés</a>',
       '</article>'
     ].join('');
+  }
+
+  function initialiseHolographicCards() {
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!finePointer || reducedMotion) return;
+
+    document.querySelectorAll('.interactive-holo').forEach(function (card) {
+      card.addEventListener('pointermove', function (event) {
+        const rect = card.getBoundingClientRect();
+        const x = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100));
+        card.style.setProperty('--holo-x', x.toFixed(2) + '%');
+        card.style.setProperty('--holo-y', y.toFixed(2) + '%');
+      });
+
+      card.addEventListener('pointerleave', function () {
+        card.style.setProperty('--holo-x', '50%');
+        card.style.setProperty('--holo-y', '50%');
+      });
+    });
   }
 
   initialiseTheme();
   initialiseMenu();
   initialiseLicenseCheckout();
+  initialiseHolographicCards();
   if (elements.copyChecksum) elements.copyChecksum.addEventListener('click', copyChecksum);
   loadLatestRelease();
 }());
