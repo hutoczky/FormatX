@@ -3,12 +3,10 @@
 
   const STORAGE_KEY = 'formatx-language';
   const SUPPORTED = new Set(['hu', 'en']);
-  let currentLanguage = resolveLanguage();
-  let translating = false;
-
-  const pairs = [
+  const TRANSLATIONS = [
     ['Ugrás a tartalomra', 'Skip to content'],
     ['Menü', 'Menu'],
+    ['Fő navigáció', 'Main navigation'],
     ['Sötét', 'Dark'],
     ['Világos', 'Light'],
     ['Megjelenés', 'Appearance'],
@@ -17,8 +15,9 @@
     ['Vissza a főoldalra', 'Back to home'],
     ['Vissza a licencekhez', 'Back to licences'],
     ['Jogi és támogatási linkek', 'Legal and support links'],
+    ['Aktuális kiadás', 'Current release'],
+    ['FormatX alapelvek', 'FormatX principles'],
 
-    ['PRODUCT', 'PRODUCT'],
     ['TERMÉK', 'PRODUCT'],
     ['PLATFORMOK', 'PLATFORM'],
     ['TECHNOLÓGIA', 'TECHNOLOGY'],
@@ -35,7 +34,6 @@
     ['TECHNIKUSI FELÜLET // 2041', 'TECHNICIAN INTERFACE // 2041'],
     ['FORMATX RENDSZERFELÜLET', 'FORMATX SYSTEM INTERFACE'],
     ['Magmodul / Technológiai előnézet', 'Core Module / Technology Preview'],
-    ['ONLINE', 'ONLINE'],
     ['Mag', 'Core'],
     ['Platformok', 'Platforms'],
     ['Technológia', 'Technology'],
@@ -61,11 +59,10 @@
     ['VALÓS IDEJŰ VEZÉRLÉS', 'REAL-TIME CONTROL'],
     ['Azonnali rálátás. Teljes irányítás.', 'Instant insight. Total command.'],
 
-    ['Aktuális kiadás', 'Current release'],
     ['Ellenőrzött GitHub Release', 'Verified GitHub Release'],
     ['ELLENŐRZÖTT GITHUB KIADÁS', 'VERIFIED GITHUB RELEASE'],
+    ['ELLENŐRZÖTT V92 TARTALÉK', 'VERIFIED V92 FALLBACK'],
     ['Kiadási központ →', 'Release center →'],
-    ['FormatX alapelvek', 'FormatX principles'],
     ['Valós rendszeradat', 'Real system data'],
     ['A felület csak mérhető állapotot jelenít meg.', 'The interface only displays measurable states.'],
     ['Biztonságos megerősítés', 'Safe confirmation'],
@@ -258,8 +255,26 @@
     ['Banki tranzakció hivatkozása', 'Bank transaction reference'],
     ['Megjegyzés — opcionális', 'Message — optional'],
     ['Hozzájárulok, hogy az adatokat az átutalás beazonosításához és a licenc aktiválásához kezeljék.', 'I consent to the processing of these data to identify the transfer and activate the licence.'],
-    ['Támogatás', 'Support'],
+    ['Fix összegű átutalási QR előkészítése', 'Prepare fixed-amount transfer QR'],
+    ['Rendelés előkészítése…', 'Preparing order…'],
+    ['Átutalási adatok elkészültek', 'Transfer details ready'],
+    ['Banki átutalás nincs konfigurálva', 'Bank transfer is not configured'],
+    ['A banki átutalás nincs engedélyezve.', 'Bank transfer is not enabled.'],
+    ['Töltsd ki a kötelező rendelési adatokat.', 'Complete the required order details.'],
+    ['Az átutalási QR és a másolható banki adatok elkészültek. Az összeget és a közleményt változtatás nélkül add meg.', 'The transfer QR and copyable bank details are ready. Enter the amount and reference without changes.'],
+    ['Az átutalási adatok a vágólapra kerültek.', 'Transfer details copied to the clipboard.'],
+    ['A másolás nem sikerült. Jelöld ki kézzel az átutalási adatokat.', 'Copying failed. Select the transfer details manually.'],
+    ['A HUF banki átutalás és az EUR SEPA QR-fizetés aktív. Jóváhagyás előtt mindig ellenőrizd az adatokat.', 'HUF bank transfer and EUR SEPA QR payment are active. Always verify the details before approval.'],
+    ['A QR-kód EPC SEPA átutalási adatot tartalmaz: EUR-összeg, IBAN, BIC, kedvezményezett és közlemény.', 'The QR code contains EPC SEPA transfer data: EUR amount, IBAN, BIC, beneficiary and reference.'],
+    ['EPC SEPA QR: a támogatás bankonként eltérhet. Jóváhagyás előtt ellenőrizd az EUR-összeget, az IBAN-t és a közleményt.', 'EPC SEPA QR support may vary by bank. Verify the EUR amount, IBAN and reference before approval.'],
+    ['A QR-kód a kiválasztott fix HUF-összeget, az IBAN-t és a közleményt tartalmazza.', 'The QR code contains the selected fixed HUF amount, IBAN and payment reference.'],
+    ['Ez nem qvik-QR. A banki alkalmazás automatikus kitöltése nem garantált; mindig ellenőrizd az adatokat.', 'This is not a qvik QR. Automatic completion by the banking app is not guaranteed; always verify the details.'],
+    ['A visszajelzés előkészítése folyamatban van…', 'Preparing the payment report…'],
+    ['A levelezőprogram megnyílt az előre kitöltött visszajelzéssel. Az e-mailt még el kell küldeni.', 'The mail application opened with the pre-filled report. You still need to send the email.'],
+    ['A visszajelzés rögzítve lett. A licenc a beérkezett banki átutalás kézi ellenőrzése után aktiválódik.', 'The report was recorded. The licence is activated after manual verification of the incoming bank transfer.'],
+    ['Töltsd ki a visszajelző űrlap kötelező mezőit.', 'Complete all required payment report fields.'],
 
+    ['Támogatás', 'Support'],
     ['SEGÍTSÉG ÉS VISSZAJELZÉS', 'HELP AND FEEDBACK'],
     ['Hibajelentéshez, fejlesztési javaslathoz és licencigényhez válaszd a megfelelő nyilvános csatornát.', 'Choose the appropriate public channel for bug reports, development suggestions and licence requests.'],
     ['TECHNIKAI HIBA', 'TECHNICAL ISSUE'],
@@ -311,13 +326,13 @@
     ['A végleges értékesítés előtt ezt az oldalt teljes, jogilag ellenőrzött adatkezelői adatokkal, jogalapokkal, megőrzési időkkel, érintetti jogokkal és adatfeldolgozói felsorolással kell kiegészíteni.', 'Before final sales, this page must be completed with legally reviewed controller details, legal bases, retention periods, data-subject rights and a list of processors.']
   ];
 
-  const pairByText = new Map();
-  pairs.forEach(function (pair) {
-    pairByText.set(pair[0], pair);
-    pairByText.set(pair[1], pair);
+  const EXACT = new Map();
+  TRANSLATIONS.forEach(function (pair) {
+    EXACT.set(pair[0], pair);
+    EXACT.set(pair[1], pair);
   });
 
-  const pageMeta = {
+  const META = {
     'index.html': {
       hu: ['FormatX Suite Pro | Technikusi felület 2041', 'FormatX Suite Pro: többplatformos technikusi rendszer valós rendszeradatokkal, ellenőrzött kiadásokkal és HUF/EUR fizetéssel.'],
       en: ['FormatX Suite Pro | Technician Interface 2041', 'FormatX Suite Pro: a cross-platform technician system with real system data, verified releases and HUF/EUR payments.']
@@ -340,6 +355,9 @@
     }
   };
 
+  let language = resolveLanguage();
+  let applying = false;
+
   function resolveLanguage() {
     const query = new URLSearchParams(window.location.search).get('lang');
     if (SUPPORTED.has(query)) return query;
@@ -352,107 +370,148 @@
     return String(navigator.language || '').toLowerCase().startsWith('hu') ? 'hu' : 'en';
   }
 
-  function preserveWhitespace(original, translated) {
-    const leading = original.match(/^\s*/)?.[0] || '';
-    const trailing = original.match(/\s*$/)?.[0] || '';
+  function preserveSpace(original, translated) {
+    const leading = original.match(/^\s*/u)?.[0] || '';
+    const trailing = original.match(/\s*$/u)?.[0] || '';
     return leading + translated + trailing;
   }
 
-  function translateInterpolated(value, language) {
-    const rules = language === 'en' ? [
-      [/^Közlemény:\s*(.+)$/u, 'Reference: $1'],
-      [/^A fix (HUF|EUR)-összegű átutalási adatok előkészítése folyamatban van…$/u, 'Preparing fixed $1 transfer details…'],
-      [/^A fizetés nem indult el:\s*(.+)$/u, 'Payment could not be started: $1'],
-      [/^A visszajelzés nem készíthető elő:\s*(.+)$/u, 'The report could not be prepared: $1'],
-      [/^Közvetlen GitHub Pages mód aktív\.(.*)$/u, 'Direct GitHub Pages mode is active.$1'],
-      [/^Rendelési azonosító:\s*(.+)$/u, 'Order reference: $1'],
-      [/^Csomag:\s*(.+)$/u, 'Plan: $1'],
-      [/^Időtartam:\s*(.+)$/u, 'Duration: $1'],
-      [/^Deviza:\s*(.+)$/u, 'Currency: $1'],
-      [/^Összeg:\s*(.+)$/u, 'Amount: $1']
+  function exact(value, targetLanguage) {
+    const pair = EXACT.get(value);
+    if (!pair) return value;
+    return targetLanguage === 'hu' ? pair[0] : pair[1];
+  }
+
+  function dynamic(value, targetLanguage) {
+    const rules = targetLanguage === 'en' ? [
+      [/^Közlemény:\s*(.+)$/u, function (match) { return 'Reference: ' + match[1]; }],
+      [/^A fix (HUF|EUR)-összegű átutalási adatok előkészítése folyamatban van…$/u, function (match) { return 'Preparing fixed ' + match[1] + ' transfer details…'; }],
+      [/^A fizetés nem indult el:\s*(.+)$/u, function (match) { return 'Payment could not be started: ' + exact(match[1], 'en'); }],
+      [/^A visszajelzés nem készíthető elő:\s*(.+)$/u, function (match) { return 'The report could not be prepared: ' + exact(match[1], 'en'); }],
+      [/^Közvetlen GitHub Pages mód aktív\.\s*(.*)$/u, function (match) { return 'Direct GitHub Pages mode is active. ' + match[1]; }],
+      [/^A szerveres rendeléskövetés jelenleg nem elérhető\.$/u, function () { return 'Server-side order tracking is currently unavailable.'; }],
+      [/^A rendelés most közvetlen, statikus módban folytatódik\.$/u, function () { return 'The order is continuing in direct static mode.'; }],
+      [/^Rendelési azonosító:\s*(.+)$/u, function (match) { return 'Order reference: ' + match[1]; }],
+      [/^Csomag:\s*(.+)$/u, function (match) { return 'Plan: ' + match[1]; }],
+      [/^Időtartam:\s*(.+)$/u, function (match) { return 'Duration: ' + match[1]; }],
+      [/^Deviza:\s*(.+)$/u, function (match) { return 'Currency: ' + match[1]; }],
+      [/^Összeg:\s*(.+)$/u, function (match) { return 'Amount: ' + match[1]; }]
     ] : [
-      [/^Reference:\s*(.+)$/u, 'Közlemény: $1'],
-      [/^Preparing fixed (HUF|EUR) transfer details…$/u, 'A fix $1-összegű átutalási adatok előkészítése folyamatban van…'],
-      [/^Payment could not be started:\s*(.+)$/u, 'A fizetés nem indult el: $1'],
-      [/^The report could not be prepared:\s*(.+)$/u, 'A visszajelzés nem készíthető elő: $1'],
-      [/^Direct GitHub Pages mode is active\.(.*)$/u, 'Közvetlen GitHub Pages mód aktív.$1'],
-      [/^Order reference:\s*(.+)$/u, 'Rendelési azonosító: $1'],
-      [/^Plan:\s*(.+)$/u, 'Csomag: $1'],
-      [/^Duration:\s*(.+)$/u, 'Időtartam: $1'],
-      [/^Currency:\s*(.+)$/u, 'Deviza: $1'],
-      [/^Amount:\s*(.+)$/u, 'Összeg: $1']
+      [/^Reference:\s*(.+)$/u, function (match) { return 'Közlemény: ' + match[1]; }],
+      [/^Preparing fixed (HUF|EUR) transfer details…$/u, function (match) { return 'A fix ' + match[1] + '-összegű átutalási adatok előkészítése folyamatban van…'; }],
+      [/^Payment could not be started:\s*(.+)$/u, function (match) { return 'A fizetés nem indult el: ' + exact(match[1], 'hu'); }],
+      [/^The report could not be prepared:\s*(.+)$/u, function (match) { return 'A visszajelzés nem készíthető elő: ' + exact(match[1], 'hu'); }],
+      [/^Direct GitHub Pages mode is active\.\s*(.*)$/u, function (match) { return 'Közvetlen GitHub Pages mód aktív. ' + match[1]; }],
+      [/^Server-side order tracking is currently unavailable\.$/u, function () { return 'A szerveres rendeléskövetés jelenleg nem elérhető.'; }],
+      [/^The order is continuing in direct static mode\.$/u, function () { return 'A rendelés most közvetlen, statikus módban folytatódik.'; }],
+      [/^Order reference:\s*(.+)$/u, function (match) { return 'Rendelési azonosító: ' + match[1]; }],
+      [/^Plan:\s*(.+)$/u, function (match) { return 'Csomag: ' + match[1]; }],
+      [/^Duration:\s*(.+)$/u, function (match) { return 'Időtartam: ' + match[1]; }],
+      [/^Currency:\s*(.+)$/u, function (match) { return 'Deviza: ' + match[1]; }],
+      [/^Amount:\s*(.+)$/u, function (match) { return 'Összeg: ' + match[1]; }]
     ];
 
     for (const rule of rules) {
-      if (rule[0].test(value)) return value.replace(rule[0], rule[1]);
+      const match = value.match(rule[0]);
+      if (match) return rule[1](match);
     }
     return value;
   }
 
-  function translateText(value, language) {
-    const trimmed = value.trim();
+  function translate(value, targetLanguage) {
+    const trimmed = String(value || '').trim();
     if (!trimmed) return value;
-    const pair = pairByText.get(trimmed);
-    if (pair) return preserveWhitespace(value, language === 'hu' ? pair[0] : pair[1]);
-    const interpolated = translateInterpolated(trimmed, language);
-    return interpolated === trimmed ? value : preserveWhitespace(value, interpolated);
+    const translated = dynamic(exact(trimmed, targetLanguage), targetLanguage);
+    return translated === trimmed ? value : preserveSpace(value, translated);
   }
 
-  function shouldSkip(element) {
-    if (!element) return false;
-    return Boolean(element.closest('script, style, noscript, code, pre, [data-i18n-control], [data-i18n-skip]'));
+  function skipped(element) {
+    return Boolean(element?.closest('script, style, noscript, code, pre, [data-i18n-control], [data-i18n-skip]'));
   }
 
-  function translateAttributes(element, language) {
-    ['aria-label', 'title', 'alt', 'placeholder'].forEach(function (attribute) {
-      if (!element.hasAttribute?.(attribute)) return;
-      const current = element.getAttribute(attribute);
-      const translated = translateText(current, language);
-      if (translated !== current) element.setAttribute(attribute, translated);
+  function translateAttributes(element, targetLanguage) {
+    ['aria-label', 'title', 'alt', 'placeholder'].forEach(function (name) {
+      if (!element.hasAttribute?.(name)) return;
+      const before = element.getAttribute(name);
+      const after = translate(before, targetLanguage);
+      if (after !== before) element.setAttribute(name, after);
     });
   }
 
-  function translateSubtree(root, language) {
-    if (!root) return;
-    translating = true;
-    try {
-      if (root.nodeType === Node.TEXT_NODE) {
-        if (!shouldSkip(root.parentElement)) root.nodeValue = translateText(root.nodeValue, language);
-        return;
-      }
+  function translateNode(node, targetLanguage) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (skipped(node.parentElement)) return;
+      const before = node.nodeValue;
+      const after = translate(before, targetLanguage);
+      if (after !== before) node.nodeValue = after;
+      return;
+    }
 
-      if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_NODE) return;
-      if (root.nodeType === Node.ELEMENT_NODE && shouldSkip(root)) return;
+    if (node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.DOCUMENT_NODE) return;
+    if (node.nodeType === Node.ELEMENT_NODE && skipped(node)) return;
+    if (node.nodeType === Node.ELEMENT_NODE) translateAttributes(node, targetLanguage);
 
-      if (root.nodeType === Node.ELEMENT_NODE) translateAttributes(root, language);
-      root.querySelectorAll?.('*').forEach(function (element) {
-        if (!shouldSkip(element)) translateAttributes(element, language);
-      });
+    node.querySelectorAll?.('*').forEach(function (element) {
+      if (!skipped(element)) translateAttributes(element, targetLanguage);
+    });
 
-      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-      let node;
-      while ((node = walker.nextNode())) {
-        if (!shouldSkip(node.parentElement)) node.nodeValue = translateText(node.nodeValue, language);
-      }
-    } finally {
-      queueMicrotask(function () { translating = false; });
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    let textNode;
+    while ((textNode = walker.nextNode())) {
+      if (skipped(textNode.parentElement)) continue;
+      const before = textNode.nodeValue;
+      const after = translate(before, targetLanguage);
+      if (after !== before) textNode.nodeValue = after;
     }
   }
 
   function pageName() {
-    const name = window.location.pathname.split('/').pop();
-    return name || 'index.html';
+    return window.location.pathname.split('/').pop() || 'index.html';
   }
 
-  function updateMeta(language) {
-    const meta = pageMeta[pageName()] || pageMeta['index.html'];
-    document.title = meta[language][0];
+  function upsertMeta(property, content) {
+    let element = document.querySelector('meta[property="' + property + '"]');
+    if (!element) {
+      element = document.createElement('meta');
+      element.setAttribute('property', property);
+      document.head.appendChild(element);
+    }
+    element.content = content;
+  }
+
+  function upsertAlternate(hreflang, href) {
+    let link = document.querySelector('link[rel="alternate"][hreflang="' + hreflang + '"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'alternate';
+      link.hreflang = hreflang;
+      document.head.appendChild(link);
+    }
+    link.href = href;
+  }
+
+  function updateMeta(targetLanguage) {
+    const meta = META[pageName()] || META['index.html'];
+    document.title = meta[targetLanguage][0];
     const description = document.querySelector('meta[name="description"]');
-    if (description) description.content = meta[language][1];
-    document.documentElement.lang = language;
+    if (description) description.content = meta[targetLanguage][1];
+    document.documentElement.lang = targetLanguage;
+    upsertMeta('og:title', meta[targetLanguage][0]);
+    upsertMeta('og:description', meta[targetLanguage][1]);
+    upsertMeta('og:locale', targetLanguage === 'hu' ? 'hu_HU' : 'en_US');
+
+    const base = new URL(window.location.href);
+    base.searchParams.delete('lang');
+    const hu = new URL(base.href);
+    hu.searchParams.set('lang', 'hu');
+    const en = new URL(base.href);
+    en.searchParams.set('lang', 'en');
+    upsertAlternate('hu', hu.href);
+    upsertAlternate('en', en.href);
+    upsertAlternate('x-default', base.href);
   }
 
-  function updateInternalLinks(language) {
+  function updateLinks(targetLanguage) {
     document.querySelectorAll('a[href]').forEach(function (link) {
       const href = link.getAttribute('href');
       if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
@@ -460,7 +519,7 @@
         const url = new URL(href, window.location.href);
         if (url.origin !== window.location.origin) return;
         if (!url.pathname.endsWith('.html') && !url.pathname.endsWith('/')) return;
-        url.searchParams.set('lang', language);
+        url.searchParams.set('lang', targetLanguage);
         link.href = url.pathname + url.search + url.hash;
       } catch (_) {
         // Invalid links are ignored.
@@ -468,20 +527,18 @@
     });
   }
 
-  function styleControls() {
-    if (document.getElementById('formatx-language-style')) return;
-    const style = document.createElement('style');
-    style.id = 'formatx-language-style';
-    style.textContent = `
-      .language-control{display:inline-flex;align-items:center;gap:3px;padding:3px;border:1px solid rgba(88,238,255,.24);border-radius:9px;background:rgba(3,13,22,.72);box-shadow:inset 0 0 18px rgba(88,238,255,.04)}
-      .language-control button{min-width:38px;min-height:31px;padding:0 9px;color:#86a7b6;border:0;border-radius:6px;background:transparent;font:700 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.09em;cursor:pointer}
-      .language-control button[aria-pressed="true"]{color:#041119;background:linear-gradient(110deg,#58eeff,#84b8ff 52%,#c46dff);box-shadow:0 0 18px rgba(88,238,255,.2)}
-      .mobile-language-control{display:none;margin-top:10px}
-      .legal-header-inner .language-control{margin-left:auto}
-      @media(max-width:980px){.header-actions>.language-control{display:none}.mobile-language-control{display:inline-flex}.legal-header-inner{gap:10px;flex-wrap:wrap}.legal-header-inner .language-control{order:3;margin-left:0}.legal-header-inner .theme-control{order:4}}
-      @media(max-width:560px){.legal-header-inner .legal-home-link{order:2}.legal-header-inner .language-control{order:3}.language-control button{min-width:42px}}
-    `;
-    document.head.appendChild(style);
+  function ensureStylesheet() {
+    if (document.querySelector('link[data-formatx-language-style]')) return;
+    const ownScript = document.currentScript
+      || Array.from(document.scripts).find(function (script) { return /\/i18n\.js(?:\?|$)/.test(script.src); });
+    const href = ownScript?.src
+      ? new URL('../styles/language.css?v=20260718-bilingual-2', ownScript.src).href
+      : './styles/language.css?v=20260718-bilingual-2';
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.dataset.formatxLanguageStyle = 'true';
+    document.head.appendChild(link);
   }
 
   function makeControl(extraClass) {
@@ -499,7 +556,7 @@
   }
 
   function installControls() {
-    styleControls();
+    ensureStylesheet();
     const headerActions = document.querySelector('.header-actions');
     const legalHeader = document.querySelector('.legal-header-inner');
     const nav = document.getElementById('primary-nav');
@@ -510,60 +567,62 @@
       const theme = legalHeader.querySelector('.theme-control');
       legalHeader.insertBefore(makeControl('legal-language-control'), theme || null);
     }
-
     if (nav && !nav.querySelector('.mobile-language-control')) {
       nav.appendChild(makeControl('mobile-language-control'));
     }
   }
 
-  function updateControls(language) {
+  function updateControls(targetLanguage) {
     document.querySelectorAll('[data-language-choice]').forEach(function (button) {
-      button.setAttribute('aria-pressed', String(button.dataset.languageChoice === language));
+      button.setAttribute('aria-pressed', String(button.dataset.languageChoice === targetLanguage));
     });
   }
 
-  function setLanguage(language, persist) {
-    if (!SUPPORTED.has(language)) return;
-    currentLanguage = language;
+  function setLanguage(targetLanguage, persist) {
+    if (!SUPPORTED.has(targetLanguage)) return;
+    language = targetLanguage;
+    applying = true;
+
     if (persist) {
       try {
-        window.localStorage.setItem(STORAGE_KEY, language);
+        window.localStorage.setItem(STORAGE_KEY, targetLanguage);
       } catch (_) {
         // Persistence is optional.
       }
       const url = new URL(window.location.href);
-      url.searchParams.set('lang', language);
+      url.searchParams.set('lang', targetLanguage);
       window.history.replaceState({}, '', url.pathname + url.search + url.hash);
     }
 
-    updateMeta(language);
-    translateSubtree(document.body, language);
-    updateControls(language);
-    updateInternalLinks(language);
-    window.dispatchEvent(new CustomEvent('formatx:languagechange', { detail: { language: language } }));
+    updateMeta(targetLanguage);
+    translateNode(document.body, targetLanguage);
+    updateControls(targetLanguage);
+    updateLinks(targetLanguage);
+    applying = false;
+    window.dispatchEvent(new CustomEvent('formatx:languagechange', { detail: { language: targetLanguage } }));
   }
 
   const observer = new MutationObserver(function (records) {
-    if (translating) return;
+    if (applying) return;
     records.forEach(function (record) {
       if (record.type === 'characterData') {
-        translateSubtree(record.target, currentLanguage);
+        translateNode(record.target, language);
       } else {
         record.addedNodes.forEach(function (node) {
-          translateSubtree(node, currentLanguage);
+          translateNode(node, language);
         });
       }
     });
   });
 
   window.FormatXI18n = {
-    getLanguage: function () { return currentLanguage; },
+    getLanguage: function () { return language; },
     setLanguage: setLanguage,
-    translateDocument: function () { setLanguage(currentLanguage, false); },
-    t: function (hu, en) { return currentLanguage === 'hu' ? hu : en; }
+    translateDocument: function () { setLanguage(language, false); },
+    t: function (hu, en) { return language === 'hu' ? hu : en; }
   };
 
   installControls();
-  setLanguage(currentLanguage, false);
+  setLanguage(language, false);
   observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
 }());
