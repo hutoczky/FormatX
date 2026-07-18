@@ -1,0 +1,38 @@
+name: Patch visible language loader
+
+on:
+  push:
+    branches:
+      - agent/fix-visible-language-switch
+    paths:
+      - "tools/patch-language-loader.py"
+      - ".github/workflows/patch-language-loader.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/fix-visible-language-switch
+          fetch-depth: 0
+
+      - name: Patch every active page
+        run: python3 tools/patch-language-loader.py
+
+      - name: Commit loader changes
+        run: |
+          if git diff --quiet; then
+            echo "Language loader already patched."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/scifi-ui/*.html
+          git commit -m "Load language switch directly on every page"
+          git push origin HEAD:agent/fix-visible-language-switch
