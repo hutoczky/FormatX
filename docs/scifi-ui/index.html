@@ -3,96 +3,287 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="FormatX Suite Pro: cross-platform technikusi eszköztár meghajtókezeléshez, telepítéshez és valós rendszerdiagnosztikához.">
-  <meta name="theme-color" content="#050a10">
+  <meta name="description" content="FormatX Suite Pro: 2041-es tervezési nyelvű, cross-platform technikusi rendszer meghajtókezeléshez, telepítéshez és valós rendszerdiagnosztikához.">
+  <meta name="theme-color" content="#030711">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'none'">
-  <meta property="og:title" content="FormatX Suite Pro">
-  <meta property="og:description" content="Valós rendszeradatok, biztonságos műveletek és egységes Windows, Linux / Bazzite és macOS csomag.">
+  <meta property="og:title" content="FormatX Suite Pro — Technician Interface 2041">
+  <meta property="og:description" content="Valós rendszeradatok, biztonságos műveletek és egységes Windows, Linux / Bazzite és macOS technikusi munkafelület.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="./assets/images/formatx-technician-console.png">
-  <title>FormatX Suite Pro | Technikusoknak tervezve</title>
+  <title>FormatX Suite Pro | Technician Interface 2041</title>
   <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
   <link rel="preload" as="image" href="./assets/images/formatx-technician-console.png">
   <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
-  <script defer src="./scripts/site.js?v=20260718-v92"></script>
+  <link rel="stylesheet" href="./styles/future-2041.css?v=20260718-2041-1">
+  <script defer src="./scripts/site.js?v=20260718-2041-1"></script>
 </head>
-<body id="top">
+<body id="top" class="future-2041">
   <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
 
-  <header class="site-header">
+  <header class="site-header future-header">
     <div class="header-inner">
-      <a class="brand" href="#top" aria-label="FormatX Suite Pro főoldal">
-        <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
-        <span><strong>FormatX Suite Pro</strong><small>Technician Console</small></span>
+      <a class="brand future-brand" href="#top" aria-label="FormatX Suite Pro főoldal">
+        <span class="brand-emblem" aria-hidden="true">
+          <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
+        </span>
+        <span>
+          <strong>FormatX Suite Pro</strong>
+          <small>Technician Interface // 2041</small>
+        </span>
       </a>
 
       <button id="menu-toggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menü</button>
 
       <nav id="primary-nav" class="primary-nav" aria-label="Fő navigáció">
-        <a href="#downloads">Letöltés</a>
+        <a href="#system">Rendszer</a>
         <a href="#platforms">Platformok</a>
         <a href="#features">Funkciók</a>
-        <a href="#pro">Pro licencek</a>
-        <a href="#about">Névjegy</a>
+        <a href="#downloads">Letöltés</a>
+        <a href="#pro">Licencek</a>
+        <a href="#security">Biztonság</a>
         <div class="mobile-theme-control" role="group" aria-label="Mobil megjelenés">
           <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
           <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
         </div>
       </nav>
 
-      <div class="theme-control" role="group" aria-label="Megjelenés">
-        <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
-        <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
+      <div class="header-actions">
+        <div class="theme-control" role="group" aria-label="Megjelenés">
+          <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
+          <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
+        </div>
+        <a class="header-cta" href="#downloads">FormatX letöltése</a>
       </div>
     </div>
   </header>
 
   <main id="main-content">
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-overlay" aria-hidden="true"></div>
-      <div class="hero-inner">
-        <p class="eyebrow">WINDOWS · LINUX / BAZZITE · macOS</p>
-        <h1 id="hero-title">FormatX Suite Pro</h1>
-        <p class="hero-copy">Meghajtókezelés, telepítés és valós rendszerdiagnosztika egy egységes, technikusi munkafelületen.</p>
-        <div class="hero-status" aria-label="Kiadási információk">
-          <span id="hero-version">V92</span>
-          <span>5 napos próbaidő</span>
-          <span>SHA256 ellenőrzés</span>
+    <section id="system" class="hero future-hero" aria-labelledby="hero-title">
+      <div class="future-grid" aria-hidden="true"></div>
+      <div class="future-orbit future-orbit-one" aria-hidden="true"></div>
+      <div class="future-orbit future-orbit-two" aria-hidden="true"></div>
+
+      <div class="hero-inner future-hero-inner">
+        <div class="future-hero-copy">
+          <p class="future-kicker"><span></span> A TECHNIKUSI MUNKAFELÜLET 2041-ES SZABVÁNYA</p>
+          <h1 id="hero-title">FormatX Suite <span>Pro</span></h1>
+          <p class="future-tagline">Felmér. Rendszerez. Biztonságosan végrehajt.</p>
+          <p class="hero-copy">Cross-platform technikusi rendszer meghajtókezeléshez, telepítéshez, fájlműveletekhez és valós rendszerdiagnosztikához — látványos díszadatok helyett ellenőrizhető állapotokkal.</p>
+
+          <div class="hero-actions">
+            <a id="hero-download" class="button primary future-primary" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip">
+              <span id="hero-version">V92</span> stabil csomag letöltése
+            </a>
+            <a class="button secondary future-secondary" href="#features">Rendszermodulok megnyitása</a>
+          </div>
+
+          <div class="future-capabilities" aria-label="Fő képességek">
+            <span><i aria-hidden="true">◇</i> Valós hardvertelemetria</span>
+            <span><i aria-hidden="true">⌁</i> Cross-platform vezérlés</span>
+            <span><i aria-hidden="true">⬡</i> Ellenőrzött kiadási lánc</span>
+          </div>
         </div>
-        <div class="hero-actions">
-          <a id="hero-download" class="button primary" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip">V92 letöltése</a>
-          <a class="button secondary" href="#features">Funkciók áttekintése</a>
+
+        <div class="core-interface interactive-holo" aria-label="FormatX Core Engine rendszeráttekintés">
+          <div class="core-frame-corner core-frame-corner-a" aria-hidden="true"></div>
+          <div class="core-frame-corner core-frame-corner-b" aria-hidden="true"></div>
+
+          <div class="core-topbar">
+            <div>
+              <span class="core-label">FORMATX CORE ENGINE</span>
+              <strong>Technician Control Matrix</strong>
+            </div>
+            <span class="core-online"><i aria-hidden="true"></i> ONLINE</span>
+          </div>
+
+          <div class="core-body">
+            <nav class="core-nav" aria-label="Rendszermodulok">
+              <span class="active"><i aria-hidden="true">⌂</i> Áttekintés</span>
+              <span><i aria-hidden="true">◫</i> Meghajtók</span>
+              <span><i aria-hidden="true">◎</i> Diagnosztika</span>
+              <span><i aria-hidden="true">⇄</i> Fájlkezelő</span>
+              <span><i aria-hidden="true">⌘</i> Biztonságos shell</span>
+              <span><i aria-hidden="true">↻</i> Frissítés</span>
+            </nav>
+
+            <div class="core-stage">
+              <div class="core-radar" aria-hidden="true">
+                <span class="radar-ring radar-ring-a"></span>
+                <span class="radar-ring radar-ring-b"></span>
+                <span class="radar-ring radar-ring-c"></span>
+                <span class="radar-axis radar-axis-x"></span>
+                <span class="radar-axis radar-axis-y"></span>
+              </div>
+              <div class="data-core" aria-hidden="true">
+                <span class="core-layer core-layer-one"></span>
+                <span class="core-layer core-layer-two"></span>
+                <span class="core-layer core-layer-three"></span>
+                <span class="core-glyph">X</span>
+              </div>
+              <span class="core-particle particle-a" aria-hidden="true"></span>
+              <span class="core-particle particle-b" aria-hidden="true"></span>
+              <span class="core-particle particle-c" aria-hidden="true"></span>
+              <span class="core-particle particle-d" aria-hidden="true"></span>
+            </div>
+
+            <div class="telemetry-stack">
+              <article>
+                <div class="telemetry-heading"><span>Platformlefedettség</span><strong>3 / 3</strong></div>
+                <div class="telemetry-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <small>Windows · Linux / Bazzite · macOS</small>
+              </article>
+              <article>
+                <div class="telemetry-heading"><span>Adatintegritás</span><strong>SHA256</strong></div>
+                <div class="telemetry-line" aria-hidden="true"><i></i></div>
+                <small>Kiadási metaadat és fájlellenőrzés</small>
+              </article>
+            </div>
+          </div>
+
+          <div class="core-metrics">
+            <div><span>Rendszermodul</span><strong>06</strong><small>egységes munkafolyamat</small></div>
+            <div><span>Frissítés</span><strong>Ed25519</strong><small>aláírt ellenőrzés</small></div>
+            <div><span>Mérési elv</span><strong>N/A-safe</strong><small>nincs kitalált érték</small></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="release-strip" aria-label="Aktuális kiadás">
+    <section class="release-strip future-release-strip" aria-label="Aktuális kiadás">
       <div class="content-width release-strip-inner">
         <div>
           <span id="release-state-dot" class="release-dot" aria-hidden="true"></span>
           <strong id="release-state">Ellenőrzött GitHub Release</strong>
         </div>
         <p><span id="release-name">FormatX Suite Pro V92</span> · <span id="release-published">2026. 07. 17.</span></p>
-        <a id="release-page-link" href="https://github.com/hutoczky/FormatX-Updates/releases/tag/v92" target="_blank" rel="noopener noreferrer">Kiadási oldal</a>
+        <a id="release-page-link" href="https://github.com/hutoczky/FormatX-Updates/releases/tag/v92" target="_blank" rel="noopener noreferrer">Kiadási központ →</a>
       </div>
     </section>
 
-    <section id="downloads" class="section-band">
+    <section class="future-principles" aria-label="FormatX alapelvek">
+      <div class="content-width principle-grid">
+        <article><span aria-hidden="true">01</span><div><strong>Valós rendszeradat</strong><small>A felület csak mérhető állapotot jelenít meg.</small></div></article>
+        <article><span aria-hidden="true">02</span><div><strong>Biztonságos megerősítés</strong><small>Kritikus művelet előtt egyértelmű célazonosítás.</small></div></article>
+        <article><span aria-hidden="true">03</span><div><strong>Nyílt kiadási lánc</strong><small>GitHub Release, SHA256 és verziókövetés.</small></div></article>
+        <article><span aria-hidden="true">04</span><div><strong>Platformnatív működés</strong><small>Az operációs rendszerhez igazított adatforrások.</small></div></article>
+      </div>
+    </section>
+
+    <section id="platforms" class="section-band future-section platform-section">
       <div class="content-width">
-        <div class="section-heading">
+        <div class="future-section-heading">
           <div>
-            <p class="eyebrow">AKTUÁLIS STABIL KIADÁS</p>
-            <h2>Egy csomag, minden támogatott platform</h2>
+            <p class="future-kicker"><span></span> PLATFORM MATRIX</p>
+            <h2>Egy közös kezelőfelület. Három natív rendszerprofil.</h2>
+            <p>A FormatX nem egyetlen platform logikáját másolja mindenhová: a munkafolyamat egységes, az adatforrás és az útvonalkezelés operációs rendszerhez igazodik.</p>
           </div>
-          <span class="section-mark" aria-hidden="true">01</span>
+          <span class="future-index">01</span>
         </div>
 
-        <div class="download-layout">
-          <article class="download-primary">
+        <div class="platform-grid future-platform-grid">
+          <article class="platform-card platform-windows interactive-holo">
+            <div class="platform-card-top"><span class="platform-code">WIN // 2041</span><i aria-hidden="true">▦</i></div>
+            <h3>Windows Edition</h3>
+            <p>Meghajtóbetűjelek, Windows fájlválasztó, natív rendszeradatok és x86_64 / ARM64 indítás.</p>
+            <ul><li>Meghajtóleltár</li><li>Natív telepítési utak</li><li>Rendszerdiagnosztika</li></ul>
+            <code>Start-FormatX-Windows.exe</code>
+          </article>
+          <article class="platform-card platform-linux interactive-holo">
+            <div class="platform-card-top"><span class="platform-code">LNX // 2041</span><i aria-hidden="true">⌬</i></div>
+            <h3>Linux / Bazzite Edition</h3>
+            <p>Flatpak, rpm-ostree, Steam / Proton, Wayland és Linux meghajtódiagnosztika.</p>
+            <ul><li>Bazzite-kompatibilitás</li><li>Immutable rendszerismeret</li><li>Linux eszközadatok</li></ul>
+            <code>Start-FormatX-Linux.sh</code>
+          </article>
+          <article class="platform-card platform-macos interactive-holo">
+            <div class="platform-card-top"><span class="platform-code">MAC // 2041</span><i aria-hidden="true">◈</i></div>
+            <h3>macOS Edition</h3>
+            <p>macOS könyvtárválasztás, platformhoz igazított útvonalak és Intel / Apple Silicon profil.</p>
+            <ul><li>Natív mappaválasztás</li><li>Intel és Apple Silicon</li><li>Platformhelyes utak</li></ul>
+            <code>Start-FormatX-macOS.command</code>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section-band future-section future-section-dark">
+      <div class="content-width">
+        <div class="future-section-heading">
+          <div>
+            <p class="future-kicker"><span></span> TECHNICIAN MODULES</p>
+            <h2>Komoly rendszereszközök egy átlátható vezérlőmátrixban.</h2>
+            <p>A hangsúly nem a látványelemen, hanem az ellenőrizhető döntésen van. A 2041-es arculat minden esetben a működést teszi érthetőbbé.</p>
+          </div>
+          <span class="future-index">02</span>
+        </div>
+
+        <div class="feature-grid future-feature-grid">
+          <article class="interactive-holo"><span class="module-id">M01</span><i aria-hidden="true">◫</i><h3>Meghajtókezelés</h3><p>Platformhelyes leltár, eszközazonosítás és megerősítés a kritikus műveletek előtt.</p><small>Inventory · Target lock · Confirmation</small></article>
+          <article class="interactive-holo"><span class="module-id">M02</span><i aria-hidden="true">⬢</i><h3>Telepítőmag</h3><p>Szabványos célmappa-választás, előellenőrzés, újrapróbálás és ellenőrzött csomagtelepítés.</p><small>Preflight · Deploy · Verify</small></article>
+          <article class="interactive-holo"><span class="module-id">M03</span><i aria-hidden="true">◎</i><h3>Diagnosztika</h3><p>Valós CPU-, memória-, hálózati és tárhelyadatok; hiányzó mérésnél egyértelmű N/A állapot.</p><small>CPU · Memory · Network · Storage</small></article>
+          <article class="interactive-holo"><span class="module-id">M04</span><i aria-hidden="true">⇄</i><h3>Kétpaneles fájlkezelő</h3><p>Másolás, mozgatás, törlés és mappakezelés a gazdarendszer útvonalaihoz igazítva.</p><small>Copy · Move · Organize</small></article>
+          <article class="interactive-holo"><span class="module-id">M05</span><i aria-hidden="true">⌘</i><h3>Biztonságos shell</h3><p>Védett műveletek, jogosultsági megerősítés és naplózható parancsvégrehajtás.</p><small>Guard · Confirm · Audit</small></article>
+          <article class="interactive-holo"><span class="module-id">M06</span><i aria-hidden="true">↻</i><h3>Frissítési rendszer</h3><p>Ed25519 és SHA256 ellenőrzés, automatikus keresés és kézi kiadásellenőrzés.</p><small>Sign · Hash · Release</small></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="future-console-showcase" aria-labelledby="showcase-title">
+      <div class="content-width showcase-grid">
+        <div class="showcase-copy">
+          <p class="future-kicker"><span></span> ZERO-FICTION TELEMETRY</p>
+          <h2 id="showcase-title">A rendszer nem talál ki adatot, csak azért, hogy szebb legyen a képernyő.</h2>
+          <p>Ha egy szenzor, meghajtó vagy hálózati adatforrás nem érhető el, a FormatX N/A vagy „Nem elérhető” állapotot jelez. A professzionális felület alapja a megbízható információ.</p>
+          <div class="showcase-facts">
+            <div><strong>N/A</strong><span>hamis helyettesítő érték helyett</span></div>
+            <div><strong>LIVE</strong><span>operációs rendszerből olvasott állapot</span></div>
+            <div><strong>LOG</strong><span>visszakövethető műveleti lánc</span></div>
+          </div>
+        </div>
+
+        <div class="console-window interactive-holo" aria-label="FormatX rendszerkonzol előnézet">
+          <div class="console-titlebar"><span></span><span></span><span></span><strong>FORMATX // SYSTEM OBSERVATORY</strong><small>LIVE</small></div>
+          <div class="console-content">
+            <div class="console-sidebar">
+              <span class="active">Áttekintés</span><span>Hardver</span><span>Meghajtók</span><span>Hálózat</span><span>Napló</span>
+            </div>
+            <div class="console-main">
+              <div class="console-map">
+                <span class="map-node node-cpu">CPU</span>
+                <span class="map-node node-ram">RAM</span>
+                <span class="map-node node-gpu">GPU</span>
+                <span class="map-node node-net">NET</span>
+                <span class="map-core">FX</span>
+              </div>
+              <div class="console-readings">
+                <article><span>CPU állapot</span><strong>Elérhető</strong><i></i></article>
+                <article><span>Memóriaforrás</span><strong>Valós mérés</strong><i></i></article>
+                <article><span>Hálózati kapcsolat</span><strong>Aktív</strong><i></i></article>
+                <article><span>Hiányzó szenzor</span><strong>N/A</strong><i class="muted-line"></i></article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="downloads" class="section-band future-section download-section-2041">
+      <div class="content-width">
+        <div class="future-section-heading">
+          <div>
+            <p class="future-kicker"><span></span> VERIFIED RELEASE CHANNEL</p>
+            <h2>Egy ellenőrzött csomag minden támogatott platformhoz.</h2>
+            <p>A stabil kiadás közvetlenül a hivatalos FormatX-Updates GitHub Release csatornából érkezik.</p>
+          </div>
+          <span class="future-index">03</span>
+        </div>
+
+        <div class="download-layout future-download-layout">
+          <article class="download-primary interactive-holo">
             <div class="download-title-row">
-              <img src="./assets/images/formatx-icon.png" width="72" height="72" alt="">
+              <span class="download-emblem"><img src="./assets/images/formatx-icon.png" width="72" height="72" alt=""></span>
               <div>
-                <p class="eyebrow">UNIVERZÁLIS ARCHÍVUM</p>
+                <p class="future-kicker"><span></span> UNIVERSAL ARCHIVE</p>
                 <h3 id="download-file-name">FormatX-Suite-Pro-V92.zip</h3>
               </div>
             </div>
@@ -101,16 +292,17 @@
               <div><dt>Verzió</dt><dd id="download-version">V92</dd></div>
               <div><dt>Méret</dt><dd id="download-size">715,76 MiB</dd></div>
               <div><dt>Forrás</dt><dd>GitHub Releases</dd></div>
-              <div><dt>Csomag</dt><dd>Cross-platform</dd></div>
+              <div><dt>Profil</dt><dd>Cross-platform</dd></div>
             </dl>
             <div class="download-actions">
-              <a id="download-primary" class="button primary" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip">Univerzális csomag letöltése</a>
-              <a id="download-release-page" class="button secondary" href="https://github.com/hutoczky/FormatX-Updates/releases/tag/v92" target="_blank" rel="noopener noreferrer">Kiadási részletek</a>
+              <a id="download-primary" class="button primary future-primary" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip">Univerzális csomag letöltése</a>
+              <a id="download-release-page" class="button secondary future-secondary" href="https://github.com/hutoczky/FormatX-Updates/releases/tag/v92" target="_blank" rel="noopener noreferrer">Kiadási részletek</a>
             </div>
           </article>
 
-          <aside class="integrity-panel" aria-labelledby="integrity-title">
-            <p class="eyebrow">FÁJLINTEGRITÁS</p>
+          <aside class="integrity-panel interactive-holo" aria-labelledby="integrity-title">
+            <div class="integrity-orb" aria-hidden="true"><span>✓</span></div>
+            <p class="future-kicker"><span></span> INTEGRITY CHECK</p>
             <h3 id="integrity-title">SHA256</h3>
             <code id="release-sha256">cbb518cf1edc9939df20d9dfa0bfe23b6e451b03fa1cea29e047af8382c93231</code>
             <button id="copy-checksum" class="text-command" type="button">Ellenőrzőösszeg másolása</button>
@@ -121,131 +313,88 @@
       </div>
     </section>
 
-    <section id="platforms" class="section-band alternate">
+    <section id="pro" class="section-band future-section future-pricing-section">
       <div class="content-width">
-        <div class="section-heading">
+        <div class="future-section-heading centered-heading">
           <div>
-            <p class="eyebrow">NATÍV PROFILOK</p>
-            <h2>A működés az operációs rendszerhez igazodik</h2>
+            <p class="future-kicker"><span></span> LICENSE MATRIX</p>
+            <h2>Válaszd ki a technikusi kapacitáshoz illő hozzáférést.</h2>
+            <p>Egyszeri havi vagy éves banki átutalás HUF-ban vagy EUR-ban, fix összegű QR-adatokkal és kézi jóváírás-ellenőrzéssel.</p>
           </div>
-          <span class="section-mark" aria-hidden="true">02</span>
+          <span class="future-index">04</span>
         </div>
 
-        <div class="platform-grid">
-          <article class="platform-card platform-windows">
-            <p class="platform-code">WIN</p>
-            <h3>Windows Edition</h3>
-            <p>Meghajtóbetűjelek, Windows fájlválasztó, natív rendszeradatok és x86_64 / ARM64 indítás.</p>
-            <code>Start-FormatX-Windows.exe</code>
-          </article>
-          <article class="platform-card platform-linux">
-            <p class="platform-code">LNX</p>
-            <h3>Linux / Bazzite Edition</h3>
-            <p>Flatpak, rpm-ostree, Steam / Proton, Wayland és Linux meghajtódiagnosztika.</p>
-            <code>Start-FormatX-Linux.sh</code>
-          </article>
-          <article class="platform-card platform-macos">
-            <p class="platform-code">MAC</p>
-            <h3>macOS Edition</h3>
-            <p>macOS könyvtárválasztás, platformhoz igazított útvonalak és Intel / Apple Silicon profil.</p>
-            <code>Start-FormatX-macOS.command</code>
-          </article>
+        <div class="license-grid future-license-grid">
+          <article><p class="eyebrow">BETÖLTÉS</p><h3>Licencadatok előkészítése…</h3><p>A csomagok rövidesen megjelennek.</p></article>
+        </div>
+
+        <div class="pricing-assurance" aria-label="Fizetési alapelvek">
+          <span>✓ 5 napos próbaidő</span>
+          <span>✓ HUF és EUR banki fizetés</span>
+          <span>✓ Nincs automatikus terhelés</span>
+          <span>✓ Kézi tranzakció-ellenőrzés</span>
         </div>
       </div>
     </section>
 
-    <section id="features" class="section-band">
-      <div class="content-width">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">TECHNICIAN TOOLKIT</p>
-            <h2>Átlátható, ellenőrizhető munkafolyamatok</h2>
+    <section id="security" class="future-security-section">
+      <div class="content-width security-grid">
+        <div class="security-core interactive-holo" aria-hidden="true">
+          <span class="security-ring ring-one"></span>
+          <span class="security-ring ring-two"></span>
+          <span class="security-ring ring-three"></span>
+          <div class="security-shield">FX</div>
+        </div>
+        <div class="security-copy">
+          <p class="future-kicker"><span></span> TRUST ARCHITECTURE</p>
+          <h2>A 2041-es megjelenés mögött ellenőrizhető biztonsági lánc működik.</h2>
+          <p>A letöltés, a fizetés és a licencaktiválás külön ellenőrzési pontokon halad át. A látvány nem helyettesíti a technikai bizonyítékot.</p>
+          <div class="security-list">
+            <article><i aria-hidden="true">01</i><div><strong>Aláírt frissítés</strong><span>Ed25519 és SHA256 ellenőrzés.</span></div></article>
+            <article><i aria-hidden="true">02</i><div><strong>Fix fizetési összeg</strong><span>A csomag és deviza alapján rögzített HUF vagy EUR ár.</span></div></article>
+            <article><i aria-hidden="true">03</i><div><strong>Kézi jóváhagyás</strong><span>A licenc csak a valódi banki jóváírás ellenőrzése után aktív.</span></div></article>
+            <article><i aria-hidden="true">04</i><div><strong>Nyílt projektállapot</strong><span>GitHub kiadások, hibajegyek és verziókövetés.</span></div></article>
           </div>
-          <span class="section-mark" aria-hidden="true">03</span>
-        </div>
-
-        <div class="feature-grid">
-          <article><span>01</span><h3>Meghajtókezelés</h3><p>Platformhelyes leltár, eszközazonosítás és megerősítés a kritikus műveletek előtt.</p></article>
-          <article><span>02</span><h3>Telepítő</h3><p>Szabványos célmappa-választás, előellenőrzés, újrapróbálás és ellenőrzött csomagtelepítés.</p></article>
-          <article><span>03</span><h3>Diagnosztika</h3><p>Valós CPU-, memória-, hálózati és tárhelyadatok; hiányzó mérésnél egyértelmű N/A állapot.</p></article>
-          <article><span>04</span><h3>Kétpaneles fájlkezelő</h3><p>Másolás, mozgatás, törlés és mappakezelés a gazdarendszer útvonalaihoz igazítva.</p></article>
-          <article><span>05</span><h3>Biztonságos shell</h3><p>Védett műveletek, jogosultsági megerősítés és naplózható parancsvégrehajtás.</p></article>
-          <article><span>06</span><h3>Frissítés</h3><p>Ed25519 és SHA256 ellenőrzés, napi három automatikus keresés és kézi ellenőrzés.</p></article>
         </div>
       </div>
     </section>
 
-    <section class="product-visual" aria-label="FormatX Technician Console képernyőkép">
-      <div class="content-width visual-copy">
-        <p class="eyebrow">VALÓS ADATOK, NEM DÍSZLET</p>
-        <h2>A rendszer csak azt állítja, amit mérni tud</h2>
-        <p>Ha egy szenzor, meghajtó vagy hálózati adatforrás nem érhető el, a felület nem talál ki értéket: N/A vagy „Nem elérhető” állapotot jelez.</p>
-      </div>
-    </section>
-
-    <section id="pro" class="section-band alternate">
-      <div class="content-width">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">LICENCELÉS</p>
-            <h2>Öt nap próbaidő, utána választott Pro licenc</h2>
-          </div>
-          <span class="section-mark" aria-hidden="true">04</span>
-        </div>
-
-        <div class="license-grid">
-          <article>
-            <p class="eyebrow">PRÓBAIDŐ</p>
-            <h3>5 nap</h3>
-            <p>Az első indításkor kezdődik. A próbaidő lejárata után aktiválható a választott licenc.</p>
-            <a class="text-link" href="#downloads">Csomag letöltése</a>
-          </article>
-          <article>
-            <p class="eyebrow">BUSINESS</p>
-            <h3>Csapatoknak</h3>
-            <p>Több gépes technikusi használat, diagnosztika, naplózás és frissítési jogosultság.</p>
-            <a class="text-link" href="./support.html?topic=business">Licencigény küldése</a>
-          </article>
-          <article>
-            <p class="eyebrow">OWNER</p>
-            <h3>Tulajdonosi hozzáférés</h3>
-            <p>Publikus csomagba nem kerülő adminisztrációs és kiadáskezelési funkciók.</p>
-            <a class="text-link" href="./support.html?topic=owner">Kapcsolatfelvétel</a>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="about" class="section-band">
+    <section id="about" class="section-band future-section future-about-section">
       <div class="content-width about-layout">
         <div>
-          <p class="eyebrow">NÉVJEGY</p>
-          <h2>FormatX Suite Pro</h2>
+          <p class="future-kicker"><span></span> FORMATX PROJECT</p>
+          <h2>Jövőorientált felület, mai rendszereken működő eszközök.</h2>
         </div>
         <div class="about-copy">
-          <p>A FormatX egy cross-platform technikusi alkalmazás meghajtókezeléshez, rendszerdiagnosztikához, telepítéshez és karbantartási műveletekhez. A közös QML felület platformonként natív adatforrásokat és útvonalkezelést használ.</p>
+          <p>A FormatX Suite Pro cross-platform technikusi alkalmazás meghajtókezeléshez, rendszerdiagnosztikához, telepítéshez és karbantartási műveletekhez. A közös QML felület platformonként natív adatforrásokat és útvonalkezelést használ.</p>
+          <p>A 2041-es arculat a rendszer hosszú távú irányát fejezi ki: gyorsan értelmezhető állapotok, mélységet adó holografikus rétegek és professzionális, zavarmentes kezelhetőség.</p>
           <div class="about-links">
-            <a href="https://github.com/hutoczky/FormatX" target="_blank" rel="noopener noreferrer">GitHub projekt</a>
-            <a href="https://github.com/hutoczky/FormatX-Updates/releases" target="_blank" rel="noopener noreferrer">Összes kiadás</a>
-            <a href="./support.html">Visszajelzés és támogatás</a>
+            <a href="https://github.com/hutoczky/FormatX" target="_blank" rel="noopener noreferrer">GitHub projekt →</a>
+            <a href="https://github.com/hutoczky/FormatX-Updates/releases" target="_blank" rel="noopener noreferrer">Összes kiadás →</a>
+            <a href="./support.html">Visszajelzés és támogatás →</a>
           </div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="content-width footer-inner">
-      <div class="footer-brand">
-        <img src="./assets/images/formatx-icon.png" width="36" height="36" alt="">
-        <span><strong>FormatX Suite Pro</strong><small>© 2026 Hutóczky József</small></span>
+  <footer class="site-footer future-footer">
+    <div class="content-width future-footer-grid">
+      <div class="footer-intro">
+        <a class="footer-brand" href="#top">
+          <img src="./assets/images/formatx-icon.png" width="42" height="42" alt="">
+          <span><strong>FormatX Suite Pro</strong><small>Technician Interface // 2041</small></span>
+        </a>
+        <p>Cross-platform technikusi rendszer valós rendszeradatokkal, ellenőrzött kiadásokkal és biztonságos munkafolyamatokkal.</p>
       </div>
-      <nav aria-label="Jogi és támogatási linkek">
-        <a href="./support.html">Támogatás</a>
-        <a href="./terms.html">Felhasználási feltételek</a>
-        <a href="./privacy.html">Adatvédelem</a>
-        <a href="#top">Tetejére</a>
-      </nav>
+      <div class="footer-column"><strong>Rendszer</strong><a href="#platforms">Platformok</a><a href="#features">Funkciók</a><a href="#downloads">Letöltés</a></div>
+      <div class="footer-column"><strong>Licencek</strong><a href="#pro">Csomagok</a><a href="./checkout.html">HUF / EUR fizetés</a><a href="./support.html?topic=business">Licenctámogatás</a></div>
+      <div class="footer-column"><strong>Bizalom</strong><a href="./terms.html">Felhasználási feltételek</a><a href="./privacy.html">Adatvédelem</a><a href="https://github.com/hutoczky/FormatX/issues" target="_blank" rel="noopener noreferrer">Nyitott hibajegyek</a></div>
+    </div>
+    <div class="content-width future-footer-bottom">
+      <span>© 2026 Hutóczky József · FormatX Suite Pro</span>
+      <span>2041-es tervezési nyelv · Valós működés · Ellenőrizhető adatok</span>
+      <a href="#top">Vissza a tetejére ↑</a>
     </div>
   </footer>
 
