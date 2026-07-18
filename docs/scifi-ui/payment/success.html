@@ -1,52 +1,46 @@
 <!doctype html>
-<html lang="hu">
+<html lang="hu" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="FormatX Suite Pro banki átutalás és licencaktiválás állapota.">
+  <meta name="theme-color" content="#030711">
   <meta name="formatx-billing-api-base" content="/api">
-  <title>Fizetés sikeres — FormatX Suite Pro</title>
-  <link rel="stylesheet" href="../styles/site.css">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'none'">
+  <title>Fizetési állapot | FormatX Suite Pro</title>
+  <link rel="icon" type="image/png" href="../assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="../styles/site.css?v=20260718-v92">
+  <link rel="stylesheet" href="../styles/checkout.css?v=20260718-bank2">
+  <script defer src="../scripts/payment-status.js?v=20260718-bilingual-1"></script>
 </head>
-<body class="theme-lcars">
-  <main class="container shell">
-    <section class="panel">
-      <h1 class="panel-title">Fizetés feldolgozása</h1>
-      <div class="card span-12">
-        <p id="payment-status-message">A fizetés feldolgozás alatt van. A licenc aktiválása néhány másodpercet vehet igénybe.</p>
-        <ul id="payment-status-details"></ul>
-        <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem;">
-          <a class="pill lg" href="../index.html#payment">VISSZA AZ ÁRAZÁSHOZ</a>
-          <a class="pill lg alt" href="../support.html">KAPCSOLATFELVÉTEL</a>
-        </div>
+<body data-payment-page="success">
+  <a class="skip-link" href="#main-content" data-hu="Ugrás a tartalomra" data-en="Skip to content">Ugrás a tartalomra</a>
+  <header class="site-header">
+    <div class="header-inner legal-header-inner">
+      <a class="brand" href="../index.html" data-internal-link aria-label="FormatX Suite Pro főoldal">
+        <img src="../assets/images/formatx-icon.png" width="44" height="44" alt="">
+        <span><strong>FormatX Suite Pro</strong><small data-hu="Fizetési állapot" data-en="Payment status">Fizetési állapot</small></span>
+      </a>
+      <a class="legal-home-link" href="../index.html#pro" data-internal-link data-hu="Vissza a licencekhez" data-en="Back to licences">Vissza a licencekhez</a>
+      <div class="language-control payment-language-control" role="group" aria-label="Language / Nyelv">
+        <button type="button" data-language-choice="hu" aria-pressed="true">HU</button>
+        <button type="button" data-language-choice="en" aria-pressed="false">EN</button>
       </div>
-    </section>
+    </div>
+  </header>
+
+  <main id="main-content" class="legal-main">
+    <article class="content-width legal-document payment-status-document">
+      <p class="eyebrow" data-hu="RENDELÉS ÉS LICENC" data-en="ORDER AND LICENCE">RENDELÉS ÉS LICENC</p>
+      <h1 data-hu="Fizetés feldolgozása" data-en="Processing payment">Fizetés feldolgozása</h1>
+      <p id="payment-status-message" class="legal-lead" data-state="pending" data-hu="A fizetési és licencadatok lekérdezése folyamatban van." data-en="Payment and licence data are being retrieved.">A fizetési és licencadatok lekérdezése folyamatban van.</p>
+      <ul id="payment-status-details" class="check-list payment-status-details"></ul>
+      <div class="legal-actions">
+        <a class="button primary" href="../index.html#pro" data-internal-link data-hu="Vissza az árakhoz" data-en="Back to pricing">Vissza az árakhoz</a>
+        <a class="button secondary" href="../support.html" data-internal-link data-hu="Kapcsolatfelvétel" data-en="Contact support">Kapcsolatfelvétel</a>
+      </div>
+      <p class="checkout-note" data-hu="A licenc csak a bankszámlán megjelent pontos deviza, összeg és közlemény kézi ellenőrzése után válik aktívvá." data-en="The licence becomes active only after manual verification of the exact currency, amount and reference credited to the bank account.">A licenc csak a bankszámlán megjelent pontos deviza, összeg és közlemény kézi ellenőrzése után válik aktívvá.</p>
+    </article>
   </main>
-  <script>
-    (async function () {
-      const apiMeta = document.querySelector('meta[name="formatx-billing-api-base"]');
-      const apiBase = (apiMeta && apiMeta.content ? apiMeta.content : '/api').replace(/\/$/, '');
-      const statusMessage = document.getElementById('payment-status-message');
-      const details = document.getElementById('payment-status-details');
-      const sessionId = new URL(window.location.href).searchParams.get('session_id');
-      if (!sessionId) {
-        statusMessage.textContent = 'Hiányzó session azonosító. A fizetés állapota nem kérdezhető le.';
-        return;
-      }
-      try {
-        const response = await fetch(`${apiBase}/session-status?session_id=${encodeURIComponent(sessionId)}`);
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Nem sikerült lekérdezni a session állapotát.');
-        statusMessage.textContent = result.message;
-        details.innerHTML = '';
-        [['Csomag', result.plan_name], ['Fizetési ciklus', result.billing_cycle], ['Licenckulcs', result.license_key || 'még nincs aktiválva']].forEach(([label, value]) => {
-          const li = document.createElement('li');
-          li.textContent = `${label}: ${value}`;
-          details.appendChild(li);
-        });
-      } catch (error) {
-        statusMessage.textContent = error.message || 'A session állapota jelenleg nem elérhető.';
-      }
-    })();
-  </script>
 </body>
 </html>
