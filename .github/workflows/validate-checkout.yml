@@ -3,15 +3,17 @@ name: Validate checkout and bilingual 2041 site
 on:
   pull_request:
     paths:
-      - "docs/scifi-ui/**"
+      - "docs/**"
       - "billing-worker/**"
+      - "tools/validate-site-i18n.py"
       - ".github/workflows/validate-checkout.yml"
   push:
     branches:
       - master
     paths:
-      - "docs/scifi-ui/**"
+      - "docs/**"
       - "billing-worker/**"
+      - "tools/validate-site-i18n.py"
       - ".github/workflows/validate-checkout.yml"
 
 permissions:
@@ -33,11 +35,16 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check docs/scifi-ui/scripts/checkout.js
+          node --check docs/scifi-ui/scripts/checkout-language.js
           node --check docs/scifi-ui/scripts/site.js
           node --check docs/scifi-ui/scripts/i18n.js
+          node --check docs/scifi-ui/scripts/payment-status.js
           node --check billing-worker/src/live-entry.js
 
-      - name: Validate bilingual site, payment data and 2041 visual system
+      - name: Run exhaustive bilingual content audit
+        run: python3 tools/validate-site-i18n.py
+
+      - name: Validate payment data and 2041 visual system
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -48,11 +55,16 @@ jobs:
 
           root = Path('.')
           html_files = [
+              root / 'docs/index.html',
+              root / 'docs/404.html',
+              root / 'docs/formatx-light/index.html',
               root / 'docs/scifi-ui/index.html',
               root / 'docs/scifi-ui/checkout.html',
               root / 'docs/scifi-ui/support.html',
               root / 'docs/scifi-ui/terms.html',
               root / 'docs/scifi-ui/privacy.html',
+              root / 'docs/scifi-ui/payment/success.html',
+              root / 'docs/scifi-ui/payment/cancel.html',
           ]
 
           for path in html_files:
@@ -64,14 +76,19 @@ jobs:
               assert text.lower().count('</body>') == 1, path
 
           checkout = (root / 'docs/scifi-ui/scripts/checkout.js').read_text(encoding='utf-8')
+          checkout_language = (root / 'docs/scifi-ui/scripts/checkout-language.js').read_text(encoding='utf-8')
+          payment_status = (root / 'docs/scifi-ui/scripts/payment-status.js').read_text(encoding='utf-8')
           worker = (root / 'billing-worker/src/live-entry.js').read_text(encoding='utf-8')
           site = (root / 'docs/scifi-ui/scripts/site.js').read_text(encoding='utf-8')
           i18n = (root / 'docs/scifi-ui/scripts/i18n.js').read_text(encoding='utf-8')
           checkout_css = (root / 'docs/scifi-ui/styles/checkout.css').read_text(encoding='utf-8')
+          language_css = (root / 'docs/scifi-ui/styles/language.css').read_text(encoding='utf-8')
           future_css = (root / 'docs/scifi-ui/styles/future-2041.css').read_text(encoding='utf-8')
           reference_css = (root / 'docs/scifi-ui/styles/reference-2041.css').read_text(encoding='utf-8')
           checkout_html = (root / 'docs/scifi-ui/checkout.html').read_text(encoding='utf-8')
           home_html = (root / 'docs/scifi-ui/index.html').read_text(encoding='utf-8')
+          success_html = (root / 'docs/scifi-ui/payment/success.html').read_text(encoding='utf-8')
+          cancel_html = (root / 'docs/scifi-ui/payment/cancel.html').read_text(encoding='utf-8')
 
           required_tokens = [
               'payment-currency',
@@ -89,6 +106,7 @@ jobs:
           for price in prices:
               assert str(price) in checkout, price
               assert str(price) in worker, price
+              assert str(price) in checkout_language, price
 
           assert 'HUF / EUR bank payment' in site
           assert 'Technician Interface // 2041' in home_html
@@ -112,20 +130,32 @@ jobs:
           assert "new Set(['hu', 'en'])" in i18n
           assert 'data-language-choice' in i18n
           assert 'MutationObserver' in i18n
+          assert 'if (after !== before)' in i18n
           assert 'formatx:languagechange' in i18n
+          assert "upsertAlternate('hu'" in i18n
+          assert "upsertAlternate('en'" in i18n
+          assert 'og:locale' in i18n
           assert 'Magyar' in i18n and 'English' in i18n
-          assert 'BELÉPÉS A RENDSZERBE' in i18n and 'ENTER THE SYSTEM' in i18n
-          assert 'Közvetlen banki átutalás QR-kóddal' in i18n
-          assert 'Direct bank transfer with QR code' in i18n
-          assert 'Felhasználási feltételek' in i18n and 'Terms of use' in i18n
-          assert 'Adatvédelem' in i18n and 'Privacy' in i18n
-          assert 'Támogatás' in i18n and 'Support' in i18n
+          assert 'style.textContent' not in i18n
+          assert 'language.css' in i18n
           assert 'mix-blend-mode' not in i18n
+
+          assert 'FormatX payment report' in checkout_language
+          assert 'Beneficiary:' in checkout_language
+          assert 'Intl.NumberFormat' in checkout_language
+          assert 'data-language-choice' in payment_status
+          assert 'data-hu=' in success_html and 'data-en=' in success_html
+          assert 'data-hu=' in cancel_html and 'data-en=' in cancel_html
 
           assert 'prefers-reduced-motion' in checkout_css
           assert 'hologram-drift' in checkout_css
           assert 'mix-blend-mode' not in checkout_css
           assert checkout_css.count('{') == checkout_css.count('}')
+
+          assert ':focus-visible' in language_css
+          assert 'prefers-reduced-motion' in language_css
+          assert 'prefers-contrast: more' in language_css
+          assert language_css.count('{') == language_css.count('}')
 
           assert 'prefers-reduced-motion' in future_css
           assert 'prefers-contrast: more' in future_css
@@ -159,6 +189,17 @@ jobs:
           ])
           assert len(epc.encode('utf-8')) <= 331
           assert epc.splitlines()[:4] == ['BCD', '001', '1', 'SCT']
+
+          redirects = [
+              (root / 'docs/index.html').read_text(encoding='utf-8'),
+              (root / 'docs/404.html').read_text(encoding='utf-8'),
+              (root / 'docs/formatx-light/index.html').read_text(encoding='utf-8'),
+          ]
+          for redirect in redirects:
+              assert 'formatx-language' in redirect
+              assert "searchParams.set('lang'" in redirect
+              assert 'Magyar oldal' in redirect
+              assert 'English site' in redirect
 
           print('FormatX bilingual checkout and exact 2041 reference validation passed.')
           PY
