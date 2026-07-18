@@ -1,0 +1,16 @@
+/* Paint-cost reductions that preserve the reference composition. */
+/* Validated against the uploaded 1536 × 864 reference layout. */
+.topbar {
+  background: rgba(2, 7, 18, .97);
+  backdrop-filter: none;
+}
+
+.brand img,
+.core-cube {
+  filter: none;
+}
+
+.particle {
+  animation: none;
+  opacity: .8;
+}
