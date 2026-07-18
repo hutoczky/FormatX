@@ -1,0 +1,44 @@
+.payment-warning {
+  margin: .8rem 0 1rem;
+  padding: .85rem;
+  border: 1px solid var(--amber);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--amber) 9%, transparent);
+  color: var(--text);
+}
+
+.bank-details {
+  display: grid;
+  gap: .55rem;
+  margin: 1rem 0;
+}
+
+.bank-details div {
+  display: grid;
+  grid-template-columns: minmax(130px, .7fr) minmax(0, 1.3fr);
+  gap: 1rem;
+  padding-bottom: .55rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.bank-details dt {
+  color: var(--muted);
+}
+
+.bank-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700;
+}
+
+#payment-open[href^="payto:"] {
+  text-decoration: none;
+}
+
+@media (max-width: 680px) {
+  .bank-details div {
+    grid-template-columns: 1fr;
+    gap: .2rem;
+  }
+}
