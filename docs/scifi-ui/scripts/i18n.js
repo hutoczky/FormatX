@@ -5,6 +5,7 @@
   const SUPPORTED = new Set(['hu', 'en']);
   const TRANSLATIONS = [
     // SOURCE_AND_DYNAMIC_COVERAGE_PATCH
+    ['FormatX letöltése', 'Download FormatX'],
     ['FormatX Suite Pro | Technician Interface 2041', 'FormatX Suite Pro | Technician Interface 2041'],
     ['Banki átutalás | FormatX Suite Pro', 'Bank transfer | FormatX Suite Pro'],
     ['Támogatás | FormatX Suite Pro', 'Support | FormatX Suite Pro'],
