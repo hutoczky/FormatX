@@ -25,7 +25,6 @@
     }
   };
 
-  const REVOLUT_HOST = 'checkout.revolut.com';
   const apiMeta = document.querySelector('meta[name="formatx-billing-api-base"]');
   const apiBase = String(apiMeta ? apiMeta.content : '').trim().replace(/\/+$/, '');
 
@@ -37,8 +36,15 @@
   const paymentPanel = document.getElementById('payment-panel');
   const paymentQr = document.getElementById('payment-qr');
   const paymentOpen = document.getElementById('payment-open');
+  const paymentCopy = document.getElementById('payment-copy');
   const paymentReset = document.getElementById('payment-reset');
   const paymentReference = document.getElementById('payment-reference');
+  const paymentHolder = document.getElementById('payment-holder');
+  const paymentLocalAccount = document.getElementById('payment-local-account');
+  const paymentIban = document.getElementById('payment-iban');
+  const paymentBic = document.getElementById('payment-bic');
+  const paymentCorrespondentBic = document.getElementById('payment-correspondent-bic');
+  const paymentAmount = document.getElementById('payment-amount');
   const confirmationForm = document.getElementById('confirmation-form');
   const confirmationFeedback = document.getElementById('confirmation-feedback');
 
@@ -52,7 +58,7 @@
   if (!form || !planSelect || !cycleSelect || !submitButton || !feedback) return;
 
   let liveReady = false;
-  let checkoutUrl = '';
+  let paymentData = null;
   let orderReference = createOrderReference();
 
   applyQuerySelection();
@@ -128,7 +134,7 @@
   async function verifyBackend() {
     liveReady = false;
     submitButton.disabled = true;
-    submitButton.textContent = 'Fizetési kapcsolat ellenőrzése…';
+    submitButton.textContent = 'Bankszámla ellenőrzése…';
 
     try {
       const response = await fetch(apiUrl('/health'), {
@@ -137,28 +143,23 @@
       });
       if (!response.ok) throw new Error('HTTP ' + response.status);
       const result = await response.json();
-      if (!result || result.provider !== 'revolut_pro' || result.mode !== 'live' || result.live_ready !== true) {
-        throw new Error('A Revolut Pro backend nincs teljesen konfigurálva.');
+      if (!result || result.provider !== 'bank_transfer' || result.mode !== 'live' || result.live_ready !== true) {
+        throw new Error('A banki átutalási backend nincs teljesen konfigurálva.');
       }
       liveReady = true;
       submitButton.disabled = false;
-      submitButton.textContent = 'Revolut fizetés és QR-kód előkészítése';
-      setFeedback(feedback, 'Az éles Revolut Pro fizetési kapcsolat aktív.', 'success');
+      submitButton.textContent = 'Fix összegű átutalási QR előkészítése';
+      setFeedback(
+        feedback,
+        result.qvik === false
+          ? 'A közvetlen banki átutalás aktív. A QR payto-formátumú; nem qvik, ezért a banki alkalmazások támogatása eltérhet.'
+          : 'A banki átutalási kapcsolat aktív.',
+        'success'
+      );
     } catch (error) {
       submitButton.disabled = true;
-      submitButton.textContent = 'Revolut fizetés nincs konfigurálva';
+      submitButton.textContent = 'Banki átutalás nincs konfigurálva';
       setFeedback(feedback, 'A fizetés le van tiltva: ' + (error instanceof Error ? error.message : 'ismeretlen hiba'), 'error');
-    }
-  }
-
-  function trustedRevolutUrl(value) {
-    try {
-      const url = new URL(value);
-      return url.protocol === 'https:'
-        && url.hostname === REVOLUT_HOST
-        && url.pathname.startsWith('/payment-link/');
-    } catch (_) {
-      return false;
     }
   }
 
@@ -174,7 +175,7 @@
       tax_number: String(data.get('tax_number') || '').trim(),
       purchase_order: String(data.get('purchase_order') || '').trim(),
       order_reference: orderReference,
-      payment_method: 'revolut_pro_payment_link_qr'
+      payment_method: 'direct_bank_transfer_qr'
     };
   }
 
@@ -189,23 +190,41 @@
     });
     const result = await response.json().catch(function () { return {}; });
     if (!response.ok) throw new Error(result.error || 'HTTP ' + response.status);
-    if (result.payment_provider !== 'revolut_pro' || result.payment_mode !== 'live') {
-      throw new Error('Nem éles Revolut Pro fizetési válasz érkezett.');
-    }
-    if (!trustedRevolutUrl(result.checkout_url)) {
-      throw new Error('A fizetési link nem hiteles Revolut checkout cím.');
+    if (result.payment_provider !== 'bank_transfer' || result.payment_mode !== 'live') {
+      throw new Error('Nem éles banki átutalási válasz érkezett.');
     }
     if (result.order_reference !== orderReference) {
       throw new Error('A rendelési azonosító eltér.');
     }
+    if (!result.payto_uri || !result.account || result.amount_huf !== selectedAmount()) {
+      throw new Error('A fizetési adatok hiányosak vagy az összeg eltér.');
+    }
     return result;
   }
 
+  function buildCopyText(result) {
+    return [
+      'Kedvezményezett: ' + result.account.holder,
+      'Belföldi HUF számlaszám: ' + result.account.local_huf_account,
+      'IBAN: ' + result.account.iban,
+      'BIC / SWIFT: ' + result.account.bic,
+      'Levelező bank BIC: ' + result.account.correspondent_bic,
+      'Összeg: ' + formatPrice(result.amount_huf),
+      'Közlemény: ' + result.order_reference
+    ].join('\n');
+  }
+
   function showPayment(result) {
-    checkoutUrl = result.checkout_url;
-    paymentOpen.href = checkoutUrl;
-    paymentReference.textContent = 'Rendelési azonosító: ' + orderReference + ' · Fizetendő: ' + formatPrice(selectedAmount());
-    paymentQr.src = 'https://quickchart.io/qr?text=' + encodeURIComponent(checkoutUrl)
+    paymentData = result;
+    paymentOpen.href = result.payto_uri;
+    paymentReference.textContent = 'Közlemény: ' + orderReference;
+    paymentHolder.textContent = result.account.holder;
+    paymentLocalAccount.textContent = result.account.local_huf_account;
+    paymentIban.textContent = result.account.iban;
+    paymentBic.textContent = result.account.bic;
+    paymentCorrespondentBic.textContent = result.account.correspondent_bic;
+    paymentAmount.textContent = formatPrice(result.amount_huf);
+    paymentQr.src = 'https://quickchart.io/qr?text=' + encodeURIComponent(result.payto_uri)
       + '&size=260&margin=3&ecLevel=M&format=png';
     paymentPanel.hidden = false;
     confirmationForm.hidden = false;
@@ -220,16 +239,27 @@
     paymentPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
+  async function copyPaymentData() {
+    if (!paymentData) return;
+    const text = buildCopyText(paymentData);
+    try {
+      await navigator.clipboard.writeText(text);
+      setFeedback(feedback, 'Az átutalási adatok a vágólapra kerültek.', 'success');
+    } catch (_) {
+      setFeedback(feedback, 'A másolás nem sikerült. Jelöld ki kézzel az átutalási adatokat.', 'error');
+    }
+  }
+
   function resetOrder() {
-    checkoutUrl = '';
+    paymentData = null;
     orderReference = createOrderReference();
     paymentPanel.hidden = true;
     confirmationForm.hidden = true;
     confirmationForm.reset();
     submitButton.disabled = !liveReady;
     submitButton.textContent = liveReady
-      ? 'Revolut fizetés és QR-kód előkészítése'
-      : 'Revolut fizetés nincs konfigurálva';
+      ? 'Fix összegű átutalási QR előkészítése'
+      : 'Banki átutalás nincs konfigurálva';
     updateSummary();
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -260,19 +290,19 @@
   }
 
   planSelect.addEventListener('change', function () {
-    if (checkoutUrl) resetOrder();
+    if (paymentData) resetOrder();
     updateSummary();
   });
 
   cycleSelect.addEventListener('change', function () {
-    if (checkoutUrl) resetOrder();
+    if (paymentData) resetOrder();
     updateSummary();
   });
 
   form.addEventListener('submit', async function (event) {
     event.preventDefault();
     if (!liveReady) {
-      setFeedback(feedback, 'A fizetés nincs engedélyezve.', 'error');
+      setFeedback(feedback, 'A banki átutalás nincs engedélyezve.', 'error');
       return;
     }
     if (!form.checkValidity()) {
@@ -283,20 +313,25 @@
 
     submitButton.disabled = true;
     submitButton.textContent = 'Rendelés rögzítése…';
-    setFeedback(feedback, 'A fix összegű Revolut Pro link előkészítése folyamatban van…', '');
+    setFeedback(feedback, 'A fix HUF-összegű átutalási adatok előkészítése folyamatban van…', '');
 
     try {
       const result = await createCheckout();
       showPayment(result);
-      setFeedback(feedback, 'A valódi Revolut Pro fizetési link és QR-kód elkészült.', 'success');
-      submitButton.textContent = 'Revolut fizetési link elkészült';
+      setFeedback(
+        feedback,
+        'Az átutalási QR és a másolható banki adatok elkészültek. A közleményt változtatás nélkül add meg.',
+        'success'
+      );
+      submitButton.textContent = 'Átutalási adatok elkészültek';
     } catch (error) {
       submitButton.disabled = false;
-      submitButton.textContent = 'Revolut fizetés és QR-kód előkészítése';
+      submitButton.textContent = 'Fix összegű átutalási QR előkészítése';
       setFeedback(feedback, 'A fizetés nem indult el: ' + (error instanceof Error ? error.message : 'ismeretlen hiba'), 'error');
     }
   });
 
+  paymentCopy.addEventListener('click', copyPaymentData);
   paymentReset.addEventListener('click', resetOrder);
 
   confirmationForm.addEventListener('submit', async function (event) {
@@ -309,7 +344,7 @@
       await submitConfirmation();
       setFeedback(
         confirmationFeedback,
-        'A visszajelzés rögzítve lett. A licenc a Revolut tranzakció kézi ellenőrzése után aktiválódik.',
+        'A visszajelzés rögzítve lett. A licenc a beérkezett banki átutalás kézi ellenőrzése után aktiválódik.',
         'success'
       );
     } catch (error) {
