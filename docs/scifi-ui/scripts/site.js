@@ -7,6 +7,8 @@
   const RELEASE_PAGE_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/';
   const FALLBACK_VERSION = 'V92';
 
+  installReferencePresentation();
+
   const elements = {
     menuToggle: document.getElementById('menu-toggle'),
     primaryNav: document.getElementById('primary-nav'),
@@ -28,7 +30,156 @@
     toast: document.getElementById('toast')
   };
 
+  function installReferencePresentation() {
+    const body = document.body;
+    if (!body || !body.classList.contains('future-2041')) return;
+
+    body.classList.add('reference-exact');
+    document.documentElement.dataset.theme = 'dark';
+
+    if (!document.querySelector('link[data-reference-2041]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = './styles/reference-2041.css?v=20260718-reference-2';
+      link.dataset.reference2041 = 'true';
+      document.head.appendChild(link);
+    }
+
+    const brandStrong = document.querySelector('.future-brand strong');
+    const brandSmall = document.querySelector('.future-brand small');
+    if (brandStrong) brandStrong.textContent = 'FORMATX';
+    if (brandSmall) brandSmall.textContent = 'SUITE PRO';
+
+    const navigationMap = {
+      '#system': 'PRODUCT',
+      '#platforms': 'PLATFORM',
+      '#features': 'TECHNOLOGY',
+      '#security': 'SECURITY',
+      '#pro': 'PRICING'
+    };
+
+    document.querySelectorAll('#primary-nav > a').forEach(function (link) {
+      const label = navigationMap[link.getAttribute('href')];
+      if (label) {
+        link.textContent = label;
+      } else if (link.getAttribute('href') === '#downloads') {
+        link.dataset.referenceHidden = 'true';
+      }
+    });
+
+    const headerCta = document.querySelector('.header-cta');
+    if (headerCta) {
+      headerCta.textContent = 'ENTER PLATFORM';
+      headerCta.href = '#downloads';
+    }
+
+    const kicker = document.querySelector('.future-hero-copy .future-kicker');
+    const title = document.getElementById('hero-title');
+    const tagline = document.querySelector('.future-hero-copy .future-tagline');
+    const description = document.querySelector('.future-hero-copy .hero-copy');
+    const heroActions = document.querySelector('.future-hero-copy .hero-actions');
+    const capabilities = document.querySelector('.future-hero-copy .future-capabilities');
+
+    if (kicker) kicker.innerHTML = '<span></span> MODULAR OPERATING PLATFORM';
+    if (title) {
+      title.innerHTML = '<span class="ref-formatx">FORMATX</span><span class="ref-suite">SUITE <b>PRO</b></span>';
+    }
+    if (tagline) tagline.innerHTML = 'Built for precision.<br><strong>Designed for the future.</strong>';
+    if (description) {
+      description.textContent = 'A cross-platform ecosystem engineered for technicians, creators, and professionals who demand complete control.';
+    }
+
+    if (heroActions) {
+      const buttons = heroActions.querySelectorAll('a');
+      if (buttons[0]) {
+        buttons[0].innerHTML = 'ENTER THE SYSTEM <span aria-hidden="true">→</span><small id="hero-version" hidden>V92</small>';
+      }
+      if (buttons[1]) {
+        buttons[1].innerHTML = '<span aria-hidden="true">▶</span> WATCH SYSTEM DEMO';
+        buttons[1].href = '#features';
+      }
+    }
+
+    if (capabilities) {
+      capabilities.innerHTML = [
+        '<span><i aria-hidden="true">●</i> FORMATX CORE ONLINE</span>',
+        '<span><i aria-hidden="true">◇</i> TECHNICIAN INTERFACE // 2041</span>'
+      ].join('');
+    }
+
+    const coreLabel = document.querySelector('.core-label');
+    const coreTitle = document.querySelector('.core-topbar strong');
+    const coreOnline = document.querySelector('.core-online');
+    if (coreLabel) coreLabel.textContent = 'FORMATX SYSTEM INTERFACE';
+    if (coreTitle) coreTitle.textContent = 'Core Module / Technology Preview';
+    if (coreOnline) coreOnline.innerHTML = '<i aria-hidden="true"></i> ONLINE';
+
+    const coreNavigation = [
+      { icon: '◇', target: '#system', label: 'Core' },
+      { icon: '▦', target: '#platforms', label: 'Platforms' },
+      { icon: '⌁', target: '#features', label: 'Technology' },
+      { icon: '⌬', target: '#downloads', label: 'Release' },
+      { icon: '⬡', target: '#security', label: 'Security' },
+      { icon: '⚙', target: '#pro', label: 'Pricing' }
+    ];
+
+    document.querySelectorAll('.core-nav span').forEach(function (item, index) {
+      const config = coreNavigation[index];
+      if (!config) return;
+      item.innerHTML = '<i aria-hidden="true">' + config.icon + '</i>';
+      item.title = config.label;
+      item.setAttribute('role', 'link');
+      item.setAttribute('tabindex', '0');
+      item.dataset.target = config.target;
+    });
+
+    const telemetryHeadings = document.querySelectorAll('.telemetry-heading');
+    if (telemetryHeadings[0]) telemetryHeadings[0].innerHTML = '<span>CORE STATUS</span><strong>100%</strong>';
+    if (telemetryHeadings[1]) telemetryHeadings[1].innerHTML = '<span>MODULE SYNC</span><strong>87%</strong>';
+
+    const telemetryNotes = document.querySelectorAll('.telemetry-stack small');
+    if (telemetryNotes[0]) telemetryNotes[0].textContent = 'Windows · Linux / Bazzite · macOS';
+    if (telemetryNotes[1]) telemetryNotes[1].textContent = 'Quantum-safe release integrity';
+
+    const metrics = document.querySelectorAll('.core-metrics > div');
+    const metricData = [
+      ['CORE ENGINE', 'ONLINE', 'modular operating platform'],
+      ['SECURITY GRID', 'ACTIVE', 'SHA256 / Ed25519'],
+      ['TELEMETRY', 'REAL-TIME', 'zero-fiction system data']
+    ];
+    metrics.forEach(function (metric, index) {
+      const data = metricData[index];
+      if (!data) return;
+      metric.innerHTML = '<span>' + data[0] + '</span><strong>' + data[1] + '</strong><small>' + data[2] + '</small>';
+    });
+
+    const principleData = [
+      { icon: '⌬', title: 'CROSS PLATFORM', copy: 'One system. Every environment.', target: '#platforms' },
+      { icon: '⬡', title: 'MODULAR BY DESIGN', copy: 'Built to evolve with you.', target: '#features' },
+      { icon: '◇', title: 'SECURITY FIRST', copy: 'Protection at every layer.', target: '#security' },
+      { icon: '⌁', title: 'REAL-TIME CONTROL', copy: 'Instant insight. Total command.', target: '#downloads' }
+    ];
+
+    document.querySelectorAll('.principle-grid article').forEach(function (card, index) {
+      const data = principleData[index];
+      if (!data) return;
+      const icon = card.querySelector(':scope > span');
+      const heading = card.querySelector('strong');
+      const copy = card.querySelector('small');
+      if (icon) icon.textContent = data.icon;
+      if (heading) heading.textContent = data.title;
+      if (copy) copy.textContent = data.copy;
+      card.classList.add('interactive-holo');
+      card.setAttribute('role', 'link');
+      card.setAttribute('tabindex', '0');
+      card.dataset.target = data.target;
+      card.setAttribute('aria-label', data.title + ': ' + data.copy);
+    });
+  }
+
   function readThemePreference() {
+    if (document.body && document.body.classList.contains('reference-exact')) return 'dark';
+
     const queryTheme = new URLSearchParams(window.location.search).get('theme');
     if (queryTheme === 'dark' || queryTheme === 'light') return queryTheme;
 
@@ -36,14 +187,15 @@
       const storedTheme = window.localStorage.getItem(THEME_KEY);
       if (storedTheme === 'dark' || storedTheme === 'light') return storedTheme;
     } catch (_) {
-      // The site remains usable when storage is unavailable.
+      // Storage is optional.
     }
 
     return 'dark';
   }
 
   function applyTheme(theme, persist) {
-    const selectedTheme = theme === 'light' ? 'light' : 'dark';
+    const forcedReferenceDark = document.body && document.body.classList.contains('reference-exact');
+    const selectedTheme = forcedReferenceDark ? 'dark' : (theme === 'light' ? 'light' : 'dark');
     document.documentElement.dataset.theme = selectedTheme;
 
     document.querySelectorAll('[data-theme-choice]').forEach(function (button) {
@@ -51,9 +203,9 @@
     });
 
     const themeColor = document.querySelector('meta[name="theme-color"]');
-    if (themeColor) themeColor.content = selectedTheme === 'light' ? '#e8f2f8' : '#030711';
+    if (themeColor) themeColor.content = selectedTheme === 'light' ? '#e8f2f8' : '#02070d';
 
-    if (persist) {
+    if (persist && !forcedReferenceDark) {
       try {
         window.localStorage.setItem(THEME_KEY, selectedTheme);
       } catch (_) {
@@ -100,11 +252,30 @@
     });
   }
 
+  function initialiseConnectedModules() {
+    function activate(element) {
+      const target = element.dataset.target;
+      if (!target) return;
+      const section = document.querySelector(target);
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.querySelectorAll('[data-target]').forEach(function (element) {
+      element.addEventListener('click', function () { activate(element); });
+      element.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          activate(element);
+        }
+      });
+    });
+  }
+
   function formatBytes(bytes) {
-    if (!Number.isFinite(bytes) || bytes <= 0) return 'Nem elérhető';
+    if (!Number.isFinite(bytes) || bytes <= 0) return 'Not available';
     const unit = bytes >= 1024 ** 3 ? 'GiB' : 'MiB';
     const divisor = unit === 'GiB' ? 1024 ** 3 : 1024 ** 2;
-    return new Intl.NumberFormat('hu-HU', {
+    return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(bytes / divisor) + ' ' + unit;
@@ -112,8 +283,8 @@
 
   function formatDate(value) {
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'Nem elérhető';
-    return new Intl.DateTimeFormat('hu-HU', {
+    if (Number.isNaN(date.getTime())) return 'Not available';
+    return new Intl.DateTimeFormat('en-GB', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
@@ -122,7 +293,7 @@
 
   function normaliseVersion(tagName) {
     const match = String(tagName || '').match(/^v?(\d+)$/i);
-    if (!match) throw new Error('A kiadás verziócímkéje nem támogatott.');
+    if (!match) throw new Error('Unsupported release tag.');
     return 'V' + match[1];
   }
 
@@ -142,7 +313,7 @@
 
   function validateRelease(payload) {
     if (!payload || payload.draft || payload.prerelease || !Array.isArray(payload.assets)) {
-      throw new Error('A stabil kiadás metaadata hiányos.');
+      throw new Error('Incomplete stable release metadata.');
     }
 
     const version = normaliseVersion(payload.tag_name);
@@ -152,11 +323,10 @@
     });
 
     if (!asset || !isTrustedUrl(asset.browser_download_url, RELEASE_DOWNLOAD_PREFIX)) {
-      throw new Error('A stabil kiadás univerzális ZIP-je nem található.');
+      throw new Error('Stable universal ZIP not found.');
     }
-
     if (!isTrustedUrl(payload.html_url, RELEASE_PAGE_PREFIX)) {
-      throw new Error('A kiadási oldal címe nem megbízható.');
+      throw new Error('Untrusted release page.');
     }
 
     return {
@@ -180,7 +350,7 @@
     if (elements.heroVersion) elements.heroVersion.textContent = release.version;
     setLink(elements.heroDownload, release.url);
 
-    if (elements.releaseState) elements.releaseState.textContent = 'Élő GitHub Release ellenőrizve';
+    if (elements.releaseState) elements.releaseState.textContent = 'VERIFIED GITHUB RELEASE';
     if (elements.releaseDot) elements.releaseDot.classList.remove('warning');
     if (elements.releaseName) elements.releaseName.textContent = 'FormatX Suite Pro ' + release.version;
     if (elements.releasePublished) elements.releasePublished.textContent = formatDate(release.publishedAt);
@@ -189,26 +359,24 @@
     if (elements.downloadFileName) elements.downloadFileName.textContent = release.name;
     if (elements.downloadVersion) elements.downloadVersion.textContent = release.version;
     if (elements.downloadSize) elements.downloadSize.textContent = formatBytes(release.size);
-    setLink(elements.downloadPrimary, release.url, release.version + ' univerzális csomag letöltése');
+    setLink(elements.downloadPrimary, release.url, release.version + ' stable package');
     setLink(elements.downloadReleasePage, release.pageUrl);
 
     if (elements.checksum) {
-      elements.checksum.textContent = release.checksum || 'A GitHub metaadat nem tartalmaz SHA256 értéket.';
+      elements.checksum.textContent = release.checksum || 'SHA256 metadata unavailable for this release.';
     }
     if (elements.copyChecksum) elements.copyChecksum.disabled = !release.checksum;
     if (elements.apiNote) {
       elements.apiNote.textContent = release.checksum
-        ? 'A letöltési linket és a SHA256 értéket az élő GitHub kiadásból ellenőriztük.'
-        : 'A letöltési link élő és ellenőrzött; ehhez a kiadáshoz nem érkezett SHA256 metaadat.';
+        ? 'Download URL and SHA256 verified from the live GitHub release.'
+        : 'Download URL verified; SHA256 metadata is not present.';
     }
   }
 
   function renderReleaseFallback() {
-    if (elements.releaseState) elements.releaseState.textContent = 'Ellenőrzött V92 tartalék link';
+    if (elements.releaseState) elements.releaseState.textContent = 'VERIFIED V92 FALLBACK';
     if (elements.releaseDot) elements.releaseDot.classList.add('warning');
-    if (elements.apiNote) {
-      elements.apiNote.textContent = 'Az élő kiadásellenőrzés nem érhető el; az ellenőrzött ' + FALLBACK_VERSION + ' link látható.';
-    }
+    if (elements.apiNote) elements.apiNote.textContent = 'Live release lookup unavailable; verified ' + FALLBACK_VERSION + ' fallback shown.';
   }
 
   async function loadLatestRelease() {
@@ -247,14 +415,14 @@
 
     try {
       await navigator.clipboard.writeText(value);
-      showToast('A SHA256 ellenőrzőösszeg a vágólapra került.');
+      showToast('SHA256 checksum copied.');
     } catch (_) {
       const range = document.createRange();
       range.selectNodeContents(elements.checksum);
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(range);
-      showToast('Az ellenőrzőösszeg kijelölve; másold a vágólapra.');
+      showToast('Checksum selected. Copy it manually.');
     }
   }
 
@@ -264,28 +432,28 @@
 
     grid.innerHTML = [
       '<article class="interactive-holo license-trial">',
-      '<p class="eyebrow">PRÓBAIDŐ</p>',
-      '<h3>5 nap teljes hozzáférés</h3>',
-      '<p>Az első indításkor kezdődik. A próbaidő alatt megismerhető a cross-platform technikusi munkafolyamat.</p>',
-      '<a class="text-link" href="#downloads">Csomag letöltése</a>',
+      '<p class="eyebrow">TRIAL ACCESS</p>',
+      '<h3>5 days full access</h3>',
+      '<p>Explore the cross-platform technician workflow before choosing a licence.</p>',
+      '<a class="text-link" href="#downloads">Download package</a>',
       '</article>',
       '<article class="interactive-holo license-lite">',
       '<p class="eyebrow">BUSINESS LITE</p>',
-      '<h3>19 900 Ft<br>vagy 55 € / hó</h3>',
-      '<p>1 technikus, legfeljebb 10 gép. Éves díj: 199 000 Ft vagy 547 €.</p>',
-      '<a class="text-link" href="./checkout.html?plan=business_lite&cycle=monthly&currency=HUF">HUF / EUR banki fizetés</a>',
+      '<h3>19 900 Ft<br>or 55 € / month</h3>',
+      '<p>1 technician, up to 10 systems. Annual: 199 000 Ft or 547 €.</p>',
+      '<a class="text-link" href="./checkout.html?plan=business_lite&cycle=monthly&currency=HUF">HUF / EUR bank payment</a>',
       '</article>',
       '<article class="interactive-holo license-pro">',
       '<p class="eyebrow">BUSINESS PRO</p>',
-      '<h3>49 900 Ft<br>vagy 137 € / hó</h3>',
-      '<p>3 technikus, legfeljebb 50 gép. Éves díj: 499 000 Ft vagy 1 373 €.</p>',
-      '<a class="text-link" href="./checkout.html?plan=business_pro&cycle=monthly&currency=HUF">HUF / EUR banki fizetés</a>',
+      '<h3>49 900 Ft<br>or 137 € / month</h3>',
+      '<p>3 technicians, up to 50 systems. Annual: 499 000 Ft or 1 373 €.</p>',
+      '<a class="text-link" href="./checkout.html?plan=business_pro&cycle=monthly&currency=HUF">HUF / EUR bank payment</a>',
       '</article>',
       '<article class="interactive-holo license-team">',
       '<p class="eyebrow">TECHNICIAN TEAM</p>',
-      '<h3>99 900 Ft<br>vagy 275 € / hó</h3>',
-      '<p>5 technikus, legfeljebb 150 gép. Éves díj: 999 000 Ft vagy 2 748 €.</p>',
-      '<a class="text-link" href="./checkout.html?plan=technician_team&cycle=monthly&currency=HUF">HUF / EUR banki fizetés</a>',
+      '<h3>99 900 Ft<br>or 275 € / month</h3>',
+      '<p>5 technicians, up to 150 systems. Annual: 999 000 Ft or 2 748 €.</p>',
+      '<a class="text-link" href="./checkout.html?plan=technician_team&cycle=monthly&currency=HUF">HUF / EUR bank payment</a>',
       '</article>'
     ].join('');
   }
@@ -313,6 +481,7 @@
 
   initialiseTheme();
   initialiseMenu();
+  initialiseConnectedModules();
   initialiseLicenseCheckout();
   initialiseHolographicCards();
   if (elements.copyChecksum) elements.copyChecksum.addEventListener('click', copyChecksum);
