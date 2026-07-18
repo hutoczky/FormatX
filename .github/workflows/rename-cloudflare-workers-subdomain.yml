@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   rename:
@@ -123,3 +124,52 @@ jobs:
 
           echo "Cloudflare accepted the rename, but the branded Worker URL has not propagated yet: $url" >&2
           exit 1
+
+      - name: Publish rename result as a GitHub issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          CURRENT_SUBDOMAIN: ${{ steps.current.outputs.current }}
+          SELECTED_SUBDOMAIN: ${{ steps.rename.outputs.selected }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          if [ "$JOB_STATUS" = "success" ]; then
+            title="Cloudflare URL rename succeeded"
+            public_url="https://${WORKER_NAME}.${SELECTED_SUBDOMAIN}.workers.dev/"
+            summary="The account workers.dev subdomain was changed successfully and the FormatX page responded at ${public_url}."
+          elif [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            title="Cloudflare URL rename blocked: API token missing"
+            public_url=""
+            summary="The repository secret CLOUDFLARE_API_TOKEN is missing, so GitHub could not call the Cloudflare account API. No Cloudflare setting was changed."
+          else
+            title="Cloudflare URL rename failed"
+            public_url=""
+            summary="Cloudflare authorization was available, but the rename or URL verification failed. Review the linked workflow run."
+          fi
+
+          python3 - "$title" "$summary" "$CURRENT_SUBDOMAIN" "$SELECTED_SUBDOMAIN" "$public_url" "$RUN_URL" > /tmp/issue.json <<'PY'
+          import json, sys
+          title, summary, current, selected, public_url, run_url = sys.argv[1:]
+          lines = [
+              summary,
+              "",
+              f"- Previous account subdomain: `{current or 'unavailable'}`",
+              f"- Selected account subdomain: `{selected or 'none'}`",
+          ]
+          if public_url:
+              lines.append(f"- Branded FormatX URL: {public_url}")
+          lines.extend(["", f"Workflow run: {run_url}"])
+          print(json.dumps({"title": title, "body": "\n".join(lines)}, ensure_ascii=False))
+          PY
+
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/issue.json
