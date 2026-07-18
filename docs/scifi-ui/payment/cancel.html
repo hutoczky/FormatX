@@ -1,24 +1,45 @@
 <!doctype html>
-<html lang="hu">
+<html lang="hu" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Fizetés megszakadt — FormatX Suite Pro</title>
-  <link rel="stylesheet" href="../styles/site.css">
+  <meta name="description" content="A FormatX Suite Pro fizetési folyamat megszakadt; újraindítás és támogatás.">
+  <meta name="theme-color" content="#030711">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'none'">
+  <title>Fizetés megszakítva | FormatX Suite Pro</title>
+  <link rel="icon" type="image/png" href="../assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="../styles/site.css?v=20260718-v92">
+  <link rel="stylesheet" href="../styles/checkout.css?v=20260718-bank2">
+  <script defer src="../scripts/payment-status.js?v=20260718-bilingual-1"></script>
 </head>
-<body class="theme-lcars">
-  <main class="container shell">
-    <section class="panel">
-      <h1 class="panel-title">Fizetés megszakadt</h1>
-      <div class="card span-12">
-        <p>A fizetés nem fejeződött be. Az előfizetés nem aktiválódott.</p>
-        <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem;">
-          <a class="pill lg" href="../index.html#payment">FIZETÉS ÚJRAPRÓBÁLÁSA</a>
-          <a class="pill lg alt" href="../index.html#pro">VISSZA AZ ÁRAZÁSHOZ</a>
-          <a class="pill lg accent" href="../support.html">KAPCSOLATFELVÉTEL</a>
-        </div>
+<body data-payment-page="cancel">
+  <a class="skip-link" href="#main-content" data-hu="Ugrás a tartalomra" data-en="Skip to content">Ugrás a tartalomra</a>
+  <header class="site-header">
+    <div class="header-inner legal-header-inner">
+      <a class="brand" href="../index.html" data-internal-link aria-label="FormatX Suite Pro főoldal">
+        <img src="../assets/images/formatx-icon.png" width="44" height="44" alt="">
+        <span><strong>FormatX Suite Pro</strong><small data-hu="Fizetés megszakítva" data-en="Payment cancelled">Fizetés megszakítva</small></span>
+      </a>
+      <a class="legal-home-link" href="../index.html#pro" data-internal-link data-hu="Vissza a licencekhez" data-en="Back to licences">Vissza a licencekhez</a>
+      <div class="language-control payment-language-control" role="group" aria-label="Language / Nyelv">
+        <button type="button" data-language-choice="hu" aria-pressed="true">HU</button>
+        <button type="button" data-language-choice="en" aria-pressed="false">EN</button>
       </div>
-    </section>
+    </div>
+  </header>
+
+  <main id="main-content" class="legal-main">
+    <article class="content-width legal-document payment-status-document">
+      <p class="eyebrow" data-hu="NEM TÖRTÉNT TERHELÉS" data-en="NO CHARGE WAS MADE">NEM TÖRTÉNT TERHELÉS</p>
+      <h1 data-hu="A fizetés megszakadt" data-en="Payment was cancelled">A fizetés megszakadt</h1>
+      <p class="legal-lead" data-hu="A fizetési folyamat nem fejeződött be, ezért rendelés vagy licenc nem aktiválódott." data-en="The payment process was not completed, so no order or licence was activated.">A fizetési folyamat nem fejeződött be, ezért rendelés vagy licenc nem aktiválódott.</p>
+      <div class="legal-actions">
+        <a class="button primary" href="../checkout.html" data-internal-link data-hu="Fizetés újrakezdése" data-en="Restart payment">Fizetés újrakezdése</a>
+        <a class="button secondary" href="../index.html#pro" data-internal-link data-hu="Vissza az árakhoz" data-en="Back to pricing">Vissza az árakhoz</a>
+        <a class="button secondary" href="../support.html" data-internal-link data-hu="Kapcsolatfelvétel" data-en="Contact support">Kapcsolatfelvétel</a>
+      </div>
+      <p class="checkout-note" data-hu="A FormatX nem használ automatikus ismétlődő terhelést. Új fizetés csak a vásárló kifejezett indítására készül." data-en="FormatX does not use automatic recurring charges. A new payment is prepared only when the buyer explicitly starts it.">A FormatX nem használ automatikus ismétlődő terhelést. Új fizetés csak a vásárló kifejezett indítására készül.</p>
+    </article>
   </main>
 </body>
 </html>
