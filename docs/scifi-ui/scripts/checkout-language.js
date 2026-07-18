@@ -2,11 +2,17 @@
   'use strict';
 
   const SUPPORT_EMAIL = 'hutoczky@gmail.com';
+  const PRICES = {
+    business_lite: { HUF: { monthly: 19900, annual: 199000 }, EUR: { monthly: 55, annual: 547 } },
+    business_pro: { HUF: { monthly: 49900, annual: 499000 }, EUR: { monthly: 137, annual: 1373 } },
+    technician_team: { HUF: { monthly: 99900, annual: 999000 }, EUR: { monthly: 275, annual: 2748 } }
+  };
   const apiMeta = document.querySelector('meta[name="formatx-billing-api-base"]');
   const apiBase = String(apiMeta?.content || '').trim().replace(/\/+$/, '');
   const confirmationForm = document.getElementById('confirmation-form');
   const confirmationFeedback = document.getElementById('confirmation-feedback');
   const confirmationButton = document.getElementById('confirmation-submit');
+  const paymentCopy = document.getElementById('payment-copy');
   let staticMode = false;
 
   if (!confirmationForm) return;
@@ -53,8 +59,53 @@
     return String(document.getElementById(id)?.textContent || '').trim();
   }
 
+  function selectedCurrency() {
+    return document.getElementById('payment-currency')?.value === 'EUR' ? 'EUR' : 'HUF';
+  }
+
+  function selectedCycle() {
+    return document.getElementById('billing-cycle')?.value === 'annual' ? 'annual' : 'monthly';
+  }
+
+  function selectedPlan() {
+    return document.getElementById('plan-id')?.value || 'business_pro';
+  }
+
+  function selectedAmount() {
+    return PRICES[selectedPlan()]?.[selectedCurrency()]?.[selectedCycle()] || 0;
+  }
+
+  function formatAmount(amount, currency) {
+    return new Intl.NumberFormat(language() === 'hu' ? 'hu-HU' : 'en-GB', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  }
+
   function cycleName() {
-    return document.getElementById('billing-cycle')?.value === 'annual' ? '1 year' : '1 month';
+    const annual = selectedCycle() === 'annual';
+    if (language() === 'hu') return annual ? '1 év' : '1 hónap';
+    return annual ? '1 year' : '1 month';
+  }
+
+  function refreshLocaleFormatting() {
+    const summaryCycle = document.getElementById('summary-cycle');
+    const summaryPrice = document.getElementById('summary-price');
+    const paymentAmount = document.getElementById('payment-amount');
+    const amount = selectedAmount();
+    const currency = selectedCurrency();
+
+    if (summaryCycle) {
+      summaryCycle.textContent = language() === 'hu'
+        ? (selectedCycle() === 'annual' ? '1 év — egyszeri fizetés' : '1 hónap — egyszeri fizetés')
+        : (selectedCycle() === 'annual' ? '1 year — one-time payment' : '1 month — one-time payment');
+    }
+    if (summaryPrice) summaryPrice.textContent = formatAmount(amount, currency);
+    if (paymentAmount && paymentAmount.textContent.trim() !== '—') {
+      paymentAmount.textContent = formatAmount(amount, currency);
+    }
   }
 
   function setStatus(message, state) {
@@ -62,6 +113,21 @@
       confirmationFeedback.textContent = message;
       confirmationFeedback.dataset.state = state;
     }
+  }
+
+  function englishTransferText() {
+    const lines = ['Beneficiary: ' + text('payment-holder')];
+    if (selectedCurrency() === 'HUF') {
+      lines.push('Domestic HUF account: ' + text('payment-local-account'));
+    }
+    lines.push(
+      'IBAN: ' + text('payment-iban'),
+      'BIC / SWIFT: ' + text('payment-bic'),
+      'Correspondent bank BIC: ' + text('payment-correspondent-bic'),
+      'Amount: ' + formatAmount(selectedAmount(), selectedCurrency()),
+      'Reference: ' + (field('confirmation-order-reference') || text('summary-reference'))
+    );
+    return lines.join('\n');
   }
 
   confirmationForm.addEventListener('submit', function (event) {
@@ -84,8 +150,8 @@
       'Order reference: ' + orderReference,
       'Plan: ' + text('summary-plan'),
       'Duration: ' + cycleName(),
-      'Currency: ' + text('summary-currency'),
-      'Amount: ' + text('summary-price'),
+      'Currency: ' + selectedCurrency(),
+      'Amount: ' + formatAmount(selectedAmount(), selectedCurrency()),
       'Payer name: ' + field('confirmation-payer-name'),
       'Buyer email: ' + field('confirmation-email'),
       'Bank transaction reference: ' + field('confirmation-transaction'),
@@ -106,5 +172,33 @@
     }, 600);
   }, true);
 
+  if (paymentCopy) {
+    paymentCopy.addEventListener('click', async function (event) {
+      if (language() !== 'en') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      try {
+        await navigator.clipboard.writeText(englishTransferText());
+        const feedback = document.getElementById('checkout-feedback');
+        if (feedback) {
+          feedback.textContent = 'Transfer details copied to the clipboard.';
+          feedback.dataset.state = 'success';
+        }
+      } catch (_) {
+        const feedback = document.getElementById('checkout-feedback');
+        if (feedback) {
+          feedback.textContent = 'Copying failed. Select the transfer details manually.';
+          feedback.dataset.state = 'error';
+        }
+      }
+    }, true);
+  }
+
+  ['plan-id', 'billing-cycle', 'payment-currency'].forEach(function (id) {
+    document.getElementById(id)?.addEventListener('change', refreshLocaleFormatting);
+  });
+  window.addEventListener('formatx:languagechange', refreshLocaleFormatting);
+
   detectMode();
+  refreshLocaleFormatting();
 }());
