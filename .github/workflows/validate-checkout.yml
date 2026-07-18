@@ -1,4 +1,4 @@
-name: Validate checkout
+name: Validate checkout and 2041 site
 
 on:
   pull_request:
@@ -36,7 +36,7 @@ jobs:
           node --check docs/scifi-ui/scripts/site.js
           node --check billing-worker/src/live-entry.js
 
-      - name: Validate checkout structure and payment data
+      - name: Validate site, payment data and 2041 visual system
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -47,6 +47,7 @@ jobs:
 
           root = Path('.')
           html_files = [
+              root / 'docs/scifi-ui/index.html',
               root / 'docs/scifi-ui/checkout.html',
               root / 'docs/scifi-ui/terms.html',
               root / 'docs/scifi-ui/privacy.html',
@@ -63,8 +64,10 @@ jobs:
           checkout = (root / 'docs/scifi-ui/scripts/checkout.js').read_text(encoding='utf-8')
           worker = (root / 'billing-worker/src/live-entry.js').read_text(encoding='utf-8')
           site = (root / 'docs/scifi-ui/scripts/site.js').read_text(encoding='utf-8')
-          css = (root / 'docs/scifi-ui/styles/checkout.css').read_text(encoding='utf-8')
+          checkout_css = (root / 'docs/scifi-ui/styles/checkout.css').read_text(encoding='utf-8')
+          future_css = (root / 'docs/scifi-ui/styles/future-2041.css').read_text(encoding='utf-8')
           checkout_html = (root / 'docs/scifi-ui/checkout.html').read_text(encoding='utf-8')
+          home_html = (root / 'docs/scifi-ui/index.html').read_text(encoding='utf-8')
 
           required_tokens = [
               'payment-currency',
@@ -84,10 +87,22 @@ jobs:
               assert str(price) in worker, price
 
           assert 'HUF / EUR banki fizetés' in site
-          assert 'prefers-reduced-motion' in css
-          assert 'hologram-drift' in css
-          assert 'mix-blend-mode' not in css
-          assert css.count('{') == css.count('}')
+          assert 'Technician Interface // 2041' in home_html
+          assert 'FORMATX CORE ENGINE' in home_html
+          assert 'ZERO-FICTION TELEMETRY' in home_html
+          assert 'future-2041.css' in home_html
+          assert 'initialiseHolographicCards' in site
+
+          assert 'prefers-reduced-motion' in checkout_css
+          assert 'hologram-drift' in checkout_css
+          assert 'mix-blend-mode' not in checkout_css
+          assert checkout_css.count('{') == checkout_css.count('}')
+
+          assert 'prefers-reduced-motion' in future_css
+          assert 'prefers-contrast: more' in future_css
+          assert 'particle-float' in future_css
+          assert 'mix-blend-mode' not in future_css
+          assert future_css.count('{') == future_css.count('}')
 
           iban = 'HU06302000141991341090015751'
           rearranged = iban[4:] + iban[:4]
@@ -110,5 +125,5 @@ jobs:
           assert len(epc.encode('utf-8')) <= 331
           assert epc.splitlines()[:4] == ['BCD', '001', '1', 'SCT']
 
-          print('Checkout validation passed.')
+          print('FormatX checkout and 2041 site validation passed.')
           PY
