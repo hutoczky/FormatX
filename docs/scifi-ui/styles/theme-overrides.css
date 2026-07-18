@@ -175,3 +175,56 @@ body::before {
     transition-duration: .001ms !important;
   }
 }
+
+/* A régi demo checkout ne villanjon fel a JavaScript indulása előtt. */
+.card-fields,
+#payment-confirmation,
+.choice-card:has(input[value="transfer"]),
+.choice-card:has(input[value="invoice"]) {
+  display: none !important;
+}
+
+.checkout-layout:has(input[value="card"]) .choice-card:has(input[value="card"]) .choice-title,
+.checkout-layout:has(input[value="card"]) .choice-card:has(input[value="card"]) .choice-meta,
+.checkout-layout:has(input[value="card"]) #summary-method,
+.checkout-layout:has(input[value="card"]) #billing-submit,
+.checkout-layout:has(input[value="card"]) .field-checkbox label,
+.checkout-layout:has(input[value="card"]) .checkout-trust p {
+  font-size: 0 !important;
+}
+
+.checkout-layout:has(input[value="card"]) .choice-card:has(input[value="card"]) .choice-title::after {
+  content: "Stripe Checkout + QR-kód";
+  font-size: 1rem;
+}
+
+.checkout-layout:has(input[value="card"]) .choice-card:has(input[value="card"]) .choice-meta::after {
+  content: "Éles fizetés a Stripe biztonságos oldalán.";
+  font-size: .92rem;
+}
+
+.checkout-layout:has(input[value="card"]) #summary-method::after {
+  content: "Stripe Checkout + QR-kód";
+  font-size: 1rem;
+}
+
+.checkout-layout:has(input[value="card"]) #billing-submit::after {
+  content: "FIZETÉSI KAPCSOLAT ELLENŐRZÉSE…";
+  font-size: 1.05rem;
+}
+
+.checkout-layout:has(input[value="card"]) .field-checkbox label::after {
+  content: "Elfogadom az ÁSZF-et és az adatkezelési tájékoztatót. A fizetés a Stripe biztonságos felületén történik.";
+  font-size: 1rem;
+}
+
+.checkout-layout:has(input[value="card"]) .field-checkbox input {
+  font-size: 1rem !important;
+}
+
+.checkout-layout:has(input[value="card"]) .checkout-trust::after {
+  content: "A weboldal nem kér és nem tárol bankkártyaadatokat. Az éles checkout csak teljes szerveroldali konfiguráció után engedélyezett.";
+  display: block;
+  font-size: .92rem;
+  color: var(--muted);
+}
