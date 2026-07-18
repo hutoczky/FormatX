@@ -1,340 +1,37 @@
-# Sci-Fi UI Demo
+# FormatX Suite Pro weboldal
 
-A production-ready, accessible, and performant demonstration of three science fiction user interface themes: **LCARS** (Star Trek), **Star Wars** holographic HUD, and **Cyberpunk** neon aesthetics.
+A `hutoczky.github.io/FormatX/` címen megjelenő statikus projekt- és letöltési oldal forrása.
 
-## 🎯 Goals
+## Kiadási adatforrás
 
-- Demonstrate theme-switchable UI design with live CSS swapping
-- Showcase accessible, progressive enhancement patterns
-- Provide a performant, production-ready reference implementation
-- Illustrate pure CSS/SVG visual effects without unlicensed assets
+Az oldal egyszer, betöltéskor olvassa a `hutoczky/FormatX-Updates` legújabb nyilvános GitHub Release metaadatát. Nem használ kliensoldali tokent, és nem végez időzített hálózati lekérdezést.
 
-## 📁 Structure
+Az élő metaadat csak akkor írhatja felül a beépített V92 tartalékot, ha:
 
-```
-docs/scifi-ui/
-├── index.html              # Main demo page (works without JS)
-├── assets/
-│   ├── images/             # WebP/AVIF optimized images (.gitkeep)
-│   ├── svgs/               # Animated SVG assets (hud-grid.svg)
-│   ├── fonts/              # Font files (.gitkeep, system fallbacks used)
-│   └── audio/              # Optional ambient sounds (.gitkeep)
-├── styles/
-│   ├── base.css            # Reset, layout, components
-│   ├── themes.css          # Shared helpers, focus rings, a11y
-│   ├── lcars.css           # LCARS theme (Star Trek)
-│   ├── starwars.css        # Star Wars holographic theme
-│   └── cyberpunk.css       # Cyberpunk neon theme
-├── scripts/
-│   ├── theme-switcher.js   # Theme switching with CustomEvent
-│   ├── preloader.js        # LCARS boot animation
-│   └── animation-controller.js  # Background layers & parallax
-├── manifests/
-│   └── themes.json         # Theme metadata
-└── README.md               # This file
-```
+- stabil, nem piszkozat és nem előzetes kiadás;
+- a címke `vNN` vagy `VNN` alakú;
+- pontosan illeszkedő `FormatX-Suite-Pro-VNN.zip` asset tartozik hozzá;
+- a letöltési URL a hivatalos `hutoczky/FormatX-Updates` GitHub Release útvonalra mutat.
 
-## 🎨 Themes
+API- vagy hálózati hiba esetén az ellenőrzött V92 URL és SHA256 marad látható.
 
-### LCARS (Star Trek)
-- **Default theme**
-- Rounded orange/amber panels with magenta accents
-- LCARS side rails and header plate
-- Subtle sheen and glow effects
-- Hero progress bar with darker right cap
-
-### Star Wars
-- Holographic cyan/teal color palette
-- Animated HUD grid overlay
-- Bluish glow and reticle/HUD lines
-- Orbitron/Michroma font family aesthetic
-- Scanning line animations
-
-### Cyberpunk
-- Neon magenta/cyan/yellow palette
-- Pixel/mono title with glitch effects
-- Steps-based micro-glitch animation
-- Stronger scanlines and noise overlay
-- Diagonal data stream effects
-
-## 🚀 Deployment
-
-### GitHub Pages
-
-The demo is deployed via GitHub Pages from the `/docs` directory:
-
-1. Repository settings → Pages → Source: `main` branch → `/docs` folder
-2. Available at: `https://hutoczky.github.io/FormatX/scifi-ui/`
-3. Root redirect at `/docs/index.html` forwards to `scifi-ui/`
-
-### Local Development
-
-Simply open `index.html` in a modern browser:
+## Helyi futtatás
 
 ```bash
-# Using Python's HTTP server
-cd docs
-python3 -m http.server 8000
-
-# Using Node's http-server
-npx http-server docs -p 8000
-
-# Then visit: http://localhost:8000/scifi-ui/
+python3 -m http.server 8000 --directory docs
 ```
 
-## 🔐 Payment Confirmation Endpoint
+Ezután nyisd meg a `http://127.0.0.1:8000/` címet.
 
-The checkout includes a Hungarian transfer confirmation form for manual QR / bank transfers.
-
-- The static site should contain only a **public form endpoint URL**.
-- Configure that URL in `/home/runner/work/FormatX/FormatX/docs/scifi-ui/index.html` with the `formatx-payment-confirmation-endpoint` meta tag, or inject the same public URL during deployment.
-- Keep the **recipient email address private** in the Formspree dashboard or in server-side environment variables.
-- Do **not** commit recipient emails, API keys, webhook secrets, or other credentials to the repository.
-- With the default empty configuration the form stays disabled and clearly tells buyers that delivery is not connected yet.
-
-Example public endpoint:
-
-```html
-<meta name="formatx-payment-confirmation-endpoint" content="https://formspree.io/f/your-public-form-id">
-```
-
-If you use your own serverless endpoint, accept a JSON `POST` from the static page and forward/store the notification server-side, where the private recipient address is configured.
-
-## ♿ Accessibility
-
-### Features
-
-- **Progressive Enhancement**: Base UX works without JavaScript (LCARS theme active)
-- **Keyboard Navigation**: Full keyboard support with Enter/Space handlers on theme buttons
-- **ARIA Attributes**: 
-  - `role="progressbar"` on preloader with `aria-valuenow/min/max`
-  - `aria-pressed`/`aria-selected` on theme buttons
-  - `aria-label` on interactive elements
-  - `aria-hidden="true"` on decorative layers
-- **Focus Rings**: High-contrast focus indicators for all interactive elements
-- **Screen Reader Support**: Semantic HTML, skip-to-content link, descriptive labels
-- **Reduced Motion**: Respects `prefers-reduced-motion` with simplified animations
-- **High Contrast**: Supports `prefers-contrast: high` with enhanced borders
-
-### Testing
-
-Run accessibility audits:
+## Ellenőrzés
 
 ```bash
-# Using axe-core
-npx @axe-core/cli docs/scifi-ui/index.html
-
-# Using Lighthouse CLI
-npx lighthouse http://localhost:8000/scifi-ui/ --view
+node --check docs/scifi-ui/scripts/site.js
+git diff --check
 ```
 
-## 📊 Performance
+Kézi ellenőrzés szükséges sötét és világos témában, valamint asztali és mobil nézetben. A fő letöltési gomb végső céljának a `FormatX-Updates` aktuális, univerzális ZIP assetjére kell mutatnia.
 
-### Optimizations
+## Közzététel
 
-- **Critical CSS Inline**: Above-the-fold styles inlined for LCP
-- **Resource Preloading**: CSS and SVG assets preloaded
-- **Lazy Loading**: Images loaded with `decoding="async"`
-- **Image Formats**: WebP/AVIF with srcset for responsive images
-- **SVG Optimization**: Minimal, optimized SVG for shapes/effects
-- **CSP Headers**: Content Security Policy meta tag (self + data)
-
-### Lighthouse Thresholds (CI)
-
-- Performance: ≥ 90%
-- Accessibility: ≥ 95%
-- Best Practices: ≥ 95%
-- SEO: ≥ 90%
-
-Run Lighthouse CI:
-
-```bash
-npm install -g @lhci/cli
-lhci autorun
-```
-
-## 🔧 JavaScript Modules
-
-### theme-switcher.js
-
-**Behavior:**
-- Swaps `link#theme-css` href between theme stylesheets
-- Persists selection to `localStorage` (key: `scifi-ui.theme`)
-- Sets `data-theme` attribute on `documentElement`
-- Updates button `aria-pressed` states
-- Dispatches `CustomEvent('themechange', {detail: {theme: name}})`
-
-**Usage:**
-```javascript
-// Programmatically change theme
-window.setTheme('starwars');
-
-// Listen for theme changes
-document.addEventListener('themechange', (e) => {
-  console.log('Theme changed to:', e.detail.theme);
-});
-```
-
-### preloader.js
-
-**Behavior:**
-- Preloads critical CSS/SVG assets
-- Shows LCARS-style boot bar with `role="progressbar"`
-- Updates bar width via CSS custom property `--w`
-- Respects `prefers-reduced-motion` (simplified indicator)
-- Updates `aria-valuenow` as resources load
-- Hides and dispatches `CustomEvent('preloader:done')` on completion
-
-**Accessible Features:**
-- ARIA progressbar with live value updates
-- Visual boot animation (LCARS style)
-- Status text for screen readers
-- Reduced motion support
-
-### animation-controller.js
-
-**Behavior:**
-- Manages background SVG/CSS layers per theme
-- Star Wars: HUD grid overlay with animated scanning line
-- Cyberpunk: Neon noise overlay with shift animation
-- LCARS: Minimal/none (clean interface)
-- Applies gentle pointer parallax after preloader (disabled for reduced-motion)
-- Listens for `themechange` and `preloader:done` events
-
-**Parallax:**
-- Smooth lerp-based movement
-- Theme-specific strength values
-- Disabled when `prefers-reduced-motion: reduce`
-
-## 📄 Assets & Licenses
-
-### Created Assets
-
-All visual assets are created with CSS and SVG:
-
-- **hud-grid.svg**: Minimal Star Wars-style HUD grid (original work)
-- **lcars-panels.svg**: Placeholder LCARS panel elements (original work)
-- **hologram-activation.svg**: Placeholder hologram circles (original work)
-- **CSS animations**: All effects implemented in pure CSS
-- **Fonts**: System font stacks used (no external fonts loaded)
-
-### Fonts Used
-
-System fallbacks (no licensing required):
-- LCARS: `"Eurostile", "Segoe UI", system-ui, Roboto, Arial, sans-serif`
-- Star Wars: `"Orbitron", "Roboto Mono", ui-monospace, system-ui, monospace`
-- Cyberpunk: `"OCR-A", "VT323", ui-monospace, monospace`
-
-**Note**: Font preload tags in `index.html` are commented out pending licensed font acquisition.
-
-### No Unlicensed IP
-
-This demo does **NOT** include:
-- Trademarked logos or symbols
-- Copyrighted imagery from films/shows
-- Licensed sound effects or music
-- Proprietary typefaces
-
-All designs are inspired aesthetics created from scratch.
-
-## ✅ Testing Steps
-
-### Manual Testing
-
-1. **Theme Switching**
-   - [ ] Click each theme button
-   - [ ] Verify visual theme changes
-   - [ ] Check localStorage persistence (refresh page)
-   - [ ] Test keyboard navigation (Tab + Enter/Space)
-
-2. **Preloader**
-   - [ ] Verify boot animation appears on load
-   - [ ] Check progress bar fills
-   - [ ] Confirm preloader hides after completion
-
-3. **Animation Controller**
-   - [ ] Star Wars: Verify HUD grid overlay appears
-   - [ ] Cyberpunk: Check neon noise overlay
-   - [ ] Test parallax effect (mouse movement)
-   - [ ] Verify reduced-motion disables animations
-
-4. **Accessibility**
-   - [ ] Tab through all interactive elements
-   - [ ] Verify focus indicators visible
-   - [ ] Test with screen reader (NVDA/JAWS/VoiceOver)
-   - [ ] Check ARIA states update correctly
-
-5. **Responsive**
-   - [ ] Test on mobile viewport (320px+)
-   - [ ] Verify layout adapts correctly
-   - [ ] Check touch interactions work
-
-6. **Payment Confirmation Form**
-   - [ ] Select the transfer payment method and verify the summary shows the generated order reference and HUF amount
-   - [ ] Check that the confirmation form is keyboard-usable and prefilled with plan, cycle, currency, and amount
-   - [ ] Confirm the default disabled state shows the honest Hungarian “not connected yet” message
-   - [ ] Re-test with `?theme=holo` to ensure readable styling and focus states
-   - [ ] If a public endpoint is configured locally, verify the request goes only to that public URL and that no recipient email appears in page source or client-side config
-
-### Automated Testing
-
-```bash
-# Lighthouse audit
-npx lighthouse http://localhost:8000/scifi-ui/ --view
-
-# Axe accessibility audit
-npx @axe-core/cli http://localhost:8000/scifi-ui/
-
-# Run CI locally
-npm install -g @lhci/cli
-lhci autorun
-```
-
-## 🎓 Learning Resources
-
-### Techniques Demonstrated
-
-- **CSS Custom Properties**: Theme variables
-- **CSS Grid/Flexbox**: Responsive layouts
-- **SVG Animation**: Animated HUD elements
-- **JavaScript Modules**: IIFE pattern, event-driven architecture
-- **Progressive Enhancement**: Works without JS
-- **Accessibility**: ARIA, keyboard navigation, reduced motion
-- **Performance**: Critical CSS, resource hints, lazy loading
-- **GitHub Actions**: Automated Lighthouse CI
-
-### References
-
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [MDN Web Docs - Accessibility](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
-- [web.dev - Performance](https://web.dev/performance/)
-- [Lighthouse CI Documentation](https://github.com/GoogleChrome/lighthouse-ci)
-
-## 📝 Acceptance Checklist
-
-- [x] Demo works from `/docs` with redirect active
-- [x] Available at `https://hutoczky.github.io/FormatX/scifi-ui/`
-- [x] Live theme swapping without page reload
-- [x] CustomEvent dispatched on theme change
-- [x] Theme selection persisted to localStorage
-- [x] Preloader runs with accessible progress bar
-- [x] Animation controller activates background layers
-- [x] Reduced motion preference honored
-- [x] Visual parity with mockups (±5%)
-- [x] Lighthouse CI workflow configured
-- [x] Accessibility thresholds met (axe/Lighthouse)
-- [x] No unlicensed IP used
-- [x] Complete directory structure with .gitkeep files
-- [x] Comprehensive documentation
-
-## 📞 Support
-
-For issues or questions, please open an issue on the [GitHub repository](https://github.com/hutoczky/FormatX/issues).
-
-## 📜 License
-
-This demo is part of the FormatX project. See the main repository LICENSE for details.
-
----
-
-**Built with ❤️ using pure CSS, SVG, and vanilla JavaScript**
+A GitHub Pages a repository `master` branchének `/docs` könyvtárából szolgálja ki az oldalt. A gyökérút a `scifi-ui/` oldalra irányít át.

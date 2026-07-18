@@ -1,116 +1,265 @@
 (function () {
-  const STORAGE_KEY = 'scifi-ui:theme';
-  const THEMES = ['lcars', 'holo', 'cyber'];
-  const root = document.body;
+  'use strict';
 
-  const nav = document.querySelector('.theme-switch');
-  const buttons = nav ? nav.querySelectorAll('[data-theme]') : [];
+  const THEME_KEY = 'formatx-site-theme';
+  const RELEASE_API = 'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest';
+  const RELEASE_DOWNLOAD_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
+  const RELEASE_PAGE_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/';
+  const FALLBACK_VERSION = 'V92';
 
-  function parseThemeFromUrl() {
+  const elements = {
+    menuToggle: document.getElementById('menu-toggle'),
+    primaryNav: document.getElementById('primary-nav'),
+    heroVersion: document.getElementById('hero-version'),
+    heroDownload: document.getElementById('hero-download'),
+    releaseDot: document.getElementById('release-state-dot'),
+    releaseState: document.getElementById('release-state'),
+    releaseName: document.getElementById('release-name'),
+    releasePublished: document.getElementById('release-published'),
+    releasePageLink: document.getElementById('release-page-link'),
+    downloadFileName: document.getElementById('download-file-name'),
+    downloadVersion: document.getElementById('download-version'),
+    downloadSize: document.getElementById('download-size'),
+    downloadPrimary: document.getElementById('download-primary'),
+    downloadReleasePage: document.getElementById('download-release-page'),
+    checksum: document.getElementById('release-sha256'),
+    copyChecksum: document.getElementById('copy-checksum'),
+    apiNote: document.getElementById('release-api-note'),
+    toast: document.getElementById('toast')
+  };
+
+  function readThemePreference() {
+    const queryTheme = new URLSearchParams(window.location.search).get('theme');
+    if (queryTheme === 'dark' || queryTheme === 'light') return queryTheme;
+
     try {
-      const u = new URL(window.location.href);
-      const q = (u.searchParams.get('theme') || '').toLowerCase();
-      if (THEMES.includes(q)) return q;
-      const hashMatch = (window.location.hash.match(/theme=([a-z]+)/i) || [])[1];
-      const h = (hashMatch || '').toLowerCase();
-      if (THEMES.includes(h)) return h;
-    } catch (_) {}
-    return null;
+      const storedTheme = window.localStorage.getItem(THEME_KEY);
+      if (storedTheme === 'dark' || storedTheme === 'light') return storedTheme;
+    } catch (_) {
+      // The site remains usable when storage is unavailable.
+    }
+
+    return 'dark';
   }
 
-  function getCurrentTheme() {
-    const c = Array.from(root.classList)
-      .map(cn => cn.replace(/^theme-/, ''))
-      .find(t => THEMES.includes(t));
-    return c || null;
-  }
+  function applyTheme(theme, persist) {
+    const selectedTheme = theme === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = selectedTheme;
 
-  function setUrlParam(key, value) {
-    try {
-      const u = new URL(window.location.href);
-      u.searchParams.set(key, value);
-      history.replaceState(null, '', u.toString());
-    } catch (_) {}
-  }
+    document.querySelectorAll('[data-theme-choice]').forEach(function (button) {
+      button.setAttribute('aria-pressed', String(button.dataset.themeChoice === selectedTheme));
+    });
 
-  function syncGlitch() {
-    const title = document.querySelector('.title');
-    if (!title) return;
-    if (root.classList.contains('theme-cyber')) {
-      // mindig a tényleges feliratot tükrözzük
-      title.setAttribute('data-glitch', title.textContent.trim());
-    } else {
-      title.removeAttribute('data-glitch');
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) themeColor.content = selectedTheme === 'light' ? '#eaf0f3' : '#050a10';
+
+    if (persist) {
+      try {
+        window.localStorage.setItem(THEME_KEY, selectedTheme);
+      } catch (_) {
+        // Theme persistence is optional.
+      }
     }
   }
 
-  function setAriaPressed(theme) {
-    buttons.forEach(btn => {
-      const isActive = btn.getAttribute('data-theme') === theme;
-      btn.setAttribute('aria-pressed', String(isActive));
+  function initialiseTheme() {
+    applyTheme(readThemePreference(), false);
+
+    document.querySelectorAll('[data-theme-choice]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        applyTheme(button.dataset.themeChoice, true);
+      });
     });
   }
 
-  function applyTheme(theme) {
-    if (!THEMES.includes(theme)) return false;
-    const before = getCurrentTheme();
-    if (before === theme) {
-      // már aktív, csak állapotokat frissítünk
-      setAriaPressed(theme);
-      syncGlitch();
+  function closeMenu() {
+    if (!elements.menuToggle || !elements.primaryNav) return;
+    elements.primaryNav.classList.remove('open');
+    elements.menuToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function initialiseMenu() {
+    if (!elements.menuToggle || !elements.primaryNav) return;
+
+    elements.menuToggle.addEventListener('click', function () {
+      const willOpen = !elements.primaryNav.classList.contains('open');
+      elements.primaryNav.classList.toggle('open', willOpen);
+      elements.menuToggle.setAttribute('aria-expanded', String(willOpen));
+    });
+
+    elements.primaryNav.addEventListener('click', function (event) {
+      if (event.target.closest('a')) closeMenu();
+    });
+
+    window.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeMenu();
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 980) closeMenu();
+    });
+  }
+
+  function formatBytes(bytes) {
+    if (!Number.isFinite(bytes) || bytes <= 0) return 'Nem elérhető';
+    const unit = bytes >= 1024 ** 3 ? 'GiB' : 'MiB';
+    const divisor = unit === 'GiB' ? 1024 ** 3 : 1024 ** 2;
+    return new Intl.NumberFormat('hu-HU', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(bytes / divisor) + ' ' + unit;
+  }
+
+  function formatDate(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Nem elérhető';
+    return new Intl.DateTimeFormat('hu-HU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(date);
+  }
+
+  function normaliseVersion(tagName) {
+    const match = String(tagName || '').match(/^v?(\d+)$/i);
+    if (!match) throw new Error('A kiadás verziócímkéje nem támogatott.');
+    return 'V' + match[1];
+  }
+
+  function isTrustedUrl(value, prefix) {
+    try {
+      const url = new URL(value);
+      return url.protocol === 'https:' && url.href.startsWith(prefix);
+    } catch (_) {
       return false;
     }
-    THEMES.forEach(t => root.classList.remove(`theme-${t}`));
-    root.classList.add(`theme-${theme}`);
-    setAriaPressed(theme);
-    try { localStorage.setItem(STORAGE_KEY, theme); } catch (_) {}
-    syncGlitch();
-    return true;
   }
 
-  // Initial theme: URL > localStorage > existing class > default
-  const initial =
-    parseThemeFromUrl() ||
-    (function () { try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; } })() ||
-    getCurrentTheme() ||
-    'lcars';
-
-  applyTheme(initial);
-
-  if (nav) {
-    nav.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-theme]');
-      if (!btn) return;
-      const t = btn.getAttribute('data-theme');
-      if (applyTheme(t)) setUrlParam('theme', t);
-    });
-
-    nav.addEventListener('keydown', (e) => {
-      const btn = e.target.closest && e.target.closest('[data-theme]');
-      if (!btn) return;
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const t = btn.getAttribute('data-theme');
-        if (applyTheme(t)) setUrlParam('theme', t);
-      }
-    });
+  function readChecksum(asset) {
+    const digest = String(asset.digest || '').replace(/^sha256:/i, '').toLowerCase();
+    return /^[a-f0-9]{64}$/.test(digest) ? digest : '';
   }
 
-  // URL vagy hash változás esetén frissítünk
-  window.addEventListener('popstate', () => {
-    const t = parseThemeFromUrl();
-    if (t) applyTheme(t);
-  });
-  window.addEventListener('hashchange', () => {
-    const t = parseThemeFromUrl();
-    if (t) applyTheme(t);
-  });
-
-  // Tabok közötti szinkron
-  window.addEventListener('storage', (e) => {
-    if (e.key === STORAGE_KEY && typeof e.newValue === 'string') {
-      const t = e.newValue;
-      if (THEMES.includes(t)) applyTheme(t);
+  function validateRelease(payload) {
+    if (!payload || payload.draft || payload.prerelease || !Array.isArray(payload.assets)) {
+      throw new Error('A stabil kiadás metaadata hiányos.');
     }
-  });
-})();
+
+    const version = normaliseVersion(payload.tag_name);
+    const expectedName = 'FormatX-Suite-Pro-' + version + '.zip';
+    const asset = payload.assets.find(function (candidate) {
+      return candidate && candidate.name === expectedName;
+    });
+
+    if (!asset || !isTrustedUrl(asset.browser_download_url, RELEASE_DOWNLOAD_PREFIX)) {
+      throw new Error('A stabil kiadás univerzális ZIP-je nem található.');
+    }
+
+    if (!isTrustedUrl(payload.html_url, RELEASE_PAGE_PREFIX)) {
+      throw new Error('A kiadási oldal címe nem megbízható.');
+    }
+
+    return {
+      version: version,
+      name: expectedName,
+      url: asset.browser_download_url,
+      pageUrl: payload.html_url,
+      size: Number(asset.size),
+      checksum: readChecksum(asset),
+      publishedAt: payload.published_at
+    };
+  }
+
+  function setLink(element, url, label) {
+    if (!element) return;
+    element.href = url;
+    if (label) element.textContent = label;
+  }
+
+  function renderRelease(release) {
+    if (elements.heroVersion) elements.heroVersion.textContent = release.version;
+    setLink(elements.heroDownload, release.url, release.version + ' letöltése');
+
+    if (elements.releaseState) elements.releaseState.textContent = 'Élő GitHub Release ellenőrizve';
+    if (elements.releaseDot) elements.releaseDot.classList.remove('warning');
+    if (elements.releaseName) elements.releaseName.textContent = 'FormatX Suite Pro ' + release.version;
+    if (elements.releasePublished) elements.releasePublished.textContent = formatDate(release.publishedAt);
+    setLink(elements.releasePageLink, release.pageUrl);
+
+    if (elements.downloadFileName) elements.downloadFileName.textContent = release.name;
+    if (elements.downloadVersion) elements.downloadVersion.textContent = release.version;
+    if (elements.downloadSize) elements.downloadSize.textContent = formatBytes(release.size);
+    setLink(elements.downloadPrimary, release.url, release.version + ' univerzális csomag letöltése');
+    setLink(elements.downloadReleasePage, release.pageUrl);
+
+    if (elements.checksum) {
+      elements.checksum.textContent = release.checksum || 'A GitHub metaadat nem tartalmaz SHA256 értéket.';
+    }
+    if (elements.copyChecksum) elements.copyChecksum.disabled = !release.checksum;
+    if (elements.apiNote) {
+      elements.apiNote.textContent = release.checksum
+        ? 'A letöltési linket és a SHA256 értéket az élő GitHub kiadásból ellenőriztük.'
+        : 'A letöltési link élő és ellenőrzött; ehhez a kiadáshoz nem érkezett SHA256 metaadat.';
+    }
+  }
+
+  function renderReleaseFallback() {
+    if (elements.releaseState) elements.releaseState.textContent = 'Ellenőrzött V92 tartalék link';
+    if (elements.releaseDot) elements.releaseDot.classList.add('warning');
+    if (elements.apiNote) {
+      elements.apiNote.textContent = 'Az élő kiadásellenőrzés nem érhető el; az ellenőrzött ' + FALLBACK_VERSION + ' link látható.';
+    }
+  }
+
+  async function loadLatestRelease() {
+    if (!elements.downloadPrimary) return;
+
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timeoutId = controller ? window.setTimeout(function () { controller.abort(); }, 8000) : null;
+
+    try {
+      const response = await window.fetch(RELEASE_API, {
+        headers: { Accept: 'application/vnd.github+json' },
+        signal: controller ? controller.signal : undefined
+      });
+      if (!response.ok) throw new Error('GitHub API HTTP ' + response.status);
+      renderRelease(validateRelease(await response.json()));
+    } catch (_) {
+      renderReleaseFallback();
+    } finally {
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+    }
+  }
+
+  function showToast(message) {
+    if (!elements.toast) return;
+    elements.toast.textContent = message;
+    elements.toast.hidden = false;
+    window.clearTimeout(showToast.timerId);
+    showToast.timerId = window.setTimeout(function () {
+      elements.toast.hidden = true;
+    }, 2600);
+  }
+
+  async function copyChecksum() {
+    if (!elements.checksum || !/^[a-f0-9]{64}$/i.test(elements.checksum.textContent.trim())) return;
+    const value = elements.checksum.textContent.trim();
+
+    try {
+      await navigator.clipboard.writeText(value);
+      showToast('A SHA256 ellenőrzőösszeg a vágólapra került.');
+    } catch (_) {
+      const range = document.createRange();
+      range.selectNodeContents(elements.checksum);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      showToast('Az ellenőrzőösszeg kijelölve; másold a vágólapra.');
+    }
+  }
+
+  initialiseTheme();
+  initialiseMenu();
+  if (elements.copyChecksum) elements.copyChecksum.addEventListener('click', copyChecksum);
+  loadLatestRelease();
+}());

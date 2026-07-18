@@ -1,30 +1,68 @@
 <!doctype html>
-<html lang="hu">
+<html lang="hu" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Support — FormatX Suite Pro</title>
-  <link rel="stylesheet" href="./styles/site.css">
+  <meta name="description" content="FormatX Suite Pro támogatás, hibajelentés és licencigény.">
+  <meta name="theme-color" content="#050a10">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'none'">
+  <title>Támogatás | FormatX Suite Pro</title>
+  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
+  <script defer src="./scripts/site.js?v=20260718-v92"></script>
 </head>
-<body class="theme-lcars">
-  <header class="site-header container">
-    <nav aria-label="Navigáció">
-      <a class="pill sm" href="./index.html">← Főoldal</a>
-    </nav>
-  </header>
-  <main class="container shell">
-    <section class="panel">
-      <h1 class="panel-title">Enterprise és support</h1>
-      <div class="card span-12">
-        <p>Enterprise csomaghoz és egyedi megfelelőségi igényhez egyedi ajánlat szükséges.</p>
-        <p>A demo checkout után innen kérhető személyes visszahívás vagy éles onboarding. Éles indulás előtt állíts be publikus support elérhetőséget és töltsd ki a worker konfigurációban a <code>SUPPORT_EMAIL</code> változót.</p>
-        <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:1rem;">
-          <a class="pill lg" href="./index.html#payment">VISSZA AZ ELŐFIZETÉSHEZ</a>
-          <a class="pill lg alt" href="./terms.html">ÁSZF / Terms</a>
-          <a class="pill lg alt" href="./privacy.html">Privacy</a>
-        </div>
+<body>
+  <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
+  <header class="site-header">
+    <div class="header-inner legal-header-inner">
+      <a class="brand" href="./index.html" aria-label="FormatX Suite Pro főoldal">
+        <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
+        <span><strong>FormatX Suite Pro</strong><small>Támogatás</small></span>
+      </a>
+      <a class="legal-home-link" href="./index.html">Vissza a főoldalra</a>
+      <div class="theme-control" role="group" aria-label="Megjelenés">
+        <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
       </div>
-    </section>
+    </div>
+  </header>
+
+  <main id="main-content" class="legal-main">
+    <article class="content-width legal-document">
+      <p class="eyebrow">SEGÍTSÉG ÉS VISSZAJELZÉS</p>
+      <h1>Támogatás</h1>
+      <p class="legal-lead">Hibajelentéshez, fejlesztési javaslathoz és licencigényhez válaszd a megfelelő nyilvános csatornát.</p>
+
+      <div class="support-grid">
+        <section>
+          <p class="eyebrow">TECHNIKAI HIBA</p>
+          <h2>GitHub hibajegy</h2>
+          <p>Írd le az operációs rendszert, a FormatX verzióját, a pontos lépéseket és a kapott hibaüzenetet. Bizalmas adatot ne csatolj.</p>
+          <a class="button primary" href="https://github.com/hutoczky/FormatX/issues/new" target="_blank" rel="noopener noreferrer">Új hibajegy nyitása</a>
+        </section>
+        <section>
+          <p class="eyebrow">ISMERT HIBÁK</p>
+          <h2>Nyitott bejelentések</h2>
+          <p>Beküldés előtt ellenőrizd, hogy a jelenséget már jelentette-e más. A meglévő hibajegy kiegészíthető új reprodukciós adattal.</p>
+          <a class="button secondary" href="https://github.com/hutoczky/FormatX/issues" target="_blank" rel="noopener noreferrer">Hibajegyek megtekintése</a>
+        </section>
+        <section>
+          <p class="eyebrow">BUSINESS / OWNER</p>
+          <h2>Licencigény</h2>
+          <p>A licenctípust, a gépek számát és a kívánt felhasználási módot add meg. Licenckulcsot vagy gépazonosítót nyilvános hibajegybe ne írj.</p>
+          <a class="button secondary" href="https://github.com/hutoczky/FormatX/issues/new?title=Licencig%C3%A9ny%3A%20" target="_blank" rel="noopener noreferrer">Licencigény indítása</a>
+        </section>
+      </div>
+
+      <section>
+        <h2>Gyors ellenőrzés hibajelentés előtt</h2>
+        <ol class="check-list">
+          <li>Ellenőrizd, hogy a legújabb stabil kiadást használod.</li>
+          <li>Hasonlítsd össze a letöltött ZIP SHA256 értékét a kiadási oldalon látható ellenőrzőösszeggel.</li>
+          <li>Csatold a releváns naplórészletet, de távolítsd el belőle a személyes vagy titkos adatokat.</li>
+        </ol>
+      </section>
+    </article>
   </main>
 </body>
 </html>

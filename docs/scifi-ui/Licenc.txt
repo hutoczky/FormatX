@@ -1,6 +1,10 @@
-Sci‑Fi UI (docs/scifi-ui) – Helyi licencfeltételek (HU)
+FormatX Suite Pro - weboldali licenctájékoztató
 
-Ez a demó NEM nyílt forráskódú; ingyenesen letölthető és telepíthető. A teljes licencszöveg a kiadásban érhető el:
-https://github.com/hutoczky/formatui/releases/download/v1.0.4/LICENSE.txt
+A FormatX Suite Pro nem nyílt forráskódú szoftver. A használatra, másolásra, módosításra és terjesztésre a projekt hivatalos licencfeltételei vonatkoznak:
+https://github.com/hutoczky/FormatX/blob/master/LICENSE
 
-Támogatás/hibajelentés: https://github.com/hutoczky/FormatX/issues
+Hivatalos programkiadások:
+https://github.com/hutoczky/FormatX-Updates/releases
+
+Támogatás és hibajelentés:
+https://github.com/hutoczky/FormatX/issues
