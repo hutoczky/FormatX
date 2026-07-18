@@ -4,8 +4,10 @@ const PLAN_CATALOG = {
   business_lite: {
     id: 'business_lite',
     name: 'Business Lite',
-    monthlyAmount: 19900,
-    annualAmount: 199000,
+    prices: {
+      HUF: { monthly: 19900, annual: 199000 },
+      EUR: { monthly: 55, annual: 547 },
+    },
     maxTechnicians: 1,
     maxDevices: 10,
     licenseSegment: 'BUSINESS',
@@ -13,8 +15,10 @@ const PLAN_CATALOG = {
   business_pro: {
     id: 'business_pro',
     name: 'Business Pro',
-    monthlyAmount: 49900,
-    annualAmount: 499000,
+    prices: {
+      HUF: { monthly: 49900, annual: 499000 },
+      EUR: { monthly: 137, annual: 1373 },
+    },
     maxTechnicians: 3,
     maxDevices: 50,
     licenseSegment: 'BUSINESS',
@@ -22,8 +26,10 @@ const PLAN_CATALOG = {
   technician_team: {
     id: 'technician_team',
     name: 'Technician Team',
-    monthlyAmount: 99900,
-    annualAmount: 999000,
+    prices: {
+      HUF: { monthly: 99900, annual: 999000 },
+      EUR: { monthly: 275, annual: 2748 },
+    },
     maxTechnicians: 5,
     maxDevices: 150,
     licenseSegment: 'TEAM',
@@ -31,6 +37,7 @@ const PLAN_CATALOG = {
 };
 
 const BILLING_CYCLES = new Set(['monthly', 'annual']);
+const SUPPORTED_CURRENCIES = new Set(['HUF', 'EUR']);
 
 export default {
   async fetch(request, env, ctx) {
@@ -49,8 +56,12 @@ export default {
           provider: 'bank_transfer',
           mode: env.PAYMENT_MODE || 'live',
           live_ready: errors.length === 0,
+          supported_currencies: [...SUPPORTED_CURRENCIES],
           qvik: false,
-          qr_format: 'payto-rfc8905',
+          qr_formats: {
+            HUF: 'payto-rfc8905',
+            EUR: 'epc069-12-v3.1',
+          },
           manual_verification_required: true,
           configuration_errors: errors.length,
         }, 200, corsHeaders);
@@ -93,7 +104,7 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
   const errors = getLiveConfigurationErrors(env);
   if (errors.length > 0) {
     return jsonResponse({
-      error: 'A közvetlen banki átutalás nincs teljesen konfigurálva.',
+      error: 'A közvetlen HUF/EUR banki átutalás nincs teljesen konfigurálva.',
       details: errors,
     }, 503, corsHeaders);
   }
@@ -106,10 +117,15 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
 
   const plan = PLAN_CATALOG[payload.plan_id];
   const billingCycle = payload.billing_cycle;
-  const amount = getPlanAmount(plan, billingCycle);
+  const currency = normaliseCurrency(payload.currency);
+  const amount = getPlanAmount(plan, billingCycle, currency);
   const orderReference = payload.order_reference.trim();
   const account = getBankAccount(env);
-  const paytoUri = buildPaytoUri(account, amount, orderReference);
+  const paymentUri = buildPaytoUri(account, amount, currency, orderReference);
+  const qrPayload = currency === 'EUR'
+    ? buildEpcQrPayload(account, amount, orderReference)
+    : paymentUri;
+  const qrFormat = currency === 'EUR' ? 'epc069-12-v3.1' : 'payto-rfc8905';
 
   if (hasSupabaseConfiguration(env)) {
     const supabase = createSupabaseClient(env);
@@ -121,8 +137,8 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
       plan_id: plan.id,
       plan_name: plan.name,
       billing_cycle: billingCycle,
-      amount_huf: amount,
-      currency: 'HUF',
+      amount_huf: getPlanAmount(plan, billingCycle, 'HUF'),
+      currency,
       max_technicians: plan.maxTechnicians,
       max_devices: plan.maxDevices,
       payment_provider: 'bank_transfer',
@@ -130,7 +146,7 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
       provider_customer_id: null,
       provider_subscription_id: null,
       provider_checkout_session_id: orderReference,
-      checkout_url: paytoUri,
+      checkout_url: paymentUri,
       subscription_status: 'pending_payment',
       payment_status: 'pending',
       metadata: {
@@ -142,11 +158,14 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
         purchase_order: payload.purchase_order?.trim() || null,
         order_reference: orderReference,
         account_holder: account.holder,
-        account_iban: account.iban,
-        account_local_huf: account.local_huf_account,
+        account_iban: currency === 'EUR' ? account.eur_iban : account.iban,
+        account_local_huf: currency === 'HUF' ? account.local_huf_account : null,
+        amount,
+        currency,
+        qr_format: qrFormat,
         automatic_renewal: false,
         qvik: false,
-        qr_format: 'payto-rfc8905',
+        sepa: currency === 'EUR',
       },
       created_at: now,
       updated_at: now,
@@ -158,12 +177,16 @@ async function handleCreateCheckoutSession(request, env, corsHeaders) {
     order_reference: orderReference,
     payment_provider: 'bank_transfer',
     payment_mode: 'live',
-    amount_huf: amount,
-    currency: 'HUF',
+    amount,
+    amount_huf: currency === 'HUF' ? amount : null,
+    currency,
     account,
-    payto_uri: paytoUri,
+    qr_payload: qrPayload,
+    payment_uri: paymentUri,
+    payto_uri: paymentUri,
     qvik: false,
-    qr_format: 'payto-rfc8905',
+    sepa: currency === 'EUR',
+    qr_format: qrFormat,
     manual_verification_required: true,
     order_tracking_ready: hasSupabaseConfiguration(env),
     automatic_renewal: false,
@@ -196,6 +219,17 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
     return jsonResponse({ error: 'A vásárlói e-mail nem egyezik a rendelésben megadott címmel.' }, 409, corsHeaders);
   }
 
+  const expectedCurrency = String(subscription.currency || subscription.metadata?.currency || 'HUF').toUpperCase();
+  const submittedCurrency = normaliseCurrency(payload.currency);
+  if (expectedCurrency !== submittedCurrency) {
+    return jsonResponse({ error: 'A visszajelzett deviza nem egyezik a rendeléssel.' }, 409, corsHeaders);
+  }
+
+  const expectedAmount = Number(subscription.metadata?.amount ?? subscription.amount_huf);
+  if (Number(payload.amount) !== expectedAmount) {
+    return jsonResponse({ error: 'A visszajelzett összeg nem egyezik a rendeléssel.' }, 409, corsHeaders);
+  }
+
   const eventId = `bank-transfer-confirmation:${payload.order_reference.trim()}`;
   const now = new Date().toISOString();
   await supabase.upsert('payment_events', [{
@@ -204,8 +238,8 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
     status: 'awaiting_manual_review',
     payload: {
       ...payload,
-      amount_huf: subscription.amount_huf,
-      currency: subscription.currency,
+      amount: expectedAmount,
+      currency: expectedCurrency,
       plan_id: subscription.plan_id,
       billing_cycle: subscription.billing_cycle,
     },
@@ -232,6 +266,8 @@ async function handlePaymentConfirmation(request, env, corsHeaders) {
   return jsonResponse({
     ok: true,
     order_reference: payload.order_reference.trim(),
+    amount: expectedAmount,
+    currency: expectedCurrency,
     status: 'awaiting_manual_review',
     message: 'A fizetési visszajelzés rögzítve lett. A licenc a beérkezett átutalás kézi ellenőrzése után aktiválható.',
   }, 200, corsHeaders);
@@ -265,6 +301,8 @@ async function handleSessionStatus(url, env, corsHeaders) {
     plan_id: subscription.plan_id,
     plan_name: subscription.plan_name,
     billing_cycle: subscription.billing_cycle,
+    amount: Number(subscription.metadata?.amount ?? subscription.amount_huf),
+    currency: subscription.currency || subscription.metadata?.currency || 'HUF',
     subscription_status: subscription.subscription_status,
     payment_status: subscription.payment_status,
     license_active: Boolean(license),
@@ -361,6 +399,7 @@ async function handleApprovePayment(request, env, corsHeaders) {
     features: [
       'direct_bank_transfer',
       'manual_payment_verification',
+      `currency:${subscription.currency || subscription.metadata?.currency || 'HUF'}`,
       `plan:${subscription.plan_id}`,
       `billing_cycle:${subscription.billing_cycle}`,
       `max_technicians:${subscription.max_technicians}`,
@@ -387,6 +426,8 @@ async function handleApprovePayment(request, env, corsHeaders) {
     payload: {
       order_reference: payload.order_reference.trim(),
       bank_transaction_id: payload.bank_transaction_id.trim(),
+      amount: Number(subscription.metadata?.amount ?? subscription.amount_huf),
+      currency: subscription.currency || subscription.metadata?.currency || 'HUF',
       approved_at: now,
     },
     processed_at: now,
@@ -405,6 +446,7 @@ function validateCheckoutRequest(payload) {
   if (!payload || typeof payload !== 'object') return 'Hiányzó kérés törzs.';
   if (!PLAN_CATALOG[payload.plan_id]) return 'Ismeretlen csomag.';
   if (!BILLING_CYCLES.has(payload.billing_cycle)) return 'Érvénytelen számlázási ciklus.';
+  if (!SUPPORTED_CURRENCIES.has(normaliseCurrency(payload.currency))) return 'Érvénytelen fizetési deviza.';
   if (!payload.company_name?.trim()) return 'A cégnév vagy tevékenységnév kötelező.';
   if (!payload.contact_name?.trim()) return 'A kapcsolattartó neve kötelező.';
   if (!payload.email?.includes('@')) return 'Érvényes e-mail-cím szükséges.';
@@ -419,6 +461,8 @@ function validatePaymentConfirmation(payload) {
   if (!payload.payer_name?.trim()) return 'Az utaló neve kötelező.';
   if (!payload.buyer_email?.includes('@')) return 'Érvényes vásárlói e-mail-cím szükséges.';
   if (!payload.transfer_reference?.trim()) return 'A banki tranzakció hivatkozása kötelező.';
+  if (!SUPPORTED_CURRENCIES.has(normaliseCurrency(payload.currency))) return 'Érvénytelen visszajelzett deviza.';
+  if (!Number.isFinite(Number(payload.amount)) || Number(payload.amount) <= 0) return 'Érvénytelen visszajelzett összeg.';
   return null;
 }
 
@@ -431,6 +475,7 @@ function getLiveConfigurationErrors(env) {
   if (env.PAYMENT_ACCOUNT_CONFIRMED !== 'true') errors.push('PAYMENT_ACCOUNT_CONFIRMED');
   if (!account.holder) errors.push('BANK_ACCOUNT_HOLDER');
   if (!isValidIban(account.iban)) errors.push('BANK_IBAN_HUF');
+  if (!isValidIban(account.eur_iban)) errors.push('BANK_IBAN_EUR');
   if (!/^\d{8}-\d{8}-\d{8}$/.test(account.local_huf_account)) errors.push('BANK_LOCAL_HUF_ACCOUNT');
   if (!isValidBic(account.bic)) errors.push('BANK_BIC');
   if (!isValidBic(account.correspondent_bic)) errors.push('BANK_CORRESPONDENT_BIC');
@@ -449,13 +494,39 @@ function getBankAccount(env) {
   };
 }
 
-function buildPaytoUri(account, amountHuf, orderReference) {
+function buildPaytoUri(account, amount, currency, orderReference) {
   const params = new URLSearchParams();
-  params.set('amount', `HUF:${amountHuf}`);
+  params.set('amount', `${currency}:${amount}`);
   params.set('receiver-name', account.holder);
   params.set('message', `FormatX ${orderReference}`);
   params.set('instruction', orderReference);
-  return `payto://iban/${account.bic}/${account.iban}?${params.toString()}`;
+  const iban = currency === 'EUR' ? account.eur_iban : account.iban;
+  return `payto://iban/${account.bic}/${iban}?${params.toString()}`;
+}
+
+function buildEpcQrPayload(account, amountEur, orderReference) {
+  const payload = [
+    'BCD',
+    '001',
+    '1',
+    'SCT',
+    account.bic,
+    account.holder,
+    account.eur_iban,
+    `EUR${Number(amountEur).toFixed(2)}`,
+    '',
+    '',
+    `FormatX ${orderReference}`,
+  ].join('\n');
+
+  if (new TextEncoder().encode(payload).length > 331) {
+    throw new Error('Az EPC SEPA QR-adat túllépi a 331 bájtos korlátot.');
+  }
+  return payload;
+}
+
+function normaliseCurrency(value) {
+  return String(value || '').trim().toUpperCase();
 }
 
 function normaliseIban(value) {
@@ -482,8 +553,8 @@ function isValidBic(value) {
   return /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(String(value || '').trim().toUpperCase());
 }
 
-function getPlanAmount(plan, billingCycle) {
-  return billingCycle === 'annual' ? plan.annualAmount : plan.monthlyAmount;
+function getPlanAmount(plan, billingCycle, currency) {
+  return plan.prices[currency][billingCycle];
 }
 
 function computeValidUntil(billingCycle) {
