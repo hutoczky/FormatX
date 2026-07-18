@@ -38,13 +38,13 @@ ALLOW_EXACT = {
     "Start-FormatX-Windows.exe", "Start-FormatX-Linux.sh", "Start-FormatX-macOS.command",
     "FormatX-Suite-Pro-V92.zip", "Cross-platform", "M01", "M02", "M03", "M04", "M05", "M06",
     "© 2026 Hutóczky József", "© 2026 Hutóczky József · FormatX Suite Pro",
-    "Hutóczky József", "REVOHUHB", "CHASDEFX",
+    "Hutóczky József", "REVOHUHB", "CHASDEFX", "X",
 }
 
 ALLOW_PATTERNS = [
     re.compile(r"^[\d\s.,:/+%€Ft—-]+$"),
     re.compile(r"^V\d+$"),
-    re.compile(r"^\d+\s*(MiB|GiB|Ft|€)?$"),
+    re.compile(r"^\d+(?:[.,]\d+)?\s*(MiB|GiB|Ft|€)?$"),
     re.compile(r"^[A-Fa-f0-9]{32,}$"),
     re.compile(r"^FX-"),
     re.compile(r"^FormatX Suite Pro V\d+$"),
