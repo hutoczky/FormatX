@@ -1,0 +1,114 @@
+name: Validate checkout
+
+on:
+  pull_request:
+    paths:
+      - "docs/scifi-ui/**"
+      - "billing-worker/**"
+      - ".github/workflows/validate-checkout.yml"
+  push:
+    branches:
+      - master
+    paths:
+      - "docs/scifi-ui/**"
+      - "billing-worker/**"
+      - ".github/workflows/validate-checkout.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check docs/scifi-ui/scripts/checkout.js
+          node --check docs/scifi-ui/scripts/site.js
+          node --check billing-worker/src/live-entry.js
+
+      - name: Validate checkout structure and payment data
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+
+          class Parser(HTMLParser):
+              pass
+
+          root = Path('.')
+          html_files = [
+              root / 'docs/scifi-ui/checkout.html',
+              root / 'docs/scifi-ui/terms.html',
+              root / 'docs/scifi-ui/privacy.html',
+          ]
+
+          for path in html_files:
+              text = path.read_text(encoding='utf-8')
+              Parser().feed(text)
+              assert text.lower().count('<html') == 1, path
+              assert text.lower().count('</html>') == 1, path
+              assert text.lower().count('<body') == 1, path
+              assert text.lower().count('</body>') == 1, path
+
+          checkout = (root / 'docs/scifi-ui/scripts/checkout.js').read_text(encoding='utf-8')
+          worker = (root / 'billing-worker/src/live-entry.js').read_text(encoding='utf-8')
+          site = (root / 'docs/scifi-ui/scripts/site.js').read_text(encoding='utf-8')
+          css = (root / 'docs/scifi-ui/styles/checkout.css').read_text(encoding='utf-8')
+          checkout_html = (root / 'docs/scifi-ui/checkout.html').read_text(encoding='utf-8')
+
+          required_tokens = [
+              'payment-currency',
+              'summary-currency',
+              'epc069-12-v3.1',
+              'buildEpcQrPayload',
+              "new Set(['HUF', 'EUR'])",
+              'supported_currencies',
+          ]
+          combined = '\n'.join([checkout, worker, checkout_html])
+          for token in required_tokens:
+              assert token in combined, token
+
+          prices = [19900, 199000, 55, 547, 49900, 499000, 137, 1373, 99900, 999000, 275, 2748]
+          for price in prices:
+              assert str(price) in checkout, price
+              assert str(price) in worker, price
+
+          assert 'HUF / EUR banki fizetés' in site
+          assert 'prefers-reduced-motion' in css
+          assert 'hologram-drift' in css
+          assert 'mix-blend-mode' not in css
+          assert css.count('{') == css.count('}')
+
+          iban = 'HU06302000141991341090015751'
+          rearranged = iban[4:] + iban[:4]
+          numeric = ''.join(ch if ch.isdigit() else str(ord(ch) - 55) for ch in rearranged)
+          assert int(numeric) % 97 == 1
+
+          epc = '\n'.join([
+              'BCD',
+              '001',
+              '1',
+              'SCT',
+              'REVOHUHB',
+              'Hutóczky József',
+              iban,
+              'EUR2748.00',
+              '',
+              '',
+              'FormatX FX-20260718-ABC123',
+          ])
+          assert len(epc.encode('utf-8')) <= 331
+          assert epc.splitlines()[:4] == ['BCD', '001', '1', 'SCT']
+
+          print('Checkout validation passed.')
+          PY

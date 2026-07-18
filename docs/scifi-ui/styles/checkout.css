@@ -1,19 +1,105 @@
 .checkout-page {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100svh - var(--header-height));
   padding: 3rem 0 5rem;
+  overflow: clip;
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--cyan) 14%, transparent), transparent 28rem),
+    radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--magenta) 11%, transparent), transparent 32rem),
+    radial-gradient(circle at 55% 95%, color-mix(in srgb, var(--green) 8%, transparent), transparent 30rem),
+    var(--bg);
+}
+
+.checkout-page::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  pointer-events: none;
+  opacity: .22;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--cyan) 16%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--cyan) 16%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, #000 0, transparent 82%);
+}
+
+.checkout-page::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -18rem;
+  left: 50%;
+  width: min(74rem, 110vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: .18;
+  background: conic-gradient(
+    from 40deg,
+    transparent 0 18%,
+    color-mix(in srgb, var(--cyan) 70%, transparent) 25%,
+    transparent 34% 53%,
+    color-mix(in srgb, var(--magenta) 60%, transparent) 62%,
+    transparent 72% 86%,
+    color-mix(in srgb, var(--green) 55%, transparent) 93%,
+    transparent
+  );
+  filter: blur(70px);
+  transform: translateX(-50%);
+  animation: hologram-drift 26s ease-in-out infinite alternate;
+}
+
+.checkout-hero,
+.checkout-layout {
+  position: relative;
+  z-index: 1;
 }
 
 .checkout-hero {
   margin-bottom: 2rem;
 }
 
+.checkout-hero::before {
+  content: "FORMATX // SECURE TRANSFER INTERFACE";
+  display: inline-flex;
+  margin-bottom: .9rem;
+  padding: .32rem .68rem;
+  border: 1px solid color-mix(in srgb, var(--cyan) 65%, var(--line));
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--cyan) 84%, var(--text));
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--magenta) 12%, transparent) inset,
+    0 0 28px color-mix(in srgb, var(--cyan) 12%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .69rem;
+  letter-spacing: .16em;
+}
+
 .checkout-hero h1 {
   max-width: 18ch;
   margin: .35rem 0 .8rem;
+  color: transparent;
+  background:
+    linear-gradient(100deg, var(--text) 0 28%, var(--cyan) 48%, color-mix(in srgb, var(--magenta) 72%, var(--text)) 68%, var(--text) 90%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  filter: drop-shadow(0 0 24px color-mix(in srgb, var(--cyan) 16%, transparent));
 }
 
 .checkout-hero > p:last-child {
   max-width: 72ch;
   color: var(--muted);
+}
+
+.checkout-hero code {
+  padding: .12em .36em;
+  border: 1px solid color-mix(in srgb, var(--cyan) 36%, var(--line));
+  border-radius: .35rem;
+  color: var(--cyan);
+  background: color-mix(in srgb, var(--surface-2) 78%, transparent);
 }
 
 .checkout-layout {
@@ -26,16 +112,69 @@
 .checkout-summary,
 .checkout-form,
 .payment-panel {
-  border: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--cyan) 26%, var(--line));
   border-radius: 24px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--surface) 94%, var(--cyan) 6%), color-mix(in srgb, var(--surface) 96%, var(--magenta) 4%));
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px color-mix(in srgb, var(--magenta) 8%, transparent) inset,
+    0 0 44px color-mix(in srgb, var(--cyan) 7%, transparent);
+  backdrop-filter: blur(16px) saturate(118%);
+}
+
+.checkout-summary::before,
+.checkout-form::before,
+.payment-panel::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 0 38%, color-mix(in srgb, var(--cyan) 9%, transparent) 48%, color-mix(in srgb, var(--magenta) 7%, transparent) 55%, transparent 66%);
+  transform: translateX(-110%);
+  transition: transform 1.15s cubic-bezier(.2, .75, .2, 1);
+}
+
+.checkout-summary:hover::before,
+.checkout-summary:focus-within::before,
+.checkout-form:hover::before,
+.checkout-form:focus-within::before,
+.payment-panel:hover::before,
+.payment-panel:focus-within::before {
+  transform: translateX(110%);
+}
+
+.checkout-summary > *,
+.checkout-form > *,
+.payment-panel > * {
+  position: relative;
+  z-index: 1;
 }
 
 .checkout-summary {
   position: sticky;
   top: 6.5rem;
   padding: 1.4rem;
+}
+
+.checkout-summary::after {
+  content: "";
+  position: absolute;
+  right: -5rem;
+  bottom: -5rem;
+  width: 11rem;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1.3rem color-mix(in srgb, var(--cyan) 4%, transparent),
+    0 0 0 2.7rem color-mix(in srgb, var(--magenta) 3%, transparent),
+    0 0 45px color-mix(in srgb, var(--cyan) 15%, transparent);
 }
 
 .checkout-summary h2,
@@ -54,7 +193,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding-bottom: .7rem;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid color-mix(in srgb, var(--cyan) 13%, var(--line));
 }
 
 .checkout-summary dt {
@@ -67,11 +206,23 @@
   font-weight: 700;
 }
 
+#summary-currency {
+  min-width: 3.2rem;
+  padding: .12rem .48rem;
+  border: 1px solid color-mix(in srgb, var(--cyan) 58%, var(--line));
+  border-radius: 999px;
+  color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 8%, transparent);
+  text-align: center;
+  letter-spacing: .08em;
+}
+
 .checkout-note {
   margin: 1rem 0 0;
   padding: .85rem;
+  border: 1px solid color-mix(in srgb, var(--cyan) 18%, var(--line));
   border-radius: 14px;
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
   color: var(--muted);
 }
 
@@ -83,6 +234,21 @@
 .checkout-form,
 .payment-panel {
   padding: clamp(1.2rem, 3vw, 2rem);
+}
+
+.form-heading .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.form-heading .eyebrow::before {
+  content: "";
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--cyan) 70%, transparent);
 }
 
 .form-grid {
@@ -103,11 +269,30 @@
   width: 100%;
   min-height: 3rem;
   padding: .72rem .82rem;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--cyan) 16%, var(--line));
   border-radius: 12px;
-  background: var(--surface-2);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--surface-2) 97%, var(--cyan) 3%), color-mix(in srgb, var(--surface-2) 98%, var(--magenta) 2%));
   color: var(--text);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text) 4%, transparent) inset;
   font: inherit;
+  transition: border-color .22s ease, box-shadow .22s ease, transform .22s ease;
+}
+
+.form-grid input:hover,
+.form-grid select:hover,
+.form-grid textarea:hover {
+  border-color: color-mix(in srgb, var(--cyan) 44%, var(--line));
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+  border-color: var(--cyan);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--cyan) 13%, transparent),
+    0 0 24px color-mix(in srgb, var(--cyan) 9%, transparent);
+  transform: translateY(-1px);
 }
 
 .form-grid textarea {
@@ -139,6 +324,7 @@
   width: 1.1rem;
   height: 1.1rem;
   margin-top: .2rem;
+  accent-color: var(--cyan);
 }
 
 .consent-row a {
@@ -150,6 +336,26 @@
   flex-wrap: wrap;
   gap: .75rem;
   margin-top: 1.25rem;
+}
+
+.checkout-actions .button {
+  position: relative;
+  overflow: hidden;
+}
+
+.checkout-actions .button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 25%, rgba(255, 255, 255, .18), transparent 72%);
+  transform: translateX(-120%);
+  transition: transform .75s ease;
+}
+
+.checkout-actions .button:hover::after,
+.checkout-actions .button:focus-visible::after {
+  transform: translateX(120%);
 }
 
 .form-feedback {
@@ -177,8 +383,13 @@
   width: 260px;
   height: 260px;
   padding: 10px;
-  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 50%, #fff);
+  border-radius: 22px;
   background: #fff;
+  box-shadow:
+    0 0 0 7px color-mix(in srgb, var(--cyan) 5%, transparent),
+    0 0 42px color-mix(in srgb, var(--cyan) 22%, transparent),
+    0 0 68px color-mix(in srgb, var(--magenta) 11%, transparent);
   object-fit: contain;
 }
 
@@ -187,11 +398,22 @@
   border: 1px solid var(--cyan);
   border-radius: 12px;
   overflow-wrap: anywhere;
+  background: color-mix(in srgb, var(--cyan) 6%, var(--surface-2));
+  box-shadow: 0 0 24px color-mix(in srgb, var(--cyan) 7%, transparent) inset;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 [hidden] {
   display: none !important;
+}
+
+@keyframes hologram-drift {
+  0% {
+    transform: translateX(-52%) translateY(-2%) rotate(-4deg) scale(.96);
+  }
+  100% {
+    transform: translateX(-48%) translateY(5%) rotate(5deg) scale(1.04);
+  }
 }
 
 @media (max-width: 900px) {
@@ -209,6 +431,16 @@
     padding-top: 2rem;
   }
 
+  .checkout-page::before {
+    background-size: 38px 38px;
+  }
+
+  .checkout-hero::before {
+    max-width: 100%;
+    font-size: .58rem;
+    letter-spacing: .1em;
+  }
+
   .form-grid,
   .payment-grid {
     grid-template-columns: 1fr;
@@ -219,5 +451,41 @@
     height: auto;
     aspect-ratio: 1;
     margin-inline: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkout-page::after {
+    animation: none;
+  }
+
+  .checkout-summary::before,
+  .checkout-form::before,
+  .payment-panel::before,
+  .checkout-actions .button::after,
+  .form-grid input,
+  .form-grid select,
+  .form-grid textarea {
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .checkout-page::after,
+  .checkout-summary::before,
+  .checkout-form::before,
+  .payment-panel::before {
+    display: none;
+  }
+
+  .checkout-summary,
+  .checkout-form,
+  .payment-panel,
+  .form-grid input,
+  .form-grid select,
+  .form-grid textarea {
+    border-color: var(--text);
+    background: var(--surface);
+    backdrop-filter: none;
   }
 }
