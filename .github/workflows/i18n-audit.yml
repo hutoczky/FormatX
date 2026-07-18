@@ -1,0 +1,40 @@
+name: Bilingual coverage report
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "tools/validate-site-i18n.py"
+      - ".github/workflows/i18n-audit.yml"
+  push:
+    branches:
+      - master
+    paths:
+      - "docs/**"
+      - "tools/validate-site-i18n.py"
+      - ".github/workflows/i18n-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate full bilingual audit report
+        id: audit
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 tools/validate-site-i18n.py 2>&1 | tee i18n-audit.txt
+
+      - name: Upload bilingual audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilingual-audit-report
+          path: i18n-audit.txt
+          retention-days: 30

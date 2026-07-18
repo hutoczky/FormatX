@@ -1,14 +1,29 @@
 <!doctype html>
 <html lang="hu">
 <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="refresh" content="0; url=./scifi-ui/" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,follow">
   <title>FormatX Suite Pro</title>
-  <script>try{location.replace("./scifi-ui/");}catch(e){}</script>
-  <noscript><meta http-equiv="refresh" content="0; url=./scifi-ui/" /></noscript>
+  <script>
+    (function () {
+      var url = new URL(window.location.href);
+      var language = url.searchParams.get('lang');
+      if (language !== 'hu' && language !== 'en') {
+        try { language = localStorage.getItem('formatx-language'); } catch (_) {}
+      }
+      if (language !== 'hu' && language !== 'en') {
+        language = String(navigator.language || '').toLowerCase().indexOf('hu') === 0 ? 'hu' : 'en';
+      }
+      var target = new URL('./scifi-ui/', window.location.href);
+      target.searchParams.set('lang', language);
+      if (url.hash) target.hash = url.hash;
+      window.location.replace(target.href);
+    }());
+  </script>
 </head>
 <body>
-  <p>Átirányítás a FormatX Suite Pro oldalára: <a href="./scifi-ui/">weboldal megnyitása</a></p>
+  <p>Átirányítás a FormatX Suite Pro oldalára. Redirecting to FormatX Suite Pro.</p>
+  <p><a href="./scifi-ui/?lang=hu">Magyar oldal</a> · <a href="./scifi-ui/?lang=en">English site</a></p>
 </body>
 </html>
