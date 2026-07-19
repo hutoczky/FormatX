@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "docs/scifi-ui/downloads/FormatX-Android.apk"
+      - "docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
       - "docs/scifi-ui/downloads/android-update.json"
       - ".github/workflows/publish-android-release.yml"
   workflow_dispatch:
@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   publish:
-    name: Verify and publish signed Android APK
+    name: Verify and publish Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -22,30 +22,37 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Verify update manifest and signed APK digest
+      - name: Verify update manifest and APK digest
         id: release
         shell: bash
         run: |
           set -euo pipefail
-          test -s docs/scifi-ui/downloads/FormatX-Android.apk
+          APK="docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
+          MANIFEST="docs/scifi-ui/downloads/android-update.json"
+          test -s "$APK"
+          test -s "$MANIFEST"
+          unzip -t "$APK" >/dev/null
+
           python3 - <<'PY' > /tmp/release.env
           import hashlib
           import json
           from pathlib import Path
 
-          apk = Path('docs/scifi-ui/downloads/FormatX-Android.apk')
+          apk = Path('docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk')
           manifest = json.loads(Path('docs/scifi-ui/downloads/android-update.json').read_text(encoding='utf-8'))
           digest = hashlib.sha256(apk.read_bytes()).hexdigest()
           expected = str(manifest['sha256']).lower()
           if digest != expected:
               raise SystemExit(f'SHA256 mismatch: manifest={expected} apk={digest}')
-          version = str(manifest['versionName'])
+          version = str(manifest['versionName']).strip()
           version_code = int(manifest['versionCode'])
-          if version_code < 1 or not version:
-              raise SystemExit('Invalid Android version metadata')
+          apk_url = str(manifest['apkUrl']).strip()
+          if version_code < 1 or not version or not apk_url.startswith('https://'):
+              raise SystemExit('Invalid Android release metadata')
           print(f'VERSION={version}')
           print(f'VERSION_CODE={version_code}')
           print(f'SHA256={digest}')
+          print(f'APK_URL={apk_url}')
           PY
           cat /tmp/release.env >> "$GITHUB_ENV"
           source /tmp/release.env
@@ -56,7 +63,7 @@ jobs:
       - name: Prepare release files
         run: |
           mkdir -p dist
-          cp docs/scifi-ui/downloads/FormatX-Android.apk dist/FormatX-Suite-Pro-Android.apk
+          cp docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk dist/FormatX-Suite-Pro-Android.apk
           printf '%s  %s\n' "$SHA256" "FormatX-Suite-Pro-Android.apk" > dist/FormatX-Suite-Pro-Android.apk.sha256
 
       - name: Create or update GitHub prerelease
@@ -71,7 +78,7 @@ jobs:
           cat > /tmp/release-notes.md <<EOF
           ## FormatX Suite Pro Android ${VERSION}
 
-          Állandó FormatX kiadási kulccsal aláírt Android alkalmazás.
+          Honlapról telepíthető, SHA-256 ellenőrzött Android bétaalkalmazás.
 
           - teljes FormatX weboldal az alkalmazásban;
           - automatikus Worker → GitHub Pages tartalék kapcsolat;
@@ -80,6 +87,8 @@ jobs:
           - automatikus APK-letöltés és SHA-256 ellenőrzés;
           - az Android rendszertelepítője végzi a frissítés jóváhagyását;
           - verziókód: ${VERSION_CODE}.
+
+          Fontos: a későbbi, helyben telepíthető frissítéseket ugyanazzal az Android aláírókulccsal kell aláírni, mint ezt az APK-t.
           EOF
 
           if gh release view "$TAG" >/dev/null 2>&1; then
@@ -108,7 +117,7 @@ jobs:
           {
             echo "## FormatX Android download"
             echo
-            echo "Website: https://formatxsuite.formatx.workers.dev/scifi-ui/downloads/FormatX-Android.apk"
+            echo "Website: $APK_URL"
             echo
             echo "GitHub: https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/FormatX-Suite-Pro-Android.apk"
             echo
