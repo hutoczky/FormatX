@@ -1,23 +1,25 @@
 package hu.formatx.suite;
 
-import android.app.Activity;
 import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.widget.Toast;
 
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -37,7 +39,9 @@ final class AppUpdater {
     private static final String KEY_SHA256 = "sha256";
     private static final String KEY_VERSION = "version";
     private static final String KEY_INSTALL_PENDING = "install_pending";
+
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final Handler MAIN = new Handler(Looper.getMainLooper());
     private static final AtomicBoolean CHECKING = new AtomicBoolean(false);
     private static final AtomicBoolean RECEIVER_REGISTERED = new AtomicBoolean(false);
 
@@ -46,9 +50,17 @@ final class AppUpdater {
     static void checkOnStartup(Context source) {
         Context context = source.getApplicationContext();
         registerDownloadReceiver(context);
-        resumePendingInstall(context);
-        if (!CHECKING.compareAndSet(false, true)) return;
 
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String downloadedVersion = prefs.getString(KEY_VERSION, "");
+        if (BuildConfig.VERSION_NAME.equals(downloadedVersion)) {
+            clearPending(context);
+        } else {
+            resumeExistingDownload(context);
+            resumePendingInstall(context);
+        }
+
+        if (!CHECKING.compareAndSet(false, true)) return;
         EXECUTOR.execute(() -> {
             try {
                 UpdateInfo info = fetchUpdateInfo();
@@ -74,8 +86,26 @@ final class AppUpdater {
         }
 
         long downloadId = prefs.getLong(KEY_DOWNLOAD_ID, -1L);
-        if (downloadId > 0) {
-            installDownloadedApk(context, downloadId);
+        if (downloadId > 0) installDownloadedApk(context, downloadId);
+    }
+
+    private static void resumeExistingDownload(Context context) {
+        long downloadId = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getLong(KEY_DOWNLOAD_ID, -1L);
+        if (downloadId <= 0) return;
+
+        DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        try (Cursor cursor = manager.query(new DownloadManager.Query().setFilterById(downloadId))) {
+            if (!cursor.moveToFirst()) {
+                clearPending(context);
+                return;
+            }
+            int status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
+            if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                verifyAndInstall(context, downloadId);
+            } else if (status == DownloadManager.STATUS_FAILED) {
+                clearPending(context);
+            }
         }
     }
 
@@ -109,7 +139,7 @@ final class AppUpdater {
             }
             String json;
             try (InputStream stream = new BufferedInputStream(connection.getInputStream())) {
-                json = new String(stream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                json = readUtf8(stream);
             }
             JSONObject object = new JSONObject(json);
             return new UpdateInfo(
@@ -123,13 +153,21 @@ final class AppUpdater {
         }
     }
 
+    private static String readUtf8(InputStream stream) throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buffer = new byte[16 * 1024];
+        int count;
+        while ((count = stream.read(buffer)) >= 0) {
+            if (count > 0) output.write(buffer, 0, count);
+        }
+        return output.toString("UTF-8");
+    }
+
     private static void enqueueUpdate(Context context, UpdateInfo info) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         long existingId = prefs.getLong(KEY_DOWNLOAD_ID, -1L);
         String existingVersion = prefs.getString(KEY_VERSION, "");
-        if (existingId > 0 && info.versionName.equals(existingVersion)) {
-            return;
-        }
+        if (existingId > 0 && info.versionName.equals(existingVersion)) return;
 
         DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(info.apkUrl));
@@ -153,11 +191,7 @@ final class AppUpdater {
                 .putBoolean(KEY_INSTALL_PENDING, false)
                 .apply();
 
-        Toast.makeText(
-                context,
-                "Új FormatX verzió érhető el. A frissítés letöltése elindult.",
-                Toast.LENGTH_LONG
-        ).show();
+        notifyUser(context, "Új FormatX verzió érhető el. A frissítés letöltése elindult.");
     }
 
     private static void registerDownloadReceiver(Context context) {
@@ -189,7 +223,7 @@ final class AppUpdater {
                 if (!cursor.moveToFirst()) return;
                 int status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
                 if (status != DownloadManager.STATUS_SUCCESSFUL) {
-                    clearPending(context);
+                    if (status == DownloadManager.STATUS_FAILED) clearPending(context);
                     return;
                 }
             }
@@ -209,11 +243,12 @@ final class AppUpdater {
                         actual.getBytes(java.nio.charset.StandardCharsets.US_ASCII)
                 )) {
                     clearPending(context);
-                    Toast.makeText(context, "A FormatX frissítés ellenőrzése sikertelen.", Toast.LENGTH_LONG).show();
+                    notifyUser(context, "A FormatX frissítés SHA-256 ellenőrzése sikertelen.");
                     return;
                 }
             } catch (Exception error) {
                 clearPending(context);
+                notifyUser(context, "A FormatX frissítés nem ellenőrizhető.");
                 return;
             }
 
@@ -246,11 +281,10 @@ final class AppUpdater {
             );
             settings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(settings);
-            Toast.makeText(
+            notifyUser(
                     context,
-                    "Engedélyezd a FormatX számára az alkalmazásfrissítések telepítését, majd térj vissza.",
-                    Toast.LENGTH_LONG
-            ).show();
+                    "Engedélyezd a FormatX számára az alkalmazásfrissítések telepítését, majd térj vissza."
+            );
             return;
         }
         installDownloadedApk(context, downloadId);
@@ -267,7 +301,6 @@ final class AppUpdater {
         Intent install = new Intent(Intent.ACTION_INSTALL_PACKAGE);
         install.setData(apkUri);
         install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-        install.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false);
         try {
             context.startActivity(install);
         } catch (ActivityNotFoundException error) {
@@ -276,6 +309,10 @@ final class AppUpdater {
             fallback.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(fallback);
         }
+    }
+
+    private static void notifyUser(Context context, String message) {
+        MAIN.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
     }
 
     private static void clearPending(Context context) {
