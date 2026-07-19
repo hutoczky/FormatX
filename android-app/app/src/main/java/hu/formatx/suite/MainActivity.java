@@ -21,6 +21,7 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -34,10 +35,10 @@ import android.window.OnBackInvokedDispatcher;
 import java.util.Locale;
 
 public final class MainActivity extends Activity {
-    private static final String PRIMARY_HOST = "hutoczky.github.io";
-    private static final String PRIMARY_PATH = "/FormatX/scifi-ui/index.html";
+    private static final String PRIMARY_HOST = "formatx1.formatx.workers.dev";
+    private static final String PRIMARY_PATH = "/scifi-ui/";
     private static final String FALLBACK_HOST = "hutoczky.github.io";
-    private static final String FALLBACK_PATH = "/FormatX/scifi-ui/index.html";
+    private static final String FALLBACK_PATH = "/FormatX/scifi-ui/";
     private static final long LOAD_TIMEOUT_MS = 18000L;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -48,7 +49,8 @@ public final class MainActivity extends Activity {
     private TextView stateTitle;
     private TextView stateMessage;
     private Button retryButton;
-    private Button browserButton;
+    private Button primaryBrowserButton;
+    private Button fallbackBrowserButton;
 
     private Uri currentHomeUri;
     private boolean usingFallback;
@@ -68,15 +70,13 @@ public final class MainActivity extends Activity {
 
         setContentView(buildLayout());
         configureWebView();
-        configureBackNavigation();
 
-        if (savedInstanceState != null && webView.restoreState(savedInstanceState) != null) {
-            currentHomeUri = buildUri(PRIMARY_HOST, PRIMARY_PATH);
-            showLoading(false);
-            scheduleTimeout();
-        } else {
-            loadPrimary();
-        }
+        webView.clearCache(true);
+        webView.clearHistory();
+        WebStorage.getInstance().deleteAllData();
+
+        configureBackNavigation();
+        loadPrimary();
     }
 
     private View buildLayout() {
@@ -119,11 +119,17 @@ public final class MainActivity extends Activity {
         retryParams.topMargin = dp(22);
         statePanel.addView(retryButton, retryParams);
 
-        browserButton = makeButton("Megnyitás böngészőben", 0xFF17395F, 0xFFF4FAFF);
-        browserButton.setOnClickListener(view -> openExternal(currentHomeUri));
-        LinearLayout.LayoutParams browserParams = matchWrap();
-        browserParams.topMargin = dp(10);
-        statePanel.addView(browserButton, browserParams);
+        primaryBrowserButton = makeButton("FormatX Worker megnyitása", 0xFF17395F, 0xFFF4FAFF);
+        primaryBrowserButton.setOnClickListener(view -> openExternal(buildUri(PRIMARY_HOST, PRIMARY_PATH)));
+        LinearLayout.LayoutParams primaryParams = matchWrap();
+        primaryParams.topMargin = dp(10);
+        statePanel.addView(primaryBrowserButton, primaryParams);
+
+        fallbackBrowserButton = makeButton("GitHub tartalék oldal megnyitása", 0xFF17395F, 0xFFF4FAFF);
+        fallbackBrowserButton.setOnClickListener(view -> openExternal(buildUri(FALLBACK_HOST, FALLBACK_PATH)));
+        LinearLayout.LayoutParams fallbackParams = matchWrap();
+        fallbackParams.topMargin = dp(10);
+        statePanel.addView(fallbackBrowserButton, fallbackParams);
 
         root.addView(statePanel, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -148,8 +154,8 @@ public final class MainActivity extends Activity {
         settings.setDisplayZoomControls(false);
         settings.setLoadsImagesAutomatically(true);
         settings.setBlockNetworkImage(false);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        settings.setUserAgentString(settings.getUserAgentString() + " FormatXAndroid/1.0.4");
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        settings.setUserAgentString(settings.getUserAgentString() + " FormatXAndroid/1.0.5");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             settings.setSafeBrowsingEnabled(true);
@@ -189,7 +195,8 @@ public final class MainActivity extends Activity {
                 .path(path)
                 .appendQueryParameter("app", "android")
                 .appendQueryParameter("lang", language)
-                .appendQueryParameter("appVersion", "1.0.4")
+                .appendQueryParameter("appVersion", "1.0.5")
+                .appendQueryParameter("cacheBust", "105")
                 .build();
     }
 
@@ -223,10 +230,11 @@ public final class MainActivity extends Activity {
         statePanel.setVisibility(View.VISIBLE);
         stateTitle.setText("FormatX betöltése…");
         stateMessage.setText(fallback
-                ? "A közvetlen kapcsolat nem sikerült. A biztonságos tartalék oldal betöltése folyamatban van."
-                : "Kapcsolódás a biztonságos FormatX szolgáltatáshoz.");
+                ? "Az elsődleges Worker nem adott megfelelő oldalt. A GitHub tartalék betöltése folyamatban van."
+                : "Kapcsolódás az elsődleges FormatX Workerhez.");
         retryButton.setVisibility(View.GONE);
-        browserButton.setVisibility(View.GONE);
+        primaryBrowserButton.setVisibility(View.GONE);
+        fallbackBrowserButton.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
     }
 
@@ -242,10 +250,11 @@ public final class MainActivity extends Activity {
         handler.removeCallbacks(loadTimeout);
         progressBar.setVisibility(View.GONE);
         statePanel.setVisibility(View.VISIBLE);
-        stateTitle.setText("A FormatX oldal nem érhető el.");
-        stateMessage.setText(reason + " Ellenőrizd az internetkapcsolatot, majd próbáld újra.");
+        stateTitle.setText("A FormatX oldalak nem érhetők el.");
+        stateMessage.setText(reason + " Ellenőrizd az internetkapcsolatot, majd próbáld újra, vagy nyisd meg valamelyik oldalt külön.");
         retryButton.setVisibility(View.VISIBLE);
-        browserButton.setVisibility(View.VISIBLE);
+        primaryBrowserButton.setVisibility(View.VISIBLE);
+        fallbackBrowserButton.setVisibility(View.VISIBLE);
     }
 
     private void handleMainFrameFailure(String reason) {
@@ -262,6 +271,36 @@ public final class MainActivity extends Activity {
                 && currentHomeUri != null
                 && uri.getHost() != null
                 && uri.getHost().equalsIgnoreCase(currentHomeUri.getHost());
+    }
+
+    private boolean isCurrentHomeRequest(Uri uri) {
+        if (!isCurrentRequest(uri) || uri.getPath() == null || currentHomeUri.getPath() == null) {
+            return false;
+        }
+        String loadedPath = normalisePath(uri.getPath());
+        String expectedPath = normalisePath(currentHomeUri.getPath());
+        return loadedPath.equals(expectedPath)
+                || loadedPath.equals(normalisePath(expectedPath + "index.html"));
+    }
+
+    private static String normalisePath(String path) {
+        if (path == null || path.isEmpty()) return "/";
+        return path.endsWith("/") ? path : path + "/";
+    }
+
+    private void verifyLandingPage(WebView view) {
+        view.evaluateJavascript(
+                "(function(){return !!(document.body && document.body.classList.contains('reference-commerce'));})()",
+                result -> {
+                    if ("true".equals(result)) {
+                        showPage();
+                    } else if (!usingFallback) {
+                        loadFallback();
+                    } else {
+                        showError("A kiszolgáló egy régi vagy nem megfelelő FormatX oldalt adott vissza.");
+                    }
+                }
+        );
     }
 
     private boolean isTrustedHost(String host) {
@@ -420,12 +459,21 @@ public final class MainActivity extends Activity {
 
         @Override
         public void onPageCommitVisible(WebView view, String url) {
-            if (isCurrentRequest(Uri.parse(url))) showPage();
+            Uri uri = Uri.parse(url);
+            if (isCurrentRequest(uri) && !isCurrentHomeRequest(uri)) {
+                showPage();
+            }
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            if (isCurrentRequest(Uri.parse(url)) && view.getProgress() >= 100) showPage();
+            Uri uri = Uri.parse(url);
+            if (!isCurrentRequest(uri) || view.getProgress() < 100) return;
+            if (isCurrentHomeRequest(uri)) {
+                verifyLandingPage(view);
+            } else {
+                showPage();
+            }
         }
 
         @Override
