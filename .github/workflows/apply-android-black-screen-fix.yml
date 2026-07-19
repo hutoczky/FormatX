@@ -1,0 +1,119 @@
+name: Apply Android black-screen and download fixes
+
+on:
+  push:
+    branches: [agent/fix-android-black-screen]
+    paths:
+      - ".github/workflows/apply-android-black-screen-fix.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/fix-android-black-screen
+
+      - name: Add same-origin Android APK download route
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          worker_path = Path('billing-worker/src/live-entry.js')
+          worker = worker_path.read_text(encoding='utf-8')
+          release_url = 'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.1-beta/FormatX-Suite-Pro-Android.apk'
+
+          if 'const ANDROID_APK_RELEASE_URL' not in worker:
+              worker = worker.replace(
+                  "import legacyWorker from './index.js';\n",
+                  "import legacyWorker from './index.js';\n\nconst ANDROID_APK_RELEASE_URL = '" + release_url + "';\n",
+                  1,
+              )
+
+          route_marker = "    try {\n      if (request.method === 'GET' && url.pathname === '/api/health') {"
+          if "url.pathname === '/download/android'" not in worker:
+              replacement = "    try {\n      if (request.method === 'GET' && url.pathname === '/download/android') {\n        return await handleAndroidDownload(request);\n      }\n\n      if (request.method === 'GET' && url.pathname === '/api/health') {"
+              if route_marker not in worker:
+                  raise SystemExit('Worker route marker not found')
+              worker = worker.replace(route_marker, replacement, 1)
+
+          function_marker = 'async function handleCreateCheckoutSession(request, env, corsHeaders) {'
+          if 'async function handleAndroidDownload(request)' not in worker:
+              function_text = r'''async function handleAndroidDownload(request) {
+            const upstreamHeaders = new Headers();
+            const range = request.headers.get('Range');
+            if (range) upstreamHeaders.set('Range', range);
+
+            const upstream = await fetch(ANDROID_APK_RELEASE_URL, {
+              method: 'GET',
+              headers: upstreamHeaders,
+              redirect: 'follow',
+            });
+            if (!upstream.ok && upstream.status !== 206) {
+              return new Response('Az Android alkalmazás jelenleg nem tölthető le.', {
+                status: 502,
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+              });
+            }
+
+            const headers = new Headers();
+            headers.set('Content-Type', 'application/vnd.android.package-archive');
+            headers.set('Content-Disposition', 'attachment; filename="FormatX-Suite-Pro-Android-1.0.1.apk"');
+            headers.set('Cache-Control', 'public, max-age=3600');
+            headers.set('X-Content-Type-Options', 'nosniff');
+            for (const name of ['Content-Length', 'Content-Range', 'Accept-Ranges', 'ETag', 'Last-Modified']) {
+              const value = upstream.headers.get(name);
+              if (value) headers.set(name, value);
+            }
+            return new Response(upstream.body, { status: upstream.status, headers });
+          }
+
+          '''
+              if function_marker not in worker:
+                  raise SystemExit('Worker function marker not found')
+              worker = worker.replace(function_marker, function_text + function_marker, 1)
+
+          worker_path.write_text(worker, encoding='utf-8')
+
+          wrangler_path = Path('billing-worker/wrangler.jsonc')
+          wrangler = wrangler_path.read_text(encoding='utf-8')
+          if '"/download/*"' not in wrangler:
+              wrangler = wrangler.replace('      "/api/*"\n', '      "/api/*",\n      "/download/*"\n', 1)
+          wrangler_path.write_text(wrangler, encoding='utf-8')
+
+          index_path = Path('docs/scifi-ui/index.html')
+          index = index_path.read_text(encoding='utf-8')
+          old_urls = [
+              'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.0-beta/FormatX-Suite-Pro-Android.apk',
+              'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.1-beta/FormatX-Suite-Pro-Android.apk',
+          ]
+          for old in old_urls:
+              index = index.replace(old, '/download/android')
+          if 'href="/download/android"' not in index:
+              raise SystemExit('Android website download link not found')
+          index_path.write_text(index, encoding='utf-8')
+
+          assert "url.pathname === '/download/android'" in worker
+          assert 'application/vnd.android.package-archive' in worker
+          assert '"/download/*"' in wrangler
+          PY
+
+      - name: Validate patched files
+        run: |
+          node --check billing-worker/src/live-entry.js
+          python3 -m json.tool billing-worker/wrangler.jsonc >/dev/null
+          grep -F 'href="/download/android"' docs/scifi-ui/index.html
+          grep -F "url.pathname === '/download/android'" billing-worker/src/live-entry.js
+
+      - name: Commit patch and remove one-time workflow
+        run: |
+          rm .github/workflows/apply-android-black-screen-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add billing-worker/src/live-entry.js billing-worker/wrangler.jsonc docs/scifi-ui/index.html .github/workflows/apply-android-black-screen-fix.yml
+          git commit -m "Fix Android black screen and serve APK from the website"
+          git push origin HEAD:agent/fix-android-black-screen
