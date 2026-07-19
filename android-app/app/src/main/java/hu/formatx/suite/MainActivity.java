@@ -1,5 +1,6 @@
 package hu.formatx.suite;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
 
 import java.util.Locale;
 
@@ -55,6 +57,7 @@ public final class MainActivity extends Activity {
         setContentView(root);
 
         configureWebView();
+        configureBackNavigation();
 
         if (savedInstanceState != null && webView.restoreState(savedInstanceState) != null) {
             return;
@@ -97,6 +100,15 @@ public final class MainActivity extends Activity {
         webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) ->
                 openExternal(Uri.parse(url))
         );
+    }
+
+    private void configureBackNavigation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    this::handleBackNavigation
+            );
+        }
     }
 
     private void loadHome() {
@@ -168,6 +180,14 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private void handleBackNavigation() {
+        if (webView != null && webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            finish();
+        }
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         webView.saveState(outState);
@@ -175,12 +195,9 @@ public final class MainActivity extends Activity {
     }
 
     @Override
+    @SuppressLint("GestureBackNavigation")
     public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            super.onBackPressed();
-        }
+        handleBackNavigation();
     }
 
     @Override
