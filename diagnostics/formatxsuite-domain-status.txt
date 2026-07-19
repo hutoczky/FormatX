@@ -1,0 +1,98 @@
+FormatX domain live diagnostics
+Generated UTC: 2026-07-19T23:37:51Z
+
+=== Authoritative delegation ===
+Cloudflare resolver NS:
+formatxsuite.com.	86400	IN	NS	cris.ns.cloudflare.com.
+formatxsuite.com.	86400	IN	NS	nicole.ns.cloudflare.com.
+Google resolver NS:
+formatxsuite.com.	21600	IN	NS	cris.ns.cloudflare.com.
+formatxsuite.com.	21600	IN	NS	nicole.ns.cloudflare.com.
+
+=== Public DNS records ===
+-- formatxsuite.com via 1.1.1.1 --
+-- formatxsuite.com via 8.8.8.8 --
+-- www.formatxsuite.com via 1.1.1.1 --
+-- www.formatxsuite.com via 8.8.8.8 --
+
+=== Cloudflare zone ===
+{
+  "success": false,
+  "errors": [
+    {
+      "code": 6003,
+      "message": "Invalid request headers",
+      "error_chain": [
+        {
+          "code": 6111,
+          "message": "Invalid format for Authorization header"
+        }
+      ]
+    }
+  ],
+  "messages": [],
+  "result": []
+}
+
+No Cloudflare zone ID was returned.
+
+=== Cloudflare Worker custom domains ===
+{
+  "success": false,
+  "errors": [
+    {
+      "code": 9106,
+      "message": "Missing X-Auth-Key, X-Auth-Email or Authorization headers"
+    }
+  ],
+  "messages": [],
+  "result": []
+}
+
+=== Cloudflare Worker scripts ===
+{
+  "success": false,
+  "errors": [
+    {
+      "code": 9106,
+      "message": "Missing X-Auth-Key, X-Auth-Email or Authorization headers"
+    }
+  ],
+  "messages": [],
+  "result": []
+}
+
+=== HTTPS checks ===
+-- https://formatxsuite.com/ --
+curl_exit=6 curl: (6) Could not resolve host: formatxsuite.com
+http_code=000 remote_ip= final_url=https://formatxsuite.com/ ssl_verify=0
+modern_formatx_marker=false
+spaceship_parking_marker=false
+
+-- https://formatxsuite.com/scifi-ui/?lang=hu --
+curl_exit=6 curl: (6) Could not resolve host: formatxsuite.com
+http_code=000 remote_ip= final_url=https://formatxsuite.com/scifi-ui/?lang=hu ssl_verify=0
+modern_formatx_marker=false
+spaceship_parking_marker=false
+
+-- https://www.formatxsuite.com/ --
+curl_exit=6 curl: (6) Could not resolve host: www.formatxsuite.com
+http_code=000 remote_ip= final_url=https://www.formatxsuite.com/ ssl_verify=0
+modern_formatx_marker=false
+spaceship_parking_marker=false
+
+-- https://www.formatxsuite.com/scifi-ui/?lang=hu --
+curl_exit=6 curl: (6) Could not resolve host: www.formatxsuite.com
+http_code=000 remote_ip= final_url=https://www.formatxsuite.com/scifi-ui/?lang=hu ssl_verify=0
+modern_formatx_marker=false
+spaceship_parking_marker=false
+
+-- https://formatx.formatx.workers.dev/scifi-ui/?lang=hu --
+curl_exit=0 http_code=200 remote_ip=104.21.8.3 final_url=https://formatx.formatx.workers.dev/scifi-ui/?lang=hu ssl_verify=0
+HTTP/2 200 
+content-type: text/html
+server: cloudflare
+cf-ray: a1dd8e7c7d57f817-DFW
+modern_formatx_marker=true
+spaceship_parking_marker=false
+
