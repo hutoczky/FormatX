@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "formatx-billing-worker",
-  "main": "src/live-entry.js",
+  "main": "src/production-entry.js",
   "compatibility_date": "2026-07-18",
   "observability": {
     "enabled": true
