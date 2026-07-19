@@ -26,22 +26,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Switch Worker custom domains to proxied routes
+      - name: Update renamed Worker and public URLs
         shell: python
         run: |
           import json
           from pathlib import Path
 
-          path = Path("billing-worker/wrangler.jsonc")
-          data = json.loads(path.read_text(encoding="utf-8"))
-          data["name"] = "formatx1"
-          data["routes"] = [
-              {"pattern": "formatxsuite.com/*", "zone_name": "formatxsuite.com"},
-              {"pattern": "www.formatxsuite.com/*", "zone_name": "formatxsuite.com"},
-          ]
-          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          root = Path('.')
+          allowed = {'.java', '.js', '.json', '.jsonc', '.html', '.yml', '.yaml', '.md'}
+          for path in root.rglob('*'):
+              if not path.is_file() or path.suffix.lower() not in allowed:
+                  continue
+              if '.git' in path.parts or 'node_modules' in path.parts:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              updated = text.replace('formatx1.formatx.workers.dev', 'formatxsuite.com')
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
 
-      - name: Deploy Worker routes
+          config = Path('billing-worker/wrangler.jsonc')
+          data = json.loads(config.read_text(encoding='utf-8'))
+          data['name'] = 'formatx'
+          data['routes'] = [
+              {'pattern': 'formatxsuite.com/*', 'zone_name': 'formatxsuite.com'},
+              {'pattern': 'www.formatxsuite.com/*', 'zone_name': 'formatxsuite.com'},
+          ]
+          config.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+      - name: Deploy renamed Worker routes
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -83,17 +98,17 @@ jobs:
           ensure_record "formatxsuite.com"
           ensure_record "www.formatxsuite.com"
 
-      - name: Commit permanent route configuration
+      - name: Commit renamed Worker configuration and URLs
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add billing-worker/wrangler.jsonc
+          git add billing-worker android-app docs .github/workflows
           if git diff --cached --quiet; then
-            echo "Route configuration already committed."
+            echo "Configuration already current."
           else
-            git commit -m "Use proxied Worker routes for FormatX domains"
+            git commit -m "Use formatx Worker and formatxsuite.com URLs"
             git pull --rebase origin master
             git push origin HEAD:master
           fi
