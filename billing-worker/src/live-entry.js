@@ -1,5 +1,7 @@
 import legacyWorker from './index.js';
 
+const ANDROID_APK_RELEASE_URL = 'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.1-beta/FormatX-Suite-Pro-Android.apk';
+
 const PLAN_CATALOG = {
   business_lite: {
     id: 'business_lite',
@@ -49,6 +51,10 @@ export default {
     }
 
     try {
+      if (request.method === 'GET' && url.pathname === '/download/android') {
+        return await handleAndroidDownload(request);
+      }
+
       if (request.method === 'GET' && url.pathname === '/api/health') {
         const errors = getLiveConfigurationErrors(env);
         return jsonResponse({
@@ -99,6 +105,35 @@ export default {
     }
   },
 };
+
+async function handleAndroidDownload(request) {
+  const upstreamHeaders = new Headers();
+  const range = request.headers.get('Range');
+  if (range) upstreamHeaders.set('Range', range);
+
+  const upstream = await fetch(ANDROID_APK_RELEASE_URL, {
+    method: 'GET',
+    headers: upstreamHeaders,
+    redirect: 'follow',
+  });
+  if (!upstream.ok && upstream.status !== 206) {
+    return new Response('Az Android alkalmazás jelenleg nem tölthető le.', {
+      status: 502,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
+  }
+
+  const headers = new Headers();
+  headers.set('Content-Type', 'application/vnd.android.package-archive');
+  headers.set('Content-Disposition', 'attachment; filename="FormatX-Suite-Pro-Android-1.0.1.apk"');
+  headers.set('Cache-Control', 'public, max-age=3600');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  for (const name of ['Content-Length', 'Content-Range', 'Accept-Ranges', 'ETag', 'Last-Modified']) {
+    const value = upstream.headers.get(name);
+    if (value) headers.set(name, value);
+  }
+  return new Response(upstream.body, { status: upstream.status, headers });
+}
 
 async function handleCreateCheckoutSession(request, env, corsHeaders) {
   const errors = getLiveConfigurationErrors(env);
