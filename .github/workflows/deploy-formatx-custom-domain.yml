@@ -1,0 +1,58 @@
+name: Deploy FormatX custom domains
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "billing-worker/**"
+      - "docs/**"
+      - ".github/workflows/deploy-formatx-custom-domain.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-custom-domain-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy formatxsuite.com to formatx1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy Worker and custom domains
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ffd7d28ea7c6a510549dc9363619c8c5
+          workingDirectory: billing-worker
+          command: deploy
+
+      - name: Verify custom domains
+        shell: bash
+        run: |
+          set -euo pipefail
+          verify() {
+            local url="$1"
+            local output
+            output="$(mktemp)"
+            for attempt in $(seq 1 12); do
+              if curl -fsSL --connect-timeout 10 --max-time 30 \
+                  -H 'Cache-Control: no-cache' "$url" -o "$output" \
+                  && grep -Fq 'class="reference-commerce"' "$output"; then
+                return 0
+              fi
+              sleep 5
+            done
+            echo "A domain még nem szolgálja ki a modern FormatX oldalt: $url" >&2
+            return 1
+          }
+
+          verify 'https://formatxsuite.com/scifi-ui/?lang=hu'
+          verify 'https://www.formatxsuite.com/scifi-ui/?lang=hu'
