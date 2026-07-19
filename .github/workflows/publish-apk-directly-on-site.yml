@@ -1,0 +1,97 @@
+name: Publish fixed Android APK directly on the website
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/publish-apk-directly-on-site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle 9.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.5.0"
+
+      - name: Install Android SDK components
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          test -n "$SDK_ROOT"
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager | sort -V | tail -n 1)"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Build and lint fixed Android app
+        run: gradle --no-daemon --stacktrace --project-dir android-app :app:assembleDebug :app:lintDebug
+
+      - name: Publish APK into website assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="android-app/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          unzip -t "$APK" >/dev/null
+
+          VERSION="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' android-app/app/build.gradle.kts | head -n 1)"
+          test -n "$VERSION"
+
+          mkdir -p docs/scifi-ui/downloads
+          cp "$APK" docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk
+          cp "$APK" "docs/scifi-ui/downloads/FormatX-Suite-Pro-Android-${VERSION}.apk"
+          sha256sum docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk > docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk.sha256
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('docs/scifi-ui/index.html')
+          text = path.read_text(encoding='utf-8')
+          targets = [
+              'https://formatxsuite.formatx.workers.dev/download/android',
+              '/download/android',
+              'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.0-beta/FormatX-Suite-Pro-Android.apk',
+              'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.1-beta/FormatX-Suite-Pro-Android.apk',
+              'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.2-beta/FormatX-Suite-Pro-Android.apk',
+          ]
+          for target in targets:
+              text = text.replace(target, './downloads/FormatX-Suite-Pro-Android.apk')
+          if './downloads/FormatX-Suite-Pro-Android.apk' not in text:
+              raise SystemExit('Android download button was not updated')
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          grep -F './downloads/FormatX-Suite-Pro-Android.apk' docs/scifi-ui/index.html
+          test "$(stat -c '%s' docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk)" -gt 800000
+          sha256sum -c docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk.sha256
+
+      - name: Commit website-hosted APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/publish-apk-directly-on-site.yml
+          git add docs/scifi-ui/index.html docs/scifi-ui/downloads
+          git commit -m "Host the fixed Android APK directly on the FormatX website"
+          git push origin HEAD:master
