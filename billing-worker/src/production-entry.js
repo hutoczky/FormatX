@@ -1,7 +1,7 @@
 import liveWorker from './live-entry.js';
 
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
-const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.3.apk';
+const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.4.apk';
 
 export default {
   async fetch(request, env, ctx) {
@@ -17,6 +17,7 @@ export default {
 
 async function serveAndroidApk(request, env) {
   const assetUrl = new URL(ANDROID_APK_PATH, request.url);
+  assetUrl.searchParams.set('v', '1.0.4');
   const assetHeaders = new Headers();
   const range = request.headers.get('Range');
   if (range) assetHeaders.set('Range', range);
@@ -39,7 +40,7 @@ async function serveAndroidApk(request, env) {
   const headers = new Headers(upstream.headers);
   headers.set('Content-Type', 'application/vnd.android.package-archive');
   headers.set('Content-Disposition', `attachment; filename="${ANDROID_APK_FILENAME}"`);
-  headers.set('Cache-Control', 'public, max-age=3600');
+  headers.set('Cache-Control', 'no-store');
   headers.set('X-Content-Type-Options', 'nosniff');
 
   return new Response(upstream.body, {
