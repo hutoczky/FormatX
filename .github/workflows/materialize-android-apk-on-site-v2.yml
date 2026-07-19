@@ -1,0 +1,68 @@
+name: Materialize Android APK on current website
+
+on:
+  push:
+    branches: [agent/host-android-apk-on-site-v2]
+    paths:
+      - ".github/workflows/materialize-android-apk-on-site-v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/host-android-apk-on-site-v2
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.5.0"
+      - name: Install Android SDK components
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager | sort -V | tail -n 1)"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
+      - name: Build and lint latest Android app
+        run: gradle --no-daemon --stacktrace --project-dir android-app :app:assembleDebug :app:lintDebug
+      - name: Add APK to static website
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/scifi-ui/downloads
+          cp android-app/app/build/outputs/apk/debug/app-debug.apk docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk
+          sha256sum docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk > docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk.sha256
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('docs/scifi-ui/index.html')
+          text = path.read_text(encoding='utf-8')
+          for old in (
+              'https://formatxsuite.formatx.workers.dev/download/android',
+              'https://formatx1.formatx.workers.dev/download/android',
+              '/download/android',
+          ):
+              text = text.replace(old, './downloads/FormatX-Suite-Pro-Android.apk')
+          path.write_text(text, encoding='utf-8')
+          assert './downloads/FormatX-Suite-Pro-Android.apk' in text
+          PY
+          test -s docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk
+      - name: Commit static APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/scifi-ui/index.html docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk.sha256
+          git commit -m "Host latest Android APK directly on FormatX website"
+          git push origin HEAD:agent/host-android-apk-on-site-v2
