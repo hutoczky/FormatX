@@ -1,0 +1,88 @@
+name: Patch Android download proxy
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/patch-android-download-proxy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Add same-origin Android APK proxy
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          worker_path = Path('billing-worker/src/live-entry.js')
+          worker = worker_path.read_text(encoding='utf-8')
+
+          constant = "const ANDROID_APK_URL = 'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.0-beta/FormatX-Suite-Pro-Android.apk';\n"
+          if 'const ANDROID_APK_URL' not in worker:
+              worker = worker.replace("import legacyWorker from './index.js';\n", "import legacyWorker from './index.js';\n\n" + constant, 1)
+
+          route = """      if (request.method === 'GET' && url.pathname === '/downloads/FormatX-Suite-Pro-Android.apk') {
+        const upstream = await fetch(ANDROID_APK_URL, {
+          headers: { Accept: 'application/vnd.android.package-archive' },
+          redirect: 'follow',
+        });
+        if (!upstream.ok || !upstream.body) {
+          return new Response('Android APK is temporarily unavailable.', { status: 502 });
+        }
+        const headers = new Headers(upstream.headers);
+        headers.set('Content-Type', 'application/vnd.android.package-archive');
+        headers.set('Content-Disposition', 'attachment; filename="FormatX-Suite-Pro-Android.apk"');
+        headers.set('Cache-Control', 'public, max-age=3600');
+        headers.set('X-Content-Type-Options', 'nosniff');
+        return new Response(upstream.body, { status: 200, headers });
+      }
+
+"""
+          marker = "      if (request.method === 'GET' && url.pathname === '/api/health') {\n"
+          if "url.pathname === '/downloads/FormatX-Suite-Pro-Android.apk'" not in worker:
+              if marker not in worker:
+                  raise SystemExit('Worker route insertion marker missing')
+              worker = worker.replace(marker, route + marker, 1)
+
+          worker_path.write_text(worker, encoding='utf-8')
+
+          index_path = Path('docs/scifi-ui/index.html')
+          index = index_path.read_text(encoding='utf-8')
+          old = 'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.0-beta/FormatX-Suite-Pro-Android.apk'
+          new = '/downloads/FormatX-Suite-Pro-Android.apk'
+          if old in index:
+              index = index.replace(old, new)
+          elif new not in index:
+              raise SystemExit('Android download link not found')
+          index_path.write_text(index, encoding='utf-8')
+
+          assert "url.pathname === '/downloads/FormatX-Suite-Pro-Android.apk'" in worker
+          assert 'Content-Disposition' in worker
+          assert 'href="/downloads/FormatX-Suite-Pro-Android.apk"' in index
+          PY
+
+      - name: Validate patched files
+        run: |
+          node --check billing-worker/src/live-entry.js
+          grep -F '/downloads/FormatX-Suite-Pro-Android.apk' docs/scifi-ui/index.html
+
+      - name: Commit proxy and website link
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add billing-worker/src/live-entry.js docs/scifi-ui/index.html
+          if git diff --cached --quiet; then
+            echo "No changes needed."
+          else
+            git commit -m "Serve Android APK through the FormatX domain"
+            git push origin HEAD:master
+          fi
