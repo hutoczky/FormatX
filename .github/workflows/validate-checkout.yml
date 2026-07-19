@@ -98,11 +98,17 @@ jobs:
           for token in required_tokens:
               assert token in combined, token
 
-          prices = [19900, 199000, 55, 547, 49900, 499000, 137, 1373, 99900, 999000, 275, 2748]
+          prices = [15900, 139300, 44, 383, 39900, 349300, 110, 961, 79900, 699300, 220, 1924]
           for price in prices:
               assert str(price) in checkout, price
               assert str(price) in worker, price
               assert str(price) in checkout_language, price
+
+          old_monthly_prices = [19900, 49900, 99900]
+          for price in old_monthly_prices:
+              assert f'monthly: {price}' not in checkout, price
+              assert f'monthly: {price}' not in worker, price
+              assert f'monthly: {price}' not in checkout_language, price
 
           assert 'HUF / EUR bank payment' in site
           assert 'reference-commerce.css' in home_html
@@ -117,12 +123,14 @@ jobs:
           assert 'data-language="hu"' in home_html
           assert 'data-language="en"' in home_html
           assert 'data-i18n-skip' in home_html
+          for token in ['15 900 Ft / hó', '39 900 Ft / hó', '79 900 Ft / hó', '44 €', '110 €', '220 €']:
+              assert token in home_html, token
 
           assert 'formatx-language' in landing
           assert 'Intl.NumberFormat' in landing
           assert 'RELEASE_API' in landing
           assert 'business_pro' in landing
-          assert '49900' in landing and '137' in landing
+          assert '39900' in landing and '110' in landing
           assert 'updateCheckoutPreview' in landing
           assert 'applyLanguage' in landing
           assert 'data-language' in landing
@@ -186,7 +194,7 @@ jobs:
           numeric = ''.join(ch if ch.isdigit() else str(ord(ch) - 55) for ch in rearranged)
           assert int(numeric) % 97 == 1
 
-          epc = '\n'.join(['BCD', '001', '1', 'SCT', 'REVOHUHB', 'Hutóczky József', iban, 'EUR2748.00', '', '', 'FormatX FX-20260718-ABC123'])
+          epc = '\n'.join(['BCD', '001', '1', 'SCT', 'REVOHUHB', 'Hutóczky József', iban, 'EUR1924.00', '', '', 'FormatX FX-20260718-ABC123'])
           assert len(epc.encode('utf-8')) <= 331
           assert epc.splitlines()[:4] == ['BCD', '001', '1', 'SCT']
 
@@ -197,5 +205,5 @@ jobs:
               assert 'Magyar oldal' in redirect
               assert 'English site' in redirect
 
-          print('FormatX bilingual checkout and exact 2041 commerce reference validation passed.')
+          print('FormatX bilingual checkout, unified discounted prices and exact 2041 commerce validation passed.')
           PY
