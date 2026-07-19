@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#030817">
+  <title>FormatX Android letöltések</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #030817; color: #f4faff; padding: 24px; }
+    main { width: min(720px, 100%); padding: 32px; border: 1px solid #244766; border-radius: 24px; background: #071426; box-shadow: 0 18px 60px #0008; }
+    h1 { margin-top: 0; font-size: clamp(28px, 6vw, 46px); }
+    p { color: #b8cbe0; line-height: 1.55; }
+    .downloads { display: grid; gap: 16px; margin-top: 28px; }
+    a { display: block; padding: 18px 20px; border-radius: 14px; text-decoration: none; font-weight: 750; color: #00111d; background: #35d9ff; }
+    a.secondary { color: #f4faff; background: #17395f; }
+    small { display: block; margin-top: 8px; color: #8faac4; line-height: 1.45; }
+    code { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>FormatX Suite Pro Android 1.0.4</h1>
+    <p>Válaszd ki a felhasználásnak megfelelő Android-csomagot.</p>
+    <div class="downloads">
+      <div>
+        <a href="./FormatX-Suite-Pro-Android-1.0.4.apk" download>APK letöltése – telefonos telepítés</a>
+        <small>Közvetlenül Android telefonra telepíthető csomag.</small>
+      </div>
+      <div>
+        <a class="secondary" href="./FormatX-Suite-Pro-Android-1.0.4-release-unsigned.aab" download>AAB letöltése – Google Play Console</a>
+        <small>Release App Bundle. A Play Console végleges feltöltése előtt saját upload-kulccsal alá kell írni.</small>
+      </div>
+    </div>
+    <p><small>APK SHA-256: <code>57de8b568fe3a80bb5e18b814549c1d6be2ecf40d68efe3b88d8f266304fa6c9</code></small></p>
+  </main>
+</body>
+</html>
