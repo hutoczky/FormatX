@@ -56,3 +56,5 @@ jobs:
 
           verify 'https://formatxsuite.com/scifi-ui/?lang=hu'
           verify 'https://www.formatxsuite.com/scifi-ui/?lang=hu'
+
+# Activation confirmed in Cloudflare on 2026-07-20; this commit retriggers deployment.
