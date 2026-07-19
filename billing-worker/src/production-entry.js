@@ -1,7 +1,7 @@
 import liveWorker from './live-entry.js';
 
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
-const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.2.apk';
+const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.3.apk';
 
 export default {
   async fetch(request, env, ctx) {

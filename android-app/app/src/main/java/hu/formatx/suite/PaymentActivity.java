@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class PaymentActivity extends Activity {
-    private static final Uri SUPPORT_URI = Uri.parse("https://formatxsuite.formatx.workers.dev/scifi-ui/support.html");
+    private static final Uri SUPPORT_URI = Uri.parse("https://formatx1.formatx.workers.dev/scifi-ui/support.html");
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final PaymentClient paymentClient = new PaymentClient();

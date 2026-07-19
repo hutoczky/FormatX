@@ -1,0 +1,1073 @@
+{
+    "$schema" : "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+    "version" : "2.1.0",
+    "runs" : [
+        {
+            "tool": {
+                "driver": {
+                    "name": "Android Lint",
+                    "fullName": "Android Lint (in gradle)",
+                    "version": "9.3.0",
+                    "semanticVersion": "9.3.0",
+                    "organization": "Google",
+                    "informationUri": "https://developer.android.com/studio/write/lint",
+                    "fullDescription": {
+                        "text": "Static analysis originally for Android source code but now performing general analysis"
+                    },
+                    "language": "en-US",
+                    "rules": [
+                        {
+                            "id": "DataExtractionRules",
+                            "shortDescription": {
+                                "text": "Missing data extraction rules"
+                            },
+                            "fullDescription": {
+                                "text": "Before Android 12, the attributes android:allowBackup and android:fullBackupContent were used to configure all forms of backup, including cloud backups, device-to-device transfers and adb backup.\n\nIn Android 12 and higher, these attributes have been deprecated and will only apply to cloud backups. You should instead use the attribute android:dataExtractionRules, specifying an @xml resource that configures which files to back up, for cloud backups and for device-to-device transfers, separately. If your minSdkVersion supports older versions, you'll still want to specify an android:fullBackupContent resource if the default behavior is not right for your app.",
+                                "markdown": "Before Android 12, the attributes `android:allowBackup` and `android:fullBackupContent` were used to configure all forms of backup, including cloud backups, device-to-device transfers and adb backup.\n\nIn Android 12 and higher, these attributes have been deprecated and will only apply to cloud backups. You should instead use the attribute `android:dataExtractionRules`, specifying an `@xml` resource that configures which files to back up, for cloud backups and for device-to-device transfers, separately. If your `minSdkVersion` supports older versions, you'll still want to specify an `android:fullBackupContent` resource if the default behavior is not right for your app."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 80
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Security"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "DiscouragedApi",
+                            "shortDescription": {
+                                "text": "Using discouraged APIs"
+                            },
+                            "fullDescription": {
+                                "text": "Discouraged APIs are allowed and are not deprecated, but they may be unfit for common use (e.g. due to slow performance or subtle behavior)."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 90
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "GradleDependency",
+                            "shortDescription": {
+                                "text": "Obsolete Gradle Dependency"
+                            },
+                            "fullDescription": {
+                                "text": "This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 70
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "LockedOrientationActivity",
+                            "shortDescription": {
+                                "text": "Incompatible screenOrientation value"
+                            },
+                            "fullDescription": {
+                                "text": "The <activity> element should not be locked to any orientation so that users can take advantage of the multi-window environments and larger screens available on Android. To fix the issue, consider declaring the corresponding activity element with `screenOrientation=\"unspecified\"`or fullSensor attribute.",
+                                "markdown": "The `<activity>` element should not be locked to any orientation so that users can take advantage of the multi-window environments and larger screens available on Android. To fix the issue, consider declaring the corresponding activity element with `screenOrientation=\"unspecified\"`or `fullSensor` attribute."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 70
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "MonochromeLauncherIcon",
+                            "shortDescription": {
+                                "text": "Monochrome icon is not defined"
+                            },
+                            "fullDescription": {
+                                "text": "The system may use the coloring of the user's chosen wallpaper and theme to tint app icons. Providing a <monochrome> layer (which will be used for tinting) for every adaptive icon is strongly recommended, otherwise Android 16 QPR 2 and above will simply tint the color version of the icon, which may look unusual. Devices running earlier Android versions will (with no monochrome layer) show the untinted color icon for your app, which will look inconsistent.",
+                                "markdown": "The system may use the coloring of the user's chosen wallpaper and theme to tint app icons. Providing a `<monochrome>` layer (which will be used for tinting) for every adaptive icon is strongly recommended, otherwise Android 16 QPR 2 and above will simply tint the color version of the icon, which may look unusual. Devices running earlier Android versions will (with no monochrome layer) show the untinted color icon for your app, which will look inconsistent."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Icons",
+                                    "Usability"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "ObsoleteSdkInt",
+                            "shortDescription": {
+                                "text": "Obsolete SDK_INT Version Check"
+                            },
+                            "fullDescription": {
+                                "text": "This check flags version checks that are not necessary, because the minSdkVersion (or surrounding known API level) is already at least as high as the version checked for.\n\nSimilarly, it also looks for resources in -vNN folders, such as values-v14 where the version qualifier is less than or equal to the minSdkVersion, where the contents should be merged into the best folder.",
+                                "markdown": "This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.\n\nSimilarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Performance"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "OldTargetApi",
+                            "shortDescription": {
+                                "text": "Target SDK attribute is not targeting latest version"
+                            },
+                            "fullDescription": {
+                                "text": "When your application or sdk runs on a version of Android that is more recent than your targetSdk specifies that it has been tested with, various compatibility modes kick in. This ensures that your application continues to work, but it may look out of place. For example, if the targetSdk is less than 14, your app may get an option button in the UI.\n\nTo fix this issue, set the targetSdk to the highest available value. Then test your app to make sure everything works correctly. You may want to consult the compatibility notes to see what changes apply to each version you are adding support for: https://developer.android.com/reference/android/os/Build.VERSION_CODES.html as well as follow this guide:\nhttps://developer.android.com/distribute/best-practices/develop/target-sdk.html",
+                                "markdown": "When your application or sdk runs on a version of Android that is more recent than your `targetSdk` specifies that it has been tested with, various compatibility modes kick in. This ensures that your application continues to work, but it may look out of place. For example, if the `targetSdk` is less than 14, your app may get an option button in the UI.\n\nTo fix this issue, set the `targetSdk` to the highest available value. Then test your app to make sure everything works correctly. You may want to consult the compatibility notes to see what changes apply to each version you are adding support for: https://developer.android.com/reference/android/os/Build.VERSION_CODES.html as well as follow this guide:\nhttps://developer.android.com/distribute/best-practices/develop/target-sdk.html"
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "SetTextI18n",
+                            "shortDescription": {
+                                "text": "TextView Internationalization"
+                            },
+                            "fullDescription": {
+                                "text": "When calling TextView#setText\n* Never call Number#toString() to format numbers; it will not handle fraction separators and locale-specific digits properly. Consider using String#format with proper format specifications (%d or %f) instead.\n* Do not pass a string literal (e.g. \"Hello\") to display text. Hardcoded text can not be properly translated to other languages. Consider using Android resource strings instead.\n* Do not build messages by concatenating text chunks. Such messages can not be properly translated.",
+                                "markdown": "When calling `TextView#setText`\n* Never call `Number#toString()` to format numbers; it will not handle fraction separators and locale-specific digits properly. Consider using `String#format` with proper format specifications (`%d` or `%f`) instead.\n* Do not pass a string literal (e.g. \"Hello\") to display text. Hardcoded text can not be properly translated to other languages. Consider using Android resource strings instead.\n* Do not build messages by concatenating text chunks. Such messages can not be properly translated."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Internationalization"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "UnusedResources",
+                            "shortDescription": {
+                                "text": "Unused resources"
+                            },
+                            "fullDescription": {
+                                "text": "Unused resources make applications larger and slow down builds.\n\n\nThe unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.\n\nYou can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests=true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests=true.\n",
+                                "markdown": "Unused resources make applications larger and slow down builds.\n\n\nThe unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.\n\nYou can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.\n"
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 80
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Performance"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "originalUriBaseIds": {
+                "%SRCROOT%": {
+                    "uri": "file:///home/runner/work/FormatX/FormatX/android-app/"
+                }
+            },
+            "results": [
+                {
+                    "ruleId": "OldTargetApi",
+                    "ruleIndex": 6,
+                    "message": {
+                        "text": "Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details.",
+                        "markdown": "Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/build.gradle.kts"
+                                },
+                                "region": {
+                                    "startLine": 12,
+                                    "startColumn": 9,
+                                    "endLine": 12,
+                                    "endColumn": 23,
+                                    "charOffset": 204,
+                                    "charLength": 14,
+                                    "snippet": {
+                                        "text": "targetSdk = 36"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 10,
+                                    "endLine": 15,
+                                    "snippet": {
+                                        "text": "        applicationId = \"hu.formatx.suite\"\n        minSdk = 26\n        targetSdk = 36\n        versionCode = 5\n        versionName = \"1.0.3\"\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Update targetSdkVersion to 37"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/build.gradle.kts"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 12,
+                                                "startColumn": 21,
+                                                "charOffset": 216,
+                                                "endLine": 12,
+                                                "endColumn": 23,
+                                                "charLength": 2
+                                            },
+                                            "insertedContent": {
+                                                "text": "37\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "0dcbddb78fe55650"
+                    }
+                },
+                {
+                    "ruleId": "GradleDependency",
+                    "ruleIndex": 2,
+                    "message": {
+                        "text": "A newer version of compileSdk than 36 is available: 37",
+                        "markdown": "A newer version of `compileSdk` than 36 is available: 37"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/build.gradle.kts"
+                                },
+                                "region": {
+                                    "startLine": 7,
+                                    "startColumn": 5,
+                                    "endLine": 7,
+                                    "endColumn": 20,
+                                    "charOffset": 96,
+                                    "charLength": 15,
+                                    "snippet": {
+                                        "text": "compileSdk = 36"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 5,
+                                    "endLine": 10,
+                                    "snippet": {
+                                        "text": "android {\n    namespace = \"hu.formatx.suite\"\n    compileSdk = 36\n\n    defaultConfig {\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Set compileSdk to 37"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/build.gradle.kts"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 7,
+                                                "startColumn": 18,
+                                                "charOffset": 109,
+                                                "endLine": 7,
+                                                "endColumn": 20,
+                                                "charLength": 2
+                                            },
+                                            "insertedContent": {
+                                                "text": "37\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "3f485f716f09c5ba"
+                    }
+                },
+                {
+                    "ruleId": "LockedOrientationActivity",
+                    "ruleIndex": 3,
+                    "message": {
+                        "text": "Expecting android:screenOrientation=\"unspecified\" or \"fullSensor\" for this activity so the user can use the application in any orientation and provide a great experience on Chrome OS devices",
+                        "markdown": "Expecting `android:screenOrientation=\"unspecified\"` or `\"fullSensor\"` for this activity so the user can use the application in any orientation and provide a great experience on Chrome OS devices"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/AndroidManifest.xml"
+                                },
+                                "region": {
+                                    "startLine": 22,
+                                    "startColumn": 13,
+                                    "endLine": 22,
+                                    "endColumn": 49,
+                                    "charOffset": 822,
+                                    "charLength": 36,
+                                    "snippet": {
+                                        "text": "android:screenOrientation=\"portrait\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 20,
+                                    "endLine": 25,
+                                    "snippet": {
+                                        "text": "            android:name=\".PaymentActivity\"\n            android:exported=\"false\"\n            android:screenOrientation=\"portrait\"\n            android:windowSoftInputMode=\"adjustResize\" />\n\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Set screenOrientation=\"fullSensor\""
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/AndroidManifest.xml"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 22,
+                                                "startColumn": 13,
+                                                "charOffset": 822,
+                                                "endLine": 22,
+                                                "endColumn": 49,
+                                                "charLength": 36
+                                            },
+                                            "insertedContent": {
+                                                "text": "android:screenOrientation=\"fullSensor\"\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "fda1e52dedb6cc33"
+                    }
+                },
+                {
+                    "ruleId": "DiscouragedApi",
+                    "ruleIndex": 1,
+                    "message": {
+                        "text": "Fixed screen orientations will be ignored in most cases, starting from Android 16. Android is moving toward a model where apps are expected to adapt to various orientations, display sizes, and aspect ratios."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/AndroidManifest.xml"
+                                },
+                                "region": {
+                                    "startLine": 22,
+                                    "startColumn": 13,
+                                    "endLine": 22,
+                                    "endColumn": 49,
+                                    "charOffset": 822,
+                                    "charLength": 36,
+                                    "snippet": {
+                                        "text": "android:screenOrientation=\"portrait\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 20,
+                                    "endLine": 25,
+                                    "snippet": {
+                                        "text": "            android:name=\".PaymentActivity\"\n            android:exported=\"false\"\n            android:screenOrientation=\"portrait\"\n            android:windowSoftInputMode=\"adjustResize\" />\n\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "fda1e52dedb6cc33"
+                    }
+                },
+                {
+                    "ruleId": "DataExtractionRules",
+                    "ruleIndex": 0,
+                    "message": {
+                        "text": "The attribute android:allowBackup is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute android:dataExtractionRules specifying an @xml resource which configures cloud backups and device transfers on Android 12 and higher.",
+                        "markdown": "The attribute `android:allowBackup` is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute `android:dataExtractionRules` specifying an `@xml` resource which configures cloud backups and device transfers on Android 12 and higher."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/AndroidManifest.xml"
+                                },
+                                "region": {
+                                    "startLine": 8,
+                                    "startColumn": 30,
+                                    "endLine": 8,
+                                    "endColumn": 35,
+                                    "charOffset": 349,
+                                    "charLength": 5,
+                                    "snippet": {
+                                        "text": "false"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 6,
+                                    "endLine": 11,
+                                    "snippet": {
+                                        "text": "    <application\n        android:name=\".FormatXApplication\"\n        android:allowBackup=\"false\"\n        android:usesCleartextTraffic=\"false\"\n        android:icon=\"@mipmap/ic_launcher\"\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Create data_extraction_rules.xml"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/res/xml/data_extraction_rules.xml"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 1,
+                                                "startColumn": 1,
+                                                "charOffset": 0
+                                            },
+                                            "insertedContent": {
+                                                "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!--\n   Sample data extraction rules file; uncomment and customize as necessary.\n   See https://developer.android.com/about/versions/12/backup-restore#xml-changes\n   for details.\n-->\n<data-extraction-rules>\n    <cloud-backup>\n        <!--\n        TODO: Use <include> and <exclude> to control what is backed up.\n        The domain can be file, database, sharedpref, external or root.\n        Examples:\n\n        <include domain=\"file\" path=\"file_to_include\"/>\n        <exclude domain=\"file\" path=\"file_to_exclude\"/>\n        <include domain=\"file\" path=\"include_folder\"/>\n        <exclude domain=\"file\" path=\"include_folder/file_to_exclude\"/>\n        <exclude domain=\"file\" path=\"exclude_folder\"/>\n        <include domain=\"file\" path=\"exclude_folder/file_to_include\"/>\n\n        <include domain=\"sharedpref\" path=\"include_shared_pref1.xml\"/>\n        <include domain=\"database\" path=\"db_name/file_to_include\"/>\n        <exclude domain=\"database\" path=\"db_name/include_folder/file_to_exclude\"/>\n        <include domain=\"external\" path=\"file_to_include\"/>\n        <exclude domain=\"external\" path=\"file_to_exclude\"/>\n        <include domain=\"root\" path=\"file_to_include\"/>\n        <exclude domain=\"root\" path=\"file_to_exclude\"/>\n        -->\n    </cloud-backup>\n    <!--\n    <device-transfer>\n        <include .../>\n        <exclude .../>\n    </device-transfer>\n    -->\n</data-extraction-rules>\n"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/AndroidManifest.xml"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 9,
+                                                "startColumn": 9,
+                                                "charOffset": 364
+                                            },
+                                            "insertedContent": {
+                                                "text": "android:dataExtractionRules=\"@xml/data_extraction_rules\" \n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "b0211e0057b2b896"
+                    }
+                },
+                {
+                    "ruleId": "ObsoleteSdkInt",
+                    "ruleIndex": 5,
+                    "message": {
+                        "text": "Unnecessary; SDK_INT is always >= 26",
+                        "markdown": "Unnecessary; `SDK_INT` is always >= 26"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/hu/formatx/suite/AppUpdater.java"
+                                },
+                                "region": {
+                                    "startLine": 84,
+                                    "startColumn": 13,
+                                    "endLine": 84,
+                                    "endColumn": 59,
+                                    "charOffset": 3289,
+                                    "charLength": 46,
+                                    "snippet": {
+                                        "text": "Build.VERSION.SDK_INT >= Build.VERSION_CODES.O"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 82,
+                                    "endLine": 87,
+                                    "snippet": {
+                                        "text": "        if (!prefs.getBoolean(KEY_INSTALL_PENDING, false)) return;\n\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O\n                && !context.getPackageManager().canRequestPackageInstalls()) {\n            return;\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "07268785100c0cc4"
+                    }
+                },
+                {
+                    "ruleId": "ObsoleteSdkInt",
+                    "ruleIndex": 5,
+                    "message": {
+                        "text": "Unnecessary; SDK_INT is always >= 26",
+                        "markdown": "Unnecessary; `SDK_INT` is always >= 26"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/hu/formatx/suite/AppUpdater.java"
+                                },
+                                "region": {
+                                    "startLine": 278,
+                                    "startColumn": 13,
+                                    "endLine": 278,
+                                    "endColumn": 59,
+                                    "charOffset": 12159,
+                                    "charLength": 46,
+                                    "snippet": {
+                                        "text": "Build.VERSION.SDK_INT >= Build.VERSION_CODES.O"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 276,
+                                    "endLine": 281,
+                                    "snippet": {
+                                        "text": "\n    private static void requestInstallPermissionOrInstall(Context context, long downloadId) {\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O\n                && !context.getPackageManager().canRequestPackageInstalls()) {\n            Intent settings = new Intent(\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "572357b120df2470"
+                    }
+                },
+                {
+                    "ruleId": "ObsoleteSdkInt",
+                    "ruleIndex": 5,
+                    "message": {
+                        "text": "Unnecessary; SDK_INT is always >= 26",
+                        "markdown": "Unnecessary; `SDK_INT` is always >= 26"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/hu/formatx/suite/MainActivity.java"
+                                },
+                                "region": {
+                                    "startLine": 154,
+                                    "startColumn": 13,
+                                    "endLine": 154,
+                                    "endColumn": 59,
+                                    "charOffset": 5879,
+                                    "charLength": 46,
+                                    "snippet": {
+                                        "text": "Build.VERSION.SDK_INT >= Build.VERSION_CODES.O"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 152,
+                                    "endLine": 157,
+                                    "snippet": {
+                                        "text": "        settings.setUserAgentString(settings.getUserAgentString() + \" FormatXAndroid/1.0.3\");\n\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n            settings.setSafeBrowsingEnabled(true);\n            webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "40dca3e21a244f10"
+                    }
+                },
+                {
+                    "ruleId": "ObsoleteSdkInt",
+                    "ruleIndex": 5,
+                    "message": {
+                        "text": "This folder configuration (v26) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into mipmap-anydpi.",
+                        "markdown": "This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-anydpi-v26"
+                                },
+                                "region": {
+                                    "startLine": 1
+                                }                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                    }
+                },
+                {
+                    "ruleId": "UnusedResources",
+                    "ruleIndex": 8,
+                    "message": {
+                        "text": "The resource R.color.formatx_surface appears to be unused",
+                        "markdown": "The resource `R.color.formatx_surface` appears to be unused"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/values/colors.xml"
+                                },
+                                "region": {
+                                    "startLine": 4,
+                                    "startColumn": 12,
+                                    "endLine": 4,
+                                    "endColumn": 34,
+                                    "charOffset": 115,
+                                    "charLength": 22,
+                                    "snippet": {
+                                        "text": "name=\"formatx_surface\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 2,
+                                    "endLine": 7,
+                                    "snippet": {
+                                        "text": "<resources>\n    <color name=\"formatx_background\">#020711</color>\n    <color name=\"formatx_surface\">#091426</color>\n    <color name=\"formatx_cyan\">#13D9FF</color>\n    <color name=\"formatx_purple\">#9C4DFF</color>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "67f4c34e42a80c4f"
+                    }
+                },
+                {
+                    "ruleId": "UnusedResources",
+                    "ruleIndex": 8,
+                    "message": {
+                        "text": "The resource R.color.formatx_purple appears to be unused",
+                        "markdown": "The resource `R.color.formatx_purple` appears to be unused"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/values/colors.xml"
+                                },
+                                "region": {
+                                    "startLine": 6,
+                                    "startColumn": 12,
+                                    "endLine": 6,
+                                    "endColumn": 33,
+                                    "charOffset": 212,
+                                    "charLength": 21,
+                                    "snippet": {
+                                        "text": "name=\"formatx_purple\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 4,
+                                    "endLine": 9,
+                                    "snippet": {
+                                        "text": "    <color name=\"formatx_surface\">#091426</color>\n    <color name=\"formatx_cyan\">#13D9FF</color>\n    <color name=\"formatx_purple\">#9C4DFF</color>\n    <color name=\"formatx_text\">#EAFBFF</color>\n</resources>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "2e1d9412c21c15e6"
+                    }
+                },
+                {
+                    "ruleId": "UnusedResources",
+                    "ruleIndex": 8,
+                    "message": {
+                        "text": "The resource R.color.formatx_text appears to be unused",
+                        "markdown": "The resource `R.color.formatx_text` appears to be unused"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/values/colors.xml"
+                                },
+                                "region": {
+                                    "startLine": 7,
+                                    "startColumn": 12,
+                                    "endLine": 7,
+                                    "endColumn": 31,
+                                    "charOffset": 261,
+                                    "charLength": 19,
+                                    "snippet": {
+                                        "text": "name=\"formatx_text\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 5,
+                                    "endLine": 9,
+                                    "snippet": {
+                                        "text": "    <color name=\"formatx_cyan\">#13D9FF</color>\n    <color name=\"formatx_purple\">#9C4DFF</color>\n    <color name=\"formatx_text\">#EAFBFF</color>\n</resources>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "60db1ba70261fbfc"
+                    }
+                },
+                {
+                    "ruleId": "MonochromeLauncherIcon",
+                    "ruleIndex": 4,
+                    "message": {
+                        "text": "The application adaptive icon is missing a monochrome tag"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml"
+                                },
+                                "region": {
+                                    "startLine": 2,
+                                    "startColumn": 1,
+                                    "endLine": 5,
+                                    "endColumn": 17,
+                                    "charOffset": 39,
+                                    "charLength": 226,
+                                    "snippet": {
+                                        "text": "<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <background android:drawable=\"@color/formatx_background\" />\n    <foreground android:drawable=\"@drawable/ic_launcher_foreground\" />\n</adaptive-icon>"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 1,
+                                    "endLine": 6,
+                                    "snippet": {
+                                        "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <background android:drawable=\"@color/formatx_background\" />\n    <foreground android:drawable=\"@drawable/ic_launcher_foreground\" />\n</adaptive-icon>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "ec4e9277347d35e4"
+                    }
+                },
+                {
+                    "ruleId": "MonochromeLauncherIcon",
+                    "ruleIndex": 4,
+                    "message": {
+                        "text": "The application adaptive roundIcon is missing a monochrome tag"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+                                },
+                                "region": {
+                                    "startLine": 2,
+                                    "startColumn": 1,
+                                    "endLine": 5,
+                                    "endColumn": 17,
+                                    "charOffset": 39,
+                                    "charLength": 226,
+                                    "snippet": {
+                                        "text": "<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <background android:drawable=\"@color/formatx_background\" />\n    <foreground android:drawable=\"@drawable/ic_launcher_foreground\" />\n</adaptive-icon>"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 1,
+                                    "endLine": 6,
+                                    "snippet": {
+                                        "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <background android:drawable=\"@color/formatx_background\" />\n    <foreground android:drawable=\"@drawable/ic_launcher_foreground\" />\n</adaptive-icon>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "ec4e9277347d35e4"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/hu/formatx/suite/MainActivity.java"
+                                },
+                                "region": {
+                                    "startLine": 224,
+                                    "startColumn": 28,
+                                    "endLine": 224,
+                                    "endColumn": 48,
+                                    "charOffset": 8445,
+                                    "charLength": 20,
+                                    "snippet": {
+                                        "text": "\"FormatX betöltése…\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 222,
+                                    "endLine": 227,
+                                    "snippet": {
+                                        "text": "    private void showLoading(boolean fallback) {\n        statePanel.setVisibility(View.VISIBLE);\n        stateTitle.setText(\"FormatX betöltése…\");\n        stateMessage.setText(fallback\n                ? \"A közvetlen kapcsolat nem sikerült. A biztonságos tartalék oldal betöltése folyamatban van.\"\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "326cfc3468be755f"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/hu/formatx/suite/MainActivity.java"
+                                },
+                                "region": {
+                                    "startLine": 245,
+                                    "startColumn": 28,
+                                    "endLine": 245,
+                                    "endColumn": 60,
+                                    "charOffset": 9283,
+                                    "charLength": 32,
+                                    "snippet": {
+                                        "text": "\"A FormatX oldal nem érhető el.\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 243,
+                                    "endLine": 248,
+                                    "snippet": {
+                                        "text": "        progressBar.setVisibility(View.GONE);\n        statePanel.setVisibility(View.VISIBLE);\n        stateTitle.setText(\"A FormatX oldal nem érhető el.\");\n        stateMessage.setText(reason + \" Ellenőrizd az internetkapcsolatot, majd próbáld újra.\");\n        retryButton.setVisibility(View.VISIBLE);\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "824d65238b63a785"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Do not concatenate text displayed with setText. Use resource string with placeholders.",
+                        "markdown": "Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/hu/formatx/suite/MainActivity.java"
+                                },
+                                "region": {
+                                    "startLine": 246,
+                                    "startColumn": 30,
+                                    "endLine": 246,
+                                    "endColumn": 95,
+                                    "charOffset": 9347,
+                                    "charLength": 65,
+                                    "snippet": {
+                                        "text": "reason + \" Ellenőrizd az internetkapcsolatot, majd próbáld újra.\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 244,
+                                    "endLine": 249,
+                                    "snippet": {
+                                        "text": "        statePanel.setVisibility(View.VISIBLE);\n        stateTitle.setText(\"A FormatX oldal nem érhető el.\");\n        stateMessage.setText(reason + \" Ellenőrizd az internetkapcsolatot, majd próbáld újra.\");\n        retryButton.setVisibility(View.VISIBLE);\n        browserButton.setVisibility(View.VISIBLE);\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "3d8b7dd772f2ae9b"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/hu/formatx/suite/MainActivity.java"
+                                },
+                                "region": {
+                                    "startLine": 246,
+                                    "startColumn": 39,
+                                    "endLine": 246,
+                                    "endColumn": 95,
+                                    "charOffset": 9356,
+                                    "charLength": 56,
+                                    "snippet": {
+                                        "text": "\" Ellenőrizd az internetkapcsolatot, majd próbáld újra.\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 244,
+                                    "endLine": 249,
+                                    "snippet": {
+                                        "text": "        statePanel.setVisibility(View.VISIBLE);\n        stateTitle.setText(\"A FormatX oldal nem érhető el.\");\n        stateMessage.setText(reason + \" Ellenőrizd az internetkapcsolatot, majd próbáld újra.\");\n        retryButton.setVisibility(View.VISIBLE);\n        browserButton.setVisibility(View.VISIBLE);\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "3d8b7dd772f2ae9b"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Do not concatenate text displayed with setText. Use resource string with placeholders.",
+                        "markdown": "Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/hu/formatx/suite/PaymentActivity.java"
+                                },
+                                "region": {
+                                    "startLine": 181,
+                                    "startColumn": 30,
+                                    "endLine": 181,
+                                    "endColumn": 113,
+                                    "charOffset": 8399,
+                                    "charLength": 83,
+                                    "snippet": {
+                                        "text": "t(\"Eredeti ár: \", \"Regular price: \") + money(plan.original(annual(), eur()), eur())"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 179,
+                                    "endLine": 184,
+                                    "snippet": {
+                                        "text": "        paymentPanel.setVisibility(View.GONE);\n        PriceCatalog.Plan plan = selectedPlan();\n        regularPrice.setText(t(\"Eredeti ár: \", \"Regular price: \") + money(plan.original(annual(), eur()), eur()));\n        finalPrice.setText(money(plan.price(annual(), eur()), eur()));\n        discountLabel.setText(annual()\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "36f321460aa25c6f"
+                    }
+                }
+            ]
+        }
+    ]
+}

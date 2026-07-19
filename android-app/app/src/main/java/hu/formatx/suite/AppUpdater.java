@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 final class AppUpdater {
     private static final String PRIMARY_MANIFEST =
-            "https://formatxsuite.formatx.workers.dev/scifi-ui/downloads/android-update.json";
+            "https://formatx1.formatx.workers.dev/scifi-ui/downloads/android-update.json";
     private static final String FALLBACK_MANIFEST =
             "https://raw.githubusercontent.com/hutoczky/FormatX/master/docs/scifi-ui/downloads/android-update.json";
     private static final String PREFS = "formatx_updater";

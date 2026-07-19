@@ -1,8 +1,8 @@
 {
-  "versionCode": 4,
-  "versionName": "1.0.2",
+  "versionCode": 5,
+  "versionName": "1.0.3",
   "apkUrl": "https://hutoczky.github.io/FormatX/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk",
-  "sha256": "fd47350080a9d589e27b4a092e5f32142a73d664c8bfc1f320a3ce7d5a2176d4",
+  "sha256": "b9bd25527034784bceb8367dd75a0555c75538d3d4297478a046860f2d60c962",
   "mandatory": false,
-  "notes": "Android WebView kapcsolatjavítás, automatikus Worker–GitHub Pages tartalék, közvetlen honlapos APK-letöltés és indításkori önfrissítés."
+  "notes": "A helyes formatx1 Worker és /scifi-ui/ kezdőoldal, javított Android WebView betöltés és frissített alkalmazáskapcsolatok."
 }
