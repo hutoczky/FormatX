@@ -49,11 +49,29 @@ jobs:
           "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Build and lint
-        run: gradle --no-daemon --stacktrace --project-dir android-app :app:assembleDebug :app:lintDebug
+        id: gradle
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p dist
+          gradle --no-daemon --stacktrace --warning-mode all --project-dir android-app :app:assembleDebug :app:lintDebug 2>&1 | tee dist/android-build.log
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormatX-Android-Build-Diagnostics
+          path: dist/android-build.log
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stop on failed build
+        if: steps.gradle.outcome == 'failure'
+        run: exit 1
 
       - name: Prepare named APK
         run: |
-          mkdir -p dist
           cp android-app/app/build/outputs/apk/debug/app-debug.apk dist/FormatX-Suite-Pro-Android.apk
           sha256sum dist/FormatX-Suite-Pro-Android.apk | tee dist/FormatX-Suite-Pro-Android.apk.sha256
 
