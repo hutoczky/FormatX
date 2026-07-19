@@ -1,5 +1,6 @@
 package hu.formatx.suite;
 
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -194,6 +195,7 @@ final class AppUpdater {
         notifyUser(context, "Új FormatX verzió érhető el. A frissítés letöltése elindult.");
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private static void registerDownloadReceiver(Context context) {
         if (!RECEIVER_REGISTERED.compareAndSet(false, true)) return;
 
