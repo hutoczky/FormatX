@@ -1,0 +1,101 @@
+name: Verify direct Android download from the website
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/verify-static-android-download.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      EXPECTED_SHA256: fd47350080a9d589e27b4a092e5f32142a73d664c8bfc1f320a3ce7d5a2176d4
+      PRODUCTION_URL: https://formatxsuite.formatx.workers.dev/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk
+      PAGES_URL: https://hutoczky.github.io/FormatX/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk
+
+    steps:
+      - name: Verify production and fallback downloads
+        id: verify
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          check_url() {
+            local label="$1"
+            local url="$2"
+            local file="/tmp/${label}.apk"
+            local headers="/tmp/${label}.headers"
+            local success=false
+            local code=000
+            local sha=""
+            local size=0
+
+            for attempt in 1 2 3 4 5 6 7 8; do
+              rm -f "$file" "$headers"
+              code="$(curl --location --silent --show-error --max-time 45 --dump-header "$headers" --output "$file" --write-out '%{http_code}' "$url" || true)"
+              if [ "$code" = "200" ] && [ -s "$file" ]; then
+                size="$(stat -c '%s' "$file")"
+                sha="$(sha256sum "$file" | cut -d' ' -f1)"
+                magic="$(od -An -tx1 -N4 "$file" | tr -d ' \n')"
+                if [ "$size" -gt 800000 ] && [ "$sha" = "$EXPECTED_SHA256" ] && [ "$magic" = "504b0304" ]; then
+                  success=true
+                  break
+                fi
+              fi
+              echo "$label attempt $attempt: HTTP $code, size $size, sha $sha"
+              sleep 15
+            done
+
+            echo "${label}_success=$success" >> "$GITHUB_OUTPUT"
+            echo "${label}_code=$code" >> "$GITHUB_OUTPUT"
+            echo "${label}_size=$size" >> "$GITHUB_OUTPUT"
+            echo "${label}_sha=$sha" >> "$GITHUB_OUTPUT"
+          }
+
+          check_url production "$PRODUCTION_URL"
+          check_url pages "$PAGES_URL"
+
+          if [ "$(grep '^production_success=' "$GITHUB_OUTPUT" | cut -d= -f2)" != "true" ] && \
+             [ "$(grep '^pages_success=' "$GITHUB_OUTPUT" | cut -d= -f2)" != "true" ]; then
+            exit 1
+          fi
+
+      - name: Publish verification result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          PROD_OK: ${{ steps.verify.outputs.production_success }}
+          PROD_CODE: ${{ steps.verify.outputs.production_code }}
+          PROD_SIZE: ${{ steps.verify.outputs.production_size }}
+          PROD_SHA: ${{ steps.verify.outputs.production_sha }}
+          PAGES_OK: ${{ steps.verify.outputs.pages_success }}
+          PAGES_CODE: ${{ steps.verify.outputs.pages_code }}
+          PAGES_SIZE: ${{ steps.verify.outputs.pages_size }}
+          PAGES_SHA: ${{ steps.verify.outputs.pages_sha }}
+        run: |
+          title="FormatX website Android download verification"
+          body=$(cat <<EOF
+          A közvetlen honlapos Android APK-ellenőrzés befejeződött.
+
+          - Production URL: ${PRODUCTION_URL}
+          - Production OK: \`${PROD_OK}\`
+          - Production HTTP: \`${PROD_CODE}\`
+          - Production size: \`${PROD_SIZE}\`
+          - Production SHA256: \`${PROD_SHA}\`
+          - GitHub Pages fallback: ${PAGES_URL}
+          - Pages OK: \`${PAGES_OK}\`
+          - Pages HTTP: \`${PAGES_CODE}\`
+          - Pages size: \`${PAGES_SIZE}\`
+          - Pages SHA256: \`${PAGES_SHA}\`
+          - Expected SHA256: \`${EXPECTED_SHA256}\`
+          EOF
+          )
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
