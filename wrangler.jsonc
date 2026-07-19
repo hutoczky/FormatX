@@ -1,12 +1,18 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "formatxsuite",
+  "main": "worker.js",
   "compatibility_date": "2026-07-19",
   "observability": {
     "enabled": true
   },
   "assets": {
-    "directory": "docs"
+    "directory": "docs",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/download/*",
+      "/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
+    ]
   },
   "compatibility_flags": [
     "nodejs_compat"
