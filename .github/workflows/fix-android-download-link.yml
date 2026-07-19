@@ -1,0 +1,99 @@
+name: Fix FormatX Android website download
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/fix-android-download-link.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fix Android download button and response headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index = Path('docs/scifi-ui/index.html')
+          html = index.read_text(encoding='utf-8')
+          old = '<a class="outline-button" href="./downloads/FormatX-Suite-Pro-Android.apk"><span data-text="androidApp">Android alkalmazás</span><i aria-hidden="true">↓</i></a>'
+          new = '<a class="outline-button" href="https://formatx1.formatx.workers.dev/download/android?v=1.0.4" download="FormatX-Suite-Pro-Android-1.0.4.apk"><span data-text="androidApp">Android alkalmazás letöltése</span><i aria-hidden="true">↓</i></a>'
+          if old not in html and new not in html:
+              raise SystemExit('Nem található az Android letöltési gomb.')
+          html = html.replace(old, new, 1)
+          index.write_text(html, encoding='utf-8')
+
+          worker = Path('billing-worker/src/production-entry.js')
+          source = worker.read_text(encoding='utf-8')
+          source = source.replace(
+              "const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.3.apk';",
+              "const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.4.apk';",
+          )
+          source = source.replace(
+              "  const assetUrl = new URL(ANDROID_APK_PATH, request.url);",
+              "  const assetUrl = new URL(ANDROID_APK_PATH, request.url);\n  assetUrl.searchParams.set('v', '1.0.4');",
+          )
+          source = source.replace(
+              "headers.set('Cache-Control', 'public, max-age=3600');",
+              "headers.set('Cache-Control', 'no-store');",
+          )
+          required = [
+              "FormatX-Suite-Pro-Android-1.0.4.apk",
+              "assetUrl.searchParams.set('v', '1.0.4');",
+              "headers.set('Cache-Control', 'no-store');",
+          ]
+          for item in required:
+              if item not in source:
+                  raise SystemExit(f'Hiányzó letöltési javítás: {item}')
+          worker.write_text(source, encoding='utf-8')
+
+          Path('.github/workflows/fix-android-download-link.yml').unlink()
+          PY
+
+      - name: Commit download fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
+          git add docs/scifi-ui/index.html billing-worker/src/production-entry.js
+          git add -u .github/workflows/fix-android-download-link.yml
+          git commit -m "Fix website Android APK download button"
+          git push origin HEAD:master
+
+      - name: Deploy formatx1 Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ffd7d28ea7c6a510549dc9363619c8c5
+          workingDirectory: billing-worker
+          command: deploy --name formatx1
+
+      - name: Verify website button and forced APK download
+        shell: bash
+        run: |
+          set -euo pipefail
+          PAGE="$(mktemp)"
+          HEADERS="$(mktemp)"
+          curl -fsSL --connect-timeout 10 --max-time 30 \
+            'https://formatx1.formatx.workers.dev/scifi-ui/?lang=hu&downloadFix=104' -o "$PAGE"
+          grep -Fq 'https://formatx1.formatx.workers.dev/download/android?v=1.0.4' "$PAGE"
+          curl -fsSL --connect-timeout 10 --max-time 60 \
+            -D "$HEADERS" -o /dev/null \
+            'https://formatx1.formatx.workers.dev/download/android?v=1.0.4'
+          grep -Eiq '^content-type: application/vnd\.android\.package-archive' "$HEADERS"
+          grep -Eiq '^content-disposition: attachment; filename="FormatX-Suite-Pro-Android-1\.0\.4\.apk"' "$HEADERS"
