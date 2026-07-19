@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="formatx_background">#020711</color>
+    <color name="formatx_surface">#091426</color>
+    <color name="formatx_cyan">#13D9FF</color>
+    <color name="formatx_purple">#9C4DFF</color>
+    <color name="formatx_text">#EAFBFF</color>
+</resources>
