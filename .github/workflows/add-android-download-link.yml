@@ -1,0 +1,67 @@
+name: Add Android release download link
+
+on:
+  push:
+    branches:
+      - agent/android-release-download
+    paths:
+      - ".github/workflows/add-android-download-link.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/android-release-download
+
+      - name: Add bilingual Android download button
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          landing_path = Path('docs/scifi-ui/scripts/landing.js')
+          landing = landing_path.read_text(encoding='utf-8')
+          landing = landing.replace(
+              "startTrial: '5 napos próba indítása', exploreFeatures:",
+              "startTrial: '5 napos próba indítása', androidApp: 'Android alkalmazás', exploreFeatures:"
+          )
+          landing = landing.replace(
+              "startTrial: 'Start 5-day Trial', exploreFeatures:",
+              "startTrial: 'Start 5-day Trial', androidApp: 'Android App', exploreFeatures:"
+          )
+          landing_path.write_text(landing, encoding='utf-8')
+
+          index_path = Path('docs/scifi-ui/index.html')
+          index = index_path.read_text(encoding='utf-8')
+          marker = '<a id="hero-download" class="gradient-button primary-cta"'
+          android_url = 'https://github.com/hutoczky/FormatX/releases/download/android-v1.0.0-beta/FormatX-Suite-Pro-Android.apk'
+          if android_url not in index:
+              old = '            <a class="outline-button" href="#features"><span data-text="exploreFeatures">Funkciók felfedezése</span><i aria-hidden="true">▶</i></a>'
+              new = '            <a class="outline-button" href="' + android_url + '"><span data-text="androidApp">Android alkalmazás</span><i aria-hidden="true">↓</i></a>\n' + old
+              if old not in index or marker not in index:
+                  raise SystemExit('Hero action marker not found')
+              index = index.replace(old, new, 1)
+          index_path.write_text(index, encoding='utf-8')
+
+          assert "androidApp: 'Android alkalmazás'" in landing
+          assert "androidApp: 'Android App'" in landing
+          assert android_url in index
+          PY
+
+      - name: Validate site scripts
+        run: |
+          node --check docs/scifi-ui/scripts/landing.js
+          grep -F "FormatX-Suite-Pro-Android.apk" docs/scifi-ui/index.html
+
+      - name: Commit download link
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/landing.js
+          git commit -m "Add Android app download to the website"
+          git push origin HEAD:agent/android-release-download
