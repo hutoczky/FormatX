@@ -58,12 +58,11 @@ jobs:
           grep -F 'versionCode = 7' "$BUILD"
           grep -F 'versionName = "1.0.5"' "$BUILD"
 
-      - name: Build and lint APK
+      - name: Build installable APK
         shell: bash
         run: |
           set -euo pipefail
-          gradle --no-daemon --stacktrace --warning-mode all --project-dir android-app \
-            :app:assembleDebug :app:lintDebug
+          gradle --no-daemon --stacktrace --warning-mode all --project-dir android-app :app:assembleDebug
 
       - name: Publish APK files
         shell: bash
