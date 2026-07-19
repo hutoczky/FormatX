@@ -1,5 +1,6 @@
 name: Verify direct Android download from the website
 
+# Recheck after pinning the production Worker name to formatxsuite.
 on:
   push:
     branches: [master]
@@ -71,7 +72,6 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
-          JOB_STATUS: ${{ job.status }}
           PROD_OK: ${{ steps.verify.outputs.production_success }}
           PROD_CODE: ${{ steps.verify.outputs.production_code }}
           PROD_SIZE: ${{ steps.verify.outputs.production_size }}
