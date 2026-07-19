@@ -34,8 +34,8 @@ import android.window.OnBackInvokedDispatcher;
 import java.util.Locale;
 
 public final class MainActivity extends Activity {
-    private static final String PRIMARY_HOST = "formatx1.formatx.workers.dev";
-    private static final String PRIMARY_PATH = "/scifi-ui/";
+    private static final String PRIMARY_HOST = "hutoczky.github.io";
+    private static final String PRIMARY_PATH = "/FormatX/scifi-ui/index.html";
     private static final String FALLBACK_HOST = "hutoczky.github.io";
     private static final String FALLBACK_PATH = "/FormatX/scifi-ui/index.html";
     private static final long LOAD_TIMEOUT_MS = 18000L;
@@ -149,7 +149,7 @@ public final class MainActivity extends Activity {
         settings.setLoadsImagesAutomatically(true);
         settings.setBlockNetworkImage(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        settings.setUserAgentString(settings.getUserAgentString() + " FormatXAndroid/1.0.3");
+        settings.setUserAgentString(settings.getUserAgentString() + " FormatXAndroid/1.0.4");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             settings.setSafeBrowsingEnabled(true);
@@ -189,7 +189,7 @@ public final class MainActivity extends Activity {
                 .path(path)
                 .appendQueryParameter("app", "android")
                 .appendQueryParameter("lang", language)
-                .appendQueryParameter("appVersion", "1.0.3")
+                .appendQueryParameter("appVersion", "1.0.4")
                 .build();
     }
 
