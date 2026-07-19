@@ -54,16 +54,29 @@ jobs:
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Apply Android 1.0.4 WebView correction
+      - name: Enforce formatx1 URL and Android 1.0.4 WebView correction
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
+          import re
           from pathlib import Path
 
           main = Path('android-app/app/src/main/java/hu/formatx/suite/MainActivity.java')
           text = main.read_text(encoding='utf-8')
 
+          text = re.sub(
+              r'private static final String PRIMARY_HOST = "[^"]+";',
+              'private static final String PRIMARY_HOST = "formatx1.formatx.workers.dev";',
+              text,
+              count=1,
+          )
+          text = re.sub(
+              r'private static final String PRIMARY_PATH = "[^"]+";',
+              'private static final String PRIMARY_PATH = "/scifi-ui/";',
+              text,
+              count=1,
+          )
           text = text.replace('FormatXAndroid/1.0.3', 'FormatXAndroid/1.0.4')
           text = text.replace('appVersion", "1.0.3"', 'appVersion", "1.0.4"')
           text = text.replace('settings.setCacheMode(WebSettings.LOAD_DEFAULT);',
@@ -213,6 +226,10 @@ jobs:
           })
           manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
+          obsolete_manifest = Path('docs/scifi-ui/android-update.json')
+          if obsolete_manifest.exists():
+              obsolete_manifest.unlink()
+
           worker = Path('billing-worker/src/production-entry.js')
           worker_text = worker.read_text(encoding='utf-8')
           worker_text = re.sub(
@@ -272,12 +289,12 @@ jobs:
           git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
           git add android-app/app/src/main/java/hu/formatx/suite/MainActivity.java \
                   android-app/app/build.gradle.kts \
-                  docs/scifi-ui/downloads \
                   billing-worker/src/production-entry.js
+          git add -A docs/scifi-ui
           if git diff --cached --quiet; then
             echo 'Nincs publikálandó Android-változás.'
             exit 0
           fi
-          git commit -m "Publish FormatX Android ${VERSION} with WebView cache fix"
+          git commit -m "Publish FormatX Android ${VERSION} with formatx1 cache fix"
           git pull --rebase origin master
           git push origin HEAD:master
