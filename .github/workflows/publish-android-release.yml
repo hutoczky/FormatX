@@ -1,0 +1,110 @@
+name: Publish FormatX Android release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "android-app/**"
+      - ".github/workflows/publish-android-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Build and publish Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle 9.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.5.0"
+
+      - name: Install Android SDK components
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          test -n "$SDK_ROOT"
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager | sort -V | tail -n 1)"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Build and lint
+        run: gradle --no-daemon --stacktrace --project-dir android-app :app:assembleDebug :app:lintDebug
+
+      - name: Prepare release files
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' android-app/app/build.gradle.kts | head -n 1)"
+          test -n "$VERSION"
+          TAG="android-v${VERSION}-beta"
+          mkdir -p dist
+          cp android-app/app/build/outputs/apk/debug/app-debug.apk dist/FormatX-Suite-Pro-Android.apk
+          sha256sum dist/FormatX-Suite-Pro-Android.apk | tee dist/FormatX-Suite-Pro-Android.apk.sha256
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/release-notes.md <<EOF
+          ## FormatX Suite Pro Android ${VERSION}
+
+          Telepíthető Android tesztverzió a teljes FormatX weboldallal és natív, egyszerűsített HUF/EUR banki fizetéssel.
+
+          - magyar és angol felület;
+          - a checkout natív Android-képernyőn nyílik meg;
+          - egyérintéses átutalási adatmásolás;
+          - banki alkalmazás megnyitási kísérlete;
+          - szerveroldalon rögzített fix összegek;
+          - bankkártyaadatot nem kezel.
+
+          Ez jelenleg közvetlen tesztelésre készült, debug aláírású APK. Google Play kiadáshoz tartós privát release-aláírás szükséges.
+          EOF
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" \
+              dist/FormatX-Suite-Pro-Android.apk \
+              dist/FormatX-Suite-Pro-Android.apk.sha256 \
+              --clobber
+            gh release edit "$TAG" \
+              --title "FormatX Suite Pro Android ${VERSION} Beta" \
+              --notes-file /tmp/release-notes.md \
+              --prerelease
+          else
+            gh release create "$TAG" \
+              dist/FormatX-Suite-Pro-Android.apk \
+              dist/FormatX-Suite-Pro-Android.apk.sha256 \
+              --target "$GITHUB_SHA" \
+              --title "FormatX Suite Pro Android ${VERSION} Beta" \
+              --notes-file /tmp/release-notes.md \
+              --prerelease
+          fi
+
+      - name: Publish permanent download URL
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          echo "## FormatX Android download" >> "$GITHUB_STEP_SUMMARY"
+          echo "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/FormatX-Suite-Pro-Android.apk" >> "$GITHUB_STEP_SUMMARY"
