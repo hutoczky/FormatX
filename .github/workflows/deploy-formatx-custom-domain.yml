@@ -1,32 +1,47 @@
-name: Deploy FormatX custom domains
+name: Repair FormatX DNS and Worker routes
 
 on:
   push:
     branches: [master]
     paths:
-      - "billing-worker/**"
-      - "docs/**"
       - ".github/workflows/deploy-formatx-custom-domain.yml"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: formatx-custom-domain-production
-  cancel-in-progress: true
+  group: formatx-domain-repair
+  cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Deploy formatxsuite.com to formatx1
+  repair:
+    name: Repair formatxsuite.com DNS and routes
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Deploy Worker and custom domains
+      - name: Switch Worker custom domains to proxied routes
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          path = Path("billing-worker/wrangler.jsonc")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          data["name"] = "formatx1"
+          data["routes"] = [
+              {"pattern": "formatxsuite.com/*", "zone_name": "formatxsuite.com"},
+              {"pattern": "www.formatxsuite.com/*", "zone_name": "formatxsuite.com"},
+          ]
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+      - name: Deploy Worker routes
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -34,7 +49,56 @@ jobs:
           workingDirectory: billing-worker
           command: deploy
 
-      - name: Verify custom domains
+      - name: Create proxied DNS records
+        shell: bash
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          API="https://api.cloudflare.com/client/v4"
+          AUTH=(-H "Authorization: Bearer ${CF_API_TOKEN}" -H "Content-Type: application/json")
+
+          ZONE_JSON="$(curl -fsS "${AUTH[@]}" "${API}/zones?name=formatxsuite.com&status=active")"
+          echo "$ZONE_JSON" | jq -e '.success == true and (.result | length) == 1' >/dev/null
+          ZONE_ID="$(echo "$ZONE_JSON" | jq -r '.result[0].id')"
+
+          ensure_record() {
+            local name="$1"
+            local records record_id record_type
+            records="$(curl -fsS "${AUTH[@]}" "${API}/zones/${ZONE_ID}/dns_records?name=${name}&per_page=100")"
+            echo "$records" | jq -e '.success == true' >/dev/null
+
+            while IFS=$'\t' read -r record_id record_type; do
+              case "$record_type" in
+                A|AAAA|CNAME)
+                  curl -fsS -X DELETE "${AUTH[@]}" "${API}/zones/${ZONE_ID}/dns_records/${record_id}" | jq -e '.success == true' >/dev/null
+                  ;;
+              esac
+            done < <(echo "$records" | jq -r '.result[] | [.id, .type] | @tsv')
+
+            payload="$(jq -nc --arg name "$name" '{type:"AAAA",name:$name,content:"100::",ttl:1,proxied:true}')"
+            curl -fsS -X POST "${AUTH[@]}" --data "$payload" "${API}/zones/${ZONE_ID}/dns_records" | jq -e '.success == true' >/dev/null
+          }
+
+          ensure_record "formatxsuite.com"
+          ensure_record "www.formatxsuite.com"
+
+      - name: Commit permanent route configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add billing-worker/wrangler.jsonc
+          if git diff --cached --quiet; then
+            echo "Route configuration already committed."
+          else
+            git commit -m "Use proxied Worker routes for FormatX domains"
+            git pull --rebase origin master
+            git push origin HEAD:master
+          fi
+
+      - name: Verify DNS and website
         shell: bash
         run: |
           set -euo pipefail
@@ -42,19 +106,17 @@ jobs:
             local url="$1"
             local output
             output="$(mktemp)"
-            for attempt in $(seq 1 12); do
-              if curl -fsSL --connect-timeout 10 --max-time 30 \
-                  -H 'Cache-Control: no-cache' "$url" -o "$output" \
+            for attempt in $(seq 1 20); do
+              if curl -fsSL --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' "$url" -o "$output" \
                   && grep -Fq 'class="reference-commerce"' "$output"; then
+                echo "Verified: $url"
                 return 0
               fi
-              sleep 5
+              sleep 6
             done
-            echo "A domain még nem szolgálja ki a modern FormatX oldalt: $url" >&2
+            echo "Verification failed: $url" >&2
             return 1
           }
 
           verify 'https://formatxsuite.com/scifi-ui/?lang=hu'
           verify 'https://www.formatxsuite.com/scifi-ui/?lang=hu'
-
-# Activation confirmed in Cloudflare on 2026-07-20; this commit retriggers deployment.
