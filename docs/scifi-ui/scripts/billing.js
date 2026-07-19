@@ -4,20 +4,20 @@
   const PLANS = {
     business_lite: {
       name: 'Business Lite',
-      monthly: 19900,
-      annual: 199000,
+      monthly: 15900,
+      annual: 139300,
       team: '1 technikus • 10 gépig',
     },
     business_pro: {
       name: 'Business Pro',
-      monthly: 49900,
-      annual: 499000,
+      monthly: 39900,
+      annual: 349300,
       team: '3 technikus • 50 gépig',
     },
     technician_team: {
       name: 'Technician Team',
-      monthly: 99900,
-      annual: 999000,
+      monthly: 79900,
+      annual: 699300,
       team: '5 technikus • 150 gépig',
     },
   };

@@ -3,9 +3,9 @@
 
   const SUPPORT_EMAIL = 'hutoczky@gmail.com';
   const PRICES = {
-    business_lite: { HUF: { monthly: 19900, annual: 199000 }, EUR: { monthly: 55, annual: 547 } },
-    business_pro: { HUF: { monthly: 49900, annual: 499000 }, EUR: { monthly: 137, annual: 1373 } },
-    technician_team: { HUF: { monthly: 99900, annual: 999000 }, EUR: { monthly: 275, annual: 2748 } }
+    business_lite: { HUF: { monthly: 15900, annual: 139300 }, EUR: { monthly: 44, annual: 383 } },
+    business_pro: { HUF: { monthly: 39900, annual: 349300 }, EUR: { monthly: 110, annual: 961 } },
+    technician_team: { HUF: { monthly: 79900, annual: 699300 }, EUR: { monthly: 220, annual: 1924 } }
   };
   const apiMeta = document.querySelector('meta[name="formatx-billing-api-base"]');
   const apiBase = String(apiMeta?.content || '').trim().replace(/\/+$/, '');

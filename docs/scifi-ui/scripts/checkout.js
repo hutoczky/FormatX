@@ -5,8 +5,8 @@
     business_lite: {
       name: 'Business Lite',
       prices: {
-        HUF: { monthly: 19900, annual: 199000 },
-        EUR: { monthly: 55, annual: 547 }
+        HUF: { monthly: 15900, annual: 139300 },
+        EUR: { monthly: 44, annual: 383 }
       },
       technicians: 1,
       devices: 10
@@ -14,8 +14,8 @@
     business_pro: {
       name: 'Business Pro',
       prices: {
-        HUF: { monthly: 49900, annual: 499000 },
-        EUR: { monthly: 137, annual: 1373 }
+        HUF: { monthly: 39900, annual: 349300 },
+        EUR: { monthly: 110, annual: 961 }
       },
       technicians: 3,
       devices: 50
@@ -23,8 +23,8 @@
     technician_team: {
       name: 'Technician Team',
       prices: {
-        HUF: { monthly: 99900, annual: 999000 },
-        EUR: { monthly: 275, annual: 2748 }
+        HUF: { monthly: 79900, annual: 699300 },
+        EUR: { monthly: 220, annual: 1924 }
       },
       technicians: 5,
       devices: 150
