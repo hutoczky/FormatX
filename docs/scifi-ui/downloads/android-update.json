@@ -1,8 +1,8 @@
 {
-  "versionCode": 3,
-  "versionName": "1.0.1",
-  "apkUrl": "https://formatxsuite.formatx.workers.dev/download/android",
+  "versionCode": 4,
+  "versionName": "1.0.2",
+  "apkUrl": "https://formatxsuite.formatx.workers.dev/scifi-ui/downloads/FormatX-Android.apk",
   "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
   "mandatory": false,
-  "notes": "Android WebView kapcsolatjavítás, automatikus tartalék webcím és beépített indításkori frissítésellenőrzés."
+  "notes": "Android WebView kapcsolatjavítás, automatikus Worker–GitHub Pages tartalék, közvetlen honlapos APK-letöltés és indításkori önfrissítés."
 }
