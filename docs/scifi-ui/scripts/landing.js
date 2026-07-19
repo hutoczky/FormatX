@@ -117,8 +117,8 @@
     const secondaryLabel = document.getElementById('preview-secondary-label');
     const checkoutLink = document.getElementById('preview-checkout-link');
     const qrLink = document.getElementById('qr-preview-link');
-    if (mainPrice) mainPrice.textContent = currency === 'EUR' ? formatPrice(137, 'EUR') : formatPrice(49900, 'HUF');
-    if (secondaryPrice) secondaryPrice.textContent = currency === 'EUR' ? formatPrice(49900, 'HUF') : formatPrice(137, 'EUR');
+    if (mainPrice) mainPrice.textContent = currency === 'EUR' ? formatPrice(110, 'EUR') : formatPrice(39900, 'HUF');
+    if (secondaryPrice) secondaryPrice.textContent = currency === 'EUR' ? formatPrice(39900, 'HUF') : formatPrice(110, 'EUR');
     if (secondaryLabel) secondaryLabel.textContent = COPY[language][currency === 'EUR' ? 'amountHuf' : 'amountEur'];
     const href = './checkout.html?plan=business_pro&cycle=monthly&currency=' + currency + '&lang=' + language;
     if (checkoutLink) checkoutLink.href = href;

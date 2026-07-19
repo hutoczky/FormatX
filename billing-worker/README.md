@@ -54,9 +54,9 @@ Az EPC-adat legfeljebb 331 bájt lehet; ezt a Worker ellenőrzi. A banki alkalma
 
 | Csomag | Havi HUF | Éves HUF | Havi EUR | Éves EUR |
 |---|---:|---:|---:|---:|
-| Business Lite | 19 900 Ft | 199 000 Ft | 55 € | 547 € |
-| Business Pro | 49 900 Ft | 499 000 Ft | 137 € | 1 373 € |
-| Technician Team | 99 900 Ft | 999 000 Ft | 275 € | 2 748 € |
+| Business Lite | 19 900 Ft | 199 000 Ft | 44 € | 547 € |
+| Business Pro | 49 900 Ft | 499 000 Ft | 110 € | 1 373 € |
+| Technician Team | 99 900 Ft | 999 000 Ft | 220 € | 2 748 € |
 
 Az EUR-árak fix kereskedelmi árak. Fizetés közben nincs élő devizaátváltás vagy automatikus árfolyam-frissítés.
 
