@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "formatx-billing-worker",
+  "name": "formatx1",
   "main": "src/production-entry.js",
   "compatibility_date": "2026-07-18",
   "observability": {
@@ -9,6 +9,16 @@
   "upload_source_maps": true,
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  "routes": [
+    {
+      "pattern": "formatxsuite.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.formatxsuite.com",
+      "custom_domain": true
+    }
   ],
   "assets": {
     "directory": "../docs",
