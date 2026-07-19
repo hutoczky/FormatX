@@ -367,3 +367,8 @@ FodyWeavers.xsd
 !.env.example
 billing-worker/.dev.vars
 billing-worker/.wrangler/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
