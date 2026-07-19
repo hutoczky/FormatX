@@ -18,7 +18,7 @@ jobs:
   attach:
     name: Attach formatxsuite.com to formatx
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout repository
@@ -41,19 +41,48 @@ jobs:
           ]
           config.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-      - name: Remove old Spaceship parking DNS records
-        continue-on-error: true
+      - name: Normalize Cloudflare API token
         shell: bash
         env:
-          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          RAW_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN="$(printf '%s' "$RAW_CF_TOKEN" | tr -d '\r\n')"
+          TOKEN="${TOKEN#Bearer }"
+          TOKEN="${TOKEN#bearer }"
+          TOKEN="${TOKEN#\"}"
+          TOKEN="${TOKEN%\"}"
+          TOKEN="${TOKEN#\'}"
+          TOKEN="${TOKEN%\'}"
+          TOKEN="$(printf '%s' "$TOKEN" | xargs)"
+          test "${#TOKEN}" -ge 20
+          echo "::add-mask::$TOKEN"
+          echo "NORMALIZED_CF_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+
+      - name: Verify Cloudflare token and locate zone
+        shell: bash
+        env:
+          CF_API_TOKEN: ${{ env.NORMALIZED_CF_TOKEN }}
         run: |
           set -euo pipefail
           API="https://api.cloudflare.com/client/v4"
           AUTH=(-H "Authorization: Bearer ${CF_API_TOKEN}" -H "Content-Type: application/json")
-
+          VERIFY="$(curl -fsS "${AUTH[@]}" "${API}/user/tokens/verify")"
+          echo "$VERIFY" | jq -e '.success == true and .result.status == "active"' >/dev/null
           ZONE_JSON="$(curl -fsS "${AUTH[@]}" "${API}/zones?name=formatxsuite.com&status=active")"
           echo "$ZONE_JSON" | jq -e '.success == true and (.result | length) == 1' >/dev/null
           ZONE_ID="$(echo "$ZONE_JSON" | jq -r '.result[0].id')"
+          echo "FORMATX_ZONE_ID=$ZONE_ID" >> "$GITHUB_ENV"
+
+      - name: Remove old Spaceship parking DNS records
+        shell: bash
+        env:
+          CF_API_TOKEN: ${{ env.NORMALIZED_CF_TOKEN }}
+          ZONE_ID: ${{ env.FORMATX_ZONE_ID }}
+        run: |
+          set -euo pipefail
+          API="https://api.cloudflare.com/client/v4"
+          AUTH=(-H "Authorization: Bearer ${CF_API_TOKEN}" -H "Content-Type: application/json")
 
           for NAME in formatxsuite.com www.formatxsuite.com; do
             RECORDS="$(curl -fsS "${AUTH[@]}" "${API}/zones/${ZONE_ID}/dns_records?name=${NAME}&per_page=100")"
@@ -62,19 +91,25 @@ jobs:
               case "$TYPE" in
                 A|AAAA|CNAME)
                   echo "Deleting old ${TYPE} ${NAME} -> ${CONTENT}"
-                  curl -fsS -X DELETE "${AUTH[@]}" "${API}/zones/${ZONE_ID}/dns_records/${ID}" | jq -e '.success == true' >/dev/null
+                  curl -fsS -X DELETE "${AUTH[@]}" "${API}/zones/${ZONE_ID}/dns_records/${ID}" \
+                    | jq -e '.success == true' >/dev/null
                   ;;
               esac
             done < <(echo "$RECORDS" | jq -r '.result[] | [.id, .type, .content] | @tsv')
           done
 
+      - name: Install Worker dependencies
+        working-directory: billing-worker
+        shell: bash
+        run: npm ci
+
       - name: Deploy formatx Worker and create custom domains
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ffd7d28ea7c6a510549dc9363619c8c5
-          workingDirectory: billing-worker
-          command: deploy --name formatx
+        working-directory: billing-worker
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ env.NORMALIZED_CF_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ffd7d28ea7c6a510549dc9363619c8c5
+        run: npx wrangler deploy --name formatx
 
       - name: Commit permanent Worker configuration
         shell: bash
@@ -99,7 +134,7 @@ jobs:
             local url="$1"
             local output
             output="$(mktemp)"
-            for attempt in $(seq 1 30); do
+            for attempt in $(seq 1 36); do
               if curl -fsSL --connect-timeout 10 --max-time 30 \
                   -H 'Cache-Control: no-cache' "$url" -o "$output" \
                   && grep -Fq 'class="reference-commerce"' "$output"; then
