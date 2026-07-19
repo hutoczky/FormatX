@@ -48,14 +48,16 @@ jobs:
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Build and lint
+      - name: Build debug, release and lint
         id: gradle
         continue-on-error: true
         shell: bash
         run: |
           set -o pipefail
           mkdir -p dist
-          gradle --no-daemon --stacktrace --warning-mode all --project-dir android-app :app:assembleDebug :app:lintDebug 2>&1 | tee dist/android-build.log
+          gradle --no-daemon --stacktrace --warning-mode all --project-dir android-app \
+            :app:assembleDebug :app:assembleRelease :app:lintDebug \
+            2>&1 | tee dist/android-build.log
           find android-app/app/build -type f \( -name 'lint-results-debug.txt' -o -name 'lint-results-debug.html' -o -name 'lint-results-debug.sarif' \) -exec cp {} dist/ \; || true
 
       - name: Upload build diagnostics
@@ -71,17 +73,29 @@ jobs:
         if: steps.gradle.outcome == 'failure'
         run: exit 1
 
-      - name: Prepare named APK
+      - name: Prepare APK artifacts
         run: |
-          cp android-app/app/build/outputs/apk/debug/app-debug.apk dist/FormatX-Suite-Pro-Android.apk
-          sha256sum dist/FormatX-Suite-Pro-Android.apk | tee dist/FormatX-Suite-Pro-Android.apk.sha256
+          cp android-app/app/build/outputs/apk/debug/app-debug.apk dist/FormatX-Suite-Pro-Android-debug.apk
+          cp android-app/app/build/outputs/apk/release/app-release-unsigned.apk dist/FormatX-Suite-Pro-Android-release-unsigned.apk
+          sha256sum dist/FormatX-Suite-Pro-Android-debug.apk | tee dist/FormatX-Suite-Pro-Android-debug.apk.sha256
+          sha256sum dist/FormatX-Suite-Pro-Android-release-unsigned.apk | tee dist/FormatX-Suite-Pro-Android-release-unsigned.apk.sha256
 
-      - name: Upload APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: FormatX-Suite-Pro-Android
+          name: FormatX-Suite-Pro-Android-debug
           path: |
-            dist/FormatX-Suite-Pro-Android.apk
-            dist/FormatX-Suite-Pro-Android.apk.sha256
+            dist/FormatX-Suite-Pro-Android-debug.apk
+            dist/FormatX-Suite-Pro-Android-debug.apk.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload unsigned release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormatX-Suite-Pro-Android-release-unsigned
+          path: |
+            dist/FormatX-Suite-Pro-Android-release-unsigned.apk
+            dist/FormatX-Suite-Pro-Android-release-unsigned.apk.sha256
           if-no-files-found: error
           retention-days: 30
