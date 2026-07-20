@@ -58,11 +58,15 @@ async function serveEnhancedHome(request, env) {
     .replaceAll('https://formatx1.formatx.workers.dev/download/android?v=1.0.4', '/download/android')
     .replace(
       '</head>',
-      '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-3"></head>',
+      [
+        '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-6">',
+        '<link rel="stylesheet" href="/scifi-ui/styles/main-readability.css?v=20260720-readability-1">',
+        '</head>',
+      ].join(''),
     )
     .replace(
       '</body>',
-      '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-3"></script></body>',
+      '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-6"></script></body>',
     );
 
   const headers = new Headers(upstream.headers);
