@@ -63,7 +63,9 @@ async function serveCleanHome(request, env) {
   html = html
     .replaceAll('="./', '="/scifi-ui/')
     .replaceAll("='./", "='/scifi-ui/")
-    .replaceAll('https://formatx1.formatx.workers.dev/download/android?v=1.0.4', '/download/android');
+    .replaceAll('https://formatx1.formatx.workers.dev/download/android?v=1.0.4', '/download/android')
+    .replace('</head>', '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-1"></head>')
+    .replace('</body>', '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-1"></script></body>');
 
   const headers = new Headers(upstream.headers);
   headers.set('Content-Type', 'text/html; charset=utf-8');
