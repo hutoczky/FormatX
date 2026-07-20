@@ -8,7 +8,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'none'">
   <title>Adatvédelem | FormatX Suite Pro</title>
   <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
-<link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
+  <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
   <script defer src="./scripts/site.js?v=20260718-bilingual-3"></script>
 </head>
 <body>
@@ -36,20 +36,20 @@
       <section>
         <h2>Rendelési adatok</h2>
         <p>A rendelés előkészítéséhez a weboldal cég- vagy vállalkozásnevet, kapcsolattartói nevet, e-mail-címet, számlázási címet, opcionális adószámot és belső hivatkozást kérhet.</p>
-        <p>GitHub Pages statikus működés esetén ezek az adatok a böngészőben maradnak. A fizetési visszajelzés gomb a felhasználó saját levelezőprogramjában készít elő egy e-mailt; az adatok csak akkor kerülnek továbbításra, amikor a felhasználó ténylegesen elküldi az e-mailt.</p>
-        <p>Szerveres rendeléskövetés bekapcsolása esetén az adatokat a rendelés nyilvántartásához, az átutalás beazonosításához, a licenc aktiválásához, a számlázási egyeztetéshez és az ügyfélszolgálati kapcsolattartáshoz használjuk.</p>
+        <p>A checkout kizárólag a Cloudflare Worker szerveroldali API-ján keresztül indít rendelést. Ha az API nem érhető el vagy az éles értékesítés feltételei nincsenek megfelelően konfigurálva, a folyamat leáll: a böngésző nem készít önálló, követetlen átutalási megbízást.</p>
+        <p>A megadott adatokat a rendelés nyilvántartásához, az átutalás beazonosításához, a licenc aktiválásához, a számlázási egyeztetéshez és az ügyfélszolgálati kapcsolattartáshoz használhatjuk. Rendelési adat csak a konfigurált szerveroldali adatbázisban tárolható.</p>
       </section>
 
       <section>
         <h2>Banki átutalás és QR-kód</h2>
-        <p>A HUF vagy EUR QR-kód a kedvezményezett nyilvános fizetési adatait, a kiválasztott fix összeget, a devizát és az egyedi rendelési azonosítót tartalmazza. EUR-fizetés esetén az EPC SEPA Credit Transfer szabvány szerinti adat készül.</p>
+        <p>A HUF vagy EUR QR-kód a kedvezményezett nyilvános fizetési adatait, a kiválasztott fix összeget, a devizát és a szerver által kiadott egyedi rendelési azonosítót tartalmazza. EUR-fizetés esetén az EPC SEPA Credit Transfer szabvány szerinti adat készül.</p>
         <p>A QR-kép elkészítéséhez a böngésző ezeket a nyilvános fizetési adatokat továbbíthatja a QuickChart QR-szolgáltatásnak. A QR-adat nem tartalmaz bankkártyaadatot, bejelentkezési adatot vagy FormatX adatbázis-hozzáférést. A külső szolgáltatás a kérés teljesítéséhez technikai kapcsolatadatokat, például IP-címet is kezelhet.</p>
-        <p>A fizetés visszajelzésekor a rendelési azonosító, a deviza, az összeg, az utaló neve, a vásárló e-mail-címe, a banki tranzakció hivatkozása és az opcionális megjegyzés szerepelhet az elküldött e-mailben vagy a konfigurált rendelési adatbázisban.</p>
+        <p>A fizetés visszajelzésekor a rendelési azonosító, a deviza, az összeg, az utaló neve, a vásárló e-mail-címe, a banki tranzakció hivatkozása és az opcionális megjegyzés kerülhet a konfigurált rendelési adatbázisba.</p>
       </section>
 
       <section>
         <h2>Helyi és külső szolgáltatások</h2>
-        <p>A megjelenési mód választását a böngésző helyi tárhelye őrizheti meg. A legújabb kiadás megjelenítéséhez az oldal lekérheti a nyilvános GitHub Releases nyilvános metaadatait. Szerveres rendeléskövetés használatakor a rendelési adatok a konfigurált Supabase adatbázisban tárolhatók.</p>
+        <p>A megjelenési mód és a rendeléshez tartozó korlátozott munkamenetadat a böngésző helyi vagy munkamenet-tárhelyén őrződhet meg. A legújabb kiadás megjelenítéséhez az oldal lekérheti a nyilvános GitHub Releases metaadatait. Szerveres rendeléskövetés használatakor a rendelési adatok a konfigurált Supabase adatbázisban tárolhatók.</p>
       </section>
 
       <section>
