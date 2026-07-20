@@ -72,32 +72,63 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
+      - name: Validate Worker bundle before deploy
+        working-directory: billing-worker
+        run: npx wrangler deploy --dry-run --outdir ../.wrangler-dry-run
+
       - name: Deploy formatx Worker
         working-directory: billing-worker
         env:
           CLOUDFLARE_ACCOUNT_ID: ffd7d28ea7c6a510549dc9363619c8c5
         run: npx wrangler deploy --name formatx
 
-      - name: Verify clean production URL
+      - name: Verify both domains, headers and API health
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 36); do
-            headers="$(mktemp)"
-            body="$(mktemp)"
-            if curl -fsSL --connect-timeout 10 --max-time 30 \
-                -D "$headers" -o "$body" \
-                -H 'Cache-Control: no-cache' \
-                'https://www.formatxsuite.com/'; then
-              if grep -Fq 'FormatX Suite Pro' "$body" \
-                 && ! grep -Fiq '^location: .*/scifi-ui/' "$headers"; then
-                echo "Verified clean production URL."
+
+          verify_site() {
+            local url="$1"
+            for attempt in $(seq 1 36); do
+              local headers body status
+              headers="$(mktemp)"
+              body="$(mktemp)"
+              status="$(curl -sS --connect-timeout 10 --max-time 30 \
+                -D "$headers" -o "$body" -w '%{http_code}' \
+                -H 'Cache-Control: no-cache' "$url" || true)"
+
+              if [ "$status" = "200" ] \
+                 && grep -Fq 'FormatX Suite Pro' "$body" \
+                 && grep -iq '^strict-transport-security:' "$headers" \
+                 && grep -iq '^content-security-policy:' "$headers" \
+                 && grep -iq '^x-content-type-options: nosniff' "$headers" \
+                 && grep -iq '^link: <https://www.formatxsuite.com/' "$headers" \
+                 && ! grep -iq '^location:' "$headers"; then
+                echo "Verified $url"
                 rm -f "$headers" "$body"
-                exit 0
+                return 0
               fi
-            fi
-            rm -f "$headers" "$body"
-            sleep 10
-          done
-          echo "Production verification failed." >&2
-          exit 1
+
+              rm -f "$headers" "$body"
+              sleep 10
+            done
+            echo "Production verification failed for $url" >&2
+            return 1
+          }
+
+          verify_site 'https://formatxsuite.com/'
+          verify_site 'https://www.formatxsuite.com/'
+
+          health="$(curl -fsSL --connect-timeout 10 --max-time 30 \
+            -H 'Cache-Control: no-cache' \
+            'https://www.formatxsuite.com/api/health')"
+          HEALTH_JSON="$health" python3 - <<'PY'
+          import json
+          import os
+
+          data = json.loads(os.environ['HEALTH_JSON'])
+          assert data.get('provider') == 'bank_transfer', data
+          assert data.get('mode') == 'live', data
+          assert set(data.get('supported_currencies', [])) == {'HUF', 'EUR'}, data
+          print('Production API health response is structurally valid.')
+          PY
