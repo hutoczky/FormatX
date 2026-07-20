@@ -50,23 +50,77 @@ jobs:
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Verify dual-site Android source
+      - name: Prepare Android 1.0.6 source
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          main = Path('android-app/app/src/main/java/hu/formatx/suite/MainActivity.java')
+          text = main.read_text(encoding='utf-8')
+          text = text.replace(
+              'PRIMARY_HOST = "formatx1.formatx.workers.dev"',
+              'PRIMARY_HOST = "www.formatxsuite.com"',
+          )
+          text = text.replace('PRIMARY_PATH = "/scifi-ui/"', 'PRIMARY_PATH = "/"')
+          text = text.replace('FormatX Worker megnyitása', 'FormatX weboldal megnyitása')
+          text = text.replace(
+              'Kapcsolódás az elsődleges FormatX Workerhez.',
+              'Kapcsolódás a FormatX fődomainhez.',
+          )
+          text = re.sub(r'FormatXAndroid/[0-9.]+', 'FormatXAndroid/1.0.6', text)
+          text = re.sub(r'appendQueryParameter\("appVersion", "[0-9.]+"\)',
+                        'appendQueryParameter("appVersion", "1.0.6")', text)
+          text = re.sub(r'appendQueryParameter\("cacheBust", "[0-9]+"\)',
+                        'appendQueryParameter("cacheBust", "106")', text)
+
+          zoom_anchor = '        settings.setDisplayZoomControls(false);\n'
+          webview_readability = (
+              zoom_anchor
+              + '        settings.setSupportZoom(false);\n'
+              + '        settings.setUseWideViewPort(true);\n'
+              + '        settings.setLoadWithOverviewMode(false);\n'
+              + '        settings.setTextZoom(100);\n'
+              + '        settings.setDefaultFontSize(16);\n'
+              + '        settings.setMinimumFontSize(12);\n'
+          )
+          if 'settings.setUseWideViewPort(true);' not in text:
+              text = text.replace(zoom_anchor, webview_readability)
+          main.write_text(text, encoding='utf-8')
+
+          updater = Path('android-app/app/src/main/java/hu/formatx/suite/AppUpdater.java')
+          text = updater.read_text(encoding='utf-8')
+          text = text.replace(
+              'https://formatx1.formatx.workers.dev/scifi-ui/downloads/android-update.json',
+              'https://www.formatxsuite.com/scifi-ui/downloads/android-update.json',
+          )
+          updater.write_text(text, encoding='utf-8')
+
+          build = Path('android-app/app/build.gradle.kts')
+          text = build.read_text(encoding='utf-8')
+          text = re.sub(r'versionCode = \d+', 'versionCode = 8', text)
+          text = re.sub(r'versionName = "[0-9.]+"', 'versionName = "1.0.6"', text)
+          build.write_text(text, encoding='utf-8')
+
+      - name: Verify Android 1.0.6 source
         shell: bash
         run: |
           set -euo pipefail
           MAIN="android-app/app/src/main/java/hu/formatx/suite/MainActivity.java"
+          UPDATER="android-app/app/src/main/java/hu/formatx/suite/AppUpdater.java"
           BUILD="android-app/app/build.gradle.kts"
-          grep -F 'PRIMARY_HOST = "formatx1.formatx.workers.dev"' "$MAIN"
-          grep -F 'PRIMARY_PATH = "/scifi-ui/"' "$MAIN"
+          grep -F 'PRIMARY_HOST = "www.formatxsuite.com"' "$MAIN"
+          grep -F 'PRIMARY_PATH = "/"' "$MAIN"
           grep -F 'FALLBACK_HOST = "hutoczky.github.io"' "$MAIN"
-          grep -F 'FALLBACK_PATH = "/FormatX/scifi-ui/"' "$MAIN"
-          grep -F 'WebSettings.LOAD_NO_CACHE' "$MAIN"
-          grep -F 'webView.clearCache(true)' "$MAIN"
-          grep -F 'FormatXAndroid/1.0.5' "$MAIN"
-          grep -F 'versionCode = 7' "$BUILD"
-          grep -F 'versionName = "1.0.5"' "$BUILD"
+          grep -F 'settings.setUseWideViewPort(true)' "$MAIN"
+          grep -F 'settings.setLoadWithOverviewMode(false)' "$MAIN"
+          grep -F 'settings.setTextZoom(100)' "$MAIN"
+          grep -F 'FormatXAndroid/1.0.6' "$MAIN"
+          grep -F 'https://www.formatxsuite.com/scifi-ui/downloads/android-update.json' "$UPDATER"
+          grep -F 'versionCode = 8' "$BUILD"
+          grep -F 'versionName = "1.0.6"' "$BUILD"
 
-      - name: Build and lint Android 1.0.5
+      - name: Build and lint Android 1.0.6
         shell: bash
         run: |
           set -euo pipefail
@@ -79,7 +133,7 @@ jobs:
           set -euo pipefail
           APK="android-app/app/build/outputs/apk/debug/app-debug.apk"
           DEST="docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
-          VERSIONED="docs/scifi-ui/downloads/FormatX-Suite-Pro-Android-1.0.5.apk"
+          VERSIONED="docs/scifi-ui/downloads/FormatX-Suite-Pro-Android-1.0.6.apk"
           MANIFEST="docs/scifi-ui/downloads/android-update.json"
 
           test -s "$APK"
@@ -99,12 +153,12 @@ jobs:
           manifest = Path('docs/scifi-ui/downloads/android-update.json')
           data = json.loads(manifest.read_text(encoding='utf-8'))
           data.update({
-              'versionCode': 7,
-              'versionName': '1.0.5',
-              'apkUrl': 'https://hutoczky.github.io/FormatX/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk',
+              'versionCode': 8,
+              'versionName': '1.0.6',
+              'apkUrl': 'https://www.formatxsuite.com/download/android',
               'sha256': os.environ['SHA256'],
               'mandatory': False,
-              'notes': 'Elsődleges formatx1 Worker és automatikus GitHub Pages tartalék; teljes WebView cache-törlés.'
+              'notes': 'Tiszta formatxsuite.com fődomain, Android WebView olvashatósági mód, megszüntetett 3D szövegfedések és frissített alkalmazáskapcsolatok.'
           })
           manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
@@ -117,7 +171,12 @@ jobs:
               text = worker.read_text(encoding='utf-8')
               text = re.sub(
                   r'FormatX-Suite-Pro-Android-[0-9.]+\.apk',
-                  'FormatX-Suite-Pro-Android-1.0.5.apk',
+                  'FormatX-Suite-Pro-Android-1.0.6.apk',
+                  text,
+              )
+              text = re.sub(
+                  r"assetUrl\.searchParams\.set\('v', '[0-9.]+'\)",
+                  "assetUrl.searchParams.set('v', '1.0.6')",
                   text,
               )
               worker.write_text(text, encoding='utf-8')
@@ -126,40 +185,25 @@ jobs:
           test "$(python3 -c "import json; print(json.load(open('$MANIFEST'))['sha256'])")" = "$SHA256"
           echo "APK_SHA256=$SHA256" >> "$GITHUB_ENV"
 
-      - name: Commit Android 1.0.5 APK
+      - name: Commit Android 1.0.6 APK and source
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
-          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
-          git add docs/scifi-ui/downloads billing-worker/src/production-entry.js
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android-app \
+            docs/scifi-ui/downloads \
+            billing-worker/src/production-entry.js
           git add -A docs/scifi-ui/android-update.json
-          git commit -m "Publish FormatX Android 1.0.5 with dual-site fallback"
+          git commit -m "Publish FormatX Android 1.0.6 with readable custom-domain WebView"
           git pull --rebase origin master
           git push origin HEAD:master
 
-      - name: Deploy current site and API to formatx1 Worker
-        continue-on-error: true
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ffd7d28ea7c6a510549dc9363619c8c5
-          workingDirectory: billing-worker
-          command: deploy --name formatx1
-
-      - name: Verify both FormatX sites
-        continue-on-error: true
+      - name: Verify generated Android package
         shell: bash
         run: |
           set -euo pipefail
-          check_site() {
-            local url="$1"
-            local html
-            html="$(mktemp)"
-            curl -fsSL --connect-timeout 10 --max-time 30 \
-              -H 'Cache-Control: no-cache' "$url" -o "$html"
-            grep -Fq 'class="reference-commerce"' "$html"
-            grep -Fq 'reference-commerce.css' "$html"
-          }
-          check_site 'https://formatx1.formatx.workers.dev/scifi-ui/?lang=hu&cacheBust=105'
-          check_site 'https://hutoczky.github.io/FormatX/scifi-ui/?lang=hu&cacheBust=105'
+          test -s docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk
+          test -s docs/scifi-ui/downloads/FormatX-Suite-Pro-Android-1.0.6.apk
+          test "${#APK_SHA256}" -eq 64
+          echo "Android 1.0.6 APK prepared and published with SHA-256: $APK_SHA256"
