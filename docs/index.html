@@ -5,41 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="index,follow">
   <meta name="theme-color" content="#030817">
-  <meta name="formatx-deployment" content="2026-07-20T15:20:00Z-clean-url-readability-v7">
+  <meta name="formatx-deployment" content="2026-07-20T17:40:00Z-quantum-secure-1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.github.com; media-src 'self'; worker-src 'self'; manifest-src 'self'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>FormatX Suite Pro | 2041 Professional Platform</title>
-  <style>
-    html,body{min-height:100%;margin:0;background:#030817;color:#eaf4ff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-    .loading{min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px}
-    .loading strong{display:block;font-size:clamp(28px,5vw,54px)}
-    .loading span{display:block;margin-top:12px;color:#9db2cc;font-size:16px}
-  </style>
-  <script>
-    (async function () {
-      try {
-        var response = await fetch('/scifi-ui/index.html', { cache: 'no-store' });
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        var html = await response.text();
-        html = html
-          .replace('<head>', '<head><base href="/scifi-ui/">')
-          .replace(
-            '</head>',
-            '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-7"><link rel="stylesheet" href="/scifi-ui/styles/main-readability.css?v=20260720-readability-2"></head>'
-          )
-          .replace(
-            '</body>',
-            '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-7"><\/script></body>'
-          );
-        document.open();
-        document.write(html);
-        document.close();
-      } catch (error) {
-        document.documentElement.innerHTML = '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FormatX Suite Pro</title></head><body style="margin:0;background:#030817;color:#eaf4ff;font:18px/1.6 system-ui;padding:40px"><h1>FormatX Suite Pro</h1><p>A főoldal betöltése nem sikerült. Frissítsd az oldalt néhány másodperc múlva.</p></body>';
-      }
-    }());
-  </script>
+  <link rel="stylesheet" href="./site-shell.css?v=20260720-secure-1">
+  <script defer src="./site-loader.js?v=20260720-quantum-1"></script>
 </head>
 <body>
-  <main class="loading">
+  <main class="loading" aria-live="polite">
     <div><strong>FormatX Suite Pro</strong><span>A professzionális felület betöltése…</span></div>
   </main>
   <noscript><p>A weboldal használatához JavaScript szükséges.</p></noscript>
