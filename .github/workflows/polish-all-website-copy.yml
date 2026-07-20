@@ -1,0 +1,281 @@
+name: Polish all FormatX website copy
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/polish-all-website-copy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  polish-copy:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Polish public Hungarian and English text
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          changed = set()
+
+          def patch(filename, pairs):
+              path = Path(filename)
+              if not path.exists():
+                  print(f'SKIP missing: {filename}')
+                  return
+              text = path.read_text(encoding='utf-8')
+              original = text
+              for old, new in pairs:
+                  if old not in text:
+                      print(f'WARN not found in {filename}: {old[:90]}')
+                  text = text.replace(old, new)
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+                  changed.add(filename)
+
+          patch('docs/scifi-ui/index.html', [
+              ('A 2041-ES ADAT- ÉS RENDSZERKEZELÉS SZABVÁNYA', 'A JÖVŐ TECHNIKUSI MUNKAFOLYAMATA'),
+              ('Rendszerez. Átalakít. Magasabb szintre emel.', 'Rendszerez. Ellenőriz. Biztonságosan végrehajt.'),
+              ('A FormatX meghajtókezeléshez, diagnosztikához és rendszer-előkészítéshez készül. Jelenleg a Windowsos asztali prototípus tölthető le. A natív Linux/Bazzite változat fejlesztés alatt áll, a macOS-verzió pedig későbbi terv.', 'A FormatX meghajtókezeléshez, rendszerdiagnosztikához és rendszer-előkészítéshez készül. Jelenleg a Windowsra készült asztali prototípus tölthető le. A natív Linux/Bazzite-verzió fejlesztés alatt áll; a macOS-verzió későbbi terv.'),
+              ('Windows próba letöltése', 'Windowsos próbaverzió letöltése'),
+              ('Android alkalmazás letöltése', 'Android-alkalmazás letöltése'),
+              ('Funkciók felfedezése', 'Funkciók megtekintése'),
+              ('Intelligens automatizálás', 'AI-alapú segítség'),
+              ('Gyors technikusi motor', 'Átlátható munkafolyamat'),
+              ('Többrétegű biztonság', 'Többrétegű védelem'),
+              ('Windows prototípus elérhető', 'Windowsos prototípus elérhető'),
+              ('Linux / Bazzite fejlesztés alatt', 'Linux/Bazzite-verzió fejlesztés alatt'),
+              ('macOS később tervezett', 'macOS-verzió későbbre tervezve'),
+              ('<span data-text="performance">Teljesítmény</span><strong>98.7<small>%</small></strong>', '<span data-text="performance">Rendszerállapot</span><strong>AKTÍV</strong>'),
+              ('<span data-text="jobsCompleted">Ellenőrzött modulok</span><strong>06</strong><em>+100%</em>', '<span data-text="jobsCompleted">Fő modulok</span><strong>06</strong><em>MODULÁRIS</em>'),
+              ('<span data-text="successRate">Kiadási állapot</span><strong>STABLE</strong><em>V92</em>', '<span data-text="successRate">Asztali kiadás</span><strong>PROTOTÍPUS</strong><em>V92</em>'),
+              ('VÁLASZD KI A JÖVŐDET MEGHAJTÓ LICENCET', 'VÁLASZD KI A MUNKÁDHOZ ILLŐ LICENCCSOMAGOT'),
+              ('Teljes alapfunkciók', 'Minden alapfunkció'),
+              ('QR-FIZETÉS', 'FIZETÉS QR-KÓDDAL'),
+              ('ERŐTELJES FUNKCIÓK. KORLÁTLAN LEHETŐSÉGEK.', 'HATÉKONY FUNKCIÓK. ÁTLÁTHATÓ MUNKAFOLYAMATOK.'),
+              ('Univerzális formázómotor', 'Meghajtókezelő eszköztár'),
+              ('Platformintegráció', 'Platformállapot'),
+              ('A FormatX Suite Pro egy moduláris, auditálható technikusi platform, amely a meghajtókezelést, rendszerdiagnosztikát, telepítési műveleteket, biztonságos törlést és ellenőrzött kiadáskezelést egyetlen egységes felületbe szervezi. A cél nem pusztán egy formázóprogram létrehozása, hanem egy teljes karbantartási és rendszer-előkészítési munkakörnyezet felépítése.', 'A FormatX Suite Pro moduláris, ellenőrizhető technikusi platform. Egyetlen, egységes felületen kapcsolja össze a meghajtókezelést, a rendszerdiagnosztikát, a telepítési feladatokat, a biztonságos törlést és a kiadások ellenőrzését. A cél egy teljes karbantartási és rendszer-előkészítési munkakörnyezet létrehozása, nem csupán egy formázóprogramé.'),
+              ('AI és támogatási modul', 'AI-alapú segítség és támogatás'),
+              ('Elkülönített segítségpanel GitHub Copilot, ChatGPT és Google Gemini elérésével. Az AI-rész nem avatkozik be automatikusan a meghajtóműveletekbe, hanem magyarázó és döntéstámogató szerepet kap.', 'Elkülönített segítségpanel a FormatX Project AI és további támogatási lehetőségek eléréséhez. Az AI magyarázatot és döntéstámogatást ad, de nem indít automatikusan meghajtóműveleteket.'),
+              ('A jelenlegi asztali prototípus Windows alatt működik. A natív Linux/Bazzite alkalmazás még fejlesztés alatt áll, és ez a projekt következő elsődleges célja. A macOS-verzió későbbi fejlesztési terv. A weboldal és az Android alkalmazás már használható.', 'A jelenlegi asztali prototípus Windows alatt működik. A natív Linux/Bazzite-alkalmazás fejlesztés alatt áll, és ez a projekt következő elsődleges célja. A macOS-verzió későbbi fejlesztési terv. A weboldal és az Android-alkalmazás már használható.'),
+              ('Technikusi platform formázáshoz, rendszerdiagnosztikához, telepítéshez és biztonságos karbantartási műveletekhez.', 'Technikusi platform formázáshoz, rendszerdiagnosztikához, telepítéshez és ellenőrzött karbantartási feladatokhoz.'),
+          ])
+
+          patch('docs/scifi-ui/scripts/landing.js', [
+              ("heroEyebrow: 'A 2041-ES ADAT- ÉS RENDSZERKEZELÉS SZABVÁNYA'", "heroEyebrow: 'A JÖVŐ TECHNIKUSI MUNKAFOLYAMATA'"),
+              ("heroTagline: 'Rendszerez. Átalakít. Magasabb szintre emel.'", "heroTagline: 'Rendszerez. Ellenőriz. Biztonságosan végrehajt.'"),
+              ("heroDescription: 'A FormatX meghajtókezeléshez, diagnosztikához és rendszer-előkészítéshez készül. Jelenleg a Windowsos asztali prototípus tölthető le. A natív Linux/Bazzite változat fejlesztés alatt áll, a macOS-verzió pedig későbbi terv.'", "heroDescription: 'A FormatX meghajtókezeléshez, rendszerdiagnosztikához és rendszer-előkészítéshez készül. Jelenleg a Windowsra készült asztali prototípus tölthető le. A natív Linux/Bazzite-verzió fejlesztés alatt áll; a macOS-verzió későbbi terv.'"),
+              ("startTrial: 'Windows próba letöltése'", "startTrial: 'Windowsos próbaverzió letöltése'"),
+              ("androidApp: 'Android alkalmazás'", "androidApp: 'Android-alkalmazás'"),
+              ("exploreFeatures: 'Funkciók felfedezése'", "exploreFeatures: 'Funkciók megtekintése'"),
+              ("assuranceAi: 'Intelligens automatizálás'", "assuranceAi: 'AI-alapú segítség'"),
+              ("assuranceSpeed: 'Gyors technikusi motor'", "assuranceSpeed: 'Átlátható munkafolyamat'"),
+              ("assuranceSecurity: 'Többrétegű biztonság'", "assuranceSecurity: 'Többrétegű védelem'"),
+              ("platformNow: 'Windows prototípus elérhető'", "platformNow: 'Windowsos prototípus elérhető'"),
+              ("platformLinux: 'Linux / Bazzite fejlesztés alatt'", "platformLinux: 'Linux/Bazzite-verzió fejlesztés alatt'"),
+              ("platformMac: 'macOS később tervezett'", "platformMac: 'macOS-verzió későbbre tervezve'"),
+              ("performance: 'Teljesítmény'", "performance: 'Rendszerállapot'"),
+              ("jobsCompleted: 'Ellenőrzött modulok'", "jobsCompleted: 'Fő modulok'"),
+              ("successRate: 'Kiadási állapot'", "successRate: 'Asztali kiadás'"),
+              ("pricingTitle: 'VÁLASZD KI A JÖVŐDET MEGHAJTÓ LICENCET'", "pricingTitle: 'VÁLASZD KI A MUNKÁDHOZ ILLŐ LICENCCSOMAGOT'"),
+              ("lite3: 'Teljes alapfunkciók'", "lite3: 'Minden alapfunkció'"),
+              ("scanToPay: 'QR-FIZETÉS'", "scanToPay: 'FIZETÉS QR-KÓDDAL'"),
+              ("featuresTitle: 'ERŐTELJES FUNKCIÓK. KORLÁTLAN LEHETŐSÉGEK.'", "featuresTitle: 'HATÉKONY FUNKCIÓK. ÁTLÁTHATÓ MUNKAFOLYAMATOK.'"),
+              ("feature1Title: 'Univerzális formázómotor'", "feature1Title: 'Meghajtókezelő eszköztár'"),
+              ("feature6Title: 'Platformintegráció'", "feature6Title: 'Platformállapot'"),
+              ("footerCopy: 'Technikusi platform formázáshoz, rendszerdiagnosztikához, telepítéshez és biztonságos karbantartási műveletekhez.'", "footerCopy: 'Technikusi platform formázáshoz, rendszerdiagnosztikához, telepítéshez és ellenőrzött karbantartási feladatokhoz.'"),
+              ("heroEyebrow: 'THE 2041 STANDARD FOR SYSTEM EXCELLENCE'", "heroEyebrow: 'THE NEXT GENERATION OF TECHNICIAN WORKFLOWS'"),
+              ("heroTagline: 'Structure. Transform. Elevate.'", "heroTagline: 'Organise. Verify. Execute safely.'"),
+              ("heroDescription: 'FormatX is being built for drive management, diagnostics and system preparation. The current downloadable desktop prototype runs on Windows. The native Linux/Bazzite version is under development, while macOS is planned for a later phase.'", "heroDescription: 'FormatX is being developed for drive management, system diagnostics and system preparation. The current downloadable desktop prototype runs on Windows. A native Linux/Bazzite version is under development, while macOS support is planned for a later phase.'"),
+              ("startTrial: 'Download Windows trial'", "startTrial: 'Download Windows prototype'"),
+              ("androidApp: 'Android App'", "androidApp: 'Android app'"),
+              ("assuranceAi: 'Intelligent Automation'", "assuranceAi: 'AI-assisted guidance'"),
+              ("assuranceSpeed: 'High-Speed Technician Engine'", "assuranceSpeed: 'Clear technician workflow'"),
+              ("assuranceSecurity: 'Multi-Layer Security'", "assuranceSecurity: 'Multi-layer protection'"),
+              ("platformNow: 'Windows prototype available'", "platformNow: 'Windows prototype available now'"),
+              ("platformLinux: 'Linux / Bazzite in development'", "platformLinux: 'Linux/Bazzite version in development'"),
+              ("platformMac: 'macOS planned later'", "platformMac: 'macOS version planned later'"),
+              ("performance: 'Performance'", "performance: 'System status'"),
+              ("jobsCompleted: 'Verified Modules'", "jobsCompleted: 'Core modules'"),
+              ("successRate: 'Release Status'", "successRate: 'Desktop release'"),
+              ("pricingTitle: 'CHOOSE THE LICENCE THAT POWERS YOUR FUTURE'", "pricingTitle: 'CHOOSE THE LICENCE PLAN THAT FITS YOUR WORKFLOW'"),
+              ("lite3: 'All core features'", "lite3: 'All standard features'"),
+              ("scanToPay: 'SCAN TO PAY'", "scanToPay: 'PAY BY QR CODE'"),
+              ("featuresTitle: 'POWERFUL FEATURES. LIMITLESS POSSIBILITIES.'", "featuresTitle: 'PRACTICAL FEATURES. CLEAR WORKFLOWS.'"),
+              ("feature1Title: 'Universal Formatting Engine'", "feature1Title: 'Drive management toolkit'"),
+              ("feature6Title: 'Platform Integration'", "feature6Title: 'Platform status'"),
+              ("footerCopy: 'A technician platform for formatting, system diagnostics, deployment and secure maintenance operations.'", "footerCopy: 'A technician platform for formatting, system diagnostics, deployment and controlled maintenance tasks.'"),
+          ])
+
+          patch('docs/project.html', [
+              ('Több mint formázóprogram: <span>technikusi rendszer</span>', 'Több mint formázóprogram: <span>egységes technikusi rendszer</span>'),
+              ('Kevesebb külön program, kevesebb megszakítás.', 'Kevesebb különálló program, kevesebb megszakítás.'),
+              ('Egyetlen rendszer, világos technikusi logikával', 'Egyetlen rendszer, átlátható technikusi logikával'),
+              ('A FormatX a műveleteket nem elszigetelt gombokként kezeli.', 'A FormatX nem egymástól elszigetelt gombokként kezeli a műveleteket.'),
+              ('A rendszer nem csak elindít egy műveletet, hanem állapotot, eredményt és visszaellenőrizhető információt ad.', 'A rendszer nemcsak elindítja a műveletet, hanem megjeleníti annak állapotát, eredményét és az ellenőrzéshez szükséges információkat is.'),
+              ('Windows-központú technikusi mag mellett webes, Android-, Linux/Bazzite- és macOS-kiegészítések.', 'Jelenleg Windowsos asztali prototípus érhető el. A natív Linux/Bazzite-verzió fejlesztés alatt áll, a macOS-verzió pedig későbbi terv. A weboldal és az Android-alkalmazás már használható.'),
+              ('A FormatX értéke nem egyetlen funkcióban van, hanem abban, hogy a teljes technikusi folyamatot egyetlen következetes rendszerbe rendezi.', 'A FormatX értéke nem egyetlen funkcióból fakad, hanem abból, hogy a teljes technikusi folyamatot következetes rendszerbe rendezi.'),
+              ('A rendszer üzleti, technikusi és biztonsági előnyei a különálló segédprogramokhoz képest.', 'A rendszer technikusi, működési és biztonsági előnyei a különálló segédprogramokhoz képest.'),
+          ])
+
+          patch('docs/scifi-ui/scripts/pages/audiences.js', [
+              ("title:'Kinek ad valódi értéket a'", "title:'Kinek nyújt valódi értéket a'"),
+              ("lead:'Azoknak, akik rendszeresen kezelnek meghajtókat, telepítéseket, diagnosztikát és karbantartási feladatokat, és szeretnék ezeket egyetlen követhető rendszerben végezni.'", "lead:'Azoknak szól, akik rendszeresen kezelnek meghajtókat, telepítéseket, diagnosztikai és karbantartási feladatokat, és mindezt egyetlen, követhető rendszerben szeretnék elvégezni.'"),
+              ("title:'Azoknak készült, akiknek a gépkezelés munkaeszköz'", "title:'Azoknak készült, akiknek a számítógépek kezelése a munkájuk része'"),
+              ("lead:'A FormatX akkor ad legtöbbet, amikor egy feladat több egymásra épülő lépésből áll, és fontos a cél, az állapot és az eredmény ellenőrzése.'", "lead:'A FormatX akkor nyújtja a legtöbb előnyt, amikor a feladat több egymásra épülő lépésből áll, és fontos a cél, az állapot és az eredmény ellenőrzése.'"),
+              ("text:'Több technikus és több gép esetén egységes eljárást és követhető munkamenetet ad.'", "text:'Több technikus és több gép esetén egységes eljárást és követhető munkamenetet biztosít.'"),
+              ("title:'Felújított gépekkel foglalkozók'", "title:'Felújított számítógépekkel foglalkozók'"),
+              ("title:'Amikor a munka nem egyetlen kattintás'", "title:'Amikor a feladat több lépésből áll'"),
+              ("title:'Tudatos használatot feltételez'", "title:'A biztonságos használat szakértelmet igényel'"),
+          ])
+
+          patch('docs/scifi-ui/scripts/pages/benefits.js', [
+              ("lead:'Mert nem egyetlen feladatot old meg, hanem a teljes technikusi folyamatot rendezi egységes, ellenőrizhető és bővíthető rendszerbe.'", "lead:'Azért, mert nem egyetlen feladatot old meg, hanem a teljes technikusi folyamatot egységes, ellenőrizhető és bővíthető rendszerbe rendezi.'"),
+              ("text:'A gyakori meghajtó-, diagnosztikai és telepítési feladatok egyetlen következetes felületben jelennek meg.'", "text:'A gyakori meghajtókezelési, diagnosztikai és telepítési feladatok egyetlen, következetes felületen jelennek meg.'"),
+              ("text:'Az ismétlődő feladatok egységes munkamenetként hajthatók végre, nem minden alkalommal újrakezdett improvizációként.'", "text:'Az ismétlődő feladatok egységes munkamenetként hajthatók végre, ezért nem kell minden alkalommal újra felépíteni a folyamatot.'"),
+              ("title:'A rendszer nemcsak időt, hanem hibaköltséget is csökkenthet'", "title:'A rendszer nemcsak időt, hanem a hibákból eredő költségeket is csökkentheti'"),
+              ("title:'Nem több funkciót, hanem jobb rendszert ad'", "title:'Nem pusztán több funkciót, hanem átgondoltabb rendszert kínál'"),
+              ("boxTitle:'A FormatX értéke az összekapcsolásban van'", "boxTitle:'A FormatX értéke az egységes működésben rejlik'"),
+          ])
+
+          patch('docs/scifi-ui/scripts/pages/modules.js', [
+              ("'ReFS és EXT4 irányú támogatás'", "'A fájlrendszer-támogatás platformonként eltér'"),
+              ("text:'Kockázatos műveletként kezelt folyamat, célazonosítással, megerősítéssel és naplózható állapottal.'", "text:'A rendszer az adattörlést kiemelten kockázatos műveletként kezeli, ezért célazonosítást, megerősítést és naplózható állapotot használ.'"),
+              ("'GitHub Release adatok'", "'GitHub-kiadási adatok'"),
+              ("title:'Nem minden modul ugyanazt csinálja, de mind ugyanazt a rendszert szolgálja'", "title:'A modulok eltérő feladatokat látnak el, de közös rendszerben működnek'"),
+              ("boxTitle:'A közös alap a fontos'", "boxTitle:'A közös működési alap a legfontosabb'"),
+          ])
+
+          patch('docs/scifi-ui/scripts/pages/workflow.js', [
+              ("lead:'A rendszer minden komolyabb feladatot ugyanarra a logikára fűz fel.'", "lead:'A rendszer minden összetettebb feladatot ugyanazon, négy lépésből álló logika szerint kezel.'"),
+              ("text:'Az eredmény visszaellenőrzése, integritási adatok, rendszerállapot és a következő szükséges lépés meghatározása.'", "text:'Az eredmény, az integritási adatok és a rendszerállapot ellenőrzése, majd a következő szükséges lépés meghatározása.'"),
+              ("text:'Az új technikus nem pusztán programokat tanul, hanem egy teljes munkamenetet.'", "text:'Az új technikus nemcsak különálló programok használatát tanulja meg, hanem egy teljes munkamenetet is.'"),
+              ("text:'A célmeghajtó, a mentés, a műveleti terv és a várható eredmény ellenőrzése a munkafolyamat része, nem külön opcionális feladat.'", "text:'A célmeghajtó, a mentés, a műveleti terv és a várható eredmény ellenőrzése a munkafolyamat része, nem pedig külön, választható feladat.'"),
+          ])
+
+          patch('docs/scifi-ui/scripts/pages/security.js', [
+              ("text:'A siker nem csak egy rövid üzenet.'", "text:'A sikeres eredményt nem csupán egy rövid üzenet jelzi.'"),
+              ("title:'Mentés elsőként'", "title:'A biztonsági mentés ellenőrzése'"),
+              ("text:'A felhasználó látja, hogy a feladat előkészítés, végrehajtás, ellenőrzés vagy hiba állapotban van.'", "text:'A felhasználó látja, hogy a feladat előkészítés alatt áll, fut, ellenőrzésre vár vagy hibával leállt.'"),
+              ("title:'Digitális aláírási irány'", "title:'Tervezett digitális aláírás-ellenőrzés'"),
+              ("text:'A webes fizetési folyamat nem tárol bankkártyaadatot; a hozzáférés kézi ellenőrzésű banki folyamatra épül.'", "text:'A webes fizetési folyamat nem tárol bankkártyaadatot; a hozzáférés kézzel ellenőrzött banki átutalásra épül.'"),
+              ("title:'Nem garantál adatmentést'", "title:'Nem garantálja az adatok helyreállítását'"),
+              ("title:'Nem helyettesíti a hardverdiagnosztikát'", "title:'Nem helyettesíti a műszeres vizsgálatot'"),
+          ])
+
+          patch('docs/scifi-ui/scripts/project-shell.js', [
+              ("<a href=\"./scifi-ui/terms.html\">Feltételek</a>", "<a href=\"./scifi-ui/terms.html\">Felhasználási feltételek</a>"),
+          ])
+
+          patch('docs/scifi-ui/support.html', [
+              ('FormatX Suite Pro támogatás, hibajelentés és licencigény.', 'FormatX Suite Pro támogatás, hibajelentés és licencigénylés.'),
+              ('A meglévő hibajegy kiegészíthető új reprodukciós adattal.', 'A meglévő hibajegyet új reprodukciós adatokkal is kiegészítheted.'),
+              ('BUSINESS / OWNER', 'ÜZLETI / TULAJDONOSI'),
+              ('<h2>Licencigény</h2>', '<h2>Licencigénylés</h2>'),
+              ('A licenctípust, a gépek számát és a kívánt felhasználási módot add meg.', 'Add meg a kívánt licenctípust, a kezelendő gépek számát és a tervezett felhasználási módot.'),
+              ('Licencigény indítása', 'Licencigénylés indítása'),
+              ('a letöltött ZIP SHA256 értékét', 'a letöltött ZIP-fájl SHA-256-ellenőrzőösszegét'),
+          ])
+
+          patch('docs/scifi-ui/privacy.html', [
+              ('A FormatX Suite Pro weboldal és HUF/EUR banki átutalásos licencvásárlás adatkezelési tájékoztatója.', 'A FormatX Suite Pro weboldalának és banki átutalásos licencvásárlásának adatkezelési tájékoztatója.'),
+              ('A fizetés HUF vagy EUR banki átutalással történik.', 'A fizetés forintban (HUF) vagy euróban (EUR), banki átutalással történik.'),
+              ('céges vagy tevékenységi nevet', 'cég- vagy vállalkozásnevet'),
+              ('az adat csak akkor kerül elküldésre, amikor a felhasználó az e-mailt ténylegesen elküldi.', 'az adatok csak akkor kerülnek továbbításra, amikor a felhasználó ténylegesen elküldi az e-mailt.'),
+              ('a nyilvános kedvezményezetti adatokat', 'a kedvezményezett nyilvános fizetési adatait'),
+              ('EUR esetén EPC SEPA Credit Transfer formátum készül.', 'EUR-fizetés esetén az EPC SEPA Credit Transfer szabvány szerinti adat készül.'),
+              ('ezt a nyilvános fizetési adatot továbbíthatja', 'ezeket a nyilvános fizetési adatokat továbbíthatja'),
+              ('GitHub Releases metaadatot', 'GitHub Releases nyilvános metaadatait'),
+          ])
+
+          patch('docs/scifi-ui/terms.html', [
+              ('A FormatX Suite Pro weboldal, HUF/EUR licencvásárlás és letöltés felhasználási feltételei.', 'A FormatX Suite Pro weboldalának, licencvásárlásának és letöltéseinek felhasználási feltételei.'),
+              ('A FormatX Suite Pro licencek', 'A FormatX Suite Pro licencei'),
+              ('A vásárló HUF vagy EUR devizát választhat.', 'A vásárló forintban (HUF) vagy euróban (EUR) fizethet.'),
+              ('EPC SEPA Credit Transfer adatot tartalmaz', 'az EPC SEPA Credit Transfer szabvány szerinti adatokat tartalmazza'),
+              ('FormatX rendelési azonosító', 'FormatX-rendelési azonosító'),
+              ('a bankszámlán jóváírt devizát, összeget és közleményt', 'a bankszámlán jóváírt összeget, devizát és közleményt'),
+              ('Művelet előtt ellenőrizd', 'Minden művelet előtt ellenőrizd'),
+              ('SHA256 ellenőrzőösszeggel', 'SHA-256-ellenőrzőösszeggel'),
+          ])
+
+          patch('docs/scifi-ui/checkout.html', [
+              ('FormatX Suite Pro licencvásárlás közvetlen, fix összegű HUF vagy EUR banki átutalással és QR-kóddal.', 'FormatX Suite Pro licencvásárlás rögzített összegű, forint- vagy euróalapú banki átutalással és QR-kóddal.'),
+              ('href="./index.html#pro">Vissza a licencekhez', 'href="./index.html#pricing">Vissza a licencekhez'),
+              ('FIX HUF VAGY EUR ÖSSZEG', 'RÖGZÍTETT ÖSSZEG HUF-BAN VAGY EURÓBAN'),
+              ('HUF-fizetésnél RFC 8905 szerinti <code>payto:</code> QR, EUR-fizetésnél pedig EPC SEPA átutalási QR készül.', 'HUF-fizetésnél az RFC 8905 szabvány szerinti <code>payto:</code> QR-kód, EUR-fizetésnél pedig EPC SEPA átutalási QR-kód készül.'),
+              ('<dt>Technikus</dt>', '<dt>Technikusok száma</dt>'),
+              ('<dt>Géplimit</dt>', '<dt>Kezelhető gépek száma</dt>'),
+              ('Cégnév vagy tevékenységnév', 'Cég vagy vállalkozás neve'),
+              ('Belső hivatkozás — opcionális', 'Belső rendelési hivatkozás — opcionális'),
+              ('Levelező bank BIC (ha kért)', 'Közvetítő bank BIC-kódja (ha szükséges)'),
+              ('Banki tranzakció hivatkozása', 'Banki tranzakció azonosítója'),
+              ('Hozzájárulok, hogy az adatokat az átutalás beazonosításához és a licenc aktiválásához kezeljék.', 'Hozzájárulok, hogy a FormatX üzemeltetője az adatokat az átutalás azonosításához és a licenc aktiválásához kezelje.'),
+          ])
+
+          patch('docs/scifi-ui/scripts/site.js', [
+              ("description.textContent = 'A cross-platform ecosystem engineered for technicians, creators, and professionals who demand complete control.';", "description.textContent = 'A technician platform for controlled drive management, diagnostics and system preparation. The Windows prototype is available now; native Linux/Bazzite support is under development.';"),
+              ("if (telemetryHeadings[0]) telemetryHeadings[0].innerHTML = '<span>CORE STATUS</span><strong>100%</strong>';", "if (telemetryHeadings[0]) telemetryHeadings[0].innerHTML = '<span>CORE STATUS</span><strong>ACTIVE</strong>';"),
+              ("if (telemetryHeadings[1]) telemetryHeadings[1].innerHTML = '<span>MODULE SYNC</span><strong>87%</strong>';", "if (telemetryHeadings[1]) telemetryHeadings[1].innerHTML = '<span>DESKTOP BUILD</span><strong>PROTOTYPE</strong>';"),
+              ("telemetryNotes[0].textContent = 'Windows · Linux / Bazzite · macOS';", "telemetryNotes[0].textContent = 'Windows available · Linux/Bazzite in development · macOS planned';"),
+              ("{ icon: '⌬', title: 'CROSS PLATFORM', copy: 'One system. Every environment.', target: '#platforms' }", "{ icon: '⌬', title: 'PLATFORM ROADMAP', copy: 'Windows now. Linux/Bazzite next.', target: '#platforms' }"),
+              ("['TELEMETRY', 'REAL-TIME', 'zero-fiction system data']", "['TELEMETRY', 'REAL-TIME', 'measured system data']"),
+          ])
+
+          # Clean up temporary one-shot workflows created during the website migration.
+          for name in [
+              '.github/workflows/polish-all-website-copy.yml',
+              '.github/workflows/polish-website-platform-copy.yml',
+              '.github/workflows/clarify-platform-status.yml',
+              '.github/workflows/set-linux-primary-platform.yml',
+              '.github/workflows/enable-project-ai-bindings.yml',
+          ]:
+              path = Path(name)
+              if path.exists():
+                  path.unlink()
+                  changed.add(name)
+
+          required = {
+              'docs/scifi-ui/index.html',
+              'docs/scifi-ui/scripts/landing.js',
+              'docs/project.html',
+              'docs/scifi-ui/scripts/pages/audiences.js',
+              'docs/scifi-ui/scripts/pages/benefits.js',
+              'docs/scifi-ui/scripts/pages/modules.js',
+              'docs/scifi-ui/scripts/pages/workflow.js',
+              'docs/scifi-ui/scripts/pages/security.js',
+          }
+          missing = required - changed
+          if missing:
+              raise SystemExit(f'Required website files were not changed: {sorted(missing)}')
+
+          print('Changed files:')
+          for filename in sorted(changed):
+              print('-', filename)
+          PY
+
+      - name: Commit polished website text
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Polish Hungarian and English website copy"
+          git pull --rebase origin master
+          git push origin HEAD:master
