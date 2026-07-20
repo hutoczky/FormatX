@@ -1,0 +1,46 @@
+name: Fix project page wording regression
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/fix-project-copy-regression.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Fix wording
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('docs/project.html')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace('Jelenleg Jelenleg Windowsos asztali prototípus érhető el.', 'Jelenleg Windowsos asztali prototípus érhető el.')
+          text = text.replace('>Feltételek</a>', '>Felhasználási feltételek</a>')
+          text = text.replace('AI-rész teljes leírása.', 'AI-alapú segítség részletes leírása.')
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/fix-project-copy-regression.yml').unlink()
+          PY
+      - name: Commit correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix final project page wording"
+          git pull --rebase origin master
+          git push origin HEAD:master
