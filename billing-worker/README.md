@@ -7,6 +7,12 @@ A FormatX Suite Pro közvetlen banki átutalásos checkoutja két működési m�
 - **GitHub Pages statikus mód:** backend nélkül is elkészíti a fix összeget és a QR-kódot;
 - **Cloudflare Worker mód:** szerveroldalon zárolja az összeget, rendelést tárolhat és licencet aktiválhat.
 
+## Éles üzemeltetési architektúra
+
+A produkció nem saját PC-ről, dinamikus IP-ről, Docker-konténerből vagy bérelt virtuális gépről fut. A `formatxsuite.com` és a `www.formatxsuite.com` közvetlen Cloudflare Worker Custom Domain. A Worker a Cloudflare globális szerver nélküli futtatókörnyezetében fut, a statikus fájlokat pedig a Workers Static Assets szolgálja ki.
+
+A GitHub a forráskód és a kiadási folyamat tárhelye; nem a GitHub szolgálja ki a produkciós weboldalt. Új verzió telepítésekor a Worker kódja és a statikus asset-verzió frissül, ezért nincs újraindításhoz kötött ideiglenes szerver-IP.
+
 ## Statikus GitHub Pages mód
 
 Ha az `/api/health` végpont nem érhető el, a checkout automatikusan statikus módra vált. Ebben a módban:
@@ -54,9 +60,9 @@ Az EPC-adat legfeljebb 331 bájt lehet; ezt a Worker ellenőrzi. A banki alkalma
 
 | Csomag | Havi HUF | Éves HUF | Havi EUR | Éves EUR |
 |---|---:|---:|---:|---:|
-| Business Lite | 19 900 Ft | 199 000 Ft | 44 € | 547 € |
-| Business Pro | 49 900 Ft | 499 000 Ft | 110 € | 1 373 € |
-| Technician Team | 99 900 Ft | 999 000 Ft | 220 € | 2 748 € |
+| Business Lite | 15 900 Ft | 139 300 Ft | 44 € | 383 € |
+| Business Pro | 39 900 Ft | 349 300 Ft | 110 € | 961 € |
+| Technician Team | 79 900 Ft | 699 300 Ft | 220 € | 1 924 € |
 
 Az EUR-árak fix kereskedelmi árak. Fizetés közben nincs élő devizaátváltás vagy automatikus árfolyam-frissítés.
 
