@@ -2,11 +2,11 @@ name: Lighthouse CI
 
 on:
   pull_request:
-    branches: [ master, main ]
+    branches: [master]
     paths:
       - 'docs/scifi-ui/**'
   push:
-    branches: [ master, main ]
+    branches: [master]
     paths:
       - 'docs/scifi-ui/**'
   workflow_dispatch:
@@ -14,30 +14,34 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm install -g @lhci/cli@0.13.x
 
       - name: Run Lighthouse CI
         id: lighthouse
-        run: |
-          lhci autorun --rc=lighthouserc.json
+        run: lhci autorun --rc=lighthouserc.json
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
       - name: Upload Lighthouse results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: lighthouse-results
@@ -45,28 +49,17 @@ jobs:
           retention-days: 30
 
       - name: Summarize Lighthouse results
-        if: github.event_name == 'pull_request'
+        if: always()
         run: |
           {
             echo "## Lighthouse CI Results"
             echo
-            echo "All Lighthouse checks passed."
+            echo "Production: https://www.formatxsuite.com/"
             echo
             echo "### Thresholds"
             echo "- LCP < 2.5s"
             echo "- CLS < 0.10"
             echo "- TTFB < 600ms"
             echo
-            echo "GitHub Pages: https://hutoczky.github.io/FormatX/scifi-ui/"
+            echo "The production site is deployed as one Cloudflare Worker with Static Assets."
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Echo Pages config on merge
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: |
-          echo "================================================"
-          echo "GitHub Pages Configuration"
-          echo "================================================"
-          echo "Source: master branch → /docs folder"
-          echo "URL: https://hutoczky.github.io/FormatX/scifi-ui/"
-          echo "Root redirect: /docs/index.html → scifi-ui/"
-          echo "================================================"
