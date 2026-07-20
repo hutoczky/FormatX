@@ -66,7 +66,7 @@ async function serveEnhancedHome(request, env) {
     )
     .replace(
       '</body>',
-      '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-7"></script></body>',
+      '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-8"></script></body>',
     );
 
   const headers = new Headers(upstream.headers);
