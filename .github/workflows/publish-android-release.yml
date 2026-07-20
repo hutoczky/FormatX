@@ -12,6 +12,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: formatx-android-release
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: Verify and publish Android APK
@@ -20,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Verify update manifest and APK digest
         id: release
@@ -47,8 +51,8 @@ jobs:
           version = str(manifest['versionName']).strip()
           version_code = int(manifest['versionCode'])
           apk_url = str(manifest['apkUrl']).strip()
-          if version_code < 1 or not version or not apk_url.startswith('https://'):
-              raise SystemExit('Invalid Android release metadata')
+          if version_code < 1 or not version or apk_url != 'https://www.formatxsuite.com/download/android':
+              raise SystemExit('Invalid Android release metadata or non-production APK URL')
           print(f'VERSION={version}')
           print(f'VERSION_CODE={version_code}')
           print(f'SHA256={digest}')
@@ -81,7 +85,7 @@ jobs:
           Honlapról telepíthető, SHA-256 ellenőrzött Android bétaalkalmazás.
 
           - teljes FormatX weboldal az alkalmazásban;
-          - automatikus Worker → GitHub Pages tartalék kapcsolat;
+          - elsődleges www és tartalék apex saját domain ugyanazon Cloudflare Workeren;
           - natív, egyszerűsített HUF/EUR banki fizetés;
           - indításkori frissítésellenőrzés;
           - automatikus APK-letöltés és SHA-256 ellenőrzés;
