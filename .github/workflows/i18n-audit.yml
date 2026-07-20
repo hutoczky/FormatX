@@ -17,12 +17,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: bilingual-audit-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   audit:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Generate full bilingual audit report
         id: audit
@@ -33,7 +38,7 @@ jobs:
 
       - name: Upload bilingual audit report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: bilingual-audit-report
           path: i18n-audit.txt
