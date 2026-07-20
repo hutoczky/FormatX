@@ -11,7 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 final class PaymentClient {
-    private static final String API_ROOT = "https://formatx1.formatx.workers.dev/api";
+    private static final String API_ROOT = "https://www.formatxsuite.com/api";
 
     PaymentData createCheckout(String planId, String cycle, String currency, String name,
                                String email, String address, String orderReference,
