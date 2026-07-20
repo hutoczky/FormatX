@@ -1,6 +1,7 @@
 name: Trigger FormatX checkout security hardening
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - ".github/workflows/harden-checkout-security-once.yml"
@@ -17,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout repository and previous workflow
+      - name: Checkout repository and reviewed workflow
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 2
+          fetch-depth: 3
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -34,7 +35,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git show HEAD^:.github/workflows/harden-checkout-security-once.yml > /tmp/formatx-hardening-source.yml
+          SOURCE_COMMIT="$(git log --format=%H --all -- .github/workflows/harden-checkout-security-once.yml | sed -n '3p')"
+          test -n "$SOURCE_COMMIT"
+          git show "$SOURCE_COMMIT:.github/workflows/harden-checkout-security-once.yml" > /tmp/formatx-hardening-source.yml
           python3 - <<'PY'
           from pathlib import Path
           import textwrap
