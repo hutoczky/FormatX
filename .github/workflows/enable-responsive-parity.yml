@@ -1,0 +1,83 @@
+name: Enable responsive feature parity
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/enable-responsive-parity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-worker:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Inject responsive parity assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('billing-worker/src/production-entry.js')
+          text = path.read_text(encoding='utf-8')
+          original = text
+
+          anchor = "const PROJECT_AI_STYLES = '/scifi-ui/styles/project-ai.css?v=20260720-project-ai-1';"
+          additions = "\nconst RESPONSIVE_PARITY_SCRIPT = '/scifi-ui/scripts/responsive-parity.js?v=20260720-responsive-parity-1';\nconst RESPONSIVE_PARITY_STYLES = '/scifi-ui/styles/responsive-parity.css?v=20260720-responsive-parity-1';"
+          if 'RESPONSIVE_PARITY_SCRIPT' not in text:
+              if anchor not in text:
+                  raise SystemExit('Project AI constants anchor not found')
+              text = text.replace(anchor, anchor + additions)
+
+          style_anchor = "      if (!html.includes(PROJECT_AI_SCRIPT)) {"
+          style_block = """      if (!html.includes(RESPONSIVE_PARITY_STYLES)) {
+        html = html.replace(
+          '</head>',
+          `<link rel=\"stylesheet\" href=\"${RESPONSIVE_PARITY_STYLES}\"></head>`,
+        );
+      }
+      if (!html.includes(RESPONSIVE_PARITY_SCRIPT)) {
+        html = html.replace(
+          '</body>',
+          `<script defer src=\"${RESPONSIVE_PARITY_SCRIPT}\"></script></body>`,
+        );
+      }
+"""
+          if 'html.includes(RESPONSIVE_PARITY_STYLES)' not in text:
+              if style_anchor not in text:
+                  raise SystemExit('Response injection anchor not found')
+              text = text.replace(style_anchor, style_block + style_anchor)
+
+          if text == original:
+              print('Responsive parity assets already enabled.')
+          else:
+              path.write_text(text, encoding='utf-8')
+              print('Worker injection updated.')
+          PY
+
+      - name: Commit responsive parity integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- billing-worker/src/production-entry.js; then
+            echo "No Worker changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
+          git add billing-worker/src/production-entry.js
+          git commit -m "Load full mobile and tablet feature parity"
+          git pull --rebase origin master
+          git push origin HEAD:master
