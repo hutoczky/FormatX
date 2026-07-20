@@ -1,0 +1,143 @@
+name: Polish FormatX website platform copy
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/polish-website-platform-copy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-website-copy:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Rewrite public website text
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index = Path('docs/scifi-ui/index.html')
+          html = index.read_text(encoding='utf-8')
+          replacements = [
+            (
+              'Fejlett technikusi platform formázáshoz, diagnosztikához és rendszer-előkészítéshez. A jelenlegi asztali prototípus Windows alatt működik; a natív Linux/Bazzite kiadás fejlesztés alatt áll.',
+              'A FormatX meghajtókezeléshez, diagnosztikához és rendszer-előkészítéshez készül. Jelenleg a Windowsos asztali prototípus tölthető le. A natív Linux/Bazzite változat fejlesztés alatt áll, a macOS-verzió pedig későbbi terv.'
+            ),
+            (
+              '<span data-text="startTrial">5 napos próba indítása</span>',
+              '<span data-text="startTrial">Windows próba letöltése</span>'
+            ),
+            (
+              'download="FormatX-Suite-Pro-Android-1.0.5.apk"',
+              'download="FormatX-Suite-Pro-Android-1.0.6.apk"'
+            ),
+            (
+              '<div class="hero-assurance" aria-label="Fő képességek"><span><i>✦</i><b data-text="assuranceAi">Intelligens automatizálás</b></span><span><i>◉</i><b data-text="assuranceSpeed">Gyors technikusi motor</b></span><span><i>⬡</i><b data-text="assuranceSecurity">Többrétegű biztonság</b></span></div>',
+              '<div class="hero-assurance" aria-label="Fő képességek"><span><i>✦</i><b data-text="assuranceAi">Intelligens automatizálás</b></span><span><i>◉</i><b data-text="assuranceSpeed">Gyors technikusi motor</b></span><span><i>⬡</i><b data-text="assuranceSecurity">Többrétegű biztonság</b></span></div><div class="hero-assurance platform-status" aria-label="Platformállapot"><span><i>✓</i><b data-text="platformNow">Windows prototípus elérhető</b></span><span><i>◷</i><b data-text="platformLinux">Linux / Bazzite fejlesztés alatt</b></span><span><i>○</i><b data-text="platformMac">macOS később tervezett</b></span></div>'
+            ),
+            (
+              '<strong>1 + 2</strong><em>WIN MOST · LNX/MAC FEJLESZTÉS</em>',
+              '<strong>Windows</strong><em>Linux/Bazzite fejlesztés alatt · macOS tervezett</em>'
+            ),
+            (
+              'Cross-platform meghajtó- és fájlműveletek ellenőrizhető állapottal.',
+              'Ellenőrizhető meghajtó- és fájlműveletek a jelenlegi Windows prototípusban.'
+            ),
+            (
+              'Linux / Bazzite az elsődleges fejlesztési cél. A jelenlegi asztali prototípus Windowsos; a natív Linux- és macOS-kiadás még nem érhető el.',
+              'Jelenleg a Windowsos asztali prototípus érhető el. A Linux/Bazzite a következő, elsődleges fejlesztési cél; a macOS-verzió későbbi terv.'
+            ),
+            (
+              'A projekt elsődleges fejlesztési célplatformja a Linux, különösen a Bazzite-kompatibilis környezet. A natív Linux asztali alkalmazás még fejlesztés alatt áll. A jelenlegi prototípus Windows alatt működik, a macOS támogatás pedig későbbi fejlesztési irány. A webes felület és az Android-kliens már használható.',
+              'A jelenlegi asztali prototípus Windows alatt működik. A natív Linux/Bazzite alkalmazás még fejlesztés alatt áll, és ez a projekt következő elsődleges célja. A macOS-verzió későbbi fejlesztési terv. A weboldal és az Android alkalmazás már használható.'
+            ),
+            (
+              '<b>LINUX / BAZZITE · CÉLPLATFORM</b><b>WINDOWS · JELENLEGI PROTOTÍPUS</b><b>macOS · TERVEZETT</b>',
+              '<b>WINDOWS · ELÉRHETŐ PROTOTÍPUS</b><b>LINUX / BAZZITE · FEJLESZTÉS ALATT</b><b>macOS · KÉSŐBB TERVEZETT</b>'
+            ),
+            (
+              'Cross-platform technikusi platform formázáshoz, rendszerdiagnosztikához, telepítéshez és biztonságos karbantartási műveletekhez.',
+              'Technikusi platform formázáshoz, rendszerdiagnosztikához, telepítéshez és biztonságos karbantartási műveletekhez.'
+            ),
+          ]
+          for old, new in replacements:
+            if old not in html:
+              print('Warning: text not found:', old[:80])
+            html = html.replace(old, new)
+          index.write_text(html, encoding='utf-8')
+
+          landing = Path('docs/scifi-ui/scripts/landing.js')
+          js = landing.read_text(encoding='utf-8')
+          js_replacements = [
+            (
+              "heroDescription: 'Fejlett technikusi platform formázáshoz, diagnosztikához és rendszer-előkészítéshez. A jelenlegi asztali prototípus Windows alatt működik; a natív Linux/Bazzite kiadás fejlesztés alatt áll.', startTrial: '5 napos próba indítása'",
+              "heroDescription: 'A FormatX meghajtókezeléshez, diagnosztikához és rendszer-előkészítéshez készül. Jelenleg a Windowsos asztali prototípus tölthető le. A natív Linux/Bazzite változat fejlesztés alatt áll, a macOS-verzió pedig későbbi terv.', startTrial: 'Windows próba letöltése'"
+            ),
+            (
+              "assuranceAi: 'Intelligens automatizálás', assuranceSpeed: 'Gyors technikusi motor', assuranceSecurity: 'Többrétegű biztonság',",
+              "assuranceAi: 'Intelligens automatizálás', assuranceSpeed: 'Gyors technikusi motor', assuranceSecurity: 'Többrétegű biztonság', platformNow: 'Windows prototípus elérhető', platformLinux: 'Linux / Bazzite fejlesztés alatt', platformMac: 'macOS később tervezett',"
+            ),
+            (
+              "feature1Copy: 'Cross-platform meghajtó- és fájlműveletek ellenőrizhető állapottal.'",
+              "feature1Copy: 'Ellenőrizhető meghajtó- és fájlműveletek a jelenlegi Windows prototípusban.'"
+            ),
+            (
+              "feature6Copy: 'Linux / Bazzite az elsődleges fejlesztési cél. A jelenlegi asztali prototípus Windowsos; a natív Linux- és macOS-kiadás még nem érhető el.'",
+              "feature6Copy: 'Jelenleg a Windowsos asztali prototípus érhető el. A Linux/Bazzite a következő, elsődleges fejlesztési cél; a macOS-verzió későbbi terv.'"
+            ),
+            (
+              "footerCopy: 'Cross-platform technikusi platform formázáshoz, rendszerdiagnosztikához, telepítéshez és biztonságos karbantartási műveletekhez.'",
+              "footerCopy: 'Technikusi platform formázáshoz, rendszerdiagnosztikához, telepítéshez és biztonságos karbantartási műveletekhez.'"
+            ),
+            (
+              "heroDescription: 'An advanced all-in-one technician platform for formatting, system diagnostics, deployment and cross-platform workflows.', startTrial: 'Start 5-day Trial'",
+              "heroDescription: 'FormatX is being built for drive management, diagnostics and system preparation. The current downloadable desktop prototype runs on Windows. The native Linux/Bazzite version is under development, while macOS is planned for a later phase.', startTrial: 'Download Windows trial'"
+            ),
+            (
+              "assuranceAi: 'Intelligent Automation', assuranceSpeed: 'High-Speed Technician Engine', assuranceSecurity: 'Multi-Layer Security',",
+              "assuranceAi: 'Intelligent Automation', assuranceSpeed: 'High-Speed Technician Engine', assuranceSecurity: 'Multi-Layer Security', platformNow: 'Windows prototype available', platformLinux: 'Linux / Bazzite in development', platformMac: 'macOS planned later',"
+            ),
+            (
+              "feature1Copy: 'Cross-platform drive and file operations with verifiable status.'",
+              "feature1Copy: 'Verifiable drive and file operations in the current Windows prototype.'"
+            ),
+            (
+              "feature6Copy: 'Linux / Bazzite is the primary development target. The current desktop prototype is Windows-only; native Linux and macOS builds are not available yet.'",
+              "feature6Copy: 'The Windows desktop prototype is currently available. Linux / Bazzite is the next primary development target, while macOS is planned for a later phase.'"
+            ),
+            (
+              "footerCopy: 'A cross-platform technician platform for formatting, system diagnostics, deployment and secure maintenance operations.'",
+              "footerCopy: 'A technician platform for formatting, system diagnostics, deployment and secure maintenance operations.'"
+            ),
+          ]
+          for old, new in js_replacements:
+            if old not in js:
+              print('Warning: JS text not found:', old[:80])
+            js = js.replace(old, new)
+          landing.write_text(js, encoding='utf-8')
+          PY
+
+      - name: Commit website wording
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/landing.js
+          git commit -m "Make website platform status clear and user-friendly"
+          git pull --rebase origin master
+          git push origin HEAD:master
