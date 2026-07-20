@@ -1,0 +1,88 @@
+name: Validate FormatX production Worker
+
+on:
+  pull_request:
+    paths:
+      - "billing-worker/src/production-entry.js"
+      - "billing-worker/src/live-entry.js"
+      - "billing-worker/src/project-ai.js"
+      - "billing-worker/wrangler.jsonc"
+      - "billing-worker/package.json"
+      - "billing-worker/package-lock.json"
+      - "docs/scifi-ui/checkout.html"
+      - "docs/scifi-ui/scripts/checkout.js"
+      - ".github/workflows/validate-production-worker.yml"
+  push:
+    branches: [master]
+    paths:
+      - "billing-worker/src/production-entry.js"
+      - "billing-worker/src/live-entry.js"
+      - "billing-worker/src/project-ai.js"
+      - "billing-worker/wrangler.jsonc"
+      - "billing-worker/package.json"
+      - "billing-worker/package-lock.json"
+      - "docs/scifi-ui/checkout.html"
+      - "docs/scifi-ui/scripts/checkout.js"
+      - ".github/workflows/validate-production-worker.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-formatx-production-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Check JavaScript syntax
+        run: |
+          set -euo pipefail
+          node --check billing-worker/src/production-entry.js
+          node --check billing-worker/src/live-entry.js
+          node --check billing-worker/src/project-ai.js
+          node --check docs/scifi-ui/scripts/checkout.js
+
+      - name: Check security invariants
+        shell: python
+        run: |
+          from pathlib import Path
+
+          production = Path("billing-worker/src/production-entry.js").read_text(encoding="utf-8")
+          checkout = Path("docs/scifi-ui/checkout.html").read_text(encoding="utf-8")
+          android_payment = Path("android-app/app/src/main/java/hu/formatx/suite/PaymentClient.java").read_text(encoding="utf-8")
+
+          assert "Strict-Transport-Security" in production
+          assert "Content-Security-Policy" in production
+          assert "frame-ancestors 'none'" in production
+          assert "CHECKOUT_CONTENT_SECURITY_POLICY" in production
+          assert "https://quickchart.io" in production
+          assert "rel=\"canonical\"" in production
+          assert "sanitiseApiServerError" in production
+          assert "enforceApiRateLimit" in production
+          assert "https://quickchart.io" in checkout
+          assert "https://www.formatxsuite.com/api" in android_payment
+          assert "formatx1.formatx.workers.dev/api" not in android_payment
+
+          print("Production security invariants are present.")
+
+      - name: Install dependencies
+        working-directory: billing-worker
+        run: npm ci
+
+      - name: Build Worker bundle without deploying
+        working-directory: billing-worker
+        run: npx wrangler deploy --dry-run --outdir ../.wrangler-dry-run
