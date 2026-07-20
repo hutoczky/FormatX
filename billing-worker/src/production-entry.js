@@ -9,6 +9,12 @@ const LEGACY_HOME_PATHS = new Set([
   '/scifi-ui/',
   '/scifi-ui/index.html',
 ]);
+const RATE_LIMITED_API_PATHS = new Set([
+  '/api/create-checkout-session',
+  '/api/payment-confirmation',
+  '/api/license/verify',
+  '/api/admin/approve-bank-transfer',
+]);
 
 const THEME_SCRIPT = '/scifi-ui/scripts/theme-system.js?v=20260720-theme-1';
 const THEME_STYLES = '/scifi-ui/styles/theme-system.css?v=20260720-theme-1';
@@ -42,8 +48,15 @@ const CHECKOUT_CONTENT_SECURITY_POLICY = CONTENT_SECURITY_POLICY.replace(
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    let response;
 
+    if (request.method !== 'OPTIONS' && RATE_LIMITED_API_PATHS.has(url.pathname)) {
+      const rateLimitedResponse = await enforceApiRateLimit(request, env, url.pathname);
+      if (rateLimitedResponse) {
+        return await secureAndEnhanceResponse(rateLimitedResponse, url);
+      }
+    }
+
+    let response;
     if (url.pathname === '/api/project-ai') {
       response = await handleProjectAi(request, env);
     } else if (
@@ -61,9 +74,58 @@ export default {
       response = await liveWorker.fetch(request, env, ctx);
     }
 
+    if (url.pathname.startsWith('/api/') && response.status >= 500) {
+      response = sanitiseApiServerError(response, url.pathname);
+    }
+
     return await secureAndEnhanceResponse(response, url);
   },
 };
+
+async function enforceApiRateLimit(request, env, pathname) {
+  if (!env.PUBLIC_API_RATE_LIMIT || typeof env.PUBLIC_API_RATE_LIMIT.limit !== 'function') {
+    return null;
+  }
+
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const data = new TextEncoder().encode(`formatx-public-api|${pathname}|${ip}`);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  const key = Array.from(new Uint8Array(digest))
+    .slice(0, 16)
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+  const result = await env.PUBLIC_API_RATE_LIMIT.limit({ key });
+  if (result.success) return null;
+
+  return new Response(JSON.stringify({
+    error: 'rate_limited',
+    message: 'Túl sok kérés érkezett. Várj egy percet, majd próbáld újra.',
+  }), {
+    status: 429,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'Retry-After': '60',
+    },
+  });
+}
+
+function sanitiseApiServerError(response, pathname) {
+  console.error(`FormatX API server error: ${pathname} returned ${response.status}`);
+  const headers = new Headers(response.headers);
+  headers.set('Content-Type', 'application/json; charset=utf-8');
+  headers.set('Cache-Control', 'no-store');
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  return new Response(JSON.stringify({
+    error: 'internal_server_error',
+    message: 'A szolgáltatás átmeneti hibát észlelt. Próbáld újra később.',
+  }), {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
 
 async function serveEnhancedHome(request, env) {
   const assetUrl = new URL('/scifi-ui/index.html', request.url);
