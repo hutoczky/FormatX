@@ -1,0 +1,672 @@
+name: One-time FormatX checkout security hardening
+
+on:
+  push:
+    paths:
+      - ".github/workflows/harden-checkout-security-once.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-checkout-security-once
+  cancel-in-progress: false
+
+jobs:
+  harden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Apply checkout and API hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          import re
+
+          def replace_once(text, old, new, label):
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected exactly one match, found {count}")
+              return text.replace(old, new, 1)
+
+          def regex_once(text, pattern, replacement, label, flags=0):
+              updated, count = re.subn(pattern, replacement, text, count=1, flags=flags)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected exactly one regex match, found {count}")
+              return updated
+
+          # ------------------------------------------------------------------
+          # Worker API hardening
+          # ------------------------------------------------------------------
+          live_path = Path("billing-worker/src/live-entry.js")
+          live = live_path.read_text(encoding="utf-8")
+
+          live = replace_once(
+              live,
+              "const SUPPORTED_CURRENCIES = new Set(['HUF', 'EUR']);\n",
+              "const SUPPORTED_CURRENCIES = new Set(['HUF', 'EUR']);\n"
+              "const MAX_JSON_BODY_LENGTH = 16 * 1024;\n"
+              "const ORDER_REFERENCE_PATTERN = /^FX-\\d{8}-[A-F0-9]{24}$/;\n"
+              "const STATUS_TOKEN_PATTERN = /^[A-F0-9]{64}$/;\n",
+              "live constants",
+          )
+
+          live = replace_once(
+              live,
+              "    const corsHeaders = buildCorsHeaders(request, env);\n\n"
+              "    if (request.method === 'OPTIONS') {\n"
+              "      return new Response(null, { status: 204, headers: corsHeaders });\n"
+              "    }\n",
+              "    const originAllowed = isRequestOriginAllowed(request, env);\n"
+              "    const corsHeaders = buildCorsHeaders(request, env, originAllowed);\n\n"
+              "    if (!originAllowed) {\n"
+              "      return jsonResponse({ error: 'Forbidden origin' }, 403, corsHeaders);\n"
+              "    }\n\n"
+              "    if (request.method === 'OPTIONS') {\n"
+              "      return new Response(null, { status: 204, headers: corsHeaders });\n"
+              "    }\n",
+              "origin enforcement",
+          )
+
+          live = replace_once(
+              live,
+              "      if (request.method === 'GET' && url.pathname === '/api/session-status') {\n"
+              "        return await handleSessionStatus(url, env, corsHeaders);\n"
+              "      }\n",
+              "      if (request.method === 'POST' && url.pathname === '/api/session-status') {\n"
+              "        return await handleSessionStatus(request, env, corsHeaders);\n"
+              "      }\n",
+              "session status method",
+          )
+
+          live = replace_once(
+              live,
+              "  const orderReference = payload.order_reference.trim();\n"
+              "  const account = getBankAccount(env);\n",
+              "  const orderReference = createOrderReference();\n"
+              "  const statusToken = randomHex(32);\n"
+              "  const statusTokenHash = await sha256Hex(statusToken);\n"
+              "  const account = getBankAccount(env);\n",
+              "server generated order credentials",
+          )
+
+          live = replace_once(
+              live,
+              "        order_reference: orderReference,\n"
+              "        account_holder: account.holder,\n",
+              "        order_reference: orderReference,\n"
+              "        status_token_hash: statusTokenHash,\n"
+              "        account_holder: account.holder,\n",
+              "store status token hash",
+          )
+
+          live = replace_once(
+              live,
+              "    order_reference: orderReference,\n"
+              "    payment_provider: 'bank_transfer',\n",
+              "    order_reference: orderReference,\n"
+              "    status_token: statusToken,\n"
+              "    payment_provider: 'bank_transfer',\n",
+              "return status token",
+          )
+
+          new_status_handler = r'''async function handleSessionStatus(request, env, corsHeaders) {
+            if (!hasSupabaseConfiguration(env)) {
+              return jsonResponse({ error: 'A rendeléskövetés nincs konfigurálva.' }, 503, corsHeaders);
+            }
+
+            const payload = await readJson(request);
+            const orderReference = String(payload.order_reference || payload.session_id || '').trim().toUpperCase();
+            const statusToken = String(payload.status_token || '').trim().toUpperCase();
+            if (!ORDER_REFERENCE_PATTERN.test(orderReference) || !STATUS_TOKEN_PATTERN.test(statusToken)) {
+              return jsonResponse({ error: 'A rendelés nem található.' }, 404, corsHeaders);
+            }
+
+            const supabase = createSupabaseClient(env);
+            const subscription = await supabase.selectSingle('subscriptions', {
+              provider_checkout_session_id: ['eq', orderReference],
+            });
+            const expectedTokenHash = String(subscription?.metadata?.status_token_hash || '').toLowerCase();
+            const providedTokenHash = await sha256Hex(statusToken);
+            if (!subscription || !expectedTokenHash || !safeEqual(providedTokenHash, expectedTokenHash)) {
+              return jsonResponse({ error: 'A rendelés nem található.' }, 404, corsHeaders);
+            }
+
+            const license = await supabase.selectSingle('licenses', {
+              subscription_id: ['eq', subscription.id],
+            });
+
+            return jsonResponse({
+              session_id: orderReference,
+              order_reference: orderReference,
+              plan_id: subscription.plan_id,
+              plan_name: subscription.plan_name,
+              billing_cycle: subscription.billing_cycle,
+              amount: Number(subscription.metadata?.amount ?? subscription.amount_huf),
+              currency: subscription.currency || subscription.metadata?.currency || 'HUF',
+              subscription_status: subscription.subscription_status,
+              payment_status: subscription.payment_status,
+              license_active: Boolean(license),
+              license_key: license?.license_key ?? null,
+              valid_until: license?.valid_until ?? subscription.valid_until ?? null,
+              manual_verification_required: !license,
+              message: license
+                ? 'A banki átutalás ellenőrzése megtörtént, a FormatX licenc aktív.'
+                : 'Az átutalás vagy annak kézi ellenőrzése még folyamatban van.',
+            }, 200, corsHeaders);
+          }
+
+          '''
+          live = regex_once(
+              live,
+              r"async function handleSessionStatus\([\s\S]*?\n}\n\n(?=async function handleApprovePayment)",
+              new_status_handler,
+              "secure session status handler",
+          )
+
+          new_checkout_validation = r'''function validateCheckoutRequest(payload) {
+            if (!payload || typeof payload !== 'object') return 'Hiányzó kérés törzs.';
+            if (!PLAN_CATALOG[payload.plan_id]) return 'Ismeretlen csomag.';
+            if (!BILLING_CYCLES.has(payload.billing_cycle)) return 'Érvénytelen számlázási ciklus.';
+            if (!SUPPORTED_CURRENCIES.has(normaliseCurrency(payload.currency))) return 'Érvénytelen fizetési deviza.';
+            if (!isBoundedText(payload.company_name, 1, 160)) return 'A cégnév vagy tevékenységnév kötelező, legfeljebb 160 karakterrel.';
+            if (!isBoundedText(payload.contact_name, 1, 120)) return 'A kapcsolattartó neve kötelező, legfeljebb 120 karakterrel.';
+            if (!isValidEmail(payload.email)) return 'Érvényes e-mail-cím szükséges.';
+            if (!isBoundedText(payload.billing_address, 1, 240)) return 'A számlázási cím kötelező, legfeljebb 240 karakterrel.';
+            if (payload.tax_number && !isBoundedText(payload.tax_number, 1, 64)) return 'Az adószám legfeljebb 64 karakter lehet.';
+            if (payload.purchase_order && !isBoundedText(payload.purchase_order, 1, 100)) return 'A belső rendelési hivatkozás legfeljebb 100 karakter lehet.';
+            return null;
+          }
+
+          function validatePaymentConfirmation(payload) {
+            if (!payload || typeof payload !== 'object') return 'Hiányzó kérés törzs.';
+            if (!ORDER_REFERENCE_PATTERN.test(String(payload.order_reference || '').trim().toUpperCase())) return 'Érvénytelen rendelési azonosító.';
+            if (!isBoundedText(payload.payer_name, 1, 120)) return 'Az utaló neve kötelező, legfeljebb 120 karakterrel.';
+            if (!isValidEmail(payload.buyer_email)) return 'Érvényes vásárlói e-mail-cím szükséges.';
+            if (!isBoundedText(payload.transfer_reference, 1, 160)) return 'A banki tranzakció hivatkozása kötelező, legfeljebb 160 karakterrel.';
+            if (!SUPPORTED_CURRENCIES.has(normaliseCurrency(payload.currency))) return 'Érvénytelen visszajelzett deviza.';
+            if (!Number.isFinite(Number(payload.amount)) || Number(payload.amount) <= 0) return 'Érvénytelen visszajelzett összeg.';
+            if (payload.message && !isBoundedText(payload.message, 1, 1000)) return 'A megjegyzés legfeljebb 1000 karakter lehet.';
+            return null;
+          }
+
+          function isBoundedText(value, minimum, maximum) {
+            if (typeof value !== 'string') return false;
+            const length = value.trim().length;
+            return length >= minimum && length <= maximum;
+          }
+
+          function isValidEmail(value) {
+            if (!isBoundedText(value, 3, 254)) return false;
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+          }
+
+          '''
+          live = regex_once(
+              live,
+              r"function validateCheckoutRequest\([\s\S]*?\n}\n\nfunction validatePaymentConfirmation\([\s\S]*?\n}\n\n(?=function getLiveConfigurationErrors)",
+              new_checkout_validation,
+              "bounded request validation",
+          )
+
+          crypto_helpers = r'''function createOrderReference() {
+            const now = new Date();
+            const ymd = [
+              now.getUTCFullYear(),
+              String(now.getUTCMonth() + 1).padStart(2, '0'),
+              String(now.getUTCDate()).padStart(2, '0'),
+            ].join('');
+            return `FX-${ymd}-${randomHex(12)}`;
+          }
+
+          function randomHex(byteLength) {
+            const bytes = new Uint8Array(byteLength);
+            crypto.getRandomValues(bytes);
+            return Array.from(bytes).map((byte) => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
+          }
+
+          async function sha256Hex(value) {
+            const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(value)));
+            return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+          }
+
+          '''
+          live = replace_once(
+              live,
+              "function normaliseCurrency(value) {\n",
+              crypto_helpers + "function normaliseCurrency(value) {\n",
+              "credential helper insertion",
+          )
+
+          new_read_json = r'''async function readJson(request) {
+            const contentType = request.headers.get('Content-Type') || '';
+            if (!contentType.toLowerCase().includes('application/json')) {
+              const error = new Error('A kérés Content-Type értéke application/json kell legyen.');
+              error.status = 415;
+              throw error;
+            }
+
+            const declaredLength = Number(request.headers.get('Content-Length') || 0);
+            if (Number.isFinite(declaredLength) && declaredLength > MAX_JSON_BODY_LENGTH) {
+              const error = new Error('A kérés túl nagy.');
+              error.status = 413;
+              throw error;
+            }
+
+            let raw;
+            try {
+              raw = await request.text();
+            } catch (_) {
+              throw new Error('Érvénytelen JSON kérés.');
+            }
+            if (!raw || new TextEncoder().encode(raw).length > MAX_JSON_BODY_LENGTH) {
+              const error = new Error(raw ? 'A kérés túl nagy.' : 'A kérés törzse üres.');
+              error.status = raw ? 413 : 400;
+              throw error;
+            }
+
+            try {
+              return JSON.parse(raw);
+            } catch (_) {
+              throw new Error('Érvénytelen JSON kérés.');
+            }
+          }
+
+          function isRequestOriginAllowed(request, env) {
+            const origin = request.headers.get('Origin');
+            if (!origin) return true;
+
+            const allowed = new Set([
+              new URL(request.url).origin,
+              'https://formatxsuite.com',
+              'https://www.formatxsuite.com',
+            ]);
+            if (env.FRONTEND_URL) {
+              try {
+                allowed.add(new URL(env.FRONTEND_URL).origin);
+              } catch (_) {
+                return false;
+              }
+            }
+            return allowed.has(origin);
+          }
+
+          function buildCorsHeaders(request, env, originAllowed = true) {
+            const headers = {
+              'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+              'Access-Control-Allow-Headers': 'Authorization,Content-Type,X-Admin-Debug-Token',
+              'Access-Control-Max-Age': '86400',
+              Vary: 'Origin',
+            };
+            const requestOrigin = request.headers.get('Origin');
+            if (originAllowed && requestOrigin) {
+              headers['Access-Control-Allow-Origin'] = requestOrigin;
+            }
+            return headers;
+          }
+
+          '''
+          live = regex_once(
+              live,
+              r"async function readJson\([\s\S]*?\n}\n\nfunction buildCorsHeaders\([\s\S]*?\n}\n\n(?=function jsonResponse)",
+              new_read_json,
+              "JSON and CORS hardening",
+          )
+
+          # Preserve explicit client error statuses raised by readJson.
+          live = replace_once(
+              live,
+              "    } catch (error) {\n"
+              "      return jsonResponse({\n"
+              "        error: error instanceof Error ? error.message : 'Unexpected error',\n"
+              "      }, 500, corsHeaders);\n"
+              "    }\n",
+              "    } catch (error) {\n"
+              "      const status = Number.isInteger(error?.status) ? error.status : 500;\n"
+              "      return jsonResponse({\n"
+              "        error: error instanceof Error ? error.message : 'Unexpected error',\n"
+              "      }, status, corsHeaders);\n"
+              "    }\n",
+              "error status preservation",
+          )
+
+          live_path.write_text(live, encoding="utf-8")
+
+          # ------------------------------------------------------------------
+          # Production middleware and rate limiting
+          # ------------------------------------------------------------------
+          production_path = Path("billing-worker/src/production-entry.js")
+          production = production_path.read_text(encoding="utf-8")
+          production = replace_once(
+              production,
+              "  '/api/payment-confirmation',\n"
+              "  '/api/license/verify',\n",
+              "  '/api/payment-confirmation',\n"
+              "  '/api/session-status',\n"
+              "  '/api/license/verify',\n",
+              "session status rate limiting",
+          )
+          production_path.write_text(production, encoding="utf-8")
+
+          # ------------------------------------------------------------------
+          # Checkout: never fall back to an untracked static payment flow.
+          # ------------------------------------------------------------------
+          checkout_path = Path("docs/scifi-ui/scripts/checkout.js")
+          checkout = checkout_path.read_text(encoding="utf-8")
+
+          checkout = regex_once(
+              checkout,
+              r"  const STATIC_ACCOUNT = \{[\s\S]*?\n  };\n  const SUPPORT_EMAIL = '[^']+';\n",
+              "  const STATUS_TOKEN_STORAGE_PREFIX = 'formatx-status-token:';\n",
+              "remove embedded static payment account",
+          )
+
+          checkout = regex_once(
+              checkout,
+              r"  function enableStaticMode\([\s\S]*?\n  }\n\n(?=  async function verifyBackend)",
+              "  function disableCheckout(reason) {\n"
+              "    backendMode = 'unavailable';\n"
+              "    liveReady = false;\n"
+              "    submitButton.disabled = true;\n"
+              "    submitButton.textContent = 'Átutalás átmenetileg nem elérhető';\n"
+              "    setFeedback(\n"
+              "      feedback,\n"
+              "      'A biztonságos szerveres rendelésrögzítés jelenleg nem érhető el, ezért átutalási adat nem készül. ' + (reason || ''),\n"
+              "      'error'\n"
+              "    );\n"
+              "  }\n\n",
+              "disable static fallback",
+          )
+          checkout = checkout.replace("enableStaticMode(", "disableCheckout(")
+
+          checkout = regex_once(
+              checkout,
+              r"  function createStaticCheckout\([\s\S]*?\n  }\n\n(?=  function normaliseCheckoutResult)",
+              "",
+              "remove static checkout builder",
+          )
+
+          checkout = replace_once(
+              checkout,
+              "  async function createCheckout() {\n"
+              "    if (backendMode === 'static') return createStaticCheckout();\n",
+              "  async function createCheckout() {\n"
+              "    if (backendMode !== 'api') {\n"
+              "      throw new Error('A szerveres rendelésrögzítés nem érhető el.');\n"
+              "    }\n",
+              "require API checkout mode",
+          )
+
+          checkout = replace_once(
+              checkout,
+              "      if (result.order_reference !== orderReference) {\n"
+              "        throw new Error('A rendelési azonosító eltér.');\n"
+              "      }\n"
+              "      if (!result.qr_payload || !result.payment_uri || !result.account || result.amount !== selectedAmount() || result.currency !== selectedCurrency()) {\n",
+              "      if (!/^FX-\\d{8}-[A-F0-9]{24}$/.test(result.order_reference || '') || !/^[A-F0-9]{64}$/.test(result.status_token || '')) {\n"
+              "        throw new Error('A szerver nem adott biztonságos rendelési hozzáférést.');\n"
+              "      }\n"
+              "      if (!result.qr_payload || !result.payment_uri || !result.account || result.amount !== selectedAmount() || result.currency !== selectedCurrency()) {\n",
+              "validate server order credentials",
+          )
+
+          checkout = replace_once(
+              checkout,
+              "      if (!result.qr_payload || !result.payment_uri || !result.account || result.amount !== selectedAmount() || result.currency !== selectedCurrency()) {\n"
+              "        throw new Error('A fizetési adatok hiányosak, vagy az összeg/deviza eltér.');\n"
+              "      }\n"
+              "      return result;\n"
+              "    } catch (_) {\n"
+              "      disableCheckout('A rendelés most közvetlen, statikus módban folytatódik.');\n"
+              "      return createStaticCheckout();\n"
+              "    }\n",
+              "      if (!result.qr_payload || !result.payment_uri || !result.account || result.amount !== selectedAmount() || result.currency !== selectedCurrency()) {\n"
+              "        throw new Error('A fizetési adatok hiányosak, vagy az összeg/deviza eltér.');\n"
+              "      }\n"
+              "      orderReference = result.order_reference;\n"
+              "      updateSummary();\n"
+              "      try {\n"
+              "        window.sessionStorage.setItem(STATUS_TOKEN_STORAGE_PREFIX + orderReference, result.status_token);\n"
+              "      } catch (_) {\n"
+              "        // A rendelés ettől még létrejött; az állapotlinkhez a token külön megadható.\n"
+              "      }\n"
+              "      return result;\n"
+              "    } catch (error) {\n"
+              "      disableCheckout('Próbáld újra később.');\n"
+              "      throw error;\n"
+              "    }\n",
+              "remove static error fallback",
+          )
+
+          checkout = regex_once(
+              checkout,
+              r"  function openStaticConfirmationEmail\([\s\S]*?\n  }\n\n(?=  async function submitConfirmation)",
+              "",
+              "remove static confirmation email",
+          )
+
+          checkout = replace_once(
+              checkout,
+              "    if (backendMode === 'static') {\n"
+              "      openStaticConfirmationEmail(payload);\n"
+              "      return { static_email: true };\n"
+              "    }\n",
+              "    if (backendMode !== 'api') {\n"
+              "      throw new Error('A szerveres fizetési visszajelzés nem érhető el.');\n"
+              "    }\n",
+              "require API confirmation mode",
+          )
+
+          checkout = replace_once(
+              checkout,
+              "        result.static_email\n"
+              "          ? 'A levelezőprogram megnyílt az előre kitöltött visszajelzéssel. Az e-mailt még el kell küldeni.'\n"
+              "          : 'A visszajelzés rögzítve lett. A licenc a beérkezett banki átutalás kézi ellenőrzése után aktiválódik.',\n",
+              "        'A visszajelzés rögzítve lett. A licenc a beérkezett banki átutalás kézi ellenőrzése után aktiválódik.',\n",
+              "remove static confirmation message",
+          )
+
+          checkout_path.write_text(checkout, encoding="utf-8")
+
+          # ------------------------------------------------------------------
+          # Secure payment status lookup with a one-time bearer credential.
+          # ------------------------------------------------------------------
+          status_path = Path("docs/scifi-ui/scripts/payment-status.js")
+          status = status_path.read_text(encoding="utf-8")
+
+          status_helper = r'''  function readStatusToken(sessionId) {
+            const url = new URL(window.location.href);
+            const queryToken = String(url.searchParams.get('status_token') || '').trim().toUpperCase();
+            let token = queryToken;
+            if (!token) {
+              try {
+                token = String(window.sessionStorage.getItem('formatx-status-token:' + sessionId) || '').trim().toUpperCase();
+              } catch (_) {
+                token = '';
+              }
+            }
+            if (queryToken) {
+              url.searchParams.delete('status_token');
+              window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+            }
+            return /^[A-F0-9]{64}$/.test(token) ? token : '';
+          }
+
+          '''
+          status = replace_once(
+              status,
+              "  async function loadStatus() {\n",
+              status_helper + "  async function loadStatus() {\n",
+              "status token helper",
+          )
+
+          status = replace_once(
+              status,
+              "    const sessionId = new URL(window.location.href).searchParams.get('session_id');\n\n"
+              "    if (!sessionId) {\n",
+              "    const sessionId = new URL(window.location.href).searchParams.get('session_id');\n"
+              "    const statusToken = sessionId ? readStatusToken(sessionId) : '';\n\n"
+              "    if (!sessionId || !statusToken) {\n",
+              "status token requirement",
+          )
+
+          status = replace_once(
+              status,
+              "        'Hiányzik a rendelési azonosító, ezért a fizetés állapota nem kérdezhető le.',\n"
+              "        'The order reference is missing, so the payment status cannot be retrieved.'\n",
+              "        'Hiányzik a rendelési azonosító vagy a biztonságos állapotkulcs, ezért a fizetés állapota nem kérdezhető le.',\n"
+              "        'The order reference or secure status token is missing, so the payment status cannot be retrieved.'\n",
+              "missing credential message",
+          )
+
+          status = replace_once(
+              status,
+              "      const response = await fetch(apiBase + '/session-status?session_id=' + encodeURIComponent(sessionId), {\n"
+              "        headers: { Accept: 'application/json' },\n"
+              "        cache: 'no-store'\n"
+              "      });\n",
+              "      const response = await fetch(apiBase + '/session-status', {\n"
+              "        method: 'POST',\n"
+              "        headers: {\n"
+              "          Accept: 'application/json',\n"
+              "          'Content-Type': 'application/json'\n"
+              "        },\n"
+              "        cache: 'no-store',\n"
+              "        body: JSON.stringify({\n"
+              "          order_reference: sessionId,\n"
+              "          status_token: statusToken\n"
+              "        })\n"
+              "      });\n",
+              "POST status lookup",
+          )
+          status_path.write_text(status, encoding="utf-8")
+
+          # ------------------------------------------------------------------
+          # Cloudflare production surface and dedicated API limiter.
+          # ------------------------------------------------------------------
+          wrangler_path = Path("billing-worker/wrangler.jsonc")
+          wrangler = json.loads(wrangler_path.read_text(encoding="utf-8"))
+          wrangler["workers_dev"] = False
+          wrangler["minify"] = True
+          limits = wrangler.setdefault("ratelimits", [])
+          if not any(item.get("name") == "PUBLIC_API_RATE_LIMIT" for item in limits):
+              limits.append({
+                  "name": "PUBLIC_API_RATE_LIMIT",
+                  "namespace_id": "420702",
+                  "simple": {"limit": 24, "period": 60},
+              })
+          wrangler_path.write_text(json.dumps(wrangler, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+          # ------------------------------------------------------------------
+          # Documentation and validation workflow.
+          # ------------------------------------------------------------------
+          readme_path = Path("billing-worker/README.md")
+          readme = readme_path.read_text(encoding="utf-8")
+          readme = readme.replace(
+              "- **GitHub Pages statikus mód:** backend nélkül is elkészíti a fix összeget és a QR-kódot;\n"
+              "- **Cloudflare Worker mód:** szerveroldalon zárolja az összeget, rendelést tárolhat és licencet aktiválhat.\n",
+              "- **Cloudflare Worker mód:** szerveroldalon zárolja az összeget, biztonságos rendelési azonosítót és állapotkulcsot készít, rendelést tárolhat és licencet aktiválhat.\n"
+              "- **Biztonságos leállás:** ha a Worker nem érhető el, a checkout nem készít követetlen statikus átutalást.\n",
+          )
+          readme = regex_once(
+              readme,
+              r"## Statikus GitHub Pages mód\n[\s\S]*?\n## Worker mód",
+              "## Biztonságos hibakezelés\n\n"
+              "A checkout kizárólag elérhető és megfelelően konfigurált Cloudflare Worker mellett enged rendelést indítani. API-hiba esetén nem jelenít meg beágyazott bankszámlaadatot, nem készít követetlen átutalási QR-kódot, és nem kerülhető meg a produkciós jogi készenléti kapu.\n\n"
+              "## Worker mód",
+              "README static mode removal",
+          )
+          readme = readme.replace(
+              "- `GET /api/session-status?session_id=FX-...`",
+              "- `POST /api/session-status` — rendelési azonosítóval és 256 bites állapotkulccsal",
+          )
+          readme_path.write_text(readme, encoding="utf-8")
+
+          validation_path = Path(".github/workflows/validate-production-worker.yml")
+          validation = validation_path.read_text(encoding="utf-8")
+          validation = validation.replace(
+              '      - "docs/scifi-ui/scripts/checkout.js"\n',
+              '      - "docs/scifi-ui/scripts/checkout.js"\n      - "docs/scifi-ui/scripts/payment-status.js"\n',
+          )
+          validation = replace_once(
+              validation,
+              "          node --check docs/scifi-ui/scripts/checkout.js\n",
+              "          node --check docs/scifi-ui/scripts/checkout.js\n"
+              "          node --check docs/scifi-ui/scripts/payment-status.js\n",
+              "payment status syntax validation",
+          )
+          validation = replace_once(
+              validation,
+              "          from pathlib import Path\n\n",
+              "          from pathlib import Path\n"
+              "          import json\n\n",
+              "validation json import",
+          )
+          validation = replace_once(
+              validation,
+              "          checkout = Path(\"docs/scifi-ui/checkout.html\").read_text(encoding=\"utf-8\")\n",
+              "          checkout = Path(\"docs/scifi-ui/checkout.html\").read_text(encoding=\"utf-8\")\n"
+              "          checkout_js = Path(\"docs/scifi-ui/scripts/checkout.js\").read_text(encoding=\"utf-8\")\n"
+              "          payment_status = Path(\"docs/scifi-ui/scripts/payment-status.js\").read_text(encoding=\"utf-8\")\n"
+              "          live_entry = Path(\"billing-worker/src/live-entry.js\").read_text(encoding=\"utf-8\")\n"
+              "          wrangler = json.loads(Path(\"billing-worker/wrangler.jsonc\").read_text(encoding=\"utf-8\"))\n",
+              "validation inputs",
+          )
+          validation = replace_once(
+              validation,
+              "          assert \"formatx1.formatx.workers.dev/api\" not in android_payment\n",
+              "          assert \"formatx1.formatx.workers.dev/api\" not in android_payment\n"
+              "          assert wrangler.get(\"workers_dev\") is False\n"
+              "          assert any(item.get(\"name\") == \"PUBLIC_API_RATE_LIMIT\" for item in wrangler.get(\"ratelimits\", []))\n"
+              "          assert \"'/api/session-status'\" in production\n"
+              "          assert \"status_token_hash\" in live_entry\n"
+              "          assert \"request.method === 'POST' && url.pathname === '/api/session-status'\" in live_entry\n"
+              "          assert \"STATIC_ACCOUNT\" not in checkout_js\n"
+              "          assert \"method: 'POST'\" in payment_status\n",
+              "new security invariants",
+          )
+          validation_path.write_text(validation, encoding="utf-8")
+
+          # Remove this one-time workflow from the resulting hardening commit.
+          Path(".github/workflows/harden-checkout-security-once.yml").unlink()
+          PY
+
+      - name: Validate JavaScript syntax
+        run: |
+          set -euo pipefail
+          node --check billing-worker/src/live-entry.js
+          node --check billing-worker/src/production-entry.js
+          node --check docs/scifi-ui/scripts/checkout.js
+          node --check docs/scifi-ui/scripts/payment-status.js
+
+      - name: Install Worker dependencies
+        working-directory: billing-worker
+        run: npm ci
+
+      - name: Validate Worker bundle
+        working-directory: billing-worker
+        run: npx wrangler deploy --dry-run --outdir ../.wrangler-security-dry-run
+
+      - name: Commit hardened production flow
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Harden checkout order access and fail closed"
+          git push
