@@ -18,26 +18,18 @@ export default {
       const target = new URL(request.url);
       target.hostname = CANONICAL_HOST;
       target.protocol = 'https:';
-      if (LEGACY_HOME_PATHS.has(target.pathname)) {
-        target.pathname = '/';
-        target.search = '';
-      }
       return Response.redirect(target.toString(), 308);
     }
 
     if (
-      url.hostname === CANONICAL_HOST
-      && request.method === 'GET'
-      && LEGACY_HOME_PATHS.has(url.pathname)
-    ) {
-      return Response.redirect(`https://${CANONICAL_HOST}/`, 308);
-    }
-
-    if (
       request.method === 'GET'
-      && (url.pathname === '/' || url.pathname === '/index.html')
+      && (
+        url.pathname === '/'
+        || url.pathname === '/index.html'
+        || LEGACY_HOME_PATHS.has(url.pathname)
+      )
     ) {
-      return serveCleanHome(request, env);
+      return serveEnhancedHome(request, env);
     }
 
     if (request.method === 'GET' && url.pathname === '/download/android') {
@@ -48,7 +40,7 @@ export default {
   },
 };
 
-async function serveCleanHome(request, env) {
+async function serveEnhancedHome(request, env) {
   const assetUrl = new URL('/scifi-ui/index.html', request.url);
   const upstream = await env.ASSETS.fetch(new Request(assetUrl, {
     method: 'GET',
@@ -64,13 +56,20 @@ async function serveCleanHome(request, env) {
     .replaceAll('="./', '="/scifi-ui/')
     .replaceAll("='./", "='/scifi-ui/")
     .replaceAll('https://formatx1.formatx.workers.dev/download/android?v=1.0.4', '/download/android')
-    .replace('</head>', '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-1"></head>')
-    .replace('</body>', '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-1"></script></body>');
+    .replace(
+      '</head>',
+      '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-3"></head>',
+    )
+    .replace(
+      '</body>',
+      '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-3"></script></body>',
+    );
 
   const headers = new Headers(upstream.headers);
   headers.set('Content-Type', 'text/html; charset=utf-8');
-  headers.set('Cache-Control', 'no-cache');
-  headers.set('Content-Location', '/');
+  headers.set('Cache-Control', 'no-store, max-age=0');
+  headers.set('Content-Location', new URL(request.url).pathname);
+  headers.set('Vary', 'Accept-Encoding');
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
 
