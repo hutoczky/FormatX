@@ -23,19 +23,19 @@ jobs:
 
     steps:
       - name: Checkout current master
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: master
           fetch-depth: 0
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Set up Gradle 9.5
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a
         with:
           gradle-version: "9.5.0"
 
@@ -58,41 +58,36 @@ jobs:
 
           main = Path('android-app/app/src/main/java/hu/formatx/suite/MainActivity.java')
           text = main.read_text(encoding='utf-8')
+          text = re.sub(r'PRIMARY_HOST = "[^"]+"', 'PRIMARY_HOST = "www.formatxsuite.com"', text)
+          text = re.sub(r'PRIMARY_PATH = "[^"]+"', 'PRIMARY_PATH = "/"', text)
+          text = re.sub(r'FALLBACK_HOST = "[^"]+"', 'FALLBACK_HOST = "formatxsuite.com"', text)
+          text = re.sub(r'FALLBACK_PATH = "[^"]+"', 'FALLBACK_PATH = "/"', text)
+          text = text.replace('GitHub tartalék oldal megnyitása', 'FormatX tartalék domain megnyitása')
           text = text.replace(
-              'PRIMARY_HOST = "formatx1.formatx.workers.dev"',
-              'PRIMARY_HOST = "www.formatxsuite.com"',
+              'Az elsődleges Worker nem adott megfelelő oldalt. A GitHub tartalék betöltése folyamatban van.',
+              'Az elsődleges domain nem adott megfelelő oldalt. A FormatX tartalék domain betöltése folyamatban van.',
           )
-          text = text.replace('PRIMARY_PATH = "/scifi-ui/"', 'PRIMARY_PATH = "/"')
-          text = text.replace('FormatX Worker megnyitása', 'FormatX weboldal megnyitása')
-          text = text.replace(
-              'Kapcsolódás az elsődleges FormatX Workerhez.',
-              'Kapcsolódás a FormatX fődomainhez.',
-          )
+          text = text.replace('A FormatX oldalak nem érhetők el.', 'A FormatX nem érhető el.')
+          text = text.replace('nyisd meg valamelyik oldalt külön.', 'nyisd meg a weboldalt külön.')
           text = re.sub(r'FormatXAndroid/[0-9.]+', 'FormatXAndroid/1.0.6', text)
-          text = re.sub(r'appendQueryParameter\("appVersion", "[0-9.]+"\)',
-                        'appendQueryParameter("appVersion", "1.0.6")', text)
-          text = re.sub(r'appendQueryParameter\("cacheBust", "[0-9]+"\)',
-                        'appendQueryParameter("cacheBust", "106")', text)
-
-          zoom_anchor = '        settings.setDisplayZoomControls(false);\n'
-          webview_readability = (
-              zoom_anchor
-              + '        settings.setSupportZoom(false);\n'
-              + '        settings.setUseWideViewPort(true);\n'
-              + '        settings.setLoadWithOverviewMode(false);\n'
-              + '        settings.setTextZoom(100);\n'
-              + '        settings.setDefaultFontSize(16);\n'
-              + '        settings.setMinimumFontSize(12);\n'
+          text = re.sub(
+              r'appendQueryParameter\("appVersion", "[0-9.]+"\)',
+              'appendQueryParameter("appVersion", "1.0.6")',
+              text,
           )
-          if 'settings.setUseWideViewPort(true);' not in text:
-              text = text.replace(zoom_anchor, webview_readability)
+          text = re.sub(
+              r'appendQueryParameter\("cacheBust", "[0-9]+"\)',
+              'appendQueryParameter("cacheBust", "106")',
+              text,
+          )
           main.write_text(text, encoding='utf-8')
 
           updater = Path('android-app/app/src/main/java/hu/formatx/suite/AppUpdater.java')
           text = updater.read_text(encoding='utf-8')
-          text = text.replace(
-              'https://formatx1.formatx.workers.dev/scifi-ui/downloads/android-update.json',
+          text = re.sub(
+              r'https://[^"\s]+/scifi-ui/downloads/android-update\.json',
               'https://www.formatxsuite.com/scifi-ui/downloads/android-update.json',
+              text,
           )
           updater.write_text(text, encoding='utf-8')
 
@@ -111,7 +106,9 @@ jobs:
           BUILD="android-app/app/build.gradle.kts"
           grep -F 'PRIMARY_HOST = "www.formatxsuite.com"' "$MAIN"
           grep -F 'PRIMARY_PATH = "/"' "$MAIN"
-          grep -F 'FALLBACK_HOST = "hutoczky.github.io"' "$MAIN"
+          grep -F 'FALLBACK_HOST = "formatxsuite.com"' "$MAIN"
+          grep -F 'FALLBACK_PATH = "/"' "$MAIN"
+          ! grep -Fq 'hutoczky.github.io' "$MAIN"
           grep -F 'settings.setUseWideViewPort(true)' "$MAIN"
           grep -F 'settings.setLoadWithOverviewMode(false)' "$MAIN"
           grep -F 'settings.setTextZoom(100)' "$MAIN"
@@ -158,7 +155,7 @@ jobs:
               'apkUrl': 'https://www.formatxsuite.com/download/android',
               'sha256': os.environ['SHA256'],
               'mandatory': False,
-              'notes': 'Tiszta formatxsuite.com fődomain, Android WebView olvashatósági mód, megszüntetett 3D szövegfedések és frissített alkalmazáskapcsolatok.'
+              'notes': 'FormatX saját domain, biztonságos WebView és egységes Cloudflare Worker kiszolgálás.'
           })
           manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
@@ -191,11 +188,13 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add android-app \
-            docs/scifi-ui/downloads \
-            billing-worker/src/production-entry.js
+          git add android-app docs/scifi-ui/downloads billing-worker/src/production-entry.js
           git add -A docs/scifi-ui/android-update.json
-          git commit -m "Publish FormatX Android 1.0.6 with readable custom-domain WebView"
+          if git diff --cached --quiet; then
+            echo "No Android publication changes to commit."
+            exit 0
+          fi
+          git commit -m "Publish FormatX Android 1.0.6 on the custom-domain Worker"
           git pull --rebase origin master
           git push origin HEAD:master
 
