@@ -83,7 +83,8 @@ export default {
 };
 
 async function enforceApiRateLimit(request, env, pathname) {
-  if (!env.PUBLIC_API_RATE_LIMIT || typeof env.PUBLIC_API_RATE_LIMIT.limit !== 'function') {
+  const limiter = env.PUBLIC_API_RATE_LIMIT || env.PROJECT_AI_RATE_LIMIT;
+  if (!limiter || typeof limiter.limit !== 'function') {
     return null;
   }
 
@@ -94,7 +95,7 @@ async function enforceApiRateLimit(request, env, pathname) {
     .slice(0, 16)
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
-  const result = await env.PUBLIC_API_RATE_LIMIT.limit({ key });
+  const result = await limiter.limit({ key });
   if (result.success) return null;
 
   return new Response(JSON.stringify({
