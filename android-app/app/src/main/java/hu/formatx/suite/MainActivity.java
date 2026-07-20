@@ -35,8 +35,8 @@ import android.window.OnBackInvokedDispatcher;
 import java.util.Locale;
 
 public final class MainActivity extends Activity {
-    private static final String PRIMARY_HOST = "formatx1.formatx.workers.dev";
-    private static final String PRIMARY_PATH = "/scifi-ui/";
+    private static final String PRIMARY_HOST = "www.formatxsuite.com";
+    private static final String PRIMARY_PATH = "/";
     private static final String FALLBACK_HOST = "hutoczky.github.io";
     private static final String FALLBACK_PATH = "/FormatX/scifi-ui/";
     private static final long LOAD_TIMEOUT_MS = 18000L;
@@ -119,7 +119,7 @@ public final class MainActivity extends Activity {
         retryParams.topMargin = dp(22);
         statePanel.addView(retryButton, retryParams);
 
-        primaryBrowserButton = makeButton("FormatX Worker megnyitása", 0xFF17395F, 0xFFF4FAFF);
+        primaryBrowserButton = makeButton("FormatX weboldal megnyitása", 0xFF17395F, 0xFFF4FAFF);
         primaryBrowserButton.setOnClickListener(view -> openExternal(buildUri(PRIMARY_HOST, PRIMARY_PATH)));
         LinearLayout.LayoutParams primaryParams = matchWrap();
         primaryParams.topMargin = dp(10);
@@ -152,10 +152,16 @@ public final class MainActivity extends Activity {
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
+        settings.setSupportZoom(false);
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(false);
+        settings.setTextZoom(100);
+        settings.setDefaultFontSize(16);
+        settings.setMinimumFontSize(12);
         settings.setLoadsImagesAutomatically(true);
         settings.setBlockNetworkImage(false);
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        settings.setUserAgentString(settings.getUserAgentString() + " FormatXAndroid/1.0.5");
+        settings.setUserAgentString(settings.getUserAgentString() + " FormatXAndroid/1.0.6");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             settings.setSafeBrowsingEnabled(true);
@@ -195,8 +201,8 @@ public final class MainActivity extends Activity {
                 .path(path)
                 .appendQueryParameter("app", "android")
                 .appendQueryParameter("lang", language)
-                .appendQueryParameter("appVersion", "1.0.5")
-                .appendQueryParameter("cacheBust", "105")
+                .appendQueryParameter("appVersion", "1.0.6")
+                .appendQueryParameter("cacheBust", "106")
                 .build();
     }
 
@@ -231,7 +237,7 @@ public final class MainActivity extends Activity {
         stateTitle.setText("FormatX betöltése…");
         stateMessage.setText(fallback
                 ? "Az elsődleges Worker nem adott megfelelő oldalt. A GitHub tartalék betöltése folyamatban van."
-                : "Kapcsolódás az elsődleges FormatX Workerhez.");
+                : "Kapcsolódás a FormatX fődomainhez.");
         retryButton.setVisibility(View.GONE);
         primaryBrowserButton.setVisibility(View.GONE);
         fallbackBrowserButton.setVisibility(View.GONE);

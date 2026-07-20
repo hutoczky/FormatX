@@ -78,7 +78,7 @@
 /home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/AppUpdater.java:278: Warning: Unnecessary; SDK_INT is always >= 26 [ObsoleteSdkInt]
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:154: Warning: Unnecessary; SDK_INT is always >= 26 [ObsoleteSdkInt]
+/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:166: Warning: Unnecessary; SDK_INT is always >= 26 [ObsoleteSdkInt]
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/runner/work/FormatX/FormatX/android-app/app/src/main/res/mipmap-anydpi-v26: Warning: This folder configuration (v26) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into mipmap-anydpi. [ObsoleteSdkInt]
@@ -150,18 +150,18 @@
    monochrome layer) show the untinted color icon for your app, which will
    look inconsistent.
 
-/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:224: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:237: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         stateTitle.setText("FormatX betöltése…");
                            ~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:245: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
-        stateTitle.setText("A FormatX oldal nem érhető el.");
-                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:246: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
-        stateMessage.setText(reason + " Ellenőrizd az internetkapcsolatot, majd próbáld újra.");
-                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:246: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
-        stateMessage.setText(reason + " Ellenőrizd az internetkapcsolatot, majd próbáld újra.");
-                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:259: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        stateTitle.setText("A FormatX oldalak nem érhetők el.");
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:260: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+        stateMessage.setText(reason + " Ellenőrizd az internetkapcsolatot, majd próbáld újra, vagy nyisd meg valamelyik oldalt külön.");
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java:260: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        stateMessage.setText(reason + " Ellenőrizd az internetkapcsolatot, majd próbáld újra, vagy nyisd meg valamelyik oldalt külön.");
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/PaymentActivity.java:181: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
         regularPrice.setText(t("Eredeti ár: ", "Regular price: ") + money(plan.original(annual(), eur()), eur()));
                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

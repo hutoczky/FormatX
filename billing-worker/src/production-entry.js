@@ -1,7 +1,7 @@
 import liveWorker from './live-entry.js';
 
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
-const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.5.apk';
+const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.6.apk';
 const CANONICAL_HOST = 'www.formatxsuite.com';
 const APEX_HOST = 'formatxsuite.com';
 const LEGACY_HOME_PATHS = new Set([
@@ -85,7 +85,7 @@ async function serveEnhancedHome(request, env) {
 
 async function serveAndroidApk(request, env) {
   const assetUrl = new URL(ANDROID_APK_PATH, request.url);
-  assetUrl.searchParams.set('v', '1.0.5');
+  assetUrl.searchParams.set('v', '1.0.6');
   const assetHeaders = new Headers();
   const range = request.headers.get('Range');
   if (range) assetHeaders.set('Range', range);

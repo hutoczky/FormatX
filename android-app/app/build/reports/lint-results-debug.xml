@@ -131,7 +131,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java"
-            line="154"
+            line="166"
             column="13"/>
     </issue>
 
@@ -241,7 +241,7 @@
         errorLine2="                           ~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java"
-            line="224"
+            line="237"
             column="28"/>
     </issue>
 
@@ -255,11 +255,11 @@
         explanation="When calling `TextView#setText`&#xA;* Never call `Number#toString()` to format numbers; it will not handle fraction separators and locale-specific digits properly. Consider using `String#format` with proper format specifications (`%d` or `%f`) instead.&#xA;* Do not pass a string literal (e.g. &quot;Hello&quot;) to display text. Hardcoded text can not be properly translated to other languages. Consider using Android resource strings instead.&#xA;* Do not build messages by concatenating text chunks. Such messages can not be properly translated."
         url="https://developer.android.com/guide/topics/resources/localization.html"
         urls="https://developer.android.com/guide/topics/resources/localization.html"
-        errorLine1="        stateTitle.setText(&quot;A FormatX oldal nem érhető el.&quot;);"
-        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="        stateTitle.setText(&quot;A FormatX oldalak nem érhetők el.&quot;);"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java"
-            line="245"
+            line="259"
             column="28"/>
     </issue>
 
@@ -273,11 +273,11 @@
         explanation="When calling `TextView#setText`&#xA;* Never call `Number#toString()` to format numbers; it will not handle fraction separators and locale-specific digits properly. Consider using `String#format` with proper format specifications (`%d` or `%f`) instead.&#xA;* Do not pass a string literal (e.g. &quot;Hello&quot;) to display text. Hardcoded text can not be properly translated to other languages. Consider using Android resource strings instead.&#xA;* Do not build messages by concatenating text chunks. Such messages can not be properly translated."
         url="https://developer.android.com/guide/topics/resources/localization.html"
         urls="https://developer.android.com/guide/topics/resources/localization.html"
-        errorLine1="        stateMessage.setText(reason + &quot; Ellenőrizd az internetkapcsolatot, majd próbáld újra.&quot;);"
-        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="        stateMessage.setText(reason + &quot; Ellenőrizd az internetkapcsolatot, majd próbáld újra, vagy nyisd meg valamelyik oldalt külön.&quot;);"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java"
-            line="246"
+            line="260"
             column="30"/>
     </issue>
 
@@ -291,11 +291,11 @@
         explanation="When calling `TextView#setText`&#xA;* Never call `Number#toString()` to format numbers; it will not handle fraction separators and locale-specific digits properly. Consider using `String#format` with proper format specifications (`%d` or `%f`) instead.&#xA;* Do not pass a string literal (e.g. &quot;Hello&quot;) to display text. Hardcoded text can not be properly translated to other languages. Consider using Android resource strings instead.&#xA;* Do not build messages by concatenating text chunks. Such messages can not be properly translated."
         url="https://developer.android.com/guide/topics/resources/localization.html"
         urls="https://developer.android.com/guide/topics/resources/localization.html"
-        errorLine1="        stateMessage.setText(reason + &quot; Ellenőrizd az internetkapcsolatot, majd próbáld újra.&quot;);"
-        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="        stateMessage.setText(reason + &quot; Ellenőrizd az internetkapcsolatot, majd próbáld újra, vagy nyisd meg valamelyik oldalt külön.&quot;);"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/FormatX/FormatX/android-app/app/src/main/java/hu/formatx/suite/MainActivity.java"
-            line="246"
+            line="260"
             column="39"/>
     </issue>
 

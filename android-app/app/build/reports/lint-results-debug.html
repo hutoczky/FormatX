@@ -179,7 +179,7 @@ document.getElementById(id).style.display = 'none';
     <div class="mdl-layout__header-row">
       <span class="mdl-layout-title">Lint Report: 19 warnings</span>
       <div class="mdl-layout-spacer"></div>
-      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Sun Jul 19 19:35:17 UTC 2026 by AGP (9.3.0)</nav>
+      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Mon Jul 20 16:05:50 UTC 2026 by AGP (9.3.0)</nav>
     </div>
   </header>
   <div class="mdl-layout__drawer">
@@ -268,8 +268,8 @@ Dismiss</button>            </div>
 <span class="lineno"> 10 </span>        applicationId = "hu.formatx.suite"
 <span class="lineno"> 11 </span>        minSdk = 26
 <span class="caretline"><span class="lineno"> 12 </span>        <span class="warning">targetSdk = 36</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno"> 13 </span>        versionCode = 5
-<span class="lineno"> 14 </span>        versionName = "1.0.3"
+<span class="lineno"> 13 </span>        versionCode = 8
+<span class="lineno"> 14 </span>        versionName = "1.0.6"
 <span class="lineno"> 15 </span>    }
 </pre>
 
@@ -523,14 +523,14 @@ Dismiss</button>            </div>
 <span class="lineno"> 281 </span>                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
 </pre>
 
-<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:154</span>: <span class="message">Unnecessary; <code>SDK_INT</code> is always >= 26</span><br /><pre class="errorlines">
-<span class="lineno"> 151 </span>     settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-<span class="lineno"> 152 </span>     settings.setUserAgentString(settings.getUserAgentString() + <span class="string">" FormatXAndroid/1.0.3"</span>);
-<span class="lineno"> 153 </span>
-<span class="caretline"><span class="lineno"> 154 </span>     <span class="keyword">if</span> (<span class="warning">Build.VERSION.SDK_INT >= Build.VERSION_CODES.O</span>) {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno"> 155 </span>         settings.setSafeBrowsingEnabled(<span class="keyword">true</span>);
-<span class="lineno"> 156 </span>         webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, <span class="keyword">false</span>);
-<span class="lineno"> 157 </span>     }
+<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:166</span>: <span class="message">Unnecessary; <code>SDK_INT</code> is always >= 26</span><br /><pre class="errorlines">
+<span class="lineno"> 163 </span>     settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+<span class="lineno"> 164 </span>     settings.setUserAgentString(settings.getUserAgentString() + <span class="string">" FormatXAndroid/1.0.6"</span>);
+<span class="lineno"> 165 </span>
+<span class="caretline"><span class="lineno"> 166 </span>     <span class="keyword">if</span> (<span class="warning">Build.VERSION.SDK_INT >= Build.VERSION_CODES.O</span>) {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno"> 167 </span>         settings.setSafeBrowsingEnabled(<span class="keyword">true</span>);
+<span class="lineno"> 168 </span>         webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, <span class="keyword">false</span>);
+<span class="lineno"> 169 </span>     }
 </pre>
 
 <span class="location"><a href="../../src/main/res/mipmap-anydpi-v26">../../src/main/res/mipmap-anydpi-v26</a></span>: <span class="message">This folder configuration (<code>v26</code>) is unnecessary; <code>minSdkVersion</code> is 26. Merge all the resources in this folder into <code>mipmap-anydpi</code>.</span><br />
@@ -714,44 +714,44 @@ Dismiss</button>            </div>
               <div class="mdl-card__supporting-text">
 <div class="issue">
 <div class="warningslist">
-<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:224</span>: <span class="message">String literal in <code>setText</code> can not be translated. Use Android resources instead.</span><br /><pre class="errorlines">
-<span class="lineno"> 221 </span>
-<span class="lineno"> 222 </span>  <span class="keyword">private</span> <span class="keyword">void</span> showLoading(<span class="keyword">boolean</span> fallback) {
-<span class="lineno"> 223 </span>      statePanel.setVisibility(View.VISIBLE);
-<span class="caretline"><span class="lineno"> 224 </span>      stateTitle.setText(<span class="warning"><span class="string">"FormatX betöltése…"</span></span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno"> 225 </span>      stateMessage.setText(fallback
-<span class="lineno"> 226 </span>              ? <span class="string">"A közvetlen kapcsolat nem sikerült. A biztonságos tartalék oldal betöltése folyamatban van."</span>
-<span class="lineno"> 227 </span>              : <span class="string">"Kapcsolódás a biztonságos FormatX szolgáltatáshoz."</span>);
+<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:237</span>: <span class="message">String literal in <code>setText</code> can not be translated. Use Android resources instead.</span><br /><pre class="errorlines">
+<span class="lineno"> 234 </span>
+<span class="lineno"> 235 </span>  <span class="keyword">private</span> <span class="keyword">void</span> showLoading(<span class="keyword">boolean</span> fallback) {
+<span class="lineno"> 236 </span>      statePanel.setVisibility(View.VISIBLE);
+<span class="caretline"><span class="lineno"> 237 </span>      stateTitle.setText(<span class="warning"><span class="string">"FormatX betöltése…"</span></span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno"> 238 </span>      stateMessage.setText(fallback
+<span class="lineno"> 239 </span>              ? <span class="string">"Az elsődleges Worker nem adott megfelelő oldalt. A GitHub tartalék betöltése folyamatban van."</span>
+<span class="lineno"> 240 </span>              : <span class="string">"Kapcsolódás a FormatX fődomainhez."</span>);
 </pre>
 
-<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:245</span>: <span class="message">String literal in <code>setText</code> can not be translated. Use Android resources instead.</span><br /><pre class="errorlines">
-<span class="lineno"> 242 </span>  handler.removeCallbacks(loadTimeout);
-<span class="lineno"> 243 </span>  progressBar.setVisibility(View.GONE);
-<span class="lineno"> 244 </span>  statePanel.setVisibility(View.VISIBLE);
-<span class="caretline"><span class="lineno"> 245 </span>  stateTitle.setText(<span class="warning"><span class="string">"A FormatX oldal nem érhető el."</span></span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno"> 246 </span>  stateMessage.setText(reason + <span class="string">" Ellenőrizd az internetkapcsolatot, majd próbáld újra."</span>);
-<span class="lineno"> 247 </span>  retryButton.setVisibility(View.VISIBLE);
-<span class="lineno"> 248 </span>  browserButton.setVisibility(View.VISIBLE);
+<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:259</span>: <span class="message">String literal in <code>setText</code> can not be translated. Use Android resources instead.</span><br /><pre class="errorlines">
+<span class="lineno"> 256 </span>  handler.removeCallbacks(loadTimeout);
+<span class="lineno"> 257 </span>  progressBar.setVisibility(View.GONE);
+<span class="lineno"> 258 </span>  statePanel.setVisibility(View.VISIBLE);
+<span class="caretline"><span class="lineno"> 259 </span>  stateTitle.setText(<span class="warning"><span class="string">"A FormatX oldalak nem érhetők el."</span></span>);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<span class="lineno"> 260 </span>  stateMessage.setText(reason + <span class="string">" Ellenőrizd az internetkapcsolatot, majd próbáld újra, vagy nyisd meg valamelyik oldalt külön."</span>);
+<span class="lineno"> 261 </span>  retryButton.setVisibility(View.VISIBLE);
+<span class="lineno"> 262 </span>  primaryBrowserButton.setVisibility(View.VISIBLE);
 </pre>
 
-<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:246</span>: <span class="message">Do not concatenate text displayed with <code>setText</code>. Use resource string with placeholders.</span><br /><pre class="errorlines">
-<span class="lineno"> 243 </span>      progressBar.setVisibility(View.GONE);
-<span class="lineno"> 244 </span>      statePanel.setVisibility(View.VISIBLE);
-<span class="lineno"> 245 </span>      stateTitle.setText(<span class="string">"A FormatX oldal nem érhető el."</span>);
-<span class="caretline"><span class="lineno"> 246 </span>      stateMessage.setText(<span class="warning">reason + <span class="string">" Ellenőrizd az internetkapcsolatot, majd próbáld újra."</span></span>);&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno"> 247 </span>      retryButton.setVisibility(View.VISIBLE);
-<span class="lineno"> 248 </span>      browserButton.setVisibility(View.VISIBLE);
-<span class="lineno"> 249 </span>  }
+<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:260</span>: <span class="message">Do not concatenate text displayed with <code>setText</code>. Use resource string with placeholders.</span><br /><pre class="errorlines">
+<span class="lineno"> 257 </span>  progressBar.setVisibility(View.GONE);
+<span class="lineno"> 258 </span>  statePanel.setVisibility(View.VISIBLE);
+<span class="lineno"> 259 </span>  stateTitle.setText(<span class="string">"A FormatX oldalak nem érhetők el."</span>);
+<span class="caretline"><span class="lineno"> 260 </span>  stateMessage.setText(<span class="warning">reason + <span class="string">" Ellenőrizd az internetkapcsolatot, majd próbáld újra, vagy nyisd meg valamelyik oldalt külön."</span></span>);</span>
+<span class="lineno"> 261 </span>  retryButton.setVisibility(View.VISIBLE);
+<span class="lineno"> 262 </span>  primaryBrowserButton.setVisibility(View.VISIBLE);
+<span class="lineno"> 263 </span>  fallbackBrowserButton.setVisibility(View.VISIBLE);
 </pre>
 
-<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:246</span>: <span class="message">String literal in <code>setText</code> can not be translated. Use Android resources instead.</span><br /><pre class="errorlines">
-<span class="lineno"> 243 </span>      progressBar.setVisibility(View.GONE);
-<span class="lineno"> 244 </span>      statePanel.setVisibility(View.VISIBLE);
-<span class="lineno"> 245 </span>      stateTitle.setText(<span class="string">"A FormatX oldal nem érhető el."</span>);
-<span class="caretline"><span class="lineno"> 246 </span>      stateMessage.setText(reason + <span class="warning"><span class="string">" Ellenőrizd az internetkapcsolatot, majd próbáld újra."</span></span>);&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno"> 247 </span>      retryButton.setVisibility(View.VISIBLE);
-<span class="lineno"> 248 </span>      browserButton.setVisibility(View.VISIBLE);
-<span class="lineno"> 249 </span>  }
+<span class="location"><a href="../../src/main/java/hu/formatx/suite/MainActivity.java">../../src/main/java/hu/formatx/suite/MainActivity.java</a>:260</span>: <span class="message">String literal in <code>setText</code> can not be translated. Use Android resources instead.</span><br /><pre class="errorlines">
+<span class="lineno"> 257 </span>  progressBar.setVisibility(View.GONE);
+<span class="lineno"> 258 </span>  statePanel.setVisibility(View.VISIBLE);
+<span class="lineno"> 259 </span>  stateTitle.setText(<span class="string">"A FormatX oldalak nem érhetők el."</span>);
+<span class="caretline"><span class="lineno"> 260 </span>  stateMessage.setText(reason + <span class="warning"><span class="string">" Ellenőrizd az internetkapcsolatot, majd próbáld újra, vagy nyisd meg valamelyik oldalt külön."</span></span>);</span>
+<span class="lineno"> 261 </span>  retryButton.setVisibility(View.VISIBLE);
+<span class="lineno"> 262 </span>  primaryBrowserButton.setVisibility(View.VISIBLE);
+<span class="lineno"> 263 </span>  fallbackBrowserButton.setVisibility(View.VISIBLE);
 </pre>
 
 <span class="location"><a href="../../src/main/java/hu/formatx/suite/PaymentActivity.java">../../src/main/java/hu/formatx/suite/PaymentActivity.java</a>:181</span>: <span class="message">Do not concatenate text displayed with <code>setText</code>. Use resource string with placeholders.</span><br /><pre class="errorlines">

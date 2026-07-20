@@ -1,8 +1,0 @@
-{
-  "versionCode": 6,
-  "versionName": "1.0.4",
-  "apkUrl": "https://hutoczky.github.io/FormatX/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk",
-  "sha256": "57de8b568fe3a80bb5e18b814549c1d6be2ecf40d68efe3b88d8f266304fa6c9",
-  "mandatory": false,
-  "notes": "Az Android alkalmazás közvetlenül a működő FormatX Suite Pro webfelületet nyitja meg."
-}
