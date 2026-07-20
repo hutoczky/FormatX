@@ -1,0 +1,110 @@
+name: Correct multiplatform trial wording
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/fix-multiplatform-trial-copy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-copy:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Update website and Project AI wording
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              'docs/scifi-ui/scripts/landing.js': [
+                  (
+                      "heroDescription: 'A FormatX meghajtókezeléshez, rendszerdiagnosztikához és rendszer-előkészítéshez készül. Jelenleg a Windowsra készült asztali prototípus tölthető le. A natív Linux/Bazzite-verzió fejlesztés alatt áll; a macOS-verzió későbbi terv.', startTrial: 'Windowsos próbaverzió letöltése', androidApp: 'Android-alkalmazás', exploreFeatures: 'Funkciók megtekintése', assuranceAi: 'AI-alapú segítség', assuranceSpeed: 'Átlátható munkafolyamat', assuranceSecurity: 'Többrétegű védelem', platformNow: 'Windowsos prototípus elérhető', platformLinux: 'Linux/Bazzite-verzió fejlesztés alatt', platformMac: 'macOS-verzió későbbre tervezve'",
+                      "heroDescription: 'A FormatX többplatformos technikusi rendszer meghajtókezeléshez, rendszerdiagnosztikához és rendszer-előkészítéshez. A próbaverzió Linux/Bazzite, Windows és macOS rendszeren is használható.', startTrial: 'Próbaverzió letöltése', androidApp: 'Android-alkalmazás', exploreFeatures: 'Funkciók megtekintése', assuranceAi: 'AI-alapú segítség', assuranceSpeed: 'Átlátható munkafolyamat', assuranceSecurity: 'Többrétegű védelem', platformNow: 'Többplatformos próbaverzió elérhető', platformLinux: 'Linux/Bazzite az elsődleges platform', platformMac: 'Windows és macOS támogatott'"
+                  ),
+                  ("feature1Copy: 'Ellenőrizhető meghajtó- és fájlműveletek a jelenlegi Windows prototípusban.'", "feature1Copy: 'Ellenőrizhető meghajtó- és fájlműveletek a többplatformos próbaverzióban.'"),
+                  ("feature6Copy: 'Jelenleg a Windowsos asztali prototípus érhető el. A Linux/Bazzite a következő, elsődleges fejlesztési cél; a macOS-verzió későbbi terv.'", "feature6Copy: 'A próbaverzió Linux/Bazzite, Windows és macOS rendszeren is használható. A Linux/Bazzite az elsődlegesen támogatott platform.'"),
+                  (
+                      "heroDescription: 'FormatX is being developed for drive management, system diagnostics and system preparation. The current downloadable desktop prototype runs on Windows. A native Linux/Bazzite version is under development, while macOS support is planned for a later phase.', startTrial: 'Download Windows prototype', androidApp: 'Android app', exploreFeatures: 'Explore Features', assuranceAi: 'AI-assisted guidance', assuranceSpeed: 'Clear technician workflow', assuranceSecurity: 'Multi-layer protection', platformNow: 'Windows prototype available now', platformLinux: 'Linux/Bazzite version in development', platformMac: 'macOS version planned later'",
+                      "heroDescription: 'FormatX is a cross-platform technician system for drive management, system diagnostics and system preparation. The trial version is available for Linux/Bazzite, Windows and macOS.', startTrial: 'Download trial version', androidApp: 'Android app', exploreFeatures: 'Explore Features', assuranceAi: 'AI-assisted guidance', assuranceSpeed: 'Clear technician workflow', assuranceSecurity: 'Multi-layer protection', platformNow: 'Cross-platform trial available', platformLinux: 'Linux/Bazzite is the primary platform', platformMac: 'Windows and macOS supported'"
+                  ),
+                  ("feature1Copy: 'Verifiable drive and file operations in the current Windows prototype.'", "feature1Copy: 'Verifiable drive and file operations in the cross-platform trial version.'"),
+                  ("feature6Copy: 'The Windows desktop prototype is currently available. Linux/Bazzite is the next primary development target, while macOS is planned for a later phase.'", "feature6Copy: 'The trial version is available for Linux/Bazzite, Windows and macOS. Linux/Bazzite is the primary supported platform.'"),
+              ],
+              'docs/scifi-ui/index.html': [
+                  ('A FormatX meghajtókezeléshez, rendszerdiagnosztikához és rendszer-előkészítéshez készül. Jelenleg a Windowsra készült asztali prototípus tölthető le. A natív Linux/Bazzite-verzió fejlesztés alatt áll; a macOS-verzió későbbi terv.', 'A FormatX többplatformos technikusi rendszer meghajtókezeléshez, rendszerdiagnosztikához és rendszer-előkészítéshez. A próbaverzió Linux/Bazzite, Windows és macOS rendszeren is használható.'),
+                  ('Windowsos próbaverzió letöltése', 'Próbaverzió letöltése'),
+                  ('Windowsos prototípus elérhető', 'Többplatformos próbaverzió elérhető'),
+                  ('Linux/Bazzite-verzió fejlesztés alatt', 'Linux/Bazzite az elsődleges platform'),
+                  ('macOS-verzió későbbre tervezve', 'Windows és macOS támogatott'),
+                  ('<strong>Windows</strong><em>Linux/Bazzite: fejlesztés alatt · macOS: tervezett</em>', '<strong>MULTIPLATFORM</strong><em>Linux/Bazzite · Windows · macOS</em>'),
+                  ('Ellenőrizhető meghajtó- és fájlműveletek a jelenlegi Windows prototípusban.', 'Ellenőrizhető meghajtó- és fájlműveletek a többplatformos próbaverzióban.'),
+                  ('Jelenleg a Windowsos asztali prototípus érhető el. A Linux/Bazzite a következő, elsődleges fejlesztési cél; a macOS-verzió későbbi terv.', 'A próbaverzió Linux/Bazzite, Windows és macOS rendszeren is használható. A Linux/Bazzite az elsődlegesen támogatott platform.'),
+              ],
+              'docs/scifi-ui/scripts/site.js': [
+                  ("<span>DESKTOP BUILD</span><strong>PROTOTYPE</strong>", "<span>TRIAL BUILD</span><strong>MULTIPLATFORM</strong>"),
+                  ("Windows available · Linux/Bazzite in development · macOS planned", "Linux/Bazzite · Windows · macOS"),
+                  ("{ icon: '⌬', title: 'PLATFORM ROADMAP', copy: 'Windows now. Linux/Bazzite next.', target: '#platforms' }", "{ icon: '⌬', title: 'MULTIPLATFORM TRIAL', copy: 'Linux/Bazzite · Windows · macOS', target: '#platforms' }"),
+              ],
+              'docs/project.html': [
+                  ('Jelenleg Windowsos asztali prototípus érhető el. A natív Linux/Bazzite-verzió fejlesztés alatt áll, a macOS-verzió pedig későbbi terv. A weboldal és az Android-alkalmazás már használható.', 'A próbaverzió Linux/Bazzite, Windows és macOS rendszeren is használható. A Linux/Bazzite az elsődlegesen támogatott platform. A weboldal és az Android-alkalmazás további hozzáférést biztosít a projekthez.'),
+              ],
+              'billing-worker/src/project-ai.js': [
+                  ('- Linux, especially Bazzite-compatible environments, is the primary development target. A native Linux desktop build is not available yet.\n- The current desktop prototype runs on Windows because it uses WinUI 3 and Windows-specific disk-management services. The web interface and Android client remain available as supplementary access.\n- Windows is the platform of the current desktop prototype. macOS support is planned for a later development phase.\n- The site and the Android client support Hungarian and English.', '- The trial version is available for Linux/Bazzite, Windows and macOS.\n- Linux, especially Bazzite-compatible environments, is the primary supported platform.\n- Windows and macOS are also supported by the trial version.\n- The web interface and Android client provide supplementary access in Hungarian and English.'),
+                  ("platforms: 'A FormatX elsődleges fejlesztési célplatformja a Linux, különösen a Bazzite-kompatibilis környezet. A natív Linux asztali kiadás még fejlesztés alatt áll. A jelenlegi asztali prototípus Windows alatt működik; a macOS támogatás későbbi fejlesztési irány. A webes felület és az Android kliens ettől függetlenül használható.'", "platforms: 'A FormatX próbaverziója Linux/Bazzite, Windows és macOS rendszeren is használható. A Linux, különösen a Bazzite-kompatibilis környezet, az elsődlegesen támogatott platform. A webes felület és az Android kliens további hozzáférést biztosít.'"),
+                  ("platforms: 'Linux, especially Bazzite-compatible environments, is the primary development target. The native Linux desktop build is still under development. The current desktop prototype runs on Windows, while macOS support is planned for a later phase. The web interface and Android client remain available.'", "platforms: 'The FormatX trial version is available for Linux/Bazzite, Windows and macOS. Linux, especially Bazzite-compatible environments, is the primary supported platform. The web interface and Android client provide supplementary access.'"),
+              ],
+          }
+
+          changed = []
+          for filename, pairs in replacements.items():
+              path = Path(filename)
+              if not path.exists():
+                  continue
+              text = path.read_text(encoding='utf-8')
+              original = text
+              for old, new in pairs:
+                  text = text.replace(old, new)
+              if text != original:
+                  path.write_text(text, encoding='utf-8')
+                  changed.append(filename)
+
+          required = {
+              'docs/scifi-ui/scripts/landing.js',
+              'docs/scifi-ui/index.html',
+              'docs/scifi-ui/scripts/site.js',
+              'billing-worker/src/project-ai.js',
+          }
+          missing = required - set(changed)
+          if missing:
+              raise SystemExit(f'Required files were not updated: {sorted(missing)}')
+
+          print('Updated files:')
+          for filename in changed:
+              print('-', filename)
+          PY
+
+      - name: Commit corrected wording
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/landing.js docs/scifi-ui/scripts/site.js docs/project.html billing-worker/src/project-ai.js
+          git commit -m "Describe the trial version as multiplatform"
+          git pull --rebase origin master
+          git push origin HEAD:master
