@@ -2,9 +2,6 @@ name: Apply and remove FormatX checkout security hardening
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - ".github/workflows/harden-checkout-security-once.yml"
 
 permissions:
   contents: write
@@ -16,7 +13,7 @@ concurrency:
 jobs:
   harden:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout repository and reviewed hardening source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -31,7 +28,7 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Recover and run the reviewed hardening script
+      - name: Recover and run the reviewed checkout hardening
         shell: bash
         run: |
           set -euo pipefail
@@ -52,13 +49,45 @@ jobs:
           PY
           python3 /tmp/formatx-hardening.py
 
-      - name: Validate JavaScript syntax
+      - name: Consolidate Android on the two custom domains
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          main_path = Path('android-app/app/src/main/java/hu/formatx/suite/MainActivity.java')
+          main = main_path.read_text(encoding='utf-8')
+          main = re.sub(r'PRIMARY_HOST = "[^"]+"', 'PRIMARY_HOST = "www.formatxsuite.com"', main)
+          main = re.sub(r'PRIMARY_PATH = "[^"]+"', 'PRIMARY_PATH = "/"', main)
+          main = re.sub(r'FALLBACK_HOST = "[^"]+"', 'FALLBACK_HOST = "formatxsuite.com"', main)
+          main = re.sub(r'FALLBACK_PATH = "[^"]+"', 'FALLBACK_PATH = "/"', main)
+          main = main.replace('GitHub tartalék oldal megnyitása', 'FormatX tartalék domain megnyitása')
+          main = main.replace(
+              'Az elsődleges Worker nem adott megfelelő oldalt. A GitHub tartalék betöltése folyamatban van.',
+              'Az elsődleges domain nem adott megfelelő oldalt. A FormatX tartalék domain betöltése folyamatban van.',
+          )
+          main = main.replace('A FormatX oldalak nem érhetők el.', 'A FormatX nem érhető el.')
+          main = main.replace('nyisd meg valamelyik oldalt külön.', 'nyisd meg a weboldalt külön.')
+          if 'hutoczky.github.io' in main:
+              raise SystemExit('GitHub Pages fallback remained in MainActivity.java')
+          main_path.write_text(main, encoding='utf-8')
+
+          payment_activity = Path('android-app/app/src/main/java/hu/formatx/suite/PaymentActivity.java').read_text(encoding='utf-8')
+          payment_data = Path('android-app/app/src/main/java/hu/formatx/suite/PaymentData.java').read_text(encoding='utf-8')
+          if 'https://www.formatxsuite.com/support.html' not in payment_activity:
+              raise SystemExit('Android support URL is not on the production domain')
+          if 'ORDER_REFERENCE_PATTERN' not in payment_data:
+              raise SystemExit('Android does not accept secure server-generated order references')
+
+      - name: Validate JavaScript and configuration invariants
         run: |
           set -euo pipefail
           node --check billing-worker/src/live-entry.js
           node --check billing-worker/src/production-entry.js
           node --check docs/scifi-ui/scripts/checkout.js
           node --check docs/scifi-ui/scripts/payment-status.js
+          grep -F 'FALLBACK_HOST = "formatxsuite.com"' android-app/app/src/main/java/hu/formatx/suite/MainActivity.java
+          ! grep -R -Fq 'hutoczky.github.io' android-app/app/src/main
 
       - name: Install Worker dependencies
         working-directory: billing-worker
@@ -74,5 +103,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Harden checkout order access and fail closed"
+          git commit -m "Harden checkout order access and consolidate production domains"
           git push
