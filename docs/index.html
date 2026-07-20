@@ -2,28 +2,45 @@
 <html lang="hu">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,follow">
-  <title>FormatX Suite Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#030817">
+  <title>FormatX Suite Pro | 2041 Professional Platform</title>
+  <style>
+    html,body{min-height:100%;margin:0;background:#030817;color:#eaf4ff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+    .loading{min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px}
+    .loading strong{display:block;font-size:clamp(28px,5vw,54px)}
+    .loading span{display:block;margin-top:12px;color:#9db2cc;font-size:16px}
+  </style>
   <script>
-    (function () {
-      var url = new URL(window.location.href);
-      var language = url.searchParams.get('lang');
-      if (language !== 'hu' && language !== 'en') {
-        try { language = localStorage.getItem('formatx-language'); } catch (_) {}
+    (async function () {
+      try {
+        var response = await fetch('/scifi-ui/index.html', { cache: 'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        var html = await response.text();
+        html = html
+          .replace('<head>', '<head><base href="/scifi-ui/">')
+          .replace(
+            '</head>',
+            '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-4"></head>'
+          )
+          .replace(
+            '</body>',
+            '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-4"><\/script></body>'
+          );
+        document.open();
+        document.write(html);
+        document.close();
+      } catch (error) {
+        document.documentElement.innerHTML = '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FormatX Suite Pro</title></head><body style="margin:0;background:#030817;color:#eaf4ff;font:18px/1.6 system-ui;padding:40px"><h1>FormatX Suite Pro</h1><p>A főoldal betöltése nem sikerült. Frissítsd az oldalt néhány másodperc múlva.</p></body>';
       }
-      if (language !== 'hu' && language !== 'en') {
-        language = String(navigator.language || '').toLowerCase().indexOf('hu') === 0 ? 'hu' : 'en';
-      }
-      var target = new URL('./scifi-ui/', window.location.href);
-      target.searchParams.set('lang', language);
-      if (url.hash) target.hash = url.hash;
-      window.location.replace(target.href);
     }());
   </script>
 </head>
 <body>
-  <p>Átirányítás a FormatX Suite Pro oldalára. Redirecting to FormatX Suite Pro.</p>
-  <p><a href="./scifi-ui/?lang=hu">Magyar oldal</a> · <a href="./scifi-ui/?lang=en">English site</a></p>
+  <main class="loading">
+    <div><strong>FormatX Suite Pro</strong><span>A professzionális felület betöltése…</span></div>
+  </main>
+  <noscript><p>A weboldal használatához JavaScript szükséges.</p></noscript>
 </body>
 </html>
