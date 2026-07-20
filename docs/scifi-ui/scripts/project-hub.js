@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  initialiseAndroidAppMode();
+
   document.querySelectorAll('a[href="#project-details"]').forEach(function (anchorLink) {
     anchorLink.href = '/project.html';
   });
@@ -16,7 +18,8 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(pointer: fine)').matches;
   const wideViewport = window.matchMedia('(min-width: 901px)').matches;
-  if (reduceMotion || !finePointer || !wideViewport) return;
+  const androidApp = document.documentElement.dataset.formatxApp === 'android';
+  if (reduceMotion || !finePointer || !wideViewport || androidApp) return;
 
   document.querySelectorAll(
     '.project-hub-card,.price-card,.feature-cards article,.project-module-grid article,.project-workflow article,.project-foundation-grid article',
@@ -68,5 +71,27 @@
       engineFrame = 0;
       engine.style.transform = '';
     });
+  }
+
+  function initialiseAndroidAppMode() {
+    const query = new URLSearchParams(window.location.search);
+    const userAgent = String(window.navigator.userAgent || '');
+    if (query.get('app') !== 'android' && userAgent.indexOf('FormatXAndroid/') === -1) return;
+
+    document.documentElement.dataset.formatxApp = 'android';
+    if (document.body) document.body.classList.add('formatx-android-app');
+    if (document.querySelector('link[data-formatx-android-style]')) return;
+
+    const currentScript = Array.prototype.find.call(
+      document.scripts,
+      function (script) { return /\/scripts\/project-hub\.js(?:\?|$)/.test(script.src); },
+    );
+    if (!currentScript || !currentScript.src) return;
+
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.dataset.formatxAndroidStyle = 'true';
+    stylesheet.href = new URL('../styles/android-app.css?v=20260720-android-app-1', currentScript.src).href;
+    document.head.appendChild(stylesheet);
   }
 }());
