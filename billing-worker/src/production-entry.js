@@ -40,12 +40,7 @@ export default {
     const url = new URL(request.url);
     let response;
 
-    if (url.hostname === APEX_HOST) {
-      const target = new URL(request.url);
-      target.hostname = CANONICAL_HOST;
-      target.protocol = 'https:';
-      response = Response.redirect(target.toString(), 308);
-    } else if (url.pathname === '/api/project-ai') {
+    if (url.pathname === '/api/project-ai') {
       response = await handleProjectAi(request, env);
     } else if (
       request.method === 'GET'
