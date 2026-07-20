@@ -15,26 +15,34 @@
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(pointer: fine)').matches;
-  if (reduceMotion || !finePointer) return;
+  const wideViewport = window.matchMedia('(min-width: 901px)').matches;
+  if (reduceMotion || !finePointer || !wideViewport) return;
 
   document.querySelectorAll(
     '.project-hub-card,.price-card,.feature-cards article,.project-module-grid article,.project-workflow article,.project-foundation-grid article',
   ).forEach(function (card) {
-    card.addEventListener('pointermove', function (event) {
-      const rect = card.getBoundingClientRect();
-      const px = (event.clientX - rect.left) / rect.width;
-      const py = (event.clientY - rect.top) / rect.height;
-      const isProjectHubCard = card.classList.contains('project-hub-card');
-      const maxRotateX = isProjectHubCard ? 5 : 8;
-      const maxRotateY = isProjectHubCard ? 7 : 11;
+    let frame = 0;
 
-      card.style.setProperty('--rx', (-(py - 0.5) * maxRotateX).toFixed(2) + 'deg');
-      card.style.setProperty('--ry', ((px - 0.5) * maxRotateY).toFixed(2) + 'deg');
-      card.style.setProperty('--glare-x', (px * 100).toFixed(1) + '%');
-      card.style.setProperty('--glare-y', (py * 100).toFixed(1) + '%');
-    });
+    card.addEventListener('pointermove', function (event) {
+      if (frame) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(function () {
+        const rect = card.getBoundingClientRect();
+        const px = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+        const py = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+        const isProjectHubCard = card.classList.contains('project-hub-card');
+        const maxRotateX = isProjectHubCard ? 2.6 : 2.1;
+        const maxRotateY = isProjectHubCard ? 3.8 : 3.1;
+
+        card.style.setProperty('--rx', (-(py - 0.5) * maxRotateX).toFixed(2) + 'deg');
+        card.style.setProperty('--ry', ((px - 0.5) * maxRotateY).toFixed(2) + 'deg');
+        card.style.setProperty('--glare-x', (px * 100).toFixed(1) + '%');
+        card.style.setProperty('--glare-y', (py * 100).toFixed(1) + '%');
+      });
+    }, { passive: true });
 
     card.addEventListener('pointerleave', function () {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
       card.style.removeProperty('--rx');
       card.style.removeProperty('--ry');
       card.style.removeProperty('--glare-x');
@@ -44,13 +52,20 @@
 
   const engine = document.querySelector('.core-engine');
   if (engine) {
+    let engineFrame = 0;
+
     window.addEventListener('pointermove', function (event) {
-      const x = event.clientX / window.innerWidth - 0.5;
-      const y = event.clientY / window.innerHeight - 0.5;
-      engine.style.transform = 'rotateY(' + (-6 + x * 7).toFixed(2) + 'deg) rotateX(' + (2 - y * 5).toFixed(2) + 'deg) translateZ(22px)';
+      if (engineFrame) cancelAnimationFrame(engineFrame);
+      engineFrame = requestAnimationFrame(function () {
+        const x = event.clientX / window.innerWidth - 0.5;
+        const y = event.clientY / window.innerHeight - 0.5;
+        engine.style.transform = 'rotateY(' + (-4 + x * 4).toFixed(2) + 'deg) rotateX(' + (1.5 - y * 3).toFixed(2) + 'deg) translateZ(16px)';
+      });
     }, { passive: true });
 
     window.addEventListener('mouseleave', function () {
+      if (engineFrame) cancelAnimationFrame(engineFrame);
+      engineFrame = 0;
       engine.style.transform = '';
     });
   }
