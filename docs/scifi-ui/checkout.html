@@ -118,7 +118,7 @@
 
           <div class="checkout-actions">
             <button id="checkout-submit" class="button primary" type="submit" disabled>Bankszámla ellenőrzése…</button>
-            <a class="button secondary" href="./index.html#pro">Mégsem</a>
+            <a class="button secondary" href="./index.html#pricing">Mégsem</a>
           </div>
           <p id="checkout-feedback" class="form-feedback" role="status" aria-live="polite"></p>
         </form>
@@ -129,9 +129,9 @@
             <h2 id="payment-panel-title">Banki átutalás</h2>
           </div>
           <div class="payment-grid">
-            <img id="payment-qr" width="260" height="260" alt="Fix összegű banki átutalási adatok QR-kódja">
+            <img id="payment-qr" width="260" height="260" alt="Rögzített összegű banki átutalás QR-kódja">
             <div>
-              <p><strong id="payment-qr-description">A QR-kód a kiválasztott fix összeget, az IBAN-t és a közleményt tartalmazza.</strong></p>
+              <p><strong id="payment-qr-description">A QR-kód a kiválasztott, rögzített összeget, az IBAN-t és a közleményt tartalmazza.</strong></p>
               <p id="payment-warning" class="payment-warning">Mindig ellenőrizd az alábbi adatokat jóváhagyás előtt.</p>
               <dl class="bank-details">
                 <div><dt>Kedvezményezett</dt><dd id="payment-holder">—</dd></div>
@@ -154,7 +154,7 @@
         <form id="confirmation-form" class="checkout-form" hidden novalidate>
           <div class="form-heading">
             <p class="eyebrow">3. LÉPÉS</p>
-            <h2>Átutalás visszajelzése</h2>
+            <h2>Az átutalás bejelentése</h2>
           </div>
           <p>A visszajelzés nem aktivál automatikusan licencet. Az adminisztrátor előbb ellenőrzi, hogy a pontos összeg és közlemény megérkezett-e a bankszámlára.</p>
           <div class="form-grid">
@@ -184,7 +184,7 @@
             <span>Hozzájárulok, hogy a FormatX üzemeltetője az adatokat az átutalás azonosításához és a licenc aktiválásához kezelje.</span>
           </label>
           <div class="checkout-actions">
-            <button id="confirmation-submit" class="button primary" type="submit">Átutalás visszajelzése</button>
+            <button id="confirmation-submit" class="button primary" type="submit">Átutalás bejelentése</button>
           </div>
           <p id="confirmation-feedback" class="form-feedback" role="status" aria-live="polite"></p>
         </form>
