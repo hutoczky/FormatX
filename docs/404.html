@@ -6,29 +6,16 @@
   <meta name="robots" content="noindex,follow">
   <title>FormatX Suite Pro</title>
   <style>
-    body { font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 2rem; color: #dceeff; background: #030711; }
-    a { color: #58eeff; }
+    body{margin:0;padding:40px;color:#dceeff;background:#030711;font:18px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+    a{color:#58eeff}
   </style>
 </head>
 <body>
-  <p>Átirányítás a FormatX Suite Pro oldalára. Redirecting to FormatX Suite Pro.</p>
-  <p><a href="/FormatX/scifi-ui/?lang=hu">Magyar oldal</a> · <a href="/FormatX/scifi-ui/?lang=en">English site</a></p>
+  <h1>FormatX Suite Pro</h1>
+  <p>A kért oldal nem található. Visszairányítás a főoldalra.</p>
+  <p><a href="/">Főoldal megnyitása</a></p>
   <script>
-    (function () {
-      var base = '/FormatX';
-      var source = new URL(window.location.href);
-      var language = source.searchParams.get('lang');
-      if (language !== 'hu' && language !== 'en') {
-        try { language = localStorage.getItem('formatx-language'); } catch (_) {}
-      }
-      if (language !== 'hu' && language !== 'en') {
-        language = String(navigator.language || '').toLowerCase().indexOf('hu') === 0 ? 'hu' : 'en';
-      }
-      var target = new URL(base + '/scifi-ui/index.html', window.location.origin);
-      target.searchParams.set('lang', language);
-      if (source.hash) target.hash = source.hash;
-      window.location.replace(target.href);
-    }());
+    window.location.replace('/');
   </script>
 </body>
 </html>
