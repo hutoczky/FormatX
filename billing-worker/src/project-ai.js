@@ -27,9 +27,9 @@ Workflow
 4. Verification: check integrity, results and records.
 
 Platforms and access
-- The central technician application is Windows-focused.
-- A web interface and Android client provide supplementary access.
-- Linux/Bazzite and macOS are part of the wider cross-platform direction and integration workflow.
+- Linux, especially Bazzite-compatible Linux environments, is the primary supported platform.
+- The web interface and Android client provide supplementary access across supported platforms.
+- Windows and macOS are additionally supported alongside the primary Linux/Bazzite platform.
 - The site and the Android client support Hungarian and English.
 
 Security and integrity
@@ -69,7 +69,7 @@ const LOCAL_ANSWERS = {
     modules: 'A fő modulok: ISO–USB írás, gyors és mély formázás, partíciótervező, biztonságos törlés, SMART- és felszínvizsgálat, rendszerdiagnosztika, kétpaneles fájlkezelő, valamint AI- és támogatási modul. Részletesen: /modules.html',
     workflow: 'A FormatX munkafolyamata négy lépésből áll: felderítés, tervezés, kontrollált végrehajtás és visszaellenőrzés. Részletesen: /workflow.html',
     security: 'A biztonság alapja a célmeghajtó egyértelmű azonosítása, a többlépcsős megerősítés, a műveleti naplózás, valamint a SHA-256 és Ed25519 integritás-ellenőrzés. Az AI nem indíthat automatikusan veszélyes lemezműveletet. Részletesen: /security.html',
-    platforms: 'A központi technikusi alkalmazás Windows-központú. A webes felület és az Android kliens kiegészítő hozzáférést ad; a Linux/Bazzite és macOS a többplatformos integrációs irány része.',
+    platforms: 'A FormatX elsődleges támogatott platformja a Linux, különösen a Bazzite-kompatibilis környezet. A Windows és a macOS kiegészítő támogatást kap, a webes felület és az Android kliens pedig többplatformos hozzáférést biztosít.',
     android: 'A FormatX rendelkezik Android klienssel, amely a webes projektfelülethez ad mobil hozzáférést, magyar és angol nyelven.',
     ai: 'A projekt-AI magyarázó és döntéstámogató szerepet kap. Kizárólag a FormatX projektről válaszol, és nem hajt végre automatikusan formázást, törlést vagy más veszélyes meghajtóműveletet.',
     support: 'A stabil kiadások GitHub Releases csatornán jelennek meg, a támogatás és hibajelentés GitHub-alapú folyamatokra épül. További információ: /support.html',
@@ -81,7 +81,7 @@ const LOCAL_ANSWERS = {
     modules: 'Its main modules are ISO-to-USB writing, quick and deep formatting, partition planning, secure erasure, SMART and surface inspection, system diagnostics, a dual-pane file manager, and an AI/support module. Details: /modules.html',
     workflow: 'The FormatX workflow has four stages: discovery, planning, controlled execution and verification. Details: /workflow.html',
     security: 'Safety is based on explicit target-drive identification, multi-step confirmation, operation logs, and SHA-256/Ed25519 integrity checks. The AI cannot automatically start destructive disk operations. Details: /security.html',
-    platforms: 'The central technician application is Windows-focused. The web interface and Android client provide supplementary access; Linux/Bazzite and macOS are part of the cross-platform integration direction.',
+    platforms: 'Linux, especially Bazzite-compatible environments, is the primary supported platform. Windows and macOS receive additional support, while the web interface and Android client provide cross-platform access.',
     android: 'FormatX includes an Android client that provides mobile access to the project web interface in Hungarian and English.',
     ai: 'The project AI provides explanations and decision support. It answers only about FormatX and cannot automatically run formatting, erasure or other destructive drive operations.',
     support: 'Stable releases are published through GitHub Releases, while support and issue reporting use GitHub-based workflows. More information: /support.html',
