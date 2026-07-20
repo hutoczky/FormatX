@@ -1,4 +1,5 @@
 import liveWorker from './live-entry.js';
+import { handleProjectAi } from './project-ai.js';
 
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.6.apk';
@@ -12,6 +13,8 @@ const LEGACY_HOME_PATHS = new Set([
 
 const THEME_SCRIPT = '/scifi-ui/scripts/theme-system.js?v=20260720-theme-1';
 const THEME_STYLES = '/scifi-ui/styles/theme-system.css?v=20260720-theme-1';
+const PROJECT_AI_SCRIPT = '/scifi-ui/scripts/project-ai.js?v=20260720-project-ai-1';
+const PROJECT_AI_STYLES = '/scifi-ui/styles/project-ai.css?v=20260720-project-ai-1';
 
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
@@ -40,6 +43,8 @@ export default {
       target.hostname = CANONICAL_HOST;
       target.protocol = 'https:';
       response = Response.redirect(target.toString(), 308);
+    } else if (url.pathname === '/api/project-ai') {
+      response = await handleProjectAi(request, env);
     } else if (
       request.method === 'GET'
       && (
@@ -180,6 +185,18 @@ async function secureAndEnhanceResponse(response, pathname) {
         html = html.replace(
           '</head>',
           `<link rel="stylesheet" href="${THEME_STYLES}"></head>`,
+        );
+      }
+      if (!html.includes(PROJECT_AI_STYLES)) {
+        html = html.replace(
+          '</head>',
+          `<link rel="stylesheet" href="${PROJECT_AI_STYLES}"></head>`,
+        );
+      }
+      if (!html.includes(PROJECT_AI_SCRIPT)) {
+        html = html.replace(
+          '</body>',
+          `<script defer src="${PROJECT_AI_SCRIPT}"></script></body>`,
         );
       }
       body = html;
