@@ -1,0 +1,256 @@
+name: One-time FormatX production hardening
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/harden-formatx-production.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-production-hardening
+  cancel-in-progress: false
+
+jobs:
+  harden:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Apply audited production fixes
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace_once(path_name, old, new):
+              path = Path(path_name)
+              text = path.read_text(encoding="utf-8")
+              if old not in text:
+                  raise SystemExit(f"Expected text not found in {path_name}: {old[:120]!r}")
+              path.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          # Worker: remove obsolete redirect constants, add canonical response metadata,
+          # permit the documented QuickChart QR image only on checkout pages, and cache the APK safely.
+          replace_once(
+              "billing-worker/src/production-entry.js",
+              "const CANONICAL_HOST = 'www.formatxsuite.com';\nconst APEX_HOST = 'formatxsuite.com';",
+              "const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';",
+          )
+          replace_once(
+              "billing-worker/src/production-entry.js",
+              "].join('; ');\n\nexport default {",
+              "].join('; ');\n\nconst CHECKOUT_CONTENT_SECURITY_POLICY = CONTENT_SECURITY_POLICY.replace(\n  \"img-src 'self' data:\",\n  \"img-src 'self' data: https://quickchart.io\",\n);\n\nexport default {",
+          )
+          replace_once(
+              "billing-worker/src/production-entry.js",
+              "return await secureAndEnhanceResponse(response, url.pathname);",
+              "return await secureAndEnhanceResponse(response, url);",
+          )
+          replace_once(
+              "billing-worker/src/production-entry.js",
+              "headers.set('Cache-Control', 'no-store');\n  headers.set('X-Content-Type-Options', 'nosniff');",
+              "headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600');\n  headers.set('X-Content-Type-Options', 'nosniff');",
+          )
+          replace_once(
+              "billing-worker/src/production-entry.js",
+              "async function secureAndEnhanceResponse(response, pathname) {\n  const headers = new Headers(response.headers);",
+              "async function secureAndEnhanceResponse(response, url) {\n  const pathname = url.pathname;\n  const headers = new Headers(response.headers);",
+          )
+          replace_once(
+              "billing-worker/src/production-entry.js",
+              "  if (isHtml) {\n    headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY);",
+              "  if (isHtml) {\n    headers.set('Link', `<${PUBLIC_ORIGIN}${pathname}>; rel=\"canonical\"`);\n    headers.set(\n      'Content-Security-Policy',\n      pathname.endsWith('/checkout.html')\n        ? CHECKOUT_CONTENT_SECURITY_POLICY\n        : CONTENT_SECURITY_POLICY,\n    );",
+          )
+
+          # Static checkout mode needs the same narrowly scoped QR image permission.
+          replace_once(
+              "docs/scifi-ui/checkout.html",
+              "img-src 'self' data:;",
+              "img-src 'self' data: https://quickchart.io;",
+          )
+          replace_once(
+              "docs/scifi-ui/scripts/checkout.js",
+              "    paymentQr.src = 'https://quickchart.io/qr?text=' + encodeURIComponent(result.qr_payload)",
+              "    paymentQr.referrerPolicy = 'no-referrer';\n    paymentQr.src = 'https://quickchart.io/qr?text=' + encodeURIComponent(result.qr_payload)",
+          )
+          replace_once(
+              "docs/scifi-ui/privacy.html",
+              "A QR-adat nem tartalmaz bankkártyaadatot, bejelentkezési adatot vagy FormatX adatbázis-hozzáférést.",
+              "A QR-adat nem tartalmaz bankkártyaadatot, bejelentkezési adatot vagy FormatX adatbázis-hozzáférést. A külső szolgáltatás a QR-kérés teljesítéséhez technikai kapcsolatadatokat, például IP-címet is kezelhet; a QR-kérés ezért no-referrer beállítással történik.",
+          )
+
+          # Android source must use the production custom domain, not a legacy workers.dev endpoint.
+          replace_once(
+              "android-app/app/src/main/java/hu/formatx/suite/PaymentClient.java",
+              'private static final String API_ROOT = "https://formatx1.formatx.workers.dev/api";',
+              'private static final String API_ROOT = "https://www.formatxsuite.com/api";',
+          )
+          replace_once(
+              "android-app/app/src/main/java/hu/formatx/suite/PaymentActivity.java",
+              'private static final Uri SUPPORT_URI = Uri.parse("https://formatx1.formatx.workers.dev/scifi-ui/support.html");',
+              'private static final Uri SUPPORT_URI = Uri.parse("https://www.formatxsuite.com/scifi-ui/support.html");',
+          )
+
+          # Documentation prices must match the server-locked and client-side catalogues.
+          readme = Path("billing-worker/README.md")
+          readme_text = readme.read_text(encoding="utf-8")
+          readme_text = readme_text.replace(
+              "| Business Lite | 19 900 Ft | 199 000 Ft | 44 € | 547 € |",
+              "| Business Lite | 15 900 Ft | 139 300 Ft | 44 € | 383 € |",
+          ).replace(
+              "| Business Pro | 49 900 Ft | 499 000 Ft | 110 € | 1 373 € |",
+              "| Business Pro | 39 900 Ft | 349 300 Ft | 110 € | 961 € |",
+          ).replace(
+              "| Technician Team | 99 900 Ft | 999 000 Ft | 220 € | 2 748 € |",
+              "| Technician Team | 79 900 Ft | 699 300 Ft | 220 € | 1 924 € |",
+          )
+          architecture = """
+
+## Éles üzemeltetési architektúra
+
+A produkció nem saját PC-ről, dinamikus IP-ről, Docker-konténerből vagy bérelt virtuális gépről fut. A `formatxsuite.com` és a `www.formatxsuite.com` közvetlen Cloudflare Worker Custom Domain. A Worker a Cloudflare globális szerver nélküli futtatókörnyezetében fut, a statikus fájlokat pedig a Workers Static Assets szolgálja ki.
+
+A GitHub a forráskód és a kiadási folyamat tárhelye; nem a GitHub szolgálja ki a produkciós weboldalt. Új verzió telepítésekor a Worker kódja és a statikus asset-verzió frissül, ezért nincs újraindításhoz kötött ideiglenes szerver-IP.
+"""
+          if "## Éles üzemeltetési architektúra" not in readme_text:
+              readme_text += architecture
+          readme.write_text(readme_text, encoding="utf-8")
+
+          # Strengthen production deployment verification for both hostnames, headers and API health.
+          deploy_path = Path(".github/workflows/deploy-formatx-custom-domain.yml")
+          deploy_text = deploy_path.read_text(encoding="utf-8")
+          marker = "      - name: Verify clean production URL\n"
+          if marker not in deploy_text:
+              raise SystemExit("Production verification step marker not found")
+          deploy_text = deploy_text[:deploy_text.index(marker)] + """      - name: Verify both production domains, security headers and API health
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          verify_site() {
+            local url="$1"
+            for attempt in $(seq 1 36); do
+              local headers body status
+              headers="$(mktemp)"
+              body="$(mktemp)"
+              status="$(curl -sS --connect-timeout 10 --max-time 30 \\
+                -D "$headers" -o "$body" -w '%{http_code}' \\
+                -H 'Cache-Control: no-cache' "$url" || true)"
+
+              if [ "$status" = "200" ] \\
+                 && grep -Fq 'FormatX Suite Pro' "$body" \\
+                 && grep -iq '^strict-transport-security:' "$headers" \\
+                 && grep -iq '^content-security-policy:' "$headers" \\
+                 && grep -iq '^x-content-type-options: nosniff' "$headers" \\
+                 && grep -iq '^link: <https://www.formatxsuite.com/' "$headers" \\
+                 && ! grep -iq '^location:' "$headers"; then
+                echo "Verified $url"
+                rm -f "$headers" "$body"
+                return 0
+              fi
+
+              rm -f "$headers" "$body"
+              sleep 10
+            done
+            echo "Production verification failed for $url" >&2
+            return 1
+          }
+
+          verify_site 'https://formatxsuite.com/'
+          verify_site 'https://www.formatxsuite.com/'
+
+          health="$(curl -fsSL --connect-timeout 10 --max-time 30 \\
+            -H 'Cache-Control: no-cache' \\
+            'https://www.formatxsuite.com/api/health')"
+          HEALTH_JSON="$health" python3 - <<'PY'
+          import json
+          import os
+
+          data = json.loads(os.environ['HEALTH_JSON'])
+          assert data.get('provider') == 'bank_transfer', data
+          assert data.get('mode') == 'live', data
+          assert set(data.get('supported_currencies', [])) == {'HUF', 'EUR'}, data
+          print('Production API health response is structurally valid.')
+          PY
+"""
+          deploy_path.write_text(deploy_text, encoding="utf-8")
+
+          # Expand regression validation for the production entry point and retired endpoint.
+          validation_path = Path(".github/workflows/validate-checkout.yml")
+          validation = validation_path.read_text(encoding="utf-8")
+          validation = validation.replace(
+              "          node --check billing-worker/src/live-entry.js\n",
+              "          node --check billing-worker/src/live-entry.js\n          node --check billing-worker/src/production-entry.js\n",
+              1,
+          )
+          validation = validation.replace(
+              "          print('FormatX bilingual checkout, unified discounted prices and exact 2041 commerce validation passed.')",
+              """          production = (root / 'billing-worker/src/production-entry.js').read_text(encoding='utf-8')
+          android_payment = (root / 'android-app/app/src/main/java/hu/formatx/suite/PaymentClient.java').read_text(encoding='utf-8')
+          android_activity = (root / 'android-app/app/src/main/java/hu/formatx/suite/PaymentActivity.java').read_text(encoding='utf-8')
+          worker_readme = (root / 'billing-worker/README.md').read_text(encoding='utf-8')
+          assert 'CHECKOUT_CONTENT_SECURITY_POLICY' in production
+          assert 'https://quickchart.io' in production
+          assert 'rel=\\\"canonical\\\"' in production
+          assert 'CANONICAL_HOST' not in production and 'APEX_HOST' not in production
+          assert 'formatx1.formatx.workers.dev' not in android_payment
+          assert 'formatx1.formatx.workers.dev' not in android_activity
+          assert 'https://www.formatxsuite.com/api' in android_payment
+          for token in ['15 900 Ft | 139 300 Ft', '39 900 Ft | 349 300 Ft', '79 900 Ft | 699 300 Ft']:
+              assert token in worker_readme, token
+
+          print('FormatX bilingual checkout, production architecture, unified prices and exact 2041 commerce validation passed.')""",
+              1,
+          )
+          validation_path.write_text(validation, encoding="utf-8")
+
+          # Remove completed one-shot workflows with repository write permission.
+          for obsolete in [
+              ".github/workflows/serve-apex-without-www-redirect.yml",
+              ".github/workflows/fix-multiplatform-trial-copy.yml",
+              ".github/workflows/enable-responsive-parity.yml",
+          ]:
+              Path(obsolete).unlink(missing_ok=True)
+
+          # This workflow is intentionally one-shot and removes itself.
+          Path(".github/workflows/harden-formatx-production.yml").unlink()
+
+      - name: Validate hardened source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check billing-worker/src/production-entry.js
+          node --check billing-worker/src/live-entry.js
+          node --check docs/scifi-ui/scripts/checkout.js
+          python3 -m json.tool billing-worker/wrangler.jsonc >/dev/null
+          ! grep -R "formatx1\.formatx\.workers\.dev" android-app/app/src/main/java
+          git diff --check
+
+      - name: Validate Worker bundle
+        working-directory: billing-worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npx wrangler deploy --dry-run --outdir ../.wrangler-dry-run
+
+      - name: Commit audited production hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Harden FormatX production architecture and verification"
+          git pull --rebase origin master
+          git push origin HEAD:master
