@@ -59,14 +59,14 @@ async function serveEnhancedHome(request, env) {
     .replace(
       '</head>',
       [
-        '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-6">',
-        '<link rel="stylesheet" href="/scifi-ui/styles/main-readability.css?v=20260720-readability-1">',
+        '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-7">',
+        '<link rel="stylesheet" href="/scifi-ui/styles/main-readability.css?v=20260720-readability-2">',
         '</head>',
       ].join(''),
     )
     .replace(
       '</body>',
-      '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-6"></script></body>',
+      '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-7"></script></body>',
     );
 
   const headers = new Headers(upstream.headers);
