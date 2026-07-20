@@ -1,36 +1,25 @@
-name: Deploy FormatX production
-run-name: Deploy FormatX production from ${{ github.sha }}
+name: Manual FormatX production deploy
+run-name: Manual FormatX production deploy from ${{ github.sha }}
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - ".github/workflows/deploy-formatx-custom-domain.yml"
-      - "billing-worker/src/**"
-      - "billing-worker/wrangler.jsonc"
-      - "billing-worker/package.json"
-      - "billing-worker/package-lock.json"
-      - "docs/**"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: formatx-production-deploy
+  group: formatx-manual-production-deploy
   cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Deploy and verify formatxsuite.com
+    name: Manual deploy and verification
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Validate production configuration
         shell: python
@@ -55,8 +44,7 @@ jobs:
           assert expected.issubset(actual)
           print("Production configuration is valid.")
 
-      - name: Detect Cloudflare token
-        id: token
+      - name: Require manual Cloudflare API token
         shell: bash
         env:
           RAW_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -64,25 +52,16 @@ jobs:
           set -euo pipefail
           TOKEN="$(printf '%s' "$RAW_CF_TOKEN" | tr -d '\r\n')"
           TOKEN="${TOKEN#Authorization: Bearer }"
-          TOKEN="${TOKEN#authorization: bearer }"
           TOKEN="${TOKEN#Bearer }"
-          TOKEN="${TOKEN#bearer }"
-          TOKEN="${TOKEN#\"}"
-          TOKEN="${TOKEN%\"}"
-          TOKEN="${TOKEN#\'}"
-          TOKEN="${TOKEN%\'}"
           TOKEN="$(printf '%s' "$TOKEN" | xargs)"
           if [ "${#TOKEN}" -lt 20 ]; then
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "Cloudflare API token is unavailable."
-            exit 0
+            echo "This manual backup workflow requires the CLOUDFLARE_API_TOKEN repository secret." >&2
+            exit 1
           fi
           echo "::add-mask::$TOKEN"
-          echo "NORMALIZED_CF_TOKEN=$TOKEN" >> "$GITHUB_ENV"
-          echo "available=true" >> "$GITHUB_OUTPUT"
+          echo "CLOUDFLARE_API_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 
       - name: Set up Node.js
-        if: steps.token.outputs.available == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -90,24 +69,16 @@ jobs:
           cache-dependency-path: billing-worker/package-lock.json
 
       - name: Install Worker dependencies
-        if: steps.token.outputs.available == 'true'
         working-directory: billing-worker
         run: npm ci
 
-      - name: Deploy formatx Worker and custom domains
-        id: deploy
-        if: steps.token.outputs.available == 'true'
-        continue-on-error: true
+      - name: Deploy formatx Worker
         working-directory: billing-worker
         env:
-          CLOUDFLARE_API_TOKEN: ${{ env.NORMALIZED_CF_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ffd7d28ea7c6a510549dc9363619c8c5
         run: npx wrangler deploy --name formatx
 
       - name: Verify clean production URL
-        id: verify
-        if: steps.token.outputs.available == 'true' && steps.deploy.outcome == 'success'
-        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -118,7 +89,7 @@ jobs:
                 -D "$headers" -o "$body" \
                 -H 'Cache-Control: no-cache' \
                 'https://www.formatxsuite.com/'; then
-              if grep -Fq 'class="reference-commerce"' "$body" \
+              if grep -Fq 'FormatX Suite Pro' "$body" \
                  && ! grep -Fiq '^location: .*/scifi-ui/' "$headers"; then
                 echo "Verified clean production URL."
                 rm -f "$headers" "$body"
@@ -130,68 +101,3 @@ jobs:
           done
           echo "Production verification failed." >&2
           exit 1
-
-      - name: Write deployment report
-        if: always()
-        shell: bash
-        env:
-          TOKEN_AVAILABLE: ${{ steps.token.outputs.available }}
-          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
-          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
-        run: |
-          set -euo pipefail
-          mkdir -p diagnostics
-          generated="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          status="failed"
-          reason="unknown"
-          if [ "$TOKEN_AVAILABLE" != "true" ]; then
-            reason="missing_cloudflare_api_token"
-          elif [ "$DEPLOY_OUTCOME" != "success" ]; then
-            reason="wrangler_deploy_failed"
-          elif [ "$VERIFY_OUTCOME" != "success" ]; then
-            reason="production_verification_failed"
-          else
-            status="success"
-            reason="deployed_and_verified"
-          fi
-          cat > diagnostics/formatxsuite-deployment-report.txt <<EOF
-          generated_utc=$generated
-          commit_sha=${GITHUB_SHA}
-          workflow_run_id=${GITHUB_RUN_ID}
-          status=$status
-          reason=$reason
-          token_available=${TOKEN_AVAILABLE:-false}
-          deploy_outcome=${DEPLOY_OUTCOME:-skipped}
-          verify_outcome=${VERIFY_OUTCOME:-skipped}
-          production_url=https://www.formatxsuite.com/
-          expected_visible_path=/
-          EOF
-
-      - name: Publish deployment report
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add diagnostics/formatxsuite-deployment-report.txt
-          if git diff --cached --quiet; then
-            echo "Deployment report unchanged."
-            exit 0
-          fi
-          git commit -m "Publish FormatX production deployment report"
-          git pull --rebase origin master
-          git push origin HEAD:master
-
-      - name: Enforce successful production deployment
-        if: always()
-        shell: bash
-        env:
-          TOKEN_AVAILABLE: ${{ steps.token.outputs.available }}
-          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
-          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
-        run: |
-          set -euo pipefail
-          test "$TOKEN_AVAILABLE" = "true"
-          test "$DEPLOY_OUTCOME" = "success"
-          test "$VERIFY_OUTCOME" = "success"
