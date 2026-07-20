@@ -36,5 +36,18 @@
     "BANK_BIC": "REVOHUHB",
     "BANK_CORRESPONDENT_BIC": "CHASDEFX",
     "LICENSE_ISSUER": "FormatX Suite Pro"
-  }
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "ratelimits": [
+    {
+      "name": "PROJECT_AI_RATE_LIMIT",
+      "namespace_id": "420701",
+      "simple": {
+        "limit": 12,
+        "period": 60
+      }
+    }
+  ]
 }
