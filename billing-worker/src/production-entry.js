@@ -3,8 +3,7 @@ import { handleProjectAi } from './project-ai.js';
 
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.6.apk';
-const CANONICAL_HOST = 'www.formatxsuite.com';
-const APEX_HOST = 'formatxsuite.com';
+const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';
 const LEGACY_HOME_PATHS = new Set([
   '/scifi-ui',
   '/scifi-ui/',
@@ -35,6 +34,11 @@ const CONTENT_SECURITY_POLICY = [
   "upgrade-insecure-requests",
 ].join('; ');
 
+const CHECKOUT_CONTENT_SECURITY_POLICY = CONTENT_SECURITY_POLICY.replace(
+  "img-src 'self' data:",
+  "img-src 'self' data: https://quickchart.io",
+);
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -57,7 +61,7 @@ export default {
       response = await liveWorker.fetch(request, env, ctx);
     }
 
-    return await secureAndEnhanceResponse(response, url.pathname);
+    return await secureAndEnhanceResponse(response, url);
   },
 };
 
@@ -132,7 +136,7 @@ async function serveAndroidApk(request, env) {
   const headers = new Headers(upstream.headers);
   headers.set('Content-Type', 'application/vnd.android.package-archive');
   headers.set('Content-Disposition', `attachment; filename="${ANDROID_APK_FILENAME}"`);
-  headers.set('Cache-Control', 'no-store');
+  headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600');
   headers.set('X-Content-Type-Options', 'nosniff');
 
   return new Response(upstream.body, {
@@ -141,7 +145,8 @@ async function serveAndroidApk(request, env) {
   });
 }
 
-async function secureAndEnhanceResponse(response, pathname) {
+async function secureAndEnhanceResponse(response, url) {
+  const pathname = url.pathname;
   const headers = new Headers(response.headers);
   const contentType = headers.get('Content-Type') || '';
   const isHtml = contentType.includes('text/html');
@@ -169,7 +174,17 @@ async function secureAndEnhanceResponse(response, pathname) {
   ].join(', '));
 
   if (isHtml) {
-    headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY);
+    const canonicalPath = pathname === '/index.html' || LEGACY_HOME_PATHS.has(pathname)
+      ? '/'
+      : pathname;
+    headers.set('Link', `<${PUBLIC_ORIGIN}${canonicalPath}>; rel="canonical"`);
+    headers.set(
+      'Content-Security-Policy',
+      pathname.endsWith('/checkout.html')
+        ? CHECKOUT_CONTENT_SECURITY_POLICY
+        : CONTENT_SECURITY_POLICY,
+    );
+
     if (response.status >= 200 && response.status < 300 && response.body) {
       let html = await response.text();
       if (!html.includes(THEME_SCRIPT)) {
