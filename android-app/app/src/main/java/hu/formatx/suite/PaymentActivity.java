@@ -24,15 +24,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class PaymentActivity extends Activity {
-    private static final Uri SUPPORT_URI = Uri.parse("https://formatx1.formatx.workers.dev/scifi-ui/support.html");
+    private static final Uri SUPPORT_URI = Uri.parse("https://www.formatxsuite.com/support.html");
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final PaymentClient paymentClient = new PaymentClient();
@@ -69,6 +66,12 @@ public final class PaymentActivity extends Activity {
         setContentView(createContent());
         applyInitialSelection();
         updatePrice();
+    }
+
+    @Override
+    protected void onDestroy() {
+        executor.shutdownNow();
+        super.onDestroy();
     }
 
     private View createContent() {
@@ -153,6 +156,10 @@ public final class PaymentActivity extends Activity {
                 "The licence activates after manual transfer verification. Check the amount, IBAN and reference before approval."
         ), 12, 0xFFFFC979, false);
         paymentPanel.addView(warning, top(14));
+
+        Button support = button(t("Támogatás megnyitása", "Open support"), false);
+        paymentPanel.addView(support, top(10));
+        support.setOnClickListener(view -> openSupport());
 
         AdapterView.OnItemSelectedListener listener = new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { updatePrice(); }
@@ -262,6 +269,16 @@ public final class PaymentActivity extends Activity {
         }
     }
 
+    private void openSupport() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, SUPPORT_URI);
+            intent.addCategory(Intent.CATEGORY_BROWSABLE);
+            startActivity(intent);
+        } catch (ActivityNotFoundException error) {
+            toast(t("Nem található webböngésző.", "No web browser is available."));
+        }
+    }
+
     private void confirmPayment() {
         if (paymentData == null) return;
         String transaction = transactionInput.getText().toString().trim();
@@ -287,49 +304,39 @@ public final class PaymentActivity extends Activity {
                     confirmationButton.setEnabled(true);
                     status.setText(sent
                             ? t("A visszajelzés rögzítve. A licenc az ellenőrzés után aktiválódik.", "Confirmation recorded. The licence activates after verification.")
-                            : t("A visszajelzés nem rögzíthető. Nyisd meg a támogatást.", "Confirmation could not be recorded. Open support."));
-                    if (!sent) openSupport();
+                            : t("A szerver nem fogadta el a visszajelzést.", "The server did not accept the confirmation."));
                 });
             } catch (Exception error) {
                 runOnUiThread(() -> {
                     confirmationButton.setEnabled(true);
-                    status.setText(t("A visszajelzés nem rögzíthető. Megnyitom a támogatást.", "Confirmation could not be recorded. Opening support."));
-                    openSupport();
+                    status.setText(t("A visszajelzés küldése sikertelen.", "Could not send the confirmation."));
                 });
             }
         });
     }
 
-    private void openSupport() {
-        try {
-            startActivity(new Intent(Intent.ACTION_VIEW, SUPPORT_URI));
-        } catch (ActivityNotFoundException error) {
-            toast(t("A támogatási oldal nem nyitható meg.", "The support page cannot be opened."));
-        }
-    }
-
     private PriceCatalog.Plan selectedPlan() {
-        return PriceCatalog.PLANS[Math.max(0, Math.min(planSpinner.getSelectedItemPosition(), PriceCatalog.PLANS.length - 1))];
+        return PriceCatalog.PLANS[planSpinner.getSelectedItemPosition()];
     }
 
     private boolean annual() { return cycleSpinner.getSelectedItemPosition() == 1; }
     private boolean eur() { return currencySpinner.getSelectedItemPosition() == 1; }
 
-    private String money(long amount, boolean eur) {
-        NumberFormat formatter = NumberFormat.getNumberInstance(english ? Locale.UK : new Locale("hu", "HU"));
-        formatter.setMaximumFractionDigits(0);
-        return formatter.format(amount) + (eur ? " €" : " Ft");
+    private String createReference() {
+        return "FX-" + System.currentTimeMillis() + "-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
     }
 
-    private static String createReference() {
-        String date = new SimpleDateFormat("yyyyMMdd", Locale.US).format(new Date());
-        String random = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase(Locale.ROOT);
-        return "FX-" + date + "-" + random;
+    private String money(long amount, boolean euro) {
+        NumberFormat format = NumberFormat.getIntegerInstance(english ? Locale.US : new Locale("hu", "HU"));
+        return euro ? "€" + format.format(amount) : format.format(amount) + " Ft";
     }
 
-    private static String groupIban(String value) { return value.replaceAll("(.{4})(?!$)", "$1 "); }
-    private static String valueOr(String value, String fallback) { return value == null || value.trim().isEmpty() ? fallback : value; }
+    private String groupIban(String value) {
+        return value.replaceAll("(.{4})(?!$)", "$1 ");
+    }
+
     private String t(String hu, String en) { return english ? en : hu; }
+    private String valueOr(String value, String fallback) { return value == null || value.isEmpty() ? fallback : value; }
 
     private LinearLayout vertical() {
         LinearLayout layout = new LinearLayout(this);
@@ -339,8 +346,12 @@ public final class PaymentActivity extends Activity {
 
     private LinearLayout card() {
         LinearLayout layout = vertical();
-        layout.setPadding(dp(16), dp(16), dp(16), dp(16));
-        layout.setBackground(background(0xEE071222, 0xFF1C5972, 16));
+        layout.setPadding(dp(18), dp(18), dp(18), dp(18));
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(0xD90B1723);
+        background.setStroke(dp(1), 0x6613D9FF);
+        background.setCornerRadius(dp(18));
+        layout.setBackground(background);
         return layout;
     }
 
@@ -349,75 +360,60 @@ public final class PaymentActivity extends Activity {
         view.setText(value);
         view.setTextSize(size);
         view.setTextColor(color);
+        view.setLineSpacing(0, 1.14f);
         if (bold) view.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         return view;
     }
 
     private TextView label(String value) {
-        TextView view = text(value, 12, 0xFF8CB3C4, true);
+        TextView view = text(value, 12, 0xFF8FB4C6, true);
         view.setPadding(0, dp(12), 0, dp(5));
         return view;
     }
 
-    private TextView detail(LinearLayout parent, String label) {
-        parent.addView(text(label, 11, 0xFF7595A5, true), top(12));
-        TextView value = text("—", 16, 0xFFEAFBFF, true);
-        value.setTextIsSelectable(true);
-        parent.addView(value);
-        return value;
+    private EditText input(String hint, int inputType) {
+        EditText view = new EditText(this);
+        view.setHint(hint);
+        view.setHintTextColor(0xFF7893A2);
+        view.setTextColor(0xFFEAFBFF);
+        view.setInputType(inputType);
+        view.setSingleLine(false);
+        view.setPadding(dp(14), dp(12), dp(14), dp(12));
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(0xCC07111C);
+        background.setStroke(dp(1), 0x5513D9FF);
+        background.setCornerRadius(dp(12));
+        view.setBackground(background);
+        return view;
     }
 
     private Spinner spinner(String[] values) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, values);
         Spinner spinner = new Spinner(this);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, values) {
-            @Override public View getView(int position, View convertView, ViewGroup parent) {
-                TextView view = (TextView) super.getView(position, convertView, parent);
-                view.setTextColor(0xFFEAFBFF);
-                view.setTextSize(16);
-                view.setPadding(dp(12), dp(12), dp(12), dp(12));
-                return view;
-            }
-            @Override public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                TextView view = (TextView) super.getDropDownView(position, convertView, parent);
-                view.setTextColor(0xFFEAFBFF);
-                view.setBackgroundColor(0xFF091426);
-                return view;
-            }
-        };
         spinner.setAdapter(adapter);
-        spinner.setBackground(background(0xFF0B1A2E, 0xFF1B5B75, 10));
         return spinner;
-    }
-
-    private EditText input(String hint, int type) {
-        EditText input = new EditText(this);
-        input.setHint(hint);
-        input.setHintTextColor(0xFF6F8F9E);
-        input.setTextColor(0xFFEAFBFF);
-        input.setTextSize(16);
-        input.setInputType(type);
-        input.setPadding(dp(14), dp(12), dp(14), dp(12));
-        input.setBackground(background(0xFF081321, 0xFF1A526B, 12));
-        return input;
     }
 
     private Button button(String value, boolean primary) {
         Button button = new Button(this);
         button.setText(value);
+        button.setTextColor(primary ? 0xFF00141E : 0xFFEAFBFF);
         button.setAllCaps(false);
-        button.setTextSize(15);
-        button.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        button.setTextColor(primary ? 0xFF020711 : 0xFFEAFBFF);
-        button.setBackground(background(primary ? 0xFF13D9FF : 0xFF101D35, primary ? 0xFF13D9FF : 0xFF9C4DFF, 12));
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(primary ? 0xFF13D9FF : 0x3313D9FF);
+        background.setStroke(dp(1), 0xAA13D9FF);
+        background.setCornerRadius(dp(14));
+        button.setBackground(background);
         return button;
     }
 
-    private GradientDrawable background(int fill, int stroke, int radius) {
-        GradientDrawable drawable = new GradientDrawable();
-        drawable.setColor(fill);
-        drawable.setCornerRadius(dp(radius));
-        drawable.setStroke(dp(1), stroke);
-        return drawable;
+    private TextView detail(LinearLayout parent, String heading) {
+        TextView label = label(heading);
+        parent.addView(label);
+        TextView value = text("—", 16, 0xFFEAFBFF, true);
+        value.setTextIsSelectable(true);
+        parent.addView(value);
+        return value;
     }
 
     private LinearLayout.LayoutParams matchWrap() {
@@ -426,16 +422,15 @@ public final class PaymentActivity extends Activity {
 
     private LinearLayout.LayoutParams top(int margin) {
         LinearLayout.LayoutParams params = matchWrap();
-        params.setMargins(0, dp(margin), 0, 0);
+        params.topMargin = dp(margin);
         return params;
     }
 
-    private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
-    private void toast(String value) { Toast.makeText(this, value, Toast.LENGTH_LONG).show(); }
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
 
-    @Override
-    protected void onDestroy() {
-        executor.shutdownNow();
-        super.onDestroy();
+    private void toast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }
