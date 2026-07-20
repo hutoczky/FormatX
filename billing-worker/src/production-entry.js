@@ -1,5 +1,11 @@
 import liveWorker from './live-entry.js';
 import { handleProjectAi } from './project-ai.js';
+import {
+  annotateHealthResponse,
+  createSalesUnavailableJson,
+  createSalesUnavailablePage,
+  isSalesLegallyReady,
+} from './sales-gate.js';
 
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.6.apk';
@@ -8,6 +14,10 @@ const LEGACY_HOME_PATHS = new Set([
   '/scifi-ui',
   '/scifi-ui/',
   '/scifi-ui/index.html',
+]);
+const CHECKOUT_PATHS = new Set([
+  '/checkout.html',
+  '/scifi-ui/checkout.html',
 ]);
 const RATE_LIMITED_API_PATHS = new Set([
   '/api/create-checkout-session',
@@ -48,6 +58,16 @@ const CHECKOUT_CONTENT_SECURITY_POLICY = CONTENT_SECURITY_POLICY.replace(
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const salesReady = isSalesLegallyReady(env);
+
+    if (!salesReady) {
+      if (request.method === 'GET' && CHECKOUT_PATHS.has(url.pathname)) {
+        return await secureAndEnhanceResponse(createSalesUnavailablePage(), url);
+      }
+      if (request.method === 'POST' && url.pathname === '/api/create-checkout-session') {
+        return await secureAndEnhanceResponse(createSalesUnavailableJson(), url);
+      }
+    }
 
     if (request.method !== 'OPTIONS' && RATE_LIMITED_API_PATHS.has(url.pathname)) {
       const rateLimitedResponse = await enforceApiRateLimit(request, env, url.pathname);
@@ -72,6 +92,10 @@ export default {
       response = await serveAndroidApk(request, env);
     } else {
       response = await liveWorker.fetch(request, env, ctx);
+    }
+
+    if (url.pathname === '/api/health') {
+      response = await annotateHealthResponse(response, salesReady);
     }
 
     if (url.pathname.startsWith('/api/') && response.status >= 500) {
