@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "formatx1",
+  "name": "formatx",
   "main": "src/production-entry.js",
   "compatibility_date": "2026-07-18",
   "observability": {
@@ -23,10 +23,7 @@
   "assets": {
     "directory": "../docs",
     "binding": "ASSETS",
-    "run_worker_first": [
-      "/api/*",
-      "/download/*"
-    ]
+    "run_worker_first": true
   },
   "vars": {
     "PAYMENT_PROVIDER": "bank_transfer",
