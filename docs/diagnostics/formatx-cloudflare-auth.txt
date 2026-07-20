@@ -1,0 +1,10 @@
+FormatX Cloudflare authentication diagnostics
+Generated UTC: 2026-07-20T00:07:17Z
+
+raw_present=false
+raw_length=0
+normalized_length=0
+had_bearer_prefix=false
+
+RESULT=FAIL
+reason=CLOUDFLARE_API_TOKEN secret is empty
