@@ -2,15 +2,42 @@ import liveWorker from './live-entry.js';
 
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.5.apk';
+const CANONICAL_HOST = 'www.formatxsuite.com';
+const APEX_HOST = 'formatxsuite.com';
+const LEGACY_HOME_PATHS = new Set([
+  '/scifi-ui',
+  '/scifi-ui/',
+  '/scifi-ui/index.html',
+]);
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    if (request.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) {
-      const target = new URL('/scifi-ui/', request.url);
-      target.searchParams.set('lang', url.searchParams.get('lang') || 'hu');
-      return Response.redirect(target.toString(), 302);
+    if (url.hostname === APEX_HOST) {
+      const target = new URL(request.url);
+      target.hostname = CANONICAL_HOST;
+      target.protocol = 'https:';
+      if (LEGACY_HOME_PATHS.has(target.pathname)) {
+        target.pathname = '/';
+        target.search = '';
+      }
+      return Response.redirect(target.toString(), 308);
+    }
+
+    if (
+      url.hostname === CANONICAL_HOST
+      && request.method === 'GET'
+      && LEGACY_HOME_PATHS.has(url.pathname)
+    ) {
+      return Response.redirect(`https://${CANONICAL_HOST}/`, 308);
+    }
+
+    if (
+      request.method === 'GET'
+      && (url.pathname === '/' || url.pathname === '/index.html')
+    ) {
+      return serveCleanHome(request, env);
     }
 
     if (request.method === 'GET' && url.pathname === '/download/android') {
@@ -20,6 +47,36 @@ export default {
     return liveWorker.fetch(request, env, ctx);
   },
 };
+
+async function serveCleanHome(request, env) {
+  const assetUrl = new URL('/scifi-ui/index.html', request.url);
+  const upstream = await env.ASSETS.fetch(new Request(assetUrl, {
+    method: 'GET',
+    headers: request.headers,
+  }));
+
+  if (!upstream.ok) {
+    return upstream;
+  }
+
+  let html = await upstream.text();
+  html = html
+    .replaceAll('="./', '="/scifi-ui/')
+    .replaceAll("='./", "='/scifi-ui/")
+    .replaceAll('https://formatx1.formatx.workers.dev/download/android?v=1.0.4', '/download/android');
+
+  const headers = new Headers(upstream.headers);
+  headers.set('Content-Type', 'text/html; charset=utf-8');
+  headers.set('Cache-Control', 'no-cache');
+  headers.set('Content-Location', '/');
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+
+  return new Response(html, {
+    status: 200,
+    headers,
+  });
+}
 
 async function serveAndroidApk(request, env) {
   const assetUrl = new URL(ANDROID_APK_PATH, request.url);
