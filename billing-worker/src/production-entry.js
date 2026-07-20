@@ -10,18 +10,34 @@ const LEGACY_HOME_PATHS = new Set([
   '/scifi-ui/index.html',
 ]);
 
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "script-src 'self'",
+  "style-src 'self'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self' https://api.github.com",
+  "media-src 'self'",
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "upgrade-insecure-requests",
+].join('; ');
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    let response;
 
     if (url.hostname === APEX_HOST) {
       const target = new URL(request.url);
       target.hostname = CANONICAL_HOST;
       target.protocol = 'https:';
-      return Response.redirect(target.toString(), 308);
-    }
-
-    if (
+      response = Response.redirect(target.toString(), 308);
+    } else if (
       request.method === 'GET'
       && (
         url.pathname === '/'
@@ -29,14 +45,14 @@ export default {
         || LEGACY_HOME_PATHS.has(url.pathname)
       )
     ) {
-      return serveEnhancedHome(request, env);
+      response = await serveEnhancedHome(request, env);
+    } else if (request.method === 'GET' && url.pathname === '/download/android') {
+      response = await serveAndroidApk(request, env);
+    } else {
+      response = await liveWorker.fetch(request, env, ctx);
     }
 
-    if (request.method === 'GET' && url.pathname === '/download/android') {
-      return serveAndroidApk(request, env);
-    }
-
-    return liveWorker.fetch(request, env, ctx);
+    return applySecurityHeaders(response, url.pathname);
   },
 };
 
@@ -47,9 +63,7 @@ async function serveEnhancedHome(request, env) {
     headers: request.headers,
   }));
 
-  if (!upstream.ok) {
-    return upstream;
-  }
+  if (!upstream.ok) return upstream;
 
   let html = await upstream.text();
   html = html
@@ -61,12 +75,17 @@ async function serveEnhancedHome(request, env) {
       [
         '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-7">',
         '<link rel="stylesheet" href="/scifi-ui/styles/main-readability.css?v=20260720-readability-2">',
+        '<link rel="stylesheet" href="/scifi-ui/styles/quantum-twin.css?v=20260720-quantum-1">',
         '</head>',
       ].join(''),
     )
     .replace(
       '</body>',
-      '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-8"></script></body>',
+      [
+        '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-8"></script>',
+        '<script defer src="/scifi-ui/scripts/quantum-twin.js?v=20260720-quantum-1"></script>',
+        '</body>',
+      ].join(''),
     );
 
   const headers = new Headers(upstream.headers);
@@ -113,6 +132,44 @@ async function serveAndroidApk(request, env) {
 
   return new Response(upstream.body, {
     status: upstream.status,
+    headers,
+  });
+}
+
+function applySecurityHeaders(response, pathname) {
+  const headers = new Headers(response.headers);
+  const contentType = headers.get('Content-Type') || '';
+  const isHtml = contentType.includes('text/html') || pathname === '/' || pathname.endsWith('.html');
+
+  headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+  headers.set('Permissions-Policy', [
+    'accelerometer=()',
+    'ambient-light-sensor=()',
+    'autoplay=()',
+    'camera=()',
+    'display-capture=()',
+    'geolocation=()',
+    'gyroscope=()',
+    'magnetometer=()',
+    'microphone=()',
+    'payment=()',
+    'publickey-credentials-get=()',
+    'usb=()',
+  ].join(', '));
+
+  if (isHtml) headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY);
+
+  headers.delete('Server');
+  headers.delete('X-Powered-By');
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
     headers,
   });
 }
