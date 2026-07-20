@@ -10,6 +10,9 @@ const LEGACY_HOME_PATHS = new Set([
   '/scifi-ui/index.html',
 ]);
 
+const THEME_SCRIPT = '/scifi-ui/scripts/theme-system.js?v=20260720-theme-1';
+const THEME_STYLES = '/scifi-ui/styles/theme-system.css?v=20260720-theme-1';
+
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -52,7 +55,7 @@ export default {
       response = await liveWorker.fetch(request, env, ctx);
     }
 
-    return applySecurityHeaders(response, url.pathname);
+    return await secureAndEnhanceResponse(response, url.pathname);
   },
 };
 
@@ -136,10 +139,11 @@ async function serveAndroidApk(request, env) {
   });
 }
 
-function applySecurityHeaders(response, pathname) {
+async function secureAndEnhanceResponse(response, pathname) {
   const headers = new Headers(response.headers);
   const contentType = headers.get('Content-Type') || '';
-  const isHtml = contentType.includes('text/html') || pathname === '/' || pathname.endsWith('.html');
+  const isHtml = contentType.includes('text/html');
+  let body = response.body;
 
   headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   headers.set('X-Content-Type-Options', 'nosniff');
@@ -162,12 +166,33 @@ function applySecurityHeaders(response, pathname) {
     'usb=()',
   ].join(', '));
 
-  if (isHtml) headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY);
+  if (isHtml) {
+    headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY);
+    if (response.status >= 200 && response.status < 300 && response.body) {
+      let html = await response.text();
+      if (!html.includes(THEME_SCRIPT)) {
+        html = html.replace(
+          '<head>',
+          `<head><script src="${THEME_SCRIPT}"></script>`,
+        );
+      }
+      if (!html.includes(THEME_STYLES)) {
+        html = html.replace(
+          '</head>',
+          `<link rel="stylesheet" href="${THEME_STYLES}"></head>`,
+        );
+      }
+      body = html;
+      headers.delete('Content-Length');
+      headers.delete('Content-Encoding');
+      headers.set('Cache-Control', pathname === '/' ? 'no-store, max-age=0' : 'private, max-age=0, must-revalidate');
+    }
+  }
 
   headers.delete('Server');
   headers.delete('X-Powered-By');
 
-  return new Response(response.body, {
+  return new Response(body, {
     status: response.status,
     statusText: response.statusText,
     headers,
