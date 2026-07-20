@@ -19,16 +19,20 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: validate-checkout-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22"
 
@@ -189,12 +193,12 @@ jobs:
           assert 'mix-blend-mode' not in commerce_css
           assert commerce_css.count('{') == commerce_css.count('}')
 
-          iban = 'HU06302000141991341090015751'
-          rearranged = iban[4:] + iban[:4]
+          test_iban = 'HU49123456789012345678901234'
+          rearranged = test_iban[4:] + test_iban[:4]
           numeric = ''.join(ch if ch.isdigit() else str(ord(ch) - 55) for ch in rearranged)
           assert int(numeric) % 97 == 1
 
-          epc = '\n'.join(['BCD', '001', '1', 'SCT', 'REVOHUHB', 'Hutóczky József', iban, 'EUR1924.00', '', '', 'FormatX FX-20260718-ABC123'])
+          epc = '\n'.join(['BCD', '001', '1', 'SCT', 'TESTHUHB', 'FormatX Test Merchant', test_iban, 'EUR1924.00', '', '', 'FormatX FX-20260718-ABC123'])
           assert len(epc.encode('utf-8')) <= 331
           assert epc.splitlines()[:4] == ['BCD', '001', '1', 'SCT']
 
