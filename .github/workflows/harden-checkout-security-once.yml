@@ -1,6 +1,7 @@
 name: Apply and remove FormatX checkout security hardening
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - ".github/workflows/harden-checkout-security-once.yml"
@@ -10,7 +11,7 @@ permissions:
 
 concurrency:
   group: formatx-checkout-security-once
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   harden:
