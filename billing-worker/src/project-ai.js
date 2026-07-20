@@ -27,9 +27,9 @@ Workflow
 4. Verification: check integrity, results and records.
 
 Platforms and access
-- Linux, especially Bazzite-compatible Linux environments, is the primary supported platform.
-- The web interface and Android client provide supplementary access across supported platforms.
-- Windows and macOS are additionally supported alongside the primary Linux/Bazzite platform.
+- Linux, especially Bazzite-compatible environments, is the primary development target. A native Linux desktop build is not available yet.
+- The current desktop prototype runs on Windows because it uses WinUI 3 and Windows-specific disk-management services. The web interface and Android client remain available as supplementary access.
+- Windows is the platform of the current desktop prototype. macOS support is planned for a later development phase.
 - The site and the Android client support Hungarian and English.
 
 Security and integrity
@@ -69,7 +69,7 @@ const LOCAL_ANSWERS = {
     modules: 'A fő modulok: ISO–USB írás, gyors és mély formázás, partíciótervező, biztonságos törlés, SMART- és felszínvizsgálat, rendszerdiagnosztika, kétpaneles fájlkezelő, valamint AI- és támogatási modul. Részletesen: /modules.html',
     workflow: 'A FormatX munkafolyamata négy lépésből áll: felderítés, tervezés, kontrollált végrehajtás és visszaellenőrzés. Részletesen: /workflow.html',
     security: 'A biztonság alapja a célmeghajtó egyértelmű azonosítása, a többlépcsős megerősítés, a műveleti naplózás, valamint a SHA-256 és Ed25519 integritás-ellenőrzés. Az AI nem indíthat automatikusan veszélyes lemezműveletet. Részletesen: /security.html',
-    platforms: 'A FormatX elsődleges támogatott platformja a Linux, különösen a Bazzite-kompatibilis környezet. A Windows és a macOS kiegészítő támogatást kap, a webes felület és az Android kliens pedig többplatformos hozzáférést biztosít.',
+    platforms: 'A FormatX elsődleges fejlesztési célplatformja a Linux, különösen a Bazzite-kompatibilis környezet. A natív Linux asztali kiadás még fejlesztés alatt áll. A jelenlegi asztali prototípus Windows alatt működik; a macOS támogatás későbbi fejlesztési irány. A webes felület és az Android kliens ettől függetlenül használható.',
     android: 'A FormatX rendelkezik Android klienssel, amely a webes projektfelülethez ad mobil hozzáférést, magyar és angol nyelven.',
     ai: 'A projekt-AI magyarázó és döntéstámogató szerepet kap. Kizárólag a FormatX projektről válaszol, és nem hajt végre automatikusan formázást, törlést vagy más veszélyes meghajtóműveletet.',
     support: 'A stabil kiadások GitHub Releases csatornán jelennek meg, a támogatás és hibajelentés GitHub-alapú folyamatokra épül. További információ: /support.html',
@@ -81,7 +81,7 @@ const LOCAL_ANSWERS = {
     modules: 'Its main modules are ISO-to-USB writing, quick and deep formatting, partition planning, secure erasure, SMART and surface inspection, system diagnostics, a dual-pane file manager, and an AI/support module. Details: /modules.html',
     workflow: 'The FormatX workflow has four stages: discovery, planning, controlled execution and verification. Details: /workflow.html',
     security: 'Safety is based on explicit target-drive identification, multi-step confirmation, operation logs, and SHA-256/Ed25519 integrity checks. The AI cannot automatically start destructive disk operations. Details: /security.html',
-    platforms: 'Linux, especially Bazzite-compatible environments, is the primary supported platform. Windows and macOS receive additional support, while the web interface and Android client provide cross-platform access.',
+    platforms: 'Linux, especially Bazzite-compatible environments, is the primary development target. The native Linux desktop build is still under development. The current desktop prototype runs on Windows, while macOS support is planned for a later phase. The web interface and Android client remain available.',
     android: 'FormatX includes an Android client that provides mobile access to the project web interface in Hungarian and English.',
     ai: 'The project AI provides explanations and decision support. It answers only about FormatX and cannot automatically run formatting, erasure or other destructive drive operations.',
     support: 'Stable releases are published through GitHub Releases, while support and issue reporting use GitHub-based workflows. More information: /support.html',
