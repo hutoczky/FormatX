@@ -106,7 +106,7 @@
     }
     if (tagline) tagline.innerHTML = 'Built for precision.<br><strong>Designed for the future.</strong>';
     if (description) {
-      description.textContent = 'A cross-platform ecosystem engineered for technicians, creators, and professionals who demand complete control.';
+      description.textContent = 'A technician platform for controlled drive management, diagnostics and system preparation. The Windows prototype is available now; native Linux/Bazzite support is under development.';
     }
 
     if (heroActions) {
@@ -154,18 +154,18 @@
     });
 
     const telemetryHeadings = document.querySelectorAll('.telemetry-heading');
-    if (telemetryHeadings[0]) telemetryHeadings[0].innerHTML = '<span>CORE STATUS</span><strong>100%</strong>';
-    if (telemetryHeadings[1]) telemetryHeadings[1].innerHTML = '<span>MODULE SYNC</span><strong>87%</strong>';
+    if (telemetryHeadings[0]) telemetryHeadings[0].innerHTML = '<span>CORE STATUS</span><strong>ACTIVE</strong>';
+    if (telemetryHeadings[1]) telemetryHeadings[1].innerHTML = '<span>DESKTOP BUILD</span><strong>PROTOTYPE</strong>';
 
     const telemetryNotes = document.querySelectorAll('.telemetry-stack small');
-    if (telemetryNotes[0]) telemetryNotes[0].textContent = 'Windows · Linux / Bazzite · macOS';
+    if (telemetryNotes[0]) telemetryNotes[0].textContent = 'Windows available · Linux/Bazzite in development · macOS planned';
     if (telemetryNotes[1]) telemetryNotes[1].textContent = 'Quantum-safe release integrity';
 
     const metrics = document.querySelectorAll('.core-metrics > div');
     const metricData = [
       ['CORE ENGINE', 'ONLINE', 'modular operating platform'],
       ['SECURITY GRID', 'ACTIVE', 'SHA256 / Ed25519'],
-      ['TELEMETRY', 'REAL-TIME', 'zero-fiction system data']
+      ['TELEMETRY', 'REAL-TIME', 'measured system data']
     ];
     metrics.forEach(function (metric, index) {
       const data = metricData[index];
@@ -174,7 +174,7 @@
     });
 
     const principleData = [
-      { icon: '⌬', title: 'CROSS PLATFORM', copy: 'One system. Every environment.', target: '#platforms' },
+      { icon: '⌬', title: 'PLATFORM ROADMAP', copy: 'Windows now. Linux/Bazzite next.', target: '#platforms' },
       { icon: '⬡', title: 'MODULAR BY DESIGN', copy: 'Built to evolve with you.', target: '#features' },
       { icon: '◇', title: 'SECURITY FIRST', copy: 'Protection at every layer.', target: '#security' },
       { icon: '⌁', title: 'REAL-TIME CONTROL', copy: 'Instant insight. Total command.', target: '#downloads' }
