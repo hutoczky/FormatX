@@ -53,11 +53,38 @@ jobs:
           first_secret = script.index('npx wrangler secret put')
           assert first_deploy < first_secret, 'The Worker must be deployed before wrangler secret put.'
           PY
-      - name: Database migration safety
+      - name: Database and repository secret safety
         run: |
-          grep -q 'CREATE TABLE IF NOT EXISTS licenses' license-migrations/0001_license_center.sql
-          grep -q 'device_hash TEXT NOT NULL' license-migrations/0001_license_center.sql
-          ! grep -RniE '(sk-[A-Za-z0-9_-]{20,}|CLOUDFLARE_API_TOKEN=.{20,}|LICENSE_PEPPER=.{20,}|ADMIN_PASSWORD_RECORD=v1:[0-9]+:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+)' src scripts ../docs license-migrations wrangler.jsonc
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          migration = Path('license-migrations/0001_license_center.sql').read_text(encoding='utf-8')
+          assert 'CREATE TABLE IF NOT EXISTS licenses' in migration
+          assert 'device_hash TEXT NOT NULL' in migration
+
+          patterns = {
+              'OpenAI key': re.compile(r'sk-[A-Za-z0-9_-]{20,}'),
+              'Cloudflare token assignment': re.compile(r'CLOUDFLARE_API_TOKEN\s*=\s*[A-Za-z0-9_-]{20,}'),
+              'license pepper assignment': re.compile(r'LICENSE_PEPPER\s*=\s*[A-Za-z0-9_+/=-]{20,}'),
+              'admin password record': re.compile(r'ADMIN_PASSWORD_RECORD\s*=\s*v1:[0-9]+:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+'),
+          }
+          roots = [Path('src'), Path('scripts'), Path('../docs'), Path('license-migrations')]
+          files = [Path('wrangler.jsonc')]
+          for root in roots:
+              files.extend(path for path in root.rglob('*') if path.is_file())
+
+          findings = []
+          for path in files:
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              for label, pattern in patterns.items():
+                  if pattern.search(text):
+                      findings.append(f'{label}: {path}')
+          assert not findings, 'Possible committed secrets:\n' + '\n'.join(findings)
+          PY
       - name: Full local D1 license lifecycle tests
         id: tests
         shell: bash
