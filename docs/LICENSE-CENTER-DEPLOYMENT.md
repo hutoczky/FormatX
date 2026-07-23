@@ -42,17 +42,28 @@ A licenckezelő nem használ külön aldomaint, és nem jelenik meg a nyilvános
 
 ## Egyparancsos telepítés Bazzite alatt
 
-A repository gyökerében:
+A legegyszerűbb és biztonságosabb módszer a Wrangler böngészős Cloudflare-belépése. Nem kell API-tokent kézzel kimásolni:
+
+```bash
+cd /run/media/system/500GB_HDD/bazzite-project
+git pull origin master
+cd billing-worker
+bash scripts/deploy-license-center-with-login.sh
+```
+
+A böngészőben jelentkezz be a domainhez tartozó Cloudflare-fiókba. A wrapper a Wrangler aktuális OAuth-hitelesítését csak a futó telepítési folyamatnak adja át, majd meghívja az éles telepítőt.
+
+Kézi API-tokenes üzemmód is rendelkezésre áll:
 
 ```bash
 cd /run/media/system/500GB_HDD/bazzite-project/billing-worker
 bash scripts/deploy-license-center-live.sh
 ```
 
-A script:
+Az éles telepítő:
 
-- ellenőrzi a Cloudflare API-tokent;
-- lefuttatja a teszteket;
+- ellenőrzi a Cloudflare hitelesítést;
+- lefuttatja a teljes helyi D1 licencéletciklus-tesztet;
 - létrehozza vagy megkeresi a D1 adatbázist;
 - létrehozza a Zero Trust szervezetet, ha még nincs;
 - létrehozza az egyszer használatos e-mail-kódos Identity Providert;
@@ -64,7 +75,7 @@ A script:
 - dry-runt és éles Workert telepít;
 - ellenőrzi az API-t és az adminvédelmet.
 
-A script a Cloudflare API-tokent csak memóriában használja. A token nem kerül repositoryba vagy állandó fájlba.
+A hitelesítési token csak memóriában használható, és nem kerül repositoryba vagy állandó projektfájlba.
 
 ## Belépés
 
@@ -75,7 +86,7 @@ Elsődleges:
 3. A Cloudflare e-mailben egyszer használatos kódot küld.
 4. A kód megadása után megnyílik az adminfelület.
 
-A script létrehoz egy kizárólag a tulajdonos által olvasható tartalék fájlt:
+A helyi telepítő létrehoz egy kizárólag a tulajdonos által olvasható tartalék fájlt:
 
 ```text
 ~/FormatX-licenc-admin-belepes.txt
@@ -83,9 +94,9 @@ A script létrehoz egy kizárólag a tulajdonos által olvasható tartalék fáj
 
 Ez a vészhelyzeti helyi jelszót tartalmazza, `chmod 600` jogosultsággal. Nem szabad GitHubra, Drive-ra vagy chatbe feltölteni.
 
-## Cloudflare API-token jogosultságai
+## Kézi Cloudflare API-token jogosultságai
 
-A telepítéshez minimálisan:
+A kézi tokenes telepítéshez minimálisan:
 
 - Workers Scripts: Edit
 - Workers Routes: Edit
