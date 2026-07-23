@@ -15,7 +15,7 @@ jobs:
   deploy:
     name: Manual deploy and verification
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -30,7 +30,7 @@ jobs:
           config = Path("billing-worker/wrangler.jsonc")
           data = json.loads(config.read_text(encoding="utf-8"))
           assert data["name"] == "formatx"
-          assert data["main"] == "src/production-entry.js"
+          assert data["main"] == "src/production-with-license.js"
           assert data["assets"]["directory"] == "../docs"
           assert data["assets"]["run_worker_first"] is True
           expected = {
@@ -42,7 +42,10 @@ jobs:
               for route in data.get("routes", [])
           }
           assert expected.issubset(actual)
-          print("Production configuration is valid.")
+          assert Path("billing-worker/src/license-center.js").is_file()
+          assert Path("billing-worker/license-migrations/0001_license_center.sql").is_file()
+          assert Path("docs/fx-owner-license/index.html").is_file()
+          print("Production website and license-center configuration is valid.")
 
       - name: Require manual Cloudflare API token
         shell: bash
@@ -55,7 +58,7 @@ jobs:
           TOKEN="${TOKEN#Bearer }"
           TOKEN="$(printf '%s' "$TOKEN" | xargs)"
           if [ "${#TOKEN}" -lt 20 ]; then
-            echo "This manual backup workflow requires the CLOUDFLARE_API_TOKEN repository secret." >&2
+            echo "The CLOUDFLARE_API_TOKEN repository secret is required." >&2
             exit 1
           fi
           echo "::add-mask::$TOKEN"
@@ -72,17 +75,23 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
-      - name: Validate Worker bundle before deploy
+      - name: Validate Worker and deployment script
         working-directory: billing-worker
-        run: npx wrangler deploy --dry-run --outdir ../.wrangler-dry-run
+        run: |
+          node --check src/license-center.js
+          node --check src/production-with-license.js
+          node --check ../docs/fx-owner-license/app.js
+          bash -n scripts/deploy-license-center-live.sh
+          npm run test:license
 
-      - name: Deploy formatx Worker
+      - name: Deploy website, D1 license database and Access protection
         working-directory: billing-worker
         env:
           CLOUDFLARE_ACCOUNT_ID: ffd7d28ea7c6a510549dc9363619c8c5
-        run: npx wrangler deploy --name formatx
+          FORMATX_ADMIN_EMAIL: hutoczky@gmail.com
+        run: bash scripts/deploy-license-center-live.sh
 
-      - name: Verify both domains, headers and API health
+      - name: Verify public website and license API
         shell: bash
         run: |
           set -euo pipefail
@@ -102,7 +111,6 @@ jobs:
                  && grep -iq '^strict-transport-security:' "$headers" \
                  && grep -iq '^content-security-policy:' "$headers" \
                  && grep -iq '^x-content-type-options: nosniff' "$headers" \
-                 && grep -iq '^link: <https://www.formatxsuite.com/' "$headers" \
                  && ! grep -iq '^location:' "$headers"; then
                 echo "Verified $url"
                 rm -f "$headers" "$body"
@@ -119,16 +127,15 @@ jobs:
           verify_site 'https://formatxsuite.com/'
           verify_site 'https://www.formatxsuite.com/'
 
-          health="$(curl -fsSL --connect-timeout 10 --max-time 30 \
+          license_health="$(curl -fsSL --connect-timeout 10 --max-time 30 \
             -H 'Cache-Control: no-cache' \
-            'https://www.formatxsuite.com/api/health')"
-          HEALTH_JSON="$health" python3 - <<'PY'
+            'https://www.formatxsuite.com/api/license/health')"
+          LICENSE_HEALTH_JSON="$license_health" python3 - <<'PY'
           import json
           import os
 
-          data = json.loads(os.environ['HEALTH_JSON'])
-          assert data.get('provider') == 'bank_transfer', data
-          assert data.get('mode') == 'live', data
-          assert set(data.get('supported_currencies', [])) == {'HUF', 'EUR'}, data
-          print('Production API health response is structurally valid.')
+          data = json.loads(os.environ['LICENSE_HEALTH_JSON'])
+          assert data.get('ok') is True, data
+          assert data.get('service') == 'formatx-license-center', data
+          print('Production license API health response is valid.')
           PY

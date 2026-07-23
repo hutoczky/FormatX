@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>FormatX Licenckezelő</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">FX</span>
+      <div>
+        <p class="eyebrow">FORMATX SUITE PRO</p>
+        <h1>Licenckezelő központ</h1>
+      </div>
+    </div>
+    <div class="session">
+      <span id="serviceState" class="state state-wait">kapcsolódás…</span>
+      <span id="adminEmail">—</span>
+      <form action="./logout" method="post"><button class="ghost compact" type="submit">Kilépés</button></form>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel create-panel" aria-labelledby="createTitle">
+      <div class="panel-head">
+        <div><p class="eyebrow">ÚJ JOGOSULTSÁG</p><h2 id="createTitle">Licenc létrehozása</h2></div>
+      </div>
+      <form id="createForm" autocomplete="off">
+        <label>Ügyfél neve<input id="customerName" maxlength="160" required></label>
+        <label>Ügyfél e-mail-címe<input id="customerEmail" type="email" maxlength="254"></label>
+        <div class="form-row">
+          <label>Licenctípus
+            <select id="plan">
+              <option value="trial">Trial</option>
+              <option value="pro" selected>Pro</option>
+              <option value="technician">Technician</option>
+              <option value="business">Business</option>
+              <option value="lifetime">Lifetime</option>
+              <option value="owner">Owner</option>
+            </select>
+          </label>
+          <label>Eszközlimit<input id="maxDevices" type="number" min="1" max="50" value="1" required></label>
+        </div>
+        <label>Lejárat<input id="expiresAt" type="datetime-local"><span class="hint">Üresen hagyva nincs időbeli lejárat.</span></label>
+        <label>Belső megjegyzés<textarea id="notes" maxlength="2000" rows="3"></textarea></label>
+        <button id="createButton" class="primary" type="submit">Licenc generálása</button>
+      </form>
+
+      <div id="generatedCard" class="generated-card" hidden>
+        <p class="eyebrow">EGYSZER LÁTHATÓ TELJES KULCS</p>
+        <code id="generatedKey"></code>
+        <div id="generatedSummary" class="generated-summary"></div>
+        <div class="button-row">
+          <button id="copyKeyButton" type="button">Kulcs másolása</button>
+          <button id="copyMessageButton" type="button">Aktiválási szöveg másolása</button>
+          <button id="emailButton" type="button">E-mail előkészítése</button>
+          <button id="dismissKeyButton" type="button" class="ghost">Elrejtés</button>
+        </div>
+        <p>A teljes kulcs nincs eltárolva olvasható formában. Most másold ki vagy készítsd elő az e-mailt.</p>
+      </div>
+    </section>
+
+    <section class="panel list-panel" aria-labelledby="listTitle">
+      <div class="panel-head list-head">
+        <div><p class="eyebrow">KÖZPONTI NYILVÁNTARTÁS</p><h2 id="listTitle">Licencek</h2></div>
+        <button id="refreshButton" type="button" class="ghost">Frissítés</button>
+      </div>
+      <div class="filters">
+        <input id="searchInput" type="search" placeholder="Név, e-mail vagy utolsó 4 karakter">
+        <select id="statusFilter" aria-label="Állapotszűrő">
+          <option value="">Minden állapot</option>
+          <option value="active">Aktív</option>
+          <option value="suspended">Felfüggesztett</option>
+          <option value="revoked">Visszavont</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ügyfél</th><th>Kulcs</th><th>Típus</th><th>Eszköz</th><th>Állapot</th><th>Lejárat</th></tr></thead>
+          <tbody id="licenseRows"></tbody>
+        </table>
+      </div>
+      <p id="emptyState" class="empty" hidden>Nincs a szűrésnek megfelelő licenc.</p>
+    </section>
+
+    <section class="panel detail-panel" aria-labelledby="detailTitle">
+      <div class="panel-head"><div><p class="eyebrow">LICENC RÉSZLETEI</p><h2 id="detailTitle">Nincs kiválasztva</h2></div></div>
+      <div id="detailContent" class="detail-empty">Válassz ki egy licencet a táblázatból.</div>
+    </section>
+
+    <section class="panel audit-panel" aria-labelledby="auditTitle">
+      <div class="panel-head"><div><p class="eyebrow">AUDITNAPLÓ</p><h2 id="auditTitle">Legutóbbi műveletek</h2></div></div>
+      <ol id="auditList" class="audit-list"></ol>
+    </section>
+  </main>
+
+  <dialog id="editDialog">
+    <form id="editForm" method="dialog">
+      <div class="dialog-head"><h2>Licenc módosítása</h2><button class="ghost compact" value="cancel">Bezárás</button></div>
+      <input id="editLicenseId" type="hidden">
+      <label>Ügyfél neve<input id="editCustomerName" maxlength="160" required></label>
+      <label>Ügyfél e-mail-címe<input id="editCustomerEmail" type="email" maxlength="254"></label>
+      <label>Eszközlimit<input id="editMaxDevices" type="number" min="1" max="50" required></label>
+      <label>Lejárat<input id="editExpiresAt" type="datetime-local"></label>
+      <label>Belső megjegyzés<textarea id="editNotes" maxlength="2000" rows="4"></textarea></label>
+      <div class="button-row"><button id="saveEditButton" class="primary" type="submit" value="default">Mentés</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

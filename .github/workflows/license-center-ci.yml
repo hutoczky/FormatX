@@ -1,0 +1,72 @@
+name: Website License Center CI
+
+on:
+  pull_request:
+    paths:
+      - 'billing-worker/src/license-center.js'
+      - 'billing-worker/src/production-with-license.js'
+      - 'billing-worker/license-migrations/**'
+      - 'billing-worker/scripts/deploy-license-center-live.sh'
+      - 'billing-worker/test/license-center*.js'
+      - 'billing-worker/vitest.license-workers.config.js'
+      - 'billing-worker/wrangler.license-test.jsonc'
+      - 'billing-worker/package.json'
+      - 'docs/fx-owner-license/**'
+      - 'billing-worker/wrangler.jsonc'
+      - '.github/workflows/license-center-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: billing-worker
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: JavaScript syntax
+        run: |
+          node --check src/license-center.js
+          node --check src/production-with-license.js
+          node --check ../docs/fx-owner-license/app.js
+          node --check vitest.license-workers.config.js
+          node --check test/license-center-e2e.spec.js
+          node --check test/license-center.setup.js
+      - name: Shell syntax
+        run: bash -n scripts/deploy-license-center-live.sh
+      - name: Database migration safety
+        run: |
+          grep -q 'CREATE TABLE IF NOT EXISTS licenses' license-migrations/0001_license_center.sql
+          grep -q 'device_hash TEXT NOT NULL' license-migrations/0001_license_center.sql
+          ! grep -RniE '(sk-[A-Za-z0-9_-]{20,}|CLOUDFLARE_API_TOKEN=.{20,}|LICENSE_PEPPER=.{20,}|ADMIN_PASSWORD_RECORD=v1:[0-9]+:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+)' src scripts ../docs license-migrations wrangler.jsonc
+      - name: Full local D1 license lifecycle tests
+        id: tests
+        shell: bash
+        run: |
+          set +e
+          npm run test:license 2>&1 | tee license-center-tests.log
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: license-center-test-log
+          path: billing-worker/license-center-tests.log
+          if-no-files-found: error
+      - name: Fail when tests failed
+        if: steps.tests.outputs.status != '0'
+        run: exit 1
+      - name: Production bundle dry-run
+        run: npx wrangler deploy --dry-run --outdir ../.wrangler-license-ci
