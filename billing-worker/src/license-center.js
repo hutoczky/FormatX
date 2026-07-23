@@ -258,7 +258,7 @@ async function adminCreateLicense(request, env, actorEmail, source = null) {
     timestamp, expiresAt, notes, actorEmail, timestamp, timestamp,
   ).run();
   await audit(env, actorEmail, 'license.created', 'license', id, { plan, max_devices: maxDevices, expires_at: expiresAt });
-  return json({ ok: true, license: { ...(await getLicense(env, id)), license_key: key } }, 201);
+  return json({ ok: true, license: { ...safeLicense(await getLicense(env, id)), license_key: key } }, 201);
 }
 
 async function adminLicenseDetail(env, id) {
@@ -492,8 +492,11 @@ function publicLicenseResult(license, devicesUsed, activationId) {
     ok: true,
     valid: true,
     license_id: license.id,
+    license_hint: `FX*-****-${license.key_last4}`,
     plan: license.plan,
     status: license.status,
+    max_devices: license.max_devices,
+    active_devices: devicesUsed,
     devices_used: devicesUsed,
     devices_allowed: license.max_devices,
     expires_at: license.expires_at,
