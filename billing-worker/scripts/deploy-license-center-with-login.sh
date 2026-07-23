@@ -55,4 +55,4 @@ PY
 [[ ${#CLOUDFLARE_API_TOKEN} -ge 20 ]] || fail 'A Cloudflare hitelesítés nem sikerült.'
 export CLOUDFLARE_API_TOKEN
 
-exec bash "$SCRIPT_DIR/deploy-license-center-live.sh"
+bash "$SCRIPT_DIR/deploy-license-center-live.sh"
