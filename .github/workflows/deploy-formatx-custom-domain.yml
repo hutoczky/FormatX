@@ -82,7 +82,7 @@ jobs:
           node --check src/production-with-license.js
           node --check ../docs/fx-owner-license/app.js
           bash -n scripts/deploy-license-center-live.sh
-          npm test -- --run
+          npm run test:license
 
       - name: Deploy website, D1 license database and Access protection
         working-directory: billing-worker
