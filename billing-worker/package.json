@@ -7,7 +7,7 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest",
-    "test:license": "vitest --config vitest.license.config.js --run"
+    "test:license": "vitest --config vitest.license-workers.config.js --run"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.12.4",
