@@ -28,6 +28,14 @@
     "binding": "ASSETS",
     "run_worker_first": true
   },
+  "d1_databases": [
+    {
+      "binding": "LICENSE_DB",
+      "database_name": "formatx-license-db",
+      "database_id": "79a699f8-2385-4cb8-9355-051868e555cb",
+      "migrations_dir": "license-migrations"
+    }
+  ],
   "vars": {
     "PAYMENT_PROVIDER": "bank_transfer",
     "PAYMENT_MODE": "live",
