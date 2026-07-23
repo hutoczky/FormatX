@@ -3,6 +3,7 @@ set -Eeuo pipefail
 
 ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-ffd7d28ea7c6a510549dc9363619c8c5}"
 ADMIN_EMAIL="${FORMATX_ADMIN_EMAIL:-hutoczky@gmail.com}"
+ACCESS_SESSION_DURATION="${FORMATX_ACCESS_SESSION_DURATION:-720h}"
 DB_NAME="formatx-license-db"
 ADMIN_PATH="/fx-owner-license/*"
 ADMIN_URL="https://www.formatxsuite.com/fx-owner-license/"
@@ -23,6 +24,7 @@ printf '============================================================\n'
 printf ' FormatX élő licenckezelő telepítése\n'
 printf ' Admin: %s\n' "$ADMIN_URL"
 printf ' Admin e-mail: %s\n' "$ADMIN_EMAIL"
+printf ' Megbízható böngésző munkamenete: %s\n' "$ACCESS_SESSION_DURATION"
 printf '============================================================\n\n'
 
 if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
@@ -69,7 +71,7 @@ ORG="$(api GET "/accounts/$ACCOUNT_ID/access/organizations" || true)"
 AUTH_DOMAIN="$(printf '%s' "$ORG" | python3 -c 'import json,sys; o=json.load(sys.stdin); r=o.get("result") or {}; print(r.get("auth_domain") or "")' 2>/dev/null || true)"
 if [[ -z "$AUTH_DOMAIN" ]]; then
   AUTH_DOMAIN="formatx-${ACCOUNT_ID: -8}.cloudflareaccess.com"
-  ORG_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX","auth_domain":sys.argv[1],"auto_redirect_to_identity":False,"deny_unmatched_requests":False,"session_duration":"24h","warp_auth_session_duration":"24h","user_seat_expiration_inactive_time":"730h"}))' "$AUTH_DOMAIN")"
+  ORG_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX","auth_domain":sys.argv[1],"auto_redirect_to_identity":False,"deny_unmatched_requests":False,"session_duration":sys.argv[2],"warp_auth_session_duration":sys.argv[2],"user_seat_expiration_inactive_time":"730h"}))' "$AUTH_DOMAIN" "$ACCESS_SESSION_DURATION")"
   ORG_CREATE="$(api POST "/accounts/$ACCOUNT_ID/access/organizations" "$ORG_BODY")"
   printf '%s' "$ORG_CREATE" | check_success || fail 'A Zero Trust szervezet nem hozható létre.'
 fi
@@ -92,7 +94,7 @@ for app in data.get("result",[]):
  uris=[d.get("uri","") for d in app.get("destinations",[]) if isinstance(d,dict)]
  if any(uri.endswith(suffix) for uri in uris) or str(app.get("domain","")).endswith(suffix): found=app.get("id",""); break
 print(found)' "$ADMIN_PATH")"
-APP_BODY="$(python3 -c 'import json,sys; otp=sys.argv[1]; print(json.dumps({"name":"FormatX tulajdonosi licenckezelő","type":"self_hosted","domain":"www.formatxsuite.com/fx-owner-license/*","destinations":[{"type":"public","uri":"www.formatxsuite.com/fx-owner-license/*"},{"type":"public","uri":"formatxsuite.com/fx-owner-license/*"}],"session_duration":"8h","app_launcher_visible":False,"auto_redirect_to_identity":True,"allowed_idps":[otp],"options_preflight_bypass":False}))' "$OTP_ID")"
+APP_BODY="$(python3 -c 'import json,sys; otp=sys.argv[1]; duration=sys.argv[2]; print(json.dumps({"name":"FormatX tulajdonosi licenckezelő","type":"self_hosted","domain":"www.formatxsuite.com/fx-owner-license/*","destinations":[{"type":"public","uri":"www.formatxsuite.com/fx-owner-license/*"},{"type":"public","uri":"formatxsuite.com/fx-owner-license/*"}],"session_duration":duration,"app_launcher_visible":False,"auto_redirect_to_identity":True,"allowed_idps":[otp],"options_preflight_bypass":False}))' "$OTP_ID" "$ACCESS_SESSION_DURATION")"
 if [[ -n "$APP_ID" ]]; then
   APP_RESULT="$(api PUT "/accounts/$ACCOUNT_ID/access/apps/$APP_ID" "$APP_BODY")"
 else
@@ -106,7 +108,7 @@ ACCESS_AUD="$(printf '%s' "$APP_RESULT" | json_result_value 'print(r.get("aud") 
 POLICIES="$(api GET "/accounts/$ACCOUNT_ID/access/apps/$APP_ID/policies?per_page=100")"
 printf '%s' "$POLICIES" | check_success || fail 'Az Access szabályok nem kérhetők le.'
 POLICY_ID="$(printf '%s' "$POLICIES" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next((x.get("id","") for x in data.get("result",[]) if x.get("name")=="FormatX owner only"),""))')"
-POLICY_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX owner only","decision":"allow","precedence":1,"include":[{"email":{"email":sys.argv[1]}}],"require":[{"login_method":{"id":sys.argv[2]}}],"session_duration":"8h"}))' "$ADMIN_EMAIL" "$OTP_ID")"
+POLICY_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX owner only","decision":"allow","precedence":1,"include":[{"email":{"email":sys.argv[1]}}],"require":[{"login_method":{"id":sys.argv[2]}}],"session_duration":sys.argv[3]}))' "$ADMIN_EMAIL" "$OTP_ID" "$ACCESS_SESSION_DURATION")"
 if [[ -n "$POLICY_ID" ]]; then
   POLICY_RESULT="$(api PUT "/accounts/$ACCOUNT_ID/access/apps/$APP_ID/policies/$POLICY_ID" "$POLICY_BODY")"
 else
@@ -181,6 +183,7 @@ printf '\n============================================================\n'
 printf ' KÉSZ – a FormatX licenckezelő élő\n'
 printf ' Admin: %s\n' "$ADMIN_URL"
 printf ' Belépés: %s + egyszer használatos e-mail-kód\n' "$ADMIN_EMAIL"
+printf ' Megbízható böngésző: %s ideig nem kér új kódot\n' "$ACCESS_SESSION_DURATION"
 printf ' Tartalék belépési adat: %s\n' "$LOGIN_FILE"
 printf ' API: %s\n' "$HEALTH_URL"
 printf ' D1 adatbázisazonosító: %s\n' "$DB_ID"
