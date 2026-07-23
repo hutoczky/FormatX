@@ -70,6 +70,9 @@ export async function handleLicenseCenterRequest(request, env) {
 
     return json({ ok: false, error: 'not_found' }, 404);
   } catch (error) {
+    if (error instanceof PublicError) {
+      return json({ ok: false, valid: false, error: error.code }, error.status);
+    }
     console.error('FormatX license center error', error instanceof Error ? error.message : String(error));
     return json({ ok: false, error: 'internal_error' }, 500);
   }
