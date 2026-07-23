@@ -1,0 +1,48 @@
+name: Website License Center CI
+
+on:
+  pull_request:
+    paths:
+      - 'billing-worker/src/license-center.js'
+      - 'billing-worker/src/production-with-license.js'
+      - 'billing-worker/license-migrations/**'
+      - 'billing-worker/scripts/deploy-license-center-live.sh'
+      - 'docs/fx-owner-license/**'
+      - 'billing-worker/wrangler.jsonc'
+      - '.github/workflows/license-center-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: billing-worker
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: JavaScript syntax
+        run: |
+          node --check src/license-center.js
+          node --check src/production-with-license.js
+          node --check ../docs/fx-owner-license/app.js
+      - name: Shell syntax
+        run: bash -n scripts/deploy-license-center-live.sh
+      - name: Database migration safety
+        run: |
+          grep -q 'CREATE TABLE IF NOT EXISTS licenses' license-migrations/0001_license_center.sql
+          grep -q 'device_hash TEXT NOT NULL' license-migrations/0001_license_center.sql
+          ! grep -RniE '(sk-[A-Za-z0-9_-]{20,}|CLOUDFLARE_API_TOKEN=.{20,}|LICENSE_PEPPER=.{20,}|ADMIN_PASSWORD_RECORD=v1:)' src scripts ../docs license-migrations
+      - name: Existing worker tests
+        run: npm test -- --run
+      - name: Production bundle dry-run
+        run: npx wrangler deploy --dry-run --outdir ../.wrangler-license-ci
