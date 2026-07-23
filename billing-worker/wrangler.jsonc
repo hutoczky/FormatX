@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "formatx",
-  "main": "src/production-entry.js",
+  "main": "src/production-with-license.js",
   "compatibility_date": "2026-07-18",
   "workers_dev": false,
   "minify": true,
