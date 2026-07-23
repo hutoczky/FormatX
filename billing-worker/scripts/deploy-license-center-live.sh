@@ -87,7 +87,7 @@ fi
 printf '5/10 – Cloudflare Access alkalmazás és tulajdonosi szabály…\n'
 APPS="$(api GET "/accounts/$ACCOUNT_ID/access/apps?per_page=100")"
 printf '%s' "$APPS" | check_success || fail 'Az Access alkalmazások nem kérhetők le.'
-APP_ID="$(printf '%s' "$APPS" | python3 -c 'import json,sys; suffix=sys.argv[1]; data=json.load(sys.stdin); found=""; 
+APP_ID="$(printf '%s' "$APPS" | python3 -c 'import json,sys; suffix=sys.argv[1]; data=json.load(sys.stdin); found="";
 for app in data.get("result",[]):
  uris=[d.get("uri","") for d in app.get("destinations",[]) if isinstance(d,dict)]
  if any(uri.endswith(suffix) for uri in uris) or str(app.get("domain","")).endswith(suffix): found=app.get("id",""); break
@@ -124,12 +124,21 @@ data.setdefault('vars',{}).update({'ADMIN_EMAILS':sys.argv[2],'ACCESS_TEAM_DOMAI
 Path(sys.argv[5]).write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 PY
 
-printf '7/10 – Titkok és vészhelyzeti helyi jelszó…\n'
+printf '7/10 – D1 migráció és első éles telepítés…\n'
+npx wrangler d1 migrations apply "$DB_NAME" --remote --config "$TMP_CONFIG"
+rm -rf .wrangler-license-dry-run
+npx wrangler deploy --dry-run --config "$TMP_CONFIG" --outdir .wrangler-license-dry-run
+npx wrangler deploy --config "$TMP_CONFIG"
+rm -rf .wrangler-license-dry-run
+
+printf '8/10 – Titkok és végső telepítés…\n'
 SECRET_LIST="$(npx wrangler secret list --config "$TMP_CONFIG" 2>/dev/null || true)"
+SECRETS_CHANGED=0
 set_secret_if_missing(){
   local name="$1" value="$2"
   if ! grep -q "\"name\"[[:space:]]*:[[:space:]]*\"$name\"" <<<"$SECRET_LIST"; then
     printf '%s' "$value" | npx wrangler secret put "$name" --config "$TMP_CONFIG" >/dev/null
+    SECRETS_CHANGED=1
   fi
 }
 set_secret_if_missing LICENSE_PEPPER "$(openssl rand -base64 48 | tr -d '\n')"
@@ -138,6 +147,7 @@ if ! grep -q '"ADMIN_PASSWORD_RECORD"' <<<"$SECRET_LIST" || [[ "$RESET_PASSWORD"
   FALLBACK_PASSWORD="$(openssl rand -base64 24 | tr -d '\n' | tr '/+' 'AZ')"
   PASSWORD_RECORD="$(python3 -c 'import base64,hashlib,os,sys; pw=sys.argv[1].encode(); salt=os.urandom(24); iterations=600000; derived=hashlib.pbkdf2_hmac("sha256",pw,salt,iterations,dklen=32); b64=lambda b:base64.urlsafe_b64encode(b).decode().rstrip("="); print(f"v1:{iterations}:{b64(salt)}:{b64(derived)}")' "$FALLBACK_PASSWORD")"
   printf '%s' "$PASSWORD_RECORD" | npx wrangler secret put ADMIN_PASSWORD_RECORD --config "$TMP_CONFIG" >/dev/null
+  SECRETS_CHANGED=1
   umask 077
   cat > "$LOGIN_FILE" <<EOF
 FormatX tulajdonosi licenckezelő
@@ -150,13 +160,9 @@ A helyi jelszó csak tartalék, ne küldd el másnak.
 EOF
   chmod 600 "$LOGIN_FILE"
 fi
-
-printf '8/10 – D1 migráció, dry-run és telepítés…\n'
-npx wrangler d1 migrations apply "$DB_NAME" --remote --config "$TMP_CONFIG"
-rm -rf .wrangler-license-dry-run
-npx wrangler deploy --dry-run --config "$TMP_CONFIG" --outdir .wrangler-license-dry-run
-npx wrangler deploy --config "$TMP_CONFIG"
-rm -rf .wrangler-license-dry-run
+if [[ "$SECRETS_CHANGED" == "1" ]]; then
+  npx wrangler deploy --config "$TMP_CONFIG"
+fi
 
 printf '9/10 – Élő licenc-API ellenőrzése…\n'
 status=''
@@ -177,4 +183,5 @@ printf ' Admin: %s\n' "$ADMIN_URL"
 printf ' Belépés: %s + egyszer használatos e-mail-kód\n' "$ADMIN_EMAIL"
 printf ' Tartalék belépési adat: %s\n' "$LOGIN_FILE"
 printf ' API: %s\n' "$HEALTH_URL"
+printf ' D1 adatbázisazonosító: %s\n' "$DB_ID"
 printf '============================================================\n'
