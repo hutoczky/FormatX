@@ -1,0 +1,84 @@
+name: Apply reviewed license client compatibility patch once
+
+on:
+  push:
+    branches:
+      - feature/website-license-center
+    paths:
+      - '.github/workflows/patch-license-client-compatibility-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: feature/website-license-center
+          fetch-depth: 0
+      - name: Align public API fields and remove key hash from admin response
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('billing-worker/src/license-center.js')
+          text = path.read_text(encoding='utf-8')
+
+          old_result = '''function publicLicenseResult(license, devicesUsed, activationId) {
+            return {
+              ok: true,
+              valid: true,
+              license_id: license.id,
+              plan: license.plan,
+              status: license.status,
+              devices_used: devicesUsed,
+              devices_allowed: license.max_devices,
+              expires_at: license.expires_at,
+              activation_id: activationId,
+              next_check_after: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+              server_time: nowIso(),
+            };
+          }
+          '''
+          new_result = '''function publicLicenseResult(license, devicesUsed, activationId) {
+            return {
+              ok: true,
+              valid: true,
+              license_id: license.id,
+              license_hint: `FX*-****-${license.key_last4}`,
+              plan: license.plan,
+              status: license.status,
+              max_devices: license.max_devices,
+              active_devices: devicesUsed,
+              devices_used: devicesUsed,
+              devices_allowed: license.max_devices,
+              expires_at: license.expires_at,
+              activation_id: activationId,
+              next_check_after: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+              server_time: nowIso(),
+            };
+          }
+          '''
+          if old_result not in text:
+              raise SystemExit('Expected publicLicenseResult block not found.')
+          text = text.replace(old_result, new_result, 1)
+
+          old_create = "  return json({ ok: true, license: { ...(await getLicense(env, id)), license_key: key } }, 201);"
+          new_create = "  return json({ ok: true, license: { ...safeLicense(await getLicense(env, id)), license_key: key } }, 201);"
+          if old_create not in text:
+              raise SystemExit('Expected license creation response not found.')
+          text = text.replace(old_create, new_create, 1)
+
+          path.write_text(text, encoding='utf-8')
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add billing-worker/src/license-center.js
+          git commit -m 'fix: align license API with the FormatX client'
+          git push origin HEAD:feature/website-license-center
