@@ -1,0 +1,63 @@
+name: Deploy FormatX license center once
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/deploy-license-center-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-license-center-live
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+      - name: Require Cloudflare deployment secret
+        shell: bash
+        env:
+          RAW_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          TOKEN="$(printf '%s' "$RAW_TOKEN" | tr -d '\r\n')"
+          TOKEN="${TOKEN#Authorization: Bearer }"
+          TOKEN="${TOKEN#Bearer }"
+          TOKEN="$(printf '%s' "$TOKEN" | xargs)"
+          if [ "${#TOKEN}" -lt 20 ]; then
+            echo '::error::A CLOUDFLARE_API_TOKEN GitHub secret nincs beállítva.'
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "CLOUDFLARE_API_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+      - name: Deploy D1, Access and license Worker
+        working-directory: billing-worker
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ffd7d28ea7c6a510549dc9363619c8c5
+          FORMATX_ADMIN_EMAIL: hutoczky@gmail.com
+        run: bash scripts/deploy-license-center-live.sh
+      - name: Verify live endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          health="$(curl -fsSL --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/api/license/health')"
+          HEALTH_JSON="$health" python3 - <<'PY'
+          import json, os
+          data=json.loads(os.environ['HEALTH_JSON'])
+          assert data.get('ok') is True, data
+          assert data.get('service') == 'formatx-license-center', data
+          PY
+          status="$(curl -sS -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 'https://www.formatxsuite.com/fx-owner-license/')"
+          case "$status" in 200|302|303) ;; *) echo "Unexpected admin HTTP status: $status" >&2; exit 1;; esac
