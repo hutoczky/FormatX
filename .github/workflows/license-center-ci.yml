@@ -7,8 +7,9 @@ on:
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/license-migrations/**'
       - 'billing-worker/scripts/deploy-license-center-live.sh'
-      - 'billing-worker/test/license-center.spec.js'
-      - 'billing-worker/vitest.license.config.js'
+      - 'billing-worker/test/license-center*.js'
+      - 'billing-worker/vitest.license-workers.config.js'
+      - 'billing-worker/wrangler.license-test.jsonc'
       - 'billing-worker/package.json'
       - 'docs/fx-owner-license/**'
       - 'billing-worker/wrangler.jsonc'
@@ -38,15 +39,17 @@ jobs:
           node --check src/license-center.js
           node --check src/production-with-license.js
           node --check ../docs/fx-owner-license/app.js
-          node --check vitest.license.config.js
+          node --check vitest.license-workers.config.js
+          node --check test/license-center-e2e.spec.js
+          node --check test/license-center.setup.js
       - name: Shell syntax
         run: bash -n scripts/deploy-license-center-live.sh
       - name: Database migration safety
         run: |
           grep -q 'CREATE TABLE IF NOT EXISTS licenses' license-migrations/0001_license_center.sql
           grep -q 'device_hash TEXT NOT NULL' license-migrations/0001_license_center.sql
-          ! grep -RniE '(sk-[A-Za-z0-9_-]{20,}|CLOUDFLARE_API_TOKEN=.{20,}|LICENSE_PEPPER=.{20,}|ADMIN_PASSWORD_RECORD=v1:)' src scripts ../docs license-migrations
-      - name: License center tests
+          ! grep -RniE '(sk-[A-Za-z0-9_-]{20,}|CLOUDFLARE_API_TOKEN=.{20,}|LICENSE_PEPPER=.{20,}|ADMIN_PASSWORD_RECORD=v1:[0-9]+:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+)' src scripts ../docs license-migrations wrangler.jsonc
+      - name: Full local D1 license lifecycle tests
         id: tests
         shell: bash
         run: |
