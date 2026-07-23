@@ -44,6 +44,15 @@ jobs:
           node --check test/license-center.setup.js
       - name: Shell syntax
         run: bash -n scripts/deploy-license-center-live.sh
+      - name: Safe Worker and secret deployment order
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          script = Path('scripts/deploy-license-center-live.sh').read_text(encoding='utf-8')
+          first_deploy = script.index('npx wrangler deploy --config "$TMP_CONFIG"')
+          first_secret = script.index('npx wrangler secret put')
+          assert first_deploy < first_secret, 'The Worker must be deployed before wrangler secret put.'
+          PY
       - name: Database migration safety
         run: |
           grep -q 'CREATE TABLE IF NOT EXISTS licenses' license-migrations/0001_license_center.sql
