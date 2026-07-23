@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "formatx-license-center-test",
+  "main": "src/production-with-license.js",
+  "compatibility_date": "2026-07-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "LICENSE_DB",
+      "database_name": "formatx-license-test-db",
+      "database_id": "00000000-0000-0000-0000-000000000001"
+    }
+  ],
+  "vars": {
+    "LICENSE_PEPPER": "formatx-license-test-pepper-not-for-production-2026",
+    "ADMIN_EMAILS": "owner@example.com",
+    "ADMIN_SESSION_SECRET": "formatx-license-test-session-secret-not-production-2026",
+    "ADMIN_PASSWORD_RECORD": "v1:200000:Zm9ybWF0eC1saWNlbnNlLXRlc3Qtc2FsdC0yMDI2:WILL_BE_OVERRIDDEN_BY_TEST_CONFIG"
+  }
+}
