@@ -11,6 +11,7 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_CONFIG="$ROOT_DIR/.wrangler-license-live.jsonc"
 LOGIN_FILE="$HOME/FormatX-licenc-admin-belepes.txt"
 RESET_PASSWORD="${FORMATX_RESET_ADMIN_PASSWORD:-0}"
+PERSIST_CONFIG="${FORMATX_PERSIST_WRANGLER_CONFIG:-0}"
 
 cleanup(){ rm -f -- "$TMP_CONFIG" /tmp/formatx-license-health.json; unset CLOUDFLARE_API_TOKEN; }
 trap cleanup EXIT
@@ -87,7 +88,7 @@ fi
 printf '5/10 – Cloudflare Access alkalmazás és tulajdonosi szabály…\n'
 APPS="$(api GET "/accounts/$ACCOUNT_ID/access/apps?per_page=100")"
 printf '%s' "$APPS" | check_success || fail 'Az Access alkalmazások nem kérhetők le.'
-APP_ID="$(printf '%s' "$APPS" | python3 -c 'import json,sys; suffix=sys.argv[1]; data=json.load(sys.stdin); found=""; 
+APP_ID="$(printf '%s' "$APPS" | python3 -c 'import json,sys; suffix=sys.argv[1]; data=json.load(sys.stdin); found="";
 for app in data.get("result",[]):
  uris=[d.get("uri","") for d in app.get("destinations",[]) if isinstance(d,dict)]
  if any(uri.endswith(suffix) for uri in uris) or str(app.get("domain","")).endswith(suffix): found=app.get("id",""); break
@@ -123,6 +124,10 @@ data['d1_databases']=[{'binding':'LICENSE_DB','database_name':'formatx-license-d
 data.setdefault('vars',{}).update({'ADMIN_EMAILS':sys.argv[2],'ACCESS_TEAM_DOMAIN':'https://'+sys.argv[3].removeprefix('https://').rstrip('/'),'ACCESS_AUD':sys.argv[4]})
 Path(sys.argv[5]).write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 PY
+if [[ "$PERSIST_CONFIG" == "1" ]]; then
+  cp -- "$TMP_CONFIG" "$ROOT_DIR/wrangler.jsonc"
+  printf 'A D1- és Access-konfiguráció elmentve a tartós wrangler.jsonc fájlba.\n'
+fi
 
 printf '7/10 – Titkok és vészhelyzeti helyi jelszó…\n'
 SECRET_LIST="$(npx wrangler secret list --config "$TMP_CONFIG" 2>/dev/null || true)"
