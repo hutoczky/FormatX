@@ -7,6 +7,7 @@ on:
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/license-migrations/**'
       - 'billing-worker/scripts/deploy-license-center-live.sh'
+      - 'billing-worker/test/license-center.spec.js'
       - 'docs/fx-owner-license/**'
       - 'billing-worker/wrangler.jsonc'
       - '.github/workflows/license-center-ci.yml'
@@ -43,6 +44,23 @@ jobs:
           grep -q 'device_hash TEXT NOT NULL' license-migrations/0001_license_center.sql
           ! grep -RniE '(sk-[A-Za-z0-9_-]{20,}|CLOUDFLARE_API_TOKEN=.{20,}|LICENSE_PEPPER=.{20,}|ADMIN_PASSWORD_RECORD=v1:)' src scripts ../docs license-migrations
       - name: Existing worker tests
-        run: npm test -- --run
+        id: tests
+        shell: bash
+        run: |
+          set +e
+          npm test -- --run 2>&1 | tee license-center-tests.log
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: license-center-test-log
+          path: billing-worker/license-center-tests.log
+          if-no-files-found: error
+      - name: Fail when tests failed
+        if: steps.tests.outputs.status != '0'
+        run: exit 1
       - name: Production bundle dry-run
         run: npx wrangler deploy --dry-run --outdir ../.wrangler-license-ci
