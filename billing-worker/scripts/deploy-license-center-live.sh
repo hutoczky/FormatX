@@ -50,7 +50,7 @@ printf '%s' "$VERIFY" | check_success || fail 'A Cloudflare API-token érvényte
 
 printf '2/10 – Függőségek és tesztek…\n'
 npm install --no-audit --no-fund
-npm test -- --run
+npm run test:license
 bash -n scripts/deploy-license-center-live.sh
 
 printf '3/10 – D1 adatbázis létrehozása vagy megkeresése…\n'
@@ -69,7 +69,7 @@ ORG="$(api GET "/accounts/$ACCOUNT_ID/access/organizations" || true)"
 AUTH_DOMAIN="$(printf '%s' "$ORG" | python3 -c 'import json,sys; o=json.load(sys.stdin); r=o.get("result") or {}; print(r.get("auth_domain") or "")' 2>/dev/null || true)"
 if [[ -z "$AUTH_DOMAIN" ]]; then
   AUTH_DOMAIN="formatx-${ACCOUNT_ID: -8}.cloudflareaccess.com"
-  ORG_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX","auth_domain":sys.argv[1],"auto_redirect_to_identity":False,"deny_unmatched_requests":False}))' "$AUTH_DOMAIN")"
+  ORG_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX","auth_domain":sys.argv[1],"auto_redirect_to_identity":False,"deny_unmatched_requests":False,"session_duration":"24h","warp_auth_session_duration":"24h","user_seat_expiration_inactive_time":"730h"}))' "$AUTH_DOMAIN")"
   ORG_CREATE="$(api POST "/accounts/$ACCOUNT_ID/access/organizations" "$ORG_BODY")"
   printf '%s' "$ORG_CREATE" | check_success || fail 'A Zero Trust szervezet nem hozható létre.'
 fi
