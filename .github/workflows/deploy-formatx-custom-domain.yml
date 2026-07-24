@@ -7,9 +7,8 @@ on:
     branches:
       - master
     paths:
-      - 'docs/scifi-ui/scripts/start-sale.js'
-      - 'docs/scifi-ui/styles/start-sale.css'
-      - 'billing-worker/src/production-with-license.js'
+      - 'billing-worker/**'
+      - 'docs/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
 
 permissions:
@@ -143,7 +142,7 @@ jobs:
 
           license_health="$(curl -fsSL --connect-timeout 10 --max-time 30 \
             -H 'Cache-Control: no-cache' \
-            'https://www.formatxsuite.com/api/license/health')"
+            'https://formatxsuite.com/api/license/health')"
           LICENSE_HEALTH_JSON="$license_health" python3 - <<'PY'
           import json
           import os
@@ -162,7 +161,7 @@ jobs:
           gh issue comment 114 --repo "$GITHUB_REPOSITORY" --body "✅ **PASS — éles telepítés és ellenőrzés sikeres**
 
           - Commit: \`${GITHUB_SHA}\`
-          - Főoldal: https://www.formatxsuite.com/
+          - Főoldal: https://formatxsuite.com/
           - Start akció CSS/JS: ellenőrizve mindkét domainen
           - Licenc-API: ellenőrizve
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
