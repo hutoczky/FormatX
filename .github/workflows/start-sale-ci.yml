@@ -1,0 +1,88 @@
+name: Start Sale CI
+
+on:
+  pull_request:
+    paths:
+      - 'docs/scifi-ui/scripts/start-sale.js'
+      - 'docs/scifi-ui/styles/start-sale.css'
+      - 'billing-worker/src/production-with-license.js'
+      - '.github/workflows/start-sale-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check docs/scifi-ui/scripts/start-sale.js
+          node --check billing-worker/src/production-with-license.js
+
+      - name: Verify promotion and price consistency
+        shell: python
+        run: |
+          from pathlib import Path
+
+          promo = Path('docs/scifi-ui/scripts/start-sale.js').read_text(encoding='utf-8')
+          css = Path('docs/scifi-ui/styles/start-sale.css').read_text(encoding='utf-8')
+          worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
+          live = Path('billing-worker/src/live-entry.js').read_text(encoding='utf-8')
+          checkout = Path('docs/scifi-ui/scripts/checkout.js').read_text(encoding='utf-8')
+          checkout_language = Path('docs/scifi-ui/scripts/checkout-language.js').read_text(encoding='utf-8')
+          home = Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
+
+          sale_prices = [15900, 139300, 44, 383, 39900, 349300, 110, 961, 79900, 699300, 220, 1924]
+          regular_prices = [19900, 199000, 55, 547, 49900, 499000, 137, 1373, 99900, 999000, 275, 2748]
+
+          for price in sale_prices:
+              assert str(price) in promo, price
+              assert str(price) in live, price
+              assert str(price) in checkout, price
+              assert str(price) in checkout_language, price
+
+          for price in regular_prices:
+              assert str(price) in promo, price
+
+          assert 'START AKCIÓ' in promo
+          assert 'LAUNCH OFFER' in promo
+          assert 'monthlyDiscount: 20' in promo
+          assert 'annualDiscount: 30' in promo
+          assert '/scifi-ui/styles/start-sale.css' in worker
+          assert '/scifi-ui/scripts/start-sale.js' in worker
+          assert "'/checkout.html'" in worker
+          assert "'/scifi-ui/checkout.html'" in worker
+          assert 'HTMLRewriter' in worker
+          assert css.count('{') == css.count('}')
+          assert '@media (prefers-reduced-motion: reduce)' in css
+          assert '@media (prefers-contrast: more)' in css
+
+          for token in ['15 900 Ft / hó', '39 900 Ft / hó', '79 900 Ft / hó', '44 €', '110 €', '220 €']:
+              assert token in home, token
+
+          print('Start akció labels, regular prices and payable prices are consistent.')
+
+      - name: Install Worker dependencies
+        working-directory: billing-worker
+        run: npm ci
+
+      - name: Run existing Worker tests
+        working-directory: billing-worker
+        run: npm test -- --run
+
+      - name: Build production Worker without deploying
+        working-directory: billing-worker
+        run: npx wrangler deploy --dry-run --outdir ../.wrangler-start-sale-ci
