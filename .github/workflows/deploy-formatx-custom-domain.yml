@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: formatx-production-deploy
@@ -152,3 +153,27 @@ jobs:
           assert data.get('service') == 'formatx-license-center', data
           print('Production license API health response is valid.')
           PY
+
+      - name: Record successful production deployment
+        if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 114 --repo "$GITHUB_REPOSITORY" --body "✅ **PASS — éles telepítés és ellenőrzés sikeres**
+
+          - Commit: \`${GITHUB_SHA}\`
+          - Főoldal: https://www.formatxsuite.com/
+          - Start akció CSS/JS: ellenőrizve mindkét domainen
+          - Licenc-API: ellenőrizve
+          - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+      - name: Record failed production deployment
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 114 --repo "$GITHUB_REPOSITORY" --body "❌ **FAILED — az éles telepítés vagy ellenőrzés sikertelen**
+
+          - Commit: \`${GITHUB_SHA}\`
+          - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          - A hiba kijavításáig az új állapot nem tekinthető igazoltan élőnek."
