@@ -2,6 +2,14 @@ import productionWorker from './production-entry.js';
 import { handleLicenseCenterRequest } from './license-center.js';
 
 const START_SALE_VERSION = '20260724-start-sale-1';
+const LICENSE_PERMISSIONS_POLICY = [
+  'camera=()',
+  'geolocation=()',
+  'microphone=()',
+  'payment=()',
+  'publickey-credentials-get=()',
+  'usb=()',
+].join(', ');
 const START_SALE_PATHS = new Set([
   '/',
   '/index.html',
@@ -44,10 +52,28 @@ function injectStartSale(response) {
     .transform(response);
 }
 
+function secureLicenseResponse(response) {
+  const headers = new Headers(response.headers);
+  headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('Referrer-Policy', 'no-referrer');
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+  headers.set('Permissions-Policy', LICENSE_PERMISSIONS_POLICY);
+  headers.delete('Server');
+  headers.delete('X-Powered-By');
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const licenseResponse = await handleLicenseCenterRequest(request, env);
-    if (licenseResponse) return licenseResponse;
+    if (licenseResponse) return secureLicenseResponse(licenseResponse);
 
     const response = await productionWorker.fetch(request, env, ctx);
     const url = new URL(request.url);
