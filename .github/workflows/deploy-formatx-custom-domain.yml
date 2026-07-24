@@ -1,19 +1,27 @@
-name: Manual FormatX production deploy
-run-name: Manual FormatX production deploy from ${{ github.sha }}
+name: FormatX production deploy
+run-name: FormatX production deploy from ${{ github.sha }}
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/scifi-ui/scripts/start-sale.js'
+      - 'docs/scifi-ui/styles/start-sale.css'
+      - 'billing-worker/src/production-with-license.js'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: formatx-manual-production-deploy
+  group: formatx-production-deploy
   cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Manual deploy and verification
+    name: Deploy and verify
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -45,9 +53,11 @@ jobs:
           assert Path("billing-worker/src/license-center.js").is_file()
           assert Path("billing-worker/license-migrations/0001_license_center.sql").is_file()
           assert Path("docs/fx-owner-license/index.html").is_file()
-          print("Production website and license-center configuration is valid.")
+          assert Path("docs/scifi-ui/scripts/start-sale.js").is_file()
+          assert Path("docs/scifi-ui/styles/start-sale.css").is_file()
+          print("Production website, license center and Start akció configuration is valid.")
 
-      - name: Require manual Cloudflare API token
+      - name: Require Cloudflare API token
         shell: bash
         env:
           RAW_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -81,6 +91,7 @@ jobs:
           node --check src/license-center.js
           node --check src/production-with-license.js
           node --check ../docs/fx-owner-license/app.js
+          node --check ../docs/scifi-ui/scripts/start-sale.js
           bash -n scripts/deploy-license-center-live.sh
           npm run test:license
 
@@ -91,7 +102,7 @@ jobs:
           FORMATX_ADMIN_EMAIL: hutoczky@gmail.com
         run: bash scripts/deploy-license-center-live.sh
 
-      - name: Verify public website and license API
+      - name: Verify public website, Start akció and license API
         shell: bash
         run: |
           set -euo pipefail
@@ -108,11 +119,13 @@ jobs:
 
               if [ "$status" = "200" ] \
                  && grep -Fq 'FormatX Suite Pro' "$body" \
+                 && grep -Fq '/scifi-ui/styles/start-sale.css' "$body" \
+                 && grep -Fq '/scifi-ui/scripts/start-sale.js' "$body" \
                  && grep -iq '^strict-transport-security:' "$headers" \
                  && grep -iq '^content-security-policy:' "$headers" \
                  && grep -iq '^x-content-type-options: nosniff' "$headers" \
                  && ! grep -iq '^location:' "$headers"; then
-                echo "Verified $url"
+                echo "Verified $url with Start akció assets"
                 rm -f "$headers" "$body"
                 return 0
               fi
