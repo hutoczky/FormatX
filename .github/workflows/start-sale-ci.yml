@@ -79,9 +79,9 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
-      - name: Run existing Worker tests
+      - name: Run production license Worker tests
         working-directory: billing-worker
-        run: npm test -- --run
+        run: npm run test:license
 
       - name: Build production Worker without deploying
         working-directory: billing-worker
