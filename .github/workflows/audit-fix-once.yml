@@ -1,0 +1,200 @@
+name: FormatX deep audit fix once
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/audit-fix-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: master
+
+      - name: Apply audited fixes
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace_exact(path, old, new):
+              file = Path(path)
+              text = file.read_text(encoding='utf-8')
+              if old in text:
+                  file.write_text(text.replace(old, new), encoding='utf-8')
+                  return
+              if new not in text:
+                  raise SystemExit(f'Expected text not found in {path}')
+
+          replace_exact(
+              'billing-worker/src/production-entry.js',
+              "const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';",
+              "const PUBLIC_ORIGIN = 'https://formatxsuite.com';",
+          )
+
+          replace_exact(
+              'billing-worker/src/production-with-license.js',
+              "const START_SALE_VERSION = '20260724-start-sale-1';",
+              """const START_SALE_VERSION = '20260724-start-sale-1';
+const LICENSE_PERMISSIONS_POLICY = [
+  'camera=()',
+  'geolocation=()',
+  'microphone=()',
+  'payment=()',
+  'publickey-credentials-get=()',
+  'usb=()',
+].join(', ');
+
+function secureLicenseResponse(response) {
+  const headers = new Headers(response.headers);
+  headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('Referrer-Policy', 'no-referrer');
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  headers.set('Cross-Origin-Resource-Policy', 'same-origin');
+  headers.set('Permissions-Policy', LICENSE_PERMISSIONS_POLICY);
+  headers.delete('Server');
+  headers.delete('X-Powered-By');
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}""",
+          )
+          replace_exact(
+              'billing-worker/src/production-with-license.js',
+              '    if (licenseResponse) return licenseResponse;',
+              '    if (licenseResponse) return secureLicenseResponse(licenseResponse);',
+          )
+
+          replace_exact(
+              'billing-worker/src/license-center.js',
+              """async function readJson(request) {
+  const length = Number(request.headers.get('Content-Length') || 0);
+  if (length > 32 * 1024) throw new PublicError(413, 'request_too_large');
+  try {
+    const payload = await request.json();
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('invalid');
+    return payload;
+  } catch {
+    throw new PublicError(400, 'invalid_json');
+  }
+}""",
+              """async function readJson(request) {
+  const contentType = request.headers.get('Content-Type') || '';
+  if (!contentType.toLowerCase().includes('application/json')) {
+    throw new PublicError(415, 'invalid_content_type');
+  }
+
+  const declaredLength = Number(request.headers.get('Content-Length') || 0);
+  if (declaredLength > 32 * 1024) throw new PublicError(413, 'request_too_large');
+
+  let raw;
+  try {
+    raw = await request.text();
+  } catch {
+    throw new PublicError(400, 'invalid_request');
+  }
+  if (!raw) throw new PublicError(400, 'empty_request');
+  if (textEncoder.encode(raw).byteLength > 32 * 1024) {
+    throw new PublicError(413, 'request_too_large');
+  }
+
+  try {
+    const payload = JSON.parse(raw);
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('invalid');
+    return payload;
+  } catch {
+    throw new PublicError(400, 'invalid_json');
+  }
+}""",
+          )
+
+          replace_exact(
+              '.github/workflows/deploy-formatx-custom-domain.yml',
+              """    paths:
+      - 'docs/scifi-ui/scripts/start-sale.js'
+      - 'docs/scifi-ui/styles/start-sale.css'
+      - 'billing-worker/src/production-with-license.js'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'""",
+              """    paths:
+      - 'billing-worker/**'
+      - 'docs/**'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'""",
+          )
+          replace_exact(
+              '.github/workflows/deploy-formatx-custom-domain.yml',
+              "'https://www.formatxsuite.com/api/license/health'",
+              "'https://formatxsuite.com/api/license/health'",
+          )
+          replace_exact(
+              '.github/workflows/deploy-formatx-custom-domain.yml',
+              '- Főoldal: https://www.formatxsuite.com/',
+              '- Főoldal: https://formatxsuite.com/',
+          )
+
+          replace_exact(
+              '.github/workflows/ci.yml',
+              '            echo "Production: https://www.formatxsuite.com/"',
+              '            echo "Production: https://formatxsuite.com/"',
+          )
+
+          replace_exact(
+              'android-app/app/src/main/java/hu/formatx/suite/MainActivity.java',
+              '    private static final String PRIMARY_HOST = "www.formatxsuite.com";',
+              '    private static final String PRIMARY_HOST = "formatxsuite.com";\n    private static final String SECONDARY_HOST = "www.formatxsuite.com";',
+          )
+          replace_exact(
+              'android-app/app/src/main/java/hu/formatx/suite/MainActivity.java',
+              """                PRIMARY_HOST.equalsIgnoreCase(host)
+                        || FALLBACK_HOST.equalsIgnoreCase(host)""",
+              """                PRIMARY_HOST.equalsIgnoreCase(host)
+                        || SECONDARY_HOST.equalsIgnoreCase(host)
+                        || FALLBACK_HOST.equalsIgnoreCase(host)""",
+          )
+          replace_exact(
+              'android-app/app/src/main/java/hu/formatx/suite/AppUpdater.java',
+              '            "https://www.formatxsuite.com/scifi-ui/downloads/android-update.json";',
+              '            "https://formatxsuite.com/scifi-ui/downloads/android-update.json";',
+          )
+          replace_exact(
+              'android-app/app/src/main/java/hu/formatx/suite/PaymentClient.java',
+              '    private static final String API_ROOT = "https://www.formatxsuite.com/api";',
+              '    private static final String API_ROOT = "https://formatxsuite.com/api";',
+          )
+          replace_exact(
+              'android-app/app/src/main/java/hu/formatx/suite/PaymentActivity.java',
+              '    private static final Uri SUPPORT_URI = Uri.parse("https://www.formatxsuite.com/support.html");',
+              '    private static final Uri SUPPORT_URI = Uri.parse("https://formatxsuite.com/support.html");',
+          )
+          replace_exact(
+              'docs/scifi-ui/downloads/android-update.json',
+              '  "apkUrl": "https://www.formatxsuite.com/download/android",',
+              '  "apkUrl": "https://formatxsuite.com/download/android",',
+          )
+
+          Path('.github/workflows/audit-fix-once.yml').unlink(missing_ok=True)
+
+      - name: Commit audit fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Harden cloud delivery and online clients'
+          git push origin HEAD:master
