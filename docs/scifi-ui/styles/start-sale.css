@@ -1,0 +1,208 @@
+.start-sale-banner {
+  width: 100%;
+  min-height: 52px;
+  padding: 9px clamp(16px, 4vw, 64px);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  color: #f7fbff;
+  border-top: 1px solid rgba(255, 200, 107, .28);
+  border-bottom: 1px solid rgba(69, 229, 255, .32);
+  background:
+    radial-gradient(circle at 15% 50%, rgba(255, 200, 107, .18), transparent 24rem),
+    linear-gradient(100deg, rgba(16, 38, 56, .98), rgba(15, 30, 52, .98) 42%, rgba(55, 25, 77, .96));
+  box-shadow: 0 16px 50px rgba(0, 0, 0, .24), inset 0 0 40px rgba(69, 229, 255, .04);
+}
+
+.start-sale-banner-badge,
+.start-sale-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  color: #171004;
+  border: 1px solid rgba(255, 237, 176, .82);
+  background: linear-gradient(110deg, #ffc86b, #fff2a6 48%, #ff9fdc);
+  box-shadow: 0 0 24px rgba(255, 200, 107, .18);
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.start-sale-banner-badge {
+  min-height: 29px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 10px;
+}
+
+.start-sale-banner-copy {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.start-sale-banner-copy strong {
+  font-size: 13px;
+  letter-spacing: .02em;
+}
+
+.start-sale-banner-copy span {
+  color: #b9c9dc;
+  font-size: 11px;
+}
+
+.start-sale-banner-link {
+  min-height: 32px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #eafcff;
+  border: 1px solid rgba(69, 229, 255, .42);
+  border-radius: 7px;
+  background: rgba(69, 229, 255, .08);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.start-sale-callout {
+  margin: 9px 0 10px;
+  padding: 9px 11px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(255, 200, 107, .32);
+  border-radius: 9px;
+  background: linear-gradient(110deg, rgba(255, 200, 107, .08), rgba(69, 229, 255, .05));
+}
+
+.start-sale-callout strong {
+  color: #ffd992;
+  font-size: 9px;
+  letter-spacing: .1em;
+}
+
+.start-sale-callout span {
+  color: #a9bad0;
+  font-size: 8px;
+}
+
+.start-sale-badge {
+  min-height: 22px;
+  margin: 0 0 9px;
+  padding: 0 8px;
+  border-radius: 5px;
+  font-size: 7px;
+}
+
+.start-sale-original {
+  clear: both;
+  margin-top: 9px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 8px;
+  color: #75849a;
+  font-size: 7px;
+}
+
+.start-sale-original span {
+  color: #9daec3;
+  font-weight: 700;
+}
+
+.start-sale-original del,
+.start-sale-preview-original del,
+.start-sale-del {
+  color: #8190a4;
+  text-decoration-color: #ff799d;
+  text-decoration-thickness: 1.5px;
+}
+
+.start-sale-saving {
+  margin-top: 3px;
+  color: #75f3bc;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.start-sale-preview-original {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #8090a6;
+  font-size: 7px;
+}
+
+.start-sale-preview-original span {
+  color: #a3b4cb;
+}
+
+.start-sale-summary-row dd.start-sale-del,
+.start-sale-summary-row .start-sale-del {
+  font-weight: 600;
+}
+
+.start-sale-summary-saving dd,
+#summary-sale-saving {
+  color: #4fe5a8;
+  font-weight: 800;
+}
+
+.start-sale-checkout-note {
+  max-width: 72ch;
+  margin: 1rem 0 0;
+  padding: .8rem 1rem;
+  border: 1px solid color-mix(in srgb, #ffc86b 42%, var(--line));
+  border-radius: 14px;
+  color: color-mix(in srgb, #ffc86b 70%, var(--text));
+  background: linear-gradient(110deg, color-mix(in srgb, #ffc86b 8%, transparent), color-mix(in srgb, var(--cyan) 5%, transparent));
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .start-sale-banner {
+    grid-template-columns: 1fr auto;
+  }
+
+  .start-sale-banner-badge {
+    grid-column: 1 / -1;
+  }
+
+  .start-sale-banner-copy {
+    display: grid;
+    gap: 2px;
+  }
+}
+
+@media (max-width: 520px) {
+  .start-sale-banner {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .start-sale-banner-link {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .start-sale-banner,
+  .start-sale-badge,
+  .start-sale-banner-badge {
+    scroll-behavior: auto;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .start-sale-banner,
+  .start-sale-callout,
+  .start-sale-checkout-note {
+    border-width: 2px;
+  }
+}
