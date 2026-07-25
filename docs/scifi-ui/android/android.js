@@ -5,7 +5,7 @@
   const versionNode = document.getElementById('androidVersion');
   const navigationLinks = Array.from(document.querySelectorAll('.bottom-nav a'));
   const updateManifestUrl = '../downloads/android-native-update.json';
-  const verifiedApkUrl = 'https://github.com/hutoczky/FormatX/releases/download/android-native-v1.1.0-beta/FormatX-Native-Android.apk';
+  const verifiedApkUrl = 'https://raw.githubusercontent.com/hutoczky/FormatX/master/docs/scifi-ui/downloads/FormatX-Native-Android.apk';
 
   function initialLanguage() {
     const query = new URLSearchParams(window.location.search).get('lang');
