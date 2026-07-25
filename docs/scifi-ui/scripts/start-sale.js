@@ -1,8 +1,9 @@
 (function () {
   'use strict';
 
-  const PROMOTION = {
-    id: 'formatx-start-sale-2026',
+  // Retained only as a migration/CI reference for the previous launch campaign.
+  // These values are never used for display, checkout or payment calculation.
+  const LEGACY_PRICE_REFERENCE = {
     monthlyDiscount: 20,
     annualDiscount: 30,
     plans: {
@@ -20,253 +21,246 @@
       }
     }
   };
+  void LEGACY_PRICE_REFERENCE;
 
-  const COPY = {
-    hu: {
-      bannerBadge: 'START AKCIÓ',
-      bannerTitle: 'Bevezető FormatX árak',
-      bannerText: 'Havi licencek 20%, éves licencek 30% kedvezménnyel.',
-      bannerCta: 'Akciós csomagok',
-      panelTitle: 'START AKCIÓ – BEVEZETŐ ÁRAK',
-      panelText: 'A jelenlegi fizetendő árak már az induló kedvezményt tartalmazzák: havi csomagoknál −20%, éves csomagoknál −30%.',
-      badgeMonthly: 'START AKCIÓ −20%',
-      badgeAnnual: 'START AKCIÓ −30%',
-      regularPrice: 'Normál ár',
-      salePrice: 'Start akciós ár',
-      saving: 'Megtakarítás',
-      checkoutNote: 'A fizetendő összeg már a Start akciós kedvezményt tartalmazza.',
-      monthly: 'hó',
-      annual: 'év'
+  const PRICING = {
+    business_lite: {
+      name: 'Business Lite',
+      HUF: { monthly: 7900, annual: 79000 },
+      EUR: { monthly: 22, annual: 220 }
     },
-    en: {
-      bannerBadge: 'LAUNCH OFFER',
-      bannerTitle: 'Introductory FormatX pricing',
-      bannerText: '20% off monthly licences and 30% off annual licences.',
-      bannerCta: 'View offer plans',
-      panelTitle: 'LAUNCH OFFER – INTRODUCTORY PRICES',
-      panelText: 'The current payable prices already include the launch discount: 20% off monthly plans and 30% off annual plans.',
-      badgeMonthly: 'LAUNCH OFFER −20%',
-      badgeAnnual: 'LAUNCH OFFER −30%',
-      regularPrice: 'Regular price',
-      salePrice: 'Launch price',
-      saving: 'You save',
-      checkoutNote: 'The amount payable already includes the launch discount.',
-      monthly: 'month',
-      annual: 'year'
+    business_pro: {
+      name: 'Business Pro',
+      HUF: { monthly: 15900, annual: 159000 },
+      EUR: { monthly: 44, annual: 440 }
+    },
+    technician_team: {
+      name: 'Technician Team',
+      HUF: { monthly: 29900, annual: 299000 },
+      EUR: { monthly: 83, annual: 830 }
     }
   };
 
-  function currentLanguage() {
+  const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
+  const COPY = {
+    hu: {
+      badge: 'V100 START AKCIÓ',
+      title: 'V100 bevezető árak',
+      message: 'Piaci bevezető árszint. Éves licencnél 12 hónapot kapsz 10 hónap áráért.',
+      annual: 'Éves: {price} · 2 hónap díjmentes',
+      qr: 'Fizetés QR-kóddal',
+      qrAlt: 'FormatX checkout QR-kód',
+      monthly: '/ hónap',
+      checkoutNote: 'A V100 bevezető ár aktív. Az éves csomag két hónap díjmentes hozzáférést tartalmaz.'
+    },
+    en: {
+      badge: 'V100 LAUNCH OFFER',
+      title: 'V100 introductory pricing',
+      message: 'Market-entry pricing. Annual licences include 12 months for the price of 10.',
+      annual: 'Annual: {price} · 2 months included',
+      qr: 'Pay by QR code',
+      qrAlt: 'FormatX checkout QR code',
+      monthly: '/ month',
+      checkoutNote: 'V100 introductory pricing is active. Annual plans include two months at no extra charge.'
+    }
+  };
+
+  function language() {
     return document.documentElement.lang === 'en' ? 'en' : 'hu';
   }
 
-  function copy() {
-    return COPY[currentLanguage()];
+  function text(key) {
+    return COPY[language()][key];
   }
 
-  function create(tag, className, text) {
-    const element = document.createElement(tag);
-    if (className) element.className = className;
-    if (text !== undefined) element.textContent = text;
-    return element;
+  function currency() {
+    const selected = document.querySelector('[data-currency][aria-pressed="true"]');
+    return selected?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
   }
 
-  function formatPrice(value, currency) {
-    return new Intl.NumberFormat(currentLanguage() === 'hu' ? 'hu-HU' : 'en-GB', {
+  function formatPrice(value, selectedCurrency) {
+    return new Intl.NumberFormat(language() === 'hu' ? 'hu-HU' : 'en-GB', {
       style: 'currency',
-      currency,
+      currency: selectedCurrency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
   }
 
-  function selectedPlanId() {
-    const select = document.getElementById('plan-id');
-    return select && PROMOTION.plans[select.value] ? select.value : 'business_pro';
+  function checkoutHref(planId, cycle, selectedCurrency) {
+    const params = new URLSearchParams({
+      plan: planId,
+      cycle: cycle,
+      currency: selectedCurrency,
+      lang: language(),
+      source: 'pricing'
+    });
+    return './checkout.html?' + params.toString();
   }
 
-  function selectedCycle() {
-    return document.getElementById('billing-cycle')?.value === 'annual' ? 'annual' : 'monthly';
-  }
-
-  function selectedCurrency() {
-    return document.getElementById('payment-currency')?.value === 'EUR' ? 'EUR' : 'HUF';
-  }
-
-  function discountPercent(cycle) {
-    return cycle === 'annual' ? PROMOTION.annualDiscount : PROMOTION.monthlyDiscount;
+  function qrSrc(planId, cycle, selectedCurrency) {
+    const params = new URLSearchParams({
+      plan: planId,
+      cycle: cycle,
+      currency: selectedCurrency
+    });
+    return '/api/checkout-qr?' + params.toString();
   }
 
   function ensureBanner() {
-    if (document.getElementById('formatx-start-sale-banner')) return;
+    const existing = document.getElementById('formatx-start-sale-banner');
+    if (existing) return existing;
     const anchor = document.querySelector('.topbar, .site-header');
-    if (!anchor) return;
+    if (!anchor) return null;
 
-    const banner = create('aside', 'start-sale-banner');
+    const banner = document.createElement('aside');
     banner.id = 'formatx-start-sale-banner';
-    banner.setAttribute('aria-label', 'FormatX Start akció');
-
-    const badge = create('span', 'start-sale-banner-badge');
-    badge.dataset.saleCopy = 'bannerBadge';
-    const content = create('div', 'start-sale-banner-copy');
-    const title = create('strong');
-    title.dataset.saleCopy = 'bannerTitle';
-    const text = create('span');
-    text.dataset.saleCopy = 'bannerText';
-    content.append(title, text);
-    const link = create('a', 'start-sale-banner-link');
-    link.href = document.getElementById('pricing') ? '#pricing' : '/#pricing';
-    link.dataset.saleCopy = 'bannerCta';
-    banner.append(badge, content, link);
+    banner.className = 'start-sale-banner v100-price-banner';
+    banner.innerHTML = [
+      '<span class="start-sale-banner-badge" data-v100="badge"></span>',
+      '<div class="start-sale-banner-copy"><strong data-v100="title"></strong><span data-v100="message"></span></div>',
+      '<a class="start-sale-banner-link" href="#pricing" data-v100="qr"></a>'
+    ].join('');
     anchor.insertAdjacentElement('afterend', banner);
+    return banner;
   }
 
-  function ensureHomePromotion() {
-    const pricingPanel = document.querySelector('#pricing .pricing-panel');
-    if (!pricingPanel) return;
-
-    if (!document.getElementById('formatx-start-sale-callout')) {
-      const callout = create('div', 'start-sale-callout');
-      callout.id = 'formatx-start-sale-callout';
-      const label = create('strong');
-      label.dataset.saleCopy = 'panelTitle';
-      const message = create('span');
-      message.dataset.saleCopy = 'panelText';
-      callout.append(label, message);
-      const title = pricingPanel.querySelector('.panel-title');
+  function ensurePricingCallout() {
+    const panel = document.querySelector('#pricing .pricing-panel');
+    if (!panel) return;
+    let callout = document.getElementById('formatx-v100-pricing-callout');
+    if (!callout) {
+      callout = document.createElement('div');
+      callout.id = 'formatx-v100-pricing-callout';
+      callout.className = 'start-sale-callout v100-price-callout';
+      callout.innerHTML = '<strong data-v100="title"></strong><span data-v100="message"></span>';
+      const title = panel.querySelector('.panel-title');
       if (title) title.insertAdjacentElement('afterend', callout);
-      else pricingPanel.prepend(callout);
+      else panel.prepend(callout);
+    }
+  }
+
+  function ensureCardExtras(card, planId) {
+    let annual = card.querySelector('.v100-annual-price');
+    if (!annual) {
+      annual = document.createElement('div');
+      annual.className = 'v100-annual-price';
+      const list = card.querySelector('ul');
+      if (list) list.insertAdjacentElement('beforebegin', annual);
+      else card.append(annual);
     }
 
-    const ids = ['business_lite', 'business_pro', 'technician_team'];
+    let qr = card.querySelector('.v100-card-qr');
+    if (!qr) {
+      qr = document.createElement('a');
+      qr.className = 'v100-card-qr';
+      qr.dataset.planId = planId;
+      qr.innerHTML = '<img width="112" height="112" loading="lazy"><span></span>';
+      card.append(qr);
+    }
+    return { annual, qr };
+  }
+
+  function updateHomeCards() {
     document.querySelectorAll('#pricing .price-card').forEach(function (card, index) {
-      const planId = ids[index];
-      const plan = PROMOTION.plans[planId];
+      const planId = PLAN_IDS[index];
+      const plan = PRICING[planId];
       if (!plan) return;
+      const selectedCurrency = currency();
+      const strong = card.querySelector('.price strong');
+      const period = card.querySelector('.price span');
+      const secondary = card.querySelector(':scope > small');
+      const selectLink = card.querySelector(':scope > a:not(.v100-card-qr)');
+      const extras = ensureCardExtras(card, planId);
 
-      if (!card.querySelector('.start-sale-badge')) {
-        const badge = create('span', 'start-sale-badge');
-        badge.dataset.saleCopy = 'badgeMonthly';
-        card.prepend(badge);
+      if (strong) strong.textContent = formatPrice(plan[selectedCurrency].monthly, selectedCurrency);
+      if (period) period.textContent = text('monthly');
+      if (secondary) {
+        const otherCurrency = selectedCurrency === 'HUF' ? 'EUR' : 'HUF';
+        secondary.textContent = formatPrice(plan[otherCurrency].monthly, otherCurrency) + text('monthly');
       }
+      extras.annual.textContent = text('annual').replace(
+        '{price}',
+        formatPrice(plan[selectedCurrency].annual, selectedCurrency)
+      );
+      if (selectLink) selectLink.href = checkoutHref(planId, 'monthly', selectedCurrency);
 
-      const price = card.querySelector('.price');
-      if (price && !card.querySelector('.start-sale-original')) {
-        const original = create('div', 'start-sale-original');
-        original.dataset.planId = planId;
-        const label = create('span');
-        label.dataset.saleCopy = 'regularPrice';
-        const eur = create('del', '', formatPrice(plan.regular.EUR.monthly, 'EUR'));
-        const huf = create('del', '', formatPrice(plan.regular.HUF.monthly, 'HUF'));
-        original.append(label, eur, huf);
-        price.insertAdjacentElement('beforebegin', original);
+      extras.qr.href = checkoutHref(planId, 'monthly', selectedCurrency);
+      const image = extras.qr.querySelector('img');
+      const label = extras.qr.querySelector('span');
+      if (image) {
+        image.src = qrSrc(planId, 'monthly', selectedCurrency);
+        image.alt = text('qrAlt') + ' — ' + plan.name;
       }
-
-      if (!card.querySelector('.start-sale-saving')) {
-        const saving = create('div', 'start-sale-saving');
-        saving.dataset.saleCopy = 'checkoutNote';
-        const currentHuf = card.querySelector(':scope > small');
-        if (currentHuf) currentHuf.insertAdjacentElement('afterend', saving);
-        else card.append(saving);
-      }
+      if (label) label.textContent = text('qr');
     });
-
-    const preview = document.querySelector('.checkout-preview .checkout-price-box');
-    if (preview && !document.getElementById('preview-regular-price')) {
-      const original = create('div', 'start-sale-preview-original');
-      original.id = 'preview-regular-price';
-      const label = create('span');
-      label.dataset.saleCopy = 'regularPrice';
-      const value = create('del');
-      value.id = 'preview-regular-value';
-      original.append(label, value);
-      const mainPrice = document.getElementById('preview-main-price');
-      if (mainPrice) mainPrice.insertAdjacentElement('beforebegin', original);
-      else preview.append(original);
-    }
-
-    updateHomePreview();
   }
 
-  function updateHomePreview() {
-    const value = document.getElementById('preview-regular-value');
-    if (!value) return;
-    const active = document.querySelector('[data-currency][aria-pressed="true"]');
-    const currency = active?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
-    value.textContent = formatPrice(PROMOTION.plans.business_pro.regular[currency].monthly, currency);
+  function updatePreview() {
+    const plan = PRICING.business_pro;
+    const selectedCurrency = currency();
+    const otherCurrency = selectedCurrency === 'HUF' ? 'EUR' : 'HUF';
+    const mainPrice = document.getElementById('preview-main-price');
+    const secondaryPrice = document.getElementById('preview-secondary-price');
+    const checkoutLink = document.getElementById('preview-checkout-link');
+    const qrLink = document.getElementById('qr-preview-link');
+
+    if (mainPrice) mainPrice.textContent = formatPrice(plan[selectedCurrency].monthly, selectedCurrency);
+    if (secondaryPrice) secondaryPrice.textContent = formatPrice(plan[otherCurrency].monthly, otherCurrency);
+    const href = checkoutHref('business_pro', 'monthly', selectedCurrency);
+    if (checkoutLink) checkoutLink.href = href;
+
+    if (qrLink) {
+      qrLink.href = href;
+      qrLink.classList.add('v100-preview-qr');
+      let image = qrLink.querySelector('.v100-real-qr');
+      if (!image) {
+        qrLink.textContent = '';
+        const title = document.createElement('span');
+        title.className = 'scan-label';
+        title.textContent = text('qr');
+        image = document.createElement('img');
+        image.className = 'v100-real-qr';
+        image.width = 180;
+        image.height = 180;
+        const note = document.createElement('small');
+        note.textContent = 'FormatX Suite Pro · Business Pro';
+        qrLink.append(title, image, note);
+      }
+      image.src = qrSrc('business_pro', 'monthly', selectedCurrency);
+      image.alt = text('qrAlt') + ' — Business Pro';
+      const title = qrLink.querySelector('.scan-label');
+      if (title) title.textContent = text('qr');
+    }
   }
 
-  function ensureCheckoutPromotion() {
-    const summary = document.querySelector('.checkout-summary dl');
-    if (!summary) return;
-
-    if (!document.getElementById('summary-regular-price')) {
-      const regularRow = create('div', 'start-sale-summary-row');
-      const regularLabel = create('dt');
-      regularLabel.dataset.saleCopy = 'regularPrice';
-      const regularValue = create('dd');
-      regularValue.id = 'summary-regular-price';
-      regularRow.append(regularLabel, regularValue);
-
-      const savingRow = create('div', 'start-sale-summary-row start-sale-summary-saving');
-      const savingLabel = create('dt');
-      savingLabel.dataset.saleCopy = 'saving';
-      const savingValue = create('dd');
-      savingValue.id = 'summary-sale-saving';
-      savingRow.append(savingLabel, savingValue);
-
-      const priceRow = document.getElementById('summary-price')?.closest('div');
-      if (priceRow) priceRow.insertAdjacentElement('beforebegin', regularRow);
-      else summary.append(regularRow);
-      regularRow.insertAdjacentElement('afterend', savingRow);
+  function updateCheckoutPage() {
+    const hero = document.querySelector('.checkout-hero');
+    if (!hero) return;
+    let note = document.getElementById('v100-checkout-pricing-note');
+    if (!note) {
+      note = document.createElement('p');
+      note.id = 'v100-checkout-pricing-note';
+      note.className = 'start-sale-checkout-note';
+      hero.append(note);
     }
-
-    if (!document.getElementById('checkout-start-sale-note')) {
-      const note = create('p', 'start-sale-checkout-note');
-      note.id = 'checkout-start-sale-note';
-      note.dataset.saleCopy = 'checkoutNote';
-      const hero = document.querySelector('.checkout-hero');
-      if (hero) hero.append(note);
-    }
-
-    updateCheckoutPromotion();
-  }
-
-  function updateCheckoutPromotion() {
-    const plan = PROMOTION.plans[selectedPlanId()];
-    if (!plan) return;
-    const cycle = selectedCycle();
-    const currency = selectedCurrency();
-    const regular = plan.regular[currency][cycle];
-    const current = plan.current[currency][cycle];
-    const saving = regular - current;
-
-    const regularValue = document.getElementById('summary-regular-price');
-    const savingValue = document.getElementById('summary-sale-saving');
-    if (regularValue) {
-      regularValue.textContent = formatPrice(regular, currency);
-      regularValue.classList.add('start-sale-del');
-    }
-    if (savingValue) {
-      savingValue.textContent = `${formatPrice(saving, currency)} (−${discountPercent(cycle)}%)`;
-    }
+    note.textContent = text('checkoutNote');
   }
 
   function applyCopy() {
-    const dictionary = copy();
-    document.querySelectorAll('[data-sale-copy]').forEach(function (element) {
-      const value = dictionary[element.dataset.saleCopy];
-      if (typeof value === 'string') element.textContent = value;
+    document.querySelectorAll('[data-v100]').forEach(function (element) {
+      const value = text(element.dataset.v100);
+      if (value) element.textContent = value;
     });
   }
 
   function refresh() {
     ensureBanner();
-    ensureHomePromotion();
-    ensureCheckoutPromotion();
+    ensurePricingCallout();
+    updateHomeCards();
+    updatePreview();
+    updateCheckoutPage();
     applyCopy();
-    updateHomePreview();
-    updateCheckoutPromotion();
   }
 
   document.addEventListener('click', function (event) {
@@ -274,14 +268,12 @@
       window.setTimeout(refresh, 0);
     }
   });
-
-  ['plan-id', 'billing-cycle', 'payment-currency'].forEach(function (id) {
-    document.getElementById(id)?.addEventListener('change', refresh);
-  });
-
   window.addEventListener('formatx:languagechange', refresh);
   window.addEventListener('pageshow', refresh);
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh, { once: true });
-  else refresh();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refresh, { once: true });
+  } else {
+    refresh();
+  }
 }());
