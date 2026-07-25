@@ -63,12 +63,23 @@ jobs:
               "docs/scifi-ui/scripts/start-sale.js",
               "docs/scifi-ui/scripts/checkout-v100.js",
               "docs/scifi-ui/scripts/checkout-language-v100.js",
+              "docs/scifi-ui/scripts/future-5000.js",
               "docs/scifi-ui/styles/start-sale.css",
               "docs/scifi-ui/styles/pricing-v100.css",
+              "docs/scifi-ui/styles/future-5000.css",
           ]
           for file_name in required_files:
               assert Path(file_name).is_file(), file_name
-          print("Production website, license center, V100 pricing and QR configuration is valid.")
+
+          start_sale = Path("docs/scifi-ui/scripts/start-sale.js").read_text(encoding="utf-8")
+          future_script = Path("docs/scifi-ui/scripts/future-5000.js").read_text(encoding="utf-8")
+          future_styles = Path("docs/scifi-ui/styles/future-5000.css").read_text(encoding="utf-8")
+          assert "formatx-plan-qr-dock" in start_sale
+          assert "cards.insertAdjacentElement('afterend', dock)" in start_sale
+          assert "formatx-future-5000" in future_script
+          assert ".fx-plan-qr-grid" in future_styles
+          assert "prefers-reduced-motion: reduce" in future_styles
+          print("Production website, license center, separate QR row and Year 5000 design are valid.")
 
       - name: Require Cloudflare API token
         id: require_token
@@ -147,7 +158,7 @@ jobs:
           echo "Both production deployment attempts failed." >&2
           exit 1
 
-      - name: Verify public website, V100 pricing assets and license API
+      - name: Verify public website, separate QR row, Year 5000 design and license API
         id: verify_production
         shell: bash
         run: |
@@ -167,12 +178,14 @@ jobs:
                  && grep -Fq 'FormatX Suite Pro' "$body" \
                  && grep -Fq '/scifi-ui/styles/start-sale.css' "$body" \
                  && grep -Fq '/scifi-ui/styles/pricing-v100.css' "$body" \
+                 && grep -Fq '/scifi-ui/styles/future-5000.css' "$body" \
                  && grep -Fq '/scifi-ui/scripts/start-sale.js' "$body" \
+                 && grep -Fq '/scifi-ui/scripts/future-5000.js' "$body" \
                  && grep -iq '^strict-transport-security:' "$headers" \
                  && grep -iq '^content-security-policy:' "$headers" \
                  && grep -iq '^x-content-type-options: nosniff' "$headers" \
                  && ! grep -iq '^location:' "$headers"; then
-                echo "Verified $url with V100 pricing assets"
+                echo "Verified $url with separate QR and Year 5000 assets"
                 rm -f "$headers" "$body"
                 return 0
               fi
@@ -213,7 +226,8 @@ jobs:
 
           - Commit: \`${GITHUB_SHA}\`
           - Főoldal: https://formatxsuite.com/
-          - V100 árak és QR-fizetés: ellenőrizve mindkét domainen
+          - Három külön csomag-QR: ellenőrizve
+          - 5000-es vizuális rendszer: ellenőrizve mindkét domainen
           - Licenc-API: ellenőrizve
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
