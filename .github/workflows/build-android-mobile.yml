@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: formatx-mobile-android-${{ github.ref }}
@@ -145,3 +146,27 @@ jobs:
             echo
             echo "SHA256: $APK_SHA256"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Record successful Android build
+        if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 114 --repo "$GITHUB_REPOSITORY" --body "✅ **PASS — FormatX Mobile Android 1.0.0 elkészült**
+
+          - Forrás commit: \`${GITHUB_SHA}\`
+          - Külön csomag: \`hu.formatx.mobile\`
+          - APK: https://www.formatxsuite.com/scifi-ui/downloads/FormatX-Mobile-Android.apk
+          - SHA-256: \`${APK_SHA256}\`
+          - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+      - name: Record failed Android build
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 114 --repo "$GITHUB_REPOSITORY" --body "❌ **FAILED — FormatX Mobile Android build**
+
+          - Forrás commit: \`${GITHUB_SHA}\`
+          - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          - Az APK a hiba kijavításáig nem tekinthető elkészültnek."
