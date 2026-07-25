@@ -7,6 +7,7 @@
 - Aktiválás: `POST https://www.formatxsuite.com/api/license/activate`
 - Ellenőrzés: `POST https://www.formatxsuite.com/api/license/check`
 - Deaktiválás: `POST https://www.formatxsuite.com/api/license/deactivate`
+- Aláírt visszavonási lista: `GET https://www.formatxsuite.com/api/license/revocations`
 - Állapot: `GET https://www.formatxsuite.com/api/license/health`
 
 A licenckezelő nem használ külön aldomaint, és nem jelenik meg a nyilvános menüben vagy sitemapben.
@@ -26,6 +27,10 @@ A licenckezelő nem használ külön aldomaint, és nem jelenik meg a nyilvános
 - nyers eszközazonosító helyett HMAC-lenyomat;
 - IP-alapú, HMAC-anonimizált kéréskorlátozás;
 - Cloudflare Access JWT-ellenőrzés;
+- ugyanazon adminoldalon kiadott kulcsok fogadása a FormatX kliens aláírt API-ján;
+- Ed25519-aláírt aktiválási, ellenőrzési és deaktiválási válaszok;
+- nonce- és időbélyeg-ellenőrzés a visszajátszásos kérések ellen;
+- aláírt visszavonási lista hálózati hiba esetére;
 - vészhelyzeti helyi jelszavas belépés PBKDF2-SHA-256 védelemmel;
 - D1 adatbázis és verziózott migráció.
 
@@ -39,6 +44,8 @@ A licenckezelő nem használ külön aldomaint, és nem jelenik meg a nyilvános
 6. A `LICENSE_PEPPER`, a munkamenettitok és a tartalék jelszó rekordja Cloudflare Worker Secret.
 7. A böngészős adminmódosításokat Origin-ellenőrzés, SameSite cookie és helyi belépésnél CSRF-token védi.
 8. Minden adminművelet auditálódik.
+9. A kliens csak a csomagba rögzített Ed25519 nyilvános kulccsal ellenőrzött választ fogad el.
+10. Az Ed25519 privát kulcs kizárólag Cloudflare Worker Secretként és a tulajdonos `chmod 600` helyi biztonsági példányában létezhet.
 
 ## Egyparancsos telepítés Bazzite alatt
 
@@ -71,11 +78,14 @@ Az éles telepítő:
 - kizárólag a tulajdonosi e-mailt engedélyezi;
 - beállítja a D1 bindingot;
 - létrehozza a Worker secreteket, de nem naplózza azokat;
+- ellenőrzi az Ed25519 kulcspárt és első telepítéskor feltölti a privát kulcsot Worker Secretként;
 - lefuttatja a D1 migrációt;
 - dry-runt és éles Workert telepít;
-- ellenőrzi az API-t és az adminvédelmet.
+- ellenőrzi az aláírt kliens API-t, az issuer kulcsazonosítóját és az adminvédelmet.
 
 A hitelesítési token csak memóriában használható, és nem kerül repositoryba vagy állandó projektfájlba.
+A publikus kulcs a repository része; a privát kulcs alapértelmezett helye
+`~/.config/formatx/license-api-issuer-key.pem`, és nem kerülhet commitba.
 
 ## Belépés
 

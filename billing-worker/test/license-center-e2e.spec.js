@@ -54,6 +54,54 @@ async function publicLicenseRequest(path, body) {
   });
 }
 
+async function signedPayload(response, expectedNonce = null) {
+  const envelope = await json(response);
+  expect(envelope.schema_version).toBe(1);
+  expect(envelope.canonicalization).toBe('json-sort-keys-compact-utf8');
+  expect(envelope.signature_algorithm).toBe('Ed25519');
+  expect(envelope.issuer_key_id).toBe(env.FORMATX_ISSUER_KEY_ID);
+
+  const payloadBytes = Uint8Array.from(atob(envelope.payload_base64), (character) => character.charCodeAt(0));
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', payloadBytes));
+  const digestHex = Array.from(digest, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  expect(digestHex).toBe(envelope.payload_hash);
+
+  const publicKey = await crypto.subtle.importKey(
+    'spki',
+    pemBytes(env.FORMATX_ISSUER_PUBLIC_KEY, 'PUBLIC KEY'),
+    { name: 'Ed25519' },
+    false,
+    ['verify'],
+  );
+  const signature = Uint8Array.from(atob(envelope.signature), (character) => character.charCodeAt(0));
+  expect(await crypto.subtle.verify('Ed25519', publicKey, signature, payloadBytes)).toBe(true);
+
+  const payload = JSON.parse(new TextDecoder().decode(payloadBytes));
+  expect(payload).toEqual(envelope.payload);
+  if (expectedNonce) expect(payload.response_nonce).toBe(expectedNonce);
+  return payload;
+}
+
+function pemBytes(value, label) {
+  const base64 = String(value)
+    .replace(`-----BEGIN ${label}-----`, '')
+    .replace(`-----END ${label}-----`, '')
+    .replace(/\s+/gu, '');
+  return Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+}
+
+function signedRequest(nonce, values = {}) {
+  return {
+    device_hash: 'ab'.repeat(32),
+    platform: 'linux',
+    architecture: 'x86_64',
+    app_version: '0.3.120',
+    request_nonce: nonce,
+    timestamp: new Date().toISOString(),
+    ...values,
+  };
+}
+
 describe('FormatX complete website license lifecycle', () => {
   it('generates, activates, limits, edits, suspends, replaces and revokes a licence', async () => {
     const session = await ownerSession();
@@ -189,5 +237,101 @@ describe('FormatX complete website license lifecycle', () => {
     });
     expect(response.status).toBe(403);
     expect((await json(response)).error).toBe('csrf_invalid');
+  });
+
+  it('accepts an admin-generated key through the signed FormatX client protocol', async () => {
+    const session = await ownerSession();
+    const createResponse = await adminRequest(session, '/licenses', {
+      method: 'POST',
+      body: JSON.stringify({
+        customer_name: 'Aláírt kliens teszt',
+        customer_email: 'signed-client@example.com',
+        plan: 'pro',
+        max_devices: 1,
+        expires_at: '2027-07-25T12:00:00.000Z',
+        notes: 'A /fx-owner-license/ oldalon kiadott kulcs',
+      }),
+    });
+    expect(createResponse.status).toBe(201);
+    const created = (await json(createResponse)).license;
+
+    const activateNonce = 'signed-activate-nonce-0001';
+    const activate = await publicLicenseRequest('activate', signedRequest(activateNonce, {
+      license_key: created.license_key,
+    }));
+    expect(activate.status).toBe(200);
+    const active = await signedPayload(activate, activateNonce);
+    expect(active.status).toBe('active');
+    expect(active.license_id).toBe(created.id);
+    expect(active.license_type).toBe('business_pro');
+    expect(active.activation_token).toMatch(/^[A-Za-z0-9_-]{40,}$/u);
+    expect(active.features).toContain('advanced_diagnostics');
+
+    const checkNonce = 'signed-check-nonce-0002';
+    const check = await publicLicenseRequest('check', signedRequest(checkNonce, {
+      license_id: active.license_id,
+      activation_token: active.activation_token,
+    }));
+    expect(check.status).toBe(200);
+    expect((await signedPayload(check, checkNonce)).status).toBe('active');
+
+    const replay = await publicLicenseRequest('check', signedRequest(checkNonce, {
+      license_id: active.license_id,
+      activation_token: active.activation_token,
+    }));
+    expect(replay.status).toBe(409);
+    const replayPayload = await signedPayload(replay, checkNonce);
+    expect(replayPayload.status).toBe('invalid_request');
+    expect(replayPayload.error_code).toBe('request_replay_detected');
+
+    const suspend = await adminRequest(session, `/licenses/${created.id}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status: 'suspended' }),
+    });
+    expect(suspend.status).toBe(200);
+    const suspendedNonce = 'signed-check-nonce-0003';
+    const suspended = await publicLicenseRequest('check', signedRequest(suspendedNonce, {
+      license_id: active.license_id,
+      activation_token: active.activation_token,
+    }));
+    expect(suspended.status).toBe(403);
+    const suspendedPayload = await signedPayload(suspended, suspendedNonce);
+    expect(suspendedPayload.status).toBe('suspended');
+    expect(suspendedPayload.error_code).toBe('license_suspended');
+
+    const reactivate = await adminRequest(session, `/licenses/${created.id}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status: 'active' }),
+    });
+    expect(reactivate.status).toBe(200);
+    const revoke = await adminRequest(session, `/licenses/${created.id}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status: 'revoked', reason: 'Aláírt visszavonási teszt' }),
+    });
+    expect(revoke.status).toBe(200);
+
+    const revokedNonce = 'signed-check-nonce-0004';
+    const revoked = await publicLicenseRequest('check', signedRequest(revokedNonce, {
+      license_id: active.license_id,
+      activation_token: active.activation_token,
+    }));
+    expect(revoked.status).toBe(403);
+    const revokedPayload = await signedPayload(revoked, revokedNonce);
+    expect(revokedPayload.status).toBe('revoked');
+    expect(revokedPayload.error_code).toBe('license_revoked');
+
+    const revocations = await SELF.fetch(`${origin}/api/license/revocations`);
+    expect(revocations.status).toBe(200);
+    const revocationPayload = await signedPayload(revocations);
+    const expectedIdHashBytes = new TextEncoder().encode(`formatx-license-id-v1:${created.id}`);
+    const expectedIdHash = Array.from(
+      new Uint8Array(await crypto.subtle.digest('SHA-256', expectedIdHashBytes)),
+      (byte) => byte.toString(16).padStart(2, '0'),
+    ).join('');
+    expect(revocationPayload.revocations).toContainEqual(expect.objectContaining({
+      license_id_hash: expectedIdHash,
+      status: 'revoked',
+      reason_code: 'admin_revoked',
+    }));
   });
 });

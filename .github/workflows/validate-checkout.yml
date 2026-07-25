@@ -202,7 +202,10 @@ jobs:
           assert len(epc.encode('utf-8')) <= 331
           assert epc.splitlines()[:4] == ['BCD', '001', '1', 'SCT']
 
-          redirects = [(root / 'docs/index.html').read_text(encoding='utf-8'), (root / 'docs/404.html').read_text(encoding='utf-8'), (root / 'docs/formatx-light/index.html').read_text(encoding='utf-8')]
+          shell = (root / 'docs/index.html').read_text(encoding='utf-8')
+          assert 'site-loader.js' in shell
+          assert "script-src 'self'" in shell
+          redirects = [(root / 'docs/404.html').read_text(encoding='utf-8'), (root / 'docs/formatx-light/index.html').read_text(encoding='utf-8')]
           for redirect in redirects:
               assert 'formatx-language' in redirect
               assert "searchParams.set('lang'" in redirect

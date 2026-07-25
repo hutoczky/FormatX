@@ -40,7 +40,8 @@
     "PAYMENT_PROVIDER": "bank_transfer",
     "PAYMENT_MODE": "live",
     "PAYMENT_ACCOUNT_CONFIRMED": "true",
-    "LICENSE_ISSUER": "FormatX Suite Pro"
+    "LICENSE_ISSUER": "FormatX Suite Pro",
+    "FORMATX_ISSUER_KEY_ID": "formatx-license-issuer-32b0d26716d41bc5"
   },
   "ai": {
     "binding": "AI"

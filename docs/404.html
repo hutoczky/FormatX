@@ -13,9 +13,22 @@
 <body>
   <h1>FormatX Suite Pro</h1>
   <p>A kért oldal nem található. Visszairányítás a főoldalra.</p>
-  <p><a href="/">Főoldal megnyitása</a></p>
+  <p>The requested page was not found. Redirecting to the home page.</p>
+  <p><a href="/?lang=hu">Magyar oldal</a> · <a href="/?lang=en">English site</a></p>
   <script>
-    window.location.replace('/');
+    (function () {
+      var source = new URL(window.location.href);
+      var language = source.searchParams.get('lang');
+      if (language !== 'hu' && language !== 'en') {
+        try { language = localStorage.getItem('formatx-language'); } catch (_) {}
+      }
+      if (language !== 'hu' && language !== 'en') {
+        language = String(navigator.language || '').toLowerCase().indexOf('hu') === 0 ? 'hu' : 'en';
+      }
+      var target = new URL('/', window.location.href);
+      target.searchParams.set('lang', language);
+      window.location.replace(target.href);
+    }());
   </script>
 </body>
 </html>

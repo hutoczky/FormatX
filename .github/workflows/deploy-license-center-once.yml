@@ -58,6 +58,10 @@ jobs:
           data=json.loads(os.environ['HEALTH_JSON'])
           assert data.get('ok') is True, data
           assert data.get('service') == 'formatx-license-center', data
+          assert data.get('signed_client_api') is True, data
+          assert data.get('signed_client_api_schema') == 1, data
+          assert data.get('signature_algorithm') == 'Ed25519', data
+          assert data.get('issuer_key_id') == 'formatx-license-issuer-32b0d26716d41bc5', data
           PY
           status="$(curl -sS -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 'https://www.formatxsuite.com/fx-owner-license/')"
           case "$status" in 200|302|303) ;; *) echo "Unexpected admin HTTP status: $status" >&2; exit 1;; esac
