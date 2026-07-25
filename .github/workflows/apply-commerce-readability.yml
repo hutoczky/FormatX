@@ -1,0 +1,76 @@
+name: Apply commerce readability stylesheet
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/apply-commerce-readability.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Inject final commerce readability layer
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('billing-worker/src/production-entry.js')
+          text = path.read_text(encoding='utf-8')
+
+          constant_anchor = "const RESPONSIVE_PARITY_STYLES = '/scifi-ui/styles/responsive-parity.css?v=20260720-responsive-parity-1';"
+          constant_line = "const COMMERCE_READABILITY_STYLES = '/scifi-ui/styles/commerce-readability.css?v=20260725-commerce-readability-1';"
+
+          if constant_line not in text:
+              if constant_anchor not in text:
+                  raise SystemExit('Responsive parity style constant anchor not found')
+              text = text.replace(constant_anchor, constant_anchor + '\n' + constant_line, 1)
+
+          block_anchor = '''      if (!html.includes(RESPONSIVE_PARITY_STYLES)) {
+                html = html.replace(
+                  '</head>',
+                  `<link rel="stylesheet" href="${RESPONSIVE_PARITY_STYLES}"></head>`,
+                );
+              }
+          '''
+          block = '''      if (!html.includes(COMMERCE_READABILITY_STYLES)) {
+                html = html.replace(
+                  '</head>',
+                  `<link rel="stylesheet" href="${COMMERCE_READABILITY_STYLES}"></head>`,
+                );
+              }
+          '''
+
+          if 'html.includes(COMMERCE_READABILITY_STYLES)' not in text:
+              if block_anchor not in text:
+                  raise SystemExit('Responsive parity injection block anchor not found')
+              text = text.replace(block_anchor, block_anchor + block, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          node --check billing-worker/src/production-entry.js
+          grep -q "commerce-readability.css?v=20260725-commerce-readability-1" billing-worker/src/production-entry.js
+
+      - name: Commit worker change
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No worker change required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add billing-worker/src/production-entry.js
+          git commit -m "Load improved commerce readability"
+          git push
