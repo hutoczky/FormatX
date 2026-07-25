@@ -1,3 +1,3 @@
 Native Android migration in progress.
 
-CI revision: 2 — WebView removed, native compiler fixes applied.
+CI revision: 3 — WebView removed, native compiler and receiver lint fixes applied.
