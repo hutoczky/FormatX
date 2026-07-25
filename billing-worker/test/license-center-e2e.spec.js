@@ -334,4 +334,43 @@ describe('FormatX complete website license lifecycle', () => {
       reason_code: 'admin_revoked',
     }));
   });
+
+  it('activates every website licence plan through the signed client protocol', async () => {
+    const session = await ownerSession();
+    const plans = [
+      { plan: 'trial', prefix: /^FXT-/u, licenseType: 'trial', feature: 'trial_pro' },
+      { plan: 'pro', prefix: /^FXP-/u, licenseType: 'business_pro', feature: 'advanced_diagnostics' },
+      { plan: 'owner', prefix: /^FXO-/u, licenseType: 'owner_master', feature: 'all' },
+    ];
+
+    for (const [index, testCase] of plans.entries()) {
+      const createResponse = await adminRequest(session, '/licenses', {
+        method: 'POST',
+        body: JSON.stringify({
+          customer_name: `Aláírt ${testCase.plan} teszt`,
+          customer_email: `${testCase.plan}@example.com`,
+          plan: testCase.plan,
+          max_devices: 1,
+          expires_at: '2027-07-26T12:00:00.000Z',
+          notes: 'Webes generálás és FormatX kliensaktiválás regressziós teszt',
+        }),
+      });
+      expect(createResponse.status).toBe(201);
+      const created = (await json(createResponse)).license;
+      expect(created.license_key).toMatch(testCase.prefix);
+
+      const nonce = `signed-${testCase.plan}-activation-${index + 1}`;
+      const activation = await publicLicenseRequest('activate', signedRequest(nonce, {
+        license_key: created.license_key,
+        device_hash: `${index + 1}`.repeat(64),
+      }));
+      expect(activation.status).toBe(200);
+      const active = await signedPayload(activation, nonce);
+      expect(active.status).toBe('active');
+      expect(active.license_id).toBe(created.id);
+      expect(active.license_type).toBe(testCase.licenseType);
+      expect(active.activation_token).toMatch(/^[A-Za-z0-9_-]{40,}$/u);
+      expect(active.features).toContain(testCase.feature);
+    }
+  });
 });
