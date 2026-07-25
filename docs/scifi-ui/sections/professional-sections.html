@@ -1,0 +1,104 @@
+<section id="operations-console" class="pro-control-center pro-reveal" data-active-scenario="prepare" aria-labelledby="pro-control-title">
+  <header class="pro-section-head">
+    <div>
+      <p class="pro-kicker" data-pro-hu="FORMATX MŰVELETI KONZOL" data-pro-en="FORMATX OPERATIONS CONSOLE">FORMATX MŰVELETI KONZOL</p>
+      <h2 id="pro-control-title" data-pro-hu="Egy rendszer, amely végigvezeti a teljes technikusi folyamatot." data-pro-en="One system guiding the complete technician workflow.">Egy rendszer, amely végigvezeti a teljes technikusi folyamatot.</h2>
+    </div>
+    <p data-pro-hu="Válassz egy munkafolyamatot. A konzol megmutatja, hogyan épül fel a felderítés, a döntés, a kontrollált végrehajtás és az ellenőrizhető eredmény." data-pro-en="Select a workflow. The console shows how discovery, decision-making, controlled execution and verifiable results fit together.">Válassz egy munkafolyamatot. A konzol megmutatja, hogyan épül fel a felderítés, a döntés, a kontrollált végrehajtás és az ellenőrizhető eredmény.</p>
+  </header>
+
+  <div class="pro-status-rail" aria-label="FormatX kontrollpontok">
+    <div class="pro-status-item"><i class="pro-status-dot" aria-hidden="true"></i><strong data-pro-hu="Megerősített cél" data-pro-en="Confirmed target">Megerősített cél</strong><span data-pro-hu="A művelet előtt azonosított meghajtó vagy rendszer." data-pro-en="Drive or system identified before execution.">A művelet előtt azonosított meghajtó vagy rendszer.</span></div>
+    <div class="pro-status-item"><i class="pro-status-dot" aria-hidden="true"></i><strong data-pro-hu="Ellenőrzött terv" data-pro-en="Verified plan">Ellenőrzött terv</strong><span data-pro-hu="A beállítások és a várható eredmény áttekinthető." data-pro-en="Settings and expected results remain reviewable.">A beállítások és a várható eredmény áttekinthető.</span></div>
+    <div class="pro-status-item"><i class="pro-status-dot" aria-hidden="true"></i><strong data-pro-hu="Kontrollált végrehajtás" data-pro-en="Controlled execution">Kontrollált végrehajtás</strong><span data-pro-hu="Állapotjelzés, megerősítés és megszakításkezelés." data-pro-en="Status, confirmation and interruption handling.">Állapotjelzés, megerősítés és megszakításkezelés.</span></div>
+    <div class="pro-status-item"><i class="pro-status-dot" aria-hidden="true"></i><strong data-pro-hu="Visszakövethető eredmény" data-pro-en="Traceable result">Visszakövethető eredmény</strong><span data-pro-hu="Ellenőrzés, napló és integritási adatok." data-pro-en="Validation, audit trail and integrity data.">Ellenőrzés, napló és integritási adatok.</span></div>
+  </div>
+
+  <div class="pro-console-shell">
+    <div class="pro-console-nav" role="tablist" aria-label="Munkafolyamat kiválasztása">
+      <span class="pro-console-label" data-pro-hu="MUNKAFOLYAMATOK" data-pro-en="WORKFLOWS">MUNKAFOLYAMATOK</span>
+      <button id="pro-tab-prepare" class="pro-tab" type="button" role="tab" aria-selected="true" aria-controls="pro-panel-prepare" data-pro-tab="prepare" data-pro-index="01"><strong data-pro-hu="Meghajtó-előkészítés" data-pro-en="Drive preparation">Meghajtó-előkészítés</strong><small data-pro-hu="ISO, partíció és fájlrendszer" data-pro-en="ISO, partition and file system">ISO, partíció és fájlrendszer</small></button>
+      <button id="pro-tab-diagnostics" class="pro-tab" type="button" role="tab" aria-selected="false" aria-controls="pro-panel-diagnostics" data-pro-tab="diagnostics" data-pro-index="02" tabindex="-1"><strong data-pro-hu="Rendszerdiagnosztika" data-pro-en="System diagnostics">Rendszerdiagnosztika</strong><small data-pro-hu="Hardver, hálózat és állapot" data-pro-en="Hardware, network and status">Hardver, hálózat és állapot</small></button>
+      <button id="pro-tab-erase" class="pro-tab" type="button" role="tab" aria-selected="false" aria-controls="pro-panel-erase" data-pro-tab="erase" data-pro-index="03" tabindex="-1"><strong data-pro-hu="Biztonságos törlés" data-pro-en="Secure erasure">Biztonságos törlés</strong><small data-pro-hu="Célazonosítás és ellenőrzés" data-pro-en="Target confirmation and validation">Célazonosítás és ellenőrzés</small></button>
+    </div>
+
+    <div class="pro-console-main">
+      <article id="pro-panel-prepare" class="pro-panel" role="tabpanel" aria-labelledby="pro-tab-prepare" data-pro-panel="prepare">
+        <header class="pro-panel-head">
+          <div><p class="pro-panel-id" data-pro-hu="MŰVELETI SÉMA · 01" data-pro-en="OPERATION SCHEMA · 01">MŰVELETI SÉMA · 01</p><h3 data-pro-hu="Meghajtó-előkészítés ellenőrizhető lépésekben" data-pro-en="Drive preparation through verifiable stages">Meghajtó-előkészítés ellenőrizhető lépésekben</h3><p class="pro-panel-intro" data-pro-hu="Az ISO-forrás, a célmeghajtó, a partíciós séma és a fájlrendszer egyetlen tervben kezelhető, még a végrehajtás előtt." data-pro-en="The ISO source, target drive, partition scheme and file system are handled in one plan before execution begins.">Az ISO-forrás, a célmeghajtó, a partíciós séma és a fájlrendszer egyetlen tervben kezelhető, még a végrehajtás előtt.</p></div>
+          <span class="pro-panel-badge" data-pro-hu="TERVEZHETŐ" data-pro-en="PLANNED">TERVEZHETŐ</span>
+        </header>
+        <div class="pro-phase-grid">
+          <article class="pro-phase"><span class="pro-phase-number">01 · DISCOVER</span><h4 data-pro-hu="Célmeghajtó azonosítása" data-pro-en="Identify target drive">Célmeghajtó azonosítása</h4><p data-pro-hu="Kapacitás, modell, csatoló és jelenlegi partíciós állapot áttekintése." data-pro-en="Review capacity, model, interface and current partition state.">Kapacitás, modell, csatoló és jelenlegi partíciós állapot áttekintése.</p></article>
+          <article class="pro-phase"><span class="pro-phase-number">02 · PLAN</span><h4 data-pro-hu="Műveleti terv összeállítása" data-pro-en="Build operation plan">Műveleti terv összeállítása</h4><p data-pro-hu="ISO, GPT vagy MBR, fájlrendszer és ellenőrzési mód kiválasztása." data-pro-en="Choose ISO, GPT or MBR, file system and validation mode.">ISO, GPT vagy MBR, fájlrendszer és ellenőrzési mód kiválasztása.</p></article>
+          <article class="pro-phase"><span class="pro-phase-number">03 · EXECUTE</span><h4 data-pro-hu="Kontrollált végrehajtás" data-pro-en="Controlled execution">Kontrollált végrehajtás</h4><p data-pro-hu="Megerősítés után induló művelet, egyértelmű állapot- és hibajelzéssel." data-pro-en="Execution starts after confirmation with clear status and error reporting.">Megerősítés után induló művelet, egyértelmű állapot- és hibajelzéssel.</p></article>
+          <article class="pro-phase"><span class="pro-phase-number">04 · VERIFY</span><h4 data-pro-hu="Eredmény visszaellenőrzése" data-pro-en="Validate result">Eredmény visszaellenőrzése</h4><p data-pro-hu="Struktúra, írhatóság és integritás ellenőrzése a folyamat végén." data-pro-en="Validate structure, writability and integrity at the end of the workflow.">Struktúra, írhatóság és integritás ellenőrzése a folyamat végén.</p></article>
+        </div>
+        <div class="pro-output-bar"><strong data-pro-hu="KIMENET" data-pro-en="OUTPUT">KIMENET</strong><span data-pro-hu="Műveleti összegzés" data-pro-en="Operation summary">Műveleti összegzés</span><span data-pro-hu="Ellenőrzési állapot" data-pro-en="Validation status">Ellenőrzési állapot</span><span data-pro-hu="Naplózható eredmény" data-pro-en="Auditable result">Naplózható eredmény</span></div>
+      </article>
+
+      <article id="pro-panel-diagnostics" class="pro-panel" role="tabpanel" aria-labelledby="pro-tab-diagnostics" data-pro-panel="diagnostics" hidden>
+        <header class="pro-panel-head">
+          <div><p class="pro-panel-id" data-pro-hu="MŰVELETI SÉMA · 02" data-pro-en="OPERATION SCHEMA · 02">MŰVELETI SÉMA · 02</p><h3 data-pro-hu="Rendszerdiagnosztika valós mért adatokkal" data-pro-en="System diagnostics based on real measurements">Rendszerdiagnosztika valós mért adatokkal</h3><p class="pro-panel-intro" data-pro-hu="A hardver-, tárhely-, hálózati és szenzoradatok egységes technikusi nézetbe kerülnek, kitalált pontszámok nélkül." data-pro-en="Hardware, storage, network and sensor data are organised into a unified technician view without fabricated scores.">A hardver-, tárhely-, hálózati és szenzoradatok egységes technikusi nézetbe kerülnek, kitalált pontszámok nélkül.</p></div>
+          <span class="pro-panel-badge" data-pro-hu="MÉRHETŐ" data-pro-en="MEASURABLE">MÉRHETŐ</span>
+        </header>
+        <div class="pro-phase-grid">
+          <article class="pro-phase"><span class="pro-phase-number">01 · INVENTORY</span><h4 data-pro-hu="Hardverleltár" data-pro-en="Hardware inventory">Hardverleltár</h4><p data-pro-hu="CPU, memória, GPU, tárhely és hálózati eszközök azonosítása." data-pro-en="Identify CPU, memory, GPU, storage and network devices.">CPU, memória, GPU, tárhely és hálózati eszközök azonosítása.</p></article>
+          <article class="pro-phase"><span class="pro-phase-number">02 · MEASURE</span><h4 data-pro-hu="Állapotmérés" data-pro-en="State measurement">Állapotmérés</h4><p data-pro-hu="Hőmérséklet, terhelés, kapacitás és kapcsolati adatok összegyűjtése." data-pro-en="Collect temperature, load, capacity and connectivity data.">Hőmérséklet, terhelés, kapacitás és kapcsolati adatok összegyűjtése.</p></article>
+          <article class="pro-phase"><span class="pro-phase-number">03 · CORRELATE</span><h4 data-pro-hu="Összefüggések áttekintése" data-pro-en="Review correlations">Összefüggések áttekintése</h4><p data-pro-hu="Az eltérő modulok adatai egy közös rendszerképet alkotnak." data-pro-en="Data from separate modules form one coherent system picture.">Az eltérő modulok adatai egy közös rendszerképet alkotnak.</p></article>
+          <article class="pro-phase"><span class="pro-phase-number">04 · REPORT</span><h4 data-pro-hu="Technikusi összegzés" data-pro-en="Technician summary">Technikusi összegzés</h4><p data-pro-hu="A mért állapot és a következő ellenőrzési lépések áttekinthetően rögzíthetők." data-pro-en="Measured state and next validation steps can be recorded clearly.">A mért állapot és a következő ellenőrzési lépések áttekinthetően rögzíthetők.</p></article>
+        </div>
+        <div class="pro-output-bar"><strong data-pro-hu="KIMENET" data-pro-en="OUTPUT">KIMENET</strong><span data-pro-hu="Hardverállapot" data-pro-en="Hardware state">Hardverállapot</span><span data-pro-hu="Mért rendszeradatok" data-pro-en="Measured system data">Mért rendszeradatok</span><span data-pro-hu="Következő vizsgálat" data-pro-en="Next validation step">Következő vizsgálat</span></div>
+      </article>
+
+      <article id="pro-panel-erase" class="pro-panel" role="tabpanel" aria-labelledby="pro-tab-erase" data-pro-panel="erase" hidden>
+        <header class="pro-panel-head">
+          <div><p class="pro-panel-id" data-pro-hu="MŰVELETI SÉMA · 03" data-pro-en="OPERATION SCHEMA · 03">MŰVELETI SÉMA · 03</p><h3 data-pro-hu="Biztonságos törlés többlépcsős kontrollal" data-pro-en="Secure erasure with multi-stage control">Biztonságos törlés többlépcsős kontrollal</h3><p class="pro-panel-intro" data-pro-hu="A visszafordíthatatlan műveleteknél a célazonosítás, a megerősítés és az utólagos ellenőrzés külön kontrollpontot kap." data-pro-en="For irreversible operations, target identification, confirmation and post-operation validation each receive a dedicated control point.">A visszafordíthatatlan műveleteknél a célazonosítás, a megerősítés és az utólagos ellenőrzés külön kontrollpontot kap.</p></div>
+          <span class="pro-panel-badge" data-pro-hu="KONTROLLÁLT" data-pro-en="CONTROLLED">KONTROLLÁLT</span>
+        </header>
+        <div class="pro-phase-grid">
+          <article class="pro-phase"><span class="pro-phase-number">01 · TARGET</span><h4 data-pro-hu="Cél pontos azonosítása" data-pro-en="Confirm exact target">Cél pontos azonosítása</h4><p data-pro-hu="Modell, kapacitás, sorozatazonosító és csatoló ellenőrzése." data-pro-en="Verify model, capacity, serial identity and interface.">Modell, kapacitás, sorozatazonosító és csatoló ellenőrzése.</p></article>
+          <article class="pro-phase"><span class="pro-phase-number">02 · APPROVE</span><h4 data-pro-hu="Kockázati megerősítés" data-pro-en="Risk confirmation">Kockázati megerősítés</h4><p data-pro-hu="A rendszer egyértelműen jelzi, hogy az adatok nem állíthatók vissza." data-pro-en="The system clearly states that the data cannot be restored.">A rendszer egyértelműen jelzi, hogy az adatok nem állíthatók vissza.</p></article>
+          <article class="pro-phase"><span class="pro-phase-number">03 · ERASE</span><h4 data-pro-hu="Felügyelt törlési folyamat" data-pro-en="Supervised erasure">Felügyelt törlési folyamat</h4><p data-pro-hu="Állapotkövetés, megszakításkezelés és hiba esetén egyértelmű visszajelzés." data-pro-en="Progress tracking, interruption handling and clear failure reporting.">Állapotkövetés, megszakításkezelés és hiba esetén egyértelmű visszajelzés.</p></article>
+          <article class="pro-phase"><span class="pro-phase-number">04 · CONFIRM</span><h4 data-pro-hu="Törlés ellenőrzése" data-pro-en="Confirm erasure">Törlés ellenőrzése</h4><p data-pro-hu="A művelet eredménye ellenőrizhető és dokumentálható állapotba kerül." data-pro-en="The result becomes verifiable and ready for documentation.">A művelet eredménye ellenőrizhető és dokumentálható állapotba kerül.</p></article>
+        </div>
+        <div class="pro-output-bar"><strong data-pro-hu="KIMENET" data-pro-en="OUTPUT">KIMENET</strong><span data-pro-hu="Célazonosító" data-pro-en="Target identity">Célazonosító</span><span data-pro-hu="Törlési állapot" data-pro-en="Erasure state">Törlési állapot</span><span data-pro-hu="Ellenőrzési eredmény" data-pro-en="Validation result">Ellenőrzési eredmény</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="pro-architecture pro-reveal" aria-labelledby="pro-architecture-title">
+  <header class="pro-architecture-head">
+    <p class="pro-kicker" data-pro-hu="ELLENŐRIZHETŐ ARCHITEKTÚRA" data-pro-en="VERIFIABLE ARCHITECTURE">ELLENŐRIZHETŐ ARCHITEKTÚRA</p>
+    <h2 id="pro-architecture-title" data-pro-hu="A kritikus műveletek köré épített kontrollréteg." data-pro-en="A control layer built around critical operations.">A kritikus műveletek köré épített kontrollréteg.</h2>
+    <p data-pro-hu="A FormatX célja nem a látványos, de ellenőrizhetetlen automatizálás. A rendszer külön kezeli a bemenetet, a döntést, a jogosultságot, a végrehajtást és a bizonyítékot." data-pro-en="FormatX is not built around impressive but unverifiable automation. Input, decisions, authorisation, execution and evidence remain separate and reviewable.">A FormatX célja nem a látványos, de ellenőrizhetetlen automatizálás. A rendszer külön kezeli a bemenetet, a döntést, a jogosultságot, a végrehajtást és a bizonyítékot.</p>
+  </header>
+
+  <div class="pro-architecture-map">
+    <div class="pro-node-column">
+      <article class="pro-node" data-pro-symbol="IN"><strong data-pro-hu="Azonosított bemenet" data-pro-en="Identified input">Azonosított bemenet</strong><span data-pro-hu="Meghajtó, ISO, rendszer és felhasználói szándék elkülönítve." data-pro-en="Drive, ISO, system and user intent remain distinct.">Meghajtó, ISO, rendszer és felhasználói szándék elkülönítve.</span></article>
+      <article class="pro-node" data-pro-symbol="ID"><strong data-pro-hu="Célmeghajtó-kontroll" data-pro-en="Target-drive control">Célmeghajtó-kontroll</strong><span data-pro-hu="A veszélyes művelet nem indulhat bizonytalan célazonosítással." data-pro-en="A destructive operation must not start with an uncertain target.">A veszélyes művelet nem indulhat bizonytalan célazonosítással.</span></article>
+      <article class="pro-node" data-pro-symbol="OK"><strong data-pro-hu="Tudatos jóváhagyás" data-pro-en="Explicit approval">Tudatos jóváhagyás</strong><span data-pro-hu="A felhasználó a művelet és a következmény ismeretében erősít meg." data-pro-en="The user confirms with full visibility of the operation and its impact.">A felhasználó a művelet és a következmény ismeretében erősít meg.</span></article>
+    </div>
+
+    <div class="pro-core" aria-hidden="true">
+      <span class="pro-core-ring"></span><span class="pro-core-ring ring-two"></span>
+      <div class="pro-core-unit"><div><strong>FX</strong><span>CONTROL CORE</span></div></div>
+    </div>
+
+    <div class="pro-node-column">
+      <article class="pro-node" data-pro-symbol="RUN"><strong data-pro-hu="Felügyelt végrehajtás" data-pro-en="Supervised execution">Felügyelt végrehajtás</strong><span data-pro-hu="Valós állapotjelzés, hibakezelés és megszakítási útvonal." data-pro-en="Real status, failure handling and interruption path.">Valós állapotjelzés, hibakezelés és megszakítási útvonal.</span></article>
+      <article class="pro-node" data-pro-symbol="LOG"><strong data-pro-hu="Műveleti bizonyíték" data-pro-en="Operation evidence">Műveleti bizonyíték</strong><span data-pro-hu="Naplózható események és ellenőrizhető eredményállapot." data-pro-en="Auditable events and a verifiable result state.">Naplózható események és ellenőrizhető eredményállapot.</span></article>
+      <article class="pro-node" data-pro-symbol="SHA"><strong data-pro-hu="Integritás-ellenőrzés" data-pro-en="Integrity validation">Integritás-ellenőrzés</strong><span data-pro-hu="SHA-256- és Ed25519-alapú kiadási ellenőrzés." data-pro-en="SHA-256 and Ed25519-based release verification.">SHA-256- és Ed25519-alapú kiadási ellenőrzés.</span></article>
+    </div>
+  </div>
+
+  <div class="pro-proof-strip">
+    <div class="pro-proof-item"><strong data-pro-hu="Valós rendszeradatok" data-pro-en="Real system data">Valós rendszeradatok</strong><span data-pro-hu="Kitalált teljesítménypontszámok helyett mérhető állapotok." data-pro-en="Measurable states instead of fabricated performance scores.">Kitalált teljesítménypontszámok helyett mérhető állapotok.</span></div>
+    <div class="pro-proof-item"><strong data-pro-hu="GitHub-alapú kiadás" data-pro-en="GitHub-based releases">GitHub-alapú kiadás</strong><span data-pro-hu="Kiadási csatorna, verzió és csomagok nyilvánosan követhetők." data-pro-en="Release channel, version and packages remain publicly traceable.">Kiadási csatorna, verzió és csomagok nyilvánosan követhetők.</span></div>
+    <div class="pro-proof-item"><strong data-pro-hu="Kézi fizetési ellenőrzés" data-pro-en="Manual payment verification">Kézi fizetési ellenőrzés</strong><span data-pro-hu="Nincs bankkártyaadat-kezelés és nincs automatikus megújítás." data-pro-en="No card-data processing and no automatic renewal.">Nincs bankkártyaadat-kezelés és nincs automatikus megújítás.</span></div>
+    <div class="pro-proof-item"><strong data-pro-hu="Közvetlen támogatási út" data-pro-en="Direct support path">Közvetlen támogatási út</strong><span data-pro-hu="Támogatási oldal, hibajegy és kiadási információ egy rendszerben." data-pro-en="Support page, issue tracking and release information in one system.">Támogatási oldal, hibajegy és kiadási információ egy rendszerben.</span></div>
+    <a class="pro-proof-cta" href="./support.html"><span data-pro-hu="Támogatási központ" data-pro-en="Support centre">Támogatási központ</span><i aria-hidden="true">→</i></a>
+  </div>
+</section>
