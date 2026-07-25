@@ -152,7 +152,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue comment 114 --repo "$GITHUB_REPOSITORY" --body "✅ **PASS — FormatX Mobile Android 1.0.0 elkészült**
+          gh issue comment 116 --repo "$GITHUB_REPOSITORY" --body "✅ **PASS — FormatX Mobile Android 1.0.0 elkészült**
 
           - Forrás commit: \`${GITHUB_SHA}\`
           - Külön csomag: \`hu.formatx.mobile\`
@@ -165,7 +165,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue comment 114 --repo "$GITHUB_REPOSITORY" --body "❌ **FAILED — FormatX Mobile Android build**
+          gh issue comment 116 --repo "$GITHUB_REPOSITORY" --body "❌ **FAILED — FormatX Mobile Android build**
 
           - Forrás commit: \`${GITHUB_SHA}\`
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
