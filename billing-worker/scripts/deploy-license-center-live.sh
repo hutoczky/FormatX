@@ -12,11 +12,12 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_CONFIG="$ROOT_DIR/.wrangler-license-live.jsonc"
 LOGIN_FILE="$HOME/FormatX-licenc-admin-belepes.txt"
 RESET_PASSWORD="${FORMATX_RESET_ADMIN_PASSWORD:-0}"
+AUTH_TYPE="${FORMATX_CLOUDFLARE_AUTH_TYPE:-api_token}"
 ISSUER_PUBLIC_KEY_FILE="$ROOT_DIR/public-keys/license-api-issuer-public-key.pem"
 ISSUER_PRIVATE_KEY_FILE="${FORMATX_ISSUER_PRIVATE_KEY_FILE:-$HOME/.config/formatx/license-api-issuer-key.pem}"
 ISSUER_KEY_ID="formatx-license-issuer-32b0d26716d41bc5"
 
-cleanup(){ rm -f -- "$TMP_CONFIG" /tmp/formatx-license-health.json; unset CLOUDFLARE_API_TOKEN; }
+cleanup(){ rm -f -- "$TMP_CONFIG" /tmp/formatx-license-health.json; unset CLOUDFLARE_API_TOKEN FORMATX_CLOUDFLARE_AUTH_TYPE; }
 trap cleanup EXIT
 fail(){ printf '\nHIBA: %s\n' "$*" >&2; exit 1; }
 need(){ command -v "$1" >/dev/null 2>&1 || fail "Hiányzó parancs: $1"; }
@@ -54,7 +55,11 @@ check_success(){ python3 -c 'import json,sys; o=json.load(sys.stdin); assert o.g
 json_result_value(){ local expression="$1"; python3 -c "import json,sys; o=json.load(sys.stdin); r=o.get('result') or {}; $expression"; }
 
 printf '1/10 – Cloudflare-token ellenőrzése…\n'
-VERIFY="$(curl -fsS https://api.cloudflare.com/client/v4/user/tokens/verify -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+if [[ "$AUTH_TYPE" == 'oauth' ]]; then
+  VERIFY="$(curl -fsS https://api.cloudflare.com/client/v4/user -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+else
+  VERIFY="$(curl -fsS https://api.cloudflare.com/client/v4/user/tokens/verify -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+fi
 printf '%s' "$VERIFY" | check_success || fail 'A Cloudflare API-token érvénytelen.'
 
 printf '2/10 – Függőségek és tesztek…\n'
@@ -74,54 +79,61 @@ fi
 [[ -n "$DB_ID" ]] || fail 'A D1 adatbázis azonosítója hiányzik.'
 
 printf '4/10 – Zero Trust szervezet és OTP bejelentkezés…\n'
-ORG="$(api GET "/accounts/$ACCOUNT_ID/access/organizations" || true)"
-AUTH_DOMAIN="$(printf '%s' "$ORG" | python3 -c 'import json,sys; o=json.load(sys.stdin); r=o.get("result") or {}; print(r.get("auth_domain") or "")' 2>/dev/null || true)"
-if [[ -z "$AUTH_DOMAIN" ]]; then
-  AUTH_DOMAIN="formatx-${ACCOUNT_ID: -8}.cloudflareaccess.com"
-  ORG_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX","auth_domain":sys.argv[1],"auto_redirect_to_identity":False,"deny_unmatched_requests":False,"session_duration":sys.argv[2],"warp_auth_session_duration":sys.argv[2],"user_seat_expiration_inactive_time":"730h"}))' "$AUTH_DOMAIN" "$ACCESS_SESSION_DURATION")"
-  ORG_CREATE="$(api POST "/accounts/$ACCOUNT_ID/access/organizations" "$ORG_BODY")"
-  printf '%s' "$ORG_CREATE" | check_success || fail 'A Zero Trust szervezet nem hozható létre.'
-fi
+AUTH_DOMAIN=''
+ACCESS_AUD=''
+if [[ "$AUTH_TYPE" == 'oauth' ]]; then
+  printf 'OAuth mód: a meglévő Cloudflare Access-konfiguráció megőrzése.\n'
+  printf '5/10 – A tulajdonosi Access-szabály megőrzése…\n'
+else
+  ORG="$(api GET "/accounts/$ACCOUNT_ID/access/organizations" || true)"
+  AUTH_DOMAIN="$(printf '%s' "$ORG" | python3 -c 'import json,sys; o=json.load(sys.stdin); r=o.get("result") or {}; print(r.get("auth_domain") or "")' 2>/dev/null || true)"
+  if [[ -z "$AUTH_DOMAIN" ]]; then
+    AUTH_DOMAIN="formatx-${ACCOUNT_ID: -8}.cloudflareaccess.com"
+    ORG_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX","auth_domain":sys.argv[1],"auto_redirect_to_identity":False,"deny_unmatched_requests":False,"session_duration":sys.argv[2],"warp_auth_session_duration":sys.argv[2],"user_seat_expiration_inactive_time":"730h"}))' "$AUTH_DOMAIN" "$ACCESS_SESSION_DURATION")"
+    ORG_CREATE="$(api POST "/accounts/$ACCOUNT_ID/access/organizations" "$ORG_BODY")"
+    printf '%s' "$ORG_CREATE" | check_success || fail 'A Zero Trust szervezet nem hozható létre.'
+  fi
 
-IDPS="$(api GET "/accounts/$ACCOUNT_ID/access/identity_providers")"
-printf '%s' "$IDPS" | check_success || fail 'Az Access bejelentkezési módok nem kérhetők le.'
-OTP_ID="$(printf '%s' "$IDPS" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next((x.get("id","") for x in data.get("result",[]) if x.get("type")=="onetimepin"),""))')"
-if [[ -z "$OTP_ID" ]]; then
-  OTP_CREATE="$(api POST "/accounts/$ACCOUNT_ID/access/identity_providers" '{"name":"FormatX egyszer használatos e-mail-kód","type":"onetimepin","config":{}}')"
-  printf '%s' "$OTP_CREATE" | check_success || fail 'Az egyszer használatos e-mail-kódos belépés nem hozható létre.'
-  OTP_ID="$(printf '%s' "$OTP_CREATE" | json_result_value 'print(r.get("id") or "")')"
-fi
-[[ -n "$OTP_ID" ]] || fail 'Az OTP identity provider azonosítója hiányzik.'
+  IDPS="$(api GET "/accounts/$ACCOUNT_ID/access/identity_providers")"
+  printf '%s' "$IDPS" | check_success || fail 'Az Access bejelentkezési módok nem kérhetők le.'
+  OTP_ID="$(printf '%s' "$IDPS" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next((x.get("id","") for x in data.get("result",[]) if x.get("type")=="onetimepin"),""))')"
+  if [[ -z "$OTP_ID" ]]; then
+    OTP_CREATE="$(api POST "/accounts/$ACCOUNT_ID/access/identity_providers" '{"name":"FormatX egyszer használatos e-mail-kód","type":"onetimepin","config":{}}')"
+    printf '%s' "$OTP_CREATE" | check_success || fail 'Az egyszer használatos e-mail-kódos belépés nem hozható létre.'
+    OTP_ID="$(printf '%s' "$OTP_CREATE" | json_result_value 'print(r.get("id") or "")')"
+  fi
+  [[ -n "$OTP_ID" ]] || fail 'Az OTP identity provider azonosítója hiányzik.'
 
-printf '5/10 – Cloudflare Access alkalmazás és tulajdonosi szabály…\n'
-APPS="$(api GET "/accounts/$ACCOUNT_ID/access/apps?per_page=100")"
-printf '%s' "$APPS" | check_success || fail 'Az Access alkalmazások nem kérhetők le.'
-APP_ID="$(printf '%s' "$APPS" | python3 -c 'import json,sys; suffix=sys.argv[1]; data=json.load(sys.stdin); found="";
+  printf '5/10 – Cloudflare Access alkalmazás és tulajdonosi szabály…\n'
+  APPS="$(api GET "/accounts/$ACCOUNT_ID/access/apps?per_page=100")"
+  printf '%s' "$APPS" | check_success || fail 'Az Access alkalmazások nem kérhetők le.'
+  APP_ID="$(printf '%s' "$APPS" | python3 -c 'import json,sys; suffix=sys.argv[1]; data=json.load(sys.stdin); found="";
 for app in data.get("result",[]):
  uris=[d.get("uri","") for d in app.get("destinations",[]) if isinstance(d,dict)]
  if any(uri.endswith(suffix) for uri in uris) or str(app.get("domain","")).endswith(suffix): found=app.get("id",""); break
 print(found)' "$ADMIN_PATH")"
-APP_BODY="$(python3 -c 'import json,sys; otp=sys.argv[1]; duration=sys.argv[2]; print(json.dumps({"name":"FormatX tulajdonosi licenckezelő","type":"self_hosted","domain":"www.formatxsuite.com/fx-owner-license/*","destinations":[{"type":"public","uri":"www.formatxsuite.com/fx-owner-license/*"},{"type":"public","uri":"formatxsuite.com/fx-owner-license/*"}],"session_duration":duration,"app_launcher_visible":False,"auto_redirect_to_identity":True,"allowed_idps":[otp],"options_preflight_bypass":False}))' "$OTP_ID" "$ACCESS_SESSION_DURATION")"
-if [[ -n "$APP_ID" ]]; then
-  APP_RESULT="$(api PUT "/accounts/$ACCOUNT_ID/access/apps/$APP_ID" "$APP_BODY")"
-else
-  APP_RESULT="$(api POST "/accounts/$ACCOUNT_ID/access/apps" "$APP_BODY")"
-fi
-printf '%s' "$APP_RESULT" | check_success || fail 'A Cloudflare Access alkalmazás nem állítható be.'
-APP_ID="$(printf '%s' "$APP_RESULT" | json_result_value 'print(r.get("id") or "")')"
-ACCESS_AUD="$(printf '%s' "$APP_RESULT" | json_result_value 'print(r.get("aud") or "")')"
-[[ -n "$APP_ID" && -n "$ACCESS_AUD" ]] || fail 'Az Access alkalmazás ID/AUD értéke hiányzik.'
+  APP_BODY="$(python3 -c 'import json,sys; otp=sys.argv[1]; duration=sys.argv[2]; print(json.dumps({"name":"FormatX tulajdonosi licenckezelő","type":"self_hosted","domain":"www.formatxsuite.com/fx-owner-license/*","destinations":[{"type":"public","uri":"www.formatxsuite.com/fx-owner-license/*"},{"type":"public","uri":"formatxsuite.com/fx-owner-license/*"}],"session_duration":duration,"app_launcher_visible":False,"auto_redirect_to_identity":True,"allowed_idps":[otp],"options_preflight_bypass":False}))' "$OTP_ID" "$ACCESS_SESSION_DURATION")"
+  if [[ -n "$APP_ID" ]]; then
+    APP_RESULT="$(api PUT "/accounts/$ACCOUNT_ID/access/apps/$APP_ID" "$APP_BODY")"
+  else
+    APP_RESULT="$(api POST "/accounts/$ACCOUNT_ID/access/apps" "$APP_BODY")"
+  fi
+  printf '%s' "$APP_RESULT" | check_success || fail 'A Cloudflare Access alkalmazás nem állítható be.'
+  APP_ID="$(printf '%s' "$APP_RESULT" | json_result_value 'print(r.get("id") or "")')"
+  ACCESS_AUD="$(printf '%s' "$APP_RESULT" | json_result_value 'print(r.get("aud") or "")')"
+  [[ -n "$APP_ID" && -n "$ACCESS_AUD" ]] || fail 'Az Access alkalmazás ID/AUD értéke hiányzik.'
 
-POLICIES="$(api GET "/accounts/$ACCOUNT_ID/access/apps/$APP_ID/policies?per_page=100")"
-printf '%s' "$POLICIES" | check_success || fail 'Az Access szabályok nem kérhetők le.'
-POLICY_ID="$(printf '%s' "$POLICIES" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next((x.get("id","") for x in data.get("result",[]) if x.get("name")=="FormatX owner only"),""))')"
-POLICY_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX owner only","decision":"allow","precedence":1,"include":[{"email":{"email":sys.argv[1]}}],"require":[{"login_method":{"id":sys.argv[2]}}],"session_duration":sys.argv[3]}))' "$ADMIN_EMAIL" "$OTP_ID" "$ACCESS_SESSION_DURATION")"
-if [[ -n "$POLICY_ID" ]]; then
-  POLICY_RESULT="$(api PUT "/accounts/$ACCOUNT_ID/access/apps/$APP_ID/policies/$POLICY_ID" "$POLICY_BODY")"
-else
-  POLICY_RESULT="$(api POST "/accounts/$ACCOUNT_ID/access/apps/$APP_ID/policies" "$POLICY_BODY")"
+  POLICIES="$(api GET "/accounts/$ACCOUNT_ID/access/apps/$APP_ID/policies?per_page=100")"
+  printf '%s' "$POLICIES" | check_success || fail 'Az Access szabályok nem kérhetők le.'
+  POLICY_ID="$(printf '%s' "$POLICIES" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next((x.get("id","") for x in data.get("result",[]) if x.get("name")=="FormatX owner only"),""))')"
+  POLICY_BODY="$(python3 -c 'import json,sys; print(json.dumps({"name":"FormatX owner only","decision":"allow","precedence":1,"include":[{"email":{"email":sys.argv[1]}}],"require":[{"login_method":{"id":sys.argv[2]}}],"session_duration":sys.argv[3]}))' "$ADMIN_EMAIL" "$OTP_ID" "$ACCESS_SESSION_DURATION")"
+  if [[ -n "$POLICY_ID" ]]; then
+    POLICY_RESULT="$(api PUT "/accounts/$ACCOUNT_ID/access/apps/$APP_ID/policies/$POLICY_ID" "$POLICY_BODY")"
+  else
+    POLICY_RESULT="$(api POST "/accounts/$ACCOUNT_ID/access/apps/$APP_ID/policies" "$POLICY_BODY")"
+  fi
+  printf '%s' "$POLICY_RESULT" | check_success || fail 'A tulajdonosi Access-szabály nem állítható be.'
 fi
-printf '%s' "$POLICY_RESULT" | check_success || fail 'A tulajdonosi Access-szabály nem állítható be.'
 
 printf '6/10 – Éles Wrangler-konfiguráció készítése…\n'
 python3 - "$DB_ID" "$ADMIN_EMAIL" "$AUTH_DOMAIN" "$ACCESS_AUD" "$TMP_CONFIG" <<'PY'
@@ -129,7 +141,12 @@ import json,sys
 from pathlib import Path
 data=json.loads(Path('wrangler.jsonc').read_text(encoding='utf-8'))
 data['d1_databases']=[{'binding':'LICENSE_DB','database_name':'formatx-license-db','database_id':sys.argv[1],'migrations_dir':'license-migrations'}]
-data.setdefault('vars',{}).update({'ADMIN_EMAILS':sys.argv[2],'ACCESS_TEAM_DOMAIN':'https://'+sys.argv[3].removeprefix('https://').rstrip('/'),'ACCESS_AUD':sys.argv[4]})
+updates={'ADMIN_EMAILS':sys.argv[2]}
+if sys.argv[3]:
+    updates['ACCESS_TEAM_DOMAIN']='https://'+sys.argv[3].removeprefix('https://').rstrip('/')
+if sys.argv[4]:
+    updates['ACCESS_AUD']=sys.argv[4]
+data.setdefault('vars',{}).update(updates)
 Path(sys.argv[5]).write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 PY
 
@@ -197,7 +214,7 @@ done
 
 printf '10/10 – Adminvédelem ellenőrzése…\n'
 admin_status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 -H 'Cache-Control: no-cache' "$ADMIN_URL" || true)"
-case "$admin_status" in 200|302|303) ;; *) fail "Az adminfelület váratlan HTTP-állapotot adott: $admin_status";; esac
+case "$admin_status" in 302|303) ;; *) fail "Az adminfelület Cloudflare Access-védelme nem igazolható. HTTP: $admin_status";; esac
 
 printf '\n============================================================\n'
 printf ' KÉSZ – a FormatX licenckezelő élő\n'
