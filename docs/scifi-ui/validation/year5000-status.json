@@ -1,10 +1,11 @@
 {
   "status": "PASS",
-  "sourceCommit": "c526db8d4df39f05e23468a4fe6edd0a8c58df3c",
-  "validatedAt": "2026-07-25T21:44:25Z",
+  "sourceCommit": "5ba674c8415bbf909dba3d639534c0a6659d3c28",
+  "validatedAt": "2026-07-25T22:05:29Z",
   "javascriptSyntax": true,
   "separatePlanQrRow": true,
-  "productionInjection": true,
-  "lensInteractionScope": true,
+  "refinedSystemArchitecture": true,
+  "cinematicEffectsInjection": true,
+  "travellingDataSignals": true,
   "reducedMotionAccessibility": true
 }
