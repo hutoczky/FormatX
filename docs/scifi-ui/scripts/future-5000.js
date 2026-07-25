@@ -1,329 +1,297 @@
 (function () {
   'use strict';
 
-  if (document.documentElement.dataset.fx5kReady === 'true') return;
-  document.documentElement.dataset.fx5kReady = 'true';
+  if (document.documentElement.dataset.fx5kReady === 'refined') return;
+  document.documentElement.dataset.fx5kReady = 'refined';
   document.documentElement.classList.add('fx5k-ready');
-  document.documentElement.dataset.fx5kLens = 'prism';
+  document.documentElement.dataset.fx5kLens = 'aether';
 
+  const MODULE_ORDER = ['observe', 'integrity', 'workflow', 'recovery', 'audit', 'release'];
   const COPY = {
     hu: {
-      kicker: 'FORMATX IDŐKOORDINÁTA · 5000',
-      title: 'Technikusi rendszer a <span>következő évezredből.</span>',
-      coordinateLabel: 'Vizuális időkoordináta',
-      lensLabel: 'KVANTUM-LENCSE',
-      lensTitle: 'Három eltérő jövőnézet',
-      lensCopy: 'A teljes vizuális energiarendszert egyetlen mozdulattal hangolhatod át.',
-      prism: 'Prizma',
-      chrono: 'Kronó',
-      void: 'Mélyűr',
-      meshLabel: 'NEURÁLIS RÁCS',
-      meshTitle: 'Érintésre épülő fényháló',
-      meshCopy: 'Kapcsold össze a csomópontokat. Minden aktiválás új vizuális mintát hoz létre.',
-      signalLabel: 'FOTON-INTENZITÁS',
-      signalTitle: 'Szabályozható energiafelület',
-      signalCopy: 'A háttérfény, a rács és a holografikus panelek ereje valós időben változik.',
-      logLabel: 'JÖVŐNAPLÓ',
-      logTitle: 'Élő rendszerüzenetek',
-      echoLabel: 'IDŐVISSZHANG',
-      echoTitle: 'Pillanatlenyomat készítése',
-      echoCopy: 'A gomb a jelenlegi vizuális állapotból egy helyi időbélyegzett visszhangot készít.',
-      echoButton: 'IDŐVISSZHANG RÖGZÍTÉSE',
-      echoEmpty: 'Még nincs rögzített idővisszhang.',
-      corridorKicker: 'EREDETI FORMATX KÍSÉRLETI MODULOK',
-      corridorTitle: 'Négy új <span>interakciós elv.</span>',
-      corridorCopy: 'Nem egyszerű díszítés: a felület reagál, állapotot vált, emléket készít és a mozgást a hozzáférhetőséghez igazítja.',
-      corridor1Title: 'Adaptív fénymező',
-      corridor1Copy: 'Az egér vagy érintés helyzete finoman átrendezi a háttér energiaközéppontját.',
-      corridor2Title: 'Kvantum-lencse',
-      corridor2Copy: 'Három teljes szín- és energiaprofil váltható újratöltés nélkül.',
-      corridor3Title: 'Neurális csillagtér',
-      corridor3Copy: 'Az aktivált csomópontokból minden látogató saját fénykonstellációt készíthet.',
-      corridor4Title: 'Idővisszhang',
-      corridor4Copy: 'A rendszer egy helyi, személyes állapotlenyomatot készít a kiválasztott nézetből.',
-      logs: [
-        '5000. rendszerkapu: online\nKvantumrács: stabil\nVizuális koherencia: 99,8%',
-        'Holografikus réteg újraszinkronizálva\nFotonmező: adaptív\nHozzáférhetőségi korlátok: aktívak',
-        'FormatX magrendszer: készenlét\nNeurális csomópontok: válaszolnak\nIdőfolyam: helyi vizuális mód'
-      ],
-      echoResult: 'Visszhang #{count}\nLencse: {lens}\nIntenzitás: {intensity}%\nKoordináta: {coordinate}'
+      eyebrow: 'FORMATX · RENDSZERARCHITEKTÚRA 5000',
+      title: 'A jövő nem látványtrükk. <span>Hanem tiszta rendszerlogika.</span>',
+      lead: 'Egy visszafogott, interaktív technikusi térkép, amely a FormatX valódi működési elveit mutatja be: felderítés, ellenőrzés, tervezés és nyomon követhető végrehajtás.',
+      eraNow: 'JELEN',
+      eraFuture: 'RENDSZERSZINTŰ JÖVŐ',
+      mapLabel: 'MŰVELETI TOPOGRÁFIA',
+      detailLabel: 'AKTÍV RENDSZERRÉTEG',
+      lensLabel: 'MEGJELENÉSI PROFIL',
+      lensAether: 'Éter',
+      lensMonolith: 'Monolit',
+      lensAurora: 'Auróra',
+      sequenceTitle: 'Ellenőrzött műveleti lánc',
+      sequenceCopy: 'A bemutató nem hajt végre meghajtóműveletet. Csak vizuálisan modellezi a FormatX háromlépcsős döntési folyamatát.',
+      sequenceButton: 'MŰVELETI LÁNC BEMUTATÁSA',
+      sequenceReady: 'KÉSZENLÉT',
+      sequenceRunning: 'ELEMZÉS FOLYAMATBAN',
+      sequenceComplete: 'ELLENŐRZÖTT TERV',
+      step1: 'Felderítés',
+      step2: 'Ellenőrzés',
+      step3: 'Végrehajtási terv',
+      principlesLabel: '5000-ES TERVEZÉSI ELVEK',
+      principle1Title: 'Csendes intelligencia',
+      principle1Copy: 'A felület nem akar mindenáron látványos lenni; csak ott reagál, ahol annak információs értéke van.',
+      principle2Title: 'Művelet előtti bizonyosság',
+      principle2Copy: 'A célmeghajtó, a kockázat és a végrehajtási terv külön állapotként jelenik meg.',
+      principle3Title: 'Helyi vezérlés',
+      principle3Copy: 'A technikusi döntés a középpontban marad, a rendszer pedig ellenőrizhető segítséget ad.',
+      principle4Title: 'Nyomon követhető eredmény',
+      principle4Copy: 'Minden fontos állapot visszakereshető és összevethető a kiindulási helyzettel.',
+      modules: {
+        observe: {
+          label: 'Felderítés',
+          title: 'A rendszer előbb megfigyel, csak utána javasol.',
+          copy: 'Hardver-, meghajtó- és környezeti állapotok rendezett összegyűjtése egyetlen technikusi nézetbe.',
+          points: ['Eszközök és kötetek azonosítása', 'Kockázati eltérések kiemelése', 'Kiindulási állapot rögzítése']
+        },
+        integrity: {
+          label: 'Integritás',
+          title: 'A bizonyítható állapot fontosabb a látványos ígéretnél.',
+          copy: 'Ellenőrzőösszegek, kiadási információk és műveleti feltételek egységes ellenőrzési rétegben.',
+          points: ['SHA-256 és Ed25519 ellenőrzés', 'Kiadási forrás összevetése', 'Eltérés esetén egyértelmű blokkolás']
+        },
+        workflow: {
+          label: 'Munkafolyamat',
+          title: 'A feladatok nem elszigetelt gombok, hanem összefüggő műveleti láncok.',
+          copy: 'A FormatX a felderítést, tervezést, végrehajtást és ellenőrzést egy követhető folyamatba rendezi.',
+          points: ['Lépésenkénti állapotkezelés', 'Megszakítható és folytatható feladatok', 'Egységes technikusi visszajelzés']
+        },
+        recovery: {
+          label: 'Visszaállítás',
+          title: 'A jó rendszer nemcsak végrehajt, hanem visszautat is tervez.',
+          copy: 'Mentési pontok, előfeltételek és helyreállítási lehetőségek a kockázatos lépések előtt.',
+          points: ['Mentési feltételek ellenőrzése', 'Visszaállítási útvonal tervezése', 'Kritikus lépések külön megerősítése']
+        },
+        audit: {
+          label: 'Naplózás',
+          title: 'A technikusi munka később is érthető marad.',
+          copy: 'A lényeges döntések, eredmények és hibák visszakövethető műveleti történetbe kerülnek.',
+          points: ['Időbélyegzett események', 'Állapotváltozások összevetése', 'Exportálható eredményjelentés']
+        },
+        release: {
+          label: 'Kiadás',
+          title: 'A frissítés csak ellenőrzött forrásból válik elérhetővé.',
+          copy: 'Verzió, csomag, ellenőrzőösszeg és kiadási állapot egyetlen ellenőrizhető csatornában.',
+          points: ['Verzióazonosítás', 'Csomagintegritás', 'Visszagörgethető kiadási állapot']
+        }
+      }
     },
     en: {
-      kicker: 'FORMATX TIME COORDINATE · 5000',
-      title: 'A technician system from the <span>next millennium.</span>',
-      coordinateLabel: 'Visual time coordinate',
-      lensLabel: 'QUANTUM LENS',
-      lensTitle: 'Three different future views',
-      lensCopy: 'Retune the complete visual energy system with a single action.',
-      prism: 'Prism',
-      chrono: 'Chrono',
-      void: 'Deep space',
-      meshLabel: 'NEURAL MESH',
-      meshTitle: 'A touch-responsive light network',
-      meshCopy: 'Connect the nodes. Every activation creates a new visual pattern.',
-      signalLabel: 'PHOTON INTENSITY',
-      signalTitle: 'Adjustable energy surface',
-      signalCopy: 'Background light, grid and holographic panels change in real time.',
-      logLabel: 'FUTURE LOG',
-      logTitle: 'Live system messages',
-      echoLabel: 'TIME ECHO',
-      echoTitle: 'Capture a moment',
-      echoCopy: 'The button creates a local timestamped echo of the current visual state.',
-      echoButton: 'CAPTURE TIME ECHO',
-      echoEmpty: 'No time echo has been captured yet.',
-      corridorKicker: 'ORIGINAL FORMATX EXPERIMENTAL MODULES',
-      corridorTitle: 'Four new <span>interaction principles.</span>',
-      corridorCopy: 'More than decoration: the interface responds, changes state, captures a memory and adapts motion to accessibility preferences.',
-      corridor1Title: 'Adaptive light field',
-      corridor1Copy: 'Pointer or touch position gently relocates the energy centre of the background.',
-      corridor2Title: 'Quantum lens',
-      corridor2Copy: 'Switch between three complete colour and energy profiles without reloading.',
-      corridor3Title: 'Neural star field',
-      corridor3Copy: 'Every visitor can create a personal light constellation from active nodes.',
-      corridor4Title: 'Time echo',
-      corridor4Copy: 'The system creates a local personal state snapshot from the selected view.',
-      logs: [
-        '5000 system gate: online\nQuantum grid: stable\nVisual coherence: 99.8%',
-        'Holographic layer resynchronised\nPhoton field: adaptive\nAccessibility limits: active',
-        'FormatX core system: ready\nNeural nodes: responding\nTime stream: local visual mode'
-      ],
-      echoResult: 'Echo #{count}\nLens: {lens}\nIntensity: {intensity}%\nCoordinate: {coordinate}'
+      eyebrow: 'FORMATX · SYSTEM ARCHITECTURE 5000',
+      title: 'The future is not a visual trick. <span>It is clear system logic.</span>',
+      lead: 'A restrained interactive technician map showing the real operating principles of FormatX: discovery, verification, planning and traceable execution.',
+      eraNow: 'PRESENT',
+      eraFuture: 'SYSTEM-LEVEL FUTURE',
+      mapLabel: 'OPERATIONAL TOPOGRAPHY',
+      detailLabel: 'ACTIVE SYSTEM LAYER',
+      lensLabel: 'VISUAL PROFILE',
+      lensAether: 'Aether',
+      lensMonolith: 'Monolith',
+      lensAurora: 'Aurora',
+      sequenceTitle: 'Verified operation chain',
+      sequenceCopy: 'The demonstration performs no drive operation. It only models the three-stage FormatX decision process visually.',
+      sequenceButton: 'DEMONSTRATE OPERATION CHAIN',
+      sequenceReady: 'READY',
+      sequenceRunning: 'ANALYSIS IN PROGRESS',
+      sequenceComplete: 'VERIFIED PLAN',
+      step1: 'Discovery',
+      step2: 'Verification',
+      step3: 'Execution plan',
+      principlesLabel: 'YEAR 5000 DESIGN PRINCIPLES',
+      principle1Title: 'Quiet intelligence',
+      principle1Copy: 'The interface responds only where interaction has information value.',
+      principle2Title: 'Certainty before action',
+      principle2Copy: 'Target, risk and execution plan are presented as separate states.',
+      principle3Title: 'Local control',
+      principle3Copy: 'The technician remains in control while the system provides verifiable assistance.',
+      principle4Title: 'Traceable outcome',
+      principle4Copy: 'Every important state can be reviewed and compared with the starting condition.',
+      modules: {
+        observe: { label: 'Discovery', title: 'The system observes before it recommends.', copy: 'Hardware, drive and environment states collected into one structured technician view.', points: ['Identify devices and volumes', 'Highlight risk deviations', 'Record the starting state'] },
+        integrity: { label: 'Integrity', title: 'Provable state matters more than impressive promises.', copy: 'Checksums, release information and operation prerequisites in one verification layer.', points: ['SHA-256 and Ed25519 verification', 'Release source comparison', 'Clear blocking on mismatch'] },
+        workflow: { label: 'Workflow', title: 'Tasks are connected operation chains, not isolated buttons.', copy: 'FormatX combines discovery, planning, execution and verification into one traceable flow.', points: ['Step-based state management', 'Cancellable and resumable tasks', 'Consistent technician feedback'] },
+        recovery: { label: 'Recovery', title: 'A good system plans the way back before it acts.', copy: 'Restore points, prerequisites and recovery options before high-risk steps.', points: ['Verify backup conditions', 'Plan a recovery route', 'Separate confirmation for critical steps'] },
+        audit: { label: 'Audit', title: 'Technician work remains understandable later.', copy: 'Important decisions, outcomes and errors become a traceable operation history.', points: ['Timestamped events', 'State-change comparison', 'Exportable result report'] },
+        release: { label: 'Release', title: 'Updates become available only through verified sources.', copy: 'Version, package, checksum and release status in one verifiable channel.', points: ['Version identification', 'Package integrity', 'Reversible release state'] }
+      }
     }
   };
 
-  const state = {
-    lens: 'prism',
-    intensity: 68,
-    echoCount: 0,
-    logIndex: 0,
-    coordinate: '5000.000.000'
-  };
+  const state = { activeModule: 'integrity', lens: 'aether', sequenceRunning: false };
 
   function language() {
     return document.documentElement.lang === 'en' ? 'en' : 'hu';
   }
 
-  function text(key) {
-    return COPY[language()][key];
+  function copy() {
+    return COPY[language()];
+  }
+
+  function cleanLegacy() {
+    ['formatx-future-5000', 'formatx-innovation-corridor'].forEach(function (id) {
+      const node = document.getElementById(id);
+      if (node) node.remove();
+    });
+    document.querySelectorAll('.fx5k-ambient').forEach(function (node) { node.remove(); });
   }
 
   function buildAmbient() {
-    if (document.querySelector('.fx5k-ambient')) return;
     const ambient = document.createElement('div');
     ambient.className = 'fx5k-ambient';
     ambient.setAttribute('aria-hidden', 'true');
-    for (let index = 0; index < 22; index += 1) {
-      const dust = document.createElement('i');
-      dust.className = 'fx5k-dust';
-      dust.style.left = ((index * 41) % 97 + 1) + '%';
-      dust.style.setProperty('--fx5k-duration', (12 + (index % 7) * 2.1) + 's');
-      dust.style.setProperty('--fx5k-delay', (-index * 0.83) + 's');
-      dust.style.setProperty('--fx5k-drift', ((index % 2 ? 1 : -1) * (22 + index * 2)) + 'px');
-      ambient.append(dust);
+    for (let index = 0; index < 10; index += 1) {
+      const line = document.createElement('i');
+      line.style.setProperty('--fx5k-line-x', ((index + 1) * 9) + '%');
+      line.style.setProperty('--fx5k-line-delay', (-index * 1.7) + 's');
+      ambient.append(line);
     }
     document.body.prepend(ambient);
   }
 
-  function buildCommandDeck() {
+  function moduleButton(id, index) {
+    return '<button class="fx5k-map-node fx5k-node-' + id + '" type="button" data-fx5k-module="' + id + '" aria-pressed="false"><small>0' + index + '</small><strong data-fx5k-module-label="' + id + '"></strong></button>';
+  }
+
+  function buildSystem() {
     const hero = document.getElementById('product');
-    if (!hero || document.getElementById('formatx-future-5000')) return;
+    if (!hero) return;
 
-    const deck = document.createElement('section');
-    deck.id = 'formatx-future-5000';
-    deck.className = 'fx5k-command-deck';
-    deck.innerHTML = [
-      '<header class="fx5k-command-head">',
-      '<div><p class="fx5k-kicker" data-fx5k-key="kicker"></p><h2 data-fx5k-html="title"></h2></div>',
-      '<div class="fx5k-coordinate"><small data-fx5k-key="coordinateLabel"></small><strong id="fx5k-coordinate">5000.000.000</strong></div>',
+    const section = document.createElement('section');
+    section.id = 'formatx-future-5000';
+    section.className = 'fx5k-system';
+    section.innerHTML = [
+      '<header class="fx5k-system-head">',
+      '<div><p class="fx5k-eyebrow" data-fx5k-key="eyebrow"></p><h2 data-fx5k-html="title"></h2><p class="fx5k-lead" data-fx5k-key="lead"></p></div>',
+      '<div class="fx5k-era"><span data-fx5k-key="eraNow"></span><i></i><strong>5000</strong><small data-fx5k-key="eraFuture"></small></div>',
       '</header>',
-      '<div class="fx5k-deck-grid">',
-      '<article class="fx5k-module fx5k-module-lens">',
-      '<div class="fx5k-module-label"><span data-fx5k-key="lensLabel"></span><i></i></div>',
-      '<h3 data-fx5k-key="lensTitle"></h3><p data-fx5k-key="lensCopy"></p>',
-      '<div class="fx5k-lens-switch" role="group" aria-label="Future visual lens">',
-      '<button type="button" data-fx5k-lens="prism" aria-pressed="true" data-fx5k-key="prism"></button>',
-      '<button type="button" data-fx5k-lens="chrono" aria-pressed="false" data-fx5k-key="chrono"></button>',
-      '<button type="button" data-fx5k-lens="void" aria-pressed="false" data-fx5k-key="void"></button>',
+      '<div class="fx5k-stage">',
+      '<article class="fx5k-map-panel"><div class="fx5k-panel-label" data-fx5k-key="mapLabel"></div>',
+      '<div class="fx5k-map">',
+      '<svg class="fx5k-map-links" viewBox="0 0 600 420" aria-hidden="true"><g><path d="M300 210 L300 52"/><path d="M300 210 L92 134"/><path d="M300 210 L508 134"/><path d="M300 210 L120 322"/><path d="M300 210 L480 322"/><path d="M300 210 L300 370"/></g></svg>',
+      '<div class="fx5k-core" aria-hidden="true"><span>FX</span><small>CORE</small></div>',
+      moduleButton('observe', 1), moduleButton('integrity', 2), moduleButton('workflow', 3), moduleButton('recovery', 4), moduleButton('audit', 5), moduleButton('release', 6),
       '</div></article>',
-      '<article class="fx5k-module fx5k-module-mesh">',
-      '<div class="fx5k-module-label"><span data-fx5k-key="meshLabel"></span><i></i></div>',
-      '<h3 data-fx5k-key="meshTitle"></h3><p data-fx5k-key="meshCopy"></p>',
-      '<div class="fx5k-neural-mesh" role="group" aria-label="Interactive neural light mesh"></div>',
-      '</article>',
-      '<article class="fx5k-module fx5k-module-signal">',
-      '<div class="fx5k-module-label"><span data-fx5k-key="signalLabel"></span><i></i></div>',
-      '<h3 data-fx5k-key="signalTitle"></h3><p data-fx5k-key="signalCopy"></p>',
-      '<input class="fx5k-signal-control" type="range" min="28" max="100" value="68" aria-label="Visual intensity">',
-      '<div class="fx5k-signal-value"><span>MIN</span><strong>68%</strong><span>MAX</span></div>',
-      '</article>',
-      '<article class="fx5k-module fx5k-module-log">',
-      '<div class="fx5k-module-label"><span data-fx5k-key="logLabel"></span><i></i></div>',
-      '<h3 data-fx5k-key="logTitle"></h3><div class="fx5k-log-window" aria-live="polite"></div>',
-      '</article>',
-      '<article class="fx5k-module fx5k-module-echo">',
-      '<div class="fx5k-module-label"><span data-fx5k-key="echoLabel"></span><i></i></div>',
-      '<h3 data-fx5k-key="echoTitle"></h3><p data-fx5k-key="echoCopy"></p>',
-      '<div class="fx5k-echo-output" aria-live="polite" data-fx5k-key="echoEmpty"></div>',
-      '<button class="fx5k-echo-button" type="button" data-fx5k-key="echoButton"></button>',
-      '</article>',
-      '</div>'
+      '<aside class="fx5k-detail-panel">',
+      '<div class="fx5k-panel-label" data-fx5k-key="detailLabel"></div>',
+      '<div class="fx5k-detail-status"><i></i><span id="fx5k-active-label"></span></div>',
+      '<h3 id="fx5k-active-title"></h3><p id="fx5k-active-copy"></p><ul id="fx5k-active-points"></ul>',
+      '<div class="fx5k-lens"><small data-fx5k-key="lensLabel"></small><div role="group" aria-label="Visual profile"><button type="button" data-fx5k-lens="aether" aria-pressed="true" data-fx5k-key="lensAether"></button><button type="button" data-fx5k-lens="monolith" aria-pressed="false" data-fx5k-key="lensMonolith"></button><button type="button" data-fx5k-lens="aurora" aria-pressed="false" data-fx5k-key="lensAurora"></button></div></div>',
+      '<div class="fx5k-sequence"><div><strong data-fx5k-key="sequenceTitle"></strong><p data-fx5k-key="sequenceCopy"></p></div><div class="fx5k-sequence-steps"><span data-step="1"><i></i><b data-fx5k-key="step1"></b></span><span data-step="2"><i></i><b data-fx5k-key="step2"></b></span><span data-step="3"><i></i><b data-fx5k-key="step3"></b></span></div><button id="fx5k-sequence-button" type="button" data-fx5k-key="sequenceButton"></button><output id="fx5k-sequence-status" data-fx5k-key="sequenceReady"></output></div>',
+      '</aside></div>',
+      '<div class="fx5k-principles"><div class="fx5k-principles-title" data-fx5k-key="principlesLabel"></div>',
+      '<article><span>01</span><strong data-fx5k-key="principle1Title"></strong><p data-fx5k-key="principle1Copy"></p></article>',
+      '<article><span>02</span><strong data-fx5k-key="principle2Title"></strong><p data-fx5k-key="principle2Copy"></p></article>',
+      '<article><span>03</span><strong data-fx5k-key="principle3Title"></strong><p data-fx5k-key="principle3Copy"></p></article>',
+      '<article><span>04</span><strong data-fx5k-key="principle4Title"></strong><p data-fx5k-key="principle4Copy"></p></article>',
+      '</div></section>'
     ].join('');
-
-    hero.insertAdjacentElement('afterend', deck);
-
-    const mesh = deck.querySelector('.fx5k-neural-mesh');
-    for (let index = 0; index < 16; index += 1) {
-      const node = document.createElement('button');
-      node.type = 'button';
-      node.className = 'fx5k-neural-node';
-      node.setAttribute('aria-label', 'Neural node ' + (index + 1));
-      if ([1, 6, 9, 14].includes(index)) node.classList.add('is-active');
-      mesh.append(node);
-    }
-  }
-
-  function buildCorridor() {
-    const anchor = document.getElementById('features') || document.getElementById('project-details');
-    if (!anchor || document.getElementById('formatx-innovation-corridor')) return;
-
-    const corridor = document.createElement('section');
-    corridor.id = 'formatx-innovation-corridor';
-    corridor.className = 'fx5k-innovation-corridor';
-    corridor.innerHTML = [
-      '<header class="fx5k-corridor-head">',
-      '<div><p class="fx5k-kicker" data-fx5k-key="corridorKicker"></p><h2 data-fx5k-html="corridorTitle"></h2></div>',
-      '<p data-fx5k-key="corridorCopy"></p>',
-      '</header>',
-      '<div class="fx5k-corridor-track">',
-      corridorCard('01', '◎', 'corridor1Title', 'corridor1Copy'),
-      corridorCard('02', '◇', 'corridor2Title', 'corridor2Copy'),
-      corridorCard('03', '✦', 'corridor3Title', 'corridor3Copy'),
-      corridorCard('04', '◴', 'corridor4Title', 'corridor4Copy'),
-      '</div>'
-    ].join('');
-    anchor.insertAdjacentElement('afterend', corridor);
-  }
-
-  function corridorCard(index, icon, titleKey, copyKey) {
-    return '<article class="fx5k-corridor-card" data-index="' + index + '"><i>' + icon + '</i><h3 data-fx5k-key="' + titleKey + '"></h3><p data-fx5k-key="' + copyKey + '"></p></article>';
+    hero.insertAdjacentElement('afterend', section);
   }
 
   function applyLanguage() {
+    const current = copy();
     document.querySelectorAll('[data-fx5k-key]').forEach(function (element) {
-      const value = text(element.dataset.fx5kKey);
+      const value = current[element.dataset.fx5kKey];
       if (typeof value === 'string') element.textContent = value;
     });
     document.querySelectorAll('[data-fx5k-html]').forEach(function (element) {
-      const value = text(element.dataset.fx5kHtml);
+      const value = current[element.dataset.fx5kHtml];
       if (typeof value === 'string') element.innerHTML = value;
     });
-    updateLog(true);
+    document.querySelectorAll('[data-fx5k-module-label]').forEach(function (element) {
+      const module = current.modules[element.dataset.fx5kModuleLabel];
+      if (module) element.textContent = module.label;
+    });
+    renderModule();
+  }
+
+  function renderModule() {
+    const module = copy().modules[state.activeModule];
+    if (!module) return;
+    const label = document.getElementById('fx5k-active-label');
+    const title = document.getElementById('fx5k-active-title');
+    const body = document.getElementById('fx5k-active-copy');
+    const list = document.getElementById('fx5k-active-points');
+    if (label) label.textContent = module.label;
+    if (title) title.textContent = module.title;
+    if (body) body.textContent = module.copy;
+    if (list) list.innerHTML = module.points.map(function (point) { return '<li>' + point + '</li>'; }).join('');
+    document.querySelectorAll('[data-fx5k-module]').forEach(function (button) {
+      button.setAttribute('aria-pressed', String(button.dataset.fx5kModule === state.activeModule));
+    });
+  }
+
+  function runSequence() {
+    if (state.sequenceRunning) return;
+    state.sequenceRunning = true;
+    const button = document.getElementById('fx5k-sequence-button');
+    const status = document.getElementById('fx5k-sequence-status');
+    const steps = Array.from(document.querySelectorAll('.fx5k-sequence-steps [data-step]'));
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    steps.forEach(function (step) { step.classList.remove('is-active', 'is-complete'); });
+    if (button) button.disabled = true;
+    if (status) status.textContent = copy().sequenceRunning;
+
+    function finish() {
+      steps.forEach(function (step) { step.classList.remove('is-active'); step.classList.add('is-complete'); });
+      if (status) status.textContent = copy().sequenceComplete;
+      if (button) button.disabled = false;
+      state.sequenceRunning = false;
+    }
+
+    if (reduced) {
+      finish();
+      return;
+    }
+
+    steps.forEach(function (step, index) {
+      window.setTimeout(function () {
+        steps.forEach(function (item, itemIndex) {
+          item.classList.toggle('is-active', itemIndex === index);
+          if (itemIndex < index) item.classList.add('is-complete');
+        });
+        if (index === steps.length - 1) window.setTimeout(finish, 520);
+      }, index * 620);
+    });
   }
 
   function bindInteractions() {
-    document.querySelectorAll('.fx5k-lens-switch [data-fx5k-lens]').forEach(function (button) {
+    document.querySelectorAll('[data-fx5k-module]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        state.activeModule = button.dataset.fx5kModule;
+        renderModule();
+      });
+    });
+
+    document.querySelectorAll('[data-fx5k-lens]').forEach(function (button) {
       button.addEventListener('click', function () {
         state.lens = button.dataset.fx5kLens;
         document.documentElement.dataset.fx5kLens = state.lens;
-        document.querySelectorAll('.fx5k-lens-switch [data-fx5k-lens]').forEach(function (candidate) {
+        document.querySelectorAll('[data-fx5k-lens]').forEach(function (candidate) {
           candidate.setAttribute('aria-pressed', String(candidate === button));
         });
       });
     });
 
-    document.querySelectorAll('.fx5k-neural-node').forEach(function (node) {
-      node.addEventListener('click', function () {
-        node.classList.toggle('is-active');
-      });
-    });
+    const sequenceButton = document.getElementById('fx5k-sequence-button');
+    if (sequenceButton) sequenceButton.addEventListener('click', runSequence);
 
-    const range = document.querySelector('.fx5k-signal-control');
-    const output = document.querySelector('.fx5k-signal-value strong');
-    if (range && output) {
-      range.addEventListener('input', function () {
-        state.intensity = Number(range.value);
-        document.documentElement.style.setProperty('--fx5k-intensity', String(state.intensity / 100));
-        output.textContent = state.intensity + '%';
-      });
-    }
-
-    const echoButton = document.querySelector('.fx5k-echo-button');
-    const echoOutput = document.querySelector('.fx5k-echo-output');
-    if (echoButton && echoOutput) {
-      echoButton.addEventListener('click', function () {
-        state.echoCount += 1;
-        echoOutput.textContent = text('echoResult')
-          .replace('{count}', String(state.echoCount).padStart(2, '0'))
-          .replace('{lens}', text(state.lens))
-          .replace('{intensity}', String(state.intensity))
-          .replace('{coordinate}', state.coordinate);
-      });
-    }
-
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reducedMotion && window.matchMedia('(pointer: fine)').matches) {
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window.matchMedia('(pointer: fine)').matches) {
       window.addEventListener('pointermove', function (event) {
-        const x = Math.round(event.clientX / window.innerWidth * 100);
-        const y = Math.round(event.clientY / window.innerHeight * 100);
-        document.documentElement.style.setProperty('--fx5k-pointer-x', x + '%');
-        document.documentElement.style.setProperty('--fx5k-pointer-y', y + '%');
+        document.documentElement.style.setProperty('--fx5k-pointer-x', Math.round(event.clientX / window.innerWidth * 100) + '%');
+        document.documentElement.style.setProperty('--fx5k-pointer-y', Math.round(event.clientY / window.innerHeight * 100) + '%');
       }, { passive: true });
     }
   }
 
-  function updateCoordinate() {
-    const now = Date.now();
-    const phase = String(Math.floor(now / 137) % 1000).padStart(3, '0');
-    const pulse = String(Math.floor(now / 17) % 1000).padStart(3, '0');
-    state.coordinate = '5000.' + phase + '.' + pulse;
-    const node = document.getElementById('fx5k-coordinate');
-    if (node) node.textContent = state.coordinate;
-  }
-
-  function updateLog(reset) {
-    const log = document.querySelector('.fx5k-log-window');
-    if (!log) return;
-    if (reset) state.logIndex = 0;
-    const logs = text('logs');
-    log.textContent = logs[state.logIndex % logs.length];
-  }
-
-  function startTimers() {
-    updateCoordinate();
-    window.setInterval(updateCoordinate, 110);
-    window.setInterval(function () {
-      state.logIndex += 1;
-      updateLog(false);
-    }, 4200);
-  }
-
-  function revealCorridor() {
-    const cards = document.querySelectorAll('.fx5k-corridor-card');
-    if (!('IntersectionObserver' in window)) {
-      cards.forEach(function (card) { card.classList.add('fx5k-visible'); });
-      return;
-    }
-    const observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('fx5k-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.18 });
-    cards.forEach(function (card) { observer.observe(card); });
-  }
-
   function initialise() {
     if (!document.body) return;
+    cleanLegacy();
     buildAmbient();
-    buildCommandDeck();
-    buildCorridor();
+    buildSystem();
     applyLanguage();
     bindInteractions();
-    startTimers();
-    revealCorridor();
-
     window.addEventListener('formatx:languagechange', applyLanguage);
     new MutationObserver(function (records) {
       if (records.some(function (record) { return record.attributeName === 'lang'; })) applyLanguage();
