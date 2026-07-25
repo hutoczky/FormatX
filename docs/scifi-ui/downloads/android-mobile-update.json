@@ -4,5 +4,5 @@
   "apkUrl": "https://www.formatxsuite.com/scifi-ui/downloads/FormatX-Mobile-Android.apk",
   "sha256": "1b8f1502f435f1a8e40120c681f5b2d60b5fe2ca79a9714d5c4f33be5a9da3be",
   "mandatory": false,
-  "notes": "Első külön FormatX Mobile Android kiadás mobilra optimalizált projekt-, kiadás-, támogatási és licencközponttal."
+  "notes": "FormatX Mobile Android 1.0.0 béta. Külön telepíthető hu.formatx.mobile csomag, mobilra optimalizált projekt-, kiadás-, támogatási és licencközponttal."
 }
