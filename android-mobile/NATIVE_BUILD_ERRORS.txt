@@ -1,0 +1,6 @@
+FormatX Native Android compiler diagnostics
+Commit: 7e6e8fc0555192eafd6a3c580b57878ac4333b15
+Run: https://github.com/hutoczky/FormatX/actions/runs/30162913648
+
+FAILURE: Build failed with an exception.
+Caused by: java.lang.RuntimeException: Lint found errors in the project; aborting build.
