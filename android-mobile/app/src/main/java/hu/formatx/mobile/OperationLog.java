@@ -71,7 +71,7 @@ public final class OperationLog {
                             .append(" · ")
                             .append(item.optString("status"));
                     String details = item.optString("details");
-                    if (!details.isBlank()) output.append(" · ").append(details);
+                    if (!details.trim().isEmpty()) output.append(" · ").append(details);
                     output.append('\n');
                 } catch (Exception ignored) {
                     output.append(line).append('\n');
