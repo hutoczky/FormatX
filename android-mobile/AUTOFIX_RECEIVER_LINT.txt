@@ -1,0 +1,1 @@
+apply targeted registerReceiver lint compatibility annotation
