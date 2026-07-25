@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const ANDROID_MOBILE_APK_URL = 'https://github.com/hutoczky/FormatX/releases/download/android-mobile-v1.0.0-beta/FormatX-Mobile-Android.apk';
+  const ANDROID_MOBILE_APK_URL = 'https://github.com/hutoczky/FormatX/releases/download/android-mobile-v1.0.0-beta.2/FormatX-Mobile-Android.apk';
 
   initialiseAndroidAppMode();
   initialiseAndroidMobilePromotion();
