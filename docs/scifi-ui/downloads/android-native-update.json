@@ -1,7 +1,7 @@
 {
   "versionCode": 110,
   "versionName": "1.1.0-beta",
-  "apkUrl": "https://github.com/hutoczky/FormatX/releases/download/android-native-v1.1.0-beta/FormatX-Native-Android.apk",
+  "apkUrl": "https://raw.githubusercontent.com/hutoczky/FormatX/master/docs/scifi-ui/downloads/FormatX-Native-Android.apk",
   "sha256": "58d3296c49fee25c0b3ba16233d48a9162613eb76069f1a5180d894cde3cead4",
   "mandatory": false,
   "notes": "FormatX Native Android 1.1.0 Beta. WebView nélküli natív alkalmazás ISO/USB, USB-vizsgálat és törlés, kétpaneles fájlkezelő, ZIP, diagnosztika, napló és integritás-ellenőrzés funkciókkal. Fordítás, Android Lint és APK-integritás: PASS. Fizikai Android-eszközön végzett teljes OTG USB teszt még szükséges."
