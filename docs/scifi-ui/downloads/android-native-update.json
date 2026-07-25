@@ -1,0 +1,8 @@
+{
+  "versionCode": 110,
+  "versionName": "1.1.0-beta",
+  "apkUrl": "https://github.com/hutoczky/FormatX/releases/download/android-native-v1.1.0-beta/FormatX-Native-Android.apk",
+  "sha256": "pending-native-build",
+  "mandatory": false,
+  "notes": "Első natív Android-kiadás WebView nélkül. ISO/USB, USB-vizsgálat és törlés, kétpaneles fájlkezelés, ZIP, diagnosztika és integritás-ellenőrzés."
+}
