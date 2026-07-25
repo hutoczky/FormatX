@@ -31,7 +31,7 @@ npm install --no-audit --no-fund
 if ! npx wrangler whoami --json >/dev/null 2>&1; then
   printf 'Megnyílik a Cloudflare bejelentkezési oldal a böngészőben.\n'
   printf 'A belépés után térj vissza ehhez a terminálhoz.\n\n'
-  npx wrangler login --use-keyring
+  npx wrangler login
 fi
 
 npx wrangler whoami
@@ -51,8 +51,20 @@ if token_type not in {'oauth', 'api_token'} or not token:
 print(token)
 PY
 )"
+FORMATX_CLOUDFLARE_AUTH_TYPE="$(python3 - "$TOKEN_FILE" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding='utf-8') as handle:
+    data = json.load(handle)
+
+print(data.get('type', ''))
+PY
+)"
 
 [[ ${#CLOUDFLARE_API_TOKEN} -ge 20 ]] || fail 'A Cloudflare hitelesítés nem sikerült.'
-export CLOUDFLARE_API_TOKEN
+[[ "$FORMATX_CLOUDFLARE_AUTH_TYPE" == 'oauth' || "$FORMATX_CLOUDFLARE_AUTH_TYPE" == 'api_token' ]] \
+  || fail 'A Cloudflare hitelesítés típusa nem támogatott.'
+export CLOUDFLARE_API_TOKEN FORMATX_CLOUDFLARE_AUTH_TYPE
 
 bash "$SCRIPT_DIR/deploy-license-center-live.sh"
