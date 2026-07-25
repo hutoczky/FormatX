@@ -2,7 +2,7 @@ import productionWorker from './production-entry.js';
 import { handleLicenseCenterRequest } from './license-center.js';
 import { handleV100PricingRequest } from './pricing-v100-api.js';
 
-const START_SALE_VERSION = '20260725-v100-pricing-1';
+const START_SALE_VERSION = '20260725-v100-pricing-2';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
