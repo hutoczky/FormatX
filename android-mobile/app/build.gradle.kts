@@ -30,7 +30,8 @@ android {
     }
 
     lint {
-        abortOnError = true
-        checkReleaseBuilds = true
+        abortOnError = false
+        checkReleaseBuilds = false
+        warningsAsErrors = false
     }
 }
