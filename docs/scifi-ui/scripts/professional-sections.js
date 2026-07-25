@@ -9,7 +9,7 @@
 
   function updateProfessionalLinks() {
     const language = currentLanguage();
-    document.querySelectorAll('#professional-sections-root a[href]').forEach(function (link) {
+    document.querySelectorAll('#professional-sections-root a[href], #operations-console a[href], .pro-architecture a[href]').forEach(function (link) {
       const href = link.getAttribute('href');
       if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
       try {
@@ -99,13 +99,23 @@
     elements.forEach(function (element) { observer.observe(element); });
   }
 
+  function openRequestedSection() {
+    if (window.location.hash !== '#operations-console') return;
+    window.requestAnimationFrame(function () {
+      const section = document.getElementById('operations-console');
+      if (section) section.scrollIntoView({ block: 'start' });
+    });
+  }
+
   async function mountSections() {
+    if (document.getElementById('operations-console')) return true;
+
     const root = document.getElementById('professional-sections-root');
     if (!root) return false;
 
     root.setAttribute('aria-busy', 'true');
     try {
-      const response = await fetch(SECTION_URL, { credentials: 'same-origin' });
+      const response = await fetch(SECTION_URL, { credentials: 'same-origin', cache: 'no-cache' });
       if (!response.ok) throw new Error('Section request failed: ' + response.status);
       root.innerHTML = await response.text();
       root.removeAttribute('aria-busy');
@@ -129,5 +139,6 @@
     applyProfessionalLanguage();
     initialiseTabs();
     initialiseReveal();
+    openRequestedSection();
   });
 }());
