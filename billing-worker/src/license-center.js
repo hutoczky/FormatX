@@ -1,3 +1,10 @@
+import {
+  handleSignedClientRequest,
+  handleSignedRevocations,
+  isSignedClientRequest,
+  signedClientApiCapabilities,
+} from './signed-license-api.js';
+
 const ADMIN_ROOT = '/fx-owner-license';
 const PUBLIC_API_ROOT = '/api/license';
 const SESSION_COOKIE = 'fx_owner_session';
@@ -20,7 +27,12 @@ export async function handleLicenseCenterRequest(request, env) {
     }
 
     if (path === `${PUBLIC_API_ROOT}/health` && request.method === 'GET') {
-      return json({ ok: true, service: 'formatx-license-center', time: nowIso() });
+      return json({
+        ok: true,
+        service: 'formatx-license-center',
+        time: nowIso(),
+        ...signedClientApiCapabilities(env),
+      });
     }
 
     if (path === `${PUBLIC_API_ROOT}/activate` && request.method === 'POST') {
@@ -31,6 +43,9 @@ export async function handleLicenseCenterRequest(request, env) {
     }
     if (path === `${PUBLIC_API_ROOT}/deactivate` && request.method === 'POST') {
       return await publicDeactivate(request, env);
+    }
+    if (path === `${PUBLIC_API_ROOT}/revocations` && request.method === 'GET') {
+      return await handleSignedRevocations(env);
     }
 
     if (path === ADMIN_ROOT) {
@@ -81,6 +96,9 @@ export async function handleLicenseCenterRequest(request, env) {
 async function publicActivate(request, env) {
   await enforceRateLimit(request, env, 'activate', 20, 60);
   const body = await readJson(request);
+  if (isSignedClientRequest(body)) {
+    return handleSignedClientRequest('activate', request, body, env);
+  }
   const license = await findLicenseByKey(env, body.license_key);
   requireUsableLicense(license);
 
@@ -148,6 +166,9 @@ async function publicActivate(request, env) {
 async function publicCheck(request, env) {
   await enforceRateLimit(request, env, 'check', 60, 60);
   const body = await readJson(request);
+  if (isSignedClientRequest(body)) {
+    return handleSignedClientRequest('check', request, body, env);
+  }
   const license = await findLicenseByKey(env, body.license_key);
   requireUsableLicense(license);
   const deviceId = validateDeviceId(body.device_id);
@@ -174,6 +195,9 @@ async function publicCheck(request, env) {
 async function publicDeactivate(request, env) {
   await enforceRateLimit(request, env, 'deactivate', 20, 60);
   const body = await readJson(request);
+  if (isSignedClientRequest(body)) {
+    return handleSignedClientRequest('deactivate', request, body, env);
+  }
   const license = await findLicenseByKey(env, body.license_key);
   const deviceId = validateDeviceId(body.device_id);
   const deviceHash = await hmacHex(env.LICENSE_PEPPER, `device:${deviceId}`);

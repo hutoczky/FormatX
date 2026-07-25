@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'billing-worker/src/license-center.js'
+      - 'billing-worker/src/signed-license-api.js'
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/license-migrations/**'
       - 'billing-worker/scripts/deploy-license-center-live.sh'

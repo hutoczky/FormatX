@@ -12,12 +12,19 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_CONFIG="$ROOT_DIR/.wrangler-license-live.jsonc"
 LOGIN_FILE="$HOME/FormatX-licenc-admin-belepes.txt"
 RESET_PASSWORD="${FORMATX_RESET_ADMIN_PASSWORD:-0}"
+ISSUER_PUBLIC_KEY_FILE="$ROOT_DIR/public-keys/license-api-issuer-public-key.pem"
+ISSUER_PRIVATE_KEY_FILE="${FORMATX_ISSUER_PRIVATE_KEY_FILE:-$HOME/.config/formatx/license-api-issuer-key.pem}"
+ISSUER_KEY_ID="formatx-license-issuer-32b0d26716d41bc5"
 
 cleanup(){ rm -f -- "$TMP_CONFIG" /tmp/formatx-license-health.json; unset CLOUDFLARE_API_TOKEN; }
 trap cleanup EXIT
 fail(){ printf '\nHIBA: %s\n' "$*" >&2; exit 1; }
 need(){ command -v "$1" >/dev/null 2>&1 || fail "Hiányzó parancs: $1"; }
-for cmd in node npm npx python3 curl openssl; do need "$cmd"; done
+for cmd in node npm npx python3 curl openssl sha256sum awk; do need "$cmd"; done
+[ -s "$ISSUER_PUBLIC_KEY_FILE" ] || fail "Hiányzó licenc-API nyilvános kulcs: $ISSUER_PUBLIC_KEY_FILE"
+PUBLIC_FINGERPRINT="$(openssl pkey -pubin -in "$ISSUER_PUBLIC_KEY_FILE" -outform DER 2>/dev/null | sha256sum | awk '{print $1}')"
+[[ "$ISSUER_KEY_ID" == "formatx-license-issuer-${PUBLIC_FINGERPRINT:0:16}" ]] \
+  || fail 'A licenc-API nyilvános kulcs és az issuer key ID nem egyezik.'
 cd "$ROOT_DIR"
 
 printf '============================================================\n'
@@ -145,6 +152,19 @@ set_secret_if_missing(){
 }
 set_secret_if_missing LICENSE_PEPPER "$(openssl rand -base64 48 | tr -d '\n')"
 set_secret_if_missing ADMIN_SESSION_SECRET "$(openssl rand -base64 48 | tr -d '\n')"
+if ! grep -q '"FORMATX_ISSUER_PRIVATE_KEY"' <<<"$SECRET_LIST"; then
+  [ -s "$ISSUER_PRIVATE_KEY_FILE" ] \
+    || fail "A licenc-API privát aláírókulcsa hiányzik: $ISSUER_PRIVATE_KEY_FILE"
+  PRIVATE_PUBLIC_FINGERPRINT="$(
+    openssl pkey -in "$ISSUER_PRIVATE_KEY_FILE" -pubout -outform DER 2>/dev/null \
+      | sha256sum | awk '{print $1}'
+  )"
+  [[ "$PRIVATE_PUBLIC_FINGERPRINT" == "$PUBLIC_FINGERPRINT" ]] \
+    || fail 'A licenc-API privát és nyilvános kulcsa nem alkot kulcspárt.'
+  printf '%s' "$(cat "$ISSUER_PRIVATE_KEY_FILE")" \
+    | npx wrangler secret put FORMATX_ISSUER_PRIVATE_KEY --config "$TMP_CONFIG" >/dev/null
+  SECRETS_CHANGED=1
+fi
 if ! grep -q '"ADMIN_PASSWORD_RECORD"' <<<"$SECRET_LIST" || [[ "$RESET_PASSWORD" == "1" ]]; then
   FALLBACK_PASSWORD="$(openssl rand -base64 24 | tr -d '\n' | tr '/+' 'AZ')"
   PASSWORD_RECORD="$(python3 -c 'import base64,hashlib,os,sys; pw=sys.argv[1].encode(); salt=os.urandom(24); iterations=600000; derived=hashlib.pbkdf2_hmac("sha256",pw,salt,iterations,dklen=32); b64=lambda b:base64.urlsafe_b64encode(b).decode().rstrip("="); print(f"v1:{iterations}:{b64(salt)}:{b64(derived)}")' "$FALLBACK_PASSWORD")"
@@ -170,7 +190,7 @@ printf '9/10 – Élő licenc-API ellenőrzése…\n'
 status=''
 for attempt in $(seq 1 24); do
   status="$(curl -sS -o /tmp/formatx-license-health.json -w '%{http_code}' --max-time 20 -H 'Cache-Control: no-cache' "$HEALTH_URL" || true)"
-  if [[ "$status" == '200' ]] && python3 -c 'import json; o=json.load(open("/tmp/formatx-license-health.json")); assert o.get("ok") is True' 2>/dev/null; then break; fi
+  if [[ "$status" == '200' ]] && python3 -c 'import json,sys; o=json.load(open("/tmp/formatx-license-health.json")); assert o.get("ok") is True; assert o.get("signed_client_api") is True; assert o.get("signed_client_api_schema")==1; assert o.get("signature_algorithm")=="Ed25519"; assert o.get("issuer_key_id")==sys.argv[1]' "$ISSUER_KEY_ID" 2>/dev/null; then break; fi
   sleep 5
 done
 [[ "$status" == '200' ]] || fail "A licenc-API nem állt fel. HTTP: ${status:-nincs válasz}"
