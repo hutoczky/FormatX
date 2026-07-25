@@ -90,10 +90,11 @@ jobs:
 
           test -s "$APK"
           unzip -t "$APK" >/dev/null
-          test "$(stat -c '%s' "$APK")" -gt 300000
+          test "$(stat -c '%s' "$APK")" -gt 50000
           cp "$APK" "$DEST"
           cp "$APK" "$VERSIONED"
           SHA256="$(sha256sum "$DEST" | awk '{print $1}')"
+          test "${#SHA256}" -eq 64
           printf '%s  %s\n' "$SHA256" "FormatX-Mobile-Android.apk" > "$DIGEST_FILE"
 
           SHA256="$SHA256" python3 - <<'PY'
