@@ -340,7 +340,7 @@ public final class MainActivity extends Activity {
         page.addView(pickers);
 
         TextView leftSelected = muted(selectionText(leftSelection), 11);
-        ListView leftList = fileList();
+        ListView leftList = createFileList();
         bindPane(leftList, true, leftSelected);
         LinearLayout leftHeader = buttonRow();
         leftHeader.addView(secondaryButton("← " + t("FEL", "UP"), view -> goParent(true)));
@@ -348,7 +348,7 @@ public final class MainActivity extends Activity {
         page.addView(section("A · " + directoryName(leftDirectory), leftHeader, leftSelected, leftList));
 
         TextView rightSelected = muted(selectionText(rightSelection), 11);
-        ListView rightList = fileList();
+        ListView rightList = createFileList();
         bindPane(rightList, false, rightSelected);
         LinearLayout rightHeader = buttonRow();
         rightHeader.addView(secondaryButton("← " + t("FEL", "UP"), view -> goParent(false)));
@@ -1167,7 +1167,7 @@ public final class MainActivity extends Activity {
         return input;
     }
 
-    private ListView fileList() {
+    private ListView createFileList() {
         ListView list = new ListView(this);
         list.setDividerHeight(1);
         list.setDivider(new android.graphics.drawable.ColorDrawable(dark ? 0xFF1B3553 : 0xFFDDE5EF));
