@@ -23,7 +23,7 @@ jobs:
   deploy:
     name: Deploy and verify
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 25
 
     steps:
       - name: Checkout repository
@@ -98,50 +98,41 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
-      - name: Deploy website, D1 license database and Access protection
+      - name: Run licence tests
+        id: license_tests
+        working-directory: billing-worker
+        run: npm run test:license
+
+      - name: Deploy Worker, assets and D1 migrations
         id: live_deploy
         working-directory: billing-worker
         env:
           CLOUDFLARE_ACCOUNT_ID: ffd7d28ea7c6a510549dc9363619c8c5
-          FORMATX_ADMIN_EMAIL: hutoczky@gmail.com
         shell: bash
         run: |
-          set -uo pipefail
+          set -euo pipefail
 
-          run_deploy_attempt() {
-            local attempt="$1"
-            local log_file status stage
-            log_file="$(mktemp)"
-            echo "Production deployment attempt ${attempt}/2"
+          echo "Applying pending D1 migrations to the existing production database…"
+          npx wrangler d1 migrations apply formatx-license-db --remote
 
-            bash scripts/deploy-license-center-live.sh 2>&1 | tee "$log_file"
-            status="${PIPESTATUS[0]}"
+          echo "Validating the exact production Worker bundle…"
+          rm -rf ../.wrangler-production-deploy
+          npx wrangler deploy --dry-run --outdir ../.wrangler-production-deploy
 
-            if [ "$status" -eq 0 ]; then
-              rm -f "$log_file"
-              return 0
+          for attempt in 1 2; do
+            echo "Routine Cloudflare Worker deployment attempt ${attempt}/2"
+            if npx wrangler deploy; then
+              rm -rf ../.wrangler-production-deploy
+              exit 0
             fi
+            if [ "$attempt" -eq 1 ]; then
+              echo "The first Worker deployment attempt failed; retrying once after 20 seconds." >&2
+              sleep 20
+            fi
+          done
 
-            stage="$(grep -E '^[0-9]+/10' "$log_file" | tail -n 1 | tr -d '\r' || true)"
-            stage="${stage:-a telepítő indulása előtt}"
-            echo "FORMATX_DEPLOY_STAGE=$stage" >> "$GITHUB_ENV"
-            echo "Deployment attempt ${attempt} failed at: $stage" >&2
-            rm -f "$log_file"
-            return "$status"
-          }
-
-          if run_deploy_attempt 1; then
-            exit 0
-          fi
-
-          echo "The first deployment attempt failed; retrying once after 20 seconds." >&2
-          sleep 20
-
-          if run_deploy_attempt 2; then
-            exit 0
-          fi
-
-          echo "Both production deployment attempts failed." >&2
+          rm -rf ../.wrangler-production-deploy
+          echo "Both routine Worker deployment attempts failed." >&2
           exit 1
 
       - name: Verify public website, V100 pricing assets and license API
@@ -208,6 +199,7 @@ jobs:
           - Főoldal: https://formatxsuite.com/
           - V100 árak és QR-fizetés: ellenőrizve mindkét domainen
           - Licenc-API: ellenőrizve
+          - Telepítési mód: rutin Worker + D1 migráció
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
       - name: Record failed production deployment
@@ -223,8 +215,8 @@ jobs:
           - Cloudflare-token: \`${{ steps.require_token.outcome }}\`
           - Node.js: \`${{ steps.setup_node.outcome }}\`
           - Függőségek: \`${{ steps.install_dependencies.outcome }}\`
-          - Cloudflare-telepítés: \`${{ steps.live_deploy.outcome }}\`
-          - Telepítő szakasz: \`${FORMATX_DEPLOY_STAGE:-nem indult}\`
+          - Licenctesztek: \`${{ steps.license_tests.outcome }}\`
+          - Worker/D1-telepítés: \`${{ steps.live_deploy.outcome }}\`
           - Éles ellenőrzés: \`${{ steps.verify_production.outcome }}\`
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           - A hiba kijavításáig az új állapot nem tekinthető igazoltan élőnek."
