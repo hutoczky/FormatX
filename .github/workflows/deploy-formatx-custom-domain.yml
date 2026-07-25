@@ -98,8 +98,8 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
-      - name: Validate Worker and deployment script
-        id: validate_worker
+      - name: Validate JavaScript and deployment script syntax
+        id: syntax_check
         working-directory: billing-worker
         run: |
           node --check src/license-center.js
@@ -110,8 +110,11 @@ jobs:
           node --check ../docs/scifi-ui/scripts/checkout-v100.js
           node --check ../docs/scifi-ui/scripts/checkout-language-v100.js
           bash -n scripts/deploy-license-center-live.sh
-          npm run test:license
-          npx wrangler deploy --dry-run --outdir ../.wrangler-production-ci
+
+      - name: Run production licence tests
+        id: license_tests
+        working-directory: billing-worker
+        run: npm run test:license
 
       - name: Deploy website, D1 license database and Access protection
         id: live_deploy
@@ -214,7 +217,8 @@ jobs:
           - Cloudflare-token: \`${{ steps.require_token.outcome }}\`
           - Node.js: \`${{ steps.setup_node.outcome }}\`
           - Függőségek: \`${{ steps.install_dependencies.outcome }}\`
-          - Worker-validáció: \`${{ steps.validate_worker.outcome }}\`
+          - Szintaxis: \`${{ steps.syntax_check.outcome }}\`
+          - Licenctesztek: \`${{ steps.license_tests.outcome }}\`
           - Cloudflare-telepítés: \`${{ steps.live_deploy.outcome }}\`
           - Éles ellenőrzés: \`${{ steps.verify_production.outcome }}\`
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
