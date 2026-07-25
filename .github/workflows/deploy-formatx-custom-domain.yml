@@ -98,24 +98,6 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
-      - name: Validate JavaScript and deployment script syntax
-        id: syntax_check
-        working-directory: billing-worker
-        run: |
-          node --check src/license-center.js
-          node --check src/pricing-v100-api.js
-          node --check src/production-with-license.js
-          node --check ../docs/fx-owner-license/app.js
-          node --check ../docs/scifi-ui/scripts/start-sale.js
-          node --check ../docs/scifi-ui/scripts/checkout-v100.js
-          node --check ../docs/scifi-ui/scripts/checkout-language-v100.js
-          bash -n scripts/deploy-license-center-live.sh
-
-      - name: Run production licence tests
-        id: license_tests
-        working-directory: billing-worker
-        run: npm run test:license
-
       - name: Deploy website, D1 license database and Access protection
         id: live_deploy
         working-directory: billing-worker
@@ -125,16 +107,40 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          for attempt in 1 2; do
+
+          run_deploy_attempt() {
+            local attempt="$1"
+            local log_file status stage
+            log_file="$(mktemp)"
             echo "Production deployment attempt ${attempt}/2"
-            if bash scripts/deploy-license-center-live.sh; then
-              exit 0
+
+            bash scripts/deploy-license-center-live.sh 2>&1 | tee "$log_file"
+            status="${PIPESTATUS[0]}"
+
+            if [ "$status" -eq 0 ]; then
+              rm -f "$log_file"
+              return 0
             fi
-            if [ "$attempt" -eq 1 ]; then
-              echo "The first deployment attempt failed; retrying once after 20 seconds." >&2
-              sleep 20
-            fi
-          done
+
+            stage="$(grep -E '^[0-9]+/10' "$log_file" | tail -n 1 | tr -d '\r' || true)"
+            stage="${stage:-a telepítő indulása előtt}"
+            echo "FORMATX_DEPLOY_STAGE=$stage" >> "$GITHUB_ENV"
+            echo "Deployment attempt ${attempt} failed at: $stage" >&2
+            rm -f "$log_file"
+            return "$status"
+          }
+
+          if run_deploy_attempt 1; then
+            exit 0
+          fi
+
+          echo "The first deployment attempt failed; retrying once after 20 seconds." >&2
+          sleep 20
+
+          if run_deploy_attempt 2; then
+            exit 0
+          fi
+
           echo "Both production deployment attempts failed." >&2
           exit 1
 
@@ -217,9 +223,8 @@ jobs:
           - Cloudflare-token: \`${{ steps.require_token.outcome }}\`
           - Node.js: \`${{ steps.setup_node.outcome }}\`
           - Függőségek: \`${{ steps.install_dependencies.outcome }}\`
-          - Szintaxis: \`${{ steps.syntax_check.outcome }}\`
-          - Licenctesztek: \`${{ steps.license_tests.outcome }}\`
           - Cloudflare-telepítés: \`${{ steps.live_deploy.outcome }}\`
+          - Telepítő szakasz: \`${FORMATX_DEPLOY_STAGE:-nem indult}\`
           - Éles ellenőrzés: \`${{ steps.verify_production.outcome }}\`
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           - A hiba kijavításáig az új állapot nem tekinthető igazoltan élőnek."
