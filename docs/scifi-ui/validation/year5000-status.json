@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "sourceCommit": "c526db8d4df39f05e23468a4fe6edd0a8c58df3c",
+  "validatedAt": "2026-07-25T21:44:25Z",
+  "javascriptSyntax": true,
+  "separatePlanQrRow": true,
+  "productionInjection": true,
+  "lensInteractionScope": true,
+  "reducedMotionAccessibility": true
+}
