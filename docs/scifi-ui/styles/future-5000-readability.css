@@ -1,0 +1,153 @@
+/*
+ * FormatX Year 5000 readability guard.
+ * Cinematic effects stay on decorative layers only. Text, controls and cards
+ * are deliberately kept on a flat compositing plane to avoid Firefox/Linux
+ * glyph slicing and blurred subpixel rasterisation.
+ */
+
+.fx5k-system {
+  isolation: isolate;
+}
+
+.fx5k-cinematic-layer {
+  z-index: 0 !important;
+}
+
+.fx5k-system::before {
+  z-index: 0;
+}
+
+.fx5k-system-head,
+.fx5k-stage,
+.fx5k-principles {
+  position: relative;
+  z-index: 3 !important;
+}
+
+/* Never transform a container that owns readable text. */
+.fx5k-cinematic .fx5k-stage,
+.fx5k-cinematic .fx5k-map-panel,
+.fx5k-cinematic .fx5k-detail-panel,
+.fx5k-cinematic .fx5k-principles,
+.fx5k-cinematic .fx5k-principles-title,
+.fx5k-cinematic .fx5k-principles article {
+  transform: none !important;
+  transform-style: flat !important;
+  perspective: none !important;
+  backface-visibility: visible !important;
+}
+
+.fx5k-system-head *,
+.fx5k-stage *,
+.fx5k-principles * {
+  backface-visibility: visible !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Explicitly restore normal glyph flow after GPU compositing. */
+.fx5k-principles-title,
+.fx5k-principles article,
+.fx5k-principles article span,
+.fx5k-principles article strong,
+.fx5k-principles article p,
+.fx5k-detail-panel,
+.fx5k-detail-panel h3,
+.fx5k-detail-panel p,
+.fx5k-detail-panel li,
+.fx5k-map-node,
+.fx5k-map-node strong,
+.fx5k-map-node small,
+.fx5k-lens button,
+.fx5k-sequence,
+.fx5k-sequence * {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  font-variant-ligatures: normal;
+  filter: none !important;
+  opacity: 1;
+}
+
+.fx5k-principles-title,
+.fx5k-principles article {
+  overflow: hidden;
+  contain: layout paint;
+}
+
+.fx5k-principles article::before {
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.22;
+}
+
+.fx5k-principles article > *,
+.fx5k-principles-title > * {
+  position: relative;
+  z-index: 2;
+}
+
+.fx5k-principles article strong {
+  color: #eef6ff;
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.fx5k-principles article p {
+  color: #9fb0c2;
+  font-size: 0.72rem;
+  line-height: 1.58;
+}
+
+.fx5k-principles article span {
+  color: #6f859a;
+}
+
+/* Decorative refraction must never sit above actual content. */
+.fx5k-detail-panel::after,
+.fx5k-map-node::after,
+.fx5k-scan-plane,
+.fx5k-spectrum-edge,
+.fx5k-holo-refraction,
+.fx5k-depth-plane {
+  pointer-events: none;
+}
+
+.fx5k-detail-panel::after,
+.fx5k-map-node::after {
+  z-index: 0;
+}
+
+.fx5k-detail-panel > *,
+.fx5k-map-node > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Keep the visual depth without rotating readable surfaces. */
+.fx5k-cinematic {
+  perspective: none !important;
+}
+
+.fx5k-depth-plane {
+  will-change: transform, opacity;
+}
+
+@media (max-width: 1040px) {
+  .fx5k-principles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .fx5k-principles {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx5k-depth-plane,
+  .fx5k-holo-refraction,
+  .fx5k-spectrum-edge {
+    transform: none !important;
+  }
+}
