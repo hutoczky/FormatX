@@ -1,7 +1,10 @@
 import productionWorker from './production-entry.js';
 import { handleLicenseCenterRequest } from './license-center.js';
+import { handleV100PricingRequest } from './pricing-v100-api.js';
 
-const START_SALE_VERSION = '20260724-start-sale-1';
+const START_SALE_VERSION = '20260725-v100-pricing-1';
+const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
+const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
   'camera=()',
   'geolocation=()',
@@ -19,11 +22,19 @@ const START_SALE_PATHS = new Set([
   '/checkout.html',
   '/scifi-ui/checkout.html',
 ]);
+const CHECKOUT_PATHS = new Set([
+  '/checkout.html',
+  '/scifi-ui/checkout.html',
+]);
 
 class StartSaleHeadHandler {
   element(element) {
     element.append(
       `<link rel="stylesheet" href="/scifi-ui/styles/start-sale.css?v=${START_SALE_VERSION}">`,
+      { html: true },
+    );
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/pricing-v100.css?v=${START_SALE_VERSION}">`,
       { html: true },
     );
   }
@@ -38,6 +49,24 @@ class StartSaleBodyHandler {
   }
 }
 
+class CheckoutScriptHandler {
+  constructor(isCheckout) {
+    this.isCheckout = isCheckout;
+  }
+
+  element(element) {
+    if (!this.isCheckout) return;
+    const src = String(element.getAttribute('src') || '');
+    if (src.includes('/scripts/checkout-language.js') || src.includes('./scripts/checkout-language.js')) {
+      element.setAttribute('src', CHECKOUT_LANGUAGE_SCRIPT);
+      return;
+    }
+    if (src.includes('/scripts/checkout.js') || src.includes('./scripts/checkout.js')) {
+      element.setAttribute('src', CHECKOUT_SCRIPT);
+    }
+  }
+}
+
 function shouldInjectStartSale(url, response) {
   const contentType = response.headers.get('Content-Type') || '';
   return START_SALE_PATHS.has(url.pathname)
@@ -45,10 +74,12 @@ function shouldInjectStartSale(url, response) {
     && contentType.toLowerCase().includes('text/html');
 }
 
-function injectStartSale(response) {
+function injectStartSale(response, url) {
+  const isCheckout = CHECKOUT_PATHS.has(url.pathname);
   return new HTMLRewriter()
     .on('head', new StartSaleHeadHandler())
     .on('body', new StartSaleBodyHandler())
+    .on('script[src]', new CheckoutScriptHandler(isCheckout))
     .transform(response);
 }
 
@@ -75,8 +106,11 @@ export default {
     const licenseResponse = await handleLicenseCenterRequest(request, env);
     if (licenseResponse) return secureLicenseResponse(licenseResponse);
 
+    const pricingResponse = await handleV100PricingRequest(request, env);
+    if (pricingResponse) return secureLicenseResponse(pricingResponse);
+
     const response = await productionWorker.fetch(request, env, ctx);
     const url = new URL(request.url);
-    return shouldInjectStartSale(url, response) ? injectStartSale(response) : response;
+    return shouldInjectStartSale(url, response) ? injectStartSale(response, url) : response;
   },
 };
