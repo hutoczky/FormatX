@@ -8,6 +8,7 @@ on:
       - "docs/scifi-ui/scripts/future-5000-effects.js"
       - "docs/scifi-ui/styles/future-5000.css"
       - "docs/scifi-ui/styles/future-5000-effects.css"
+      - "docs/scifi-ui/styles/future-5000-readability.css"
       - "docs/scifi-ui/scripts/start-sale.js"
       - "billing-worker/src/production-with-license.js"
       - ".github/workflows/validate-year-5000.yml"
@@ -69,6 +70,17 @@ jobs:
           grep -F 'fx5k-detail-refract' docs/scifi-ui/styles/future-5000-effects.css
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/future-5000-effects.css
 
+      - name: Validate readability protection
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'future-5000-readability.css' billing-worker/src/production-with-license.js
+          grep -F '.fx5k-cinematic .fx5k-stage' docs/scifi-ui/styles/future-5000-readability.css
+          grep -F 'transform: none !important' docs/scifi-ui/styles/future-5000-readability.css
+          grep -F 'writing-mode: horizontal-tb !important' docs/scifi-ui/styles/future-5000-readability.css
+          grep -F 'text-rendering: optimizeLegibility' docs/scifi-ui/styles/future-5000-readability.css
+          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/future-5000-readability.css
+
       - name: Summary
         run: |
           {
@@ -79,6 +91,8 @@ jobs:
             echo '- Refined system architecture: PASS'
             echo '- Cinematic effects injection: PASS'
             echo '- Travelling data signals: PASS'
+            echo '- Flat readable text plane: PASS'
+            echo '- Firefox/Linux glyph protection: PASS'
             echo '- Reduced-motion accessibility: PASS'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -97,6 +111,8 @@ jobs:
             "refinedSystemArchitecture": true,
             "cinematicEffectsInjection": true,
             "travellingDataSignals": true,
+            "flatReadableTextPlane": true,
+            "firefoxLinuxGlyphProtection": true,
             "reducedMotionAccessibility": true
           }
           EOF
@@ -104,6 +120,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/scifi-ui/validation/year5000-status.json
           if ! git diff --cached --quiet; then
-            git commit -m "Record successful refined Year 5000 validation"
+            git commit -m "Record successful readable Year 5000 validation"
             git push origin HEAD:master
           fi
