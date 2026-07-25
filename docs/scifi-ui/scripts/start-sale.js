@@ -140,7 +140,13 @@
     }
   }
 
-  function ensureCardExtras(card, planId) {
+  function ensureCardAnnualPrice(card) {
+    // QR payment belongs only in the dedicated payment panel on the right.
+    // Remove any card-level QR left by an older cached script or markup.
+    card.querySelectorAll('.v100-card-qr').forEach(function (qr) {
+      qr.remove();
+    });
+
     let annual = card.querySelector('.v100-annual-price');
     if (!annual) {
       annual = document.createElement('div');
@@ -149,16 +155,7 @@
       if (list) list.insertAdjacentElement('beforebegin', annual);
       else card.append(annual);
     }
-
-    let qr = card.querySelector('.v100-card-qr');
-    if (!qr) {
-      qr = document.createElement('a');
-      qr.className = 'v100-card-qr';
-      qr.dataset.planId = planId;
-      qr.innerHTML = '<img width="112" height="112" loading="lazy"><span></span>';
-      card.append(qr);
-    }
-    return { annual, qr };
+    return annual;
   }
 
   function updateHomeCards() {
@@ -170,8 +167,8 @@
       const strong = card.querySelector('.price strong');
       const period = card.querySelector('.price span');
       const secondary = card.querySelector(':scope > small');
-      const selectLink = card.querySelector(':scope > a:not(.v100-card-qr)');
-      const extras = ensureCardExtras(card, planId);
+      const selectLink = card.querySelector(':scope > a');
+      const annual = ensureCardAnnualPrice(card);
 
       if (strong) strong.textContent = formatPrice(plan[selectedCurrency].monthly, selectedCurrency);
       if (period) period.textContent = text('monthly');
@@ -179,20 +176,11 @@
         const otherCurrency = selectedCurrency === 'HUF' ? 'EUR' : 'HUF';
         secondary.textContent = formatPrice(plan[otherCurrency].monthly, otherCurrency) + text('monthly');
       }
-      extras.annual.textContent = text('annual').replace(
+      annual.textContent = text('annual').replace(
         '{price}',
         formatPrice(plan[selectedCurrency].annual, selectedCurrency)
       );
       if (selectLink) selectLink.href = checkoutHref(planId, 'monthly', selectedCurrency);
-
-      extras.qr.href = checkoutHref(planId, 'monthly', selectedCurrency);
-      const image = extras.qr.querySelector('img');
-      const label = extras.qr.querySelector('span');
-      if (image) {
-        image.src = qrSrc(planId, 'monthly', selectedCurrency);
-        image.alt = text('qrAlt') + ' — ' + plan.name;
-      }
-      if (label) label.textContent = text('qr');
     });
   }
 
