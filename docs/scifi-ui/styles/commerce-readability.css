@@ -141,10 +141,14 @@
   min-height: 330px !important;
   padding: 18px !important;
   gap: 18px !important;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, .82fr) !important;
+  align-items: start !important;
+  overflow: hidden;
   border-color: rgba(88, 185, 255, .38) !important;
 }
 
 .reference-commerce .checkout-summary {
+  min-width: 0;
   gap: 11px !important;
 }
 
@@ -161,6 +165,7 @@
 
 .reference-commerce .checkout-price-box,
 .reference-commerce .checkout-conversion {
+  min-width: 0;
   padding: 14px !important;
   border-color: rgba(88, 174, 255, .28) !important;
 }
@@ -207,25 +212,58 @@
   font-weight: 800 !important;
 }
 
+/* Keep the QR and its caption inside their own column. */
+.reference-commerce .qr-preview {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding-inline: 10px;
+  box-sizing: border-box;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-flow: row;
+  overflow: hidden;
+  isolation: isolate;
+}
+
 .reference-commerce .scan-label {
+  width: 100%;
+  max-width: 100%;
   color: #7ce7ff !important;
   font-size: 13px !important;
   line-height: 1.4 !important;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .reference-commerce .qr-preview > small {
+  width: 100%;
+  max-width: 100%;
   margin-top: 5px !important;
   color: #c1d1e5 !important;
   font-size: 12px !important;
   line-height: 1.4 !important;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.reference-commerce .qr-shell {
+  width: min(137px, 100%) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  justify-self: center;
 }
 
 .reference-commerce .qr-preview em {
-  margin-top: 9px !important;
+  position: static !important;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 12px !important;
   color: #72e2ff !important;
   font-size: 11px !important;
   line-height: 1.45 !important;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 /* Promotion banner outside the pricing section */
@@ -252,7 +290,17 @@
 
 @media (max-width: 1220px) {
   .reference-commerce .checkout-card {
-    grid-template-columns: minmax(0, 1fr) minmax(220px, .9fr) !important;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, .82fr) !important;
+  }
+}
+
+@media (max-width: 920px) {
+  .reference-commerce .checkout-card {
+    grid-template-columns: 1fr !important;
+  }
+
+  .reference-commerce .qr-preview {
+    padding-top: 4px;
   }
 }
 
