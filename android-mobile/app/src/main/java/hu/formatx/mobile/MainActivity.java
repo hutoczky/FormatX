@@ -1,4 +1,5 @@
 package hu.formatx.mobile;
+\nimport android.annotation.SuppressLint;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -936,6 +937,7 @@ public final class MainActivity extends Activity {
         }
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private void registerUsbReceiver() {
         IntentFilter filter = new IntentFilter(USB_PERMISSION_ACTION);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
