@@ -1,0 +1,63 @@
+name: Validate FormatX Year 5000 website
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "docs/scifi-ui/scripts/future-5000.js"
+      - "docs/scifi-ui/styles/future-5000.css"
+      - "docs/scifi-ui/scripts/start-sale.js"
+      - "billing-worker/src/production-with-license.js"
+      - ".github/workflows/validate-year-5000.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/future-5000.js
+          node --check docs/scifi-ui/scripts/start-sale.js
+          node --check billing-worker/src/production-with-license.js
+
+      - name: Validate separate QR structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'id = '\''formatx-plan-qr-dock'\''' docs/scifi-ui/scripts/start-sale.js
+          grep -F 'cards.insertAdjacentElement('\''afterend'\'', dock)' docs/scifi-ui/scripts/start-sale.js
+          grep -F 'grid-template-columns: repeat(3, minmax(0, 1fr))' docs/scifi-ui/styles/future-5000.css
+          grep -F '.fx-plan-qr-dock' docs/scifi-ui/styles/future-5000.css
+          grep -F '.fx-plan-qr-card' docs/scifi-ui/styles/future-5000.css
+          ! grep -E 'price-card[^\n]*position:[[:space:]]*absolute' docs/scifi-ui/styles/future-5000.css
+
+      - name: Validate Year 5000 injection
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F '/scifi-ui/styles/future-5000.css' billing-worker/src/production-with-license.js
+          grep -F '/scifi-ui/scripts/future-5000.js' billing-worker/src/production-with-license.js
+          grep -F 'formatx-future-5000' docs/scifi-ui/scripts/future-5000.js
+          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/future-5000.css
+
+      - name: Summary
+        run: |
+          {
+            echo '## FormatX Year 5000 validation'
+            echo
+            echo '- JavaScript syntax: PASS'
+            echo '- Separate three-plan QR row: PASS'
+            echo '- Production injection: PASS'
+            echo '- Reduced-motion accessibility: PASS'
+          } >> "$GITHUB_STEP_SUMMARY"
