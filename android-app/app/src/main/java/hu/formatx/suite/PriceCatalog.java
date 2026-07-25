@@ -2,9 +2,9 @@ package hu.formatx.suite;
 
 final class PriceCatalog {
     static final Plan[] PLANS = new Plan[] {
-            new Plan("business_lite", "Business Lite", 15900, 139300, 44, 383, 19900, 199000, 55, 547),
-            new Plan("business_pro", "Business Pro", 39900, 349300, 110, 961, 49900, 499000, 137, 1373),
-            new Plan("technician_team", "Technician Team", 79900, 699300, 220, 1924, 99900, 999000, 275, 2748)
+            new Plan("business_lite", "Business Lite", 7900, 79000, 22, 220, 9900, 99000, 27, 270),
+            new Plan("business_pro", "Business Pro", 15900, 159000, 44, 440, 19900, 199000, 55, 550),
+            new Plan("technician_team", "Technician Team", 29900, 299000, 83, 830, 39900, 399000, 110, 1100)
     };
 
     private PriceCatalog() { }
