@@ -102,7 +102,7 @@ public final class UsbOperations {
                 blockOffset += aligned / blockSize;
                 notifyProgress(
                         listener,
-                        progress(writtenSourceBytes, sourceBytes, verify ? 0, 70),
+                        progress(writtenSourceBytes, sourceBytes, 0, verify ? 70 : 100),
                         "Writing image · " + humanBytes(writtenSourceBytes) + " / " + humanBytes(sourceBytes)
                 );
             }
