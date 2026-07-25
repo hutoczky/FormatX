@@ -1,7 +1,7 @@
 {
   "status": "PASS",
-  "sourceCommit": "5ba674c8415bbf909dba3d639534c0a6659d3c28",
-  "validatedAt": "2026-07-25T22:05:29Z",
+  "sourceCommit": "962c92158776833514d33280b05a2046f1209c5d",
+  "validatedAt": "2026-07-25T22:13:49Z",
   "javascriptSyntax": true,
   "separatePlanQrRow": true,
   "refinedSystemArchitecture": true,
