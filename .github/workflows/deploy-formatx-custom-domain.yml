@@ -23,13 +23,15 @@ jobs:
   deploy:
     name: Deploy and verify
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
 
     steps:
       - name: Checkout repository
+        id: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Validate production configuration
+        id: validate_config
         shell: python
         run: |
           import json
@@ -50,14 +52,23 @@ jobs:
               for route in data.get("routes", [])
           }
           assert expected.issubset(actual)
-          assert Path("billing-worker/src/license-center.js").is_file()
-          assert Path("billing-worker/license-migrations/0001_license_center.sql").is_file()
-          assert Path("docs/fx-owner-license/index.html").is_file()
-          assert Path("docs/scifi-ui/scripts/start-sale.js").is_file()
-          assert Path("docs/scifi-ui/styles/start-sale.css").is_file()
-          print("Production website, license center and Start akció configuration is valid.")
+          required_files = [
+              "billing-worker/src/license-center.js",
+              "billing-worker/src/pricing-v100-api.js",
+              "billing-worker/license-migrations/0001_license_center.sql",
+              "docs/fx-owner-license/index.html",
+              "docs/scifi-ui/scripts/start-sale.js",
+              "docs/scifi-ui/scripts/checkout-v100.js",
+              "docs/scifi-ui/scripts/checkout-language-v100.js",
+              "docs/scifi-ui/styles/start-sale.css",
+              "docs/scifi-ui/styles/pricing-v100.css",
+          ]
+          for file_name in required_files:
+              assert Path(file_name).is_file(), file_name
+          print("Production website, license center, V100 pricing and QR configuration is valid.")
 
       - name: Require Cloudflare API token
+        id: require_token
         shell: bash
         env:
           RAW_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -75,6 +86,7 @@ jobs:
           echo "CLOUDFLARE_API_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 
       - name: Set up Node.js
+        id: setup_node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22"
@@ -82,27 +94,49 @@ jobs:
           cache-dependency-path: billing-worker/package-lock.json
 
       - name: Install Worker dependencies
+        id: install_dependencies
         working-directory: billing-worker
         run: npm ci
 
       - name: Validate Worker and deployment script
+        id: validate_worker
         working-directory: billing-worker
         run: |
           node --check src/license-center.js
+          node --check src/pricing-v100-api.js
           node --check src/production-with-license.js
           node --check ../docs/fx-owner-license/app.js
           node --check ../docs/scifi-ui/scripts/start-sale.js
+          node --check ../docs/scifi-ui/scripts/checkout-v100.js
+          node --check ../docs/scifi-ui/scripts/checkout-language-v100.js
           bash -n scripts/deploy-license-center-live.sh
           npm run test:license
+          npx wrangler deploy --dry-run --outdir ../.wrangler-production-ci
 
       - name: Deploy website, D1 license database and Access protection
+        id: live_deploy
         working-directory: billing-worker
         env:
           CLOUDFLARE_ACCOUNT_ID: ffd7d28ea7c6a510549dc9363619c8c5
           FORMATX_ADMIN_EMAIL: hutoczky@gmail.com
-        run: bash scripts/deploy-license-center-live.sh
+        shell: bash
+        run: |
+          set -uo pipefail
+          for attempt in 1 2; do
+            echo "Production deployment attempt ${attempt}/2"
+            if bash scripts/deploy-license-center-live.sh; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 1 ]; then
+              echo "The first deployment attempt failed; retrying once after 20 seconds." >&2
+              sleep 20
+            fi
+          done
+          echo "Both production deployment attempts failed." >&2
+          exit 1
 
-      - name: Verify public website, Start akció and license API
+      - name: Verify public website, V100 pricing assets and license API
+        id: verify_production
         shell: bash
         run: |
           set -euo pipefail
@@ -120,12 +154,13 @@ jobs:
               if [ "$status" = "200" ] \
                  && grep -Fq 'FormatX Suite Pro' "$body" \
                  && grep -Fq '/scifi-ui/styles/start-sale.css' "$body" \
+                 && grep -Fq '/scifi-ui/styles/pricing-v100.css' "$body" \
                  && grep -Fq '/scifi-ui/scripts/start-sale.js' "$body" \
                  && grep -iq '^strict-transport-security:' "$headers" \
                  && grep -iq '^content-security-policy:' "$headers" \
                  && grep -iq '^x-content-type-options: nosniff' "$headers" \
                  && ! grep -iq '^location:' "$headers"; then
-                echo "Verified $url with Start akció assets"
+                echo "Verified $url with V100 pricing assets"
                 rm -f "$headers" "$body"
                 return 0
               fi
@@ -162,7 +197,7 @@ jobs:
 
           - Commit: \`${GITHUB_SHA}\`
           - Főoldal: https://formatxsuite.com/
-          - Start akció CSS/JS: ellenőrizve mindkét domainen
+          - V100 árak és QR-fizetés: ellenőrizve mindkét domainen
           - Licenc-API: ellenőrizve
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
@@ -174,5 +209,13 @@ jobs:
           gh issue comment 114 --repo "$GITHUB_REPOSITORY" --body "❌ **FAILED — az éles telepítés vagy ellenőrzés sikertelen**
 
           - Commit: \`${GITHUB_SHA}\`
+          - Checkout: \`${{ steps.checkout.outcome }}\`
+          - Konfiguráció: \`${{ steps.validate_config.outcome }}\`
+          - Cloudflare-token: \`${{ steps.require_token.outcome }}\`
+          - Node.js: \`${{ steps.setup_node.outcome }}\`
+          - Függőségek: \`${{ steps.install_dependencies.outcome }}\`
+          - Worker-validáció: \`${{ steps.validate_worker.outcome }}\`
+          - Cloudflare-telepítés: \`${{ steps.live_deploy.outcome }}\`
+          - Éles ellenőrzés: \`${{ steps.verify_production.outcome }}\`
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           - A hiba kijavításáig az új állapot nem tekinthető igazoltan élőnek."
