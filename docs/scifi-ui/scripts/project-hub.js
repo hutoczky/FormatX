@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const ANDROID_MOBILE_APK_URL = 'https://github.com/hutoczky/FormatX/releases/download/android-mobile-v1.0.0-beta.2/FormatX-Mobile-Android.apk';
+  const ANDROID_NATIVE_APK_URL = 'https://github.com/hutoczky/FormatX/releases/download/android-native-v1.1.0-beta/FormatX-Native-Android.apk';
 
   initialiseAndroidAppMode();
   initialiseAndroidMobilePromotion();
@@ -113,13 +113,12 @@
     promo.id = 'android-mobile';
     promo.className = 'android-mobile-promo';
     promo.setAttribute('aria-labelledby', 'android-mobile-title');
-    promo.innerHTML = '<div class="android-mobile-promo-copy"><p class="android-mobile-promo-kicker" data-mobile-hu="KÜLÖN ANDROID KIADÁS" data-mobile-en="DEDICATED ANDROID EDITION">KÜLÖN ANDROID KIADÁS</p><h2 id="android-mobile-title" data-mobile-hu="FormatX Mobile — a projekt saját Android-központja." data-mobile-en="FormatX Mobile — the project’s dedicated Android centre.">FormatX Mobile — a projekt saját Android-központja.</h2><p data-mobile-hu="Nem a számítógépes oldal lekicsinyített másolata. Mobilra tervezett projekt-, kiadás-, támogatási és licencfelület, külön telepíthető alkalmazáscsomaggal." data-mobile-en="Not a scaled-down copy of the desktop page. A mobile-first project, release, support and licence interface with a separately installable app package.">Nem a számítógépes oldal lekicsinyített másolata. Mobilra tervezett projekt-, kiadás-, támogatási és licencfelület, külön telepíthető alkalmazáscsomaggal.</p><div class="android-mobile-promo-points"><span><i>✓</i><b data-mobile-hu="Külön alkalmazásazonosító" data-mobile-en="Separate application identity">Külön alkalmazásazonosító</b></span><span><i>✓</i><b data-mobile-hu="Mobilra optimalizált felület" data-mobile-en="Mobile-optimised interface">Mobilra optimalizált felület</b></span><span><i>✓</i><b data-mobile-hu="HTTPS és biztonságos WebView" data-mobile-en="HTTPS and secure WebView">HTTPS és biztonságos WebView</b></span><span><i>✓</i><b data-mobile-hu="SHA-256 ellenőrzött APK" data-mobile-en="SHA-256 verified APK">SHA-256 ellenőrzött APK</b></span></div><div class="android-mobile-promo-actions"><a class="android-mobile-primary" href="/scifi-ui/downloads/FormatX-Mobile-Android.apk" download><span data-mobile-hu="ANDROID APK LETÖLTÉSE" data-mobile-en="DOWNLOAD ANDROID APK">ANDROID APK LETÖLTÉSE</span><b>↓</b></a><a class="android-mobile-secondary" href="/scifi-ui/android/"><span data-mobile-hu="MOBILVERZIÓ MEGNYITÁSA" data-mobile-en="OPEN MOBILE EDITION">MOBILVERZIÓ MEGNYITÁSA</span><b>→</b></a></div></div><div class="android-mobile-device" aria-hidden="true"><div class="android-mobile-screen"><div class="android-mobile-screen-head"><img src="/scifi-ui/assets/images/formatx-icon.png" width="34" height="34" alt=""><span><strong>FORMATX</strong><small>MOBILE · ANDROID</small></span></div><h3 data-mobile-hu="Mobil központ" data-mobile-en="Mobile centre">Mobil központ</h3><p data-mobile-hu="Projekt, kiadások, támogatás és licencek egy Androidra tervezett nézetben." data-mobile-en="Project, releases, support and licences in an Android-first view.">Projekt, kiadások, támogatás és licencek egy Androidra tervezett nézetben.</p><div class="android-mobile-screen-grid"><span><i>⌘</i><b data-mobile-hu="Projekt" data-mobile-en="Project">Projekt</b></span><span><i>⇩</i><b data-mobile-hu="Kiadások" data-mobile-en="Releases">Kiadások</b></span><span><i>◎</i><b data-mobile-hu="Támogatás" data-mobile-en="Support">Támogatás</b></span><span><i>◇</i><b data-mobile-hu="Licencek" data-mobile-en="Licences">Licencek</b></span></div><div class="android-mobile-screen-status"><span data-mobile-hu="ANDROID KIADÁS" data-mobile-en="ANDROID RELEASE">ANDROID KIADÁS</span><strong id="android-mobile-version">1.0.0</strong><i></i></div></div></div>';
+    promo.innerHTML = '<div class="android-mobile-promo-copy"><p class="android-mobile-promo-kicker" data-mobile-hu="NATÍV ANDROID KIADÁS" data-mobile-en="NATIVE ANDROID EDITION">NATÍV ANDROID KIADÁS</p><h2 id="android-mobile-title" data-mobile-hu="FormatX Native — valódi Android-alkalmazás, nem weboldal." data-mobile-en="FormatX Native — a real Android application, not a website.">FormatX Native — valódi Android-alkalmazás, nem weboldal.</h2><p data-mobile-hu="Saját natív kezelőfelületet és Android-műveleti motort használ. ISO-t ír támogatott OTG USB-re, vizsgálja és törli az USB-t, fájlokat kezel, ZIP-et készít, diagnosztikát és integritás-ellenőrzést futtat." data-mobile-en="It uses its own native interface and Android operation engine. It writes images to supported OTG USB storage, scans and erases USB devices, manages files, handles ZIP archives, and runs diagnostics and integrity checks.">Saját natív kezelőfelületet és Android-műveleti motort használ. ISO-t ír támogatott OTG USB-re, vizsgálja és törli az USB-t, fájlokat kezel, ZIP-et készít, diagnosztikát és integritás-ellenőrzést futtat.</p><div class="android-mobile-promo-points"><span><i>✓</i><b data-mobile-hu="WebView nélkül" data-mobile-en="No WebView">WebView nélkül</b></span><span><i>✓</i><b data-mobile-hu="Natív ISO → USB" data-mobile-en="Native image → USB">Natív ISO → USB</b></span><span><i>✓</i><b data-mobile-hu="Kétpaneles fájlkezelő" data-mobile-en="Dual-pane file manager">Kétpaneles fájlkezelő</b></span><span><i>✓</i><b data-mobile-hu="SHA-256 és Ed25519" data-mobile-en="SHA-256 and Ed25519">SHA-256 és Ed25519</b></span></div><div class="android-mobile-promo-actions"><a class="android-mobile-primary" href="https://github.com/hutoczky/FormatX/releases/download/android-native-v1.1.0-beta/FormatX-Native-Android.apk"><span data-mobile-hu="NATÍV APK LETÖLTÉSE" data-mobile-en="DOWNLOAD NATIVE APK">NATÍV APK LETÖLTÉSE</span><b>↓</b></a><a class="android-mobile-secondary" href="/scifi-ui/android/"><span data-mobile-hu="ANDROID KIADÁS RÉSZLETEI" data-mobile-en="ANDROID EDITION DETAILS">ANDROID KIADÁS RÉSZLETEI</span><b>→</b></a></div></div><div class="android-mobile-device" aria-hidden="true"><div class="android-mobile-screen"><div class="android-mobile-screen-head"><img src="/scifi-ui/assets/images/formatx-icon.png" width="34" height="34" alt=""><span><strong>FORMATX</strong><small>NATIVE · ANDROID</small></span></div><h3 data-mobile-hu="Natív eszközök" data-mobile-en="Native tools">Natív eszközök</h3><p data-mobile-hu="ISO/USB, fájlkezelő, USB-vizsgálat, integritás és diagnosztika közvetlenül az alkalmazásban." data-mobile-en="Image/USB tools, file manager, USB scan, integrity and diagnostics directly in the app.">ISO/USB, fájlkezelő, USB-vizsgálat, integritás és diagnosztika közvetlenül az alkalmazásban.</p><div class="android-mobile-screen-grid"><span><i>⇩</i><b>ISO → USB</b></span><span><i>▥</i><b data-mobile-hu="Fájlok" data-mobile-en="Files">Fájlok</b></span><span><i>◉</i><b data-mobile-hu="USB-eszközök" data-mobile-en="USB tools">USB-eszközök</b></span><span><i>✓</i><b data-mobile-hu="Integritás" data-mobile-en="Integrity">Integritás</b></span></div><div class="android-mobile-screen-status"><span data-mobile-hu="NATÍV BÉTA" data-mobile-en="NATIVE BETA">NATÍV BÉTA</span><strong id="android-mobile-version">1.1.0-beta</strong><i></i></div></div></div>';
     insertionPoint.insertAdjacentElement('afterend', promo);
 
     const verifiedDownload = promo.querySelector('.android-mobile-primary');
     if (verifiedDownload) {
-      verifiedDownload.href = ANDROID_MOBILE_APK_URL;
-      verifiedDownload.removeAttribute('download');
+      verifiedDownload.href = ANDROID_NATIVE_APK_URL;
       verifiedDownload.target = '_blank';
       verifiedDownload.rel = 'noopener noreferrer';
     }
@@ -137,7 +136,7 @@
       attributeFilter: ['lang'],
     });
 
-    fetch('/scifi-ui/downloads/android-mobile-update.json', {
+    fetch('/scifi-ui/downloads/android-native-update.json', {
       cache: 'no-store',
       headers: { Accept: 'application/json' },
     }).then(function (response) {
@@ -145,7 +144,7 @@
     }).then(function (payload) {
       const version = payload && String(payload.versionName || '').trim();
       const node = document.getElementById('android-mobile-version');
-      if (node && /^\d+\.\d+\.\d+$/.test(version)) node.textContent = version;
+      if (node && /^\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?$/i.test(version)) node.textContent = version;
     }).catch(function () {});
   }
 
