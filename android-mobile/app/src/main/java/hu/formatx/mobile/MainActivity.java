@@ -1,5 +1,5 @@
 package hu.formatx.mobile;
-\nimport android.annotation.SuppressLint;
+import android.annotation.SuppressLint;
 
 import android.app.Activity;
 import android.app.AlertDialog;
