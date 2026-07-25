@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: formatx-mobile-android-release
@@ -127,3 +128,26 @@ jobs:
             echo
             echo "SHA256: $SHA256"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Record successful release publication
+        if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          gh issue comment 116 --repo "$GITHUB_REPOSITORY" --body "✅ **PASS — FormatX Mobile GitHub béta-kiadás közzétéve**
+
+          - Tag: \`${TAG}\`
+          - APK: https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/FormatX-Mobile-Android.apk
+          - SHA-256: \`${SHA256}\`
+          - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+      - name: Record failed release publication
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment 116 --repo "$GITHUB_REPOSITORY" --body "❌ **FAILED — FormatX Mobile GitHub kiadás közzététele**
+
+          - Forrás commit: \`${GITHUB_SHA}\`
+          - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
