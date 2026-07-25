@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import me.jahnen.libaums.core.driver.BlockDeviceDriver;
 import me.jahnen.libaums.core.driver.BlockDeviceDriverFactory;
@@ -164,8 +165,13 @@ public final class RawUsbMassStorageDevice implements Closeable {
 
     public static String displayName(UsbDevice device) {
         String product = device.getProductName();
-        if (product == null || product.isBlank()) {
-            product = "USB " + String.format("%04X:%04X", device.getVendorId(), device.getProductId());
+        if (product == null || product.trim().isEmpty()) {
+            product = "USB " + String.format(
+                    Locale.ROOT,
+                    "%04X:%04X",
+                    device.getVendorId(),
+                    device.getProductId()
+            );
         }
         return product + " · " + device.getDeviceName();
     }
