@@ -51,7 +51,11 @@
       qr: 'Fizetés QR-kóddal',
       qrAlt: 'FormatX checkout QR-kód',
       monthly: '/ hónap',
-      checkoutNote: 'A bevezető ár aktív. Az éves csomag két hónap díjmentes hozzáférést tartalmaz.'
+      checkoutNote: 'A bevezető ár aktív. Az éves csomag két hónap díjmentes hozzáférést tartalmaz.',
+      qrDockTitle: 'KÜLÖN FIZETÉSI QR-KÓDOK',
+      qrDockCopy: 'Mindhárom csomag saját QR-kódja külön, az árkártyák alatt található.',
+      qrDockNote: 'Havi csomag · rögzített összeg · bankkártyaadat-kezelés nélkül',
+      openPayment: 'QR megnyitása és fizetés'
     },
     en: {
       badge: 'INTRODUCTORY OFFER',
@@ -61,7 +65,11 @@
       qr: 'Pay by QR code',
       qrAlt: 'FormatX checkout QR code',
       monthly: '/ month',
-      checkoutNote: 'Introductory pricing is active. Annual plans include two months at no extra charge.'
+      checkoutNote: 'Introductory pricing is active. Annual plans include two months at no extra charge.',
+      qrDockTitle: 'SEPARATE PAYMENT QR CODES',
+      qrDockCopy: 'Each plan has its own QR code in a dedicated row below the pricing cards.',
+      qrDockNote: 'Monthly plan · fixed amount · no card-data handling',
+      openPayment: 'Open QR and payment'
     }
   };
 
@@ -141,9 +149,8 @@
   }
 
   function ensureCardAnnualPrice(card) {
-    // QR payment belongs only in the dedicated payment panel on the right.
-    // Remove any card-level QR left by an older cached script or markup.
-    card.querySelectorAll('.v100-card-qr').forEach(function (qr) {
+    // QR payment belongs only in the dedicated row below all three cards.
+    card.querySelectorAll('.v100-card-qr, .fx-card-qr').forEach(function (qr) {
       qr.remove();
     });
 
@@ -156,6 +163,80 @@
       else card.append(annual);
     }
     return annual;
+  }
+
+  function ensurePlanQrDock() {
+    const cards = document.querySelector('#pricing .price-cards');
+    if (!cards) return null;
+
+    let dock = document.getElementById('formatx-plan-qr-dock');
+    if (dock) return dock;
+
+    dock = document.createElement('section');
+    dock.id = 'formatx-plan-qr-dock';
+    dock.className = 'fx-plan-qr-dock';
+    dock.setAttribute('aria-labelledby', 'formatx-plan-qr-title');
+    dock.innerHTML = [
+      '<header class="fx-plan-qr-head">',
+      '<strong id="formatx-plan-qr-title"></strong>',
+      '<span class="fx-plan-qr-intro"></span>',
+      '</header>',
+      '<div class="fx-plan-qr-grid">',
+      PLAN_IDS.map(function (planId) {
+        return [
+          '<article class="fx-plan-qr-card" data-plan-qr="', planId, '">',
+          '<div class="fx-plan-qr-copy">',
+          '<strong></strong>',
+          '<span></span>',
+          '<small></small>',
+          '</div>',
+          '<a class="fx-plan-qr-link" href="#" aria-label="">',
+          '<img width="116" height="116" alt="">',
+          '</a>',
+          '</article>'
+        ].join('');
+      }).join(''),
+      '</div>'
+    ].join('');
+
+    cards.insertAdjacentElement('afterend', dock);
+    return dock;
+  }
+
+  function updatePlanQrDock() {
+    const dock = ensurePlanQrDock();
+    if (!dock) return;
+
+    const selectedCurrency = currency();
+    const title = dock.querySelector('#formatx-plan-qr-title');
+    const intro = dock.querySelector('.fx-plan-qr-intro');
+    if (title) title.textContent = text('qrDockTitle');
+    if (intro) intro.textContent = text('qrDockCopy');
+
+    PLAN_IDS.forEach(function (planId) {
+      const plan = PRICING[planId];
+      const card = dock.querySelector('[data-plan-qr="' + planId + '"]');
+      if (!plan || !card) return;
+
+      const name = card.querySelector('.fx-plan-qr-copy strong');
+      const amount = card.querySelector('.fx-plan-qr-copy span');
+      const note = card.querySelector('.fx-plan-qr-copy small');
+      const link = card.querySelector('.fx-plan-qr-link');
+      const image = card.querySelector('img');
+      const href = checkoutHref(planId, 'monthly', selectedCurrency);
+
+      if (name) name.textContent = plan.name;
+      if (amount) amount.textContent = formatPrice(plan[selectedCurrency].monthly, selectedCurrency) + text('monthly');
+      if (note) note.textContent = text('qrDockNote');
+      if (link) {
+        link.href = href;
+        link.setAttribute('aria-label', plan.name + ' — ' + text('openPayment'));
+      }
+      if (image) {
+        image.src = qrSrc(planId, 'monthly', selectedCurrency);
+        image.alt = text('qrAlt') + ' — ' + plan.name;
+      }
+    });
   }
 
   function updateHomeCards() {
@@ -246,6 +327,7 @@
     ensureBanner();
     ensurePricingCallout();
     updateHomeCards();
+    updatePlanQrDock();
     updatePreview();
     updateCheckoutPage();
     applyCopy();
