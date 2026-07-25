@@ -55,23 +55,35 @@ jobs:
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           exit "$STATUS"
 
-      - name: Persist compiler diagnostics
+      - name: Persist compiler and lint diagnostics
         if: steps.compile.outcome == 'failure'
         shell: bash
         run: |
           set -euo pipefail
+          LINT_REPORT="android-mobile/app/build/intermediates/lint_intermediate_text_report/debug/lintReportDebug/lint-results-debug.txt"
+          if [[ ! -f "$LINT_REPORT" ]]; then
+            LINT_REPORT="android-mobile/app/build/reports/lint-results-debug.txt"
+          fi
           {
-            echo "FormatX Native Android compiler diagnostics"
+            echo "FormatX Native Android compiler and lint diagnostics"
             echo "Commit: ${GITHUB_SHA}"
             echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
             echo
+            echo "=== Compiler / Gradle ==="
             grep -E '(^|: )(error:|FAILURE:|Caused by:|What went wrong:)|^e: |^[[:space:]]*symbol:|^[[:space:]]*location:' /tmp/native-android-build.log | tail -n 120 || true
+            echo
+            echo "=== Android Lint ==="
+            if [[ -f "$LINT_REPORT" ]]; then
+              cat "$LINT_REPORT"
+            else
+              find android-mobile/app/build -type f -iname '*lint*result*.txt' -print -exec cat {} \; 2>/dev/null || true
+            fi
           } > android-mobile/NATIVE_BUILD_ERRORS.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add android-mobile/NATIVE_BUILD_ERRORS.txt
           if ! git diff --cached --quiet; then
-            git commit -m "Record native Android compiler diagnostics"
+            git commit -m "Record native Android compiler and lint diagnostics"
             git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
           fi
 
@@ -97,13 +109,11 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## FormatX Native Android fordítási hiba'
+            echo '## FormatX Native Android build hiba'
             echo
-            echo '```text'
-            grep -E '(^|: )(error:|FAILURE:|Caused by:|What went wrong:)|^e: |^[[:space:]]*symbol:|^[[:space:]]*location:' /tmp/native-android-build.log | tail -n 80 || true
-            echo '```'
+            echo 'A teljes fordító- és lint-jelentés az `android-mobile/NATIVE_BUILD_ERRORS.txt` fájlba került.'
             echo
-            echo "Teljes futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > /tmp/pr-comment.md
           gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file /tmp/pr-comment.md
 
