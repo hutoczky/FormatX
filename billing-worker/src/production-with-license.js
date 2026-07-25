@@ -5,6 +5,7 @@ import { handleV100PricingRequest } from './pricing-v100-api.js';
 const START_SALE_VERSION = '20260725-separate-qr-row-5';
 const FUTURE_5000_VERSION = '20260725-year-5000-refined-3';
 const FUTURE_5000_EFFECTS_VERSION = '20260725-year-5000-cinematic-1';
+const FUTURE_5000_READABILITY_VERSION = '20260725-year-5000-readability-1';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
@@ -45,6 +46,10 @@ class StartSaleHeadHandler {
     );
     element.append(
       `<link rel="stylesheet" href="/scifi-ui/styles/future-5000-effects.css?v=${FUTURE_5000_EFFECTS_VERSION}">`,
+      { html: true },
+    );
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/future-5000-readability.css?v=${FUTURE_5000_READABILITY_VERSION}">`,
       { html: true },
     );
   }
