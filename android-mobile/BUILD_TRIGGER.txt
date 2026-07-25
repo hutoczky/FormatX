@@ -2,3 +2,5 @@ FormatX Mobile Android initial build trigger
 Version: 1.0.0
 Version code: 100
 Package: hu.formatx.mobile
+Build log issue: 116
+Trigger revision: 2
