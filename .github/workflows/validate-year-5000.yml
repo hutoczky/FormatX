@@ -5,7 +5,9 @@ on:
     branches: [master]
     paths:
       - "docs/scifi-ui/scripts/future-5000.js"
+      - "docs/scifi-ui/scripts/future-5000-effects.js"
       - "docs/scifi-ui/styles/future-5000.css"
+      - "docs/scifi-ui/styles/future-5000-effects.css"
       - "docs/scifi-ui/scripts/start-sale.js"
       - "billing-worker/src/production-with-license.js"
       - ".github/workflows/validate-year-5000.yml"
@@ -30,6 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/future-5000.js
+          node --check docs/scifi-ui/scripts/future-5000-effects.js
           node --check docs/scifi-ui/scripts/start-sale.js
           node --check billing-worker/src/production-with-license.js
 
@@ -44,15 +47,27 @@ jobs:
           grep -F '.fx-plan-qr-card' docs/scifi-ui/styles/future-5000.css
           ! grep -E 'price-card[^\n]*position:[[:space:]]*absolute' docs/scifi-ui/styles/future-5000.css
 
-      - name: Validate Year 5000 injection
+      - name: Validate refined Year 5000 architecture
         shell: bash
         run: |
           set -euo pipefail
-          grep -F '/scifi-ui/styles/future-5000.css' billing-worker/src/production-with-license.js
-          grep -F '/scifi-ui/scripts/future-5000.js' billing-worker/src/production-with-license.js
           grep -F 'formatx-future-5000' docs/scifi-ui/scripts/future-5000.js
+          grep -F 'fx5k-map-node' docs/scifi-ui/scripts/future-5000.js
+          grep -F 'fx5k-sequence-button' docs/scifi-ui/scripts/future-5000.js
+          grep -F '[data-fx5k-lens]' docs/scifi-ui/scripts/future-5000.js
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/future-5000.css
-          grep -F ".fx5k-lens-switch [data-fx5k-lens]" docs/scifi-ui/scripts/future-5000.js
+
+      - name: Validate cinematic effects layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'future-5000-effects.css' billing-worker/src/production-with-license.js
+          grep -F 'future-5000-effects.js' billing-worker/src/production-with-license.js
+          grep -F 'fx5k-cinematic-layer' docs/scifi-ui/scripts/future-5000-effects.js
+          grep -F 'animateMotion' docs/scifi-ui/scripts/future-5000-effects.js
+          grep -F 'fx5k-core-orbit' docs/scifi-ui/styles/future-5000-effects.css
+          grep -F 'fx5k-detail-refract' docs/scifi-ui/styles/future-5000-effects.css
+          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/future-5000-effects.css
 
       - name: Summary
         run: |
@@ -61,8 +76,9 @@ jobs:
             echo
             echo '- JavaScript syntax: PASS'
             echo '- Separate three-plan QR row: PASS'
-            echo '- Production injection: PASS'
-            echo '- Lens interaction scope: PASS'
+            echo '- Refined system architecture: PASS'
+            echo '- Cinematic effects injection: PASS'
+            echo '- Travelling data signals: PASS'
             echo '- Reduced-motion accessibility: PASS'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -78,8 +94,9 @@ jobs:
             "validatedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "javascriptSyntax": true,
             "separatePlanQrRow": true,
-            "productionInjection": true,
-            "lensInteractionScope": true,
+            "refinedSystemArchitecture": true,
+            "cinematicEffectsInjection": true,
+            "travellingDataSignals": true,
             "reducedMotionAccessibility": true
           }
           EOF
@@ -87,6 +104,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/scifi-ui/validation/year5000-status.json
           if ! git diff --cached --quiet; then
-            git commit -m "Record successful Year 5000 website validation"
+            git commit -m "Record successful refined Year 5000 validation"
             git push origin HEAD:master
           fi
