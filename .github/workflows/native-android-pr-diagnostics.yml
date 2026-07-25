@@ -8,7 +8,7 @@ on:
       - ".github/workflows/native-android-pr-diagnostics.yml"
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -17,8 +17,11 @@ jobs:
     timeout-minutes: 35
 
     steps:
-      - name: Checkout pull request
+      - name: Checkout feature branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
@@ -52,6 +55,40 @@ jobs:
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           exit "$STATUS"
 
+      - name: Persist compiler diagnostics
+        if: steps.compile.outcome == 'failure'
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "FormatX Native Android compiler diagnostics"
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo
+            grep -E '(^|: )(error:|FAILURE:|Caused by:|What went wrong:)|^e: |^[[:space:]]*symbol:|^[[:space:]]*location:' /tmp/native-android-build.log | tail -n 120 || true
+          } > android-mobile/NATIVE_BUILD_ERRORS.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android-mobile/NATIVE_BUILD_ERRORS.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Record native Android compiler diagnostics"
+            git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+          fi
+
+      - name: Remove stale compiler diagnostics after success
+        if: steps.compile.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f android-mobile/NATIVE_BUILD_ERRORS.txt ]]; then
+            rm android-mobile/NATIVE_BUILD_ERRORS.txt
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A android-mobile/NATIVE_BUILD_ERRORS.txt
+            git commit -m "Clear native Android compiler diagnostics"
+            git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+          fi
+
       - name: Comment compiler diagnostics
         if: steps.compile.outcome == 'failure'
         env:
@@ -63,7 +100,7 @@ jobs:
             echo '## FormatX Native Android fordítási hiba'
             echo
             echo '```text'
-            grep -E '(^|: )(error:|FAILURE:|Caused by:|What went wrong:)|^e: ' /tmp/native-android-build.log | tail -n 80
+            grep -E '(^|: )(error:|FAILURE:|Caused by:|What went wrong:)|^e: |^[[:space:]]*symbol:|^[[:space:]]*location:' /tmp/native-android-build.log | tail -n 80 || true
             echo '```'
             echo
             echo "Teljes futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
