@@ -1,8 +1,24 @@
 (function () {
   'use strict';
 
+  const SECTION_URL = './sections/professional-sections.html';
+
   function currentLanguage() {
     return document.documentElement.lang === 'en' ? 'en' : 'hu';
+  }
+
+  function updateProfessionalLinks() {
+    const language = currentLanguage();
+    document.querySelectorAll('#professional-sections-root a[href]').forEach(function (link) {
+      const href = link.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      try {
+        const url = new URL(href, window.location.href);
+        if (url.origin !== window.location.origin) return;
+        url.searchParams.set('lang', language);
+        link.href = url.pathname + url.search + url.hash;
+      } catch (_) {}
+    });
   }
 
   function applyProfessionalLanguage() {
@@ -11,6 +27,7 @@
       const value = language === 'en' ? element.dataset.proEn : element.dataset.proHu;
       if (typeof value === 'string') element.textContent = value;
     });
+    updateProfessionalLinks();
   }
 
   function activateTab(button, focus) {
@@ -82,6 +99,23 @@
     elements.forEach(function (element) { observer.observe(element); });
   }
 
+  async function mountSections() {
+    const root = document.getElementById('professional-sections-root');
+    if (!root) return false;
+
+    root.setAttribute('aria-busy', 'true');
+    try {
+      const response = await fetch(SECTION_URL, { credentials: 'same-origin' });
+      if (!response.ok) throw new Error('Section request failed: ' + response.status);
+      root.innerHTML = await response.text();
+      root.removeAttribute('aria-busy');
+      return true;
+    } catch (_) {
+      root.removeAttribute('aria-busy');
+      return false;
+    }
+  }
+
   const languageObserver = new MutationObserver(function (mutations) {
     if (mutations.some(function (mutation) { return mutation.attributeName === 'lang'; })) {
       applyProfessionalLanguage();
@@ -89,7 +123,11 @@
   });
 
   languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-  applyProfessionalLanguage();
-  initialiseTabs();
-  initialiseReveal();
+
+  mountSections().then(function (mounted) {
+    if (!mounted) return;
+    applyProfessionalLanguage();
+    initialiseTabs();
+    initialiseReveal();
+  });
 }());
