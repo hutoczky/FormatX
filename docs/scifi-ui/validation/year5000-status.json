@@ -1,11 +1,13 @@
 {
   "status": "PASS",
-  "sourceCommit": "962c92158776833514d33280b05a2046f1209c5d",
-  "validatedAt": "2026-07-25T22:13:49Z",
+  "sourceCommit": "0598bd99b95036ee834ea41a356ddb1e8453e4c6",
+  "validatedAt": "2026-07-25T22:14:45Z",
   "javascriptSyntax": true,
   "separatePlanQrRow": true,
   "refinedSystemArchitecture": true,
   "cinematicEffectsInjection": true,
   "travellingDataSignals": true,
+  "flatReadableTextPlane": true,
+  "firefoxLinuxGlyphProtection": true,
   "reducedMotionAccessibility": true
 }
