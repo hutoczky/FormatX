@@ -1,0 +1,157 @@
+name: Publish FormatX Native Android release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "docs/scifi-ui/downloads/FormatX-Native-Android.apk"
+      - "docs/scifi-ui/downloads/android-native-update.json"
+      - ".github/workflows/publish-android-native-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: formatx-native-android-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Verify native APK and metadata
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="docs/scifi-ui/downloads/FormatX-Native-Android.apk"
+          MANIFEST="docs/scifi-ui/downloads/android-native-update.json"
+          test -s "$APK"
+          test -s "$MANIFEST"
+          unzip -t "$APK" >/dev/null
+
+          python3 - <<'PY' > /tmp/native-release.env
+          import hashlib
+          import json
+          from pathlib import Path
+
+          apk = Path('docs/scifi-ui/downloads/FormatX-Native-Android.apk')
+          manifest_path = Path('docs/scifi-ui/downloads/android-native-update.json')
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          digest = hashlib.sha256(apk.read_bytes()).hexdigest()
+          expected = str(manifest['sha256']).lower()
+          if digest != expected:
+              raise SystemExit(f'SHA256 mismatch: manifest={expected} apk={digest}')
+          if int(manifest['versionCode']) != 110:
+              raise SystemExit('Unexpected versionCode')
+          if str(manifest['versionName']) != '1.1.0-beta':
+              raise SystemExit('Unexpected versionName')
+          expected_url = 'https://github.com/hutoczky/FormatX/releases/download/android-native-v1.1.0-beta/FormatX-Native-Android.apk'
+          if str(manifest['apkUrl']) != expected_url:
+              raise SystemExit('Unexpected native APK URL')
+          print('VERSION=1.1.0-beta')
+          print('TAG=android-native-v1.1.0-beta')
+          print(f'SHA256={digest}')
+          print(f'APK_URL={expected_url}')
+          PY
+
+          cat /tmp/native-release.env >> "$GITHUB_ENV"
+          source /tmp/native-release.env
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp docs/scifi-ui/downloads/FormatX-Native-Android.apk dist/FormatX-Native-Android.apk
+          printf '%s  %s\n' "$SHA256" "FormatX-Native-Android.apk" > dist/FormatX-Native-Android.apk.sha256
+
+      - name: Create or update prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/release-notes.md <<'EOF'
+          ## FormatX Native Android 1.1.0 Beta
+
+          WebView nélküli, valódi natív Android-alkalmazás.
+
+          ### Natív funkciók
+
+          - ISO/lemezkép elemzés és SHA-256;
+          - támogatott OTG USB Mass Storage felismerés;
+          - nyers ISO → USB írás;
+          - teljes visszaolvasásos ellenőrzés;
+          - USB felületi olvasási teszt;
+          - gyors metaadat-törlés;
+          - teljes nullás vagy véletlen felülírás;
+          - kétpaneles SAF fájlkezelő;
+          - másolás, áthelyezés, törlés és mappakészítés;
+          - ZIP készítés és biztonságos kibontás;
+          - Android rendszerdiagnosztika;
+          - SHA-256 és Ed25519 integritás-ellenőrzés;
+          - helyi műveleti napló és CSV-export;
+          - magyar/angol felület és témaválasztás.
+
+          ### Biztonsági határ
+
+          Nyers blokkeszköz-műveletek kizárólag támogatott OTG USB-tárolón futnak. A telefon belső fizikai lemezét és rendszerpartícióit az alkalmazás nem célozza.
+
+          Ez béta, debug kulccsal aláírt tesztkiadás. Play Áruházhoz vagy végleges terjesztéshez stabil kiadási kulcs szükséges.
+          EOF
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" \
+              dist/FormatX-Native-Android.apk \
+              dist/FormatX-Native-Android.apk.sha256 \
+              --clobber
+            gh release edit "$TAG" \
+              --title "FormatX Native Android 1.1.0 Beta" \
+              --notes-file /tmp/release-notes.md \
+              --prerelease
+          else
+            gh release create "$TAG" \
+              dist/FormatX-Native-Android.apk \
+              dist/FormatX-Native-Android.apk.sha256 \
+              --target "$GITHUB_SHA" \
+              --title "FormatX Native Android 1.1.0 Beta" \
+              --notes-file /tmp/release-notes.md \
+              --prerelease
+          fi
+
+      - name: Record successful native release
+        if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          gh issue comment 116 --repo "$GITHUB_REPOSITORY" --body "✅ **PASS — FormatX Native Android 1.1.0 Beta kiadás közzétéve**
+
+          - Tag: \`${TAG}\`
+          - APK: https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/FormatX-Native-Android.apk
+          - SHA-256: \`${SHA256}\`
+          - WebView: nincs
+          - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+      - name: Record failed native release
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh issue comment 116 --repo "$GITHUB_REPOSITORY" --body "❌ **FAILED — FormatX Native Android kiadás közzététele**
+
+          - Commit: \`${GITHUB_SHA}\`
+          - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
