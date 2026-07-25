@@ -5,7 +5,6 @@ on:
     branches: [master]
     paths:
       - "android-mobile/**"
-      - "docs/scifi-ui/android/**"
       - ".github/workflows/build-android-mobile.yml"
   workflow_dispatch:
 
@@ -110,7 +109,7 @@ jobs:
               'apkUrl': 'https://www.formatxsuite.com/scifi-ui/downloads/FormatX-Mobile-Android.apk',
               'sha256': os.environ['SHA256'],
               'mandatory': False,
-              'notes': 'Első külön FormatX Mobile Android kiadás mobilra optimalizált projekt-, kiadás-, támogatási és licencközponttal.'
+              'notes': 'FormatX Mobile Android 1.0.0 béta. Külön telepíthető hu.formatx.mobile csomag, mobilra optimalizált projekt-, kiadás-, támogatási és licencközponttal.'
           }
           manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
           PY
