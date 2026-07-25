@@ -62,7 +62,7 @@ jobs:
           cat /tmp/mobile-release.env >> "$GITHUB_ENV"
           source /tmp/mobile-release.env
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=android-mobile-v${VERSION}-beta" >> "$GITHUB_OUTPUT"
+          echo "tag=android-mobile-v${VERSION}-beta.2" >> "$GITHUB_OUTPUT"
           echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
 
       - name: Prepare release files
@@ -81,7 +81,7 @@ jobs:
         run: |
           set -euo pipefail
           cat > /tmp/release-notes.md <<EOF
-          ## FormatX Mobile Android ${VERSION}
+          ## FormatX Mobile Android ${VERSION} Beta 2
 
           Külön telepíthető, Androidra optimalizált FormatX mobilközpont.
 
@@ -102,7 +102,7 @@ jobs:
               dist/FormatX-Mobile-Android.apk.sha256 \
               --clobber
             gh release edit "$TAG" \
-              --title "FormatX Mobile Android ${VERSION} Beta" \
+              --title "FormatX Mobile Android ${VERSION} Beta 2" \
               --notes-file /tmp/release-notes.md \
               --prerelease
           else
@@ -110,7 +110,7 @@ jobs:
               dist/FormatX-Mobile-Android.apk \
               dist/FormatX-Mobile-Android.apk.sha256 \
               --target "$GITHUB_SHA" \
-              --title "FormatX Mobile Android ${VERSION} Beta" \
+              --title "FormatX Mobile Android ${VERSION} Beta 2" \
               --notes-file /tmp/release-notes.md \
               --prerelease
           fi
