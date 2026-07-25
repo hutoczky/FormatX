@@ -32,6 +32,7 @@ const PROJECT_AI_SCRIPT = '/scifi-ui/scripts/project-ai.js?v=20260720-project-ai
 const PROJECT_AI_STYLES = '/scifi-ui/styles/project-ai.css?v=20260720-project-ai-1';
 const RESPONSIVE_PARITY_SCRIPT = '/scifi-ui/scripts/responsive-parity.js?v=20260720-responsive-parity-1';
 const RESPONSIVE_PARITY_STYLES = '/scifi-ui/styles/responsive-parity.css?v=20260720-responsive-parity-1';
+const COMMERCE_READABILITY_STYLES = '/scifi-ui/styles/commerce-readability.css?v=20260725-commerce-readability-1';
 
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
@@ -296,6 +297,12 @@ async function secureAndEnhanceResponse(response, url) {
         html = html.replace(
           '</head>',
           `<link rel="stylesheet" href="${RESPONSIVE_PARITY_STYLES}"></head>`,
+        );
+      }
+      if (!html.includes(COMMERCE_READABILITY_STYLES)) {
+        html = html.replace(
+          '</head>',
+          `<link rel="stylesheet" href="${COMMERCE_READABILITY_STYLES}"></head>`,
         );
       }
       if (!html.includes(RESPONSIVE_PARITY_SCRIPT)) {
