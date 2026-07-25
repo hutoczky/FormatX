@@ -83,7 +83,7 @@ public final class StorageTools {
     public static DocumentFile createFolder(DocumentFile directory, String requestedName) throws IOException {
         requireDirectory(directory);
         String clean = sanitizeName(requestedName);
-        if (clean.isBlank()) throw new IOException("Folder name is empty");
+        if (clean.trim().isEmpty()) throw new IOException("Folder name is empty");
         DocumentFile result = directory.createDirectory(uniqueName(directory, clean));
         if (result == null) throw new IOException("Could not create folder");
         return result;
@@ -118,7 +118,7 @@ public final class StorageTools {
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
                 String safePath = normalizeZipPath(entry.getName());
-                if (safePath.isBlank()) {
+                if (safePath.trim().isEmpty()) {
                     zip.closeEntry();
                     continue;
                 }
@@ -179,7 +179,7 @@ public final class StorageTools {
         DocumentFile current = root;
         for (int index = 0; index < parts.length; index++) {
             String part = sanitizeName(parts[index]);
-            if (part.isBlank()) continue;
+            if (part.trim().isEmpty()) continue;
             boolean last = index == parts.length - 1;
             DocumentFile existing = current.findFile(part);
             if (last && !directoryEntry) {
@@ -208,7 +208,7 @@ public final class StorageTools {
         String[] parts = normalized.split("/");
         StringBuilder safe = new StringBuilder();
         for (String part : parts) {
-            if (part.isBlank() || ".".equals(part)) continue;
+            if (part.trim().isEmpty() || ".".equals(part)) continue;
             if ("..".equals(part)) throw new IOException("Blocked unsafe ZIP path");
             if (safe.length() > 0) safe.append('/');
             safe.append(part);
@@ -257,7 +257,7 @@ public final class StorageTools {
 
     private static String safeName(DocumentFile file) {
         String name = file == null ? null : file.getName();
-        return name == null || name.isBlank() ? "unnamed" : name;
+        return name == null || name.trim().isEmpty() ? "unnamed" : name;
     }
 
     private static boolean sameDocument(DocumentFile left, DocumentFile right) {
