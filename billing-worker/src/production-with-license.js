@@ -2,8 +2,8 @@ import productionWorker from './production-entry.js';
 import { handleLicenseCenterRequest } from './license-center.js';
 import { handleV100PricingRequest } from './pricing-v100-api.js';
 
-const START_SALE_VERSION = '20260725-separate-qr-row-4';
-const FUTURE_5000_VERSION = '20260725-year-5000-1';
+const START_SALE_VERSION = '20260725-separate-qr-row-5';
+const FUTURE_5000_VERSION = '20260725-year-5000-2';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
