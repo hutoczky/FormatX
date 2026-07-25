@@ -2,7 +2,8 @@ import productionWorker from './production-entry.js';
 import { handleLicenseCenterRequest } from './license-center.js';
 import { handleV100PricingRequest } from './pricing-v100-api.js';
 
-const START_SALE_VERSION = '20260725-introductory-pricing-3';
+const START_SALE_VERSION = '20260725-separate-qr-row-4';
+const FUTURE_5000_VERSION = '20260725-year-5000-1';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
@@ -37,6 +38,10 @@ class StartSaleHeadHandler {
       `<link rel="stylesheet" href="/scifi-ui/styles/pricing-v100.css?v=${START_SALE_VERSION}">`,
       { html: true },
     );
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/future-5000.css?v=${FUTURE_5000_VERSION}">`,
+      { html: true },
+    );
   }
 }
 
@@ -44,6 +49,10 @@ class StartSaleBodyHandler {
   element(element) {
     element.append(
       `<script defer src="/scifi-ui/scripts/start-sale.js?v=${START_SALE_VERSION}"></script>`,
+      { html: true },
+    );
+    element.append(
+      `<script defer src="/scifi-ui/scripts/future-5000.js?v=${FUTURE_5000_VERSION}"></script>`,
       { html: true },
     );
   }
