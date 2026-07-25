@@ -1,0 +1,39 @@
+name: Native Android one-shot source fix
+
+on:
+  push:
+    branches: [feature/native-android-formatx]
+    paths:
+      - "android-mobile/AUTOFIX_NATIVE.txt"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: feature/native-android-formatx
+          fetch-depth: 0
+
+      - name: Rename conflicting native helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="android-mobile/app/src/main/java/hu/formatx/mobile/MainActivity.java"
+          sed -i 's/fileList()/createFileList()/g' "$FILE"
+          grep -F 'private ListView createFileList()' "$FILE"
+          ! grep -Fq 'private ListView fileList()' "$FILE"
+          rm -f android-mobile/AUTOFIX_NATIVE.txt .github/workflows/native-android-one-shot-fix.yml
+
+      - name: Commit source correction
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix native Android file list helper name"
+          git push origin HEAD:feature/native-android-formatx
