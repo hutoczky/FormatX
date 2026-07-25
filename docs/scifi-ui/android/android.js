@@ -4,8 +4,8 @@
   const languageButton = document.getElementById('languageButton');
   const versionNode = document.getElementById('androidVersion');
   const navigationLinks = Array.from(document.querySelectorAll('.bottom-nav a'));
-  const updateManifestUrl = '../downloads/android-mobile-update.json';
-  const verifiedApkUrl = 'https://github.com/hutoczky/FormatX/releases/download/android-mobile-v1.0.0-beta.2/FormatX-Mobile-Android.apk';
+  const updateManifestUrl = '../downloads/android-native-update.json';
+  const verifiedApkUrl = 'https://github.com/hutoczky/FormatX/releases/download/android-native-v1.1.0-beta/FormatX-Native-Android.apk';
 
   function initialLanguage() {
     const query = new URLSearchParams(window.location.search).get('lang');
@@ -40,7 +40,9 @@
   }
 
   function configureVerifiedDownloads() {
-    document.querySelectorAll('a[href$="FormatX-Mobile-Android.apk"]').forEach(function (link) {
+    document.querySelectorAll(
+      'a[href$="FormatX-Mobile-Android.apk"],a[href$="FormatX-Native-Android.apk"]',
+    ).forEach(function (link) {
       link.href = verifiedApkUrl;
       link.removeAttribute('download');
       link.target = '_blank';
@@ -55,7 +57,7 @@
       if (!response.ok) return;
       const payload = await response.json();
       const version = String(payload.versionName || '').trim();
-      if (/^\d+\.\d+\.\d+$/.test(version)) versionNode.textContent = version;
+      if (/^\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?$/i.test(version)) versionNode.textContent = version;
     } catch (_) {}
   }
 
