@@ -172,6 +172,49 @@
     } catch (_) {}
   }
 
+  async function loadProfessionalSections() {
+    if (document.getElementById('operations-console')) return;
+
+    if (!document.querySelector('link[data-professional-sections]')) {
+      const stylesheet = document.createElement('link');
+      stylesheet.rel = 'stylesheet';
+      stylesheet.href = './styles/professional-sections.css?v=20260725-professional-sections-1';
+      stylesheet.dataset.professionalSections = 'true';
+      document.head.appendChild(stylesheet);
+    }
+
+    try {
+      const response = await fetch('./sections/professional-sections.html?v=20260725-professional-sections-1', { cache: 'no-cache' });
+      if (!response.ok) throw new Error('Professional sections HTTP ' + response.status);
+      const markup = await response.text();
+      if (!markup.includes('id="operations-console"')) throw new Error('Professional sections markup invalid');
+
+      const template = document.createElement('template');
+      template.innerHTML = markup.trim();
+      const projectDetails = document.getElementById('project-details');
+      const features = document.getElementById('features');
+
+      if (projectDetails && projectDetails.parentNode) {
+        projectDetails.parentNode.insertBefore(template.content, projectDetails);
+      } else if (features) {
+        features.after(template.content);
+      } else {
+        document.querySelector('main')?.appendChild(template.content);
+      }
+
+      updateInternalLinks();
+
+      if (!document.querySelector('script[data-professional-sections]')) {
+        const script = document.createElement('script');
+        script.src = './scripts/professional-sections.js?v=20260725-professional-sections-1';
+        script.dataset.professionalSections = 'true';
+        document.body.appendChild(script);
+      }
+    } catch (error) {
+      console.warn('FormatX professional sections could not be loaded.', error);
+    }
+  }
+
   document.querySelectorAll('[data-language]').forEach(function (button) {
     button.addEventListener('click', function () { applyLanguage(button.dataset.language, true); });
   });
@@ -179,4 +222,5 @@
   initialiseCurrencyTabs();
   applyLanguage(language, false);
   loadLatestRelease();
+  loadProfessionalSections();
 }());
