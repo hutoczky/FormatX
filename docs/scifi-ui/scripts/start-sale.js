@@ -44,24 +44,24 @@
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
   const COPY = {
     hu: {
-      badge: 'V100 START AKCIÓ',
-      title: 'V100 bevezető árak',
+      badge: 'BEVEZETŐ AJÁNLAT',
+      title: 'Bevezető árak',
       message: 'Piaci bevezető árszint. Éves licencnél 12 hónapot kapsz 10 hónap áráért.',
       annual: 'Éves: {price} · 2 hónap díjmentes',
       qr: 'Fizetés QR-kóddal',
       qrAlt: 'FormatX checkout QR-kód',
       monthly: '/ hónap',
-      checkoutNote: 'A V100 bevezető ár aktív. Az éves csomag két hónap díjmentes hozzáférést tartalmaz.'
+      checkoutNote: 'A bevezető ár aktív. Az éves csomag két hónap díjmentes hozzáférést tartalmaz.'
     },
     en: {
-      badge: 'V100 LAUNCH OFFER',
-      title: 'V100 introductory pricing',
+      badge: 'INTRODUCTORY OFFER',
+      title: 'Introductory pricing',
       message: 'Market-entry pricing. Annual licences include 12 months for the price of 10.',
       annual: 'Annual: {price} · 2 months included',
       qr: 'Pay by QR code',
       qrAlt: 'FormatX checkout QR code',
       monthly: '/ month',
-      checkoutNote: 'V100 introductory pricing is active. Annual plans include two months at no extra charge.'
+      checkoutNote: 'Introductory pricing is active. Annual plans include two months at no extra charge.'
     }
   };
 
