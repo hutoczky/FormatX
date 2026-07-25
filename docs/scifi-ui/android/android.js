@@ -5,7 +5,7 @@
   const versionNode = document.getElementById('androidVersion');
   const navigationLinks = Array.from(document.querySelectorAll('.bottom-nav a'));
   const updateManifestUrl = '../downloads/android-mobile-update.json';
-  const verifiedApkUrl = 'https://github.com/hutoczky/FormatX/releases/download/android-mobile-v1.0.0-beta/FormatX-Mobile-Android.apk';
+  const verifiedApkUrl = 'https://github.com/hutoczky/FormatX/releases/download/android-mobile-v1.0.0-beta.2/FormatX-Mobile-Android.apk';
 
   function initialLanguage() {
     const query = new URLSearchParams(window.location.search).get('lang');
