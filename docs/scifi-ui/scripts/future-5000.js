@@ -221,11 +221,11 @@
   }
 
   function bindInteractions() {
-    document.querySelectorAll('[data-fx5k-lens]').forEach(function (button) {
+    document.querySelectorAll('.fx5k-lens-switch [data-fx5k-lens]').forEach(function (button) {
       button.addEventListener('click', function () {
         state.lens = button.dataset.fx5kLens;
         document.documentElement.dataset.fx5kLens = state.lens;
-        document.querySelectorAll('[data-fx5k-lens]').forEach(function (candidate) {
+        document.querySelectorAll('.fx5k-lens-switch [data-fx5k-lens]').forEach(function (candidate) {
           candidate.setAttribute('aria-pressed', String(candidate === button));
         });
       });

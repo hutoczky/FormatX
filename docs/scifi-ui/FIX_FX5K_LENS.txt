@@ -1,1 +1,0 @@
-Restrict Year 5000 lens events to the three actual buttons.
