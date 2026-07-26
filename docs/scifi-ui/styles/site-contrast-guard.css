@@ -1,0 +1,325 @@
+/*
+ * FormatX final contrast guard.
+ * Loaded after every visual and readability layer.
+ * It prevents a finished intro animation or ambient effect from dimming real content.
+ */
+
+:root {
+  --fx-readable-primary: #f4f9ff;
+  --fx-readable-secondary: #d9e6f5;
+  --fx-readable-muted: #b8c9dd;
+  --fx-readable-cyan: #9cecff;
+  --fx-readable-panel: rgba(3, 11, 27, 0.76);
+  --fx-readable-panel-strong: rgba(3, 10, 24, 0.90);
+}
+
+/* Never leave the page in the opening animation's dimmed frame. */
+html:not(.fx-intro-running) .reference-commerce :is(
+  .hero-copy,
+  .hero-copy > *,
+  .core-engine,
+  .core-engine > *,
+  .hero-actions,
+  .hero-assurance,
+  .platform-status
+) {
+  opacity: 1 !important;
+  filter: none !important;
+  visibility: visible !important;
+}
+
+html.fx-intro-complete .reference-commerce :is(.hero-copy, .core-engine),
+html:not(.fx-intro-reveal):not(.fx-intro-running) .reference-commerce :is(.hero-copy, .core-engine) {
+  animation: none !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+
+.reference-commerce main,
+.reference-commerce section,
+.reference-commerce article,
+.reference-commerce aside,
+.reference-commerce .site-footer {
+  color: var(--fx-readable-primary);
+}
+
+/* Hero readability surface: visible but still part of the Quantum Aurora design. */
+.reference-commerce .hero-grid {
+  position: relative;
+  z-index: 3;
+}
+
+.reference-commerce .hero-copy {
+  position: relative;
+  z-index: 8 !important;
+  width: 100%;
+  padding: clamp(24px, 3vw, 42px) !important;
+  border: 1px solid rgba(126, 220, 255, 0.18);
+  border-radius: 28px;
+  color: var(--fx-readable-primary);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(79, 205, 255, 0.10), transparent 22rem),
+    linear-gradient(145deg, rgba(5, 18, 40, 0.86), rgba(2, 8, 22, 0.78) 62%, rgba(13, 8, 34, 0.76));
+  box-shadow:
+    0 26px 78px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 0 0 1px rgba(60, 179, 255, 0.025);
+  backdrop-filter: blur(18px) saturate(130%);
+  isolation: isolate;
+}
+
+.reference-commerce .hero-copy::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(105deg, rgba(124, 235, 255, 0.055), transparent 34% 70%, rgba(170, 108, 255, 0.055));
+}
+
+.reference-commerce .hero .eyebrow {
+  color: var(--fx-readable-cyan) !important;
+  opacity: 1 !important;
+  text-shadow: 0 0 20px rgba(80, 215, 255, 0.30);
+}
+
+.reference-commerce .hero h1 {
+  color: var(--fx-readable-primary) !important;
+  opacity: 1 !important;
+  text-shadow:
+    0 3px 18px rgba(0, 0, 0, 0.46),
+    0 0 42px rgba(76, 175, 255, 0.13);
+}
+
+.reference-commerce .hero h1 span {
+  color: #c4b6ff !important;
+  background: linear-gradient(90deg, #a7e9ff 0%, #b8b0ff 48%, #f19af0 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 14px rgba(111, 117, 255, 0.22));
+}
+
+.reference-commerce .hero-tagline {
+  color: #f0f7ff !important;
+  opacity: 1 !important;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.46);
+}
+
+.reference-commerce .hero-description {
+  color: #d7e4f3 !important;
+  opacity: 1 !important;
+  line-height: 1.7 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.34);
+}
+
+.reference-commerce .hero-actions {
+  z-index: 10 !important;
+}
+
+.reference-commerce .hero-actions :is(a, span, i) {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.reference-commerce .hero-actions .gradient-button {
+  color: #ffffff !important;
+  background: linear-gradient(110deg, #078fff 0%, #536dff 48%, #d94eea 100%) !important;
+  border-color: rgba(255, 255, 255, 0.32) !important;
+  box-shadow:
+    0 14px 34px rgba(35, 115, 255, 0.30),
+    0 0 28px rgba(92, 211, 255, 0.13);
+}
+
+.reference-commerce .hero-actions .outline-button {
+  color: #f1f8ff !important;
+  border-color: rgba(132, 218, 255, 0.34) !important;
+  background: rgba(5, 17, 37, 0.82) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.reference-commerce :is(.hero-assurance, .platform-status) span {
+  color: #d8e7f6 !important;
+  opacity: 1 !important;
+  padding: 8px 10px;
+  border: 1px solid rgba(118, 211, 255, 0.13);
+  border-radius: 10px;
+  background: rgba(4, 15, 33, 0.66);
+  backdrop-filter: blur(10px);
+}
+
+.reference-commerce :is(.hero-assurance, .platform-status) :is(b, i) {
+  opacity: 1 !important;
+}
+
+/* The engine preview must not inherit any dimming from the intro reveal. */
+.reference-commerce .core-engine {
+  z-index: 7 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  border-color: rgba(105, 207, 255, 0.42) !important;
+  background:
+    radial-gradient(circle at 52% 42%, rgba(34, 128, 255, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(10, 32, 66, 0.96), rgba(3, 14, 34, 0.94)) !important;
+  box-shadow:
+    0 26px 80px rgba(0, 0, 0, 0.35),
+    inset 0 0 52px rgba(39, 143, 255, 0.08),
+    0 0 48px rgba(35, 139, 255, 0.11) !important;
+}
+
+.reference-commerce .core-engine :is(span, strong, b, em, a) {
+  opacity: 1 !important;
+}
+
+.reference-commerce .engine-header,
+.reference-commerce .engine-nav a,
+.reference-commerce .engine-stats span,
+.reference-commerce .engine-footer span,
+.reference-commerce .engine-footer em {
+  color: #bdcee5 !important;
+}
+
+.reference-commerce .engine-stats strong,
+.reference-commerce .engine-footer strong {
+  color: #e7f4ff !important;
+}
+
+/* Full-page copy contrast. */
+.reference-commerce :is(
+  .panel-title,
+  .section-label,
+  .project-section-title,
+  .project-kicker,
+  .release-band strong,
+  .site-footer strong
+) {
+  color: #e8f7ff !important;
+  opacity: 1 !important;
+}
+
+.reference-commerce :is(
+  .price-card h2,
+  .feature-cards h3,
+  .project-details h2,
+  .project-module-grid h3,
+  .project-workflow h3,
+  .project-foundation-grid h3,
+  .trust-promises strong
+) {
+  color: #f2f8ff !important;
+  opacity: 1 !important;
+}
+
+.reference-commerce :is(
+  .price-card p,
+  .price-card li,
+  .pricing-notes,
+  .checkout-card span,
+  .checkout-card small,
+  .checkout-card em,
+  .feature-cards p,
+  .project-lead,
+  .project-details p,
+  .project-details li,
+  .trust-strip span,
+  .release-band small,
+  .site-footer p,
+  .site-footer a
+) {
+  color: var(--fx-readable-secondary) !important;
+  opacity: 1 !important;
+}
+
+.reference-commerce :is(
+  .price-card,
+  .checkout-card,
+  .feature-cards article,
+  .project-module-grid article,
+  .project-workflow article,
+  .project-foundation-grid article,
+  .trust-promises article,
+  .release-band
+) {
+  background:
+    linear-gradient(145deg, rgba(9, 25, 49, 0.92), rgba(3, 12, 28, 0.90) 60%, rgba(15, 9, 34, 0.86)) !important;
+  border-color: rgba(126, 212, 255, 0.20) !important;
+}
+
+/* Keep the animated world visible, but never stronger than the information. */
+.reference-commerce .hero::after {
+  background:
+    linear-gradient(90deg, rgba(2, 7, 18, 0.88) 0%, rgba(2, 7, 18, 0.68) 35%, rgba(2, 7, 18, 0.22) 70%, rgba(2, 7, 18, 0.10) 100%),
+    linear-gradient(180deg, transparent 62%, rgba(3, 8, 20, 0.56)) !important;
+}
+
+.fx-site-ambient-grid {
+  opacity: 0.075 !important;
+}
+
+.fx-site-ambient-beam,
+.fx-site-ambient-streams {
+  opacity: 0.18 !important;
+}
+
+.fx-site-ambient-vignette {
+  opacity: 0.58 !important;
+}
+
+.fx-art-direction-ready .fx-directed-section::after {
+  color: rgba(218, 244, 255, 0.82) !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.48), 0 0 18px rgba(74, 204, 255, 0.15);
+}
+
+.fx-system-rail-links a {
+  color: rgba(218, 242, 252, 0.76) !important;
+  background: rgba(3, 12, 27, 0.76) !important;
+}
+
+.fx-system-rail-links a.is-active {
+  color: #f1ffff !important;
+}
+
+@media (max-width: 1180px) {
+  .reference-commerce .hero-copy {
+    max-width: 900px;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .reference-commerce .hero-copy {
+    padding: 22px 18px !important;
+    border-radius: 22px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(74, 205, 255, 0.10), transparent 18rem),
+      linear-gradient(145deg, rgba(4, 16, 36, 0.94), rgba(2, 8, 22, 0.90)) !important;
+    backdrop-filter: blur(14px) saturate(122%);
+  }
+
+  .reference-commerce .hero-description {
+    font-size: 1rem !important;
+    line-height: 1.62 !important;
+  }
+
+  .reference-commerce .hero-actions > a {
+    width: 100%;
+    flex-basis: 100% !important;
+  }
+
+  .reference-commerce :is(.hero-assurance, .platform-status) {
+    gap: 8px !important;
+  }
+
+  .reference-commerce :is(.hero-assurance, .platform-status) span {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.fx-intro-running) .reference-commerce :is(.hero-copy, .core-engine) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
