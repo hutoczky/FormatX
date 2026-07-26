@@ -1,0 +1,106 @@
+{
+  "status": "FAIL",
+  "generatedAt": "2026-07-26T13:52:47.671Z",
+  "visualSystem": "FormatX Quantum Aurora",
+  "cases": [
+    {
+      "case": "desktop",
+      "runtimeErrors": [],
+      "roots": 1,
+      "visualSystem": "formatx-quantum-aurora",
+      "initialScene": "core",
+      "railExists": true,
+      "railDisplay": "grid",
+      "ambientPointerEvents": "none",
+      "overflow": 0,
+      "styles": [
+        "http://127.0.0.1:4173/scifi-ui/styles/formatx-event-horizon.css?v=20260726-event-horizon-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/reference-commerce.css?v=20260718-reference-commerce-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/reference-performance.css?v=20260718-reference-performance-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/project-accessibility.css?v=20260720-project-accessibility-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/commerce-readability.css?v=20260725-commerce-readability-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-ambient-background.css?v=20260726-quantum-aurora-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-quantum-aurora.css?v=20260726-quantum-aurora-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-premium-finish.css?v=20260726-premium-finish-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-art-direction.css?v=20260726-art-direction-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/professional-sections.css?v=20260725-professional-sections-1"
+      ],
+      "pricingActive": true,
+      "projectActive": true,
+      "motion": {
+        "gridAnimation": "fx-site-grid-drift",
+        "ringAnimation": "fx-quantum-signature-spin"
+      },
+      "railCorrect": true,
+      "motionCorrect": true,
+      "assetsLoaded": true,
+      "pass": true
+    },
+    {
+      "case": "mobile",
+      "runtimeErrors": [],
+      "roots": 1,
+      "visualSystem": "formatx-quantum-aurora",
+      "initialScene": "core",
+      "railExists": true,
+      "railDisplay": "none",
+      "ambientPointerEvents": "none",
+      "overflow": 0,
+      "styles": [
+        "http://127.0.0.1:4173/scifi-ui/styles/formatx-event-horizon.css?v=20260726-event-horizon-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/reference-commerce.css?v=20260718-reference-commerce-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/reference-performance.css?v=20260718-reference-performance-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/project-accessibility.css?v=20260720-project-accessibility-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/commerce-readability.css?v=20260725-commerce-readability-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-ambient-background.css?v=20260726-quantum-aurora-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-quantum-aurora.css?v=20260726-quantum-aurora-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-premium-finish.css?v=20260726-premium-finish-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-art-direction.css?v=20260726-art-direction-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/professional-sections.css?v=20260725-professional-sections-1"
+      ],
+      "pricingActive": true,
+      "projectActive": true,
+      "motion": {
+        "gridAnimation": "fx-site-grid-drift",
+        "ringAnimation": "fx-quantum-signature-spin"
+      },
+      "railCorrect": true,
+      "motionCorrect": true,
+      "assetsLoaded": true,
+      "pass": true
+    },
+    {
+      "case": "reduced-motion",
+      "runtimeErrors": [],
+      "roots": 1,
+      "visualSystem": "formatx-quantum-aurora",
+      "initialScene": "core",
+      "railExists": true,
+      "railDisplay": "none",
+      "ambientPointerEvents": "none",
+      "overflow": 0,
+      "styles": [
+        "http://127.0.0.1:4173/scifi-ui/styles/formatx-event-horizon.css?v=20260726-event-horizon-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/reference-commerce.css?v=20260718-reference-commerce-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/reference-performance.css?v=20260718-reference-performance-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/project-accessibility.css?v=20260720-project-accessibility-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/commerce-readability.css?v=20260725-commerce-readability-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-ambient-background.css?v=20260726-quantum-aurora-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-quantum-aurora.css?v=20260726-quantum-aurora-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-premium-finish.css?v=20260726-premium-finish-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-art-direction.css?v=20260726-art-direction-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/professional-sections.css?v=20260725-professional-sections-1"
+      ],
+      "pricingActive": true,
+      "projectActive": true,
+      "motion": {
+        "gridAnimation": "none",
+        "ringAnimation": "none"
+      },
+      "railCorrect": false,
+      "motionCorrect": true,
+      "assetsLoaded": true,
+      "pass": false
+    }
+  ]
+}
