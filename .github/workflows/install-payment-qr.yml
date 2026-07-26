@@ -1,0 +1,145 @@
+name: Install payment QR section
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/install-payment-qr.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Install the static and resilient QR payment section
+        shell: python
+        run: |
+          from pathlib import Path
+
+          index = Path('docs/scifi-ui/index.html')
+          text = index.read_text(encoding='utf-8')
+
+          css_line = '  <link rel="stylesheet" href="./styles/payment-qr.css?v=20260726-payment-qr-1">\n'
+          if css_line not in text:
+              marker = '  <link rel="stylesheet" href="./styles/site-foreground-guard.css?v=20260726-foreground-1">\n'
+              if marker not in text:
+                  marker = '  <link rel="stylesheet" href="./styles/site-contrast-guard.css?v=20260726-contrast-guard-1">\n'
+              if marker not in text:
+                  raise SystemExit('QR CSS insertion marker not found')
+              text = text.replace(marker, marker + css_line, 1)
+
+          js_line = '  <script defer src="./scripts/payment-qr.js?v=20260726-payment-qr-1"></script>\n'
+          if js_line not in text:
+              marker = '  <script defer src="./scripts/landing.js?v=20260718-reference-commerce-1"></script>\n'
+              if marker not in text:
+                  raise SystemExit('QR JS insertion marker not found')
+              text = text.replace(marker, marker + js_line, 1)
+
+          if 'id="formatx-plan-qr-dock"' not in text:
+              start = text.index('<div class="price-cards">')
+              marker = '\n        </div>\n        <div class="pricing-notes">'
+              position = text.index(marker, start)
+              static_qr = '''
+        </div>
+        <section id="formatx-plan-qr-dock" class="fx-plan-qr-dock" aria-labelledby="formatx-plan-qr-title">
+          <header class="fx-plan-qr-head">
+            <strong id="formatx-plan-qr-title">FIZETÉS QR-KÓDDAL</strong>
+            <span class="fx-plan-qr-intro">Mindhárom licenccsomag saját QR-kódot kapott. Beolvasás után a kiválasztott fizetési oldal nyílik meg.</span>
+          </header>
+          <div class="fx-plan-qr-grid">
+            <article class="fx-plan-qr-card is-qr-loading" data-plan-qr="business_lite">
+              <div class="fx-plan-qr-copy"><strong>Business Lite</strong><span>7 900 Ft / hónap</span><small>Havi licenc · rögzített összeg · bankkártyaadat-kezelés nélkül</small></div>
+              <a class="fx-plan-qr-link" href="./checkout.html?plan=business_lite&amp;cycle=monthly&amp;currency=HUF&amp;lang=hu&amp;source=pricing-qr" aria-label="Business Lite fizetés megnyitása"><img src="/api/checkout-qr?plan=business_lite&amp;cycle=monthly&amp;currency=HUF" width="112" height="112" alt="FormatX fizetési QR-kód — Business Lite"></a>
+            </article>
+            <article class="fx-plan-qr-card is-qr-loading" data-plan-qr="business_pro">
+              <div class="fx-plan-qr-copy"><strong>Business Pro</strong><span>15 900 Ft / hónap</span><small>Havi licenc · rögzített összeg · bankkártyaadat-kezelés nélkül</small></div>
+              <a class="fx-plan-qr-link" href="./checkout.html?plan=business_pro&amp;cycle=monthly&amp;currency=HUF&amp;lang=hu&amp;source=pricing-qr" aria-label="Business Pro fizetés megnyitása"><img src="/api/checkout-qr?plan=business_pro&amp;cycle=monthly&amp;currency=HUF" width="112" height="112" alt="FormatX fizetési QR-kód — Business Pro"></a>
+            </article>
+            <article class="fx-plan-qr-card is-qr-loading" data-plan-qr="technician_team">
+              <div class="fx-plan-qr-copy"><strong>Technician Team</strong><span>29 900 Ft / hónap</span><small>Havi licenc · rögzített összeg · bankkártyaadat-kezelés nélkül</small></div>
+              <a class="fx-plan-qr-link" href="./checkout.html?plan=technician_team&amp;cycle=monthly&amp;currency=HUF&amp;lang=hu&amp;source=pricing-qr" aria-label="Technician Team fizetés megnyitása"><img src="/api/checkout-qr?plan=technician_team&amp;cycle=monthly&amp;currency=HUF" width="112" height="112" alt="FormatX fizetési QR-kód — Technician Team"></a>
+            </article>
+          </div>
+        </section>
+        <div class="pricing-notes">'''
+              text = text[:position] + static_qr + text[position + len(marker):]
+
+          index.write_text(text, encoding='utf-8')
+
+          worker = Path('billing-worker/src/production-with-license.js')
+          text = worker.read_text(encoding='utf-8')
+          version_marker = "const SITE_FOREGROUND_VERSION = '20260726-foreground-1';\n"
+          version_line = "const SITE_PAYMENT_QR_VERSION = '20260726-payment-qr-1';\n"
+          if version_line not in text:
+              if version_marker not in text:
+                  version_marker = "const SITE_ART_VERSION = '20260726-art-direction-2';\n"
+              if version_marker not in text:
+                  raise SystemExit('Worker QR version insertion marker not found')
+              text = text.replace(version_marker, version_marker + version_line, 1)
+
+          css_marker = '''    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/site-art-direction.css?v=${SITE_ART_VERSION}">`,
+      { html: true },
+    );
+'''
+          css_addition = '''    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/payment-qr.css?v=${SITE_PAYMENT_QR_VERSION}">`,
+      { html: true },
+    );
+'''
+          if 'styles/payment-qr.css' not in text:
+              if css_marker not in text:
+                  raise SystemExit('Worker QR CSS marker not found')
+              text = text.replace(css_marker, css_marker + css_addition, 1)
+
+          js_marker = '''    element.append(
+      `<script defer src="/scifi-ui/scripts/site-art-direction.js?v=${SITE_ART_VERSION}"></script>`,
+      { html: true },
+    );
+'''
+          js_addition = '''    element.append(
+      `<script defer src="/scifi-ui/scripts/payment-qr.js?v=${SITE_PAYMENT_QR_VERSION}"></script>`,
+      { html: true },
+    );
+'''
+          if 'scripts/payment-qr.js' not in text:
+              if js_marker not in text:
+                  raise SystemExit('Worker QR JS marker not found')
+              text = text.replace(js_marker, js_marker + js_addition, 1)
+
+          worker.write_text(text, encoding='utf-8')
+
+      - name: Validate the QR section and endpoint contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/payment-qr.js
+          node --check billing-worker/src/production-with-license.js
+          grep -F 'id="formatx-plan-qr-dock"' docs/scifi-ui/index.html
+          test "$(grep -o 'data-plan-qr=' docs/scifi-ui/index.html | wc -l)" -eq 3
+          grep -F 'payment-qr.css?v=20260726-payment-qr-1' docs/scifi-ui/index.html
+          grep -F 'payment-qr.js?v=20260726-payment-qr-1' docs/scifi-ui/index.html
+          grep -F '/api/checkout-qr?plan=business_lite' docs/scifi-ui/index.html
+          grep -F '/api/checkout-qr?plan=business_pro' docs/scifi-ui/index.html
+          grep -F '/api/checkout-qr?plan=technician_team' docs/scifi-ui/index.html
+          grep -F "url.pathname === '/api/checkout-qr'" billing-worker/src/pricing-v100-api.js
+          grep -F "SITE_PAYMENT_QR_VERSION = '20260726-payment-qr-1'" billing-worker/src/production-with-license.js
+          grep -F 'styles/payment-qr.css' billing-worker/src/production-with-license.js
+          grep -F 'scripts/payment-qr.js' billing-worker/src/production-with-license.js
+
+      - name: Commit the visible QR payment section
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html billing-worker/src/production-with-license.js
+          git commit -m 'Show all three payment QR codes without Worker-only rendering'
+          git push origin HEAD:master
