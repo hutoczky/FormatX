@@ -135,10 +135,6 @@ class StartSaleHeadHandler {
       `<link rel="stylesheet" href="/scifi-ui/styles/site-readability-audit.css?v=${SITE_READABILITY_VERSION}">`,
       { html: true },
     );
-    element.append(
-      `<link rel="stylesheet" href="/scifi-ui/styles/site-contrast-guard.css?v=${SITE_CONTRAST_VERSION}">`,
-      { html: true },
-    );
   }
 }
 
