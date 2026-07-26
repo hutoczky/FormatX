@@ -1,0 +1,292 @@
+/* FormatX premium finish.
+   Provides one coherent visual hierarchy above the animated ambient field. */
+
+html.fx-site-ambient-ready body {
+  background: transparent !important;
+}
+
+html.fx-site-ambient-ready .fx-site-ambient {
+  z-index: 0;
+}
+
+html.fx-site-ambient-ready .topbar,
+html.fx-site-ambient-ready main,
+html.fx-site-ambient-ready .site-footer,
+html.fx-site-ambient-ready .skip-link,
+html.fx-site-ambient-ready .fx-intro-overlay {
+  z-index: 2;
+}
+
+html.fx-site-ambient-ready main,
+html.fx-site-ambient-ready .site-footer {
+  position: relative;
+}
+
+.reference-commerce .topbar {
+  border-bottom-color: rgba(116, 218, 255, 0.16) !important;
+  background: linear-gradient(180deg, rgba(3, 9, 22, 0.90), rgba(3, 9, 22, 0.72)) !important;
+  box-shadow: 0 14px 48px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(26px) saturate(145%);
+}
+
+.reference-commerce .hero,
+.reference-commerce .commerce-zone,
+.reference-commerce .feature-strip,
+.reference-commerce .project-details,
+.reference-commerce .trust-strip,
+.reference-commerce .release-band,
+.reference-commerce .site-footer {
+  position: relative;
+  isolation: isolate;
+}
+
+.reference-commerce .hero::before,
+.reference-commerce .commerce-zone::before,
+.reference-commerce .feature-strip::before,
+.reference-commerce .project-details::before,
+.reference-commerce .trust-strip::before,
+.reference-commerce .release-band::before,
+.reference-commerce .site-footer::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+
+.reference-commerce .hero::before {
+  background:
+    radial-gradient(circle at 72% 46%, rgba(74, 204, 255, 0.055), transparent 29rem),
+    linear-gradient(180deg, rgba(2, 7, 18, 0.18), rgba(2, 7, 18, 0.42));
+}
+
+.reference-commerce .commerce-zone::before,
+.reference-commerce .feature-strip::before,
+.reference-commerce .project-details::before,
+.reference-commerce .trust-strip::before,
+.reference-commerce .release-band::before {
+  background: linear-gradient(180deg, rgba(2, 7, 18, 0.36), rgba(4, 11, 25, 0.18) 48%, rgba(2, 7, 18, 0.38));
+  border-top: 1px solid rgba(115, 210, 255, 0.065);
+}
+
+.reference-commerce .pricing-panel,
+.reference-commerce .checkout-preview,
+.reference-commerce .feature-cards article,
+.reference-commerce .project-module-grid article,
+.reference-commerce .project-workflow article,
+.reference-commerce .project-foundation-grid article,
+.reference-commerce .trust-promises article,
+.reference-commerce .release-band,
+.fx5k-system {
+  border-color: rgba(133, 214, 255, 0.17) !important;
+  background:
+    linear-gradient(145deg, rgba(12, 27, 50, 0.84), rgba(5, 13, 28, 0.78) 58%, rgba(16, 12, 37, 0.76)) !important;
+  box-shadow:
+    0 24px 78px rgba(0, 0, 0, 0.25),
+    inset 0 1px rgba(255, 255, 255, 0.035),
+    inset 0 -1px rgba(73, 202, 255, 0.025);
+  backdrop-filter: blur(18px) saturate(132%);
+}
+
+.reference-commerce .price-card,
+.reference-commerce .checkout-card,
+.reference-commerce .fx-plan-qr-card {
+  border-color: rgba(132, 211, 255, 0.16) !important;
+  background:
+    linear-gradient(150deg, rgba(11, 26, 48, 0.90), rgba(4, 13, 27, 0.86) 62%, rgba(12, 10, 31, 0.82)) !important;
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.22),
+    inset 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.reference-commerce .price-card.featured {
+  border-color: rgba(96, 226, 255, 0.44) !important;
+  box-shadow:
+    0 26px 76px rgba(30, 100, 190, 0.18),
+    0 0 0 1px rgba(116, 224, 255, 0.055),
+    inset 0 1px rgba(255, 255, 255, 0.045);
+}
+
+.reference-commerce .panel-title,
+.reference-commerce .section-label,
+.reference-commerce .project-section-title {
+  text-shadow: 0 0 24px rgba(75, 213, 255, 0.12);
+}
+
+.reference-commerce .hero-copy,
+.reference-commerce .pricing-panel,
+.reference-commerce .checkout-preview,
+.reference-commerce .feature-cards,
+.reference-commerce .project-intro,
+.reference-commerce .project-module-grid,
+.reference-commerce .project-workflow,
+.reference-commerce .project-foundation-grid,
+.reference-commerce .trust-technologies,
+.reference-commerce .trust-promises,
+.reference-commerce .release-band,
+.reference-commerce .site-footer > * {
+  position: relative;
+  z-index: 2;
+}
+
+.reference-commerce .hero h1,
+.fx5k-system-head h2,
+.reference-commerce .project-intro h2 {
+  text-wrap: balance;
+  text-rendering: optimizeLegibility;
+}
+
+.reference-commerce .hero-description,
+.reference-commerce .project-lead,
+.reference-commerce .feature-cards p,
+.reference-commerce .project-module-grid p,
+.reference-commerce .project-workflow p,
+.reference-commerce .project-foundation-grid p,
+.reference-commerce .site-footer p {
+  text-wrap: pretty;
+}
+
+.reference-commerce .gradient-button,
+.reference-commerce .outline-button,
+.reference-commerce .ghost-button,
+.reference-commerce .checkout-open,
+.reference-commerce .price-card > a,
+#fx5k-sequence-button,
+.fx5k-lens button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.reference-commerce .gradient-button::before,
+.reference-commerce .checkout-open::before,
+.reference-commerce .price-card > a::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2px;
+  opacity: 0;
+  background: linear-gradient(105deg, transparent 22%, rgba(255, 255, 255, 0.26) 48%, transparent 72%);
+  transform: translateX(-115%);
+  transition: opacity 180ms ease, transform 520ms cubic-bezier(.2, .8, .2, 1);
+  pointer-events: none;
+}
+
+.reference-commerce .project-details {
+  max-width: 1480px;
+  margin-inline: auto;
+}
+
+.reference-commerce .project-note {
+  border: 1px solid rgba(255, 190, 101, 0.20);
+  background: linear-gradient(110deg, rgba(255, 173, 75, 0.075), rgba(40, 148, 255, 0.055));
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.reference-commerce .release-band {
+  overflow: hidden;
+}
+
+.reference-commerce .release-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 0 44%, rgba(94, 225, 255, 0.045) 49%, transparent 54% 100%);
+  transform: translateX(-70%);
+  animation: fx-premium-release-scan 9s ease-in-out infinite;
+}
+
+.reference-commerce .site-footer::before {
+  background:
+    linear-gradient(180deg, rgba(3, 9, 21, 0.62), rgba(2, 6, 15, 0.92)),
+    radial-gradient(circle at 18% 0, rgba(60, 194, 255, 0.06), transparent 30rem);
+  border-top: 1px solid rgba(111, 212, 255, 0.10);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .reference-commerce .price-card:hover,
+  .reference-commerce .feature-cards article:hover,
+  .reference-commerce .project-module-grid article:hover,
+  .reference-commerce .project-workflow article:hover,
+  .reference-commerce .project-foundation-grid article:hover,
+  .reference-commerce .trust-promises article:hover,
+  .reference-commerce .fx-plan-qr-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(105, 224, 255, 0.34) !important;
+    box-shadow:
+      0 28px 78px rgba(0, 0, 0, 0.30),
+      0 0 34px rgba(71, 193, 255, 0.055),
+      inset 0 1px rgba(255, 255, 255, 0.045);
+  }
+
+  .reference-commerce .gradient-button:hover,
+  .reference-commerce .outline-button:hover,
+  .reference-commerce .ghost-button:hover,
+  .reference-commerce .checkout-open:hover,
+  .reference-commerce .price-card > a:hover,
+  #fx5k-sequence-button:hover,
+  .fx5k-lens button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(39, 145, 235, 0.20);
+  }
+
+  .reference-commerce .gradient-button:hover::before,
+  .reference-commerce .checkout-open:hover::before,
+  .reference-commerce .price-card > a:hover::before {
+    opacity: 1;
+    transform: translateX(115%);
+  }
+}
+
+@keyframes fx-premium-release-scan {
+  0%, 20% { transform: translateX(-72%); opacity: 0; }
+  34% { opacity: 1; }
+  70% { opacity: 0.54; }
+  100% { transform: translateX(72%); opacity: 0; }
+}
+
+@media (max-width: 760px) {
+  .reference-commerce .pricing-panel,
+  .reference-commerce .checkout-preview,
+  .reference-commerce .feature-cards article,
+  .reference-commerce .project-module-grid article,
+  .reference-commerce .project-workflow article,
+  .reference-commerce .project-foundation-grid article,
+  .reference-commerce .trust-promises article,
+  .reference-commerce .release-band,
+  .fx5k-system {
+    backdrop-filter: blur(12px) saturate(122%);
+  }
+
+  .reference-commerce .price-card,
+  .reference-commerce .checkout-card,
+  .reference-commerce .fx-plan-qr-card {
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reference-commerce .release-band::after {
+    animation: none !important;
+    display: none;
+  }
+
+  .reference-commerce .gradient-button,
+  .reference-commerce .outline-button,
+  .reference-commerce .ghost-button,
+  .reference-commerce .checkout-open,
+  .reference-commerce .price-card,
+  .reference-commerce .feature-cards article,
+  .reference-commerce .project-module-grid article,
+  .reference-commerce .project-workflow article,
+  .reference-commerce .project-foundation-grid article,
+  .reference-commerce .trust-promises article {
+    transition: none !important;
+  }
+}
