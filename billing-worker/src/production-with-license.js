@@ -8,6 +8,7 @@ const FUTURE_5000_EFFECTS_VERSION = '20260725-year-5000-cinematic-1';
 const FUTURE_5000_READABILITY_VERSION = '20260725-year-5000-readability-1';
 const CAUSAL_MEMORY_VERSION = '20260726-causal-memory-1';
 const CAUSAL_HOVER_VERSION = '20260726-causal-hover-1';
+const CAUSAL_BOOT_VERSION = '20260726-causal-boot-1';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
@@ -67,6 +68,10 @@ class StartSaleHeadHandler {
       `<link rel="stylesheet" href="/scifi-ui/styles/causal-memory-hover.css?v=${CAUSAL_HOVER_VERSION}">`,
       { html: true },
     );
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/causal-memory-boot.css?v=${CAUSAL_BOOT_VERSION}">`,
+      { html: true },
+    );
   }
 }
 
@@ -95,6 +100,10 @@ class StartSaleBodyHandler {
     );
     element.append(
       `<script defer src="/scifi-ui/scripts/causal-memory-hover.js?v=${CAUSAL_HOVER_VERSION}"></script>`,
+      { html: true },
+    );
+    element.append(
+      `<script defer src="/scifi-ui/scripts/causal-memory-boot.js?v=${CAUSAL_BOOT_VERSION}"></script>`,
       { html: true },
     );
   }
