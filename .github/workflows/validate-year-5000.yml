@@ -109,7 +109,7 @@ jobs:
           grep -F 'causal-memory-hover.css' billing-worker/src/production-with-license.js
           grep -F 'causal-memory-hover.js' billing-worker/src/production-with-license.js
 
-      - name: Validate animated boot sequence
+      - name: Validate refresh-safe animated boot sequence
         shell: bash
         run: |
           set -euo pipefail
@@ -117,11 +117,17 @@ jobs:
           grep -F 'fx-causal-boot-perimeter' docs/scifi-ui/scripts/causal-memory-boot.js
           grep -F 'fx-causal-boot-core' docs/scifi-ui/scripts/causal-memory-boot.js
           grep -F 'fx-causal-boot-module' docs/scifi-ui/scripts/causal-memory-boot.js
-          grep -F '2200' docs/scifi-ui/scripts/causal-memory-boot.js
-          grep -F '.fx-causal-boot-layer' docs/scifi-ui/styles/causal-memory-boot.css
-          grep -F '@keyframes fx-causal-boot-core-ignite' docs/scifi-ui/styles/causal-memory-boot.css
-          grep -F '@keyframes fx-causal-boot-module-awake' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F "performance.getEntriesByType('navigation')" docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F "window.addEventListener('pageshow'" docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'event.persisted' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'function resetBoot(root)' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'fx-causal-boot-minimal' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F '.fx5k-stage' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F '.fx5k-principles' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F '@keyframes fx-causal-root-energize' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F '@keyframes fx-causal-root-minimal' docs/scifi-ui/styles/causal-memory-boot.css
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F "CAUSAL_BOOT_VERSION = '20260726-causal-boot-2'" billing-worker/src/production-with-license.js
           grep -F 'causal-memory-boot.css' billing-worker/src/production-with-license.js
           grep -F 'causal-memory-boot.js' billing-worker/src/production-with-license.js
 
@@ -150,12 +156,13 @@ jobs:
             echo '- Interaction DNA generation: PASS'
             echo '- Hover branch projection: PASS'
             echo '- Animated SVG energy paths: PASS'
-            echo '- Animated non-blocking boot sequence: PASS'
-            echo '- Staggered module activation: PASS'
+            echo '- Refresh navigation boot replay: PASS'
+            echo '- BFCache/pageshow boot replay: PASS'
+            echo '- Visible real-element reveal sequence: PASS'
+            echo '- Reduced-motion confirmation pulse: PASS'
             echo '- Keyboard focus animation: PASS'
             echo '- Flat readable text plane: PASS'
             echo '- Firefox/Linux glyph protection: PASS'
-            echo '- Reduced-motion accessibility: PASS'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Persist successful validation
@@ -176,18 +183,19 @@ jobs:
             "interactionDnaGeneration": true,
             "hoverBranchProjection": true,
             "animatedSvgEnergyPaths": true,
-            "animatedBootSequence": true,
-            "staggeredModuleActivation": true,
+            "refreshNavigationBootReplay": true,
+            "bfcachePageshowBootReplay": true,
+            "visibleRealElementRevealSequence": true,
+            "reducedMotionConfirmationPulse": true,
             "keyboardFocusAnimation": true,
             "flatReadableTextPlane": true,
-            "firefoxLinuxGlyphProtection": true,
-            "reducedMotionAccessibility": true
+            "firefoxLinuxGlyphProtection": true
           }
           EOF
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/scifi-ui/validation/year5000-status.json
           if ! git diff --cached --quiet; then
-            git commit -m "Record successful animated causal Year 5000 validation"
+            git commit -m "Record successful refresh-safe Year 5000 validation"
             git push origin HEAD:master
           fi
