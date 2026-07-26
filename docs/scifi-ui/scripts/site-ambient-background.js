@@ -2,9 +2,14 @@
   'use strict';
 
   const ROOT_ID = 'formatx-site-ambient';
-  const PARTICLE_COUNT = 22;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = window.matchMedia('(pointer: fine)');
+  const coarsePointer = window.matchMedia('(pointer: coarse)');
+  const isFirefox = /Firefox\//i.test(navigator.userAgent);
+  const lowConcurrency = Number(navigator.hardwareConcurrency || 8) <= 4;
+  const lowMemory = Number(navigator.deviceMemory || 8) <= 4;
+  const balancedMode = reduceMotion.matches || coarsePointer.matches || isFirefox || lowConcurrency || lowMemory;
+  const particleCount = reduceMotion.matches ? 0 : (balancedMode ? 6 : 12);
   const scenes = [
     { selector: '#product', name: 'core' },
     { selector: '#pricing', name: 'licence' },
@@ -23,7 +28,7 @@
     const y = (index * 53 + 19) % 100;
     const size = 1 + ((index * 7) % 4) * 0.42;
     const opacity = 0.18 + ((index * 13) % 7) * 0.055;
-    const duration = 15 + ((index * 11) % 17);
+    const duration = 18 + ((index * 11) % 17);
     const delay = -((index * 1.37) % duration);
     const drift = -42 + ((index * 29) % 84);
     return '<i style="--fx-particle-x:' + x + '%;--fx-particle-y:' + y + '%;--fx-particle-size:' + size.toFixed(2) + 'px;--fx-particle-opacity:' + opacity.toFixed(2) + ';--fx-particle-duration:' + duration + 's;--fx-particle-delay:' + delay.toFixed(2) + 's;--fx-particle-drift:' + drift + 'px"></i>';
@@ -36,6 +41,9 @@
     root.className = 'fx-site-ambient';
     root.dataset.scene = 'core';
     root.dataset.visualSystem = 'formatx-quantum-aurora';
+    root.dataset.performance = balancedMode ? 'balanced' : 'full';
+    root.dataset.browser = isFirefox ? 'firefox' : 'standard';
+    root.dataset.paused = document.hidden ? 'true' : 'false';
     root.setAttribute('aria-hidden', 'true');
     root.innerHTML = [
       '<div class="fx-site-ambient-grid"></div>',
@@ -45,16 +53,17 @@
       '<div class="fx-site-ambient-streams"></div>',
       '<div class="fx-site-ambient-beam"></div>',
       '<div class="fx-site-ambient-signature"><span></span><span></span><span></span><span></span></div>',
-      '<div class="fx-site-ambient-particles">' + Array.from({ length: PARTICLE_COUNT }, function (_, index) { return particle(index); }).join('') + '</div>',
+      '<div class="fx-site-ambient-particles">' + Array.from({ length: particleCount }, function (_, index) { return particle(index); }).join('') + '</div>',
       '<div class="fx-site-ambient-vignette"></div>'
     ].join('');
     document.body.prepend(root);
     document.documentElement.classList.add('fx-site-ambient-ready');
     document.documentElement.dataset.fxVisualSystem = 'quantum-aurora';
+    document.documentElement.dataset.fxPerformanceMode = root.dataset.performance;
   }
 
   function bindPointer() {
-    if (!finePointer.matches || reduceMotion.matches) return;
+    if (!root || root.dataset.performance !== 'full' || !finePointer.matches || reduceMotion.matches) return;
     window.addEventListener('pointermove', function (event) {
       if (pointerFrame) return;
       pointerFrame = window.requestAnimationFrame(function () {
@@ -68,12 +77,12 @@
   }
 
   function bindScroll() {
-    if (reduceMotion.matches) return;
+    if (!root || root.dataset.performance !== 'full' || reduceMotion.matches) return;
     window.addEventListener('scroll', function () {
       if (scrollFrame) return;
       scrollFrame = window.requestAnimationFrame(function () {
         scrollFrame = 0;
-        const offset = Math.max(-30, Math.min(30, window.scrollY * 0.018));
+        const offset = Math.max(-24, Math.min(24, window.scrollY * 0.014));
         document.documentElement.style.setProperty('--fx-bg-scroll', offset.toFixed(2) + 'px');
       });
     }, { passive: true });
