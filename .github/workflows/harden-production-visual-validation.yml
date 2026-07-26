@@ -1,0 +1,133 @@
+name: Harden production visual validation
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/harden-production-visual-validation.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Harden source and live visual verification
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('.github/workflows/deploy-formatx-custom-domain.yml')
+          text = path.read_text(encoding='utf-8')
+
+          file_marker = "              'docs/scifi-ui/styles/site-readability-audit.css',\n"
+          file_addition = """              'docs/scifi-ui/styles/site-readability-audit.css',
+              'docs/scifi-ui/scripts/formatx-event-horizon.js',
+              'docs/scifi-ui/scripts/site-ambient-background.js',
+              'docs/scifi-ui/scripts/site-art-direction.js',
+              'docs/scifi-ui/styles/formatx-event-horizon.css',
+              'docs/scifi-ui/styles/site-ambient-background.css',
+              'docs/scifi-ui/styles/site-quantum-aurora.css',
+              'docs/scifi-ui/styles/site-art-direction.css',
+              'docs/scifi-ui/styles/site-contrast-guard.css',
+"""
+          if "docs/scifi-ui/styles/site-contrast-guard.css" not in text:
+              if file_marker not in text:
+                  raise SystemExit('Required-file insertion marker not found')
+              text = text.replace(file_marker, file_addition, 1)
+
+          read_marker = "          worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')\n"
+          read_addition = """          worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
+          index_html = Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
+          event_styles = Path('docs/scifi-ui/styles/formatx-event-horizon.css').read_text(encoding='utf-8')
+          ambient_script = Path('docs/scifi-ui/scripts/site-ambient-background.js').read_text(encoding='utf-8')
+          ambient_styles = Path('docs/scifi-ui/styles/site-ambient-background.css').read_text(encoding='utf-8')
+          quantum_styles = Path('docs/scifi-ui/styles/site-quantum-aurora.css').read_text(encoding='utf-8')
+          art_script = Path('docs/scifi-ui/scripts/site-art-direction.js').read_text(encoding='utf-8')
+          contrast_styles = Path('docs/scifi-ui/styles/site-contrast-guard.css').read_text(encoding='utf-8')
+"""
+          if "event_styles = Path('docs/scifi-ui/styles/formatx-event-horizon.css')" not in text:
+              if read_marker not in text:
+                  raise SystemExit('Source-read insertion marker not found')
+              text = text.replace(read_marker, read_addition, 1)
+
+          assertion_marker = "          assert 'causal-memory-field' not in worker\n"
+          assertion_addition = """          assert 'causal-memory-field' not in worker
+          assert 'fx-intro-page-reveal' not in event_styles
+          assert not Path('docs/scifi-ui/styles/site-foreground-guard.css').exists()
+          assert 'site-foreground-guard' not in index_html
+          assert 'site-foreground-guard' not in worker
+          assert 'balancedMode' in ambient_script
+          assert 'isFirefox' in ambient_script
+          assert 'dataset.performance' in ambient_script
+          assert 'data-performance="balanced"' in ambient_styles
+          assert 'data-performance="balanced"' in quantum_styles
+          assert "style.setProperty('opacity'" not in art_script
+          assert '.reference-commerce .hero-description' in contrast_styles
+          assert "SITE_AMBIENT_VERSION = '20260726-quantum-aurora-2'" in worker
+          assert "SITE_ART_VERSION = '20260726-art-direction-3'" in worker
+          assert "SITE_CONTRAST_VERSION = '20260726-contrast-guard-2'" in worker
+          assert worker.count('site-contrast-guard.css') == 1
+          assert 'formatx-event-horizon.css?v=20260726-event-horizon-2' in index_html
+          assert 'site-ambient-background.css?v=20260726-quantum-aurora-2' in index_html
+          assert 'site-quantum-aurora.css?v=20260726-quantum-aurora-2' in index_html
+          assert 'site-art-direction.js?v=20260726-art-direction-3' in index_html
+          assert 'site-contrast-guard.css?v=20260726-contrast-guard-2' in index_html
+"""
+          if "worker.count('site-contrast-guard.css') == 1" not in text:
+              if assertion_marker not in text:
+                  raise SystemExit('Assertion insertion marker not found')
+              text = text.replace(assertion_marker, assertion_addition, 1)
+
+          live_marker = "                 && ! grep -Fq 'causal-memory-field' \"$body\" \\\n"
+          live_addition = """                 && ! grep -Fq 'causal-memory-field' "$body" \\
+                 && ! grep -Fq 'site-foreground-guard' "$body" \\
+                 && grep -Fq 'formatx-event-horizon.css?v=20260726-event-horizon-2' "$body" \\
+                 && grep -Fq 'site-ambient-background.css?v=20260726-quantum-aurora-2' "$body" \\
+                 && grep -Fq 'site-quantum-aurora.css?v=20260726-quantum-aurora-2' "$body" \\
+                 && grep -Fq 'site-art-direction.js?v=20260726-art-direction-3' "$body" \\
+                 && grep -Fq 'site-contrast-guard.css?v=20260726-contrast-guard-2' "$body" \\
+                 && [ "$(grep -o 'site-contrast-guard.css' "$body" | wc -l)" -eq 1 ] \\
+"""
+          if "site-ambient-background.css?v=20260726-quantum-aurora-2' \"$body\"" not in text:
+              if live_marker not in text:
+                  raise SystemExit('Live-verification insertion marker not found')
+              text = text.replace(live_marker, live_addition, 1)
+
+          text = text.replace(
+              "Production website, readability guard, mobile animation, QR row and licence center are valid.",
+              "Production website, consolidated visual system, Firefox balanced mode, mobile animation, QR row and licence center are valid.",
+          )
+          text = text.replace(
+              'Verified $url with readability guard, removed interaction DNA, mobile animation and separate QR row',
+              'Verified $url with one consolidated visual stack, Firefox balanced mode, mobile animation and separate QR row',
+          )
+          path.write_text(text, encoding='utf-8')
+
+      - name: Validate hardened workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "SITE_AMBIENT_VERSION = '20260726-quantum-aurora-2'" .github/workflows/deploy-formatx-custom-domain.yml
+          grep -F "worker.count('site-contrast-guard.css') == 1" .github/workflows/deploy-formatx-custom-domain.yml
+          grep -F 'fx-intro-page-reveal' .github/workflows/deploy-formatx-custom-domain.yml
+          grep -F 'site-foreground-guard' .github/workflows/deploy-formatx-custom-domain.yml
+          grep -F 'site-contrast-guard.css?v=20260726-contrast-guard-2' .github/workflows/deploy-formatx-custom-domain.yml
+          grep -F "grep -o 'site-contrast-guard.css'" .github/workflows/deploy-formatx-custom-domain.yml
+
+      - name: Commit hardened workflow and remove installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/harden-production-visual-validation.yml
+          git add .github/workflows/deploy-formatx-custom-domain.yml
+          git commit -m 'Require the consolidated visual system in production'
+          git push origin HEAD:master
