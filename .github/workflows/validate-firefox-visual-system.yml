@@ -1,0 +1,304 @@
+name: Validate FormatX in Firefox
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-event-horizon.css'
+      - 'docs/scifi-ui/styles/site-ambient-background.css'
+      - 'docs/scifi-ui/styles/site-quantum-aurora.css'
+      - 'docs/scifi-ui/styles/site-art-direction.css'
+      - 'docs/scifi-ui/styles/site-contrast-guard.css'
+      - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
+      - 'docs/scifi-ui/scripts/site-ambient-background.js'
+      - 'docs/scifi-ui/scripts/site-art-direction.js'
+      - 'billing-worker/src/production-with-license.js'
+      - '.github/workflows/validate-firefox-visual-system.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: validate-formatx-firefox-visual-system
+  cancel-in-progress: true
+
+jobs:
+  firefox-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Validate the consolidated source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/site-ambient-background.js
+          node --check docs/scifi-ui/scripts/site-art-direction.js
+          node --check billing-worker/src/production-with-license.js
+          ! grep -Fq 'fx-intro-page-reveal' docs/scifi-ui/styles/formatx-event-horizon.css
+          ! grep -Fq 'site-foreground-guard' docs/scifi-ui/index.html
+          ! grep -Fq 'site-foreground-guard' docs/scifi-ui/scripts/site-art-direction.js
+          ! grep -Fq "style.setProperty('opacity'" docs/scifi-ui/scripts/site-art-direction.js
+          test ! -e docs/scifi-ui/styles/site-foreground-guard.css
+          test "$(grep -o 'site-contrast-guard.css' billing-worker/src/production-with-license.js | wc -l)" -eq 1
+          grep -F "SITE_AMBIENT_VERSION = '20260726-quantum-aurora-2'" billing-worker/src/production-with-license.js
+          grep -F "SITE_ART_VERSION = '20260726-art-direction-3'" billing-worker/src/production-with-license.js
+          grep -F "SITE_CONTRAST_VERSION = '20260726-contrast-guard-2'" billing-worker/src/production-with-license.js
+          grep -F 'balancedMode' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'isFirefox' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-ambient-background.css
+          grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-quantum-aurora.css
+
+      - name: Install Firefox runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/formatx-firefox"
+          npm install --prefix "$RUNNER_TEMP/formatx-firefox" --no-audit --no-fund playwright@1.55.0
+          "$RUNNER_TEMP/formatx-firefox/node_modules/.bin/playwright" install --with-deps firefox
+
+      - name: Start local site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4174 --directory docs > "$RUNNER_TEMP/formatx-firefox-http.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/formatx-firefox-http.pid"
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:4174/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-firefox-http.log"
+          exit 1
+
+      - name: Run actual Firefox lifecycle and layout checks
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-firefox/node_modules
+        run: |
+          set -euo pipefail
+          mkdir -p firefox-visual-artifacts
+          node <<'NODE'
+          const fs = require('fs');
+          const { firefox } = require('playwright');
+
+          const cases = [
+            { name: 'firefox-desktop-hu', width: 1440, height: 1000, locale: 'hu-HU', lang: 'hu' },
+            { name: 'firefox-desktop-en', width: 1180, height: 900, locale: 'en-US', lang: 'en' },
+            { name: 'firefox-mobile-hu', width: 390, height: 844, locale: 'hu-HU', lang: 'hu' },
+          ];
+
+          const selectors = [
+            '.eyebrow',
+            '#hero-title',
+            '.hero-tagline',
+            '.hero-description',
+            '.hero-actions',
+            '.hero-assurance:not(.platform-status)',
+            '.platform-status',
+          ];
+
+          function overlapReport() {
+            const nodes = selectors.map((selector) => ({ selector, element: document.querySelector(selector) })).filter((item) => item.element);
+            const overlaps = [];
+            for (let i = 0; i < nodes.length; i += 1) {
+              const a = nodes[i].element.getBoundingClientRect();
+              for (let j = i + 1; j < nodes.length; j += 1) {
+                const b = nodes[j].element.getBoundingClientRect();
+                const width = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+                const height = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+                if (width > 1 && height > 1) overlaps.push({ a: nodes[i].selector, b: nodes[j].selector, width, height });
+              }
+            }
+            return overlaps;
+          }
+
+          (async () => {
+            const browser = await firefox.launch({ headless: true });
+            const results = [];
+            try {
+              for (const testCase of cases) {
+                const context = await browser.newContext({
+                  viewport: { width: testCase.width, height: testCase.height },
+                  locale: testCase.locale,
+                  reducedMotion: 'no-preference',
+                });
+                const page = await context.newPage();
+                const errors = [];
+                page.on('pageerror', (error) => errors.push(String(error)));
+                await page.goto(`http://127.0.0.1:4174/scifi-ui/index.html?lang=${testCase.lang}`, { waitUntil: 'networkidle', timeout: 30000 });
+
+                await page.waitForSelector('#formatx-site-ambient[data-browser="firefox"][data-performance="balanced"]', { timeout: 10000 });
+                await page.waitForFunction(() => {
+                  const html = document.documentElement;
+                  const overlay = document.getElementById('formatx-event-horizon');
+                  return html.classList.contains('fx-intro-complete')
+                    && !html.classList.contains('fx-intro-running')
+                    && !html.classList.contains('fx-intro-reveal')
+                    && (!overlay || overlay.hidden);
+                }, null, { timeout: 10000 });
+                await page.waitForFunction(() => document.documentElement.classList.contains('fx-contrast-guard-ready'), null, { timeout: 5000 });
+                await page.waitForTimeout(300);
+
+                const result = await page.evaluate((selectors) => {
+                  const inspect = (selector) => {
+                    const element = document.querySelector(selector);
+                    if (!element) return null;
+                    const style = getComputedStyle(element);
+                    return {
+                      opacity: Number(style.opacity),
+                      visibility: style.visibility,
+                      display: style.display,
+                      color: style.color,
+                      filter: style.filter,
+                      animationName: style.animationName,
+                      inlineStyle: element.getAttribute('style') || '',
+                    };
+                  };
+                  const visible = (item) => item
+                    && item.opacity >= 0.99
+                    && item.visibility === 'visible'
+                    && item.display !== 'none'
+                    && item.color !== 'rgba(0, 0, 0, 0)';
+
+                  const readable = {
+                    heroCopy: inspect('.hero-copy'),
+                    title: inspect('#hero-title'),
+                    tagline: inspect('.hero-tagline'),
+                    description: inspect('.hero-description'),
+                    primaryButton: inspect('#hero-download'),
+                    engine: inspect('.core-engine'),
+                  };
+
+                  const nodes = selectors.map((selector) => ({ selector, element: document.querySelector(selector) })).filter((item) => item.element);
+                  const overlaps = [];
+                  for (let i = 0; i < nodes.length; i += 1) {
+                    const a = nodes[i].element.getBoundingClientRect();
+                    for (let j = i + 1; j < nodes.length; j += 1) {
+                      const b = nodes[j].element.getBoundingClientRect();
+                      const width = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+                      const height = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+                      if (width > 1 && height > 1) overlaps.push({ a: nodes[i].selector, b: nodes[j].selector, width, height });
+                    }
+                  }
+
+                  const styleHrefs = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map((link) => String(link.href || ''));
+                  const scriptSrcs = Array.from(document.querySelectorAll('script[src]')).map((script) => String(script.src || ''));
+                  const count = (values, token) => values.filter((value) => value.includes(token)).length;
+                  const ambient = document.getElementById('formatx-site-ambient');
+                  const ambientAnimations = ambient && typeof ambient.getAnimations === 'function'
+                    ? ambient.getAnimations({ subtree: true }).filter((animation) => animation.playState === 'running').length
+                    : -1;
+                  const hiddenHeavyLayers = ['.fx-site-ambient-aura--three', '.fx-site-ambient-streams', '.fx-site-ambient-beam']
+                    .every((selector) => {
+                      const element = document.querySelector(selector);
+                      return element && getComputedStyle(element).display === 'none';
+                    });
+                  const forbiddenInline = /(opacity|filter|clip-path|transform|animation)\s*:/i;
+
+                  return {
+                    ua: navigator.userAgent,
+                    performanceMode: ambient && ambient.dataset.performance,
+                    browserMode: ambient && ambient.dataset.browser,
+                    particleCount: document.querySelectorAll('.fx-site-ambient-particles i').length,
+                    ambientAnimations,
+                    hiddenHeavyLayers,
+                    styleHrefs,
+                    scriptSrcs,
+                    duplicateCounts: {
+                      eventCss: count(styleHrefs, 'formatx-event-horizon.css'),
+                      ambientCss: count(styleHrefs, 'site-ambient-background.css'),
+                      quantumCss: count(styleHrefs, 'site-quantum-aurora.css'),
+                      artCss: count(styleHrefs, 'site-art-direction.css'),
+                      contrastCss: count(styleHrefs, 'site-contrast-guard.css'),
+                      eventJs: count(scriptSrcs, 'formatx-event-horizon.js'),
+                      ambientJs: count(scriptSrcs, 'site-ambient-background.js'),
+                      artJs: count(scriptSrcs, 'site-art-direction.js'),
+                    },
+                    readable,
+                    heroReadable: Object.values(readable).every(visible),
+                    inlineOverridesAbsent: [readable.heroCopy, readable.engine].every((item) => item && !forbiddenInline.test(item.inlineStyle)),
+                    overlaps,
+                    overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth,
+                    introComplete: document.documentElement.classList.contains('fx-intro-complete'),
+                    revealAbsent: !document.documentElement.classList.contains('fx-intro-reveal'),
+                    foregroundFileAbsent: !styleHrefs.some((href) => href.includes('site-foreground-guard.css')),
+                  };
+                }, selectors);
+
+                const duplicatesAbsent = Object.values(result.duplicateCounts).every((value) => value === 1);
+                result.case = testCase.name;
+                result.runtimeErrors = errors;
+                result.duplicatesAbsent = duplicatesAbsent;
+                result.pass = errors.length === 0
+                  && result.performanceMode === 'balanced'
+                  && result.browserMode === 'firefox'
+                  && result.particleCount <= 6
+                  && result.ambientAnimations >= 0
+                  && result.ambientAnimations <= 12
+                  && result.hiddenHeavyLayers
+                  && result.heroReadable
+                  && result.inlineOverridesAbsent
+                  && result.overlaps.length === 0
+                  && result.overflow <= 1
+                  && result.introComplete
+                  && result.revealAbsent
+                  && result.foregroundFileAbsent
+                  && duplicatesAbsent;
+
+                results.push(result);
+                await page.screenshot({ path: `firefox-visual-artifacts/${testCase.name}.png`, fullPage: true });
+                await context.close();
+              }
+            } finally {
+              await browser.close();
+            }
+
+            const report = {
+              status: results.every((item) => item.pass) ? 'PASS' : 'FAIL',
+              generatedAt: new Date().toISOString(),
+              engine: 'Playwright Firefox',
+              visualSystem: 'FormatX Quantum Aurora balanced',
+              cases: results,
+            };
+            fs.writeFileSync('firefox-visual-result.json', JSON.stringify(report, null, 2) + '\n');
+            console.log(JSON.stringify(report, null, 2));
+            process.exit(report.status === 'PASS' ? 0 : 1);
+          })().catch((error) => {
+            fs.writeFileSync('firefox-visual-result.json', JSON.stringify({ status: 'ERROR', error: String(error) }, null, 2) + '\n');
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Upload Firefox screenshots and report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-firefox-visual-validation
+          path: |
+            firefox-visual-result.json
+            firefox-visual-artifacts/*.png
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Persist Firefox validation status
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin master
+          mkdir -p .github/audit
+          cp firefox-visual-result.json .github/audit/firefox-visual-status.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/audit/firefox-visual-status.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record FormatX Firefox visual validation'
+            git push origin HEAD:master
+          fi
