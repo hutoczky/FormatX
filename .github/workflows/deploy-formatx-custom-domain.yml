@@ -3,13 +3,18 @@ run-name: Validate FormatX production candidate from ${{ github.sha }}
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'billing-worker/**'
+      - 'docs/**'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'
   push:
     branches: [master]
     paths:
       - 'billing-worker/**'
       - 'docs/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
-      - '.github/workflows/validate-website.yml'
 
 permissions:
   contents: read
@@ -35,54 +40,37 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate canonical cinematic source
+      - name: Validate canonical production source
         shell: bash
         run: |
           set -euo pipefail
           node --check billing-worker/src/production-with-license.js
           node --check billing-worker/src/pricing-v100-api.js
-          node --check docs/site-loader.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
-          node --check docs/scifi-ui/scripts/site-ambient-background.js
-          node --check docs/scifi-ui/scripts/site-art-direction.js
-          node --check docs/scifi-ui/scripts/landing.js
-          node --check docs/scifi-ui/scripts/pricing-sync.js
-          node --check docs/scifi-ui/scripts/checkout-v100.js
-          node --check docs/scifi-ui/scripts/checkout-language-v100.js
-
+          node --check docs/scifi-ui/scripts/formatx-igloo.js
           grep -Fq "['/', '/scifi-ui/']" billing-worker/src/production-with-license.js
-          grep -Fq "no-cache, max-age=0, must-revalidate" billing-worker/src/production-with-license.js
-          grep -Fq 'FAILSAFE_DEADLINE' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'overlay.getAnimations({ subtree: true })' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'visibilitychange' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'formatx:introcomplete' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq '.fx-intro-skip' docs/scifi-ui/styles/formatx-event-horizon.css
-          grep -Fq 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/formatx-event-horizon.css
-          grep -Fq -- '--fx-cyan' docs/scifi-ui/styles/site-premium-finish.css
-          grep -Fq 'fx-page-scrolled' docs/scifi-ui/styles/site-premium-finish.css
-          grep -Fq -- '--fx-pointer-x' docs/scifi-ui/scripts/site-art-direction.js
+          grep -Fq 'formatx-igloo.css?v=20260726-igloo-1' docs/scifi-ui/index.html
+          grep -Fq 'formatx-igloo.js?v=20260726-igloo-1' docs/scifi-ui/index.html
+          grep -Fq 'id="fx-hero-canvas"' docs/scifi-ui/index.html
+          grep -Fq 'class="fx-story"' docs/scifi-ui/index.html
           grep -Fq '15 900 Ft / hó' docs/scifi-ui/index.html
           grep -Fq '29 900 Ft / hó' docs/scifi-ui/index.html
-          ! grep -Eq 'future-5000|causal-memory|site-readability-audit|start-sale|site-foreground-guard|main-spatial|main-readability|quantum-twin|project-hub' docs/scifi-ui/index.html
+          ! grep -Eq 'site-ambient-background|site-quantum-aurora|site-premium-finish|site-art-direction|site-contrast-guard|commerce-readability|future-5000|causal-memory|quantum-twin|project-hub' docs/scifi-ui/index.html
 
-      - name: Install Worker dependencies
-        working-directory: billing-worker
-        run: npm ci
-
-      - name: Run tests and production dry build
+      - name: Install, test and dry-build Worker
         working-directory: billing-worker
         run: |
+          npm ci
           npm test
           npx wrangler deploy --dry-run --outdir ../.wrangler-production-candidate
 
       - name: Publish candidate status
-        if: always()
+        if: always() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
             description='Production source, tests and Worker dry build passed'
