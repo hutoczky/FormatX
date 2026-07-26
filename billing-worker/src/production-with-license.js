@@ -11,6 +11,7 @@ const CAUSAL_BOOT_VERSION = '20260726-causal-boot-3';
 const SITE_READABILITY_VERSION = '20260726-site-readability-1';
 const SITE_AMBIENT_VERSION = '20260726-quantum-aurora-1';
 const SITE_PREMIUM_VERSION = '20260726-premium-finish-1';
+const SITE_ART_VERSION = '20260726-art-direction-1';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
@@ -64,6 +65,10 @@ class GlobalVisualHeadHandler {
       `<link rel="stylesheet" href="/scifi-ui/styles/site-premium-finish.css?v=${SITE_PREMIUM_VERSION}">`,
       { html: true },
     );
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/site-art-direction.css?v=${SITE_ART_VERSION}">`,
+      { html: true },
+    );
   }
 }
 
@@ -76,6 +81,10 @@ class GlobalVisualBodyHandler {
     if (this.skipStaticVisuals) return;
     element.append(
       `<script defer src="/scifi-ui/scripts/site-ambient-background.js?v=${SITE_AMBIENT_VERSION}"></script>`,
+      { html: true },
+    );
+    element.append(
+      `<script defer src="/scifi-ui/scripts/site-art-direction.js?v=${SITE_ART_VERSION}"></script>`,
       { html: true },
     );
   }
