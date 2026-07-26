@@ -82,14 +82,15 @@
 
   function ensureControls(overlay) {
     let button = overlay.querySelector('.fx-intro-skip');
+    const shouldAppendButton = !button;
     if (!button) {
       button = document.createElement('button');
       button.className = 'fx-intro-skip';
       button.type = 'button';
-      overlay.appendChild(button);
     }
     button.textContent = COPY[language()].skip;
     button.onclick = function () { finishIntro(overlay, runToken, true); };
+    if (shouldAppendButton) overlay.appendChild(button);
 
     if (!overlay.querySelector('.fx-intro-corners')) {
       const corners = document.createElement('div');
