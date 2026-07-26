@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -F "- '!docs/scifi-ui/validation/**'" .github/workflows/deploy-formatx-custom-domain.yml
+          grep -F -- "- '!docs/scifi-ui/validation/**'" .github/workflows/deploy-formatx-custom-domain.yml
       - name: Commit cleanup
         shell: bash
         run: |
