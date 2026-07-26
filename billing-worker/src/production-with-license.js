@@ -11,8 +11,8 @@ const CAUSAL_BOOT_VERSION = '20260726-causal-boot-3';
 const SITE_READABILITY_VERSION = '20260726-site-readability-1';
 const SITE_AMBIENT_VERSION = '20260726-quantum-aurora-1';
 const SITE_PREMIUM_VERSION = '20260726-premium-finish-1';
-const SITE_ART_VERSION = '20260726-art-direction-2';
-const SITE_CONTRAST_VERSION = '20260726-contrast-guard-1';
+const SITE_ART_VERSION = '20260726-art-direction-3';
+const SITE_CONTRAST_VERSION = '20260726-contrast-guard-2';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
