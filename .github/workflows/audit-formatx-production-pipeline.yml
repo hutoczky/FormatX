@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/audit-formatx-production-pipeline.yml'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
+      - '.github/workflows/validate-year-5000.yml'
       - 'billing-worker/vitest.config.js'
       - 'billing-worker/wrangler.billing-test.jsonc'
       - 'billing-worker/package.json'
@@ -106,9 +107,13 @@ jobs:
         run: |
           from pathlib import Path
 
-          text = Path('.github/workflows/deploy-formatx-custom-domain.yml').read_text(encoding='utf-8')
-          duplicate = "- 'docs/**'" in text and "!docs/scifi-ui/validation/**" not in text
-          serial_queue = 'cancel-in-progress: false' in text
+          deploy = Path('.github/workflows/deploy-formatx-custom-domain.yml').read_text(encoding='utf-8')
+          validation = Path('.github/workflows/validate-year-5000.yml').read_text(encoding='utf-8')
+          generated_status_is_deploy_asset = 'docs/scifi-ui/validation/year5000-status.json' in validation
+          deploy_watches_docs = "- 'docs/**'" in deploy
+          validation_status_excluded = "!docs/scifi-ui/validation/**" in deploy
+          duplicate = generated_status_is_deploy_asset and deploy_watches_docs and not validation_status_excluded
+          serial_queue = 'cancel-in-progress: false' in deploy
           with open(Path.home() / 'topology.env', 'w', encoding='utf-8') as handle:
               handle.write(f'duplicate_status_deploy={str(duplicate).lower()}\n')
               handle.write(f'serial_deploy_queue={str(serial_queue).lower()}\n')
