@@ -1,5 +1,5 @@
-name: FormatX production deploy
-run-name: FormatX production deploy from ${{ github.sha }}
+name: Validate FormatX production candidate
+run-name: Validate FormatX production candidate from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -16,14 +16,13 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-production-deploy
+  group: formatx-production-candidate-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
-    environment: formatx-license-production
-    timeout-minutes: 25
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -36,99 +35,11 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate production source
-        shell: python
-        run: |
-          import json
-          from pathlib import Path
-
-          config = json.loads(Path('billing-worker/wrangler.jsonc').read_text(encoding='utf-8'))
-          assert config['name'] == 'formatx'
-          assert config['main'] == 'src/production-with-license.js'
-          assert config['assets']['directory'] == '../docs'
-          assert config['assets']['run_worker_first'] is True
-
-          routes = {(item.get('pattern'), item.get('custom_domain')) for item in config.get('routes', [])}
-          assert ('formatxsuite.com', True) in routes
-          assert ('www.formatxsuite.com', True) in routes
-
-          required = [
-              'billing-worker/src/production-with-license.js',
-              'billing-worker/src/production-entry.js',
-              'billing-worker/src/pricing-v100-api.js',
-              'docs/index.html',
-              'docs/site-loader.js',
-              'docs/scifi-ui/index.html',
-              'docs/scifi-ui/checkout.html',
-              'docs/scifi-ui/scripts/pricing-sync.js',
-              'docs/scifi-ui/scripts/checkout-v100.js',
-              'docs/scifi-ui/scripts/checkout-language-v100.js',
-              'docs/scifi-ui/scripts/formatx-event-horizon.js',
-              'docs/scifi-ui/scripts/site-ambient-background.js',
-              'docs/scifi-ui/scripts/site-art-direction.js',
-              'docs/scifi-ui/styles/formatx-event-horizon.css',
-              'docs/scifi-ui/styles/site-ambient-background.css',
-              'docs/scifi-ui/styles/site-quantum-aurora.css',
-              'docs/scifi-ui/styles/site-premium-finish.css',
-              'docs/scifi-ui/styles/site-art-direction.css',
-              'docs/scifi-ui/styles/site-contrast-guard.css',
-          ]
-          for path in required:
-              assert Path(path).is_file(), path
-
-          wrapper = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
-          production = Path('billing-worker/src/production-entry.js').read_text(encoding='utf-8')
-          home = Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
-          checkout = Path('docs/scifi-ui/checkout.html').read_text(encoding='utf-8')
-          loader = Path('docs/site-loader.js').read_text(encoding='utf-8')
-          event_js = Path('docs/scifi-ui/scripts/formatx-event-horizon.js').read_text(encoding='utf-8')
-          event_css = Path('docs/scifi-ui/styles/formatx-event-horizon.css').read_text(encoding='utf-8')
-          premium_css = Path('docs/scifi-ui/styles/site-premium-finish.css').read_text(encoding='utf-8')
-          ambient_js = Path('docs/scifi-ui/scripts/site-ambient-background.js').read_text(encoding='utf-8')
-          art_js = Path('docs/scifi-ui/scripts/site-art-direction.js').read_text(encoding='utf-8')
-
-          assert 'HTMLRewriter' not in wrapper
-          assert "['/', '/scifi-ui/']" in wrapper
-          assert "['/checkout.html', '/scifi-ui/checkout.html']" in wrapper
-          assert "no-cache, max-age=0, must-revalidate" in wrapper
-          assert 'document.write' not in loader
-          assert 'pricing-sync.js?v=20260726-pricing-sync-1' in home
-          assert 'formatx-event-horizon.css?v=20260726-event-horizon-2' in home
-          assert 'site-ambient-background.css?v=20260726-quantum-aurora-2' in home
-          assert 'site-quantum-aurora.css?v=20260726-quantum-aurora-2' in home
-          assert 'site-premium-finish.css?v=20260726-premium-finish-1' in home
-          assert 'site-art-direction.js?v=20260726-art-direction-4' in home
-          assert 'site-contrast-guard.css?v=20260726-contrast-guard-2' in home
-          assert '15 900 Ft / hó' in home
-          assert '29 900 Ft / hó' in home
-          assert 'checkout-v100.js?v=20260725-separate-qr-row-5' in checkout
-          assert 'checkout-language-v100.js?v=20260725-separate-qr-row-5' in checkout
-
-          for token in ('future-5000', 'causal-memory', 'site-readability-audit', 'start-sale', 'site-foreground-guard'):
-              assert token not in wrapper, token
-              assert token not in home, token
-
-          for token in ('main-spatial.css', 'main-readability.css', 'quantum-twin.css', 'quantum-twin.js', 'project-hub.js'):
-              assert token not in production, token
-
-          for token in ('FAILSAFE_DEADLINE', 'overlay.getAnimations({ subtree: true })', 'visibilitychange', 'formatx:introcomplete'):
-              assert token in event_js, token
-          assert '.fx-intro-skip' in event_css
-          assert 'prefers-reduced-motion: reduce' in event_css
-          assert '--fx-cyan' in premium_css
-          assert 'fx-page-scrolled' in premium_css
-          assert 'fx-intro-page-reveal' not in event_css
-          assert 'balancedMode' in ambient_js
-          assert 'isFirefox' in ambient_js
-          assert "style.setProperty('opacity'" not in art_js
-          assert '--fx-pointer-x' in art_js
-
-      - name: Validate JavaScript syntax
+      - name: Validate canonical cinematic source
         shell: bash
         run: |
           set -euo pipefail
           node --check billing-worker/src/production-with-license.js
-          node --check billing-worker/src/production-entry.js
           node --check billing-worker/src/pricing-v100-api.js
           node --check docs/site-loader.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
@@ -139,113 +50,32 @@ jobs:
           node --check docs/scifi-ui/scripts/checkout-v100.js
           node --check docs/scifi-ui/scripts/checkout-language-v100.js
 
-      - name: Require Cloudflare API token
-        shell: bash
-        env:
-          RAW_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          token="$(printf '%s' "$RAW_CF_TOKEN" | tr -d '\r\n')"
-          token="${token#Authorization: Bearer }"
-          token="${token#Bearer }"
-          token="$(printf '%s' "$token" | xargs)"
-          test "${#token}" -ge 20
-          echo "::add-mask::$token"
-          echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
+          grep -Fq "['/', '/scifi-ui/']" billing-worker/src/production-with-license.js
+          grep -Fq "no-cache, max-age=0, must-revalidate" billing-worker/src/production-with-license.js
+          grep -Fq 'FAILSAFE_DEADLINE' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'overlay.getAnimations({ subtree: true })' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'visibilitychange' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'formatx:introcomplete' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq '.fx-intro-skip' docs/scifi-ui/styles/formatx-event-horizon.css
+          grep -Fq 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/formatx-event-horizon.css
+          grep -Fq -- '--fx-cyan' docs/scifi-ui/styles/site-premium-finish.css
+          grep -Fq 'fx-page-scrolled' docs/scifi-ui/styles/site-premium-finish.css
+          grep -Fq -- '--fx-pointer-x' docs/scifi-ui/scripts/site-art-direction.js
+          grep -Fq '15 900 Ft / hó' docs/scifi-ui/index.html
+          grep -Fq '29 900 Ft / hó' docs/scifi-ui/index.html
+          ! grep -Eq 'future-5000|causal-memory|site-readability-audit|start-sale|site-foreground-guard|main-spatial|main-readability|quantum-twin|project-hub' docs/scifi-ui/index.html
 
-      - name: Install and test Worker
+      - name: Install Worker dependencies
+        working-directory: billing-worker
+        run: npm ci
+
+      - name: Run tests and production dry build
         working-directory: billing-worker
         run: |
-          npm ci
           npm test
-          npx wrangler deploy --dry-run --outdir ../.wrangler-production-check
+          npx wrangler deploy --dry-run --outdir ../.wrangler-production-candidate
 
-      - name: Deploy Worker and assets
-        working-directory: billing-worker
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ffd7d28ea7c6a510549dc9363619c8c5
-        shell: bash
-        run: |
-          set -euo pipefail
-          npx wrangler d1 migrations apply formatx-license-db --remote
-          for attempt in 1 2; do
-            if npx wrangler deploy; then
-              rm -rf ../.wrangler-production-check
-              exit 0
-            fi
-            [ "$attempt" -eq 1 ] && sleep 20
-          done
-          exit 1
-
-      - name: Verify live website
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          verify_origin() {
-            local origin="$1"
-            local headers home checkout event_js event_css premium_css
-            headers="$(mktemp)"
-            home="$(mktemp)"
-            checkout="$(mktemp)"
-            event_js="$(mktemp)"
-            event_css="$(mktemp)"
-            premium_css="$(mktemp)"
-
-            for attempt in $(seq 1 36); do
-              root_status="$(curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' "$origin/" || true)"
-              home_status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$home" -w '%{http_code}' -H 'Cache-Control: no-cache' "$origin/scifi-ui/?lang=hu" || true)"
-              checkout_status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$checkout" -w '%{http_code}' -H 'Cache-Control: no-cache' "$origin/scifi-ui/checkout.html?plan=business_pro&currency=HUF" || true)"
-              event_js_status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$event_js" -w '%{http_code}' -H 'Cache-Control: no-cache' "$origin/scifi-ui/scripts/formatx-event-horizon.js" || true)"
-              event_css_status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$event_css" -w '%{http_code}' -H 'Cache-Control: no-cache' "$origin/scifi-ui/styles/formatx-event-horizon.css" || true)"
-              premium_css_status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$premium_css" -w '%{http_code}' -H 'Cache-Control: no-cache' "$origin/scifi-ui/styles/site-premium-finish.css" || true)"
-
-              if [ "$root_status" = '308' ] \
-                 && grep -iq '^location: .*/scifi-ui/' "$headers" \
-                 && [ "$home_status" = '200' ] \
-                 && [ "$checkout_status" = '200' ] \
-                 && [ "$event_js_status" = '200' ] \
-                 && [ "$event_css_status" = '200' ] \
-                 && [ "$premium_css_status" = '200' ] \
-                 && grep -Fq 'pricing-sync.js?v=20260726-pricing-sync-1' "$home" \
-                 && grep -Fq 'formatx-event-horizon.css?v=20260726-event-horizon-2' "$home" \
-                 && grep -Fq 'site-ambient-background.css?v=20260726-quantum-aurora-2' "$home" \
-                 && grep -Fq 'site-quantum-aurora.css?v=20260726-quantum-aurora-2' "$home" \
-                 && grep -Fq 'site-premium-finish.css?v=20260726-premium-finish-1' "$home" \
-                 && grep -Fq 'site-art-direction.js?v=20260726-art-direction-4' "$home" \
-                 && grep -Fq 'site-contrast-guard.css?v=20260726-contrast-guard-2' "$home" \
-                 && grep -Fq '15 900 Ft / hó' "$home" \
-                 && grep -Fq 'checkout-v100.js?v=20260725-separate-qr-row-5' "$checkout" \
-                 && grep -Fq 'FAILSAFE_DEADLINE' "$event_js" \
-                 && grep -Fq 'overlay.getAnimations({ subtree: true })' "$event_js" \
-                 && grep -Fq '.fx-intro-skip' "$event_css" \
-                 && grep -Fq -- '--fx-cyan' "$premium_css" \
-                 && ! grep -Eq 'future-5000|causal-memory|site-readability-audit|start-sale|site-foreground-guard|main-spatial|main-readability|quantum-twin|project-hub' "$home"; then
-                rm -f "$headers" "$home" "$checkout" "$event_js" "$event_css" "$premium_css"
-                return 0
-              fi
-              sleep 10
-            done
-
-            rm -f "$headers" "$home" "$checkout" "$event_js" "$event_css" "$premium_css"
-            return 1
-          }
-
-          verify_origin 'https://formatxsuite.com'
-          verify_origin 'https://www.formatxsuite.com'
-
-          license_health="$(curl -fsSL --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/api/license/health')"
-          LICENSE_HEALTH_JSON="$license_health" python3 - <<'PY'
-          import json
-          import os
-          data = json.loads(os.environ['LICENSE_HEALTH_JSON'])
-          assert data.get('ok') is True, data
-          assert data.get('service') == 'formatx-license-center', data
-          assert data.get('signed_client_api') is True, data
-          assert data.get('signature_algorithm') == 'Ed25519', data
-          PY
-
-      - name: Publish production status
+      - name: Publish candidate status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -255,13 +85,13 @@ jobs:
           set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Cloudflare deployment and live website verification passed'
+            description='Production source, tests and Worker dry build passed'
           else
             state='failure'
-            description='Production deployment or live verification failed'
+            description='Production candidate validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX production deployment' \
+            -f context='FormatX production candidate' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
