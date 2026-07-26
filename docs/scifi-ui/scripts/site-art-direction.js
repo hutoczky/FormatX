@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  const CONTRAST_STYLESHEET = '/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-1';
   const sections = [
     { id: 'product', short: 'CORE', labelHu: 'Termék', labelEn: 'Product' },
     { id: 'pricing', short: 'LIC', labelHu: 'Licencek', labelEn: 'Licences' },
@@ -13,6 +14,29 @@
   let scrollFrame = 0;
   let rail;
   let currentScene = 'product';
+
+  function ensureContrastGuard() {
+    const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(function (link) {
+      return String(link.getAttribute('href') || '').includes('site-contrast-guard.css');
+    });
+    if (existing) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = CONTRAST_STYLESHEET;
+    link.dataset.fxContrastGuard = 'true';
+    document.head.appendChild(link);
+  }
+
+  function recoverIntroContent() {
+    if (document.documentElement.classList.contains('fx-intro-running')) return;
+    document.documentElement.classList.add('fx-contrast-guard-ready');
+    document.querySelectorAll('.hero-copy, .core-engine').forEach(function (element) {
+      element.style.removeProperty('opacity');
+      element.style.removeProperty('filter');
+      element.style.removeProperty('visibility');
+      element.style.removeProperty('clip-path');
+    });
+  }
 
   function language() {
     return document.documentElement.lang === 'en' ? 'en' : 'hu';
@@ -137,6 +161,7 @@
 
   function initialise() {
     if (!document.body || document.documentElement.dataset.fxArtDirection === 'ready') return;
+    ensureContrastGuard();
     const items = prepareSections();
     if (!items.length) return;
     document.documentElement.dataset.fxArtDirection = 'ready';
@@ -145,6 +170,10 @@
     bindActiveSection(items);
     bindProgress();
     setActive(items, items[0].item.id);
+    recoverIntroContent();
+    window.addEventListener('pageshow', recoverIntroContent);
+    window.setTimeout(recoverIntroContent, 1200);
+    window.setTimeout(recoverIntroContent, 5200);
 
     const languageObserver = new MutationObserver(function (records) {
       if (records.some(function (record) { return record.attributeName === 'lang'; })) updateLanguage(items);
