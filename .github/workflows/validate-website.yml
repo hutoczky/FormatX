@@ -136,7 +136,19 @@ jobs:
       - name: Test Chromium, Firefox, mobile, reduced motion and two scroll loops
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-        run: node .github/scripts/validate-apex-site.cjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-apex-site.cjs 2>&1 | tee apex-browser-report.txt
+
+      - name: Upload APEX browser report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-apex-browser-report
+          path: apex-browser-report.txt
+          if-no-files-found: warn
+          retention-days: 5
 
       - name: Publish validation status
         if: always() && github.event_name == 'push'
