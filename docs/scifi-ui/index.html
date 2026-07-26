@@ -3,32 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="FormatX Suite Pro — moduláris technikusi platform formázáshoz, ISO–USB íráshoz, partíciókezeléshez, rendszerdiagnosztikához, biztonságos törléshez és ellenőrzött kiadásokhoz.">
-  <meta name="theme-color" content="#030817">
+  <meta name="description" content="FormatX Suite Pro — prémium, moduláris technikusi platform meghajtókezeléshez, rendszerdiagnosztikához, telepítéshez, biztonságos törléshez és ellenőrzött kiadásokhoz.">
+  <meta name="theme-color" content="#050608">
+  <meta name="color-scheme" content="dark">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'self'">
-  <meta property="og:title" content="FormatX Suite Pro — 2041 Professional Platform">
-  <meta property="og:description" content="Moduláris technikusi platform formázáshoz, diagnosztikához, telepítéshez és biztonságos rendszerkarbantartáshoz.">
+  <meta property="og:title" content="FormatX Suite Pro — Immersive Technician Platform">
+  <meta property="og:description" content="Ellenőrizhető technikusi munkafolyamatok egy karakteres, interaktív felületen.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="./assets/images/formatx-technician-console.png">
-  <title data-i18n-skip>FormatX Suite Pro | 2041 Professional Platform</title>
+  <title data-i18n-skip>FormatX Suite Pro | Immersive Technician Platform</title>
   <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
-  <link rel="stylesheet" href="./styles/formatx-event-horizon.css?v=20260726-event-horizon-2">
+  <link rel="stylesheet" href="./styles/formatx-event-horizon.css?v=20260726-event-horizon-3">
   <link rel="stylesheet" href="./styles/reference-commerce.css?v=20260718-reference-commerce-1">
   <link rel="stylesheet" href="./styles/reference-performance.css?v=20260718-reference-performance-1">
   <link rel="stylesheet" href="./styles/project-accessibility.css?v=20260720-project-accessibility-1">
-  <link rel="stylesheet" href="./styles/commerce-readability.css?v=20260725-commerce-readability-1">
-  <link rel="stylesheet" href="./styles/site-ambient-background.css?v=20260726-quantum-aurora-2">
-  <link rel="stylesheet" href="./styles/site-quantum-aurora.css?v=20260726-quantum-aurora-2">
-  <link rel="stylesheet" href="./styles/site-premium-finish.css?v=20260726-premium-finish-1">
-  <link rel="stylesheet" href="./styles/site-art-direction.css?v=20260726-art-direction-3">
-  <link rel="stylesheet" href="./styles/site-contrast-guard.css?v=20260726-contrast-guard-2">
-  <script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-2"></script>
-  <script defer src="./scripts/site-ambient-background.js?v=20260726-quantum-aurora-2"></script>
-  <script defer src="./scripts/site-art-direction.js?v=20260726-art-direction-4"></script>
+  <link rel="stylesheet" href="./styles/formatx-igloo.css?v=20260726-igloo-1">
+  <script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-3"></script>
   <script defer src="./scripts/landing.js?v=20260718-reference-commerce-1"></script>
   <script defer src="./scripts/pricing-sync.js?v=20260726-pricing-sync-1"></script>
+  <script defer src="./scripts/formatx-igloo.js?v=20260726-igloo-1"></script>
 </head>
-<body class="reference-commerce" data-i18n-skip>
+<body id="top" class="reference-commerce" data-i18n-skip>
   <div id="formatx-event-horizon" class="fx-intro-overlay" aria-hidden="true">
     <div class="fx-intro-curtain fx-intro-curtain--top"></div>
     <div class="fx-intro-curtain fx-intro-curtain--bottom"></div>
@@ -53,7 +48,7 @@
 
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="#top">
+      <a class="brand" href="#top" aria-label="FormatX Suite Pro">
         <img src="./assets/images/formatx-icon.png" width="42" height="42" alt="">
         <span><strong>FORMATX</strong><small>SUITE PRO</small></span>
       </a>
@@ -70,18 +65,24 @@
   </header>
 
   <main id="main-content">
-    <section id="product" class="hero" aria-labelledby="hero-title">
-      <div class="space-dust" aria-hidden="true"></div><div class="planet-horizon" aria-hidden="true"></div>
+    <section id="product" class="hero fx-igloo-hero" aria-labelledby="hero-title">
+      <canvas id="fx-hero-canvas" class="fx-hero-canvas" aria-hidden="true"></canvas>
+      <div class="fx-hero-noise" aria-hidden="true"></div>
+      <div class="fx-hero-vignette" aria-hidden="true"></div>
+      <div class="fx-hero-orbit" aria-hidden="true"></div>
+      <div class="fx-hero-index"><span>01 / 06</span><b data-fx-hu="Rendszermag" data-fx-en="System core">Rendszermag</b></div>
+
       <div class="hero-grid">
         <div class="hero-copy">
           <p class="eyebrow" data-text="heroEyebrow">A JÖVŐ TECHNIKUSI MUNKAFOLYAMATA</p>
-          <h1 id="hero-title">FormatX Suite <span>Pro</span></h1>
+          <h1 id="hero-title"><span class="fx-title-primary">FormatX</span><span class="fx-title-secondary">Suite Pro</span></h1>
           <p class="hero-tagline" data-text="heroTagline">Rendszerez. Ellenőriz. Biztonságosan végrehajt.</p>
           <p class="hero-description" data-text="heroDescription">A FormatX teljes értékű, többplatformos technikusi rendszer meghajtókezeléshez, rendszerdiagnosztikához és rendszer-előkészítéshez. Az első aktiváláskor 5 napos licencet kap; ezt követően az érvényes licenc feltételei szerint működik tovább.</p>
+          <p class="fx-hero-note" data-fx-hu="Valós rendszeradatok · ellenőrizhető műveletek" data-fx-en="Real system data · verifiable operations">Valós rendszeradatok · ellenőrizhető műveletek</p>
           <div class="hero-actions">
-            <a id="hero-download" class="gradient-button primary-cta" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip"><span data-text="startTrial">Teljes verzió letöltése</span><i aria-hidden="true">→</i></a>
+            <a id="hero-download" class="gradient-button primary-cta" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip"><span data-text="startTrial">Teljes verzió letöltése</span><i aria-hidden="true">↗</i></a>
             <a class="outline-button" href="/download/android" download="FormatX-Suite-Pro-Android-1.0.6.apk"><span data-text="androidApp">Android-alkalmazás letöltése</span><i aria-hidden="true">↓</i></a>
-            <a class="outline-button" href="#features"><span data-text="exploreFeatures">Funkciók megtekintése</span><i aria-hidden="true">▶</i></a>
+            <a class="outline-button" href="#features"><span data-text="exploreFeatures">Funkciók megtekintése</span><i aria-hidden="true">→</i></a>
           </div>
           <div class="hero-assurance" aria-label="Fő képességek"><span><i>✦</i><b data-text="assuranceAi">AI-alapú segítség</b></span><span><i>◉</i><b data-text="assuranceSpeed">Átlátható munkafolyamat</b></span><span><i>⬡</i><b data-text="assuranceSecurity">Többrétegű védelem</b></span></div>
           <div class="hero-assurance platform-status" aria-label="Platformállapot"><span><i>✓</i><b data-text="platformNow">Teljes értékű kiadás · 5 napos kezdőlicenc</b></span><span><i>◷</i><b data-text="platformLinux">Linux/Bazzite az elsődleges platform</b></span><span><i>○</i><b data-text="platformMac">Windows és macOS támogatott</b></span></div>
@@ -106,6 +107,20 @@
           </div>
           <div class="engine-footer"><div><i>◎</i><span data-text="jobsCompleted">Fő modulok</span><strong>06</strong><em>MODULÁRIS</em></div><div><i>✓</i><span data-text="successRate">Asztali kiadás</span><strong>PROTOTÍPUS</strong><em>V92</em></div><div><i>◷</i><span data-text="timeSaved">Platformok</span><strong>MULTIPLATFORM</strong><em>Linux/Bazzite · Windows · macOS</em></div></div>
         </div>
+      </div>
+      <a class="fx-scroll-cue" href="#experience"><span data-fx-hu="Felfedezés" data-fx-en="Explore">Felfedezés</span><i></i></a>
+    </section>
+
+    <section id="experience" class="fx-story" data-active="0" aria-labelledby="fx-story-title">
+      <div class="fx-story-sticky">
+        <p class="fx-story-label" data-fx-hu="Egyetlen ellenőrzött folyamat" data-fx-en="One controlled workflow">Egyetlen ellenőrzött folyamat</p>
+        <h2 id="fx-story-title" class="fx-story-title"><span data-fx-hu="Felderít." data-fx-en="Discover.">Felderít.</span><span data-fx-hu="Megtervez." data-fx-en="Plan.">Megtervez.</span><span data-fx-hu="Ellenőriz." data-fx-en="Verify.">Ellenőriz.</span></h2>
+        <div class="fx-story-crystal" aria-hidden="true"><span></span><span></span><span></span></div>
+      </div>
+      <div class="fx-story-chapters">
+        <article data-fx-story="0"><small>01 — DISCOVER</small><h3 data-fx-hu="A rendszer előbb megérti a környezetet." data-fx-en="The system understands the environment first.">A rendszer előbb megérti a környezetet.</h3><p data-fx-hu="Meghajtók, hardverek, fájlrendszerek és szenzoradatok egyetlen technikusi nézetben, kitalált mérőszámok nélkül." data-fx-en="Drives, hardware, file systems and sensor data in one technician view, without fabricated metrics.">Meghajtók, hardverek, fájlrendszerek és szenzoradatok egyetlen technikusi nézetben, kitalált mérőszámok nélkül.</p></article>
+        <article data-fx-story="1"><small>02 — PLAN</small><h3 data-fx-hu="A veszélyes műveletből átlátható terv lesz." data-fx-en="A risky operation becomes a transparent plan.">A veszélyes műveletből átlátható terv lesz.</h3><p data-fx-hu="A célmeghajtó, partíciós séma, fájlrendszer és ellenőrzési lépések a végrehajtás előtt egyértelműen láthatók." data-fx-en="The target drive, partition scheme, file system and verification steps are explicit before execution.">A célmeghajtó, partíciós séma, fájlrendszer és ellenőrzési lépések a végrehajtás előtt egyértelműen láthatók.</p></article>
+        <article data-fx-story="2"><small>03 — VERIFY</small><h3 data-fx-hu="Minden eredmény visszakövethető." data-fx-en="Every outcome remains traceable.">Minden eredmény visszakövethető.</h3><p data-fx-hu="Valós idejű állapotjelzés, naplózás, SHA-256- és Ed25519-integritás, valamint dokumentálható végeredmény." data-fx-en="Live state feedback, audit logs, SHA-256 and Ed25519 integrity, plus a documentable final result.">Valós idejű állapotjelzés, naplózás, SHA-256- és Ed25519-integritás, valamint dokumentálható végeredmény.</p></article>
       </div>
     </section>
 
