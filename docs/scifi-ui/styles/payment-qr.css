@@ -1,0 +1,245 @@
+/* FormatX payment QR section — always visible, responsive and foreground-safe. */
+
+.reference-commerce #formatx-plan-qr-dock {
+  position: relative !important;
+  z-index: 80 !important;
+  width: 100%;
+  margin: 22px 0 16px !important;
+  padding: clamp(18px, 2.4vw, 28px) !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+  transform: none !important;
+  overflow: visible !important;
+  color: #f5f9ff;
+  border: 1px solid rgba(122, 220, 255, 0.28) !important;
+  border-radius: 22px !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(69, 216, 255, 0.12), transparent 28rem),
+    linear-gradient(145deg, rgba(7, 22, 47, 0.97), rgba(3, 12, 29, 0.96) 58%, rgba(18, 10, 40, 0.94)) !important;
+  box-shadow:
+    0 26px 78px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 52px rgba(55, 184, 255, 0.07) !important;
+  isolation: isolate;
+}
+
+.reference-commerce #formatx-plan-qr-dock::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(129, 231, 255, 0.045), transparent 42% 66%, rgba(196, 114, 255, 0.05)),
+    repeating-linear-gradient(90deg, transparent 0 108px, rgba(255, 255, 255, 0.012) 109px 110px);
+}
+
+.reference-commerce .fx-plan-qr-head {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px 24px;
+  margin: 0 0 18px !important;
+}
+
+.reference-commerce .fx-plan-qr-head strong {
+  color: #f4fbff !important;
+  font-size: clamp(0.92rem, 1.5vw, 1.15rem) !important;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.reference-commerce .fx-plan-qr-head span {
+  max-width: 58ch;
+  color: #c3d5e8 !important;
+  font-size: 0.82rem !important;
+  line-height: 1.55;
+  text-align: right;
+}
+
+.reference-commerce .fx-plan-qr-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.reference-commerce .fx-plan-qr-card {
+  position: relative;
+  min-width: 0;
+  min-height: 172px;
+  padding: 16px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 126px !important;
+  gap: 14px !important;
+  align-items: center !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+  transform: none !important;
+  border: 1px solid rgba(127, 204, 255, 0.20) !important;
+  border-radius: 16px !important;
+  background:
+    linear-gradient(150deg, rgba(12, 31, 59, 0.90), rgba(5, 16, 34, 0.92)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.reference-commerce .fx-plan-qr-card::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  left: 12px;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(107, 218, 255, 0.22), transparent);
+}
+
+.reference-commerce .fx-plan-qr-copy {
+  min-width: 0;
+}
+
+.reference-commerce .fx-plan-qr-copy :is(strong, span, small) {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  overflow-wrap: anywhere;
+}
+
+.reference-commerce .fx-plan-qr-copy strong {
+  color: #f4f9ff !important;
+  font-size: 1rem !important;
+}
+
+.reference-commerce .fx-plan-qr-copy span {
+  margin-top: 8px !important;
+  color: #8feaff !important;
+  font-size: 0.94rem !important;
+  font-weight: 900 !important;
+}
+
+.reference-commerce .fx-plan-qr-copy small {
+  margin-top: 8px !important;
+  color: #b4c7dc !important;
+  font-size: 0.72rem !important;
+  line-height: 1.5 !important;
+}
+
+.reference-commerce .fx-plan-qr-link {
+  position: relative;
+  width: 126px !important;
+  min-width: 126px;
+  min-height: 126px;
+  padding: 7px !important;
+  display: grid !important;
+  place-items: center;
+  opacity: 1 !important;
+  visibility: visible !important;
+  border: 1px solid rgba(172, 232, 255, 0.72) !important;
+  border-radius: 13px !important;
+  background: #ffffff !important;
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.30),
+    0 0 24px rgba(91, 222, 255, 0.15) !important;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.reference-commerce .fx-plan-qr-link img {
+  width: 112px !important;
+  height: 112px !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: #ffffff;
+}
+
+.reference-commerce .fx-plan-qr-card.is-qr-loading .fx-plan-qr-link::after {
+  content: "QR";
+  position: absolute;
+  inset: 7px;
+  display: grid;
+  place-items: center;
+  color: #17314d;
+  background: repeating-linear-gradient(45deg, #fff 0 8px, #eef5fa 8px 16px);
+  font-weight: 950;
+  letter-spacing: 0.12em;
+}
+
+.reference-commerce .fx-plan-qr-card.is-qr-ready .fx-plan-qr-link::after {
+  content: none;
+}
+
+.reference-commerce .fx-plan-qr-card.is-qr-error .fx-plan-qr-link::after {
+  content: "QR ↗";
+  position: absolute;
+  inset: 7px;
+  display: grid;
+  place-items: center;
+  color: #0d2842;
+  background: #f4fbff;
+  font-weight: 950;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .reference-commerce .fx-plan-qr-card:hover {
+    border-color: rgba(122, 228, 255, 0.42) !important;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24), 0 0 34px rgba(75, 191, 255, 0.08);
+  }
+
+  .reference-commerce .fx-plan-qr-link:hover {
+    transform: translateY(-2px) !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .reference-commerce .fx-plan-qr-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .reference-commerce .fx-plan-qr-card {
+    min-height: 148px;
+  }
+}
+
+@media (max-width: 680px) {
+  .reference-commerce .fx-plan-qr-head {
+    grid-template-columns: 1fr;
+  }
+
+  .reference-commerce .fx-plan-qr-head span {
+    text-align: left;
+  }
+
+  .reference-commerce .fx-plan-qr-card {
+    grid-template-columns: 1fr !important;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .reference-commerce .fx-plan-qr-link {
+    width: 148px !important;
+    min-width: 148px;
+    min-height: 148px;
+  }
+
+  .reference-commerce .fx-plan-qr-link img {
+    width: 134px !important;
+    height: 134px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reference-commerce .fx-plan-qr-card,
+  .reference-commerce .fx-plan-qr-link {
+    transition: none !important;
+    animation: none !important;
+  }
+}
