@@ -35,3 +35,13 @@ Kézi ellenőrzés szükséges sötét és világos témában, valamint asztali 
 ## Közzététel
 
 A GitHub Pages a repository `master` branchének `/docs` könyvtárából szolgálja ki az oldalt. A gyökérút a `scifi-ui/` oldalra irányít át.
+
+## Windows updater kiadási követelmények
+
+A Windows asztali frissítő kizárólag a `hutoczky/FormatX-Updates` publikus GitHub Release végpontról tölt le. A kiadáshoz:
+
+- kötelező csatolni egy ZIP csomagot (`FormatX-Suite-Pro-VNN.zip`);
+- kötelező közzétenni SHA-256 ellenőrzőösszeget (GitHub release asset digest vagy `.sha256` mellékfájl);
+- a ZIP-ben lévő `FormatX.exe` fájlt Authenticode aláírással kell publikálni.
+
+Ha a checksum hiányzik vagy eltér, a kliens fail-closed módon leállítja az indítást.
