@@ -72,6 +72,16 @@
       style.dataset.fxCryosphereStyle = 'true';
       document.head.appendChild(style);
     }
+    if (!document.querySelector('link[data-fx-readability-style]')) {
+      const readability = document.createElement('link');
+      readability.rel = 'stylesheet';
+      readability.href = './styles/readability-focus.css?v=20260726-readability-1';
+      readability.dataset.fxReadabilityStyle = 'true';
+      readability.addEventListener('load', function () {
+        ROOT.dataset.fxReadability = 'ready';
+      }, { once: true });
+      document.head.appendChild(readability);
+    }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
       script.src = './scripts/igloo-parity.js?v=20260726-parity-1';
