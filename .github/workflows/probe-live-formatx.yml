@@ -5,58 +5,68 @@ on:
   push:
     branches: [master]
     paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-igloo.css'
+      - 'docs/scifi-ui/scripts/formatx-igloo.js'
       - '.github/workflows/probe-live-formatx.yml'
 
 permissions:
   contents: read
   statuses: write
 
+concurrency:
+  group: formatx-live-probe
+  cancel-in-progress: true
+
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: Fetch live website assets
+      - name: Wait for Cloudflare Git deployment and verify assets
         id: probe
         shell: bash
         run: |
           set +e
           mkdir -p live-probe
-          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/home.headers -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
-          home_status=$?
-          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/intro-js.headers -o live-probe/formatx-event-horizon.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-event-horizon.js'
-          js_status=$?
-          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/intro-css.headers -o live-probe/formatx-event-horizon.css 'https://formatxsuite.com/scifi-ui/styles/formatx-event-horizon.css'
-          css_status=$?
-          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/premium-css.headers -o live-probe/site-premium-finish.css 'https://formatxsuite.com/scifi-ui/styles/site-premium-finish.css'
-          premium_status=$?
-          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/contrast-css.headers -o live-probe/site-contrast-guard.css 'https://formatxsuite.com/scifi-ui/styles/site-contrast-guard.css'
-          contrast_status=$?
-
           found_new=0
-          grep -Fq 'FAILSAFE_DEADLINE' live-probe/formatx-event-horizon.js && \
-          grep -Fq 'cancelOverlayAnimations' live-probe/formatx-event-horizon.js && \
-          grep -Fq '.fx-intro-skip' live-probe/formatx-event-horizon.css && \
-          grep -Fq -- '--fx-cyan' live-probe/site-premium-finish.css && \
-          grep -Fq 'z-index: 2147483000 !important' live-probe/site-contrast-guard.css && \
-          grep -Fq 'pointer-events: auto !important' live-probe/site-contrast-guard.css && found_new=1
+
+          for attempt in $(seq 1 42); do
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
+            home_status=$?
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/formatx-igloo.css 'https://formatxsuite.com/scifi-ui/styles/formatx-igloo.css'
+            css_status=$?
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/formatx-igloo.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-igloo.js'
+            js_status=$?
+
+            if [ "$home_status" = '0' ] \
+               && [ "$css_status" = '0' ] \
+               && [ "$js_status" = '0' ] \
+               && grep -Fq 'formatx-igloo.css?v=20260726-igloo-1' live-probe/home.html \
+               && grep -Fq 'formatx-igloo.js?v=20260726-igloo-1' live-probe/home.html \
+               && grep -Fq 'FormatX Igloo Experience' live-probe/formatx-igloo.css \
+               && grep -Fq 'createHeroCanvas' live-probe/formatx-igloo.js \
+               && grep -Fq 'fx-chapter-rail' live-probe/formatx-igloo.js \
+               && ! grep -Eq 'site-ambient-background|site-quantum-aurora|site-premium-finish|site-art-direction|site-contrast-guard|commerce-readability' live-probe/home.html; then
+              found_new=1
+              break
+            fi
+            sleep 10
+          done
 
           {
             echo "home_curl_status=$home_status"
-            echo "js_curl_status=$js_status"
             echo "css_curl_status=$css_status"
-            echo "premium_curl_status=$premium_status"
-            echo "contrast_curl_status=$contrast_status"
+            echo "js_curl_status=$js_status"
             echo "new_build=$found_new"
           } | tee live-probe/result.txt
-
           echo "new_build=$found_new" >> "$GITHUB_OUTPUT"
           exit 0
 
       - name: Upload live probe
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-live-probe
+          name: formatx-live-igloo-probe
           path: live-probe
           retention-days: 3
 
@@ -68,13 +78,13 @@ jobs:
         run: |
           if [ "$NEW_BUILD" = '1' ]; then
             state='success'
-            description='Live domain serves the corrected cinematic stacking build'
+            description='Live domain serves the Igloo-inspired FormatX experience'
           else
             state='failure'
-            description='Live domain is still serving a previous cinematic build'
+            description='Live domain is still serving a previous website build'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX live cinematic probe' \
+            -f context='FormatX live Igloo probe' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
