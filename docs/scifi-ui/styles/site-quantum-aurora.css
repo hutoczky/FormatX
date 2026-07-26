@@ -7,7 +7,7 @@
   --fx-scene-tertiary: 76, 255, 216;
   --fx-scene-grid: 112, 218, 255;
   --fx-scene-ring: 111, 230, 255;
-  transition: background 900ms ease, filter 900ms ease;
+  transition: background 900ms ease;
 }
 
 .fx-site-ambient[data-scene="licence"] {
@@ -61,7 +61,7 @@
   background-image:
     linear-gradient(rgba(var(--fx-scene-grid), 0.16) 1px, transparent 1px),
     linear-gradient(90deg, rgba(var(--fx-scene-grid), 0.16) 1px, transparent 1px);
-  transition: opacity 800ms ease, filter 800ms ease;
+  transition: opacity 800ms ease;
 }
 
 .fx-site-ambient-aura--one {
@@ -77,7 +77,7 @@
 }
 
 .fx-site-ambient-aura {
-  transition: background 900ms ease, filter 900ms ease;
+  transition: background 900ms ease;
 }
 
 .fx-site-ambient-signature {
@@ -87,8 +87,8 @@
   top: 50%;
   transform: translate3d(-50%, -50%, 0);
   opacity: 0.18;
-  filter: drop-shadow(0 0 24px rgba(var(--fx-scene-ring), 0.16));
-  transition: opacity 700ms ease, filter 900ms ease;
+  filter: drop-shadow(0 0 20px rgba(var(--fx-scene-ring), 0.14));
+  transition: opacity 700ms ease, transform 900ms ease;
 }
 
 .fx-site-ambient-signature::before,
@@ -101,54 +101,49 @@
   border: 1px solid rgba(var(--fx-scene-ring), var(--fx-ring-opacity, 0.22));
   border-left-color: transparent;
   border-bottom-color: rgba(var(--fx-scene-secondary), 0.06);
-  box-shadow: inset 0 0 28px rgba(var(--fx-scene-primary), 0.025);
+  box-shadow: inset 0 0 24px rgba(var(--fx-scene-primary), 0.022);
   animation: fx-quantum-signature-spin var(--fx-ring-duration, 29s) linear infinite;
 }
 
 .fx-site-ambient-signature::before {
   --fx-ring-inset: 2%;
   --fx-ring-opacity: 0.26;
-  --fx-ring-duration: 31s;
+  --fx-ring-duration: 34s;
 }
 
 .fx-site-ambient-signature::after {
   --fx-ring-inset: 18%;
   --fx-ring-opacity: 0.20;
-  --fx-ring-duration: 23s;
+  --fx-ring-duration: 26s;
   animation-direction: reverse;
 }
 
 .fx-site-ambient-signature span:nth-child(1) {
   --fx-ring-inset: 31%;
   --fx-ring-opacity: 0.26;
-  --fx-ring-duration: 17s;
+  --fx-ring-duration: 20s;
 }
 
 .fx-site-ambient-signature span:nth-child(2) {
   --fx-ring-inset: 41%;
   --fx-ring-opacity: 0.34;
-  --fx-ring-duration: 13s;
+  --fx-ring-duration: 16s;
   animation-direction: reverse;
 }
 
 .fx-site-ambient-signature span:nth-child(3) {
   --fx-ring-inset: 47%;
-  --fx-ring-opacity: 0.58;
-  --fx-ring-duration: 9s;
-  box-shadow:
-    0 0 22px rgba(var(--fx-scene-ring), 0.18),
-    inset 0 0 18px rgba(var(--fx-scene-primary), 0.12);
+  --fx-ring-opacity: 0.52;
+  --fx-ring-duration: 12s;
+  box-shadow: 0 0 18px rgba(var(--fx-scene-ring), 0.15), inset 0 0 14px rgba(var(--fx-scene-primary), 0.10);
 }
 
 .fx-site-ambient-signature span:nth-child(4) {
   inset: 49.4%;
   border: 0;
   background: rgba(var(--fx-scene-ring), 0.78);
-  box-shadow:
-    0 0 12px rgba(var(--fx-scene-ring), 0.92),
-    0 0 42px rgba(var(--fx-scene-primary), 0.45),
-    0 0 100px rgba(var(--fx-scene-secondary), 0.22);
-  animation: fx-quantum-signature-pulse 4.8s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(var(--fx-scene-ring), 0.82), 0 0 36px rgba(var(--fx-scene-primary), 0.36);
+  animation: fx-quantum-signature-pulse 6s ease-in-out infinite;
 }
 
 .fx-site-ambient[data-scene="licence"] .fx-site-ambient-signature {
@@ -188,14 +183,43 @@
 }
 
 @keyframes fx-quantum-signature-pulse {
-  0%, 100% { transform: scale(0.74); opacity: 0.58; }
-  50% { transform: scale(1.34); opacity: 1; }
+  0%, 100% { transform: scale(0.78); opacity: 0.58; }
+  50% { transform: scale(1.22); opacity: 0.94; }
+}
+
+/* Balanced mode keeps the identity but reduces six moving rings to two. */
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-signature {
+  opacity: 0.12;
+  filter: none;
+}
+
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-signature::after,
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-signature span:nth-child(2),
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-signature span:nth-child(3) {
+  display: none;
+}
+
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-signature::before {
+  animation-duration: 54s;
+}
+
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-signature span:nth-child(1) {
+  animation-duration: 38s;
+}
+
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-signature span:nth-child(4) {
+  animation-duration: 9s;
+  box-shadow: 0 0 16px rgba(var(--fx-scene-ring), 0.30);
+}
+
+.fx-site-ambient[data-browser="firefox"] .fx-site-ambient-signature {
+  filter: none;
 }
 
 @media (max-width: 760px), (pointer: coarse) {
   .fx-site-ambient-signature {
     width: 112vw;
-    opacity: 0.13;
+    opacity: 0.11;
   }
 
   .fx-site-ambient[data-scene] .fx-site-ambient-signature {
@@ -211,6 +235,6 @@
   }
 
   .fx-site-ambient-signature {
-    opacity: 0.09;
+    opacity: 0.08;
   }
 }
