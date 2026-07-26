@@ -1,10 +1,10 @@
 {
-  "sourceCommit": "c394e5a4f7161d3d7e882de3697771528ee538e1",
-  "auditedAt": "2026-07-26T06:53:07.797683Z",
+  "sourceCommit": "90396133d0002b4cc7b14ff19c71e69351aa45a1",
+  "auditedAt": "2026-07-26T06:54:16.491788Z",
   "configuration": "success",
   "javascriptSyntax": "success",
   "npmCi": "success",
-  "workerTests": "failure",
+  "workerTests": "success",
   "cloudflareTokenPresent": false,
   "duplicateValidationStatusDeployTrigger": true,
   "serialProductionQueue": true,
@@ -19,6 +19,6 @@
     "bootCssContainsMobileEffect": true,
     "licenseHealthValid": true
   },
-  "sourceReady": false,
+  "sourceReady": true,
   "productionReady": false
 }
