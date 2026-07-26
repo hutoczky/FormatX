@@ -4,10 +4,13 @@
   const ROOT_ID = 'formatx-future-5000';
   const MODULE_ORDER = ['observe', 'integrity', 'workflow', 'recovery', 'audit', 'release'];
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const mobileViewport = window.matchMedia('(max-width: 820px), (pointer: coarse)');
   const timers = new Set();
   let sequence = 0;
   let pageShowSeen = false;
   let rootObserver = null;
+  let visibilityObserver = null;
+  let pendingBoot = null;
   let lastStart = 0;
 
   function createSvgElement(name, attributes) {
@@ -39,6 +42,24 @@
   function clearTimers() {
     timers.forEach(function (timer) { window.clearTimeout(timer); });
     timers.clear();
+  }
+
+  function disconnectVisibilityObserver() {
+    if (visibilityObserver) visibilityObserver.disconnect();
+    visibilityObserver = null;
+    pendingBoot = null;
+  }
+
+  function rootIsVisible(root) {
+    const rect = root.getBoundingClientRect();
+    const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+    const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    return rect.width > 0
+      && rect.height > 0
+      && rect.right > 0
+      && rect.left < viewportWidth
+      && rect.bottom > viewportHeight * 0.08
+      && rect.top < viewportHeight * 0.92;
   }
 
   function moduleCenter(root, id) {
@@ -96,7 +117,7 @@
     layer.append(createSvgElement('circle', {
       cx: center.x,
       cy: center.y,
-      r: Math.min(width, height) * 0.11,
+      r: Math.min(width, height) * (mobileViewport.matches ? 0.145 : 0.11),
       class: 'fx-causal-boot-core',
       fill: 'url(#fx-causal-boot-core)',
       filter: 'url(#fx-causal-boot-glow)'
@@ -117,7 +138,7 @@
         layer.append(createSvgElement('circle', {
           cx: point.x,
           cy: point.y,
-          r: '13',
+          r: mobileViewport.matches ? '16' : '13',
           class: 'fx-causal-boot-node',
           style: '--fx-causal-boot-delay:' + (700 + index * 120) + 'ms'
         }));
@@ -145,13 +166,15 @@
       'fx-causal-boot-started',
       'fx-causal-boot-reveal',
       'fx-causal-boot-complete',
-      'fx-causal-boot-minimal'
+      'fx-causal-boot-minimal',
+      'fx-causal-boot-mobile'
     );
     root.querySelectorAll('.fx-causal-boot-module').forEach(function (module) {
       module.classList.remove('fx-causal-boot-module');
       module.style.removeProperty('--fx-causal-boot-delay');
     });
     delete root.dataset.fxCausalBoot;
+    delete root.dataset.fxCausalBootPending;
     void root.offsetWidth;
     return sequence;
   }
@@ -170,13 +193,16 @@
     if (!force && root.dataset.fxCausalBoot === 'ready') return;
     if (now - lastStart < 300) return;
     lastStart = now;
+    disconnectVisibilityObserver();
 
     const token = resetBoot(root);
     const minimal = reduceMotion.matches;
     root.dataset.fxCausalBoot = 'ready';
     root.dataset.fxCausalBootReason = reason;
+    root.dataset.fxCausalBootMode = mobileViewport.matches ? 'mobile-visible' : 'desktop-immediate';
     root.classList.add('fx-causal-boot-prep');
     if (minimal) root.classList.add('fx-causal-boot-minimal');
+    if (mobileViewport.matches) root.classList.add('fx-causal-boot-mobile');
     void root.offsetWidth;
 
     root.classList.add('fx-causal-booting');
@@ -212,6 +238,32 @@
     }, completeDelay);
   }
 
+  function startWhenVisible(root, reason, force) {
+    disconnectVisibilityObserver();
+
+    if (!mobileViewport.matches || rootIsVisible(root) || !('IntersectionObserver' in window)) {
+      window.requestAnimationFrame(function () { startBoot(root, reason, force); });
+      return;
+    }
+
+    root.dataset.fxCausalBootPending = 'visible-entry';
+    pendingBoot = { root: root, reason: reason, force: force };
+    visibilityObserver = new IntersectionObserver(function (entries) {
+      const visibleEntry = entries.find(function (entry) {
+        return entry.target === root && entry.isIntersecting;
+      });
+      if (!visibleEntry) return;
+      disconnectVisibilityObserver();
+      window.requestAnimationFrame(function () {
+        startBoot(root, reason + '-visible-entry', force);
+      });
+    }, {
+      threshold: [0.01, 0.08, 0.2],
+      rootMargin: '-6% 0px -10% 0px'
+    });
+    visibilityObserver.observe(root);
+  }
+
   function withRoot(callback) {
     const existing = document.getElementById(ROOT_ID);
     if (existing) {
@@ -240,9 +292,7 @@
 
   function run(reason, force) {
     withRoot(function (root) {
-      window.requestAnimationFrame(function () {
-        startBoot(root, reason, force);
-      });
+      startWhenVisible(root, reason, force);
     });
   }
 
@@ -250,6 +300,20 @@
     pageShowSeen = true;
     const type = navigationType();
     run(event.persisted ? 'bfcache' : type, true);
+  });
+
+  window.addEventListener('pagehide', function () {
+    disconnectVisibilityObserver();
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible' || !pendingBoot) return;
+    const boot = pendingBoot;
+    if (!rootIsVisible(boot.root)) return;
+    disconnectVisibilityObserver();
+    window.requestAnimationFrame(function () {
+      startBoot(boot.root, boot.reason + '-tab-visible', boot.force);
+    });
   });
 
   function fallbackStart() {
