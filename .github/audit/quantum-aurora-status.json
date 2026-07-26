@@ -1,6 +1,6 @@
 {
-  "status": "PASS",
-  "generatedAt": "2026-07-26T14:37:47.150Z",
+  "status": "FAIL",
+  "generatedAt": "2026-07-26T14:40:01.322Z",
   "visualSystem": "FormatX Quantum Aurora",
   "cases": [
     {
@@ -26,6 +26,59 @@
         "http://127.0.0.1:4173/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-1",
         "http://127.0.0.1:4173/scifi-ui/styles/professional-sections.css?v=20260725-professional-sections-1"
       ],
+      "introComplete": true,
+      "contrastGuardReady": false,
+      "readable": {
+        "heroCopy": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(244, 249, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "title": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(244, 249, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "tagline": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(240, 247, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "description": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(215, 228, 243)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "primaryButton": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "flex",
+          "color": "rgb(255, 255, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "engine": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(244, 249, 255)",
+          "filter": "none",
+          "animation": "none"
+        }
+      },
+      "heroReadable": true,
       "pricingActive": true,
       "projectActive": true,
       "motion": {
@@ -36,7 +89,7 @@
       "railCorrect": true,
       "motionCorrect": true,
       "assetsLoaded": true,
-      "pass": true
+      "pass": false
     },
     {
       "case": "mobile",
@@ -61,6 +114,59 @@
         "http://127.0.0.1:4173/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-1",
         "http://127.0.0.1:4173/scifi-ui/styles/professional-sections.css?v=20260725-professional-sections-1"
       ],
+      "introComplete": true,
+      "contrastGuardReady": false,
+      "readable": {
+        "heroCopy": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(244, 249, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "title": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(244, 249, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "tagline": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(240, 247, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "description": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(215, 228, 243)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "primaryButton": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "flex",
+          "color": "rgb(255, 255, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "engine": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(244, 249, 255)",
+          "filter": "none",
+          "animation": "none"
+        }
+      },
+      "heroReadable": true,
       "pricingActive": true,
       "projectActive": true,
       "motion": {
@@ -71,7 +177,7 @@
       "railCorrect": true,
       "motionCorrect": true,
       "assetsLoaded": true,
-      "pass": true
+      "pass": false
     },
     {
       "case": "reduced-motion",
@@ -96,6 +202,59 @@
         "http://127.0.0.1:4173/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-1",
         "http://127.0.0.1:4173/scifi-ui/styles/professional-sections.css?v=20260725-professional-sections-1"
       ],
+      "introComplete": true,
+      "contrastGuardReady": false,
+      "readable": {
+        "heroCopy": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(244, 249, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "title": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(244, 249, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "tagline": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(240, 247, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "description": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(215, 228, 243)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "primaryButton": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "flex",
+          "color": "rgb(255, 255, 255)",
+          "filter": "none",
+          "animation": "none"
+        },
+        "engine": {
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "block",
+          "color": "rgb(244, 249, 255)",
+          "filter": "none",
+          "animation": "none"
+        }
+      },
+      "heroReadable": true,
       "pricingActive": true,
       "projectActive": true,
       "motion": {
@@ -106,7 +265,7 @@
       "railCorrect": true,
       "motionCorrect": true,
       "assetsLoaded": true,
-      "pass": true
+      "pass": false
     }
   ]
 }
