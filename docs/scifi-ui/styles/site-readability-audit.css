@@ -1,0 +1,574 @@
+/*
+ * FormatX full-page readability guard.
+ * Loaded last. Decorative effects stay behind content while all readable
+ * surfaces use normal document flow and content-driven height.
+ */
+
+.reference-commerce,
+.reference-commerce * {
+  box-sizing: border-box;
+}
+
+.reference-commerce main,
+.reference-commerce section,
+.reference-commerce article,
+.reference-commerce aside,
+.reference-commerce header,
+.reference-commerce footer,
+.reference-commerce nav,
+.reference-commerce div {
+  min-width: 0;
+}
+
+.reference-commerce :is(h1, h2, h3, h4, p, li, a, button, strong, b, small, span, em, output) {
+  max-width: 100%;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.reference-commerce :is(h1, h2, h3, h4, p, li) {
+  white-space: normal;
+  text-wrap: pretty;
+}
+
+.reference-commerce :is(a, button) {
+  white-space: normal;
+  line-height: 1.35;
+}
+
+/* Decorative layers must never cover readable content. */
+.reference-commerce :is(
+  .space-dust,
+  .planet-horizon,
+  .fx5k-ambient,
+  .fx5k-cinematic-layer,
+  .fx5k-depth-plane,
+  .fx5k-holo-refraction,
+  .fx5k-spectrum-edge,
+  .fx5k-scan-plane,
+  .fx-causal-hover-layer
+) {
+  pointer-events: none !important;
+}
+
+.reference-commerce :is(
+  .hero-grid,
+  .hero-copy,
+  .core-engine,
+  .pricing-panel,
+  .checkout-preview,
+  .feature-strip,
+  .project-details,
+  .trust-strip,
+  .release-band,
+  .site-footer,
+  .fx5k-system-head,
+  .fx5k-stage,
+  .fx5k-principles
+) {
+  position: relative;
+  z-index: 2;
+}
+
+/* Header: allow controls to shrink instead of colliding. */
+.reference-commerce .topbar-inner {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(12px, 2vw, 30px);
+}
+
+.reference-commerce .main-nav {
+  min-width: 0;
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+.reference-commerce .main-nav a,
+.reference-commerce .header-actions > * {
+  flex: 0 1 auto;
+}
+
+/* Hero and engine. */
+.reference-commerce .hero {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.reference-commerce .hero-grid {
+  height: auto !important;
+  min-height: 500px;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr) !important;
+  gap: clamp(28px, 5vw, 72px);
+}
+
+.reference-commerce .hero-copy,
+.reference-commerce .core-engine {
+  width: 100%;
+  max-width: 100%;
+}
+
+.reference-commerce .hero-copy {
+  padding-right: 0;
+}
+
+.reference-commerce .hero h1,
+.reference-commerce .hero-tagline,
+.reference-commerce .hero-description {
+  position: relative;
+  z-index: 3;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.reference-commerce .hero h1 {
+  line-height: 1.02 !important;
+}
+
+.reference-commerce .hero-tagline {
+  line-height: 1.14 !important;
+}
+
+.reference-commerce .hero-actions,
+.reference-commerce .hero-assurance,
+.reference-commerce .platform-status {
+  position: relative;
+  z-index: 3;
+  height: auto !important;
+  align-items: stretch;
+}
+
+.reference-commerce .hero-actions > a {
+  flex: 1 1 180px;
+  min-width: 0 !important;
+  padding: 12px 16px;
+  text-align: center;
+}
+
+.reference-commerce .hero-assurance span {
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.reference-commerce .core-engine {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+.reference-commerce .engine-body,
+.reference-commerce .engine-footer,
+.reference-commerce .engine-stats,
+.reference-commerce .engine-nav {
+  min-width: 0;
+  height: auto !important;
+}
+
+.reference-commerce .engine-nav a,
+.reference-commerce .engine-footer > div,
+.reference-commerce .engine-stats article {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.reference-commerce .engine-nav a span,
+.reference-commerce .engine-footer :is(span, strong, em),
+.reference-commerce .engine-stats :is(span, strong) {
+  overflow-wrap: anywhere;
+}
+
+/* Pricing: remove absolute-button and fixed-height collision risks. */
+.reference-commerce .commerce-zone,
+.reference-commerce .price-cards,
+.reference-commerce .checkout-card {
+  align-items: stretch;
+}
+
+.reference-commerce .price-cards {
+  grid-auto-rows: auto;
+}
+
+.reference-commerce .price-card {
+  position: relative;
+  display: flex !important;
+  flex-direction: column;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 22px !important;
+  overflow: visible !important;
+  contain: none !important;
+}
+
+.reference-commerce .price-card > :is(h2, p, small, ul, .price, .start-sale-original, .start-sale-saving) {
+  position: static !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.reference-commerce .price-card .popular,
+.reference-commerce .price-card .start-sale-badge {
+  position: static !important;
+  inset: auto !important;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 12px;
+  align-self: flex-start;
+}
+
+.reference-commerce .price-card ul {
+  margin-bottom: 18px;
+}
+
+.reference-commerce .price-card > a {
+  position: static !important;
+  inset: auto !important;
+  width: 100%;
+  min-height: 46px;
+  margin-top: auto !important;
+  padding: 11px 14px;
+}
+
+.reference-commerce .pricing-notes {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  height: auto !important;
+}
+
+.reference-commerce .checkout-card,
+.reference-commerce .checkout-summary,
+.reference-commerce .qr-preview,
+.reference-commerce .checkout-price-box,
+.reference-commerce .checkout-conversion {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  contain: none !important;
+}
+
+.reference-commerce .checkout-card {
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 0.7fr) !important;
+}
+
+.reference-commerce .qr-preview {
+  position: relative !important;
+  inset: auto !important;
+  align-content: start;
+}
+
+.reference-commerce .qr-preview > * {
+  position: relative !important;
+  inset: auto !important;
+}
+
+.reference-commerce .fx-plan-qr-head {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.reference-commerce .fx-plan-qr-card {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* Content grids: content decides height. */
+.reference-commerce :is(
+  .feature-cards,
+  .project-module-grid,
+  .project-workflow,
+  .project-foundation-grid,
+  .trust-promises,
+  .site-footer
+) {
+  grid-auto-rows: auto;
+  align-items: stretch;
+}
+
+.reference-commerce :is(
+  .feature-cards article,
+  .project-module-grid article,
+  .project-workflow article,
+  .project-foundation-grid article,
+  .trust-promises article,
+  .site-footer > div
+) {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  contain: none !important;
+}
+
+.reference-commerce :is(
+  .feature-cards article,
+  .project-module-grid article,
+  .project-workflow article,
+  .project-foundation-grid article
+) :is(h2, h3, p, ul, li) {
+  position: static !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.reference-commerce .project-note,
+.reference-commerce .release-band,
+.reference-commerce .trust-technologies,
+.reference-commerce .trust-promises {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* Year 5000 system: keep animation behind a normal, readable document flow. */
+#formatx-future-5000 {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+#formatx-future-5000 > :not(.fx-causal-hover-layer):not(.fx5k-cinematic-layer) {
+  position: relative;
+  z-index: 3;
+}
+
+#formatx-future-5000 .fx-causal-hover-layer,
+#formatx-future-5000 .fx5k-cinematic-layer {
+  z-index: 1 !important;
+}
+
+.fx5k-system,
+.fx5k-stage,
+.fx5k-map-panel,
+.fx5k-detail-panel,
+.fx5k-principles,
+.fx5k-principles-title,
+.fx5k-principles article,
+.fx5k-sequence,
+.fx5k-lens {
+  transform: none !important;
+  transform-style: flat !important;
+  perspective: none !important;
+  backface-visibility: visible !important;
+}
+
+.fx5k-stage {
+  align-items: start;
+}
+
+.fx5k-map-panel,
+.fx5k-detail-panel,
+.fx5k-sequence,
+.fx5k-lens,
+.fx5k-principles-title,
+.fx5k-principles article {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  contain: none !important;
+}
+
+.fx5k-detail-panel > :is(h3, p, ul, .fx5k-detail-status, .fx5k-lens, .fx5k-sequence),
+.fx5k-principles article > :is(span, strong, p) {
+  position: static !important;
+  height: auto !important;
+  overflow: visible !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+.fx5k-detail-panel h3,
+.fx5k-system-head h2 {
+  line-height: 1.18 !important;
+}
+
+.fx5k-detail-panel > p,
+.fx5k-detail-panel li,
+.fx5k-principles article p,
+.fx5k-lead,
+.fx5k-sequence p {
+  line-height: 1.62 !important;
+}
+
+.fx5k-principles {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+}
+
+.fx5k-principles-title {
+  grid-column: 1 / -1;
+  min-height: auto !important;
+  align-items: center;
+}
+
+.fx5k-principles article strong {
+  margin-top: 10px;
+  line-height: 1.4 !important;
+}
+
+.fx5k-principles article p {
+  font-size: 0.75rem !important;
+}
+
+.fx5k-sequence-steps span,
+.fx5k-lens button,
+#fx5k-sequence-button,
+.fx5k-map-node {
+  height: auto !important;
+}
+
+.fx5k-sequence-steps b,
+.fx5k-map-node strong {
+  line-height: 1.35 !important;
+}
+
+/* Large tablet: avoid the old explicit grid-row layout, which could overlap. */
+@media (max-width: 1180px) {
+  .reference-commerce .hero-grid {
+    grid-template-columns: 1fr !important;
+    min-height: 0;
+    padding-block: 36px;
+  }
+
+  .reference-commerce .hero-copy {
+    padding-inline: clamp(0px, 3vw, 34px);
+  }
+
+  .reference-commerce .core-engine {
+    max-width: 920px;
+    margin-inline: auto;
+  }
+
+  .reference-commerce .commerce-zone {
+    grid-template-columns: 1fr !important;
+  }
+
+  .fx5k-stage {
+    grid-template-columns: 1fr !important;
+  }
+
+  .fx5k-detail-panel {
+    display: block !important;
+  }
+
+  .fx5k-lens,
+  .fx5k-sequence {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    margin-top: 18px !important;
+    padding-top: 16px !important;
+    border-top: 1px solid rgba(151, 188, 220, 0.12) !important;
+  }
+}
+
+@media (max-width: 920px) {
+  .reference-commerce .checkout-card {
+    grid-template-columns: 1fr !important;
+  }
+
+  .reference-commerce .feature-cards,
+  .reference-commerce .project-module-grid,
+  .reference-commerce .project-foundation-grid,
+  .reference-commerce .project-workflow,
+  .reference-commerce .trust-promises {
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .reference-commerce .topbar-inner {
+    width: min(100% - 24px, 1460px);
+    gap: 10px;
+  }
+
+  .reference-commerce .header-actions {
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .reference-commerce .header-actions .ghost-button,
+  .reference-commerce .header-actions .header-buy {
+    display: none !important;
+  }
+
+  .reference-commerce .hero-grid {
+    width: min(100% - 24px, 1460px);
+    padding-block: 28px;
+  }
+
+  .reference-commerce .hero-copy {
+    padding-inline: 0;
+  }
+
+  .reference-commerce .hero h1 {
+    font-size: clamp(40px, 13vw, 62px) !important;
+  }
+
+  .reference-commerce .hero-tagline {
+    font-size: clamp(24px, 8vw, 36px) !important;
+  }
+
+  .reference-commerce .hero-actions {
+    gap: 10px;
+  }
+
+  .reference-commerce .hero-actions > a {
+    flex-basis: 100%;
+  }
+
+  .reference-commerce .engine-body,
+  .reference-commerce .engine-footer {
+    grid-template-columns: 1fr !important;
+  }
+
+  .reference-commerce .price-card {
+    padding: 20px 18px !important;
+  }
+
+  .reference-commerce .site-footer {
+    grid-template-columns: 1fr !important;
+  }
+
+  .fx5k-system {
+    width: min(100% - 18px, 1240px) !important;
+    padding: 15px !important;
+  }
+
+  .fx5k-map {
+    grid-template-columns: 1fr !important;
+  }
+
+  .fx5k-lens > div,
+  .fx5k-sequence-steps,
+  .fx-plan-qr-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .reference-commerce .brand small {
+    letter-spacing: 0.18em;
+  }
+
+  .reference-commerce .language-switch button {
+    min-width: 31px;
+  }
+
+  .reference-commerce .panel-title,
+  .reference-commerce .section-label,
+  .fx5k-eyebrow,
+  .fx5k-panel-label,
+  .fx5k-principles-title {
+    letter-spacing: 0.1em !important;
+  }
+
+  .reference-commerce .start-sale-callout,
+  .reference-commerce .start-sale-banner,
+  .reference-commerce .pricing-notes {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reference-commerce :is(.fx5k-ambient i, .fx-causal-hover-layer *) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
