@@ -58,7 +58,7 @@ jobs:
           assert 'data-flow="3"' in home
           assert '15 900 Ft / hó' in home and '29 900 Ft / hó' in home
           assert 'FAILSAFE_DEADLINE' in intro
-          for token in ('webgl2','createRenderer','particles','infinite','data.fxInfinite','formatx:loop'):
+          for token in ('webgl2','createRenderer','particles','infinite','dataset.fxInfinite','formatx:loop'):
               assert token in js, token
           for token in ('prefers-reduced-motion:reduce','scene-loop-clone','loop-toggle'):
               assert token in css, token
