@@ -1,0 +1,24 @@
+{
+  "sourceCommit": "cff8429a4b7959f0db53bc8997f783a37737e7b8",
+  "auditedAt": "2026-07-26T06:42:26.255245Z",
+  "configuration": "success",
+  "javascriptSyntax": "success",
+  "npmCi": "success",
+  "workerTests": "failure",
+  "cloudflareTokenPresent": false,
+  "duplicateValidationStatusDeployTrigger": true,
+  "serialProductionQueue": true,
+  "live": {
+    "mainHttp": "200",
+    "wwwHttp": "200",
+    "bootJsHttp": "200",
+    "bootCssHttp": "200",
+    "licenseHttp": "200",
+    "mainReferencesBoot3": true,
+    "bootJsContainsMobileTrigger": true,
+    "bootCssContainsMobileEffect": true,
+    "licenseHealthValid": true
+  },
+  "sourceReady": false,
+  "productionReady": false
+}
