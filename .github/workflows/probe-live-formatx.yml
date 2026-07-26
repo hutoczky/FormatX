@@ -30,18 +30,23 @@ jobs:
           css_status=$?
           curl -sS --connect-timeout 10 --max-time 30 -D live-probe/premium-css.headers -o live-probe/site-premium-finish.css 'https://formatxsuite.com/scifi-ui/styles/site-premium-finish.css'
           premium_status=$?
+          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/contrast-css.headers -o live-probe/site-contrast-guard.css 'https://formatxsuite.com/scifi-ui/styles/site-contrast-guard.css'
+          contrast_status=$?
 
           found_new=0
           grep -Fq 'FAILSAFE_DEADLINE' live-probe/formatx-event-horizon.js && \
-          grep -Fq 'overlay.getAnimations({ subtree: true })' live-probe/formatx-event-horizon.js && \
+          grep -Fq 'cancelOverlayAnimations' live-probe/formatx-event-horizon.js && \
           grep -Fq '.fx-intro-skip' live-probe/formatx-event-horizon.css && \
-          grep -Fq -- '--fx-cyan' live-probe/site-premium-finish.css && found_new=1
+          grep -Fq -- '--fx-cyan' live-probe/site-premium-finish.css && \
+          grep -Fq 'z-index: 2147483000 !important' live-probe/site-contrast-guard.css && \
+          grep -Fq 'pointer-events: auto !important' live-probe/site-contrast-guard.css && found_new=1
 
           {
             echo "home_curl_status=$home_status"
             echo "js_curl_status=$js_status"
             echo "css_curl_status=$css_status"
             echo "premium_curl_status=$premium_status"
+            echo "contrast_curl_status=$contrast_status"
             echo "new_build=$found_new"
           } | tee live-probe/result.txt
 
@@ -63,10 +68,10 @@ jobs:
         run: |
           if [ "$NEW_BUILD" = '1' ]; then
             state='success'
-            description='Live domain is serving the new cinematic build'
+            description='Live domain serves the corrected cinematic stacking build'
           else
             state='failure'
-            description='Live domain is still serving the previous build'
+            description='Live domain is still serving a previous cinematic build'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
