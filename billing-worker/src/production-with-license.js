@@ -9,6 +9,8 @@ const FUTURE_5000_READABILITY_VERSION = '20260725-year-5000-readability-1';
 const CAUSAL_HOVER_VERSION = '20260726-causal-hover-2';
 const CAUSAL_BOOT_VERSION = '20260726-causal-boot-3';
 const SITE_READABILITY_VERSION = '20260726-site-readability-1';
+const SITE_AMBIENT_VERSION = '20260726-quantum-aurora-1';
+const SITE_PREMIUM_VERSION = '20260726-premium-finish-1';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
@@ -19,6 +21,7 @@ const LICENSE_PERMISSIONS_POLICY = [
   'publickey-credentials-get=()',
   'usb=()',
 ].join(', ');
+
 const START_SALE_PATHS = new Set([
   '/',
   '/index.html',
@@ -28,10 +31,55 @@ const START_SALE_PATHS = new Set([
   '/checkout.html',
   '/scifi-ui/checkout.html',
 ]);
+
+const STATIC_VISUAL_PATHS = new Set([
+  '/',
+  '/index.html',
+  '/scifi-ui',
+  '/scifi-ui/',
+  '/scifi-ui/index.html',
+]);
+
 const CHECKOUT_PATHS = new Set([
   '/checkout.html',
   '/scifi-ui/checkout.html',
 ]);
+
+class GlobalVisualHeadHandler {
+  constructor(skipStaticVisuals) {
+    this.skipStaticVisuals = skipStaticVisuals;
+  }
+
+  element(element) {
+    if (this.skipStaticVisuals) return;
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/site-ambient-background.css?v=${SITE_AMBIENT_VERSION}">`,
+      { html: true },
+    );
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/site-quantum-aurora.css?v=${SITE_AMBIENT_VERSION}">`,
+      { html: true },
+    );
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/site-premium-finish.css?v=${SITE_PREMIUM_VERSION}">`,
+      { html: true },
+    );
+  }
+}
+
+class GlobalVisualBodyHandler {
+  constructor(skipStaticVisuals) {
+    this.skipStaticVisuals = skipStaticVisuals;
+  }
+
+  element(element) {
+    if (this.skipStaticVisuals) return;
+    element.append(
+      `<script defer src="/scifi-ui/scripts/site-ambient-background.js?v=${SITE_AMBIENT_VERSION}"></script>`,
+      { html: true },
+    );
+  }
+}
 
 class StartSaleHeadHandler {
   constructor(isCheckout) {
@@ -124,20 +172,27 @@ class CheckoutScriptHandler {
   }
 }
 
-function shouldInjectStartSale(url, response) {
+function isHtmlResponse(response) {
   const contentType = response.headers.get('Content-Type') || '';
-  return START_SALE_PATHS.has(url.pathname)
-    && response.status === 200
-    && contentType.toLowerCase().includes('text/html');
+  return response.status === 200 && contentType.toLowerCase().includes('text/html');
 }
 
-function injectStartSale(response, url) {
+function injectSiteAssets(response, url) {
+  const startSale = START_SALE_PATHS.has(url.pathname);
   const isCheckout = CHECKOUT_PATHS.has(url.pathname);
-  return new HTMLRewriter()
-    .on('head', new StartSaleHeadHandler(isCheckout))
-    .on('body', new StartSaleBodyHandler(isCheckout))
-    .on('script[src]', new CheckoutScriptHandler(isCheckout))
-    .transform(response);
+  const staticVisuals = STATIC_VISUAL_PATHS.has(url.pathname);
+  const rewriter = new HTMLRewriter()
+    .on('head', new GlobalVisualHeadHandler(staticVisuals))
+    .on('body', new GlobalVisualBodyHandler(staticVisuals));
+
+  if (startSale) {
+    rewriter
+      .on('head', new StartSaleHeadHandler(isCheckout))
+      .on('body', new StartSaleBodyHandler(isCheckout))
+      .on('script[src]', new CheckoutScriptHandler(isCheckout));
+  }
+
+  return rewriter.transform(response);
 }
 
 function secureLicenseResponse(response) {
@@ -168,6 +223,6 @@ export default {
 
     const response = await productionWorker.fetch(request, env, ctx);
     const url = new URL(request.url);
-    return shouldInjectStartSale(url, response) ? injectStartSale(response, url) : response;
+    return isHtmlResponse(response) ? injectSiteAssets(response, url) : response;
   },
 };
