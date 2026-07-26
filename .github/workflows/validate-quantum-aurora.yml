@@ -38,7 +38,7 @@ jobs:
           node --check docs/scifi-ui/scripts/site-ambient-background.js
           node --check docs/scifi-ui/scripts/site-art-direction.js
           node --check billing-worker/src/production-with-license.js
-          grep -F 'data.visualSystem = ' docs/scifi-ui/scripts/site-ambient-background.js >/dev/null || grep -F "dataset.visualSystem = 'formatx-quantum-aurora'" docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F "dataset.visualSystem = 'formatx-quantum-aurora'" docs/scifi-ui/scripts/site-ambient-background.js
           grep -F 'new IntersectionObserver' docs/scifi-ui/scripts/site-ambient-background.js
           grep -F 'fx-system-rail' docs/scifi-ui/scripts/site-art-direction.js
           grep -F 'site-quantum-aurora.css?v=20260726-quantum-aurora-1' docs/scifi-ui/index.html
@@ -153,7 +153,10 @@ jobs:
                   };
                 });
 
-                const railCorrect = testCase.mobile ? initial.railDisplay === 'none' : initial.railExists && initial.railDisplay !== 'none';
+                const railShouldBeHidden = testCase.width <= 1180;
+                const railCorrect = railShouldBeHidden
+                  ? initial.railDisplay === 'none'
+                  : initial.railExists && initial.railDisplay !== 'none';
                 const motionCorrect = testCase.reducedMotion === 'reduce'
                   ? motion.ringAnimation === 'none'
                   : motion.gridAnimation !== 'none' && motion.ringAnimation !== 'none';
@@ -167,6 +170,7 @@ jobs:
                   pricingActive,
                   projectActive,
                   motion,
+                  railShouldBeHidden,
                   railCorrect,
                   motionCorrect,
                   assetsLoaded,
