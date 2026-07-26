@@ -77,11 +77,11 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
-      - name: Run Worker test suite
+      - name: Run billing and license Worker test suites
         id: tests
         continue-on-error: true
         working-directory: billing-worker
-        run: npm test -- --run
+        run: npm test
 
       - name: Check Cloudflare credential prerequisite
         id: cloudflare
