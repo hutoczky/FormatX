@@ -1,6 +1,6 @@
 {
-  "status": "FAIL",
-  "generatedAt": "2026-07-26T13:52:47.671Z",
+  "status": "PASS",
+  "generatedAt": "2026-07-26T13:55:35.830Z",
   "visualSystem": "FormatX Quantum Aurora",
   "cases": [
     {
@@ -31,6 +31,7 @@
         "gridAnimation": "fx-site-grid-drift",
         "ringAnimation": "fx-quantum-signature-spin"
       },
+      "railShouldBeHidden": false,
       "railCorrect": true,
       "motionCorrect": true,
       "assetsLoaded": true,
@@ -64,6 +65,7 @@
         "gridAnimation": "fx-site-grid-drift",
         "ringAnimation": "fx-quantum-signature-spin"
       },
+      "railShouldBeHidden": true,
       "railCorrect": true,
       "motionCorrect": true,
       "assetsLoaded": true,
@@ -97,10 +99,11 @@
         "gridAnimation": "none",
         "ringAnimation": "none"
       },
-      "railCorrect": false,
+      "railShouldBeHidden": true,
+      "railCorrect": true,
       "motionCorrect": true,
       "assetsLoaded": true,
-      "pass": false
+      "pass": true
     }
   ]
 }
