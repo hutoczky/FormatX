@@ -234,6 +234,11 @@ function secureResponse(response, url) {
         ? CHECKOUT_CONTENT_SECURITY_POLICY
         : CONTENT_SECURITY_POLICY,
     );
+    headers.set('Cache-Control', 'no-cache, max-age=0, must-revalidate');
+  } else if (/\.(?:css|js)$/i.test(url.pathname)) {
+    // The public HTML uses stable asset URLs. Revalidation prevents a browser
+    // from keeping an older cinematic controller after a new deployment.
+    headers.set('Cache-Control', 'no-cache, max-age=0, must-revalidate');
   }
 
   return new Response(response.body, {
