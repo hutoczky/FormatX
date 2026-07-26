@@ -158,7 +158,7 @@
       uniform float uVelocity;
       uniform float uQuality;
 
-      #define MAX_STEPS 84
+      #define MAX_STEPS 72
       #define FAR 13.0
       #define PI 3.14159265359
       #define TAU 6.28318530718
@@ -193,7 +193,7 @@
         vec3 coreP=p;
         coreP.xz*=rot(.18*uTime+uScroll*1.8);
         coreP.xy*=rot(-.12*uTime+uPointer.y*.12);
-        float fracture=(fbm(coreP*2.7+uTime*.08)-.5)*.11;
+        float fracture=(noise3(coreP*2.9+uTime*.08)-.5)*.095;
         float core=sdOcta(coreP,1.42+commerce*.12*pulse)+fracture;
         float inner=sdRoundBox(coreP,vec3(.72,.92,.72),.14);
         core=smin(core,inner,.18);
@@ -208,7 +208,7 @@
           bp.xy*=rot((hash11(fi+2.1)-.5)*.8+uTime*.025*(mod(fi,2.)*2.-1.));
           vec3 size=vec3(.28+.18*hash11(fi),.52+.46*hash11(fi+4.7),.22+.2*hash11(fi+9.));
           size*=mix(.2,1.,explode);
-          float block=sdRoundBox(bp,size,.075)+(fbm(bp*5.+fi)-.5)*.035;
+          float block=sdRoundBox(bp,size,.075)+sin(dot(bp,vec3(6.7,8.3,5.9))+fi)*.012;
           result = block<result.x ? vec2(block,2.+mod(fi,3.)) : result;
         }
 
@@ -230,7 +230,7 @@
         float beaconCore=length(beaconP)-mix(.1,.34,beacon)*(1.+.12*sin(uTime*4.));
         if(beacon>0.) result=beaconCore<result.x?vec2(beaconCore,8.):result;
 
-        float floorNoise=(fbm(vec3(p.xz*1.35,uTime*.025))-.5)*.08;
+        float floorNoise=(noise3(vec3(p.xz*1.35,uTime*.025))-.5)*.07;
         float ground=p.y+1.72+floorNoise;
         if(ground<result.x) result=vec2(ground,9.);
         return result;
@@ -246,7 +246,8 @@
 
       float softShadow(vec3 ro,vec3 rd,float mint,float maxt){
         float res=1.,t=mint;
-        for(int i=0;i<24;i++){
+        for(int i=0;i<16;i++){
+          if(uQuality>.5&&i>10)break;
           float h=mapScene(ro+rd*t).x;
           res=min(res,12.*h/t);
           t+=clamp(h,.025,.18);
@@ -257,8 +258,9 @@
 
       float ambientOcclusion(vec3 p,vec3 n){
         float occ=0.,scale=1.;
-        for(int i=1;i<=5;i++){
-          float h=.055*float(i);
+        for(int i=1;i<=4;i++){
+          if(uQuality>.5&&i>3)break;
+          float h=.06*float(i);
           float d=mapScene(p+n*h).x;
           occ+=(h-d)*scale;
           scale*=.72;
@@ -350,6 +352,7 @@
         float t=0.,material=0.,glow=0.;
         vec2 hit=vec2(0.);
         for(int i=0;i<MAX_STEPS;i++){
+          if(uQuality>.5&&i>52)break;
           vec3 p=ro+rd*t;
           hit=mapScene(p);
           glow+=exp(-13.*abs(hit.x))*.0035;
@@ -412,7 +415,7 @@
     const started = performance.now();
 
     function resize() {
-      const dpr = Math.min(MOBILE.matches ? 1.05 : 1.45, devicePixelRatio || 1);
+      const dpr = Math.min(MOBILE.matches ? .9 : 1.4, devicePixelRatio || 1);
       width = Math.max(1, innerWidth);
       height = Math.max(1, innerHeight);
       canvas.width = Math.floor(width * dpr);
@@ -441,7 +444,19 @@
     resize();
     addEventListener('resize', resize, { passive: true });
     if (!REDUCE.matches) raf = requestAnimationFrame(render);
-    else render(started);
+    else {
+      const shockAge = 1;
+      gl.useProgram(program);
+      gl.uniform2f(uniforms.uResolution, canvas.width, canvas.height);
+      gl.uniform2f(uniforms.uPointer, 0, 0);
+      gl.uniform1f(uniforms.uTime, 0);
+      gl.uniform1f(uniforms.uScroll, 0);
+      gl.uniform1f(uniforms.uScene, 0);
+      gl.uniform1f(uniforms.uShock, shockAge);
+      gl.uniform1f(uniforms.uVelocity, 0);
+      gl.uniform1f(uniforms.uQuality, 1);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
 
     return {
       destroy: function () {
@@ -456,7 +471,7 @@
     const context = canvas.getContext('2d', { alpha: true });
     if (!context) return null;
     const particles = [];
-    const count = MOBILE.matches ? 150 : 360;
+    const count = MOBILE.matches ? 120 : 340;
     let width = 1;
     let height = 1;
     let dpr = 1;
