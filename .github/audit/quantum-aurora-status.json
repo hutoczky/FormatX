@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "generatedAt": "2026-07-26T13:55:35.830Z",
+  "generatedAt": "2026-07-26T14:36:08.228Z",
   "visualSystem": "FormatX Quantum Aurora",
   "cases": [
     {
@@ -23,6 +23,7 @@
         "http://127.0.0.1:4173/scifi-ui/styles/site-quantum-aurora.css?v=20260726-quantum-aurora-1",
         "http://127.0.0.1:4173/scifi-ui/styles/site-premium-finish.css?v=20260726-premium-finish-1",
         "http://127.0.0.1:4173/scifi-ui/styles/site-art-direction.css?v=20260726-art-direction-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-1",
         "http://127.0.0.1:4173/scifi-ui/styles/professional-sections.css?v=20260725-professional-sections-1"
       ],
       "pricingActive": true,
@@ -57,6 +58,7 @@
         "http://127.0.0.1:4173/scifi-ui/styles/site-quantum-aurora.css?v=20260726-quantum-aurora-1",
         "http://127.0.0.1:4173/scifi-ui/styles/site-premium-finish.css?v=20260726-premium-finish-1",
         "http://127.0.0.1:4173/scifi-ui/styles/site-art-direction.css?v=20260726-art-direction-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-1",
         "http://127.0.0.1:4173/scifi-ui/styles/professional-sections.css?v=20260725-professional-sections-1"
       ],
       "pricingActive": true,
@@ -91,6 +93,7 @@
         "http://127.0.0.1:4173/scifi-ui/styles/site-quantum-aurora.css?v=20260726-quantum-aurora-1",
         "http://127.0.0.1:4173/scifi-ui/styles/site-premium-finish.css?v=20260726-premium-finish-1",
         "http://127.0.0.1:4173/scifi-ui/styles/site-art-direction.css?v=20260726-art-direction-1",
+        "http://127.0.0.1:4173/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-1",
         "http://127.0.0.1:4173/scifi-ui/styles/professional-sections.css?v=20260725-professional-sections-1"
       ],
       "pricingActive": true,
