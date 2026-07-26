@@ -1,0 +1,221 @@
+name: Validate FormatX website
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/workflows/validate-website.yml'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/**'
+      - 'billing-worker/**'
+      - '.github/workflows/validate-website.yml'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-formatx-website-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Validate JavaScript and static architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check billing-worker/src/production-with-license.js
+          node --check billing-worker/src/pricing-v100-api.js
+          node --check docs/site-loader.js
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/site-ambient-background.js
+          node --check docs/scifi-ui/scripts/site-art-direction.js
+          node --check docs/scifi-ui/scripts/landing.js
+          node --check docs/scifi-ui/scripts/pricing-sync.js
+          node --check docs/scifi-ui/scripts/checkout-v100.js
+          node --check docs/scifi-ui/scripts/checkout-language-v100.js
+
+          grep -F "['/', '/scifi-ui/']" billing-worker/src/production-with-license.js
+          grep -F "['/checkout.html', '/scifi-ui/checkout.html']" billing-worker/src/production-with-license.js
+          ! grep -F 'HTMLRewriter' billing-worker/src/production-with-license.js
+          ! grep -F 'document.write' docs/site-loader.js
+          ! grep -E 'future-5000|causal-memory|site-readability-audit|start-sale' docs/scifi-ui/index.html
+          ! grep -E 'future-5000|causal-memory|site-readability-audit|start-sale' billing-worker/src/production-with-license.js
+          ! grep -E 'ensureContrastGuard|recoverIntroContent|watchIntroCompletion' docs/scifi-ui/scripts/site-art-direction.js
+
+      - name: Verify one public price catalogue
+        shell: python
+        run: |
+          from pathlib import Path
+
+          api = Path('billing-worker/src/pricing-v100-api.js').read_text(encoding='utf-8')
+          checkout = Path('docs/scifi-ui/scripts/checkout-v100.js').read_text(encoding='utf-8')
+          language = Path('docs/scifi-ui/scripts/checkout-language-v100.js').read_text(encoding='utf-8')
+          home = Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
+          sync = Path('docs/scifi-ui/scripts/pricing-sync.js').read_text(encoding='utf-8')
+          checkout_html = Path('docs/scifi-ui/checkout.html').read_text(encoding='utf-8')
+
+          prices = {
+              'business_lite': (7900, 79000, 22, 220),
+              'business_pro': (15900, 159000, 44, 440),
+              'technician_team': (29900, 299000, 83, 830),
+          }
+          for values in prices.values():
+              for value in values:
+                  token = str(value)
+                  assert token in api, ('api', value)
+                  assert token in checkout, ('checkout', value)
+                  assert token in language, ('language', value)
+
+          for token in ['7 900 Ft / hó', '15 900 Ft / hó', '29 900 Ft / hó', '22 €', '44 €', '83 €']:
+              assert token in home, ('homepage', token)
+
+          assert 'HUF: 15900' in sync
+          assert 'EUR: 44' in sync
+          assert 'checkout-v100.js' in checkout_html
+          assert 'checkout-language-v100.js' in checkout_html
+          assert '15 900 Ft' in checkout_html
+          assert 'checkout.js?v=' not in checkout_html
+          assert 'checkout-language.js?v=' not in checkout_html
+          print('Homepage, checkout and API prices are aligned.')
+
+      - name: Install Worker dependencies
+        working-directory: billing-worker
+        run: npm ci
+
+      - name: Run Worker tests and dry build
+        working-directory: billing-worker
+        run: |
+          npm test
+          npx wrangler deploy --dry-run --outdir ../.wrangler-website-validation
+
+      - name: Install Chromium runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-browser" --no-audit --no-fund playwright@1.55.0
+          "$RUNNER_TEMP/formatx-browser/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start local website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/formatx-http.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/formatx-http.pid"
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:4173/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-http.log"
+          exit 1
+
+      - name: Validate desktop, mobile and checkout behavior
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { chromium } = require('playwright');
+
+          const cases = [
+            { name: 'desktop', width: 1440, height: 1000, reducedMotion: 'no-preference' },
+            { name: 'mobile', width: 390, height: 844, reducedMotion: 'no-preference' },
+            { name: 'reduced-motion', width: 1180, height: 900, reducedMotion: 'reduce' },
+          ];
+
+          function assert(condition, message) {
+            if (!condition) throw new Error(message);
+          }
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            try {
+              for (const testCase of cases) {
+                const context = await browser.newContext({
+                  viewport: { width: testCase.width, height: testCase.height },
+                  locale: 'hu-HU',
+                  reducedMotion: testCase.reducedMotion,
+                  hasTouch: testCase.width <= 480,
+                  isMobile: testCase.width <= 480,
+                });
+                const page = await context.newPage();
+                const errors = [];
+                page.on('pageerror', (error) => errors.push(String(error)));
+                await page.goto('http://127.0.0.1:4173/scifi-ui/index.html?lang=hu', { waitUntil: 'networkidle', timeout: 30000 });
+                await page.waitForFunction(() => {
+                  const overlay = document.getElementById('formatx-event-horizon');
+                  return document.documentElement.classList.contains('fx-intro-complete') && (!overlay || overlay.hidden);
+                }, null, { timeout: 10000 });
+
+                const state = await page.evaluate(() => {
+                  const hero = document.querySelector('.hero-copy');
+                  const engine = document.querySelector('.core-engine');
+                  const heroStyle = getComputedStyle(hero);
+                  const engineStyle = getComputedStyle(engine);
+                  return {
+                    ambientRoots: document.querySelectorAll('#formatx-site-ambient').length,
+                    railRoots: document.querySelectorAll('.fx-system-rail').length,
+                    heroVisible: heroStyle.visibility === 'visible' && Number(heroStyle.opacity) > 0.99,
+                    engineVisible: engineStyle.visibility === 'visible' && Number(engineStyle.opacity) > 0.99,
+                    overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+                    mainPrice: document.getElementById('preview-main-price').textContent,
+                    oldLayers: Array.from(document.styleSheets).some((sheet) => /future-5000|causal-memory|site-readability-audit|start-sale/.test(String(sheet.href || ''))),
+                  };
+                });
+
+                assert(errors.length === 0, `${testCase.name}: runtime errors: ${errors.join(' | ')}`);
+                assert(state.ambientRoots === 1, `${testCase.name}: duplicate ambient roots`);
+                assert(state.railRoots === 1, `${testCase.name}: duplicate system rails`);
+                assert(state.heroVisible, `${testCase.name}: hero is hidden`);
+                assert(state.engineVisible, `${testCase.name}: engine is hidden`);
+                assert(state.overflow <= 1, `${testCase.name}: horizontal overflow ${state.overflow}px`);
+                assert(state.mainPrice.includes('15') && state.mainPrice.includes('900'), `${testCase.name}: wrong Business Pro HUF price`);
+                assert(!state.oldLayers, `${testCase.name}: a legacy visual layer loaded`);
+
+                await page.click('[data-currency="EUR"]');
+                await page.waitForTimeout(50);
+                const eurPrice = await page.locator('#preview-main-price').textContent();
+                assert(eurPrice.includes('44'), `${testCase.name}: EUR price did not update`);
+                await context.close();
+              }
+
+              const checkout = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+              const checkoutErrors = [];
+              checkout.on('pageerror', (error) => checkoutErrors.push(String(error)));
+              await checkout.goto('http://127.0.0.1:4173/scifi-ui/checkout.html?plan=business_pro&cycle=monthly&currency=HUF', { waitUntil: 'networkidle', timeout: 30000 });
+              await checkout.waitForTimeout(250);
+              assert(checkoutErrors.length === 0, `checkout runtime errors: ${checkoutErrors.join(' | ')}`);
+              assert((await checkout.locator('#summary-price').textContent()).includes('15'), 'checkout Business Pro price is stale');
+              await checkout.selectOption('#plan-id', 'technician_team');
+              await checkout.selectOption('#billing-cycle', 'annual');
+              await checkout.selectOption('#payment-currency', 'EUR');
+              await checkout.waitForTimeout(50);
+              assert((await checkout.locator('#summary-price').textContent()).includes('830'), 'checkout annual Team EUR price is wrong');
+            } finally {
+              await browser.close();
+            }
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
