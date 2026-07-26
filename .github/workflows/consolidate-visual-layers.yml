@@ -1,5 +1,6 @@
 name: Consolidate FormatX visual layers
 
+# Triggered after the Firefox Nightly screenshot exposed stacked reveal and foreground rules.
 on:
   push:
     branches: [master]
