@@ -1,0 +1,86 @@
+name: Install Quantum Aurora visual system
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/install-quantum-aurora-visual-system.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Wire first-frame visual assets
+        shell: python
+        run: |
+          from pathlib import Path
+
+          index = Path('docs/scifi-ui/index.html')
+          text = index.read_text(encoding='utf-8')
+          if 'site-ambient-background.css?v=20260726-quantum-aurora-1' not in text:
+              marker = '  <link rel="stylesheet" href="./styles/commerce-readability.css?v=20260725-commerce-readability-1">\n'
+              addition = (
+                  '  <link rel="stylesheet" href="./styles/site-ambient-background.css?v=20260726-quantum-aurora-1">\n'
+                  '  <link rel="stylesheet" href="./styles/site-quantum-aurora.css?v=20260726-quantum-aurora-1">\n'
+                  '  <link rel="stylesheet" href="./styles/site-premium-finish.css?v=20260726-premium-finish-1">\n'
+              )
+              if marker not in text:
+                  raise SystemExit('CSS insertion marker not found')
+              text = text.replace(marker, marker + addition, 1)
+          if 'site-ambient-background.js?v=20260726-quantum-aurora-1' not in text:
+              marker = '  <script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-1"></script>\n'
+              addition = '  <script defer src="./scripts/site-ambient-background.js?v=20260726-quantum-aurora-1"></script>\n'
+              if marker not in text:
+                  raise SystemExit('JS insertion marker not found')
+              text = text.replace(marker, marker + addition, 1)
+          index.write_text(text, encoding='utf-8')
+
+          deploy = Path('.github/workflows/deploy-formatx-custom-domain.yml')
+          text = deploy.read_text(encoding='utf-8')
+          required_marker = '              "docs/scifi-ui/styles/site-readability-audit.css",\n'
+          required_addition = (
+              '              "docs/scifi-ui/styles/site-ambient-background.css",\n'
+              '              "docs/scifi-ui/styles/site-quantum-aurora.css",\n'
+              '              "docs/scifi-ui/styles/site-premium-finish.css",\n'
+              '              "docs/scifi-ui/scripts/site-ambient-background.js",\n'
+          )
+          if '"docs/scifi-ui/styles/site-quantum-aurora.css"' not in text:
+              if required_marker not in text:
+                  raise SystemExit('Deploy required-files marker not found')
+              text = text.replace(required_marker, required_marker + required_addition, 1)
+          if 'SITE_AMBIENT_VERSION' not in text:
+              raise SystemExit('Production Worker does not contain SITE_AMBIENT_VERSION')
+          deploy.write_text(text, encoding='utf-8')
+
+      - name: Validate installed assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/site-ambient-background.js
+          node --check billing-worker/src/production-with-license.js
+          grep -F 'site-ambient-background.css?v=20260726-quantum-aurora-1' docs/scifi-ui/index.html
+          grep -F 'site-quantum-aurora.css?v=20260726-quantum-aurora-1' docs/scifi-ui/index.html
+          grep -F 'site-premium-finish.css?v=20260726-premium-finish-1' docs/scifi-ui/index.html
+          grep -F 'site-ambient-background.js?v=20260726-quantum-aurora-1' docs/scifi-ui/index.html
+          grep -F 'formatx-quantum-aurora' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'new IntersectionObserver' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F '[data-scene="architecture"]' docs/scifi-ui/styles/site-quantum-aurora.css
+          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/site-quantum-aurora.css
+
+      - name: Commit installed visual system
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html .github/workflows/deploy-formatx-custom-domain.yml
+          git commit -m 'Install the Quantum Aurora system across the FormatX site'
+          git push origin HEAD:master
