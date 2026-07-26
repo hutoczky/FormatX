@@ -2,210 +2,109 @@
 <html lang="hu" data-theme="dark" class="fx-intro-pending">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="FormatX Suite Pro — prémium, moduláris technikusi platform meghajtókezeléshez, rendszerdiagnosztikához, telepítéshez, biztonságos törléshez és ellenőrzött kiadásokhoz.">
-  <meta name="theme-color" content="#050608">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="FormatX Suite Pro — interaktív, ellenőrizhető technikusi platform meghajtókezeléshez, diagnosztikához, telepítéshez és biztonságos rendszerkarbantartáshoz.">
+  <meta name="theme-color" content="#05070a">
   <meta name="color-scheme" content="dark">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'self'">
-  <meta property="og:title" content="FormatX Suite Pro — Immersive Technician Platform">
-  <meta property="og:description" content="Ellenőrizhető technikusi munkafolyamatok egy karakteres, interaktív felületen.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self';base-uri 'self';object-src 'none';script-src 'self';style-src 'self';img-src 'self' data:;connect-src 'self' https://api.github.com;form-action 'self'">
+  <meta property="og:title" content="FormatX Suite Pro — APEX System Experience">
+  <meta property="og:description" content="Egy térbeli technikusi munkafolyamat, amely felderít, tervez, végrehajt és ellenőriz.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="./assets/images/formatx-technician-console.png">
-  <title data-i18n-skip>FormatX Suite Pro | Immersive Technician Platform</title>
+  <title>FormatX Suite Pro | APEX System Experience</title>
   <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
   <link rel="stylesheet" href="./styles/formatx-event-horizon.css?v=20260726-event-horizon-3">
-  <link rel="stylesheet" href="./styles/reference-commerce.css?v=20260718-reference-commerce-1">
-  <link rel="stylesheet" href="./styles/reference-performance.css?v=20260718-reference-performance-1">
-  <link rel="stylesheet" href="./styles/project-accessibility.css?v=20260720-project-accessibility-1">
-  <link rel="stylesheet" href="./styles/formatx-igloo.css?v=20260726-igloo-1">
+  <link rel="stylesheet" href="./styles/formatx-apex.css?v=20260726-apex-2">
   <script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-3"></script>
-  <script defer src="./scripts/landing.js?v=20260718-reference-commerce-1"></script>
-  <script defer src="./scripts/pricing-sync.js?v=20260726-pricing-sync-1"></script>
-  <script defer src="./scripts/formatx-igloo.js?v=20260726-igloo-1"></script>
+  <script defer src="./scripts/formatx-apex.js?v=20260726-apex-2"></script>
 </head>
-<body id="top" class="reference-commerce" data-i18n-skip>
+<body id="top">
   <div id="formatx-event-horizon" class="fx-intro-overlay" aria-hidden="true">
-    <div class="fx-intro-curtain fx-intro-curtain--top"></div>
-    <div class="fx-intro-curtain fx-intro-curtain--bottom"></div>
-    <div class="fx-intro-grid"></div>
-    <div class="fx-intro-scan"></div>
-    <div class="fx-intro-portal"></div>
-    <div class="fx-intro-flare"></div>
-    <div class="fx-intro-meta"><span>FORMATX / EVENT HORIZON</span><span>INTERFACE ORIGIN · YEAR 5000</span></div>
-    <div class="fx-intro-center">
-      <span class="fx-intro-kicker">TECHNICIAN SYSTEM AWAKENING</span>
-      <strong class="fx-intro-word"><span>FORMATX</span></strong>
-      <span class="fx-intro-subtitle">SUITE PRO · SYSTEM CORE</span>
-    </div>
-    <div class="fx-intro-progress-wrap">
-      <output data-fx-intro-output>000</output>
-      <progress data-fx-intro-progress max="100" value="0">0%</progress>
-      <span class="fx-intro-status" data-fx-intro-status>KAPCSOLAT FELÉPÍTÉSE</span>
-    </div>
+    <div class="fx-intro-curtain fx-intro-curtain--top"></div><div class="fx-intro-curtain fx-intro-curtain--bottom"></div>
+    <div class="fx-intro-grid"></div><div class="fx-intro-scan"></div><div class="fx-intro-portal"></div><div class="fx-intro-flare"></div>
+    <div class="fx-intro-meta"><span>FORMATX / APEX</span><span>CONTROLLED SYSTEM EXPERIENCE</span></div>
+    <div class="fx-intro-center"><span class="fx-intro-kicker">SYSTEM ENVIRONMENT INITIALISING</span><strong class="fx-intro-word"><span>FORMATX</span></strong><span class="fx-intro-subtitle">SUITE PRO · APEX CORE</span></div>
+    <div class="fx-intro-progress-wrap"><output data-fx-intro-output>000</output><progress data-fx-intro-progress max="100" value="0">0%</progress><span class="fx-intro-status" data-fx-intro-status>KAPCSOLAT FELÉPÍTÉSE</span></div>
   </div>
 
-  <a class="skip-link" href="#main-content" data-text="skip">Ugrás a tartalomra</a>
+  <canvas id="fx-apex-canvas" class="fx-apex-canvas" aria-hidden="true"></canvas>
+  <div class="fx-atmosphere" aria-hidden="true"><span class="grain"></span><span class="vignette"></span></div>
+  <a class="skip-link" href="#main-content" data-hu="Ugrás a tartalomra" data-en="Skip to content">Ugrás a tartalomra</a>
 
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="#top" aria-label="FormatX Suite Pro">
-        <img src="./assets/images/formatx-icon.png" width="42" height="42" alt="">
-        <span><strong>FORMATX</strong><small>SUITE PRO</small></span>
-      </a>
-      <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Menü / Menu" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span><b data-text="menu">Menü</b></button>
-      <nav id="main-nav" class="main-nav" aria-label="Fő navigáció">
-        <a href="#product" data-text="navProduct">Termék</a><a href="#features" data-text="navFeatures">Funkciók</a><a href="#solutions" data-text="navSolutions">Megoldások</a><a href="#pricing" data-text="navPricing">Árak</a><a href="#resources" data-text="navResources">Források</a><a href="#project-details" data-text="navCompany">Projekt</a>
-      </nav>
-      <div class="header-actions">
-        <div class="language-switch" role="group" aria-label="Language / Nyelv"><button type="button" data-language="hu" aria-pressed="true">HU</button><button type="button" data-language="en" aria-pressed="false">EN</button></div>
-        <a class="ghost-button" href="./support.html" data-text="support">Támogatás</a>
-        <a class="gradient-button header-buy" href="#pricing" data-text="getPro">FormatX Suite Pro</a>
-      </div>
-    </div>
+  <header class="topbar" data-reveal>
+    <a class="brand" href="#top" aria-label="FormatX Suite Pro"><img src="./assets/images/formatx-icon.png" width="38" height="38" alt=""><span><strong>FORMATX</strong><small>APEX SYSTEM</small></span></a>
+    <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Menü / Menu" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><b>Menü</b></button>
+    <nav id="main-nav" class="main-nav" aria-label="Fő navigáció">
+      <a href="#experience" data-hu="Élmény" data-en="Experience">Élmény</a><a href="#capabilities" data-hu="Képességek" data-en="Capabilities">Képességek</a><a href="#pricing" data-hu="Árak" data-en="Pricing">Árak</a><a href="#system" data-hu="Rendszer" data-en="System">Rendszer</a><a href="#resources" data-hu="Kiadás" data-en="Release">Kiadás</a>
+    </nav>
+    <div class="header-actions"><div class="language-switch" role="group" aria-label="Language / Nyelv"><button type="button" data-language="hu" aria-pressed="true">HU</button><button type="button" data-language="en" aria-pressed="false">EN</button></div><a class="header-support" href="./support.html" data-hu="Támogatás" data-en="Support">Támogatás</a><a class="button button-solid header-buy" href="#pricing" data-hu="Licenc" data-en="Licence">Licenc</a></div>
   </header>
 
+  <aside class="fx-rail" aria-label="Oldalfejezetek"><span class="fx-rail-progress"></span><a href="#hero" data-scene-link="0"><span data-hu="Mag" data-en="Core">Mag</span></a><a href="#experience" data-scene-link="1"><span data-hu="Folyamat" data-en="Flow">Folyamat</span></a><a href="#capabilities" data-scene-link="2"><span data-hu="Modulok" data-en="Modules">Modulok</span></a><a href="#pricing" data-scene-link="3"><span data-hu="Licenc" data-en="Licence">Licenc</span></a><a href="#system" data-scene-link="4"><span data-hu="Alapok" data-en="Foundation">Alapok</span></a><a href="#resources" data-scene-link="5"><span data-hu="Kiadás" data-en="Release">Kiadás</span></a></aside>
+
   <main id="main-content">
-    <section id="product" class="hero fx-igloo-hero" aria-labelledby="hero-title">
-      <canvas id="fx-hero-canvas" class="fx-hero-canvas" aria-hidden="true"></canvas>
-      <div class="fx-hero-noise" aria-hidden="true"></div>
-      <div class="fx-hero-vignette" aria-hidden="true"></div>
-      <div class="fx-hero-orbit" aria-hidden="true"></div>
-      <div class="fx-hero-index"><span>01 / 06</span><b data-fx-hu="Rendszermag" data-fx-en="System core">Rendszermag</b></div>
-
+    <section id="hero" class="scene hero" aria-labelledby="hero-title">
       <div class="hero-grid">
-        <div class="hero-copy">
-          <p class="eyebrow" data-text="heroEyebrow">A JÖVŐ TECHNIKUSI MUNKAFOLYAMATA</p>
-          <h1 id="hero-title"><span class="fx-title-primary">FormatX</span><span class="fx-title-secondary">Suite Pro</span></h1>
-          <p class="hero-tagline" data-text="heroTagline">Rendszerez. Ellenőriz. Biztonságosan végrehajt.</p>
-          <p class="hero-description" data-text="heroDescription">A FormatX teljes értékű, többplatformos technikusi rendszer meghajtókezeléshez, rendszerdiagnosztikához és rendszer-előkészítéshez. Az első aktiváláskor 5 napos licencet kap; ezt követően az érvényes licenc feltételei szerint működik tovább.</p>
-          <p class="fx-hero-note" data-fx-hu="Valós rendszeradatok · ellenőrizhető műveletek" data-fx-en="Real system data · verifiable operations">Valós rendszeradatok · ellenőrizhető műveletek</p>
-          <div class="hero-actions">
-            <a id="hero-download" class="gradient-button primary-cta" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip"><span data-text="startTrial">Teljes verzió letöltése</span><i aria-hidden="true">↗</i></a>
-            <a class="outline-button" href="/download/android" download="FormatX-Suite-Pro-Android-1.0.6.apk"><span data-text="androidApp">Android-alkalmazás letöltése</span><i aria-hidden="true">↓</i></a>
-            <a class="outline-button" href="#features"><span data-text="exploreFeatures">Funkciók megtekintése</span><i aria-hidden="true">→</i></a>
-          </div>
-          <div class="hero-assurance" aria-label="Fő képességek"><span><i>✦</i><b data-text="assuranceAi">AI-alapú segítség</b></span><span><i>◉</i><b data-text="assuranceSpeed">Átlátható munkafolyamat</b></span><span><i>⬡</i><b data-text="assuranceSecurity">Többrétegű védelem</b></span></div>
-          <div class="hero-assurance platform-status" aria-label="Platformállapot"><span><i>✓</i><b data-text="platformNow">Teljes értékű kiadás · 5 napos kezdőlicenc</b></span><span><i>◷</i><b data-text="platformLinux">Linux/Bazzite az elsődleges platform</b></span><span><i>○</i><b data-text="platformMac">Windows és macOS támogatott</b></span></div>
+        <div class="hero-copy" data-reveal>
+          <p class="kicker" data-hu="A TECHNIKUSI RENDSZER ÚJ FORMÁJA" data-en="A NEW FORM OF TECHNICIAN SYSTEM">A TECHNIKUSI RENDSZER ÚJ FORMÁJA</p>
+          <h1 id="hero-title" aria-label="FormatX Suite Pro"><span class="hero-title-main">FORMATX</span><span class="hero-title-sub">SUITE PRO</span></h1>
+          <p class="hero-lead" data-hu="Nem egyszerűen végrehajt. Előbb megérti a környezetet, megtervezi a műveletet, majd bizonyíthatóan ellenőrzi az eredményt." data-en="It does not merely execute. It understands the environment, plans the operation, then verifies the result with evidence.">Nem egyszerűen végrehajt. Előbb megérti a környezetet, megtervezi a műveletet, majd bizonyíthatóan ellenőrzi az eredményt.</p>
+          <div class="hero-actions"><a id="hero-download" class="button button-solid magnetic" href="https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip"><span data-hu="Teljes verzió letöltése" data-en="Download full version">Teljes verzió letöltése</span><i>↗</i></a><a class="button button-line magnetic" href="/download/android" download="FormatX-Suite-Pro-Android-1.0.6.apk"><span data-hu="Android alkalmazás" data-en="Android application">Android alkalmazás</span><i>↓</i></a></div>
+          <div class="hero-facts"><span><b>06</b><small data-hu="fő modul" data-en="core modules">fő modul</small></span><span><b>03</b><small data-hu="platform" data-en="platforms">platform</small></span><span><b>05</b><small data-hu="napos kezdőlicenc" data-en="day initial licence">napos kezdőlicenc</small></span></div>
         </div>
+        <div class="hero-space" aria-hidden="true"><div class="hero-label a"><span>01.04</span><b>ENVIRONMENT</b></div><div class="hero-label b"><span>92.00</span><b>RELEASE</b></div><div class="hero-label c"><span>256</span><b>INTEGRITY</b></div><div class="hero-ring"></div></div>
+      </div>
+      <a class="scroll-cue" href="#experience"><span data-hu="Belépés a rendszerbe" data-en="Enter the system">Belépés a rendszerbe</span><i></i></a>
+    </section>
 
-        <div class="core-engine" aria-label="FormatX Core Engine előnézet">
-          <div class="engine-frame frame-a" aria-hidden="true"></div><div class="engine-frame frame-b" aria-hidden="true"></div>
-          <div class="engine-header"><span>FORMATX CORE ENGINE</span><div><i></i><b>ONLINE</b><em>＋</em></div></div>
-          <div class="engine-body">
-            <nav class="engine-nav" aria-label="Core Engine modulok">
-              <a class="active" href="#product"><i>⌂</i><span data-text="engineOverview">Áttekintés</span></a><a href="#solutions"><i>⇄</i><span data-text="engineTransform">Átalakítás</span></a><a href="#resources"><i>✓</i><span data-text="engineValidate">Ellenőrzés</span></a><a href="#features"><i>⚙</i><span data-text="engineAutomate">Automatizálás</span></a><a href="#project-details"><i>⌘</i><span data-text="engineIntegrations">Integrációk</span></a><a href="#pricing"><i>◴</i><span data-text="engineInsights">Elemzések</span></a>
-            </nav>
-            <div class="engine-core-stage" aria-hidden="true">
-              <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div>
-              <div class="core-cube"><span class="cube-layer cube-1"></span><span class="cube-layer cube-2"></span><span class="cube-layer cube-3"></span><span class="cube-layer cube-4"></span><span class="cube-beacon">✦</span></div>
-              <span class="particle p1"></span><span class="particle p2"></span><span class="particle p3"></span><span class="particle p4"></span><span class="particle p5"></span>
-            </div>
-            <aside class="engine-stats">
-              <article><div><span data-text="performance">Rendszerállapot</span><strong>AKTÍV</strong></div><div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
-              <article><div><span data-text="releaseIntegrity">Kiadási integritás</span><strong>SHA256</strong></div><div class="mini-line" aria-hidden="true"></div></article>
-            </aside>
-          </div>
-          <div class="engine-footer"><div><i>◎</i><span data-text="jobsCompleted">Fő modulok</span><strong>06</strong><em>MODULÁRIS</em></div><div><i>✓</i><span data-text="successRate">Asztali kiadás</span><strong>PROTOTÍPUS</strong><em>V92</em></div><div><i>◷</i><span data-text="timeSaved">Platformok</span><strong>MULTIPLATFORM</strong><em>Linux/Bazzite · Windows · macOS</em></div></div>
+    <section id="experience" class="scene" aria-labelledby="experience-title">
+      <header class="section-heading" data-reveal><p class="section-index">02 — CONTROLLED FLOW</p><h2 id="experience-title"><span data-hu="Egy művelet." data-en="One operation.">Egy művelet.</span><em data-hu="Négy bizonyítható állapot." data-en="Four provable states.">Négy bizonyítható állapot.</em></h2></header>
+      <div class="flow">
+        <div class="flow-stage"><div class="flow-rings" aria-hidden="true"><i></i><i></i><i></i></div><div class="flow-state"><span data-flow-number>01</span><strong data-flow-title>FELDERÍTÉS</strong><small data-flow-code>ENV / READ</small></div></div>
+        <div class="flow-chapters">
+          <article data-flow="0" class="active" tabindex="0"><span>01</span><div><small>DISCOVER</small><h3 data-hu="A rendszer előbb feltérképezi a valós környezetet." data-en="The system maps the real environment first.">A rendszer előbb feltérképezi a valós környezetet.</h3><p data-hu="Meghajtók, fájlrendszerek, hardverek és szenzoradatok egyetlen nézetben, kitalált mérőszámok nélkül." data-en="Drives, file systems, hardware and sensor data in one view, without fabricated metrics.">Meghajtók, fájlrendszerek, hardverek és szenzoradatok egyetlen nézetben, kitalált mérőszámok nélkül.</p></div></article>
+          <article data-flow="1" tabindex="0"><span>02</span><div><small>PLAN</small><h3 data-hu="A kockázatos műveletből átlátható terv lesz." data-en="A risky operation becomes a transparent plan.">A kockázatos műveletből átlátható terv lesz.</h3><p data-hu="A célmeghajtó, partíciós séma, fájlrendszer és ellenőrzési lépések a végrehajtás előtt láthatók." data-en="The target, partition scheme, file system and verification steps are visible before execution.">A célmeghajtó, partíciós séma, fájlrendszer és ellenőrzési lépések a végrehajtás előtt láthatók.</p></div></article>
+          <article data-flow="2" tabindex="0"><span>03</span><div><small>EXECUTE</small><h3 data-hu="A végrehajtás kontrollált és megszakítható." data-en="Execution remains controlled and interruptible.">A végrehajtás kontrollált és megszakítható.</h3><p data-hu="Valós idejű állapot, egyértelmű megerősítések és naplózott műveleti lépések." data-en="Live state, explicit confirmations and logged operational steps.">Valós idejű állapot, egyértelmű megerősítések és naplózott műveleti lépések.</p></div></article>
+          <article data-flow="3" tabindex="0"><span>04</span><div><small>VERIFY</small><h3 data-hu="Minden eredmény visszakövethető." data-en="Every outcome remains traceable.">Minden eredmény visszakövethető.</h3><p data-hu="SHA-256, Ed25519, állapotjelentés és dokumentálható végeredmény." data-en="SHA-256, Ed25519, state reports and a documentable result.">SHA-256, Ed25519, állapotjelentés és dokumentálható végeredmény.</p></div></article>
         </div>
       </div>
-      <a class="fx-scroll-cue" href="#experience"><span data-fx-hu="Felfedezés" data-fx-en="Explore">Felfedezés</span><i></i></a>
     </section>
 
-    <section id="experience" class="fx-story" data-active="0" aria-labelledby="fx-story-title">
-      <div class="fx-story-sticky">
-        <p class="fx-story-label" data-fx-hu="Egyetlen ellenőrzött folyamat" data-fx-en="One controlled workflow">Egyetlen ellenőrzött folyamat</p>
-        <h2 id="fx-story-title" class="fx-story-title"><span data-fx-hu="Felderít." data-fx-en="Discover.">Felderít.</span><span data-fx-hu="Megtervez." data-fx-en="Plan.">Megtervez.</span><span data-fx-hu="Ellenőriz." data-fx-en="Verify.">Ellenőriz.</span></h2>
-        <div class="fx-story-crystal" aria-hidden="true"><span></span><span></span><span></span></div>
-      </div>
-      <div class="fx-story-chapters">
-        <article data-fx-story="0"><small>01 — DISCOVER</small><h3 data-fx-hu="A rendszer előbb megérti a környezetet." data-fx-en="The system understands the environment first.">A rendszer előbb megérti a környezetet.</h3><p data-fx-hu="Meghajtók, hardverek, fájlrendszerek és szenzoradatok egyetlen technikusi nézetben, kitalált mérőszámok nélkül." data-fx-en="Drives, hardware, file systems and sensor data in one technician view, without fabricated metrics.">Meghajtók, hardverek, fájlrendszerek és szenzoradatok egyetlen technikusi nézetben, kitalált mérőszámok nélkül.</p></article>
-        <article data-fx-story="1"><small>02 — PLAN</small><h3 data-fx-hu="A veszélyes műveletből átlátható terv lesz." data-fx-en="A risky operation becomes a transparent plan.">A veszélyes műveletből átlátható terv lesz.</h3><p data-fx-hu="A célmeghajtó, partíciós séma, fájlrendszer és ellenőrzési lépések a végrehajtás előtt egyértelműen láthatók." data-fx-en="The target drive, partition scheme, file system and verification steps are explicit before execution.">A célmeghajtó, partíciós séma, fájlrendszer és ellenőrzési lépések a végrehajtás előtt egyértelműen láthatók.</p></article>
-        <article data-fx-story="2"><small>03 — VERIFY</small><h3 data-fx-hu="Minden eredmény visszakövethető." data-fx-en="Every outcome remains traceable.">Minden eredmény visszakövethető.</h3><p data-fx-hu="Valós idejű állapotjelzés, naplózás, SHA-256- és Ed25519-integritás, valamint dokumentálható végeredmény." data-fx-en="Live state feedback, audit logs, SHA-256 and Ed25519 integrity, plus a documentable final result.">Valós idejű állapotjelzés, naplózás, SHA-256- és Ed25519-integritás, valamint dokumentálható végeredmény.</p></article>
+    <section id="capabilities" class="scene" aria-labelledby="capabilities-title">
+      <header class="section-heading" data-reveal><p class="section-index">03 — CAPABILITIES</p><h2 id="capabilities-title"><span data-hu="Nem eszközök halmaza." data-en="Not a collection of tools.">Nem eszközök halmaza.</span><em data-hu="Egy összefüggő rendszer." data-en="One connected system.">Egy összefüggő rendszer.</em></h2></header>
+      <div class="cards">
+        <article class="card" data-reveal><span>01</span><i>↧</i><h3>ISO → USB</h3><p data-hu="GPT vagy MBR, opcionális visszaellenőrzés és egyértelmű állapot." data-en="GPT or MBR, optional verification and explicit state.">GPT vagy MBR, opcionális visszaellenőrzés és egyértelmű állapot.</p><b>WRITE / VERIFY</b></article>
+        <article class="card" data-reveal><span>02</span><i>◫</i><h3 data-hu="Formázás" data-en="Formatting">Formázás</h3><p>NTFS · FAT32 · exFAT · ReFS · EXT4</p><b>QUICK / DEEP</b></article>
+        <article class="card" data-reveal><span>03</span><i>▦</i><h3 data-hu="Partíciótervező" data-en="Partition planner">Partíciótervező</h3><p data-hu="Előnézet, alkalmazás és támogatott helyzetben visszavonás." data-en="Preview, apply and undo where supported.">Előnézet, alkalmazás és támogatott helyzetben visszavonás.</p><b>PLAN / PREVIEW</b></article>
+        <article class="card" data-reveal><span>04</span><i>⌫</i><h3 data-hu="Biztonságos törlés" data-en="Secure erase">Biztonságos törlés</h3><p data-hu="Többlépcsős célmeghajtó-védelem és naplózható felülírás." data-en="Multi-step target protection and auditable overwrite.">Többlépcsős célmeghajtó-védelem és naplózható felülírás.</p><b>CONFIRM / ERASE</b></article>
+        <article class="card" data-reveal><span>05</span><i>◉</i><h3>SMART</h3><p data-hu="Meghajtó-egészség, hőmérséklet, hibaszektor és felszíni állapot." data-en="Drive health, temperature, bad sectors and surface state.">Meghajtó-egészség, hőmérséklet, hibaszektor és felszíni állapot.</p><b>READ / ANALYSE</b></article>
+        <article class="card" data-reveal><span>06</span><i>✦</i><h3 data-hu="AI segítség" data-en="AI guidance">AI segítség</h3><p data-hu="Magyarázatot és döntéstámogatást ad, de veszélyes műveletet nem indít önállóan." data-en="Provides guidance but never starts risky operations autonomously.">Magyarázatot és döntéstámogatást ad, de veszélyes műveletet nem indít önállóan.</p><b>EXPLAIN / GUIDE</b></article>
       </div>
     </section>
 
-    <section id="pricing" class="commerce-zone">
-      <div class="pricing-panel">
-        <div class="panel-title"><span data-text="pricingTitle">VÁLASZD KI A MUNKÁDHOZ ILLŐ LICENCCSOMAGOT</span></div>
-        <div class="price-cards">
-          <article class="price-card"><div class="plan-icon">♙</div><h2 data-text="planLite">Business Lite</h2><p data-text="planLiteCopy">Egyéni technikusoknak és kisebb feladatokra</p><div class="price"><strong>22 €</strong><span data-text="perMonth">/ hónap</span></div><small>7 900 Ft / hó</small><ul><li data-text="lite1">1 technikus</li><li data-text="lite2">Legfeljebb 10 gép</li><li data-text="lite3">Minden alapfunkció</li><li data-text="lite4">Alapszintű támogatás</li></ul><a href="./checkout.html?plan=business_lite&cycle=monthly&currency=EUR" data-text="choosePlan">Csomag kiválasztása</a></article>
-          <article class="price-card featured"><div class="popular" data-text="mostPopular">LEGNÉPSZERŰBB</div><div class="plan-icon">♧</div><h2 data-text="planPro">Business Pro</h2><p data-text="planProCopy">Növekvő technikusi és üzleti környezethez</p><div class="price"><strong>44 €</strong><span data-text="perMonth">/ hónap</span></div><small>15 900 Ft / hó</small><ul><li data-text="pro1">3 technikus</li><li data-text="pro2">Legfeljebb 50 gép</li><li data-text="pro3">Haladó automatizálás</li><li data-text="pro4">Elsőbbségi támogatás</li></ul><a href="./checkout.html?plan=business_pro&cycle=monthly&currency=EUR" data-text="choosePlan">Csomag kiválasztása</a></article>
-          <article class="price-card"><div class="plan-icon">⬡</div><h2 data-text="planTeam">Technician Team</h2><p data-text="planTeamCopy">Nagyobb csapatok és több rendszer kezeléséhez</p><div class="price"><strong>83 €</strong><span data-text="perMonth">/ hónap</span></div><small>29 900 Ft / hó</small><ul><li data-text="team1">5 technikus</li><li data-text="team2">Legfeljebb 150 gép</li><li data-text="team3">Teljes modulkészlet</li><li data-text="team4">Kiemelt támogatás</li></ul><a href="./checkout.html?plan=technician_team&cycle=monthly&currency=EUR" data-text="choosePlan">Csomag kiválasztása</a></article>
-        </div>
-        <div class="pricing-notes"><span>✓ <b data-text="trialNote">5 napos teljes értékű kezdőlicenc</b></span><span>✓ <b data-text="noCard">Nincs bankkártya-adatkezelés</b></span><span>✓ <b data-text="cancelAnytime">Nincs automatikus megújítás</b></span></div>
+    <section id="pricing" class="scene" aria-labelledby="pricing-title">
+      <header class="section-heading" data-reveal><p class="section-index">04 — LICENSING</p><h2 id="pricing-title"><span data-hu="A rendszer mérete igazodik" data-en="The system scales">A rendszer mérete igazodik</span><em data-hu="a munkádhoz." data-en="to your work.">a munkádhoz.</em></h2></header>
+      <div class="pricing">
+        <article class="price-card" data-reveal><header><span>01</span><b>INDIVIDUAL</b></header><h3>Business Lite</h3><p data-hu="Egyéni technikusoknak és kisebb feladatokra." data-en="For individual technicians and smaller workloads.">Egyéni technikusoknak és kisebb feladatokra.</p><div class="price"><strong>22 €</strong><span data-hu="/ hónap" data-en="/ month">/ hónap</span><small>7 900 Ft / hó</small></div><ul><li data-hu="1 technikus" data-en="1 technician">1 technikus</li><li data-hu="Legfeljebb 10 gép" data-en="Up to 10 devices">Legfeljebb 10 gép</li><li data-hu="Minden alapfunkció" data-en="All standard features">Minden alapfunkció</li></ul><a class="button button-line" href="./checkout.html?plan=business_lite&cycle=monthly&currency=EUR" data-hu="Csomag kiválasztása" data-en="Choose plan">Csomag kiválasztása</a></article>
+        <article class="price-card featured" data-reveal><header><span>02</span><b>RECOMMENDED</b></header><h3>Business Pro</h3><p data-hu="Növekvő technikusi és üzleti környezethez." data-en="For growing technician and business environments.">Növekvő technikusi és üzleti környezethez.</p><div class="price"><strong>44 €</strong><span data-hu="/ hónap" data-en="/ month">/ hónap</span><small>15 900 Ft / hó</small></div><ul><li data-hu="3 technikus" data-en="3 technicians">3 technikus</li><li data-hu="Legfeljebb 50 gép" data-en="Up to 50 devices">Legfeljebb 50 gép</li><li data-hu="Haladó automatizálás" data-en="Advanced automation">Haladó automatizálás</li></ul><a class="button button-solid" href="./checkout.html?plan=business_pro&cycle=monthly&currency=EUR" data-hu="Business Pro kiválasztása" data-en="Choose Business Pro">Business Pro kiválasztása</a></article>
+        <article class="price-card" data-reveal><header><span>03</span><b>TEAM</b></header><h3>Technician Team</h3><p data-hu="Nagyobb csapatok és több rendszer kezeléséhez." data-en="For larger teams managing more systems.">Nagyobb csapatok és több rendszer kezeléséhez.</p><div class="price"><strong>83 €</strong><span data-hu="/ hónap" data-en="/ month">/ hónap</span><small>29 900 Ft / hó</small></div><ul><li data-hu="5 technikus" data-en="5 technicians">5 technikus</li><li data-hu="Legfeljebb 150 gép" data-en="Up to 150 devices">Legfeljebb 150 gép</li><li data-hu="Teljes modulkészlet" data-en="Complete module set">Teljes modulkészlet</li></ul><a class="button button-line" href="./checkout.html?plan=technician_team&cycle=monthly&currency=EUR" data-hu="Csomag kiválasztása" data-en="Choose plan">Csomag kiválasztása</a></article>
       </div>
-
-      <aside class="checkout-preview" aria-labelledby="checkout-preview-title">
-        <div class="panel-title"><span id="checkout-preview-title" data-text="checkoutPreview">BIZTONSÁGOS FIZETÉSI FOLYAMAT</span></div>
-        <div class="checkout-card">
-          <div class="checkout-summary">
-            <div class="currency-tabs" role="group" aria-label="Deviza"><button type="button" data-currency="HUF" aria-pressed="true">HUF</button><button type="button" data-currency="EUR" aria-pressed="false">EUR</button></div>
-            <div class="checkout-price-box"><span data-text="selectedPlan">Business Pro-licenc</span><strong id="preview-main-price">15 900 Ft</strong><small data-text="monthlyAccess">1 hónapos hozzáférés</small></div>
-            <div class="checkout-conversion"><span id="preview-secondary-label" data-text="amountEur">Összeg EUR-ban</span><strong id="preview-secondary-price">44 €</strong><small>✓ <b data-text="fixedAmount">Előre rögzített összeg</b></small></div>
-            <a id="preview-checkout-link" class="checkout-open" href="./checkout.html?plan=business_pro&cycle=monthly&currency=HUF" data-text="openCheckout">Fizetés megnyitása</a>
-          </div>
-          <a id="qr-preview-link" class="qr-preview" href="./checkout.html?plan=business_pro&cycle=monthly&currency=HUF"><span class="scan-label" data-text="scanToPay">FIZETÉS QR-KÓDDAL</span><small data-text="secureQr">Biztonságos banki átutalás</small><div class="qr-shell" aria-hidden="true"><div class="qr-code"><i class="finder f1"></i><i class="finder f2"></i><i class="finder f3"></i><span class="qr-logo"><img src="./assets/images/formatx-icon.png" width="34" height="34" alt=""></span></div></div><em data-text="instantSecure">Rögzített összeg · HUF vagy EUR · Kézi ellenőrzés</em></a>
-        </div>
-      </aside>
+      <div class="payment" data-reveal><div><p class="section-index" data-hu="BIZTONSÁGOS FIZETÉSI FOLYAMAT" data-en="SECURE PAYMENT FLOW">BIZTONSÁGOS FIZETÉSI FOLYAMAT</p><h3 data-hu="Nincs automatikus megújítás. Nincs bankkártyaadat-kezelés." data-en="No automatic renewal. No payment-card data processing.">Nincs automatikus megújítás. Nincs bankkártyaadat-kezelés.</h3><p data-hu="Rögzített HUF- vagy EUR-összeg, kézi banki ellenőrzéssel." data-en="Fixed HUF or EUR amount with manual bank verification.">Rögzített HUF- vagy EUR-összeg, kézi banki ellenőrzéssel.</p></div><div class="payment-console"><div class="currency-tabs" role="group" aria-label="Deviza / Currency"><button type="button" data-currency="HUF" aria-pressed="true">HUF</button><button type="button" data-currency="EUR" aria-pressed="false">EUR</button></div><span data-hu="Business Pro licenc" data-en="Business Pro licence">Business Pro licenc</span><strong id="preview-main-price">15 900 Ft</strong><small id="preview-secondary-label">Összeg EUR-ban</small><b id="preview-secondary-price">44 €</b><a id="preview-checkout-link" class="button button-solid" href="./checkout.html?plan=business_pro&cycle=monthly&currency=HUF" data-hu="Fizetés megnyitása" data-en="Open payment">Fizetés megnyitása</a></div></div>
     </section>
 
-    <section id="features" class="feature-strip"><div class="section-label" data-text="featuresTitle">HATÉKONY FUNKCIÓK. ÁTLÁTHATÓ MUNKAFOLYAMATOK.</div><div class="feature-cards">
-      <article><i>⬡</i><div><h3 data-text="feature1Title">Meghajtókezelő eszköztár</h3><p data-text="feature1Copy">Ellenőrizhető meghajtó- és fájlműveletek a teljes értékű, licencalapú kiadásban.</p></div></article><article><i>◉</i><div><h3 data-text="feature2Title">Rendszerdiagnosztika</h3><p data-text="feature2Copy">Valós CPU-, memória-, hálózati és tárhelyadatok.</p></div></article><article><i>⌘</i><div><h3 data-text="feature3Title">Munkafolyamat-automatizálás</h3><p data-text="feature3Copy">Telepítés, ellenőrzés és frissítés egységes folyamatban.</p></div></article><article><i>⬢</i><div><h3 data-text="feature4Title">Többrétegű védelem</h3><p data-text="feature4Copy">Megerősítés, naplózás, SHA-256- és Ed25519-ellenőrzés.</p></div></article><article><i>▥</i><div><h3 data-text="feature5Title">Valós idejű áttekintés</h3><p data-text="feature5Copy">Mérhető rendszerállapotok kitalált adatok nélkül.</p></div></article><article><i>⌁</i><div><h3 data-text="feature6Title">Platformállapot</h3><p data-text="feature6Copy">A teljes értékű kiadás Linux/Bazzite, Windows és macOS rendszeren is használható. Az 5 napos kezdőlicenc után az érvényes licenc feltételei szerint működik tovább; a Linux/Bazzite az elsődlegesen támogatott platform.</p></div></article>
-    </div></section>
-
-    <section id="project-details" class="project-details" aria-labelledby="project-details-title">
-      <header class="project-intro">
-        <p class="project-kicker">A projekt teljes bemutatása</p>
-        <h2 id="project-details-title">Mi a FormatX Suite Pro?</h2>
-        <p class="project-lead">A FormatX Suite Pro moduláris, ellenőrizhető technikusi platform. Egyetlen, egységes felületen kapcsolja össze a meghajtókezelést, a rendszerdiagnosztikát, a telepítési feladatokat, a biztonságos törlést és a kiadások ellenőrzését. A cél egy teljes karbantartási és rendszer-előkészítési munkakörnyezet létrehozása, nem csupán egy formázóprogram elkészítése.</p>
-        <div class="project-pill-row"><span>Moduláris felépítés</span><span>Auditálható műveletek</span><span>Linux/Bazzite: elsődleges célplatform</span><span>Webes és Android-hozzáférés</span><span>GitHub-alapú kiadások</span><span>Magyar és angol kezelőfelület</span></div>
-      </header>
-
-      <h3 class="project-section-title">A rendszer fő moduljai</h3>
-      <div class="project-module-grid">
-        <article><i>⇩</i><h3>ISO → USB írás</h3><p>Rendszerképek előkészítése és USB-meghajtóra írása GPT vagy MBR partíciós sémával, opcionális visszaellenőrzéssel és egyértelmű műveleti állapotokkal.</p></article>
-        <article><i>◫</i><h3>Gyors és mély formázás</h3><p>NTFS, FAT32, exFAT, ReFS és EXT4 fájlrendszerek kezelése. A gyors és teljes formázási módok külön választhatók, a veszélyes műveletek pedig megerősítést igényelnek.</p></article>
-        <article><i>▦</i><h3>Partíciótervező</h3><p>A meglévő lemezszerkezet betöltése, új partíciós terv összeállítása, módosítások előnézete, alkalmazása és a támogatott helyzetekben visszavonása.</p></article>
-        <article><i>⌫</i><h3>Biztonságos törlés</h3><p>Meghajtók ellenőrzött adattörlése teljes felülírási lehetőséggel, naplózható folyamatokkal és a téves célmeghajtó kiválasztását csökkentő védelmi lépésekkel.</p></article>
-        <article><i>◉</i><h3>SMART és felszíni vizsgálat</h3><p>Meghajtó-egészség, hőmérséklet, SMART állapot, hibaszektorok és felületi problémák áttekintése a megelőző karbantartás támogatására.</p></article>
-        <article><i>⌁</i><h3>Rendszerdiagnosztika</h3><p>CPU-, RAM-, GPU-, tárhely-, hálózati és szenzoradatok gyors vagy részletes megjelenítése, valódi mért értékekkel és egységes technikusi nézettel.</p></article>
-        <article><i>▥</i><h3>Kétpaneles fájlkezelő</h3><p>Másolás, áthelyezés, törlés, mappakezelés, ZIP-folyamatok és FTP-kapcsolatok egy munkafelületen, hogy a karbantartási feladatokhoz ne kelljen több külön program.</p></article>
-        <article><i>✦</i><h3>AI-alapú segítség és támogatás</h3><p>Elkülönített segítségpanel a FormatX Project AI és további támogatási lehetőségek eléréséhez. Az AI magyarázatot és döntéstámogatást ad, de nem indít automatikusan meghajtóműveleteket.</p></article>
-      </div>
-
-      <h3 class="project-section-title">Egységes technikusi munkafolyamat</h3>
-      <div class="project-workflow">
-        <article><h3>Felderítés</h3><p>A rendszer és a meghajtók azonosítása, állapotuk ellenőrzése, a releváns hardver- és fájlrendszeradatok összegyűjtése.</p></article>
-        <article><h3>Tervezés</h3><p>A kívánt művelet, partíciós séma, fájlrendszer, telepítési forrás és biztonsági ellenőrzések kiválasztása.</p></article>
-        <article><h3>Végrehajtás</h3><p>A művelet kontrollált indítása, valós idejű állapotjelzéssel, naplózással, megerősítésekkel és megszakításkezeléssel.</p></article>
-        <article><h3>Ellenőrzés</h3><p>Az eredmény visszaellenőrzése, integritásvizsgálat, állapotjelentés és a kiadás vagy karbantartási feladat dokumentálása.</p></article>
-      </div>
-
-      <h3 class="project-section-title">Technológiai és működési alapok</h3>
-      <div class="project-foundation-grid">
-        <article><h3>Platform és architektúra</h3><p>A jelenlegi asztali prototípus Windows alatt működik. A natív Linux/Bazzite-alkalmazás fejlesztés alatt áll, és ez a projekt következő elsődleges célja. A macOS-verzió későbbi fejlesztési terv. A weboldal és az Android-alkalmazás már használható.</p><ul><li>Moduláris szolgáltatások és elkülönített felületi részek</li><li>Webes Worker-kiszolgálás és statikus eszközök</li><li>Android WebView-kliens tartalék GitHub-oldallal</li></ul></article>
-        <article><h3>Biztonság és ellenőrizhetőség</h3><p>A lemezműveletek kiemelt kockázatúak, ezért a rendszer célja az egyértelmű célmeghajtó-azonosítás, a többlépcsős megerősítés és a visszakövethető állapotok biztosítása.</p><ul><li>SHA256 és Ed25519 integritás-ellenőrzés</li><li>Műveleti naplózás és kiadási állapotok</li><li>Bankkártyaadatok nélküli, kézi banki fizetési folyamat</li></ul></article>
-        <article><h3>Kiadás, támogatás és licenc</h3><p>A stabil csomagok és frissítési információk GitHub Releases csatornán jelennek meg. A projekt saját, nem továbbterjeszthető licencet használ, a támogatás és hibajelentés pedig nyilvános GitHub-folyamatokra épül.</p><ul><li>Ellenőrzött GitHub Release csomagok</li><li>Nyilvános hibajegyek és projektállapot</li><li>FormatX Custom License – Non-Redistributable Edition</li></ul></article>
-      </div>
-
-      <p class="project-note"><strong>Fontos:</strong> a FormatX veszélyes meghajtóműveleteket is képes előkészíteni vagy végrehajtani. Minden formázás, partíciómódosítás és biztonságos törlés előtt kötelező a célmeghajtó, a mentések és a műveleti terv ellenőrzése.</p>
+    <section id="system" class="scene" aria-labelledby="system-title">
+      <header class="section-heading" data-reveal><p class="section-index">05 — FOUNDATION</p><h2 id="system-title"><span data-hu="A látvány mögött" data-en="Behind the experience">A látvány mögött</span><em data-hu="ellenőrizhető rendszer áll." data-en="is a verifiable system.">ellenőrizhető rendszer áll.</em></h2></header>
+      <div class="system-grid"><article data-reveal><span>01</span><h3 data-hu="Platform" data-en="Platform">Platform</h3><p data-hu="Linux/Bazzite az elsődleges platform. Windows, macOS, web és Android hozzáférés támogatott." data-en="Linux/Bazzite is primary. Windows, macOS, web and Android access are supported.">Linux/Bazzite az elsődleges platform. Windows, macOS, web és Android hozzáférés támogatott.</p></article><article data-reveal><span>02</span><h3 data-hu="Biztonság" data-en="Safety">Biztonság</h3><p data-hu="Célmeghajtó-azonosítás, többlépcsős megerősítés, naplózás, SHA-256 és Ed25519." data-en="Target identification, multi-step confirmation, logs, SHA-256 and Ed25519.">Célmeghajtó-azonosítás, többlépcsős megerősítés, naplózás, SHA-256 és Ed25519.</p></article><article data-reveal><span>03</span><h3 data-hu="Kiadás" data-en="Release">Kiadás</h3><p data-hu="Ellenőrzött GitHub Release csomagok, nyilvános hibajegyek és saját licenc." data-en="Verified GitHub Release packages, public issues and a custom licence.">Ellenőrzött GitHub Release csomagok, nyilvános hibajegyek és saját licenc.</p></article></div>
+      <div class="marquee" aria-hidden="true"><span>FORMATX / VERIFY BEFORE EXECUTE / FORMATX / VERIFY BEFORE EXECUTE / FORMATX / VERIFY BEFORE EXECUTE / </span></div>
     </section>
 
-    <section id="solutions" class="trust-strip">
-      <div class="trust-technologies"><span class="section-label" data-text="trustedTitle">ELLENŐRIZHETŐ TECHNOLÓGIAI ALAPOK</span><div><b>WINDOWS · ELÉRHETŐ PROTOTÍPUS</b><b>LINUX / BAZZITE · FEJLESZTÉS ALATT</b><b>macOS · KÉSŐBB TERVEZETT</b><b>GITHUB RELEASES</b><b>SHA256</b><b>ED25519</b></div></div>
-      <div class="trust-promises"><article><i>⬡</i><div><strong data-text="trust1Title">Ellenőrzött kiadás</strong><span data-text="trust1Copy">GitHub-kiadások és ellenőrzőösszegek</span></div></article><article><i>◉</i><div><strong data-text="trust2Title">Közvetlen támogatás</strong><span data-text="trust2Copy">Nyilvános hibajegy és licenctámogatás</span></div></article><article><i>▣</i><div><strong data-text="trust3Title">Adatvédelem</strong><span data-text="trust3Copy">Nincs bankkártyaadat-kezelés</span></div></article></div>
+    <section id="resources" class="scene" aria-labelledby="release-title">
+      <div class="release-layout" data-reveal><div><p class="section-index">06 — VERIFIED RELEASE</p><h2 id="release-title" data-hu="A legújabb ellenőrzött kiadás." data-en="The latest verified release.">A legújabb ellenőrzött kiadás.</h2><p data-hu="A stabil csomagok és kiadási információk a FormatX GitHub Releases csatornáján jelennek meg." data-en="Stable packages and release information are published through FormatX GitHub Releases.">A stabil csomagok és kiadási információk a FormatX GitHub Releases csatornáján jelennek meg.</p></div><div class="release-card"><span data-hu="AKTUÁLIS KIADÁS" data-en="CURRENT RELEASE">AKTUÁLIS KIADÁS</span><strong id="release-name">FormatX Suite Pro V92</strong><small id="release-published">GitHub Releases</small><a id="release-page-link" class="button button-line" href="https://github.com/hutoczky/FormatX-Updates/releases/tag/v92" target="_blank" rel="noopener noreferrer" data-hu="Kiadási részletek" data-en="Release details">Kiadási részletek</a></div></div>
+      <div class="particle-footer" aria-hidden="true"><canvas id="fx-particle-canvas"></canvas><span>FORMATX</span></div>
+      <p class="loop-note" data-hu="∞ Görgess tovább — a rendszer újraindul" data-en="∞ Keep scrolling — the system begins again">∞ Görgess tovább — a rendszer újraindul</p>
     </section>
-
-    <section id="resources" class="release-band"><div><span data-text="releaseChannel">ELLENŐRZÖTT KIADÁSI CSATORNA</span><strong id="release-name">FormatX Suite Pro V92</strong><small id="release-published">GitHub Releases</small></div><a id="release-page-link" href="https://github.com/hutoczky/FormatX-Updates/releases/tag/v92" target="_blank" rel="noopener noreferrer" data-text="releaseDetails">Kiadási részletek →</a></section>
   </main>
 
-  <footer id="company" class="site-footer">
-    <div class="footer-brand"><a class="brand" href="#top"><img src="./assets/images/formatx-icon.png" width="38" height="38" alt=""><span><strong>FORMATX</strong><small>SUITE PRO</small></span></a><p data-text="footerCopy">Technikusi platform formázáshoz, rendszerdiagnosztikához, telepítéshez és ellenőrzött karbantartási feladatokhoz.</p></div>
-    <div class="footer-column"><strong data-text="footerProduct">TERMÉK</strong><a href="#product" data-text="overview">Áttekintés</a><a href="#features" data-text="whatsNew">Funkciók</a><a href="#project-details">Projektleírás</a><a href="#pricing" data-text="roadmap">Csomagok</a></div>
-    <div class="footer-column"><strong data-text="footerResources">FORRÁSOK</strong><a href="./support.html" data-text="documentation">Támogatás</a><a href="https://github.com/hutoczky/FormatX" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/hutoczky/FormatX/issues" target="_blank" rel="noopener noreferrer" data-text="guides">Hibajegyek</a><a href="https://github.com/hutoczky/FormatX-Updates/releases" target="_blank" rel="noopener noreferrer" data-text="community">Kiadások</a></div>
-    <div class="footer-column"><strong data-text="footerLegal">JOGI</strong><a href="./privacy.html" data-text="privacy">Adatvédelem</a><a href="./terms.html" data-text="terms">Felhasználási feltételek</a><a href="./support.html" data-text="security">Biztonság</a><a href="./checkout.html" data-text="checkout">Checkout</a></div>
-    <div class="footer-updates"><strong data-text="stayUpdated">NAPRAKÉSZ INFORMÁCIÓK</strong><p data-text="updatesCopy">A legújabb elérhető kiadás és a projekt állapota a GitHub kiadási csatornáján követhető.</p><a href="https://github.com/hutoczky/FormatX-Updates/releases" target="_blank" rel="noopener noreferrer" data-text="followReleases">Kiadások követése →</a></div>
-    <div class="footer-bottom"><span>© 2026 Hutóczky József · FormatX Suite Pro</span><a href="#top" data-text="backTop">Vissza a tetejére ↑</a></div>
-  </footer>
+  <footer class="site-footer"><div class="footer-brand"><a class="brand" href="#top"><img src="./assets/images/formatx-icon.png" width="34" height="34" alt=""><span><strong>FORMATX</strong><small>APEX SYSTEM</small></span></a><p data-hu="Ellenőrizhető technikusi platform formázáshoz, diagnosztikához, telepítéshez és karbantartáshoz." data-en="A verifiable technician platform for formatting, diagnostics, deployment and maintenance.">Ellenőrizhető technikusi platform formázáshoz, diagnosztikához, telepítéshez és karbantartáshoz.</p></div><nav><a href="#experience" data-hu="Élmény" data-en="Experience">Élmény</a><a href="#capabilities" data-hu="Képességek" data-en="Capabilities">Képességek</a><a href="#pricing" data-hu="Árak" data-en="Pricing">Árak</a><a href="./support.html" data-hu="Támogatás" data-en="Support">Támogatás</a></nav><nav><a href="./privacy.html" data-hu="Adatvédelem" data-en="Privacy">Adatvédelem</a><a href="./terms.html" data-hu="Feltételek" data-en="Terms">Feltételek</a><a href="https://github.com/hutoczky/FormatX" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/hutoczky/FormatX/issues" target="_blank" rel="noopener noreferrer" data-hu="Hibajegyek" data-en="Issues">Hibajegyek</a></nav><div class="footer-bottom"><span>© 2026 Hutóczky József · FormatX Suite Pro</span><a href="#top" data-hu="Vissza a tetejére ↑" data-en="Back to top ↑">Vissza a tetejére ↑</a></div></footer>
 </body>
 </html>
