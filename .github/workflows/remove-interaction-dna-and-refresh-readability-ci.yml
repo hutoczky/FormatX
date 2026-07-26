@@ -1,0 +1,149 @@
+name: Remove interaction DNA and refresh readability CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/remove-interaction-dna-and-refresh-readability-ci.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Remove interaction DNA module and update validations
+        shell: python
+        run: |
+          from pathlib import Path
+          import json
+          import re
+
+          def replace_required(text, old, new, label):
+              if old not in text:
+                  raise SystemExit(f'Missing patch anchor: {label}')
+              return text.replace(old, new, 1)
+
+          validate_path = Path('.github/workflows/validate-year-5000.yml')
+          validate = validate_path.read_text(encoding='utf-8')
+          validate = validate.replace('      - "docs/scifi-ui/scripts/causal-memory-field.js"\n', '')
+          validate = validate.replace('      - "docs/scifi-ui/styles/causal-memory-field.css"\n', '')
+          validate = validate.replace('          node --check docs/scifi-ui/scripts/causal-memory-field.js\n', '')
+          validate = re.sub(
+              r'\n      - name: Validate causal memory field\n.*?(?=\n      - name: Validate causal hover animation)',
+              '\n',
+              validate,
+              flags=re.S,
+          )
+          validate = validate.replace("            echo '- Causal session memory: PASS'\n", '')
+          validate = validate.replace("            echo '- Interaction DNA generation: PASS'\n", '')
+          validate = validate.replace('            "causalSessionMemory": true,\n', '')
+          validate = validate.replace('            "interactionDnaGeneration": true,\n', '')
+          validate = replace_required(
+              validate,
+              '      - "docs/scifi-ui/styles/causal-memory-boot.css"\n',
+              '      - "docs/scifi-ui/styles/causal-memory-boot.css"\n      - "docs/scifi-ui/styles/site-readability-audit.css"\n',
+              'readability validation path',
+          )
+          readability_step = '''\n      - name: Validate full-page readability guard\n        shell: bash\n        run: |\n          set -euo pipefail\n          grep -F '.reference-commerce .price-card {' docs/scifi-ui/styles/site-readability-audit.css\n          grep -F 'position: static !important' docs/scifi-ui/styles/site-readability-audit.css\n          grep -F 'grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important' docs/scifi-ui/styles/site-readability-audit.css\n          grep -F '.fx5k-detail-panel {' docs/scifi-ui/styles/site-readability-audit.css\n          grep -F "SITE_READABILITY_VERSION = '20260726-site-readability-1'" billing-worker/src/production-with-license.js\n          ! grep -R -F 'INTERAKCIÓS DNS' docs billing-worker/src\n          ! grep -R -F 'causal-memory-field' docs billing-worker/src\n'''
+          validate = replace_required(
+              validate,
+              '\n      - name: Validate readability protection\n',
+              readability_step + '\n      - name: Validate readability protection\n',
+              'readability step insertion',
+          )
+          validate = validate.replace(
+              "            echo '- Firefox/Linux glyph protection: PASS'\n",
+              "            echo '- Firefox/Linux glyph protection: PASS'\n            echo '- Full-page text collision guard: PASS'\n",
+          )
+          validate = validate.replace(
+              '            "firefoxLinuxGlyphProtection": true\n',
+              '            "firefoxLinuxGlyphProtection": true,\n            "fullPageTextCollisionGuard": true\n',
+          )
+          validate_path.write_text(validate, encoding='utf-8')
+
+          deploy_path = Path('.github/workflows/deploy-formatx-custom-domain.yml')
+          deploy = deploy_path.read_text(encoding='utf-8')
+          deploy = deploy.replace('              "docs/scifi-ui/scripts/causal-memory-field.js",\n', '')
+          deploy = deploy.replace('              "docs/scifi-ui/styles/causal-memory-field.css",\n', '')
+          deploy = replace_required(
+              deploy,
+              '              "docs/scifi-ui/styles/causal-memory-boot.css",\n',
+              '              "docs/scifi-ui/styles/causal-memory-boot.css",\n              "docs/scifi-ui/styles/site-readability-audit.css",\n',
+              'deploy required readability file',
+          )
+          deploy = deploy.replace("          assert \"CAUSAL_MEMORY_VERSION", '') if False else deploy
+          deploy = replace_required(
+              deploy,
+              "          assert \"CAUSAL_BOOT_VERSION = '20260726-causal-boot-3'\" in worker\n",
+              "          assert \"CAUSAL_BOOT_VERSION = '20260726-causal-boot-3'\" in worker\n          assert \"SITE_READABILITY_VERSION = '20260726-site-readability-1'\" in worker\n          assert 'causal-memory-field' not in worker\n",
+              'deploy source assertions',
+          )
+          deploy = deploy.replace("                 && grep -Fq '/scifi-ui/styles/causal-memory-field.css' \"$body\" \\\n", '')
+          deploy = deploy.replace("                 && grep -Fq '/scifi-ui/scripts/causal-memory-field.js' \"$body\" \\\n", '')
+          deploy = replace_required(
+              deploy,
+              "                 && grep -Fq '/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-3' \"$body\" \\\n",
+              "                 && grep -Fq '/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-3' \"$body\" \\\n                 && grep -Fq '/scifi-ui/styles/site-readability-audit.css?v=20260726-site-readability-1' \"$body\" \\\n                 && ! grep -Fq 'causal-memory-field' \"$body\" \\\n",
+              'live readability reference',
+          )
+          deploy = deploy.replace(
+              '          - Mobil képernyőre lépéskor induló animáció: ellenőrizve\n',
+              '          - Mobil képernyőre lépéskor induló animáció: ellenőrizve\n          - Teljes oldalas olvashatósági védelem: ellenőrizve\n          - Interakciós DNS modul: eltávolítva\n',
+          )
+          deploy_path.write_text(deploy, encoding='utf-8')
+
+          audit_path = Path('.github/workflows/audit-formatx-production-pipeline.yml')
+          audit = audit_path.read_text(encoding='utf-8')
+          audit = audit.replace('           node --check docs/scifi-ui/scripts/causal-memory-field.js\n', '')
+          audit_path.write_text(audit, encoding='utf-8')
+
+          for status_path in [
+              Path('docs/scifi-ui/validation/year5000-status.json'),
+              Path('.github/audit/year5000-status.json'),
+          ]:
+              if status_path.exists():
+                  try:
+                      data = json.loads(status_path.read_text(encoding='utf-8'))
+                  except json.JSONDecodeError:
+                      continue
+                  data.pop('causalSessionMemory', None)
+                  data.pop('interactionDnaGeneration', None)
+                  data['interactionDnaRemoved'] = True
+                  data['fullPageTextCollisionGuard'] = True
+                  status_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          for obsolete in [
+              Path('docs/scifi-ui/scripts/causal-memory-field.js'),
+              Path('docs/scifi-ui/styles/causal-memory-field.css'),
+          ]:
+              obsolete.unlink(missing_ok=True)
+
+      - name: Verify removal and CI topology
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e docs/scifi-ui/scripts/causal-memory-field.js
+          test ! -e docs/scifi-ui/styles/causal-memory-field.css
+          grep -F 'site-readability-audit.css' billing-worker/src/production-with-license.js
+          grep -F 'site-readability-audit.css' .github/workflows/deploy-formatx-custom-domain.yml
+          grep -F 'Validate full-page readability guard' .github/workflows/validate-year-5000.yml
+          ! grep -R -F 'INTERAKCIÓS DNS' docs billing-worker/src
+          ! grep -R -F 'causal-memory-field' docs billing-worker/src .github/workflows/validate-year-5000.yml .github/workflows/deploy-formatx-custom-domain.yml
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/remove-interaction-dna-and-refresh-readability-ci.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Remove interaction DNA and enforce full-page readability'
+          git push origin HEAD:master
