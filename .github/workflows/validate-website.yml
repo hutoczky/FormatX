@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: validate-formatx-website-${{ github.ref }}
@@ -39,7 +40,7 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate JavaScript and canonical architecture
+      - name: Validate canonical source architecture
         shell: bash
         run: |
           set -euo pipefail
@@ -57,27 +58,23 @@ jobs:
 
           grep -F "['/', '/scifi-ui/']" billing-worker/src/production-with-license.js
           grep -F "['/checkout.html', '/scifi-ui/checkout.html']" billing-worker/src/production-with-license.js
-          ! grep -F 'HTMLRewriter' billing-worker/src/production-with-license.js
-          ! grep -F 'document.write' docs/site-loader.js
-          ! grep -E 'future-5000|causal-memory|site-readability-audit|start-sale' docs/scifi-ui/index.html
-          ! grep -E 'future-5000|causal-memory|site-readability-audit|start-sale' billing-worker/src/production-with-license.js
-          ! grep -E 'ensureContrastGuard|recoverIntroContent|watchIntroCompletion' docs/scifi-ui/scripts/site-art-direction.js
-          ! grep -F 'fx-intro-page-reveal' docs/scifi-ui/styles/formatx-event-horizon.css
+          ! grep -Fq 'HTMLRewriter' billing-worker/src/production-with-license.js
+          ! grep -Fq 'document.write' docs/site-loader.js
+          ! grep -Eq 'future-5000|causal-memory|site-readability-audit|start-sale|site-foreground-guard' docs/scifi-ui/index.html
+          ! grep -Eq 'future-5000|causal-memory|site-readability-audit|start-sale|site-foreground-guard' billing-worker/src/production-with-license.js
+          ! grep -Eq 'ensureContrastGuard|recoverIntroContent|watchIntroCompletion' docs/scifi-ui/scripts/site-art-direction.js
+          ! grep -Fq 'fx-intro-page-reveal' docs/scifi-ui/styles/formatx-event-horizon.css
           ! test -e docs/scifi-ui/styles/site-foreground-guard.css
 
-          # The canonical Quantum Aurora page must not receive the old 3D/Quantum Twin composition.
-          ! grep -E 'main-spatial\.css|main-readability\.css|quantum-twin\.css|quantum-twin\.js|project-hub\.js' billing-worker/src/production-entry.js
-          grep -F 'THEME_SCRIPT' billing-worker/src/production-entry.js
-          grep -F 'PROJECT_AI_SCRIPT' billing-worker/src/production-entry.js
-          grep -F 'RESPONSIVE_PARITY_SCRIPT' billing-worker/src/production-entry.js
-          grep -F 'COMMERCE_READABILITY_STYLES' billing-worker/src/production-entry.js
+          # The old 3D and Quantum Twin composition must never be injected into the canonical page.
+          ! grep -Eq 'main-spatial\.css|main-readability\.css|quantum-twin\.css|quantum-twin\.js|project-hub\.js' billing-worker/src/production-entry.js
 
           # Adaptive performance mode is mandatory for Firefox and touch devices.
-          grep -F 'balancedMode' docs/scifi-ui/scripts/site-ambient-background.js
-          grep -F 'isFirefox' docs/scifi-ui/scripts/site-ambient-background.js
-          grep -F 'dataset.performance' docs/scifi-ui/scripts/site-ambient-background.js
-          grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-ambient-background.css
-          grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-quantum-aurora.css
+          grep -Fq 'balancedMode' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -Fq 'isFirefox' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -Fq 'dataset.performance' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -Fq 'data-performance="balanced"' docs/scifi-ui/styles/site-ambient-background.css
+          grep -Fq 'data-performance="balanced"' docs/scifi-ui/styles/site-quantum-aurora.css
 
       - name: Verify one public price catalogue
         shell: python
@@ -103,7 +100,7 @@ jobs:
                   assert token in checkout, ('checkout', value)
                   assert token in language, ('language', value)
 
-          for token in ['7 900 Ft / hó', '15 900 Ft / hó', '29 900 Ft / hó', '22 €', '44 €', '83 €']:
+          for token in ('7 900 Ft / hó', '15 900 Ft / hó', '29 900 Ft / hó', '22 €', '44 €', '83 €'):
               assert token in home, ('homepage', token)
 
           assert 'HUF: 15900' in sync
@@ -113,19 +110,15 @@ jobs:
           assert '15 900 Ft' in checkout_html
           assert 'checkout.js?v=' not in checkout_html
           assert 'checkout-language.js?v=' not in checkout_html
-          print('Homepage, checkout and API prices are aligned.')
 
-      - name: Install Worker dependencies
-        working-directory: billing-worker
-        run: npm ci
-
-      - name: Run Worker tests and dry build
+      - name: Install and test Worker
         working-directory: billing-worker
         run: |
+          npm ci
           npm test
           npx wrangler deploy --dry-run --outdir ../.wrangler-website-validation
 
-      - name: Install Chromium and Firefox runtimes
+      - name: Install Chromium and Firefox
         shell: bash
         run: |
           set -euo pipefail
@@ -137,7 +130,6 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/formatx-http.log" 2>&1 &
-          echo $! > "$RUNNER_TEMP/formatx-http.pid"
           for attempt in $(seq 1 40); do
             curl -fsS http://127.0.0.1:4173/scifi-ui/index.html >/dev/null && exit 0
             sleep 0.25
@@ -145,7 +137,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-http.log"
           exit 1
 
-      - name: Validate Chromium, Firefox, mobile and checkout behavior
+      - name: Validate Chromium, Firefox, mobile, layout and checkout
         shell: bash
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
@@ -168,13 +160,29 @@ jobs:
             if (!condition) throw new Error(message);
           }
 
-          async function inspectPage(page, label, expectBalanced) {
-            const errors = [];
-            page.on('pageerror', (error) => errors.push(String(error)));
-            await page.goto('http://127.0.0.1:4173/scifi-ui/index.html?lang=hu', { waitUntil: 'networkidle', timeout: 30000 });
+          async function validateHome(browser, testCase) {
+            const contextOptions = {
+              viewport: { width: testCase.width, height: testCase.height },
+              locale: 'hu-HU',
+              reducedMotion: testCase.reducedMotion || 'no-preference',
+            };
+            if (testCase.engine === 'chromium' && testCase.mobile) {
+              contextOptions.hasTouch = true;
+              contextOptions.isMobile = true;
+            }
+
+            const context = await browser.newContext(contextOptions);
+            const page = await context.newPage();
+            const runtimeErrors = [];
+            page.on('pageerror', (error) => runtimeErrors.push(String(error)));
+
+            await page.goto('http://127.0.0.1:4173/scifi-ui/index.html?lang=hu', {
+              waitUntil: 'networkidle',
+              timeout: 30000,
+            });
             await page.waitForFunction(() => {
-              const overlay = document.getElementById('formatx-event-horizon');
               const html = document.documentElement;
+              const overlay = document.getElementById('formatx-event-horizon');
               return html.classList.contains('fx-intro-complete')
                 && !html.classList.contains('fx-intro-running')
                 && !html.classList.contains('fx-intro-reveal')
@@ -231,7 +239,7 @@ jobs:
               const count = (values, token) => values.filter((value) => value.includes(token)).length;
               const ambient = document.getElementById('formatx-site-ambient');
               const forbiddenInline = /(opacity|filter|clip-path|transform|animation)\s*:/i;
-              const oldLayerPattern = /future-5000|causal-memory|site-readability-audit|start-sale|main-spatial|main-readability|quantum-twin|project-hub/;
+              const oldLayerPattern = /future-5000|causal-memory|site-readability-audit|start-sale|main-spatial|main-readability|quantum-twin|project-hub|site-foreground-guard/;
               const heavyLayersHidden = ['.fx-site-ambient-aura--three', '.fx-site-ambient-streams', '.fx-site-ambient-beam']
                 .every((selector) => {
                   const element = document.querySelector(selector);
@@ -250,11 +258,12 @@ jobs:
 
               return {
                 readable: Object.values(readable).every(visible),
-                inlineClean: [readable.hero, readable.engine].every((item) => item && !forbiddenInline.test(item.inlineStyle)),
+                inlineClean: [readable.hero, readable.engine]
+                  .every((item) => item && !forbiddenInline.test(item.inlineStyle)),
                 overlaps,
+                overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
                 ambientRoots: document.querySelectorAll('#formatx-site-ambient').length,
                 railRoots: document.querySelectorAll('.fx-system-rail').length,
-                overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
                 performanceMode: ambient && ambient.dataset.performance,
                 browserMode: ambient && ambient.dataset.browser,
                 particleCount: document.querySelectorAll('.fx-site-ambient-particles i').length,
@@ -266,54 +275,50 @@ jobs:
               };
             }, layoutSelectors);
 
-            assert(errors.length === 0, `${label}: runtime errors: ${errors.join(' | ')}`);
-            assert(state.readable, `${label}: important content is not fully visible`);
-            assert(state.inlineClean, `${label}: conflicting inline visual style remains`);
-            assert(state.overlaps.length === 0, `${label}: text overlap ${JSON.stringify(state.overlaps)}`);
-            assert(state.ambientRoots === 1, `${label}: duplicate ambient roots`);
-            assert(state.railRoots === 1, `${label}: duplicate system rails`);
-            assert(state.overflow <= 1, `${label}: horizontal overflow ${state.overflow}px`);
-            assert(!state.oldLayers, `${label}: a legacy visual layer loaded`);
-            assert(state.duplicates, `${label}: duplicate visual assets ${JSON.stringify(state.duplicateCounts)}`);
-            assert(state.mainPrice.includes('15') && state.mainPrice.includes('900'), `${label}: wrong Business Pro HUF price`);
+            assert(runtimeErrors.length === 0, `${testCase.label}: runtime errors: ${runtimeErrors.join(' | ')}`);
+            assert(state.readable, `${testCase.label}: important content is not fully visible`);
+            assert(state.inlineClean, `${testCase.label}: conflicting inline visual style remains`);
+            assert(state.overlaps.length === 0, `${testCase.label}: text overlap ${JSON.stringify(state.overlaps)}`);
+            assert(state.overflow <= 1, `${testCase.label}: horizontal overflow ${state.overflow}px`);
+            assert(state.ambientRoots === 1, `${testCase.label}: duplicate ambient roots`);
+            assert(state.railRoots === 1, `${testCase.label}: duplicate system rails`);
+            assert(!state.oldLayers, `${testCase.label}: a legacy visual layer loaded`);
+            assert(state.duplicates, `${testCase.label}: duplicate visual assets ${JSON.stringify(state.duplicateCounts)}`);
+            assert(state.mainPrice.includes('15') && state.mainPrice.includes('900'), `${testCase.label}: wrong Business Pro HUF price`);
 
-            if (expectBalanced) {
-              assert(state.performanceMode === 'balanced', `${label}: balanced mode is not active`);
-              assert(state.particleCount <= 6, `${label}: too many particles (${state.particleCount})`);
-              assert(state.heavyLayersHidden, `${label}: heavy ambient layers are still active`);
+            if (testCase.expectBalanced) {
+              assert(state.performanceMode === 'balanced', `${testCase.label}: balanced mode is not active`);
+              assert(state.particleCount <= 6, `${testCase.label}: too many particles (${state.particleCount})`);
+              assert(state.heavyLayersHidden, `${testCase.label}: heavy ambient layers are active`);
+            }
+            if (testCase.engine === 'firefox') {
+              assert(state.browserMode === 'firefox', `${testCase.label}: Firefox mode was not detected`);
             }
 
             await page.click('[data-currency="EUR"]');
             await page.waitForTimeout(50);
-            const eurPrice = await page.locator('#preview-main-price').textContent();
-            assert(eurPrice.includes('44'), `${label}: EUR price did not update`);
+            assert((await page.locator('#preview-main-price').textContent()).includes('44'), `${testCase.label}: EUR price did not update`);
+            await context.close();
           }
 
           (async () => {
             const chromiumBrowser = await chromium.launch({ headless: true });
             try {
-              const chromiumCases = [
-                { label: 'chromium-desktop', width: 1440, height: 1000, reducedMotion: 'no-preference', mobile: false },
-                { label: 'chromium-mobile', width: 390, height: 844, reducedMotion: 'no-preference', mobile: true },
-                { label: 'chromium-reduced-motion', width: 1180, height: 900, reducedMotion: 'reduce', mobile: false },
-              ];
-              for (const testCase of chromiumCases) {
-                const context = await chromiumBrowser.newContext({
-                  viewport: { width: testCase.width, height: testCase.height },
-                  locale: 'hu-HU',
-                  reducedMotion: testCase.reducedMotion,
-                  hasTouch: testCase.mobile,
-                  isMobile: testCase.mobile,
-                });
-                const page = await context.newPage();
-                await inspectPage(page, testCase.label, testCase.mobile || testCase.reducedMotion === 'reduce');
-                await context.close();
+              for (const testCase of [
+                { label: 'chromium-desktop', engine: 'chromium', width: 1440, height: 1000, expectBalanced: false },
+                { label: 'chromium-mobile', engine: 'chromium', width: 390, height: 844, mobile: true, expectBalanced: true },
+                { label: 'chromium-reduced-motion', engine: 'chromium', width: 1180, height: 900, reducedMotion: 'reduce', expectBalanced: true },
+              ]) {
+                await validateHome(chromiumBrowser, testCase);
               }
 
               const checkout = await chromiumBrowser.newPage({ viewport: { width: 1280, height: 900 } });
               const checkoutErrors = [];
               checkout.on('pageerror', (error) => checkoutErrors.push(String(error)));
-              await checkout.goto('http://127.0.0.1:4173/scifi-ui/checkout.html?plan=business_pro&cycle=monthly&currency=HUF', { waitUntil: 'networkidle', timeout: 30000 });
+              await checkout.goto('http://127.0.0.1:4173/scifi-ui/checkout.html?plan=business_pro&cycle=monthly&currency=HUF', {
+                waitUntil: 'networkidle',
+                timeout: 30000,
+              });
               await checkout.waitForTimeout(250);
               assert(checkoutErrors.length === 0, `checkout runtime errors: ${checkoutErrors.join(' | ')}`);
               assert((await checkout.locator('#summary-price').textContent()).includes('15'), 'checkout Business Pro price is stale');
@@ -329,20 +334,10 @@ jobs:
             const firefoxBrowser = await firefox.launch({ headless: true });
             try {
               for (const testCase of [
-                { label: 'firefox-desktop', width: 1440, height: 1000, mobile: false },
-                { label: 'firefox-mobile', width: 390, height: 844, mobile: true },
+                { label: 'firefox-desktop', engine: 'firefox', width: 1440, height: 1000, expectBalanced: true },
+                { label: 'firefox-mobile-width', engine: 'firefox', width: 390, height: 844, expectBalanced: true },
               ]) {
-                const context = await firefoxBrowser.newContext({
-                  viewport: { width: testCase.width, height: testCase.height },
-                  locale: 'hu-HU',
-                  hasTouch: testCase.mobile,
-                  isMobile: testCase.mobile,
-                });
-                const page = await context.newPage();
-                await inspectPage(page, testCase.label, true);
-                const browserMode = await page.locator('#formatx-site-ambient').getAttribute('data-browser');
-                assert(browserMode === 'firefox', `${testCase.label}: Firefox mode was not detected`);
-                await context.close();
+                await validateHome(firefoxBrowser, testCase);
               }
             } finally {
               await firefoxBrowser.close();
@@ -352,3 +347,24 @@ jobs:
             process.exit(1);
           });
           NODE
+
+      - name: Publish validation status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Chromium, Firefox, mobile, layout and checkout checks passed'
+          else
+            state='failure'
+            description='Unified website validation failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX unified website validation' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
