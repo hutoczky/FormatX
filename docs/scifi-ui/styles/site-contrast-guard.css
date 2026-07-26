@@ -11,6 +11,16 @@
   --fx-readable-panel: rgba(3, 11, 27, 0.90);
 }
 
+/* The first-load experience must remain the topmost interaction layer. */
+html.fx-intro-pending .fx-intro-overlay,
+html.fx-intro-running .fx-intro-overlay,
+html.fx-intro-reveal .fx-intro-overlay {
+  position: fixed !important;
+  z-index: 2147483000 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+}
+
 .reference-commerce {
   color: var(--fx-readable-primary);
 }
