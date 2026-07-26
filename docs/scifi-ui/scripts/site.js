@@ -155,7 +155,7 @@
 
     const telemetryHeadings = document.querySelectorAll('.telemetry-heading');
     if (telemetryHeadings[0]) telemetryHeadings[0].innerHTML = '<span>CORE STATUS</span><strong>ACTIVE</strong>';
-    if (telemetryHeadings[1]) telemetryHeadings[1].innerHTML = '<span>TRIAL BUILD</span><strong>MULTIPLATFORM</strong>';
+    if (telemetryHeadings[1]) telemetryHeadings[1].innerHTML = '<span>LICENSED BUILD</span><strong>MULTIPLATFORM</strong>';
 
     const telemetryNotes = document.querySelectorAll('.telemetry-stack small');
     if (telemetryNotes[0]) telemetryNotes[0].textContent = 'Linux/Bazzite · Windows · macOS';
@@ -174,7 +174,7 @@
     });
 
     const principleData = [
-      { icon: '⌬', title: 'MULTIPLATFORM TRIAL', copy: 'Linux/Bazzite · Windows · macOS', target: '#platforms' },
+      { icon: '⌬', title: 'FULL-FEATURED RELEASE', copy: 'Linux/Bazzite · Windows · macOS', target: '#platforms' },
       { icon: '⬡', title: 'MODULAR BY DESIGN', copy: 'Built to evolve with you.', target: '#features' },
       { icon: '◇', title: 'SECURITY FIRST', copy: 'Protection at every layer.', target: '#security' },
       { icon: '⌁', title: 'REAL-TIME CONTROL', copy: 'Instant insight. Total command.', target: '#downloads' }

@@ -27,9 +27,9 @@ Workflow
 4. Verification: check integrity, results and records.
 
 Platforms and access
-- The trial version is available for Linux/Bazzite, Windows and macOS.
+- The full-featured release is available for Linux/Bazzite, Windows and macOS. First activation includes a 5-day licence; continued operation follows the terms of a valid licence.
 - Linux, especially Bazzite-compatible environments, is the primary supported platform.
-- Windows and macOS are also supported by the trial version.
+- Windows and macOS are also supported by the full-featured release.
 - The web interface and Android client provide supplementary access in Hungarian and English.
 
 Security and integrity
@@ -69,7 +69,7 @@ const LOCAL_ANSWERS = {
     modules: 'A fő modulok: ISO–USB írás, gyors és mély formázás, partíciótervező, biztonságos törlés, SMART- és felszínvizsgálat, rendszerdiagnosztika, kétpaneles fájlkezelő, valamint AI- és támogatási modul. Részletesen: /modules.html',
     workflow: 'A FormatX munkafolyamata négy lépésből áll: felderítés, tervezés, kontrollált végrehajtás és visszaellenőrzés. Részletesen: /workflow.html',
     security: 'A biztonság alapja a célmeghajtó egyértelmű azonosítása, a többlépcsős megerősítés, a műveleti naplózás, valamint a SHA-256 és Ed25519 integritás-ellenőrzés. Az AI nem indíthat automatikusan veszélyes lemezműveletet. Részletesen: /security.html',
-    platforms: 'A FormatX próbaverziója Linux/Bazzite, Windows és macOS rendszeren is használható. A Linux, különösen a Bazzite-kompatibilis környezet, az elsődlegesen támogatott platform. A webes felület és az Android kliens további hozzáférést biztosít.',
+    platforms: 'A FormatX teljes értékű kiadása Linux/Bazzite, Windows és macOS rendszeren is használható. Az első aktiváláskor 5 napos licencet kap, majd az érvényes licenc feltételei szerint működik tovább. A Linux, különösen a Bazzite-kompatibilis környezet, az elsődlegesen támogatott platform.',
     android: 'A FormatX rendelkezik Android klienssel, amely a webes projektfelülethez ad mobil hozzáférést, magyar és angol nyelven.',
     ai: 'A projekt-AI magyarázó és döntéstámogató szerepet kap. Kizárólag a FormatX projektről válaszol, és nem hajt végre automatikusan formázást, törlést vagy más veszélyes meghajtóműveletet.',
     support: 'A stabil kiadások GitHub Releases csatornán jelennek meg, a támogatás és hibajelentés GitHub-alapú folyamatokra épül. További információ: /support.html',
@@ -81,7 +81,7 @@ const LOCAL_ANSWERS = {
     modules: 'Its main modules are ISO-to-USB writing, quick and deep formatting, partition planning, secure erasure, SMART and surface inspection, system diagnostics, a dual-pane file manager, and an AI/support module. Details: /modules.html',
     workflow: 'The FormatX workflow has four stages: discovery, planning, controlled execution and verification. Details: /workflow.html',
     security: 'Safety is based on explicit target-drive identification, multi-step confirmation, operation logs, and SHA-256/Ed25519 integrity checks. The AI cannot automatically start destructive disk operations. Details: /security.html',
-    platforms: 'The FormatX trial version is available for Linux/Bazzite, Windows and macOS. Linux, especially Bazzite-compatible environments, is the primary supported platform. The web interface and Android client provide supplementary access.',
+    platforms: 'The full-featured FormatX release is available for Linux/Bazzite, Windows and macOS. First activation includes a 5-day licence, after which operation continues under the terms of a valid licence. Linux, especially Bazzite-compatible environments, is the primary supported platform.',
     android: 'FormatX includes an Android client that provides mobile access to the project web interface in Hungarian and English.',
     ai: 'The project AI provides explanations and decision support. It answers only about FormatX and cannot automatically run formatting, erasure or other destructive drive operations.',
     support: 'Stable releases are published through GitHub Releases, while support and issue reporting use GitHub-based workflows. More information: /support.html',
