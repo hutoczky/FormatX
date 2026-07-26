@@ -1,4 +1,4 @@
-name: Probe live FormatX website
+name: Probe live FormatX APEX website
 
 on:
   workflow_dispatch:
@@ -6,8 +6,8 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
-      - 'docs/scifi-ui/styles/formatx-igloo.css'
-      - 'docs/scifi-ui/scripts/formatx-igloo.js'
+      - 'docs/scifi-ui/styles/formatx-apex.css'
+      - 'docs/scifi-ui/scripts/formatx-apex.js'
       - '.github/workflows/probe-live-formatx.yml'
 
 permissions:
@@ -15,45 +15,43 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-live-probe
+  group: formatx-live-apex-probe
   cancel-in-progress: true
 
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 9
     steps:
-      - name: Wait for Cloudflare Git deployment and verify assets
+      - name: Wait for Cloudflare Git deployment and verify APEX assets
         id: probe
         shell: bash
         run: |
           set +e
           mkdir -p live-probe
           found_new=0
-
-          for attempt in $(seq 1 42); do
+          for attempt in $(seq 1 48); do
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
             home_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/formatx-igloo.css 'https://formatxsuite.com/scifi-ui/styles/formatx-igloo.css'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/formatx-apex.css 'https://formatxsuite.com/scifi-ui/styles/formatx-apex.css'
             css_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/formatx-igloo.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-igloo.js'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/formatx-apex.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-apex.js'
             js_status=$?
-
             if [ "$home_status" = '0' ] \
                && [ "$css_status" = '0' ] \
                && [ "$js_status" = '0' ] \
-               && grep -Fq 'formatx-igloo.css?v=20260726-igloo-1' live-probe/home.html \
-               && grep -Fq 'formatx-igloo.js?v=20260726-igloo-1' live-probe/home.html \
-               && grep -Fq 'FormatX Igloo Experience' live-probe/formatx-igloo.css \
-               && grep -Fq 'createHeroCanvas' live-probe/formatx-igloo.js \
-               && grep -Fq 'fx-chapter-rail' live-probe/formatx-igloo.js \
-               && ! grep -Eq 'site-ambient-background|site-quantum-aurora|site-premium-finish|site-art-direction|site-contrast-guard|commerce-readability' live-probe/home.html; then
+               && grep -Fq 'formatx-apex.css?v=20260726-apex-2' live-probe/home.html \
+               && grep -Fq 'formatx-apex.js?v=20260726-apex-2' live-probe/home.html \
+               && grep -Fq 'FormatX APEX' live-probe/formatx-apex.css \
+               && grep -Fq 'createRenderer' live-probe/formatx-apex.js \
+               && grep -Fq 'formatx:loop' live-probe/formatx-apex.js \
+               && grep -Fq 'scene-loop-clone' live-probe/formatx-apex.css \
+               && ! grep -Eq 'formatx-igloo|reference-commerce|professional-sections|pricing-sync' live-probe/home.html; then
               found_new=1
               break
             fi
             sleep 10
           done
-
           {
             echo "home_curl_status=$home_status"
             echo "css_curl_status=$css_status"
@@ -66,7 +64,7 @@ jobs:
       - name: Upload live probe
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-live-igloo-probe
+          name: formatx-live-apex-probe
           path: live-probe
           retention-days: 3
 
@@ -78,13 +76,13 @@ jobs:
         run: |
           if [ "$NEW_BUILD" = '1' ]; then
             state='success'
-            description='Live domain serves the Igloo-inspired FormatX experience'
+            description='Live domain serves the looping FormatX APEX experience'
           else
             state='failure'
             description='Live domain is still serving a previous website build'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX live Igloo probe' \
+            -f context='FormatX live APEX probe' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

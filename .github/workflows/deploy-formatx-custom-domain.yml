@@ -1,5 +1,5 @@
-name: Validate FormatX production candidate
-run-name: Validate FormatX production candidate from ${{ github.sha }}
+name: Validate FormatX APEX production candidate
+run-name: Validate FormatX APEX production candidate from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -21,14 +21,13 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-production-candidate-${{ github.ref }}
+  group: formatx-apex-production-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -40,29 +39,32 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate canonical production source
+      - name: Validate canonical APEX production source
         shell: bash
         run: |
           set -euo pipefail
           node --check billing-worker/src/production-with-license.js
           node --check billing-worker/src/pricing-v100-api.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
-          node --check docs/scifi-ui/scripts/formatx-igloo.js
+          node --check docs/scifi-ui/scripts/formatx-apex.js
           grep -Fq "['/', '/scifi-ui/']" billing-worker/src/production-with-license.js
-          grep -Fq 'formatx-igloo.css?v=20260726-igloo-1' docs/scifi-ui/index.html
-          grep -Fq 'formatx-igloo.js?v=20260726-igloo-1' docs/scifi-ui/index.html
-          grep -Fq 'id="fx-hero-canvas"' docs/scifi-ui/index.html
-          grep -Fq 'class="fx-story"' docs/scifi-ui/index.html
+          grep -Fq 'formatx-apex.css?v=20260726-apex-2' docs/scifi-ui/index.html
+          grep -Fq 'formatx-apex.js?v=20260726-apex-2' docs/scifi-ui/index.html
+          grep -Fq 'id="fx-apex-canvas"' docs/scifi-ui/index.html
+          grep -Fq 'id="fx-particle-canvas"' docs/scifi-ui/index.html
+          grep -Fq 'createRenderer' docs/scifi-ui/scripts/formatx-apex.js
+          grep -Fq 'formatx:loop' docs/scifi-ui/scripts/formatx-apex.js
+          grep -Fq 'scene-loop-clone' docs/scifi-ui/styles/formatx-apex.css
           grep -Fq '15 900 Ft / hó' docs/scifi-ui/index.html
           grep -Fq '29 900 Ft / hó' docs/scifi-ui/index.html
-          ! grep -Eq 'site-ambient-background|site-quantum-aurora|site-premium-finish|site-art-direction|site-contrast-guard|commerce-readability|future-5000|causal-memory|quantum-twin|project-hub' docs/scifi-ui/index.html
+          ! grep -Eq 'formatx-igloo|reference-commerce|reference-performance|project-accessibility|professional-sections|pricing-sync|site-ambient-background|site-quantum-aurora|site-premium-finish|site-art-direction|site-contrast-guard|commerce-readability' docs/scifi-ui/index.html
 
       - name: Install, test and dry-build Worker
         working-directory: billing-worker
         run: |
           npm ci
           npm test
-          npx wrangler deploy --dry-run --outdir ../.wrangler-production-candidate
+          npx wrangler deploy --dry-run --outdir ../.wrangler-apex-production
 
       - name: Publish candidate status
         if: always() && github.event_name == 'push'
@@ -73,13 +75,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Production source, tests and Worker dry build passed'
+            description='APEX source, tests and Worker dry build passed'
           else
             state='failure'
-            description='Production candidate validation failed'
+            description='APEX production candidate validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX production candidate' \
+            -f context='FormatX APEX production candidate' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

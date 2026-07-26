@@ -1,4 +1,4 @@
-name: Validate FormatX website
+name: Validate FormatX APEX website
 
 on:
   workflow_dispatch:
@@ -7,14 +7,14 @@ on:
     paths:
       - 'docs/**'
       - 'billing-worker/**'
-      - '.github/scripts/validate-igloo-site.cjs'
+      - '.github/scripts/validate-apex-site.cjs'
       - '.github/workflows/validate-website.yml'
   push:
     branches: [master]
     paths:
       - 'docs/**'
       - 'billing-worker/**'
-      - '.github/scripts/validate-igloo-site.cjs'
+      - '.github/scripts/validate-apex-site.cjs'
       - '.github/workflows/validate-website.yml'
 
 permissions:
@@ -22,14 +22,13 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-site-validation-${{ github.ref }}
+  group: formatx-apex-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -41,67 +40,59 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate source architecture
+      - name: Validate APEX source architecture
         shell: python
         run: |
           from pathlib import Path
           import re
 
           home = Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
-          igloo_css = Path('docs/scifi-ui/styles/formatx-igloo.css').read_text(encoding='utf-8')
-          igloo_js = Path('docs/scifi-ui/scripts/formatx-igloo.js').read_text(encoding='utf-8')
-          intro_js = Path('docs/scifi-ui/scripts/formatx-event-horizon.js').read_text(encoding='utf-8')
+          css = Path('docs/scifi-ui/styles/formatx-apex.css').read_text(encoding='utf-8')
+          js = Path('docs/scifi-ui/scripts/formatx-apex.js').read_text(encoding='utf-8')
+          intro = Path('docs/scifi-ui/scripts/formatx-event-horizon.js').read_text(encoding='utf-8')
 
-          required = [
-              'docs/scifi-ui/styles/formatx-igloo.css',
-              'docs/scifi-ui/scripts/formatx-igloo.js',
-              '.github/scripts/validate-igloo-site.cjs',
-          ]
-          for path in required:
-              assert Path(path).is_file(), path
-
-          assert home.count('formatx-igloo.css?v=20260726-igloo-1') == 1
-          assert home.count('formatx-igloo.js?v=20260726-igloo-1') == 1
-          assert 'id="fx-hero-canvas"' in home
-          assert 'class="fx-story"' in home
-          assert '15 900 Ft / hó' in home
-          assert '29 900 Ft / hó' in home
-          assert 'FAILSAFE_DEADLINE' in intro_js
-          assert 'prefers-reduced-motion: reduce' in igloo_css
-          assert 'ResizeObserver' in igloo_js
-          assert 'IntersectionObserver' in igloo_js
-          assert 'visibilitychange' in igloo_js
-          assert 'devicePixelRatio' in igloo_js
-          assert 'fx-chapter-rail' in igloo_js
+          assert home.count('formatx-apex.css?v=20260726-apex-2') == 1
+          assert home.count('formatx-apex.js?v=20260726-apex-2') == 1
+          assert 'id="fx-apex-canvas"' in home
+          assert 'id="fx-particle-canvas"' in home
+          assert 'data-flow="3"' in home
+          assert '15 900 Ft / hó' in home and '29 900 Ft / hó' in home
+          assert 'FAILSAFE_DEADLINE' in intro
+          for token in ('webgl2','createRenderer','particles','infinite','dataset.fxInfinite','formatx:loop'):
+              assert token in js, token
+          for token in ('prefers-reduced-motion:reduce','scene-loop-clone','loop-toggle'):
+              assert token in css, token
 
           obsolete_tokens = (
-              'site-ambient-background', 'site-quantum-aurora', 'site-premium-finish',
-              'site-art-direction', 'site-contrast-guard', 'commerce-readability',
-              'future-5000', 'causal-memory', 'quantum-twin', 'project-hub',
+              'formatx-igloo','reference-commerce','reference-performance',
+              'project-accessibility','professional-sections','pricing-sync',
+              'site-ambient-background','site-quantum-aurora','site-premium-finish',
+              'site-art-direction','site-contrast-guard','commerce-readability',
+              'future-5000','causal-memory','quantum-twin','project-hub',
           )
           for token in obsolete_tokens:
               assert token not in home, token
 
           obsolete_files = [
-              'docs/scifi-ui/styles/site-ambient-background.css',
-              'docs/scifi-ui/styles/site-quantum-aurora.css',
-              'docs/scifi-ui/styles/site-premium-finish.css',
-              'docs/scifi-ui/styles/site-art-direction.css',
-              'docs/scifi-ui/styles/site-contrast-guard.css',
-              'docs/scifi-ui/styles/commerce-readability.css',
-              'docs/scifi-ui/scripts/site-ambient-background.js',
-              'docs/scifi-ui/scripts/site-art-direction.js',
-              'billing-worker/src/production-entry.js',
-              '.github/audit/quantum-aurora-status.json',
-              '.github/workflows/validate-intro-animation.yml',
+              'docs/scifi-ui/styles/formatx-igloo.css',
+              'docs/scifi-ui/scripts/formatx-igloo.js',
+              'docs/scifi-ui/styles/reference-commerce.css',
+              'docs/scifi-ui/styles/reference-performance.css',
+              'docs/scifi-ui/styles/project-accessibility.css',
+              'docs/scifi-ui/styles/professional-sections.css',
+              'docs/scifi-ui/scripts/professional-sections.js',
+              'docs/scifi-ui/sections/professional-sections.html',
+              'docs/scifi-ui/scripts/landing.js',
+              'docs/scifi-ui/scripts/pricing-sync.js',
+              '.github/scripts/validate-igloo-site.cjs',
           ]
           for path in obsolete_files:
               assert not Path(path).exists(), path
 
           styles = re.findall(r'<link[^>]+href="([^"]+\.css[^\"]*)"', home)
           scripts = re.findall(r'<script[^>]+src="([^"]+\.js[^\"]*)"', home)
-          assert len(styles) == len(set(styles)), styles
-          assert len(scripts) == len(set(scripts)), scripts
+          assert len(styles) == 2 and len(styles) == len(set(styles)), styles
+          assert len(scripts) == 2 and len(scripts) == len(set(scripts)), scripts
 
       - name: Validate JavaScript syntax
         shell: bash
@@ -111,19 +102,17 @@ jobs:
           node --check billing-worker/src/pricing-v100-api.js
           node --check docs/site-loader.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
-          node --check docs/scifi-ui/scripts/formatx-igloo.js
-          node --check docs/scifi-ui/scripts/landing.js
-          node --check docs/scifi-ui/scripts/pricing-sync.js
+          node --check docs/scifi-ui/scripts/formatx-apex.js
           node --check docs/scifi-ui/scripts/checkout-v100.js
           node --check docs/scifi-ui/scripts/checkout-language-v100.js
-          node --check .github/scripts/validate-igloo-site.cjs
+          node --check .github/scripts/validate-apex-site.cjs
 
       - name: Test Worker and production bundle
         working-directory: billing-worker
         run: |
           npm ci
           npm test
-          npx wrangler deploy --dry-run --outdir ../.wrangler-site-validation
+          npx wrangler deploy --dry-run --outdir ../.wrangler-apex-validation
 
       - name: Install Playwright browsers
         shell: bash
@@ -144,10 +133,22 @@ jobs:
           cat "$RUNNER_TEMP/formatx-http.log"
           exit 1
 
-      - name: Test Chromium, Firefox, mobile and reduced motion
+      - name: Test Chromium, Firefox, mobile, reduced motion and two scroll loops
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-        run: node .github/scripts/validate-igloo-site.cjs
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-apex-site.cjs 2>&1 | tee apex-browser-report.txt
+
+      - name: Upload APEX browser report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-apex-browser-report
+          path: apex-browser-report.txt
+          if-no-files-found: warn
+          retention-days: 5
 
       - name: Publish validation status
         if: always() && github.event_name == 'push'
@@ -158,13 +159,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Igloo experience, Worker and cross-browser validation passed'
+            description='APEX WebGL, infinite scroll and cross-browser validation passed'
           else
             state='failure'
-            description='FormatX website validation failed'
+            description='FormatX APEX website validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX unified website validation' \
+            -f context='FormatX APEX website validation' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

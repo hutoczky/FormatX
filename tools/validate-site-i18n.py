@@ -30,25 +30,36 @@ COLLAPSE_RE = re.compile(r"\s+")
 ALLOW_EXACT = {
     "FormatX", "FormatX Suite Pro", "FormatX Suite", "Pro", "SUITE PRO",
     "Business Lite", "Business Pro", "Technician Team", "BUSINESS LITE",
-    "BUSINESS PRO", "TECHNICIAN TEAM", "BUSINESS / OWNER",
+    "BUSINESS PRO", "TECHNICIAN TEAM", "BUSINESS / OWNER", "Platform",
     "Windows", "Linux / Bazzite", "macOS", "Windows · Linux / Bazzite · macOS",
     "WIN // 2041", "LNX // 2041", "MAC // 2041", "V92", "SHA256", "Ed25519",
-    "HUF", "EUR", "IBAN", "BIC / SWIFT", "N/A", "N/A-safe", "CPU", "RAM",
+    "HUF", "EUR", "HU", "EN", "IBAN", "BIC / SWIFT", "N/A", "N/A-safe", "CPU", "RAM",
     "GPU", "NET", "FX", "LIVE", "ONLINE", "GitHub", "GitHub Releases",
     "Start-FormatX-Windows.exe", "Start-FormatX-Linux.sh", "Start-FormatX-macOS.command",
     "FormatX-Suite-Pro-V92.zip", "Cross-platform", "M01", "M02", "M03", "M04", "M05", "M06",
     "© 2026 Hutóczky József", "© 2026 Hutóczky József · FormatX Suite Pro",
-    "Hutóczky József", "REVOHUHB", "CHASDEFX", "X",
+    "Hutóczky József", "REVOHUHB", "CHASDEFX", "X", "FORMATX", "APEX SYSTEM",
+    "FORMATX / APEX", "CONTROLLED SYSTEM EXPERIENCE", "SYSTEM ENVIRONMENT INITIALISING",
+    "SUITE PRO · APEX CORE", "DISCOVER", "PLAN", "EXECUTE", "VERIFY",
+    "WRITE / VERIFY", "QUICK / DEEP", "PLAN / PREVIEW", "CONFIRM / ERASE",
+    "READ / ANALYSE", "EXPLAIN / GUIDE", "INDIVIDUAL", "RECOMMENDED", "TEAM",
+    "ENVIRONMENT", "RELEASE", "INTEGRITY", "LOOP", "ENV / READ", "FELDERÍTÉS",
+    "ISO → USB", "KAPCSOLAT FELÉPÍTÉSE", "NTFS · FAT32 · exFAT · ReFS · EXT4", "SMART",
+    "Összeg EUR-ban", "FormatX Suite Pro | APEX System Experience",
+    "FORMATX / VERIFY BEFORE EXECUTE / FORMATX / VERIFY BEFORE EXECUTE / FORMATX / VERIFY BEFORE EXECUTE /",
+    "Menü / Menu", "Language / Nyelv", "Deviza / Currency", "Oldalfejezetek",
 }
 
 ALLOW_PATTERNS = [
     re.compile(r"^[\d\s.,:/+%€Ft—-]+$"),
     re.compile(r"^V\d+$"),
     re.compile(r"^\d+(?:[.,]\d+)?\s*(MiB|GiB|Ft|€)?$"),
+    re.compile(r"^\d{1,3}(?: \d{3})* Ft / hó$"),
     re.compile(r"^[A-Fa-f0-9]{32,}$"),
     re.compile(r"^FX-"),
     re.compile(r"^FormatX Suite Pro V\d+$"),
     re.compile(r"^FormatX-Suite-Pro-V\d+\.zip$"),
+    re.compile(r"^\d{2}\s*[—-]"),
 ]
 
 SKIP_TAGS = {"script", "style", "noscript", "code", "pre", "svg"}
@@ -69,7 +80,7 @@ def load_pairs() -> tuple[set[str], list[tuple[str, str]]]:
         try:
             hu = ast.literal_eval(match.group(1))
             en = ast.literal_eval(match.group(2))
-        except Exception as exc:  # pragma: no cover - CI diagnostic
+        except Exception as exc:
             raise RuntimeError(f"Invalid translation pair at {I18N}:{line_number}: {exc}") from exc
         hu = normalize(hu)
         en = normalize(en)
@@ -103,7 +114,19 @@ class VisibleTextParser(HTMLParser):
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attr_map = {name: value or "" for name, value in attrs}
         parent_skip = self.stack[-1][1] if self.stack else False
-        skip = parent_skip or tag in SKIP_TAGS or "data-i18n-skip" in attr_map
+        has_hu = "data-hu" in attr_map
+        has_en = "data-en" in attr_map
+        if has_hu != has_en:
+            self.missing.append(f"<{tag}> must contain both data-hu and data-en")
+        if has_hu and has_en:
+            hu = normalize(attr_map["data-hu"])
+            en = normalize(attr_map["data-en"])
+            if not hu or not en:
+                self.missing.append(f"<{tag}> contains an empty inline translation")
+            elif hu == en and hu not in ALLOW_EXACT:
+                self.missing.append(f"<{tag}> HU and EN values must differ: {hu!r}")
+        inline_translation = has_hu and has_en
+        skip = parent_skip or tag in SKIP_TAGS or "data-i18n-skip" in attr_map or inline_translation
         self.stack.append((tag, skip))
         if skip:
             return
@@ -222,7 +245,7 @@ def main() -> int:
         print(f"\nCatalog size: {len(pairs)} pairs")
         return 1
 
-    print(f"FormatX bilingual audit passed: {len(pairs)} translation pairs, {len(ACTIVE_PAGES)} active pages, {len(PAYMENT_PAGES)} payment pages.")
+    print(f"FormatX bilingual audit passed: {len(pairs)} catalog pairs plus inline APEX translations, {len(ACTIVE_PAGES)} active pages, {len(PAYMENT_PAGES)} payment pages.")
     return 0
 
 
