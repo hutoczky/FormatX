@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "formatx-billing-worker-test",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "PAYMENT_PROVIDER": "stripe",
+    "PAYMENT_MODE": "test"
+  }
+}
