@@ -6,11 +6,13 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-event-horizon.css'
       - 'docs/scifi-ui/styles/site-ambient-background.css'
       - 'docs/scifi-ui/styles/site-quantum-aurora.css'
       - 'docs/scifi-ui/styles/site-premium-finish.css'
       - 'docs/scifi-ui/styles/site-art-direction.css'
       - 'docs/scifi-ui/styles/site-contrast-guard.css'
+      - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
       - 'docs/scifi-ui/scripts/site-ambient-background.js'
       - 'docs/scifi-ui/scripts/site-art-direction.js'
       - 'billing-worker/src/production-with-license.js'
@@ -36,20 +38,27 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/site-ambient-background.js
           node --check docs/scifi-ui/scripts/site-art-direction.js
           node --check billing-worker/src/production-with-license.js
           grep -F "dataset.visualSystem = 'formatx-quantum-aurora'" docs/scifi-ui/scripts/site-ambient-background.js
           grep -F 'new IntersectionObserver' docs/scifi-ui/scripts/site-ambient-background.js
           grep -F 'fx-system-rail' docs/scifi-ui/scripts/site-art-direction.js
-          grep -F 'site-contrast-guard.css?v=20260726-contrast-guard-1' docs/scifi-ui/scripts/site-art-direction.js
-          grep -F 'SITE_CONTRAST_VERSION' billing-worker/src/production-with-license.js
-          grep -F 'site-quantum-aurora.css?v=20260726-quantum-aurora-1' docs/scifi-ui/index.html
-          grep -F 'site-art-direction.js?v=20260726-art-direction-1' docs/scifi-ui/index.html
+          grep -F 'site-contrast-guard.css?v=20260726-contrast-guard-2' docs/scifi-ui/scripts/site-art-direction.js
+          grep -F 'formatx-event-horizon.css?v=20260726-event-horizon-2' docs/scifi-ui/index.html
+          grep -F 'site-art-direction.js?v=20260726-art-direction-3' docs/scifi-ui/index.html
+          grep -F 'site-contrast-guard.css?v=20260726-contrast-guard-2' docs/scifi-ui/index.html
+          grep -F "SITE_ART_VERSION = '20260726-art-direction-3'" billing-worker/src/production-with-license.js
+          grep -F "SITE_CONTRAST_VERSION = '20260726-contrast-guard-2'" billing-worker/src/production-with-license.js
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/site-quantum-aurora.css
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/site-art-direction.css
-          grep -F 'html.fx-intro-complete' docs/scifi-ui/styles/site-contrast-guard.css
           grep -F '.reference-commerce .hero-description' docs/scifi-ui/styles/site-contrast-guard.css
+          ! grep -Fq 'fx-intro-page-reveal' docs/scifi-ui/styles/formatx-event-horizon.css
+          ! grep -Fq 'site-foreground-guard' docs/scifi-ui/index.html
+          ! grep -Fq 'site-foreground-guard' docs/scifi-ui/scripts/site-art-direction.js
+          ! grep -Fq "style.setProperty('opacity'" docs/scifi-ui/scripts/site-art-direction.js
+          test ! -e docs/scifi-ui/styles/site-foreground-guard.css
 
       - name: Install Chromium runtime
         shell: bash
@@ -72,7 +81,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-aurora-http.log"
           exit 1
 
-      - name: Run desktop, mobile and reduced-motion validation
+      - name: Run real loader, desktop, mobile and reduced-motion validation
         shell: bash
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-aurora/node_modules
@@ -116,12 +125,15 @@ jobs:
                 await page.waitForSelector('#formatx-site-ambient[data-visual-system="formatx-quantum-aurora"]', { timeout: 10000 });
                 await page.waitForSelector('.fx-directed-section', { timeout: 10000 });
                 await page.waitForFunction(() => {
+                  const root = document.documentElement;
                   const overlay = document.getElementById('formatx-event-horizon');
-                  return document.documentElement.classList.contains('fx-intro-complete')
+                  return root.classList.contains('fx-intro-complete')
+                    && !root.classList.contains('fx-intro-running')
+                    && !root.classList.contains('fx-intro-reveal')
                     && (!overlay || overlay.hidden);
-                }, null, { timeout: 9000 });
-                await page.waitForFunction(() => Array.from(document.styleSheets).some((sheet) => String(sheet.href || '').includes('site-contrast-guard.css')), null, { timeout: 8000 });
-                await page.waitForTimeout(450);
+                }, null, { timeout: 10000 });
+                await page.waitForFunction(() => document.documentElement.classList.contains('fx-contrast-guard-ready'), null, { timeout: 5000 });
+                await page.waitForTimeout(250);
 
                 const initial = await page.evaluate(() => {
                   const root = document.getElementById('formatx-site-ambient');
@@ -139,6 +151,7 @@ jobs:
                       color: style.color,
                       filter: style.filter,
                       animation: style.animationName,
+                      inlineStyle: element.getAttribute('style') || '',
                     };
                   };
                   const readable = {
@@ -154,6 +167,24 @@ jobs:
                     && item.visibility === 'visible'
                     && item.display !== 'none'
                     && item.color !== 'rgba(0, 0, 0, 0)';
+                  const forbiddenInline = /(opacity|filter|clip-path|transform|animation)\s*:/i;
+                  const inlineOverridesAbsent = [readable.heroCopy, readable.engine]
+                    .every((item) => item && !forbiddenInline.test(item.inlineStyle));
+
+                  const overlapSelectors = ['.eyebrow', '#hero-title', '.hero-tagline', '.hero-description', '.hero-actions', '.hero-assurance:not(.platform-status)', '.platform-status'];
+                  const nodes = overlapSelectors.map((selector) => document.querySelector(selector)).filter(Boolean);
+                  const overlaps = [];
+                  for (let i = 0; i < nodes.length; i += 1) {
+                    const a = nodes[i].getBoundingClientRect();
+                    for (let j = i + 1; j < nodes.length; j += 1) {
+                      const b = nodes[j].getBoundingClientRect();
+                      const width = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+                      const height = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+                      if (width > 1 && height > 1) overlaps.push([overlapSelectors[i], overlapSelectors[j], width, height]);
+                    }
+                  }
+
+                  const styles = Array.from(document.styleSheets).map((sheet) => String(sheet.href || ''));
                   return {
                     roots: document.querySelectorAll('#formatx-site-ambient').length,
                     visualSystem: root && root.dataset.visualSystem,
@@ -162,11 +193,15 @@ jobs:
                     railDisplay: railStyle && railStyle.display,
                     ambientPointerEvents: ambientStyle && ambientStyle.pointerEvents,
                     overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth,
-                    styles: Array.from(document.styleSheets).map((sheet) => String(sheet.href || '')),
+                    styles,
                     introComplete: document.documentElement.classList.contains('fx-intro-complete'),
                     contrastGuardReady: document.documentElement.classList.contains('fx-contrast-guard-ready'),
+                    revealAbsent: !document.documentElement.classList.contains('fx-intro-reveal'),
+                    foregroundAbsent: !styles.some((href) => href.includes('site-foreground-guard.css')),
                     readable,
                     heroReadable: Object.values(readable).every(visible),
+                    inlineOverridesAbsent,
+                    overlaps,
                   };
                 });
 
@@ -214,7 +249,11 @@ jobs:
                   && initial.overflow <= 1
                   && initial.introComplete
                   && initial.contrastGuardReady
+                  && initial.revealAbsent
+                  && initial.foregroundAbsent
                   && initial.heroReadable
+                  && initial.inlineOverridesAbsent
+                  && initial.overlaps.length === 0
                   && pricingActive
                   && projectActive
                   && railCorrect
@@ -232,7 +271,7 @@ jobs:
             const report = {
               status: results.every((item) => item.pass) ? 'PASS' : 'FAIL',
               generatedAt: new Date().toISOString(),
-              visualSystem: 'FormatX Quantum Aurora',
+              visualSystem: 'FormatX Quantum Aurora consolidated',
               cases: results,
             };
             fs.writeFileSync('quantum-aurora-result.json', JSON.stringify(report, null, 2) + '\n');
@@ -268,6 +307,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add .github/audit/quantum-aurora-status.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Record FormatX Quantum Aurora browser validation'
+            git commit -m 'Record consolidated FormatX visual validation'
             git push origin HEAD:master
           fi
