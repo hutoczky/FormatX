@@ -115,8 +115,9 @@
   addEventListener('pageshow', replaceExistingQr);
 
   const queue = [
-    './scripts/formatx-transcend-bridge.js?v=20260727-transcend-3',
-    './scripts/formatx-transcend-lite.js?v=20260727-transcend-3'
+    './scripts/formatx-transcend-bridge.js?v=20260727-transcend-4',
+    './scripts/formatx-transcend-lite.js?v=20260727-transcend-4',
+    './scripts/worldstage-enhancements.js?v=20260727-worldstage-1'
   ];
 
   function load(index) {
