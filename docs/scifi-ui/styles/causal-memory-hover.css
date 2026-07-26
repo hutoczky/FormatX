@@ -1,3 +1,14 @@
+#formatx-future-5000 {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+#formatx-future-5000 > :not(.fx-causal-hover-layer):not(.fx5k-cinematic-layer) {
+  position: relative;
+  z-index: 2;
+}
+
 .fx-causal-hover-layer {
   position: absolute;
   inset: 0;
@@ -6,11 +17,6 @@
   height: 100%;
   overflow: visible;
   pointer-events: none;
-}
-
-.fx-causal-memory-ready > .fx-causal-hover-layer {
-  position: absolute;
-  z-index: 1;
 }
 
 .fx-causal-hover-path,
