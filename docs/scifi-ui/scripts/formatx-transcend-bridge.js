@@ -31,5 +31,11 @@
     clone.hidden = true;
   });
 
+  new MutationObserver(function (entries) {
+    if (entries.some(function (entry) { return entry.attributeName === 'lang'; })) {
+      document.dispatchEvent(new CustomEvent('formatx:languagechange'));
+    }
+  }).observe(root, { attributes: true, attributeFilter: ['lang'] });
+
   root.dataset.fxLegacyRenderer = 'retired';
 }());
