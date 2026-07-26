@@ -6,15 +6,14 @@ on:
     paths:
       - "docs/scifi-ui/scripts/future-5000.js"
       - "docs/scifi-ui/scripts/future-5000-effects.js"
-      - "docs/scifi-ui/scripts/causal-memory-field.js"
       - "docs/scifi-ui/scripts/causal-memory-hover.js"
       - "docs/scifi-ui/scripts/causal-memory-boot.js"
       - "docs/scifi-ui/styles/future-5000.css"
       - "docs/scifi-ui/styles/future-5000-effects.css"
       - "docs/scifi-ui/styles/future-5000-readability.css"
-      - "docs/scifi-ui/styles/causal-memory-field.css"
       - "docs/scifi-ui/styles/causal-memory-hover.css"
       - "docs/scifi-ui/styles/causal-memory-boot.css"
+      - "docs/scifi-ui/styles/site-readability-audit.css"
       - "docs/scifi-ui/scripts/start-sale.js"
       - "billing-worker/src/production-with-license.js"
       - ".github/workflows/validate-year-5000.yml"
@@ -40,11 +39,12 @@ jobs:
           set -euo pipefail
           node --check docs/scifi-ui/scripts/future-5000.js
           node --check docs/scifi-ui/scripts/future-5000-effects.js
-          node --check docs/scifi-ui/scripts/causal-memory-field.js
           node --check docs/scifi-ui/scripts/causal-memory-hover.js
           node --check docs/scifi-ui/scripts/causal-memory-boot.js
           node --check docs/scifi-ui/scripts/start-sale.js
           node --check billing-worker/src/production-with-license.js
+          ! grep -R -F 'INTERAKCIÓS DNS' docs billing-worker/src
+          ! grep -R -F 'causal-memory-field' docs billing-worker/src
 
       - name: Validate separate QR structure
         shell: bash
@@ -78,20 +78,6 @@ jobs:
           grep -F 'fx5k-core-orbit' docs/scifi-ui/styles/future-5000-effects.css
           grep -F 'fx5k-detail-refract' docs/scifi-ui/styles/future-5000-effects.css
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/future-5000-effects.css
-
-      - name: Validate causal memory field
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -F 'sessionStorage' docs/scifi-ui/scripts/causal-memory-field.js
-          grep -F 'formatx-causal-memory-v1' docs/scifi-ui/scripts/causal-memory-field.js
-          grep -F 'INTERAKCIÓS DNS' docs/scifi-ui/scripts/causal-memory-field.js
-          grep -F 'drawMemoryPaths' docs/scifi-ui/scripts/causal-memory-field.js
-          grep -F 'drawPredictions' docs/scifi-ui/scripts/causal-memory-field.js
-          grep -F '.fx-causal-memory-panel' docs/scifi-ui/styles/causal-memory-field.css
-          grep -F '.fx-causal-dna' docs/scifi-ui/styles/causal-memory-field.css
-          grep -F 'causal-memory-field.css' billing-worker/src/production-with-license.js
-          grep -F 'causal-memory-field.js' billing-worker/src/production-with-license.js
 
       - name: Validate causal hover animation
         shell: bash
@@ -138,6 +124,17 @@ jobs:
           grep -F 'causal-memory-boot.css' billing-worker/src/production-with-license.js
           grep -F 'causal-memory-boot.js' billing-worker/src/production-with-license.js
 
+      - name: Validate full-page readability guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F '.reference-commerce .price-card {' docs/scifi-ui/styles/site-readability-audit.css
+          grep -F 'position: static !important' docs/scifi-ui/styles/site-readability-audit.css
+          grep -F 'grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important' docs/scifi-ui/styles/site-readability-audit.css
+          grep -F '.fx5k-detail-panel {' docs/scifi-ui/styles/site-readability-audit.css
+          grep -F "SITE_READABILITY_VERSION = '20260726-site-readability-1'" billing-worker/src/production-with-license.js
+          grep -F 'site-readability-audit.css' billing-worker/src/production-with-license.js
+
       - name: Validate readability protection
         shell: bash
         run: |
@@ -147,7 +144,6 @@ jobs:
           grep -F 'transform: none !important' docs/scifi-ui/styles/future-5000-readability.css
           grep -F 'writing-mode: horizontal-tb !important' docs/scifi-ui/styles/future-5000-readability.css
           grep -F 'text-rendering: optimizeLegibility' docs/scifi-ui/styles/future-5000-readability.css
-          grep -F 'transform: none !important' docs/scifi-ui/styles/causal-memory-field.css
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/future-5000-readability.css
 
       - name: Summary
@@ -159,8 +155,7 @@ jobs:
             echo '- Separate three-plan QR row: PASS'
             echo '- Refined system architecture: PASS'
             echo '- Cinematic effects injection: PASS'
-            echo '- Causal session memory: PASS'
-            echo '- Interaction DNA generation: PASS'
+            echo '- Interaction DNA module removed: PASS'
             echo '- Hover branch projection: PASS'
             echo '- Animated SVG energy paths: PASS'
             echo '- Refresh navigation boot replay: PASS'
@@ -172,6 +167,7 @@ jobs:
             echo '- Keyboard focus animation: PASS'
             echo '- Flat readable text plane: PASS'
             echo '- Firefox/Linux glyph protection: PASS'
+            echo '- Full-page text collision guard: PASS'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Persist successful validation
@@ -189,8 +185,7 @@ jobs:
             "separatePlanQrRow": true,
             "refinedSystemArchitecture": true,
             "cinematicEffectsInjection": true,
-            "causalSessionMemory": true,
-            "interactionDnaGeneration": true,
+            "interactionDnaRemoved": true,
             "hoverBranchProjection": true,
             "animatedSvgEnergyPaths": true,
             "refreshNavigationBootReplay": true,
@@ -201,13 +196,14 @@ jobs:
             "reducedMotionConfirmationPulse": true,
             "keyboardFocusAnimation": true,
             "flatReadableTextPlane": true,
-            "firefoxLinuxGlyphProtection": true
+            "firefoxLinuxGlyphProtection": true,
+            "fullPageTextCollisionGuard": true
           }
           EOF
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .github/audit/year5000-status.json
           if ! git diff --cached --quiet; then
-            git commit -m "Record successful mobile-visible Year 5000 validation"
+            git commit -m "Record successful readable Year 5000 validation"
             git push origin HEAD:master
           fi
