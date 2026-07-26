@@ -1,6 +1,7 @@
-@import url("./formatx-transcend.css?v=20260726-transcend-1");
+@import url("./formatx-transcend.css?v=20260726-transcend-2");
+@import url("./formatx-transcend-performance.css?v=20260726-performance-1");
 
 /* Compatibility entrypoint retained for the existing GitHub Pages loader. */
 html {
-  --fx-experience-engine: "transcend";
+  --fx-experience-engine: "transcend-lean";
 }
