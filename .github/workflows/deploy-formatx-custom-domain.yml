@@ -52,6 +52,7 @@ jobs:
 
           required = [
               'billing-worker/src/production-with-license.js',
+              'billing-worker/src/production-entry.js',
               'billing-worker/src/pricing-v100-api.js',
               'docs/index.html',
               'docs/site-loader.js',
@@ -60,35 +61,66 @@ jobs:
               'docs/scifi-ui/scripts/pricing-sync.js',
               'docs/scifi-ui/scripts/checkout-v100.js',
               'docs/scifi-ui/scripts/checkout-language-v100.js',
+              'docs/scifi-ui/scripts/formatx-event-horizon.js',
+              'docs/scifi-ui/scripts/site-ambient-background.js',
+              'docs/scifi-ui/scripts/site-art-direction.js',
+              'docs/scifi-ui/styles/formatx-event-horizon.css',
+              'docs/scifi-ui/styles/site-ambient-background.css',
+              'docs/scifi-ui/styles/site-quantum-aurora.css',
+              'docs/scifi-ui/styles/site-art-direction.css',
+              'docs/scifi-ui/styles/site-contrast-guard.css',
           ]
           for path in required:
               assert Path(path).is_file(), path
 
-          worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
+          wrapper = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
+          production = Path('billing-worker/src/production-entry.js').read_text(encoding='utf-8')
           home = Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
           checkout = Path('docs/scifi-ui/checkout.html').read_text(encoding='utf-8')
           loader = Path('docs/site-loader.js').read_text(encoding='utf-8')
+          event_css = Path('docs/scifi-ui/styles/formatx-event-horizon.css').read_text(encoding='utf-8')
+          ambient_js = Path('docs/scifi-ui/scripts/site-ambient-background.js').read_text(encoding='utf-8')
+          art_js = Path('docs/scifi-ui/scripts/site-art-direction.js').read_text(encoding='utf-8')
 
-          assert 'HTMLRewriter' not in worker
-          assert "['/', '/scifi-ui/']" in worker
-          assert "['/checkout.html', '/scifi-ui/checkout.html']" in worker
+          assert 'HTMLRewriter' not in wrapper
+          assert "['/', '/scifi-ui/']" in wrapper
+          assert "['/checkout.html', '/scifi-ui/checkout.html']" in wrapper
           assert 'document.write' not in loader
           assert 'pricing-sync.js?v=20260726-pricing-sync-1' in home
+          assert 'formatx-event-horizon.css?v=20260726-event-horizon-2' in home
+          assert 'site-ambient-background.css?v=20260726-quantum-aurora-2' in home
+          assert 'site-quantum-aurora.css?v=20260726-quantum-aurora-2' in home
           assert 'site-art-direction.js?v=20260726-art-direction-4' in home
+          assert 'site-contrast-guard.css?v=20260726-contrast-guard-2' in home
           assert '15 900 Ft / hó' in home
           assert '29 900 Ft / hó' in home
           assert 'checkout-v100.js?v=20260725-separate-qr-row-5' in checkout
           assert 'checkout-language-v100.js?v=20260725-separate-qr-row-5' in checkout
 
-          for token in ('future-5000', 'causal-memory', 'site-readability-audit', 'start-sale'):
-              assert token not in worker, token
+          forbidden_static = ('future-5000', 'causal-memory', 'site-readability-audit', 'start-sale', 'site-foreground-guard')
+          for token in forbidden_static:
+              assert token not in wrapper, token
               assert token not in home, token
+
+          forbidden_server_visuals = ('main-spatial.css', 'main-readability.css', 'quantum-twin.css', 'quantum-twin.js', 'project-hub.js')
+          for token in forbidden_server_visuals:
+              assert token not in production, token
+
+          assert 'THEME_SCRIPT' in production
+          assert 'PROJECT_AI_SCRIPT' in production
+          assert 'RESPONSIVE_PARITY_SCRIPT' in production
+          assert 'COMMERCE_READABILITY_STYLES' in production
+          assert 'fx-intro-page-reveal' not in event_css
+          assert 'balancedMode' in ambient_js
+          assert 'isFirefox' in ambient_js
+          assert "style.setProperty('opacity'" not in art_js
 
       - name: Validate JavaScript syntax
         shell: bash
         run: |
           set -euo pipefail
           node --check billing-worker/src/production-with-license.js
+          node --check billing-worker/src/production-entry.js
           node --check billing-worker/src/pricing-v100-api.js
           node --check docs/site-loader.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
@@ -159,9 +191,14 @@ jobs:
                  && [ "$home_status" = '200' ] \
                  && [ "$checkout_status" = '200' ] \
                  && grep -Fq 'pricing-sync.js?v=20260726-pricing-sync-1' "$home" \
+                 && grep -Fq 'formatx-event-horizon.css?v=20260726-event-horizon-2' "$home" \
+                 && grep -Fq 'site-ambient-background.css?v=20260726-quantum-aurora-2' "$home" \
+                 && grep -Fq 'site-quantum-aurora.css?v=20260726-quantum-aurora-2' "$home" \
+                 && grep -Fq 'site-art-direction.js?v=20260726-art-direction-4' "$home" \
+                 && grep -Fq 'site-contrast-guard.css?v=20260726-contrast-guard-2' "$home" \
                  && grep -Fq '15 900 Ft / hó' "$home" \
                  && grep -Fq 'checkout-v100.js?v=20260725-separate-qr-row-5' "$checkout" \
-                 && ! grep -Eq 'future-5000|causal-memory|site-readability-audit|start-sale' "$home"; then
+                 && ! grep -Eq 'future-5000|causal-memory|site-readability-audit|start-sale|site-foreground-guard|main-spatial|main-readability|quantum-twin|project-hub' "$home"; then
                 rm -f "$headers" "$home" "$checkout"
                 return 0
               fi
