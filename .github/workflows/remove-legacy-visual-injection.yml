@@ -1,5 +1,6 @@
 name: Remove legacy visual injection
 
+# Removes the final server-side legacy 3D/Quantum Twin composition from the canonical page.
 on:
   push:
     branches: [master]
