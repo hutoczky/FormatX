@@ -1,6 +1,10 @@
 name: Publish website validation status
 
 on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/publish-website-validation-status.yml'
   workflow_run:
     workflows:
       - Validate FormatX website
@@ -8,12 +12,22 @@ on:
       - completed
 
 permissions:
+  actions: write
   contents: read
   statuses: write
 
 jobs:
+  trigger:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch the authoritative website validation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run validate-website.yml --ref master
+
   publish:
-    if: github.event.workflow_run.head_branch == 'master'
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'master'
     runs-on: ubuntu-latest
     steps:
       - name: Publish unified validation result
