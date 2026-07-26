@@ -1,0 +1,187 @@
+name: FormatX production deploy
+run-name: FormatX production deploy from ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'billing-worker/**'
+      - 'docs/**'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'
+      - '.github/workflows/validate-website.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Validate production source
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          config = json.loads(Path('billing-worker/wrangler.jsonc').read_text(encoding='utf-8'))
+          assert config['name'] == 'formatx'
+          assert config['main'] == 'src/production-with-license.js'
+          assert config['assets']['directory'] == '../docs'
+          assert config['assets']['run_worker_first'] is True
+
+          routes = {(item.get('pattern'), item.get('custom_domain')) for item in config.get('routes', [])}
+          assert ('formatxsuite.com', True) in routes
+          assert ('www.formatxsuite.com', True) in routes
+
+          required = [
+              'billing-worker/src/production-with-license.js',
+              'billing-worker/src/pricing-v100-api.js',
+              'docs/index.html',
+              'docs/site-loader.js',
+              'docs/scifi-ui/index.html',
+              'docs/scifi-ui/checkout.html',
+              'docs/scifi-ui/scripts/pricing-sync.js',
+              'docs/scifi-ui/scripts/checkout-v100.js',
+              'docs/scifi-ui/scripts/checkout-language-v100.js',
+          ]
+          for path in required:
+              assert Path(path).is_file(), path
+
+          worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
+          home = Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
+          checkout = Path('docs/scifi-ui/checkout.html').read_text(encoding='utf-8')
+          loader = Path('docs/site-loader.js').read_text(encoding='utf-8')
+
+          assert 'HTMLRewriter' not in worker
+          assert "['/', '/scifi-ui/']" in worker
+          assert "['/checkout.html', '/scifi-ui/checkout.html']" in worker
+          assert 'document.write' not in loader
+          assert 'pricing-sync.js?v=20260726-pricing-sync-1' in home
+          assert 'site-art-direction.js?v=20260726-art-direction-4' in home
+          assert '15 900 Ft / hó' in home
+          assert '29 900 Ft / hó' in home
+          assert 'checkout-v100.js?v=20260725-separate-qr-row-5' in checkout
+          assert 'checkout-language-v100.js?v=20260725-separate-qr-row-5' in checkout
+
+          for token in ('future-5000', 'causal-memory', 'site-readability-audit', 'start-sale'):
+              assert token not in worker, token
+              assert token not in home, token
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check billing-worker/src/production-with-license.js
+          node --check billing-worker/src/pricing-v100-api.js
+          node --check docs/site-loader.js
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/site-ambient-background.js
+          node --check docs/scifi-ui/scripts/site-art-direction.js
+          node --check docs/scifi-ui/scripts/landing.js
+          node --check docs/scifi-ui/scripts/pricing-sync.js
+          node --check docs/scifi-ui/scripts/checkout-v100.js
+          node --check docs/scifi-ui/scripts/checkout-language-v100.js
+
+      - name: Require Cloudflare API token
+        shell: bash
+        env:
+          RAW_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          token="$(printf '%s' "$RAW_CF_TOKEN" | tr -d '\r\n')"
+          token="${token#Authorization: Bearer }"
+          token="${token#Bearer }"
+          token="$(printf '%s' "$token" | xargs)"
+          test "${#token}" -ge 20
+          echo "::add-mask::$token"
+          echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
+
+      - name: Install and test Worker
+        working-directory: billing-worker
+        run: |
+          npm ci
+          npm test
+          npx wrangler deploy --dry-run --outdir ../.wrangler-production-check
+
+      - name: Deploy Worker and assets
+        working-directory: billing-worker
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ffd7d28ea7c6a510549dc9363619c8c5
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler d1 migrations apply formatx-license-db --remote
+          for attempt in 1 2; do
+            if npx wrangler deploy; then
+              rm -rf ../.wrangler-production-check
+              exit 0
+            fi
+            [ "$attempt" -eq 1 ] && sleep 20
+          done
+          exit 1
+
+      - name: Verify live website
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          verify_origin() {
+            local origin="$1"
+            local headers home checkout
+            headers="$(mktemp)"
+            home="$(mktemp)"
+            checkout="$(mktemp)"
+
+            for attempt in $(seq 1 36); do
+              root_status="$(curl -sS --connect-timeout 10 --max-time 30 -D "$headers" -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' "$origin/" || true)"
+              home_status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$home" -w '%{http_code}' -H 'Cache-Control: no-cache' "$origin/scifi-ui/?lang=hu" || true)"
+              checkout_status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$checkout" -w '%{http_code}' -H 'Cache-Control: no-cache' "$origin/scifi-ui/checkout.html?plan=business_pro&currency=HUF" || true)"
+
+              if [ "$root_status" = '308' ] \
+                 && grep -iq '^location: .*/scifi-ui/' "$headers" \
+                 && [ "$home_status" = '200' ] \
+                 && [ "$checkout_status" = '200' ] \
+                 && grep -Fq 'pricing-sync.js?v=20260726-pricing-sync-1' "$home" \
+                 && grep -Fq '15 900 Ft / hó' "$home" \
+                 && grep -Fq 'checkout-v100.js?v=20260725-separate-qr-row-5' "$checkout" \
+                 && ! grep -Eq 'future-5000|causal-memory|site-readability-audit|start-sale' "$home"; then
+                rm -f "$headers" "$home" "$checkout"
+                return 0
+              fi
+              sleep 10
+            done
+
+            rm -f "$headers" "$home" "$checkout"
+            return 1
+          }
+
+          verify_origin 'https://formatxsuite.com'
+          verify_origin 'https://www.formatxsuite.com'
+
+          license_health="$(curl -fsSL --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/api/license/health')"
+          LICENSE_HEALTH_JSON="$license_health" python3 - <<'PY'
+          import json
+          import os
+          data = json.loads(os.environ['LICENSE_HEALTH_JSON'])
+          assert data.get('ok') is True, data
+          assert data.get('service') == 'formatx-license-center', data
+          assert data.get('signed_client_api') is True, data
+          assert data.get('signature_algorithm') == 'Ed25519', data
+          PY
