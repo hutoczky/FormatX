@@ -1,8 +1,7 @@
 (function () {
   'use strict';
 
-  const CONTRAST_STYLESHEET = '/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-1';
-  const FOREGROUND_STYLESHEET = '/scifi-ui/styles/site-foreground-guard.css?v=20260726-foreground-1';
+  const CONTRAST_STYLESHEET = '/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-2';
   const sections = [
     { id: 'product', short: 'CORE', labelHu: 'Termék', labelEn: 'Product' },
     { id: 'pricing', short: 'LIC', labelHu: 'Licencek', labelEn: 'Licences' },
@@ -16,42 +15,29 @@
   let rail;
   let currentScene = 'product';
 
-  function ensureStylesheet(fileName, href, dataName) {
+  function ensureContrastGuard() {
     const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(function (link) {
-      return String(link.getAttribute('href') || '').includes(fileName);
+      return String(link.getAttribute('href') || '').includes('site-contrast-guard.css');
     });
     if (existing) return existing;
+
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = href;
-    link.dataset[dataName] = 'true';
+    link.href = CONTRAST_STYLESHEET;
+    link.dataset.fxContrastGuard = 'true';
     document.head.appendChild(link);
     return link;
   }
 
-  function ensureVisualGuards() {
-    ensureStylesheet('site-contrast-guard.css', CONTRAST_STYLESHEET, 'fxContrastGuard');
-    ensureStylesheet('site-foreground-guard.css', FOREGROUND_STYLESHEET, 'fxForegroundGuard');
-  }
-
-  function recoverIntroContent() {
+  function markIntroComplete() {
     if (document.documentElement.classList.contains('fx-intro-running')) return;
-    document.documentElement.classList.add('fx-contrast-guard-ready', 'fx-foreground-guard-ready');
-    document.querySelectorAll('.hero-copy, .core-engine').forEach(function (element) {
-      element.style.setProperty('opacity', '1', 'important');
-      element.style.setProperty('visibility', 'visible', 'important');
-      element.style.setProperty('filter', 'none', 'important');
-      element.style.setProperty('clip-path', 'none', 'important');
-      element.style.setProperty('transform', 'none', 'important');
-      element.style.setProperty('animation', 'none', 'important');
-      element.style.setProperty('mix-blend-mode', 'normal', 'important');
-    });
+    document.documentElement.classList.add('fx-contrast-guard-ready');
   }
 
   function watchIntroCompletion() {
     const observer = new MutationObserver(function (records) {
       if (!records.some(function (record) { return record.attributeName === 'class'; })) return;
-      if (!document.documentElement.classList.contains('fx-intro-running')) recoverIntroContent();
+      markIntroComplete();
     });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   }
@@ -179,22 +165,20 @@
 
   function initialise() {
     if (!document.body || document.documentElement.dataset.fxArtDirection === 'ready') return;
-    ensureVisualGuards();
+    ensureContrastGuard();
     watchIntroCompletion();
+
     const items = prepareSections();
     if (!items.length) return;
+
     document.documentElement.dataset.fxArtDirection = 'ready';
     document.documentElement.classList.add('fx-art-direction-ready');
     buildRail(items);
     bindActiveSection(items);
     bindProgress();
     setActive(items, items[0].item.id);
-    recoverIntroContent();
-    window.addEventListener('pageshow', recoverIntroContent);
-    window.setTimeout(recoverIntroContent, 400);
-    window.setTimeout(recoverIntroContent, 1200);
-    window.setTimeout(recoverIntroContent, 2600);
-    window.setTimeout(recoverIntroContent, 6200);
+    markIntroComplete();
+    window.addEventListener('pageshow', markIntroComplete);
 
     const languageObserver = new MutationObserver(function (records) {
       if (records.some(function (record) { return record.attributeName === 'lang'; })) updateLanguage(items);
