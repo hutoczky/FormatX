@@ -1,7 +1,7 @@
 {
   "status": "PASS",
-  "sourceCommit": "fcac59e60ecef24ea50d9229a355c1a8be11ac9e",
-  "validatedAt": "2026-07-26T06:05:44Z",
+  "sourceCommit": "b29d34403b64fe370b1483edb9226a855f35faf4",
+  "validatedAt": "2026-07-26T06:07:34Z",
   "javascriptSyntax": true,
   "separatePlanQrRow": true,
   "refinedSystemArchitecture": true,
@@ -12,6 +12,8 @@
   "animatedSvgEnergyPaths": true,
   "refreshNavigationBootReplay": true,
   "bfcachePageshowBootReplay": true,
+  "mobileViewportEntryBootTrigger": true,
+  "coarsePointerMobileVisualBoost": true,
   "visibleRealElementRevealSequence": true,
   "reducedMotionConfirmationPulse": true,
   "keyboardFocusAnimation": true,
