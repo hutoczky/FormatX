@@ -1,0 +1,75 @@
+name: Probe live FormatX website
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/probe-live-formatx.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch live website assets
+        id: probe
+        shell: bash
+        run: |
+          set +e
+          mkdir -p live-probe
+          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/home.headers -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
+          home_status=$?
+          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/intro-js.headers -o live-probe/formatx-event-horizon.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-event-horizon.js'
+          js_status=$?
+          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/intro-css.headers -o live-probe/formatx-event-horizon.css 'https://formatxsuite.com/scifi-ui/styles/formatx-event-horizon.css'
+          css_status=$?
+          curl -sS --connect-timeout 10 --max-time 30 -D live-probe/premium-css.headers -o live-probe/site-premium-finish.css 'https://formatxsuite.com/scifi-ui/styles/site-premium-finish.css'
+          premium_status=$?
+
+          found_new=0
+          grep -Fq 'FAILSAFE_DEADLINE' live-probe/formatx-event-horizon.js && \
+          grep -Fq 'overlay.getAnimations({ subtree: true })' live-probe/formatx-event-horizon.js && \
+          grep -Fq '.fx-intro-skip' live-probe/formatx-event-horizon.css && \
+          grep -Fq -- '--fx-cyan' live-probe/site-premium-finish.css && found_new=1
+
+          {
+            echo "home_curl_status=$home_status"
+            echo "js_curl_status=$js_status"
+            echo "css_curl_status=$css_status"
+            echo "premium_curl_status=$premium_status"
+            echo "new_build=$found_new"
+          } | tee live-probe/result.txt
+
+          echo "new_build=$found_new" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload live probe
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-live-probe
+          path: live-probe
+          retention-days: 3
+
+      - name: Publish probe status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEW_BUILD: ${{ steps.probe.outputs.new_build }}
+        shell: bash
+        run: |
+          if [ "$NEW_BUILD" = '1' ]; then
+            state='success'
+            description='Live domain is serving the new cinematic build'
+          else
+            state='failure'
+            description='Live domain is still serving the previous build'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX live cinematic probe' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
