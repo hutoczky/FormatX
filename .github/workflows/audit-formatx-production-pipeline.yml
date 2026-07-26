@@ -7,6 +7,12 @@ on:
       - master
     paths:
       - '.github/workflows/audit-formatx-production-pipeline.yml'
+      - '.github/workflows/deploy-formatx-custom-domain.yml'
+      - 'billing-worker/vitest.config.js'
+      - 'billing-worker/wrangler.billing-test.jsonc'
+      - 'billing-worker/package.json'
+      - 'billing-worker/package-lock.json'
+      - 'billing-worker/test/**'
 
 permissions:
   contents: write
@@ -108,7 +114,7 @@ jobs:
               handle.write(f'serial_deploy_queue={str(serial_queue).lower()}\n')
           print(f'duplicate_status_deploy={str(duplicate).lower()}')
           print(f'serial_deploy_queue={str(serial_queue).lower()}')
-        
+
       - name: Export workflow topology
         shell: bash
         run: cat "$HOME/topology.env" >> "$GITHUB_ENV"
