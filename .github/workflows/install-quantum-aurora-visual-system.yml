@@ -18,62 +18,91 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Wire first-frame visual assets
+      - name: Wire static and Worker visual assets
         shell: python
         run: |
           from pathlib import Path
 
           index = Path('docs/scifi-ui/index.html')
           text = index.read_text(encoding='utf-8')
-          if 'site-ambient-background.css?v=20260726-quantum-aurora-1' not in text:
-              marker = '  <link rel="stylesheet" href="./styles/commerce-readability.css?v=20260725-commerce-readability-1">\n'
-              addition = (
-                  '  <link rel="stylesheet" href="./styles/site-ambient-background.css?v=20260726-quantum-aurora-1">\n'
-                  '  <link rel="stylesheet" href="./styles/site-quantum-aurora.css?v=20260726-quantum-aurora-1">\n'
-                  '  <link rel="stylesheet" href="./styles/site-premium-finish.css?v=20260726-premium-finish-1">\n'
-              )
-              if marker not in text:
+          css_marker = '  <link rel="stylesheet" href="./styles/commerce-readability.css?v=20260725-commerce-readability-1">\n'
+          css_assets = (
+              '  <link rel="stylesheet" href="./styles/site-ambient-background.css?v=20260726-quantum-aurora-1">\n'
+              '  <link rel="stylesheet" href="./styles/site-quantum-aurora.css?v=20260726-quantum-aurora-1">\n'
+              '  <link rel="stylesheet" href="./styles/site-premium-finish.css?v=20260726-premium-finish-1">\n'
+              '  <link rel="stylesheet" href="./styles/site-art-direction.css?v=20260726-art-direction-1">\n'
+          )
+          if 'site-art-direction.css?v=20260726-art-direction-1' not in text:
+              if css_marker not in text:
                   raise SystemExit('CSS insertion marker not found')
-              text = text.replace(marker, marker + addition, 1)
-          if 'site-ambient-background.js?v=20260726-quantum-aurora-1' not in text:
-              marker = '  <script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-1"></script>\n'
-              addition = '  <script defer src="./scripts/site-ambient-background.js?v=20260726-quantum-aurora-1"></script>\n'
-              if marker not in text:
+              text = text.replace(css_marker, css_marker + css_assets, 1)
+
+          js_marker = '  <script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-1"></script>\n'
+          js_assets = (
+              '  <script defer src="./scripts/site-ambient-background.js?v=20260726-quantum-aurora-1"></script>\n'
+              '  <script defer src="./scripts/site-art-direction.js?v=20260726-art-direction-1"></script>\n'
+          )
+          if 'site-art-direction.js?v=20260726-art-direction-1' not in text:
+              if js_marker not in text:
                   raise SystemExit('JS insertion marker not found')
-              text = text.replace(marker, marker + addition, 1)
+              text = text.replace(js_marker, js_marker + js_assets, 1)
           index.write_text(text, encoding='utf-8')
 
-          deploy = Path('.github/workflows/deploy-formatx-custom-domain.yml')
-          text = deploy.read_text(encoding='utf-8')
-          required_marker = '              "docs/scifi-ui/styles/site-readability-audit.css",\n'
-          required_addition = (
-              '              "docs/scifi-ui/styles/site-ambient-background.css",\n'
-              '              "docs/scifi-ui/styles/site-quantum-aurora.css",\n'
-              '              "docs/scifi-ui/styles/site-premium-finish.css",\n'
-              '              "docs/scifi-ui/scripts/site-ambient-background.js",\n'
-          )
-          if '"docs/scifi-ui/styles/site-quantum-aurora.css"' not in text:
-              if required_marker not in text:
-                  raise SystemExit('Deploy required-files marker not found')
-              text = text.replace(required_marker, required_marker + required_addition, 1)
-          if 'SITE_AMBIENT_VERSION' not in text:
-              raise SystemExit('Production Worker does not contain SITE_AMBIENT_VERSION')
-          deploy.write_text(text, encoding='utf-8')
+          worker = Path('billing-worker/src/production-with-license.js')
+          text = worker.read_text(encoding='utf-8')
+          if 'SITE_ART_VERSION' not in text:
+              marker = "const SITE_PREMIUM_VERSION = '20260726-premium-finish-1';\n"
+              if marker not in text:
+                  raise SystemExit('Worker version marker not found')
+              text = text.replace(marker, marker + "const SITE_ART_VERSION = '20260726-art-direction-1';\n", 1)
 
-      - name: Validate installed assets
+          if 'site-art-direction.css' not in text:
+              marker = '''    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/site-premium-finish.css?v=${SITE_PREMIUM_VERSION}">`,
+      { html: true },
+    );
+'''
+              addition = '''    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/site-art-direction.css?v=${SITE_ART_VERSION}">`,
+      { html: true },
+    );
+'''
+              if marker not in text:
+                  raise SystemExit('Worker CSS marker not found')
+              text = text.replace(marker, marker + addition, 1)
+
+          if 'site-art-direction.js' not in text:
+              marker = '''    element.append(
+      `<script defer src="/scifi-ui/scripts/site-ambient-background.js?v=${SITE_AMBIENT_VERSION}"></script>`,
+      { html: true },
+    );
+'''
+              addition = '''    element.append(
+      `<script defer src="/scifi-ui/scripts/site-art-direction.js?v=${SITE_ART_VERSION}"></script>`,
+      { html: true },
+    );
+'''
+              if marker not in text:
+                  raise SystemExit('Worker JS marker not found')
+              text = text.replace(marker, marker + addition, 1)
+          worker.write_text(text, encoding='utf-8')
+
+      - name: Validate installed visual assets
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/site-ambient-background.js
+          node --check docs/scifi-ui/scripts/site-art-direction.js
           node --check billing-worker/src/production-with-license.js
           grep -F 'site-ambient-background.css?v=20260726-quantum-aurora-1' docs/scifi-ui/index.html
           grep -F 'site-quantum-aurora.css?v=20260726-quantum-aurora-1' docs/scifi-ui/index.html
           grep -F 'site-premium-finish.css?v=20260726-premium-finish-1' docs/scifi-ui/index.html
+          grep -F 'site-art-direction.css?v=20260726-art-direction-1' docs/scifi-ui/index.html
           grep -F 'site-ambient-background.js?v=20260726-quantum-aurora-1' docs/scifi-ui/index.html
+          grep -F 'site-art-direction.js?v=20260726-art-direction-1' docs/scifi-ui/index.html
           grep -F 'formatx-quantum-aurora' docs/scifi-ui/scripts/site-ambient-background.js
-          grep -F 'new IntersectionObserver' docs/scifi-ui/scripts/site-ambient-background.js
-          grep -F '[data-scene="architecture"]' docs/scifi-ui/styles/site-quantum-aurora.css
-          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/site-quantum-aurora.css
+          grep -F 'fx-system-rail' docs/scifi-ui/scripts/site-art-direction.js
+          grep -F 'SITE_ART_VERSION' billing-worker/src/production-with-license.js
 
       - name: Commit installed visual system
         shell: bash
@@ -81,6 +110,8 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html .github/workflows/deploy-formatx-custom-domain.yml
-          git commit -m 'Install the Quantum Aurora system across the FormatX site'
-          git push origin HEAD:master
+          git add docs/scifi-ui/index.html billing-worker/src/production-with-license.js
+          if ! git diff --cached --quiet; then
+            git commit -m 'Install the complete FormatX Quantum Aurora art direction'
+            git push origin HEAD:master
+          fi
