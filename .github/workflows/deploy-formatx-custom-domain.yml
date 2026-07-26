@@ -95,12 +95,19 @@ jobs:
           assert "performance.getEntriesByType('navigation')" in boot_script
           assert "event.persisted" in boot_script
           assert "function resetBoot(root)" in boot_script
+          assert "const mobileViewport" in boot_script
+          assert "function rootIsVisible(root)" in boot_script
+          assert "new IntersectionObserver" in boot_script
+          assert "visible-entry" in boot_script
+          assert "fx-causal-boot-mobile" in boot_script
           assert "fx-causal-boot-minimal" in boot_script
           assert ".fx5k-stage" in boot_styles
           assert ".fx5k-principles" in boot_styles
+          assert "(pointer: coarse)" in boot_styles
+          assert "@keyframes fx-causal-root-energize-mobile" in boot_styles
           assert "@keyframes fx-causal-root-minimal" in boot_styles
-          assert "CAUSAL_BOOT_VERSION = '20260726-causal-boot-2'" in worker
-          print("Production website, refresh-safe boot animation, QR row and license center are valid.")
+          assert "CAUSAL_BOOT_VERSION = '20260726-causal-boot-3'" in worker
+          print("Production website, mobile viewport boot animation, QR row and license center are valid.")
 
       - name: Require Cloudflare API token
         id: require_token
@@ -179,7 +186,7 @@ jobs:
           echo "Both production deployment attempts failed." >&2
           exit 1
 
-      - name: Verify public website, refresh animation, QR row and license API
+      - name: Verify public website, mobile animation, QR row and license API
         id: verify_production
         shell: bash
         run: |
@@ -200,11 +207,11 @@ jobs:
 
               curl -fsSL --connect-timeout 10 --max-time 30 \
                 -H 'Cache-Control: no-cache' \
-                "$origin/scifi-ui/scripts/causal-memory-boot.js?v=20260726-causal-boot-2" \
+                "$origin/scifi-ui/scripts/causal-memory-boot.js?v=20260726-causal-boot-3" \
                 -o "$boot_js" || true
               curl -fsSL --connect-timeout 10 --max-time 30 \
                 -H 'Cache-Control: no-cache' \
-                "$origin/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-2" \
+                "$origin/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-3" \
                 -o "$boot_css" || true
 
               if [ "$status" = "200" ] \
@@ -214,23 +221,27 @@ jobs:
                  && grep -Fq '/scifi-ui/styles/future-5000.css' "$body" \
                  && grep -Fq '/scifi-ui/styles/causal-memory-field.css' "$body" \
                  && grep -Fq '/scifi-ui/styles/causal-memory-hover.css' "$body" \
-                 && grep -Fq '/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-2' "$body" \
+                 && grep -Fq '/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-3' "$body" \
                  && grep -Fq '/scifi-ui/scripts/start-sale.js' "$body" \
                  && grep -Fq '/scifi-ui/scripts/future-5000.js' "$body" \
                  && grep -Fq '/scifi-ui/scripts/causal-memory-field.js' "$body" \
                  && grep -Fq '/scifi-ui/scripts/causal-memory-hover.js' "$body" \
-                 && grep -Fq '/scifi-ui/scripts/causal-memory-boot.js?v=20260726-causal-boot-2' "$body" \
+                 && grep -Fq '/scifi-ui/scripts/causal-memory-boot.js?v=20260726-causal-boot-3' "$body" \
                  && grep -Fq "window.addEventListener('pageshow'" "$boot_js" \
                  && grep -Fq "performance.getEntriesByType('navigation')" "$boot_js" \
                  && grep -Fq 'event.persisted' "$boot_js" \
                  && grep -Fq 'function resetBoot(root)' "$boot_js" \
-                 && grep -Fq '@keyframes fx-causal-root-energize' "$boot_css" \
+                 && grep -Fq 'const mobileViewport' "$boot_js" \
+                 && grep -Fq 'function rootIsVisible(root)' "$boot_js" \
+                 && grep -Fq 'new IntersectionObserver' "$boot_js" \
+                 && grep -Fq 'visible-entry' "$boot_js" \
+                 && grep -Fq '@keyframes fx-causal-root-energize-mobile' "$boot_css" \
                  && grep -Fq '@keyframes fx-causal-root-minimal' "$boot_css" \
                  && grep -iq '^strict-transport-security:' "$headers" \
                  && grep -iq '^content-security-policy:' "$headers" \
                  && grep -iq '^x-content-type-options: nosniff' "$headers" \
                  && ! grep -iq '^location:' "$headers"; then
-                echo "Verified $url with refresh-safe boot animation, separate QR and Year 5000 assets"
+                echo "Verified $url with mobile viewport boot animation, separate QR and Year 5000 assets"
                 rm -f "$headers" "$body" "$boot_js" "$boot_css"
                 return 0
               fi
@@ -273,7 +284,8 @@ jobs:
           - Főoldal: https://formatxsuite.com/
           - Három külön csomag-QR: ellenőrizve
           - 5000-es vizuális rendszer: ellenőrizve mindkét domainen
-          - Frissítéskor újrainduló boot-animáció v2: ellenőrizve
+          - Frissítéskor újrainduló boot-animáció v3: ellenőrizve
+          - Mobil képernyőre lépéskor induló animáció: ellenőrizve
           - BFCache/pageshow újraindítás: ellenőrizve
           - Csökkentett mozgás fényimpulzusa: ellenőrizve
           - Licenc-API: ellenőrizve
