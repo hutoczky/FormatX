@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "sourceCommit": "7bda45a7755efa75739cdf1e96af263853761b1c",
+  "validatedAt": "2026-07-26T10:16:43Z",
+  "firstHtmlFrameOverlay": true,
+  "javascriptSyntax": true,
+  "desktopLifecycle": true,
+  "mobileLifecycle": true,
+  "progressAnimation": true,
+  "automaticPageRelease": true,
+  "scrollLockCleanup": true,
+  "reducedMotionFallback": true
+}
