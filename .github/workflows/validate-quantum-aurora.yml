@@ -1,0 +1,234 @@
+name: Validate FormatX Quantum Aurora
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/site-ambient-background.css'
+      - 'docs/scifi-ui/styles/site-quantum-aurora.css'
+      - 'docs/scifi-ui/styles/site-premium-finish.css'
+      - 'docs/scifi-ui/styles/site-art-direction.css'
+      - 'docs/scifi-ui/scripts/site-ambient-background.js'
+      - 'docs/scifi-ui/scripts/site-art-direction.js'
+      - 'billing-worker/src/production-with-license.js'
+      - '.github/workflows/validate-quantum-aurora.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: validate-formatx-quantum-aurora
+  cancel-in-progress: true
+
+jobs:
+  browser-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Validate source contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/site-ambient-background.js
+          node --check docs/scifi-ui/scripts/site-art-direction.js
+          node --check billing-worker/src/production-with-license.js
+          grep -F 'data.visualSystem = ' docs/scifi-ui/scripts/site-ambient-background.js >/dev/null || grep -F "dataset.visualSystem = 'formatx-quantum-aurora'" docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'new IntersectionObserver' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'fx-system-rail' docs/scifi-ui/scripts/site-art-direction.js
+          grep -F 'site-quantum-aurora.css?v=20260726-quantum-aurora-1' docs/scifi-ui/index.html
+          grep -F 'site-art-direction.js?v=20260726-art-direction-1' docs/scifi-ui/index.html
+          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/site-quantum-aurora.css
+          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/site-art-direction.css
+
+      - name: Install Chromium runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/formatx-aurora"
+          npm install --prefix "$RUNNER_TEMP/formatx-aurora" --no-audit --no-fund playwright@1.55.0
+          "$RUNNER_TEMP/formatx-aurora/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start local site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/formatx-aurora-http.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/formatx-aurora-http.pid"
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:4173/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-aurora-http.log"
+          exit 1
+
+      - name: Run desktop, mobile and reduced-motion validation
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-aurora/node_modules
+        run: |
+          set -euo pipefail
+          mkdir -p quantum-aurora-artifacts
+          node <<'NODE'
+          const fs = require('fs');
+          const { chromium } = require('playwright');
+
+          const cases = [
+            { name: 'desktop', width: 1440, height: 1000, mobile: false, reducedMotion: 'no-preference' },
+            { name: 'mobile', width: 390, height: 844, mobile: true, reducedMotion: 'no-preference' },
+            { name: 'reduced-motion', width: 1180, height: 900, mobile: false, reducedMotion: 'reduce' },
+          ];
+
+          async function hideIntro(page) {
+            await page.evaluate(() => {
+              const overlay = document.getElementById('formatx-event-horizon');
+              if (overlay) overlay.hidden = true;
+              document.documentElement.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-reveal');
+              document.documentElement.classList.add('fx-intro-complete');
+            });
+          }
+
+          async function scene(page, target, expected) {
+            await page.locator(target).scrollIntoViewIfNeeded();
+            await page.waitForFunction((value) => {
+              const root = document.getElementById('formatx-site-ambient');
+              return root && root.dataset.scene === value;
+            }, expected, { timeout: 8000 });
+          }
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const results = [];
+            try {
+              for (const testCase of cases) {
+                const context = await browser.newContext({
+                  viewport: { width: testCase.width, height: testCase.height },
+                  isMobile: testCase.mobile,
+                  hasTouch: testCase.mobile,
+                  locale: 'hu-HU',
+                  reducedMotion: testCase.reducedMotion,
+                });
+                const page = await context.newPage();
+                const errors = [];
+                page.on('pageerror', (error) => errors.push(String(error)));
+                await page.goto('http://127.0.0.1:4173/scifi-ui/index.html?lang=hu', { waitUntil: 'networkidle', timeout: 30000 });
+                await hideIntro(page);
+                await page.waitForSelector('#formatx-site-ambient[data-visual-system="formatx-quantum-aurora"]', { timeout: 10000 });
+                await page.waitForSelector('.fx-directed-section', { timeout: 10000 });
+                await page.waitForTimeout(350);
+
+                const initial = await page.evaluate(() => {
+                  const root = document.getElementById('formatx-site-ambient');
+                  const rail = document.querySelector('.fx-system-rail');
+                  const railStyle = rail ? getComputedStyle(rail) : null;
+                  const ambientStyle = root ? getComputedStyle(root) : null;
+                  return {
+                    roots: document.querySelectorAll('#formatx-site-ambient').length,
+                    visualSystem: root && root.dataset.visualSystem,
+                    initialScene: root && root.dataset.scene,
+                    railExists: Boolean(rail),
+                    railDisplay: railStyle && railStyle.display,
+                    ambientPointerEvents: ambientStyle && ambientStyle.pointerEvents,
+                    overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth,
+                    styles: Array.from(document.styleSheets).map((sheet) => String(sheet.href || '')),
+                  };
+                });
+
+                await scene(page, '#pricing', 'licence');
+                const pricingActive = await page.evaluate(() => document.documentElement.dataset.fxActiveSection === 'pricing');
+                await scene(page, '#project-details', 'architecture');
+                const projectActive = await page.evaluate(() => document.documentElement.dataset.fxActiveSection === 'project-details');
+
+                const motion = await page.evaluate(() => {
+                  const grid = document.querySelector('.fx-site-ambient-grid');
+                  const ring = document.querySelector('.fx-site-ambient-signature span');
+                  return {
+                    gridAnimation: grid ? getComputedStyle(grid).animationName : '',
+                    ringAnimation: ring ? getComputedStyle(ring).animationName : '',
+                  };
+                });
+
+                const railCorrect = testCase.mobile ? initial.railDisplay === 'none' : initial.railExists && initial.railDisplay !== 'none';
+                const motionCorrect = testCase.reducedMotion === 'reduce'
+                  ? motion.ringAnimation === 'none'
+                  : motion.gridAnimation !== 'none' && motion.ringAnimation !== 'none';
+                const assetsLoaded = ['site-ambient-background.css', 'site-quantum-aurora.css', 'site-premium-finish.css', 'site-art-direction.css']
+                  .every((asset) => initial.styles.some((href) => href.includes(asset)));
+
+                const result = {
+                  case: testCase.name,
+                  runtimeErrors: errors,
+                  ...initial,
+                  pricingActive,
+                  projectActive,
+                  motion,
+                  railCorrect,
+                  motionCorrect,
+                  assetsLoaded,
+                };
+                result.pass = errors.length === 0
+                  && initial.roots === 1
+                  && initial.visualSystem === 'formatx-quantum-aurora'
+                  && initial.initialScene === 'core'
+                  && initial.ambientPointerEvents === 'none'
+                  && initial.overflow <= 1
+                  && pricingActive
+                  && projectActive
+                  && railCorrect
+                  && motionCorrect
+                  && assetsLoaded;
+                results.push(result);
+                await page.screenshot({ path: `quantum-aurora-artifacts/${testCase.name}.png`, fullPage: true });
+                await context.close();
+              }
+            } finally {
+              await browser.close();
+            }
+
+            const report = {
+              status: results.every((item) => item.pass) ? 'PASS' : 'FAIL',
+              generatedAt: new Date().toISOString(),
+              visualSystem: 'FormatX Quantum Aurora',
+              cases: results,
+            };
+            fs.writeFileSync('quantum-aurora-result.json', JSON.stringify(report, null, 2) + '\n');
+            console.log(JSON.stringify(report, null, 2));
+            process.exit(report.status === 'PASS' ? 0 : 1);
+          })().catch((error) => {
+            fs.writeFileSync('quantum-aurora-result.json', JSON.stringify({ status: 'ERROR', error: String(error) }, null, 2) + '\n');
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-quantum-aurora-validation
+          path: |
+            quantum-aurora-result.json
+            quantum-aurora-artifacts/*.png
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Persist validation status
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin master
+          mkdir -p .github/audit
+          cp quantum-aurora-result.json .github/audit/quantum-aurora-status.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/audit/quantum-aurora-status.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record FormatX Quantum Aurora browser validation'
+            git push origin HEAD:master
+          fi
