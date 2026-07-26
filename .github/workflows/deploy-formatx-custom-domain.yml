@@ -22,6 +22,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: formatx-license-production
     timeout-minutes: 25
 
     steps:
