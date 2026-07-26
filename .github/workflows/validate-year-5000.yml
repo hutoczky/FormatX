@@ -6,9 +6,13 @@ on:
     paths:
       - "docs/scifi-ui/scripts/future-5000.js"
       - "docs/scifi-ui/scripts/future-5000-effects.js"
+      - "docs/scifi-ui/scripts/causal-memory-field.js"
+      - "docs/scifi-ui/scripts/causal-memory-hover.js"
       - "docs/scifi-ui/styles/future-5000.css"
       - "docs/scifi-ui/styles/future-5000-effects.css"
       - "docs/scifi-ui/styles/future-5000-readability.css"
+      - "docs/scifi-ui/styles/causal-memory-field.css"
+      - "docs/scifi-ui/styles/causal-memory-hover.css"
       - "docs/scifi-ui/scripts/start-sale.js"
       - "billing-worker/src/production-with-license.js"
       - ".github/workflows/validate-year-5000.yml"
@@ -34,6 +38,8 @@ jobs:
           set -euo pipefail
           node --check docs/scifi-ui/scripts/future-5000.js
           node --check docs/scifi-ui/scripts/future-5000-effects.js
+          node --check docs/scifi-ui/scripts/causal-memory-field.js
+          node --check docs/scifi-ui/scripts/causal-memory-hover.js
           node --check docs/scifi-ui/scripts/start-sale.js
           node --check billing-worker/src/production-with-license.js
 
@@ -70,6 +76,36 @@ jobs:
           grep -F 'fx5k-detail-refract' docs/scifi-ui/styles/future-5000-effects.css
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/future-5000-effects.css
 
+      - name: Validate causal memory field
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'sessionStorage' docs/scifi-ui/scripts/causal-memory-field.js
+          grep -F 'formatx-causal-memory-v1' docs/scifi-ui/scripts/causal-memory-field.js
+          grep -F 'INTERAKCIÓS DNS' docs/scifi-ui/scripts/causal-memory-field.js
+          grep -F 'drawMemoryPaths' docs/scifi-ui/scripts/causal-memory-field.js
+          grep -F 'drawPredictions' docs/scifi-ui/scripts/causal-memory-field.js
+          grep -F '.fx-causal-memory-panel' docs/scifi-ui/styles/causal-memory-field.css
+          grep -F '.fx-causal-dna' docs/scifi-ui/styles/causal-memory-field.css
+          grep -F 'causal-memory-field.css' billing-worker/src/production-with-license.js
+          grep -F 'causal-memory-field.js' billing-worker/src/production-with-license.js
+
+      - name: Validate causal hover animation
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'fx-causal-hover-layer' docs/scifi-ui/scripts/causal-memory-hover.js
+          grep -F 'animateMotion' docs/scifi-ui/scripts/causal-memory-hover.js
+          grep -F 'fx-causal-preview-source' docs/scifi-ui/scripts/causal-memory-hover.js
+          grep -F 'fx-causal-preview-target' docs/scifi-ui/scripts/causal-memory-hover.js
+          grep -F 'pointerenter' docs/scifi-ui/scripts/causal-memory-hover.js
+          grep -F 'focus' docs/scifi-ui/scripts/causal-memory-hover.js
+          grep -F '.fx-causal-hover-path' docs/scifi-ui/styles/causal-memory-hover.css
+          grep -F '@keyframes fx-causal-wave' docs/scifi-ui/styles/causal-memory-hover.css
+          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/causal-memory-hover.css
+          grep -F 'causal-memory-hover.css' billing-worker/src/production-with-license.js
+          grep -F 'causal-memory-hover.js' billing-worker/src/production-with-license.js
+
       - name: Validate readability protection
         shell: bash
         run: |
@@ -79,6 +115,7 @@ jobs:
           grep -F 'transform: none !important' docs/scifi-ui/styles/future-5000-readability.css
           grep -F 'writing-mode: horizontal-tb !important' docs/scifi-ui/styles/future-5000-readability.css
           grep -F 'text-rendering: optimizeLegibility' docs/scifi-ui/styles/future-5000-readability.css
+          grep -F 'transform: none !important' docs/scifi-ui/styles/causal-memory-field.css
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/future-5000-readability.css
 
       - name: Summary
@@ -90,7 +127,11 @@ jobs:
             echo '- Separate three-plan QR row: PASS'
             echo '- Refined system architecture: PASS'
             echo '- Cinematic effects injection: PASS'
-            echo '- Travelling data signals: PASS'
+            echo '- Causal session memory: PASS'
+            echo '- Interaction DNA generation: PASS'
+            echo '- Hover branch projection: PASS'
+            echo '- Animated SVG energy paths: PASS'
+            echo '- Keyboard focus animation: PASS'
             echo '- Flat readable text plane: PASS'
             echo '- Firefox/Linux glyph protection: PASS'
             echo '- Reduced-motion accessibility: PASS'
@@ -110,7 +151,11 @@ jobs:
             "separatePlanQrRow": true,
             "refinedSystemArchitecture": true,
             "cinematicEffectsInjection": true,
-            "travellingDataSignals": true,
+            "causalSessionMemory": true,
+            "interactionDnaGeneration": true,
+            "hoverBranchProjection": true,
+            "animatedSvgEnergyPaths": true,
+            "keyboardFocusAnimation": true,
             "flatReadableTextPlane": true,
             "firefoxLinuxGlyphProtection": true,
             "reducedMotionAccessibility": true
@@ -120,6 +165,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/scifi-ui/validation/year5000-status.json
           if ! git diff --cached --quiet; then
-            git commit -m "Record successful readable Year 5000 validation"
+            git commit -m "Record successful causal Year 5000 validation"
             git push origin HEAD:master
           fi
