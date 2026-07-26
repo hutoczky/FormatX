@@ -1,5 +1,6 @@
 name: Fix unified Firefox context
 
+# One-time compatibility patch for Playwright Firefox mobile viewport testing.
 on:
   push:
     branches: [master]
