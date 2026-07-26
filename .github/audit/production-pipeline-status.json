@@ -1,6 +1,6 @@
 {
-  "sourceCommit": "f9a36b7d303d72f9e828bf5ec1dade861df95681",
-  "auditedAt": "2026-07-26T10:02:15.315441Z",
+  "sourceCommit": "051f1ebc7412f0c1e09ea2266997f0c8f17c3483",
+  "auditedAt": "2026-07-26T11:13:34.831817Z",
   "configuration": "success",
   "javascriptSyntax": "success",
   "npmCi": "success",
@@ -13,10 +13,13 @@
     "wwwHttp": "200",
     "bootJsHttp": "200",
     "bootCssHttp": "200",
+    "readabilityCssHttp": "200",
     "licenseHttp": "200",
     "mainReferencesBoot3": true,
     "bootJsContainsMobileTrigger": true,
     "bootCssContainsMobileEffect": true,
+    "readabilityGuardLive": true,
+    "interactionDnaAbsent": true,
     "licenseHealthValid": true
   },
   "sourceReady": true,
