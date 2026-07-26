@@ -51,24 +51,15 @@
     return url.href;
   }
 
-  function qrImageUrl(planId, selectedCurrency, retry) {
-    const checkout = checkoutHref(planId, selectedCurrency);
-    const params = new URLSearchParams({
-      text: checkout,
-      size: '320',
-      margin: '2',
-      ecLevel: 'M',
-      format: 'png'
-    });
-    if (retry) params.set('retry', String(Date.now()));
-    return 'https://quickchart.io/qr?' + params.toString();
+  function qrImageUrl(planId, selectedCurrency) {
+    return './assets/qr/' + planId + '-' + selectedCurrency.toLowerCase() + '.svg';
   }
 
   function loadCryosphere() {
     if (!document.querySelector('link[data-fx-cryosphere-style]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = './styles/igloo-parity.css?v=20260726-parity-1';
+      style.href = './styles/igloo-parity.css?v=20260726-parity-2';
       style.dataset.fxCryosphereStyle = 'true';
       document.head.appendChild(style);
     }
@@ -84,7 +75,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260726-parity-1';
+      script.src = './scripts/igloo-parity.js?v=20260726-parity-2';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
@@ -153,13 +144,8 @@
       }
       if (!image) return;
 
-      let retries = 0;
       card.classList.remove('is-qr-ready', 'is-qr-error');
       card.classList.add('is-qr-loading');
-
-      function loadQr(cacheBust) {
-        image.src = qrImageUrl(planId, selectedCurrency, cacheBust);
-      }
 
       image.onload = function () {
         if (generation !== qrGeneration) return;
@@ -173,20 +159,18 @@
 
       image.onerror = function () {
         if (generation !== qrGeneration) return;
-        retries += 1;
-        if (retries <= 2) {
-          setTimeout(function () {
-            if (generation === qrGeneration) loadQr(true);
-          }, retries * 900);
-          return;
-        }
         card.classList.remove('is-qr-loading', 'is-qr-ready');
         card.classList.add('is-qr-error');
       };
 
-      loadQr(false);
       image.alt = plan.name + ' — '
         + (language() === 'hu' ? 'fizetési oldal QR-kódja' : 'payment page QR code');
+
+      if (ROOT.dataset.fxLocalQr === 'ready') {
+        image.src = qrImageUrl(planId, selectedCurrency);
+      } else {
+        image.removeAttribute('src');
+      }
     });
   }
 
