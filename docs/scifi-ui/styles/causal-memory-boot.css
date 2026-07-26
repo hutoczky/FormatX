@@ -1,12 +1,20 @@
 .fx-causal-boot-layer {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   width: 100%;
   height: 100%;
   overflow: visible;
   pointer-events: none;
   opacity: 1;
+}
+
+.fx-causal-boot-prep .fx5k-system-head,
+.fx-causal-boot-prep .fx5k-stage,
+.fx-causal-boot-prep .fx5k-principles,
+.fx-causal-boot-prep .fx-causal-memory-panel {
+  position: relative;
+  z-index: 3;
 }
 
 .fx-causal-boot-perimeter,
@@ -51,24 +59,34 @@
   animation: fx-causal-boot-node 760ms cubic-bezier(.2, .8, .2, 1) var(--fx-causal-boot-delay, 700ms) forwards;
 }
 
-.fx-causal-booting .fx-causal-memory-panel,
-.fx-causal-booting .fx5k-detail-grid,
-.fx-causal-booting .fx5k-sequence,
-.fx-causal-booting .fx5k-system-status {
-  opacity: 0;
-  transition: opacity 520ms ease;
+.fx-causal-booting {
+  animation: fx-causal-root-energize 2200ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
+.fx-causal-boot-prep .fx5k-system-head,
+.fx-causal-boot-prep .fx5k-stage,
+.fx-causal-boot-prep .fx5k-principles,
+.fx-causal-boot-prep .fx-causal-memory-panel {
+  opacity: 0;
+  filter: brightness(0.76) saturate(0.76);
+  transition: opacity 560ms ease, filter 560ms ease;
+}
+
+.fx-causal-boot-reveal .fx5k-system-head,
+.fx-causal-boot-reveal .fx5k-stage,
+.fx-causal-boot-reveal .fx5k-principles,
 .fx-causal-boot-reveal .fx-causal-memory-panel,
-.fx-causal-boot-reveal .fx5k-detail-grid,
-.fx-causal-boot-reveal .fx5k-sequence,
-.fx-causal-boot-reveal .fx5k-system-status {
+.fx-causal-boot-complete .fx5k-system-head,
+.fx-causal-boot-complete .fx5k-stage,
+.fx-causal-boot-complete .fx5k-principles,
+.fx-causal-boot-complete .fx-causal-memory-panel {
   opacity: 1;
+  filter: none;
 }
 
 .fx-causal-boot-module {
   opacity: 0;
-  filter: brightness(0.7) saturate(0.7);
+  filter: brightness(0.62) saturate(0.62);
   animation: fx-causal-boot-module-awake 760ms cubic-bezier(.2, .8, .2, 1) var(--fx-causal-boot-delay, 620ms) forwards;
 }
 
@@ -76,10 +94,6 @@
   animation: fx-causal-boot-layer-out 620ms ease forwards;
 }
 
-.fx-causal-boot-complete .fx-causal-memory-panel,
-.fx-causal-boot-complete .fx5k-detail-grid,
-.fx-causal-boot-complete .fx5k-sequence,
-.fx-causal-boot-complete .fx5k-system-status,
 .fx-causal-boot-complete [data-fx5k-module] {
   opacity: 1;
   filter: none;
@@ -87,23 +101,42 @@
 
 @media (max-width: 720px) {
   .fx-causal-boot-layer {
-    opacity: 0.72;
+    opacity: 0.78;
   }
 }
 
+/* Reduced motion still receives a short, non-spatial confirmation pulse. */
 @media (prefers-reduced-motion: reduce) {
-  .fx-causal-boot-layer {
+  .fx-causal-boot-minimal {
+    animation: fx-causal-root-minimal 720ms ease both;
+  }
+
+  .fx-causal-boot-minimal .fx-causal-boot-branch,
+  .fx-causal-boot-minimal .fx-causal-boot-node {
     display: none !important;
   }
 
-  .fx-causal-booting .fx-causal-memory-panel,
-  .fx-causal-booting .fx5k-detail-grid,
-  .fx-causal-booting .fx5k-sequence,
-  .fx-causal-booting .fx5k-system-status,
-  .fx-causal-boot-module {
-    opacity: 1 !important;
-    filter: none !important;
-    animation: none !important;
+  .fx-causal-boot-minimal .fx-causal-boot-perimeter {
+    animation: fx-causal-minimal-frame 520ms ease 20ms both !important;
+  }
+
+  .fx-causal-boot-minimal .fx-causal-boot-core {
+    animation: fx-causal-minimal-core 560ms ease 40ms both !important;
+    transform: none !important;
+  }
+
+  .fx-causal-boot-minimal.fx-causal-boot-prep .fx5k-system-head,
+  .fx-causal-boot-minimal.fx-causal-boot-prep .fx5k-stage,
+  .fx-causal-boot-minimal.fx-causal-boot-prep .fx5k-principles,
+  .fx-causal-boot-minimal.fx-causal-boot-prep .fx-causal-memory-panel {
+    opacity: 0.35;
+    filter: none;
+    transition: opacity 280ms ease;
+  }
+
+  .fx-causal-boot-minimal .fx-causal-boot-module {
+    filter: none;
+    animation: fx-causal-minimal-module 300ms ease var(--fx-causal-boot-delay, 70ms) both !important;
   }
 }
 
@@ -133,12 +166,40 @@
 }
 
 @keyframes fx-causal-boot-module-awake {
-  0% { opacity: 0; filter: brightness(0.65) saturate(0.65); }
-  46% { opacity: 1; filter: brightness(1.18) saturate(1.1); }
+  0% { opacity: 0; filter: brightness(0.62) saturate(0.62); }
+  46% { opacity: 1; filter: brightness(1.2) saturate(1.12); }
   100% { opacity: 1; filter: none; }
+}
+
+@keyframes fx-causal-root-energize {
+  0% { box-shadow: 0 36px 110px rgba(0, 0, 0, 0.42), inset 0 1px rgba(255, 255, 255, 0.025); }
+  38% { box-shadow: 0 36px 110px rgba(0, 0, 0, 0.42), 0 0 52px rgba(118, 230, 255, 0.18), inset 0 0 42px rgba(118, 230, 255, 0.06); }
+  100% { box-shadow: 0 36px 110px rgba(0, 0, 0, 0.42), inset 0 1px rgba(255, 255, 255, 0.025); }
 }
 
 @keyframes fx-causal-boot-layer-out {
   from { opacity: 1; }
   to { opacity: 0; }
+}
+
+@keyframes fx-causal-root-minimal {
+  0%, 100% { box-shadow: 0 36px 110px rgba(0, 0, 0, 0.42), inset 0 1px rgba(255, 255, 255, 0.025); }
+  50% { box-shadow: 0 36px 110px rgba(0, 0, 0, 0.42), 0 0 28px rgba(118, 230, 255, 0.14), inset 0 0 24px rgba(118, 230, 255, 0.05); }
+}
+
+@keyframes fx-causal-minimal-frame {
+  0% { opacity: 0; }
+  55% { opacity: 0.72; }
+  100% { opacity: 0.28; }
+}
+
+@keyframes fx-causal-minimal-core {
+  0% { opacity: 0; }
+  48% { opacity: 0.7; }
+  100% { opacity: 0.24; }
+}
+
+@keyframes fx-causal-minimal-module {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
 }
