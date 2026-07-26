@@ -410,8 +410,8 @@ namespace FormatX
 
     private async void CheckUpdates_Click(object sender, RoutedEventArgs e)
     {
-      await new UpdateService().CheckAndUpdateAsync((p,t)=>DispatcherQueue.TryEnqueue(()=>SetProgress(p,t)), CancellationToken.None);
-      await ShowToast(_lang == AppLanguage.Hu ? "Frissítés ellenőrizve" : "Update checked");
+      string message = await new UpdateService().CheckAndUpdateAsync((p,t)=>DispatcherQueue.TryEnqueue(()=>SetProgress(p,t)), CancellationToken.None);
+      await ShowToast(message);
     }
 
     private async void ExportCsv_Click(object sender, RoutedEventArgs e)
