@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  const CONTRAST_STYLESHEET = '/scifi-ui/styles/site-contrast-guard.css?v=20260726-contrast-guard-2';
   const sections = [
     { id: 'product', short: 'CORE', labelHu: 'Termék', labelEn: 'Product' },
     { id: 'pricing', short: 'LIC', labelHu: 'Licencek', labelEn: 'Licences' },
@@ -14,33 +13,6 @@
   let scrollFrame = 0;
   let rail;
   let currentScene = 'product';
-
-  function ensureContrastGuard() {
-    const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(function (link) {
-      return String(link.getAttribute('href') || '').includes('site-contrast-guard.css');
-    });
-    if (existing) return existing;
-
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = CONTRAST_STYLESHEET;
-    link.dataset.fxContrastGuard = 'true';
-    document.head.appendChild(link);
-    return link;
-  }
-
-  function markIntroComplete() {
-    if (document.documentElement.classList.contains('fx-intro-running')) return;
-    document.documentElement.classList.add('fx-contrast-guard-ready');
-  }
-
-  function watchIntroCompletion() {
-    const observer = new MutationObserver(function (records) {
-      if (!records.some(function (record) { return record.attributeName === 'class'; })) return;
-      markIntroComplete();
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-  }
 
   function language() {
     return document.documentElement.lang === 'en' ? 'en' : 'hu';
@@ -165,9 +137,6 @@
 
   function initialise() {
     if (!document.body || document.documentElement.dataset.fxArtDirection === 'ready') return;
-    ensureContrastGuard();
-    watchIntroCompletion();
-
     const items = prepareSections();
     if (!items.length) return;
 
@@ -177,8 +146,6 @@
     bindActiveSection(items);
     bindProgress();
     setActive(items, items[0].item.id);
-    markIntroComplete();
-    window.addEventListener('pageshow', markIntroComplete);
 
     const languageObserver = new MutationObserver(function (records) {
       if (records.some(function (record) { return record.attributeName === 'lang'; })) updateLanguage(items);
