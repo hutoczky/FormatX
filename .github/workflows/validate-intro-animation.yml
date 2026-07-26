@@ -111,8 +111,14 @@ jobs:
               await page.goto('http://127.0.0.1:4178/scifi-ui/index.html', { waitUntil: 'domcontentloaded' });
               const skip = page.locator('.fx-intro-skip');
               await skip.waitFor({ state: 'attached', timeout: 2000 });
+              await page.waitForFunction(() => {
+                const button = document.querySelector('.fx-intro-skip');
+                return button
+                  && getComputedStyle(button).visibility === 'visible'
+                  && Number(getComputedStyle(button).opacity) >= 0.5;
+              }, null, { timeout: 2600 });
               const started = Date.now();
-              await skip.click({ force: true });
+              await skip.click();
               await waitForComplete(page, 1800);
               const elapsed = Date.now() - started;
               console.log(JSON.stringify({ case: 'skip', elapsed }));
