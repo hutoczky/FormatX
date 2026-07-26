@@ -30,10 +30,10 @@ COLLAPSE_RE = re.compile(r"\s+")
 ALLOW_EXACT = {
     "FormatX", "FormatX Suite Pro", "FormatX Suite", "Pro", "SUITE PRO",
     "Business Lite", "Business Pro", "Technician Team", "BUSINESS LITE",
-    "BUSINESS PRO", "TECHNICIAN TEAM", "BUSINESS / OWNER",
+    "BUSINESS PRO", "TECHNICIAN TEAM", "BUSINESS / OWNER", "Platform",
     "Windows", "Linux / Bazzite", "macOS", "Windows · Linux / Bazzite · macOS",
     "WIN // 2041", "LNX // 2041", "MAC // 2041", "V92", "SHA256", "Ed25519",
-    "HUF", "EUR", "IBAN", "BIC / SWIFT", "N/A", "N/A-safe", "CPU", "RAM",
+    "HUF", "EUR", "HU", "EN", "IBAN", "BIC / SWIFT", "N/A", "N/A-safe", "CPU", "RAM",
     "GPU", "NET", "FX", "LIVE", "ONLINE", "GitHub", "GitHub Releases",
     "Start-FormatX-Windows.exe", "Start-FormatX-Linux.sh", "Start-FormatX-macOS.command",
     "FormatX-Suite-Pro-V92.zip", "Cross-platform", "M01", "M02", "M03", "M04", "M05", "M06",
@@ -43,13 +43,18 @@ ALLOW_EXACT = {
     "SUITE PRO · APEX CORE", "DISCOVER", "PLAN", "EXECUTE", "VERIFY",
     "WRITE / VERIFY", "QUICK / DEEP", "PLAN / PREVIEW", "CONFIRM / ERASE",
     "READ / ANALYSE", "EXPLAIN / GUIDE", "INDIVIDUAL", "RECOMMENDED", "TEAM",
-    "ENVIRONMENT", "RELEASE", "INTEGRITY", "LOOP",
+    "ENVIRONMENT", "RELEASE", "INTEGRITY", "LOOP", "ENV / READ", "FELDERÍTÉS",
+    "ISO → USB", "KAPCSOLAT FELÉPÍTÉSE", "NTFS · FAT32 · exFAT · ReFS · EXT4", "SMART",
+    "Összeg EUR-ban", "FormatX Suite Pro | APEX System Experience",
+    "FORMATX / VERIFY BEFORE EXECUTE / FORMATX / VERIFY BEFORE EXECUTE / FORMATX / VERIFY BEFORE EXECUTE /",
+    "Menü / Menu", "Language / Nyelv", "Deviza / Currency", "Oldalfejezetek",
 }
 
 ALLOW_PATTERNS = [
     re.compile(r"^[\d\s.,:/+%€Ft—-]+$"),
     re.compile(r"^V\d+$"),
     re.compile(r"^\d+(?:[.,]\d+)?\s*(MiB|GiB|Ft|€)?$"),
+    re.compile(r"^\d{1,3}(?: \d{3})* Ft / hó$"),
     re.compile(r"^[A-Fa-f0-9]{32,}$"),
     re.compile(r"^FX-"),
     re.compile(r"^FormatX Suite Pro V\d+$"),
@@ -75,7 +80,7 @@ def load_pairs() -> tuple[set[str], list[tuple[str, str]]]:
         try:
             hu = ast.literal_eval(match.group(1))
             en = ast.literal_eval(match.group(2))
-        except Exception as exc:  # pragma: no cover - CI diagnostic
+        except Exception as exc:
             raise RuntimeError(f"Invalid translation pair at {I18N}:{line_number}: {exc}") from exc
         hu = normalize(hu)
         en = normalize(en)
