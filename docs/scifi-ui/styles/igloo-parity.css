@@ -1,7 +1,8 @@
-@import url("./formatx-transcend.css?v=20260726-transcend-2");
-@import url("./formatx-transcend-performance.css?v=20260726-performance-1");
+@import url("./formatx-transcend.css?v=20260727-transcend-3");
+@import url("./formatx-transcend-performance.css?v=20260727-performance-2");
+@import url("./worldstage-enhancements.css?v=20260727-worldstage-1");
 
 /* Compatibility entrypoint retained for the existing GitHub Pages loader. */
 html {
-  --fx-experience-engine: "transcend-lean";
+  --fx-experience-engine: "worldstage";
 }
