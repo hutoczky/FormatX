@@ -1,5 +1,6 @@
 name: Install payment QR section
 
+# Triggered after the live page showed that the QR payment block was missing.
 on:
   push:
     branches: [master]
