@@ -6,6 +6,8 @@ const START_SALE_VERSION = '20260725-separate-qr-row-5';
 const FUTURE_5000_VERSION = '20260725-year-5000-refined-3';
 const FUTURE_5000_EFFECTS_VERSION = '20260725-year-5000-cinematic-1';
 const FUTURE_5000_READABILITY_VERSION = '20260725-year-5000-readability-1';
+const CAUSAL_MEMORY_VERSION = '20260726-causal-memory-1';
+const CAUSAL_HOVER_VERSION = '20260726-causal-hover-1';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
@@ -31,6 +33,10 @@ const CHECKOUT_PATHS = new Set([
 ]);
 
 class StartSaleHeadHandler {
+  constructor(isCheckout) {
+    this.isCheckout = isCheckout;
+  }
+
   element(element) {
     element.append(
       `<link rel="stylesheet" href="/scifi-ui/styles/start-sale.css?v=${START_SALE_VERSION}">`,
@@ -52,10 +58,23 @@ class StartSaleHeadHandler {
       `<link rel="stylesheet" href="/scifi-ui/styles/future-5000-readability.css?v=${FUTURE_5000_READABILITY_VERSION}">`,
       { html: true },
     );
+    if (this.isCheckout) return;
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/causal-memory-field.css?v=${CAUSAL_MEMORY_VERSION}">`,
+      { html: true },
+    );
+    element.append(
+      `<link rel="stylesheet" href="/scifi-ui/styles/causal-memory-hover.css?v=${CAUSAL_HOVER_VERSION}">`,
+      { html: true },
+    );
   }
 }
 
 class StartSaleBodyHandler {
+  constructor(isCheckout) {
+    this.isCheckout = isCheckout;
+  }
+
   element(element) {
     element.append(
       `<script defer src="/scifi-ui/scripts/start-sale.js?v=${START_SALE_VERSION}"></script>`,
@@ -67,6 +86,15 @@ class StartSaleBodyHandler {
     );
     element.append(
       `<script defer src="/scifi-ui/scripts/future-5000-effects.js?v=${FUTURE_5000_EFFECTS_VERSION}"></script>`,
+      { html: true },
+    );
+    if (this.isCheckout) return;
+    element.append(
+      `<script defer src="/scifi-ui/scripts/causal-memory-field.js?v=${CAUSAL_MEMORY_VERSION}"></script>`,
+      { html: true },
+    );
+    element.append(
+      `<script defer src="/scifi-ui/scripts/causal-memory-hover.js?v=${CAUSAL_HOVER_VERSION}"></script>`,
       { html: true },
     );
   }
@@ -100,8 +128,8 @@ function shouldInjectStartSale(url, response) {
 function injectStartSale(response, url) {
   const isCheckout = CHECKOUT_PATHS.has(url.pathname);
   return new HTMLRewriter()
-    .on('head', new StartSaleHeadHandler())
-    .on('body', new StartSaleBodyHandler())
+    .on('head', new StartSaleHeadHandler(isCheckout))
+    .on('body', new StartSaleBodyHandler(isCheckout))
     .on('script[src]', new CheckoutScriptHandler(isCheckout))
     .transform(response);
 }
