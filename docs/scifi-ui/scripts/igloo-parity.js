@@ -21,11 +21,11 @@
     if (!entry) return '';
     const size = entry[0];
     const bytes = Uint8Array.from(atob(entry[1]), char => char.charCodeAt(0));
+    const bit = index => (bytes[index >> 3] >> (7 - (index & 7))) & 1;
     let path = '';
     for (let y = 0; y < size; y += 1) {
       let x = 0;
       while (x < size) {
-        const bit = index => (bytes[index >> 3] >> (7 - (index & 7))) & 1;
         if (!bit(y * size + x)) { x += 1; continue; }
         const start = x;
         while (x < size && bit(y * size + x)) x += 1;
@@ -39,25 +39,38 @@
     return url;
   }
 
-  const descriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
-  if (descriptor && descriptor.set && descriptor.get) {
-    Object.defineProperty(HTMLImageElement.prototype, 'src', {
-      configurable: true,
-      enumerable: descriptor.enumerable,
-      get: descriptor.get,
-      set(value) {
-        const match = String(value).match(/assets\/qr\/(business_lite|business_pro|technician_team)-(huf|eur)\.svg/i);
-        descriptor.set.call(this, match ? qrUrl(match[1].toLowerCase() + '-' + match[2].toLowerCase()) : value);
-      }
-    });
+  function qrKey(value) {
+    const match = String(value || '').match(/assets\/qr\/(business_lite|business_pro|technician_team)-(huf|eur)\.svg/i);
+    return match ? match[1].toLowerCase() + '-' + match[2].toLowerCase() : '';
   }
+
+  function localizeImage(image, source) {
+    if (!(image instanceof HTMLImageElement)) return false;
+    const key = qrKey(source || image.getAttribute('src') || image.src);
+    if (!key) return false;
+    const local = qrUrl(key);
+    if (image.src !== local) image.src = local;
+    return true;
+  }
+
+  const qrObserver = new MutationObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.type === 'attributes') localizeImage(entry.target, entry.target.getAttribute('src'));
+      entry.addedNodes?.forEach(node => {
+        if (node instanceof HTMLImageElement) localizeImage(node);
+        if (node instanceof Element) node.querySelectorAll('img').forEach(image => localizeImage(image));
+      });
+    });
+  });
+  qrObserver.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['src'] });
 
   function replaceExistingQr() {
     const currency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'eur' : 'huf';
     document.querySelectorAll('[data-plan-qr]').forEach(card => {
       const image = card.querySelector('[data-plan-qr-image]');
       if (!image) return;
-      image.src = './assets/qr/' + card.dataset.planQr + '-' + currency + '.svg';
+      const key = card.dataset.planQr + '-' + currency;
+      image.src = qrUrl(key);
     });
   }
   replaceExistingQr();
@@ -82,6 +95,7 @@
   }
 
   addEventListener('pagehide', function () {
+    qrObserver.disconnect();
     qrUrls.forEach(url => URL.revokeObjectURL(url));
   }, { once: true });
 
