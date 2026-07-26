@@ -1,13 +1,12 @@
 {
   "status": "PASS",
-  "sourceCommit": "a353ae5e40ca1a96e1a008e598901115dfeb075a",
-  "validatedAt": "2026-07-26T06:56:52Z",
+  "sourceCommit": "b58eeeb613b38566cd1c020521f4244f0b4e894c",
+  "validatedAt": "2026-07-26T11:15:38Z",
   "javascriptSyntax": true,
   "separatePlanQrRow": true,
   "refinedSystemArchitecture": true,
   "cinematicEffectsInjection": true,
-  "causalSessionMemory": true,
-  "interactionDnaGeneration": true,
+  "interactionDnaRemoved": true,
   "hoverBranchProjection": true,
   "animatedSvgEnergyPaths": true,
   "refreshNavigationBootReplay": true,
@@ -18,5 +17,6 @@
   "reducedMotionConfirmationPulse": true,
   "keyboardFocusAnimation": true,
   "flatReadableTextPlane": true,
-  "firefoxLinuxGlyphProtection": true
+  "firefoxLinuxGlyphProtection": true,
+  "fullPageTextCollisionGuard": true
 }
