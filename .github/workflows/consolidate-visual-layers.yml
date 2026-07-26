@@ -43,7 +43,7 @@ jobs:
           node --check docs/scifi-ui/scripts/site-ambient-background.js
           node --check docs/scifi-ui/scripts/site-art-direction.js
           node --check billing-worker/src/production-with-license.js
-          grep -F 'data-performance' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'dataset.performance' docs/scifi-ui/scripts/site-ambient-background.js
           grep -F 'balancedMode' docs/scifi-ui/scripts/site-ambient-background.js
           grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-ambient-background.css
           grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-quantum-aurora.css
