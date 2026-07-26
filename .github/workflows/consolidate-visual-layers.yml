@@ -1,0 +1,106 @@
+name: Consolidate FormatX visual layers
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/consolidate-visual-layers.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  consolidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Remove conflicting reveal and duplicate foreground layer
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          event = Path('docs/scifi-ui/styles/formatx-event-horizon.css')
+          text = event.read_text(encoding='utf-8')
+          text, count = re.subn(
+              r"\nhtml\.fx-intro-reveal \.hero-copy,\nhtml\.fx-intro-reveal \.core-engine \{.*?\n\}\n\nhtml\.fx-intro-reveal \.core-engine \{.*?\n\}\n",
+              "\n/* The intro animates only its own overlay. Real page content is never dimmed. */\n",
+              text,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one page-reveal selector block, found {count}')
+          text, count = re.subn(
+              r"\n@keyframes fx-intro-page-reveal \{.*?\n\}\n",
+              "\n",
+              text,
+              flags=re.S,
+          )
+          if count != 1:
+              raise SystemExit(f'Expected one page-reveal keyframe, found {count}')
+          text = text.replace(
+              "  html.fx-intro-running .fx-intro-scan,\n  html.fx-intro-reveal .hero-copy,\n  html.fx-intro-reveal .core-engine {",
+              "  html.fx-intro-running .fx-intro-scan {",
+          )
+          if 'fx-intro-page-reveal' in text:
+              raise SystemExit('Page reveal animation still present')
+          event.write_text(text, encoding='utf-8')
+
+          index = Path('docs/scifi-ui/index.html')
+          text = index.read_text(encoding='utf-8')
+          text = text.replace('formatx-event-horizon.css?v=20260726-event-horizon-1', 'formatx-event-horizon.css?v=20260726-event-horizon-2')
+          text = text.replace('formatx-event-horizon.js?v=20260726-event-horizon-1', 'formatx-event-horizon.js?v=20260726-event-horizon-2')
+          text = text.replace('site-art-direction.css?v=20260726-art-direction-2', 'site-art-direction.css?v=20260726-art-direction-3')
+          text = text.replace('site-art-direction.js?v=20260726-art-direction-2', 'site-art-direction.js?v=20260726-art-direction-3')
+          text = text.replace('site-contrast-guard.css?v=20260726-contrast-guard-1', 'site-contrast-guard.css?v=20260726-contrast-guard-2')
+          text = re.sub(r'^.*site-foreground-guard\.css.*\n?', '', text, flags=re.M)
+          index.write_text(text, encoding='utf-8')
+
+          worker = Path('billing-worker/src/production-with-license.js')
+          text = worker.read_text(encoding='utf-8')
+          text = text.replace("SITE_ART_VERSION = '20260726-art-direction-2'", "SITE_ART_VERSION = '20260726-art-direction-3'")
+          text = text.replace("SITE_CONTRAST_VERSION = '20260726-contrast-guard-1'", "SITE_CONTRAST_VERSION = '20260726-contrast-guard-2'")
+          text = re.sub(r"\nconst SITE_FOREGROUND_VERSION = .*?;", '', text)
+          text = re.sub(r"\nclass ForegroundHeadHandler \{.*?\n\}\n", '\n', text, flags=re.S)
+          text = re.sub(r"\n\s*rewriter\.on\('head', new ForegroundHeadHandler\(staticVisuals\)\);", '', text)
+          if 'site-foreground-guard' in text or 'ForegroundHeadHandler' in text:
+              raise SystemExit('Foreground injection still present in Worker')
+          worker.write_text(text, encoding='utf-8')
+
+          foreground = Path('docs/scifi-ui/styles/site-foreground-guard.css')
+          if foreground.exists():
+              foreground.unlink()
+
+      - name: Validate consolidated system
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/site-art-direction.js
+          node --check billing-worker/src/production-with-license.js
+          ! grep -Fq 'fx-intro-page-reveal' docs/scifi-ui/styles/formatx-event-horizon.css
+          ! grep -Fq 'site-foreground-guard' docs/scifi-ui/index.html
+          ! grep -Fq 'site-foreground-guard' billing-worker/src/production-with-license.js
+          test ! -e docs/scifi-ui/styles/site-foreground-guard.css
+          grep -F 'formatx-event-horizon.css?v=20260726-event-horizon-2' docs/scifi-ui/index.html
+          grep -F 'site-art-direction.js?v=20260726-art-direction-3' docs/scifi-ui/index.html
+          grep -F 'site-contrast-guard.css?v=20260726-contrast-guard-2' docs/scifi-ui/index.html
+          grep -F "SITE_ART_VERSION = '20260726-art-direction-3'" billing-worker/src/production-with-license.js
+          grep -F "SITE_CONTRAST_VERSION = '20260726-contrast-guard-2'" billing-worker/src/production-with-license.js
+          grep -F 'const CONTRAST_STYLESHEET' docs/scifi-ui/scripts/site-art-direction.js
+          ! grep -Fq 'setTimeout(recoverIntroContent' docs/scifi-ui/scripts/site-art-direction.js
+          ! grep -Fq "style.setProperty('opacity'" docs/scifi-ui/scripts/site-art-direction.js
+
+      - name: Commit consolidated visual system
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A docs/scifi-ui billing-worker/src/production-with-license.js
+          git commit -m 'Consolidate intro, foreground and readability layers'
+          git push origin HEAD:master
