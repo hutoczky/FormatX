@@ -1,5 +1,6 @@
 name: Install foreground guard
 
+# Triggered explicitly after the Firefox Nightly screenshot confirmed a suspended reveal frame.
 on:
   push:
     branches: [master]
