@@ -6,9 +6,9 @@ const START_SALE_VERSION = '20260725-separate-qr-row-5';
 const FUTURE_5000_VERSION = '20260725-year-5000-refined-3';
 const FUTURE_5000_EFFECTS_VERSION = '20260725-year-5000-cinematic-1';
 const FUTURE_5000_READABILITY_VERSION = '20260725-year-5000-readability-1';
-const CAUSAL_MEMORY_VERSION = '20260726-causal-memory-1';
-const CAUSAL_HOVER_VERSION = '20260726-causal-hover-1';
+const CAUSAL_HOVER_VERSION = '20260726-causal-hover-2';
 const CAUSAL_BOOT_VERSION = '20260726-causal-boot-3';
+const SITE_READABILITY_VERSION = '20260726-site-readability-1';
 const CHECKOUT_SCRIPT = `/scifi-ui/scripts/checkout-v100.js?v=${START_SALE_VERSION}`;
 const CHECKOUT_LANGUAGE_SCRIPT = `/scifi-ui/scripts/checkout-language-v100.js?v=${START_SALE_VERSION}`;
 const LICENSE_PERMISSIONS_POLICY = [
@@ -59,17 +59,18 @@ class StartSaleHeadHandler {
       `<link rel="stylesheet" href="/scifi-ui/styles/future-5000-readability.css?v=${FUTURE_5000_READABILITY_VERSION}">`,
       { html: true },
     );
-    if (this.isCheckout) return;
+    if (!this.isCheckout) {
+      element.append(
+        `<link rel="stylesheet" href="/scifi-ui/styles/causal-memory-hover.css?v=${CAUSAL_HOVER_VERSION}">`,
+        { html: true },
+      );
+      element.append(
+        `<link rel="stylesheet" href="/scifi-ui/styles/causal-memory-boot.css?v=${CAUSAL_BOOT_VERSION}">`,
+        { html: true },
+      );
+    }
     element.append(
-      `<link rel="stylesheet" href="/scifi-ui/styles/causal-memory-field.css?v=${CAUSAL_MEMORY_VERSION}">`,
-      { html: true },
-    );
-    element.append(
-      `<link rel="stylesheet" href="/scifi-ui/styles/causal-memory-hover.css?v=${CAUSAL_HOVER_VERSION}">`,
-      { html: true },
-    );
-    element.append(
-      `<link rel="stylesheet" href="/scifi-ui/styles/causal-memory-boot.css?v=${CAUSAL_BOOT_VERSION}">`,
+      `<link rel="stylesheet" href="/scifi-ui/styles/site-readability-audit.css?v=${SITE_READABILITY_VERSION}">`,
       { html: true },
     );
   }
@@ -94,10 +95,6 @@ class StartSaleBodyHandler {
       { html: true },
     );
     if (this.isCheckout) return;
-    element.append(
-      `<script defer src="/scifi-ui/scripts/causal-memory-field.js?v=${CAUSAL_MEMORY_VERSION}"></script>`,
-      { html: true },
-    );
     element.append(
       `<script defer src="/scifi-ui/scripts/causal-memory-hover.js?v=${CAUSAL_HOVER_VERSION}"></script>`,
       { html: true },
