@@ -8,11 +8,13 @@ on:
       - "docs/scifi-ui/scripts/future-5000-effects.js"
       - "docs/scifi-ui/scripts/causal-memory-field.js"
       - "docs/scifi-ui/scripts/causal-memory-hover.js"
+      - "docs/scifi-ui/scripts/causal-memory-boot.js"
       - "docs/scifi-ui/styles/future-5000.css"
       - "docs/scifi-ui/styles/future-5000-effects.css"
       - "docs/scifi-ui/styles/future-5000-readability.css"
       - "docs/scifi-ui/styles/causal-memory-field.css"
       - "docs/scifi-ui/styles/causal-memory-hover.css"
+      - "docs/scifi-ui/styles/causal-memory-boot.css"
       - "docs/scifi-ui/scripts/start-sale.js"
       - "billing-worker/src/production-with-license.js"
       - ".github/workflows/validate-year-5000.yml"
@@ -40,6 +42,7 @@ jobs:
           node --check docs/scifi-ui/scripts/future-5000-effects.js
           node --check docs/scifi-ui/scripts/causal-memory-field.js
           node --check docs/scifi-ui/scripts/causal-memory-hover.js
+          node --check docs/scifi-ui/scripts/causal-memory-boot.js
           node --check docs/scifi-ui/scripts/start-sale.js
           node --check billing-worker/src/production-with-license.js
 
@@ -106,6 +109,22 @@ jobs:
           grep -F 'causal-memory-hover.css' billing-worker/src/production-with-license.js
           grep -F 'causal-memory-hover.js' billing-worker/src/production-with-license.js
 
+      - name: Validate animated boot sequence
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'fx-causal-boot-layer' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'fx-causal-boot-perimeter' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'fx-causal-boot-core' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'fx-causal-boot-module' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F '2200' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F '.fx-causal-boot-layer' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F '@keyframes fx-causal-boot-core-ignite' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F '@keyframes fx-causal-boot-module-awake' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F 'causal-memory-boot.css' billing-worker/src/production-with-license.js
+          grep -F 'causal-memory-boot.js' billing-worker/src/production-with-license.js
+
       - name: Validate readability protection
         shell: bash
         run: |
@@ -131,6 +150,8 @@ jobs:
             echo '- Interaction DNA generation: PASS'
             echo '- Hover branch projection: PASS'
             echo '- Animated SVG energy paths: PASS'
+            echo '- Animated non-blocking boot sequence: PASS'
+            echo '- Staggered module activation: PASS'
             echo '- Keyboard focus animation: PASS'
             echo '- Flat readable text plane: PASS'
             echo '- Firefox/Linux glyph protection: PASS'
@@ -155,6 +176,8 @@ jobs:
             "interactionDnaGeneration": true,
             "hoverBranchProjection": true,
             "animatedSvgEnergyPaths": true,
+            "animatedBootSequence": true,
+            "staggeredModuleActivation": true,
             "keyboardFocusAnimation": true,
             "flatReadableTextPlane": true,
             "firefoxLinuxGlyphProtection": true,
@@ -165,6 +188,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/scifi-ui/validation/year5000-status.json
           if ! git diff --cached --quiet; then
-            git commit -m "Record successful causal Year 5000 validation"
+            git commit -m "Record successful animated causal Year 5000 validation"
             git push origin HEAD:master
           fi
