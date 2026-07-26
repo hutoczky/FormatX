@@ -166,24 +166,7 @@ async function serveEnhancedHome(request, env) {
   html = html
     .replaceAll('="./', '="/scifi-ui/')
     .replaceAll("='./", "='/scifi-ui/")
-    .replaceAll('https://formatx1.formatx.workers.dev/download/android?v=1.0.4', '/download/android')
-    .replace(
-      '</head>',
-      [
-        '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-7">',
-        '<link rel="stylesheet" href="/scifi-ui/styles/main-readability.css?v=20260720-readability-2">',
-        '<link rel="stylesheet" href="/scifi-ui/styles/quantum-twin.css?v=20260720-quantum-1">',
-        '</head>',
-      ].join(''),
-    )
-    .replace(
-      '</body>',
-      [
-        '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-8"></script>',
-        '<script defer src="/scifi-ui/scripts/quantum-twin.js?v=20260720-quantum-1"></script>',
-        '</body>',
-      ].join(''),
-    );
+    .replaceAll('https://formatx1.formatx.workers.dev/download/android?v=1.0.4', '/download/android');
 
   const headers = new Headers(upstream.headers);
   headers.set('Content-Type', 'text/html; charset=utf-8');
