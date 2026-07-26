@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  const ROOT = document.documentElement;
+  const REDUCE_QUERY = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const FINE_POINTER_QUERY = window.matchMedia('(hover: hover) and (pointer: fine)');
   const sections = [
     { id: 'product', short: 'CORE', labelHu: 'Termék', labelEn: 'Product' },
     { id: 'pricing', short: 'LIC', labelHu: 'Licencek', labelEn: 'Licences' },
@@ -15,7 +18,7 @@
   let currentScene = 'product';
 
   function language() {
-    return document.documentElement.lang === 'en' ? 'en' : 'hu';
+    return ROOT.lang === 'en' ? 'en' : 'hu';
   }
 
   function label(item) {
@@ -36,6 +39,9 @@
   }
 
   function buildRail(items) {
+    const existing = document.querySelector('.fx-system-rail');
+    if (existing) existing.remove();
+
     rail = document.createElement('nav');
     rail.className = 'fx-system-rail';
     rail.setAttribute('aria-label', language() === 'en' ? 'FormatX system sections' : 'FormatX rendszerfejezetek');
@@ -69,7 +75,8 @@
   function setActive(items, id) {
     const entry = items.find(function (candidate) { return candidate.item.id === id; }) || items[0];
     currentScene = entry.item.id;
-    document.documentElement.dataset.fxActiveSection = entry.item.id;
+    ROOT.dataset.fxActiveSection = entry.item.id;
+
     items.forEach(function (candidate) {
       const active = candidate.item.id === entry.item.id;
       candidate.element.classList.toggle('fx-section-active', active);
@@ -80,6 +87,7 @@
         else link.removeAttribute('aria-current');
       }
     });
+
     if (rail) {
       const output = rail.querySelector('.fx-system-rail-scene');
       if (output) {
@@ -92,13 +100,18 @@
   }
 
   function bindActiveSection(items) {
-    if (!('IntersectionObserver' in window)) return;
+    if (!('IntersectionObserver' in window)) {
+      items.forEach(function (entry) { entry.element.classList.add('fx-section-seen'); });
+      return;
+    }
+
     const ratios = new Map();
     const observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         ratios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
         if (entry.isIntersecting) entry.target.classList.add('fx-section-seen');
       });
+
       let selected = items[0];
       let score = -1;
       items.forEach(function (candidate) {
@@ -106,14 +119,14 @@
         const ratio = ratios.get(candidate.element) || 0;
         const center = Math.abs(rect.top + rect.height / 2 - window.innerHeight / 2);
         const centerScore = Math.max(0, 1 - center / Math.max(window.innerHeight, 1));
-        const next = ratio * 1.4 + centerScore * 0.6;
+        const next = ratio * 1.45 + centerScore * 0.55;
         if (next > score) {
           score = next;
           selected = candidate;
         }
       });
       setActive(items, selected.item.id);
-    }, { rootMargin: '-20% 0px -20% 0px', threshold: [0, 0.08, 0.2, 0.45, 0.7] });
+    }, { rootMargin: '-18% 0px -18% 0px', threshold: [0, 0.08, 0.2, 0.42, 0.68] });
 
     items.forEach(function (entry) {
       ratios.set(entry.element, 0);
@@ -121,13 +134,15 @@
     });
   }
 
-  function bindProgress() {
+  function bindScrollState() {
     function update() {
       scrollFrame = 0;
       const documentHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
       const progress = Math.max(0, Math.min(1, window.scrollY / documentHeight));
-      document.documentElement.style.setProperty('--fx-page-progress', progress.toFixed(4));
+      ROOT.style.setProperty('--fx-page-progress', progress.toFixed(4));
+      ROOT.classList.toggle('fx-page-scrolled', window.scrollY > 28);
     }
+
     window.addEventListener('scroll', function () {
       if (scrollFrame) return;
       scrollFrame = window.requestAnimationFrame(update);
@@ -135,22 +150,92 @@
     update();
   }
 
+  function bindPointerLighting() {
+    if (REDUCE_QUERY.matches || !FINE_POINTER_QUERY.matches) return;
+
+    const selector = [
+      '.core-engine',
+      '.pricing-panel',
+      '.checkout-preview',
+      '.price-card',
+      '.feature-cards article',
+      '.project-module-grid article',
+      '.project-workflow article',
+      '.project-foundation-grid article',
+      '.trust-promises article',
+      '.fx-plan-qr-card'
+    ].join(',');
+
+    document.querySelectorAll(selector).forEach(function (element) {
+      let pointerFrame = 0;
+      let latestEvent = null;
+
+      function paint() {
+        pointerFrame = 0;
+        if (!latestEvent) return;
+        const rect = element.getBoundingClientRect();
+        const x = Math.max(0, Math.min(100, ((latestEvent.clientX - rect.left) / Math.max(rect.width, 1)) * 100));
+        const y = Math.max(0, Math.min(100, ((latestEvent.clientY - rect.top) / Math.max(rect.height, 1)) * 100));
+        element.style.setProperty('--fx-pointer-x', x.toFixed(2) + '%');
+        element.style.setProperty('--fx-pointer-y', y.toFixed(2) + '%');
+      }
+
+      element.addEventListener('pointermove', function (event) {
+        latestEvent = event;
+        if (!pointerFrame) pointerFrame = window.requestAnimationFrame(paint);
+      }, { passive: true });
+
+      element.addEventListener('pointerleave', function () {
+        latestEvent = null;
+        window.cancelAnimationFrame(pointerFrame);
+        pointerFrame = 0;
+        element.style.removeProperty('--fx-pointer-x');
+        element.style.removeProperty('--fx-pointer-y');
+      }, { passive: true });
+    });
+  }
+
+  function bindRailNavigation() {
+    if (!rail) return;
+    rail.addEventListener('click', function (event) {
+      const link = event.target.closest('[data-fx-rail-target]');
+      if (!link) return;
+      const target = document.getElementById(link.dataset.fxRailTarget);
+      if (!target) return;
+      event.preventDefault();
+      target.scrollIntoView({
+        behavior: REDUCE_QUERY.matches ? 'auto' : 'smooth',
+        block: 'start'
+      });
+      history.replaceState(null, '', '#' + target.id);
+    });
+  }
+
+  function markInterfaceLive() {
+    ROOT.classList.add('fx-interface-live');
+  }
+
   function initialise() {
-    if (!document.body || document.documentElement.dataset.fxArtDirection === 'ready') return;
+    if (!document.body || ROOT.dataset.fxArtDirection === 'ready') return;
     const items = prepareSections();
     if (!items.length) return;
 
-    document.documentElement.dataset.fxArtDirection = 'ready';
-    document.documentElement.classList.add('fx-art-direction-ready');
+    ROOT.dataset.fxArtDirection = 'ready';
+    ROOT.classList.add('fx-art-direction-ready');
     buildRail(items);
     bindActiveSection(items);
-    bindProgress();
+    bindScrollState();
+    bindPointerLighting();
+    bindRailNavigation();
     setActive(items, items[0].item.id);
+
+    if (ROOT.classList.contains('fx-intro-complete')) markInterfaceLive();
+    else document.addEventListener('formatx:introcomplete', markInterfaceLive, { once: true });
 
     const languageObserver = new MutationObserver(function (records) {
       if (records.some(function (record) { return record.attributeName === 'lang'; })) updateLanguage(items);
     });
-    languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    languageObserver.observe(ROOT, { attributes: true, attributeFilter: ['lang'] });
   }
 
   if (document.readyState === 'loading') {
