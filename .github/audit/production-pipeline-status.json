@@ -1,6 +1,6 @@
 {
-  "sourceCommit": "b78da1705917d39e57c09c240412c401cbbdfd2b",
-  "auditedAt": "2026-07-26T13:38:10.250432Z",
+  "sourceCommit": "767097e064a142328dcd1f28ecf851c935c5725f",
+  "auditedAt": "2026-07-26T13:51:20.812236Z",
   "configuration": "success",
   "javascriptSyntax": "success",
   "npmCi": "success",
