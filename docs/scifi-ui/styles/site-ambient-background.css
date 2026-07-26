@@ -48,15 +48,13 @@ html.fx-site-ambient-ready body {
   transform: perspective(1050px) rotateX(67deg) scale(1.34) translate3d(-18px, calc(11% + var(--fx-bg-scroll)), 0);
   -webkit-mask-image: radial-gradient(ellipse at 50% 63%, #000 18%, rgba(0, 0, 0, 0.78) 47%, transparent 82%);
   mask-image: radial-gradient(ellipse at 50% 63%, #000 18%, rgba(0, 0, 0, 0.78) 47%, transparent 82%);
-  animation: fx-site-grid-drift 26s linear infinite;
-  will-change: transform;
+  animation: fx-site-grid-drift 30s linear infinite;
 }
 
 .fx-site-ambient-aura {
   border-radius: 50%;
-  filter: blur(66px);
+  filter: blur(52px);
   mix-blend-mode: screen;
-  will-change: transform, opacity;
 }
 
 .fx-site-ambient-aura--one {
@@ -66,7 +64,7 @@ html.fx-site-ambient-ready body {
   left: -17%;
   opacity: 0.56;
   background: radial-gradient(circle, rgba(56, 183, 255, 0.30), rgba(43, 98, 255, 0.11) 38%, transparent 72%);
-  animation: fx-site-aura-one 21s ease-in-out infinite alternate;
+  animation: fx-site-aura-one 24s ease-in-out infinite alternate;
 }
 
 .fx-site-ambient-aura--two {
@@ -76,7 +74,7 @@ html.fx-site-ambient-ready body {
   right: -16%;
   opacity: 0.48;
   background: radial-gradient(circle, rgba(76, 255, 216, 0.23), rgba(40, 138, 255, 0.08) 40%, transparent 73%);
-  animation: fx-site-aura-two 27s ease-in-out infinite alternate;
+  animation: fx-site-aura-two 30s ease-in-out infinite alternate;
 }
 
 .fx-site-ambient-aura--three {
@@ -86,36 +84,35 @@ html.fx-site-ambient-ready body {
   left: 25%;
   opacity: 0.38;
   background: radial-gradient(circle, rgba(145, 84, 255, 0.24), rgba(236, 72, 226, 0.07) 42%, transparent 72%);
-  animation: fx-site-aura-three 31s ease-in-out infinite alternate;
+  animation: fx-site-aura-three 34s ease-in-out infinite alternate;
 }
 
 .fx-site-ambient-beam {
   inset: -45% -8%;
-  opacity: 0.34;
+  opacity: 0.28;
   background: linear-gradient(
     180deg,
     transparent 0%,
     transparent 37%,
     rgba(127, 239, 255, 0.02) 42%,
-    rgba(127, 239, 255, 0.16) 50%,
+    rgba(127, 239, 255, 0.14) 50%,
     rgba(142, 113, 255, 0.05) 57%,
     transparent 64%,
     transparent 100%
   );
   transform: translate3d(0, -36%, 0) rotate(-4deg);
   mix-blend-mode: screen;
-  animation: fx-site-beam-sweep 13s cubic-bezier(.45, 0, .25, 1) infinite;
-  will-change: transform, opacity;
+  animation: fx-site-beam-sweep 16s cubic-bezier(.45, 0, .25, 1) infinite;
 }
 
 .fx-site-ambient-streams {
   inset: 0;
-  opacity: 0.33;
+  opacity: 0.25;
   background:
     repeating-linear-gradient(103deg, transparent 0 88px, rgba(121, 225, 255, 0.055) 89px 90px, transparent 91px 174px),
     repeating-linear-gradient(77deg, transparent 0 137px, rgba(153, 123, 255, 0.035) 138px 139px, transparent 140px 268px);
   background-size: 125% 125%, 137% 137%;
-  animation: fx-site-stream-flow 34s linear infinite;
+  animation: fx-site-stream-flow 40s linear infinite;
 }
 
 .fx-site-ambient-vignette {
@@ -141,16 +138,11 @@ html.fx-site-ambient-ready body {
   box-shadow: 0 0 8px rgba(111, 231, 255, 0.78), 0 0 18px rgba(112, 112, 255, 0.32);
   animation: fx-site-particle-rise var(--fx-particle-duration) linear infinite;
   animation-delay: var(--fx-particle-delay);
-  will-change: transform, opacity;
 }
 
 @keyframes fx-site-grid-drift {
-  from {
-    transform: perspective(1050px) rotateX(67deg) scale(1.34) translate3d(-18px, calc(11% + var(--fx-bg-scroll)), 0);
-  }
-  to {
-    transform: perspective(1050px) rotateX(67deg) scale(1.34) translate3d(-82px, calc(11% + var(--fx-bg-scroll) + 64px), 0);
-  }
+  from { transform: perspective(1050px) rotateX(67deg) scale(1.34) translate3d(-18px, calc(11% + var(--fx-bg-scroll)), 0); }
+  to { transform: perspective(1050px) rotateX(67deg) scale(1.34) translate3d(-82px, calc(11% + var(--fx-bg-scroll) + 64px), 0); }
 }
 
 @keyframes fx-site-aura-one {
@@ -170,9 +162,9 @@ html.fx-site-ambient-ready body {
 
 @keyframes fx-site-beam-sweep {
   0% { transform: translate3d(0, -40%, 0) rotate(-4deg); opacity: 0; }
-  12% { opacity: 0.18; }
-  48% { opacity: 0.38; }
-  88% { opacity: 0.14; }
+  12% { opacity: 0.16; }
+  48% { opacity: 0.32; }
+  88% { opacity: 0.12; }
   100% { transform: translate3d(0, 42%, 0) rotate(-4deg); opacity: 0; }
 }
 
@@ -188,23 +180,43 @@ html.fx-site-ambient-ready body {
   100% { transform: translate3d(var(--fx-particle-drift), -112vh, 0) scale(1.18); opacity: 0; }
 }
 
+/* Firefox, touch devices and lower-resource systems use a deliberately lighter scene. */
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-grid {
+  animation-duration: 52s;
+  opacity: 0.055;
+}
+
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-aura {
+  filter: blur(28px);
+  mix-blend-mode: normal;
+  animation-duration: 44s;
+}
+
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-aura--three,
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-streams,
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-beam {
+  display: none;
+}
+
+.fx-site-ambient[data-performance="balanced"] .fx-site-ambient-particles i {
+  box-shadow: 0 0 8px rgba(111, 231, 255, 0.46);
+}
+
+.fx-site-ambient[data-browser="firefox"] {
+  background:
+    radial-gradient(circle at 52% 24%, rgba(75, 211, 255, 0.08), transparent 28rem),
+    radial-gradient(circle at 84% 13%, rgba(132, 91, 255, 0.07), transparent 31rem),
+    linear-gradient(180deg, #020712 0%, #061021 46%, #030813 100%);
+}
+
 @media (max-width: 760px), (pointer: coarse) {
   .fx-site-ambient-grid {
-    opacity: 0.085;
     background-size: 42px 42px;
-    animation-duration: 34s;
-  }
-
-  .fx-site-ambient-aura {
-    filter: blur(52px);
   }
 
   .fx-site-ambient-aura--one { width: 96vw; }
   .fx-site-ambient-aura--two { width: 90vw; top: 23%; }
   .fx-site-ambient-aura--three { width: 92vw; left: 4%; }
-  .fx-site-ambient-streams { opacity: 0.20; }
-  .fx-site-ambient-beam { opacity: 0.23; animation-duration: 17s; }
-  .fx-site-ambient-particles i:nth-child(n+13) { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -216,15 +228,13 @@ html.fx-site-ambient-ready body {
     animation: none !important;
   }
 
-  .fx-site-ambient-grid { opacity: 0.055; }
-  .fx-site-ambient-aura { opacity: 0.24; }
-  .fx-site-ambient-beam { display: none; }
-  .fx-site-ambient-streams { opacity: 0.10; }
+  .fx-site-ambient-grid { opacity: 0.045; }
+  .fx-site-ambient-aura { opacity: 0.20; }
+  .fx-site-ambient-beam,
+  .fx-site-ambient-streams,
   .fx-site-ambient-particles { display: none; }
 }
 
 @media (prefers-contrast: more) {
-  .fx-site-ambient {
-    opacity: 0.56;
-  }
+  .fx-site-ambient { opacity: 0.50; }
 }
