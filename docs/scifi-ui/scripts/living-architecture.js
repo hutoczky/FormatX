@@ -51,9 +51,25 @@
     return url.href;
   }
 
-  function qrImageUrl(targetUrl) {
-    return 'https://quickchart.io/qr?text=' + encodeURIComponent(targetUrl)
-      + '&size=320&margin=2&ecLevel=M&format=png';
+  function qrImageUrl(planId, selectedCurrency, retry) {
+    const params = new URLSearchParams({
+      plan: planId,
+      cycle: 'monthly',
+      currency: selectedCurrency
+    });
+    if (retry) params.set('retry', String(Date.now()));
+    return '/api/checkout-qr?' + params.toString();
+  }
+
+  function revealQrDock() {
+    const dock = document.getElementById('formatx-plan-qr-dock');
+    if (!dock) return;
+    dock.classList.add('visible');
+    dock.style.setProperty('opacity', '1', 'important');
+    dock.style.setProperty('visibility', 'visible', 'important');
+    dock.style.setProperty('transform', 'none', 'important');
+    dock.style.setProperty('filter', 'none', 'important');
+    dock.dataset.fxQrVisible = 'true';
   }
 
   function syncScene() {
@@ -75,6 +91,7 @@
     const selectedCurrency = currency();
     const otherCurrency = selectedCurrency === 'HUF' ? 'EUR' : 'HUF';
     const generation = ++qrGeneration;
+    revealQrDock();
 
     document.querySelectorAll('[data-plan-id]').forEach(function (card) {
       const planId = card.dataset.planId;
@@ -105,19 +122,39 @@
           + (language() === 'hu' ? 'fizetés megnyitása' : 'open payment'));
       }
       if (!image) return;
+
+      let retries = 0;
       card.classList.remove('is-qr-ready', 'is-qr-error');
       card.classList.add('is-qr-loading');
+
+      function loadQr(cacheBust) {
+        image.src = qrImageUrl(planId, selectedCurrency, cacheBust);
+      }
+
       image.onload = function () {
         if (generation !== qrGeneration) return;
+        if (image.naturalWidth < 32 || image.naturalHeight < 32) {
+          image.onerror();
+          return;
+        }
         card.classList.remove('is-qr-loading', 'is-qr-error');
         card.classList.add('is-qr-ready');
       };
+
       image.onerror = function () {
         if (generation !== qrGeneration) return;
+        retries += 1;
+        if (retries <= 2) {
+          setTimeout(function () {
+            if (generation === qrGeneration) loadQr(true);
+          }, retries * 900);
+          return;
+        }
         card.classList.remove('is-qr-loading', 'is-qr-ready');
         card.classList.add('is-qr-error');
       };
-      image.src = qrImageUrl(href);
+
+      loadQr(false);
       image.alt = plan.name + ' — '
         + (language() === 'hu' ? 'fizetési oldal QR-kódja' : 'payment page QR code');
     });
@@ -163,10 +200,14 @@
       syncScene();
       updateCommerce();
     });
-    window.addEventListener('pageshow', updateCommerce);
+    window.addEventListener('pageshow', function () {
+      revealQrDock();
+      updateCommerce();
+    });
   }
 
   function initialise() {
+    revealQrDock();
     syncScene();
     updateCommerce();
     pulse();
