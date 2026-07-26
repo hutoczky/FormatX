@@ -1,12 +1,12 @@
 {
-  "sourceCommit": "e64ab9596eb51995ca4924e83ae64e54e6b7e498",
-  "auditedAt": "2026-07-26T06:55:18.142438Z",
+  "sourceCommit": "61d358ddd458678228b754873329939599b6a0b3",
+  "auditedAt": "2026-07-26T06:58:42.963470Z",
   "configuration": "success",
   "javascriptSyntax": "success",
   "npmCi": "success",
   "workerTests": "success",
   "cloudflareTokenPresent": false,
-  "duplicateValidationStatusDeployTrigger": true,
+  "duplicateValidationStatusDeployTrigger": false,
   "serialProductionQueue": true,
   "live": {
     "mainHttp": "200",
