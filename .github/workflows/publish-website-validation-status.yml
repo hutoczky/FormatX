@@ -1,0 +1,39 @@
+name: Publish website validation status
+
+on:
+  workflow_run:
+    workflows:
+      - Validate FormatX website
+    types:
+      - completed
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  publish:
+    if: github.event.workflow_run.head_branch == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish unified validation result
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$CONCLUSION" = 'success' ]; then
+            state='success'
+            description='Chromium, Firefox, mobile, layout and checkout checks passed'
+          else
+            state='failure'
+            description="Unified website validation ended with: $CONCLUSION"
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            -f state="$state" \
+            -f context='FormatX unified website validation' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$RUN_ID"
