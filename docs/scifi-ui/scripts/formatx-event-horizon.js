@@ -115,10 +115,14 @@
     }
   }
 
-  function resetAnimatedElements(overlay) {
+  function cancelOverlayAnimations(overlay) {
     overlay.getAnimations({ subtree: true }).forEach(function (animation) {
       animation.cancel();
     });
+  }
+
+  function resetAnimatedElements(overlay) {
+    cancelOverlayAnimations(overlay);
     overlay.hidden = false;
     overlay.setAttribute('aria-hidden', 'false');
     overlay.classList.remove('is-exiting');
@@ -133,9 +137,7 @@
     window.clearTimeout(failsafeTimer);
 
     if (overlay) {
-      overlay.getAnimations({ subtree: true }).forEach(function (animation) {
-        animation.cancel();
-      });
+      cancelOverlayAnimations(overlay);
       overlay.hidden = true;
       overlay.setAttribute('aria-hidden', 'true');
       overlay.classList.remove('is-exiting');
@@ -274,10 +276,24 @@
     finishing = true;
     window.cancelAnimationFrame(progressFrame);
 
-    if (!skipped) await completeProgress(overlay, token);
-    else setProgress(overlay, 100);
+    if (skipped) {
+      setProgress(overlay, 100);
+      cancelOverlayAnimations(overlay);
+      ROOT.classList.add('fx-intro-reveal');
+      overlay.classList.add('is-exiting');
 
+      const fade = overlay.animate(
+        [{ opacity: 1 }, { opacity: 0 }],
+        { duration: 120, easing: 'ease-out', fill: 'both' }
+      );
+      await Promise.race([animationFinished(fade), delay(180)]);
+      if (token === runToken) completeImmediately(overlay);
+      return;
+    }
+
+    await completeProgress(overlay, token);
     if (token !== runToken) return;
+
     ROOT.classList.add('fx-intro-reveal');
     overlay.classList.add('is-exiting');
 
@@ -347,7 +363,7 @@
     }, FAILSAFE_DEADLINE);
 
     await afterTwoFrames();
-    if (token !== runToken) return;
+    if (token !== runToken || finishing) return;
 
     beginProgress(overlay, token);
     const visuals = playVisualSequence(overlay);
@@ -362,7 +378,7 @@
       ]);
     }
 
-    if (token === runToken) await finishIntro(overlay, token, false);
+    if (token === runToken && !finishing) await finishIntro(overlay, token, false);
   }
 
   window.addEventListener('pageshow', function (event) {
