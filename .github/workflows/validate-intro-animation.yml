@@ -10,6 +10,7 @@ on:
       - 'docs/scifi-ui/scripts/site-art-direction.js'
       - 'docs/scifi-ui/styles/formatx-event-horizon.css'
       - 'docs/scifi-ui/styles/site-premium-finish.css'
+      - 'docs/scifi-ui/styles/site-contrast-guard.css'
       - '.github/workflows/validate-intro-animation.yml'
 
 permissions:
