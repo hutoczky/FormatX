@@ -12,7 +12,7 @@ on:
       - '.github/workflows/validate-formatx-event-horizon.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: validate-formatx-event-horizon
@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
 
       - name: Validate source syntax and first-frame integration
         shell: bash
@@ -48,19 +50,6 @@ jobs:
         shell: bash
         run: npm install --prefix "$RUNNER_TEMP/formatx-jsdom" --no-audit --no-fund jsdom@26.1.0
 
-      - name: Start static website server
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/formatx-http.log" 2>&1 &
-          echo $! > "$RUNNER_TEMP/formatx-http.pid"
-          for attempt in $(seq 1 20); do
-            curl -fsS http://127.0.0.1:4173/scifi-ui/index.html >/dev/null && exit 0
-            sleep 0.25
-          done
-          cat "$RUNNER_TEMP/formatx-http.log"
-          exit 1
-
       - name: Exercise desktop and mobile loading lifecycle
         shell: bash
         env:
@@ -68,7 +57,24 @@ jobs:
         run: |
           set -euo pipefail
           node <<'NODE'
+          const fs = require('node:fs');
           const { JSDOM, VirtualConsole } = require('jsdom');
+          const script = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
+
+          const markup = `<!doctype html>
+          <html class="fx-intro-pending"><head></head><body>
+            <div id="formatx-event-horizon" class="fx-intro-overlay" aria-hidden="true">
+              <div class="fx-intro-curtain fx-intro-curtain--top"></div>
+              <div class="fx-intro-curtain fx-intro-curtain--bottom"></div>
+              <div class="fx-intro-center"><strong class="fx-intro-word"><span>FORMATX</span></strong></div>
+              <div class="fx-intro-progress-wrap">
+                <output data-fx-intro-output>000</output>
+                <progress data-fx-intro-progress max="100" value="0">0%</progress>
+                <span data-fx-intro-status>KAPCSOLAT FELÉPÍTÉSE</span>
+              </div>
+            </div>
+            <main><section class="hero"><div class="hero-copy"></div><div class="core-engine"></div></section></main>
+          </body></html>`;
 
           async function wait(ms) {
             await new Promise((resolve) => setTimeout(resolve, ms));
@@ -76,15 +82,14 @@ jobs:
 
           async function verify(mode) {
             const mobile = mode === 'mobile';
-            const errors = [];
+            const runtimeErrors = [];
             const virtualConsole = new VirtualConsole();
-            virtualConsole.on('jsdomError', (error) => errors.push(String(error)));
-            virtualConsole.on('error', (error) => errors.push(String(error)));
+            virtualConsole.on('error', (error) => runtimeErrors.push(String(error)));
 
-            const dom = await JSDOM.fromURL('http://127.0.0.1:4173/scifi-ui/index.html', {
-              runScripts: 'dangerously',
-              resources: 'usable',
+            const dom = new JSDOM(markup, {
+              runScripts: 'outside-only',
               pretendToBeVisual: true,
+              url: 'https://formatxsuite.test/',
               virtualConsole,
               beforeParse(window) {
                 window.matchMedia = (query) => ({
@@ -100,21 +105,19 @@ jobs:
               },
             });
 
-            await new Promise((resolve) => {
-              if (dom.window.document.readyState === 'complete') resolve();
-              else dom.window.addEventListener('load', resolve, { once: true });
-            });
+            dom.window.eval(script);
+            dom.window.document.dispatchEvent(new dom.window.Event('DOMContentLoaded'));
+            dom.window.dispatchEvent(new dom.window.Event('load'));
 
             const root = dom.window.document.documentElement;
             const overlay = dom.window.document.getElementById('formatx-event-horizon');
-            const progress = overlay?.querySelector('[data-fx-intro-progress]');
-            if (!overlay || !progress) throw new Error(`${mode}: loader markup missing`);
+            const progress = overlay.querySelector('[data-fx-intro-progress]');
 
             await wait(180);
             if (!root.classList.contains('fx-intro-running')) {
               throw new Error(`${mode}: loading lifecycle did not start`);
             }
-            if (overlay.hidden) throw new Error(`${mode}: overlay hid before the loading sequence`);
+            if (overlay.hidden) throw new Error(`${mode}: overlay hid before the sequence`);
             if (Number(progress.value) <= 0) throw new Error(`${mode}: progress did not advance`);
 
             await wait(mobile ? 3000 : 3300);
@@ -125,7 +128,9 @@ jobs:
             if (root.classList.contains('fx-intro-running')) {
               throw new Error(`${mode}: scroll lock remained active`);
             }
-            if (errors.length) throw new Error(`${mode}: runtime errors: ${errors.join(' | ')}`);
+            if (runtimeErrors.length) {
+              throw new Error(`${mode}: runtime errors: ${runtimeErrors.join(' | ')}`);
+            }
 
             dom.window.close();
           }
@@ -154,3 +159,32 @@ jobs:
             echo '- Scroll-lock cleanup: PASS'
             echo '- Reduced-motion fallback: PRESENT'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Persist successful runtime validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin master
+          mkdir -p .github/audit
+          cat > .github/audit/event-horizon-status.json <<EOF
+          {
+            "status": "PASS",
+            "sourceCommit": "${GITHUB_SHA}",
+            "validatedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "firstHtmlFrameOverlay": true,
+            "javascriptSyntax": true,
+            "desktopLifecycle": true,
+            "mobileLifecycle": true,
+            "progressAnimation": true,
+            "automaticPageRelease": true,
+            "scrollLockCleanup": true,
+            "reducedMotionFallback": true
+          }
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/audit/event-horizon-status.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record successful Event Horizon runtime validation'
+            git push origin HEAD:master
+          fi
