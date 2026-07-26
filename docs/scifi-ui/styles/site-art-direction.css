@@ -1,0 +1,253 @@
+/* FormatX art direction and functional System Rail. */
+
+:root {
+  --fx-page-progress: 0;
+}
+
+.fx-art-direction-ready .fx-directed-section {
+  --fx-section-accent: rgba(102, 224, 255, 0.42);
+  position: relative;
+}
+
+.fx-art-direction-ready .fx-directed-section::after {
+  content: attr(data-fx-section-index) " / " attr(data-fx-section-label);
+  position: absolute;
+  z-index: 4;
+  top: 20px;
+  right: clamp(18px, 3vw, 46px);
+  color: rgba(195, 235, 255, 0.58);
+  font: 700 0.66rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0.72;
+  transition: opacity 220ms ease, color 220ms ease;
+}
+
+.fx-art-direction-ready .fx-directed-section.fx-section-active::after {
+  color: rgba(224, 250, 255, 0.92);
+  opacity: 1;
+  text-shadow: 0 0 20px rgba(89, 221, 255, 0.24);
+}
+
+.fx-art-direction-ready .fx-directed-section::before {
+  border-top-color: rgba(112, 215, 255, 0.07) !important;
+}
+
+.fx-art-direction-ready .fx-directed-section.fx-section-active::before {
+  border-top-color: rgba(108, 229, 255, 0.14) !important;
+}
+
+.fx-art-direction-ready .hero h1 {
+  letter-spacing: -0.055em;
+  line-height: 0.89;
+  max-width: 10ch;
+}
+
+.fx-art-direction-ready .hero-tagline {
+  letter-spacing: -0.015em;
+}
+
+.fx-art-direction-ready .panel-title,
+.fx-art-direction-ready .section-label,
+.fx-art-direction-ready .project-section-title {
+  letter-spacing: 0.075em;
+}
+
+.fx-art-direction-ready .project-kicker,
+.fx-art-direction-ready .eyebrow {
+  letter-spacing: 0.18em;
+}
+
+.fx-system-rail {
+  position: fixed;
+  z-index: 40;
+  right: clamp(12px, 1.35vw, 24px);
+  top: 50%;
+  width: 76px;
+  transform: translateY(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  color: #dff9ff;
+  pointer-events: none;
+}
+
+.fx-system-rail-brand,
+.fx-system-rail-links,
+.fx-system-rail-scene {
+  pointer-events: auto;
+}
+
+.fx-system-rail-brand {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(114, 223, 255, 0.22);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(12, 27, 49, 0.86), rgba(4, 11, 25, 0.80));
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.24), inset 0 1px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(18px) saturate(132%);
+}
+
+.fx-system-rail-brand span {
+  font: 800 0.72rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.12em;
+}
+
+.fx-system-rail-brand small {
+  margin-top: -8px;
+  color: rgba(112, 226, 255, 0.66);
+  font: 700 0.48rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.09em;
+}
+
+.fx-system-rail-track {
+  position: absolute;
+  z-index: -1;
+  top: 62px;
+  bottom: 70px;
+  left: 50%;
+  width: 1px;
+  overflow: hidden;
+  background: rgba(119, 213, 255, 0.10);
+}
+
+.fx-system-rail-track i {
+  display: block;
+  width: 100%;
+  height: calc(var(--fx-page-progress) * 100%);
+  background: linear-gradient(180deg, rgba(100, 240, 255, 0.96), rgba(141, 102, 255, 0.75));
+  box-shadow: 0 0 12px rgba(95, 225, 255, 0.65);
+}
+
+.fx-system-rail-links {
+  display: grid;
+  gap: 8px;
+}
+
+.fx-system-rail-links a {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  color: rgba(190, 226, 239, 0.55);
+  text-decoration: none;
+  background: rgba(4, 11, 24, 0.44);
+  backdrop-filter: blur(10px);
+  transition: color 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.fx-system-rail-links a b {
+  font: 800 0.58rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.08em;
+}
+
+.fx-system-rail-links a span {
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  min-width: max-content;
+  padding: 7px 10px;
+  border: 1px solid rgba(111, 222, 255, 0.16);
+  border-radius: 9px;
+  color: rgba(228, 248, 255, 0.92);
+  background: rgba(3, 9, 21, 0.92);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  font: 700 0.62rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translate3d(6px, -50%, 0);
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.fx-system-rail-links a.is-active {
+  color: #eaffff;
+  border-color: rgba(97, 227, 255, 0.38);
+  background: linear-gradient(145deg, rgba(24, 79, 118, 0.72), rgba(28, 21, 77, 0.62));
+  box-shadow: 0 0 24px rgba(78, 208, 255, 0.14), inset 0 1px rgba(255, 255, 255, 0.045);
+}
+
+.fx-system-rail-scene {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 58px;
+  padding: 9px 8px;
+  border: 1px solid rgba(111, 221, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(3, 10, 23, 0.74);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.20);
+  backdrop-filter: blur(14px);
+}
+
+.fx-system-rail-scene span {
+  color: rgba(105, 228, 255, 0.72);
+  font: 800 0.56rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.fx-system-rail-scene strong {
+  max-width: 52px;
+  overflow: hidden;
+  color: rgba(225, 247, 255, 0.82);
+  font: 700 0.48rem/1.15 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fx-system-rail-links a:hover {
+    color: #efffff;
+    border-color: rgba(111, 229, 255, 0.28);
+    background: rgba(18, 54, 83, 0.72);
+  }
+
+  .fx-system-rail-links a:hover span,
+  .fx-system-rail-links a:focus-visible span {
+    opacity: 1;
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+@media (max-width: 1180px) {
+  .fx-system-rail {
+    display: none;
+  }
+
+  .fx-art-direction-ready .fx-directed-section::after {
+    top: 14px;
+    right: 16px;
+    font-size: 0.58rem;
+  }
+}
+
+@media (max-width: 680px) {
+  .fx-art-direction-ready .fx-directed-section::after {
+    content: attr(data-fx-section-index);
+    top: 12px;
+    right: 12px;
+    letter-spacing: 0.08em;
+    opacity: 0.42;
+  }
+
+  .fx-art-direction-ready .hero h1 {
+    max-width: 100%;
+    letter-spacing: -0.045em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-system-rail-links a,
+  .fx-system-rail-links a span,
+  .fx-art-direction-ready .fx-directed-section::after {
+    transition: none !important;
+  }
+}
