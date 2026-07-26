@@ -1,6 +1,10 @@
+/* FormatX Event Horizon v3
+   Deterministic first-load presentation. Motion is driven by one WAAPI controller;
+   CSS supplies stable first-paint states and a no-JavaScript failsafe only. */
+
 html.fx-intro-pending,
 html.fx-intro-running {
-  background: #02040a;
+  background: #01040b;
 }
 
 html.fx-intro-running {
@@ -9,6 +13,10 @@ html.fx-intro-running {
 }
 
 .fx-intro-overlay {
+  --fx-intro-cyan: #7cecff;
+  --fx-intro-blue: #458cff;
+  --fx-intro-violet: #8f72ff;
+  --fx-intro-gold: #ffd294;
   position: fixed;
   inset: 0;
   z-index: 2147483000;
@@ -19,16 +27,48 @@ html.fx-intro-running {
   isolation: isolate;
   color: #effdff;
   background:
-    radial-gradient(circle at 50% 46%, rgba(88, 224, 255, 0.12), transparent 24%),
-    radial-gradient(circle at 50% 52%, rgba(104, 83, 255, 0.1), transparent 42%),
-    #02040a;
+    radial-gradient(circle at 50% 48%, rgba(81, 213, 255, 0.13), transparent 24%),
+    radial-gradient(ellipse at 50% 54%, rgba(113, 82, 255, 0.12), transparent 48%),
+    linear-gradient(145deg, #01040b 0%, #030917 48%, #08051a 100%);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  pointer-events: all;
-  animation: fx-intro-failsafe 1ms linear 8s forwards;
+  pointer-events: auto;
+  animation: fx-intro-failsafe 1ms linear 6s forwards;
 }
 
-html.fx-intro-running .fx-intro-overlay {
+html.fx-intro-managed .fx-intro-overlay {
   animation: none;
+}
+
+.fx-intro-overlay::before,
+.fx-intro-overlay::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.fx-intro-overlay::before {
+  z-index: -6;
+  inset: -20%;
+  opacity: 0.28;
+  background-image:
+    radial-gradient(circle at 9% 18%, rgba(255, 255, 255, 0.8) 0 0.55px, transparent 0.8px),
+    radial-gradient(circle at 21% 76%, rgba(124, 236, 255, 0.7) 0 0.7px, transparent 0.95px),
+    radial-gradient(circle at 74% 24%, rgba(255, 210, 148, 0.55) 0 0.6px, transparent 0.9px),
+    radial-gradient(circle at 88% 68%, rgba(143, 114, 255, 0.7) 0 0.7px, transparent 1px);
+  background-size: 121px 117px, 173px 163px, 211px 197px, 263px 241px;
+  transform: rotate(-7deg) scale(1.08);
+}
+
+.fx-intro-overlay::after {
+  z-index: 8;
+  inset: 0;
+  border: 1px solid rgba(130, 230, 255, 0.06);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px);
+  background-size: 4px 4px;
+  opacity: 0.18;
+  mix-blend-mode: screen;
 }
 
 .fx-intro-overlay[hidden] {
@@ -43,60 +83,85 @@ html.fx-intro-running .fx-intro-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
 .fx-intro-curtain {
   z-index: -4;
   height: 50.5%;
   background:
-    linear-gradient(90deg, transparent, rgba(93, 235, 255, 0.05), transparent),
-    #02040a;
-  transition: transform 950ms cubic-bezier(.78, 0, .16, 1);
+    linear-gradient(90deg, transparent, rgba(93, 235, 255, 0.04), transparent),
+    linear-gradient(180deg, rgba(6, 13, 29, 0.98), rgba(1, 4, 11, 0.995));
 }
 
 .fx-intro-curtain--top {
   bottom: auto;
   border-bottom: 1px solid rgba(129, 237, 255, 0.16);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.34);
 }
 
 .fx-intro-curtain--bottom {
   top: auto;
   border-top: 1px solid rgba(129, 237, 255, 0.16);
+  box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.34);
 }
 
 .fx-intro-grid {
   z-index: -3;
-  opacity: 0.34;
+  opacity: 0;
   background-image:
     linear-gradient(rgba(116, 229, 255, 0.055) 1px, transparent 1px),
     linear-gradient(90deg, rgba(116, 229, 255, 0.055) 1px, transparent 1px);
   background-size: clamp(36px, 5vw, 72px) clamp(36px, 5vw, 72px);
-  mask-image: radial-gradient(circle at center, #000 0 28%, transparent 72%);
-  transform: perspective(700px) rotateX(64deg) scale(1.6) translateY(18%);
+  -webkit-mask-image: radial-gradient(circle at center, #000 0 27%, transparent 73%);
+  mask-image: radial-gradient(circle at center, #000 0 27%, transparent 73%);
+  transform: perspective(700px) rotateX(64deg) scale(1.82) translateY(25%);
   transform-origin: center bottom;
 }
 
 .fx-intro-scan {
-  z-index: -1;
+  z-index: 2;
   inset: -30% 0 auto;
   height: 36%;
   opacity: 0;
-  background: linear-gradient(to bottom, transparent, rgba(156, 247, 255, 0.22), transparent);
+  background: linear-gradient(to bottom, transparent, rgba(156, 247, 255, 0.2), transparent);
   mix-blend-mode: screen;
 }
 
 .fx-intro-portal {
   z-index: -2;
   inset: 50% auto auto 50%;
-  width: min(68vw, 760px);
+  width: min(70vw, 780px);
   aspect-ratio: 1;
-  transform: translate(-50%, -50%);
   border-radius: 50%;
-  background:
-    radial-gradient(circle, transparent 0 19%, rgba(143, 247, 255, 0.16) 19.4% 19.8%, transparent 20.2% 33%, rgba(122, 105, 255, 0.14) 33.4% 33.8%, transparent 34.2% 47%, rgba(138, 242, 255, 0.09) 47.4% 47.7%, transparent 48.2%),
-    conic-gradient(from 0deg, transparent 0 9%, rgba(123, 235, 255, 0.24) 12%, transparent 18% 42%, rgba(134, 111, 255, 0.19) 47%, transparent 55% 78%, rgba(255, 208, 139, 0.13) 83%, transparent 91%);
-  filter: drop-shadow(0 0 34px rgba(103, 226, 255, 0.13));
   opacity: 0;
+  transform: translate(-50%, -50%) scale(0.48) rotate(-24deg);
+  background:
+    radial-gradient(circle, transparent 0 18.8%, rgba(143, 247, 255, 0.18) 19.2% 19.7%, transparent 20.1% 31%, rgba(122, 105, 255, 0.16) 31.4% 31.9%, transparent 32.3% 44%, rgba(138, 242, 255, 0.1) 44.4% 44.8%, transparent 45.2%),
+    conic-gradient(from 0deg, transparent 0 8%, rgba(123, 235, 255, 0.28) 12%, transparent 18% 39%, rgba(134, 111, 255, 0.22) 47%, transparent 55% 76%, rgba(255, 208, 139, 0.15) 83%, transparent 92%);
+  box-shadow:
+    inset 0 0 44px rgba(91, 221, 255, 0.035),
+    0 0 120px rgba(82, 121, 255, 0.045);
+  filter: blur(8px) drop-shadow(0 0 10px rgba(103, 226, 255, 0.08));
+}
+
+.fx-intro-portal::before,
+.fx-intro-portal::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+}
+
+.fx-intro-portal::before {
+  inset: 12%;
+  border: 1px solid rgba(154, 242, 255, 0.2);
+  box-shadow: 0 0 42px rgba(100, 220, 255, 0.08);
+}
+
+.fx-intro-portal::after {
+  inset: 38%;
+  background: radial-gradient(circle, rgba(235, 253, 255, 0.92), rgba(98, 220, 255, 0.22) 18%, transparent 64%);
+  filter: blur(4px);
 }
 
 .fx-intro-flare {
@@ -105,35 +170,39 @@ html.fx-intro-running .fx-intro-overlay {
   width: 4px;
   height: 4px;
   border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.01);
   background: #fff;
   box-shadow:
-    0 0 16px 5px rgba(180, 249, 255, 0.88),
-    0 0 80px 24px rgba(91, 221, 255, 0.34),
-    0 0 180px 56px rgba(112, 84, 255, 0.18);
-  transform: translate(-50%, -50%) scale(0.01);
-  opacity: 0;
+    0 0 16px 5px rgba(180, 249, 255, 0.9),
+    0 0 84px 26px rgba(91, 221, 255, 0.34),
+    0 0 190px 62px rgba(112, 84, 255, 0.18);
 }
 
 .fx-intro-meta {
   position: absolute;
+  z-index: 3;
   top: max(22px, env(safe-area-inset-top));
   right: max(24px, env(safe-area-inset-right));
   left: max(24px, env(safe-area-inset-left));
   display: flex;
   justify-content: space-between;
   gap: 16px;
+  opacity: 0;
   font-size: clamp(9px, 0.72vw, 12px);
-  font-weight: 700;
+  font-weight: 720;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: rgba(214, 249, 255, 0.58);
 }
 
 .fx-intro-meta span:last-child {
-  color: rgba(255, 216, 154, 0.68);
+  color: rgba(255, 216, 154, 0.72);
 }
 
 .fx-intro-center {
+  position: relative;
+  z-index: 3;
   width: min(1180px, calc(100vw - 40px));
   text-align: center;
 }
@@ -141,33 +210,40 @@ html.fx-intro-running .fx-intro-overlay {
 .fx-intro-kicker {
   display: block;
   margin-bottom: clamp(16px, 2.6vh, 30px);
-  font-size: clamp(9px, 0.8vw, 13px);
-  font-weight: 700;
-  letter-spacing: 0.42em;
-  color: rgba(173, 242, 255, 0.62);
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(14px);
+  font-size: clamp(9px, 0.8vw, 13px);
+  font-weight: 760;
+  letter-spacing: 0.58em;
+  color: rgba(173, 242, 255, 0.68);
 }
 
 .fx-intro-word {
   display: block;
   overflow: hidden;
   font-size: clamp(62px, 15vw, 228px);
-  font-weight: 850;
+  font-weight: 880;
   line-height: 0.76;
   letter-spacing: -0.075em;
   text-transform: uppercase;
   text-wrap: nowrap;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(219, 251, 255, 0.86);
-  text-shadow: 0 0 38px rgba(111, 230, 255, 0.12);
+  -webkit-text-stroke: 1px rgba(219, 251, 255, 0.92);
+  text-shadow:
+    0 0 34px rgba(111, 230, 255, 0.13),
+    0 16px 70px rgba(65, 91, 255, 0.12);
 }
 
 .fx-intro-word span {
   display: inline-block;
   padding-right: 0.075em;
-  transform: translateY(116%) skewY(6deg);
+  opacity: 0;
+  transform: translateY(112%) skewY(6deg) scale(0.97);
   transform-origin: left bottom;
+  background: linear-gradient(112deg, #f7ffff 8%, #9af2ff 38%, #9c8cff 70%, #ffd49a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: blur(12px);
 }
 
 .fx-intro-subtitle {
@@ -176,12 +252,13 @@ html.fx-intro-running .fx-intro-overlay {
   justify-content: center;
   gap: 14px;
   margin-top: clamp(20px, 4vh, 44px);
+  opacity: 0;
+  transform: translateY(10px);
   font-size: clamp(10px, 0.9vw, 14px);
-  font-weight: 650;
+  font-weight: 680;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: rgba(226, 251, 255, 0.72);
-  opacity: 0;
+  color: rgba(226, 251, 255, 0.76);
 }
 
 .fx-intro-subtitle::before,
@@ -189,7 +266,8 @@ html.fx-intro-running .fx-intro-overlay {
   content: "";
   width: clamp(24px, 5vw, 78px);
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(143, 239, 255, 0.62));
+  background: linear-gradient(90deg, transparent, rgba(143, 239, 255, 0.7));
+  box-shadow: 0 0 12px rgba(105, 228, 255, 0.16);
 }
 
 .fx-intro-subtitle::after {
@@ -198,6 +276,7 @@ html.fx-intro-running .fx-intro-overlay {
 
 .fx-intro-progress-wrap {
   position: absolute;
+  z-index: 4;
   right: max(24px, env(safe-area-inset-right));
   bottom: max(24px, env(safe-area-inset-bottom));
   left: max(24px, env(safe-area-inset-left));
@@ -205,16 +284,19 @@ html.fx-intro-running .fx-intro-overlay {
   grid-template-columns: auto minmax(120px, 1fr) auto;
   align-items: end;
   gap: clamp(14px, 2vw, 30px);
+  opacity: 0;
+  transform: translateY(16px);
 }
 
 .fx-intro-progress-wrap output {
   min-width: 3.2ch;
   font-variant-numeric: tabular-nums;
   font-size: clamp(32px, 6vw, 84px);
-  font-weight: 250;
+  font-weight: 230;
   line-height: 0.75;
   letter-spacing: -0.08em;
   color: #f1feff;
+  text-shadow: 0 0 28px rgba(106, 232, 255, 0.18);
 }
 
 .fx-intro-progress-wrap progress {
@@ -223,6 +305,7 @@ html.fx-intro-running .fx-intro-overlay {
   appearance: none;
   border: 0;
   overflow: hidden;
+  border-radius: 999px;
   background: rgba(151, 236, 255, 0.12);
 }
 
@@ -230,120 +313,85 @@ html.fx-intro-running .fx-intro-overlay {
   background: rgba(151, 236, 255, 0.12);
 }
 
-.fx-intro-progress-wrap progress::-webkit-progress-value {
-  background: linear-gradient(90deg, #8ef5ff, #8a7dff 74%, #ffd28c);
-  box-shadow: 0 0 18px rgba(116, 237, 255, 0.75);
-}
-
+.fx-intro-progress-wrap progress::-webkit-progress-value,
 .fx-intro-progress-wrap progress::-moz-progress-bar {
-  background: linear-gradient(90deg, #8ef5ff, #8a7dff 74%, #ffd28c);
-  box-shadow: 0 0 18px rgba(116, 237, 255, 0.75);
+  background: linear-gradient(90deg, var(--fx-intro-cyan), var(--fx-intro-violet) 74%, var(--fx-intro-gold));
+  box-shadow: 0 0 18px rgba(116, 237, 255, 0.76);
 }
 
 .fx-intro-status {
-  max-width: 22ch;
+  max-width: 24ch;
   text-align: right;
   font-size: clamp(9px, 0.68vw, 11px);
-  font-weight: 700;
+  font-weight: 720;
   line-height: 1.5;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(199, 244, 251, 0.54);
+  color: rgba(199, 244, 251, 0.58);
 }
 
-html.fx-intro-running .fx-intro-kicker {
-  animation: fx-intro-kicker-in 620ms cubic-bezier(.22, .8, .22, 1) 80ms forwards;
-}
-
-html.fx-intro-running .fx-intro-word span {
-  animation: fx-intro-word-in 900ms cubic-bezier(.16, .82, .16, 1) 120ms forwards;
-}
-
-html.fx-intro-running .fx-intro-subtitle {
-  animation: fx-intro-subtitle-in 620ms ease 620ms forwards;
-}
-
-html.fx-intro-running .fx-intro-portal {
-  animation: fx-intro-portal-in 1500ms cubic-bezier(.18, .78, .2, 1) 80ms forwards,
-             fx-intro-portal-spin 14s linear 1600ms infinite;
-}
-
-html.fx-intro-running .fx-intro-flare {
-  animation: fx-intro-flare-in 1200ms cubic-bezier(.18, .8, .2, 1) 120ms forwards;
-}
-
-html.fx-intro-running .fx-intro-scan {
-  animation: fx-intro-scan 1500ms cubic-bezier(.2, .75, .2, 1) 180ms forwards;
-}
-
-.fx-intro-overlay.is-exiting .fx-intro-curtain--top {
-  transform: translateY(-102%);
-}
-
-.fx-intro-overlay.is-exiting .fx-intro-curtain--bottom {
-  transform: translateY(102%);
-}
-
-.fx-intro-overlay.is-exiting .fx-intro-center,
-.fx-intro-overlay.is-exiting .fx-intro-meta,
-.fx-intro-overlay.is-exiting .fx-intro-progress-wrap,
-.fx-intro-overlay.is-exiting .fx-intro-grid,
-.fx-intro-overlay.is-exiting .fx-intro-portal,
-.fx-intro-overlay.is-exiting .fx-intro-flare,
-.fx-intro-overlay.is-exiting .fx-intro-scan {
+.fx-intro-skip {
+  position: absolute;
+  z-index: 9;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: calc(max(24px, env(safe-area-inset-bottom)) + clamp(62px, 8vw, 96px));
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid rgba(145, 230, 255, 0.16);
+  border-radius: 999px;
   opacity: 0;
-  transition: opacity 360ms ease;
+  color: rgba(225, 250, 255, 0.72);
+  background: rgba(5, 13, 28, 0.46);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(12px);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
-/* The intro animates only its own overlay. Real page content is never dimmed. */
+.fx-intro-skip:hover,
+.fx-intro-skip:focus-visible {
+  opacity: 1 !important;
+  border-color: rgba(133, 230, 255, 0.42);
+  color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(85, 205, 255, 0.11), inset 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.fx-intro-corners {
+  position: absolute;
+  z-index: 5;
+  inset: 18px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fx-intro-corners i {
+  position: absolute;
+  width: 42px;
+  height: 42px;
+  border-color: rgba(126, 231, 255, 0.42);
+  border-style: solid;
+}
+
+.fx-intro-corners i:nth-child(1) { top: 0; left: 0; border-width: 1px 0 0 1px; }
+.fx-intro-corners i:nth-child(2) { top: 0; right: 0; border-width: 1px 1px 0 0; }
+.fx-intro-corners i:nth-child(3) { right: 0; bottom: 0; border-width: 0 1px 1px 0; }
+.fx-intro-corners i:nth-child(4) { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
 
 @keyframes fx-intro-failsafe {
   to { opacity: 0; visibility: hidden; pointer-events: none; }
 }
 
-@keyframes fx-intro-kicker-in {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fx-intro-word-in {
-  to { transform: translateY(0) skewY(0); }
-}
-
-@keyframes fx-intro-subtitle-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fx-intro-portal-in {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.54) rotate(-18deg); }
-  54% { opacity: 0.88; }
-  100% { opacity: 0.56; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
-}
-
-@keyframes fx-intro-portal-spin {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-@keyframes fx-intro-flare-in {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.01); }
-  42% { opacity: 0.95; }
-  100% { opacity: 0.38; transform: translate(-50%, -50%) scale(1); }
-}
-
-@keyframes fx-intro-scan {
-  0% { opacity: 0; transform: translateY(-80%); }
-  20% { opacity: 0.68; }
-  100% { opacity: 0; transform: translateY(410%); }
-}
-
-
 @media (max-width: 720px) {
   .fx-intro-overlay {
     background:
-      radial-gradient(circle at 50% 45%, rgba(88, 224, 255, 0.16), transparent 30%),
-      radial-gradient(circle at 50% 54%, rgba(104, 83, 255, 0.13), transparent 50%),
-      #02040a;
+      radial-gradient(circle at 50% 45%, rgba(88, 224, 255, 0.16), transparent 31%),
+      radial-gradient(circle at 50% 54%, rgba(104, 83, 255, 0.14), transparent 52%),
+      linear-gradient(145deg, #01040b, #050619 100%);
   }
 
   .fx-intro-meta {
@@ -361,7 +409,7 @@ html.fx-intro-running .fx-intro-scan {
   }
 
   .fx-intro-portal {
-    width: 112vw;
+    width: 116vw;
   }
 
   .fx-intro-subtitle {
@@ -382,20 +430,32 @@ html.fx-intro-running .fx-intro-scan {
     max-width: none;
     text-align: left;
   }
+
+  .fx-intro-skip {
+    bottom: calc(max(24px, env(safe-area-inset-bottom)) + 92px);
+    font-size: 9px;
+  }
+
+  .fx-intro-corners {
+    inset: 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.fx-intro-running .fx-intro-kicker,
-  html.fx-intro-running .fx-intro-word span,
-  html.fx-intro-running .fx-intro-subtitle,
-  html.fx-intro-running .fx-intro-portal,
-  html.fx-intro-running .fx-intro-flare,
-  html.fx-intro-running .fx-intro-scan {
-    animation-duration: 1ms !important;
-    animation-delay: 0ms !important;
+  .fx-intro-grid,
+  .fx-intro-scan,
+  .fx-intro-portal,
+  .fx-intro-flare,
+  .fx-intro-corners {
+    display: none;
   }
 
-  .fx-intro-overlay.is-exiting .fx-intro-curtain {
-    transition-duration: 220ms;
+  .fx-intro-word span,
+  .fx-intro-kicker,
+  .fx-intro-subtitle,
+  .fx-intro-meta,
+  .fx-intro-progress-wrap {
+    transform: none;
+    filter: none;
   }
 }
