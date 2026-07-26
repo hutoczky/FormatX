@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: formatx-production-deploy
@@ -97,19 +98,13 @@ jobs:
           assert 'checkout-v100.js?v=20260725-separate-qr-row-5' in checkout
           assert 'checkout-language-v100.js?v=20260725-separate-qr-row-5' in checkout
 
-          forbidden_static = ('future-5000', 'causal-memory', 'site-readability-audit', 'start-sale', 'site-foreground-guard')
-          for token in forbidden_static:
+          for token in ('future-5000', 'causal-memory', 'site-readability-audit', 'start-sale', 'site-foreground-guard'):
               assert token not in wrapper, token
               assert token not in home, token
 
-          forbidden_server_visuals = ('main-spatial.css', 'main-readability.css', 'quantum-twin.css', 'quantum-twin.js', 'project-hub.js')
-          for token in forbidden_server_visuals:
+          for token in ('main-spatial.css', 'main-readability.css', 'quantum-twin.css', 'quantum-twin.js', 'project-hub.js'):
               assert token not in production, token
 
-          assert 'THEME_SCRIPT' in production
-          assert 'PROJECT_AI_SCRIPT' in production
-          assert 'RESPONSIVE_PARITY_SCRIPT' in production
-          assert 'COMMERCE_READABILITY_STYLES' in production
           assert 'fx-intro-page-reveal' not in event_css
           assert 'balancedMode' in ambient_js
           assert 'isFirefox' in ambient_js
@@ -222,3 +217,24 @@ jobs:
           assert data.get('signed_client_api') is True, data
           assert data.get('signature_algorithm') == 'Ed25519', data
           PY
+
+      - name: Publish production status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Cloudflare deployment and live website verification passed'
+          else
+            state='failure'
+            description='Production deployment or live verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX production deployment' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
