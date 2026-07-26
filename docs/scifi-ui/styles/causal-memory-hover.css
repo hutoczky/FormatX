@@ -1,0 +1,132 @@
+.fx-causal-hover-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.fx-causal-hover-path,
+.fx-causal-hover-trace {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.fx-causal-hover-path {
+  stroke: url(#fx-causal-hover-gradient);
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-dasharray: 0.08 0.055;
+  stroke-dashoffset: 0;
+  opacity: 0;
+  filter: url(#fx-causal-hover-glow);
+  animation:
+    fx-causal-path-appear 520ms cubic-bezier(.2, .8, .2, 1) forwards,
+    fx-causal-path-flow 1.45s linear infinite;
+  animation-delay: var(--fx-causal-delay, 0ms), var(--fx-causal-delay, 0ms);
+}
+
+.fx-causal-hover-trace {
+  stroke: rgba(111, 226, 255, 0.18);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 0.01 0.99;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation: fx-causal-trace 1.65s cubic-bezier(.16, .72, .2, 1) infinite;
+  animation-delay: var(--fx-causal-delay, 0ms);
+}
+
+.fx-causal-hover-orb {
+  mix-blend-mode: screen;
+  opacity: 0.98;
+}
+
+.fx-causal-hover-wave-ring {
+  fill: none;
+  stroke: rgba(103, 241, 255, 0.78);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+}
+
+.fx-causal-hover-source-wave .fx-causal-hover-wave-ring {
+  animation: fx-causal-wave 1.55s cubic-bezier(.12, .68, .18, 1) infinite;
+  animation-delay: calc(var(--fx-causal-ring, 0) * 145ms);
+}
+
+.fx-causal-hover-target-wave .fx-causal-hover-wave-ring {
+  stroke: rgba(255, 195, 111, 0.68);
+  animation: fx-causal-wave 1.55s cubic-bezier(.12, .68, .18, 1) infinite;
+  animation-delay: calc(var(--fx-causal-delay, 0ms) + var(--fx-causal-ring, 0) * 145ms);
+}
+
+.fx-causal-previewing .fx5k-system-map::after {
+  content: "";
+  position: absolute;
+  inset: 7%;
+  z-index: 0;
+  border: 1px solid rgba(104, 233, 255, 0.07);
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 38%, rgba(101, 219, 255, 0.025) 39%, transparent 40%);
+  pointer-events: none;
+  animation: fx-causal-field-breathe 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-causal-hover-path,
+  .fx-causal-hover-trace,
+  .fx-causal-hover-wave-ring,
+  .fx-causal-previewing .fx5k-system-map::after {
+    animation: none !important;
+  }
+
+  .fx-causal-hover-path {
+    opacity: 0.5;
+    stroke-dasharray: 0.08 0.055;
+  }
+
+  .fx-causal-hover-trace,
+  .fx-causal-hover-orb,
+  .fx-causal-hover-wave-ring {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .fx-causal-hover-layer {
+    opacity: 0.72;
+  }
+}
+
+@keyframes fx-causal-path-appear {
+  from { opacity: 0; }
+  to { opacity: 0.88; }
+}
+
+@keyframes fx-causal-path-flow {
+  to { stroke-dashoffset: -1; }
+}
+
+@keyframes fx-causal-trace {
+  0% { stroke-dashoffset: 1; opacity: 0; }
+  12% { opacity: 0.72; }
+  70% { opacity: 0.22; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes fx-causal-wave {
+  0% { transform: scale(0.55); opacity: 0; }
+  18% { opacity: 0.72; }
+  76% { opacity: 0.18; }
+  100% { transform: scale(1.72); opacity: 0; }
+}
+
+@keyframes fx-causal-field-breathe {
+  0%, 100% { transform: scale(0.985); opacity: 0.38; }
+  50% { transform: scale(1.015); opacity: 0.82; }
+}
