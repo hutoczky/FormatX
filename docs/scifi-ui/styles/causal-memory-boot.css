@@ -1,0 +1,144 @@
+.fx-causal-boot-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.fx-causal-boot-perimeter,
+.fx-causal-boot-branch {
+  fill: none;
+  stroke: url(#fx-causal-boot-line);
+  vector-effect: non-scaling-stroke;
+}
+
+.fx-causal-boot-perimeter {
+  stroke-width: 1.15;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation: fx-causal-boot-frame 820ms cubic-bezier(.2, .8, .2, 1) 80ms forwards;
+}
+
+.fx-causal-boot-core {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fx-causal-boot-core-ignite 920ms cubic-bezier(.18, .78, .2, 1) 280ms forwards;
+}
+
+.fx-causal-boot-branch {
+  stroke-width: 1.25;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  filter: url(#fx-causal-boot-glow);
+  animation: fx-causal-boot-branch 650ms cubic-bezier(.16, .78, .2, 1) var(--fx-causal-boot-delay, 420ms) forwards;
+}
+
+.fx-causal-boot-node {
+  fill: rgba(106, 242, 255, 0.08);
+  stroke: rgba(121, 240, 255, 0.9);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fx-causal-boot-node 760ms cubic-bezier(.2, .8, .2, 1) var(--fx-causal-boot-delay, 700ms) forwards;
+}
+
+.fx-causal-booting .fx-causal-memory-panel,
+.fx-causal-booting .fx5k-detail-grid,
+.fx-causal-booting .fx5k-sequence,
+.fx-causal-booting .fx5k-system-status {
+  opacity: 0;
+  transition: opacity 520ms ease;
+}
+
+.fx-causal-boot-reveal .fx-causal-memory-panel,
+.fx-causal-boot-reveal .fx5k-detail-grid,
+.fx-causal-boot-reveal .fx5k-sequence,
+.fx-causal-boot-reveal .fx5k-system-status {
+  opacity: 1;
+}
+
+.fx-causal-boot-module {
+  opacity: 0;
+  filter: brightness(0.7) saturate(0.7);
+  animation: fx-causal-boot-module-awake 760ms cubic-bezier(.2, .8, .2, 1) var(--fx-causal-boot-delay, 620ms) forwards;
+}
+
+.fx-causal-boot-layer-out {
+  animation: fx-causal-boot-layer-out 620ms ease forwards;
+}
+
+.fx-causal-boot-complete .fx-causal-memory-panel,
+.fx-causal-boot-complete .fx5k-detail-grid,
+.fx-causal-boot-complete .fx5k-sequence,
+.fx-causal-boot-complete .fx5k-system-status,
+.fx-causal-boot-complete [data-fx5k-module] {
+  opacity: 1;
+  filter: none;
+}
+
+@media (max-width: 720px) {
+  .fx-causal-boot-layer {
+    opacity: 0.72;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-causal-boot-layer {
+    display: none !important;
+  }
+
+  .fx-causal-booting .fx-causal-memory-panel,
+  .fx-causal-booting .fx5k-detail-grid,
+  .fx-causal-booting .fx5k-sequence,
+  .fx-causal-booting .fx5k-system-status,
+  .fx-causal-boot-module {
+    opacity: 1 !important;
+    filter: none !important;
+    animation: none !important;
+  }
+}
+
+@keyframes fx-causal-boot-frame {
+  0% { stroke-dashoffset: 1; opacity: 0; }
+  18% { opacity: 0.9; }
+  100% { stroke-dashoffset: 0; opacity: 0.54; }
+}
+
+@keyframes fx-causal-boot-core-ignite {
+  0% { opacity: 0; transform: scale(0.18); }
+  42% { opacity: 1; transform: scale(1.18); }
+  72% { opacity: 0.78; transform: scale(0.92); }
+  100% { opacity: 0.5; transform: scale(1); }
+}
+
+@keyframes fx-causal-boot-branch {
+  0% { stroke-dashoffset: 1; opacity: 0; }
+  15% { opacity: 0.92; }
+  100% { stroke-dashoffset: 0; opacity: 0.55; }
+}
+
+@keyframes fx-causal-boot-node {
+  0% { opacity: 0; transform: scale(0.3); }
+  45% { opacity: 1; transform: scale(1.38); }
+  100% { opacity: 0.72; transform: scale(1); }
+}
+
+@keyframes fx-causal-boot-module-awake {
+  0% { opacity: 0; filter: brightness(0.65) saturate(0.65); }
+  46% { opacity: 1; filter: brightness(1.18) saturate(1.1); }
+  100% { opacity: 1; filter: none; }
+}
+
+@keyframes fx-causal-boot-layer-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
