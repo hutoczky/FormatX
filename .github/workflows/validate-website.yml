@@ -26,7 +26,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -39,11 +39,12 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate JavaScript and static architecture
+      - name: Validate JavaScript and canonical architecture
         shell: bash
         run: |
           set -euo pipefail
           node --check billing-worker/src/production-with-license.js
+          node --check billing-worker/src/production-entry.js
           node --check billing-worker/src/pricing-v100-api.js
           node --check docs/site-loader.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
@@ -61,6 +62,22 @@ jobs:
           ! grep -E 'future-5000|causal-memory|site-readability-audit|start-sale' docs/scifi-ui/index.html
           ! grep -E 'future-5000|causal-memory|site-readability-audit|start-sale' billing-worker/src/production-with-license.js
           ! grep -E 'ensureContrastGuard|recoverIntroContent|watchIntroCompletion' docs/scifi-ui/scripts/site-art-direction.js
+          ! grep -F 'fx-intro-page-reveal' docs/scifi-ui/styles/formatx-event-horizon.css
+          ! test -e docs/scifi-ui/styles/site-foreground-guard.css
+
+          # The canonical Quantum Aurora page must not receive the old 3D/Quantum Twin composition.
+          ! grep -E 'main-spatial\.css|main-readability\.css|quantum-twin\.css|quantum-twin\.js|project-hub\.js' billing-worker/src/production-entry.js
+          grep -F 'THEME_SCRIPT' billing-worker/src/production-entry.js
+          grep -F 'PROJECT_AI_SCRIPT' billing-worker/src/production-entry.js
+          grep -F 'RESPONSIVE_PARITY_SCRIPT' billing-worker/src/production-entry.js
+          grep -F 'COMMERCE_READABILITY_STYLES' billing-worker/src/production-entry.js
+
+          # Adaptive performance mode is mandatory for Firefox and touch devices.
+          grep -F 'balancedMode' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'isFirefox' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'dataset.performance' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-ambient-background.css
+          grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-quantum-aurora.css
 
       - name: Verify one public price catalogue
         shell: python
@@ -108,12 +125,12 @@ jobs:
           npm test
           npx wrangler deploy --dry-run --outdir ../.wrangler-website-validation
 
-      - name: Install Chromium runtime
+      - name: Install Chromium and Firefox runtimes
         shell: bash
         run: |
           set -euo pipefail
           npm install --prefix "$RUNNER_TEMP/formatx-browser" --no-audit --no-fund playwright@1.55.0
-          "$RUNNER_TEMP/formatx-browser/node_modules/.bin/playwright" install --with-deps chromium
+          "$RUNNER_TEMP/formatx-browser/node_modules/.bin/playwright" install --with-deps chromium firefox
 
       - name: Start local website
         shell: bash
@@ -128,78 +145,172 @@ jobs:
           cat "$RUNNER_TEMP/formatx-http.log"
           exit 1
 
-      - name: Validate desktop, mobile and checkout behavior
+      - name: Validate Chromium, Firefox, mobile and checkout behavior
         shell: bash
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
         run: |
           set -euo pipefail
           node <<'NODE'
-          const { chromium } = require('playwright');
+          const { chromium, firefox } = require('playwright');
 
-          const cases = [
-            { name: 'desktop', width: 1440, height: 1000, reducedMotion: 'no-preference' },
-            { name: 'mobile', width: 390, height: 844, reducedMotion: 'no-preference' },
-            { name: 'reduced-motion', width: 1180, height: 900, reducedMotion: 'reduce' },
+          const layoutSelectors = [
+            '.eyebrow',
+            '#hero-title',
+            '.hero-tagline',
+            '.hero-description',
+            '.hero-actions',
+            '.hero-assurance:not(.platform-status)',
+            '.platform-status',
           ];
 
           function assert(condition, message) {
             if (!condition) throw new Error(message);
           }
 
+          async function inspectPage(page, label, expectBalanced) {
+            const errors = [];
+            page.on('pageerror', (error) => errors.push(String(error)));
+            await page.goto('http://127.0.0.1:4173/scifi-ui/index.html?lang=hu', { waitUntil: 'networkidle', timeout: 30000 });
+            await page.waitForFunction(() => {
+              const overlay = document.getElementById('formatx-event-horizon');
+              const html = document.documentElement;
+              return html.classList.contains('fx-intro-complete')
+                && !html.classList.contains('fx-intro-running')
+                && !html.classList.contains('fx-intro-reveal')
+                && (!overlay || overlay.hidden);
+            }, null, { timeout: 10000 });
+            await page.waitForSelector('#formatx-site-ambient', { timeout: 5000 });
+            await page.waitForTimeout(250);
+
+            const state = await page.evaluate((selectors) => {
+              const inspect = (selector) => {
+                const element = document.querySelector(selector);
+                if (!element) return null;
+                const style = getComputedStyle(element);
+                return {
+                  opacity: Number(style.opacity),
+                  visibility: style.visibility,
+                  display: style.display,
+                  color: style.color,
+                  filter: style.filter,
+                  inlineStyle: element.getAttribute('style') || '',
+                };
+              };
+              const visible = (item) => item
+                && item.opacity >= 0.99
+                && item.visibility === 'visible'
+                && item.display !== 'none'
+                && item.color !== 'rgba(0, 0, 0, 0)';
+
+              const readable = {
+                hero: inspect('.hero-copy'),
+                title: inspect('#hero-title'),
+                tagline: inspect('.hero-tagline'),
+                description: inspect('.hero-description'),
+                button: inspect('#hero-download'),
+                engine: inspect('.core-engine'),
+              };
+
+              const nodes = selectors
+                .map((selector) => ({ selector, element: document.querySelector(selector) }))
+                .filter((item) => item.element);
+              const overlaps = [];
+              for (let i = 0; i < nodes.length; i += 1) {
+                const a = nodes[i].element.getBoundingClientRect();
+                for (let j = i + 1; j < nodes.length; j += 1) {
+                  const b = nodes[j].element.getBoundingClientRect();
+                  const width = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+                  const height = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+                  if (width > 1 && height > 1) overlaps.push([nodes[i].selector, nodes[j].selector, width, height]);
+                }
+              }
+
+              const styles = Array.from(document.styleSheets).map((sheet) => String(sheet.href || ''));
+              const scripts = Array.from(document.querySelectorAll('script[src]')).map((script) => String(script.src || ''));
+              const count = (values, token) => values.filter((value) => value.includes(token)).length;
+              const ambient = document.getElementById('formatx-site-ambient');
+              const forbiddenInline = /(opacity|filter|clip-path|transform|animation)\s*:/i;
+              const oldLayerPattern = /future-5000|causal-memory|site-readability-audit|start-sale|main-spatial|main-readability|quantum-twin|project-hub/;
+              const heavyLayersHidden = ['.fx-site-ambient-aura--three', '.fx-site-ambient-streams', '.fx-site-ambient-beam']
+                .every((selector) => {
+                  const element = document.querySelector(selector);
+                  return element && getComputedStyle(element).display === 'none';
+                });
+              const duplicateCounts = {
+                eventCss: count(styles, 'formatx-event-horizon.css'),
+                ambientCss: count(styles, 'site-ambient-background.css'),
+                quantumCss: count(styles, 'site-quantum-aurora.css'),
+                artCss: count(styles, 'site-art-direction.css'),
+                contrastCss: count(styles, 'site-contrast-guard.css'),
+                eventJs: count(scripts, 'formatx-event-horizon.js'),
+                ambientJs: count(scripts, 'site-ambient-background.js'),
+                artJs: count(scripts, 'site-art-direction.js'),
+              };
+
+              return {
+                readable: Object.values(readable).every(visible),
+                inlineClean: [readable.hero, readable.engine].every((item) => item && !forbiddenInline.test(item.inlineStyle)),
+                overlaps,
+                ambientRoots: document.querySelectorAll('#formatx-site-ambient').length,
+                railRoots: document.querySelectorAll('.fx-system-rail').length,
+                overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+                performanceMode: ambient && ambient.dataset.performance,
+                browserMode: ambient && ambient.dataset.browser,
+                particleCount: document.querySelectorAll('.fx-site-ambient-particles i').length,
+                heavyLayersHidden,
+                oldLayers: styles.concat(scripts).some((url) => oldLayerPattern.test(url)),
+                duplicates: Object.values(duplicateCounts).every((value) => value === 1),
+                duplicateCounts,
+                mainPrice: document.getElementById('preview-main-price').textContent,
+              };
+            }, layoutSelectors);
+
+            assert(errors.length === 0, `${label}: runtime errors: ${errors.join(' | ')}`);
+            assert(state.readable, `${label}: important content is not fully visible`);
+            assert(state.inlineClean, `${label}: conflicting inline visual style remains`);
+            assert(state.overlaps.length === 0, `${label}: text overlap ${JSON.stringify(state.overlaps)}`);
+            assert(state.ambientRoots === 1, `${label}: duplicate ambient roots`);
+            assert(state.railRoots === 1, `${label}: duplicate system rails`);
+            assert(state.overflow <= 1, `${label}: horizontal overflow ${state.overflow}px`);
+            assert(!state.oldLayers, `${label}: a legacy visual layer loaded`);
+            assert(state.duplicates, `${label}: duplicate visual assets ${JSON.stringify(state.duplicateCounts)}`);
+            assert(state.mainPrice.includes('15') && state.mainPrice.includes('900'), `${label}: wrong Business Pro HUF price`);
+
+            if (expectBalanced) {
+              assert(state.performanceMode === 'balanced', `${label}: balanced mode is not active`);
+              assert(state.particleCount <= 6, `${label}: too many particles (${state.particleCount})`);
+              assert(state.heavyLayersHidden, `${label}: heavy ambient layers are still active`);
+            }
+
+            await page.click('[data-currency="EUR"]');
+            await page.waitForTimeout(50);
+            const eurPrice = await page.locator('#preview-main-price').textContent();
+            assert(eurPrice.includes('44'), `${label}: EUR price did not update`);
+          }
+
           (async () => {
-            const browser = await chromium.launch({ headless: true });
+            const chromiumBrowser = await chromium.launch({ headless: true });
             try {
-              for (const testCase of cases) {
-                const context = await browser.newContext({
+              const chromiumCases = [
+                { label: 'chromium-desktop', width: 1440, height: 1000, reducedMotion: 'no-preference', mobile: false },
+                { label: 'chromium-mobile', width: 390, height: 844, reducedMotion: 'no-preference', mobile: true },
+                { label: 'chromium-reduced-motion', width: 1180, height: 900, reducedMotion: 'reduce', mobile: false },
+              ];
+              for (const testCase of chromiumCases) {
+                const context = await chromiumBrowser.newContext({
                   viewport: { width: testCase.width, height: testCase.height },
                   locale: 'hu-HU',
                   reducedMotion: testCase.reducedMotion,
-                  hasTouch: testCase.width <= 480,
-                  isMobile: testCase.width <= 480,
+                  hasTouch: testCase.mobile,
+                  isMobile: testCase.mobile,
                 });
                 const page = await context.newPage();
-                const errors = [];
-                page.on('pageerror', (error) => errors.push(String(error)));
-                await page.goto('http://127.0.0.1:4173/scifi-ui/index.html?lang=hu', { waitUntil: 'networkidle', timeout: 30000 });
-                await page.waitForFunction(() => {
-                  const overlay = document.getElementById('formatx-event-horizon');
-                  return document.documentElement.classList.contains('fx-intro-complete') && (!overlay || overlay.hidden);
-                }, null, { timeout: 10000 });
-
-                const state = await page.evaluate(() => {
-                  const hero = document.querySelector('.hero-copy');
-                  const engine = document.querySelector('.core-engine');
-                  const heroStyle = getComputedStyle(hero);
-                  const engineStyle = getComputedStyle(engine);
-                  return {
-                    ambientRoots: document.querySelectorAll('#formatx-site-ambient').length,
-                    railRoots: document.querySelectorAll('.fx-system-rail').length,
-                    heroVisible: heroStyle.visibility === 'visible' && Number(heroStyle.opacity) > 0.99,
-                    engineVisible: engineStyle.visibility === 'visible' && Number(engineStyle.opacity) > 0.99,
-                    overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
-                    mainPrice: document.getElementById('preview-main-price').textContent,
-                    oldLayers: Array.from(document.styleSheets).some((sheet) => /future-5000|causal-memory|site-readability-audit|start-sale/.test(String(sheet.href || ''))),
-                  };
-                });
-
-                assert(errors.length === 0, `${testCase.name}: runtime errors: ${errors.join(' | ')}`);
-                assert(state.ambientRoots === 1, `${testCase.name}: duplicate ambient roots`);
-                assert(state.railRoots === 1, `${testCase.name}: duplicate system rails`);
-                assert(state.heroVisible, `${testCase.name}: hero is hidden`);
-                assert(state.engineVisible, `${testCase.name}: engine is hidden`);
-                assert(state.overflow <= 1, `${testCase.name}: horizontal overflow ${state.overflow}px`);
-                assert(state.mainPrice.includes('15') && state.mainPrice.includes('900'), `${testCase.name}: wrong Business Pro HUF price`);
-                assert(!state.oldLayers, `${testCase.name}: a legacy visual layer loaded`);
-
-                await page.click('[data-currency="EUR"]');
-                await page.waitForTimeout(50);
-                const eurPrice = await page.locator('#preview-main-price').textContent();
-                assert(eurPrice.includes('44'), `${testCase.name}: EUR price did not update`);
+                await inspectPage(page, testCase.label, testCase.mobile || testCase.reducedMotion === 'reduce');
                 await context.close();
               }
 
-              const checkout = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+              const checkout = await chromiumBrowser.newPage({ viewport: { width: 1280, height: 900 } });
               const checkoutErrors = [];
               checkout.on('pageerror', (error) => checkoutErrors.push(String(error)));
               await checkout.goto('http://127.0.0.1:4173/scifi-ui/checkout.html?plan=business_pro&cycle=monthly&currency=HUF', { waitUntil: 'networkidle', timeout: 30000 });
@@ -212,7 +323,29 @@ jobs:
               await checkout.waitForTimeout(50);
               assert((await checkout.locator('#summary-price').textContent()).includes('830'), 'checkout annual Team EUR price is wrong');
             } finally {
-              await browser.close();
+              await chromiumBrowser.close();
+            }
+
+            const firefoxBrowser = await firefox.launch({ headless: true });
+            try {
+              for (const testCase of [
+                { label: 'firefox-desktop', width: 1440, height: 1000, mobile: false },
+                { label: 'firefox-mobile', width: 390, height: 844, mobile: true },
+              ]) {
+                const context = await firefoxBrowser.newContext({
+                  viewport: { width: testCase.width, height: testCase.height },
+                  locale: 'hu-HU',
+                  hasTouch: testCase.mobile,
+                  isMobile: testCase.mobile,
+                });
+                const page = await context.newPage();
+                await inspectPage(page, testCase.label, true);
+                const browserMode = await page.locator('#formatx-site-ambient').getAttribute('data-browser');
+                assert(browserMode === 'firefox', `${testCase.label}: Firefox mode was not detected`);
+                await context.close();
+              }
+            } finally {
+              await firefoxBrowser.close();
             }
           })().catch((error) => {
             console.error(error);
