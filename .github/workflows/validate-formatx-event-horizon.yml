@@ -1,0 +1,156 @@
+name: Validate FormatX Event Horizon loader
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
+      - 'docs/scifi-ui/styles/formatx-event-horizon.css'
+      - '.github/workflows/validate-formatx-event-horizon.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-formatx-event-horizon
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Validate source syntax and first-frame integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -F 'class="fx-intro-pending"' docs/scifi-ui/index.html
+          grep -F 'id="formatx-event-horizon"' docs/scifi-ui/index.html
+          grep -F 'formatx-event-horizon.css?v=20260726-event-horizon-1' docs/scifi-ui/index.html
+          grep -F 'formatx-event-horizon.js?v=20260726-event-horizon-1' docs/scifi-ui/index.html
+          grep -F 'data-fx-intro-progress' docs/scifi-ui/index.html
+          grep -F 'fx-intro-failsafe' docs/scifi-ui/styles/formatx-event-horizon.css
+          grep -F '.fx-intro-overlay.is-exiting' docs/scifi-ui/styles/formatx-event-horizon.css
+          grep -F '@media (max-width: 720px)' docs/scifi-ui/styles/formatx-event-horizon.css
+          grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/formatx-event-horizon.css
+          grep -F "window.addEventListener('pageshow'" docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -F "window.addEventListener('load'" docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -F 'MAX_DURATION' docs/scifi-ui/scripts/formatx-event-horizon.js
+
+      - name: Install isolated DOM runtime
+        shell: bash
+        run: npm install --prefix "$RUNNER_TEMP/formatx-jsdom" --no-audit --no-fund jsdom@26.1.0
+
+      - name: Start static website server
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/formatx-http.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/formatx-http.pid"
+          for attempt in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:4173/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-http.log"
+          exit 1
+
+      - name: Exercise desktop and mobile loading lifecycle
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-jsdom/node_modules
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const { JSDOM, VirtualConsole } = require('jsdom');
+
+          async function wait(ms) {
+            await new Promise((resolve) => setTimeout(resolve, ms));
+          }
+
+          async function verify(mode) {
+            const mobile = mode === 'mobile';
+            const errors = [];
+            const virtualConsole = new VirtualConsole();
+            virtualConsole.on('jsdomError', (error) => errors.push(String(error)));
+            virtualConsole.on('error', (error) => errors.push(String(error)));
+
+            const dom = await JSDOM.fromURL('http://127.0.0.1:4173/scifi-ui/index.html', {
+              runScripts: 'dangerously',
+              resources: 'usable',
+              pretendToBeVisual: true,
+              virtualConsole,
+              beforeParse(window) {
+                window.matchMedia = (query) => ({
+                  matches: query.includes('pointer: coarse') ? mobile : false,
+                  media: query,
+                  onchange: null,
+                  addListener() {},
+                  removeListener() {},
+                  addEventListener() {},
+                  removeEventListener() {},
+                  dispatchEvent() { return false; },
+                });
+              },
+            });
+
+            await new Promise((resolve) => {
+              if (dom.window.document.readyState === 'complete') resolve();
+              else dom.window.addEventListener('load', resolve, { once: true });
+            });
+
+            const root = dom.window.document.documentElement;
+            const overlay = dom.window.document.getElementById('formatx-event-horizon');
+            const progress = overlay?.querySelector('[data-fx-intro-progress]');
+            if (!overlay || !progress) throw new Error(`${mode}: loader markup missing`);
+
+            await wait(180);
+            if (!root.classList.contains('fx-intro-running')) {
+              throw new Error(`${mode}: loading lifecycle did not start`);
+            }
+            if (overlay.hidden) throw new Error(`${mode}: overlay hid before the loading sequence`);
+            if (Number(progress.value) <= 0) throw new Error(`${mode}: progress did not advance`);
+
+            await wait(mobile ? 3000 : 3300);
+            if (!overlay.hidden) throw new Error(`${mode}: overlay did not release the page`);
+            if (!root.classList.contains('fx-intro-complete')) {
+              throw new Error(`${mode}: completion state missing`);
+            }
+            if (root.classList.contains('fx-intro-running')) {
+              throw new Error(`${mode}: scroll lock remained active`);
+            }
+            if (errors.length) throw new Error(`${mode}: runtime errors: ${errors.join(' | ')}`);
+
+            dom.window.close();
+          }
+
+          (async () => {
+            await verify('desktop');
+            await verify('mobile');
+            console.log('Desktop and mobile Event Horizon lifecycle: PASS');
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Summary
+        run: |
+          {
+            echo '## FormatX Event Horizon validation'
+            echo
+            echo '- First HTML frame overlay: PASS'
+            echo '- JavaScript syntax: PASS'
+            echo '- Desktop loading lifecycle: PASS'
+            echo '- Mobile loading lifecycle: PASS'
+            echo '- Progress animation: PASS'
+            echo '- Automatic page release: PASS'
+            echo '- Scroll-lock cleanup: PASS'
+            echo '- Reduced-motion fallback: PRESENT'
+          } >> "$GITHUB_STEP_SUMMARY"
