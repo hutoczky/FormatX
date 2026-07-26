@@ -64,9 +64,18 @@ jobs:
               "docs/scifi-ui/scripts/checkout-v100.js",
               "docs/scifi-ui/scripts/checkout-language-v100.js",
               "docs/scifi-ui/scripts/future-5000.js",
+              "docs/scifi-ui/scripts/future-5000-effects.js",
+              "docs/scifi-ui/scripts/causal-memory-field.js",
+              "docs/scifi-ui/scripts/causal-memory-hover.js",
+              "docs/scifi-ui/scripts/causal-memory-boot.js",
               "docs/scifi-ui/styles/start-sale.css",
               "docs/scifi-ui/styles/pricing-v100.css",
               "docs/scifi-ui/styles/future-5000.css",
+              "docs/scifi-ui/styles/future-5000-effects.css",
+              "docs/scifi-ui/styles/future-5000-readability.css",
+              "docs/scifi-ui/styles/causal-memory-field.css",
+              "docs/scifi-ui/styles/causal-memory-hover.css",
+              "docs/scifi-ui/styles/causal-memory-boot.css",
           ]
           for file_name in required_files:
               assert Path(file_name).is_file(), file_name
@@ -74,12 +83,24 @@ jobs:
           start_sale = Path("docs/scifi-ui/scripts/start-sale.js").read_text(encoding="utf-8")
           future_script = Path("docs/scifi-ui/scripts/future-5000.js").read_text(encoding="utf-8")
           future_styles = Path("docs/scifi-ui/styles/future-5000.css").read_text(encoding="utf-8")
+          boot_script = Path("docs/scifi-ui/scripts/causal-memory-boot.js").read_text(encoding="utf-8")
+          boot_styles = Path("docs/scifi-ui/styles/causal-memory-boot.css").read_text(encoding="utf-8")
+          worker = Path("billing-worker/src/production-with-license.js").read_text(encoding="utf-8")
           assert "formatx-plan-qr-dock" in start_sale
           assert "cards.insertAdjacentElement('afterend', dock)" in start_sale
           assert "formatx-future-5000" in future_script
           assert ".fx-plan-qr-grid" in future_styles
           assert "prefers-reduced-motion: reduce" in future_styles
-          print("Production website, license center, separate QR row and Year 5000 design are valid.")
+          assert "window.addEventListener('pageshow'" in boot_script
+          assert "performance.getEntriesByType('navigation')" in boot_script
+          assert "event.persisted" in boot_script
+          assert "function resetBoot(root)" in boot_script
+          assert "fx-causal-boot-minimal" in boot_script
+          assert ".fx5k-stage" in boot_styles
+          assert ".fx5k-principles" in boot_styles
+          assert "@keyframes fx-causal-root-minimal" in boot_styles
+          assert "CAUSAL_BOOT_VERSION = '20260726-causal-boot-2'" in worker
+          print("Production website, refresh-safe boot animation, QR row and license center are valid.")
 
       - name: Require Cloudflare API token
         id: require_token
@@ -158,7 +179,7 @@ jobs:
           echo "Both production deployment attempts failed." >&2
           exit 1
 
-      - name: Verify public website, separate QR row, Year 5000 design and license API
+      - name: Verify public website, refresh animation, QR row and license API
         id: verify_production
         shell: bash
         run: |
@@ -166,31 +187,55 @@ jobs:
 
           verify_site() {
             local url="$1"
+            local origin="${url%/}"
             for attempt in $(seq 1 36); do
-              local headers body status
+              local headers body boot_js boot_css status
               headers="$(mktemp)"
               body="$(mktemp)"
+              boot_js="$(mktemp)"
+              boot_css="$(mktemp)"
               status="$(curl -sS --connect-timeout 10 --max-time 30 \
                 -D "$headers" -o "$body" -w '%{http_code}' \
                 -H 'Cache-Control: no-cache' "$url" || true)"
+
+              curl -fsSL --connect-timeout 10 --max-time 30 \
+                -H 'Cache-Control: no-cache' \
+                "$origin/scifi-ui/scripts/causal-memory-boot.js?v=20260726-causal-boot-2" \
+                -o "$boot_js" || true
+              curl -fsSL --connect-timeout 10 --max-time 30 \
+                -H 'Cache-Control: no-cache' \
+                "$origin/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-2" \
+                -o "$boot_css" || true
 
               if [ "$status" = "200" ] \
                  && grep -Fq 'FormatX Suite Pro' "$body" \
                  && grep -Fq '/scifi-ui/styles/start-sale.css' "$body" \
                  && grep -Fq '/scifi-ui/styles/pricing-v100.css' "$body" \
                  && grep -Fq '/scifi-ui/styles/future-5000.css' "$body" \
+                 && grep -Fq '/scifi-ui/styles/causal-memory-field.css' "$body" \
+                 && grep -Fq '/scifi-ui/styles/causal-memory-hover.css' "$body" \
+                 && grep -Fq '/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-2' "$body" \
                  && grep -Fq '/scifi-ui/scripts/start-sale.js' "$body" \
                  && grep -Fq '/scifi-ui/scripts/future-5000.js' "$body" \
+                 && grep -Fq '/scifi-ui/scripts/causal-memory-field.js' "$body" \
+                 && grep -Fq '/scifi-ui/scripts/causal-memory-hover.js' "$body" \
+                 && grep -Fq '/scifi-ui/scripts/causal-memory-boot.js?v=20260726-causal-boot-2' "$body" \
+                 && grep -Fq "window.addEventListener('pageshow'" "$boot_js" \
+                 && grep -Fq "performance.getEntriesByType('navigation')" "$boot_js" \
+                 && grep -Fq 'event.persisted' "$boot_js" \
+                 && grep -Fq 'function resetBoot(root)' "$boot_js" \
+                 && grep -Fq '@keyframes fx-causal-root-energize' "$boot_css" \
+                 && grep -Fq '@keyframes fx-causal-root-minimal' "$boot_css" \
                  && grep -iq '^strict-transport-security:' "$headers" \
                  && grep -iq '^content-security-policy:' "$headers" \
                  && grep -iq '^x-content-type-options: nosniff' "$headers" \
                  && ! grep -iq '^location:' "$headers"; then
-                echo "Verified $url with separate QR and Year 5000 assets"
-                rm -f "$headers" "$body"
+                echo "Verified $url with refresh-safe boot animation, separate QR and Year 5000 assets"
+                rm -f "$headers" "$body" "$boot_js" "$boot_css"
                 return 0
               fi
 
-              rm -f "$headers" "$body"
+              rm -f "$headers" "$body" "$boot_js" "$boot_css"
               sleep 10
             done
             echo "Production verification failed for $url" >&2
@@ -228,6 +273,9 @@ jobs:
           - Főoldal: https://formatxsuite.com/
           - Három külön csomag-QR: ellenőrizve
           - 5000-es vizuális rendszer: ellenőrizve mindkét domainen
+          - Frissítéskor újrainduló boot-animáció v2: ellenőrizve
+          - BFCache/pageshow újraindítás: ellenőrizve
+          - Csökkentett mozgás fényimpulzusa: ellenőrizve
           - Licenc-API: ellenőrizve
           - Futás: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
