@@ -109,7 +109,7 @@ jobs:
           grep -F 'causal-memory-hover.css' billing-worker/src/production-with-license.js
           grep -F 'causal-memory-hover.js' billing-worker/src/production-with-license.js
 
-      - name: Validate refresh-safe animated boot sequence
+      - name: Validate refresh-safe and mobile-visible boot sequence
         shell: bash
         run: |
           set -euo pipefail
@@ -121,13 +121,20 @@ jobs:
           grep -F "window.addEventListener('pageshow'" docs/scifi-ui/scripts/causal-memory-boot.js
           grep -F 'event.persisted' docs/scifi-ui/scripts/causal-memory-boot.js
           grep -F 'function resetBoot(root)' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'const mobileViewport' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'function rootIsVisible(root)' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'new IntersectionObserver' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'visible-entry' docs/scifi-ui/scripts/causal-memory-boot.js
+          grep -F 'fx-causal-boot-mobile' docs/scifi-ui/scripts/causal-memory-boot.js
           grep -F 'fx-causal-boot-minimal' docs/scifi-ui/scripts/causal-memory-boot.js
           grep -F '.fx5k-stage' docs/scifi-ui/styles/causal-memory-boot.css
           grep -F '.fx5k-principles' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F '(pointer: coarse)' docs/scifi-ui/styles/causal-memory-boot.css
           grep -F '@keyframes fx-causal-root-energize' docs/scifi-ui/styles/causal-memory-boot.css
+          grep -F '@keyframes fx-causal-root-energize-mobile' docs/scifi-ui/styles/causal-memory-boot.css
           grep -F '@keyframes fx-causal-root-minimal' docs/scifi-ui/styles/causal-memory-boot.css
           grep -F 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/causal-memory-boot.css
-          grep -F "CAUSAL_BOOT_VERSION = '20260726-causal-boot-2'" billing-worker/src/production-with-license.js
+          grep -F "CAUSAL_BOOT_VERSION = '20260726-causal-boot-3'" billing-worker/src/production-with-license.js
           grep -F 'causal-memory-boot.css' billing-worker/src/production-with-license.js
           grep -F 'causal-memory-boot.js' billing-worker/src/production-with-license.js
 
@@ -158,6 +165,8 @@ jobs:
             echo '- Animated SVG energy paths: PASS'
             echo '- Refresh navigation boot replay: PASS'
             echo '- BFCache/pageshow boot replay: PASS'
+            echo '- Mobile viewport-entry boot trigger: PASS'
+            echo '- Coarse-pointer mobile visual boost: PASS'
             echo '- Visible real-element reveal sequence: PASS'
             echo '- Reduced-motion confirmation pulse: PASS'
             echo '- Keyboard focus animation: PASS'
@@ -185,6 +194,8 @@ jobs:
             "animatedSvgEnergyPaths": true,
             "refreshNavigationBootReplay": true,
             "bfcachePageshowBootReplay": true,
+            "mobileViewportEntryBootTrigger": true,
+            "coarsePointerMobileVisualBoost": true,
             "visibleRealElementRevealSequence": true,
             "reducedMotionConfirmationPulse": true,
             "keyboardFocusAnimation": true,
@@ -196,6 +207,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/scifi-ui/validation/year5000-status.json
           if ! git diff --cached --quiet; then
-            git commit -m "Record successful refresh-safe Year 5000 validation"
+            git commit -m "Record successful mobile-visible Year 5000 validation"
             git push origin HEAD:master
           fi
