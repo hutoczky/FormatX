@@ -1,12 +1,12 @@
 {
   "status": "PASS",
-  "generatedAt": "2026-07-26T13:44:24.878Z",
+  "generatedAt": "2026-07-26T13:52:42.544Z",
   "cases": [
     {
       "overlaps": [],
       "clipped": [],
       "viewportOverflow": 0,
-      "textNodeCount": 180,
+      "textNodeCount": 187,
       "interactionDnaPresent": false,
       "readabilityLoaded": true,
       "futureSectionPresent": true,
@@ -21,7 +21,7 @@
       "overlaps": [],
       "clipped": [],
       "viewportOverflow": 0,
-      "textNodeCount": 180,
+      "textNodeCount": 187,
       "interactionDnaPresent": false,
       "readabilityLoaded": true,
       "futureSectionPresent": true,
