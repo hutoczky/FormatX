@@ -1,7 +1,7 @@
 {
   "status": "PASS",
-  "sourceCommit": "35f9fa4893416fba39c098bb48854904703a08ea",
-  "validatedAt": "2026-07-26T00:09:04Z",
+  "sourceCommit": "fb50fabacf71dcfdbdad8f8efbffd56650871863",
+  "validatedAt": "2026-07-26T00:10:09Z",
   "javascriptSyntax": true,
   "separatePlanQrRow": true,
   "refinedSystemArchitecture": true,
@@ -10,6 +10,8 @@
   "interactionDnaGeneration": true,
   "hoverBranchProjection": true,
   "animatedSvgEnergyPaths": true,
+  "animatedBootSequence": true,
+  "staggeredModuleActivation": true,
   "keyboardFocusAnimation": true,
   "flatReadableTextPlane": true,
   "firefoxLinuxGlyphProtection": true,
