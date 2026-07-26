@@ -8,6 +8,11 @@
   pointer-events: none;
 }
 
+.fx-causal-memory-ready > .fx-causal-hover-layer {
+  position: absolute;
+  z-index: 1;
+}
+
 .fx-causal-hover-path,
 .fx-causal-hover-trace {
   fill: none;
