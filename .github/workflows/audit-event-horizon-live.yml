@@ -1,0 +1,108 @@
+name: Audit Event Horizon on production
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
+      - 'docs/scifi-ui/styles/formatx-event-horizon.css'
+      - '.github/workflows/audit-event-horizon-live.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: audit-event-horizon-live
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Wait for production assets and inspect them
+        id: live
+        shell: bash
+        run: |
+          set -uo pipefail
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
+          live=false
+          main_http=000
+          css_http=000
+          js_http=000
+
+          for attempt in $(seq 1 24); do
+            main_http="$(curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' \
+              -o "$work/main.html" -w '%{http_code}' 'https://formatxsuite.com/' || true)"
+            css_http="$(curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' \
+              -o "$work/intro.css" -w '%{http_code}' \
+              'https://formatxsuite.com/scifi-ui/styles/formatx-event-horizon.css?v=20260726-event-horizon-1' || true)"
+            js_http="$(curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' \
+              -o "$work/intro.js" -w '%{http_code}' \
+              'https://formatxsuite.com/scifi-ui/scripts/formatx-event-horizon.js?v=20260726-event-horizon-1' || true)"
+
+            if [ "$main_http" = 200 ] \
+              && [ "$css_http" = 200 ] \
+              && [ "$js_http" = 200 ] \
+              && grep -Fq 'formatx-event-horizon.css?v=20260726-event-horizon-1' "$work/main.html" \
+              && grep -Fq 'formatx-event-horizon.js?v=20260726-event-horizon-1' "$work/main.html" \
+              && grep -Fq 'id="formatx-event-horizon"' "$work/main.html" \
+              && grep -Fq 'fx-intro-failsafe' "$work/intro.css" \
+              && grep -Fq 'fx-intro-overlay.is-exiting' "$work/intro.css" \
+              && grep -Fq "window.addEventListener('pageshow'" "$work/intro.js" \
+              && grep -Fq 'MAX_DURATION' "$work/intro.js"; then
+              live=true
+              break
+            fi
+
+            sleep 10
+          done
+
+          {
+            echo "live=$live"
+            echo "main_http=$main_http"
+            echo "css_http=$css_http"
+            echo "js_http=$js_http"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Persist production audit
+        if: always()
+        shell: bash
+        env:
+          LIVE: ${{ steps.live.outputs.live }}
+          MAIN_HTTP: ${{ steps.live.outputs.main_http }}
+          CSS_HTTP: ${{ steps.live.outputs.css_http }}
+          JS_HTTP: ${{ steps.live.outputs.js_http }}
+        run: |
+          set -euo pipefail
+          git pull --rebase origin master
+          mkdir -p .github/audit
+          cat > .github/audit/event-horizon-live-status.json <<EOF
+          {
+            "sourceCommit": "${GITHUB_SHA}",
+            "auditedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "live": ${LIVE:-false},
+            "mainHttp": "${MAIN_HTTP:-000}",
+            "cssHttp": "${CSS_HTTP:-000}",
+            "javascriptHttp": "${JS_HTTP:-000}"
+          }
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/audit/event-horizon-live-status.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record Event Horizon production audit'
+            git push origin HEAD:master
+          fi
+
+      - name: Fail when the new loader is not live
+        if: steps.live.outputs.live != 'true'
+        run: exit 1
