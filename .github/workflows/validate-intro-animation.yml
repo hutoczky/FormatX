@@ -49,12 +49,14 @@ jobs:
           exit 1
 
       - name: Test normal, skipped, reduced-motion and mobile flows
+        id: browser_test
+        continue-on-error: true
         shell: bash
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-intro-browser/node_modules
         run: |
-          set -euo pipefail
-          node <<'NODE'
+          set +e
+          node <<'NODE' 2>&1 | tee intro-browser-validation.log
           const { chromium, firefox } = require('playwright');
 
           function assert(condition, message) {
@@ -90,6 +92,7 @@ jobs:
                 engineOpacity: Number(getComputedStyle(document.querySelector('.core-engine')).opacity),
                 overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
               }));
+              console.log(JSON.stringify({ case: name, elapsed, errors, state }));
               assert(errors.length === 0, `${name}: runtime errors ${errors.join(' | ')}`);
               assert(elapsed < 6200, `${name}: intro exceeded failsafe (${elapsed}ms)`);
               assert(state.overlayHidden && state.rootComplete, `${name}: intro did not finish cleanly`);
@@ -111,7 +114,9 @@ jobs:
               const started = Date.now();
               await skip.click({ force: true });
               await waitForComplete(page, 1800);
-              assert(Date.now() - started < 1700, 'skip: animation did not close quickly');
+              const elapsed = Date.now() - started;
+              console.log(JSON.stringify({ case: 'skip', elapsed }));
+              assert(elapsed < 1700, 'skip: animation did not close quickly');
             } finally {
               await browser.close();
             }
@@ -128,7 +133,9 @@ jobs:
               const started = Date.now();
               await page.goto('http://127.0.0.1:4178/scifi-ui/index.html', { waitUntil: 'domcontentloaded' });
               await waitForComplete(page, 1600);
-              assert(Date.now() - started < 1500, 'reduced-motion: intro lasted too long');
+              const elapsed = Date.now() - started;
+              console.log(JSON.stringify({ case: 'reduced-motion', elapsed }));
+              assert(elapsed < 1500, 'reduced-motion: intro lasted too long');
               await context.close();
             } finally {
               await browser.close();
@@ -147,6 +154,7 @@ jobs:
               await page.goto('http://127.0.0.1:4178/scifi-ui/index.html', { waitUntil: 'domcontentloaded' });
               await waitForComplete(page, 6500);
               const overflow = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth);
+              console.log(JSON.stringify({ case: 'mobile', overflow }));
               assert(overflow <= 1, `mobile: horizontal overflow ${overflow}px`);
               await context.close();
             } finally {
@@ -161,10 +169,29 @@ jobs:
             await runReducedMotion();
             await runMobile();
           })().catch(error => {
-            console.error(error);
+            console.error(error && error.stack ? error.stack : error);
             process.exit(1);
           });
           NODE
+          browser_status=${PIPESTATUS[0]}
+          echo "exit_code=$browser_status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-intro-browser-diagnostics
+          path: intro-browser-validation.log
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Enforce browser validation
+        if: steps.browser_test.outputs.exit_code != '0'
+        shell: bash
+        run: |
+          echo "Intro browser validation failed with exit code ${{ steps.browser_test.outputs.exit_code }}" >&2
+          exit 1
 
       - name: Publish browser validation status
         if: always()
