@@ -45,6 +45,7 @@
     const scrollable = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
     const progress = clamp(window.scrollY / scrollable, 0, 1);
     ROOT.style.setProperty('--fx-page-progress', progress.toFixed(5));
+    ROOT.style.setProperty('--fx-page-progress-width', (progress * 100).toFixed(3) + '%');
     ROOT.classList.toggle('fx-page-scrolled', window.scrollY > 24);
   }
 
@@ -68,6 +69,8 @@
         ROOT.style.setProperty('--fx-pointer-y', (pointerY * 100).toFixed(2) + '%');
         ROOT.style.setProperty('--fx-pointer-x-num', pointerX.toFixed(4));
         ROOT.style.setProperty('--fx-pointer-y-num', pointerY.toFixed(4));
+        ROOT.style.setProperty('--fx-engine-tilt-y', ((pointerX - 0.5) * -5).toFixed(3) + 'deg');
+        ROOT.style.setProperty('--fx-engine-tilt-x', ((pointerY - 0.5) * 4).toFixed(3) + 'deg');
       });
     }, { passive: true });
   }
@@ -152,6 +155,9 @@
       const distance = Math.max(story.offsetHeight - window.innerHeight, 1);
       const progress = clamp(-rect.top / distance, 0, 1);
       ROOT.style.setProperty('--fx-story-progress', progress.toFixed(4));
+      ROOT.style.setProperty('--fx-story-angle', (-13 + progress * 72).toFixed(3) + 'deg');
+      ROOT.style.setProperty('--fx-story-orbit-angle', (progress * 26).toFixed(3) + 'deg');
+      ROOT.style.setProperty('--fx-story-scale', (.9 + progress * .08).toFixed(4));
     }
 
     window.addEventListener('scroll', updateStoryProgress, { passive: true });
