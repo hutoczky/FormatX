@@ -5,10 +5,14 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/**'
+      - 'lighthouserc.json'
+      - '.github/workflows/ci.yml'
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/**'
+      - 'lighthouserc.json'
+      - '.github/workflows/ci.yml'
   workflow_dispatch:
 
 permissions:
@@ -36,7 +40,10 @@ jobs:
 
       - name: Run Lighthouse CI
         id: lighthouse
-        run: lhci autorun --rc=lighthouserc.json
+        shell: bash
+        run: |
+          set -o pipefail
+          lhci autorun --rc=lighthouserc.json 2>&1 | tee lighthouse-output.txt
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
@@ -45,7 +52,11 @@ jobs:
         if: always()
         with:
           name: lighthouse-results
-          path: .lighthouseci/
+          path: |
+            .lighthouseci/
+            lighthouse-output.txt
+          include-hidden-files: true
+          if-no-files-found: warn
           retention-days: 30
 
       - name: Summarize Lighthouse results
@@ -57,6 +68,10 @@ jobs:
             echo "Production: https://www.formatxsuite.com/"
             echo
             echo "### Thresholds"
+            echo "- Performance ≥ 0.90"
+            echo "- Accessibility ≥ 0.95"
+            echo "- Best practices ≥ 0.95"
+            echo "- SEO ≥ 0.90"
             echo "- LCP < 2.5s"
             echo "- CLS < 0.10"
             echo "- TTFB < 600ms"
