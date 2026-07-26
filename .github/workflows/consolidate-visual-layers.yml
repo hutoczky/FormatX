@@ -1,6 +1,5 @@
-name: Consolidate FormatX visual layers
+name: Finalize FormatX visual consolidation
 
-# Triggered after the Firefox Nightly screenshot exposed stacked reveal and foreground rules.
 on:
   push:
     branches: [master]
@@ -11,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  consolidate:
+  finalize:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -19,89 +18,51 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Remove conflicting reveal and duplicate foreground layer
+      - name: Bump adaptive visual cache versions
         shell: python
         run: |
           from pathlib import Path
-          import re
-
-          event = Path('docs/scifi-ui/styles/formatx-event-horizon.css')
-          text = event.read_text(encoding='utf-8')
-          text, count = re.subn(
-              r"\nhtml\.fx-intro-reveal \.hero-copy,\nhtml\.fx-intro-reveal \.core-engine \{.*?\n\}\n\nhtml\.fx-intro-reveal \.core-engine \{.*?\n\}\n",
-              "\n/* The intro animates only its own overlay. Real page content is never dimmed. */\n",
-              text,
-              flags=re.S,
-          )
-          if count != 1:
-              raise SystemExit(f'Expected one page-reveal selector block, found {count}')
-          text, count = re.subn(
-              r"\n@keyframes fx-intro-page-reveal \{.*?\n\}\n",
-              "\n",
-              text,
-              flags=re.S,
-          )
-          if count != 1:
-              raise SystemExit(f'Expected one page-reveal keyframe, found {count}')
-          text = text.replace(
-              "  html.fx-intro-running .fx-intro-scan,\n  html.fx-intro-reveal .hero-copy,\n  html.fx-intro-reveal .core-engine {",
-              "  html.fx-intro-running .fx-intro-scan {",
-          )
-          if 'fx-intro-page-reveal' in text:
-              raise SystemExit('Page reveal animation still present')
-          event.write_text(text, encoding='utf-8')
 
           index = Path('docs/scifi-ui/index.html')
           text = index.read_text(encoding='utf-8')
-          text = text.replace('formatx-event-horizon.css?v=20260726-event-horizon-1', 'formatx-event-horizon.css?v=20260726-event-horizon-2')
-          text = text.replace('formatx-event-horizon.js?v=20260726-event-horizon-1', 'formatx-event-horizon.js?v=20260726-event-horizon-2')
-          text = text.replace('site-art-direction.css?v=20260726-art-direction-2', 'site-art-direction.css?v=20260726-art-direction-3')
-          text = text.replace('site-art-direction.js?v=20260726-art-direction-2', 'site-art-direction.js?v=20260726-art-direction-3')
-          text = text.replace('site-contrast-guard.css?v=20260726-contrast-guard-1', 'site-contrast-guard.css?v=20260726-contrast-guard-2')
-          text = re.sub(r'^.*site-foreground-guard\.css.*\n?', '', text, flags=re.M)
+          text = text.replace('site-ambient-background.css?v=20260726-quantum-aurora-1', 'site-ambient-background.css?v=20260726-quantum-aurora-2')
+          text = text.replace('site-quantum-aurora.css?v=20260726-quantum-aurora-1', 'site-quantum-aurora.css?v=20260726-quantum-aurora-2')
+          text = text.replace('site-ambient-background.js?v=20260726-quantum-aurora-1', 'site-ambient-background.js?v=20260726-quantum-aurora-2')
           index.write_text(text, encoding='utf-8')
 
           worker = Path('billing-worker/src/production-with-license.js')
           text = worker.read_text(encoding='utf-8')
-          text = text.replace("SITE_ART_VERSION = '20260726-art-direction-2'", "SITE_ART_VERSION = '20260726-art-direction-3'")
-          text = text.replace("SITE_CONTRAST_VERSION = '20260726-contrast-guard-1'", "SITE_CONTRAST_VERSION = '20260726-contrast-guard-2'")
-          text = re.sub(r"\nconst SITE_FOREGROUND_VERSION = .*?;", '', text)
-          text = re.sub(r"\nclass ForegroundHeadHandler \{.*?\n\}\n", '\n', text, flags=re.S)
-          text = re.sub(r"\n\s*rewriter\.on\('head', new ForegroundHeadHandler\(staticVisuals\)\);", '', text)
-          if 'site-foreground-guard' in text or 'ForegroundHeadHandler' in text:
-              raise SystemExit('Foreground injection still present in Worker')
+          text = text.replace("SITE_AMBIENT_VERSION = '20260726-quantum-aurora-1'", "SITE_AMBIENT_VERSION = '20260726-quantum-aurora-2'")
           worker.write_text(text, encoding='utf-8')
 
-          foreground = Path('docs/scifi-ui/styles/site-foreground-guard.css')
-          if foreground.exists():
-              foreground.unlink()
-
-      - name: Validate consolidated system
+      - name: Validate final consolidated and adaptive system
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/site-ambient-background.js
           node --check docs/scifi-ui/scripts/site-art-direction.js
           node --check billing-worker/src/production-with-license.js
+          grep -F 'data-performance' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'balancedMode' docs/scifi-ui/scripts/site-ambient-background.js
+          grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-ambient-background.css
+          grep -F 'data-performance="balanced"' docs/scifi-ui/styles/site-quantum-aurora.css
+          grep -F 'site-ambient-background.css?v=20260726-quantum-aurora-2' docs/scifi-ui/index.html
+          grep -F 'site-quantum-aurora.css?v=20260726-quantum-aurora-2' docs/scifi-ui/index.html
+          grep -F 'site-ambient-background.js?v=20260726-quantum-aurora-2' docs/scifi-ui/index.html
+          grep -F "SITE_AMBIENT_VERSION = '20260726-quantum-aurora-2'" billing-worker/src/production-with-license.js
           ! grep -Fq 'fx-intro-page-reveal' docs/scifi-ui/styles/formatx-event-horizon.css
           ! grep -Fq 'site-foreground-guard' docs/scifi-ui/index.html
-          ! grep -Fq 'site-foreground-guard' billing-worker/src/production-with-license.js
+          ! grep -Fq 'site-foreground-guard' docs/scifi-ui/scripts/site-art-direction.js
           test ! -e docs/scifi-ui/styles/site-foreground-guard.css
-          grep -F 'formatx-event-horizon.css?v=20260726-event-horizon-2' docs/scifi-ui/index.html
-          grep -F 'site-art-direction.js?v=20260726-art-direction-3' docs/scifi-ui/index.html
-          grep -F 'site-contrast-guard.css?v=20260726-contrast-guard-2' docs/scifi-ui/index.html
-          grep -F "SITE_ART_VERSION = '20260726-art-direction-3'" billing-worker/src/production-with-license.js
-          grep -F "SITE_CONTRAST_VERSION = '20260726-contrast-guard-2'" billing-worker/src/production-with-license.js
-          grep -F 'const CONTRAST_STYLESHEET' docs/scifi-ui/scripts/site-art-direction.js
-          ! grep -Fq 'setTimeout(recoverIntroContent' docs/scifi-ui/scripts/site-art-direction.js
-          ! grep -Fq "style.setProperty('opacity'" docs/scifi-ui/scripts/site-art-direction.js
 
-      - name: Commit consolidated visual system
+      - name: Commit final system and remove this installer
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A docs/scifi-ui billing-worker/src/production-with-license.js
-          git commit -m 'Consolidate intro, foreground and readability layers'
+          git rm .github/workflows/consolidate-visual-layers.yml
+          git add docs/scifi-ui/index.html billing-worker/src/production-with-license.js
+          git commit -m 'Finalize adaptive and conflict-free FormatX visual system'
           git push origin HEAD:master
