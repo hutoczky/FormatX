@@ -1,0 +1,85 @@
+name: Remove legacy visual injection
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/remove-legacy-visual-injection.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Remove legacy visual composition from the canonical homepage
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('billing-worker/src/production-entry.js')
+          text = path.read_text(encoding='utf-8')
+
+          old = """  html = html
+    .replaceAll('="./', '="/scifi-ui/')
+    .replaceAll("='./", "='/scifi-ui/")
+    .replaceAll('https://formatx1.formatx.workers.dev/download/android?v=1.0.4', '/download/android')
+    .replace(
+      '</head>',
+      [
+        '<link rel="stylesheet" href="/scifi-ui/styles/main-spatial.css?v=20260720-spatial-7">',
+        '<link rel="stylesheet" href="/scifi-ui/styles/main-readability.css?v=20260720-readability-2">',
+        '<link rel="stylesheet" href="/scifi-ui/styles/quantum-twin.css?v=20260720-quantum-1">',
+        '</head>',
+      ].join(''),
+    )
+    .replace(
+      '</body>',
+      [
+        '<script defer src="/scifi-ui/scripts/project-hub.js?v=20260720-project-hub-8"></script>',
+        '<script defer src="/scifi-ui/scripts/quantum-twin.js?v=20260720-quantum-1"></script>',
+        '</body>',
+      ].join(''),
+    );
+"""
+          new = """  html = html
+    .replaceAll('="./', '="/scifi-ui/')
+    .replaceAll("='./", "='/scifi-ui/")
+    .replaceAll('https://formatx1.formatx.workers.dev/download/android?v=1.0.4', '/download/android');
+"""
+          if old not in text:
+              raise SystemExit('Legacy visual injection block was not found exactly once')
+          text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+
+      - name: Validate the canonical visual stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check billing-worker/src/production-entry.js
+          ! grep -Fq 'main-spatial.css' billing-worker/src/production-entry.js
+          ! grep -Fq 'main-readability.css' billing-worker/src/production-entry.js
+          ! grep -Fq 'quantum-twin.css' billing-worker/src/production-entry.js
+          ! grep -Fq 'quantum-twin.js' billing-worker/src/production-entry.js
+          ! grep -Fq 'project-hub.js' billing-worker/src/production-entry.js
+          grep -Fq 'THEME_SCRIPT' billing-worker/src/production-entry.js
+          grep -Fq 'PROJECT_AI_SCRIPT' billing-worker/src/production-entry.js
+          grep -Fq 'RESPONSIVE_PARITY_SCRIPT' billing-worker/src/production-entry.js
+          grep -Fq 'COMMERCE_READABILITY_STYLES' billing-worker/src/production-entry.js
+
+      - name: Commit canonical Worker and remove installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/remove-legacy-visual-injection.yml
+          git add billing-worker/src/production-entry.js
+          git commit -m 'Remove legacy 3D and Quantum Twin homepage injection'
+          git push origin HEAD:master
