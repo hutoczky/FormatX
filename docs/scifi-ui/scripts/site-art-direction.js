@@ -38,6 +38,14 @@
     });
   }
 
+  function watchIntroCompletion() {
+    const observer = new MutationObserver(function (records) {
+      if (!records.some(function (record) { return record.attributeName === 'class'; })) return;
+      if (!document.documentElement.classList.contains('fx-intro-running')) recoverIntroContent();
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  }
+
   function language() {
     return document.documentElement.lang === 'en' ? 'en' : 'hu';
   }
@@ -162,6 +170,7 @@
   function initialise() {
     if (!document.body || document.documentElement.dataset.fxArtDirection === 'ready') return;
     ensureContrastGuard();
+    watchIntroCompletion();
     const items = prepareSections();
     if (!items.length) return;
     document.documentElement.dataset.fxArtDirection = 'ready';
@@ -173,7 +182,7 @@
     recoverIntroContent();
     window.addEventListener('pageshow', recoverIntroContent);
     window.setTimeout(recoverIntroContent, 1200);
-    window.setTimeout(recoverIntroContent, 5200);
+    window.setTimeout(recoverIntroContent, 6200);
 
     const languageObserver = new MutationObserver(function (records) {
       if (records.some(function (record) { return record.attributeName === 'lang'; })) updateLanguage(items);
