@@ -37,77 +37,87 @@ jobs:
           import json
           from pathlib import Path
 
-          config = Path("billing-worker/wrangler.jsonc")
-          data = json.loads(config.read_text(encoding="utf-8"))
-          assert data["name"] == "formatx"
-          assert data["main"] == "src/production-with-license.js"
-          assert data["assets"]["directory"] == "../docs"
-          assert data["assets"]["run_worker_first"] is True
+          config = Path('billing-worker/wrangler.jsonc')
+          data = json.loads(config.read_text(encoding='utf-8'))
+          assert data['name'] == 'formatx'
+          assert data['main'] == 'src/production-with-license.js'
+          assert data['assets']['directory'] == '../docs'
+          assert data['assets']['run_worker_first'] is True
+
           expected = {
-              ("formatxsuite.com", True),
-              ("www.formatxsuite.com", True),
+              ('formatxsuite.com', True),
+              ('www.formatxsuite.com', True),
           }
           actual = {
-              (route.get("pattern"), route.get("custom_domain"))
-              for route in data.get("routes", [])
+              (route.get('pattern'), route.get('custom_domain'))
+              for route in data.get('routes', [])
           }
           assert expected.issubset(actual)
+
           required_files = [
-              "billing-worker/src/license-center.js",
-              "billing-worker/src/signed-license-api.js",
-              "billing-worker/src/pricing-v100-api.js",
-              "billing-worker/license-migrations/0001_license_center.sql",
-              "billing-worker/license-migrations/0002_signed_client_api.sql",
-              "billing-worker/public-keys/license-api-issuer-public-key.pem",
-              "docs/fx-owner-license/index.html",
-              "docs/scifi-ui/scripts/start-sale.js",
-              "docs/scifi-ui/scripts/checkout-v100.js",
-              "docs/scifi-ui/scripts/checkout-language-v100.js",
-              "docs/scifi-ui/scripts/future-5000.js",
-              "docs/scifi-ui/scripts/future-5000-effects.js",
-              "docs/scifi-ui/scripts/causal-memory-field.js",
-              "docs/scifi-ui/scripts/causal-memory-hover.js",
-              "docs/scifi-ui/scripts/causal-memory-boot.js",
-              "docs/scifi-ui/styles/start-sale.css",
-              "docs/scifi-ui/styles/pricing-v100.css",
-              "docs/scifi-ui/styles/future-5000.css",
-              "docs/scifi-ui/styles/future-5000-effects.css",
-              "docs/scifi-ui/styles/future-5000-readability.css",
-              "docs/scifi-ui/styles/causal-memory-field.css",
-              "docs/scifi-ui/styles/causal-memory-hover.css",
-              "docs/scifi-ui/styles/causal-memory-boot.css",
+              'billing-worker/src/license-center.js',
+              'billing-worker/src/signed-license-api.js',
+              'billing-worker/src/pricing-v100-api.js',
+              'billing-worker/license-migrations/0001_license_center.sql',
+              'billing-worker/license-migrations/0002_signed_client_api.sql',
+              'billing-worker/public-keys/license-api-issuer-public-key.pem',
+              'docs/fx-owner-license/index.html',
+              'docs/scifi-ui/scripts/start-sale.js',
+              'docs/scifi-ui/scripts/checkout-v100.js',
+              'docs/scifi-ui/scripts/checkout-language-v100.js',
+              'docs/scifi-ui/scripts/future-5000.js',
+              'docs/scifi-ui/scripts/future-5000-effects.js',
+              'docs/scifi-ui/scripts/causal-memory-hover.js',
+              'docs/scifi-ui/scripts/causal-memory-boot.js',
+              'docs/scifi-ui/styles/start-sale.css',
+              'docs/scifi-ui/styles/pricing-v100.css',
+              'docs/scifi-ui/styles/future-5000.css',
+              'docs/scifi-ui/styles/future-5000-effects.css',
+              'docs/scifi-ui/styles/future-5000-readability.css',
+              'docs/scifi-ui/styles/causal-memory-hover.css',
+              'docs/scifi-ui/styles/causal-memory-boot.css',
+              'docs/scifi-ui/styles/site-readability-audit.css',
           ]
           for file_name in required_files:
               assert Path(file_name).is_file(), file_name
 
-          start_sale = Path("docs/scifi-ui/scripts/start-sale.js").read_text(encoding="utf-8")
-          future_script = Path("docs/scifi-ui/scripts/future-5000.js").read_text(encoding="utf-8")
-          future_styles = Path("docs/scifi-ui/styles/future-5000.css").read_text(encoding="utf-8")
-          boot_script = Path("docs/scifi-ui/scripts/causal-memory-boot.js").read_text(encoding="utf-8")
-          boot_styles = Path("docs/scifi-ui/styles/causal-memory-boot.css").read_text(encoding="utf-8")
-          worker = Path("billing-worker/src/production-with-license.js").read_text(encoding="utf-8")
-          assert "formatx-plan-qr-dock" in start_sale
+          assert not Path('docs/scifi-ui/scripts/causal-memory-field.js').exists()
+          assert not Path('docs/scifi-ui/styles/causal-memory-field.css').exists()
+
+          start_sale = Path('docs/scifi-ui/scripts/start-sale.js').read_text(encoding='utf-8')
+          future_script = Path('docs/scifi-ui/scripts/future-5000.js').read_text(encoding='utf-8')
+          future_styles = Path('docs/scifi-ui/styles/future-5000.css').read_text(encoding='utf-8')
+          boot_script = Path('docs/scifi-ui/scripts/causal-memory-boot.js').read_text(encoding='utf-8')
+          boot_styles = Path('docs/scifi-ui/styles/causal-memory-boot.css').read_text(encoding='utf-8')
+          readability = Path('docs/scifi-ui/styles/site-readability-audit.css').read_text(encoding='utf-8')
+          worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
+
+          assert 'formatx-plan-qr-dock' in start_sale
           assert "cards.insertAdjacentElement('afterend', dock)" in start_sale
-          assert "formatx-future-5000" in future_script
-          assert ".fx-plan-qr-grid" in future_styles
-          assert "prefers-reduced-motion: reduce" in future_styles
+          assert 'formatx-future-5000' in future_script
+          assert '.fx-plan-qr-grid' in future_styles
+          assert 'prefers-reduced-motion: reduce' in future_styles
           assert "window.addEventListener('pageshow'" in boot_script
           assert "performance.getEntriesByType('navigation')" in boot_script
-          assert "event.persisted" in boot_script
-          assert "function resetBoot(root)" in boot_script
-          assert "const mobileViewport" in boot_script
-          assert "function rootIsVisible(root)" in boot_script
-          assert "new IntersectionObserver" in boot_script
-          assert "visible-entry" in boot_script
-          assert "fx-causal-boot-mobile" in boot_script
-          assert "fx-causal-boot-minimal" in boot_script
-          assert ".fx5k-stage" in boot_styles
-          assert ".fx5k-principles" in boot_styles
-          assert "(pointer: coarse)" in boot_styles
-          assert "@keyframes fx-causal-root-energize-mobile" in boot_styles
-          assert "@keyframes fx-causal-root-minimal" in boot_styles
+          assert 'event.persisted' in boot_script
+          assert 'function resetBoot(root)' in boot_script
+          assert 'const mobileViewport' in boot_script
+          assert 'function rootIsVisible(root)' in boot_script
+          assert 'new IntersectionObserver' in boot_script
+          assert 'visible-entry' in boot_script
+          assert 'fx-causal-boot-mobile' in boot_script
+          assert 'fx-causal-boot-minimal' in boot_script
+          assert '.fx5k-stage' in boot_styles
+          assert '.fx5k-principles' in boot_styles
+          assert '(pointer: coarse)' in boot_styles
+          assert '@keyframes fx-causal-root-energize-mobile' in boot_styles
+          assert '@keyframes fx-causal-root-minimal' in boot_styles
+          assert '.reference-commerce .price-card {' in readability
+          assert 'grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important' in readability
           assert "CAUSAL_BOOT_VERSION = '20260726-causal-boot-3'" in worker
-          print("Production website, mobile viewport boot animation, QR row and license center are valid.")
+          assert "SITE_READABILITY_VERSION = '20260726-site-readability-1'" in worker
+          assert 'causal-memory-field' not in worker
+          print('Production website, readability guard, mobile animation, QR row and licence center are valid.')
 
       - name: Require Cloudflare API token
         id: require_token
@@ -121,7 +131,7 @@ jobs:
           TOKEN="${TOKEN#Bearer }"
           TOKEN="$(printf '%s' "$TOKEN" | xargs)"
           if [ "${#TOKEN}" -lt 20 ]; then
-            echo "The CLOUDFLARE_API_TOKEN repository secret is required." >&2
+            echo 'The CLOUDFLARE_API_TOKEN repository secret is required.' >&2
             exit 1
           fi
           echo "::add-mask::$TOKEN"
@@ -131,7 +141,7 @@ jobs:
         id: setup_node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
@@ -154,10 +164,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "Applying pending D1 migrations to the existing production database…"
+          echo 'Applying pending D1 migrations to the existing production database…'
           npx wrangler d1 migrations apply formatx-license-db --remote
 
-          echo "Validating the exact production Worker bundle…"
+          echo 'Validating the exact production Worker bundle…'
           rm -rf ../.wrangler-production-deploy
           npx wrangler deploy --dry-run --outdir ../.wrangler-production-deploy
 
@@ -168,16 +178,16 @@ jobs:
               exit 0
             fi
             if [ "$attempt" -eq 1 ]; then
-              echo "The first Worker deployment attempt failed; retrying once after 20 seconds." >&2
+              echo 'The first Worker deployment attempt failed; retrying once after 20 seconds.' >&2
               sleep 20
             fi
           done
 
           rm -rf ../.wrangler-production-deploy
-          echo "Both routine Worker deployment attempts failed." >&2
+          echo 'Both routine Worker deployment attempts failed.' >&2
           exit 1
 
-      - name: Verify public website, mobile animation, QR row and license API
+      - name: Verify public website, readability, mobile animation, QR row and licence API
         id: verify_production
         shell: bash
         run: |
@@ -187,11 +197,13 @@ jobs:
             local url="$1"
             local origin="${url%/}"
             for attempt in $(seq 1 36); do
-              local headers body boot_js boot_css status
+              local headers body boot_js boot_css readability_css status
               headers="$(mktemp)"
               body="$(mktemp)"
               boot_js="$(mktemp)"
               boot_css="$(mktemp)"
+              readability_css="$(mktemp)"
+
               status="$(curl -sS --connect-timeout 10 --max-time 30 \
                 -D "$headers" -o "$body" -w '%{http_code}' \
                 -H 'Cache-Control: no-cache' "$url" || true)"
@@ -204,20 +216,24 @@ jobs:
                 -H 'Cache-Control: no-cache' \
                 "$origin/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-3" \
                 -o "$boot_css" || true
+              curl -fsSL --connect-timeout 10 --max-time 30 \
+                -H 'Cache-Control: no-cache' \
+                "$origin/scifi-ui/styles/site-readability-audit.css?v=20260726-site-readability-1" \
+                -o "$readability_css" || true
 
-              if [ "$status" = "200" ] \
+              if [ "$status" = '200' ] \
                  && grep -Fq 'FormatX Suite Pro' "$body" \
                  && grep -Fq '/scifi-ui/styles/start-sale.css' "$body" \
                  && grep -Fq '/scifi-ui/styles/pricing-v100.css' "$body" \
                  && grep -Fq '/scifi-ui/styles/future-5000.css' "$body" \
-                 && grep -Fq '/scifi-ui/styles/causal-memory-field.css' "$body" \
-                 && grep -Fq '/scifi-ui/styles/causal-memory-hover.css' "$body" \
+                 && grep -Fq '/scifi-ui/styles/causal-memory-hover.css?v=20260726-causal-hover-2' "$body" \
                  && grep -Fq '/scifi-ui/styles/causal-memory-boot.css?v=20260726-causal-boot-3' "$body" \
+                 && grep -Fq '/scifi-ui/styles/site-readability-audit.css?v=20260726-site-readability-1' "$body" \
                  && grep -Fq '/scifi-ui/scripts/start-sale.js' "$body" \
                  && grep -Fq '/scifi-ui/scripts/future-5000.js' "$body" \
-                 && grep -Fq '/scifi-ui/scripts/causal-memory-field.js' "$body" \
-                 && grep -Fq '/scifi-ui/scripts/causal-memory-hover.js' "$body" \
+                 && grep -Fq '/scifi-ui/scripts/causal-memory-hover.js?v=20260726-causal-hover-2' "$body" \
                  && grep -Fq '/scifi-ui/scripts/causal-memory-boot.js?v=20260726-causal-boot-3' "$body" \
+                 && ! grep -Fq 'causal-memory-field' "$body" \
                  && grep -Fq "window.addEventListener('pageshow'" "$boot_js" \
                  && grep -Fq "performance.getEntriesByType('navigation')" "$boot_js" \
                  && grep -Fq 'event.persisted' "$boot_js" \
@@ -228,16 +244,19 @@ jobs:
                  && grep -Fq 'visible-entry' "$boot_js" \
                  && grep -Fq '@keyframes fx-causal-root-energize-mobile' "$boot_css" \
                  && grep -Fq '@keyframes fx-causal-root-minimal' "$boot_css" \
+                 && grep -Fq '.reference-commerce .price-card {' "$readability_css" \
+                 && grep -Fq 'position: static !important' "$readability_css" \
+                 && grep -Fq 'grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important' "$readability_css" \
                  && grep -iq '^strict-transport-security:' "$headers" \
                  && grep -iq '^content-security-policy:' "$headers" \
                  && grep -iq '^x-content-type-options: nosniff' "$headers" \
                  && ! grep -iq '^location:' "$headers"; then
-                echo "Verified $url with mobile viewport boot animation, separate QR and Year 5000 assets"
-                rm -f "$headers" "$body" "$boot_js" "$boot_css"
+                echo "Verified $url with readability guard, removed interaction DNA, mobile animation and separate QR row"
+                rm -f "$headers" "$body" "$boot_js" "$boot_css" "$readability_css"
                 return 0
               fi
 
-              rm -f "$headers" "$body" "$boot_js" "$boot_css"
+              rm -f "$headers" "$body" "$boot_js" "$boot_css" "$readability_css"
               sleep 10
             done
             echo "Production verification failed for $url" >&2
@@ -261,7 +280,7 @@ jobs:
           assert data.get('signed_client_api_schema') == 1, data
           assert data.get('signature_algorithm') == 'Ed25519', data
           assert data.get('issuer_key_id') == 'formatx-license-issuer-32b0d26716d41bc5', data
-          print('Production license API health response is valid.')
+          print('Production licence API health response is valid.')
           PY
 
       - name: Record successful production deployment
@@ -277,6 +296,8 @@ jobs:
           - 5000-es vizuális rendszer: ellenőrizve mindkét domainen
           - Frissítéskor újrainduló boot-animáció v3: ellenőrizve
           - Mobil képernyőre lépéskor induló animáció: ellenőrizve
+          - Teljes oldalas olvashatósági védelem: ellenőrizve
+          - Interakciós DNS modul: eltávolítva
           - BFCache/pageshow újraindítás: ellenőrizve
           - Csökkentett mozgás fényimpulzusa: ellenőrizve
           - Licenc-API: ellenőrizve
