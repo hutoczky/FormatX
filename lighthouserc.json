@@ -7,6 +7,7 @@
       ],
       "numberOfRuns": 1,
       "settings": {
+        "preset": "desktop",
         "chromeFlags": "--headless=new --no-sandbox --disable-dev-shm-usage --force-prefers-reduced-motion",
         "maxWaitForLoad": 45000,
         "pauseAfterLoadMs": 400,
