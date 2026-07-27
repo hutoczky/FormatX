@@ -8,14 +8,20 @@ function assert(value, message) {
   if (!value) throw new Error(message);
 }
 
-async function waitIntro(page) {
+async function clearIntro(page) {
+  const skip = page.locator('.fx-intro-skip');
+  const canSkip = await skip.waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  if (canSkip) await skip.click();
+
   await page.waitForFunction(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
     return root.classList.contains('fx-intro-complete')
       && !root.classList.contains('fx-intro-running')
       && (!overlay || overlay.hidden);
-  }, null, { timeout: 20000 });
+  }, null, { timeout: 15000 });
 }
 
 async function runCase(browser, name, contextOptions) {
@@ -32,7 +38,7 @@ async function runCase(browser, name, contextOptions) {
   });
 
   await page.goto(TEST_URL + '?lang=hu&audio-test=1', { waitUntil: 'domcontentloaded' });
-  await waitIntro(page);
+  await clearIntro(page);
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'verified-v3', null, { timeout: 15000 });
   await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 10000 });
 
