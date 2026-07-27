@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/live-site-deep-audit-20260727
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
 
 permissions:
