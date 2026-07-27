@@ -26,7 +26,7 @@ const ARGS = [
 
   const response = await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
   report.http = response?.status() || 0;
-  await page.waitForTimeout(18000);
+  await page.waitForTimeout(14000);
   report.state = await page.evaluate(async () => {
     const canvas = document.querySelector('canvas');
     const root = document.documentElement;
@@ -63,10 +63,14 @@ const ARGS = [
   console.log(JSON.stringify(report, null, 2));
   await browser.close();
 
+  const blockingConsoleErrors = report.console.filter(entry => entry.type === 'error');
   const success = report.state?.navigatorGpu
     && report.state?.renderer === 'webgpu-tsl'
     && report.state?.webgpu === 'ready'
-    && report.state?.canvas?.[0] > 0;
+    && report.state?.canvas?.[0] > 0
+    && report.pageErrors.length === 0
+    && report.failed.length === 0
+    && blockingConsoleErrors.length === 0;
   process.exitCode = success ? 0 : 1;
 })().catch(error => {
   console.error(error.stack || error);
