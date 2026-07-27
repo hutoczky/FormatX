@@ -129,11 +129,11 @@ async function validateDesktop() {
 
     const meaningful = errors.filter(item => !/GPU stall|ReadPixels|WebGPU|WGSL|swizzle|Instance dropped/i.test(item));
     assert(!meaningful.length, 'desktop diagnostics: ' + meaningful.join(' | '));
-    await page.screenshot({ path: 'organism-main-desktop.png', fullPage: false });
+    await page.screenshot({ path: 'organism-main-desktop.png', fullPage: false, timeout: 5000 }).catch(() => {});
     await context.close();
     mark('desktop: passed');
   } catch (error) {
-    if (page) await page.screenshot({ path: 'organism-main-desktop-failure.png', fullPage: false }).catch(() => {});
+    if (page) await page.screenshot({ path: 'organism-main-desktop-failure.png', fullPage: false, timeout: 5000 }).catch(() => {});
     throw error;
   } finally {
     await browser.close();
@@ -173,11 +173,11 @@ async function validateMobile() {
 
     const meaningful = errors.filter(item => !/GPU stall|ReadPixels|WebGPU|WGSL|swizzle|Instance dropped/i.test(item));
     assert(!meaningful.length, 'mobile diagnostics: ' + meaningful.join(' | '));
-    await page.screenshot({ path: 'organism-main-mobile.png', fullPage: false });
+    await page.screenshot({ path: 'organism-main-mobile.png', fullPage: false, timeout: 5000 }).catch(() => {});
     await context.close();
     mark('mobile: passed');
   } catch (error) {
-    if (page) await page.screenshot({ path: 'organism-main-mobile-failure.png', fullPage: false }).catch(() => {});
+    if (page) await page.screenshot({ path: 'organism-main-mobile-failure.png', fullPage: false, timeout: 5000 }).catch(() => {});
     throw error;
   } finally {
     await browser.close();
