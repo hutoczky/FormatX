@@ -2,18 +2,12 @@ const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260727-webgpu-1', import.m
 const WEBGL_LOADER_URL = new URL('./webgl-fallback-loader.js?v=20260727-webgpu-1', import.meta.url).href;
 const WEBGPU_STARTUP_BUDGET = 8000;
 const WEBGPU_STABLE_FRAMES = 90;
+const FORCE_WEBGL = new URLSearchParams(location.search).get('force-webgl') === '1';
 // A real navigator.gpu value is required; merely using "'gpu' in navigator" is insufficient.
 
 let webGpuAttemptActive = false;
 let webGpuFallbackStarted = false;
 let activeWebGpuExperience = null;
-let webGpuStartupTimer = 0;
-
-function clearWebGpuStartupTimer() {
-  if (!webGpuStartupTimer) return;
-  clearTimeout(webGpuStartupTimer);
-  webGpuStartupTimer = 0;
-}
 let startupTimer = 0;
 
 function clearStartupTimer() {
@@ -62,6 +56,18 @@ function stopActiveWebGpu() {
   try { failed.dispose(); } catch (_) {}
 }
 
+function reloadIntoWebGlFallback(message) {
+  updateParentState('fallback', message);
+  const recoveryUrl = new URL(location.href);
+  if (recoveryUrl.searchParams.get('force-webgl') === '1') {
+    void startWebGLExperience().catch(reportFatal);
+    return;
+  }
+  recoveryUrl.searchParams.set('force-webgl', '1');
+  recoveryUrl.searchParams.set('recovery', 'webgpu');
+  location.replace(recoveryUrl.href);
+}
+
 function requestWebGLFallback(reason) {
   if (webGpuFallbackStarted) return;
   webGpuFallbackStarted = true;
@@ -69,8 +75,7 @@ function requestWebGLFallback(reason) {
   clearStartupTimer();
   stopActiveWebGpu();
   const message = reason?.message ? String(reason.message) : String(reason || 'webgpu-runtime-failure');
-  updateParentState('fallback', message);
-  void startWebGLExperience().catch(reportFatal);
+  reloadIntoWebGlFallback(message);
 }
 
 function installRuntimeGuard(webGpuModule) {
@@ -133,6 +138,16 @@ addEventListener('formatx:webgpufatal', event => {
 });
 
 async function startExperience() {
+  if (FORCE_WEBGL) {
+    let previousError = 'webgpu-recovery';
+    try {
+      previousError = parent.document.documentElement.dataset.fxWebgpuError || previousError;
+    } catch (_) {}
+    updateParentState('fallback', previousError);
+    await startWebGLExperience();
+    return;
+  }
+
   if (!isSecureContext || !navigator.gpu) {
     updateParentState('unsupported');
     await startWebGLExperience();
@@ -157,11 +172,7 @@ async function startExperience() {
     }, WEBGPU_STARTUP_BUDGET);
     updateParentState('initialised');
   } catch (error) {
-    webGpuAttemptActive = false;
-    clearStartupTimer();
-    stopActiveWebGpu();
-    updateParentState('fallback', error instanceof Error ? error.message : String(error));
-    await startWebGLExperience();
+    requestWebGLFallback(error);
   }
 }
 
