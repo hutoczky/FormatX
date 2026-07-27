@@ -116,7 +116,8 @@
 
   const queue = [
     './scripts/formatx-transcend-bridge.js?v=20260727-transcend-5',
-    './scripts/formatx-three-host.js?v=20260727-three-1'
+    './scripts/formatx-three-host.js?v=20260727-three-1',
+    './scripts/formatx-infinite-loop-fix.js?v=20260727-loop-1'
   ];
 
   function load(index) {
