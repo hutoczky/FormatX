@@ -12,7 +12,10 @@ import {
 const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.6.apk';
-const THREE_STAGE_PATH = '/scifi-ui/three-stage.html';
+const THREE_STAGE_PATHS = new Set([
+  '/scifi-ui/three-stage',
+  '/scifi-ui/three-stage.html',
+]);
 
 const CHECKOUT_PATHS = new Set([
   '/checkout.html',
@@ -134,13 +137,21 @@ export default {
   },
 };
 
-function canonicalPageRedirect(request, url) {
+export function isThreeStagePath(pathname) {
+  const normalized = String(pathname || '').replace(/\/+$/, '') || '/';
+  return THREE_STAGE_PATHS.has(normalized);
+}
+
+export function canonicalPageRedirect(request, url) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return null;
 
   const targetPath = CANONICAL_PAGE_REDIRECTS.get(url.pathname);
   if (!targetPath) return null;
 
-  const target = new URL(targetPath, url.origin);
+  const targetOrigin = url.hostname === 'formatxsuite.com'
+    ? PUBLIC_ORIGIN
+    : url.origin;
+  const target = new URL(targetPath, targetOrigin);
   target.search = url.search;
   return Response.redirect(target.toString(), 308);
 }
@@ -226,10 +237,10 @@ async function serveAndroidApk(request, env) {
   });
 }
 
-function secureResponse(response, url) {
+export function secureResponse(response, url) {
   const headers = new Headers(response.headers);
   const contentType = headers.get('Content-Type') || '';
-  const isThreeStage = url.pathname === THREE_STAGE_PATH;
+  const isThreeStage = isThreeStagePath(url.pathname);
 
   headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   headers.set('X-Content-Type-Options', 'nosniff');
