@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#02070d">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="FormatX Suite Pro Living Core – interaktív kiber-biológiai kezelőfelület és technológiai labor.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self';base-uri 'self';object-src 'none';frame-ancestors 'none';script-src 'self' https://cdn.jsdelivr.net;style-src 'self' 'unsafe-inline';img-src 'self' data:;font-src 'self';connect-src 'self' https://cdn.jsdelivr.net https://api.github.com;media-src 'none';worker-src 'none';form-action 'self';upgrade-insecure-requests">
+  <title>FormatX / Living Core</title>
+  <link rel="stylesheet" href="./styles/living-core.css?v=20260727-living-core-1">
+</head>
+<body>
+  <div class="lc-noise" aria-hidden="true"></div>
+  <div class="lc-scanlines" aria-hidden="true"></div>
+
+  <header class="lc-header">
+    <a class="lc-brand" href="./" aria-label="Vissza a FormatX főoldalára">
+      <span class="lc-brand-mark" aria-hidden="true"><i></i><b></b></span>
+      <span><strong>FORMATX</strong><small>SUITE PRO / LIVING CORE</small></span>
+    </a>
+    <div class="lc-header-status" aria-live="polite">
+      <i></i>
+      <span>ORGANISM ONLINE</span>
+      <b id="lc-fps">-- FPS</b>
+    </div>
+    <button class="lc-sound" id="lc-sound" type="button" aria-pressed="false" aria-label="Generatív hang bekapcsolása">
+      <i aria-hidden="true"><b></b><b></b><b></b></i>
+      <span>SOUND OFF</span>
+    </button>
+  </header>
+
+  <main class="lc-app" aria-labelledby="lc-title">
+    <section class="lc-stage" aria-label="Interaktív FormatX kiber-organizmus">
+      <canvas id="living-core-canvas" aria-hidden="true"></canvas>
+      <svg class="lc-hud-lines" id="lc-hud-lines" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line data-link="0"></line>
+        <line data-link="1"></line>
+        <line data-link="2"></line>
+        <line data-link="3"></line>
+        <line data-link="4"></line>
+        <line data-link="5"></line>
+      </svg>
+
+      <div class="lc-core-label" aria-hidden="true">
+        <span>FORMATX / ORGANISM</span>
+        <strong>LIVING CORE</strong>
+        <small>PROCEDURAL SYSTEM HEART</small>
+      </div>
+
+      <div class="lc-node-layer" aria-label="FormatX modulok">
+        <button class="lc-node" type="button" data-node="0" aria-keyshortcuts="1">
+          <span class="lc-node-index">01</span>
+          <span class="lc-node-copy"><strong>ISO → USB</strong><small>WRITE &amp; VERIFY</small></span>
+          <i aria-hidden="true"></i>
+        </button>
+        <button class="lc-node" type="button" data-node="1" aria-keyshortcuts="2">
+          <span class="lc-node-index">02</span>
+          <span class="lc-node-copy"><strong>FORMÁZÁS</strong><small>MULTI-FS ENGINE</small></span>
+          <i aria-hidden="true"></i>
+        </button>
+        <button class="lc-node" type="button" data-node="2" aria-keyshortcuts="3">
+          <span class="lc-node-index">03</span>
+          <span class="lc-node-copy"><strong>PARTÍCIÓTERVEZŐ</strong><small>PLAN &amp; PREVIEW</small></span>
+          <i aria-hidden="true"></i>
+        </button>
+        <button class="lc-node" type="button" data-node="3" aria-keyshortcuts="4">
+          <span class="lc-node-index">04</span>
+          <span class="lc-node-copy"><strong>BIZTONSÁGOS TÖRLÉS</strong><small>CONFIRM &amp; ERASE</small></span>
+          <i aria-hidden="true"></i>
+        </button>
+        <button class="lc-node" type="button" data-node="4" aria-keyshortcuts="5">
+          <span class="lc-node-index">05</span>
+          <span class="lc-node-copy"><strong>SMART DIAGNOSZTIKA</strong><small>READ &amp; ANALYSE</small></span>
+          <i aria-hidden="true"></i>
+        </button>
+        <button class="lc-node" type="button" data-node="5" aria-keyshortcuts="6">
+          <span class="lc-node-index">06</span>
+          <span class="lc-node-copy"><strong>AI SEGÍTSÉG</strong><small>EXPLAIN &amp; GUIDE</small></span>
+          <i aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="lc-intro">
+        <p class="lc-kicker"><span></span> ORGANISM-FOCUSED CONTROL SURFACE</p>
+        <h1 id="lc-title">A rendszer nem menü.<br><strong>Élő technikai organizmus.</strong></h1>
+        <p>Mutass egy szinaptikus csomópontra, vagy használd az <kbd>1–6</kbd> billentyűket. A mag reagál, a kamera közelít, és megnyílik a modul mérnöki állapotpanele.</p>
+      </div>
+
+      <aside class="lc-panel" id="lc-panel" aria-hidden="true" aria-live="polite">
+        <div class="lc-panel-edge" aria-hidden="true"></div>
+        <header>
+          <span id="lc-panel-index">NODE / 01</span>
+          <button id="lc-panel-close" type="button" aria-label="Panel bezárása">ESC</button>
+        </header>
+        <p class="lc-panel-kicker" id="lc-panel-kicker">WRITE &amp; VERIFY</p>
+        <h2 id="lc-panel-title">ISO → USB</h2>
+        <p class="lc-panel-description" id="lc-panel-description"></p>
+        <div class="lc-panel-metrics" id="lc-panel-metrics"></div>
+        <div class="lc-panel-log">
+          <span>LIVE STATUS LOG</span>
+          <ol id="lc-panel-log"></ol>
+        </div>
+      </aside>
+
+      <div class="lc-keymap" aria-hidden="true">
+        <span><kbd>1–6</kbd> NODE SELECT</span>
+        <span><kbd>ESC</kbd> RELEASE CAMERA</span>
+        <span><kbd>POINTER</kbd> PROXIMITY FIELD</span>
+      </div>
+    </section>
+  </main>
+
+  <nav class="lc-actionbar" aria-label="FormatX gyorsműveletek">
+    <a id="lc-full-download" class="lc-action-primary" href="https://github.com/hutoczky/FormatX-Updates/releases/latest" target="_blank" rel="noopener noreferrer">
+      <span>TELJES VERZIÓ LETÖLTÉSE</span><strong>V92</strong><i aria-hidden="true">↓</i>
+    </a>
+    <a href="https://github.com/hutoczky/FormatX/releases/download/android-native-v1.1.0-beta/FormatX-Native-Android.apk" target="_blank" rel="noopener noreferrer">
+      <span>ANDROID APK</span><strong>1.1.0-BETA</strong><i aria-hidden="true">↓</i>
+    </a>
+    <a href="https://github.com/hutoczky/FormatX-Updates/releases" target="_blank" rel="noopener noreferrer">
+      <span>GITHUB RELEASES</span><strong>VERIFIED BUILDS</strong><i aria-hidden="true">↗</i>
+    </a>
+  </nav>
+
+  <noscript>
+    <p class="lc-noscript">A Living Core interaktív motorhoz JavaScript szükséges.</p>
+  </noscript>
+
+  <script type="module" src="./scripts/living-core.js?v=20260727-living-core-1"></script>
+</body>
+</html>
