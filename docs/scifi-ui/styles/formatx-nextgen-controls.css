@@ -1,0 +1,70 @@
+.fx-nextgen-xr {
+  position: fixed;
+  z-index: 499;
+  right: 18px;
+  bottom: 68px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fx-nextgen-xr[hidden] {
+  display: none !important;
+}
+
+.fx-nextgen-xr button {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid rgba(153, 232, 255, .23);
+  border-radius: 999px;
+  color: rgba(232, 248, 255, .88);
+  background: linear-gradient(145deg, rgba(5, 15, 24, .9), rgba(4, 9, 16, .74));
+  box-shadow: 0 14px 44px rgba(0, 0, 0, .34), inset 0 1px rgba(255, 255, 255, .04);
+  backdrop-filter: blur(12px) saturate(120%);
+  cursor: pointer;
+  font: 760 7px/1 system-ui, sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.fx-nextgen-xr button:hover,
+.fx-nextgen-xr button:focus-visible {
+  border-color: rgba(132, 236, 255, .58);
+  color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(68, 207, 255, .09), 0 18px 50px rgba(0, 0, 0, .4);
+}
+
+.fx-nextgen-xr button[aria-pressed="true"] {
+  border-color: rgba(126, 255, 208, .65);
+  color: #baffdf;
+}
+
+html[data-fx-webgpu="ready"] .fx-three-telemetry > span::after {
+  content: " / WEBGPU + TSL";
+  color: rgba(118, 243, 255, .72);
+}
+
+html[data-fx-xr="presenting"] .fx-three-telemetry {
+  opacity: .42;
+}
+
+@media (max-width: 760px) {
+  .fx-nextgen-xr {
+    right: 12px;
+    bottom: 64px;
+    gap: 6px;
+  }
+
+  .fx-nextgen-xr button {
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-nextgen-xr button {
+    transition: none !important;
+  }
+}
