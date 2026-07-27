@@ -33,6 +33,9 @@
     clearTimer();
     root.dataset.fxThree = 'ready';
     root.classList.add('fx-three-engine-ready');
+    if (telemetry && /INITIALISING|FRAME ERROR/.test(telemetry.textContent || '')) {
+      telemetry.textContent = 'THREE / READY';
+    }
   }
 
   function markError(message) {
