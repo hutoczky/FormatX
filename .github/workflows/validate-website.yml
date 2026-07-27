@@ -49,6 +49,7 @@ jobs:
           apex = Path('docs/scifi-ui/scripts/formatx-apex.js').read_text(encoding='utf-8')
           loader = Path('docs/scifi-ui/scripts/igloo-parity.js').read_text(encoding='utf-8')
           host = Path('docs/scifi-ui/scripts/formatx-three-host.js').read_text(encoding='utf-8')
+          loop_fix = Path('docs/scifi-ui/scripts/formatx-infinite-loop-fix.js').read_text(encoding='utf-8')
           engine = Path('docs/scifi-ui/scripts/Experience.js').read_text(encoding='utf-8')
           entry = Path('docs/scifi-ui/scripts/experience-entry.js').read_text(encoding='utf-8')
           stage = Path('docs/scifi-ui/three-stage.html').read_text(encoding='utf-8')
@@ -63,12 +64,14 @@ jobs:
           assert '15 900 Ft / hó' in home and '29 900 Ft / hó' in home
           assert 'FAILSAFE_DEADLINE' in intro
 
-          for token in ('formatx-three-host.js', 'formatx-transcend-bridge.js'):
+          for token in ('formatx-three-host.js', 'formatx-transcend-bridge.js', 'formatx-infinite-loop-fix.js'):
               assert token in loader, token
           for token in ('THREE.WebGLRenderer', 'THREE.PerspectiveCamera', 'THREE.InstancedMesh', 'THREE.Points', 'CatmullRomCurve3', 'QualityGovernor', 'requestAnimationFrame'):
               assert token in engine, token
           for token in ('Float32Array', '__FORMATX_3D_STATE__', 'AudioContext', 'fx-three-loop-bridge', 'formatx:loop'):
               assert token in host, token
+          for token in ('maximumScroll', 'cloneReach', 'formatx:loop'):
+              assert token in loop_fix, token
           for token in ('experience-entry.js', 'blob:', 'cdn.jsdelivr.net'):
               assert token in stage, token
           for token in ('streamSpeed', 'ArrayBuffer.isView'):
@@ -94,6 +97,7 @@ jobs:
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/formatx-transcend-bridge.js
           node --check docs/scifi-ui/scripts/formatx-three-host.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           node --check docs/scifi-ui/scripts/experience-entry.js
           node --check docs/scifi-ui/scripts/Experience.js
           node --check docs/scifi-ui/scripts/checkout-v100.js
@@ -129,6 +133,10 @@ jobs:
       - name: Test Chromium, Firefox, mobile, reduced motion and two scroll loops
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
+          MOZ_WEBRENDER: '1'
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          GALLIUM_DRIVER: llvmpipe
+          MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
         shell: bash
         run: |
           set -o pipefail
