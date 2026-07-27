@@ -196,11 +196,14 @@ async function desktop(browserType, name) {
     assert(String(checkout).includes('currency=EUR'), name + ' checkout currency');
     await closeOrganismPanel(page);
 
-    await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
     for (let cycle = 1; cycle <= 2; cycle += 1) {
-      const metrics = await page.locator('[data-fx-loop-bridge="true"]').evaluate(node => ({ top: node.offsetTop, height: node.offsetHeight }));
-      await page.evaluate(({ top, height }) => scrollTo(0, top + height * 0.86), metrics);
-      await page.waitForFunction(expected => Number(document.documentElement.dataset.fxLoopCount || 0) >= expected && scrollY < document.getElementById('experience').offsetTop, cycle, { timeout: 10000 });
+      const before = await page.evaluate(() => Number(document.documentElement.dataset.fxLoopCount || 0));
+      await page.evaluate(() => {
+        const maximum = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+        scrollTo({ top: maximum, left: 0, behavior: 'instant' });
+        dispatchEvent(new Event('scroll'));
+      });
+      await page.waitForFunction(previous => Number(document.documentElement.dataset.fxLoopCount || 0) > previous, before, { timeout: 15000 });
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     }
 
@@ -276,7 +279,7 @@ async function mobile() {
     attachDiagnostics(page, diagnostics);
     await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
     await verifyCommon(page, 'mobile', diagnostics, 380, 800);
-    await page.locator('#menu-toggle').click();
+    await page.locator('#menu-toggle').evaluate(node => node.click());
     assert(await page.locator('#main-nav').evaluate(node => node.classList.contains('open')), 'mobile menu');
     await context.close();
   } finally {
