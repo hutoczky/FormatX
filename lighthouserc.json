@@ -9,7 +9,7 @@
       "settings": {
         "chromeFlags": "--headless=new --no-sandbox --disable-dev-shm-usage --force-prefers-reduced-motion",
         "maxWaitForLoad": 45000,
-        "pauseAfterLoadMs": 1200,
+        "pauseAfterLoadMs": 400,
         "skipAudits": [
           "render-blocking-resources",
           "unused-css-rules",
