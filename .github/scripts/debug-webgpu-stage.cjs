@@ -16,12 +16,47 @@ const ARGS = [
 ];
 
 (async () => {
-  const report = { url: URL, console: [], pageErrors: [], failed: [], state: null };
+  const report = {
+    url: URL,
+    console: [],
+    pageErrors: [],
+    rejections: [],
+    protocolExceptions: [],
+    protocolLog: [],
+    failed: [],
+    state: null
+  };
   const browser = await chromium.launch({ headless: true, args: ARGS });
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  await context.addInitScript(() => {
+    window.__FORMATX_REJECTIONS__ = [];
+    addEventListener('unhandledrejection', event => {
+      const reason = event.reason;
+      window.__FORMATX_REJECTIONS__.push({
+        name: reason?.name || '',
+        message: reason?.message || String(reason),
+        stack: reason?.stack || ''
+      });
+    });
+  });
+
   const page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Runtime.enable');
+  await cdp.send('Log.enable');
+  cdp.on('Runtime.exceptionThrown', event => {
+    report.protocolExceptions.push(event.exceptionDetails);
+  });
+  cdp.on('Log.entryAdded', event => {
+    report.protocolLog.push(event.entry);
+  });
+
   page.on('console', message => report.console.push({ type: message.type(), text: message.text() }));
-  page.on('pageerror', error => report.pageErrors.push(String(error.stack || error)));
+  page.on('pageerror', error => report.pageErrors.push({
+    name: error.name || '',
+    message: error.message || String(error),
+    stack: error.stack || ''
+  }));
   page.on('requestfailed', request => report.failed.push({ url: request.url(), error: request.failure()?.errorText || 'failed' }));
 
   const response = await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -55,9 +90,11 @@ const ARGS = [
       canvas: canvas ? [canvas.width, canvas.height, canvas.clientWidth, canvas.clientHeight] : null,
       bodyChildren: document.body.children.length,
       scripts: Array.from(document.scripts, script => script.src),
+      rejections: window.__FORMATX_REJECTIONS__ || [],
       adapter
     };
   });
+  report.rejections = report.state.rejections;
   await page.screenshot({ path: 'webgpu-stage-debug.png' });
   fs.writeFileSync('webgpu-stage-debug.json', `${JSON.stringify(report, null, 2)}\n`);
   console.log(JSON.stringify(report, null, 2));
@@ -69,6 +106,7 @@ const ARGS = [
     && report.state?.webgpu === 'ready'
     && report.state?.canvas?.[0] > 0
     && report.pageErrors.length === 0
+    && report.rejections.length === 0
     && report.failed.length === 0
     && blockingConsoleErrors.length === 0;
   process.exitCode = success ? 0 : 1;
