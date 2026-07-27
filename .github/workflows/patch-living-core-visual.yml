@@ -1,0 +1,68 @@
+name: Patch Living Core particle exposure
+
+on:
+  push:
+    branches:
+      - agent/webgpu-tsl-evolution
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-living-core-visual-patch
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Living Core branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: agent/webgpu-tsl-evolution
+          fetch-depth: 0
+
+      - name: Correct particle point size and additive exposure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('docs/scifi-ui/scripts/living-core.js')
+          source = path.read_text(encoding='utf-8')
+          replacements = [
+              ('sizes[index] = 0.72 + random() * 1.65;',
+               'sizes[index] = 0.48 + random() * 0.82;'),
+              ('gl_PointSize = (aSize + proximity * 1.7 + uFocus * aEnergy * 1.15) * uPixelRatio * (315.0 / max(1.0, -mvPosition.z));',
+               'gl_PointSize = (aSize + proximity * 0.65 + uFocus * aEnergy * 0.42) * uPixelRatio * (18.0 / max(1.0, -mvPosition.z));'),
+              ('colour += hot * (0.25 + vProximity * 0.7);',
+               'colour += hot * (0.05 + vProximity * 0.22);'),
+              ('float alpha = disc * (0.28 + vEnergy * 0.72) * (1.0 - vDepth * 0.42);',
+               'float alpha = disc * (0.075 + vEnergy * 0.24 + vProximity * 0.1 + uFocus * 0.035) * (1.0 - vDepth * 0.48);'),
+              ('if (alpha < 0.025) discard;',
+               'if (alpha < 0.012) discard;'),
+          ]
+
+          original = source
+          for old, new in replacements:
+              if old in source:
+                  source = source.replace(old, new, 1)
+              elif new not in source:
+                  raise SystemExit(f'Living Core shader marker is missing: {old}')
+
+          if source != original:
+              path.write_text(source, encoding='utf-8')
+          PY
+
+          if git diff --quiet -- docs/scifi-ui/scripts/living-core.js; then
+            echo 'Living Core particle exposure is already corrected.'
+            exit 0
+          fi
+
+          git config user.name 'FormatX Living Core Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/living-core.js
+          git commit -m 'Correct Living Core particle exposure'
+          git push origin HEAD:agent/webgpu-tsl-evolution
