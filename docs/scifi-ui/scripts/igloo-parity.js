@@ -115,9 +115,8 @@
   addEventListener('pageshow', replaceExistingQr);
 
   const queue = [
-    './scripts/formatx-transcend-bridge.js?v=20260727-transcend-4',
-    './scripts/formatx-transcend-lite.js?v=20260727-transcend-4',
-    './scripts/worldstage-enhancements.js?v=20260727-worldstage-1'
+    './scripts/formatx-transcend-bridge.js?v=20260727-transcend-5',
+    './scripts/formatx-three-host.js?v=20260727-three-1'
   ];
 
   function load(index) {
@@ -129,7 +128,7 @@
     script.addEventListener('load', function () { load(index + 1); }, { once: true });
     script.addEventListener('error', function () {
       root.dataset.fxTranscendLoader = 'error';
-      console.warn('FormatX Transcend module failed to load:', queue[index]);
+      console.warn('FormatX Three module failed to load:', queue[index]);
     }, { once: true });
     document.head.appendChild(script);
   }
