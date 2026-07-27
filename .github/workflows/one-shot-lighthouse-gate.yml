@@ -1,9 +1,10 @@
 name: Install Lighthouse intro gate
 
 on:
-  push:
-    branches:
-      - agent/webgpu-tsl-evolution
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-lighthouse-gate.yml'
 
 permissions:
   contents: write
