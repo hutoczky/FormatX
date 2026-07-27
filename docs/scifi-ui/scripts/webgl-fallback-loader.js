@@ -1,4 +1,4 @@
-const WEBGL_SOURCE_URL = new URL('./Experience.js?v=20260727-particles-focus-2', import.meta.url).href;
+const WEBGL_SOURCE_URL = new URL('./Experience.js?v=20260727-particles-stable-3', import.meta.url).href;
 const PRIMARY_THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.min.js';
 const FALLBACK_THREE_URL = 'https://unpkg.com/three@0.185.1/build/three.module.js?module';
 
@@ -82,12 +82,20 @@ export async function startWebGLExperience() {
     'const particles = this.mobile ? [400, 650, 1100, 1700] : [600, 1200, 1900, 3100];',
     'particle quality tiers'
   );
+  source = replaceRequired(
+    source,
+    '} else if (fps > 58 && this.tier < 3) {',
+    '} else if (false && fps > 58 && this.tier < 3) {',
+    'upward quality scaling lock'
+  );
 
   const moduleUrl = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
   try {
     await import(moduleUrl);
     try {
-      parent.document.documentElement.dataset.fxParticleProfile = 'focus-half';
+      const root = parent.document.documentElement;
+      root.dataset.fxParticleProfile = 'focus-half-stable';
+      root.dataset.fxParticleTierLock = 'upward-disabled';
     } catch (_) {}
   } finally {
     URL.revokeObjectURL(moduleUrl);
