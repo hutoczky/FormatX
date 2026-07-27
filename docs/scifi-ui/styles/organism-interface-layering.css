@@ -1,20 +1,38 @@
 /* Stacking-context corrections for the organism-first main-site shell. */
 .fx-organism-interface-ready .topbar {
-  position: fixed;
-  z-index: 96 !important;
+  position: fixed !important;
+  z-index: 960 !important;
+  display: grid !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  filter: none !important;
   isolation: isolate;
 }
 
+.fx-organism-interface-ready #menu-toggle {
+  position: relative;
+  z-index: 1002 !important;
+  display: inline-flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
 .fx-organism-interface-ready .main-nav {
-  z-index: 100 !important;
+  z-index: 1000 !important;
 }
 
 .fx-organism-interface-ready .main-nav.open {
+  opacity: 1 !important;
+  visibility: visible !important;
   pointer-events: auto !important;
 }
 
 .fx-organism-interface-ready .main-nav.open a {
   position: relative;
   z-index: 2;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
