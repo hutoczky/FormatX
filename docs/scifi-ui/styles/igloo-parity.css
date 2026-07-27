@@ -1,6 +1,7 @@
 @import url("./formatx-transcend.css?v=20260727-transcend-3");
 @import url("./formatx-transcend-performance.css?v=20260727-performance-2");
 @import url("./formatx-three-host.css?v=20260727-three-1");
+@import url("./motion-focus.css?v=20260727-focus-2");
 
 /* Compatibility entrypoint retained for the existing GitHub Pages loader. */
 html {
