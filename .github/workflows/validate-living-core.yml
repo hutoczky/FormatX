@@ -1,0 +1,134 @@
+name: Validate FormatX Living Core laboratory
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/living-core.html'
+      - 'docs/scifi-ui/scripts/living-core.js'
+      - 'docs/scifi-ui/scripts/formatx-living-core-launcher.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/styles/living-core.css'
+      - 'docs/scifi-ui/styles/living-core-launcher.css'
+      - 'billing-worker/src/production-with-license.js'
+      - 'billing-worker/test/production-routing.spec.js'
+      - '.github/scripts/validate-living-core.cjs'
+      - '.github/workflows/validate-living-core.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/living-core.html'
+      - 'docs/scifi-ui/scripts/living-core.js'
+      - 'docs/scifi-ui/scripts/formatx-living-core-launcher.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/styles/living-core.css'
+      - 'docs/scifi-ui/styles/living-core-launcher.css'
+      - 'billing-worker/src/production-with-license.js'
+      - 'billing-worker/test/production-routing.spec.js'
+      - '.github/scripts/validate-living-core.cjs'
+      - '.github/workflows/validate-living-core.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-living-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  living-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Validate Living Core source architecture
+        shell: python
+        run: |
+          from pathlib import Path
+
+          html = Path('docs/scifi-ui/living-core.html').read_text(encoding='utf-8')
+          css = Path('docs/scifi-ui/styles/living-core.css').read_text(encoding='utf-8')
+          engine = Path('docs/scifi-ui/scripts/living-core.js').read_text(encoding='utf-8')
+          launcher = Path('docs/scifi-ui/scripts/formatx-living-core-launcher.js').read_text(encoding='utf-8')
+          loader = Path('docs/scifi-ui/scripts/igloo-parity.js').read_text(encoding='utf-8')
+          worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
+
+          for token in ('living-core-canvas', 'data-node="0"', 'data-node="5"', 'lc-panel', 'lc-actionbar', 'ANDROID APK', 'GITHUB RELEASES'):
+              assert token in html, token
+          for token in ('ShaderMaterial', 'WebGLRenderer', 'gsap.to', 'AudioContext', 'createOscillator', 'SHA-256', 'requestAnimationFrame', 'setDrawRange'):
+              assert token in engine, token
+          for token in ('lc-node', 'lc-panel', 'clip-path', 'prefers-reduced-motion', 'lc-actionbar'):
+              assert token in css, token
+          assert 'living-core.html' in launcher
+          assert 'formatx-living-core-launcher.js' in loader
+          assert 'LIVING_CORE_CONTENT_SECURITY_POLICY' in worker
+          assert 'isLivingCorePath' in worker
+          assert "script-src 'self' https://cdn.jsdelivr.net" in worker
+          assert 'https://api.github.com' in worker
+          assert html.count('class="lc-node"') == 6
+          assert html.count('data-link=') == 6
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/living-core.js
+          node --check docs/scifi-ui/scripts/formatx-living-core-launcher.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check billing-worker/src/production-with-license.js
+          node --check .github/scripts/validate-living-core.cjs
+
+      - name: Test Worker route and security policy
+        working-directory: billing-worker
+        run: |
+          npm ci
+          npm test
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-living-core" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-living-core/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start static website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/living-core-http.log" 2>&1 &
+          for attempt in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/living-core.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/living-core-http.log"
+          exit 1
+
+      - name: Test desktop, mobile, keyboard, panel and audio controls
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-living-core/node_modules
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-living-core.cjs 2>&1 | tee living-core-browser-report.txt
+
+      - name: Upload Living Core evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-living-core-evidence
+          path: |
+            living-core-browser-report.txt
+            living-core-desktop.png
+            living-core-mobile.png
+          if-no-files-found: warn
+          retention-days: 7

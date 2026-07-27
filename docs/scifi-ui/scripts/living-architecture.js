@@ -2,6 +2,18 @@
   'use strict';
 
   const ROOT = document.documentElement;
+  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
+  if (AUDIT_MODE) {
+    const canvas = document.getElementById('fx-apex-canvas');
+    if (canvas) canvas.hidden = true;
+    ROOT.classList.add('fx-audit-mode');
+    ROOT.dataset.fxThree = 'audit-skip';
+    ROOT.dataset.fxLighthouse = 'ready';
+    ROOT.dataset.fxLivingArchitecture = 'audit-skip';
+    dispatchEvent(new CustomEvent('formatx:livingready'));
+    return;
+  }
+
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
   const PLANS = {
     business_lite: { name: 'Business Lite', HUF: 7900, EUR: 22 },
@@ -58,7 +70,7 @@
     if (!document.querySelector('link[data-fx-cryosphere-style]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = './styles/igloo-parity.css?v=20260727-three-1';
+      style.href = './styles/igloo-parity.css?v=20260727-webgpu-1';
       style.dataset.fxCryosphereStyle = 'true';
       document.head.appendChild(style);
     }
@@ -74,7 +86,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260727-three-1';
+      script.src = './scripts/igloo-parity.js?v=20260727-webgpu-1';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);

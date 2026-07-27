@@ -116,8 +116,10 @@
 
   const queue = [
     './scripts/formatx-transcend-bridge.js?v=20260727-transcend-5',
-    './scripts/formatx-three-host.js?v=20260727-three-6',
-    './scripts/formatx-three-frame-bootstrap.js?v=20260727-three-6',
+    './scripts/formatx-three-host.js?v=20260727-webgpu-1',
+    './scripts/formatx-nextgen-controls.js?v=20260727-webgpu-1',
+    './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
+    './scripts/formatx-three-frame-bootstrap.js?v=20260727-webgpu-1',
     './scripts/formatx-infinite-loop-fix.js?v=20260727-loop-1'
   ];
 

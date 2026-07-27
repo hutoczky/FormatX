@@ -1,0 +1,70 @@
+name: Debug FormatX WebGPU stage
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/ExperienceWebGPU.js'
+      - 'docs/scifi-ui/scripts/WebXRDirector.js'
+      - 'docs/scifi-ui/scripts/experience-entry.js'
+      - 'docs/scifi-ui/three-stage.html'
+      - '.github/scripts/debug-webgpu-stage.cjs'
+      - '.github/scripts/debug-progressive-main.cjs'
+      - '.github/workflows/debug-webgpu-stage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  webgpu-stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Install Chromium 151
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Start static site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > /tmp/formatx-webgpu-http.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/three-stage.html >/dev/null && exit 0
+            sleep .25
+          done
+          cat /tmp/formatx-webgpu-http.log
+          exit 1
+
+      - name: Compile and render the WebGPU TSL stage
+        shell: bash
+        run: node .github/scripts/debug-webgpu-stage.cjs
+
+      - name: Verify the parent bootstrap and recovery timeline
+        shell: bash
+        run: node .github/scripts/debug-progressive-main.cjs
+
+      - name: Upload WebGPU diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-webgpu-stage-debug
+          path: |
+            webgpu-stage-debug.json
+            webgpu-stage-debug.png
+            progressive-main-debug.json
+            progressive-main-debug.png
+          if-no-files-found: warn
+          retention-days: 5

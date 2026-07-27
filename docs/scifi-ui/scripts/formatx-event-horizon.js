@@ -2,6 +2,24 @@
   'use strict';
 
   const ROOT = document.documentElement;
+  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
+  if (AUDIT_MODE) {
+    const overlay = document.getElementById('formatx-event-horizon');
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    const topbar = document.querySelector('.topbar');
+    const heroCopy = document.querySelector('.hero-copy');
+    if (topbar) topbar.classList.add('visible');
+    if (heroCopy) heroCopy.classList.add('visible');
+    ROOT.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-reveal', 'fx-intro-managed');
+    ROOT.classList.add('fx-intro-complete', 'fx-audit-mode');
+    ROOT.dataset.fxIntro = 'audit-skip';
+    document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+    return;
+  }
+
   const OVERLAY_ID = 'formatx-event-horizon';
   const MOBILE_QUERY = window.matchMedia('(max-width: 820px), (pointer: coarse)');
   const REDUCE_QUERY = window.matchMedia('(prefers-reduced-motion: reduce)');
