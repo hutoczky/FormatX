@@ -28,11 +28,11 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install Chromium
+      - name: Install Chromium 151
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save --no-audit --no-fund playwright@1.55.0
+          npm install --no-save --no-audit --no-fund playwright@1.62.0
           npx playwright install --with-deps chromium
 
       - name: Start static site
