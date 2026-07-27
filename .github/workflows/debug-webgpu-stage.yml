@@ -9,6 +9,7 @@ on:
       - 'docs/scifi-ui/scripts/experience-entry.js'
       - 'docs/scifi-ui/three-stage.html'
       - '.github/scripts/debug-webgpu-stage.cjs'
+      - '.github/scripts/debug-progressive-main.cjs'
       - '.github/workflows/debug-webgpu-stage.yml'
   workflow_dispatch:
 
@@ -18,7 +19,7 @@ permissions:
 jobs:
   webgpu-stage:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -51,6 +52,10 @@ jobs:
         shell: bash
         run: node .github/scripts/debug-webgpu-stage.cjs
 
+      - name: Verify the parent bootstrap and recovery timeline
+        shell: bash
+        run: node .github/scripts/debug-progressive-main.cjs
+
       - name: Upload WebGPU diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -59,5 +64,7 @@ jobs:
           path: |
             webgpu-stage-debug.json
             webgpu-stage-debug.png
+            progressive-main-debug.json
+            progressive-main-debug.png
           if-no-files-found: warn
           retention-days: 5
