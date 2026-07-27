@@ -1,8 +1,10 @@
-const SOURCE_URL = './Experience.js?v=20260727-three-2';
+const SOURCE_URL = new URL('./Experience.js?v=20260727-three-3', import.meta.url).href;
 
 async function startExperience() {
   const response = await fetch(SOURCE_URL, { cache: 'force-cache' });
-  if (!response.ok) throw new Error('FormatX Experience source could not be loaded');
+  if (!response.ok) {
+    throw new Error('FormatX Experience source could not be loaded: ' + response.status + ' ' + SOURCE_URL);
+  }
 
   let source = await response.text();
 
