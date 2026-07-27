@@ -4,9 +4,17 @@ const PRIMARY_THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/thre
 const FALLBACK_THREE_URL = 'https://unpkg.com/three@0.185.1/build/three.module.js?module';
 const WEBGPU_STARTUP_BUDGET = 8000;
 const WEBGPU_STARTUP_BUDGET = 8000;
+const WEBGPU_STARTUP_BUDGET = 8000;
 let webGpuFatalFallbackStarted = false;
 let webGpuAttemptActive = false;
 let activeWebGpuExperience = null;
+let webGpuStartupTimer = 0;
+
+function clearWebGpuStartupTimer() {
+  if (!webGpuStartupTimer) return;
+  clearTimeout(webGpuStartupTimer);
+  webGpuStartupTimer = 0;
+}
 let webGpuStartupTimer = 0;
 
 function clearWebGpuStartupTimer() {
