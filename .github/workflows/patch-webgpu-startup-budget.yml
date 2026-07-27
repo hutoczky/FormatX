@@ -1,0 +1,81 @@
+name: Patch bounded WebGPU startup
+
+on:
+  push:
+    branches:
+      - agent/webgpu-tsl-evolution
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout WebGPU branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: agent/webgpu-tsl-evolution
+          fetch-depth: 0
+
+      - name: Add startup budget and deterministic teardown
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('docs/scifi-ui/scripts/experience-entry.js')
+          source = path.read_text(encoding='utf-8')
+
+          source = source.replace(
+              "const FALLBACK_THREE_URL = 'https://unpkg.com/three@0.185.1/build/three.module.js?module';\n",
+              "const FALLBACK_THREE_URL = 'https://unpkg.com/three@0.185.1/build/three.module.js?module';\nconst WEBGPU_STARTUP_BUDGET = 8000;\n",
+              1,
+          )
+          source = source.replace(
+              "let activeWebGpuExperience = null;\n",
+              "let activeWebGpuExperience = null;\nlet webGpuStartupTimer = 0;\n\nfunction clearWebGpuStartupTimer() {\n  if (!webGpuStartupTimer) return;\n  clearTimeout(webGpuStartupTimer);\n  webGpuStartupTimer = 0;\n}\n",
+              1,
+          )
+          source = source.replace(
+              "  webGpuAttemptActive = false;\n  const failedExperience = activeWebGpuExperience;",
+              "  webGpuAttemptActive = false;\n  clearWebGpuStartupTimer();\n  const failedExperience = activeWebGpuExperience;",
+              1,
+          )
+          source = source.replace(
+              "        webGpuAttemptActive = false;\n        originalSignalReady.call(this);",
+              "        webGpuAttemptActive = false;\n        clearWebGpuStartupTimer();\n        originalSignalReady.call(this);",
+              1,
+          )
+          source = source.replace(
+              "      activeWebGpuExperience = await webGpuModule.startWebGPUExperience();\n      updateParentWebGpuState('initialised');",
+              "      activeWebGpuExperience = await webGpuModule.startWebGPUExperience();\n      if (webGpuFatalFallbackStarted) {\n        try { activeWebGpuExperience.dispose(); } catch (_) {}\n        activeWebGpuExperience = null;\n        return;\n      }\n      webGpuStartupTimer = setTimeout(() => {\n        requestWebGlFallback(new Error('webgpu-startup-timeout'));\n      }, WEBGPU_STARTUP_BUDGET);\n      updateParentWebGpuState('initialised');",
+              1,
+          )
+          source = source.replace(
+              "      activeWebGpuExperience = null;\n      const message = error instanceof Error ? error.message : String(error);",
+              "      activeWebGpuExperience = null;\n      clearWebGpuStartupTimer();\n      const message = error instanceof Error ? error.message : String(error);",
+              1,
+          )
+
+          required = [
+              'WEBGPU_STARTUP_BUDGET = 8000',
+              'clearWebGpuStartupTimer()',
+              "webgpu-startup-timeout",
+          ]
+          missing = [token for token in required if token not in source]
+          if missing:
+              raise SystemExit(f'WebGPU startup patch incomplete: {missing}')
+          path.write_text(source, encoding='utf-8')
+          PY
+
+          node --check docs/scifi-ui/scripts/experience-entry.js
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name 'FormatX WebGPU Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/experience-entry.js
+          git commit -m 'Bound WebGPU startup before WebGL2 recovery'
+          git push origin HEAD:agent/webgpu-tsl-evolution
