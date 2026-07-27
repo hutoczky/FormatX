@@ -2,9 +2,17 @@ const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260727-webgpu-1', import.m
 const WEBGL_SOURCE_URL = new URL('./Experience.js?v=20260727-three-4', import.meta.url).href;
 const PRIMARY_THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.min.js';
 const FALLBACK_THREE_URL = 'https://unpkg.com/three@0.185.1/build/three.module.js?module';
+const WEBGPU_STARTUP_BUDGET = 8000;
 let webGpuFatalFallbackStarted = false;
 let webGpuAttemptActive = false;
 let activeWebGpuExperience = null;
+let webGpuStartupTimer = 0;
+
+function clearWebGpuStartupTimer() {
+  if (!webGpuStartupTimer) return;
+  clearTimeout(webGpuStartupTimer);
+  webGpuStartupTimer = 0;
+}
 
 function updateParentWebGpuState(state, message = '') {
   try {
@@ -80,6 +88,7 @@ function requestWebGlFallback(reason) {
   if (webGpuFatalFallbackStarted) return;
   webGpuFatalFallbackStarted = true;
   webGpuAttemptActive = false;
+  clearWebGpuStartupTimer();
   const failedExperience = activeWebGpuExperience;
   activeWebGpuExperience = null;
   if (failedExperience) {
@@ -116,6 +125,7 @@ function installWebGpuRuntimeGuard(webGpuModule) {
       if (!this.__formatxReadySignalled && this.__formatxStableFrames >= 90) {
         this.__formatxReadySignalled = true;
         webGpuAttemptActive = false;
+        clearWebGpuStartupTimer();
         originalSignalReady.call(this);
         try {
           const root = window.parent.document.documentElement;
@@ -155,11 +165,20 @@ async function startExperience() {
       const webGpuModule = await import(WEBGPU_URL);
       installWebGpuRuntimeGuard(webGpuModule);
       activeWebGpuExperience = await webGpuModule.startWebGPUExperience();
+      if (webGpuFatalFallbackStarted) {
+        try { activeWebGpuExperience.dispose(); } catch (_) {}
+        activeWebGpuExperience = null;
+        return;
+      }
+      webGpuStartupTimer = setTimeout(() => {
+        requestWebGlFallback(new Error('webgpu-startup-timeout'));
+      }, WEBGPU_STARTUP_BUDGET);
       updateParentWebGpuState('initialised');
       return;
     } catch (error) {
       webGpuAttemptActive = false;
       activeWebGpuExperience = null;
+      clearWebGpuStartupTimer();
       const message = error instanceof Error ? error.message : String(error);
       console.warn('FormatX WebGPU/TSL engine failed; switching to the proven WebGL2 engine.', error);
       updateParentWebGpuState('fallback', message);
