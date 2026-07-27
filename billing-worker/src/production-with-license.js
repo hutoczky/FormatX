@@ -12,6 +12,7 @@ import {
 const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.6.apk';
+const THREE_STAGE_PATH = '/scifi-ui/three-stage.html';
 
 const CHECKOUT_PATHS = new Set([
   '/checkout.html',
@@ -52,6 +53,22 @@ const CHECKOUT_CONTENT_SECURITY_POLICY = CONTENT_SECURITY_POLICY.replace(
   "img-src 'self' data:",
   "img-src 'self' data: https://quickchart.io",
 );
+
+const THREE_STAGE_CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "script-src 'self' blob: https://cdn.jsdelivr.net https://unpkg.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'none'",
+  "connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com",
+  "media-src 'none'",
+  "worker-src 'none'",
+  "manifest-src 'none'",
+  'upgrade-insecure-requests',
+].join('; ');
 
 const PERMISSIONS_POLICY = [
   'accelerometer=()',
@@ -212,11 +229,12 @@ async function serveAndroidApk(request, env) {
 function secureResponse(response, url) {
   const headers = new Headers(response.headers);
   const contentType = headers.get('Content-Type') || '';
+  const isThreeStage = url.pathname === THREE_STAGE_PATH;
 
   headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   headers.set('X-Content-Type-Options', 'nosniff');
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  headers.set('X-Frame-Options', 'DENY');
+  headers.set('X-Frame-Options', isThreeStage ? 'SAMEORIGIN' : 'DENY');
   headers.set('Cross-Origin-Opener-Policy', 'same-origin');
   headers.set('Cross-Origin-Resource-Policy', 'same-origin');
   headers.set('Permissions-Policy', PERMISSIONS_POLICY);
@@ -228,12 +246,12 @@ function secureResponse(response, url) {
       ? '/scifi-ui/'
       : url.pathname;
     headers.set('Link', `<${PUBLIC_ORIGIN}${canonicalPath}>; rel="canonical"`);
-    headers.set(
-      'Content-Security-Policy',
-      url.pathname.endsWith('/checkout.html')
+    const contentSecurityPolicy = isThreeStage
+      ? THREE_STAGE_CONTENT_SECURITY_POLICY
+      : url.pathname.endsWith('/checkout.html')
         ? CHECKOUT_CONTENT_SECURITY_POLICY
-        : CONTENT_SECURITY_POLICY,
-    );
+        : CONTENT_SECURITY_POLICY;
+    headers.set('Content-Security-Policy', contentSecurityPolicy);
     headers.set('Cache-Control', 'no-cache, max-age=0, must-revalidate');
   } else if (/\.(?:css|js)$/i.test(url.pathname)) {
     // The public HTML uses stable asset URLs. Revalidation prevents a browser
