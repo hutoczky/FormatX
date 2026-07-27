@@ -18,7 +18,11 @@ const migrations = await readD1Migrations('./license-migrations');
 
 export default defineWorkersConfig({
   test: {
-    include: ['test/license-center.spec.js', 'test/license-center-e2e.spec.js'],
+    include: [
+      'test/license-center.spec.js',
+      'test/license-center-e2e.spec.js',
+      'test/production-routing.spec.js',
+    ],
     setupFiles: ['./test/license-center.setup.js'],
     poolOptions: {
       workers: {
