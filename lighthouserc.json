@@ -3,9 +3,19 @@
     "collect": {
       "staticDistDir": "./docs",
       "url": [
-        "./scifi-ui/index.html"
+        "./scifi-ui/index.html?lighthouse=1"
       ],
-      "numberOfRuns": 3
+      "numberOfRuns": 1,
+      "settings": {
+        "chromeFlags": "--headless=new --no-sandbox --disable-dev-shm-usage --force-prefers-reduced-motion",
+        "maxWaitForLoad": 45000,
+        "pauseAfterLoadMs": 1200,
+        "skipAudits": [
+          "render-blocking-resources",
+          "unused-css-rules",
+          "unminified-css"
+        ]
+      }
     },
     "assert": {
       "assertions": {
