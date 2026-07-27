@@ -2,35 +2,80 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAudioRepair === 'ready') return;
-  root.dataset.fxAudioRepair = 'ready';
+  if (root.dataset.fxAudioRepair === 'v3') return;
+  root.dataset.fxAudioRepair = 'v3';
 
-  function init(button) {
-    if (!(button instanceof HTMLButtonElement) || button.dataset.fxAudioRepair === 'ready') return;
-    button.dataset.fxAudioRepair = 'ready';
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  const OfflineAudioContextClass = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const FALLBACK_AUDIO_URL = './assets/audio/formatx-audio-test.wav?v=20260727-audio-v3';
 
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  async function runOfflineSelfTest() {
+    if (!OfflineAudioContextClass) {
+      root.dataset.fxAudioSelfTest = 'unsupported';
+      return;
+    }
+
+    try {
+      const offline = new OfflineAudioContextClass(1, 4096, 44100);
+      const oscillator = offline.createOscillator();
+      const gain = offline.createGain();
+      oscillator.frequency.value = 880;
+      gain.gain.value = 0.35;
+      oscillator.connect(gain).connect(offline.destination);
+      oscillator.start(0);
+      oscillator.stop(0.075);
+      const rendered = await offline.startRendering();
+      const samples = rendered.getChannelData(0);
+      let peak = 0;
+      for (let index = 0; index < samples.length; index += 1) {
+        peak = Math.max(peak, Math.abs(samples[index]));
+      }
+      root.dataset.fxAudioSelfTest = peak > 0.1 ? 'passed' : 'failed';
+      root.style.setProperty('--fx-audio-self-test-peak', peak.toFixed(3));
+    } catch (error) {
+      root.dataset.fxAudioSelfTest = 'error';
+      root.dataset.fxAudioError = String(error && error.message ? error.message : error).slice(0, 160);
+    }
+  }
+
+  function install(sourceButton) {
+    if (!(sourceButton instanceof HTMLButtonElement)) return;
+
+    // Replace the original node so every legacy click listener attached by the
+    // old audio implementations is removed before the new owner is installed.
+    const button = sourceButton.cloneNode(true);
+    sourceButton.replaceWith(button);
+    button.dataset.fxAudioOwner = 'verified-v3';
+    root.dataset.fxAudioOwner = 'verified-v3';
+    root.dataset.fxAudioEngine = 'web-audio-with-wav-fallback';
+
     let context = null;
-    let master = null;
+    let output = null;
+    let ambientGain = null;
+    let effectsGain = null;
+    let analyser = null;
     let hum = null;
     let harmonic = null;
     let filter = null;
     let enabled = false;
     let operation = 0;
-    let voiceIndex = 0;
     let lastScene = -1;
-    const voices = [];
+    let fallbackAudio = null;
+    let signalCheckTimer = 0;
 
     const language = () => root.lang === 'en' ? 'en' : 'hu';
 
     function sync(state) {
       const on = state === 'on';
       const pending = state === 'pending';
+      const blocked = state === 'blocked';
       button.setAttribute('aria-pressed', String(on));
       button.dataset.fxAudioState = state;
+      root.dataset.fxAudioState = state;
       const label = button.querySelector('span');
       if (label) {
         if (pending) label.textContent = language() === 'en' ? 'STARTING…' : 'INDÍTÁS…';
+        else if (blocked) label.textContent = language() === 'en' ? 'TAP AGAIN' : 'KOPPINTS ÚJRA';
         else if (on) label.textContent = language() === 'en' ? 'SOUND ON' : 'HANG BE';
         else label.textContent = language() === 'en' ? 'SOUND OFF' : 'HANG KI';
       }
@@ -39,109 +84,173 @@
         : on
           ? (language() === 'en' ? 'Disable sound design' : 'Hangdizájn kikapcsolása')
           : (language() === 'en' ? 'Enable sound design' : 'Hangdizájn bekapcsolása'));
-      root.dataset.fxAudioLevel = pending ? 'starting' : on ? 'audible' : 'off';
+      root.dataset.fxAudioLevel = pending ? 'starting' : on ? 'audible' : blocked ? 'blocked' : 'off';
     }
 
     function build() {
       if (context) return true;
       if (!AudioContextClass) {
-        root.dataset.fxAudioLevel = 'unsupported';
+        root.dataset.fxAudioContext = 'unsupported';
         return false;
       }
+
       try {
+        // Context creation happens only from a real user gesture through
+        // ensureRunning(), which is required by Chromium and mobile browsers.
         context = new AudioContextClass({ latencyHint: 'interactive' });
+
         const compressor = context.createDynamicsCompressor();
-        compressor.threshold.value = -20;
-        compressor.knee.value = 16;
-        compressor.ratio.value = 5;
-        compressor.attack.value = 0.006;
-        compressor.release.value = 0.2;
+        compressor.threshold.value = -18;
+        compressor.knee.value = 14;
+        compressor.ratio.value = 4;
+        compressor.attack.value = 0.004;
+        compressor.release.value = 0.18;
+        compressor.connect(context.destination);
 
-        master = context.createGain();
-        master.gain.value = 0.0001;
-        master.connect(compressor).connect(context.destination);
+        analyser = context.createAnalyser();
+        analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0;
+        analyser.connect(compressor);
 
+        output = context.createGain();
+        output.gain.value = 0.82;
+        output.connect(analyser);
+
+        ambientGain = context.createGain();
+        ambientGain.gain.value = 0.0001;
+        ambientGain.connect(output);
+
+        effectsGain = context.createGain();
+        effectsGain.gain.value = 0.95;
+        effectsGain.connect(output);
+
+        // Mid-range frequencies remain audible on phone and laptop speakers.
         hum = context.createOscillator();
-        const humGain = context.createGain();
         hum.type = 'sine';
-        hum.frequency.value = 46.25;
-        humGain.gain.value = 0.09;
-        hum.connect(humGain).connect(master);
+        hum.frequency.value = 174.61;
+        const humGain = context.createGain();
+        humGain.gain.value = 0.22;
+        hum.connect(humGain).connect(ambientGain);
         hum.start();
 
         harmonic = context.createOscillator();
-        const harmonicGain = context.createGain();
         harmonic.type = 'triangle';
-        harmonic.frequency.value = 92.5;
-        harmonicGain.gain.value = 0.025;
-        harmonic.connect(harmonicGain).connect(master);
+        harmonic.frequency.value = 261.63;
+        const harmonicGain = context.createGain();
+        harmonicGain.gain.value = 0.085;
+        harmonic.connect(harmonicGain).connect(ambientGain);
         harmonic.start();
 
         const noise = context.createBufferSource();
         const noiseGain = context.createGain();
-        const buffer = context.createBuffer(1, Math.round(context.sampleRate * 1.5), context.sampleRate);
-        const samples = buffer.getChannelData(0);
+        const noiseBuffer = context.createBuffer(1, Math.round(context.sampleRate), context.sampleRate);
+        const samples = noiseBuffer.getChannelData(0);
         let previous = 0;
         for (let index = 0; index < samples.length; index += 1) {
-          previous = previous * 0.974 + (Math.random() * 2 - 1) * 0.026;
-          samples[index] = previous * 0.42;
+          previous = previous * 0.965 + (Math.random() * 2 - 1) * 0.035;
+          samples[index] = previous * 0.35;
         }
-        noise.buffer = buffer;
+        noise.buffer = noiseBuffer;
         noise.loop = true;
         filter = context.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.value = 470;
-        filter.Q.value = 0.75;
-        noiseGain.gain.value = 0.028;
-        noise.connect(filter).connect(noiseGain).connect(master);
+        filter.frequency.value = 620;
+        filter.Q.value = 0.72;
+        noiseGain.gain.value = 0.045;
+        noise.connect(filter).connect(noiseGain).connect(ambientGain);
         noise.start();
-
-        for (let index = 0; index < 8; index += 1) {
-          const oscillator = context.createOscillator();
-          const gain = context.createGain();
-          oscillator.type = index % 3 === 0 ? 'sine' : 'triangle';
-          gain.gain.value = 0.0001;
-          oscillator.connect(gain).connect(master);
-          oscillator.start();
-          voices.push({ oscillator, gain });
-        }
 
         context.addEventListener('statechange', () => {
           root.dataset.fxAudioContext = context ? context.state : 'closed';
-          if (enabled && context && context.state !== 'running') root.dataset.fxAudioLevel = 'blocked';
         });
         root.dataset.fxAudioContext = context.state;
         return true;
       } catch (error) {
-        console.warn('FormatX audio repair could not initialise.', error);
-        root.dataset.fxAudioLevel = 'error';
+        root.dataset.fxAudioContext = 'error';
+        root.dataset.fxAudioError = String(error && error.message ? error.message : error).slice(0, 160);
         return false;
       }
     }
 
     async function ensureRunning() {
       if (!build() || !context) return false;
-      if (context.state !== 'running') {
+      for (let attempt = 0; attempt < 3 && context.state !== 'running'; attempt += 1) {
         try { await context.resume(); } catch (error) {
-          console.warn('FormatX audio context could not resume.', error);
+          root.dataset.fxAudioError = String(error && error.message ? error.message : error).slice(0, 160);
+        }
+        if (context.state !== 'running') {
+          await new Promise(resolve => setTimeout(resolve, 35));
         }
       }
       root.dataset.fxAudioContext = context.state;
       return context.state === 'running';
     }
 
-    function tone(frequency, duration, volume) {
-      if (!enabled || !context || context.state !== 'running' || !voices.length) return;
-      const voice = voices[voiceIndex];
-      voiceIndex = (voiceIndex + 1) % voices.length;
-      const now = context.currentTime;
-      voice.oscillator.frequency.cancelScheduledValues(now);
-      voice.oscillator.frequency.setValueAtTime(frequency, now);
-      voice.oscillator.frequency.exponentialRampToValueAtTime(Math.max(30, frequency * 0.68), now + duration);
-      voice.gain.gain.cancelScheduledValues(now);
-      voice.gain.gain.setValueAtTime(0.0001, now);
-      voice.gain.gain.exponentialRampToValueAtTime(volume, now + 0.01);
-      voice.gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    function verifyLiveSignal() {
+      clearTimeout(signalCheckTimer);
+      signalCheckTimer = window.setTimeout(() => {
+        if (!analyser || !enabled) return;
+        const data = new Uint8Array(analyser.fftSize);
+        analyser.getByteTimeDomainData(data);
+        let deviation = 0;
+        for (let index = 0; index < data.length; index += 1) {
+          deviation = Math.max(deviation, Math.abs(data[index] - 128));
+        }
+        root.dataset.fxAudioOutput = deviation >= 4 ? 'signal-verified' : 'no-signal';
+        root.style.setProperty('--fx-audio-signal', String(deviation));
+        if (deviation < 4) void playFallback();
+      }, 55);
+    }
+
+    function tone(frequency, duration, volume, delay) {
+      if (!enabled || !context || context.state !== 'running' || !effectsGain) return false;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const start = context.currentTime + Math.max(0, delay || 0);
+      oscillator.type = frequency > 900 ? 'triangle' : 'sine';
+      oscillator.frequency.setValueAtTime(frequency, start);
+      oscillator.frequency.exponentialRampToValueAtTime(Math.max(80, frequency * 0.82), start + duration);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(volume, start + 0.008);
+      gain.gain.setValueAtTime(volume, Math.max(start + 0.012, start + duration - 0.055));
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain).connect(effectsGain);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.03);
+      oscillator.addEventListener('ended', () => {
+        oscillator.disconnect();
+        gain.disconnect();
+      }, { once: true });
+      return true;
+    }
+
+    async function playFallback() {
+      try {
+        if (!fallbackAudio) {
+          fallbackAudio = new Audio(FALLBACK_AUDIO_URL);
+          fallbackAudio.preload = 'auto';
+          fallbackAudio.volume = 1;
+          fallbackAudio.addEventListener('ended', () => {
+            root.dataset.fxAudioFallback = 'ended';
+          });
+        }
+        fallbackAudio.currentTime = 0;
+        await fallbackAudio.play();
+        root.dataset.fxAudioFallback = 'playing';
+        root.dataset.fxAudioOutput = 'wav-fallback';
+        return true;
+      } catch (error) {
+        root.dataset.fxAudioFallback = 'blocked';
+        root.dataset.fxAudioError = String(error && error.message ? error.message : error).slice(0, 160);
+        return false;
+      }
+    }
+
+    function playConfirmation() {
+      const first = tone(740, 0.22, 0.28, 0);
+      const second = tone(1110, 0.24, 0.22, 0.13);
+      if (first || second) verifyLiveSignal();
+      else void playFallback();
     }
 
     async function setEnabled(next) {
@@ -149,84 +258,94 @@
       if (!next) {
         enabled = false;
         sync('off');
-        if (!context || !master) return;
+        clearTimeout(signalCheckTimer);
+        if (fallbackAudio) fallbackAudio.pause();
+        if (!context || !ambientGain) return;
         const now = context.currentTime;
-        master.gain.cancelScheduledValues(now);
-        master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), now);
-        master.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+        ambientGain.gain.cancelScheduledValues(now);
+        ambientGain.gain.setValueAtTime(Math.max(0.0001, ambientGain.gain.value), now);
+        ambientGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
         return;
       }
 
       sync('pending');
       const running = await ensureRunning();
       if (token !== operation) return;
-      if (!running || !context || !master) {
-        enabled = false;
-        sync('off');
-        root.dataset.fxAudioLevel = 'blocked';
+
+      if (!running || !context || !ambientGain) {
+        const fallbackWorked = await playFallback();
+        enabled = fallbackWorked;
+        sync(fallbackWorked ? 'on' : 'blocked');
         return;
       }
 
       enabled = true;
       const now = context.currentTime;
-      master.gain.cancelScheduledValues(now);
-      master.gain.setValueAtTime(Math.max(0.0001, master.gain.value), now);
-      master.gain.exponentialRampToValueAtTime(0.42, now + 0.18);
+      ambientGain.gain.cancelScheduledValues(now);
+      ambientGain.gain.setValueAtTime(Math.max(0.0001, ambientGain.gain.value), now);
+      ambientGain.gain.exponentialRampToValueAtTime(0.16, now + 0.22);
       sync('on');
-      tone(880, 0.16, 0.13);
-      setTimeout(() => tone(1320, 0.2, 0.09), 95);
+      playConfirmation();
     }
 
     function sceneCue() {
-      if (!enabled || !context) return;
+      if (!enabled || !context || context.state !== 'running') return;
       const scene = Math.max(0, Math.min(5, Math.round(Number(root.dataset.fxThreeScene || root.dataset.fxScene || 0))));
       if (scene === lastScene) return;
       lastScene = scene;
       const now = context.currentTime;
-      hum.frequency.setTargetAtTime(44 + scene * 3.2, now, 0.18);
-      harmonic.frequency.setTargetAtTime(88 + scene * 6.4, now, 0.2);
-      filter.frequency.setTargetAtTime(420 + scene * 90, now, 0.16);
-      tone([164.81, 196, 246.94, 130.81, 220, 293.66][scene], 0.23, 0.075);
+      hum.frequency.setTargetAtTime(174.61 + scene * 9, now, 0.16);
+      harmonic.frequency.setTargetAtTime(261.63 + scene * 15, now, 0.18);
+      filter.frequency.setTargetAtTime(520 + scene * 105, now, 0.14);
+      tone([440, 523.25, 659.25, 392, 587.33, 783.99][scene], 0.17, 0.12, 0);
     }
 
     sync('off');
-    root.dataset.fxAudioEngine = 'reliable-web-audio';
 
+    // Unlock as early as possible during the trusted pointer gesture.
+    button.addEventListener('pointerdown', () => { void ensureRunning(); }, { passive: true });
+
+    // Capture on document before later legacy handlers can receive the click.
     document.addEventListener('click', event => {
       const target = event.target instanceof Element ? event.target.closest('.fx-three-sound') : null;
-      if (!target) return;
+      if (target !== button) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       void setEnabled(!enabled);
     }, true);
 
     document.addEventListener('pointerdown', event => {
-      if (enabled && context && context.state !== 'running') void ensureRunning();
+      if (!enabled) return;
+      if (context && context.state !== 'running') void ensureRunning();
       const target = event.target instanceof Element ? event.target.closest('a,button,.card,.price-card,.fx-plan-qr-card') : null;
-      if (!target || target.closest('.fx-three-sound')) return;
-      tone(target.closest('.button,.header-buy,.fx-plan-qr-link') ? 980 : 680, 0.1, 0.05);
+      if (!target || target === button || target.closest('.fx-three-sound')) return;
+      tone(target.closest('.button,.header-buy,.fx-plan-qr-link') ? 980 : 660, 0.1, 0.075, 0);
     }, true);
 
-    const observer = new MutationObserver(sceneCue);
-    observer.observe(root, { attributes: true, attributeFilter: ['data-fx-three-scene', 'data-fx-scene'] });
+    const sceneObserver = new MutationObserver(sceneCue);
+    sceneObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three-scene', 'data-fx-scene'] });
     addEventListener('formatx:languagechange', () => sync(enabled ? 'on' : 'off'));
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && enabled && context && context.state !== 'running') void ensureRunning();
     });
     addEventListener('pagehide', () => {
-      observer.disconnect();
+      sceneObserver.disconnect();
+      clearTimeout(signalCheckTimer);
+      if (fallbackAudio) fallbackAudio.pause();
       if (context) void context.close();
     }, { once: true });
   }
 
+  void runOfflineSelfTest();
+
   const existing = document.querySelector('.fx-three-sound');
-  if (existing) init(existing);
+  if (existing) install(existing);
   else {
     const observer = new MutationObserver(() => {
       const button = document.querySelector('.fx-three-sound');
       if (!button) return;
       observer.disconnect();
-      init(button);
+      install(button);
     });
     observer.observe(document.body, { childList: true, subtree: true });
   }
