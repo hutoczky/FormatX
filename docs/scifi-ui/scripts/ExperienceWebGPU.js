@@ -1,5 +1,5 @@
 // @ts-check
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.webgpu.js';
+import * as THREE from 'three/webgpu';
 import {
   Fn,
   If,
@@ -31,7 +31,7 @@ import {
   cameraPosition,
   modelWorldMatrixInverse,
   varying
-} from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.tsl.js';
+} from 'three/tsl';
 import { WebXRDirector } from './WebXRDirector.js?v=20260727-webgpu-1';
 
 const INDEX = Object.freeze({
