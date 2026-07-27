@@ -24,29 +24,56 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('docs/scifi-ui/scripts/ExperienceWebGPU.js')
           source = path.read_text(encoding='utf-8')
-          pairs = [
-              ("    this.disposed = false;\n    this.quality = 0.72;",
-               "    this.disposed = false;\n    this.readySignalled = false;\n    this.quality = 0.72;"),
-              ("    this.resize();\n    this.signalReady();\n    addEventListener('resize', this.onResize, { passive: true });",
-               "    this.resize();\n    addEventListener('resize', this.onResize, { passive: true });"),
-              ("      root.dataset.fxWebgpu = 'ready';\n      window.parent.dispatchEvent(new CustomEvent('formatx:threeready'));",
-               "      root.dataset.fxWebgpu = 'ready';\n      root.style.setProperty('--fx-experience-engine', 'webgpu-tsl');\n      window.parent.dispatchEvent(new CustomEvent('formatx:threeready'));"),
-              ("    this.particles.update(\n      seconds,",
-               "    try {\n      this.particles.update(\n        seconds,"),
-              ("    this.renderer.render(this.scene, this.camera);\n    this.governor.sample(delta);",
-               "      this.renderer.render(this.scene, this.camera);\n      if (!this.readySignalled) {\n        this.readySignalled = true;\n        this.signalReady();\n      }\n      this.governor.sample(delta);\n    } catch (error) {\n      const message = error instanceof Error ? error.message : String(error);\n      this.dispose();\n      dispatchEvent(new CustomEvent('formatx:webgpufatal', { detail: { message } }));\n    }")
+
+          if 'this.readySignalled = false;' not in source:
+              source = source.replace(
+                  '    this.disposed = false;\n',
+                  '    this.disposed = false;\n    this.readySignalled = false;\n',
+                  1,
+              )
+
+          source = source.replace('    this.signalReady();\n', '', 1)
+
+          if "--fx-experience-engine', 'webgpu-tsl'" not in source:
+              source = source.replace(
+                  "      root.dataset.fxWebgpu = 'ready';\n",
+                  "      root.dataset.fxWebgpu = 'ready';\n      root.style.setProperty('--fx-experience-engine', 'webgpu-tsl');\n",
+                  1,
+              )
+
+          if "formatx:webgpufatal" not in source:
+              start = source.index('    this.particles.update(')
+              end_marker = '    this.governor.sample(delta);'
+              end = source.index(end_marker, start) + len(end_marker)
+              block = source[start:end]
+              guarded = (
+                  '    try {\n'
+                  + ''.join('  ' + line + '\n' for line in block.splitlines())
+                  + "      if (!this.readySignalled) {\n"
+                  + "        this.readySignalled = true;\n"
+                  + "        this.signalReady();\n"
+                  + "      }\n"
+                  + "    } catch (error) {\n"
+                  + "      const message = error instanceof Error ? error.message : String(error);\n"
+                  + "      this.dispose();\n"
+                  + "      dispatchEvent(new CustomEvent('formatx:webgpufatal', { detail: { message } }));\n"
+                  + "    }"
+              )
+              source = source[:start] + guarded + source[end:]
+
+          required = [
+              'this.readySignalled = false;',
+              "--fx-experience-engine', 'webgpu-tsl'",
+              "formatx:webgpufatal",
           ]
-          original = source
-          for old, new in pairs:
-              if old in source:
-                  source = source.replace(old, new, 1)
-              elif new not in source:
-                  raise SystemExit(f'Missing WebGPU runtime marker: {old[:100]}')
-          if source != original:
-              path.write_text(source, encoding='utf-8')
+          missing = [token for token in required if token not in source]
+          if missing:
+              raise SystemExit(f'WebGPU runtime guard incomplete: {missing}')
+          path.write_text(source, encoding='utf-8')
 
           for workflow_name in [
               '.github/workflows/debug-webgpu-stage.yml',
@@ -54,9 +81,11 @@ jobs:
           ]:
               workflow = Path(workflow_name)
               content = workflow.read_text(encoding='utf-8')
-              content = content.replace('playwright@1.55.0', 'playwright@1.62.0')
+              content = re.sub(r'playwright@1\.(?:55|61)\.\d+', 'playwright@1.62.0', content)
               workflow.write_text(content, encoding='utf-8')
           PY
+
+          node --check docs/scifi-ui/scripts/ExperienceWebGPU.js
 
           if git diff --quiet; then
             exit 0
