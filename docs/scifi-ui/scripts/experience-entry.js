@@ -2,6 +2,7 @@ const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260727-webgpu-1', import.m
 const WEBGL_LOADER_URL = new URL('./webgl-fallback-loader.js?v=20260727-webgpu-1', import.meta.url).href;
 const WEBGPU_STARTUP_BUDGET = 8000;
 const WEBGPU_STABLE_FRAMES = 90;
+// A real navigator.gpu value is required; merely using "'gpu' in navigator" is insufficient.
 
 let webGpuAttemptActive = false;
 let webGpuFallbackStarted = false;
