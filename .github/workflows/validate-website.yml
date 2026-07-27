@@ -76,7 +76,7 @@ jobs:
               assert token in webgl_engine, token
           for token in ('THREE.WebGPURenderer', 'MeshBasicNodeMaterial', 'instancedArray', 'renderer.compute', '500000', 'fragmentNode', 'WebXRDirector', 'setAnimationLoop'):
               assert token in webgpu_engine, token
-          for token in ('renderer.xr.enabled = true', "requestSession(mode", "immersive-ar", "immersive-vr", "renderer.xr.setSession"):
+          for token in ('renderer.xr.enabled = true', 'requestSession(mode', 'immersive-ar', 'immersive-vr', 'renderer.xr.setSession'):
               assert token in xr, token
           for token in ('AudioContext', 'OscillatorNode', 'BiquadFilterNode', 'scheduleBeat', 'scrollVelocity', 'formatx:xrstate'):
               if token == 'OscillatorNode':
@@ -144,7 +144,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --prefix "$RUNNER_TEMP/formatx-browser" --no-audit --no-fund playwright@1.55.0
+          npm install --prefix "$RUNNER_TEMP/formatx-browser" --no-audit --no-fund playwright@1.62.0
           "$RUNNER_TEMP/formatx-browser/node_modules/.bin/playwright" install --with-deps chromium firefox
 
       - name: Start static website
