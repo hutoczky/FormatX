@@ -1,10 +1,9 @@
 name: Patch Lighthouse intro gate
 
 on:
-  pull_request:
-    branches: [master]
-    paths:
-      - '.github/workflows/patch-lighthouse-intro.yml'
+  push:
+    branches:
+      - agent/webgpu-tsl-evolution
 
 permissions:
   contents: write
