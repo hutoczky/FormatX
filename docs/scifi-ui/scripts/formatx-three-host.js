@@ -52,7 +52,7 @@
   const frame = document.createElement('iframe');
   frame.id = 'fx-three-frame';
   frame.title = 'FormatX real-time three-dimensional system engine';
-  frame.src = './three-stage.html?v=20260727-three-1';
+  frame.src = './three-stage.html?v=20260727-three-6';
   frame.tabIndex = -1;
   frame.loading = 'eager';
   frame.referrerPolicy = 'no-referrer';
