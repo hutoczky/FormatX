@@ -16,6 +16,10 @@ const THREE_STAGE_PATHS = new Set([
   '/scifi-ui/three-stage',
   '/scifi-ui/three-stage.html',
 ]);
+const LIVING_CORE_PATHS = new Set([
+  '/scifi-ui/living-core',
+  '/scifi-ui/living-core.html',
+]);
 
 const CHECKOUT_PATHS = new Set([
   '/checkout.html',
@@ -67,6 +71,23 @@ const THREE_STAGE_CONTENT_SECURITY_POLICY = [
   "img-src 'self' data:",
   "font-src 'none'",
   "connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com",
+  "media-src 'none'",
+  "worker-src 'none'",
+  "manifest-src 'none'",
+  'upgrade-insecure-requests',
+].join('; ');
+
+const LIVING_CORE_CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "script-src 'self' https://cdn.jsdelivr.net",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self' https://cdn.jsdelivr.net https://api.github.com",
   "media-src 'none'",
   "worker-src 'none'",
   "manifest-src 'none'",
@@ -137,9 +158,16 @@ export default {
   },
 };
 
+function normalisePath(pathname) {
+  return String(pathname || '').replace(/\/+$/, '') || '/';
+}
+
 export function isThreeStagePath(pathname) {
-  const normalized = String(pathname || '').replace(/\/+$/, '') || '/';
-  return THREE_STAGE_PATHS.has(normalized);
+  return THREE_STAGE_PATHS.has(normalisePath(pathname));
+}
+
+export function isLivingCorePath(pathname) {
+  return LIVING_CORE_PATHS.has(normalisePath(pathname));
 }
 
 export function canonicalPageRedirect(request, url) {
@@ -241,6 +269,7 @@ export function secureResponse(response, url) {
   const headers = new Headers(response.headers);
   const contentType = headers.get('Content-Type') || '';
   const isThreeStage = isThreeStagePath(url.pathname);
+  const isLivingCore = isLivingCorePath(url.pathname);
 
   headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   headers.set('X-Content-Type-Options', 'nosniff');
@@ -259,14 +288,14 @@ export function secureResponse(response, url) {
     headers.set('Link', `<${PUBLIC_ORIGIN}${canonicalPath}>; rel="canonical"`);
     const contentSecurityPolicy = isThreeStage
       ? THREE_STAGE_CONTENT_SECURITY_POLICY
-      : url.pathname.endsWith('/checkout.html')
-        ? CHECKOUT_CONTENT_SECURITY_POLICY
-        : CONTENT_SECURITY_POLICY;
+      : isLivingCore
+        ? LIVING_CORE_CONTENT_SECURITY_POLICY
+        : url.pathname.endsWith('/checkout.html')
+          ? CHECKOUT_CONTENT_SECURITY_POLICY
+          : CONTENT_SECURITY_POLICY;
     headers.set('Content-Security-Policy', contentSecurityPolicy);
     headers.set('Cache-Control', 'no-cache, max-age=0, must-revalidate');
   } else if (/\.(?:css|js)$/i.test(url.pathname)) {
-    // The public HTML uses stable asset URLs. Revalidation prevents a browser
-    // from keeping an older cinematic controller after a new deployment.
     headers.set('Cache-Control', 'no-cache, max-age=0, must-revalidate');
   }
 
