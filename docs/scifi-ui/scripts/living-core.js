@@ -64,12 +64,6 @@ const MOBILE_HUD_ANCHORS = Object.freeze([
   [0.26, 0.67], [0.74, 0.67]
 ]);
 
-const MOBILE_HUD_ANCHORS = Object.freeze([
-  [0.24, 0.37], [0.76, 0.37],
-  [0.20, 0.52], [0.80, 0.52],
-  [0.26, 0.67], [0.74, 0.67]
-]);
-
 const RELEASE_API = 'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest';
 const RELEASE_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
 
