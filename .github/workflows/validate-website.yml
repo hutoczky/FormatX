@@ -54,6 +54,8 @@ jobs:
           stage = Path('docs/scifi-ui/three-stage.html').read_text(encoding='utf-8')
           css = Path('docs/scifi-ui/styles/formatx-three-host.css').read_text(encoding='utf-8')
           intro = Path('docs/scifi-ui/scripts/formatx-event-horizon.js').read_text(encoding='utf-8')
+          static_headers = Path('docs/scifi-ui/_headers').read_text(encoding='utf-8')
+          worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
 
           assert home.count('formatx-apex.css?v=20260726-apex-2') == 1
           assert home.count('formatx-apex.js?v=20260726-apex-2') == 1
@@ -80,6 +82,13 @@ jobs:
           assert "getContext('webgl2'" not in apex
           assert 'formatx-transcend-lite.js' not in loader
           assert 'worldstage-enhancements.js' not in loader
+
+          # A global static DENY is combined with the route-specific Worker
+          # header by Cloudflare and blocks the same-origin Three.js iframe.
+          assert 'X-Frame-Options' not in static_headers
+          assert 'THREE_STAGE_CONTENT_SECURITY_POLICY' in worker
+          assert "isThreeStage ? 'SAMEORIGIN' : 'DENY'" in worker
+          assert '"frame-ancestors \'self\'"' in worker
 
       - name: Validate JavaScript syntax
         shell: bash
