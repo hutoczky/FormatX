@@ -1,0 +1,175 @@
+name: Patch Living Core responsive HUD
+
+on:
+  push:
+    branches:
+      - agent/webgpu-tsl-evolution
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-living-core-layout-patch
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Living Core branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: agent/webgpu-tsl-evolution
+          fetch-depth: 0
+
+      - name: Stabilise the core, mobile HUD and viewport panel
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          js_path = Path('docs/scifi-ui/scripts/living-core.js')
+          source = js_path.read_text(encoding='utf-8')
+          original = source
+
+          simple = [
+              ('const RELEASE_API = ', "const MOBILE_HUD_ANCHORS = Object.freeze([\n  [0.24, 0.37], [0.76, 0.37],\n  [0.20, 0.52], [0.80, 0.52],\n  [0.26, 0.67], [0.74, 0.67]\n]);\n\nconst RELEASE_API = "),
+              ('gl_PointSize = (aSize + proximity * 0.65 + uFocus * aEnergy * 0.42) * uPixelRatio * (18.0 / max(1.0, -mvPosition.z));',
+               'gl_PointSize = (aSize + proximity * 0.72 + uFocus * aEnergy * 0.48) * uPixelRatio * (38.0 / max(1.0, -mvPosition.z));'),
+              ('colour += hot * (0.05 + vProximity * 0.22);',
+               'colour += hot * (0.08 + vProximity * 0.3);'),
+              ('float alpha = disc * (0.075 + vEnergy * 0.24 + vProximity * 0.1 + uFocus * 0.035) * (1.0 - vDepth * 0.48);',
+               'float alpha = disc * (0.11 + vEnergy * 0.31 + vProximity * 0.13 + uFocus * 0.045) * (1.0 - vDepth * 0.44);'),
+          ]
+
+          for old, new in simple:
+              if old in source:
+                  source = source.replace(old, new, 1)
+              elif new not in source:
+                  raise SystemExit(f'Living Core marker is missing: {old}')
+
+          old_hud = '''  updateHud() {
+            this.coreProjected.set(0, 0, 0).applyMatrix4(this.world.matrixWorld).project(this.camera);
+            const coreX = (this.coreProjected.x * 0.5 + 0.5) * this.width;
+            const coreY = (-this.coreProjected.y * 0.5 + 0.5) * this.height;
+
+            for (let index = 0; index < this.nodeGroups.length; index += 1) {
+              const group = this.nodeGroups[index];
+              group.getWorldPosition(this.worldPosition);
+              this.projected.copy(this.worldPosition).project(this.camera);
+              const x = (this.projected.x * 0.5 + 0.5) * this.width;
+              const y = (-this.projected.y * 0.5 + 0.5) * this.height;
+              const button = this.nodeButtons[index];
+              const line = this.lineElements[index];
+              if (button) {
+                button.style.setProperty('--node-x', `${x.toFixed(1)}px`);
+                button.style.setProperty('--node-y', `${y.toFixed(1)}px`);
+                const hidden = this.projected.z > 1 || x < -180 || x > this.width + 180 || y < -90 || y > this.height + 90;
+                button.style.visibility = hidden ? 'hidden' : 'visible';
+              }
+              if (line) {
+                line.setAttribute('x1', (coreX / this.width * 100).toFixed(3));
+                line.setAttribute('y1', (coreY / this.height * 100).toFixed(3));
+                line.setAttribute('x2', (x / this.width * 100).toFixed(3));
+                line.setAttribute('y2', (y / this.height * 100).toFixed(3));
+              }
+            }
+          }'''
+
+          new_hud = '''  updateHud() {
+            this.coreProjected.set(0, 0, 0).applyMatrix4(this.world.matrixWorld).project(this.camera);
+            const coreX = (this.coreProjected.x * 0.5 + 0.5) * this.width;
+            const coreY = (-this.coreProjected.y * 0.5 + 0.5) * this.height;
+
+            for (let index = 0; index < this.nodeGroups.length; index += 1) {
+              const group = this.nodeGroups[index];
+              group.getWorldPosition(this.worldPosition);
+              this.projected.copy(this.worldPosition).project(this.camera);
+              let x = (this.projected.x * 0.5 + 0.5) * this.width;
+              let y = (-this.projected.y * 0.5 + 0.5) * this.height;
+              if (this.mobile) {
+                const anchor = MOBILE_HUD_ANCHORS[index];
+                x = anchor[0] * this.width;
+                y = anchor[1] * this.height;
+              }
+              const button = this.nodeButtons[index];
+              const line = this.lineElements[index];
+              if (button) {
+                button.style.setProperty('--node-x', `${x.toFixed(1)}px`);
+                button.style.setProperty('--node-y', `${y.toFixed(1)}px`);
+                const hidden = !this.mobile && (this.projected.z > 1 || x < -180 || x > this.width + 180 || y < -90 || y > this.height + 90);
+                button.style.visibility = hidden ? 'hidden' : 'visible';
+              }
+              if (line) {
+                line.setAttribute('x1', (coreX / this.width * 100).toFixed(3));
+                line.setAttribute('y1', (coreY / this.height * 100).toFixed(3));
+                line.setAttribute('x2', (x / this.width * 100).toFixed(3));
+                line.setAttribute('y2', (y / this.height * 100).toFixed(3));
+              }
+            }
+          }'''
+
+          if old_hud in source:
+              source = source.replace(old_hud, new_hud, 1)
+          elif new_hud not in source:
+              raise SystemExit('Living Core updateHud block is missing')
+
+          old_panel = '''    gsap.fromTo(this.panel,
+              mobilePanel
+                ? { autoAlpha: 0, y: 34, scale: 0.98, rotationY: 0 }
+                : { autoAlpha: 0, x: 52, scale: 0.96, rotationY: -8 },
+              mobilePanel
+                ? { autoAlpha: 1, y: 0, scale: 1, duration: 0.62, ease: 'power3.out' }
+                : { autoAlpha: 1, x: 0, scale: 1, rotationY: 0, duration: 0.62, ease: 'power3.out' }
+            );'''
+          new_panel = '''    gsap.fromTo(this.panel,
+              mobilePanel
+                ? { autoAlpha: 0, y: 34, yPercent: 0, scale: 0.98, rotationY: 0 }
+                : { autoAlpha: 0, x: 52, yPercent: -50, scale: 0.96, rotationY: -8 },
+              mobilePanel
+                ? { autoAlpha: 1, y: 0, yPercent: 0, scale: 1, duration: 0.62, ease: 'power3.out' }
+                : { autoAlpha: 1, x: 0, yPercent: -50, scale: 1, rotationY: 0, duration: 0.62, ease: 'power3.out' }
+            );'''
+          if old_panel in source:
+              source = source.replace(old_panel, new_panel, 1)
+          elif new_panel not in source:
+              raise SystemExit('Living Core panel entrance block is missing')
+
+          old_close = '''      y: mobilePanel ? 34 : 0,
+              scale: 0.97,'''
+          new_close = '''      y: mobilePanel ? 34 : 0,
+              yPercent: mobilePanel ? 0 : -50,
+              scale: 0.97,'''
+          if old_close in source:
+              source = source.replace(old_close, new_close, 1)
+          elif new_close not in source:
+              raise SystemExit('Living Core panel close block is missing')
+
+          if source != original:
+              js_path.write_text(source, encoding='utf-8')
+
+          css_path = Path('docs/scifi-ui/styles/living-core.css')
+          css = css_path.read_text(encoding='utf-8')
+          original_css = css
+          old_css = '.lc-panel {\n  --panel-accent: #6eeaff;\n  position: absolute;'
+          new_css = '.lc-panel {\n  --panel-accent: #6eeaff;\n  position: fixed;'
+          if old_css in css:
+              css = css.replace(old_css, new_css, 1)
+          elif new_css not in css:
+              raise SystemExit('Living Core panel positioning marker is missing')
+          if css != original_css:
+              css_path.write_text(css, encoding='utf-8')
+          PY
+
+          if git diff --quiet -- docs/scifi-ui/scripts/living-core.js docs/scifi-ui/styles/living-core.css; then
+            echo 'Living Core responsive correction is already applied.'
+            exit 0
+          fi
+
+          git config user.name 'FormatX Living Core Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/living-core.js docs/scifi-ui/styles/living-core.css
+          git commit -m 'Stabilise Living Core mobile HUD and panel layout'
+          git push origin HEAD:agent/webgpu-tsl-evolution
