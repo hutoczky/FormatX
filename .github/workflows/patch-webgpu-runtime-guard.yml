@@ -18,52 +18,80 @@ jobs:
           ref: agent/webgpu-tsl-evolution
           fetch-depth: 0
 
-      - name: Delay readiness until a successful frame and guard runtime failure
+      - name: Apply one deterministic runtime patch
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import re
 
           path = Path('docs/scifi-ui/scripts/ExperienceWebGPU.js')
           source = path.read_text(encoding='utf-8')
 
           if 'this.readySignalled = false;' not in source:
               source = source.replace(
-                  '    this.disposed = false;\n',
-                  '    this.disposed = false;\n    this.readySignalled = false;\n',
+                  '    this.disposed = false;\n    this.quality = 0.72;',
+                  '    this.disposed = false;\n    this.readySignalled = false;\n    this.quality = 0.72;',
                   1,
               )
 
-          source = source.replace('    this.signalReady();\n', '', 1)
+          source = source.replace(
+              "    this.resize();\n    this.signalReady();\n    addEventListener('resize', this.onResize, { passive: true });",
+              "    this.resize();\n    addEventListener('resize', this.onResize, { passive: true });",
+              1,
+          )
 
           if "--fx-experience-engine', 'webgpu-tsl'" not in source:
               source = source.replace(
-                  "      root.dataset.fxWebgpu = 'ready';\n",
-                  "      root.dataset.fxWebgpu = 'ready';\n      root.style.setProperty('--fx-experience-engine', 'webgpu-tsl');\n",
+                  "      root.dataset.fxWebgpu = 'ready';\n      window.parent.dispatchEvent(new CustomEvent('formatx:threeready'));",
+                  "      root.dataset.fxWebgpu = 'ready';\n      root.style.setProperty('--fx-experience-engine', 'webgpu-tsl');\n      window.parent.dispatchEvent(new CustomEvent('formatx:threeready'));",
                   1,
               )
 
-          if "formatx:webgpufatal" not in source:
-              start = source.index('    this.particles.update(')
-              end_marker = '    this.governor.sample(delta);'
-              end = source.index(end_marker, start) + len(end_marker)
-              block = source[start:end]
-              guarded = (
-                  '    try {\n'
-                  + ''.join('  ' + line + '\n' for line in block.splitlines())
-                  + "      if (!this.readySignalled) {\n"
-                  + "        this.readySignalled = true;\n"
-                  + "        this.signalReady();\n"
-                  + "      }\n"
-                  + "    } catch (error) {\n"
-                  + "      const message = error instanceof Error ? error.message : String(error);\n"
-                  + "      this.dispose();\n"
-                  + "      dispatchEvent(new CustomEvent('formatx:webgpufatal', { detail: { message } }));\n"
-                  + "    }"
-              )
-              source = source[:start] + guarded + source[end:]
+          old_block = '''    this.core.update(seconds, this.sceneValue, this.pointerX, this.pointerY, this.quality);
+    this.particles.update(
+      seconds,
+      this.sceneValue,
+      this.pointerX,
+      this.pointerY,
+      this.pointerVX,
+      this.pointerVY,
+      runtimeState[INDEX.VELOCITY] || 0
+    );
+    this.volume.mesh.rotation.y = seconds * -0.035;
+    this.grid.position.z = -this.scrollValue * 4.2;
+    this.renderer.render(this.scene, this.camera);
+    this.governor.sample(delta);'''
+
+          new_block = '''    this.core.update(seconds, this.sceneValue, this.pointerX, this.pointerY, this.quality);
+    try {
+      this.particles.update(
+        seconds,
+        this.sceneValue,
+        this.pointerX,
+        this.pointerY,
+        this.pointerVX,
+        this.pointerVY,
+        runtimeState[INDEX.VELOCITY] || 0
+      );
+      this.volume.mesh.rotation.y = seconds * -0.035;
+      this.grid.position.z = -this.scrollValue * 4.2;
+      this.renderer.render(this.scene, this.camera);
+      if (!this.readySignalled) {
+        this.readySignalled = true;
+        this.signalReady();
+      }
+      this.governor.sample(delta);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.dispose();
+      dispatchEvent(new CustomEvent('formatx:webgpufatal', { detail: { message } }));
+    }'''
+
+          if old_block in source:
+              source = source.replace(old_block, new_block, 1)
+          elif "formatx:webgpufatal" not in source:
+              raise SystemExit('The expected WebGPU frame block is missing')
 
           required = [
               'this.readySignalled = false;',
@@ -72,7 +100,7 @@ jobs:
           ]
           missing = [token for token in required if token not in source]
           if missing:
-              raise SystemExit(f'WebGPU runtime guard incomplete: {missing}')
+              raise SystemExit(f'Runtime patch incomplete: {missing}')
           path.write_text(source, encoding='utf-8')
 
           for workflow_name in [
@@ -81,13 +109,15 @@ jobs:
           ]:
               workflow = Path(workflow_name)
               content = workflow.read_text(encoding='utf-8')
-              content = re.sub(r'playwright@1\.(?:55|61)\.\d+', 'playwright@1.62.0', content)
+              content = content.replace('playwright@1.55.0', 'playwright@1.62.0')
+              content = content.replace('playwright@1.61.1', 'playwright@1.62.0')
               workflow.write_text(content, encoding='utf-8')
           PY
 
           node --check docs/scifi-ui/scripts/ExperienceWebGPU.js
 
           if git diff --quiet; then
+            echo 'WebGPU runtime guard already applied.'
             exit 0
           fi
           git config user.name 'FormatX WebGPU Bot'
