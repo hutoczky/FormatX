@@ -1,0 +1,68 @@
+name: Validate organism-first FormatX main site
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/**'
+      - '.github/scripts/validate-organism-main.cjs'
+      - '.github/workflows/validate-organism-main.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  organism-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Validate new JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/organism-interface.js
+          node --check docs/scifi-ui/scripts/living-architecture.js
+          node --check .github/scripts/validate-organism-main.cjs
+
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start static website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-organism-http.log" 2>&1 &
+          for attempt in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/formatx-organism-http.log"
+          exit 1
+
+      - name: Test desktop and mobile organism interactions
+        shell: bash
+        run: node .github/scripts/validate-organism-main.cjs
+
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-organism-main-evidence
+          path: |
+            organism-main-desktop.png
+            organism-main-mobile.png
+          if-no-files-found: warn
+          retention-days: 7
