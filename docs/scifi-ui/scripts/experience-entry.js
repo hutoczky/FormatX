@@ -1,6 +1,6 @@
-const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260727-particles-pro-1', import.meta.url).href;
+const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260727-particles-focus-2', import.meta.url).href;
 const WEBXR_URL = new URL('./WebXRDirector.js?v=20260727-webgpu-1', import.meta.url).href;
-const WEBGL_LOADER_URL = new URL('./webgl-fallback-loader.js?v=20260727-particles-pro-1', import.meta.url).href;
+const WEBGL_LOADER_URL = new URL('./webgl-fallback-loader.js?v=20260727-particles-focus-2', import.meta.url).href;
 const WEBGPU_STARTUP_BUDGET = 8000;
 const WEBGPU_STABLE_FRAMES = 90;
 const FORCE_WEBGL = new URLSearchParams(location.search).get('force-webgl') === '1';
@@ -61,13 +61,13 @@ async function loadWebGpuModule() {
   source = replaceRequired(
     source,
     'this.maxCount = reduced ? 60000 : mobile ? 260000 : 500000;',
-    'this.maxCount = reduced ? 36000 : mobile ? 120000 : 200000;',
+    'this.maxCount = reduced ? 18000 : mobile ? 60000 : 100000;',
     'maximum particle count'
   );
   source = replaceRequired(
     source,
     'this.counts = reduced ? [18000, 30000, 45000, 60000] : mobile ? [45000, 90000, 160000, 260000] : [80000, 170000, 320000, 500000];',
-    'this.counts = reduced ? [6000, 12000, 22000, 36000] : mobile ? [18000, 38000, 72000, 120000] : [30000, 65000, 120000, 200000];',
+    'this.counts = reduced ? [3000, 6000, 11000, 18000] : mobile ? [9000, 19000, 36000, 60000] : [15000, 32000, 60000, 100000];',
     'particle quality tiers'
   );
   source = replaceRequired(
@@ -195,7 +195,7 @@ function installRuntimeGuard(webGpuModule) {
         originalReady.call(this);
         try {
           parent.document.documentElement.style.setProperty('--fx-experience-engine', 'webgpu-tsl');
-          parent.document.documentElement.dataset.fxParticleProfile = 'professional';
+          parent.document.documentElement.dataset.fxParticleProfile = 'focus-half';
         } catch (_) {}
       }
     } catch (error) {
