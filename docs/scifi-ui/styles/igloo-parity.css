@@ -1,8 +1,8 @@
 @import url("./formatx-transcend.css?v=20260727-transcend-3");
 @import url("./formatx-transcend-performance.css?v=20260727-performance-2");
-@import url("./worldstage-enhancements.css?v=20260727-worldstage-1");
+@import url("./formatx-three-host.css?v=20260727-three-1");
 
 /* Compatibility entrypoint retained for the existing GitHub Pages loader. */
 html {
-  --fx-experience-engine: "worldstage";
+  --fx-experience-engine: "three-webgl";
 }

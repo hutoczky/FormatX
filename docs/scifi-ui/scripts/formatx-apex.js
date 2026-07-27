@@ -1,36 +1,280 @@
-(function(){
-'use strict';
-const ROOT=document.documentElement,REDUCE=matchMedia('(prefers-reduced-motion: reduce)'),FINE=matchMedia('(hover:hover) and (pointer:fine)'),MOBILE=matchMedia('(max-width:820px)');
-const LANG_KEY='formatx-language',RELEASE_API='https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest',DOWNLOAD_PREFIX='https://github.com/hutoczky/FormatX-Updates/releases/download/',PAGE_PREFIX='https://github.com/hutoczky/FormatX-Updates/releases/';
-const PRICES={HUF:15900,EUR:44};
-const SCENES=[['hero','120,210,255',0],['experience','183,163,255',.24],['capabilities','126,241,190',.48],['pricing','255,196,126',.7],['system','126,190,255',.88],['resources','205,235,249',1]];
-const FLOWS=[['01','FELDERÍTÉS','DISCOVERY','ENV / READ',.06],['02','TERVEZÉS','PLANNING','PLAN / PREVIEW',.34],['03','VÉGREHAJTÁS','EXECUTION','RUN / CONTROL',.65],['04','ELLENŐRZÉS','VERIFICATION','HASH / REPORT',.93]];
-let language=initialLanguage(),renderer=null,activeScene=0,activeFlow=0,visible=!document.hidden,loopClone=null,looping=false,loopEnabled=false,loopCount=0;
-function initialLanguage(){const q=new URLSearchParams(location.search).get('lang');if(q==='hu'||q==='en')return q;try{const s=localStorage.getItem(LANG_KEY);if(s==='hu'||s==='en')return s}catch(_){}return String(navigator.language||'').toLowerCase().startsWith('hu')?'hu':'en'}
-function applyLanguage(next,persist){language=next==='en'?'en':'hu';ROOT.lang=language;document.querySelectorAll('[data-hu][data-en]').forEach(e=>e.textContent=e.dataset[language]);document.querySelectorAll('[data-language]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.language===language)));if(persist){try{localStorage.setItem(LANG_KEY,language)}catch(_){}const u=new URL(location.href);u.searchParams.set('lang',language);history.replaceState({},'',u.pathname+u.search+u.hash)}updateLinks();updatePrice();updateFlow(activeFlow,false);document.querySelector('.loop-toggle')?.setAttribute('aria-label',language==='hu'?'Végtelen görgetés be- vagy kikapcsolása':'Toggle infinite scrolling')}
-function updateLinks(){document.querySelectorAll('a[href]').forEach(a=>{const h=a.getAttribute('href');if(!h||h.startsWith('#')||h.startsWith('mailto:')||h.startsWith('tel:'))return;try{const u=new URL(h,location.href);if(u.origin!==location.origin)return;if(!u.pathname.endsWith('.html')&&!u.pathname.endsWith('/'))return;u.searchParams.set('lang',language);a.href=u.pathname+u.search+u.hash}catch(_){}})}
-function money(v,c){return new Intl.NumberFormat(language==='hu'?'hu-HU':'en-GB',{style:'currency',currency:c,minimumFractionDigits:0,maximumFractionDigits:0}).format(v)}
-function currentCurrency(){return document.querySelector('[data-currency][aria-pressed=true]')?.dataset.currency==='EUR'?'EUR':'HUF'}
-function updatePrice(){const c=currentCurrency(),o=c==='HUF'?'EUR':'HUF',main=document.getElementById('preview-main-price'),second=document.getElementById('preview-secondary-price'),label=document.getElementById('preview-secondary-label'),link=document.getElementById('preview-checkout-link');if(main)main.textContent=money(PRICES[c],c);if(second)second.textContent=money(PRICES[o],o);if(label)label.textContent=language==='hu'?(o==='EUR'?'Összeg EUR-ban':'Összeg HUF-ban'):(o==='EUR'?'Amount in EUR':'Amount in HUF');if(link)link.href='./checkout.html?plan=business_pro&cycle=monthly&currency='+c+'&lang='+language}
-function navigation(){const t=document.getElementById('menu-toggle'),n=document.getElementById('main-nav');t?.addEventListener('click',()=>{const open=!n.classList.contains('open');n.classList.toggle('open',open);t.setAttribute('aria-expanded',String(open))});n?.addEventListener('click',e=>{if(e.target.closest('a')){n.classList.remove('open');t?.setAttribute('aria-expanded','false')}});addEventListener('keydown',e=>{if(e.key==='Escape'){n?.classList.remove('open');t?.setAttribute('aria-expanded','false')}});document.querySelectorAll('[data-language]').forEach(b=>b.addEventListener('click',()=>applyLanguage(b.dataset.language,true)));document.querySelectorAll('[data-currency]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-currency]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));updatePrice()}))}
-function trusted(value,prefix){try{const u=new URL(value);return u.protocol==='https:'&&u.href.startsWith(prefix)}catch(_){return false}}
-async function latestRelease(){try{const r=await fetch(RELEASE_API,{headers:{Accept:'application/vnd.github+json'}});if(!r.ok)throw Error();const p=await r.json(),m=String(p.tag_name||'').match(/^v?(\d+)$/i);if(!m||p.draft||p.prerelease||!Array.isArray(p.assets))throw Error();const version='V'+m[1],asset=p.assets.find(a=>a?.name==='FormatX-Suite-Pro-'+version+'.zip');if(!asset||!trusted(asset.browser_download_url,DOWNLOAD_PREFIX)||!trusted(p.html_url,PAGE_PREFIX))throw Error();const dl=document.getElementById('hero-download'),name=document.getElementById('release-name'),date=document.getElementById('release-published'),page=document.getElementById('release-page-link');if(dl)dl.href=asset.browser_download_url;if(name)name.textContent='FormatX Suite Pro '+version;if(page)page.href=p.html_url;if(date){const d=new Date(p.published_at);date.textContent=Number.isNaN(d.getTime())?'GitHub Releases':new Intl.DateTimeFormat(language==='hu'?'hu-HU':'en-GB',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}}catch(_){}}
-function reveal(){const els=[...document.querySelectorAll('[data-reveal]')];if(REDUCE.matches||!('IntersectionObserver'in window)){els.forEach(e=>e.classList.add('visible'));return}const o=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');o.unobserve(e.target)}}),{rootMargin:'0px 0px -7% 0px',threshold:.08});els.forEach(e=>o.observe(e))}
-function setScene(i){i=Math.max(0,Math.min(SCENES.length-1,i));activeScene=i;const s=SCENES[i];ROOT.dataset.fxScene=String(i);ROOT.style.setProperty('--accent',s[1]);document.querySelectorAll('[data-scene-link]').forEach(a=>a.classList.toggle('active',Number(a.dataset.sceneLink)===i));document.querySelectorAll('.main-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+s[0]));renderer?.setScene(s[2])}
-function scenes(){const sections=SCENES.map(s=>document.getElementById(s[0])).filter(Boolean);if('IntersectionObserver'in window){const o=new IntersectionObserver(es=>{let best=null;es.forEach(e=>{if(e.isIntersecting&&(!best||e.intersectionRatio>best.intersectionRatio))best=e});if(best){const i=SCENES.findIndex(s=>s[0]===best.target.id);if(i>=0)setScene(i)}},{threshold:[.2,.4,.6]});sections.forEach(s=>o.observe(s))}const progress=()=>{const end=loopClone?loopClone.offsetTop:document.documentElement.scrollHeight,range=Math.max(1,end-innerHeight),p=Math.max(0,Math.min(1,scrollY/range));ROOT.style.setProperty('--progress',p.toFixed(5));ROOT.classList.toggle('fx-page-scrolled',scrollY>24);renderer?.setScroll(p)};progress();addEventListener('scroll',progress,{passive:true});addEventListener('resize',progress,{passive:true})}
-function scramble(el,text){if(!el||REDUCE.matches){if(el)el.textContent=text;return}const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/+-',len=Math.max(el.textContent.length,text.length);let f=0;function tick(){let out='',settled=Math.floor(f/13*len);for(let i=0;i<len;i++)out+=i<settled?(text[i]||''):(i<text.length?chars[(i*7+f*3)%chars.length]:'');el.textContent=out;if(f++<13)requestAnimationFrame(tick);else el.textContent=text}tick()}
-function updateFlow(i,animate=true){i=Math.max(0,Math.min(FLOWS.length-1,i));activeFlow=i;ROOT.dataset.fxFlow=String(i);document.querySelectorAll('[data-flow]').forEach(e=>e.classList.toggle('active',Number(e.dataset.flow)===i));const f=FLOWS[i],num=document.querySelector('[data-flow-number]'),title=document.querySelector('[data-flow-title]'),code=document.querySelector('[data-flow-code]');if(num)num.textContent=f[0];if(code)code.textContent=f[3];if(title)animate?scramble(title,f[language==='hu'?1:2]):title.textContent=f[language==='hu'?1:2];renderer?.setFlow(f[4])}
-function flow(){const chapters=[...document.querySelectorAll('[data-flow]')];chapters.forEach(c=>{c.addEventListener('mouseenter',()=>updateFlow(Number(c.dataset.flow)));c.addEventListener('focus',()=>updateFlow(Number(c.dataset.flow)))});if('IntersectionObserver'in window){const o=new IntersectionObserver(es=>{let best=null;es.forEach(e=>{if(e.isIntersecting&&(!best||e.intersectionRatio>best.intersectionRatio))best=e});if(best)updateFlow(Number(best.target.dataset.flow))},{rootMargin:'-32% 0px -32%',threshold:[0,.2,.5,.8]});chapters.forEach(c=>o.observe(c))}updateFlow(0,false)}
-function pointer(){if(!FINE.matches||REDUCE.matches)return;const ring=document.createElement('span'),dot=document.createElement('span');ring.className='fx-cursor';dot.className='fx-cursor-dot';document.body.append(ring,dot);let x=innerWidth/2,y=innerHeight/2,dx=x,dy=y,tx=x,ty=y;addEventListener('pointermove',e=>{tx=e.clientX;ty=e.clientY;ROOT.style.setProperty('--px',(e.clientX/innerWidth*2-1).toFixed(3));ROOT.style.setProperty('--py',(e.clientY/innerHeight*2-1).toFixed(3));renderer?.setPointer(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight*2-1))},{passive:true});document.addEventListener('pointerover',e=>ROOT.classList.toggle('cursor-hover',Boolean(e.target.closest('a,button,[tabindex],.card,.price-card'))));(function draw(){x+=(tx-x)*.16;y+=(ty-y)*.16;dx+=(tx-dx)*.43;dy+=(ty-dy)*.43;ring.style.transform=`translate3d(${x}px,${y}px,0) translate(-50%,-50%)`;dot.style.transform=`translate3d(${dx}px,${dy}px,0) translate(-50%,-50%)`;requestAnimationFrame(draw)})();document.querySelectorAll('.magnetic').forEach(b=>{b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect(),bx=e.clientX-r.left-r.width/2,by=e.clientY-r.top-r.height/2;b.style.setProperty('--bx',(bx*.12).toFixed(2)+'px');b.style.setProperty('--by',(by*.12).toFixed(2)+'px');b.style.setProperty('--hx',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');b.style.setProperty('--hy',((e.clientY-r.top)/r.height*100).toFixed(1)+'%')});b.addEventListener('pointerleave',()=>{b.style.setProperty('--bx','0px');b.style.setProperty('--by','0px')})});document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();c.style.setProperty('--cx',((e.clientX-r.left)/r.width*100)+'%');c.style.setProperty('--cy',((e.clientY-r.top)/r.height*100)+'%')}))}
-function shader(gl,type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
-function program(gl,v,f){const p=gl.createProgram();gl.attachShader(p,shader(gl,gl.VERTEX_SHADER,v));gl.attachShader(p,shader(gl,gl.FRAGMENT_SHADER,f));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));return p}
-function renderer2d(canvas){const ctx=canvas.getContext('2d'),state={scene:0,flow:0,scroll:0,px:0,py:0},target={...state};let raf=0,w=0,h=0;function resize(){w=canvas.clientWidth||innerWidth;h=canvas.clientHeight||innerHeight;const d=Math.min(MOBILE.matches?1:1.5,devicePixelRatio||1);canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0)}function draw(t){raf=requestAnimationFrame(draw);if(!visible)return;Object.keys(state).forEach(k=>state[k]+=(target[k]-state[k])*.055);ctx.clearRect(0,0,w,h);const cx=w*(.66+state.px*.025),cy=h*(.47-state.py*.02),r=Math.min(w,h)*(.18+state.flow*.04);ctx.save();ctx.translate(cx,cy);ctx.rotate(t*.00008+state.scroll*2);for(let i=0;i<8;i++){ctx.rotate(Math.PI/4);ctx.strokeStyle=`rgba(${150+i*8},${220-i*3},255,${.08+i*.018})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,-r*(.55+i*.045));ctx.lineTo(r*(.34+i*.025),0);ctx.lineTo(0,r*(.55+i*.045));ctx.lineTo(-r*(.34+i*.025),0);ctx.closePath();ctx.stroke()}ctx.restore()}resize();addEventListener('resize',resize,{passive:true});if(!REDUCE.matches)raf=requestAnimationFrame(draw);else draw(0);return{mode:'canvas2d',setScene:v=>target.scene=v,setFlow:v=>target.flow=v,setScroll:v=>target.scroll=v,setPointer:(x,y)=>{target.px=x;target.py=y},destroy:()=>cancelAnimationFrame(raf)}}
-function createRenderer(){const canvas=document.getElementById('fx-apex-canvas');if(!canvas)return null;const gl=canvas.getContext('webgl2',{alpha:true,antialias:false,depth:false,powerPreference:'high-performance'});if(!gl)return renderer2d(canvas);try{const vs=`#version 300 es
-in vec2 p;out vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0,1);}`;const fs=`#version 300 es
-precision highp float;out vec4 O;in vec2 uv;uniform vec2 R,P;uniform float T,S,F,Q;
-mat2 r(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}float oct(vec3 p,float s){p=abs(p);return(p.x+p.y+p.z-s)*.577;}float box(vec3 p,vec3 b){vec3 q=abs(p)-b;return length(max(q,0.))+min(max(q.x,max(q.y,q.z)),0.);}float map(vec3 p){p.xz*=r(.35*T+S*1.8+P.x*.18);p.xy*=r(.22*T+F*1.4-P.y*.14);float k=mix(oct(p,1.38),box(p,vec3(.72)),smoothstep(.25,.75,F));float rings=abs(length(p.xz)-(.9+.15*sin(p.y*3.+T)))-.025;float nodes=length(p-vec3(sin(T*.4)*.65,cos(T*.3)*.45,0.))-.18;return min(k,max(rings,-k*.4+Q*.08))-nodes*.08;}vec3 normal(vec3 p){vec2 e=vec2(.002,0);return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}void main(){vec2 q=(uv*2.-1.);q.x*=R.x/R.y;vec3 ro=vec3(0,0,4.4+S*.7),rd=normalize(vec3(q,-1.7));rd.xz*=r(P.x*.08);rd.yz*=r(P.y*.06);float d=0.,glow=0.;vec3 pos;for(int i=0;i<64;i++){pos=ro+rd*d;float h=map(pos);glow+=exp(-18.*abs(h))*.012;if(abs(h)<.0015||d>10.)break;d+=h*.7;}vec3 col=vec3(.008,.014,.022);if(d<10.){vec3 n=normal(pos),l=normalize(vec3(-.4,.8,.5));float dif=max(dot(n,l),0.),rim=pow(1.-max(dot(n,-rd),0.),2.8),spec=pow(max(dot(reflect(-l,n),-rd),0.),40.);vec3 a=mix(vec3(.35,.78,1.),vec3(.72,.55,1.),S);a=mix(a,vec3(.38,1.,.72),smoothstep(.35,.65,F));a=mix(a,vec3(1.,.65,.3),smoothstep(.68,.92,S));col+=a*(.12+dif*.55+rim*.8)+spec*vec3(1.);col*=1.+.15*sin(pos.y*12.+T*2.);}col+=glow*mix(vec3(.3,.8,1.),vec3(.8,.55,1.),S);col+=.018/(.03+abs(q.y+.28+sin(q.x*3.+T*.2)*.02));col*=1.-dot(q,q)*.12;O=vec4(pow(col,vec3(.82)),clamp(.12+length(col),0.,.92));}`;const pr=program(gl,vs,fs),buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.useProgram(pr);const loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);const u=n=>gl.getUniformLocation(pr,n),U={R:u('R'),P:u('P'),T:u('T'),S:u('S'),F:u('F'),Q:u('Q')};let state={scene:0,flow:0,scroll:0,px:0,py:0},target={...state},raf=0,start=performance.now();function resize(){const d=Math.min(MOBILE.matches?1:1.45,devicePixelRatio||1),w=Math.max(1,innerWidth),h=Math.max(1,innerHeight);canvas.width=Math.floor(w*d);canvas.height=Math.floor(h*d);gl.viewport(0,0,canvas.width,canvas.height)}function draw(now){raf=requestAnimationFrame(draw);if(!visible)return;Object.keys(state).forEach(k=>state[k]+=(target[k]-state[k])*.045);gl.useProgram(pr);gl.uniform2f(U.R,canvas.width,canvas.height);gl.uniform2f(U.P,state.px,state.py);gl.uniform1f(U.T,(now-start)*.001);gl.uniform1f(U.S,state.scene);gl.uniform1f(U.F,state.flow);gl.uniform1f(U.Q,state.scroll);gl.drawArrays(gl.TRIANGLES,0,3)}resize();addEventListener('resize',resize,{passive:true});if(!REDUCE.matches)raf=requestAnimationFrame(draw);else draw(start);return{mode:'webgl2',setScene:v=>target.scene=v,setFlow:v=>target.flow=v,setScroll:v=>target.scroll=v,setPointer:(x,y)=>{target.px=x;target.py=y},destroy:()=>{cancelAnimationFrame(raf);gl.deleteProgram(pr);gl.deleteBuffer(buf)}}}catch(e){console.warn('APEX WebGL fallback.',e);return renderer2d(canvas)}}
-function particles(){const canvas=document.getElementById('fx-particle-canvas'),host=canvas?.parentElement,ctx=canvas?.getContext('2d',{alpha:true});if(!canvas||!host||!ctx)return null;const off=document.createElement('canvas'),oc=off.getContext('2d',{willReadFrequently:true});let parts=[],w=0,h=0,d=1,raf=0,seen=false,mouse={x:-9999,y:-9999};function build(){w=Math.max(1,host.clientWidth);h=Math.max(1,host.clientHeight);d=Math.min(MOBILE.matches?1:1.3,devicePixelRatio||1);canvas.width=w*d;canvas.height=h*d;canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(d,0,0,d,0,0);off.width=Math.floor(w/2);off.height=Math.floor(h/2);oc.clearRect(0,0,off.width,off.height);oc.fillStyle='#fff';oc.textAlign='center';oc.textBaseline='middle';oc.font='900 '+Math.floor(Math.min(off.width*.23,off.height*.42))+'px Arial Black';oc.fillText('FORMATX',off.width/2,off.height/2);const data=oc.getImageData(0,0,off.width,off.height).data,targets=[],step=MOBILE.matches?5:4;for(let y=0;y<off.height;y+=step)for(let x=0;x<off.width;x+=step)if(data[(y*off.width+x)*4+3]>120)targets.push([x*2,y*2]);const max=MOBILE.matches?480:1000,stride=Math.max(1,Math.ceil(targets.length/max));parts=targets.filter((_,i)=>i%stride===0).slice(0,max).map((t,i)=>({x:parts[i]?.x??Math.random()*w,y:parts[i]?.y??Math.random()*h,vx:0,vy:0,tx:t[0],ty:t[1],p:Math.random()*6.28,s:.6+Math.random()*1.2}))}function draw(now){raf=requestAnimationFrame(draw);if(!visible||!seen)return;ctx.clearRect(0,0,w,h);const t=now*.001;parts.forEach(p=>{let tx=p.tx+Math.sin(t*.7+p.p)*2.5,ty=p.ty+Math.cos(t*.6+p.p)*2.5,dx=p.x-mouse.x,dy=p.y-mouse.y,dist=Math.hypot(dx,dy);if(dist<110){const f=(110-dist)/110;tx+=dx/Math.max(1,dist)*f*42;ty+=dy/Math.max(1,dist)*f*42}p.vx+=(tx-p.x)*.018;p.vy+=(ty-p.y)*.018;p.vx*=.9;p.vy*=.9;p.x+=p.vx;p.y+=p.vy;const speed=Math.min(1,Math.hypot(p.vx,p.vy)/5);ctx.fillStyle=`rgba(${180+speed*60},${220-speed*20},255,${.18+speed*.6})`;ctx.beginPath();ctx.arc(p.x,p.y,p.s+speed*1.7,0,6.283);ctx.fill()})}host.addEventListener('pointermove',e=>{const r=host.getBoundingClientRect();mouse={x:e.clientX-r.left,y:e.clientY-r.top}});host.addEventListener('pointerleave',()=>mouse={x:-9999,y:-9999});new ResizeObserver(build).observe(host);if('IntersectionObserver'in window)new IntersectionObserver(es=>seen=es.some(e=>e.isIntersecting),{rootMargin:'200px'}).observe(host);else seen=true;build();if(!REDUCE.matches)raf=requestAnimationFrame(draw);else{seen=true;draw(0);cancelAnimationFrame(raf)}return{destroy:()=>cancelAnimationFrame(raf)}}
-function infinite(){const hero=document.getElementById('hero'),footer=document.querySelector('.site-footer');if(!hero||!footer||REDUCE.matches){ROOT.dataset.fxInfinite=REDUCE.matches?'reduced-motion-disabled':'unavailable';return null}loopClone=hero.cloneNode(true);loopClone.removeAttribute('id');loopClone.removeAttribute('aria-labelledby');loopClone.classList.add('scene-loop-clone');loopClone.dataset.loopClone='true';loopClone.setAttribute('aria-hidden','true');loopClone.inert=true;loopClone.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));loopClone.querySelectorAll('[data-reveal]').forEach(e=>{e.removeAttribute('data-reveal');e.classList.add('visible')});loopClone.querySelectorAll('a,button,[tabindex]').forEach(e=>e.setAttribute('tabindex','-1'));document.body.append(loopClone);loopEnabled=true;ROOT.dataset.fxInfinite='ready';ROOT.dataset.fxLoopCount='0';if('scrollRestoration'in history)history.scrollRestoration='manual';const toggle=document.createElement('button');toggle.type='button';toggle.className='loop-toggle';toggle.setAttribute('aria-pressed','true');toggle.setAttribute('aria-label',language==='hu'?'Végtelen görgetés be- vagy kikapcsolása':'Toggle infinite scrolling');toggle.innerHTML='<span aria-hidden="true">∞</span><b>LOOP</b>';document.body.append(toggle);toggle.addEventListener('click',()=>{loopEnabled=!loopEnabled;toggle.setAttribute('aria-pressed',String(loopEnabled));ROOT.dataset.fxInfinite=loopEnabled?'ready':'paused'});function handle(){if(!loopEnabled||looping||!loopClone)return;const top=loopClone.offsetTop;if(scrollY>=top-innerHeight*.72)renderer?.setScene(0);if(scrollY<top+2)return;looping=true;ROOT.classList.add('loop-transfer');setScene(0);const offset=Math.max(0,Math.min(hero.offsetHeight-2,scrollY-top));scrollTo({top:hero.offsetTop+offset,behavior:'auto'});ROOT.dataset.fxLoopCount=String(++loopCount);requestAnimationFrame(()=>requestAnimationFrame(()=>{ROOT.classList.remove('loop-transfer');looping=false;dispatchEvent(new CustomEvent('formatx:loop',{detail:{count:loopCount}}))}))}addEventListener('scroll',handle,{passive:true});return{destroy:()=>{loopEnabled=false;loopClone?.remove();toggle.remove()}}}
-function initialise(){navigation();applyLanguage(language,false);reveal();scenes();flow();pointer();document.addEventListener('visibilitychange',()=>visible=!document.hidden);updatePrice();latestRelease();renderer=createRenderer();const particle=particles(),loop=infinite();setScene(activeScene);updateFlow(activeFlow,false);ROOT.dataset.fxApex='ready';ROOT.dataset.fxRenderer=renderer?.mode||'none';dispatchEvent(new CustomEvent('formatx:apexready',{detail:{renderer:ROOT.dataset.fxRenderer,infinite:ROOT.dataset.fxInfinite}}));addEventListener('pagehide',()=>{renderer?.destroy();particle?.destroy();loop?.destroy()},{once:true})}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialise,{once:true});else initialise();
+(function () {
+  'use strict';
+
+  const ROOT = document.documentElement;
+  const LANG_KEY = 'formatx-language';
+  const RELEASE_API = 'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest';
+  const DOWNLOAD_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
+  const PAGE_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/';
+  const PRICES = { HUF: 15900, EUR: 44 };
+  const SCENES = [
+    ['hero', '120,210,255'],
+    ['experience', '183,163,255'],
+    ['capabilities', '126,241,190'],
+    ['pricing', '255,196,126'],
+    ['system', '126,190,255'],
+    ['resources', '205,235,249']
+  ];
+  const FLOWS = [
+    ['01', 'FELDERÍTÉS', 'DISCOVERY', 'ENV / READ'],
+    ['02', 'TERVEZÉS', 'PLANNING', 'PLAN / PREVIEW'],
+    ['03', 'VÉGREHAJTÁS', 'EXECUTION', 'RUN / CONTROL'],
+    ['04', 'ELLENŐRZÉS', 'VERIFICATION', 'HASH / REPORT']
+  ];
+
+  let language = initialLanguage();
+  let activeScene = 0;
+  let activeFlow = 0;
+
+  function initialLanguage() {
+    const query = new URLSearchParams(location.search).get('lang');
+    if (query === 'hu' || query === 'en') return query;
+    try {
+      const stored = localStorage.getItem(LANG_KEY);
+      if (stored === 'hu' || stored === 'en') return stored;
+    } catch (_) {}
+    return String(navigator.language || '').toLowerCase().startsWith('hu') ? 'hu' : 'en';
+  }
+
+  function applyLanguage(next, persist) {
+    language = next === 'en' ? 'en' : 'hu';
+    ROOT.lang = language;
+    document.querySelectorAll('[data-hu][data-en]').forEach(element => {
+      element.textContent = element.dataset[language];
+    });
+    document.querySelectorAll('[data-language]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.language === language));
+    });
+    if (persist) {
+      try { localStorage.setItem(LANG_KEY, language); } catch (_) {}
+      const url = new URL(location.href);
+      url.searchParams.set('lang', language);
+      history.replaceState({}, '', url.pathname + url.search + url.hash);
+    }
+    updateLinks();
+    updatePrice();
+    updateFlow(activeFlow);
+    dispatchEvent(new CustomEvent('formatx:languagechange'));
+  }
+
+  function updateLinks() {
+    document.querySelectorAll('a[href]').forEach(anchor => {
+      const href = anchor.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      try {
+        const url = new URL(href, location.href);
+        if (url.origin !== location.origin) return;
+        if (!url.pathname.endsWith('.html') && !url.pathname.endsWith('/')) return;
+        url.searchParams.set('lang', language);
+        anchor.href = url.pathname + url.search + url.hash;
+      } catch (_) {}
+    });
+  }
+
+  function money(value, currency) {
+    return new Intl.NumberFormat(language === 'hu' ? 'hu-HU' : 'en-GB', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  }
+
+  function currentCurrency() {
+    return document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
+  }
+
+  function updatePrice() {
+    const selected = currentCurrency();
+    const other = selected === 'HUF' ? 'EUR' : 'HUF';
+    const main = document.getElementById('preview-main-price');
+    const secondary = document.getElementById('preview-secondary-price');
+    const label = document.getElementById('preview-secondary-label');
+    const link = document.getElementById('preview-checkout-link');
+    if (main) main.textContent = money(PRICES[selected], selected);
+    if (secondary) secondary.textContent = money(PRICES[other], other);
+    if (label) label.textContent = language === 'hu'
+      ? (other === 'EUR' ? 'Összeg EUR-ban' : 'Összeg HUF-ban')
+      : (other === 'EUR' ? 'Amount in EUR' : 'Amount in HUF');
+    if (link) link.href = './checkout.html?plan=business_pro&cycle=monthly&currency=' + selected + '&lang=' + language;
+  }
+
+  function navigation() {
+    const toggle = document.getElementById('menu-toggle');
+    const nav = document.getElementById('main-nav');
+    toggle?.addEventListener('click', () => {
+      const open = !nav.classList.contains('open');
+      nav.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+    nav?.addEventListener('click', event => {
+      if (!event.target.closest('a')) return;
+      nav.classList.remove('open');
+      toggle?.setAttribute('aria-expanded', 'false');
+    });
+    addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      nav?.classList.remove('open');
+      toggle?.setAttribute('aria-expanded', 'false');
+    });
+    document.querySelectorAll('[data-language]').forEach(button => {
+      button.addEventListener('click', () => applyLanguage(button.dataset.language, true));
+    });
+    document.querySelectorAll('[data-currency]').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-currency]').forEach(item => {
+          item.setAttribute('aria-pressed', String(item === button));
+        });
+        updatePrice();
+      });
+    });
+  }
+
+  function trusted(value, prefix) {
+    try {
+      const url = new URL(value);
+      return url.protocol === 'https:' && url.href.startsWith(prefix);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function latestRelease() {
+    try {
+      const response = await fetch(RELEASE_API, { headers: { Accept: 'application/vnd.github+json' } });
+      if (!response.ok) throw new Error('Release lookup failed');
+      const payload = await response.json();
+      const match = String(payload.tag_name || '').match(/^v?(\d+)$/i);
+      if (!match || payload.draft || payload.prerelease || !Array.isArray(payload.assets)) throw new Error('Invalid release');
+      const version = 'V' + match[1];
+      const asset = payload.assets.find(item => item?.name === 'FormatX-Suite-Pro-' + version + '.zip');
+      if (!asset || !trusted(asset.browser_download_url, DOWNLOAD_PREFIX) || !trusted(payload.html_url, PAGE_PREFIX)) throw new Error('Untrusted release');
+      const download = document.getElementById('hero-download');
+      const name = document.getElementById('release-name');
+      const date = document.getElementById('release-published');
+      const page = document.getElementById('release-page-link');
+      if (download) download.href = asset.browser_download_url;
+      if (name) name.textContent = 'FormatX Suite Pro ' + version;
+      if (page) page.href = payload.html_url;
+      if (date) {
+        const published = new Date(payload.published_at);
+        date.textContent = Number.isNaN(published.getTime())
+          ? 'GitHub Releases'
+          : new Intl.DateTimeFormat(language === 'hu' ? 'hu-HU' : 'en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(published);
+      }
+    } catch (_) {}
+  }
+
+  function reveal() {
+    const elements = Array.from(document.querySelectorAll('[data-reveal]'));
+    if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      elements.forEach(element => element.classList.add('visible'));
+      return;
+    }
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -7% 0px', threshold: 0.08 });
+    elements.forEach(element => observer.observe(element));
+  }
+
+  function setScene(index) {
+    activeScene = Math.max(0, Math.min(SCENES.length - 1, index));
+    const scene = SCENES[activeScene];
+    ROOT.dataset.fxScene = String(activeScene);
+    ROOT.style.setProperty('--accent', scene[1]);
+    document.querySelectorAll('[data-scene-link]').forEach(anchor => {
+      anchor.classList.toggle('active', Number(anchor.dataset.sceneLink) === activeScene);
+    });
+    document.querySelectorAll('.main-nav a').forEach(anchor => {
+      anchor.classList.toggle('active', anchor.getAttribute('href') === '#' + scene[0]);
+    });
+  }
+
+  function scenes() {
+    const sceneSections = SCENES.map(scene => document.getElementById(scene[0])).filter(Boolean);
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(entries => {
+        let best = null;
+        entries.forEach(entry => {
+          if (entry.isIntersecting && (!best || entry.intersectionRatio > best.intersectionRatio)) best = entry;
+        });
+        if (!best) return;
+        const index = SCENES.findIndex(scene => scene[0] === best.target.id);
+        if (index >= 0) setScene(index);
+      }, { threshold: [0.2, 0.4, 0.6] });
+      sceneSections.forEach(section => observer.observe(section));
+    }
+    const progress = () => {
+      const range = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+      const value = Math.max(0, Math.min(1, scrollY / range));
+      ROOT.style.setProperty('--progress', value.toFixed(5));
+      ROOT.classList.toggle('fx-page-scrolled', scrollY > 24);
+    };
+    progress();
+    addEventListener('scroll', progress, { passive: true });
+    addEventListener('resize', progress, { passive: true });
+  }
+
+  function updateFlow(index) {
+    activeFlow = Math.max(0, Math.min(FLOWS.length - 1, index));
+    ROOT.dataset.fxFlow = String(activeFlow);
+    document.querySelectorAll('[data-flow]').forEach(element => {
+      element.classList.toggle('active', Number(element.dataset.flow) === activeFlow);
+    });
+    const flow = FLOWS[activeFlow];
+    const number = document.querySelector('[data-flow-number]');
+    const title = document.querySelector('[data-flow-title]');
+    const code = document.querySelector('[data-flow-code]');
+    if (number) number.textContent = flow[0];
+    if (title) title.textContent = flow[language === 'hu' ? 1 : 2];
+    if (code) code.textContent = flow[3];
+  }
+
+  function flow() {
+    const chapters = Array.from(document.querySelectorAll('[data-flow]'));
+    chapters.forEach(chapter => {
+      chapter.addEventListener('mouseenter', () => updateFlow(Number(chapter.dataset.flow)));
+      chapter.addEventListener('focus', () => updateFlow(Number(chapter.dataset.flow)));
+    });
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(entries => {
+        let best = null;
+        entries.forEach(entry => {
+          if (entry.isIntersecting && (!best || entry.intersectionRatio > best.intersectionRatio)) best = entry;
+        });
+        if (best) updateFlow(Number(best.target.dataset.flow));
+      }, { rootMargin: '-32% 0px -32%', threshold: [0, 0.2, 0.5, 0.8] });
+      chapters.forEach(chapter => observer.observe(chapter));
+    }
+    updateFlow(0);
+  }
+
+  function pointerVariables() {
+    addEventListener('pointermove', event => {
+      ROOT.style.setProperty('--px', (event.clientX / Math.max(1, innerWidth) * 2 - 1).toFixed(3));
+      ROOT.style.setProperty('--py', (event.clientY / Math.max(1, innerHeight) * 2 - 1).toFixed(3));
+    }, { passive: true });
+  }
+
+  function initialise() {
+    navigation();
+    applyLanguage(language, false);
+    reveal();
+    scenes();
+    flow();
+    pointerVariables();
+    updatePrice();
+    latestRelease();
+    setScene(activeScene);
+    ROOT.dataset.fxApex = 'controller-only';
+    ROOT.dataset.fxRenderer = 'three-host';
+    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
+  else initialise();
 }());

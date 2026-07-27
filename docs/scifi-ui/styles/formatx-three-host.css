@@ -1,0 +1,344 @@
+/* FormatX real Three.js stage */
+:root {
+  --fx-three-fps: 0;
+}
+
+html[data-fx-three-host="ready"] {
+  background: #010307;
+}
+
+html[data-fx-three-host="ready"] body {
+  background: transparent !important;
+  touch-action: pan-y;
+}
+
+html[data-fx-three-host="ready"] #fx-apex-canvas,
+html[data-fx-three-host="ready"] #fx-particle-canvas,
+html[data-fx-three-host="ready"] .fx-transcend-shell,
+html[data-fx-three-host="ready"] .fx-worldstage-flow,
+html[data-fx-three-host="ready"] .fx-worldstage-shock,
+html[data-fx-three-host="ready"] .fx-worldstage-guide,
+html[data-fx-three-host="ready"] .fx-transcend-sound {
+  display: none !important;
+}
+
+.fx-three-stage-shell {
+  position: fixed;
+  z-index: -8;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 55% 42%, rgba(25, 123, 157, .08), transparent 34rem),
+    linear-gradient(180deg, #02070d, #010307 75%);
+}
+
+#fx-three-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.018);
+  transition: opacity 1s cubic-bezier(.16, .82, .18, 1), transform 1.1s cubic-bezier(.16, .82, .18, 1);
+}
+
+html.fx-three-frame-loaded #fx-three-frame {
+  opacity: .45;
+}
+
+html.fx-three-engine-ready #fx-three-frame,
+html[data-fx-three="ready"] #fx-three-frame {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fx-three-telemetry {
+  position: fixed;
+  z-index: 474;
+  left: clamp(16px, 2.3vw, 38px);
+  bottom: clamp(18px, 3vh, 34px);
+  min-width: min(320px, calc(100vw - 32px));
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  align-items: end;
+  padding: 14px 16px;
+  border: 1px solid rgba(198, 235, 249, .14);
+  border-radius: 17px;
+  color: #f2fbff;
+  background: linear-gradient(145deg, rgba(3, 9, 15, .82), rgba(3, 8, 14, .52));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .34), inset 0 1px rgba(255, 255, 255, .035);
+  backdrop-filter: blur(14px) saturate(118%);
+  pointer-events: none;
+}
+
+.fx-three-telemetry span,
+.fx-three-telemetry small {
+  color: rgba(200, 226, 238, .58);
+  font-size: 7px;
+  font-weight: 760;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.fx-three-telemetry strong {
+  grid-column: 1 / -1;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 790;
+  letter-spacing: .12em;
+  text-shadow: 0 0 24px rgba(104, 225, 255, .28);
+}
+
+.fx-three-telemetry small {
+  grid-column: 1 / -1;
+}
+
+.fx-three-sound {
+  position: fixed;
+  z-index: 498;
+  right: 18px;
+  bottom: 18px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 15px;
+  border: 1px solid rgba(202, 234, 248, .17);
+  border-radius: 999px;
+  color: rgba(226, 242, 248, .76);
+  background: rgba(3, 8, 14, .78);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, .3);
+  backdrop-filter: blur(14px) saturate(118%);
+  cursor: pointer;
+}
+
+.fx-three-sound > i {
+  height: 13px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.fx-three-sound > i b {
+  width: 2px;
+  height: 5px;
+  border-radius: 999px;
+  background: #91eaff;
+  animation: fx-three-sound-bars .82s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+
+.fx-three-sound > i b:nth-child(2) {
+  height: 11px;
+  animation-delay: -.27s;
+}
+
+.fx-three-sound > i b:nth-child(3) {
+  height: 7px;
+  animation-delay: -.51s;
+}
+
+.fx-three-sound[aria-pressed="true"] > i b {
+  animation-play-state: running;
+}
+
+.fx-three-sound span {
+  font-size: 7px;
+  font-weight: 780;
+  letter-spacing: .13em;
+}
+
+@keyframes fx-three-sound-bars {
+  to {
+    transform: scaleY(.3);
+    opacity: .42;
+  }
+}
+
+.fx-three-guide {
+  position: fixed;
+  z-index: 468;
+  top: 50%;
+  right: clamp(20px, 3vw, 54px);
+  display: grid;
+  grid-template-columns: 18px auto;
+  gap: 2px 10px;
+  align-items: center;
+  color: rgba(216, 239, 248, .58);
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: opacity .3s ease;
+}
+
+.fx-three-guide i {
+  grid-row: 1 / 3;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(141, 232, 255, .48);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(86, 215, 255, .2);
+}
+
+.fx-three-guide span,
+.fx-three-guide b {
+  font-size: 7px;
+  font-weight: 760;
+  letter-spacing: .14em;
+}
+
+.fx-three-guide b {
+  color: rgba(197, 221, 233, .38);
+}
+
+html.fx-three-dragging {
+  cursor: grabbing;
+}
+
+html.fx-three-dragging .fx-three-guide {
+  opacity: 1;
+}
+
+html.fx-three-shock body::after {
+  content: "";
+  position: fixed;
+  z-index: 466;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at calc(50% + var(--fx-transcend-pointer-x, 0) * 8%) calc(50% - var(--fx-transcend-pointer-y, 0) * 8%), transparent 0 8%, rgba(142, 236, 255, .18) 8.4%, transparent 9.4%),
+    radial-gradient(circle at 50% 50%, rgba(133, 216, 255, .08), transparent 48%);
+  mix-blend-mode: screen;
+  animation: fx-three-shock .52s ease-out both;
+}
+
+@keyframes fx-three-shock {
+  0% { opacity: 0; transform: scale(.78); }
+  28% { opacity: .72; }
+  100% { opacity: 0; transform: scale(1.32); }
+}
+
+.fx-three-loop-bridge {
+  position: relative;
+  min-height: 112svh !important;
+  margin: 0;
+  overflow: clip;
+  pointer-events: none;
+  user-select: none;
+  contain: layout paint style;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1100px;
+  background: transparent !important;
+}
+
+.fx-three-loop-bridge .hero-copy {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+.fx-three-continuum {
+  position: absolute;
+  z-index: 4;
+  right: var(--gutter);
+  bottom: clamp(34px, 6vh, 76px);
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 3px 10px;
+  color: rgba(220, 242, 251, .8);
+  text-align: right;
+  pointer-events: none;
+}
+
+.fx-three-continuum span {
+  grid-row: 1 / 3;
+  color: #a8efff;
+  font-size: 42px;
+  font-weight: 200;
+  line-height: 1;
+}
+
+.fx-three-continuum b,
+.fx-three-continuum small {
+  font-size: 8px;
+  letter-spacing: .16em;
+}
+
+.fx-three-continuum small {
+  color: rgba(207, 229, 239, .5);
+}
+
+html.fx-three-loop-transfer body::before {
+  content: "";
+  position: fixed;
+  z-index: 2147482000;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 52%, rgba(121, 226, 255, .15), rgba(1, 4, 8, .07) 36%, transparent 72%);
+  animation: fx-three-loop-mask .17s ease both;
+}
+
+@keyframes fx-three-loop-mask {
+  0% { opacity: 0; }
+  45% { opacity: .6; }
+  100% { opacity: 0; }
+}
+
+html[data-fx-three-host="ready"] main,
+html[data-fx-three-host="ready"] .topbar,
+html[data-fx-three-host="ready"] .site-footer {
+  position: relative;
+  z-index: 2;
+}
+
+html[data-fx-three-host="ready"] .scene {
+  background: transparent !important;
+}
+
+@media (max-width: 900px) {
+  .fx-three-guide {
+    display: none;
+  }
+
+  .fx-three-telemetry {
+    left: 12px;
+    bottom: 64px;
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+    padding: 11px 13px;
+    backdrop-filter: none;
+  }
+
+  .fx-three-sound {
+    right: 12px;
+    bottom: 12px;
+    backdrop-filter: none;
+  }
+
+  .fx-three-loop-bridge {
+    min-height: 100svh !important;
+  }
+
+  .fx-three-continuum {
+    right: 18px;
+    bottom: 72px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #fx-three-frame,
+  .fx-three-sound > i b,
+  html.fx-three-shock body::after,
+  html.fx-three-loop-transfer body::before {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .fx-three-guide {
+    display: none;
+  }
+}
