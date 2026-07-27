@@ -1,7 +1,7 @@
 # Security headers for static assets only.
 # HTML framing and CSP are controlled centrally by
 # billing-worker/src/production-with-license.js so route-specific policies
-# cannot be combined with a second conflicting X-Frame-Options value here.
+# cannot be combined with a second conflicting frame-control value here.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
