@@ -5,6 +5,7 @@ on:
     paths:
       - "docs/**"
       - "tools/validate-site-i18n.py"
+      - "tools/validate-site-i18n-three.py"
       - ".github/workflows/i18n-audit.yml"
   push:
     branches:
@@ -12,6 +13,7 @@ on:
     paths:
       - "docs/**"
       - "tools/validate-site-i18n.py"
+      - "tools/validate-site-i18n-three.py"
       - ".github/workflows/i18n-audit.yml"
 
 permissions:
@@ -34,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python3 tools/validate-site-i18n.py 2>&1 | tee i18n-audit.txt
+          python3 tools/validate-site-i18n-three.py 2>&1 | tee i18n-audit.txt
 
       - name: Upload bilingual audit report
         if: always()

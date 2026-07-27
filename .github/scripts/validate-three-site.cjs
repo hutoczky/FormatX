@@ -35,11 +35,16 @@ async function readState(page) {
     const frameDocument = frame?.contentDocument;
     const canvas = frameDocument?.querySelector('canvas');
     const rect = canvas?.getBoundingClientRect();
+    const engine = getComputedStyle(document.documentElement)
+      .getPropertyValue('--fx-experience-engine')
+      .replace(/["']/g, '')
+      .trim();
 
     return {
       three: document.documentElement.dataset.fxThree,
       renderer: document.documentElement.dataset.fxThreeRenderer,
       quality: document.documentElement.dataset.fxThreeQuality,
+      engine,
       infinite: document.documentElement.dataset.fxInfinite,
       loops: Number(document.documentElement.dataset.fxLoopCount || 0),
       scene: document.documentElement.dataset.fxThreeScene,
@@ -54,7 +59,6 @@ async function readState(page) {
       rail: document.querySelectorAll('.fx-rail').length,
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
       duplicates,
-      styles: Array.from(document.styleSheets, sheet => sheet.href || '').join('|'),
       scripts: Array.from(document.scripts, script => script.src || '').join('|'),
       frameScripts: frameDocument ? Array.from(frameDocument.scripts, script => script.src || '').join('|') : ''
     };
@@ -67,6 +71,7 @@ async function verifyCommon(page, name, errors, minimumWidth, minimumHeight) {
   const state = await readState(page);
   assert(!errors.length, name + ' page errors: ' + errors.join(' | '));
   assert(state.three === 'ready' && state.renderer === 'three-webgl', name + ' renderer: ' + JSON.stringify(state));
+  assert(state.engine === 'three-webgl', name + ' experience CSS engine: ' + state.engine);
   assert(state.frame, name + ' missing Three stage iframe');
   assert(state.canvas[0] >= minimumWidth && state.canvas[1] >= minimumHeight, name + ' canvas: ' + state.canvas);
   assert(state.infinite === 'ready' && state.clone === 1 && state.toggle === 0, name + ' mandatory loop: ' + JSON.stringify(state));
@@ -74,7 +79,6 @@ async function verifyCommon(page, name, errors, minimumWidth, minimumHeight) {
   assert(state.rail === 1, name + ' missing chapter rail');
   assert(!state.duplicates.length, name + ' duplicate IDs: ' + state.duplicates.join(','));
   assert(state.overflow <= 1, name + ' horizontal overflow: ' + state.overflow);
-  assert(state.styles.includes('formatx-three-host.css'), name + ' missing Three host CSS');
   assert(state.scripts.includes('formatx-three-host.js'), name + ' missing Three host script');
   assert(state.frameScripts.includes('experience-entry.js'), name + ' missing Three entry module');
   return state;
