@@ -1,8 +1,9 @@
 name: Patch WebGPU first-frame guard
 
 on:
-  pull_request:
-    branches: [master]
+  push:
+    branches:
+      - agent/webgpu-tsl-evolution
   workflow_dispatch:
 
 permissions:
