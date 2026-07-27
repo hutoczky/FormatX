@@ -1,0 +1,25 @@
+name: Export Three.js host source
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/export-three-host-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Upload host source
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-three-host-source
+          path: docs/scifi-ui/scripts/formatx-three-host.js
+          retention-days: 1
