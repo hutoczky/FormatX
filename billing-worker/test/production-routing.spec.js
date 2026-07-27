@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   canonicalPageRedirect,
+  createAudioTestWav,
   isLivingCorePath,
   isThreeStagePath,
   secureResponse,
@@ -71,6 +72,19 @@ describe('production routing and frame security', () => {
     expect(policy).not.toContain('autoplay=()');
     expect(policy).toContain('microphone=()');
     expect(response.headers.get('Content-Security-Policy')).toContain("media-src 'self'");
+  });
+
+  it('generates a valid and audible PCM WAV fallback', () => {
+    const wav = createAudioTestWav();
+    const header = new TextDecoder().decode(wav.slice(0, 12));
+    const samples = new Int16Array(wav.buffer, wav.byteOffset + 44, (wav.byteLength - 44) / 2);
+    let peak = 0;
+    for (const sample of samples) peak = Math.max(peak, Math.abs(sample));
+
+    expect(header.slice(0, 4)).toBe('RIFF');
+    expect(header.slice(8, 12)).toBe('WAVE');
+    expect(wav.byteLength).toBeGreaterThan(4000);
+    expect(peak).toBeGreaterThan(15000);
   });
 
   it('redirects the apex domain to the canonical www product page', () => {
