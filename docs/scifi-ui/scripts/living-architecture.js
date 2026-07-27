@@ -21,7 +21,6 @@
   const statusIndex = status?.querySelector('.fx-organism-status-index');
   const statusName = status?.querySelector('strong');
   const nodes = Array.from(document.querySelectorAll('[data-organ-node]'));
-  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let qrGeneration = 0;
 
   function language() {
@@ -55,27 +54,27 @@
     return './assets/qr/' + planId + '-' + selectedCurrency.toLowerCase() + '.svg';
   }
 
-  function loadCryosphere() {
+  function loadThreeExperience() {
     if (!document.querySelector('link[data-fx-cryosphere-style]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = './styles/igloo-parity.css?v=20260726-parity-2';
+      style.href = './styles/igloo-parity.css?v=20260727-three-1';
       style.dataset.fxCryosphereStyle = 'true';
       document.head.appendChild(style);
     }
     if (!document.querySelector('link[data-fx-readability-style]')) {
       const readability = document.createElement('link');
       readability.rel = 'stylesheet';
-      readability.href = './styles/readability-focus.css?v=20260726-readability-1';
+      readability.href = './styles/readability-focus.css?v=20260727-readability-2';
       readability.dataset.fxReadabilityStyle = 'true';
-      readability.addEventListener('load', function () {
+      readability.addEventListener('load', () => {
         ROOT.dataset.fxReadability = 'ready';
       }, { once: true });
       document.head.appendChild(readability);
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260726-parity-2';
+      script.src = './scripts/igloo-parity.js?v=20260727-three-1';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
@@ -100,7 +99,7 @@
     ROOT.style.setProperty('--organism-progress', Math.round(scene.progress * 100) + '%');
     if (statusIndex) statusIndex.textContent = String(index + 1).padStart(2, '0') + ' / 06';
     if (statusName) statusName.textContent = scene[language()];
-    nodes.forEach(function (node, nodeIndex) {
+    nodes.forEach((node, nodeIndex) => {
       const active = nodeIndex === index;
       node.classList.toggle('active', active);
       if (active) node.setAttribute('aria-current', 'step');
@@ -114,7 +113,7 @@
     const generation = ++qrGeneration;
     revealQrDock();
 
-    document.querySelectorAll('[data-plan-id]').forEach(function (card) {
+    document.querySelectorAll('[data-plan-id]').forEach(card => {
       const planId = card.dataset.planId;
       const plan = PLANS[planId];
       if (!plan) return;
@@ -127,7 +126,7 @@
       if (link) link.href = checkoutHref(planId, selectedCurrency);
     });
 
-    PLAN_IDS.forEach(function (planId) {
+    PLAN_IDS.forEach(planId => {
       const plan = PLANS[planId];
       const card = document.querySelector('[data-plan-qr="' + planId + '"]');
       if (!plan || !card) return;
@@ -143,11 +142,9 @@
           + (language() === 'hu' ? 'fizetés megnyitása' : 'open payment'));
       }
       if (!image) return;
-
       card.classList.remove('is-qr-ready', 'is-qr-error');
       card.classList.add('is-qr-loading');
-
-      image.onload = function () {
+      image.onload = () => {
         if (generation !== qrGeneration) return;
         if (image.naturalWidth < 32 || image.naturalHeight < 32) {
           image.onerror();
@@ -156,84 +153,53 @@
         card.classList.remove('is-qr-loading', 'is-qr-error');
         card.classList.add('is-qr-ready');
       };
-
-      image.onerror = function () {
+      image.onerror = () => {
         if (generation !== qrGeneration) return;
         card.classList.remove('is-qr-loading', 'is-qr-ready');
         card.classList.add('is-qr-error');
       };
-
       image.alt = plan.name + ' — '
         + (language() === 'hu' ? 'fizetési oldal QR-kódja' : 'payment page QR code');
-
-      if (ROOT.dataset.fxLocalQr === 'ready') {
-        image.src = qrImageUrl(planId, selectedCurrency);
-      } else {
-        image.removeAttribute('src');
-      }
+      if (ROOT.dataset.fxLocalQr === 'ready') image.src = qrImageUrl(planId, selectedCurrency);
+      else image.removeAttribute('src');
     });
   }
 
-  function pulse() {
-    if (reduceMotion.matches) {
-      ROOT.style.setProperty('--organism-scale', '1');
-      return;
-    }
-    let frame = 0;
-    function draw(now) {
-      if (++frame % 2 === 0) {
-        const value = 1 + Math.sin(now * .0027) * .22;
-        ROOT.style.setProperty('--organism-scale', value.toFixed(3));
-      }
-      requestAnimationFrame(draw);
-    }
-    requestAnimationFrame(draw);
-  }
-
   function bind() {
-    const observer = new MutationObserver(function (entries) {
-      if (entries.some(function (entry) {
-        return entry.type === 'attributes' && (entry.attributeName === 'data-fx-scene' || entry.attributeName === 'lang');
-      })) {
+    const observer = new MutationObserver(entries => {
+      if (entries.some(entry => entry.type === 'attributes' && (entry.attributeName === 'data-fx-scene' || entry.attributeName === 'lang'))) {
         syncScene();
         updateCommerce();
       }
     });
     observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
-
-    document.addEventListener('click', function (event) {
-      if (event.target.closest('[data-currency], [data-language]')) {
-        setTimeout(function () {
-          syncScene();
-          updateCommerce();
-        }, 0);
-      }
+    document.addEventListener('click', event => {
+      if (!event.target.closest('[data-currency], [data-language]')) return;
+      setTimeout(() => {
+        syncScene();
+        updateCommerce();
+      }, 0);
     });
-
-    window.addEventListener('formatx:languagechange', function () {
+    addEventListener('formatx:languagechange', () => {
       syncScene();
       updateCommerce();
     });
-    window.addEventListener('pageshow', function () {
+    addEventListener('pageshow', () => {
       revealQrDock();
       updateCommerce();
     });
   }
 
   function initialise() {
-    loadCryosphere();
+    loadThreeExperience();
     revealQrDock();
     syncScene();
     updateCommerce();
-    pulse();
     bind();
     ROOT.dataset.fxLivingArchitecture = 'ready';
-    window.dispatchEvent(new CustomEvent('formatx:livingready'));
+    dispatchEvent(new CustomEvent('formatx:livingready'));
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initialise, { once: true });
-  } else {
-    initialise();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
+  else initialise();
 }());
