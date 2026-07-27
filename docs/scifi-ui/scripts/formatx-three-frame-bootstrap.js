@@ -11,7 +11,7 @@
 
   const telemetry = document.querySelector('[data-fx-three-telemetry]');
   const stageUrl = new URL('./three-stage.html', location.href);
-  stageUrl.searchParams.set('v', '20260727-three-6');
+  stageUrl.searchParams.set('v', '20260727-three-7');
 
   root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
   root.dataset.fxThree = 'loading';
@@ -33,6 +33,9 @@
     clearTimer();
     root.dataset.fxThree = 'ready';
     root.classList.add('fx-three-engine-ready');
+    if (telemetry && /INITIALISING|FRAME ERROR/.test(telemetry.textContent || '')) {
+      telemetry.textContent = 'THREE / READY';
+    }
   }
 
   function markError(message) {
