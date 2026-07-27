@@ -319,7 +319,7 @@ class LivingCoreExperience {
       positions[offset + 1] = y * shell;
       positions[offset + 2] = Math.sin(angle) * radius * shell;
       phases[index] = random() * Math.PI * 2;
-      sizes[index] = 0.72 + random() * 1.65;
+      sizes[index] = 0.48 + random() * 0.82;
       energies[index] = random();
     }
 
@@ -370,7 +370,7 @@ class LivingCoreExperience {
 
           vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
           gl_Position = projectionMatrix * mvPosition;
-          gl_PointSize = (aSize + proximity * 1.7 + uFocus * aEnergy * 1.15) * uPixelRatio * (315.0 / max(1.0, -mvPosition.z));
+          gl_PointSize = (aSize + proximity * 0.65 + uFocus * aEnergy * 0.42) * uPixelRatio * (18.0 / max(1.0, -mvPosition.z));
           vEnergy = aEnergy;
           vProximity = proximity;
           vDepth = clamp((-mvPosition.z - 4.0) / 8.0, 0.0, 1.0);
@@ -390,9 +390,9 @@ class LivingCoreExperience {
           float disc = smoothstep(0.5, 0.08, distanceToCenter);
           float hot = smoothstep(0.32, 0.0, distanceToCenter);
           vec3 colour = mix(uBaseColor, uAccentColor, clamp(vEnergy * 0.76 + vProximity * 0.62 + uFocus * 0.22, 0.0, 1.0));
-          colour += hot * (0.25 + vProximity * 0.7);
-          float alpha = disc * (0.28 + vEnergy * 0.72) * (1.0 - vDepth * 0.42);
-          if (alpha < 0.025) discard;
+          colour += hot * (0.05 + vProximity * 0.22);
+          float alpha = disc * (0.075 + vEnergy * 0.24 + vProximity * 0.1 + uFocus * 0.035) * (1.0 - vDepth * 0.48);
+          if (alpha < 0.012) discard;
           gl_FragColor = vec4(colour, alpha);
         }
       `,
