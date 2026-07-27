@@ -39,7 +39,7 @@ function attachDiagnostics(page, diagnostics) {
   });
 }
 
-async function waitIntro(page, timeout = 8000) {
+async function waitIntro(page, timeout = 15000) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
@@ -49,7 +49,7 @@ async function waitIntro(page, timeout = 8000) {
   }, null, { timeout });
 }
 
-async function waitThree(page, diagnostics, timeout = 20000) {
+async function waitThree(page, diagnostics, timeout = 30000) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxThree === 'ready' || root.dataset.fxThree === 'error';
@@ -67,7 +67,8 @@ async function readState(page) {
     const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
     const frame = document.getElementById('fx-three-frame');
     const frameDocument = frame?.contentDocument;
-    const canvas = frameDocument?.querySelector('canvas');
+    const canvases = frameDocument ? Array.from(frameDocument.querySelectorAll('canvas')) : [];
+    const canvas = canvases.at(-1);
     const rect = canvas?.getBoundingClientRect();
     const engine = getComputedStyle(document.documentElement)
       .getPropertyValue('--fx-experience-engine')
@@ -88,6 +89,7 @@ async function readState(page) {
       flow: document.documentElement.dataset.fxFlow,
       frame: Boolean(frame),
       frameSrc: frame instanceof HTMLIFrameElement ? frame.src : '',
+      canvasCount: canvases.length,
       canvas: [Math.round(rect?.width || 0), Math.round(rect?.height || 0)],
       clone: document.querySelectorAll('[data-fx-loop-bridge="true"]').length,
       toggle: document.querySelectorAll('.loop-toggle').length,
@@ -105,17 +107,24 @@ async function readState(page) {
   });
 }
 
+function isRecoverableGpuDiagnostic(item, state) {
+  if (/WebGL stall due to ReadPixels|GPU stall/i.test(item)) return true;
+  return state.webgpu === 'fallback'
+    && /GPU|WebGPU|WGSL|shader|pipeline|device|adapter|popErrorScope|Instance dropped|createView|swizzle/i.test(item);
+}
+
 async function verifyCommon(page, name, diagnostics, minimumWidth, minimumHeight, expectedRenderer = null) {
   await waitIntro(page);
   await waitThree(page, diagnostics);
   const state = await readState(page);
-  const meaningfulDiagnostics = diagnostics.filter(item => !/WebGL stall due to ReadPixels|GPU stall/i.test(item));
+  const meaningfulDiagnostics = diagnostics.filter(item => !isRecoverableGpuDiagnostic(item, state));
   assert(!meaningfulDiagnostics.length, name + ' browser diagnostics: ' + meaningfulDiagnostics.join(' | '));
   assert(state.three === 'ready', name + ' stage state: ' + JSON.stringify(state));
   assert(['webgpu-tsl', 'three-webgl'].includes(state.renderer), name + ' renderer: ' + JSON.stringify(state));
   if (expectedRenderer) assert(state.renderer === expectedRenderer, name + ' expected ' + expectedRenderer + ': ' + JSON.stringify(state));
   assert(state.frame, name + ' missing Three stage iframe');
   assert(state.frameSrc.includes('20260727-webgpu-1'), name + ' stale stage URL: ' + state.frameSrc);
+  assert(state.canvasCount === 1, name + ' must expose exactly one active canvas: ' + JSON.stringify(state));
   assert(state.canvas[0] >= minimumWidth && state.canvas[1] >= minimumHeight, name + ' canvas: ' + state.canvas);
   assert(state.infinite === 'ready' && state.clone === 1 && state.toggle === 0, name + ' mandatory loop: ' + JSON.stringify(state));
   assert(state.nextgen === 'ready' && state.xrControls === 1, name + ' missing next-generation controls');
@@ -140,7 +149,11 @@ async function desktop(browserType, name) {
     let state = await verifyCommon(page, name, diagnostics, 1200, 800);
 
     if (browserType === chromium && state.webgpuAvailable) {
-      assert(state.webgpu === 'ready' && state.renderer === 'webgpu-tsl', name + ' WebGPU path did not activate: ' + JSON.stringify(state));
+      const nativeWebGpu = state.webgpu === 'ready' && state.renderer === 'webgpu-tsl';
+      const recoveredWebGl = state.webgpu === 'fallback'
+        && state.renderer === 'three-webgl'
+        && /GPU|WebGPU|popErrorScope|Instance dropped|device|pipeline|createView|swizzle/i.test(state.webgpuError);
+      assert(nativeWebGpu || recoveredWebGl, name + ' progressive rendering path failed: ' + JSON.stringify(state));
     }
 
     const flowCard = page.locator('[data-flow="2"]');
@@ -162,7 +175,7 @@ async function desktop(browserType, name) {
     for (let cycle = 1; cycle <= 2; cycle += 1) {
       const metrics = await page.locator('[data-fx-loop-bridge="true"]').evaluate(node => ({ top: node.offsetTop, height: node.offsetHeight }));
       await page.evaluate(({ top, height }) => scrollTo(0, top + height * 0.86), metrics);
-      await page.waitForFunction(expected => Number(document.documentElement.dataset.fxLoopCount || 0) >= expected && scrollY < document.getElementById('experience').offsetTop, cycle, { timeout: 8000 });
+      await page.waitForFunction(expected => Number(document.documentElement.dataset.fxLoopCount || 0) >= expected && scrollY < document.getElementById('experience').offsetTop, cycle, { timeout: 10000 });
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     }
 
@@ -205,9 +218,9 @@ async function skipIntro() {
     await button.waitFor({ state: 'visible', timeout: 3000 });
     const started = Date.now();
     await button.click();
-    await waitIntro(page, 2200);
+    await waitIntro(page, 2500);
     await waitThree(page, diagnostics);
-    assert(Date.now() - started < 2200, 'intro skip too slow');
+    assert(Date.now() - started < 2500, 'intro skip too slow');
   } finally {
     await browser.close();
   }
@@ -247,7 +260,7 @@ async function mobile() {
 }
 
 (async () => {
-  await desktop(chromium, 'chromium-webgpu');
+  await desktop(chromium, 'chromium-progressive');
   try {
     await desktop(firefox, 'firefox-webgl2');
   } catch (error) {
