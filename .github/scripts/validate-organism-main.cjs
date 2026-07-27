@@ -47,6 +47,7 @@ async function enterSite(page, label) {
   const skip = page.locator('.fx-intro-skip');
   if (await skip.isVisible().catch(() => false)) await skip.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 10000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 10000 });
   mark(label + ': site-ready');
 }
@@ -54,6 +55,7 @@ async function enterSite(page, label) {
 async function state(page) {
   return page.evaluate(() => ({
     ready: document.documentElement.dataset.fxOrganismInterface,
+    menuReady: document.documentElement.dataset.fxOrganismMenu,
     triggers: document.querySelectorAll('[data-organism-open]').length,
     panels: document.querySelectorAll('[data-organism-panel]').length,
     actionLinks: document.querySelectorAll('.fx-organism-actionbar a').length,
@@ -77,9 +79,9 @@ async function validateDesktop() {
     diagnostics(page, errors);
     await enterSite(page, 'desktop');
 
-    let current = await state(page);
+    const current = await state(page);
     mark('desktop: initial-state', current);
-    assert(current.ready === 'ready', 'interface not ready: ' + JSON.stringify(current));
+    assert(current.ready === 'ready' && current.menuReady === 'ready', 'interface/menu not ready: ' + JSON.stringify(current));
     assert(current.triggers === 5 && current.panels === 5, 'chapter/panel count: ' + JSON.stringify(current));
     assert(current.actionLinks === 3, 'action bar links: ' + JSON.stringify(current));
     assert(current.overlayHidden === true, 'console must start hidden');
@@ -113,9 +115,10 @@ async function validateDesktop() {
     await page.keyboard.press('Escape');
     mark('desktop: keyboard-navigation-passed');
 
-    await page.locator('#menu-toggle').click();
+    await page.locator('#menu-toggle').evaluate(node => node.click());
+    await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
     assert(await page.locator('#main-nav').evaluate(node => node.classList.contains('open')), 'interactive system menu did not open');
-    await page.locator('#main-nav a[href="#pricing"]').click();
+    await page.locator('#main-nav a[href="#pricing"]').evaluate(node => node.click());
     await page.waitForFunction(() => !document.querySelector('[data-organism-panel="pricing"]').hidden);
     mark('desktop: header-navigation-passed');
 
@@ -164,6 +167,9 @@ async function validateMobile() {
     assert(overflow <= 1, 'mobile horizontal overflow: ' + overflow);
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
+
+    await page.locator('#menu-toggle').evaluate(node => node.click());
+    await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
 
     const meaningful = errors.filter(item => !/GPU stall|ReadPixels|WebGPU|WGSL|swizzle|Instance dropped/i.test(item));
     assert(!meaningful.length, 'mobile diagnostics: ' + meaningful.join(' | '));
