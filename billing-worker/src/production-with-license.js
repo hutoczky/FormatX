@@ -12,6 +12,8 @@ import {
 const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.6.apk';
+const AUDIO_TEST_WAV_PATH = '/scifi-ui/assets/audio/formatx-audio-test.wav';
+const AUDIO_TEST_WAV = createAudioTestWav();
 const THREE_STAGE_PATHS = new Set([
   '/scifi-ui/three-stage',
   '/scifi-ui/three-stage.html',
@@ -113,6 +115,13 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    if (
+      (request.method === 'GET' || request.method === 'HEAD')
+      && url.pathname === AUDIO_TEST_WAV_PATH
+    ) {
+      return secureResponse(serveAudioTestWav(request), url);
+    }
+
     const licenseResponse = await handleLicenseCenterRequest(request, env);
     if (licenseResponse) return secureResponse(licenseResponse, url);
 
@@ -182,6 +191,63 @@ export function canonicalPageRedirect(request, url) {
   const target = new URL(targetPath, targetOrigin);
   target.search = url.search;
   return Response.redirect(target.toString(), 308);
+}
+
+export function createAudioTestWav() {
+  const sampleRate = 8000;
+  const durationSeconds = 0.3;
+  const sampleCount = Math.round(sampleRate * durationSeconds);
+  const bytesPerSample = 2;
+  const dataSize = sampleCount * bytesPerSample;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  const writeText = (offset, text) => {
+    for (let index = 0; index < text.length; index += 1) {
+      view.setUint8(offset + index, text.charCodeAt(index));
+    }
+  };
+
+  writeText(0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true);
+  writeText(8, 'WAVE');
+  writeText(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * bytesPerSample, true);
+  view.setUint16(32, bytesPerSample, true);
+  view.setUint16(34, 16, true);
+  writeText(36, 'data');
+  view.setUint32(40, dataSize, true);
+
+  for (let index = 0; index < sampleCount; index += 1) {
+    const time = index / sampleRate;
+    const inFirstTone = time < 0.14;
+    const inGap = time >= 0.14 && time < 0.16;
+    const segmentTime = inFirstTone ? time : time - 0.16;
+    const frequency = inGap ? 0 : inFirstTone ? 700 : 1050;
+    const segmentDuration = inGap ? 0.02 : 0.14;
+    const attack = Math.min(1, Math.max(0, segmentTime / 0.008));
+    const release = Math.min(1, Math.max(0, (segmentDuration - segmentTime) / 0.02));
+    const envelope = frequency ? Math.min(attack, release) : 0;
+    const value = Math.sin(2 * Math.PI * frequency * time) * envelope * 0.65;
+    view.setInt16(44 + index * 2, Math.round(value * 32767), true);
+  }
+
+  return new Uint8Array(buffer);
+}
+
+function serveAudioTestWav(request) {
+  return new Response(request.method === 'HEAD' ? null : AUDIO_TEST_WAV.slice(), {
+    status: 200,
+    headers: {
+      'Content-Type': 'audio/wav',
+      'Content-Length': String(AUDIO_TEST_WAV.byteLength),
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Accept-Ranges': 'none',
+    },
+  });
 }
 
 async function enforceApiRateLimit(request, env, pathname) {
