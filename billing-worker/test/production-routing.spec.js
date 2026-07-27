@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
+import productionWorker, {
   canonicalPageRedirect,
   createAudioTestWav,
   isLivingCorePath,
@@ -86,6 +86,22 @@ describe('production routing and frame security', () => {
     expect(wave).toBe('WAVE');
     expect(wav.byteLength).toBeGreaterThan(4000);
     expect(peak).toBeGreaterThan(15000);
+  });
+
+  it('serves the audible WAV fallback through the production route', async () => {
+    const response = await productionWorker.fetch(
+      new Request('https://www.formatxsuite.com/scifi-ui/assets/audio/formatx-audio-test.wav?v=test'),
+      {},
+      {},
+    );
+    const bytes = new Uint8Array(await response.arrayBuffer());
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toBe('audio/wav');
+    expect(response.headers.get('Permissions-Policy')).toContain('autoplay=(self)');
+    expect(String.fromCharCode(...bytes.slice(0, 4))).toBe('RIFF');
+    expect(String.fromCharCode(...bytes.slice(8, 12))).toBe('WAVE');
+    expect(bytes.byteLength).toBeGreaterThan(4000);
   });
 
   it('redirects the apex domain to the canonical www product page', () => {
