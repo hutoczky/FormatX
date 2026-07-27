@@ -1,0 +1,20 @@
+/* Stacking-context corrections for the organism-first main-site shell. */
+.fx-organism-interface-ready .topbar {
+  position: fixed;
+  z-index: 96 !important;
+  isolation: isolate;
+}
+
+.fx-organism-interface-ready .main-nav {
+  z-index: 100 !important;
+}
+
+.fx-organism-interface-ready .main-nav.open {
+  pointer-events: auto !important;
+}
+
+.fx-organism-interface-ready .main-nav.open a {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
