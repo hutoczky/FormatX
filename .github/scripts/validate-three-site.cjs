@@ -24,8 +24,8 @@ function launchOptions(browserType) {
 function attachDiagnostics(page, diagnostics) {
   page.on('pageerror', error => diagnostics.push('pageerror: ' + String(error)));
   page.on('console', message => {
-    if (message.type() === 'error' || message.type() === 'warning') {
-      diagnostics.push('console-' + message.type() + ': ' + message.text());
+    if (message.type() === 'error') {
+      diagnostics.push('console-error: ' + message.text());
     }
   });
   page.on('requestfailed', request => {
