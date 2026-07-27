@@ -1,6 +1,6 @@
-const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260727-particles-focus-2', import.meta.url).href;
+const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260727-particles-stable-3', import.meta.url).href;
 const WEBXR_URL = new URL('./WebXRDirector.js?v=20260727-webgpu-1', import.meta.url).href;
-const WEBGL_LOADER_URL = new URL('./webgl-fallback-loader.js?v=20260727-particles-focus-2', import.meta.url).href;
+const WEBGL_LOADER_URL = new URL('./webgl-fallback-loader.js?v=20260727-particles-stable-3', import.meta.url).href;
 const WEBGPU_STARTUP_BUDGET = 8000;
 const WEBGPU_STABLE_FRAMES = 90;
 const FORCE_WEBGL = new URLSearchParams(location.search).get('force-webgl') === '1';
@@ -112,6 +112,12 @@ async function loadWebGpuModule() {
     'this.pointScale.value = [0.015, 0.018, 0.021, 0.024][this.tier];',
     'particle tier size'
   );
+  source = replaceRequired(
+    source,
+    '} else if (fps > 108 && this.tier < 3) {',
+    '} else if (false && fps > 108 && this.tier < 3) {',
+    'upward quality scaling lock'
+  );
 
   const moduleUrl = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
   try {
@@ -195,7 +201,8 @@ function installRuntimeGuard(webGpuModule) {
         originalReady.call(this);
         try {
           parent.document.documentElement.style.setProperty('--fx-experience-engine', 'webgpu-tsl');
-          parent.document.documentElement.dataset.fxParticleProfile = 'focus-half';
+          parent.document.documentElement.dataset.fxParticleProfile = 'focus-half-stable';
+          parent.document.documentElement.dataset.fxParticleTierLock = 'upward-disabled';
         } catch (_) {}
       }
     } catch (error) {
