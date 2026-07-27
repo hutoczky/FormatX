@@ -1,9 +1,6 @@
 name: Patch Living Core responsive HUD
 
 on:
-  push:
-    branches:
-      - agent/webgpu-tsl-evolution
   pull_request:
     branches:
       - master
