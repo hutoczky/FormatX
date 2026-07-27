@@ -1,0 +1,45 @@
+name: Patch WebGPU import-map CSP
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout WebGPU branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: agent/webgpu-tsl-evolution
+          fetch-depth: 0
+
+      - name: Add the fixed import-map hash to the Worker CSP
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('billing-worker/src/production-with-license.js')
+          source = path.read_text(encoding='utf-8')
+          old = '"script-src \'self\' blob: https://cdn.jsdelivr.net https://unpkg.com",'
+          new = '"script-src \'self\' blob: \'sha256-l1yP9fGwg/zCCCWl6g2Cen0mXM6bs3A7z30qWUVzQ9c=\' https://cdn.jsdelivr.net https://unpkg.com",'
+          if old in source:
+              source = source.replace(old, new, 1)
+              path.write_text(source, encoding='utf-8')
+          elif new not in source:
+              raise SystemExit('Three-stage CSP script-src marker is missing')
+          PY
+
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name 'FormatX WebGPU Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add billing-worker/src/production-with-license.js
+          git commit -m 'Authorize the fixed Three.js WebGPU import map'
+          git push origin HEAD:agent/webgpu-tsl-evolution
