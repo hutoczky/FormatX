@@ -5,6 +5,56 @@
   if (root.dataset.fxProfessionalRefinement === 'ready') return;
   root.dataset.fxProfessionalRefinement = 'ready';
 
+  function installLanguageToggle() {
+    if (!document.querySelector('link[data-fx-single-language-style]')) {
+      const style = document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = './styles/single-language-toggle.css?v=20260727-single-language-1';
+      style.dataset.fxSingleLanguageStyle = 'true';
+      document.head.appendChild(style);
+    }
+
+    const switchRoot = document.querySelector('.language-switch');
+    if (!(switchRoot instanceof HTMLElement) || switchRoot.dataset.fxSingleLanguage === 'ready') return;
+
+    const sourceButtons = Array.from(switchRoot.querySelectorAll('[data-language]'))
+      .filter(button => button instanceof HTMLButtonElement);
+    if (sourceButtons.length < 2) return;
+
+    switchRoot.dataset.fxSingleLanguage = 'ready';
+    switchRoot.classList.add('fx-single-language-switch');
+    switchRoot.removeAttribute('role');
+    switchRoot.setAttribute('aria-label', 'Language / Nyelv');
+    sourceButtons.forEach(button => { button.hidden = true; });
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'fx-language-toggle';
+    toggle.dataset.languageToggle = 'true';
+    const label = document.createElement('span');
+    label.dataset.languageLabel = 'true';
+    toggle.appendChild(label);
+    switchRoot.appendChild(toggle);
+
+    const sync = () => {
+      const current = root.lang === 'en' ? 'en' : 'hu';
+      const next = current === 'hu' ? 'en' : 'hu';
+      label.textContent = current.toUpperCase();
+      toggle.dataset.nextLanguage = next;
+      toggle.setAttribute('aria-label', current === 'hu' ? 'Switch to English' : 'Váltás magyar nyelvre');
+      toggle.setAttribute('title', current === 'hu' ? 'Switch to English' : 'Váltás magyar nyelvre');
+    };
+
+    toggle.addEventListener('click', () => {
+      const next = toggle.dataset.nextLanguage === 'en' ? 'en' : 'hu';
+      const source = sourceButtons.find(button => button.dataset.language === next);
+      source?.click();
+    });
+
+    addEventListener('formatx:languagechange', sync);
+    sync();
+  }
+
   function enforceFullscreenConsoleState(consoleRoot) {
     if (!(consoleRoot instanceof HTMLElement)) return;
     const sync = () => {
@@ -181,6 +231,7 @@
     }, { once: true });
   }
 
+  installLanguageToggle();
   watchConsole();
   installAudioLayer();
 }());
