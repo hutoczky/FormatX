@@ -85,17 +85,8 @@
   function prepareAuditMode() {
     const canvas = document.getElementById('fx-apex-canvas');
     if (canvas) canvas.hidden = true;
-
-    const overlay = document.getElementById('formatx-event-horizon');
-    if (overlay) {
-      overlay.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
-      overlay.hidden = true;
-      overlay.setAttribute('aria-hidden', 'true');
-    }
-
     document.querySelectorAll('[data-reveal]').forEach(element => element.classList.add('visible'));
-    ROOT.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-reveal', 'fx-intro-managed');
-    ROOT.classList.add('fx-intro-complete', 'fx-audit-mode');
+    ROOT.classList.add('fx-audit-mode');
     ROOT.dataset.fxThree = 'audit-skip';
     ROOT.dataset.fxLighthouse = 'ready';
   }
