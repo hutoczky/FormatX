@@ -10,9 +10,27 @@
     if (document.querySelector('link[data-fx-motion-focus-style]')) return;
     const style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = './styles/motion-focus.css?v=20260727-focus-1';
+    style.href = './styles/motion-focus.css?v=20260727-focus-2';
     style.dataset.fxMotionFocusStyle = 'true';
     document.head.appendChild(style);
+  }
+
+  function refreshParticleStage() {
+    const stableSource = './three-stage.html?v=20260727-particles-stable-3';
+    const apply = () => {
+      const frame = document.getElementById('fx-three-frame');
+      if (!(frame instanceof HTMLIFrameElement)) return false;
+      if (!frame.src.includes('particles-stable-3')) frame.src = stableSource;
+      root.dataset.fxParticleStage = 'stable-3';
+      return true;
+    };
+
+    if (apply()) return;
+    const observer = new MutationObserver(() => {
+      if (!apply()) return;
+      observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   function installLanguageToggle() {
@@ -242,6 +260,7 @@
   }
 
   installMotionFocus();
+  refreshParticleStage();
   installLanguageToggle();
   watchConsole();
   installAudioLayer();
