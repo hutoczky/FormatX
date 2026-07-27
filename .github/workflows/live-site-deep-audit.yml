@@ -1,0 +1,64 @@
+name: Deep audit live FormatX site
+
+on:
+  push:
+    branches:
+      - agent/live-site-deep-audit-20260727
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout audit source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Audit live routes, headers, all assets and runtime
+        id: audit
+        shell: bash
+        run: |
+          set +e
+          node .github/scripts/audit-live-formatx.cjs 2>&1 | tee live-audit-console.txt
+          status=${PIPESTATUS[0]}
+          echo "$status" > live-audit-exit-code.txt
+          exit 0
+
+      - name: Upload complete live audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-live-deep-audit
+          path: |
+            live-audit-report.json
+            live-audit-console.txt
+            live-audit-exit-code.txt
+            live-audit-desktop.png
+            live-audit-mobile.png
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Enforce audit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(cat live-audit-exit-code.txt)"
+          if [[ "$code" != "0" ]]; then
+            echo "Live FormatX audit found critical problems."
+            exit "$code"
+          fi
