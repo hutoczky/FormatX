@@ -56,13 +56,16 @@ jobs:
         shell: bash
         run: node .github/scripts/validate-organism-main.cjs
 
-      - name: Upload visual evidence
+      - name: Upload visual evidence and diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: formatx-organism-main-evidence
           path: |
+            organism-main-report.json
             organism-main-desktop.png
+            organism-main-desktop-failure.png
             organism-main-mobile.png
+            organism-main-mobile-failure.png
           if-no-files-found: warn
           retention-days: 7
