@@ -94,7 +94,7 @@
     if (!document.querySelector('link[data-fx-organism-layering-style]')) {
       const organismLayering = document.createElement('link');
       organismLayering.rel = 'stylesheet';
-      organismLayering.href = './styles/organism-interface-layering.css?v=20260727-organism-2';
+      organismLayering.href = './styles/organism-interface-layering.css?v=20260727-organism-3';
       organismLayering.dataset.fxOrganismLayeringStyle = 'true';
       document.head.appendChild(organismLayering);
     }
@@ -107,10 +107,17 @@
     }
     if (!document.querySelector('script[data-fx-organism-interface-script]')) {
       const organismScript = document.createElement('script');
-      organismScript.src = './scripts/organism-interface.js?v=20260727-organism-1';
+      organismScript.src = './scripts/organism-interface.js?v=20260727-organism-2';
       organismScript.defer = true;
       organismScript.dataset.fxOrganismInterfaceScript = 'true';
       document.head.appendChild(organismScript);
+    }
+    if (!document.querySelector('script[data-fx-organism-menu-script]')) {
+      const menuScript = document.createElement('script');
+      menuScript.src = './scripts/organism-menu-controller.js?v=20260727-organism-1';
+      menuScript.defer = true;
+      menuScript.dataset.fxOrganismMenuScript = 'true';
+      document.head.appendChild(menuScript);
     }
   }
 
