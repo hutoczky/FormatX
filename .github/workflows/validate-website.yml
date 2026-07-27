@@ -1,4 +1,4 @@
-name: Validate FormatX Three.js website
+name: Validate FormatX WebGPU and Three.js website
 
 on:
   workflow_dispatch:
@@ -22,13 +22,13 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-three-validation-${{ github.ref }}
+  group: formatx-webgpu-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -40,7 +40,7 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate Three.js source architecture
+      - name: Validate WebGPU TSL source architecture
         shell: python
         run: |
           from pathlib import Path
@@ -50,10 +50,14 @@ jobs:
           loader = Path('docs/scifi-ui/scripts/igloo-parity.js').read_text(encoding='utf-8')
           host = Path('docs/scifi-ui/scripts/formatx-three-host.js').read_text(encoding='utf-8')
           bootstrap = Path('docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js').read_text(encoding='utf-8')
-          engine = Path('docs/scifi-ui/scripts/Experience.js').read_text(encoding='utf-8')
+          webgl_engine = Path('docs/scifi-ui/scripts/Experience.js').read_text(encoding='utf-8')
+          webgpu_engine = Path('docs/scifi-ui/scripts/ExperienceWebGPU.js').read_text(encoding='utf-8')
+          xr = Path('docs/scifi-ui/scripts/WebXRDirector.js').read_text(encoding='utf-8')
+          controls = Path('docs/scifi-ui/scripts/formatx-nextgen-controls.js').read_text(encoding='utf-8')
           entry = Path('docs/scifi-ui/scripts/experience-entry.js').read_text(encoding='utf-8')
           stage = Path('docs/scifi-ui/three-stage.html').read_text(encoding='utf-8')
           css = Path('docs/scifi-ui/styles/formatx-three-host.css').read_text(encoding='utf-8')
+          nextgen_css = Path('docs/scifi-ui/styles/formatx-nextgen-controls.css').read_text(encoding='utf-8')
           intro = Path('docs/scifi-ui/scripts/formatx-event-horizon.js').read_text(encoding='utf-8')
           static_headers = Path('docs/scifi-ui/_headers').read_text(encoding='utf-8')
           worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
@@ -66,31 +70,44 @@ jobs:
           assert '15 900 Ft / hó' in home and '29 900 Ft / hó' in home
           assert 'FAILSAFE_DEADLINE' in intro
 
-          for token in ('formatx-three-host.js', 'formatx-three-frame-bootstrap.js', 'formatx-transcend-bridge.js'):
+          for token in ('formatx-three-host.js', 'formatx-nextgen-controls.js', 'formatx-three-frame-bootstrap.js', 'formatx-transcend-bridge.js'):
               assert token in loader, token
-          for token in ('THREE.WebGLRenderer', 'THREE.PerspectiveCamera', 'THREE.InstancedMesh', 'THREE.Points', 'CatmullRomCurve3', 'QualityGovernor', 'requestAnimationFrame'):
-              assert token in engine, token
-          for token in ('Float32Array', '__FORMATX_3D_STATE__', 'AudioContext', 'fx-three-loop-bridge', 'formatx:loop'):
+          for token in ('THREE.WebGLRenderer', 'THREE.PerspectiveCamera', 'CatmullRomCurve3', 'QualityGovernor'):
+              assert token in webgl_engine, token
+          for token in ('THREE.WebGPURenderer', 'MeshBasicNodeMaterial', 'instancedArray', 'renderer.compute', '500000', 'fragmentNode', 'WebXRDirector', 'setAnimationLoop'):
+              assert token in webgpu_engine, token
+          for token in ('renderer.xr.enabled = true', "requestSession(mode", "immersive-ar", "immersive-vr", "renderer.xr.setSession"):
+              assert token in xr, token
+          for token in ('AudioContext', 'OscillatorNode', 'BiquadFilterNode', 'scheduleBeat', 'scrollVelocity', 'formatx:xrstate'):
+              if token == 'OscillatorNode':
+                  assert 'createOscillator' in controls
+              elif token == 'BiquadFilterNode':
+                  assert 'createBiquadFilter' in controls
+              elif token == 'scrollVelocity':
+                  assert 'VELOCITY' in controls
+              else:
+                  assert token in controls, token
+          for token in ('Float32Array', '__FORMATX_3D_STATE__', 'fx-three-loop-bridge', 'formatx:loop'):
               assert token in host, token
-          for token in ('three-stage.html', '20260727-three-6', 'THREE / FRAME ERROR', 'formatx:threeready'):
+          for token in ('three-stage.html', '20260727-webgpu-1', 'THREE / FRAME ERROR', 'formatx:threeready'):
               assert token in bootstrap, token
-          for token in ('experience-entry.js', 'blob:', 'cdn.jsdelivr.net'):
+          for token in ('experience-entry.js', '20260727-webgpu-1'):
               assert token in stage, token
-          for token in ('streamSpeed', 'ArrayBuffer.isView'):
+          for token in ('ExperienceWebGPU.js', "'gpu' in navigator", 'startWebGLExperience', 'fxWebgpu'):
               assert token in entry, token
           for token in ('fx-three-stage-shell', 'fx-three-sound', 'fx-three-loop-bridge'):
               assert token in css, token
+          for token in ('fx-nextgen-xr', 'data-fx-webgpu'):
+              assert token in nextgen_css, token
 
           assert 'createRenderer' not in apex
           assert "getContext('webgl2'" not in apex
           assert 'formatx-transcend-lite.js' not in loader
           assert 'worldstage-enhancements.js' not in loader
-
-          # A global static DENY is combined with the route-specific Worker
-          # header by Cloudflare and blocks the same-origin Three.js iframe.
           assert 'X-Frame-Options' not in static_headers
           assert 'THREE_STAGE_CONTENT_SECURITY_POLICY' in worker
           assert "isThreeStage ? 'SAMEORIGIN' : 'DENY'" in worker
+          assert 'https://cdn.jsdelivr.net' in worker and 'https://unpkg.com' in worker
           assert '"frame-ancestors \'self\'"' in worker
 
       - name: Validate JavaScript syntax
@@ -107,8 +124,11 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-transcend-bridge.js
           node --check docs/scifi-ui/scripts/formatx-three-host.js
           node --check docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js
+          node --check docs/scifi-ui/scripts/formatx-nextgen-controls.js
           node --check docs/scifi-ui/scripts/experience-entry.js
           node --check docs/scifi-ui/scripts/Experience.js
+          node --check docs/scifi-ui/scripts/ExperienceWebGPU.js
+          node --check docs/scifi-ui/scripts/WebXRDirector.js
           node --check docs/scifi-ui/scripts/checkout-v100.js
           node --check docs/scifi-ui/scripts/checkout-language-v100.js
           node --check .github/scripts/validate-three-site.cjs
@@ -118,7 +138,7 @@ jobs:
         run: |
           npm ci
           npm test
-          npx wrangler deploy --dry-run --outdir ../.wrangler-three-validation
+          npx wrangler deploy --dry-run --outdir ../.wrangler-webgpu-validation
 
       - name: Install Playwright browsers
         shell: bash
@@ -139,20 +159,20 @@ jobs:
           cat "$RUNNER_TEMP/formatx-http.log"
           exit 1
 
-      - name: Test Chromium, Firefox, mobile, reduced motion and two scroll loops
+      - name: Test WebGPU, WebGL2 fallback, Firefox, mobile, reduced motion and two loops
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
         shell: bash
         run: |
           set -o pipefail
-          node .github/scripts/validate-three-site.cjs 2>&1 | tee three-browser-report.txt
+          node .github/scripts/validate-three-site.cjs 2>&1 | tee webgpu-browser-report.txt
 
-      - name: Upload Three.js browser report
+      - name: Upload WebGPU browser report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-three-browser-report
-          path: three-browser-report.txt
+          name: formatx-webgpu-browser-report
+          path: webgpu-browser-report.txt
           if-no-files-found: warn
           retention-days: 5
 
@@ -165,13 +185,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Three.js engine, mandatory loop and cross-browser validation passed'
+            description='WebGPU TSL, compute, XR and WebGL2 fallback validation passed'
           else
             state='failure'
-            description='FormatX Three.js website validation failed'
+            description='FormatX WebGPU evolution validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX Three.js website validation' \
+            -f context='FormatX WebGPU evolution validation' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
