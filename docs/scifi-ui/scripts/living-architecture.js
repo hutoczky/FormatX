@@ -3,6 +3,17 @@
 
   const ROOT = document.documentElement;
   const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
+  if (AUDIT_MODE) {
+    const canvas = document.getElementById('fx-apex-canvas');
+    if (canvas) canvas.hidden = true;
+    ROOT.classList.add('fx-audit-mode');
+    ROOT.dataset.fxThree = 'audit-skip';
+    ROOT.dataset.fxLighthouse = 'ready';
+    ROOT.dataset.fxLivingArchitecture = 'audit-skip';
+    dispatchEvent(new CustomEvent('formatx:livingready'));
+    return;
+  }
+
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
   const PLANS = {
     business_lite: { name: 'Business Lite', HUF: 7900, EUR: 22 },
@@ -80,15 +91,6 @@
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
     }
-  }
-
-  function prepareAuditMode() {
-    const canvas = document.getElementById('fx-apex-canvas');
-    if (canvas) canvas.hidden = true;
-    document.querySelectorAll('[data-reveal]').forEach(element => element.classList.add('visible'));
-    ROOT.classList.add('fx-audit-mode');
-    ROOT.dataset.fxThree = 'audit-skip';
-    ROOT.dataset.fxLighthouse = 'ready';
   }
 
   function revealQrDock() {
@@ -201,14 +203,6 @@
   }
 
   function initialise() {
-    if (AUDIT_MODE) {
-      prepareAuditMode();
-      syncScene();
-      ROOT.dataset.fxLivingArchitecture = 'ready';
-      dispatchEvent(new CustomEvent('formatx:livingready'));
-      return;
-    }
-
     loadThreeExperience();
     revealQrDock();
     syncScene();
