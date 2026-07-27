@@ -94,13 +94,13 @@
     if (!document.querySelector('link[data-fx-organism-layering-style]')) {
       const organismLayering = document.createElement('link');
       organismLayering.rel = 'stylesheet';
-      organismLayering.href = './styles/organism-interface-layering.css?v=20260727-organism-3';
+      organismLayering.href = './styles/organism-interface-layering.css?v=20260727-fullscreen-1';
       organismLayering.dataset.fxOrganismLayeringStyle = 'true';
       document.head.appendChild(organismLayering);
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260727-webgpu-1';
+      script.src = './scripts/igloo-parity.js?v=20260727-professional-1';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
