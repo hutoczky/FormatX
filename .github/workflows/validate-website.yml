@@ -8,6 +8,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
+      - '.github/scripts/audit-live-formatx.cjs'
       - '.github/workflows/validate-website.yml'
   push:
     branches: [master]
@@ -85,9 +86,6 @@ jobs:
           assert "getContext('webgl2'" not in apex
           assert 'formatx-transcend-lite.js' not in loader
           assert 'worldstage-enhancements.js' not in loader
-
-          # A global static DENY is combined with the route-specific Worker
-          # header by Cloudflare and blocks the same-origin Three.js iframe.
           assert 'X-Frame-Options' not in static_headers
           assert 'THREE_STAGE_CONTENT_SECURITY_POLICY' in worker
           assert "isThreeStage ? 'SAMEORIGIN' : 'DENY'" in worker
@@ -175,3 +173,55 @@ jobs:
             -f context='FormatX Three.js website validation' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+  live-production-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run deep live production audit
+        shell: bash
+        run: |
+          set +e
+          node .github/scripts/audit-live-formatx.cjs 2>&1 | tee live-audit-console.txt
+          status=${PIPESTATUS[0]}
+          echo "$status" > live-audit-exit-code.txt
+          exit 0
+
+      - name: Upload live audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-live-deep-audit
+          path: |
+            live-audit-report.json
+            live-audit-console.txt
+            live-audit-exit-code.txt
+            live-audit-desktop.png
+            live-audit-mobile.png
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Enforce live audit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(cat live-audit-exit-code.txt)"
+          if [[ "$code" != "0" ]]; then
+            echo "Live FormatX audit found critical problems."
+            exit "$code"
+          fi
