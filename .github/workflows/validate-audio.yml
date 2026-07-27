@@ -1,0 +1,126 @@
+name: Validate FormatX verified audio
+run-name: Validate FormatX verified audio from ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'billing-worker/src/production-with-license.js'
+      - 'billing-worker/test/production-routing.spec.js'
+      - '.github/scripts/validate-audio.cjs'
+      - '.github/workflows/validate-audio.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'billing-worker/src/production-with-license.js'
+      - 'billing-worker/test/production-routing.spec.js'
+      - '.github/scripts/validate-audio.cjs'
+      - '.github/workflows/validate-audio.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-verified-audio-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verified-audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Validate audio source architecture and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-audio-repair.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/living-architecture.js
+          node --check billing-worker/src/production-with-license.js
+          node --check .github/scripts/validate-audio.cjs
+          grep -Fq "verified-v3" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "OfflineAudioContext" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "createAnalyser" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "signal-verified" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "autoplay=(self)" billing-worker/src/production-with-license.js
+          ! grep -Fq "'autoplay=()'" billing-worker/src/production-with-license.js
+
+      - name: Test production security headers
+        working-directory: billing-worker
+        run: |
+          npm ci
+          npm test
+
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-audio" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-audio/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start static website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-audio-http.log" 2>&1 &
+          for attempt in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-audio-http.log"
+          exit 1
+
+      - name: Verify desktop and mobile audio signal in Chromium
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-audio/node_modules
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-audio.cjs 2>&1 | tee verified-audio-report.txt
+
+      - name: Upload audio verification report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-verified-audio-report
+          path: verified-audio-report.txt
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Publish verified audio status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Desktop and mobile Web Audio signal verification passed'
+          else
+            state='failure'
+            description='FormatX verified audio validation failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX verified audio' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
