@@ -1,10 +1,12 @@
+# Security headers for static assets only.
+# HTML framing and CSP are controlled centrally by
+# billing-worker/src/production-with-license.js so route-specific policies
+# cannot be combined with a second conflicting X-Frame-Options value here.
 /*
   X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Cross-Origin-Opener-Policy: same-origin
-  Cache-Control: public, max-age=300, must-revalidate
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
