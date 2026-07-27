@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   canonicalPageRedirect,
+  isLivingCorePath,
   isThreeStagePath,
   secureResponse,
 } from '../src/production-with-license.js';
@@ -11,6 +12,13 @@ describe('production routing and frame security', () => {
     expect(isThreeStagePath('/scifi-ui/three-stage')).toBe(true);
     expect(isThreeStagePath('/scifi-ui/three-stage/')).toBe(true);
     expect(isThreeStagePath('/scifi-ui/')).toBe(false);
+  });
+
+  it('recognises both Cloudflare HTML forms of the Living Core laboratory', () => {
+    expect(isLivingCorePath('/scifi-ui/living-core.html')).toBe(true);
+    expect(isLivingCorePath('/scifi-ui/living-core')).toBe(true);
+    expect(isLivingCorePath('/scifi-ui/living-core/')).toBe(true);
+    expect(isLivingCorePath('/scifi-ui/')).toBe(false);
   });
 
   it.each([
@@ -26,6 +34,23 @@ describe('production routing and frame security', () => {
     expect(response.headers.get('Content-Security-Policy')).toContain('https://cdn.jsdelivr.net');
   });
 
+  it.each([
+    '/scifi-ui/living-core.html',
+    '/scifi-ui/living-core',
+  ])('isolates the Living Core CDN permissions for %s', (pathname) => {
+    const response = secureResponse(new Response('<!doctype html>', {
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    }), new URL(`https://www.formatxsuite.com${pathname}`));
+    const policy = response.headers.get('Content-Security-Policy') || '';
+
+    expect(response.headers.get('X-Frame-Options')).toBe('DENY');
+    expect(policy).toContain("frame-ancestors 'none'");
+    expect(policy).toContain("script-src 'self' https://cdn.jsdelivr.net");
+    expect(policy).toContain('https://api.github.com');
+    expect(policy).not.toContain('blob:');
+    expect(policy).not.toContain('https://unpkg.com');
+  });
+
   it('keeps ordinary HTML pages protected from framing', () => {
     const response = secureResponse(new Response('<!doctype html>', {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
@@ -33,6 +58,7 @@ describe('production routing and frame security', () => {
 
     expect(response.headers.get('X-Frame-Options')).toBe('DENY');
     expect(response.headers.get('Content-Security-Policy')).toContain("frame-ancestors 'none'");
+    expect(response.headers.get('Content-Security-Policy')).not.toContain('https://cdn.jsdelivr.net');
   });
 
   it('redirects the apex domain to the canonical www product page', () => {
