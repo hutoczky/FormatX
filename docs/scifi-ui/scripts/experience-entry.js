@@ -7,6 +7,13 @@ const WEBGPU_STABLE_FRAMES = 90;
 let webGpuAttemptActive = false;
 let webGpuFallbackStarted = false;
 let activeWebGpuExperience = null;
+let webGpuStartupTimer = 0;
+
+function clearWebGpuStartupTimer() {
+  if (!webGpuStartupTimer) return;
+  clearTimeout(webGpuStartupTimer);
+  webGpuStartupTimer = 0;
+}
 let startupTimer = 0;
 
 function clearStartupTimer() {
