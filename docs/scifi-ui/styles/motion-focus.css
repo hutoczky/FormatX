@@ -1,0 +1,72 @@
+/* FormatX attention-first motion profile: preserve atmosphere without competing with copy. */
+
+html[data-fx-motion-profile="focus"] .fx-transcend-lens {
+  opacity: .24 !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-transcend-lens i:nth-child(2),
+html[data-fx-motion-profile="focus"] .fx-transcend-lens i:nth-child(3) {
+  display: none !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-transcend-lens i:first-child {
+  animation-duration: 38s !important;
+  filter: blur(62px) !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-transcend-film::before {
+  opacity: .025 !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-transcend-film::after {
+  opacity: .035 !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-atmosphere .grain {
+  opacity: .04 !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-organism-map::after {
+  display: none !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-organism-map::before {
+  opacity: .48 !important;
+  animation-duration: 38s !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-organism-status i::after {
+  opacity: .45 !important;
+  animation-duration: 5.2s !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-three-guide {
+  opacity: .48 !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-three-sound > i b:nth-child(2),
+html[data-fx-motion-profile="focus"] .fx-transcend-sound > i b:nth-child(2) {
+  display: none !important;
+}
+
+html[data-fx-motion-profile="focus"] .fx-three-sound > i b,
+html[data-fx-motion-profile="focus"] .fx-transcend-sound > i b {
+  animation-duration: 1.6s !important;
+}
+
+html[data-fx-motion-profile="focus"] .living-architecture .card::after,
+html[data-fx-motion-profile="focus"] .living-architecture .price-card::after,
+html[data-fx-motion-profile="focus"] .living-architecture .system-grid article::after {
+  opacity: .5;
+  transition-duration: 1.15s !important;
+}
+
+@media (max-width: 820px) {
+  html[data-fx-motion-profile="focus"] .fx-transcend-lens {
+    opacity: .17 !important;
+  }
+
+  html[data-fx-motion-profile="focus"] .fx-three-guide {
+    display: none !important;
+  }
+}
