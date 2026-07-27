@@ -91,6 +91,13 @@
       organismStyle.dataset.fxOrganismInterfaceStyle = 'true';
       document.head.appendChild(organismStyle);
     }
+    if (!document.querySelector('link[data-fx-organism-layering-style]')) {
+      const organismLayering = document.createElement('link');
+      organismLayering.rel = 'stylesheet';
+      organismLayering.href = './styles/organism-interface-layering.css?v=20260727-organism-2';
+      organismLayering.dataset.fxOrganismLayeringStyle = 'true';
+      document.head.appendChild(organismLayering);
+    }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
       script.src = './scripts/igloo-parity.js?v=20260727-webgpu-1';
