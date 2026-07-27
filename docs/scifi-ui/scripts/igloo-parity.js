@@ -117,8 +117,8 @@
   const queue = [
     './scripts/formatx-transcend-bridge.js?v=20260727-transcend-5',
     './scripts/formatx-three-host.js?v=20260727-audio-pro-1',
+    './scripts/formatx-audio-repair.js?v=20260727-audio-v3',
     './scripts/formatx-professional-refinement.js?v=20260727-professional-1',
-    './scripts/formatx-audio-repair.js?v=20260727-audio-repair-1',
     './scripts/formatx-nextgen-controls.js?v=20260727-webgpu-1',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/formatx-three-frame-bootstrap.js?v=20260727-webgpu-1',
