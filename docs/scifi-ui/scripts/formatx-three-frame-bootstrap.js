@@ -11,7 +11,7 @@
 
   const telemetry = document.querySelector('[data-fx-three-telemetry]');
   const stageUrl = new URL('./three-stage.html', location.href);
-  stageUrl.searchParams.set('v', '20260727-three-6');
+  stageUrl.searchParams.set('v', '20260727-webgpu-1');
 
   root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
   root.dataset.fxThree = 'loading';

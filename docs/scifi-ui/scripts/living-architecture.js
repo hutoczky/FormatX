@@ -58,7 +58,7 @@
     if (!document.querySelector('link[data-fx-cryosphere-style]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = './styles/igloo-parity.css?v=20260727-three-1';
+      style.href = './styles/igloo-parity.css?v=20260727-webgpu-1';
       style.dataset.fxCryosphereStyle = 'true';
       document.head.appendChild(style);
     }
@@ -74,7 +74,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260727-three-1';
+      script.src = './scripts/igloo-parity.js?v=20260727-webgpu-1';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
