@@ -62,7 +62,7 @@ const THREE_STAGE_CONTENT_SECURITY_POLICY = [
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'self'",
-  "script-src 'self' blob: https://cdn.jsdelivr.net https://unpkg.com",
+  "script-src 'self' blob: 'sha256-l1yP9fGwg/zCCCWl6g2Cen0mXM6bs3A7z30qWUVzQ9c=' https://cdn.jsdelivr.net https://unpkg.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data:",
   "font-src 'none'",
