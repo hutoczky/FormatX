@@ -25,78 +25,423 @@ html.fx-organism-scene-5 { --accent: 205, 235, 249; --fx-panel-accent: 205, 235,
 }
 
 .fx-organism-interface-ready .header-actions {
-  margin-right: 64px;
+  margin-right: 74px;
 }
 
 .fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle {
   position: fixed !important;
-  top: 18px !important;
+  top: 16px !important;
   right: clamp(18px, 2.4vw, 38px) !important;
-  z-index: 1002 !important;
+  z-index: 1202 !important;
   display: inline-grid !important;
-  width: 46px !important;
-  height: 46px !important;
-  place-items: center;
+  width: 54px !important;
+  height: 54px !important;
+  padding: 0 !important;
+  place-content: center;
+  gap: 5px;
+  overflow: visible;
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
   transform: none !important;
   filter: none !important;
-  border-color: rgba(178, 230, 249, .24);
-  background: rgba(3, 10, 18, .9);
-  box-shadow: 0 14px 48px rgba(0, 0, 0, .38), 0 0 24px rgba(107, 218, 255, .08);
-  backdrop-filter: blur(18px) saturate(130%);
+  color: #eafaff;
+  border: 1px solid rgba(178, 230, 249, .28);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(15, 34, 48, .94), rgba(3, 10, 18, .96)),
+    radial-gradient(circle at 50% 0, rgba(107, 218, 255, .18), transparent 64%);
+  box-shadow: 0 16px 54px rgba(0, 0, 0, .44), inset 0 0 0 1px rgba(255, 255, 255, .025), 0 0 30px rgba(107, 218, 255, .08);
+  backdrop-filter: blur(20px) saturate(135%);
+  cursor: pointer;
+  transition: border-color .28s ease, background .28s ease, box-shadow .28s ease, transform .28s cubic-bezier(.2,.8,.2,1) !important;
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle::before,
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle::before {
+  inset: 7px;
+  border: 1px solid rgba(180, 233, 252, .1);
+  border-radius: 12px;
+  transition: border-color .28s ease, transform .38s cubic-bezier(.2,.8,.2,1);
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle::after {
+  top: 8px;
+  right: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgb(var(--accent));
+  box-shadow: 0 0 12px rgba(var(--accent), .9);
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle:hover,
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle:focus-visible,
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle.open {
+  border-color: rgba(var(--accent), .62);
+  background:
+    linear-gradient(145deg, rgba(18, 43, 58, .98), rgba(3, 12, 20, .98)),
+    radial-gradient(circle at 50% 0, rgba(var(--accent), .23), transparent 70%);
+  box-shadow: 0 20px 64px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .04), 0 0 42px rgba(var(--accent), .14);
+  transform: translateY(-1px) !important;
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle.open::before {
+  border-color: rgba(var(--accent), .24);
+  transform: rotate(45deg);
 }
 
 .fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle span {
-  width: 18px;
-  margin: 2px auto;
-  transition: transform .22s ease, opacity .22s ease;
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 23px;
+  height: 1px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 12px rgba(191, 239, 255, .28);
+  transform-origin: center;
+  transition: transform .32s cubic-bezier(.2,.8,.2,1), opacity .2s ease, width .28s ease;
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle span:last-of-type {
+  width: 15px;
+  margin-left: auto;
+  margin-right: 15px;
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle b {
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  color: rgba(219, 243, 252, .48);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 5px;
+  font-weight: 700;
+  letter-spacing: .24em;
+  line-height: 1;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  transition: opacity .2s ease;
 }
 
 .fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle.open span:first-of-type {
+  width: 23px;
   transform: translateY(3px) rotate(45deg);
 }
 
 .fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle.open span:last-of-type {
+  width: 23px;
+  margin-right: auto;
   transform: translateY(-3px) rotate(-45deg);
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle.open b {
+  opacity: 0;
+}
+
+html.fx-organism-menu-open,
+html.fx-organism-menu-open body {
+  overflow: hidden !important;
 }
 
 .fx-organism-interface-ready #main-nav.fx-organism-system-menu {
   position: fixed !important;
-  top: 76px !important;
-  right: clamp(18px, 2.4vw, 38px) !important;
-  z-index: 1000 !important;
+  inset: 0 !important;
+  z-index: 1200 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-width: 0 !important;
+  padding: clamp(104px, 14vh, 150px) clamp(24px, 8vw, 150px) clamp(42px, 8vh, 90px) !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  align-content: center !important;
+  justify-items: center !important;
+  gap: clamp(8px, 1.8vh, 20px) !important;
+  overflow: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background:
+    linear-gradient(135deg, rgba(1, 5, 10, .985), rgba(4, 13, 22, .975)),
+    radial-gradient(circle at 78% 18%, rgba(var(--accent), .14), transparent 36%),
+    radial-gradient(circle at 22% 82%, rgba(126, 190, 255, .07), transparent 40%) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(30px) saturate(135%) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  clip-path: circle(0 at calc(100% - 45px) 43px);
+  transform: none !important;
+  transition: opacity .34s ease, visibility .34s ease, clip-path .62s cubic-bezier(.16,.84,.22,1) !important;
+}
+
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu::before {
+  content: 'FORMATX / SYSTEM NAVIGATION';
+  position: absolute;
+  top: clamp(28px, 5vh, 54px);
+  left: clamp(24px, 6vw, 100px);
+  color: rgba(220, 243, 252, .42);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9px;
+  letter-spacing: .28em;
+}
+
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu::after {
+  content: '';
+  position: absolute;
+  inset: 26px;
+  border: 1px solid rgba(var(--accent), .08);
+  pointer-events: none;
 }
 
 .fx-organism-interface-ready #main-nav.fx-organism-system-menu.open {
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
+  clip-path: circle(150% at calc(100% - 45px) 43px);
+}
+
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu a {
+  position: relative;
+  z-index: 2;
+  width: min(980px, 100%);
+  min-height: clamp(58px, 9vh, 94px);
+  padding: 0 clamp(18px, 3vw, 42px) !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between !important;
+  color: rgba(230, 246, 252, .58) !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(176, 226, 246, .1) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  font-size: clamp(24px, 4vw, 60px) !important;
+  font-weight: 520 !important;
+  letter-spacing: -.035em !important;
+  line-height: 1 !important;
+  text-transform: none;
+  opacity: 0;
+  transform: translateY(22px);
+  transition: color .25s ease, border-color .25s ease, padding .35s cubic-bezier(.2,.8,.2,1), opacity .4s ease, transform .45s cubic-bezier(.2,.8,.2,1) !important;
+}
+
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu a::before {
+  content: '0' counter(fx-menu);
+  counter-increment: fx-menu;
+  order: 2;
+  color: rgba(var(--accent), .62);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .18em;
+}
+
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu {
+  counter-reset: fx-menu;
 }
 
 .fx-organism-interface-ready #main-nav.fx-organism-system-menu.open a {
-  position: relative;
-  z-index: 2;
+  opacity: 1;
+  transform: translateY(0);
   pointer-events: auto !important;
+}
+
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu.open a:nth-child(1) { transition-delay: .08s !important; }
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu.open a:nth-child(2) { transition-delay: .12s !important; }
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu.open a:nth-child(3) { transition-delay: .16s !important; }
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu.open a:nth-child(4) { transition-delay: .20s !important; }
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu.open a:nth-child(5) { transition-delay: .24s !important; }
+
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu a:hover,
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu a:focus-visible,
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu a.active {
+  padding-left: clamp(28px, 5vw, 76px) !important;
+  color: #f4fcff !important;
+  border-color: rgba(var(--accent), .46) !important;
+}
+
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu a::after {
+  right: auto !important;
+  bottom: -1px !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, rgb(var(--accent)), transparent 76%) !important;
+}
+
+/* Full-viewport content console: selected sections no longer open as a side drawer. */
+.fx-organism-interface-ready .fx-organism-console {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1300 !important;
+  display: block !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  overflow: hidden !important;
+  background: #02070d;
+}
+
+.fx-organism-interface-ready .fx-organism-console-backdrop {
+  display: none !important;
+}
+
+.fx-organism-interface-ready .fx-organism-console-shell {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2 !important;
+  grid-column: auto !important;
+  width: 100vw !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  border: 0 !important;
+  background:
+    linear-gradient(180deg, rgba(3, 10, 18, .995), rgba(1, 5, 10, .995)),
+    radial-gradient(circle at 82% 8%, rgba(var(--fx-panel-accent), .13), transparent 34%),
+    radial-gradient(circle at 18% 92%, rgba(var(--fx-panel-accent), .055), transparent 38%) !important;
+  box-shadow: none !important;
+  animation: fx-console-fullscreen-enter .5s cubic-bezier(.18,.82,.18,1) both !important;
+}
+
+@keyframes fx-console-fullscreen-enter {
+  from { opacity: 0; transform: scale(1.018); filter: blur(5px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+.fx-organism-interface-ready .fx-organism-console-head {
+  padding: clamp(22px, 4vh, 46px) clamp(22px, 5vw, 86px) clamp(18px, 3vh, 30px) !important;
+  background: linear-gradient(180deg, rgba(2, 8, 14, .92), rgba(2, 8, 14, .38));
+  backdrop-filter: blur(20px) saturate(125%);
+}
+
+.fx-organism-interface-ready .fx-organism-console-title {
+  font-size: clamp(34px, 5vw, 76px) !important;
+}
+
+.fx-organism-interface-ready .fx-organism-console-close {
+  width: 54px !important;
+  border-radius: 18px !important;
+}
+
+.fx-organism-interface-ready .fx-organism-console-nav {
+  padding: 14px clamp(22px, 5vw, 86px) !important;
+  background: rgba(2, 8, 14, .72);
+  backdrop-filter: blur(18px);
+}
+
+.fx-organism-interface-ready .fx-organism-console-viewport {
+  width: 100%;
+}
+
+.fx-organism-interface-ready .fx-organism-panel {
+  width: 100%;
+  padding: clamp(34px, 6vh, 72px) clamp(22px, 6vw, 110px) 140px !important;
+}
+
+.fx-organism-interface-ready .fx-organism-panel > * {
+  width: min(1500px, 100%);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 900px) {
   .fx-organism-interface-ready .header-actions {
-    margin-right: 54px;
+    margin-right: 60px;
   }
 
   .fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle {
-    top: 12px !important;
-    right: 12px !important;
-    width: 44px !important;
-    height: 44px !important;
+    top: 10px !important;
+    right: 10px !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 15px;
+  }
+
+  .fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle b {
+    display: none;
   }
 
   .fx-organism-interface-ready #main-nav.fx-organism-system-menu {
-    top: 64px !important;
-    right: 12px !important;
-    left: 12px !important;
-    width: auto !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    padding: 86px 20px 28px !important;
+    gap: 2px !important;
+    clip-path: circle(0 at calc(100% - 34px) 34px);
+  }
+
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu.open {
+    clip-path: circle(155% at calc(100% - 34px) 34px);
+  }
+
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu::before {
+    top: 24px;
+    left: 20px;
+    max-width: calc(100vw - 96px);
+    font-size: 7px;
+  }
+
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu::after {
+    inset: 12px;
+  }
+
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu a {
+    min-height: clamp(54px, 10vh, 78px);
+    padding-inline: 12px !important;
+    font-size: clamp(24px, 8.7vw, 42px) !important;
+  }
+
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu a:hover,
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu a:focus-visible,
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu a.active {
+    padding-left: 22px !important;
+  }
+
+  .fx-organism-interface-ready .fx-organism-console-head {
+    padding: 20px 18px 16px !important;
+  }
+
+  .fx-organism-interface-ready .fx-organism-console-title {
+    font-size: clamp(28px, 9vw, 46px) !important;
+  }
+
+  .fx-organism-interface-ready .fx-organism-console-close {
+    width: 46px !important;
+  }
+
+  .fx-organism-interface-ready .fx-organism-console-nav {
+    padding: 11px 18px !important;
+  }
+
+  .fx-organism-interface-ready .fx-organism-panel {
+    padding: 28px 18px 110px !important;
+  }
+
+  .fx-organism-interface-ready .fx-organism-panel .pricing,
+  .fx-organism-interface-ready .fx-organism-panel .cards,
+  .fx-organism-interface-ready .fx-organism-panel .system-grid,
+  .fx-organism-interface-ready .fx-organism-panel .fx-plan-qr-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .fx-organism-interface-ready .fx-organism-panel .pricing .price-card:last-child,
+  .fx-organism-interface-ready .fx-organism-panel .cards .card:last-child {
+    grid-column: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu,
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu a,
+  .fx-organism-interface-ready .fx-organism-console-shell {
+    transition: none !important;
+    animation: none !important;
   }
 }
