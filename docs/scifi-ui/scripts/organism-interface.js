@@ -5,50 +5,35 @@
   if (ROOT.dataset.fxOrganismInterface === 'ready') return;
 
   const REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
-  const ACCENTS = ['183,163,255', '126,241,190', '255,196,126', '126,190,255', '205,235,249'];
+  const SCENE_CLASSES = [0, 1, 2, 3, 4, 5].map(index => 'fx-organism-scene-' + index);
   const SPECS = [
     {
-      id: 'experience',
-      scene: 1,
-      index: '02 / NERVOUS SYSTEM',
-      hu: 'Műveleti idegrendszer',
-      en: 'Operational nervous system',
+      id: 'experience', scene: 1, index: '02 / NERVOUS SYSTEM',
+      hu: 'Műveleti idegrendszer', en: 'Operational nervous system',
       summaryHu: 'Felderítés, tervezés, kontrollált végrehajtás és visszaellenőrzés egyetlen döntési útvonalon.',
       summaryEn: 'Discovery, planning, controlled execution and verification on one decision path.'
     },
     {
-      id: 'capabilities',
-      scene: 2,
-      index: '03 / SYSTEM ORGANS',
-      hu: 'Rendszerszervek',
-      en: 'System organs',
+      id: 'capabilities', scene: 2, index: '03 / SYSTEM ORGANS',
+      hu: 'Rendszerszervek', en: 'System organs',
       summaryHu: 'Hat specializált modul jelenik meg csak akkor, amikor valóban szükséged van rájuk.',
       summaryEn: 'Six specialised modules appear only when you actually need them.'
     },
     {
-      id: 'pricing',
-      scene: 3,
-      index: '04 / COMMERCE HEART',
-      hu: 'Árak és licencek',
-      en: 'Pricing and licences',
+      id: 'pricing', scene: 3, index: '04 / COMMERCE HEART',
+      hu: 'Árak és licencek', en: 'Pricing and licences',
       summaryHu: 'Csomagok, devizaváltás, fizetési folyamat és mindhárom QR-kód egy külön kereskedelmi konzolban.',
       summaryEn: 'Plans, currencies, payment flow and all three QR codes in a dedicated commerce console.'
     },
     {
-      id: 'system',
-      scene: 4,
-      index: '05 / SYSTEM SKELETON',
-      hu: 'Biztonság és platform',
-      en: 'Safety and platform',
+      id: 'system', scene: 4, index: '05 / SYSTEM SKELETON',
+      hu: 'Biztonság és platform', en: 'Safety and platform',
       summaryHu: 'A rendszer ellenőrizhető váza: platformok, célmeghajtó-védelem, naplózás, SHA-256 és Ed25519.',
       summaryEn: 'The verifiable skeleton: platforms, target protection, logs, SHA-256 and Ed25519.'
     },
     {
-      id: 'resources',
-      scene: 5,
-      index: '06 / RELEASE BEACON',
-      hu: 'Letöltés és támogatás',
-      en: 'Downloads and support',
+      id: 'resources', scene: 5, index: '06 / RELEASE BEACON',
+      hu: 'Letöltés és támogatás', en: 'Downloads and support',
       summaryHu: 'Stabil kiadások, Android alkalmazás, GitHub, támogatás és jogi információk egyetlen jeladóban.',
       summaryEn: 'Stable releases, Android, GitHub, support and legal information in one beacon.'
     }
@@ -69,10 +54,6 @@
     return ROOT.lang === 'en' ? 'en' : 'hu';
   }
 
-  function text(spec, key) {
-    return spec[key + (language() === 'en' ? 'En' : 'Hu')];
-  }
-
   function create(tag, className, attributes) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -85,12 +66,11 @@
   }
 
   function buildTrigger(spec) {
-    const button = create('button', 'fx-organism-chapter-trigger', {
+    const button = create('button', 'fx-organism-chapter-trigger fx-organism-accent-' + spec.scene, {
       type: 'button',
       'data-organism-open': spec.id,
       'aria-haspopup': 'dialog',
-      'aria-controls': 'fx-organism-console',
-      style: '--chapter-accent:' + ACCENTS[spec.scene - 1]
+      'aria-controls': 'fx-organism-console'
     });
     const index = create('span', 'fx-organism-chapter-index');
     index.textContent = spec.index;
@@ -106,7 +86,7 @@
     const action = create('span', 'fx-organism-chapter-action');
     action.dataset.hu = 'Rendszerpanel megnyitása';
     action.dataset.en = 'Open system panel';
-    action.textContent = language() === 'en' ? 'Open system panel' : 'Rendszerpanel megnyitása';
+    action.textContent = language() === 'en' ? action.dataset.en : action.dataset.hu;
     action.appendChild(create('i'));
     copy.append(title, summary, action);
     button.append(index, copy);
@@ -115,19 +95,14 @@
 
   function buildConsole() {
     const root = create('div', 'fx-organism-console', {
-      id: 'fx-organism-console',
-      hidden: '',
-      'aria-hidden': 'true'
+      id: 'fx-organism-console', hidden: '', 'aria-hidden': 'true'
     });
     const backdrop = create('button', 'fx-organism-console-backdrop', {
-      type: 'button',
-      'data-organism-close': '',
+      type: 'button', 'data-organism-close': '',
       'aria-label': language() === 'en' ? 'Close panel' : 'Panel bezárása'
     });
     const shell = create('section', 'fx-organism-console-shell', {
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'fx-organism-console-title'
+      role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'fx-organism-console-title'
     });
     const head = create('header', 'fx-organism-console-head');
     const headingCopy = create('div');
@@ -135,21 +110,19 @@
     consoleTitle = create('h2', 'fx-organism-console-title', { id: 'fx-organism-console-title' });
     headingCopy.append(consoleKicker, consoleTitle);
     consoleClose = create('button', 'fx-organism-console-close', {
-      type: 'button',
-      'data-organism-close': '',
+      type: 'button', 'data-organism-close': '',
       'aria-label': language() === 'en' ? 'Close panel' : 'Panel bezárása'
     });
     consoleClose.textContent = '×';
     head.append(headingCopy, consoleClose);
-    consoleNav = create('nav', 'fx-organism-console-nav', { 'aria-label': language() === 'en' ? 'System panels' : 'Rendszerpanelek' });
+    consoleNav = create('nav', 'fx-organism-console-nav', {
+      'aria-label': language() === 'en' ? 'System panels' : 'Rendszerpanelek'
+    });
     const viewport = create('div', 'fx-organism-console-viewport');
 
     SPECS.forEach(spec => {
       const tab = create('button', '', {
-        type: 'button',
-        role: 'tab',
-        'data-organism-tab': spec.id,
-        'aria-selected': 'false'
+        type: 'button', role: 'tab', 'data-organism-tab': spec.id, 'aria-selected': 'false'
       });
       tab.dataset.hu = spec.hu;
       tab.dataset.en = spec.en;
@@ -157,8 +130,7 @@
       consoleNav.appendChild(tab);
 
       const panel = create('article', 'fx-organism-panel', {
-        hidden: '',
-        'data-organism-panel': spec.id,
+        hidden: '', 'data-organism-panel': spec.id,
         'aria-label': language() === 'en' ? spec.en : spec.hu
       });
       panelById.set(spec.id, panel);
@@ -193,8 +165,8 @@
     section.setAttribute('aria-label', language() === 'en' ? spec.en : spec.hu);
   }
 
-  function actionLink(href, hu, en, className) {
-    const anchor = create('a', className || '', { href });
+  function actionLink(href, hu, en) {
+    const anchor = create('a', '', { href });
     anchor.dataset.hu = hu;
     anchor.dataset.en = en;
     anchor.textContent = language() === 'en' ? en : hu;
@@ -202,31 +174,43 @@
   }
 
   function buildActionbar() {
-    const bar = create('nav', 'fx-organism-actionbar', { 'aria-label': language() === 'en' ? 'Quick actions' : 'Gyorsműveletek' });
+    const bar = create('nav', 'fx-organism-actionbar', {
+      'aria-label': language() === 'en' ? 'Quick actions' : 'Gyorsműveletek'
+    });
     const downloadSource = document.getElementById('hero-download');
     const releaseSource = document.getElementById('release-page-link');
-    const download = actionLink(downloadSource?.href || 'https://github.com/hutoczky/FormatX-Updates/releases/tag/v92', 'Teljes verzió', 'Full version');
+    const download = actionLink(
+      downloadSource?.href || 'https://github.com/hutoczky/FormatX-Updates/releases/tag/v92',
+      'Teljes verzió', 'Full version'
+    );
     const android = actionLink('/download/android', 'Android APK', 'Android APK');
-    const github = actionLink(releaseSource?.href || 'https://github.com/hutoczky/FormatX-Updates/releases', 'GitHub Releases', 'GitHub Releases');
+    const github = actionLink(
+      releaseSource?.href || 'https://github.com/hutoczky/FormatX-Updates/releases',
+      'GitHub Releases', 'GitHub Releases'
+    );
     github.target = '_blank';
     github.rel = 'noopener noreferrer';
     bar.append(download, android, github);
     document.body.appendChild(bar);
 
     if (downloadSource) {
-      new MutationObserver(() => { download.href = downloadSource.href; }).observe(downloadSource, { attributes: true, attributeFilter: ['href'] });
+      new MutationObserver(() => { download.href = downloadSource.href; })
+        .observe(downloadSource, { attributes: true, attributeFilter: ['href'] });
     }
     if (releaseSource) {
-      new MutationObserver(() => { github.href = releaseSource.href; }).observe(releaseSource, { attributes: true, attributeFilter: ['href'] });
+      new MutationObserver(() => { github.href = releaseSource.href; })
+        .observe(releaseSource, { attributes: true, attributeFilter: ['href'] });
     }
   }
 
   function activateScene(spec) {
     ROOT.dataset.fxScene = String(spec.scene);
-    ROOT.style.setProperty('--accent', ACCENTS[spec.scene - 1]);
-    ROOT.style.setProperty('--fx-panel-accent', ACCENTS[spec.scene - 1]);
+    ROOT.classList.remove(...SCENE_CLASSES);
+    ROOT.classList.add('fx-organism-scene-' + spec.scene);
     triggerById.forEach((trigger, id) => trigger.classList.toggle('is-active', id === spec.id));
-    dispatchEvent(new CustomEvent('formatx:organismfocus', { detail: { id: spec.id, scene: spec.scene } }));
+    dispatchEvent(new CustomEvent('formatx:organismfocus', {
+      detail: { id: spec.id, scene: spec.scene }
+    }));
   }
 
   function syncConsoleLanguage() {
@@ -248,8 +232,9 @@
 
   function focusableElements() {
     if (!consoleRoot || consoleRoot.hidden) return [];
-    return Array.from(consoleRoot.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'))
-      .filter(element => !element.closest('[hidden]') && element.getClientRects().length > 0);
+    return Array.from(consoleRoot.querySelector(
+      'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+    )).filter(element => !element.closest('[hidden]') && element.getClientRects().length > 0);
   }
 
   function openPanel(id, source) {
@@ -278,7 +263,9 @@
     document.body.classList.add('fx-organism-panel-open');
     history.replaceState({}, '', location.pathname + location.search + '#' + id);
     requestAnimationFrame(() => consoleClose?.focus({ preventScroll: true }));
-    dispatchEvent(new CustomEvent('formatx:organismpanelopen', { detail: { id, scene: spec.scene } }));
+    dispatchEvent(new CustomEvent('formatx:organismpanelopen', {
+      detail: { id, scene: spec.scene }
+    }));
   }
 
   function closePanel(restore) {
@@ -325,12 +312,17 @@
 
   function onKeydown(event) {
     const target = event.target;
-    const typing = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
+    const typing = target instanceof HTMLInputElement
+      || target instanceof HTMLTextAreaElement
+      || target instanceof HTMLSelectElement
+      || target?.isContentEditable;
+
     if (event.key === 'Escape' && activeId) {
       event.preventDefault();
       closePanel(true);
       return;
     }
+
     if (activeId && event.key === 'Tab') {
       const focusables = focusableElements();
       if (!focusables.length) return;
@@ -345,6 +337,7 @@
       }
       return;
     }
+
     if (typing || activeId || !/^[1-5]$/.test(event.key)) return;
     const spec = SPECS[Number(event.key) - 1];
     if (!spec) return;
@@ -376,7 +369,7 @@
     consoleRoot = buildConsole();
     SPECS.forEach(moveSectionContent);
     buildActionbar();
-    ROOT.classList.add('fx-organism-interface-ready');
+    ROOT.classList.add('fx-organism-interface-ready', 'fx-organism-scene-0');
     ROOT.dataset.fxOrganismInterface = 'ready';
     document.body.classList.add('fx-organism-shell');
 
@@ -387,9 +380,14 @@
     observeChapters();
     syncConsoleLanguage();
     openHashPanel();
-    dispatchEvent(new CustomEvent('formatx:organisminterfaceready', { detail: { panels: SPECS.length } }));
+    dispatchEvent(new CustomEvent('formatx:organisminterfaceready', {
+      detail: { panels: SPECS.length }
+    }));
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
-  else initialise();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialise, { once: true });
+  } else {
+    initialise();
+  }
 }());

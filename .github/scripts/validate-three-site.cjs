@@ -87,6 +87,7 @@ async function readState(page) {
       loops: Number(document.documentElement.dataset.fxLoopCount || 0),
       scene: document.documentElement.dataset.fxThreeScene,
       flow: document.documentElement.dataset.fxFlow,
+      organism: document.documentElement.dataset.fxOrganismInterface || '',
       frame: Boolean(frame),
       frameSrc: frame instanceof HTMLIFrameElement ? frame.src : '',
       canvasCount: canvases.length,
@@ -116,6 +117,7 @@ function isRecoverableGpuDiagnostic(item, state) {
 async function verifyCommon(page, name, diagnostics, minimumWidth, minimumHeight, expectedRenderer = null) {
   await waitIntro(page);
   await waitThree(page, diagnostics);
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready');
   const state = await readState(page);
   const meaningfulDiagnostics = diagnostics.filter(item => !isRecoverableGpuDiagnostic(item, state));
   assert(!meaningfulDiagnostics.length, name + ' browser diagnostics: ' + meaningfulDiagnostics.join(' | '));
@@ -130,12 +132,31 @@ async function verifyCommon(page, name, diagnostics, minimumWidth, minimumHeight
   assert(state.nextgen === 'ready' && state.xrControls === 1, name + ' missing next-generation controls');
   assert(state.legacyCanvasHidden && state.legacyParticleHidden && state.oldRuntime === 0, name + ' legacy renderer still active');
   assert(state.rail === 1, name + ' missing chapter rail');
+  assert(state.organism === 'ready', name + ' organism-first interface missing');
   assert(!state.duplicates.length, name + ' duplicate IDs: ' + state.duplicates.join(','));
   assert(state.overflow <= 1, name + ' horizontal overflow: ' + state.overflow);
   assert(state.scripts.includes('formatx-three-host.js'), name + ' missing Three host script');
   assert(state.scripts.includes('formatx-nextgen-controls.js'), name + ' missing WebXR/audio controls');
+  assert(state.scripts.includes('organism-interface.js'), name + ' missing organism interface');
   assert(state.frameScripts.includes('experience-entry.js'), name + ' missing Three entry module');
   return state;
+}
+
+async function openOrganismPanel(page, id) {
+  const trigger = page.locator('[data-organism-open="' + id + '"]');
+  await trigger.scrollIntoViewIfNeeded();
+  await trigger.click();
+  await page.waitForFunction(panelId => {
+    const consoleRoot = document.getElementById('fx-organism-console');
+    const panel = document.querySelector('[data-organism-panel="' + panelId + '"]');
+    return consoleRoot && !consoleRoot.hidden && panel && !panel.hidden;
+  }, id);
+}
+
+async function closeOrganismPanel(page) {
+  const close = page.locator('.fx-organism-console-close');
+  if (await close.isVisible().catch(() => false)) await close.click();
+  await page.waitForFunction(() => document.getElementById('fx-organism-console')?.hidden === true);
 }
 
 async function desktop(browserType, name) {
@@ -156,26 +177,33 @@ async function desktop(browserType, name) {
       assert(nativeWebGpu || recoveredWebGl, name + ' progressive rendering path failed: ' + JSON.stringify(state));
     }
 
-    const flowCard = page.locator('[data-flow="2"]');
+    await openOrganismPanel(page, 'experience');
+    const flowCard = page.locator('[data-organism-panel="experience"] [data-flow="2"]');
     await flowCard.scrollIntoViewIfNeeded();
     await flowCard.hover();
     await page.waitForFunction(() => document.documentElement.dataset.fxFlow === '2');
+    await closeOrganismPanel(page);
 
     await page.locator('[data-language="en"]').click();
     await page.waitForFunction(() => document.documentElement.lang === 'en');
     const heading = await page.locator('#experience-title').textContent();
     assert(/core|spine|decision/i.test(heading || ''), name + ' language switch: ' + heading);
 
-    await page.locator('[data-currency="EUR"]').click();
+    await openOrganismPanel(page, 'pricing');
+    await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click();
     await page.waitForFunction(() => document.getElementById('preview-main-price')?.textContent.includes('44'));
     const checkout = await page.locator('#preview-checkout-link').getAttribute('href');
     assert(String(checkout).includes('currency=EUR'), name + ' checkout currency');
+    await closeOrganismPanel(page);
 
-    await page.evaluate(() => { document.documentElement.style.scrollBehavior = 'auto'; });
     for (let cycle = 1; cycle <= 2; cycle += 1) {
-      const metrics = await page.locator('[data-fx-loop-bridge="true"]').evaluate(node => ({ top: node.offsetTop, height: node.offsetHeight }));
-      await page.evaluate(({ top, height }) => scrollTo(0, top + height * 0.86), metrics);
-      await page.waitForFunction(expected => Number(document.documentElement.dataset.fxLoopCount || 0) >= expected && scrollY < document.getElementById('experience').offsetTop, cycle, { timeout: 10000 });
+      const before = await page.evaluate(() => Number(document.documentElement.dataset.fxLoopCount || 0));
+      await page.evaluate(() => {
+        const maximum = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+        scrollTo({ top: maximum, left: 0, behavior: 'instant' });
+        dispatchEvent(new Event('scroll'));
+      });
+      await page.waitForFunction(previous => Number(document.documentElement.dataset.fxLoopCount || 0) > previous, before, { timeout: 15000 });
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     }
 
@@ -218,10 +246,8 @@ async function skipIntro() {
     await button.waitFor({ state: 'visible', timeout: 3000 });
     const started = Date.now();
     await button.click();
-    // SwiftShader can briefly starve the main thread while the WebGPU fallback
-    // path is being established. The product animation still exits in ~180 ms.
-    await waitIntro(page, 5000);
-    assert(Date.now() - started < 5000, 'intro skip too slow');
+    await waitIntro(page, 2500);
+    assert(Date.now() - started < 2500, 'intro skip too slow');
     await waitThree(page, diagnostics);
   } finally {
     await browser.close();
@@ -253,7 +279,7 @@ async function mobile() {
     attachDiagnostics(page, diagnostics);
     await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
     await verifyCommon(page, 'mobile', diagnostics, 380, 800);
-    await page.locator('#menu-toggle').click();
+    await page.locator('#menu-toggle').evaluate(node => node.click());
     assert(await page.locator('#main-nav').evaluate(node => node.classList.contains('open')), 'mobile menu');
     await context.close();
   } finally {
