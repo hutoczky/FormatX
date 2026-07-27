@@ -2,6 +2,7 @@
   'use strict';
 
   const ROOT = document.documentElement;
+  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
   const PLANS = {
     business_lite: { name: 'Business Lite', HUF: 7900, EUR: 22 },
@@ -79,6 +80,14 @@
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
     }
+  }
+
+  function prepareAuditMode() {
+    const canvas = document.getElementById('fx-apex-canvas');
+    if (canvas) canvas.hidden = true;
+    ROOT.dataset.fxThree = 'audit-skip';
+    ROOT.dataset.fxLighthouse = 'ready';
+    ROOT.classList.add('fx-audit-mode');
   }
 
   function revealQrDock() {
@@ -191,7 +200,8 @@
   }
 
   function initialise() {
-    loadThreeExperience();
+    if (AUDIT_MODE) prepareAuditMode();
+    else loadThreeExperience();
     revealQrDock();
     syncScene();
     updateCommerce();
