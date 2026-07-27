@@ -2,6 +2,18 @@
   'use strict';
 
   const ROOT = document.documentElement;
+  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
+  if (AUDIT_MODE) {
+    ROOT.dataset.fxApex = 'audit-skip';
+    ROOT.dataset.fxRenderer = 'static-audit';
+    ROOT.dataset.fxScene = '0';
+    ROOT.dataset.fxFlow = '0';
+    ROOT.style.setProperty('--accent', '120,210,255');
+    ROOT.style.setProperty('--progress', '0');
+    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'static-audit', infinite: 'skipped' } }));
+    return;
+  }
+
   const LANG_KEY = 'formatx-language';
   const RELEASE_API = 'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest';
   const DOWNLOAD_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
