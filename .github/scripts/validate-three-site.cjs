@@ -127,7 +127,9 @@ async function desktop(browserType, name) {
     await page.goto(TEST_URL + '?lang=hu', { waitUntil: 'domcontentloaded' });
     let state = await verifyCommon(page, name, diagnostics, 1200, 800);
 
-    await page.locator('[data-flow="2"]').scrollIntoViewIfNeeded();
+    const flowCard = page.locator('[data-flow="2"]');
+    await flowCard.scrollIntoViewIfNeeded();
+    await flowCard.hover();
     await page.waitForFunction(() => document.documentElement.dataset.fxFlow === '2');
 
     await page.locator('[data-language="en"]').click();
