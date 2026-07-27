@@ -76,13 +76,14 @@ describe('production routing and frame security', () => {
 
   it('generates a valid and audible PCM WAV fallback', () => {
     const wav = createAudioTestWav();
-    const header = new TextDecoder().decode(wav.slice(0, 12));
+    const riff = String.fromCharCode(...wav.slice(0, 4));
+    const wave = String.fromCharCode(...wav.slice(8, 12));
     const samples = new Int16Array(wav.buffer, wav.byteOffset + 44, (wav.byteLength - 44) / 2);
     let peak = 0;
     for (const sample of samples) peak = Math.max(peak, Math.abs(sample));
 
-    expect(header.slice(0, 4)).toBe('RIFF');
-    expect(header.slice(8, 12)).toBe('WAVE');
+    expect(riff).toBe('RIFF');
+    expect(wave).toBe('WAVE');
     expect(wav.byteLength).toBeGreaterThan(4000);
     expect(peak).toBeGreaterThan(15000);
   });
