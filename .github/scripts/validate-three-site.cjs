@@ -3,9 +3,34 @@
 const { chromium, firefox } = require('playwright');
 
 const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
+const CHROMIUM_ARGS = ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
 
 function assert(value, message) {
   if (!value) throw new Error(message);
+}
+
+function launchOptions(browserType) {
+  if (browserType === chromium) return { headless: true, args: CHROMIUM_ARGS };
+  return {
+    headless: true,
+    firefoxUserPrefs: {
+      'webgl.disabled': false,
+      'webgl.force-enabled': true,
+      'webgl.enable-webgl2': true
+    }
+  };
+}
+
+function attachDiagnostics(page, diagnostics) {
+  page.on('pageerror', error => diagnostics.push('pageerror: ' + String(error)));
+  page.on('console', message => {
+    if (message.type() === 'error' || message.type() === 'warning') {
+      diagnostics.push('console-' + message.type() + ': ' + message.text());
+    }
+  });
+  page.on('requestfailed', request => {
+    diagnostics.push('requestfailed: ' + request.url() + ' — ' + (request.failure()?.errorText || 'unknown'));
+  });
 }
 
 async function waitIntro(page, timeout = 8000) {
@@ -18,13 +43,16 @@ async function waitIntro(page, timeout = 8000) {
   }, null, { timeout });
 }
 
-async function waitThree(page, timeout = 12000) {
+async function waitThree(page, diagnostics, timeout = 12000) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxThree === 'ready' || root.dataset.fxThree === 'error';
   }, null, { timeout });
   const status = await page.evaluate(() => document.documentElement.dataset.fxThree);
-  assert(status === 'ready', 'Three.js stage failed to start: ' + status);
+  if (status !== 'ready') {
+    await page.waitForTimeout(250);
+    throw new Error('Three.js stage failed to start: ' + status + ' | ' + diagnostics.join(' | '));
+  }
 }
 
 async function readState(page) {
@@ -65,11 +93,11 @@ async function readState(page) {
   });
 }
 
-async function verifyCommon(page, name, errors, minimumWidth, minimumHeight) {
+async function verifyCommon(page, name, diagnostics, minimumWidth, minimumHeight) {
   await waitIntro(page);
-  await waitThree(page);
+  await waitThree(page, diagnostics);
   const state = await readState(page);
-  assert(!errors.length, name + ' page errors: ' + errors.join(' | '));
+  assert(!diagnostics.length, name + ' browser diagnostics: ' + diagnostics.join(' | '));
   assert(state.three === 'ready' && state.renderer === 'three-webgl', name + ' renderer: ' + JSON.stringify(state));
   assert(state.engine === 'three-webgl', name + ' experience CSS engine: ' + state.engine);
   assert(state.frame, name + ' missing Three stage iframe');
@@ -85,7 +113,7 @@ async function verifyCommon(page, name, errors, minimumWidth, minimumHeight) {
 }
 
 async function desktop(browserType, name) {
-  const browser = await browserType.launch({ headless: true });
+  const browser = await browserType.launch(launchOptions(browserType));
   try {
     const context = await browser.newContext({
       viewport: { width: 1440, height: 960 },
@@ -93,11 +121,11 @@ async function desktop(browserType, name) {
       colorScheme: 'dark'
     });
     const page = await context.newPage();
-    const errors = [];
-    page.on('pageerror', error => errors.push(String(error)));
+    const diagnostics = [];
+    attachDiagnostics(page, diagnostics);
 
     await page.goto(TEST_URL + '?lang=hu', { waitUntil: 'domcontentloaded' });
-    let state = await verifyCommon(page, name, errors, 1200, 800);
+    let state = await verifyCommon(page, name, diagnostics, 1200, 800);
 
     await page.locator('[data-flow="2"]').scrollIntoViewIfNeeded();
     await page.waitForFunction(() => document.documentElement.dataset.fxFlow === '2');
@@ -137,16 +165,18 @@ async function desktop(browserType, name) {
 }
 
 async function skipIntro() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch(launchOptions(chromium));
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 840 } });
+    const diagnostics = [];
+    attachDiagnostics(page, diagnostics);
     await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
     const button = page.locator('.fx-intro-skip');
     await button.waitFor({ state: 'visible', timeout: 3000 });
     const started = Date.now();
     await button.click();
     await waitIntro(page, 2200);
-    await waitThree(page);
+    await waitThree(page, diagnostics);
     assert(Date.now() - started < 2200, 'intro skip too slow');
   } finally {
     await browser.close();
@@ -154,17 +184,17 @@ async function skipIntro() {
 }
 
 async function reducedMotion() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch(launchOptions(chromium));
   try {
     const context = await browser.newContext({
       viewport: { width: 1180, height: 820 },
       reducedMotion: 'reduce'
     });
     const page = await context.newPage();
-    const errors = [];
-    page.on('pageerror', error => errors.push(String(error)));
+    const diagnostics = [];
+    attachDiagnostics(page, diagnostics);
     await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
-    const state = await verifyCommon(page, 'reduced-motion', errors, 1000, 700);
+    const state = await verifyCommon(page, 'reduced-motion', diagnostics, 1000, 700);
     assert(state.infinite === 'ready' && state.clone === 1, 'reduced motion must retain mandatory infinite loop');
     await context.close();
   } finally {
@@ -173,7 +203,7 @@ async function reducedMotion() {
 }
 
 async function mobile() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch(launchOptions(chromium));
   try {
     const context = await browser.newContext({
       viewport: { width: 390, height: 844 },
@@ -182,10 +212,10 @@ async function mobile() {
       deviceScaleFactor: 2
     });
     const page = await context.newPage();
-    const errors = [];
-    page.on('pageerror', error => errors.push(String(error)));
+    const diagnostics = [];
+    attachDiagnostics(page, diagnostics);
     await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
-    await verifyCommon(page, 'mobile', errors, 380, 800);
+    await verifyCommon(page, 'mobile', diagnostics, 380, 800);
     await page.locator('#menu-toggle').click();
     assert(await page.locator('#main-nav').evaluate(node => node.classList.contains('open')), 'mobile menu');
     await context.close();
