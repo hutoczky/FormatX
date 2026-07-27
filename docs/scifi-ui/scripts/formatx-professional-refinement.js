@@ -5,11 +5,21 @@
   if (root.dataset.fxProfessionalRefinement === 'ready') return;
   root.dataset.fxProfessionalRefinement = 'ready';
 
+  function installMotionFocus() {
+    root.dataset.fxMotionProfile = 'focus';
+    if (document.querySelector('link[data-fx-motion-focus-style]')) return;
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = './styles/motion-focus.css?v=20260727-focus-1';
+    style.dataset.fxMotionFocusStyle = 'true';
+    document.head.appendChild(style);
+  }
+
   function installLanguageToggle() {
     if (!document.querySelector('link[data-fx-single-language-style]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = './styles/single-language-toggle.css?v=20260727-single-language-1';
+      style.href = './styles/single-language-toggle.css?v=20260727-single-language-2';
       style.dataset.fxSingleLanguageStyle = 'true';
       document.head.appendChild(style);
     }
@@ -231,6 +241,7 @@
     }, { once: true });
   }
 
+  installMotionFocus();
   installLanguageToggle();
   watchConsole();
   installAudioLayer();
