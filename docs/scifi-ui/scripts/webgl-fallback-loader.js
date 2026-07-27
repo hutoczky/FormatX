@@ -1,4 +1,4 @@
-const WEBGL_SOURCE_URL = new URL('./Experience.js?v=20260727-particles-pro-1', import.meta.url).href;
+const WEBGL_SOURCE_URL = new URL('./Experience.js?v=20260727-particles-focus-2', import.meta.url).href;
 const PRIMARY_THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.min.js';
 const FALLBACK_THREE_URL = 'https://unpkg.com/three@0.185.1/build/three.module.js?module';
 
@@ -67,19 +67,19 @@ export async function startWebGLExperience() {
   source = replaceRequired(
     source,
     'this.maxCount = mobile ? 7000 : 14000;',
-    'this.maxCount = mobile ? 3600 : 7000;',
+    'this.maxCount = mobile ? 1800 : 3500;',
     'maximum particle count'
   );
   source = replaceRequired(
     source,
     'this.setCount(mobile ? 3200 : 8500);',
-    'this.setCount(mobile ? 1600 : 3800);',
+    'this.setCount(mobile ? 800 : 1900);',
     'initial particle count'
   );
   source = replaceRequired(
     source,
     'const particles = this.mobile ? [1300, 2400, 4000, 6200] : [2200, 4800, 8500, 12500];',
-    'const particles = this.mobile ? [800, 1300, 2200, 3400] : [1200, 2400, 3800, 6200];',
+    'const particles = this.mobile ? [400, 650, 1100, 1700] : [600, 1200, 1900, 3100];',
     'particle quality tiers'
   );
 
@@ -87,7 +87,7 @@ export async function startWebGLExperience() {
   try {
     await import(moduleUrl);
     try {
-      parent.document.documentElement.dataset.fxParticleProfile = 'professional';
+      parent.document.documentElement.dataset.fxParticleProfile = 'focus-half';
     } catch (_) {}
   } finally {
     URL.revokeObjectURL(moduleUrl);
