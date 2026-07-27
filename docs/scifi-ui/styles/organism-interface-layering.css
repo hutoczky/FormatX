@@ -24,28 +24,79 @@ html.fx-organism-scene-5 { --accent: 205, 235, 249; --fx-panel-accent: 205, 235,
   isolation: isolate;
 }
 
-.fx-organism-interface-ready #menu-toggle {
-  position: relative;
+.fx-organism-interface-ready .header-actions {
+  margin-right: 64px;
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle {
+  position: fixed !important;
+  top: 18px !important;
+  right: clamp(18px, 2.4vw, 38px) !important;
   z-index: 1002 !important;
-  display: inline-flex !important;
+  display: inline-grid !important;
+  width: 46px !important;
+  height: 46px !important;
+  place-items: center;
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
   transform: none !important;
+  filter: none !important;
+  border-color: rgba(178, 230, 249, .24);
+  background: rgba(3, 10, 18, .9);
+  box-shadow: 0 14px 48px rgba(0, 0, 0, .38), 0 0 24px rgba(107, 218, 255, .08);
+  backdrop-filter: blur(18px) saturate(130%);
 }
 
-.fx-organism-interface-ready .main-nav {
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle span {
+  width: 18px;
+  margin: 2px auto;
+  transition: transform .22s ease, opacity .22s ease;
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle.open span:first-of-type {
+  transform: translateY(3px) rotate(45deg);
+}
+
+.fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle.open span:last-of-type {
+  transform: translateY(-3px) rotate(-45deg);
+}
+
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu {
+  position: fixed !important;
+  top: 76px !important;
+  right: clamp(18px, 2.4vw, 38px) !important;
   z-index: 1000 !important;
 }
 
-.fx-organism-interface-ready .main-nav.open {
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu.open {
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
 }
 
-.fx-organism-interface-ready .main-nav.open a {
+.fx-organism-interface-ready #main-nav.fx-organism-system-menu.open a {
   position: relative;
   z-index: 2;
   pointer-events: auto !important;
+}
+
+@media (max-width: 900px) {
+  .fx-organism-interface-ready .header-actions {
+    margin-right: 54px;
+  }
+
+  .fx-organism-interface-ready #menu-toggle.fx-organism-system-toggle {
+    top: 12px !important;
+    right: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .fx-organism-interface-ready #main-nav.fx-organism-system-menu {
+    top: 64px !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+  }
 }
