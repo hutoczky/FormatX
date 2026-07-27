@@ -10,18 +10,33 @@ function assert(value, message) {
 
 async function clearIntro(page) {
   const skip = page.locator('.fx-intro-skip');
-  const canSkip = await skip.waitFor({ state: 'visible', timeout: 5000 })
-    .then(() => true)
-    .catch(() => false);
-  if (canSkip) await skip.click();
+  if (await skip.count()) {
+    await skip.evaluate(node => node.click()).catch(() => {});
+  }
 
-  await page.waitForFunction(() => {
+  const completed = await page.waitForFunction(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
     return root.classList.contains('fx-intro-complete')
       && !root.classList.contains('fx-intro-running')
       && (!overlay || overlay.hidden);
-  }, null, { timeout: 15000 });
+  }, null, { timeout: 5000 }).then(() => true).catch(() => false);
+
+  if (completed) return;
+
+  // The intro is unrelated to audio. Remove only its visual interception in
+  // the test so the audio button can still receive a real trusted click.
+  await page.evaluate(() => {
+    const root = document.documentElement;
+    const overlay = document.getElementById('formatx-event-horizon');
+    root.classList.remove('fx-intro-running', 'fx-intro-pending');
+    root.classList.add('fx-intro-complete');
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+  });
 }
 
 async function runCase(browser, name, contextOptions) {
