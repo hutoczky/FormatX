@@ -61,6 +61,18 @@ describe('production routing and frame security', () => {
     expect(response.headers.get('Content-Security-Policy')).not.toContain('https://cdn.jsdelivr.net');
   });
 
+  it('allows same-origin user-activated audio without opening microphone access', () => {
+    const response = secureResponse(new Response('<!doctype html>', {
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    }), new URL('https://www.formatxsuite.com/scifi-ui/'));
+    const policy = response.headers.get('Permissions-Policy') || '';
+
+    expect(policy).toContain('autoplay=(self)');
+    expect(policy).not.toContain('autoplay=()');
+    expect(policy).toContain('microphone=()');
+    expect(response.headers.get('Content-Security-Policy')).toContain("media-src 'self'");
+  });
+
   it('redirects the apex domain to the canonical www product page', () => {
     const request = new Request('https://formatxsuite.com/');
     const response = canonicalPageRedirect(request, new URL(request.url));
