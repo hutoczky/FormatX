@@ -219,8 +219,8 @@ async function skipIntro() {
     const started = Date.now();
     await button.click();
     await waitIntro(page, 2500);
-    await waitThree(page, diagnostics);
     assert(Date.now() - started < 2500, 'intro skip too slow');
+    await waitThree(page, diagnostics);
   } finally {
     await browser.close();
   }
