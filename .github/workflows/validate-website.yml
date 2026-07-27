@@ -1,4 +1,4 @@
-name: Validate FormatX APEX website
+name: Validate FormatX Three.js website
 
 on:
   workflow_dispatch:
@@ -7,14 +7,14 @@ on:
     paths:
       - 'docs/**'
       - 'billing-worker/**'
-      - '.github/scripts/validate-apex-site.cjs'
+      - '.github/scripts/validate-three-site.cjs'
       - '.github/workflows/validate-website.yml'
   push:
     branches: [master]
     paths:
       - 'docs/**'
       - 'billing-worker/**'
-      - '.github/scripts/validate-apex-site.cjs'
+      - '.github/scripts/validate-three-site.cjs'
       - '.github/workflows/validate-website.yml'
 
 permissions:
@@ -22,7 +22,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-apex-validation-${{ github.ref }}
+  group: formatx-three-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -40,15 +40,19 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate APEX source architecture
+      - name: Validate Three.js source architecture
         shell: python
         run: |
           from pathlib import Path
-          import re
 
           home = Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
-          css = Path('docs/scifi-ui/styles/formatx-apex.css').read_text(encoding='utf-8')
-          js = Path('docs/scifi-ui/scripts/formatx-apex.js').read_text(encoding='utf-8')
+          apex = Path('docs/scifi-ui/scripts/formatx-apex.js').read_text(encoding='utf-8')
+          loader = Path('docs/scifi-ui/scripts/igloo-parity.js').read_text(encoding='utf-8')
+          host = Path('docs/scifi-ui/scripts/formatx-three-host.js').read_text(encoding='utf-8')
+          engine = Path('docs/scifi-ui/scripts/Experience.js').read_text(encoding='utf-8')
+          entry = Path('docs/scifi-ui/scripts/experience-entry.js').read_text(encoding='utf-8')
+          stage = Path('docs/scifi-ui/three-stage.html').read_text(encoding='utf-8')
+          css = Path('docs/scifi-ui/styles/formatx-three-host.css').read_text(encoding='utf-8')
           intro = Path('docs/scifi-ui/scripts/formatx-event-horizon.js').read_text(encoding='utf-8')
 
           assert home.count('formatx-apex.css?v=20260726-apex-2') == 1
@@ -58,41 +62,24 @@ jobs:
           assert 'data-flow="3"' in home
           assert '15 900 Ft / hó' in home and '29 900 Ft / hó' in home
           assert 'FAILSAFE_DEADLINE' in intro
-          for token in ('webgl2','createRenderer','particles','infinite','dataset.fxInfinite','formatx:loop'):
-              assert token in js, token
-          for token in ('prefers-reduced-motion:reduce','scene-loop-clone','loop-toggle'):
+
+          for token in ('formatx-three-host.js', 'formatx-transcend-bridge.js'):
+              assert token in loader, token
+          for token in ('THREE.WebGLRenderer', 'THREE.PerspectiveCamera', 'THREE.InstancedMesh', 'THREE.Points', 'CatmullRomCurve3', 'QualityGovernor', 'requestAnimationFrame'):
+              assert token in engine, token
+          for token in ('Float32Array', '__FORMATX_3D_STATE__', 'AudioContext', 'fx-three-loop-bridge', 'formatx:loop'):
+              assert token in host, token
+          for token in ('experience-entry.js', 'blob:', 'cdn.jsdelivr.net'):
+              assert token in stage, token
+          for token in ('streamSpeed', 'ArrayBuffer.isView'):
+              assert token in entry, token
+          for token in ('fx-three-stage-shell', 'fx-three-sound', 'fx-three-loop-bridge'):
               assert token in css, token
 
-          obsolete_tokens = (
-              'formatx-igloo','reference-commerce','reference-performance',
-              'project-accessibility','professional-sections','pricing-sync',
-              'site-ambient-background','site-quantum-aurora','site-premium-finish',
-              'site-art-direction','site-contrast-guard','commerce-readability',
-              'future-5000','causal-memory','quantum-twin','project-hub',
-          )
-          for token in obsolete_tokens:
-              assert token not in home, token
-
-          obsolete_files = [
-              'docs/scifi-ui/styles/formatx-igloo.css',
-              'docs/scifi-ui/scripts/formatx-igloo.js',
-              'docs/scifi-ui/styles/reference-commerce.css',
-              'docs/scifi-ui/styles/reference-performance.css',
-              'docs/scifi-ui/styles/project-accessibility.css',
-              'docs/scifi-ui/styles/professional-sections.css',
-              'docs/scifi-ui/scripts/professional-sections.js',
-              'docs/scifi-ui/sections/professional-sections.html',
-              'docs/scifi-ui/scripts/landing.js',
-              'docs/scifi-ui/scripts/pricing-sync.js',
-              '.github/scripts/validate-igloo-site.cjs',
-          ]
-          for path in obsolete_files:
-              assert not Path(path).exists(), path
-
-          styles = re.findall(r'<link[^>]+href="([^"]+\.css[^\"]*)"', home)
-          scripts = re.findall(r'<script[^>]+src="([^"]+\.js[^\"]*)"', home)
-          assert len(styles) == 2 and len(styles) == len(set(styles)), styles
-          assert len(scripts) == 2 and len(scripts) == len(set(scripts)), scripts
+          assert 'createRenderer' not in apex
+          assert "getContext('webgl2'" not in apex
+          assert 'formatx-transcend-lite.js' not in loader
+          assert 'worldstage-enhancements.js' not in loader
 
       - name: Validate JavaScript syntax
         shell: bash
@@ -103,16 +90,22 @@ jobs:
           node --check docs/site-loader.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-apex.js
+          node --check docs/scifi-ui/scripts/living-architecture.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/formatx-transcend-bridge.js
+          node --check docs/scifi-ui/scripts/formatx-three-host.js
+          node --check docs/scifi-ui/scripts/experience-entry.js
+          node --check docs/scifi-ui/scripts/Experience.js
           node --check docs/scifi-ui/scripts/checkout-v100.js
           node --check docs/scifi-ui/scripts/checkout-language-v100.js
-          node --check .github/scripts/validate-apex-site.cjs
+          node --check .github/scripts/validate-three-site.cjs
 
       - name: Test Worker and production bundle
         working-directory: billing-worker
         run: |
           npm ci
           npm test
-          npx wrangler deploy --dry-run --outdir ../.wrangler-apex-validation
+          npx wrangler deploy --dry-run --outdir ../.wrangler-three-validation
 
       - name: Install Playwright browsers
         shell: bash
@@ -139,14 +132,14 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          node .github/scripts/validate-apex-site.cjs 2>&1 | tee apex-browser-report.txt
+          node .github/scripts/validate-three-site.cjs 2>&1 | tee three-browser-report.txt
 
-      - name: Upload APEX browser report
+      - name: Upload Three.js browser report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-apex-browser-report
-          path: apex-browser-report.txt
+          name: formatx-three-browser-report
+          path: three-browser-report.txt
           if-no-files-found: warn
           retention-days: 5
 
@@ -159,13 +152,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='APEX WebGL, infinite scroll and cross-browser validation passed'
+            description='Three.js engine, mandatory loop and cross-browser validation passed'
           else
             state='failure'
-            description='FormatX APEX website validation failed'
+            description='FormatX Three.js website validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX APEX website validation' \
+            -f context='FormatX Three.js website validation' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
