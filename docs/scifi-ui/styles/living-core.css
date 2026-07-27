@@ -520,7 +520,7 @@ body.lc-panel-open .lc-intro {
 
 .lc-panel {
   --panel-accent: #6eeaff;
-  position: absolute;
+  position: fixed;
   z-index: 22;
   right: clamp(18px, 3vw, 54px);
   top: 50%;

@@ -58,6 +58,12 @@ const NODE_DATA = Object.freeze([
   }
 ]);
 
+const MOBILE_HUD_ANCHORS = Object.freeze([
+  [0.24, 0.37], [0.76, 0.37],
+  [0.20, 0.52], [0.80, 0.52],
+  [0.26, 0.67], [0.74, 0.67]
+]);
+
 const RELEASE_API = 'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest';
 const RELEASE_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
 
@@ -370,7 +376,7 @@ class LivingCoreExperience {
 
           vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
           gl_Position = projectionMatrix * mvPosition;
-          gl_PointSize = (aSize + proximity * 0.65 + uFocus * aEnergy * 0.42) * uPixelRatio * (18.0 / max(1.0, -mvPosition.z));
+          gl_PointSize = (aSize + proximity * 0.72 + uFocus * aEnergy * 0.48) * uPixelRatio * (38.0 / max(1.0, -mvPosition.z));
           vEnergy = aEnergy;
           vProximity = proximity;
           vDepth = clamp((-mvPosition.z - 4.0) / 8.0, 0.0, 1.0);
@@ -390,8 +396,8 @@ class LivingCoreExperience {
           float disc = smoothstep(0.5, 0.08, distanceToCenter);
           float hot = smoothstep(0.32, 0.0, distanceToCenter);
           vec3 colour = mix(uBaseColor, uAccentColor, clamp(vEnergy * 0.76 + vProximity * 0.62 + uFocus * 0.22, 0.0, 1.0));
-          colour += hot * (0.05 + vProximity * 0.22);
-          float alpha = disc * (0.075 + vEnergy * 0.24 + vProximity * 0.1 + uFocus * 0.035) * (1.0 - vDepth * 0.48);
+          colour += hot * (0.08 + vProximity * 0.3);
+          float alpha = disc * (0.11 + vEnergy * 0.31 + vProximity * 0.13 + uFocus * 0.045) * (1.0 - vDepth * 0.44);
           if (alpha < 0.012) discard;
           gl_FragColor = vec4(colour, alpha);
         }
@@ -649,11 +655,11 @@ class LivingCoreExperience {
     gsap.killTweensOf(this.panel);
     gsap.fromTo(this.panel,
       mobilePanel
-        ? { autoAlpha: 0, y: 34, scale: 0.98, rotationY: 0 }
-        : { autoAlpha: 0, x: 52, scale: 0.96, rotationY: -8 },
+        ? { autoAlpha: 0, y: 34, yPercent: 0, scale: 0.98, rotationY: 0 }
+        : { autoAlpha: 0, x: 52, yPercent: -50, scale: 0.96, rotationY: -8 },
       mobilePanel
-        ? { autoAlpha: 1, y: 0, scale: 1, duration: 0.62, ease: 'power3.out' }
-        : { autoAlpha: 1, x: 0, scale: 1, rotationY: 0, duration: 0.62, ease: 'power3.out' }
+        ? { autoAlpha: 1, y: 0, yPercent: 0, scale: 1, duration: 0.62, ease: 'power3.out' }
+        : { autoAlpha: 1, x: 0, yPercent: -50, scale: 1, rotationY: 0, duration: 0.62, ease: 'power3.out' }
     );
   }
 
@@ -724,6 +730,7 @@ class LivingCoreExperience {
       autoAlpha: 0,
       x: mobilePanel ? 0 : 46,
       y: mobilePanel ? 34 : 0,
+      yPercent: mobilePanel ? 0 : -50,
       scale: 0.97,
       rotationY: mobilePanel ? 0 : -7,
       duration: 0.38,
@@ -764,14 +771,19 @@ class LivingCoreExperience {
       const group = this.nodeGroups[index];
       group.getWorldPosition(this.worldPosition);
       this.projected.copy(this.worldPosition).project(this.camera);
-      const x = (this.projected.x * 0.5 + 0.5) * this.width;
-      const y = (-this.projected.y * 0.5 + 0.5) * this.height;
+      let x = (this.projected.x * 0.5 + 0.5) * this.width;
+      let y = (-this.projected.y * 0.5 + 0.5) * this.height;
+      if (this.mobile) {
+        const anchor = MOBILE_HUD_ANCHORS[index];
+        x = anchor[0] * this.width;
+        y = anchor[1] * this.height;
+      }
       const button = this.nodeButtons[index];
       const line = this.lineElements[index];
       if (button) {
         button.style.setProperty('--node-x', `${x.toFixed(1)}px`);
         button.style.setProperty('--node-y', `${y.toFixed(1)}px`);
-        const hidden = this.projected.z > 1 || x < -180 || x > this.width + 180 || y < -90 || y > this.height + 90;
+        const hidden = !this.mobile && (this.projected.z > 1 || x < -180 || x > this.width + 180 || y < -90 || y > this.height + 90);
         button.style.visibility = hidden ? 'hidden' : 'visible';
       }
       if (line) {
