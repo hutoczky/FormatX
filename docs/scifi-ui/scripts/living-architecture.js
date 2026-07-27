@@ -84,12 +84,26 @@
       }, { once: true });
       document.head.appendChild(readability);
     }
+    if (!document.querySelector('link[data-fx-organism-interface-style]')) {
+      const organismStyle = document.createElement('link');
+      organismStyle.rel = 'stylesheet';
+      organismStyle.href = './styles/organism-interface.css?v=20260727-organism-1';
+      organismStyle.dataset.fxOrganismInterfaceStyle = 'true';
+      document.head.appendChild(organismStyle);
+    }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
       script.src = './scripts/igloo-parity.js?v=20260727-webgpu-1';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
+    }
+    if (!document.querySelector('script[data-fx-organism-interface-script]')) {
+      const organismScript = document.createElement('script');
+      organismScript.src = './scripts/organism-interface.js?v=20260727-organism-1';
+      organismScript.defer = true;
+      organismScript.dataset.fxOrganismInterfaceScript = 'true';
+      document.head.appendChild(organismScript);
     }
   }
 
