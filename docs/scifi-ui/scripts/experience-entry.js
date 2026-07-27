@@ -68,6 +68,46 @@ async function startWebGLExperience() {
   }
 }
 
+function installWebGpuRuntimeGuard(webGpuModule) {
+  const prototype = webGpuModule.FormatXWebGPUExperience?.prototype;
+  if (!prototype || prototype.__formatxRuntimeGuard) return;
+
+  const originalSignalReady = prototype.signalReady;
+  const originalFrame = prototype.frame;
+  prototype.__formatxRuntimeGuard = true;
+
+  prototype.signalReady = function deferSignalReady() {
+    this.__formatxReadyPending = true;
+  };
+
+  prototype.frame = function guardedWebGpuFrame(now) {
+    if (this.__formatxGpuFatal) return;
+    try {
+      originalFrame.call(this, now);
+      let visible = true;
+      try {
+        const shared = window.parent.__FORMATX_3D_STATE__;
+        visible = !shared || Number(shared[14]) >= 0.5;
+      } catch (_) {}
+      if (!this.__formatxReadySignalled && !this.disposed && visible) {
+        this.__formatxReadySignalled = true;
+        originalSignalReady.call(this);
+        try {
+          const root = window.parent.document.documentElement;
+          root.style.setProperty('--fx-experience-engine', 'webgpu-tsl');
+        } catch (_) {}
+      }
+    } catch (error) {
+      this.__formatxGpuFatal = true;
+      const message = error instanceof Error ? error.message : String(error);
+      try { this.dispose(); } catch (_) {}
+      dispatchEvent(new CustomEvent('formatx:webgpufatal', {
+        detail: { message }
+      }));
+    }
+  };
+}
+
 addEventListener('formatx:webgpufatal', event => {
   if (webGpuFatalFallbackStarted) return;
   webGpuFatalFallbackStarted = true;
@@ -83,6 +123,7 @@ async function startExperience() {
     updateParentWebGpuState('initialising');
     try {
       const webGpuModule = await import(WEBGPU_URL);
+      installWebGpuRuntimeGuard(webGpuModule);
       await webGpuModule.startWebGPUExperience();
       updateParentWebGpuState('initialised');
       return;
