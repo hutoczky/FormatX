@@ -1,4 +1,17 @@
-/* Stacking-context corrections for the organism-first main-site shell. */
+/* Stacking-context and CSP-safe accent corrections for the organism-first shell. */
+.fx-organism-accent-1 { --chapter-accent: 183, 163, 255; }
+.fx-organism-accent-2 { --chapter-accent: 126, 241, 190; }
+.fx-organism-accent-3 { --chapter-accent: 255, 196, 126; }
+.fx-organism-accent-4 { --chapter-accent: 126, 190, 255; }
+.fx-organism-accent-5 { --chapter-accent: 205, 235, 249; }
+
+html.fx-organism-scene-0 { --accent: 120, 210, 255; --fx-panel-accent: 120, 210, 255; }
+html.fx-organism-scene-1 { --accent: 183, 163, 255; --fx-panel-accent: 183, 163, 255; }
+html.fx-organism-scene-2 { --accent: 126, 241, 190; --fx-panel-accent: 126, 241, 190; }
+html.fx-organism-scene-3 { --accent: 255, 196, 126; --fx-panel-accent: 255, 196, 126; }
+html.fx-organism-scene-4 { --accent: 126, 190, 255; --fx-panel-accent: 126, 190, 255; }
+html.fx-organism-scene-5 { --accent: 205, 235, 249; --fx-panel-accent: 205, 235, 249; }
+
 .fx-organism-interface-ready .topbar {
   position: fixed !important;
   z-index: 960 !important;
