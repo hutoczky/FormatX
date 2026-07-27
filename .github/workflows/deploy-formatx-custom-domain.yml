@@ -1,5 +1,5 @@
-name: Validate FormatX APEX production candidate
-run-name: Validate FormatX APEX production candidate from ${{ github.sha }}
+name: Validate FormatX Three.js production candidate
+run-name: Validate FormatX Three.js production candidate from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-apex-production-${{ github.ref }}
+  group: formatx-three-production-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate canonical APEX production source
+      - name: Validate canonical Three.js production source
         shell: bash
         run: |
           set -euo pipefail
@@ -47,24 +47,36 @@ jobs:
           node --check billing-worker/src/pricing-v100-api.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-apex.js
+          node --check docs/scifi-ui/scripts/living-architecture.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/formatx-transcend-bridge.js
+          node --check docs/scifi-ui/scripts/formatx-three-host.js
+          node --check docs/scifi-ui/scripts/experience-entry.js
+          node --check docs/scifi-ui/scripts/Experience.js
           grep -Fq "['/', '/scifi-ui/']" billing-worker/src/production-with-license.js
           grep -Fq 'formatx-apex.css?v=20260726-apex-2' docs/scifi-ui/index.html
           grep -Fq 'formatx-apex.js?v=20260726-apex-2' docs/scifi-ui/index.html
           grep -Fq 'id="fx-apex-canvas"' docs/scifi-ui/index.html
           grep -Fq 'id="fx-particle-canvas"' docs/scifi-ui/index.html
-          grep -Fq 'createRenderer' docs/scifi-ui/scripts/formatx-apex.js
-          grep -Fq 'formatx:loop' docs/scifi-ui/scripts/formatx-apex.js
-          grep -Fq 'scene-loop-clone' docs/scifi-ui/styles/formatx-apex.css
+          grep -Fq 'THREE.WebGLRenderer' docs/scifi-ui/scripts/Experience.js
+          grep -Fq 'THREE.InstancedMesh' docs/scifi-ui/scripts/Experience.js
+          grep -Fq 'THREE.Points' docs/scifi-ui/scripts/Experience.js
+          grep -Fq 'QualityGovernor' docs/scifi-ui/scripts/Experience.js
+          grep -Fq '__FORMATX_3D_STATE__' docs/scifi-ui/scripts/formatx-three-host.js
+          grep -Fq 'formatx:loop' docs/scifi-ui/scripts/formatx-three-host.js
+          grep -Fq 'experience-entry.js' docs/scifi-ui/three-stage.html
+          grep -Fq 'formatx-three-host.css' docs/scifi-ui/styles/igloo-parity.css
           grep -Fq '15 900 Ft / hó' docs/scifi-ui/index.html
           grep -Fq '29 900 Ft / hó' docs/scifi-ui/index.html
-          ! grep -Eq 'formatx-igloo|reference-commerce|reference-performance|project-accessibility|professional-sections|pricing-sync|site-ambient-background|site-quantum-aurora|site-premium-finish|site-art-direction|site-contrast-guard|commerce-readability' docs/scifi-ui/index.html
+          ! grep -Fq 'formatx-transcend-lite.js' docs/scifi-ui/scripts/igloo-parity.js
+          ! grep -Fq 'worldstage-enhancements.js' docs/scifi-ui/scripts/igloo-parity.js
 
       - name: Install, test and dry-build Worker
         working-directory: billing-worker
         run: |
           npm ci
           npm test
-          npx wrangler deploy --dry-run --outdir ../.wrangler-apex-production
+          npx wrangler deploy --dry-run --outdir ../.wrangler-three-production
 
       - name: Publish candidate status
         if: always() && github.event_name == 'push'
@@ -75,13 +87,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='APEX source, tests and Worker dry build passed'
+            description='Three.js source, tests and Worker dry build passed'
           else
             state='failure'
-            description='APEX production candidate validation failed'
+            description='Three.js production candidate validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX APEX production candidate' \
+            -f context='FormatX Three.js production candidate' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
