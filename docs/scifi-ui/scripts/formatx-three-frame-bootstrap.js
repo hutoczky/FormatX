@@ -12,35 +12,36 @@
   const telemetry = document.querySelector('[data-fx-three-telemetry]');
   const stageUrl = new URL('./three-stage.html', location.href);
   stageUrl.searchParams.set('v', '20260727-webgpu-1');
+  const readyDeadline = 20000;
 
   root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
   root.dataset.fxThree = 'loading';
   delete root.dataset.fxThreeError;
 
-  let settled = false;
+  let ready = false;
   let timeout = 0;
 
   function clearTimer() {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = 0;
-    }
+    if (!timeout) return;
+    clearTimeout(timeout);
+    timeout = 0;
   }
 
   function markReady() {
-    if (settled) return;
-    settled = true;
+    ready = true;
     clearTimer();
     root.dataset.fxThree = 'ready';
+    delete root.dataset.fxThreeError;
     root.classList.add('fx-three-engine-ready');
     if (telemetry && /INITIALISING|FRAME ERROR/.test(telemetry.textContent || '')) {
-      telemetry.textContent = 'THREE / READY';
+      telemetry.textContent = root.dataset.fxWebgpu === 'ready'
+        ? 'WEBGPU / READY'
+        : 'THREE / READY';
     }
   }
 
   function markError(message) {
-    if (settled) return;
-    settled = true;
+    if (ready) return;
     clearTimer();
     root.dataset.fxThree = 'error';
     root.dataset.fxThreeError = String(message || 'three-stage-timeout').slice(0, 180);
@@ -48,18 +49,18 @@
     if (telemetry) telemetry.textContent = 'THREE / FRAME ERROR';
   }
 
-  addEventListener('formatx:threeready', markReady, { once: true });
+  addEventListener('formatx:threeready', markReady);
   addEventListener('formatx:threeerror', event => {
     markError(event.detail && event.detail.message ? event.detail.message : 'three-engine-error');
-  }, { once: true });
+  });
 
   frame.addEventListener('error', () => markError('three-frame-network-error'), { once: true });
 
   if (frame.src !== stageUrl.href) frame.src = stageUrl.href;
 
   timeout = setTimeout(() => {
-    if (root.dataset.fxThree !== 'ready') markError('three-stage-ready-timeout');
-  }, 12000);
+    if (!ready && root.dataset.fxThree !== 'ready') markError('three-stage-ready-timeout');
+  }, readyDeadline);
 
   root.dataset.fxThreeBootstrap = 'ready';
 }());
