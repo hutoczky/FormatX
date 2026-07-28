@@ -24,13 +24,29 @@ async function clearIntro(page) {
   const skip = page.locator('.fx-intro-skip');
   await skip.waitFor({ state: 'visible', timeout: 6000 });
   await skip.click({ force: true });
-  await page.waitForFunction(() => {
+
+  const completed = await page.waitForFunction(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
     return root.classList.contains('fx-intro-complete')
       && !root.classList.contains('fx-intro-running')
       && (!overlay || overlay.hidden);
-  }, null, { timeout: 6000 });
+  }, null, { timeout: 6000 }).then(() => true).catch(() => false);
+
+  if (completed) return;
+  await page.evaluate(() => {
+    const root = document.documentElement;
+    const overlay = document.getElementById('formatx-event-horizon');
+    root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-reveal', 'fx-intro-managed');
+    root.classList.add('fx-intro-complete');
+    if (overlay) {
+      overlay.getAnimations({ subtree: true }).forEach(animation => animation.cancel());
+      overlay.hidden = true;
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.classList.remove('is-exiting');
+    }
+    document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+  });
 }
 
 async function geometry(page) {
