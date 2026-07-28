@@ -10,9 +10,7 @@ function assert(value, message) {
 
 async function clearIntro(page) {
   const skip = page.locator('.fx-intro-skip');
-  if (await skip.count()) {
-    await skip.evaluate(node => node.click()).catch(() => {});
-  }
+  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
 
   const completed = await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -23,9 +21,6 @@ async function clearIntro(page) {
   }, null, { timeout: 5000 }).then(() => true).catch(() => false);
 
   if (completed) return;
-
-  // The intro is unrelated to audio. Remove only its visual interception in
-  // the test so the audio button can still receive a real trusted click.
   await page.evaluate(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
@@ -54,7 +49,7 @@ async function runCase(browser, name, contextOptions) {
 
   await page.goto(TEST_URL + '?lang=hu&audio-test=1', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
-  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'verified-v3', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'cinematic-v4', null, { timeout: 15000 });
   await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 10000 });
 
   const button = page.locator('.fx-three-sound');
@@ -68,6 +63,7 @@ async function runCase(browser, name, contextOptions) {
   const state = await page.evaluate(() => ({
     owner: document.documentElement.dataset.fxAudioOwner || '',
     engine: document.documentElement.dataset.fxAudioEngine || '',
+    character: document.documentElement.dataset.fxAudioCharacter || '',
     context: document.documentElement.dataset.fxAudioContext || '',
     state: document.documentElement.dataset.fxAudioState || '',
     level: document.documentElement.dataset.fxAudioLevel || '',
@@ -82,9 +78,10 @@ async function runCase(browser, name, contextOptions) {
     label: document.querySelector('.fx-three-sound span')?.textContent || ''
   }));
 
-  assert(state.owner === 'verified-v3', name + ': wrong audio owner: ' + JSON.stringify(state));
-  assert(state.buttonOwner === 'verified-v3', name + ': button owner was replaced: ' + JSON.stringify(state));
-  assert(state.engine === 'web-audio-with-wav-fallback', name + ': wrong engine: ' + JSON.stringify(state));
+  assert(state.owner === 'cinematic-v4', name + ': wrong audio owner: ' + JSON.stringify(state));
+  assert(state.buttonOwner === 'cinematic-v4', name + ': button owner was replaced: ' + JSON.stringify(state));
+  assert(state.engine === 'cinematic-spatial-web-audio-v4', name + ': wrong engine: ' + JSON.stringify(state));
+  assert(state.character === 'modern-cinematic', name + ': wrong sound character: ' + JSON.stringify(state));
   assert(state.state === 'on' && state.level === 'audible', name + ': audio did not turn on: ' + JSON.stringify(state));
   assert(state.pressed === 'true', name + ': button state is not active: ' + JSON.stringify(state));
   assert(state.context === 'running' || state.output === 'wav-fallback', name + ': audio context is not running: ' + JSON.stringify(state));
@@ -111,12 +108,12 @@ async function runCase(browser, name, contextOptions) {
   });
 
   try {
-    await runCase(browser, 'desktop-audio', {
+    await runCase(browser, 'desktop-cinematic-audio', {
       viewport: { width: 1280, height: 840 },
       locale: 'hu-HU',
       colorScheme: 'dark'
     });
-    await runCase(browser, 'mobile-audio', {
+    await runCase(browser, 'mobile-cinematic-audio', {
       viewport: { width: 390, height: 844 },
       isMobile: true,
       hasTouch: true,
