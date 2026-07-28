@@ -1,4 +1,4 @@
-const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260729-organic-core-2', import.meta.url).href;
+const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260729-organic-core-3', import.meta.url).href;
 const WEBXR_URL = new URL('./WebXRDirector.js?v=20260727-webgpu-1', import.meta.url).href;
 const WEBGL_LOADER_URL = new URL('./webgl-fallback-loader.js?v=20260727-particles-stable-3', import.meta.url).href;
 const WEBGPU_STARTUP_BUDGET = 8000;
@@ -40,7 +40,7 @@ function reportFatal(error) {
 
 function replaceRequired(source, search, replacement, label) {
   if (!source.includes(search)) {
-    throw new Error('FormatX particle profile marker missing: ' + label);
+    throw new Error('FormatX runtime marker missing: ' + label);
   }
   return source.replace(search, replacement);
 }
@@ -61,8 +61,20 @@ async function loadWebGpuModule() {
   source = replaceRequired(
     source,
     'const geometry = new THREE.IcosahedronGeometry(1.72, mobile ? 5 : 6);',
-    'const geometry = new THREE.SphereGeometry(1.72, mobile ? 40 : 64, mobile ? 28 : 48);',
+    'const geometry = new THREE.SphereGeometry(1.56, mobile ? 36 : 56, mobile ? 24 : 40);',
     'organic shell geometry'
+  );
+  source = replaceRequired(
+    source,
+    'material.side = THREE.DoubleSide;',
+    'material.side = THREE.FrontSide;',
+    'single smooth membrane surface'
+  );
+  source = replaceRequired(
+    source,
+    'material.blending = THREE.AdditiveBlending;',
+    'material.blending = THREE.NormalBlending;',
+    'non-overexposed membrane blending'
   );
   source = replaceRequired(
     source,
@@ -79,6 +91,56 @@ async function loadWebGpuModule() {
   );
   source = replaceRequired(
     source,
+    `const planBase = p.abs().pow(vec3(0.72)).mul(p.sign());
+      const segment = p.y.add(1.4).mul(3.5).floor();
+      const segmentGate = step(0.5, segment.mul(0.37).add(seed).fract());
+      const planScale = float(1.08).add(segmentGate.mul(0.18));
+      const organsShape = vec3(
+        planBase.x.mul(planScale),
+        planBase.y.add(segment.mul(2.1).add(this.time.mul(0.42)).sin().mul(0.055)),
+        planBase.z.mul(planScale)
+      );`,
+    `const organRipple = p.y.mul(6.2).add(this.time.mul(0.52)).sin();
+      const organScale = float(1.02).add(organRipple.mul(0.055)).add(this.pulse.mul(0.035));
+      const organsShape = vec3(
+        p.x.mul(organScale),
+        p.y.mul(1.08).add(organRipple.mul(0.045)),
+        p.z.mul(organScale)
+      ).add(n.mul(phase.mul(0.9).sub(this.time.mul(0.38)).sin().mul(0.045)));`,
+    'smooth organ-state deformation'
+  );
+  source = replaceRequired(
+    source,
+    `const facetSteps = mix(float(3), float(7), this.quality);
+      const facets = wave.mul(0.5).add(0.5).mul(facetSteps).floor().div(facetSteps);
+      const skeletonShape = p.add(n.mul(facets.mul(0.24).sub(0.08)))
+        .add(tangent.mul(seed.mul(31).add(this.time).sin().mul(0.075)))
+        .mul(vec3(1.08, 1, 1.08));`,
+    `const skeletonFlow = phase.mul(1.4).add(this.time.mul(0.65)).sin();
+      const skeletonShape = p
+        .add(n.mul(skeletonFlow.mul(0.08)))
+        .add(tangent.mul(seed.mul(31).add(this.time).sin().mul(0.045)))
+        .mul(vec3(1.04, 1.08, 1.04));`,
+    'smooth living skeleton state'
+  );
+  source = replaceRequired(
+    source,
+    `const transitionArc = this.scene.max(0).fract().mul(PI).sin();
+      const fragmentDirection = hash(seed.mul(91)).mul(2).sub(1);
+      const breakup = transitionArc.mul(this.explode).mul(float(0.18).add(this.quality.mul(0.34)));
+      transformed.addAssign(n.mul(fragmentDirection.mul(breakup).mul(float(0.32).add(seed.mul(0.46)))));
+      transformed.addAssign(tangent.mul(transitionArc.mul(fragmentDirection).mul(0.12)));
+      transformed.addAssign(bitangent.mul(transitionArc.mul(seed.mul(19).sin()).mul(0.07)));`,
+    `const transitionArc = this.scene.max(0).fract().mul(PI).sin();
+      const transitionFlow = transitionArc.mul(float(0.035).add(this.quality.mul(0.025)));
+      const transitionWave = phase.mul(0.72).add(this.time.mul(0.86)).sin();
+      transformed.addAssign(n.mul(transitionWave.mul(transitionFlow)));
+      transformed.addAssign(tangent.mul(this.pointer.x.mul(transitionFlow).mul(0.22)));
+      transformed.addAssign(bitangent.mul(this.pointer.y.mul(transitionFlow).mul(0.18)));`,
+    'fluid state transition without fragmentation'
+  );
+  source = replaceRequired(
+    source,
     `const pointerWarp = smoothstep(1.55, 0, pointerDistance).mul(0.09);
       transformed.addAssign(n.mul(pointerWarp.mul(this.time.mul(2).add(phase).sin())));`,
     `const pointerWarp = smoothstep(1.82, 0, pointerDistance).mul(0.17);
@@ -89,8 +151,24 @@ async function loadWebGpuModule() {
   );
   source = replaceRequired(
     source,
+    `return baseColor.mul(float(0.18).add(circuit.mul(0.58)).add(scanline.mul(0.085)))
+        .add(color(0xb8ffff).mul(fresnel.mul(float(1.2).add(this.quality.mul(0.65)))))
+        .add(baseColor.mul(this.pulse.mul(float(0.08).add(stateWeight(this.scene, 3).mul(0.2)))));`,
+    `return baseColor.mul(float(0.28).add(circuit.mul(0.22)).add(scanline.mul(0.04)))
+        .add(color(0xb8ffff).mul(fresnel.mul(float(0.42).add(this.quality.mul(0.18)))))
+        .add(baseColor.mul(this.pulse.mul(float(0.14).add(stateWeight(this.scene, 3).mul(0.18)))));`,
+    'living membrane colour'
+  );
+  source = replaceRequired(
+    source,
+    'return float(0.42).add(fresnel.mul(0.48)).clamp(0, 0.94);',
+    'return float(0.16).add(fresnel.mul(0.42)).add(this.pulse.mul(0.06)).clamp(0.08, 0.68);',
+    'translucent membrane opacity'
+  );
+  source = replaceRequired(
+    source,
     'this.energy = new THREE.Mesh(new THREE.IcosahedronGeometry(1.28, mobile ? 3 : 4), energyMaterial);',
-    'this.energy = new THREE.Mesh(new THREE.SphereGeometry(1.28, mobile ? 28 : 44, mobile ? 20 : 32), energyMaterial);',
+    'this.energy = new THREE.Mesh(new THREE.SphereGeometry(1.18, mobile ? 26 : 40, mobile ? 18 : 28), energyMaterial);',
     'organic inner energy geometry'
   );
   source = replaceRequired(
@@ -250,7 +328,7 @@ function installRuntimeGuard(webGpuModule) {
           parent.document.documentElement.style.setProperty('--fx-experience-engine', 'webgpu-tsl');
           parent.document.documentElement.dataset.fxParticleProfile = 'focus-half-stable';
           parent.document.documentElement.dataset.fxParticleTierLock = 'upward-disabled';
-          parent.document.documentElement.dataset.fxCoreForm = 'organic-mouse-reactive';
+          parent.document.documentElement.dataset.fxCoreForm = 'organic-fluid-interactive';
         } catch (_) {}
       }
     } catch (error) {
