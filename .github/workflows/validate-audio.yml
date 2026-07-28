@@ -1,5 +1,5 @@
 name: Validate FormatX verified audio
-run-name: Validate FormatX verified audio from ${{ github.sha }}
+run-name: Validate FormatX professional score from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -47,7 +47,7 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate audio source architecture and syntax
+      - name: Validate professional score architecture and syntax
         shell: bash
         run: |
           set -euo pipefail
@@ -56,16 +56,15 @@ jobs:
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check billing-worker/src/production-with-license.js
           node --check .github/scripts/validate-audio.cjs
-          grep -Fq "cinematic-v5" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "cinematic-ambient-score-v5" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "cinematic-ambient-music" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "CHORDS" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "scheduleMusic" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "schedulePadNote" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "professional-v6" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "premium-cinematic-music" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "sixteen-bar-evolving-score" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "createPeriodicWave" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "createWaveShaper" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "createConvolver" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "createDelay" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "createStereoPanner" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "OfflineAudioContext" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "createAnalyser" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "signal-verified" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "autoplay=(self)" billing-worker/src/production-with-license.js
           ! grep -Fq "'autoplay=()'" billing-worker/src/production-with-license.js
@@ -95,7 +94,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-audio-http.log"
           exit 1
 
-      - name: Verify desktop and mobile cinematic ambient music in Chromium
+      - name: Verify desktop and mobile professional score in Chromium
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-audio/node_modules
         shell: bash
@@ -121,10 +120,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Desktop and mobile cinematic ambient music verification passed'
+            description='Desktop and mobile professional cinematic score verification passed'
           else
             state='failure'
-            description='FormatX ambient music validation failed'
+            description='FormatX professional score validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
