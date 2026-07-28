@@ -49,7 +49,7 @@ async function runCase(browser, name, contextOptions) {
 
   await page.goto(TEST_URL + '?lang=hu&audio-test=1', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
-  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'cinematic-v4', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'cinematic-v5', null, { timeout: 15000 });
   await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 10000 });
 
   const button = page.locator('.fx-three-sound');
@@ -59,11 +59,14 @@ async function runCase(browser, name, contextOptions) {
   await button.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'on', null, { timeout: 10000 });
   await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 10000 });
+  await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 10000 });
 
   const state = await page.evaluate(() => ({
     owner: document.documentElement.dataset.fxAudioOwner || '',
     engine: document.documentElement.dataset.fxAudioEngine || '',
     character: document.documentElement.dataset.fxAudioCharacter || '',
+    music: document.documentElement.dataset.fxAudioMusic || '',
+    chord: document.documentElement.dataset.fxAudioChord || '',
     context: document.documentElement.dataset.fxAudioContext || '',
     state: document.documentElement.dataset.fxAudioState || '',
     level: document.documentElement.dataset.fxAudioLevel || '',
@@ -78,15 +81,16 @@ async function runCase(browser, name, contextOptions) {
     label: document.querySelector('.fx-three-sound span')?.textContent || ''
   }));
 
-  assert(state.owner === 'cinematic-v4', name + ': wrong audio owner: ' + JSON.stringify(state));
-  assert(state.buttonOwner === 'cinematic-v4', name + ': button owner was replaced: ' + JSON.stringify(state));
-  assert(state.engine === 'cinematic-spatial-web-audio-v4', name + ': wrong engine: ' + JSON.stringify(state));
-  assert(state.character === 'modern-cinematic', name + ': wrong sound character: ' + JSON.stringify(state));
+  assert(state.owner === 'cinematic-v5', name + ': wrong audio owner: ' + JSON.stringify(state));
+  assert(state.buttonOwner === 'cinematic-v5', name + ': button owner was replaced: ' + JSON.stringify(state));
+  assert(state.engine === 'cinematic-ambient-score-v5', name + ': wrong engine: ' + JSON.stringify(state));
+  assert(state.character === 'cinematic-ambient-music', name + ': wrong sound character: ' + JSON.stringify(state));
+  assert(['playing', 'fallback-playing'].includes(state.music), name + ': ambient score is not playing: ' + JSON.stringify(state));
   assert(state.state === 'on' && state.level === 'audible', name + ': audio did not turn on: ' + JSON.stringify(state));
   assert(state.pressed === 'true', name + ': button state is not active: ' + JSON.stringify(state));
   assert(state.context === 'running' || state.output === 'wav-fallback', name + ': audio context is not running: ' + JSON.stringify(state));
-  assert(['signal-verified', 'wav-fallback'].includes(state.output), name + ': no verified audio signal: ' + JSON.stringify(state));
-  assert(state.selfTest === 'passed' || state.selfTest === 'unsupported', name + ': offline audio graph failed: ' + JSON.stringify(state));
+  assert(['signal-verified', 'wav-fallback'].includes(state.output), name + ': no verified music signal: ' + JSON.stringify(state));
+  assert(state.selfTest === 'passed' || state.selfTest === 'unsupported', name + ': offline music graph failed: ' + JSON.stringify(state));
 
   await button.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'off');
@@ -108,12 +112,12 @@ async function runCase(browser, name, contextOptions) {
   });
 
   try {
-    await runCase(browser, 'desktop-cinematic-audio', {
+    await runCase(browser, 'desktop-cinematic-ambient-music', {
       viewport: { width: 1280, height: 840 },
       locale: 'hu-HU',
       colorScheme: 'dark'
     });
-    await runCase(browser, 'mobile-cinematic-audio', {
+    await runCase(browser, 'mobile-cinematic-ambient-music', {
       viewport: { width: 390, height: 844 },
       isMobile: true,
       hasTouch: true,
