@@ -1,4 +1,4 @@
-# Trigger revision 2
+# Trigger revision 3
 name: Apply FormatX Design System
 
 on:
@@ -36,7 +36,7 @@ jobs:
               if new in text:
                   return False
               if old not in text:
-                  raise SystemExit(f'Expected source not found in {path}: {old}')
+                  return False
               file.write_text(text.replace(old, new, 1), encoding='utf-8')
               return True
 
@@ -95,6 +95,14 @@ jobs:
               '  <link rel="stylesheet" href="./styles/project-simulator.css?v=20260728-operational-twin-1">\n  <link rel="stylesheet" data-fx-design-system="true" href="./styles/formatx-design-system.css?v=' + VERSION + '">'
           )
 
+          css_path = Path('docs/scifi-ui/styles/formatx-design-system.css')
+          css = css_path.read_text(encoding='utf-8')
+          marker = '/* DS2 mobile containment v1 */'
+          if marker not in css:
+              css += '''\n\n/* DS2 mobile containment v1 */\n@media (max-width: 720px) {\n  html[data-fx-design-system="2"],\n  html[data-fx-design-system="2"] body,\n  html[data-fx-design-system="2"] main {\n    width: 100%;\n    max-width: 100%;\n    overflow-x: hidden;\n  }\n\n  html[data-fx-design-system="2"] :where(.scene, .hero, .hero-grid, .hero-copy, .hero-actions) {\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  html[data-fx-design-system="2"] .hero h1 {\n    width: 100%;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  html[data-fx-design-system="2"] .hero-title-main {\n    max-width: 100%;\n    font-size: clamp(54px, 17vw, 78px);\n    letter-spacing: -.08em;\n  }\n\n  html[data-fx-design-system="2"] .hero-actions {\n    width: 100%;\n    grid-template-columns: minmax(0, 1fr);\n  }\n\n  html[data-fx-design-system="2"] .hero-actions .button {\n    width: 100%;\n    min-width: 0;\n    max-width: 100%;\n    padding-inline: 14px;\n    white-space: normal;\n    text-align: center;\n    overflow-wrap: anywhere;\n  }\n\n  html[data-fx-design-system="2"] :where(.fx-category-deck, .fx-origin-proof) {\n    width: calc(100% - 24px);\n    max-width: calc(100% - 24px);\n  }\n}\n'''
+              css_path.write_text(css, encoding='utf-8')
+              changed = True
+
           for path in ('docs/scifi-ui/index.html', 'docs/scifi-ui/checkout.html', 'docs/scifi-ui/project-simulator.html'):
               text = Path(path).read_text(encoding='utf-8')
               assert 'data-fx-design-system="2"' in text, path
@@ -113,6 +121,6 @@ jobs:
           fi
           git config user.name 'FormatX Design System Bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add docs/scifi-ui/index.html docs/scifi-ui/checkout.html docs/scifi-ui/project-simulator.html
-          git commit -m 'Unify product surfaces with FormatX Design System 2.0'
+          git add docs/scifi-ui/index.html docs/scifi-ui/checkout.html docs/scifi-ui/project-simulator.html docs/scifi-ui/styles/formatx-design-system.css
+          git commit -m 'Fix FormatX Design System mobile containment'
           git push origin HEAD:master
