@@ -10,6 +10,7 @@ on:
       - 'docs/scifi-ui/scripts/project-simulator-entry.js'
       - 'docs/scifi-ui/styles/project-simulator.css'
       - 'docs/scifi-ui/scripts/formatx-category-positioning.js'
+      - 'docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
       - 'docs/scifi-ui/scripts/formatx-infinite-loop-fix.js'
       - 'docs/scifi-ui/scripts/checkout-language-v100.js'
@@ -23,6 +24,7 @@ on:
       - 'docs/scifi-ui/scripts/project-simulator-entry.js'
       - 'docs/scifi-ui/styles/project-simulator.css'
       - 'docs/scifi-ui/scripts/formatx-category-positioning.js'
+      - 'docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
       - 'docs/scifi-ui/scripts/formatx-infinite-loop-fix.js'
       - 'docs/scifi-ui/scripts/checkout-language-v100.js'
@@ -55,15 +57,18 @@ jobs:
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-category-positioning.js
+          node --check docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js
           node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           node --check docs/scifi-ui/scripts/checkout-language-v100.js
           node --check docs/scifi-ui/scripts/project-simulator.js
           node --check docs/scifi-ui/scripts/project-simulator-entry.js
           node --check .github/scripts/validate-category-positioning.cjs
           grep -Fq "Saját technikusi kategória" docs/scifi-ui/scripts/formatx-category-positioning.js
+          grep -Fq "fxCategoryDeckState = 'ready'" docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js
           grep -Fq "authoritative-v4" docs/scifi-ui/scripts/checkout-language-v100.js
           grep -Fq "formatx-category-positioning.js?v=20260728-category-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq "formatx-category-positioning.css?v=20260728-category-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
+          grep -Fq "formatx-category-deck-stabilizer.js?v=20260728-category-deck-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq "project-simulator-entry.js?v=20260728-operational-twin-1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq "operational-twin-v1" docs/scifi-ui/scripts/project-simulator.js
           grep -Fq "SZIMULÁCIÓS KÖRNYEZET / NINCS VALÓDI ESZKÖZHOZZÁFÉRÉS" docs/scifi-ui/project-simulator.html
