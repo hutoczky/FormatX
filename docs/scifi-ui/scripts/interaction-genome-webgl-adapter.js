@@ -70,6 +70,9 @@
       renderer.setData(state.items, state.selected);
       renderer.resize();
       renderer.render(now);
+      canvas.dataset.fxRenderedFrame = String(Number(canvas.dataset.fxRenderedFrame || 0) + 1);
+      canvas.dataset.fxRenderedNodes = String(state.items.length);
+      canvas.dataset.fxRenderedAt = String(Math.round(now));
     }
     const overlay = document.getElementById('fx-interaction-genome');
     if (overlay?.dataset.open === 'true') frame = requestAnimationFrame(renderLoop);
@@ -107,6 +110,8 @@
       canvas.style.height = '100%';
       canvas.style.zIndex = '1';
       canvas.style.touchAction = 'none';
+      canvas.dataset.fxRenderedFrame = '0';
+      canvas.dataset.fxRenderedNodes = '0';
       stage.insertBefore(canvas, original);
       original.style.opacity = '0';
       original.style.pointerEvents = 'none';
