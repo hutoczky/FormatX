@@ -1,0 +1,117 @@
+name: Apply FormatX Design System
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/apply-formatx-design-system.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          token: ${{ github.token }}
+
+      - name: Apply Design System 2.0 bindings
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          VERSION = '20260728-ds2'
+
+          def replace_once(path, old, new):
+              file = Path(path)
+              text = file.read_text(encoding='utf-8')
+              if new in text:
+                  return False
+              if old not in text:
+                  raise SystemExit(f'Expected source not found in {path}: {old}')
+              file.write_text(text.replace(old, new, 1), encoding='utf-8')
+              return True
+
+          changed = False
+
+          changed |= replace_once(
+              'docs/scifi-ui/index.html',
+              '<html lang="hu" data-theme="dark" class="fx-intro-pending">',
+              '<html lang="hu" data-theme="dark" data-fx-design-system="2" class="fx-intro-pending">'
+          )
+          changed |= replace_once(
+              'docs/scifi-ui/index.html',
+              '<meta name="theme-color" content="#05070a">',
+              '<meta name="theme-color" content="#01040b">'
+          )
+          changed |= replace_once(
+              'docs/scifi-ui/index.html',
+              '  <link rel="stylesheet" data-fx-category-style="true" href="./styles/formatx-category-positioning.css?v=20260728-category-v1">',
+              '  <link rel="stylesheet" data-fx-category-style="true" href="./styles/formatx-category-positioning.css?v=20260728-category-v1">\n  <link rel="stylesheet" data-fx-design-system="true" href="./styles/formatx-design-system.css?v=' + VERSION + '">'
+          )
+
+          changed |= replace_once(
+              'docs/scifi-ui/checkout.html',
+              '<html lang="hu" data-theme="dark">',
+              '<html lang="hu" data-theme="dark" data-fx-design-system="2">'
+          )
+          changed |= replace_once(
+              'docs/scifi-ui/checkout.html',
+              '<meta name="theme-color" content="#050a10">',
+              '<meta name="theme-color" content="#01040b">'
+          )
+          changed |= replace_once(
+              'docs/scifi-ui/checkout.html',
+              '  <link rel="stylesheet" href="./styles/pricing-v100.css?v=20260725-separate-qr-row-5">',
+              '  <link rel="stylesheet" href="./styles/pricing-v100.css?v=20260725-separate-qr-row-5">\n  <link rel="stylesheet" data-fx-design-system="true" href="./styles/formatx-design-system.css?v=' + VERSION + '">'
+          )
+          changed |= replace_once(
+              'docs/scifi-ui/checkout.html',
+              '<span><strong>FormatX Suite Pro</strong><small>HUF / EUR banki átutalás</small></span>',
+              '<span><strong>FORMATX</strong><small>SECURE COMMERCE</small></span>'
+          )
+
+          changed |= replace_once(
+              'docs/scifi-ui/project-simulator.html',
+              '<html lang="hu" data-simulator-state="idle">',
+              '<html lang="hu" data-simulator-state="idle" data-fx-design-system="2">'
+          )
+          changed |= replace_once(
+              'docs/scifi-ui/project-simulator.html',
+              '<meta name="theme-color" content="#071014">',
+              '<meta name="theme-color" content="#01040b">'
+          )
+          changed |= replace_once(
+              'docs/scifi-ui/project-simulator.html',
+              '  <link rel="stylesheet" href="./styles/project-simulator.css?v=20260728-operational-twin-1">',
+              '  <link rel="stylesheet" href="./styles/project-simulator.css?v=20260728-operational-twin-1">\n  <link rel="stylesheet" data-fx-design-system="true" href="./styles/formatx-design-system.css?v=' + VERSION + '">'
+          )
+
+          for path in ('docs/scifi-ui/index.html', 'docs/scifi-ui/checkout.html', 'docs/scifi-ui/project-simulator.html'):
+              text = Path(path).read_text(encoding='utf-8')
+              assert 'data-fx-design-system="2"' in text, path
+              assert f'formatx-design-system.css?v={VERSION}' in text, path
+
+          print('changed=' + str(changed).lower())
+          PY
+
+      - name: Commit unified surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'Design System bindings already applied.'
+            exit 0
+          fi
+          git config user.name 'FormatX Design System Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/index.html docs/scifi-ui/checkout.html docs/scifi-ui/project-simulator.html
+          git commit -m 'Unify product surfaces with FormatX Design System 2.0'
+          git push origin HEAD:master
