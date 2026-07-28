@@ -28,6 +28,7 @@
 
   function announceReady() {
     root.dataset.fxCategoryDeckState = 'ready';
+    root.dataset.fxCategoryLayer = 'ready';
     dispatchEvent(new CustomEvent('formatx:languagechange', {
       detail: { language: root.lang === 'en' ? 'en' : 'hu', source: 'category-deck-stabilizer' }
     }));
