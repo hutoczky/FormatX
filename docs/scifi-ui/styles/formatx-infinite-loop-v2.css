@@ -1,0 +1,25 @@
+/* FormatX continuous loop V2 — laptop touchpad and wheel stability */
+html[data-fx-infinite-controller="authoritative-wheel-v2"],
+html[data-fx-infinite-controller="authoritative-wheel-v2"] body {
+  overscroll-behavior-y: none;
+}
+
+html[data-fx-infinite-controller="authoritative-wheel-v2"].fx-precision-wheel,
+html[data-fx-infinite-controller="authoritative-wheel-v2"].fx-three-loop-transfer {
+  scroll-snap-type: none !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-fx-infinite-controller="authoritative-wheel-v2"].fx-three-loop-transfer body {
+  scroll-behavior: auto !important;
+}
+
+html[data-fx-infinite-controller="authoritative-wheel-v2"] .fx-three-loop-bridge {
+  scroll-snap-align: none !important;
+}
+
+@media (pointer: fine) and (hover: hover) {
+  html[data-fx-infinite-controller="authoritative-wheel-v2"].fx-precision-wheel {
+    scroll-snap-type: none !important;
+  }
+}
