@@ -56,8 +56,12 @@ jobs:
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check billing-worker/src/production-with-license.js
           node --check .github/scripts/validate-audio.cjs
-          grep -Fq "cinematic-v4" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "modern-cinematic" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "cinematic-v5" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "cinematic-ambient-score-v5" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "cinematic-ambient-music" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "CHORDS" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "scheduleMusic" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "schedulePadNote" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "createConvolver" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "createStereoPanner" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "OfflineAudioContext" docs/scifi-ui/scripts/formatx-audio-repair.js
@@ -91,7 +95,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-audio-http.log"
           exit 1
 
-      - name: Verify desktop and mobile cinematic audio signal in Chromium
+      - name: Verify desktop and mobile cinematic ambient music in Chromium
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-audio/node_modules
         shell: bash
@@ -117,10 +121,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Desktop and mobile cinematic Web Audio verification passed'
+            description='Desktop and mobile cinematic ambient music verification passed'
           else
             state='failure'
-            description='FormatX verified audio validation failed'
+            description='FormatX ambient music validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
