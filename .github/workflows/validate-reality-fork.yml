@@ -1,0 +1,115 @@
+name: Validate FormatX Reality Fork Capsule
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/project-simulator.html'
+      - 'docs/scifi-ui/scripts/project-simulator.js'
+      - 'docs/scifi-ui/scripts/operational-twin-dom-bridge.js'
+      - 'docs/scifi-ui/scripts/reality-fork-capsule.js'
+      - 'docs/scifi-ui/styles/reality-fork-capsule.css'
+      - '.github/scripts/validate-reality-fork.cjs'
+      - '.github/workflows/validate-reality-fork.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/project-simulator.html'
+      - 'docs/scifi-ui/scripts/project-simulator.js'
+      - 'docs/scifi-ui/scripts/operational-twin-dom-bridge.js'
+      - 'docs/scifi-ui/scripts/reality-fork-capsule.js'
+      - 'docs/scifi-ui/styles/reality-fork-capsule.css'
+      - '.github/scripts/validate-reality-fork.cjs'
+      - '.github/workflows/validate-reality-fork.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-reality-fork-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Validate source architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/project-simulator.js
+          node --check docs/scifi-ui/scripts/operational-twin-dom-bridge.js
+          node --check docs/scifi-ui/scripts/reality-fork-capsule.js
+          node --check .github/scripts/validate-reality-fork.cjs
+          grep -Fq 'reality-fork-capsule.css?v=20260728-reality-fork-1' docs/scifi-ui/project-simulator.html
+          grep -Fq 'operational-twin-dom-bridge.js?v=20260728-reality-fork-1' docs/scifi-ui/project-simulator.html
+          grep -Fq 'reality-fork-capsule.js?v=20260728-reality-fork-1' docs/scifi-ui/project-simulator.html
+          grep -Fq 'ECDSA-P256-SHA256' docs/scifi-ui/scripts/reality-fork-capsule.js
+          grep -Fq 'formatx-reality-fork-capsule-v1' docs/scifi-ui/scripts/reality-fork-capsule.js
+
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-reality-fork" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-reality-fork/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4192 --directory docs > "$RUNNER_TEMP/formatx-reality-fork-http.log" 2>&1 &
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:4192/scifi-ui/project-simulator.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-reality-fork-http.log"
+          exit 1
+
+      - name: Validate counterfactual replay and cryptographic capsule
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-reality-fork/node_modules
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-reality-fork.cjs 2>&1 | tee reality-fork-report.txt
+
+      - name: Upload Reality Fork report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-reality-fork-report
+          path: reality-fork-report.txt
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Publish validation status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Counterfactual replay, capsule signature and tamper rejection passed'
+          else
+            state='failure'
+            description='Reality Fork Capsule validation failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX Reality Fork validation' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
