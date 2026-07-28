@@ -1,3 +1,4 @@
+/* FormatX Operational Twin read-only bridge — validation revision 2 */
 (function () {
   'use strict';
 
