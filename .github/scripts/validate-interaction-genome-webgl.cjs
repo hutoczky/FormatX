@@ -140,7 +140,7 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
 
   assert(state.adapter === 'ready-v3', name + ' adapter: ' + JSON.stringify(state));
   assert(state.renderer === 'webgl2-cinematic-pbr' && state.stageRenderer === 'webgl2-cinematic-pbr', name + ' renderer markers: ' + JSON.stringify(state));
-  assert(state.resourcePolicy === 'cinematic-adaptive-v3', name + ' resource policy: ' + JSON.stringify(state));
+  assert(['cinematic-adaptive-v3', 'cinematic-adaptive-v3-4k-eco'].includes(state.resourcePolicy), name + ' resource policy: ' + JSON.stringify(state));
   assert(state.geometry === 'instanced-meshes', name + ' instanced geometry marker missing: ' + JSON.stringify(state));
   assert(state.canvasCount === 1, name + ' WebGL canvas count: ' + JSON.stringify(state));
   assert(state.canvas[0] >= minimumCanvas[0] && state.canvas[1] >= minimumCanvas[1], name + ' canvas CSS size: ' + JSON.stringify(state));
@@ -172,11 +172,12 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
 
   if (expectations.fourK) {
     assert(status.fourK === true, name + ' 4K profile was not selected: ' + JSON.stringify(status));
-    assert(status.targetFps <= 30, name + ' 4K FPS ceiling too high: ' + JSON.stringify(status));
+    assert(status.targetFps <= 24, name + ' 4K ECO FPS ceiling too high: ' + JSON.stringify(status));
     assert(status.maxPixels <= 3400000, name + ' 4K internal pixel budget too high: ' + JSON.stringify(status));
     assert(status.effectiveDpr <= 1.08, name + ' 4K DPR budget too high: ' + JSON.stringify(status));
     assert(status.particles <= 160, name + ' 4K particle budget too high: ' + JSON.stringify(status));
     assert(status.bloomPasses <= 2, name + ' 4K bloom pass budget too high: ' + JSON.stringify(status));
+    assert(status.fourKResourceMode === true, name + ' 4K resource cap missing: ' + JSON.stringify(status));
   }
   if (expectations.reduced) assert(/reduced/.test(status.quality), name + ' reduced-motion profile missing: ' + JSON.stringify(status));
 
