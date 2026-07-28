@@ -8,6 +8,7 @@ on:
       - 'docs/scifi-ui/scripts/interaction-genome-webgl.js'
       - 'docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js'
       - 'docs/scifi-ui/styles/interaction-genome-webgl.css'
+      - 'docs/scifi-ui/styles/formatx-4k-polish.css'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - '.github/scripts/validate-interaction-genome-webgl.cjs'
       - '.github/workflows/validate-interaction-genome-webgl.yml'
@@ -23,7 +24,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -33,7 +34,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Validate WebGL Genome source
+      - name: Validate adaptive WebGL Genome source
         shell: bash
         run: |
           set -euo pipefail
@@ -42,8 +43,14 @@ jobs:
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
           grep -Fq "getContext('webgl2'" docs/scifi-ui/scripts/interaction-genome-webgl.js
-          grep -Fq "interaction-genome-webgl-adapter.js?v=20260728-genome-webgl-1" docs/scifi-ui/scripts/living-architecture.js
+          grep -Fq "adaptive-4k-v2" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
+          grep -Fq "maxPixels" docs/scifi-ui/scripts/interaction-genome-webgl.js
+          grep -Fq "targetFps" docs/scifi-ui/scripts/interaction-genome-webgl.js
+          grep -Fq "ResizeObserver" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
+          grep -Fq "visibilitychange" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
+          grep -Fq "interaction-genome-webgl-adapter.js?v=20260728-adaptive-4k-v2" docs/scifi-ui/scripts/living-architecture.js
           grep -Fq "data-renderer=\"webgl2-pbr\"" docs/scifi-ui/styles/interaction-genome-webgl.css
+          grep -Fq "FormatX 4K Polish" docs/scifi-ui/styles/formatx-4k-polish.css
 
       - name: Install Chromium
         shell: bash
@@ -64,7 +71,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-genome-webgl-http.log"
           exit 1
 
-      - name: Validate realistic WebGL2 genome rendering
+      - name: Validate 4K quality and resource budgets
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-genome-webgl/node_modules
         shell: bash
@@ -90,10 +97,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='WebGL2 depth, PBR nodes, particles and responsive rendering passed'
+            description='Adaptive 4K quality and GPU resource budgets passed'
           else
             state='failure'
-            description='Interaction Genome WebGL validation failed'
+            description='Interaction Genome adaptive 4K validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
