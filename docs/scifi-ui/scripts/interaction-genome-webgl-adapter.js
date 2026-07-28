@@ -15,6 +15,10 @@
   let resizeObserver = null;
   let targetFrameInterval = 1000 / 30;
   let destroyed = false;
+  let pointerStartX = 0;
+  let pointerStartY = 0;
+  let pointerTravel = 0;
+  let suppressNextClick = false;
 
   function loadStyle(source, marker) {
     if (document.querySelector('link[' + marker + ']')) return;
@@ -174,6 +178,7 @@
       canvas.dataset.fxRenderedFrame = '0';
       canvas.dataset.fxRenderedNodes = '0';
       canvas.dataset.fxSkippedFrames = '0';
+      canvas.dataset.fxGesture = 'idle';
       stage.insertBefore(canvas, original);
       original.style.opacity = '0';
       original.style.pointerEvents = 'none';
@@ -206,12 +211,48 @@
       publishTelemetry();
       addHud();
 
+      canvas.addEventListener('pointerdown', event => {
+        pointerStartX = event.clientX;
+        pointerStartY = event.clientY;
+        pointerTravel = 0;
+        suppressNextClick = false;
+        canvas.dataset.fxGesture = 'pointer';
+      }, { passive: true });
+
       canvas.addEventListener('pointermove', event => {
         const point = pointerPosition(event);
         renderer.pointerMove(point.x, point.y, event);
+        if (event.buttons) {
+          pointerTravel = Math.max(pointerTravel, Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY));
+          if (pointerTravel > 6) {
+            suppressNextClick = true;
+            canvas.dataset.fxGesture = 'drag';
+          }
+        }
       }, { passive: true });
+
+      canvas.addEventListener('pointerup', () => {
+        canvas.dataset.fxGesture = suppressNextClick ? 'drag-complete' : 'click-ready';
+      }, { passive: true });
+
+      canvas.addEventListener('pointercancel', () => {
+        suppressNextClick = true;
+        canvas.dataset.fxGesture = 'cancelled';
+      }, { passive: true });
+
       canvas.addEventListener('pointerleave', () => renderer.pointerLeave(), { passive: true });
-      canvas.addEventListener('click', () => renderer.click());
+      canvas.addEventListener('click', event => {
+        if (suppressNextClick || pointerTravel > 6) {
+          event.preventDefault();
+          event.stopPropagation();
+          suppressNextClick = false;
+          pointerTravel = 0;
+          canvas.dataset.fxGesture = 'drag-suppressed-click';
+          return;
+        }
+        canvas.dataset.fxGesture = 'node-click';
+        renderer.click();
+      });
 
       observer = new MutationObserver(() => {
         if (overlay.dataset.open === 'true') {
