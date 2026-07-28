@@ -20,6 +20,18 @@
   let pointerTravel = 0;
   let suppressNextClick = false;
 
+  const physicalViewportWidth = Math.max(
+    innerWidth * (devicePixelRatio || 1),
+    screen.width * (devicePixelRatio || 1)
+  );
+  const fourKResourceMode = physicalViewportWidth >= 3400;
+  const fourKFrameCap = 24;
+
+  function effectiveTargetFps(current) {
+    const rendererTarget = Math.max(1, Number(current?.targetFps || 45));
+    return fourKResourceMode ? Math.min(rendererTarget, fourKFrameCap) : rendererTarget;
+  }
+
   function loadStyle(source, marker) {
     const existing = document.querySelector('link[' + marker + ']');
     if (existing) {
@@ -83,10 +95,12 @@
     if (!canvas || !renderer) return;
     const current = status();
     if (!current) return;
+    const effectiveFps = effectiveTargetFps(current);
     const fields = {
       fxRendererVersion: current.version,
       fxQuality: current.quality,
-      fxTargetFps: current.targetFps,
+      fxTargetFps: effectiveFps,
+      fxRendererTargetFps: current.targetFps,
       fxEffectiveDpr: current.effectiveDpr,
       fxResolutionScale: current.resolutionScale,
       fxDynamicScale: current.dynamicScale,
@@ -101,6 +115,7 @@
       fxPostProcessing: current.postProcessing,
       fxAdaptiveQuality: current.adaptiveQuality,
       fxIs4k: current.fourK,
+      fxResourceCapped: fourKResourceMode,
       fxResizeCount: current.resizeCount,
       fxQualityChanges: current.qualityChanges,
       fxGlErrors: current.glErrors
@@ -109,8 +124,8 @@
       canvas.dataset[key] = String(value ?? '');
     });
     root.dataset.fxGenomeQuality = current.quality;
-    root.dataset.fxGenome4k = current.fourK ? 'adaptive' : 'standard';
-    root.dataset.fxGenomeFpsCap = String(current.targetFps);
+    root.dataset.fxGenome4k = current.fourK ? 'adaptive-resource-capped' : 'standard';
+    root.dataset.fxGenomeFpsCap = String(effectiveFps);
     root.dataset.fxGenomePipeline = current.postProcessing;
     root.dataset.fxGenomeGeometry = current.instancedMeshes ? 'instanced-meshes' : 'legacy';
   }
@@ -121,8 +136,8 @@
     const badge = document.createElement('span');
     badge.className = 'fx-genome-renderer-badge';
     badge.innerHTML = '<b>CINEMATIC WEBGL2</b><small></small>';
-    const suffix = current?.fourK ? '4K ADAPTIVE' : String(current?.quality || 'ADAPTIVE').replaceAll('-', ' ').toUpperCase();
-    badge.querySelector('small').textContent = suffix + ' · INSTANCED PBR · BLOOM · ' + current?.targetFps + ' FPS';
+    const suffix = current?.fourK ? '4K ADAPTIVE ECO' : String(current?.quality || 'ADAPTIVE').replaceAll('-', ' ').toUpperCase();
+    badge.querySelector('small').textContent = suffix + ' · INSTANCED PBR · BLOOM · ' + effectiveTargetFps(current) + ' FPS';
 
     const depth = document.createElement('i');
     depth.className = 'fx-genome-depth-scale';
@@ -153,7 +168,7 @@
     frame = 0;
     if (destroyed || document.hidden || overlay?.dataset.open !== 'true') return;
     const current = status();
-    if (current?.targetFps) targetFrameInterval = 1000 / Math.max(1, current.targetFps);
+    targetFrameInterval = 1000 / effectiveTargetFps(current);
     if (!lastRenderedAt || now - lastRenderedAt >= targetFrameInterval - 1) {
       if (renderOnce(now)) lastRenderedAt = now;
     } else {
@@ -234,12 +249,12 @@
       }
 
       const current = status();
-      targetFrameInterval = 1000 / Math.max(1, current.targetFps);
+      targetFrameInterval = 1000 / effectiveTargetFps(current);
       stage.dataset.renderer = 'webgl2-cinematic-pbr';
       stage.dataset.quality = current.quality;
       root.dataset.fxInteractionGenomeRenderer = 'webgl2-cinematic-pbr';
       root.dataset.fxGenomeWebglAdapter = 'ready-v3';
-      root.dataset.fxGenomeResourcePolicy = 'cinematic-adaptive-v3';
+      root.dataset.fxGenomeResourcePolicy = fourKResourceMode ? 'cinematic-adaptive-v3-4k-eco' : 'cinematic-adaptive-v3';
       publishTelemetry();
       addHud();
 
@@ -321,13 +336,21 @@
       }, { once: true });
 
       window.FormatXGenome3DAdapter = Object.freeze({
-        version: 'cinematic-adaptive-v3-gesture-safe',
-        getStatus: () => status(),
+        version: 'cinematic-adaptive-v3-gesture-safe-4k-eco',
+        getStatus: () => {
+          const currentStatus = status();
+          return currentStatus ? {
+            ...currentStatus,
+            targetFps: effectiveTargetFps(currentStatus),
+            rendererTargetFps: currentStatus.targetFps,
+            fourKResourceMode
+          } : null;
+        },
         renderOnce: () => renderOnce(performance.now())
       });
 
       document.dispatchEvent(new CustomEvent('formatx:interaction-genome-3d-ready', {
-        detail: status()
+        detail: window.FormatXGenome3DAdapter.getStatus()
       }));
     } catch (error) {
       console.warn('FormatX Interaction Genome cinematic adapter fallback:', error);
