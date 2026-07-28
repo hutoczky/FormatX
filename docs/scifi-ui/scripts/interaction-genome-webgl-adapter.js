@@ -15,6 +15,10 @@
   let resizeObserver = null;
   let targetFrameInterval = 1000 / 45;
   let destroyed = false;
+  let pointerStartX = 0;
+  let pointerStartY = 0;
+  let pointerTravel = 0;
+  let suppressNextClick = false;
 
   function loadStyle(source, marker) {
     const existing = document.querySelector('link[' + marker + ']');
@@ -183,7 +187,7 @@
 
   async function initialise() {
     try {
-      loadStyle('./styles/formatx-4k-polish.css?v=20260728-4k-polish-1', 'data-fx-4k-polish-style');
+      loadStyle('./styles/formatx-4k-polish.css?v=20260728-4k-polish-2', 'data-fx-4k-polish-style');
       loadStyle('./styles/interaction-genome-webgl.css?v=20260728-genome-cinematic-v3', 'data-fx-genome-webgl-style');
       await loadScript('./scripts/interaction-genome-webgl.js?v=20260728-genome-cinematic-v3', 'data-fx-genome-renderer-script');
       const { api, genomeOverlay, original } = await waitForGenome();
@@ -206,6 +210,7 @@
       canvas.dataset.fxRenderedFrame = '0';
       canvas.dataset.fxRenderedNodes = '0';
       canvas.dataset.fxSkippedFrames = '0';
+      canvas.dataset.fxGesture = 'idle';
       stage.insertBefore(canvas, original);
       original.style.opacity = '0';
       original.style.pointerEvents = 'none';
@@ -238,12 +243,48 @@
       publishTelemetry();
       addHud();
 
+      canvas.addEventListener('pointerdown', event => {
+        pointerStartX = event.clientX;
+        pointerStartY = event.clientY;
+        pointerTravel = 0;
+        suppressNextClick = false;
+        canvas.dataset.fxGesture = 'pointer';
+      }, { passive: true });
+
       canvas.addEventListener('pointermove', event => {
         const point = pointerPosition(event);
         renderer.pointerMove(point.x, point.y, event);
+        if (event.buttons) {
+          pointerTravel = Math.max(pointerTravel, Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY));
+          if (pointerTravel > 6) {
+            suppressNextClick = true;
+            canvas.dataset.fxGesture = 'drag';
+          }
+        }
       }, { passive: true });
+
+      canvas.addEventListener('pointerup', () => {
+        canvas.dataset.fxGesture = suppressNextClick ? 'drag-complete' : 'click-ready';
+      }, { passive: true });
+
+      canvas.addEventListener('pointercancel', () => {
+        suppressNextClick = true;
+        canvas.dataset.fxGesture = 'cancelled';
+      }, { passive: true });
+
       canvas.addEventListener('pointerleave', () => renderer.pointerLeave(), { passive: true });
-      canvas.addEventListener('click', () => renderer.click());
+      canvas.addEventListener('click', event => {
+        if (suppressNextClick || pointerTravel > 6) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          suppressNextClick = false;
+          pointerTravel = 0;
+          canvas.dataset.fxGesture = 'drag-suppressed-click';
+          return;
+        }
+        canvas.dataset.fxGesture = 'node-click';
+        renderer.click();
+      });
 
       observer = new MutationObserver(() => {
         if (overlay.dataset.open === 'true') {
@@ -280,7 +321,7 @@
       }, { once: true });
 
       window.FormatXGenome3DAdapter = Object.freeze({
-        version: 'cinematic-adaptive-v3',
+        version: 'cinematic-adaptive-v3-gesture-safe',
         getStatus: () => status(),
         renderOnce: () => renderOnce(performance.now())
       });
