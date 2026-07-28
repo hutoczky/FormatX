@@ -47,32 +47,38 @@ async function runCase(browser, name, contextOptions) {
     diagnostics.push('requestfailed: ' + request.url() + ' — ' + (request.failure()?.errorText || 'unknown'));
   });
 
-  await page.goto(TEST_URL + '?lang=hu&audio-test=1', { waitUntil: 'domcontentloaded' });
+  await page.goto(TEST_URL + '?lang=hu&audio-test=1&score=v6', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
-  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'cinematic-v5', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'professional-v6', null, { timeout: 15000 });
   await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 10000 });
 
   const button = page.locator('.fx-three-sound');
   await button.waitFor({ state: 'visible', timeout: 10000 });
-  assert(await button.count() === 1, name + ': exactly one audio button is required');
+  assert(await button.count() === 1, name + ': exactly one music button is required');
 
   await button.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'on', null, { timeout: 10000 });
   await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 10000 });
   await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 10000 });
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    return root.dataset.fxAudioMusic === 'fallback-playing' || Boolean(root.dataset.fxAudioChord);
+  }, null, { timeout: 10000 });
 
   const state = await page.evaluate(() => ({
     owner: document.documentElement.dataset.fxAudioOwner || '',
     engine: document.documentElement.dataset.fxAudioEngine || '',
     character: document.documentElement.dataset.fxAudioCharacter || '',
+    arrangement: document.documentElement.dataset.fxAudioArrangement || '',
+    tempo: document.documentElement.dataset.fxAudioTempo || '',
     music: document.documentElement.dataset.fxAudioMusic || '',
     chord: document.documentElement.dataset.fxAudioChord || '',
+    section: document.documentElement.dataset.fxAudioSection || '',
     context: document.documentElement.dataset.fxAudioContext || '',
     state: document.documentElement.dataset.fxAudioState || '',
     level: document.documentElement.dataset.fxAudioLevel || '',
     selfTest: document.documentElement.dataset.fxAudioSelfTest || '',
     output: document.documentElement.dataset.fxAudioOutput || '',
-    fallback: document.documentElement.dataset.fxAudioFallback || '',
     error: document.documentElement.dataset.fxAudioError || '',
     signal: getComputedStyle(document.documentElement).getPropertyValue('--fx-audio-signal').trim(),
     peak: getComputedStyle(document.documentElement).getPropertyValue('--fx-audio-self-test-peak').trim(),
@@ -81,23 +87,36 @@ async function runCase(browser, name, contextOptions) {
     label: document.querySelector('.fx-three-sound span')?.textContent || ''
   }));
 
-  assert(state.owner === 'cinematic-v5', name + ': wrong audio owner: ' + JSON.stringify(state));
-  assert(state.buttonOwner === 'cinematic-v5', name + ': button owner was replaced: ' + JSON.stringify(state));
-  assert(state.engine === 'cinematic-ambient-score-v5', name + ': wrong engine: ' + JSON.stringify(state));
-  assert(state.character === 'cinematic-ambient-music', name + ': wrong sound character: ' + JSON.stringify(state));
-  assert(['playing', 'fallback-playing'].includes(state.music), name + ': ambient score is not playing: ' + JSON.stringify(state));
-  assert(state.state === 'on' && state.level === 'audible', name + ': audio did not turn on: ' + JSON.stringify(state));
-  assert(state.pressed === 'true', name + ': button state is not active: ' + JSON.stringify(state));
+  assert(state.owner === 'professional-v6', name + ': wrong score owner: ' + JSON.stringify(state));
+  assert(state.buttonOwner === 'professional-v6', name + ': button owner was replaced: ' + JSON.stringify(state));
+  assert(state.engine === 'professional-cinematic-score-v6', name + ': wrong score engine: ' + JSON.stringify(state));
+  assert(state.character === 'premium-cinematic-music', name + ': wrong score character: ' + JSON.stringify(state));
+  assert(state.arrangement === 'sixteen-bar-evolving-score', name + ': wrong arrangement: ' + JSON.stringify(state));
+  assert(state.tempo === '72', name + ': wrong tempo: ' + JSON.stringify(state));
+  assert(state.state === 'on' && state.level === 'audible', name + ': score did not turn on: ' + JSON.stringify(state));
+  assert(state.pressed === 'true', name + ': music button is not active: ' + JSON.stringify(state));
   assert(state.context === 'running' || state.output === 'wav-fallback', name + ': audio context is not running: ' + JSON.stringify(state));
   assert(['signal-verified', 'wav-fallback'].includes(state.output), name + ': no verified music signal: ' + JSON.stringify(state));
-  assert(state.selfTest === 'passed' || state.selfTest === 'unsupported', name + ': offline music graph failed: ' + JSON.stringify(state));
+  assert(['playing', 'fallback-playing'].includes(state.music), name + ': score is not playing: ' + JSON.stringify(state));
+  assert(state.music === 'fallback-playing' || state.chord.length > 0, name + ': harmonic scheduler did not start: ' + JSON.stringify(state));
+  assert(state.selfTest === 'passed' || state.selfTest === 'unsupported', name + ': offline score graph failed: ' + JSON.stringify(state));
+  assert(!state.error, name + ': score reported an error: ' + JSON.stringify(state));
+
+  await page.waitForTimeout(1400);
+  const sustained = await page.evaluate(() => ({
+    output: document.documentElement.dataset.fxAudioOutput || '',
+    chord: document.documentElement.dataset.fxAudioChord || '',
+    music: document.documentElement.dataset.fxAudioMusic || ''
+  }));
+  assert(['signal-verified', 'wav-fallback'].includes(sustained.output), name + ': music signal was not sustained: ' + JSON.stringify(sustained));
+  assert(sustained.music === 'fallback-playing' || sustained.chord.length > 0, name + ': score scheduler stopped: ' + JSON.stringify(sustained));
 
   await button.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'off');
 
   const meaningfulDiagnostics = diagnostics.filter(item => !/favicon|WebGL stall|GPU stall|net::ERR_ABORTED/i.test(item));
   assert(!meaningfulDiagnostics.length, name + ': browser diagnostics: ' + meaningfulDiagnostics.join(' | '));
-  console.log(JSON.stringify({ case: name, state }));
+  console.log(JSON.stringify({ case: name, state, sustained }));
   await context.close();
 }
 
@@ -112,12 +131,12 @@ async function runCase(browser, name, contextOptions) {
   });
 
   try {
-    await runCase(browser, 'desktop-cinematic-ambient-music', {
+    await runCase(browser, 'desktop-professional-score', {
       viewport: { width: 1280, height: 840 },
       locale: 'hu-HU',
       colorScheme: 'dark'
     });
-    await runCase(browser, 'mobile-cinematic-ambient-music', {
+    await runCase(browser, 'mobile-professional-score', {
       viewport: { width: 390, height: 844 },
       isMobile: true,
       hasTouch: true,
