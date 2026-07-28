@@ -1,0 +1,120 @@
+name: Validate FormatX Design System
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/checkout.html'
+      - 'docs/scifi-ui/project-simulator.html'
+      - 'docs/scifi-ui/styles/formatx-design-system.css'
+      - '.github/scripts/validate-formatx-design-system.cjs'
+      - '.github/workflows/validate-formatx-design-system.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/checkout.html'
+      - 'docs/scifi-ui/project-simulator.html'
+      - 'docs/scifi-ui/styles/formatx-design-system.css'
+      - '.github/scripts/validate-formatx-design-system.cjs'
+      - '.github/workflows/validate-formatx-design-system.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-design-system-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Validate source architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/validate-formatx-design-system.cjs
+          test -s docs/scifi-ui/styles/formatx-design-system.css
+          grep -Fq 'data-fx-design-system="2"' docs/scifi-ui/index.html
+          grep -Fq 'data-fx-design-system="2"' docs/scifi-ui/checkout.html
+          grep -Fq 'data-fx-design-system="2"' docs/scifi-ui/project-simulator.html
+          grep -Fq 'data-fx-design-system="true"' docs/scifi-ui/index.html
+          grep -Fq 'data-fx-design-system="true"' docs/scifi-ui/checkout.html
+          grep -Fq 'data-fx-design-system="true"' docs/scifi-ui/project-simulator.html
+          grep -Fq -- '--fx-radius-lg: 30px 7px 30px 7px' docs/scifi-ui/styles/formatx-design-system.css
+          grep -Fq 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/formatx-design-system.css
+          grep -Fq 'prefers-reduced-transparency: reduce' docs/scifi-ui/styles/formatx-design-system.css
+
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-design-system" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-design-system/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4181 --directory docs > "$RUNNER_TEMP/formatx-design-system-http.log" 2>&1 &
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:4181/scifi-ui/index.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4181/scifi-ui/checkout.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4181/scifi-ui/project-simulator.html >/dev/null \
+              && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-design-system-http.log"
+          exit 1
+
+      - name: Validate desktop and mobile design system
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-design-system/node_modules
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-formatx-design-system.cjs 2>&1 | tee design-system-report.txt
+
+      - name: Upload design evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-design-system-evidence
+          path: |
+            design-system-report.txt
+            design-system-*.png
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Publish validation status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Unified FormatX Design System validated on desktop and mobile'
+          else
+            state='failure'
+            description='FormatX Design System validation failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX Design System validation' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
