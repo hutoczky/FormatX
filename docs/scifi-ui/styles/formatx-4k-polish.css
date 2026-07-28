@@ -1,0 +1,177 @@
+/* FormatX 4K Polish — rounded premium geometry with a strict rendering budget */
+
+html[data-fx-design-system="2"] {
+  --fx-radius-xs: 12px;
+  --fx-radius-sm: 18px;
+  --fx-radius-md: 26px;
+  --fx-radius-lg: 36px;
+  --fx-radius-xl: 48px;
+  --fx-radius-pill: 999px;
+}
+
+html[data-fx-design-system="2"] :where(
+  .card,
+  .price-card,
+  .proof-card,
+  .category-card,
+  .origin-proof-card,
+  .checkout-panel,
+  .checkout-card,
+  .sim-panel,
+  .sim-card,
+  .fx-genome-shell,
+  .fx-genome-stage,
+  .fx-genome-inspector,
+  .fx-genome-selected,
+  .fx-genome-proof,
+  .fx-reality-fork,
+  .fx-reality-panel
+) {
+  border-radius: var(--fx-radius-lg) !important;
+  clip-path: none !important;
+  overflow: hidden;
+}
+
+html[data-fx-design-system="2"] :where(
+  .fx-genome-metrics > div,
+  .fx-genome-actions button,
+  .fx-genome-close,
+  .button,
+  .action-primary,
+  .action-secondary,
+  .header-link,
+  .header-support,
+  .legal-home-link,
+  .fx-three-sound,
+  .fx-genome-launcher
+) {
+  border-radius: var(--fx-radius-pill) !important;
+  clip-path: none !important;
+}
+
+html[data-fx-design-system="2"] :where(input, select, textarea, .field, .summary-row) {
+  border-radius: var(--fx-radius-sm) !important;
+}
+
+.fx-genome-stage[data-renderer="webgl2-pbr"] {
+  contain: layout paint style;
+  isolation: isolate;
+  border-radius: clamp(24px, 2.4vw, 44px) !important;
+  overflow: hidden;
+  transform: translateZ(0);
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(90, 173, 220, .075), transparent 38%),
+    radial-gradient(ellipse at 50% 115%, rgba(105, 69, 180, .09), transparent 47%),
+    linear-gradient(180deg, #02060c 0%, #030913 50%, #01040a 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(170, 231, 255, .08),
+    inset 0 1px 0 rgba(255, 255, 255, .045),
+    inset 0 -36px 80px rgba(0, 0, 0, .28),
+    0 28px 80px rgba(0, 0, 0, .32);
+}
+
+.fx-genome-stage[data-renderer="webgl2-pbr"]::before,
+.fx-genome-stage[data-renderer="webgl2-pbr"]::after {
+  border-radius: inherit;
+}
+
+.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge {
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: var(--fx-radius-pill);
+  border: 1px solid rgba(122, 223, 255, .18);
+  background: rgba(2, 8, 15, .68);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+
+.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge b,
+.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge small {
+  display: inline-block;
+}
+
+.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge b {
+  color: rgba(229, 249, 255, .86);
+  font: 800 8px/1 var(--fx-font-mono, ui-monospace, monospace);
+  letter-spacing: .14em;
+}
+
+.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge small {
+  margin-left: 8px;
+  color: rgba(169, 207, 221, .62);
+  font: 700 7px/1 var(--fx-font-mono, ui-monospace, monospace);
+  letter-spacing: .1em;
+}
+
+.fx-genome-webgl-canvas {
+  border-radius: inherit;
+  image-rendering: auto;
+}
+
+@media (min-width: 2560px) {
+  html[data-fx-design-system="2"] {
+    --fx-content: 1920px;
+    --fx-radius-sm: 20px;
+    --fx-radius-md: 30px;
+    --fx-radius-lg: 42px;
+    --fx-radius-xl: 54px;
+  }
+
+  html[data-fx-design-system="2"] body {
+    font-size: 17px;
+  }
+
+  html[data-fx-design-system="2"] :where(.topbar, .sim-header, .site-header .header-inner) {
+    min-height: 88px;
+  }
+
+  .fx-genome-shell {
+    width: min(94vw, 2200px);
+    max-height: min(92vh, 1320px);
+  }
+
+  .fx-genome-stage {
+    min-height: min(72vh, 1080px);
+  }
+
+  .fx-genome-inspector {
+    padding: clamp(24px, 1.4vw, 40px);
+  }
+}
+
+@media (max-width: 720px) {
+  html[data-fx-design-system="2"] {
+    --fx-radius-sm: 15px;
+    --fx-radius-md: 20px;
+    --fx-radius-lg: 26px;
+  }
+
+  .fx-genome-stage[data-renderer="webgl2-pbr"] {
+    border-radius: 24px !important;
+  }
+
+  .fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge {
+    max-width: calc(100% - 20px);
+    white-space: nowrap;
+  }
+
+  .fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge small {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-genome-stage[data-renderer="webgl2-pbr"],
+  .fx-genome-stage[data-renderer="webgl2-pbr"] * {
+    transition-duration: .01ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge {
+    background: #06101b;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
