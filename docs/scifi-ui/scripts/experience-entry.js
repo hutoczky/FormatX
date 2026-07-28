@@ -1,4 +1,4 @@
-const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260727-particles-stable-3', import.meta.url).href;
+const WEBGPU_URL = new URL('./ExperienceWebGPU.js?v=20260729-organic-core-2', import.meta.url).href;
 const WEBXR_URL = new URL('./WebXRDirector.js?v=20260727-webgpu-1', import.meta.url).href;
 const WEBGL_LOADER_URL = new URL('./webgl-fallback-loader.js?v=20260727-particles-stable-3', import.meta.url).href;
 const WEBGPU_STARTUP_BUDGET = 8000;
@@ -57,6 +57,53 @@ async function loadWebGpuModule() {
     "from './WebXRDirector.js?v=20260727-webgpu-1';",
     "from '" + WEBXR_URL + "';",
     'WebXR import'
+  );
+  source = replaceRequired(
+    source,
+    'const geometry = new THREE.IcosahedronGeometry(1.72, mobile ? 5 : 6);',
+    'const geometry = new THREE.SphereGeometry(1.72, mobile ? 40 : 64, mobile ? 28 : 48);',
+    'organic shell geometry'
+  );
+  source = replaceRequired(
+    source,
+    'const coreShape = p.add(n.mul(wave.mul(0.075).add(this.pulse.mul(0.045))));',
+    `const breathing = this.time.mul(1.15).sin().mul(0.035).add(this.pulse.mul(0.055));
+      const organicWave = phase.add(this.time.mul(0.72)).sin().mul(0.055)
+        .add(p.y.mul(4.5).sub(this.time.mul(0.31)).sin().mul(0.03));
+      const coreShape = vec3(
+        p.x.mul(float(0.96).add(breathing)),
+        p.y.mul(float(1.12).add(breathing.mul(0.65))),
+        p.z.mul(float(0.92).add(breathing.mul(0.8)))
+      ).add(n.mul(organicWave));`,
+    'living breathing core shape'
+  );
+  source = replaceRequired(
+    source,
+    `const pointerWarp = smoothstep(1.55, 0, pointerDistance).mul(0.09);
+      transformed.addAssign(n.mul(pointerWarp.mul(this.time.mul(2).add(phase).sin())));`,
+    `const pointerWarp = smoothstep(1.82, 0, pointerDistance).mul(0.17);
+      transformed.addAssign(n.mul(pointerWarp.mul(this.time.mul(2).add(phase).sin())));
+      transformed.addAssign(tangent.mul(this.pointer.x.mul(pointerWarp).mul(0.16)));
+      transformed.addAssign(bitangent.mul(this.pointer.y.mul(pointerWarp).mul(0.12)));`,
+    'mouse-responsive membrane'
+  );
+  source = replaceRequired(
+    source,
+    'this.energy = new THREE.Mesh(new THREE.IcosahedronGeometry(1.28, mobile ? 3 : 4), energyMaterial);',
+    'this.energy = new THREE.Mesh(new THREE.SphereGeometry(1.28, mobile ? 28 : 44, mobile ? 20 : 32), energyMaterial);',
+    'organic inner energy geometry'
+  );
+  source = replaceRequired(
+    source,
+    'this.core.group.scale.setScalar(this.scale);',
+    `this.core.group.scale.setScalar(this.scale);
+      const organismFollow = Math.min(1, delta * 5.5);
+      const organismTurn = Math.min(1, delta * 4.2);
+      this.core.group.position.x += (this.pointerX * 0.28 - this.core.group.position.x) * organismFollow;
+      this.core.group.position.y += (this.pointerY * 0.18 - this.core.group.position.y) * organismFollow;
+      this.core.group.rotation.z += (-this.pointerX * 0.12 - this.core.group.rotation.z) * organismTurn;
+      this.core.group.rotation.x += (this.pointerY * 0.1 - this.core.group.rotation.x) * organismTurn;`,
+    'whole-organism mouse follow'
   );
   source = replaceRequired(
     source,
@@ -203,6 +250,7 @@ function installRuntimeGuard(webGpuModule) {
           parent.document.documentElement.style.setProperty('--fx-experience-engine', 'webgpu-tsl');
           parent.document.documentElement.dataset.fxParticleProfile = 'focus-half-stable';
           parent.document.documentElement.dataset.fxParticleTierLock = 'upward-disabled';
+          parent.document.documentElement.dataset.fxCoreForm = 'organic-mouse-reactive';
         } catch (_) {}
       }
     } catch (error) {
