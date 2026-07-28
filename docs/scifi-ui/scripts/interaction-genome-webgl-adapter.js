@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxGenomeWebglAdapter === 'ready') return;
-  root.dataset.fxGenomeWebglAdapter = 'loading';
+  if (root.dataset.fxGenomeWebglAdapter === 'ready-v3') return;
+  root.dataset.fxGenomeWebglAdapter = 'loading-v3';
 
   let renderer = null;
   let canvas = null;
@@ -13,15 +13,15 @@
   let lastRenderedAt = 0;
   let observer = null;
   let resizeObserver = null;
-  let targetFrameInterval = 1000 / 30;
+  let targetFrameInterval = 1000 / 45;
   let destroyed = false;
-  let pointerStartX = 0;
-  let pointerStartY = 0;
-  let pointerTravel = 0;
-  let suppressNextClick = false;
 
   function loadStyle(source, marker) {
-    if (document.querySelector('link[' + marker + ']')) return;
+    const existing = document.querySelector('link[' + marker + ']');
+    if (existing) {
+      if (existing.href !== new URL(source, location.href).href) existing.href = source;
+      return;
+    }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = source;
@@ -34,7 +34,10 @@
       const existing = document.querySelector('script[' + marker + ']');
       if (existing) {
         if (window.FormatXGenomeRenderer3D) resolve();
-        else existing.addEventListener('load', resolve, { once: true });
+        else {
+          existing.addEventListener('load', resolve, { once: true });
+          existing.addEventListener('error', reject, { once: true });
+        }
         return;
       }
       const script = document.createElement('script');
@@ -76,18 +79,36 @@
     if (!canvas || !renderer) return;
     const current = status();
     if (!current) return;
-    canvas.dataset.fxQuality = current.quality;
-    canvas.dataset.fxTargetFps = String(current.targetFps);
-    canvas.dataset.fxEffectiveDpr = String(current.effectiveDpr);
-    canvas.dataset.fxResolutionScale = String(current.resolutionScale);
-    canvas.dataset.fxMaxPixels = String(current.maxPixels);
-    canvas.dataset.fxBackingPixels = String(current.backingPixels);
-    canvas.dataset.fxParticleCount = String(current.particles);
-    canvas.dataset.fxIs4k = String(current.fourK);
-    canvas.dataset.fxResizeCount = String(current.resizeCount);
+    const fields = {
+      fxRendererVersion: current.version,
+      fxQuality: current.quality,
+      fxTargetFps: current.targetFps,
+      fxEffectiveDpr: current.effectiveDpr,
+      fxResolutionScale: current.resolutionScale,
+      fxDynamicScale: current.dynamicScale,
+      fxMaxPixels: current.maxPixels,
+      fxBackingPixels: current.backingPixels,
+      fxParticleCount: current.particles,
+      fxNodeInstances: current.nodeInstances,
+      fxTubeInstances: current.tubeInstances,
+      fxDrawCalls: current.drawCalls,
+      fxBloomPasses: current.bloomPasses,
+      fxToneMapping: current.toneMapping,
+      fxPostProcessing: current.postProcessing,
+      fxAdaptiveQuality: current.adaptiveQuality,
+      fxIs4k: current.fourK,
+      fxResizeCount: current.resizeCount,
+      fxQualityChanges: current.qualityChanges,
+      fxGlErrors: current.glErrors
+    };
+    Object.entries(fields).forEach(([key, value]) => {
+      canvas.dataset[key] = String(value ?? '');
+    });
     root.dataset.fxGenomeQuality = current.quality;
     root.dataset.fxGenome4k = current.fourK ? 'adaptive' : 'standard';
     root.dataset.fxGenomeFpsCap = String(current.targetFps);
+    root.dataset.fxGenomePipeline = current.postProcessing;
+    root.dataset.fxGenomeGeometry = current.instancedMeshes ? 'instanced-meshes' : 'legacy';
   }
 
   function addHud() {
@@ -95,21 +116,24 @@
     const current = status();
     const badge = document.createElement('span');
     badge.className = 'fx-genome-renderer-badge';
-    badge.innerHTML = '<b>NATIVE WEBGL2</b><small></small>';
-    badge.querySelector('small').textContent = current?.fourK
-      ? '4K ADAPTIVE · ' + current.targetFps + ' FPS CAP'
-      : 'ADAPTIVE QUALITY · ' + current?.targetFps + ' FPS CAP';
+    badge.innerHTML = '<b>CINEMATIC WEBGL2</b><small></small>';
+    const suffix = current?.fourK ? '4K ADAPTIVE' : String(current?.quality || 'ADAPTIVE').replaceAll('-', ' ').toUpperCase();
+    badge.querySelector('small').textContent = suffix + ' · INSTANCED PBR · BLOOM · ' + current?.targetFps + ' FPS';
 
     const depth = document.createElement('i');
     depth.className = 'fx-genome-depth-scale';
     depth.setAttribute('aria-hidden', 'true');
-    stage.append(badge, depth);
+
+    const pipeline = document.createElement('span');
+    pipeline.className = 'fx-genome-pipeline';
+    pipeline.setAttribute('aria-hidden', 'true');
+    pipeline.innerHTML = '<i></i><i></i><i></i><i></i><b>SCENE</b><b>PBR</b><b>BLOOM</b><b>FILMIC</b>';
+    stage.append(badge, depth, pipeline);
   }
 
   function renderOnce(now) {
     if (!renderer || !canvas || destroyed) return false;
-    const api = window.FormatXInteractionGenome;
-    const genomeState = api?.getState?.();
+    const genomeState = window.FormatXInteractionGenome?.getState?.();
     if (!genomeState) return false;
     renderer.setData(genomeState.items, genomeState.selected);
     const rendered = renderer.render(now);
@@ -124,7 +148,8 @@
   function renderLoop(now) {
     frame = 0;
     if (destroyed || document.hidden || overlay?.dataset.open !== 'true') return;
-
+    const current = status();
+    if (current?.targetFps) targetFrameInterval = 1000 / Math.max(1, current.targetFps);
     if (!lastRenderedAt || now - lastRenderedAt >= targetFrameInterval - 1) {
       if (renderOnce(now)) lastRenderedAt = now;
     } else {
@@ -159,7 +184,8 @@
   async function initialise() {
     try {
       loadStyle('./styles/formatx-4k-polish.css?v=20260728-4k-polish-1', 'data-fx-4k-polish-style');
-      await loadScript('./scripts/interaction-genome-webgl.js?v=20260728-genome-webgl-4k-v2', 'data-fx-genome-renderer-script');
+      loadStyle('./styles/interaction-genome-webgl.css?v=20260728-genome-cinematic-v3', 'data-fx-genome-webgl-style');
+      await loadScript('./scripts/interaction-genome-webgl.js?v=20260728-genome-cinematic-v3', 'data-fx-genome-renderer-script');
       const { api, genomeOverlay, original } = await waitForGenome();
       overlay = genomeOverlay;
       stage = original.closest('.fx-genome-stage');
@@ -168,17 +194,18 @@
       canvas = document.createElement('canvas');
       canvas.className = 'fx-genome-webgl-canvas';
       canvas.tabIndex = 0;
-      canvas.setAttribute('aria-label', original.getAttribute('aria-label') || 'FormatX Interaction Genome 3D');
-      canvas.style.position = 'absolute';
-      canvas.style.inset = '0';
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
-      canvas.style.zIndex = '1';
-      canvas.style.touchAction = 'none';
+      canvas.setAttribute('aria-label', original.getAttribute('aria-label') || 'FormatX Interaction Genome cinematic 3D');
+      Object.assign(canvas.style, {
+        position: 'absolute',
+        inset: '0',
+        width: '100%',
+        height: '100%',
+        zIndex: '1',
+        touchAction: 'none'
+      });
       canvas.dataset.fxRenderedFrame = '0';
       canvas.dataset.fxRenderedNodes = '0';
       canvas.dataset.fxSkippedFrames = '0';
-      canvas.dataset.fxGesture = 'idle';
       stage.insertBefore(canvas, original);
       original.style.opacity = '0';
       original.style.pointerEvents = 'none';
@@ -203,56 +230,20 @@
 
       const current = status();
       targetFrameInterval = 1000 / Math.max(1, current.targetFps);
-      stage.dataset.renderer = 'webgl2-pbr';
+      stage.dataset.renderer = 'webgl2-cinematic-pbr';
       stage.dataset.quality = current.quality;
-      root.dataset.fxInteractionGenomeRenderer = 'webgl2-pbr';
-      root.dataset.fxGenomeWebglAdapter = 'ready';
-      root.dataset.fxGenomeResourcePolicy = 'adaptive-4k-v2';
+      root.dataset.fxInteractionGenomeRenderer = 'webgl2-cinematic-pbr';
+      root.dataset.fxGenomeWebglAdapter = 'ready-v3';
+      root.dataset.fxGenomeResourcePolicy = 'cinematic-adaptive-v3';
       publishTelemetry();
       addHud();
-
-      canvas.addEventListener('pointerdown', event => {
-        pointerStartX = event.clientX;
-        pointerStartY = event.clientY;
-        pointerTravel = 0;
-        suppressNextClick = false;
-        canvas.dataset.fxGesture = 'pointer';
-      }, { passive: true });
 
       canvas.addEventListener('pointermove', event => {
         const point = pointerPosition(event);
         renderer.pointerMove(point.x, point.y, event);
-        if (event.buttons) {
-          pointerTravel = Math.max(pointerTravel, Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY));
-          if (pointerTravel > 6) {
-            suppressNextClick = true;
-            canvas.dataset.fxGesture = 'drag';
-          }
-        }
       }, { passive: true });
-
-      canvas.addEventListener('pointerup', () => {
-        canvas.dataset.fxGesture = suppressNextClick ? 'drag-complete' : 'click-ready';
-      }, { passive: true });
-
-      canvas.addEventListener('pointercancel', () => {
-        suppressNextClick = true;
-        canvas.dataset.fxGesture = 'cancelled';
-      }, { passive: true });
-
       canvas.addEventListener('pointerleave', () => renderer.pointerLeave(), { passive: true });
-      canvas.addEventListener('click', event => {
-        if (suppressNextClick || pointerTravel > 6) {
-          event.preventDefault();
-          event.stopPropagation();
-          suppressNextClick = false;
-          pointerTravel = 0;
-          canvas.dataset.fxGesture = 'drag-suppressed-click';
-          return;
-        }
-        canvas.dataset.fxGesture = 'node-click';
-        renderer.click();
-      });
+      canvas.addEventListener('click', () => renderer.click());
 
       observer = new MutationObserver(() => {
         if (overlay.dataset.open === 'true') {
@@ -289,7 +280,7 @@
       }, { once: true });
 
       window.FormatXGenome3DAdapter = Object.freeze({
-        version: 'adaptive-4k-v2',
+        version: 'cinematic-adaptive-v3',
         getStatus: () => status(),
         renderOnce: () => renderOnce(performance.now())
       });
@@ -298,7 +289,7 @@
         detail: status()
       }));
     } catch (error) {
-      console.warn('FormatX Interaction Genome 3D adapter fallback:', error);
+      console.warn('FormatX Interaction Genome cinematic adapter fallback:', error);
       root.dataset.fxGenomeWebglAdapter = 'error';
     }
   }
