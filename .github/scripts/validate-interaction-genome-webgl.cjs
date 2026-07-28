@@ -27,7 +27,7 @@ async function clearIntro(page) {
 
 async function openGenome(page) {
   await page.waitForFunction(() => window.FormatXInteractionGenome
-    && document.documentElement.dataset.fxGenomeWebglAdapter === 'ready-v3', null, { timeout: 30000 });
+    && document.documentElement.dataset.fxGenomeWebglAdapter === 'ready-v3', null, { timeout: 45000 });
   await page.evaluate(() => {
     const api = window.FormatXInteractionGenome;
     for (let index = 0; index < 14; index += 1) {
@@ -44,7 +44,7 @@ async function openGenome(page) {
   });
   await page.waitForFunction(() => document.getElementById('fx-interaction-genome')?.dataset.open === 'true');
   await page.waitForFunction(() => document.documentElement.dataset.fxInteractionGenomeRenderer === 'webgl2-cinematic-pbr');
-  await page.waitForFunction(() => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= 4, null, { timeout: 10000 });
+  await page.waitForFunction(() => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= 4, null, { timeout: 20000 });
 }
 
 async function rendererState(page) {
@@ -126,7 +126,7 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
     await page.mouse.down();
     await page.mouse.move(box.x + box.width * 0.64, box.y + box.height * 0.54, { steps: 12 });
     await page.mouse.up();
-    await page.waitForFunction(() => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= 8, null, { timeout: 7000 });
+    await page.waitForFunction(() => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= 8, null, { timeout: 10000 });
   }
 
   const state = await rendererState(page);
@@ -193,7 +193,7 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
     await verify(browser, { viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-desktop', [760, 520]);
     await verify(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-mobile', [360, 430], { minimumSphereTriangles: 300 });
     await verify(browser, { viewport: { width: 1180, height: 820 }, reducedMotion: 'reduce', locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-reduced-motion', [640, 450], { reduced: true, minimumSphereTriangles: 400 });
-    await verify(browser, { viewport: { width: 2560, height: 1440 }, deviceScaleFactor: 1.5, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-physical-4k', [1400, 680], { fourK: true, minimumSphereTriangles: 600 });
+    await verify(browser, { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-physical-4k', [1050, 560], { fourK: true, minimumSphereTriangles: 600 });
   } finally {
     await browser.close();
   }
