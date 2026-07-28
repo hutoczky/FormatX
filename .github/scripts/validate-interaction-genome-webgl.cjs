@@ -75,6 +75,10 @@ async function rendererState(page) {
       glError: gl ? gl.getError() : -1,
       renderedFrames: Number(canvas?.dataset.fxRenderedFrame || 0),
       renderedNodes: Number(canvas?.dataset.fxRenderedNodes || 0),
+      gesture: canvas?.dataset.fxGesture || '',
+      overlayOpen: document.getElementById('fx-interaction-genome')?.dataset.open || '',
+      roundedStage: parseFloat(getComputedStyle(stage).borderTopLeftRadius) || 0,
+      polishLoaded: document.querySelectorAll('link[data-fx-4k-polish-style]').length,
       badge: document.querySelectorAll('.fx-genome-renderer-badge').length,
       depthScale: document.querySelectorAll('.fx-genome-depth-scale').length,
       pipelineHud: document.querySelectorAll('.fx-genome-pipeline').length,
@@ -83,6 +87,25 @@ async function rendererState(page) {
       status
     };
   });
+}
+
+async function verifyFrameCeiling(page, targetFps, name) {
+  const canvas = page.locator('.fx-genome-webgl-canvas');
+  const before = Number(await canvas.getAttribute('data-fx-rendered-frame'));
+  await page.waitForTimeout(1000);
+  const after = Number(await canvas.getAttribute('data-fx-rendered-frame'));
+  const rendered = after - before;
+  assert(rendered >= 1, name + ' renderer stopped while visible: ' + JSON.stringify({ before, after, rendered, targetFps }));
+  assert(rendered <= targetFps + 5, name + ' renderer exceeded its FPS ceiling: ' + JSON.stringify({ before, after, rendered, targetFps }));
+}
+
+async function verifyStopsWhenClosed(page, name) {
+  await page.evaluate(() => window.FormatXInteractionGenome.close());
+  const canvas = page.locator('.fx-genome-webgl-canvas');
+  const before = Number(await canvas.getAttribute('data-fx-rendered-frame'));
+  await page.waitForTimeout(450);
+  const after = Number(await canvas.getAttribute('data-fx-rendered-frame'));
+  assert(after - before <= 1, name + ' renderer continued while closed: ' + JSON.stringify({ before, after }));
 }
 
 async function verify(browser, contextOptions, name, minimumCanvas, expectations = {}) {
@@ -108,6 +131,8 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
 
   const state = await rendererState(page);
   const status = state.status;
+  const minimumSphereTriangles = expectations.minimumSphereTriangles || 400;
+
   assert(state.adapter === 'ready-v3', name + ' adapter: ' + JSON.stringify(state));
   assert(state.renderer === 'webgl2-cinematic-pbr' && state.stageRenderer === 'webgl2-cinematic-pbr', name + ' renderer markers: ' + JSON.stringify(state));
   assert(state.resourcePolicy === 'cinematic-adaptive-v3', name + ' resource policy: ' + JSON.stringify(state));
@@ -119,6 +144,9 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
   assert(!state.contextLost && state.glError === 0, name + ' WebGL runtime error: ' + JSON.stringify(state));
   assert(state.renderedFrames >= 8 && state.renderedNodes >= 14, name + ' renderer did not produce cinematic frames: ' + JSON.stringify(state));
   assert(state.originalOpacity === '0', name + ' original 2D canvas still visible: ' + JSON.stringify(state));
+  assert(state.overlayOpen === 'true', name + ' drag unexpectedly closed the 3D view: ' + JSON.stringify(state));
+  assert(['drag-complete', 'drag-suppressed-click'].includes(state.gesture), name + ' drag gesture was not separated from click: ' + JSON.stringify(state));
+  assert(state.roundedStage >= 20 && state.polishLoaded === 1, name + ' rounded 4K polish missing: ' + JSON.stringify(state));
   assert(state.badge === 1 && state.depthScale === 1 && state.pipelineHud === 1, name + ' cinematic HUD missing: ' + JSON.stringify(state));
   assert(state.overflow <= 1, name + ' horizontal overflow: ' + JSON.stringify(state));
   assert(state.nodeCount >= 14, name + ' genome nodes missing: ' + JSON.stringify(state));
@@ -128,7 +156,7 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
   assert(status.instancedMeshes === true, name + ' instanced meshes disabled: ' + JSON.stringify(status));
   assert(status.nodeGeometry === 'uv-sphere' && status.tubeGeometry === 'instanced-cylinder', name + ' physical geometry missing: ' + JSON.stringify(status));
   assert(status.nodeInstances >= 28 && status.tubeInstances >= 40, name + ' insufficient 3D instances: ' + JSON.stringify(status));
-  assert(status.sphereTriangles >= 400 && status.tubeTriangles >= 20, name + ' geometry density too low: ' + JSON.stringify(status));
+  assert(status.sphereTriangles >= minimumSphereTriangles && status.tubeTriangles >= 20, name + ' profile geometry density too low: ' + JSON.stringify(status));
   assert(status.bloom === true && status.bloomPasses >= 1, name + ' bloom pipeline missing: ' + JSON.stringify(status));
   assert(status.toneMapping === 'ACES-filmic', name + ' filmic tone mapping missing: ' + JSON.stringify(status));
   assert(status.postProcessing === 'rgba8-bloom-aces-vignette', name + ' post-processing pipeline missing: ' + JSON.stringify(status));
@@ -136,8 +164,19 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
   assert(status.drawCalls >= 9 && status.glErrors === 0, name + ' render pipeline incomplete: ' + JSON.stringify(status));
   assert(status.particles <= 190, name + ' particle budget too noisy: ' + JSON.stringify(status));
   assert(status.backingPixels <= status.maxPixels * 1.06, name + ' GPU pixel budget exceeded: ' + JSON.stringify(status));
-  if (expectations.fourK) assert(status.fourK === true, name + ' 4K profile was not selected: ' + JSON.stringify(status));
+
+  if (expectations.fourK) {
+    assert(status.fourK === true, name + ' 4K profile was not selected: ' + JSON.stringify(status));
+    assert(status.targetFps <= 30, name + ' 4K FPS ceiling too high: ' + JSON.stringify(status));
+    assert(status.maxPixels <= 3400000, name + ' 4K internal pixel budget too high: ' + JSON.stringify(status));
+    assert(status.effectiveDpr <= 1.08, name + ' 4K DPR budget too high: ' + JSON.stringify(status));
+    assert(status.particles <= 160, name + ' 4K particle budget too high: ' + JSON.stringify(status));
+    assert(status.bloomPasses <= 2, name + ' 4K bloom pass budget too high: ' + JSON.stringify(status));
+  }
   if (expectations.reduced) assert(/reduced/.test(status.quality), name + ' reduced-motion profile missing: ' + JSON.stringify(status));
+
+  await verifyFrameCeiling(page, status.targetFps, name);
+  await verifyStopsWhenClosed(page, name);
 
   const meaningful = errors.filter(error => !/WebGL stall|GPU stall|favicon|ERR_ABORTED/i.test(error));
   assert(!meaningful.length, name + ' browser diagnostics: ' + meaningful.join(' | '));
@@ -152,9 +191,9 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
   });
   try {
     await verify(browser, { viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-desktop', [760, 520]);
-    await verify(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-mobile', [360, 430]);
-    await verify(browser, { viewport: { width: 1180, height: 820 }, reducedMotion: 'reduce', locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-reduced-motion', [640, 450], { reduced: true });
-    await verify(browser, { viewport: { width: 3840, height: 2160 }, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-4k', [1800, 900], { fourK: true });
+    await verify(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-mobile', [360, 430], { minimumSphereTriangles: 300 });
+    await verify(browser, { viewport: { width: 1180, height: 820 }, reducedMotion: 'reduce', locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-reduced-motion', [640, 450], { reduced: true, minimumSphereTriangles: 400 });
+    await verify(browser, { viewport: { width: 3840, height: 2160 }, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-4k', [1800, 900], { fourK: true, minimumSphereTriangles: 600 });
   } finally {
     await browser.close();
   }
