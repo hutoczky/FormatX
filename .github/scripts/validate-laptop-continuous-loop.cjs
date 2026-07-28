@@ -20,6 +20,19 @@ async function waitFrames(page, count = 2) {
   }), count);
 }
 
+async function clearIntro(page) {
+  const skip = page.locator('.fx-intro-skip');
+  await skip.waitFor({ state: 'visible', timeout: 6000 });
+  await skip.click({ force: true });
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const overlay = document.getElementById('formatx-event-horizon');
+    return root.classList.contains('fx-intro-complete')
+      && !root.classList.contains('fx-intro-running')
+      && (!overlay || overlay.hidden);
+  }, null, { timeout: 6000 });
+}
+
 async function geometry(page) {
   return page.evaluate(() => {
     const hero = document.getElementById('hero');
@@ -90,7 +103,8 @@ async function verifyViewport(browser, viewport, name) {
     if (message.type() === 'error') diagnostics.push('console-error: ' + message.text());
   });
 
-  await page.goto(TEST_URL + '?lang=hu&lighthouse=1&loop-test=2', { waitUntil: 'domcontentloaded' });
+  await page.goto(TEST_URL + '?lang=hu&loop-test=2', { waitUntil: 'domcontentloaded' });
+  await clearIntro(page);
   await page.waitForFunction(() => document.documentElement.dataset.fxInfiniteController === 'authoritative-wheel-v2', null, { timeout: 30000 });
   await page.waitForFunction(() => document.querySelectorAll('[data-fx-loop-bridge="true"]').length === 1, null, { timeout: 15000 });
 
