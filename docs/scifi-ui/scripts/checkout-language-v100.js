@@ -214,7 +214,13 @@
     theme.insertAdjacentElement('beforebegin', control);
     control.addEventListener('click', event => {
       const button = event.target instanceof Element ? event.target.closest('[data-checkout-language]') : null;
-      if (button) applyLanguage(button.dataset.checkoutLanguage, true, true);
+      if (!button) return;
+      const target = button.dataset.checkoutLanguage === 'en' ? 'en' : 'hu';
+      if (window.FormatXI18n?.setLanguage) {
+        window.FormatXI18n.setLanguage(target, true);
+      } else {
+        applyLanguage(target, true, true);
+      }
     });
   }
 
