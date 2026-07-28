@@ -739,3 +739,52 @@ html[data-fx-design-system="2"] .simulation-disclaimer {
     background: #07111e;
   }
 }
+
+
+/* DS2 mobile containment v1 */
+@media (max-width: 720px) {
+  html[data-fx-design-system="2"],
+  html[data-fx-design-system="2"] body,
+  html[data-fx-design-system="2"] main {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  html[data-fx-design-system="2"] :where(.scene, .hero, .hero-grid, .hero-copy, .hero-actions) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  html[data-fx-design-system="2"] .hero h1 {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  html[data-fx-design-system="2"] .hero-title-main {
+    max-width: 100%;
+    font-size: clamp(54px, 17vw, 78px);
+    letter-spacing: -.08em;
+  }
+
+  html[data-fx-design-system="2"] .hero-actions {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-fx-design-system="2"] .hero-actions .button {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding-inline: 14px;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  html[data-fx-design-system="2"] :where(.fx-category-deck, .fx-origin-proof) {
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+  }
+}
