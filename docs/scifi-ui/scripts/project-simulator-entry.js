@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxSimulatorEntry === 'v1') return;
-  root.dataset.fxSimulatorEntry = 'v1';
+  if (root.dataset.fxSimulatorEntryController === 'v1') return;
+  root.dataset.fxSimulatorEntryController = 'v1';
 
   const COPY = {
     hu: {
@@ -34,7 +34,7 @@
   function ensureHeroEntry() {
     const actions = document.querySelector('#hero .hero-actions');
     if (!actions) return false;
-    let link = actions.querySelector('[data-fx-simulator-entry="hero"]');
+    let link = actions.querySelector('a[data-fx-simulator-entry="hero"]');
     if (!link) {
       link = document.createElement('a');
       link.className = 'button button-line magnetic';
@@ -48,7 +48,7 @@
   function ensureHeaderEntry() {
     const actions = document.querySelector('.header-actions');
     if (!actions) return false;
-    let link = actions.querySelector('[data-fx-simulator-entry="header"]');
+    let link = actions.querySelector('a[data-fx-simulator-entry="header"]');
     if (!link) {
       link = document.createElement('a');
       link.className = 'header-support';
@@ -62,7 +62,7 @@
   function ensureFooterEntry() {
     const footerNav = document.querySelector('.site-footer nav');
     if (!footerNav) return false;
-    let link = footerNav.querySelector('[data-fx-simulator-entry="footer"]');
+    let link = footerNav.querySelector('a[data-fx-simulator-entry="footer"]');
     if (!link) {
       link = document.createElement('a');
       link.dataset.fxSimulatorEntry = 'footer';
@@ -73,7 +73,7 @@
 
   function render() {
     const copy = COPY[language()];
-    document.querySelectorAll('[data-fx-simulator-entry]').forEach(link => {
+    document.querySelectorAll('a[data-fx-simulator-entry]').forEach(link => {
       link.href = href();
       link.setAttribute('aria-label', copy.aria);
       if (link.dataset.fxSimulatorEntry === 'hero') {
@@ -81,7 +81,7 @@
         if (label) label.textContent = copy.hero;
       } else if (link.dataset.fxSimulatorEntry === 'header') {
         link.textContent = copy.header;
-      } else {
+      } else if (link.dataset.fxSimulatorEntry === 'footer') {
         link.textContent = copy.footer;
       }
     });
