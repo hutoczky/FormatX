@@ -1,0 +1,31 @@
+{
+  "id": "formatx-professional-score-v6",
+  "title": "FormatX: Event Horizon",
+  "version": 6,
+  "type": "original-procedural-cinematic-score",
+  "tempo_bpm": 72,
+  "time_signature": "4/4",
+  "arrangement": "16-bar evolving loop",
+  "loop_duration_seconds": 53.333,
+  "harmony": [
+    "Dm9",
+    "Bbmaj9",
+    "Fmaj9",
+    "Cadd9",
+    "Gm9",
+    "Bbmaj7",
+    "Fmaj9/A",
+    "Asus4(add9)"
+  ],
+  "layers": [
+    "custom wavetable pads",
+    "sub bass",
+    "cinematic pulse",
+    "glass motif",
+    "air texture",
+    "convolution reverb",
+    "stereo delay",
+    "soft saturation"
+  ],
+  "license": "Original music created specifically for the FormatX website; no third-party copyrighted recording is embedded."
+}
