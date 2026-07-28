@@ -15,6 +15,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
       - 'docs/scifi-ui/scripts/formatx-infinite-loop-fix.js'
       - 'docs/scifi-ui/scripts/checkout-language-v100.js'
+      - '.github/scripts/diagnose-main-document.cjs'
       - '.github/scripts/validate-category-positioning.cjs'
       - '.github/workflows/validate-category-positioning.yml'
   pull_request:
@@ -30,6 +31,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
       - 'docs/scifi-ui/scripts/formatx-infinite-loop-fix.js'
       - 'docs/scifi-ui/scripts/checkout-language-v100.js'
+      - '.github/scripts/diagnose-main-document.cjs'
       - '.github/scripts/validate-category-positioning.cjs'
       - '.github/workflows/validate-category-positioning.yml'
 
@@ -64,6 +66,7 @@ jobs:
           node --check docs/scifi-ui/scripts/checkout-language-v100.js
           node --check docs/scifi-ui/scripts/project-simulator.js
           node --check docs/scifi-ui/scripts/project-simulator-entry.js
+          node --check .github/scripts/diagnose-main-document.cjs
           node --check .github/scripts/validate-category-positioning.cjs
           grep -Fq "Saját technikusi kategória" docs/scifi-ui/scripts/formatx-category-positioning.js
           grep -Fq "fxCategoryDeckState = 'ready'" docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js
@@ -72,6 +75,7 @@ jobs:
           grep -Fq 'data-fx-category-deck-stabilizer="true"' docs/scifi-ui/index.html
           grep -Fq 'data-fx-origin-proof-script="true"' docs/scifi-ui/index.html
           grep -Fq 'data-fx-simulator-entry-script="true"' docs/scifi-ui/index.html
+          grep -Fq 'fx-category-deck--standalone' docs/scifi-ui/index.html
           grep -Fq "formatx-category-positioning.js?v=20260728-category-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq "formatx-category-positioning.css?v=20260728-category-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq "formatx-category-deck-stabilizer.js?v=20260728-category-deck-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
@@ -103,13 +107,21 @@ jobs:
           cat "$RUNNER_TEMP/formatx-category-http.log"
           exit 1
 
+      - name: Diagnose top-level document state
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-category/node_modules
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/diagnose-main-document.cjs 2>&1 | tee category-positioning-report.txt
+
       - name: Verify positioning, checkout and Operational Twin in Chromium
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-category/node_modules
         shell: bash
         run: |
           set -o pipefail
-          node .github/scripts/validate-category-positioning.cjs 2>&1 | tee category-positioning-report.txt
+          node .github/scripts/validate-category-positioning.cjs 2>&1 | tee -a category-positioning-report.txt
 
       - name: Upload validation report
         if: always()
