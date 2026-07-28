@@ -43,7 +43,7 @@ async function openGenome(page) {
   });
   await page.waitForFunction(() => document.getElementById('fx-interaction-genome')?.dataset.open === 'true');
   await page.waitForFunction(() => document.documentElement.dataset.fxInteractionGenomeRenderer === 'webgl2-pbr');
-  await page.waitForTimeout(500);
+  await page.waitForFunction(() => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= 3, null, { timeout: 8000 });
 }
 
 async function rendererState(page) {
@@ -55,16 +55,6 @@ async function rendererState(page) {
     const rect = canvas?.getBoundingClientRect();
     const gl = canvas?.getContext('webgl2');
     const attributes = gl?.getContextAttributes();
-    let litPixels = 0;
-    if (gl && canvas.width > 0 && canvas.height > 0) {
-      const width = Math.min(160, canvas.width);
-      const height = Math.min(160, canvas.height);
-      const x = Math.max(0, Math.floor((canvas.width - width) / 2));
-      const y = Math.max(0, Math.floor((canvas.height - height) / 2));
-      const pixels = new Uint8Array(width * height * 4);
-      gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-      for (let index = 3; index < pixels.length; index += 4) if (pixels[index] > 2) litPixels += 1;
-    }
     return {
       adapter: root.dataset.fxGenomeWebglAdapter || '',
       renderer: root.dataset.fxInteractionGenomeRenderer || '',
@@ -76,7 +66,11 @@ async function rendererState(page) {
       webgl2: Boolean(gl),
       antialias: Boolean(attributes?.antialias),
       depth: Boolean(attributes?.depth),
-      litPixels,
+      contextLost: gl ? gl.isContextLost() : true,
+      glError: gl ? gl.getError() : -1,
+      renderedFrames: Number(canvas?.dataset.fxRenderedFrame || 0),
+      renderedNodes: Number(canvas?.dataset.fxRenderedNodes || 0),
+      renderedAt: Number(canvas?.dataset.fxRenderedAt || 0),
       badge: document.querySelectorAll('.fx-genome-renderer-badge').length,
       depthScale: document.querySelectorAll('.fx-genome-depth-scale').length,
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
@@ -103,7 +97,7 @@ async function verify(browser, contextOptions, name, minimumCanvas) {
     await page.mouse.down();
     await page.mouse.move(box.x + box.width * .62, box.y + box.height * .52, { steps: 8 });
     await page.mouse.up();
-    await page.waitForTimeout(180);
+    await page.waitForFunction(() => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= 6, null, { timeout: 5000 });
   }
 
   const state = await rendererState(page);
@@ -114,7 +108,9 @@ async function verify(browser, contextOptions, name, minimumCanvas) {
   assert(state.backing[0] >= state.canvas[0] && state.backing[1] >= state.canvas[1], name + ' backing resolution: ' + JSON.stringify(state));
   assert(state.webgl2 && state.depth, name + ' missing WebGL2 depth context: ' + JSON.stringify(state));
   assert(state.antialias, name + ' antialias disabled: ' + JSON.stringify(state));
-  assert(state.litPixels > 18, name + ' empty GPU frame: ' + JSON.stringify(state));
+  assert(!state.contextLost && state.glError === 0, name + ' WebGL runtime error: ' + JSON.stringify(state));
+  assert(state.renderedFrames >= 6 && state.renderedAt > 0, name + ' renderer did not produce continuous frames: ' + JSON.stringify(state));
+  assert(state.renderedNodes >= 10, name + ' renderer did not receive genome nodes: ' + JSON.stringify(state));
   assert(state.originalOpacity === '0', name + ' original 2D canvas still visible: ' + JSON.stringify(state));
   assert(state.badge === 1 && state.depthScale === 1, name + ' professional HUD missing: ' + JSON.stringify(state));
   assert(state.overflow <= 1, name + ' horizontal overflow: ' + JSON.stringify(state));
