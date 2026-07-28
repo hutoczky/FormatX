@@ -1,4 +1,4 @@
-# Trigger revision 3
+# Trigger revision 4
 name: Apply FormatX Design System
 
 on:
@@ -95,6 +95,12 @@ jobs:
               '  <link rel="stylesheet" href="./styles/project-simulator.css?v=20260728-operational-twin-1">\n  <link rel="stylesheet" data-fx-design-system="true" href="./styles/formatx-design-system.css?v=' + VERSION + '">'
           )
 
+          changed |= replace_once(
+              'docs/scifi-ui/styles/formatx-design-system.css',
+              '  min-width: 38px;\n  min-height: 32px;',
+              '  min-width: 40px;\n  min-height: 40px;'
+          )
+
           css_path = Path('docs/scifi-ui/styles/formatx-design-system.css')
           css = css_path.read_text(encoding='utf-8')
           marker = '/* DS2 mobile containment v1 */'
@@ -122,5 +128,5 @@ jobs:
           git config user.name 'FormatX Design System Bot'
           git config user.email 'actions@users.noreply.github.com'
           git add docs/scifi-ui/index.html docs/scifi-ui/checkout.html docs/scifi-ui/project-simulator.html docs/scifi-ui/styles/formatx-design-system.css
-          git commit -m 'Fix FormatX Design System mobile containment'
+          git commit -m 'Increase FormatX unified language control targets'
           git push origin HEAD:master
