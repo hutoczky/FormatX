@@ -112,6 +112,21 @@
     document.head.appendChild(script);
   }
 
+  function loadCategoryDeckStabilizer() {
+    if (document.querySelector('script[data-fx-category-deck-stabilizer]')) return;
+    const script = document.createElement('script');
+    script.src = './scripts/formatx-category-deck-stabilizer.js?v=20260728-category-deck-v1';
+    script.async = false;
+    script.dataset.fxCategoryDeckStabilizer = 'true';
+    script.addEventListener('load', () => {
+      root.dataset.fxCategoryDeckStabilizerLayer = 'ready';
+    }, { once: true });
+    script.addEventListener('error', () => {
+      root.dataset.fxCategoryDeckStabilizerLayer = 'error';
+    }, { once: true });
+    document.head.appendChild(script);
+  }
+
   function loadSimulatorEntryLayer() {
     if (document.querySelector('script[data-fx-simulator-entry-script]')) return;
     const script = document.createElement('script');
@@ -127,6 +142,12 @@
     document.head.appendChild(script);
   }
 
+  function loadDependentLayers() {
+    loadCategoryDeckStabilizer();
+    loadOriginProofLayer();
+    loadSimulatorEntryLayer();
+  }
+
   function loadCategoryLayer() {
     if (!document.querySelector('link[data-fx-category-style]')) {
       const style = document.createElement('link');
@@ -138,8 +159,7 @@
 
     const existing = document.querySelector('script[data-fx-category-script]');
     if (existing) {
-      loadOriginProofLayer();
-      loadSimulatorEntryLayer();
+      loadDependentLayers();
       return;
     }
 
@@ -149,13 +169,11 @@
     script.dataset.fxCategoryScript = 'true';
     script.addEventListener('load', () => {
       root.dataset.fxCategoryLayer = 'ready';
-      loadOriginProofLayer();
-      loadSimulatorEntryLayer();
+      loadDependentLayers();
     }, { once: true });
     script.addEventListener('error', () => {
       root.dataset.fxCategoryLayer = 'error';
-      loadOriginProofLayer();
-      loadSimulatorEntryLayer();
+      loadDependentLayers();
     }, { once: true });
     document.head.appendChild(script);
   }
