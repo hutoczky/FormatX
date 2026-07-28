@@ -103,6 +103,7 @@
   addEventListener('pageshow', replaceExistingQr);
 
   const queue = [
+    './scripts/formatx-intro-skip-guard.js?v=20260728-skip-guard-1',
     './scripts/formatx-transcend-bridge.js?v=20260727-transcend-5',
     './scripts/formatx-three-host.js?v=20260727-audio-pro-1',
     './scripts/formatx-audio-repair.js?v=20260728-ambient-score-v5',
