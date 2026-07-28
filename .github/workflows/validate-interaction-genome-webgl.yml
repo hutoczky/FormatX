@@ -1,3 +1,4 @@
+# Final physical 4K validation revision 1
 name: Validate FormatX Interaction Genome WebGL
 
 on:
@@ -49,11 +50,12 @@ jobs:
           grep -Fq "ACES-filmic" docs/scifi-ui/scripts/interaction-genome-webgl.js
           grep -Fq "rgba8-bloom-aces-vignette" docs/scifi-ui/scripts/interaction-genome-webgl.js
           grep -Fq "cinematic-adaptive-v3" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
+          grep -Fq "drag-suppressed-click" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
           grep -Fq "ResizeObserver" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
           grep -Fq "visibilitychange" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
-          grep -Fq "interaction-genome-webgl-adapter.js?v=20260728-cinematic-v3" docs/scifi-ui/scripts/living-architecture.js
+          grep -Fq "interaction-genome-webgl-adapter.js?v=20260728-cinematic-v3-gesture-safe" docs/scifi-ui/scripts/living-architecture.js
           grep -Fq 'data-renderer="webgl2-cinematic-pbr"' docs/scifi-ui/styles/interaction-genome-webgl.css
-          grep -Fq "FormatX 4K Polish" docs/scifi-ui/styles/formatx-4k-polish.css
+          grep -Fq "FormatX 4K Polish v2" docs/scifi-ui/styles/formatx-4k-polish.css
 
       - name: Install Chromium
         shell: bash
@@ -74,7 +76,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-genome-webgl-http.log"
           exit 1
 
-      - name: Validate cinematic PBR, bloom, 4K and resource budgets
+      - name: Validate cinematic PBR, bloom, physical 4K and resource budgets
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-genome-webgl/node_modules
         shell: bash
@@ -100,10 +102,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Cinematic instanced PBR, bloom and adaptive 4K validation passed'
+            description='Cinematic PBR, rounded physical 4K and resource budgets passed'
           else
             state='failure'
-            description='Interaction Genome cinematic PBR validation failed'
+            description='Interaction Genome physical 4K validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
