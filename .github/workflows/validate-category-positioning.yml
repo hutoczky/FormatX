@@ -1,0 +1,113 @@
+name: Validate FormatX category positioning
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-category-positioning.js'
+      - 'docs/scifi-ui/styles/formatx-category-positioning.css'
+      - 'docs/scifi-ui/scripts/formatx-infinite-loop-fix.js'
+      - 'docs/scifi-ui/scripts/checkout-language-v100.js'
+      - '.github/scripts/validate-category-positioning.cjs'
+      - '.github/workflows/validate-category-positioning.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-category-positioning.js'
+      - 'docs/scifi-ui/styles/formatx-category-positioning.css'
+      - 'docs/scifi-ui/scripts/formatx-infinite-loop-fix.js'
+      - 'docs/scifi-ui/scripts/checkout-language-v100.js'
+      - '.github/scripts/validate-category-positioning.cjs'
+      - '.github/workflows/validate-category-positioning.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-category-positioning-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Validate source architecture and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-category-positioning.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
+          node --check docs/scifi-ui/scripts/checkout-language-v100.js
+          node --check .github/scripts/validate-category-positioning.cjs
+          grep -Fq "Saját technikusi kategória" docs/scifi-ui/scripts/formatx-category-positioning.js
+          grep -Fq "authoritative-v4" docs/scifi-ui/scripts/checkout-language-v100.js
+          grep -Fq "formatx-category-positioning.js?v=20260728-category-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
+          grep -Fq "formatx-category-positioning.css?v=20260728-category-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
+          ! grep -Fq "new MutationObserver" docs/scifi-ui/scripts/checkout-language-v100.js
+
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-category" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-category/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4181 --directory docs > "$RUNNER_TEMP/formatx-category-http.log" 2>&1 &
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:4181/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-category-http.log"
+          exit 1
+
+      - name: Verify Hungarian, English, mobile and checkout in Chromium
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-category/node_modules
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-category-positioning.cjs 2>&1 | tee category-positioning-report.txt
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-category-positioning-report
+          path: category-positioning-report.txt
+          if-no-files-found: warn
+          retention-days: 5
+
+      - name: Publish validation status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Category positioning and bilingual checkout validation passed'
+          else
+            state='failure'
+            description='FormatX category positioning validation failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX category positioning validation' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
