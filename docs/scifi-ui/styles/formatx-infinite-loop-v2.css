@@ -1,4 +1,4 @@
-/* FormatX continuous loop V2 — laptop touchpad and wheel stability */
+/* FormatX continuous loop V2 — laptop touchpad and wheel stability — validation revision 1 */
 html[data-fx-infinite-controller="authoritative-wheel-v2"],
 html[data-fx-infinite-controller="authoritative-wheel-v2"] body {
   overscroll-behavior-y: none;
