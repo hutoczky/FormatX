@@ -10,16 +10,18 @@
 
   function createDeck() {
     const existing = document.querySelector('.fx-category-deck');
-    if (existing) return existing;
-    const hero = document.getElementById('hero');
-    const grid = hero?.querySelector('.hero-grid');
-    if (!hero || !grid) return null;
+    if (existing && !existing.closest('#hero')) return existing;
+    if (existing) existing.remove();
+
+    const main = document.getElementById('main-content');
+    const experience = document.getElementById('experience');
+    if (!main || !experience || experience.parentElement !== main) return null;
 
     const deck = document.createElement('section');
-    deck.className = 'fx-category-deck';
+    deck.className = 'fx-category-deck fx-category-deck--standalone';
     deck.setAttribute('aria-labelledby', 'fx-category-title');
     deck.innerHTML = '<header><p class="section-index" data-fx-category-eyebrow></p><h2 id="fx-category-title" data-fx-category-title></h2><p data-fx-category-lead></p></header><div class="fx-category-grid"></div>';
-    grid.insertAdjacentElement('afterend', deck);
+    experience.insertAdjacentElement('beforebegin', deck);
     return deck;
   }
 
@@ -56,7 +58,8 @@
   }
 
   const structureObserver = new MutationObserver(() => {
-    if (!document.querySelector('.fx-category-deck')) queueMicrotask(ensure);
+    const deck = document.querySelector('.fx-category-deck');
+    if (!deck || deck.closest('#hero')) queueMicrotask(ensure);
   });
   structureObserver.observe(root, { childList: true, subtree: true });
 
