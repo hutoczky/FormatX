@@ -1,4 +1,4 @@
-# FormatX Reality Fork regression trigger 2
+# FormatX continuous laptop loop regression trigger 1
 name: Validate FormatX WebGPU and Three.js website
 
 on:
@@ -9,6 +9,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
+      - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/scripts/validate-reality-fork.cjs'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
@@ -18,6 +19,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
+      - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/scripts/validate-reality-fork.cjs'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
@@ -33,7 +35,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -75,6 +77,8 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-three-host.js
           node --check docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js
           node --check docs/scifi-ui/scripts/formatx-nextgen-controls.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js
           node --check docs/scifi-ui/scripts/experience-entry.js
           node --check docs/scifi-ui/scripts/Experience.js
           node --check docs/scifi-ui/scripts/ExperienceWebGPU.js
@@ -83,12 +87,15 @@ jobs:
           node --check docs/scifi-ui/scripts/checkout-language-v100.js
           node --check docs/scifi-ui/scripts/formatx-category-positioning.js
           node --check docs/scifi-ui/scripts/formatx-origin-proof.js
-          node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           node --check docs/scifi-ui/scripts/project-simulator.js
           node --check docs/scifi-ui/scripts/operational-twin-dom-bridge.js
           node --check docs/scifi-ui/scripts/reality-fork-capsule.js
           node --check .github/scripts/validate-three-site.cjs
+          node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-reality-fork.cjs
+          grep -Fq 'authoritative-wheel-v2' docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js
+          grep -Fq 'formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2' docs/scifi-ui/scripts/igloo-parity.js
+          ! grep -Fq 'formatx-infinite-loop-fix.js?v=20260727-loop-1' docs/scifi-ui/scripts/igloo-parity.js
 
       - name: Test Worker and production bundle
         working-directory: billing-worker
@@ -128,6 +135,14 @@ jobs:
           set -o pipefail
           node .github/scripts/validate-three-site.cjs 2>&1 | tee webgpu-browser-report.txt
 
+      - name: Test continuous laptop wheel and touchpad looping
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-laptop-continuous-loop.cjs 2>&1 | tee laptop-continuous-loop-report.txt
+
       - name: Validate Reality Fork counterfactual replay and capsule proof
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
@@ -136,12 +151,14 @@ jobs:
           set -o pipefail
           node .github/scripts/validate-reality-fork.cjs 2>&1 | tee reality-fork-report.txt
 
-      - name: Upload WebGPU browser report
+      - name: Upload browser reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: formatx-webgpu-browser-report
-          path: webgpu-browser-report.txt
+          path: |
+            webgpu-browser-report.txt
+            laptop-continuous-loop-report.txt
           if-no-files-found: warn
           retention-days: 5
 
@@ -163,10 +180,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='WebGPU, XR, fallback and Reality Fork proof validation passed'
+            description='WebGPU, laptop loop and Reality Fork validation passed'
           else
             state='failure'
-            description='FormatX production and Reality Fork validation failed'
+            description='FormatX production, laptop loop or Reality Fork validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
