@@ -20,26 +20,20 @@
     if (qrUrls.has(key)) return qrUrls.get(key);
     const entry = qrData[key];
     if (!entry) return '';
-
     const size = entry[0];
     const bytes = Uint8Array.from(atob(entry[1]), char => char.charCodeAt(0));
     const bit = index => (bytes[index >> 3] >> (7 - (index & 7))) & 1;
     let path = '';
-
     for (let y = 0; y < size; y += 1) {
       let x = 0;
       while (x < size) {
-        if (!bit(y * size + x)) {
-          x += 1;
-          continue;
-        }
+        if (!bit(y * size + x)) { x += 1; continue; }
         const start = x;
         while (x < size && bit(y * size + x)) x += 1;
         const width = x - start;
         path += 'M' + start + ' ' + y + 'h' + width + 'v1h-' + width + 'z';
       }
     }
-
     const quiet = 4;
     const total = size + quiet * 2;
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + total + ' ' + total + '" shape-rendering="crispEdges"><rect width="' + total + '" height="' + total + '" fill="#fff"/><g transform="translate(' + quiet + ' ' + quiet + ')"><path d="' + path + '" fill="#07131c"/></g></svg>';
@@ -87,12 +81,7 @@
     });
   });
 
-  qrObserver.observe(document.documentElement, {
-    subtree: true,
-    childList: true,
-    attributes: true,
-    attributeFilter: ['src']
-  });
+  qrObserver.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['src'] });
 
   function replaceExistingQr() {
     const currency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'eur' : 'huf';
@@ -108,7 +97,6 @@
 
   root.dataset.fxLocalQr = 'ready';
   replaceExistingQr();
-
   document.addEventListener('click', event => {
     if (event.target.closest('[data-currency]')) setTimeout(replaceExistingQr, 0);
   });
@@ -117,7 +105,7 @@
   const queue = [
     './scripts/formatx-transcend-bridge.js?v=20260727-transcend-5',
     './scripts/formatx-three-host.js?v=20260727-audio-pro-1',
-    './scripts/formatx-audio-repair.js?v=20260727-audio-v3',
+    './scripts/formatx-audio-repair.js?v=20260728-cinematic-v4',
     './scripts/formatx-professional-refinement.js?v=20260727-professional-1',
     './scripts/formatx-nextgen-controls.js?v=20260727-webgpu-1',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
