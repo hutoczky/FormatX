@@ -1,5 +1,4 @@
-/* Validation trigger revision 1 */
-/* FormatX 4K Polish — rounded premium geometry with a strict rendering budget */
+/* FormatX 4K Polish v2 — rounded premium geometry with a strict rendering budget */
 
 html[data-fx-design-system="2"] {
   --fx-radius-xs: 12px;
@@ -54,55 +53,42 @@ html[data-fx-design-system="2"] :where(input, select, textarea, .field, .summary
   border-radius: var(--fx-radius-sm) !important;
 }
 
-.fx-genome-stage[data-renderer="webgl2-pbr"] {
+.fx-genome-stage:is(
+  [data-renderer="webgl2-cinematic-pbr"],
+  [data-renderer="webgl2-pbr"]
+) {
   contain: layout paint style;
   isolation: isolate;
   border-radius: clamp(24px, 2.4vw, 44px) !important;
   overflow: hidden;
   transform: translateZ(0);
-  background:
-    radial-gradient(ellipse at 50% 38%, rgba(90, 173, 220, .075), transparent 38%),
-    radial-gradient(ellipse at 50% 115%, rgba(105, 69, 180, .09), transparent 47%),
-    linear-gradient(180deg, #02060c 0%, #030913 50%, #01040a 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(170, 231, 255, .08),
-    inset 0 1px 0 rgba(255, 255, 255, .045),
-    inset 0 -36px 80px rgba(0, 0, 0, .28),
-    0 28px 80px rgba(0, 0, 0, .32);
 }
 
-.fx-genome-stage[data-renderer="webgl2-pbr"]::before,
-.fx-genome-stage[data-renderer="webgl2-pbr"]::after {
+.fx-genome-stage:is(
+  [data-renderer="webgl2-cinematic-pbr"],
+  [data-renderer="webgl2-pbr"]
+)::before,
+.fx-genome-stage:is(
+  [data-renderer="webgl2-cinematic-pbr"],
+  [data-renderer="webgl2-pbr"]
+)::after,
+.fx-genome-stage:is(
+  [data-renderer="webgl2-cinematic-pbr"],
+  [data-renderer="webgl2-pbr"]
+) canvas {
   border-radius: inherit;
 }
 
+.fx-genome-stage[data-renderer="webgl2-cinematic-pbr"] .fx-genome-renderer-badge,
+.fx-genome-stage[data-renderer="webgl2-cinematic-pbr"] .fx-genome-pipeline,
 .fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge {
-  min-height: 32px;
-  padding: 6px 12px;
-  border-radius: var(--fx-radius-pill);
-  border: 1px solid rgba(122, 223, 255, .18);
-  background: rgba(2, 8, 15, .68);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  border-radius: var(--fx-radius-pill) !important;
+  clip-path: none !important;
 }
 
-.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge b,
-.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge small {
-  display: inline-block;
-}
-
-.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge b {
-  color: rgba(229, 249, 255, .86);
-  font: 800 8px/1 var(--fx-font-mono, ui-monospace, monospace);
-  letter-spacing: .14em;
-}
-
-.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge small {
-  margin-left: 8px;
-  color: rgba(169, 207, 221, .62);
-  font: 700 7px/1 var(--fx-font-mono, ui-monospace, monospace);
-  letter-spacing: .1em;
+.fx-genome-stage[data-renderer="webgl2-cinematic-pbr"] .fx-genome-stage-note,
+.fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-stage-note {
+  border-radius: var(--fx-radius-sm) !important;
 }
 
 .fx-genome-webgl-canvas {
@@ -148,29 +134,38 @@ html[data-fx-design-system="2"] :where(input, select, textarea, .field, .summary
     --fx-radius-lg: 26px;
   }
 
-  .fx-genome-stage[data-renderer="webgl2-pbr"] {
+  .fx-genome-stage:is(
+    [data-renderer="webgl2-cinematic-pbr"],
+    [data-renderer="webgl2-pbr"]
+  ) {
     border-radius: 24px !important;
   }
 
+  .fx-genome-stage[data-renderer="webgl2-cinematic-pbr"] .fx-genome-renderer-badge,
   .fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge {
     max-width: calc(100% - 20px);
     white-space: nowrap;
   }
-
-  .fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge small {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fx-genome-stage[data-renderer="webgl2-pbr"],
-  .fx-genome-stage[data-renderer="webgl2-pbr"] * {
+  .fx-genome-stage:is(
+    [data-renderer="webgl2-cinematic-pbr"],
+    [data-renderer="webgl2-pbr"]
+  ),
+  .fx-genome-stage:is(
+    [data-renderer="webgl2-cinematic-pbr"],
+    [data-renderer="webgl2-pbr"]
+  ) * {
     transition-duration: .01ms !important;
   }
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .fx-genome-stage[data-renderer="webgl2-pbr"] .fx-genome-renderer-badge {
+  .fx-genome-stage:is(
+    [data-renderer="webgl2-cinematic-pbr"],
+    [data-renderer="webgl2-pbr"]
+  ) :is(.fx-genome-renderer-badge, .fx-genome-pipeline) {
     background: #06101b;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
