@@ -25,7 +25,8 @@
     ['Világos', 'Light'],
     ['RÖGZÍTETT ÖSSZEG HUF-BAN VAGY EURÓBAN', 'FIXED AMOUNT IN HUF OR EUR'],
     ['Közvetlen banki átutalás QR-kóddal', 'Direct bank transfer with QR'],
-    ['HUF-fizetésnél az RFC 8905 szabvány szerinti payto: QR-kód, EUR-fizetésnél pedig EPC SEPA átutalási QR-kód készül. A kiválasztott csomaghoz rögzített összeg és egyedi rendelési azonosító tartozik.', 'For HUF payments an RFC 8905 payto: QR is generated; for EUR payments an EPC SEPA transfer QR is generated. Every selected plan has a fixed amount and a unique order reference.'],
+    ['HUF-fizetésnél az RFC 8905 szabvány szerinti', 'For HUF payments, an RFC 8905'],
+    ['QR-kód, EUR-fizetésnél pedig EPC SEPA átutalási QR-kód készül. A kiválasztott csomaghoz rögzített összeg és egyedi rendelési azonosító tartozik.', 'QR is generated; for EUR payments, an EPC SEPA transfer QR is generated. Every selected plan has a fixed amount and a unique order reference.'],
     ['RENDELÉS', 'ORDER'],
     ['Összegzés', 'Summary'],
     ['Csomag', 'Plan'],
@@ -52,9 +53,9 @@
     ['1 év — egyszeri fizetés, 2 hónap díjmentes', '1 year — one-time payment, 2 months included'],
     ['Magyar forint (HUF)', 'Hungarian forint (HUF)'],
     ['Euró (EUR / SEPA)', 'Euro (EUR / SEPA)'],
-    ['Elfogadom a ', 'I accept the '],
+    ['Elfogadom a', 'I accept the'],
     ['felhasználási feltételeket', 'terms of use'],
-    [' és az ', ' and the '],
+    ['és az', 'and the'],
     ['adatkezelési tájékoztatót', 'privacy notice'],
     ['. Tudomásul veszem, hogy ez egyszeri banki átutalás, és a licenc csak a jóváírás kézi ellenőrzése után aktiválódik.', '. I understand that this is a one-time bank transfer and the licence is activated only after manual verification of the credit.'],
     ['Bankszámla ellenőrzése…', 'Checking bank payment…'],
@@ -70,7 +71,6 @@
     ['HUF számlaszám', 'HUF account number'],
     ['Közvetítő bank BIC-kódja (ha szükséges)', 'Correspondent bank BIC (when required)'],
     ['Összeg', 'Amount'],
-    ['Közlemény: ', 'Reference: '],
     ['Banki alkalmazás megnyitása', 'Open banking application'],
     ['SEPA átutalás megnyitása', 'Open SEPA transfer'],
     ['Átutalási adatok másolása', 'Copy transfer details'],
@@ -119,12 +119,17 @@
   }
 
   function translateValue(value, target) {
-    const trimmed = String(value || '').trim();
-    if (!trimmed) return value;
-    const translated = target === 'en' ? (HU_EN.get(trimmed) || trimmed) : (EN_HU.get(trimmed) || trimmed);
-    if (translated === trimmed) return value;
-    const leading = String(value).match(/^\s*/)?.[0] || '';
-    const trailing = String(value).match(/\s*$/)?.[0] || '';
+    const source = String(value || '');
+    const trimmed = source.trim();
+    if (!trimmed) return source;
+
+    let translated = target === 'en' ? (HU_EN.get(trimmed) || trimmed) : (EN_HU.get(trimmed) || trimmed);
+    if (target === 'en' && trimmed.startsWith('Közlemény:')) translated = trimmed.replace(/^Közlemény:/, 'Reference:');
+    if (target === 'hu' && trimmed.startsWith('Reference:')) translated = trimmed.replace(/^Reference:/, 'Közlemény:');
+    if (translated === trimmed) return source;
+
+    const leading = source.match(/^\s*/)?.[0] || '';
+    const trailing = source.match(/\s*$/)?.[0] || '';
     return leading + translated + trailing;
   }
 
@@ -168,8 +173,9 @@
     Array.from(plan?.options || []).forEach(option => {
       const price = PRICES[option.value]?.[selectedCurrency]?.monthly;
       if (!Number.isFinite(price)) return;
-      option.textContent = PLAN_NAMES[option.value] + ' — ' + formatMoney(price, selectedCurrency, target)
+      const next = PLAN_NAMES[option.value] + ' — ' + formatMoney(price, selectedCurrency, target)
         + (target === 'en' ? '/month' : '/hó');
+      if (option.textContent !== next) option.textContent = next;
     });
     if (cycle?.options[0]) cycle.options[0].textContent = target === 'en' ? '1 month — one-time payment' : '1 hónap — egyszeri fizetés';
     if (cycle?.options[1]) cycle.options[1].textContent = target === 'en' ? '1 year — one-time payment' : '1 év — egyszeri fizetés';
@@ -217,7 +223,7 @@
     applying = true;
     const target = next === 'en' ? 'en' : 'hu';
     if (root.lang !== target) root.lang = target;
-    root.dataset.fxCheckoutLanguage = 'authoritative-v3';
+    root.dataset.fxCheckoutLanguage = 'authoritative-v4';
     root.dataset.formatxPricing = 'v100-market-2026-07';
     document.title = target === 'en' ? 'Bank transfer | FormatX Suite Pro' : 'Banki átutalás | FormatX Suite Pro';
     const description = document.querySelector('meta[name="description"]');
@@ -242,20 +248,15 @@
     }
     applying = false;
     if (notify) dispatchEvent(new CustomEvent('formatx:languagechange', {
-      detail: { language: target, source: 'checkout-authoritative-v3' }
+      detail: { language: target, source: 'checkout-authoritative-v4' }
     }));
   }
 
   installSwitch();
   applyLanguage(initialLanguage(), false, false);
 
-  const observer = new MutationObserver(() => {
-    if (!applying) queueMicrotask(() => applyLanguage(language(), false, false));
-  });
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-
   addEventListener('formatx:languagechange', event => {
-    if (event.detail?.source === 'checkout-authoritative-v3') return;
+    if (event.detail?.source === 'checkout-authoritative-v4') return;
     queueMicrotask(() => applyLanguage(language(), false, false));
   });
   addEventListener('pageshow', () => applyLanguage(language(), false, false));
