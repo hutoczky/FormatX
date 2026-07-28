@@ -5,6 +5,7 @@ on:
   push:
     branches: [master]
     paths:
+      - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/project-simulator.html'
       - 'docs/scifi-ui/scripts/project-simulator.js'
       - 'docs/scifi-ui/scripts/project-simulator-entry.js'
@@ -19,6 +20,7 @@ on:
   pull_request:
     branches: [master]
     paths:
+      - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/project-simulator.html'
       - 'docs/scifi-ui/scripts/project-simulator.js'
       - 'docs/scifi-ui/scripts/project-simulator-entry.js'
@@ -66,6 +68,10 @@ jobs:
           grep -Fq "Saját technikusi kategória" docs/scifi-ui/scripts/formatx-category-positioning.js
           grep -Fq "fxCategoryDeckState = 'ready'" docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js
           grep -Fq "authoritative-v4" docs/scifi-ui/scripts/checkout-language-v100.js
+          grep -Fq 'data-fx-category-script="true"' docs/scifi-ui/index.html
+          grep -Fq 'data-fx-category-deck-stabilizer="true"' docs/scifi-ui/index.html
+          grep -Fq 'data-fx-origin-proof-script="true"' docs/scifi-ui/index.html
+          grep -Fq 'data-fx-simulator-entry-script="true"' docs/scifi-ui/index.html
           grep -Fq "formatx-category-positioning.js?v=20260728-category-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq "formatx-category-positioning.css?v=20260728-category-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq "formatx-category-deck-stabilizer.js?v=20260728-category-deck-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
