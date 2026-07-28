@@ -109,6 +109,7 @@ async function readState(page) {
 }
 
 function isRecoverableGpuDiagnostic(item, state) {
+  if (/^requestfailed: blob:.*net::ERR_ABORTED/i.test(item)) return true;
   if (/WebGL stall due to ReadPixels|GPU stall/i.test(item)) return true;
   return state.webgpu === 'fallback'
     && /GPU|WebGPU|WGSL|shader|pipeline|device|adapter|popErrorScope|Instance dropped|createView|swizzle/i.test(item);
