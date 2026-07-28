@@ -9,9 +9,10 @@
   let attempts = 0;
 
   function createDeck() {
-    const existing = document.querySelector('.fx-category-deck');
-    if (existing && !existing.closest('#hero')) return existing;
-    if (existing) existing.remove();
+    document.querySelectorAll('#hero .fx-category-deck').forEach(deck => deck.remove());
+    const standalone = Array.from(document.querySelectorAll('.fx-category-deck'))
+      .find(deck => !deck.closest('#hero'));
+    if (standalone) return standalone;
 
     const main = document.getElementById('main-content');
     const experience = document.getElementById('experience');
@@ -58,8 +59,10 @@
   }
 
   const structureObserver = new MutationObserver(() => {
-    const deck = document.querySelector('.fx-category-deck');
-    if (!deck || deck.closest('#hero')) queueMicrotask(ensure);
+    const standalone = Array.from(document.querySelectorAll('.fx-category-deck'))
+      .find(deck => !deck.closest('#hero'));
+    const heroDeck = document.querySelector('#hero .fx-category-deck');
+    if (!standalone || heroDeck) queueMicrotask(ensure);
   });
   structureObserver.observe(root, { childList: true, subtree: true });
 
