@@ -193,7 +193,7 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
     await verify(browser, { viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-desktop', [760, 520]);
     await verify(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-mobile', [360, 430], { minimumSphereTriangles: 300 });
     await verify(browser, { viewport: { width: 1180, height: 820 }, reducedMotion: 'reduce', locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-reduced-motion', [640, 450], { reduced: true, minimumSphereTriangles: 400 });
-    await verify(browser, { viewport: { width: 3840, height: 2160 }, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-4k', [1800, 900], { fourK: true, minimumSphereTriangles: 600 });
+    await verify(browser, { viewport: { width: 2560, height: 1440 }, deviceScaleFactor: 1.5, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-physical-4k', [1400, 680], { fourK: true, minimumSphereTriangles: 600 });
   } finally {
     await browser.close();
   }
