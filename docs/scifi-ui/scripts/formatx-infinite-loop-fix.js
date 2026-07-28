@@ -97,6 +97,21 @@
     if (button.getAttribute('aria-label') !== nextAria) button.setAttribute('aria-label', nextAria);
   }
 
+  function loadOriginProofLayer() {
+    if (document.querySelector('script[data-fx-origin-proof-script]')) return;
+    const script = document.createElement('script');
+    script.src = './scripts/formatx-origin-proof.js?v=20260728-origin-proof-v1';
+    script.async = false;
+    script.dataset.fxOriginProofScript = 'true';
+    script.addEventListener('load', () => {
+      root.dataset.fxOriginProofLayer = 'ready';
+    }, { once: true });
+    script.addEventListener('error', () => {
+      root.dataset.fxOriginProofLayer = 'error';
+    }, { once: true });
+    document.head.appendChild(script);
+  }
+
   function loadCategoryLayer() {
     if (!document.querySelector('link[data-fx-category-style]')) {
       const style = document.createElement('link');
@@ -105,19 +120,26 @@
       style.dataset.fxCategoryStyle = 'true';
       document.head.appendChild(style);
     }
-    if (!document.querySelector('script[data-fx-category-script]')) {
-      const script = document.createElement('script');
-      script.src = './scripts/formatx-category-positioning.js?v=20260728-category-v1';
-      script.async = false;
-      script.dataset.fxCategoryScript = 'true';
-      script.addEventListener('load', () => {
-        root.dataset.fxCategoryLayer = 'ready';
-      }, { once: true });
-      script.addEventListener('error', () => {
-        root.dataset.fxCategoryLayer = 'error';
-      }, { once: true });
-      document.head.appendChild(script);
+
+    const existing = document.querySelector('script[data-fx-category-script]');
+    if (existing) {
+      loadOriginProofLayer();
+      return;
     }
+
+    const script = document.createElement('script');
+    script.src = './scripts/formatx-category-positioning.js?v=20260728-category-v1';
+    script.async = false;
+    script.dataset.fxCategoryScript = 'true';
+    script.addEventListener('load', () => {
+      root.dataset.fxCategoryLayer = 'ready';
+      loadOriginProofLayer();
+    }, { once: true });
+    script.addEventListener('error', () => {
+      root.dataset.fxCategoryLayer = 'error';
+      loadOriginProofLayer();
+    }, { once: true });
+    document.head.appendChild(script);
   }
 
   const audioLabelObserver = new MutationObserver(syncAudioActionLabel);
