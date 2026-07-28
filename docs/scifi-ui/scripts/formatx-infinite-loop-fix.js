@@ -5,6 +5,7 @@
   if (root.dataset.fxInfiniteFix === 'ready') return;
   root.dataset.fxInfiniteFix = 'ready';
   root.dataset.fxInfiniteController = 'authoritative';
+  root.dataset.fxAudioLabelFix = 'v1';
 
   let transferring = false;
   let settleFrame = 0;
@@ -71,8 +72,59 @@
     });
   }
 
+  function syncAudioActionLabel() {
+    const button = document.querySelector('.fx-three-sound');
+    const label = button?.querySelector('span');
+    if (!button || !label) return;
+
+    const state = button.dataset.fxAudioState || root.dataset.fxAudioState || 'off';
+    const english = root.lang === 'en';
+    let nextLabel;
+    let nextAria;
+
+    if (state === 'pending') {
+      nextLabel = english ? 'STARTING…' : 'INDÍTÁS…';
+      nextAria = english ? 'Starting the cinematic score' : 'Filmes zene indítása';
+    } else if (state === 'blocked') {
+      nextLabel = english ? 'TAP AGAIN' : 'KOPPINTS ÚJRA';
+      nextAria = english ? 'Tap again to enable the cinematic score' : 'Koppints újra a filmes zene bekapcsolásához';
+    } else if (state === 'on') {
+      nextLabel = english ? 'MUSIC OFF' : 'ZENE KI';
+      nextAria = english ? 'Disable the cinematic score' : 'Filmes zene kikapcsolása';
+    } else {
+      nextLabel = english ? 'MUSIC ON' : 'ZENE BE';
+      nextAria = english ? 'Enable the cinematic score' : 'Filmes zene bekapcsolása';
+    }
+
+    if (label.textContent !== nextLabel) label.textContent = nextLabel;
+    if (button.getAttribute('aria-label') !== nextAria) button.setAttribute('aria-label', nextAria);
+  }
+
+  const audioLabelObserver = new MutationObserver(syncAudioActionLabel);
+  audioLabelObserver.observe(root, {
+    attributes: true,
+    attributeFilter: ['data-fx-audio-state', 'data-fx-audio-level', 'lang'],
+    childList: true,
+    subtree: true
+  });
+
   addEventListener('scroll', transferAtBoundary, { capture: true, passive: true });
   addEventListener('resize', transferAtBoundary, { capture: true, passive: true });
-  addEventListener('pageshow', transferAtBoundary, { passive: true });
-  addEventListener('pagehide', () => cancelAnimationFrame(settleFrame), { once: true });
+  addEventListener('pageshow', () => {
+    transferAtBoundary();
+    syncAudioActionLabel();
+  }, { passive: true });
+  addEventListener('formatx:languagechange', syncAudioActionLabel);
+  document.addEventListener('click', event => {
+    if (event.target instanceof Element && event.target.closest('.fx-three-sound')) {
+      queueMicrotask(syncAudioActionLabel);
+    }
+  }, true);
+
+  syncAudioActionLabel();
+
+  addEventListener('pagehide', () => {
+    cancelAnimationFrame(settleFrame);
+    audioLabelObserver.disconnect();
+  }, { once: true });
 }());
