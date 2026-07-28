@@ -1,4 +1,4 @@
-# Trigger revision 4
+# Trigger revision 5
 name: Apply FormatX Design System
 
 on:
@@ -21,112 +21,49 @@ jobs:
         with:
           token: ${{ github.token }}
 
-      - name: Apply Design System 2.0 bindings
+      - name: Make intro skip authoritative
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
 
-          VERSION = '20260728-ds2'
-
-          def replace_once(path, old, new):
-              file = Path(path)
-              text = file.read_text(encoding='utf-8')
-              if new in text:
-                  return False
+          path = Path('docs/scifi-ui/scripts/formatx-event-horizon.js')
+          text = path.read_text(encoding='utf-8')
+          old = """  async function finishIntro(overlay, token, skipped) {
+    if (token !== runToken || finishing) return;
+    finishing = true;
+"""
+          new = """  async function finishIntro(overlay, token, skipped) {
+    if (token !== runToken) return;
+    if (skipped && finishing) {
+      completeImmediately(overlay);
+      return;
+    }
+    if (finishing) return;
+    finishing = true;
+"""
+          if new not in text:
               if old not in text:
-                  return False
-              file.write_text(text.replace(old, new, 1), encoding='utf-8')
-              return True
-
-          changed = False
-
-          changed |= replace_once(
-              'docs/scifi-ui/index.html',
-              '<html lang="hu" data-theme="dark" class="fx-intro-pending">',
-              '<html lang="hu" data-theme="dark" data-fx-design-system="2" class="fx-intro-pending">'
-          )
-          changed |= replace_once(
-              'docs/scifi-ui/index.html',
-              '<meta name="theme-color" content="#05070a">',
-              '<meta name="theme-color" content="#01040b">'
-          )
-          changed |= replace_once(
-              'docs/scifi-ui/index.html',
-              '  <link rel="stylesheet" data-fx-category-style="true" href="./styles/formatx-category-positioning.css?v=20260728-category-v1">',
-              '  <link rel="stylesheet" data-fx-category-style="true" href="./styles/formatx-category-positioning.css?v=20260728-category-v1">\n  <link rel="stylesheet" data-fx-design-system="true" href="./styles/formatx-design-system.css?v=' + VERSION + '">'
-          )
-
-          changed |= replace_once(
-              'docs/scifi-ui/checkout.html',
-              '<html lang="hu" data-theme="dark">',
-              '<html lang="hu" data-theme="dark" data-fx-design-system="2">'
-          )
-          changed |= replace_once(
-              'docs/scifi-ui/checkout.html',
-              '<meta name="theme-color" content="#050a10">',
-              '<meta name="theme-color" content="#01040b">'
-          )
-          changed |= replace_once(
-              'docs/scifi-ui/checkout.html',
-              '  <link rel="stylesheet" href="./styles/pricing-v100.css?v=20260725-separate-qr-row-5">',
-              '  <link rel="stylesheet" href="./styles/pricing-v100.css?v=20260725-separate-qr-row-5">\n  <link rel="stylesheet" data-fx-design-system="true" href="./styles/formatx-design-system.css?v=' + VERSION + '">'
-          )
-          changed |= replace_once(
-              'docs/scifi-ui/checkout.html',
-              '<span><strong>FormatX Suite Pro</strong><small>HUF / EUR banki átutalás</small></span>',
-              '<span><strong>FORMATX</strong><small>SECURE COMMERCE</small></span>'
-          )
-
-          changed |= replace_once(
-              'docs/scifi-ui/project-simulator.html',
-              '<html lang="hu" data-simulator-state="idle">',
-              '<html lang="hu" data-simulator-state="idle" data-fx-design-system="2">'
-          )
-          changed |= replace_once(
-              'docs/scifi-ui/project-simulator.html',
-              '<meta name="theme-color" content="#071014">',
-              '<meta name="theme-color" content="#01040b">'
-          )
-          changed |= replace_once(
-              'docs/scifi-ui/project-simulator.html',
-              '  <link rel="stylesheet" href="./styles/project-simulator.css?v=20260728-operational-twin-1">',
-              '  <link rel="stylesheet" href="./styles/project-simulator.css?v=20260728-operational-twin-1">\n  <link rel="stylesheet" data-fx-design-system="true" href="./styles/formatx-design-system.css?v=' + VERSION + '">'
-          )
-
-          changed |= replace_once(
-              'docs/scifi-ui/styles/formatx-design-system.css',
-              '  min-width: 38px;\n  min-height: 32px;',
-              '  min-width: 40px;\n  min-height: 40px;'
-          )
-
-          css_path = Path('docs/scifi-ui/styles/formatx-design-system.css')
-          css = css_path.read_text(encoding='utf-8')
-          marker = '/* DS2 mobile containment v1 */'
-          if marker not in css:
-              css += '''\n\n/* DS2 mobile containment v1 */\n@media (max-width: 720px) {\n  html[data-fx-design-system="2"],\n  html[data-fx-design-system="2"] body,\n  html[data-fx-design-system="2"] main {\n    width: 100%;\n    max-width: 100%;\n    overflow-x: hidden;\n  }\n\n  html[data-fx-design-system="2"] :where(.scene, .hero, .hero-grid, .hero-copy, .hero-actions) {\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  html[data-fx-design-system="2"] .hero h1 {\n    width: 100%;\n    min-width: 0;\n    max-width: 100%;\n  }\n\n  html[data-fx-design-system="2"] .hero-title-main {\n    max-width: 100%;\n    font-size: clamp(54px, 17vw, 78px);\n    letter-spacing: -.08em;\n  }\n\n  html[data-fx-design-system="2"] .hero-actions {\n    width: 100%;\n    grid-template-columns: minmax(0, 1fr);\n  }\n\n  html[data-fx-design-system="2"] .hero-actions .button {\n    width: 100%;\n    min-width: 0;\n    max-width: 100%;\n    padding-inline: 14px;\n    white-space: normal;\n    text-align: center;\n    overflow-wrap: anywhere;\n  }\n\n  html[data-fx-design-system="2"] :where(.fx-category-deck, .fx-origin-proof) {\n    width: calc(100% - 24px);\n    max-width: calc(100% - 24px);\n  }\n}\n'''
-              css_path.write_text(css, encoding='utf-8')
-              changed = True
-
-          for path in ('docs/scifi-ui/index.html', 'docs/scifi-ui/checkout.html', 'docs/scifi-ui/project-simulator.html'):
-              text = Path(path).read_text(encoding='utf-8')
-              assert 'data-fx-design-system="2"' in text, path
-              assert f'formatx-design-system.css?v={VERSION}' in text, path
-
-          print('changed=' + str(changed).lower())
+                  raise SystemExit('Expected finishIntro source block not found')
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+              print('changed=true')
+          else:
+              print('changed=false')
           PY
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'if (skipped && finishing)' docs/scifi-ui/scripts/formatx-event-horizon.js
 
-      - name: Commit unified surfaces
+      - name: Commit intro reliability fix
         shell: bash
         run: |
           set -euo pipefail
           if git diff --quiet; then
-            echo 'Design System bindings already applied.'
+            echo 'Intro fix already applied.'
             exit 0
           fi
           git config user.name 'FormatX Design System Bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add docs/scifi-ui/index.html docs/scifi-ui/checkout.html docs/scifi-ui/project-simulator.html docs/scifi-ui/styles/formatx-design-system.css
-          git commit -m 'Increase FormatX unified language control targets'
+          git add docs/scifi-ui/scripts/formatx-event-horizon.js
+          git commit -m 'Make intro skip authoritative during transition'
           git push origin HEAD:master
