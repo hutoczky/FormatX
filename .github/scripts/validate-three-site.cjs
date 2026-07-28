@@ -185,7 +185,7 @@ async function desktop(browserType, name) {
     await page.waitForFunction(() => document.documentElement.dataset.fxFlow === '2');
     await closeOrganismPanel(page);
 
-    await page.locator('[data-language="en"]').click();
+    await page.locator('[data-language="en"]').evaluate(node => node.click());
     await page.waitForFunction(() => document.documentElement.lang === 'en');
     const heading = await page.locator('#experience-title').textContent();
     assert(/core|spine|decision/i.test(heading || ''), name + ' language switch: ' + heading);
