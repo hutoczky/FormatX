@@ -66,7 +66,8 @@ jobs:
           grep -Fq "formatx-category-positioning.css?v=20260728-category-v1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq "project-simulator-entry.js?v=20260728-operational-twin-1" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq "operational-twin-v1" docs/scifi-ui/scripts/project-simulator.js
-          grep -Fq "SIMULATION ENVIRONMENT / NO REAL DEVICE ACCESS" docs/scifi-ui/project-simulator.html
+          grep -Fq "SZIMULÁCIÓS KÖRNYEZET / NINCS VALÓDI ESZKÖZHOZZÁFÉRÉS" docs/scifi-ui/project-simulator.html
+          grep -Fq "SIMULATION ENVIRONMENT / NO REAL DEVICE ACCESS" docs/scifi-ui/scripts/project-simulator.js
           grep -Fq "fail-closed" docs/scifi-ui/scripts/project-simulator.js
           ! grep -Fq "new MutationObserver" docs/scifi-ui/scripts/checkout-language-v100.js
 
