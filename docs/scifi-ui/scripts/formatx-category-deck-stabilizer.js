@@ -5,8 +5,26 @@
   if (root.dataset.fxCategoryDeckStabilizer === 'v1') return;
   root.dataset.fxCategoryDeckStabilizer = 'v1';
 
+  const NAVIGATION = {
+    hu: ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
+    en: ['How it works', 'Modules', 'Licences', 'Proof', 'Download']
+  };
+
   let retryTimer = 0;
   let attempts = 0;
+
+  function language() {
+    return root.lang === 'en' ? 'en' : 'hu';
+  }
+
+  function syncNavigation() {
+    document.querySelectorAll('.main-nav a').forEach((anchor, index) => {
+      if (!NAVIGATION.hu[index] || !NAVIGATION.en[index]) return;
+      anchor.dataset.hu = NAVIGATION.hu[index];
+      anchor.dataset.en = NAVIGATION.en[index];
+      anchor.textContent = NAVIGATION[language()][index];
+    });
+  }
 
   function createDeck() {
     document.querySelectorAll('#hero .fx-category-deck').forEach(deck => deck.remove());
@@ -29,8 +47,9 @@
   function announceReady() {
     root.dataset.fxCategoryDeckState = 'ready';
     root.dataset.fxCategoryLayer = 'ready';
+    syncNavigation();
     dispatchEvent(new CustomEvent('formatx:languagechange', {
-      detail: { language: root.lang === 'en' ? 'en' : 'hu', source: 'category-deck-stabilizer' }
+      detail: { language: language(), source: 'category-deck-stabilizer' }
     }));
   }
 
@@ -71,6 +90,7 @@
   ['DOMContentLoaded', 'pageshow', 'formatx:livingready', 'formatx:threeready', 'formatx:loop'].forEach(name => {
     addEventListener(name, ensure);
   });
+  addEventListener('formatx:languagechange', () => queueMicrotask(syncNavigation));
 
   addEventListener('pagehide', () => {
     clearInterval(retryTimer);
