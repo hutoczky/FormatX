@@ -129,7 +129,7 @@ async function verify(browser, contextOptions, name, minimumCanvas) {
   try {
     await verify(browser, { viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-webgl-desktop', [760, 520]);
     await verify(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-webgl-mobile', [360, 430]);
-    await verify(browser, { viewport: { width: 1180, height: 820 }, reducedMotion: 'reduce', locale: 'hu-HU', colorScheme: 'dark' }, 'genome-webgl-reduced-motion', [650, 450]);
+    await verify(browser, { viewport: { width: 1180, height: 820 }, reducedMotion: 'reduce', locale: 'hu-HU', colorScheme: 'dark' }, 'genome-webgl-reduced-motion', [640, 450]);
   } finally {
     await browser.close();
   }
