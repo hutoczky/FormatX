@@ -23,42 +23,50 @@
     return deck;
   }
 
+  function announceReady() {
+    root.dataset.fxCategoryDeckState = 'ready';
+    dispatchEvent(new CustomEvent('formatx:languagechange', {
+      detail: { language: root.lang === 'en' ? 'en' : 'hu', source: 'category-deck-stabilizer' }
+    }));
+  }
+
   function ensure() {
     const deck = createDeck();
     if (deck) {
-      root.dataset.fxCategoryDeckState = 'ready';
+      announceReady();
       clearInterval(retryTimer);
       retryTimer = 0;
-      dispatchEvent(new CustomEvent('formatx:languagechange', {
-        detail: { language: root.lang === 'en' ? 'en' : 'hu', source: 'category-deck-stabilizer' }
-      }));
+      attempts = 0;
       return;
     }
 
     if (!retryTimer) {
+      attempts = 0;
       retryTimer = window.setInterval(() => {
         attempts += 1;
         const result = createDeck();
         if (result || attempts >= 80) {
           clearInterval(retryTimer);
           retryTimer = 0;
-          if (result) {
-            root.dataset.fxCategoryDeckState = 'ready';
-            dispatchEvent(new CustomEvent('formatx:languagechange', {
-              detail: { language: root.lang === 'en' ? 'en' : 'hu', source: 'category-deck-stabilizer' }
-            }));
-          } else {
-            root.dataset.fxCategoryDeckState = 'missing-target';
-          }
+          if (result) announceReady();
+          else root.dataset.fxCategoryDeckState = 'missing-target';
         }
       }, 250);
     }
   }
+
+  const structureObserver = new MutationObserver(() => {
+    if (!document.querySelector('.fx-category-deck')) queueMicrotask(ensure);
+  });
+  structureObserver.observe(root, { childList: true, subtree: true });
 
   ensure();
   ['DOMContentLoaded', 'pageshow', 'formatx:livingready', 'formatx:threeready', 'formatx:loop'].forEach(name => {
     addEventListener(name, ensure);
   });
 
-  addEventListener('pagehide', () => clearInterval(retryTimer), { once: true });
+  addEventListener('pagehide', () => {
+    clearInterval(retryTimer);
+    structureObserver.disconnect();
+  }, { once: true });
 }());
