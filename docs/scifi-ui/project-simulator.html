@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="hu" data-simulator-state="idle">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="FormatX Operational Twin — biztonságos projekt-szimulátor az éles technikusi munkafolyamat kipróbálásához valódi meghajtó-hozzáférés nélkül.">
+  <meta name="theme-color" content="#071014">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self';base-uri 'self';object-src 'none';script-src 'self';style-src 'self';img-src 'self' data:;connect-src 'none';form-action 'none'">
+  <title>FormatX Operational Twin | Projekt szimulátor</title>
+  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="./styles/project-simulator.css?v=20260728-operational-twin-1">
+  <script defer src="./scripts/project-simulator.js?v=20260728-operational-twin-1"></script>
+</head>
+<body>
+  <a class="skip-link" href="#simulator" data-i18n="skip">Ugrás a szimulátorhoz</a>
+
+  <div class="twin-atmosphere" aria-hidden="true">
+    <span class="twin-grid"></span>
+    <span class="twin-noise"></span>
+    <span class="twin-beam twin-beam-a"></span>
+    <span class="twin-beam twin-beam-b"></span>
+  </div>
+
+  <header class="sim-header">
+    <a class="sim-brand" href="./index.html" aria-label="FormatX Suite Pro">
+      <img src="./assets/images/formatx-icon.png" width="42" height="42" alt="">
+      <span><strong>FORMATX</strong><small>OPERATIONAL TWIN</small></span>
+    </a>
+    <div class="sim-header-status" aria-live="polite">
+      <i></i><span data-i18n="headerStatus">SZIMULÁCIÓS KÖRNYEZET / NINCS VALÓDI ESZKÖZHOZZÁFÉRÉS</span>
+    </div>
+    <div class="sim-header-actions">
+      <div class="language-control" role="group" aria-label="Nyelv / Language">
+        <button type="button" data-language="hu" aria-pressed="true">HU</button>
+        <button type="button" data-language="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="header-link" href="./index.html" data-i18n="back">Vissza a főoldalra</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="sim-hero" aria-labelledby="sim-title">
+      <div class="sim-hero-copy">
+        <p class="sim-eyebrow"><span></span> FORMATX / OPERATIONAL TWIN</p>
+        <h1 id="sim-title" data-i18n="heroTitle">Teszteld a projektet, mielőtt éles környezetbe kerül.</h1>
+        <p data-i18n="heroLead">A szimulátor ugyanazt a döntési és biztonsági logikát modellezi, amelyet a FormatX éles technikusi munkafolyamata használna. Válassz projektet, platformot és céleszközt, majd nézd végig a felmérést, a tervet, a biztonsági reteszt, a végrehajtást és az ellenőrzést.</p>
+        <div class="sim-hero-badges">
+          <span><b>04</b><small data-i18n="badgeScenarios">éles munkatípus</small></span>
+          <span><b>03</b><small data-i18n="badgePlatforms">platformprofil</small></span>
+          <span><b>00</b><small data-i18n="badgeHardware">valódi hardverművelet</small></span>
+        </div>
+      </div>
+      <aside class="sim-hero-manifest" aria-label="Szimulátor képességei">
+        <span class="manifest-index">TWIN / 01</span>
+        <strong data-i18n="manifestTitle">Éles működés — biztonságos digitális másolatban</strong>
+        <ul>
+          <li data-i18n="manifestOne">Valós munkafolyamat-logika</li>
+          <li data-i18n="manifestTwo">Kockázat és célazonosítás</li>
+          <li data-i18n="manifestThree">Hibainjektálás és fail-closed leállás</li>
+          <li data-i18n="manifestFour">Exportálható végrehajtási jelentés</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section id="simulator" class="simulator-shell" aria-labelledby="workspace-title">
+      <header class="workspace-header">
+        <div>
+          <p class="sim-eyebrow">02 / LIVE PROJECT MODEL</p>
+          <h2 id="workspace-title" data-i18n="workspaceTitle">Éles projekt digitális ikerpárja</h2>
+        </div>
+        <div class="workspace-state">
+          <span data-i18n="workspaceMode">MÓD</span>
+          <strong id="workspace-state-label">KÉSZENLÉT</strong>
+          <i aria-hidden="true"></i>
+        </div>
+      </header>
+
+      <div class="simulator-grid">
+        <aside class="configuration-panel" aria-labelledby="configuration-title">
+          <header class="panel-heading">
+            <span>01</span>
+            <div><small data-i18n="configurationEyebrow">PROJEKTKONFIGURÁCIÓ</small><h3 id="configuration-title" data-i18n="configurationTitle">Mit szeretnél kipróbálni?</h3></div>
+          </header>
+
+          <fieldset class="scenario-selector">
+            <legend data-i18n="scenarioLegend">Munkatípus</legend>
+            <button type="button" class="scenario-card active" data-scenario="iso_usb" aria-pressed="true">
+              <span>01</span><div><strong>ISO → USB</strong><small data-i18n="scenarioIso">Telepítő adathordozó előkészítése és visszaellenőrzése</small></div><i>↧</i>
+            </button>
+            <button type="button" class="scenario-card" data-scenario="diagnostics" aria-pressed="false">
+              <span>02</span><div><strong>SMART / HEALTH</strong><small data-i18n="scenarioDiagnostics">Meghajtóállapot, hőmérséklet és hibakockázat elemzése</small></div><i>◉</i>
+            </button>
+            <button type="button" class="scenario-card" data-scenario="partition" aria-pressed="false">
+              <span>03</span><div><strong>PARTITION PLAN</strong><small data-i18n="scenarioPartition">Partíciós terv előnézettel és célzárral</small></div><i>▦</i>
+            </button>
+            <button type="button" class="scenario-card" data-scenario="secure_erase" aria-pressed="false">
+              <span>04</span><div><strong>SECURE ERASE</strong><small data-i18n="scenarioErase">Többlépcsős célmeghajtó-védelem és törlési szimuláció</small></div><i>⌫</i>
+            </button>
+          </fieldset>
+
+          <fieldset class="platform-selector">
+            <legend data-i18n="platformLegend">Platformprofil</legend>
+            <div class="segmented-control">
+              <button type="button" data-platform="bazzite" aria-pressed="true">BAZZITE</button>
+              <button type="button" data-platform="windows" aria-pressed="false">WINDOWS</button>
+              <button type="button" data-platform="macos" aria-pressed="false">macOS</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="target-selector">
+            <legend data-i18n="targetLegend">Szimulált céleszköz</legend>
+            <div id="target-list" class="target-list"></div>
+          </fieldset>
+        </aside>
+
+        <section class="twin-stage" aria-labelledby="twin-stage-title">
+          <header class="panel-heading stage-heading">
+            <span>02</span>
+            <div><small data-i18n="twinEyebrow">DIGITÁLIS IKERPÁR</small><h3 id="twin-stage-title" data-i18n="twinTitle">A projekt állapota valós időben</h3></div>
+            <div class="stage-clock"><small>SIM TIME</small><strong id="sim-clock">00:00.000</strong></div>
+          </header>
+
+          <div class="operational-twin" aria-live="polite">
+            <div class="twin-orbit orbit-a" aria-hidden="true"></div>
+            <div class="twin-orbit orbit-b" aria-hidden="true"></div>
+            <div class="twin-core" aria-hidden="true">
+              <span></span><i></i><b>FX</b>
+            </div>
+
+            <div class="workflow-path" role="list" aria-label="Szimulációs munkafolyamat">
+              <article class="workflow-node active" data-step="discover" role="listitem">
+                <span>01</span><i></i><div><strong data-i18n="stepDiscover">FELDERÍTÉS</strong><small>ENV / READ</small></div>
+              </article>
+              <article class="workflow-node" data-step="plan" role="listitem">
+                <span>02</span><i></i><div><strong data-i18n="stepPlan">TERV</strong><small>MODEL / PREVIEW</small></div>
+              </article>
+              <article class="workflow-node" data-step="lock" role="listitem">
+                <span>03</span><i></i><div><strong data-i18n="stepLock">CÉLZÁR</strong><small>IDENTIFY / CONFIRM</small></div>
+              </article>
+              <article class="workflow-node" data-step="execute" role="listitem">
+                <span>04</span><i></i><div><strong data-i18n="stepExecute">VÉGREHAJTÁS</strong><small>CONTROL / APPLY</small></div>
+              </article>
+              <article class="workflow-node" data-step="verify" role="listitem">
+                <span>05</span><i></i><div><strong data-i18n="stepVerify">ELLENŐRZÉS</strong><small>HASH / REPORT</small></div>
+              </article>
+            </div>
+
+            <div class="telemetry-card telemetry-source">
+              <small data-i18n="telemetrySource">FORRÁS</small>
+              <strong id="telemetry-source">FormatX-Rescue.iso</strong>
+              <span id="telemetry-source-meta">6.8 GB · SHA-256 READY</span>
+            </div>
+            <div class="telemetry-card telemetry-target">
+              <small data-i18n="telemetryTarget">CÉL</small>
+              <strong id="telemetry-target">USB 3.2 / 64 GB</strong>
+              <span id="telemetry-target-meta">EXFAT · REMOVABLE · 38 °C</span>
+            </div>
+            <div class="telemetry-card telemetry-result">
+              <small data-i18n="telemetryResult">VÁRHATÓ EREDMÉNY</small>
+              <strong id="telemetry-result">BOOTABLE MEDIA</strong>
+              <span id="telemetry-result-meta">GPT · UEFI · VERIFIED</span>
+            </div>
+          </div>
+
+          <div class="simulation-progress">
+            <div class="progress-meta"><span id="progress-label">READY / SELECT CONFIGURATION</span><strong id="progress-value">0%</strong></div>
+            <div class="progress-track"><i id="progress-bar"></i></div>
+          </div>
+        </section>
+
+        <aside class="inspector-panel" aria-labelledby="inspector-title">
+          <header class="panel-heading">
+            <span>03</span>
+            <div><small data-i18n="inspectorEyebrow">ÉLES ELŐNÉZET</small><h3 id="inspector-title" data-i18n="inspectorTitle">Mi történne valódi környezetben?</h3></div>
+          </header>
+
+          <dl class="project-facts">
+            <div><dt data-i18n="factProject">Projekt</dt><dd id="fact-project">ISO → USB</dd></div>
+            <div><dt data-i18n="factPlatform">Platform</dt><dd id="fact-platform">Bazzite / Linux</dd></div>
+            <div><dt data-i18n="factTarget">Céleszköz</dt><dd id="fact-target">USB 3.2 / 64 GB</dd></div>
+            <div><dt data-i18n="factDuration">Becsült idő</dt><dd id="fact-duration">08–12 perc</dd></div>
+          </dl>
+
+          <section class="risk-module" aria-labelledby="risk-title">
+            <div class="risk-heading"><span data-i18n="riskLabel">KOCKÁZATI PROFIL</span><strong id="risk-title">KÖZEPES</strong></div>
+            <div class="risk-scale" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <p id="risk-description">A céleszköz tartalma felülíródna. Éles módban kötelező lenne a célazonosítás és a megerősítés.</p>
+          </section>
+
+          <label class="safety-toggle">
+            <input id="safety-gate" type="checkbox" checked>
+            <span><strong data-i18n="safetyTitle">Biztonsági retesz aktív</strong><small data-i18n="safetyCopy">Eltérés vagy bizonytalan cél esetén a folyamat fail-closed módon leáll.</small></span>
+          </label>
+
+          <label class="fault-toggle">
+            <input id="fault-injection" type="checkbox">
+            <span><strong data-i18n="faultTitle">Hibainjektálás</strong><small data-i18n="faultCopy">Szimulálj célazonosítási vagy integritási hibát a védelmi reakció teszteléséhez.</small></span>
+          </label>
+
+          <div class="sim-actions">
+            <button id="run-simulation" class="action-primary" type="button"><span data-i18n="run">Szimuláció indítása</span><i>→</i></button>
+            <button id="reset-simulation" class="action-secondary" type="button" data-i18n="reset">Alaphelyzet</button>
+            <button id="export-report" class="action-secondary" type="button" disabled data-i18n="export">Jelentés exportálása</button>
+          </div>
+
+          <p class="simulation-disclaimer" data-i18n="disclaimer">A szimulátor nem olvas, nem formáz és nem töröl valódi meghajtót. Az eredmények bemutató és munkafolyamat-tervezési célúak.</p>
+        </aside>
+      </div>
+
+      <section class="operations-console" aria-labelledby="console-title">
+        <header>
+          <div><p class="sim-eyebrow">03 / AUDIT STREAM</p><h3 id="console-title" data-i18n="consoleTitle">Élő végrehajtási napló</h3></div>
+          <span id="console-status">IDLE</span>
+        </header>
+        <div id="event-log" class="event-log" role="log" aria-live="polite" aria-relevant="additions">
+          <p><time>00:00.000</time><b>READY</b><span data-i18n="logReady">Válassz projektet és indítsd el a digitális ikerpárt.</span></p>
+        </div>
+      </section>
+    </section>
+
+    <section class="live-meaning" aria-labelledby="live-meaning-title">
+      <div>
+        <p class="sim-eyebrow">04 / PRODUCTION MEANING</p>
+        <h2 id="live-meaning-title" data-i18n="liveTitle">Mit mutat meg ez az éles termékről?</h2>
+      </div>
+      <div class="live-meaning-grid">
+        <article><span>01</span><h3 data-i18n="meaningOneTitle">Nem vakon hajt végre</h3><p data-i18n="meaningOneCopy">A FormatX előbb feltérképezi a környezetet, majd egyértelmű tervet és célazonosítást mutat.</p></article>
+        <article><span>02</span><h3 data-i18n="meaningTwoTitle">A hiba is tervezett állapot</h3><p data-i18n="meaningTwoCopy">Az eltérés nem rejtett összeomlás: a rendszer leáll, megnevezi az okot és megőrzi az auditnyomot.</p></article>
+        <article><span>03</span><h3 data-i18n="meaningThreeTitle">Minden eredmény ellenőrizhető</h3><p data-i18n="meaningThreeCopy">A végrehajtás végén állapot, integritás és dokumentálható eredmény tartozik a projekthez.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="sim-footer">
+    <a class="sim-brand" href="./index.html"><img src="./assets/images/formatx-icon.png" width="34" height="34" alt=""><span><strong>FORMATX</strong><small>OPERATIONAL TWIN</small></span></a>
+    <p data-i18n="footer">Biztonságos digitális ikerpár a FormatX technikusi munkafolyamatainak éles előnézetéhez.</p>
+    <a href="#simulator" data-i18n="footerBack">Vissza a szimulátorhoz ↑</a>
+  </footer>
+</body>
+</html>
