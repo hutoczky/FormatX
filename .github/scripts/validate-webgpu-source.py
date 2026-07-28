@@ -90,7 +90,8 @@ tokens("frame bootstrap", bootstrap, (
     "THREE / FRAME ERROR",
     "formatx:threeready",
 ))
-tokens("Three stage", stage, ("experience-entry.js", "20260727-webgpu-1"))
+require("Three stage: module entry", 'type="module"' in stage)
+require("Three stage: versioned experience entry", "experience-entry.js?v=" in stage)
 tokens("experience entry", entry, (
     "ExperienceWebGPU.js",
     "'gpu' in navigator",
