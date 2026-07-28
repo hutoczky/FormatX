@@ -1,3 +1,4 @@
+# WebGL integration revision 1
 name: Apply FormatX Interaction Genome
 
 on:
@@ -6,7 +7,9 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/interaction-genome.js'
+      - 'docs/scifi-ui/scripts/interaction-genome-webgl.js'
       - 'docs/scifi-ui/styles/interaction-genome.css'
+      - 'docs/scifi-ui/styles/interaction-genome-webgl.css'
       - '.github/workflows/apply-interaction-genome.yml'
 
 permissions:
@@ -22,37 +25,162 @@ jobs:
         with:
           token: ${{ github.token }}
 
-      - name: Bind Interaction Genome to main runtime
+      - name: Bind native WebGL2 Interaction Genome
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('docs/scifi-ui/scripts/igloo-parity.js')
-          source = path.read_text(encoding='utf-8')
-          genome = "    './scripts/interaction-genome.js?v=20260728-genome-1'"
-          if genome not in source:
-              old = "    './scripts/formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2'\n  ];"
-              new = "    './scripts/formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2',\n" + genome + "\n  ];"
-              if old not in source:
+
+          loader = Path('docs/scifi-ui/scripts/igloo-parity.js')
+          source = loader.read_text(encoding='utf-8')
+          old_genome = "    './scripts/interaction-genome.js?v=20260728-genome-1'"
+          webgl_pair = "    './scripts/interaction-genome-webgl.js?v=20260728-genome-webgl-1',\n    './scripts/interaction-genome.js?v=20260728-genome-3d-1'"
+          if old_genome in source:
+              source = source.replace(old_genome, webgl_pair, 1)
+          elif 'interaction-genome-webgl.js?v=20260728-genome-webgl-1' not in source:
+              anchor = "    './scripts/formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2'\n  ];"
+              replacement = "    './scripts/formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2',\n" + webgl_pair + "\n  ];"
+              if anchor not in source:
                   raise SystemExit('Runtime queue anchor missing')
-              source = source.replace(old, new, 1)
-              path.write_text(source, encoding='utf-8')
+              source = source.replace(anchor, replacement, 1)
+          loader.write_text(source, encoding='utf-8')
+
+          genome = Path('docs/scifi-ui/scripts/interaction-genome.js')
+          code = genome.read_text(encoding='utf-8')
+          if 'renderer3D: null' not in code:
+              code = code.replace("    notice: ''\n  };", "    notice: '',\n    renderer3D: null\n  };", 1)
+
+          anchor = "    });\n\n    bindUi();\n    translate();\n    resizeCanvas();"
+          setup = """    });
+
+    const stage = elements.canvas.closest('.fx-genome-stage');
+    try {
+      state.renderer3D = window.FormatXGenomeRenderer3D?.create(elements.canvas, {
+        reducedMotion,
+        onSelect: index => select(index)
+      }) || null;
+    } catch (error) {
+      console.warn('FormatX Interaction Genome WebGL fallback:', error);
+      state.renderer3D = null;
+    }
+    if (stage) {
+      stage.dataset.renderer = state.renderer3D ? 'webgl2-pbr' : 'canvas2d-fallback';
+      if (state.renderer3D) {
+        const badge = document.createElement('span');
+        badge.className = 'fx-genome-renderer-badge';
+        badge.textContent = 'NATIVE WEBGL2 / DEPTH / PBR NODES';
+        const scale = document.createElement('i');
+        scale.className = 'fx-genome-depth-scale';
+        scale.setAttribute('aria-hidden', 'true');
+        stage.append(badge, scale);
+      }
+    }
+    root.dataset.fxInteractionGenomeRenderer = state.renderer3D ? 'webgl2-pbr' : 'canvas2d-fallback';
+
+    bindUi();
+    translate();
+    resizeCanvas();"""
+          if 'NATIVE WEBGL2 / DEPTH / PBR NODES' not in code:
+              if anchor not in code:
+                  raise SystemExit('Genome UI anchor missing')
+              code = code.replace(anchor, setup, 1)
+
+          start = code.index('  function resizeCanvas() {')
+          end = code.index('\n  function colorFor(', start)
+          replacement = """  function resizeCanvas() {
+    if (!elements.canvas) return;
+    if (state.renderer3D) {
+      state.renderer3D.resize();
+      state.renderer3D.setData(state.items, state.selected);
+      state.renderer3D.render(performance.now());
+      return;
+    }
+    const rect = elements.canvas.getBoundingClientRect();
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    const width = Math.max(320, Math.round(rect.width * dpr));
+    const height = Math.max(360, Math.round(rect.height * dpr));
+    if (elements.canvas.width !== width || elements.canvas.height !== height) {
+      elements.canvas.width = width; elements.canvas.height = height;
+      drawCanvas(performance.now());
+    }
+  }
+"""
+          code = code[:start] + replacement + code[end:]
+
+          draw_anchor = "  function drawCanvas(now) {\n    if (!elements.canvas) return;"
+          draw_replacement = """  function drawCanvas(now) {
+    if (!elements.canvas) return;
+    if (state.renderer3D) {
+      state.renderer3D.setData(state.items, state.selected);
+      state.renderer3D.render(now);
+      return;
+    }"""
+          if 'state.renderer3D.render(now)' not in code:
+              if draw_anchor not in code:
+                  raise SystemExit('drawCanvas anchor missing')
+              code = code.replace(draw_anchor, draw_replacement, 1)
+
+          pointer_anchor = """  function onCanvasPointer(event) {
+    const rect = elements.canvas.getBoundingClientRect();"""
+          pointer_replacement = """  function onCanvasPointer(event) {
+    const rect = elements.canvas.getBoundingClientRect();
+    if (state.renderer3D) {
+      state.renderer3D.pointerMove(event.clientX - rect.left, event.clientY - rect.top, event);
+      return;
+    }"""
+          if 'state.renderer3D.pointerMove' not in code:
+              if pointer_anchor not in code:
+                  raise SystemExit('pointer anchor missing')
+              code = code.replace(pointer_anchor, pointer_replacement, 1)
+
+          click_anchor = """  function onCanvasClick() {
+    const index = Number(elements.canvas.dataset.hoverIndex);"""
+          click_replacement = """  function onCanvasClick() {
+    if (state.renderer3D) {
+      state.renderer3D.click();
+      return;
+    }
+    const index = Number(elements.canvas.dataset.hoverIndex);"""
+          if 'state.renderer3D.click()' not in code:
+              if click_anchor not in code:
+                  raise SystemExit('click anchor missing')
+              code = code.replace(click_anchor, click_replacement, 1)
+
+          code = code.replace(
+              "elements.canvas.addEventListener('pointerleave', () => { state.pointerX = 0; state.pointerY = 0; });",
+              "elements.canvas.addEventListener('pointerleave', () => { state.pointerX = 0; state.pointerY = 0; state.renderer3D?.pointerLeave(); });",
+              1
+          )
+          code = code.replace(
+              "addEventListener('pagehide', () => { observer.disconnect(); clearTimeout(scrollTimer); }, { once: true });",
+              "addEventListener('pagehide', () => { observer.disconnect(); clearTimeout(scrollTimer); state.renderer3D?.destroy(); }, { once: true });",
+              1
+          )
+          code = code.replace(
+              "getState: () => JSON.parse(JSON.stringify({ items: state.items, selected: state.selected, fingerprint: state.fingerprint, opened: state.opened }))",
+              "getState: () => JSON.parse(JSON.stringify({ items: state.items, selected: state.selected, fingerprint: state.fingerprint, opened: state.opened, renderer: state.renderer3D?.getStatus?.() || { kind: 'canvas2d-fallback' } }))",
+              1
+          )
+          genome.write_text(code, encoding='utf-8')
           PY
-          node --check docs/scifi-ui/scripts/igloo-parity.js
+
+          node --check docs/scifi-ui/scripts/interaction-genome-webgl.js
           node --check docs/scifi-ui/scripts/interaction-genome.js
-          grep -Fq 'interaction-genome.js?v=20260728-genome-1' docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'interaction-genome-webgl.js?v=20260728-genome-webgl-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq "fxInteractionGenomeRenderer = state.renderer3D ? 'webgl2-pbr'" docs/scifi-ui/scripts/interaction-genome.js
 
       - name: Commit integration
         shell: bash
         run: |
           set -euo pipefail
           if git diff --quiet; then
-            echo 'Interaction Genome already integrated.'
+            echo 'WebGL Interaction Genome already integrated.'
             exit 0
           fi
           git config user.name 'FormatX Genome Bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add docs/scifi-ui/scripts/igloo-parity.js
-          git commit -m 'Integrate reversible Interaction Genome runtime'
+          git add docs/scifi-ui/scripts/igloo-parity.js docs/scifi-ui/scripts/interaction-genome.js
+          git commit -m 'Render Interaction Genome as native WebGL2 spatial system'
           git push origin HEAD:master
