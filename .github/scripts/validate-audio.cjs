@@ -34,6 +34,16 @@ async function clearIntro(page) {
   });
 }
 
+async function waitForStableViewport(page) {
+  await page.waitForFunction(() => {
+    const state = document.documentElement.dataset.fxThree;
+    return state === 'ready' || state === 'error';
+  }, null, { timeout: 30000 });
+  await page.evaluate(() => new Promise(resolve => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  }));
+}
+
 async function runCase(browser, name, contextOptions) {
   const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
@@ -51,6 +61,7 @@ async function runCase(browser, name, contextOptions) {
   await clearIntro(page);
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'professional-v6', null, { timeout: 15000 });
   await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 10000 });
+  await waitForStableViewport(page);
 
   const button = page.locator('.fx-three-sound');
   await button.waitFor({ state: 'visible', timeout: 10000 });
