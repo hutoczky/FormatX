@@ -1,41 +1,623 @@
-(function(){
-'use strict';
-if(window.FormatXGenomeRenderer3D)return;
-const COLORS={init:[.46,.88,1],scroll:[.36,.78,1],scene:[.66,.43,1],click:[1,.34,.72],language:[.46,.94,.72],audio:[1,.72,.28],loop:[.78,.52,1],restore:[.96,.99,1]};
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function m4(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1])}
-function mul(o,a,b){for(let c=0;c<4;c++){const i=c*4,b0=b[i],b1=b[i+1],b2=b[i+2],b3=b[i+3];o[i]=a[0]*b0+a[4]*b1+a[8]*b2+a[12]*b3;o[i+1]=a[1]*b0+a[5]*b1+a[9]*b2+a[13]*b3;o[i+2]=a[2]*b0+a[6]*b1+a[10]*b2+a[14]*b3;o[i+3]=a[3]*b0+a[7]*b1+a[11]*b2+a[15]*b3}return o}
-function perspective(o,fov,aspect,n,f){const t=1/Math.tan(fov/2);o.fill(0);o[0]=t/aspect;o[5]=t;o[10]=(f+n)/(n-f);o[11]=-1;o[14]=2*f*n/(n-f);return o}
-function lookAt(o,e,t,u){let zx=e[0]-t[0],zy=e[1]-t[1],zz=e[2]-t[2],l=Math.hypot(zx,zy,zz)||1;zx/=l;zy/=l;zz/=l;let xx=u[1]*zz-u[2]*zy,xy=u[2]*zx-u[0]*zz,xz=u[0]*zy-u[1]*zx;l=Math.hypot(xx,xy,xz)||1;xx/=l;xy/=l;xz/=l;const yx=zy*xz-zz*xy,yy=zz*xx-zx*xz,yz=zx*xy-zy*xx;o[0]=xx;o[1]=yx;o[2]=zx;o[3]=0;o[4]=xy;o[5]=yy;o[6]=zy;o[7]=0;o[8]=xz;o[9]=yz;o[10]=zz;o[11]=0;o[12]=-(xx*e[0]+xy*e[1]+xz*e[2]);o[13]=-(yx*e[0]+yy*e[1]+yz*e[2]);o[14]=-(zx*e[0]+zy*e[1]+zz*e[2]);o[15]=1;return o}
-function shader(gl,type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s)||'shader');return s}
-function program(gl,v,f){const p=gl.createProgram();gl.attachShader(p,shader(gl,gl.VERTEX_SHADER,v));gl.attachShader(p,shader(gl,gl.FRAGMENT_SHADER,f));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p)||'link');return p}
-function project(p,m,w,h){const x=p[0],y=p[1],z=p[2],cx=m[0]*x+m[4]*y+m[8]*z+m[12],cy=m[1]*x+m[5]*y+m[9]*z+m[13],cw=m[3]*x+m[7]*y+m[11]*z+m[15];if(cw<=.01)return null;return{x:(cx/cw*.5+.5)*w,y:(1-(cy/cw*.5+.5))*h,d:cw}}
-function loadStyle(){if(document.querySelector('link[data-fx-genome-webgl-style]'))return;const l=document.createElement('link');l.rel='stylesheet';l.href='./styles/interaction-genome-webgl.css?v=20260728-genome-webgl-1';l.dataset.fxGenomeWebglStyle='true';document.head.appendChild(l)}
-function create(canvas,opt){const gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:true,powerPreference:'high-performance'});if(!gl)return null;
-const nodeP=program(gl,`#version 300 es
-layout(location=0)in vec3 p;layout(location=1)in vec3 c;layout(location=2)in float s;layout(location=3)in float sel;uniform mat4 vp;uniform float dpr;out vec3 C;out float S;void main(){vec4 q=vp*vec4(p,1);gl_Position=q;gl_PointSize=s*dpr*clamp(9.0/q.w,.58,2.3);C=c;S=sel;}`,`#version 300 es
-precision highp float;in vec3 C;in float S;out vec4 O;void main(){vec2 q=gl_PointCoord*2.-1.;float r=dot(q,q);if(r>1.)discard;float z=sqrt(max(0.,1.-r));vec3 n=normalize(vec3(q,z));vec3 l=normalize(vec3(-.35,.65,.7));float dif=.16+max(dot(n,l),0.)*.74;float spec=pow(max(dot(reflect(-l,n),vec3(0,0,1)),0.),48.);float rim=pow(1.-z,3.);vec3 col=C*dif+vec3(.85,.95,1.)*spec*.72+mix(C,vec3(.7,.92,1.),.55)*rim*(.45+S*.8);float a=smoothstep(1.,.72,r)*(.82+S*.18);O=vec4(col,a);}`);
-const lineP=program(gl,`#version 300 es
-layout(location=0)in vec3 p;layout(location=1)in vec3 c;uniform mat4 vp;out vec3 C;void main(){gl_Position=vp*vec4(p,1);C=c;}`,`#version 300 es
-precision highp float;in vec3 C;uniform float alpha;out vec4 O;void main(){O=vec4(C,alpha);}`);
-const particleP=program(gl,`#version 300 es
-layout(location=0)in vec4 a;uniform mat4 vp;uniform float time;uniform float dpr;out float A;void main(){vec3 p=a.xyz;p.y=mod(p.y+time*(.08+fract(a.w*7.)*.12)+5.,10.)-5.;p.x+=sin(time*.23+a.w*19.+p.y)*.16;p.z+=cos(time*.19+a.w*13.+p.y)*.16;vec4 q=vp*vec4(p,1);gl_Position=q;gl_PointSize=(1.8+fract(a.w*17.)*3.)*dpr*clamp(8./q.w,.5,2.);A=.15+fract(a.w*5.)*.4;}`,`#version 300 es
-precision mediump float;in float A;out vec4 O;void main(){vec2 q=gl_PointCoord*2.-1.;float r=dot(q,q);if(r>1.)discard;O=vec4(.42,.86,1.,pow(1.-r,2.)*A);}`);
-const nodeV=gl.createVertexArray(),nodeB=gl.createBuffer();gl.bindVertexArray(nodeV);gl.bindBuffer(gl.ARRAY_BUFFER,nodeB);for(let i=0;i<4;i++)gl.enableVertexAttribArray(i);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);gl.vertexAttribPointer(1,3,gl.FLOAT,false,32,12);gl.vertexAttribPointer(2,1,gl.FLOAT,false,32,24);gl.vertexAttribPointer(3,1,gl.FLOAT,false,32,28);
-const lineV=gl.createVertexArray(),lineB=gl.createBuffer();gl.bindVertexArray(lineV);gl.bindBuffer(gl.ARRAY_BUFFER,lineB);gl.enableVertexAttribArray(0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
-let seed=0x51a27,particles=new Float32Array(420*4);const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};for(let i=0;i<420;i++){const a=rnd()*Math.PI*2,r=2.4+rnd()*4;particles[i*4]=Math.cos(a)*r;particles[i*4+1]=rnd()*10-5;particles[i*4+2]=Math.sin(a)*r;particles[i*4+3]=rnd()}
-const partV=gl.createVertexArray(),partB=gl.createBuffer();gl.bindVertexArray(partV);gl.bindBuffer(gl.ARRAY_BUFFER,partB);gl.bufferData(gl.ARRAY_BUFFER,particles,gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,4,gl.FLOAT,false,16,0);gl.bindVertexArray(null);
-const U={node:{vp:gl.getUniformLocation(nodeP,'vp'),dpr:gl.getUniformLocation(nodeP,'dpr')},line:{vp:gl.getUniformLocation(lineP,'vp'),alpha:gl.getUniformLocation(lineP,'alpha')},part:{vp:gl.getUniformLocation(particleP,'vp'),time:gl.getUniformLocation(particleP,'time'),dpr:gl.getUniformLocation(particleP,'dpr')}};
-const R={items:[],selected:-1,w:1,h:1,dpr:1,px:.5,py:.5,tx:.5,ty:.5,drag:false,dx:0,dy:0,orbit:0,pitch:0,hits:[],hover:-1,reduced:!!opt.reducedMotion,lost:false};
-gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.clearColor(0,0,0,0);
-function resize(){const r=canvas.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);R.w=Math.max(1,r.width);R.h=Math.max(1,r.height);R.dpr=d;const w=Math.round(R.w*d),h=Math.round(R.h*d);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}gl.viewport(0,0,w,h)}
-function points(now){const n=Math.max(1,R.items.length),rot=R.reduced?.28:now*.00012,out=[];for(let i=0;i<n;i++){const t=n===1?.5:i/(n-1),y=4.15-t*8.3,a=rot+i*.82,r=1.64+Math.sin(i*.53)*.06;out.push({a:[Math.cos(a)*r,y,Math.sin(a)*r],b:[Math.cos(a+Math.PI)*r,y,Math.sin(a+Math.PI)*r],item:R.items[i]||{type:'init'},i})}return out}
-function render(now){if(R.lost)return;R.px+=(R.tx-R.px)*.06;R.py+=(R.ty-R.py)*.06;const time=R.reduced?0:now*.001,o=(R.reduced?.36:time*.055)+(R.px-.5)*.9+R.orbit,e=.35+(.5-R.py)*.7+R.pitch,eye=[Math.sin(o)*8.6,e*2.6,Math.cos(o)*8.6],pr=m4(),vw=m4(),vp=m4();perspective(pr,Math.PI/4.1,R.w/R.h,.12,40);lookAt(vw,eye,[0,0,0],[0,1,0]);mul(vp,pr,vw);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-gl.useProgram(particleP);gl.uniformMatrix4fv(U.part.vp,false,vp);gl.uniform1f(U.part.time,time);gl.uniform1f(U.part.dpr,R.dpr);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);gl.bindVertexArray(partV);gl.drawArrays(gl.POINTS,0,420);gl.depthMask(true);
-const P=points(now),lines=[];for(let s=0;s<2;s++){for(let i=0;i<P.length;i++){const q=s?P[i].b:P[i].a,c=s?[.46,.25,.82]:[.15,.62,.82];lines.push(...q,...c)}}for(const q of P){const c=COLORS[q.item.type]||COLORS.scroll;lines.push(...q.a,...c,...q.b,...c)}gl.useProgram(lineP);gl.uniformMatrix4fv(U.line.vp,false,vp);gl.uniform1f(U.line.alpha,.52);gl.bindVertexArray(lineV);gl.bindBuffer(gl.ARRAY_BUFFER,lineB);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(lines),gl.DYNAMIC_DRAW);gl.drawArrays(gl.LINE_STRIP,0,P.length);gl.drawArrays(gl.LINE_STRIP,P.length,P.length);for(let i=0;i<P.length;i++)gl.drawArrays(gl.LINES,P.length*2+i*2,2);
-const nodes=[];R.hits=[];for(const q of P){const c=COLORS[q.item.type]||COLORS.scroll,sel=q.i===R.selected,hov=q.i===R.hover,size=sel?27:hov?23:18;nodes.push(...q.a,...c,size,sel?1:0,...q.b,...c,size,sel?1:0);for(const p of[q.a,q.b]){const h=project(p,vp,R.w,R.h);if(h)R.hits.push({x:h.x,y:h.y,r:sel?26:20,i:q.i,d:h.d})}}gl.useProgram(nodeP);gl.uniformMatrix4fv(U.node.vp,false,vp);gl.uniform1f(U.node.dpr,R.dpr);gl.bindVertexArray(nodeV);gl.bindBuffer(gl.ARRAY_BUFFER,nodeB);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(nodes),gl.DYNAMIC_DRAW);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.drawArrays(gl.POINTS,0,nodes.length/8);gl.disable(gl.BLEND);gl.bindVertexArray(null)}
-function move(x,y,e){R.tx=clamp(x/R.w,0,1);R.ty=clamp(y/R.h,0,1);if(R.drag&&e){R.orbit+=(e.clientX-R.dx)*.006;R.pitch=clamp(R.pitch-(e.clientY-R.dy)*.0035,-.55,.55);R.dx=e.clientX;R.dy=e.clientY}let best=-1,d=1e9;for(const h of R.hits){const n=Math.hypot(h.x-x,h.y-y);if(n<h.r&&n<d){best=h.i;d=n}}R.hover=best;canvas.style.cursor=R.drag?'grabbing':best>=0?'pointer':'grab';return best}
-canvas.addEventListener('pointerdown',e=>{R.drag=true;R.dx=e.clientX;R.dy=e.clientY;canvas.setPointerCapture?.(e.pointerId)});canvas.addEventListener('pointerup',e=>{R.drag=false;canvas.releasePointerCapture?.(e.pointerId)});canvas.addEventListener('pointercancel',e=>{R.drag=false;canvas.releasePointerCapture?.(e.pointerId)});canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();R.lost=true;document.documentElement.dataset.fxInteractionGenomeRenderer='context-lost'});
-resize();return{kind:'webgl2-pbr',setData:(items,selected)=>{R.items=Array.isArray(items)?items:[];R.selected=Number.isInteger(selected)?selected:-1},resize,render,pointerMove:move,pointerLeave(){R.hover=-1;R.tx=.5;R.ty=.5},click(){if(R.hover>=0)opt.onSelect?.(R.hover)},destroy(){[nodeP,lineP,particleP].forEach(p=>gl.deleteProgram(p));[nodeB,lineB,partB].forEach(b=>gl.deleteBuffer(b));[nodeV,lineV,partV].forEach(v=>gl.deleteVertexArray(v))},getStatus(){const a=gl.getContextAttributes();return{kind:'webgl2-pbr',context:'webgl2',antialias:!!a?.antialias,depth:!!a?.depth,particles:420,nodes:R.items.length,selected:R.selected,contextLost:R.lost}}}}
-loadStyle();window.FormatXGenomeRenderer3D=Object.freeze({version:'interaction-genome-webgl2-pbr-v1',create});
+(function () {
+  'use strict';
+
+  if (window.FormatXGenomeRenderer3D) return;
+
+  const VERSION = 'interaction-genome-webgl2-adaptive-4k-v2';
+  const COLORS = {
+    init: [0.46, 0.88, 1],
+    scroll: [0.36, 0.78, 1],
+    scene: [0.66, 0.43, 1],
+    click: [1, 0.34, 0.72],
+    language: [0.46, 0.94, 0.72],
+    audio: [1, 0.72, 0.28],
+    loop: [0.78, 0.52, 1],
+    restore: [0.96, 0.99, 1]
+  };
+
+  const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
+
+  function identity() {
+    return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+  }
+
+  function multiply(output, left, right) {
+    for (let column = 0; column < 4; column += 1) {
+      const index = column * 4;
+      const b0 = right[index];
+      const b1 = right[index + 1];
+      const b2 = right[index + 2];
+      const b3 = right[index + 3];
+      output[index] = left[0] * b0 + left[4] * b1 + left[8] * b2 + left[12] * b3;
+      output[index + 1] = left[1] * b0 + left[5] * b1 + left[9] * b2 + left[13] * b3;
+      output[index + 2] = left[2] * b0 + left[6] * b1 + left[10] * b2 + left[14] * b3;
+      output[index + 3] = left[3] * b0 + left[7] * b1 + left[11] * b2 + left[15] * b3;
+    }
+    return output;
+  }
+
+  function perspective(output, fieldOfView, aspect, near, far) {
+    const scale = 1 / Math.tan(fieldOfView / 2);
+    output.fill(0);
+    output[0] = scale / aspect;
+    output[5] = scale;
+    output[10] = (far + near) / (near - far);
+    output[11] = -1;
+    output[14] = 2 * far * near / (near - far);
+    return output;
+  }
+
+  function lookAt(output, eye, target, up) {
+    let zx = eye[0] - target[0];
+    let zy = eye[1] - target[1];
+    let zz = eye[2] - target[2];
+    let length = Math.hypot(zx, zy, zz) || 1;
+    zx /= length;
+    zy /= length;
+    zz /= length;
+
+    let xx = up[1] * zz - up[2] * zy;
+    let xy = up[2] * zx - up[0] * zz;
+    let xz = up[0] * zy - up[1] * zx;
+    length = Math.hypot(xx, xy, xz) || 1;
+    xx /= length;
+    xy /= length;
+    xz /= length;
+
+    const yx = zy * xz - zz * xy;
+    const yy = zz * xx - zx * xz;
+    const yz = zx * xy - zy * xx;
+
+    output[0] = xx;
+    output[1] = yx;
+    output[2] = zx;
+    output[3] = 0;
+    output[4] = xy;
+    output[5] = yy;
+    output[6] = zy;
+    output[7] = 0;
+    output[8] = xz;
+    output[9] = yz;
+    output[10] = zz;
+    output[11] = 0;
+    output[12] = -(xx * eye[0] + xy * eye[1] + xz * eye[2]);
+    output[13] = -(yx * eye[0] + yy * eye[1] + yz * eye[2]);
+    output[14] = -(zx * eye[0] + zy * eye[1] + zz * eye[2]);
+    output[15] = 1;
+    return output;
+  }
+
+  function project(point, matrix, width, height) {
+    const x = point[0];
+    const y = point[1];
+    const z = point[2];
+    const clipX = matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12];
+    const clipY = matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13];
+    const clipW = matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15];
+    if (clipW <= 0.01) return null;
+    return {
+      x: (clipX / clipW * 0.5 + 0.5) * width,
+      y: (1 - (clipY / clipW * 0.5 + 0.5)) * height,
+      depth: clipW
+    };
+  }
+
+  function compileShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      const message = gl.getShaderInfoLog(shader) || 'Shader compilation failed';
+      gl.deleteShader(shader);
+      throw new Error(message);
+    }
+    return shader;
+  }
+
+  function createProgram(gl, vertexSource, fragmentSource) {
+    const vertex = compileShader(gl, gl.VERTEX_SHADER, vertexSource);
+    const fragment = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+    const program = gl.createProgram();
+    gl.attachShader(program, vertex);
+    gl.attachShader(program, fragment);
+    gl.linkProgram(program);
+    gl.deleteShader(vertex);
+    gl.deleteShader(fragment);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      const message = gl.getProgramInfoLog(program) || 'Program linking failed';
+      gl.deleteProgram(program);
+      throw new Error(message);
+    }
+    return program;
+  }
+
+  function physicalViewportWidth() {
+    return Math.max(innerWidth * (devicePixelRatio || 1), screen.width * (devicePixelRatio || 1));
+  }
+
+  function chooseProfile(options) {
+    const reducedMotion = Boolean(options.reducedMotion);
+    const mobile = matchMedia('(pointer: coarse)').matches || innerWidth < 720;
+    const fourK = physicalViewportWidth() >= 3400;
+    const memory = Number(navigator.deviceMemory || 8);
+    const cores = Number(navigator.hardwareConcurrency || 8);
+    const constrained = memory <= 4 || cores <= 4;
+
+    if (reducedMotion) {
+      return {
+        name: fourK ? '4k-reduced' : 'reduced',
+        fourK,
+        targetFps: 12,
+        maxDpr: fourK ? 1.1 : 1.35,
+        maxPixels: fourK ? 2200000 : 1600000,
+        particles: 150,
+        lowPower: true
+      };
+    }
+
+    if (mobile) {
+      return {
+        name: 'mobile-balanced',
+        fourK: false,
+        targetFps: 30,
+        maxDpr: constrained ? 1.25 : 1.5,
+        maxPixels: constrained ? 900000 : 1250000,
+        particles: constrained ? 140 : 190,
+        lowPower: true
+      };
+    }
+
+    if (fourK) {
+      return {
+        name: constrained ? '4k-efficient' : '4k-balanced',
+        fourK: true,
+        targetFps: constrained ? 24 : 30,
+        maxDpr: constrained ? 1 : 1.25,
+        maxPixels: constrained ? 2100000 : 2800000,
+        particles: constrained ? 190 : 260,
+        lowPower: true
+      };
+    }
+
+    return {
+      name: constrained ? 'desktop-efficient' : 'desktop-quality',
+      fourK: false,
+      targetFps: constrained ? 30 : 45,
+      maxDpr: constrained ? 1.25 : 1.6,
+      maxPixels: constrained ? 1600000 : 2600000,
+      particles: constrained ? 210 : 340,
+      lowPower: constrained
+    };
+  }
+
+  function loadStyle() {
+    if (document.querySelector('link[data-fx-genome-webgl-style]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/interaction-genome-webgl.css?v=20260728-genome-webgl-4k-v2';
+    link.dataset.fxGenomeWebglStyle = 'true';
+    document.head.appendChild(link);
+  }
+
+  function create(canvas, options) {
+    const profile = chooseProfile(options || {});
+    const gl = canvas.getContext('webgl2', {
+      alpha: true,
+      antialias: true,
+      depth: true,
+      premultipliedAlpha: true,
+      powerPreference: profile.lowPower ? 'low-power' : 'default',
+      preserveDrawingBuffer: false
+    });
+    if (!gl) return null;
+
+    const nodeProgram = createProgram(gl, `#version 300 es
+      layout(location=0) in vec3 position;
+      layout(location=1) in vec3 color;
+      layout(location=2) in float size;
+      layout(location=3) in float selected;
+      uniform mat4 viewProjection;
+      uniform float pixelRatio;
+      out vec3 nodeColor;
+      out float nodeSelected;
+      void main() {
+        vec4 projected = viewProjection * vec4(position, 1.0);
+        gl_Position = projected;
+        gl_PointSize = size * pixelRatio * clamp(9.0 / projected.w, 0.58, 2.3);
+        nodeColor = color;
+        nodeSelected = selected;
+      }`, `#version 300 es
+      precision highp float;
+      in vec3 nodeColor;
+      in float nodeSelected;
+      out vec4 outputColor;
+      void main() {
+        vec2 point = gl_PointCoord * 2.0 - 1.0;
+        float radius = dot(point, point);
+        if (radius > 1.0) discard;
+        float z = sqrt(max(0.0, 1.0 - radius));
+        vec3 normal = normalize(vec3(point, z));
+        vec3 light = normalize(vec3(-0.35, 0.65, 0.7));
+        float diffuse = 0.16 + max(dot(normal, light), 0.0) * 0.74;
+        float specular = pow(max(dot(reflect(-light, normal), vec3(0.0, 0.0, 1.0)), 0.0), 48.0);
+        float rim = pow(1.0 - z, 3.0);
+        vec3 color = nodeColor * diffuse
+          + vec3(0.85, 0.95, 1.0) * specular * 0.72
+          + mix(nodeColor, vec3(0.7, 0.92, 1.0), 0.55) * rim * (0.45 + nodeSelected * 0.8);
+        float alpha = smoothstep(1.0, 0.72, radius) * (0.82 + nodeSelected * 0.18);
+        outputColor = vec4(color, alpha);
+      }`);
+
+    const lineProgram = createProgram(gl, `#version 300 es
+      layout(location=0) in vec3 position;
+      layout(location=1) in vec3 color;
+      uniform mat4 viewProjection;
+      out vec3 lineColor;
+      void main() {
+        gl_Position = viewProjection * vec4(position, 1.0);
+        lineColor = color;
+      }`, `#version 300 es
+      precision highp float;
+      in vec3 lineColor;
+      uniform float alpha;
+      out vec4 outputColor;
+      void main() { outputColor = vec4(lineColor, alpha); }`);
+
+    const particleProgram = createProgram(gl, `#version 300 es
+      layout(location=0) in vec4 particle;
+      uniform mat4 viewProjection;
+      uniform float time;
+      uniform float pixelRatio;
+      out float particleAlpha;
+      void main() {
+        vec3 position = particle.xyz;
+        position.y = mod(position.y + time * (0.08 + fract(particle.w * 7.0) * 0.12) + 5.0, 10.0) - 5.0;
+        position.x += sin(time * 0.23 + particle.w * 19.0 + position.y) * 0.16;
+        position.z += cos(time * 0.19 + particle.w * 13.0 + position.y) * 0.16;
+        vec4 projected = viewProjection * vec4(position, 1.0);
+        gl_Position = projected;
+        gl_PointSize = (1.8 + fract(particle.w * 17.0) * 3.0) * pixelRatio * clamp(8.0 / projected.w, 0.5, 2.0);
+        particleAlpha = 0.15 + fract(particle.w * 5.0) * 0.4;
+      }`, `#version 300 es
+      precision mediump float;
+      in float particleAlpha;
+      out vec4 outputColor;
+      void main() {
+        vec2 point = gl_PointCoord * 2.0 - 1.0;
+        float radius = dot(point, point);
+        if (radius > 1.0) discard;
+        outputColor = vec4(0.42, 0.86, 1.0, pow(1.0 - radius, 2.0) * particleAlpha);
+      }`);
+
+    const nodeVao = gl.createVertexArray();
+    const nodeBuffer = gl.createBuffer();
+    gl.bindVertexArray(nodeVao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, nodeBuffer);
+    for (let index = 0; index < 4; index += 1) gl.enableVertexAttribArray(index);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 32, 0);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 32, 12);
+    gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 32, 24);
+    gl.vertexAttribPointer(3, 1, gl.FLOAT, false, 32, 28);
+
+    const lineVao = gl.createVertexArray();
+    const lineBuffer = gl.createBuffer();
+    gl.bindVertexArray(lineVao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
+    gl.enableVertexAttribArray(0);
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 24, 0);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 24, 12);
+
+    let seed = 0x51a27;
+    const random = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+    const particleData = new Float32Array(profile.particles * 4);
+    for (let index = 0; index < profile.particles; index += 1) {
+      const angle = random() * Math.PI * 2;
+      const radius = 2.4 + random() * 4;
+      particleData[index * 4] = Math.cos(angle) * radius;
+      particleData[index * 4 + 1] = random() * 10 - 5;
+      particleData[index * 4 + 2] = Math.sin(angle) * radius;
+      particleData[index * 4 + 3] = random();
+    }
+
+    const particleVao = gl.createVertexArray();
+    const particleBuffer = gl.createBuffer();
+    gl.bindVertexArray(particleVao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, particleBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, particleData, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 16, 0);
+    gl.bindVertexArray(null);
+
+    const uniforms = {
+      node: {
+        matrix: gl.getUniformLocation(nodeProgram, 'viewProjection'),
+        pixelRatio: gl.getUniformLocation(nodeProgram, 'pixelRatio')
+      },
+      line: {
+        matrix: gl.getUniformLocation(lineProgram, 'viewProjection'),
+        alpha: gl.getUniformLocation(lineProgram, 'alpha')
+      },
+      particle: {
+        matrix: gl.getUniformLocation(particleProgram, 'viewProjection'),
+        time: gl.getUniformLocation(particleProgram, 'time'),
+        pixelRatio: gl.getUniformLocation(particleProgram, 'pixelRatio')
+      }
+    };
+
+    const runtime = {
+      items: [],
+      selected: -1,
+      width: 1,
+      height: 1,
+      effectiveDpr: 1,
+      resolutionScale: 1,
+      backingPixels: 1,
+      pointerX: 0.5,
+      pointerY: 0.5,
+      targetX: 0.5,
+      targetY: 0.5,
+      dragging: false,
+      dragX: 0,
+      dragY: 0,
+      orbit: 0,
+      pitch: 0,
+      hits: [],
+      hover: -1,
+      reduced: Boolean(options.reducedMotion),
+      lost: false,
+      frames: 0,
+      resizeCount: 0,
+      lineArray: new Float32Array(0),
+      nodeArray: new Float32Array(0)
+    };
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clearColor(0, 0, 0, 0);
+
+    function resize() {
+      const rectangle = canvas.getBoundingClientRect();
+      const width = Math.max(1, rectangle.width);
+      const height = Math.max(1, rectangle.height);
+      const rawDpr = Math.min(profile.maxDpr, devicePixelRatio || 1);
+      const desiredPixels = width * height * rawDpr * rawDpr;
+      const resolutionScale = Math.min(1, Math.sqrt(profile.maxPixels / Math.max(1, desiredPixels)));
+      const effectiveDpr = Math.max(0.72, rawDpr * resolutionScale);
+      const backingWidth = Math.max(1, Math.round(width * effectiveDpr));
+      const backingHeight = Math.max(1, Math.round(height * effectiveDpr));
+
+      runtime.width = width;
+      runtime.height = height;
+      runtime.effectiveDpr = effectiveDpr;
+      runtime.resolutionScale = resolutionScale;
+      runtime.backingPixels = backingWidth * backingHeight;
+
+      if (canvas.width !== backingWidth || canvas.height !== backingHeight) {
+        canvas.width = backingWidth;
+        canvas.height = backingHeight;
+        runtime.resizeCount += 1;
+      }
+      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      return runtime.backingPixels;
+    }
+
+    function makePoints(now) {
+      const count = Math.max(1, runtime.items.length);
+      const rotation = runtime.reduced ? 0.28 : now * 0.00012;
+      const points = [];
+      for (let index = 0; index < count; index += 1) {
+        const ratio = count === 1 ? 0.5 : index / (count - 1);
+        const y = 4.15 - ratio * 8.3;
+        const angle = rotation + index * 0.82;
+        const radius = 1.64 + Math.sin(index * 0.53) * 0.06;
+        points.push({
+          first: [Math.cos(angle) * radius, y, Math.sin(angle) * radius],
+          second: [Math.cos(angle + Math.PI) * radius, y, Math.sin(angle + Math.PI) * radius],
+          item: runtime.items[index] || { type: 'init' },
+          index
+        });
+      }
+      return points;
+    }
+
+    function ensureArrays(pointCount) {
+      const requiredLines = (pointCount * 2 + pointCount * 2) * 6;
+      const requiredNodes = pointCount * 2 * 8;
+      if (runtime.lineArray.length !== requiredLines) runtime.lineArray = new Float32Array(requiredLines);
+      if (runtime.nodeArray.length !== requiredNodes) runtime.nodeArray = new Float32Array(requiredNodes);
+    }
+
+    function render(now) {
+      if (runtime.lost) return false;
+
+      runtime.pointerX += (runtime.targetX - runtime.pointerX) * 0.06;
+      runtime.pointerY += (runtime.targetY - runtime.pointerY) * 0.06;
+
+      const time = runtime.reduced ? 0 : now * 0.001;
+      const cameraOrbit = (runtime.reduced ? 0.36 : time * 0.055) + (runtime.pointerX - 0.5) * 0.9 + runtime.orbit;
+      const cameraElevation = 0.35 + (0.5 - runtime.pointerY) * 0.7 + runtime.pitch;
+      const eye = [Math.sin(cameraOrbit) * 8.6, cameraElevation * 2.6, Math.cos(cameraOrbit) * 8.6];
+      const projection = identity();
+      const view = identity();
+      const viewProjection = identity();
+      perspective(projection, Math.PI / 4.1, runtime.width / runtime.height, 0.12, 40);
+      lookAt(view, eye, [0, 0, 0], [0, 1, 0]);
+      multiply(viewProjection, projection, view);
+
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      gl.useProgram(particleProgram);
+      gl.uniformMatrix4fv(uniforms.particle.matrix, false, viewProjection);
+      gl.uniform1f(uniforms.particle.time, time);
+      gl.uniform1f(uniforms.particle.pixelRatio, runtime.effectiveDpr);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+      gl.depthMask(false);
+      gl.bindVertexArray(particleVao);
+      gl.drawArrays(gl.POINTS, 0, profile.particles);
+      gl.depthMask(true);
+
+      const points = makePoints(now);
+      ensureArrays(points.length);
+      let lineOffset = 0;
+      for (let strand = 0; strand < 2; strand += 1) {
+        for (const point of points) {
+          const position = strand ? point.second : point.first;
+          const color = strand ? [0.46, 0.25, 0.82] : [0.15, 0.62, 0.82];
+          runtime.lineArray.set([...position, ...color], lineOffset);
+          lineOffset += 6;
+        }
+      }
+      for (const point of points) {
+        const color = COLORS[point.item.type] || COLORS.scroll;
+        runtime.lineArray.set([...point.first, ...color, ...point.second, ...color], lineOffset);
+        lineOffset += 12;
+      }
+
+      gl.useProgram(lineProgram);
+      gl.uniformMatrix4fv(uniforms.line.matrix, false, viewProjection);
+      gl.uniform1f(uniforms.line.alpha, 0.52);
+      gl.bindVertexArray(lineVao);
+      gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, runtime.lineArray, gl.DYNAMIC_DRAW);
+      gl.drawArrays(gl.LINE_STRIP, 0, points.length);
+      gl.drawArrays(gl.LINE_STRIP, points.length, points.length);
+      for (let index = 0; index < points.length; index += 1) {
+        gl.drawArrays(gl.LINES, points.length * 2 + index * 2, 2);
+      }
+
+      runtime.hits = [];
+      let nodeOffset = 0;
+      for (const point of points) {
+        const color = COLORS[point.item.type] || COLORS.scroll;
+        const selected = point.index === runtime.selected;
+        const hovered = point.index === runtime.hover;
+        const size = selected ? 27 : hovered ? 23 : 18;
+        runtime.nodeArray.set([...point.first, ...color, size, selected ? 1 : 0], nodeOffset);
+        nodeOffset += 8;
+        runtime.nodeArray.set([...point.second, ...color, size, selected ? 1 : 0], nodeOffset);
+        nodeOffset += 8;
+
+        for (const position of [point.first, point.second]) {
+          const hit = project(position, viewProjection, runtime.width, runtime.height);
+          if (hit) runtime.hits.push({ x: hit.x, y: hit.y, radius: selected ? 26 : 20, index: point.index, depth: hit.depth });
+        }
+      }
+
+      gl.useProgram(nodeProgram);
+      gl.uniformMatrix4fv(uniforms.node.matrix, false, viewProjection);
+      gl.uniform1f(uniforms.node.pixelRatio, runtime.effectiveDpr);
+      gl.bindVertexArray(nodeVao);
+      gl.bindBuffer(gl.ARRAY_BUFFER, nodeBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, runtime.nodeArray, gl.DYNAMIC_DRAW);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.drawArrays(gl.POINTS, 0, runtime.nodeArray.length / 8);
+      gl.disable(gl.BLEND);
+      gl.bindVertexArray(null);
+
+      runtime.frames += 1;
+      return true;
+    }
+
+    function pointerMove(x, y, event) {
+      runtime.targetX = clamp(x / runtime.width, 0, 1);
+      runtime.targetY = clamp(y / runtime.height, 0, 1);
+      if (runtime.dragging && event) {
+        runtime.orbit += (event.clientX - runtime.dragX) * 0.006;
+        runtime.pitch = clamp(runtime.pitch - (event.clientY - runtime.dragY) * 0.0035, -0.55, 0.55);
+        runtime.dragX = event.clientX;
+        runtime.dragY = event.clientY;
+      }
+
+      let best = -1;
+      let distance = Infinity;
+      for (const hit of runtime.hits) {
+        const current = Math.hypot(hit.x - x, hit.y - y);
+        if (current < hit.radius && current < distance) {
+          best = hit.index;
+          distance = current;
+        }
+      }
+      runtime.hover = best;
+      canvas.style.cursor = runtime.dragging ? 'grabbing' : best >= 0 ? 'pointer' : 'grab';
+      return best;
+    }
+
+    canvas.addEventListener('pointerdown', event => {
+      runtime.dragging = true;
+      runtime.dragX = event.clientX;
+      runtime.dragY = event.clientY;
+      canvas.setPointerCapture?.(event.pointerId);
+    });
+    canvas.addEventListener('pointerup', event => {
+      runtime.dragging = false;
+      canvas.releasePointerCapture?.(event.pointerId);
+    });
+    canvas.addEventListener('pointercancel', event => {
+      runtime.dragging = false;
+      canvas.releasePointerCapture?.(event.pointerId);
+    });
+    canvas.addEventListener('webglcontextlost', event => {
+      event.preventDefault();
+      runtime.lost = true;
+      document.documentElement.dataset.fxInteractionGenomeRenderer = 'context-lost';
+    });
+
+    resize();
+
+    return {
+      kind: 'webgl2-pbr-4k-adaptive',
+      profile,
+      setData(items, selected) {
+        runtime.items = Array.isArray(items) ? items : [];
+        runtime.selected = Number.isInteger(selected) ? selected : -1;
+      },
+      resize,
+      render,
+      pointerMove,
+      pointerLeave() {
+        runtime.hover = -1;
+        runtime.targetX = 0.5;
+        runtime.targetY = 0.5;
+      },
+      click() {
+        if (runtime.hover >= 0) options.onSelect?.(runtime.hover);
+      },
+      destroy() {
+        [nodeProgram, lineProgram, particleProgram].forEach(program => gl.deleteProgram(program));
+        [nodeBuffer, lineBuffer, particleBuffer].forEach(buffer => gl.deleteBuffer(buffer));
+        [nodeVao, lineVao, particleVao].forEach(vao => gl.deleteVertexArray(vao));
+      },
+      getStatus() {
+        const attributes = gl.getContextAttributes();
+        return {
+          version: VERSION,
+          kind: 'webgl2-pbr-4k-adaptive',
+          context: 'webgl2',
+          antialias: Boolean(attributes?.antialias),
+          depth: Boolean(attributes?.depth),
+          quality: profile.name,
+          fourK: profile.fourK,
+          targetFps: profile.targetFps,
+          effectiveDpr: Number(runtime.effectiveDpr.toFixed(3)),
+          resolutionScale: Number(runtime.resolutionScale.toFixed(3)),
+          maxPixels: profile.maxPixels,
+          backingPixels: runtime.backingPixels,
+          particles: profile.particles,
+          nodes: runtime.items.length,
+          selected: runtime.selected,
+          frames: runtime.frames,
+          resizeCount: runtime.resizeCount,
+          contextLost: runtime.lost
+        };
+      }
+    };
+  }
+
+  loadStyle();
+  window.FormatXGenomeRenderer3D = Object.freeze({ version: VERSION, create });
 }());
