@@ -112,6 +112,21 @@
     document.head.appendChild(script);
   }
 
+  function loadSimulatorEntryLayer() {
+    if (document.querySelector('script[data-fx-simulator-entry-script]')) return;
+    const script = document.createElement('script');
+    script.src = './scripts/project-simulator-entry.js?v=20260728-operational-twin-1';
+    script.async = false;
+    script.dataset.fxSimulatorEntryScript = 'true';
+    script.addEventListener('load', () => {
+      root.dataset.fxSimulatorEntryLayer = 'ready';
+    }, { once: true });
+    script.addEventListener('error', () => {
+      root.dataset.fxSimulatorEntryLayer = 'error';
+    }, { once: true });
+    document.head.appendChild(script);
+  }
+
   function loadCategoryLayer() {
     if (!document.querySelector('link[data-fx-category-style]')) {
       const style = document.createElement('link');
@@ -124,6 +139,7 @@
     const existing = document.querySelector('script[data-fx-category-script]');
     if (existing) {
       loadOriginProofLayer();
+      loadSimulatorEntryLayer();
       return;
     }
 
@@ -134,10 +150,12 @@
     script.addEventListener('load', () => {
       root.dataset.fxCategoryLayer = 'ready';
       loadOriginProofLayer();
+      loadSimulatorEntryLayer();
     }, { once: true });
     script.addEventListener('error', () => {
       root.dataset.fxCategoryLayer = 'error';
       loadOriginProofLayer();
+      loadSimulatorEntryLayer();
     }, { once: true });
     document.head.appendChild(script);
   }
