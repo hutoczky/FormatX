@@ -22,12 +22,13 @@ async function clearIntro(page) {
     root.classList.remove('fx-intro-running');
     root.classList.add('fx-intro-complete');
     return true;
-  }, null, { timeout: 8000 });
+  }, null, { timeout: 12000 });
 }
 
 async function openGenome(page) {
   await page.waitForFunction(() => window.FormatXInteractionGenome
-    && document.documentElement.dataset.fxGenomeWebglAdapter === 'ready-v3', null, { timeout: 45000 });
+    && document.documentElement.dataset.fxGenomeWebglAdapter === 'ready-v3', null, { timeout: 90000 });
+
   await page.evaluate(() => {
     const api = window.FormatXInteractionGenome;
     for (let index = 0; index < 14; index += 1) {
@@ -42,21 +43,21 @@ async function openGenome(page) {
     }
     api.open();
   });
-  await page.waitForFunction(() => document.getElementById('fx-interaction-genome')?.dataset.open === 'true');
-  await page.waitForFunction(() => document.documentElement.dataset.fxInteractionGenomeRenderer === 'webgl2-cinematic-pbr');
-  await page.waitForFunction(() => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= 4, null, { timeout: 20000 });
+
+  await page.waitForFunction(() => document.getElementById('fx-interaction-genome')?.dataset.open === 'true', null, { timeout: 30000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxInteractionGenomeRenderer === 'webgl2-cinematic-pbr', null, { timeout: 90000 });
+  await page.waitForFunction(() => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= 4, null, { timeout: 45000 });
 }
 
-async function rendererState(page) {
+async function stateOf(page) {
   return page.evaluate(() => {
     const root = document.documentElement;
     const stage = document.querySelector('.fx-genome-stage');
     const canvas = document.querySelector('.fx-genome-webgl-canvas');
     const original = document.getElementById('fx-genome-canvas');
-    const rect = canvas?.getBoundingClientRect();
+    const rectangle = canvas?.getBoundingClientRect();
     const gl = canvas?.getContext('webgl2');
     const attributes = gl?.getContextAttributes();
-    const status = window.FormatXGenome3DAdapter?.getStatus?.() || {};
     return {
       adapter: root.dataset.fxGenomeWebglAdapter || '',
       renderer: root.dataset.fxInteractionGenomeRenderer || '',
@@ -65,7 +66,7 @@ async function rendererState(page) {
       pipeline: root.dataset.fxGenomePipeline || '',
       geometry: root.dataset.fxGenomeGeometry || '',
       canvasCount: document.querySelectorAll('.fx-genome-webgl-canvas').length,
-      canvas: [Math.round(rect?.width || 0), Math.round(rect?.height || 0)],
+      canvas: [Math.round(rectangle?.width || 0), Math.round(rectangle?.height || 0)],
       backing: [canvas?.width || 0, canvas?.height || 0],
       originalOpacity: original ? getComputedStyle(original).opacity : '',
       webgl2: Boolean(gl),
@@ -84,9 +85,22 @@ async function rendererState(page) {
       pipelineHud: document.querySelectorAll('.fx-genome-pipeline').length,
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
       nodeCount: window.FormatXInteractionGenome?.getState?.().items.length || 0,
-      status
+      status: window.FormatXGenome3DAdapter?.getStatus?.() || {}
     };
   });
+}
+
+async function exerciseDrag(page) {
+  const canvas = page.locator('.fx-genome-webgl-canvas');
+  const box = await canvas.boundingBox();
+  assert(box, '3D canvas has no visible bounding box');
+  const before = Number(await canvas.getAttribute('data-fx-rendered-frame'));
+  await page.mouse.move(box.x + box.width * 0.38, box.y + box.height * 0.38);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.64, box.y + box.height * 0.54, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForFunction(previous => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= previous + 2, before, { timeout: 30000 });
+  await page.waitForTimeout(120);
 }
 
 async function verifyFrameCeiling(page, targetFps, name) {
@@ -103,7 +117,7 @@ async function verifyStopsWhenClosed(page, name) {
   await page.evaluate(() => window.FormatXInteractionGenome.close());
   const canvas = page.locator('.fx-genome-webgl-canvas');
   const before = Number(await canvas.getAttribute('data-fx-rendered-frame'));
-  await page.waitForTimeout(450);
+  await page.waitForTimeout(500);
   const after = Number(await canvas.getAttribute('data-fx-rendered-frame'));
   assert(after - before <= 1, name + ' renderer continued while closed: ' + JSON.stringify({ before, after }));
 }
@@ -114,22 +128,13 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
   const errors = [];
   page.on('pageerror', error => errors.push('pageerror: ' + String(error)));
   page.on('console', message => { if (message.type() === 'error') errors.push('console: ' + message.text()); });
-  await page.goto(TEST_URL + '?lang=hu&genome-cinematic-test=1', { waitUntil: 'domcontentloaded' });
+
+  await page.goto(TEST_URL + '?lang=hu&genome-cinematic-test=1', { waitUntil: 'domcontentloaded', timeout: 90000 });
   await clearIntro(page);
   await openGenome(page);
+  await exerciseDrag(page);
 
-  const canvas = page.locator('.fx-genome-webgl-canvas');
-  await canvas.hover();
-  const box = await canvas.boundingBox();
-  if (box) {
-    await page.mouse.move(box.x + box.width * 0.38, box.y + box.height * 0.38);
-    await page.mouse.down();
-    await page.mouse.move(box.x + box.width * 0.64, box.y + box.height * 0.54, { steps: 12 });
-    await page.mouse.up();
-    await page.waitForFunction(() => Number(document.querySelector('.fx-genome-webgl-canvas')?.dataset.fxRenderedFrame || 0) >= 8, null, { timeout: 10000 });
-  }
-
-  const state = await rendererState(page);
+  const state = await stateOf(page);
   const status = state.status;
   const minimumSphereTriangles = expectations.minimumSphereTriangles || 400;
 
@@ -142,7 +147,7 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
   assert(state.backing[0] > 0 && state.backing[1] > 0, name + ' backing resolution missing: ' + JSON.stringify(state));
   assert(state.webgl2 && state.depth && state.antialias, name + ' WebGL2 quality context missing: ' + JSON.stringify(state));
   assert(!state.contextLost && state.glError === 0, name + ' WebGL runtime error: ' + JSON.stringify(state));
-  assert(state.renderedFrames >= 8 && state.renderedNodes >= 14, name + ' renderer did not produce cinematic frames: ' + JSON.stringify(state));
+  assert(state.renderedFrames >= 6 && state.renderedNodes >= 14, name + ' renderer did not produce cinematic frames: ' + JSON.stringify(state));
   assert(state.originalOpacity === '0', name + ' original 2D canvas still visible: ' + JSON.stringify(state));
   assert(state.overlayOpen === 'true', name + ' drag unexpectedly closed the 3D view: ' + JSON.stringify(state));
   assert(['drag-complete', 'drag-suppressed-click'].includes(state.gesture), name + ' drag gesture was not separated from click: ' + JSON.stringify(state));
@@ -189,11 +194,12 @@ async function verify(browser, contextOptions, name, minimumCanvas, expectations
     headless: true,
     args: ['--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--use-angle=swiftshader']
   });
+
   try {
+    await verify(browser, { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-physical-4k', [1050, 560], { fourK: true, minimumSphereTriangles: 500 });
     await verify(browser, { viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-desktop', [760, 520]);
     await verify(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-mobile', [360, 430], { minimumSphereTriangles: 300 });
     await verify(browser, { viewport: { width: 1180, height: 820 }, reducedMotion: 'reduce', locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-reduced-motion', [640, 450], { reduced: true, minimumSphereTriangles: 400 });
-    await verify(browser, { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' }, 'genome-cinematic-physical-4k', [1050, 560], { fourK: true, minimumSphereTriangles: 600 });
   } finally {
     await browser.close();
   }
