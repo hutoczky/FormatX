@@ -1,0 +1,219 @@
+/* FormatX category-defining positioning layer */
+.fx-category-deck,
+.fx-origin-proof {
+  position: relative;
+  z-index: 28;
+  width: min(1380px, calc(100% - (var(--gutter) * 2)));
+  margin-inline: auto;
+  border: 1px solid rgba(var(--accent), .2);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(var(--accent), .11), transparent 30rem),
+    linear-gradient(145deg, rgba(7, 14, 24, .94), rgba(3, 8, 15, .97));
+  box-shadow: 0 32px 90px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .035);
+  overflow: hidden;
+}
+
+.fx-category-deck {
+  margin-top: clamp(24px, 4vw, 54px);
+  padding: clamp(24px, 4vw, 52px);
+  border-radius: 28px;
+}
+
+.fx-category-deck::before,
+.fx-origin-proof::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0 49.9%, rgba(255, 255, 255, .024) 50%, transparent 50.1%),
+    repeating-linear-gradient(0deg, transparent 0 84px, rgba(255, 255, 255, .012) 85px 86px);
+}
+
+.fx-category-deck > header {
+  position: relative;
+  max-width: 980px;
+  display: grid;
+  gap: 14px;
+}
+
+.fx-category-deck h2 {
+  max-width: 920px;
+  margin: 0;
+  color: #f7fbff;
+  font-size: clamp(30px, 5.2vw, 72px);
+  font-weight: 500;
+  line-height: .98;
+  letter-spacing: -.055em;
+}
+
+.fx-category-deck > header > p:last-child {
+  max-width: 830px;
+  margin: 0;
+  color: #b9cbd8;
+  font-size: clamp(14px, 1.5vw, 18px);
+  line-height: 1.7;
+}
+
+.fx-category-grid {
+  position: relative;
+  margin-top: clamp(28px, 4vw, 48px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.fx-category-grid article {
+  min-height: 230px;
+  padding: 21px;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  border: 1px solid rgba(184, 226, 247, .13);
+  border-radius: 20px;
+  background: linear-gradient(155deg, rgba(16, 33, 51, .72), rgba(5, 12, 22, .84));
+  transition: transform .35s ease, border-color .35s ease, background .35s ease;
+}
+
+.fx-category-grid article:hover {
+  transform: translateY(-5px);
+  border-color: rgba(var(--accent), .46);
+  background: linear-gradient(155deg, rgba(var(--accent), .11), rgba(5, 12, 22, .9));
+}
+
+.fx-category-grid article > span,
+.fx-proof-grid article > span {
+  color: rgb(var(--accent));
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .15em;
+}
+
+.fx-category-grid h3,
+.fx-proof-grid h4 {
+  margin: 0;
+  color: #f4f9fc;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.fx-category-grid p,
+.fx-proof-grid p {
+  margin: 0;
+  color: #9eb2c2;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.fx-origin-proof {
+  margin-top: clamp(28px, 5vw, 66px);
+  padding: clamp(24px, 4vw, 50px);
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(26px, 5vw, 74px);
+  border-radius: 30px;
+}
+
+.fx-origin-copy {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 17px;
+}
+
+.fx-origin-copy h3 {
+  margin: 0;
+  max-width: 680px;
+  color: #f6fbff;
+  font-size: clamp(32px, 4.8vw, 64px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.05em;
+}
+
+.fx-origin-copy > p:not(.section-index) {
+  margin: 0;
+  color: #aebfcd;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.fx-origin-copy blockquote {
+  margin: 8px 0 0;
+  padding: 22px 0 2px 24px;
+  color: #eef8ff;
+  border-left: 2px solid rgb(var(--accent));
+  font-size: clamp(17px, 2vw, 24px);
+  line-height: 1.45;
+  letter-spacing: -.02em;
+}
+
+.fx-proof-grid {
+  position: relative;
+  display: grid;
+  gap: 11px;
+}
+
+.fx-proof-grid article {
+  min-height: 118px;
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  border: 1px solid rgba(176, 222, 246, .13);
+  border-radius: 17px;
+  background: rgba(8, 18, 30, .7);
+}
+
+.fx-proof-grid article > div {
+  display: grid;
+  gap: 8px;
+}
+
+.living-architecture .price-card ul {
+  display: grid;
+  gap: 10px;
+}
+
+.living-architecture .price-card ul li {
+  position: relative;
+  padding-left: 18px;
+  color: #b9cad7;
+  line-height: 1.45;
+}
+
+.living-architecture .price-card ul li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .62em;
+  width: 7px;
+  height: 7px;
+  border: 1px solid rgb(var(--accent));
+  transform: rotate(45deg);
+  box-shadow: 0 0 10px rgba(var(--accent), .35);
+}
+
+@media (max-width: 1100px) {
+  .fx-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fx-origin-proof { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 680px) {
+  .fx-category-deck,
+  .fx-origin-proof {
+    width: min(100% - 24px, 1380px);
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  .fx-category-grid { grid-template-columns: 1fr; }
+  .fx-category-grid article { min-height: 0; }
+  .fx-proof-grid article { grid-template-columns: 30px minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-category-grid article { transition: none; }
+}
