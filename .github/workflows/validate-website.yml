@@ -1,4 +1,4 @@
-# FormatX Design System regression trigger 1
+# FormatX Reality Fork regression trigger 2
 name: Validate FormatX WebGPU and Three.js website
 
 on:
@@ -9,6 +9,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
+      - '.github/scripts/validate-reality-fork.cjs'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
   push:
@@ -17,6 +18,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
+      - '.github/scripts/validate-reality-fork.cjs'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
 
@@ -31,7 +33,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -82,7 +84,11 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-category-positioning.js
           node --check docs/scifi-ui/scripts/formatx-origin-proof.js
           node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
+          node --check docs/scifi-ui/scripts/project-simulator.js
+          node --check docs/scifi-ui/scripts/operational-twin-dom-bridge.js
+          node --check docs/scifi-ui/scripts/reality-fork-capsule.js
           node --check .github/scripts/validate-three-site.cjs
+          node --check .github/scripts/validate-reality-fork.cjs
 
       - name: Test Worker and production bundle
         working-directory: billing-worker
@@ -103,11 +109,15 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-http.log" 2>&1 &
+          python3 -m http.server 4192 --directory docs > "$RUNNER_TEMP/formatx-reality-http.log" 2>&1 &
           for attempt in $(seq 1 40); do
-            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4192/scifi-ui/project-simulator.html >/dev/null \
+              && exit 0
             sleep 0.25
           done
           cat "$RUNNER_TEMP/formatx-http.log"
+          cat "$RUNNER_TEMP/formatx-reality-http.log"
           exit 1
 
       - name: Test WebGPU, WebGL2 fallback, Firefox, mobile, reduced motion and two loops
@@ -118,6 +128,14 @@ jobs:
           set -o pipefail
           node .github/scripts/validate-three-site.cjs 2>&1 | tee webgpu-browser-report.txt
 
+      - name: Validate Reality Fork counterfactual replay and capsule proof
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-reality-fork.cjs 2>&1 | tee reality-fork-report.txt
+
       - name: Upload WebGPU browser report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -126,6 +144,15 @@ jobs:
           path: webgpu-browser-report.txt
           if-no-files-found: warn
           retention-days: 5
+
+      - name: Upload Reality Fork report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-reality-fork-report
+          path: reality-fork-report.txt
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Publish validation status
         if: always() && github.event_name == 'push'
@@ -136,10 +163,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='WebGPU TSL, compute, XR and WebGL2 fallback validation passed'
+            description='WebGPU, XR, fallback and Reality Fork proof validation passed'
           else
             state='failure'
-            description='FormatX WebGPU evolution validation failed'
+            description='FormatX production and Reality Fork validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
