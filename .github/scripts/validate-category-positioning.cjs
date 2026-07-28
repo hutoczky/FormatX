@@ -8,11 +8,36 @@ const BASE = 'http://127.0.0.1:4181/scifi-ui/';
 async function mainPageCase(browser, language, viewport) {
   const context = await browser.newContext({ viewport, locale: language === 'hu' ? 'hu-HU' : 'en-GB' });
   const page = await context.newPage();
+  const browserEvents = [];
+  page.on('pageerror', error => browserEvents.push('pageerror: ' + String(error)));
+  page.on('console', message => {
+    if (message.type() === 'error' || message.type() === 'warning') browserEvents.push(message.type() + ': ' + message.text());
+  });
   await page.goto(BASE + 'index.html?lang=' + language, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.documentElement.dataset.fxCategoryPositioning === 'v1', null, { timeout: 20000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxSimulatorEntryState === 'ready', null, { timeout: 20000 });
-  await page.waitForSelector('.fx-category-deck', { state: 'attached' });
-  await page.waitForSelector('.fx-origin-proof', { state: 'attached' });
+
+  const diagnosis = await page.evaluate(() => ({
+    href: location.href,
+    title: document.title,
+    readyState: document.readyState,
+    deckCount: document.querySelectorAll('.fx-category-deck').length,
+    proofCount: document.querySelectorAll('.fx-origin-proof').length,
+    mainPresent: Boolean(document.getElementById('main-content')),
+    mainChildren: Array.from(document.querySelectorAll('#main-content > *')).map(element => ({
+      tag: element.tagName,
+      id: element.id,
+      className: element.className
+    })),
+    scripts: Array.from(document.scripts, script => script.src || '[inline]'),
+    dataset: { ...document.documentElement.dataset },
+    responseMarker: document.documentElement.outerHTML.includes('fx-category-deck--standalone'),
+    bodyStart: document.body.innerHTML.slice(0, 1200)
+  }));
+  console.log(JSON.stringify({ case: 'main-diagnostic-' + language + '-' + viewport.width, diagnosis, browserEvents }));
+
+  await page.waitForSelector('.fx-category-deck', { state: 'attached', timeout: 10000 });
+  await page.waitForSelector('.fx-origin-proof', { state: 'attached', timeout: 10000 });
 
   const result = await page.evaluate(() => {
     const root = document.documentElement;
