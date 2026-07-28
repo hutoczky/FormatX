@@ -71,7 +71,12 @@
     return true;
   }
 
+  function removeCloneEntries() {
+    document.querySelectorAll('[data-fx-loop-bridge="true"] a[data-fx-simulator-entry]').forEach(link => link.remove());
+  }
+
   function render() {
+    removeCloneEntries();
     const copy = COPY[language()];
     document.querySelectorAll('a[data-fx-simulator-entry]').forEach(link => {
       link.href = href();
@@ -117,9 +122,14 @@
   addEventListener('formatx:languagechange', () => queueMicrotask(render));
 
   const observer = new MutationObserver(entries => {
-    if (entries.some(entry => entry.attributeName === 'lang')) queueMicrotask(render);
+    const languageChanged = entries.some(entry => entry.type === 'attributes' && entry.attributeName === 'lang');
+    const cloneAdded = entries.some(entry => entry.type === 'childList' && Array.from(entry.addedNodes).some(node => {
+      return node instanceof Element && (node.matches('[data-fx-loop-bridge="true"]')
+        || Boolean(node.querySelector('[data-fx-loop-bridge="true"]')));
+    }));
+    if (languageChanged || cloneAdded) queueMicrotask(render);
   });
-  observer.observe(root, { attributes: true, attributeFilter: ['lang'] });
+  observer.observe(root, { attributes: true, attributeFilter: ['lang'], childList: true, subtree: true });
 
   addEventListener('pagehide', () => {
     clearInterval(retryTimer);
