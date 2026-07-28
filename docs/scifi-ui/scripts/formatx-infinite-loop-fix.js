@@ -51,9 +51,6 @@
     const { trigger } = metrics(clone);
     if (scrollY < trigger) return;
 
-    // This capture-phase handler owns the boundary hand-off. It prevents the
-    // older host listener from racing the same scroll event and changing the
-    // counter before the viewport has actually returned to the core.
     if (event && typeof event.stopImmediatePropagation === 'function') {
       event.stopImmediatePropagation();
     }
@@ -100,6 +97,29 @@
     if (button.getAttribute('aria-label') !== nextAria) button.setAttribute('aria-label', nextAria);
   }
 
+  function loadCategoryLayer() {
+    if (!document.querySelector('link[data-fx-category-style]')) {
+      const style = document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = './styles/formatx-category-positioning.css?v=20260728-category-v1';
+      style.dataset.fxCategoryStyle = 'true';
+      document.head.appendChild(style);
+    }
+    if (!document.querySelector('script[data-fx-category-script]')) {
+      const script = document.createElement('script');
+      script.src = './scripts/formatx-category-positioning.js?v=20260728-category-v1';
+      script.async = false;
+      script.dataset.fxCategoryScript = 'true';
+      script.addEventListener('load', () => {
+        root.dataset.fxCategoryLayer = 'ready';
+      }, { once: true });
+      script.addEventListener('error', () => {
+        root.dataset.fxCategoryLayer = 'error';
+      }, { once: true });
+      document.head.appendChild(script);
+    }
+  }
+
   const audioLabelObserver = new MutationObserver(syncAudioActionLabel);
   audioLabelObserver.observe(root, {
     attributes: true,
@@ -113,6 +133,7 @@
   addEventListener('pageshow', () => {
     transferAtBoundary();
     syncAudioActionLabel();
+    loadCategoryLayer();
   }, { passive: true });
   addEventListener('formatx:languagechange', syncAudioActionLabel);
   document.addEventListener('click', event => {
@@ -122,6 +143,7 @@
   }, true);
 
   syncAudioActionLabel();
+  loadCategoryLayer();
 
   addEventListener('pagehide', () => {
     cancelAnimationFrame(settleFrame);
