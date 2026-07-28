@@ -1,4 +1,4 @@
-# FormatX continuous laptop loop regression trigger 1
+# FormatX Interaction Genome WebGL regression trigger 1
 name: Validate FormatX WebGPU and Three.js website
 
 on:
@@ -11,6 +11,7 @@ on:
       - '.github/scripts/validate-three-site.cjs'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/scripts/validate-reality-fork.cjs'
+      - '.github/scripts/validate-interaction-genome-webgl.cjs'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
   push:
@@ -21,6 +22,7 @@ on:
       - '.github/scripts/validate-three-site.cjs'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/scripts/validate-reality-fork.cjs'
+      - '.github/scripts/validate-interaction-genome-webgl.cjs'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
 
@@ -35,7 +37,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -90,11 +92,17 @@ jobs:
           node --check docs/scifi-ui/scripts/project-simulator.js
           node --check docs/scifi-ui/scripts/operational-twin-dom-bridge.js
           node --check docs/scifi-ui/scripts/reality-fork-capsule.js
+          node --check docs/scifi-ui/scripts/interaction-genome.js
+          node --check docs/scifi-ui/scripts/interaction-genome-webgl.js
+          node --check docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
           node --check .github/scripts/validate-three-site.cjs
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-reality-fork.cjs
+          node --check .github/scripts/validate-interaction-genome-webgl.cjs
           grep -Fq 'authoritative-wheel-v2' docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js
           grep -Fq 'formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq "getContext('webgl2'" docs/scifi-ui/scripts/interaction-genome-webgl.js
+          grep -Fq 'interaction-genome-webgl-adapter.js?v=20260728-genome-webgl-1' docs/scifi-ui/scripts/living-architecture.js
           ! grep -Fq 'formatx-infinite-loop-fix.js?v=20260727-loop-1' docs/scifi-ui/scripts/igloo-parity.js
 
       - name: Test Worker and production bundle
@@ -151,6 +159,15 @@ jobs:
           set -o pipefail
           node .github/scripts/validate-reality-fork.cjs 2>&1 | tee reality-fork-report.txt
 
+      - name: Validate realistic Interaction Genome WebGL2 rendering
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-interaction-genome-webgl.cjs 2>&1 | tee interaction-genome-webgl-report.txt
+
       - name: Upload browser reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -159,6 +176,7 @@ jobs:
           path: |
             webgpu-browser-report.txt
             laptop-continuous-loop-report.txt
+            interaction-genome-webgl-report.txt
           if-no-files-found: warn
           retention-days: 5
 
@@ -180,10 +198,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='WebGPU, laptop loop and Reality Fork validation passed'
+            description='WebGPU, laptop loop, Reality Fork and Genome WebGL2 validation passed'
           else
             state='failure'
-            description='FormatX production, laptop loop or Reality Fork validation failed'
+            description='FormatX production or Genome WebGL2 validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
