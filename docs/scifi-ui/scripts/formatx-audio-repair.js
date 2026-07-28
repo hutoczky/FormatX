@@ -23,21 +23,19 @@
     }
     try {
       const offline = new OfflineContext(1, 8192, 44100);
-      const frequencies = [146.83, 174.61, 220];
-      frequencies.forEach((frequency, index) => {
+      [146.83, 174.61, 220].forEach((frequency, index) => {
         const oscillator = offline.createOscillator();
         const gain = offline.createGain();
         oscillator.type = index === 1 ? 'triangle' : 'sine';
         oscillator.frequency.value = frequency;
-        gain.gain.value = 0.11 / frequencies.length;
+        gain.gain.value = 0.04;
         oscillator.connect(gain).connect(offline.destination);
         oscillator.start(0);
         oscillator.stop(0.16);
       });
       const rendered = await offline.startRendering();
-      const data = rendered.getChannelData(0);
       let peak = 0;
-      for (const sample of data) peak = Math.max(peak, Math.abs(sample));
+      for (const sample of rendered.getChannelData(0)) peak = Math.max(peak, Math.abs(sample));
       root.dataset.fxAudioSelfTest = peak > 0.05 ? 'passed' : 'failed';
       root.style.setProperty('--fx-audio-self-test-peak', peak.toFixed(3));
     } catch (error) {
@@ -69,12 +67,12 @@
     let fallback;
     let enabled = false;
     let operation = 0;
-    let lastUi = 0;
-    let signalTimer = 0;
     let schedulerTimer = 0;
+    let signalTimer = 0;
     let nextChordTime = 0;
     let chordIndex = 0;
-    const activeMusicSources = new Set();
+    let lastUi = 0;
+    const activeSources = new Set();
 
     const language = () => root.lang === 'en' ? 'en' : 'hu';
 
@@ -85,6 +83,8 @@
       button.setAttribute('aria-pressed', String(on));
       button.dataset.fxAudioState = state;
       root.dataset.fxAudioState = state;
+      root.dataset.fxAudioLevel = pending ? 'starting' : on ? 'audible' : blocked ? 'blocked' : 'off';
+      root.dataset.fxAudioMusic = on ? 'playing' : pending ? 'starting' : 'stopped';
       const label = button.querySelector('span');
       if (label) label.textContent = pending
         ? (language() === 'en' ? 'STARTING…' : 'INDÍTÁS…')
@@ -96,8 +96,6 @@
       button.setAttribute('aria-label', on
         ? (language() === 'en' ? 'Disable cinematic ambient music' : 'Filmes ambient zene kikapcsolása')
         : (language() === 'en' ? 'Enable cinematic ambient music' : 'Filmes ambient zene bekapcsolása'));
-      root.dataset.fxAudioLevel = pending ? 'starting' : on ? 'audible' : blocked ? 'blocked' : 'off';
-      root.dataset.fxAudioMusic = on ? 'playing' : pending ? 'starting' : 'stopped';
     }
 
     function impulse(seconds, decay) {
@@ -106,31 +104,10 @@
       for (let channel = 0; channel < 2; channel += 1) {
         const data = buffer.getChannelData(channel);
         for (let index = 0; index < length; index += 1) {
-          const envelope = Math.pow(1 - index / length, decay);
-          data[index] = (Math.random() * 2 - 1) * envelope;
+          data[index] = (Math.random() * 2 - 1) * Math.pow(1 - index / length, decay);
         }
       }
       return buffer;
-    }
-
-    function connectSpatial(node, pan = 0, wetness = 0.5, destination = null) {
-      const panner = typeof ctx.createStereoPanner === 'function' ? ctx.createStereoPanner() : null;
-      const dryGain = ctx.createGain();
-      const wetGain = ctx.createGain();
-      dryGain.gain.value = 1 - wetness * 0.55;
-      wetGain.gain.value = wetness;
-      if (panner) {
-        panner.pan.value = pan;
-        node.connect(panner);
-        panner.connect(dryGain);
-        panner.connect(wetGain);
-      } else {
-        node.connect(dryGain);
-        node.connect(wetGain);
-      }
-      dryGain.connect(destination || dry);
-      wetGain.connect(wet);
-      return [panner, dryGain, wetGain];
     }
 
     function build() {
@@ -149,15 +126,15 @@
 
         analyser = ctx.createAnalyser();
         analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.12;
+        analyser.smoothingTimeConstant = 0;
         analyser.connect(compressor);
 
         master = ctx.createGain();
-        master.gain.value = 0.82;
+        master.gain.value = 0.88;
         master.connect(analyser);
 
         dry = ctx.createGain();
-        dry.gain.value = 0.76;
+        dry.gain.value = 0.82;
         dry.connect(master);
 
         reverb = ctx.createConvolver();
@@ -181,8 +158,11 @@
         musicFilter.connect(musicWet).connect(wet);
 
         fxBus = ctx.createGain();
-        fxBus.gain.value = 0.78;
+        fxBus.gain.value = 1;
         fxBus.connect(dry);
+        const fxWet = ctx.createGain();
+        fxWet.gain.value = 0.35;
+        fxBus.connect(fxWet).connect(wet);
 
         const air = ctx.createBufferSource();
         const airBuffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
@@ -235,98 +215,86 @@
     }
 
     function track(source, cleanup) {
-      activeMusicSources.add(source);
+      activeSources.add(source);
       source.addEventListener('ended', () => {
-        activeMusicSources.delete(source);
+        activeSources.delete(source);
         try { source.disconnect(); } catch (_) {}
         cleanup?.();
       }, { once: true });
     }
 
+    function panned(node, pan) {
+      if (typeof ctx.createStereoPanner !== 'function') return node;
+      const panner = ctx.createStereoPanner();
+      panner.pan.value = pan;
+      node.connect(panner);
+      return panner;
+    }
+
     function schedulePadNote(frequency, start, duration, volume, pan, detune) {
       const oscillator = ctx.createOscillator();
-      const shimmer = ctx.createOscillator();
-      const gain = ctx.createGain();
+      const overtone = ctx.createOscillator();
+      const overtoneGain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
       const finish = start + duration;
-      const releaseStart = Math.max(start + 2.2, finish - 2.4);
+      const release = finish - 2.4;
 
       oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(frequency, start);
+      oscillator.frequency.value = frequency;
       oscillator.detune.value = detune;
-      shimmer.type = 'triangle';
-      shimmer.frequency.setValueAtTime(frequency * 2, start);
-      shimmer.detune.value = -detune * 0.65;
-
-      const shimmerGain = ctx.createGain();
-      shimmerGain.gain.value = 0.16;
+      overtone.type = 'triangle';
+      overtone.frequency.value = frequency * 2;
+      overtone.detune.value = -detune * 0.65;
+      overtoneGain.gain.value = 0.15;
       filter.type = 'lowpass';
       filter.frequency.value = Math.min(3200, frequency * 7.5);
       filter.Q.value = 0.3;
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(volume, start + 1.7);
-      gain.gain.setValueAtTime(volume, releaseStart);
-      gain.gain.exponentialRampToValueAtTime(0.0001, finish);
-
-      oscillator.connect(filter);
-      shimmer.connect(shimmerGain).connect(filter);
-      filter.connect(gain).connect(musicBus);
-      const panner = typeof ctx.createStereoPanner === 'function' ? ctx.createStereoPanner() : null;
-      if (panner) {
-        gain.disconnect();
-        gain.connect(panner).connect(musicBus);
-        panner.pan.value = pan;
-      }
-
-      oscillator.start(start);
-      shimmer.start(start);
-      oscillator.stop(finish + 0.05);
-      shimmer.stop(finish + 0.05);
-      track(oscillator, () => {
-        try { shimmer.disconnect(); } catch (_) {}
-        try { shimmerGain.disconnect(); } catch (_) {}
-        try { filter.disconnect(); } catch (_) {}
-        try { gain.disconnect(); } catch (_) {}
-        try { panner?.disconnect(); } catch (_) {}
-      });
-      track(shimmer);
-    }
-
-    function scheduleBass(rootFrequency, start, accent = 1) {
-      const oscillator = ctx.createOscillator();
-      const overtone = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      const finish = start + 2.6;
-
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(rootFrequency, start);
-      oscillator.frequency.exponentialRampToValueAtTime(rootFrequency * 0.94, finish);
-      overtone.type = 'sine';
-      overtone.frequency.setValueAtTime(rootFrequency * 2, start);
-      const overtoneGain = ctx.createGain();
-      overtoneGain.gain.value = 0.18;
-      filter.type = 'lowpass';
-      filter.frequency.value = 310;
-      filter.Q.value = 0.55;
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.075 * accent, start + 0.11);
+      gain.gain.exponentialRampToValueAtTime(volume, start + 1.6);
+      gain.gain.setValueAtTime(volume, release);
       gain.gain.exponentialRampToValueAtTime(0.0001, finish);
 
       oscillator.connect(filter);
       overtone.connect(overtoneGain).connect(filter);
-      filter.connect(gain).connect(musicBus);
+      filter.connect(gain);
+      const output = panned(gain, pan);
+      output.connect(musicBus);
       oscillator.start(start);
       overtone.start(start);
-      oscillator.stop(finish + 0.04);
-      overtone.stop(finish + 0.04);
+      oscillator.stop(finish + 0.05);
+      overtone.stop(finish + 0.05);
       track(oscillator, () => {
         try { overtone.disconnect(); } catch (_) {}
         try { overtoneGain.disconnect(); } catch (_) {}
         try { filter.disconnect(); } catch (_) {}
         try { gain.disconnect(); } catch (_) {}
+        if (output !== gain) try { output.disconnect(); } catch (_) {}
       });
       track(overtone);
+    }
+
+    function scheduleBass(frequency, start, accent) {
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      const finish = start + 2.8;
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(frequency, start);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.94, finish);
+      filter.type = 'lowpass';
+      filter.frequency.value = 300;
+      filter.Q.value = 0.5;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.09 * accent, start + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.0001, finish);
+      oscillator.connect(filter).connect(gain).connect(musicBus);
+      oscillator.start(start);
+      oscillator.stop(finish + 0.04);
+      track(oscillator, () => {
+        try { filter.disconnect(); } catch (_) {}
+        try { gain.disconnect(); } catch (_) {}
+      });
     }
 
     function scheduleShimmer(frequency, start, pan) {
@@ -335,29 +303,35 @@
       const finish = start + 4.8;
       oscillator.type = 'sine';
       oscillator.frequency.value = frequency;
-      oscillator.detune.value = pan * 8;
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.016, start + 1.35);
+      gain.gain.exponentialRampToValueAtTime(0.014, start + 1.35);
       gain.gain.exponentialRampToValueAtTime(0.0001, finish);
       oscillator.connect(gain);
-      const nodes = connectSpatial(gain, pan, 0.9, dry);
+      const output = panned(gain, pan);
+      const dryGain = ctx.createGain();
+      const wetGain = ctx.createGain();
+      dryGain.gain.value = 0.35;
+      wetGain.gain.value = 0.82;
+      output.connect(dryGain).connect(dry);
+      output.connect(wetGain).connect(wet);
       oscillator.start(start);
       oscillator.stop(finish + 0.04);
       track(oscillator, () => {
         try { gain.disconnect(); } catch (_) {}
-        nodes.forEach(node => { try { node?.disconnect(); } catch (_) {} });
+        if (output !== gain) try { output.disconnect(); } catch (_) {}
+        try { dryGain.disconnect(); } catch (_) {}
+        try { wetGain.disconnect(); } catch (_) {}
       });
     }
 
     function scheduleChord(start, chord, index) {
       const duration = CHORD_SECONDS + 2.4;
       chord.notes.forEach((frequency, noteIndex) => {
-        const spread = (noteIndex / Math.max(1, chord.notes.length - 1)) * 1.2 - 0.6;
-        const volume = noteIndex < 2 ? 0.034 : 0.024;
-        schedulePadNote(frequency, start, duration, volume, spread, noteIndex % 2 ? 5 : -6);
+        const pan = noteIndex / Math.max(1, chord.notes.length - 1) * 1.2 - 0.6;
+        schedulePadNote(frequency, start, duration, noteIndex < 2 ? 0.038 : 0.027, pan, noteIndex % 2 ? 5 : -6);
       });
       scheduleBass(chord.root, start + 0.05, 1);
-      scheduleBass(chord.root * 1.5, start + 4.05, 0.58);
+      scheduleBass(chord.root * 1.5, start + 4.05, 0.6);
       scheduleShimmer(chord.notes.at(-1) * 2, start + 2.15, index % 2 ? 0.42 : -0.42);
       window.setTimeout(() => {
         if (enabled) root.dataset.fxAudioChord = chord.name;
@@ -368,8 +342,7 @@
       if (!enabled || ctx?.state !== 'running') return;
       const horizon = ctx.currentTime + 16;
       while (nextChordTime < horizon) {
-        const chord = CHORDS[chordIndex % CHORDS.length];
-        scheduleChord(nextChordTime, chord, chordIndex);
+        scheduleChord(nextChordTime, CHORDS[chordIndex], chordIndex);
         nextChordTime += CHORD_SECONDS;
         chordIndex = (chordIndex + 1) % CHORDS.length;
       }
@@ -378,10 +351,10 @@
     function stopScore() {
       clearInterval(schedulerTimer);
       schedulerTimer = 0;
-      for (const source of activeMusicSources) {
+      for (const source of activeSources) {
         try { source.stop(); } catch (_) {}
       }
-      activeMusicSources.clear();
+      activeSources.clear();
       nextChordTime = 0;
       root.dataset.fxAudioChord = '';
     }
@@ -389,12 +362,12 @@
     function startScore() {
       stopScore();
       chordIndex = 0;
-      nextChordTime = ctx.currentTime + 0.08;
+      nextChordTime = ctx.currentTime + 0.06;
       scheduleMusic();
       schedulerTimer = window.setInterval(scheduleMusic, 1000);
     }
 
-    function filteredNoise({ duration = 0.24, volume = 0.025, frequency = 950, end = 320, q = 0.5, pan = 0, wetness = 0.55 }) {
+    function noiseSwell({ duration = 0.3, volume = 0.03, frequency = 1100, end = 300, q = 0.45 }) {
       if (!enabled || ctx?.state !== 'running') return false;
       const source = ctx.createBufferSource();
       const buffer = ctx.createBuffer(1, Math.round(ctx.sampleRate * duration), ctx.sampleRate);
@@ -402,25 +375,23 @@
       for (let index = 0; index < data.length; index += 1) data[index] = Math.random() * 2 - 1;
       source.buffer = buffer;
       const filter = ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.Q.value = q;
       const gain = ctx.createGain();
       const start = ctx.currentTime;
       const finish = start + duration;
+      filter.type = 'bandpass';
+      filter.Q.value = q;
       filter.frequency.setValueAtTime(frequency, start);
       filter.frequency.exponentialRampToValueAtTime(end, finish);
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(volume, start + Math.min(0.045, duration * 0.25));
+      gain.gain.exponentialRampToValueAtTime(volume, start + Math.min(0.06, duration * 0.24));
       gain.gain.exponentialRampToValueAtTime(0.0001, finish);
-      source.connect(filter).connect(gain);
-      const nodes = connectSpatial(gain, pan, wetness, fxBus);
+      source.connect(filter).connect(gain).connect(fxBus);
       source.start(start);
       source.stop(finish + 0.02);
       source.addEventListener('ended', () => {
         try { source.disconnect(); } catch (_) {}
         try { filter.disconnect(); } catch (_) {}
         try { gain.disconnect(); } catch (_) {}
-        nodes.forEach(node => { try { node?.disconnect(); } catch (_) {} });
       }, { once: true });
       return true;
     }
@@ -433,18 +404,18 @@
         analyser.getByteTimeDomainData(data);
         let deviation = 0;
         for (const value of data) deviation = Math.max(deviation, Math.abs(value - 128));
-        root.dataset.fxAudioOutput = deviation >= 3 ? 'signal-verified' : 'no-signal';
+        root.dataset.fxAudioOutput = deviation >= 1 ? 'signal-verified' : 'no-signal';
         root.style.setProperty('--fx-audio-signal', String(deviation));
-        if (deviation < 3) void playFallback();
-      }, 520);
+        if (deviation < 1) void playFallback();
+      }, 850);
     }
 
     async function playFallback() {
       try {
         fallback ||= new Audio(fallbackUrl);
         fallback.preload = 'auto';
-        fallback.loop = true;
-        fallback.volume = 0.72;
+        fallback.loop = false;
+        fallback.volume = 0.62;
         fallback.currentTime = 0;
         await fallback.play();
         root.dataset.fxAudioFallback = 'playing';
@@ -459,21 +430,19 @@
     }
 
     function activation() {
-      filteredNoise({ duration: 1.15, volume: 0.035, frequency: 1700, end: 260, q: 0.3, wetness: 0.85 });
+      noiseSwell({ duration: 1.25, volume: 0.12, frequency: 1850, end: 240, q: 0.28 });
       verifySignal();
     }
 
     function interfaceCue(primary) {
       if (performance.now() - lastUi < 90) return;
       lastUi = performance.now();
-      filteredNoise({
+      noiseSwell({
         duration: primary ? 0.13 : 0.085,
         volume: primary ? 0.022 : 0.012,
         frequency: primary ? 1050 : 760,
         end: primary ? 360 : 280,
-        q: primary ? 0.9 : 0.65,
-        pan: primary ? 0.12 : -0.08,
-        wetness: 0.38
+        q: primary ? 0.9 : 0.65
       });
     }
 
@@ -484,7 +453,6 @@
       musicFilter.frequency.setTargetAtTime(1050 + scene * 115, now, 0.75);
       airFilter.frequency.setTargetAtTime(920 + scene * 105, now, 0.8);
       wet.gain.setTargetAtTime(0.34 + scene * 0.018, now, 0.9);
-      filteredNoise({ duration: 0.52, volume: 0.013, frequency: 720 + scene * 80, end: 250, q: 0.32, pan: scene % 2 ? 0.28 : -0.28, wetness: 0.78 });
     }
 
     async function setEnabled(next) {
@@ -498,9 +466,9 @@
           const now = ctx.currentTime;
           musicBus.gain.cancelScheduledValues(now);
           musicBus.gain.setValueAtTime(Math.max(0.0001, musicBus.gain.value), now);
-          musicBus.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+          musicBus.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
         }
-        window.setTimeout(stopScore, 650);
+        window.setTimeout(stopScore, 540);
         return;
       }
 
@@ -518,7 +486,7 @@
       const now = ctx.currentTime;
       musicBus.gain.cancelScheduledValues(now);
       musicBus.gain.setValueAtTime(Math.max(0.0001, musicBus.gain.value), now);
-      musicBus.gain.exponentialRampToValueAtTime(0.86, now + 2.2);
+      musicBus.gain.exponentialRampToValueAtTime(0.9, now + 1.25);
       sync('on');
       startScore();
       activation();
