@@ -32,13 +32,35 @@ const CASES = [
   }
 ];
 
+function expectedStaticApiFailure(config, rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    return config.name === 'checkout' && url.origin === 'http://127.0.0.1:4181' && url.pathname.startsWith('/api/');
+  } catch (_) {
+    return false;
+  }
+}
+
 async function inspect(browser, config, viewport) {
   const context = await browser.newContext({ viewport, locale: 'hu-HU', reducedMotion: 'no-preference' });
   const page = await context.newPage();
   const errors = [];
+
   page.on('pageerror', error => errors.push('pageerror: ' + error.message));
   page.on('console', message => {
-    if (message.type() === 'error') errors.push('console: ' + message.text());
+    if (message.type() !== 'error') return;
+    const text = message.text();
+    if (/^Failed to load resource:/i.test(text)) return;
+    errors.push('console: ' + text);
+  });
+  page.on('response', response => {
+    if (response.status() < 400 || expectedStaticApiFailure(config, response.url())) return;
+    const request = response.request();
+    errors.push('http ' + response.status() + ' ' + request.resourceType() + ': ' + response.url());
+  });
+  page.on('requestfailed', request => {
+    if (expectedStaticApiFailure(config, request.url())) return;
+    errors.push('requestfailed ' + request.resourceType() + ': ' + request.url() + ' — ' + (request.failure()?.errorText || 'unknown'));
   });
 
   await page.goto(BASE + config.url, { waitUntil: 'domcontentloaded' });
