@@ -8,6 +8,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
+      - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
   push:
     branches: [master]
@@ -15,6 +16,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
+      - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
 
 permissions:
@@ -41,74 +43,19 @@ jobs:
           cache-dependency-path: billing-worker/package-lock.json
 
       - name: Validate WebGPU TSL source architecture
-        shell: python
+        shell: bash
         run: |
-          from pathlib import Path
+          set -euo pipefail
+          python3 .github/scripts/validate-webgpu-source.py
 
-          home = Path('docs/scifi-ui/index.html').read_text(encoding='utf-8')
-          apex = Path('docs/scifi-ui/scripts/formatx-apex.js').read_text(encoding='utf-8')
-          loader = Path('docs/scifi-ui/scripts/igloo-parity.js').read_text(encoding='utf-8')
-          host = Path('docs/scifi-ui/scripts/formatx-three-host.js').read_text(encoding='utf-8')
-          bootstrap = Path('docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js').read_text(encoding='utf-8')
-          webgl_engine = Path('docs/scifi-ui/scripts/Experience.js').read_text(encoding='utf-8')
-          webgpu_engine = Path('docs/scifi-ui/scripts/ExperienceWebGPU.js').read_text(encoding='utf-8')
-          xr = Path('docs/scifi-ui/scripts/WebXRDirector.js').read_text(encoding='utf-8')
-          controls = Path('docs/scifi-ui/scripts/formatx-nextgen-controls.js').read_text(encoding='utf-8')
-          entry = Path('docs/scifi-ui/scripts/experience-entry.js').read_text(encoding='utf-8')
-          stage = Path('docs/scifi-ui/three-stage.html').read_text(encoding='utf-8')
-          css = Path('docs/scifi-ui/styles/formatx-three-host.css').read_text(encoding='utf-8')
-          nextgen_css = Path('docs/scifi-ui/styles/formatx-nextgen-controls.css').read_text(encoding='utf-8')
-          intro = Path('docs/scifi-ui/scripts/formatx-event-horizon.js').read_text(encoding='utf-8')
-          static_headers = Path('docs/scifi-ui/_headers').read_text(encoding='utf-8')
-          worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
-
-          assert home.count('formatx-apex.css?v=20260726-apex-2') == 1
-          assert home.count('formatx-apex.js?v=20260726-apex-2') == 1
-          assert 'id="fx-apex-canvas"' in home
-          assert 'id="fx-particle-canvas"' in home
-          assert 'data-flow="3"' in home
-          assert '15 900 Ft / hó' in home and '29 900 Ft / hó' in home
-          assert 'FAILSAFE_DEADLINE' in intro
-
-          for token in ('formatx-three-host.js', 'formatx-nextgen-controls.js', 'formatx-three-frame-bootstrap.js', 'formatx-transcend-bridge.js'):
-              assert token in loader, token
-          for token in ('THREE.WebGLRenderer', 'THREE.PerspectiveCamera', 'CatmullRomCurve3', 'QualityGovernor'):
-              assert token in webgl_engine, token
-          for token in ('THREE.WebGPURenderer', 'MeshBasicNodeMaterial', 'instancedArray', 'renderer.compute', '500000', 'fragmentNode', 'WebXRDirector', 'setAnimationLoop'):
-              assert token in webgpu_engine, token
-          for token in ('renderer.xr.enabled = true', 'requestSession(mode', 'immersive-ar', 'immersive-vr', 'renderer.xr.setSession'):
-              assert token in xr, token
-          for token in ('AudioContext', 'OscillatorNode', 'BiquadFilterNode', 'scheduleBeat', 'scrollVelocity', 'formatx:xrstate'):
-              if token == 'OscillatorNode':
-                  assert 'createOscillator' in controls
-              elif token == 'BiquadFilterNode':
-                  assert 'createBiquadFilter' in controls
-              elif token == 'scrollVelocity':
-                  assert 'VELOCITY' in controls
-              else:
-                  assert token in controls, token
-          for token in ('Float32Array', '__FORMATX_3D_STATE__', 'fx-three-loop-bridge', 'formatx:loop'):
-              assert token in host, token
-          for token in ('three-stage.html', '20260727-webgpu-1', 'THREE / FRAME ERROR', 'formatx:threeready'):
-              assert token in bootstrap, token
-          for token in ('experience-entry.js', '20260727-webgpu-1'):
-              assert token in stage, token
-          for token in ('ExperienceWebGPU.js', "'gpu' in navigator", 'startWebGLExperience', 'fxWebgpu'):
-              assert token in entry, token
-          for token in ('fx-three-stage-shell', 'fx-three-sound', 'fx-three-loop-bridge'):
-              assert token in css, token
-          for token in ('fx-nextgen-xr', 'data-fx-webgpu'):
-              assert token in nextgen_css, token
-
-          assert 'createRenderer' not in apex
-          assert "getContext('webgl2'" not in apex
-          assert 'formatx-transcend-lite.js' not in loader
-          assert 'worldstage-enhancements.js' not in loader
-          assert 'X-Frame-Options' not in static_headers
-          assert 'THREE_STAGE_CONTENT_SECURITY_POLICY' in worker
-          assert "isThreeStage ? 'SAMEORIGIN' : 'DENY'" in worker
-          assert 'https://cdn.jsdelivr.net' in worker and 'https://unpkg.com' in worker
-          assert '"frame-ancestors \'self\'"' in worker
+      - name: Upload WebGPU source architecture report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-webgpu-source-architecture-report
+          path: webgpu-source-architecture-report.txt
+          if-no-files-found: warn
+          retention-days: 5
 
       - name: Validate JavaScript syntax
         shell: bash
@@ -131,6 +78,9 @@ jobs:
           node --check docs/scifi-ui/scripts/WebXRDirector.js
           node --check docs/scifi-ui/scripts/checkout-v100.js
           node --check docs/scifi-ui/scripts/checkout-language-v100.js
+          node --check docs/scifi-ui/scripts/formatx-category-positioning.js
+          node --check docs/scifi-ui/scripts/formatx-origin-proof.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           node --check .github/scripts/validate-three-site.cjs
 
       - name: Test Worker and production bundle
