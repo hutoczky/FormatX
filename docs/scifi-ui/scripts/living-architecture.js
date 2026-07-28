@@ -107,7 +107,7 @@
     }
     if (!document.querySelector('script[data-fx-genome-webgl-adapter]')) {
       const genome3d = document.createElement('script');
-      genome3d.src = './scripts/interaction-genome-webgl-adapter.js?v=20260728-adaptive-4k-v2';
+      genome3d.src = './scripts/interaction-genome-webgl-adapter.js?v=20260728-cinematic-v3';
       genome3d.defer = true;
       genome3d.dataset.fxGenomeWebglAdapter = 'true';
       document.head.appendChild(genome3d);
