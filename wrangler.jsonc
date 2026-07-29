@@ -20,6 +20,10 @@
     "directory": "docs",
     "binding": "ASSETS",
     "run_worker_first": [
+      "/",
+      "/scifi-ui/",
+      "/scifi-ui/index.html",
+      "/scifi-ui/scripts/formatx-mobile-recovery.js",
       "/download/*",
       "/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
     ]
