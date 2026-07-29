@@ -1,6 +1,10 @@
 const APK_ASSET_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const APK_DOWNLOAD_PATH = '/download/android';
 const APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.2.apk';
+const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
+const MOBILE_RECOVERY_PATH = '/scifi-ui/scripts/formatx-mobile-recovery.js';
+const MOBILE_RECOVERY_OLD_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-1';
+const MOBILE_RECOVERY_NEW_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-3';
 
 export default {
   async fetch(request, env) {
@@ -13,9 +17,64 @@ export default {
       return serveAndroidApk(request, env);
     }
 
+    if (
+      (request.method === 'GET' || request.method === 'HEAD') &&
+      SCIFI_ENTRY_PATHS.has(url.pathname)
+    ) {
+      return serveScifiEntry(request, env);
+    }
+
+    if (
+      (request.method === 'GET' || request.method === 'HEAD') &&
+      url.pathname === MOBILE_RECOVERY_PATH
+    ) {
+      return serveNoStoreAsset(request, env);
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
+
+async function serveScifiEntry(request, env) {
+  const upstream = await env.ASSETS.fetch(request);
+  if (!upstream.ok || request.method === 'HEAD') {
+    const headers = new Headers(upstream.headers);
+    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.delete('ETag');
+    return new Response(null, { status: upstream.status, headers });
+  }
+
+  const contentType = upstream.headers.get('Content-Type') || '';
+  if (!contentType.includes('text/html')) return upstream;
+
+  const html = (await upstream.text()).replaceAll(
+    MOBILE_RECOVERY_OLD_VERSION,
+    MOBILE_RECOVERY_NEW_VERSION,
+  );
+  const headers = new Headers(upstream.headers);
+  headers.set('Cache-Control', 'no-store, max-age=0');
+  headers.set('Pragma', 'no-cache');
+  headers.delete('Content-Length');
+  headers.delete('ETag');
+
+  return new Response(html, {
+    status: upstream.status,
+    headers,
+  });
+}
+
+async function serveNoStoreAsset(request, env) {
+  const upstream = await env.ASSETS.fetch(request);
+  const headers = new Headers(upstream.headers);
+  headers.set('Cache-Control', 'no-store, max-age=0');
+  headers.set('Pragma', 'no-cache');
+  headers.delete('ETag');
+
+  return new Response(request.method === 'HEAD' ? null : upstream.body, {
+    status: upstream.status,
+    headers,
+  });
+}
 
 async function serveAndroidApk(request, env) {
   const assetUrl = new URL(APK_ASSET_PATH, request.url);
