@@ -1,0 +1,74 @@
+/* Mobile stability and hero-layout recovery for the live 3D stage. */
+@media (max-width: 900px), (pointer: coarse) {
+  html[data-fx-three-host="ready"] .fx-three-stage-shell {
+    z-index: 0 !important;
+  }
+
+  html[data-fx-three-host="ready"] main,
+  html[data-fx-three-host="ready"] .topbar,
+  html[data-fx-three-host="ready"] .site-footer {
+    position: relative;
+    z-index: 2;
+  }
+
+  html.fx-mobile-stable-3d #fx-three-frame {
+    opacity: 1;
+    transform: none;
+  }
+
+  .fx-three-telemetry {
+    display: none !important;
+  }
+
+  .fx-three-sound {
+    right: 12px !important;
+    bottom: max(78px, calc(70px + env(safe-area-inset-bottom))) !important;
+  }
+
+  .fx-organism-interface-ready #hero .hero-copy {
+    left: 22px !important;
+    right: 22px !important;
+    bottom: max(210px, calc(184px + env(safe-area-inset-bottom))) !important;
+    width: auto !important;
+  }
+
+  .fx-organism-actionbar {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    max-width: calc(100vw - 24px);
+    gap: 4px !important;
+    padding: 6px !important;
+    overflow-x: auto;
+    border-radius: 17px !important;
+    transform: none !important;
+    scrollbar-width: none;
+  }
+
+  .fx-organism-actionbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fx-organism-actionbar a {
+    flex: 1 0 auto !important;
+    justify-content: center;
+    min-height: 40px !important;
+    padding-inline: 10px !important;
+    font-size: 7px !important;
+    letter-spacing: .08em !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .fx-organism-interface-ready #hero .hero-copy {
+    bottom: max(198px, calc(176px + env(safe-area-inset-bottom))) !important;
+  }
+
+  .fx-organism-interface-ready #hero .hero-title-main {
+    font-size: clamp(52px, 17vw, 78px) !important;
+  }
+
+  .fx-organism-interface-ready #hero .hero-title-sub {
+    font-size: clamp(21px, 7.4vw, 34px) !important;
+  }
+}
