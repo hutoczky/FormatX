@@ -13,33 +13,12 @@
   function installMobileScrollPriority() {
     try {
       const documentRef = parent.document;
-      if (!documentRef.getElementById('fx-mobile-scroll-priority')) {
-        const style = documentRef.createElement('style');
-        style.id = 'fx-mobile-scroll-priority';
-        style.textContent = `
-          @media (max-width: 900px), (pointer: coarse) {
-            html,
-            body {
-              overflow-x: hidden !important;
-              overflow-y: auto !important;
-              touch-action: pan-y pinch-zoom !important;
-              overscroll-behavior-y: auto !important;
-              -webkit-overflow-scrolling: touch !important;
-            }
-
-            main,
-            .scene,
-            .fx-three-stage-shell {
-              touch-action: pan-y pinch-zoom !important;
-            }
-
-            .fx-three-stage-shell,
-            #fx-three-frame {
-              pointer-events: none !important;
-            }
-          }
-        `;
-        documentRef.head.appendChild(style);
+      if (!documentRef.querySelector('link[data-fx-mobile-scroll-style]')) {
+        const link = documentRef.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = './styles/formatx-mobile-scroll.css?v=20260729-mobile-scroll-1';
+        link.dataset.fxMobileScrollStyle = 'true';
+        documentRef.head.appendChild(link);
       }
       documentRef.documentElement.dataset.fxMobileScroll = 'native-pan-y';
     } catch (_) {}
