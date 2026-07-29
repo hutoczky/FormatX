@@ -1,4 +1,4 @@
-name: Validate FormatX continuous laptop loop
+name: Validate FormatX clone-free laptop loop
 run-name: Validate laptop wheel loop from ${{ github.sha }}
 
 on:
@@ -7,16 +7,18 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/igloo-parity.js'
-      - 'docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js'
-      - 'docs/scifi-ui/styles/formatx-infinite-loop-v2.css'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+      - 'docs/scifi-ui/scripts/organism-core-controller.js'
+      - 'docs/scifi-ui/styles/formatx-site-stability.css'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
   pull_request:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/igloo-parity.js'
-      - 'docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js'
-      - 'docs/scifi-ui/styles/formatx-infinite-loop-v2.css'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+      - 'docs/scifi-ui/scripts/organism-core-controller.js'
+      - 'docs/scifi-ui/styles/formatx-site-stability.css'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
 
@@ -45,12 +47,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --check docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
-          grep -Fq 'authoritative-wheel-v2' docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js
-          grep -Fq 'formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2' docs/scifi-ui/scripts/igloo-parity.js
-          ! grep -Fq 'formatx-infinite-loop-fix.js?v=20260727-loop-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq "boundary-v3" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "clonedContent: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "reinitialisedRenderer: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3" docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq "addEventListener('formatx:loop'" docs/scifi-ui/scripts/organism-core-controller.js
+          ! grep -Fq "data-fx-loop-bridge" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "cloneNode" docs/scifi-ui/scripts/formatx-infinite-scroll.js
 
       - name: Install Chromium
         shell: bash
@@ -71,7 +78,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-laptop-loop-http.log"
           exit 1
 
-      - name: Verify real laptop wheel and touchpad continuity
+      - name: Verify laptop wheel and touchpad continuity
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-laptop-loop/node_modules
         shell: bash
@@ -83,7 +90,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-laptop-continuous-loop-report
+          name: formatx-laptop-boundary-loop-report
           path: laptop-continuous-loop-report.txt
           if-no-files-found: warn
           retention-days: 7
@@ -97,13 +104,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='1366x768 and 1536x864 continuous wheel loops passed'
+            description='Clone-free boundary loops passed at both laptop sizes'
           else
             state='failure'
-            description='Continuous laptop wheel loop validation failed'
+            description='Clone-free laptop loop validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX continuous laptop loop' \
+            -f context='FormatX clone-free laptop loop' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
