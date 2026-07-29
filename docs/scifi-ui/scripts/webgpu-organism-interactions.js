@@ -72,10 +72,37 @@
       `    this.onPageHide = () => this.dispose();
     this.scrollImpulse = 0;
     this.clickImpulse = 0;
+    this.tapCandidate = null;
+
     this.onCorePointerDown = event => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       const target = event.target;
-      if (target && target.closest && target.closest('a,button,input,select,textarea,[contenteditable="true"],[role="button"]')) return;
+      if (target && target.closest && target.closest('a,button,input,select,textarea,[contenteditable="true"],[role="button"]')) {
+        this.tapCandidate = null;
+        return;
+      }
+      this.tapCandidate = {
+        id: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        startedAt: performance.now(),
+        moved: false
+      };
+    };
+
+    this.onCorePointerMove = event => {
+      const candidate = this.tapCandidate;
+      if (!candidate || candidate.id !== event.pointerId) return;
+      if (Math.hypot(event.clientX - candidate.x, event.clientY - candidate.y) > 12) {
+        candidate.moved = true;
+      }
+    };
+
+    this.onCorePointerUp = event => {
+      const candidate = this.tapCandidate;
+      if (!candidate || candidate.id !== event.pointerId) return;
+      this.tapCandidate = null;
+      if (candidate.moved || performance.now() - candidate.startedAt > 450) return;
       const viewportWidth = Math.max(1, parent.innerWidth || innerWidth);
       const viewportHeight = Math.max(1, parent.innerHeight || innerHeight);
       const inCoreZone = event.clientX > viewportWidth * 0.18
@@ -84,10 +111,32 @@
         && event.clientY < viewportHeight * 0.9;
       if (inCoreZone) this.clickImpulse = 1;
     };
+
+    this.onCorePointerCancel = event => {
+      if (this.tapCandidate && this.tapCandidate.id === event.pointerId) this.tapCandidate = null;
+    };
+
+    this.onLoop = () => {
+      this.scrollImpulse = 0;
+      this.clickImpulse = 0;
+      this.sceneValue = 0;
+      this.scrollValue = 0;
+      this.pointerVX = 0;
+      this.pointerVY = 0;
+      if (this.particles && typeof this.particles.reset === 'function') this.particles.reset();
+      try {
+        parent.document.documentElement.dataset.fxParticleLoopReset = String(Date.now());
+      } catch (_) {}
+    };
+
     try {
       parent.document.addEventListener('pointerdown', this.onCorePointerDown, { passive: true });
+      parent.document.addEventListener('pointermove', this.onCorePointerMove, { passive: true });
+      parent.document.addEventListener('pointerup', this.onCorePointerUp, { passive: true });
+      parent.document.addEventListener('pointercancel', this.onCorePointerCancel, { passive: true });
+      parent.addEventListener('formatx:loop', this.onLoop);
     } catch (_) {}`,
-      'interaction state'
+      'tap, scroll and loop interaction state'
     );
 
     source = replaceRequired(
@@ -146,6 +195,18 @@
 
     source = replaceRequired(
       source,
+      '  dispose() {\n    this.sprite.material.dispose();',
+      `  reset() {
+    this.renderer.compute(this.computeInit);
+  }
+
+  dispose() {
+    this.sprite.material.dispose();`,
+      'particle field loop reset method'
+    );
+
+    source = replaceRequired(
+      source,
       '    this.core.update(seconds, this.sceneValue, this.pointerX, this.pointerY, this.quality);',
       `    const scrollVelocity = runtimeState[INDEX.VELOCITY] || 0;
     const scrollTarget = Math.min(1, Math.abs(scrollVelocity) * 0.86);
@@ -154,7 +215,7 @@
 
     this.core.update(seconds, this.sceneValue, this.pointerX, this.pointerY, this.quality);
 
-    // Reuse the existing organism pulse uniform, so no extra shader or render loop is required.
+    // Reuse existing uniforms and the current WebGPU frame; no extra render loop.
     this.core.pulse.value = Math.min(
       1.85,
       this.core.pulse.value + this.scrollImpulse * 0.34 + this.clickImpulse * 0.92
@@ -171,7 +232,7 @@
       this.clickImpulse * 0.2 + Math.max(-0.16, Math.min(0.16, scrollVelocity * 0.08))
       - this.core.group.rotation.y
     ) * interactionFollow;`,
-      'scroll and click reaction'
+      'scroll and tap reaction'
     );
 
     source = replaceRequired(
@@ -180,6 +241,10 @@
       `    removeEventListener('resize', this.onResize);
     try {
       parent.document.removeEventListener('pointerdown', this.onCorePointerDown);
+      parent.document.removeEventListener('pointermove', this.onCorePointerMove);
+      parent.document.removeEventListener('pointerup', this.onCorePointerUp);
+      parent.document.removeEventListener('pointercancel', this.onCorePointerCancel);
+      parent.removeEventListener('formatx:loop', this.onLoop);
     } catch (_) {}`,
       'interaction cleanup'
     );
