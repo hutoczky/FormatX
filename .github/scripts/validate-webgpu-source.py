@@ -39,7 +39,11 @@ require("home: one formatx-apex controller", home.count("formatx-apex.js?v=20260
 tokens("home", home, ('id="fx-apex-canvas"', 'id="fx-particle-canvas"', 'data-flow="3"'))
 require("home: Business Pro price", "15 900 Ft / hó" in home)
 require("home: Technician Team price", "29 900 Ft / hó" in home)
-require("intro: failsafe deadline", "FAILSAFE_DEADLINE" in intro)
+require("intro: deterministic timeline", "TIMELINE_DURATION" in intro)
+require("intro: hard deadline", "HARD_DEADLINE" in intro)
+require("intro: no window load wait", "loadOrDeadline" not in intro)
+require("intro: no animation promise wait", "Promise.all(animations)" not in intro)
+
 
 tokens("loader", loader, (
     "formatx-three-host.js",
