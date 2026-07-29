@@ -1,7 +1,6 @@
 // Final-source refinement for the FormatX WebGPU organism.
-// It runs after the interaction fetch patch and before experience-entry creates
-// the executable module Blob, so the live model is refined without a second
-// canvas, renderer or animation loop.
+// The live core keeps one proven node material and one render loop while using
+// a denser mesh and three gently offset membrane surfaces.
 (() => {
   'use strict';
 
@@ -21,19 +20,10 @@
     source = replaceRequired(
       source,
       'const geometry = new THREE.SphereGeometry(1.56, mobile ? 36 : 56, mobile ? 24 : 40);',
-      `const geometry = new THREE.SphereGeometry(1.56, mobile ? 72 : 144, mobile ? 54 : 108);
+      `const geometry = new THREE.SphereGeometry(1.56, mobile ? 64 : 128, mobile ? 48 : 96);
     geometry.computeVertexNormals();
     geometry.normalizeNormals();`,
       'high resolution membrane geometry'
-    );
-
-    source = replaceRequired(
-      source,
-      'material.blending = THREE.NormalBlending;',
-      `material.blending = THREE.NormalBlending;
-    material.alphaToCoverage = true;
-    material.premultipliedAlpha = true;`,
-      'smooth membrane compositing'
     );
 
     source = replaceRequired(
@@ -82,17 +72,17 @@
       `const flowA = positionWorld.y.mul(3.1).add(positionWorld.x.mul(1.7)).sub(this.time.mul(0.52)).sin().mul(0.5).add(0.5);
       const flowB = positionWorld.z.mul(4.2).sub(positionWorld.y.mul(1.9)).add(this.time.mul(0.34)).sin().mul(0.5).add(0.5);
       const filament = smoothstep(0.82, 0.98, flowA.mul(0.62).add(flowB.mul(0.38)));
-      return baseColor.mul(float(0.18).add(flowA.mul(0.08)).add(this.pulse.mul(0.11)))
-        .add(color(0xd5ffff).mul(fresnel.mul(float(0.58).add(this.quality.mul(0.12)))))
-        .add(color(0x4dfff2).mul(filament.mul(0.32)))
-        .add(baseColor.mul(flowB.mul(0.08)));`,
+      return baseColor.mul(float(0.16).add(flowA.mul(0.075)).add(this.pulse.mul(0.1)))
+        .add(color(0xd5ffff).mul(fresnel.mul(float(0.5).add(this.quality.mul(0.1)))))
+        .add(color(0x4dfff2).mul(filament.mul(0.24)))
+        .add(baseColor.mul(flowB.mul(0.06)));`,
       'flowing membrane light'
     );
 
     source = replaceRequired(
       source,
       'return float(0.16).add(fresnel.mul(0.42)).add(this.pulse.mul(0.06)).clamp(0.08, 0.68);',
-      'return float(0.1).add(fresnel.mul(0.34)).add(this.pulse.mul(0.025)).clamp(0.06, 0.52);',
+      'return float(0.055).add(fresnel.mul(0.24)).add(this.pulse.mul(0.02)).clamp(0.04, 0.34);',
       'glass membrane opacity'
     );
 
@@ -105,52 +95,26 @@
     this.shell.frustumCulled = false;
     this.group.add(this.shell);
 
-    const outerVeilMaterial = material.clone();
-    outerVeilMaterial.opacityNode = material.opacityNode.mul(0.24);
-    outerVeilMaterial.colorNode = material.colorNode.mul(0.72).add(color(0xd7ffff).mul(0.045));
-    this.outerVeil = new THREE.Mesh(geometry.clone(), outerVeilMaterial);
+    // The veils deliberately share the same stable node material. Only their
+    // transforms differ, producing depth without extra shader pipelines.
+    this.outerVeil = new THREE.Mesh(geometry.clone(), material);
     this.outerVeil.frustumCulled = false;
-    this.outerVeil.scale.set(1.045, 1.02, 1.035);
-    this.outerVeil.rotation.set(0.12, -0.2, 0.08);
+    this.outerVeil.scale.set(1.04, 1.018, 1.032);
+    this.outerVeil.rotation.set(0.11, -0.19, 0.075);
     this.group.add(this.outerVeil);
 
-    const innerVeilMaterial = material.clone();
-    innerVeilMaterial.opacityNode = material.opacityNode.mul(0.34);
-    innerVeilMaterial.colorNode = material.colorNode.mul(0.62).add(color(0x2ffff0).mul(0.07));
-    this.innerVeil = new THREE.Mesh(geometry.clone(), innerVeilMaterial);
+    this.innerVeil = new THREE.Mesh(geometry.clone(), material);
     this.innerVeil.frustumCulled = false;
-    this.innerVeil.scale.set(0.91, 0.95, 0.89);
-    this.innerVeil.rotation.set(-0.16, 0.24, -0.1);
-    this.group.add(this.innerVeil);
-
-    const filamentMaterial = new THREE.MeshBasicNodeMaterial();
-    filamentMaterial.transparent = true;
-    filamentMaterial.depthWrite = false;
-    filamentMaterial.blending = THREE.AdditiveBlending;
-    filamentMaterial.colorNode = stateColor(this.scene).mul(float(0.42).add(this.pulse.mul(0.48)));
-    filamentMaterial.opacityNode = float(0.08).add(this.pulse.mul(0.07));
-
-    this.filamentA = new THREE.Mesh(
-      new THREE.TorusKnotGeometry(0.83, 0.012, mobile ? 96 : 180, mobile ? 8 : 12, 2, 3),
-      filamentMaterial
-    );
-    this.filamentA.scale.set(0.9, 1.18, 0.78);
-    this.group.add(this.filamentA);
-
-    this.filamentB = new THREE.Mesh(
-      new THREE.TorusKnotGeometry(0.68, 0.009, mobile ? 84 : 156, mobile ? 7 : 10, 3, 2),
-      filamentMaterial.clone()
-    );
-    this.filamentB.scale.set(0.78, 1.24, 0.92);
-    this.filamentB.rotation.set(0.46, -0.28, 0.3);
-    this.group.add(this.filamentB);`,
-      'layered living membranes and inner filaments'
+    this.innerVeil.scale.set(0.92, 0.955, 0.9);
+    this.innerVeil.rotation.set(-0.15, 0.23, -0.09);
+    this.group.add(this.innerVeil);`,
+      'stable layered living membranes'
     );
 
     source = replaceRequired(
       source,
       'this.energy = new THREE.Mesh(new THREE.SphereGeometry(1.18, mobile ? 26 : 40, mobile ? 18 : 28), energyMaterial);',
-      'this.energy = new THREE.Mesh(new THREE.SphereGeometry(1.12, mobile ? 52 : 96, mobile ? 38 : 72), energyMaterial);',
+      'this.energy = new THREE.Mesh(new THREE.SphereGeometry(1.1, mobile ? 40 : 80, mobile ? 30 : 60), energyMaterial);',
       'smooth inner energy geometry'
     );
 
@@ -159,15 +123,11 @@
       '    this.pointer.value.set(pointerX, pointerY);',
       `    this.pointer.value.set(pointerX, pointerY);
     const layerBreath = 1 + Math.sin(timeValue * 0.78) * 0.006;
-    this.outerVeil.scale.set(1.045 * layerBreath, 1.02 / layerBreath, 1.035 * layerBreath);
-    this.outerVeil.rotation.y = -0.2 + timeValue * 0.032 + pointerX * 0.035;
-    this.outerVeil.rotation.z = 0.08 + Math.sin(timeValue * 0.37) * 0.045;
-    this.innerVeil.rotation.x = -0.16 - timeValue * 0.025 + pointerY * 0.03;
-    this.innerVeil.rotation.y = 0.24 - timeValue * 0.041;
-    this.filamentA.rotation.x = timeValue * 0.052;
-    this.filamentA.rotation.y = timeValue * -0.064;
-    this.filamentB.rotation.y = 0.3 + timeValue * 0.073;
-    this.filamentB.rotation.z = timeValue * -0.046;`,
+    this.outerVeil.scale.set(1.04 * layerBreath, 1.018 / layerBreath, 1.032 * layerBreath);
+    this.outerVeil.rotation.y = -0.19 + timeValue * 0.03 + pointerX * 0.03;
+    this.outerVeil.rotation.z = 0.075 + Math.sin(timeValue * 0.37) * 0.04;
+    this.innerVeil.rotation.x = -0.15 - timeValue * 0.023 + pointerY * 0.026;
+    this.innerVeil.rotation.y = 0.23 - timeValue * 0.038;`,
       'independent membrane drift'
     );
 
