@@ -22,6 +22,7 @@ on:
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
+      - 'docs/scifi-ui/scripts/organism-console-state.js'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   workflow_dispatch:
 
@@ -52,6 +53,7 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-interface.js
           node --check docs/scifi-ui/scripts/organism-menu-controller.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
+          node --check docs/scifi-ui/scripts/organism-console-state.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v2.js
           node --input-type=module --check < billing-worker/src/production-entry.js
@@ -73,6 +75,7 @@ jobs:
             '/scifi-ui/scripts/formatx-mobile-recovery.js',
             '/scifi-ui/scripts/living-architecture.js',
             '/scifi-ui/scripts/igloo-parity.js',
+            '/scifi-ui/scripts/organism-console-state.js',
             '/scifi-ui/scripts/formatx-render-visibility.js',
             '/scifi-ui/scripts/mobile-webgl-entry.js',
             '/scifi-ui/scripts/mobile-core-engine-v2.js',
@@ -114,6 +117,7 @@ jobs:
           const organism = fs.readFileSync('docs/scifi-ui/scripts/organism-interface.js', 'utf8');
           const menu = fs.readFileSync('docs/scifi-ui/scripts/organism-menu-controller.js', 'utf8');
           const coreController = fs.readFileSync('docs/scifi-ui/scripts/organism-core-controller.js', 'utf8');
+          const consoleState = fs.readFileSync('docs/scifi-ui/scripts/organism-console-state.js', 'utf8');
           const rootWorker = fs.readFileSync('worker.js', 'utf8');
           const productionEntry = fs.readFileSync('billing-worker/src/production-entry.js', 'utf8');
 
@@ -129,8 +133,10 @@ jobs:
             [living.includes('scheduleThreeExperience()'), '3D loader scheduling missing'],
             [living.includes('organism-interface.js'), 'organism interface is not loaded'],
             [living.includes('organism-menu-controller.js'), 'organism menu controller is not loaded'],
-            [loader.includes('formatx-site-stability.css?v=20260729-stability-2'), 'stability stylesheet v2 loader missing'],
-            [loader.includes("safe-ready-v7"), 'safe loader v7 marker missing'],
+            [loader.includes('formatx-site-stability.css?v=20260729-stability-3'), 'stability stylesheet v3 loader missing'],
+            [loader.includes("safe-ready-v8"), 'safe loader v8 marker missing'],
+            [queue.indexOf('organism-console-state.js') < queue.indexOf('organism-core-controller.js'), 'console state must load before core controller'],
+            [loader.includes('organism-console-state.js?v=20260729-console-state-1'), 'console state loader missing'],
             [loader.includes('organism-core-controller.js?v=20260729-core-ui-1'), 'Organism core controller loader missing'],
             [loader.includes('formatx-three-host-safe.js'), 'safe host missing from loader'],
             [loader.includes('formatx-render-visibility.js?v=20260729-render-visibility-1'), 'render visibility module missing'],
@@ -150,6 +156,8 @@ jobs:
             [stabilityCss.includes('--fx-layer-panel: 1700'), 'panel stacking contract missing'],
             [stabilityCss.includes('html.fx-organism-core-active .fx-three-stage-shell'), 'hero core emphasis missing'],
             [stabilityCss.includes('[data-organ-node][aria-current]'), 'Organism map active-state styling missing'],
+            [stabilityCss.includes('.fx-organism-console:not(.is-authorised-open)'), 'unauthorised console hiding missing'],
+            [stabilityCss.includes('.fx-organism-console.is-authorised-open:not([hidden])'), 'authorised console display contract missing'],
             [stabilityCss.includes('html.fx-organism-menu-open .fx-three-stage-shell'), '3D menu suppression missing'],
             [stabilityCss.includes('body.fx-organism-panel-open .fx-three-stage-shell'), '3D panel suppression missing'],
             [stabilityCss.includes('touch-action: pan-y'), 'mobile native scrolling contract missing'],
@@ -169,16 +177,22 @@ jobs:
             [coreController.includes("document.querySelectorAll('[data-organ-node], [data-scene-link]')"), 'map and rail synchronisation missing'],
             [coreController.includes("addEventListener('formatx:organismpanelclose'"), 'panel-to-core return missing'],
             [coreController.includes("if (!/^[1-6]$/.test(event.key)) return"), '01–06 keyboard navigation missing'],
+            [consoleState.includes("root.dataset.fxOrganismConsoleState = 'ready'"), 'console state ready marker missing'],
+            [consoleState.includes("shell.classList.add('is-authorised-open')"), 'panel-open authorisation missing'],
+            [consoleState.includes("shell.classList.remove('is-authorised-open')"), 'panel-close revocation missing'],
+            [consoleState.includes('if (!authorised)'), 'leaked console self-healing missing'],
             [rootWorker.includes('20260729-living-core-css-v3'), 'preview Worker CSS cache version missing'],
             [rootWorker.includes('formatx-site-stability.css'), 'preview Worker stability route missing'],
             [rootWorker.includes('formatx-render-visibility.js'), 'preview Worker render route missing'],
             [rootWorker.includes('organism-core-controller.js'), 'preview Worker core-controller route missing'],
+            [rootWorker.includes('organism-console-state.js'), 'preview Worker console-state route missing'],
             [!rootWorker.includes('organism-panel-startup-guard'), 'preview Worker still references deleted guard'],
             [productionEntry.includes('/scifi-ui/three-stage-mobile.html'), 'mobile stage framing route missing'],
             [productionEntry.includes("headers.set('X-Frame-Options', 'SAMEORIGIN')"), 'same-origin framing header missing'],
             [productionEntry.includes('formatx-site-stability.css'), 'production Worker stability route missing'],
             [productionEntry.includes('formatx-render-visibility.js'), 'production Worker render route missing'],
             [productionEntry.includes('organism-core-controller.js'), 'production Worker core-controller route missing'],
+            [productionEntry.includes('organism-console-state.js'), 'production Worker console-state route missing'],
             [!productionEntry.includes('organism-panel-startup-guard'), 'production Worker still references deleted guard'],
           ];
 
