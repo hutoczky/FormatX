@@ -5,11 +5,13 @@ const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
+  '/scifi-ui/scripts/igloo-parity.js',
   '/scifi-ui/scripts/organism-interface.js',
   '/scifi-ui/scripts/organism-menu-controller.js',
   '/scifi-ui/scripts/mobile-webgl-entry.js',
   '/scifi-ui/scripts/mobile-core-engine-v2.js',
   '/scifi-ui/styles/formatx-mobile-recovery.css',
+  '/scifi-ui/styles/formatx-site-stability.css',
   '/scifi-ui/scripts/formatx-event-horizon.js',
 ]);
 const REPLACEMENTS = [
