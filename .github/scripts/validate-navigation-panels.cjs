@@ -12,7 +12,8 @@ async function waitForInterface(page) {
       && root.dataset.fxOrganismMenu === 'ready'
       && root.dataset.fxOrganismCoreController === 'ready'
       && root.dataset.fxOrganismConsoleState === 'ready'
-      && root.dataset.fxSingleLanguageToggle === 'ready';
+      && root.dataset.fxSingleLanguageToggle === 'ready'
+      && root.dataset.fxInfiniteScroll === 'ready-v3';
   }, null, { timeout: 20000 });
 }
 
@@ -132,6 +133,58 @@ async function closePanelAndAssertCore(page) {
   await assertCore(page);
 }
 
+async function resourceFootprint(page) {
+  return page.evaluate(() => {
+    const frames = Array.from(document.querySelectorAll('.fx-three-stage-shell iframe'));
+    const frameCanvases = frames.reduce((count, frame) => {
+      try {
+        return count + (frame.contentDocument?.querySelectorAll('canvas').length || 0);
+      } catch (_) {
+        return count;
+      }
+    }, 0);
+    return {
+      frames: frames.length,
+      canvases: document.querySelectorAll('canvas').length + frameCanvases,
+      modules: document.querySelectorAll('script[data-fx-transcend-module]').length,
+      loopBridges: document.querySelectorAll('[data-fx-loop-bridge]').length,
+      stageShells: document.querySelectorAll('.fx-three-stage-shell').length,
+    };
+  });
+}
+
+async function completeLoop(page, expectedCount) {
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.waitForFunction(count => (
+    Number(document.documentElement.dataset.fxLoopCount || 0) === count
+    && document.documentElement.dataset.fxLoopSource === 'native-scroll'
+    && document.documentElement.dataset.fxInfiniteInput === 'idle'
+  ), expectedCount, { timeout: 7000 });
+  await assertCore(page);
+
+  const position = await page.evaluate(() => ({
+    y: window.scrollY,
+    hero: document.getElementById('hero')?.getBoundingClientRect().top + window.scrollY,
+  }));
+  if (!Number.isFinite(position.hero) || Math.abs(position.y - position.hero) > 3) {
+    throw new Error(`Infinite scroll did not return to hero: ${JSON.stringify(position)}`);
+  }
+}
+
+async function assertInfiniteScrolling(page) {
+  await completeLoop(page, 1);
+  const first = await resourceFootprint(page);
+  if (first.loopBridges !== 0) throw new Error(`Clone-based loop bridge returned: ${JSON.stringify(first)}`);
+
+  await page.waitForTimeout(450);
+  await completeLoop(page, 2);
+  const second = await resourceFootprint(page);
+
+  if (JSON.stringify(first) !== JSON.stringify(second)) {
+    throw new Error(`Resources accumulated between infinite-scroll cycles: ${JSON.stringify({ first, second })}`);
+  }
+}
+
 async function testDesktop(browser) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
@@ -154,6 +207,7 @@ async function testDesktop(browser) {
   await assertPanel(page, 'system', 4);
   await closePanelAndAssertCore(page);
 
+  await assertInfiniteScrolling(page);
   await page.close();
 }
 
@@ -180,6 +234,7 @@ async function testMobile(browser) {
   await page.keyboard.press('1');
   await assertCore(page);
 
+  await assertInfiniteScrolling(page);
   await page.close();
 }
 
@@ -188,7 +243,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX single language toggle, hero core, blank-console recovery, menu, map, rail and panel interaction');
+    console.log('PASS FormatX language toggle, navigation, panels and two stable infinite-scroll cycles');
   } finally {
     await browser.close();
   }
