@@ -8,6 +8,7 @@ on:
       - 'wrangler.jsonc'
       - 'billing-worker/wrangler.jsonc'
       - 'billing-worker/src/production-entry.js'
+      - 'docs/scifi-ui/license.html'
       - 'docs/scifi-ui/three-stage-mobile.html'
       - 'docs/scifi-ui/Licenc.txt'
       - 'docs/scifi-ui/styles/single-language-toggle.css'
@@ -16,6 +17,8 @@ on:
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/scripts/formatx-copy-polish.js'
+      - 'docs/scifi-ui/scripts/formatx-license-links.js'
+      - 'docs/scifi-ui/scripts/license-page.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
@@ -52,6 +55,8 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/single-language-toggle.js
           node --check docs/scifi-ui/scripts/formatx-copy-polish.js
+          node --check docs/scifi-ui/scripts/formatx-license-links.js
+          node --check docs/scifi-ui/scripts/license-page.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
@@ -79,12 +84,21 @@ jobs:
           const required = [
             '/scifi-ui/',
             '/scifi-ui/index.html',
+            '/scifi-ui/license.html',
+            '/scifi-ui/support.html',
+            '/scifi-ui/terms.html',
+            '/scifi-ui/privacy.html',
+            '/scifi-ui/checkout.html',
+            '/scifi-ui/payment/success.html',
+            '/scifi-ui/payment/cancel.html',
             '/scifi-ui/styles/single-language-toggle.css',
             '/scifi-ui/styles/formatx-copy-polish.css',
             '/scifi-ui/styles/formatx-mobile-recovery.css',
             '/scifi-ui/styles/formatx-site-stability.css',
             '/scifi-ui/scripts/single-language-toggle.js',
             '/scifi-ui/scripts/formatx-copy-polish.js',
+            '/scifi-ui/scripts/formatx-license-links.js',
+            '/scifi-ui/scripts/license-page.js',
             '/scifi-ui/scripts/formatx-infinite-scroll.js',
             '/scifi-ui/scripts/formatx-mobile-recovery.js',
             '/scifi-ui/scripts/living-architecture.js',
@@ -118,6 +132,8 @@ jobs:
           const languageToggleCss = fs.readFileSync('docs/scifi-ui/styles/single-language-toggle.css', 'utf8');
           const copyPolish = fs.readFileSync('docs/scifi-ui/scripts/formatx-copy-polish.js', 'utf8');
           const copyPolishCss = fs.readFileSync('docs/scifi-ui/styles/formatx-copy-polish.css', 'utf8');
+          const licenceLinks = fs.readFileSync('docs/scifi-ui/scripts/formatx-license-links.js', 'utf8');
+          const licencePage = fs.readFileSync('docs/scifi-ui/license.html', 'utf8');
           const licenceSummary = fs.readFileSync('docs/scifi-ui/Licenc.txt', 'utf8');
           const infinite = fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll.js', 'utf8');
           const intro = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
@@ -141,21 +157,26 @@ jobs:
           const queue = loader.split('const queue =', 2)[1]?.split('];', 1)[0] || '';
           const assertions = [
             [languageToggle.includes("toggle.className = 'fx-language-toggle'"), 'single language button creation missing'],
-            [languageToggle.includes('originalButtons.forEach'), 'legacy language buttons are not hidden'],
-            [languageToggleCss.includes('.fx-language-toggle'), 'single language button styling missing'],
+            [languageToggle.includes('hideLegacyControls'), 'legacy language controls are not hidden'],
+            [languageToggle.includes("document.querySelector('.language-switch, .language-control')"), 'universal language container support missing'],
+            [languageToggleCss.includes('.fx-language-toggle') && languageToggleCss.includes('.language-control.fx-single-language-switch'), 'unified language button styling missing'],
             [copyPolish.includes("root.dataset.fxCopyPolish = 'ready-v1'"), 'copy polish ready marker missing'],
             [copyPolish.includes('Licenc és árak') && copyPolish.includes('Licence & pricing'), 'bilingual licence navigation missing'],
             [copyPolish.includes('5 napos próbalicenc') && copyPolish.includes('5-day trial'), 'trial licence wording missing'],
             [copyPolish.includes('Mit ad a FormatX licenc?'), 'licence clarification block missing'],
             [copyPolishCss.includes('.fx-licence-clarity'), 'licence clarification styling missing'],
+            [licenceLinks.includes("'/scifi-ui/license.html'"), 'local detailed licence routing missing'],
+            [licencePage.includes('Részletes licencfeltételek') && licencePage.includes('Detailed licence terms'), 'local bilingual licence page incomplete'],
+            [!licencePage.includes('github.com/hutoczky/FormatX/blob/master/LICENSE'), 'local licence page must not redirect to GitHub'],
             [licenceSummary.includes('nem nyílt forráskódú') && licenceSummary.includes('does not transfer ownership'), 'licence summary is incomplete'],
             [intro.includes('TIMELINE_DURATION') && intro.includes('HARD_DEADLINE'), 'deterministic intro deadline missing'],
             [!intro.includes('loadOrDeadline'), 'intro must not wait for window load'],
             [gate.includes("root.dataset.fxSafeThreeGate = 'ready-v2'"), 'living core gate marker missing'],
             [living.includes('scheduleThreeExperience()'), '3D loader scheduling missing'],
-            [loader.includes("safe-ready-v11"), 'safe loader v11 marker missing'],
+            [loader.includes("safe-ready-v12"), 'safe loader v12 marker missing'],
             [queue.indexOf('single-language-toggle.js') < queue.indexOf('formatx-copy-polish.js'), 'language toggle must load before copy polish'],
-            [queue.indexOf('formatx-copy-polish.js') < queue.indexOf('organism-console-state.js'), 'copy polish must load before Organism modules'],
+            [queue.indexOf('formatx-copy-polish.js') < queue.indexOf('formatx-license-links.js'), 'licence link localizer must load after copy polish'],
+            [queue.indexOf('formatx-license-links.js') < queue.indexOf('organism-console-state.js'), 'local licence routing must be ready before Organism modules'],
             [queue.indexOf('organism-console-state.js') < queue.indexOf('organism-core-controller.js'), 'console state must load before core controller'],
             [queue.indexOf('organism-core-controller.js') < queue.indexOf('formatx-infinite-scroll.js'), 'infinite scroll must load after core controller'],
             [queue.indexOf('formatx-infinite-scroll.js') < queue.indexOf('formatx-three-host-safe.js'), 'infinite scroll must be ready before the 3D host'],
@@ -184,8 +205,8 @@ jobs:
             [menu.includes('function setOpen(toggle, nav, open)'), 'menu state controller missing'],
             [coreController.includes("ROOT.dataset.fxOrganismState = bounded === 0 ? 'core'"), '01 MAG core state missing'],
             [consoleState.includes("root.dataset.fxOrganismConsoleState = 'ready'"), 'console state ready marker missing'],
-            [rootWorker.includes('formatx-copy-polish.js') && rootWorker.includes('formatx-copy-polish.css'), 'preview Worker copy routes missing'],
-            [productionEntry.includes('formatx-copy-polish.js') && productionEntry.includes('formatx-copy-polish.css'), 'production Worker copy routes missing'],
+            [rootWorker.includes('formatx-license-links.js') && rootWorker.includes('license.html'), 'preview Worker local licence routes missing'],
+            [productionEntry.includes('formatx-license-links.js') && productionEntry.includes('license.html'), 'production Worker local licence routes missing'],
             [rootWorker.includes('formatx-infinite-scroll.js'), 'preview Worker infinite-scroll route missing'],
             [productionEntry.includes('formatx-infinite-scroll.js'), 'production Worker infinite-scroll route missing'],
             [productionEntry.includes("headers.set('X-Frame-Options', 'SAMEORIGIN')"), 'same-origin framing header missing'],
