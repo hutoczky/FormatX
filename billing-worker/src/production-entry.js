@@ -1,7 +1,7 @@
 import productionWorker from './production-with-license.js';
 
 const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
-const SINGLE_LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="./styles/single-language-toggle.css?v=20260729-single-language-2">\n  <script defer src="./scripts/single-language-toggle.js?v=20260729-single-language-1"></script>\n';
+const EARLY_UI_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="./styles/single-language-toggle.css?v=20260729-single-language-2">\n  <link rel="stylesheet" data-fx-copy-polish-style="true" href="./styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="./scripts/single-language-toggle.js?v=20260729-single-language-1"></script>\n  <script defer src="./scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
 const EMBEDDABLE_STAGE_PATHS = new Set([
   '/scifi-ui/three-stage-mobile',
   '/scifi-ui/three-stage-mobile.html',
@@ -14,6 +14,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/igloo-parity.js',
   '/scifi-ui/scripts/single-language-toggle.js',
+  '/scifi-ui/scripts/formatx-copy-polish.js',
   '/scifi-ui/scripts/formatx-infinite-scroll.js',
   '/scifi-ui/scripts/organism-console-state.js',
   '/scifi-ui/scripts/formatx-render-visibility.js',
@@ -23,6 +24,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/mobile-webgl-entry.js',
   '/scifi-ui/scripts/mobile-core-engine-v2.js',
   '/scifi-ui/styles/single-language-toggle.css',
+  '/scifi-ui/styles/formatx-copy-polish.css',
   '/scifi-ui/styles/formatx-mobile-recovery.css',
   '/scifi-ui/styles/formatx-site-stability.css',
 ]);
@@ -83,7 +85,9 @@ async function applyStartupSafety(request, url, response) {
   let html = await response.text();
   for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
   if (!html.includes('data-fx-single-language-style')) {
-    html = html.replace('</head>', SINGLE_LANGUAGE_ASSETS + '</head>');
+    html = html.replace('</head>', EARLY_UI_ASSETS + '</head>');
+  } else if (!html.includes('data-fx-copy-polish-style')) {
+    html = html.replace('</head>', '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="./styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="./scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n</head>');
   }
 
   const headers = new Headers(response.headers);
