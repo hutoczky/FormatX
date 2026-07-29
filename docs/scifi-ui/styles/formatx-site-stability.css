@@ -1,0 +1,151 @@
+/* FormatX production interaction and stacking contract. */
+
+:root {
+  --fx-layer-stage: 120;
+  --fx-layer-content: 220;
+  --fx-layer-floating: 720;
+  --fx-layer-header: 960;
+  --fx-layer-menu: 1600;
+  --fx-layer-panel: 1700;
+  --fx-layer-intro: 3000;
+}
+
+.fx-three-stage-shell {
+  z-index: var(--fx-layer-stage) !important;
+  pointer-events: none !important;
+}
+
+#main-content,
+.site-footer {
+  position: relative;
+  z-index: var(--fx-layer-content) !important;
+}
+
+#hero,
+#hero .hero-grid,
+#hero .hero-space,
+main > .scene {
+  background-color: transparent !important;
+}
+
+#hero .hero-copy,
+#hero .hero-actions,
+#hero .hero-facts,
+#hero .scroll-cue {
+  position: relative;
+  z-index: calc(var(--fx-layer-content) + 20) !important;
+}
+
+.fx-rail,
+.fx-organism-status,
+.fx-organism-actionbar,
+.fx-genome-launcher,
+.fx-three-sound {
+  z-index: var(--fx-layer-floating) !important;
+}
+
+.topbar {
+  z-index: var(--fx-layer-header) !important;
+}
+
+#menu-toggle.fx-organism-system-toggle {
+  z-index: calc(var(--fx-layer-menu) + 2) !important;
+}
+
+#main-nav.fx-organism-system-menu {
+  z-index: var(--fx-layer-menu) !important;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+#main-nav.fx-organism-system-menu.open,
+#main-nav.fx-organism-system-menu.open a {
+  pointer-events: auto !important;
+}
+
+.fx-organism-console {
+  z-index: var(--fx-layer-panel) !important;
+  pointer-events: auto;
+}
+
+.fx-organism-console-backdrop,
+.fx-organism-console-shell,
+.fx-organism-console-close,
+.fx-organism-console-nav,
+.fx-organism-panel {
+  pointer-events: auto;
+}
+
+.fx-organism-console-viewport,
+.fx-organism-panel {
+  min-height: 0;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fx-intro-overlay {
+  z-index: var(--fx-layer-intro) !important;
+}
+
+html.fx-organism-menu-open .fx-three-stage-shell,
+body.fx-organism-panel-open .fx-three-stage-shell {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+html.fx-organism-menu-open #main-content,
+html.fx-organism-menu-open .fx-rail,
+html.fx-organism-menu-open .fx-organism-status,
+html.fx-organism-menu-open .fx-organism-actionbar,
+html.fx-organism-menu-open .fx-genome-launcher {
+  pointer-events: none !important;
+}
+
+body.fx-organism-panel-open #menu-toggle,
+body.fx-organism-panel-open #main-nav,
+body.fx-organism-panel-open .fx-organism-actionbar,
+body.fx-organism-panel-open .fx-genome-launcher {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.fx-organism-panel-open .fx-organism-console {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  #main-content {
+    z-index: calc(var(--fx-layer-content) + 10) !important;
+  }
+
+  .fx-organism-console {
+    padding-top: max(72px, env(safe-area-inset-top)) !important;
+  }
+
+  .fx-organism-console-shell {
+    height: calc(100dvh - max(72px, env(safe-area-inset-top))) !important;
+    max-height: none !important;
+  }
+
+  .fx-organism-panel {
+    padding-bottom: max(96px, calc(72px + env(safe-area-inset-bottom))) !important;
+  }
+
+  #main-nav.fx-organism-system-menu {
+    padding-top: max(104px, calc(78px + env(safe-area-inset-top))) !important;
+    padding-bottom: max(42px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main-nav.fx-organism-system-menu,
+  #main-nav.fx-organism-system-menu a,
+  .fx-organism-console-shell {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
