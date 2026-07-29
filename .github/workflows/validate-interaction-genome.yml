@@ -21,7 +21,6 @@ on:
 
 permissions:
   contents: read
-  statuses: write
 
 concurrency:
   group: formatx-interaction-genome-${{ github.ref }}
@@ -32,11 +31,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
@@ -48,19 +45,15 @@ jobs:
           node --check .github/scripts/validate-interaction-genome.cjs
           grep -Fq 'formatx-interaction-genome-v1' docs/scifi-ui/scripts/interaction-genome.js
           grep -Fq 'contains_form_values: false' docs/scifi-ui/scripts/interaction-genome.js
-          grep -Fq 'interaction-genome.js?v=20260728-genome-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'interaction-genome.js?v=20260728-genome-3d-1' docs/scifi-ui/scripts/igloo-parity.js
 
       - name: Install Chromium
-        shell: bash
         run: |
-          set -euo pipefail
           npm install --prefix "$RUNNER_TEMP/formatx-genome" --no-audit --no-fund playwright@1.62.0
           "$RUNNER_TEMP/formatx-genome/node_modules/.bin/playwright" install --with-deps chromium
 
       - name: Start website
-        shell: bash
         run: |
-          set -euo pipefail
           python3 -m http.server 4179 --directory docs > "$RUNNER_TEMP/formatx-genome-http.log" 2>&1 &
           for attempt in $(seq 1 40); do
             curl -fsS http://127.0.0.1:4179/scifi-ui/index.html >/dev/null && exit 0
@@ -72,36 +65,4 @@ jobs:
       - name: Validate reversible spatial session genome
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-genome/node_modules
-        shell: bash
-        run: |
-          set -o pipefail
-          node .github/scripts/validate-interaction-genome.cjs 2>&1 | tee interaction-genome-report.txt
-
-      - name: Upload Interaction Genome report
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: formatx-interaction-genome-report
-          path: interaction-genome-report.txt
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Publish validation status
-        if: always() && github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          JOB_STATUS: ${{ job.status }}
-        shell: bash
-        run: |
-          if [ "$JOB_STATUS" = 'success' ]; then
-            state='success'
-            description='Interaction Genome capture, rewind, fingerprint and export passed'
-          else
-            state='failure'
-            description='Interaction Genome validation failed'
-          fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
-            -f state="$state" \
-            -f context='FormatX Interaction Genome' \
-            -f description="$description" \
-            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        run: node .github/scripts/validate-interaction-genome.cjs
