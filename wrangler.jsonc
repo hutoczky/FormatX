@@ -6,6 +6,16 @@
   "observability": {
     "enabled": true
   },
+  "routes": [
+    {
+      "pattern": "formatxsuite.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.formatxsuite.com",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "docs",
     "binding": "ASSETS",
