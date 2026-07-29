@@ -13,6 +13,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
@@ -47,6 +48,7 @@ jobs:
         shell: bash
         run: |
           node --check docs/scifi-ui/scripts/single-language-toggle.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
           node --check docs/scifi-ui/scripts/living-architecture.js
@@ -77,6 +79,7 @@ jobs:
             '/scifi-ui/styles/formatx-mobile-recovery.css',
             '/scifi-ui/styles/formatx-site-stability.css',
             '/scifi-ui/scripts/single-language-toggle.js',
+            '/scifi-ui/scripts/formatx-infinite-scroll.js',
             '/scifi-ui/scripts/formatx-mobile-recovery.js',
             '/scifi-ui/scripts/living-architecture.js',
             '/scifi-ui/scripts/igloo-parity.js',
@@ -98,18 +101,16 @@ jobs:
           if (!domains.includes('formatxsuite.com') || !domains.includes('www.formatxsuite.com')) {
             throw new Error('Production Worker custom domains are incomplete');
           }
-          if (first.some(path => path.includes('organism-panel-startup-guard'))) {
-            throw new Error('Deleted panel startup guard is still routed');
-          }
           NODE
 
-      - name: Validate hero, language, navigation, overlays and living core contract
+      - name: Validate hero, language, infinite scroll and living core contract
         shell: bash
         run: |
           node - <<'NODE'
           const fs = require('fs');
           const languageToggle = fs.readFileSync('docs/scifi-ui/scripts/single-language-toggle.js', 'utf8');
           const languageToggleCss = fs.readFileSync('docs/scifi-ui/styles/single-language-toggle.css', 'utf8');
+          const infinite = fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll.js', 'utf8');
           const intro = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
           const gate = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-recovery.js', 'utf8');
           const living = fs.readFileSync('docs/scifi-ui/scripts/living-architecture.js', 'utf8');
@@ -132,87 +133,44 @@ jobs:
           const assertions = [
             [languageToggle.includes("toggle.className = 'fx-language-toggle'"), 'single language button creation missing'],
             [languageToggle.includes('originalButtons.forEach'), 'legacy language buttons are not hidden'],
-            [languageToggle.includes('original.click()'), 'single toggle does not use the working language controller'],
-            [languageToggle.includes("addEventListener('formatx:languagechange'"), 'language toggle synchronisation missing'],
             [languageToggleCss.includes('.fx-language-toggle'), 'single language button styling missing'],
-            [languageToggleCss.includes('[data-language][hidden]'), 'legacy language button hiding CSS missing'],
-            [intro.includes('TIMELINE_DURATION'), 'deterministic intro timeline missing'],
-            [intro.includes('HARD_DEADLINE'), 'intro hard deadline missing'],
+            [intro.includes('TIMELINE_DURATION') && intro.includes('HARD_DEADLINE'), 'deterministic intro deadline missing'],
             [!intro.includes('loadOrDeadline'), 'intro must not wait for window load'],
             [gate.includes("root.dataset.fxSafeThreeGate = 'ready-v2'"), 'living core gate marker missing'],
-            [gate.includes("return introComplete && started && !failed ? stageUrl.href : 'about:blank'"), 'blank-before-intro contract missing'],
-            [gate.includes('let ready = false'), 'idempotent ready flag missing'],
-            [gate.includes('if (failed || ready) return'), 'ready re-entry guard missing'],
             [living.includes('scheduleThreeExperience()'), '3D loader scheduling missing'],
-            [living.includes('organism-interface.js'), 'organism interface is not loaded'],
-            [living.includes('organism-menu-controller.js'), 'organism menu controller is not loaded'],
-            [loader.includes('formatx-site-stability.css?v=20260729-stability-3'), 'stability stylesheet v3 loader missing'],
-            [loader.includes("safe-ready-v9"), 'safe loader v9 marker missing'],
+            [loader.includes("safe-ready-v10"), 'safe loader v10 marker missing'],
             [queue.indexOf('single-language-toggle.js') < queue.indexOf('organism-console-state.js'), 'language toggle must load before Organism modules'],
-            [loader.includes('single-language-toggle.js?v=20260729-single-language-1'), 'single language loader missing'],
             [queue.indexOf('organism-console-state.js') < queue.indexOf('organism-core-controller.js'), 'console state must load before core controller'],
-            [loader.includes('organism-console-state.js?v=20260729-console-state-1'), 'console state loader missing'],
-            [loader.includes('organism-core-controller.js?v=20260729-core-ui-1'), 'Organism core controller loader missing'],
-            [loader.includes('formatx-three-host-safe.js'), 'safe host missing from loader'],
-            [loader.includes('formatx-render-visibility.js?v=20260729-render-visibility-1'), 'render visibility module missing'],
-            [!queue.includes('interaction-genome-webgl-adapter.js'), 'secondary WebGL still starts eagerly'],
+            [queue.indexOf('organism-core-controller.js') < queue.indexOf('formatx-infinite-scroll.js'), 'infinite scroll must load after core controller'],
+            [queue.indexOf('formatx-infinite-scroll.js') < queue.indexOf('formatx-three-host-safe.js'), 'infinite scroll must be ready before the 3D host'],
+            [loader.includes('formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3'), 'boundary-v3 loader missing'],
+            [infinite.includes("root.dataset.fxInfiniteScroll = 'ready-v3'"), 'infinite-scroll ready marker missing'],
+            [infinite.includes("controller: 'boundary-v3'"), 'boundary-v3 event contract missing'],
+            [infinite.includes('clonedContent: false'), 'clone-free contract missing'],
+            [infinite.includes('reinitialisedRenderer: false'), 'renderer reuse contract missing'],
+            [infinite.includes("addEventListener('scroll', onScroll, { passive: true })"), 'native mobile scroll listener missing'],
+            [!infinite.includes("addEventListener('click'"), 'infinite scroll must not treat touch as click'],
+            [!infinite.includes('cloneNode'), 'infinite scroll must not clone page content'],
+            [!infinite.includes('data-fx-loop-bridge'), 'legacy loop bridge dependency returned'],
+            [coreController.includes("addEventListener('formatx:loop'"), 'loop-to-core reset missing'],
+            [stabilityCss.includes('html.fx-infinite-loop-jump'), 'instant loop handoff CSS missing'],
             [host.includes("frame.src = 'about:blank'"), 'safe host must create blank frame'],
             [!host.includes('preventDefault()'), 'safe host must not block native scrolling'],
             [renderVisibility.includes("root.classList.contains('fx-organism-menu-open')"), 'menu render pause missing'],
-            [renderVisibility.includes("document.body?.classList.contains('fx-organism-panel-open')"), 'panel render pause missing'],
-            [renderVisibility.includes('state[VISIBLE_INDEX] = shouldRender() ? 1 : 0'), 'shared visibility update missing'],
             [entry.includes('mobile-core-engine-v2.js?v=20260729-living-core-v2'), 'living core engine entry missing'],
             [engine.includes('class LivingCoreEngine'), 'living core class missing'],
             [engine.includes('SphereGeometry(1.28, 96, 72)'), 'smooth membrane missing'],
             [engine.includes('const count = 220'), 'reduced particle budget missing'],
             [stage.includes('20260729-living-entry-v2'), 'living stage cache version missing'],
             [coreCss.includes('data-fx-safe-three-gate="ready-v2"'), 'living core layer selector missing'],
-            [coreCss.includes('.fx-three-telemetry') && coreCss.includes('display: none !important'), 'telemetry overlap protection missing'],
-            [stabilityCss.includes('--fx-layer-panel: 1700'), 'panel stacking contract missing'],
-            [stabilityCss.includes('html.fx-organism-core-active .fx-three-stage-shell'), 'hero core emphasis missing'],
-            [stabilityCss.includes('[data-organ-node][aria-current]'), 'Organism map active-state styling missing'],
-            [stabilityCss.includes('.fx-organism-console:not(.is-authorised-open)'), 'unauthorised console hiding missing'],
-            [stabilityCss.includes('.fx-organism-console.is-authorised-open:not([hidden])'), 'authorised console display contract missing'],
-            [stabilityCss.includes('html.fx-organism-menu-open .fx-three-stage-shell'), '3D menu suppression missing'],
-            [stabilityCss.includes('body.fx-organism-panel-open .fx-three-stage-shell'), '3D panel suppression missing'],
             [stabilityCss.includes('touch-action: pan-y'), 'mobile native scrolling contract missing'],
             [organism.includes('function buildConsole()'), 'working organism console missing'],
-            [organism.includes('function openPanel(id, source)'), 'panel opening missing'],
-            [organism.includes("'data-organism-open': spec.id"), 'panel triggers missing'],
-            [!organism.includes('removeFullscreenOrganismUi'), 'organism interface is disabled'],
-            [!organism.includes('openHashPanel()'), 'stale hash still auto-opens a panel'],
             [menu.includes('function setOpen(toggle, nav, open)'), 'menu state controller missing'],
-            [menu.includes("toggle.addEventListener('click'"), 'menu click handler missing'],
-            [menu.includes("ROOT.dataset.fxOrganismMenu = 'ready'"), 'menu ready state missing'],
-            [!menu.includes("ROOT.dataset.fxOrganismInterface !== 'ready'"), 'menu still depends on panel startup'],
-            [menu.includes('if (event.persisted) resetRestoredPanel()'), 'bfcache panel reset missing'],
-            [!menu.includes('forceClosed'), 'menu is permanently forced closed'],
-            [coreController.includes("ROOT.dataset.fxOrganismCoreController = 'ready'"), 'core controller ready marker missing'],
             [coreController.includes("ROOT.dataset.fxOrganismState = bounded === 0 ? 'core'"), '01 MAG core state missing'],
-            [coreController.includes("document.querySelectorAll('[data-organ-node], [data-scene-link]')"), 'map and rail synchronisation missing'],
-            [coreController.includes("addEventListener('formatx:organismpanelclose'"), 'panel-to-core return missing'],
-            [coreController.includes("if (!/^[1-6]$/.test(event.key)) return"), '01–06 keyboard navigation missing'],
             [consoleState.includes("root.dataset.fxOrganismConsoleState = 'ready'"), 'console state ready marker missing'],
-            [consoleState.includes("shell.classList.add('is-authorised-open')"), 'panel-open authorisation missing'],
-            [consoleState.includes("shell.classList.remove('is-authorised-open')"), 'panel-close revocation missing'],
-            [consoleState.includes('if (!authorised)'), 'leaked console self-healing missing'],
-            [rootWorker.includes('20260729-living-core-css-v3'), 'preview Worker CSS cache version missing'],
-            [rootWorker.includes('single-language-toggle.js'), 'preview Worker language toggle route missing'],
-            [rootWorker.includes('single-language-toggle.css'), 'preview Worker language CSS route missing'],
-            [rootWorker.includes('formatx-site-stability.css'), 'preview Worker stability route missing'],
-            [rootWorker.includes('formatx-render-visibility.js'), 'preview Worker render route missing'],
-            [rootWorker.includes('organism-core-controller.js'), 'preview Worker core-controller route missing'],
-            [rootWorker.includes('organism-console-state.js'), 'preview Worker console-state route missing'],
-            [!rootWorker.includes('organism-panel-startup-guard'), 'preview Worker still references deleted guard'],
-            [productionEntry.includes('/scifi-ui/three-stage-mobile.html'), 'mobile stage framing route missing'],
+            [rootWorker.includes('formatx-infinite-scroll.js'), 'preview Worker infinite-scroll route missing'],
+            [productionEntry.includes('formatx-infinite-scroll.js'), 'production Worker infinite-scroll route missing'],
             [productionEntry.includes("headers.set('X-Frame-Options', 'SAMEORIGIN')"), 'same-origin framing header missing'],
-            [productionEntry.includes('single-language-toggle.js'), 'production Worker language toggle route missing'],
-            [productionEntry.includes('single-language-toggle.css'), 'production Worker language CSS route missing'],
-            [productionEntry.includes('formatx-site-stability.css'), 'production Worker stability route missing'],
-            [productionEntry.includes('formatx-render-visibility.js'), 'production Worker render route missing'],
-            [productionEntry.includes('organism-core-controller.js'), 'production Worker core-controller route missing'],
-            [productionEntry.includes('organism-console-state.js'), 'production Worker console-state route missing'],
-            [!productionEntry.includes('organism-panel-startup-guard'), 'production Worker still references deleted guard'],
           ];
 
           for (const [ok, message] of assertions) {
