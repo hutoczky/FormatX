@@ -34,6 +34,7 @@
   const statusName = status?.querySelector('strong');
   const nodes = Array.from(document.querySelectorAll('[data-organ-node]'));
   let qrGeneration = 0;
+  let threeLoadStarted = false;
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -67,6 +68,10 @@
   }
 
   function loadThreeExperience() {
+    if (threeLoadStarted) return;
+    threeLoadStarted = true;
+    ROOT.dataset.fxThreeLoader = 'starting-after-intro';
+
     if (!document.querySelector('link[data-fx-cryosphere-style]')) {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
@@ -100,7 +105,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260728-cinematic-v4';
+      script.src = './scripts/igloo-parity.js?v=20260729-safe-loader-1';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
@@ -126,6 +131,17 @@
       menuScript.dataset.fxOrganismMenuScript = 'true';
       document.head.appendChild(menuScript);
     }
+
+    ROOT.dataset.fxThreeLoader = 'requested';
+  }
+
+  function scheduleThreeExperience() {
+    if (ROOT.classList.contains('fx-intro-complete')) {
+      loadThreeExperience();
+      return;
+    }
+    ROOT.dataset.fxThreeLoader = 'waiting-for-intro';
+    document.addEventListener('formatx:introcomplete', loadThreeExperience, { once: true });
   }
 
   function revealQrDock() {
@@ -238,7 +254,7 @@
   }
 
   function initialise() {
-    loadThreeExperience();
+    scheduleThreeExperience();
     revealQrDock();
     syncScene();
     updateCommerce();
