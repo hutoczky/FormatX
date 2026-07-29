@@ -21,6 +21,7 @@ intro = text("docs/scifi-ui/scripts/formatx-event-horizon.js")
 static_headers = text("docs/scifi-ui/_headers")
 root_worker = text("worker.js")
 production_worker = text("billing-worker/src/production-with-license.js")
+production_entry = text("billing-worker/src/production-entry.js")
 
 results: list[tuple[str, bool]] = []
 
@@ -114,12 +115,19 @@ require("static headers: no global X-Frame-Options", "X-Frame-Options" not in st
 tokens("root worker safe delivery", root_worker, (
     "20260729-safe-three-gate-1",
     "20260729-safe-three-css-1",
-    "20260729-safe-three-start-2",
+    "20260729-safe-three-start-4",
     "Cache-Control', 'no-store",
 ))
 tokens("production worker security retained", production_worker, (
     "THREE_STAGE_CONTENT_SECURITY_POLICY",
     "isThreeStage ? 'SAMEORIGIN' : 'DENY'",
+    '"frame-ancestors \'self\'"',
+))
+tokens("production entry mobile stage framing", production_entry, (
+    "EMBEDDABLE_STAGE_PATHS",
+    "/scifi-ui/three-stage-mobile.html",
+    "withEmbeddableStageHeaders",
+    "headers.set('X-Frame-Options', 'SAMEORIGIN')",
     '"frame-ancestors \'self\'"',
 ))
 
