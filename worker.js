@@ -11,7 +11,7 @@ const SAFE_THREE_GATE_NEW_VERSION = 'formatx-mobile-recovery.js?v=20260729-safe-
 const SAFE_THREE_CSS_OLD_VERSION = 'formatx-mobile-recovery.css?v=20260729-mobile-recovery-1';
 const SAFE_THREE_CSS_NEW_VERSION = 'formatx-mobile-recovery.css?v=20260729-safe-three-css-1';
 const LIVING_ARCHITECTURE_OLD_VERSION = 'living-architecture.js?v=20260726-living-1';
-const LIVING_ARCHITECTURE_NEW_VERSION = 'living-architecture.js?v=20260729-safe-three-start-1';
+const LIVING_ARCHITECTURE_NEW_VERSION = 'living-architecture.js?v=20260729-safe-three-start-2';
 const EVENT_HORIZON_OLD_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-3"></script>';
 const EVENT_HORIZON_NEW_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260729-event-horizon-5"></script>';
 
