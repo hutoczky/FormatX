@@ -8,6 +8,8 @@ def text(path: str) -> str:
 home = text("docs/scifi-ui/index.html")
 apex = text("docs/scifi-ui/scripts/formatx-apex.js")
 loader = text("docs/scifi-ui/scripts/igloo-parity.js")
+infinite = text("docs/scifi-ui/scripts/formatx-infinite-scroll.js")
+core_controller = text("docs/scifi-ui/scripts/organism-core-controller.js")
 safe_host = text("docs/scifi-ui/scripts/formatx-three-host-safe.js")
 gate = text("docs/scifi-ui/scripts/formatx-mobile-recovery.js")
 living = text("docs/scifi-ui/scripts/living-architecture.js")
@@ -17,6 +19,7 @@ mobile_stage = text("docs/scifi-ui/three-stage-mobile.html")
 legacy_webgpu = text("docs/scifi-ui/scripts/ExperienceWebGPU.js")
 css = text("docs/scifi-ui/styles/formatx-three-host.css")
 safe_css = text("docs/scifi-ui/styles/formatx-mobile-recovery.css")
+stability_css = text("docs/scifi-ui/styles/formatx-site-stability.css")
 intro = text("docs/scifi-ui/scripts/formatx-event-horizon.js")
 static_headers = text("docs/scifi-ui/_headers")
 root_worker = text("worker.js")
@@ -47,25 +50,48 @@ require("intro: no window load wait", "loadOrDeadline" not in intro)
 require("intro: no animation promise wait", "Promise.all(animations)" not in intro)
 
 # Production uses one direct WebGL stage after the intro. The experimental
-# WebGPU engine remains in the repository but must not be started by the live loader.
+# WebGPU engine remains in the repository but is not started by the live loader.
 tokens("safe loader", loader, (
+    "single-language-toggle.js",
+    "organism-console-state.js",
+    "organism-core-controller.js?v=20260729-core-ui-2",
+    "formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3",
     "formatx-three-host-safe.js",
     "formatx-living-core-launcher.js",
     "interaction-genome.js",
+    "safe-ready-v10",
     "load(index + 1)",
 ))
 require("safe loader: no global event bridge", "formatx-transcend-bridge.js" not in loader)
 require("safe loader: no legacy frame bootstrap", "formatx-three-frame-bootstrap.js" not in loader)
 require("safe loader: no legacy professional refinement", "formatx-professional-refinement.js" not in loader)
-require("safe loader: no duplicate infinite loop", "formatx-infinite-loop-controller-v2.js" not in loader)
+require("safe loader: no legacy infinite loop", "formatx-infinite-loop-controller-v2.js" not in loader)
+require("safe loader: no old infinite fix", "formatx-infinite-loop-fix.js" not in loader)
 require("safe loader: no WebGPU nextgen controls", "formatx-nextgen-controls.js" not in loader)
 require("Genome WebGL lazy click trigger", ".fx-genome-launcher" in loader)
 require("Genome WebGL lazy adapter request", "requestGenomeWebgl" in loader)
 require("Genome WebGL adapter not in startup queue", "interaction-genome-webgl-adapter.js" not in loader.split("const queue =", 1)[1].split("];", 1)[0])
 
+# Infinite scrolling is boundary based and reuses the existing renderer.
+tokens("infinite scroll", infinite, (
+    "boundary-v3",
+    "ready-v3",
+    "clonedContent: false",
+    "reinitialisedRenderer: false",
+    "addEventListener('scroll', onScroll, { passive: true })",
+    "addEventListener('wheel', onWheel, { capture: true, passive: false })",
+    "nestedScrollerCanConsume",
+    "fx-infinite-loop-jump",
+))
+require("infinite scroll: no DOM clone", "cloneNode" not in infinite)
+require("infinite scroll: no loop bridge", "data-fx-loop-bridge" not in infinite)
+require("infinite scroll: touch is not a click", "addEventListener('click'" not in infinite)
+require("infinite scroll: projected wheel handoff", "loopToCore('wheel', projected)" in infinite)
+require("infinite scroll: core state reset", "addEventListener('formatx:loop'" in core_controller)
+require("infinite scroll: instant CSS handoff", "html.fx-infinite-loop-jump" in stability_css)
+
 require("living architecture waits for intro", "scheduleThreeExperience()" in living)
 require("living architecture has one loader start", "threeLoadStarted" in living)
-require("living architecture uses safe loader version", "20260729-safe-loader-3" in living)
 require("living architecture does not eagerly inject Genome WebGL", "data-fx-genome-webgl-adapter" not in living)
 
 tokens("living core gate", gate, (
@@ -104,8 +130,7 @@ require("living engine: reduced particles", "const count = 220" in living_engine
 require("living engine: desktop right placement", "this.baseWorldX = desktop ? 1.05 : 0" in living_engine)
 require("living engine: bright emissive core", "emissiveIntensity: 2.45" in living_engine)
 
-# The experimental source remains available for later controlled reintroduction,
-# but it is not part of the live startup path.
+# Experimental WebGPU source is retained for later controlled reintroduction.
 tokens("experimental WebGPU source retained", legacy_webgpu, (
     "THREE.WebGPURenderer",
     "renderer.compute",
@@ -122,8 +147,9 @@ require("static headers: no global X-Frame-Options", "X-Frame-Options" not in st
 
 tokens("root worker living delivery", root_worker, (
     "20260729-living-core-gate-v2",
-    "20260729-living-core-css-v2",
+    "20260729-living-core-css-v3",
     "mobile-core-engine-v2.js",
+    "formatx-infinite-scroll.js",
     "Cache-Control', 'no-store",
 ))
 tokens("production worker security retained", production_worker, (
@@ -138,8 +164,9 @@ tokens("production entry living stage framing", production_entry, (
     "headers.set('X-Frame-Options', 'SAMEORIGIN')",
     '"frame-ancestors \'self\'"',
     "mobile-core-engine-v2.js",
+    "formatx-infinite-scroll.js",
     "20260729-living-core-gate-v2",
-    "20260729-living-core-css-v2",
+    "20260729-living-core-css-v3",
 ))
 
 report = "\n".join(("PASS " if passed else "FAIL ") + label for label, passed in results) + "\n"
