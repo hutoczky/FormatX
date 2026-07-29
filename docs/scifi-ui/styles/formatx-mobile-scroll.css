@@ -1,0 +1,22 @@
+/* Native mobile scrolling takes priority over decorative 3D interaction. */
+@media (max-width: 900px), (pointer: coarse) {
+  html,
+  body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    touch-action: pan-y pinch-zoom !important;
+    overscroll-behavior-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  main,
+  .scene,
+  .fx-three-stage-shell {
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  .fx-three-stage-shell,
+  #fx-three-frame {
+    pointer-events: none !important;
+  }
+}
