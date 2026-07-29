@@ -1,0 +1,74 @@
+name: Validate navigation and organism panels
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/organism-interface.js'
+      - 'docs/scifi-ui/scripts/organism-menu-controller.js'
+      - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'docs/scifi-ui/styles/organism-interface.css'
+      - 'docs/scifi-ui/styles/organism-interface-layering.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
+      - '.github/scripts/validate-navigation-panels.cjs'
+      - '.github/workflows/validate-navigation-panels.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/organism-interface.js'
+      - 'docs/scifi-ui/scripts/organism-menu-controller.js'
+      - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'docs/scifi-ui/styles/organism-interface.css'
+      - 'docs/scifi-ui/styles/organism-interface-layering.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
+      - '.github/scripts/validate-navigation-panels.cjs'
+      - '.github/workflows/validate-navigation-panels.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-navigation-panels-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate source syntax
+        run: |
+          node --check docs/scifi-ui/scripts/organism-interface.js
+          node --check docs/scifi-ui/scripts/organism-menu-controller.js
+          node --check .github/scripts/validate-navigation-panels.cjs
+
+      - name: Install Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-nav" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-nav/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start website
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-nav-http.log" 2>&1 &
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-nav-http.log"
+          exit 1
+
+      - name: Test desktop and mobile navigation
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-nav/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html?lang=hu
+        run: node .github/scripts/validate-navigation-panels.cjs
