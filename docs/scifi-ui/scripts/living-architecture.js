@@ -63,8 +63,18 @@
     return url.href;
   }
 
-  function qrImageUrl(planId, selectedCurrency) {
-    return './assets/qr/' + planId + '-' + selectedCurrency.toLowerCase() + '.svg';
+  function qrApiUrl(planId, selectedCurrency) {
+    const params = new URLSearchParams({
+      plan: planId,
+      cycle: 'monthly',
+      currency: selectedCurrency,
+      v: '20260730-qr1'
+    });
+    return '/api/checkout-qr?' + params.toString();
+  }
+
+  function qrLocalUrl(planId, selectedCurrency) {
+    return './assets/qr/' + planId + '-' + selectedCurrency.toLowerCase() + '.svg?v=20260730-qr1';
   }
 
   function loadThreeExperience() {
@@ -105,7 +115,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260729-safe-loader-10';
+      script.src = './scripts/igloo-parity.js?v=20260730-safe-loader-13';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
@@ -163,6 +173,45 @@
     });
   }
 
+  function loadQrImage(card, image, planId, selectedCurrency, generation) {
+    const apiSource = qrApiUrl(planId, selectedCurrency);
+    const localSource = qrLocalUrl(planId, selectedCurrency);
+
+    card.classList.remove('is-qr-ready', 'is-qr-error');
+    card.classList.add('is-qr-loading');
+    image.decoding = 'async';
+    image.dataset.fxQrFallback = 'false';
+
+    image.onload = () => {
+      if (generation !== qrGeneration) return;
+      if (image.naturalWidth < 32 || image.naturalHeight < 32) {
+        image.onerror?.();
+        return;
+      }
+      card.classList.remove('is-qr-loading', 'is-qr-error');
+      card.classList.add('is-qr-ready');
+      ROOT.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'local-fallback' : 'api';
+    };
+
+    image.onerror = () => {
+      if (generation !== qrGeneration) return;
+      if (image.dataset.fxQrFallback !== 'true') {
+        image.dataset.fxQrFallback = 'true';
+        image.src = localSource;
+        return;
+      }
+      card.classList.remove('is-qr-loading', 'is-qr-ready');
+      card.classList.add('is-qr-error');
+      ROOT.dataset.fxQrDelivery = 'failed';
+    };
+
+    if (image.getAttribute('src') !== apiSource || !image.complete || image.naturalWidth < 32) {
+      image.src = apiSource;
+    } else {
+      image.onload();
+    }
+  }
+
   function updateCommerce() {
     const selectedCurrency = currency();
     const otherCurrency = selectedCurrency === 'HUF' ? 'EUR' : 'HUF';
@@ -198,26 +247,9 @@
           + (language() === 'hu' ? 'fizetési oldal megnyitása' : 'open payment'));
       }
       if (!image) return;
-      card.classList.remove('is-qr-ready', 'is-qr-error');
-      card.classList.add('is-qr-loading');
-      image.onload = () => {
-        if (generation !== qrGeneration) return;
-        if (image.naturalWidth < 32 || image.naturalHeight < 32) {
-          image.onerror();
-          return;
-        }
-        card.classList.remove('is-qr-loading', 'is-qr-error');
-        card.classList.add('is-qr-ready');
-      };
-      image.onerror = () => {
-        if (generation !== qrGeneration) return;
-        card.classList.remove('is-qr-loading', 'is-qr-ready');
-        card.classList.add('is-qr-error');
-      };
       image.alt = plan.name + ' — '
         + (language() === 'hu' ? 'fizetési oldal QR-kódja' : 'payment page QR code');
-      if (ROOT.dataset.fxLocalQr === 'ready') image.src = qrImageUrl(planId, selectedCurrency);
-      else image.removeAttribute('src');
+      loadQrImage(card, image, planId, selectedCurrency, generation);
     });
   }
 
@@ -230,7 +262,7 @@
     });
     observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
     document.addEventListener('click', event => {
-      if (!event.target.closest('[data-currency], [data-language]')) return;
+      if (!event.target.closest('[data-currency], .fx-language-toggle, [data-language], [data-language-choice]')) return;
       setTimeout(() => {
         syncScene();
         updateCommerce();
@@ -247,6 +279,7 @@
   }
 
   function initialise() {
+    ROOT.dataset.fxQrOwner = 'living-v2';
     scheduleThreeExperience();
     revealQrDock();
     syncScene();
