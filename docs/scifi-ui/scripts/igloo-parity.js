@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v6') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v6';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v7') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v7';
 
   let genomeWebglRequested = false;
 
@@ -11,7 +11,7 @@
     if (document.querySelector('link[data-fx-site-stability]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/formatx-site-stability.css?v=20260729-stability-1';
+    link.href = './styles/formatx-site-stability.css?v=20260729-stability-2';
     link.dataset.fxSiteStability = 'true';
     link.addEventListener('load', () => {
       root.dataset.fxSiteStability = 'ready';
@@ -79,8 +79,9 @@
   });
   addEventListener('pageshow', refreshQrImages);
 
-  // Only modules that cannot replace the iframe source or global event APIs.
+  // Ordered, failure-tolerant production modules. None may replace the iframe source.
   const queue = [
+    './scripts/organism-core-controller.js?v=20260729-core-ui-1',
     './scripts/formatx-three-host-safe.js?v=20260729-safe-host-1',
     './scripts/formatx-render-visibility.js?v=20260729-render-visibility-1',
     './scripts/formatx-audio-repair.js?v=20260728-ambient-score-v5',
@@ -90,7 +91,7 @@
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v6';
+      root.dataset.fxTranscendLoader = 'safe-ready-v7';
       return;
     }
 
@@ -101,7 +102,7 @@
     script.addEventListener('load', () => load(index + 1), { once: true });
     script.addEventListener('error', () => {
       console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v6';
+      root.dataset.fxTranscendLoader = 'safe-degraded-v7';
       load(index + 1);
     }, { once: true });
     document.head.appendChild(script);
