@@ -87,9 +87,9 @@
     });
   }
 
-  function loopToCore(source) {
+  function loopToCore(source, projectedY = window.scrollY) {
     if (looping || overlayOpen() || performance.now() < cooldownUntil) return false;
-    if (!atBoundary(window.scrollY)) return false;
+    if (!atBoundary(projectedY)) return false;
 
     looping = true;
     const target = heroTop();
@@ -122,7 +122,7 @@
 
     const projected = window.scrollY + deltaY;
     if (!atBoundary(projected)) return;
-    if (loopToCore('wheel') && event.cancelable) event.preventDefault();
+    if (loopToCore('wheel', projected) && event.cancelable) event.preventDefault();
   }
 
   function onScroll() {
