@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v1') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v1';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v2') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v2';
 
   function refreshQrImages() {
     const currency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR'
@@ -36,10 +36,10 @@
   });
   addEventListener('pageshow', refreshQrImages);
 
-  // Only modules that do not replace the iframe source are allowed here.
+  // Only modules that cannot replace the iframe source are allowed here.
   const queue = [
     './scripts/formatx-transcend-bridge.js?v=20260727-transcend-5',
-    './scripts/formatx-three-host.js?v=20260729-safe-host-1',
+    './scripts/formatx-three-host-safe.js?v=20260729-safe-host-1',
     './scripts/formatx-audio-repair.js?v=20260728-ambient-score-v5',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/interaction-genome.js?v=20260728-genome-3d-1'
@@ -47,7 +47,7 @@
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v1';
+      root.dataset.fxTranscendLoader = 'safe-ready-v2';
       return;
     }
 
@@ -58,7 +58,7 @@
     script.addEventListener('load', () => load(index + 1), { once: true });
     script.addEventListener('error', () => {
       console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v1';
+      root.dataset.fxTranscendLoader = 'safe-degraded-v2';
       load(index + 1);
     }, { once: true });
     document.head.appendChild(script);
