@@ -24,6 +24,7 @@
       "/scifi-ui/",
       "/scifi-ui/index.html",
       "/scifi-ui/scripts/formatx-mobile-recovery.js",
+      "/scifi-ui/scripts/formatx-intro-deadlock-guard.js",
       "/download/*",
       "/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
     ]
