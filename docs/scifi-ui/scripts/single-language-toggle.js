@@ -4,8 +4,9 @@
   const ROOT = document.documentElement;
   const STORAGE_KEY = 'formatx-language';
   const SUPPORTED = new Set(['hu', 'en']);
-  if (ROOT.dataset.fxSingleLanguageToggle === 'ready-v2') return;
-  ROOT.dataset.fxSingleLanguageToggle = 'loading-v2';
+  if (ROOT.dataset.fxSingleLanguageToggle === 'ready' && ROOT.dataset.fxSingleLanguageToggleVersion === '2') return;
+  ROOT.dataset.fxSingleLanguageToggle = 'loading';
+  ROOT.dataset.fxSingleLanguageToggleVersion = '2';
 
   function ownScript() {
     return document.currentScript
@@ -171,7 +172,8 @@
     const duplicateObserver = new MutationObserver(() => hideLegacyControls(container));
     duplicateObserver.observe(document.documentElement, { subtree: true, childList: true });
 
-    ROOT.dataset.fxSingleLanguageToggle = 'ready-v2';
+    ROOT.dataset.fxSingleLanguageToggle = 'ready';
+    ROOT.dataset.fxSingleLanguageToggleVersion = '2';
     return true;
   }
 
