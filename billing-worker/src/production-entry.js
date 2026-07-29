@@ -15,6 +15,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/formatx-render-visibility.js',
   '/scifi-ui/scripts/organism-interface.js',
   '/scifi-ui/scripts/organism-menu-controller.js',
+  '/scifi-ui/scripts/organism-core-controller.js',
   '/scifi-ui/scripts/mobile-webgl-entry.js',
   '/scifi-ui/scripts/mobile-core-engine-v2.js',
   '/scifi-ui/styles/formatx-mobile-recovery.css',
