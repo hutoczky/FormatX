@@ -1,4 +1,4 @@
-name: Validate deterministic intro and direct 3D recovery
+name: Validate deterministic intro and safe 3D startup
 
 on:
   push:
@@ -9,10 +9,12 @@ on:
       - 'docs/scifi-ui/three-stage-mobile.html'
       - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
       - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
+      - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'docs/scifi-ui/scripts/mobile-webgl-entry.js'
       - 'docs/scifi-ui/scripts/mobile-core-engine.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-recovery.js'
-      - 'docs/scifi-ui/scripts/formatx-intro-deadlock-guard.js'
+      - 'docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js'
+      - 'docs/scifi-ui/scripts/formatx-professional-refinement.js'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   workflow_dispatch:
 
@@ -21,7 +23,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-mobile-intro-recovery
+  group: formatx-safe-three-startup
   cancel-in-progress: true
 
 jobs:
@@ -36,7 +38,9 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
-          node --check docs/scifi-ui/scripts/formatx-intro-deadlock-guard.js
+          node --check docs/scifi-ui/scripts/living-architecture.js
+          node --check docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js
+          node --check docs/scifi-ui/scripts/formatx-professional-refinement.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine.js
           node --input-type=module --check < worker.js
@@ -53,24 +57,25 @@ jobs:
             '/scifi-ui/index.html',
             '/scifi-ui/scripts/formatx-event-horizon.js',
             '/scifi-ui/scripts/formatx-mobile-recovery.js',
-            '/scifi-ui/scripts/formatx-intro-deadlock-guard.js',
           ];
           for (const path of required) {
             if (!first.includes(path)) throw new Error(`Missing run_worker_first path: ${path}`);
           }
           NODE
 
-      - name: Validate runtime hand-off contract
+      - name: Validate safe runtime hand-off contract
         shell: bash
         run: |
           node - <<'NODE'
           const fs = require('fs');
           const intro = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
-          const mobile = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-recovery.js', 'utf8');
-          const guard = fs.readFileSync('docs/scifi-ui/scripts/formatx-intro-deadlock-guard.js', 'utf8');
+          const gate = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-recovery.js', 'utf8');
+          const living = fs.readFileSync('docs/scifi-ui/scripts/living-architecture.js', 'utf8');
           const entry = fs.readFileSync('docs/scifi-ui/scripts/mobile-webgl-entry.js', 'utf8');
           const engine = fs.readFileSync('docs/scifi-ui/scripts/mobile-core-engine.js', 'utf8');
           const stage = fs.readFileSync('docs/scifi-ui/three-stage-mobile.html', 'utf8');
+          const bootstrap = fs.readFileSync('docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js', 'utf8');
+          const refinement = fs.readFileSync('docs/scifi-ui/scripts/formatx-professional-refinement.js', 'utf8');
           const worker = fs.readFileSync('worker.js', 'utf8');
 
           const assertions = [
@@ -79,17 +84,21 @@ jobs:
             [intro.includes("beginExit(overlay, token, 'timeline-complete')"), 'timeline completion hand-off missing'],
             [!intro.includes('loadOrDeadline'), 'intro must not wait for window load'],
             [!intro.includes('Promise.all(animations)'), 'intro must not wait for animation promises'],
-            [mobile.includes("return 'about:blank'"), '3D must remain blank before intro completion'],
-            [mobile.includes("document.addEventListener('formatx:introcomplete'"), 'mobile runtime must listen for intro completion'],
-            [guard.includes('DEADLINE = 4800'), 'intro deadline guard missing'],
-            [entry.includes('mobile-core-engine.js'), 'direct mobile engine entry missing'],
+            [gate.includes("root.dataset.fxSafeThreeGate = 'ready-v1'"), 'all-device safe gate marker missing'],
+            [gate.includes("return introComplete && started && !failed ? stageUrl.href : 'about:blank'"), '3D blank-before-intro contract missing'],
+            [gate.includes("document.addEventListener('formatx:introcomplete'"), 'safe gate must listen for intro completion'],
+            [gate.includes('Do not reload the frame automatically'), 'crash-loop prevention missing'],
+            [living.includes('scheduleThreeExperience()'), '3D loader scheduling missing'],
+            [living.includes("'waiting-for-intro'"), '3D loader must wait for intro'],
+            [entry.includes('mobile-core-engine.js'), 'direct engine entry missing'],
             [engine.includes('class MobileCoreEngine'), 'direct 3D engine class missing'],
             [engine.includes("root.dataset.fxThree = 'ready'"), 'first-frame ready signal missing'],
             [stage.includes('direct-mobile-entry-1'), 'direct stage cache version missing'],
-            [worker.includes('20260729-event-horizon-4'), 'live intro cache version missing'],
-            [worker.includes('formatx-mobile-recovery-5'), 'live mobile recovery cache version missing'],
-            [!worker.includes('formatx-intro-replay.js?v='), 'obsolete intro replay must not be injected'],
-            [worker.includes('formatx-intro-deadlock-guard.js?v=20260729-intro-guard-2'), 'intro guard injection missing'],
+            [bootstrap.includes("'safe-gate-bypass'"), 'legacy WebGPU bootstrap bypass missing'],
+            [refinement.includes("'safe-gate-bypass'"), 'legacy refinement bypass missing'],
+            [worker.includes('20260729-event-horizon-5'), 'live intro cache version missing'],
+            [worker.includes('20260729-safe-three-gate-1'), 'live safe gate cache version missing'],
+            [!worker.includes('formatx-intro-deadlock-guard.js?v='), 'duplicate intro guard must not be injected'],
             [worker.includes("Cache-Control', 'no-store"), 'no-store delivery missing'],
           ];
 
