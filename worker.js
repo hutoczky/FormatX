@@ -5,6 +5,7 @@ const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
 const SAFE_THREE_GATE_PATH = '/scifi-ui/scripts/formatx-mobile-recovery.js';
 const LIVING_ARCHITECTURE_PATH = '/scifi-ui/scripts/living-architecture.js';
 const ORGANISM_PANEL_GUARD_PATH = '/scifi-ui/scripts/organism-panel-startup-guard.js';
+const ORGANISM_MENU_CONTROLLER_PATH = '/scifi-ui/scripts/organism-menu-controller.js';
 const SAFE_THREE_CSS_PATH = '/scifi-ui/styles/formatx-mobile-recovery.css';
 const EVENT_HORIZON_PATH = '/scifi-ui/scripts/formatx-event-horizon.js';
 const SAFE_THREE_GATE_OLD_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-1';
@@ -12,9 +13,9 @@ const SAFE_THREE_GATE_NEW_VERSION = 'formatx-mobile-recovery.js?v=20260729-safe-
 const SAFE_THREE_CSS_OLD_VERSION = 'formatx-mobile-recovery.css?v=20260729-mobile-recovery-1';
 const SAFE_THREE_CSS_NEW_VERSION = 'formatx-mobile-recovery.css?v=20260729-safe-three-css-1';
 const LIVING_ARCHITECTURE_OLD_VERSION = 'living-architecture.js?v=20260726-living-1';
-const LIVING_ARCHITECTURE_NEW_VERSION = 'living-architecture.js?v=20260729-safe-three-start-3';
-const LIVING_ARCHITECTURE_NEW_TAG = '<script defer src="./scripts/living-architecture.js?v=20260729-safe-three-start-3"></script>';
-const ORGANISM_PANEL_GUARD_TAG = '<script defer src="./scripts/organism-panel-startup-guard.js?v=20260729-panel-startup-guard-1"></script>';
+const LIVING_ARCHITECTURE_NEW_VERSION = 'living-architecture.js?v=20260729-safe-three-start-4';
+const LIVING_ARCHITECTURE_NEW_TAG = '<script defer src="./scripts/living-architecture.js?v=20260729-safe-three-start-4"></script>';
+const ORGANISM_PANEL_GUARD_TAG = '<script defer src="./scripts/organism-panel-startup-guard.js?v=20260729-panel-startup-guard-2"></script>';
 const EVENT_HORIZON_OLD_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-3"></script>';
 const EVENT_HORIZON_NEW_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260729-event-horizon-5"></script>';
 
@@ -42,6 +43,7 @@ export default {
         url.pathname === SAFE_THREE_GATE_PATH ||
         url.pathname === LIVING_ARCHITECTURE_PATH ||
         url.pathname === ORGANISM_PANEL_GUARD_PATH ||
+        url.pathname === ORGANISM_MENU_CONTROLLER_PATH ||
         url.pathname === SAFE_THREE_CSS_PATH ||
         url.pathname === EVENT_HORIZON_PATH
       )
