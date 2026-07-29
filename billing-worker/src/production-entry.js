@@ -12,6 +12,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/igloo-parity.js',
+  '/scifi-ui/scripts/single-language-toggle.js',
   '/scifi-ui/scripts/organism-console-state.js',
   '/scifi-ui/scripts/formatx-render-visibility.js',
   '/scifi-ui/scripts/organism-interface.js',
@@ -19,6 +20,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/organism-core-controller.js',
   '/scifi-ui/scripts/mobile-webgl-entry.js',
   '/scifi-ui/scripts/mobile-core-engine-v2.js',
+  '/scifi-ui/styles/single-language-toggle.css',
   '/scifi-ui/styles/formatx-mobile-recovery.css',
   '/scifi-ui/styles/formatx-site-stability.css',
 ]);
