@@ -95,7 +95,6 @@
       overlay.hidden = true;
       overlay.setAttribute('aria-hidden', 'true');
       overlay.classList.remove('is-exiting');
-      overlay.style.removeProperty('opacity');
     }
 
     ROOT.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-reveal', 'fx-intro-managed');
@@ -105,65 +104,74 @@
   }
 
   function animateSafely(element, keyframes, options) {
-    if (!element || REDUCE_QUERY.matches) return;
+    if (!element) return;
     try {
       element.animate(keyframes, Object.assign({ fill: 'both' }, options));
     } catch (_) {}
   }
 
   function startVisuals(overlay) {
+    const speed = REDUCE_QUERY.matches ? 0.12 : 1;
+    function timing(duration, delay, easing) {
+      return {
+        duration: Math.max(1, duration * speed),
+        delay: Math.max(0, delay * speed),
+        easing: easing
+      };
+    }
+
     animateSafely(overlay.querySelector('.fx-intro-meta'),
       [{ opacity: 0, transform: 'translateY(-8px)' }, { opacity: 1, transform: 'translateY(0)' }],
-      { duration: 520, delay: 40, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      timing(520, 40, 'cubic-bezier(.2,.8,.2,1)'));
     animateSafely(overlay.querySelector('.fx-intro-corners'),
       [{ opacity: 0 }, { opacity: 0.72 }],
-      { duration: 680, delay: 60, easing: 'ease-out' });
+      timing(680, 60, 'ease-out'));
     animateSafely(overlay.querySelector('.fx-intro-kicker'),
       [{ opacity: 0, transform: 'translateY(14px)', letterSpacing: '.58em' }, { opacity: 1, transform: 'translateY(0)', letterSpacing: '.42em' }],
-      { duration: 620, delay: 120, easing: 'cubic-bezier(.18,.8,.2,1)' });
+      timing(620, 120, 'cubic-bezier(.18,.8,.2,1)'));
     animateSafely(overlay.querySelector('.fx-intro-word span'),
       [
         { opacity: 0, transform: 'translateY(112%) skewY(6deg) scale(.97)', filter: 'blur(12px)' },
         { opacity: 1, offset: 0.58 },
         { opacity: 1, transform: 'translateY(0) skewY(0) scale(1)', filter: 'blur(0)' }
       ],
-      { duration: 920, delay: 150, easing: 'cubic-bezier(.16,.82,.16,1)' });
+      timing(920, 150, 'cubic-bezier(.16,.82,.16,1)'));
     animateSafely(overlay.querySelector('.fx-intro-subtitle'),
       [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'translateY(0)' }],
-      { duration: 560, delay: 650, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      timing(560, 650, 'cubic-bezier(.2,.8,.2,1)'));
     animateSafely(overlay.querySelector('.fx-intro-progress-wrap'),
       [{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'translateY(0)' }],
-      { duration: 620, delay: 360, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      timing(620, 360, 'cubic-bezier(.2,.8,.2,1)'));
     animateSafely(overlay.querySelector('.fx-intro-skip'),
       [{ opacity: 0 }, { opacity: 0.78 }],
-      { duration: 520, delay: 720, easing: 'ease-out' });
+      timing(520, 720, 'ease-out'));
     animateSafely(overlay.querySelector('.fx-intro-grid'),
       [
         { opacity: 0, transform: 'perspective(700px) rotateX(64deg) scale(1.82) translateY(25%)' },
         { opacity: 0.42, transform: 'perspective(700px) rotateX(64deg) scale(1.52) translateY(17%)' }
       ],
-      { duration: 1500, easing: 'cubic-bezier(.16,.8,.2,1)' });
+      timing(1500, 0, 'cubic-bezier(.16,.8,.2,1)'));
     animateSafely(overlay.querySelector('.fx-intro-portal'),
       [
         { opacity: 0, transform: 'translate(-50%, -50%) scale(.48) rotate(-24deg)', filter: 'blur(8px)' },
         { opacity: 0.78, offset: 0.56 },
         { opacity: 0.56, transform: 'translate(-50%, -50%) scale(1) rotate(16deg)', filter: 'blur(0)' }
       ],
-      { duration: 1760, delay: 30, easing: 'cubic-bezier(.18,.78,.2,1)' });
+      timing(1760, 30, 'cubic-bezier(.18,.78,.2,1)'));
     animateSafely(overlay.querySelector('.fx-intro-flare'),
       [
         { opacity: 0, transform: 'translate(-50%, -50%) scale(.01)' },
         { opacity: 0.96, offset: 0.42 },
         { opacity: 0.34, transform: 'translate(-50%, -50%) scale(1)' }
       ],
-      { duration: 1320, delay: 150, easing: 'cubic-bezier(.18,.8,.2,1)' });
+      timing(1320, 150, 'cubic-bezier(.18,.8,.2,1)'));
     animateSafely(overlay.querySelector('.fx-intro-scan'),
       [
         { opacity: 0, transform: 'translateY(-80%)' },
         { opacity: 0.62, offset: 0.2 },
         { opacity: 0, transform: 'translateY(410%)' }
       ],
-      { duration: 1450, delay: 210, easing: 'cubic-bezier(.2,.75,.2,1)' });
+      timing(1450, 210, 'cubic-bezier(.2,.75,.2,1)'));
   }
 
   function ensureControls(overlay) {
@@ -194,11 +202,9 @@
     ROOT.classList.add('fx-intro-reveal');
     overlay.classList.add('is-exiting');
 
-    if (!REDUCE_QUERY.matches) {
-      animateSafely(overlay,
-        [{ opacity: 1 }, { opacity: 0 }],
-        { duration: EXIT_DURATION, easing: 'ease-out' });
-    }
+    animateSafely(overlay,
+      [{ opacity: 1 }, { opacity: 0 }],
+      { duration: EXIT_DURATION, easing: 'ease-out' });
 
     exitTimer = setTimeout(function () {
       if (token === runToken) releasePage(overlay, source || 'timeline-complete');
@@ -243,15 +249,13 @@
     overlay.hidden = false;
     overlay.setAttribute('aria-hidden', 'false');
     overlay.classList.remove('is-exiting');
-    overlay.style.removeProperty('opacity');
     setProgress(overlay, 0);
 
     ROOT.classList.remove('fx-intro-complete', 'fx-intro-reveal');
     ROOT.classList.add('fx-intro-managed', 'fx-intro-pending', 'fx-intro-running');
     ROOT.dataset.fxIntro = 'timeline-running';
 
-    if (REDUCE_QUERY.matches) overlay.style.opacity = '1';
-    else startVisuals(overlay);
+    startVisuals(overlay);
     startProgress(overlay, token);
 
     hardTimer = setTimeout(function () {
