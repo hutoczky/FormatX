@@ -1,0 +1,87 @@
+name: Validate bilingual labels and licence clarification
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/Licenc.txt'
+      - 'docs/scifi-ui/scripts/formatx-copy-polish.js'
+      - 'docs/scifi-ui/styles/formatx-copy-polish.css'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'billing-worker/src/sales-gate.js'
+      - 'billing-worker/src/production-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - '.github/scripts/validate-copy-license.cjs'
+      - '.github/workflows/validate-copy-license.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/Licenc.txt'
+      - 'docs/scifi-ui/scripts/formatx-copy-polish.js'
+      - 'docs/scifi-ui/styles/formatx-copy-polish.css'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'billing-worker/src/sales-gate.js'
+      - 'billing-worker/src/production-entry.js'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - '.github/scripts/validate-copy-license.cjs'
+      - '.github/workflows/validate-copy-license.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-copy-license-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate source syntax and licence contract
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-copy-polish.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check billing-worker/src/sales-gate.js
+          node --input-type=module --check < billing-worker/src/production-entry.js
+          node --input-type=module --check < worker.js
+          node --check .github/scripts/validate-copy-license.cjs
+          grep -Fq '5 napos próbalicenc' docs/scifi-ui/Licenc.txt
+          grep -Fq 'nem nyílt forráskódú' docs/scifi-ui/Licenc.txt
+          grep -Fq 'does not transfer ownership' docs/scifi-ui/Licenc.txt
+          grep -Fq 'formatx-copy-polish.js?v=20260729-copy-polish-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq '/scifi-ui/scripts/formatx-copy-polish.js' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/styles/formatx-copy-polish.css' billing-worker/src/production-entry.js
+
+      - name: Install Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-copy" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-copy/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start website
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-copy-http.log" 2>&1 &
+          for attempt in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-copy-http.log"
+          exit 1
+
+      - name: Test Hungarian and English labels on desktop and mobile
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-copy/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html?lang=hu
+        run: node .github/scripts/validate-copy-license.cjs
