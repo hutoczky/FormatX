@@ -1,4 +1,4 @@
-name: Validate navigation and organism panels
+name: Validate hero core, navigation and organism panels
 
 on:
   push:
@@ -7,10 +7,13 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
+      - 'docs/scifi-ui/scripts/organism-core-controller.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/styles/organism-interface.css'
       - 'docs/scifi-ui/styles/organism-interface-layering.css'
       - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
+      - 'docs/scifi-ui/styles/formatx-site-stability.css'
       - '.github/scripts/validate-navigation-panels.cjs'
       - '.github/workflows/validate-navigation-panels.yml'
   pull_request:
@@ -19,10 +22,13 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
+      - 'docs/scifi-ui/scripts/organism-core-controller.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/styles/organism-interface.css'
       - 'docs/scifi-ui/styles/organism-interface-layering.css'
       - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
+      - 'docs/scifi-ui/styles/formatx-site-stability.css'
       - '.github/scripts/validate-navigation-panels.cjs'
       - '.github/workflows/validate-navigation-panels.yml'
   workflow_dispatch:
@@ -32,7 +38,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-navigation-panels-${{ github.ref }}
+  group: formatx-hero-navigation-panels-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -50,6 +56,8 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/organism-interface.js
           node --check docs/scifi-ui/scripts/organism-menu-controller.js
+          node --check docs/scifi-ui/scripts/organism-core-controller.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check .github/scripts/validate-navigation-panels.cjs
 
       - name: Install Chromium
@@ -67,7 +75,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-nav-http.log"
           exit 1
 
-      - name: Test desktop and mobile navigation
+      - name: Test desktop and mobile hero navigation
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-nav/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html?lang=hu
