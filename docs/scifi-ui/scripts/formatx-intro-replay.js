@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxIntroReplayController === 'ready') return;
-  root.dataset.fxIntroReplayController = 'ready';
+  if (root.dataset.fxIntroReplayController === 'ready-v2') return;
+  root.dataset.fxIntroReplayController = 'ready-v2';
 
   const OVERLAY_ID = 'formatx-event-horizon';
   const DURATION = 1900;
@@ -18,6 +18,11 @@
     } catch (_) {
       return 'navigate';
     }
+  }
+
+  const initialNavigationType = navigationType();
+  if (initialNavigationType === 'back_forward') {
+    root.dataset.fxIntroReplayPlanned = 'true';
   }
 
   function setProgress(overlay, value) {
@@ -82,6 +87,7 @@
       root.classList.add('fx-intro-complete');
       root.dataset.fxIntro = 'replayed';
       root.dataset.fxIntroReplaySource = source;
+      delete root.dataset.fxIntroReplayPlanned;
       replaying = false;
       document.dispatchEvent(new CustomEvent('formatx:introcomplete', {
         detail: { source: 'intro-replay', reason: source }
@@ -95,6 +101,7 @@
     if (!overlay) return;
 
     replaying = true;
+    root.dataset.fxIntroReplayPlanned = 'true';
     token += 1;
     const currentToken = token;
     cancelAnimationFrame(frame);
@@ -140,11 +147,13 @@
   }
 
   addEventListener('pageshow', event => {
-    if (event.persisted) setTimeout(() => replay('bfcache-restore'), 0);
+    if (!event.persisted) return;
+    root.dataset.fxIntroReplayPlanned = 'true';
+    setTimeout(() => replay('bfcache-restore'), 0);
   });
 
   function checkRestoredNavigation() {
-    if (navigationType() !== 'back_forward') return;
+    if (initialNavigationType !== 'back_forward') return;
     setTimeout(() => replay('back-forward-navigation'), 40);
   }
 
