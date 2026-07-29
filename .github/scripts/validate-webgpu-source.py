@@ -58,10 +58,14 @@ require("safe loader: no legacy frame bootstrap", "formatx-three-frame-bootstrap
 require("safe loader: no legacy professional refinement", "formatx-professional-refinement.js" not in loader)
 require("safe loader: no duplicate infinite loop", "formatx-infinite-loop-controller-v2.js" not in loader)
 require("safe loader: no WebGPU nextgen controls", "formatx-nextgen-controls.js" not in loader)
+require("Genome WebGL lazy click trigger", ".fx-genome-launcher" in loader)
+require("Genome WebGL lazy adapter request", "requestGenomeWebgl" in loader)
+require("Genome WebGL adapter not in startup queue", "interaction-genome-webgl-adapter.js" not in loader.split("const queue =", 1)[1].split("];", 1)[0])
 
 require("living architecture waits for intro", "scheduleThreeExperience()" in living)
 require("living architecture has one loader start", "threeLoadStarted" in living)
-require("living architecture uses safe loader version", "20260729-safe-loader-2" in living)
+require("living architecture uses safe loader version", "20260729-safe-loader-3" in living)
+require("living architecture does not eagerly inject Genome WebGL", "data-fx-genome-webgl-adapter" not in living)
 
 tokens("safe 3D gate", gate, (
     "fxSafeThreeGate",
@@ -93,7 +97,8 @@ tokens("direct WebGL engine", mobile_engine, (
     "requestAnimationFrame",
 ))
 
-# The experimental source remains syntactically represented but is not live-owned.
+# The experimental source remains available for later controlled reintroduction,
+# but it is not part of the live startup path.
 tokens("experimental WebGPU source retained", legacy_webgpu, (
     "THREE.WebGPURenderer",
     "renderer.compute",
@@ -109,7 +114,7 @@ require("static headers: no global X-Frame-Options", "X-Frame-Options" not in st
 tokens("root worker safe delivery", root_worker, (
     "20260729-safe-three-gate-1",
     "20260729-safe-three-css-1",
-    "20260729-safe-three-start-1",
+    "20260729-safe-three-start-2",
     "Cache-Control', 'no-store",
 ))
 tokens("production worker security retained", production_worker, (
