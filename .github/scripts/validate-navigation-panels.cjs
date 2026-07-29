@@ -10,7 +10,8 @@ async function waitForInterface(page) {
     return root.classList.contains('fx-intro-complete')
       && root.dataset.fxOrganismInterface === 'ready'
       && root.dataset.fxOrganismMenu === 'ready'
-      && root.dataset.fxOrganismCoreController === 'ready';
+      && root.dataset.fxOrganismCoreController === 'ready'
+      && root.dataset.fxOrganismConsoleState === 'ready';
   }, null, { timeout: 20000 });
 }
 
@@ -34,12 +35,16 @@ async function assertPanel(page, id, scene) {
       root
       && !root.hidden
       && root.getAttribute('aria-hidden') === 'false'
+      && root.classList.contains('is-authorised-open')
+      && getComputedStyle(root).display === 'grid'
       && document.body.classList.contains('fx-organism-panel-open')
       && document.documentElement.dataset.fxScene === String(expectedScene)
       && !document.documentElement.classList.contains('fx-organism-core-active')
       && panel
       && !panel.hidden
       && panel.getAttribute('aria-hidden') === 'false'
+      && getComputedStyle(panel).display !== 'none'
+      && panel.textContent.trim().length > 20
     );
   }, { expectedId: id, expectedScene: scene }, { timeout: 5000 });
 }
@@ -63,15 +68,30 @@ async function assertCore(page) {
     return root.dataset.fxScene === '0'
       && root.dataset.fxOrganismState === 'core'
       && root.classList.contains('fx-organism-core-active')
+      && root.dataset.fxOrganismConsole === 'closed'
       && document.getElementById('hero')?.classList.contains('is-core-active')
       && !document.body.classList.contains('fx-organism-panel-open')
       && consoleRoot?.hidden === true
+      && consoleRoot?.getAttribute('aria-hidden') === 'true'
+      && !consoleRoot?.classList.contains('is-authorised-open')
+      && getComputedStyle(consoleRoot).display === 'none'
       && location.hash === '#hero'
       && status?.querySelector('.fx-organism-status-index')?.textContent === '01 / 06'
       && status?.querySelector('strong')?.textContent === 'MAG'
       && document.querySelector('[data-organ-node="0"]')?.getAttribute('aria-current') === 'page'
       && document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current') === 'page';
   }, null, { timeout: 5000 });
+}
+
+async function assertLeakedConsoleSelfHeals(page) {
+  await page.evaluate(() => {
+    const shell = document.getElementById('fx-organism-console');
+    if (!shell) throw new Error('Organism console missing');
+    shell.hidden = false;
+    shell.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('fx-organism-panel-open');
+  });
+  await assertCore(page);
 }
 
 async function closePanelAndAssertCore(page) {
@@ -84,6 +104,7 @@ async function testDesktop(browser) {
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await waitForInterface(page);
   await assertCore(page);
+  await assertLeakedConsoleSelfHeals(page);
 
   await openMenu(page);
   await page.locator('#main-nav a[href="#experience"]').click();
@@ -111,6 +132,7 @@ async function testMobile(browser) {
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await waitForInterface(page);
   await assertCore(page);
+  await assertLeakedConsoleSelfHeals(page);
 
   await openMenu(page);
   await page.locator('#main-nav a[href="#capabilities"]').click();
@@ -131,7 +153,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX hero core, menu, map, rail and panel interaction');
+    console.log('PASS FormatX hero core, blank-console recovery, menu, map, rail and panel interaction');
   } finally {
     await browser.close();
   }
