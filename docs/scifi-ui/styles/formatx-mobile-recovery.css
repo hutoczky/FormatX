@@ -1,7 +1,8 @@
-/* Mobile stability and hero-layout recovery for the live 3D stage. */
+/* Mobile stability, visible 3D stage and compact hero layout. */
 @media (max-width: 900px), (pointer: coarse) {
   html[data-fx-three-host="ready"] .fx-three-stage-shell {
-    z-index: 0 !important;
+    z-index: 1 !important;
+    background: transparent !important;
   }
 
   html[data-fx-three-host="ready"] main,
@@ -11,9 +12,18 @@
     z-index: 2;
   }
 
-  html.fx-mobile-stable-3d #fx-three-frame {
-    opacity: 1;
-    transform: none;
+  html[data-fx-three-host="ready"] #hero,
+  html[data-fx-three-host="ready"] #hero .hero-grid,
+  html[data-fx-three-host="ready"] #hero .hero-space {
+    background: transparent !important;
+  }
+
+  html.fx-mobile-stable-3d #fx-three-frame,
+  html[data-fx-three="ready"] #fx-three-frame,
+  html.fx-three-engine-ready #fx-three-frame {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
   }
 
   .fx-three-telemetry {
@@ -25,11 +35,35 @@
     bottom: max(78px, calc(70px + env(safe-area-inset-bottom))) !important;
   }
 
+  .topbar {
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 10px !important;
+    padding-inline: 16px !important;
+  }
+
+  .topbar .brand {
+    min-width: 0 !important;
+  }
+
+  .topbar .brand span {
+    min-width: 0 !important;
+  }
+
+  .topbar .header-actions {
+    display: none !important;
+  }
+
+  .topbar .menu-toggle {
+    justify-self: end !important;
+  }
+
   .fx-organism-interface-ready #hero .hero-copy {
     left: 22px !important;
     right: 22px !important;
     bottom: max(210px, calc(184px + env(safe-area-inset-bottom))) !important;
     width: auto !important;
+    z-index: 4 !important;
   }
 
   .fx-organism-actionbar {
