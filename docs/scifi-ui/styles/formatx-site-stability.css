@@ -13,6 +13,7 @@
 .fx-three-stage-shell {
   z-index: var(--fx-layer-stage) !important;
   pointer-events: none !important;
+  transition: opacity .42s ease, visibility .42s ease, filter .42s ease !important;
 }
 
 #main-content,
@@ -34,6 +35,42 @@ main > .scene {
 #hero .scroll-cue {
   position: relative;
   z-index: calc(var(--fx-layer-content) + 20) !important;
+}
+
+html.fx-organism-core-active .fx-three-stage-shell {
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: saturate(1.16) brightness(1.08) contrast(1.04) !important;
+}
+
+#hero.is-core-active .hero-title-main,
+#hero.is-core-active .hero-actions {
+  filter: saturate(1.08) brightness(1.04);
+}
+
+#hero.is-core-active .hero-actions .button-solid {
+  box-shadow: 0 0 0 1px rgba(126, 232, 255, .34), 0 18px 52px rgba(80, 185, 255, .16);
+}
+
+.fx-organism-map [data-organ-node],
+.fx-rail [data-scene-link] {
+  transition: opacity .22s ease, transform .22s ease, filter .22s ease;
+}
+
+.fx-organism-map [data-organ-node].active,
+.fx-organism-map [data-organ-node][aria-current],
+.fx-rail [data-scene-link].active,
+.fx-rail [data-scene-link][aria-current] {
+  opacity: 1 !important;
+  filter: brightness(1.28) saturate(1.22) drop-shadow(0 0 12px rgba(105, 226, 255, .42));
+}
+
+.fx-organism-map [data-organ-node].active {
+  transform: translateX(4px) scale(1.035);
+}
+
+.fx-rail [data-scene-link].active {
+  transform: scale(1.12);
 }
 
 .fx-rail,
@@ -122,6 +159,10 @@ body.fx-organism-panel-open .fx-organism-console {
     z-index: calc(var(--fx-layer-content) + 10) !important;
   }
 
+  #hero.is-core-active .hero-space {
+    min-height: 52svh;
+  }
+
   .fx-organism-console {
     padding-top: max(72px, env(safe-area-inset-top)) !important;
   }
@@ -144,7 +185,10 @@ body.fx-organism-panel-open .fx-organism-console {
 @media (prefers-reduced-motion: reduce) {
   #main-nav.fx-organism-system-menu,
   #main-nav.fx-organism-system-menu a,
-  .fx-organism-console-shell {
+  .fx-organism-console-shell,
+  .fx-three-stage-shell,
+  .fx-organism-map [data-organ-node],
+  .fx-rail [data-scene-link] {
     transition-duration: .01ms !important;
     animation-duration: .01ms !important;
   }
