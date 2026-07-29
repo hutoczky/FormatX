@@ -64,34 +64,22 @@ jobs:
           if-no-files-found: warn
           retention-days: 5
 
-      - name: Validate JavaScript and cinematic Genome source
+      - name: Validate JavaScript and safe startup source
         shell: bash
         run: |
           set -euo pipefail
           node --check billing-worker/src/production-with-license.js
+          node --check billing-worker/src/production-entry.js
           node --check billing-worker/src/pricing-v100-api.js
           node --check docs/site-loader.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-apex.js
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
-          node --check docs/scifi-ui/scripts/formatx-transcend-bridge.js
-          node --check docs/scifi-ui/scripts/formatx-three-host.js
-          node --check docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js
-          node --check docs/scifi-ui/scripts/formatx-nextgen-controls.js
-          node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
-          node --check docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js
-          node --check docs/scifi-ui/scripts/experience-entry.js
-          node --check docs/scifi-ui/scripts/Experience.js
-          node --check docs/scifi-ui/scripts/ExperienceWebGPU.js
-          node --check docs/scifi-ui/scripts/WebXRDirector.js
-          node --check docs/scifi-ui/scripts/checkout-v100.js
-          node --check docs/scifi-ui/scripts/checkout-language-v100.js
-          node --check docs/scifi-ui/scripts/formatx-category-positioning.js
-          node --check docs/scifi-ui/scripts/formatx-origin-proof.js
-          node --check docs/scifi-ui/scripts/project-simulator.js
-          node --check docs/scifi-ui/scripts/operational-twin-dom-bridge.js
-          node --check docs/scifi-ui/scripts/reality-fork-capsule.js
+          node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
+          node --check docs/scifi-ui/scripts/mobile-webgl-entry.js
+          node --check docs/scifi-ui/scripts/mobile-core-engine.js
           node --check docs/scifi-ui/scripts/interaction-genome.js
           node --check docs/scifi-ui/scripts/interaction-genome-webgl.js
           node --check docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
@@ -99,15 +87,18 @@ jobs:
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-reality-fork.cjs
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
-          grep -Fq 'authoritative-wheel-v2' docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js
-          grep -Fq 'formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'formatx-three-host-safe.js' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq '.fx-genome-launcher' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'requestGenomeWebgl' docs/scifi-ui/scripts/igloo-parity.js
+          ! grep -Fq 'formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2' docs/scifi-ui/scripts/igloo-parity.js
+          ! grep -Fq 'interaction-genome-webgl-adapter.js?v=20260728-cinematic-v3' docs/scifi-ui/scripts/living-architecture.js
           grep -Fq "getContext('webgl2'" docs/scifi-ui/scripts/interaction-genome-webgl.js
           grep -Fq 'drawElementsInstanced' docs/scifi-ui/scripts/interaction-genome-webgl.js
-          grep -Fq 'interaction-genome-webgl-adapter.js?v=20260728-cinematic-v3' docs/scifi-ui/scripts/living-architecture.js
           grep -Fq 'cinematic-adaptive-v3' docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
           grep -Fq 'rgba8-bloom-aces-vignette' docs/scifi-ui/scripts/interaction-genome-webgl.js
           grep -Fq 'FormatX 4K Polish' docs/scifi-ui/styles/formatx-4k-polish.css
-          ! grep -Fq 'formatx-infinite-loop-fix.js?v=20260727-loop-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq '/scifi-ui/three-stage-mobile.html' billing-worker/src/production-entry.js
+          grep -Fq "headers.set('X-Frame-Options', 'SAMEORIGIN')" billing-worker/src/production-entry.js
 
       - name: Test Worker and production bundle
         working-directory: billing-worker
@@ -202,10 +193,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='WebGPU, cinematic 4K PBR, laptop loop and Reality Fork passed'
+            description='Safe startup, iframe security and browser validation passed'
           else
             state='failure'
-            description='FormatX production or cinematic 4K validation failed'
+            description='FormatX production or browser validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
