@@ -53,13 +53,15 @@ require("intro: no animation promise wait", "Promise.all(animations)" not in int
 # WebGPU engine remains in the repository but is not started by the live loader.
 tokens("safe loader", loader, (
     "single-language-toggle.js",
+    "formatx-copy-polish.js",
+    "formatx-license-links.js",
     "organism-console-state.js",
     "organism-core-controller.js?v=20260729-core-ui-2",
     "formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3",
     "formatx-three-host-safe.js",
     "formatx-living-core-launcher.js",
     "interaction-genome.js",
-    "safe-ready-v10",
+    "safe-ready-v12",
     "load(index + 1)",
 ))
 require("safe loader: no global event bridge", "formatx-transcend-bridge.js" not in loader)
@@ -150,6 +152,7 @@ tokens("root worker living delivery", root_worker, (
     "20260729-living-core-css-v3",
     "mobile-core-engine-v2.js",
     "formatx-infinite-scroll.js",
+    "formatx-license-links.js",
     "Cache-Control', 'no-store",
 ))
 tokens("production worker security retained", production_worker, (
@@ -165,6 +168,7 @@ tokens("production entry living stage framing", production_entry, (
     '"frame-ancestors \'self\'"',
     "mobile-core-engine-v2.js",
     "formatx-infinite-scroll.js",
+    "formatx-license-links.js",
     "20260729-living-core-gate-v2",
     "20260729-living-core-css-v3",
 ))
