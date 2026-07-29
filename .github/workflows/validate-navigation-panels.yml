@@ -1,4 +1,4 @@
-name: Validate hero core, navigation and organism panels
+name: Validate hero, navigation, language and infinite scroll
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/styles/single-language-toggle.css'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
@@ -25,6 +26,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/styles/single-language-toggle.css'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
@@ -44,7 +46,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-hero-navigation-panels-${{ github.ref }}
+  group: formatx-hero-navigation-infinite-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -61,6 +63,7 @@ jobs:
       - name: Validate source syntax
         run: |
           node --check docs/scifi-ui/scripts/single-language-toggle.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check docs/scifi-ui/scripts/organism-interface.js
           node --check docs/scifi-ui/scripts/organism-menu-controller.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
@@ -83,7 +86,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-nav-http.log"
           exit 1
 
-      - name: Test desktop and mobile hero navigation
+      - name: Test desktop and mobile navigation plus two loop cycles
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-nav/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html?lang=hu
