@@ -28,6 +28,7 @@
       "/scifi-ui/scripts/formatx-mobile-recovery.js",
       "/scifi-ui/scripts/living-architecture.js",
       "/scifi-ui/scripts/organism-panel-startup-guard.js",
+      "/scifi-ui/scripts/organism-menu-controller.js",
       "/download/*",
       "/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
     ]
