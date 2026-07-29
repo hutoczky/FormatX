@@ -2,23 +2,28 @@ const APK_ASSET_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const APK_DOWNLOAD_PATH = '/download/android';
 const APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.2.apk';
 const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
-const SAFE_THREE_GATE_PATH = '/scifi-ui/scripts/formatx-mobile-recovery.js';
-const LIVING_ARCHITECTURE_PATH = '/scifi-ui/scripts/living-architecture.js';
-const ORGANISM_PANEL_GUARD_PATH = '/scifi-ui/scripts/organism-panel-startup-guard.js';
-const ORGANISM_INTERFACE_PATH = '/scifi-ui/scripts/organism-interface.js';
-const ORGANISM_MENU_CONTROLLER_PATH = '/scifi-ui/scripts/organism-menu-controller.js';
-const SAFE_THREE_CSS_PATH = '/scifi-ui/styles/formatx-mobile-recovery.css';
-const EVENT_HORIZON_PATH = '/scifi-ui/scripts/formatx-event-horizon.js';
-const SAFE_THREE_GATE_OLD_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-1';
-const SAFE_THREE_GATE_NEW_VERSION = 'formatx-mobile-recovery.js?v=20260729-safe-three-gate-1';
-const SAFE_THREE_CSS_OLD_VERSION = 'formatx-mobile-recovery.css?v=20260729-mobile-recovery-1';
-const SAFE_THREE_CSS_NEW_VERSION = 'formatx-mobile-recovery.css?v=20260729-safe-three-css-1';
-const LIVING_ARCHITECTURE_OLD_VERSION = 'living-architecture.js?v=20260726-living-1';
-const LIVING_ARCHITECTURE_NEW_VERSION = 'living-architecture.js?v=20260729-safe-three-start-4';
-const LIVING_ARCHITECTURE_NEW_TAG = '<script defer src="./scripts/living-architecture.js?v=20260729-safe-three-start-4"></script>';
-const ORGANISM_PANEL_GUARD_TAG = '<script defer src="./scripts/organism-panel-startup-guard.js?v=20260729-panel-startup-guard-2"></script>';
-const EVENT_HORIZON_OLD_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-3"></script>';
-const EVENT_HORIZON_NEW_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260729-event-horizon-5"></script>';
+const CRITICAL_ASSET_PATHS = new Set([
+  '/scifi-ui/scripts/formatx-mobile-recovery.js',
+  '/scifi-ui/scripts/living-architecture.js',
+  '/scifi-ui/scripts/organism-panel-startup-guard.js',
+  '/scifi-ui/scripts/organism-interface.js',
+  '/scifi-ui/scripts/organism-menu-controller.js',
+  '/scifi-ui/scripts/mobile-webgl-entry.js',
+  '/scifi-ui/scripts/mobile-core-engine-v2.js',
+  '/scifi-ui/styles/formatx-mobile-recovery.css',
+  '/scifi-ui/scripts/formatx-event-horizon.js',
+]);
+const REPLACEMENTS = [
+  ['formatx-mobile-recovery.js?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
+  ['formatx-mobile-recovery.js?v=20260729-safe-three-gate-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
+  ['formatx-mobile-recovery.css?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v2'],
+  ['formatx-mobile-recovery.css?v=20260729-safe-three-css-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v2'],
+  ['living-architecture.js?v=20260726-living-1', 'living-architecture.js?v=20260729-safe-three-start-4'],
+  ['living-architecture.js?v=20260729-safe-three-start-3', 'living-architecture.js?v=20260729-safe-three-start-4'],
+  ['formatx-event-horizon.js?v=20260726-event-horizon-3', 'formatx-event-horizon.js?v=20260729-event-horizon-5'],
+];
+const LIVING_TAG = '<script defer src="./scripts/living-architecture.js?v=20260729-safe-three-start-4"></script>';
+const PANEL_GUARD_TAG = '<script defer src="./scripts/organism-panel-startup-guard.js?v=20260729-panel-startup-guard-2"></script>';
 
 export default {
   async fetch(request, env) {
@@ -40,15 +45,7 @@ export default {
 
     if (
       (request.method === 'GET' || request.method === 'HEAD') &&
-      (
-        url.pathname === SAFE_THREE_GATE_PATH ||
-        url.pathname === LIVING_ARCHITECTURE_PATH ||
-        url.pathname === ORGANISM_PANEL_GUARD_PATH ||
-        url.pathname === ORGANISM_INTERFACE_PATH ||
-        url.pathname === ORGANISM_MENU_CONTROLLER_PATH ||
-        url.pathname === SAFE_THREE_CSS_PATH ||
-        url.pathname === EVENT_HORIZON_PATH
-      )
+      CRITICAL_ASSET_PATHS.has(url.pathname)
     ) {
       return serveNoStoreAsset(request, env);
     }
@@ -69,16 +66,13 @@ async function serveScifiEntry(request, env) {
   const contentType = upstream.headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) return upstream;
 
-  let html = (await upstream.text())
-    .replaceAll(SAFE_THREE_GATE_OLD_VERSION, SAFE_THREE_GATE_NEW_VERSION)
-    .replaceAll(SAFE_THREE_CSS_OLD_VERSION, SAFE_THREE_CSS_NEW_VERSION)
-    .replaceAll(LIVING_ARCHITECTURE_OLD_VERSION, LIVING_ARCHITECTURE_NEW_VERSION)
-    .replace(EVENT_HORIZON_OLD_TAG, EVENT_HORIZON_NEW_TAG);
+  let html = await upstream.text();
+  for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
 
   if (!html.includes('organism-panel-startup-guard.js')) {
     html = html.replace(
-      LIVING_ARCHITECTURE_NEW_TAG,
-      ORGANISM_PANEL_GUARD_TAG + '\n  ' + LIVING_ARCHITECTURE_NEW_TAG
+      LIVING_TAG,
+      PANEL_GUARD_TAG + '\n  ' + LIVING_TAG
     );
   }
 
@@ -86,6 +80,7 @@ async function serveScifiEntry(request, env) {
   headers.set('Cache-Control', 'no-store, max-age=0');
   headers.set('Pragma', 'no-cache');
   headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
   headers.delete('ETag');
 
   return new Response(html, {
