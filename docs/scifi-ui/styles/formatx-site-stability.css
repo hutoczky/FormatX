@@ -48,6 +48,17 @@ html.fx-organism-core-active .fx-three-stage-shell {
   filter: saturate(1.08) brightness(1.04);
 }
 
+#hero.is-core-active .hero-actions {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#hero.is-core-active .hero-facts {
+  display: flex !important;
+  flex-wrap: wrap;
+}
+
 #hero.is-core-active .hero-actions .button-solid {
   box-shadow: 0 0 0 1px rgba(126, 232, 255, .34), 0 18px 52px rgba(80, 185, 255, .16);
 }
@@ -101,9 +112,34 @@ html.fx-organism-core-active .fx-three-stage-shell {
   pointer-events: auto !important;
 }
 
-.fx-organism-console {
+/* Closed is the physical default. A real panel-open event must add
+   is-authorised-open before the console can enter the render tree. */
+.fx-organism-console,
+.fx-organism-console[hidden],
+.fx-organism-console[aria-hidden="true"],
+.fx-organism-console:not(.is-authorised-open),
+body:not(.fx-organism-panel-open) .fx-organism-console {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.fx-organism-panel-open .fx-organism-console.is-authorised-open:not([hidden])[aria-hidden="false"] {
+  display: grid !important;
   z-index: var(--fx-layer-panel) !important;
-  pointer-events: auto;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.fx-organism-panel[hidden],
+.fx-organism-panel[aria-hidden="true"],
+[data-organism-panel][hidden],
+[data-organism-panel][aria-hidden="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .fx-organism-console-backdrop,
@@ -149,11 +185,6 @@ body.fx-organism-panel-open .fx-genome-launcher {
   pointer-events: none !important;
 }
 
-body.fx-organism-panel-open .fx-organism-console {
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
 @media (max-width: 900px), (pointer: coarse) {
   #main-content {
     z-index: calc(var(--fx-layer-content) + 10) !important;
@@ -163,7 +194,14 @@ body.fx-organism-panel-open .fx-organism-console {
     min-height: 52svh;
   }
 
-  .fx-organism-console {
+  #hero.is-core-active .hero-actions,
+  #hero.is-core-active .hero-facts {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .fx-organism-console.is-authorised-open {
     padding-top: max(72px, env(safe-area-inset-top)) !important;
   }
 
