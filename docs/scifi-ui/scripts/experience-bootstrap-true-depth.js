@@ -1,29 +1,20 @@
-// Cache-safe bootstrap for the true-depth FormatX organism engines.
-// GitHub Pages and mobile browsers may retain nested module URLs longer than
-// the stage document. Refresh the engine sources before importing the entry.
-(async () => {
-  'use strict';
+// Ordered cache refresh for the true-depth FormatX organism engines.
+// This module completes before the following direct experience-entry module
+// executes, while keeping the entry visible to production diagnostics.
+const sources = [
+  new URL('./ExperienceWebGPU.js?v=20260729-true-depth-4', import.meta.url).href,
+  new URL('./webgl-fallback-loader.js?v=20260729-true-depth-fallback-1', import.meta.url).href
+];
 
-  const sources = [
-    new URL('./ExperienceWebGPU.js?v=20260729-true-depth-4', import.meta.url).href,
-    new URL('./webgl-fallback-loader.js?v=20260729-true-depth-fallback-1', import.meta.url).href
-  ];
-
-  await Promise.all(sources.map(async url => {
-    try {
-      const response = await fetch(url, { cache: 'reload' });
-      if (!response.ok) throw new Error(`${response.status} ${url}`);
-    } catch (error) {
-      console.warn('FormatX engine refresh warning:', error);
-    }
-  }));
-
-  await import('./experience-entry.js?v=20260729-true-depth-entry-4');
-})().catch(error => {
-  console.error('FormatX true-depth bootstrap failed:', error);
+await Promise.all(sources.map(async url => {
   try {
-    parent.dispatchEvent(new CustomEvent('formatx:threeerror', {
-      detail: { message: error instanceof Error ? error.message : String(error) }
-    }));
-  } catch (_) {}
-});
+    const response = await fetch(url, { cache: 'reload' });
+    if (!response.ok) throw new Error(`${response.status} ${url}`);
+  } catch (error) {
+    console.warn('FormatX engine refresh warning:', error);
+  }
+}));
+
+try {
+  parent.document.documentElement.dataset.fxTrueDepthPreload = 'ready';
+} catch (_) {}
