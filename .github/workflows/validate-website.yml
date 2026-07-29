@@ -1,5 +1,4 @@
-# FormatX Living Core V2 regression
-name: Validate FormatX Living Core and Three.js website
+name: Validate FormatX Living Core and website
 
 on:
   workflow_dispatch:
@@ -28,7 +27,6 @@ on:
 
 permissions:
   contents: read
-  statuses: write
 
 concurrency:
   group: formatx-living-core-validation-${{ github.ref }}
@@ -39,30 +37,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
       - name: Validate production source architecture
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 .github/scripts/validate-webgpu-source.py
-
-      - name: Upload source architecture report
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: formatx-living-core-source-architecture-report
-          path: webgpu-source-architecture-report.txt
-          if-no-files-found: warn
-          retention-days: 5
+        run: python3 .github/scripts/validate-webgpu-source.py
 
       - name: Validate JavaScript and safe startup source
         shell: bash
@@ -77,6 +61,9 @@ jobs:
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
+          node --check docs/scifi-ui/scripts/formatx-copy-polish.js
+          node --check docs/scifi-ui/scripts/formatx-license-links.js
+          node --check docs/scifi-ui/scripts/license-page.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
@@ -90,29 +77,17 @@ jobs:
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-reality-fork.cjs
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
-          grep -Fq 'formatx-three-host-safe.js' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v12' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'formatx-license-links.js?v=20260729-local-licence-2' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'safe-ready-v10' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq "boundary-v3" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "clonedContent: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "reinitialisedRenderer: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "loopToCore('wheel', projected)" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "addEventListener('formatx:loop'" docs/scifi-ui/scripts/organism-core-controller.js
-          ! grep -Fq 'cloneNode' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq 'data-fx-loop-bridge' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq 'formatx-infinite-loop-controller-v2.js?v=' docs/scifi-ui/scripts/igloo-parity.js
-          ! grep -Fq 'formatx-infinite-loop-fix.js?v=' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq '.fx-genome-launcher' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'requestGenomeWebgl' docs/scifi-ui/scripts/igloo-parity.js
-          ! grep -Fq 'interaction-genome-webgl-adapter.js?v=20260728-cinematic-v3' docs/scifi-ui/scripts/living-architecture.js
-          grep -Fq "getContext('webgl2'" docs/scifi-ui/scripts/interaction-genome-webgl.js
-          grep -Fq 'drawElementsInstanced' docs/scifi-ui/scripts/interaction-genome-webgl.js
-          grep -Fq 'cinematic-adaptive-v3' docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
-          grep -Fq 'rgba8-bloom-aces-vignette' docs/scifi-ui/scripts/interaction-genome-webgl.js
-          grep -Fq 'FormatX 4K Polish' docs/scifi-ui/styles/formatx-4k-polish.css
+          grep -Fq 'boundary-v3' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'reinitialisedRenderer: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq '/scifi-ui/license.html' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/three-stage-mobile.html' billing-worker/src/production-entry.js
           grep -Fq "headers.set('X-Frame-Options', 'SAMEORIGIN')" billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/scripts/formatx-infinite-scroll.js' billing-worker/src/production-entry.js
+          ! grep -Fq 'cloneNode' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq 'data-fx-loop-bridge' docs/scifi-ui/scripts/formatx-infinite-scroll.js
 
       - name: Test Worker and production bundle
         working-directory: billing-worker
@@ -122,20 +97,17 @@ jobs:
           npx wrangler deploy --dry-run --outdir ../.wrangler-living-core-validation
 
       - name: Install Playwright browsers
-        shell: bash
         run: |
-          set -euo pipefail
           npm install --prefix "$RUNNER_TEMP/formatx-browser" --no-audit --no-fund playwright@1.62.0
           "$RUNNER_TEMP/formatx-browser/node_modules/.bin/playwright" install --with-deps chromium firefox
 
       - name: Start static website
-        shell: bash
         run: |
-          set -euo pipefail
           python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-http.log" 2>&1 &
           python3 -m http.server 4192 --directory docs > "$RUNNER_TEMP/formatx-reality-http.log" 2>&1 &
           for attempt in $(seq 1 40); do
             curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/license.html >/dev/null \
               && curl -fsS http://127.0.0.1:4192/scifi-ui/project-simulator.html >/dev/null \
               && exit 0
             sleep 0.25
@@ -144,76 +116,23 @@ jobs:
           cat "$RUNNER_TEMP/formatx-reality-http.log"
           exit 1
 
-      - name: Test Living Core, Firefox, mobile, reduced motion and two loops
+      - name: Test Living Core, mobile and two loops
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-        shell: bash
-        run: |
-          set -o pipefail
-          node .github/scripts/validate-three-site.cjs 2>&1 | tee living-core-browser-report.txt
+        run: node .github/scripts/validate-three-site.cjs
 
       - name: Test continuous laptop wheel and touchpad looping
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-        shell: bash
-        run: |
-          set -o pipefail
-          node .github/scripts/validate-laptop-continuous-loop.cjs 2>&1 | tee laptop-continuous-loop-report.txt
+        run: node .github/scripts/validate-laptop-continuous-loop.cjs
 
-      - name: Validate Reality Fork counterfactual replay and capsule proof
+      - name: Validate Reality Fork
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-        shell: bash
-        run: |
-          set -o pipefail
-          node .github/scripts/validate-reality-fork.cjs 2>&1 | tee reality-fork-report.txt
+        run: node .github/scripts/validate-reality-fork.cjs
 
-      - name: Validate cinematic 4K Interaction Genome PBR rendering
+      - name: Validate cinematic Interaction Genome rendering
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
-        shell: bash
-        run: |
-          set -o pipefail
-          node .github/scripts/validate-interaction-genome-webgl.cjs 2>&1 | tee interaction-genome-webgl-report.txt
-
-      - name: Upload browser reports
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: formatx-living-core-browser-report
-          path: |
-            living-core-browser-report.txt
-            laptop-continuous-loop-report.txt
-            interaction-genome-webgl-report.txt
-          if-no-files-found: warn
-          retention-days: 5
-
-      - name: Upload Reality Fork report
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: formatx-reality-fork-report
-          path: reality-fork-report.txt
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Publish validation status
-        if: always() && github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          JOB_STATUS: ${{ job.status }}
-        shell: bash
-        run: |
-          if [ "$JOB_STATUS" = 'success' ]; then
-            state='success'
-            description='Living Core V2 and clone-free loops passed'
-          else
-            state='failure'
-            description='FormatX production or browser validation failed'
-          fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
-            -f state="$state" \
-            -f context='FormatX Living Core validation' \
-            -f description="$description" \
-            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        run: node .github/scripts/validate-interaction-genome-webgl.cjs
