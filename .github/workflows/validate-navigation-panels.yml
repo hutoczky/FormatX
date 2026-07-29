@@ -8,6 +8,7 @@ on:
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
+      - 'docs/scifi-ui/scripts/organism-console-state.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/styles/organism-interface.css'
@@ -23,6 +24,7 @@ on:
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
+      - 'docs/scifi-ui/scripts/organism-console-state.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/styles/organism-interface.css'
@@ -57,6 +59,7 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-interface.js
           node --check docs/scifi-ui/scripts/organism-menu-controller.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
+          node --check docs/scifi-ui/scripts/organism-console-state.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check .github/scripts/validate-navigation-panels.cjs
 
