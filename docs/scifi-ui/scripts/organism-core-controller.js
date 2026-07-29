@@ -168,7 +168,7 @@
   function interfaceBecameReady() {
     interfaceReady = true;
     if (pendingPanel) openPanel(pendingPanel, 'deferred-navigation');
-    else if (!panelIsOpen()) updateNavigation(0);
+    else if (!panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: false });
   }
 
   document.addEventListener('click', handleNavigation, true);
@@ -189,5 +189,5 @@
 
   ROOT.dataset.fxOrganismCoreController = 'ready';
   if (interfaceReady) interfaceBecameReady();
-  else updateNavigation(0);
+  else activateCore({ scroll: false, replaceHistory: true, closePanel: false });
 }());
