@@ -10,6 +10,8 @@ on:
       - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
       - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/formatx-three-host-safe.js'
       - 'docs/scifi-ui/scripts/mobile-webgl-entry.js'
       - 'docs/scifi-ui/scripts/mobile-core-engine.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-recovery.js'
@@ -39,6 +41,8 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
           node --check docs/scifi-ui/scripts/living-architecture.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
           node --check docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js
           node --check docs/scifi-ui/scripts/formatx-professional-refinement.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
@@ -55,8 +59,10 @@ jobs:
           const required = [
             '/scifi-ui/',
             '/scifi-ui/index.html',
+            '/scifi-ui/styles/formatx-mobile-recovery.css',
             '/scifi-ui/scripts/formatx-event-horizon.js',
             '/scifi-ui/scripts/formatx-mobile-recovery.js',
+            '/scifi-ui/scripts/living-architecture.js',
           ];
           for (const path of required) {
             if (!first.includes(path)) throw new Error(`Missing run_worker_first path: ${path}`);
@@ -71,6 +77,8 @@ jobs:
           const intro = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
           const gate = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-recovery.js', 'utf8');
           const living = fs.readFileSync('docs/scifi-ui/scripts/living-architecture.js', 'utf8');
+          const loader = fs.readFileSync('docs/scifi-ui/scripts/igloo-parity.js', 'utf8');
+          const host = fs.readFileSync('docs/scifi-ui/scripts/formatx-three-host-safe.js', 'utf8');
           const entry = fs.readFileSync('docs/scifi-ui/scripts/mobile-webgl-entry.js', 'utf8');
           const engine = fs.readFileSync('docs/scifi-ui/scripts/mobile-core-engine.js', 'utf8');
           const stage = fs.readFileSync('docs/scifi-ui/three-stage-mobile.html', 'utf8');
@@ -90,6 +98,14 @@ jobs:
             [gate.includes('Do not reload the frame automatically'), 'crash-loop prevention missing'],
             [living.includes('scheduleThreeExperience()'), '3D loader scheduling missing'],
             [living.includes("'waiting-for-intro'"), '3D loader must wait for intro'],
+            [loader.includes('formatx-three-host-safe.js'), 'safe host is not in the live loader'],
+            [!loader.includes('formatx-three-frame-bootstrap.js'), 'legacy frame bootstrap is still live'],
+            [!loader.includes('formatx-professional-refinement.js'), 'legacy refinement is still live'],
+            [!loader.includes('formatx-infinite-loop-controller-v2.js'), 'duplicate loop controller is still live'],
+            [loader.includes('load(index + 1)'), 'loader must continue after optional module errors'],
+            [host.includes("frame.src = 'about:blank'"), 'safe host must create a blank frame'],
+            [host.includes('__FORMATX_3D_STATE__'), 'safe host shared state missing'],
+            [!host.includes('preventDefault()'), 'safe host must not block native scrolling'],
             [entry.includes('mobile-core-engine.js'), 'direct engine entry missing'],
             [engine.includes('class MobileCoreEngine'), 'direct 3D engine class missing'],
             [engine.includes("root.dataset.fxThree = 'ready'"), 'first-frame ready signal missing'],
@@ -98,6 +114,8 @@ jobs:
             [refinement.includes("'safe-gate-bypass'"), 'legacy refinement bypass missing'],
             [worker.includes('20260729-event-horizon-5'), 'live intro cache version missing'],
             [worker.includes('20260729-safe-three-gate-1'), 'live safe gate cache version missing'],
+            [worker.includes('20260729-safe-three-css-1'), 'live safe CSS cache version missing'],
+            [worker.includes('20260729-safe-three-start-1'), 'live delayed loader cache version missing'],
             [!worker.includes('formatx-intro-deadlock-guard.js?v='), 'duplicate intro guard must not be injected'],
             [worker.includes("Cache-Control', 'no-store"), 'no-store delivery missing'],
           ];
