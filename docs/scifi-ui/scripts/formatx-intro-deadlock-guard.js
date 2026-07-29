@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxIntroDeadlockGuard === 'ready') return;
-  root.dataset.fxIntroDeadlockGuard = 'ready';
+  if (root.dataset.fxIntroDeadlockGuard === 'ready-v2') return;
+  root.dataset.fxIntroDeadlockGuard = 'ready-v2';
 
   const OVERLAY_ID = 'formatx-event-horizon';
   const DEADLINE = 4800;
@@ -45,36 +45,34 @@
       'fx-intro-pending',
       'fx-intro-running',
       'fx-intro-reveal',
-      'fx-intro-managed',
+      'fx-intro-managed'
     );
     root.classList.add('fx-intro-complete');
     root.dataset.fxIntro = 'deadlock-guard-complete';
     root.dataset.fxIntroGuardSource = source;
 
     document.dispatchEvent(new CustomEvent('formatx:introcomplete', {
-      detail: { source: 'deadlock-guard', reason: source },
+      detail: { source: 'deadlock-guard', reason: source }
     }));
   }
 
   function armGuard() {
     clearGuard();
     if (alreadyComplete()) return;
+    completed = false;
     timer = window.setTimeout(() => forceComplete('deadline'), DEADLINE);
   }
 
+  document.addEventListener('formatx:introreplaystart', armGuard);
   document.addEventListener('formatx:introcomplete', () => {
     completed = true;
     clearGuard();
-  }, { once: true });
+  });
 
   document.addEventListener('click', event => {
     if (!event.target.closest('.fx-intro-skip')) return;
-    window.setTimeout(() => forceComplete('skip-fallback'), 260);
+    window.setTimeout(() => forceComplete('skip-fallback'), 650);
   }, true);
-
-  addEventListener('pageshow', event => {
-    if (event.persisted) forceComplete('page-restore');
-  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', armGuard, { once: true });
