@@ -179,6 +179,7 @@
     if (Object.hasOwn(PANEL_SCENES, id)) updateNavigation(PANEL_SCENES[id]);
   });
   addEventListener('formatx:organismpanelclose', () => activateCore({ scroll: false, replaceHistory: true, closePanel: false }));
+  addEventListener('formatx:loop', () => activateCore({ scroll: false, replaceHistory: true, closePanel: true }));
   document.addEventListener('formatx:introcomplete', () => {
     if (!panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: false });
   });
