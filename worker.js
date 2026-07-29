@@ -3,8 +3,11 @@ const APK_DOWNLOAD_PATH = '/download/android';
 const APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.2.apk';
 const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
 const MOBILE_RECOVERY_PATH = '/scifi-ui/scripts/formatx-mobile-recovery.js';
+const INTRO_GUARD_PATH = '/scifi-ui/scripts/formatx-intro-deadlock-guard.js';
 const MOBILE_RECOVERY_OLD_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-1';
 const MOBILE_RECOVERY_NEW_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-3';
+const EVENT_HORIZON_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-3"></script>';
+const INTRO_GUARD_TAG = EVENT_HORIZON_TAG + '\n  <script defer src="./scripts/formatx-intro-deadlock-guard.js?v=20260729-intro-guard-1"></script>';
 
 export default {
   async fetch(request, env) {
@@ -26,7 +29,7 @@ export default {
 
     if (
       (request.method === 'GET' || request.method === 'HEAD') &&
-      url.pathname === MOBILE_RECOVERY_PATH
+      (url.pathname === MOBILE_RECOVERY_PATH || url.pathname === INTRO_GUARD_PATH)
     ) {
       return serveNoStoreAsset(request, env);
     }
@@ -47,10 +50,9 @@ async function serveScifiEntry(request, env) {
   const contentType = upstream.headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) return upstream;
 
-  const html = (await upstream.text()).replaceAll(
-    MOBILE_RECOVERY_OLD_VERSION,
-    MOBILE_RECOVERY_NEW_VERSION,
-  );
+  const html = (await upstream.text())
+    .replaceAll(MOBILE_RECOVERY_OLD_VERSION, MOBILE_RECOVERY_NEW_VERSION)
+    .replace(EVENT_HORIZON_TAG, INTRO_GUARD_TAG);
   const headers = new Headers(upstream.headers);
   headers.set('Cache-Control', 'no-store, max-age=0');
   headers.set('Pragma', 'no-cache');
