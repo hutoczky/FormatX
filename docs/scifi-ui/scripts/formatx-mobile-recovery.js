@@ -2,10 +2,10 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxMobileRecovery === 'ready-v2') return;
+  if (root.dataset.fxMobileRecovery === 'ready-v3') return;
 
   const mobile = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
-  root.dataset.fxMobileRecovery = mobile ? 'ready-v2' : 'desktop-pass';
+  root.dataset.fxMobileRecovery = mobile ? 'ready-v3' : 'desktop-pass';
   if (!mobile) return;
 
   root.classList.add('fx-mobile-stable-3d');
@@ -132,7 +132,7 @@
   });
   stateObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three'] });
 
-  addEventListener('formatx:introcomplete', startThreeAfterIntro, { once: true });
+  document.addEventListener('formatx:introcomplete', startThreeAfterIntro, { once: true });
   addEventListener('formatx:threeready', () => {
     clearWatchdog();
     root.dataset.fxMobile3d = 'ready';
