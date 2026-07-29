@@ -1,10 +1,51 @@
-FormatX Suite Pro - weboldali licenctájékoztató
+FORMATX SUITE PRO – LICENCÖSSZEFOGLALÓ
+FORMATX SUITE PRO – LICENCE SUMMARY
 
-A FormatX Suite Pro nem nyílt forráskódú szoftver. A használatra, másolásra, módosításra és terjesztésre a projekt hivatalos licencfeltételei vonatkoznak:
+Frissítve / Updated: 2026-07-29
+
+MAGYAR
+
+Ez a dokumentum közérthető összefoglaló. Az irányadó licencfeltételeket a projekt LICENSE fájlja és a felhasználási feltételek tartalmazzák.
+
+1. A FormatX Suite Pro nem nyílt forráskódú szoftver.
+
+2. Az 5 napos próbalicenc a teljes kiadás kipróbálására szolgál.
+
+3. A fizetős licenccsomag a kiadott FormatX alkalmazás használatára jogosít a kiválasztott hozzáférési idő, technikusszám és gépkeret szerint. A licenc nem jelent tulajdonjog-átruházást.
+
+4. A szoftver vagy a forráskód másolása, módosítása, közzététele, továbbértékesítése vagy terjesztése a szerző előzetes írásos engedélye nélkül nem megengedett.
+
+5. A FormatX név, logó és vizuális elemek a szerző szellemi tulajdonát képezik.
+
+6. Fizetős rendelésnél a licencaktiválás a banki jóváírás, a deviza, az összeg és a rendelési azonosító kézi ellenőrzése után történik. Automatikus megújítás nincs.
+
+ENGLISH
+
+This document is a plain-language summary. The governing licence terms are contained in the project LICENSE file and the terms of use.
+
+1. FormatX Suite Pro is not open-source software.
+
+2. The 5-day trial licence is provided for evaluating the full release.
+
+3. A paid licence plan grants permission to use the released FormatX application for the selected access period and technician/device limits. The licence does not transfer ownership.
+
+4. Copying, modifying, publishing, reselling or redistributing the software or source code requires the author's prior written permission.
+
+5. The FormatX name, logo and visual assets are the author's intellectual property.
+
+6. For paid orders, activation follows manual verification of the bank credit, currency, amount and order reference. There is no automatic renewal.
+
+IRÁNYADÓ LICENC / GOVERNING LICENCE
 https://github.com/hutoczky/FormatX/blob/master/LICENSE
 
-Hivatalos programkiadások:
+FELHASZNÁLÁSI FELTÉTELEK / TERMS OF USE
+https://www.formatxsuite.com/scifi-ui/terms.html
+
+HIVATALOS KIADÁSOK / OFFICIAL RELEASES
 https://github.com/hutoczky/FormatX-Updates/releases
 
-Támogatás és hibajelentés:
+TÁMOGATÁS ÉS HIBAJELENTÉS / SUPPORT AND ISSUES
 https://github.com/hutoczky/FormatX/issues
+
+KAPCSOLAT ÉS ENGEDÉLYKÉRÉS / CONTACT AND PERMISSION REQUESTS
+hutoczky@gmail.com
