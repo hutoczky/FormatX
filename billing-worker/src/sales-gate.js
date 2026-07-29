@@ -46,8 +46,8 @@ export function createSalesUnavailablePage() {
     <article class="content-width legal-document">
       <p class="eyebrow">ÉRTÉKESÍTÉSI ÁLLAPOT</p>
       <h1>Az új licencvásárlás átmenetileg nem indítható</h1>
-      <p class="legal-lead">A FormatX bemutatóoldala és a teljes értékű, 5 napos kezdőlicenccel használható kiadás elérhető, de az éles fizetési folyamat a teljes üzemeltetői, fogyasztóvédelmi és adatkezelési dokumentáció véglegesítéséig zárolva marad.</p>
-      <p><strong>English:</strong> New licence purchases are temporarily disabled until the merchant, consumer-information and privacy documentation is complete.</p>
+      <p class="legal-lead">A FormatX bemutatóoldala és a teljes értékű, 5 napos próbalicenccel használható kiadás elérhető, de az éles fizetési folyamat a teljes üzemeltetői, fogyasztóvédelmi és adatkezelési dokumentáció véglegesítéséig zárolva marad.</p>
+      <p><strong>English:</strong> The FormatX presentation site and the full release with a 5-day trial licence remain available, but new purchases are temporarily disabled until the merchant, consumer-information and privacy documentation is complete.</p>
       <div class="legal-actions">
         <a class="button primary" href="/">Vissza a főoldalra</a>
         <a class="button secondary" href="/scifi-ui/support.html">Támogatás</a>
