@@ -73,6 +73,7 @@
     this.scrollImpulse = 0;
     this.clickImpulse = 0;
     this.tapCandidate = null;
+    this.mobileTouchRouting = matchMedia('(pointer: coarse), (max-width: 900px)').matches;
 
     this.onCorePointerDown = event => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
@@ -90,6 +91,16 @@
       };
     };
 
+    this.onMobilePointerMoveCapture = event => {
+      if (!this.mobileTouchRouting || event.pointerType !== 'touch') return;
+      const candidate = this.tapCandidate;
+      if (candidate && candidate.id === event.pointerId) {
+        if (Math.hypot(event.clientX - candidate.x, event.clientY - candidate.y) > 6) candidate.moved = true;
+      }
+      // Do not cancel the browser default. Only stop the old 3D drag listener.
+      event.stopImmediatePropagation();
+    };
+
     this.onCorePointerMove = event => {
       const candidate = this.tapCandidate;
       if (!candidate || candidate.id !== event.pointerId) return;
@@ -102,7 +113,8 @@
       const candidate = this.tapCandidate;
       if (!candidate || candidate.id !== event.pointerId) return;
       this.tapCandidate = null;
-      if (candidate.moved || performance.now() - candidate.startedAt > 450) return;
+      const travel = Math.hypot(event.clientX - candidate.x, event.clientY - candidate.y);
+      if (candidate.moved || travel > 12 || performance.now() - candidate.startedAt > 450) return;
       const viewportWidth = Math.max(1, parent.innerWidth || innerWidth);
       const viewportHeight = Math.max(1, parent.innerHeight || innerHeight);
       const inCoreZone = event.clientX > viewportWidth * 0.18
@@ -130,6 +142,7 @@
     };
 
     try {
+      parent.addEventListener('pointermove', this.onMobilePointerMoveCapture, { capture: true, passive: true });
       parent.document.addEventListener('pointerdown', this.onCorePointerDown, { passive: true });
       parent.document.addEventListener('pointermove', this.onCorePointerMove, { passive: true });
       parent.document.addEventListener('pointerup', this.onCorePointerUp, { passive: true });
@@ -240,6 +253,7 @@
       "    removeEventListener('resize', this.onResize);",
       `    removeEventListener('resize', this.onResize);
     try {
+      parent.removeEventListener('pointermove', this.onMobilePointerMoveCapture, true);
       parent.document.removeEventListener('pointerdown', this.onCorePointerDown);
       parent.document.removeEventListener('pointermove', this.onCorePointerMove);
       parent.document.removeEventListener('pointerup', this.onCorePointerUp);
