@@ -2,10 +2,26 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v4') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v4';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v5') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v5';
 
   let genomeWebglRequested = false;
+
+  function ensureStabilityStyle() {
+    if (document.querySelector('link[data-fx-site-stability]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/formatx-site-stability.css?v=20260729-stability-1';
+    link.dataset.fxSiteStability = 'true';
+    link.addEventListener('load', () => {
+      root.dataset.fxSiteStability = 'ready';
+    }, { once: true });
+    link.addEventListener('error', () => {
+      root.dataset.fxSiteStability = 'failed';
+      console.warn('FormatX stability stylesheet failed to load.');
+    }, { once: true });
+    document.head.appendChild(link);
+  }
 
   function refreshQrImages() {
     const currency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR'
@@ -50,14 +66,16 @@
     document.head.appendChild(script);
   }
 
+  ensureStabilityStyle();
   root.dataset.fxLocalQr = 'ready';
   root.dataset.fxLegacyRenderer = 'retired';
   root.dataset.fxRenderer = 'three-host-safe';
   refreshQrImages();
 
   document.addEventListener('click', event => {
-    if (event.target.closest('[data-currency]')) setTimeout(refreshQrImages, 0);
-    if (event.target.closest('.fx-genome-launcher')) setTimeout(requestGenomeWebgl, 0);
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('[data-currency]')) setTimeout(refreshQrImages, 0);
+    if (target?.closest('.fx-genome-launcher')) setTimeout(requestGenomeWebgl, 0);
   });
   addEventListener('pageshow', refreshQrImages);
 
@@ -71,7 +89,7 @@
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v4';
+      root.dataset.fxTranscendLoader = 'safe-ready-v5';
       return;
     }
 
@@ -82,7 +100,7 @@
     script.addEventListener('load', () => load(index + 1), { once: true });
     script.addEventListener('error', () => {
       console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v4';
+      root.dataset.fxTranscendLoader = 'safe-degraded-v5';
       load(index + 1);
     }, { once: true });
     document.head.appendChild(script);
