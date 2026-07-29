@@ -5,8 +5,8 @@
   'use strict';
 
   const sources = [
-    './ExperienceWebGPU.js?v=20260729-true-depth-4',
-    './webgl-fallback-loader.js?v=20260729-true-depth-fallback-1'
+    new URL('./ExperienceWebGPU.js?v=20260729-true-depth-4', import.meta.url).href,
+    new URL('./webgl-fallback-loader.js?v=20260729-true-depth-fallback-1', import.meta.url).href
   ];
 
   await Promise.all(sources.map(async url => {
