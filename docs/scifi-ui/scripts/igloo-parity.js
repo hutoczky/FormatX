@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v8') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v8';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v9') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v9';
 
   let genomeWebglRequested = false;
 
@@ -81,6 +81,7 @@
 
   // Ordered, failure-tolerant production modules. None may replace the iframe source.
   const queue = [
+    './scripts/single-language-toggle.js?v=20260729-single-language-1',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
     './scripts/organism-core-controller.js?v=20260729-core-ui-1',
     './scripts/formatx-three-host-safe.js?v=20260729-safe-host-1',
@@ -92,7 +93,7 @@
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v8';
+      root.dataset.fxTranscendLoader = 'safe-ready-v9';
       return;
     }
 
@@ -103,7 +104,7 @@
     script.addEventListener('load', () => load(index + 1), { once: true });
     script.addEventListener('error', () => {
       console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v8';
+      root.dataset.fxTranscendLoader = 'safe-degraded-v9';
       load(index + 1);
     }, { once: true });
     document.head.appendChild(script);
