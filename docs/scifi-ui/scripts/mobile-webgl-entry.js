@@ -1,4 +1,4 @@
-const ENGINE_URL = new URL('./mobile-core-engine.js?v=20260729-direct-mobile-core-1', import.meta.url).href;
+const ENGINE_URL = new URL('./mobile-core-engine-v2.js?v=20260729-living-core-v2', import.meta.url).href;
 
 function parentRoot() {
   try { return parent.document.documentElement; } catch (_) { return null; }
@@ -11,25 +11,25 @@ function setTelemetry(text) {
   } catch (_) {}
 }
 
-async function startMobileCore() {
+async function startLivingCore() {
   const root = parentRoot();
   if (root) {
-    root.dataset.fxWebgpu = 'mobile-webgl';
-    root.dataset.fxMobile3dEngine = 'direct-webgl-loading';
+    root.dataset.fxWebgpu = 'webgl-living-core-v2';
+    root.dataset.fxMobile3dEngine = 'living-core-v2-loading';
     root.dataset.fxThree = 'loading';
   }
-  setTelemetry('THREE / DIRECT MOBILE 3D');
+  setTelemetry('THREE / LIVING CORE V2');
 
   const module = await import(ENGINE_URL);
   if (typeof module.startMobileCore !== 'function') {
-    throw new Error('FormatX direct mobile 3D entry is missing');
+    throw new Error('FormatX living organism entry is missing');
   }
   await module.startMobileCore();
 }
 
-startMobileCore().catch(error => {
+startLivingCore().catch(error => {
   const message = error instanceof Error ? error.message : String(error);
-  console.error('FormatX direct mobile 3D stage failed:', error);
+  console.error('FormatX living organism stage failed:', error);
   try {
     const root = parent.document.documentElement;
     root.dataset.fxThree = 'error';
@@ -37,5 +37,5 @@ startMobileCore().catch(error => {
     root.dataset.fxMobile3dEngine = 'error';
     parent.dispatchEvent(new CustomEvent('formatx:threeerror', { detail: { message } }));
   } catch (_) {}
-  setTelemetry('THREE / MOBILE LOAD ERROR');
+  setTelemetry('THREE / LIVING CORE ERROR');
 });
