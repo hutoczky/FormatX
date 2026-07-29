@@ -14,6 +14,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/igloo-parity.js',
   '/scifi-ui/scripts/single-language-toggle.js',
+  '/scifi-ui/scripts/formatx-infinite-scroll.js',
   '/scifi-ui/scripts/organism-console-state.js',
   '/scifi-ui/scripts/formatx-render-visibility.js',
   '/scifi-ui/scripts/organism-interface.js',
