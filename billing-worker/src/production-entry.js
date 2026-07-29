@@ -6,6 +6,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/organism-panel-startup-guard.js',
+  '/scifi-ui/scripts/organism-interface.js',
   '/scifi-ui/scripts/organism-menu-controller.js',
   '/scifi-ui/styles/formatx-mobile-recovery.css',
 ]);
