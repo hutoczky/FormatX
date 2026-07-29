@@ -5,7 +5,6 @@ const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
 const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
-  '/scifi-ui/scripts/organism-panel-startup-guard.js',
   '/scifi-ui/scripts/organism-interface.js',
   '/scifi-ui/scripts/organism-menu-controller.js',
   '/scifi-ui/scripts/mobile-webgl-entry.js',
@@ -23,8 +22,6 @@ const REPLACEMENTS = [
   ['living-architecture.js?v=20260729-safe-three-start-3', 'living-architecture.js?v=20260729-safe-three-start-4'],
   ['formatx-event-horizon.js?v=20260726-event-horizon-3', 'formatx-event-horizon.js?v=20260729-event-horizon-5'],
 ];
-const LIVING_TAG = '<script defer src="./scripts/living-architecture.js?v=20260729-safe-three-start-4"></script>';
-const PANEL_GUARD_TAG = '<script defer src="./scripts/organism-panel-startup-guard.js?v=20260729-panel-startup-guard-2"></script>';
 
 export default {
   async fetch(request, env) {
@@ -57,9 +54,6 @@ async function serveScifiEntry(request, env) {
 
   let html = await upstream.text();
   for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
-  if (!html.includes('organism-panel-startup-guard.js')) {
-    html = html.replace(LIVING_TAG, PANEL_GUARD_TAG + '\n  ' + LIVING_TAG);
-  }
 
   const headers = new Headers(upstream.headers);
   headers.set('Cache-Control', 'no-store, max-age=0');
