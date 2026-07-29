@@ -9,7 +9,8 @@ async function waitForInterface(page) {
     const root = document.documentElement;
     return root.classList.contains('fx-intro-complete')
       && root.dataset.fxOrganismInterface === 'ready'
-      && root.dataset.fxOrganismMenu === 'ready';
+      && root.dataset.fxOrganismMenu === 'ready'
+      && root.dataset.fxOrganismCoreController === 'ready';
   }, null, { timeout: 20000 });
 }
 
@@ -25,8 +26,8 @@ async function openMenu(page) {
   }, null, { timeout: 5000 });
 }
 
-async function assertPanel(page, id) {
-  await page.waitForFunction(expectedId => {
+async function assertPanel(page, id, scene) {
+  await page.waitForFunction(({ expectedId, expectedScene }) => {
     const root = document.getElementById('fx-organism-console');
     const panel = document.querySelector(`[data-organism-panel="${expectedId}"]`);
     return Boolean(
@@ -34,11 +35,13 @@ async function assertPanel(page, id) {
       && !root.hidden
       && root.getAttribute('aria-hidden') === 'false'
       && document.body.classList.contains('fx-organism-panel-open')
+      && document.documentElement.dataset.fxScene === String(expectedScene)
+      && !document.documentElement.classList.contains('fx-organism-core-active')
       && panel
       && !panel.hidden
       && panel.getAttribute('aria-hidden') === 'false'
     );
-  }, id, { timeout: 5000 });
+  }, { expectedId: id, expectedScene: scene }, { timeout: 5000 });
 }
 
 async function assertMenuClosed(page) {
@@ -52,30 +55,49 @@ async function assertMenuClosed(page) {
   }
 }
 
+async function assertCore(page) {
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const consoleRoot = document.getElementById('fx-organism-console');
+    const status = document.querySelector('.fx-organism-status');
+    return root.dataset.fxScene === '0'
+      && root.dataset.fxOrganismState === 'core'
+      && root.classList.contains('fx-organism-core-active')
+      && document.getElementById('hero')?.classList.contains('is-core-active')
+      && !document.body.classList.contains('fx-organism-panel-open')
+      && consoleRoot?.hidden === true
+      && location.hash === '#hero'
+      && status?.querySelector('.fx-organism-status-index')?.textContent === '01 / 06'
+      && status?.querySelector('strong')?.textContent === 'MAG'
+      && document.querySelector('[data-organ-node="0"]')?.getAttribute('aria-current') === 'page'
+      && document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current') === 'page';
+  }, null, { timeout: 5000 });
+}
+
+async function closePanelAndAssertCore(page) {
+  await page.locator('.fx-organism-console-close').click();
+  await assertCore(page);
+}
+
 async function testDesktop(browser) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await waitForInterface(page);
-
-  const startupState = await page.evaluate(() => ({
-    panelOpen: document.body.classList.contains('fx-organism-panel-open'),
-    consoleHidden: document.getElementById('fx-organism-console')?.hidden,
-    interfaceState: document.documentElement.dataset.fxOrganismInterface,
-  }));
-  if (startupState.panelOpen || startupState.consoleHidden !== true || startupState.interfaceState !== 'ready') {
-    throw new Error(`Desktop startup state invalid: ${JSON.stringify(startupState)}`);
-  }
+  await assertCore(page);
 
   await openMenu(page);
   await page.locator('#main-nav a[href="#experience"]').click();
-  await assertPanel(page, 'experience');
+  await assertPanel(page, 'experience', 1);
   await assertMenuClosed(page);
+  await closePanelAndAssertCore(page);
 
-  await page.locator('.fx-organism-console-close').click();
-  await page.waitForFunction(() => {
-    const root = document.getElementById('fx-organism-console');
-    return Boolean(root?.hidden && !document.body.classList.contains('fx-organism-panel-open'));
-  }, null, { timeout: 5000 });
+  await page.locator('.fx-organism-map a[href="#pricing"]').click();
+  await assertPanel(page, 'pricing', 3);
+  await closePanelAndAssertCore(page);
+
+  await page.locator('.fx-rail a[href="#system"]').click();
+  await assertPanel(page, 'system', 4);
+  await closePanelAndAssertCore(page);
 
   await page.close();
 }
@@ -88,13 +110,19 @@ async function testMobile(browser) {
   });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await waitForInterface(page);
+  await assertCore(page);
 
   await openMenu(page);
   await page.locator('#main-nav a[href="#capabilities"]').click();
-  await assertPanel(page, 'capabilities');
+  await assertPanel(page, 'capabilities', 2);
   await assertMenuClosed(page);
+  await closePanelAndAssertCore(page);
 
-  await page.locator('.fx-organism-console-close').click();
+  await page.locator('.scroll-cue').click();
+  await assertPanel(page, 'experience', 1);
+  await page.keyboard.press('1');
+  await assertCore(page);
+
   await page.close();
 }
 
@@ -103,7 +131,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX desktop and mobile navigation/panel interaction');
+    console.log('PASS FormatX hero core, menu, map, rail and panel interaction');
   } finally {
     await browser.close();
   }
