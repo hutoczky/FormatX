@@ -1,0 +1,44 @@
+name: Validate FormatX pricing QR
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/assets/qr/**'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'billing-worker/src/pricing-v100-api.js'
+      - '.github/scripts/validate-pricing-qr.cjs'
+      - '.github/workflows/validate-pricing-qr.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/assets/qr/**'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'billing-worker/src/pricing-v100-api.js'
+      - '.github/scripts/validate-pricing-qr.cjs'
+      - '.github/workflows/validate-pricing-qr.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-pricing-qr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript syntax
+        run: |
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/living-architecture.js
+          node --check billing-worker/src/pricing-v100-api.js
+          node --check .github/scripts/validate-pricing-qr.cjs
+      - name: Validate QR delivery and local fallbacks
+        run: node .github/scripts/validate-pricing-qr.cjs
