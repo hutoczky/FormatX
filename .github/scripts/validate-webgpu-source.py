@@ -8,19 +8,19 @@ def text(path: str) -> str:
 home = text("docs/scifi-ui/index.html")
 apex = text("docs/scifi-ui/scripts/formatx-apex.js")
 loader = text("docs/scifi-ui/scripts/igloo-parity.js")
-host = text("docs/scifi-ui/scripts/formatx-three-host.js")
-bootstrap = text("docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js")
-webgl_engine = text("docs/scifi-ui/scripts/Experience.js")
-webgpu_engine = text("docs/scifi-ui/scripts/ExperienceWebGPU.js")
-xr = text("docs/scifi-ui/scripts/WebXRDirector.js")
-controls = text("docs/scifi-ui/scripts/formatx-nextgen-controls.js")
-entry = text("docs/scifi-ui/scripts/experience-entry.js")
-stage = text("docs/scifi-ui/three-stage.html")
+safe_host = text("docs/scifi-ui/scripts/formatx-three-host-safe.js")
+gate = text("docs/scifi-ui/scripts/formatx-mobile-recovery.js")
+living = text("docs/scifi-ui/scripts/living-architecture.js")
+mobile_engine = text("docs/scifi-ui/scripts/mobile-core-engine.js")
+mobile_entry = text("docs/scifi-ui/scripts/mobile-webgl-entry.js")
+mobile_stage = text("docs/scifi-ui/three-stage-mobile.html")
+legacy_webgpu = text("docs/scifi-ui/scripts/ExperienceWebGPU.js")
 css = text("docs/scifi-ui/styles/formatx-three-host.css")
-nextgen_css = text("docs/scifi-ui/styles/formatx-nextgen-controls.css")
+safe_css = text("docs/scifi-ui/styles/formatx-mobile-recovery.css")
 intro = text("docs/scifi-ui/scripts/formatx-event-horizon.js")
 static_headers = text("docs/scifi-ui/_headers")
-worker = text("billing-worker/src/production-with-license.js")
+root_worker = text("worker.js")
+production_worker = text("billing-worker/src/production-with-license.js")
 
 results: list[tuple[str, bool]] = []
 
@@ -39,82 +39,83 @@ require("home: one formatx-apex controller", home.count("formatx-apex.js?v=20260
 tokens("home", home, ('id="fx-apex-canvas"', 'id="fx-particle-canvas"', 'data-flow="3"'))
 require("home: Business Pro price", "15 900 Ft / hó" in home)
 require("home: Technician Team price", "29 900 Ft / hó" in home)
+
 require("intro: deterministic timeline", "TIMELINE_DURATION" in intro)
 require("intro: hard deadline", "HARD_DEADLINE" in intro)
 require("intro: no window load wait", "loadOrDeadline" not in intro)
 require("intro: no animation promise wait", "Promise.all(animations)" not in intro)
 
-
-tokens("loader", loader, (
-    "formatx-three-host.js",
-    "formatx-nextgen-controls.js",
-    "formatx-three-frame-bootstrap.js",
+# Production uses one direct WebGL stage after the intro. The experimental
+# WebGPU engine remains in the repository but must not be started by the live loader.
+tokens("safe loader", loader, (
+    "formatx-three-host-safe.js",
     "formatx-transcend-bridge.js",
+    "formatx-living-core-launcher.js",
+    "interaction-genome.js",
+    "load(index + 1)",
 ))
-tokens("WebGL engine", webgl_engine, (
-    "THREE.WebGLRenderer",
-    "THREE.PerspectiveCamera",
-    "CatmullRomCurve3",
-    "QualityGovernor",
+require("safe loader: no legacy frame bootstrap", "formatx-three-frame-bootstrap.js" not in loader)
+require("safe loader: no legacy professional refinement", "formatx-professional-refinement.js" not in loader)
+require("safe loader: no duplicate infinite loop", "formatx-infinite-loop-controller-v2.js" not in loader)
+require("safe loader: no WebGPU nextgen controls", "formatx-nextgen-controls.js" not in loader)
+
+require("living architecture waits for intro", "scheduleThreeExperience()" in living)
+require("living architecture has one loader start", "threeLoadStarted" in living)
+require("living architecture uses safe loader version", "20260729-safe-loader-1" in living)
+
+tokens("safe 3D gate", gate, (
+    "fxSafeThreeGate",
+    "about:blank",
+    "formatx:introcomplete",
+    "three-stage-mobile.html",
+    "Do not reload the frame automatically",
 ))
-tokens("WebGPU engine", webgpu_engine, (
-    "THREE.WebGPURenderer",
-    "MeshBasicNodeMaterial",
-    "instancedArray",
-    "renderer.compute",
-    "500000",
-    "fragmentNode",
-    "WebXRDirector",
-    "setAnimationLoop",
-))
-tokens("WebXR director", xr, (
-    "renderer.xr.enabled = true",
-    "requestSession(mode",
-    "immersive-ar",
-    "immersive-vr",
-    "renderer.xr.setSession",
-))
-tokens("next-generation controls", controls, (
-    "AudioContext",
-    "createOscillator",
-    "createBiquadFilter",
-    "scheduleBeat",
-    "VELOCITY",
-    "formatx:xrstate",
-))
-tokens("Three host", host, (
+require("safe gate: no automatic retry loop", "frame.src = expectedUrl(attempts)" not in gate)
+
+
+tokens("safe host", safe_host, (
     "Float32Array",
     "__FORMATX_3D_STATE__",
-    "fx-three-loop-bridge",
-    "formatx:loop",
+    "frame.src = 'about:blank'",
+    "touch",
+    "formatx:coreclick",
 ))
-tokens("frame bootstrap", bootstrap, (
-    "three-stage.html",
-    "20260727-webgpu-1",
-    "THREE / FRAME ERROR",
-    "formatx:threeready",
-))
-require("Three stage: module entry", 'type="module"' in stage)
-require("Three stage: versioned experience entry", "experience-entry.js?v=" in stage)
-tokens("experience entry", entry, (
-    "ExperienceWebGPU.js",
-    "'gpu' in navigator",
-    "startWebGLExperience",
-    "fxWebgpu",
-))
-tokens("Three host CSS", css, ("fx-three-stage-shell", "fx-three-sound", "fx-three-loop-bridge"))
-tokens("next-generation controls CSS", nextgen_css, ("fx-nextgen-xr", "data-fx-webgpu"))
+require("safe host: no scroll preventDefault", "preventDefault()" not in safe_host)
+require("safe host: no infinite hero clone", "cloneNode" not in safe_host)
 
+require("mobile stage: direct module entry", 'type="module"' in mobile_stage)
+require("mobile stage: direct engine entry", "mobile-webgl-entry.js?v=20260729-direct-mobile-entry-1" in mobile_stage)
+require("mobile entry imports engine", "mobile-core-engine.js" in mobile_entry)
+tokens("direct WebGL engine", mobile_engine, (
+    "THREE.WebGLRenderer",
+    "THREE.ShaderMaterial",
+    "class MobileCoreEngine",
+    "root.dataset.fxThree = 'ready'",
+    "requestAnimationFrame",
+))
+
+# The experimental source remains syntactically represented but is not live-owned.
+tokens("experimental WebGPU source retained", legacy_webgpu, (
+    "THREE.WebGPURenderer",
+    "renderer.compute",
+    "WebXRDirector",
+))
+
+require("safe CSS exposes stage on all devices", 'data-fx-safe-three-gate="ready-v1"' in safe_css)
+tokens("Three host CSS", css, ("fx-three-stage-shell", "fx-three-engine-ready"))
 require("apex: no renderer ownership", "createRenderer" not in apex)
 require("apex: no WebGL context ownership", "getContext('webgl2'" not in apex)
-require("loader: no legacy transcend-lite", "formatx-transcend-lite.js" not in loader)
-require("loader: no worldstage enhancements", "worldstage-enhancements.js" not in loader)
 require("static headers: no global X-Frame-Options", "X-Frame-Options" not in static_headers)
-tokens("worker", worker, (
+
+tokens("root worker safe delivery", root_worker, (
+    "20260729-safe-three-gate-1",
+    "20260729-safe-three-css-1",
+    "20260729-safe-three-start-1",
+    "Cache-Control', 'no-store",
+))
+tokens("production worker security retained", production_worker, (
     "THREE_STAGE_CONTENT_SECURITY_POLICY",
     "isThreeStage ? 'SAMEORIGIN' : 'DENY'",
-    "https://cdn.jsdelivr.net",
-    "https://unpkg.com",
     '"frame-ancestors \'self\'"',
 ))
 
@@ -124,4 +125,4 @@ print(report, end="")
 
 failed = [label for label, passed in results if not passed]
 if failed:
-    raise SystemExit("WebGPU source architecture validation failed: " + "; ".join(failed))
+    raise SystemExit("Production 3D source architecture validation failed: " + "; ".join(failed))
