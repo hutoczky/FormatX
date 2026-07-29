@@ -2,13 +2,26 @@ const APK_ASSET_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const APK_DOWNLOAD_PATH = '/download/android';
 const APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.2.apk';
 const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
-const EARLY_UI_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="./styles/single-language-toggle.css?v=20260729-single-language-2">\n  <link rel="stylesheet" data-fx-copy-polish-style="true" href="./styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="./scripts/single-language-toggle.js?v=20260729-single-language-1"></script>\n  <script defer src="./scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
+const LANGUAGE_PAGE_PATHS = new Set([
+  '/scifi-ui/',
+  '/scifi-ui/index.html',
+  '/scifi-ui/license.html',
+  '/scifi-ui/support.html',
+  '/scifi-ui/terms.html',
+  '/scifi-ui/privacy.html',
+  '/scifi-ui/checkout.html',
+  '/scifi-ui/payment/success.html',
+  '/scifi-ui/payment/cancel.html',
+]);
+const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260729-single-language-3">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260729-single-language-2"></script>\n';
+const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
 const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/igloo-parity.js',
   '/scifi-ui/scripts/single-language-toggle.js',
   '/scifi-ui/scripts/formatx-copy-polish.js',
+  '/scifi-ui/scripts/formatx-license-links.js',
   '/scifi-ui/scripts/formatx-infinite-scroll.js',
   '/scifi-ui/scripts/organism-console-state.js',
   '/scifi-ui/scripts/formatx-render-visibility.js',
@@ -41,8 +54,8 @@ export default {
     if ((request.method === 'GET' || request.method === 'HEAD') && (url.pathname === APK_ASSET_PATH || url.pathname === APK_DOWNLOAD_PATH)) {
       return serveAndroidApk(request, env);
     }
-    if ((request.method === 'GET' || request.method === 'HEAD') && SCIFI_ENTRY_PATHS.has(url.pathname)) {
-      return serveScifiEntry(request, env);
+    if ((request.method === 'GET' || request.method === 'HEAD') && LANGUAGE_PAGE_PATHS.has(url.pathname)) {
+      return serveLanguagePage(request, env, url.pathname);
     }
     if ((request.method === 'GET' || request.method === 'HEAD') && CRITICAL_ASSET_PATHS.has(url.pathname)) {
       return serveNoStoreAsset(request, env);
@@ -51,7 +64,7 @@ export default {
   },
 };
 
-async function serveScifiEntry(request, env) {
+async function serveLanguagePage(request, env, pathname) {
   const upstream = await env.ASSETS.fetch(request);
   if (!upstream.ok || request.method === 'HEAD') {
     const headers = new Headers(upstream.headers);
@@ -64,11 +77,14 @@ async function serveScifiEntry(request, env) {
   if (!contentType.includes('text/html')) return upstream;
 
   let html = await upstream.text();
-  for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
+  if (SCIFI_ENTRY_PATHS.has(pathname)) {
+    for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
+  }
   if (!html.includes('data-fx-single-language-style')) {
-    html = html.replace('</head>', EARLY_UI_ASSETS + '</head>');
-  } else if (!html.includes('data-fx-copy-polish-style')) {
-    html = html.replace('</head>', '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="./styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="./scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n</head>');
+    html = html.replace('</head>', LANGUAGE_ASSETS + '</head>');
+  }
+  if (SCIFI_ENTRY_PATHS.has(pathname) && !html.includes('data-fx-copy-polish-style')) {
+    html = html.replace('</head>', COPY_ASSETS + '</head>');
   }
 
   const headers = new Headers(upstream.headers);
