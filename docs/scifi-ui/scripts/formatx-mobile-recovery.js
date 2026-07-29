@@ -117,6 +117,7 @@
   }
 
   function startThreeAfterIntro() {
+    if (root.dataset.fxIntroReplayPlanned === 'true') return;
     if (threeStarted && root.dataset.fxThree !== 'error') return;
     introComplete = true;
     threeStarted = true;
