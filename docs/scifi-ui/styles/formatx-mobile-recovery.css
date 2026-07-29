@@ -1,18 +1,45 @@
-/* Safe all-device 3D layering and mobile layout recovery. */
+/* FormatX living-core visibility and responsive layout recovery. */
 html[data-fx-safe-three-gate="ready-v1"] body,
 html[data-fx-safe-three-gate="ready-v2"] body {
-  background: transparent !important;
+  background: #010307 !important;
 }
 
+/*
+ * Desktop: the 3D stage owns only the right visual field. This keeps it above
+ * opaque/composited page layers without allowing it to cover the hero copy.
+ */
 html[data-fx-safe-three-gate="ready-v1"] .fx-three-stage-shell,
 html[data-fx-safe-three-gate="ready-v2"] .fx-three-stage-shell {
-  z-index: 1 !important;
+  position: fixed !important;
+  z-index: 120 !important;
+  top: 80px !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 50vw !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
   background: transparent !important;
   visibility: visible !important;
   opacity: 1 !important;
+  pointer-events: none !important;
   isolation: isolate;
 }
 
+html[data-fx-safe-three-gate="ready-v1"] #fx-three-frame,
+html[data-fx-safe-three-gate="ready-v2"] #fx-three-frame {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  filter: none !important;
+  pointer-events: none !important;
+}
+
+/* The obsolete APEX layer must never cover the active Three.js stage. */
 html[data-fx-safe-three-gate="ready-v1"] #fx-apex-canvas,
 html[data-fx-safe-three-gate="ready-v2"] #fx-apex-canvas,
 html[data-fx-safe-three-gate="ready-v1"] .fx-atmosphere,
@@ -21,13 +48,22 @@ html[data-fx-safe-three-gate="ready-v2"] .fx-atmosphere {
 }
 
 html[data-fx-safe-three-gate="ready-v1"] main,
-html[data-fx-safe-three-gate="ready-v1"] .topbar,
-html[data-fx-safe-three-gate="ready-v1"] .site-footer,
 html[data-fx-safe-three-gate="ready-v2"] main,
-html[data-fx-safe-three-gate="ready-v2"] .topbar,
+html[data-fx-safe-three-gate="ready-v1"] .site-footer,
 html[data-fx-safe-three-gate="ready-v2"] .site-footer {
   position: relative;
-  z-index: 2;
+  z-index: auto !important;
+}
+
+html[data-fx-safe-three-gate="ready-v1"] .topbar,
+html[data-fx-safe-three-gate="ready-v2"] .topbar,
+html[data-fx-safe-three-gate="ready-v1"] .fx-rail,
+html[data-fx-safe-three-gate="ready-v2"] .fx-rail,
+html[data-fx-safe-three-gate="ready-v1"] .fx-organism-status,
+html[data-fx-safe-three-gate="ready-v2"] .fx-organism-status,
+html[data-fx-safe-three-gate="ready-v1"] .fx-genome-launcher,
+html[data-fx-safe-three-gate="ready-v2"] .fx-genome-launcher {
+  isolation: isolate;
 }
 
 html[data-fx-safe-three-gate="ready-v1"] #hero,
@@ -41,40 +77,52 @@ html[data-fx-safe-three-gate="ready-v2"] .scene {
   background: transparent !important;
 }
 
-html[data-fx-safe-three-gate="ready-v1"] #fx-three-frame,
-html[data-fx-safe-three-gate="ready-v2"] #fx-three-frame {
-  pointer-events: none !important;
-}
-
 html[data-fx-safe-three-gate="ready-v1"]:not(.fx-intro-complete) .fx-three-stage-shell,
 html[data-fx-safe-three-gate="ready-v2"]:not(.fx-intro-complete) .fx-three-stage-shell {
   visibility: hidden !important;
 }
 
 html[data-fx-safe-three-gate="ready-v1"].fx-intro-complete .fx-three-stage-shell,
-html[data-fx-safe-three-gate="ready-v2"].fx-intro-complete .fx-three-stage-shell {
+html[data-fx-safe-three-gate="ready-v2"].fx-intro-complete .fx-three-stage-shell,
+html[data-fx-safe-three-gate="ready-v1"].fx-three-engine-ready .fx-three-stage-shell,
+html[data-fx-safe-three-gate="ready-v2"].fx-three-engine-ready .fx-three-stage-shell {
   visibility: visible !important;
 }
 
-html[data-fx-safe-three-gate="ready-v1"].fx-three-engine-ready #fx-three-frame,
-html[data-fx-safe-three-gate="ready-v1"][data-fx-three="ready"] #fx-three-frame,
-html[data-fx-safe-three-gate="ready-v2"].fx-three-engine-ready #fx-three-frame,
-html[data-fx-safe-three-gate="ready-v2"][data-fx-three="ready"] #fx-three-frame {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: none !important;
-  filter: none !important;
+/* Production telemetry caused the visible overlap with the hero fact row. */
+.fx-three-telemetry {
+  display: none !important;
+}
+
+html[data-fx-safe-three-gate="ready-v1"] #hero,
+html[data-fx-safe-three-gate="ready-v2"] #hero {
+  padding-bottom: clamp(92px, 10vh, 140px) !important;
+}
+
+html[data-fx-safe-three-gate="ready-v1"] #hero .hero-facts,
+html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(20px, 3vh, 34px) !important;
+  padding-bottom: 20px;
+}
+
+@media (min-width: 901px) and (max-aspect-ratio: 16/10) {
+  html[data-fx-safe-three-gate="ready-v1"] .fx-three-stage-shell,
+  html[data-fx-safe-three-gate="ready-v2"] .fx-three-stage-shell {
+    left: 54vw !important;
+  }
 }
 
 @media (max-width: 900px), (pointer: coarse) {
-  html[data-fx-three-host="ready"],
-  html[data-fx-three-host="safe-ready-v1"] {
-    background: #010307;
-  }
-
+  html[data-fx-safe-three-gate="ready-v1"] .fx-three-stage-shell,
+  html[data-fx-safe-three-gate="ready-v2"] .fx-three-stage-shell,
   html[data-fx-three-host="ready"] .fx-three-stage-shell,
   html[data-fx-three-host="safe-ready-v1"] .fx-three-stage-shell {
     z-index: 1 !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100svh !important;
     background: transparent !important;
   }
 
@@ -88,25 +136,12 @@ html[data-fx-safe-three-gate="ready-v2"][data-fx-three="ready"] #fx-three-frame 
     z-index: 2;
   }
 
-  html[data-fx-three-host="ready"] #hero,
-  html[data-fx-three-host="ready"] #hero .hero-grid,
-  html[data-fx-three-host="ready"] #hero .hero-space,
-  html[data-fx-three-host="safe-ready-v1"] #hero,
-  html[data-fx-three-host="safe-ready-v1"] #hero .hero-grid,
-  html[data-fx-three-host="safe-ready-v1"] #hero .hero-space {
-    background: transparent !important;
-  }
-
   html.fx-mobile-stable-3d #fx-three-frame,
   html[data-fx-three="ready"] #fx-three-frame,
   html.fx-three-engine-ready #fx-three-frame {
     opacity: 1 !important;
     visibility: visible !important;
     transform: none !important;
-  }
-
-  .fx-three-telemetry {
-    display: none !important;
   }
 
   .fx-three-sound {
@@ -121,10 +156,7 @@ html[data-fx-safe-three-gate="ready-v2"][data-fx-three="ready"] #fx-three-frame 
     padding-inline: 16px !important;
   }
 
-  .topbar .brand {
-    min-width: 0 !important;
-  }
-
+  .topbar .brand,
   .topbar .brand span {
     min-width: 0 !important;
   }
@@ -137,11 +169,8 @@ html[data-fx-safe-three-gate="ready-v2"][data-fx-three="ready"] #fx-three-frame 
     justify-self: end !important;
   }
 
-  .fx-organism-interface-ready #hero .hero-copy {
-    left: 22px !important;
-    right: 22px !important;
-    bottom: max(210px, calc(184px + env(safe-area-inset-bottom))) !important;
-    width: auto !important;
+  #hero .hero-copy {
+    position: relative !important;
     z-index: 4 !important;
   }
 
@@ -173,15 +202,11 @@ html[data-fx-safe-three-gate="ready-v2"][data-fx-three="ready"] #fx-three-frame 
 }
 
 @media (max-width: 430px) {
-  .fx-organism-interface-ready #hero .hero-copy {
-    bottom: max(198px, calc(176px + env(safe-area-inset-bottom))) !important;
-  }
-
-  .fx-organism-interface-ready #hero .hero-title-main {
+  #hero .hero-title-main {
     font-size: clamp(52px, 17vw, 78px) !important;
   }
 
-  .fx-organism-interface-ready #hero .hero-title-sub {
+  #hero .hero-title-sub {
     font-size: clamp(21px, 7.4vw, 34px) !important;
   }
 }
