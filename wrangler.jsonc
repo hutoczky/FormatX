@@ -29,7 +29,6 @@
       "/scifi-ui/scripts/living-architecture.js",
       "/scifi-ui/scripts/mobile-webgl-entry.js",
       "/scifi-ui/scripts/mobile-core-engine-v2.js",
-      "/scifi-ui/scripts/organism-panel-startup-guard.js",
       "/scifi-ui/scripts/organism-interface.js",
       "/scifi-ui/scripts/organism-menu-controller.js",
       "/download/*",
