@@ -121,7 +121,6 @@ async function verifyViewport(browser, viewport, name) {
   const firstFootprint = await footprint(page);
 
   await page.waitForTimeout(420);
-  const beforeContinue = window;
   const startY = await page.evaluate(() => window.scrollY);
   await page.mouse.wheel(0, 160);
   await page.waitForTimeout(160);
