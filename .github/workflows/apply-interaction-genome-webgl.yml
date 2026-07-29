@@ -1,175 +1,28 @@
-# Integration trigger revision 1
-name: Apply FormatX Interaction Genome WebGL
+name: Audit FormatX Interaction Genome WebGL
 
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - 'docs/scifi-ui/scripts/interaction-genome-webgl.js'
-      - 'docs/scifi-ui/styles/interaction-genome-webgl.css'
-      - '.github/workflows/apply-interaction-genome-webgl.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  integrate:
+  audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          token: ${{ github.token }}
+      - uses: actions/checkout@v4
 
-      - name: Bind WebGL renderer and Interaction Genome
-        shell: bash
+      - name: Validate WebGL renderer and lazy loading
         run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          loader = Path('docs/scifi-ui/scripts/igloo-parity.js')
-          source = loader.read_text(encoding='utf-8')
-          old = "    './scripts/formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2'\n  ];"
-          new = "    './scripts/formatx-infinite-loop-controller-v2.js?v=20260728-loop-v2',\n    './scripts/interaction-genome-webgl.js?v=20260728-genome-webgl-1',\n    './scripts/interaction-genome.js?v=20260728-genome-3d-1'\n  ];"
-          if 'interaction-genome-webgl.js?v=20260728-genome-webgl-1' not in source:
-              if old not in source:
-                  raise SystemExit('Runtime queue anchor missing')
-              source = source.replace(old, new, 1)
-              loader.write_text(source, encoding='utf-8')
-
-          genome = Path('docs/scifi-ui/scripts/interaction-genome.js')
-          code = genome.read_text(encoding='utf-8')
-          code = code.replace("    notice: ''\n  };", "    notice: '',\n    renderer3D: null\n  };", 1)
-
-          anchor = "    });\n\n    bindUi();\n    translate();\n    resizeCanvas();"
-          renderer_setup = """    });
-
-    const stage = elements.canvas.closest('.fx-genome-stage');
-    try {
-      state.renderer3D = window.FormatXGenomeRenderer3D?.create(elements.canvas, {
-        reducedMotion,
-        onSelect: index => select(index)
-      }) || null;
-    } catch (error) {
-      console.warn('FormatX Interaction Genome WebGL fallback:', error);
-      state.renderer3D = null;
-    }
-    if (stage) {
-      stage.dataset.renderer = state.renderer3D ? 'webgl2-pbr' : 'canvas2d-fallback';
-      if (state.renderer3D) {
-        const badge = document.createElement('span');
-        badge.className = 'fx-genome-renderer-badge';
-        badge.textContent = 'NATIVE WEBGL2 / DEPTH / PBR NODES';
-        const scale = document.createElement('i');
-        scale.className = 'fx-genome-depth-scale';
-        scale.setAttribute('aria-hidden', 'true');
-        stage.append(badge, scale);
-      }
-    }
-    root.dataset.fxInteractionGenomeRenderer = state.renderer3D ? 'webgl2-pbr' : 'canvas2d-fallback';
-
-    bindUi();
-    translate();
-    resizeCanvas();"""
-          if 'NATIVE WEBGL2 / DEPTH / PBR NODES' not in code:
-              if anchor not in code:
-                  raise SystemExit('Genome UI anchor missing')
-              code = code.replace(anchor, renderer_setup, 1)
-
-          start = code.index('  function resizeCanvas() {')
-          end = code.index('\n  function colorFor(', start)
-          replacement = """  function resizeCanvas() {
-    if (!elements.canvas) return;
-    if (state.renderer3D) {
-      state.renderer3D.resize();
-      state.renderer3D.setData(state.items, state.selected);
-      state.renderer3D.render(performance.now());
-      return;
-    }
-    const rect = elements.canvas.getBoundingClientRect();
-    const dpr = Math.min(2, devicePixelRatio || 1);
-    const width = Math.max(320, Math.round(rect.width * dpr));
-    const height = Math.max(360, Math.round(rect.height * dpr));
-    if (elements.canvas.width !== width || elements.canvas.height !== height) {
-      elements.canvas.width = width; elements.canvas.height = height;
-      drawCanvas(performance.now());
-    }
-  }
-"""
-          code = code[:start] + replacement + code[end:]
-
-          draw_anchor = "  function drawCanvas(now) {\n    if (!elements.canvas) return;"
-          draw_replacement = """  function drawCanvas(now) {
-    if (!elements.canvas) return;
-    if (state.renderer3D) {
-      state.renderer3D.setData(state.items, state.selected);
-      state.renderer3D.render(now);
-      return;
-    }"""
-          if 'state.renderer3D.render(now)' not in code:
-              if draw_anchor not in code:
-                  raise SystemExit('drawCanvas anchor missing')
-              code = code.replace(draw_anchor, draw_replacement, 1)
-
-          pointer_anchor = """  function onCanvasPointer(event) {
-    const rect = elements.canvas.getBoundingClientRect();"""
-          pointer_replacement = """  function onCanvasPointer(event) {
-    const rect = elements.canvas.getBoundingClientRect();
-    if (state.renderer3D) {
-      state.renderer3D.pointerMove(event.clientX - rect.left, event.clientY - rect.top, event);
-      return;
-    }"""
-          if 'state.renderer3D.pointerMove' not in code:
-              if pointer_anchor not in code:
-                  raise SystemExit('pointer anchor missing')
-              code = code.replace(pointer_anchor, pointer_replacement, 1)
-
-          click_anchor = """  function onCanvasClick() {
-    const index = Number(elements.canvas.dataset.hoverIndex);"""
-          click_replacement = """  function onCanvasClick() {
-    if (state.renderer3D) {
-      state.renderer3D.click();
-      return;
-    }
-    const index = Number(elements.canvas.dataset.hoverIndex);"""
-          if 'state.renderer3D.click()' not in code:
-              if click_anchor not in code:
-                  raise SystemExit('click anchor missing')
-              code = code.replace(click_anchor, click_replacement, 1)
-
-          leave_old = "elements.canvas.addEventListener('pointerleave', () => { state.pointerX = 0; state.pointerY = 0; });"
-          leave_new = "elements.canvas.addEventListener('pointerleave', () => { state.pointerX = 0; state.pointerY = 0; state.renderer3D?.pointerLeave(); });"
-          code = code.replace(leave_old, leave_new, 1)
-
-          pagehide_old = "addEventListener('pagehide', () => { observer.disconnect(); clearTimeout(scrollTimer); }, { once: true });"
-          pagehide_new = "addEventListener('pagehide', () => { observer.disconnect(); clearTimeout(scrollTimer); state.renderer3D?.destroy(); }, { once: true });"
-          code = code.replace(pagehide_old, pagehide_new, 1)
-
-          state_old = "getState: () => JSON.parse(JSON.stringify({ items: state.items, selected: state.selected, fingerprint: state.fingerprint, opened: state.opened }))"
-          state_new = "getState: () => JSON.parse(JSON.stringify({ items: state.items, selected: state.selected, fingerprint: state.fingerprint, opened: state.opened, renderer: state.renderer3D?.getStatus?.() || { kind: 'canvas2d-fallback' } }))"
-          code = code.replace(state_old, state_new, 1)
-          genome.write_text(code, encoding='utf-8')
-          PY
-
           node --check docs/scifi-ui/scripts/interaction-genome-webgl.js
+          node --check docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
           node --check docs/scifi-ui/scripts/interaction-genome.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'interaction-genome-webgl.js?v=20260728-genome-webgl-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq "fxInteractionGenomeRenderer = state.renderer3D ? 'webgl2-pbr'" docs/scifi-ui/scripts/interaction-genome.js
+          grep -Fq "getContext('webgl2'" docs/scifi-ui/scripts/interaction-genome-webgl.js
+          grep -Fq 'drawElementsInstanced' docs/scifi-ui/scripts/interaction-genome-webgl.js
+          grep -Fq 'requestGenomeWebgl' docs/scifi-ui/scripts/igloo-parity.js
+          ! grep -Fq 'git push origin HEAD:master' .github/workflows/apply-interaction-genome-webgl.yml
 
-      - name: Commit WebGL integration
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git diff --quiet; then
-            echo 'WebGL Interaction Genome already integrated.'
-            exit 0
-          fi
-          git config user.name 'FormatX Genome 3D Bot'
-          git config user.email 'actions@users.noreply.github.com'
-          git add docs/scifi-ui/scripts/igloo-parity.js docs/scifi-ui/scripts/interaction-genome.js
-          git commit -m 'Render Interaction Genome as native WebGL2 spatial system'
-          git push origin HEAD:master
+      - name: Report
+        run: echo 'Interaction Genome WebGL audit passed; no repository files were modified.'
