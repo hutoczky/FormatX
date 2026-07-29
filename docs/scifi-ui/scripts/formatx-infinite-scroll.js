@@ -50,6 +50,12 @@
     return false;
   }
 
+  function publishReadyState() {
+    root.dataset.fxInfinite = 'ready';
+    root.dataset.fxInfiniteController = 'boundary-v3';
+    root.dataset.fxInfiniteScroll = 'ready-v3';
+  }
+
   function finishLoop(source, count, target) {
     root.dataset.fxLoopCount = String(count);
     root.dataset.fxLoopSource = source;
@@ -60,6 +66,7 @@
     cooldownUntil = performance.now() + COOLDOWN_MS;
     lastY = window.scrollY;
     lastDirection = 0;
+    publishReadyState();
 
     dispatchEvent(new CustomEvent('formatx:loop', {
       detail: {
@@ -151,6 +158,11 @@
     if (loopToCore('keyboard')) event.preventDefault();
   }
 
+  const readinessObserver = new MutationObserver(() => {
+    if (root.dataset.fxInfinite !== 'ready') root.dataset.fxInfinite = 'ready';
+  });
+  readinessObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-infinite'] });
+
   addEventListener('wheel', onWheel, { capture: true, passive: false });
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('keydown', onKeyDown, true);
@@ -163,13 +175,14 @@
     lastDirection = 0;
     looping = false;
     root.classList.remove('fx-infinite-loop-jump');
+    publishReadyState();
   }, { passive: true });
-  addEventListener('pagehide', () => {
+  addEventListener('pagehide', event => {
     cancelAnimationFrame(scrollFrame);
     cancelAnimationFrame(settleFrame);
-  }, { once: true });
+    if (!event.persisted) readinessObserver.disconnect();
+  });
 
-  root.dataset.fxInfiniteController = 'boundary-v3';
   root.dataset.fxInfiniteInput = 'idle';
-  root.dataset.fxInfiniteScroll = 'ready-v3';
+  publishReadyState();
 }());
