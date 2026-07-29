@@ -1,4 +1,4 @@
-// Interaction patch for the FormatX WebGPU organism.
+// Interaction and performance patch for the FormatX WebGPU organism.
 // Runs before experience-entry.js and augments the fetched engine source.
 (() => {
   'use strict';
@@ -6,8 +6,44 @@
   if (window.__FORMATX_ORGANISM_INTERACTIONS__) return;
   window.__FORMATX_ORGANISM_INTERACTIONS__ = true;
 
+  const PARTICLE_BUDGET_RATIO = 0.35;
   const nativeFetch = window.fetch.bind(window);
   const enginePattern = /\/ExperienceWebGPU\.js(?:\?|$)/;
+
+  function installMobileScrollPriority() {
+    try {
+      const documentRef = parent.document;
+      if (!documentRef.getElementById('fx-mobile-scroll-priority')) {
+        const style = documentRef.createElement('style');
+        style.id = 'fx-mobile-scroll-priority';
+        style.textContent = `
+          @media (max-width: 900px), (pointer: coarse) {
+            html,
+            body {
+              overflow-x: hidden !important;
+              overflow-y: auto !important;
+              touch-action: pan-y pinch-zoom !important;
+              overscroll-behavior-y: auto !important;
+              -webkit-overflow-scrolling: touch !important;
+            }
+
+            main,
+            .scene,
+            .fx-three-stage-shell {
+              touch-action: pan-y pinch-zoom !important;
+            }
+
+            .fx-three-stage-shell,
+            #fx-three-frame {
+              pointer-events: none !important;
+            }
+          }
+        `;
+        documentRef.head.appendChild(style);
+      }
+      documentRef.documentElement.dataset.fxMobileScroll = 'native-pan-y';
+    } catch (_) {}
+  }
 
   function replaceRequired(source, search, replacement, label) {
     if (!source.includes(search)) {
@@ -15,6 +51,8 @@
     }
     return source.replace(search, replacement);
   }
+
+  installMobileScrollPriority();
 
   window.fetch = async function formatXInteractionFetch(input, init) {
     const response = await nativeFetch(input, init);
@@ -50,6 +88,60 @@
       parent.document.addEventListener('pointerdown', this.onCorePointerDown, { passive: true });
     } catch (_) {}`,
       'interaction state'
+    );
+
+    source = replaceRequired(
+      source,
+      '    this.maxCount = reduced ? 60000 : mobile ? 260000 : 500000;',
+      `    this.maxCount = reduced ? 60000 : mobile ? 260000 : 500000;
+    this.particleBudget = Math.max(1, Math.floor(this.maxCount * ${PARTICLE_BUDGET_RATIO}));`,
+      'fixed particle budget'
+    );
+
+    source = replaceRequired(
+      source,
+      "    this.positions = instancedArray(this.maxCount, 'vec3');",
+      "    this.positions = instancedArray(this.particleBudget, 'vec3');",
+      'particle position buffer budget'
+    );
+    source = replaceRequired(
+      source,
+      "    this.velocities = instancedArray(this.maxCount, 'vec3');",
+      "    this.velocities = instancedArray(this.particleBudget, 'vec3');",
+      'particle velocity buffer budget'
+    );
+    source = replaceRequired(
+      source,
+      "    this.seeds = instancedArray(this.maxCount, 'vec4');",
+      "    this.seeds = instancedArray(this.particleBudget, 'vec4');",
+      'particle seed buffer budget'
+    );
+    source = replaceRequired(
+      source,
+      "    })().compute(this.maxCount).setName('FormatX particle initialization');",
+      "    })().compute(this.particleBudget).setName('FormatX particle initialization');",
+      'particle initialization budget'
+    );
+    source = replaceRequired(
+      source,
+      '    this.computeNodes = this.counts.map(count => updateFn().compute(count).setName(`FormatX particle update ${count}`));',
+      `    this.computeNodes = this.counts.map(count => {
+      const budgetCount = Math.max(1, Math.floor(count * ${PARTICLE_BUDGET_RATIO}));
+      return updateFn().compute(budgetCount).setName(\`FormatX particle update \${budgetCount}\`);
+    });`,
+      'particle compute budget'
+    );
+    source = replaceRequired(
+      source,
+      '    this.sprite.count = this.counts[1];',
+      `    this.sprite.count = Math.max(1, Math.floor(this.counts[1] * ${PARTICLE_BUDGET_RATIO}));`,
+      'initial visible particle budget'
+    );
+    source = replaceRequired(
+      source,
+      '    this.sprite.count = this.counts[this.tier];',
+      `    this.sprite.count = Math.max(1, Math.floor(this.counts[this.tier] * ${PARTICLE_BUDGET_RATIO}));`,
+      'tier visible particle budget'
     );
 
     source = replaceRequired(
