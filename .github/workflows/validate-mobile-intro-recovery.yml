@@ -15,6 +15,7 @@ on:
       - 'docs/scifi-ui/scripts/mobile-webgl-entry.js'
       - 'docs/scifi-ui/scripts/mobile-core-engine.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-recovery.js'
+      - 'docs/scifi-ui/scripts/organism-panel-startup-guard.js'
       - 'docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js'
       - 'docs/scifi-ui/scripts/formatx-professional-refinement.js'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
@@ -40,6 +41,7 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
+          node --check docs/scifi-ui/scripts/organism-panel-startup-guard.js
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
@@ -63,6 +65,7 @@ jobs:
             '/scifi-ui/scripts/formatx-event-horizon.js',
             '/scifi-ui/scripts/formatx-mobile-recovery.js',
             '/scifi-ui/scripts/living-architecture.js',
+            '/scifi-ui/scripts/organism-panel-startup-guard.js',
           ];
           for (const path of required) {
             if (!first.includes(path)) throw new Error(`Missing run_worker_first path: ${path}`);
@@ -76,6 +79,7 @@ jobs:
           const fs = require('fs');
           const intro = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
           const gate = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-recovery.js', 'utf8');
+          const panelGuard = fs.readFileSync('docs/scifi-ui/scripts/organism-panel-startup-guard.js', 'utf8');
           const living = fs.readFileSync('docs/scifi-ui/scripts/living-architecture.js', 'utf8');
           const loader = fs.readFileSync('docs/scifi-ui/scripts/igloo-parity.js', 'utf8');
           const host = fs.readFileSync('docs/scifi-ui/scripts/formatx-three-host-safe.js', 'utf8');
@@ -97,6 +101,10 @@ jobs:
             [gate.includes("return introComplete && started && !failed ? stageUrl.href : 'about:blank'"), '3D blank-before-intro contract missing'],
             [gate.includes("document.addEventListener('formatx:introcomplete'"), 'safe gate must listen for intro completion'],
             [gate.includes('Do not reload the frame automatically'), 'crash-loop prevention missing'],
+            [panelGuard.includes("'#experience'"), 'stale panel hash protection missing'],
+            [panelGuard.includes('closeStalePanel'), 'stale panel close routine missing'],
+            [panelGuard.includes("formatx:introcomplete"), 'panel guard must run after intro'],
+            [panelGuard.includes("formatx:organisminterfaceready"), 'panel guard must close restored console after interface init'],
             [living.includes('scheduleThreeExperience()'), '3D loader scheduling missing'],
             [living.includes("'waiting-for-intro'"), '3D loader must wait for intro'],
             [living.includes('20260729-safe-loader-3'), 'latest safe loader cache version missing'],
@@ -122,7 +130,8 @@ jobs:
             [worker.includes('20260729-event-horizon-5'), 'live intro cache version missing'],
             [worker.includes('20260729-safe-three-gate-1'), 'live safe gate cache version missing'],
             [worker.includes('20260729-safe-three-css-1'), 'live safe CSS cache version missing'],
-            [worker.includes('20260729-safe-three-start-2'), 'live delayed loader cache version missing'],
+            [worker.includes('20260729-safe-three-start-3'), 'live delayed loader cache version missing'],
+            [worker.includes('20260729-panel-startup-guard-1'), 'live panel startup guard injection missing'],
             [!worker.includes('formatx-intro-deadlock-guard.js?v='), 'duplicate intro guard must not be injected'],
             [worker.includes("Cache-Control', 'no-store"), 'no-store delivery missing'],
           ];
