@@ -3,11 +3,15 @@ const APK_DOWNLOAD_PATH = '/download/android';
 const APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.2.apk';
 const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
 const SAFE_THREE_GATE_PATH = '/scifi-ui/scripts/formatx-mobile-recovery.js';
+const LIVING_ARCHITECTURE_PATH = '/scifi-ui/scripts/living-architecture.js';
+const SAFE_THREE_CSS_PATH = '/scifi-ui/styles/formatx-mobile-recovery.css';
 const EVENT_HORIZON_PATH = '/scifi-ui/scripts/formatx-event-horizon.js';
 const SAFE_THREE_GATE_OLD_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-1';
 const SAFE_THREE_GATE_NEW_VERSION = 'formatx-mobile-recovery.js?v=20260729-safe-three-gate-1';
-const MOBILE_RECOVERY_CSS_OLD_VERSION = 'formatx-mobile-recovery.css?v=20260729-mobile-recovery-1';
-const MOBILE_RECOVERY_CSS_NEW_VERSION = 'formatx-mobile-recovery.css?v=20260729-mobile-recovery-2';
+const SAFE_THREE_CSS_OLD_VERSION = 'formatx-mobile-recovery.css?v=20260729-mobile-recovery-1';
+const SAFE_THREE_CSS_NEW_VERSION = 'formatx-mobile-recovery.css?v=20260729-safe-three-css-1';
+const LIVING_ARCHITECTURE_OLD_VERSION = 'living-architecture.js?v=20260726-living-1';
+const LIVING_ARCHITECTURE_NEW_VERSION = 'living-architecture.js?v=20260729-safe-three-start-1';
 const EVENT_HORIZON_OLD_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-3"></script>';
 const EVENT_HORIZON_NEW_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260729-event-horizon-5"></script>';
 
@@ -31,7 +35,12 @@ export default {
 
     if (
       (request.method === 'GET' || request.method === 'HEAD') &&
-      (url.pathname === SAFE_THREE_GATE_PATH || url.pathname === EVENT_HORIZON_PATH)
+      (
+        url.pathname === SAFE_THREE_GATE_PATH ||
+        url.pathname === LIVING_ARCHITECTURE_PATH ||
+        url.pathname === SAFE_THREE_CSS_PATH ||
+        url.pathname === EVENT_HORIZON_PATH
+      )
     ) {
       return serveNoStoreAsset(request, env);
     }
@@ -54,7 +63,8 @@ async function serveScifiEntry(request, env) {
 
   const html = (await upstream.text())
     .replaceAll(SAFE_THREE_GATE_OLD_VERSION, SAFE_THREE_GATE_NEW_VERSION)
-    .replaceAll(MOBILE_RECOVERY_CSS_OLD_VERSION, MOBILE_RECOVERY_CSS_NEW_VERSION)
+    .replaceAll(SAFE_THREE_CSS_OLD_VERSION, SAFE_THREE_CSS_NEW_VERSION)
+    .replaceAll(LIVING_ARCHITECTURE_OLD_VERSION, LIVING_ARCHITECTURE_NEW_VERSION)
     .replace(EVENT_HORIZON_OLD_TAG, EVENT_HORIZON_NEW_TAG);
   const headers = new Headers(upstream.headers);
   headers.set('Cache-Control', 'no-store, max-age=0');
