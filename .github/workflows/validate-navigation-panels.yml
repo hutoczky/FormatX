@@ -5,6 +5,8 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - 'docs/scifi-ui/styles/single-language-toggle.css'
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
@@ -21,6 +23,8 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - 'docs/scifi-ui/styles/single-language-toggle.css'
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
@@ -56,6 +60,7 @@ jobs:
 
       - name: Validate source syntax
         run: |
+          node --check docs/scifi-ui/scripts/single-language-toggle.js
           node --check docs/scifi-ui/scripts/organism-interface.js
           node --check docs/scifi-ui/scripts/organism-menu-controller.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
