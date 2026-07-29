@@ -115,6 +115,11 @@
     closeResponsiveMenu();
     updateNavigation(scene);
 
+    if (panelIsOpen() && location.hash === '#' + id) {
+      pendingPanel = '';
+      return;
+    }
+
     const trigger = document.querySelector('[data-organism-open="' + CSS.escape(id) + '"]');
     if (!(trigger instanceof HTMLElement)) {
       pendingPanel = id;
