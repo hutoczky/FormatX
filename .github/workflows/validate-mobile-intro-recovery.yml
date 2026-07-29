@@ -9,8 +9,10 @@ on:
       - 'billing-worker/wrangler.jsonc'
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/three-stage-mobile.html'
+      - 'docs/scifi-ui/styles/single-language-toggle.css'
       - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
@@ -44,6 +46,7 @@ jobs:
       - name: Validate JavaScript syntax
         shell: bash
         run: |
+          node --check docs/scifi-ui/scripts/single-language-toggle.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
           node --check docs/scifi-ui/scripts/living-architecture.js
@@ -70,8 +73,10 @@ jobs:
           const required = [
             '/scifi-ui/',
             '/scifi-ui/index.html',
+            '/scifi-ui/styles/single-language-toggle.css',
             '/scifi-ui/styles/formatx-mobile-recovery.css',
             '/scifi-ui/styles/formatx-site-stability.css',
+            '/scifi-ui/scripts/single-language-toggle.js',
             '/scifi-ui/scripts/formatx-mobile-recovery.js',
             '/scifi-ui/scripts/living-architecture.js',
             '/scifi-ui/scripts/igloo-parity.js',
@@ -98,11 +103,13 @@ jobs:
           }
           NODE
 
-      - name: Validate hero, navigation, overlays and living core contract
+      - name: Validate hero, language, navigation, overlays and living core contract
         shell: bash
         run: |
           node - <<'NODE'
           const fs = require('fs');
+          const languageToggle = fs.readFileSync('docs/scifi-ui/scripts/single-language-toggle.js', 'utf8');
+          const languageToggleCss = fs.readFileSync('docs/scifi-ui/styles/single-language-toggle.css', 'utf8');
           const intro = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
           const gate = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-recovery.js', 'utf8');
           const living = fs.readFileSync('docs/scifi-ui/scripts/living-architecture.js', 'utf8');
@@ -123,6 +130,12 @@ jobs:
 
           const queue = loader.split('const queue =', 2)[1]?.split('];', 1)[0] || '';
           const assertions = [
+            [languageToggle.includes("toggle.className = 'fx-language-toggle'"), 'single language button creation missing'],
+            [languageToggle.includes('originalButtons.forEach'), 'legacy language buttons are not hidden'],
+            [languageToggle.includes('original.click()'), 'single toggle does not use the working language controller'],
+            [languageToggle.includes("addEventListener('formatx:languagechange'"), 'language toggle synchronisation missing'],
+            [languageToggleCss.includes('.fx-language-toggle'), 'single language button styling missing'],
+            [languageToggleCss.includes('[data-language][hidden]'), 'legacy language button hiding CSS missing'],
             [intro.includes('TIMELINE_DURATION'), 'deterministic intro timeline missing'],
             [intro.includes('HARD_DEADLINE'), 'intro hard deadline missing'],
             [!intro.includes('loadOrDeadline'), 'intro must not wait for window load'],
@@ -134,7 +147,9 @@ jobs:
             [living.includes('organism-interface.js'), 'organism interface is not loaded'],
             [living.includes('organism-menu-controller.js'), 'organism menu controller is not loaded'],
             [loader.includes('formatx-site-stability.css?v=20260729-stability-3'), 'stability stylesheet v3 loader missing'],
-            [loader.includes("safe-ready-v8"), 'safe loader v8 marker missing'],
+            [loader.includes("safe-ready-v9"), 'safe loader v9 marker missing'],
+            [queue.indexOf('single-language-toggle.js') < queue.indexOf('organism-console-state.js'), 'language toggle must load before Organism modules'],
+            [loader.includes('single-language-toggle.js?v=20260729-single-language-1'), 'single language loader missing'],
             [queue.indexOf('organism-console-state.js') < queue.indexOf('organism-core-controller.js'), 'console state must load before core controller'],
             [loader.includes('organism-console-state.js?v=20260729-console-state-1'), 'console state loader missing'],
             [loader.includes('organism-core-controller.js?v=20260729-core-ui-1'), 'Organism core controller loader missing'],
@@ -182,6 +197,8 @@ jobs:
             [consoleState.includes("shell.classList.remove('is-authorised-open')"), 'panel-close revocation missing'],
             [consoleState.includes('if (!authorised)'), 'leaked console self-healing missing'],
             [rootWorker.includes('20260729-living-core-css-v3'), 'preview Worker CSS cache version missing'],
+            [rootWorker.includes('single-language-toggle.js'), 'preview Worker language toggle route missing'],
+            [rootWorker.includes('single-language-toggle.css'), 'preview Worker language CSS route missing'],
             [rootWorker.includes('formatx-site-stability.css'), 'preview Worker stability route missing'],
             [rootWorker.includes('formatx-render-visibility.js'), 'preview Worker render route missing'],
             [rootWorker.includes('organism-core-controller.js'), 'preview Worker core-controller route missing'],
@@ -189,6 +206,8 @@ jobs:
             [!rootWorker.includes('organism-panel-startup-guard'), 'preview Worker still references deleted guard'],
             [productionEntry.includes('/scifi-ui/three-stage-mobile.html'), 'mobile stage framing route missing'],
             [productionEntry.includes("headers.set('X-Frame-Options', 'SAMEORIGIN')"), 'same-origin framing header missing'],
+            [productionEntry.includes('single-language-toggle.js'), 'production Worker language toggle route missing'],
+            [productionEntry.includes('single-language-toggle.css'), 'production Worker language CSS route missing'],
             [productionEntry.includes('formatx-site-stability.css'), 'production Worker stability route missing'],
             [productionEntry.includes('formatx-render-visibility.js'), 'production Worker render route missing'],
             [productionEntry.includes('organism-core-controller.js'), 'production Worker core-controller route missing'],
