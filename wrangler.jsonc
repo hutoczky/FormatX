@@ -25,6 +25,7 @@
       "/scifi-ui/scripts/mobile-core-engine-v2.js",
       "/scifi-ui/scripts/organism-interface.js",
       "/scifi-ui/scripts/organism-menu-controller.js",
+      "/scifi-ui/scripts/organism-core-controller.js",
       "/download/*",
       "/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
     ]
