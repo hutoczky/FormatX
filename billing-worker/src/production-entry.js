@@ -14,6 +14,8 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/organism-panel-startup-guard.js',
   '/scifi-ui/scripts/organism-interface.js',
   '/scifi-ui/scripts/organism-menu-controller.js',
+  '/scifi-ui/scripts/mobile-webgl-entry.js',
+  '/scifi-ui/scripts/mobile-core-engine-v2.js',
   '/scifi-ui/styles/formatx-mobile-recovery.css',
 ]);
 
@@ -34,8 +36,10 @@ const EMBEDDABLE_STAGE_CSP = [
 ].join('; ');
 
 const REPLACEMENTS = [
-  ['formatx-mobile-recovery.js?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.js?v=20260729-safe-three-gate-1'],
-  ['formatx-mobile-recovery.css?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.css?v=20260729-safe-three-css-1'],
+  ['formatx-mobile-recovery.js?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
+  ['formatx-mobile-recovery.js?v=20260729-safe-three-gate-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
+  ['formatx-mobile-recovery.css?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v2'],
+  ['formatx-mobile-recovery.css?v=20260729-safe-three-css-1', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v2'],
   ['living-architecture.js?v=20260726-living-1', 'living-architecture.js?v=20260729-safe-three-start-4'],
   ['living-architecture.js?v=20260729-safe-three-start-3', 'living-architecture.js?v=20260729-safe-three-start-4'],
   ['formatx-event-horizon.js?v=20260726-event-horizon-3', 'formatx-event-horizon.js?v=20260729-event-horizon-5'],
