@@ -11,8 +11,41 @@ async function waitForInterface(page) {
       && root.dataset.fxOrganismInterface === 'ready'
       && root.dataset.fxOrganismMenu === 'ready'
       && root.dataset.fxOrganismCoreController === 'ready'
-      && root.dataset.fxOrganismConsoleState === 'ready';
+      && root.dataset.fxOrganismConsoleState === 'ready'
+      && root.dataset.fxSingleLanguageToggle === 'ready';
   }, null, { timeout: 20000 });
+}
+
+async function assertSingleLanguageToggle(page) {
+  const toggle = page.locator('.fx-language-toggle');
+  if (await toggle.count() !== 1) throw new Error('Exactly one visible language toggle is required');
+  await toggle.waitFor({ state: 'visible' });
+
+  const initial = await page.evaluate(() => ({
+    language: document.documentElement.lang,
+    label: document.querySelector('.fx-language-toggle')?.textContent?.trim(),
+    visibleLegacyButtons: Array.from(document.querySelectorAll('.language-switch [data-language]'))
+      .filter(button => getComputedStyle(button).display !== 'none').length,
+  }));
+  if (initial.language !== 'hu' || initial.label !== 'HU' || initial.visibleLegacyButtons !== 0) {
+    throw new Error(`Invalid initial language toggle state: ${JSON.stringify(initial)}`);
+  }
+
+  await toggle.click();
+  await page.waitForFunction(() => {
+    const button = document.querySelector('.fx-language-toggle');
+    return document.documentElement.lang === 'en'
+      && button?.textContent?.trim() === 'EN'
+      && button?.dataset.nextLanguage === 'hu';
+  });
+
+  await toggle.click();
+  await page.waitForFunction(() => {
+    const button = document.querySelector('.fx-language-toggle');
+    return document.documentElement.lang === 'hu'
+      && button?.textContent?.trim() === 'HU'
+      && button?.dataset.nextLanguage === 'en';
+  });
 }
 
 async function openMenu(page) {
@@ -103,6 +136,7 @@ async function testDesktop(browser) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await waitForInterface(page);
+  await assertSingleLanguageToggle(page);
   await assertCore(page);
   await assertLeakedConsoleSelfHeals(page);
 
@@ -131,6 +165,7 @@ async function testMobile(browser) {
   });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await waitForInterface(page);
+  await assertSingleLanguageToggle(page);
   await assertCore(page);
   await assertLeakedConsoleSelfHeals(page);
 
@@ -153,7 +188,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX hero core, blank-console recovery, menu, map, rail and panel interaction');
+    console.log('PASS FormatX single language toggle, hero core, blank-console recovery, menu, map, rail and panel interaction');
   } finally {
     await browser.close();
   }
