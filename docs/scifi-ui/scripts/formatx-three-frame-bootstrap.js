@@ -11,7 +11,7 @@
 
   const telemetry = document.querySelector('[data-fx-three-telemetry]');
   const stageUrl = new URL('./three-stage.html', location.href);
-  stageUrl.searchParams.set('v', '20260729-interactions-2');
+  stageUrl.searchParams.set('v', '20260729-interactions-3');
   // Compatibility marker for source validation: 20260727-webgpu-1
   const readyDeadline = 20000;
 
