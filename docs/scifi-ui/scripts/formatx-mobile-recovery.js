@@ -2,17 +2,17 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxMobileRecovery === 'ready-v4') return;
+  if (root.dataset.fxMobileRecovery === 'ready-v5') return;
 
   const mobile = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
-  root.dataset.fxMobileRecovery = mobile ? 'ready-v4' : 'desktop-pass';
+  root.dataset.fxMobileRecovery = mobile ? 'ready-v5' : 'desktop-pass';
   if (!mobile) return;
 
   root.classList.add('fx-mobile-stable-3d');
   root.dataset.fxMobile3d = 'intro-wait';
 
   const stageUrl = new URL('./three-stage-mobile.html', location.href);
-  stageUrl.searchParams.set('v', '20260729-direct-mobile-stage-1');
+  stageUrl.searchParams.set('v', '20260729-direct-mobile-stage-2');
 
   let frame = null;
   let frameObserver = null;
@@ -117,7 +117,7 @@
   }
 
   function startThreeAfterIntro() {
-    if (threeStarted) return;
+    if (threeStarted && root.dataset.fxThree !== 'error') return;
     introComplete = true;
     threeStarted = true;
     attempts = 0;
@@ -128,6 +128,18 @@
     armWatchdog();
   }
 
+  function resetForIntroReplay() {
+    clearWatchdog();
+    introComplete = false;
+    threeStarted = false;
+    attempts = 0;
+    root.dataset.fxMobile3d = 'intro-replay-wait';
+    root.dataset.fxThree = 'intro-wait';
+    root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
+    findFrame();
+    applyDesiredFrameSource();
+  }
+
   bodyObserver = new MutationObserver(findFrame);
   bodyObserver.observe(document.documentElement, { childList: true, subtree: true });
 
@@ -136,16 +148,22 @@
   });
   stateObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three'] });
 
-  document.addEventListener('formatx:introcomplete', startThreeAfterIntro, { once: true });
+  document.addEventListener('formatx:introreplaystart', resetForIntroReplay);
+  document.addEventListener('formatx:introcomplete', startThreeAfterIntro);
   addEventListener('formatx:threeready', markReady);
   document.addEventListener('formatx:threeready', markReady);
 
-  addEventListener('pagehide', () => {
+  addEventListener('pageshow', event => {
+    if (event.persisted) findFrame();
+  });
+
+  addEventListener('pagehide', event => {
     clearWatchdog();
+    if (event.persisted) return;
     bodyObserver?.disconnect();
     stateObserver?.disconnect();
     frameObserver?.disconnect();
-  }, { once: true });
+  });
 
   findFrame();
   if (introComplete) startThreeAfterIntro();
