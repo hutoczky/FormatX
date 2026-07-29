@@ -24,26 +24,61 @@
   }
 
   function refreshQrImages() {
-    const currency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR'
-      ? 'eur'
-      : 'huf';
+    const selectedCurrency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR'
+      ? 'EUR'
+      : 'HUF';
+    const assetCurrency = selectedCurrency.toLowerCase();
+    const language = root.lang === 'en' ? 'en' : 'hu';
 
     document.querySelectorAll('[data-plan-qr]').forEach(card => {
       const image = card.querySelector('[data-plan-qr-image]');
+      const link = card.querySelector('.fx-plan-qr-link');
       const plan = card.dataset.planQr;
       if (!(image instanceof HTMLImageElement) || !plan) return;
-      const source = './assets/qr/' + plan + '-' + currency + '.svg';
-      if (image.getAttribute('src') !== source) image.src = source;
-      card.classList.remove('is-qr-error');
+
+      const apiSource = '/api/checkout-qr?plan=' + encodeURIComponent(plan)
+        + '&cycle=monthly&currency=' + encodeURIComponent(selectedCurrency)
+        + '&v=20260730-qr1';
+      const localSource = './assets/qr/' + plan + '-' + assetCurrency + '.svg?v=20260730-qr1';
+      const checkoutSource = './checkout.html?plan=' + encodeURIComponent(plan)
+        + '&cycle=monthly&currency=' + encodeURIComponent(selectedCurrency)
+        + '&lang=' + encodeURIComponent(language)
+        + '&source=pricing-qr';
+
+      if (link instanceof HTMLAnchorElement) link.href = checkoutSource;
+
+      card.classList.remove('is-qr-ready', 'is-qr-error');
       card.classList.add('is-qr-loading');
-      image.addEventListener('load', () => {
+      image.decoding = 'async';
+      image.dataset.fxQrFallback = 'false';
+
+      image.onload = () => {
+        if (image.naturalWidth < 32 || image.naturalHeight < 32) {
+          image.onerror?.();
+          return;
+        }
         card.classList.remove('is-qr-loading', 'is-qr-error');
         card.classList.add('is-qr-ready');
-      }, { once: true });
-      image.addEventListener('error', () => {
+        image.dataset.fxQrSource = image.currentSrc || image.src;
+        root.dataset.fxQrDelivery = image.dataset.fxQrFallback === 'true' ? 'local-fallback' : 'api';
+      };
+
+      image.onerror = () => {
+        if (image.dataset.fxQrFallback !== 'true') {
+          image.dataset.fxQrFallback = 'true';
+          image.src = localSource;
+          return;
+        }
         card.classList.remove('is-qr-loading', 'is-qr-ready');
         card.classList.add('is-qr-error');
-      }, { once: true });
+        root.dataset.fxQrDelivery = 'failed';
+      };
+
+      if (image.getAttribute('src') !== apiSource || !image.complete || image.naturalWidth < 32) {
+        image.src = apiSource;
+      } else {
+        image.onload();
+      }
     });
   }
 
@@ -67,17 +102,20 @@
   }
 
   ensureStabilityStyle();
-  root.dataset.fxLocalQr = 'ready';
+  root.dataset.fxLocalQr = 'ready-v2';
   root.dataset.fxLegacyRenderer = 'retired';
   root.dataset.fxRenderer = 'three-host-safe';
   refreshQrImages();
 
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
-    if (target?.closest('[data-currency]')) setTimeout(refreshQrImages, 0);
+    if (target?.closest('[data-currency], .fx-language-toggle, [data-language], [data-language-choice]')) {
+      setTimeout(refreshQrImages, 0);
+    }
     if (target?.closest('.fx-genome-launcher')) setTimeout(requestGenomeWebgl, 0);
   });
   addEventListener('pageshow', refreshQrImages);
+  addEventListener('formatx:languagechange', refreshQrImages);
 
   // Ordered, failure-tolerant production modules. None may replace the iframe source.
   const queue = [
