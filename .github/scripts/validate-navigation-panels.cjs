@@ -13,6 +13,18 @@ async function waitForInterface(page) {
   }, null, { timeout: 20000 });
 }
 
+async function openMenu(page) {
+  await page.locator('#menu-toggle').click();
+  await page.waitForFunction(() => {
+    const toggle = document.getElementById('menu-toggle');
+    const nav = document.getElementById('main-nav');
+    return toggle?.getAttribute('aria-expanded') === 'true'
+      && toggle.classList.contains('open')
+      && nav?.classList.contains('open')
+      && document.documentElement.classList.contains('fx-organism-menu-open');
+  }, null, { timeout: 5000 });
+}
+
 async function assertPanel(page, id) {
   await page.waitForFunction(expectedId => {
     const root = document.getElementById('fx-organism-console');
@@ -29,6 +41,17 @@ async function assertPanel(page, id) {
   }, id, { timeout: 5000 });
 }
 
+async function assertMenuClosed(page) {
+  const state = await page.evaluate(() => ({
+    expanded: document.getElementById('menu-toggle')?.getAttribute('aria-expanded'),
+    navOpen: document.getElementById('main-nav')?.classList.contains('open'),
+    rootOpen: document.documentElement.classList.contains('fx-organism-menu-open'),
+  }));
+  if (state.expanded !== 'false' || state.navOpen || state.rootOpen) {
+    throw new Error(`Menu did not close after navigation: ${JSON.stringify(state)}`);
+  }
+}
+
 async function testDesktop(browser) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
@@ -37,14 +60,16 @@ async function testDesktop(browser) {
   const startupState = await page.evaluate(() => ({
     panelOpen: document.body.classList.contains('fx-organism-panel-open'),
     consoleHidden: document.getElementById('fx-organism-console')?.hidden,
-    disabled: document.documentElement.dataset.fxOrganismInterface,
+    interfaceState: document.documentElement.dataset.fxOrganismInterface,
   }));
-  if (startupState.panelOpen || startupState.consoleHidden !== true || startupState.disabled !== 'ready') {
+  if (startupState.panelOpen || startupState.consoleHidden !== true || startupState.interfaceState !== 'ready') {
     throw new Error(`Desktop startup state invalid: ${JSON.stringify(startupState)}`);
   }
 
+  await openMenu(page);
   await page.locator('#main-nav a[href="#experience"]').click();
   await assertPanel(page, 'experience');
+  await assertMenuClosed(page);
 
   await page.locator('.fx-organism-console-close').click();
   await page.waitForFunction(() => {
@@ -64,27 +89,10 @@ async function testMobile(browser) {
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await waitForInterface(page);
 
-  await page.locator('#menu-toggle').click();
-  await page.waitForFunction(() => {
-    const toggle = document.getElementById('menu-toggle');
-    const nav = document.getElementById('main-nav');
-    return toggle?.getAttribute('aria-expanded') === 'true'
-      && toggle.classList.contains('open')
-      && nav?.classList.contains('open')
-      && document.documentElement.classList.contains('fx-organism-menu-open');
-  }, null, { timeout: 5000 });
-
+  await openMenu(page);
   await page.locator('#main-nav a[href="#capabilities"]').click();
   await assertPanel(page, 'capabilities');
-
-  const menuClosed = await page.evaluate(() => ({
-    expanded: document.getElementById('menu-toggle')?.getAttribute('aria-expanded'),
-    navOpen: document.getElementById('main-nav')?.classList.contains('open'),
-    rootOpen: document.documentElement.classList.contains('fx-organism-menu-open'),
-  }));
-  if (menuClosed.expanded !== 'false' || menuClosed.navOpen || menuClosed.rootOpen) {
-    throw new Error(`Mobile menu did not close after navigation: ${JSON.stringify(menuClosed)}`);
-  }
+  await assertMenuClosed(page);
 
   await page.locator('.fx-organism-console-close').click();
   await page.close();
