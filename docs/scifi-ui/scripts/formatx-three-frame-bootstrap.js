@@ -2,6 +2,11 @@
   'use strict';
 
   const root = document.documentElement;
+  if (root.dataset.fxSafeThreeGate === 'ready-v1') {
+    root.dataset.fxThreeBootstrap = 'safe-gate-bypass';
+    return;
+  }
+
   const frame = document.getElementById('fx-three-frame');
   if (!(frame instanceof HTMLIFrameElement)) {
     root.dataset.fxThree = 'error';
