@@ -3,9 +3,20 @@
 
   const root = document.documentElement;
 
+  function loadMobileScrollStylesheet() {
+    if (document.querySelector('link[data-fx-mobile-scroll-style]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/formatx-mobile-scroll.css?v=20260729-mobile-scroll-1';
+    link.dataset.fxMobileScrollStyle = 'true';
+    document.head.appendChild(link);
+  }
+
   // Mobile routing must be installed before formatx-three-host.js registers
   // its pointer listeners. One-finger touch is reserved for native scrolling.
   if (matchMedia('(pointer: coarse), (max-width: 900px)').matches && root.dataset.fxMobileTouchGuard !== 'ready') {
+    loadMobileScrollStylesheet();
+
     const nativeAdd = window.addEventListener;
     const nativeRemove = window.removeEventListener;
     const wrappedListeners = new WeakMap();
@@ -36,8 +47,6 @@
     });
     observer.observe(root, { attributes: true, attributeFilter: ['data-fx-three-host'] });
 
-    root.style.setProperty('touch-action', 'pan-y pinch-zoom', 'important');
-    if (document.body) document.body.style.setProperty('touch-action', 'pan-y pinch-zoom', 'important');
     root.dataset.fxMobileTouchGuard = 'ready';
   }
 
