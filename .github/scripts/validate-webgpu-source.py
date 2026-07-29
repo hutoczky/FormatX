@@ -11,7 +11,7 @@ loader = text("docs/scifi-ui/scripts/igloo-parity.js")
 safe_host = text("docs/scifi-ui/scripts/formatx-three-host-safe.js")
 gate = text("docs/scifi-ui/scripts/formatx-mobile-recovery.js")
 living = text("docs/scifi-ui/scripts/living-architecture.js")
-mobile_engine = text("docs/scifi-ui/scripts/mobile-core-engine.js")
+living_engine = text("docs/scifi-ui/scripts/mobile-core-engine-v2.js")
 mobile_entry = text("docs/scifi-ui/scripts/mobile-webgl-entry.js")
 mobile_stage = text("docs/scifi-ui/three-stage-mobile.html")
 legacy_webgpu = text("docs/scifi-ui/scripts/ExperienceWebGPU.js")
@@ -68,14 +68,15 @@ require("living architecture has one loader start", "threeLoadStarted" in living
 require("living architecture uses safe loader version", "20260729-safe-loader-3" in living)
 require("living architecture does not eagerly inject Genome WebGL", "data-fx-genome-webgl-adapter" not in living)
 
-tokens("safe 3D gate", gate, (
+tokens("living core gate", gate, (
     "fxSafeThreeGate",
+    "ready-v2",
     "about:blank",
     "formatx:introcomplete",
     "three-stage-mobile.html",
-    "Do not reload the frame automatically",
+    "20260729-living-stage-v2",
 ))
-require("safe gate: no automatic retry loop", "frame.src = expectedUrl(attempts)" not in gate)
+require("living core gate: no automatic retry loop", "frame.src = expectedUrl(attempts)" not in gate)
 
 tokens("safe host", safe_host, (
     "Float32Array",
@@ -87,16 +88,21 @@ tokens("safe host", safe_host, (
 require("safe host: no scroll preventDefault", "preventDefault()" not in safe_host)
 require("safe host: no infinite hero clone", "cloneNode" not in safe_host)
 
-require("mobile stage: direct module entry", 'type="module"' in mobile_stage)
-require("mobile stage: direct engine entry", "mobile-webgl-entry.js?v=20260729-direct-mobile-entry-1" in mobile_stage)
-require("mobile entry imports engine", "mobile-core-engine.js" in mobile_entry)
-tokens("direct WebGL engine", mobile_engine, (
+require("living stage: direct module entry", 'type="module"' in mobile_stage)
+require("living stage: v2 entry", "mobile-webgl-entry.js?v=20260729-living-entry-v2" in mobile_stage)
+require("living entry imports v2 engine", "mobile-core-engine-v2.js?v=20260729-living-core-v2" in mobile_entry)
+tokens("visible living organism engine", living_engine, (
     "THREE.WebGLRenderer",
     "THREE.ShaderMaterial",
-    "class MobileCoreEngine",
-    "root.dataset.fxThree = 'ready'",
+    "class LivingCoreEngine",
+    "SphereGeometry(1.28, 96, 72)",
+    "three-webgl-living-core-v2",
+    "visible-organic-living-core-v2",
     "requestAnimationFrame",
 ))
+require("living engine: reduced particles", "const count = 220" in living_engine)
+require("living engine: desktop right placement", "this.baseWorldX = desktop ? 1.05 : 0" in living_engine)
+require("living engine: bright emissive core", "emissiveIntensity: 2.45" in living_engine)
 
 # The experimental source remains available for later controlled reintroduction,
 # but it is not part of the live startup path.
@@ -106,16 +112,18 @@ tokens("experimental WebGPU source retained", legacy_webgpu, (
     "WebXRDirector",
 ))
 
-require("safe CSS exposes stage on all devices", 'data-fx-safe-three-gate="ready-v1"' in safe_css)
+require("living CSS exposes v2 stage", 'data-fx-safe-three-gate="ready-v2"' in safe_css)
+require("living CSS raises stage above legacy canvas", "z-index: 1 !important" in safe_css)
+require("living CSS hides legacy apex canvas", "#fx-apex-canvas" in safe_css and "display: none !important" in safe_css)
 tokens("Three host CSS", css, ("fx-three-stage-shell", "fx-three-engine-ready"))
 require("apex: no renderer ownership", "createRenderer" not in apex)
 require("apex: no WebGL context ownership", "getContext('webgl2'" not in apex)
 require("static headers: no global X-Frame-Options", "X-Frame-Options" not in static_headers)
 
-tokens("root worker safe delivery", root_worker, (
-    "20260729-safe-three-gate-1",
-    "20260729-safe-three-css-1",
-    "20260729-safe-three-start-4",
+tokens("root worker living delivery", root_worker, (
+    "20260729-living-core-gate-v2",
+    "20260729-living-core-css-v2",
+    "mobile-core-engine-v2.js",
     "Cache-Control', 'no-store",
 ))
 tokens("production worker security retained", production_worker, (
@@ -123,12 +131,15 @@ tokens("production worker security retained", production_worker, (
     "isThreeStage ? 'SAMEORIGIN' : 'DENY'",
     '"frame-ancestors \'self\'"',
 ))
-tokens("production entry mobile stage framing", production_entry, (
+tokens("production entry living stage framing", production_entry, (
     "EMBEDDABLE_STAGE_PATHS",
     "/scifi-ui/three-stage-mobile.html",
     "withEmbeddableStageHeaders",
     "headers.set('X-Frame-Options', 'SAMEORIGIN')",
     '"frame-ancestors \'self\'"',
+    "mobile-core-engine-v2.js",
+    "20260729-living-core-gate-v2",
+    "20260729-living-core-css-v2",
 ))
 
 report = "\n".join(("PASS " if passed else "FAIL ") + label for label, passed in results) + "\n"
