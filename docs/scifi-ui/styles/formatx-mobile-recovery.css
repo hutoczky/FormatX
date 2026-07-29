@@ -1,7 +1,39 @@
-/* Mobile stability, visible 3D stage and compact hero layout. */
+/* Safe all-device 3D layering and mobile layout recovery. */
+html[data-fx-safe-three-gate="ready-v1"] .fx-three-stage-shell {
+  z-index: 0 !important;
+  background: transparent !important;
+  visibility: visible !important;
+}
+
+html[data-fx-safe-three-gate="ready-v1"] main,
+html[data-fx-safe-three-gate="ready-v1"] .topbar,
+html[data-fx-safe-three-gate="ready-v1"] .site-footer {
+  position: relative;
+  z-index: 2;
+}
+
+html[data-fx-safe-three-gate="ready-v1"] #hero,
+html[data-fx-safe-three-gate="ready-v1"] #hero .hero-grid,
+html[data-fx-safe-three-gate="ready-v1"] #hero .hero-space,
+html[data-fx-safe-three-gate="ready-v1"] .scene {
+  background: transparent !important;
+}
+
+html[data-fx-safe-three-gate="ready-v1"] #fx-three-frame {
+  pointer-events: none !important;
+}
+
+html[data-fx-safe-three-gate="ready-v1"]:not(.fx-intro-complete) .fx-three-stage-shell {
+  visibility: hidden !important;
+}
+
+html[data-fx-safe-three-gate="ready-v1"].fx-intro-complete .fx-three-stage-shell {
+  visibility: visible !important;
+}
+
 @media (max-width: 900px), (pointer: coarse) {
   html[data-fx-three-host="ready"] .fx-three-stage-shell {
-    z-index: 1 !important;
+    z-index: 0 !important;
     background: transparent !important;
   }
 
