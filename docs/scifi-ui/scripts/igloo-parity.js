@@ -2,8 +2,10 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v3') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v3';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v4') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v4';
+
+  let genomeWebglRequested = false;
 
   function refreshQrImages() {
     const currency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR'
@@ -29,12 +31,33 @@
     });
   }
 
+  function requestGenomeWebgl() {
+    if (genomeWebglRequested || document.querySelector('script[data-fx-genome-webgl-adapter]')) return;
+    genomeWebglRequested = true;
+    root.dataset.fxGenomeWebglAdapter = 'lazy-requested';
+
+    const script = document.createElement('script');
+    script.src = './scripts/interaction-genome-webgl-adapter.js?v=20260729-genome-webgl-lazy-1';
+    script.defer = true;
+    script.dataset.fxGenomeWebglAdapter = 'true';
+    script.addEventListener('load', () => {
+      root.dataset.fxGenomeWebglAdapterLoad = 'ready';
+    }, { once: true });
+    script.addEventListener('error', () => {
+      root.dataset.fxGenomeWebglAdapterLoad = 'fallback-canvas2d';
+      console.warn('FormatX Interaction Genome WebGL was unavailable; Canvas2D remains active.');
+    }, { once: true });
+    document.head.appendChild(script);
+  }
+
   root.dataset.fxLocalQr = 'ready';
   root.dataset.fxLegacyRenderer = 'retired';
   root.dataset.fxRenderer = 'three-host-safe';
   refreshQrImages();
+
   document.addEventListener('click', event => {
     if (event.target.closest('[data-currency]')) setTimeout(refreshQrImages, 0);
+    if (event.target.closest('.fx-genome-launcher')) setTimeout(requestGenomeWebgl, 0);
   });
   addEventListener('pageshow', refreshQrImages);
 
@@ -48,7 +71,7 @@
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v3';
+      root.dataset.fxTranscendLoader = 'safe-ready-v4';
       return;
     }
 
@@ -59,7 +82,7 @@
     script.addEventListener('load', () => load(index + 1), { once: true });
     script.addEventListener('error', () => {
       console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v3';
+      root.dataset.fxTranscendLoader = 'safe-degraded-v4';
       load(index + 1);
     }, { once: true });
     document.head.appendChild(script);
