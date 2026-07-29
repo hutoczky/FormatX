@@ -185,6 +185,21 @@ body.fx-organism-panel-open .fx-genome-launcher {
   pointer-events: none !important;
 }
 
+/* Infinite-scroll handoff must never animate backwards through the page. */
+html.fx-infinite-loop-jump,
+html.fx-infinite-loop-jump body {
+  scroll-behavior: auto !important;
+}
+
+html.fx-infinite-loop-jump .fx-three-stage-shell {
+  transition: none !important;
+}
+
+.loop-note {
+  touch-action: pan-y;
+  user-select: none;
+}
+
 @media (max-width: 900px), (pointer: coarse) {
   #main-content {
     z-index: calc(var(--fx-layer-content) + 10) !important;
