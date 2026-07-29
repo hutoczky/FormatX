@@ -2,6 +2,7 @@ const APK_ASSET_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const APK_DOWNLOAD_PATH = '/download/android';
 const APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.2.apk';
 const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
+const SINGLE_LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="./styles/single-language-toggle.css?v=20260729-single-language-2">\n  <script defer src="./scripts/single-language-toggle.js?v=20260729-single-language-1"></script>\n';
 const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
@@ -61,6 +62,9 @@ async function serveScifiEntry(request, env) {
 
   let html = await upstream.text();
   for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
+  if (!html.includes('data-fx-single-language-style')) {
+    html = html.replace('</head>', SINGLE_LANGUAGE_ASSETS + '</head>');
+  }
 
   const headers = new Headers(upstream.headers);
   headers.set('Cache-Control', 'no-store, max-age=0');
