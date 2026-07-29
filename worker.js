@@ -2,17 +2,14 @@ const APK_ASSET_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const APK_DOWNLOAD_PATH = '/download/android';
 const APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.2.apk';
 const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
-const MOBILE_RECOVERY_PATH = '/scifi-ui/scripts/formatx-mobile-recovery.js';
-const INTRO_GUARD_PATH = '/scifi-ui/scripts/formatx-intro-deadlock-guard.js';
+const SAFE_THREE_GATE_PATH = '/scifi-ui/scripts/formatx-mobile-recovery.js';
 const EVENT_HORIZON_PATH = '/scifi-ui/scripts/formatx-event-horizon.js';
-const MOBILE_RECOVERY_OLD_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-1';
-const MOBILE_RECOVERY_NEW_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-5';
+const SAFE_THREE_GATE_OLD_VERSION = 'formatx-mobile-recovery.js?v=20260729-mobile-recovery-1';
+const SAFE_THREE_GATE_NEW_VERSION = 'formatx-mobile-recovery.js?v=20260729-safe-three-gate-1';
 const MOBILE_RECOVERY_CSS_OLD_VERSION = 'formatx-mobile-recovery.css?v=20260729-mobile-recovery-1';
 const MOBILE_RECOVERY_CSS_NEW_VERSION = 'formatx-mobile-recovery.css?v=20260729-mobile-recovery-2';
 const EVENT_HORIZON_OLD_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260726-event-horizon-3"></script>';
-const EVENT_HORIZON_NEW_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260729-event-horizon-4"></script>';
-const INTRO_SUPPORT_TAGS = EVENT_HORIZON_NEW_TAG
-  + '\n  <script defer src="./scripts/formatx-intro-deadlock-guard.js?v=20260729-intro-guard-2"></script>';
+const EVENT_HORIZON_NEW_TAG = '<script defer src="./scripts/formatx-event-horizon.js?v=20260729-event-horizon-5"></script>';
 
 export default {
   async fetch(request, env) {
@@ -34,11 +31,7 @@ export default {
 
     if (
       (request.method === 'GET' || request.method === 'HEAD') &&
-      (
-        url.pathname === MOBILE_RECOVERY_PATH ||
-        url.pathname === INTRO_GUARD_PATH ||
-        url.pathname === EVENT_HORIZON_PATH
-      )
+      (url.pathname === SAFE_THREE_GATE_PATH || url.pathname === EVENT_HORIZON_PATH)
     ) {
       return serveNoStoreAsset(request, env);
     }
@@ -60,9 +53,9 @@ async function serveScifiEntry(request, env) {
   if (!contentType.includes('text/html')) return upstream;
 
   const html = (await upstream.text())
-    .replaceAll(MOBILE_RECOVERY_OLD_VERSION, MOBILE_RECOVERY_NEW_VERSION)
+    .replaceAll(SAFE_THREE_GATE_OLD_VERSION, SAFE_THREE_GATE_NEW_VERSION)
     .replaceAll(MOBILE_RECOVERY_CSS_OLD_VERSION, MOBILE_RECOVERY_CSS_NEW_VERSION)
-    .replace(EVENT_HORIZON_OLD_TAG, INTRO_SUPPORT_TAGS);
+    .replace(EVENT_HORIZON_OLD_TAG, EVENT_HORIZON_NEW_TAG);
   const headers = new Headers(upstream.headers);
   headers.set('Cache-Control', 'no-store, max-age=0');
   headers.set('Pragma', 'no-cache');
