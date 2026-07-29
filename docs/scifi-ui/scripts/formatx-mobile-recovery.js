@@ -2,22 +2,25 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxMobileRecovery === 'ready') return;
+  if (root.dataset.fxMobileRecovery === 'ready-v2') return;
 
   const mobile = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
-  root.dataset.fxMobileRecovery = mobile ? 'ready' : 'desktop-pass';
+  root.dataset.fxMobileRecovery = mobile ? 'ready-v2' : 'desktop-pass';
   if (!mobile) return;
 
   root.classList.add('fx-mobile-stable-3d');
-  root.dataset.fxMobile3d = 'webgl-forced';
+  root.dataset.fxMobile3d = 'intro-wait';
 
   const stageUrl = new URL('./three-stage-mobile.html', location.href);
-  stageUrl.searchParams.set('v', '20260729-mobile-webgl-stage-2');
+  stageUrl.searchParams.set('v', '20260729-mobile-webgl-stage-3');
 
   let frame = null;
   let frameObserver = null;
+  let bodyObserver = null;
+  let stateObserver = null;
   let watchdog = 0;
   let attempts = 0;
+  let introComplete = root.classList.contains('fx-intro-complete');
 
   function telemetry(text) {
     const output = document.querySelector('[data-fx-three-telemetry]');
@@ -31,28 +34,56 @@
   }
 
   function expectedUrl(attempt) {
+    if (!introComplete) return 'about:blank';
     const url = new URL(stageUrl.href);
     if (attempt > 0) url.searchParams.set('attempt', String(attempt));
     return url.href;
   }
 
+  function sameUrl(current, desired) {
+    if (desired === 'about:blank') return current === 'about:blank';
+    try {
+      return new URL(current, location.href).href === desired;
+    } catch (_) {
+      return false;
+    }
+  }
+
   function armWatchdog() {
     clearWatchdog();
+    if (!introComplete || !frame) return;
+
     watchdog = window.setTimeout(() => {
       if (root.dataset.fxThree === 'ready') return;
       attempts += 1;
       if (!frame || attempts > 2) {
         root.dataset.fxThree = 'error';
         root.dataset.fxThreeError = 'mobile-webgl-startup-timeout';
+        root.dataset.fxMobile3d = 'timeout';
         telemetry('THREE / MOBILE TIMEOUT');
         return;
       }
+
       root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
       root.dataset.fxThree = 'loading';
+      root.dataset.fxMobile3d = 'retry-' + attempts;
       telemetry('THREE / MOBILE RECOVERY');
       frame.src = expectedUrl(attempts);
       armWatchdog();
     }, attempts === 0 ? 9000 : 12000);
+  }
+
+  function applyDesiredFrameSource() {
+    if (!(frame instanceof HTMLIFrameElement)) return;
+    const desired = expectedUrl(attempts);
+    const current = frame.getAttribute('src') || frame.src || 'about:blank';
+    if (sameUrl(current, desired)) return;
+
+    root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
+    root.dataset.fxThree = introComplete ? 'loading' : 'intro-wait';
+    root.dataset.fxMobile3d = introComplete ? 'webgl-starting' : 'intro-wait';
+    telemetry(introComplete ? 'THREE / MOBILE WEBGL' : 'THREE / WAITING FOR INTRO');
+    frame.src = desired;
   }
 
   function lockFrame(nextFrame) {
@@ -60,25 +91,15 @@
     if (frame !== nextFrame) {
       frameObserver?.disconnect();
       frame = nextFrame;
-      frameObserver = new MutationObserver(() => {
-        if (!frame) return;
-        const current = new URL(frame.getAttribute('src') || frame.src, location.href).href;
-        const desired = expectedUrl(attempts);
-        if (current !== desired) frame.src = desired;
-      });
+      frameObserver = new MutationObserver(applyDesiredFrameSource);
       frameObserver.observe(frame, { attributes: true, attributeFilter: ['src'] });
-      frame.addEventListener('load', () => root.classList.add('fx-three-frame-loaded'));
+      frame.addEventListener('load', () => {
+        if (introComplete) root.classList.add('fx-three-frame-loaded');
+      });
     }
 
-    const current = new URL(frame.getAttribute('src') || frame.src, location.href).href;
-    const desired = expectedUrl(attempts);
-    if (current !== desired) {
-      root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
-      root.dataset.fxThree = 'loading';
-      telemetry('THREE / MOBILE WEBGL');
-      frame.src = desired;
-    }
-    armWatchdog();
+    applyDesiredFrameSource();
+    if (introComplete) armWatchdog();
   }
 
   function findFrame() {
@@ -86,10 +107,21 @@
     if (candidate instanceof HTMLIFrameElement) lockFrame(candidate);
   }
 
-  const bodyObserver = new MutationObserver(findFrame);
+  function startThreeAfterIntro() {
+    if (introComplete) return;
+    introComplete = true;
+    attempts = 0;
+    root.dataset.fxMobile3d = 'webgl-starting';
+    root.dataset.fxThree = 'loading';
+    findFrame();
+    applyDesiredFrameSource();
+    armWatchdog();
+  }
+
+  bodyObserver = new MutationObserver(findFrame);
   bodyObserver.observe(document.documentElement, { childList: true, subtree: true });
 
-  const stateObserver = new MutationObserver(() => {
+  stateObserver = new MutationObserver(() => {
     if (root.dataset.fxThree === 'ready') {
       clearWatchdog();
       root.dataset.fxMobile3d = 'ready';
@@ -98,6 +130,7 @@
   });
   stateObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three'] });
 
+  addEventListener('formatx:introcomplete', startThreeAfterIntro, { once: true });
   addEventListener('formatx:threeready', () => {
     clearWatchdog();
     root.dataset.fxMobile3d = 'ready';
@@ -105,10 +138,11 @@
 
   addEventListener('pagehide', () => {
     clearWatchdog();
-    bodyObserver.disconnect();
-    stateObserver.disconnect();
+    bodyObserver?.disconnect();
+    stateObserver?.disconnect();
     frameObserver?.disconnect();
   }, { once: true });
 
   findFrame();
+  if (introComplete) startThreeAfterIntro();
 }());
