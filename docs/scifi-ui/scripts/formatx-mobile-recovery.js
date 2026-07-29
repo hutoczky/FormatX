@@ -20,6 +20,7 @@
   let introComplete = root.classList.contains('fx-intro-complete');
   let started = false;
   let failed = false;
+  let ready = false;
 
   function telemetry(text) {
     const output = document.querySelector('[data-fx-three-telemetry]');
@@ -48,6 +49,7 @@
   function markError(message) {
     clearWatchdog();
     failed = true;
+    ready = false;
     root.dataset.fxThree = 'error';
     root.dataset.fxThreeError = String(message || 'living-core-startup-failed').slice(0, 180);
     root.dataset.fxMobile3d = 'living-core-stage-error';
@@ -56,9 +58,10 @@
   }
 
   function markReady() {
-    if (failed) return;
+    if (failed || ready) return;
+    ready = true;
     clearWatchdog();
-    root.dataset.fxThree = 'ready';
+    if (root.dataset.fxThree !== 'ready') root.dataset.fxThree = 'ready';
     root.dataset.fxMobile3d = 'living-core-stage-ready';
     root.dataset.fxThreeRenderer = 'three-webgl-living-core-v2';
     root.classList.add('fx-three-frame-loaded', 'fx-three-engine-ready');
@@ -71,6 +74,7 @@
     const current = frame.getAttribute('src') || frame.src || 'about:blank';
     if (sameUrl(current, desired)) return;
 
+    ready = false;
     root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
     root.dataset.fxThree = desired === 'about:blank' ? 'intro-wait' : 'loading';
     root.dataset.fxMobile3d = desired === 'about:blank' ? 'intro-wait' : 'living-core-stage-starting';
@@ -98,7 +102,7 @@
   function armWatchdog() {
     clearWatchdog();
     watchdog = setTimeout(() => {
-      if (root.dataset.fxThree !== 'ready') markError('living-core-ready-timeout');
+      if (!ready) markError('living-core-ready-timeout');
     }, 15000);
   }
 
@@ -106,6 +110,7 @@
     if (started || failed) return;
     introComplete = true;
     started = true;
+    ready = false;
     root.dataset.fxThree = 'loading';
     root.dataset.fxMobile3d = 'living-core-stage-starting';
     findFrame();
@@ -118,6 +123,7 @@
     introComplete = false;
     started = false;
     failed = false;
+    ready = false;
     root.dataset.fxThree = 'intro-wait';
     root.dataset.fxMobile3d = 'intro-wait';
     root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
@@ -129,7 +135,7 @@
   bodyObserver.observe(document.documentElement, { childList: true, subtree: true });
 
   stateObserver = new MutationObserver(() => {
-    if (root.dataset.fxThree === 'ready') markReady();
+    if (!ready && root.dataset.fxThree === 'ready') markReady();
   });
   stateObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three'] });
 
