@@ -1,6 +1,7 @@
 import productionWorker from './production-with-license.js';
 
 const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
+const SINGLE_LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="./styles/single-language-toggle.css?v=20260729-single-language-2">\n  <script defer src="./scripts/single-language-toggle.js?v=20260729-single-language-1"></script>\n';
 const EMBEDDABLE_STAGE_PATHS = new Set([
   '/scifi-ui/three-stage-mobile',
   '/scifi-ui/three-stage-mobile.html',
@@ -80,6 +81,9 @@ async function applyStartupSafety(request, url, response) {
 
   let html = await response.text();
   for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
+  if (!html.includes('data-fx-single-language-style')) {
+    html = html.replace('</head>', SINGLE_LANGUAGE_ASSETS + '</head>');
+  }
 
   const headers = new Headers(response.headers);
   headers.set('Cache-Control', 'no-store, max-age=0');
