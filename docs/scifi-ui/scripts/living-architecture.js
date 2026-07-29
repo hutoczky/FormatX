@@ -105,17 +105,10 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260729-safe-loader-2';
+      script.src = './scripts/igloo-parity.js?v=20260729-safe-loader-3';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
-    }
-    if (!document.querySelector('script[data-fx-genome-webgl-adapter]')) {
-      const genome3d = document.createElement('script');
-      genome3d.src = './scripts/interaction-genome-webgl-adapter.js?v=20260728-cinematic-v3-gesture-safe';
-      genome3d.defer = true;
-      genome3d.dataset.fxGenomeWebglAdapter = 'true';
-      document.head.appendChild(genome3d);
     }
     if (!document.querySelector('script[data-fx-organism-interface-script]')) {
       const organismScript = document.createElement('script');
