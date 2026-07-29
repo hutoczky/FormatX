@@ -5,6 +5,7 @@ const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
 const SAFE_THREE_GATE_PATH = '/scifi-ui/scripts/formatx-mobile-recovery.js';
 const LIVING_ARCHITECTURE_PATH = '/scifi-ui/scripts/living-architecture.js';
 const ORGANISM_PANEL_GUARD_PATH = '/scifi-ui/scripts/organism-panel-startup-guard.js';
+const ORGANISM_INTERFACE_PATH = '/scifi-ui/scripts/organism-interface.js';
 const ORGANISM_MENU_CONTROLLER_PATH = '/scifi-ui/scripts/organism-menu-controller.js';
 const SAFE_THREE_CSS_PATH = '/scifi-ui/styles/formatx-mobile-recovery.css';
 const EVENT_HORIZON_PATH = '/scifi-ui/scripts/formatx-event-horizon.js';
@@ -43,6 +44,7 @@ export default {
         url.pathname === SAFE_THREE_GATE_PATH ||
         url.pathname === LIVING_ARCHITECTURE_PATH ||
         url.pathname === ORGANISM_PANEL_GUARD_PATH ||
+        url.pathname === ORGANISM_INTERFACE_PATH ||
         url.pathname === ORGANISM_MENU_CONTROLLER_PATH ||
         url.pathname === SAFE_THREE_CSS_PATH ||
         url.pathname === EVENT_HORIZON_PATH
