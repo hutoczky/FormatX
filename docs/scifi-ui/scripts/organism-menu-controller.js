@@ -11,6 +11,25 @@
     ROOT.classList.toggle('fx-organism-menu-open', open);
   }
 
+  function resetRestoredPanel() {
+    const consoleRoot = document.getElementById('fx-organism-console');
+    if (consoleRoot) {
+      consoleRoot.hidden = true;
+      consoleRoot.setAttribute('aria-hidden', 'true');
+    }
+    document.body?.classList.remove('fx-organism-panel-open');
+    document.querySelectorAll('[data-organism-panel]').forEach(panel => {
+      panel.hidden = true;
+      panel.setAttribute('aria-hidden', 'true');
+    });
+    document.querySelectorAll('[data-organism-tab]').forEach(tab => {
+      tab.setAttribute('aria-selected', 'false');
+    });
+    if (['#experience', '#capabilities', '#pricing', '#system', '#resources'].includes(location.hash)) {
+      history.replaceState({}, '', location.pathname + location.search + '#hero');
+    }
+  }
+
   function initialise() {
     if (initialised) return;
     const toggle = document.getElementById('menu-toggle');
@@ -45,7 +64,10 @@
       if (event.key === 'Escape' && nav.classList.contains('open')) setOpen(toggle, nav, false);
     });
 
-    addEventListener('pageshow', () => setOpen(toggle, nav, false));
+    addEventListener('pageshow', event => {
+      setOpen(toggle, nav, false);
+      if (event.persisted) resetRestoredPanel();
+    });
     document.addEventListener('formatx:introcomplete', () => setOpen(toggle, nav, false));
 
     ROOT.dataset.fxOrganismMenu = 'ready';
