@@ -28,6 +28,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/single-language-toggle.js',
   '/scifi-ui/scripts/formatx-copy-polish.js',
   '/scifi-ui/scripts/formatx-license-links.js',
+  '/scifi-ui/scripts/license-page.js',
   '/scifi-ui/scripts/formatx-infinite-scroll.js',
   '/scifi-ui/scripts/organism-console-state.js',
   '/scifi-ui/scripts/formatx-render-visibility.js',
