@@ -105,7 +105,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260729-safe-loader-1';
+      script.src = './scripts/igloo-parity.js?v=20260729-safe-loader-2';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
@@ -202,7 +202,7 @@
       if (link) {
         link.href = href;
         link.setAttribute('aria-label', plan.name + ' — '
-          + (language() === 'hu' ? 'fizetés megnyitása' : 'open payment'));
+          + (language() === 'hu' ? 'fizetési oldal megnyitása' : 'open payment'));
       }
       if (!image) return;
       card.classList.remove('is-qr-ready', 'is-qr-error');
