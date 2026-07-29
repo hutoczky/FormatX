@@ -49,11 +49,11 @@ require("intro: no animation promise wait", "Promise.all(animations)" not in int
 # WebGPU engine remains in the repository but must not be started by the live loader.
 tokens("safe loader", loader, (
     "formatx-three-host-safe.js",
-    "formatx-transcend-bridge.js",
     "formatx-living-core-launcher.js",
     "interaction-genome.js",
     "load(index + 1)",
 ))
+require("safe loader: no global event bridge", "formatx-transcend-bridge.js" not in loader)
 require("safe loader: no legacy frame bootstrap", "formatx-three-frame-bootstrap.js" not in loader)
 require("safe loader: no legacy professional refinement", "formatx-professional-refinement.js" not in loader)
 require("safe loader: no duplicate infinite loop", "formatx-infinite-loop-controller-v2.js" not in loader)
@@ -61,7 +61,7 @@ require("safe loader: no WebGPU nextgen controls", "formatx-nextgen-controls.js"
 
 require("living architecture waits for intro", "scheduleThreeExperience()" in living)
 require("living architecture has one loader start", "threeLoadStarted" in living)
-require("living architecture uses safe loader version", "20260729-safe-loader-1" in living)
+require("living architecture uses safe loader version", "20260729-safe-loader-2" in living)
 
 tokens("safe 3D gate", gate, (
     "fxSafeThreeGate",
@@ -71,7 +71,6 @@ tokens("safe 3D gate", gate, (
     "Do not reload the frame automatically",
 ))
 require("safe gate: no automatic retry loop", "frame.src = expectedUrl(attempts)" not in gate)
-
 
 tokens("safe host", safe_host, (
     "Float32Array",
