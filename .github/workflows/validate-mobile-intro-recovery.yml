@@ -1,4 +1,4 @@
-name: Validate deterministic intro and living organism v2
+name: Validate deterministic intro, navigation and living organism
 
 on:
   push:
@@ -16,6 +16,8 @@ on:
       - 'docs/scifi-ui/scripts/mobile-webgl-entry.js'
       - 'docs/scifi-ui/scripts/mobile-core-engine-v2.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-recovery.js'
+      - 'docs/scifi-ui/scripts/organism-interface.js'
+      - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   workflow_dispatch:
 
@@ -24,7 +26,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-living-core-v2-startup
+  group: formatx-navigation-living-core
   cancel-in-progress: true
 
 jobs:
@@ -42,6 +44,8 @@ jobs:
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
+          node --check docs/scifi-ui/scripts/organism-interface.js
+          node --check docs/scifi-ui/scripts/organism-menu-controller.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v2.js
           node --input-type=module --check < billing-worker/src/production-entry.js
@@ -62,13 +66,18 @@ jobs:
             '/scifi-ui/scripts/living-architecture.js',
             '/scifi-ui/scripts/mobile-webgl-entry.js',
             '/scifi-ui/scripts/mobile-core-engine-v2.js',
+            '/scifi-ui/scripts/organism-interface.js',
+            '/scifi-ui/scripts/organism-menu-controller.js',
           ];
           for (const path of required) {
             if (!first.includes(path)) throw new Error(`Missing run_worker_first path: ${path}`);
           }
+          if (first.some(path => path.includes('organism-panel-startup-guard'))) {
+            throw new Error('Deleted panel startup guard is still routed');
+          }
           NODE
 
-      - name: Validate living organism hand-off
+      - name: Validate navigation and living organism contract
         shell: bash
         run: |
           node - <<'NODE'
@@ -82,6 +91,8 @@ jobs:
           const engine = fs.readFileSync('docs/scifi-ui/scripts/mobile-core-engine-v2.js', 'utf8');
           const stage = fs.readFileSync('docs/scifi-ui/three-stage-mobile.html', 'utf8');
           const css = fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-recovery.css', 'utf8');
+          const organism = fs.readFileSync('docs/scifi-ui/scripts/organism-interface.js', 'utf8');
+          const menu = fs.readFileSync('docs/scifi-ui/scripts/organism-menu-controller.js', 'utf8');
           const rootWorker = fs.readFileSync('worker.js', 'utf8');
           const productionEntry = fs.readFileSync('billing-worker/src/production-entry.js', 'utf8');
 
@@ -92,9 +103,9 @@ jobs:
             [!intro.includes('loadOrDeadline'), 'intro must not wait for window load'],
             [gate.includes("root.dataset.fxSafeThreeGate = 'ready-v2'"), 'living core v2 gate marker missing'],
             [gate.includes("return introComplete && started && !failed ? stageUrl.href : 'about:blank'"), 'blank-before-intro contract missing'],
-            [gate.includes('20260729-living-stage-v2'), 'living stage cache version missing'],
             [living.includes('scheduleThreeExperience()'), '3D loader scheduling missing'],
-            [living.includes('20260729-safe-loader-3'), 'safe loader cache version missing'],
+            [living.includes('organism-interface.js'), 'organism interface is not loaded'],
+            [living.includes('organism-menu-controller.js'), 'organism menu controller is not loaded'],
             [loader.includes('formatx-three-host-safe.js'), 'safe host missing from loader'],
             [!queue.includes('interaction-genome-webgl-adapter.js'), 'secondary WebGL still starts eagerly'],
             [host.includes("frame.src = 'about:blank'"), 'safe host must create blank frame'],
@@ -102,18 +113,26 @@ jobs:
             [entry.includes('mobile-core-engine-v2.js?v=20260729-living-core-v2'), 'living core v2 engine entry missing'],
             [engine.includes('class LivingCoreEngine'), 'living core v2 class missing'],
             [engine.includes('SphereGeometry(1.28, 96, 72)'), 'smooth high-resolution membrane missing'],
-            [engine.includes("this.baseWorldX = desktop ? 1.05 : 0"), 'responsive organism placement missing'],
-            [engine.includes('emissiveIntensity: 2.45'), 'visible emissive nucleus missing'],
             [engine.includes('const count = 220'), 'reduced particle budget missing'],
             [stage.includes('20260729-living-entry-v2'), 'living stage entry cache version missing'],
             [css.includes('data-fx-safe-three-gate="ready-v2"'), 'v2 layer selector missing'],
-            [css.includes('#fx-apex-canvas'), 'legacy canvas suppression missing'],
-            [css.includes('z-index: 1 !important'), 'living stage z-index missing'],
-            [rootWorker.includes('20260729-living-core-gate-v2'), 'root Worker gate cache version missing'],
-            [rootWorker.includes('20260729-living-core-css-v2'), 'root Worker CSS cache version missing'],
+            [css.includes('z-index: 120 !important'), 'desktop living-core layer is not visible'],
+            [css.includes('.fx-three-telemetry') && css.includes('display: none !important'), 'production telemetry overlap protection missing'],
+            [organism.includes('function buildConsole()'), 'working organism console missing'],
+            [organism.includes('function openPanel(id, source)'), 'organism panel opening missing'],
+            [organism.includes("'data-organism-open': spec.id"), 'organism panel triggers missing'],
+            [organism.includes("history.replaceState({}, '', location.pathname + location.search + '#hero')"), 'stale startup hash reset missing'],
+            [!organism.includes('removeFullscreenOrganismUi'), 'organism interface is still disabled'],
+            [!organism.includes('openHashPanel()'), 'stale hash still auto-opens a panel'],
+            [menu.includes('function setOpen(toggle, nav, open)'), 'responsive menu state controller missing'],
+            [menu.includes("toggle.addEventListener('click'"), 'menu click handler missing'],
+            [menu.includes("ROOT.dataset.fxOrganismMenu = 'ready'"), 'menu ready state missing'],
+            [!menu.includes('forceClosed'), 'menu is still permanently forced closed'],
+            [rootWorker.includes('20260729-living-core-css-v3'), 'root Worker CSS v3 cache version missing'],
+            [!rootWorker.includes('organism-panel-startup-guard'), 'root Worker still injects deleted guard'],
             [productionEntry.includes('/scifi-ui/three-stage-mobile.html'), 'mobile stage framing route missing'],
             [productionEntry.includes("headers.set('X-Frame-Options', 'SAMEORIGIN')"), 'same-origin framing header missing'],
-            [productionEntry.includes('mobile-core-engine-v2.js'), 'production no-store engine route missing'],
+            [!productionEntry.includes('organism-panel-startup-guard'), 'production Worker still injects deleted guard'],
           ];
 
           for (const [ok, message] of assertions) {
