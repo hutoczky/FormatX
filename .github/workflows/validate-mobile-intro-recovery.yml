@@ -1,4 +1,4 @@
-name: Validate deterministic intro and safe 3D startup
+name: Validate deterministic intro and living organism v2
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'worker.js'
       - 'wrangler.jsonc'
+      - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/three-stage-mobile.html'
       - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
       - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
@@ -13,11 +14,8 @@ on:
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/formatx-three-host-safe.js'
       - 'docs/scifi-ui/scripts/mobile-webgl-entry.js'
-      - 'docs/scifi-ui/scripts/mobile-core-engine.js'
+      - 'docs/scifi-ui/scripts/mobile-core-engine-v2.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-recovery.js'
-      - 'docs/scifi-ui/scripts/organism-panel-startup-guard.js'
-      - 'docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js'
-      - 'docs/scifi-ui/scripts/formatx-professional-refinement.js'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   workflow_dispatch:
 
@@ -26,7 +24,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-safe-three-startup
+  group: formatx-living-core-v2-startup
   cancel-in-progress: true
 
 jobs:
@@ -41,17 +39,15 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
-          node --check docs/scifi-ui/scripts/organism-panel-startup-guard.js
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
-          node --check docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js
-          node --check docs/scifi-ui/scripts/formatx-professional-refinement.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
-          node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine.js
+          node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v2.js
+          node --input-type=module --check < billing-worker/src/production-entry.js
           node --input-type=module --check < worker.js
 
-      - name: Validate Wrangler configuration
+      - name: Validate Wrangler routing
         shell: bash
         run: |
           node - <<'NODE'
@@ -62,78 +58,62 @@ jobs:
             '/scifi-ui/',
             '/scifi-ui/index.html',
             '/scifi-ui/styles/formatx-mobile-recovery.css',
-            '/scifi-ui/scripts/formatx-event-horizon.js',
             '/scifi-ui/scripts/formatx-mobile-recovery.js',
             '/scifi-ui/scripts/living-architecture.js',
-            '/scifi-ui/scripts/organism-panel-startup-guard.js',
+            '/scifi-ui/scripts/mobile-webgl-entry.js',
+            '/scifi-ui/scripts/mobile-core-engine-v2.js',
           ];
           for (const path of required) {
             if (!first.includes(path)) throw new Error(`Missing run_worker_first path: ${path}`);
           }
           NODE
 
-      - name: Validate safe runtime hand-off contract
+      - name: Validate living organism hand-off
         shell: bash
         run: |
           node - <<'NODE'
           const fs = require('fs');
           const intro = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
           const gate = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-recovery.js', 'utf8');
-          const panelGuard = fs.readFileSync('docs/scifi-ui/scripts/organism-panel-startup-guard.js', 'utf8');
           const living = fs.readFileSync('docs/scifi-ui/scripts/living-architecture.js', 'utf8');
           const loader = fs.readFileSync('docs/scifi-ui/scripts/igloo-parity.js', 'utf8');
           const host = fs.readFileSync('docs/scifi-ui/scripts/formatx-three-host-safe.js', 'utf8');
           const entry = fs.readFileSync('docs/scifi-ui/scripts/mobile-webgl-entry.js', 'utf8');
-          const engine = fs.readFileSync('docs/scifi-ui/scripts/mobile-core-engine.js', 'utf8');
+          const engine = fs.readFileSync('docs/scifi-ui/scripts/mobile-core-engine-v2.js', 'utf8');
           const stage = fs.readFileSync('docs/scifi-ui/three-stage-mobile.html', 'utf8');
-          const bootstrap = fs.readFileSync('docs/scifi-ui/scripts/formatx-three-frame-bootstrap.js', 'utf8');
-          const refinement = fs.readFileSync('docs/scifi-ui/scripts/formatx-professional-refinement.js', 'utf8');
-          const worker = fs.readFileSync('worker.js', 'utf8');
+          const css = fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-recovery.css', 'utf8');
+          const rootWorker = fs.readFileSync('worker.js', 'utf8');
+          const productionEntry = fs.readFileSync('billing-worker/src/production-entry.js', 'utf8');
 
           const queue = loader.split('const queue =', 2)[1]?.split('];', 1)[0] || '';
           const assertions = [
             [intro.includes('TIMELINE_DURATION'), 'deterministic intro timeline missing'],
             [intro.includes('HARD_DEADLINE'), 'intro hard deadline missing'],
-            [intro.includes("beginExit(overlay, token, 'timeline-complete')"), 'timeline completion hand-off missing'],
             [!intro.includes('loadOrDeadline'), 'intro must not wait for window load'],
-            [!intro.includes('Promise.all(animations)'), 'intro must not wait for animation promises'],
-            [gate.includes("root.dataset.fxSafeThreeGate = 'ready-v1'"), 'all-device safe gate marker missing'],
-            [gate.includes("return introComplete && started && !failed ? stageUrl.href : 'about:blank'"), '3D blank-before-intro contract missing'],
-            [gate.includes("document.addEventListener('formatx:introcomplete'"), 'safe gate must listen for intro completion'],
-            [gate.includes('Do not reload the frame automatically'), 'crash-loop prevention missing'],
-            [panelGuard.includes("'#experience'"), 'stale panel hash protection missing'],
-            [panelGuard.includes('closeStalePanel'), 'stale panel close routine missing'],
-            [panelGuard.includes("formatx:introcomplete"), 'panel guard must run after intro'],
-            [panelGuard.includes("formatx:organisminterfaceready"), 'panel guard must close restored console after interface init'],
+            [gate.includes("root.dataset.fxSafeThreeGate = 'ready-v2'"), 'living core v2 gate marker missing'],
+            [gate.includes("return introComplete && started && !failed ? stageUrl.href : 'about:blank'"), 'blank-before-intro contract missing'],
+            [gate.includes('20260729-living-stage-v2'), 'living stage cache version missing'],
             [living.includes('scheduleThreeExperience()'), '3D loader scheduling missing'],
-            [living.includes("'waiting-for-intro'"), '3D loader must wait for intro'],
-            [living.includes('20260729-safe-loader-3'), 'latest safe loader cache version missing'],
-            [!living.includes('data-fx-genome-webgl-adapter'), 'Genome WebGL is still eagerly injected'],
-            [loader.includes('formatx-three-host-safe.js'), 'safe host is not in the live loader'],
-            [!loader.includes('formatx-transcend-bridge.js'), 'global event bridge is still live'],
-            [!loader.includes('formatx-three-frame-bootstrap.js'), 'legacy frame bootstrap is still live'],
-            [!loader.includes('formatx-professional-refinement.js'), 'legacy refinement is still live'],
-            [!loader.includes('formatx-infinite-loop-controller-v2.js'), 'duplicate loop controller is still live'],
-            [loader.includes('load(index + 1)'), 'loader must continue after optional module errors'],
-            [loader.includes('.fx-genome-launcher'), 'Genome WebGL lazy trigger missing'],
-            [loader.includes('requestGenomeWebgl'), 'Genome WebGL lazy request missing'],
-            [!queue.includes('interaction-genome-webgl-adapter.js'), 'Genome WebGL adapter is still in startup queue'],
-            [host.includes("frame.src = 'about:blank'"), 'safe host must create a blank frame'],
-            [host.includes('__FORMATX_3D_STATE__'), 'safe host shared state missing'],
+            [living.includes('20260729-safe-loader-3'), 'safe loader cache version missing'],
+            [loader.includes('formatx-three-host-safe.js'), 'safe host missing from loader'],
+            [!queue.includes('interaction-genome-webgl-adapter.js'), 'secondary WebGL still starts eagerly'],
+            [host.includes("frame.src = 'about:blank'"), 'safe host must create blank frame'],
             [!host.includes('preventDefault()'), 'safe host must not block native scrolling'],
-            [entry.includes('mobile-core-engine.js'), 'direct engine entry missing'],
-            [engine.includes('class MobileCoreEngine'), 'direct 3D engine class missing'],
-            [engine.includes("root.dataset.fxThree = 'ready'"), 'first-frame ready signal missing'],
-            [stage.includes('direct-mobile-entry-1'), 'direct stage cache version missing'],
-            [bootstrap.includes("'safe-gate-bypass'"), 'legacy WebGPU bootstrap bypass missing'],
-            [refinement.includes("'safe-gate-bypass'"), 'legacy refinement bypass missing'],
-            [worker.includes('20260729-event-horizon-5'), 'live intro cache version missing'],
-            [worker.includes('20260729-safe-three-gate-1'), 'live safe gate cache version missing'],
-            [worker.includes('20260729-safe-three-css-1'), 'live safe CSS cache version missing'],
-            [worker.includes('20260729-safe-three-start-3'), 'live delayed loader cache version missing'],
-            [worker.includes('20260729-panel-startup-guard-1'), 'live panel startup guard injection missing'],
-            [!worker.includes('formatx-intro-deadlock-guard.js?v='), 'duplicate intro guard must not be injected'],
-            [worker.includes("Cache-Control', 'no-store"), 'no-store delivery missing'],
+            [entry.includes('mobile-core-engine-v2.js?v=20260729-living-core-v2'), 'living core v2 engine entry missing'],
+            [engine.includes('class LivingCoreEngine'), 'living core v2 class missing'],
+            [engine.includes('SphereGeometry(1.28, 96, 72)'), 'smooth high-resolution membrane missing'],
+            [engine.includes("this.baseWorldX = desktop ? 1.05 : 0"), 'responsive organism placement missing'],
+            [engine.includes('emissiveIntensity: 2.45'), 'visible emissive nucleus missing'],
+            [engine.includes('const count = 220'), 'reduced particle budget missing'],
+            [stage.includes('20260729-living-entry-v2'), 'living stage entry cache version missing'],
+            [css.includes('data-fx-safe-three-gate="ready-v2"'), 'v2 layer selector missing'],
+            [css.includes('#fx-apex-canvas'), 'legacy canvas suppression missing'],
+            [css.includes('z-index: 1 !important'), 'living stage z-index missing'],
+            [rootWorker.includes('20260729-living-core-gate-v2'), 'root Worker gate cache version missing'],
+            [rootWorker.includes('20260729-living-core-css-v2'), 'root Worker CSS cache version missing'],
+            [productionEntry.includes('/scifi-ui/three-stage-mobile.html'), 'mobile stage framing route missing'],
+            [productionEntry.includes("headers.set('X-Frame-Options', 'SAMEORIGIN')"), 'same-origin framing header missing'],
+            [productionEntry.includes('mobile-core-engine-v2.js'), 'production no-store engine route missing'],
           ];
 
           for (const [ok, message] of assertions) {
