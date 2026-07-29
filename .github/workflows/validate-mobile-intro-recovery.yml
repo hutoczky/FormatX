@@ -1,4 +1,4 @@
-name: Validate mobile intro and direct 3D recovery
+name: Validate deterministic intro and direct 3D recovery
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
       - 'wrangler.jsonc'
       - 'docs/scifi-ui/three-stage-mobile.html'
       - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
+      - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
       - 'docs/scifi-ui/scripts/mobile-webgl-entry.js'
       - 'docs/scifi-ui/scripts/mobile-core-engine.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-recovery.js'
-      - 'docs/scifi-ui/scripts/formatx-intro-replay.js'
       - 'docs/scifi-ui/scripts/formatx-intro-deadlock-guard.js'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   workflow_dispatch:
@@ -34,8 +34,8 @@ jobs:
       - name: Validate JavaScript syntax
         shell: bash
         run: |
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
-          node --check docs/scifi-ui/scripts/formatx-intro-replay.js
           node --check docs/scifi-ui/scripts/formatx-intro-deadlock-guard.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine.js
@@ -51,8 +51,8 @@ jobs:
           const required = [
             '/scifi-ui/',
             '/scifi-ui/index.html',
+            '/scifi-ui/scripts/formatx-event-horizon.js',
             '/scifi-ui/scripts/formatx-mobile-recovery.js',
-            '/scifi-ui/scripts/formatx-intro-replay.js',
             '/scifi-ui/scripts/formatx-intro-deadlock-guard.js',
           ];
           for (const path of required) {
@@ -65,8 +65,8 @@ jobs:
         run: |
           node - <<'NODE'
           const fs = require('fs');
+          const intro = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
           const mobile = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-recovery.js', 'utf8');
-          const replay = fs.readFileSync('docs/scifi-ui/scripts/formatx-intro-replay.js', 'utf8');
           const guard = fs.readFileSync('docs/scifi-ui/scripts/formatx-intro-deadlock-guard.js', 'utf8');
           const entry = fs.readFileSync('docs/scifi-ui/scripts/mobile-webgl-entry.js', 'utf8');
           const engine = fs.readFileSync('docs/scifi-ui/scripts/mobile-core-engine.js', 'utf8');
@@ -74,18 +74,21 @@ jobs:
           const worker = fs.readFileSync('worker.js', 'utf8');
 
           const assertions = [
+            [intro.includes('TIMELINE_DURATION'), 'deterministic intro timeline missing'],
+            [intro.includes('HARD_DEADLINE'), 'intro hard deadline missing'],
+            [intro.includes("beginExit(overlay, token, 'timeline-complete')"), 'timeline completion hand-off missing'],
+            [!intro.includes('loadOrDeadline'), 'intro must not wait for window load'],
+            [!intro.includes('Promise.all(animations)'), 'intro must not wait for animation promises'],
             [mobile.includes("return 'about:blank'"), '3D must remain blank before intro completion'],
-            [mobile.includes("document.addEventListener('formatx:introreplaystart'"), 'mobile runtime must pause for intro replay'],
             [mobile.includes("document.addEventListener('formatx:introcomplete'"), 'mobile runtime must listen for intro completion'],
-            [replay.includes("formatx:introreplaystart"), 'intro replay start event missing'],
-            [replay.includes("formatx:introcomplete"), 'intro replay completion event missing'],
             [guard.includes('DEADLINE = 4800'), 'intro deadline guard missing'],
             [entry.includes('mobile-core-engine.js'), 'direct mobile engine entry missing'],
             [engine.includes('class MobileCoreEngine'), 'direct 3D engine class missing'],
             [engine.includes("root.dataset.fxThree = 'ready'"), 'first-frame ready signal missing'],
             [stage.includes('direct-mobile-entry-1'), 'direct stage cache version missing'],
+            [worker.includes('20260729-event-horizon-4'), 'live intro cache version missing'],
             [worker.includes('formatx-mobile-recovery-5'), 'live mobile recovery cache version missing'],
-            [worker.includes('formatx-intro-replay.js?v=20260729-intro-replay-1'), 'intro replay injection missing'],
+            [!worker.includes('formatx-intro-replay.js?v='), 'obsolete intro replay must not be injected'],
             [worker.includes('formatx-intro-deadlock-guard.js?v=20260729-intro-guard-2'), 'intro guard injection missing'],
             [worker.includes("Cache-Control', 'no-store"), 'no-store delivery missing'],
           ];
