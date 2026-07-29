@@ -105,7 +105,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260729-safe-loader-3';
+      script.src = './scripts/igloo-parity.js?v=20260729-safe-loader-10';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
