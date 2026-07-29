@@ -21,6 +21,7 @@
   let watchdog = 0;
   let attempts = 0;
   let introComplete = root.classList.contains('fx-intro-complete');
+  let threeStarted = false;
 
   function telemetry(text) {
     const output = document.querySelector('[data-fx-three-telemetry]');
@@ -108,8 +109,9 @@
   }
 
   function startThreeAfterIntro() {
-    if (introComplete) return;
+    if (threeStarted) return;
     introComplete = true;
+    threeStarted = true;
     attempts = 0;
     root.dataset.fxMobile3d = 'webgl-starting';
     root.dataset.fxThree = 'loading';
