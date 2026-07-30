@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v13') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v13';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v14') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v14';
 
   let genomeWebglRequested = false;
 
@@ -19,6 +19,22 @@
     link.addEventListener('error', () => {
       root.dataset.fxSiteStability = 'failed';
       console.warn('FormatX stability stylesheet failed to load.');
+    }, { once: true });
+    document.head.appendChild(link);
+  }
+
+  function ensureOrganismDockStyle() {
+    if (document.querySelector('link[data-fx-organism-voice-dock]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/organism-voice-dock.css?v=20260730-organism-dock-1';
+    link.dataset.fxOrganismVoiceDock = 'true';
+    link.addEventListener('load', () => {
+      root.dataset.fxOrganismDock = 'ready';
+    }, { once: true });
+    link.addEventListener('error', () => {
+      root.dataset.fxOrganismDock = 'failed';
+      console.warn('FormatX Organism dock stylesheet failed to load.');
     }, { once: true });
     document.head.appendChild(link);
   }
@@ -102,6 +118,7 @@
   }
 
   ensureStabilityStyle();
+  ensureOrganismDockStyle();
   root.dataset.fxLocalQr = 'ready-v2';
   root.dataset.fxLegacyRenderer = 'retired';
   root.dataset.fxRenderer = 'three-host-safe';
@@ -135,7 +152,7 @@
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v13';
+      root.dataset.fxTranscendLoader = 'safe-ready-v14';
       return;
     }
 
@@ -146,7 +163,7 @@
     script.addEventListener('load', () => load(index + 1), { once: true });
     script.addEventListener('error', () => {
       console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v13';
+      root.dataset.fxTranscendLoader = 'safe-degraded-v14';
       load(index + 1);
     }, { once: true });
     document.head.appendChild(script);
