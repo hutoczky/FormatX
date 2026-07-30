@@ -1,0 +1,408 @@
+/* FormatX Organism voice and thought dialogue — local, bilingual, accessibility-first. */
+
+.fx-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.fx-organism-dialogue {
+  --fx-thought-accent: 125, 229, 255;
+  position: fixed;
+  z-index: 78;
+  top: clamp(164px, 24vh, 286px);
+  right: clamp(18px, 4vw, 66px);
+  display: grid;
+  justify-items: end;
+  gap: 14px;
+  width: min(390px, calc(100vw - 32px));
+  pointer-events: none;
+  transition: opacity .24s ease, transform .24s ease;
+}
+
+.fx-organism-thought-trigger,
+.fx-organism-thought,
+.fx-organism-thought button,
+.fx-organism-thought input {
+  font: inherit;
+}
+
+.fx-organism-thought-trigger {
+  position: relative;
+  width: 66px;
+  min-width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  gap: 0;
+  color: #eafaff;
+  border: 1px solid rgba(var(--fx-thought-accent), .34);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .18), transparent 30%),
+    linear-gradient(145deg, rgba(9, 32, 49, .96), rgba(4, 13, 24, .98));
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, .38),
+    0 0 34px rgba(var(--fx-thought-accent), .12),
+    inset 0 1px 0 rgba(255, 255, 255, .08);
+  backdrop-filter: blur(18px) saturate(135%);
+  pointer-events: auto;
+  cursor: pointer;
+  isolation: isolate;
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+
+.fx-organism-thought-trigger::before,
+.fx-organism-thought-trigger::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.fx-organism-thought-trigger::before {
+  inset: 8px;
+  border: 1px solid rgba(var(--fx-thought-accent), .18);
+  animation: fx-organism-thought-pulse 2.7s ease-in-out infinite;
+}
+
+.fx-organism-thought-trigger::after {
+  inset: -5px;
+  border: 1px solid rgba(var(--fx-thought-accent), .08);
+}
+
+.fx-organism-thought-trigger span {
+  position: relative;
+  z-index: 2;
+  font-size: 24px;
+  line-height: 1;
+  filter: drop-shadow(0 0 12px rgba(var(--fx-thought-accent), .34));
+}
+
+.fx-organism-thought-trigger b {
+  position: absolute;
+  right: 0;
+  bottom: -7px;
+  left: 0;
+  color: rgba(220, 244, 255, .72);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 7px;
+  letter-spacing: .24em;
+  text-align: center;
+}
+
+.fx-organism-thought-trigger:hover,
+.fx-organism-thought-trigger:focus-visible,
+.fx-organism-dialogue.is-open .fx-organism-thought-trigger {
+  border-color: rgba(var(--fx-thought-accent), .72);
+  box-shadow:
+    0 22px 64px rgba(0, 0, 0, .44),
+    0 0 48px rgba(var(--fx-thought-accent), .22),
+    inset 0 1px 0 rgba(255, 255, 255, .11);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.fx-organism-dialogue.is-speaking .fx-organism-thought-trigger {
+  animation: fx-organism-speaking 1.05s ease-in-out infinite;
+}
+
+.fx-organism-thought[hidden] {
+  display: none !important;
+}
+
+.fx-organism-thought {
+  position: relative;
+  width: 100%;
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+  color: #edfaff;
+  border: 1px solid rgba(var(--fx-thought-accent), .30);
+  border-radius: 24px 24px 8px 24px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(var(--fx-thought-accent), .12), transparent 35%),
+    linear-gradient(150deg, rgba(8, 27, 43, .97), rgba(3, 10, 19, .985));
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, .52),
+    0 0 50px rgba(var(--fx-thought-accent), .08),
+    inset 0 1px 0 rgba(255, 255, 255, .055);
+  backdrop-filter: blur(22px) saturate(145%);
+  pointer-events: auto;
+  isolation: isolate;
+  animation: fx-organism-thought-enter .28s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.fx-organism-thought::before,
+.fx-organism-thought::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border: 1px solid rgba(var(--fx-thought-accent), .26);
+  border-radius: 50%;
+  background: rgba(5, 18, 29, .96);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .28);
+}
+
+.fx-organism-thought::before {
+  right: 18px;
+  bottom: -18px;
+  width: 24px;
+  height: 24px;
+}
+
+.fx-organism-thought::after {
+  right: 5px;
+  bottom: -32px;
+  width: 11px;
+  height: 11px;
+}
+
+.fx-organism-thought-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fx-organism-thought-label {
+  min-width: 0;
+  color: rgb(var(--fx-thought-accent));
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .20em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fx-organism-thought-close {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  color: rgba(230, 247, 255, .72);
+  border: 1px solid rgba(200, 235, 250, .15);
+  border-radius: 50%;
+  background: rgba(0, 7, 13, .38);
+  cursor: pointer;
+}
+
+.fx-organism-thought-close:hover,
+.fx-organism-thought-close:focus-visible {
+  color: #fff;
+  border-color: rgba(var(--fx-thought-accent), .55);
+}
+
+.fx-organism-thought-output {
+  min-height: 5.2em;
+  margin: 0;
+  color: rgba(231, 245, 251, .88);
+  font-size: 14px;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.fx-organism-dialogue.is-speaking .fx-organism-thought-output {
+  color: #fff;
+  text-shadow: 0 0 24px rgba(var(--fx-thought-accent), .12);
+}
+
+.fx-organism-question {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: 8px;
+}
+
+.fx-organism-question input {
+  min-width: 0;
+  height: 44px;
+  padding: 0 13px;
+  color: #f3fbff;
+  border: 1px solid rgba(176, 224, 246, .18);
+  border-radius: 13px;
+  outline: none;
+  background: rgba(1, 8, 15, .58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
+}
+
+.fx-organism-question input::placeholder {
+  color: rgba(204, 226, 237, .38);
+}
+
+.fx-organism-question input:focus {
+  border-color: rgba(var(--fx-thought-accent), .58);
+  box-shadow: 0 0 0 3px rgba(var(--fx-thought-accent), .09);
+}
+
+.fx-organism-ask {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: #00111b;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #aaf5ff, #82c6ff 58%, #d3b9ff);
+  box-shadow: 0 8px 24px rgba(87, 203, 255, .18);
+  cursor: pointer;
+}
+
+.fx-organism-thought-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fx-organism-voice-toggle,
+.fx-organism-repeat {
+  min-height: 36px;
+  padding: 0 12px;
+  color: rgba(225, 243, 251, .78);
+  border: 1px solid rgba(185, 226, 245, .15);
+  border-radius: 999px;
+  background: rgba(3, 12, 21, .64);
+  cursor: pointer;
+}
+
+.fx-organism-voice-toggle[aria-pressed='true'] {
+  color: #00131c;
+  border-color: rgba(var(--fx-thought-accent), .72);
+  background: rgb(var(--fx-thought-accent));
+  box-shadow: 0 0 22px rgba(var(--fx-thought-accent), .17);
+}
+
+.fx-organism-voice-toggle:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+}
+
+.fx-organism-repeat {
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
+  font-size: 18px;
+}
+
+.fx-organism-voice-toggle:hover:not(:disabled),
+.fx-organism-voice-toggle:focus-visible,
+.fx-organism-repeat:hover,
+.fx-organism-repeat:focus-visible {
+  border-color: rgba(var(--fx-thought-accent), .52);
+  color: #fff;
+}
+
+.fx-organism-privacy {
+  color: rgba(200, 223, 234, .42);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 8px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+html.fx-organism-menu-open .fx-organism-dialogue,
+body.fx-organism-panel-open .fx-organism-dialogue,
+html.fx-intro-pending .fx-organism-dialogue,
+html.fx-intro-running .fx-organism-dialogue,
+html.fx-intro-reveal .fx-organism-dialogue {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+}
+
+@keyframes fx-organism-thought-enter {
+  from { opacity: 0; transform: translateY(12px) scale(.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fx-organism-thought-pulse {
+  0%, 100% { opacity: .35; transform: scale(.86); }
+  50% { opacity: .95; transform: scale(1.04); }
+}
+
+@keyframes fx-organism-speaking {
+  0%, 100% { transform: translateY(-2px) scale(1.01); }
+  50% { transform: translateY(-4px) scale(1.07); }
+}
+
+@media (max-width: 1100px) {
+  .fx-organism-dialogue {
+    right: 16px;
+    width: min(360px, calc(100vw - 32px));
+  }
+}
+
+@media (max-width: 820px) {
+  .fx-organism-dialogue {
+    top: auto;
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(84px, calc(env(safe-area-inset-bottom) + 72px));
+    left: max(12px, env(safe-area-inset-left));
+    width: auto;
+    max-height: min(72svh, 560px);
+  }
+
+  .fx-organism-thought {
+    max-height: min(62svh, 480px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    border-radius: 22px 22px 8px 22px;
+  }
+
+  .fx-organism-thought-trigger {
+    width: 60px;
+    min-width: 60px;
+    height: 60px;
+  }
+
+  .fx-organism-thought-output {
+    min-height: auto;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fx-organism-thought {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .fx-organism-question {
+    grid-template-columns: minmax(0, 1fr) 42px;
+  }
+
+  .fx-organism-question input,
+  .fx-organism-ask {
+    height: 42px;
+  }
+
+  .fx-organism-ask {
+    width: 42px;
+  }
+
+  .fx-organism-thought-controls {
+    flex-wrap: wrap;
+  }
+
+  .fx-organism-privacy {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-organism-dialogue,
+  .fx-organism-thought,
+  .fx-organism-thought-trigger,
+  .fx-organism-thought-trigger::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
