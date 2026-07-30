@@ -20,7 +20,33 @@ function overlaps(a, b, tolerance = 2) {
 
 async function waitForReady(page) {
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismVoice === 'ready-v2', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismCoreInteraction === 'ready-v1', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismSpeakingVisual === 'ready', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 15000 });
+}
+
+async function validateSpeakingVisual(page, name) {
+  await page.evaluate(() => { document.documentElement.dataset.fxOrganismSpeech = 'speaking'; });
+  await page.waitForTimeout(120);
+  const speaking = await page.locator('.fx-three-stage-shell').evaluate(node => {
+    const shell = getComputedStyle(node);
+    const ring = getComputedStyle(node, '::before');
+    return {
+      shellAnimation: shell.animationName,
+      shellFilter: shell.filter,
+      ringAnimation: ring.animationName,
+      ringPointerEvents: ring.pointerEvents,
+    };
+  });
+  assert(speaking.shellAnimation.includes('fx-core-speaking-light'), `${name}: 3D core light animation is not active while speaking`);
+  assert(speaking.shellFilter !== 'none', `${name}: speaking state does not brighten the 3D core`);
+  assert(speaking.ringAnimation.includes('fx-core-speaking-ring'), `${name}: speaking rings are not active`);
+  assert(speaking.ringPointerEvents === 'none', `${name}: speaking visual blocks clicks`);
+
+  await page.evaluate(() => { document.documentElement.dataset.fxOrganismSpeech = 'idle'; });
+  await page.waitForTimeout(80);
+  const idleAnimation = await page.locator('.fx-three-stage-shell').evaluate(node => getComputedStyle(node).animationName);
+  assert(idleAnimation === 'none', `${name}: 3D speech animation did not stop`);
 }
 
 async function validateViewport(browser, name, viewport, mobile) {
@@ -42,6 +68,8 @@ async function validateViewport(browser, name, viewport, mobile) {
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 1, `${name}: Organism dialogue causes horizontal overflow (${overflow}px)`);
+
+  await validateSpeakingVisual(page, name);
 
   await trigger.click();
   await bubble.waitFor({ state: 'visible' });
@@ -76,6 +104,16 @@ async function validateViewport(browser, name, viewport, mobile) {
 
   await page.locator('.fx-organism-thought-close').click();
   await bubble.waitFor({ state: 'hidden' });
+
+  if (!mobile) {
+    const magNode = page.locator('[data-organ-node="0"]');
+    await magNode.click();
+    await bubble.waitFor({ state: 'visible' });
+    assert(await page.evaluate(() => document.documentElement.dataset.fxOrganismCoreActivation) === 'mag-navigation', `${name}: MAG navigation did not activate the dialogue`);
+    await page.locator('.fx-organism-thought-close').click();
+    await bubble.waitFor({ state: 'hidden' });
+  }
+
   await page.locator('#menu-toggle').click();
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-organism-menu-open'));
   const menuHiddenState = await page.locator('.fx-organism-dialogue').evaluate(node => {
@@ -92,7 +130,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   try {
     await validateViewport(browser, 'desktop', { width: 1440, height: 900 }, false);
     await validateViewport(browser, 'mobile', { width: 390, height: 844 }, true);
-    console.log('PASS: Organism dialogue is closed by default, readable, local and fully switchable.');
+    console.log('PASS: Organism dialogue is readable, switchable, MAG-clickable and visibly animated while speaking.');
   } finally {
     await browser.close();
   }
