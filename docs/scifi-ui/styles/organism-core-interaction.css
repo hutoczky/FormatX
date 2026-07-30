@@ -1,11 +1,12 @@
 /* FormatX MAG/core interaction guard — keeps all core controls clickable. */
 
+/* Closed dialogue must occupy only the visible MAG pill, never a transparent 380px box. */
 .fx-organism-dialogue:not(.is-open) {
-  width: 58px !important;
+  width: 92px !important;
 }
 
 .fx-organism-dialogue.is-disabled:not(.is-open) {
-  width: 48px !important;
+  width: 68px !important;
 }
 
 .fx-organism-dialogue .fx-organism-thought-trigger,
@@ -32,12 +33,12 @@ a[href="#hero"]:not(.brand):not(.skip-link):focus-visible {
   outline-offset: 4px;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 820px), (pointer: coarse) {
   .fx-organism-dialogue:not(.is-open) {
-    width: 56px !important;
+    width: 86px !important;
   }
 
   .fx-organism-dialogue.is-disabled:not(.is-open) {
-    width: 46px !important;
+    width: 64px !important;
   }
 }
