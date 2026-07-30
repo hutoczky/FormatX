@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v15') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v15';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v16') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v16';
 
   let genomeWebglRequested = false;
 
@@ -51,6 +51,22 @@
     link.addEventListener('error', () => {
       root.dataset.fxOrganismSpeakingVisual = 'failed';
       console.warn('FormatX Organism speaking visual failed to load.');
+    }, { once: true });
+    document.head.appendChild(link);
+  }
+
+  function ensureMobileReadabilityStyle() {
+    if (document.querySelector('link[data-fx-mobile-readability]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/formatx-mobile-readability.css?v=20260730-mobile-readability-1';
+    link.dataset.fxMobileReadability = 'true';
+    link.addEventListener('load', () => {
+      root.dataset.fxMobileReadability = 'ready';
+    }, { once: true });
+    link.addEventListener('error', () => {
+      root.dataset.fxMobileReadability = 'failed';
+      console.warn('FormatX mobile readability stylesheet failed to load.');
     }, { once: true });
     document.head.appendChild(link);
   }
@@ -136,6 +152,7 @@
   ensureStabilityStyle();
   ensureOrganismDockStyle();
   ensureOrganismSpeakingStyle();
+  ensureMobileReadabilityStyle();
   root.dataset.fxLocalQr = 'ready-v2';
   root.dataset.fxLegacyRenderer = 'retired';
   root.dataset.fxRenderer = 'three-host-safe';
@@ -162,7 +179,7 @@
     './scripts/organism-core-interaction.js?v=20260730-core-interaction-1',
     './scripts/formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3',
     './scripts/formatx-three-host-safe.js?v=20260729-safe-host-1',
-    './scripts/formatx-render-visibility.js?v=20260729-render-visibility-1',
+    './scripts/formatx-render-visibility.js?v=20260730-render-visibility-2',
     './scripts/formatx-audio-repair.js?v=20260728-ambient-score-v5',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/interaction-genome.js?v=20260728-genome-3d-1'
@@ -170,7 +187,7 @@
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v15';
+      root.dataset.fxTranscendLoader = 'safe-ready-v16';
       return;
     }
 
@@ -181,7 +198,7 @@
     script.addEventListener('load', () => load(index + 1), { once: true });
     script.addEventListener('error', () => {
       console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v15';
+      root.dataset.fxTranscendLoader = 'safe-degraded-v16';
       load(index + 1);
     }, { once: true });
     document.head.appendChild(script);
