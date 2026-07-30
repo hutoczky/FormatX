@@ -5,7 +5,7 @@
   if (ROOT.dataset.fxPlatformStatus === 'ready-v3') return;
   ROOT.dataset.fxPlatformStatus = 'loading-v3';
 
-  const DATA_URL = '/scifi-ui/data/platform-status.json?v=20260730-platform-status-1';
+  const DATA_URL = '/scifi-ui/data/platform-status.json?v=20260730-platform-status-2';
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -33,19 +33,26 @@
     return element;
   }
 
+  function supportRole(platform, data, lang) {
+    return text(data.support_role_labels && data.support_role_labels[platform.support_role], lang);
+  }
+
   function buildCard(platform, data, lang) {
     const article = document.createElement('article');
     article.className = 'fx-platform-card';
     article.dataset.platform = platform.id;
     article.dataset.status = platform.status;
+    article.dataset.supportRole = platform.support_role || '';
+
     const head = document.createElement('header');
     const titleWrap = document.createElement('div');
     const title = document.createElement('h3');
     const version = document.createElement('small');
     title.textContent = platform.name;
-    version.textContent = platform.version;
+    version.textContent = [supportRole(platform, data, lang), platform.version].filter(Boolean).join(' · ');
     titleWrap.append(title, version);
     head.append(titleWrap, badge(platform.status, data.status_labels, lang));
+
     const description = document.createElement('p');
     description.textContent = text(platform, lang);
     article.append(head, description);
@@ -67,8 +74,8 @@
     eyebrow.textContent = lang === 'en' ? 'PUBLIC PRODUCT STATUS' : 'NYILVÁNOS TERMÉKÁLLAPOT';
     heading.textContent = lang === 'en' ? 'One status matrix across every surface.' : 'Egyetlen állapotmátrix minden felületen.';
     lead.textContent = lang === 'en'
-      ? 'V92 is a public beta. Platform labels describe actual availability and are not marketing promises.'
-      : 'A V92 nyilvános béta. A platformcímkék a tényleges elérhetőséget jelzik, nem marketingígéretek.';
+      ? 'Linux/Bazzite is the primary target and support platform. Windows is secondary supported. V92 remains a public beta.'
+      : 'A Linux/Bazzite az elsődleges cél- és támogatási platform. A Windows másodlagosan támogatott. A V92 továbbra is nyilvános béta.';
     copy.append(eyebrow, heading, lead);
 
     const release = document.createElement('div');
@@ -91,8 +98,8 @@
     const note = document.createElement('p');
     note.className = 'fx-platform-status-note';
     note.append(document.createTextNode(lang === 'en'
-      ? 'No platform is currently labelled Stable. Stable will only be used after the public test matrix and release evidence meet the published acceptance criteria. '
-      : 'Jelenleg egyik platform sem kap Stabil címkét. A Stabil állapot csak a nyilvános tesztmátrix és a kiadási bizonyítékok elfogadási feltételeinek teljesítése után jelenhet meg. '));
+      ? 'Support priority and maturity are separate: Linux/Bazzite is primary while its native build is in Development; Windows is secondary supported and currently Public beta. No platform is labelled Stable. '
+      : 'A támogatási prioritás és a fejlettségi állapot külön fogalom: a Linux/Bazzite elsődleges, miközben a natív kiadás Development; a Windows másodlagosan támogatott és jelenleg Public beta. Egyik platform sem Stable. '));
     const matrixLink = document.createElement('a');
     matrixLink.href = '/scifi-ui/test-matrix.html';
     matrixLink.textContent = lang === 'en' ? 'Open public test matrix' : 'Nyilvános tesztmátrix megnyitása';
@@ -122,8 +129,8 @@
       badge(data.product_release.status, data.status_labels, lang),
       Object.assign(document.createElement('span'), {
         textContent: lang === 'en'
-          ? 'Windows V92 available · Linux/Bazzite in development · 5-day trial'
-          : 'Windows V92 elérhető · Linux/Bazzite fejlesztés alatt · 5 napos próbalicenc'
+          ? 'Linux/Bazzite primary platform · Windows secondary supported Public beta · 5-day trial'
+          : 'Linux/Bazzite elsődleges platform · Windows másodlagosan támogatott Public beta · 5 napos próbalicenc'
       })
     );
 
@@ -153,8 +160,8 @@
       badge(data.product_release.status, data.status_labels, lang),
       Object.assign(document.createElement('div'), {
         innerHTML: lang === 'en'
-          ? '<strong>V92 is a public beta.</strong><span>The licence grants access to the released beta build. No platform is currently labelled Stable.</span>'
-          : '<strong>A V92 nyilvános béta.</strong><span>A licenc a kiadott béta build használatára jogosít. Jelenleg egyik platform sem kap Stabil címkét.</span>'
+          ? '<strong>V92 is a public beta.</strong><span>Linux/Bazzite is the primary platform direction; Windows is secondary supported. No platform is currently labelled Stable.</span>'
+          : '<strong>A V92 nyilvános béta.</strong><span>A Linux/Bazzite az elsődleges platformirány; a Windows másodlagosan támogatott. Jelenleg egyik platform sem kap Stable címkét.</span>'
       })
     );
   }
@@ -185,7 +192,7 @@
     const lang = language();
     statusRow.querySelector('span').textContent = lang === 'en'
       ? 'I understand that V92 is a Public beta, not a Stable release, and that platform capabilities differ according to the published status matrix.'
-      : 'Tudomásul veszem, hogy a V92 nyilvános béta, nem Stabil kiadás, és a platformok képességei a közzétett állapotmátrix szerint eltérnek.';
+      : 'Tudomásul veszem, hogy a V92 nyilvános béta, nem Stable kiadás, és a platformok képességei a közzétett állapotmátrix szerint eltérnek.';
     immediateRow.querySelector('span').innerHTML = lang === 'en'
       ? 'I expressly request activation immediately after payment verification. If I qualify as a consumer, I acknowledge the digital-performance and withdrawal information in the <a href="./terms.html" target="_blank" rel="noopener">terms of use</a>.'
       : 'Kifejezetten kérem az aktiválást a jóváírás ellenőrzése után. Ha fogyasztónak minősülök, tudomásul veszem a <a href="./terms.html" target="_blank" rel="noopener">felhasználási feltételekben</a> szereplő digitális teljesítési és elállási tájékoztatást.';
@@ -195,8 +202,8 @@
     const lang = language();
     const names = Object.fromEntries(data.platforms.map(item => [item.name, text(data.status_labels[item.status], lang)]));
     return lang === 'en'
-      ? `V92 is a Public beta. Windows: ${names.Windows}; Linux / Bazzite: ${names['Linux / Bazzite']}; macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. No platform is currently labelled Stable. Downloads and evidence are available from the download centre and public test matrix.`
-      : `A V92 nyilvános béta. Windows: ${names.Windows}; Linux / Bazzite: ${names['Linux / Bazzite']}; macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. Jelenleg egyik platform sem kap Stabil címkét. A letöltések és bizonyítékok a letöltési központban és a nyilvános tesztmátrixban érhetők el.`;
+      ? `Linux/Bazzite is the primary target and support platform and is currently ${names['Linux / Bazzite']}. Windows is the secondary supported platform and is currently ${names.Windows}. V92 overall is a Public beta. macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. No platform is currently labelled Stable.`
+      : `A Linux/Bazzite az elsődleges cél- és támogatási platform, jelenlegi állapota: ${names['Linux / Bazzite']}. A Windows a másodlagosan támogatott platform, jelenlegi állapota: ${names.Windows}. A V92 összesített állapota nyilvános béta. macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. Jelenleg egyik platform sem kap Stable címkét.`;
   }
 
   function speakCanonical(textValue) {
