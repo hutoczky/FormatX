@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="hu" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="FormatX Suite Pro nyilvános platform- és funkciótesztmátrix.">
+  <meta name="theme-color" content="#050a10">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self';base-uri 'self';object-src 'none';script-src 'self';style-src 'self';img-src 'self' data:;connect-src 'self';form-action 'none'">
+  <link rel="canonical" href="https://www.formatxsuite.com/scifi-ui/test-matrix.html">
+  <title>Nyilvános tesztmátrix | FormatX Suite Pro</title>
+  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
+  <link rel="stylesheet" href="./styles/single-language-toggle.css?v=20260729-single-language-3">
+  <script defer src="./scripts/single-language-toggle.js?v=20260729-single-language-2"></script>
+  <style>
+    .matrix-wrap{overflow:auto;border:1px solid #29475e;border-radius:18px}.matrix{width:100%;min-width:980px;border-collapse:collapse;background:#071426}.matrix th,.matrix td{padding:14px 16px;border-bottom:1px solid #1f374b;text-align:left;vertical-align:top;font-size:13px;line-height:1.5}.matrix th{color:#91e9ff;background:#0a1b2b;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.matrix td{color:#d5e6ef}.result{font-weight:800}.result.pending{color:#ffd787}.result.pass{color:#87f6bd}.result.limited{color:#c4adff}.matrix-note{margin-top:20px;padding:18px;border-left:3px solid #35d9ff;background:#071426;color:#c5d7e3;line-height:1.6}
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="header-inner legal-header-inner"><a class="brand" href="./index.html"><img src="./assets/images/formatx-icon.png" width="44" height="44" alt=""><span><strong>FormatX Suite Pro</strong><small data-hu="Nyilvános tesztmátrix" data-en="Public test matrix">Nyilvános tesztmátrix</small></span></a><a class="legal-home-link" href="./downloads/" data-hu="Letöltések" data-en="Downloads">Letöltések</a><div class="language-switch" role="group" aria-label="Language / Nyelv"><button type="button" data-language="hu" aria-pressed="true">HU</button><button type="button" data-language="en" aria-pressed="false">EN</button></div></div></header>
+  <main class="legal-main" id="main-content"><article class="content-width legal-document">
+    <p class="eyebrow">PUBLIC EVIDENCE</p>
+    <h1 data-hu="Nyilvános tesztmátrix" data-en="Public test matrix">Nyilvános tesztmátrix</h1>
+    <p class="legal-lead" data-hu="A táblázat csak publikált vagy egyértelműen függőben lévő eredményt mutat. A hiányzó mérés nem minősül sikeres tesztnek." data-en="The table shows only published results or explicitly pending evidence. A missing measurement is never treated as a successful test.">A táblázat csak publikált vagy egyértelműen függőben lévő eredményt mutat. A hiányzó mérés nem minősül sikeres tesztnek.</p>
+
+    <div class="matrix-wrap"><table class="matrix">
+      <thead><tr><th>Platform</th><th data-hu="OS / verzió" data-en="OS / version">OS / verzió</th><th data-hu="Hardver" data-en="Hardware">Hardver</th><th data-hu="Funkció" data-en="Function">Funkció</th><th data-hu="Eredmény" data-en="Result">Eredmény</th><th data-hu="Ismert korlátozás" data-en="Known limitation">Ismert korlátozás</th><th data-hu="Bizonyíték" data-en="Evidence">Bizonyíték</th></tr></thead>
+      <tbody>
+        <tr><td>Windows · Public beta</td><td>Windows 11 / V92</td><td data-hu="Publikálásra vár" data-en="Pending publication">Publikálásra vár</td><td data-hu="Asztali prototípus indítása és alapmodulok" data-en="Desktop prototype launch and core modules">Asztali prototípus indítása és alapmodulok</td><td class="result limited" data-hu="Korlátozott nyilvános bizonyíték" data-en="Limited public evidence">Korlátozott nyilvános bizonyíték</td><td data-hu="Windows-specifikus WinUI 3 és lemezkezelő komponensek" data-en="Windows-specific WinUI 3 and disk-management components">Windows-specifikus WinUI 3 és lemezkezelő komponensek</td><td>V92 release + README</td></tr>
+        <tr><td>Linux / Bazzite · Development</td><td data-hu="Natív célplatform" data-en="Native target">Natív célplatform</td><td data-hu="Nincs még publikált mátrix" data-en="No published matrix yet">Nincs még publikált mátrix</td><td data-hu="Natív meghajtókezelés" data-en="Native drive management">Natív meghajtókezelés</td><td class="result pending" data-hu="Fejlesztés alatt" data-en="In development">Fejlesztés alatt</td><td data-hu="Nincs kiadott natív csomag" data-en="No released native package">Nincs kiadott natív csomag</td><td data-hu="Bizonyíték függőben" data-en="Evidence pending">Bizonyíték függőben</td></tr>
+        <tr><td>Web · Technical preview</td><td>Chromium / Firefox</td><td data-hu="CI böngészők; valódi mobilmérés függőben" data-en="CI browsers; real-device mobile run pending">CI böngészők; valódi mobilmérés függőben</td><td data-hu="Navigáció, Organizmus-UI, QR fallback, státuszmátrix" data-en="Navigation, Organism UI, QR fallback, status matrix">Navigáció, Organizmus-UI, QR fallback, státuszmátrix</td><td class="result limited" data-hu="Automatizált tesztek konfigurálva" data-en="Automated tests configured">Automatizált tesztek konfigurálva</td><td data-hu="Nem végez natív meghajtóműveletet" data-en="Does not perform native drive operations">Nem végez natív meghajtóműveletet</td><td>GitHub Actions workflow</td></tr>
+        <tr><td>Android · Public beta</td><td>Android APK 1.0.4–1.0.6</td><td data-hu="Valódi eszközmátrix függőben" data-en="Real-device matrix pending">Valódi eszközmátrix függőben</td><td data-hu="APK telepítés és frissítési út" data-en="APK installation and update path">APK telepítés és frissítési út</td><td class="result pending" data-hu="Kézi eszközteszt publikálásra vár" data-en="Manual device test pending publication">Kézi eszközteszt publikálásra vár</td><td data-hu="Nem végleges Play Áruház-kiadás" data-en="Not a final Play Store release">Nem végleges Play Áruház-kiadás</td><td>APK SHA-256</td></tr>
+        <tr><td>macOS · Planned</td><td>—</td><td>—</td><td data-hu="Natív kiadás" data-en="Native edition">Natív kiadás</td><td class="result pending">Planned</td><td data-hu="Nincs csomag" data-en="No package">Nincs csomag</td><td>Roadmap</td></tr>
+        <tr><td>iOS / iPadOS · Planned</td><td>—</td><td>—</td><td data-hu="Natív kiadás" data-en="Native edition">Natív kiadás</td><td class="result pending">Planned</td><td data-hu="Nincs csomag" data-en="No package">Nincs csomag</td><td>Roadmap</td></tr>
+      </tbody>
+    </table></div>
+
+    <p class="matrix-note" data-hu="Stable előléptetés feltétele: legalább két támogatott OS-verzió, dokumentált hardver, minden kritikus funkció eredménye, ismert korlátozások, reprodukálható hash/aláírás és közzétett auditjelentés." data-en="Promotion to Stable requires at least two supported OS versions, documented hardware, results for every critical function, known limitations, reproducible hash/signature evidence and a published audit report.">Stable előléptetés feltétele: legalább két támogatott OS-verzió, dokumentált hardver, minden kritikus funkció eredménye, ismert korlátozások, reprodukálható hash/aláírás és közzétett auditjelentés.</p>
+  </article></main>
+</body>
+</html>
