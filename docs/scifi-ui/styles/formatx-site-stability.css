@@ -87,6 +87,7 @@ html.fx-organism-core-active .fx-three-stage-shell {
 .fx-rail,
 .fx-organism-status,
 .fx-organism-actionbar,
+.fx-organism-dialogue,
 .fx-genome-launcher,
 .fx-three-sound {
   z-index: var(--fx-layer-floating) !important;
@@ -172,6 +173,7 @@ html.fx-organism-menu-open #main-content,
 html.fx-organism-menu-open .fx-rail,
 html.fx-organism-menu-open .fx-organism-status,
 html.fx-organism-menu-open .fx-organism-actionbar,
+html.fx-organism-menu-open .fx-organism-dialogue,
 html.fx-organism-menu-open .fx-genome-launcher {
   pointer-events: none !important;
 }
@@ -179,6 +181,7 @@ html.fx-organism-menu-open .fx-genome-launcher {
 body.fx-organism-panel-open #menu-toggle,
 body.fx-organism-panel-open #main-nav,
 body.fx-organism-panel-open .fx-organism-actionbar,
+body.fx-organism-panel-open .fx-organism-dialogue,
 body.fx-organism-panel-open .fx-genome-launcher {
   opacity: 0 !important;
   visibility: hidden !important;
@@ -239,6 +242,7 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
   #main-nav.fx-organism-system-menu,
   #main-nav.fx-organism-system-menu a,
   .fx-organism-console-shell,
+  .fx-organism-dialogue,
   .fx-three-stage-shell,
   .fx-organism-map [data-organ-node],
   .fx-rail [data-scene-link] {
