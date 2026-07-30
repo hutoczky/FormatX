@@ -10,6 +10,8 @@ loader = read("docs/scifi-ui/scripts/igloo-parity.js")
 intro = read("docs/scifi-ui/scripts/formatx-event-horizon.js")
 voice = read("docs/scifi-ui/scripts/organism-voice.js")
 voice_css = read("docs/scifi-ui/styles/organism-voice.css")
+foreground = read("docs/scifi-ui/scripts/organism-voice-foreground.js")
+foreground_css = read("docs/scifi-ui/styles/organism-voice-foreground.css")
 dock_css = read("docs/scifi-ui/styles/organism-voice-dock.css")
 interaction = read("docs/scifi-ui/scripts/organism-core-interaction.js")
 interaction_css = read("docs/scifi-ui/styles/organism-core-interaction.css")
@@ -50,9 +52,10 @@ require("intro: deterministic timeline", "TIMELINE_DURATION" in intro and "HARD_
 require("intro: does not wait for window load", "loadOrDeadline" not in intro)
 
 require_tokens("loader", loader, (
-    "safe-ready-v16",
+    "safe-ready-v17",
     "organism-core-controller.js?v=20260729-core-ui-2",
     "organism-voice.js?v=20260730-organism-voice-2",
+    "organism-voice-foreground.js?v=20260730-organism-foreground-1",
     "organism-core-interaction.js?v=20260730-core-interaction-1",
     "organism-speaking-visual.css?v=20260730-speaking-visual-1",
     "formatx-mobile-readability.css?v=20260730-mobile-readability-1",
@@ -63,7 +66,8 @@ require_tokens("loader", loader, (
 ))
 queue = loader.split("const queue =", 1)[1].split("];", 1)[0]
 require("loader order: core before voice", queue.index("organism-core-controller.js") < queue.index("organism-voice.js"))
-require("loader order: voice before MAG interaction", queue.index("organism-voice.js") < queue.index("organism-core-interaction.js"))
+require("loader order: voice before foreground guard", queue.index("organism-voice.js") < queue.index("organism-voice-foreground.js"))
+require("loader order: foreground before MAG interaction", queue.index("organism-voice-foreground.js") < queue.index("organism-core-interaction.js"))
 require("loader order: MAG interaction before infinite scroll", queue.index("organism-core-interaction.js") < queue.index("formatx-infinite-scroll.js"))
 require("loader: no legacy infinite controller", "formatx-infinite-loop-controller-v2.js" not in loader)
 require("loader: WebGL adapter remains lazy", "interaction-genome-webgl-adapter.js" not in queue)
@@ -89,6 +93,24 @@ require("voice CSS: hidden panel protected", ".fx-organism-thought[hidden]" in v
 require("voice CSS: readable response", "font-size: 14.5px" in voice_css and "line-height: 1.68" in voice_css)
 require("voice CSS: menus cannot be covered", "html.fx-organism-menu-open .fx-organism-dialogue" in voice_css)
 require("voice dock: compact control", "min-width: 92px" in dock_css and "height: 44px" in dock_css)
+
+require_tokens("foreground guard", foreground, (
+    "ready-v1",
+    "organism-voice-foreground.css?v=20260730-organism-foreground-1",
+    "data-fx-organism-voice-foreground-style",
+    "document.body.appendChild(shell)",
+    "MutationObserver",
+))
+require_tokens("foreground CSS", foreground_css, (
+    "z-index: 940 !important",
+    "width: 58px !important",
+    "border-radius: 50% !important",
+    "bottom: max(132px",
+    "html.fx-organism-menu-open .fx-organism-dialogue",
+    "body.fx-organism-panel-open .fx-organism-dialogue",
+))
+require("foreground CSS: above content but below fixed header", "z-index: 940 !important" in foreground_css)
+require("foreground CSS: closed shell is compact", ".fx-organism-dialogue:not(.is-open)" in foreground_css and "width: auto !important" in foreground_css)
 
 require_tokens("mobile readability", mobile_readability, (
     'html[data-fx-mobile-core-visible="false"] .fx-three-stage-shell',
@@ -173,6 +195,8 @@ require("living stage uses module entry", 'type="module"' in stage)
 
 require_tokens("preview Worker", root_worker, (
     "organism-voice.js",
+    "organism-voice-foreground.js",
+    "organism-voice-foreground.css",
     "organism-core-interaction.js",
     "organism-speaking-visual.css",
     "formatx-mobile-readability.css",
@@ -180,6 +204,8 @@ require_tokens("preview Worker", root_worker, (
 ))
 require_tokens("production entry", production_entry, (
     "organism-voice.js",
+    "organism-voice-foreground.js",
+    "organism-voice-foreground.css",
     "organism-core-interaction.js",
     "organism-speaking-visual.css",
     "formatx-mobile-readability.css",
@@ -187,6 +213,8 @@ require_tokens("production entry", production_entry, (
     "headers.set('X-Frame-Options', 'SAMEORIGIN')",
 ))
 require_tokens("preview routes", preview_config, (
+    "/scifi-ui/scripts/organism-voice-foreground.js",
+    "/scifi-ui/styles/organism-voice-foreground.css",
     "/scifi-ui/scripts/organism-core-interaction.js",
     "/scifi-ui/styles/organism-core-interaction.css",
     "/scifi-ui/styles/organism-speaking-visual.css",
