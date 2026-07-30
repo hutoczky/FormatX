@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "updated": "2026-07-30",
+  "product_release": {
+    "name": "FormatX Suite Pro V92",
+    "status": "public_beta",
+    "hu": "Nyilvános béta",
+    "en": "Public beta",
+    "trial_days": 5,
+    "activation": "manual_bank_verification"
+  },
+  "status_labels": {
+    "stable": { "hu": "Stabil", "en": "Stable" },
+    "public_beta": { "hu": "Nyilvános béta", "en": "Public beta" },
+    "technical_preview": { "hu": "Technikai előnézet", "en": "Technical preview" },
+    "development": { "hu": "Fejlesztés alatt", "en": "Development" },
+    "planned": { "hu": "Tervezett", "en": "Planned" }
+  },
+  "platforms": [
+    {
+      "id": "windows",
+      "name": "Windows",
+      "status": "public_beta",
+      "version": "V92",
+      "hu": "A jelenlegi asztali kiadás Windows-specifikus WinUI 3 és lemezkezelő komponenseket használ. Nyilvánosan tesztelhető, de még nem stabil végleges kiadás.",
+      "en": "The current desktop build uses Windows-specific WinUI 3 and disk-management components. It is publicly testable but is not yet a final stable release."
+    },
+    {
+      "id": "linux-bazzite",
+      "name": "Linux / Bazzite",
+      "status": "development",
+      "version": "Native target",
+      "hu": "A natív Linux/Bazzite kiadás az elsődleges célplatform, jelenleg aktív fejlesztés alatt áll.",
+      "en": "The native Linux/Bazzite edition is the primary target platform and is currently under active development."
+    },
+    {
+      "id": "macos",
+      "name": "macOS",
+      "status": "planned",
+      "version": "Roadmap",
+      "hu": "A natív macOS kiadás ütemezett fejlesztési irány; nyilvános csomag még nincs.",
+      "en": "A native macOS edition is on the roadmap; no public package is available yet."
+    },
+    {
+      "id": "web",
+      "name": "Web",
+      "status": "technical_preview",
+      "version": "Browser experience",
+      "hu": "A webes Organizmus-UI, projekt-szimulátor és licencfelület technikai előnézetként használható; nem helyettesíti a natív rendszereszközöket.",
+      "en": "The web Organism UI, project simulator and licensing interface are available as a technical preview and do not replace native system tools."
+    },
+    {
+      "id": "android",
+      "name": "Android",
+      "status": "public_beta",
+      "version": "1.0.4–1.0.6",
+      "hu": "Az Android APK nyilvános béta. Közvetlen telepítéssel tesztelhető; Play Áruházban még nem érhető el végleges kiadásként.",
+      "en": "The Android APK is a public beta. It can be tested through direct installation and is not yet a final Play Store release."
+    },
+    {
+      "id": "ios",
+      "name": "iOS / iPadOS",
+      "status": "planned",
+      "version": "Roadmap",
+      "hu": "Az iOS/iPadOS kiadás tervezett; jelenleg nincs letölthető vagy tesztelhető csomag.",
+      "en": "An iOS/iPadOS edition is planned; no downloadable or testable package currently exists."
+    }
+  ]
+}
