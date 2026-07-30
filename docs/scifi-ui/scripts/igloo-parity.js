@@ -124,7 +124,7 @@
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
     './scripts/organism-core-controller.js?v=20260729-core-ui-2',
-    './scripts/organism-voice.js?v=20260730-organism-voice-1',
+    './scripts/organism-voice.js?v=20260730-organism-voice-2',
     './scripts/formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3',
     './scripts/formatx-three-host-safe.js?v=20260729-safe-host-1',
     './scripts/formatx-render-visibility.js?v=20260729-render-visibility-1',
