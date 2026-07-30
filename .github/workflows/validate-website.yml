@@ -11,6 +11,7 @@ on:
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/scripts/validate-reality-fork.cjs'
       - '.github/scripts/validate-interaction-genome-webgl.cjs'
+      - '.github/scripts/validate-organism-voice-browser.cjs'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
   push:
@@ -22,6 +23,7 @@ on:
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/scripts/validate-reality-fork.cjs'
       - '.github/scripts/validate-interaction-genome-webgl.cjs'
+      - '.github/scripts/validate-organism-voice-browser.cjs'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-website.yml'
 
@@ -66,6 +68,7 @@ jobs:
           node --check docs/scifi-ui/scripts/license-page.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
+          node --check docs/scifi-ui/scripts/organism-voice.js
           node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
           node --check docs/scifi-ui/scripts/mobile-webgl-entry.js
@@ -77,17 +80,23 @@ jobs:
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-reality-fork.cjs
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
-          grep -Fq 'safe-ready-v12' docs/scifi-ui/scripts/igloo-parity.js
+          node --check .github/scripts/validate-organism-voice-browser.cjs
+          grep -Fq 'safe-ready-v13' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'organism-voice.js?v=20260730-organism-voice-2' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'formatx-license-links.js?v=20260729-local-licence-2' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'boundary-v3' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'reinitialisedRenderer: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq '/scifi-ui/license.html' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/scripts/organism-voice.js' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/styles/organism-voice.css' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/three-stage-mobile.html' billing-worker/src/production-entry.js
           grep -Fq "headers.set('X-Frame-Options', 'SAMEORIGIN')" billing-worker/src/production-entry.js
           ! grep -Fq 'cloneNode' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq 'data-fx-loop-bridge' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq 'fetch(' docs/scifi-ui/scripts/organism-voice.js
+          ! grep -Fq 'formatx:introcomplete' docs/scifi-ui/scripts/organism-voice.js
 
       - name: Test Worker and production bundle
         working-directory: billing-worker
@@ -120,6 +129,12 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
         run: node .github/scripts/validate-three-site.cjs
+
+      - name: Test readable switchable Organism dialogue
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+        run: node .github/scripts/validate-organism-voice-browser.cjs
 
       - name: Test continuous laptop wheel and touchpad looping
         env:
