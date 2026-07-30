@@ -1,0 +1,209 @@
+/* FormatX mobile unified layer — continuous scrolling, clear hierarchy, no text overlap. */
+
+:root {
+  --fx-mobile-dock-height: 54px;
+  --fx-mobile-edge: 12px;
+  --fx-mobile-safe-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+
+  body {
+    padding-bottom: calc(var(--fx-mobile-dock-height) + var(--fx-mobile-safe-bottom) + 18px);
+  }
+
+  .topbar {
+    min-height: 76px !important;
+    border-bottom: 1px solid rgba(154, 222, 255, .14) !important;
+    background: linear-gradient(180deg, rgba(4, 14, 24, .96), rgba(4, 14, 24, .88)) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .32) !important;
+    backdrop-filter: blur(22px) saturate(135%) !important;
+  }
+
+  #hero {
+    min-height: 116svh !important;
+    padding-top: 82px !important;
+    padding-bottom: 124px !important;
+  }
+
+  #hero .hero-grid {
+    min-height: calc(116svh - 82px) !important;
+    padding-top: 22px !important;
+  }
+
+  #hero .hero-copy {
+    position: relative !important;
+    z-index: 5 !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 16px !important;
+  }
+
+  #hero .hero-lead {
+    max-width: none !important;
+    margin-inline: 0 !important;
+    color: rgba(239, 248, 252, .94) !important;
+    font-size: clamp(16px, 4.3vw, 19px) !important;
+    line-height: 1.62 !important;
+  }
+
+  html[data-fx-safe-three-gate='ready-v1'] #fx-three-frame,
+  html[data-fx-safe-three-gate='ready-v2'] #fx-three-frame,
+  html[data-fx-three='ready'] #fx-three-frame,
+  html.fx-three-engine-ready #fx-three-frame {
+    opacity: .86 !important;
+    transform: translateY(15svh) scale(.80) !important;
+    transform-origin: 50% 50% !important;
+    transition: opacity .24s ease !important;
+  }
+
+  .fx-organism-dialogue {
+    z-index: 76 !important;
+    top: auto !important;
+    right: max(var(--fx-mobile-edge), env(safe-area-inset-right)) !important;
+    bottom: calc(var(--fx-mobile-dock-height) + var(--fx-mobile-safe-bottom) + 12px) !important;
+    left: auto !important;
+    width: min(350px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .fx-organism-thought-trigger {
+    width: 52px !important;
+    min-width: 52px !important;
+    height: 52px !important;
+    border-color: rgba(125, 229, 255, .30) !important;
+    background: linear-gradient(145deg, rgba(9, 32, 49, .94), rgba(4, 13, 24, .98)) !important;
+  }
+
+  .fx-organism-dialogue.is-disabled .fx-organism-thought-trigger {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+  }
+
+  .fx-organism-thought {
+    max-height: min(58svh, 520px) !important;
+    border-radius: 22px 22px 8px 22px !important;
+    background: linear-gradient(150deg, rgba(8, 27, 43, .985), rgba(3, 10, 19, .995)) !important;
+  }
+
+  .fx-organism-thought-output {
+    color: rgba(241, 250, 253, .96) !important;
+    font-size: 15px !important;
+    line-height: 1.68 !important;
+  }
+
+  .fx-organism-actionbar {
+    position: fixed !important;
+    z-index: 70 !important;
+    left: var(--fx-mobile-edge) !important;
+    right: var(--fx-mobile-edge) !important;
+    bottom: var(--fx-mobile-safe-bottom) !important;
+    width: auto !important;
+    max-width: none !important;
+    height: var(--fx-mobile-dock-height) !important;
+    min-height: var(--fx-mobile-dock-height) !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 5px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(153, 222, 255, .18) !important;
+    border-radius: 18px !important;
+    background: linear-gradient(180deg, rgba(5, 17, 29, .95), rgba(3, 11, 19, .97)) !important;
+    box-shadow: 0 16px 52px rgba(0, 0, 0, .42) !important;
+    backdrop-filter: blur(20px) saturate(135%) !important;
+    transform: none !important;
+    transition: opacity .18s ease, transform .22s ease !important;
+  }
+
+  .fx-organism-actionbar a {
+    min-width: 0 !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    padding: 0 7px !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    color: rgba(231, 245, 251, .76) !important;
+    font-size: clamp(6.5px, 1.85vw, 8px) !important;
+    letter-spacing: .09em !important;
+    line-height: 1 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .fx-organism-actionbar a:first-child {
+    color: #031017 !important;
+    background: linear-gradient(105deg, #dffaff, #80dff3 58%, #c8b6ff) !important;
+  }
+
+  html.fx-page-scrolling .fx-organism-dialogue,
+  html.fx-page-scrolling .fx-organism-actionbar {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html.fx-page-scrolling .fx-organism-dialogue {
+    transform: translateY(10px) !important;
+  }
+
+  html.fx-page-scrolling .fx-organism-actionbar {
+    transform: translateY(calc(100% + 18px)) !important;
+  }
+
+  body.fx-organism-panel-open .fx-organism-dialogue,
+  body.fx-organism-panel-open .fx-organism-actionbar,
+  html.fx-organism-menu-open .fx-organism-dialogue {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .site-footer {
+    padding-bottom: calc(var(--fx-mobile-dock-height) + var(--fx-mobile-safe-bottom) + 26px) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #hero {
+    min-height: 120svh !important;
+  }
+
+  #hero .hero-copy {
+    margin-inline: 12px !important;
+  }
+
+  .fx-organism-dialogue {
+    right: 10px !important;
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  .fx-organism-thought-trigger {
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+  }
+
+  .fx-organism-actionbar {
+    left: 8px !important;
+    right: 8px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-organism-dialogue,
+  .fx-organism-actionbar,
+  #fx-three-frame {
+    transition-duration: .01ms !important;
+  }
+}
