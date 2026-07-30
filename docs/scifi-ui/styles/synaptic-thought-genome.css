@@ -1,0 +1,221 @@
+/* FormatX Synaptic Thought Genome — visual layer behind content, controls inside dialogue. */
+
+.fx-thought-genome-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: .72;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: opacity .28s ease, filter .28s ease;
+}
+
+.fx-thought-genome-layer.is-disabled {
+  opacity: 0;
+}
+
+.fx-thought-genome-path {
+  fill: none;
+  stroke: rgba(121, 238, 255, .32);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#fx-thought-genome-glow);
+  vector-effect: non-scaling-stroke;
+  transition: d .42s ease, opacity .28s ease;
+}
+
+.fx-thought-genome-node {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.fx-thought-genome-star {
+  fill: hsl(var(--fx-genome-hue) 88% 72%);
+  filter: url(#fx-thought-genome-glow);
+  opacity: .92;
+}
+
+.fx-thought-genome-orbit {
+  fill: none;
+  stroke: hsl(var(--fx-genome-hue) 84% 67% / .34);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  opacity: .58;
+}
+
+.fx-thought-genome-node.is-new .fx-thought-genome-star,
+.fx-thought-genome-layer.is-replaying .fx-thought-genome-star {
+  animation: fx-thought-star-arrive .72s cubic-bezier(.16, .82, .2, 1) both;
+}
+
+.fx-thought-genome-node.is-new .fx-thought-genome-orbit,
+.fx-thought-genome-layer.is-replaying .fx-thought-genome-orbit {
+  animation: fx-thought-orbit-expand 1.1s cubic-bezier(.16, .82, .2, 1) both;
+}
+
+.fx-thought-genome-layer.is-pulsing .fx-thought-genome-path,
+.fx-thought-genome-layer.is-replaying .fx-thought-genome-path {
+  animation: fx-thought-path-write .9s cubic-bezier(.2, .75, .2, 1) both;
+}
+
+.fx-thought-genome-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.fx-thought-genome-controls button {
+  min-height: 32px;
+  padding: 0 10px;
+  color: rgba(229, 246, 253, .82);
+  border: 1px solid rgba(170, 226, 246, .16);
+  border-radius: 999px;
+  background: rgba(2, 12, 21, .72);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease, background .2s ease, opacity .2s ease;
+}
+
+.fx-thought-genome-controls button:hover:not(:disabled),
+.fx-thought-genome-controls button:focus-visible {
+  color: #fff;
+  border-color: rgba(125, 229, 255, .58);
+  background: rgba(13, 43, 59, .86);
+}
+
+.fx-thought-genome-toggle[aria-pressed='true'] {
+  color: #00141d;
+  border-color: rgba(125, 229, 255, .75);
+  background: linear-gradient(135deg, #b7f7ff, #78d9ff 62%, #d4bdff);
+  box-shadow: 0 0 20px rgba(88, 218, 255, .14);
+}
+
+.fx-thought-genome-form {
+  max-width: min(210px, 48vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fx-thought-genome-replay,
+.fx-thought-genome-clear {
+  width: 32px;
+  min-width: 32px;
+  padding: 0 !important;
+  font-size: 15px !important;
+  letter-spacing: 0 !important;
+}
+
+.fx-thought-genome-controls button:disabled {
+  opacity: .34;
+  cursor: not-allowed;
+}
+
+.fx-thought-genome-counter {
+  margin-left: auto;
+  color: rgba(199, 225, 236, .42);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 7px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fx-thought-genome-controls.is-disabled .fx-thought-genome-form,
+.fx-thought-genome-controls.is-disabled .fx-thought-genome-replay {
+  opacity: .35;
+}
+
+html.fx-organism-menu-open .fx-thought-genome-layer,
+body.fx-organism-panel-open .fx-thought-genome-layer,
+html.fx-intro-pending .fx-thought-genome-layer,
+html.fx-intro-running .fx-thought-genome-layer,
+html.fx-intro-reveal .fx-thought-genome-layer {
+  opacity: 0;
+}
+
+@keyframes fx-thought-star-arrive {
+  0% { opacity: 0; transform: scale(.1); }
+  46% { opacity: 1; transform: scale(1.65); }
+  100% { opacity: .92; transform: scale(1); }
+}
+
+@keyframes fx-thought-orbit-expand {
+  0% { opacity: 0; transform: scale(.2); }
+  35% { opacity: .72; }
+  100% { opacity: .12; transform: scale(2.3); }
+}
+
+@keyframes fx-thought-path-write {
+  from {
+    opacity: 0;
+    stroke-dasharray: var(--fx-genome-path-length, 1200);
+    stroke-dashoffset: var(--fx-genome-path-length, 1200);
+  }
+  to {
+    opacity: 1;
+    stroke-dasharray: var(--fx-genome-path-length, 1200);
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  .fx-thought-genome-layer {
+    opacity: .52;
+  }
+
+  .fx-thought-genome-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) 32px 32px;
+    gap: 6px;
+  }
+
+  .fx-thought-genome-controls button {
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .fx-thought-genome-form {
+    max-width: none;
+  }
+
+  .fx-thought-genome-counter {
+    grid-column: 1 / -1;
+    margin-left: 0;
+    text-align: right;
+  }
+}
+
+@media (max-width: 430px) {
+  .fx-thought-genome-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fx-thought-genome-replay,
+  .fx-thought-genome-clear {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-thought-genome-layer *,
+  .fx-thought-genome-controls * {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+
+  .fx-thought-genome-layer {
+    opacity: .44;
+  }
+}
