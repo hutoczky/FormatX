@@ -115,8 +115,13 @@ jobs:
           grep -Fq 'min-aspect-ratio: 21/9' docs/scifi-ui/styles/organism-voice-dock.css
           grep -Fq 'right: 440px !important' docs/scifi-ui/styles/organism-voice-dock.css
           grep -Fq 'platform-status.js?v=20260730-platform-status-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'const HARD_DEADLINE = 700' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'MOBILE_QUERY.matches ? 2100 : 2400' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'TIMELINE_DURATION + EXIT_DURATION + 1100' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq "DOMContentLoaded', startIntro" docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'if (event.persisted) startIntro();' docs/scifi-ui/scripts/formatx-event-horizon.js
+          ! grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq '20260731-intro-restored-1' worker.js
+          grep -Fq '20260731-intro-restored-1' billing-worker/src/production-entry.js
           grep -Fq 'formatx-mobile-unified.js?v=20260730-mobile-unified-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'boundary-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
