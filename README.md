@@ -2,6 +2,13 @@
 
 Moduláris, auditálható technikusi platform meghajtókezeléshez, rendszerdiagnosztikához, telepítéshez és ellenőrizhető karbantartáshoz.
 
+## Platformstratégia
+
+**Elsődleges cél- és támogatási platform:** **Linux / Bazzite**  
+**Másodlagosan támogatott platform:** **Windows**
+
+A támogatási sorrend és a fejlettségi állapot két külön fogalom. A Linux/Bazzite a projekt fő iránya akkor is, amikor a natív kiadás még **Development** állapotú. A Windows jelenleg használhatóbb, **Public beta** állapotú kiadással rendelkezik, de hosszú távon másodlagos támogatási szerepet tölt be.
+
 ## Nyilvános termékállapot
 
 **Aktuális kiadás:** FormatX Suite Pro V92  
@@ -14,14 +21,14 @@ Moduláris, auditálható technikusi platform meghajtókezeléshez, rendszerdiag
 
 ## Egységes platformállapot
 
-| Platform | Állapot | Verzió / irány | Mit jelent? |
-|---|---|---|---|
-| Windows | **Public beta** | V92 | A jelenlegi asztali kiadás Windows-specifikus WinUI 3 és lemezkezelő komponenseket használ. Nyilvánosan tesztelhető, de még nem stabil végleges kiadás. |
-| Linux / Bazzite | **Development** | Native target | Az elsődleges célplatform natív kiadása aktív fejlesztés alatt áll. |
-| macOS | **Planned** | Roadmap | Natív nyilvános csomag még nincs. |
-| Web | **Technical preview** | Browser experience | Az Organizmus-UI, projekt-szimulátor és licencfelület technikai előnézet; nem helyettesíti a natív rendszereszközöket. |
-| Android | **Public beta** | 1.0.4–1.0.6 | Közvetlenül telepíthető APK nyilvános teszteléshez; még nem végleges Play Áruház-kiadás. |
-| iOS / iPadOS | **Planned** | Roadmap | Jelenleg nincs letölthető vagy tesztelhető csomag. |
+| Platform | Támogatási szerep | Állapot | Verzió / irány | Mit jelent? |
+|---|---|---|---|---|
+| Linux / Bazzite | **Elsődleges platform** | **Development** | Native target | A FormatX fő cél- és támogatási platformja. A natív kiadás aktív fejlesztés alatt áll. |
+| Windows | **Másodlagosan támogatott** | **Public beta** | V92 | A jelenlegi WinUI 3 alapú asztali kiadás nyilvánosan tesztelhető, de még nem stabil végleges kiadás. |
+| macOS | Fejlesztési ütemterv | **Planned** | Roadmap | Natív nyilvános csomag még nincs. |
+| Web | Kiegészítő előnézet | **Technical preview** | Browser experience | Az Organizmus-UI, projekt-szimulátor és licencfelület technikai előnézet; nem helyettesíti a natív rendszereszközöket. |
+| Android | Kiegészítő előnézet | **Public beta** | 1.0.4–1.0.6 | Közvetlenül telepíthető APK nyilvános teszteléshez; még nem végleges Play Áruház-kiadás. |
+| iOS / iPadOS | Fejlesztési ütemterv | **Planned** | Roadmap | Jelenleg nincs letölthető vagy tesztelhető csomag. |
 
 A géppel olvasható, irányadó állapotforrás: [`docs/scifi-ui/data/platform-status.json`](docs/scifi-ui/data/platform-status.json).
 
