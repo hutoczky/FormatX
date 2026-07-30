@@ -102,6 +102,7 @@ jobs:
           for (const path of required) {
             if (!first.includes(path)) throw new Error(`Missing preview Worker path: ${path}`);
           }
+          if (first.some(path => path.includes('organism-natural-voice'))) throw new Error('Obsolete Natural Voice route returned');
           if (preview.routes?.length) throw new Error('Preview Worker must not own production custom domains');
           if (preview.workers_dev !== true) throw new Error('Preview Worker must remain available on workers.dev');
           if (production.main !== 'src/production-entry.js') throw new Error('Production Worker wrapper is not active');
@@ -111,12 +112,14 @@ jobs:
           }
           NODE
 
-      - name: Validate first-visit intro, product status and natural local Organism
+      - name: Validate first-visit intro, product status and unified local Organism
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'safe-ready-v21' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-voice.js?v=20260730-organism-voice-3' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v23' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' docs/scifi-ui/scripts/igloo-parity.js
+          ! grep -Fq 'organism-natural-voice' docs/scifi-ui/scripts/igloo-parity.js
+          ! test -e docs/scifi-ui/scripts/organism-natural-voice.js
           grep -Fq 'organism-voice-dock.css?v=20260730-organism-dock-2' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'min-aspect-ratio: 21/9' docs/scifi-ui/styles/organism-voice-dock.css
           grep -Fq 'right: 440px !important' docs/scifi-ui/styles/organism-voice-dock.css
@@ -134,7 +137,9 @@ jobs:
           grep -Fq 'function voiceScore(voice)' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'function splitSpeech(text)' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'sentence-prosody-v3' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'espeak|festival|pico|compact|mbrola|robot' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'synth.resume()' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'speechWatchdog = window.setTimeout' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'browser-default' docs/scifi-ui/scripts/organism-voice.js
           ! grep -Fq 'utterance.pitch = 0.82' docs/scifi-ui/scripts/organism-voice.js
           ! grep -Fq 'fetch(' docs/scifi-ui/scripts/organism-voice.js
           ! grep -Fq 'formatx:introcomplete' docs/scifi-ui/scripts/organism-voice.js
