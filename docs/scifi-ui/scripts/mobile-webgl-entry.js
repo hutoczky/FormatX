@@ -11,6 +11,53 @@ function setTelemetry(text) {
   } catch (_) {}
 }
 
+function lockMorphingState(engine) {
+  if (!engine || engine.fxEntryMorphLock === 'ready-v1') return engine;
+  engine.fxEntryMorphLock = 'ready-v1';
+
+  const applyTelemetry = () => {
+    const root = parentRoot();
+    if (!root) return;
+    root.dataset.fxThreeRenderer = 'three-webgl-morphing-organism-v3';
+    root.dataset.fxMobile3dEngine = 'morphing-organism-v3-running';
+    root.dataset.fxCoreForm = 'synaptic-thought-genome-v1';
+    root.dataset.fxCoreMorph = String(engine.fxFormB || 0);
+  };
+
+  if (typeof engine.signalReady === 'function') {
+    const originalSignalReady = engine.signalReady.bind(engine);
+    engine.signalReady = function signalMorphingReady() {
+      originalSignalReady();
+      applyTelemetry();
+    };
+  }
+
+  if (engine.renderer && typeof engine.renderer.render === 'function') {
+    const originalRender = engine.renderer.render.bind(engine.renderer);
+    engine.renderer.render = function renderMorphingState(scene, camera) {
+      const now = performance.now() * 0.001;
+      const pulse = 0.5 + 0.5 * Math.sin(now * 2.8) * Math.sin(now * 1.33 + 0.72);
+      const currentForm = engine.fxMorph < 0.5 ? engine.fxFormA : engine.fxFormB;
+      const nucleusShapeY = [1.18, 1.06, 0.94, 1.12, 1.34, 1.48][currentForm] || 1.18;
+      if (engine.nucleus) {
+        engine.nucleus.scale.y = nucleusShapeY + pulse * 0.052 + (engine.clickPulse || 0) * 0.07;
+        engine.nucleus.material.emissiveIntensity = 2.05 + pulse * 1.25
+          + (engine.clickPulse || 0) * 2.0 + (engine.fxThoughtPulse || 0) * 2.1;
+      }
+      if (engine.glow) {
+        engine.glow.material.opacity = 0.14 + pulse * 0.13
+          + (engine.clickPulse || 0) * 0.12 + (engine.fxThoughtPulse || 0) * 0.10;
+      }
+      const result = originalRender(scene, camera);
+      applyTelemetry();
+      return result;
+    };
+  }
+
+  applyTelemetry();
+  return engine;
+}
+
 async function startLivingCore() {
   const root = parentRoot();
   if (root) {
@@ -24,7 +71,8 @@ async function startLivingCore() {
   if (typeof module.startMobileCore !== 'function') {
     throw new Error('FormatX morphing organism entry is missing');
   }
-  await module.startMobileCore();
+  const engine = await module.startMobileCore();
+  lockMorphingState(engine);
 }
 
 startLivingCore().catch(error => {
