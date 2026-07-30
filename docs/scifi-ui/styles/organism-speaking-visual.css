@@ -1,0 +1,117 @@
+/* FormatX Organism speech visualisation — lives on the 3D core layer only. */
+
+.fx-three-stage-shell,
+.fx-three-stage-shell #fx-three-frame {
+  transition: filter .28s ease, opacity .28s ease;
+}
+
+.fx-three-stage-shell::before,
+.fx-three-stage-shell::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  left: 58%;
+  top: 47%;
+  width: clamp(170px, 30vw, 390px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(118, 242, 255, .56);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.72);
+  box-shadow:
+    0 0 18px rgba(78, 238, 255, .18),
+    inset 0 0 22px rgba(100, 221, 255, .09);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+.fx-three-stage-shell::after {
+  width: clamp(215px, 38vw, 470px);
+  border-color: rgba(147, 119, 255, .38);
+  box-shadow:
+    0 0 24px rgba(117, 92, 255, .14),
+    inset 0 0 28px rgba(100, 221, 255, .06);
+}
+
+html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame {
+  filter:
+    brightness(1.22)
+    saturate(1.24)
+    drop-shadow(0 0 18px rgba(68, 244, 232, .36))
+    drop-shadow(0 0 34px rgba(115, 96, 255, .20));
+  animation: fx-core-speaking-light .72s ease-in-out infinite alternate;
+}
+
+html[data-fx-organism-speech='speaking'] .fx-three-stage-shell::before {
+  animation: fx-core-speaking-ring 1.05s cubic-bezier(.18, .72, .2, 1) infinite;
+}
+
+html[data-fx-organism-speech='speaking'] .fx-three-stage-shell::after {
+  animation: fx-core-speaking-ring 1.05s .34s cubic-bezier(.18, .72, .2, 1) infinite;
+}
+
+html[data-fx-organism-speech='speaking'] {
+  --fx-core-speaking: 1;
+}
+
+@keyframes fx-core-speaking-light {
+  from {
+    filter:
+      brightness(1.12)
+      saturate(1.15)
+      drop-shadow(0 0 14px rgba(68, 244, 232, .25))
+      drop-shadow(0 0 24px rgba(115, 96, 255, .14));
+  }
+  to {
+    filter:
+      brightness(1.34)
+      saturate(1.34)
+      drop-shadow(0 0 26px rgba(68, 244, 232, .48))
+      drop-shadow(0 0 46px rgba(115, 96, 255, .28));
+  }
+}
+
+@keyframes fx-core-speaking-ring {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.64);
+  }
+  24% {
+    opacity: .72;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  .fx-three-stage-shell::before,
+  .fx-three-stage-shell::after {
+    left: 50%;
+    top: 43%;
+    width: clamp(150px, 52vw, 290px);
+  }
+
+  .fx-three-stage-shell::after {
+    width: clamp(190px, 66vw, 350px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame {
+    animation: none !important;
+    filter:
+      brightness(1.25)
+      saturate(1.22)
+      drop-shadow(0 0 22px rgba(68, 244, 232, .38));
+  }
+
+  html[data-fx-organism-speech='speaking'] .fx-three-stage-shell::before,
+  html[data-fx-organism-speech='speaking'] .fx-three-stage-shell::after {
+    animation: none !important;
+    opacity: .48;
+    transform: translate(-50%, -50%) scale(.92);
+  }
+}
