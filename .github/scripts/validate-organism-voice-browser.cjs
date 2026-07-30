@@ -22,6 +22,7 @@ async function waitForReady(page) {
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismVoice === 'ready-v2', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismCoreInteraction === 'ready-v1', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismSpeakingVisual === 'ready', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxMobileReadability === 'ready', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 15000 });
 }
 
@@ -49,6 +50,52 @@ async function validateSpeakingVisual(page, name) {
   assert(idleAnimation === 'none', `${name}: 3D speech animation did not stop`);
 }
 
+async function validateMobileReadability(page, viewport) {
+  const actionsDisplay = await page.locator('#hero .hero-actions').evaluate(node => getComputedStyle(node).display);
+  const factsDisplay = await page.locator('#hero .hero-facts').evaluate(node => getComputedStyle(node).display);
+  assert(actionsDisplay === 'none', 'mobile: duplicate hero actions remain visible');
+  assert(factsDisplay === 'none', 'mobile: hero fact row remains visible over the Living Core');
+
+  const simulator = page.locator('#hero [data-fx-simulator-entry="hero"]');
+  if (await simulator.count()) {
+    assert(await simulator.evaluate(node => getComputedStyle(node).display) === 'none', 'mobile: duplicate project simulator hero button remains visible');
+  }
+
+  await page.locator('#fx-three-frame').waitFor({ state: 'attached', timeout: 15000 });
+  const frameVisual = await page.locator('#fx-three-frame').evaluate(node => {
+    const style = getComputedStyle(node);
+    return { transform: style.transform, opacity: Number(style.opacity), width: node.getBoundingClientRect().width };
+  });
+  assert(frameVisual.transform !== 'none', 'mobile: Living Core iframe was not visually reduced');
+  assert(frameVisual.opacity <= 0.9, `mobile: Living Core iframe is too opaque (${frameVisual.opacity})`);
+
+  const thoughtBox = await page.locator('.fx-organism-thought-trigger').boundingBox();
+  const genome = page.locator('.fx-genome-launcher');
+  if (await genome.count() && await genome.isVisible()) {
+    const genomeBox = await genome.boundingBox();
+    assert(!overlaps(thoughtBox, genomeBox), 'mobile: thought and Interaction DNA controls overlap');
+  }
+
+  const actionbar = page.locator('.fx-organism-actionbar');
+  if (await actionbar.count() && await actionbar.isVisible()) {
+    const actionbarBox = await actionbar.boundingBox();
+    assert(!overlaps(thoughtBox, actionbarBox), 'mobile: thought control overlaps the action dock');
+  }
+
+  const heroCopy = await page.locator('#hero .hero-copy').evaluate(node => {
+    const style = getComputedStyle(node);
+    return { background: style.backgroundColor, color: style.color, width: node.getBoundingClientRect().width };
+  });
+  assert(heroCopy.width <= viewport.width - 20, 'mobile: hero copy exceeds viewport width');
+
+  await page.locator('#experience').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => document.documentElement.dataset.fxMobileCoreVisible === 'false', null, { timeout: 5000 });
+  const stageOpacity = await page.locator('.fx-three-stage-shell').evaluate(node => Number(getComputedStyle(node).opacity));
+  assert(stageOpacity === 0, `mobile: Living Core remains visible after leaving hero (${stageOpacity})`);
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.waitForFunction(() => document.documentElement.dataset.fxMobileCoreVisible === 'true', null, { timeout: 5000 });
+}
+
 async function validateViewport(browser, name, viewport, mobile) {
   const context = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile });
   const page = await context.newPage();
@@ -69,6 +116,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 1, `${name}: Organism dialogue causes horizontal overflow (${overflow}px)`);
 
+  if (mobile) await validateMobileReadability(page, viewport);
   await validateSpeakingVisual(page, name);
 
   await trigger.click();
@@ -130,7 +178,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   try {
     await validateViewport(browser, 'desktop', { width: 1440, height: 900 }, false);
     await validateViewport(browser, 'mobile', { width: 390, height: 844 }, true);
-    console.log('PASS: Organism dialogue is readable, switchable, MAG-clickable and visibly animated while speaking.');
+    console.log('PASS: Organism dialogue and mobile Living Core remain readable, switchable and collision-free.');
   } finally {
     await browser.close();
   }
