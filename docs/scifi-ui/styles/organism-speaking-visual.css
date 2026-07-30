@@ -34,6 +34,10 @@
     inset 0 0 28px rgba(100, 221, 255, .06);
 }
 
+html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame {
+  opacity: 1;
+}
+
 html[data-fx-organism-speech='speaking'] .fx-three-stage-shell {
   animation: fx-core-speaking-light .72s ease-in-out infinite alternate;
 }
