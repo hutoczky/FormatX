@@ -77,9 +77,11 @@ jobs:
             '/scifi-ui/styles/organism-voice-dock.css',
             '/scifi-ui/styles/organism-core-interaction.css',
             '/scifi-ui/styles/organism-speaking-visual.css',
+            '/scifi-ui/styles/formatx-mobile-readability.css',
             '/scifi-ui/scripts/organism-voice.js',
             '/scifi-ui/scripts/organism-core-interaction.js',
             '/scifi-ui/scripts/organism-core-controller.js',
+            '/scifi-ui/scripts/formatx-render-visibility.js',
             '/scifi-ui/scripts/formatx-infinite-scroll.js',
             '/scifi-ui/scripts/igloo-parity.js',
           ];
@@ -95,7 +97,7 @@ jobs:
           }
           NODE
 
-      - name: Validate switchable speaking Organism and stable startup contract
+      - name: Validate switchable speaking Organism and mobile readability contract
         shell: bash
         run: |
           node - <<'NODE'
@@ -106,6 +108,8 @@ jobs:
           const interaction = fs.readFileSync('docs/scifi-ui/scripts/organism-core-interaction.js', 'utf8');
           const interactionCss = fs.readFileSync('docs/scifi-ui/styles/organism-core-interaction.css', 'utf8');
           const speakingCss = fs.readFileSync('docs/scifi-ui/styles/organism-speaking-visual.css', 'utf8');
+          const mobileReadability = fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-readability.css', 'utf8');
+          const renderVisibility = fs.readFileSync('docs/scifi-ui/scripts/formatx-render-visibility.js', 'utf8');
           const core = fs.readFileSync('docs/scifi-ui/scripts/organism-core-controller.js', 'utf8');
           const infinite = fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll.js', 'utf8');
           const rootWorker = fs.readFileSync('worker.js', 'utf8');
@@ -113,7 +117,9 @@ jobs:
           const queue = loader.split('const queue =', 2)[1]?.split('];', 1)[0] || '';
 
           const assertions = [
-            [loader.includes('safe-ready-v15'), 'safe loader v15 marker missing'],
+            [loader.includes('safe-ready-v16'), 'safe loader v16 marker missing'],
+            [loader.includes('formatx-mobile-readability.css?v=20260730-mobile-readability-1'), 'mobile readability loader missing'],
+            [loader.includes('formatx-render-visibility.js?v=20260730-render-visibility-2'), 'render visibility v2 loader missing'],
             [loader.includes('organism-voice.js?v=20260730-organism-voice-2'), 'Organism voice v2 loader missing'],
             [loader.includes('organism-core-interaction.js?v=20260730-core-interaction-1'), 'MAG interaction loader missing'],
             [loader.includes('organism-speaking-visual.css?v=20260730-speaking-visual-1'), 'speaking visual loader missing'],
@@ -124,7 +130,7 @@ jobs:
             [voice.includes('SpeechSynthesisUtterance'), 'speech synthesis missing'],
             [voice.includes('fx-organism-master-toggle'), 'master on/off switch missing'],
             [voice.includes('fx-organism-voice-toggle'), 'voice switch missing'],
-            [voice.includes("setOpen(false, false)"), 'dialogue must start closed'],
+            [voice.includes('setOpen(false, false)'), 'dialogue must start closed'],
             [voice.includes('localStorage.setItem') && voice.includes('localStorage.getItem'), 'local enabled state persistence missing'],
             [voice.includes('localOnly: true'), 'local-only response marker missing'],
             [!voice.includes('formatx:introcomplete'), 'dialogue must not auto-open after intro'],
@@ -140,14 +146,21 @@ jobs:
             [interactionCss.includes('.fx-organism-dialogue:not(.is-open)') && interactionCss.includes('pointer-events: auto'), 'compact click-safe MAG CSS missing'],
             [speakingCss.includes("html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame"), '3D core speaking brightness missing'],
             [speakingCss.includes('fx-core-speaking-ring') && speakingCss.includes('pointer-events: none'), '3D core speaking rings missing or interactive'],
+            [mobileReadability.includes('transform: scale(.66)'), 'mobile Living Core is not visually reduced'],
+            [mobileReadability.includes('#hero.is-core-active .hero-facts'), 'mobile hero facts are not suppressed'],
+            [mobileReadability.includes('[data-fx-simulator-entry="hero"]'), 'mobile duplicate simulator entry is not suppressed'],
+            [mobileReadability.includes('.fx-organism-dialogue.is-open') && mobileReadability.includes('.fx-genome-launcher'), 'floating controls collision contract missing'],
+            [renderVisibility.includes("root.dataset.fxRenderVisibility = 'ready-v2'"), 'render visibility v2 marker missing'],
+            [renderVisibility.includes('fxMobileCoreVisible') && renderVisibility.includes('IntersectionObserver'), 'hero-bound mobile 3D visibility missing'],
+            [renderVisibility.includes('state[SCALE_INDEX] = MOBILE_QUERY.matches ? 0.84 : 1'), 'mobile renderer scale cap missing'],
             [core.includes("ROOT.dataset.fxOrganismState = bounded === 0 ? 'core'"), '01 MAG core state missing'],
             [infinite.includes("controller: 'boundary-v3'"), 'boundary-v3 infinite scroll missing'],
-            [rootWorker.includes('organism-core-interaction.js') && rootWorker.includes('organism-speaking-visual.css'), 'preview Worker new routes missing'],
-            [productionEntry.includes('organism-core-interaction.js') && productionEntry.includes('organism-speaking-visual.css'), 'production Worker new routes missing'],
+            [rootWorker.includes('formatx-mobile-readability.css') && rootWorker.includes('organism-speaking-visual.css'), 'preview Worker new routes missing'],
+            [productionEntry.includes('formatx-mobile-readability.css') && productionEntry.includes('organism-speaking-visual.css'), 'production Worker new routes missing'],
           ];
 
           for (const [ok, message] of assertions) {
             if (!ok) throw new Error(message);
           }
-          console.log('PASS: MAG is clickable and the 3D Organism visibly reacts only while speaking.');
+          console.log('PASS: mobile content remains readable and the Organism controls stay collision-free.');
           NODE
