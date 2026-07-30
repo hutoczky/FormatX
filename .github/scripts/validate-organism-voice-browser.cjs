@@ -82,6 +82,7 @@ async function waitForReady(page) {
   const profile = await page.evaluate(() => window.FormatXOrganismVoice?.voiceInfo?.());
   assert(profile?.name === 'Microsoft Noemi Online Natural', `Natural Hungarian voice was not selected (${profile?.name || 'none'})`);
   assert(profile?.quality === 'premium', `Natural voice quality was not classified as premium (${profile?.quality || 'none'})`);
+  assert(profile?.service === 'browser-online', `Online Natural voice service was not disclosed (${profile?.service || 'none'})`);
   assert(profile?.mode === 'sentence-prosody-v3', `Natural sentence prosody is not active (${profile?.mode || 'none'})`);
 }
 
@@ -291,7 +292,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   await page.locator('#fx-organism-question-input').fill('What is the price?');
   await page.locator('.fx-organism-question').evaluate(form => form.requestSubmit());
   await page.waitForFunction(() => document.querySelector('.fx-organism-thought-output')?.textContent.includes('7,900'));
-  assert((await page.locator('.fx-organism-privacy').textContent()).includes('no data is sent'), `${name}: local-only privacy copy did not switch to English`);
+  assert((await page.locator('.fx-organism-privacy').textContent()).includes('speech uses the device or browser voice service'), `${name}: speech service disclosure did not switch to English`);
 
   const master = page.locator('.fx-organism-master-toggle');
   await master.click();
@@ -346,7 +347,7 @@ async function validateViewport(browser, name, viewport, mobile) {
       await validateDesktopCollisionLayout(browser, name, viewport);
     }
 
-    console.log('PASS: Organism dialogue is readable, collision-free, and selects the premium Natural voice over eSpeak.');
+    console.log('PASS: Organism dialogue is readable, collision-free, selects the premium Natural voice over eSpeak, and discloses the speech service.');
   } finally {
     await browser.close();
   }
