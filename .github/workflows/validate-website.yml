@@ -67,6 +67,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-license-links.js
           node --check docs/scifi-ui/scripts/license-page.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-voice.js
           node --check docs/scifi-ui/scripts/organism-voice-foreground.js
@@ -84,35 +85,29 @@ jobs:
           node --check .github/scripts/validate-reality-fork.cjs
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
           node --check .github/scripts/validate-organism-voice-browser.cjs
-          grep -Fq 'safe-ready-v17' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-voice-foreground.js?v=20260730-organism-foreground-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'formatx-mobile-readability.css?v=20260730-mobile-readability-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'formatx-render-visibility.js?v=20260730-render-visibility-2' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-voice.js?v=20260730-organism-voice-2' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-core-interaction.js?v=20260730-core-interaction-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-speaking-visual.css?v=20260730-speaking-visual-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'formatx-license-links.js?v=20260729-local-licence-2' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'boundary-v3' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'safe-ready-v18' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'formatx-mobile-unified.js?v=20260730-mobile-unified-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'boundary-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'ready-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'fx-page-scrolling' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'formatx:pagestartscroll' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'reinitialisedRenderer: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'z-index: 940 !important' docs/scifi-ui/styles/organism-voice-foreground.css
-          grep -Fq 'bottom: max(132px' docs/scifi-ui/styles/organism-voice-foreground.css
-          grep -Fq 'width: 58px !important' docs/scifi-ui/styles/organism-voice-foreground.css
           grep -Fq 'document.body.appendChild(shell)' docs/scifi-ui/scripts/organism-voice-foreground.js
           grep -Fq 'data-fx-mobile-core-visible="false"' docs/scifi-ui/styles/formatx-mobile-readability.css
-          grep -Fq 'transform: scale(.66)' docs/scifi-ui/styles/formatx-mobile-readability.css
-          grep -Fq '#hero.is-core-active .hero-facts' docs/scifi-ui/styles/formatx-mobile-readability.css
           grep -Fq 'fxMobileCoreVisible' docs/scifi-ui/scripts/formatx-render-visibility.js
           grep -Fq 'state[SCALE_INDEX] = MOBILE_QUERY.matches ? 0.84 : 1' docs/scifi-ui/scripts/formatx-render-visibility.js
+          grep -Fq -- '--fx-mobile-dock-height: 54px' docs/scifi-ui/styles/formatx-mobile-unified.css
+          grep -Fq 'right: max(var(--fx-mobile-edge)' docs/scifi-ui/styles/formatx-mobile-unified.css
+          grep -Fq 'transform: translateY(15svh) scale(.80)' docs/scifi-ui/styles/formatx-mobile-unified.css
+          grep -Fq 'html.fx-page-scrolling .fx-organism-dialogue' docs/scifi-ui/styles/formatx-mobile-unified.css
+          grep -Fq 'grid-template-columns: repeat(3, minmax(0, 1fr))' docs/scifi-ui/styles/formatx-mobile-unified.css
+          grep -Fq '/scifi-ui/scripts/formatx-mobile-unified.js' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/styles/formatx-mobile-unified.css' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/scripts/formatx-mobile-unified.js' worker.js
+          grep -Fq '/scifi-ui/styles/formatx-mobile-unified.css' worker.js
           grep -Fq '/scifi-ui/license.html' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/scripts/organism-voice.js' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/scripts/organism-voice-foreground.js' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/scripts/organism-core-interaction.js' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/styles/organism-voice.css' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/styles/organism-voice-foreground.css' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/styles/organism-speaking-visual.css' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/styles/formatx-mobile-readability.css' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/three-stage-mobile.html' billing-worker/src/production-entry.js
           grep -Fq "headers.set('X-Frame-Options', 'SAMEORIGIN')" billing-worker/src/production-entry.js
           grep -Fq "html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame" docs/scifi-ui/styles/organism-speaking-visual.css
@@ -154,7 +149,7 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
         run: node .github/scripts/validate-three-site.cjs
 
-      - name: Test readable switchable Organism dialogue
+      - name: Test unified mobile visibility and Organism dialogue
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
