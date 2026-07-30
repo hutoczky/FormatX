@@ -38,8 +38,18 @@ expected = {
     "Android": "public_beta",
     "iOS / iPadOS": "planned",
 }
+expected_support = {
+    "Linux / Bazzite": "primary",
+    "Windows": "secondary",
+    "macOS": "roadmap",
+    "Web": "preview",
+    "Android": "preview",
+    "iOS / iPadOS": "roadmap",
+}
 actual = {item["name"]: item["status"] for item in status_data["platforms"]}
+actual_support = {item["name"]: item.get("support_role") for item in status_data["platforms"]}
 require("canonical status matrix matches expected platforms", actual == expected, results)
+require("canonical support priority matches product strategy", actual_support == expected_support, results)
 require("overall release is Public beta", status_data["product_release"]["status"] == "public_beta", results)
 require("no platform is falsely marked Stable", "stable" not in actual.values(), results)
 
@@ -51,6 +61,13 @@ for platform, status in expected.items():
 for label in ("Public beta", "Development", "Technical preview", "Planned"):
     require(f"README contains status {label}", label in readme, results)
     require(f"release notes contain status {label}", label in release_notes, results)
+
+require("README identifies Linux Bazzite as primary", "Linux / Bazzite | **Elsődleges platform**" in readme, results)
+require("README identifies Windows as secondary", "Windows | **Másodlagosan támogatott**" in readme, results)
+require("release notes identify Linux Bazzite as primary", "Linux / Bazzite | **Primary platform**" in release_notes, results)
+require("release notes identify Windows as secondary", "Windows | **Secondary supported**" in release_notes, results)
+require("website status prioritizes Linux Bazzite", "Linux/Bazzite elsődleges platform" in status_js and "Windows másodlagosan támogatott" in status_js, results)
+require("website displays canonical support role", "support_role_labels" in status_js and "dataset.supportRole" in status_js, results)
 
 require("download page renders canonical status module", "platform-status.js" in downloads and "data-platform-status-root" in downloads, results)
 require("main loader includes platform status", "platform-status.js?v=20260730-platform-status-1" in loader, results)
