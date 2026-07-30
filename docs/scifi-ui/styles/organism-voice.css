@@ -372,7 +372,7 @@ html.fx-intro-reveal .fx-organism-dialogue {
 @media (max-width: 820px) {
   .fx-organism-dialogue {
     right: max(12px, env(safe-area-inset-right));
-    bottom: max(82px, calc(env(safe-area-inset-bottom) + 70px));
+    bottom: max(72px, calc(env(safe-area-inset-bottom) + 70px));
     left: max(12px, env(safe-area-inset-left));
     width: auto;
   }
