@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v19') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v19';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v20') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v20';
 
   let genomeWebglRequested = false;
 
@@ -27,10 +27,10 @@
     if (document.querySelector('link[data-fx-organism-voice-dock]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/organism-voice-dock.css?v=20260730-organism-dock-1';
+    link.href = './styles/organism-voice-dock.css?v=20260730-organism-dock-2';
     link.dataset.fxOrganismVoiceDock = 'true';
     link.addEventListener('load', () => {
-      root.dataset.fxOrganismDock = 'ready';
+      root.dataset.fxOrganismDock = 'ready-v2';
     }, { once: true });
     link.addEventListener('error', () => {
       root.dataset.fxOrganismDock = 'failed';
@@ -190,7 +190,7 @@
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v19';
+      root.dataset.fxTranscendLoader = 'safe-ready-v20';
       return;
     }
 
@@ -201,7 +201,7 @@
     script.addEventListener('load', () => load(index + 1), { once: true });
     script.addEventListener('error', () => {
       console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v19';
+      root.dataset.fxTranscendLoader = 'safe-degraded-v20';
       load(index + 1);
     }, { once: true });
     document.head.appendChild(script);
