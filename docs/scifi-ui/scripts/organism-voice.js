@@ -75,7 +75,7 @@
       voiceEnable: 'Organizmus hangjának bekapcsolása',
       voiceDisable: 'Organizmus hangjának kikapcsolása',
       repeat: 'Válasz újbóli felolvasása',
-      privacy: 'Helyi válaszadás · nincs adatküldés',
+      privacy: 'A válasz helyben készül · a hangot a készülék vagy a böngésző beszédszolgáltatása adja',
       unsupported: 'A böngésző ezen az eszközön nem támogatja a gépi beszédet.',
       welcome: 'Kapcsolat létrejött. Én vagyok a FormatX MAG. Kérdezz a működésről, modulokról, licencekről, biztonságról, fizetésről vagy letöltésről.',
       empty: 'Írj be egy kérdést, és a helyi FormatX tudás alapján válaszolok.',
@@ -97,7 +97,7 @@
       voiceEnable: 'Enable the Organism voice',
       voiceDisable: 'Disable the Organism voice',
       repeat: 'Read the response again',
-      privacy: 'Local responses · no data is sent',
+      privacy: 'The response is generated locally · speech uses the device or browser voice service',
       unsupported: 'Speech synthesis is not supported by this browser on this device.',
       welcome: 'Connection established. I am the FormatX CORE. Ask about workflow, modules, licences, safety, payment or downloads.',
       empty: 'Enter a question and I will answer from the local FormatX knowledge base.',
@@ -117,7 +117,7 @@
       ['platform|linux|bazzite|windows|macos|android', 'A Linux és Bazzite az elsődleges környezet. A honlap Windows-, macOS-, webes és Android-hozzáférést is felsorol; az Android APK a jeladó és a fő letöltési műveletek közül érhető el.'],
       ['letölt|apk|release|kiadás', 'A teljes kiadás a fő letöltési gombból, az Android APK a külön Android műveletből, a kiadások és támogatási információk pedig a 06 JELADÓ panelből érhetők el.'],
       ['modul|szerv|iso|formáz|partíció|smart|törlés', 'A hat rendszerszerv: ISO írás és ellenőrzés, formázás, partíciótervezés, biztonságos törlés, SMART-diagnosztika és AI-alapú magyarázat.'],
-      ['adat|adatküldés|privát|kérdés hova', 'Ez a gondolatbuborék helyben, a böngészőben válaszol. A beírt kérdés nem kerül elküldésre külső szervernek vagy AI-szolgáltatásnak.'],
+      ['adat|adatküldés|privát|kérdés hova', 'A kérdés feldolgozása és a válasz helyben, a böngészőben történik. Ha bekapcsolod a hangot, a felolvasást az eszközöd vagy a böngésződ beszédszolgáltatása végzi; az elérhető hang lehet helyi vagy online.'],
       ['köszön|köszi|rendben', 'Szívesen. A rendszer készen áll a következő kérdésre.']
     ],
     en: [
@@ -131,7 +131,7 @@
       ['platform|linux|bazzite|windows|macos|android', 'Linux and Bazzite are the primary environment. The site also lists Windows, macOS, web and Android access; the Android APK is available from the beacon and the main download actions.'],
       ['download|apk|release', 'The full release is available from the main download action, the Android APK from the Android action, and releases and support information from the 06 BEACON panel.'],
       ['module|organ|iso|format|partition|smart|erase', 'The six system organs are ISO writing and verification, formatting, partition planning, secure erase, SMART diagnostics and AI-assisted guidance.'],
-      ['data|privacy|send|question stored', 'This thought dialogue answers locally in your browser. Your question is not sent to an external server or AI service.'],
+      ['data|privacy|send|question stored', 'Your question and the generated response are processed locally in the browser. When voice is enabled, playback is provided by your device or browser speech service, and the selected voice may be local or online.'],
       ['thanks|thank you|okay', 'You are welcome. The system is ready for the next question.']
     ]
   });
@@ -330,12 +330,12 @@
     let score = voiceLanguage === locale.toLowerCase() ? 140 : 100;
     const qualitySignals = [
       ['natural', 180], ['neural', 175], ['premium', 165], ['enhanced', 150],
-      ['online', 95], ['studio', 90], ['expressive', 85], ['wavenet', 80],
+      ['online', 45], ['studio', 90], ['expressive', 85], ['wavenet', 80],
       ['google', 75], ['microsoft', 70], ['samsung', 65], ['apple', 62], ['siri', 62]
     ];
     qualitySignals.forEach(([token, value]) => { if (descriptor.includes(token)) score += value; });
     if (voice.default) score += 18;
-    if (voice.localService) score += 8;
+    if (voice.localService) score += 80;
 
     if (language() === 'hu') {
       if (/szabolcs|noemi|noémi|tünde|anna|google magyar/.test(descriptor)) score += 55;
@@ -365,6 +365,7 @@
     ROOT.dataset.fxOrganismVoiceLanguage = selectedVoice?.lang || (language() === 'en' ? 'en-GB' : 'hu-HU');
     ROOT.dataset.fxOrganismVoiceName = selectedVoice?.name || 'browser-default';
     ROOT.dataset.fxOrganismVoiceQuality = selectedVoiceQuality;
+    ROOT.dataset.fxOrganismVoiceService = selectedVoice?.localService === false ? 'browser-online' : 'device-local';
     return selectedVoice;
   }
 
@@ -445,7 +446,12 @@
     ROOT.dataset.fxOrganismSpeech = 'idle';
     shell?.classList.remove('is-speaking');
     dispatchEvent(new CustomEvent('formatx:organismspeechend', {
-      detail: { text, explicit: Boolean(explicit), voice: selectedVoice?.name || 'browser-default' }
+      detail: {
+        text,
+        explicit: Boolean(explicit),
+        voice: selectedVoice?.name || 'browser-default',
+        service: selectedVoice?.localService === false ? 'browser-online' : 'device-local'
+      }
     }));
   }
 
@@ -486,6 +492,7 @@
               explicit: Boolean(explicit),
               voice: voice?.name || 'browser-default',
               quality: selectedVoiceQuality,
+              service: voice?.localService === false ? 'browser-online' : 'device-local',
               chunks: chunks.length
             }
           }));
@@ -660,6 +667,8 @@
           name: selectedVoice?.name || 'browser-default',
           language: selectedVoice?.lang || (language() === 'en' ? 'en-GB' : 'hu-HU'),
           quality: selectedVoiceQuality,
+          localService: selectedVoice?.localService !== false,
+          service: selectedVoice?.localService === false ? 'browser-online' : 'device-local',
           mode: 'sentence-prosody-v3'
         });
       }
@@ -672,11 +681,12 @@
     dispatchEvent(new CustomEvent('formatx:organismvoiceready', {
       detail: {
         speechSupported,
-        localOnly: true,
+        responseLocalOnly: true,
         scenes: SCENES.length,
         enabled,
         voice: selectedVoice?.name || 'browser-default',
         quality: selectedVoiceQuality,
+        service: selectedVoice?.localService === false ? 'browser-online' : 'device-local',
         mode: 'sentence-prosody-v3'
       }
     }));
