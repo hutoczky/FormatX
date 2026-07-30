@@ -2,8 +2,8 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxOrganismVoice === 'ready-v2') return;
-  ROOT.dataset.fxOrganismVoice = 'loading-v2';
+  if (ROOT.dataset.fxOrganismVoice === 'ready-v3') return;
+  ROOT.dataset.fxOrganismVoice = 'loading-v3';
 
   const MAX_QUESTION_LENGTH = 180;
   const STORAGE_KEY = 'formatx-organism-dialogue-enabled';
@@ -155,7 +155,10 @@
   let speechEnabled = false;
   const speechSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   let selectedVoice = null;
+  let selectedVoiceQuality = 'default';
   let lastUserGesture = -Infinity;
+  let speechRun = 0;
+  let speechPauseTimer = 0;
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -194,7 +197,7 @@
   function buildInterface() {
     shell = create('aside', 'fx-organism-dialogue', {
       'aria-label': copy().region,
-      'data-fx-organism-dialogue': 'ready-v2'
+      'data-fx-organism-dialogue': 'ready-v3'
     });
     bubble = create('section', 'fx-organism-thought', {
       hidden: '',
@@ -210,7 +213,6 @@
     head.append(sceneLabel, closeButton);
 
     output = create('p', 'fx-organism-thought-output');
-
     form = create('form', 'fx-organism-question');
     const hiddenLabel = create('label', 'fx-visually-hidden', { for: 'fx-organism-question-input' });
     input = create('input', '', {
@@ -239,7 +241,6 @@
       'aria-expanded': 'false'
     });
     trigger.innerHTML = '<span aria-hidden="true">💭</span><b>MAG</b>';
-
     shell.append(bubble, trigger);
     document.body.appendChild(shell);
 
@@ -319,48 +320,203 @@
     ROOT.dataset.fxOrganismLastIntent = answer === copy().unknown ? 'unknown' : 'matched';
   }
 
+  function voiceScore(voice) {
+    const locale = language() === 'en' ? 'en-GB' : 'hu-HU';
+    const prefix = locale.slice(0, 2).toLowerCase();
+    const voiceLanguage = String(voice.lang || '').toLowerCase();
+    const descriptor = `${voice.name || ''} ${voice.voiceURI || ''}`.toLowerCase();
+    if (!voiceLanguage.startsWith(prefix)) return -10000;
+
+    let score = voiceLanguage === locale.toLowerCase() ? 140 : 100;
+    const qualitySignals = [
+      ['natural', 180], ['neural', 175], ['premium', 165], ['enhanced', 150],
+      ['online', 95], ['studio', 90], ['expressive', 85], ['wavenet', 80],
+      ['google', 75], ['microsoft', 70], ['samsung', 65], ['apple', 62], ['siri', 62]
+    ];
+    qualitySignals.forEach(([token, value]) => { if (descriptor.includes(token)) score += value; });
+    if (voice.default) score += 18;
+    if (voice.localService) score += 8;
+
+    if (language() === 'hu') {
+      if (/szabolcs|noemi|noémi|tünde|anna|google magyar/.test(descriptor)) score += 55;
+    } else if (/aria|jenny|sonia|ryan|ava|samantha|daniel|serena|google uk english/.test(descriptor)) {
+      score += 45;
+    }
+
+    if (/espeak|festival|pico|compact|mbrola|robot/.test(descriptor)) score -= 220;
+    return score;
+  }
+
   function selectVoice() {
     if (!speechSupported) return null;
-    const prefix = language() === 'en' ? 'en' : 'hu';
     const voices = speechSynthesis.getVoices();
-    selectedVoice = voices.find(voice => voice.lang.toLowerCase().startsWith(prefix) && voice.localService)
-      || voices.find(voice => voice.lang.toLowerCase().startsWith(prefix))
-      || null;
+    selectedVoice = voices
+      .map(voice => ({ voice, score: voiceScore(voice) }))
+      .filter(item => item.score > -1000)
+      .sort((a, b) => b.score - a.score)[0]?.voice || null;
+
+    const descriptor = `${selectedVoice?.name || ''} ${selectedVoice?.voiceURI || ''}`.toLowerCase();
+    selectedVoiceQuality = /natural|neural|premium|enhanced|studio|expressive|wavenet/.test(descriptor)
+      ? 'premium'
+      : /google|microsoft|samsung|apple|siri|online/.test(descriptor)
+        ? 'enhanced'
+        : 'standard';
+
     ROOT.dataset.fxOrganismVoiceLanguage = selectedVoice?.lang || (language() === 'en' ? 'en-GB' : 'hu-HU');
+    ROOT.dataset.fxOrganismVoiceName = selectedVoice?.name || 'browser-default';
+    ROOT.dataset.fxOrganismVoiceQuality = selectedVoiceQuality;
     return selectedVoice;
+  }
+
+  function prepareSpeechText(text) {
+    let value = String(text || '').replace(/\s+/g, ' ').trim();
+    value = value.replace(/FormatX/g, 'Format X');
+    if (language() === 'hu') {
+      return value
+        .replace(/SHA-256/gi, 'SHA kettő öt hat')
+        .replace(/Ed25519/gi, 'Ed kettő öt öt egy kilenc')
+        .replace(/\bHUF\b/g, 'forint')
+        .replace(/\bEUR\b/g, 'euró')
+        .replace(/\bQR\b/g, 'kú er')
+        .replace(/\bAPK\b/g, 'á pé ká')
+        .replace(/\bAI\b/g, 'mesterséges intelligencia');
+    }
+    return value
+      .replace(/SHA-256/gi, 'S H A two fifty six')
+      .replace(/Ed25519/gi, 'Ed two five five one nine')
+      .replace(/\bHUF\b/g, 'H U F')
+      .replace(/\bEUR\b/g, 'euros')
+      .replace(/\bQR\b/g, 'Q R')
+      .replace(/\bAPK\b/g, 'A P K')
+      .replace(/\bAI\b/g, 'A I');
+  }
+
+  function splitSpeech(text) {
+    const prepared = prepareSpeechText(text);
+    const sentences = prepared.match(/[^.!?;:]+[.!?;:]?|[^.!?;:]+$/g) || [prepared];
+    const chunks = [];
+
+    sentences.forEach(sentence => {
+      const clean = sentence.trim();
+      if (!clean) return;
+      if (clean.length <= 170) {
+        chunks.push(clean);
+        return;
+      }
+
+      const clauses = clean.split(/(?<=[,–—])\s+/);
+      let buffer = '';
+      clauses.forEach(clause => {
+        const candidate = buffer ? `${buffer} ${clause}` : clause;
+        if (candidate.length > 150 && buffer) {
+          chunks.push(buffer.trim());
+          buffer = clause;
+        } else {
+          buffer = candidate;
+        }
+      });
+      if (buffer.trim()) chunks.push(buffer.trim());
+    });
+
+    return chunks.filter(Boolean);
+  }
+
+  function prosody(chunk, index, count) {
+    const premium = selectedVoiceQuality === 'premium' || selectedVoiceQuality === 'enhanced';
+    const isQuestion = /\?$/.test(chunk);
+    const isFinal = index === count - 1;
+    const baseRate = language() === 'en' ? 0.97 : 0.94;
+    return {
+      rate: Math.max(0.82, Math.min(1.05, baseRate + (premium ? 0.015 : -0.025) + (isFinal ? -0.012 : 0))),
+      pitch: Math.max(0.9, Math.min(1.08, (language() === 'en' ? 1.0 : 0.98) + (isQuestion ? 0.025 : 0))),
+      volume: 0.92
+    };
+  }
+
+  function pauseAfter(chunk) {
+    if (/[:;]$/.test(chunk)) return 115;
+    if (/[,–—]$/.test(chunk)) return 70;
+    if (/[.!?]$/.test(chunk)) return 155;
+    return 90;
+  }
+
+  function finishSpeech(run, text, explicit) {
+    if (run !== speechRun) return;
+    ROOT.dataset.fxOrganismSpeech = 'idle';
+    shell?.classList.remove('is-speaking');
+    dispatchEvent(new CustomEvent('formatx:organismspeechend', {
+      detail: { text, explicit: Boolean(explicit), voice: selectedVoice?.name || 'browser-default' }
+    }));
   }
 
   function speak(text, explicit) {
     if (!enabled || !speechSupported || !speechEnabled || !text) return;
     try {
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language() === 'en' ? 'en-GB' : 'hu-HU';
-      utterance.rate = language() === 'en' ? 0.94 : 0.91;
-      utterance.pitch = 0.82;
-      utterance.volume = 0.96;
-      const voice = selectedVoice || selectVoice();
-      if (voice) utterance.voice = voice;
-      utterance.addEventListener('start', () => {
-        ROOT.dataset.fxOrganismSpeech = 'speaking';
-        shell?.classList.add('is-speaking');
-        dispatchEvent(new CustomEvent('formatx:organismspeechstart', { detail: { text, explicit: Boolean(explicit) } }));
-      });
-      const finish = () => {
-        ROOT.dataset.fxOrganismSpeech = 'idle';
-        shell?.classList.remove('is-speaking');
-        dispatchEvent(new CustomEvent('formatx:organismspeechend'));
+      stopSpeech();
+      const run = ++speechRun;
+      const chunks = splitSpeech(text);
+      if (!chunks.length) return;
+      const voice = selectVoice();
+      let started = false;
+
+      const speakChunk = index => {
+        if (run !== speechRun || index >= chunks.length) {
+          finishSpeech(run, text, explicit);
+          return;
+        }
+
+        const chunk = chunks[index];
+        const utterance = new SpeechSynthesisUtterance(chunk);
+        utterance.lang = language() === 'en' ? 'en-GB' : 'hu-HU';
+        const profile = prosody(chunk, index, chunks.length);
+        utterance.rate = profile.rate;
+        utterance.pitch = profile.pitch;
+        utterance.volume = profile.volume;
+        if (voice) utterance.voice = voice;
+
+        utterance.addEventListener('start', () => {
+          if (run !== speechRun || started) return;
+          started = true;
+          ROOT.dataset.fxOrganismSpeech = 'speaking';
+          ROOT.dataset.fxOrganismSpeechMode = 'sentence-prosody-v3';
+          shell?.classList.add('is-speaking');
+          dispatchEvent(new CustomEvent('formatx:organismspeechstart', {
+            detail: {
+              text,
+              explicit: Boolean(explicit),
+              voice: voice?.name || 'browser-default',
+              quality: selectedVoiceQuality,
+              chunks: chunks.length
+            }
+          }));
+        }, { once: true });
+
+        utterance.addEventListener('end', () => {
+          if (run !== speechRun) return;
+          speechPauseTimer = window.setTimeout(() => speakChunk(index + 1), pauseAfter(chunk));
+        }, { once: true });
+
+        utterance.addEventListener('error', event => {
+          if (run !== speechRun) return;
+          if (event.error === 'canceled' || event.error === 'interrupted') return;
+          speechPauseTimer = window.setTimeout(() => speakChunk(index + 1), 60);
+        }, { once: true });
+
+        speechSynthesis.speak(utterance);
       };
-      utterance.addEventListener('end', finish, { once: true });
-      utterance.addEventListener('error', finish, { once: true });
-      speechSynthesis.speak(utterance);
+
+      speakChunk(0);
     } catch (error) {
       ROOT.dataset.fxOrganismSpeech = 'error';
       ROOT.dataset.fxOrganismVoiceError = String(error?.message || error).slice(0, 120);
+      shell?.classList.remove('is-speaking');
     }
   }
 
   function stopSpeech() {
+    speechRun += 1;
+    clearTimeout(speechPauseTimer);
+    speechPauseTimer = 0;
     if (speechSupported) {
       try { speechSynthesis.cancel(); } catch (_) {}
     }
@@ -432,6 +588,7 @@
     repeatButton.title = words.repeat;
     repeatButton.disabled = !enabled || !speechSupported;
     privacyNote.textContent = words.privacy;
+    selectedVoice = null;
     selectVoice();
     if (enabled) {
       const item = SCENES[currentScene];
@@ -462,6 +619,7 @@
     document.addEventListener('keydown', noteUserGesture, true);
     addEventListener('formatx:organismstatechange', handleStateChange);
     addEventListener('formatx:languagechange', () => {
+      stopSpeech();
       currentText = SCENES[currentScene].response[language()];
       updateLanguage();
     });
@@ -472,7 +630,10 @@
 
     if (speechSupported) {
       selectVoice();
-      speechSynthesis.addEventListener?.('voiceschanged', selectVoice);
+      speechSynthesis.addEventListener?.('voiceschanged', () => {
+        selectedVoice = null;
+        selectVoice();
+      });
     }
 
     window.FormatXOrganismVoice = Object.freeze({
@@ -493,15 +654,31 @@
         ROOT.dataset.fxOrganismVoiceEnabled = String(speechEnabled);
         updateLanguage();
         if (!speechEnabled) stopSpeech();
+      },
+      voiceInfo() {
+        return Object.freeze({
+          name: selectedVoice?.name || 'browser-default',
+          language: selectedVoice?.lang || (language() === 'en' ? 'en-GB' : 'hu-HU'),
+          quality: selectedVoiceQuality,
+          mode: 'sentence-prosody-v3'
+        });
       }
     });
 
-    ROOT.dataset.fxOrganismVoice = 'ready-v2';
+    ROOT.dataset.fxOrganismVoice = 'ready-v3';
     ROOT.dataset.fxOrganismVoiceEnabled = 'false';
     ROOT.dataset.fxOrganismDialogueEnabled = String(enabled);
     ROOT.dataset.fxOrganismSpeech = 'idle';
     dispatchEvent(new CustomEvent('formatx:organismvoiceready', {
-      detail: { speechSupported, localOnly: true, scenes: SCENES.length, enabled }
+      detail: {
+        speechSupported,
+        localOnly: true,
+        scenes: SCENES.length,
+        enabled,
+        voice: selectedVoice?.name || 'browser-default',
+        quality: selectedVoiceQuality,
+        mode: 'sentence-prosody-v3'
+      }
     }));
   }
 
