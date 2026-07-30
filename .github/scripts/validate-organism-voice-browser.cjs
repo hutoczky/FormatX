@@ -23,7 +23,10 @@ async function waitForReady(page) {
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismCoreInteraction === 'ready-v1', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismSpeakingVisual === 'ready', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxMobileReadability === 'ready', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxMobileUnified === 'ready-v1', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxInfiniteScroll === 'ready-v4', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 15000 });
+  await page.waitForTimeout(220);
 }
 
 async function validateSpeakingVisual(page, name) {
@@ -50,6 +53,22 @@ async function validateSpeakingVisual(page, name) {
   assert(idleAnimation === 'none', `${name}: 3D speech animation did not stop`);
 }
 
+async function validateContinuousLoop(page, name) {
+  const before = Number(await page.evaluate(() => document.documentElement.dataset.fxLoopCount || 0));
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.waitForFunction(expected => Number(document.documentElement.dataset.fxLoopCount || 0) > expected, before, { timeout: 7000 });
+  await page.waitForFunction(() => window.scrollY < 50, null, { timeout: 5000 });
+  await page.waitForFunction(() => !document.documentElement.classList.contains('fx-page-scrolling'), null, { timeout: 3000 });
+  const contract = await page.evaluate(() => ({
+    controller: document.documentElement.dataset.fxInfiniteController,
+    input: document.documentElement.dataset.fxInfiniteInput,
+    scrollActivity: document.documentElement.dataset.fxScrollActivity,
+  }));
+  assert(contract.controller === 'boundary-v4', `${name}: boundary-v4 controller is not active`);
+  assert(contract.input === 'idle', `${name}: continuous loop input did not settle`);
+  assert(contract.scrollActivity === 'idle', `${name}: floating UI remained in scrolling state`);
+}
+
 async function validateMobileReadability(page, viewport) {
   const actionsDisplay = await page.locator('#hero .hero-actions').evaluate(node => getComputedStyle(node).display);
   const factsDisplay = await page.locator('#hero .hero-facts').evaluate(node => getComputedStyle(node).display);
@@ -64,12 +83,16 @@ async function validateMobileReadability(page, viewport) {
   await page.locator('#fx-three-frame').waitFor({ state: 'attached', timeout: 15000 });
   const frameVisual = await page.locator('#fx-three-frame').evaluate(node => {
     const style = getComputedStyle(node);
-    return { transform: style.transform, opacity: Number(style.opacity), width: node.getBoundingClientRect().width };
+    const box = node.getBoundingClientRect();
+    return { transform: style.transform, opacity: Number(style.opacity), width: box.width, y: box.y };
   });
   assert(frameVisual.transform !== 'none', 'mobile: Living Core iframe was not visually reduced');
   assert(frameVisual.opacity <= 0.9, `mobile: Living Core iframe is too opaque (${frameVisual.opacity})`);
+  assert(frameVisual.width <= viewport.width * 1.01, `mobile: Living Core iframe exceeds unified viewport (${frameVisual.width})`);
 
   const thoughtBox = await page.locator('.fx-organism-thought-trigger').boundingBox();
+  assert(thoughtBox && thoughtBox.x > viewport.width * 0.68, 'mobile: thought control is not docked to the right edge');
+
   const genome = page.locator('.fx-genome-launcher');
   if (await genome.count() && await genome.isVisible()) {
     const genomeBox = await genome.boundingBox();
@@ -80,6 +103,8 @@ async function validateMobileReadability(page, viewport) {
   if (await actionbar.count() && await actionbar.isVisible()) {
     const actionbarBox = await actionbar.boundingBox();
     assert(!overlaps(thoughtBox, actionbarBox), 'mobile: thought control overlaps the action dock');
+    assert(actionbarBox.height <= 58, `mobile: action dock is too tall (${actionbarBox.height}px)`);
+    assert(actionbarBox.x >= 6 && actionbarBox.x + actionbarBox.width <= viewport.width - 6, 'mobile: action dock leaves the viewport');
   }
 
   const heroCopy = await page.locator('#hero .hero-copy').evaluate(node => {
@@ -87,6 +112,17 @@ async function validateMobileReadability(page, viewport) {
     return { background: style.backgroundColor, color: style.color, width: node.getBoundingClientRect().width };
   });
   assert(heroCopy.width <= viewport.width - 20, 'mobile: hero copy exceeds viewport width');
+
+  await page.evaluate(() => window.scrollTo(0, Math.min(window.innerHeight * 0.7, document.documentElement.scrollHeight - window.innerHeight - 80)));
+  await page.waitForFunction(() => document.documentElement.classList.contains('fx-page-scrolling'), null, { timeout: 3000 });
+  const hiddenDuringScroll = await page.evaluate(() => {
+    const dialogue = getComputedStyle(document.querySelector('.fx-organism-dialogue'));
+    const dock = getComputedStyle(document.querySelector('.fx-organism-actionbar'));
+    return { dialogueOpacity: dialogue.opacity, dockOpacity: dock.opacity, dockPointer: dock.pointerEvents };
+  });
+  assert(hiddenDuringScroll.dialogueOpacity === '0', 'mobile: thought control remains visible during active scrolling');
+  assert(hiddenDuringScroll.dockOpacity === '0' && hiddenDuringScroll.dockPointer === 'none', 'mobile: action dock remains active during scrolling');
+  await page.waitForFunction(() => !document.documentElement.classList.contains('fx-page-scrolling'), null, { timeout: 3000 });
 
   await page.locator('#experience').scrollIntoViewIfNeeded();
   await page.waitForFunction(() => document.documentElement.dataset.fxMobileCoreVisible === 'false', null, { timeout: 5000 });
@@ -117,6 +153,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   assert(overflow <= 1, `${name}: Organism dialogue causes horizontal overflow (${overflow}px)`);
 
   if (mobile) await validateMobileReadability(page, viewport);
+  await validateContinuousLoop(page, name);
   await validateSpeakingVisual(page, name);
 
   await trigger.click();
@@ -178,7 +215,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   try {
     await validateViewport(browser, 'desktop', { width: 1440, height: 900 }, false);
     await validateViewport(browser, 'mobile', { width: 390, height: 844 }, true);
-    console.log('PASS: Organism dialogue and mobile Living Core remain readable, switchable and collision-free.');
+    console.log('PASS: unified Organism dialogue, mobile layout and boundary-v4 scrolling are readable and collision-free.');
   } finally {
     await browser.close();
   }
