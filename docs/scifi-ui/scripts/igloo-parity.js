@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v18') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v18';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v19') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v19';
 
   let genomeWebglRequested = false;
 
@@ -172,6 +172,7 @@
   const queue = [
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
     './scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
+    './scripts/platform-status.js?v=20260730-platform-status-1',
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
     './scripts/organism-core-controller.js?v=20260729-core-ui-2',
@@ -189,7 +190,7 @@
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v18';
+      root.dataset.fxTranscendLoader = 'safe-ready-v19';
       return;
     }
 
@@ -200,7 +201,7 @@
     script.addEventListener('load', () => load(index + 1), { once: true });
     script.addEventListener('error', () => {
       console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v18';
+      root.dataset.fxTranscendLoader = 'safe-degraded-v19';
       load(index + 1);
     }, { once: true });
     document.head.appendChild(script);
