@@ -5,16 +5,23 @@
 
 A V92 nyilvánosan tesztelhető kiadás. Jelenleg egyik platform sem kap **Stable** címkét.
 
+## Platformstratégia / Platform strategy
+
+- **Linux / Bazzite:** elsődleges cél- és támogatási platform / primary target and support platform.
+- **Windows:** másodlagosan támogatott platform / secondary supported platform.
+
+A támogatási szerep nem azonos a fejlettségi állapottal: a Linux/Bazzite a fő projektirány, miközben a natív kiadás még Development állapotú; a Windows jelenleg Public beta állapotú, de hosszú távon másodlagos támogatási szerepet tölt be.
+
 ## Egységes platformállapot / Unified platform status
 
-| Platform | Status | Version / direction | Public meaning |
-|---|---|---|---|
-| Windows | **Public beta** | V92 | Publicly testable Windows-specific desktop build; not a final stable release. |
-| Linux / Bazzite | **Development** | Native target | Primary native target under active development. |
-| macOS | **Planned** | Roadmap | No public native package yet. |
-| Web | **Technical preview** | Browser experience | Organism UI, simulator and licensing preview; no native drive operations. |
-| Android | **Public beta** | 1.0.4–1.0.6 | Direct-install APK for public testing; not a final Play Store release. |
-| iOS / iPadOS | **Planned** | Roadmap | No downloadable or testable package yet. |
+| Platform | Support role | Status | Version / direction | Public meaning |
+|---|---|---|---|---|
+| Linux / Bazzite | **Primary platform** | **Development** | Native target | Main FormatX target and support platform; native edition under active development. |
+| Windows | **Secondary supported** | **Public beta** | V92 | Publicly testable Windows-specific desktop build; not a final stable release. |
+| macOS | Roadmap | **Planned** | Roadmap | No public native package yet. |
+| Web | Supplementary preview | **Technical preview** | Browser experience | Organism UI, simulator and licensing preview; no native drive operations. |
+| Android | Supplementary preview | **Public beta** | 1.0.4–1.0.6 | Direct-install APK for public testing; not a final Play Store release. |
+| iOS / iPadOS | Roadmap | **Planned** | Roadmap | No downloadable or testable package yet. |
 
 Canonical machine-readable source: `docs/scifi-ui/data/platform-status.json`.
 
@@ -28,6 +35,7 @@ Canonical machine-readable source: `docs/scifi-ui/data/platform-status.json`.
 ## V92 focus
 
 - Public Windows prototype with Windows-specific WinUI 3 and disk-management components.
+- Linux/Bazzite-first product direction and native-platform development.
 - Unified web product-status communication.
 - Local, switchable Organism thought and voice interface.
 - QR-assisted bank-transfer workflow with local fallback QR assets.
@@ -46,11 +54,11 @@ Before promoting any platform to **Stable**, the release must publish:
 
 ## Known limitations
 
-- Linux/Bazzite native tooling is still in development.
+- Linux/Bazzite is the primary platform direction, but its native tooling is still in development.
+- Windows V92 is the secondary supported platform and remains a public beta.
 - macOS and iOS/iPadOS packages are not available.
 - Android is distributed as a public-beta direct-install package.
 - The Web build is a technical preview, not a replacement for native drive-management operations.
-- Windows V92 remains a public beta and may contain incomplete or platform-specific behaviour.
 
 ## Support
 
