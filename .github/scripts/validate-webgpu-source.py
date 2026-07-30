@@ -85,10 +85,12 @@ require("platform status uses readable 12px badges", "font-size: 12px" in status
 require("hero CTA is redirected to status-aware downloads", "downloads/" in status_js and "hero-download" in status_js, results)
 require("checkout receives Public beta notice", "fx-checkout-product-state" in status_js, results)
 
-require("intro maximum deadline is 700ms", "const HARD_DEADLINE = 700" in intro, results)
-require("intro timeline is 560ms", "const TIMELINE_DURATION = REDUCE_QUERY.matches ? 1 : 560" in intro, results)
-require("intro is first-visit only", "formatx-intro-seen-v1" in intro and "seenBefore()" in intro and "markSeen()" in intro, results)
-require("bfcache does not replay intro", "bfcache-restore" in intro and "startIntro();" not in intro.split("addEventListener('pageshow'", 1)[1], results)
+require("intro uses full desktop and mobile timeline", "MOBILE_QUERY.matches ? 2100 : 2400" in intro, results)
+require("intro keeps deterministic hard deadline", "TIMELINE_DURATION + EXIT_DURATION + 1100" in intro, results)
+require("intro is not suppressed by local storage", "formatx-intro-seen-v1" not in intro and "seenBefore()" not in intro and "markSeen()" not in intro, results)
+require("intro runs on normal page load", "DOMContentLoaded', startIntro" in intro, results)
+require("bfcache restores intro", "if (event.persisted) startIntro();" in intro, results)
+require("intro remains skippable", "fx-intro-skip" in intro and "beginExit" in intro, results)
 
 require("voice remains local", all(token not in voice for token in ("fetch(", "XMLHttpRequest", "WebSocket")), results)
 require("voice remains switchable", "fx-organism-master-toggle" in voice and "let speechEnabled = false" in voice, results)
@@ -119,7 +121,7 @@ for worker_source, label in ((root_worker, "preview Worker"), (production_entry,
     require(f"{label} serves Organism dock CSS", "organism-voice-dock.css" in worker_source, results)
     require(f"{label} serves unified Organism voice", "organism-voice.js" in worker_source, results)
     require(f"{label} has no obsolete Natural Voice route", "organism-natural-voice" not in worker_source, results)
-    require(f"{label} rewrites intro cache version", "20260730-first-visit-1" in worker_source, results)
+    require(f"{label} rewrites restored intro cache version", "20260731-intro-restored-1" in worker_source, results)
 
 require("preview routing includes download centre", "/scifi-ui/downloads/index.html" in preview_config, results)
 require("preview routing includes platform status assets", "/scifi-ui/data/platform-status.json" in preview_config and "/scifi-ui/scripts/platform-status.js" in preview_config, results)
