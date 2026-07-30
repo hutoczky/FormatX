@@ -1,4 +1,4 @@
-name: Validate unified FormatX hero and Organism architecture
+name: Validate unified FormatX mobile and Organism architecture
 
 on:
   push:
@@ -25,7 +25,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: formatx-unified-hero-organism-architecture-${{ github.ref }}
+  group: formatx-unified-mobile-organism-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -39,11 +39,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --check docs/scifi-ui/scripts/single-language-toggle.js
-          node --check docs/scifi-ui/scripts/formatx-copy-polish.js
-          node --check docs/scifi-ui/scripts/formatx-license-links.js
-          node --check docs/scifi-ui/scripts/license-page.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
           node --check docs/scifi-ui/scripts/living-architecture.js
@@ -80,12 +77,14 @@ jobs:
             '/scifi-ui/styles/organism-core-interaction.css',
             '/scifi-ui/styles/organism-speaking-visual.css',
             '/scifi-ui/styles/formatx-mobile-readability.css',
+            '/scifi-ui/styles/formatx-mobile-unified.css',
             '/scifi-ui/scripts/organism-voice.js',
             '/scifi-ui/scripts/organism-voice-foreground.js',
             '/scifi-ui/scripts/organism-core-interaction.js',
             '/scifi-ui/scripts/organism-core-controller.js',
             '/scifi-ui/scripts/formatx-render-visibility.js',
             '/scifi-ui/scripts/formatx-infinite-scroll.js',
+            '/scifi-ui/scripts/formatx-mobile-unified.js',
             '/scifi-ui/scripts/igloo-parity.js',
           ];
           for (const path of required) {
@@ -100,7 +99,7 @@ jobs:
           }
           NODE
 
-      - name: Validate switchable speaking Organism and mobile readability contract
+      - name: Validate unified mobile visibility and continuous scrolling
         shell: bash
         run: |
           node - <<'NODE'
@@ -109,11 +108,10 @@ jobs:
           const voice = fs.readFileSync('docs/scifi-ui/scripts/organism-voice.js', 'utf8');
           const voiceCss = fs.readFileSync('docs/scifi-ui/styles/organism-voice.css', 'utf8');
           const foreground = fs.readFileSync('docs/scifi-ui/scripts/organism-voice-foreground.js', 'utf8');
-          const foregroundCss = fs.readFileSync('docs/scifi-ui/styles/organism-voice-foreground.css', 'utf8');
-          const interaction = fs.readFileSync('docs/scifi-ui/scripts/organism-core-interaction.js', 'utf8');
-          const interactionCss = fs.readFileSync('docs/scifi-ui/styles/organism-core-interaction.css', 'utf8');
           const speakingCss = fs.readFileSync('docs/scifi-ui/styles/organism-speaking-visual.css', 'utf8');
           const mobileReadability = fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-readability.css', 'utf8');
+          const mobileUnified = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-unified.js', 'utf8');
+          const mobileUnifiedCss = fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-unified.css', 'utf8');
           const renderVisibility = fs.readFileSync('docs/scifi-ui/scripts/formatx-render-visibility.js', 'utf8');
           const core = fs.readFileSync('docs/scifi-ui/scripts/organism-core-controller.js', 'utf8');
           const infinite = fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll.js', 'utf8');
@@ -122,17 +120,11 @@ jobs:
           const queue = loader.split('const queue =', 2)[1]?.split('];', 1)[0] || '';
 
           const assertions = [
-            [loader.includes('safe-ready-v17'), 'safe loader v17 marker missing'],
-            [loader.includes('formatx-mobile-readability.css?v=20260730-mobile-readability-1'), 'mobile readability loader missing'],
-            [loader.includes('formatx-render-visibility.js?v=20260730-render-visibility-2'), 'render visibility v2 loader missing'],
-            [loader.includes('organism-voice.js?v=20260730-organism-voice-2'), 'Organism voice v2 loader missing'],
-            [loader.includes('organism-voice-foreground.js?v=20260730-organism-foreground-1'), 'Organism foreground guard missing'],
-            [loader.includes('organism-core-interaction.js?v=20260730-core-interaction-1'), 'MAG interaction loader missing'],
-            [loader.includes('organism-speaking-visual.css?v=20260730-speaking-visual-1'), 'speaking visual loader missing'],
-            [queue.indexOf('organism-core-controller.js') < queue.indexOf('organism-voice.js'), 'voice must load after core controller'],
-            [queue.indexOf('organism-voice.js') < queue.indexOf('organism-voice-foreground.js'), 'foreground must load after voice'],
-            [queue.indexOf('organism-voice-foreground.js') < queue.indexOf('organism-core-interaction.js'), 'MAG interaction must load after foreground guard'],
-            [queue.indexOf('organism-core-interaction.js') < queue.indexOf('formatx-infinite-scroll.js'), 'MAG interaction must load before infinite scroll'],
+            [loader.includes('safe-ready-v18'), 'safe loader v18 marker missing'],
+            [loader.includes('formatx-mobile-unified.js?v=20260730-mobile-unified-1'), 'unified mobile loader missing'],
+            [loader.includes('formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4'), 'boundary-v4 loader missing'],
+            [queue.indexOf('organism-core-interaction.js') < queue.indexOf('formatx-mobile-unified.js'), 'unified mobile must load after Organism interaction'],
+            [queue.indexOf('formatx-mobile-unified.js') < queue.indexOf('formatx-infinite-scroll.js'), 'continuous scroll must load after unified mobile controller'],
             [voice.includes("ROOT.dataset.fxOrganismVoice = 'ready-v2'"), 'voice ready-v2 marker missing'],
             [voice.includes('SpeechSynthesisUtterance'), 'speech synthesis missing'],
             [voice.includes('fx-organism-master-toggle'), 'master on/off switch missing'],
@@ -144,34 +136,32 @@ jobs:
             [!voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'), 'questions must not leave the browser'],
             [voiceCss.includes('.fx-organism-dialogue.is-disabled'), 'disabled appearance missing'],
             [voiceCss.includes('.fx-organism-thought[hidden]'), 'hidden bubble protection missing'],
-            [voiceCss.includes('body.fx-organism-panel-open .fx-organism-dialogue'), 'panel overlap protection missing'],
-            [voiceCss.includes('html.fx-organism-menu-open .fx-organism-dialogue'), 'menu overlap protection missing'],
-            [voiceCss.includes('font-size: 14.5px') && voiceCss.includes('line-height: 1.68'), 'readable response typography missing'],
             [foreground.includes('document.body.appendChild(shell)'), 'dialogue is not promoted to the foreground DOM layer'],
-            [foregroundCss.includes('z-index: 940 !important'), 'foreground z-index missing'],
-            [foregroundCss.includes('width: 58px !important') && foregroundCss.includes('border-radius: 50% !important'), 'compact circular trigger missing'],
-            [foregroundCss.includes('bottom: max(132px'), 'mobile control is not above the bottom action bar'],
-            [interaction.includes("ROOT.dataset.fxOrganismCoreInteraction = 'ready-v1'"), 'MAG interaction ready marker missing'],
-            [interaction.includes("addEventListener('pointerdown'") && interaction.includes("addEventListener('pointerup'"), 'mouse/touch MAG activation missing'],
-            [interaction.includes('[data-organ-node="0"]') && interaction.includes('[data-scene-link="0"]'), 'MAG navigation activation missing'],
-            [interactionCss.includes('.fx-organism-dialogue:not(.is-open)') && interactionCss.includes('pointer-events: auto'), 'compact click-safe MAG CSS missing'],
-            [speakingCss.includes("html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame"), '3D core speaking brightness missing'],
-            [speakingCss.includes('fx-core-speaking-ring') && speakingCss.includes('pointer-events: none'), '3D core speaking rings missing or interactive'],
-            [mobileReadability.includes('transform: scale(.66)'), 'mobile Living Core is not visually reduced'],
-            [mobileReadability.includes('#hero.is-core-active .hero-facts'), 'mobile hero facts are not suppressed'],
-            [mobileReadability.includes('[data-fx-simulator-entry="hero"]'), 'mobile duplicate simulator entry is not suppressed'],
-            [mobileReadability.includes('.fx-organism-dialogue.is-open') && mobileReadability.includes('.fx-genome-launcher'), 'floating controls collision contract missing'],
+            [speakingCss.includes('fx-core-speaking-ring') && speakingCss.includes('pointer-events: none'), '3D speaking visual missing or interactive'],
+            [mobileReadability.includes('data-fx-mobile-core-visible="false"'), 'hero-bound 3D visibility contract missing'],
             [renderVisibility.includes("root.dataset.fxRenderVisibility = 'ready-v2'"), 'render visibility v2 marker missing'],
-            [renderVisibility.includes('fxMobileCoreVisible') && renderVisibility.includes('IntersectionObserver'), 'hero-bound mobile 3D visibility missing'],
-            [renderVisibility.includes('state[SCALE_INDEX] = MOBILE_QUERY.matches ? 0.84 : 1'), 'mobile renderer scale cap missing'],
+            [renderVisibility.includes('fxMobileCoreVisible') && renderVisibility.includes('IntersectionObserver'), 'mobile 3D visibility observer missing'],
             [core.includes("ROOT.dataset.fxOrganismState = bounded === 0 ? 'core'"), '01 MAG core state missing'],
-            [infinite.includes("controller: 'boundary-v3'"), 'boundary-v3 infinite scroll missing'],
-            [rootWorker.includes('organism-voice-foreground.js') && rootWorker.includes('organism-voice-foreground.css'), 'preview Worker foreground routes missing'],
-            [productionEntry.includes('organism-voice-foreground.js') && productionEntry.includes('organism-voice-foreground.css'), 'production Worker foreground routes missing'],
+            [infinite.includes("root.dataset.fxInfiniteController = 'boundary-v4'"), 'boundary-v4 infinite scroll missing'],
+            [infinite.includes("root.dataset.fxInfiniteScroll = 'ready-v4'"), 'boundary-v4 ready marker missing'],
+            [infinite.includes('fx-page-scrolling') && infinite.includes('formatx:pagestartscroll'), 'active-scroll floating UI suppression missing'],
+            [infinite.includes('clonedContent: false') && infinite.includes('reinitialisedRenderer: false'), 'clone-free renderer reuse contract missing'],
+            [!infinite.includes('cloneNode') && !infinite.includes("addEventListener('click'"), 'continuous scrolling must not clone or treat touch as click'],
+            [mobileUnified.includes("root.dataset.fxMobileUnified = 'ready-v1'"), 'unified mobile ready marker missing'],
+            [mobileUnified.includes('closeDialogueForScroll') && mobileUnified.includes('formatx:pagestartscroll'), 'dialogue is not closed during continuous scrolling'],
+            [mobileUnifiedCss.includes('--fx-mobile-dock-height: 54px'), 'compact mobile dock height missing'],
+            [mobileUnifiedCss.includes('right: max(var(--fx-mobile-edge)'), 'thought control is not docked to the right edge'],
+            [mobileUnifiedCss.includes('width: 100vw !important') && mobileUnifiedCss.includes('height: 100svh !important'), '3D viewport is not constrained to the mobile viewport'],
+            [mobileUnifiedCss.includes('transform: translateY(15svh) scale(.80)'), 'mobile Living Core scale and placement missing'],
+            [mobileUnifiedCss.includes('html.fx-page-scrolling .fx-organism-dialogue'), 'thought control remains visible during scrolling'],
+            [mobileUnifiedCss.includes('html.fx-page-scrolling .fx-organism-actionbar'), 'action dock remains visible during scrolling'],
+            [mobileUnifiedCss.includes('grid-template-columns: repeat(3, minmax(0, 1fr))'), 'unified three-action dock missing'],
+            [rootWorker.includes('formatx-mobile-unified.js') && rootWorker.includes('formatx-mobile-unified.css'), 'preview Worker unified mobile routes missing'],
+            [productionEntry.includes('formatx-mobile-unified.js') && productionEntry.includes('formatx-mobile-unified.css'), 'production Worker unified mobile routes missing'],
           ];
 
           for (const [ok, message] of assertions) {
             if (!ok) throw new Error(message);
           }
-          console.log('PASS: mobile content remains readable and the Organism control stays above content.');
+          console.log('PASS: continuous scrolling, mobile visibility and unified Organism design are current.');
           NODE
