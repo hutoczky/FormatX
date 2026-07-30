@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="FormatX Suite Pro támogatás, hibajelentés és licencigénylés.">
+  <meta name="description" content="FormatX Suite Pro támogatás, hibajelentés, panaszkezelés és licencügyintézés.">
   <meta name="theme-color" content="#050a10">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'none'">
+  <link rel="canonical" href="https://www.formatxsuite.com/scifi-ui/support.html">
   <title>Támogatás | FormatX Suite Pro</title>
   <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
-<link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
+  <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
   <script defer src="./scripts/site.js?v=20260718-bilingual-3"></script>
 </head>
 <body>
@@ -29,39 +30,58 @@
 
   <main id="main-content" class="legal-main">
     <article class="content-width legal-document">
-      <p class="eyebrow">SEGÍTSÉG ÉS VISSZAJELZÉS</p>
-      <h1>Támogatás</h1>
-      <p class="legal-lead">Hibajelentéshez, fejlesztési javaslathoz és licencigényhez válaszd a megfelelő nyilvános csatornát.</p>
+      <p class="eyebrow">SEGÍTSÉG · PANASZ · LICENC</p>
+      <h1>Működő támogatási csatornák</h1>
+      <p class="legal-lead">A GitHub hibajegy nem az egyetlen út. Bizalmas rendelési, licenc-, számlázási, panasz- vagy adatvédelmi ügyet e-mailben küldj.</p>
 
       <div class="support-grid">
         <section>
-          <p class="eyebrow">TECHNIKAI HIBA</p>
+          <p class="eyebrow">PRIVÁT TÁMOGATÁS</p>
+          <h2>E-mail</h2>
+          <p>Rendelési azonosító, licenckulcs, tranzakciós adat vagy személyes adat kizárólag privát csatornán küldhető.</p>
+          <a class="button primary" href="mailto:hutoczky@gmail.com?subject=FormatX%20t%C3%A1mogat%C3%A1s">E-mail küldése</a>
+          <p><small>Kapcsolat: <strong>hutoczky@gmail.com</strong></small></p>
+        </section>
+        <section>
+          <p class="eyebrow">NYILVÁNOS TECHNIKAI HIBA</p>
           <h2>GitHub hibajegy</h2>
-          <p>Írd le az operációs rendszert, a FormatX verzióját, a pontos lépéseket és a kapott hibaüzenetet. Bizalmas adatot ne csatolj.</p>
-          <a class="button primary" href="https://github.com/hutoczky/FormatX/issues/new" target="_blank" rel="noopener noreferrer">Új hibajegy nyitása</a>
+          <p>Reprodukálható, nem bizalmas technikai hibához add meg az operációs rendszert, verziót, hardvert, lépéseket és hibaüzenetet.</p>
+          <a class="button secondary" href="https://github.com/hutoczky/FormatX/issues/new" target="_blank" rel="noopener noreferrer">Új hibajegy</a>
         </section>
         <section>
-          <p class="eyebrow">ISMERT HIBÁK</p>
-          <h2>Nyitott bejelentések</h2>
-          <p>Beküldés előtt ellenőrizd, hogy a jelenséget már jelentette-e más. A meglévő hibajegyet új reprodukciós adatokkal is kiegészítheted.</p>
-          <a class="button secondary" href="https://github.com/hutoczky/FormatX/issues" target="_blank" rel="noopener noreferrer">Hibajegyek megtekintése</a>
-        </section>
-        <section>
-          <p class="eyebrow">ÜZLETI / TULAJDONOSI</p>
-          <h2>Licencigénylés</h2>
-          <p>Add meg a kívánt licenctípust, a kezelendő gépek számát és a tervezett felhasználási módot. Licenckulcsot vagy gépazonosítót nyilvános hibajegybe ne írj.</p>
-          <a class="button secondary" href="https://github.com/hutoczky/FormatX/issues/new?title=Licencig%C3%A9ny%3A%20" target="_blank" rel="noopener noreferrer">Licencigénylés indítása</a>
+          <p class="eyebrow">PANASZ ÉS REFUND</p>
+          <h2>Írásbeli ügyintézés</h2>
+          <p>Írd meg a rendelési azonosítót, a kifogásolt eseményt, az igényelt megoldást és azt az e-mail-címet, amelyen a visszaigazolást kéred.</p>
+          <a class="button secondary" href="mailto:hutoczky@gmail.com?subject=FormatX%20panasz%20vagy%20refund">Panasz vagy refund kérése</a>
         </section>
       </div>
 
       <section>
-        <h2>Gyors ellenőrzés hibajelentés előtt</h2>
+        <h2>Prioritás és válaszcél</h2>
+        <ul class="check-list">
+          <li><strong>P1 – kritikus:</strong> letöltés, fizetés, aktiválás vagy adatbiztonság teljes kiesése. Cél: első érdemi válasz 1 munkanapon belül.</li>
+          <li><strong>P2 – magas:</strong> fő funkció hibája működő kerülőút nélkül. Cél: első érdemi válasz 2 munkanapon belül.</li>
+          <li><strong>P3 – normál:</strong> kisebb hiba, dokumentáció vagy fejlesztési javaslat. Cél: első érdemi válasz 5 munkanapon belül.</li>
+        </ul>
+        <p><small>A válaszcél szolgáltatási vállalás, nem garantált hibaelhárítási határidő.</small></p>
+      </section>
+
+      <section>
+        <h2>Hibajelentéshez szükséges adatok</h2>
         <ol class="check-list">
-          <li>Ellenőrizd, hogy a legújabb stabil kiadást használod.</li>
-          <li>Hasonlítsd össze a letöltött ZIP-fájl SHA-256-ellenőrzőösszegét a kiadási oldalon látható ellenőrzőösszeggel.</li>
-          <li>Csatold a releváns naplórészletet, de távolítsd el belőle a személyes vagy titkos adatokat.</li>
+          <li>Platform és állapotcímke: Stable, Public beta, Technical preview, Development vagy Planned.</li>
+          <li>Operációs rendszer és pontos verzió.</li>
+          <li>FormatX verzió és letöltési forrás.</li>
+          <li>Hardver, érintett funkció, reprodukciós lépések és tényleges eredmény.</li>
+          <li>Ismert korlátozás vagy kerülőút.</li>
         </ol>
       </section>
+
+      <div class="legal-actions">
+        <a class="button secondary" href="./downloads/">Letöltések és platformállapot</a>
+        <a class="button secondary" href="./terms.html">Felhasználási feltételek</a>
+        <a class="button secondary" href="./privacy.html">Adatvédelem</a>
+      </div>
     </article>
   </main>
 </body>
