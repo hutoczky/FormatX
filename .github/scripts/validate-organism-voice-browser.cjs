@@ -20,13 +20,31 @@ function overlaps(a, b, tolerance = 2) {
 
 async function waitForReady(page) {
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismVoice === 'ready-v2', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismDock === 'ready-v2', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismCoreInteraction === 'ready-v1', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismSpeakingVisual === 'ready', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxMobileReadability === 'ready', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxMobileUnified === 'ready-v1', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxInfiniteScroll === 'ready-v4', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 15000 });
-  await page.waitForTimeout(220);
+  await page.waitForTimeout(240);
+}
+
+async function visibleBox(locator) {
+  if (!await locator.count() || !await locator.isVisible()) return null;
+  const opacity = await locator.evaluate(node => Number(getComputedStyle(node).opacity));
+  if (opacity <= 0.02) return null;
+  return locator.boundingBox();
+}
+
+async function assertNoCollision(subject, others, name, phase) {
+  const subjectBox = await visibleBox(subject);
+  assert(subjectBox, `${name}: ${phase} subject is not visible`);
+  for (const [label, locator] of others) {
+    const box = await visibleBox(locator);
+    if (box) assert(!overlaps(subjectBox, box), `${name}: ${phase} overlaps ${label}`);
+  }
+  return subjectBox;
 }
 
 async function validateSpeakingVisual(page, name) {
@@ -107,10 +125,7 @@ async function validateMobileReadability(page, viewport) {
     assert(actionbarBox.x >= 6 && actionbarBox.x + actionbarBox.width <= viewport.width - 6, 'mobile: action dock leaves the viewport');
   }
 
-  const heroCopy = await page.locator('#hero .hero-copy').evaluate(node => {
-    const style = getComputedStyle(node);
-    return { background: style.backgroundColor, color: style.color, width: node.getBoundingClientRect().width };
-  });
+  const heroCopy = await page.locator('#hero .hero-copy').evaluate(node => ({ width: node.getBoundingClientRect().width }));
   assert(heroCopy.width <= viewport.width - 20, 'mobile: hero copy exceeds viewport width');
 
   await page.evaluate(() => window.scrollTo(0, Math.min(window.innerHeight * 0.7, document.documentElement.scrollHeight - window.innerHeight - 80)));
@@ -130,6 +145,51 @@ async function validateMobileReadability(page, viewport) {
   assert(stageOpacity === 0, `mobile: Living Core remains visible after leaving hero (${stageOpacity})`);
   await page.evaluate(() => scrollTo(0, 0));
   await page.waitForFunction(() => document.documentElement.dataset.fxMobileCoreVisible === 'true', null, { timeout: 5000 });
+}
+
+async function validateDesktopCollisionLayout(browser, name, viewport) {
+  const context = await browser.newContext({ viewport });
+  const page = await context.newPage();
+  await page.addInitScript(() => localStorage.removeItem('formatx-organism-dialogue-enabled'));
+  await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+  await waitForReady(page);
+
+  const trigger = page.locator('.fx-organism-thought-trigger');
+  const bubble = page.locator('.fx-organism-thought');
+  const heroCopy = page.locator('#hero .hero-copy');
+  const actionbar = page.locator('.fx-organism-actionbar');
+  const organismMap = page.locator('#hero .fx-organism-map');
+  const stage = page.locator('.fx-three-stage-shell');
+
+  await trigger.waitFor({ state: 'visible' });
+  assert(await bubble.isHidden(), `${name}: thought bubble must start closed`);
+  await assertNoCollision(trigger, [
+    ['hero copy', heroCopy],
+    ['action dock', actionbar],
+    ['Organism map', organismMap],
+  ], name, 'closed trigger');
+
+  await trigger.click();
+  await bubble.waitFor({ state: 'visible' });
+  const bubbleBox = await assertNoCollision(bubble, [
+    ['hero copy', heroCopy],
+    ['action dock', actionbar],
+    ['Organism map', organismMap],
+    ['Three.js stage', stage],
+  ], name, 'open dialogue');
+
+  assert(bubbleBox.x >= -1 && bubbleBox.y >= -1, `${name}: dialogue leaves viewport at top or left`);
+  assert(bubbleBox.x + bubbleBox.width <= viewport.width + 1, `${name}: dialogue leaves viewport horizontally`);
+  assert(bubbleBox.y + bubbleBox.height <= viewport.height + 1, `${name}: dialogue leaves viewport vertically`);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  assert(overflow <= 1, `${name}: dialogue causes horizontal overflow (${overflow}px)`);
+
+  if (viewport.width / viewport.height >= 21 / 9) {
+    const rightGap = viewport.width - (bubbleBox.x + bubbleBox.width);
+    assert(rightGap >= 24 && rightGap <= 60, `${name}: ultrawide dialogue lane is not anchored safely (${rightGap}px)`);
+  }
+
+  await context.close();
 }
 
 async function validateViewport(browser, name, viewport, mobile) {
@@ -213,9 +273,23 @@ async function validateViewport(browser, name, viewport, mobile) {
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
-    await validateViewport(browser, 'desktop', { width: 1440, height: 900 }, false);
-    await validateViewport(browser, 'mobile', { width: 390, height: 844 }, true);
-    console.log('PASS: unified Organism dialogue, mobile layout and boundary-v4 scrolling are readable and collision-free.');
+    await validateViewport(browser, 'desktop-functional', { width: 1440, height: 900 }, false);
+    await validateViewport(browser, 'mobile-functional', { width: 390, height: 844 }, true);
+
+    const desktopLayouts = [
+      ['desktop-1024x768', { width: 1024, height: 768 }],
+      ['desktop-1366x768', { width: 1366, height: 768 }],
+      ['desktop-1536x864', { width: 1536, height: 864 }],
+      ['desktop-1920x1080', { width: 1920, height: 1080 }],
+      ['ultrawide-2560x1080', { width: 2560, height: 1080 }],
+      ['ultrawide-3440x1440', { width: 3440, height: 1440 }],
+      ['super-ultrawide-5120x1440', { width: 5120, height: 1440 }],
+    ];
+    for (const [name, viewport] of desktopLayouts) {
+      await validateDesktopCollisionLayout(browser, name, viewport);
+    }
+
+    console.log('PASS: Organism dialogue is readable and collision-free on mobile, desktop, 21:9 and 32:9 displays.');
   } finally {
     await browser.close();
   }
