@@ -39,6 +39,22 @@
     document.head.appendChild(link);
   }
 
+  function ensureOrganismSpeakingStyle() {
+    if (document.querySelector('link[data-fx-organism-speaking-visual]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/organism-speaking-visual.css?v=20260730-speaking-visual-1';
+    link.dataset.fxOrganismSpeakingVisual = 'true';
+    link.addEventListener('load', () => {
+      root.dataset.fxOrganismSpeakingVisual = 'ready';
+    }, { once: true });
+    link.addEventListener('error', () => {
+      root.dataset.fxOrganismSpeakingVisual = 'failed';
+      console.warn('FormatX Organism speaking visual failed to load.');
+    }, { once: true });
+    document.head.appendChild(link);
+  }
+
   function refreshQrImages() {
     const selectedCurrency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR'
       ? 'EUR'
@@ -119,6 +135,7 @@
 
   ensureStabilityStyle();
   ensureOrganismDockStyle();
+  ensureOrganismSpeakingStyle();
   root.dataset.fxLocalQr = 'ready-v2';
   root.dataset.fxLegacyRenderer = 'retired';
   root.dataset.fxRenderer = 'three-host-safe';
