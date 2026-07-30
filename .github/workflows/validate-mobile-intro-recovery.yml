@@ -111,11 +111,12 @@ jobs:
           }
           NODE
 
-      - name: Validate first-visit intro, product status and local Organism
+      - name: Validate first-visit intro, product status and natural local Organism
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'safe-ready-v20' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v21' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'organism-voice.js?v=20260730-organism-voice-3' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-voice-dock.css?v=20260730-organism-dock-2' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'min-aspect-ratio: 21/9' docs/scifi-ui/styles/organism-voice-dock.css
           grep -Fq 'right: 440px !important' docs/scifi-ui/styles/organism-voice-dock.css
@@ -130,6 +131,11 @@ jobs:
           grep -Fq 'Public beta' RELEASE_NOTES.md
           grep -Fq 'fx-organism-master-toggle' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'setOpen(false, false)' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'function voiceScore(voice)' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'function splitSpeech(text)' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'sentence-prosody-v3' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'espeak|festival|pico|compact|mbrola|robot' docs/scifi-ui/scripts/organism-voice.js
+          ! grep -Fq 'utterance.pitch = 0.82' docs/scifi-ui/scripts/organism-voice.js
           ! grep -Fq 'fetch(' docs/scifi-ui/scripts/organism-voice.js
           ! grep -Fq 'formatx:introcomplete' docs/scifi-ui/scripts/organism-voice.js
 
