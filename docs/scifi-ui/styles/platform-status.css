@@ -1,0 +1,176 @@
+/* Shared FormatX platform status matrix. Minimum readable label size: 12px. */
+.fx-platform-status-host {
+  position: relative;
+  z-index: 6;
+  width: min(1180px, calc(100% - 32px));
+  margin: clamp(42px, 7vw, 96px) auto;
+}
+
+.fx-platform-status {
+  padding: clamp(24px, 4vw, 48px);
+  border: 1px solid rgba(123, 224, 255, .22);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(89, 224, 255, .12), transparent 34%),
+    linear-gradient(145deg, rgba(7, 20, 34, .96), rgba(3, 9, 17, .985));
+  box-shadow: 0 30px 100px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255, 255, 255, .045);
+}
+
+.fx-platform-status > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, .42fr);
+  align-items: end;
+  gap: clamp(22px, 4vw, 50px);
+  margin-bottom: 28px;
+}
+
+.fx-platform-status .section-index {
+  margin: 0 0 10px;
+  color: rgba(132, 229, 255, .86);
+  font-size: 12px !important;
+  line-height: 1.35;
+  letter-spacing: .16em;
+}
+
+.fx-platform-status h2 {
+  max-width: 19ch;
+  margin: 0;
+  color: #f2fbff;
+  font-size: clamp(1.75rem, 4vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -.045em;
+}
+
+.fx-platform-status > header > div:first-child > p:last-child {
+  max-width: 68ch;
+  margin: 16px 0 0;
+  color: rgba(226, 242, 249, .75);
+  font-size: 15px;
+  line-height: 1.66;
+}
+
+.fx-product-release-state {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  min-height: 132px;
+  padding: 20px;
+  border: 1px solid rgba(145, 225, 255, .18);
+  border-radius: 20px;
+  background: rgba(1, 9, 17, .58);
+}
+
+.fx-product-release-state strong {
+  color: #f4fbff;
+  font-size: 18px;
+}
+
+.fx-product-release-state small {
+  color: rgba(213, 234, 243, .68);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.fx-platform-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.fx-platform-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(160, 220, 245, .13);
+  border-radius: 18px;
+  background: rgba(4, 13, 23, .64);
+}
+
+.fx-platform-card header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.fx-platform-card h3 {
+  margin: 0;
+  color: #f2fbff;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.fx-platform-card header small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(202, 226, 237, .58);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.fx-platform-card p {
+  margin: 0;
+  color: rgba(224, 240, 247, .72);
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.fx-platform-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.fx-platform-status-badge[data-status='stable'] { color: #87f6bd; background: rgba(50, 220, 135, .09); }
+.fx-platform-status-badge[data-status='public_beta'] { color: #8ceaff; background: rgba(70, 203, 255, .10); }
+.fx-platform-status-badge[data-status='technical_preview'] { color: #c4adff; background: rgba(156, 116, 255, .10); }
+.fx-platform-status-badge[data-status='development'] { color: #ffd787; background: rgba(255, 177, 61, .10); }
+.fx-platform-status-badge[data-status='planned'] { color: #b8c7d2; background: rgba(183, 201, 211, .08); }
+
+.fx-platform-status-note {
+  margin: 20px 0 0;
+  padding-top: 18px;
+  color: rgba(214, 233, 241, .62);
+  border-top: 1px solid rgba(155, 221, 245, .11);
+  font-size: 13px;
+  line-height: 1.58;
+}
+
+.fx-platform-status--compact {
+  padding: 22px;
+  border-radius: 22px;
+}
+
+.fx-platform-status--compact > header {
+  grid-template-columns: 1fr;
+  margin-bottom: 18px;
+}
+
+.fx-platform-status--compact h2 { font-size: clamp(1.45rem, 3vw, 2.3rem); }
+.fx-platform-status--compact .fx-product-release-state { min-height: auto; }
+.fx-platform-status--compact .fx-platform-status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+@media (max-width: 900px) {
+  .fx-platform-status > header,
+  .fx-platform-status-grid,
+  .fx-platform-status--compact .fx-platform-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fx-platform-status-host {
+    width: min(100% - 22px, 720px);
+    margin-block: 36px;
+  }
+
+  .fx-platform-status { padding: 20px; border-radius: 22px; }
+  .fx-platform-card { padding: 16px; }
+}
