@@ -1,0 +1,69 @@
+/* Final readable-type floor for public FormatX UI. Decorative microcopy must not fall below 10px. */
+:where(
+  .section-index,
+  .eyebrow,
+  .kicker,
+  .hero-label b,
+  .hero-label span,
+  .fx-organism-status small,
+  .fx-organism-status-index,
+  .fx-organism-chapter-index,
+  .fx-organism-chapter-action,
+  .fx-organism-console-kicker,
+  .fx-organism-console-nav button,
+  .fx-organism-actionbar a,
+  .fx-organism-thought-label,
+  .fx-organism-privacy,
+  .fx-plan-qr-copy small,
+  .price-card header b,
+  .payment-console small,
+  .main-nav a,
+  .fx-rail a span
+) {
+  font-size: max(10px, .67rem) !important;
+  line-height: 1.35 !important;
+}
+
+:where(
+  .fx-platform-status-badge,
+  .fx-product-release-state small,
+  .fx-platform-card header small,
+  .site-footer small,
+  .legal-document small,
+  .checkout-note,
+  .form-feedback
+) {
+  font-size: max(12px, .75rem) !important;
+  line-height: 1.5 !important;
+}
+
+:where(button, a, input, select, textarea) {
+  text-rendering: optimizeLegibility;
+}
+
+@media (max-width: 900px) {
+  :where(
+    .section-index,
+    .eyebrow,
+    .kicker,
+    .fx-organism-status small,
+    .fx-organism-status-index,
+    .fx-organism-chapter-index,
+    .fx-organism-chapter-action,
+    .fx-organism-actionbar a,
+    .fx-organism-thought-label,
+    .fx-organism-privacy,
+    .fx-plan-qr-copy small,
+    .price-card header b,
+    .main-nav a
+  ) {
+    font-size: 11px !important;
+  }
+
+  .fx-organism-actionbar a {
+    min-height: 44px;
+    padding-inline: 12px !important;
+    white-space: normal !important;
+    text-align: center;
+  }
+}
