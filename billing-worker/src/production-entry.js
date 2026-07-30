@@ -9,11 +9,15 @@ const LANGUAGE_PAGE_PATHS = new Set([
   '/scifi-ui/terms.html',
   '/scifi-ui/privacy.html',
   '/scifi-ui/checkout.html',
+  '/scifi-ui/downloads/',
+  '/scifi-ui/downloads/index.html',
+  '/scifi-ui/downloads/android.html',
   '/scifi-ui/payment/success.html',
   '/scifi-ui/payment/cancel.html',
 ]);
 const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260729-single-language-3">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260729-single-language-2"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
 const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
+const STATUS_ASSETS = '  <link rel="stylesheet" data-fx-platform-status-style="true" href="/scifi-ui/styles/platform-status.css?v=20260730-platform-status-2">\n  <script defer src="/scifi-ui/scripts/platform-status.js?v=20260730-platform-status-2"></script>\n';
 const EMBEDDABLE_STAGE_PATHS = new Set([
   '/scifi-ui/three-stage-mobile',
   '/scifi-ui/three-stage-mobile.html',
@@ -21,6 +25,9 @@ const EMBEDDABLE_STAGE_PATHS = new Set([
   '/scifi-ui/three-stage.html',
 ]);
 const CRITICAL_STARTUP_ASSETS = new Set([
+  '/scifi-ui/data/platform-status.json',
+  '/scifi-ui/scripts/platform-status.js',
+  '/scifi-ui/styles/platform-status.css',
   '/scifi-ui/scripts/formatx-event-horizon.js',
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
@@ -78,7 +85,8 @@ const REPLACEMENTS = [
   ['formatx-mobile-recovery.css?v=20260729-living-core-css-v2', 'formatx-mobile-recovery.css?v=20260729-living-core-css-v3'],
   ['living-architecture.js?v=20260726-living-1', 'living-architecture.js?v=20260729-safe-three-start-4'],
   ['living-architecture.js?v=20260729-safe-three-start-3', 'living-architecture.js?v=20260729-safe-three-start-4'],
-  ['formatx-event-horizon.js?v=20260726-event-horizon-3', 'formatx-event-horizon.js?v=20260729-event-horizon-5'],
+  ['formatx-event-horizon.js?v=20260726-event-horizon-3', 'formatx-event-horizon.js?v=20260730-first-visit-1'],
+  ['formatx-event-horizon.js?v=20260729-event-horizon-5', 'formatx-event-horizon.js?v=20260730-first-visit-1'],
 ];
 
 export default {
@@ -113,6 +121,9 @@ async function applyStartupSafety(request, url, response) {
   }
   if (!html.includes('data-fx-single-language-style')) {
     html = html.replace('</head>', LANGUAGE_ASSETS + '</head>');
+  }
+  if (!html.includes('data-fx-platform-status-style')) {
+    html = html.replace('</head>', STATUS_ASSETS + '</head>');
   }
   if (SCIFI_ENTRY_PATHS.has(url.pathname) && !html.includes('data-fx-copy-polish-style')) {
     html = html.replace('</head>', COPY_ASSETS + '</head>');
