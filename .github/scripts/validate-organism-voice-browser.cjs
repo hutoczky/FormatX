@@ -8,6 +8,56 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+async function installVoiceMock(page) {
+  await page.addInitScript(() => {
+    const voices = [
+      {
+        name: 'eSpeak Hungarian',
+        voiceURI: 'espeak-hu',
+        lang: 'hu-HU',
+        localService: true,
+        default: true,
+      },
+      {
+        name: 'Microsoft Noemi Online Natural',
+        voiceURI: 'Microsoft Noemi Online Natural',
+        lang: 'hu-HU',
+        localService: false,
+        default: false,
+      },
+      {
+        name: 'Microsoft Sonia Online Natural',
+        voiceURI: 'Microsoft Sonia Online Natural',
+        lang: 'en-GB',
+        localService: false,
+        default: false,
+      },
+    ];
+
+    if (!('SpeechSynthesisUtterance' in window)) {
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', {
+        configurable: true,
+        value: class SpeechSynthesisUtteranceMock {},
+      });
+    }
+
+    const synth = window.speechSynthesis || {
+      cancel() {},
+      speak() {},
+      addEventListener() {},
+    };
+    try {
+      Object.defineProperty(synth, 'getVoices', {
+        configurable: true,
+        value: () => voices,
+      });
+    } catch (_) {}
+    if (!window.speechSynthesis) {
+      Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: synth });
+    }
+  });
+}
+
 function overlaps(a, b, tolerance = 2) {
   if (!a || !b) return false;
   return !(
@@ -19,7 +69,7 @@ function overlaps(a, b, tolerance = 2) {
 }
 
 async function waitForReady(page) {
-  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismVoice === 'ready-v2', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismVoice === 'ready-v3', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismDock === 'ready-v2', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismCoreInteraction === 'ready-v1', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismSpeakingVisual === 'ready', null, { timeout: 15000 });
@@ -28,6 +78,11 @@ async function waitForReady(page) {
   await page.waitForFunction(() => document.documentElement.dataset.fxInfiniteScroll === 'ready-v4', null, { timeout: 15000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 15000 });
   await page.waitForTimeout(240);
+
+  const profile = await page.evaluate(() => window.FormatXOrganismVoice?.voiceInfo?.());
+  assert(profile?.name === 'Microsoft Noemi Online Natural', `Natural Hungarian voice was not selected (${profile?.name || 'none'})`);
+  assert(profile?.quality === 'premium', `Natural voice quality was not classified as premium (${profile?.quality || 'none'})`);
+  assert(profile?.mode === 'sentence-prosody-v3', `Natural sentence prosody is not active (${profile?.mode || 'none'})`);
 }
 
 async function visibleBox(locator) {
@@ -150,6 +205,7 @@ async function validateMobileReadability(page, viewport) {
 async function validateDesktopCollisionLayout(browser, name, viewport) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
+  await installVoiceMock(page);
   await page.addInitScript(() => localStorage.removeItem('formatx-organism-dialogue-enabled'));
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
   await waitForReady(page);
@@ -195,6 +251,7 @@ async function validateDesktopCollisionLayout(browser, name, viewport) {
 async function validateViewport(browser, name, viewport, mobile) {
   const context = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile });
   const page = await context.newPage();
+  await installVoiceMock(page);
   await page.addInitScript(() => localStorage.removeItem('formatx-organism-dialogue-enabled'));
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
   await waitForReady(page);
@@ -289,7 +346,7 @@ async function validateViewport(browser, name, viewport, mobile) {
       await validateDesktopCollisionLayout(browser, name, viewport);
     }
 
-    console.log('PASS: Organism dialogue is readable and collision-free on mobile, desktop, 21:9 and 32:9 displays.');
+    console.log('PASS: Organism dialogue is readable, collision-free, and selects the premium Natural voice over eSpeak.');
   } finally {
     await browser.close();
   }
