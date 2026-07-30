@@ -71,6 +71,7 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-voice.js
           node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
+          node --check docs/scifi-ui/scripts/formatx-render-visibility.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
           node --check docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --check docs/scifi-ui/scripts/mobile-core-engine-v2.js
@@ -82,7 +83,9 @@ jobs:
           node --check .github/scripts/validate-reality-fork.cjs
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
           node --check .github/scripts/validate-organism-voice-browser.cjs
-          grep -Fq 'safe-ready-v15' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v16' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'formatx-mobile-readability.css?v=20260730-mobile-readability-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'formatx-render-visibility.js?v=20260730-render-visibility-2' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-voice.js?v=20260730-organism-voice-2' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-core-interaction.js?v=20260730-core-interaction-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-speaking-visual.css?v=20260730-speaking-visual-1' docs/scifi-ui/scripts/igloo-parity.js
@@ -91,11 +94,17 @@ jobs:
           grep -Fq 'boundary-v3' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'reinitialisedRenderer: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'data-fx-mobile-core-visible="false"' docs/scifi-ui/styles/formatx-mobile-readability.css
+          grep -Fq 'transform: scale(.66)' docs/scifi-ui/styles/formatx-mobile-readability.css
+          grep -Fq '#hero.is-core-active .hero-facts' docs/scifi-ui/styles/formatx-mobile-readability.css
+          grep -Fq 'fxMobileCoreVisible' docs/scifi-ui/scripts/formatx-render-visibility.js
+          grep -Fq 'state[SCALE_INDEX] = MOBILE_QUERY.matches ? 0.84 : 1' docs/scifi-ui/scripts/formatx-render-visibility.js
           grep -Fq '/scifi-ui/license.html' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/scripts/organism-voice.js' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/scripts/organism-core-interaction.js' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/styles/organism-voice.css' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/styles/organism-speaking-visual.css' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/styles/formatx-mobile-readability.css' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/three-stage-mobile.html' billing-worker/src/production-entry.js
           grep -Fq "headers.set('X-Frame-Options', 'SAMEORIGIN')" billing-worker/src/production-entry.js
           grep -Fq "html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame" docs/scifi-ui/styles/organism-speaking-visual.css
