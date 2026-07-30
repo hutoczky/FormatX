@@ -74,8 +74,8 @@
     eyebrow.textContent = lang === 'en' ? 'PUBLIC PRODUCT STATUS' : 'NYILVÁNOS TERMÉKÁLLAPOT';
     heading.textContent = lang === 'en' ? 'One status matrix across every surface.' : 'Egyetlen állapotmátrix minden felületen.';
     lead.textContent = lang === 'en'
-      ? 'Linux/Bazzite is the primary target and support platform. Windows is secondary supported. V92 remains a public beta.'
-      : 'A Linux/Bazzite az elsődleges cél- és támogatási platform. A Windows másodlagosan támogatott. A V92 továbbra is nyilvános béta.';
+      ? 'Linux/Bazzite is the primary target and support platform. Windows is secondary supported. The current release remains a public beta.'
+      : 'A Linux/Bazzite az elsődleges cél- és támogatási platform. A Windows másodlagosan támogatott. Az aktuális kiadás továbbra is nyilvános béta.';
     copy.append(eyebrow, heading, lead);
 
     const release = document.createElement('div');
@@ -160,8 +160,8 @@
       badge(data.product_release.status, data.status_labels, lang),
       Object.assign(document.createElement('div'), {
         innerHTML: lang === 'en'
-          ? '<strong>V92 is a public beta.</strong><span>Linux/Bazzite is the primary platform direction; Windows is secondary supported. No platform is currently labelled Stable.</span>'
-          : '<strong>A V92 nyilvános béta.</strong><span>A Linux/Bazzite az elsődleges platformirány; a Windows másodlagosan támogatott. Jelenleg egyik platform sem kap Stable címkét.</span>'
+          ? '<strong>The current release is a public beta.</strong><span>Linux/Bazzite is the primary platform direction; Windows is secondary supported. No platform is currently labelled Stable.</span>'
+          : '<strong>Az aktuális kiadás nyilvános béta.</strong><span>A Linux/Bazzite az elsődleges platformirány; a Windows másodlagosan támogatott. Jelenleg egyik platform sem kap Stable címkét.</span>'
       })
     );
   }
@@ -191,8 +191,8 @@
 
     const lang = language();
     statusRow.querySelector('span').textContent = lang === 'en'
-      ? 'I understand that V92 is a Public beta, not a Stable release, and that platform capabilities differ according to the published status matrix.'
-      : 'Tudomásul veszem, hogy a V92 nyilvános béta, nem Stable kiadás, és a platformok képességei a közzétett állapotmátrix szerint eltérnek.';
+      ? 'I understand that the current release is a Public beta, not a Stable release, and that platform capabilities differ according to the published status matrix.'
+      : 'Tudomásul veszem, hogy az aktuális kiadás nyilvános béta, nem Stable kiadás, és a platformok képességei a közzétett állapotmátrix szerint eltérnek.';
     immediateRow.querySelector('span').innerHTML = lang === 'en'
       ? 'I expressly request activation immediately after payment verification. If I qualify as a consumer, I acknowledge the digital-performance and withdrawal information in the <a href="./terms.html" target="_blank" rel="noopener">terms of use</a>.'
       : 'Kifejezetten kérem az aktiválást a jóváírás ellenőrzése után. Ha fogyasztónak minősülök, tudomásul veszem a <a href="./terms.html" target="_blank" rel="noopener">felhasználási feltételekben</a> szereplő digitális teljesítési és elállási tájékoztatást.';
@@ -202,19 +202,21 @@
     const lang = language();
     const names = Object.fromEntries(data.platforms.map(item => [item.name, text(data.status_labels[item.status], lang)]));
     return lang === 'en'
-      ? `Linux/Bazzite is the primary target and support platform and is currently ${names['Linux / Bazzite']}. Windows is the secondary supported platform and is currently ${names.Windows}. V92 overall is a Public beta. macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. No platform is currently labelled Stable.`
-      : `A Linux/Bazzite az elsődleges cél- és támogatási platform, jelenlegi állapota: ${names['Linux / Bazzite']}. A Windows a másodlagosan támogatott platform, jelenlegi állapota: ${names.Windows}. A V92 összesített állapota nyilvános béta. macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. Jelenleg egyik platform sem kap Stable címkét.`;
+      ? `Linux/Bazzite is the primary target and support platform and is currently ${names['Linux / Bazzite']}. Windows is the secondary supported platform and is currently ${names.Windows}. The current release is a Public beta. macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. No platform is currently labelled Stable.`
+      : `A Linux/Bazzite az elsődleges cél- és támogatási platform, jelenlegi állapota: ${names['Linux / Bazzite']}. A Windows a másodlagosan támogatott platform, jelenlegi állapota: ${names.Windows}. Az aktuális kiadás összesített állapota nyilvános béta. macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. Jelenleg egyik platform sem kap Stable címkét.`;
   }
 
-  function speakCanonical(textValue) {
-    const voiceButton = document.querySelector('.fx-organism-voice-toggle[aria-pressed="true"]');
-    if (!voiceButton || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
-    try {
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(textValue);
-      utterance.lang = language() === 'en' ? 'en-GB' : 'hu-HU';
-      speechSynthesis.speak(utterance);
-    } catch (_) {}
+  function publishOrganismAnswer(answer) {
+    const api = window.FormatXOrganismVoice;
+    if (api && typeof api.say === 'function') {
+      api.say(answer);
+      return;
+    }
+    const output = document.querySelector('.fx-organism-thought-output');
+    if (output) output.textContent = answer;
+    dispatchEvent(new CustomEvent('formatx:organismresponse', {
+      detail: { text: answer, topic: 'platform-status', localOnly: true }
+    }));
   }
 
   function installOrganismStatusSync(data) {
@@ -230,13 +232,8 @@
       event.preventDefault();
       event.stopImmediatePropagation();
       const answer = canonicalStatusAnswer(data);
-      const output = document.querySelector('.fx-organism-thought-output');
-      if (output) output.textContent = answer;
       if (input) input.value = '';
-      speakCanonical(answer);
-      dispatchEvent(new CustomEvent('formatx:organismresponse', {
-        detail: { text: answer, topic: 'platform-status', localOnly: true }
-      }));
+      publishOrganismAnswer(answer);
     }, true);
 
     const observe = () => {
@@ -246,9 +243,7 @@
       new MutationObserver(() => {
         const current = output.textContent || '';
         if (!/(stabil kiadásokat|stable releases|Linux és Bazzite az elsődleges|Linux and Bazzite are the primary)/i.test(current)) return;
-        const answer = canonicalStatusAnswer(data);
-        output.textContent = answer;
-        speakCanonical(answer);
+        publishOrganismAnswer(canonicalStatusAnswer(data));
       }).observe(output, { childList: true, subtree: true, characterData: true });
     };
     observe();
