@@ -1,8 +1,8 @@
 /* FormatX Organism speech visualisation — lives on the 3D core layer only. */
 
-.fx-three-stage-shell,
-.fx-three-stage-shell #fx-three-frame {
+.fx-three-stage-shell {
   transition: filter .28s ease, opacity .28s ease;
+  will-change: filter;
 }
 
 .fx-three-stage-shell::before,
@@ -34,12 +34,7 @@
     inset 0 0 28px rgba(100, 221, 255, .06);
 }
 
-html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame {
-  filter:
-    brightness(1.22)
-    saturate(1.24)
-    drop-shadow(0 0 18px rgba(68, 244, 232, .36))
-    drop-shadow(0 0 34px rgba(115, 96, 255, .20));
+html[data-fx-organism-speech='speaking'] .fx-three-stage-shell {
   animation: fx-core-speaking-light .72s ease-in-out infinite alternate;
 }
 
@@ -100,7 +95,7 @@ html[data-fx-organism-speech='speaking'] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame {
+  html[data-fx-organism-speech='speaking'] .fx-three-stage-shell {
     animation: none !important;
     filter:
       brightness(1.25)
