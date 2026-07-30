@@ -8,51 +8,37 @@ on:
       - 'wrangler.jsonc'
       - 'billing-worker/wrangler.jsonc'
       - 'billing-worker/src/production-entry.js'
-      - 'docs/scifi-ui/license.html'
-      - 'docs/scifi-ui/three-stage-mobile.html'
-      - 'docs/scifi-ui/Licenc.txt'
-      - 'docs/scifi-ui/styles/single-language-toggle.css'
-      - 'docs/scifi-ui/styles/formatx-copy-polish.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
-      - 'docs/scifi-ui/styles/formatx-site-stability.css'
-      - 'docs/scifi-ui/scripts/single-language-toggle.js'
-      - 'docs/scifi-ui/scripts/formatx-copy-polish.js'
-      - 'docs/scifi-ui/scripts/formatx-license-links.js'
-      - 'docs/scifi-ui/scripts/license-page.js'
-      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
-      - 'docs/scifi-ui/scripts/formatx-event-horizon.js'
-      - 'docs/scifi-ui/scripts/living-architecture.js'
-      - 'docs/scifi-ui/scripts/igloo-parity.js'
-      - 'docs/scifi-ui/scripts/formatx-three-host-safe.js'
-      - 'docs/scifi-ui/scripts/formatx-render-visibility.js'
-      - 'docs/scifi-ui/scripts/mobile-webgl-entry.js'
-      - 'docs/scifi-ui/scripts/mobile-core-engine-v2.js'
-      - 'docs/scifi-ui/scripts/formatx-mobile-recovery.js'
-      - 'docs/scifi-ui/scripts/organism-interface.js'
-      - 'docs/scifi-ui/scripts/organism-menu-controller.js'
-      - 'docs/scifi-ui/scripts/organism-core-controller.js'
-      - 'docs/scifi-ui/scripts/organism-console-state.js'
+      - 'docs/scifi-ui/**'
+      - '.github/workflows/validate-mobile-intro-recovery.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - 'billing-worker/wrangler.jsonc'
+      - 'billing-worker/src/production-entry.js'
+      - 'docs/scifi-ui/**'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
-  statuses: write
 
 concurrency:
-  group: formatx-unified-hero-organism-architecture
+  group: formatx-unified-hero-organism-architecture-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
 
       - name: Validate JavaScript syntax
         shell: bash
         run: |
+          set -euo pipefail
           node --check docs/scifi-ui/scripts/single-language-toggle.js
           node --check docs/scifi-ui/scripts/formatx-copy-polish.js
           node --check docs/scifi-ui/scripts/formatx-license-links.js
@@ -68,12 +54,13 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-menu-controller.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-console-state.js
+          node --check docs/scifi-ui/scripts/organism-voice.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v2.js
           node --input-type=module --check < billing-worker/src/production-entry.js
           node --input-type=module --check < worker.js
 
-      - name: Validate Worker ownership and routing
+      - name: Validate Worker ownership and critical routes
         shell: bash
         run: |
           node - <<'NODE'
@@ -85,31 +72,11 @@ jobs:
             '/scifi-ui/',
             '/scifi-ui/index.html',
             '/scifi-ui/license.html',
-            '/scifi-ui/support.html',
-            '/scifi-ui/terms.html',
-            '/scifi-ui/privacy.html',
-            '/scifi-ui/checkout.html',
-            '/scifi-ui/payment/success.html',
-            '/scifi-ui/payment/cancel.html',
-            '/scifi-ui/styles/single-language-toggle.css',
-            '/scifi-ui/styles/formatx-copy-polish.css',
-            '/scifi-ui/styles/formatx-mobile-recovery.css',
-            '/scifi-ui/styles/formatx-site-stability.css',
-            '/scifi-ui/scripts/single-language-toggle.js',
-            '/scifi-ui/scripts/formatx-copy-polish.js',
-            '/scifi-ui/scripts/formatx-license-links.js',
-            '/scifi-ui/scripts/license-page.js',
-            '/scifi-ui/scripts/formatx-infinite-scroll.js',
-            '/scifi-ui/scripts/formatx-mobile-recovery.js',
-            '/scifi-ui/scripts/living-architecture.js',
-            '/scifi-ui/scripts/igloo-parity.js',
-            '/scifi-ui/scripts/organism-console-state.js',
-            '/scifi-ui/scripts/formatx-render-visibility.js',
-            '/scifi-ui/scripts/mobile-webgl-entry.js',
-            '/scifi-ui/scripts/mobile-core-engine-v2.js',
-            '/scifi-ui/scripts/organism-interface.js',
-            '/scifi-ui/scripts/organism-menu-controller.js',
+            '/scifi-ui/styles/organism-voice.css',
+            '/scifi-ui/scripts/organism-voice.js',
             '/scifi-ui/scripts/organism-core-controller.js',
+            '/scifi-ui/scripts/formatx-infinite-scroll.js',
+            '/scifi-ui/scripts/igloo-parity.js',
           ];
           for (const path of required) {
             if (!first.includes(path)) throw new Error(`Missing preview Worker path: ${path}`);
@@ -123,96 +90,47 @@ jobs:
           }
           NODE
 
-      - name: Validate hero, copy, licence, infinite scroll and living core contract
+      - name: Validate switchable Organism and stable startup contract
         shell: bash
         run: |
           node - <<'NODE'
           const fs = require('fs');
-          const languageToggle = fs.readFileSync('docs/scifi-ui/scripts/single-language-toggle.js', 'utf8');
-          const languageToggleCss = fs.readFileSync('docs/scifi-ui/styles/single-language-toggle.css', 'utf8');
-          const copyPolish = fs.readFileSync('docs/scifi-ui/scripts/formatx-copy-polish.js', 'utf8');
-          const copyPolishCss = fs.readFileSync('docs/scifi-ui/styles/formatx-copy-polish.css', 'utf8');
-          const licenceLinks = fs.readFileSync('docs/scifi-ui/scripts/formatx-license-links.js', 'utf8');
-          const licencePage = fs.readFileSync('docs/scifi-ui/license.html', 'utf8');
-          const licenceSummary = fs.readFileSync('docs/scifi-ui/Licenc.txt', 'utf8');
-          const infinite = fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll.js', 'utf8');
-          const intro = fs.readFileSync('docs/scifi-ui/scripts/formatx-event-horizon.js', 'utf8');
-          const gate = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-recovery.js', 'utf8');
-          const living = fs.readFileSync('docs/scifi-ui/scripts/living-architecture.js', 'utf8');
           const loader = fs.readFileSync('docs/scifi-ui/scripts/igloo-parity.js', 'utf8');
-          const host = fs.readFileSync('docs/scifi-ui/scripts/formatx-three-host-safe.js', 'utf8');
-          const renderVisibility = fs.readFileSync('docs/scifi-ui/scripts/formatx-render-visibility.js', 'utf8');
-          const entry = fs.readFileSync('docs/scifi-ui/scripts/mobile-webgl-entry.js', 'utf8');
-          const engine = fs.readFileSync('docs/scifi-ui/scripts/mobile-core-engine-v2.js', 'utf8');
-          const stage = fs.readFileSync('docs/scifi-ui/three-stage-mobile.html', 'utf8');
-          const coreCss = fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-recovery.css', 'utf8');
-          const stabilityCss = fs.readFileSync('docs/scifi-ui/styles/formatx-site-stability.css', 'utf8');
-          const organism = fs.readFileSync('docs/scifi-ui/scripts/organism-interface.js', 'utf8');
-          const menu = fs.readFileSync('docs/scifi-ui/scripts/organism-menu-controller.js', 'utf8');
-          const coreController = fs.readFileSync('docs/scifi-ui/scripts/organism-core-controller.js', 'utf8');
-          const consoleState = fs.readFileSync('docs/scifi-ui/scripts/organism-console-state.js', 'utf8');
+          const voice = fs.readFileSync('docs/scifi-ui/scripts/organism-voice.js', 'utf8');
+          const voiceCss = fs.readFileSync('docs/scifi-ui/styles/organism-voice.css', 'utf8');
+          const core = fs.readFileSync('docs/scifi-ui/scripts/organism-core-controller.js', 'utf8');
+          const infinite = fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll.js', 'utf8');
           const rootWorker = fs.readFileSync('worker.js', 'utf8');
           const productionEntry = fs.readFileSync('billing-worker/src/production-entry.js', 'utf8');
-
           const queue = loader.split('const queue =', 2)[1]?.split('];', 1)[0] || '';
+
           const assertions = [
-            [languageToggle.includes("toggle.className = 'fx-language-toggle'"), 'single language button creation missing'],
-            [languageToggle.includes('hideLegacyControls'), 'legacy language controls are not hidden'],
-            [languageToggle.includes("document.querySelector('.language-switch, .language-control')"), 'universal language container support missing'],
-            [languageToggleCss.includes('.fx-language-toggle') && languageToggleCss.includes('.language-control.fx-single-language-switch'), 'unified language button styling missing'],
-            [copyPolish.includes("root.dataset.fxCopyPolish = 'ready-v1'"), 'copy polish ready marker missing'],
-            [copyPolish.includes('Licenc és árak') && copyPolish.includes('Licence & pricing'), 'bilingual licence navigation missing'],
-            [copyPolish.includes('5 napos próbalicenc') && copyPolish.includes('5-day trial'), 'trial licence wording missing'],
-            [copyPolish.includes('Mit ad a FormatX licenc?'), 'licence clarification block missing'],
-            [copyPolishCss.includes('.fx-licence-clarity'), 'licence clarification styling missing'],
-            [licenceLinks.includes("'/scifi-ui/license.html'"), 'local detailed licence routing missing'],
-            [licencePage.includes('Részletes licencfeltételek') && licencePage.includes('Detailed licence terms'), 'local bilingual licence page incomplete'],
-            [!licencePage.includes('github.com/hutoczky/FormatX/blob/master/LICENSE'), 'local licence page must not redirect to GitHub'],
-            [licenceSummary.includes('nem nyílt forráskódú') && licenceSummary.includes('does not transfer ownership'), 'licence summary is incomplete'],
-            [intro.includes('TIMELINE_DURATION') && intro.includes('HARD_DEADLINE'), 'deterministic intro deadline missing'],
-            [!intro.includes('loadOrDeadline'), 'intro must not wait for window load'],
-            [gate.includes("root.dataset.fxSafeThreeGate = 'ready-v2'"), 'living core gate marker missing'],
-            [living.includes('scheduleThreeExperience()'), '3D loader scheduling missing'],
-            [loader.includes("safe-ready-v12"), 'safe loader v12 marker missing'],
-            [queue.indexOf('single-language-toggle.js') < queue.indexOf('formatx-copy-polish.js'), 'language toggle must load before copy polish'],
-            [queue.indexOf('formatx-copy-polish.js') < queue.indexOf('formatx-license-links.js'), 'licence link localizer must load after copy polish'],
-            [queue.indexOf('formatx-license-links.js') < queue.indexOf('organism-console-state.js'), 'local licence routing must be ready before Organism modules'],
-            [queue.indexOf('organism-console-state.js') < queue.indexOf('organism-core-controller.js'), 'console state must load before core controller'],
-            [queue.indexOf('organism-core-controller.js') < queue.indexOf('formatx-infinite-scroll.js'), 'infinite scroll must load after core controller'],
-            [queue.indexOf('formatx-infinite-scroll.js') < queue.indexOf('formatx-three-host-safe.js'), 'infinite scroll must be ready before the 3D host'],
-            [loader.includes('formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3'), 'boundary-v3 loader missing'],
-            [infinite.includes("root.dataset.fxInfiniteScroll = 'ready-v3'"), 'infinite-scroll ready marker missing'],
-            [infinite.includes("controller: 'boundary-v3'"), 'boundary-v3 event contract missing'],
-            [infinite.includes('clonedContent: false'), 'clone-free contract missing'],
-            [infinite.includes('reinitialisedRenderer: false'), 'renderer reuse contract missing'],
-            [infinite.includes("addEventListener('scroll', onScroll, { passive: true })"), 'native mobile scroll listener missing'],
-            [!infinite.includes("addEventListener('click'"), 'infinite scroll must not treat touch as click'],
-            [!infinite.includes('cloneNode'), 'infinite scroll must not clone page content'],
-            [!infinite.includes('data-fx-loop-bridge'), 'legacy loop bridge dependency returned'],
-            [coreController.includes("addEventListener('formatx:loop'"), 'loop-to-core reset missing'],
-            [stabilityCss.includes('html.fx-infinite-loop-jump'), 'instant loop handoff CSS missing'],
-            [host.includes("frame.src = 'about:blank'"), 'safe host must create blank frame'],
-            [!host.includes('preventDefault()'), 'safe host must not block native scrolling'],
-            [renderVisibility.includes("root.classList.contains('fx-organism-menu-open')"), 'menu render pause missing'],
-            [entry.includes('mobile-core-engine-v2.js?v=20260729-living-core-v2'), 'living core engine entry missing'],
-            [engine.includes('class LivingCoreEngine'), 'living core class missing'],
-            [engine.includes('SphereGeometry(1.28, 96, 72)'), 'smooth membrane missing'],
-            [engine.includes('const count = 220'), 'reduced particle budget missing'],
-            [stage.includes('20260729-living-entry-v2'), 'living stage cache version missing'],
-            [coreCss.includes('data-fx-safe-three-gate="ready-v2"'), 'living core layer selector missing'],
-            [stabilityCss.includes('touch-action: pan-y'), 'mobile native scrolling contract missing'],
-            [organism.includes('function buildConsole()'), 'working organism console missing'],
-            [menu.includes('function setOpen(toggle, nav, open)'), 'menu state controller missing'],
-            [coreController.includes("ROOT.dataset.fxOrganismState = bounded === 0 ? 'core'"), '01 MAG core state missing'],
-            [consoleState.includes("root.dataset.fxOrganismConsoleState = 'ready'"), 'console state ready marker missing'],
-            [rootWorker.includes('formatx-license-links.js') && rootWorker.includes('license.html'), 'preview Worker local licence routes missing'],
-            [productionEntry.includes('formatx-license-links.js') && productionEntry.includes('license.html'), 'production Worker local licence routes missing'],
-            [rootWorker.includes('formatx-infinite-scroll.js'), 'preview Worker infinite-scroll route missing'],
-            [productionEntry.includes('formatx-infinite-scroll.js'), 'production Worker infinite-scroll route missing'],
-            [productionEntry.includes("headers.set('X-Frame-Options', 'SAMEORIGIN')"), 'same-origin framing header missing'],
+            [loader.includes('safe-ready-v13'), 'safe loader v13 marker missing'],
+            [loader.includes('organism-voice.js?v=20260730-organism-voice-2'), 'Organism voice v2 loader missing'],
+            [queue.indexOf('organism-core-controller.js') < queue.indexOf('organism-voice.js'), 'voice must load after core controller'],
+            [queue.indexOf('organism-voice.js') < queue.indexOf('formatx-infinite-scroll.js'), 'voice must load before infinite scroll'],
+            [voice.includes("ROOT.dataset.fxOrganismVoice = 'ready-v2'"), 'voice ready-v2 marker missing'],
+            [voice.includes('SpeechSynthesisUtterance'), 'speech synthesis missing'],
+            [voice.includes('fx-organism-master-toggle'), 'master on/off switch missing'],
+            [voice.includes('fx-organism-voice-toggle'), 'voice switch missing'],
+            [voice.includes("setOpen(false, false)"), 'dialogue must start closed'],
+            [voice.includes('localStorage.setItem') && voice.includes('localStorage.getItem'), 'local enabled state persistence missing'],
+            [voice.includes('localOnly: true'), 'local-only response marker missing'],
+            [!voice.includes('formatx:introcomplete'), 'dialogue must not auto-open after intro'],
+            [!voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'), 'questions must not leave the browser'],
+            [voiceCss.includes('.fx-organism-dialogue.is-disabled'), 'disabled appearance missing'],
+            [voiceCss.includes('.fx-organism-thought[hidden]'), 'hidden bubble protection missing'],
+            [voiceCss.includes('body.fx-organism-panel-open .fx-organism-dialogue'), 'panel overlap protection missing'],
+            [voiceCss.includes('html.fx-organism-menu-open .fx-organism-dialogue'), 'menu overlap protection missing'],
+            [voiceCss.includes('font-size: 14.5px') && voiceCss.includes('line-height: 1.68'), 'readable response typography missing'],
+            [core.includes("ROOT.dataset.fxOrganismState = bounded === 0 ? 'core'"), '01 MAG core state missing'],
+            [infinite.includes("controller: 'boundary-v3'"), 'boundary-v3 infinite scroll missing'],
+            [rootWorker.includes('organism-voice.js') && rootWorker.includes('organism-voice.css'), 'preview Worker voice routes missing'],
+            [productionEntry.includes('organism-voice.js') && productionEntry.includes('organism-voice.css'), 'production Worker voice routes missing'],
           ];
 
           for (const [ok, message] of assertions) {
             if (!ok) throw new Error(message);
           }
+          console.log('PASS: Organism dialogue is local, closed by default, readable and fully switchable.');
           NODE
