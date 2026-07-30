@@ -7,6 +7,9 @@
 
   const MAX_QUESTION_LENGTH = 180;
   const STORAGE_KEY = 'formatx-organism-dialogue-enabled';
+  const speechSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  const synth = speechSupported ? window.speechSynthesis : null;
+
   const SCENES = Object.freeze([
     {
       id: 'hero',
@@ -52,8 +55,8 @@
       id: 'resources',
       label: { hu: '06 / JELADÓ', en: '06 / BEACON' },
       response: {
-        hu: 'A jeladó gyűjti össze a stabil kiadásokat, az Android alkalmazást, a támogatást, a dokumentációt és a helyben megnyíló jogi információkat.',
-        en: 'The beacon collects stable releases, the Android application, support, documentation and legal information that opens inside the FormatX site.'
+        hu: 'A jeladó gyűjti össze az aktuális kiadást, az Android alkalmazást, a támogatást, a dokumentációt és a helyben megnyíló jogi információkat.',
+        en: 'The beacon collects the current release, the Android application, support, documentation and legal information that opens inside the FormatX site.'
       }
     }
   ]);
@@ -77,6 +80,10 @@
       repeat: 'Válasz újbóli felolvasása',
       privacy: 'A válasz helyben készül · a hangot a készülék vagy a böngésző beszédszolgáltatása adja',
       unsupported: 'A böngésző ezen az eszközön nem támogatja a gépi beszédet.',
+      voiceReady: 'A FormatX hangja bekapcsolva.',
+      voiceStarting: 'Hang indítása…',
+      voiceWorking: 'Hang működik',
+      voiceError: 'A hang nem indult el. Ellenőrizd a médiahangot és az Android szövegfelolvasó szolgáltatását, majd nyomd meg újra a Hang be gombot.',
       welcome: 'Kapcsolat létrejött. Én vagyok a FormatX MAG. Kérdezz a működésről, modulokról, licencekről, biztonságról, fizetésről vagy letöltésről.',
       empty: 'Írj be egy kérdést, és a helyi FormatX tudás alapján válaszolok.',
       unknown: 'Ezt a kérdést a helyi tudásom nem tudja biztosan megválaszolni. Kérdezz a működésről, modulokról, árakról, licencről, QR-fizetésről, biztonságról vagy letöltésről.'
@@ -99,6 +106,10 @@
       repeat: 'Read the response again',
       privacy: 'The response is generated locally · speech uses the device or browser voice service',
       unsupported: 'Speech synthesis is not supported by this browser on this device.',
+      voiceReady: 'The FormatX voice is enabled.',
+      voiceStarting: 'Starting voice…',
+      voiceWorking: 'Voice is working',
+      voiceError: 'Speech did not start. Check media volume and the Android text-to-speech service, then press Voice on again.',
       welcome: 'Connection established. I am the FormatX CORE. Ask about workflow, modules, licences, safety, payment or downloads.',
       empty: 'Enter a question and I will answer from the local FormatX knowledge base.',
       unknown: 'My local knowledge cannot answer that question reliably. Ask about workflow, modules, pricing, licences, QR payment, safety or downloads.'
@@ -115,7 +126,7 @@
       ['qr|fizetés|bank|átutal', 'A csomag QR-kódja először a kiválasztott rendelési oldalt nyitja meg. A tényleges banki QR az adatok és a rendelési azonosító megadása után készül el. A rendszer nem végez automatikus terhelést.'],
       ['biztonság|biztonságos|védelem|sha|ed25519', 'A FormatX biztonsági modellje célmeghajtó-védelmet, egyértelmű megerősítéseket, naplózott lépéseket, SHA-256 ellenőrzést és Ed25519-aláírási bizonyítékot használ.'],
       ['platform|linux|bazzite|windows|macos|android', 'A Linux és Bazzite az elsődleges környezet. A honlap Windows-, macOS-, webes és Android-hozzáférést is felsorol; az Android APK a jeladó és a fő letöltési műveletek közül érhető el.'],
-      ['letölt|apk|release|kiadás', 'A teljes kiadás a fő letöltési gombból, az Android APK a külön Android műveletből, a kiadások és támogatási információk pedig a 06 JELADÓ panelből érhetők el.'],
+      ['letölt|apk|release|kiadás', 'Az aktuális kiadás a fő letöltési gombból, az Android APK a külön Android műveletből, a kiadások és támogatási információk pedig a 06 JELADÓ panelből érhetők el.'],
       ['modul|szerv|iso|formáz|partíció|smart|törlés', 'A hat rendszerszerv: ISO írás és ellenőrzés, formázás, partíciótervezés, biztonságos törlés, SMART-diagnosztika és AI-alapú magyarázat.'],
       ['adat|adatküldés|privát|kérdés hova', 'A kérdés feldolgozása és a válasz helyben, a böngészőben történik. Ha bekapcsolod a hangot, a felolvasást az eszközöd vagy a böngésződ beszédszolgáltatása végzi; az elérhető hang lehet helyi vagy online.'],
       ['köszön|köszi|rendben', 'Szívesen. A rendszer készen áll a következő kérdésre.']
@@ -129,7 +140,7 @@
       ['qr|payment|bank|transfer', 'A plan QR code first opens the selected checkout page. The actual bank-transfer QR is generated after order details and the order reference are entered. The system never charges automatically.'],
       ['safety|secure|protection|sha|ed25519', 'The FormatX safety model uses target-drive protection, explicit confirmations, logged steps, SHA-256 verification and Ed25519 signature proof.'],
       ['platform|linux|bazzite|windows|macos|android', 'Linux and Bazzite are the primary environment. The site also lists Windows, macOS, web and Android access; the Android APK is available from the beacon and the main download actions.'],
-      ['download|apk|release', 'The full release is available from the main download action, the Android APK from the Android action, and releases and support information from the 06 BEACON panel.'],
+      ['download|apk|release', 'The current release is available from the main download action, the Android APK from the Android action, and releases and support information from the 06 BEACON panel.'],
       ['module|organ|iso|format|partition|smart|erase', 'The six system organs are ISO writing and verification, formatting, partition planning, secure erase, SMART diagnostics and AI-assisted guidance.'],
       ['data|privacy|send|question stored', 'Your question and the generated response are processed locally in the browser. When voice is enabled, playback is provided by your device or browser speech service, and the selected voice may be local or online.'],
       ['thanks|thank you|okay', 'You are welcome. The system is ready for the next question.']
@@ -153,12 +164,12 @@
   let opened = false;
   let enabled = readEnabled();
   let speechEnabled = false;
-  const speechSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   let selectedVoice = null;
   let selectedVoiceQuality = 'default';
   let lastUserGesture = -Infinity;
   let speechRun = 0;
   let speechPauseTimer = 0;
+  let speechWatchdog = 0;
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -255,7 +266,7 @@
     masterButton.addEventListener('click', () => setEnabled(!enabled, false));
     voiceButton.addEventListener('click', toggleVoice);
     repeatButton.addEventListener('click', () => {
-      if (!enabled) return;
+      if (!enabled || !speechEnabled) return;
       setOpen(true, false);
       speak(currentText, true);
     });
@@ -321,57 +332,45 @@
   }
 
   function voiceScore(voice) {
-    const locale = language() === 'en' ? 'en-GB' : 'hu-HU';
-    const prefix = locale.slice(0, 2).toLowerCase();
-    const voiceLanguage = String(voice.lang || '').toLowerCase();
-    const descriptor = `${voice.name || ''} ${voice.voiceURI || ''}`.toLowerCase();
-    if (!voiceLanguage.startsWith(prefix)) return -10000;
-
-    let score = voiceLanguage === locale.toLowerCase() ? 140 : 100;
-    const qualitySignals = [
-      ['natural', 180], ['neural', 175], ['premium', 165], ['enhanced', 150],
-      ['online', 45], ['studio', 90], ['expressive', 85], ['wavenet', 80],
-      ['google', 75], ['microsoft', 70], ['samsung', 65], ['apple', 62], ['siri', 62]
-    ];
-    qualitySignals.forEach(([token, value]) => { if (descriptor.includes(token)) score += value; });
-    if (voice.default) score += 18;
-    if (voice.localService) score += 80;
-
-    if (language() === 'hu') {
-      if (/szabolcs|noemi|noémi|tünde|anna|google magyar/.test(descriptor)) score += 55;
-    } else if (/aria|jenny|sonia|ryan|ava|samantha|daniel|serena|google uk english/.test(descriptor)) {
-      score += 45;
-    }
-
-    if (/espeak|festival|pico|compact|mbrola|robot/.test(descriptor)) score -= 220;
+    const expected = language() === 'en' ? 'en-gb' : 'hu-hu';
+    const prefix = expected.slice(0, 2);
+    const voiceLanguage = String(voice?.lang || '').toLowerCase();
+    const descriptor = `${voice?.name || ''} ${voice?.voiceURI || ''}`.toLowerCase();
+    let score = 0;
+    if (voiceLanguage === expected) score += 1000;
+    else if (voiceLanguage.startsWith(prefix)) score += 700;
+    else if (voice?.default) score += 80;
+    else score -= 500;
+    if (/natural|neural|premium|enhanced|studio|expressive|wavenet/.test(descriptor)) score += 500;
+    if (/google|microsoft|samsung|apple|siri/.test(descriptor)) score += 220;
+    if (/online/.test(descriptor)) score += 80;
+    if (voice?.localService) score += 60;
+    if (voice?.default) score += 40;
+    if (/espeak|festival|pico|compact|mbrola|robot/.test(descriptor)) score -= 160;
     return score;
   }
 
   function selectVoice() {
     if (!speechSupported) return null;
-    const voices = speechSynthesis.getVoices();
+    const voices = synth.getVoices();
     selectedVoice = voices
       .map(voice => ({ voice, score: voiceScore(voice) }))
-      .filter(item => item.score > -1000)
       .sort((a, b) => b.score - a.score)[0]?.voice || null;
-
     const descriptor = `${selectedVoice?.name || ''} ${selectedVoice?.voiceURI || ''}`.toLowerCase();
     selectedVoiceQuality = /natural|neural|premium|enhanced|studio|expressive|wavenet/.test(descriptor)
       ? 'premium'
       : /google|microsoft|samsung|apple|siri|online/.test(descriptor)
         ? 'enhanced'
         : 'standard';
-
     ROOT.dataset.fxOrganismVoiceLanguage = selectedVoice?.lang || (language() === 'en' ? 'en-GB' : 'hu-HU');
     ROOT.dataset.fxOrganismVoiceName = selectedVoice?.name || 'browser-default';
     ROOT.dataset.fxOrganismVoiceQuality = selectedVoiceQuality;
-    ROOT.dataset.fxOrganismVoiceService = selectedVoice?.localService === false ? 'browser-online' : 'device-local';
+    ROOT.dataset.fxOrganismVoiceService = selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser';
     return selectedVoice;
   }
 
   function prepareSpeechText(text) {
-    let value = String(text || '').replace(/\s+/g, ' ').trim();
-    value = value.replace(/FormatX/g, 'Format X');
+    let value = String(text || '').replace(/\s+/g, ' ').trim().replace(/FormatX/g, 'Format X');
     if (language() === 'hu') {
       return value
         .replace(/SHA-256/gi, 'SHA kettő öt hat')
@@ -395,42 +394,17 @@
   function splitSpeech(text) {
     const prepared = prepareSpeechText(text);
     const sentences = prepared.match(/[^.!?;:]+[.!?;:]?|[^.!?;:]+$/g) || [prepared];
-    const chunks = [];
-
-    sentences.forEach(sentence => {
-      const clean = sentence.trim();
-      if (!clean) return;
-      if (clean.length <= 170) {
-        chunks.push(clean);
-        return;
-      }
-
-      const clauses = clean.split(/(?<=[,–—])\s+/);
-      let buffer = '';
-      clauses.forEach(clause => {
-        const candidate = buffer ? `${buffer} ${clause}` : clause;
-        if (candidate.length > 150 && buffer) {
-          chunks.push(buffer.trim());
-          buffer = clause;
-        } else {
-          buffer = candidate;
-        }
-      });
-      if (buffer.trim()) chunks.push(buffer.trim());
-    });
-
-    return chunks.filter(Boolean);
+    return sentences.map(value => value.trim()).filter(Boolean);
   }
 
   function prosody(chunk, index, count) {
-    const premium = selectedVoiceQuality === 'premium' || selectedVoiceQuality === 'enhanced';
     const isQuestion = /\?$/.test(chunk);
     const isFinal = index === count - 1;
     const baseRate = language() === 'en' ? 0.97 : 0.94;
     return {
-      rate: Math.max(0.82, Math.min(1.05, baseRate + (premium ? 0.015 : -0.025) + (isFinal ? -0.012 : 0))),
+      rate: Math.max(0.84, Math.min(1.05, baseRate + (selectedVoiceQuality === 'premium' ? 0.01 : -0.02) + (isFinal ? -0.01 : 0))),
       pitch: Math.max(0.9, Math.min(1.08, (language() === 'en' ? 1.0 : 0.98) + (isQuestion ? 0.025 : 0))),
-      volume: 0.92
+      volume: 1
     };
   }
 
@@ -441,91 +415,136 @@
     return 90;
   }
 
+  function clearSpeechTimers() {
+    clearTimeout(speechPauseTimer);
+    clearTimeout(speechWatchdog);
+    speechPauseTimer = 0;
+    speechWatchdog = 0;
+  }
+
   function finishSpeech(run, text, explicit) {
     if (run !== speechRun) return;
+    clearSpeechTimers();
     ROOT.dataset.fxOrganismSpeech = 'idle';
     shell?.classList.remove('is-speaking');
+    privacyNote.textContent = `${copy().voiceWorking}${selectedVoice ? ' · ' + selectedVoice.name : ''}`;
     dispatchEvent(new CustomEvent('formatx:organismspeechend', {
       detail: {
         text,
         explicit: Boolean(explicit),
         voice: selectedVoice?.name || 'browser-default',
-        service: selectedVoice?.localService === false ? 'browser-online' : 'device-local'
+        service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser'
       }
     }));
   }
 
+  function failSpeech(run) {
+    if (run !== speechRun) return;
+    clearSpeechTimers();
+    ROOT.dataset.fxOrganismSpeech = 'error';
+    ROOT.dataset.fxOrganismVoiceError = 'speech-start-timeout';
+    shell?.classList.remove('is-speaking');
+    privacyNote.textContent = copy().voiceError;
+  }
+
   function speak(text, explicit) {
     if (!enabled || !speechSupported || !speechEnabled || !text) return;
-    try {
-      stopSpeech();
-      const run = ++speechRun;
-      const chunks = splitSpeech(text);
-      if (!chunks.length) return;
-      const voice = selectVoice();
+    clearSpeechTimers();
+    const run = ++speechRun;
+    const chunks = splitSpeech(text);
+    if (!chunks.length) return;
+    selectVoice();
+
+    const speakChunk = (index, fallback) => {
+      if (run !== speechRun || !speechEnabled) return;
+      if (index >= chunks.length) {
+        finishSpeech(run, text, explicit);
+        return;
+      }
+
+      const chunk = chunks[index];
+      const utterance = new SpeechSynthesisUtterance(chunk);
+      utterance.lang = language() === 'en' ? 'en-GB' : 'hu-HU';
+      const profile = prosody(chunk, index, chunks.length);
+      utterance.rate = profile.rate;
+      utterance.pitch = profile.pitch;
+      utterance.volume = profile.volume;
+      if (!fallback && selectedVoice) utterance.voice = selectedVoice;
       let started = false;
 
-      const speakChunk = index => {
-        if (run !== speechRun || index >= chunks.length) {
-          finishSpeech(run, text, explicit);
-          return;
+      speechWatchdog = window.setTimeout(() => {
+        if (run !== speechRun || started) return;
+        if (!fallback) {
+          try { synth.cancel(); } catch (_) {}
+          selectedVoice = null;
+          window.setTimeout(() => speakChunk(index, true), 90);
+        } else {
+          failSpeech(run);
         }
+      }, 1800);
 
-        const chunk = chunks[index];
-        const utterance = new SpeechSynthesisUtterance(chunk);
-        utterance.lang = language() === 'en' ? 'en-GB' : 'hu-HU';
-        const profile = prosody(chunk, index, chunks.length);
-        utterance.rate = profile.rate;
-        utterance.pitch = profile.pitch;
-        utterance.volume = profile.volume;
-        if (voice) utterance.voice = voice;
+      utterance.addEventListener('start', () => {
+        if (run !== speechRun) return;
+        started = true;
+        clearTimeout(speechWatchdog);
+        ROOT.dataset.fxOrganismSpeech = 'speaking';
+        ROOT.dataset.fxOrganismSpeechMode = 'sentence-prosody-v3';
+        shell?.classList.add('is-speaking');
+        privacyNote.textContent = `${copy().voiceWorking}${utterance.voice?.name ? ' · ' + utterance.voice.name : ''}`;
+        dispatchEvent(new CustomEvent('formatx:organismspeechstart', {
+          detail: {
+            text,
+            explicit: Boolean(explicit),
+            voice: utterance.voice?.name || selectedVoice?.name || 'browser-default',
+            quality: selectedVoiceQuality,
+            service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser',
+            chunks: chunks.length
+          }
+        }));
+      }, { once: true });
 
-        utterance.addEventListener('start', () => {
-          if (run !== speechRun || started) return;
-          started = true;
-          ROOT.dataset.fxOrganismSpeech = 'speaking';
-          ROOT.dataset.fxOrganismSpeechMode = 'sentence-prosody-v3';
-          shell?.classList.add('is-speaking');
-          dispatchEvent(new CustomEvent('formatx:organismspeechstart', {
-            detail: {
-              text,
-              explicit: Boolean(explicit),
-              voice: voice?.name || 'browser-default',
-              quality: selectedVoiceQuality,
-              service: voice?.localService === false ? 'browser-online' : 'device-local',
-              chunks: chunks.length
-            }
-          }));
-        }, { once: true });
+      utterance.addEventListener('end', () => {
+        if (run !== speechRun) return;
+        clearTimeout(speechWatchdog);
+        speechPauseTimer = window.setTimeout(() => speakChunk(index + 1, false), pauseAfter(chunk));
+      }, { once: true });
 
-        utterance.addEventListener('end', () => {
-          if (run !== speechRun) return;
-          speechPauseTimer = window.setTimeout(() => speakChunk(index + 1), pauseAfter(chunk));
-        }, { once: true });
+      utterance.addEventListener('error', event => {
+        if (run !== speechRun) return;
+        clearTimeout(speechWatchdog);
+        if (event.error === 'canceled' || event.error === 'interrupted') return;
+        if (!fallback) {
+          selectedVoice = null;
+          window.setTimeout(() => speakChunk(index, true), 90);
+        } else {
+          failSpeech(run);
+        }
+      }, { once: true });
 
-        utterance.addEventListener('error', event => {
-          if (run !== speechRun) return;
-          if (event.error === 'canceled' || event.error === 'interrupted') return;
-          speechPauseTimer = window.setTimeout(() => speakChunk(index + 1), 60);
-        }, { once: true });
+      try {
+        synth.resume();
+        synth.speak(utterance);
+      } catch (_) {
+        if (!fallback) window.setTimeout(() => speakChunk(index, true), 90);
+        else failSpeech(run);
+      }
+    };
 
-        speechSynthesis.speak(utterance);
-      };
-
-      speakChunk(0);
-    } catch (error) {
-      ROOT.dataset.fxOrganismSpeech = 'error';
-      ROOT.dataset.fxOrganismVoiceError = String(error?.message || error).slice(0, 120);
-      shell?.classList.remove('is-speaking');
+    privacyNote.textContent = copy().voiceStarting;
+    ROOT.dataset.fxOrganismSpeech = 'starting';
+    if (synth.speaking || synth.pending) {
+      try { synth.cancel(); } catch (_) {}
+      window.setTimeout(() => speakChunk(0, false), 80);
+    } else {
+      speakChunk(0, false);
     }
   }
 
   function stopSpeech() {
     speechRun += 1;
-    clearTimeout(speechPauseTimer);
-    speechPauseTimer = 0;
+    clearSpeechTimers();
     if (speechSupported) {
-      try { speechSynthesis.cancel(); } catch (_) {}
+      try { synth.cancel(); } catch (_) {}
     }
     ROOT.dataset.fxOrganismSpeech = 'idle';
     shell?.classList.remove('is-speaking');
@@ -542,9 +561,10 @@
     updateLanguage();
     if (speechEnabled) {
       selectVoice();
-      speak(currentText || copy().welcome, true);
+      speak(copy().voiceReady, true);
     } else {
       stopSpeech();
+      privacyNote.textContent = copy().privacy;
     }
   }
 
@@ -593,8 +613,10 @@
     voiceButton.disabled = !enabled || !speechSupported;
     repeatButton.setAttribute('aria-label', words.repeat);
     repeatButton.title = words.repeat;
-    repeatButton.disabled = !enabled || !speechSupported;
-    privacyNote.textContent = words.privacy;
+    repeatButton.disabled = !enabled || !speechSupported || !speechEnabled;
+    if (ROOT.dataset.fxOrganismSpeech !== 'speaking' && ROOT.dataset.fxOrganismSpeech !== 'starting') {
+      privacyNote.textContent = words.privacy;
+    }
     selectedVoice = null;
     selectVoice();
     if (enabled) {
@@ -612,6 +634,7 @@
 
   function noteUserGesture() {
     lastUserGesture = performance.now();
+    try { synth?.resume(); } catch (_) {}
   }
 
   function initialise() {
@@ -622,7 +645,7 @@
     setEnabled(enabled, false);
     setOpen(false, false);
 
-    document.addEventListener('pointerdown', noteUserGesture, true);
+    document.addEventListener('pointerdown', noteUserGesture, { capture: true, passive: true });
     document.addEventListener('keydown', noteUserGesture, true);
     addEventListener('formatx:organismstatechange', handleStateChange);
     addEventListener('formatx:languagechange', () => {
@@ -637,7 +660,7 @@
 
     if (speechSupported) {
       selectVoice();
-      speechSynthesis.addEventListener?.('voiceschanged', () => {
+      synth.addEventListener?.('voiceschanged', () => {
         selectedVoice = null;
         selectVoice();
       });
@@ -660,7 +683,8 @@
         speechEnabled = Boolean(value) && enabled && speechSupported;
         ROOT.dataset.fxOrganismVoiceEnabled = String(speechEnabled);
         updateLanguage();
-        if (!speechEnabled) stopSpeech();
+        if (speechEnabled) speak(copy().voiceReady, true);
+        else stopSpeech();
       },
       voiceInfo() {
         return Object.freeze({
@@ -668,7 +692,7 @@
           language: selectedVoice?.lang || (language() === 'en' ? 'en-GB' : 'hu-HU'),
           quality: selectedVoiceQuality,
           localService: selectedVoice?.localService !== false,
-          service: selectedVoice?.localService === false ? 'browser-online' : 'device-local',
+          service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser',
           mode: 'sentence-prosody-v3'
         });
       }
@@ -678,6 +702,7 @@
     ROOT.dataset.fxOrganismVoiceEnabled = 'false';
     ROOT.dataset.fxOrganismDialogueEnabled = String(enabled);
     ROOT.dataset.fxOrganismSpeech = 'idle';
+    ROOT.dataset.fxOrganismSpeechCompatibility = 'adaptive-v3';
     dispatchEvent(new CustomEvent('formatx:organismvoiceready', {
       detail: {
         speechSupported,
@@ -686,15 +711,12 @@
         enabled,
         voice: selectedVoice?.name || 'browser-default',
         quality: selectedVoiceQuality,
-        service: selectedVoice?.localService === false ? 'browser-online' : 'device-local',
+        service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser',
         mode: 'sentence-prosody-v3'
       }
     }));
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initialise, { once: true });
-  } else {
-    initialise();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
+  else initialise();
 }());
