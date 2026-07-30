@@ -13,6 +13,7 @@ const LANGUAGE_PAGE_PATHS = new Set([
   '/scifi-ui/downloads/',
   '/scifi-ui/downloads/index.html',
   '/scifi-ui/downloads/android.html',
+  '/scifi-ui/test-matrix.html',
   '/scifi-ui/payment/success.html',
   '/scifi-ui/payment/cancel.html',
 ]);
