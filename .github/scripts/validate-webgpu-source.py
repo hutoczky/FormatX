@@ -17,6 +17,8 @@ interaction = read("docs/scifi-ui/scripts/organism-core-interaction.js")
 interaction_css = read("docs/scifi-ui/styles/organism-core-interaction.css")
 speaking_css = read("docs/scifi-ui/styles/organism-speaking-visual.css")
 mobile_readability = read("docs/scifi-ui/styles/formatx-mobile-readability.css")
+mobile_unified = read("docs/scifi-ui/scripts/formatx-mobile-unified.js")
+mobile_unified_css = read("docs/scifi-ui/styles/formatx-mobile-unified.css")
 render_visibility = read("docs/scifi-ui/scripts/formatx-render-visibility.js")
 core_controller = read("docs/scifi-ui/scripts/organism-core-controller.js")
 infinite = read("docs/scifi-ui/scripts/formatx-infinite-scroll.js")
@@ -52,15 +54,16 @@ require("intro: deterministic timeline", "TIMELINE_DURATION" in intro and "HARD_
 require("intro: does not wait for window load", "loadOrDeadline" not in intro)
 
 require_tokens("loader", loader, (
-    "safe-ready-v17",
+    "safe-ready-v18",
     "organism-core-controller.js?v=20260729-core-ui-2",
     "organism-voice.js?v=20260730-organism-voice-2",
     "organism-voice-foreground.js?v=20260730-organism-foreground-1",
     "organism-core-interaction.js?v=20260730-core-interaction-1",
+    "formatx-mobile-unified.js?v=20260730-mobile-unified-1",
     "organism-speaking-visual.css?v=20260730-speaking-visual-1",
     "formatx-mobile-readability.css?v=20260730-mobile-readability-1",
     "formatx-render-visibility.js?v=20260730-render-visibility-2",
-    "formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3",
+    "formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4",
     "formatx-three-host-safe.js",
     "load(index + 1)",
 ))
@@ -68,7 +71,8 @@ queue = loader.split("const queue =", 1)[1].split("];", 1)[0]
 require("loader order: core before voice", queue.index("organism-core-controller.js") < queue.index("organism-voice.js"))
 require("loader order: voice before foreground guard", queue.index("organism-voice.js") < queue.index("organism-voice-foreground.js"))
 require("loader order: foreground before MAG interaction", queue.index("organism-voice-foreground.js") < queue.index("organism-core-interaction.js"))
-require("loader order: MAG interaction before infinite scroll", queue.index("organism-core-interaction.js") < queue.index("formatx-infinite-scroll.js"))
+require("loader order: interaction before unified mobile", queue.index("organism-core-interaction.js") < queue.index("formatx-mobile-unified.js"))
+require("loader order: unified mobile before infinite scroll", queue.index("formatx-mobile-unified.js") < queue.index("formatx-infinite-scroll.js"))
 require("loader: no legacy infinite controller", "formatx-infinite-loop-controller-v2.js" not in loader)
 require("loader: WebGL adapter remains lazy", "interaction-genome-webgl-adapter.js" not in queue)
 
@@ -124,6 +128,26 @@ require_tokens("mobile readability", mobile_readability, (
 ))
 require("mobile readability: text contrast layer", "backdrop-filter: blur(17px)" in mobile_readability)
 require("mobile readability: category deck opaque", "rgba(2, 8, 15, .995)" in mobile_readability)
+
+require_tokens("unified mobile controller", mobile_unified, (
+    "ready-v1",
+    "formatx-mobile-unified.css?v=20260730-mobile-unified-1",
+    "formatx:pagestartscroll",
+    "closeDialogueForScroll",
+    "--fx-visual-viewport-height",
+))
+require_tokens("unified mobile CSS", mobile_unified_css, (
+    "--fx-mobile-dock-height: 54px",
+    "right: max(var(--fx-mobile-edge)",
+    "transform: translateY(15svh) scale(.80)",
+    "grid-template-columns: repeat(3, minmax(0, 1fr))",
+    "html.fx-page-scrolling .fx-organism-dialogue",
+    "html.fx-page-scrolling .fx-organism-actionbar",
+    "max-height: min(58svh, 520px)",
+))
+require("unified mobile CSS: hero copy stays inside viewport", "margin: 0 16px !important" in mobile_unified_css)
+require("unified mobile CSS: dock does not trap scroll", "pointer-events: none !important" in mobile_unified_css)
+
 require_tokens("render visibility", render_visibility, (
     "ready-v2",
     "fxMobileCoreVisible",
@@ -157,8 +181,11 @@ require("speaking visual: desktop core placement", "left: 58%" in speaking_css a
 require("speaking visual: mobile core placement", "left: 50%" in speaking_css and "top: 43%" in speaking_css)
 
 require_tokens("infinite scroll", infinite, (
-    "boundary-v3",
-    "ready-v3",
+    "boundary-v4",
+    "ready-v4",
+    "fx-page-scrolling",
+    "formatx:pagestartscroll",
+    "formatx:pagestopscroll",
     "clonedContent: false",
     "reinitialisedRenderer: false",
     "nestedScrollerCanConsume",
@@ -200,6 +227,8 @@ require_tokens("preview Worker", root_worker, (
     "organism-core-interaction.js",
     "organism-speaking-visual.css",
     "formatx-mobile-readability.css",
+    "formatx-mobile-unified.js",
+    "formatx-mobile-unified.css",
     "Cache-Control', 'no-store",
 ))
 require_tokens("production entry", production_entry, (
@@ -209,6 +238,8 @@ require_tokens("production entry", production_entry, (
     "organism-core-interaction.js",
     "organism-speaking-visual.css",
     "formatx-mobile-readability.css",
+    "formatx-mobile-unified.js",
+    "formatx-mobile-unified.css",
     "withEmbeddableStageHeaders",
     "headers.set('X-Frame-Options', 'SAMEORIGIN')",
 ))
@@ -219,6 +250,8 @@ require_tokens("preview routes", preview_config, (
     "/scifi-ui/styles/organism-core-interaction.css",
     "/scifi-ui/styles/organism-speaking-visual.css",
     "/scifi-ui/styles/formatx-mobile-readability.css",
+    "/scifi-ui/scripts/formatx-mobile-unified.js",
+    "/scifi-ui/styles/formatx-mobile-unified.css",
 ))
 require_tokens("production security", production_worker, (
     "THREE_STAGE_CONTENT_SECURITY_POLICY",
