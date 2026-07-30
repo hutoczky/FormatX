@@ -9,24 +9,25 @@
   }
 
   html[data-fx-mobile-core-visible="true"] .fx-three-stage-shell {
-    z-index: 0 !important;
-    opacity: .56 !important;
+    z-index: var(--fx-layer-stage, 120) !important;
+    opacity: .94 !important;
     visibility: visible !important;
-    filter: brightness(.66) saturate(.82) contrast(.96) !important;
+    filter: brightness(.92) saturate(1.06) contrast(1.02) !important;
     pointer-events: none !important;
   }
 
   html[data-fx-mobile-core-visible="true"] #fx-three-frame {
-    top: -8svh !important;
-    right: -18vw !important;
+    top: -3svh !important;
+    right: -10vw !important;
     bottom: auto !important;
-    left: -18vw !important;
-    width: 136vw !important;
-    height: 112svh !important;
-    opacity: .88 !important;
-    transform: scale(.66) !important;
-    transform-origin: 50% 42% !important;
-    filter: brightness(.72) saturate(.88) !important;
+    left: -10vw !important;
+    width: 120vw !important;
+    height: 108svh !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: scale(.78) !important;
+    transform-origin: 50% 43% !important;
+    filter: brightness(.96) saturate(1.06) !important;
   }
 
   #main-content {
