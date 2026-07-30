@@ -30,6 +30,7 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/scripts/organism-menu-controller.js',
   '/scifi-ui/scripts/organism-core-controller.js',
   '/scifi-ui/scripts/organism-voice.js',
+  '/scifi-ui/scripts/organism-core-interaction.js',
   '/scifi-ui/scripts/mobile-webgl-entry.js',
   '/scifi-ui/scripts/mobile-core-engine-v2.js',
   '/scifi-ui/styles/single-language-toggle.css',
@@ -38,6 +39,8 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/styles/formatx-site-stability.css',
   '/scifi-ui/styles/organism-voice.css',
   '/scifi-ui/styles/organism-voice-dock.css',
+  '/scifi-ui/styles/organism-core-interaction.css',
+  '/scifi-ui/styles/organism-speaking-visual.css',
   '/scifi-ui/scripts/formatx-event-horizon.js',
 ]);
 const REPLACEMENTS = [
