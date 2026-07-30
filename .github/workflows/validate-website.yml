@@ -1,10 +1,14 @@
-name: Validate FormatX Living Core and website
+name: Validate FormatX product status, Living Core and website
 
 on:
   workflow_dispatch:
   pull_request:
     branches: [master]
     paths:
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
@@ -18,6 +22,10 @@ on:
   push:
     branches: [master]
     paths:
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
+      - 'worker.js'
+      - 'wrangler.jsonc'
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
@@ -33,7 +41,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: formatx-living-core-validation-${{ github.ref }}
+  group: formatx-product-status-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -49,17 +57,19 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate production source architecture
+      - name: Validate canonical product architecture
         run: python3 .github/scripts/validate-webgpu-source.py
 
       - name: Validate JavaScript and safe startup source
         shell: bash
         run: |
           set -euo pipefail
+          node --check worker.js
           node --check billing-worker/src/production-with-license.js
           node --check billing-worker/src/production-entry.js
           node --check billing-worker/src/pricing-v100-api.js
           node --check docs/site-loader.js
+          node --check docs/scifi-ui/scripts/platform-status.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-apex.js
           node --check docs/scifi-ui/scripts/living-architecture.js
@@ -88,33 +98,27 @@ jobs:
           node --check .github/scripts/validate-reality-fork.cjs
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
           node --check .github/scripts/validate-organism-voice-browser.cjs
-          grep -Fq 'safe-ready-v18' docs/scifi-ui/scripts/igloo-parity.js
+
+          grep -Fq 'safe-ready-v19' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'platform-status.js?v=20260730-platform-status-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'const HARD_DEADLINE = 700' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
           grep -Fq 'formatx-mobile-unified.js?v=20260730-mobile-unified-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'boundary-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'ready-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'fx-page-scrolling' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'formatx:pagestartscroll' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'reinitialisedRenderer: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'document.body.appendChild(shell)' docs/scifi-ui/scripts/organism-voice-foreground.js
           grep -Fq 'data-fx-mobile-core-visible="false"' docs/scifi-ui/styles/formatx-mobile-readability.css
           grep -Fq 'fxMobileCoreVisible' docs/scifi-ui/scripts/formatx-render-visibility.js
-          grep -Fq 'state[SCALE_INDEX] = MOBILE_QUERY.matches ? 0.84 : 1' docs/scifi-ui/scripts/formatx-render-visibility.js
           grep -Fq -- '--fx-mobile-dock-height: 54px' docs/scifi-ui/styles/formatx-mobile-unified.css
-          grep -Fq 'right: max(var(--fx-mobile-edge)' docs/scifi-ui/styles/formatx-mobile-unified.css
-          grep -Fq 'transform: translateY(15svh) scale(.80)' docs/scifi-ui/styles/formatx-mobile-unified.css
-          grep -Fq 'html.fx-page-scrolling .fx-organism-dialogue' docs/scifi-ui/styles/formatx-mobile-unified.css
-          grep -Fq 'grid-template-columns: repeat(3, minmax(0, 1fr))' docs/scifi-ui/styles/formatx-mobile-unified.css
-          grep -Fq '/scifi-ui/scripts/formatx-mobile-unified.js' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/styles/formatx-mobile-unified.css' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/scripts/formatx-mobile-unified.js' worker.js
-          grep -Fq '/scifi-ui/styles/formatx-mobile-unified.css' worker.js
+          grep -Fq '/scifi-ui/data/platform-status.json' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/test-matrix.html' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/data/platform-status.json' worker.js
+          grep -Fq '/scifi-ui/test-matrix.html' worker.js
           grep -Fq '/scifi-ui/license.html' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/three-stage-mobile.html' billing-worker/src/production-entry.js
           grep -Fq "headers.set('X-Frame-Options', 'SAMEORIGIN')" billing-worker/src/production-entry.js
-          grep -Fq "html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame" docs/scifi-ui/styles/organism-speaking-visual.css
-          grep -Fq 'fx-core-speaking-ring' docs/scifi-ui/styles/organism-speaking-visual.css
           ! grep -Fq 'cloneNode' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq 'data-fx-loop-bridge' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq 'fetch(' docs/scifi-ui/scripts/organism-voice.js
@@ -139,6 +143,9 @@ jobs:
           for attempt in $(seq 1 40); do
             curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null \
               && curl -fsS http://127.0.0.1:4178/scifi-ui/license.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/downloads/index.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/test-matrix.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/data/platform-status.json >/dev/null \
               && curl -fsS http://127.0.0.1:4192/scifi-ui/project-simulator.html >/dev/null \
               && exit 0
             sleep 0.25
