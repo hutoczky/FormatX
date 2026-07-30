@@ -1,4 +1,4 @@
-name: Validate unified FormatX mobile, status and Organism architecture
+name: Validate unified FormatX mobile, status and Morphing Organism architecture
 
 on:
   push:
@@ -12,6 +12,7 @@ on:
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-webgpu-source.py'
+      - '.github/scripts/validate-thought-genome.cjs'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   pull_request:
     branches: [master]
@@ -24,6 +25,7 @@ on:
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-webgpu-source.py'
+      - '.github/scripts/validate-thought-genome.cjs'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   workflow_dispatch:
 
@@ -31,7 +33,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: formatx-unified-mobile-status-organism-${{ github.ref }}
+  group: formatx-unified-mobile-morphing-organism-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -64,10 +66,13 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-voice.js
           node --check docs/scifi-ui/scripts/organism-voice-foreground.js
           node --check docs/scifi-ui/scripts/organism-core-interaction.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v2.js
+          node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v3.js
           node --input-type=module --check < billing-worker/src/production-entry.js
           node --input-type=module --check < worker.js
+          node --check .github/scripts/validate-thought-genome.cjs
 
       - name: Validate Worker ownership and critical routes
         shell: bash
@@ -91,9 +96,12 @@ jobs:
             '/scifi-ui/styles/organism-voice-dock.css',
             '/scifi-ui/styles/formatx-mobile-readability.css',
             '/scifi-ui/styles/formatx-mobile-unified.css',
+            '/scifi-ui/styles/synaptic-thought-genome.css',
             '/scifi-ui/scripts/organism-voice.js',
             '/scifi-ui/scripts/organism-voice-foreground.js',
             '/scifi-ui/scripts/organism-core-controller.js',
+            '/scifi-ui/scripts/synaptic-thought-genome.js',
+            '/scifi-ui/scripts/mobile-core-engine-v3.js',
             '/scifi-ui/scripts/formatx-render-visibility.js',
             '/scifi-ui/scripts/formatx-infinite-scroll.js',
             '/scifi-ui/scripts/formatx-mobile-unified.js',
@@ -112,12 +120,20 @@ jobs:
           }
           NODE
 
-      - name: Validate restored intro, product status and unified local Organism
+      - name: Validate restored intro, product status and local Morphing Organism
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'safe-ready-v23' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v24' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'synaptic-thought-genome.js?v=20260731-thought-genome-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'mobile-core-engine-v3.js?v=20260731-morphing-organism-v3' docs/scifi-ui/scripts/mobile-webgl-entry.js
+          grep -Fq 'three-webgl-morphing-organism-v3' docs/scifi-ui/scripts/mobile-webgl-entry.js
+          grep -Fq 'questionStored: false' docs/scifi-ui/scripts/synaptic-thought-genome.js
+          grep -Fq 'fingerprint-only' docs/scifi-ui/scripts/synaptic-thought-genome.js
+          grep -Fq 'function heartForm' docs/scifi-ui/scripts/mobile-core-engine-v3.js
+          grep -Fq 'function beaconForm' docs/scifi-ui/scripts/mobile-core-engine-v3.js
+          ! grep -Fq 'fetch(' docs/scifi-ui/scripts/synaptic-thought-genome.js
           ! grep -Fq 'organism-natural-voice' docs/scifi-ui/scripts/igloo-parity.js
           ! test -e docs/scifi-ui/scripts/organism-natural-voice.js
           grep -Fq 'organism-voice-dock.css?v=20260730-organism-dock-2' docs/scifi-ui/scripts/igloo-parity.js
