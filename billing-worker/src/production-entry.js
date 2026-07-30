@@ -45,6 +45,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/organism-menu-controller.js',
   '/scifi-ui/scripts/organism-core-controller.js',
   '/scifi-ui/scripts/organism-voice.js',
+  '/scifi-ui/scripts/organism-natural-voice.js',
   '/scifi-ui/scripts/organism-voice-foreground.js',
   '/scifi-ui/scripts/organism-core-interaction.js',
   '/scifi-ui/scripts/mobile-webgl-entry.js',
