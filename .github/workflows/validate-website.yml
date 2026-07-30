@@ -8,6 +8,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
+      - '.github/scripts/validate-three-site-v4.cjs'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/scripts/validate-reality-fork.cjs'
       - '.github/scripts/validate-interaction-genome-webgl.cjs'
@@ -20,6 +21,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-three-site.cjs'
+      - '.github/scripts/validate-three-site-v4.cjs'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/scripts/validate-reality-fork.cjs'
       - '.github/scripts/validate-interaction-genome-webgl.cjs'
@@ -81,6 +83,7 @@ jobs:
           node --check docs/scifi-ui/scripts/interaction-genome-webgl.js
           node --check docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
           node --check .github/scripts/validate-three-site.cjs
+          node --check .github/scripts/validate-three-site-v4.cjs
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-reality-fork.cjs
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
@@ -147,7 +150,7 @@ jobs:
       - name: Test Living Core, mobile and two loops
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-        run: node .github/scripts/validate-three-site.cjs
+        run: node .github/scripts/validate-three-site-v4.cjs
 
       - name: Test unified mobile visibility and Organism dialogue
         env:
