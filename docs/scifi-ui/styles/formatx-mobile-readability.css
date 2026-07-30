@@ -1,0 +1,189 @@
+/* FormatX mobile readability contract — keeps the Living Core atmospheric, never obstructive. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  html[data-fx-mobile-core-visible="false"] .fx-three-stage-shell,
+  html[data-fx-mobile-core-visible="false"] #fx-three-frame {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-mobile-core-visible="true"] .fx-three-stage-shell {
+    z-index: 0 !important;
+    opacity: .56 !important;
+    visibility: visible !important;
+    filter: brightness(.66) saturate(.82) contrast(.96) !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-mobile-core-visible="true"] #fx-three-frame {
+    top: -8svh !important;
+    right: -18vw !important;
+    bottom: auto !important;
+    left: -18vw !important;
+    width: 136vw !important;
+    height: 112svh !important;
+    opacity: .88 !important;
+    transform: scale(.66) !important;
+    transform-origin: 50% 42% !important;
+    filter: brightness(.72) saturate(.88) !important;
+  }
+
+  #main-content {
+    isolation: isolate;
+  }
+
+  #hero {
+    min-height: 100svh !important;
+    padding-bottom: 132px !important;
+    isolation: isolate;
+  }
+
+  #hero .hero-grid {
+    min-height: 100svh !important;
+  }
+
+  #hero .hero-copy {
+    z-index: 260 !important;
+    max-width: calc(100vw - 32px) !important;
+    padding: 18px 18px 20px !important;
+    border: 1px solid rgba(153, 225, 255, .18) !important;
+    border-radius: 22px !important;
+    background:
+      linear-gradient(145deg, rgba(2, 11, 19, .90), rgba(2, 8, 15, .82)),
+      radial-gradient(circle at 85% 0%, rgba(88, 223, 238, .10), transparent 48%) !important;
+    box-shadow: 0 22px 68px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+    backdrop-filter: blur(17px) saturate(118%) !important;
+  }
+
+  #hero .hero-title-main,
+  #hero .hero-title-sub,
+  #hero .hero-lead,
+  #hero .kicker {
+    position: relative;
+    z-index: 2;
+  }
+
+  #hero .hero-lead {
+    color: rgba(240, 249, 252, .92) !important;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, .86) !important;
+  }
+
+  #hero .kicker {
+    color: rgba(209, 239, 248, .86) !important;
+  }
+
+  /* The compact action dock already contains these operations on mobile. */
+  #hero.is-core-active .hero-actions,
+  #hero.is-core-active .hero-facts,
+  #hero [data-fx-simulator-entry="hero"] {
+    display: none !important;
+  }
+
+  #hero .scroll-cue {
+    bottom: 98px !important;
+    z-index: 270 !important;
+  }
+
+  .fx-category-deck--standalone,
+  .fx-category-deck,
+  .fx-origin-proof,
+  main > .scene:not(#hero) {
+    position: relative;
+    z-index: 250 !important;
+  }
+
+  .fx-category-deck--standalone,
+  .fx-category-deck,
+  .fx-origin-proof {
+    background:
+      radial-gradient(circle at 12% 0%, rgba(var(--accent), .09), transparent 24rem),
+      linear-gradient(145deg, rgba(6, 16, 28, .985), rgba(2, 8, 15, .995)) !important;
+    box-shadow: 0 28px 84px rgba(0, 0, 0, .54), inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+    backdrop-filter: blur(18px) !important;
+  }
+
+  .fx-category-deck--standalone {
+    margin-top: 24px !important;
+  }
+
+  .fx-category-deck h2,
+  .fx-origin-copy h3,
+  .fx-category-grid h3,
+  .fx-proof-grid h4 {
+    color: #f7fcff !important;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, .72) !important;
+  }
+
+  .fx-category-deck p,
+  .fx-origin-copy p,
+  .fx-category-grid p,
+  .fx-proof-grid p {
+    color: rgba(224, 239, 247, .82) !important;
+  }
+
+  .fx-organism-actionbar {
+    z-index: 820 !important;
+    background: rgba(2, 10, 18, .96) !important;
+    border-color: rgba(158, 224, 250, .22) !important;
+    box-shadow: 0 18px 58px rgba(0, 0, 0, .58) !important;
+    backdrop-filter: blur(20px) saturate(125%) !important;
+  }
+
+  /* Keep the two optional floating controls on opposite sides, above the action dock. */
+  html body .fx-organism-dialogue {
+    right: auto !important;
+    left: max(12px, env(safe-area-inset-left)) !important;
+    bottom: max(138px, calc(env(safe-area-inset-bottom) + 126px)) !important;
+    width: min(380px, calc(100vw - 24px)) !important;
+  }
+
+  html body .fx-organism-dialogue.is-open {
+    right: max(12px, env(safe-area-inset-right)) !important;
+    left: max(12px, env(safe-area-inset-left)) !important;
+    width: auto !important;
+  }
+
+  html body .fx-genome-launcher {
+    right: max(12px, env(safe-area-inset-right)) !important;
+    bottom: max(138px, calc(env(safe-area-inset-bottom) + 126px)) !important;
+    transform: scale(.86) !important;
+    transform-origin: right bottom !important;
+  }
+
+  html body .fx-organism-dialogue.is-open ~ .fx-genome-launcher,
+  body.fx-genome-open .fx-organism-dialogue {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #hero .hero-copy {
+    left: 14px !important;
+    right: 14px !important;
+    width: auto !important;
+    padding: 16px !important;
+  }
+
+  #hero .hero-title-main {
+    font-size: clamp(48px, 16vw, 72px) !important;
+  }
+
+  #hero .hero-title-sub {
+    font-size: clamp(20px, 7vw, 31px) !important;
+  }
+
+  #hero .hero-lead {
+    font-size: 13.5px !important;
+    line-height: 1.58 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-three-stage-shell,
+  #fx-three-frame {
+    transition: none !important;
+  }
+}
