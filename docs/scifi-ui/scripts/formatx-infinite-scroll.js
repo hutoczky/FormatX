@@ -2,10 +2,11 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxInfiniteScroll === 'ready-v3') return;
+  if (root.dataset.fxInfiniteScroll === 'ready-v4') return;
 
-  const BOUNDARY_PX = 10;
+  const BOUNDARY_PX = 28;
   const COOLDOWN_MS = 360;
+  const SCROLL_IDLE_MS = 190;
   const DOWN_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ']);
 
   let lastY = window.scrollY;
@@ -14,9 +15,12 @@
   let cooldownUntil = 0;
   let scrollFrame = 0;
   let settleFrame = 0;
+  let scrollIdleTimer = 0;
+  let scrolling = false;
 
   function maximumScroll() {
-    return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const viewportHeight = window.visualViewport?.height || window.innerHeight;
+    return Math.max(0, document.documentElement.scrollHeight - viewportHeight);
   }
 
   function heroTop() {
@@ -24,10 +28,15 @@
     return hero ? Math.max(0, hero.getBoundingClientRect().top + window.scrollY) : 0;
   }
 
+  function dialogueOpen() {
+    return Boolean(document.querySelector('.fx-organism-dialogue.is-open'));
+  }
+
   function overlayOpen() {
     return root.classList.contains('fx-organism-menu-open')
       || document.body?.classList.contains('fx-organism-panel-open')
-      || document.getElementById('fx-organism-console')?.classList.contains('is-authorised-open');
+      || document.getElementById('fx-organism-console')?.classList.contains('is-authorised-open')
+      || dialogueOpen();
   }
 
   function atBoundary(projectedY) {
@@ -52,8 +61,31 @@
 
   function publishReadyState() {
     root.dataset.fxInfinite = 'ready';
-    root.dataset.fxInfiniteController = 'boundary-v3';
-    root.dataset.fxInfiniteScroll = 'ready-v3';
+    root.dataset.fxInfiniteController = 'boundary-v4';
+    root.dataset.fxInfiniteScroll = 'ready-v4';
+  }
+
+  function stopScrolling(source) {
+    clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = 0;
+    if (!scrolling) return;
+    scrolling = false;
+    root.classList.remove('fx-page-scrolling');
+    root.dataset.fxScrollActivity = 'idle';
+    dispatchEvent(new CustomEvent('formatx:pagestopscroll', { detail: { source } }));
+  }
+
+  function markScrolling(source) {
+    clearTimeout(scrollIdleTimer);
+    if (!scrolling) {
+      scrolling = true;
+      root.classList.add('fx-page-scrolling');
+      root.dataset.fxScrollActivity = source;
+      dispatchEvent(new CustomEvent('formatx:pagestartscroll', { detail: { source } }));
+    } else {
+      root.dataset.fxScrollActivity = source;
+    }
+    scrollIdleTimer = setTimeout(() => stopScrolling(source), SCROLL_IDLE_MS);
   }
 
   function finishLoop(source, count, target) {
@@ -66,13 +98,14 @@
     cooldownUntil = performance.now() + COOLDOWN_MS;
     lastY = window.scrollY;
     lastDirection = 0;
+    stopScrolling('loop-complete');
     publishReadyState();
 
     dispatchEvent(new CustomEvent('formatx:loop', {
       detail: {
         count,
         source,
-        controller: 'boundary-v3',
+        controller: 'boundary-v4',
         target,
         actual: window.scrollY,
         clonedContent: false,
@@ -124,8 +157,9 @@
   function onWheel(event) {
     if (event.ctrlKey || event.defaultPrevented || overlayOpen()) return;
     const deltaY = normaliseWheel(event);
-    if (!Number.isFinite(deltaY) || deltaY <= 0 || Math.abs(deltaY) <= Math.abs(event.deltaX)) return;
-    if (nestedScrollerCanConsume(event.target, deltaY)) return;
+    if (!Number.isFinite(deltaY) || deltaY === 0 || Math.abs(deltaY) <= Math.abs(event.deltaX)) return;
+    markScrolling('wheel');
+    if (deltaY <= 0 || nestedScrollerCanConsume(event.target, deltaY)) return;
 
     const projected = window.scrollY + deltaY;
     if (!atBoundary(projected)) return;
@@ -135,7 +169,10 @@
   function onScroll() {
     const current = window.scrollY;
     const delta = current - lastY;
-    if (Math.abs(delta) > 0.5) lastDirection = Math.sign(delta);
+    if (Math.abs(delta) > 0.5) {
+      lastDirection = Math.sign(delta);
+      markScrolling('native-scroll');
+    }
     lastY = current;
 
     if (scrollFrame) return;
@@ -154,6 +191,7 @@
       || target?.isContentEditable;
     if (typing || event.altKey || event.ctrlKey || event.metaKey || !DOWN_KEYS.has(event.key)) return;
     if (event.key === ' ' && event.shiftKey) return;
+    markScrolling('keyboard');
     if (!atBoundary(window.scrollY)) return;
     if (loopToCore('keyboard')) event.preventDefault();
   }
@@ -174,15 +212,18 @@
     lastY = window.scrollY;
     lastDirection = 0;
     looping = false;
+    stopScrolling('pageshow');
     root.classList.remove('fx-infinite-loop-jump');
     publishReadyState();
   }, { passive: true });
   addEventListener('pagehide', event => {
+    clearTimeout(scrollIdleTimer);
     cancelAnimationFrame(scrollFrame);
     cancelAnimationFrame(settleFrame);
     if (!event.persisted) readinessObserver.disconnect();
   });
 
   root.dataset.fxInfiniteInput = 'idle';
+  root.dataset.fxScrollActivity = 'idle';
   publishReadyState();
 }());
