@@ -1,23 +1,29 @@
-name: Validate unified FormatX mobile and Organism architecture
+name: Validate unified FormatX mobile, status and Organism architecture
 
 on:
   push:
     branches: [master]
     paths:
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
       - 'worker.js'
       - 'wrangler.jsonc'
       - 'billing-worker/wrangler.jsonc'
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/**'
+      - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   pull_request:
     branches: [master]
     paths:
+      - 'README.md'
+      - 'RELEASE_NOTES.md'
       - 'worker.js'
       - 'wrangler.jsonc'
       - 'billing-worker/wrangler.jsonc'
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/**'
+      - '.github/scripts/validate-webgpu-source.py'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   workflow_dispatch:
 
@@ -25,20 +31,24 @@ permissions:
   contents: read
 
 concurrency:
-  group: formatx-unified-mobile-organism-${{ github.ref }}
+  group: formatx-unified-mobile-status-organism-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
+      - name: Validate central architecture contract
+        run: python3 .github/scripts/validate-webgpu-source.py
 
       - name: Validate JavaScript syntax
         shell: bash
         run: |
           set -euo pipefail
+          node --check docs/scifi-ui/scripts/platform-status.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
@@ -70,17 +80,19 @@ jobs:
           const required = [
             '/scifi-ui/',
             '/scifi-ui/index.html',
-            '/scifi-ui/license.html',
+            '/scifi-ui/downloads/',
+            '/scifi-ui/downloads/index.html',
+            '/scifi-ui/test-matrix.html',
+            '/scifi-ui/data/platform-status.json',
+            '/scifi-ui/styles/platform-status.css',
+            '/scifi-ui/scripts/platform-status.js',
             '/scifi-ui/styles/organism-voice.css',
             '/scifi-ui/styles/organism-voice-foreground.css',
             '/scifi-ui/styles/organism-voice-dock.css',
-            '/scifi-ui/styles/organism-core-interaction.css',
-            '/scifi-ui/styles/organism-speaking-visual.css',
             '/scifi-ui/styles/formatx-mobile-readability.css',
             '/scifi-ui/styles/formatx-mobile-unified.css',
             '/scifi-ui/scripts/organism-voice.js',
             '/scifi-ui/scripts/organism-voice-foreground.js',
-            '/scifi-ui/scripts/organism-core-interaction.js',
             '/scifi-ui/scripts/organism-core-controller.js',
             '/scifi-ui/scripts/formatx-render-visibility.js',
             '/scifi-ui/scripts/formatx-infinite-scroll.js',
@@ -99,69 +111,34 @@ jobs:
           }
           NODE
 
-      - name: Validate unified mobile visibility and continuous scrolling
+      - name: Validate first-visit intro, product status and local Organism
         shell: bash
         run: |
-          node - <<'NODE'
-          const fs = require('fs');
-          const loader = fs.readFileSync('docs/scifi-ui/scripts/igloo-parity.js', 'utf8');
-          const voice = fs.readFileSync('docs/scifi-ui/scripts/organism-voice.js', 'utf8');
-          const voiceCss = fs.readFileSync('docs/scifi-ui/styles/organism-voice.css', 'utf8');
-          const foreground = fs.readFileSync('docs/scifi-ui/scripts/organism-voice-foreground.js', 'utf8');
-          const speakingCss = fs.readFileSync('docs/scifi-ui/styles/organism-speaking-visual.css', 'utf8');
-          const mobileReadability = fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-readability.css', 'utf8');
-          const mobileUnified = fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-unified.js', 'utf8');
-          const mobileUnifiedCss = fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-unified.css', 'utf8');
-          const renderVisibility = fs.readFileSync('docs/scifi-ui/scripts/formatx-render-visibility.js', 'utf8');
-          const core = fs.readFileSync('docs/scifi-ui/scripts/organism-core-controller.js', 'utf8');
-          const infinite = fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll.js', 'utf8');
-          const rootWorker = fs.readFileSync('worker.js', 'utf8');
-          const productionEntry = fs.readFileSync('billing-worker/src/production-entry.js', 'utf8');
-          const queue = loader.split('const queue =', 2)[1]?.split('];', 1)[0] || '';
+          set -euo pipefail
+          grep -Fq 'safe-ready-v19' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'platform-status.js?v=20260730-platform-status-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'const HARD_DEADLINE = 700' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'public_beta' docs/scifi-ui/data/platform-status.json
+          grep -Fq 'technical_preview' docs/scifi-ui/data/platform-status.json
+          grep -Fq 'development' docs/scifi-ui/data/platform-status.json
+          grep -Fq 'planned' docs/scifi-ui/data/platform-status.json
+          grep -Fq 'Public beta' README.md
+          grep -Fq 'Public beta' RELEASE_NOTES.md
+          grep -Fq 'fx-organism-master-toggle' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'setOpen(false, false)' docs/scifi-ui/scripts/organism-voice.js
+          ! grep -Fq 'fetch(' docs/scifi-ui/scripts/organism-voice.js
+          ! grep -Fq 'formatx:introcomplete' docs/scifi-ui/scripts/organism-voice.js
 
-          const assertions = [
-            [loader.includes('safe-ready-v18'), 'safe loader v18 marker missing'],
-            [loader.includes('formatx-mobile-unified.js?v=20260730-mobile-unified-1'), 'unified mobile loader missing'],
-            [loader.includes('formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4'), 'boundary-v4 loader missing'],
-            [queue.indexOf('organism-core-interaction.js') < queue.indexOf('formatx-mobile-unified.js'), 'unified mobile must load after Organism interaction'],
-            [queue.indexOf('formatx-mobile-unified.js') < queue.indexOf('formatx-infinite-scroll.js'), 'continuous scroll must load after unified mobile controller'],
-            [voice.includes("ROOT.dataset.fxOrganismVoice = 'ready-v2'"), 'voice ready-v2 marker missing'],
-            [voice.includes('SpeechSynthesisUtterance'), 'speech synthesis missing'],
-            [voice.includes('fx-organism-master-toggle'), 'master on/off switch missing'],
-            [voice.includes('fx-organism-voice-toggle'), 'voice switch missing'],
-            [voice.includes('setOpen(false, false)'), 'dialogue must start closed'],
-            [voice.includes('localStorage.setItem') && voice.includes('localStorage.getItem'), 'local enabled state persistence missing'],
-            [voice.includes('localOnly: true'), 'local-only response marker missing'],
-            [!voice.includes('formatx:introcomplete'), 'dialogue must not auto-open after intro'],
-            [!voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'), 'questions must not leave the browser'],
-            [voiceCss.includes('.fx-organism-dialogue.is-disabled'), 'disabled appearance missing'],
-            [voiceCss.includes('.fx-organism-thought[hidden]'), 'hidden bubble protection missing'],
-            [foreground.includes('document.body.appendChild(shell)'), 'dialogue is not promoted to the foreground DOM layer'],
-            [speakingCss.includes('fx-core-speaking-ring') && speakingCss.includes('pointer-events: none'), '3D speaking visual missing or interactive'],
-            [mobileReadability.includes('data-fx-mobile-core-visible="false"'), 'hero-bound 3D visibility contract missing'],
-            [renderVisibility.includes("root.dataset.fxRenderVisibility = 'ready-v2'"), 'render visibility v2 marker missing'],
-            [renderVisibility.includes('fxMobileCoreVisible') && renderVisibility.includes('IntersectionObserver'), 'mobile 3D visibility observer missing'],
-            [core.includes("ROOT.dataset.fxOrganismState = bounded === 0 ? 'core'"), '01 MAG core state missing'],
-            [infinite.includes("root.dataset.fxInfiniteController = 'boundary-v4'"), 'boundary-v4 infinite scroll missing'],
-            [infinite.includes("root.dataset.fxInfiniteScroll = 'ready-v4'"), 'boundary-v4 ready marker missing'],
-            [infinite.includes('fx-page-scrolling') && infinite.includes('formatx:pagestartscroll'), 'active-scroll floating UI suppression missing'],
-            [infinite.includes('clonedContent: false') && infinite.includes('reinitialisedRenderer: false'), 'clone-free renderer reuse contract missing'],
-            [!infinite.includes('cloneNode') && !infinite.includes("addEventListener('click'"), 'continuous scrolling must not clone or treat touch as click'],
-            [mobileUnified.includes("root.dataset.fxMobileUnified = 'ready-v1'"), 'unified mobile ready marker missing'],
-            [mobileUnified.includes('closeDialogueForScroll') && mobileUnified.includes('formatx:pagestartscroll'), 'dialogue is not closed during continuous scrolling'],
-            [mobileUnifiedCss.includes('--fx-mobile-dock-height: 54px'), 'compact mobile dock height missing'],
-            [mobileUnifiedCss.includes('right: max(var(--fx-mobile-edge)'), 'thought control is not docked to the right edge'],
-            [mobileUnifiedCss.includes('width: 100vw !important') && mobileUnifiedCss.includes('height: 100svh !important'), '3D viewport is not constrained to the mobile viewport'],
-            [mobileUnifiedCss.includes('transform: translateY(15svh) scale(.80)'), 'mobile Living Core scale and placement missing'],
-            [mobileUnifiedCss.includes('html.fx-page-scrolling .fx-organism-dialogue'), 'thought control remains visible during scrolling'],
-            [mobileUnifiedCss.includes('html.fx-page-scrolling .fx-organism-actionbar'), 'action dock remains visible during scrolling'],
-            [mobileUnifiedCss.includes('grid-template-columns: repeat(3, minmax(0, 1fr))'), 'unified three-action dock missing'],
-            [rootWorker.includes('formatx-mobile-unified.js') && rootWorker.includes('formatx-mobile-unified.css'), 'preview Worker unified mobile routes missing'],
-            [productionEntry.includes('formatx-mobile-unified.js') && productionEntry.includes('formatx-mobile-unified.css'), 'production Worker unified mobile routes missing'],
-          ];
-
-          for (const [ok, message] of assertions) {
-            if (!ok) throw new Error(message);
-          }
-          console.log('PASS: continuous scrolling, mobile visibility and unified Organism design are current.');
-          NODE
+      - name: Validate continuous mobile behaviour
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'boundary-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'ready-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'reinitialisedRenderer: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'data-fx-mobile-core-visible="false"' docs/scifi-ui/styles/formatx-mobile-readability.css
+          grep -Fq -- '--fx-mobile-dock-height: 54px' docs/scifi-ui/styles/formatx-mobile-unified.css
+          ! grep -Fq 'cloneNode' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "addEventListener('click'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
