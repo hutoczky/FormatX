@@ -10,6 +10,8 @@ apex = text("docs/scifi-ui/scripts/formatx-apex.js")
 loader = text("docs/scifi-ui/scripts/igloo-parity.js")
 infinite = text("docs/scifi-ui/scripts/formatx-infinite-scroll.js")
 core_controller = text("docs/scifi-ui/scripts/organism-core-controller.js")
+organism_voice = text("docs/scifi-ui/scripts/organism-voice.js")
+organism_voice_css = text("docs/scifi-ui/styles/organism-voice.css")
 safe_host = text("docs/scifi-ui/scripts/formatx-three-host-safe.js")
 gate = text("docs/scifi-ui/scripts/formatx-mobile-recovery.js")
 living = text("docs/scifi-ui/scripts/living-architecture.js")
@@ -49,21 +51,25 @@ require("intro: hard deadline", "HARD_DEADLINE" in intro)
 require("intro: no window load wait", "loadOrDeadline" not in intro)
 require("intro: no animation promise wait", "Promise.all(animations)" not in intro)
 
-# Production uses one direct WebGL stage after the intro. The experimental
-# WebGPU engine remains in the repository but is not started by the live loader.
+# Production uses one direct WebGL stage after the intro. Optional modules are
+# ordered and failure tolerant; the dialogue loads after the core controller.
 tokens("safe loader", loader, (
     "single-language-toggle.js",
     "formatx-copy-polish.js",
     "formatx-license-links.js",
     "organism-console-state.js",
     "organism-core-controller.js?v=20260729-core-ui-2",
+    "organism-voice.js?v=20260730-organism-voice-2",
     "formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3",
     "formatx-three-host-safe.js",
     "formatx-living-core-launcher.js",
     "interaction-genome.js",
-    "safe-ready-v12",
+    "safe-ready-v13",
     "load(index + 1)",
 ))
+queue = loader.split("const queue =", 1)[1].split("];", 1)[0]
+require("safe loader: core before voice", queue.index("organism-core-controller.js") < queue.index("organism-voice.js"))
+require("safe loader: voice before infinite scroll", queue.index("organism-voice.js") < queue.index("formatx-infinite-scroll.js"))
 require("safe loader: no global event bridge", "formatx-transcend-bridge.js" not in loader)
 require("safe loader: no legacy frame bootstrap", "formatx-three-frame-bootstrap.js" not in loader)
 require("safe loader: no legacy professional refinement", "formatx-professional-refinement.js" not in loader)
@@ -72,7 +78,38 @@ require("safe loader: no old infinite fix", "formatx-infinite-loop-fix.js" not i
 require("safe loader: no WebGPU nextgen controls", "formatx-nextgen-controls.js" not in loader)
 require("Genome WebGL lazy click trigger", ".fx-genome-launcher" in loader)
 require("Genome WebGL lazy adapter request", "requestGenomeWebgl" in loader)
-require("Genome WebGL adapter not in startup queue", "interaction-genome-webgl-adapter.js" not in loader.split("const queue =", 1)[1].split("];", 1)[0])
+require("Genome WebGL adapter not in startup queue", "interaction-genome-webgl-adapter.js" not in queue)
+
+# The Organism dialogue is local, compact, closed by default and fully switchable.
+tokens("Organism voice", organism_voice, (
+    "ready-v2",
+    "SpeechSynthesisUtterance",
+    "formatx-organism-dialogue-enabled",
+    "function setEnabled(next, openAfterEnable)",
+    "function setOpen(next, focusInput)",
+    "setOpen(false, false)",
+    "localOnly: true",
+    "fx-organism-master-toggle",
+    "fx-organism-voice-toggle",
+    "Helyi válaszadás · nincs adatküldés",
+))
+require("Organism voice: no automatic intro opening", "formatx:introcomplete" not in organism_voice)
+require("Organism voice: no network fetch", "fetch(" not in organism_voice)
+require("Organism voice: no XMLHttpRequest", "XMLHttpRequest" not in organism_voice)
+require("Organism voice: no WebSocket", "WebSocket" not in organism_voice)
+require("Organism voice: speech off by default", "let speechEnabled = false" in organism_voice)
+require("Organism voice: master state persisted locally", "localStorage.setItem" in organism_voice and "localStorage.getItem" in organism_voice)
+tokens("Organism voice CSS", organism_voice_css, (
+    ".fx-organism-dialogue",
+    ".fx-organism-dialogue.is-disabled",
+    ".fx-organism-master-toggle",
+    ".fx-organism-thought[hidden]",
+    "max-height: min(68vh, 570px)",
+    "body.fx-organism-panel-open .fx-organism-dialogue",
+    "html.fx-organism-menu-open .fx-organism-dialogue",
+))
+require("Organism voice CSS: compact trigger", "width: 58px" in organism_voice_css)
+require("Organism voice CSS: readable response", "font-size: 14.5px" in organism_voice_css and "line-height: 1.68" in organism_voice_css)
 
 # Infinite scrolling is boundary based and reuses the existing renderer.
 tokens("infinite scroll", infinite, (
@@ -132,7 +169,6 @@ require("living engine: reduced particles", "const count = 220" in living_engine
 require("living engine: desktop right placement", "this.baseWorldX = desktop ? 1.05 : 0" in living_engine)
 require("living engine: bright emissive core", "emissiveIntensity: 2.45" in living_engine)
 
-# Experimental WebGPU source is retained for later controlled reintroduction.
 tokens("experimental WebGPU source retained", legacy_webgpu, (
     "THREE.WebGPURenderer",
     "renderer.compute",
@@ -153,6 +189,8 @@ tokens("root worker living delivery", root_worker, (
     "mobile-core-engine-v2.js",
     "formatx-infinite-scroll.js",
     "formatx-license-links.js",
+    "organism-voice.js",
+    "organism-voice.css",
     "Cache-Control', 'no-store",
 ))
 tokens("production worker security retained", production_worker, (
@@ -169,6 +207,8 @@ tokens("production entry living stage framing", production_entry, (
     "mobile-core-engine-v2.js",
     "formatx-infinite-scroll.js",
     "formatx-license-links.js",
+    "organism-voice.js",
+    "organism-voice.css",
     "20260729-living-core-gate-v2",
     "20260729-living-core-css-v3",
 ))
