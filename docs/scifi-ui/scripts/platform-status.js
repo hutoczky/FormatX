@@ -2,8 +2,8 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxPlatformStatus === 'ready-v2') return;
-  ROOT.dataset.fxPlatformStatus = 'loading-v2';
+  if (ROOT.dataset.fxPlatformStatus === 'ready-v3') return;
+  ROOT.dataset.fxPlatformStatus = 'loading-v3';
 
   const DATA_URL = '/scifi-ui/data/platform-status.json?v=20260730-platform-status-1';
 
@@ -90,9 +90,13 @@
 
     const note = document.createElement('p');
     note.className = 'fx-platform-status-note';
-    note.textContent = lang === 'en'
-      ? 'No platform is currently labelled Stable. Stable will only be used after the public test matrix and release evidence meet the published acceptance criteria.'
-      : 'Jelenleg egyik platform sem kap Stabil címkét. A Stabil állapot csak a nyilvános tesztmátrix és a kiadási bizonyítékok elfogadási feltételeinek teljesítése után jelenhet meg.';
+    note.append(document.createTextNode(lang === 'en'
+      ? 'No platform is currently labelled Stable. Stable will only be used after the public test matrix and release evidence meet the published acceptance criteria. '
+      : 'Jelenleg egyik platform sem kap Stabil címkét. A Stabil állapot csak a nyilvános tesztmátrix és a kiadási bizonyítékok elfogadási feltételeinek teljesítése után jelenhet meg. '));
+    const matrixLink = document.createElement('a');
+    matrixLink.href = '/scifi-ui/test-matrix.html';
+    matrixLink.textContent = lang === 'en' ? 'Open public test matrix' : 'Nyilvános tesztmátrix megnyitása';
+    note.appendChild(matrixLink);
     section.append(header, grid, note);
     return section;
   }
@@ -155,10 +159,101 @@
     );
   }
 
+  function installCheckoutConsents() {
+    const form = document.getElementById('checkout-form');
+    const original = document.getElementById('checkout-consent')?.closest('.consent-row');
+    if (!form || !original) return;
+
+    let statusRow = form.querySelector('[data-fx-product-status-consent]');
+    if (!statusRow) {
+      statusRow = document.createElement('label');
+      statusRow.className = 'consent-row';
+      statusRow.dataset.fxProductStatusConsent = 'true';
+      statusRow.innerHTML = '<input name="product_status_acknowledged" type="checkbox" required><span></span>';
+      original.insertAdjacentElement('afterend', statusRow);
+    }
+
+    let immediateRow = form.querySelector('[data-fx-immediate-performance-consent]');
+    if (!immediateRow) {
+      immediateRow = document.createElement('label');
+      immediateRow.className = 'consent-row';
+      immediateRow.dataset.fxImmediatePerformanceConsent = 'true';
+      immediateRow.innerHTML = '<input name="immediate_performance_requested" type="checkbox" required><span></span>';
+      statusRow.insertAdjacentElement('afterend', immediateRow);
+    }
+
+    const lang = language();
+    statusRow.querySelector('span').textContent = lang === 'en'
+      ? 'I understand that V92 is a Public beta, not a Stable release, and that platform capabilities differ according to the published status matrix.'
+      : 'Tudomásul veszem, hogy a V92 nyilvános béta, nem Stabil kiadás, és a platformok képességei a közzétett állapotmátrix szerint eltérnek.';
+    immediateRow.querySelector('span').innerHTML = lang === 'en'
+      ? 'I expressly request activation immediately after payment verification. If I qualify as a consumer, I acknowledge the digital-performance and withdrawal information in the <a href="./terms.html" target="_blank" rel="noopener">terms of use</a>.'
+      : 'Kifejezetten kérem az aktiválást a jóváírás ellenőrzése után. Ha fogyasztónak minősülök, tudomásul veszem a <a href="./terms.html" target="_blank" rel="noopener">felhasználási feltételekben</a> szereplő digitális teljesítési és elállási tájékoztatást.';
+  }
+
+  function canonicalStatusAnswer(data) {
+    const lang = language();
+    const names = Object.fromEntries(data.platforms.map(item => [item.name, text(data.status_labels[item.status], lang)]));
+    return lang === 'en'
+      ? `V92 is a Public beta. Windows: ${names.Windows}; Linux / Bazzite: ${names['Linux / Bazzite']}; macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. No platform is currently labelled Stable. Downloads and evidence are available from the download centre and public test matrix.`
+      : `A V92 nyilvános béta. Windows: ${names.Windows}; Linux / Bazzite: ${names['Linux / Bazzite']}; macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. Jelenleg egyik platform sem kap Stabil címkét. A letöltések és bizonyítékok a letöltési központban és a nyilvános tesztmátrixban érhetők el.`;
+  }
+
+  function speakCanonical(textValue) {
+    const voiceButton = document.querySelector('.fx-organism-voice-toggle[aria-pressed="true"]');
+    if (!voiceButton || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;
+    try {
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(textValue);
+      utterance.lang = language() === 'en' ? 'en-GB' : 'hu-HU';
+      speechSynthesis.speak(utterance);
+    } catch (_) {}
+  }
+
+  function installOrganismStatusSync(data) {
+    if (ROOT.dataset.fxOrganismStatusSync === 'ready') return;
+    ROOT.dataset.fxOrganismStatusSync = 'ready';
+
+    document.addEventListener('submit', event => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement) || !form.matches('.fx-organism-question')) return;
+      const input = form.querySelector('input');
+      const query = String(input?.value || '').toLocaleLowerCase(language() === 'en' ? 'en' : 'hu');
+      if (!/(platform|állapot|status|stable|stabil|beta|béta|windows|linux|bazzite|macos|android|ios|letölt|download|release|kiadás)/i.test(query)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const answer = canonicalStatusAnswer(data);
+      const output = document.querySelector('.fx-organism-thought-output');
+      if (output) output.textContent = answer;
+      if (input) input.value = '';
+      speakCanonical(answer);
+      dispatchEvent(new CustomEvent('formatx:organismresponse', {
+        detail: { text: answer, topic: 'platform-status', localOnly: true }
+      }));
+    }, true);
+
+    const observe = () => {
+      const output = document.querySelector('.fx-organism-thought-output');
+      if (!output || output.dataset.fxStatusObserved === 'true') return;
+      output.dataset.fxStatusObserved = 'true';
+      new MutationObserver(() => {
+        const current = output.textContent || '';
+        if (!/(stabil kiadásokat|stable releases|Linux és Bazzite az elsődleges|Linux and Bazzite are the primary)/i.test(current)) return;
+        const answer = canonicalStatusAnswer(data);
+        output.textContent = answer;
+        speakCanonical(answer);
+      }).observe(output, { childList: true, subtree: true, characterData: true });
+    };
+    observe();
+    addEventListener('formatx:organisminterfaceready', observe);
+  }
+
   function installDefaultTargets(data) {
     document.querySelectorAll('[data-platform-status-root]').forEach(target => renderInto(target, data));
     installHeroState(data);
     installCheckoutNotice(data);
+    installCheckoutConsents();
+    installOrganismStatusSync(data);
 
     if (document.body.classList.contains('living-architecture') && !document.querySelector('[data-platform-status-root]')) {
       const anchor = document.getElementById('pricing') || document.getElementById('system');
@@ -180,10 +275,10 @@
       const data = await response.json();
       ROOT.__FORMATX_PLATFORM_STATUS__ = data;
       installDefaultTargets(data);
-      ROOT.dataset.fxPlatformStatus = 'ready-v2';
+      ROOT.dataset.fxPlatformStatus = 'ready-v3';
       dispatchEvent(new CustomEvent('formatx:platformstatusready', { detail: data }));
     } catch (error) {
-      ROOT.dataset.fxPlatformStatus = 'failed-v2';
+      ROOT.dataset.fxPlatformStatus = 'failed-v3';
       ROOT.dataset.fxPlatformStatusError = String(error && error.message || error).slice(0, 120);
     }
   }
@@ -193,6 +288,7 @@
     document.querySelectorAll('[data-platform-status-root]').forEach(target => renderInto(target, ROOT.__FORMATX_PLATFORM_STATUS__));
     installHeroState(ROOT.__FORMATX_PLATFORM_STATUS__);
     installCheckoutNotice(ROOT.__FORMATX_PLATFORM_STATUS__);
+    installCheckoutConsents();
   });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once: true });
