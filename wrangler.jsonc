@@ -27,6 +27,8 @@
       "/scifi-ui/styles/formatx-site-stability.css",
       "/scifi-ui/styles/organism-voice.css",
       "/scifi-ui/styles/organism-voice-dock.css",
+      "/scifi-ui/styles/organism-core-interaction.css",
+      "/scifi-ui/styles/organism-speaking-visual.css",
       "/scifi-ui/scripts/formatx-event-horizon.js",
       "/scifi-ui/scripts/formatx-mobile-recovery.js",
       "/scifi-ui/scripts/living-architecture.js",
@@ -44,6 +46,7 @@
       "/scifi-ui/scripts/organism-menu-controller.js",
       "/scifi-ui/scripts/organism-core-controller.js",
       "/scifi-ui/scripts/organism-voice.js",
+      "/scifi-ui/scripts/organism-core-interaction.js",
       "/download/*",
       "/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
     ]
