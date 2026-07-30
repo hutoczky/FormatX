@@ -55,6 +55,7 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-console-state.js
           node --check docs/scifi-ui/scripts/organism-voice.js
+          node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v2.js
           node --input-type=module --check < billing-worker/src/production-entry.js
@@ -73,7 +74,11 @@ jobs:
             '/scifi-ui/index.html',
             '/scifi-ui/license.html',
             '/scifi-ui/styles/organism-voice.css',
+            '/scifi-ui/styles/organism-voice-dock.css',
+            '/scifi-ui/styles/organism-core-interaction.css',
+            '/scifi-ui/styles/organism-speaking-visual.css',
             '/scifi-ui/scripts/organism-voice.js',
+            '/scifi-ui/scripts/organism-core-interaction.js',
             '/scifi-ui/scripts/organism-core-controller.js',
             '/scifi-ui/scripts/formatx-infinite-scroll.js',
             '/scifi-ui/scripts/igloo-parity.js',
@@ -90,7 +95,7 @@ jobs:
           }
           NODE
 
-      - name: Validate switchable Organism and stable startup contract
+      - name: Validate switchable speaking Organism and stable startup contract
         shell: bash
         run: |
           node - <<'NODE'
@@ -98,6 +103,9 @@ jobs:
           const loader = fs.readFileSync('docs/scifi-ui/scripts/igloo-parity.js', 'utf8');
           const voice = fs.readFileSync('docs/scifi-ui/scripts/organism-voice.js', 'utf8');
           const voiceCss = fs.readFileSync('docs/scifi-ui/styles/organism-voice.css', 'utf8');
+          const interaction = fs.readFileSync('docs/scifi-ui/scripts/organism-core-interaction.js', 'utf8');
+          const interactionCss = fs.readFileSync('docs/scifi-ui/styles/organism-core-interaction.css', 'utf8');
+          const speakingCss = fs.readFileSync('docs/scifi-ui/styles/organism-speaking-visual.css', 'utf8');
           const core = fs.readFileSync('docs/scifi-ui/scripts/organism-core-controller.js', 'utf8');
           const infinite = fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll.js', 'utf8');
           const rootWorker = fs.readFileSync('worker.js', 'utf8');
@@ -105,10 +113,13 @@ jobs:
           const queue = loader.split('const queue =', 2)[1]?.split('];', 1)[0] || '';
 
           const assertions = [
-            [loader.includes('safe-ready-v13'), 'safe loader v13 marker missing'],
+            [loader.includes('safe-ready-v15'), 'safe loader v15 marker missing'],
             [loader.includes('organism-voice.js?v=20260730-organism-voice-2'), 'Organism voice v2 loader missing'],
+            [loader.includes('organism-core-interaction.js?v=20260730-core-interaction-1'), 'MAG interaction loader missing'],
+            [loader.includes('organism-speaking-visual.css?v=20260730-speaking-visual-1'), 'speaking visual loader missing'],
             [queue.indexOf('organism-core-controller.js') < queue.indexOf('organism-voice.js'), 'voice must load after core controller'],
-            [queue.indexOf('organism-voice.js') < queue.indexOf('formatx-infinite-scroll.js'), 'voice must load before infinite scroll'],
+            [queue.indexOf('organism-voice.js') < queue.indexOf('organism-core-interaction.js'), 'MAG interaction must load after voice API'],
+            [queue.indexOf('organism-core-interaction.js') < queue.indexOf('formatx-infinite-scroll.js'), 'MAG interaction must load before infinite scroll'],
             [voice.includes("ROOT.dataset.fxOrganismVoice = 'ready-v2'"), 'voice ready-v2 marker missing'],
             [voice.includes('SpeechSynthesisUtterance'), 'speech synthesis missing'],
             [voice.includes('fx-organism-master-toggle'), 'master on/off switch missing'],
@@ -123,14 +134,20 @@ jobs:
             [voiceCss.includes('body.fx-organism-panel-open .fx-organism-dialogue'), 'panel overlap protection missing'],
             [voiceCss.includes('html.fx-organism-menu-open .fx-organism-dialogue'), 'menu overlap protection missing'],
             [voiceCss.includes('font-size: 14.5px') && voiceCss.includes('line-height: 1.68'), 'readable response typography missing'],
+            [interaction.includes("ROOT.dataset.fxOrganismCoreInteraction = 'ready-v1'"), 'MAG interaction ready marker missing'],
+            [interaction.includes("addEventListener('pointerdown'") && interaction.includes("addEventListener('pointerup'"), 'mouse/touch MAG activation missing'],
+            [interaction.includes('[data-organ-node="0"]') && interaction.includes('[data-scene-link="0"]'), 'MAG navigation activation missing'],
+            [interactionCss.includes('.fx-organism-dialogue:not(.is-open)') && interactionCss.includes('pointer-events: auto'), 'compact click-safe MAG CSS missing'],
+            [speakingCss.includes("html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame"), '3D core speaking brightness missing'],
+            [speakingCss.includes('fx-core-speaking-ring') && speakingCss.includes('pointer-events: none'), '3D core speaking rings missing or interactive'],
             [core.includes("ROOT.dataset.fxOrganismState = bounded === 0 ? 'core'"), '01 MAG core state missing'],
             [infinite.includes("controller: 'boundary-v3'"), 'boundary-v3 infinite scroll missing'],
-            [rootWorker.includes('organism-voice.js') && rootWorker.includes('organism-voice.css'), 'preview Worker voice routes missing'],
-            [productionEntry.includes('organism-voice.js') && productionEntry.includes('organism-voice.css'), 'production Worker voice routes missing'],
+            [rootWorker.includes('organism-core-interaction.js') && rootWorker.includes('organism-speaking-visual.css'), 'preview Worker new routes missing'],
+            [productionEntry.includes('organism-core-interaction.js') && productionEntry.includes('organism-speaking-visual.css'), 'production Worker new routes missing'],
           ];
 
           for (const [ok, message] of assertions) {
             if (!ok) throw new Error(message);
           }
-          console.log('PASS: Organism dialogue is local, closed by default, readable and fully switchable.');
+          console.log('PASS: MAG is clickable and the 3D Organism visibly reacts only while speaking.');
           NODE
