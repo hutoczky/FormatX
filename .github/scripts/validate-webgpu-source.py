@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 
@@ -5,266 +6,92 @@ def read(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
 
+def require(label: str, condition: bool, results: list[tuple[str, bool]]) -> None:
+    results.append((label, bool(condition)))
+
+
+results: list[tuple[str, bool]] = []
+
 home = read("docs/scifi-ui/index.html")
 loader = read("docs/scifi-ui/scripts/igloo-parity.js")
 intro = read("docs/scifi-ui/scripts/formatx-event-horizon.js")
+status_js = read("docs/scifi-ui/scripts/platform-status.js")
+status_css = read("docs/scifi-ui/styles/platform-status.css")
+status_data = json.loads(read("docs/scifi-ui/data/platform-status.json"))
+readme = read("README.md")
+release_notes = read("RELEASE_NOTES.md")
+downloads = read("docs/scifi-ui/downloads/index.html")
+terms = read("docs/scifi-ui/terms.html")
+privacy = read("docs/scifi-ui/privacy.html")
+support = read("docs/scifi-ui/support.html")
+test_matrix = read("docs/scifi-ui/test-matrix.html")
 voice = read("docs/scifi-ui/scripts/organism-voice.js")
-voice_css = read("docs/scifi-ui/styles/organism-voice.css")
-foreground = read("docs/scifi-ui/scripts/organism-voice-foreground.js")
-foreground_css = read("docs/scifi-ui/styles/organism-voice-foreground.css")
-dock_css = read("docs/scifi-ui/styles/organism-voice-dock.css")
-interaction = read("docs/scifi-ui/scripts/organism-core-interaction.js")
-interaction_css = read("docs/scifi-ui/styles/organism-core-interaction.css")
-speaking_css = read("docs/scifi-ui/styles/organism-speaking-visual.css")
-mobile_readability = read("docs/scifi-ui/styles/formatx-mobile-readability.css")
-mobile_unified = read("docs/scifi-ui/scripts/formatx-mobile-unified.js")
-mobile_unified_css = read("docs/scifi-ui/styles/formatx-mobile-unified.css")
-render_visibility = read("docs/scifi-ui/scripts/formatx-render-visibility.js")
-core_controller = read("docs/scifi-ui/scripts/organism-core-controller.js")
-infinite = read("docs/scifi-ui/scripts/formatx-infinite-scroll.js")
-safe_host = read("docs/scifi-ui/scripts/formatx-three-host-safe.js")
-gate = read("docs/scifi-ui/scripts/formatx-mobile-recovery.js")
-living = read("docs/scifi-ui/scripts/living-architecture.js")
-engine = read("docs/scifi-ui/scripts/mobile-core-engine-v2.js")
-entry = read("docs/scifi-ui/scripts/mobile-webgl-entry.js")
-stage = read("docs/scifi-ui/three-stage-mobile.html")
-stability_css = read("docs/scifi-ui/styles/formatx-site-stability.css")
-static_headers = read("docs/scifi-ui/_headers")
-legacy_webgpu = read("docs/scifi-ui/scripts/ExperienceWebGPU.js")
 root_worker = read("worker.js")
-production_worker = read("billing-worker/src/production-with-license.js")
 production_entry = read("billing-worker/src/production-entry.js")
 preview_config = read("wrangler.jsonc")
 
-checks: list[tuple[str, bool]] = []
+expected = {
+    "Windows": "public_beta",
+    "Linux / Bazzite": "development",
+    "macOS": "planned",
+    "Web": "technical_preview",
+    "Android": "public_beta",
+    "iOS / iPadOS": "planned",
+}
+actual = {item["name"]: item["status"] for item in status_data["platforms"]}
+require("canonical status matrix matches expected platforms", actual == expected, results)
+require("overall release is Public beta", status_data["product_release"]["status"] == "public_beta", results)
+require("no platform is falsely marked Stable", "stable" not in actual.values(), results)
 
+for platform, status in expected.items():
+    require(f"README contains {platform}", platform in readme, results)
+    require(f"release notes contain {platform}", platform in release_notes, results)
+    require(f"status JSON contains {platform}:{status}", actual.get(platform) == status, results)
 
-def require(label: str, condition: bool) -> None:
-    checks.append((label, bool(condition)))
+for label in ("Public beta", "Development", "Technical preview", "Planned"):
+    require(f"README contains status {label}", label in readme, results)
+    require(f"release notes contain status {label}", label in release_notes, results)
 
+require("download page renders canonical status module", "platform-status.js" in downloads and "data-platform-status-root" in downloads, results)
+require("main loader includes platform status", "platform-status.js?v=20260730-platform-status-1" in loader, results)
+require("loader version is v19", "safe-ready-v19" in loader and "safe-degraded-v19" in loader, results)
+require("platform status renderer uses canonical JSON", "data/platform-status.json" in status_js, results)
+require("platform status uses readable 12px badges", "font-size: 12px" in status_css, results)
+require("hero CTA is redirected to status-aware downloads", "downloads/" in status_js and "hero-download" in status_js, results)
+require("checkout receives Public beta notice", "fx-checkout-product-state" in status_js, results)
 
-def require_tokens(label: str, source: str, tokens: tuple[str, ...]) -> None:
-    for token in tokens:
-        require(f"{label}: {token}", token in source)
+require("intro maximum deadline is 700ms", "const HARD_DEADLINE = 700" in intro, results)
+require("intro timeline is 560ms", "const TIMELINE_DURATION = REDUCE_QUERY.matches ? 1 : 560" in intro, results)
+require("intro is first-visit only", "formatx-intro-seen-v1" in intro and "seenBefore()" in intro and "markSeen()" in intro, results)
+require("bfcache does not replay intro", "bfcache-restore" in intro and "startIntro();" not in intro.split("addEventListener('pageshow'", 1)[1], results)
 
+require("voice remains local", all(token not in voice for token in ("fetch(", "XMLHttpRequest", "WebSocket")), results)
+require("voice remains switchable", "fx-organism-master-toggle" in voice and "let speechEnabled = false" in voice, results)
 
-require("home: Business Pro price", "15 900 Ft / hó" in home)
-require("home: Technician Team price", "29 900 Ft / hó" in home)
-require("intro: deterministic timeline", "TIMELINE_DURATION" in intro and "HARD_DEADLINE" in intro)
-require("intro: does not wait for window load", "loadOrDeadline" not in intro)
+require("support has private email route", "mailto:hutoczky@gmail.com" in support, results)
+require("support is not GitHub-only", "GitHub hibajegy nem az egyetlen út" in support, results)
+require("terms include withdrawal", "Elállás és azonnali digitális teljesítés" in terms, results)
+require("terms include refund", "Refund és hibás teljesítés" in terms, results)
+require("terms include complaint handling", "30 napon belül" in terms, results)
+require("privacy identifies controller", "Hutóczky József" in privacy, results)
+require("privacy lists processors", "Cloudflare" in privacy and "GitHub" in privacy and "QuickChart" in privacy and "Google / Gmail" in privacy, results)
+require("privacy lists retention periods", "8 év" in privacy and "3 év" in privacy and "30 nap" in privacy, results)
+require("public test matrix exists", "Nyilvános tesztmátrix" in test_matrix and "Ismert korlátozás" in test_matrix, results)
+require("test matrix does not claim Stable", "· Stable" not in test_matrix, results)
 
-require_tokens("loader", loader, (
-    "safe-ready-v18",
-    "organism-core-controller.js?v=20260729-core-ui-2",
-    "organism-voice.js?v=20260730-organism-voice-2",
-    "organism-voice-foreground.js?v=20260730-organism-foreground-1",
-    "organism-core-interaction.js?v=20260730-core-interaction-1",
-    "formatx-mobile-unified.js?v=20260730-mobile-unified-1",
-    "organism-speaking-visual.css?v=20260730-speaking-visual-1",
-    "formatx-mobile-readability.css?v=20260730-mobile-readability-1",
-    "formatx-render-visibility.js?v=20260730-render-visibility-2",
-    "formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4",
-    "formatx-three-host-safe.js",
-    "load(index + 1)",
-))
-queue = loader.split("const queue =", 1)[1].split("];", 1)[0]
-require("loader order: core before voice", queue.index("organism-core-controller.js") < queue.index("organism-voice.js"))
-require("loader order: voice before foreground guard", queue.index("organism-voice.js") < queue.index("organism-voice-foreground.js"))
-require("loader order: foreground before MAG interaction", queue.index("organism-voice-foreground.js") < queue.index("organism-core-interaction.js"))
-require("loader order: interaction before unified mobile", queue.index("organism-core-interaction.js") < queue.index("formatx-mobile-unified.js"))
-require("loader order: unified mobile before infinite scroll", queue.index("formatx-mobile-unified.js") < queue.index("formatx-infinite-scroll.js"))
-require("loader: no legacy infinite controller", "formatx-infinite-loop-controller-v2.js" not in loader)
-require("loader: WebGL adapter remains lazy", "interaction-genome-webgl-adapter.js" not in queue)
+for worker_source, label in ((root_worker, "preview Worker"), (production_entry, "production Worker")):
+    require(f"{label} serves platform JSON", "platform-status.json" in worker_source, results)
+    require(f"{label} serves platform JS", "platform-status.js" in worker_source, results)
+    require(f"{label} serves platform CSS", "platform-status.css" in worker_source, results)
+    require(f"{label} rewrites intro cache version", "20260730-first-visit-1" in worker_source, results)
 
-require_tokens("voice", voice, (
-    "ready-v2",
-    "SpeechSynthesisUtterance",
-    "formatx-organism-dialogue-enabled",
-    "function setEnabled(next, openAfterEnable)",
-    "function setOpen(next, focusInput)",
-    "setOpen(false, false)",
-    "localOnly: true",
-    "fx-organism-master-toggle",
-    "fx-organism-voice-toggle",
-    "ROOT.dataset.fxOrganismSpeech = 'speaking'",
-    "ROOT.dataset.fxOrganismSpeech = 'idle'",
-))
-require("voice: off by default", "let speechEnabled = false" in voice)
-require("voice: no automatic intro opening", "formatx:introcomplete" not in voice)
-require("voice: no network request", all(token not in voice for token in ("fetch(", "XMLHttpRequest", "WebSocket")))
-require("voice: local enabled state", "localStorage.setItem" in voice and "localStorage.getItem" in voice)
-require("voice CSS: hidden panel protected", ".fx-organism-thought[hidden]" in voice_css)
-require("voice CSS: readable response", "font-size: 14.5px" in voice_css and "line-height: 1.68" in voice_css)
-require("voice CSS: menus cannot be covered", "html.fx-organism-menu-open .fx-organism-dialogue" in voice_css)
-require("voice dock: compact control", "min-width: 92px" in dock_css and "height: 44px" in dock_css)
+require("preview routing includes download centre", "/scifi-ui/downloads/index.html" in preview_config, results)
+require("preview routing includes platform status assets", "/scifi-ui/data/platform-status.json" in preview_config and "/scifi-ui/scripts/platform-status.js" in preview_config, results)
+require("home still contains public pricing", "15 900 Ft / hó" in home and "29 900 Ft / hó" in home, results)
 
-require_tokens("foreground guard", foreground, (
-    "ready-v1",
-    "organism-voice-foreground.css?v=20260730-organism-foreground-1",
-    "data-fx-organism-voice-foreground-style",
-    "document.body.appendChild(shell)",
-    "MutationObserver",
-))
-require_tokens("foreground CSS", foreground_css, (
-    "z-index: 940 !important",
-    "width: 58px !important",
-    "border-radius: 50% !important",
-    "bottom: max(132px",
-    "html.fx-organism-menu-open .fx-organism-dialogue",
-    "body.fx-organism-panel-open .fx-organism-dialogue",
-))
-require("foreground CSS: above content but below fixed header", "z-index: 940 !important" in foreground_css)
-require("foreground CSS: closed shell is compact", ".fx-organism-dialogue:not(.is-open)" in foreground_css and "width: auto !important" in foreground_css)
-
-require_tokens("mobile readability", mobile_readability, (
-    'html[data-fx-mobile-core-visible="false"] .fx-three-stage-shell',
-    "transform: scale(.66)",
-    "#hero.is-core-active .hero-actions",
-    "#hero.is-core-active .hero-facts",
-    '[data-fx-simulator-entry="hero"]',
-    ".fx-organism-actionbar",
-    ".fx-organism-dialogue.is-open",
-    ".fx-genome-launcher",
-))
-require("mobile readability: text contrast layer", "backdrop-filter: blur(17px)" in mobile_readability)
-require("mobile readability: category deck opaque", "rgba(2, 8, 15, .995)" in mobile_readability)
-
-require_tokens("unified mobile controller", mobile_unified, (
-    "ready-v1",
-    "formatx-mobile-unified.css?v=20260730-mobile-unified-1",
-    "formatx:pagestartscroll",
-    "closeDialogueForScroll",
-    "--fx-visual-viewport-height",
-))
-require_tokens("unified mobile CSS", mobile_unified_css, (
-    "--fx-mobile-dock-height: 54px",
-    "right: max(var(--fx-mobile-edge)",
-    "transform: translateY(15svh) scale(.80)",
-    "grid-template-columns: repeat(3, minmax(0, 1fr))",
-    "html.fx-page-scrolling .fx-organism-dialogue",
-    "html.fx-page-scrolling .fx-organism-actionbar",
-    "max-height: min(58svh, 520px)",
-))
-require("unified mobile CSS: hero copy stays inside viewport", "margin: 0 16px !important" in mobile_unified_css)
-require("unified mobile CSS: dock does not trap scroll", "pointer-events: none !important" in mobile_unified_css)
-
-require_tokens("render visibility", render_visibility, (
-    "ready-v2",
-    "fxMobileCoreVisible",
-    "IntersectionObserver",
-    "heroVisible",
-    "state[SCALE_INDEX] = MOBILE_QUERY.matches ? 0.84 : 1",
-))
-
-require_tokens("MAG interaction", interaction, (
-    "ready-v1",
-    "MAX_TAP_TRAVEL",
-    "MAX_TAP_DURATION",
-    "[data-organ-node=\"0\"]",
-    "[data-scene-link=\"0\"]",
-    "formatx:organismcoreactivate",
-    "pointerdown",
-    "pointerup",
-))
-require("MAG interaction: drag does not activate", "active.moved" in interaction and "travel > MAX_TAP_TRAVEL" in interaction)
-require("MAG interaction CSS: closed hitbox is compact", ".fx-organism-dialogue:not(.is-open)" in interaction_css and "width: 58px" in interaction_css)
-require("MAG interaction CSS: controls remain clickable", "pointer-events: auto" in interaction_css)
-
-require_tokens("speaking visual", speaking_css, (
-    "html[data-fx-organism-speech='speaking'] .fx-three-stage-shell #fx-three-frame",
-    "fx-core-speaking-light",
-    "fx-core-speaking-ring",
-    "pointer-events: none",
-    "prefers-reduced-motion",
-))
-require("speaking visual: desktop core placement", "left: 58%" in speaking_css and "top: 47%" in speaking_css)
-require("speaking visual: mobile core placement", "left: 50%" in speaking_css and "top: 43%" in speaking_css)
-
-require_tokens("infinite scroll", infinite, (
-    "boundary-v4",
-    "ready-v4",
-    "fx-page-scrolling",
-    "formatx:pagestartscroll",
-    "formatx:pagestopscroll",
-    "clonedContent: false",
-    "reinitialisedRenderer: false",
-    "nestedScrollerCanConsume",
-))
-require("infinite scroll: no DOM clone", "cloneNode" not in infinite)
-require("infinite scroll: touch is not click", "addEventListener('click'" not in infinite)
-require("core reset after loop", "addEventListener('formatx:loop'" in core_controller)
-require("instant loop handoff CSS", "html.fx-infinite-loop-jump" in stability_css)
-
-require_tokens("living gate", gate, (
-    "ready-v2",
-    "about:blank",
-    "formatx:introcomplete",
-    "three-stage-mobile.html",
-))
-require("living architecture starts after intro", "scheduleThreeExperience()" in living)
-require_tokens("safe host", safe_host, (
-    "Float32Array",
-    "__FORMATX_3D_STATE__",
-    "frame.src = 'about:blank'",
-    "formatx:coreclick",
-))
-require("safe host does not block scroll", "preventDefault()" not in safe_host)
-require_tokens("living engine", engine, (
-    "THREE.WebGLRenderer",
-    "THREE.ShaderMaterial",
-    "class LivingCoreEngine",
-    "SphereGeometry(1.28, 96, 72)",
-    "const count = 220",
-    "emissiveIntensity: 2.45",
-))
-require("living entry imports engine", "mobile-core-engine-v2.js" in entry)
-require("living stage uses module entry", 'type="module"' in stage)
-
-require_tokens("preview Worker", root_worker, (
-    "organism-voice.js",
-    "organism-voice-foreground.js",
-    "organism-voice-foreground.css",
-    "organism-core-interaction.js",
-    "organism-speaking-visual.css",
-    "formatx-mobile-readability.css",
-    "formatx-mobile-unified.js",
-    "formatx-mobile-unified.css",
-    "Cache-Control', 'no-store",
-))
-require_tokens("production entry", production_entry, (
-    "organism-voice.js",
-    "organism-voice-foreground.js",
-    "organism-voice-foreground.css",
-    "organism-core-interaction.js",
-    "organism-speaking-visual.css",
-    "formatx-mobile-readability.css",
-    "formatx-mobile-unified.js",
-    "formatx-mobile-unified.css",
-    "withEmbeddableStageHeaders",
-    "headers.set('X-Frame-Options', 'SAMEORIGIN')",
-))
-require_tokens("preview routes", preview_config, (
-    "/scifi-ui/scripts/organism-voice-foreground.js",
-    "/scifi-ui/styles/organism-voice-foreground.css",
-    "/scifi-ui/scripts/organism-core-interaction.js",
-    "/scifi-ui/styles/organism-core-interaction.css",
-    "/scifi-ui/styles/organism-speaking-visual.css",
-    "/scifi-ui/styles/formatx-mobile-readability.css",
-    "/scifi-ui/scripts/formatx-mobile-unified.js",
-    "/scifi-ui/styles/formatx-mobile-unified.css",
-))
-require_tokens("production security", production_worker, (
-    "THREE_STAGE_CONTENT_SECURITY_POLICY",
-    "isThreeStage ? 'SAMEORIGIN' : 'DENY'",
-    '"frame-ancestors \'self\'"',
-))
-require("static headers have no global X-Frame-Options", "X-Frame-Options" not in static_headers)
-require("experimental WebGPU source retained", "THREE.WebGPURenderer" in legacy_webgpu and "renderer.compute" in legacy_webgpu)
-
-report = "\n".join(("PASS " if ok else "FAIL ") + label for label, ok in checks) + "\n"
+report = "\n".join(("PASS " if ok else "FAIL ") + label for label, ok in results) + "\n"
 Path("webgpu-source-architecture-report.txt").write_text(report, encoding="utf-8")
 print(report, end="")
-
-failed = [label for label, ok in checks if not ok]
+failed = [label for label, ok in results if not ok]
 if failed:
     raise SystemExit("FormatX production architecture validation failed: " + "; ".join(failed))
