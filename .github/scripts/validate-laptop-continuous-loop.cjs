@@ -24,6 +24,8 @@ async function loopState(page) {
     controller: document.documentElement.dataset.fxInfiniteController || '',
     ready: document.documentElement.dataset.fxInfiniteScroll || '',
     input: document.documentElement.dataset.fxInfiniteInput || '',
+    activity: document.documentElement.dataset.fxScrollActivity || '',
+    scrollingClass: document.documentElement.classList.contains('fx-page-scrolling'),
     count: Number(document.documentElement.dataset.fxLoopCount || 0),
     source: document.documentElement.dataset.fxLoopSource || '',
     target: Number(document.documentElement.dataset.fxLoopTarget || 0),
@@ -70,7 +72,7 @@ async function performWheelLoop(page, expectedCount) {
   }));
   assert(Number.isFinite(geometry.heroTop) && geometry.maximum > 120, 'invalid loop geometry: ' + JSON.stringify(geometry));
 
-  await page.evaluate(target => scrollTo(0, target), Math.max(0, geometry.maximum - 76));
+  await page.evaluate(target => scrollTo(0, target), Math.max(0, geometry.maximum - 84));
   await page.waitForTimeout(60);
   await highResolutionWheel(page, [9, 11, 10, 12, 14, 16, 18, 20]);
 
@@ -78,11 +80,14 @@ async function performWheelLoop(page, expectedCount) {
     Number(document.documentElement.dataset.fxLoopCount || 0) === count
     && document.documentElement.dataset.fxLoopSource === 'wheel'
     && document.documentElement.dataset.fxInfiniteInput === 'idle'
+    && document.documentElement.dataset.fxScrollActivity === 'idle'
+    && !document.documentElement.classList.contains('fx-page-scrolling')
   ), expectedCount, { timeout: 7000 });
 
   const state = await loopState(page);
-  assert(state.controller === 'boundary-v3', 'wrong controller after loop: ' + JSON.stringify(state));
-  assert(state.ready === 'ready-v3', 'controller not ready after loop: ' + JSON.stringify(state));
+  assert(state.controller === 'boundary-v4', 'wrong controller after loop: ' + JSON.stringify(state));
+  assert(state.ready === 'ready-v4', 'controller not ready after loop: ' + JSON.stringify(state));
+  assert(state.activity === 'idle' && !state.scrollingClass, 'floating UI did not settle after loop: ' + JSON.stringify(state));
   assert(state.cloneCount === 0, 'clone-based loop returned: ' + JSON.stringify(state));
   assert(state.boundaryControllerLoaded && !state.legacyControllerLoaded, 'controller loading conflict: ' + JSON.stringify(state));
   assert(Math.abs(state.scrollY - state.heroTop) <= 3, 'loop did not land on hero: ' + JSON.stringify(state));
@@ -106,11 +111,12 @@ async function verifyViewport(browser, viewport, name) {
     if (message.type() === 'error') diagnostics.push('console-error: ' + message.text());
   });
 
-  await page.goto(TEST_URL + '?lang=hu&loop-test=3', { waitUntil: 'domcontentloaded' });
+  await page.goto(TEST_URL + '?lang=hu&loop-test=4', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
   await page.waitForFunction(() => (
-    document.documentElement.dataset.fxInfiniteController === 'boundary-v3'
-    && document.documentElement.dataset.fxInfiniteScroll === 'ready-v3'
+    document.documentElement.dataset.fxInfiniteController === 'boundary-v4'
+    && document.documentElement.dataset.fxInfiniteScroll === 'ready-v4'
+    && document.documentElement.dataset.fxMobileUnified === 'ready-v1'
   ), null, { timeout: 30000 });
 
   const initial = await loopState(page);
@@ -123,7 +129,7 @@ async function verifyViewport(browser, viewport, name) {
   await page.waitForTimeout(420);
   const startY = await page.evaluate(() => window.scrollY);
   await page.mouse.wheel(0, 160);
-  await page.waitForTimeout(160);
+  await page.waitForTimeout(260);
   const continuedY = await page.evaluate(() => window.scrollY);
   assert(continuedY > startY + 20, name + ': scrolling did not continue after loop');
 
