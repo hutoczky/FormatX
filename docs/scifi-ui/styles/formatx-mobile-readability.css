@@ -130,25 +130,29 @@
     backdrop-filter: blur(20px) saturate(125%) !important;
   }
 
-  /* Keep the two optional floating controls on opposite sides, above the action dock. */
+  /* Optional floating controls live in the free band directly below the header. */
   html body .fx-organism-dialogue {
+    top: max(142px, calc(env(safe-area-inset-top) + 118px)) !important;
     right: auto !important;
+    bottom: auto !important;
     left: max(12px, env(safe-area-inset-left)) !important;
-    bottom: max(138px, calc(env(safe-area-inset-bottom) + 126px)) !important;
     width: min(380px, calc(100vw - 24px)) !important;
   }
 
   html body .fx-organism-dialogue.is-open {
+    top: max(132px, calc(env(safe-area-inset-top) + 108px)) !important;
     right: max(12px, env(safe-area-inset-right)) !important;
+    bottom: auto !important;
     left: max(12px, env(safe-area-inset-left)) !important;
     width: auto !important;
   }
 
   html body .fx-genome-launcher {
+    top: max(142px, calc(env(safe-area-inset-top) + 118px)) !important;
     right: max(12px, env(safe-area-inset-right)) !important;
-    bottom: max(138px, calc(env(safe-area-inset-bottom) + 126px)) !important;
+    bottom: auto !important;
     transform: scale(.86) !important;
-    transform-origin: right bottom !important;
+    transform-origin: right top !important;
   }
 
   html body .fx-organism-dialogue.is-open ~ .fx-genome-launcher,
