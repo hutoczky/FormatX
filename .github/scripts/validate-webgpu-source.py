@@ -72,7 +72,8 @@ require("website displays canonical support role", "support_role_labels" in stat
 
 require("download page renders canonical status module", "platform-status.js" in downloads and "data-platform-status-root" in downloads, results)
 require("main loader includes platform status", "platform-status.js?v=20260730-platform-status-1" in loader, results)
-require("loader version is v20", "safe-ready-v20" in loader and "safe-degraded-v20" in loader, results)
+require("loader version is v21", "safe-ready-v21" in loader and "safe-degraded-v21" in loader, results)
+require("loader includes natural voice v3", "organism-voice.js?v=20260730-organism-voice-3" in loader, results)
 require("loader includes dock v2", "organism-voice-dock.css?v=20260730-organism-dock-2" in loader, results)
 require("dock reserves desktop dialogue lane", "right: 430px !important" in voice_dock, results)
 require("dock protects 21:9 and 32:9", "min-aspect-ratio: 21/9" in voice_dock and "right: 440px !important" in voice_dock, results)
@@ -90,6 +91,14 @@ require("bfcache does not replay intro", "bfcache-restore" in intro and "startIn
 
 require("voice remains local", all(token not in voice for token in ("fetch(", "XMLHttpRequest", "WebSocket")), results)
 require("voice remains switchable", "fx-organism-master-toggle" in voice and "let speechEnabled = false" in voice, results)
+require("voice version is natural v3", "ready-v3" in voice and "sentence-prosody-v3" in voice, results)
+require("voice ranks premium and neural engines", "function voiceScore(voice)" in voice and "natural" in voice and "neural" in voice and "premium" in voice and "enhanced" in voice, results)
+require("voice deprioritizes robotic engines", "espeak|festival|pico|compact|mbrola|robot" in voice, results)
+require("voice uses sentence and clause chunks", "function splitSpeech(text)" in voice and "function pauseAfter(chunk)" in voice, results)
+require("voice uses natural language prosody", "function prosody(chunk, index, count)" in voice and "0.98" in voice and "0.94" in voice, results)
+require("voice no longer forces robotic low pitch", "utterance.pitch = 0.82" not in voice, results)
+require("voice exposes selected quality", "fxOrganismVoiceQuality" in voice and "voiceInfo()" in voice, results)
+require("voice remains off by default", "let speechEnabled = false" in voice, results)
 
 require("support has private email route", "mailto:hutoczky@gmail.com" in support, results)
 require("support is not GitHub-only", "GitHub hibajegy nem az egyetlen út" in support, results)
