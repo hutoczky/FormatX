@@ -60,16 +60,8 @@
   background: rgba(1, 9, 17, .58);
 }
 
-.fx-product-release-state strong {
-  color: #f4fbff;
-  font-size: 18px;
-}
-
-.fx-product-release-state small {
-  color: rgba(213, 234, 243, .68);
-  font-size: 12px;
-  line-height: 1.5;
-}
+.fx-product-release-state strong { color: #f4fbff; font-size: 18px; }
+.fx-product-release-state small { color: rgba(213, 234, 243, .68); font-size: 12px; line-height: 1.5; }
 
 .fx-platform-status-grid {
   display: grid;
@@ -93,27 +85,9 @@
   margin-bottom: 14px;
 }
 
-.fx-platform-card h3 {
-  margin: 0;
-  color: #f2fbff;
-  font-size: 17px;
-  line-height: 1.25;
-}
-
-.fx-platform-card header small {
-  display: block;
-  margin-top: 4px;
-  color: rgba(202, 226, 237, .58);
-  font-size: 12px;
-  line-height: 1.35;
-}
-
-.fx-platform-card p {
-  margin: 0;
-  color: rgba(224, 240, 247, .72);
-  font-size: 14px;
-  line-height: 1.58;
-}
+.fx-platform-card h3 { margin: 0; color: #f2fbff; font-size: 17px; line-height: 1.25; }
+.fx-platform-card header small { display: block; margin-top: 4px; color: rgba(202, 226, 237, .58); font-size: 12px; line-height: 1.35; }
+.fx-platform-card p { margin: 0; color: rgba(224, 240, 247, .72); font-size: 14px; line-height: 1.58; }
 
 .fx-platform-status-badge {
   display: inline-flex;
@@ -145,32 +119,48 @@
   line-height: 1.58;
 }
 
-.fx-platform-status--compact {
-  padding: 22px;
-  border-radius: 22px;
-}
-
-.fx-platform-status--compact > header {
-  grid-template-columns: 1fr;
-  margin-bottom: 18px;
-}
-
+.fx-platform-status--compact { padding: 22px; border-radius: 22px; }
+.fx-platform-status--compact > header { grid-template-columns: 1fr; margin-bottom: 18px; }
 .fx-platform-status--compact h2 { font-size: clamp(1.45rem, 3vw, 2.3rem); }
 .fx-platform-status--compact .fx-product-release-state { min-height: auto; }
 .fx-platform-status--compact .fx-platform-status-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
+.fx-hero-product-state {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  color: rgba(224, 241, 248, .78);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.fx-hero-product-state .fx-platform-status-badge { min-height: 28px; }
+
+.fx-checkout-product-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 18px;
+  margin-bottom: 24px;
+  padding: 16px 18px;
+  border: 1px solid rgba(111, 221, 255, .24);
+  border-radius: 16px;
+  background: rgba(5, 18, 31, .88);
+}
+
+.fx-checkout-product-state div { display: grid; gap: 5px; min-width: 0; }
+.fx-checkout-product-state strong { color: #f4fbff; font-size: 15px; line-height: 1.35; }
+.fx-checkout-product-state span { color: rgba(220, 238, 246, .72); font-size: 13px; line-height: 1.5; }
+
 @media (max-width: 900px) {
   .fx-platform-status > header,
   .fx-platform-status-grid,
-  .fx-platform-status--compact .fx-platform-status-grid {
-    grid-template-columns: 1fr;
-  }
+  .fx-platform-status--compact .fx-platform-status-grid { grid-template-columns: 1fr; }
 
-  .fx-platform-status-host {
-    width: min(100% - 22px, 720px);
-    margin-block: 36px;
-  }
-
+  .fx-platform-status-host { width: min(100% - 22px, 720px); margin-block: 36px; }
   .fx-platform-status { padding: 20px; border-radius: 22px; }
   .fx-platform-card { padding: 16px; }
+  .fx-checkout-product-state { display: grid; }
 }
