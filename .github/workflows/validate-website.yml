@@ -99,7 +99,10 @@ jobs:
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
           node --check .github/scripts/validate-organism-voice-browser.cjs
 
-          grep -Fq 'safe-ready-v19' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v20' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'organism-voice-dock.css?v=20260730-organism-dock-2' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'min-aspect-ratio: 21/9' docs/scifi-ui/styles/organism-voice-dock.css
+          grep -Fq 'right: 440px !important' docs/scifi-ui/styles/organism-voice-dock.css
           grep -Fq 'platform-status.js?v=20260730-platform-status-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'const HARD_DEADLINE = 700' docs/scifi-ui/scripts/formatx-event-horizon.js
           grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
@@ -159,7 +162,7 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
         run: node .github/scripts/validate-three-site-v4.cjs
 
-      - name: Test unified mobile visibility and Organism dialogue
+      - name: Test mobile, desktop and ultrawide Organism dialogue
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
