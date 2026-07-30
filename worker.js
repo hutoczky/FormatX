@@ -37,6 +37,7 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/styles/formatx-mobile-recovery.css',
   '/scifi-ui/styles/formatx-site-stability.css',
   '/scifi-ui/styles/organism-voice.css',
+  '/scifi-ui/styles/organism-voice-dock.css',
   '/scifi-ui/scripts/formatx-event-horizon.js',
 ]);
 const REPLACEMENTS = [
