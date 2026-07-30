@@ -5,7 +5,7 @@
   if (root.dataset.fxSafeThreeGate === 'ready-v2') return;
 
   root.dataset.fxSafeThreeGate = 'ready-v2';
-  root.dataset.fxMobileRecovery = 'living-core-all-devices-v2';
+  root.dataset.fxMobileRecovery = 'morphing-organism-all-devices-v3';
   root.dataset.fxThree = 'intro-wait';
   root.classList.add('fx-mobile-stable-3d');
 
@@ -51,10 +51,10 @@
     failed = true;
     ready = false;
     root.dataset.fxThree = 'error';
-    root.dataset.fxThreeError = String(message || 'living-core-startup-failed').slice(0, 180);
-    root.dataset.fxMobile3d = 'living-core-stage-error';
+    root.dataset.fxThreeError = String(message || 'morphing-organism-startup-failed').slice(0, 180);
+    root.dataset.fxMobile3d = 'morphing-organism-stage-error';
     root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
-    telemetry('THREE / LIVING CORE UNAVAILABLE');
+    telemetry('THREE / MORPHING ORGANISM UNAVAILABLE');
   }
 
   function markReady() {
@@ -62,10 +62,12 @@
     ready = true;
     clearWatchdog();
     if (root.dataset.fxThree !== 'ready') root.dataset.fxThree = 'ready';
-    root.dataset.fxMobile3d = 'living-core-stage-ready';
-    root.dataset.fxThreeRenderer = 'three-webgl-living-core-v2';
+    root.dataset.fxMobile3d = 'morphing-organism-stage-ready';
+    root.dataset.fxThreeRenderer = 'three-webgl-morphing-organism-v3';
+    root.dataset.fxMobile3dEngine = 'morphing-organism-v3-running';
+    root.dataset.fxCoreForm = 'synaptic-thought-genome-v1';
     root.classList.add('fx-three-frame-loaded', 'fx-three-engine-ready');
-    telemetry('THREE / LIVING CORE READY');
+    telemetry('THREE / MORPHING ORGANISM READY');
   }
 
   function enforceFrameSource() {
@@ -77,8 +79,8 @@
     ready = false;
     root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
     root.dataset.fxThree = desired === 'about:blank' ? 'intro-wait' : 'loading';
-    root.dataset.fxMobile3d = desired === 'about:blank' ? 'intro-wait' : 'living-core-stage-starting';
-    telemetry(desired === 'about:blank' ? 'THREE / WAITING FOR INTRO' : 'THREE / LIVING CORE STARTING');
+    root.dataset.fxMobile3d = desired === 'about:blank' ? 'intro-wait' : 'morphing-organism-stage-starting';
+    telemetry(desired === 'about:blank' ? 'THREE / WAITING FOR INTRO' : 'THREE / MORPHING ORGANISM STARTING');
     frame.src = desired;
   }
 
@@ -89,7 +91,7 @@
       frame = nextFrame;
       frameObserver = new MutationObserver(enforceFrameSource);
       frameObserver.observe(frame, { attributes: true, attributeFilter: ['src'] });
-      frame.addEventListener('error', () => markError('living-core-frame-network-error'), { once: true });
+      frame.addEventListener('error', () => markError('morphing-organism-frame-network-error'), { once: true });
     }
     enforceFrameSource();
   }
@@ -102,7 +104,7 @@
   function armWatchdog() {
     clearWatchdog();
     watchdog = setTimeout(() => {
-      if (!ready) markError('living-core-ready-timeout');
+      if (!ready) markError('morphing-organism-ready-timeout');
     }, 15000);
   }
 
@@ -112,7 +114,7 @@
     started = true;
     ready = false;
     root.dataset.fxThree = 'loading';
-    root.dataset.fxMobile3d = 'living-core-stage-starting';
+    root.dataset.fxMobile3d = 'morphing-organism-stage-starting';
     findFrame();
     enforceFrameSource();
     armWatchdog();
@@ -143,7 +145,7 @@
   addEventListener('formatx:threeready', markReady);
   document.addEventListener('formatx:threeready', markReady);
   addEventListener('formatx:threeerror', event => {
-    markError(event.detail?.message || 'living-core-engine-error');
+    markError(event.detail?.message || 'morphing-organism-engine-error');
   });
 
   addEventListener('pageshow', event => {
