@@ -2,6 +2,7 @@ const REQUIRED_LEGAL_FIELDS = [
   'MERCHANT_LEGAL_NAME',
   'MERCHANT_ADDRESS',
   'MERCHANT_TAX_ID',
+  'INVOICE_PROVIDER_NAME',
   'SUPPORT_EMAIL',
 ];
 
@@ -19,7 +20,7 @@ export function isSalesLegallyReady(env) {
 export function createSalesUnavailableJson() {
   return new Response(JSON.stringify({
     error: 'sales_temporarily_unavailable',
-    message: 'Az új licencvásárlás a jogi és adatkezelési dokumentumok véglegesítéséig nem indítható.',
+    message: 'Az új licencvásárlás a teljes üzemeltetői, számlázási és jogi adatok jóváhagyásáig nem indítható.',
   }), {
     status: 503,
     headers: {
@@ -44,12 +45,12 @@ export function createSalesUnavailablePage() {
   <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
   <main id="main-content" class="legal-main">
     <article class="content-width legal-document">
-      <p class="eyebrow">ÉRTÉKESÍTÉSI ÁLLAPOT</p>
+      <p class="eyebrow">ÉRTÉKESÍTÉSI ÁLLAPOT · PUBLIC BETA</p>
       <h1>Az új licencvásárlás átmenetileg nem indítható</h1>
-      <p class="legal-lead">A FormatX bemutatóoldala és a teljes értékű, 5 napos próbalicenccel használható kiadás elérhető, de az éles fizetési folyamat a teljes üzemeltetői, fogyasztóvédelmi és adatkezelési dokumentáció véglegesítéséig zárolva marad.</p>
-      <p><strong>English:</strong> The FormatX presentation site and the full release with a 5-day trial licence remain available, but new purchases are temporarily disabled until the merchant, consumer-information and privacy documentation is complete.</p>
+      <p class="legal-lead">A FormatX V92 nyilvános béta és az 5 napos próbalicenc letölthető marad, de az éles fizetési folyamat a teljes üzemeltetői cím, adószám, számlázási szolgáltató, fogyasztóvédelmi és adatkezelési adatok jóváhagyásáig zárolva van.</p>
+      <p><strong>English:</strong> FormatX V92 remains available as a public beta with a 5-day trial, but new purchases are disabled until the complete merchant address, tax ID, invoicing provider, consumer-information and privacy details have been approved.</p>
       <div class="legal-actions">
-        <a class="button primary" href="/">Vissza a főoldalra</a>
+        <a class="button primary" href="/scifi-ui/downloads/">Letöltések és platformállapot</a>
         <a class="button secondary" href="/scifi-ui/support.html">Támogatás</a>
         <a class="button secondary" href="/scifi-ui/terms.html">Feltételek</a>
       </div>
@@ -89,7 +90,9 @@ export async function annotateHealthResponse(response, salesReady) {
   return new Response(JSON.stringify({
     ...payload,
     live_ready: salesReady ? payload.live_ready : false,
+    sales_ready: Boolean(salesReady),
     legal_documents_approved: salesReady,
+    required_legal_fields: REQUIRED_LEGAL_FIELDS,
   }), {
     status: response.status,
     statusText: response.statusText,
