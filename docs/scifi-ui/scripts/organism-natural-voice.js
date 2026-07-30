@@ -2,45 +2,45 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxOrganismNaturalVoiceGuard === 'ready-v1') return;
-  ROOT.dataset.fxOrganismNaturalVoiceGuard = 'loading-v1';
+  if (ROOT.dataset.fxOrganismNaturalVoiceGuard === 'ready-v2') return;
+  ROOT.dataset.fxOrganismNaturalVoiceGuard = 'loading-v2';
 
-  const speechSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
-  const NATURAL_TOKENS = /natural|neural|online|premium|enhanced|studio|expressive|wavenet/i;
-  const TRUSTED_ENGINE_TOKENS = /google|samsung|apple|siri/i;
-  const LEGACY_TOKENS = /desktop|legacy|sapi|onecore|mobile|compact|espeak|festival|pico|mbrola|robot/i;
-  const failedVoices = new Set();
+  const supported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  const synth = supported ? window.speechSynthesis : null;
+  const COPY = {
+    hu: {
+      on: '🔊 Hang be',
+      off: '🔇 Hang ki',
+      enable: 'Organizmus hangjának bekapcsolása',
+      disable: 'Organizmus hangjának kikapcsolása',
+      ready: 'A FormatX hangja bekapcsolva.',
+      starting: 'Hang indítása…',
+      working: 'Hang működik',
+      unavailable: 'A hang nem indult el. Ellenőrizd a médiahangot és az Android szövegfelolvasó szolgáltatását, majd nyomd meg újra a Hang be gombot.',
+      unsupported: 'Ez a böngésző nem támogatja a gépi beszédet.'
+    },
+    en: {
+      on: '🔊 Voice on',
+      off: '🔇 Voice off',
+      enable: 'Enable the Organism voice',
+      disable: 'Disable the Organism voice',
+      ready: 'The FormatX voice is enabled.',
+      starting: 'Starting voice…',
+      working: 'Voice is working',
+      unavailable: 'Speech did not start. Check media volume and the Android text-to-speech service, then press Voice on again.',
+      unsupported: 'Speech synthesis is not supported by this browser.'
+    }
+  };
 
   let active = false;
-  let selectedVoice = null;
   let currentText = '';
-  let searchRun = 0;
-  let speechRun = 0;
+  let selectedVoice = null;
+  let runId = 0;
+  let watchdog = 0;
   let pauseTimer = 0;
   let voiceButton = null;
   let repeatButton = null;
   let privacyNote = null;
-
-  const COPY = {
-    hu: {
-      on: '🔊 Természetes hang be',
-      off: '🔇 Hang ki',
-      enable: 'Természetes Organizmus-hang bekapcsolása',
-      disable: 'Organizmus hangjának kikapcsolása',
-      searching: 'Természetes magyar hang keresése…',
-      unavailable: 'Ebben a böngészőben nem találtam természetes magyar hangot. A régi Windows rendszerhangot szándékosan nem használom. Próbáld Edge-ben vagy Chrome-ban, illetve telepíts Natural vagy Online magyar beszédhangot.',
-      privacy: 'Csak Natural, Neural vagy Online hang használható'
-    },
-    en: {
-      on: '🔊 Natural voice on',
-      off: '🔇 Voice off',
-      enable: 'Enable the natural Organism voice',
-      disable: 'Disable the Organism voice',
-      searching: 'Searching for a natural English voice…',
-      unavailable: 'No natural English voice is available in this browser. The legacy Windows system voice is intentionally blocked. Try Edge or Chrome, or install a Natural or Online speech voice.',
-      privacy: 'Only a Natural, Neural or Online voice may be used'
-    }
-  };
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -54,100 +54,6 @@
     return COPY[language()];
   }
 
-  function voiceId(voice) {
-    return String(voice?.voiceURI || voice?.name || '');
-  }
-
-  function descriptor(voice) {
-    return `${voice?.name || ''} ${voice?.voiceURI || ''}`.toLowerCase();
-  }
-
-  function quality(voice) {
-    const value = descriptor(voice);
-    if (LEGACY_TOKENS.test(value)) return 'legacy';
-    if (NATURAL_TOKENS.test(value)) return 'natural';
-    if (TRUSTED_ENGINE_TOKENS.test(value)) return 'enhanced';
-    return 'standard';
-  }
-
-  function score(voice) {
-    const expected = locale().toLowerCase();
-    const lang = String(voice.lang || '').toLowerCase();
-    const value = descriptor(voice);
-    if (!lang.startsWith(expected.slice(0, 2))) return -100000;
-    if (failedVoices.has(voiceId(voice))) return -100000;
-
-    const level = quality(voice);
-    if (level === 'legacy' || level === 'standard') return -10000;
-
-    let result = lang === expected ? 700 : 420;
-    if (level === 'natural') result += 2200;
-    if (level === 'enhanced') result += 1100;
-    if (voice.localService === false) result += 650;
-    if (/online/.test(value)) result += 600;
-    if (/natural|neural/.test(value)) result += 500;
-    if (/premium|enhanced|studio|expressive|wavenet/.test(value)) result += 320;
-    if (/google/.test(value)) result += 260;
-    if (/samsung|apple|siri/.test(value)) result += 220;
-    if (/microsoft/.test(value) && !/natural|neural|online/.test(value)) result -= 2000;
-    if (voice.default) result += 10;
-
-    if (language() === 'hu' && /noemi|noémi|tamás|tamas|anna|tünde|google magyar/.test(value)) result += 170;
-    if (language() === 'en' && /aria|jenny|sonia|ryan|ava|samantha|daniel|serena|google uk english/.test(value)) result += 150;
-    return result;
-  }
-
-  function candidates() {
-    if (!speechSupported) return [];
-    return speechSynthesis.getVoices()
-      .map(voice => ({ voice, score: score(voice) }))
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score);
-  }
-
-  function selectVoice() {
-    const list = candidates();
-    selectedVoice = list[0]?.voice || null;
-    ROOT.dataset.fxOrganismNaturalVoiceCount = String(list.length);
-    ROOT.dataset.fxOrganismNaturalVoiceName = selectedVoice?.name || 'unavailable';
-    ROOT.dataset.fxOrganismNaturalVoiceQuality = selectedVoice ? quality(selectedVoice) : 'unavailable';
-    ROOT.dataset.fxOrganismNaturalVoiceService = selectedVoice?.localService === false
-      ? 'browser-online'
-      : selectedVoice
-        ? 'device-enhanced'
-        : 'legacy-blocked';
-    return selectedVoice;
-  }
-
-  async function waitForVoice(timeoutMs) {
-    const immediate = selectVoice();
-    if (immediate) return immediate;
-
-    const run = ++searchRun;
-    const timeout = Math.max(400, Number(timeoutMs) || 1900);
-    return new Promise(resolve => {
-      let finished = false;
-      const timers = [];
-      const finish = voice => {
-        if (finished || run !== searchRun) return;
-        finished = true;
-        timers.forEach(clearTimeout);
-        speechSynthesis.removeEventListener?.('voiceschanged', check);
-        resolve(voice || null);
-      };
-      const check = () => {
-        const voice = selectVoice();
-        if (voice) finish(voice);
-      };
-
-      speechSynthesis.addEventListener?.('voiceschanged', check);
-      [80, 220, 480, 850, 1250].forEach(delay => {
-        timers.push(window.setTimeout(check, Math.min(delay, timeout - 20)));
-      });
-      timers.push(window.setTimeout(() => finish(selectVoice()), timeout));
-    });
-  }
-
   function findControls() {
     voiceButton = document.querySelector('.fx-organism-voice-toggle');
     repeatButton = document.querySelector('.fx-organism-repeat');
@@ -157,57 +63,62 @@
     return voiceButton instanceof HTMLButtonElement;
   }
 
+  function voiceScore(voice) {
+    const expected = locale().toLowerCase();
+    const lang = String(voice?.lang || '').toLowerCase();
+    const descriptor = `${voice?.name || ''} ${voice?.voiceURI || ''}`.toLowerCase();
+    let score = 0;
+    if (lang === expected) score += 1000;
+    else if (lang.startsWith(expected.slice(0, 2))) score += 700;
+    else if (voice?.default) score += 80;
+    else score -= 500;
+    if (/natural|neural|premium|enhanced|studio|expressive|wavenet/.test(descriptor)) score += 500;
+    if (/google|samsung|microsoft|apple|siri/.test(descriptor)) score += 220;
+    if (/online/.test(descriptor)) score += 80;
+    if (voice?.localService) score += 60;
+    if (voice?.default) score += 40;
+    return score;
+  }
+
+  function chooseVoice() {
+    if (!supported) return null;
+    const voices = synth.getVoices();
+    selectedVoice = voices
+      .map(voice => ({ voice, score: voiceScore(voice) }))
+      .sort((a, b) => b.score - a.score)[0]?.voice || null;
+    ROOT.dataset.fxOrganismVoiceName = selectedVoice?.name || 'browser-default';
+    ROOT.dataset.fxOrganismVoiceLanguage = selectedVoice?.lang || locale();
+    ROOT.dataset.fxOrganismVoiceService = selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser';
+    return selectedVoice;
+  }
+
+  function setStatus(text, state) {
+    ROOT.dataset.fxOrganismSpeech = state || 'idle';
+    if (privacyNote) privacyNote.textContent = text;
+  }
+
   function syncControls() {
     if (!findControls()) return;
     const words = copy();
+    voiceButton.disabled = !supported;
     voiceButton.textContent = active ? words.on : words.off;
     voiceButton.setAttribute('aria-pressed', String(active));
     voiceButton.setAttribute('aria-label', active ? words.disable : words.enable);
     voiceButton.title = active ? words.disable : words.enable;
-    voiceButton.disabled = !speechSupported;
-    voiceButton.dataset.fxNaturalVoiceOwner = 'true';
+    voiceButton.dataset.fxAdaptiveVoiceOwner = 'true';
     if (repeatButton instanceof HTMLButtonElement) {
-      repeatButton.disabled = !speechSupported || !active;
-      repeatButton.dataset.fxNaturalVoiceOwner = 'true';
-    }
-    if (privacyNote) {
-      privacyNote.textContent = selectedVoice
-        ? `${words.privacy} · ${selectedVoice.name}`
-        : words.privacy;
+      repeatButton.disabled = !supported || !active;
+      repeatButton.dataset.fxAdaptiveVoiceOwner = 'true';
     }
     ROOT.dataset.fxOrganismNaturalVoiceEnabled = String(active);
+    ROOT.dataset.fxOrganismVoiceEnabled = String(active);
+    if (!supported) setStatus(words.unsupported, 'unsupported');
   }
 
-  function showMessage(text) {
-    const api = window.FormatXOrganismVoice;
-    if (api?.say) {
-      api.say(text);
-      return;
-    }
-    const output = document.querySelector('.fx-organism-thought-output');
-    const bubble = document.querySelector('.fx-organism-thought');
-    const shell = document.querySelector('.fx-organism-dialogue');
-    if (output) output.textContent = text;
-    if (bubble instanceof HTMLElement) {
-      bubble.hidden = false;
-      bubble.setAttribute('aria-hidden', 'false');
-    }
-    shell?.classList.add('is-open');
-  }
-
-  function stop() {
-    speechRun += 1;
-    clearTimeout(pauseTimer);
-    pauseTimer = 0;
-    try { speechSynthesis.cancel(); } catch (_) {}
-    document.querySelector('.fx-organism-dialogue')?.classList.remove('is-speaking');
-    ROOT.dataset.fxOrganismSpeech = 'idle';
-  }
-
-  function speechText(text) {
-    let value = String(text || '').replace(/\s+/g, ' ').trim().replace(/FormatX/g, 'Format X');
+  function cleanSpeechText(value) {
+    let text = String(value || '').replace(/\s+/g, ' ').trim().replace(/FormatX/g, 'Format X');
     if (language() === 'hu') {
-      return value
+      return text
         .replace(/SHA-256/gi, 'SHA kettő öt hat')
         .replace(/Ed25519/gi, 'Ed kettő öt öt egy kilenc')
         .replace(/\bHUF\b/g, 'forint')
@@ -216,7 +127,7 @@
         .replace(/\bAPK\b/g, 'á pé ká')
         .replace(/\bAI\b/g, 'mesterséges intelligencia');
     }
-    return value
+    return text
       .replace(/SHA-256/gi, 'S H A two fifty six')
       .replace(/Ed25519/gi, 'Ed two five five one nine')
       .replace(/\bHUF\b/g, 'H U F')
@@ -226,164 +137,172 @@
       .replace(/\bAI\b/g, 'A I');
   }
 
-  function chunks(text) {
-    const prepared = speechText(text);
-    return (prepared.match(/[^.!?;:]+[.!?;:]?|[^.!?;:]+$/g) || [prepared])
-      .map(value => value.trim())
-      .filter(Boolean);
+  function splitText(value) {
+    const text = cleanSpeechText(value);
+    const sentences = text.match(/[^.!?;:]+[.!?;:]?|[^.!?;:]+$/g) || [text];
+    return sentences.map(item => item.trim()).filter(Boolean);
   }
 
-  function pauseAfter(text) {
-    if (/[:;]$/.test(text)) return 160;
-    if (/[,–—]$/.test(text)) return 95;
-    if (/[.!?]$/.test(text)) return 210;
-    return 120;
+  function clearTimers() {
+    clearTimeout(watchdog);
+    clearTimeout(pauseTimer);
+    watchdog = 0;
+    pauseTimer = 0;
   }
 
-  function speak(text) {
-    if (!active || !speechSupported || !text) return;
-    stop();
-    const voice = selectVoice();
-    if (!voice) {
-      disable(false);
-      showMessage(copy().unavailable);
-      ROOT.dataset.fxOrganismSpeech = 'natural-voice-unavailable';
-      return;
-    }
+  function stop() {
+    runId += 1;
+    clearTimers();
+    try { synth?.cancel(); } catch (_) {}
+    document.querySelector('.fx-organism-dialogue')?.classList.remove('is-speaking');
+    if (active) setStatus(copy().working, 'idle');
+    else ROOT.dataset.fxOrganismSpeech = 'idle';
+  }
 
-    const run = ++speechRun;
-    const parts = chunks(text);
-    let announced = false;
+  function makeUtterance(text, useSelectedVoice) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = locale();
+    utterance.rate = language() === 'en' ? 0.96 : 0.92;
+    utterance.pitch = language() === 'en' ? 1.0 : 0.98;
+    utterance.volume = 1;
+    if (useSelectedVoice && selectedVoice) utterance.voice = selectedVoice;
+    return utterance;
+  }
 
-    const next = (index, retry) => {
-      if (run !== speechRun || index >= parts.length) {
+  function speak(value, options) {
+    if (!active || !supported) return;
+    const text = String(value || '').trim();
+    if (!text) return;
+    currentText = text;
+    clearTimers();
+    const run = ++runId;
+    const parts = splitText(text);
+    chooseVoice();
+    let startedAny = false;
+
+    const begin = (index, fallback) => {
+      if (run !== runId || !active) return;
+      if (index >= parts.length) {
         document.querySelector('.fx-organism-dialogue')?.classList.remove('is-speaking');
-        ROOT.dataset.fxOrganismSpeech = 'idle';
+        setStatus(`${copy().working}${selectedVoice ? ' · ' + selectedVoice.name : ''}`, 'idle');
         return;
       }
 
-      const activeVoice = selectedVoice || selectVoice();
-      if (!activeVoice) {
-        disable(false);
-        showMessage(copy().unavailable);
-        return;
-      }
-
-      const utterance = new SpeechSynthesisUtterance(parts[index]);
-      utterance.lang = locale();
-      utterance.voice = activeVoice;
-      utterance.rate = language() === 'en' ? 0.94 : 0.90;
-      utterance.pitch = language() === 'en' ? 0.99 : 0.97;
-      utterance.volume = 0.94;
+      const utterance = makeUtterance(parts[index], !fallback);
+      let started = false;
+      watchdog = window.setTimeout(() => {
+        if (run !== runId || started) return;
+        if (!fallback) {
+          try { synth.cancel(); } catch (_) {}
+          selectedVoice = null;
+          window.setTimeout(() => begin(index, true), 90);
+        } else {
+          document.querySelector('.fx-organism-dialogue')?.classList.remove('is-speaking');
+          setStatus(copy().unavailable, 'error');
+        }
+      }, 1800);
 
       utterance.addEventListener('start', () => {
-        if (run !== speechRun) return;
-        if (!announced) {
-          announced = true;
-          ROOT.dataset.fxOrganismSpeech = 'speaking';
-          ROOT.dataset.fxOrganismSpeechMode = 'natural-only-guard-v1';
-          document.querySelector('.fx-organism-dialogue')?.classList.add('is-speaking');
-        }
+        if (run !== runId) return;
+        started = true;
+        startedAny = true;
+        clearTimeout(watchdog);
+        document.querySelector('.fx-organism-dialogue')?.classList.add('is-speaking');
+        setStatus(`${copy().working}${utterance.voice?.name ? ' · ' + utterance.voice.name : ''}`, 'speaking');
       }, { once: true });
 
       utterance.addEventListener('end', () => {
-        if (run !== speechRun) return;
-        pauseTimer = window.setTimeout(() => next(index + 1, 0), pauseAfter(parts[index]));
+        if (run !== runId) return;
+        clearTimeout(watchdog);
+        pauseTimer = window.setTimeout(() => begin(index + 1, false), 90);
       }, { once: true });
 
       utterance.addEventListener('error', event => {
-        if (run !== speechRun) return;
+        if (run !== runId) return;
+        clearTimeout(watchdog);
         if (event.error === 'canceled' || event.error === 'interrupted') return;
-        failedVoices.add(voiceId(activeVoice));
-        selectedVoice = null;
-        if (selectVoice() && retry < 1) {
-          pauseTimer = window.setTimeout(() => next(index, retry + 1), 80);
-          return;
+        if (!fallback) {
+          selectedVoice = null;
+          window.setTimeout(() => begin(index, true), 90);
+        } else {
+          document.querySelector('.fx-organism-dialogue')?.classList.remove('is-speaking');
+          setStatus(copy().unavailable, 'error');
         }
-        disable(false);
-        showMessage(copy().unavailable);
       }, { once: true });
 
-      speechSynthesis.speak(utterance);
+      try {
+        synth.resume();
+        synth.speak(utterance);
+      } catch (_) {
+        if (!fallback) window.setTimeout(() => begin(index, true), 90);
+        else setStatus(copy().unavailable, 'error');
+      }
     };
 
-    next(0, 0);
+    const startNow = () => begin(0, false);
+    if (synth.speaking || synth.pending) {
+      try { synth.cancel(); } catch (_) {}
+      window.setTimeout(startNow, 80);
+    } else {
+      startNow();
+    }
+
+    if (options?.test && !startedAny) setStatus(copy().starting, 'starting');
   }
 
-  function disable(updateMessage) {
+  function enable() {
+    if (!supported) {
+      setStatus(copy().unsupported, 'unsupported');
+      syncControls();
+      return;
+    }
+    active = true;
+    chooseVoice();
+    syncControls();
+    setStatus(copy().starting, 'starting');
+    speak(copy().ready, { test: true });
+  }
+
+  function disable() {
     active = false;
     stop();
     syncControls();
-    if (updateMessage) showMessage(copy().unavailable);
-  }
-
-  async function enable() {
-    if (!speechSupported) {
-      showMessage(copy().unavailable);
-      return;
-    }
-
-    if (!findControls()) return;
-    voiceButton.disabled = true;
-    if (privacyNote) privacyNote.textContent = copy().searching;
-    ROOT.dataset.fxOrganismSpeech = 'searching-natural-voice';
-    const voice = await waitForVoice(1900);
-    voiceButton.disabled = false;
-
-    if (!voice) {
-      disable(false);
-      showMessage(copy().unavailable);
-      ROOT.dataset.fxOrganismSpeech = 'natural-voice-unavailable';
-      return;
-    }
-
-    active = true;
-    syncControls();
-    speak(currentText || document.querySelector('.fx-organism-thought-output')?.textContent || '');
+    setStatus(language() === 'en' ? 'Voice is off' : 'A hang ki van kapcsolva', 'idle');
   }
 
   function interceptClick(event) {
     const target = event.target instanceof Element ? event.target : null;
     if (!target) return;
-
     if (target.closest('.fx-organism-voice-toggle')) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      if (active) disable(false);
-      else void enable();
+      if (active) disable();
+      else enable();
       return;
     }
-
     if (target.closest('.fx-organism-repeat')) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      if (active) speak(currentText);
+      if (active) speak(currentText || document.querySelector('.fx-organism-thought-output')?.textContent || '');
       return;
     }
-
     if (target.closest('.fx-organism-master-toggle')) {
       window.setTimeout(() => {
         const master = document.querySelector('.fx-organism-master-toggle');
-        if (master?.getAttribute('aria-pressed') === 'false') disable(false);
+        if (master?.getAttribute('aria-pressed') === 'false') disable();
         else syncControls();
       }, 0);
     }
   }
 
   function initialise() {
-    if (!speechSupported) {
-      ROOT.dataset.fxOrganismNaturalVoiceGuard = 'unsupported';
-      return;
-    }
-
     document.addEventListener('click', interceptClick, true);
     addEventListener('formatx:organismresponse', event => {
       currentText = String(event.detail?.text || '').trim();
       if (active && currentText) speak(currentText);
     });
     addEventListener('formatx:languagechange', () => {
-      disable(false);
-      failedVoices.clear();
+      if (active) stop();
       selectedVoice = null;
       window.setTimeout(syncControls, 0);
     });
@@ -391,56 +310,55 @@
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) stop();
     });
+    document.addEventListener('pointerdown', () => {
+      try { synth?.resume(); } catch (_) {}
+    }, { capture: true, passive: true });
 
-    speechSynthesis.addEventListener?.('voiceschanged', () => {
+    synth?.addEventListener?.('voiceschanged', () => {
       selectedVoice = null;
-      selectVoice();
+      chooseVoice();
       syncControls();
     });
 
     if (!findControls()) {
       const observer = new MutationObserver(() => {
-        if (findControls()) {
-          observer.disconnect();
-          selectVoice();
-          syncControls();
-        }
+        if (!findControls()) return;
+        observer.disconnect();
+        chooseVoice();
+        syncControls();
       });
       observer.observe(document.documentElement, { childList: true, subtree: true });
       window.setTimeout(() => {
         observer.disconnect();
         findControls();
-        selectVoice();
+        chooseVoice();
         syncControls();
       }, 8000);
     } else {
-      selectVoice();
+      chooseVoice();
       syncControls();
     }
 
     window.FormatXNaturalVoice = Object.freeze({
       enable,
-      disable() { disable(false); },
+      disable,
       speak,
       voiceInfo() {
         return Object.freeze({
           active,
-          name: selectedVoice?.name || 'natural-voice-unavailable',
+          supported,
+          name: selectedVoice?.name || 'browser-default',
           language: selectedVoice?.lang || locale(),
-          quality: selectedVoice ? quality(selectedVoice) : 'unavailable',
-          service: selectedVoice?.localService === false ? 'browser-online' : selectedVoice ? 'device-enhanced' : 'legacy-blocked',
-          candidates: candidates().map(item => item.voice.name)
+          service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser'
         });
       }
     });
 
-    ROOT.dataset.fxOrganismNaturalVoiceGuard = 'ready-v1';
+    ROOT.dataset.fxOrganismNaturalVoiceGuard = 'ready-v2';
     ROOT.dataset.fxOrganismNaturalVoiceEnabled = 'false';
+    ROOT.dataset.fxOrganismSpeechCompatibility = 'adaptive-v2';
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initialise, { once: true });
-  } else {
-    initialise();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
+  else initialise();
 }());
