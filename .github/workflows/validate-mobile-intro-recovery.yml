@@ -55,6 +55,7 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-console-state.js
           node --check docs/scifi-ui/scripts/organism-voice.js
+          node --check docs/scifi-ui/scripts/organism-voice-foreground.js
           node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v2.js
@@ -74,11 +75,13 @@ jobs:
             '/scifi-ui/index.html',
             '/scifi-ui/license.html',
             '/scifi-ui/styles/organism-voice.css',
+            '/scifi-ui/styles/organism-voice-foreground.css',
             '/scifi-ui/styles/organism-voice-dock.css',
             '/scifi-ui/styles/organism-core-interaction.css',
             '/scifi-ui/styles/organism-speaking-visual.css',
             '/scifi-ui/styles/formatx-mobile-readability.css',
             '/scifi-ui/scripts/organism-voice.js',
+            '/scifi-ui/scripts/organism-voice-foreground.js',
             '/scifi-ui/scripts/organism-core-interaction.js',
             '/scifi-ui/scripts/organism-core-controller.js',
             '/scifi-ui/scripts/formatx-render-visibility.js',
@@ -105,6 +108,8 @@ jobs:
           const loader = fs.readFileSync('docs/scifi-ui/scripts/igloo-parity.js', 'utf8');
           const voice = fs.readFileSync('docs/scifi-ui/scripts/organism-voice.js', 'utf8');
           const voiceCss = fs.readFileSync('docs/scifi-ui/styles/organism-voice.css', 'utf8');
+          const foreground = fs.readFileSync('docs/scifi-ui/scripts/organism-voice-foreground.js', 'utf8');
+          const foregroundCss = fs.readFileSync('docs/scifi-ui/styles/organism-voice-foreground.css', 'utf8');
           const interaction = fs.readFileSync('docs/scifi-ui/scripts/organism-core-interaction.js', 'utf8');
           const interactionCss = fs.readFileSync('docs/scifi-ui/styles/organism-core-interaction.css', 'utf8');
           const speakingCss = fs.readFileSync('docs/scifi-ui/styles/organism-speaking-visual.css', 'utf8');
@@ -117,14 +122,16 @@ jobs:
           const queue = loader.split('const queue =', 2)[1]?.split('];', 1)[0] || '';
 
           const assertions = [
-            [loader.includes('safe-ready-v16'), 'safe loader v16 marker missing'],
+            [loader.includes('safe-ready-v17'), 'safe loader v17 marker missing'],
             [loader.includes('formatx-mobile-readability.css?v=20260730-mobile-readability-1'), 'mobile readability loader missing'],
             [loader.includes('formatx-render-visibility.js?v=20260730-render-visibility-2'), 'render visibility v2 loader missing'],
             [loader.includes('organism-voice.js?v=20260730-organism-voice-2'), 'Organism voice v2 loader missing'],
+            [loader.includes('organism-voice-foreground.js?v=20260730-organism-foreground-1'), 'Organism foreground guard missing'],
             [loader.includes('organism-core-interaction.js?v=20260730-core-interaction-1'), 'MAG interaction loader missing'],
             [loader.includes('organism-speaking-visual.css?v=20260730-speaking-visual-1'), 'speaking visual loader missing'],
             [queue.indexOf('organism-core-controller.js') < queue.indexOf('organism-voice.js'), 'voice must load after core controller'],
-            [queue.indexOf('organism-voice.js') < queue.indexOf('organism-core-interaction.js'), 'MAG interaction must load after voice API'],
+            [queue.indexOf('organism-voice.js') < queue.indexOf('organism-voice-foreground.js'), 'foreground must load after voice'],
+            [queue.indexOf('organism-voice-foreground.js') < queue.indexOf('organism-core-interaction.js'), 'MAG interaction must load after foreground guard'],
             [queue.indexOf('organism-core-interaction.js') < queue.indexOf('formatx-infinite-scroll.js'), 'MAG interaction must load before infinite scroll'],
             [voice.includes("ROOT.dataset.fxOrganismVoice = 'ready-v2'"), 'voice ready-v2 marker missing'],
             [voice.includes('SpeechSynthesisUtterance'), 'speech synthesis missing'],
@@ -140,6 +147,10 @@ jobs:
             [voiceCss.includes('body.fx-organism-panel-open .fx-organism-dialogue'), 'panel overlap protection missing'],
             [voiceCss.includes('html.fx-organism-menu-open .fx-organism-dialogue'), 'menu overlap protection missing'],
             [voiceCss.includes('font-size: 14.5px') && voiceCss.includes('line-height: 1.68'), 'readable response typography missing'],
+            [foreground.includes('document.body.appendChild(shell)'), 'dialogue is not promoted to the foreground DOM layer'],
+            [foregroundCss.includes('z-index: 940 !important'), 'foreground z-index missing'],
+            [foregroundCss.includes('width: 58px !important') && foregroundCss.includes('border-radius: 50% !important'), 'compact circular trigger missing'],
+            [foregroundCss.includes('bottom: max(132px'), 'mobile control is not above the bottom action bar'],
             [interaction.includes("ROOT.dataset.fxOrganismCoreInteraction = 'ready-v1'"), 'MAG interaction ready marker missing'],
             [interaction.includes("addEventListener('pointerdown'") && interaction.includes("addEventListener('pointerup'"), 'mouse/touch MAG activation missing'],
             [interaction.includes('[data-organ-node="0"]') && interaction.includes('[data-scene-link="0"]'), 'MAG navigation activation missing'],
@@ -155,12 +166,12 @@ jobs:
             [renderVisibility.includes('state[SCALE_INDEX] = MOBILE_QUERY.matches ? 0.84 : 1'), 'mobile renderer scale cap missing'],
             [core.includes("ROOT.dataset.fxOrganismState = bounded === 0 ? 'core'"), '01 MAG core state missing'],
             [infinite.includes("controller: 'boundary-v3'"), 'boundary-v3 infinite scroll missing'],
-            [rootWorker.includes('formatx-mobile-readability.css') && rootWorker.includes('organism-speaking-visual.css'), 'preview Worker new routes missing'],
-            [productionEntry.includes('formatx-mobile-readability.css') && productionEntry.includes('organism-speaking-visual.css'), 'production Worker new routes missing'],
+            [rootWorker.includes('organism-voice-foreground.js') && rootWorker.includes('organism-voice-foreground.css'), 'preview Worker foreground routes missing'],
+            [productionEntry.includes('organism-voice-foreground.js') && productionEntry.includes('organism-voice-foreground.css'), 'production Worker foreground routes missing'],
           ];
 
           for (const [ok, message] of assertions) {
             if (!ok) throw new Error(message);
           }
-          console.log('PASS: mobile content remains readable and the Organism controls stay collision-free.');
+          console.log('PASS: mobile content remains readable and the Organism control stays above content.');
           NODE
