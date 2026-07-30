@@ -60,6 +60,12 @@
   html[data-fx-safe-three-gate='ready-v2'] #fx-three-frame,
   html[data-fx-three='ready'] #fx-three-frame,
   html.fx-three-engine-ready #fx-three-frame {
+    top: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100svh !important;
     opacity: .86 !important;
     transform: translateY(15svh) scale(.80) !important;
     transform-origin: 50% 50% !important;
@@ -67,19 +73,35 @@
   }
 
   .fx-organism-dialogue {
-    z-index: 76 !important;
+    z-index: 940 !important;
     top: auto !important;
     right: max(var(--fx-mobile-edge), env(safe-area-inset-right)) !important;
     bottom: calc(var(--fx-mobile-dock-height) + var(--fx-mobile-safe-bottom) + 12px) !important;
     left: auto !important;
     width: min(350px, calc(100vw - 24px)) !important;
     max-width: calc(100vw - 24px) !important;
+    justify-items: end !important;
+  }
+
+  .fx-organism-dialogue:not(.is-open) {
+    width: auto !important;
+  }
+
+  .fx-organism-dialogue.is-open {
+    left: max(var(--fx-mobile-edge), env(safe-area-inset-left)) !important;
   }
 
   .fx-organism-thought-trigger {
     width: 52px !important;
     min-width: 52px !important;
+    max-width: 52px !important;
     height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 50% !important;
     border-color: rgba(125, 229, 255, .30) !important;
     background: linear-gradient(145deg, rgba(9, 32, 49, .94), rgba(4, 13, 24, .98)) !important;
   }
@@ -87,7 +109,10 @@
   .fx-organism-dialogue.is-disabled .fx-organism-thought-trigger {
     width: 44px !important;
     min-width: 44px !important;
+    max-width: 44px !important;
     height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
   }
 
   .fx-organism-thought {
@@ -104,7 +129,7 @@
 
   .fx-organism-actionbar {
     position: fixed !important;
-    z-index: 70 !important;
+    z-index: 820 !important;
     left: var(--fx-mobile-edge) !important;
     right: var(--fx-mobile-edge) !important;
     bottom: var(--fx-mobile-safe-bottom) !important;
@@ -184,14 +209,21 @@
 
   .fx-organism-dialogue {
     right: 10px !important;
-    width: calc(100vw - 20px) !important;
     max-width: calc(100vw - 20px) !important;
+  }
+
+  .fx-organism-dialogue.is-open {
+    left: 10px !important;
+    width: auto !important;
   }
 
   .fx-organism-thought-trigger {
     width: 48px !important;
     min-width: 48px !important;
+    max-width: 48px !important;
     height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
   }
 
   .fx-organism-actionbar {
