@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "updated": "2026-07-30",
   "product_release": {
     "name": "FormatX Suite Pro V92",
@@ -16,26 +16,35 @@
     "development": { "hu": "Fejlesztés alatt", "en": "Development" },
     "planned": { "hu": "Tervezett", "en": "Planned" }
   },
+  "support_role_labels": {
+    "primary": { "hu": "Elsődleges platform", "en": "Primary platform" },
+    "secondary": { "hu": "Másodlagosan támogatott", "en": "Secondary supported platform" },
+    "preview": { "hu": "Kiegészítő előnézet", "en": "Supplementary preview" },
+    "roadmap": { "hu": "Fejlesztési ütemterv", "en": "Roadmap" }
+  },
   "platforms": [
-    {
-      "id": "windows",
-      "name": "Windows",
-      "status": "public_beta",
-      "version": "V92",
-      "hu": "A jelenlegi asztali kiadás Windows-specifikus WinUI 3 és lemezkezelő komponenseket használ. Nyilvánosan tesztelhető, de még nem stabil végleges kiadás.",
-      "en": "The current desktop build uses Windows-specific WinUI 3 and disk-management components. It is publicly testable but is not yet a final stable release."
-    },
     {
       "id": "linux-bazzite",
       "name": "Linux / Bazzite",
+      "support_role": "primary",
       "status": "development",
       "version": "Native target",
-      "hu": "A natív Linux/Bazzite kiadás az elsődleges célplatform, jelenleg aktív fejlesztés alatt áll.",
-      "en": "The native Linux/Bazzite edition is the primary target platform and is currently under active development."
+      "hu": "A Linux/Bazzite a FormatX elsődleges cél- és támogatási platformja. A natív kiadás jelenleg aktív fejlesztés alatt áll.",
+      "en": "Linux/Bazzite is the primary target and support platform for FormatX. The native edition is currently under active development."
+    },
+    {
+      "id": "windows",
+      "name": "Windows",
+      "support_role": "secondary",
+      "status": "public_beta",
+      "version": "V92",
+      "hu": "A Windows a másodlagosan támogatott platform. A jelenlegi V92 asztali kiadás WinUI 3 és Windows-specifikus lemezkezelő komponenseket használ; nyilvánosan tesztelhető, de még nem stabil végleges kiadás.",
+      "en": "Windows is the secondary supported platform. The current V92 desktop build uses WinUI 3 and Windows-specific disk-management components; it is publicly testable but is not yet a final stable release."
     },
     {
       "id": "macos",
       "name": "macOS",
+      "support_role": "roadmap",
       "status": "planned",
       "version": "Roadmap",
       "hu": "A natív macOS kiadás ütemezett fejlesztési irány; nyilvános csomag még nincs.",
@@ -44,22 +53,25 @@
     {
       "id": "web",
       "name": "Web",
+      "support_role": "preview",
       "status": "technical_preview",
       "version": "Browser experience",
-      "hu": "A webes Organizmus-UI, projekt-szimulátor és licencfelület technikai előnézetként használható; nem helyettesíti a natív rendszereszközöket.",
-      "en": "The web Organism UI, project simulator and licensing interface are available as a technical preview and do not replace native system tools."
+      "hu": "A webes Organizmus-UI, projekt-szimulátor és licencfelület kiegészítő technikai előnézet; nem helyettesíti a natív rendszereszközöket.",
+      "en": "The web Organism UI, project simulator and licensing interface are a supplementary technical preview and do not replace native system tools."
     },
     {
       "id": "android",
       "name": "Android",
+      "support_role": "preview",
       "status": "public_beta",
       "version": "1.0.4–1.0.6",
-      "hu": "Az Android APK nyilvános béta. Közvetlen telepítéssel tesztelhető; Play Áruházban még nem érhető el végleges kiadásként.",
-      "en": "The Android APK is a public beta. It can be tested through direct installation and is not yet a final Play Store release."
+      "hu": "Az Android APK kiegészítő nyilvános béta. Közvetlen telepítéssel tesztelhető; Play Áruházban még nem érhető el végleges kiadásként.",
+      "en": "The Android APK is a supplementary public beta. It can be tested through direct installation and is not yet a final Play Store release."
     },
     {
       "id": "ios",
       "name": "iOS / iPadOS",
+      "support_role": "roadmap",
       "status": "planned",
       "version": "Roadmap",
       "hu": "Az iOS/iPadOS kiadás tervezett; jelenleg nincs letölthető vagy tesztelhető csomag.",
