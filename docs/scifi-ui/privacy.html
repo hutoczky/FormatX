@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="A FormatX Suite Pro weboldalának és banki átutalásos licencvásárlásának adatkezelési tájékoztatója.">
+  <meta name="description" content="A FormatX Suite Pro weboldalának, támogatásának és banki átutalásos licencelésének adatkezelési tájékoztatója.">
   <meta name="theme-color" content="#050a10">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'none'">
+  <link rel="canonical" href="https://www.formatxsuite.com/scifi-ui/privacy.html">
   <title>Adatvédelem | FormatX Suite Pro</title>
   <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
   <link rel="stylesheet" href="./styles/site.css?v=20260718-v92">
@@ -13,54 +14,88 @@
 </head>
 <body>
   <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
-  <header class="site-header">
-    <div class="header-inner legal-header-inner">
-      <a class="brand" href="./index.html" aria-label="FormatX Suite Pro főoldal">
-        <img src="./assets/images/formatx-icon.png" width="44" height="44" alt="">
-        <span><strong>FormatX Suite Pro</strong><small>Adatvédelem</small></span>
-      </a>
-      <a class="legal-home-link" href="./index.html">Vissza a főoldalra</a>
-      <div class="theme-control" role="group" aria-label="Megjelenés">
-        <button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button>
-        <button type="button" data-theme-choice="light" aria-pressed="false">Világos</button>
-      </div>
-    </div>
-  </header>
+  <header class="site-header"><div class="header-inner legal-header-inner"><a class="brand" href="./index.html" aria-label="FormatX Suite Pro főoldal"><img src="./assets/images/formatx-icon.png" width="44" height="44" alt=""><span><strong>FormatX Suite Pro</strong><small>Adatvédelem</small></span></a><a class="legal-home-link" href="./index.html">Vissza a főoldalra</a><div class="theme-control" role="group" aria-label="Megjelenés"><button type="button" data-theme-choice="dark" aria-pressed="true">Sötét</button><button type="button" data-theme-choice="light" aria-pressed="false">Világos</button></div></div></header>
 
   <main id="main-content" class="legal-main">
     <article class="content-width legal-document">
-      <p class="eyebrow">JOGI INFORMÁCIÓ</p>
+      <p class="eyebrow">ADATKEZELÉSI TÁJÉKOZTATÓ · FRISSÍTVE 2026-07-30</p>
       <h1>Adatvédelem</h1>
-      <p class="legal-lead">A FormatX weboldal nem kér és nem tárol bankkártyaszámot, lejárati adatot vagy CVC-kódot. A fizetés forintban (HUF) vagy euróban (EUR), banki átutalással történik.</p>
+      <p class="legal-lead">A FormatX nem kér és nem tárol bankkártyaszámot, lejárati adatot vagy CVC-kódot. A fizetés HUF- vagy EUR-bankátutalással történik. A kezelt adatok körét célhoz kötötten és a szükséges időre korlátozzuk.</p>
 
       <section>
-        <h2>Rendelési adatok</h2>
-        <p>A rendelés előkészítéséhez a weboldal cég- vagy vállalkozásnevet, kapcsolattartói nevet, e-mail-címet, számlázási címet, opcionális adószámot és belső hivatkozást kérhet.</p>
-        <p>A checkout kizárólag a Cloudflare Worker szerveroldali API-ján keresztül indít rendelést. Ha az API nem érhető el vagy az éles értékesítés feltételei nincsenek megfelelően konfigurálva, a folyamat leáll: a böngésző nem készít önálló, követetlen átutalási megbízást.</p>
-        <p>A megadott adatokat a rendelés nyilvántartásához, az átutalás beazonosításához, a licenc aktiválásához, a számlázási egyeztetéshez és az ügyfélszolgálati kapcsolattartáshoz használhatjuk. Rendelési adat csak a konfigurált szerveroldali adatbázisban tárolható.</p>
+        <h2>1. Adatkezelő</h2>
+        <p><strong>Adatkezelő:</strong> Hutóczky József</p>
+        <p><strong>Kapcsolat és érintetti kérelmek:</strong> <a href="mailto:hutoczky@gmail.com">hutoczky@gmail.com</a></p>
+        <p><strong>Honlap:</strong> https://www.formatxsuite.com</p>
+        <p>A teljes nyilvános fogyasztói értékesítés aktiválása előtt az adatkezelő teljes postai/székhelyadatait és adószámát is közzé kell tenni.</p>
       </section>
 
       <section>
-        <h2>Banki átutalás és QR-kód</h2>
-        <p>A HUF vagy EUR QR-kód a kedvezményezett nyilvános fizetési adatait, a kiválasztott fix összeget, a devizát és a szerver által kiadott egyedi rendelési azonosítót tartalmazza. EUR-fizetés esetén az EPC SEPA Credit Transfer szabvány szerinti adat készül.</p>
-        <p>A QR-kép elkészítéséhez a böngésző ezeket a nyilvános fizetési adatokat továbbíthatja a QuickChart QR-szolgáltatásnak. A QR-adat nem tartalmaz bankkártyaadatot, bejelentkezési adatot vagy FormatX adatbázis-hozzáférést. A külső szolgáltatás a kérés teljesítéséhez technikai kapcsolatadatokat, például IP-címet is kezelhet.</p>
-        <p>A fizetés visszajelzésekor a rendelési azonosító, a deviza, az összeg, az utaló neve, a vásárló e-mail-címe, a banki tranzakció hivatkozása és az opcionális megjegyzés kerülhet a konfigurált rendelési adatbázisba.</p>
+        <h2>2. Adatkezelési célok, adatok és jogalapok</h2>
+        <ul>
+          <li><strong>Rendelés és szerződés:</strong> cégnév vagy név, kapcsolattartó, e-mail, számlázási cím, adószám, csomag, deviza, összeg, rendelési azonosító. Jogalap: szerződés előkészítése és teljesítése.</li>
+          <li><strong>Banki azonosítás és licencaktiválás:</strong> utaló neve, tranzakciós hivatkozás, összeg, deviza, közlemény. Jogalap: szerződés teljesítése és számviteli/jogi kötelezettség.</li>
+          <li><strong>Számlázás:</strong> számlázási név, cím, adószám, számlatartalom. Jogalap: jogi kötelezettség.</li>
+          <li><strong>Támogatás és panasz:</strong> név, e-mail, rendelési vagy licencazonosító, üzenet, melléklet, technikai környezet. Jogalap: szerződés teljesítése, jogi kötelezettség vagy jogos érdek.</li>
+          <li><strong>Biztonsági és működési napló:</strong> időpont, IP-cím, technikai kérésadatok, hibakód. Jogalap: a szolgáltatás biztonságához fűződő jogos érdek.</li>
+          <li><strong>Helyi beállítások:</strong> nyelv, téma, intro-megtekintés és Organizmus BE/KI állapot a böngésző helyi tárhelyén. Jogalap: a felhasználó által kért működés; az adat nem kerül automatikusan szerverre.</li>
+        </ul>
       </section>
 
       <section>
-        <h2>Helyi és külső szolgáltatások</h2>
-        <p>A megjelenési mód és a rendeléshez tartozó korlátozott munkamenetadat a böngésző helyi vagy munkamenet-tárhelyén őrződhet meg. A legújabb kiadás megjelenítéséhez az oldal lekérheti a nyilvános GitHub Releases metaadatait. Szerveres rendeléskövetés használatakor a rendelési adatok a konfigurált Supabase adatbázisban tárolhatók.</p>
+        <h2>3. Adatfeldolgozók és címzettek</h2>
+        <ul>
+          <li><strong>Cloudflare:</strong> webtárhely, CDN, Worker, biztonsági napló és D1-adatbázis.</li>
+          <li><strong>GitHub:</strong> forráskód, kiadási csomagok, nyilvános hibajegyek és release metaadatok.</li>
+          <li><strong>Google / Gmail:</strong> támogatási, panasz- és licencüzenetek fogadása.</li>
+          <li><strong>QuickChart:</strong> QR-kép előállítása, ha a helyi QR-fallback helyett külső szolgáltatás működik. A kérés technikai kapcsolatadatot, például IP-címet is érinthet.</li>
+          <li><strong>Bank és pénzforgalmi szolgáltatók:</strong> a bankátutalás teljesítése és azonosítása.</li>
+          <li><strong>Számlázási szolgáltató:</strong> csak a számlázás aktiválásakor, a közzétett szolgáltató és adatfeldolgozói feltételek szerint.</li>
+        </ul>
+        <p>Új adatfeldolgozó bekapcsolása előtt az adatkezelési tájékoztatót frissíteni kell.</p>
       </section>
 
       <section>
-        <h2>Éles értékesítés</h2>
-        <p><strong>A végleges értékesítés előtt ezt az oldalt teljes, jogilag ellenőrzött adatkezelői adatokkal, jogalapokkal, megőrzési időkkel, érintetti jogokkal és adatfeldolgozói felsorolással kell kiegészíteni.</strong></p>
-        <div class="legal-actions">
-          <a class="button primary" href="./checkout.html">Licencvásárlás</a>
-          <a class="button secondary" href="./terms.html">Felhasználási feltételek</a>
-          <a class="button secondary" href="./support.html">Támogatás</a>
-        </div>
+        <h2>4. Megőrzési idők</h2>
+        <ul>
+          <li><strong>Számviteli és számlázási iratok:</strong> 8 év.</li>
+          <li><strong>Teljesített rendelés és licencnyilvántartás:</strong> a hozzáférés megszűnésétől számított 5 év, illetve a jogi igény érvényesíthetőségéig; a számviteli adatokra a hosszabb kötelező idő alkalmazandó.</li>
+          <li><strong>Sikertelen vagy be nem fejezett rendelési munkamenet:</strong> legfeljebb 30 nap.</li>
+          <li><strong>Írásbeli fogyasztói panasz és válasz:</strong> 3 év.</li>
+          <li><strong>Általános támogatási levelezés:</strong> az ügy lezárásától számított 2 év, kivéve ha jogi igény vagy szerződés miatt hosszabb megőrzés szükséges.</li>
+          <li><strong>Biztonsági és hibakeresési napló:</strong> főszabály szerint 30 nap, biztonsági eseménynél a vizsgálat lezárásáig.</li>
+          <li><strong>Böngésző helyi beállításai:</strong> törlésig, böngészőadat-törlésig vagy a felhasználó visszaállításáig.</li>
+        </ul>
       </section>
+
+      <section>
+        <h2>5. QR-kód és banki adat</h2>
+        <p>A QR-kód a kedvezményezett fizetési adatait, a rögzített összeget, devizát és rendelési azonosítót tartalmazhatja. Nem tartalmaz bankkártyaadatot, jelszót vagy online banki bejelentkezési adatot.</p>
+        <p>A vásárló minden átutalás jóváhagyása előtt köteles ellenőrizni a kedvezményezettet, az IBAN-t, az összeget, a devizát és a közleményt.</p>
+      </section>
+
+      <section>
+        <h2>6. Automatizált döntéshozatal</h2>
+        <p>A FormatX checkout nem hoz kizárólag automatizált, joghatással járó licencdöntést. A fizetés és a licencaktiválás kézi ellenőrzéshez kötött. Az Organizmus gondolatbuborék helyi szabályalapú válaszokat ad; a kérdést nem küldi külső AI-szolgáltatásnak.</p>
+      </section>
+
+      <section>
+        <h2>7. Érintetti jogok</h2>
+        <p>Az érintett kérhet hozzáférést, helyesbítést, törlést, korlátozást, tiltakozhat a jogos érdeken alapuló adatkezelés ellen, és ahol alkalmazható, élhet adathordozhatósággal vagy visszavonhatja hozzájárulását.</p>
+        <p>Kérelem: <a href="mailto:hutoczky@gmail.com?subject=FormatX%20adatv%C3%A9delmi%20k%C3%A9relem">hutoczky@gmail.com</a>. Az adatkezelő azonosításhoz csak a szükséges adatot kérheti.</p>
+        <p>Az érintett panaszt tehet a Nemzeti Adatvédelmi és Információszabadság Hatóságnál, továbbá bírósághoz fordulhat.</p>
+      </section>
+
+      <section>
+        <h2>8. Adatbiztonság</h2>
+        <p>A szerveroldali rendelési végpontok hozzáférés-korlátozást, sebességkorlátot, naplózást és adatbázis-jogosultságokat alkalmazhatnak. Titkos adatot, licenckulcsot vagy banki hitelesítő adatot nyilvános GitHub-hibajegyben nem szabad megadni.</p>
+      </section>
+
+      <div class="legal-actions">
+        <a class="button primary" href="./support.html">Adatvédelmi kapcsolat</a>
+        <a class="button secondary" href="./terms.html">Felhasználási feltételek</a>
+        <a class="button secondary" href="./license.html">Licenc</a>
+      </div>
     </article>
   </main>
 </body>
