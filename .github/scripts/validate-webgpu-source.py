@@ -14,6 +14,8 @@ dock_css = read("docs/scifi-ui/styles/organism-voice-dock.css")
 interaction = read("docs/scifi-ui/scripts/organism-core-interaction.js")
 interaction_css = read("docs/scifi-ui/styles/organism-core-interaction.css")
 speaking_css = read("docs/scifi-ui/styles/organism-speaking-visual.css")
+mobile_readability = read("docs/scifi-ui/styles/formatx-mobile-readability.css")
+render_visibility = read("docs/scifi-ui/scripts/formatx-render-visibility.js")
 core_controller = read("docs/scifi-ui/scripts/organism-core-controller.js")
 infinite = read("docs/scifi-ui/scripts/formatx-infinite-scroll.js")
 safe_host = read("docs/scifi-ui/scripts/formatx-three-host-safe.js")
@@ -48,11 +50,13 @@ require("intro: deterministic timeline", "TIMELINE_DURATION" in intro and "HARD_
 require("intro: does not wait for window load", "loadOrDeadline" not in intro)
 
 require_tokens("loader", loader, (
-    "safe-ready-v15",
+    "safe-ready-v16",
     "organism-core-controller.js?v=20260729-core-ui-2",
     "organism-voice.js?v=20260730-organism-voice-2",
     "organism-core-interaction.js?v=20260730-core-interaction-1",
     "organism-speaking-visual.css?v=20260730-speaking-visual-1",
+    "formatx-mobile-readability.css?v=20260730-mobile-readability-1",
+    "formatx-render-visibility.js?v=20260730-render-visibility-2",
     "formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3",
     "formatx-three-host-safe.js",
     "load(index + 1)",
@@ -85,6 +89,26 @@ require("voice CSS: hidden panel protected", ".fx-organism-thought[hidden]" in v
 require("voice CSS: readable response", "font-size: 14.5px" in voice_css and "line-height: 1.68" in voice_css)
 require("voice CSS: menus cannot be covered", "html.fx-organism-menu-open .fx-organism-dialogue" in voice_css)
 require("voice dock: compact control", "min-width: 92px" in dock_css and "height: 44px" in dock_css)
+
+require_tokens("mobile readability", mobile_readability, (
+    'html[data-fx-mobile-core-visible="false"] .fx-three-stage-shell',
+    "transform: scale(.66)",
+    "#hero.is-core-active .hero-actions",
+    "#hero.is-core-active .hero-facts",
+    '[data-fx-simulator-entry="hero"]',
+    ".fx-organism-actionbar",
+    ".fx-organism-dialogue.is-open",
+    ".fx-genome-launcher",
+))
+require("mobile readability: text contrast layer", "backdrop-filter: blur(17px)" in mobile_readability)
+require("mobile readability: category deck opaque", "rgba(2, 8, 15, .995)" in mobile_readability)
+require_tokens("render visibility", render_visibility, (
+    "ready-v2",
+    "fxMobileCoreVisible",
+    "IntersectionObserver",
+    "heroVisible",
+    "state[SCALE_INDEX] = MOBILE_QUERY.matches ? 0.84 : 1",
+))
 
 require_tokens("MAG interaction", interaction, (
     "ready-v1",
@@ -151,12 +175,14 @@ require_tokens("preview Worker", root_worker, (
     "organism-voice.js",
     "organism-core-interaction.js",
     "organism-speaking-visual.css",
+    "formatx-mobile-readability.css",
     "Cache-Control', 'no-store",
 ))
 require_tokens("production entry", production_entry, (
     "organism-voice.js",
     "organism-core-interaction.js",
     "organism-speaking-visual.css",
+    "formatx-mobile-readability.css",
     "withEmbeddableStageHeaders",
     "headers.set('X-Frame-Options', 'SAMEORIGIN')",
 ))
@@ -164,6 +190,7 @@ require_tokens("preview routes", preview_config, (
     "/scifi-ui/scripts/organism-core-interaction.js",
     "/scifi-ui/styles/organism-core-interaction.css",
     "/scifi-ui/styles/organism-speaking-visual.css",
+    "/scifi-ui/styles/formatx-mobile-readability.css",
 ))
 require_tokens("production security", production_worker, (
     "THREE_STAGE_CONTENT_SECURITY_POLICY",
