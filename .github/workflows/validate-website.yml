@@ -99,14 +99,18 @@ jobs:
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
           node --check .github/scripts/validate-organism-voice-browser.cjs
 
-          grep -Fq 'safe-ready-v21' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-voice.js?v=20260730-organism-voice-3' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v23' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' docs/scifi-ui/scripts/igloo-parity.js
+          ! grep -Fq 'organism-natural-voice' docs/scifi-ui/scripts/igloo-parity.js
+          ! test -e docs/scifi-ui/scripts/organism-natural-voice.js
           grep -Fq 'organism-voice-dock.css?v=20260730-organism-dock-2' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'function voiceScore(voice)' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'function splitSpeech(text)' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'function prosody(chunk, index, count)' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'sentence-prosody-v3' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'espeak|festival|pico|compact|mbrola|robot' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'synth.resume()' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'speechWatchdog = window.setTimeout' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'browser-default' docs/scifi-ui/scripts/organism-voice.js
           ! grep -Fq 'utterance.pitch = 0.82' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'min-aspect-ratio: 21/9' docs/scifi-ui/styles/organism-voice-dock.css
           grep -Fq 'right: 440px !important' docs/scifi-ui/styles/organism-voice-dock.css
