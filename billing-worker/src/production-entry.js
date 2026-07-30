@@ -43,6 +43,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/styles/formatx-mobile-recovery.css',
   '/scifi-ui/styles/formatx-site-stability.css',
   '/scifi-ui/styles/organism-voice.css',
+  '/scifi-ui/styles/organism-voice-dock.css',
 ]);
 
 const EMBEDDABLE_STAGE_CSP = [
