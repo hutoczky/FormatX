@@ -59,6 +59,20 @@
     summary.title = details.open ? copy.close : copy.open;
   }
 
+  function repairLiveRegion(bubble) {
+    if (!(bubble instanceof HTMLElement)) return;
+    bubble.removeAttribute('aria-live');
+    bubble.removeAttribute('aria-atomic');
+    const output = bubble.querySelector('.fx-organism-thought-output');
+    if (output instanceof HTMLElement) {
+      output.setAttribute('role', 'status');
+      output.setAttribute('aria-live', 'polite');
+      output.setAttribute('aria-atomic', 'true');
+      output.dataset.fxOrganismLiveRegion = 'response-only';
+    }
+    ROOT.dataset.fxOrganismLiveRegion = 'response-only';
+  }
+
   function closeForOverlay() {
     setOpen(false);
   }
@@ -73,6 +87,7 @@
       summary = details.querySelector('summary');
       title = summary?.querySelector('strong') || null;
       hint = summary?.querySelector('small') || null;
+      repairLiveRegion(details.closest('.fx-organism-thought'));
       setOpen(false);
       ROOT.dataset.fxThoughtDisclosure = 'ready-v1';
       return true;
@@ -102,6 +117,7 @@
     });
 
     const bubble = details.closest('.fx-organism-thought');
+    repairLiveRegion(bubble);
     if (bubble instanceof HTMLElement) {
       bubbleObserver = new MutationObserver(() => {
         if (bubble.hidden || bubble.getAttribute('aria-hidden') === 'true') setOpen(false);
@@ -112,7 +128,7 @@
     syncLanguage();
     ROOT.dataset.fxThoughtDisclosure = 'ready-v1';
     dispatchEvent(new CustomEvent('formatx:thoughtdisclosureready', {
-      detail: { defaultOpen: false, progressiveDisclosure: true }
+      detail: { defaultOpen: false, progressiveDisclosure: true, liveRegion: 'response-only' }
     }));
     return true;
   }
