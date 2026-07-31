@@ -2,10 +2,10 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxReleaseMetadata === 'ready-v1') return;
-  ROOT.dataset.fxReleaseMetadata = 'loading-v1';
+  if (ROOT.dataset.fxReleaseMetadata === 'ready-v2') return;
+  ROOT.dataset.fxReleaseMetadata = 'loading-v2';
 
-  const CHANNEL_URL = '/scifi-ui/data/release-channel.json';
+  const RELEASE_URL = '/scifi-ui/data/current-release.json';
   const FALLBACK = Object.freeze({
     hu: {
       windows: 'Windows nyilvános béta letöltése',
@@ -21,12 +21,7 @@
     }
   });
 
-  let state = {
-    channel: null,
-    release: null,
-    available: false,
-    error: null
-  };
+  let state = { release: null, available: false, error: null };
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -40,10 +35,11 @@
     return typeof value === 'string' ? value.trim() : '';
   }
 
-  function isHttpUrl(value) {
+  function isAllowedDownloadUrl(value) {
     try {
       const url = new URL(value, location.origin);
-      return url.protocol === 'https:' || (url.protocol === 'http:' && url.hostname === '127.0.0.1');
+      if (url.origin === location.origin) return true;
+      return url.protocol === 'https:' && url.hostname === 'github.com' && url.pathname.startsWith('/hutoczky/FormatX-Updates/releases/download/');
     } catch (_) {
       return false;
     }
@@ -65,45 +61,20 @@
 
   function windowsAsset() {
     const asset = state.release && state.release.channels && state.release.channels.windows;
-    if (!asset || asset.available !== true || !isHttpUrl(asset.download_url)) return null;
+    if (!asset || asset.available !== true || !isAllowedDownloadUrl(asset.download_url)) return null;
     return asset;
   }
 
   function windowsLabel() {
     const version = releaseVersion();
-    if (language() === 'en') return version
-      ? `Download Windows ${version} public beta`
-      : copy().windows;
-    return version
-      ? `Windows ${version} nyilvános béta letöltése`
-      : copy().windows;
+    if (language() === 'en') return version ? `Download Windows ${version} public beta` : copy().windows;
+    return version ? `Windows ${version} nyilvános béta letöltése` : copy().windows;
   }
 
   function setText(selector, value) {
     document.querySelectorAll(selector).forEach(element => {
       element.textContent = value || copy().unknown;
     });
-  }
-
-  function updateDownloadLink(link) {
-    if (!(link instanceof HTMLAnchorElement)) return;
-    const asset = windowsAsset();
-    const labelTarget = link.querySelector('[data-release-download-label], span') || link;
-    labelTarget.textContent = windowsLabel();
-    link.dataset.releaseState = asset ? 'available' : 'metadata-unavailable';
-    link.removeAttribute('download');
-
-    if (asset) {
-      link.href = asset.download_url;
-      link.removeAttribute('aria-disabled');
-      link.classList.remove('is-disabled');
-      link.title = windowsLabel();
-    } else {
-      link.href = '/scifi-ui/downloads/';
-      link.setAttribute('aria-describedby', ensureFallbackNotice().id);
-      link.classList.add('is-metadata-fallback');
-      link.title = copy().unavailable;
-    }
   }
 
   function ensureFallbackNotice() {
@@ -124,60 +95,75 @@
     return notice;
   }
 
+  function updateDownloadLink(link) {
+    if (!(link instanceof HTMLAnchorElement)) return;
+    const asset = windowsAsset();
+    const labelTarget = link.querySelector('[data-release-download-label], span') || link;
+    labelTarget.textContent = windowsLabel();
+    link.dataset.releaseState = asset ? 'available' : 'metadata-unavailable';
+    link.removeAttribute('download');
+
+    if (asset) {
+      link.href = asset.download_url;
+      link.removeAttribute('aria-disabled');
+      link.classList.remove('is-disabled', 'is-metadata-fallback');
+      link.title = windowsLabel();
+    } else {
+      link.href = '/scifi-ui/downloads/';
+      link.setAttribute('aria-describedby', ensureFallbackNotice().id);
+      link.classList.add('is-metadata-fallback');
+      link.title = copy().unavailable;
+    }
+  }
+
+  function updateEvidenceLinks() {
+    const releaseUrl = safeText(state.release && state.release.release_url);
+    const notesUrl = safeText(state.release && state.release.notes_url) || releaseUrl;
+    const evidence = state.release && state.release.evidence || {};
+    const mappings = [
+      ['[data-release-page-url]', releaseUrl],
+      ['[data-release-notes-url]', notesUrl],
+      ['[data-release-checksum-url]', safeText(evidence.checksum_asset_url)],
+      ['[data-release-signature-url]', safeText(evidence.signature_asset_url)]
+    ];
+    mappings.forEach(([selector, href]) => {
+      document.querySelectorAll(selector).forEach(link => {
+        if (!(link instanceof HTMLAnchorElement)) return;
+        if (href && isAllowedDownloadUrl(href) || href && href.startsWith('https://github.com/hutoczky/FormatX-Updates/releases/')) {
+          link.href = href;
+          link.removeAttribute('aria-disabled');
+        } else {
+          link.removeAttribute('href');
+          link.setAttribute('aria-disabled', 'true');
+        }
+      });
+    });
+  }
+
   function apply() {
     const version = releaseVersion();
     const date = releaseDate();
-    const releaseUrl = safeText(state.release && state.release.release_url);
-    const notesUrl = safeText(state.release && state.release.notes_url) || releaseUrl;
     const asset = windowsAsset();
-
     setText('[data-release-version]', version);
     setText('[data-release-date]', date);
     setText('[data-release-status]', language() === 'en' ? 'Public beta' : 'Nyilvános béta');
     setText('[data-release-sha256]', asset && safeText(asset.digest) ? asset.digest : '');
-
-    document.querySelectorAll('[data-release-page-url]').forEach(link => {
-      if (!(link instanceof HTMLAnchorElement)) return;
-      if (isHttpUrl(releaseUrl)) link.href = releaseUrl;
-      else link.removeAttribute('href');
-    });
-    document.querySelectorAll('[data-release-notes-url]').forEach(link => {
-      if (!(link instanceof HTMLAnchorElement)) return;
-      if (isHttpUrl(notesUrl)) link.href = notesUrl;
-      else link.removeAttribute('href');
-    });
     document.querySelectorAll('[data-release-download="windows"], #hero-download').forEach(updateDownloadLink);
-
+    updateEvidenceLinks();
     ensureFallbackNotice();
-    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v1' : 'fallback-v1';
+    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v2' : 'fallback-v2';
     ROOT.__FORMATX_RELEASE_METADATA__ = Object.freeze({ ...state });
     dispatchEvent(new CustomEvent('formatx:releasemetadataready', { detail: ROOT.__FORMATX_RELEASE_METADATA__ }));
   }
 
-  async function fetchJson(url) {
-    const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
-    if (!response.ok) throw new Error(`${url}: ${response.status}`);
-    return response.json();
-  }
-
   async function load() {
     try {
-      const channel = await fetchJson(CHANNEL_URL);
-      const apiPath = safeText(channel && channel.source && channel.source.api_path) || '/api/release-metadata';
-      const release = await fetchJson(apiPath);
-      state = {
-        channel,
-        release,
-        available: release && release.ok === true,
-        error: null
-      };
+      const response = await fetch(RELEASE_URL, { cache: 'no-store', credentials: 'same-origin' });
+      if (!response.ok) throw new Error(`${RELEASE_URL}: ${response.status}`);
+      const release = await response.json();
+      state = { release, available: release && release.ok === true, error: null };
     } catch (error) {
-      state = {
-        channel: null,
-        release: null,
-        available: false,
-        error: String(error && error.message || error).slice(0, 160)
-      };
+      state = { release: null, available: false, error: String(error && error.message || error).slice(0, 160) };
       ROOT.dataset.fxReleaseMetadataError = state.error;
     }
     apply();
