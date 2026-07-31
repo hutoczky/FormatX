@@ -1,1 +1,82 @@
-<!doctype html><html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="FormatX ismert hibák és korlátozások."><link rel="canonical" href="https://www.formatxsuite.com/scifi-ui/known-issues.html"><title>Ismert hibák és korlátozások | FormatX</title><link rel="stylesheet" href="./styles/site.css"><link rel="stylesheet" href="./styles/formatx-content-standard.css"><script defer src="./scripts/public-evidence-pages.js"></script></head><body data-fx-public-page="known-issues"><main class="fx-page-shell"><section class="fx-page-hero"><h1>Ismert hibák és korlátozások</h1><p>A bétaállapot és a bizonyítékhiányok nyílt nyilvántartása.</p><nav class="fx-page-nav" data-public-nav></nav><p data-page-status role="status" aria-live="polite">Adatok betöltése…</p></section><div class="fx-issue-grid" data-issues-root></div></main></body></html>
+<!doctype html>
+<html lang="hu" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="A FormatX nyilvános ismert hibái, korlátozásai, kerülőútjai és javítási állapotai.">
+  <meta name="theme-color" content="#030817">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self';base-uri 'self';object-src 'none';script-src 'self';style-src 'self';img-src 'self' data:;connect-src 'self';form-action 'none'">
+  <link rel="canonical" href="https://www.formatxsuite.com/scifi-ui/known-issues.html">
+  <link rel="alternate" hreflang="hu" href="https://www.formatxsuite.com/scifi-ui/known-issues.html?lang=hu">
+  <link rel="alternate" hreflang="en" href="https://www.formatxsuite.com/scifi-ui/known-issues.html?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://www.formatxsuite.com/scifi-ui/known-issues.html">
+  <meta property="og:title" content="Ismert hibák és korlátozások | FormatX">
+  <meta property="og:description" content="Nyílt hibanyilvántartás, kerülőutak és javítási állapotok a FormatX nyilvános béta és technikai előnézeti kiadásaihoz.">
+  <meta property="og:type" content="website">
+  <title>Ismert hibák és korlátozások | FormatX</title>
+  <link rel="icon" href="./assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="./styles/site.css">
+  <link rel="stylesheet" href="./styles/single-language-toggle.css">
+  <link rel="stylesheet" href="./styles/formatx-content-standard.css">
+  <script defer src="./scripts/single-language-toggle.js"></script>
+  <script defer src="./scripts/release-metadata.js"></script>
+  <script defer src="./scripts/public-evidence-pages.js"></script>
+  <script defer src="./scripts/formatx-seo.js"></script>
+</head>
+<body data-fx-public-page="known-issues">
+  <a class="skip-link" href="#main-content" data-hu="Ugrás a tartalomra" data-en="Skip to content">Ugrás a tartalomra</a>
+  <header class="fx-public-header">
+    <div class="fx-public-header__inner">
+      <a class="fx-public-brand" href="./index.html" aria-label="FormatX Suite Pro főoldal">
+        <img src="./assets/images/formatx-icon.png" width="36" height="36" alt="">
+        <span><strong>FORMATX</strong><small>PUBLIC EVIDENCE</small></span>
+      </a>
+      <div class="fx-public-tools">
+        <a class="fx-public-home" href="./index.html" data-hu="Főoldal" data-en="Home">Főoldal</a>
+        <div class="language-switch" role="group" aria-label="Language / Nyelv">
+          <button type="button" data-language="hu" aria-pressed="true">HU</button>
+          <button type="button" data-language="en" aria-pressed="false">EN</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="fx-page-shell">
+    <section class="fx-page-hero">
+      <p class="eyebrow">PUBLIC ISSUE REGISTER</p>
+      <h1 data-hu="Ismert hibák és korlátozások" data-en="Known issues and limitations">Ismert hibák és korlátozások</h1>
+      <p data-hu="A bétaállapot, a platformkorlátok és a bizonyítékhiányok nyílt nyilvántartása. Egy hiányzó mérés vagy csomag nem tekinthető működő funkciónak." data-en="An open register of beta status, platform limitations and evidence gaps. A missing measurement or package is not treated as a working feature.">A bétaállapot, a platformkorlátok és a bizonyítékhiányok nyílt nyilvántartása. Egy hiányzó mérés vagy csomag nem tekinthető működő funkciónak.</p>
+      <nav class="fx-page-nav" data-public-nav aria-label="Nyilvános bizonyítéki oldalak"></nav>
+      <div class="fx-issue-overview" data-issues-summary aria-live="polite"></div>
+      <form class="fx-issue-controls" data-issue-controls role="search">
+        <div class="fx-issue-field">
+          <label for="issue-search" data-hu="Keresés" data-en="Search">Keresés</label>
+          <input id="issue-search" type="search" maxlength="120" autocomplete="off" data-issue-search placeholder="Platform, probléma vagy azonosító">
+        </div>
+        <div class="fx-issue-field">
+          <label for="issue-platform" data-hu="Platform" data-en="Platform">Platform</label>
+          <select id="issue-platform" data-issue-filter="platform"><option value="">Minden platform</option></select>
+        </div>
+        <div class="fx-issue-field">
+          <label for="issue-severity" data-hu="Súlyosság" data-en="Severity">Súlyosság</label>
+          <select id="issue-severity" data-issue-filter="severity"><option value="">Minden súlyosság</option></select>
+        </div>
+        <div class="fx-issue-field">
+          <label for="issue-status" data-hu="Javítás állapota" data-en="Fix status">Javítás állapota</label>
+          <select id="issue-status" data-issue-filter="status"><option value="">Minden állapot</option></select>
+        </div>
+        <button class="fx-issue-reset" type="reset" data-hu="Szűrők törlése" data-en="Clear filters">Szűrők törlése</button>
+      </form>
+      <p class="fx-issue-results" data-issue-results role="status" aria-live="polite"></p>
+      <p data-page-status role="status" aria-live="polite">Adatok betöltése…</p>
+    </section>
+    <div class="fx-issue-grid" data-issues-root aria-busy="true"></div>
+  </main>
+
+  <footer class="fx-public-footer">
+    <nav class="fx-page-nav" data-public-footer-nav aria-label="Kapcsolódó FormatX oldalak"></nav>
+    <p data-hu="A nyilvántartás a központi JSON-adatforrásból épül fel. A javítás állapota csak közzétett rekord alapján változik." data-en="This register is built from the canonical JSON data source. A fix status changes only when a corresponding record is published.">A nyilvántartás a központi JSON-adatforrásból épül fel. A javítás állapota csak közzétett rekord alapján változik.</p>
+  </footer>
+</body>
+</html>
