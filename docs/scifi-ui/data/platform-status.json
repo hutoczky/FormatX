@@ -1,13 +1,24 @@
 {
-  "schema_version": 2,
-  "updated": "2026-07-30",
+  "schema_version": 3,
+  "updated": "2026-07-31",
+  "canonical": true,
+  "product_category": {
+    "hu": "Technikusi operációs réteg",
+    "en": "Technician Operating Layer",
+    "definition": {
+      "hu": "Egy közös, ellenőrizhető munkafolyamat meghajtókezeléshez, rendszerdiagnosztikához, telepítéshez és biztonságos karbantartáshoz.",
+      "en": "One shared, verifiable workflow for drive management, system diagnostics, installation and safe maintenance."
+    }
+  },
+  "method": {
+    "hu": ["Felderítés", "Terv", "Kontrollált végrehajtás", "Visszaellenőrzés"],
+    "en": ["Discover", "Plan", "Controlled execution", "Verify"]
+  },
   "product_release": {
-    "name": "FormatX Suite Pro V92",
     "status": "public_beta",
-    "hu": "Nyilvános béta",
-    "en": "Public beta",
     "trial_days": 5,
-    "activation": "manual_bank_verification"
+    "activation": "manual_bank_verification",
+    "version_source": "/scifi-ui/data/release-channel.json"
   },
   "status_labels": {
     "stable": { "hu": "Stabil", "en": "Stable" },
@@ -17,65 +28,65 @@
     "planned": { "hu": "Tervezett", "en": "Planned" }
   },
   "support_role_labels": {
-    "primary": { "hu": "Elsődleges platform", "en": "Primary platform" },
+    "primary": { "hu": "Elsődleges fejlesztési és támogatási irány", "en": "Primary development and support direction" },
     "secondary": { "hu": "Másodlagosan támogatott", "en": "Secondary supported platform" },
     "preview": { "hu": "Kiegészítő előnézet", "en": "Supplementary preview" },
     "roadmap": { "hu": "Fejlesztési ütemterv", "en": "Roadmap" }
   },
   "platforms": [
     {
-      "id": "linux-bazzite",
-      "name": "Linux / Bazzite",
-      "support_role": "primary",
-      "status": "development",
-      "version": "Native target",
-      "hu": "A Linux/Bazzite a FormatX elsődleges cél- és támogatási platformja. A natív kiadás jelenleg aktív fejlesztés alatt áll.",
-      "en": "Linux/Bazzite is the primary target and support platform for FormatX. The native edition is currently under active development."
-    },
-    {
       "id": "windows",
       "name": "Windows",
       "support_role": "secondary",
       "status": "public_beta",
-      "version": "V92",
-      "hu": "A Windows a másodlagosan támogatott platform. A jelenlegi V92 asztali kiadás WinUI 3 és Windows-specifikus lemezkezelő komponenseket használ; nyilvánosan tesztelhető, de még nem stabil végleges kiadás.",
-      "en": "Windows is the secondary supported platform. The current V92 desktop build uses WinUI 3 and Windows-specific disk-management components; it is publicly testable but is not yet a final stable release."
-    },
-    {
-      "id": "macos",
-      "name": "macOS",
-      "support_role": "roadmap",
-      "status": "planned",
-      "version": "Roadmap",
-      "hu": "A natív macOS kiadás ütemezett fejlesztési irány; nyilvános csomag még nincs.",
-      "en": "A native macOS edition is on the roadmap; no public package is available yet."
-    },
-    {
-      "id": "web",
-      "name": "Web",
-      "support_role": "preview",
-      "status": "technical_preview",
-      "version": "Browser experience",
-      "hu": "A webes Organizmus-UI, projekt-szimulátor és licencfelület kiegészítő technikai előnézet; nem helyettesíti a natív rendszereszközöket.",
-      "en": "The web Organism UI, project simulator and licensing interface are a supplementary technical preview and do not replace native system tools."
+      "public_package_policy": "release_metadata_required",
+      "hu": "A Windows-kiadás nyilvános béta. Tesztelhető, de még nem Stable verzió. Az aktív letöltés csak akkor jelenik meg, ha a hivatalos kiadási metaadat tényleges Windows-csomagot igazol.",
+      "en": "The Windows edition is a public beta. It is testable but is not yet Stable. An active download is shown only when the official release metadata confirms an actual Windows package."
     },
     {
       "id": "android",
       "name": "Android",
       "support_role": "preview",
       "status": "public_beta",
-      "version": "1.0.4–1.0.6",
-      "hu": "Az Android APK kiegészítő nyilvános béta. Közvetlen telepítéssel tesztelhető; Play Áruházban még nem érhető el végleges kiadásként.",
-      "en": "The Android APK is a supplementary public beta. It can be tested through direct installation and is not yet a final Play Store release."
+      "public_package_policy": "configured_endpoint_required",
+      "hu": "Az Android-kiadás nyilvános béta. Közvetlenül telepíthető csomag csak ellenőrzött letöltési végpont esetén jelenhet meg; ez még nem végleges áruházi kiadás.",
+      "en": "The Android edition is a public beta. A direct-install package may be shown only when a verified download endpoint exists; it is not yet a final store release."
+    },
+    {
+      "id": "linux-bazzite",
+      "name": "Linux / Bazzite",
+      "support_role": "primary",
+      "status": "development",
+      "public_package_policy": "none",
+      "hu": "A Linux/Bazzite a FormatX elsődleges fejlesztési és hosszú távú támogatási platformja. A natív kiadás jelenleg aktív fejlesztés alatt áll; nyilvános natív csomag még nincs.",
+      "en": "Linux/Bazzite is the primary development and long-term support platform for FormatX. The native edition is under active development; no public native package is available yet."
+    },
+    {
+      "id": "web",
+      "name": "Web",
+      "support_role": "preview",
+      "status": "technical_preview",
+      "public_package_policy": "browser_only",
+      "hu": "A webes Organizmus-UI, projekt-szimulátor és licencfelület technikai előnézet. Nem helyettesíti a natív meghajtókezelő funkciókat.",
+      "en": "The web Organism UI, project simulator and licensing interface are a technical preview. They do not replace native drive-management functions."
+    },
+    {
+      "id": "macos",
+      "name": "macOS",
+      "support_role": "roadmap",
+      "status": "planned",
+      "public_package_policy": "none",
+      "hu": "A natív macOS-kiadás tervezett. Jelenleg nincs letölthető vagy teljesen támogatott nyilvános csomag.",
+      "en": "A native macOS edition is planned. No downloadable or fully supported public package currently exists."
     },
     {
       "id": "ios",
       "name": "iOS / iPadOS",
       "support_role": "roadmap",
       "status": "planned",
-      "version": "Roadmap",
-      "hu": "Az iOS/iPadOS kiadás tervezett; jelenleg nincs letölthető vagy tesztelhető csomag.",
-      "en": "An iOS/iPadOS edition is planned; no downloadable or testable package currently exists."
+      "public_package_policy": "none",
+      "hu": "Az iOS/iPadOS-kiadás tervezett. Jelenleg nincs letölthető vagy tesztelhető nyilvános csomag.",
+      "en": "An iOS/iPadOS edition is planned. No downloadable or testable public package currently exists."
     }
   ]
 }
