@@ -1,0 +1,59 @@
+name: Measure FormatX web performance contracts
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/**'
+      - '.github/scripts/measure-web-performance.cjs'
+      - '.github/workflows/measure-content-performance.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/**'
+      - '.github/scripts/measure-web-performance.cjs'
+      - '.github/workflows/measure-content-performance.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-web-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium measurement runtime
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-perf" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-perf/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start website
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-perf-http.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-perf-http.log"
+          exit 1
+      - name: Collect raw CI measurements
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-perf/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_PERF_FILE: artifacts/performance/ci-chromium.json
+        run: node .github/scripts/measure-web-performance.cjs
+      - name: Upload measurement artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-ci-performance-measurement
+          path: artifacts/performance/ci-chromium.json
+          if-no-files-found: error
+          retention-days: 30
