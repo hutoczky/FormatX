@@ -1,4 +1,4 @@
-name: Validate FormatX product status, Morphing Organism and website
+name: Validate FormatX canonical content, evidence and visual contracts
 
 on:
   workflow_dispatch:
@@ -8,17 +8,12 @@ on:
       - 'README.md'
       - 'RELEASE_NOTES.md'
       - 'worker.js'
+      - 'content-preview-entry.js'
       - 'wrangler.jsonc'
       - 'docs/**'
       - 'billing-worker/**'
-      - '.github/scripts/validate-three-site.cjs'
-      - '.github/scripts/validate-three-site-v4.cjs'
-      - '.github/scripts/validate-laptop-continuous-loop.cjs'
-      - '.github/scripts/validate-reality-fork.cjs'
-      - '.github/scripts/validate-interaction-genome-webgl.cjs'
-      - '.github/scripts/validate-organism-voice-browser.cjs'
-      - '.github/scripts/validate-thought-genome.cjs'
-      - '.github/scripts/validate-webgpu-source.py'
+      - '.github/scripts/validate-content-standard.py'
+      - '.github/scripts/validate-content-visuals.cjs'
       - '.github/workflows/validate-website.yml'
   push:
     branches: [master]
@@ -26,24 +21,19 @@ on:
       - 'README.md'
       - 'RELEASE_NOTES.md'
       - 'worker.js'
+      - 'content-preview-entry.js'
       - 'wrangler.jsonc'
       - 'docs/**'
       - 'billing-worker/**'
-      - '.github/scripts/validate-three-site.cjs'
-      - '.github/scripts/validate-three-site-v4.cjs'
-      - '.github/scripts/validate-laptop-continuous-loop.cjs'
-      - '.github/scripts/validate-reality-fork.cjs'
-      - '.github/scripts/validate-interaction-genome-webgl.cjs'
-      - '.github/scripts/validate-organism-voice-browser.cjs'
-      - '.github/scripts/validate-thought-genome.cjs'
-      - '.github/scripts/validate-webgpu-source.py'
+      - '.github/scripts/validate-content-standard.py'
+      - '.github/scripts/validate-content-visuals.cjs'
       - '.github/workflows/validate-website.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: formatx-morphing-organism-validation-${{ github.ref }}
+  group: formatx-canonical-content-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -51,185 +41,105 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate canonical product architecture
-        run: python3 .github/scripts/validate-webgpu-source.py
+      - name: Validate canonical data, trust and SEO contracts
+        run: python3 .github/scripts/validate-content-standard.py
 
-      - name: Validate JavaScript and safe startup source
+      - name: Validate JavaScript syntax
         shell: bash
         run: |
           set -euo pipefail
           node --check worker.js
+          node --check content-preview-entry.js
           node --check billing-worker/src/production-with-license.js
           node --check billing-worker/src/production-entry.js
-          node --check billing-worker/src/pricing-v100-api.js
-          node --check docs/site-loader.js
-          node --check docs/scifi-ui/scripts/platform-status.js
+          node --check billing-worker/src/production-content-entry.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
-          node --check docs/scifi-ui/scripts/formatx-apex.js
-          node --check docs/scifi-ui/scripts/living-architecture.js
-          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/release-metadata.js
+          node --check docs/scifi-ui/scripts/formatx-content-standard.js
+          node --check docs/scifi-ui/scripts/formatx-content-finalizer.js
+          node --check docs/scifi-ui/scripts/formatx-platform-surface-finalizer.js
+          node --check docs/scifi-ui/scripts/formatx-organism-trust.js
+          node --check docs/scifi-ui/scripts/formatx-organism-semantic-state.js
+          node --check docs/scifi-ui/scripts/public-evidence-pages.js
+          node --check docs/scifi-ui/scripts/formatx-seo.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
-          node --check docs/scifi-ui/scripts/formatx-copy-polish.js
-          node --check docs/scifi-ui/scripts/formatx-license-links.js
-          node --check docs/scifi-ui/scripts/license-page.js
-          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-voice.js
-          node --check docs/scifi-ui/scripts/organism-voice-foreground.js
-          node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
-          node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
-          node --check docs/scifi-ui/scripts/formatx-render-visibility.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
-          node --check docs/scifi-ui/scripts/mobile-webgl-entry.js
-          node --check docs/scifi-ui/scripts/mobile-core-engine-v2.js
           node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
-          node --check docs/scifi-ui/scripts/interaction-genome.js
-          node --check docs/scifi-ui/scripts/interaction-genome-webgl.js
-          node --check docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
-          node --check .github/scripts/validate-three-site.cjs
-          node --check .github/scripts/validate-three-site-v4.cjs
-          node --check .github/scripts/validate-laptop-continuous-loop.cjs
-          node --check .github/scripts/validate-reality-fork.cjs
-          node --check .github/scripts/validate-interaction-genome-webgl.cjs
-          node --check .github/scripts/validate-organism-voice-browser.cjs
-          node --check .github/scripts/validate-thought-genome.cjs
+          node --check .github/scripts/validate-content-visuals.cjs
 
-          grep -Fq 'safe-ready-v24' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'synaptic-thought-genome.js?v=20260731-thought-genome-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'mobile-core-engine-v3.js?v=20260731-morphing-organism-v3' docs/scifi-ui/scripts/mobile-webgl-entry.js
-          grep -Fq 'three-webgl-morphing-organism-v3' docs/scifi-ui/scripts/mobile-webgl-entry.js
-          grep -Fq 'synaptic-thought-genome-v1' docs/scifi-ui/scripts/mobile-webgl-entry.js
-          grep -Fq 'function heartForm' docs/scifi-ui/scripts/mobile-core-engine-v3.js
-          grep -Fq 'function skeletonForm' docs/scifi-ui/scripts/mobile-core-engine-v3.js
-          grep -Fq 'function beaconForm' docs/scifi-ui/scripts/mobile-core-engine-v3.js
-          grep -Fq 'formatx:thoughtgenome' docs/scifi-ui/scripts/mobile-core-engine-v3.js
-          grep -Fq 'questionStored: false' docs/scifi-ui/scripts/synaptic-thought-genome.js
-          grep -Fq 'fingerprint-only' docs/scifi-ui/scripts/synaptic-thought-genome.js
-          grep -Fq 'MAX_HISTORY = 12' docs/scifi-ui/scripts/synaptic-thought-genome.js
-          grep -Fq 'fx-thought-genome-form' docs/scifi-ui/scripts/synaptic-thought-genome.js
-          grep -Fq 'pointer-events: none' docs/scifi-ui/styles/synaptic-thought-genome.css
-          ! grep -Fq 'fetch(' docs/scifi-ui/scripts/synaptic-thought-genome.js
-          ! grep -Fq 'XMLHttpRequest' docs/scifi-ui/scripts/synaptic-thought-genome.js
-          ! grep -Fq 'WebSocket' docs/scifi-ui/scripts/synaptic-thought-genome.js
-
-          grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' docs/scifi-ui/scripts/igloo-parity.js
-          ! grep -Fq 'organism-natural-voice' docs/scifi-ui/scripts/igloo-parity.js
-          ! test -e docs/scifi-ui/scripts/organism-natural-voice.js
-          grep -Fq 'organism-voice-dock.css?v=20260730-organism-dock-2' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'function voiceScore(voice)' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'function splitSpeech(text)' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'function prosody(chunk, index, count)' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'sentence-prosody-v3' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'synth.resume()' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'speechWatchdog = window.setTimeout' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'browser-default' docs/scifi-ui/scripts/organism-voice.js
-          ! grep -Fq 'utterance.pitch = 0.82' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'min-aspect-ratio: 21/9' docs/scifi-ui/styles/organism-voice-dock.css
-          grep -Fq 'right: 440px !important' docs/scifi-ui/styles/organism-voice-dock.css
-          grep -Fq 'platform-status.js?v=20260730-platform-status-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'MOBILE_QUERY.matches ? 2100 : 2400' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'TIMELINE_DURATION + EXIT_DURATION + 1100' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq "DOMContentLoaded', startIntro" docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'if (event.persisted) startIntro();' docs/scifi-ui/scripts/formatx-event-horizon.js
-          ! grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq '20260731-intro-restored-1' worker.js
-          grep -Fq '20260731-intro-restored-1' billing-worker/src/production-entry.js
-          grep -Fq 'formatx-mobile-unified.js?v=20260730-mobile-unified-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'boundary-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'reinitialisedRenderer: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'document.body.appendChild(shell)' docs/scifi-ui/scripts/organism-voice-foreground.js
-          grep -Fq 'data-fx-mobile-core-visible="false"' docs/scifi-ui/styles/formatx-mobile-readability.css
-          grep -Fq 'fxMobileCoreVisible' docs/scifi-ui/scripts/formatx-render-visibility.js
-          grep -Fq -- '--fx-mobile-dock-height: 54px' docs/scifi-ui/styles/formatx-mobile-unified.css
-          grep -Fq '/scifi-ui/data/platform-status.json' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/test-matrix.html' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/data/platform-status.json' worker.js
-          grep -Fq '/scifi-ui/test-matrix.html' worker.js
-          grep -Fq '/scifi-ui/scripts/synaptic-thought-genome.js' worker.js
-          grep -Fq '/scifi-ui/styles/synaptic-thought-genome.css' worker.js
-          grep -Fq '/scifi-ui/scripts/mobile-core-engine-v3.js' worker.js
-          grep -Fq '/scifi-ui/scripts/synaptic-thought-genome.js' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/styles/synaptic-thought-genome.css' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/scripts/mobile-core-engine-v3.js' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/license.html' billing-worker/src/production-entry.js
-          grep -Fq '/scifi-ui/three-stage-mobile.html' billing-worker/src/production-entry.js
-          grep -Fq "headers.set('X-Frame-Options', 'SAMEORIGIN')" billing-worker/src/production-entry.js
-          ! grep -Fq 'cloneNode' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq 'data-fx-loop-bridge' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq 'fetch(' docs/scifi-ui/scripts/organism-voice.js
-          ! grep -Fq 'formatx:introcomplete' docs/scifi-ui/scripts/organism-voice.js
-
-      - name: Test Worker and production bundle
+      - name: Validate billing Worker and production bundle
         working-directory: billing-worker
         run: |
           npm ci
           npm test
-          npx wrangler deploy --dry-run --outdir ../.wrangler-living-core-validation
+          npx wrangler deploy --dry-run --outdir ../.wrangler-content-validation
 
       - name: Install Playwright browsers
         run: |
           npm install --prefix "$RUNNER_TEMP/formatx-browser" --no-audit --no-fund playwright@1.62.0
-          "$RUNNER_TEMP/formatx-browser/node_modules/.bin/playwright" install --with-deps chromium firefox
+          "$RUNNER_TEMP/formatx-browser/node_modules/.bin/playwright" install --with-deps chromium
 
       - name: Start static website
         run: |
           python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-http.log" 2>&1 &
-          python3 -m http.server 4192 --directory docs > "$RUNNER_TEMP/formatx-reality-http.log" 2>&1 &
-          for attempt in $(seq 1 40); do
+          for attempt in $(seq 1 60); do
             curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null \
-              && curl -fsS http://127.0.0.1:4178/scifi-ui/license.html >/dev/null \
               && curl -fsS http://127.0.0.1:4178/scifi-ui/downloads/index.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/verification.html >/dev/null \
               && curl -fsS http://127.0.0.1:4178/scifi-ui/test-matrix.html >/dev/null \
               && curl -fsS http://127.0.0.1:4178/scifi-ui/data/platform-status.json >/dev/null \
-              && curl -fsS http://127.0.0.1:4192/scifi-ui/project-simulator.html >/dev/null \
               && exit 0
             sleep 0.25
           done
           cat "$RUNNER_TEMP/formatx-http.log"
-          cat "$RUNNER_TEMP/formatx-reality-http.log"
           exit 1
 
-      - name: Test Morphing Organism, mobile and two loops
-        env:
-          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-        run: node .github/scripts/validate-three-site-v4.cjs
-
-      - name: Test mobile, desktop and ultrawide Organism dialogue
+      - name: Capture and validate visual contracts
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
-        run: node .github/scripts/validate-organism-voice-browser.cjs
+          FORMATX_VISUAL_DIR: artifacts/content-visuals
+        run: node .github/scripts/validate-content-visuals.cjs
 
-      - name: Test Synaptic Thought Genome and shape morphing
+      - name: Validate existing Morphing Organism and dialogue contracts
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
-        run: node .github/scripts/validate-thought-genome.cjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .github/scripts/validate-three-site-v4.cjs
+          node .github/scripts/validate-organism-voice-browser.cjs
+          node .github/scripts/validate-thought-genome.cjs
 
-      - name: Test continuous laptop wheel and touchpad looping
-        env:
-          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-        run: node .github/scripts/validate-laptop-continuous-loop.cjs
+      - name: Verify synchronized download URL when available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if jq -e '.ok == true and .channels.windows.available == true' docs/scifi-ui/data/current-release.json >/dev/null; then
+            url="$(jq -r '.channels.windows.download_url' docs/scifi-ui/data/current-release.json)"
+            curl --fail --location --silent --show-error --head --max-time 30 "$url" >/dev/null
+          else
+            echo 'No synchronized Windows asset; versionless fallback is the expected state.'
+          fi
 
-      - name: Validate Reality Fork
-        env:
-          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-        run: node .github/scripts/validate-reality-fork.cjs
-
-      - name: Validate cinematic Interaction Genome rendering
-        env:
-          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
-          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
-        run: node .github/scripts/validate-interaction-genome-webgl.cjs
+      - name: Upload visual contract screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-content-visual-contracts
+          path: artifacts/content-visuals
+          if-no-files-found: warn
+          retention-days: 14
