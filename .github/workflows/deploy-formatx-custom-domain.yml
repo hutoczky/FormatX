@@ -40,6 +40,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: formatx-production-${{ github.ref }}
@@ -116,6 +117,37 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Publish production validation status
+        if: always()
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          STATUS_CONTEXT: FormatX production validation
+          STATUS_DESCRIPTION: Requested features and Worker candidate validation
+          STATUS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node - <<'NODE'
+          const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
+          const url = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/vnd.github+json',
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+              'X-GitHub-Api-Version': '2022-11-28',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: process.env.STATUS_DESCRIPTION.slice(0, 140),
+              target_url: process.env.STATUS_URL,
+            }),
+          });
+          if (!response.ok) throw new Error(`Status publish failed: ${response.status} ${await response.text()}`);
+          NODE
+
   deploy:
     name: Deploy to FormatX custom domains
     if: (github.event_name == 'workflow_dispatch' && inputs.deploy == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]'))
@@ -189,3 +221,34 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Publish production deployment status
+        if: always()
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          STATUS_CONTEXT: FormatX production deployment
+          STATUS_DESCRIPTION: Cloudflare deploy and live requested-feature smoke test
+          STATUS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node - <<'NODE'
+          const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
+          const url = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/vnd.github+json',
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+              'X-GitHub-Api-Version': '2022-11-28',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: process.env.STATUS_DESCRIPTION.slice(0, 140),
+              target_url: process.env.STATUS_URL,
+            }),
+          });
+          if (!response.ok) throw new Error(`Status publish failed: ${response.status} ${await response.text()}`);
+          NODE
