@@ -76,6 +76,10 @@ async function validateViewport(browser, name, viewport, mobile) {
   await bubble.waitFor({ state: 'hidden' });
   assert(await page.evaluate(() => document.documentElement.dataset.fxOrganismDialogueEnabled === 'false'), `${name}: Organism master switch did not disable the dialogue`);
   assert((await trigger.locator('b').textContent()).trim() === 'OFF', `${name}: disabled trigger does not show OFF`);
+  await page.waitForFunction(() => {
+    const layer = document.querySelector('.fx-thought-genome-layer');
+    return layer && Number(getComputedStyle(layer).opacity) <= 0.01;
+  }, null, { timeout: 2000 });
   const disabledGenomeOpacity = await genomeLayer.evaluate(node => Number(getComputedStyle(node).opacity));
   assert(disabledGenomeOpacity <= 0.01, `${name}: thought constellation remains visible while Organism is off (${disabledGenomeOpacity})`);
 
