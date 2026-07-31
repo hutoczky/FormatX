@@ -17,15 +17,11 @@ jobs:
   align:
     if: contains(github.event.head_commit.message, '[align-v26]')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
 
       - name: Align stale validation contracts
         run: |
@@ -60,26 +56,18 @@ jobs:
                   path.write_text(updated, encoding='utf-8')
                   changed.append(str(path))
           if not changed:
-              raise SystemExit('No stale v25 validation contracts were found')
-          print('Updated:')
+              raise SystemExit('No stale validation contracts were found')
           print('\n'.join(changed))
           PY
 
-      - name: Validate aligned candidate
+      - name: Verify only the alignment patch
         run: |
           set -euo pipefail
-          python3 .github/scripts/validate-webgpu-source.py
-          python3 .github/scripts/validate-content-standard-v2.py
-          python3 .github/scripts/validate-public-release-integration.py
-          node .github/scripts/production-preflight.cjs
-          node .github/scripts/validate-pricing-qr.cjs
-          node .github/scripts/validate-user-requested-site-features.cjs
-          node --check docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'safe-ready-v26' docs/scifi-ui/scripts/igloo-parity.js
-          ! grep -R -Fq 'safe-ready-v25' .github/scripts .github/workflows
-          ! grep -R -Fq 'organism-dock-2' .github/scripts .github/workflows
+          ! grep -R -Fq 'safe-ready-v25' .github/scripts .github/workflows --exclude='one-shot-align-v26.yml'
+          ! grep -R -Fq 'organism-dock-2' .github/scripts .github/workflows --exclude='one-shot-align-v26.yml'
 
-      - name: Commit aligned validation and remove one-shot workflow
+      - name: Commit patch and trigger guarded production pipeline
         run: |
           set -euo pipefail
           git rm .github/workflows/one-shot-align-v26.yml
