@@ -17,6 +17,7 @@ const NO_STORE_PATHS = new Set([
   '/scifi-ui/data/test-matrix.json', '/scifi-ui/data/known-issues.json',
   '/scifi-ui/data/stable-gate.json', '/scifi-ui/data/decision-log.json',
   '/scifi-ui/data/workflow-cases.json', '/scifi-ui/scripts/release-metadata.js',
+  '/scifi-ui/scripts/formatx-public-shell.js',
   '/scifi-ui/scripts/formatx-content-standard.js',
   '/scifi-ui/scripts/formatx-content-finalizer.js',
   '/scifi-ui/scripts/formatx-platform-surface-finalizer.js',
@@ -31,8 +32,9 @@ const LANGUAGE_ASSETS = [
   '<script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260731-language-unified-1"></script>'
 ].join('\n');
 const CONTENT_ASSETS = [
-  '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-1">',
+  '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-2">',
   '<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260731-release-2"></script>',
+  '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260731-seo-2"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-finalizer.js?v=20260731-content-final-1"></script>',
@@ -51,8 +53,14 @@ export default {
     if (!(response.headers.get('Content-Type') || '').includes('text/html')) return response;
 
     let html = cleanLegacyReleaseCopy(await response.text());
-    if (!html.includes('data-fx-single-language-style')) html = html.replace('</head>', LANGUAGE_ASSETS + '\n</head>');
-    if (!html.includes('data-fx-content-standard-style')) html = html.replace('</head>', CONTENT_ASSETS + '\n</head>');
+    if (!html.includes('data-fx-single-language-style') && !html.includes('single-language-toggle.css')) {
+      html = html.replace('</head>', LANGUAGE_ASSETS + '\n</head>');
+    }
+    if (!html.includes('data-fx-content-standard-style') && !html.includes('formatx-content-standard.css')) {
+      html = html.replace('</head>', CONTENT_ASSETS + '\n</head>');
+    } else if (!html.includes('formatx-public-shell.js')) {
+      html = html.replace('</head>', '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>\n</head>');
+    }
 
     const headers = new Headers(response.headers);
     headers.set('Cache-Control', 'no-store, max-age=0');
