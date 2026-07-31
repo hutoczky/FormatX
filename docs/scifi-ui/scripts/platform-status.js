@@ -2,10 +2,10 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxPlatformStatus === 'ready-v3') return;
-  ROOT.dataset.fxPlatformStatus = 'loading-v3';
+  if (ROOT.dataset.fxPlatformStatus === 'ready') return;
+  ROOT.dataset.fxPlatformStatus = 'loading';
 
-  const DATA_URL = '/scifi-ui/data/platform-status.json?v=20260730-platform-status-2';
+  const DATA_URL = '/scifi-ui/data/platform-status.json';
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -15,7 +15,7 @@
     if (document.querySelector('link[data-fx-platform-status-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/platform-status.css?v=20260730-platform-status-2';
+    link.href = '/scifi-ui/styles/platform-status.css';
     link.dataset.fxPlatformStatusStyle = 'true';
     document.head.appendChild(link);
   }
@@ -47,16 +47,20 @@
     const head = document.createElement('header');
     const titleWrap = document.createElement('div');
     const title = document.createElement('h3');
-    const version = document.createElement('small');
+    const role = document.createElement('small');
     title.textContent = platform.name;
-    version.textContent = [supportRole(platform, data, lang), platform.version].filter(Boolean).join(' · ');
-    titleWrap.append(title, version);
+    role.textContent = supportRole(platform, data, lang);
+    titleWrap.append(title, role);
     head.append(titleWrap, badge(platform.status, data.status_labels, lang));
 
     const description = document.createElement('p');
     description.textContent = text(platform, lang);
     article.append(head, description);
     return article;
+  }
+
+  function platformById(data, id) {
+    return data.platforms.find(platform => platform.id === id) || null;
   }
 
   function buildMatrix(data, compact) {
@@ -72,21 +76,25 @@
     const lead = document.createElement('p');
     eyebrow.className = 'section-index';
     eyebrow.textContent = lang === 'en' ? 'PUBLIC PRODUCT STATUS' : 'NYILVÁNOS TERMÉKÁLLAPOT';
-    heading.textContent = lang === 'en' ? 'One status matrix across every surface.' : 'Egyetlen állapotmátrix minden felületen.';
+    heading.textContent = lang === 'en'
+      ? 'One honest status matrix across every surface.'
+      : 'Egyetlen valós állapotmátrix minden felületen.';
     lead.textContent = lang === 'en'
-      ? 'Linux/Bazzite is the primary target and support platform. Windows is secondary supported. The current release remains a public beta.'
-      : 'A Linux/Bazzite az elsődleges cél- és támogatási platform. A Windows másodlagosan támogatott. Az aktuális kiadás továbbra is nyilvános béta.';
+      ? 'Bazzite/Linux is the primary FormatX system. Windows is supported as a secondary platform in the same multiplatform public beta package.'
+      : 'A Bazzite/Linux a FormatX elsődleges rendszere. A Windows támogatott másodlagos platform ugyanabban a multiplatform nyilvános béta csomagban.';
     copy.append(eyebrow, heading, lead);
 
     const release = document.createElement('div');
     release.className = 'fx-product-release-state';
     release.append(
       badge(data.product_release.status, data.status_labels, lang),
-      Object.assign(document.createElement('strong'), { textContent: data.product_release.name }),
+      Object.assign(document.createElement('strong'), {
+        textContent: lang === 'en' ? 'Multiplatform package' : 'Multiplatform csomag'
+      }),
       Object.assign(document.createElement('small'), {
         textContent: lang === 'en'
-          ? '5-day trial · manual activation after payment verification'
-          : '5 napos próbalicenc · kézi aktiválás a jóváírás ellenőrzése után'
+          ? 'Bazzite/Linux primary · Windows supported · 5-day trial'
+          : 'Bazzite/Linux elsődleges · Windows támogatott · 5 napos próbalicenc'
       })
     );
     header.append(copy, release);
@@ -98,8 +106,8 @@
     const note = document.createElement('p');
     note.className = 'fx-platform-status-note';
     note.append(document.createTextNode(lang === 'en'
-      ? 'Support priority and maturity are separate: Linux/Bazzite is primary while its native build is in Development; Windows is secondary supported and currently Public beta. No platform is labelled Stable. '
-      : 'A támogatási prioritás és a fejlettségi állapot külön fogalom: a Linux/Bazzite elsődleges, miközben a natív kiadás Development; a Windows másodlagosan támogatott és jelenleg Public beta. Egyik platform sem Stable. '));
+      ? 'Bazzite/Linux and Windows are both Public beta, but their support priority differs: Bazzite/Linux is primary and Windows is secondary supported. No platform is labelled Stable. '
+      : 'A Bazzite/Linux és a Windows egyaránt nyilvános béta, de a támogatási prioritás eltér: a Bazzite/Linux elsődleges, a Windows támogatott másodlagos platform. Egyik platform sem Stable. '));
     const matrixLink = document.createElement('a');
     matrixLink.href = '/scifi-ui/test-matrix.html';
     matrixLink.textContent = lang === 'en' ? 'Open public test matrix' : 'Nyilvános tesztmátrix megnyitása';
@@ -129,17 +137,22 @@
       badge(data.product_release.status, data.status_labels, lang),
       Object.assign(document.createElement('span'), {
         textContent: lang === 'en'
-          ? 'Linux/Bazzite primary platform · Windows secondary supported Public beta · 5-day trial'
-          : 'Linux/Bazzite elsődleges platform · Windows másodlagosan támogatott Public beta · 5 napos próbalicenc'
+          ? 'Bazzite/Linux primary system · Windows supported · one multiplatform package'
+          : 'Bazzite/Linux elsődleges rendszer · Windows támogatott · egy multiplatform csomag'
       })
     );
 
     const download = document.getElementById('hero-download');
     if (download instanceof HTMLAnchorElement) {
       download.href = './downloads/';
+      download.dataset.releaseDownload = 'multiplatform';
       download.removeAttribute('download');
-      const label = download.querySelector('span');
-      if (label) label.textContent = lang === 'en' ? 'Downloads and platform status' : 'Letöltések és platformállapot';
+      const label = download.querySelector('[data-release-download-label], span');
+      if (label) {
+        label.textContent = lang === 'en'
+          ? 'Multiplatform public beta'
+          : 'Multiplatform nyilvános béta';
+      }
     }
   }
 
@@ -160,8 +173,8 @@
       badge(data.product_release.status, data.status_labels, lang),
       Object.assign(document.createElement('div'), {
         innerHTML: lang === 'en'
-          ? '<strong>The current release is a public beta.</strong><span>Linux/Bazzite is the primary platform direction; Windows is secondary supported. No platform is currently labelled Stable.</span>'
-          : '<strong>Az aktuális kiadás nyilvános béta.</strong><span>A Linux/Bazzite az elsődleges platformirány; a Windows másodlagosan támogatott. Jelenleg egyik platform sem kap Stable címkét.</span>'
+          ? '<strong>The current package is a multiplatform public beta.</strong><span>Bazzite/Linux is primary; Windows is supported as a secondary platform. No platform is currently labelled Stable.</span>'
+          : '<strong>Az aktuális csomag multiplatform nyilvános béta.</strong><span>A Bazzite/Linux elsődleges; a Windows támogatott másodlagos platform. Jelenleg egyik platform sem kap Stable címkét.</span>'
       })
     );
   }
@@ -191,8 +204,8 @@
 
     const lang = language();
     statusRow.querySelector('span').textContent = lang === 'en'
-      ? 'I understand that the current release is a Public beta, not a Stable release, and that platform capabilities differ according to the published status matrix.'
-      : 'Tudomásul veszem, hogy az aktuális kiadás nyilvános béta, nem Stable kiadás, és a platformok képességei a közzétett állapotmátrix szerint eltérnek.';
+      ? 'I understand that the current multiplatform package is a Public beta, not a Stable release, and platform capabilities differ according to the published status matrix.'
+      : 'Tudomásul veszem, hogy az aktuális multiplatform csomag nyilvános béta, nem Stable kiadás, és a platformok képességei a közzétett állapotmátrix szerint eltérnek.';
     immediateRow.querySelector('span').innerHTML = lang === 'en'
       ? 'I expressly request activation immediately after payment verification. If I qualify as a consumer, I acknowledge the digital-performance and withdrawal information in the <a href="./terms.html" target="_blank" rel="noopener">terms of use</a>.'
       : 'Kifejezetten kérem az aktiválást a jóváírás ellenőrzése után. Ha fogyasztónak minősülök, tudomásul veszem a <a href="./terms.html" target="_blank" rel="noopener">felhasználási feltételekben</a> szereplő digitális teljesítési és elállási tájékoztatást.';
@@ -200,10 +213,17 @@
 
   function canonicalStatusAnswer(data) {
     const lang = language();
-    const names = Object.fromEntries(data.platforms.map(item => [item.name, text(data.status_labels[item.status], lang)]));
+    const bazzite = platformById(data, 'linux-bazzite');
+    const windows = platformById(data, 'windows');
+    const macos = platformById(data, 'macos');
+    const web = platformById(data, 'web');
+    const android = platformById(data, 'android');
+    const ios = platformById(data, 'ios');
+    const status = platform => text(data.status_labels[platform?.status], lang);
+
     return lang === 'en'
-      ? `Linux/Bazzite is the primary target and support platform and is currently ${names['Linux / Bazzite']}. Windows is the secondary supported platform and is currently ${names.Windows}. The current release is a Public beta. macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. No platform is currently labelled Stable.`
-      : `A Linux/Bazzite az elsődleges cél- és támogatási platform, jelenlegi állapota: ${names['Linux / Bazzite']}. A Windows a másodlagosan támogatott platform, jelenlegi állapota: ${names.Windows}. Az aktuális kiadás összesített állapota nyilvános béta. macOS: ${names.macOS}; Web: ${names.Web}; Android: ${names.Android}; iOS / iPadOS: ${names['iOS / iPadOS']}. Jelenleg egyik platform sem kap Stable címkét.`;
+      ? `Bazzite/Linux is the primary FormatX system and is currently ${status(bazzite)}. Windows is a supported secondary platform and is currently ${status(windows)}. Both use the same multiplatform public beta package. macOS: ${status(macos)}; Web: ${status(web)}; Android: ${status(android)}; iOS/iPadOS: ${status(ios)}. No platform is currently labelled Stable.`
+      : `A Bazzite/Linux a FormatX elsődleges rendszere, jelenlegi állapota: ${status(bazzite)}. A Windows támogatott másodlagos platform, jelenlegi állapota: ${status(windows)}. Mindkettő ugyanazt a multiplatform nyilvános béta csomagot használja. macOS: ${status(macos)}; Web: ${status(web)}; Android: ${status(android)}; iOS/iPadOS: ${status(ios)}. Jelenleg egyik platform sem kap Stable címkét.`;
   }
 
   function publishOrganismAnswer(answer) {
@@ -228,7 +248,7 @@
       if (!(form instanceof HTMLFormElement) || !form.matches('.fx-organism-question')) return;
       const input = form.querySelector('input');
       const query = String(input?.value || '').toLocaleLowerCase(language() === 'en' ? 'en' : 'hu');
-      if (!/(platform|állapot|status|stable|stabil|beta|béta|windows|linux|bazzite|macos|android|ios|letölt|download|release|kiadás)/i.test(query)) return;
+      if (!/(platform|állapot|status|stable|stabil|beta|béta|windows|linux|bazzite|macos|android|ios|letölt|download|release|kiadás|multiplatform)/i.test(query)) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       const answer = canonicalStatusAnswer(data);
@@ -277,10 +297,10 @@
       const data = await response.json();
       ROOT.__FORMATX_PLATFORM_STATUS__ = data;
       installDefaultTargets(data);
-      ROOT.dataset.fxPlatformStatus = 'ready-v3';
+      ROOT.dataset.fxPlatformStatus = 'ready';
       dispatchEvent(new CustomEvent('formatx:platformstatusready', { detail: data }));
     } catch (error) {
-      ROOT.dataset.fxPlatformStatus = 'failed-v3';
+      ROOT.dataset.fxPlatformStatus = 'failed';
       ROOT.dataset.fxPlatformStatusError = String(error && error.message || error).slice(0, 120);
     }
   }
