@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxMobileUnified === 'ready-v2') return;
-  root.dataset.fxMobileUnified = 'loading-v2';
+  if (root.dataset.fxMobileUnified === 'ready-v1') return;
+  root.dataset.fxMobileUnified = 'loading-v1';
 
   function ensureStyle() {
     if (document.querySelector('link[data-fx-mobile-unified-style]')) return;
@@ -44,5 +44,5 @@
   window.visualViewport?.addEventListener('resize', syncViewportHeight, { passive: true });
   addEventListener('pageshow', syncViewportHeight, { passive: true });
 
-  root.dataset.fxMobileUnified = 'ready-v2';
+  root.dataset.fxMobileUnified = 'ready-v1';
 }());
