@@ -84,7 +84,13 @@
   }
 
   function ensureSkipLink() {
-    if (document.querySelector('.skip-link')) return;
+    const main = document.querySelector('main');
+    if (main && !main.id) main.id = 'main-content';
+    const existing = document.querySelector('.skip-link');
+    if (existing) {
+      existing.href = '#main-content';
+      return;
+    }
     const skip = create('a', 'skip-link');
     skip.href = '#main-content';
     skip.dataset.hu = 'Ugrás a tartalomra';
