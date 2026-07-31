@@ -24,9 +24,9 @@ const licenceLinks = read('docs/scifi-ui/scripts/formatx-license-links.js');
 const licencePage = read('docs/scifi-ui/license.html');
 const infinite = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice.js');
+const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
 const voiceCss = read('docs/scifi-ui/styles/organism-voice.css');
 const voiceDock = read('docs/scifi-ui/styles/organism-voice-dock.css');
-const voiceForeground = read('docs/scifi-ui/scripts/organism-voice-foreground.js');
 const thoughtGenome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
 const thoughtDisclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
 const mobileUnified = read('docs/scifi-ui/styles/formatx-mobile-unified.css');
@@ -36,31 +36,38 @@ const living = read('docs/scifi-ui/scripts/living-architecture.js');
 const pricingApi = read('billing-worker/src/pricing-v100-api.js');
 const productionEntry = read('billing-worker/src/production-entry.js');
 const previewWorker = read('worker.js');
+const previewConfig = read('wrangler.jsonc');
 const deployWorkflow = read('.github/workflows/deploy-formatx-custom-domain.yml');
 
-requireFeature('Loader is the current failure-tolerant v25 chain',
-  includesAll(loader, ['safe-ready-v25', 'safe-degraded-v25', 'load(index + 1)']));
-requireFeature('Loader orders core, voice, thought and renderer safely',
+requireFeature('Loader is the current failure-tolerant v26 chain',
+  includesAll(loader, ['safe-ready-v26', 'safe-degraded-v26', 'load(index + 1)']));
+requireFeature('Loader orders core, voice, stability, thought and renderer safely',
   loader.indexOf('organism-core-controller.js') < loader.indexOf('organism-voice.js')
-  && loader.indexOf('organism-voice.js') < loader.indexOf('synaptic-thought-genome.js')
+  && loader.indexOf('organism-voice.js') < loader.indexOf('organism-voice-stability.js')
+  && loader.indexOf('organism-voice-stability.js') < loader.indexOf('synaptic-thought-genome.js')
   && loader.indexOf('synaptic-thought-disclosure.js') < loader.indexOf('formatx-three-host-safe.js'));
+requireFeature('Conflicting foreground module is not loaded',
+  !loader.includes('organism-voice-foreground.js')
+  && !productionEntry.includes('organism-voice-foreground.js')
+  && !previewWorker.includes('organism-voice-foreground.js')
+  && !previewConfig.includes('organism-voice-foreground.js'));
 
 requireFeature('Menu has explicit open/close state and accessibility state',
-  includesAll(menu, ['function setOpen(toggle, nav, open)', "aria-expanded", 'fx-organism-menu-open']));
+  includesAll(menu, ['function setOpen(toggle, nav, open)', 'aria-expanded', 'fx-organism-menu-open']));
 requireFeature('Menu starts and restores closed',
   menu.includes('setOpen(toggle, nav, false)') && menu.includes("event.key === 'Escape'"));
 requireFeature('Organism console is physically closed unless authorised',
-  includesAll(consoleState, ['forceClosed', 'is-authorised-open', "shell.hidden = true", "root.dataset.fxOrganismConsole = 'closed'"]));
+  includesAll(consoleState, ['forceClosed', 'is-authorised-open', 'shell.hidden = true', "root.dataset.fxOrganismConsole = 'closed'"]));
 requireFeature('01 MAG is the central Organism state',
-  includesAll(core, ["bounded === 0 ? 'core'", "replaceHash('#hero')", "formatx:organismstatechange"]));
+  includesAll(core, ["bounded === 0 ? 'core'", "replaceHash('#hero')", 'formatx:organismstatechange']));
 
 requireFeature('Exactly one visible language toggle is generated',
-  includesAll(language, ["toggle.className = 'fx-language-toggle'", 'hideLegacyControls', 'current === \'hu\' ? \'en\' : \'hu\'']));
+  includesAll(language, ["toggle.className = 'fx-language-toggle'", 'hideLegacyControls', "current === 'hu' ? 'en' : 'hu'"]));
 requireFeature('Language selection is persisted locally',
   includesAll(language, ['formatx-language', 'localStorage.setItem', 'localStorage.getItem']));
 
 requireFeature('Detailed licence links remain inside the FormatX site',
-  includesAll(licenceLinks, ["'/scifi-ui/license.html'", 'link.removeAttribute(\'target\')', 'data-fx-local-licence']));
+  includesAll(licenceLinks, ["'/scifi-ui/license.html'", "link.removeAttribute('target')", 'data-fx-local-licence']));
 requireFeature('Detailed licence page is bilingual and complete',
   includesAll(licencePage, ['Részletes licencfeltételek', 'Detailed licence terms', '5 napos próbalicenc', '5-day trial licence', 'Tiltott felhasználás', 'Prohibited use']));
 requireFeature('Detailed licence page does not redirect to GitHub LICENSE',
@@ -88,22 +95,38 @@ requireFeature('QR delivery uses own API and local fallback',
 requireFeature('Pricing Worker returns QR images',
   includesAll(pricingApi, ["url.pathname === '/api/checkout-qr'", "Content-Type', 'image/png"]));
 
-requireFeature('Organism voice is local and bilingual',
+requireFeature('Organism voice is bilingual and keeps question answering local',
   includesAll(voice, ['SpeechSynthesisUtterance', 'A FormatX Organizmus válaszai', 'FormatX Organism responses'])
   && !voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'));
+requireFeature('Speech-service disclosure is accurate',
+  includesAll(voice, ['device or browser voice service', 'készülék vagy a böngésző beszédszolgáltatása', 'browser-online', 'device-or-browser']));
 requireFeature('Organism has independent master and speech switches',
   includesAll(voice, ['fx-organism-master-toggle', 'fx-organism-voice-toggle', 'formatx-organism-dialogue-enabled', 'let speechEnabled = false']));
 requireFeature('Thought bubble starts closed and can be reopened',
   includesAll(voice, ['setOpen(false, false)', "hidden: ''", 'function setOpen(next']));
 requireFeature('Voice state is visible and resilient on Android/browser speech services',
   includesAll(voice, ['voiceStarting', 'voiceWorking', 'voiceError', 'synth.resume()', 'speechWatchdog']));
+requireFeature('Atomic stability guard closes overlays, stops speech and removes duplicates',
+  includesAll(voiceStability, [
+    'function interfaceBlocked()',
+    'function stopSpeech()',
+    'function closeDialogue()',
+    'formatx:organismpanelopen',
+    'formatx:pagestartscroll',
+    'candidates.slice(0, -1).forEach(node => node.remove())',
+    'fxOrganismLiveRegion = \'response-only\'',
+  ]));
 requireFeature('Thought system remains local and starts collapsed',
   !thoughtGenome.includes('fetch(') && !thoughtDisclosure.includes('fetch(')
   && includesAll(thoughtDisclosure, ['details.open = false', 'defaultOpen: false']));
-requireFeature('Voice foreground and dock layers are installed',
-  voiceForeground.includes('fx-organism-dialogue')
-  && voiceDock.includes('fx-organism-dialogue')
-  && loader.includes('organism-voice-foreground.js'));
+requireFeature('One stable circular dock replaces the conflicting foreground layer',
+  includesAll(voiceDock, [
+    'flex: 0 0 58px !important',
+    'border-radius: 50% !important',
+    'width: 52px !important',
+    'width: 48px !important',
+  ])
+  && loader.includes('organism-voice-stability.js?v=20260731-organism-stability-1'));
 
 requireFeature('Voice UI is readable, compact and hidden under menus/panels',
   includesAll(voiceCss, ['font-size: 14.5px', 'line-height: 1.68', '.fx-organism-dialogue.is-disabled', 'body.fx-organism-panel-open .fx-organism-dialogue', 'html.fx-organism-menu-open .fx-organism-dialogue']));
@@ -125,7 +148,7 @@ for (const [name, worker] of [['production Worker', productionEntry], ['preview 
       'organism-menu-controller.js',
       'organism-console-state.js',
       'organism-voice.js',
-      'organism-voice-foreground.js',
+      'organism-voice-stability.js',
       'synaptic-thought-genome.js',
       'synaptic-thought-disclosure.js',
       'formatx-mobile-unified.css',
