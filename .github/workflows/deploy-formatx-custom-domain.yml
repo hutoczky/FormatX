@@ -20,6 +20,8 @@ on:
       - '.github/scripts/validate-content-standard-v2.py'
       - '.github/scripts/validate-public-release-integration.py'
       - '.github/scripts/production-preflight.cjs'
+      - '.github/scripts/validate-pricing-qr.cjs'
+      - '.github/scripts/validate-user-requested-site-features.cjs'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
   push:
     branches: [master]
@@ -32,6 +34,8 @@ on:
       - '.github/scripts/validate-content-standard-v2.py'
       - '.github/scripts/validate-public-release-integration.py'
       - '.github/scripts/production-preflight.cjs'
+      - '.github/scripts/validate-pricing-qr.cjs'
+      - '.github/scripts/validate-user-requested-site-features.cjs'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
 
 permissions:
@@ -57,11 +61,13 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate public, release and production contracts
+      - name: Validate public, release and every requested website feature
         run: |
           python3 .github/scripts/validate-content-standard-v2.py
           python3 .github/scripts/validate-public-release-integration.py
           node .github/scripts/production-preflight.cjs
+          node .github/scripts/validate-pricing-qr.cjs
+          node .github/scripts/validate-user-requested-site-features.cjs
 
       - name: Validate production JavaScript syntax
         run: |
@@ -75,9 +81,20 @@ jobs:
           node --check docs/scifi-ui/scripts/public-evidence-pages.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/single-language-toggle.js
+          node --check docs/scifi-ui/scripts/formatx-license-links.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/organism-menu-controller.js
+          node --check docs/scifi-ui/scripts/organism-console-state.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-voice.js
+          node --check docs/scifi-ui/scripts/organism-voice-foreground.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
+          node --check .github/scripts/validate-pricing-qr.cjs
+          node --check .github/scripts/validate-user-requested-site-features.cjs
 
       - name: Install dependencies and run Worker tests
         working-directory: billing-worker
@@ -134,25 +151,41 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           npx wrangler deploy
 
-      - name: Smoke-test both custom domains
+      - name: Smoke-test both custom domains and requested features
         run: |
           set -euo pipefail
           for origin in https://formatxsuite.com https://www.formatxsuite.com; do
             success=false
             for attempt in $(seq 1 12); do
-              if curl --fail --silent --show-error --location --max-time 30 \
-                "$origin/scifi-ui/" >/dev/null \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                "$origin/scifi-ui/known-issues.html" >/dev/null \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                "$origin/scifi-ui/data/current-release.json" >/dev/null; then
+              tmp="$(mktemp -d)"
+              if curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/" > "$tmp/home.html" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/license.html" > "$tmp/license.html" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/igloo-parity.js?v=20260731-live-audit-1" > "$tmp/loader.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/organism-voice.js?v=20260731-live-audit-1" > "$tmp/voice.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260731-live-audit-1" > "$tmp/infinite.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/single-language-toggle.js?v=20260731-live-audit-1" > "$tmp/language.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/formatx-mobile-unified.css?v=20260731-live-audit-1" > "$tmp/mobile.css" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/assets/qr/business_lite-huf.svg?v=20260731-live-audit-1" > "$tmp/qr.svg" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/data/current-release.json" > "$tmp/release.json" \
+                && grep -Fq 'safe-ready-v25' "$tmp/loader.js" \
+                && grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' "$tmp/loader.js" \
+                && grep -Fq 'SpeechSynthesisUtterance' "$tmp/voice.js" \
+                && grep -Fq 'fx-organism-master-toggle' "$tmp/voice.js" \
+                && grep -Fq 'boundary-v4' "$tmp/infinite.js" \
+                && grep -Fq "toggle.className = 'fx-language-toggle'" "$tmp/language.js" \
+                && grep -Fq 'Részletes licencfeltételek' "$tmp/license.html" \
+                && grep -Fq 'Detailed licence terms' "$tmp/license.html" \
+                && grep -Fq 'no text overlap' "$tmp/mobile.css" \
+                && grep -Fq '<svg' "$tmp/qr.svg"; then
                 success=true
+                rm -rf "$tmp"
                 break
               fi
+              rm -rf "$tmp"
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Production smoke test failed for $origin" >&2
+              echo "Production requested-feature smoke test failed for $origin" >&2
               exit 1
             fi
           done
