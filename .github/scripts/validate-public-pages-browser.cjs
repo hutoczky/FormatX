@@ -50,6 +50,8 @@ async function assertPage(browser, pathname, name, viewport) {
   assert(await page.locator('header.fx-public-header').count() === 1, `${name}: canonical public header missing or duplicated`);
   assert(await page.locator('footer.fx-public-footer').count() === 1, `${name}: canonical public footer missing or duplicated`);
   assert(await page.locator('.fx-language-toggle:visible').count() === 1, `${name}: exactly one visible language toggle is required`);
+  assert(await page.locator('main#main-content').count() === 1, `${name}: main-content skip target is missing or duplicated`);
+  assert(await page.locator('.skip-link[href="#main-content"]').count() === 1, `${name}: canonical skip link is missing or duplicated`);
 
   const current = await page.locator('.fx-public-footer a[aria-current="page"]').count();
   assert(current >= 1, `${name}: current page is not identified in public navigation`);
@@ -118,7 +120,7 @@ async function assertKnownIssues(browser, viewport) {
     }
     await assertKnownIssues(browser, { width: 1440, height: 900 });
     await assertKnownIssues(browser, { width: 390, height: 844 });
-    console.log('PASS: public shell, language control, known-issues filters and responsive layouts are valid.');
+    console.log('PASS: public shell, skip navigation, language control, known-issues filters and responsive layouts are valid.');
   } finally {
     await browser.close();
   }
