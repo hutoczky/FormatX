@@ -95,6 +95,10 @@
   display: none !important;
 }
 
+html[data-fx-organism-dialogue-enabled='false'] .fx-thought-genome-layer {
+  opacity: 0 !important;
+}
+
 @media (max-width: 480px) {
   .fx-thought-genome-disclosure > summary {
     grid-template-columns: 22px minmax(0, 1fr) 18px;
