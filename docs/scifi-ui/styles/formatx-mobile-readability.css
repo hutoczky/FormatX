@@ -34,27 +34,58 @@
     isolation: isolate;
   }
 
+  /*
+   * Mobile must use normal document flow. The earlier absolute hero card was
+   * taller than the 100svh section, so the next heading and the scroll cue
+   * appeared through the card. The copy and the reserved 3D field now both
+   * contribute to the real height of #hero.
+   */
   #hero {
-    min-height: 100svh !important;
-    padding-bottom: 132px !important;
+    min-height: auto !important;
+    height: auto !important;
+    padding: 0 0 22px !important;
+    overflow: visible !important;
     isolation: isolate;
   }
 
   #hero .hero-grid {
-    min-height: 100svh !important;
+    min-height: auto !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: clamp(18px, 4.5vw, 28px) 0 0 !important;
   }
 
   #hero .hero-copy {
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
     z-index: 260 !important;
-    max-width: calc(100vw - 32px) !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 14px !important;
     padding: 18px 18px 20px !important;
     border: 1px solid rgba(153, 225, 255, .18) !important;
     border-radius: 22px !important;
     background:
-      linear-gradient(145deg, rgba(2, 11, 19, .90), rgba(2, 8, 15, .82)),
+      linear-gradient(145deg, rgba(2, 11, 19, .92), rgba(2, 8, 15, .86)),
       radial-gradient(circle at 85% 0%, rgba(88, 223, 238, .10), transparent 48%) !important;
     box-shadow: 0 22px 68px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .035) !important;
     backdrop-filter: blur(17px) saturate(118%) !important;
+  }
+
+  #hero .hero-space {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 1 !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: clamp(300px, 48svh, 500px) !important;
+    pointer-events: none !important;
   }
 
   #hero .hero-title-main,
@@ -81,9 +112,17 @@
     display: none !important;
   }
 
+  /* The chapter cue is a real flow element, never an overlay on the card. */
   #hero .scroll-cue {
-    bottom: 98px !important;
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
     z-index: 270 !important;
+    width: min(100% - 28px, 680px) !important;
+    margin: 8px auto 0 !important;
+    transform: none !important;
   }
 
   .fx-category-deck--standalone,
@@ -92,6 +131,7 @@
   main > .scene:not(#hero) {
     position: relative;
     z-index: 250 !important;
+    clear: both;
   }
 
   .fx-category-deck--standalone,
@@ -105,7 +145,7 @@
   }
 
   .fx-category-deck--standalone {
-    margin-top: 24px !important;
+    margin-top: 18px !important;
   }
 
   .fx-category-deck h2,
@@ -131,29 +171,43 @@
     backdrop-filter: blur(20px) saturate(125%) !important;
   }
 
-  /* Optional floating controls live in the free band directly below the header. */
+  /*
+   * Closed floating controls occupy the reserved 3D field above the action
+   * dock. They never sit beside or on top of the hero text.
+   */
   html body .fx-organism-dialogue {
-    top: max(142px, calc(env(safe-area-inset-top) + 118px)) !important;
+    top: auto !important;
     right: auto !important;
-    bottom: auto !important;
-    left: max(12px, env(safe-area-inset-left)) !important;
-    width: min(380px, calc(100vw - 24px)) !important;
+    bottom: max(92px, calc(env(safe-area-inset-bottom) + 82px)) !important;
+    left: max(14px, env(safe-area-inset-left)) !important;
+    width: min(380px, calc(100vw - 28px)) !important;
   }
 
   html body .fx-organism-dialogue.is-open {
-    top: max(132px, calc(env(safe-area-inset-top) + 108px)) !important;
+    top: auto !important;
     right: max(12px, env(safe-area-inset-right)) !important;
-    bottom: auto !important;
+    bottom: max(88px, calc(env(safe-area-inset-bottom) + 78px)) !important;
     left: max(12px, env(safe-area-inset-left)) !important;
     width: auto !important;
+    max-height: calc(100dvh - 118px) !important;
   }
 
   html body .fx-genome-launcher {
-    top: max(142px, calc(env(safe-area-inset-top) + 118px)) !important;
-    right: max(12px, env(safe-area-inset-right)) !important;
-    bottom: auto !important;
-    transform: scale(.86) !important;
-    transform-origin: right top !important;
+    top: auto !important;
+    right: max(14px, env(safe-area-inset-right)) !important;
+    bottom: max(94px, calc(env(safe-area-inset-bottom) + 84px)) !important;
+    left: auto !important;
+    transform: scale(.78) !important;
+    transform-origin: right bottom !important;
+  }
+
+  html body .fx-three-sound {
+    top: auto !important;
+    right: max(82px, calc(env(safe-area-inset-right) + 70px)) !important;
+    bottom: max(96px, calc(env(safe-area-inset-bottom) + 86px)) !important;
+    left: auto !important;
+    transform: scale(.82) !important;
+    transform-origin: right bottom !important;
   }
 
   html body .fx-organism-dialogue.is-open ~ .fx-genome-launcher,
@@ -166,9 +220,7 @@
 
 @media (max-width: 430px) {
   #hero .hero-copy {
-    left: 14px !important;
-    right: 14px !important;
-    width: auto !important;
+    margin-inline: 12px !important;
     padding: 16px !important;
   }
 
@@ -183,6 +235,10 @@
   #hero .hero-lead {
     font-size: 13.5px !important;
     line-height: 1.58 !important;
+  }
+
+  #hero .hero-space {
+    min-height: clamp(280px, 44svh, 430px) !important;
   }
 }
 
