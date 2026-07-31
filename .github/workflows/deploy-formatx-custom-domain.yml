@@ -127,7 +127,7 @@ jobs:
           STATUS_DESCRIPTION: Requested features and Worker candidate validation
           STATUS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          node - <<'NODE'
+          node --input-type=module - <<'NODE'
           const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
           const url = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`;
           const response = await fetch(url, {
@@ -232,7 +232,7 @@ jobs:
           STATUS_DESCRIPTION: Cloudflare deploy and live requested-feature smoke test
           STATUS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          node - <<'NODE'
+          node --input-type=module - <<'NODE'
           const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
           const url = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`;
           const response = await fetch(url, {
