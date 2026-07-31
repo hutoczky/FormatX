@@ -35,33 +35,47 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Audit master baseline
-        working-directory: baseline/billing-worker
+      - name: Collect audit, test and dry-build evidence
         shell: bash
         run: |
-          set -euo pipefail
-          npm ci
-          npm audit --json > ../../audit-before.json || true
-
-      - name: Audit and validate maintenance candidate
-        working-directory: billing-worker
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm ci
-          npm audit --json > ../audit-after.json || true
-          npm test
-          npx wrangler deploy --dry-run --outdir ../.wrangler-audit-comparison
-
-      - name: Build compact audit evidence
-        shell: bash
-        run: |
-          set -euo pipefail
+          set -u
           mkdir -p artifacts
+
+          baseline_ci=0
+          baseline_audit=0
+          candidate_ci=0
+          candidate_audit=0
+          candidate_test=0
+          candidate_dry_build=0
+
+          (cd baseline/billing-worker && npm ci) || baseline_ci=$?
+          if [[ $baseline_ci -eq 0 ]]; then
+            (cd baseline/billing-worker && npm audit --json > ../../audit-before.json) || baseline_audit=$?
+          fi
+
+          (cd billing-worker && npm ci) || candidate_ci=$?
+          if [[ $candidate_ci -eq 0 ]]; then
+            (cd billing-worker && npm audit --json > ../audit-after.json) || candidate_audit=$?
+            (cd billing-worker && npm test) || candidate_test=$?
+            (cd billing-worker && npx wrangler deploy --dry-run --outdir ../.wrangler-audit-comparison) || candidate_dry_build=$?
+          fi
+
+          BASELINE_CI=$baseline_ci \
+          BASELINE_AUDIT=$baseline_audit \
+          CANDIDATE_CI=$candidate_ci \
+          CANDIDATE_AUDIT=$candidate_audit \
+          CANDIDATE_TEST=$candidate_test \
+          CANDIDATE_DRY_BUILD=$candidate_dry_build \
           node - <<'NODE'
           const fs = require('node:fs');
-          const before = JSON.parse(fs.readFileSync('audit-before.json', 'utf8'));
-          const after = JSON.parse(fs.readFileSync('audit-after.json', 'utf8'));
+
+          function readJson(path) {
+            try {
+              return JSON.parse(fs.readFileSync(path, 'utf8'));
+            } catch {
+              return {};
+            }
+          }
 
           function compact(report) {
             const vulnerabilities = report.vulnerabilities || {};
@@ -89,15 +103,22 @@ jobs:
           const evidence = {
             schema_version: 1,
             generated_at: new Date().toISOString(),
-            baseline: compact(before),
-            candidate: compact(after),
+            execution: {
+              baseline_npm_ci_exit: Number(process.env.BASELINE_CI),
+              baseline_npm_audit_exit: Number(process.env.BASELINE_AUDIT),
+              candidate_npm_ci_exit: Number(process.env.CANDIDATE_CI),
+              candidate_npm_audit_exit: Number(process.env.CANDIDATE_AUDIT),
+              candidate_test_exit: Number(process.env.CANDIDATE_TEST),
+              candidate_dry_build_exit: Number(process.env.CANDIDATE_DRY_BUILD),
+            },
+            baseline: compact(readJson('audit-before.json')),
+            candidate: compact(readJson('audit-after.json')),
           };
 
           fs.writeFileSync(
             'artifacts/npm-audit-comparison.json',
             JSON.stringify(evidence, null, 2) + '\n'
           );
-
           console.log(JSON.stringify(evidence, null, 2));
           NODE
 
