@@ -35,10 +35,9 @@
   }
 
   /*
-   * Mobile must use normal document flow. The earlier absolute hero card was
+   * Mobile uses normal document flow. The earlier absolute hero card could be
    * taller than the 100svh section, so the next heading and the scroll cue
-   * appeared through the card. The copy and the reserved 3D field now both
-   * contribute to the real height of #hero.
+   * appeared through the card. Copy and reserved 3D field now define height.
    */
   #hero {
     min-height: auto !important;
@@ -105,14 +104,12 @@
     color: rgba(209, 239, 248, .86) !important;
   }
 
-  /* The compact action dock already contains these operations on mobile. */
   #hero.is-core-active .hero-actions,
   #hero.is-core-active .hero-facts,
   #hero [data-fx-simulator-entry="hero"] {
     display: none !important;
   }
 
-  /* The chapter cue is a real flow element, never an overlay on the card. */
   #hero .scroll-cue {
     position: relative !important;
     inset: auto !important;
@@ -171,15 +168,12 @@
     backdrop-filter: blur(20px) saturate(125%) !important;
   }
 
-  /*
-   * Closed floating controls occupy the reserved 3D field above the action
-   * dock. They never sit beside or on top of the hero text.
-   */
+  /* Thought on the right; DNA and sound on the left, all above the action dock. */
   html body .fx-organism-dialogue {
     top: auto !important;
-    right: auto !important;
+    right: max(14px, env(safe-area-inset-right)) !important;
     bottom: max(92px, calc(env(safe-area-inset-bottom) + 82px)) !important;
-    left: max(14px, env(safe-area-inset-left)) !important;
+    left: auto !important;
     width: min(380px, calc(100vw - 28px)) !important;
   }
 
@@ -194,20 +188,20 @@
 
   html body .fx-genome-launcher {
     top: auto !important;
-    right: max(14px, env(safe-area-inset-right)) !important;
+    right: auto !important;
     bottom: max(94px, calc(env(safe-area-inset-bottom) + 84px)) !important;
-    left: auto !important;
+    left: max(14px, env(safe-area-inset-left)) !important;
     transform: scale(.78) !important;
-    transform-origin: right bottom !important;
+    transform-origin: left bottom !important;
   }
 
   html body .fx-three-sound {
     top: auto !important;
-    right: max(82px, calc(env(safe-area-inset-right) + 70px)) !important;
+    right: auto !important;
     bottom: max(96px, calc(env(safe-area-inset-bottom) + 86px)) !important;
-    left: auto !important;
+    left: max(82px, calc(env(safe-area-inset-left) + 70px)) !important;
     transform: scale(.82) !important;
-    transform-origin: right bottom !important;
+    transform-origin: left bottom !important;
   }
 
   html body .fx-organism-dialogue.is-open ~ .fx-genome-launcher,
