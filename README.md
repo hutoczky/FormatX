@@ -14,9 +14,9 @@ Független, egyszemélyes **technikusi operációs réteg** (*Technician Operati
 - Ismert korlátozások: [`docs/scifi-ui/data/known-issues.json`](docs/scifi-ui/data/known-issues.json)
 - Stable kapu: [`docs/scifi-ui/data/stable-gate.json`](docs/scifi-ui/data/stable-gate.json)
 
-A Windows és Android **Public beta**. A Linux/Bazzite az elsődleges fejlesztési irány, állapota **Development**. A Web **Technical preview**. A macOS és iOS/iPadOS **Planned**. Jelenleg egyik platform sem Stable.
+A **Bazzite/Linux a FormatX elsődleges rendszere és támogatási iránya**. A Windows támogatott másodlagos platform. Mindkettő ugyanabban a hivatalos **multiplatform nyilvános béta csomagban** érhető el. Az Android külön Public beta, a Web Technical preview, a macOS és iOS/iPadOS Planned. Jelenleg egyik platform sem Stable.
 
-A verzió, kiadási dátum és letöltési URL nem szerepel kézzel több fájlban. Ezeket a `current-release.json` tartalmazza, amelyet a hivatalos FormatX-Updates kiadásból a `sync-current-release.yml` frissít. Ha a metaadat nem elérhető, a felület nem talál ki verziót.
+A verzió, kiadási dátum és letöltési URL nem szerepel kézzel több fájlban. Ezeket a `current-release.json` tartalmazza, amelyet a hivatalos FormatX-Updates kiadásból a `sync-current-release.yml` frissít. A nyilvános felület nem jelenít meg belső komponens- vagy buildverziókat, és metaadat-hiány esetén nem talál ki verziót.
 
 ## Nyilvános oldalak
 
