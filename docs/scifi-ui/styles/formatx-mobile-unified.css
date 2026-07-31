@@ -26,26 +26,54 @@
     backdrop-filter: blur(22px) saturate(135%) !important;
   }
 
+  /* Mobile hero participates in normal flow; no following heading may enter it. */
   #hero {
-    min-height: 116svh !important;
-    padding-top: 82px !important;
-    padding-bottom: 124px !important;
+    min-height: auto !important;
+    height: auto !important;
+    padding: 82px 0 22px !important;
+    overflow: visible !important;
   }
 
   #hero .hero-grid {
-    min-height: calc(116svh - 82px) !important;
+    min-height: auto !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
     padding-top: 22px !important;
   }
 
   #hero .hero-copy {
     position: relative !important;
     z-index: 5 !important;
+    inset: auto !important;
     left: auto !important;
     right: auto !important;
     bottom: auto !important;
+    flex: 0 0 auto !important;
     width: auto !important;
     max-width: none !important;
     margin: 0 16px !important;
+  }
+
+  #hero .hero-space {
+    position: relative !important;
+    inset: auto !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: clamp(300px, 48svh, 500px) !important;
+    pointer-events: none !important;
+  }
+
+  #hero .scroll-cue {
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(100% - 28px, 680px) !important;
+    margin: 8px auto 0 !important;
+    transform: none !important;
   }
 
   #hero .hero-lead {
@@ -72,15 +100,16 @@
     transition: opacity .24s ease !important;
   }
 
+  /* Closed thought control stays above the dock on the left, outside copy. */
   .fx-organism-dialogue {
     z-index: 940 !important;
     top: auto !important;
-    right: max(var(--fx-mobile-edge), env(safe-area-inset-right)) !important;
-    bottom: calc(var(--fx-mobile-dock-height) + var(--fx-mobile-safe-bottom) + 12px) !important;
-    left: auto !important;
+    right: auto !important;
+    bottom: calc(var(--fx-mobile-dock-height) + var(--fx-mobile-safe-bottom) + 28px) !important;
+    left: max(var(--fx-mobile-edge), env(safe-area-inset-left)) !important;
     width: min(350px, calc(100vw - 24px)) !important;
     max-width: calc(100vw - 24px) !important;
-    justify-items: end !important;
+    justify-items: start !important;
   }
 
   .fx-organism-dialogue:not(.is-open) {
@@ -88,7 +117,10 @@
   }
 
   .fx-organism-dialogue.is-open {
+    right: max(var(--fx-mobile-edge), env(safe-area-inset-right)) !important;
     left: max(var(--fx-mobile-edge), env(safe-area-inset-left)) !important;
+    width: auto !important;
+    justify-items: stretch !important;
   }
 
   .fx-organism-thought-trigger {
@@ -199,20 +231,21 @@
 }
 
 @media (max-width: 430px) {
-  #hero {
-    min-height: 120svh !important;
-  }
-
   #hero .hero-copy {
     margin-inline: 12px !important;
   }
 
+  #hero .hero-space {
+    min-height: clamp(280px, 44svh, 430px) !important;
+  }
+
   .fx-organism-dialogue {
-    right: 10px !important;
+    left: 10px !important;
     max-width: calc(100vw - 20px) !important;
   }
 
   .fx-organism-dialogue.is-open {
+    right: 10px !important;
     left: 10px !important;
     width: auto !important;
   }
