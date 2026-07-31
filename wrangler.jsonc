@@ -28,6 +28,7 @@
       "/scifi-ui/styles/organism-voice.css", "/scifi-ui/styles/organism-voice-foreground.css",
       "/scifi-ui/styles/organism-voice-dock.css", "/scifi-ui/styles/organism-core-interaction.css",
       "/scifi-ui/styles/organism-speaking-visual.css", "/scifi-ui/styles/synaptic-thought-genome.css",
+      "/scifi-ui/styles/synaptic-thought-disclosure.css",
       "/scifi-ui/scripts/platform-status.js", "/scifi-ui/scripts/release-metadata.js",
       "/scifi-ui/scripts/formatx-public-shell.js",
       "/scifi-ui/scripts/formatx-content-standard.js", "/scifi-ui/scripts/formatx-content-finalizer.js",
@@ -45,6 +46,7 @@
       "/scifi-ui/scripts/organism-menu-controller.js", "/scifi-ui/scripts/organism-core-controller.js",
       "/scifi-ui/scripts/organism-voice.js", "/scifi-ui/scripts/organism-voice-foreground.js",
       "/scifi-ui/scripts/organism-core-interaction.js", "/scifi-ui/scripts/synaptic-thought-genome.js",
+      "/scifi-ui/scripts/synaptic-thought-disclosure.js",
       "/download/*", "/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"
     ]
   },
