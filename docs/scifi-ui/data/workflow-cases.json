@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "updated": "2026-07-31",
+  "method": {
+    "hu": ["Felderítés", "Terv", "Kontrollált végrehajtás", "Visszaellenőrzés"],
+    "en": ["Discover", "Plan", "Controlled execution", "Verify"]
+  },
+  "workflows": [
+    {
+      "id": "FX-WF-ISO-USB",
+      "title": {"hu": "ISO-kép biztonságos USB-meghajtóra írása", "en": "Safely writing an ISO image to a USB drive"},
+      "evidence_state": "awaiting_verified_run",
+      "steps": [
+        {"id": "discover", "hu": "A forráskép, a csatlakoztatott meghajtók, a célkapacitás és a rendszermeghajtó kizárása rögzítendő.", "en": "Record the source image, connected drives, target capacity and exclusion of the system drive."},
+        {"id": "plan", "hu": "A célmeghajtó azonosítója, partíciós séma, írási mód, törlési hatás és visszaellenőrzési terv jelenjen meg.", "en": "Show the target identifier, partition scheme, write mode, destructive effect and verification plan."},
+        {"id": "controlled_execution", "hu": "A rendszer csak kifejezett megerősítés után indíthatja a naplózott írást.", "en": "The system may start the logged write only after explicit confirmation."},
+        {"id": "verify", "hu": "Az elkészült adathordozó olvashatóságát, elrendezését és ahol elérhető, a tartalmi ellenőrzést dokumentálni kell.", "en": "Document readability, layout and, where available, content verification of the completed media."}
+      ],
+      "required_evidence": ["before_capture", "target_identity", "plan_capture", "confirmation_capture", "execution_log", "verification_result", "build", "test_date"]
+    },
+    {
+      "id": "FX-WF-DRIVE-DIAGNOSTICS",
+      "title": {"hu": "Meghajtó állapotának felderítése és diagnosztikája", "en": "Drive discovery and diagnostics"},
+      "evidence_state": "awaiting_verified_run",
+      "steps": [
+        {"id": "discover", "hu": "A meghajtó modellje, kapacitása, kapcsolattípusa és elérhető diagnosztikai forrásai rögzítendők.", "en": "Record drive model, capacity, connection type and available diagnostic sources."},
+        {"id": "plan", "hu": "A futtatandó SMART-, felszíni vagy állapotvizsgálat, annak kockázata és időigénye jelenjen meg.", "en": "Show the SMART, surface or health checks to be run, including risk and expected duration."},
+        {"id": "controlled_execution", "hu": "A mérés naplózott módon fusson, és a nem elérhető adatokat a rendszer ne találja ki.", "en": "Run measurements with logging and never fabricate unavailable data."},
+        {"id": "verify", "hu": "Az eredményben különüljön el a mért adat, az értelmezés és az ismert korlátozás.", "en": "Separate measured data, interpretation and known limitation in the result."}
+      ],
+      "required_evidence": ["drive_identity", "diagnostic_source", "result_capture", "log", "limitation_note", "build", "test_date"]
+    },
+    {
+      "id": "FX-WF-PARTITION-FORMAT",
+      "title": {"hu": "Partíció- vagy formázási művelet előkészítése és visszaellenőrzése", "en": "Preparing and verifying a partition or formatting operation"},
+      "evidence_state": "awaiting_verified_run",
+      "steps": [
+        {"id": "discover", "hu": "A jelenlegi lemezelrendezés, fájlrendszer, csatolási állapot és célmeghajtó azonosítója rögzítendő.", "en": "Record current disk layout, file system, mount state and target-drive identifier."},
+        {"id": "plan", "hu": "Az új elrendezés, fájlrendszer, törlendő adatok, kockázat és visszavonhatóság jelenjen meg.", "en": "Show the new layout, file system, data to be removed, risk and reversibility."},
+        {"id": "controlled_execution", "hu": "A végrehajtáshoz egyértelmű célmeghajtó-megerősítés és napló szükséges.", "en": "Execution requires explicit target-drive confirmation and logging."},
+        {"id": "verify", "hu": "A rendszer olvassa vissza a létrejött partíciós táblát és fájlrendszer-jellemzőket, majd közölje az eltérést.", "en": "Read back the resulting partition table and file-system properties and report any mismatch."}
+      ],
+      "required_evidence": ["before_layout", "target_identity", "plan_capture", "risk_acknowledgement", "execution_log", "after_layout", "verification_result", "build", "test_date"]
+    }
+  ]
+}
