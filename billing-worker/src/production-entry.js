@@ -48,6 +48,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/organism-voice-foreground.js',
   '/scifi-ui/scripts/organism-core-interaction.js',
   '/scifi-ui/scripts/synaptic-thought-genome.js',
+  '/scifi-ui/scripts/synaptic-thought-disclosure.js',
   '/scifi-ui/scripts/mobile-webgl-entry.js',
   '/scifi-ui/scripts/mobile-core-engine-v2.js',
   '/scifi-ui/scripts/mobile-core-engine-v3.js',
@@ -63,6 +64,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/styles/organism-core-interaction.css',
   '/scifi-ui/styles/organism-speaking-visual.css',
   '/scifi-ui/styles/synaptic-thought-genome.css',
+  '/scifi-ui/styles/synaptic-thought-disclosure.css',
 ]);
 
 const EMBEDDABLE_STAGE_CSP = [
