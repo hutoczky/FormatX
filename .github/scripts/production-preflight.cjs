@@ -63,7 +63,7 @@ for (const [label, source] of [['production', productionWrapper], ['preview', pr
   check(`${label}-legacy-cleanup`, source.includes('cleanLegacyReleaseCopy'), `${label} wrapper must sanitize historical fixed release copy`);
 }
 
-check('organism-loader-v25', loader.includes('safe-ready-v25') && loader.includes('safe-degraded-v25'), 'Organism startup loader must use the v25 disclosure-safe contract');
+check('organism-loader-v26', loader.includes('safe-ready-v26') && loader.includes('safe-degraded-v26'), 'Organism startup loader must use the v26 disclosure-safe contract');
 check('organism-loader-disclosure', loader.includes('synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1'), 'Organism startup loader does not include the thought disclosure module');
 check('organism-loader-order', loader.indexOf('synaptic-thought-genome.js') < loader.indexOf('synaptic-thought-disclosure.js') && loader.indexOf('synaptic-thought-disclosure.js') < loader.indexOf('formatx-three-host-safe.js'), 'Thought disclosure startup ordering is invalid');
 check('organism-master-switch', organismVoice.includes('fx-organism-master-toggle') && organismVoice.includes('ROOT.dataset.fxOrganismDialogueEnabled'), 'Organism master on/off control is missing');
