@@ -1,23 +1,23 @@
 {
   "schema_version": 1,
-  "synced_at": null,
-  "ok": false,
+  "synced_at": "2026-07-31T12:57:04Z",
+  "ok": true,
   "source": "github_published_release",
   "repository": "hutoczky/FormatX-Updates",
-  "version": null,
-  "release_name": null,
-  "published_at": null,
-  "prerelease": null,
-  "release_url": "https://github.com/hutoczky/FormatX-Updates/releases",
-  "notes_url": null,
+  "version": "v116",
+  "release_name": "FormatX Suite Pro V116",
+  "published_at": "2026-07-27T04:58:11Z",
+  "prerelease": false,
+  "release_url": "https://github.com/hutoczky/FormatX-Updates/releases/tag/v116",
+  "notes_url": "https://github.com/hutoczky/FormatX-Updates/releases/tag/v116",
   "channels": {
     "windows": {
-      "available": false,
-      "name": null,
-      "download_url": null,
-      "size": null,
-      "digest": null,
-      "content_type": null
+      "available": true,
+      "name": "FormatX-Suite-Pro-V116.zip",
+      "download_url": "https://github.com/hutoczky/FormatX-Updates/releases/download/v116/FormatX-Suite-Pro-V116.zip",
+      "size": 531480554,
+      "digest": "sha256:ed781446e8cecfed9c7a65d4118ce0734e63d469ef243d27247484e12a7d211f",
+      "content_type": "application/zip"
     },
     "android": {
       "available": true,
@@ -35,5 +35,5 @@
     "known_issues_url": "/scifi-ui/known-issues.html",
     "verification_url": "/scifi-ui/verification.html"
   },
-  "error": "Official release metadata has not been synchronised yet."
+  "error": null
 }
