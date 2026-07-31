@@ -17,6 +17,7 @@ on:
       - '.github/scripts/validate-public-release-integration.py'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-thought-disclosure-browser.cjs'
       - '.github/scripts/production-preflight.cjs'
       - '.github/workflows/sync-current-release.yml'
       - '.github/workflows/validate-website.yml'
@@ -35,6 +36,7 @@ on:
       - '.github/scripts/validate-public-release-integration.py'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-thought-disclosure-browser.cjs'
       - '.github/scripts/production-preflight.cjs'
       - '.github/workflows/sync-current-release.yml'
       - '.github/workflows/validate-website.yml'
@@ -89,9 +91,11 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-voice.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
           node --check .github/scripts/validate-content-visuals.cjs
           node --check .github/scripts/validate-public-pages-browser.cjs
+          node --check .github/scripts/validate-thought-disclosure-browser.cjs
           node --check .github/scripts/production-preflight.cjs
 
       - name: Validate billing Worker and production bundle
@@ -148,6 +152,7 @@ jobs:
           node .github/scripts/validate-three-site-v4.cjs
           node .github/scripts/validate-organism-voice-browser.cjs
           node .github/scripts/validate-thought-genome.cjs
+          node .github/scripts/validate-thought-disclosure-browser.cjs
 
       - name: Generate production readiness report
         run: node .github/scripts/production-preflight.cjs
