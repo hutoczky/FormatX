@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "updated": "2026-07-31",
+  "severity_labels": {
+    "critical": {"hu": "Kritikus", "en": "Critical"},
+    "high": {"hu": "Magas", "en": "High"},
+    "medium": {"hu": "Közepes", "en": "Medium"},
+    "low": {"hu": "Alacsony", "en": "Low"},
+    "information": {"hu": "Tájékoztató", "en": "Information"}
+  },
+  "fix_labels": {
+    "open": {"hu": "Nyitott", "en": "Open"},
+    "investigating": {"hu": "Vizsgálat alatt", "en": "Investigating"},
+    "workaround": {"hu": "Kerülőút elérhető", "en": "Workaround available"},
+    "blocked": {"hu": "Blokkolt", "en": "Blocked"},
+    "planned": {"hu": "Tervezett", "en": "Planned"}
+  },
+  "items": [
+    {
+      "id": "FX-LIMIT-LINUX-PACKAGE",
+      "type": "limitation",
+      "platform": "Linux / Bazzite",
+      "affected_version": null,
+      "problem": {
+        "hu": "A natív Linux/Bazzite-kiadás aktív fejlesztés alatt áll, ezért jelenleg nincs nyilvános natív csomag.",
+        "en": "The native Linux/Bazzite edition is under active development, so no public native package is currently available."
+      },
+      "severity": "information",
+      "workaround": {
+        "hu": "A webes technikai előnézet használható a termékkoncepció és a dokumentáció megtekintésére, de nem helyettesít natív meghajtóműveleteket.",
+        "en": "The web technical preview can be used to inspect the product concept and documentation, but it does not replace native drive operations."
+      },
+      "fix_status": "planned",
+      "issue_url": null,
+      "last_updated": "2026-07-31"
+    },
+    {
+      "id": "FX-LIMIT-WEB-NATIVE",
+      "type": "limitation",
+      "platform": "Web",
+      "affected_version": null,
+      "problem": {
+        "hu": "A böngészős Organizmus-UI technikai előnézet, és biztonsági okból nem végez natív meghajtóírást, formázást vagy törlést.",
+        "en": "The browser Organism UI is a technical preview and, for safety reasons, does not perform native drive writing, formatting or erasure."
+      },
+      "severity": "information",
+      "workaround": {
+        "hu": "Natív művelethez csak olyan kiadást használj, amelyhez a letöltési központ tényleges, ellenőrzött csomagot jelez.",
+        "en": "For native operations, use only an edition for which the download centre confirms an actual verified package."
+      },
+      "fix_status": "open",
+      "issue_url": null,
+      "last_updated": "2026-07-31"
+    },
+    {
+      "id": "FX-LIMIT-PUBLIC-EVIDENCE",
+      "type": "evidence_gap",
+      "platform": "Windows / Android",
+      "affected_version": null,
+      "problem": {
+        "hu": "A nyilvános, hardverenkénti végponttól végpontig tesztbizonyíték még nem teljes.",
+        "en": "Public hardware-specific end-to-end test evidence is not yet complete."
+      },
+      "severity": "medium",
+      "workaround": {
+        "hu": "A kiadást bétaállapotként kezeld, ellenőrizd a csomag hashét, és kritikus művelet előtt készíts külön mentést.",
+        "en": "Treat the release as beta, verify the package digest and create an independent backup before any critical operation."
+      },
+      "fix_status": "investigating",
+      "issue_url": "https://github.com/hutoczky/FormatX/issues",
+      "last_updated": "2026-07-31"
+    },
+    {
+      "id": "FX-LIMIT-MACOS-IOS",
+      "type": "roadmap",
+      "platform": "macOS / iOS / iPadOS",
+      "affected_version": null,
+      "problem": {
+        "hu": "Ezek a natív kiadások tervezettek; jelenleg nincs letölthető vagy tesztelhető nyilvános csomag.",
+        "en": "These native editions are planned; no downloadable or testable public package currently exists."
+      },
+      "severity": "information",
+      "workaround": {
+        "hu": "Ne kezeld ezeket elérhető platformként. Kövesd a platformállapot- és kiadási oldalakat.",
+        "en": "Do not treat these as available platforms. Follow the platform-status and release pages."
+      },
+      "fix_status": "planned",
+      "issue_url": null,
+      "last_updated": "2026-07-31"
+    }
+  ]
+}
