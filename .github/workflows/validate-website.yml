@@ -13,6 +13,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-content-standard.py'
+      - '.github/scripts/validate-content-standard-v2.py'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/workflows/validate-website.yml'
   push:
@@ -26,6 +27,7 @@ on:
       - 'docs/**'
       - 'billing-worker/**'
       - '.github/scripts/validate-content-standard.py'
+      - '.github/scripts/validate-content-standard-v2.py'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/workflows/validate-website.yml'
 
@@ -51,8 +53,8 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate canonical data, trust and SEO contracts
-        run: python3 .github/scripts/validate-content-standard.py
+      - name: Validate canonical data, delivered copy, trust and SEO contracts
+        run: python3 .github/scripts/validate-content-standard-v2.py
 
       - name: Validate JavaScript syntax
         shell: bash
