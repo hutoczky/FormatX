@@ -76,6 +76,7 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-voice-foreground.js
           node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v2.js
           node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v3.js
@@ -111,10 +112,12 @@ jobs:
             '/scifi-ui/styles/formatx-mobile-readability.css',
             '/scifi-ui/styles/formatx-mobile-unified.css',
             '/scifi-ui/styles/synaptic-thought-genome.css',
+            '/scifi-ui/styles/synaptic-thought-disclosure.css',
             '/scifi-ui/scripts/organism-voice.js',
             '/scifi-ui/scripts/organism-voice-foreground.js',
             '/scifi-ui/scripts/organism-core-controller.js',
             '/scifi-ui/scripts/synaptic-thought-genome.js',
+            '/scifi-ui/scripts/synaptic-thought-disclosure.js',
             '/scifi-ui/scripts/mobile-core-engine-v3.js',
             '/scifi-ui/scripts/formatx-render-visibility.js',
             '/scifi-ui/scripts/formatx-infinite-scroll.js',
@@ -139,16 +142,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'safe-ready-v24' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v25' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'synaptic-thought-genome.js?v=20260731-thought-genome-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'mobile-core-engine-v3.js?v=20260731-morphing-organism-v3' docs/scifi-ui/scripts/mobile-webgl-entry.js
           grep -Fq 'three-webgl-morphing-organism-v3' docs/scifi-ui/scripts/mobile-webgl-entry.js
           grep -Fq 'questionStored: false' docs/scifi-ui/scripts/synaptic-thought-genome.js
           grep -Fq 'fingerprint-only' docs/scifi-ui/scripts/synaptic-thought-genome.js
+          grep -Fq 'details.open = false' docs/scifi-ui/scripts/synaptic-thought-disclosure.js
+          grep -Fq 'defaultOpen: false' docs/scifi-ui/scripts/synaptic-thought-disclosure.js
+          grep -Fq ':not([open]) > .fx-thought-genome-controls' docs/scifi-ui/styles/synaptic-thought-disclosure.css
           grep -Fq 'function heartForm' docs/scifi-ui/scripts/mobile-core-engine-v3.js
           grep -Fq 'function beaconForm' docs/scifi-ui/scripts/mobile-core-engine-v3.js
           ! grep -Fq 'fetch(' docs/scifi-ui/scripts/synaptic-thought-genome.js
+          ! grep -Fq 'fetch(' docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           ! grep -Fq 'organism-natural-voice' docs/scifi-ui/scripts/igloo-parity.js
           ! test -e docs/scifi-ui/scripts/organism-natural-voice.js
           grep -Fq 'organism-voice-dock.css?v=20260730-organism-dock-2' docs/scifi-ui/scripts/igloo-parity.js
