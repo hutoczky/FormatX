@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "updated": "2026-07-31",
+  "policy": {
+    "no_mockups_as_evidence": true,
+    "no_fabricated_results": true,
+    "required_capture_context": [
+      "platform",
+      "operating_system",
+      "application_build",
+      "capture_date",
+      "workflow_step",
+      "redaction_note",
+      "source_commit_or_release"
+    ]
+  },
+  "captures": [
+    {
+      "id": "FX-CAP-DISCOVER-01",
+      "workflow": "drive-diagnostics",
+      "step": "discover",
+      "title": {"hu": "Meghajtófelderítés", "en": "Drive discovery"},
+      "file": null,
+      "alt": {"hu": "Valódi FormatX alkalmazásképernyő a felismert meghajtókról és állapotukról.", "en": "Real FormatX application screen showing detected drives and their state."},
+      "publication_state": "awaiting_verified_capture"
+    },
+    {
+      "id": "FX-CAP-PLAN-01",
+      "workflow": "safe-iso-write",
+      "step": "plan",
+      "title": {"hu": "Műveleti terv", "en": "Operation plan"},
+      "file": null,
+      "alt": {"hu": "Valódi FormatX műveleti terv célmeghajtóval, sémával és ellenőrzési lépésekkel.", "en": "Real FormatX operation plan with target drive, scheme and verification steps."},
+      "publication_state": "awaiting_verified_capture"
+    },
+    {
+      "id": "FX-CAP-RISK-01",
+      "workflow": "safe-iso-write",
+      "step": "risk",
+      "title": {"hu": "Kockázati összefoglaló", "en": "Risk summary"},
+      "file": null,
+      "alt": {"hu": "Valódi FormatX kockázati összefoglaló egy veszélyes meghajtóművelet előtt.", "en": "Real FormatX risk summary before a destructive drive operation."},
+      "publication_state": "awaiting_verified_capture"
+    },
+    {
+      "id": "FX-CAP-CONFIRM-01",
+      "workflow": "partition-format",
+      "step": "confirm",
+      "title": {"hu": "Végrehajtás előtti megerősítés", "en": "Pre-execution confirmation"},
+      "file": null,
+      "alt": {"hu": "Valódi FormatX megerősítő képernyő az azonosított célmeghajtóval.", "en": "Real FormatX confirmation screen with the identified target drive."},
+      "publication_state": "awaiting_verified_capture"
+    },
+    {
+      "id": "FX-CAP-EXECUTE-01",
+      "workflow": "safe-iso-write",
+      "step": "execute",
+      "title": {"hu": "Kontrollált végrehajtás", "en": "Controlled execution"},
+      "file": null,
+      "alt": {"hu": "Valódi FormatX végrehajtási állapot naplózott lépésekkel.", "en": "Real FormatX execution state with logged steps."},
+      "publication_state": "awaiting_verified_capture"
+    },
+    {
+      "id": "FX-CAP-VERIFY-01",
+      "workflow": "safe-iso-write",
+      "step": "verify",
+      "title": {"hu": "Visszaellenőrzött eredmény", "en": "Verified result"},
+      "file": null,
+      "alt": {"hu": "Valódi FormatX eredményképernyő a végrehajtás utáni ellenőrzéssel.", "en": "Real FormatX result screen with post-execution verification."},
+      "publication_state": "awaiting_verified_capture"
+    },
+    {
+      "id": "FX-CAP-LOG-01",
+      "workflow": "drive-diagnostics",
+      "step": "log",
+      "title": {"hu": "Naplózott diagnosztika", "en": "Logged diagnostics"},
+      "file": null,
+      "alt": {"hu": "Valódi FormatX diagnosztikai napló időbélyeggel és eredménnyel.", "en": "Real FormatX diagnostic log with timestamp and result."},
+      "publication_state": "awaiting_verified_capture"
+    },
+    {
+      "id": "FX-CAP-LIMITATION-01",
+      "workflow": "partition-format",
+      "step": "limitation",
+      "title": {"hu": "Ismert korlátozás megjelenítése", "en": "Known limitation display"},
+      "file": null,
+      "alt": {"hu": "Valódi FormatX felület, amely egy ismert korlátozást és kerülőutat közöl.", "en": "Real FormatX interface communicating a known limitation and workaround."},
+      "publication_state": "awaiting_verified_capture"
+    }
+  ],
+  "demo": {
+    "target_duration_seconds": [60, 90],
+    "file": null,
+    "publication_state": "awaiting_verified_recording",
+    "required_sequence": ["discover", "plan", "risk", "confirm", "execute", "verify"]
+  }
+}
