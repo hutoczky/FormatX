@@ -65,9 +65,12 @@ async function commonAssertions(page, mobile) {
   }
 }
 
-async function capture(browser, name, viewport, setup = async () => {}, pageSetup = async () => {}) {
+async function capture(browser, name, viewport, setup = async () => {}, contextSetup = async () => {}) {
   const context = await browser.newContext({ viewport, reducedMotion: name.includes('reduced') ? 'reduce' : 'no-preference' });
-  await pageSetup(context);
+  await context.addInitScript(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+  });
+  await contextSetup(context);
   const page = await context.newPage();
   page.on('pageerror', error => console.warn(`[${name}] pageerror:`, error.message));
   await page.goto(base, { waitUntil: 'domcontentloaded' });
@@ -98,9 +101,10 @@ async function publicPage(browser, name, pathname, expectedSelector, viewport = 
     await capture(browser, 'small-height-hero', { width: 1366, height: 600 });
     await capture(browser, 'reduced-motion', { width: 1440, height: 900 });
     await capture(browser, 'desktop-hero-en', { width: 1440, height: 900 }, async page => {
-      const toggle = page.locator('.fx-language-toggle:visible, .language-switch:visible').first();
-      if (await toggle.count()) await toggle.click();
-      await page.waitForTimeout(300);
+      const single = page.locator('.fx-language-toggle:visible').first();
+      if (await single.count()) await single.click();
+      else await page.locator('[data-language="en"]:visible').first().click();
+      await page.waitForTimeout(350);
       assert((await page.locator('html').getAttribute('lang')) === 'en', 'Language did not switch to English');
     });
     await capture(browser, 'mobile-menu-open', { width: 390, height: 844 }, async page => {
