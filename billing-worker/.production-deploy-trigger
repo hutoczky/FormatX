@@ -1,0 +1,3 @@
+FormatX production deployment trigger
+Created: 2026-07-31T21:47:00+02:00
+Purpose: run the guarded validation, Cloudflare deployment and live smoke tests.
