@@ -56,8 +56,8 @@ jobs:
 
           jq --argjson android_local "$android_local" '
             def clean: if type == "string" then gsub("^\\s+|\\s+$"; "") else . end;
-            def windows_asset:
-              [.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.(zip|msix|msixbundle)$"; "i"))] | first;
+            def multiplatform_asset:
+              [.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.(zip|tar\\.gz|tar\\.xz)$"; "i"))] | first;
             def android_asset:
               [.assets[]? | select(.name | test("^FormatX-Suite-Pro-Android(?:-.*)?\\.apk$"; "i"))] | first;
             def checksum_asset:
@@ -91,7 +91,7 @@ jobs:
                 source: null
               } end;
             . as $release |
-            (windows_asset) as $windows |
+            (multiplatform_asset) as $package |
             (android_asset) as $android |
             (checksum_asset) as $checksum |
             (signature_asset) as $signature |
@@ -111,7 +111,12 @@ jobs:
               release_url: $release.html_url,
               notes_url: $release.html_url,
               channels: {
-                windows: asset_record($windows),
+                multiplatform: (
+                  asset_record($package) + {
+                    primary_platform: "linux-bazzite",
+                    supported_platforms: ["linux-bazzite", "windows"]
+                  }
+                ),
                 android: (
                   if $android then asset_record($android)
                   elif $android_local then {
@@ -141,12 +146,12 @@ jobs:
                 verification_url: "/scifi-ui/verification.html"
               },
               integrity: {
-                windows_digest_available: (($windows.digest // "") | startswith("sha256:")),
+                package_digest_available: (($package.digest // "") | startswith("sha256:")),
                 checksum_asset_available: ($checksum != null),
                 signature_asset_available: ($signature != null),
                 status: (
-                  if $signature and (($windows.digest // "") | startswith("sha256:")) then "digest_and_signature_published"
-                  elif (($windows.digest // "") | startswith("sha256:")) or $checksum then "digest_published"
+                  if $signature and (($package.digest // "") | startswith("sha256:")) then "digest_and_signature_published"
+                  elif (($package.digest // "") | startswith("sha256:")) or $checksum then "digest_published"
                   else "package_only"
                   end
                 )
@@ -170,8 +175,11 @@ jobs:
             (.version | type == "string" and length > 0) and
             .prerelease == false and
             (.release_url | startswith("https://github.com/hutoczky/FormatX-Updates/releases/")) and
-            ((.channels.windows.available == false) or
-             (.channels.windows.download_url | startswith("https://github.com/hutoczky/FormatX-Updates/releases/download/"))) and
+            ((.channels.multiplatform.available == false) or
+             ((.channels.multiplatform.download_url | startswith("https://github.com/hutoczky/FormatX-Updates/releases/download/")) and
+              .channels.multiplatform.primary_platform == "linux-bazzite" and
+              (.channels.multiplatform.supported_platforms | index("linux-bazzite")) != null and
+              (.channels.multiplatform.supported_platforms | index("windows")) != null)) and
             ((.channels.android.available == false) or
              (.channels.android.download_url == "/download/android") or
              (.channels.android.download_url | startswith("https://github.com/hutoczky/FormatX-Updates/releases/download/"))) and
