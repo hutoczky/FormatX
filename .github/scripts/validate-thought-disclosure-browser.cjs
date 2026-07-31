@@ -30,8 +30,10 @@ async function validateViewport(browser, name, viewport, mobile) {
   const details = page.locator('.fx-thought-genome-disclosure');
   const summary = details.locator('summary');
   const controls = details.locator('.fx-thought-genome-controls');
+  const genomeLayer = page.locator('.fx-thought-genome-layer');
 
   await trigger.waitFor({ state: 'visible' });
+  await genomeLayer.waitFor({ state: 'attached', timeout: 15000 });
   assert(await bubble.isHidden(), `${name}: dialogue must start closed`);
 
   await trigger.click();
@@ -74,6 +76,8 @@ async function validateViewport(browser, name, viewport, mobile) {
   await bubble.waitFor({ state: 'hidden' });
   assert(await page.evaluate(() => document.documentElement.dataset.fxOrganismDialogueEnabled === 'false'), `${name}: Organism master switch did not disable the dialogue`);
   assert((await trigger.locator('b').textContent()).trim() === 'OFF', `${name}: disabled trigger does not show OFF`);
+  const disabledGenomeOpacity = await genomeLayer.evaluate(node => Number(getComputedStyle(node).opacity));
+  assert(disabledGenomeOpacity <= 0.01, `${name}: thought constellation remains visible while Organism is off (${disabledGenomeOpacity})`);
 
   await trigger.click();
   await bubble.waitFor({ state: 'visible' });
