@@ -1,120 +1,26 @@
-(function () {
-  'use strict';
-
-  const ROOT = document.documentElement;
-  if (ROOT.dataset.fxSeo === 'ready-v1') return;
-  ROOT.dataset.fxSeo = 'loading-v1';
-
-  const ORIGIN = 'https://www.formatxsuite.com';
-  const STATUS_URL = ORIGIN + '/scifi-ui/data/platform-status.json';
-
-  function canonicalPath() {
-    let path = location.pathname || '/scifi-ui/';
-    if (path === '/scifi-ui/index.html') path = '/scifi-ui/';
-    if (path === '/scifi-ui/downloads/index.html') path = '/scifi-ui/downloads/';
-    return path;
-  }
-
-  function ensureLink(rel, href, hreflang) {
-    const selector = hreflang
-      ? `link[rel="${rel}"][hreflang="${hreflang}"]`
-      : `link[rel="${rel}"]:not([hreflang])`;
-    let link = document.head.querySelector(selector);
-    if (!link) {
-      link = document.createElement('link');
-      link.rel = rel;
-      if (hreflang) link.hreflang = hreflang;
-      document.head.appendChild(link);
-    }
-    link.href = href;
-  }
-
-  function installLinks() {
-    const canonical = ORIGIN + canonicalPath();
-    ensureLink('canonical', canonical);
-    ensureLink('alternate', canonical + '?lang=hu', 'hu');
-    ensureLink('alternate', canonical + '?lang=en', 'en');
-    ensureLink('alternate', canonical, 'x-default');
-  }
-
-  function pageName(path) {
-    const names = {
-      '/scifi-ui/': 'FormatX Suite Pro',
-      '/scifi-ui/license.html': 'FormatX Suite Pro licence',
-      '/scifi-ui/support.html': 'FormatX Suite Pro support',
-      '/scifi-ui/terms.html': 'FormatX Suite Pro terms of use',
-      '/scifi-ui/privacy.html': 'FormatX Suite Pro privacy notice',
-      '/scifi-ui/checkout.html': 'FormatX Suite Pro checkout',
-      '/scifi-ui/downloads/': 'FormatX Suite Pro downloads',
-      '/scifi-ui/downloads/android.html': 'FormatX Android downloads',
-      '/scifi-ui/test-matrix.html': 'FormatX public test matrix'
-    };
-    return names[path] || document.title || 'FormatX Suite Pro';
-  }
-
-  function installStructuredData() {
-    const path = canonicalPath();
-    const pageUrl = ORIGIN + path;
-    const graph = [
-      {
-        '@type': 'WebSite',
-        '@id': ORIGIN + '/#website',
-        url: ORIGIN + '/',
-        name: 'FormatX Suite Pro',
-        inLanguage: ['hu-HU', 'en-GB']
-      },
-      {
-        '@type': 'SoftwareApplication',
-        '@id': ORIGIN + '/#software',
-        name: 'FormatX Suite Pro',
-        softwareVersion: 'V92',
-        applicationCategory: 'UtilitiesApplication',
-        operatingSystem: 'Windows (Public beta); Linux/Bazzite (Development); macOS (Planned); Web (Technical preview); Android (Public beta); iOS/iPadOS (Planned)',
-        url: ORIGIN + '/scifi-ui/',
-        downloadUrl: ORIGIN + '/scifi-ui/downloads/',
-        releaseNotes: 'https://github.com/hutoczky/FormatX/blob/master/RELEASE_NOTES.md',
-        license: ORIGIN + '/scifi-ui/license.html',
-        maintainer: {
-          '@type': 'Person',
-          name: 'Hutóczky József',
-          email: 'mailto:hutoczky@gmail.com'
-        },
-        additionalProperty: [
-          { '@type': 'PropertyValue', name: 'Overall release status', value: 'Public beta' },
-          { '@type': 'PropertyValue', name: 'Canonical platform status', value: STATUS_URL },
-          { '@type': 'PropertyValue', name: 'Trial period', value: '5 days' },
-          { '@type': 'PropertyValue', name: 'Activation', value: 'Manual after bank-transfer verification' }
-        ],
-        sameAs: ['https://github.com/hutoczky/FormatX']
-      },
-      {
-        '@type': 'WebPage',
-        '@id': pageUrl + '#webpage',
-        url: pageUrl,
-        name: pageName(path),
-        isPartOf: { '@id': ORIGIN + '/#website' },
-        about: { '@id': ORIGIN + '/#software' },
-        inLanguage: ROOT.lang === 'en' ? 'en-GB' : 'hu-HU'
-      }
-    ];
-
-    let script = document.getElementById('formatx-structured-data');
-    if (!script) {
-      script = document.createElement('script');
-      script.id = 'formatx-structured-data';
-      script.type = 'application/ld+json';
-      document.head.appendChild(script);
-    }
-    script.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
-  }
-
-  function install() {
-    installLinks();
-    installStructuredData();
-    ROOT.dataset.fxSeo = 'ready-v1';
-  }
-
-  addEventListener('formatx:languagechange', install);
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
-  else install();
+(function(){
+'use strict';
+const R=document.documentElement,O='https://www.formatxsuite.com';
+const P={
+'/scifi-ui/':{hu:['FormatX Suite Pro | Technikusi operációs réteg','Független technikusi operációs réteg diagnosztikához, telepítéshez, meghajtókezeléshez és ellenőrizhető karbantartáshoz.'],en:['FormatX Suite Pro | Technician Operating Layer','An independent technician operating layer for diagnostics, installation, drive management and verifiable maintenance.']},
+'/scifi-ui/downloads/':{hu:['Letöltések és platformállapot | FormatX','Csak ténylegesen elérhető béta csomaghoz jelenik meg aktív letöltés.'],en:['Downloads and platform status | FormatX','An active download is shown only for an actually available beta package.']},
+'/scifi-ui/method.html':{hu:['A FormatX módszer | FormatX','Felderítés, Terv, Kontrollált végrehajtás és Visszaellenőrzés.'],en:['The FormatX Method | FormatX','Discover, Plan, Controlled execution and Verify.']},
+'/scifi-ui/verification.html':{hu:['Bizonyítéki központ | FormatX','Kiadási adatok, tesztek, korlátozások és nyílt bizonyítékhiányok.'],en:['Verification Centre | FormatX','Release data, tests, limitations and open evidence gaps.']},
+'/scifi-ui/test-matrix.html':{hu:['Nyilvános tesztmátrix | FormatX','Bizonyítékalapú tesztesetek szöveges állapottal és ismert korlátozással.'],en:['Public test matrix | FormatX','Evidence-based test cases with textual status and known limitations.']},
+'/scifi-ui/known-issues.html':{hu:['Ismert hibák és korlátozások | FormatX','A bétaállapot nyílt korlátozásai, kerülőutak és javítási állapotok.'],en:['Known issues and limitations | FormatX','Open beta limitations, workarounds and fix states.']},
+'/scifi-ui/security.html':{hu:['Biztonsági modell | FormatX','A FormatX módszer biztonsági elvei és nyilvános bizonyítékállapota.'],en:['Security model | FormatX','Security principles and public evidence state of the FormatX Method.']},
+'/scifi-ui/decision-log.html':{hu:['Fejlesztési döntésnapló | FormatX','Nyilvános problémák, döntések, kompromisszumok és nyitott kérdések.'],en:['Development decision log | FormatX','Public problems, decisions, trade-offs and open questions.']},
+'/scifi-ui/license.html':{hu:['Részletes licenc | FormatX','A FormatX használati és forráskódlicencének közérthető feltételei.'],en:['Detailed licence | FormatX','Plain-language terms of the FormatX usage and source-code licence.']},
+'/scifi-ui/terms.html':{hu:['Felhasználási feltételek | FormatX','A FormatX béta használatának és licencelésének feltételei.'],en:['Terms of use | FormatX','Terms for using and licensing the FormatX beta.']},
+'/scifi-ui/privacy.html':{hu:['Adatkezelés | FormatX','A FormatX weboldal és licencfolyamat adatkezelési tájékoztatója.'],en:['Privacy notice | FormatX','Privacy information for the FormatX website and licensing process.']},
+'/scifi-ui/support.html':{hu:['Támogatás és hibajelentés | FormatX','Támogatási, hibajelentési és bizonyítékbeküldési lehetőségek.'],en:['Support and issue reporting | FormatX','Support, issue-reporting and evidence-submission routes.']},
+'/scifi-ui/checkout.html':{hu:['Licencrendelés | FormatX','Egyszeri banki átutalásos licencrendelés Public beta termékállapottal.'],en:['Licence order | FormatX','One-time bank-transfer licence order with Public beta product status.']}
+};
+function path(){let p=location.pathname||'/scifi-ui/';if(p==='/scifi-ui/index.html')p='/scifi-ui/';if(p==='/scifi-ui/downloads/index.html')p='/scifi-ui/downloads/';return p}
+function lang(){return R.lang==='en'?'en':'hu'}
+function link(rel,href,hl){const q=hl?`link[rel="${rel}"][hreflang="${hl}"]`:`link[rel="${rel}"]:not([hreflang])`;let x=document.head.querySelector(q);if(!x){x=document.createElement('link');x.rel=rel;if(hl)x.hreflang=hl;document.head.append(x)}x.href=href}
+function meta(sel,name,value){let x=document.head.querySelector(sel);if(!x){x=document.createElement('meta');if(name.startsWith('og:'))x.setAttribute('property',name);else x.name=name;document.head.append(x)}x.content=value}
+function release(){return R.__FORMATX_RELEASE_METADATA__?.release||null}
+function install(){const p=path(),u=O+p,c=P[p]||P['/scifi-ui/'],v=c[lang()];document.title=v[0];meta('meta[name="description"]','description',v[1]);meta('meta[property="og:title"]','og:title',v[0]);meta('meta[property="og:description"]','og:description',v[1]);meta('meta[property="og:type"]','og:type','website');meta('meta[property="og:url"]','og:url',u);link('canonical',u);link('alternate',u+'?lang=hu','hu');link('alternate',u+'?lang=en','en');link('alternate',u,'x-default');const rel=release(),software={'@type':'SoftwareApplication','@id':O+'/#software',name:'FormatX Suite Pro',applicationCategory:'UtilitiesApplication',operatingSystem:'Windows (Public beta); Android (Public beta); Linux/Bazzite (Development); Web (Technical preview); macOS (Planned); iOS/iPadOS (Planned)',url:O+'/scifi-ui/',downloadUrl:O+'/scifi-ui/downloads/',license:O+'/scifi-ui/license.html',author:{'@type':'Person',name:'Hutóczky József'},additionalProperty:[{'@type':'PropertyValue',name:'Category',value:'Technician Operating Layer'},{'@type':'PropertyValue',name:'Method',value:'Discover → Plan → Controlled execution → Verify'},{'@type':'PropertyValue',name:'Overall status',value:'Public beta'}],sameAs:['https://github.com/hutoczky/FormatX']};if(rel?.version)software.softwareVersion=rel.version;if(rel?.published_at)software.datePublished=rel.published_at;if(rel?.release_url)software.releaseNotes=rel.release_url;let s=document.getElementById('formatx-structured-data');if(!s){s=document.createElement('script');s.id='formatx-structured-data';s.type='application/ld+json';document.head.append(s)}s.textContent=JSON.stringify({'@context':'https://schema.org','@graph':[{'@type':'WebSite','@id':O+'/#website',url:O+'/',name:'FormatX Suite Pro',inLanguage:['hu-HU','en-GB']},software,{'@type':'WebPage','@id':u+'#webpage',url:u,name:v[0],description:v[1],isPartOf:{'@id':O+'/#website'},about:{'@id':O+'/#software'},inLanguage:lang()==='en'?'en-GB':'hu-HU'}]});R.dataset.fxSeo='ready-v2'}
+addEventListener('formatx:languagechange',install);addEventListener('formatx:releasemetadataready',install);document.readyState==='loading'?document.addEventListener('DOMContentLoaded',install,{once:true}):install();
 }());
