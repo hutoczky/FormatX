@@ -26,6 +26,10 @@ const NO_STORE_PATHS = new Set([
   '/scifi-ui/styles/formatx-content-standard.css'
 ]);
 
+const LANGUAGE_ASSETS = [
+  '<link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260731-language-unified-1">',
+  '<script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260731-language-unified-1"></script>'
+].join('\n');
 const CONTENT_ASSETS = [
   '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-1">',
   '<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260731-release-2"></script>',
@@ -44,10 +48,12 @@ export default {
     if (request.method !== 'GET' && request.method !== 'HEAD') return response;
     if (NO_STORE_PATHS.has(url.pathname)) return noStore(response, request.method === 'HEAD');
     if (!HTML_PATHS.has(url.pathname) || request.method === 'HEAD' || !response.ok) return response;
-    const type = response.headers.get('Content-Type') || '';
-    if (!type.includes('text/html')) return response;
-    let html = await response.text();
+    if (!(response.headers.get('Content-Type') || '').includes('text/html')) return response;
+
+    let html = cleanLegacyReleaseCopy(await response.text());
+    if (!html.includes('data-fx-single-language-style')) html = html.replace('</head>', LANGUAGE_ASSETS + '\n</head>');
     if (!html.includes('data-fx-content-standard-style')) html = html.replace('</head>', CONTENT_ASSETS + '\n</head>');
+
     const headers = new Headers(response.headers);
     headers.set('Cache-Control', 'no-store, max-age=0');
     headers.set('Pragma', 'no-cache');
@@ -57,6 +63,18 @@ export default {
     return new Response(html, { status: response.status, statusText: response.statusText, headers });
   }
 };
+
+function cleanLegacyReleaseCopy(html) {
+  return html
+    .replaceAll('https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip', '/scifi-ui/downloads/')
+    .replaceAll('FormatX Suite Pro V92', 'FormatX Suite Pro')
+    .replaceAll('Windows V92', 'Windows')
+    .replaceAll('V92 kiadási oldal', 'Hivatalos kiadási oldal')
+    .replaceAll('site.css?v=20260718-v92', 'site.css')
+    .replaceAll('<span>92.00</span><b>RELEASE DNA</b>', '<span>—</span><b>OFFICIAL RELEASE</b>')
+    .replaceAll('Teljes verzió letöltése', 'Windows nyilvános béta letöltése')
+    .replaceAll('Download full version', 'Download Windows public beta');
+}
 
 function noStore(response, withoutBody) {
   const headers = new Headers(response.headers);
