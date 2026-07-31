@@ -165,6 +165,12 @@
     home.classList.add('fx-public-home');
     tools.append(home);
 
+    const themeControl = inner.querySelector('.theme-control');
+    if (themeControl) {
+      themeControl.classList.add('fx-public-theme-control');
+      tools.append(themeControl);
+    }
+
     const languageControl = findOrCreateLanguageControl();
     tools.append(languageControl);
 
@@ -175,7 +181,7 @@
       badge.dataset.hu = 'BÉTA';
       badge.dataset.en = 'BETA';
       badge.textContent = language() === 'en' ? badge.dataset.en : badge.dataset.hu;
-      tools.insertBefore(badge, languageControl);
+      tools.insertBefore(badge, themeControl || languageControl);
     }
     return badge;
   }
