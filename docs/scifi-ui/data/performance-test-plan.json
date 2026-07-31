@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "updated": "2026-07-31",
+  "policy": {
+    "no_invented_measurements": true,
+    "automated_ci_is_not_real_device_evidence": true,
+    "optimise_only_after_recorded_regression": true
+  },
+  "metrics": [
+    "first_contentful_paint",
+    "largest_contentful_paint",
+    "cumulative_layout_shift",
+    "total_long_task_time",
+    "interaction_response_time",
+    "webgl_initialisation_time",
+    "post_intro_usable_time",
+    "scroll_frame_rate_sample",
+    "memory_snapshot_where_supported",
+    "background_restore_time",
+    "orientation_change_stability",
+    "long_session_stability"
+  ],
+  "environments": [
+    {
+      "id": "ci-chromium-desktop",
+      "type": "automated_ci",
+      "status": "configured",
+      "evidence": ".github/scripts/measure-web-performance.cjs",
+      "limitation": "GitHub-hosted runner; not representative of a named physical device."
+    },
+    {
+      "id": "high-end-android",
+      "type": "physical_device",
+      "status": "awaiting_measurement",
+      "required_fields": ["device", "soc", "ram", "android_version", "browser_version", "network_profile", "test_date", "commit", "results"]
+    },
+    {
+      "id": "mid-range-android",
+      "type": "physical_device",
+      "status": "awaiting_measurement",
+      "required_fields": ["device", "soc", "ram", "android_version", "browser_version", "network_profile", "test_date", "commit", "results"]
+    },
+    {
+      "id": "integrated-gpu-desktop",
+      "type": "physical_device",
+      "status": "awaiting_measurement",
+      "required_fields": ["cpu", "gpu", "ram", "os", "browser_version", "test_date", "commit", "results"]
+    },
+    {
+      "id": "webgl-fallback",
+      "type": "automated_and_manual",
+      "status": "configured_for_ci_manual_pending",
+      "evidence": ".github/scripts/validate-content-visuals.cjs"
+    },
+    {
+      "id": "reduced-motion",
+      "type": "automated_and_manual",
+      "status": "configured_for_ci_manual_pending",
+      "evidence": ".github/scripts/validate-content-visuals.cjs"
+    },
+    {
+      "id": "slow-network-cold-cache",
+      "type": "automated_and_manual",
+      "status": "configured_for_ci_manual_pending"
+    },
+    {
+      "id": "returning-visitor",
+      "type": "automated",
+      "status": "configured",
+      "evidence": "formatx:intro-seen-v1"
+    }
+  ],
+  "published_results": []
+}
