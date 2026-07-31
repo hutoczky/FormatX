@@ -21,6 +21,7 @@ const NO_STORE_PATHS = new Set([
   '/scifi-ui/scripts/formatx-content-finalizer.js',
   '/scifi-ui/scripts/formatx-platform-surface-finalizer.js',
   '/scifi-ui/scripts/formatx-organism-trust.js',
+  '/scifi-ui/scripts/formatx-organism-semantic-state.js',
   '/scifi-ui/scripts/public-evidence-pages.js', '/scifi-ui/scripts/formatx-seo.js',
   '/scifi-ui/styles/formatx-content-standard.css'
 ]);
@@ -32,7 +33,8 @@ const CONTENT_ASSETS = [
   '<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260731-seo-2"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-finalizer.js?v=20260731-content-final-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-platform-surface-finalizer.js?v=20260731-platform-final-1"></script>',
-  '<script defer src="/scifi-ui/scripts/formatx-organism-trust.js?v=20260731-organism-trust-1"></script>'
+  '<script defer src="/scifi-ui/scripts/formatx-organism-trust.js?v=20260731-organism-trust-1"></script>',
+  '<script defer src="/scifi-ui/scripts/formatx-organism-semantic-state.js?v=20260731-organism-semantic-1"></script>'
 ].join('\n');
 
 export default {
