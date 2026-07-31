@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "updated": "2026-07-31",
+  "policy": "A platform may be labelled Stable only when every mandatory criterion is supported by published evidence.",
+  "status_source": "/scifi-ui/data/platform-status.json",
+  "test_source": "/scifi-ui/data/test-matrix.json",
+  "issues_source": "/scifi-ui/data/known-issues.json",
+  "release_source": "/scifi-ui/data/release-channel.json",
+  "mandatory_criteria": [
+    {
+      "id": "critical-tests",
+      "hu": "Minden kritikus művelethez pozitív, bizonyítékkal hivatkozott teszteredmény.",
+      "en": "A positive evidence-linked test result for every critical operation."
+    },
+    {
+      "id": "real-hardware",
+      "hu": "Több dokumentált valós hardverkörnyezet.",
+      "en": "Multiple documented real-hardware environments."
+    },
+    {
+      "id": "no-critical-data-loss",
+      "hu": "Nincs ismert, adatvesztést okozó kritikus hiba.",
+      "en": "No known critical data-loss defect."
+    },
+    {
+      "id": "download-integrity",
+      "hu": "A letöltéshez nyilvános SHA-256 vagy kiadási digest tartozik.",
+      "en": "The download has a public SHA-256 value or release digest."
+    },
+    {
+      "id": "installation-guide",
+      "hu": "A telepítés dokumentált és tesztelt.",
+      "en": "Installation is documented and tested."
+    },
+    {
+      "id": "verification-tested",
+      "hu": "A végrehajtás utáni visszaellenőrzés tesztelt.",
+      "en": "Post-execution verification is tested."
+    },
+    {
+      "id": "update-rollback",
+      "hu": "A frissítési vagy visszaállítási út dokumentált.",
+      "en": "The update or rollback path is documented."
+    },
+    {
+      "id": "known-issues-public",
+      "hu": "Az ismert hibák és korlátozások nyilvánosak.",
+      "en": "Known issues and limitations are public."
+    },
+    {
+      "id": "release-verifiable",
+      "hu": "A kiadás reprodukálható vagy külső fél által ellenőrizhető.",
+      "en": "The release is reproducible or independently verifiable."
+    },
+    {
+      "id": "status-consistent",
+      "hu": "A platformállapot minden oldalon ugyanabból a központi forrásból származik.",
+      "en": "Platform status comes from the same canonical source on every page."
+    }
+  ],
+  "current_gate": {
+    "windows": {
+      "eligible": false,
+      "reason": "Public beta; mandatory evidence set is incomplete."
+    },
+    "android": {
+      "eligible": false,
+      "reason": "Public beta; real-device and release-evidence set is incomplete."
+    },
+    "linux-bazzite": {
+      "eligible": false,
+      "reason": "Development; no public native package."
+    },
+    "web": {
+      "eligible": false,
+      "reason": "Technical preview; not a native technician release."
+    },
+    "macos": {
+      "eligible": false,
+      "reason": "Planned; no public package."
+    },
+    "ios": {
+      "eligible": false,
+      "reason": "Planned; no public package."
+    }
+  }
+}
