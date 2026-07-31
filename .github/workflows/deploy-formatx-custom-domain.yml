@@ -1,99 +1,158 @@
-name: Validate FormatX Three.js production candidate
-run-name: Validate FormatX Three.js production candidate from ${{ github.sha }}
+name: Prepare or deploy FormatX production
+run-name: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy && 'Deploy' || 'Validate' }} FormatX production from ${{ github.sha }}
 
 on:
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy the validated candidate to the production custom domains'
+        required: true
+        type: boolean
+        default: false
   pull_request:
     branches: [master]
     paths:
       - 'billing-worker/**'
       - 'docs/**'
+      - 'content-preview-entry.js'
+      - 'wrangler.jsonc'
+      - '.github/scripts/validate-content-standard.py'
+      - '.github/scripts/validate-content-standard-v2.py'
+      - '.github/scripts/validate-public-release-integration.py'
+      - '.github/scripts/production-preflight.cjs'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
   push:
     branches: [master]
     paths:
       - 'billing-worker/**'
       - 'docs/**'
+      - 'content-preview-entry.js'
+      - 'wrangler.jsonc'
+      - '.github/scripts/validate-content-standard.py'
+      - '.github/scripts/validate-content-standard-v2.py'
+      - '.github/scripts/validate-public-release-integration.py'
+      - '.github/scripts/production-preflight.cjs'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
 
 permissions:
   contents: read
-  statuses: write
 
 concurrency:
-  group: formatx-three-production-${{ github.ref }}
-  cancel-in-progress: true
+  group: formatx-production-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 jobs:
   validate:
+    name: Validate production candidate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate canonical Three.js production source
-        shell: bash
+      - name: Validate public, release and production contracts
         run: |
-          set -euo pipefail
-          node --check billing-worker/src/production-with-license.js
-          node --check billing-worker/src/pricing-v100-api.js
-          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
-          node --check docs/scifi-ui/scripts/formatx-apex.js
-          node --check docs/scifi-ui/scripts/living-architecture.js
-          node --check docs/scifi-ui/scripts/igloo-parity.js
-          node --check docs/scifi-ui/scripts/formatx-transcend-bridge.js
-          node --check docs/scifi-ui/scripts/formatx-three-host.js
-          node --check docs/scifi-ui/scripts/experience-entry.js
-          node --check docs/scifi-ui/scripts/Experience.js
-          grep -Fq "['/', '/scifi-ui/']" billing-worker/src/production-with-license.js
-          grep -Fq 'formatx-apex.css?v=20260726-apex-2' docs/scifi-ui/index.html
-          grep -Fq 'formatx-apex.js?v=20260726-apex-2' docs/scifi-ui/index.html
-          grep -Fq 'id="fx-apex-canvas"' docs/scifi-ui/index.html
-          grep -Fq 'id="fx-particle-canvas"' docs/scifi-ui/index.html
-          grep -Fq 'THREE.WebGLRenderer' docs/scifi-ui/scripts/Experience.js
-          grep -Fq 'THREE.InstancedMesh' docs/scifi-ui/scripts/Experience.js
-          grep -Fq 'THREE.Points' docs/scifi-ui/scripts/Experience.js
-          grep -Fq 'QualityGovernor' docs/scifi-ui/scripts/Experience.js
-          grep -Fq '__FORMATX_3D_STATE__' docs/scifi-ui/scripts/formatx-three-host.js
-          grep -Fq 'formatx:loop' docs/scifi-ui/scripts/formatx-three-host.js
-          grep -Fq 'experience-entry.js' docs/scifi-ui/three-stage.html
-          grep -Fq 'formatx-three-host.css' docs/scifi-ui/styles/igloo-parity.css
-          grep -Fq '15 900 Ft / hó' docs/scifi-ui/index.html
-          grep -Fq '29 900 Ft / hó' docs/scifi-ui/index.html
-          ! grep -Fq 'formatx-transcend-lite.js' docs/scifi-ui/scripts/igloo-parity.js
-          ! grep -Fq 'worldstage-enhancements.js' docs/scifi-ui/scripts/igloo-parity.js
+          python3 .github/scripts/validate-content-standard-v2.py
+          python3 .github/scripts/validate-public-release-integration.py
+          node .github/scripts/production-preflight.cjs
 
-      - name: Install, test and dry-build Worker
+      - name: Validate production JavaScript syntax
+        run: |
+          node --check content-preview-entry.js
+          node --check billing-worker/src/production-with-license.js
+          node --check billing-worker/src/production-entry.js
+          node --check billing-worker/src/production-content-entry.js
+          node --check billing-worker/src/pricing-v100-api.js
+          node --check docs/scifi-ui/scripts/release-metadata.js
+          node --check docs/scifi-ui/scripts/formatx-public-shell.js
+          node --check docs/scifi-ui/scripts/public-evidence-pages.js
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/organism-core-controller.js
+          node --check docs/scifi-ui/scripts/organism-voice.js
+          node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
+
+      - name: Install dependencies and run Worker tests
         working-directory: billing-worker
         run: |
           npm ci
           npm test
-          npx wrangler deploy --dry-run --outdir ../.wrangler-three-production
 
-      - name: Publish candidate status
-        if: always() && github.event_name == 'push'
+      - name: Build production Worker without deploying
+        working-directory: billing-worker
+        run: npx wrangler deploy --dry-run --outdir ../.wrangler-production-candidate
+
+      - name: Upload production candidate and readiness report
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-production-candidate-${{ github.sha }}
+          path: |
+            .wrangler-production-candidate
+            artifacts/production-readiness.json
+          if-no-files-found: error
+          retention-days: 14
+
+  deploy:
+    name: Deploy to FormatX custom domains
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy == true
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://www.formatxsuite.com/scifi-ui/
+    steps:
+      - name: Check out validated commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Install locked Worker dependencies
+        working-directory: billing-worker
+        run: npm ci
+
+      - name: Deploy the validated production Worker
+        working-directory: billing-worker
         env:
-          GH_TOKEN: ${{ github.token }}
-          JOB_STATUS: ${{ job.status }}
-        shell: bash
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then
-            state='success'
-            description='Three.js source, tests and Worker dry build passed'
-          else
-            state='failure'
-            description='Three.js production candidate validation failed'
-          fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
-            -f state="$state" \
-            -f context='FormatX Three.js production candidate' \
-            -f description="$description" \
-            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npx wrangler deploy
+
+      - name: Smoke-test both custom domains
+        run: |
+          set -euo pipefail
+          for origin in https://formatxsuite.com https://www.formatxsuite.com; do
+            success=false
+            for attempt in $(seq 1 12); do
+              if curl --fail --silent --show-error --location --max-time 30 \
+                "$origin/scifi-ui/" >/dev/null \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                "$origin/scifi-ui/known-issues.html" >/dev/null \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                "$origin/scifi-ui/data/current-release.json" >/dev/null; then
+                success=true
+                break
+              fi
+              sleep 10
+            done
+            if [[ "$success" != true ]]; then
+              echo "Production smoke test failed for $origin" >&2
+              exit 1
+            fi
+          done
