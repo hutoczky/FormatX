@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: formatx-one-shot-audit-comparison
+  group: formatx-one-shot-audit-comparison-v2
   cancel-in-progress: false
 
 jobs:
