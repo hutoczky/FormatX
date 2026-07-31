@@ -2,17 +2,17 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxMobileUnified === 'ready-v1') return;
-  root.dataset.fxMobileUnified = 'loading-v1';
+  if (root.dataset.fxMobileUnified === 'ready-v2') return;
+  root.dataset.fxMobileUnified = 'loading-v2';
 
   function ensureStyle() {
     if (document.querySelector('link[data-fx-mobile-unified-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/formatx-mobile-unified.css?v=20260730-mobile-unified-1';
+    link.href = './styles/formatx-mobile-unified.css?v=20260731-mobile-unified-2';
     link.dataset.fxMobileUnifiedStyle = 'true';
     link.addEventListener('load', () => {
-      root.dataset.fxMobileUnifiedStyle = 'ready';
+      root.dataset.fxMobileUnifiedStyle = 'ready-v2';
     }, { once: true });
     link.addEventListener('error', () => {
       root.dataset.fxMobileUnifiedStyle = 'failed';
@@ -44,5 +44,5 @@
   window.visualViewport?.addEventListener('resize', syncViewportHeight, { passive: true });
   addEventListener('pageshow', syncViewportHeight, { passive: true });
 
-  root.dataset.fxMobileUnified = 'ready-v1';
+  root.dataset.fxMobileUnified = 'ready-v2';
 }());
