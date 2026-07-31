@@ -1,77 +1,41 @@
-/* FormatX Organism dialogue dock — collision-free placement beside other floating controls. */
+/* FormatX Organism dialogue dock — one stable compact control and protected panel lane. */
+
 .fx-organism-dialogue {
+  z-index: 940 !important;
   right: max(16px, env(safe-area-inset-right)) !important;
   bottom: max(96px, calc(env(safe-area-inset-bottom) + 84px)) !important;
+  isolation: isolate !important;
+}
+
+.fx-organism-dialogue:not(.is-open) {
+  width: auto !important;
 }
 
 .fx-organism-thought-trigger {
-  width: auto !important;
-  min-width: 92px !important;
-  height: 44px !important;
-  padding: 0 14px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  border-radius: 14px !important;
-  border-color: rgba(var(--fx-thought-accent), .42) !important;
-  background: linear-gradient(145deg, rgba(7, 25, 39, .99), rgba(2, 9, 17, .995)) !important;
-  box-shadow:
-    0 0 0 4px rgba(1, 4, 8, .94),
-    0 15px 40px rgba(0, 0, 0, .44),
-    0 0 22px rgba(var(--fx-thought-accent), .10),
-    inset 0 1px 0 rgba(255, 255, 255, .08) !important;
-}
-
-.fx-organism-thought-trigger::before,
-.fx-organism-thought-trigger::after {
-  display: none !important;
-}
-
-.fx-organism-thought-trigger span {
-  flex: 0 0 auto;
-  font-size: 18px !important;
-  filter: none !important;
-}
-
-.fx-organism-thought-trigger b {
-  position: static !important;
-  color: rgba(226, 247, 255, .86) !important;
-  font-size: 8px !important;
-  line-height: 1 !important;
-  letter-spacing: .16em !important;
-  white-space: nowrap;
-}
-
-.fx-organism-thought-trigger:hover,
-.fx-organism-thought-trigger:focus-visible,
-.fx-organism-dialogue.is-open .fx-organism-thought-trigger {
-  box-shadow:
-    0 0 0 4px rgba(1, 4, 8, .96),
-    0 18px 46px rgba(0, 0, 0, .48),
-    0 0 30px rgba(var(--fx-thought-accent), .18),
-    inset 0 1px 0 rgba(255, 255, 255, .10) !important;
-  transform: translateY(-2px) !important;
+  flex: 0 0 58px !important;
+  width: 58px !important;
+  min-width: 58px !important;
+  max-width: 58px !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 50% !important;
 }
 
 .fx-organism-dialogue.is-disabled .fx-organism-thought-trigger {
-  width: auto !important;
-  min-width: 68px !important;
-  height: 40px !important;
-  padding-inline: 12px !important;
-  opacity: .62 !important;
+  flex-basis: 48px !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
 }
 
-.fx-organism-dialogue.is-disabled .fx-organism-thought-trigger span {
-  font-size: 16px !important;
-}
-
-/*
- * Desktop collision contract:
- * - the open thought panel owns a dedicated right-side lane;
- * - the Three.js viewport ends before that lane;
- * - the Organism map is temporarily hidden rather than being covered.
- */
+/* Wide desktops reserve a right-side dialogue lane instead of covering the core. */
 @media (min-width: 1200px) {
   html:has(.fx-organism-dialogue.is-open) .fx-three-stage-shell {
     right: 430px !important;
@@ -82,23 +46,17 @@
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
-    transform: translateX(-20px) !important;
   }
 }
 
-/* Compact desktop and laptop widths cannot safely host two right-side panes. */
+/* Laptop widths cannot safely show two right-side visual panes at once. */
 @media (min-width: 901px) and (max-width: 1199px) {
   .fx-organism-dialogue {
     width: min(360px, calc(100vw - 36px)) !important;
     right: 18px !important;
   }
 
-  html:has(.fx-organism-dialogue.is-open) .fx-three-stage-shell {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
+  html:has(.fx-organism-dialogue.is-open) .fx-three-stage-shell,
   html:has(.fx-organism-dialogue.is-open) #hero .fx-organism-map {
     opacity: 0 !important;
     visibility: hidden !important;
@@ -106,7 +64,6 @@
   }
 }
 
-/* 21:9 and 32:9 displays receive an explicit protected dialogue lane. */
 @media (min-width: 1800px) and (min-aspect-ratio: 21/9) {
   .fx-organism-dialogue {
     right: max(28px, env(safe-area-inset-right)) !important;
@@ -118,7 +75,6 @@
   }
 }
 
-/* Short desktop viewports keep the whole panel above the action dock. */
 @media (min-width: 901px) and (max-height: 800px) {
   .fx-organism-dialogue {
     bottom: max(86px, calc(env(safe-area-inset-bottom) + 78px)) !important;
@@ -136,21 +92,55 @@
     left: max(12px, env(safe-area-inset-left)) !important;
   }
 
+  .fx-organism-dialogue:not(.is-open) {
+    left: auto !important;
+    width: auto !important;
+  }
+
+  .fx-organism-dialogue.is-open {
+    width: auto !important;
+    justify-items: stretch !important;
+  }
+
   .fx-organism-thought-trigger {
-    min-width: 86px !important;
-    height: 42px !important;
-    padding-inline: 13px !important;
-    border-radius: 13px !important;
+    flex-basis: 52px !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
   }
 
   .fx-organism-dialogue.is-disabled .fx-organism-thought-trigger {
-    min-width: 64px !important;
-    height: 38px !important;
+    flex-basis: 44px !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
   }
 }
 
 @media (max-width: 430px) {
   .fx-organism-dialogue {
+    right: 10px !important;
+    left: 10px !important;
     bottom: max(140px, calc(env(safe-area-inset-bottom) + 128px)) !important;
+  }
+
+  .fx-organism-dialogue:not(.is-open) {
+    left: auto !important;
+  }
+
+  .fx-organism-thought-trigger {
+    flex-basis: 48px !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
   }
 }
