@@ -1,0 +1,415 @@
+name: One-shot clean desktop and multiplatform public fix
+
+on:
+  push:
+    branches:
+      - fix/desktop-multiplatform-public-copy
+    paths:
+      - '.github/workflows/one-shot-desktop-multiplatform-clean.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-clean-desktop-multiplatform-fix
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply focused public-site fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import re
+          from pathlib import Path
+
+          ROOT = Path('.')
+
+          def read(path: str) -> str:
+              return (ROOT / path).read_text(encoding='utf-8')
+
+          def write(path: str, value: str) -> None:
+              (ROOT / path).write_text(value, encoding='utf-8')
+
+          def replace_required(value: str, old: str, new: str, label: str) -> str:
+              if old not in value:
+                  raise SystemExit(f'Missing replacement contract: {label}')
+              return value.replace(old, new)
+
+          desktop_css = '''/* FormatX desktop composition contract.
+             Preserves the living visual system while preventing oversized empty hero space. */
+
+          @media (min-width: 1100px) and (pointer: fine) {
+            html.fx-organism-interface-ready #hero {
+              display: grid;
+              min-height: min(100svh, 960px);
+              padding: clamp(88px, 9vh, 124px) 0 clamp(86px, 9vh, 116px);
+              align-items: center;
+              overflow: clip;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-grid {
+              position: relative;
+              display: grid;
+              grid-template-columns: minmax(500px, .92fr) minmax(520px, 1.08fr);
+              width: min(1680px, calc(100% - clamp(72px, 8vw, 150px)));
+              min-height: clamp(620px, calc(100svh - 174px), 760px);
+              margin-inline: auto;
+              padding: 0;
+              gap: clamp(34px, 5vw, 96px);
+              align-items: center;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-copy {
+              position: relative;
+              left: auto;
+              bottom: auto;
+              align-self: center;
+              width: min(680px, 100%);
+              max-width: none;
+              margin: 0;
+              transform: translateY(-1.5vh);
+            }
+
+            html.fx-organism-interface-ready #hero .hero-title-main {
+              font-size: clamp(68px, 7.7vw, 138px);
+              line-height: .82;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-title-sub {
+              font-size: clamp(28px, 3.15vw, 52px);
+            }
+
+            html.fx-organism-interface-ready #hero .hero-lead {
+              max-width: 620px;
+              margin-top: clamp(18px, 2.4vh, 28px);
+              font-size: clamp(15px, 1.1vw, 19px);
+              line-height: 1.62;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-actions {
+              display: flex !important;
+              width: min(620px, 100%);
+              margin-top: clamp(20px, 2.8vh, 32px);
+              flex-wrap: wrap;
+              gap: 12px;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-actions .button {
+              min-height: 48px;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-facts {
+              display: flex !important;
+              width: min(620px, 100%);
+              margin-top: clamp(16px, 2vh, 24px);
+              flex-wrap: wrap;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-space {
+              position: relative;
+              inset: auto;
+              align-self: center;
+              width: 100%;
+              height: clamp(520px, 66vh, 720px);
+              min-height: 0;
+              pointer-events: none;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-space::before {
+              content: '';
+              position: absolute;
+              inset: 8% 3% 7%;
+              border-radius: 50%;
+              background: radial-gradient(circle, rgba(var(--accent, 56 222 255), .055), transparent 66%);
+              filter: blur(28px);
+              pointer-events: none;
+            }
+
+            html.fx-organism-interface-ready #hero .scroll-cue {
+              position: absolute;
+              left: 50%;
+              right: auto;
+              bottom: clamp(24px, 3.5vh, 42px);
+              margin: 0;
+              transform: translateX(-50%);
+            }
+
+            html.fx-organism-interface-ready main > .scene:not(#hero) {
+              min-height: clamp(760px, 94svh, 980px);
+              padding-block: clamp(96px, 12vh, 150px);
+            }
+          }
+
+          @media (min-width: 1100px) and (max-height: 820px) and (pointer: fine) {
+            html.fx-organism-interface-ready #hero {
+              min-height: 720px;
+              padding-top: 76px;
+              padding-bottom: 70px;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-grid {
+              min-height: 574px;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-copy {
+              transform: none;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-space {
+              height: 560px;
+            }
+
+            html.fx-organism-interface-ready #hero .hero-title-main {
+              font-size: clamp(62px, 7vw, 112px);
+            }
+
+            html.fx-organism-interface-ready #hero .hero-lead {
+              line-height: 1.5;
+            }
+          }
+
+          @media (min-width: 1600px) and (min-height: 900px) and (pointer: fine) {
+            html.fx-organism-interface-ready #hero .hero-grid {
+              grid-template-columns: minmax(600px, .95fr) minmax(650px, 1.05fr);
+            }
+
+            html.fx-organism-interface-ready #hero .hero-space {
+              height: clamp(620px, 68vh, 780px);
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            html.fx-organism-interface-ready #hero .hero-copy {
+              transform: none;
+            }
+          }
+          '''
+          write('docs/scifi-ui/styles/formatx-desktop-unified.css', desktop_css)
+
+          platform = json.loads(read('docs/scifi-ui/data/platform-status.json'))
+          platform['schema_version'] = 4
+          platform['product_release']['public_package'] = 'multiplatform'
+          platform['support_role_labels']['primary'] = {
+              'hu': 'Elsődleges rendszer és támogatási irány',
+              'en': 'Primary system and support direction',
+          }
+          platform['support_role_labels']['secondary'] = {
+              'hu': 'Támogatott másodlagos platform',
+              'en': 'Supported secondary platform',
+          }
+          by_id = {item['id']: item for item in platform['platforms']}
+          bazzite = by_id['linux-bazzite']
+          bazzite.update({
+              'name': 'Bazzite / Linux',
+              'support_role': 'primary',
+              'status': 'public_beta',
+              'public_package_policy': 'multiplatform_release_metadata_required',
+              'hu': 'A Bazzite/Linux a FormatX elsődleges rendszere és hosszú távú támogatási platformja. A nyilvános béta a hivatalos multiplatform csomag része.',
+              'en': 'Bazzite/Linux is the primary FormatX system and long-term support platform. Its public beta is included in the official multiplatform package.',
+          })
+          windows = by_id['windows']
+          windows.update({
+              'support_role': 'secondary',
+              'status': 'public_beta',
+              'public_package_policy': 'multiplatform_release_metadata_required',
+              'hu': 'A Windows támogatott másodlagos platform. Külön Windows-csomag helyett ugyanaz a hivatalos multiplatform nyilvános béta tölthető le.',
+              'en': 'Windows is a supported secondary platform. The same official multiplatform public beta is provided instead of a separate Windows-only package.',
+          })
+          platform['platforms'] = [
+              by_id['linux-bazzite'], by_id['windows'], by_id['android'],
+              by_id['web'], by_id['macos'], by_id['ios'],
+          ]
+          write('docs/scifi-ui/data/platform-status.json', json.dumps(platform, ensure_ascii=False, indent=2) + '\n')
+
+          release = json.loads(read('docs/scifi-ui/data/current-release.json'))
+          package = release.get('channels', {}).get('windows')
+          if not isinstance(package, dict):
+              raise SystemExit('Canonical package channel is missing')
+          package['package_scope'] = 'multiplatform'
+          package['primary_platform'] = 'linux-bazzite'
+          package['supported_platforms'] = ['linux-bazzite', 'windows']
+          write('docs/scifi-ui/data/current-release.json', json.dumps(release, ensure_ascii=False, indent=2) + '\n')
+
+          release_channel = json.loads(read('docs/scifi-ui/data/release-channel.json'))
+          desktop = release_channel['channels']['windows']
+          desktop['package_scope'] = 'multiplatform'
+          desktop['primary_platform'] = 'linux-bazzite'
+          desktop['supported_platforms'] = ['linux-bazzite', 'windows']
+          desktop['fallback'] = {
+              'hu': 'Multiplatform nyilvános béta letöltése',
+              'en': 'Download multiplatform public beta',
+          }
+          write('docs/scifi-ui/data/release-channel.json', json.dumps(release_channel, ensure_ascii=False, indent=2) + '\n')
+
+          home = read('docs/scifi-ui/index.html')
+          desktop_link = '  <link rel="stylesheet" href="./styles/formatx-desktop-unified.css">\n'
+          if 'formatx-desktop-unified.css' not in home:
+              anchor = '  <link rel="stylesheet" href="./styles/formatx-mobile-recovery.css?v=20260729-mobile-recovery-1">\n'
+              home = replace_required(home, anchor, anchor + desktop_link, 'desktop stylesheet link')
+          home = home.replace('data-release-download="windows"', 'data-release-download="multiplatform"')
+          home = home.replace('Windows nyilvános béta letöltése', 'Multiplatform nyilvános béta letöltése')
+          home = home.replace('Download Windows public beta', 'Download multiplatform public beta')
+          home = home.replace(' download="FormatX-Suite-Pro-Android-1.0.6.apk"', '')
+          home = home.replace('<span>92.00</span><b>RELEASE DNA</b>', '<span>01</span><b>PRIMARY SYSTEM</b>')
+          write('docs/scifi-ui/index.html', home)
+
+          downloads = read('docs/scifi-ui/downloads/index.html')
+          downloads = replace_required(
+              downloads,
+              'A Windows- és Android-kiadás Public beta. A Linux/Bazzite natív változata Development, a webes felület Technical preview, a macOS és iOS/iPadOS Planned. Tesztelhető béta kiadás nem Stable verzió.',
+              'A Bazzite/Linux a FormatX elsődleges rendszere, a Windows támogatott másodlagos platform. Mindkettő ugyanabból a multiplatform nyilvános béta csomagból telepíthető. Az Android külön nyilvános béta, a webes felület technikai előnézet.',
+              'Hungarian download introduction',
+          )
+          downloads = replace_required(
+              downloads,
+              'Windows and Android are Public beta. The native Linux/Bazzite edition is in Development, Web is a Technical preview, and macOS and iOS/iPadOS are Planned. A testable beta release is not Stable.',
+              'Bazzite/Linux is the primary FormatX system and Windows is a supported secondary platform. Both are installed from the same multiplatform public beta package. Android is a separate public beta and Web is a technical preview.',
+              'English download introduction',
+          )
+          old_card = '<article class="fx-download-action"><h2>Windows · Public beta</h2><p data-hu="A gomb csak szinkronizált hivatalos kiadási csomag esetén mutat közvetlen letöltésre." data-en="The button points to a direct download only when an official release package has been synchronised.">A gomb csak szinkronizált hivatalos kiadási csomag esetén mutat közvetlen letöltésre.</p><a data-release-download="windows" aria-describedby="windows-beta-note" href="./"><span data-release-download-label data-hu="Windows nyilvános béta letöltése" data-en="Download Windows public beta">Windows nyilvános béta letöltése</span></a><small id="windows-beta-note" data-hu="Tesztelhető béta kiadás. Még nem Stable verzió." data-en="Testable beta release. Not yet a Stable version.">Tesztelhető béta kiadás. Még nem Stable verzió.</small></article>'
+          new_card = '<article class="fx-download-action"><h2>Bazzite/Linux elsődleges · Windows támogatott</h2><p data-hu="Egyetlen hivatalos multiplatform csomag. A Bazzite/Linux az elsődleges rendszer, a Windows támogatott másodlagos platform." data-en="One official multiplatform package. Bazzite/Linux is the primary system and Windows is a supported secondary platform.">Egyetlen hivatalos multiplatform csomag. A Bazzite/Linux az elsődleges rendszer, a Windows támogatott másodlagos platform.</p><a data-release-download="multiplatform" aria-describedby="multiplatform-beta-note" href="./"><span data-release-download-label data-hu="Multiplatform nyilvános béta letöltése" data-en="Download multiplatform public beta">Multiplatform nyilvános béta letöltése</span></a><small id="multiplatform-beta-note" data-hu="Bazzite/Linux + Windows. Tesztelhető béta, nem Stable kiadás." data-en="Bazzite/Linux + Windows. Testable beta, not a Stable release.">Bazzite/Linux + Windows. Tesztelhető béta, nem Stable kiadás.</small></article>'
+          downloads = replace_required(downloads, old_card, new_card, 'multiplatform download card')
+          write('docs/scifi-ui/downloads/index.html', downloads)
+
+          metadata = read('docs/scifi-ui/scripts/release-metadata.js')
+          metadata = metadata.replace("windows: 'Windows nyilvános béta letöltése'", "package: 'Multiplatform nyilvános béta letöltése'")
+          metadata = metadata.replace("unavailable: 'A hivatalos Windows-csomag metaadata jelenleg nem érhető el.'", "unavailable: 'A hivatalos multiplatform csomag metaadata jelenleg nem érhető el.'")
+          metadata = metadata.replace("beta: 'Tesztelhető béta kiadás. Még nem Stable verzió.'", "beta: 'Bazzite/Linux az elsődleges platform; a Windows támogatott ugyanebben a nyilvános béta csomagban.'")
+          metadata = metadata.replace("windows: 'Download Windows public beta'", "package: 'Download multiplatform public beta'")
+          metadata = metadata.replace("unavailable: 'Official Windows package metadata is currently unavailable.'", "unavailable: 'Official multiplatform package metadata is currently unavailable.'")
+          metadata = metadata.replace("beta: 'Testable beta release. Not yet a Stable version.'", "beta: 'Bazzite/Linux is the primary platform; Windows is supported in the same public beta package.'")
+          metadata = re.sub(
+              r"\n  function releaseVersion\(\) \{.*?\n  \}\n",
+              '\n',
+              metadata,
+              count=1,
+              flags=re.DOTALL,
+          )
+          metadata = metadata.replace('function windowsAsset()', 'function packageAsset()')
+          metadata = metadata.replace('function windowsLabel() {\n    const version = releaseVersion();\n    if (language() === \'en\') return version ? `Download Windows ${version} public beta` : copy().windows;\n    return version ? `Windows ${version} nyilvános béta letöltése` : copy().windows;\n  }', "function packageLabel() {\n    return copy().package;\n  }")
+          metadata = metadata.replace('const asset = windowsAsset();', 'const asset = packageAsset();')
+          metadata = metadata.replace('labelTarget.textContent = windowsLabel();', 'labelTarget.textContent = packageLabel();')
+          metadata = metadata.replace('link.title = windowsLabel();', 'link.title = packageLabel();')
+          metadata = metadata.replace("const version = releaseVersion();\n    const asset = packageAsset();", "const asset = packageAsset();")
+          metadata = metadata.replace("setText('[data-release-version]', version);", "setText('[data-release-version]', '', false);")
+          metadata = metadata.replace("'[data-release-download=\"windows\"], #hero-download'", "'[data-release-download=\"multiplatform\"], [data-release-download=\"windows\"], #hero-download'")
+          if 'windowsLabel' in metadata or 'releaseVersion()' in metadata:
+              raise SystemExit('Visible release-version renderer remains')
+          write('docs/scifi-ui/scripts/release-metadata.js', metadata)
+
+          status_js = read('docs/scifi-ui/scripts/platform-status.js')
+          status_js = status_js.replace("const version = document.createElement('small');", "const role = document.createElement('small');")
+          status_js = status_js.replace("version.textContent = [supportRole(platform, data, lang), platform.version].filter(Boolean).join(' · ');", "role.textContent = supportRole(platform, data, lang);")
+          status_js = status_js.replace('titleWrap.append(title, version);', 'titleWrap.append(title, role);')
+          replacements = {
+              'Linux/Bazzite is the primary target and support platform. Windows is secondary supported. The current release remains a public beta.': 'Bazzite/Linux is the primary FormatX system. Windows is supported as a secondary platform in the same multiplatform public beta package.',
+              'A Linux/Bazzite az elsődleges cél- és támogatási platform. A Windows másodlagosan támogatott. Az aktuális kiadás továbbra is nyilvános béta.': 'A Bazzite/Linux a FormatX elsődleges rendszere. A Windows támogatott másodlagos platform ugyanabban a multiplatform nyilvános béta csomagban.',
+              'Linux/Bazzite primary platform · Windows secondary supported Public beta · 5-day trial': 'Bazzite/Linux primary system · Windows supported · one multiplatform package',
+              'Linux/Bazzite elsődleges platform · Windows másodlagosan támogatott Public beta · 5 napos próbalicenc': 'Bazzite/Linux elsődleges rendszer · Windows támogatott · egy multiplatform csomag',
+              'Downloads and platform status': 'Multiplatform public beta',
+              'Letöltések és platformállapot': 'Multiplatform nyilvános béta',
+              '<strong>The current release is a public beta.</strong><span>Linux/Bazzite is the primary platform direction; Windows is secondary supported. No platform is currently labelled Stable.</span>': '<strong>The current package is a multiplatform public beta.</strong><span>Bazzite/Linux is primary; Windows is supported as a secondary platform. No platform is currently labelled Stable.</span>',
+              '<strong>Az aktuális kiadás nyilvános béta.</strong><span>A Linux/Bazzite az elsődleges platformirány; a Windows másodlagosan támogatott. Jelenleg egyik platform sem kap Stable címkét.</span>': '<strong>Az aktuális csomag multiplatform nyilvános béta.</strong><span>A Bazzite/Linux elsődleges; a Windows támogatott másodlagos platform. Jelenleg egyik platform sem kap Stable címkét.</span>',
+          }
+          for old, new in replacements.items():
+              if old in status_js:
+                  status_js = status_js.replace(old, new)
+          status_js = status_js.replace("download.href = './downloads/';\n      download.removeAttribute('download');", "download.href = './downloads/';\n      download.dataset.releaseDownload = 'multiplatform';\n      download.removeAttribute('download');")
+          write('docs/scifi-ui/scripts/platform-status.js', status_js)
+
+          readme = read('README.md')
+          readme = readme.replace(
+              'A Windows és Android **Public beta**. A Linux/Bazzite az elsődleges fejlesztési irány, állapota **Development**.',
+              'A Bazzite/Linux a FormatX elsődleges rendszere és **Public beta**. A Windows támogatott másodlagos platform ugyanabban a multiplatform nyilvános béta csomagban. Az Android külön **Public beta**.',
+          )
+          write('README.md', readme)
+
+          notes = read('RELEASE_NOTES.md')
+          notes = notes.replace('- Windows: **Public beta**\n- Android: **Public beta**\n- Linux / Bazzite: **Development**, elsődleges fejlesztési irány', '- Bazzite / Linux: **Public beta**, elsődleges rendszer és támogatási irány\n- Windows: **Public beta**, támogatott másodlagos platform ugyanabban a multiplatform csomagban\n- Android: **Public beta**, külön csomag')
+          write('RELEASE_NOTES.md', notes)
+
+          sync = read('.github/workflows/sync-current-release.yml')
+          sync = replace_required(
+              sync,
+              'windows: asset_record($windows),',
+              'windows: (asset_record($windows) + {package_scope: "multiplatform", primary_platform: "linux-bazzite", supported_platforms: ["linux-bazzite", "windows"]}),',
+              'release sync package scope',
+          )
+          write('.github/workflows/sync-current-release.yml', sync)
+
+          for path in ('content-preview-entry.js', 'billing-worker/src/production-content-entry.js'):
+              source = read(path)
+              source = source.replace("'<span>—</span><b>OFFICIAL RELEASE</b>'", "'<span>01</span><b>PRIMARY SYSTEM</b>'")
+              source = source.replace("'Windows nyilvános béta letöltése'", "'Multiplatform nyilvános béta letöltése'")
+              source = source.replace("'Download Windows public beta'", "'Download multiplatform public beta'")
+              write(path, source)
+
+          validator = read('.github/scripts/validate-webgpu-source.py')
+          validator = validator.replace('"Linux / Bazzite": "development"', '"Bazzite / Linux": "public_beta"')
+          validator = validator.replace('"Linux / Bazzite": "primary"', '"Bazzite / Linux": "primary"')
+          validator = validator.replace("('Windows', 'Linux/Bazzite', 'macOS', 'Web', 'Android', 'iOS/iPadOS')", "('Windows', 'Bazzite/Linux', 'macOS', 'Web', 'Android', 'iOS/iPadOS')")
+          validator = validator.replace('compact_platform_copy(value: str) -> str:\n    return value.replace("Linux / Bazzite", "Linux/Bazzite")', 'compact_platform_copy(value: str) -> str:\n    return value.replace("Linux / Bazzite", "Bazzite/Linux").replace("Bazzite / Linux", "Bazzite/Linux")')
+          write('.github/scripts/validate-webgpu-source.py', validator)
+          PY
+
+      - name: Validate focused contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'formatx-desktop-unified.css' docs/scifi-ui/index.html
+          grep -Fq 'grid-template-columns: minmax(500px' docs/scifi-ui/styles/formatx-desktop-unified.css
+          grep -Fq 'data-release-download="multiplatform"' docs/scifi-ui/index.html
+          grep -Fq 'data-release-download="multiplatform"' docs/scifi-ui/downloads/index.html
+          grep -Fq 'Bazzite / Linux' docs/scifi-ui/data/platform-status.json
+          grep -Fq '"package_scope": "multiplatform"' docs/scifi-ui/data/current-release.json
+          ! grep -Fq '<span>92.00</span><b>RELEASE DNA</b>' docs/scifi-ui/index.html
+          ! grep -Fq 'Windows nyilvános béta letöltése' docs/scifi-ui/index.html
+          ! grep -Fq 'Download Windows public beta' docs/scifi-ui/index.html
+          node --check docs/scifi-ui/scripts/release-metadata.js
+          node --check docs/scifi-ui/scripts/platform-status.js
+          node --check content-preview-entry.js
+          node --check billing-worker/src/production-content-entry.js
+          python3 .github/scripts/validate-content-standard-v2.py
+
+      - name: Validate Worker bundle
+        working-directory: billing-worker
+        run: |
+          set -euo pipefail
+          npm ci
+          npm test
+          npx wrangler deploy --dry-run --outdir ../.wrangler-clean-public-fix
+
+      - name: Remove one-shot workflow and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/one-shot-desktop-multiplatform-clean.yml
+          git config user.name 'FormatX focused maintenance'
+          git config user.email 'actions@users.noreply.github.com'
+          git add README.md RELEASE_NOTES.md \
+            .github/scripts/validate-webgpu-source.py \
+            .github/workflows/sync-current-release.yml \
+            content-preview-entry.js \
+            billing-worker/src/production-content-entry.js \
+            docs/scifi-ui/index.html \
+            docs/scifi-ui/downloads/index.html \
+            docs/scifi-ui/data/platform-status.json \
+            docs/scifi-ui/data/current-release.json \
+            docs/scifi-ui/data/release-channel.json \
+            docs/scifi-ui/scripts/release-metadata.js \
+            docs/scifi-ui/scripts/platform-status.js \
+            docs/scifi-ui/styles/formatx-desktop-unified.css
+          git commit -m 'Fix desktop composition and publish multiplatform Bazzite-first download'
+          git push origin HEAD:fix/desktop-multiplatform-public-copy
