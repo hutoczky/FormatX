@@ -1,0 +1,266 @@
+name: One-shot FormatX release sync and production deploy
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-formatx-production.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: one-shot-formatx-production
+  cancel-in-progress: false
+
+jobs:
+  release-and-deploy:
+    if: contains(github.event.head_commit.message, '[release-and-deploy]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: production
+      url: https://www.formatxsuite.com/scifi-ui/
+
+    steps:
+      - name: Check out master
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Read latest official release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp
+          curl --fail --silent --show-error --location \
+            --retry 4 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 15 --max-time 90 \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            'https://api.github.com/repos/hutoczky/FormatX-Updates/releases?per_page=30' \
+            > .tmp/releases.json
+
+          jq -e '
+            map(select(
+              .draft == false and
+              .prerelease == false and
+              .published_at != null and
+              (.tag_name | type == "string" and length > 0)
+            )) | sort_by(.published_at) | reverse | first
+          ' .tmp/releases.json > .tmp/release.json
+
+      - name: Generate provenance-aware release metadata
+        run: |
+          set -euo pipefail
+          android_local=false
+          if [[ -f docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk ]]; then
+            android_local=true
+          fi
+
+          jq --argjson android_local "$android_local" '
+            def clean: if type == "string" then gsub("^\\s+|\\s+$"; "") else . end;
+            def windows_asset:
+              [.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.(zip|msix|msixbundle)$"; "i"))] | first;
+            def android_asset:
+              [.assets[]? | select(.name | test("^FormatX-Suite-Pro-Android(?:-.*)?\\.apk$"; "i"))] | first;
+            def checksum_asset:
+              [.assets[]? | select(.name | test("sha256|checksums?|checksum"; "i"))] | first;
+            def signature_asset:
+              [.assets[]? | select(.name | test("\\.(sig|minisig|asc)$"; "i"))] | first;
+            def asset_record($asset):
+              if $asset then {
+                available: true,
+                asset_id: $asset.id,
+                name: $asset.name,
+                download_url: $asset.browser_download_url,
+                size: $asset.size,
+                digest: (($asset.digest // null) | if type == "string" and startswith("sha256:") then . else null end),
+                content_type: ($asset.content_type // null),
+                created_at: ($asset.created_at // null),
+                updated_at: ($asset.updated_at // null),
+                download_count: ($asset.download_count // null),
+                source: "github_release_asset"
+              } else {
+                available: false,
+                asset_id: null,
+                name: null,
+                download_url: null,
+                size: null,
+                digest: null,
+                content_type: null,
+                created_at: null,
+                updated_at: null,
+                download_count: null,
+                source: null
+              } end;
+            . as $release |
+            (windows_asset) as $windows |
+            (android_asset) as $android |
+            (checksum_asset) as $checksum |
+            (signature_asset) as $signature |
+            {
+              schema_version: 2,
+              synced_at: (now | todateiso8601),
+              ok: true,
+              source: "github_published_release",
+              repository: "hutoczky/FormatX-Updates",
+              source_release_id: $release.id,
+              source_updated_at: ($release.updated_at // null),
+              target_commitish: ($release.target_commitish // null),
+              version: ($release.tag_name | clean | select(length > 0)),
+              release_name: (($release.name // $release.tag_name) | clean | select(length > 0)),
+              published_at: $release.published_at,
+              prerelease: false,
+              release_url: $release.html_url,
+              notes_url: $release.html_url,
+              channels: {
+                windows: asset_record($windows),
+                android: (
+                  if $android then asset_record($android)
+                  elif $android_local then {
+                    available: true,
+                    asset_id: null,
+                    name: "FormatX-Suite-Pro-Android.apk",
+                    download_url: "/download/android",
+                    size: null,
+                    digest: null,
+                    content_type: "application/vnd.android.package-archive",
+                    created_at: null,
+                    updated_at: null,
+                    download_count: null,
+                    source: "local_worker_asset"
+                  }
+                  else asset_record(null)
+                  end
+                )
+              },
+              evidence: {
+                checksum_asset_url: ($checksum.browser_download_url // null),
+                checksum_asset_name: ($checksum.name // null),
+                signature_asset_url: ($signature.browser_download_url // null),
+                signature_asset_name: ($signature.name // null),
+                test_matrix_url: "/scifi-ui/test-matrix.html",
+                known_issues_url: "/scifi-ui/known-issues.html",
+                verification_url: "/scifi-ui/verification.html"
+              },
+              integrity: {
+                windows_digest_available: (($windows.digest // "") | startswith("sha256:")),
+                checksum_asset_available: ($checksum != null),
+                signature_asset_available: ($signature != null),
+                status: (
+                  if $signature and (($windows.digest // "") | startswith("sha256:")) then "digest_and_signature_published"
+                  elif (($windows.digest // "") | startswith("sha256:")) or $checksum then "digest_published"
+                  else "package_only"
+                  end
+                )
+              },
+              error: null
+            }
+          ' .tmp/release.json > docs/scifi-ui/data/current-release.json
+
+          jq -e '
+            .schema_version == 2 and
+            .ok == true and
+            .source == "github_published_release" and
+            (.source_release_id | type == "number") and
+            (.version | type == "string" and length > 0) and
+            .prerelease == false and
+            (.release_url | startswith("https://github.com/hutoczky/FormatX-Updates/releases/")) and
+            ((.channels.windows.available == false) or
+             (.channels.windows.download_url | startswith("https://github.com/hutoczky/FormatX-Updates/releases/download/"))) and
+            (.integrity.status | IN("package_only", "digest_published", "digest_and_signature_published"))
+          ' docs/scifi-ui/data/current-release.json >/dev/null
+
+      - name: Validate public and production contracts
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/validate-content-standard-v2.py
+          python3 .github/scripts/validate-public-release-integration.py
+          node .github/scripts/production-preflight.cjs
+          node --check content-preview-entry.js
+          node --check billing-worker/src/production-entry.js
+          node --check billing-worker/src/production-content-entry.js
+          node --check docs/scifi-ui/scripts/release-metadata.js
+          node --check docs/scifi-ui/scripts/formatx-public-shell.js
+          node --check docs/scifi-ui/scripts/public-evidence-pages.js
+          node --check docs/scifi-ui/scripts/organism-voice.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
+
+      - name: Install and test production Worker
+        working-directory: billing-worker
+        run: |
+          npm ci
+          npm test
+          npx wrangler deploy --dry-run --outdir ../.wrangler-one-shot-production
+
+      - name: Deploy validated Worker
+        working-directory: billing-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npx wrangler deploy
+
+      - name: Smoke-test both production domains
+        run: |
+          set -euo pipefail
+          for origin in https://formatxsuite.com https://www.formatxsuite.com; do
+            success=false
+            for attempt in $(seq 1 12); do
+              if curl --fail --silent --show-error --location --max-time 30 \
+                "$origin/scifi-ui/" >/dev/null \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                "$origin/scifi-ui/known-issues.html" >/dev/null \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                "$origin/scifi-ui/data/current-release.json" \
+                | jq -e '.schema_version == 2 and .ok == true' >/dev/null; then
+                success=true
+                break
+              fi
+              sleep 10
+            done
+            if [[ "$success" != true ]]; then
+              echo "Production smoke test failed for $origin" >&2
+              exit 1
+            fi
+          done
+
+      - name: Persist synchronized release metadata
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- docs/scifi-ui/data/current-release.json; then
+            echo 'Canonical release metadata was already current.'
+            exit 0
+          fi
+          git config user.name 'FormatX production release bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/data/current-release.json
+          git commit -m 'Sync schema 2 release metadata after production deployment'
+          git pull --rebase origin master
+          git push origin HEAD:master
+
+      - name: Upload production readiness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-one-shot-production-${{ github.sha }}
+          path: |
+            artifacts/production-readiness.json
+            .wrangler-one-shot-production
+          if-no-files-found: warn
+          retention-days: 14
