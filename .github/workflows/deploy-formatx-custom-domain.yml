@@ -1,5 +1,5 @@
 name: Prepare or deploy FormatX production
-run-name: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy && 'Deploy' || 'Validate' }} FormatX production from ${{ github.sha }}
+run-name: FormatX production from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -101,7 +101,7 @@ jobs:
 
   deploy:
     name: Deploy to FormatX custom domains
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy == true
+    if: (github.event_name == 'workflow_dispatch' && inputs.deploy == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]'))
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 20
