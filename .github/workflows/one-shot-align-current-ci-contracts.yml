@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: formatx-one-shot-align-current-ci-contracts
+  group: formatx-one-shot-align-current-ci-contracts-v2
   cancel-in-progress: false
 
 jobs:
@@ -28,35 +28,48 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
+          import re
           from pathlib import Path
 
+          mobile = Path('.github/workflows/validate-mobile-intro-recovery.yml')
+          text = mobile.read_text(encoding='utf-8')
           replacements = {
-              '.github/workflows/validate-mobile-intro-recovery.yml': {
-                  'safe-ready-v25': 'safe-ready-v26',
-                  'safe-degraded-v25': 'safe-degraded-v26',
-                  'organism-voice-dock.css?v=20260730-organism-dock-2': 'organism-voice-dock.css?v=20260731-organism-dock-3',
-                  'MOBILE_QUERY.matches ? 2100 : 2400': 'MOBILE_QUERY.matches?2100:2400',
-                  'TIMELINE_DURATION + EXIT_DURATION + 1100': 'hardDeadline=timelineDuration+exitDuration+1100',
-                  "DOMContentLoaded', startIntro": "DOMContentLoaded',start",
-                  'if (event.persisted) startIntro();': 'bfcache-restore',
-                  "! grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js": "grep -Fq 'formatx:intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js",
-              },
-              '.github/workflows/validate-organism-dialogue.yml': {
-                  'safe-ready-v25': 'safe-ready-v26',
-                  'safe-degraded-v25': 'safe-degraded-v26',
-                  'v25 loader or disclosure module missing': 'v26 loader or disclosure module missing',
-              },
+              'safe-ready-v25': 'safe-ready-v26',
+              'safe-degraded-v25': 'safe-degraded-v26',
+              'organism-voice-dock.css?v=20260730-organism-dock-2': 'organism-voice-dock.css?v=20260731-organism-dock-3',
+              'MOBILE_QUERY.matches ? 2100 : 2400': 'MOBILE_QUERY.matches?2100:2400',
+              'TIMELINE_DURATION + EXIT_DURATION + 1100': 'hardDeadline=timelineDuration+exitDuration+1100',
+              "DOMContentLoaded', startIntro": "DOMContentLoaded',start",
+              'if (event.persisted) startIntro();': 'bfcache-restore',
           }
+          for old, new in replacements.items():
+              text = text.replace(old, new)
 
-          for relative, mapping in replacements.items():
-              path = Path(relative)
-              source = path.read_text(encoding='utf-8')
-              updated = source
-              for old, new in mapping.items():
-                  updated = updated.replace(old, new)
-              if updated == source:
-                  raise SystemExit(f'No CI contract changes made in {relative}')
-              path.write_text(updated, encoding='utf-8')
+          text = re.sub(
+              r"^\s*!\s*grep -Fq 'formatx-intro-seen-v1'.*$",
+              "          grep -Fq 'formatx:intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js",
+              text,
+              flags=re.MULTILINE,
+          )
+          text = text.replace(
+              "            '/scifi-ui/styles/organism-voice-foreground.css',\n",
+              "",
+          )
+          text = text.replace(
+              "            '/scifi-ui/scripts/organism-voice-foreground.js',\n",
+              "",
+          )
+          mobile.write_text(text, encoding='utf-8')
+
+          organism = Path('.github/workflows/validate-organism-dialogue.yml')
+          text = organism.read_text(encoding='utf-8')
+          text = text.replace('safe-ready-v25', 'safe-ready-v26')
+          text = text.replace('safe-degraded-v25', 'safe-degraded-v26')
+          text = text.replace(
+              'v25 loader or disclosure module missing',
+              'v26 loader or disclosure module missing',
+          )
+          organism.write_text(text, encoding='utf-8')
           PY
 
           grep -Fq 'safe-ready-v26' .github/workflows/validate-mobile-intro-recovery.yml
@@ -66,6 +79,8 @@ jobs:
           grep -Fq 'safe-ready-v26' .github/workflows/validate-organism-dialogue.yml
           ! grep -Fq 'safe-ready-v25' .github/workflows/validate-mobile-intro-recovery.yml
           ! grep -Fq 'safe-ready-v25' .github/workflows/validate-organism-dialogue.yml
+          ! grep -Fq "'/scifi-ui/styles/organism-voice-foreground.css'" .github/workflows/validate-mobile-intro-recovery.yml
+          ! grep -Fq "'/scifi-ui/scripts/organism-voice-foreground.js'" .github/workflows/validate-mobile-intro-recovery.yml
 
       - name: Remove one-shot workflow and commit alignment
         shell: bash
@@ -76,5 +91,5 @@ jobs:
           git config user.email 'actions@users.noreply.github.com'
           git add .github/workflows/validate-mobile-intro-recovery.yml \
                   .github/workflows/validate-organism-dialogue.yml
-          git commit -m 'Align CI with v26 loader and returning-visitor intro'
+          git commit -m 'Align CI with current v26 and route contracts'
           git push origin HEAD:maintenance/npm-audit-20260731
