@@ -145,8 +145,8 @@ jobs:
                 checksum_asset_available: ($checksum != null),
                 signature_asset_available: ($signature != null),
                 status: (
-                  if $signature and ($windows.digest // "" | startswith("sha256:")) then "digest_and_signature_published"
-                  elif ($windows.digest // "" | startswith("sha256:")) or $checksum then "digest_published"
+                  if $signature and (($windows.digest // "") | startswith("sha256:")) then "digest_and_signature_published"
+                  elif (($windows.digest // "") | startswith("sha256:")) or $checksum then "digest_published"
                   else "package_only"
                   end
                 )
