@@ -1,0 +1,121 @@
+name: Sync current FormatX release metadata
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-current-formatx-release
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Read latest published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp
+          curl --fail --silent --show-error \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            'https://api.github.com/repos/hutoczky/FormatX-Updates/releases?per_page=20' \
+            > .tmp/releases.json
+
+          jq -e 'map(select(.draft == false and .published_at != null)) | first' \
+            .tmp/releases.json > .tmp/release.json
+
+      - name: Build canonical metadata file
+        run: |
+          set -euo pipefail
+          jq '
+            def clean: if type == "string" then gsub("^\\s+|\\s+$"; "") else . end;
+            def windows_asset:
+              [.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.(zip|msix|msixbundle)$"; "i"))] | first;
+            def checksum_asset:
+              [.assets[]? | select(.name | test("sha256|checksums?|checksum"; "i"))] | first;
+            def signature_asset:
+              [.assets[]? | select(.name | test("\\.(sig|minisig|asc)$"; "i"))] | first;
+            . as $release |
+            (windows_asset) as $windows |
+            (checksum_asset) as $checksum |
+            (signature_asset) as $signature |
+            {
+              schema_version: 1,
+              synced_at: (now | todateiso8601),
+              ok: true,
+              source: "github_published_release",
+              repository: "hutoczky/FormatX-Updates",
+              version: ($release.tag_name | clean | select(length > 0)),
+              release_name: ($release.name | clean | select(length > 0)),
+              published_at: $release.published_at,
+              prerelease: ($release.prerelease == true),
+              release_url: $release.html_url,
+              notes_url: $release.html_url,
+              channels: {
+                windows: (if $windows then {
+                  available: true,
+                  name: $windows.name,
+                  download_url: $windows.browser_download_url,
+                  size: $windows.size,
+                  digest: (($windows.digest // null) | if type == "string" and startswith("sha256:") then . else null end),
+                  content_type: ($windows.content_type // null)
+                } else {
+                  available: false,
+                  name: null,
+                  download_url: null,
+                  size: null,
+                  digest: null,
+                  content_type: null
+                } end),
+                android: {
+                  available: true,
+                  name: "FormatX-Suite-Pro-Android.apk",
+                  download_url: "/download/android",
+                  size: null,
+                  digest: null,
+                  content_type: "application/vnd.android.package-archive"
+                }
+              },
+              evidence: {
+                checksum_asset_url: ($checksum.browser_download_url // null),
+                signature_asset_url: ($signature.browser_download_url // null),
+                test_matrix_url: "/scifi-ui/test-matrix.html",
+                known_issues_url: "/scifi-ui/known-issues.html",
+                verification_url: "/scifi-ui/verification.html"
+              },
+              error: null
+            }
+          ' .tmp/release.json > docs/scifi-ui/data/current-release.json
+
+          jq -e '
+            .schema_version == 1 and
+            .source == "github_published_release" and
+            (.version | type == "string" and length > 0) and
+            (.release_url | startswith("https://github.com/hutoczky/FormatX-Updates/releases/")) and
+            ((.channels.windows.available == false) or
+             (.channels.windows.download_url | startswith("https://github.com/hutoczky/FormatX-Updates/releases/download/")))
+          ' docs/scifi-ui/data/current-release.json >/dev/null
+
+      - name: Commit metadata only when changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- docs/scifi-ui/data/current-release.json; then
+            echo 'Release metadata is unchanged.'
+            exit 0
+          fi
+          git config user.name 'FormatX release metadata bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/data/current-release.json
+          git commit -m 'Sync official current release metadata'
+          git push
