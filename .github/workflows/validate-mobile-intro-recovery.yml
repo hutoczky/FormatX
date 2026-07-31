@@ -7,9 +7,11 @@ on:
       - 'README.md'
       - 'RELEASE_NOTES.md'
       - 'worker.js'
+      - 'content-preview-entry.js'
       - 'wrangler.jsonc'
       - 'billing-worker/wrangler.jsonc'
       - 'billing-worker/src/production-entry.js'
+      - 'billing-worker/src/production-content-entry.js'
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/scripts/validate-thought-genome.cjs'
@@ -20,9 +22,11 @@ on:
       - 'README.md'
       - 'RELEASE_NOTES.md'
       - 'worker.js'
+      - 'content-preview-entry.js'
       - 'wrangler.jsonc'
       - 'billing-worker/wrangler.jsonc'
       - 'billing-worker/src/production-entry.js'
+      - 'billing-worker/src/production-content-entry.js'
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-webgpu-source.py'
       - '.github/scripts/validate-thought-genome.cjs'
@@ -50,7 +54,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node --check content-preview-entry.js
+          node --check billing-worker/src/production-content-entry.js
           node --check docs/scifi-ui/scripts/platform-status.js
+          node --check docs/scifi-ui/scripts/release-metadata.js
+          node --check docs/scifi-ui/scripts/formatx-public-shell.js
+          node --check docs/scifi-ui/scripts/public-evidence-pages.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
@@ -88,9 +97,14 @@ jobs:
             '/scifi-ui/downloads/',
             '/scifi-ui/downloads/index.html',
             '/scifi-ui/test-matrix.html',
+            '/scifi-ui/known-issues.html',
             '/scifi-ui/data/platform-status.json',
+            '/scifi-ui/data/current-release.json',
             '/scifi-ui/styles/platform-status.css',
             '/scifi-ui/scripts/platform-status.js',
+            '/scifi-ui/scripts/release-metadata.js',
+            '/scifi-ui/scripts/formatx-public-shell.js',
+            '/scifi-ui/scripts/public-evidence-pages.js',
             '/scifi-ui/styles/organism-voice.css',
             '/scifi-ui/styles/organism-voice-foreground.css',
             '/scifi-ui/styles/organism-voice-dock.css',
@@ -113,7 +127,8 @@ jobs:
           if (first.some(path => path.includes('organism-natural-voice'))) throw new Error('Obsolete Natural Voice route returned');
           if (preview.routes?.length) throw new Error('Preview Worker must not own production custom domains');
           if (preview.workers_dev !== true) throw new Error('Preview Worker must remain available on workers.dev');
-          if (production.main !== 'src/production-entry.js') throw new Error('Production Worker wrapper is not active');
+          if (preview.main !== 'content-preview-entry.js') throw new Error('Preview content wrapper is not active');
+          if (production.main !== 'src/production-content-entry.js') throw new Error('Production content wrapper is not active');
           const domains = (production.routes || []).map(route => route.pattern);
           if (!domains.includes('formatxsuite.com') || !domains.includes('www.formatxsuite.com')) {
             throw new Error('Production Worker custom domains are incomplete');
@@ -147,6 +162,8 @@ jobs:
           ! grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
           grep -Fq '20260731-intro-restored-1' worker.js
           grep -Fq '20260731-intro-restored-1' billing-worker/src/production-entry.js
+          grep -Fq 'formatx-public-shell.js' billing-worker/src/production-content-entry.js
+          grep -Fq 'formatx-public-shell.js' content-preview-entry.js
           grep -Fq 'public_beta' docs/scifi-ui/data/platform-status.json
           grep -Fq 'technical_preview' docs/scifi-ui/data/platform-status.json
           grep -Fq 'development' docs/scifi-ui/data/platform-status.json
