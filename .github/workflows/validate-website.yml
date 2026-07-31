@@ -14,7 +14,11 @@ on:
       - 'billing-worker/**'
       - '.github/scripts/validate-content-standard.py'
       - '.github/scripts/validate-content-standard-v2.py'
+      - '.github/scripts/validate-public-release-integration.py'
       - '.github/scripts/validate-content-visuals.cjs'
+      - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/production-preflight.cjs'
+      - '.github/workflows/sync-current-release.yml'
       - '.github/workflows/validate-website.yml'
   push:
     branches: [master]
@@ -28,7 +32,11 @@ on:
       - 'billing-worker/**'
       - '.github/scripts/validate-content-standard.py'
       - '.github/scripts/validate-content-standard-v2.py'
+      - '.github/scripts/validate-public-release-integration.py'
       - '.github/scripts/validate-content-visuals.cjs'
+      - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/production-preflight.cjs'
+      - '.github/workflows/sync-current-release.yml'
       - '.github/workflows/validate-website.yml'
 
 permissions:
@@ -53,8 +61,10 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate canonical data, delivered copy, trust and SEO contracts
-        run: python3 .github/scripts/validate-content-standard-v2.py
+      - name: Validate canonical data, public pages, release sync and Worker ownership
+        run: |
+          python3 .github/scripts/validate-content-standard-v2.py
+          python3 .github/scripts/validate-public-release-integration.py
 
       - name: Validate JavaScript syntax
         shell: bash
@@ -67,6 +77,7 @@ jobs:
           node --check billing-worker/src/production-content-entry.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/release-metadata.js
+          node --check docs/scifi-ui/scripts/formatx-public-shell.js
           node --check docs/scifi-ui/scripts/formatx-content-standard.js
           node --check docs/scifi-ui/scripts/formatx-content-finalizer.js
           node --check docs/scifi-ui/scripts/formatx-platform-surface-finalizer.js
@@ -80,6 +91,8 @@ jobs:
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
           node --check .github/scripts/validate-content-visuals.cjs
+          node --check .github/scripts/validate-public-pages-browser.cjs
+          node --check .github/scripts/production-preflight.cjs
 
       - name: Validate billing Worker and production bundle
         working-directory: billing-worker
@@ -88,7 +101,7 @@ jobs:
           npm test
           npx wrangler deploy --dry-run --outdir ../.wrangler-content-validation
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browser
         run: |
           npm install --prefix "$RUNNER_TEMP/formatx-browser" --no-audit --no-fund playwright@1.62.0
           "$RUNNER_TEMP/formatx-browser/node_modules/.bin/playwright" install --with-deps chromium
@@ -101,6 +114,10 @@ jobs:
               && curl -fsS http://127.0.0.1:4178/scifi-ui/downloads/index.html >/dev/null \
               && curl -fsS http://127.0.0.1:4178/scifi-ui/verification.html >/dev/null \
               && curl -fsS http://127.0.0.1:4178/scifi-ui/test-matrix.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/known-issues.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/security.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/support.html >/dev/null \
+              && curl -fsS http://127.0.0.1:4178/scifi-ui/data/current-release.json >/dev/null \
               && curl -fsS http://127.0.0.1:4178/scifi-ui/data/platform-status.json >/dev/null \
               && exit 0
             sleep 0.25
@@ -115,6 +132,12 @@ jobs:
           FORMATX_VISUAL_DIR: artifacts/content-visuals
         run: node .github/scripts/validate-content-visuals.cjs
 
+      - name: Validate every public page and known-issues interaction
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
+          FORMATX_PUBLIC_ORIGIN: http://127.0.0.1:4178
+        run: node .github/scripts/validate-public-pages-browser.cjs
+
       - name: Validate existing Morphing Organism and dialogue contracts
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
@@ -126,22 +149,27 @@ jobs:
           node .github/scripts/validate-organism-voice-browser.cjs
           node .github/scripts/validate-thought-genome.cjs
 
+      - name: Generate production readiness report
+        run: node .github/scripts/production-preflight.cjs
+
       - name: Verify synchronized download URL when available
         shell: bash
         run: |
           set -euo pipefail
           if jq -e '.ok == true and .channels.windows.available == true' docs/scifi-ui/data/current-release.json >/dev/null; then
             url="$(jq -r '.channels.windows.download_url' docs/scifi-ui/data/current-release.json)"
-            curl --fail --location --silent --show-error --head --max-time 30 "$url" >/dev/null
+            curl --fail --location --silent --show-error --range 0-0 --max-time 45 "$url" >/dev/null
           else
             echo 'No synchronized Windows asset; versionless fallback is the expected state.'
           fi
 
-      - name: Upload visual contract screenshots
+      - name: Upload validation artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: formatx-content-visual-contracts
-          path: artifacts/content-visuals
+          name: formatx-content-and-production-readiness
+          path: |
+            artifacts/content-visuals
+            artifacts/production-readiness.json
           if-no-files-found: warn
           retention-days: 14
