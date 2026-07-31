@@ -16,10 +16,11 @@ const DATA_PATHS = new Set([
   '/scifi-ui/data/stable-gate.json', '/scifi-ui/data/decision-log.json',
   '/scifi-ui/data/workflow-cases.json', '/scifi-ui/scripts/release-metadata.js',
   '/scifi-ui/scripts/formatx-content-standard.js',
+  '/scifi-ui/scripts/formatx-content-finalizer.js',
   '/scifi-ui/scripts/public-evidence-pages.js', '/scifi-ui/scripts/formatx-seo.js',
   '/scifi-ui/styles/formatx-content-standard.css'
 ]);
-const ASSETS = '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-1">\n<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260731-release-2"></script>\n<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260731-seo-2"></script>';
+const ASSETS = '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-1">\n<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260731-release-2"></script>\n<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260731-seo-2"></script>\n<script defer src="/scifi-ui/scripts/formatx-content-finalizer.js?v=20260731-content-final-1"></script>';
 
 export default {
   async fetch(request, env, ctx) {
