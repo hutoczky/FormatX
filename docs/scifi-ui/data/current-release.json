@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "synced_at": null,
+  "ok": false,
+  "source": "github_published_release",
+  "repository": "hutoczky/FormatX-Updates",
+  "version": null,
+  "release_name": null,
+  "published_at": null,
+  "prerelease": null,
+  "release_url": "https://github.com/hutoczky/FormatX-Updates/releases",
+  "notes_url": null,
+  "channels": {
+    "windows": {
+      "available": false,
+      "name": null,
+      "download_url": null,
+      "size": null,
+      "digest": null,
+      "content_type": null
+    },
+    "android": {
+      "available": true,
+      "name": "FormatX-Suite-Pro-Android.apk",
+      "download_url": "/download/android",
+      "size": null,
+      "digest": null,
+      "content_type": "application/vnd.android.package-archive"
+    }
+  },
+  "evidence": {
+    "checksum_asset_url": null,
+    "signature_asset_url": null,
+    "test_matrix_url": "/scifi-ui/test-matrix.html",
+    "known_issues_url": "/scifi-ui/known-issues.html",
+    "verification_url": "/scifi-ui/verification.html"
+  },
+  "error": "Official release metadata has not been synchronised yet."
+}
