@@ -1,0 +1,118 @@
+/* FormatX thought genome progressive disclosure — keeps the answer surface readable. */
+
+.fx-thought-genome-disclosure {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid rgba(182, 226, 244, .10);
+}
+
+.fx-thought-genome-disclosure > summary {
+  min-width: 0;
+  min-height: 38px;
+  padding: 8px 2px 0;
+  display: grid;
+  grid-template-columns: 22px minmax(0, auto) minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 8px;
+  color: rgba(229, 246, 253, .82);
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.fx-thought-genome-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fx-thought-genome-disclosure > summary::after {
+  content: '+';
+  justify-self: end;
+  color: rgba(125, 229, 255, .76);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.fx-thought-genome-disclosure[open] > summary::after {
+  content: '−';
+}
+
+.fx-thought-genome-disclosure > summary:hover,
+.fx-thought-genome-disclosure > summary:focus-visible {
+  color: #fff;
+  outline: none;
+}
+
+.fx-thought-genome-disclosure > summary:focus-visible {
+  border-radius: 8px;
+  box-shadow: 0 0 0 3px rgba(125, 229, 255, .10);
+}
+
+.fx-thought-genome-disclosure-icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: rgb(125, 229, 255);
+  border: 1px solid rgba(125, 229, 255, .22);
+  border-radius: 50%;
+  background: rgba(5, 20, 31, .72);
+  font-size: 10px;
+}
+
+.fx-thought-genome-disclosure > summary strong {
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fx-thought-genome-disclosure > summary small {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(202, 227, 237, .44);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 7px;
+  letter-spacing: .06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fx-thought-genome-disclosure > .fx-thought-genome-controls {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid rgba(162, 218, 241, .10);
+  border-radius: 14px;
+  background: rgba(1, 9, 16, .36);
+}
+
+.fx-thought-genome-disclosure:not([open]) > .fx-thought-genome-controls {
+  display: none !important;
+}
+
+@media (max-width: 480px) {
+  .fx-thought-genome-disclosure > summary {
+    grid-template-columns: 22px minmax(0, 1fr) 18px;
+  }
+
+  .fx-thought-genome-disclosure > summary small {
+    display: none;
+  }
+
+  .fx-thought-genome-disclosure > summary strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-thought-genome-disclosure,
+  .fx-thought-genome-disclosure * {
+    transition: none !important;
+  }
+}
