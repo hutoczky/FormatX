@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "updated": "2026-07-31",
+  "entries": [
+    {
+      "id": "FX-ADR-001",
+      "date": "2026-07-31",
+      "problem": {"hu": "A platformállapot több felületen eltérően jelent meg.", "en": "Platform maturity appeared inconsistently across surfaces."},
+      "decision": {"hu": "A platform-status.json az egyetlen irányadó platformállapot-forrás. A támogatási irány és a fejlettségi állapot külön mező.", "en": "platform-status.json is the single canonical platform-status source. Support direction and maturity are separate fields."},
+      "tradeoff": {"hu": "Minden oldal igaz, verzió nélküli fallback szöveget igényel.", "en": "Every page requires an honest versionless fallback."},
+      "verification": "/scifi-ui/data/platform-status.json",
+      "open_question": "Extend parity checks to every new public page."
+    },
+    {
+      "id": "FX-ADR-002",
+      "date": "2026-07-31",
+      "problem": {"hu": "A több fájlba kézzel írt verzió és letöltési URL elavulhat.", "en": "A version and download URL copied into multiple files can become stale."},
+      "decision": {"hu": "Az aktuális verzió, dátum és Windows-csomag a hivatalos FormatX-Updates legfrissebb GitHub Release metaadataiból származik.", "en": "The current version, date and Windows package come from the latest official FormatX-Updates GitHub Release metadata."},
+      "tradeoff": {"hu": "Metaadathibánál a felület nem talál ki verziót és nem mutat ellenőrizetlen közvetlen letöltést.", "en": "When metadata is unavailable, the interface invents no version and exposes no unverified direct download."},
+      "verification": "/scifi-ui/data/release-channel.json",
+      "open_question": "Publish checksum and signature assets consistently for every release."
+    },
+    {
+      "id": "FX-ADR-003",
+      "date": "2026-07-31",
+      "problem": {"hu": "A hiányzó termékbizonyítékokat dekoratív mockupok elfedhetnék.", "en": "Decorative mockups could hide missing product evidence."},
+      "decision": {"hu": "Bizonyítékként csak valódi alkalmazásállapot, napló, kiadási digest vagy reprodukálható teszt fogadható el.", "en": "Only real application states, logs, release digests or reproducible tests may be published as evidence."},
+      "tradeoff": {"hu": "A bizonyítékközpont a hiányokat is nyíltan mutatja.", "en": "The verification centre exposes evidence gaps openly."},
+      "verification": "/scifi-ui/data/evidence-manifest.json",
+      "open_question": "Capture and redact the required real application states."
+    },
+    {
+      "id": "FX-ADR-004",
+      "date": "2026-07-31",
+      "problem": {"hu": "Az Organizmus vagy WebGL hibája nem zárhatja ki a fő tartalmat.", "en": "An Organism or WebGL failure must not lock out the core content."},
+      "decision": {"hu": "A fő tartalom, navigáció és letöltési központ független az opcionális vizuális moduloktól.", "en": "Core content, navigation and the download centre are independent of optional visual modules."},
+      "tradeoff": {"hu": "Több fallback- és regressziós ellenőrzés szükséges.", "en": "More fallback and regression checks are required."},
+      "verification": "/scifi-ui/test-matrix.html",
+      "open_question": "Publish a dedicated no-WebGL test artifact."
+    }
+  ]
+}
