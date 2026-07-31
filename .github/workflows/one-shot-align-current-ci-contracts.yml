@@ -1,0 +1,80 @@
+name: One-shot align current CI contracts
+
+on:
+  push:
+    branches:
+      - maintenance/npm-audit-20260731
+    paths:
+      - '.github/workflows/one-shot-align-current-ci-contracts.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-one-shot-align-current-ci-contracts
+  cancel-in-progress: false
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align stale workflow assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              '.github/workflows/validate-mobile-intro-recovery.yml': {
+                  'safe-ready-v25': 'safe-ready-v26',
+                  'safe-degraded-v25': 'safe-degraded-v26',
+                  'organism-voice-dock.css?v=20260730-organism-dock-2': 'organism-voice-dock.css?v=20260731-organism-dock-3',
+                  'MOBILE_QUERY.matches ? 2100 : 2400': 'MOBILE_QUERY.matches?2100:2400',
+                  'TIMELINE_DURATION + EXIT_DURATION + 1100': 'hardDeadline=timelineDuration+exitDuration+1100',
+                  "DOMContentLoaded', startIntro": "DOMContentLoaded',start",
+                  'if (event.persisted) startIntro();': 'bfcache-restore',
+                  "! grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js": "grep -Fq 'formatx:intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js",
+              },
+              '.github/workflows/validate-organism-dialogue.yml': {
+                  'safe-ready-v25': 'safe-ready-v26',
+                  'safe-degraded-v25': 'safe-degraded-v26',
+                  'v25 loader or disclosure module missing': 'v26 loader or disclosure module missing',
+              },
+          }
+
+          for relative, mapping in replacements.items():
+              path = Path(relative)
+              source = path.read_text(encoding='utf-8')
+              updated = source
+              for old, new in mapping.items():
+                  updated = updated.replace(old, new)
+              if updated == source:
+                  raise SystemExit(f'No CI contract changes made in {relative}')
+              path.write_text(updated, encoding='utf-8')
+          PY
+
+          grep -Fq 'safe-ready-v26' .github/workflows/validate-mobile-intro-recovery.yml
+          grep -Fq 'organism-dock-3' .github/workflows/validate-mobile-intro-recovery.yml
+          grep -Fq 'formatx:intro-seen-v1' .github/workflows/validate-mobile-intro-recovery.yml
+          grep -Fq 'bfcache-restore' .github/workflows/validate-mobile-intro-recovery.yml
+          grep -Fq 'safe-ready-v26' .github/workflows/validate-organism-dialogue.yml
+          ! grep -Fq 'safe-ready-v25' .github/workflows/validate-mobile-intro-recovery.yml
+          ! grep -Fq 'safe-ready-v25' .github/workflows/validate-organism-dialogue.yml
+
+      - name: Remove one-shot workflow and commit alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/one-shot-align-current-ci-contracts.yml
+          git config user.name 'FormatX maintenance automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add .github/workflows/validate-mobile-intro-recovery.yml \
+                  .github/workflows/validate-organism-dialogue.yml
+          git commit -m 'Align CI with v26 loader and returning-visitor intro'
+          git push origin HEAD:maintenance/npm-audit-20260731
