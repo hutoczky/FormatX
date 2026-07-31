@@ -1,0 +1,142 @@
+name: Validate Organism speech and thought dialogue
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/organism-voice.js'
+      - 'docs/scifi-ui/scripts/organism-voice-foreground.js'
+      - 'docs/scifi-ui/scripts/organism-core-interaction.js'
+      - 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
+      - 'docs/scifi-ui/scripts/synaptic-thought-disclosure.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-unified.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/styles/organism-voice.css'
+      - 'docs/scifi-ui/styles/organism-voice-foreground.css'
+      - 'docs/scifi-ui/styles/organism-voice-dock.css'
+      - 'docs/scifi-ui/styles/synaptic-thought-genome.css'
+      - 'docs/scifi-ui/styles/synaptic-thought-disclosure.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-unified.css'
+      - 'docs/scifi-ui/privacy.html'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - 'billing-worker/src/production-entry.js'
+      - '.github/scripts/validate-thought-disclosure-browser.cjs'
+      - '.github/workflows/validate-organism-dialogue.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/organism-voice.js'
+      - 'docs/scifi-ui/scripts/organism-voice-foreground.js'
+      - 'docs/scifi-ui/scripts/organism-core-interaction.js'
+      - 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
+      - 'docs/scifi-ui/scripts/synaptic-thought-disclosure.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-unified.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/styles/organism-voice.css'
+      - 'docs/scifi-ui/styles/organism-voice-foreground.css'
+      - 'docs/scifi-ui/styles/organism-voice-dock.css'
+      - 'docs/scifi-ui/styles/synaptic-thought-genome.css'
+      - 'docs/scifi-ui/styles/synaptic-thought-disclosure.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-unified.css'
+      - 'docs/scifi-ui/privacy.html'
+      - 'worker.js'
+      - 'wrangler.jsonc'
+      - 'billing-worker/src/production-entry.js'
+      - '.github/scripts/validate-thought-disclosure-browser.cjs'
+      - '.github/workflows/validate-organism-dialogue.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-organism-dialogue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate source contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/organism-voice.js
+          node --check docs/scifi-ui/scripts/organism-voice-foreground.js
+          node --check docs/scifi-ui/scripts/organism-core-interaction.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
+          node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check .github/scripts/validate-thought-disclosure-browser.cjs
+          node --input-type=module --check < billing-worker/src/production-entry.js
+          node --input-type=module --check < worker.js
+
+          node - <<'NODE'
+          const fs = require('fs');
+          const read = path => fs.readFileSync(path, 'utf8');
+          const voice = read('docs/scifi-ui/scripts/organism-voice.js');
+          const disclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
+          const disclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
+          const genome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
+          const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
+          const privacy = read('docs/scifi-ui/privacy.html');
+          const preview = read('worker.js');
+          const production = read('billing-worker/src/production-entry.js');
+          const previewConfig = read('wrangler.jsonc');
+
+          const checks = [
+            [voice.includes("let speechEnabled = false"), 'speech must be off by default'],
+            [voice.includes('fx-organism-master-toggle'), 'Organism master switch missing'],
+            [voice.includes('setOpen(false, false)'), 'dialogue does not start closed'],
+            [voice.includes("ROOT.dataset.fxOrganismDialogueEnabled"), 'master state marker missing'],
+            [!voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'), 'voice answer engine must remain network-free'],
+            [genome.includes('questionStored: false') && genome.includes('fingerprint-only'), 'Thought Genome must store fingerprints only'],
+            [!genome.includes('fetch(') && !genome.includes('XMLHttpRequest') && !genome.includes('WebSocket'), 'Thought Genome must remain network-free'],
+            [disclosure.includes('details.open = false') && disclosure.includes('defaultOpen: false'), 'advanced controls must start closed'],
+            [disclosure.includes("output.setAttribute('aria-live', 'polite')"), 'response-only live region missing'],
+            [disclosure.includes("bubble.removeAttribute('aria-live')"), 'whole dialogue is still an aria-live region'],
+            [disclosure.includes("liveRegion: 'response-only'"), 'live-region contract marker missing'],
+            [disclosureCss.includes(':not([open]) > .fx-thought-genome-controls'), 'advanced controls are not hidden while closed'],
+            [disclosureCss.includes("data-fx-organism-dialogue-enabled='false'") && disclosureCss.includes('.fx-thought-genome-layer'), 'Thought constellation is not hidden by master off'],
+            [loader.includes('safe-ready-v25') && loader.includes('synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1'), 'v25 loader or disclosure module missing'],
+            [loader.indexOf('synaptic-thought-genome.js') < loader.indexOf('synaptic-thought-disclosure.js'), 'disclosure loads before Thought Genome'],
+            [privacy.includes('legfeljebb 12 gondolatgenom-lenyomat') && privacy.includes('nyers kérdésszöveget nem menti'), 'privacy page does not document local Thought Genome data'],
+            [privacy.includes('helyi vagy online hangot használhat'), 'privacy page does not disclose browser speech service'],
+            [preview.includes('synaptic-thought-disclosure.js') && preview.includes('synaptic-thought-disclosure.css'), 'preview Worker disclosure routes missing'],
+            [production.includes('synaptic-thought-disclosure.js') && production.includes('synaptic-thought-disclosure.css'), 'production Worker disclosure routes missing'],
+            [previewConfig.includes('/scifi-ui/scripts/synaptic-thought-disclosure.js') && previewConfig.includes('/scifi-ui/styles/synaptic-thought-disclosure.css'), 'preview route ownership missing disclosure assets'],
+          ];
+          const failed = checks.filter(([ok]) => !ok).map(([, message]) => message);
+          if (failed.length) throw new Error(failed.join('; '));
+          console.log('PASS: Organism dialogue source, privacy, accessibility and routing contracts are valid.');
+          NODE
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-organism-browser" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-organism-browser/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start static site
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-organism-http.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-organism-http.log"
+          exit 1
+
+      - name: Validate desktop and mobile interaction
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-organism-browser/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+        run: node .github/scripts/validate-thought-disclosure-browser.cjs
