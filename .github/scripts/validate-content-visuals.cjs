@@ -14,6 +14,8 @@ function assert(condition, message) {
 
 async function injectContentLayer(page) {
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-content-standard.css' });
+  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-readability.css' });
+  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-unified.css' });
   for (const src of [
     '/scifi-ui/scripts/release-metadata.js',
     '/scifi-ui/scripts/formatx-content-standard.js',
@@ -23,7 +25,7 @@ async function injectContentLayer(page) {
   ]) {
     await page.addScriptTag({ url: origin + src });
   }
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(2600);
 }
 
 async function visibleBox(page, selector) {
@@ -38,8 +40,61 @@ async function visibleBox(page, selector) {
   });
 }
 
-function overlap(a, b) {
-  return !(a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y);
+async function optionalVisibleBox(page, selector) {
+  const locator = page.locator(selector).first();
+  if (!(await locator.count())) return null;
+  return locator.evaluate(element => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    const visible = style.display !== 'none'
+      && style.visibility !== 'hidden'
+      && Number(style.opacity) > .02
+      && rect.width > 0
+      && rect.height > 0;
+    return visible ? {
+      x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+      display: style.display, visibility: style.visibility, opacity: Number(style.opacity),
+      text: element.textContent.trim()
+    } : null;
+  });
+}
+
+function overlap(a, b, gap = 0) {
+  if (!a || !b) return false;
+  return !(
+    a.x + a.width + gap <= b.x
+    || b.x + b.width + gap <= a.x
+    || a.y + a.height + gap <= b.y
+    || b.y + b.height + gap <= a.y
+  );
+}
+
+async function mobileLayoutAssertions(page) {
+  const heroCopy = await visibleBox(page, '#hero .hero-copy');
+  const heroSpace = await visibleBox(page, '#hero .hero-space');
+  const cue = await visibleBox(page, '#hero .scroll-cue');
+  const category = await visibleBox(page, '.fx-category-deck--standalone, .fx-category-deck');
+
+  assert(heroCopy.y + heroCopy.height <= heroSpace.y + 2, 'Reserved 3D field starts inside the hero copy');
+  assert(heroSpace.y + heroSpace.height <= cue.y + 2, 'Chapter cue overlaps the reserved 3D field');
+  assert(cue.y + cue.height <= category.y + 2, 'Next category heading overlaps the hero chapter cue');
+  assert(!overlap(heroCopy, category), 'Category section overlaps the mobile hero copy');
+
+  const thought = await optionalVisibleBox(page, '.fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger');
+  const genome = await optionalVisibleBox(page, '.fx-genome-launcher');
+  const sound = await optionalVisibleBox(page, '.fx-three-sound');
+  const dock = await optionalVisibleBox(page, '.fx-organism-actionbar');
+
+  for (const [name, control] of [['Thought trigger', thought], ['Genome trigger', genome], ['Sound trigger', sound]]) {
+    if (!control) continue;
+    assert(!overlap(control, heroCopy, 4), `${name} overlaps the mobile hero copy`);
+    assert(!overlap(control, cue, 4), `${name} overlaps the chapter cue`);
+    if (dock) assert(!overlap(control, dock, 4), `${name} overlaps the bottom action dock`);
+  }
+
+  assert(!overlap(thought, genome, 4), 'Thought and Genome triggers overlap');
+  assert(!overlap(thought, sound, 4), 'Thought and sound triggers overlap');
+  assert(!overlap(genome, sound, 4), 'Genome and sound triggers overlap');
 }
 
 async function commonAssertions(page, mobile) {
@@ -62,6 +117,7 @@ async function commonAssertions(page, mobile) {
   if (mobile) {
     const menu = await visibleBox(page, '#menu-toggle');
     assert(menu.width >= 40 && menu.height >= 40, 'Mobile menu target is too small');
+    await mobileLayoutAssertions(page);
   }
 }
 
@@ -98,6 +154,7 @@ async function publicPage(browser, name, pathname, expectedSelector, viewport = 
   try {
     await capture(browser, 'desktop-hero-hu', { width: 1440, height: 900 });
     await capture(browser, 'mobile-hero-hu', { width: 390, height: 844 });
+    await capture(browser, 'mobile-hero-wide', { width: 430, height: 932 });
     await capture(browser, 'small-height-hero', { width: 1366, height: 600 });
     await capture(browser, 'reduced-motion', { width: 1440, height: 900 });
     await capture(browser, 'desktop-hero-en', { width: 1440, height: 900 }, async page => {
