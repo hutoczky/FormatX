@@ -186,6 +186,14 @@ jobs:
       - name: Smoke-test both custom domains and requested features
         run: |
           set -euo pipefail
+          expected_loader_marker="$(grep -Eo 'safe-ready-v[0-9]+' docs/scifi-ui/scripts/igloo-parity.js | head -n 1)"
+          expected_release_version="$(node -p "require('./docs/scifi-ui/data/current-release.json').version")"
+          expected_release_schema="$(node -p "require('./docs/scifi-ui/data/current-release.json').schema_version")"
+          expected_release_digest="$(node -p "require('./docs/scifi-ui/data/current-release.json').channels?.windows?.digest || ''")"
+          test -n "$expected_loader_marker"
+          test -n "$expected_release_version"
+          test -n "$expected_release_schema"
+
           for origin in https://formatxsuite.com https://www.formatxsuite.com; do
             success=false
             for attempt in $(seq 1 12); do
@@ -199,7 +207,7 @@ jobs:
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/formatx-mobile-unified.css?v=20260731-live-audit-1" > "$tmp/mobile.css" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/assets/qr/business_lite-huf.svg?v=20260731-live-audit-1" > "$tmp/qr.svg" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/data/current-release.json" > "$tmp/release.json" \
-                && grep -Fq 'safe-ready-v25' "$tmp/loader.js" \
+                && grep -Fq "$expected_loader_marker" "$tmp/loader.js" \
                 && grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' "$tmp/loader.js" \
                 && grep -Fq 'SpeechSynthesisUtterance' "$tmp/voice.js" \
                 && grep -Fq 'fx-organism-master-toggle' "$tmp/voice.js" \
@@ -208,7 +216,17 @@ jobs:
                 && grep -Fq 'Részletes licencfeltételek' "$tmp/license.html" \
                 && grep -Fq 'Detailed licence terms' "$tmp/license.html" \
                 && grep -Fq 'no text overlap' "$tmp/mobile.css" \
-                && grep -Fq '<svg' "$tmp/qr.svg"; then
+                && grep -Fq '<svg' "$tmp/qr.svg" \
+                && node - "$tmp/release.json" "$expected_release_version" "$expected_release_schema" "$expected_release_digest" <<'NODE'
+          const fs = require('node:fs');
+          const [file, expectedVersion, expectedSchema, expectedDigest] = process.argv.slice(2);
+          const live = JSON.parse(fs.readFileSync(file, 'utf8'));
+          if (live.ok !== true) process.exit(1);
+          if (live.version !== expectedVersion) process.exit(1);
+          if (String(live.schema_version) !== expectedSchema) process.exit(1);
+          if (expectedDigest && live.channels?.windows?.digest !== expectedDigest) process.exit(1);
+          NODE
+              then
                 success=true
                 rm -rf "$tmp"
                 break
