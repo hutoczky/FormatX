@@ -1,39 +1,60 @@
 {
-  "schema_version": 1,
-  "synced_at": "2026-07-31T12:57:04Z",
+  "schema_version": 2,
+  "synced_at": "2026-07-31T18:48:09Z",
   "ok": true,
   "source": "github_published_release",
   "repository": "hutoczky/FormatX-Updates",
-  "version": "v116",
-  "release_name": "FormatX Suite Pro V116",
-  "published_at": "2026-07-27T04:58:11Z",
+  "source_release_id": 363189352,
+  "source_updated_at": "2026-07-31T16:10:31Z",
+  "target_commitish": "main",
+  "version": "v120",
+  "release_name": "FormatX Suite Pro V120",
+  "published_at": "2026-07-31T16:10:06Z",
   "prerelease": false,
-  "release_url": "https://github.com/hutoczky/FormatX-Updates/releases/tag/v116",
-  "notes_url": "https://github.com/hutoczky/FormatX-Updates/releases/tag/v116",
+  "release_url": "https://github.com/hutoczky/FormatX-Updates/releases/tag/v120",
+  "notes_url": "https://github.com/hutoczky/FormatX-Updates/releases/tag/v120",
   "channels": {
     "windows": {
       "available": true,
-      "name": "FormatX-Suite-Pro-V116.zip",
-      "download_url": "https://github.com/hutoczky/FormatX-Updates/releases/download/v116/FormatX-Suite-Pro-V116.zip",
-      "size": 531480554,
-      "digest": "sha256:ed781446e8cecfed9c7a65d4118ce0734e63d469ef243d27247484e12a7d211f",
-      "content_type": "application/zip"
+      "asset_id": 496883996,
+      "name": "FormatX-Suite-Pro-V120.zip",
+      "download_url": "https://github.com/hutoczky/FormatX-Updates/releases/download/v120/FormatX-Suite-Pro-V120.zip",
+      "size": 537085443,
+      "digest": "sha256:226d9edcfa184185f238bd3805531a2f31a4ed669bcb06f8bb82ce977a1bb93e",
+      "content_type": "application/zip",
+      "created_at": "2026-07-31T16:10:07Z",
+      "updated_at": "2026-07-31T16:10:31Z",
+      "download_count": 1,
+      "source": "github_release_asset"
     },
     "android": {
       "available": true,
+      "asset_id": null,
       "name": "FormatX-Suite-Pro-Android.apk",
       "download_url": "/download/android",
       "size": null,
       "digest": null,
-      "content_type": "application/vnd.android.package-archive"
+      "content_type": "application/vnd.android.package-archive",
+      "created_at": null,
+      "updated_at": null,
+      "download_count": null,
+      "source": "local_worker_asset"
     }
   },
   "evidence": {
     "checksum_asset_url": null,
+    "checksum_asset_name": null,
     "signature_asset_url": null,
+    "signature_asset_name": null,
     "test_matrix_url": "/scifi-ui/test-matrix.html",
     "known_issues_url": "/scifi-ui/known-issues.html",
     "verification_url": "/scifi-ui/verification.html"
+  },
+  "integrity": {
+    "windows_digest_available": true,
+    "checksum_asset_available": false,
+    "signature_asset_available": false,
+    "status": "digest_published"
   },
   "error": null
 }
