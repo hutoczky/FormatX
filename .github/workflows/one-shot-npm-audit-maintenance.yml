@@ -37,7 +37,7 @@ jobs:
           mkdir -p ../artifacts
           npm ci
           npm audit --json > ../artifacts/npm-audit-before.json || true
-          npm audit fix --package-lock-only
+          npm audit fix --package-lock-only || true
           npm ci
           npm audit --json > ../artifacts/npm-audit-after.json || true
 
