@@ -46,7 +46,22 @@
   }
 
   .fx-organism-dialogue:not(.is-open) {
-    display: none !important;
+    right: 10px !important;
+    bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 58px !important;
+    max-width: 58px !important;
+    justify-items: center !important;
+  }
+
+  .fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger {
+    position: relative !important;
+    inset: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 10030 !important;
   }
 }
 
