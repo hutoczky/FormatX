@@ -14,7 +14,7 @@
     flex: 0 0 auto !important;
     width: auto !important;
     margin-left: 16px !important;
-    margin-right: 82px !important;
+    margin-right: 92px !important;
   }
 
   #hero .hero-space {
@@ -34,11 +34,36 @@
     translate: none !important;
     margin-top: 12px !important;
   }
+
+  .fx-language-toggle {
+    display: inline-flex !important;
+    position: fixed !important;
+    top: 14px !important;
+    right: 70px !important;
+    z-index: 10040 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .fx-organism-thought-trigger {
+    position: fixed !important;
+    top: auto !important;
+    right: 10px !important;
+    bottom: calc(138px + env(safe-area-inset-bottom, 0px)) !important;
+    left: auto !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 10030 !important;
+  }
 }
 
 @media (max-width: 430px) {
   #hero .hero-copy {
     margin-left: 12px !important;
-    margin-right: 76px !important;
+    margin-right: 86px !important;
+  }
+
+  .fx-language-toggle {
+    right: 66px !important;
   }
 }
