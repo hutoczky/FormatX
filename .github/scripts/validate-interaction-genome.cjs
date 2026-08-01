@@ -11,7 +11,9 @@ function assert(value, message) {
 
 async function clearIntro(page) {
   const skip = page.locator('.fx-intro-skip');
-  if (await skip.isVisible({ timeout: 5000 }).catch(() => false)) await skip.click({ force: true });
+  if (await skip.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await skip.click({ force: true });
+  }
   await page.waitForFunction(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
@@ -27,7 +29,11 @@ async function clearIntro(page) {
 }
 
 async function waitGenome(page) {
-  await page.waitForFunction(() => document.documentElement.dataset.fxInteractionGenome === 'ready' && window.FormatXInteractionGenome, null, { timeout: 30000 });
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxInteractionGenome === 'ready'
+    && document.documentElement.dataset.fxInteractionGenomeExport === 'ready'
+    && window.FormatXInteractionGenome
+  ), null, { timeout: 30000 });
 }
 
 async function state(page) {
@@ -39,6 +45,7 @@ async function state(page) {
     const rect = canvas?.getBoundingClientRect();
     return {
       marker: document.documentElement.dataset.fxInteractionGenome,
+      exportMarker: document.documentElement.dataset.fxInteractionGenomeExport,
       count: data.items.length,
       selected: data.selected,
       fingerprint: data.fingerprint,
@@ -48,17 +55,28 @@ async function state(page) {
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
       lang: document.documentElement.lang,
       launcher: Boolean(document.querySelector('.fx-genome-launcher')),
-      schemaReady: data.items.every(item => typeof item.y === 'number' && typeof item.scene === 'number' && typeof item.lang === 'string')
+      schemaReady: data.items.every(item => (
+        typeof item.y === 'number'
+        && typeof item.scene === 'number'
+        && typeof item.lang === 'string'
+      ))
     };
   });
 }
 
 async function desktop(browser) {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark', acceptDownloads: true });
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    locale: 'hu-HU',
+    colorScheme: 'dark',
+    acceptDownloads: true
+  });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(String(error)));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
 
   await page.goto(URL + '?lang=hu&genome-test=1', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
@@ -66,15 +84,27 @@ async function desktop(browser) {
 
   await page.evaluate(() => {
     scrollTo(0, 640);
-    window.FormatXInteractionGenome.record('scroll', 'Desktop checkpoint A', { y: 640, progress: .18, scene: 1, lang: 'hu', audio: 'off', loop: 0 });
+    window.FormatXInteractionGenome.record('scroll', 'Desktop checkpoint A', {
+      y: 640, progress: .18, scene: 1, lang: 'hu', audio: 'off', loop: 0
+    });
     scrollTo(0, 1280);
-    window.FormatXInteractionGenome.record('scene', 'Desktop checkpoint B', { y: 1280, progress: .36, scene: 2, lang: 'hu', audio: 'off', loop: 0 });
+    window.FormatXInteractionGenome.record('scene', 'Desktop checkpoint B', {
+      y: 1280, progress: .36, scene: 2, lang: 'hu', audio: 'off', loop: 0
+    });
   });
 
   const english = page.locator('[data-language="en"]').first();
   if (await english.count()) await english.evaluate(node => node.click());
   await page.waitForFunction(() => document.documentElement.lang === 'en');
-  await page.evaluate(() => window.FormatXInteractionGenome.record('language', 'Language checkpoint', { y: scrollY, scene: Number(document.documentElement.dataset.fxThreeScene || 0), lang: 'en' }));
+  await page.evaluate(() => window.FormatXInteractionGenome.record(
+    'language',
+    'Language checkpoint',
+    {
+      y: scrollY,
+      scene: Number(document.documentElement.dataset.fxThreeScene || 0),
+      lang: 'en'
+    }
+  ));
 
   await page.locator('.fx-genome-launcher').click();
   await page.waitForFunction(() => document.getElementById('fx-interaction-genome')?.dataset.open === 'true');
@@ -82,44 +112,76 @@ async function desktop(browser) {
 
   let current = await state(page);
   assert(current.marker === 'ready', 'genome marker: ' + JSON.stringify(current));
+  assert(current.exportMarker === 'ready', 'genome exporter marker: ' + JSON.stringify(current));
   assert(current.count >= 4, 'not enough genome nodes: ' + JSON.stringify(current));
   assert(current.fingerprint.length === 64, 'invalid SHA-256 fingerprint: ' + current.fingerprint);
-  assert(current.overlayOpen === 'true' && current.canvas[0] > 700 && current.canvas[1] > 400, 'desktop genome stage: ' + JSON.stringify(current));
+  assert(
+    current.overlayOpen === 'true' && current.canvas[0] > 700 && current.canvas[1] > 400,
+    'desktop genome stage: ' + JSON.stringify(current)
+  );
   assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
   assert(current.schemaReady, 'invalid genome state schema');
-  assert(/website remembers|honlap emlékszik/i.test(await page.locator('#fx-genome-title').textContent()), 'translated genome title missing');
+  assert(
+    /website remembers|honlap emlékszik/i.test(await page.locator('#fx-genome-title').textContent()),
+    'translated genome title missing'
+  );
 
-  const checkpointIndex = await page.evaluate(() => window.FormatXInteractionGenome.getState().items.findIndex(item => item.action === 'Desktop checkpoint A'));
+  const checkpointIndex = await page.evaluate(() => (
+    window.FormatXInteractionGenome.getState().items.findIndex(
+      item => item.action === 'Desktop checkpoint A'
+    )
+  ));
   assert(checkpointIndex >= 0, 'checkpoint not found');
   await page.evaluate(index => window.FormatXInteractionGenome.restore(index), checkpointIndex);
   await page.waitForFunction(() => Math.abs(scrollY - 640) < 12, null, { timeout: 5000 });
   await page.waitForFunction(() => document.documentElement.lang === 'hu', null, { timeout: 5000 });
 
   await page.locator('.fx-genome-launcher').click();
-  const downloadPromise = page.waitForEvent('download');
+  const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
   await page.locator('#fx-genome-export').click();
   const download = await downloadPromise;
   const file = await download.path();
   const payload = JSON.parse(fs.readFileSync(file, 'utf8'));
   assert(payload.schema === 'formatx-interaction-genome-v1', 'export schema');
-  assert(payload.local_only === true && payload.contains_form_values === false && payload.contains_personal_text === false, 'privacy metadata');
-  assert(payload.fingerprint_sha256.length === 64 && payload.states.length >= 4, 'export payload');
+  assert(
+    payload.local_only === true
+      && payload.contains_form_values === false
+      && payload.contains_personal_text === false,
+    'privacy metadata'
+  );
+  assert(
+    payload.fingerprint_sha256.length === 64 && payload.states.length >= 4,
+    'export payload'
+  );
 
   const meaningful = errors.filter(error => !/WebGL|WebGPU|GPU|favicon|ERR_ABORTED/i.test(error));
   assert(!meaningful.length, 'desktop browser errors: ' + meaningful.join(' | '));
   current = await state(page);
-  console.log(JSON.stringify({ case: 'interaction-genome-desktop', current, exportedStates: payload.states.length }));
+  console.log(JSON.stringify({
+    case: 'interaction-genome-desktop',
+    current,
+    exportedStates: payload.states.length
+  }));
   await context.close();
 }
 
 async function mobile(browser) {
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, locale: 'hu-HU', colorScheme: 'dark' });
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 2,
+    locale: 'hu-HU',
+    colorScheme: 'dark'
+  });
   const page = await context.newPage();
   await page.goto(URL + '?lang=hu&genome-test=1', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
   await waitGenome(page);
   await page.evaluate(() => {
-    window.FormatXInteractionGenome.record('click', 'Mobile checkpoint', { y: 260, progress: .1, scene: 0, lang: 'hu', audio: 'off', loop: 0 });
+    window.FormatXInteractionGenome.record('click', 'Mobile checkpoint', {
+      y: 260, progress: .1, scene: 0, lang: 'hu', audio: 'off', loop: 0
+    });
     window.FormatXInteractionGenome.open();
   });
   await page.waitForFunction(() => document.getElementById('fx-interaction-genome')?.dataset.open === 'true');
@@ -133,7 +195,10 @@ async function mobile(browser) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader', '--disable-smooth-scrolling'] });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--enable-unsafe-swiftshader', '--disable-smooth-scrolling']
+  });
   try {
     await desktop(browser);
     await mobile(browser);
