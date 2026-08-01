@@ -9,6 +9,12 @@
     "public_release_version_visible": false,
     "release_maturity": "public_beta"
   },
+  "layout_contract": {
+    "desktop_composition_preloaded": true,
+    "mobile_layout_unchanged": true,
+    "infinite_scroll_controller": "boundary-v4",
+    "clone_based_loop": false
+  },
   "source_of_truth": {
     "platform_status": "/scifi-ui/data/platform-status.json",
     "release_metadata": "/scifi-ui/data/current-release.json"
