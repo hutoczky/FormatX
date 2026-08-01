@@ -44,6 +44,24 @@
     ROOT.classList.remove('fx-organism-menu-open');
   }
 
+  function normalizeClosedConsole() {
+    const consoleRoot = document.getElementById('fx-organism-console');
+    if (consoleRoot) {
+      consoleRoot.classList.remove('is-authorised-open');
+      consoleRoot.hidden = true;
+      consoleRoot.setAttribute('aria-hidden', 'true');
+    }
+    document.querySelectorAll('[data-organism-panel]').forEach(panel => {
+      panel.hidden = true;
+      panel.setAttribute('aria-hidden', 'true');
+    });
+    document.querySelectorAll('[data-organism-tab]').forEach(tab => {
+      tab.setAttribute('aria-selected', 'false');
+    });
+    document.body?.classList.remove('fx-organism-panel-open');
+    ROOT.dataset.fxOrganismConsole = 'closed';
+  }
+
   function updateNavigation(scene) {
     const bounded = Math.max(0, Math.min(5, Number(scene) || 0));
     const label = SCENE_LABELS[bounded];
@@ -87,16 +105,9 @@
     if (settings.closePanel && panelIsOpen()) {
       const close = document.querySelector('[data-organism-close]');
       if (close instanceof HTMLElement) close.click();
-      else {
-        const consoleRoot = document.getElementById('fx-organism-console');
-        if (consoleRoot) {
-          consoleRoot.hidden = true;
-          consoleRoot.setAttribute('aria-hidden', 'true');
-        }
-        document.body?.classList.remove('fx-organism-panel-open');
-      }
     }
 
+    normalizeClosedConsole();
     updateNavigation(0);
     if (settings.replaceHistory) replaceHash('#hero');
 
@@ -191,8 +202,8 @@
       updateNavigation(scene);
     }
   });
-  addEventListener('pageshow', event => {
-    if (event.persisted || !panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: true });
+  addEventListener('pageshow', () => {
+    activateCore({ scroll: false, replaceHistory: true, closePanel: true });
   });
 
   ROOT.dataset.fxOrganismCoreController = 'ready';
