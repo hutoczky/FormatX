@@ -8,6 +8,7 @@
   root.dataset.fxInfiniteController = 'boundary-v4';
   root.dataset.fxInfiniteCloneMode = 'none';
   root.dataset.fxInfiniteInput = 'idle';
+  root.dataset.fxScrollActivity = 'idle';
 
   const TOP_SELECTOR = '#hero';
   const BOTTOM_SELECTOR = '#resources';
@@ -16,15 +17,22 @@
   const BOUNDARY_EPSILON = 12;
   const COOLDOWN_MS = 360;
   const SETTLE_MS = 320;
+  const NATIVE_LOOP_DELAY_MS = 180;
+  const ACTIVITY_IDLE_MS = 140;
   const DOWN_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ']);
   const UP_KEYS = new Set(['ArrowUp', 'PageUp', 'Home']);
 
   let looping = false;
   let cooldownUntil = 0;
-  let loopCount = Number(root.dataset.fxInfiniteLoopCount || 0);
+  let loopCount = Number(
+    root.dataset.fxLoopCount || root.dataset.fxInfiniteLoopCount || 0
+  );
   let wheelDown = 0;
   let wheelUp = 0;
   let touchStartY = null;
+  let lastExplicitInputAt = 0;
+  let nativeLoopQueued = false;
+  let activityTimer = 0;
 
   function topNode() {
     return document.querySelector(TOP_SELECTOR);
@@ -63,9 +71,9 @@
       + '[data-scroll-container], [data-organism-panel]'
     );
     if (!(scroller instanceof HTMLElement)) return false;
-    const max = scroller.scrollHeight - scroller.clientHeight;
-    if (max <= 1) return false;
-    if (deltaY > 0) return scroller.scrollTop < max - 1;
+    const maximum = scroller.scrollHeight - scroller.clientHeight;
+    if (maximum <= 1) return false;
+    if (deltaY > 0) return scroller.scrollTop < maximum - 1;
     if (deltaY < 0) return scroller.scrollTop > 1;
     return true;
   }
@@ -77,16 +85,63 @@
     ));
   }
 
+  function markActivity() {
+    root.dataset.fxScrollActivity = 'scrolling';
+    root.classList.add('fx-page-scrolling');
+    clearTimeout(activityTimer);
+    activityTimer = window.setTimeout(() => {
+      if (!looping) markIdle();
+    }, ACTIVITY_IDLE_MS);
+  }
+
+  function markIdle() {
+    clearTimeout(activityTimer);
+    root.dataset.fxScrollActivity = 'idle';
+    root.classList.remove('fx-page-scrolling');
+  }
+
   function publishReadyState() {
     root.dataset.fxInfiniteScroll = 'ready-v4';
     root.dataset.fxInfiniteController = 'boundary-v4';
     root.dataset.fxInfiniteCloneMode = 'none';
     root.dataset.fxInfiniteLoopCount = String(loopCount);
+    root.dataset.fxLoopCount = String(loopCount);
     root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
       version: 'boundary-v4',
       clonedContent: false,
       reinitialisedRenderer: false,
       loopCount
+    });
+  }
+
+  function publishLoop(direction, source, target) {
+    root.dataset.fxInfiniteLast = direction;
+    root.dataset.fxInfiniteLoopCount = String(loopCount);
+    root.dataset.fxLoopCount = String(loopCount);
+    root.dataset.fxLoopSource = source;
+    root.dataset.fxLoopTarget = String(target);
+    root.dataset.fxInfiniteBoundary = direction === 'down' ? 'top' : 'bottom';
+  }
+
+  function queueNativeBottomLoop() {
+    if (
+      nativeLoopQueued
+      || looping
+      || dialogueOpen()
+      || performance.now() < cooldownUntil
+      || performance.now() - lastExplicitInputAt < NATIVE_LOOP_DELAY_MS
+    ) return;
+
+    nativeLoopQueued = true;
+    requestAnimationFrame(() => {
+      nativeLoopQueued = false;
+      if (
+        nearBottom()
+        && !looping
+        && performance.now() - lastExplicitInputAt >= NATIVE_LOOP_DELAY_MS
+      ) {
+        void performLoop('down', 'native-scroll');
+      }
     });
   }
 
@@ -96,6 +151,8 @@
       : nearBottom()
         ? 'bottom'
         : 'middle';
+    markActivity();
+    if (nearBottom()) queueNativeBottomLoop();
   }
 
   function replaceHash(direction) {
@@ -126,14 +183,13 @@
     root.dataset.fxInfiniteInput = 'looping';
     root.dataset.fxInfiniteSource = source || 'unknown';
     root.classList.add('fx-infinite-loop-jump');
+    markActivity();
     replaceHash(direction);
 
     await settleAt(target);
 
     loopCount += 1;
-    root.dataset.fxInfiniteLast = direction;
-    root.dataset.fxInfiniteLoopCount = String(loopCount);
-    root.dataset.fxInfiniteBoundary = direction === 'down' ? 'top' : 'bottom';
+    publishLoop(direction, source || 'unknown', target);
 
     dispatchEvent(new CustomEvent('formatx:loop', {
       detail: {
@@ -155,10 +211,12 @@
     cooldownUntil = performance.now() + COOLDOWN_MS;
     wheelDown = 0;
     wheelUp = 0;
+    markIdle();
     return true;
   }
 
   function handleWheel(event) {
+    lastExplicitInputAt = performance.now();
     if (
       looping
       || performance.now() < cooldownUntil
@@ -197,18 +255,21 @@
     ) return;
 
     if (DOWN_KEYS.has(event.key) && nearBottom()) {
+      lastExplicitInputAt = performance.now();
       event.preventDefault();
       void performLoop('down', 'keyboard');
       return;
     }
 
     if (UP_KEYS.has(event.key) && nearTop()) {
+      lastExplicitInputAt = performance.now();
       event.preventDefault();
       void performLoop('up', 'keyboard');
     }
   }
 
   function handleTouchStart(event) {
+    lastExplicitInputAt = performance.now();
     if (ignoredTarget(event.target) || dialogueOpen()) return;
     touchStartY = event.touches?.[0]?.clientY ?? null;
   }
@@ -248,11 +309,13 @@
     loopNote.setAttribute('role', 'button');
     loopNote.addEventListener('keydown', event => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
+      lastExplicitInputAt = performance.now();
       event.preventDefault();
       void performLoop('down', 'loop-note');
     });
   }
 
   onScroll();
+  markIdle();
   publishReadyState();
 }());
