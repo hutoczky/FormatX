@@ -3,13 +3,13 @@
 
 /* Desktop and laptop input remains continuous. Mobile keeps its guided snap flow. */
 @media (min-width: 901px) {
-  html.fx-organism-interface-ready {
+  html body.living-architecture {
     scroll-snap-type: none !important;
   }
 }
 
 @media (min-width: 1100px) and (pointer: fine) {
-  html.fx-organism-interface-ready #hero {
+  html body.living-architecture #hero {
     display: grid;
     min-height: min(100svh, 960px);
     padding: clamp(88px, 9vh, 124px) 0 clamp(86px, 9vh, 116px);
@@ -17,7 +17,7 @@
     overflow: clip;
   }
 
-  html.fx-organism-interface-ready #hero .hero-grid {
+  html body.living-architecture #hero .hero-grid {
     position: relative;
     display: grid;
     grid-template-columns: minmax(500px, .92fr) minmax(520px, 1.08fr);
@@ -29,7 +29,7 @@
     align-items: center;
   }
 
-  html.fx-organism-interface-ready #hero .hero-copy {
+  html body.living-architecture #hero .hero-copy {
     position: relative;
     left: auto;
     bottom: auto;
@@ -40,23 +40,23 @@
     transform: translateY(-1.5vh);
   }
 
-  html.fx-organism-interface-ready #hero .hero-title-main {
+  html body.living-architecture #hero .hero-title-main {
     font-size: clamp(68px, 7.7vw, 138px);
     line-height: .82;
   }
 
-  html.fx-organism-interface-ready #hero .hero-title-sub {
+  html body.living-architecture #hero .hero-title-sub {
     font-size: clamp(28px, 3.15vw, 52px);
   }
 
-  html.fx-organism-interface-ready #hero .hero-lead {
+  html body.living-architecture #hero .hero-lead {
     max-width: 620px;
     margin-top: clamp(18px, 2.4vh, 28px);
     font-size: clamp(15px, 1.1vw, 19px);
     line-height: 1.62;
   }
 
-  html.fx-organism-interface-ready #hero .hero-actions {
+  html body.living-architecture #hero .hero-actions {
     display: flex !important;
     width: min(620px, 100%);
     margin-top: clamp(20px, 2.8vh, 32px);
@@ -64,18 +64,18 @@
     gap: 12px;
   }
 
-  html.fx-organism-interface-ready #hero .hero-actions .button {
+  html body.living-architecture #hero .hero-actions .button {
     min-height: 48px;
   }
 
-  html.fx-organism-interface-ready #hero .hero-facts {
+  html body.living-architecture #hero .hero-facts {
     display: flex !important;
     width: min(620px, 100%);
     margin-top: clamp(16px, 2vh, 24px);
     flex-wrap: wrap;
   }
 
-  html.fx-organism-interface-ready #hero .hero-space {
+  html body.living-architecture #hero .hero-space {
     position: relative;
     inset: auto;
     align-self: center;
@@ -85,7 +85,7 @@
     pointer-events: none;
   }
 
-  html.fx-organism-interface-ready #hero .hero-space::before {
+  html body.living-architecture #hero .hero-space::before {
     content: '';
     position: absolute;
     inset: 8% 3% 7%;
@@ -95,7 +95,7 @@
     pointer-events: none;
   }
 
-  html.fx-organism-interface-ready #hero .scroll-cue {
+  html body.living-architecture #hero .scroll-cue {
     position: absolute;
     left: 50%;
     right: auto;
@@ -104,52 +104,52 @@
     transform: translateX(-50%);
   }
 
-  html.fx-organism-interface-ready main > .scene:not(#hero) {
+  html body.living-architecture main > .scene:not(#hero) {
     min-height: clamp(760px, 94svh, 980px);
     padding-block: clamp(96px, 12vh, 150px);
   }
 }
 
 @media (min-width: 1100px) and (max-height: 820px) and (pointer: fine) {
-  html.fx-organism-interface-ready #hero {
+  html body.living-architecture #hero {
     min-height: 720px;
     padding-top: 76px;
     padding-bottom: 70px;
   }
 
-  html.fx-organism-interface-ready #hero .hero-grid {
+  html body.living-architecture #hero .hero-grid {
     min-height: 574px;
   }
 
-  html.fx-organism-interface-ready #hero .hero-copy {
+  html body.living-architecture #hero .hero-copy {
     transform: none;
   }
 
-  html.fx-organism-interface-ready #hero .hero-space {
+  html body.living-architecture #hero .hero-space {
     height: 560px;
   }
 
-  html.fx-organism-interface-ready #hero .hero-title-main {
+  html body.living-architecture #hero .hero-title-main {
     font-size: clamp(62px, 7vw, 112px);
   }
 
-  html.fx-organism-interface-ready #hero .hero-lead {
+  html body.living-architecture #hero .hero-lead {
     line-height: 1.5;
   }
 }
 
 @media (min-width: 1600px) and (min-height: 900px) and (pointer: fine) {
-  html.fx-organism-interface-ready #hero .hero-grid {
+  html body.living-architecture #hero .hero-grid {
     grid-template-columns: minmax(600px, .95fr) minmax(650px, 1.05fr);
   }
 
-  html.fx-organism-interface-ready #hero .hero-space {
+  html body.living-architecture #hero .hero-space {
     height: clamp(620px, 68vh, 780px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.fx-organism-interface-ready #hero .hero-copy {
+  html body.living-architecture #hero .hero-copy {
     transform: none;
   }
 }
