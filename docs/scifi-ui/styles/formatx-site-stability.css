@@ -10,6 +10,21 @@
   --fx-layer-intro: 3000;
 }
 
+/* Legacy visual runtimes may remain as compatibility DOM, but they must never
+   enter the render tree. The active renderer is the safe Three.js stage. */
+#fx-apex-canvas,
+#fx-particle-canvas,
+.fx-transcend-shell,
+.fx-worldstage-flow,
+.fx-worldstage-shock,
+.fx-worldstage-guide,
+.fx-transcend-sound {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .fx-three-stage-shell {
   z-index: var(--fx-layer-stage) !important;
   pointer-events: none !important;
