@@ -86,7 +86,12 @@
 
     document.getElementById('hero')?.classList.toggle('is-core-active', bounded === 0);
     dispatchEvent(new CustomEvent('formatx:organismstatechange', {
-      detail: { scene: bounded, id: bounded === 0 ? 'hero' : Object.keys(PANEL_SCENES).find(id => PANEL_SCENES[id] === bounded) }
+      detail: {
+        scene: bounded,
+        id: bounded === 0
+          ? 'hero'
+          : Object.keys(PANEL_SCENES).find(id => PANEL_SCENES[id] === bounded)
+      }
     }));
   }
 
@@ -98,7 +103,10 @@
   }
 
   function activateCore(options) {
-    const settings = Object.assign({ scroll: false, replaceHistory: true, closePanel: true }, options);
+    const settings = Object.assign(
+      { scroll: false, replaceHistory: true, closePanel: true },
+      options
+    );
     pendingPanel = '';
     closeResponsiveMenu();
 
@@ -131,7 +139,9 @@
       return;
     }
 
-    const trigger = document.querySelector('[data-organism-open="' + CSS.escape(id) + '"]');
+    const trigger = document.querySelector(
+      '[data-organism-open="' + CSS.escape(id) + '"]'
+    );
     if (!(trigger instanceof HTMLElement)) {
       pendingPanel = id;
       return;
@@ -153,8 +163,11 @@
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    if (id === 'hero') activateCore({ scroll: true, replaceHistory: true, closePanel: true });
-    else openPanel(id, anchor.closest('.fx-organism-map') ? 'organism-map' : 'navigation');
+    if (id === 'hero') {
+      activateCore({ scroll: true, replaceHistory: true, closePanel: true });
+    } else {
+      openPanel(id, anchor.closest('.fx-organism-map') ? 'organism-map' : 'navigation');
+    }
   }
 
   function handleKeyboard(event) {
@@ -169,8 +182,9 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     const scene = Number(event.key) - 1;
-    if (scene === 0) activateCore({ scroll: true, replaceHistory: true, closePanel: true });
-    else {
+    if (scene === 0) {
+      activateCore({ scroll: true, replaceHistory: true, closePanel: true });
+    } else {
       const id = Object.keys(PANEL_SCENES).find(key => PANEL_SCENES[key] === scene);
       if (id) openPanel(id, 'keyboard');
     }
@@ -179,7 +193,9 @@
   function interfaceBecameReady() {
     interfaceReady = true;
     if (pendingPanel) openPanel(pendingPanel, 'deferred-navigation');
-    else if (!panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    else if (!panelIsOpen()) {
+      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    }
   }
 
   document.addEventListener('click', handleNavigation, true);
@@ -189,10 +205,16 @@
     const id = event.detail?.id;
     if (Object.hasOwn(PANEL_SCENES, id)) updateNavigation(PANEL_SCENES[id]);
   });
-  addEventListener('formatx:organismpanelclose', () => activateCore({ scroll: false, replaceHistory: true, closePanel: false }));
-  addEventListener('formatx:loop', () => activateCore({ scroll: false, replaceHistory: true, closePanel: true }));
+  addEventListener('formatx:organismpanelclose', () => {
+    activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+  });
+  addEventListener('formatx:loop', () => {
+    activateCore({ scroll: false, replaceHistory: true, closePanel: true });
+  });
   document.addEventListener('formatx:introcomplete', () => {
-    if (!panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    if (!panelIsOpen()) {
+      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    }
   });
   addEventListener('formatx:languagechange', () => {
     const scene = Number(ROOT.dataset.fxScene || 0);
@@ -204,6 +226,16 @@
   });
   addEventListener('pageshow', () => {
     activateCore({ scroll: false, replaceHistory: true, closePanel: true });
+  });
+
+  const sceneGuard = new MutationObserver(() => {
+    if (!panelIsOpen() && ROOT.dataset.fxScene !== '0') {
+      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    }
+  });
+  sceneGuard.observe(ROOT, {
+    attributes: true,
+    attributeFilter: ['data-fx-scene']
   });
 
   ROOT.dataset.fxOrganismCoreController = 'ready';
