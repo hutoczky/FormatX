@@ -47,6 +47,7 @@
       shell.classList.remove('is-authorised-open');
       shell.hidden = true;
       shell.setAttribute('aria-hidden', 'true');
+      shell.style.setProperty('display', 'none');
     }
 
     document.querySelectorAll('[data-organism-panel]').forEach(panel => {
@@ -78,6 +79,7 @@
 
     authorised = true;
     activeId = id;
+    shell.style.removeProperty('display');
     shell.classList.add('is-authorised-open');
     shell.hidden = false;
     shell.setAttribute('aria-hidden', 'false');
@@ -96,7 +98,8 @@
       const leakedOpenState = !shell.hidden
         || shell.getAttribute('aria-hidden') === 'false'
         || shell.classList.contains('is-authorised-open')
-        || document.body?.classList.contains('fx-organism-panel-open');
+        || document.body?.classList.contains('fx-organism-panel-open')
+        || shell.style.display !== 'none';
       if (leakedOpenState) forceClosed({ replaceHash: true });
       return;
     }
@@ -107,6 +110,7 @@
       return;
     }
 
+    shell.style.removeProperty('display');
     shell.classList.add('is-authorised-open');
     shell.hidden = false;
     shell.setAttribute('aria-hidden', 'false');
@@ -128,7 +132,7 @@
       subtree: true,
       childList: true,
       attributes: true,
-      attributeFilter: ['class', 'hidden', 'aria-hidden', 'aria-selected']
+      attributeFilter: ['class', 'hidden', 'aria-hidden', 'aria-selected', 'style']
     });
     scheduleReconcile();
   }
