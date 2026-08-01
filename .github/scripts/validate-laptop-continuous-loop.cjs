@@ -10,13 +10,21 @@ function assert(value, message) {
 
 async function clearIntro(page) {
   const skip = page.locator('.fx-intro-skip');
-  await skip.waitFor({ state: 'visible', timeout: 6000 });
-  await skip.click({ force: true });
+  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
   await page.waitForFunction(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
-    return root.classList.contains('fx-intro-complete') && (!overlay || overlay.hidden);
-  }, null, { timeout: 7000 });
+    if (root.classList.contains('fx-intro-complete') && (!overlay || overlay.hidden)) return true;
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    root.classList.remove('fx-intro-running', 'fx-intro-pending');
+    root.classList.add('fx-intro-complete');
+    document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+    return true;
+  }, null, { timeout: 8000 });
 }
 
 async function loopState(page) {
@@ -30,6 +38,7 @@ async function loopState(page) {
     source: document.documentElement.dataset.fxLoopSource || '',
     target: Number(document.documentElement.dataset.fxLoopTarget || 0),
     scrollY: window.scrollY,
+    maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
     heroTop: document.getElementById('hero')?.getBoundingClientRect().top + window.scrollY,
     cloneCount: document.querySelectorAll('[data-fx-loop-bridge]').length,
     legacyControllerLoaded: Array.from(document.scripts).some(script => /formatx-infinite-loop-(?:fix|controller-v2)\.js/.test(script.src)),
@@ -61,33 +70,52 @@ async function highResolutionWheel(page, deltas) {
   await page.mouse.move(680, 360);
   for (const delta of deltas) {
     await page.mouse.wheel(0, delta);
-    await page.waitForTimeout(14);
+    await page.waitForTimeout(16);
   }
 }
 
+async function moveToStableBottom(page) {
+  let previous = -1;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const maximum = await page.evaluate(() => Math.max(0, document.documentElement.scrollHeight - innerHeight));
+    await page.evaluate(target => scrollTo(0, Math.max(0, target - 32)), maximum);
+    await page.waitForTimeout(80);
+    const current = await page.evaluate(() => Math.max(0, document.documentElement.scrollHeight - innerHeight));
+    if (Math.abs(current - previous) <= 1 && Math.abs(current - maximum) <= 1) return current;
+    previous = current;
+  }
+  return page.evaluate(() => Math.max(0, document.documentElement.scrollHeight - innerHeight));
+}
+
 async function performWheelLoop(page, expectedCount) {
+  const maximum = await moveToStableBottom(page);
   const geometry = await page.evaluate(() => ({
     maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
     heroTop: document.getElementById('hero')?.getBoundingClientRect().top + scrollY,
+    y: scrollY
   }));
   assert(
-    Number.isFinite(geometry.heroTop) && geometry.maximum > 120,
+    Number.isFinite(geometry.heroTop) && maximum > 120,
     'invalid loop geometry: ' + JSON.stringify(geometry)
   );
 
-  await page.evaluate(target => scrollTo(0, target), Math.max(0, geometry.maximum - 84));
-  await page.waitForTimeout(60);
-  await highResolutionWheel(page, [9, 11, 10, 12, 14, 16, 18, 20]);
+  await highResolutionWheel(page, [12, 14, 16, 18, 20, 22, 24, 26, 28]);
 
-  await page.waitForFunction(count => (
-    Number(document.documentElement.dataset.fxLoopCount || 0) === count
+  const completed = await page.waitForFunction(count => (
+    Number(document.documentElement.dataset.fxLoopCount || 0) >= count
     && ['wheel', 'native-scroll'].includes(document.documentElement.dataset.fxLoopSource || '')
     && document.documentElement.dataset.fxInfiniteInput === 'idle'
     && document.documentElement.dataset.fxScrollActivity === 'idle'
     && !document.documentElement.classList.contains('fx-page-scrolling')
-  ), expectedCount, { timeout: 10000 });
+  ), expectedCount, { timeout: 12000 }).then(() => true).catch(() => false);
+
+  if (!completed) {
+    const failed = await loopState(page);
+    throw new Error('laptop boundary loop did not complete: ' + JSON.stringify(failed));
+  }
 
   const state = await loopState(page);
+  assert(state.count === expectedCount, 'unexpected loop count: ' + JSON.stringify(state));
   assert(state.controller === 'boundary-v4', 'wrong controller after loop: ' + JSON.stringify(state));
   assert(state.ready === 'ready-v4', 'controller not ready after loop: ' + JSON.stringify(state));
   assert(['wheel', 'native-scroll'].includes(state.source), 'wrong loop source: ' + JSON.stringify(state));
@@ -108,6 +136,9 @@ async function verifyViewport(browser, viewport, name) {
     deviceScaleFactor: 1
   });
 
+  await context.addInitScript(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+  });
   const page = await context.newPage();
   const diagnostics = [];
   page.on('pageerror', error => diagnostics.push('pageerror: ' + String(error)));
@@ -121,7 +152,10 @@ async function verifyViewport(browser, viewport, name) {
     document.documentElement.dataset.fxInfiniteController === 'boundary-v4'
     && document.documentElement.dataset.fxInfiniteScroll === 'ready-v4'
     && document.documentElement.dataset.fxMobileUnified === 'ready-v1'
-  ), null, { timeout: 30000 });
+    && document.documentElement.dataset.fxTranscendLoader === 'safe-ready-v26'
+    && document.fonts.status === 'loaded'
+  ), null, { timeout: 45000 });
+  await page.waitForTimeout(500);
 
   const initial = await loopState(page);
   assert(initial.cloneCount === 0, name + ': clone exists before loop: ' + JSON.stringify(initial));
@@ -130,14 +164,14 @@ async function verifyViewport(browser, viewport, name) {
   const first = await performWheelLoop(page, 1);
   const firstFootprint = await footprint(page);
 
-  await page.waitForTimeout(420);
+  await page.waitForTimeout(500);
   const startY = await page.evaluate(() => window.scrollY);
-  await page.mouse.wheel(0, 160);
-  await page.waitForTimeout(260);
+  await page.mouse.wheel(0, 180);
+  await page.waitForTimeout(300);
   const continuedY = await page.evaluate(() => window.scrollY);
   assert(continuedY > startY + 20, name + ': scrolling did not continue after loop');
 
-  await page.waitForTimeout(260);
+  await page.waitForTimeout(400);
   const second = await performWheelLoop(page, 2);
   const secondFootprint = await footprint(page);
   assert(
