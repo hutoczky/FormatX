@@ -137,6 +137,15 @@
     scheduleReconcile();
   }
 
+  function handleEscape(event) {
+    if (event.key !== 'Escape') return;
+    const shell = consoleRoot();
+    if (!shell || shell.hidden) return;
+    const close = shell.querySelector('[data-organism-close]');
+    if (close instanceof HTMLElement) close.click();
+    requestAnimationFrame(() => forceClosed({ replaceHash: true }));
+  }
+
   addEventListener('formatx:organisminterfaceready', () => {
     bindConsoleObserver();
     requestAnimationFrame(() => {
@@ -153,6 +162,8 @@
   addEventListener('formatx:organismpanelclose', () => {
     forceClosed({ replaceHash: true });
   });
+
+  addEventListener('keydown', handleEscape, true);
 
   document.addEventListener('formatx:introcomplete', () => {
     if (!authorised) forceClosed({ replaceHash: true });
