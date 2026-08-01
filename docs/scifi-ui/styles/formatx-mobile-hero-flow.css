@@ -7,6 +7,7 @@
   }
 
   #hero .hero-copy {
+    box-sizing: border-box !important;
     position: relative !important;
     inset: auto !important;
     transform: none !important;
@@ -17,6 +18,7 @@
     max-width: calc(100% - 108px) !important;
     margin-left: 16px !important;
     margin-right: 0 !important;
+    padding-right: 0 !important;
   }
 
   #hero .hero-space {
@@ -55,9 +57,9 @@
     box-sizing: border-box !important;
     display: inline-flex !important;
     position: fixed !important;
-    top: 72px !important;
+    top: auto !important;
     right: 10px !important;
-    bottom: auto !important;
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
     left: auto !important;
     width: 58px !important;
     min-width: 58px !important;
