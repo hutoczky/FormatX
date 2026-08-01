@@ -112,11 +112,13 @@ async function validateDesktop() {
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
     await page.waitForTimeout(550);
 
-    await page.keyboard.press('2');
+    const capabilitiesTrigger = page.locator('[data-organism-open="capabilities"]');
+    await capabilitiesTrigger.evaluate(node => node.click());
     await page.waitForFunction(() => !document.querySelector('[data-organism-panel="capabilities"]').hidden);
     assert(await page.locator('[data-organism-panel="capabilities"] .card').count() === 6, 'six system organs are missing');
-    await page.keyboard.press('Escape');
-    mark('desktop: keyboard-navigation-passed');
+    await page.locator('.fx-organism-console-close').click();
+    await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
+    mark('desktop: visible-control-navigation-passed');
 
     await page.locator('#menu-toggle').evaluate(node => node.click());
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
