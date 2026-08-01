@@ -16,6 +16,7 @@ async function injectContentLayer(page) {
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-content-standard.css' });
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-readability.css' });
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-unified.css' });
+  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-hero-flow.css' });
   for (const src of [
     '/scifi-ui/scripts/release-metadata.js',
     '/scifi-ui/scripts/formatx-content-standard.js',
