@@ -35,6 +35,69 @@
     }
   }
 
+  function mobileMode() {
+    return matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  }
+
+  function setImportant(element, property, value) {
+    element?.style.setProperty(property, value, 'important');
+  }
+
+  function finalizeMobileControls() {
+    if (!mobileMode()) return;
+
+    const languageContainer = document.querySelector('.fx-single-language-switch');
+    if (languageContainer instanceof HTMLElement && document.body
+      && languageContainer.parentElement !== document.body) {
+      document.body.appendChild(languageContainer);
+    }
+    if (languageContainer instanceof HTMLElement) {
+      languageContainer.hidden = false;
+      languageContainer.removeAttribute('aria-hidden');
+      setImportant(languageContainer, 'display', 'block');
+      setImportant(languageContainer, 'position', 'fixed');
+      setImportant(languageContainer, 'top', '14px');
+      setImportant(languageContainer, 'right', '70px');
+      setImportant(languageContainer, 'z-index', '10040');
+      setImportant(languageContainer, 'visibility', 'visible');
+      setImportant(languageContainer, 'opacity', '1');
+    }
+
+    const languageToggle = document.querySelector('.fx-language-toggle');
+    if (languageToggle instanceof HTMLElement) {
+      languageToggle.hidden = false;
+      setImportant(languageToggle, 'display', 'inline-flex');
+      setImportant(languageToggle, 'visibility', 'visible');
+      setImportant(languageToggle, 'opacity', '1');
+    }
+
+    const dialogue = document.querySelector('.fx-organism-dialogue:not(.is-open)');
+    if (dialogue instanceof HTMLElement) {
+      setImportant(dialogue, 'position', 'fixed');
+      setImportant(dialogue, 'top', 'auto');
+      setImportant(dialogue, 'right', '10px');
+      setImportant(dialogue, 'bottom', '150px');
+      setImportant(dialogue, 'left', 'auto');
+      setImportant(dialogue, 'width', '58px');
+      setImportant(dialogue, 'max-width', '58px');
+      setImportant(dialogue, 'transform', 'none');
+      setImportant(dialogue, 'translate', 'none');
+      setImportant(dialogue, 'z-index', '10030');
+    }
+
+    const thought = dialogue?.querySelector('.fx-organism-thought-trigger');
+    if (thought instanceof HTMLElement) {
+      setImportant(thought, 'position', 'relative');
+      setImportant(thought, 'inset', 'auto');
+      setImportant(thought, 'top', 'auto');
+      setImportant(thought, 'right', 'auto');
+      setImportant(thought, 'bottom', 'auto');
+      setImportant(thought, 'left', 'auto');
+      setImportant(thought, 'transform', 'none');
+      setImportant(thought, 'translate', 'none');
+    }
+  }
+
   function updateTelemetry() {
     const data = content();
     const facts = document.querySelectorAll('#hero .hero-facts > span');
@@ -148,6 +211,7 @@
     updateDownload();
     updateTelemetry();
     ensureLicenceLink();
+    finalizeMobileControls();
     ROOT.dataset.fxContentFinalizer = 'ready-v2';
   }
 
@@ -158,6 +222,7 @@
     'formatx:releasemetadataready'
   ].forEach(name => addEventListener(name, apply));
 
+  addEventListener('resize', finalizeMobileControls, { passive: true });
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', apply, { once: true });
   } else {
