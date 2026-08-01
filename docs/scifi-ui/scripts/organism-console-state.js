@@ -175,6 +175,10 @@
   });
 
   addEventListener('formatx:organismpanelopen', event => {
+    /* A real panel-open event represents a new explicit user action. It must
+       cancel the short Escape race lock instead of being mistaken for a stale
+       automatic reopen. */
+    closeLockUntil = 0;
     bindConsoleObserver();
     authoriseOpen(String(event.detail?.id || ''));
   });
