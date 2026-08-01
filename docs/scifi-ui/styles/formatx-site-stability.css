@@ -254,3 +254,8 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
     animation-duration: .01ms !important;
   }
 }
+
+/* Fine-pointer desktop and laptop input remains continuous after boundary loops. */
+html.fx-continuous-scroll-mode {
+  scroll-snap-type: none !important;
+}

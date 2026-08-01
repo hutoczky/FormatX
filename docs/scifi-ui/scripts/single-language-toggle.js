@@ -109,6 +109,7 @@
 
   function setLanguage(language, persist, container, toggle) {
     if (!SUPPORTED.has(language)) return;
+    const preservedHash = location.hash;
     if (persist) persistLanguage(language);
     applyBilingualCopy(language);
 
@@ -124,7 +125,14 @@
       dispatchEvent(new CustomEvent('formatx:languagechange', { detail: { language } }));
     }
 
-    requestAnimationFrame(() => updateToggle(toggle, language));
+    requestAnimationFrame(() => {
+      if (preservedHash && location.hash !== preservedHash) {
+        const url = new URL(location.href);
+        url.hash = preservedHash;
+        history.replaceState({}, '', url.pathname + url.search + url.hash);
+      }
+      updateToggle(toggle, language);
+    });
   }
 
   function install() {

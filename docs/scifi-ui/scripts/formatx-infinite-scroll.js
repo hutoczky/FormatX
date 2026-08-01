@@ -8,6 +8,9 @@
   const COOLDOWN_MS = 360;
   const SCROLL_IDLE_MS = 190;
   const DOWN_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ']);
+  const CONTINUOUS_POINTER = matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (CONTINUOUS_POINTER) root.classList.add('fx-continuous-scroll-mode');
 
   let lastY = window.scrollY;
   let lastDirection = 0;
