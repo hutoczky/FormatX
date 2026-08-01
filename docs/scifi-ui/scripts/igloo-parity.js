@@ -196,7 +196,8 @@
     './scripts/formatx-three-host-safe.js?v=20260729-safe-host-1',
     './scripts/formatx-render-visibility.js?v=20260730-render-visibility-2',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
-    './scripts/interaction-genome.js?v=20260728-genome-3d-1'
+    './scripts/interaction-genome.js?v=20260728-genome-3d-1',
+    './scripts/formatx-language-copy-stability.js'
   ];
 
   function load(index) {
