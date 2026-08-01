@@ -45,6 +45,11 @@
     display: inline-flex !important;
   }
 
+  .fx-three-sound,
+  .fx-genome-launcher {
+    display: none !important;
+  }
+
   .fx-organism-dialogue:not(.is-open) {
     right: 10px !important;
     bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
