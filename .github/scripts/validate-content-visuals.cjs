@@ -119,7 +119,14 @@ async function commonAssertions(page, mobile) {
   }
 }
 
-async function capture(browser, name, viewport, setup = async () => {}, contextSetup = async () => {}) {
+async function capture(
+  browser,
+  name,
+  viewport,
+  setup = async () => {},
+  contextSetup = async () => {},
+  targetUrl = base
+) {
   const context = await browser.newContext({ viewport, reducedMotion: name.includes('reduced') ? 'reduce' : 'no-preference' });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
@@ -127,7 +134,7 @@ async function capture(browser, name, viewport, setup = async () => {}, contextS
   await contextSetup(context);
   const page = await context.newPage();
   page.on('pageerror', error => console.warn(`[${name}] pageerror:`, error.message));
-  await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
   await injectContentLayer(page);
   await setup(page);
   await commonAssertions(page, viewport.width < 700);
@@ -149,21 +156,24 @@ async function publicPage(browser, name, pathname, expectedSelector, viewport = 
 (async () => {
   await fs.mkdir(out, { recursive: true });
   const browser = await chromium.launch({ headless: true });
+  const englishUrl = new URL(base);
+  englishUrl.searchParams.set('lang', 'en');
   try {
     await capture(browser, 'desktop-hero-hu', { width: 1440, height: 900 });
     await capture(browser, 'mobile-hero-hu', { width: 390, height: 844 });
     await capture(browser, 'mobile-hero-wide', { width: 430, height: 932 });
     await capture(browser, 'small-height-hero', { width: 1366, height: 600 });
     await capture(browser, 'reduced-motion', { width: 1440, height: 900 });
-    await capture(browser, 'desktop-hero-en', { width: 1440, height: 900 }, async page => {
-      const single = page.locator('.fx-language-toggle:visible').first();
-      if (await single.count()) {
-        await single.evaluate(node => node.click());
-      } else {
-        await page.locator('[data-language="en"]:visible').first().evaluate(node => node.click());
-      }
-      await page.waitForFunction(() => document.documentElement.lang === 'en', null, { timeout: 8000 });
-    });
+    await capture(
+      browser,
+      'desktop-hero-en',
+      { width: 1440, height: 900 },
+      async page => {
+        await page.waitForFunction(() => document.documentElement.lang === 'en', null, { timeout: 8000 });
+      },
+      async () => {},
+      englishUrl.href
+    );
     await capture(browser, 'mobile-menu-open', { width: 390, height: 844 }, async page => {
       await page.locator('#menu-toggle').click();
       await page.waitForTimeout(200);
