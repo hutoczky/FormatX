@@ -13,7 +13,7 @@ async function waitForInterface(page) {
       && root.dataset.fxOrganismCoreController === 'ready'
       && root.dataset.fxOrganismConsoleState === 'ready'
       && root.dataset.fxSingleLanguageToggle === 'ready'
-      && root.dataset.fxInfiniteScroll === 'ready-v3';
+      && root.dataset.fxInfiniteScroll === 'ready-v4';
   }, null, { timeout: 20000 });
 }
 

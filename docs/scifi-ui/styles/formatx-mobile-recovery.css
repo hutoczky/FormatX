@@ -1,3 +1,5 @@
+@import url('./formatx-desktop-unified.css');
+
 /* FormatX living-core visibility and responsive layout recovery. */
 html[data-fx-safe-three-gate="ready-v1"] body,
 html[data-fx-safe-three-gate="ready-v2"] body {

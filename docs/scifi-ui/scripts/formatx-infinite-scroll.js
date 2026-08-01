@@ -92,6 +92,7 @@
     root.dataset.fxLoopCount = String(count);
     root.dataset.fxLoopSource = source;
     root.dataset.fxLoopTarget = String(Math.round(target));
+    window.scrollTo(0, target);
     root.dataset.fxInfiniteInput = 'idle';
     root.classList.remove('fx-infinite-loop-jump');
     looping = false;
