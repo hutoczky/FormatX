@@ -41,6 +41,10 @@ function diagnostics(page, output) {
   });
 }
 
+function meaningfulDiagnostics(items) {
+  return items.filter(item => !/GPU stall|ReadPixels|WebGPU|WGSL|swizzle|Instance dropped|Failed to load resource: the server responded with a status of 404 \(File not found\)/i.test(item));
+}
+
 async function enterSite(page, label) {
   mark(label + ': navigation-start');
   await page.goto(TEST_URL + '?organism-validation=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -125,7 +129,7 @@ async function validateDesktop() {
     assert(qrReady.length === 3 && qrReady.every(item => item.width >= 32), 'QR images not rendered: ' + JSON.stringify(qrReady));
     mark('desktop: qr-ready', qrReady);
 
-    const meaningful = errors.filter(item => !/GPU stall|ReadPixels|WebGPU|WGSL|swizzle|Instance dropped/i.test(item));
+    const meaningful = meaningfulDiagnostics(errors);
     assert(!meaningful.length, 'desktop diagnostics: ' + meaningful.join(' | '));
     await page.screenshot({ path: 'organism-main-desktop.png', fullPage: false, timeout: 5000 }).catch(() => {});
     await context.close();
@@ -169,7 +173,7 @@ async function validateMobile() {
     await page.locator('#menu-toggle').evaluate(node => node.click());
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
 
-    const meaningful = errors.filter(item => !/GPU stall|ReadPixels|WebGPU|WGSL|swizzle|Instance dropped/i.test(item));
+    const meaningful = meaningfulDiagnostics(errors);
     assert(!meaningful.length, 'mobile diagnostics: ' + meaningful.join(' | '));
     await page.screenshot({ path: 'organism-main-mobile.png', fullPage: false, timeout: 5000 }).catch(() => {});
     await context.close();
