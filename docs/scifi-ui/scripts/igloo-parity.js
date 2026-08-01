@@ -188,6 +188,7 @@
   const queue = [
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
     './scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
+    './scripts/release-metadata.js',
     './scripts/platform-status.js?v=20260730-platform-status-1',
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
