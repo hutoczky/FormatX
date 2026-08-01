@@ -35,6 +35,7 @@ function check(id, condition, detail, severity = 'error') {
 const production = json('billing-worker/wrangler.jsonc');
 const preview = json('wrangler.jsonc');
 const release = json('docs/scifi-ui/data/current-release.json');
+const platformContract = json('docs/scifi-ui/data/public-platform-contract.json');
 const issues = json('docs/scifi-ui/data/known-issues.json');
 const productionWrapper = read('billing-worker/src/production-content-entry.js');
 const productionBase = read('billing-worker/src/production-entry.js');
@@ -49,6 +50,7 @@ const thoughtGenome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
 const thoughtDisclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
 const thoughtDisclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
 const privacy = read('docs/scifi-ui/privacy.html');
+const packageAsset = release.channels?.multiplatform || null;
 
 check('production-entry', production.main === 'src/production-content-entry.js', 'Production Worker must use src/production-content-entry.js');
 check('production-domains', JSON.stringify((production.routes || []).map(route => route.pattern)) === JSON.stringify(['formatxsuite.com', 'www.formatxsuite.com']), 'Production Worker must exclusively own both FormatX custom domains');
@@ -86,17 +88,23 @@ check('preview-thought-disclosure-routes', JSON.stringify(preview).includes('/sc
 
 check('release-ok', release.ok === true, 'Current official release metadata is not available');
 check('release-source', release.source === 'github_published_release', 'Current release source is not github_published_release');
-check('release-version', typeof release.version === 'string' && release.version.length > 0, 'Current release version is missing');
+check('release-version', typeof release.version === 'string' && release.version.length > 0, 'Internal current release version is missing');
 check('release-not-prerelease', release.prerelease !== true, 'Current official release must not be a prerelease');
-check('windows-download', /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\//.test(release.channels?.windows?.download_url || ''), 'Windows download is not an official FormatX-Updates release asset');
-check('release-schema-v2', release.schema_version === 2, 'Release metadata has not yet been regenerated with provenance schema 2', 'warning');
-check('release-digest', /^sha256:[a-f0-9]{64}$/i.test(release.channels?.windows?.digest || ''), 'Windows package has no published SHA-256 digest', 'warning');
+check('release-schema-v2', release.schema_version === 2, 'Release metadata must use provenance schema 2');
+check('multiplatform-download', /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\//.test(packageAsset?.download_url || ''), 'Multiplatform download is not an official FormatX-Updates release asset');
+check('multiplatform-primary', packageAsset?.primary_platform === 'linux-bazzite', 'Bazzite/Linux must be the primary package platform');
+check('multiplatform-support', ['linux-bazzite', 'windows'].every(platform => packageAsset?.supported_platforms?.includes(platform)), 'Multiplatform support metadata must include Bazzite/Linux and Windows');
+check('release-digest', /^sha256:[a-f0-9]{64}$/i.test(packageAsset?.digest || ''), 'Multiplatform package has no published SHA-256 digest');
 check('release-signature', Boolean(release.evidence?.signature_asset_url), 'No detached signature asset is published for the current release', 'warning');
+check('public-version-hidden', platformContract.public_copy?.public_release_version_visible === false, 'Public release version must remain hidden');
+check('public-platform-primary', platformContract.public_copy?.primary_system === 'linux-bazzite', 'Public platform contract must identify Bazzite/Linux as primary');
+check('public-channel', platformContract.public_copy?.download_channel === 'multiplatform', 'Public download channel must be multiplatform');
 
 check('known-issues-present', Array.isArray(issues.items) && issues.items.length > 0, 'Known-issues register is empty');
 check('known-issues-current', typeof issues.updated === 'string' && issues.updated >= '2026-07-31', 'Known-issues register is not current');
 check('release-sync-deterministic', syncWorkflow.includes("del(.synced_at)") && syncWorkflow.includes('cmp -s'), 'Release sync must ignore timestamp-only changes');
 check('release-sync-retry', syncWorkflow.includes('--retry-all-errors'), 'Release sync lacks resilient GitHub API retries');
+check('release-sync-zip-first', syncWorkflow.indexOf('\\.zip$') < syncWorkflow.indexOf('tar\\.gz|tar\\.xz'), 'Release sync must prefer ZIP before tar fallbacks');
 
 const publicPages = [
   '/scifi-ui/', '/scifi-ui/downloads/', '/scifi-ui/method.html',
@@ -112,6 +120,7 @@ for (const relative of [
   'docs/scifi-ui/scripts/formatx-public-shell.js',
   'docs/scifi-ui/scripts/public-evidence-pages.js',
   'docs/scifi-ui/scripts/release-metadata.js',
+  'docs/scifi-ui/styles/downloads-page.css',
   'docs/scifi-ui/scripts/organism-voice.js',
   'docs/scifi-ui/scripts/synaptic-thought-genome.js',
   'docs/scifi-ui/scripts/synaptic-thought-disclosure.js',
@@ -125,15 +134,18 @@ for (const relative of [
 }
 
 const report = {
-  schema_version: 1,
+  schema_version: 2,
   generated_at: new Date().toISOString(),
   ready: errors.length === 0,
   errors: [...new Set(errors)],
   warnings: [...new Set(warnings)],
   release: {
-    version: release.version || null,
+    internal_version: release.version || null,
+    public_version_visible: false,
     schema_version: release.schema_version || null,
-    windows_digest: release.channels?.windows?.digest || null,
+    package_digest: packageAsset?.digest || null,
+    primary_platform: packageAsset?.primary_platform || null,
+    supported_platforms: packageAsset?.supported_platforms || [],
     integrity_status: release.integrity?.status || null,
   },
   checks,
