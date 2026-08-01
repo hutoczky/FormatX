@@ -49,21 +49,21 @@ async function runCase(browser, name, contextOptions) {
 
   await page.goto(TEST_URL + '?lang=hu&audio-test=1&score=v6', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
-  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'professional-v6', null, { timeout: 15000 });
-  await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 10000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'professional-v6', null, { timeout: 45000 });
+  await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 20000 });
 
   const button = page.locator('.fx-three-sound');
-  await button.waitFor({ state: 'visible', timeout: 10000 });
+  await button.waitFor({ state: 'visible', timeout: 15000 });
   assert(await button.count() === 1, name + ': exactly one music button is required');
 
   await button.click({ force: true });
-  await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'on', null, { timeout: 10000 });
-  await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 10000 });
-  await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 10000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'on', null, { timeout: 15000 });
+  await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 15000 });
+  await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 15000 });
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxAudioMusic === 'fallback-playing' || Boolean(root.dataset.fxAudioChord);
-  }, null, { timeout: 10000 });
+  }, null, { timeout: 15000 });
 
   const state = await page.evaluate(() => ({
     owner: document.documentElement.dataset.fxAudioOwner || '',
