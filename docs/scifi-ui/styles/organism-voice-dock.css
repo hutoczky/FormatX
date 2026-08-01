@@ -1,4 +1,5 @@
 /* FormatX Organism dialogue dock — one stable compact control and protected panel lane. */
+/* Production-reviewed deployment trigger: 2026-08-01. No visual behaviour change. */
 
 .fx-organism-dialogue {
   z-index: 940 !important;
