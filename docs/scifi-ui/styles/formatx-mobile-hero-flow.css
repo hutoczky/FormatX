@@ -45,9 +45,30 @@
     display: inline-flex !important;
   }
 
-  .fx-three-sound,
   .fx-genome-launcher {
     display: none !important;
+  }
+
+  .fx-three-sound {
+    display: inline-flex !important;
+    position: fixed !important;
+    top: 118px !important;
+    right: 10px !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+    overflow: hidden !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 10025 !important;
+  }
+
+  .fx-three-sound span {
+    max-width: 30px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
   }
 
   .fx-organism-dialogue:not(.is-open) {
