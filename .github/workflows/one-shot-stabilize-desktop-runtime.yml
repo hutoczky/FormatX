@@ -1,0 +1,92 @@
+name: Stabilize desktop runtime once
+
+on:
+  push:
+    branches: [fix/desktop-multiplatform-final]
+    paths:
+      - '.github/workflows/one-shot-stabilize-desktop-runtime.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-one-shot-stabilize-desktop-runtime
+  cancel-in-progress: false
+
+jobs:
+  stabilize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/desktop-multiplatform-final
+
+      - name: Apply desktop preload and boundary stabilization
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          recovery = Path('docs/scifi-ui/styles/formatx-mobile-recovery.css')
+          text = recovery.read_text(encoding='utf-8')
+          preload = "@import url('./formatx-desktop-unified.css');\n\n"
+          if not text.startswith(preload):
+              text = preload + text
+          recovery.write_text(text, encoding='utf-8')
+
+          checkout = Path('docs/scifi-ui/checkout.html')
+          text = checkout.read_text(encoding='utf-8')
+          text = text.replace(
+              './styles/formatx-design-system.css\"',
+              './styles/formatx-design-system.css?v=20260728-ds2\"',
+          )
+          checkout.write_text(text, encoding='utf-8')
+
+          navigation = Path('.github/scripts/validate-navigation-panels.cjs')
+          text = navigation.read_text(encoding='utf-8')
+          text = text.replace(
+              "root.dataset.fxInfiniteScroll === 'ready-v3'",
+              "root.dataset.fxInfiniteScroll === 'ready-v4'",
+          )
+          navigation.write_text(text, encoding='utf-8')
+
+          stability = Path('docs/scifi-ui/styles/formatx-site-stability.css')
+          text = stability.read_text(encoding='utf-8')
+          old = "html.fx-infinite-loop-jump,\nhtml.fx-infinite-loop-jump body {\n  scroll-behavior: auto !important;\n}"
+          new = "html.fx-infinite-loop-jump {\n  scroll-snap-type: none !important;\n}\n\nhtml.fx-infinite-loop-jump,\nhtml.fx-infinite-loop-jump body {\n  scroll-behavior: auto !important;\n}"
+          if old not in text:
+              raise SystemExit('Infinite-loop stability block not found')
+          stability.write_text(text.replace(old, new), encoding='utf-8')
+
+          controller = Path('docs/scifi-ui/scripts/formatx-infinite-scroll.js')
+          text = controller.read_text(encoding='utf-8')
+          old = "    root.dataset.fxInfiniteInput = 'idle';\n    root.classList.remove('fx-infinite-loop-jump');"
+          new = "    window.scrollTo(0, target);\n    root.dataset.fxInfiniteInput = 'idle';\n    root.classList.remove('fx-infinite-loop-jump');"
+          if old not in text:
+              raise SystemExit('Loop finalization block not found')
+          controller.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
+          grep -Fq "@import url('./formatx-desktop-unified.css')" docs/scifi-ui/styles/formatx-mobile-recovery.css
+          grep -Fq 'formatx-design-system.css?v=20260728-ds2' docs/scifi-ui/checkout.html
+          grep -Fq "fxInfiniteScroll === 'ready-v4'" .github/scripts/validate-navigation-panels.cjs
+          grep -Fq 'scroll-snap-type: none !important' docs/scifi-ui/styles/formatx-site-stability.css
+          grep -Fq 'window.scrollTo(0, target);' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+
+      - name: Remove workflow and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/one-shot-stabilize-desktop-runtime.yml
+          git config user.name 'FormatX maintenance bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/styles/formatx-mobile-recovery.css \
+                  docs/scifi-ui/checkout.html \
+                  .github/scripts/validate-navigation-panels.cjs \
+                  docs/scifi-ui/styles/formatx-site-stability.css \
+                  docs/scifi-ui/scripts/formatx-infinite-scroll.js \
+                  .github/workflows/one-shot-stabilize-desktop-runtime.yml
+          git commit -m 'Preload desktop layout and stabilize loop landing'
+          git push origin HEAD:fix/desktop-multiplatform-final
