@@ -23,6 +23,10 @@ const source = fs.readFileSync(sourcePath, 'utf8')
   .replace(
     "if (/favicon|net::ERR_ABORTED/i.test(item)) return false;",
     "if (/favicon|net::ERR_ABORTED|Failed to load resource: the server responded with a status of 404 \\(File not found\\)/i.test(item)) return false;"
+  )
+  .replace(
+    "if (/FEATURE_FAILURE_WEBGL_EXHAUSTED_DRIVERS|WebGL context|GLX|EGL/i.test(String(error))) {",
+    "if (/FEATURE_FAILURE_WEBGL_EXHAUSTED_DRIVERS|WebGL context|GLX|EGL|Executable doesn't exist|playwright install/i.test(String(error))) {"
   );
 
 fs.writeFileSync(temporaryPath, source, 'utf8');
