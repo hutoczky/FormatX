@@ -13,6 +13,7 @@
   const TOP_SELECTOR = '#hero';
   const BOTTOM_SELECTOR = '#resources';
   const WHEEL_THRESHOLD = 110;
+  const WHEEL_CAPTURE_PX = 96;
   const TOUCH_THRESHOLD = 62;
   const BOUNDARY_EPSILON = 12;
   const COOLDOWN_MS = 360;
@@ -46,12 +47,24 @@
     return Math.max(0, document.documentElement.scrollHeight - innerHeight);
   }
 
+  function distanceFromBottom() {
+    return Math.max(0, documentEnd() - scrollY);
+  }
+
   function nearTop() {
     return scrollY <= BOUNDARY_EPSILON;
   }
 
   function nearBottom() {
-    return documentEnd() - scrollY <= BOUNDARY_EPSILON;
+    return distanceFromBottom() <= BOUNDARY_EPSILON;
+  }
+
+  function withinWheelTopZone() {
+    return scrollY <= WHEEL_CAPTURE_PX;
+  }
+
+  function withinWheelBottomZone() {
+    return distanceFromBottom() <= WHEEL_CAPTURE_PX;
   }
 
   function dialogueOpen() {
@@ -225,7 +238,7 @@
       || nestedScrollerCanConsume(event.target, event.deltaY)
     ) return;
 
-    if (event.deltaY > 0 && nearBottom()) {
+    if (event.deltaY > 0 && withinWheelBottomZone()) {
       wheelDown += Math.abs(event.deltaY);
       wheelUp = 0;
       if (event.cancelable) event.preventDefault();
@@ -233,7 +246,7 @@
       return;
     }
 
-    if (event.deltaY < 0 && nearTop()) {
+    if (event.deltaY < 0 && withinWheelTopZone()) {
       wheelUp += Math.abs(event.deltaY);
       wheelDown = 0;
       if (event.cancelable) event.preventDefault();
