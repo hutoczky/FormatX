@@ -95,11 +95,11 @@ function assertHungarian(state, name) {
 function assertEnglish(state, name) {
   assert(state.lang === 'en', name + ': English language state missing: ' + JSON.stringify(state));
   assert(JSON.stringify(state.nav) === JSON.stringify([
-    'Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads'
+    'How it works', 'Modules', 'Licences', 'Proof', 'Download'
   ]), name + ': English navigation mismatch: ' + JSON.stringify(state));
   assert(state.heroDownload === 'Download multiplatform public beta',
     name + ': English download label mismatch: ' + JSON.stringify(state));
-  assert(state.trialLabel === 'day trial licence',
+  assert(state.trialLabel === 'day full trial',
     name + ': English trial label mismatch: ' + JSON.stringify(state));
   assert(state.pricingTitle === 'The licence plan fits your work.',
     name + ': English pricing heading mismatch: ' + JSON.stringify(state));
