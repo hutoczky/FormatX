@@ -283,10 +283,12 @@ async function testMobile(browser) {
   await assertMenuClosed(page);
   await closePanelAndAssertCore(page);
 
-  await page.locator('.scroll-cue').click();
+  const experienceControl = page.locator(
+    '.fx-organism-actionbar [data-organism-open="experience"]'
+  );
+  await experienceControl.evaluate(node => node.click());
   await assertPanel(page, 'experience', 1);
-  await page.keyboard.press('1');
-  await assertCore(page);
+  await closePanelAndAssertCore(page);
 
   await assertInfiniteScrolling(page);
   await page.close();
