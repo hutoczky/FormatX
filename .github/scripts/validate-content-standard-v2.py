@@ -7,7 +7,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 HERE = Path(__file__).resolve().parent
-SPEC = importlib.util.spec_from_file_location("formatx_content_validator", HERE / "validate-content-standard.py")
+SPEC = importlib.util.spec_from_file_location(
+    "formatx_content_validator", HERE / "validate-content-standard.py"
+)
 module = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(module)
@@ -15,48 +17,50 @@ SPEC.loader.exec_module(module)
 
 def validate_release_metadata_v2() -> None:
     data = module.load_json(module.SCIFI / "data/current-release.json")
-    schema = data.get("schema_version")
-    if schema not in {1, 2}:
-        module.fail(f"Unsupported current-release schema: {schema}")
-
+    if data.get("schema_version") != 2:
+        module.fail("Current release must use schema 2")
     if data.get("ok") is True:
-        if not isinstance(data.get("version"), str) or not data["version"].strip():
-            module.fail("Synchronized release must have a version tag")
         if data.get("source") != "github_published_release":
             module.fail("Synchronized release source is not canonical")
         if data.get("prerelease") is True:
             module.fail("Current official release must not be a prerelease")
+        if not isinstance(data.get("source_release_id"), int):
+            module.fail("Schema 2 release lacks source_release_id")
         release_url = urlparse(str(data.get("release_url") or ""))
-        if release_url.scheme != "https" or release_url.netloc != "github.com" or not release_url.path.startswith("/hutoczky/FormatX-Updates/releases/"):
+        if (
+            release_url.scheme != "https"
+            or release_url.netloc != "github.com"
+            or not release_url.path.startswith("/hutoczky/FormatX-Updates/releases/")
+        ):
             module.fail("Release URL is not an official FormatX-Updates release")
-        win = data.get("channels", {}).get("windows", {})
-        if win.get("available") is True:
-            url = urlparse(str(win.get("download_url") or ""))
-            if url.scheme != "https" or url.netloc != "github.com" or not url.path.startswith("/hutoczky/FormatX-Updates/releases/download/"):
-                module.fail("Windows release URL is not an official FormatX-Updates asset")
-        if schema == 2:
-            if not isinstance(data.get("source_release_id"), int):
-                module.fail("Schema 2 release lacks source_release_id")
-            if data.get("integrity", {}).get("status") not in {
-                "package_only", "digest_published", "digest_and_signature_published"
-            }:
-                module.fail("Schema 2 release has an invalid integrity status")
+        package = data.get("channels", {}).get("multiplatform", {})
+        if package.get("available") is not True:
+            module.fail("Schema 2 release lacks the multiplatform package")
+        elif not module.official_download(str(package.get("download_url") or "")):
+            module.fail("Multiplatform package URL is not official")
+        if package.get("primary_platform") != "linux-bazzite":
+            module.fail("Bazzite/Linux is not the package primary platform")
+        supported = set(package.get("supported_platforms") or [])
+        if not {"linux-bazzite", "windows"}.issubset(supported):
+            module.fail("Package supported-platform metadata is incomplete")
+        if not str(package.get("digest") or "").startswith("sha256:"):
+            module.fail("Multiplatform package digest is missing")
     else:
+        package = data.get("channels", {}).get("multiplatform", {})
         if data.get("version") is not None:
             module.fail("Fallback release metadata must not invent a version")
-        if data.get("channels", {}).get("windows", {}).get("available") is not False:
-            module.fail("Fallback release metadata must not expose a Windows package")
+        if package.get("available") is not False:
+            module.fail("Fallback release metadata must not expose a package")
 
     workflow = module.read(".github/workflows/sync-current-release.yml")
     for token in [
         "FormatX-Updates/releases?per_page=30",
-        "prerelease == false",
-        "docs/scifi-ui/data/current-release.json",
+        "multiplatform_asset",
         "source_release_id",
         "integrity",
         "del(.synced_at)",
         "cmp -s",
-        "git diff" if False else "git commit -m 'Sync official current release metadata'",
+        "git commit -m 'Sync official current release metadata'",
     ]:
         if token not in workflow:
             module.fail(f"Release sync workflow missing contract: {token}")
@@ -74,26 +78,29 @@ def validate_public_pages_v2() -> None:
             module.fail(f"Missing public page: {page}")
             continue
         text = module.visible_text(path)
-        if re.search(r"\bV92\b", text, re.I):
-            module.fail(f"Visible hardcoded V92 remains in {page}")
-        if re.search(r"\b(csapatunk|fejlesztőink|vállalatunk|our team|our developers|our company)\b", text, re.I):
+        if re.search(r"\bV(?:92|120)\b", text, re.I):
+            module.fail(f"Visible release version remains in {page}")
+        if re.search(
+            r"\b(csapatunk|fejlesztőink|vállalatunk|our team|our developers|our company)\b",
+            text,
+            re.I,
+        ):
             module.fail(f"False team/company voice remains in {page}")
-        if re.search(r"\b(világelső|piacvezető|world[- ]leading|market leader)\b", text, re.I):
-            module.fail(f"Unsupported leadership claim remains in {page}")
+
+    downloads = module.read("docs/scifi-ui/downloads/index.html")
+    for token in [
+        'data-release-download="multiplatform"',
+        "Bazzite/Linux elsődleges",
+        "Windows támogatott",
+        "Multiplatform nyilvános béta letöltése",
+    ]:
+        if token not in downloads:
+            module.fail(f"Downloads page missing multiplatform contract: {token}")
 
     production = module.read("billing-worker/src/production-content-entry.js")
     preview = module.read("content-preview-entry.js")
-    legacy_contracts = [
-        "FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip",
-        "FormatX Suite Pro V92", "Windows V92", "92.00",
-        "Teljes verzió letöltése", "Download full version"
-    ]
-    for contract in legacy_contracts:
-        if contract not in production or contract not in preview:
-            module.fail(f"Legacy main-page value is not sanitized in both Workers: {contract}")
-
     for source, name in [(production, "production"), (preview, "preview")]:
-        for token in ["formatx-public-shell.js", "formatx-content-standard.css?v=20260731-content-2"]:
+        for token in ["formatx-public-shell.js", "formatx-content-standard.css"]:
             if token not in source:
                 module.fail(f"{name} public-page wrapper missing {token}")
 

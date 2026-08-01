@@ -10,6 +10,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
+      - 'docs/scifi-ui/styles/formatx-desktop-unified.css'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
   pull_request:
@@ -19,6 +20,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
+      - 'docs/scifi-ui/styles/formatx-desktop-unified.css'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
 
@@ -51,10 +53,11 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
-          grep -Fq "boundary-v3" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "boundary-v4" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "clonedContent: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "reinitialisedRenderer: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "formatx-infinite-scroll.js?v=20260729-infinite-boundary-v3" docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq "formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4" docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq "formatx-desktop-unified.css" docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq "addEventListener('formatx:loop'" docs/scifi-ui/scripts/organism-core-controller.js
           ! grep -Fq "data-fx-loop-bridge" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "cloneNode" docs/scifi-ui/scripts/formatx-infinite-scroll.js
@@ -104,10 +107,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Clone-free boundary loops passed at both laptop sizes'
+            description='Boundary-v4 loops passed at both laptop sizes'
           else
             state='failure'
-            description='Clone-free laptop loop validation failed'
+            description='Laptop boundary-v4 validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \

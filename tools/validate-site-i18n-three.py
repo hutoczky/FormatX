@@ -33,6 +33,7 @@ validator.ALLOW_EXACT.update({
     "LIVING SYSTEM",
     "MAG",
     "PAYMENT ACCESS LAYER",
+    "Platform",
     "QR ↗",
     "RELEASE DNA",
     "RESPONSIVE SYSTEM ARCHITECTURE",
