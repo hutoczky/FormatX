@@ -177,6 +177,7 @@ async function assertLeakedConsoleSelfHeals(page) {
 async function closePanelAndAssertCore(page) {
   await page.locator('.fx-organism-console-close').click();
   await assertCore(page);
+  await page.waitForTimeout(550);
 }
 
 async function resourceFootprint(page) {
