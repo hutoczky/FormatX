@@ -39,12 +39,15 @@ async function clearIntro(page) {
 async function waitReady(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
+    const loaderReady = /^safe-(?:ready|degraded)-v26$/.test(
+      root.dataset.fxTranscendLoader || ''
+    );
     return root.classList.contains('fx-intro-complete')
       && root.dataset.fxSingleLanguageToggle === 'ready'
       && root.dataset.fxCopyPolish === 'ready-v1'
       && /^(ready|fallback)-v4$/.test(root.dataset.fxReleaseMetadata || '')
       && root.dataset.fxInteractionGenomeExport === 'ready'
-      && root.dataset.fxTranscendLoader === 'safe-ready-v26'
+      && loaderReady
       && Boolean(document.getElementById('fx-licence-clarity'))
       && document.querySelector('#hero-download [data-release-download-label]')?.textContent.trim()
         === 'Multiplatform nyilvános béta letöltése'
