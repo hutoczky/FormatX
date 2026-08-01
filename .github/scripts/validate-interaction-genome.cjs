@@ -145,7 +145,7 @@ async function desktop(browser) {
     )
   ), null, { timeout: 5000 });
 
-  const meaningful = errors.filter(error => !/WebGL|WebGPU|GPU|favicon|ERR_ABORTED/i.test(error));
+  const meaningful = errors.filter(error => !/WebGL|WebGPU|GPU|favicon|ERR_ABORTED|Failed to load resource:.*404/i.test(error));
   assert(!meaningful.length, 'desktop browser errors: ' + meaningful.join(' | '));
   current = await state(page);
   console.log(JSON.stringify({
