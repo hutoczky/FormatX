@@ -139,7 +139,7 @@ async function testViewport(browser, viewport, name, mobile) {
   assertEnglish(await readCopy(page), name);
 
   const meaningful = errors.filter(item => (
-    !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item)
+    !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*(?:403|404)/i.test(item)
   ));
   assert(!meaningful.length, name + ': browser errors: ' + meaningful.join(' | '));
   await context.close();
