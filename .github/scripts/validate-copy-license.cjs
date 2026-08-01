@@ -31,16 +31,28 @@ async function waitPublicState(page, language) {
     ? 'Download multiplatform public beta'
     : 'Multiplatform nyilvános béta letöltése';
   const expectedLicence = language === 'en' ? 'Licence' : 'Licenc';
+  const expectedNavigation = language === 'en'
+    ? ['Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads']
+    : ['Működés', 'Modulok', 'Licenc és árak', 'Biztonság', 'Letöltés'];
+  const expectedTrial = language === 'en' ? 'day trial licence' : 'napos próbalicenc';
 
-  await page.waitForFunction(({ lang, download, licence }) => (
+  await page.waitForFunction(({ lang, download, licence, navigation, trial }) => (
     document.documentElement.lang === lang
+    && document.documentElement.dataset.fxLanguageCopyStability === 'ready-v1'
     && Boolean(document.querySelector('.fx-language-toggle'))
     && document.querySelector('#hero-download span')?.textContent.trim() === download
     && document.querySelector('.site-footer [data-fx-licence-link]')?.textContent.trim() === licence
+    && JSON.stringify(Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim()))
+      === JSON.stringify(navigation)
+    && document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() === trial
     && Boolean(document.getElementById('fx-licence-clarity'))
-  ), { lang: language, download: expectedDownload, licence: expectedLicence }, {
-    timeout: 45000
-  });
+  ), {
+    lang: language,
+    download: expectedDownload,
+    licence: expectedLicence,
+    navigation: expectedNavigation,
+    trial: expectedTrial
+  }, { timeout: 45000 });
 }
 
 async function readCopy(page) {
@@ -95,11 +107,11 @@ function assertHungarian(state, name) {
 function assertEnglish(state, name) {
   assert(state.lang === 'en', name + ': English language state missing: ' + JSON.stringify(state));
   assert(JSON.stringify(state.nav) === JSON.stringify([
-    'How it works', 'Modules', 'Licences', 'Proof', 'Download'
+    'Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads'
   ]), name + ': English navigation mismatch: ' + JSON.stringify(state));
   assert(state.heroDownload === 'Download multiplatform public beta',
     name + ': English download label mismatch: ' + JSON.stringify(state));
-  assert(state.trialLabel === 'day full trial',
+  assert(state.trialLabel === 'day trial licence',
     name + ': English trial label mismatch: ' + JSON.stringify(state));
   assert(state.pricingTitle === 'The licence plan fits your work.',
     name + ': English pricing heading mismatch: ' + JSON.stringify(state));
