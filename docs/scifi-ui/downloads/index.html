@@ -18,24 +18,11 @@
   <link rel="stylesheet" href="../styles/platform-status.css">
   <link rel="stylesheet" href="../styles/single-language-toggle.css">
   <link rel="stylesheet" href="../styles/formatx-content-standard.css">
+  <link rel="stylesheet" href="../styles/downloads-page.css">
   <script defer src="../scripts/single-language-toggle.js"></script>
   <script defer src="../scripts/release-metadata.js"></script>
   <script defer src="../scripts/platform-status.js"></script>
   <script defer src="../scripts/formatx-seo.js"></script>
-  <style>
-    body{margin:0;background:#030817;color:#f4faff}
-    .fx-download-page{width:min(1180px,calc(100% - 28px));margin:auto;padding:40px 0 80px}
-    .fx-download-header{display:flex;align-items:center;justify-content:space-between;gap:18px}
-    .fx-download-intro{max-width:840px;margin:52px 0 30px}
-    .fx-download-intro h1{font-size:clamp(2.2rem,6vw,5rem);line-height:.95}
-    .fx-download-intro p{color:#bed0dc;line-height:1.65}
-    .fx-download-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:28px 0 46px}
-    .fx-download-action{padding:22px;border:1px solid #23445d;border-radius:20px;background:#071426}
-    .fx-download-action p{color:#b8cbe0;line-height:1.55}
-    .fx-download-action a{display:inline-flex;min-height:44px;align-items:center;padding:0 16px;border-radius:12px;background:#35d9ff;color:#00111d;text-decoration:none;font-weight:800}
-    .fx-download-action a.secondary{background:#17395f;color:#f4faff}
-    @media(max-width:800px){.fx-download-actions{grid-template-columns:1fr}}
-  </style>
 </head>
 <body>
   <main class="fx-download-page">
@@ -53,8 +40,8 @@
     <section class="fx-download-actions" aria-label="Elérhető letöltések">
       <article class="fx-download-action">
         <h2 data-hu="Bazzite/Linux elsődleges · Windows támogatott" data-en="Bazzite/Linux primary · Windows supported">Bazzite/Linux elsődleges · Windows támogatott</h2>
-        <p data-hu="Egyetlen hivatalos multiplatform nyilvános béta csomag. A gomb csak szinkronizált kiadási metaadat esetén mutat közvetlen letöltésre." data-en="One official multiplatform public beta package. The button points to a direct download only when synchronized release metadata is available.">Egyetlen hivatalos multiplatform nyilvános béta csomag. A gomb csak szinkronizált kiadási metaadat esetén mutat közvetlen letöltésre.</p>
-        <a data-release-download="multiplatform" aria-describedby="multiplatform-beta-note" href="./">
+        <p data-hu="Egyetlen hivatalos multiplatform nyilvános béta csomag. A gomb csak szinkronizált, hiteles kiadási metaadat esetén mutat közvetlen letöltésre." data-en="One official multiplatform public beta package. The button points to a direct download only when synchronized, trusted release metadata is available.">Egyetlen hivatalos multiplatform nyilvános béta csomag. A gomb csak szinkronizált, hiteles kiadási metaadat esetén mutat közvetlen letöltésre.</p>
+        <a data-release-download="multiplatform" data-release-description="multiplatform-beta-note" aria-describedby="multiplatform-beta-note" href="./">
           <span data-release-download-label data-hu="Multiplatform nyilvános béta letöltése" data-en="Download multiplatform public beta">Multiplatform nyilvános béta letöltése</span>
         </a>
         <small id="multiplatform-beta-note" data-hu="Bazzite/Linux az elsődleges rendszer; a Windows támogatott. Nem Stable kiadás." data-en="Bazzite/Linux is primary; Windows is supported. Not a Stable release.">Bazzite/Linux az elsődleges rendszer; a Windows támogatott. Nem Stable kiadás.</small>

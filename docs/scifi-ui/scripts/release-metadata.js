@@ -88,6 +88,7 @@
   }
 
   function packageAsset() {
+    if (!state.available) return null;
     const asset = state.release?.channels?.multiplatform
       || state.release?.channels?.windows;
     if (!asset || asset.available !== true || !isAllowedDownloadUrl(asset.download_url)) return null;
@@ -131,16 +132,25 @@
     if (!(link instanceof HTMLAnchorElement)) return;
     const asset = packageAsset();
     const labelTarget = link.querySelector('[data-release-download-label], span') || link;
+    const defaultDescription = link.dataset.releaseDescription
+      || link.getAttribute('aria-describedby')
+      || '';
+    if (defaultDescription) link.dataset.releaseDescription = defaultDescription;
+
     labelTarget.textContent = packageLabel();
     link.dataset.releaseState = asset ? 'available' : 'metadata-unavailable';
     link.dataset.releaseChannel = 'multiplatform';
     link.removeAttribute('download');
-    link.removeAttribute('aria-describedby');
 
     if (asset) {
       link.href = asset.download_url;
       link.removeAttribute('aria-disabled');
       link.classList.remove('is-disabled', 'is-metadata-fallback');
+      if (link.dataset.releaseDescription) {
+        link.setAttribute('aria-describedby', link.dataset.releaseDescription);
+      } else {
+        link.removeAttribute('aria-describedby');
+      }
       link.title = packageLabel();
     } else {
       link.href = '/scifi-ui/downloads/';
