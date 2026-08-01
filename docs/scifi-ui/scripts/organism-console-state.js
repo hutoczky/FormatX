@@ -12,6 +12,7 @@
   let documentObserver = null;
   let reconciling = false;
   let scheduled = 0;
+  let closeLockUntil = 0;
 
   function consoleRoot() {
     return document.getElementById('fx-organism-console');
@@ -65,6 +66,10 @@
   }
 
   function authoriseOpen(id) {
+    if (performance.now() < closeLockUntil) {
+      forceClosed({ replaceHash: true });
+      return;
+    }
     if (!PANEL_IDS.has(id)) {
       forceClosed({ replaceHash: true });
       return;
@@ -90,6 +95,11 @@
   function reconcile() {
     scheduled = 0;
     if (reconciling) return;
+
+    if (performance.now() < closeLockUntil) {
+      forceClosed({ replaceHash: true });
+      return;
+    }
 
     const shell = consoleRoot();
     if (!shell) return;
@@ -137,6 +147,11 @@
     scheduleReconcile();
   }
 
+  function holdClosedUntil(deadline) {
+    forceClosed({ replaceHash: true });
+    if (performance.now() < deadline) requestAnimationFrame(() => holdClosedUntil(deadline));
+  }
+
   function handleEscape(event) {
     if (event.key !== 'Escape') return;
     const shell = consoleRoot();
@@ -145,13 +160,10 @@
     event.preventDefault();
     event.stopImmediatePropagation();
 
+    closeLockUntil = performance.now() + 1200;
     const close = shell.querySelector('[data-organism-close]');
     if (close instanceof HTMLElement) close.click();
-    forceClosed({ replaceHash: true });
-    requestAnimationFrame(() => {
-      forceClosed({ replaceHash: true });
-      requestAnimationFrame(() => forceClosed({ replaceHash: true }));
-    });
+    holdClosedUntil(closeLockUntil);
   }
 
   addEventListener('formatx:organisminterfaceready', () => {
