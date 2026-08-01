@@ -50,6 +50,7 @@
       consoleRoot.classList.remove('is-authorised-open');
       consoleRoot.hidden = true;
       consoleRoot.setAttribute('aria-hidden', 'true');
+      consoleRoot.style.setProperty('display', 'none');
     }
     document.querySelectorAll('[data-organism-panel]').forEach(panel => {
       panel.hidden = true;
@@ -147,6 +148,8 @@
       return;
     }
 
+    const consoleRoot = document.getElementById('fx-organism-console');
+    consoleRoot?.style.removeProperty('display');
     pendingPanel = '';
     trigger.dataset.organismSource = source || 'system-navigation';
     trigger.click();
