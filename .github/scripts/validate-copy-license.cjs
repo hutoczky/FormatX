@@ -43,7 +43,13 @@ async function waitReady(page) {
       && root.dataset.fxSingleLanguageToggle === 'ready'
       && root.dataset.fxCopyPolish === 'ready-v1'
       && /^(ready|fallback)-v4$/.test(root.dataset.fxReleaseMetadata || '')
-      && Boolean(document.getElementById('fx-licence-clarity'));
+      && root.dataset.fxInteractionGenomeExport === 'ready'
+      && root.dataset.fxTranscendLoader === 'safe-ready-v26'
+      && Boolean(document.getElementById('fx-licence-clarity'))
+      && document.querySelector('#hero-download [data-release-download-label]')?.textContent.trim()
+        === 'Multiplatform nyilvános béta letöltése'
+      && document.querySelector('.site-footer [data-fx-licence-link]')?.textContent.trim()
+        === 'Licenc';
   }, null, { timeout: 45000 });
 }
 
@@ -199,6 +205,10 @@ async function testViewport(browser, viewport, name, mobile) {
     document.documentElement.lang === 'en'
     && document.documentElement.dataset.fxCopyPolish === 'ready-v1'
     && /^(ready|fallback)-v4$/.test(document.documentElement.dataset.fxReleaseMetadata || '')
+    && document.querySelector('#hero-download [data-release-download-label]')?.textContent.trim()
+      === 'Download multiplatform public beta'
+    && document.querySelector('.site-footer [data-fx-licence-link]')?.textContent.trim()
+      === 'Licence'
   ));
   await assertEnglish(page, name);
 
