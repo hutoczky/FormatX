@@ -128,7 +128,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   );
 
   const languageToggle = page.locator('.fx-language-toggle');
-  await languageToggle.click();
+  await languageToggle.evaluate(node => node.click());
   await page.waitForFunction(() => document.documentElement.lang === 'en');
   assert(
     (await summary.locator('strong').textContent()).trim() === 'Thought genome',
