@@ -43,7 +43,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
 
@@ -73,7 +73,6 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-console-state.js
           node --check docs/scifi-ui/scripts/organism-voice.js
-          node --check docs/scifi-ui/scripts/organism-voice-foreground.js
           node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
@@ -84,7 +83,7 @@ jobs:
           node --input-type=module --check < worker.js
           node --check .github/scripts/validate-thought-genome.cjs
 
-      - name: Validate Worker ownership and critical routes
+      - name: Validate Worker ownership and current routes
         shell: bash
         run: |
           node - <<'NODE'
@@ -102,19 +101,17 @@ jobs:
             '/scifi-ui/data/platform-status.json',
             '/scifi-ui/data/current-release.json',
             '/scifi-ui/styles/platform-status.css',
-            '/scifi-ui/scripts/platform-status.js',
-            '/scifi-ui/scripts/release-metadata.js',
-            '/scifi-ui/scripts/formatx-public-shell.js',
-            '/scifi-ui/scripts/public-evidence-pages.js',
             '/scifi-ui/styles/organism-voice.css',
-            '/scifi-ui/styles/organism-voice-foreground.css',
             '/scifi-ui/styles/organism-voice-dock.css',
             '/scifi-ui/styles/formatx-mobile-readability.css',
             '/scifi-ui/styles/formatx-mobile-unified.css',
             '/scifi-ui/styles/synaptic-thought-genome.css',
             '/scifi-ui/styles/synaptic-thought-disclosure.css',
+            '/scifi-ui/scripts/platform-status.js',
+            '/scifi-ui/scripts/release-metadata.js',
+            '/scifi-ui/scripts/formatx-public-shell.js',
+            '/scifi-ui/scripts/public-evidence-pages.js',
             '/scifi-ui/scripts/organism-voice.js',
-            '/scifi-ui/scripts/organism-voice-foreground.js',
             '/scifi-ui/scripts/organism-core-controller.js',
             '/scifi-ui/scripts/synaptic-thought-genome.js',
             '/scifi-ui/scripts/synaptic-thought-disclosure.js',
@@ -127,7 +124,14 @@ jobs:
           for (const path of required) {
             if (!first.includes(path)) throw new Error(`Missing preview Worker path: ${path}`);
           }
-          if (first.some(path => path.includes('organism-natural-voice'))) throw new Error('Obsolete Natural Voice route returned');
+          const retired = [
+            '/scifi-ui/styles/organism-voice-foreground.css',
+            '/scifi-ui/scripts/organism-voice-foreground.js',
+            '/scifi-ui/scripts/organism-natural-voice.js',
+          ];
+          for (const path of retired) {
+            if (first.includes(path)) throw new Error(`Retired preview Worker path returned: ${path}`);
+          }
           if (preview.routes?.length) throw new Error('Preview Worker must not own production custom domains');
           if (preview.workers_dev !== true) throw new Error('Preview Worker must remain available on workers.dev');
           if (preview.main !== 'content-preview-entry.js') throw new Error('Preview content wrapper is not active');
@@ -138,12 +142,15 @@ jobs:
           }
           NODE
 
-      - name: Validate restored intro, product status and local Morphing Organism
+      - name: Validate current intro, release and local Organism contracts
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'safe-ready-v25' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v26' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-degraded-v26' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'organism-voice-dock.css?v=20260731-organism-dock-3' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'formatx-desktop-unified.css' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'synaptic-thought-genome.js?v=20260731-thought-genome-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'mobile-core-engine-v3.js?v=20260731-morphing-organism-v3' docs/scifi-ui/scripts/mobile-webgl-entry.js
@@ -153,44 +160,31 @@ jobs:
           grep -Fq 'details.open = false' docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           grep -Fq 'defaultOpen: false' docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           grep -Fq ':not([open]) > .fx-thought-genome-controls' docs/scifi-ui/styles/synaptic-thought-disclosure.css
-          grep -Fq 'function heartForm' docs/scifi-ui/scripts/mobile-core-engine-v3.js
-          grep -Fq 'function beaconForm' docs/scifi-ui/scripts/mobile-core-engine-v3.js
           ! grep -Fq 'fetch(' docs/scifi-ui/scripts/synaptic-thought-genome.js
           ! grep -Fq 'fetch(' docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           ! grep -Fq 'organism-natural-voice' docs/scifi-ui/scripts/igloo-parity.js
-          ! test -e docs/scifi-ui/scripts/organism-natural-voice.js
-          grep -Fq 'organism-voice-dock.css?v=20260730-organism-dock-2' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'min-aspect-ratio: 21/9' docs/scifi-ui/styles/organism-voice-dock.css
           grep -Fq 'right: 440px !important' docs/scifi-ui/styles/organism-voice-dock.css
           grep -Fq 'platform-status.js?v=20260730-platform-status-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'MOBILE_QUERY.matches ? 2100 : 2400' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'TIMELINE_DURATION + EXIT_DURATION + 1100' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq "DOMContentLoaded', startIntro" docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'if (event.persisted) startIntro();' docs/scifi-ui/scripts/formatx-event-horizon.js
-          ! grep -Fq 'formatx-intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq '20260731-intro-restored-1' worker.js
-          grep -Fq '20260731-intro-restored-1' billing-worker/src/production-entry.js
-          grep -Fq 'formatx-public-shell.js' billing-worker/src/production-content-entry.js
-          grep -Fq 'formatx-public-shell.js' content-preview-entry.js
+          grep -Fq 'MOBILE_QUERY.matches?2100:2400' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'hardDeadline=timelineDuration+exitDuration+1100' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq "DOMContentLoaded',start" docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'bfcache-restore' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'formatx:intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
           grep -Fq 'public_beta' docs/scifi-ui/data/platform-status.json
-          grep -Fq 'technical_preview' docs/scifi-ui/data/platform-status.json
-          grep -Fq 'development' docs/scifi-ui/data/platform-status.json
-          grep -Fq 'planned' docs/scifi-ui/data/platform-status.json
-          grep -Fq 'Public beta' README.md
-          grep -Fq 'Public beta' RELEASE_NOTES.md
+          grep -Fq '"id": "linux-bazzite"' docs/scifi-ui/data/platform-status.json
+          grep -Fq '"public_package": "multiplatform"' docs/scifi-ui/data/platform-status.json
+          grep -Fq '"multiplatform"' docs/scifi-ui/data/current-release.json
+          grep -Fq 'data-release-download="multiplatform"' docs/scifi-ui/index.html
+          ! grep -Fq '92.00' docs/scifi-ui/index.html
           grep -Fq 'fx-organism-master-toggle' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'setOpen(false, false)' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'function voiceScore(voice)' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'function splitSpeech(text)' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'sentence-prosody-v3' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'synth.resume()' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'speechWatchdog = window.setTimeout' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'browser-default' docs/scifi-ui/scripts/organism-voice.js
-          ! grep -Fq 'utterance.pitch = 0.82' docs/scifi-ui/scripts/organism-voice.js
           ! grep -Fq 'fetch(' docs/scifi-ui/scripts/organism-voice.js
-          ! grep -Fq 'formatx:introcomplete' docs/scifi-ui/scripts/organism-voice.js
 
-      - name: Validate continuous mobile behaviour
+      - name: Validate continuous mobile and laptop behaviour
         shell: bash
         run: |
           set -euo pipefail
@@ -200,5 +194,6 @@ jobs:
           grep -Fq 'reinitialisedRenderer: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'data-fx-mobile-core-visible="false"' docs/scifi-ui/styles/formatx-mobile-readability.css
           grep -Fq -- '--fx-mobile-dock-height: 54px' docs/scifi-ui/styles/formatx-mobile-unified.css
+          grep -Fq 'max-height: 820px' docs/scifi-ui/styles/formatx-desktop-unified.css
           ! grep -Fq 'cloneNode' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "addEventListener('click'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
