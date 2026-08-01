@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "public_copy": {
+    "primary_system": "linux-bazzite",
+    "supported_secondary_platforms": [
+      "windows"
+    ],
+    "download_channel": "multiplatform",
+    "public_release_version_visible": false,
+    "release_maturity": "public_beta"
+  },
+  "source_of_truth": {
+    "platform_status": "/scifi-ui/data/platform-status.json",
+    "release_metadata": "/scifi-ui/data/current-release.json"
+  }
+}
