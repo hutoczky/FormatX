@@ -155,9 +155,10 @@
     scheduleReconcile();
   }
 
-  function holdClosedUntil(deadline) {
+  function holdClosed() {
+    if (performance.now() >= closeLockUntil) return;
     forceClosed({ replaceHash: true });
-    if (performance.now() < deadline) requestAnimationFrame(() => holdClosedUntil(deadline));
+    requestAnimationFrame(holdClosed);
   }
 
   function clearCloseLock() {
@@ -184,7 +185,7 @@
     closeLockUntil = performance.now() + 450;
     const close = shell.querySelector('[data-organism-close]');
     if (close instanceof HTMLElement) close.click();
-    holdClosedUntil(closeLockUntil);
+    holdClosed();
   }
 
   addEventListener('pointerdown', handleExplicitPointer, true);
