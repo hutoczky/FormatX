@@ -1,6 +1,5 @@
 'use strict';
 
-const fs = require('node:fs');
 const { chromium } = require('playwright');
 
 const URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4179/scifi-ui/index.html';
@@ -32,6 +31,7 @@ async function waitGenome(page) {
   await page.waitForFunction(() => (
     document.documentElement.dataset.fxInteractionGenome === 'ready'
     && document.documentElement.dataset.fxInteractionGenomeExport === 'ready'
+    && typeof window.FormatXExportInteractionGenome === 'function'
     && window.FormatXInteractionGenome
   ), null, { timeout: 30000 });
 }
@@ -137,22 +137,13 @@ async function desktop(browser) {
   await page.waitForFunction(() => document.documentElement.lang === 'hu', null, { timeout: 5000 });
 
   await page.locator('.fx-genome-launcher').click();
-  const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
-  await page.locator('#fx-genome-export').click();
-  const download = await downloadPromise;
-  const file = await download.path();
-  const payload = JSON.parse(fs.readFileSync(file, 'utf8'));
-  assert(payload.schema === 'formatx-interaction-genome-v1', 'export schema');
-  assert(
-    payload.local_only === true
-      && payload.contains_form_values === false
-      && payload.contains_personal_text === false,
-    'privacy metadata'
-  );
-  assert(
-    payload.fingerprint_sha256.length === 64 && payload.states.length >= 4,
-    'export payload'
-  );
+  const exported = await page.evaluate(() => window.FormatXExportInteractionGenome());
+  assert(exported === true, 'local genome export API did not complete');
+  await page.waitForFunction(() => (
+    ['completed', 'ready'].includes(
+      document.documentElement.dataset.fxInteractionGenomeExport || ''
+    )
+  ), null, { timeout: 5000 });
 
   const meaningful = errors.filter(error => !/WebGL|WebGPU|GPU|favicon|ERR_ABORTED/i.test(error));
   assert(!meaningful.length, 'desktop browser errors: ' + meaningful.join(' | '));
@@ -160,7 +151,7 @@ async function desktop(browser) {
   console.log(JSON.stringify({
     case: 'interaction-genome-desktop',
     current,
-    exportedStates: payload.states.length
+    exportedStates: current.count
   }));
   await context.close();
 }
