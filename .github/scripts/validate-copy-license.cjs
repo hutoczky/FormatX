@@ -9,6 +9,33 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+async function clearIntro(page) {
+  const skip = page.locator('.fx-intro-skip');
+  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
+
+  const completed = await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const overlay = document.getElementById('formatx-event-horizon');
+    return root.classList.contains('fx-intro-complete')
+      && !root.classList.contains('fx-intro-running')
+      && (!overlay || overlay.hidden);
+  }, null, { timeout: 5000 }).then(() => true).catch(() => false);
+
+  if (completed) return;
+  await page.evaluate(() => {
+    const root = document.documentElement;
+    const overlay = document.getElementById('formatx-event-horizon');
+    root.classList.remove('fx-intro-running', 'fx-intro-pending', 'fx-intro-reveal');
+    root.classList.add('fx-intro-complete');
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+  });
+}
+
 async function waitReady(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -163,6 +190,7 @@ async function testViewport(browser, viewport, name, mobile) {
   });
 
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
+  await clearIntro(page);
   await waitReady(page);
   await assertHungarian(page, name);
 
@@ -170,6 +198,7 @@ async function testViewport(browser, viewport, name, mobile) {
   await page.waitForFunction(() => (
     document.documentElement.lang === 'en'
     && document.documentElement.dataset.fxCopyPolish === 'ready-v1'
+    && /^(ready|fallback)-v4$/.test(document.documentElement.dataset.fxReleaseMetadata || '')
   ));
   await assertEnglish(page, name);
 
