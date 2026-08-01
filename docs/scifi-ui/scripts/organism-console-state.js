@@ -158,7 +158,6 @@
     if (!shell || shell.hidden) return;
 
     event.preventDefault();
-    event.stopImmediatePropagation();
 
     closeLockUntil = performance.now() + 450;
     const close = shell.querySelector('[data-organism-close]');
@@ -175,9 +174,6 @@
   });
 
   addEventListener('formatx:organismpanelopen', event => {
-    /* A real panel-open event represents a new explicit user action. It must
-       cancel the short Escape race lock instead of being mistaken for a stale
-       automatic reopen. */
     closeLockUntil = 0;
     bindConsoleObserver();
     authoriseOpen(String(event.detail?.id || ''));
