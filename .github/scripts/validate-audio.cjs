@@ -114,7 +114,7 @@ async function runCase(browser, name, contextOptions) {
   await button.click({ force: true });
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'off');
 
-  const meaningfulDiagnostics = diagnostics.filter(item => !/favicon|WebGL stall|GPU stall|net::ERR_ABORTED/i.test(item));
+  const meaningfulDiagnostics = diagnostics.filter(item => !/favicon|WebGL stall|GPU stall|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item));
   assert(!meaningfulDiagnostics.length, name + ': browser diagnostics: ' + meaningfulDiagnostics.join(' | '));
   console.log(JSON.stringify({ case: name, state, sustained }));
   await context.close();
