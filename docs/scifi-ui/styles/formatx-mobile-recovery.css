@@ -1,4 +1,5 @@
 @import url('./formatx-desktop-unified.css');
+@import url('./formatx-mobile-hero-flow.css');
 
 /* FormatX living-core visibility and responsive layout recovery. */
 html[data-fx-safe-three-gate="ready-v1"] body,
