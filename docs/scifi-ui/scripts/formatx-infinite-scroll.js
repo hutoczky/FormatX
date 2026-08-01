@@ -20,6 +20,7 @@
   const SETTLE_MS = 320;
   const NATIVE_LOOP_DELAY_MS = 180;
   const ACTIVITY_IDLE_MS = 140;
+  const WHEEL_INTENT_IDLE_MS = 220;
   const DOWN_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ']);
   const UP_KEYS = new Set(['ArrowUp', 'PageUp', 'Home']);
 
@@ -30,6 +31,7 @@
   );
   let wheelDown = 0;
   let wheelUp = 0;
+  let wheelIntentTimer = 0;
   let touchStartY = null;
   let lastExplicitInputAt = 0;
   let nativeLoopQueued = false;
@@ -112,6 +114,17 @@
     root.classList.remove('fx-page-scrolling');
   }
 
+  function resetWheelIntent() {
+    clearTimeout(wheelIntentTimer);
+    wheelDown = 0;
+    wheelUp = 0;
+  }
+
+  function keepWheelIntentAlive() {
+    clearTimeout(wheelIntentTimer);
+    wheelIntentTimer = window.setTimeout(resetWheelIntent, WHEEL_INTENT_IDLE_MS);
+  }
+
   function publishReadyState() {
     root.dataset.fxInfiniteScroll = 'ready-v4';
     root.dataset.fxInfiniteController = 'boundary-v4';
@@ -157,6 +170,15 @@
     });
   }
 
+  function finishWheelIntentAtBoundary() {
+    if (looping || performance.now() < cooldownUntil) return;
+    if (wheelDown >= WHEEL_THRESHOLD && withinWheelBottomZone()) {
+      void performLoop('down', 'wheel');
+    } else if (wheelUp >= WHEEL_THRESHOLD && withinWheelTopZone()) {
+      void performLoop('up', 'wheel');
+    }
+  }
+
   function onScroll() {
     root.dataset.fxInfiniteBoundary = nearTop()
       ? 'top'
@@ -164,6 +186,7 @@
         ? 'bottom'
         : 'middle';
     markActivity();
+    requestAnimationFrame(finishWheelIntentAtBoundary);
     if (nearBottom()) queueNativeBottomLoop();
   }
 
@@ -221,8 +244,7 @@
     publishReadyState();
     looping = false;
     cooldownUntil = performance.now() + COOLDOWN_MS;
-    wheelDown = 0;
-    wheelUp = 0;
+    resetWheelIntent();
     markIdle();
     return true;
   }
@@ -237,24 +259,30 @@
       || nestedScrollerCanConsume(event.target, event.deltaY)
     ) return;
 
-    if (event.deltaY > 0 && withinWheelBottomZone()) {
+    if (event.deltaY > 0) {
       wheelDown += Math.abs(event.deltaY);
       wheelUp = 0;
-      if (event.cancelable) event.preventDefault();
-      if (wheelDown >= WHEEL_THRESHOLD) void performLoop('down', 'wheel');
+      keepWheelIntentAlive();
+      if (withinWheelBottomZone()) {
+        if (event.cancelable) event.preventDefault();
+        finishWheelIntentAtBoundary();
+      } else {
+        requestAnimationFrame(finishWheelIntentAtBoundary);
+      }
       return;
     }
 
-    if (event.deltaY < 0 && withinWheelTopZone()) {
+    if (event.deltaY < 0) {
       wheelUp += Math.abs(event.deltaY);
       wheelDown = 0;
-      if (event.cancelable) event.preventDefault();
-      if (wheelUp >= WHEEL_THRESHOLD) void performLoop('up', 'wheel');
-      return;
+      keepWheelIntentAlive();
+      if (withinWheelTopZone()) {
+        if (event.cancelable) event.preventDefault();
+        finishWheelIntentAtBoundary();
+      } else {
+        requestAnimationFrame(finishWheelIntentAtBoundary);
+      }
     }
-
-    wheelDown = 0;
-    wheelUp = 0;
   }
 
   function handleKey(event) {
