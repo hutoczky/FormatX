@@ -1,0 +1,80 @@
+name: Fix final core state once
+
+on:
+  push:
+    branches: [fix/desktop-multiplatform-final]
+    paths:
+      - '.github/workflows/one-shot-fix-final-core-state.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-one-shot-fix-final-core-state
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/desktop-multiplatform-final
+
+      - name: Fix desktop scroll landing and language core state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          stability = Path('docs/scifi-ui/styles/formatx-site-stability.css')
+          text = stability.read_text(encoding='utf-8')
+          rule = '''
+
+/* Desktop and laptop scrolling is continuous; mobile keeps its guided snap flow. */
+@media (min-width: 901px) {
+  html.fx-organism-interface-ready {
+    scroll-snap-type: none !important;
+  }
+}
+'''
+          if '@media (min-width: 901px)' not in text or 'html.fx-organism-interface-ready' not in text.split('@media (min-width: 901px)', 1)[-1]:
+              text += rule
+          stability.write_text(text, encoding='utf-8')
+
+          controller = Path('docs/scifi-ui/scripts/organism-core-controller.js')
+          text = controller.read_text(encoding='utf-8')
+          old = "  addEventListener('formatx:languagechange', () => updateNavigation(Number(ROOT.dataset.fxScene || 0)));"
+          new = '''  addEventListener('formatx:languagechange', () => {
+    const scene = Number(ROOT.dataset.fxScene || 0);
+    if (scene === 0 && !panelIsOpen()) {
+      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    } else {
+      updateNavigation(scene);
+    }
+  });'''
+          if old not in text:
+              raise SystemExit('Language-change core handler was not found')
+          controller.write_text(text.replace(old, new), encoding='utf-8')
+          PY
+
+          grep -Fq '@media (min-width: 901px)' docs/scifi-ui/styles/formatx-site-stability.css
+          grep -Fq 'html.fx-organism-interface-ready' docs/scifi-ui/styles/formatx-site-stability.css
+          grep -Fq "const scene = Number(ROOT.dataset.fxScene || 0);" docs/scifi-ui/scripts/organism-core-controller.js
+          grep -Fq "activateCore({ scroll: false, replaceHistory: true, closePanel: false });" docs/scifi-ui/scripts/organism-core-controller.js
+          node --check docs/scifi-ui/scripts/organism-core-controller.js
+
+      - name: Remove workflow and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/one-shot-fix-final-core-state.yml
+          git config user.name 'FormatX maintenance bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/styles/formatx-site-stability.css \
+                  docs/scifi-ui/scripts/organism-core-controller.js \
+                  .github/workflows/one-shot-fix-final-core-state.yml
+          git commit -m 'Fix final desktop landing and language core state'
+          git push origin HEAD:fix/desktop-multiplatform-final
