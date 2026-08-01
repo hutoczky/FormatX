@@ -2,15 +2,16 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxReleaseMetadata === 'ready-v3') return;
-  ROOT.dataset.fxReleaseMetadata = 'loading-v3';
+  if (ROOT.dataset.fxReleaseMetadata === 'ready-v4') return;
+  ROOT.dataset.fxReleaseMetadata = 'loading-v4';
 
   const RELEASE_URL = '/scifi-ui/data/current-release.json';
   const FALLBACK = Object.freeze({
     hu: {
-      windows: 'Windows nyilvános béta letöltése',
-      unavailable: 'A hivatalos Windows-csomag metaadata jelenleg nem érhető el.',
-      beta: 'Tesztelhető béta kiadás. Még nem Stable verzió.',
+      package: 'Multiplatform nyilvános béta letöltése',
+      unavailable: 'A hivatalos multiplatform csomag metaadata jelenleg nem érhető el.',
+      beta: 'Bazzite/Linux az elsődleges platform; a Windows támogatott ugyanebben a nyilvános béta csomagban.',
+      status: 'Multiplatform nyilvános béta',
       unknown: 'Nincs közzétett adat',
       integrity: {
         package_only: 'Csomag közzétéve; külön integritási bizonyíték nincs',
@@ -19,9 +20,10 @@
       }
     },
     en: {
-      windows: 'Download Windows public beta',
-      unavailable: 'Official Windows package metadata is currently unavailable.',
-      beta: 'Testable beta release. Not yet a Stable version.',
+      package: 'Download multiplatform public beta',
+      unavailable: 'Official multiplatform package metadata is currently unavailable.',
+      beta: 'Bazzite/Linux is the primary platform; Windows is supported in the same public beta package.',
+      status: 'Multiplatform public beta',
       unknown: 'No published data',
       integrity: {
         package_only: 'Package published; no separate integrity proof',
@@ -60,10 +62,6 @@
     }
   }
 
-  function releaseVersion() {
-    return safeText(state.release?.version);
-  }
-
   function releaseDate(value = state.release?.published_at) {
     const raw = safeText(value);
     if (!raw) return '';
@@ -89,16 +87,15 @@
     }).format(amount) + ' ' + units[index];
   }
 
-  function windowsAsset() {
-    const asset = state.release?.channels?.windows;
+  function packageAsset() {
+    const asset = state.release?.channels?.multiplatform
+      || state.release?.channels?.windows;
     if (!asset || asset.available !== true || !isAllowedDownloadUrl(asset.download_url)) return null;
     return asset;
   }
 
-  function windowsLabel() {
-    const version = releaseVersion();
-    if (language() === 'en') return version ? `Download Windows ${version} public beta` : copy().windows;
-    return version ? `Windows ${version} nyilvános béta letöltése` : copy().windows;
+  function packageLabel() {
+    return copy().package;
   }
 
   function integrityLabel() {
@@ -132,10 +129,11 @@
 
   function updateDownloadLink(link) {
     if (!(link instanceof HTMLAnchorElement)) return;
-    const asset = windowsAsset();
+    const asset = packageAsset();
     const labelTarget = link.querySelector('[data-release-download-label], span') || link;
-    labelTarget.textContent = windowsLabel();
+    labelTarget.textContent = packageLabel();
     link.dataset.releaseState = asset ? 'available' : 'metadata-unavailable';
+    link.dataset.releaseChannel = 'multiplatform';
     link.removeAttribute('download');
     link.removeAttribute('aria-describedby');
 
@@ -143,7 +141,7 @@
       link.href = asset.download_url;
       link.removeAttribute('aria-disabled');
       link.classList.remove('is-disabled', 'is-metadata-fallback');
-      link.title = windowsLabel();
+      link.title = packageLabel();
     } else {
       link.href = '/scifi-ui/downloads/';
       link.setAttribute('aria-describedby', ensureFallbackNotice().id);
@@ -177,19 +175,20 @@
   }
 
   function apply() {
-    const version = releaseVersion();
-    const asset = windowsAsset();
-    setText('[data-release-version]', version);
+    const asset = packageAsset();
+    setText('[data-release-version]', '', false);
     setText('[data-release-date]', releaseDate());
-    setText('[data-release-status]', language() === 'en' ? 'Public beta' : 'Nyilvános béta');
+    setText('[data-release-status]', copy().status);
     setText('[data-release-sha256]', asset && safeText(asset.digest) ? asset.digest : '');
     setText('[data-release-size]', asset ? formatBytes(asset.size) : '');
     setText('[data-release-integrity]', integrityLabel());
     setText('[data-release-source-updated]', releaseDate(state.release?.source_updated_at));
-    document.querySelectorAll('[data-release-download="windows"], #hero-download').forEach(updateDownloadLink);
+    document.querySelectorAll(
+      '[data-release-download="multiplatform"], [data-release-download="windows"], #hero-download'
+    ).forEach(updateDownloadLink);
     updateEvidenceLinks();
     ensureFallbackNotice();
-    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v3' : 'fallback-v3';
+    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v4' : 'fallback-v4';
     ROOT.dataset.fxReleaseSchema = String(state.release?.schema_version || 0);
     ROOT.__FORMATX_RELEASE_METADATA__ = Object.freeze({ ...state });
     dispatchEvent(new CustomEvent('formatx:releasemetadataready', { detail: ROOT.__FORMATX_RELEASE_METADATA__ }));
@@ -203,9 +202,17 @@
       const official = release?.source === 'github_published_release'
         && isAllowedReleaseUrl(release.release_url)
         && release.prerelease !== true;
-      state = { release, available: release?.ok === true && official, error: official ? null : 'Untrusted release metadata source' };
+      state = {
+        release,
+        available: release?.ok === true && official,
+        error: official ? null : 'Untrusted release metadata source'
+      };
     } catch (error) {
-      state = { release: null, available: false, error: String(error?.message || error).slice(0, 160) };
+      state = {
+        release: null,
+        available: false,
+        error: String(error?.message || error).slice(0, 160)
+      };
       ROOT.dataset.fxReleaseMetadataError = state.error;
     }
     apply();
