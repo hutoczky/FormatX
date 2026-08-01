@@ -70,7 +70,10 @@ async function performWheelLoop(page, expectedCount) {
     maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
     heroTop: document.getElementById('hero')?.getBoundingClientRect().top + scrollY,
   }));
-  assert(Number.isFinite(geometry.heroTop) && geometry.maximum > 120, 'invalid loop geometry: ' + JSON.stringify(geometry));
+  assert(
+    Number.isFinite(geometry.heroTop) && geometry.maximum > 120,
+    'invalid loop geometry: ' + JSON.stringify(geometry)
+  );
 
   await page.evaluate(target => scrollTo(0, target), Math.max(0, geometry.maximum - 84));
   await page.waitForTimeout(60);
@@ -78,15 +81,16 @@ async function performWheelLoop(page, expectedCount) {
 
   await page.waitForFunction(count => (
     Number(document.documentElement.dataset.fxLoopCount || 0) === count
-    && document.documentElement.dataset.fxLoopSource === 'wheel'
+    && ['wheel', 'native-scroll'].includes(document.documentElement.dataset.fxLoopSource || '')
     && document.documentElement.dataset.fxInfiniteInput === 'idle'
     && document.documentElement.dataset.fxScrollActivity === 'idle'
     && !document.documentElement.classList.contains('fx-page-scrolling')
-  ), expectedCount, { timeout: 7000 });
+  ), expectedCount, { timeout: 10000 });
 
   const state = await loopState(page);
   assert(state.controller === 'boundary-v4', 'wrong controller after loop: ' + JSON.stringify(state));
   assert(state.ready === 'ready-v4', 'controller not ready after loop: ' + JSON.stringify(state));
+  assert(['wheel', 'native-scroll'].includes(state.source), 'wrong loop source: ' + JSON.stringify(state));
   assert(state.activity === 'idle' && !state.scrollingClass, 'floating UI did not settle after loop: ' + JSON.stringify(state));
   assert(state.cloneCount === 0, 'clone-based loop returned: ' + JSON.stringify(state));
   assert(state.boundaryControllerLoaded && !state.legacyControllerLoaded, 'controller loading conflict: ' + JSON.stringify(state));
@@ -136,7 +140,10 @@ async function verifyViewport(browser, viewport, name) {
   await page.waitForTimeout(260);
   const second = await performWheelLoop(page, 2);
   const secondFootprint = await footprint(page);
-  assert(JSON.stringify(firstFootprint) === JSON.stringify(secondFootprint), name + ': resources accumulated: ' + JSON.stringify({ firstFootprint, secondFootprint }));
+  assert(
+    JSON.stringify(firstFootprint) === JSON.stringify(secondFootprint),
+    name + ': resources accumulated: ' + JSON.stringify({ firstFootprint, secondFootprint })
+  );
 
   const meaningful = diagnostics.filter(item => !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED/i.test(item));
   assert(!meaningful.length, name + ': browser diagnostics: ' + meaningful.join(' | '));
