@@ -2,7 +2,6 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  let closeLockUntil = 0;
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -42,32 +41,6 @@
 
   function setImportant(element, property, value) {
     element?.style.setProperty(property, value, 'important');
-  }
-
-  function forceCloseOrganism() {
-    const shell = document.getElementById('fx-organism-console');
-    if (shell instanceof HTMLElement) {
-      shell.hidden = true;
-      shell.setAttribute('aria-hidden', 'true');
-      shell.classList.remove('is-authorised-open');
-      shell.style.setProperty('display', 'none', 'important');
-    }
-    document.querySelectorAll('[data-organism-panel]').forEach(panel => {
-      panel.hidden = true;
-      panel.setAttribute('aria-hidden', 'true');
-    });
-    document.querySelectorAll('[data-organism-tab]').forEach(tab => {
-      tab.setAttribute('aria-selected', 'false');
-    });
-    document.body?.classList.remove('fx-organism-panel-open');
-    ROOT.dataset.fxOrganismConsole = 'closed';
-  }
-
-  function holdOrganismClosed() {
-    forceCloseOrganism();
-    if (performance.now() < closeLockUntil) {
-      requestAnimationFrame(holdOrganismClosed);
-    }
   }
 
   function finalizeMobileControls() {
@@ -122,6 +95,20 @@
       setImportant(thought, 'left', 'auto');
       setImportant(thought, 'transform', 'none');
       setImportant(thought, 'translate', 'none');
+    }
+
+    const genome = document.querySelector('.fx-genome-launcher');
+    if (genome instanceof HTMLElement) {
+      setImportant(genome, 'position', 'fixed');
+      setImportant(genome, 'top', '170px');
+      setImportant(genome, 'right', '10px');
+      setImportant(genome, 'bottom', 'auto');
+      setImportant(genome, 'left', 'auto');
+      setImportant(genome, 'width', '58px');
+      setImportant(genome, 'max-width', '58px');
+      setImportant(genome, 'transform', 'none');
+      setImportant(genome, 'translate', 'none');
+      setImportant(genome, 'z-index', '10020');
     }
   }
 
@@ -239,7 +226,6 @@
     updateTelemetry();
     ensureLicenceLink();
     finalizeMobileControls();
-    if (performance.now() < closeLockUntil) forceCloseOrganism();
     ROOT.dataset.fxContentFinalizer = 'ready-v2';
   }
 
@@ -249,15 +235,6 @@
     'formatx:organisminterfaceready',
     'formatx:releasemetadataready'
   ].forEach(name => addEventListener(name, apply));
-
-  addEventListener('keydown', event => {
-    if (event.key !== 'Escape') return;
-    const shell = document.getElementById('fx-organism-console');
-    if (!shell || shell.hidden) return;
-    event.preventDefault();
-    closeLockUntil = performance.now() + 1500;
-    holdOrganismClosed();
-  }, true);
 
   addEventListener('resize', finalizeMobileControls, { passive: true });
   if (document.readyState === 'loading') {
