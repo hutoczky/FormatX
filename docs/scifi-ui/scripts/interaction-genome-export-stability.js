@@ -15,6 +15,12 @@
     if (element && element.textContent !== text) element.textContent = text;
   }
 
+  function setImportant(element, property, value) {
+    if (element instanceof HTMLElement) {
+      element.style.setProperty(property, value, 'important');
+    }
+  }
+
   function schedulePublicState() {
     if (scheduled) return;
     scheduled = requestAnimationFrame(() => {
@@ -37,6 +43,63 @@
       + (language() === 'en' ? 'MUSIC OFF' : 'ZENE KI')
       + '</span>';
     document.body.appendChild(button);
+  }
+
+  function stabilizeMobileGeometry() {
+    if (!matchMedia('(max-width: 900px), (pointer: coarse)').matches) return;
+
+    const heroCopy = document.querySelector('#hero .hero-copy');
+    setImportant(heroCopy, 'box-sizing', 'border-box');
+    setImportant(heroCopy, 'position', 'relative');
+    setImportant(heroCopy, 'inset', 'auto');
+    setImportant(heroCopy, 'width', 'calc(100% - 108px)');
+    setImportant(heroCopy, 'max-width', 'calc(100% - 108px)');
+    setImportant(heroCopy, 'margin-left', innerWidth <= 430 ? '12px' : '16px');
+    setImportant(heroCopy, 'margin-right', '0');
+    setImportant(heroCopy, 'padding-right', '0');
+    setImportant(heroCopy, 'transform', 'none');
+    setImportant(heroCopy, 'translate', 'none');
+
+    const sound = document.querySelector('.fx-three-sound');
+    setImportant(sound, 'box-sizing', 'border-box');
+    setImportant(sound, 'display', 'inline-flex');
+    setImportant(sound, 'position', 'fixed');
+    setImportant(sound, 'top', '72px');
+    setImportant(sound, 'right', '10px');
+    setImportant(sound, 'bottom', 'auto');
+    setImportant(sound, 'left', 'auto');
+    setImportant(sound, 'width', '58px');
+    setImportant(sound, 'min-width', '58px');
+    setImportant(sound, 'max-width', '58px');
+    setImportant(sound, 'height', '44px');
+    setImportant(sound, 'min-height', '44px');
+    setImportant(sound, 'padding', '0');
+    setImportant(sound, 'gap', '0');
+    setImportant(sound, 'justify-content', 'center');
+    setImportant(sound, 'overflow', 'hidden');
+    setImportant(sound, 'transform', 'none');
+    setImportant(sound, 'translate', 'none');
+    setImportant(sound, 'z-index', '10025');
+    const soundLabel = sound?.querySelector('span');
+    setImportant(soundLabel, 'display', 'none');
+
+    const consoleShell = document.querySelector('.fx-organism-console-shell');
+    setImportant(consoleShell, 'box-sizing', 'border-box');
+    setImportant(consoleShell, 'position', 'fixed');
+    setImportant(consoleShell, 'top', '8px');
+    setImportant(consoleShell, 'right', '8px');
+    setImportant(consoleShell, 'bottom', '8px');
+    setImportant(consoleShell, 'left', '8px');
+    setImportant(consoleShell, 'width', 'auto');
+    setImportant(consoleShell, 'min-width', '0');
+    setImportant(consoleShell, 'max-width', 'calc(100vw - 16px)');
+    setImportant(consoleShell, 'height', 'auto');
+    setImportant(consoleShell, 'min-height', '0');
+    setImportant(consoleShell, 'max-height', 'calc(100svh - 16px)');
+    setImportant(consoleShell, 'margin', '0');
+    setImportant(consoleShell, 'transform', 'none');
+    setImportant(consoleShell, 'translate', 'none');
+    setImportant(consoleShell, 'animation', 'none');
   }
 
   function ensureHeroContent() {
@@ -174,6 +237,7 @@
     applying = true;
     try {
       ensureAudioControl();
+      stabilizeMobileGeometry();
       ensureHeroContent();
       ensureLicenceClarity();
       ensureCoreCurrentState();
@@ -308,7 +372,8 @@
     'formatx:organismstatechange',
     'formatx:organismpanelclose',
     'formatx:loop',
-    'pageshow'
+    'pageshow',
+    'resize'
   ].forEach(name => addEventListener(name, schedulePublicState));
 
   const observer = new MutationObserver(schedulePublicState);
