@@ -46,9 +46,34 @@
     return documentEnd() - scrollY <= BOUNDARY_EPSILON;
   }
 
+  function dialogueOpen() {
+    const dialogue = document.querySelector('.fx-organism-dialogue');
+    return Boolean(
+      dialogue
+      && !dialogue.hidden
+      && dialogue.classList.contains('is-open')
+      && getComputedStyle(dialogue).display !== 'none'
+    );
+  }
+
+  function nestedScrollerCanConsume(target, deltaY) {
+    if (!(target instanceof Element)) return false;
+    const scroller = target.closest(
+      '.fx-organism-console-viewport, .fx-organism-panel, .fx-organism-dialogue, '
+      + '[data-scroll-container], [data-organism-panel]'
+    );
+    if (!(scroller instanceof HTMLElement)) return false;
+    const max = scroller.scrollHeight - scroller.clientHeight;
+    if (max <= 1) return false;
+    if (deltaY > 0) return scroller.scrollTop < max - 1;
+    if (deltaY < 0) return scroller.scrollTop > 1;
+    return true;
+  }
+
   function ignoredTarget(target) {
     return target instanceof Element && Boolean(target.closest(
-      'input, textarea, select, button, [contenteditable="true"], .fx-organism-console, .fx-organism-panel'
+      'input, textarea, select, button, [contenteditable="true"], '
+      + '.fx-organism-console, .fx-organism-panel, .fx-organism-dialogue'
     ));
   }
 
@@ -65,7 +90,7 @@
     });
   }
 
-  function updateBoundary() {
+  function onScroll() {
     root.dataset.fxInfiniteBoundary = nearTop()
       ? 'top'
       : nearBottom()
@@ -91,7 +116,7 @@
   }
 
   async function performLoop(direction, source) {
-    if (looping || performance.now() < cooldownUntil) return false;
+    if (looping || performance.now() < cooldownUntil || dialogueOpen()) return false;
     const top = topNode();
     const bottom = bottomNode();
     if (!top || !bottom) return false;
@@ -134,7 +159,13 @@
   }
 
   function handleWheel(event) {
-    if (looping || performance.now() < cooldownUntil || ignoredTarget(event.target)) return;
+    if (
+      looping
+      || performance.now() < cooldownUntil
+      || ignoredTarget(event.target)
+      || dialogueOpen()
+      || nestedScrollerCanConsume(event.target, event.deltaY)
+    ) return;
 
     if (event.deltaY > 0 && nearBottom()) {
       wheelDown += Math.abs(event.deltaY);
@@ -157,7 +188,13 @@
   }
 
   function handleKey(event) {
-    if (event.altKey || event.ctrlKey || event.metaKey || ignoredTarget(event.target)) return;
+    if (
+      event.altKey
+      || event.ctrlKey
+      || event.metaKey
+      || ignoredTarget(event.target)
+      || dialogueOpen()
+    ) return;
 
     if (DOWN_KEYS.has(event.key) && nearBottom()) {
       event.preventDefault();
@@ -172,7 +209,7 @@
   }
 
   function handleTouchStart(event) {
-    if (ignoredTarget(event.target)) return;
+    if (ignoredTarget(event.target) || dialogueOpen()) return;
     touchStartY = event.touches?.[0]?.clientY ?? null;
   }
 
@@ -188,6 +225,7 @@
     }
     const delta = touchStartY - endY;
     touchStartY = null;
+    if (nestedScrollerCanConsume(event.target, delta)) return;
     if (delta >= TOUCH_THRESHOLD && nearBottom()) void performLoop('down', 'touch');
     else if (delta <= -TOUCH_THRESHOLD && nearTop()) void performLoop('up', 'touch');
   }
@@ -196,11 +234,11 @@
   addEventListener('keydown', handleKey, { capture: true });
   addEventListener('touchstart', handleTouchStart, { passive: true, capture: true });
   addEventListener('touchend', handleTouchEnd, { passive: true, capture: true });
-  addEventListener('scroll', updateBoundary, { passive: true });
-  addEventListener('resize', updateBoundary, { passive: true });
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll, { passive: true });
   addEventListener('pageshow', () => {
     root.dataset.fxInfiniteInput = 'idle';
-    updateBoundary();
+    onScroll();
     publishReadyState();
   });
 
@@ -215,6 +253,6 @@
     });
   }
 
-  updateBoundary();
+  onScroll();
   publishReadyState();
 }());
