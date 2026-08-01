@@ -157,10 +157,12 @@ async function publicPage(browser, name, pathname, expectedSelector, viewport = 
     await capture(browser, 'reduced-motion', { width: 1440, height: 900 });
     await capture(browser, 'desktop-hero-en', { width: 1440, height: 900 }, async page => {
       const single = page.locator('.fx-language-toggle:visible').first();
-      if (await single.count()) await single.click();
-      else await page.locator('[data-language="en"]:visible').first().click();
-      await page.waitForTimeout(350);
-      assert((await page.locator('html').getAttribute('lang')) === 'en', 'Language did not switch to English');
+      if (await single.count()) {
+        await single.evaluate(node => node.click());
+      } else {
+        await page.locator('[data-language="en"]:visible').first().evaluate(node => node.click());
+      }
+      await page.waitForFunction(() => document.documentElement.lang === 'en', null, { timeout: 8000 });
     });
     await capture(browser, 'mobile-menu-open', { width: 390, height: 844 }, async page => {
       await page.locator('#menu-toggle').click();
@@ -178,7 +180,7 @@ async function publicPage(browser, name, pathname, expectedSelector, viewport = 
         };
       });
     });
-    await publicPage(browser, 'downloads', '/scifi-ui/downloads/', '[data-release-download="windows"]');
+    await publicPage(browser, 'downloads', '/scifi-ui/downloads/', '[data-release-download="multiplatform"]');
     await publicPage(browser, 'verification-centre', '/scifi-ui/verification.html', '[data-verification-root]');
     await publicPage(browser, 'test-matrix', '/scifi-ui/test-matrix.html', '[data-test-table-body]');
     console.log('Visual contract and fallback screenshots completed.');
