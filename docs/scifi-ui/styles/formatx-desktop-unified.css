@@ -13,6 +13,7 @@
     display: grid;
     box-sizing: border-box;
     height: min(960px, calc(100svh - 69px));
+    max-height: min(100svh, 960px);
     min-height: 720px;
     padding: clamp(76px, 8vh, 108px) 0 clamp(70px, 8vh, 100px);
     align-items: center;
