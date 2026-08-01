@@ -1,6 +1,13 @@
 /* FormatX desktop composition contract.
    Keeps the visual system intact while preventing oversized empty hero space. */
 
+/* Desktop and laptop input remains continuous. Mobile keeps its guided snap flow. */
+@media (min-width: 901px) {
+  html.fx-organism-interface-ready {
+    scroll-snap-type: none !important;
+  }
+}
+
 @media (min-width: 1100px) and (pointer: fine) {
   html.fx-organism-interface-ready #hero {
     display: grid;
