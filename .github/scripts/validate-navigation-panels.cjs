@@ -283,9 +283,7 @@ async function testMobile(browser) {
   await assertMenuClosed(page);
   await closePanelAndAssertCore(page);
 
-  const experienceControl = page.locator(
-    '.fx-organism-actionbar [data-organism-open="experience"]'
-  );
+  const experienceControl = page.locator('[data-organism-open="experience"]').first();
   await experienceControl.evaluate(node => node.click());
   await assertPanel(page, 'experience', 1);
   await closePanelAndAssertCore(page);
