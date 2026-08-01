@@ -1,0 +1,170 @@
+name: Harden public download once
+
+on:
+  push:
+    branches: [fix/desktop-multiplatform-final]
+    paths:
+      - '.github/workflows/one-shot-harden-public-download.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-one-shot-harden-public-download
+  cancel-in-progress: false
+
+jobs:
+  harden:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out repair branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/desktop-multiplatform-final
+
+      - name: Apply CSP, trust and accessibility fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > docs/scifi-ui/styles/downloads-page.css <<'CSS'
+          body {
+            margin: 0;
+            background: #030817;
+            color: #f4faff;
+          }
+
+          .fx-download-page {
+            width: min(1180px, calc(100% - 28px));
+            margin: auto;
+            padding: 40px 0 80px;
+          }
+
+          .fx-download-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+          }
+
+          .fx-download-intro {
+            max-width: 840px;
+            margin: 52px 0 30px;
+          }
+
+          .fx-download-intro h1 {
+            font-size: clamp(2.2rem, 6vw, 5rem);
+            line-height: .95;
+          }
+
+          .fx-download-intro p,
+          .fx-download-action p {
+            color: #bed0dc;
+            line-height: 1.65;
+          }
+
+          .fx-download-actions {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin: 28px 0 46px;
+          }
+
+          .fx-download-action {
+            padding: 22px;
+            border: 1px solid #23445d;
+            border-radius: 20px;
+            background: #071426;
+          }
+
+          .fx-download-action a {
+            display: inline-flex;
+            min-height: 44px;
+            align-items: center;
+            padding: 0 16px;
+            border-radius: 12px;
+            background: #35d9ff;
+            color: #00111d;
+            text-decoration: none;
+            font-weight: 800;
+          }
+
+          .fx-download-action a.secondary {
+            background: #17395f;
+            color: #f4faff;
+          }
+
+          @media (max-width: 800px) {
+            .fx-download-actions {
+              grid-template-columns: 1fr;
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .fx-download-action a {
+              transition: none;
+            }
+          }
+          CSS
+
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          downloads = Path('docs/scifi-ui/downloads/index.html')
+          text = downloads.read_text(encoding='utf-8')
+          text = re.sub(r'<style>.*?</style>', '', text, count=1, flags=re.S)
+          marker = '<link rel="stylesheet" href="../styles/formatx-content-standard.css">'
+          addition = marker + '<link rel="stylesheet" href="../styles/downloads-page.css">'
+          if 'downloads-page.css' not in text:
+              text = text.replace(marker, addition)
+          downloads.write_text(text, encoding='utf-8')
+
+          release = Path('docs/scifi-ui/scripts/release-metadata.js')
+          text = release.read_text(encoding='utf-8')
+          text = text.replace(
+              '  function packageAsset() {\n    const asset =',
+              '  function packageAsset() {\n    if (!state.available) return null;\n    const asset =',
+          )
+          text = text.replace(
+              "    link.removeAttribute('aria-describedby');",
+              "    const defaultDescription = link.dataset.releaseDescription\n      || link.getAttribute('aria-describedby')\n      || '';\n    if (defaultDescription) link.dataset.releaseDescription = defaultDescription;",
+          )
+          text = text.replace(
+              "      link.classList.remove('is-disabled', 'is-metadata-fallback');\n      link.title = packageLabel();",
+              "      link.classList.remove('is-disabled', 'is-metadata-fallback');\n      if (link.dataset.releaseDescription) {\n        link.setAttribute('aria-describedby', link.dataset.releaseDescription);\n      } else {\n        link.removeAttribute('aria-describedby');\n      }\n      link.title = packageLabel();",
+          )
+          release.write_text(text, encoding='utf-8')
+
+          workflow = Path('.github/workflows/sync-current-release.yml')
+          text = workflow.read_text(encoding='utf-8')
+          old = '''            def multiplatform_asset:
+              [.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.(zip|tar\\.gz|tar\\.xz)$"; "i"))] | first;'''
+          new = '''            def multiplatform_asset:
+              ([.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.zip$"; "i"))] | first)
+              // ([.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.(tar\\.gz|tar\\.xz)$"; "i"))] | first);'''
+          if old not in text:
+              raise SystemExit('Expected multiplatform asset selector was not found')
+          workflow.write_text(text.replace(old, new), encoding='utf-8')
+          PY
+
+          grep -Fq 'downloads-page.css' docs/scifi-ui/downloads/index.html
+          ! grep -Fq '<style>' docs/scifi-ui/downloads/index.html
+          grep -Fq 'if (!state.available) return null;' docs/scifi-ui/scripts/release-metadata.js
+          grep -Fq 'releaseDescription' docs/scifi-ui/scripts/release-metadata.js
+          grep -Fq 'test("^FormatX-Suite-Pro-.*\\.zip$"' .github/workflows/sync-current-release.yml
+
+      - name: Remove one-shot workflow and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/one-shot-harden-public-download.yml
+          git config user.name 'FormatX maintenance bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/downloads/index.html \
+                  docs/scifi-ui/styles/downloads-page.css \
+                  docs/scifi-ui/scripts/release-metadata.js \
+                  .github/workflows/sync-current-release.yml \
+                  .github/workflows/one-shot-harden-public-download.yml
+          git commit -m 'Harden public multiplatform download flow'
+          git push origin HEAD:fix/desktop-multiplatform-final
