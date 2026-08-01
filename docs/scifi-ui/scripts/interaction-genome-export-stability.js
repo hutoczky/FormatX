@@ -70,12 +70,24 @@
     }
   }
 
+  function ensureCoreCurrentState() {
+    const consoleClosed = root.dataset.fxOrganismConsole === 'closed'
+      && !document.body?.classList.contains('fx-organism-panel-open');
+    if (root.dataset.fxScene !== '0' || !consoleClosed) return;
+
+    const mapCore = document.querySelector('[data-organ-node="0"]');
+    const railCore = document.querySelector('[data-scene-link="0"]');
+    mapCore?.setAttribute('aria-current', 'page');
+    railCore?.setAttribute('aria-current', 'page');
+  }
+
   function stabilizePublicState() {
     if (applying) return;
     applying = true;
     try {
       ensureAudioControl();
       ensureHeroContent();
+      ensureCoreCurrentState();
 
       const download = document.getElementById('hero-download');
       if (download) {
@@ -198,7 +210,14 @@
 
   window.FormatXExportInteractionGenome = createExport;
   document.addEventListener('click', exportFromClick, true);
-  ['formatx:languagechange', 'formatx:releasemetadataready', 'pageshow'].forEach(name => {
+  [
+    'formatx:languagechange',
+    'formatx:releasemetadataready',
+    'formatx:organismstatechange',
+    'formatx:organismpanelclose',
+    'formatx:loop',
+    'pageshow'
+  ].forEach(name => {
     addEventListener(name, schedulePublicState);
   });
 
