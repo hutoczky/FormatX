@@ -6,6 +6,14 @@
   root.dataset.fxOrganismConsoleState = 'loading';
 
   const PANEL_IDS = new Set(['experience', 'capabilities', 'pricing', 'system', 'resources']);
+  const OPEN_SELECTOR = [
+    '[data-organism-open]',
+    '[data-organism-tab]',
+    '[data-scene-link]',
+    '[data-organ-node]',
+    '.scroll-cue',
+    '#main-nav a[href^="#"]'
+  ].join(', ');
   let authorised = false;
   let activeId = '';
   let consoleObserver = null;
@@ -152,6 +160,19 @@
     if (performance.now() < deadline) requestAnimationFrame(() => holdClosedUntil(deadline));
   }
 
+  function clearCloseLock() {
+    closeLockUntil = 0;
+  }
+
+  function handleExplicitPointer(event) {
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest(OPEN_SELECTOR)) clearCloseLock();
+  }
+
+  function handleKeyboardIntent(event) {
+    if (/^[1-6]$/.test(event.key)) clearCloseLock();
+  }
+
   function handleEscape(event) {
     if (event.key !== 'Escape') return;
     const shell = consoleRoot();
@@ -160,11 +181,15 @@
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    closeLockUntil = performance.now() + 1200;
+    closeLockUntil = performance.now() + 450;
     const close = shell.querySelector('[data-organism-close]');
     if (close instanceof HTMLElement) close.click();
     holdClosedUntil(closeLockUntil);
   }
+
+  addEventListener('pointerdown', handleExplicitPointer, true);
+  addEventListener('click', handleExplicitPointer, true);
+  addEventListener('keydown', handleKeyboardIntent, true);
 
   addEventListener('formatx:organisminterfaceready', () => {
     bindConsoleObserver();
