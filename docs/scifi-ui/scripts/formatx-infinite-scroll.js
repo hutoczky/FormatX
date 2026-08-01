@@ -93,8 +93,7 @@
 
   function ignoredTarget(target) {
     return target instanceof Element && Boolean(target.closest(
-      'input, textarea, select, button, [contenteditable="true"], '
-      + '.fx-organism-console, .fx-organism-panel, .fx-organism-dialogue'
+      'input, textarea, select, [contenteditable="true"]'
     ));
   }
 
