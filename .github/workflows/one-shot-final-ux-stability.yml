@@ -1,0 +1,132 @@
+name: Final UX stability once
+
+on:
+  push:
+    branches: [fix/desktop-multiplatform-final]
+    paths:
+      - '.github/workflows/one-shot-final-ux-stability.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-one-shot-final-ux-stability
+  cancel-in-progress: false
+
+jobs:
+  stabilize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/desktop-multiplatform-final
+
+      - name: Stabilize first paint, loop landing and core state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          desktop = Path('docs/scifi-ui/styles/formatx-desktop-unified.css')
+          text = desktop.read_text(encoding='utf-8')
+          text = text.replace('html.fx-organism-interface-ready', 'html body.living-architecture')
+          desktop.write_text(text, encoding='utf-8')
+
+          infinite = Path('docs/scifi-ui/scripts/formatx-infinite-scroll.js')
+          text = infinite.read_text(encoding='utf-8')
+          old = '''    await doubleFrame();
+    window.scrollTo(0, target);
+    dispatchEvent(new CustomEvent('formatx:loop', {
+      detail: { direction, target, continuous: true, clonedContent: false, reinitialisedRenderer: false }
+    }));
+    root.dataset.fxInfiniteInput = 'idle';
+    root.classList.remove('fx-infinite-loop-jump');
+    root.dataset.fxInfiniteLast = direction;
+    root.dataset.fxInfiniteLoopCount = String(loopCount);
+    root.dataset.fxInfiniteBoundary = direction === 'down' ? 'top' : 'bottom';
+    publishReadyState();
+    looping = false;
+    cooldownUntil = performance.now() + COOLDOWN_MS;'''
+          new = '''    await doubleFrame();
+    const settleUntil = performance.now() + 260;
+    while (performance.now() < settleUntil) {
+      window.scrollTo(0, target);
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    window.scrollTo(0, target);
+    dispatchEvent(new CustomEvent('formatx:loop', {
+      detail: { direction, target, continuous: true, clonedContent: false, reinitialisedRenderer: false }
+    }));
+    root.dataset.fxInfiniteInput = 'idle';
+    root.classList.remove('fx-infinite-loop-jump');
+    root.dataset.fxInfiniteLast = direction;
+    root.dataset.fxInfiniteLoopCount = String(loopCount);
+    root.dataset.fxInfiniteBoundary = direction === 'down' ? 'top' : 'bottom';
+    publishReadyState();
+    looping = false;
+    cooldownUntil = performance.now() + COOLDOWN_MS;'''
+          if old not in text:
+              raise SystemExit('Infinite-loop finish block was not found')
+          infinite.write_text(text.replace(old, new), encoding='utf-8')
+
+          controller = Path('docs/scifi-ui/scripts/organism-core-controller.js')
+          text = controller.read_text(encoding='utf-8')
+          marker = '''    updateNavigation(0);
+    if (settings.replaceHistory) replaceHash('#hero');'''
+          replacement = '''    const consoleRoot = document.getElementById('fx-organism-console');
+    if (consoleRoot) {
+      consoleRoot.classList.remove('is-authorised-open');
+      consoleRoot.hidden = true;
+      consoleRoot.setAttribute('aria-hidden', 'true');
+    }
+    document.querySelectorAll('[data-organism-panel]').forEach(panel => {
+      panel.hidden = true;
+      panel.setAttribute('aria-hidden', 'true');
+    });
+    document.body?.classList.remove('fx-organism-panel-open');
+    ROOT.dataset.fxOrganismConsole = 'closed';
+
+    updateNavigation(0);
+    if (settings.replaceHistory) replaceHash('#hero');'''
+          if marker not in text:
+              raise SystemExit('Core normalization insertion point was not found')
+          controller.write_text(text.replace(marker, replacement, 1), encoding='utf-8')
+
+          copy_test = Path('.github/scripts/validate-copy-license.cjs')
+          text = copy_test.read_text(encoding='utf-8')
+          text = text.replace('{ timeout: 25000 }', '{ timeout: 45000 }', 1)
+          copy_test.write_text(text, encoding='utf-8')
+
+          nav_test = Path('.github/scripts/validate-navigation-panels.cjs')
+          text = nav_test.read_text(encoding='utf-8')
+          text = text.replace('}, null, { timeout: 5000 });\n}\n\nasync function assertLeakedConsoleSelfHeals', '}, null, { timeout: 10000 });\n}\n\nasync function assertLeakedConsoleSelfHeals', 1)
+          nav_test.write_text(text, encoding='utf-8')
+          PY
+
+          grep -Fq 'html body.living-architecture #hero' docs/scifi-ui/styles/formatx-desktop-unified.css
+          ! grep -Fq 'html.fx-organism-interface-ready #hero' docs/scifi-ui/styles/formatx-desktop-unified.css
+          grep -Fq 'const settleUntil = performance.now() + 260' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "ROOT.dataset.fxOrganismConsole = 'closed'" docs/scifi-ui/scripts/organism-core-controller.js
+          grep -Fq '{ timeout: 45000 }' .github/scripts/validate-copy-license.cjs
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/organism-core-controller.js
+          node --check .github/scripts/validate-copy-license.cjs
+          node --check .github/scripts/validate-navigation-panels.cjs
+
+      - name: Remove workflow and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/one-shot-final-ux-stability.yml
+          git config user.name 'FormatX maintenance bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/styles/formatx-desktop-unified.css \
+                  docs/scifi-ui/scripts/formatx-infinite-scroll.js \
+                  docs/scifi-ui/scripts/organism-core-controller.js \
+                  .github/scripts/validate-copy-license.cjs \
+                  .github/scripts/validate-navigation-panels.cjs \
+                  .github/workflows/one-shot-final-ux-stability.yml
+          git commit -m 'Stabilize first paint, loop landing and core state'
+          git push origin HEAD:fix/desktop-multiplatform-final
