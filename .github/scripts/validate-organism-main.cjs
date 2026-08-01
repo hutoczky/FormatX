@@ -110,6 +110,7 @@ async function validateDesktop() {
 
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
+    await page.waitForTimeout(550);
 
     await page.keyboard.press('2');
     await page.waitForFunction(() => !document.querySelector('[data-organism-panel="capabilities"]').hidden);
