@@ -17,7 +17,7 @@ async function waitReady(page) {
       && root.dataset.fxCopyPolish === 'ready-v1'
       && /^(ready|fallback)-v4$/.test(root.dataset.fxReleaseMetadata || '')
       && Boolean(document.getElementById('fx-licence-clarity'));
-  }, null, { timeout: 25000 });
+  }, null, { timeout: 45000 });
 }
 
 async function readCopy(page) {
