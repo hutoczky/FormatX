@@ -141,9 +141,17 @@
     if (event.key !== 'Escape') return;
     const shell = consoleRoot();
     if (!shell || shell.hidden) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
     const close = shell.querySelector('[data-organism-close]');
     if (close instanceof HTMLElement) close.click();
-    requestAnimationFrame(() => forceClosed({ replaceHash: true }));
+    forceClosed({ replaceHash: true });
+    requestAnimationFrame(() => {
+      forceClosed({ replaceHash: true });
+      requestAnimationFrame(() => forceClosed({ replaceHash: true }));
+    });
   }
 
   addEventListener('formatx:organisminterfaceready', () => {
