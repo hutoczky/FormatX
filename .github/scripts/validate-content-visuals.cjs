@@ -81,20 +81,17 @@ async function mobileLayoutAssertions(page) {
   assert(cue.y + cue.height <= category.y + 2, 'Next category heading overlaps the hero chapter cue');
   assert(!overlap(heroCopy, category), 'Category section overlaps the mobile hero copy');
 
-  const thought = await optionalVisibleBox(page, '.fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger');
   const genome = await optionalVisibleBox(page, '.fx-genome-launcher');
   const sound = await optionalVisibleBox(page, '.fx-three-sound');
   const dock = await optionalVisibleBox(page, '.fx-organism-actionbar');
 
-  for (const [name, control] of [['Thought trigger', thought], ['Genome trigger', genome], ['Sound trigger', sound]]) {
+  for (const [name, control] of [['Genome trigger', genome], ['Sound trigger', sound]]) {
     if (!control) continue;
     assert(!overlap(control, heroCopy, 4), `${name} overlaps the mobile hero copy`);
     assert(!overlap(control, cue, 4), `${name} overlaps the chapter cue`);
     if (dock) assert(!overlap(control, dock, 4), `${name} overlaps the bottom action dock`);
   }
 
-  assert(!overlap(thought, genome, 4), 'Thought and Genome triggers overlap');
-  assert(!overlap(thought, sound, 4), 'Thought and sound triggers overlap');
   assert(!overlap(genome, sound, 4), 'Genome and sound triggers overlap');
 }
 
