@@ -183,7 +183,14 @@
   document.addEventListener('formatx:introcomplete', () => {
     if (!panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: false });
   });
-  addEventListener('formatx:languagechange', () => updateNavigation(Number(ROOT.dataset.fxScene || 0)));
+  addEventListener('formatx:languagechange', () => {
+    const scene = Number(ROOT.dataset.fxScene || 0);
+    if (scene === 0 && !panelIsOpen()) {
+      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    } else {
+      updateNavigation(scene);
+    }
+  });
   addEventListener('pageshow', event => {
     if (event.persisted || !panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: true });
   });
