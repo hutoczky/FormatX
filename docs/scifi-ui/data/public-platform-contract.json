@@ -13,7 +13,9 @@
     "desktop_composition_preloaded": true,
     "mobile_layout_unchanged": true,
     "infinite_scroll_controller": "boundary-v4",
-    "clone_based_loop": false
+    "clone_based_loop": false,
+    "fine_pointer_scroll_mode": "continuous",
+    "language_switch_preserves_scene_hash": true
   },
   "source_of_truth": {
     "platform_status": "/scifi-ui/data/platform-status.json",
