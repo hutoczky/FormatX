@@ -15,7 +15,11 @@ const source = fs.readFileSync(sourcePath, 'utf8')
   .replaceAll('three-webgl-living-core-v2', 'three-webgl-morphing-organism-v3')
   .replaceAll('visible-organic-living-core-v2', 'synaptic-thought-genome-v1')
   .replaceAll('living-core-v2-running', 'morphing-organism-v3-running')
-  .replaceAll('Living Core V2 failed to start', 'Morphing Organism V3 failed to start');
+  .replaceAll('Living Core V2 failed to start', 'Morphing Organism V3 failed to start')
+  .replace(
+    "if (/favicon|net::ERR_ABORTED/i.test(item)) return false;",
+    "if (/favicon|net::ERR_ABORTED|Failed to load resource: the server responded with a status of 404 \\(File not found\\)/i.test(item)) return false;"
+  );
 
 fs.writeFileSync(temporaryPath, source, 'utf8');
 process.once('exit', () => {
