@@ -14,7 +14,7 @@
     flex: 0 0 auto !important;
     width: auto !important;
     margin-left: 16px !important;
-    margin-right: 92px !important;
+    margin-right: 104px !important;
   }
 
   #hero .hero-space {
@@ -46,11 +46,17 @@
   }
 
   .fx-organism-dialogue:not(.is-open) {
+    position: fixed !important;
+    top: 96px !important;
     right: 10px !important;
-    bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: auto !important;
+    left: auto !important;
     width: 58px !important;
     max-width: 58px !important;
+    transform: none !important;
+    translate: none !important;
     justify-items: center !important;
+    z-index: 10030 !important;
   }
 
   .fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger {
@@ -68,6 +74,6 @@
 @media (max-width: 430px) {
   #hero .hero-copy {
     margin-left: 12px !important;
-    margin-right: 86px !important;
+    margin-right: 98px !important;
   }
 }
