@@ -137,6 +137,12 @@
     }
   }
 
+  function publishLanguageChange(language) {
+    dispatchEvent(new CustomEvent('formatx:languagechange', {
+      detail: { language, source: 'single-language-toggle-v2' }
+    }));
+  }
+
   function setLanguage(language, persist, container, toggle) {
     if (!SUPPORTED.has(language)) return;
     const preservedHash = location.hash;
@@ -151,9 +157,11 @@
       window.FormatXI18n.setLanguage(language, persist);
     } else if (legacy) {
       legacy.click();
-    } else {
-      dispatchEvent(new CustomEvent('formatx:languagechange', { detail: { language } }));
     }
+
+    /* Every dynamic surface consumes this canonical event. Legacy language
+       adapters are allowed to publish it too; all consumers are idempotent. */
+    publishLanguageChange(language);
 
     requestAnimationFrame(() => {
       if (preservedHash && location.hash !== preservedHash) {
