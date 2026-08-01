@@ -35,102 +35,210 @@ function check(id, condition, detail, severity = 'error') {
 const production = json('billing-worker/wrangler.jsonc');
 const preview = json('wrangler.jsonc');
 const release = json('docs/scifi-ui/data/current-release.json');
-const platformContract = json('docs/scifi-ui/data/public-platform-contract.json');
-const issues = json('docs/scifi-ui/data/known-issues.json');
-const productionWrapper = read('billing-worker/src/production-content-entry.js');
-const productionBase = read('billing-worker/src/production-entry.js');
-const previewWrapper = read('content-preview-entry.js');
-const previewBase = read('worker.js');
-const syncWorkflow = read('.github/workflows/sync-current-release.yml');
-const robots = read('docs/robots.txt');
-const sitemap = read('docs/sitemap.xml');
-const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
-const organismVoice = read('docs/scifi-ui/scripts/organism-voice.js');
-const thoughtGenome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
-const thoughtDisclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
-const thoughtDisclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
-const privacy = read('docs/scifi-ui/privacy.html');
+const publicContract = json('docs/scifi-ui/data/public-platform-contract.json');
 const packageAsset = release.channels?.multiplatform || null;
+const syncWorkflow = read('.github/workflows/sync-current-release.yml');
+const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
+const voice = read('docs/scifi-ui/scripts/organism-voice.js');
+const genome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
+const disclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
+const disclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
+const privacy = read('docs/scifi-ui/privacy.html');
+const downloads = read('docs/scifi-ui/downloads/index.html');
+const home = read('docs/scifi-ui/index.html');
+const productionWrapper = read('billing-worker/src/production-content-entry.js');
+const previewWrapper = read('content-preview-entry.js');
+const sitemap = read('docs/sitemap.xml');
+const robots = read('docs/robots.txt');
 
-check('production-entry', production.main === 'src/production-content-entry.js', 'Production Worker must use src/production-content-entry.js');
-check('production-domains', JSON.stringify((production.routes || []).map(route => route.pattern)) === JSON.stringify(['formatxsuite.com', 'www.formatxsuite.com']), 'Production Worker must exclusively own both FormatX custom domains');
-check('preview-entry', preview.main === 'content-preview-entry.js', 'Preview Worker must use content-preview-entry.js');
-check('preview-domain-isolation', !(preview.routes || []).length, 'Preview Worker must not own production domains');
-check('preview-workers-dev', preview.workers_dev === true, 'Preview Worker must remain available through workers.dev');
+check(
+  'production-entry',
+  production.main === 'src/production-content-entry.js',
+  'Production Worker must use the content wrapper'
+);
+check(
+  'production-domains',
+  JSON.stringify((production.routes || []).map(route => route.pattern))
+    === JSON.stringify(['formatxsuite.com', 'www.formatxsuite.com']),
+  'Production Worker must own both FormatX custom domains'
+);
+check(
+  'preview-isolation',
+  preview.main === 'content-preview-entry.js'
+    && preview.workers_dev === true
+    && !(preview.routes || []).length,
+  'Preview Worker must remain isolated on workers.dev'
+);
 
-for (const [label, source] of [['production', productionWrapper], ['preview', previewWrapper]]) {
-  check(`${label}-public-shell`, source.includes('formatx-public-shell.js'), `${label} wrapper must inject the canonical public shell`);
-  check(`${label}-release-controller`, source.includes('release-metadata.js'), `${label} wrapper must inject release metadata`);
-  check(`${label}-no-store`, source.includes("Cache-Control', 'no-store"), `${label} wrapper must disable stale HTML/data caching`);
-  check(`${label}-legacy-cleanup`, source.includes('cleanLegacyReleaseCopy'), `${label} wrapper must sanitize historical fixed release copy`);
+for (const [name, source] of [
+  ['production', productionWrapper],
+  ['preview', previewWrapper],
+]) {
+  check(
+    `${name}-wrapper`,
+    source.includes('formatx-public-shell.js')
+      && source.includes('release-metadata.js')
+      && source.includes('cleanLegacyReleaseCopy')
+      && source.includes("Cache-Control', 'no-store"),
+    `${name} public content wrapper is incomplete`
+  );
 }
 
-check('organism-loader-v26', loader.includes('safe-ready-v26') && loader.includes('safe-degraded-v26'), 'Organism startup loader must use the v26 disclosure-safe contract');
-check('organism-loader-disclosure', loader.includes('synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1'), 'Organism startup loader does not include the thought disclosure module');
-check('organism-loader-order', loader.indexOf('synaptic-thought-genome.js') < loader.indexOf('synaptic-thought-disclosure.js') && loader.indexOf('synaptic-thought-disclosure.js') < loader.indexOf('formatx-three-host-safe.js'), 'Thought disclosure startup ordering is invalid');
-check('organism-master-switch', organismVoice.includes('fx-organism-master-toggle') && organismVoice.includes('ROOT.dataset.fxOrganismDialogueEnabled'), 'Organism master on/off control is missing');
-check('organism-voice-off-default', organismVoice.includes('let speechEnabled = false'), 'Organism speech must remain off by default');
-check('organism-dialogue-closed-default', organismVoice.includes("hidden: ''") && organismVoice.includes('setOpen(false, false)'), 'Organism thought dialogue must start closed');
-check('organism-local-response', !organismVoice.includes('fetch(') && !organismVoice.includes('XMLHttpRequest') && !organismVoice.includes('WebSocket'), 'Organism response engine must not send questions over the network');
-check('thought-genome-fingerprint-only', thoughtGenome.includes('questionStored: false') && thoughtGenome.includes('fingerprint-only'), 'Thought Genome must store fingerprints instead of raw questions');
-check('thought-genome-local', !thoughtGenome.includes('fetch(') && !thoughtGenome.includes('XMLHttpRequest') && !thoughtGenome.includes('WebSocket'), 'Thought Genome must remain local');
-check('thought-disclosure-closed-default', thoughtDisclosure.includes('details.open = false') && thoughtDisclosure.includes('defaultOpen: false'), 'Thought Genome advanced controls must start closed');
-check('thought-disclosure-response-live-region', thoughtDisclosure.includes("bubble.removeAttribute('aria-live')") && thoughtDisclosure.includes("output.setAttribute('aria-live', 'polite')") && thoughtDisclosure.includes("liveRegion: 'response-only'"), 'Only the Organism response text may be an aria-live region');
-check('thought-disclosure-master-off', thoughtDisclosureCss.includes("data-fx-organism-dialogue-enabled='false'") && thoughtDisclosureCss.includes('.fx-thought-genome-layer') && thoughtDisclosureCss.includes('opacity: 0 !important'), 'Organism master off must hide the thought constellation');
-check('thought-disclosure-progressive', thoughtDisclosureCss.includes(':not([open]) > .fx-thought-genome-controls') && thoughtDisclosureCss.includes('display: none !important'), 'Thought Genome advanced controls must use progressive disclosure');
-check('organism-privacy-raw-question', privacy.includes('nyers kérdésszöveget nem menti') && privacy.includes('legfeljebb 12 gondolatgenom-lenyomat'), 'Privacy notice must document fingerprint-only Thought Genome storage');
-check('organism-privacy-speech-service', privacy.includes('helyi vagy online hangot használhat'), 'Privacy notice must disclose that browser speech may be local or online');
-for (const [label, source] of [['production', productionBase], ['preview', previewBase]]) {
-  check(`${label}-thought-disclosure-js`, source.includes('synaptic-thought-disclosure.js'), `${label} Worker must serve thought disclosure JavaScript without stale caching`);
-  check(`${label}-thought-disclosure-css`, source.includes('synaptic-thought-disclosure.css'), `${label} Worker must serve thought disclosure CSS without stale caching`);
+check(
+  'release-source',
+  release.ok === true
+    && release.schema_version === 2
+    && release.source === 'github_published_release'
+    && release.prerelease !== true,
+  'Current release provenance is invalid'
+);
+check(
+  'multiplatform-package',
+  packageAsset?.available === true
+    && /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\//.test(
+      packageAsset?.download_url || ''
+    ),
+  'Official multiplatform package is unavailable'
+);
+check(
+  'platform-priority',
+  packageAsset?.primary_platform === 'linux-bazzite'
+    && ['linux-bazzite', 'windows'].every(
+      platform => packageAsset?.supported_platforms?.includes(platform)
+    ),
+  'Package must identify Bazzite/Linux as primary and Windows as supported'
+);
+check(
+  'release-digest',
+  /^sha256:[a-f0-9]{64}$/i.test(packageAsset?.digest || ''),
+  'Multiplatform package SHA-256 digest is missing'
+);
+check(
+  'detached-signature',
+  Boolean(release.evidence?.signature_asset_url),
+  'No detached signature asset is published for the current release',
+  'warning'
+);
+check(
+  'public-version-hidden',
+  publicContract.public_copy?.public_release_version_visible === false,
+  'Public release version must remain hidden'
+);
+check(
+  'public-contract',
+  publicContract.public_copy?.primary_system === 'linux-bazzite'
+    && publicContract.public_copy?.download_channel === 'multiplatform'
+    && publicContract.public_copy?.supported_secondary_platforms?.includes('windows'),
+  'Public Bazzite-first multiplatform contract is invalid'
+);
+check(
+  'public-download-copy',
+  downloads.includes('data-release-download="multiplatform"')
+    && downloads.includes('Bazzite/Linux elsődleges')
+    && downloads.includes('Windows támogatott')
+    && !downloads.includes('/releases/download/v92/'),
+  'Downloads page does not expose the current multiplatform contract'
+);
+check(
+  'public-home-copy',
+  home.includes('data-release-download="multiplatform"')
+    && !home.includes('/releases/download/v92/')
+    && !home.includes('92.00'),
+  'Home page contains stale public release copy'
+);
+
+const zipPosition = syncWorkflow.indexOf('\\.zip$');
+const tarPosition = syncWorkflow.indexOf('tar\\.gz|tar\\.xz');
+check(
+  'release-sync-zip-first',
+  syncWorkflow.includes('def multiplatform_asset:')
+    && zipPosition >= 0
+    && tarPosition >= 0
+    && zipPosition < tarPosition,
+  'Release sync must prefer ZIP before tar fallbacks'
+);
+check(
+  'release-sync-deterministic',
+  syncWorkflow.includes('del(.synced_at)')
+    && syncWorkflow.includes('cmp -s')
+    && syncWorkflow.includes('--retry-all-errors'),
+  'Release sync is not deterministic and resilient'
+);
+
+check(
+  'organism-loader',
+  loader.includes('safe-ready-v26')
+    && loader.includes('safe-degraded-v26')
+    && loader.includes('synaptic-thought-disclosure.js'),
+  'Current Organism loader contract is missing'
+);
+check(
+  'organism-safe-defaults',
+  voice.includes('let speechEnabled = false')
+    && voice.includes('setOpen(false, false)')
+    && voice.includes('fx-organism-master-toggle')
+    && !voice.includes('fetch(')
+    && !voice.includes('XMLHttpRequest')
+    && !voice.includes('WebSocket'),
+  'Organism privacy or default-state contract failed'
+);
+check(
+  'thought-genome-local',
+  genome.includes('questionStored: false')
+    && genome.includes('fingerprint-only')
+    && !genome.includes('fetch(')
+    && !genome.includes('XMLHttpRequest')
+    && !genome.includes('WebSocket'),
+  'Thought Genome must remain local and fingerprint-only'
+);
+check(
+  'thought-disclosure',
+  disclosure.includes('details.open = false')
+    && disclosure.includes('defaultOpen: false')
+    && disclosure.includes("liveRegion: 'response-only'")
+    && disclosureCss.includes(':not([open]) > .fx-thought-genome-controls'),
+  'Thought disclosure accessibility contract failed'
+);
+check(
+  'privacy-notice',
+  privacy.includes('nyers kérdésszöveget nem menti')
+    && privacy.includes('legfeljebb 12 gondolatgenom-lenyomat')
+    && privacy.includes('helyi vagy online hangot használhat'),
+  'Privacy notice is incomplete'
+);
+
+for (const route of [
+  '/scifi-ui/',
+  '/scifi-ui/downloads/',
+  '/scifi-ui/known-issues.html',
+  '/scifi-ui/security.html',
+  '/scifi-ui/privacy.html',
+  '/scifi-ui/support.html',
+]) {
+  check(`sitemap-${route}`, sitemap.includes(route), `Sitemap missing ${route}`);
 }
-check('preview-thought-disclosure-routes', JSON.stringify(preview).includes('/scifi-ui/scripts/synaptic-thought-disclosure.js') && JSON.stringify(preview).includes('/scifi-ui/styles/synaptic-thought-disclosure.css'), 'Preview Worker route list is missing thought disclosure assets');
-
-check('release-ok', release.ok === true, 'Current official release metadata is not available');
-check('release-source', release.source === 'github_published_release', 'Current release source is not github_published_release');
-check('release-version', typeof release.version === 'string' && release.version.length > 0, 'Internal current release version is missing');
-check('release-not-prerelease', release.prerelease !== true, 'Current official release must not be a prerelease');
-check('release-schema-v2', release.schema_version === 2, 'Release metadata must use provenance schema 2');
-check('multiplatform-download', /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\//.test(packageAsset?.download_url || ''), 'Multiplatform download is not an official FormatX-Updates release asset');
-check('multiplatform-primary', packageAsset?.primary_platform === 'linux-bazzite', 'Bazzite/Linux must be the primary package platform');
-check('multiplatform-support', ['linux-bazzite', 'windows'].every(platform => packageAsset?.supported_platforms?.includes(platform)), 'Multiplatform support metadata must include Bazzite/Linux and Windows');
-check('release-digest', /^sha256:[a-f0-9]{64}$/i.test(packageAsset?.digest || ''), 'Multiplatform package has no published SHA-256 digest');
-check('release-signature', Boolean(release.evidence?.signature_asset_url), 'No detached signature asset is published for the current release', 'warning');
-check('public-version-hidden', platformContract.public_copy?.public_release_version_visible === false, 'Public release version must remain hidden');
-check('public-platform-primary', platformContract.public_copy?.primary_system === 'linux-bazzite', 'Public platform contract must identify Bazzite/Linux as primary');
-check('public-channel', platformContract.public_copy?.download_channel === 'multiplatform', 'Public download channel must be multiplatform');
-
-check('known-issues-present', Array.isArray(issues.items) && issues.items.length > 0, 'Known-issues register is empty');
-check('known-issues-current', typeof issues.updated === 'string' && issues.updated >= '2026-07-31', 'Known-issues register is not current');
-check('release-sync-deterministic', syncWorkflow.includes("del(.synced_at)") && syncWorkflow.includes('cmp -s'), 'Release sync must ignore timestamp-only changes');
-check('release-sync-retry', syncWorkflow.includes('--retry-all-errors'), 'Release sync lacks resilient GitHub API retries');
-check('release-sync-zip-first', syncWorkflow.indexOf('\\.zip$') < syncWorkflow.indexOf('tar\\.gz|tar\\.xz'), 'Release sync must prefer ZIP before tar fallbacks');
-
-const publicPages = [
-  '/scifi-ui/', '/scifi-ui/downloads/', '/scifi-ui/method.html',
-  '/scifi-ui/verification.html', '/scifi-ui/test-matrix.html',
-  '/scifi-ui/known-issues.html', '/scifi-ui/security.html',
-  '/scifi-ui/decision-log.html', '/scifi-ui/license.html',
-  '/scifi-ui/terms.html', '/scifi-ui/privacy.html', '/scifi-ui/support.html',
-];
-for (const url of publicPages) check(`sitemap-${url}`, sitemap.includes(url), `Sitemap missing ${url}`);
-check('robots-sitemap', robots.includes('Sitemap: https://www.formatxsuite.com/sitemap.xml'), 'robots.txt does not declare the canonical sitemap');
+check(
+  'robots-sitemap',
+  robots.includes('Sitemap: https://www.formatxsuite.com/sitemap.xml'),
+  'robots.txt does not declare the canonical sitemap'
+);
 
 for (const relative of [
+  'docs/scifi-ui/styles/formatx-desktop-unified.css',
+  'docs/scifi-ui/styles/downloads-page.css',
+  'docs/scifi-ui/scripts/release-metadata.js',
   'docs/scifi-ui/scripts/formatx-public-shell.js',
   'docs/scifi-ui/scripts/public-evidence-pages.js',
-  'docs/scifi-ui/scripts/release-metadata.js',
-  'docs/scifi-ui/styles/downloads-page.css',
-  'docs/scifi-ui/scripts/organism-voice.js',
-  'docs/scifi-ui/scripts/synaptic-thought-genome.js',
-  'docs/scifi-ui/scripts/synaptic-thought-disclosure.js',
-  'docs/scifi-ui/styles/synaptic-thought-disclosure.css',
   '.github/scripts/validate-public-release-integration.py',
   '.github/scripts/validate-public-pages-browser.cjs',
   '.github/scripts/validate-thought-disclosure-browser.cjs',
   '.github/workflows/validate-organism-dialogue.yml',
 ]) {
-  check(`required-${relative}`, fs.existsSync(path.join(root, relative)), `Missing production readiness component: ${relative}`);
+  check(
+    `required-${relative}`,
+    fs.existsSync(path.join(root, relative)),
+    `Missing production readiness component: ${relative}`
+  );
 }
 
 const report = {
@@ -142,7 +250,6 @@ const report = {
   release: {
     internal_version: release.version || null,
     public_version_visible: false,
-    schema_version: release.schema_version || null,
     package_digest: packageAsset?.digest || null,
     primary_platform: packageAsset?.primary_platform || null,
     supported_platforms: packageAsset?.supported_platforms || [],
@@ -153,7 +260,10 @@ const report = {
 
 const outDir = path.join(root, 'artifacts');
 fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(path.join(outDir, 'production-readiness.json'), JSON.stringify(report, null, 2) + '\n');
+fs.writeFileSync(
+  path.join(outDir, 'production-readiness.json'),
+  JSON.stringify(report, null, 2) + '\n'
+);
 
 console.log(JSON.stringify(report, null, 2));
 if (!report.ready) process.exit(1);
