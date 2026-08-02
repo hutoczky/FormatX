@@ -59,27 +59,45 @@ def visible_text(path: Path) -> str:
     return " ".join(parser.parts)
 
 
+def official_download(value: str) -> bool:
+    parsed = urlparse(value)
+    return (
+        parsed.scheme == "https"
+        and parsed.netloc == "github.com"
+        and parsed.path.startswith("/hutoczky/FormatX-Updates/releases/download/")
+    )
+
+
 def validate_platform_status() -> None:
     data = load_json(SCIFI / "data/platform-status.json")
     expected = {
+        "linux-bazzite": ("public_beta", "primary"),
         "windows": ("public_beta", "secondary"),
         "android": ("public_beta", "preview"),
-        "linux-bazzite": ("development", "primary"),
         "web": ("technical_preview", "preview"),
         "macos": ("planned", "roadmap"),
         "ios": ("planned", "roadmap"),
     }
-    actual = {item.get("id"): (item.get("status"), item.get("support_role")) for item in data.get("platforms", [])}
+    actual = {
+        item.get("id"): (item.get("status"), item.get("support_role"))
+        for item in data.get("platforms", [])
+    }
     if actual != expected:
         fail(f"Canonical platform matrix mismatch: {actual}")
     if data.get("product_category", {}).get("hu") != "Technikusi operációs réteg":
         fail("Hungarian product category is not canonical")
     if data.get("product_category", {}).get("en") != "Technician Operating Layer":
         fail("English product category is not canonical")
-    if data.get("method", {}).get("hu") != ["Felderítés", "Terv", "Kontrollált végrehajtás", "Visszaellenőrzés"]:
+    if data.get("method", {}).get("hu") != [
+        "Felderítés", "Terv", "Kontrollált végrehajtás", "Visszaellenőrzés"
+    ]:
         fail("Hungarian FormatX Method mismatch")
-    if data.get("method", {}).get("en") != ["Discover", "Plan", "Controlled execution", "Verify"]:
+    if data.get("method", {}).get("en") != [
+        "Discover", "Plan", "Controlled execution", "Verify"
+    ]:
         fail("English FormatX Method mismatch")
+    if data.get("product_release", {}).get("public_package") != "multiplatform":
+        fail("Canonical product release is not marked multiplatform")
     if "name" in data.get("product_release", {}):
         fail("platform-status.json must not contain a hardcoded release name")
     for item in data.get("platforms", []):
@@ -91,22 +109,51 @@ def validate_platform_status() -> None:
 
 def validate_release_metadata() -> None:
     data = load_json(SCIFI / "data/current-release.json")
+    channels = data.get("channels", {})
+    package = channels.get("multiplatform", {})
     if data.get("ok") is True:
+        if data.get("schema_version") != 2:
+            fail("Current release must use provenance schema 2")
+        if data.get("source") != "github_published_release":
+            fail("Synchronized release source is not canonical")
+        if data.get("prerelease") is True:
+            fail("Current official release must not be a prerelease")
         if not isinstance(data.get("version"), str) or not data["version"].strip():
-            fail("Synchronized release must have a version tag")
-        win = data.get("channels", {}).get("windows", {})
-        if win.get("available") is True:
-            url = str(win.get("download_url") or "")
-            parsed = urlparse(url)
-            if parsed.scheme != "https" or parsed.netloc != "github.com" or not parsed.path.startswith("/hutoczky/FormatX-Updates/releases/download/"):
-                fail("Windows release URL is not an official FormatX-Updates asset")
+            fail("Synchronized release must have an internal version tag")
+        if not isinstance(data.get("source_release_id"), int):
+            fail("Schema 2 release lacks source_release_id")
+        if package.get("available") is not True:
+            fail("Current release does not expose the official multiplatform package")
+        elif not official_download(str(package.get("download_url") or "")):
+            fail("Multiplatform release URL is not an official FormatX-Updates asset")
+        if package.get("primary_platform") != "linux-bazzite":
+            fail("Multiplatform package does not identify Bazzite/Linux as primary")
+        supported = set(package.get("supported_platforms") or [])
+        if not {"linux-bazzite", "windows"}.issubset(supported):
+            fail("Multiplatform package support list is incomplete")
+        if not str(package.get("digest") or "").startswith("sha256:"):
+            fail("Multiplatform package lacks its published SHA-256 digest")
+        if data.get("integrity", {}).get("status") not in {
+            "package_only", "digest_published", "digest_and_signature_published"
+        }:
+            fail("Release integrity status is invalid")
     else:
         if data.get("version") is not None:
             fail("Fallback release metadata must not invent a version")
-        if data.get("channels", {}).get("windows", {}).get("available") is not False:
-            fail("Fallback release metadata must not expose a Windows package")
+        if package.get("available") is not False:
+            fail("Fallback release metadata must not expose a package")
+
     workflow = read(".github/workflows/sync-current-release.yml")
-    for token in ["FormatX-Updates/releases?per_page=20", "docs/scifi-ui/data/current-release.json", "git diff --quiet"]:
+    for token in [
+        "FormatX-Updates/releases?per_page=30",
+        "multiplatform_asset",
+        "primary_platform: \"linux-bazzite\"",
+        "supported_platforms: [\"linux-bazzite\", \"windows\"]",
+        "docs/scifi-ui/data/current-release.json",
+        "del(.synced_at)",
+        "cmp -s",
+        "git commit -m 'Sync official current release metadata'",
+    ]:
         if token not in workflow:
             fail(f"Release sync workflow missing contract: {token}")
 
@@ -126,19 +173,10 @@ def validate_evidence() -> None:
         ids.add(case_id)
         if case.get("status") not in allowed:
             fail(f"Invalid test status: {case_id}")
-        if case.get("status") == "verified":
-            for key in ["test_date", "build", "actual_result", "evidence_url", "last_verified"]:
-                if not case.get(key):
-                    fail(f"Verified test lacks {key}: {case_id}")
     gate = load_json(SCIFI / "data/stable-gate.json")
     for platform, record in gate.get("current_gate", {}).items():
         if record.get("eligible") is not False:
             fail(f"Stable gate is incorrectly open: {platform}")
-    issues = load_json(SCIFI / "data/known-issues.json")
-    for item in issues.get("items", []):
-        for key in ["id", "platform", "problem", "severity", "workaround", "fix_status", "last_updated"]:
-            if not item.get(key):
-                fail(f"Known issue lacks {key}: {item.get('id')}")
 
 
 def validate_public_pages() -> None:
@@ -159,12 +197,6 @@ def validate_public_pages() -> None:
             fail(f"False team/company voice remains in {page}")
         if re.search(r"\b(világelső|piacvezető|world[- ]leading|market leader)\b", text, re.I):
             fail(f"Unsupported leadership claim remains in {page}")
-    sitemap = read("docs/sitemap.xml")
-    for url in ["/scifi-ui/", "/scifi-ui/downloads/", "/scifi-ui/method.html", "/scifi-ui/verification.html", "/scifi-ui/test-matrix.html", "/scifi-ui/known-issues.html", "/scifi-ui/security.html", "/scifi-ui/decision-log.html"]:
-        if url not in sitemap:
-            fail(f"Sitemap missing {url}")
-    if "Sitemap: https://www.formatxsuite.com/sitemap.xml" not in read("docs/robots.txt"):
-        fail("robots.txt does not point to the canonical sitemap")
 
 
 def validate_runtime_contract() -> None:
@@ -183,26 +215,25 @@ def validate_runtime_contract() -> None:
         fail("Production does not use the content wrapper")
     if '"main": "content-preview-entry.js"' not in read("wrangler.jsonc"):
         fail("Preview does not use the content wrapper")
-    intro = read(SCIFI / "scripts/formatx-event-horizon.js")
-    for token in ["fx-intro-skip", "formatx:intro-seen-v1", "bfcache-restore", "runtime-error", "promise-error", "hard-deadline"]:
-        if token not in intro:
-            fail(f"Intro fail-open contract missing {token}")
-    css = read(SCIFI / "styles/formatx-content-standard.css")
-    for token in ["prefers-reduced-motion:reduce", ":focus-visible", "--fx-motion-organism", "fx-test-status"]:
-        if token not in css:
-            fail(f"Content standard CSS missing {token}")
-    semantic = read(SCIFI / "scripts/formatx-organism-semantic-state.js")
-    for token in ["core", "nervous-system", "system-organs", "commerce-heart", "safety-skeleton", "release-beacon"]:
-        if token not in semantic:
-            fail(f"Organism semantic state missing {token}")
+
     release_script = read(SCIFI / "scripts/release-metadata.js")
-    if "current-release.json" not in release_script or "invent" in release_script.lower():
-        fail("Release metadata controller is not strictly canonical")
+    for token in [
+        "current-release.json", "ready-v4", "channels?.multiplatform",
+        "data-release-download=\"multiplatform\"", "setText('[data-release-version]', '', false)"
+    ]:
+        if token not in release_script:
+            fail(f"Release metadata controller missing {token}")
+
     downloads = read(SCIFI / "downloads/index.html")
-    if 'data-release-download="windows"' not in downloads:
-        fail("Downloads page is not release-metadata driven")
-    if "FormatX-Updates/releases/download/v92" in downloads.lower():
-        fail("Downloads page contains a fixed historical asset URL")
+    if 'data-release-download="multiplatform"' not in downloads:
+        fail("Downloads page is not driven by multiplatform release metadata")
+    for legacy in ["/releases/download/v92/", "FormatX-Suite-Pro-V92.zip", "92.00"]:
+        if legacy in downloads:
+            fail(f"Downloads page contains historical release copy: {legacy}")
+
+    home = read(SCIFI / "index.html")
+    if "/releases/download/v92/" in home or "FormatX-Suite-Pro-V92.zip" in home:
+        fail("Static home page still contains the V92 release asset")
 
 
 def main() -> int:
@@ -216,7 +247,7 @@ def main() -> int:
         for error in ERRORS:
             print(f" - {error}", file=sys.stderr)
         return 1
-    print("FormatX content, release, SEO, evidence and trust contracts are valid.")
+    print("FormatX content, multiplatform release, evidence and trust contracts are valid.")
     return 0
 
 

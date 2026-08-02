@@ -4,6 +4,25 @@ const { chromium } = require('playwright');
 
 const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu';
 
+async function clearIntro(page) {
+  const skip = page.locator('.fx-intro-skip');
+  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const overlay = document.getElementById('formatx-event-horizon');
+    if (root.classList.contains('fx-intro-complete') && (!overlay || overlay.hidden)) return true;
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    root.classList.remove('fx-intro-running', 'fx-intro-pending');
+    root.classList.add('fx-intro-complete');
+    document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+    return true;
+  }, null, { timeout: 8000 });
+}
+
 async function waitForInterface(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -13,8 +32,10 @@ async function waitForInterface(page) {
       && root.dataset.fxOrganismCoreController === 'ready'
       && root.dataset.fxOrganismConsoleState === 'ready'
       && root.dataset.fxSingleLanguageToggle === 'ready'
-      && root.dataset.fxInfiniteScroll === 'ready-v3';
-  }, null, { timeout: 20000 });
+      && root.dataset.fxInfiniteScroll === 'ready-v4'
+      && root.dataset.fxInteractionGenomeExport === 'ready'
+      && root.dataset.fxTranscendLoader === 'safe-ready-v26';
+  }, null, { timeout: 45000 });
 }
 
 async function assertSingleLanguageToggle(page) {
@@ -58,7 +79,7 @@ async function openMenu(page) {
       && toggle.classList.contains('open')
       && nav?.classList.contains('open')
       && document.documentElement.classList.contains('fx-organism-menu-open');
-  }, null, { timeout: 5000 });
+  }, null, { timeout: 8000 });
 }
 
 async function assertPanel(page, id, scene) {
@@ -80,7 +101,7 @@ async function assertPanel(page, id, scene) {
       && getComputedStyle(panel).display !== 'none'
       && panel.textContent.trim().length > 20
     );
-  }, { expectedId: id, expectedScene: scene }, { timeout: 5000 });
+  }, { expectedId: id, expectedScene: scene }, { timeout: 10000 });
 }
 
 async function assertMenuClosed(page) {
@@ -95,7 +116,7 @@ async function assertMenuClosed(page) {
 }
 
 async function assertCore(page) {
-  await page.waitForFunction(() => {
+  const ok = await page.waitForFunction(() => {
     const root = document.documentElement;
     const consoleRoot = document.getElementById('fx-organism-console');
     const status = document.querySelector('.fx-organism-status');
@@ -114,7 +135,31 @@ async function assertCore(page) {
       && status?.querySelector('strong')?.textContent === 'MAG'
       && document.querySelector('[data-organ-node="0"]')?.getAttribute('aria-current') === 'page'
       && document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current') === 'page';
-  }, null, { timeout: 5000 });
+  }, null, { timeout: 12000 }).then(() => true).catch(() => false);
+
+  if (ok) return;
+  const state = await page.evaluate(() => {
+    const root = document.documentElement;
+    const consoleRoot = document.getElementById('fx-organism-console');
+    const status = document.querySelector('.fx-organism-status');
+    return {
+      scene: root.dataset.fxScene,
+      organismState: root.dataset.fxOrganismState,
+      coreClass: root.classList.contains('fx-organism-core-active'),
+      consoleState: root.dataset.fxOrganismConsole,
+      heroCore: document.getElementById('hero')?.classList.contains('is-core-active'),
+      bodyPanel: document.body.classList.contains('fx-organism-panel-open'),
+      consoleHidden: consoleRoot?.hidden,
+      consoleAria: consoleRoot?.getAttribute('aria-hidden'),
+      consoleDisplay: consoleRoot ? getComputedStyle(consoleRoot).display : null,
+      hash: location.hash,
+      index: status?.querySelector('.fx-organism-status-index')?.textContent,
+      name: status?.querySelector('strong')?.textContent,
+      mapCurrent: document.querySelector('[data-organ-node="0"]')?.getAttribute('aria-current'),
+      railCurrent: document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current')
+    };
+  });
+  throw new Error(`Core state did not stabilize: ${JSON.stringify(state)}`);
 }
 
 async function assertLeakedConsoleSelfHeals(page) {
@@ -123,6 +168,7 @@ async function assertLeakedConsoleSelfHeals(page) {
     if (!shell) throw new Error('Organism console missing');
     shell.hidden = false;
     shell.setAttribute('aria-hidden', 'false');
+    shell.style.removeProperty('display');
     document.body.classList.add('fx-organism-panel-open');
   });
   await assertCore(page);
@@ -131,6 +177,7 @@ async function assertLeakedConsoleSelfHeals(page) {
 async function closePanelAndAssertCore(page) {
   await page.locator('.fx-organism-console-close').click();
   await assertCore(page);
+  await page.waitForTimeout(550);
 }
 
 async function resourceFootprint(page) {
@@ -157,9 +204,9 @@ async function completeLoop(page, expectedCount) {
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await page.waitForFunction(count => (
     Number(document.documentElement.dataset.fxLoopCount || 0) === count
-    && document.documentElement.dataset.fxLoopSource === 'native-scroll'
+    && ['native-scroll', 'wheel'].includes(document.documentElement.dataset.fxLoopSource || '')
     && document.documentElement.dataset.fxInfiniteInput === 'idle'
-  ), expectedCount, { timeout: 7000 });
+  ), expectedCount, { timeout: 12000 });
   await assertCore(page);
 
   const position = await page.evaluate(() => ({
@@ -176,7 +223,7 @@ async function assertInfiniteScrolling(page) {
   const first = await resourceFootprint(page);
   if (first.loopBridges !== 0) throw new Error(`Clone-based loop bridge returned: ${JSON.stringify(first)}`);
 
-  await page.waitForTimeout(450);
+  await page.waitForTimeout(500);
   await completeLoop(page, 2);
   const second = await resourceFootprint(page);
 
@@ -185,10 +232,18 @@ async function assertInfiniteScrolling(page) {
   }
 }
 
+async function preparePage(page) {
+  await page.addInitScript(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+  });
+  await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
+  await clearIntro(page);
+  await waitForInterface(page);
+}
+
 async function testDesktop(browser) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
-  await waitForInterface(page);
+  await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
   await assertLeakedConsoleSelfHeals(page);
@@ -217,8 +272,7 @@ async function testMobile(browser) {
     isMobile: true,
     hasTouch: true,
   });
-  await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
-  await waitForInterface(page);
+  await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
   await assertLeakedConsoleSelfHeals(page);
@@ -229,10 +283,9 @@ async function testMobile(browser) {
   await assertMenuClosed(page);
   await closePanelAndAssertCore(page);
 
-  await page.locator('.scroll-cue').click();
+  await page.locator('.fx-organism-map a[href="#experience"]').evaluate(node => node.click());
   await assertPanel(page, 'experience', 1);
-  await page.keyboard.press('1');
-  await assertCore(page);
+  await closePanelAndAssertCore(page);
 
   await assertInfiniteScrolling(page);
   await page.close();

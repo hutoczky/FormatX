@@ -1,7 +1,17 @@
+@import url('./formatx-desktop-unified.css');
+@import url('./formatx-mobile-hero-flow.css');
+
 /* FormatX living-core visibility and responsive layout recovery. */
 html[data-fx-safe-three-gate="ready-v1"] body,
 html[data-fx-safe-three-gate="ready-v2"] body {
   background: #010307 !important;
+}
+
+/* The decorative hero veil was the dominant layout-shift source. The live
+   Three.js field remains intact without this redundant pseudo-element. */
+#hero::after {
+  content: none !important;
+  display: none !important;
 }
 
 /*
@@ -147,6 +157,13 @@ html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
   .fx-three-sound {
     right: 12px !important;
     bottom: max(78px, calc(70px + env(safe-area-inset-bottom))) !important;
+  }
+
+  /* The full Interaction Genome remains available on desktop. On compact
+     screens its separate floating launcher is removed to prevent content and
+     action-dock overlap. */
+  .fx-genome-launcher {
+    display: none !important;
   }
 
   .topbar {

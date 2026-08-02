@@ -16,6 +16,7 @@ async function injectContentLayer(page) {
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-content-standard.css' });
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-readability.css' });
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-unified.css' });
+  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-hero-flow.css' });
   for (const src of [
     '/scifi-ui/scripts/release-metadata.js',
     '/scifi-ui/scripts/formatx-content-standard.js',
@@ -80,20 +81,17 @@ async function mobileLayoutAssertions(page) {
   assert(cue.y + cue.height <= category.y + 2, 'Next category heading overlaps the hero chapter cue');
   assert(!overlap(heroCopy, category), 'Category section overlaps the mobile hero copy');
 
-  const thought = await optionalVisibleBox(page, '.fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger');
   const genome = await optionalVisibleBox(page, '.fx-genome-launcher');
   const sound = await optionalVisibleBox(page, '.fx-three-sound');
   const dock = await optionalVisibleBox(page, '.fx-organism-actionbar');
 
-  for (const [name, control] of [['Thought trigger', thought], ['Genome trigger', genome], ['Sound trigger', sound]]) {
+  for (const [name, control] of [['Genome trigger', genome], ['Sound trigger', sound]]) {
     if (!control) continue;
     assert(!overlap(control, heroCopy, 4), `${name} overlaps the mobile hero copy`);
     assert(!overlap(control, cue, 4), `${name} overlaps the chapter cue`);
     if (dock) assert(!overlap(control, dock, 4), `${name} overlaps the bottom action dock`);
   }
 
-  assert(!overlap(thought, genome, 4), 'Thought and Genome triggers overlap');
-  assert(!overlap(thought, sound, 4), 'Thought and sound triggers overlap');
   assert(!overlap(genome, sound, 4), 'Genome and sound triggers overlap');
 }
 
@@ -104,7 +102,7 @@ async function commonAssertions(page, mobile) {
   const cta = await visibleBox(page, '#hero-download');
   assert(title.width > 100 && title.height > 20, 'Hero title is not visible');
   assert(lead.text.length > 80 && lead.height > 20, 'Concrete product definition is not visible');
-  assert(/Windows|public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not communicate Windows beta status');
+  assert(/multiplatform|public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not communicate multiplatform beta status');
   assert(!overlap(lead, cta), 'Primary CTA overlaps the hero product definition');
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 2, `Horizontal overflow detected: ${overflow}px`);
@@ -112,7 +110,7 @@ async function commonAssertions(page, mobile) {
   assert(/Technikusi operációs réteg|Technician Operating Layer/.test(category || ''), 'Product category is missing');
   const method = await page.locator('.fx-method-inline li').count();
   assert(method === 4, `FormatX Method must have four steps, found ${method}`);
-  const visibleLanguageControls = await page.locator('.fx-language-toggle:visible, .language-switch:visible, .language-control:visible').count();
+  const visibleLanguageControls = await page.locator('.fx-language-toggle:visible, .language-switch [data-language]:visible, .language-control [data-language-choice]:visible').count();
   assert(visibleLanguageControls <= 1, `More than one visible language control: ${visibleLanguageControls}`);
   if (mobile) {
     const menu = await visibleBox(page, '#menu-toggle');
@@ -121,7 +119,14 @@ async function commonAssertions(page, mobile) {
   }
 }
 
-async function capture(browser, name, viewport, setup = async () => {}, contextSetup = async () => {}) {
+async function capture(
+  browser,
+  name,
+  viewport,
+  setup = async () => {},
+  contextSetup = async () => {},
+  targetUrl = base
+) {
   const context = await browser.newContext({ viewport, reducedMotion: name.includes('reduced') ? 'reduce' : 'no-preference' });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
@@ -129,7 +134,7 @@ async function capture(browser, name, viewport, setup = async () => {}, contextS
   await contextSetup(context);
   const page = await context.newPage();
   page.on('pageerror', error => console.warn(`[${name}] pageerror:`, error.message));
-  await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
   await injectContentLayer(page);
   await setup(page);
   await commonAssertions(page, viewport.width < 700);
@@ -151,19 +156,24 @@ async function publicPage(browser, name, pathname, expectedSelector, viewport = 
 (async () => {
   await fs.mkdir(out, { recursive: true });
   const browser = await chromium.launch({ headless: true });
+  const englishUrl = new URL(base);
+  englishUrl.searchParams.set('lang', 'en');
   try {
     await capture(browser, 'desktop-hero-hu', { width: 1440, height: 900 });
     await capture(browser, 'mobile-hero-hu', { width: 390, height: 844 });
     await capture(browser, 'mobile-hero-wide', { width: 430, height: 932 });
     await capture(browser, 'small-height-hero', { width: 1366, height: 600 });
     await capture(browser, 'reduced-motion', { width: 1440, height: 900 });
-    await capture(browser, 'desktop-hero-en', { width: 1440, height: 900 }, async page => {
-      const single = page.locator('.fx-language-toggle:visible').first();
-      if (await single.count()) await single.click();
-      else await page.locator('[data-language="en"]:visible').first().click();
-      await page.waitForTimeout(350);
-      assert((await page.locator('html').getAttribute('lang')) === 'en', 'Language did not switch to English');
-    });
+    await capture(
+      browser,
+      'desktop-hero-en',
+      { width: 1440, height: 900 },
+      async page => {
+        await page.waitForFunction(() => document.documentElement.lang === 'en', null, { timeout: 8000 });
+      },
+      async () => {},
+      englishUrl.href
+    );
     await capture(browser, 'mobile-menu-open', { width: 390, height: 844 }, async page => {
       await page.locator('#menu-toggle').click();
       await page.waitForTimeout(200);
@@ -180,7 +190,7 @@ async function publicPage(browser, name, pathname, expectedSelector, viewport = 
         };
       });
     });
-    await publicPage(browser, 'downloads', '/scifi-ui/downloads/', '[data-release-download="windows"]');
+    await publicPage(browser, 'downloads', '/scifi-ui/downloads/', '[data-release-download="multiplatform"]');
     await publicPage(browser, 'verification-centre', '/scifi-ui/verification.html', '[data-verification-root]');
     await publicPage(browser, 'test-matrix', '/scifi-ui/test-matrix.html', '[data-test-table-body]');
     console.log('Visual contract and fallback screenshots completed.');

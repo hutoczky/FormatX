@@ -6,14 +6,12 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/organism-voice.js'
-      - 'docs/scifi-ui/scripts/organism-voice-foreground.js'
       - 'docs/scifi-ui/scripts/organism-core-interaction.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-disclosure.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-unified.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/styles/organism-voice.css'
-      - 'docs/scifi-ui/styles/organism-voice-foreground.css'
       - 'docs/scifi-ui/styles/organism-voice-dock.css'
       - 'docs/scifi-ui/styles/synaptic-thought-genome.css'
       - 'docs/scifi-ui/styles/synaptic-thought-disclosure.css'
@@ -28,14 +26,12 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/organism-voice.js'
-      - 'docs/scifi-ui/scripts/organism-voice-foreground.js'
       - 'docs/scifi-ui/scripts/organism-core-interaction.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-disclosure.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-unified.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/styles/organism-voice.css'
-      - 'docs/scifi-ui/styles/organism-voice-foreground.css'
       - 'docs/scifi-ui/styles/organism-voice-dock.css'
       - 'docs/scifi-ui/styles/synaptic-thought-genome.css'
       - 'docs/scifi-ui/styles/synaptic-thought-disclosure.css'
@@ -65,12 +61,11 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Validate source contracts
+      - name: Validate current source contracts
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/organism-voice.js
-          node --check docs/scifi-ui/scripts/organism-voice-foreground.js
           node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
@@ -82,7 +77,7 @@ jobs:
 
           node - <<'NODE'
           const fs = require('fs');
-          const read = path => fs.readFileSync(path, 'utf8');
+          const read = file => fs.readFileSync(file, 'utf8');
           const voice = read('docs/scifi-ui/scripts/organism-voice.js');
           const disclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
           const disclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
@@ -97,7 +92,7 @@ jobs:
             [voice.includes("let speechEnabled = false"), 'speech must be off by default'],
             [voice.includes('fx-organism-master-toggle'), 'Organism master switch missing'],
             [voice.includes('setOpen(false, false)'), 'dialogue does not start closed'],
-            [voice.includes("ROOT.dataset.fxOrganismDialogueEnabled"), 'master state marker missing'],
+            [voice.includes('ROOT.dataset.fxOrganismDialogueEnabled'), 'master state marker missing'],
             [!voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'), 'voice answer engine must remain network-free'],
             [genome.includes('questionStored: false') && genome.includes('fingerprint-only'), 'Thought Genome must store fingerprints only'],
             [!genome.includes('fetch(') && !genome.includes('XMLHttpRequest') && !genome.includes('WebSocket'), 'Thought Genome must remain network-free'],
@@ -107,7 +102,8 @@ jobs:
             [disclosure.includes("liveRegion: 'response-only'"), 'live-region contract marker missing'],
             [disclosureCss.includes(':not([open]) > .fx-thought-genome-controls'), 'advanced controls are not hidden while closed'],
             [disclosureCss.includes("data-fx-organism-dialogue-enabled='false'") && disclosureCss.includes('.fx-thought-genome-layer'), 'Thought constellation is not hidden by master off'],
-            [loader.includes('safe-ready-v25') && loader.includes('synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1'), 'v25 loader or disclosure module missing'],
+            [loader.includes('safe-ready-v26') && loader.includes('safe-degraded-v26'), 'v26 loader markers are missing'],
+            [loader.includes('synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1'), 'thought disclosure module is missing'],
             [loader.indexOf('synaptic-thought-genome.js') < loader.indexOf('synaptic-thought-disclosure.js'), 'disclosure loads before Thought Genome'],
             [privacy.includes('legfeljebb 12 gondolatgenom-lenyomat') && privacy.includes('nyers kérdésszöveget nem menti'), 'privacy page does not document local Thought Genome data'],
             [privacy.includes('helyi vagy online hangot használhat'), 'privacy page does not disclose browser speech service'],
@@ -115,9 +111,10 @@ jobs:
             [production.includes('synaptic-thought-disclosure.js') && production.includes('synaptic-thought-disclosure.css'), 'production Worker disclosure routes missing'],
             [previewConfig.includes('/scifi-ui/scripts/synaptic-thought-disclosure.js') && previewConfig.includes('/scifi-ui/styles/synaptic-thought-disclosure.css'), 'preview route ownership missing disclosure assets'],
           ];
+
           const failed = checks.filter(([ok]) => !ok).map(([, message]) => message);
           if (failed.length) throw new Error(failed.join('; '));
-          console.log('PASS: Organism dialogue source, privacy, accessibility and routing contracts are valid.');
+          console.log('PASS: current Organism dialogue, privacy, accessibility and routing contracts are valid.');
           NODE
 
       - name: Install Playwright Chromium

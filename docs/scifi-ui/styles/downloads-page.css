@@ -1,0 +1,77 @@
+body {
+  margin: 0;
+  background: #030817;
+  color: #f4faff;
+}
+
+.fx-download-page {
+  width: min(1180px, calc(100% - 28px));
+  margin: auto;
+  padding: 40px 0 80px;
+}
+
+.fx-download-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.fx-download-intro {
+  max-width: 840px;
+  margin: 52px 0 30px;
+}
+
+.fx-download-intro h1 {
+  font-size: clamp(2.2rem, 6vw, 5rem);
+  line-height: .95;
+}
+
+.fx-download-intro p,
+.fx-download-action p {
+  color: #bed0dc;
+  line-height: 1.65;
+}
+
+.fx-download-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 28px 0 46px;
+}
+
+.fx-download-action {
+  padding: 22px;
+  border: 1px solid #23445d;
+  border-radius: 20px;
+  background: #071426;
+}
+
+.fx-download-action a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: #35d9ff;
+  color: #00111d;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.fx-download-action a.secondary {
+  background: #17395f;
+  color: #f4faff;
+}
+
+@media (max-width: 800px) {
+  .fx-download-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-download-action a {
+    transition: none;
+  }
+}

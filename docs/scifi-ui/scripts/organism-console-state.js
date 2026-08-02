@@ -12,6 +12,7 @@
   let documentObserver = null;
   let reconciling = false;
   let scheduled = 0;
+  let closeLockUntil = 0;
 
   function consoleRoot() {
     return document.getElementById('fx-organism-console');
@@ -47,6 +48,7 @@
       shell.classList.remove('is-authorised-open');
       shell.hidden = true;
       shell.setAttribute('aria-hidden', 'true');
+      shell.style.setProperty('display', 'none');
     }
 
     document.querySelectorAll('[data-organism-panel]').forEach(panel => {
@@ -64,6 +66,10 @@
   }
 
   function authoriseOpen(id) {
+    if (performance.now() < closeLockUntil) {
+      forceClosed({ replaceHash: true });
+      return;
+    }
     if (!PANEL_IDS.has(id)) {
       forceClosed({ replaceHash: true });
       return;
@@ -78,6 +84,7 @@
 
     authorised = true;
     activeId = id;
+    shell.style.removeProperty('display');
     shell.classList.add('is-authorised-open');
     shell.hidden = false;
     shell.setAttribute('aria-hidden', 'false');
@@ -89,6 +96,11 @@
     scheduled = 0;
     if (reconciling) return;
 
+    if (performance.now() < closeLockUntil) {
+      forceClosed({ replaceHash: true });
+      return;
+    }
+
     const shell = consoleRoot();
     if (!shell) return;
 
@@ -96,7 +108,8 @@
       const leakedOpenState = !shell.hidden
         || shell.getAttribute('aria-hidden') === 'false'
         || shell.classList.contains('is-authorised-open')
-        || document.body?.classList.contains('fx-organism-panel-open');
+        || document.body?.classList.contains('fx-organism-panel-open')
+        || shell.style.display !== 'none';
       if (leakedOpenState) forceClosed({ replaceHash: true });
       return;
     }
@@ -107,6 +120,7 @@
       return;
     }
 
+    shell.style.removeProperty('display');
     shell.classList.add('is-authorised-open');
     shell.hidden = false;
     shell.setAttribute('aria-hidden', 'false');
@@ -128,9 +142,27 @@
       subtree: true,
       childList: true,
       attributes: true,
-      attributeFilter: ['class', 'hidden', 'aria-hidden', 'aria-selected']
+      attributeFilter: ['class', 'hidden', 'aria-hidden', 'aria-selected', 'style']
     });
     scheduleReconcile();
+  }
+
+  function holdClosedUntil(deadline) {
+    forceClosed({ replaceHash: true });
+    if (performance.now() < deadline) requestAnimationFrame(() => holdClosedUntil(deadline));
+  }
+
+  function handleEscape(event) {
+    if (event.key !== 'Escape') return;
+    const shell = consoleRoot();
+    if (!shell || shell.hidden) return;
+
+    event.preventDefault();
+
+    closeLockUntil = performance.now() + 450;
+    const close = shell.querySelector('[data-organism-close]');
+    if (close instanceof HTMLElement) close.click();
+    holdClosedUntil(closeLockUntil);
   }
 
   addEventListener('formatx:organisminterfaceready', () => {
@@ -142,6 +174,7 @@
   });
 
   addEventListener('formatx:organismpanelopen', event => {
+    closeLockUntil = 0;
     bindConsoleObserver();
     authoriseOpen(String(event.detail?.id || ''));
   });
@@ -149,6 +182,8 @@
   addEventListener('formatx:organismpanelclose', () => {
     forceClosed({ replaceHash: true });
   });
+
+  addEventListener('keydown', handleEscape, true);
 
   document.addEventListener('formatx:introcomplete', () => {
     if (!authorised) forceClosed({ replaceHash: true });

@@ -96,3 +96,15 @@
     font-size: 9px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-language-toggle {
+    transition: none !important;
+  }
+
+  .fx-language-toggle:hover,
+  .fx-language-toggle:focus-visible,
+  .fx-language-toggle:active {
+    transform: none !important;
+  }
+}

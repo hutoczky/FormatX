@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "updated": "2026-07-31",
   "canonical": true,
   "product_category": {
@@ -11,37 +11,84 @@
     }
   },
   "method": {
-    "hu": ["Felderítés", "Terv", "Kontrollált végrehajtás", "Visszaellenőrzés"],
-    "en": ["Discover", "Plan", "Controlled execution", "Verify"]
+    "hu": [
+      "Felderítés",
+      "Terv",
+      "Kontrollált végrehajtás",
+      "Visszaellenőrzés"
+    ],
+    "en": [
+      "Discover",
+      "Plan",
+      "Controlled execution",
+      "Verify"
+    ]
   },
   "product_release": {
     "status": "public_beta",
     "trial_days": 5,
     "activation": "manual_bank_verification",
-    "version_source": "/scifi-ui/data/release-channel.json"
+    "version_source": "/scifi-ui/data/release-channel.json",
+    "public_package": "multiplatform"
   },
   "status_labels": {
-    "stable": { "hu": "Stabil", "en": "Stable" },
-    "public_beta": { "hu": "Nyilvános béta", "en": "Public beta" },
-    "technical_preview": { "hu": "Technikai előnézet", "en": "Technical preview" },
-    "development": { "hu": "Fejlesztés alatt", "en": "Development" },
-    "planned": { "hu": "Tervezett", "en": "Planned" }
+    "stable": {
+      "hu": "Stabil",
+      "en": "Stable"
+    },
+    "public_beta": {
+      "hu": "Nyilvános béta",
+      "en": "Public beta"
+    },
+    "technical_preview": {
+      "hu": "Technikai előnézet",
+      "en": "Technical preview"
+    },
+    "development": {
+      "hu": "Fejlesztés alatt",
+      "en": "Development"
+    },
+    "planned": {
+      "hu": "Tervezett",
+      "en": "Planned"
+    }
   },
   "support_role_labels": {
-    "primary": { "hu": "Elsődleges fejlesztési és támogatási irány", "en": "Primary development and support direction" },
-    "secondary": { "hu": "Másodlagosan támogatott", "en": "Secondary supported platform" },
-    "preview": { "hu": "Kiegészítő előnézet", "en": "Supplementary preview" },
-    "roadmap": { "hu": "Fejlesztési ütemterv", "en": "Roadmap" }
+    "primary": {
+      "hu": "Elsődleges rendszer és támogatási irány",
+      "en": "Primary system and support direction"
+    },
+    "secondary": {
+      "hu": "Támogatott másodlagos platform",
+      "en": "Supported secondary platform"
+    },
+    "preview": {
+      "hu": "Kiegészítő előnézet",
+      "en": "Supplementary preview"
+    },
+    "roadmap": {
+      "hu": "Fejlesztési ütemterv",
+      "en": "Roadmap"
+    }
   },
   "platforms": [
+    {
+      "id": "linux-bazzite",
+      "name": "Bazzite / Linux",
+      "support_role": "primary",
+      "status": "public_beta",
+      "public_package_policy": "multiplatform_release_metadata_required",
+      "hu": "A Bazzite/Linux a FormatX elsődleges rendszere és hosszú távú támogatási platformja. A nyilvános béta a hivatalos multiplatform csomag része.",
+      "en": "Bazzite/Linux is the primary FormatX system and long-term support platform. Its public beta is included in the official multiplatform package."
+    },
     {
       "id": "windows",
       "name": "Windows",
       "support_role": "secondary",
       "status": "public_beta",
-      "public_package_policy": "release_metadata_required",
-      "hu": "A Windows-kiadás nyilvános béta. Tesztelhető, de még nem Stable verzió. Az aktív letöltés csak akkor jelenik meg, ha a hivatalos kiadási metaadat tényleges Windows-csomagot igazol.",
-      "en": "The Windows edition is a public beta. It is testable but is not yet Stable. An active download is shown only when the official release metadata confirms an actual Windows package."
+      "public_package_policy": "multiplatform_release_metadata_required",
+      "hu": "A Windows támogatott másodlagos platform. Külön Windows-csomag helyett ugyanaz a hivatalos multiplatform nyilvános béta tölthető le.",
+      "en": "Windows is a supported secondary platform. The same official multiplatform public beta is provided instead of a separate Windows-only package."
     },
     {
       "id": "android",
@@ -49,17 +96,8 @@
       "support_role": "preview",
       "status": "public_beta",
       "public_package_policy": "configured_endpoint_required",
-      "hu": "Az Android-kiadás nyilvános béta. Közvetlenül telepíthető csomag csak ellenőrzött letöltési végpont esetén jelenhet meg; ez még nem végleges áruházi kiadás.",
-      "en": "The Android edition is a public beta. A direct-install package may be shown only when a verified download endpoint exists; it is not yet a final store release."
-    },
-    {
-      "id": "linux-bazzite",
-      "name": "Linux / Bazzite",
-      "support_role": "primary",
-      "status": "development",
-      "public_package_policy": "none",
-      "hu": "A Linux/Bazzite a FormatX elsődleges fejlesztési és hosszú távú támogatási platformja. A natív kiadás jelenleg aktív fejlesztés alatt áll; nyilvános natív csomag még nincs.",
-      "en": "Linux/Bazzite is the primary development and long-term support platform for FormatX. The native edition is under active development; no public native package is available yet."
+      "hu": "Az Android-kiadás külön nyilvános béta. Közvetlenül telepíthető csomag csak ellenőrzött letöltési végpont esetén jelenhet meg; ez még nem végleges áruházi kiadás.",
+      "en": "The Android edition is a separate public beta. A direct-install package may be shown only when a verified download endpoint exists; it is not yet a final store release."
     },
     {
       "id": "web",

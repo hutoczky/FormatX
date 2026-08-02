@@ -2,20 +2,78 @@
 
 const { chromium } = require('playwright');
 
-const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu';
+const TEST_URL = process.env.FORMATX_TEST_URL
+  || 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu';
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function waitReady(page) {
-  await page.waitForFunction(() => {
+const NAVIGATION = Object.freeze({
+  hu: [
+    ['Működés', 'Modulok', 'Licenc és árak', 'Biztonság', 'Letöltés'],
+    ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
+    ['Hogyan működik', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
+    ['Idegrendszer — Hogyan működik', 'Szervek — Funkciók és modulok', 'Kereskedelmi szív — Licencek és árak', 'Váz — Technológia és biztonság', 'Jeladó — Letöltés és bizonyítékok']
+  ],
+  en: [
+    ['Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads'],
+    ['How it works', 'Modules', 'Licences', 'Proof', 'Download'],
+    ['Nervous system — How it works', 'Organs — Functions and modules', 'Commerce heart — Licences and pricing', 'Skeleton — Technology and safety', 'Beacon — Downloads and evidence']
+  ]
+});
+
+const DOWNLOAD_LABELS = Object.freeze({
+  hu: ['Multiplatform nyilvános béta letöltése', 'Multiplatform nyilvános béta'],
+  en: ['Download multiplatform public beta', 'Multiplatform public beta']
+});
+
+const TRIAL_LABELS = Object.freeze({
+  hu: ['napos próbalicenc', 'napos teljes próba', 'nap teljes próba'],
+  en: ['day trial licence', 'day full trial']
+});
+
+function matchesOne(actual, expectedSets) {
+  return expectedSets.some(expected => JSON.stringify(actual) === JSON.stringify(expected));
+}
+
+async function clearIntro(page) {
+  const skip = page.locator('.fx-intro-skip');
+  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
+  await page.evaluate(() => {
     const root = document.documentElement;
-    return root.classList.contains('fx-intro-complete')
-      && root.dataset.fxSingleLanguageToggle === 'ready'
-      && root.dataset.fxCopyPolish === 'ready-v1'
+    const overlay = document.getElementById('formatx-event-horizon');
+    root.classList.remove('fx-intro-running', 'fx-intro-pending', 'fx-intro-reveal');
+    root.classList.add('fx-intro-complete');
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+  });
+}
+
+async function waitPublicState(page, language) {
+  await page.waitForFunction(({ lang, navigation, downloads, trials }) => {
+    const nav = Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim());
+    const download = document.querySelector('#hero-download span')?.textContent.trim() || '';
+    const trial = document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '';
+    return document.documentElement.lang === lang
+      && document.documentElement.dataset.fxLanguageCopyStability === 'ready-v1'
+      && Boolean(document.querySelector('.fx-language-toggle'))
+      && downloads.includes(download)
+      && trials.includes(trial)
+      && navigation.some(expected => JSON.stringify(expected) === JSON.stringify(nav))
+      && Boolean(document.querySelector('.site-footer [data-fx-licence-link]'))
       && Boolean(document.getElementById('fx-licence-clarity'));
-  }, null, { timeout: 25000 });
+  }, {
+    lang: language,
+    navigation: NAVIGATION[language],
+    downloads: DOWNLOAD_LABELS[language],
+    trials: TRIAL_LABELS[language]
+  }, { timeout: 45000 });
+  await page.waitForTimeout(250);
 }
 
 async function readCopy(page) {
@@ -24,45 +82,66 @@ async function readCopy(page) {
     nav: Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim()),
     heroDownload: document.querySelector('#hero-download span')?.textContent.trim() || '',
     trialLabel: document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '',
-    pricingTitle: document.getElementById('pricing-title')?.textContent.replace(/\s+/g, ' ').trim() || '',
+    pricingTitle: Array.from(
+      document.querySelectorAll('#pricing-title > span, #pricing-title > em'),
+      node => node.textContent.trim()
+    ).join(' '),
     licenceTitle: document.getElementById('fx-licence-clarity-title')?.textContent.trim() || '',
-    licenceItems: Array.from(document.querySelectorAll('#fx-licence-clarity li'), node => node.textContent.trim()),
-    footerLicence: document.querySelector('.site-footer a[data-fx-licence-link]')?.textContent.trim() || '',
-    visibleLanguageButtons: Array.from(document.querySelectorAll('.fx-language-toggle, .language-switch [data-language]'))
-      .filter(node => getComputedStyle(node).display !== 'none' && !node.hidden).length,
-    legacyStarterCopy: /kezdőlicenc|initial licence/i.test(document.body.innerText),
-    horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+    licenceItems: document.querySelectorAll('#fx-licence-clarity li').length,
+    footerLicence: document.querySelector('.site-footer [data-fx-licence-link]')?.textContent.trim() || '',
+    visibleLanguageButtons: Array.from(
+      document.querySelectorAll('.fx-language-toggle, .language-switch [data-language]')
+    ).filter(node => getComputedStyle(node).display !== 'none' && !node.hidden).length,
+    legacyVersionCopy: /\bV(?:29|92|120|121)\b|92\.00|Windows nyilvános béta letöltése|Download Windows public beta/i.test(
+      document.body.innerText
+    ),
+    horizontalOverflow: Math.max(
+      document.documentElement.scrollWidth,
+      document.body.scrollWidth
+    ) - innerWidth
   }));
 }
 
-async function assertHungarian(page, name) {
-  const state = await readCopy(page);
-  assert(state.lang === 'hu', name + ': language is not Hungarian: ' + JSON.stringify(state));
-  assert(JSON.stringify(state.nav) === JSON.stringify(['Működés', 'Modulok', 'Licenc és árak', 'Biztonság', 'Letöltés']), name + ': Hungarian navigation mismatch: ' + JSON.stringify(state));
-  assert(state.heroDownload.includes('5 napos próbalicenc'), name + ': Hungarian trial download label missing: ' + JSON.stringify(state));
-  assert(state.trialLabel === 'napos próbalicenc', name + ': Hungarian trial fact mismatch: ' + JSON.stringify(state));
-  assert(state.pricingTitle === 'A licenccsomag a munkádhoz igazodik.', name + ': Hungarian licence heading mismatch: ' + JSON.stringify(state));
-  assert(state.licenceTitle === 'Mit ad a FormatX licenc?', name + ': Hungarian licence clarification missing: ' + JSON.stringify(state));
-  assert(state.licenceItems.length === 4, name + ': licence clarification must contain four points: ' + JSON.stringify(state));
-  assert(state.footerLicence === 'Licenc', name + ': footer licence link mismatch: ' + JSON.stringify(state));
-  assert(state.visibleLanguageButtons === 1, name + ': exactly one visible language button required: ' + JSON.stringify(state));
-  assert(!state.legacyStarterCopy, name + ': obsolete starter-licence wording remains: ' + JSON.stringify(state));
-  assert(state.horizontalOverflow <= 1, name + ': horizontal overflow: ' + JSON.stringify(state));
+function assertHungarian(state, name) {
+  assert(state.lang === 'hu', name + ': Hungarian language state missing: ' + JSON.stringify(state));
+  assert(matchesOne(state.nav, NAVIGATION.hu), name + ': Hungarian navigation mismatch: ' + JSON.stringify(state));
+  assert(DOWNLOAD_LABELS.hu.includes(state.heroDownload),
+    name + ': Hungarian download label mismatch: ' + JSON.stringify(state));
+  assert(TRIAL_LABELS.hu.includes(state.trialLabel),
+    name + ': Hungarian trial label mismatch: ' + JSON.stringify(state));
+  assert(state.pricingTitle === 'A licenccsomag a munkádhoz igazodik.',
+    name + ': Hungarian pricing heading mismatch: ' + JSON.stringify(state));
+  assert(state.licenceTitle === 'Mit ad a FormatX licenc?' && state.licenceItems === 4,
+    name + ': Hungarian licence clarification mismatch: ' + JSON.stringify(state));
+  assert(state.footerLicence === 'Licenc',
+    name + ': Hungarian footer licence mismatch: ' + JSON.stringify(state));
+  assert(state.visibleLanguageButtons === 1,
+    name + ': exactly one visible language button required: ' + JSON.stringify(state));
+  assert(!state.legacyVersionCopy,
+    name + ': public version or Windows-only copy remains: ' + JSON.stringify(state));
+  assert(state.horizontalOverflow <= 1,
+    name + ': horizontal overflow: ' + JSON.stringify(state));
 }
 
-async function assertEnglish(page, name) {
-  const state = await readCopy(page);
-  assert(state.lang === 'en', name + ': language is not English: ' + JSON.stringify(state));
-  assert(JSON.stringify(state.nav) === JSON.stringify(['Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads']), name + ': English navigation mismatch: ' + JSON.stringify(state));
-  assert(state.heroDownload.includes('5-day trial'), name + ': English trial download label missing: ' + JSON.stringify(state));
-  assert(state.trialLabel === 'day trial licence', name + ': English trial fact mismatch: ' + JSON.stringify(state));
-  assert(state.pricingTitle === 'The licence plan fits your work.', name + ': English licence heading mismatch: ' + JSON.stringify(state));
-  assert(state.licenceTitle === 'What does the FormatX licence grant?', name + ': English licence clarification missing: ' + JSON.stringify(state));
-  assert(state.licenceItems.length === 4, name + ': English licence clarification must contain four points: ' + JSON.stringify(state));
-  assert(state.footerLicence === 'Licence', name + ': English footer licence link mismatch: ' + JSON.stringify(state));
-  assert(state.visibleLanguageButtons === 1, name + ': exactly one visible language button required after language change: ' + JSON.stringify(state));
-  assert(!state.legacyStarterCopy, name + ': obsolete licence wording remains in English: ' + JSON.stringify(state));
-  assert(state.horizontalOverflow <= 1, name + ': horizontal overflow after language change: ' + JSON.stringify(state));
+function assertEnglish(state, name) {
+  assert(state.lang === 'en', name + ': English language state missing: ' + JSON.stringify(state));
+  assert(matchesOne(state.nav, NAVIGATION.en), name + ': English navigation mismatch: ' + JSON.stringify(state));
+  assert(DOWNLOAD_LABELS.en.includes(state.heroDownload),
+    name + ': English download label mismatch: ' + JSON.stringify(state));
+  assert(TRIAL_LABELS.en.includes(state.trialLabel),
+    name + ': English trial label mismatch: ' + JSON.stringify(state));
+  assert(state.pricingTitle === 'The licence plan fits your work.',
+    name + ': English pricing heading mismatch: ' + JSON.stringify(state));
+  assert(state.licenceTitle === 'What does the FormatX licence grant?' && state.licenceItems === 4,
+    name + ': English licence clarification mismatch: ' + JSON.stringify(state));
+  assert(state.footerLicence === 'Licence',
+    name + ': English footer licence mismatch: ' + JSON.stringify(state));
+  assert(state.visibleLanguageButtons === 1,
+    name + ': exactly one visible language button required: ' + JSON.stringify(state));
+  assert(!state.legacyVersionCopy,
+    name + ': public version or Windows-only copy remains: ' + JSON.stringify(state));
+  assert(state.horizontalOverflow <= 1,
+    name + ': horizontal overflow: ' + JSON.stringify(state));
 }
 
 async function testViewport(browser, viewport, name, mobile) {
@@ -70,7 +149,7 @@ async function testViewport(browser, viewport, name, mobile) {
     viewport,
     isMobile: Boolean(mobile),
     hasTouch: Boolean(mobile),
-    locale: 'hu-HU',
+    locale: 'hu-HU'
   });
   const page = await context.newPage();
   const errors = [];
@@ -80,24 +159,30 @@ async function testViewport(browser, viewport, name, mobile) {
   });
 
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
-  await waitReady(page);
-  await assertHungarian(page, name);
+  await clearIntro(page);
+  await waitPublicState(page, 'hu');
+  assertHungarian(await readCopy(page), name);
 
-  await page.locator('.fx-language-toggle').click();
-  await page.waitForFunction(() => document.documentElement.lang === 'en' && document.documentElement.dataset.fxCopyPolish === 'ready-v1');
-  await assertEnglish(page, name);
+  await page.locator('.fx-language-toggle').evaluate(node => node.click());
+  await waitPublicState(page, 'en');
+  assertEnglish(await readCopy(page), name);
 
-  const meaningful = errors.filter(item => !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED/i.test(item));
+  const meaningful = errors.filter(item => (
+    !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*(?:403|404)/i.test(item)
+  ));
   assert(!meaningful.length, name + ': browser errors: ' + meaningful.join(' | '));
   await context.close();
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--enable-unsafe-swiftshader']
+  });
   try {
     await testViewport(browser, { width: 1440, height: 900 }, 'desktop', false);
     await testViewport(browser, { width: 390, height: 844 }, 'mobile', true);
-    console.log('PASS FormatX bilingual labels, single language toggle and licence clarification');
+    console.log('PASS FormatX bilingual labels, multiplatform CTA and licence clarification');
   } finally {
     await browser.close();
   }

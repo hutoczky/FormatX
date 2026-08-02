@@ -17,11 +17,6 @@
     return ROOT.lang === 'en' ? 'en' : 'hu';
   }
 
-  function local(value) {
-    if (value && typeof value === 'object') return value[language()] || value.hu || value.en || '';
-    return String(value || '');
-  }
-
   function setBilingual(element, hu, en) {
     if (!element) return;
     element.dataset.hu = hu;
@@ -32,6 +27,7 @@
   function ensureCategoryDefinition() {
     const heroCopy = document.querySelector('#hero .hero-copy');
     if (!heroCopy) return;
+
     let block = heroCopy.querySelector('.fx-category-definition');
     if (!block) {
       block = document.createElement('p');
@@ -40,6 +36,7 @@
       if (kicker) kicker.insertAdjacentElement('afterend', block);
       else heroCopy.prepend(block);
     }
+
     block.innerHTML = language() === 'en'
       ? '<strong>Technician Operating Layer</strong>One shared, verifiable workflow for drive management, system diagnostics, installation and safe maintenance.'
       : '<strong>Technikusi operációs réteg</strong>Egy közös, ellenőrizhető munkafolyamat meghajtókezeléshez, rendszerdiagnosztikához, telepítéshez és biztonságos karbantartáshoz.';
@@ -58,10 +55,13 @@
       method.setAttribute('aria-label', 'FormatX Method');
       lead?.insertAdjacentElement('afterend', method);
     }
+
     const steps = language() === 'en'
       ? ['Discover', 'Plan', 'Controlled execution', 'Verify']
       : ['Felderítés', 'Terv', 'Kontrollált végrehajtás', 'Visszaellenőrzés'];
-    method.replaceChildren(...steps.map(step => Object.assign(document.createElement('li'), { textContent: step })));
+    method.replaceChildren(...steps.map(step => Object.assign(document.createElement('li'), {
+      textContent: step
+    })));
   }
 
   function updateNavigation() {
@@ -72,26 +72,44 @@
       ['#system', 'Váz — Technológia és biztonság', 'Skeleton — Technology and safety'],
       ['#resources', 'Jeladó — Letöltés és bizonyítékok', 'Beacon — Downloads and evidence']
     ];
+
     labels.forEach(([href, hu, en]) => {
-      document.querySelectorAll(`#main-nav a[href="${href}"]`).forEach(link => setBilingual(link, hu, en));
+      document.querySelectorAll(`#main-nav a[href="${href}"]`).forEach(link => {
+        setBilingual(link, hu, en);
+      });
     });
+
     const nav = document.getElementById('main-nav');
-    if (nav) nav.setAttribute('aria-label', language() === 'en' ? 'FormatX system navigation' : 'FormatX rendszernavigáció');
+    if (nav) {
+      nav.setAttribute(
+        'aria-label',
+        language() === 'en' ? 'FormatX system navigation' : 'FormatX rendszernavigáció'
+      );
+    }
   }
 
   function updateDownloadSemantics() {
     const download = document.getElementById('hero-download');
     if (download) {
-      download.dataset.releaseDownload = 'windows';
+      download.dataset.releaseDownload = 'multiplatform';
       download.removeAttribute('download');
       const span = download.querySelector('span') || download;
       span.dataset.releaseDownloadLabel = 'true';
-      setBilingual(span, 'Windows nyilvános béta letöltése', 'Download Windows public beta');
+      setBilingual(
+        span,
+        'Multiplatform nyilvános béta letöltése',
+        'Download multiplatform public beta'
+      );
     }
+
     const android = document.querySelector('#hero .hero-actions a[href*="/download/android"]');
     if (android) {
       const span = android.querySelector('span') || android;
-      setBilingual(span, 'Android nyilvános béta letöltése', 'Download Android public beta');
+      setBilingual(
+        span,
+        'Android nyilvános béta letöltése',
+        'Download Android public beta'
+      );
     }
   }
 
@@ -102,15 +120,23 @@
     const verified = Array.isArray(data.tests?.cases)
       ? data.tests.cases.filter(item => item.status === 'verified').length
       : null;
+
     const values = [
       ['04', language() === 'en' ? 'method steps' : 'módszerlépés'],
-      [platforms == null ? '—' : String(platforms).padStart(2, '0'), language() === 'en' ? 'published platform states' : 'közzétett platformállapot'],
-      [verified == null ? '—' : String(verified).padStart(2, '0'), language() === 'en' ? 'verified public tests' : 'ellenőrzött nyilvános teszt']
+      [
+        platforms == null ? '—' : String(platforms).padStart(2, '0'),
+        language() === 'en' ? 'published platform states' : 'közzétett platformállapot'
+      ],
+      [
+        verified == null ? '—' : String(verified).padStart(2, '0'),
+        language() === 'en' ? 'verified public tests' : 'ellenőrzött nyilvános teszt'
+      ]
     ];
+
     facts.forEach((fact, index) => {
+      if (!values[index]) return;
       const value = fact.querySelector('b');
       const label = fact.querySelector('small');
-      if (!values[index]) return;
       if (value) value.textContent = values[index][0];
       if (label) label.textContent = values[index][1];
       fact.classList.add('fx-proof-metric');
@@ -123,27 +149,27 @@
       labels[0].querySelector('b').textContent = 'METHOD STEP';
     }
     if (labels[1]) {
-      labels[1].querySelector('span').textContent = '—';
-      labels[1].querySelector('b').textContent = 'OFFICIAL RELEASE';
+      labels[1].querySelector('span').textContent = 'BETA';
+      labels[1].querySelector('b').textContent = 'PUBLIC RELEASE';
       labels[1].dataset.releaseTelemetry = 'true';
     }
     if (labels[2]) {
-      labels[2].querySelector('span').textContent = issueCount == null ? '—' : String(issueCount).padStart(2, '0');
+      labels[2].querySelector('span').textContent = issueCount == null
+        ? '—'
+        : String(issueCount).padStart(2, '0');
       labels[2].querySelector('b').textContent = 'KNOWN LIMITS';
     }
   }
 
-  function updateReleaseTelemetry(event) {
-    const release = event?.detail?.release || ROOT.__FORMATX_RELEASE_METADATA__?.release || null;
+  function updateReleaseTelemetry() {
     const target = document.querySelector('#hero .hero-label[data-release-telemetry] span');
-    if (!target) return;
-    const version = typeof release?.version === 'string' ? release.version.trim() : '';
-    target.textContent = version || '—';
+    if (target) target.textContent = 'BETA';
   }
 
   function ensureTrustStrip() {
     if (!document.body.classList.contains('living-architecture')) return;
     if (document.querySelector('.fx-trust-strip')) return;
+
     const main = document.getElementById('main-content');
     const resource = document.getElementById('resources');
     if (!main) return;
@@ -165,6 +191,7 @@
         <a class="fx-trust-card" href="/scifi-ui/test-matrix.html"><strong data-card="tests"></strong><small data-card-copy="tests"></small><span>↗</span></a>
         <a class="fx-trust-card" href="/scifi-ui/known-issues.html"><strong data-card="issues"></strong><small data-card-copy="issues"></small><span>↗</span></a>
       </div>`;
+
     if (resource) resource.before(section);
     else main.appendChild(section);
     translateTrustStrip(section);
@@ -172,16 +199,40 @@
 
   function translateTrustStrip(section) {
     const en = language() === 'en';
-    section.querySelector('#fx-trust-title').textContent = en ? 'Claims become useful only when they can be opened and checked.' : 'Az állítás akkor hasznos, ha megnyitható és ellenőrizhető.';
+    section.querySelector('#fx-trust-title').textContent = en
+      ? 'Claims become useful only when they can be opened and checked.'
+      : 'Az állítás akkor hasznos, ha megnyitható és ellenőrizhető.';
     section.querySelector('[data-fx-trust-lead]').textContent = en
       ? 'The public evidence layer separates released, tested, limited, planned and still-unverified work.'
       : 'A nyilvános bizonyítéki réteg elkülöníti a kiadott, tesztelt, korlátozott, tervezett és még nem igazolt részeket.';
+
     const copy = {
-      method: [en ? 'The FormatX Method' : 'A FormatX módszer', en ? 'Discover → Plan → Controlled execution → Verify.' : 'Felderítés → Terv → Kontrollált végrehajtás → Visszaellenőrzés.'],
-      verification: [en ? 'Verification Centre' : 'Bizonyítéki központ', en ? 'Release, digest, signature availability, security model and evidence gaps.' : 'Kiadás, digest, aláírás-elérhetőség, biztonsági modell és bizonyítékhiányok.'],
-      tests: [en ? 'Public test matrix' : 'Nyilvános tesztmátrix', en ? 'No missing result is treated as a successful test.' : 'A hiányzó eredmény nem minősül sikeres tesztnek.'],
-      issues: [en ? 'Known issues' : 'Ismert hibák', en ? 'Open limitations, workarounds and publication status.' : 'Nyílt korlátozások, kerülőutak és javítási állapotok.']
+      method: [
+        en ? 'The FormatX Method' : 'A FormatX módszer',
+        en
+          ? 'Discover → Plan → Controlled execution → Verify.'
+          : 'Felderítés → Terv → Kontrollált végrehajtás → Visszaellenőrzés.'
+      ],
+      verification: [
+        en ? 'Verification Centre' : 'Bizonyítéki központ',
+        en
+          ? 'Release, digest, signature availability, security model and evidence gaps.'
+          : 'Kiadás, digest, aláírás-elérhetőség, biztonsági modell és bizonyítékhiányok.'
+      ],
+      tests: [
+        en ? 'Public test matrix' : 'Nyilvános tesztmátrix',
+        en
+          ? 'No missing result is treated as a successful test.'
+          : 'A hiányzó eredmény nem minősül sikeres tesztnek.'
+      ],
+      issues: [
+        en ? 'Known issues' : 'Ismert hibák',
+        en
+          ? 'Open limitations, workarounds and publication status.'
+          : 'Nyílt korlátozások, kerülőutak és javítási állapotok.'
+      ]
     };
+
     Object.entries(copy).forEach(([key, values]) => {
       section.querySelector(`[data-card="${key}"]`).textContent = values[0];
       section.querySelector(`[data-card-copy="${key}"]`).textContent = values[1];
@@ -190,13 +241,18 @@
 
   function ensureIndependentOrigin() {
     const host = document.querySelector('.fx-trust-strip');
-    if (!host || host.querySelector('.fx-independent-origin')) return;
-    const paragraph = document.createElement('p');
-    paragraph.className = 'fx-independent-origin';
+    if (!host) return;
+
+    let paragraph = host.querySelector('.fx-independent-origin');
+    if (!paragraph) {
+      paragraph = document.createElement('p');
+      paragraph.className = 'fx-independent-origin';
+      host.appendChild(paragraph);
+    }
+
     paragraph.textContent = language() === 'en'
       ? 'FormatX Suite Pro is an independent, one-person technology project. Hutóczky József is responsible for system design, development and product direction.'
       : 'A FormatX Suite Pro független, egyszemélyes technológiai projekt. A rendszer tervezését, fejlesztését és termékirányát Hutóczky József végzi.';
-    host.appendChild(paragraph);
   }
 
   async function fetchJson(url) {
@@ -207,7 +263,9 @@
 
   async function loadData() {
     const settled = await Promise.allSettled([
-      fetchJson(URLS.status), fetchJson(URLS.tests), fetchJson(URLS.issues)
+      fetchJson(URLS.status),
+      fetchJson(URLS.tests),
+      fetchJson(URLS.issues)
     ]);
     data.status = settled[0].status === 'fulfilled' ? settled[0].value : null;
     data.tests = settled[1].status === 'fulfilled' ? settled[1].value : null;
@@ -234,6 +292,9 @@
 
   addEventListener('formatx:languagechange', apply);
   addEventListener('formatx:releasemetadataready', updateReleaseTelemetry);
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
-  else init();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
 }());

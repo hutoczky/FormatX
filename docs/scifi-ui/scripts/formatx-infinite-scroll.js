@@ -4,226 +4,358 @@
   const root = document.documentElement;
   if (root.dataset.fxInfiniteScroll === 'ready-v4') return;
 
-  const BOUNDARY_PX = 28;
-  const COOLDOWN_MS = 360;
-  const SCROLL_IDLE_MS = 190;
-  const DOWN_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ']);
+  root.dataset.fxInfiniteScroll = 'loading-v4';
+  root.dataset.fxInfiniteController = 'boundary-v4';
+  root.dataset.fxInfiniteCloneMode = 'none';
+  root.dataset.fxInfiniteInput = 'idle';
+  root.dataset.fxScrollActivity = 'idle';
 
-  let lastY = window.scrollY;
-  let lastDirection = 0;
+  const TOP_SELECTOR = '#hero';
+  const BOTTOM_SELECTOR = '#resources';
+  const WHEEL_THRESHOLD = 110;
+  const WHEEL_CAPTURE_PX = 96;
+  const TOUCH_THRESHOLD = 62;
+  const BOUNDARY_EPSILON = 12;
+  const COOLDOWN_MS = 360;
+  const SETTLE_MS = 320;
+  const NATIVE_LOOP_DELAY_MS = 180;
+  const ACTIVITY_IDLE_MS = 140;
+  const WHEEL_INTENT_IDLE_MS = 220;
+  const DOWN_KEYS = new Set(['ArrowDown', 'PageDown', 'End', ' ']);
+  const UP_KEYS = new Set(['ArrowUp', 'PageUp', 'Home']);
+
   let looping = false;
   let cooldownUntil = 0;
-  let scrollFrame = 0;
-  let settleFrame = 0;
-  let scrollIdleTimer = 0;
-  let scrolling = false;
+  let loopCount = Number(
+    root.dataset.fxLoopCount || root.dataset.fxInfiniteLoopCount || 0
+  );
+  let wheelDown = 0;
+  let wheelUp = 0;
+  let wheelIntentTimer = 0;
+  let touchStartY = null;
+  let lastExplicitInputAt = 0;
+  let nativeLoopQueued = false;
+  let activityTimer = 0;
 
-  function maximumScroll() {
-    const viewportHeight = window.visualViewport?.height || window.innerHeight;
-    return Math.max(0, document.documentElement.scrollHeight - viewportHeight);
+  function topNode() {
+    return document.querySelector(TOP_SELECTOR);
   }
 
-  function heroTop() {
-    const hero = document.getElementById('hero');
-    return hero ? Math.max(0, hero.getBoundingClientRect().top + window.scrollY) : 0;
+  function bottomNode() {
+    return document.querySelector(BOTTOM_SELECTOR);
+  }
+
+  function documentEnd() {
+    return Math.max(0, document.documentElement.scrollHeight - innerHeight);
+  }
+
+  function distanceFromBottom() {
+    return Math.max(0, documentEnd() - scrollY);
+  }
+
+  function nearTop() {
+    return scrollY <= BOUNDARY_EPSILON;
+  }
+
+  function nearBottom() {
+    return distanceFromBottom() <= BOUNDARY_EPSILON;
+  }
+
+  function withinWheelTopZone() {
+    return scrollY <= WHEEL_CAPTURE_PX;
+  }
+
+  function withinWheelBottomZone() {
+    return distanceFromBottom() <= WHEEL_CAPTURE_PX;
   }
 
   function dialogueOpen() {
-    return Boolean(document.querySelector('.fx-organism-dialogue.is-open'));
-  }
-
-  function overlayOpen() {
-    return root.classList.contains('fx-organism-menu-open')
-      || document.body?.classList.contains('fx-organism-panel-open')
-      || document.getElementById('fx-organism-console')?.classList.contains('is-authorised-open')
-      || dialogueOpen();
-  }
-
-  function atBoundary(projectedY) {
-    const maximum = maximumScroll();
-    return maximum > BOUNDARY_PX && projectedY >= maximum - BOUNDARY_PX;
+    const dialogue = document.querySelector('.fx-organism-dialogue');
+    return Boolean(
+      dialogue
+      && !dialogue.hidden
+      && dialogue.classList.contains('is-open')
+      && getComputedStyle(dialogue).display !== 'none'
+    );
   }
 
   function nestedScrollerCanConsume(target, deltaY) {
-    let element = target instanceof Element ? target : null;
-    while (element && element !== document.body && element !== document.documentElement) {
-      const style = getComputedStyle(element);
-      const scrollable = /(auto|scroll|overlay)/.test(style.overflowY)
-        && element.scrollHeight > element.clientHeight + 1;
-      if (scrollable) {
-        if (deltaY > 0 && element.scrollTop + element.clientHeight < element.scrollHeight - 1) return true;
-        if (deltaY < 0 && element.scrollTop > 1) return true;
-      }
-      element = element.parentElement;
-    }
-    return false;
-  }
-
-  function publishReadyState() {
-    root.dataset.fxInfinite = 'ready';
-    root.dataset.fxInfiniteController = 'boundary-v4';
-    root.dataset.fxInfiniteScroll = 'ready-v4';
-  }
-
-  function stopScrolling(source) {
-    clearTimeout(scrollIdleTimer);
-    scrollIdleTimer = 0;
-    if (!scrolling) return;
-    scrolling = false;
-    root.classList.remove('fx-page-scrolling');
-    root.dataset.fxScrollActivity = 'idle';
-    dispatchEvent(new CustomEvent('formatx:pagestopscroll', { detail: { source } }));
-  }
-
-  function markScrolling(source) {
-    clearTimeout(scrollIdleTimer);
-    if (!scrolling) {
-      scrolling = true;
-      root.classList.add('fx-page-scrolling');
-      root.dataset.fxScrollActivity = source;
-      dispatchEvent(new CustomEvent('formatx:pagestartscroll', { detail: { source } }));
-    } else {
-      root.dataset.fxScrollActivity = source;
-    }
-    scrollIdleTimer = setTimeout(() => stopScrolling(source), SCROLL_IDLE_MS);
-  }
-
-  function finishLoop(source, count, target) {
-    root.dataset.fxLoopCount = String(count);
-    root.dataset.fxLoopSource = source;
-    root.dataset.fxLoopTarget = String(Math.round(target));
-    root.dataset.fxInfiniteInput = 'idle';
-    root.classList.remove('fx-infinite-loop-jump');
-    looping = false;
-    cooldownUntil = performance.now() + COOLDOWN_MS;
-    lastY = window.scrollY;
-    lastDirection = 0;
-    stopScrolling('loop-complete');
-    publishReadyState();
-
-    dispatchEvent(new CustomEvent('formatx:loop', {
-      detail: {
-        count,
-        source,
-        controller: 'boundary-v4',
-        target,
-        actual: window.scrollY,
-        clonedContent: false,
-        reinitialisedRenderer: false
-      }
-    }));
-  }
-
-  function settle(source, count, target, attempt) {
-    cancelAnimationFrame(settleFrame);
-    settleFrame = requestAnimationFrame(() => {
-      if (Math.abs(window.scrollY - target) > 1.5 && attempt < 5) {
-        window.scrollTo(0, target);
-        settle(source, count, target, attempt + 1);
-        return;
-      }
-      settleFrame = 0;
-      finishLoop(source, count, target);
-    });
-  }
-
-  function loopToCore(source, projectedY = window.scrollY) {
-    if (looping || overlayOpen() || performance.now() < cooldownUntil) return false;
-    if (!atBoundary(projectedY)) return false;
-
-    looping = true;
-    const target = heroTop();
-    const count = Number(root.dataset.fxLoopCount || 0) + 1;
-
-    root.dataset.fxInfiniteInput = source;
-    root.classList.add('fx-infinite-loop-jump');
-
-    requestAnimationFrame(() => {
-      window.scrollTo(0, target);
-      settle(source, count, target, 0);
-    });
+    if (!(target instanceof Element)) return false;
+    const scroller = target.closest(
+      '.fx-organism-console-viewport, .fx-organism-panel, .fx-organism-dialogue, '
+      + '[data-scroll-container], [data-organism-panel]'
+    );
+    if (!(scroller instanceof HTMLElement)) return false;
+    const maximum = scroller.scrollHeight - scroller.clientHeight;
+    if (maximum <= 1) return false;
+    if (deltaY > 0) return scroller.scrollTop < maximum - 1;
+    if (deltaY < 0) return scroller.scrollTop > 1;
     return true;
   }
 
-  function normaliseWheel(event) {
-    const multiplier = event.deltaMode === WheelEvent.DOM_DELTA_LINE
-      ? 16
-      : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
-        ? window.innerHeight
-        : 1;
-    return event.deltaY * multiplier;
+  function ignoredTarget(target) {
+    return target instanceof Element && Boolean(target.closest(
+      'input, textarea, select, [contenteditable="true"]'
+    ));
   }
 
-  function onWheel(event) {
-    if (event.ctrlKey || event.defaultPrevented || overlayOpen()) return;
-    const deltaY = normaliseWheel(event);
-    if (!Number.isFinite(deltaY) || deltaY === 0 || Math.abs(deltaY) <= Math.abs(event.deltaX)) return;
-    markScrolling('wheel');
-    if (deltaY <= 0 || nestedScrollerCanConsume(event.target, deltaY)) return;
-
-    const projected = window.scrollY + deltaY;
-    if (!atBoundary(projected)) return;
-    if (loopToCore('wheel', projected) && event.cancelable) event.preventDefault();
+  function markActivity() {
+    root.dataset.fxScrollActivity = 'scrolling';
+    root.classList.add('fx-page-scrolling');
+    clearTimeout(activityTimer);
+    activityTimer = window.setTimeout(() => {
+      if (!looping) markIdle();
+    }, ACTIVITY_IDLE_MS);
   }
 
-  function onScroll() {
-    const current = window.scrollY;
-    const delta = current - lastY;
-    if (Math.abs(delta) > 0.5) {
-      lastDirection = Math.sign(delta);
-      markScrolling('native-scroll');
-    }
-    lastY = current;
+  function markIdle() {
+    clearTimeout(activityTimer);
+    root.dataset.fxScrollActivity = 'idle';
+    root.classList.remove('fx-page-scrolling');
+  }
 
-    if (scrollFrame) return;
-    scrollFrame = requestAnimationFrame(() => {
-      scrollFrame = 0;
-      if (looping || lastDirection <= 0 || overlayOpen()) return;
-      if (atBoundary(window.scrollY)) loopToCore('native-scroll');
+  function resetWheelIntent() {
+    clearTimeout(wheelIntentTimer);
+    wheelDown = 0;
+    wheelUp = 0;
+  }
+
+  function keepWheelIntentAlive() {
+    clearTimeout(wheelIntentTimer);
+    wheelIntentTimer = window.setTimeout(resetWheelIntent, WHEEL_INTENT_IDLE_MS);
+  }
+
+  function publishReadyState() {
+    root.dataset.fxInfiniteScroll = 'ready-v4';
+    root.dataset.fxInfiniteController = 'boundary-v4';
+    root.dataset.fxInfiniteCloneMode = 'none';
+    root.dataset.fxInfiniteLoopCount = String(loopCount);
+    root.dataset.fxLoopCount = String(loopCount);
+    root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
+      version: 'boundary-v4',
+      clonedContent: false,
+      reinitialisedRenderer: false,
+      loopCount
     });
   }
 
-  function onKeyDown(event) {
-    const target = event.target;
-    const typing = target instanceof HTMLInputElement
-      || target instanceof HTMLTextAreaElement
-      || target instanceof HTMLSelectElement
-      || target?.isContentEditable;
-    if (typing || event.altKey || event.ctrlKey || event.metaKey || !DOWN_KEYS.has(event.key)) return;
-    if (event.key === ' ' && event.shiftKey) return;
-    markScrolling('keyboard');
-    if (!atBoundary(window.scrollY)) return;
-    if (loopToCore('keyboard')) event.preventDefault();
+  function publishLoop(direction, source, target) {
+    root.dataset.fxInfiniteLast = direction;
+    root.dataset.fxInfiniteLoopCount = String(loopCount);
+    root.dataset.fxLoopCount = String(loopCount);
+    root.dataset.fxLoopSource = source;
+    root.dataset.fxLoopTarget = String(target);
+    root.dataset.fxInfiniteBoundary = direction === 'down' ? 'top' : 'bottom';
   }
 
-  const readinessObserver = new MutationObserver(() => {
-    if (root.dataset.fxInfinite !== 'ready') root.dataset.fxInfinite = 'ready';
-  });
-  readinessObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-infinite'] });
+  function queueNativeBottomLoop() {
+    if (
+      nativeLoopQueued
+      || looping
+      || dialogueOpen()
+      || performance.now() < cooldownUntil
+      || performance.now() - lastExplicitInputAt < NATIVE_LOOP_DELAY_MS
+    ) return;
 
-  addEventListener('wheel', onWheel, { capture: true, passive: false });
-  addEventListener('scroll', onScroll, { passive: true });
-  addEventListener('keydown', onKeyDown, true);
-  addEventListener('resize', () => {
-    lastY = window.scrollY;
-    lastDirection = 0;
-  }, { passive: true });
-  addEventListener('pageshow', () => {
-    lastY = window.scrollY;
-    lastDirection = 0;
-    looping = false;
-    stopScrolling('pageshow');
+    nativeLoopQueued = true;
+    requestAnimationFrame(() => {
+      nativeLoopQueued = false;
+      if (
+        nearBottom()
+        && !looping
+        && performance.now() - lastExplicitInputAt >= NATIVE_LOOP_DELAY_MS
+      ) {
+        void performLoop('down', 'native-scroll');
+      }
+    });
+  }
+
+  function finishWheelIntentAtBoundary() {
+    if (looping || performance.now() < cooldownUntil) return;
+    if (wheelDown >= WHEEL_THRESHOLD && withinWheelBottomZone()) {
+      void performLoop('down', 'wheel');
+    } else if (wheelUp >= WHEEL_THRESHOLD && withinWheelTopZone()) {
+      void performLoop('up', 'wheel');
+    }
+  }
+
+  function onScroll() {
+    root.dataset.fxInfiniteBoundary = nearTop()
+      ? 'top'
+      : nearBottom()
+        ? 'bottom'
+        : 'middle';
+    markActivity();
+    requestAnimationFrame(finishWheelIntentAtBoundary);
+    if (nearBottom()) queueNativeBottomLoop();
+  }
+
+  function replaceHash(direction) {
+    const hash = direction === 'down' ? '#hero' : '#resources';
+    const next = location.pathname + location.search + hash;
+    if (location.pathname + location.search + location.hash !== next) {
+      history.replaceState({}, '', next);
+    }
+  }
+
+  async function settleAt(target) {
+    const deadline = performance.now() + SETTLE_MS;
+    while (performance.now() < deadline) {
+      window.scrollTo(0, target);
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    window.scrollTo(0, target);
+  }
+
+  async function performLoop(direction, source) {
+    if (looping || performance.now() < cooldownUntil || dialogueOpen()) return false;
+    const top = topNode();
+    const bottom = bottomNode();
+    if (!top || !bottom) return false;
+
+    const target = direction === 'down' ? 0 : documentEnd();
+    looping = true;
+    root.dataset.fxInfiniteInput = 'looping';
+    root.dataset.fxInfiniteSource = source || 'unknown';
+    root.classList.add('fx-infinite-loop-jump');
+    markActivity();
+    replaceHash(direction);
+
+    await settleAt(target);
+
+    loopCount += 1;
+    publishLoop(direction, source || 'unknown', target);
+
+    dispatchEvent(new CustomEvent('formatx:loop', {
+      detail: {
+        direction,
+        target,
+        source: source || 'unknown',
+        continuous: true,
+        clonedContent: false,
+        reinitialisedRenderer: false,
+        loopCount
+      }
+    }));
+
+    await settleAt(target);
     root.classList.remove('fx-infinite-loop-jump');
+    root.dataset.fxInfiniteInput = 'idle';
     publishReadyState();
-  }, { passive: true });
-  addEventListener('pagehide', event => {
-    clearTimeout(scrollIdleTimer);
-    cancelAnimationFrame(scrollFrame);
-    cancelAnimationFrame(settleFrame);
-    if (!event.persisted) readinessObserver.disconnect();
+    looping = false;
+    cooldownUntil = performance.now() + COOLDOWN_MS;
+    resetWheelIntent();
+    markIdle();
+    return true;
+  }
+
+  function handleWheel(event) {
+    lastExplicitInputAt = performance.now();
+    if (
+      looping
+      || performance.now() < cooldownUntil
+      || ignoredTarget(event.target)
+      || dialogueOpen()
+      || nestedScrollerCanConsume(event.target, event.deltaY)
+    ) return;
+
+    if (event.deltaY > 0) {
+      wheelDown += Math.abs(event.deltaY);
+      wheelUp = 0;
+      keepWheelIntentAlive();
+      if (withinWheelBottomZone()) {
+        if (event.cancelable) event.preventDefault();
+        finishWheelIntentAtBoundary();
+      } else {
+        requestAnimationFrame(finishWheelIntentAtBoundary);
+      }
+      return;
+    }
+
+    if (event.deltaY < 0) {
+      wheelUp += Math.abs(event.deltaY);
+      wheelDown = 0;
+      keepWheelIntentAlive();
+      if (withinWheelTopZone()) {
+        if (event.cancelable) event.preventDefault();
+        finishWheelIntentAtBoundary();
+      } else {
+        requestAnimationFrame(finishWheelIntentAtBoundary);
+      }
+    }
+  }
+
+  function handleKey(event) {
+    if (
+      event.altKey
+      || event.ctrlKey
+      || event.metaKey
+      || ignoredTarget(event.target)
+      || dialogueOpen()
+    ) return;
+
+    if (DOWN_KEYS.has(event.key) && nearBottom()) {
+      lastExplicitInputAt = performance.now();
+      event.preventDefault();
+      void performLoop('down', 'keyboard');
+      return;
+    }
+
+    if (UP_KEYS.has(event.key) && nearTop()) {
+      lastExplicitInputAt = performance.now();
+      event.preventDefault();
+      void performLoop('up', 'keyboard');
+    }
+  }
+
+  function handleTouchStart(event) {
+    lastExplicitInputAt = performance.now();
+    if (ignoredTarget(event.target) || dialogueOpen()) return;
+    touchStartY = event.touches?.[0]?.clientY ?? null;
+  }
+
+  function handleTouchEnd(event) {
+    if (touchStartY == null || looping || performance.now() < cooldownUntil) {
+      touchStartY = null;
+      return;
+    }
+    const endY = event.changedTouches?.[0]?.clientY;
+    if (!Number.isFinite(endY)) {
+      touchStartY = null;
+      return;
+    }
+    const delta = touchStartY - endY;
+    touchStartY = null;
+    if (nestedScrollerCanConsume(event.target, delta)) return;
+    if (delta >= TOUCH_THRESHOLD && nearBottom()) void performLoop('down', 'touch');
+    else if (delta <= -TOUCH_THRESHOLD && nearTop()) void performLoop('up', 'touch');
+  }
+
+  addEventListener('wheel', handleWheel, { passive: false, capture: true });
+  addEventListener('keydown', handleKey, { capture: true });
+  addEventListener('touchstart', handleTouchStart, { passive: true, capture: true });
+  addEventListener('touchend', handleTouchEnd, { passive: true, capture: true });
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll, { passive: true });
+  addEventListener('pageshow', () => {
+    root.dataset.fxInfiniteInput = 'idle';
+    onScroll();
+    publishReadyState();
   });
 
-  root.dataset.fxInfiniteInput = 'idle';
-  root.dataset.fxScrollActivity = 'idle';
+  const loopNote = document.querySelector('.loop-note');
+  if (loopNote) {
+    loopNote.setAttribute('tabindex', '0');
+    loopNote.setAttribute('role', 'button');
+    loopNote.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      lastExplicitInputAt = performance.now();
+      event.preventDefault();
+      void performLoop('down', 'loop-note');
+    });
+  }
+
+  onScroll();
+  markIdle();
   publishReadyState();
 }());
