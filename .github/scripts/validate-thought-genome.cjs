@@ -96,6 +96,8 @@ async function verify(viewport, mobile) {
     assert(Object.keys(stored.parsed[0]).sort().join(',') === 'at,fingerprint,intent,scene', 'stored genome schema contains unexpected data');
     assert(!stored.layerDisabled, 'genome layer disabled unexpectedly');
 
+    await page.locator('.fx-thought-genome-disclosure > summary').click();
+    await page.waitForFunction(() => document.querySelector('.fx-thought-genome-disclosure')?.open === true);
     await page.locator('.fx-thought-genome-form').click();
     await page.waitForFunction(() => document.documentElement.dataset.fxCoreMorph === '0');
 
