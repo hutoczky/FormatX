@@ -174,7 +174,7 @@ jobs:
           grep -Fq 'public_beta' docs/scifi-ui/data/platform-status.json
           grep -Fq '"id": "linux-bazzite"' docs/scifi-ui/data/platform-status.json
           grep -Fq '"public_package": "multiplatform"' docs/scifi-ui/data/platform-status.json
-          grep -Fq '"multiplatform"' docs/scifi-ui/data/current-release.json
+          grep -Fq '"download_channel": "multiplatform"' docs/scifi-ui/data/public-platform-contract.json
           grep -Fq 'data-release-download="multiplatform"' docs/scifi-ui/index.html
           ! grep -Fq '92.00' docs/scifi-ui/index.html
           grep -Fq 'fx-organism-master-toggle' docs/scifi-ui/scripts/organism-voice.js
