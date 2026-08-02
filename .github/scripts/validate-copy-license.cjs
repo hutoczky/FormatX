@@ -12,6 +12,7 @@ function assert(condition, message) {
 const NAVIGATION = Object.freeze({
   hu: [
     ['Működés', 'Modulok', 'Licenc és árak', 'Biztonság', 'Letöltés'],
+    ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
     ['Hogyan működik', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
     ['Idegrendszer — Hogyan működik', 'Szervek — Funkciók és modulok', 'Kereskedelmi szív — Licencek és árak', 'Váz — Technológia és biztonság', 'Jeladó — Letöltés és bizonyítékok']
   ],
@@ -28,7 +29,7 @@ const DOWNLOAD_LABELS = Object.freeze({
 });
 
 const TRIAL_LABELS = Object.freeze({
-  hu: ['napos próbalicenc', 'napos teljes próba'],
+  hu: ['napos próbalicenc', 'napos teljes próba', 'nap teljes próba'],
   en: ['day trial licence', 'day full trial']
 });
 
