@@ -112,10 +112,10 @@ async function validateDesktop() {
     assert(String(checkoutHref).includes('currency=EUR'), 'EUR checkout did not update');
     mark('desktop: currency-updated', { checkoutHref });
 
-    await page.keyboard.press('Escape');
+    await page.locator('.fx-organism-console-close').click();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
     await page.waitForTimeout(550);
-    mark('desktop: escape-close-passed');
+    mark('desktop: close-control-passed');
 
     await page.locator('#menu-toggle').evaluate(node => node.click());
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
@@ -167,7 +167,7 @@ async function validateMobile() {
 
     const overflow = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth);
     assert(overflow <= 1, 'mobile horizontal overflow: ' + overflow);
-    await page.keyboard.press('Escape');
+    await page.locator('.fx-organism-console-close').tap();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
 
     await page.locator('#menu-toggle').evaluate(node => node.click());
