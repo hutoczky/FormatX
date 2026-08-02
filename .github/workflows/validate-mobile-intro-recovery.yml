@@ -73,6 +73,8 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-console-state.js
           node --check docs/scifi-ui/scripts/organism-voice.js
+          node --check docs/scifi-ui/scripts/organism-voice-stability.js
+          node --check docs/scifi-ui/scripts/organism-master-sync.js
           node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
@@ -103,6 +105,7 @@ jobs:
             '/scifi-ui/styles/platform-status.css',
             '/scifi-ui/styles/organism-voice.css',
             '/scifi-ui/styles/organism-voice-dock.css',
+            '/scifi-ui/styles/organism-master-sync.css',
             '/scifi-ui/styles/formatx-mobile-readability.css',
             '/scifi-ui/styles/formatx-mobile-unified.css',
             '/scifi-ui/styles/synaptic-thought-genome.css',
@@ -112,6 +115,8 @@ jobs:
             '/scifi-ui/scripts/formatx-public-shell.js',
             '/scifi-ui/scripts/public-evidence-pages.js',
             '/scifi-ui/scripts/organism-voice.js',
+            '/scifi-ui/scripts/organism-voice-stability.js',
+            '/scifi-ui/scripts/organism-master-sync.js',
             '/scifi-ui/scripts/organism-core-controller.js',
             '/scifi-ui/scripts/synaptic-thought-genome.js',
             '/scifi-ui/scripts/synaptic-thought-disclosure.js',
@@ -146,9 +151,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'safe-ready-v26' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'safe-degraded-v26' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-ready-v27' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'safe-degraded-v27' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'organism-voice-stability.js?v=20260731-organism-stability-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'organism-master-sync.js?v=20260802-master-sync-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-voice-dock.css?v=20260731-organism-dock-3' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'formatx-desktop-unified.css' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'synaptic-thought-genome.js?v=20260731-thought-genome-1' docs/scifi-ui/scripts/igloo-parity.js
@@ -183,6 +190,12 @@ jobs:
           grep -Fq 'function splitSpeech(text)' docs/scifi-ui/scripts/organism-voice.js
           grep -Fq 'speechWatchdog = window.setTimeout' docs/scifi-ui/scripts/organism-voice.js
           ! grep -Fq 'fetch(' docs/scifi-ui/scripts/organism-voice.js
+          grep -Fq 'data-fx-organism-dialogue-enabled' docs/scifi-ui/scripts/organism-master-sync.js
+          grep -Fq 'fx-organism-master-disabled' docs/scifi-ui/scripts/organism-master-sync.js
+          grep -Fq 'organism-master-sync.css?v=20260802-master-sync-1' docs/scifi-ui/scripts/organism-master-sync.js
+          ! grep -Fq "document.createElement('style')" docs/scifi-ui/scripts/organism-master-sync.js
+          grep -Fq 'html.fx-organism-master-disabled .fx-thought-genome-layer' docs/scifi-ui/styles/organism-master-sync.css
+          grep -Fq 'html.fx-organism-master-disabled .fx-thought-genome-disclosure' docs/scifi-ui/styles/organism-master-sync.css
 
       - name: Validate continuous mobile and laptop behaviour
         shell: bash
