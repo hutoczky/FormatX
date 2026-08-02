@@ -49,13 +49,26 @@
     display: inline-flex !important;
   }
 
-  /* The compact mobile dock already exposes the living-system controls.
-     Separate floating launchers must not cover the primary hero content. */
-  .fx-genome-launcher,
-  .fx-three-sound {
+  /* The full genome launcher is kept out of the hero on compact screens. */
+  .fx-genome-launcher {
     display: none !important;
     visibility: hidden !important;
     pointer-events: none !important;
+  }
+
+  /* Music remains user-controlled on mobile without covering the primary copy. */
+  .fx-three-sound {
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    left: 12px !important;
+    right: auto !important;
+    bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 40px !important;
+    max-width: calc(100vw - 92px) !important;
+    padding: 0 12px !important;
+    opacity: 1 !important;
   }
 
   .fx-organism-dialogue:not(.is-open) {
