@@ -61,6 +61,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/styles/formatx-mobile-unified.css',
   '/scifi-ui/styles/organism-voice.css',
   '/scifi-ui/styles/organism-voice-dock.css',
+  '/scifi-ui/styles/organism-master-sync.css',
   '/scifi-ui/styles/organism-core-interaction.css',
   '/scifi-ui/styles/organism-speaking-visual.css',
   '/scifi-ui/styles/synaptic-thought-genome.css',
