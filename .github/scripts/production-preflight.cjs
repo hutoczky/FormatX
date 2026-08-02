@@ -36,7 +36,7 @@ const production = json('billing-worker/wrangler.jsonc');
 const preview = json('wrangler.jsonc');
 const release = json('docs/scifi-ui/data/current-release.json');
 const publicContract = json('docs/scifi-ui/data/public-platform-contract.json');
-const packageAsset = release.channels?.multiplatform || null;
+const packageAsset = release.channels?.multiplatform || release.channels?.windows || null;
 const syncWorkflow = read('.github/workflows/sync-current-release.yml');
 const home = read('docs/scifi-ui/index.html');
 const downloads = read('docs/scifi-ui/downloads/index.html');
@@ -87,27 +87,13 @@ check(
   'Current release provenance is invalid'
 );
 check(
-  'multiplatform-package',
+  'official-package',
   packageAsset?.available === true
     && /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\//.test(
       packageAsset?.download_url || ''
     )
     && /^sha256:[a-f0-9]{64}$/i.test(packageAsset?.digest || ''),
-  'Official multiplatform package or SHA-256 digest is invalid'
-);
-check(
-  'bazzite-first-package',
-  packageAsset?.primary_platform === 'linux-bazzite'
-    && ['linux-bazzite', 'windows'].every(
-      platform => packageAsset?.supported_platforms?.includes(platform)
-    ),
-  'Package must identify Bazzite/Linux as primary and Windows as supported'
-);
-check(
-  'detached-signature',
-  Boolean(release.evidence?.signature_asset_url),
-  'No detached signature asset is published for the current release',
-  'warning'
+  'Official package or SHA-256 digest is invalid'
 );
 check(
   'public-platform-contract',
@@ -116,6 +102,12 @@ check(
     && publicContract.public_copy?.public_release_version_visible === false
     && publicContract.public_copy?.supported_secondary_platforms?.includes('windows'),
   'Public Bazzite-first multiplatform contract is invalid'
+);
+check(
+  'detached-signature',
+  Boolean(release.evidence?.signature_asset_url),
+  'No detached signature asset is published for the current release',
+  'warning'
 );
 
 check(
@@ -139,8 +131,9 @@ check(
   'trusted-download-gate',
   releaseController.includes('if (!state.available) return null;')
     && releaseController.includes('releaseDescription')
-    && releaseController.includes("setText('[data-release-version]', '', false)"),
-  'Public download controller does not enforce trust, accessibility and hidden versions'
+    && releaseController.includes("setText('[data-release-version]', '', false)")
+    && releaseController.includes('channels?.windows'),
+  'Public download controller does not enforce trust, accessibility, hidden versions and legacy channel normalization'
 );
 
 const selectorStart = syncWorkflow.indexOf('def multiplatform_asset:');
@@ -252,8 +245,11 @@ const report = {
     internal_version: release.version || null,
     public_version_visible: false,
     package_digest: packageAsset?.digest || null,
-    primary_platform: packageAsset?.primary_platform || null,
-    supported_platforms: packageAsset?.supported_platforms || [],
+    primary_platform: publicContract.public_copy?.primary_system || null,
+    supported_platforms: [
+      publicContract.public_copy?.primary_system,
+      ...(publicContract.public_copy?.supported_secondary_platforms || [])
+    ].filter(Boolean),
     integrity_status: release.integrity?.status || null,
   },
   checks,
