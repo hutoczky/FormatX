@@ -13,24 +13,19 @@
   }
 
   function ensureStyle() {
-    if (document.querySelector('style[data-fx-organism-master-sync-style]')) return;
-    const style = document.createElement('style');
-    style.dataset.fxOrganismMasterSyncStyle = 'true';
-    style.textContent = `
-      html.fx-organism-master-disabled .fx-thought-genome-layer {
-        display: none !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-      }
-      html.fx-organism-master-disabled .fx-thought-genome-disclosure,
-      html.fx-organism-master-disabled .fx-thought-genome-controls {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-      }
-    `;
-    document.head.appendChild(style);
+    if (document.querySelector('link[data-fx-organism-master-sync-style]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/organism-master-sync.css?v=20260802-master-sync-1';
+    link.dataset.fxOrganismMasterSyncStyle = 'true';
+    link.addEventListener('load', () => {
+      ROOT.dataset.fxOrganismMasterSyncStyle = 'ready';
+    }, { once: true });
+    link.addEventListener('error', () => {
+      ROOT.dataset.fxOrganismMasterSyncStyle = 'failed';
+      console.warn('FormatX Organism master synchronizer stylesheet failed to load.');
+    }, { once: true });
+    document.head.appendChild(link);
   }
 
   function closeGenomeDisclosure() {
