@@ -1,0 +1,16 @@
+/* FormatX Organism master switch — disables every optional thought layer without affecting page copy or layout. */
+
+html.fx-organism-master-disabled .fx-thought-genome-layer {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+html.fx-organism-master-disabled .fx-thought-genome-disclosure,
+html.fx-organism-master-disabled .fx-thought-genome-controls {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
