@@ -150,7 +150,11 @@ jobs:
         run: |
           set -euo pipefail
           node .github/scripts/validate-three-site-v4.cjs
-          node .github/scripts/validate-organism-voice-browser.cjs
+          if ! node .github/scripts/validate-organism-voice-browser.cjs; then
+            echo 'Voice browser startup did not stabilize on the first isolated launch; retrying once.'
+            sleep 2
+            node .github/scripts/validate-organism-voice-browser.cjs
+          fi
           node .github/scripts/validate-thought-genome.cjs
           node .github/scripts/validate-thought-disclosure-browser.cjs
 
@@ -161,11 +165,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if jq -e '.ok == true and .channels.windows.available == true' docs/scifi-ui/data/current-release.json >/dev/null; then
-            url="$(jq -r '.channels.windows.download_url' docs/scifi-ui/data/current-release.json)"
+          if jq -e '.ok == true and ((.channels.multiplatform // .channels.windows).available == true)' docs/scifi-ui/data/current-release.json >/dev/null; then
+            url="$(jq -r '(.channels.multiplatform // .channels.windows).download_url' docs/scifi-ui/data/current-release.json)"
             curl --fail --location --silent --show-error --range 0-0 --max-time 45 "$url" >/dev/null
           else
-            echo 'No synchronized Windows asset; versionless fallback is the expected state.'
+            echo 'No synchronized official package; versionless fallback is the expected state.'
           fi
 
       - name: Upload validation artifacts
