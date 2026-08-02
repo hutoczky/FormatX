@@ -177,8 +177,8 @@ jobs:
       - name: Deploy the validated production Worker
         working-directory: billing-worker
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.FORMATX_CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_WORKERS_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID || 'ffd7d28ea7c6a510549dc9363619c8c5' }}
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
