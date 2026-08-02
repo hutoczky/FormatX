@@ -92,6 +92,17 @@
     root.dataset.fxOrganismConsole = 'open-' + id;
   }
 
+  function adoptVisibleOpen(shell, id) {
+    authorised = true;
+    activeId = id;
+    shell.style.removeProperty('display');
+    shell.classList.add('is-authorised-open');
+    shell.hidden = false;
+    shell.setAttribute('aria-hidden', 'false');
+    document.body?.classList.add('fx-organism-panel-open');
+    root.dataset.fxOrganismConsole = 'open-' + id;
+  }
+
   function reconcile() {
     scheduled = 0;
     if (reconciling) return;
@@ -105,6 +116,19 @@
     if (!shell) return;
 
     if (!authorised) {
+      const visibleId = visiblePanelId();
+      const legitimateOpen = Boolean(
+        visibleId
+        && !shell.hidden
+        && shell.getAttribute('aria-hidden') === 'false'
+        && document.body?.classList.contains('fx-organism-panel-open')
+      );
+
+      if (legitimateOpen) {
+        adoptVisibleOpen(shell, visibleId);
+        return;
+      }
+
       const leakedOpenState = !shell.hidden
         || shell.getAttribute('aria-hidden') === 'false'
         || shell.classList.contains('is-authorised-open')
