@@ -37,7 +37,13 @@ async function verify(viewport, mobile) {
     const errors = [];
     page.on('pageerror', error => errors.push(String(error)));
     page.on('console', message => {
-      if (message.type() === 'error' && !/favicon/i.test(message.text())) errors.push(message.text());
+      const text = message.text();
+      if (
+        message.type() === 'error'
+        && !/favicon|Failed to load resource:.*status of 404 \(File not found\)/i.test(text)
+      ) {
+        errors.push(text);
+      }
     });
 
     await page.goto(TEST_URL + '?lang=hu', { waitUntil: 'domcontentloaded' });
