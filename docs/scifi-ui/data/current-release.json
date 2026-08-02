@@ -14,7 +14,7 @@
   "release_url": "https://github.com/hutoczky/FormatX-Updates/releases/tag/v121",
   "notes_url": "https://github.com/hutoczky/FormatX-Updates/releases/tag/v121",
   "channels": {
-    "windows": {
+    "multiplatform": {
       "available": true,
       "asset_id": 498015202,
       "name": "FormatX-Suite-Pro-V121.zip",
@@ -25,7 +25,12 @@
       "created_at": "2026-08-01T15:29:32Z",
       "updated_at": "2026-08-01T15:29:51Z",
       "download_count": 2,
-      "source": "github_release_asset"
+      "source": "github_release_asset",
+      "primary_platform": "linux-bazzite",
+      "supported_platforms": [
+        "linux-bazzite",
+        "windows"
+      ]
     },
     "android": {
       "available": true,
@@ -51,7 +56,7 @@
     "verification_url": "/scifi-ui/verification.html"
   },
   "integrity": {
-    "windows_digest_available": true,
+    "package_digest_available": true,
     "checksum_asset_available": false,
     "signature_asset_available": false,
     "status": "digest_published"
