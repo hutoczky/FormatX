@@ -43,6 +43,67 @@
     element?.style.setProperty(property, value, 'important');
   }
 
+  function ensureMobileCoreButton(languageContainer, languageToggle) {
+    if (!(languageContainer instanceof HTMLElement)) return;
+
+    let coreButton = languageContainer.querySelector('[data-fx-mobile-core-button]');
+    if (!(coreButton instanceof HTMLAnchorElement)) {
+      coreButton = document.createElement('a');
+      coreButton.href = '#hero';
+      coreButton.className = 'fx-mobile-core-button';
+      coreButton.dataset.fxMobileCoreButton = 'true';
+      coreButton.addEventListener('click', event => {
+        event.preventDefault();
+
+        const source = document.querySelector(
+          '.fx-rail [data-scene-link="0"], .fx-organism-map [data-organ-node="0"]'
+        );
+        if (source instanceof HTMLElement && source !== coreButton) {
+          source.click();
+          return;
+        }
+
+        const hero = document.getElementById('hero');
+        hero?.scrollIntoView({
+          behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          block: 'start'
+        });
+        history.replaceState({}, '', location.pathname + location.search + '#hero');
+      });
+      languageContainer.insertBefore(coreButton, languageToggle || languageContainer.firstChild);
+    }
+
+    bilingual(coreButton, 'MAG', 'CORE');
+    coreButton.setAttribute(
+      'aria-label',
+      language() === 'en' ? 'Return to the FormatX core' : 'Vissza a FormatX Maghoz'
+    );
+    coreButton.title = language() === 'en' ? 'FormatX core' : 'FormatX Mag';
+
+    setImportant(coreButton, 'position', 'relative');
+    setImportant(coreButton, 'display', 'inline-flex');
+    setImportant(coreButton, 'align-items', 'center');
+    setImportant(coreButton, 'justify-content', 'center');
+    setImportant(coreButton, 'width', '48px');
+    setImportant(coreButton, 'height', '34px');
+    setImportant(coreButton, 'min-width', '48px');
+    setImportant(coreButton, 'padding', '0 8px');
+    setImportant(coreButton, 'color', 'rgba(231, 247, 253, .9)');
+    setImportant(coreButton, 'border', '1px solid rgba(178, 230, 249, .24)');
+    setImportant(coreButton, 'border-radius', '11px');
+    setImportant(coreButton, 'background', 'rgba(3, 10, 18, .78)');
+    setImportant(coreButton, 'box-shadow', 'inset 0 0 0 1px rgba(255,255,255,.02), 0 8px 24px rgba(0,0,0,.22)');
+    setImportant(coreButton, 'font-family', 'var(--font-mono, ui-monospace, SFMono-Regular, Consolas, monospace)');
+    setImportant(coreButton, 'font-size', '9px');
+    setImportant(coreButton, 'font-weight', '800');
+    setImportant(coreButton, 'letter-spacing', '.08em');
+    setImportant(coreButton, 'line-height', '1');
+    setImportant(coreButton, 'text-decoration', 'none');
+    setImportant(coreButton, 'touch-action', 'manipulation');
+    setImportant(coreButton, 'visibility', 'visible');
+    setImportant(coreButton, 'opacity', '1');
+  }
+
   function finalizeMobileControls() {
     if (!mobileMode()) return;
 
@@ -54,10 +115,14 @@
     if (languageContainer instanceof HTMLElement) {
       languageContainer.hidden = false;
       languageContainer.removeAttribute('aria-hidden');
-      setImportant(languageContainer, 'display', 'block');
+      setImportant(languageContainer, 'display', 'inline-flex');
+      setImportant(languageContainer, 'align-items', 'center');
+      setImportant(languageContainer, 'justify-content', 'center');
+      setImportant(languageContainer, 'gap', '8px');
       setImportant(languageContainer, 'position', 'fixed');
       setImportant(languageContainer, 'top', '14px');
       setImportant(languageContainer, 'right', '70px');
+      setImportant(languageContainer, 'min-width', 'auto');
       setImportant(languageContainer, 'z-index', '10040');
       setImportant(languageContainer, 'visibility', 'visible');
       setImportant(languageContainer, 'opacity', '1');
@@ -70,6 +135,7 @@
       setImportant(languageToggle, 'visibility', 'visible');
       setImportant(languageToggle, 'opacity', '1');
     }
+    ensureMobileCoreButton(languageContainer, languageToggle);
 
     const dialogue = document.querySelector('.fx-organism-dialogue:not(.is-open)');
     if (dialogue instanceof HTMLElement) {
