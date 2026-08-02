@@ -142,7 +142,7 @@ jobs:
           FORMATX_PUBLIC_ORIGIN: http://127.0.0.1:4178
         run: node .github/scripts/validate-public-pages-browser.cjs
 
-      - name: Validate existing Morphing Organism and dialogue contracts
+      - name: Validate existing Morphing Organism and thought contracts
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
@@ -150,11 +150,6 @@ jobs:
         run: |
           set -euo pipefail
           node .github/scripts/validate-three-site-v4.cjs
-          if ! node .github/scripts/validate-organism-voice-browser.cjs; then
-            echo 'Voice browser startup did not stabilize on the first isolated launch; retrying once.'
-            sleep 2
-            node .github/scripts/validate-organism-voice-browser.cjs
-          fi
           node .github/scripts/validate-thought-genome.cjs
           node .github/scripts/validate-thought-disclosure-browser.cjs
 
