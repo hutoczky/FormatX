@@ -44,12 +44,17 @@ const releaseController = read('docs/scifi-ui/scripts/release-metadata.js');
 const desktopCss = read('docs/scifi-ui/styles/formatx-desktop-unified.css');
 const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice.js');
+const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
+const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
+const masterSyncCss = read('docs/scifi-ui/styles/organism-master-sync.css');
 const genome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
 const disclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
 const disclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
 const privacy = read('docs/scifi-ui/privacy.html');
 const productionWrapper = read('billing-worker/src/production-content-entry.js');
+const productionEntry = read('billing-worker/src/production-entry.js');
 const previewWrapper = read('content-preview-entry.js');
+const previewWorker = read('worker.js');
 const sitemap = read('docs/sitemap.xml');
 const robots = read('docs/robots.txt');
 
@@ -167,9 +172,10 @@ check(
 );
 check(
   'organism-loader',
-  loader.includes('safe-ready-v26')
-    && loader.includes('safe-degraded-v26')
+  loader.includes('safe-ready-v27')
+    && loader.includes('safe-degraded-v27')
     && loader.includes('formatx-desktop-unified.css')
+    && loader.includes('organism-master-sync.js?v=20260802-master-sync-1')
     && loader.includes('synaptic-thought-disclosure.js'),
   'Current Organism loader contract is missing'
 );
@@ -182,6 +188,28 @@ check(
     && !voice.includes('XMLHttpRequest')
     && !voice.includes('WebSocket'),
   'Organism privacy or default-state contract failed'
+);
+check(
+  'organism-overlay-stability',
+  voiceStability.includes('function interfaceBlocked()')
+    && voiceStability.includes('function stopSpeech()')
+    && voiceStability.includes('candidates.slice(0, -1).forEach(node => node.remove())'),
+  'Organism overlay or duplicate-instance stability contract failed'
+);
+check(
+  'organism-master-sync',
+  masterSync.includes('data-fx-organism-dialogue-enabled')
+    && masterSync.includes('fx-organism-master-disabled')
+    && masterSync.includes('organism-master-sync.css?v=20260802-master-sync-1')
+    && masterSync.includes('formatx:organismmastersync')
+    && !masterSync.includes("document.createElement('style')")
+    && masterSyncCss.includes('html.fx-organism-master-disabled .fx-thought-genome-layer')
+    && masterSyncCss.includes('html.fx-organism-master-disabled .fx-thought-genome-disclosure')
+    && productionEntry.includes('organism-master-sync.js')
+    && productionEntry.includes('organism-master-sync.css')
+    && previewWorker.includes('organism-master-sync.js')
+    && previewWorker.includes('organism-master-sync.css'),
+  'Organism master switch does not control every optional thought layer safely'
 );
 check(
   'thought-genome',
@@ -220,9 +248,11 @@ check(
 for (const relative of [
   'docs/scifi-ui/styles/formatx-desktop-unified.css',
   'docs/scifi-ui/styles/downloads-page.css',
+  'docs/scifi-ui/styles/organism-master-sync.css',
   'docs/scifi-ui/scripts/release-metadata.js',
   'docs/scifi-ui/scripts/formatx-public-shell.js',
   'docs/scifi-ui/scripts/public-evidence-pages.js',
+  'docs/scifi-ui/scripts/organism-master-sync.js',
   '.github/scripts/validate-public-release-integration.py',
   '.github/scripts/validate-public-pages-browser.cjs',
   '.github/scripts/validate-thought-disclosure-browser.cjs',
