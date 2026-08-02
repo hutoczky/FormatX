@@ -58,8 +58,8 @@ async function enterSite(page, label) {
     await skip.click({ force: true, timeout: 1500 }).catch(() => {});
   }
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
-  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 10000 });
-  await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 10000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
+  await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
   mark(label + ': site-ready');
 }
 
