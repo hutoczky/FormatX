@@ -1,0 +1,47 @@
+name: Validate FormatX 110 finish
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - 'docs/scifi-ui/scripts/webgl-fallback-loader.js'
+      - 'docs/scifi-ui/scripts/experience-entry.js'
+      - '.github/scripts/validate-formatx-110.cjs'
+      - '.github/workflows/validate-formatx-110.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - 'docs/scifi-ui/scripts/webgl-fallback-loader.js'
+      - 'docs/scifi-ui/scripts/experience-entry.js'
+      - '.github/scripts/validate-formatx-110.cjs'
+      - '.github/workflows/validate-formatx-110.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate final runtime safeguards
+        run: |
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/single-language-toggle.js
+          node --check docs/scifi-ui/scripts/webgl-fallback-loader.js
+          node --check docs/scifi-ui/scripts/experience-entry.js
+          node .github/scripts/validate-formatx-110.cjs
+          node .github/scripts/production-preflight.cjs
+          node .github/scripts/validate-user-requested-site-features.cjs

@@ -159,8 +159,6 @@
       legacy.click();
     }
 
-    /* Every dynamic surface consumes this canonical event. Legacy language
-       adapters are allowed to publish it too; all consumers are idempotent. */
     publishLanguageChange(language);
 
     requestAnimationFrame(() => {
@@ -198,6 +196,9 @@
     toggle.addEventListener('click', () => {
       const current = SUPPORTED.has(ROOT.lang) ? ROOT.lang : storedLanguage();
       setLanguage(current === 'hu' ? 'en' : 'hu', true, container, toggle);
+    });
+    container.addEventListener('click', event => {
+      if (event.target === container) toggle.click();
     });
 
     container.appendChild(toggle);
