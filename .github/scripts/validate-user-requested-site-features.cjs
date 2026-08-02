@@ -25,6 +25,8 @@ const licencePage = read('docs/scifi-ui/license.html');
 const infinite = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice.js');
 const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
+const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
+const masterSyncCss = read('docs/scifi-ui/styles/organism-master-sync.css');
 const voiceCss = read('docs/scifi-ui/styles/organism-voice.css');
 const voiceDock = read('docs/scifi-ui/styles/organism-voice-dock.css');
 const thoughtGenome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
@@ -39,12 +41,13 @@ const previewWorker = read('worker.js');
 const previewConfig = read('wrangler.jsonc');
 const deployWorkflow = read('.github/workflows/deploy-formatx-custom-domain.yml');
 
-requireFeature('Loader is the current failure-tolerant v26 chain',
-  includesAll(loader, ['safe-ready-v26', 'safe-degraded-v26', 'load(index + 1)']));
-requireFeature('Loader orders core, voice, stability, thought and renderer safely',
+requireFeature('Loader is the current failure-tolerant v27 chain',
+  includesAll(loader, ['safe-ready-v27', 'safe-degraded-v27', 'load(index + 1)']));
+requireFeature('Loader orders core, voice, stability, master sync, thought and renderer safely',
   loader.indexOf('organism-core-controller.js') < loader.indexOf('organism-voice.js')
   && loader.indexOf('organism-voice.js') < loader.indexOf('organism-voice-stability.js')
-  && loader.indexOf('organism-voice-stability.js') < loader.indexOf('synaptic-thought-genome.js')
+  && loader.indexOf('organism-voice-stability.js') < loader.indexOf('organism-master-sync.js')
+  && loader.indexOf('organism-master-sync.js') < loader.indexOf('synaptic-thought-genome.js')
   && loader.indexOf('synaptic-thought-disclosure.js') < loader.indexOf('formatx-three-host-safe.js'));
 requireFeature('Conflicting foreground module is not loaded',
   !loader.includes('organism-voice-foreground.js')
@@ -116,6 +119,23 @@ requireFeature('Atomic stability guard closes overlays, stops speech and removes
     'candidates.slice(0, -1).forEach(node => node.remove())',
     'fxOrganismLiveRegion = \'response-only\'',
   ]));
+requireFeature('Master switch synchronizes every optional thought layer',
+  includesAll(masterSync, [
+    'data-fx-organism-dialogue-enabled',
+    'fx-organism-master-disabled',
+    'formatx:organismmastersync',
+    'speechSynthesis.cancel()',
+    'organism-master-sync.css?v=20260802-master-sync-1',
+  ]));
+requireFeature('Master synchronizer is CSP safe and does not inject inline style',
+  !masterSync.includes("document.createElement('style')")
+  && masterSync.includes("document.createElement('link')"));
+requireFeature('Master switch CSS fully hides thought genome and disclosure',
+  includesAll(masterSyncCss, [
+    'html.fx-organism-master-disabled .fx-thought-genome-layer',
+    'html.fx-organism-master-disabled .fx-thought-genome-disclosure',
+    'display: none !important',
+  ]));
 requireFeature('Thought system remains local and starts collapsed',
   !thoughtGenome.includes('fetch(') && !thoughtDisclosure.includes('fetch(')
   && includesAll(thoughtDisclosure, ['details.open = false', 'defaultOpen: false']));
@@ -149,12 +169,17 @@ for (const [name, worker] of [['production Worker', productionEntry], ['preview 
       'organism-console-state.js',
       'organism-voice.js',
       'organism-voice-stability.js',
+      'organism-master-sync.js',
+      'organism-master-sync.css',
       'synaptic-thought-genome.js',
       'synaptic-thought-disclosure.js',
       'formatx-mobile-unified.css',
       'mobile-core-engine-v3.js',
     ]));
 }
+requireFeature('Preview Worker route list includes master sync script and CSS',
+  previewConfig.includes('/scifi-ui/scripts/organism-master-sync.js')
+  && previewConfig.includes('/scifi-ui/styles/organism-master-sync.css'));
 
 requireFeature('Production deployment validates before deploy',
   deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'));
