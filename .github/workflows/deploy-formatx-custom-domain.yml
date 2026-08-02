@@ -89,7 +89,9 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-console-state.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-voice.js
-          node --check docs/scifi-ui/scripts/organism-voice-foreground.js
+          node --check docs/scifi-ui/scripts/organism-voice-stability.js
+          node --check docs/scifi-ui/scripts/organism-master-sync.js
+          node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
@@ -200,17 +202,24 @@ jobs:
               tmp="$(mktemp -d)"
               if curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/" > "$tmp/home.html" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/license.html" > "$tmp/license.html" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/igloo-parity.js?v=20260731-live-audit-1" > "$tmp/loader.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/organism-voice.js?v=20260731-live-audit-1" > "$tmp/voice.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260731-live-audit-1" > "$tmp/infinite.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/single-language-toggle.js?v=20260731-live-audit-1" > "$tmp/language.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/formatx-mobile-unified.css?v=20260731-live-audit-1" > "$tmp/mobile.css" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/assets/qr/business_lite-huf.svg?v=20260731-live-audit-1" > "$tmp/qr.svg" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/igloo-parity.js?v=20260802-live-audit-1" > "$tmp/loader.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/organism-voice.js?v=20260802-live-audit-1" > "$tmp/voice.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/organism-master-sync.js?v=20260802-live-audit-1" > "$tmp/master.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/organism-master-sync.css?v=20260802-live-audit-1" > "$tmp/master.css" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260802-live-audit-1" > "$tmp/infinite.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/single-language-toggle.js?v=20260802-live-audit-1" > "$tmp/language.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/formatx-mobile-unified.css?v=20260802-live-audit-1" > "$tmp/mobile.css" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/assets/qr/business_lite-huf.svg?v=20260802-live-audit-1" > "$tmp/qr.svg" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/data/current-release.json" > "$tmp/release.json" \
                 && grep -Fq "$expected_loader_marker" "$tmp/loader.js" \
                 && grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' "$tmp/loader.js" \
+                && grep -Fq 'organism-master-sync.js?v=20260802-master-sync-1' "$tmp/loader.js" \
                 && grep -Fq 'SpeechSynthesisUtterance' "$tmp/voice.js" \
                 && grep -Fq 'fx-organism-master-toggle' "$tmp/voice.js" \
+                && grep -Fq 'data-fx-organism-dialogue-enabled' "$tmp/master.js" \
+                && grep -Fq 'fx-organism-master-disabled' "$tmp/master.js" \
+                && grep -Fq 'html.fx-organism-master-disabled .fx-thought-genome-layer' "$tmp/master.css" \
+                && grep -Fq 'html.fx-organism-master-disabled .fx-thought-genome-disclosure' "$tmp/master.css" \
                 && grep -Fq 'boundary-v4' "$tmp/infinite.js" \
                 && grep -Fq "toggle.className = 'fx-language-toggle'" "$tmp/language.js" \
                 && grep -Fq 'Részletes licencfeltételek' "$tmp/license.html" \
