@@ -47,6 +47,11 @@ def official_download(value: str) -> bool:
     )
 
 
+def canonical_package(release: dict) -> dict:
+    channels = release.get("channels", {})
+    return channels.get("multiplatform") or channels.get("windows") or {}
+
+
 def validate_known_issues() -> None:
     page = read(SCIFI / "known-issues.html")
     controller = read(SCIFI / "scripts/public-evidence-pages.js")
@@ -104,6 +109,7 @@ def validate_release_sync() -> None:
     workflow = read(".github/workflows/sync-current-release.yml")
     release_script = read(SCIFI / "scripts/release-metadata.js")
     release = load_json(SCIFI / "data/current-release.json")
+    public_contract = load_json(SCIFI / "data/public-platform-contract.json")
 
     require_tokens(workflow, "Release sync workflow", [
         "repository_dispatch", "formatx-release-published", "prerelease == false",
@@ -115,7 +121,7 @@ def validate_release_sync() -> None:
     ])
     require_tokens(release_script, "Release metadata controller", [
         "ready-v4", "isAllowedReleaseUrl", "formatBytes", "integrityLabel",
-        "channels?.multiplatform", "data-release-integrity",
+        "channels?.multiplatform", "channels?.windows", "data-release-integrity",
         "data-release-source-updated", "current-release.json",
         "setText('[data-release-version]', '', false)",
     ])
@@ -130,12 +136,9 @@ def validate_release_sync() -> None:
         and release_url.path.startswith("/hutoczky/FormatX-Updates/releases/"),
         "Current release URL is not official",
     )
-    package = release.get("channels", {}).get("multiplatform", {})
-    require(package.get("available") is True, "Multiplatform package is unavailable")
+    package = canonical_package(release)
+    require(package.get("available") is True, "Official package is unavailable")
     require(official_download(str(package.get("download_url") or "")), "Package URL is not official")
-    require(package.get("primary_platform") == "linux-bazzite", "Package primary platform is not Bazzite/Linux")
-    supported = set(package.get("supported_platforms") or [])
-    require({"linux-bazzite", "windows"}.issubset(supported), "Package support list is incomplete")
     require(str(package.get("digest") or "").startswith("sha256:"), "Package SHA-256 digest is missing")
     require(
         release.get("integrity", {}).get("status") in {
@@ -143,6 +146,15 @@ def validate_release_sync() -> None:
         },
         "Schema 2 release integrity status is invalid",
     )
+
+    public_copy = public_contract.get("public_copy", {})
+    require(public_copy.get("primary_system") == "linux-bazzite", "Public primary platform is not Bazzite/Linux")
+    require(public_copy.get("download_channel") == "multiplatform", "Public download channel is not multiplatform")
+    require(
+        "windows" in (public_copy.get("supported_secondary_platforms") or []),
+        "Windows is not a supported secondary platform",
+    )
+    require(public_copy.get("public_release_version_visible") is False, "Public release version must remain hidden")
 
 
 def validate_worker_ownership() -> None:
@@ -171,7 +183,7 @@ def main() -> int:
         for error in ERRORS:
             print(f" - {error}", file=sys.stderr)
         return 1
-    print("FormatX public pages, multiplatform release sync and Worker ownership are valid.")
+    print("FormatX public pages, official release provenance, multiplatform public contract and Worker ownership are valid.")
     return 0
 
 
