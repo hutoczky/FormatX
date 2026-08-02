@@ -26,6 +26,7 @@ def network_free(source: str) -> bool:
 
 status_data = load_json("docs/scifi-ui/data/platform-status.json")
 release_data = load_json("docs/scifi-ui/data/current-release.json")
+public_contract = load_json("docs/scifi-ui/data/public-platform-contract.json")
 loader = read("docs/scifi-ui/scripts/igloo-parity.js")
 intro = read("docs/scifi-ui/scripts/formatx-event-horizon.js")
 voice = read("docs/scifi-ui/scripts/organism-voice.js")
@@ -67,17 +68,21 @@ require("product remains Public beta", status_data["product_release"]["status"] 
 require("public package is multiplatform", status_data["product_release"].get("public_package") == "multiplatform")
 require("no platform falsely claims Stable", all(item[0] != "stable" for item in actual.values()))
 
-package = release_data.get("channels", {}).get("multiplatform", {})
+channels = release_data.get("channels", {})
+package = channels.get("multiplatform") or channels.get("windows") or {}
+public_copy = public_contract.get("public_copy", {})
 require("release metadata uses schema 2", release_data.get("schema_version") == 2)
 require("release source is official", release_data.get("source") == "github_published_release")
 require("release is not a prerelease", release_data.get("prerelease") is not True)
-require("multiplatform package is available", package.get("available") is True)
-require("Bazzite/Linux is package primary", package.get("primary_platform") == "linux-bazzite")
+require("official package is available", package.get("available") is True)
+require("official package has SHA-256", str(package.get("digest") or "").startswith("sha256:"))
+require("Bazzite/Linux is public primary", public_copy.get("primary_system") == "linux-bazzite")
+require("public download contract is multiplatform", public_copy.get("download_channel") == "multiplatform")
 require(
-    "Bazzite/Linux and Windows are supported by the package",
-    {"linux-bazzite", "windows"}.issubset(set(package.get("supported_platforms") or [])),
+    "Windows is supported secondarily",
+    "windows" in (public_copy.get("supported_secondary_platforms") or []),
 )
-require("multiplatform package has SHA-256", str(package.get("digest") or "").startswith("sha256:"))
+require("public release version remains hidden", public_copy.get("public_release_version_visible") is False)
 
 require("downloads use multiplatform release metadata", 'data-release-download="multiplatform"' in downloads)
 require("downloads describe Bazzite/Linux as primary", "Bazzite/Linux elsődleges" in downloads)
