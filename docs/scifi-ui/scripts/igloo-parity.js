@@ -203,20 +203,34 @@
 
   function load(index) {
     if (index >= queue.length) {
+      root.dataset.fxTranscendProgress = '100';
       root.dataset.fxTranscendLoader = 'safe-ready-v27';
       return;
     }
 
+    root.dataset.fxTranscendProgress = String(Math.round(index / queue.length * 100));
     const script = document.createElement('script');
     script.src = queue[index];
     script.async = false;
     script.dataset.fxTranscendModule = String(index);
-    script.addEventListener('load', () => load(index + 1), { once: true });
-    script.addEventListener('error', () => {
-      console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v27';
+
+    let settled = false;
+    let timeout = 0;
+    const finish = (ok, reason) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      if (!ok) {
+        console.warn('FormatX optional module did not complete:', queue[index], reason);
+        root.dataset.fxTranscendLoader = 'safe-degraded-v27';
+      }
+      root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
       load(index + 1);
-    }, { once: true });
+    };
+
+    timeout = setTimeout(() => finish(false, 'timeout'), 9000);
+    script.addEventListener('load', () => finish(true, 'load'), { once: true });
+    script.addEventListener('error', () => finish(false, 'error'), { once: true });
     document.head.appendChild(script);
   }
 
