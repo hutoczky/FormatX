@@ -30,6 +30,9 @@ public_contract = load_json("docs/scifi-ui/data/public-platform-contract.json")
 loader = read("docs/scifi-ui/scripts/igloo-parity.js")
 intro = read("docs/scifi-ui/scripts/formatx-event-horizon.js")
 voice = read("docs/scifi-ui/scripts/organism-voice.js")
+voice_stability = read("docs/scifi-ui/scripts/organism-voice-stability.js")
+master_sync = read("docs/scifi-ui/scripts/organism-master-sync.js")
+master_sync_css = read("docs/scifi-ui/styles/organism-master-sync.css")
 voice_dock = read("docs/scifi-ui/styles/organism-voice-dock.css")
 genome = read("docs/scifi-ui/scripts/synaptic-thought-genome.js")
 genome_css = read("docs/scifi-ui/styles/synaptic-thought-genome.css")
@@ -92,10 +95,12 @@ require("static home contains no V92 asset", "/releases/download/v92/" not in ho
 require("static hero CTA is multiplatform", 'data-release-download="multiplatform"' in home)
 require("static hero has no numeric release DNA", "92.00" not in home)
 
-require("loader uses v26 ready marker", "safe-ready-v26" in loader)
-require("loader uses v26 degraded marker", "safe-degraded-v26" in loader)
+require("loader uses v27 ready marker", "safe-ready-v27" in loader)
+require("loader uses v27 degraded marker", "safe-degraded-v27" in loader)
 require("loader includes platform status", "platform-status.js?v=20260730-platform-status-1" in loader)
 require("loader includes Organism voice v4", "organism-voice.js?v=20260730-organism-voice-4" in loader)
+require("loader includes voice stability", "organism-voice-stability.js?v=20260731-organism-stability-1" in loader)
+require("loader includes master synchronizer", "organism-master-sync.js?v=20260802-master-sync-1" in loader)
 require("loader includes Thought Genome", "synaptic-thought-genome.js?v=20260731-thought-genome-1" in loader)
 require("loader includes Thought Genome disclosure", "synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1" in loader)
 require("loader includes unified mobile controller", "formatx-mobile-unified.js?v=20260731-mobile-unified-2" in loader)
@@ -104,6 +109,8 @@ require("loader includes desktop composition", "formatx-desktop-unified.css" in 
 require(
     "loader module ordering",
     loader.index("organism-voice.js")
+    < loader.index("organism-voice-stability.js")
+    < loader.index("organism-master-sync.js")
     < loader.index("synaptic-thought-genome.js")
     < loader.index("synaptic-thought-disclosure.js")
     < loader.index("formatx-three-host-safe.js"),
@@ -129,6 +136,11 @@ require("Organism speech is off by default", "let speechEnabled = false" in voic
 require("Organism has a master switch", "fx-organism-master-toggle" in voice)
 require("Organism dialogue starts closed", "setOpen(false, false)" in voice and "hidden: ''" in voice)
 require("Organism response engine remains local", network_free(voice))
+require("voice stability closes overlays", "function interfaceBlocked()" in voice_stability and "function stopSpeech()" in voice_stability)
+require("master sync observes dialogue state", "data-fx-organism-dialogue-enabled" in master_sync)
+require("master sync is CSP safe", "organism-master-sync.css?v=20260802-master-sync-1" in master_sync and "document.createElement('style')" not in master_sync)
+require("master off hides thought layer", "html.fx-organism-master-disabled .fx-thought-genome-layer" in master_sync_css and "display: none !important" in master_sync_css)
+require("master off hides advanced controls", "html.fx-organism-master-disabled .fx-thought-genome-disclosure" in master_sync_css)
 require("dock reserves desktop dialogue lane", "right: 430px !important" in voice_dock)
 require("dock protects ultrawide layouts", "min-aspect-ratio: 21/9" in voice_dock and "right: 440px !important" in voice_dock)
 
@@ -158,12 +170,13 @@ require("test matrix does not claim Stable", "· Stable" not in test_matrix)
 
 require("preview Worker remains isolated", not preview_config.get("routes"))
 require("preview Worker remains on workers.dev", preview_config.get("workers_dev") is True)
+require("preview routes master-sync assets", "/scifi-ui/scripts/organism-master-sync.js" in preview_config.get("assets", {}).get("run_worker_first", []) and "/scifi-ui/styles/organism-master-sync.css" in preview_config.get("assets", {}).get("run_worker_first", []))
 require("production Worker owns the content wrapper", production_config.get("main") == "src/production-content-entry.js")
 production_domains = [route.get("pattern") for route in production_config.get("routes", [])]
 require("production Worker owns both custom domains", production_domains == ["formatxsuite.com", "www.formatxsuite.com"])
 for source, label in ((preview_worker, "preview Worker"), (production_worker, "production Worker")):
     require(f"{label} serves platform status assets", all(token in source for token in ("platform-status.json", "platform-status.js", "platform-status.css")))
-    require(f"{label} serves Organism assets", all(token in source for token in ("organism-voice.js", "organism-voice-dock.css", "synaptic-thought-genome.js", "synaptic-thought-disclosure.js")))
+    require(f"{label} serves Organism assets", all(token in source for token in ("organism-voice.js", "organism-voice-dock.css", "organism-master-sync.js", "organism-master-sync.css", "synaptic-thought-genome.js", "synaptic-thought-disclosure.js")))
     require(f"{label} serves Morphing Organism V3", "mobile-core-engine-v3.js" in source)
 
 failed = [label for label, passed in RESULTS if not passed]
