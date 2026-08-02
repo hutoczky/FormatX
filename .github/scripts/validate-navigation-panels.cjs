@@ -283,7 +283,7 @@ async function testMobile(browser) {
   await assertMenuClosed(page);
   await closePanelAndAssertCore(page);
 
-  await page.locator('.fx-organism-map a[href="#experience"]').evaluate(node => node.click());
+  await page.locator('.scroll-cue').evaluate(node => node.click());
   await assertPanel(page, 'experience', 1);
   await closePanelAndAssertCore(page);
 
