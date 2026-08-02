@@ -34,7 +34,8 @@ async function waitForInterface(page) {
       && root.dataset.fxSingleLanguageToggle === 'ready'
       && root.dataset.fxInfiniteScroll === 'ready-v4'
       && root.dataset.fxInteractionGenomeExport === 'ready'
-      && root.dataset.fxTranscendLoader === 'safe-ready-v26';
+      && root.dataset.fxOrganismMasterSync === 'ready-v1'
+      && root.dataset.fxTranscendLoader === 'safe-ready-v27';
   }, null, { timeout: 45000 });
 }
 
