@@ -57,9 +57,9 @@
     box-sizing: border-box !important;
     display: inline-flex !important;
     position: fixed !important;
-    top: auto !important;
+    top: max(92px, calc(72px + env(safe-area-inset-top, 0px))) !important;
     right: 10px !important;
-    bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: auto !important;
     left: auto !important;
     width: 58px !important;
     min-width: 58px !important;
