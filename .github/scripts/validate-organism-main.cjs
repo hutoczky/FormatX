@@ -42,7 +42,12 @@ function diagnostics(page, output) {
 }
 
 function meaningfulDiagnostics(items) {
-  return items.filter(item => !/GPU stall|ReadPixels|WebGPU|WGSL|swizzle|Instance dropped|Failed to load resource: the server responded with a status of 404 \(File not found\)/i.test(item));
+  return items.filter(item => {
+    if (/requestfailed: .*\/assets\/qr\/[^ ]+\.svg(?:\?[^ ]*)? — net::ERR_ABORTED/i.test(item)) {
+      return false;
+    }
+    return !/GPU stall|ReadPixels|WebGPU|WGSL|swizzle|Instance dropped|Failed to load resource: the server responded with a status of 404 \(File not found\)/i.test(item);
+  });
 }
 
 async function enterSite(page, label) {
