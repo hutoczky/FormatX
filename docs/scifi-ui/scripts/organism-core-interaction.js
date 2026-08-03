@@ -8,6 +8,9 @@
   const MAX_TAP_TRAVEL = 14;
   const MAX_TAP_DURATION = 760;
   let gesture = null;
+  let thoughtLabelObserver = null;
+  let thoughtDiscoveryObserver = null;
+  let syncingThoughtLabel = false;
 
   function ensureStyle() {
     if (document.querySelector('link[data-fx-organism-core-interaction-style]')) return;
@@ -20,6 +23,54 @@
 
   function dialogueEnabled() {
     return ROOT.dataset.fxOrganismDialogueEnabled !== 'false';
+  }
+
+  function thoughtActionLabel() {
+    if (!dialogueEnabled()) return ROOT.lang === 'en' ? 'OFF' : 'KI';
+    return ROOT.lang === 'en' ? 'ASK' : 'KÉRDEZZ';
+  }
+
+  function syncThoughtLabel() {
+    if (syncingThoughtLabel) return false;
+    const label = document.querySelector('.fx-organism-thought-trigger b');
+    if (!(label instanceof HTMLElement)) return false;
+
+    syncingThoughtLabel = true;
+    const next = thoughtActionLabel();
+    if (label.textContent !== next) label.textContent = next;
+    label.closest('.fx-organism-thought-trigger')?.setAttribute(
+      'data-fx-core-label-role',
+      'thought-action'
+    );
+    syncingThoughtLabel = false;
+    return true;
+  }
+
+  function bindThoughtLabel() {
+    if (!syncThoughtLabel()) return false;
+    const label = document.querySelector('.fx-organism-thought-trigger b');
+    if (!(label instanceof HTMLElement)) return false;
+
+    if (!thoughtLabelObserver) {
+      thoughtLabelObserver = new MutationObserver(syncThoughtLabel);
+      thoughtLabelObserver.observe(label, {
+        subtree: true,
+        childList: true,
+        characterData: true
+      });
+    }
+    thoughtDiscoveryObserver?.disconnect();
+    thoughtDiscoveryObserver = null;
+    return true;
+  }
+
+  function discoverThoughtLabel() {
+    if (bindThoughtLabel() || thoughtDiscoveryObserver) return;
+    thoughtDiscoveryObserver = new MutationObserver(bindThoughtLabel);
+    thoughtDiscoveryObserver.observe(document.documentElement, {
+      subtree: true,
+      childList: true
+    });
   }
 
   function interfaceBlocked() {
@@ -139,6 +190,13 @@
   }
 
   ensureStyle();
+  discoverThoughtLabel();
+  addEventListener('formatx:organismvoiceready', bindThoughtLabel);
+  addEventListener('formatx:languagechange', () => queueMicrotask(syncThoughtLabel));
+  new MutationObserver(syncThoughtLabel).observe(ROOT, {
+    attributes: true,
+    attributeFilter: ['lang', 'data-fx-organism-dialogue-enabled']
+  });
   addEventListener('click', onNavigationClick, true);
   addEventListener('pointerdown', onPointerDown, { capture: true, passive: true });
   addEventListener('pointermove', onPointerMove, { capture: true, passive: true });
@@ -148,6 +206,6 @@
 
   ROOT.dataset.fxOrganismCoreInteraction = 'ready-v1';
   dispatchEvent(new CustomEvent('formatx:organismcoreinteractionready', {
-    detail: { mouse: true, touch: true, navigation: true }
+    detail: { mouse: true, touch: true, navigation: true, singleMagLabel: true }
   }));
 }());
