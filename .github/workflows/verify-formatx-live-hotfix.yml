@@ -1,5 +1,5 @@
 name: Verify FormatX live hotfix
-run-name: Verify live duplicate-control hotfix from ${{ github.sha }}
+run-name: Verify live mobile hero fix from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -26,25 +26,30 @@ jobs:
           for origin in https://formatxsuite.com https://www.formatxsuite.com; do
             success=false
             for attempt in $(seq 1 24); do
-              css="$(mktemp)"
+              hero_css="$(mktemp)"
+              recovery_css="$(mktemp)"
               home="$(mktemp)"
               if curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-mobile-recovery.css?v=${GITHUB_SHA}-${attempt}" > "$css" \
+                   "$origin/scifi-ui/styles/formatx-mobile-hero-flow.css?v=${GITHUB_SHA}-${attempt}" > "$hero_css" \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/styles/formatx-mobile-recovery.css?v=${GITHUB_SHA}-${attempt}" > "$recovery_css" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/?v=${GITHUB_SHA}-${attempt}" > "$home" \
-                && grep -Fq 'The Interaction Genome is a separate feature' "$css" \
-                && grep -Fq '.fx-three-sound,' "$css" \
+                && grep -Fq 'mobile hero overflow fix' "$hero_css" \
+                && grep -Fq 'white-space: normal !important;' "$hero_css" \
+                && grep -Fq 'padding-bottom: max(104px' "$hero_css" \
+                && grep -Fq 'The Interaction Genome is a separate feature' "$recovery_css" \
                 && grep -Fq 'FormatX Suite Pro' "$home"
               then
                 success=true
-                rm -f "$css" "$home"
+                rm -f "$hero_css" "$recovery_css" "$home"
                 break
               fi
-              rm -f "$css" "$home"
+              rm -f "$hero_css" "$recovery_css" "$home"
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Live hotfix verification failed for $origin" >&2
+              echo "Live mobile hero verification failed for $origin" >&2
               exit 1
             fi
           done
@@ -69,8 +74,8 @@ jobs:
               },
               body: JSON.stringify({
                 state,
-                context: 'FormatX live hotfix verification',
-                description: 'Both custom domains serve the duplicate-control hotfix',
+                context: 'FormatX live mobile hero verification',
+                description: 'Both custom domains serve the mobile title overflow fix',
                 target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
               }),
             }
