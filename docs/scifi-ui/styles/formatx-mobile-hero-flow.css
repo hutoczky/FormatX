@@ -1,5 +1,11 @@
 /* Real-device hero geometry: compact desktop composition and full-width mobile reading flow. */
 
+/* The hero map is the single visible MAG/Core control while the core scene is
+   active. The rail copy returns outside the hero so users can navigate home. */
+html.fx-organism-core-active .fx-rail [data-scene-link="0"] {
+  display: none !important;
+}
+
 @media (min-width: 901px) and (pointer: fine) {
   #hero {
     box-sizing: border-box !important;
