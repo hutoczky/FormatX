@@ -120,6 +120,14 @@ async function assertCore(page) {
     const root = document.documentElement;
     const consoleRoot = document.getElementById('fx-organism-console');
     const status = document.querySelector('.fx-organism-status');
+    const visibleCoreControls = Array.from(document.querySelectorAll(
+      '[data-organ-node="0"], [data-scene-link="0"]'
+    )).filter(control => {
+      const style = getComputedStyle(control);
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && control.getClientRects().length > 0;
+    });
     return root.dataset.fxScene === '0'
       && root.dataset.fxOrganismState === 'core'
       && root.classList.contains('fx-organism-core-active')
@@ -134,7 +142,8 @@ async function assertCore(page) {
       && status?.querySelector('.fx-organism-status-index')?.textContent === '01 / 06'
       && status?.querySelector('strong')?.textContent === 'MAG'
       && document.querySelector('[data-organ-node="0"]')?.getAttribute('aria-current') === 'page'
-      && document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current') === 'page';
+      && document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current') === 'page'
+      && visibleCoreControls.length === 1;
   }, null, { timeout: 12000 }).then(() => true).catch(() => false);
 
   if (ok) return;
@@ -142,6 +151,18 @@ async function assertCore(page) {
     const root = document.documentElement;
     const consoleRoot = document.getElementById('fx-organism-console');
     const status = document.querySelector('.fx-organism-status');
+    const visibleCoreControls = Array.from(document.querySelectorAll(
+      '[data-organ-node="0"], [data-scene-link="0"]'
+    )).filter(control => {
+      const style = getComputedStyle(control);
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && control.getClientRects().length > 0;
+    }).map(control => ({
+      node: control.getAttribute('data-organ-node'),
+      scene: control.getAttribute('data-scene-link'),
+      text: control.textContent?.trim()
+    }));
     return {
       scene: root.dataset.fxScene,
       organismState: root.dataset.fxOrganismState,
@@ -156,7 +177,8 @@ async function assertCore(page) {
       index: status?.querySelector('.fx-organism-status-index')?.textContent,
       name: status?.querySelector('strong')?.textContent,
       mapCurrent: document.querySelector('[data-organ-node="0"]')?.getAttribute('aria-current'),
-      railCurrent: document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current')
+      railCurrent: document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current'),
+      visibleCoreControls
     };
   });
   throw new Error(`Core state did not stabilize: ${JSON.stringify(state)}`);
@@ -296,7 +318,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX language toggle, navigation, panels and two stable infinite-scroll cycles');
+    console.log('PASS FormatX language toggle, navigation, single Core control, panels and two stable infinite-scroll cycles');
   } finally {
     await browser.close();
   }
