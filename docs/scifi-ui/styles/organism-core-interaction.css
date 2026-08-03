@@ -1,6 +1,6 @@
-/* FormatX MAG/core interaction guard — keeps all core controls clickable. */
+/* FormatX MAG/core interaction guard — keeps the single primary core control clickable. */
 
-/* Closed dialogue must occupy only the visible MAG pill, never a transparent 380px box. */
+/* Closed dialogue must occupy only the visible question pill, never a transparent 380px box. */
 .fx-organism-dialogue:not(.is-open) {
   width: 92px !important;
 }
@@ -12,6 +12,27 @@
 .fx-organism-dialogue .fx-organism-thought-trigger,
 .fx-organism-dialogue.is-open .fx-organism-thought {
   pointer-events: auto !important;
+}
+
+/* The hero system map owns the single visible MAG navigation control. */
+.fx-rail [data-scene-link="0"] {
+  display: none !important;
+}
+
+/* The dialogue trigger is an action, not a second MAG navigation button. */
+.fx-organism-thought-trigger b {
+  font-size: 0 !important;
+}
+
+.fx-organism-thought-trigger b::after {
+  content: "KÉRDEZZ";
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: .08em;
+}
+
+html[lang="en"] .fx-organism-thought-trigger b::after {
+  content: "ASK";
 }
 
 [data-organ-node="0"],
