@@ -80,14 +80,14 @@
 
 @media (max-width: 900px), (pointer: coarse) {
   body {
-    padding-bottom: max(44px, env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: max(104px, calc(92px + env(safe-area-inset-bottom, 0px))) !important;
   }
 
   #hero {
     box-sizing: border-box !important;
     min-height: 0 !important;
     height: auto !important;
-    padding: 28px 0 max(44px, env(safe-area-inset-bottom, 0px)) !important;
+    padding: 28px 0 max(104px, calc(92px + env(safe-area-inset-bottom, 0px))) !important;
     overflow: visible !important;
   }
 
@@ -149,8 +149,10 @@
   }
 
   #hero-title {
+    box-sizing: border-box !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     margin-bottom: 20px !important;
     overflow: visible !important;
   }
@@ -159,21 +161,30 @@
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    font-size: clamp(46px, 14.1vw, 68px) !important;
-    line-height: .88 !important;
-    letter-spacing: -.065em !important;
-    white-space: nowrap !important;
+    min-width: 0 !important;
+    font-size: clamp(38px, 11.6vw, 56px) !important;
+    line-height: .94 !important;
+    letter-spacing: -.045em !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    hyphens: auto !important;
+    text-wrap: balance !important;
     transform: none !important;
   }
 
   #hero .hero-title-sub {
     display: block !important;
+    width: 100% !important;
     max-width: 100% !important;
-    margin-top: 8px !important;
-    font-size: clamp(20px, 6.8vw, 31px) !important;
-    line-height: 1 !important;
-    letter-spacing: .14em !important;
-    white-space: nowrap !important;
+    min-width: 0 !important;
+    margin-top: 10px !important;
+    font-size: clamp(18px, 5.8vw, 27px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: .09em !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-wrap: balance !important;
     transform: none !important;
   }
 
@@ -306,20 +317,22 @@
 
 @media (max-width: 430px) {
   #hero .hero-grid {
-    padding-inline: 10px !important;
+    padding-inline: 8px !important;
   }
 
   #hero .hero-copy {
-    padding-inline: 18px !important;
+    padding-inline: 16px !important;
   }
 
   #hero .hero-title-main {
-    font-size: clamp(44px, 13.9vw, 60px) !important;
+    font-size: clamp(36px, 11.2vw, 48px) !important;
+    letter-spacing: -.035em !important;
   }
 
   #hero .hero-title-sub {
-    font-size: clamp(19px, 6.5vw, 28px) !important;
+    font-size: clamp(17px, 5.4vw, 24px) !important;
+    letter-spacing: .07em !important;
   }
 }
 
-/* Deployment trigger marker: 2026-08-03 real-device hero release. */
+/* Deployment trigger marker: 2026-08-03 mobile hero overflow fix. */
