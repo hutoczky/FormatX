@@ -1,9 +1,98 @@
-/* Mobile hero geometry guard: full-width readable content with a dedicated control lane. */
-@media (max-width: 900px), (pointer: coarse) {
+/* Real-device hero geometry: compact desktop composition and full-width mobile reading flow. */
+
+@media (min-width: 901px) and (pointer: fine) {
   #hero {
     box-sizing: border-box !important;
+    min-height: min(900px, calc(100svh - 72px)) !important;
+    max-height: 900px !important;
+    padding-top: clamp(92px, 9vh, 118px) !important;
+    padding-bottom: clamp(64px, 7vh, 94px) !important;
+    scroll-margin-top: 76px !important;
+    overflow: clip !important;
+  }
+
+  #hero .hero-grid {
+    width: min(100%, 1680px) !important;
+    min-height: 0 !important;
+    margin-inline: auto !important;
+    grid-template-columns: minmax(430px, .92fr) minmax(560px, 1.08fr) !important;
+    align-items: center !important;
+    gap: clamp(30px, 4vw, 72px) !important;
+  }
+
+  #hero .hero-copy {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 690px !important;
+    margin: 0 !important;
+    padding-top: 108px !important;
+    padding-bottom: 42px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* These two blocks are injected after first paint. Their positions are
+     reserved up front so they cannot push the hero and create CLS. */
+  #hero .fx-category-definition {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-width: 650px !important;
+    margin: 0 !important;
+  }
+
+  #hero .fx-method-inline {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+  }
+
+  #hero .hero-space {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    min-height: clamp(500px, 64vh, 720px) !important;
+    max-height: 720px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  #hero .hero-title-main {
+    font-size: clamp(74px, 7vw, 128px) !important;
+    line-height: .84 !important;
+  }
+
+  #hero .hero-title-sub {
+    font-size: clamp(32px, 3.4vw, 64px) !important;
+  }
+
+  #hero::after,
+  #hero .hero-copy,
+  #hero .hero-space {
+    animation: none !important;
+    transition-property: opacity, color, background-color, border-color !important;
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  body {
     padding-bottom: max(44px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #hero {
+    box-sizing: border-box !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 28px 0 max(44px, env(safe-area-inset-bottom, 0px)) !important;
     overflow: visible !important;
+  }
+
+  #hero::after {
+    display: none !important;
   }
 
   #hero .hero-grid {
@@ -13,7 +102,11 @@
     align-items: stretch !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
     padding-inline: 12px !important;
+    gap: 18px !important;
     overflow: visible !important;
   }
 
@@ -29,8 +122,9 @@
     max-width: 100% !important;
     min-width: 0 !important;
     margin: 0 !important;
-    padding-inline: clamp(20px, 5.4vw, 28px) !important;
+    padding: 24px clamp(18px, 5.2vw, 26px) 28px !important;
     overflow: hidden !important;
+    border-radius: 24px !important;
   }
 
   /* The category definition already names the product category. Repeating the
@@ -43,7 +137,7 @@
     box-sizing: border-box !important;
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 0 clamp(24px, 5vw, 34px) !important;
+    margin: 0 0 clamp(22px, 5vw, 32px) !important;
     font-size: clamp(15px, 4.1vw, 18px) !important;
     line-height: 1.5 !important;
     overflow-wrap: anywhere !important;
@@ -56,30 +150,68 @@
     line-height: 1.3 !important;
   }
 
+  #hero-title {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 20px !important;
+    overflow: visible !important;
+  }
+
   #hero .hero-title-main {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    font-size: clamp(46px, 14.4vw, 68px) !important;
+    font-size: clamp(46px, 14.1vw, 68px) !important;
     line-height: .88 !important;
     letter-spacing: -.065em !important;
     white-space: nowrap !important;
+    transform: none !important;
   }
 
   #hero .hero-title-sub {
     display: block !important;
     max-width: 100% !important;
-    font-size: clamp(20px, 7vw, 31px) !important;
+    margin-top: 8px !important;
+    font-size: clamp(20px, 6.8vw, 31px) !important;
     line-height: 1 !important;
-    letter-spacing: .16em !important;
+    letter-spacing: .14em !important;
     white-space: nowrap !important;
+    transform: none !important;
   }
 
   #hero .hero-lead {
     max-width: 100% !important;
+    margin: 0 !important;
     font-size: clamp(15px, 4.1vw, 18px) !important;
-    line-height: 1.58 !important;
+    line-height: 1.56 !important;
     overflow-wrap: anywhere !important;
+    text-wrap: pretty !important;
+  }
+
+  #hero .hero-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 22px !important;
+  }
+
+  #hero .hero-actions .button {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    justify-content: center !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+
+  #hero .hero-facts {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 20px !important;
+    padding-bottom: 0 !important;
   }
 
   #hero .hero-space {
@@ -88,18 +220,23 @@
     transform: none !important;
     translate: none !important;
     flex: 0 0 auto !important;
+    box-sizing: border-box !important;
     width: 100% !important;
-    margin-top: 18px !important;
-    min-height: clamp(280px, 44svh, 460px) !important;
+    margin: 0 !important;
+    min-height: clamp(300px, 45svh, 470px) !important;
+    max-height: 490px !important;
+    overflow: hidden !important;
+    border-radius: 24px !important;
   }
 
   #hero .scroll-cue {
     position: relative !important;
     inset: auto !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
     transform: none !important;
     translate: none !important;
-    margin-top: 16px !important;
-    margin-bottom: 20px !important;
+    margin: 0 0 20px !important;
   }
 
   .fx-single-language-switch,
@@ -129,8 +266,8 @@
     right: 12px !important;
     bottom: auto !important;
     left: auto !important;
-    width: 58px !important;
-    max-width: 58px !important;
+    width: 54px !important;
+    max-width: 54px !important;
     justify-items: center !important;
     transform: none !important;
     translate: none !important;
@@ -185,6 +322,10 @@
   }
 
   #hero .hero-title-main {
-    font-size: clamp(44px, 14.1vw, 60px) !important;
+    font-size: clamp(44px, 13.9vw, 60px) !important;
+  }
+
+  #hero .hero-title-sub {
+    font-size: clamp(19px, 6.5vw, 28px) !important;
   }
 }
