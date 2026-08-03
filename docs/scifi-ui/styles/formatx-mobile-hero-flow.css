@@ -1,0 +1,119 @@
+/* Mobile hero geometry guard: preserves the full visual system while keeping document flow deterministic. */
+@media (max-width: 900px), (pointer: coarse) {
+  #hero .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  #hero .hero-copy {
+    box-sizing: border-box !important;
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    translate: none !important;
+    flex: 0 0 auto !important;
+    align-self: flex-start !important;
+    width: calc(100% - 108px) !important;
+    max-width: calc(100% - 108px) !important;
+    margin-left: 16px !important;
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  #hero .hero-space {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    translate: none !important;
+    flex: 0 0 auto !important;
+    margin-top: 24px !important;
+    min-height: clamp(320px, 50svh, 520px) !important;
+  }
+
+  #hero .scroll-cue {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    translate: none !important;
+    margin-top: 12px !important;
+  }
+
+  .fx-single-language-switch,
+  .fx-language-toggle {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .fx-language-toggle {
+    display: inline-flex !important;
+  }
+
+  /* The full genome launcher is kept out of the hero on compact screens. */
+  .fx-genome-launcher {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* Music remains user-controlled on mobile without covering the primary copy. */
+  .fx-three-sound {
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    left: 12px !important;
+    right: auto !important;
+    bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 40px !important;
+    max-width: calc(100vw - 92px) !important;
+    padding: 0 12px !important;
+    opacity: 1 !important;
+  }
+
+  .fx-organism-dialogue:not(.is-open) {
+    right: 10px !important;
+    bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 58px !important;
+    max-width: 58px !important;
+    justify-items: center !important;
+  }
+
+  .fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger {
+    position: relative !important;
+    inset: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 10030 !important;
+  }
+
+  .fx-organism-console-shell {
+    box-sizing: border-box !important;
+    position: fixed !important;
+    top: max(8px, env(safe-area-inset-top, 0px)) !important;
+    right: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    left: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 16px) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100svh - 16px) !important;
+    margin: 0 !important;
+    transform: none !important;
+    translate: none !important;
+    animation: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #hero .hero-copy {
+    width: calc(100% - 104px) !important;
+    max-width: calc(100% - 104px) !important;
+    margin-left: 12px !important;
+  }
+}

@@ -9,12 +9,12 @@ const warnings = [];
 const checks = [];
 
 function read(relative) {
-  const file = path.join(root, relative);
-  if (!fs.existsSync(file)) {
+  const target = path.join(root, relative);
+  if (!fs.existsSync(target)) {
     errors.push(`Missing file: ${relative}`);
     return '';
   }
-  return fs.readFileSync(file, 'utf8');
+  return fs.readFileSync(target, 'utf8');
 }
 
 function json(relative) {
@@ -26,114 +26,260 @@ function json(relative) {
   }
 }
 
-function check(id, condition, detail, severity = 'error') {
-  const passed = Boolean(condition);
-  checks.push({ id, passed, detail });
-  if (!passed) (severity === 'warning' ? warnings : errors).push(detail);
+function check(id, passed, detail, severity = 'error') {
+  const result = Boolean(passed);
+  checks.push({ id, passed: result, detail });
+  if (!result) (severity === 'warning' ? warnings : errors).push(detail);
 }
 
 const production = json('billing-worker/wrangler.jsonc');
 const preview = json('wrangler.jsonc');
 const release = json('docs/scifi-ui/data/current-release.json');
-const issues = json('docs/scifi-ui/data/known-issues.json');
-const productionWrapper = read('billing-worker/src/production-content-entry.js');
-const productionBase = read('billing-worker/src/production-entry.js');
-const previewWrapper = read('content-preview-entry.js');
-const previewBase = read('worker.js');
+const publicContract = json('docs/scifi-ui/data/public-platform-contract.json');
+const packageAsset = release.channels?.multiplatform || release.channels?.windows || null;
 const syncWorkflow = read('.github/workflows/sync-current-release.yml');
-const robots = read('docs/robots.txt');
-const sitemap = read('docs/sitemap.xml');
+const home = read('docs/scifi-ui/index.html');
+const downloads = read('docs/scifi-ui/downloads/index.html');
+const releaseController = read('docs/scifi-ui/scripts/release-metadata.js');
+const desktopCss = read('docs/scifi-ui/styles/formatx-desktop-unified.css');
 const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
-const organismVoice = read('docs/scifi-ui/scripts/organism-voice.js');
-const thoughtGenome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
-const thoughtDisclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
-const thoughtDisclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
+const voice = read('docs/scifi-ui/scripts/organism-voice.js');
+const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
+const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
+const masterSyncCss = read('docs/scifi-ui/styles/organism-master-sync.css');
+const genome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
+const disclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
+const disclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
 const privacy = read('docs/scifi-ui/privacy.html');
+const productionWrapper = read('billing-worker/src/production-content-entry.js');
+const productionEntry = read('billing-worker/src/production-entry.js');
+const previewWrapper = read('content-preview-entry.js');
+const previewWorker = read('worker.js');
+const sitemap = read('docs/sitemap.xml');
+const robots = read('docs/robots.txt');
 
-check('production-entry', production.main === 'src/production-content-entry.js', 'Production Worker must use src/production-content-entry.js');
-check('production-domains', JSON.stringify((production.routes || []).map(route => route.pattern)) === JSON.stringify(['formatxsuite.com', 'www.formatxsuite.com']), 'Production Worker must exclusively own both FormatX custom domains');
-check('preview-entry', preview.main === 'content-preview-entry.js', 'Preview Worker must use content-preview-entry.js');
-check('preview-domain-isolation', !(preview.routes || []).length, 'Preview Worker must not own production domains');
-check('preview-workers-dev', preview.workers_dev === true, 'Preview Worker must remain available through workers.dev');
-
-for (const [label, source] of [['production', productionWrapper], ['preview', previewWrapper]]) {
-  check(`${label}-public-shell`, source.includes('formatx-public-shell.js'), `${label} wrapper must inject the canonical public shell`);
-  check(`${label}-release-controller`, source.includes('release-metadata.js'), `${label} wrapper must inject release metadata`);
-  check(`${label}-no-store`, source.includes("Cache-Control', 'no-store"), `${label} wrapper must disable stale HTML/data caching`);
-  check(`${label}-legacy-cleanup`, source.includes('cleanLegacyReleaseCopy'), `${label} wrapper must sanitize historical fixed release copy`);
+check(
+  'production-worker',
+  production.main === 'src/production-content-entry.js'
+    && JSON.stringify((production.routes || []).map(route => route.pattern))
+      === JSON.stringify(['formatxsuite.com', 'www.formatxsuite.com']),
+  'Production Worker ownership is invalid'
+);
+check(
+  'preview-worker',
+  preview.main === 'content-preview-entry.js'
+    && preview.workers_dev === true
+    && !(preview.routes || []).length,
+  'Preview Worker must remain isolated on workers.dev'
+);
+for (const [name, source] of [['production', productionWrapper], ['preview', previewWrapper]]) {
+  check(
+    `${name}-wrapper`,
+    source.includes('formatx-public-shell.js')
+      && source.includes('release-metadata.js')
+      && source.includes('cleanLegacyReleaseCopy')
+      && source.includes("Cache-Control', 'no-store"),
+    `${name} public content wrapper is incomplete`
+  );
 }
 
-check('organism-loader-v26', loader.includes('safe-ready-v26') && loader.includes('safe-degraded-v26'), 'Organism startup loader must use the v26 disclosure-safe contract');
-check('organism-loader-disclosure', loader.includes('synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1'), 'Organism startup loader does not include the thought disclosure module');
-check('organism-loader-order', loader.indexOf('synaptic-thought-genome.js') < loader.indexOf('synaptic-thought-disclosure.js') && loader.indexOf('synaptic-thought-disclosure.js') < loader.indexOf('formatx-three-host-safe.js'), 'Thought disclosure startup ordering is invalid');
-check('organism-master-switch', organismVoice.includes('fx-organism-master-toggle') && organismVoice.includes('ROOT.dataset.fxOrganismDialogueEnabled'), 'Organism master on/off control is missing');
-check('organism-voice-off-default', organismVoice.includes('let speechEnabled = false'), 'Organism speech must remain off by default');
-check('organism-dialogue-closed-default', organismVoice.includes("hidden: ''") && organismVoice.includes('setOpen(false, false)'), 'Organism thought dialogue must start closed');
-check('organism-local-response', !organismVoice.includes('fetch(') && !organismVoice.includes('XMLHttpRequest') && !organismVoice.includes('WebSocket'), 'Organism response engine must not send questions over the network');
-check('thought-genome-fingerprint-only', thoughtGenome.includes('questionStored: false') && thoughtGenome.includes('fingerprint-only'), 'Thought Genome must store fingerprints instead of raw questions');
-check('thought-genome-local', !thoughtGenome.includes('fetch(') && !thoughtGenome.includes('XMLHttpRequest') && !thoughtGenome.includes('WebSocket'), 'Thought Genome must remain local');
-check('thought-disclosure-closed-default', thoughtDisclosure.includes('details.open = false') && thoughtDisclosure.includes('defaultOpen: false'), 'Thought Genome advanced controls must start closed');
-check('thought-disclosure-response-live-region', thoughtDisclosure.includes("bubble.removeAttribute('aria-live')") && thoughtDisclosure.includes("output.setAttribute('aria-live', 'polite')") && thoughtDisclosure.includes("liveRegion: 'response-only'"), 'Only the Organism response text may be an aria-live region');
-check('thought-disclosure-master-off', thoughtDisclosureCss.includes("data-fx-organism-dialogue-enabled='false'") && thoughtDisclosureCss.includes('.fx-thought-genome-layer') && thoughtDisclosureCss.includes('opacity: 0 !important'), 'Organism master off must hide the thought constellation');
-check('thought-disclosure-progressive', thoughtDisclosureCss.includes(':not([open]) > .fx-thought-genome-controls') && thoughtDisclosureCss.includes('display: none !important'), 'Thought Genome advanced controls must use progressive disclosure');
-check('organism-privacy-raw-question', privacy.includes('nyers kérdésszöveget nem menti') && privacy.includes('legfeljebb 12 gondolatgenom-lenyomat'), 'Privacy notice must document fingerprint-only Thought Genome storage');
-check('organism-privacy-speech-service', privacy.includes('helyi vagy online hangot használhat'), 'Privacy notice must disclose that browser speech may be local or online');
-for (const [label, source] of [['production', productionBase], ['preview', previewBase]]) {
-  check(`${label}-thought-disclosure-js`, source.includes('synaptic-thought-disclosure.js'), `${label} Worker must serve thought disclosure JavaScript without stale caching`);
-  check(`${label}-thought-disclosure-css`, source.includes('synaptic-thought-disclosure.css'), `${label} Worker must serve thought disclosure CSS without stale caching`);
+check(
+  'release-provenance',
+  release.ok === true
+    && release.schema_version === 2
+    && release.source === 'github_published_release'
+    && release.prerelease !== true,
+  'Current release provenance is invalid'
+);
+check(
+  'official-package',
+  packageAsset?.available === true
+    && /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\//.test(
+      packageAsset?.download_url || ''
+    )
+    && /^sha256:[a-f0-9]{64}$/i.test(packageAsset?.digest || ''),
+  'Official package or SHA-256 digest is invalid'
+);
+check(
+  'public-platform-contract',
+  publicContract.public_copy?.primary_system === 'linux-bazzite'
+    && publicContract.public_copy?.download_channel === 'multiplatform'
+    && publicContract.public_copy?.public_release_version_visible === false
+    && publicContract.public_copy?.supported_secondary_platforms?.includes('windows'),
+  'Public Bazzite-first multiplatform contract is invalid'
+);
+check(
+  'detached-signature',
+  Boolean(release.evidence?.signature_asset_url),
+  'No detached signature asset is published for the current release',
+  'warning'
+);
+
+check(
+  'public-copy',
+  home.includes('data-release-download="multiplatform"')
+    && downloads.includes('data-release-download="multiplatform"')
+    && downloads.includes('Bazzite/Linux elsődleges')
+    && downloads.includes('Windows támogatott')
+    && !home.includes('/releases/download/v92/')
+    && !downloads.includes('/releases/download/v92/')
+    && !home.includes('92.00'),
+  'Public release copy still contains a stale or Windows-only contract'
+);
+check(
+  'download-csp',
+  downloads.includes('../styles/downloads-page.css')
+    && !downloads.includes('<style>'),
+  'Downloads page styling is incompatible with its CSP'
+);
+check(
+  'trusted-download-gate',
+  releaseController.includes('if (!state.available) return null;')
+    && releaseController.includes('releaseDescription')
+    && releaseController.includes("setText('[data-release-version]', '', false)")
+    && releaseController.includes('channels?.windows'),
+  'Public download controller does not enforce trust, accessibility, hidden versions and legacy channel normalization'
+);
+
+const selectorStart = syncWorkflow.indexOf('def multiplatform_asset:');
+const selectorEnd = syncWorkflow.indexOf('def android_asset:');
+const selector = selectorStart >= 0 && selectorEnd > selectorStart
+  ? syncWorkflow.slice(selectorStart, selectorEnd)
+  : '';
+check(
+  'release-sync-asset-order',
+  selector.includes('zip')
+    && selector.includes('tar')
+    && selector.indexOf('zip') < selector.indexOf('tar')
+    && selector.includes('//'),
+  'Release sync must prefer ZIP before tar fallbacks'
+);
+check(
+  'release-sync-deterministic',
+  syncWorkflow.includes('del(.synced_at)')
+    && syncWorkflow.includes('cmp -s')
+    && syncWorkflow.includes('--retry-all-errors'),
+  'Release sync is not deterministic and resilient'
+);
+
+check(
+  'desktop-layout',
+  desktopCss.includes('grid-template-columns')
+    && desktopCss.includes('min(100svh, 960px)')
+    && desktopCss.includes('max-height: 820px')
+    && desktopCss.includes('min-width: 1100px'),
+  'Desktop hero composition contract is incomplete'
+);
+check(
+  'organism-loader',
+  loader.includes('safe-ready-v27')
+    && loader.includes('safe-degraded-v27')
+    && loader.includes('formatx-desktop-unified.css')
+    && loader.includes('organism-master-sync.js?v=20260802-master-sync-1')
+    && loader.includes('synaptic-thought-disclosure.js'),
+  'Current Organism loader contract is missing'
+);
+check(
+  'organism-safe-defaults',
+  voice.includes('let speechEnabled = false')
+    && voice.includes('setOpen(false, false)')
+    && voice.includes('fx-organism-master-toggle')
+    && !voice.includes('fetch(')
+    && !voice.includes('XMLHttpRequest')
+    && !voice.includes('WebSocket'),
+  'Organism privacy or default-state contract failed'
+);
+check(
+  'organism-overlay-stability',
+  voiceStability.includes('function interfaceBlocked()')
+    && voiceStability.includes('function stopSpeech()')
+    && voiceStability.includes('candidates.slice(0, -1).forEach(node => node.remove())'),
+  'Organism overlay or duplicate-instance stability contract failed'
+);
+check(
+  'organism-master-sync',
+  masterSync.includes('data-fx-organism-dialogue-enabled')
+    && masterSync.includes('fx-organism-master-disabled')
+    && masterSync.includes('organism-master-sync.css?v=20260802-master-sync-1')
+    && masterSync.includes('formatx:organismmastersync')
+    && !masterSync.includes("document.createElement('style')")
+    && masterSyncCss.includes('html.fx-organism-master-disabled .fx-thought-genome-layer')
+    && masterSyncCss.includes('html.fx-organism-master-disabled .fx-thought-genome-disclosure')
+    && productionEntry.includes('organism-master-sync.js')
+    && productionEntry.includes('organism-master-sync.css')
+    && previewWorker.includes('organism-master-sync.js')
+    && previewWorker.includes('organism-master-sync.css'),
+  'Organism master switch does not control every optional thought layer safely'
+);
+check(
+  'thought-genome',
+  genome.includes('questionStored: false')
+    && genome.includes('fingerprint-only')
+    && !genome.includes('fetch(')
+    && disclosure.includes('details.open = false')
+    && disclosure.includes("liveRegion: 'response-only'")
+    && disclosureCss.includes(':not([open]) > .fx-thought-genome-controls'),
+  'Thought Genome privacy or progressive-disclosure contract failed'
+);
+check(
+  'privacy-notice',
+  privacy.includes('nyers kérdésszöveget nem menti')
+    && privacy.includes('legfeljebb 12 gondolatgenom-lenyomat')
+    && privacy.includes('helyi vagy online hangot használhat'),
+  'Privacy notice is incomplete'
+);
+
+for (const route of [
+  '/scifi-ui/',
+  '/scifi-ui/downloads/',
+  '/scifi-ui/known-issues.html',
+  '/scifi-ui/security.html',
+  '/scifi-ui/privacy.html',
+  '/scifi-ui/support.html',
+]) {
+  check(`sitemap-${route}`, sitemap.includes(route), `Sitemap missing ${route}`);
 }
-check('preview-thought-disclosure-routes', JSON.stringify(preview).includes('/scifi-ui/scripts/synaptic-thought-disclosure.js') && JSON.stringify(preview).includes('/scifi-ui/styles/synaptic-thought-disclosure.css'), 'Preview Worker route list is missing thought disclosure assets');
-
-check('release-ok', release.ok === true, 'Current official release metadata is not available');
-check('release-source', release.source === 'github_published_release', 'Current release source is not github_published_release');
-check('release-version', typeof release.version === 'string' && release.version.length > 0, 'Current release version is missing');
-check('release-not-prerelease', release.prerelease !== true, 'Current official release must not be a prerelease');
-check('windows-download', /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\//.test(release.channels?.windows?.download_url || ''), 'Windows download is not an official FormatX-Updates release asset');
-check('release-schema-v2', release.schema_version === 2, 'Release metadata has not yet been regenerated with provenance schema 2', 'warning');
-check('release-digest', /^sha256:[a-f0-9]{64}$/i.test(release.channels?.windows?.digest || ''), 'Windows package has no published SHA-256 digest', 'warning');
-check('release-signature', Boolean(release.evidence?.signature_asset_url), 'No detached signature asset is published for the current release', 'warning');
-
-check('known-issues-present', Array.isArray(issues.items) && issues.items.length > 0, 'Known-issues register is empty');
-check('known-issues-current', typeof issues.updated === 'string' && issues.updated >= '2026-07-31', 'Known-issues register is not current');
-check('release-sync-deterministic', syncWorkflow.includes("del(.synced_at)") && syncWorkflow.includes('cmp -s'), 'Release sync must ignore timestamp-only changes');
-check('release-sync-retry', syncWorkflow.includes('--retry-all-errors'), 'Release sync lacks resilient GitHub API retries');
-
-const publicPages = [
-  '/scifi-ui/', '/scifi-ui/downloads/', '/scifi-ui/method.html',
-  '/scifi-ui/verification.html', '/scifi-ui/test-matrix.html',
-  '/scifi-ui/known-issues.html', '/scifi-ui/security.html',
-  '/scifi-ui/decision-log.html', '/scifi-ui/license.html',
-  '/scifi-ui/terms.html', '/scifi-ui/privacy.html', '/scifi-ui/support.html',
-];
-for (const url of publicPages) check(`sitemap-${url}`, sitemap.includes(url), `Sitemap missing ${url}`);
-check('robots-sitemap', robots.includes('Sitemap: https://www.formatxsuite.com/sitemap.xml'), 'robots.txt does not declare the canonical sitemap');
+check(
+  'robots-sitemap',
+  robots.includes('Sitemap: https://www.formatxsuite.com/sitemap.xml'),
+  'robots.txt does not declare the canonical sitemap'
+);
 
 for (const relative of [
+  'docs/scifi-ui/styles/formatx-desktop-unified.css',
+  'docs/scifi-ui/styles/downloads-page.css',
+  'docs/scifi-ui/styles/organism-master-sync.css',
+  'docs/scifi-ui/scripts/release-metadata.js',
   'docs/scifi-ui/scripts/formatx-public-shell.js',
   'docs/scifi-ui/scripts/public-evidence-pages.js',
-  'docs/scifi-ui/scripts/release-metadata.js',
-  'docs/scifi-ui/scripts/organism-voice.js',
-  'docs/scifi-ui/scripts/synaptic-thought-genome.js',
-  'docs/scifi-ui/scripts/synaptic-thought-disclosure.js',
-  'docs/scifi-ui/styles/synaptic-thought-disclosure.css',
+  'docs/scifi-ui/scripts/organism-master-sync.js',
   '.github/scripts/validate-public-release-integration.py',
   '.github/scripts/validate-public-pages-browser.cjs',
   '.github/scripts/validate-thought-disclosure-browser.cjs',
   '.github/workflows/validate-organism-dialogue.yml',
 ]) {
-  check(`required-${relative}`, fs.existsSync(path.join(root, relative)), `Missing production readiness component: ${relative}`);
+  check(
+    `required-${relative}`,
+    fs.existsSync(path.join(root, relative)),
+    `Missing production readiness component: ${relative}`
+  );
 }
 
 const report = {
-  schema_version: 1,
+  schema_version: 2,
   generated_at: new Date().toISOString(),
   ready: errors.length === 0,
   errors: [...new Set(errors)],
   warnings: [...new Set(warnings)],
   release: {
-    version: release.version || null,
-    schema_version: release.schema_version || null,
-    windows_digest: release.channels?.windows?.digest || null,
+    internal_version: release.version || null,
+    public_version_visible: false,
+    package_digest: packageAsset?.digest || null,
+    primary_platform: publicContract.public_copy?.primary_system || null,
+    supported_platforms: [
+      publicContract.public_copy?.primary_system,
+      ...(publicContract.public_copy?.supported_secondary_platforms || [])
+    ].filter(Boolean),
     integrity_status: release.integrity?.status || null,
   },
   checks,
@@ -141,7 +287,9 @@ const report = {
 
 const outDir = path.join(root, 'artifacts');
 fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(path.join(outDir, 'production-readiness.json'), JSON.stringify(report, null, 2) + '\n');
-
+fs.writeFileSync(
+  path.join(outDir, 'production-readiness.json'),
+  JSON.stringify(report, null, 2) + '\n'
+);
 console.log(JSON.stringify(report, null, 2));
 if (!report.ready) process.exit(1);

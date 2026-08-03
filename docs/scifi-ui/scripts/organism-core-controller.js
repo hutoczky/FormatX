@@ -44,6 +44,25 @@
     ROOT.classList.remove('fx-organism-menu-open');
   }
 
+  function normalizeClosedConsole() {
+    const consoleRoot = document.getElementById('fx-organism-console');
+    if (consoleRoot) {
+      consoleRoot.classList.remove('is-authorised-open');
+      consoleRoot.hidden = true;
+      consoleRoot.setAttribute('aria-hidden', 'true');
+      consoleRoot.style.setProperty('display', 'none');
+    }
+    document.querySelectorAll('[data-organism-panel]').forEach(panel => {
+      panel.hidden = true;
+      panel.setAttribute('aria-hidden', 'true');
+    });
+    document.querySelectorAll('[data-organism-tab]').forEach(tab => {
+      tab.setAttribute('aria-selected', 'false');
+    });
+    document.body?.classList.remove('fx-organism-panel-open');
+    ROOT.dataset.fxOrganismConsole = 'closed';
+  }
+
   function updateNavigation(scene) {
     const bounded = Math.max(0, Math.min(5, Number(scene) || 0));
     const label = SCENE_LABELS[bounded];
@@ -68,7 +87,12 @@
 
     document.getElementById('hero')?.classList.toggle('is-core-active', bounded === 0);
     dispatchEvent(new CustomEvent('formatx:organismstatechange', {
-      detail: { scene: bounded, id: bounded === 0 ? 'hero' : Object.keys(PANEL_SCENES).find(id => PANEL_SCENES[id] === bounded) }
+      detail: {
+        scene: bounded,
+        id: bounded === 0
+          ? 'hero'
+          : Object.keys(PANEL_SCENES).find(id => PANEL_SCENES[id] === bounded)
+      }
     }));
   }
 
@@ -80,23 +104,19 @@
   }
 
   function activateCore(options) {
-    const settings = Object.assign({ scroll: false, replaceHistory: true, closePanel: true }, options);
+    const settings = Object.assign(
+      { scroll: false, replaceHistory: true, closePanel: true },
+      options
+    );
     pendingPanel = '';
     closeResponsiveMenu();
 
     if (settings.closePanel && panelIsOpen()) {
       const close = document.querySelector('[data-organism-close]');
       if (close instanceof HTMLElement) close.click();
-      else {
-        const consoleRoot = document.getElementById('fx-organism-console');
-        if (consoleRoot) {
-          consoleRoot.hidden = true;
-          consoleRoot.setAttribute('aria-hidden', 'true');
-        }
-        document.body?.classList.remove('fx-organism-panel-open');
-      }
     }
 
+    normalizeClosedConsole();
     updateNavigation(0);
     if (settings.replaceHistory) replaceHash('#hero');
 
@@ -120,12 +140,16 @@
       return;
     }
 
-    const trigger = document.querySelector('[data-organism-open="' + CSS.escape(id) + '"]');
+    const trigger = document.querySelector(
+      '[data-organism-open="' + CSS.escape(id) + '"]'
+    );
     if (!(trigger instanceof HTMLElement)) {
       pendingPanel = id;
       return;
     }
 
+    const consoleRoot = document.getElementById('fx-organism-console');
+    consoleRoot?.style.removeProperty('display');
     pendingPanel = '';
     trigger.dataset.organismSource = source || 'system-navigation';
     trigger.click();
@@ -142,8 +166,11 @@
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    if (id === 'hero') activateCore({ scroll: true, replaceHistory: true, closePanel: true });
-    else openPanel(id, anchor.closest('.fx-organism-map') ? 'organism-map' : 'navigation');
+    if (id === 'hero') {
+      activateCore({ scroll: true, replaceHistory: true, closePanel: true });
+    } else {
+      openPanel(id, anchor.closest('.fx-organism-map') ? 'organism-map' : 'navigation');
+    }
   }
 
   function handleKeyboard(event) {
@@ -158,8 +185,9 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     const scene = Number(event.key) - 1;
-    if (scene === 0) activateCore({ scroll: true, replaceHistory: true, closePanel: true });
-    else {
+    if (scene === 0) {
+      activateCore({ scroll: true, replaceHistory: true, closePanel: true });
+    } else {
       const id = Object.keys(PANEL_SCENES).find(key => PANEL_SCENES[key] === scene);
       if (id) openPanel(id, 'keyboard');
     }
@@ -168,7 +196,9 @@
   function interfaceBecameReady() {
     interfaceReady = true;
     if (pendingPanel) openPanel(pendingPanel, 'deferred-navigation');
-    else if (!panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    else if (!panelIsOpen()) {
+      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    }
   }
 
   document.addEventListener('click', handleNavigation, true);
@@ -178,14 +208,37 @@
     const id = event.detail?.id;
     if (Object.hasOwn(PANEL_SCENES, id)) updateNavigation(PANEL_SCENES[id]);
   });
-  addEventListener('formatx:organismpanelclose', () => activateCore({ scroll: false, replaceHistory: true, closePanel: false }));
-  addEventListener('formatx:loop', () => activateCore({ scroll: false, replaceHistory: true, closePanel: true }));
-  document.addEventListener('formatx:introcomplete', () => {
-    if (!panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+  addEventListener('formatx:organismpanelclose', () => {
+    activateCore({ scroll: false, replaceHistory: true, closePanel: false });
   });
-  addEventListener('formatx:languagechange', () => updateNavigation(Number(ROOT.dataset.fxScene || 0)));
-  addEventListener('pageshow', event => {
-    if (event.persisted || !panelIsOpen()) activateCore({ scroll: false, replaceHistory: true, closePanel: true });
+  addEventListener('formatx:loop', () => {
+    activateCore({ scroll: false, replaceHistory: true, closePanel: true });
+  });
+  document.addEventListener('formatx:introcomplete', () => {
+    if (!panelIsOpen()) {
+      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    }
+  });
+  addEventListener('formatx:languagechange', () => {
+    const scene = Number(ROOT.dataset.fxScene || 0);
+    if (scene === 0 && !panelIsOpen()) {
+      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    } else {
+      updateNavigation(scene);
+    }
+  });
+  addEventListener('pageshow', () => {
+    activateCore({ scroll: false, replaceHistory: true, closePanel: true });
+  });
+
+  const sceneGuard = new MutationObserver(() => {
+    if (!panelIsOpen() && ROOT.dataset.fxScene !== '0') {
+      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+    }
+  });
+  sceneGuard.observe(ROOT, {
+    attributes: true,
+    attributeFilter: ['data-fx-scene']
   });
 
   ROOT.dataset.fxOrganismCoreController = 'ready';

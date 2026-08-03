@@ -26,6 +26,7 @@
       "/scifi-ui/styles/formatx-mobile-recovery.css", "/scifi-ui/styles/formatx-site-stability.css",
       "/scifi-ui/styles/formatx-mobile-readability.css", "/scifi-ui/styles/formatx-mobile-unified.css",
       "/scifi-ui/styles/organism-voice.css", "/scifi-ui/styles/organism-voice-dock.css",
+      "/scifi-ui/styles/organism-master-sync.css",
       "/scifi-ui/styles/organism-core-interaction.css", "/scifi-ui/styles/organism-speaking-visual.css",
       "/scifi-ui/styles/synaptic-thought-genome.css", "/scifi-ui/styles/synaptic-thought-disclosure.css",
       "/scifi-ui/scripts/platform-status.js", "/scifi-ui/scripts/release-metadata.js",
@@ -44,6 +45,7 @@
       "/scifi-ui/scripts/mobile-core-engine-v3.js", "/scifi-ui/scripts/organism-interface.js",
       "/scifi-ui/scripts/organism-menu-controller.js", "/scifi-ui/scripts/organism-core-controller.js",
       "/scifi-ui/scripts/organism-voice.js", "/scifi-ui/scripts/organism-voice-stability.js",
+      "/scifi-ui/scripts/organism-master-sync.js",
       "/scifi-ui/scripts/organism-core-interaction.js", "/scifi-ui/scripts/synaptic-thought-genome.js",
       "/scifi-ui/scripts/synaptic-thought-disclosure.js",
       "/download/*", "/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk"

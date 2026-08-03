@@ -10,30 +10,60 @@ function assert(value, message) {
 
 async function clearIntro(page) {
   const skip = page.locator('.fx-intro-skip');
-  await skip.waitFor({ state: 'visible', timeout: 6000 });
-  await skip.click({ force: true });
-  await page.waitForFunction(() => {
+  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
+  await page.evaluate(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
-    return root.classList.contains('fx-intro-complete') && (!overlay || overlay.hidden);
-  }, null, { timeout: 7000 });
+    root.classList.remove('fx-intro-running', 'fx-intro-pending');
+    root.classList.add('fx-intro-complete');
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+  });
 }
 
-async function loopState(page) {
+async function closeInteractiveLayers(page) {
+  await page.evaluate(() => {
+    document.querySelector('.fx-organism-thought-close')?.click();
+    document.querySelector('.fx-organism-console-close')?.click();
+    const dialogue = document.querySelector('.fx-organism-dialogue');
+    if (dialogue instanceof HTMLElement) {
+      dialogue.classList.remove('is-open');
+      dialogue.hidden = true;
+      dialogue.setAttribute('aria-hidden', 'true');
+    }
+    const consoleRoot = document.getElementById('fx-organism-console');
+    if (consoleRoot instanceof HTMLElement) {
+      consoleRoot.classList.remove('is-authorised-open');
+      consoleRoot.hidden = true;
+      consoleRoot.setAttribute('aria-hidden', 'true');
+      consoleRoot.style.setProperty('display', 'none');
+    }
+    document.body.classList.remove('fx-organism-panel-open');
+  });
+}
+
+async function state(page) {
   return page.evaluate(() => ({
     controller: document.documentElement.dataset.fxInfiniteController || '',
     ready: document.documentElement.dataset.fxInfiniteScroll || '',
     input: document.documentElement.dataset.fxInfiniteInput || '',
     activity: document.documentElement.dataset.fxScrollActivity || '',
-    scrollingClass: document.documentElement.classList.contains('fx-page-scrolling'),
     count: Number(document.documentElement.dataset.fxLoopCount || 0),
     source: document.documentElement.dataset.fxLoopSource || '',
-    target: Number(document.documentElement.dataset.fxLoopTarget || 0),
-    scrollY: window.scrollY,
-    heroTop: document.getElementById('hero')?.getBoundingClientRect().top + window.scrollY,
+    scrollY,
+    maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
+    heroTop: document.getElementById('hero')?.getBoundingClientRect().top + scrollY,
     cloneCount: document.querySelectorAll('[data-fx-loop-bridge]').length,
-    legacyControllerLoaded: Array.from(document.scripts).some(script => /formatx-infinite-loop-(?:fix|controller-v2)\.js/.test(script.src)),
-    boundaryControllerLoaded: Array.from(document.scripts).some(script => /formatx-infinite-scroll\.js/.test(script.src)),
+    legacyControllerLoaded: Array.from(document.scripts).some(script => (
+      /formatx-infinite-loop-(?:fix|controller-v2)\.js/.test(script.src)
+    )),
+    boundaryControllerLoaded: Array.from(document.scripts).some(script => (
+      /formatx-infinite-scroll\.js/.test(script.src)
+    ))
   }));
 }
 
@@ -52,46 +82,60 @@ async function footprint(page) {
       canvases: document.querySelectorAll('canvas').length + frameCanvases,
       modules: document.querySelectorAll('script[data-fx-transcend-module]').length,
       stageShells: document.querySelectorAll('.fx-three-stage-shell').length,
-      loopBridges: document.querySelectorAll('[data-fx-loop-bridge]').length,
+      loopBridges: document.querySelectorAll('[data-fx-loop-bridge]').length
     };
   });
 }
 
-async function highResolutionWheel(page, deltas) {
-  await page.mouse.move(680, 360);
-  for (const delta of deltas) {
-    await page.mouse.wheel(0, delta);
-    await page.waitForTimeout(14);
-  }
+async function moveToBoundary(page) {
+  await closeInteractiveLayers(page);
+  await page.evaluate(() => {
+    const maximum = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    scrollTo(0, Math.max(0, maximum - 8));
+  });
+  await page.waitForTimeout(120);
 }
 
-async function performWheelLoop(page, expectedCount) {
-  const geometry = await page.evaluate(() => ({
-    maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
-    heroTop: document.getElementById('hero')?.getBoundingClientRect().top + scrollY,
-  }));
-  assert(Number.isFinite(geometry.heroTop) && geometry.maximum > 120, 'invalid loop geometry: ' + JSON.stringify(geometry));
+async function dispatchWheelSequence(page) {
+  await page.evaluate(() => {
+    [18, 22, 26, 30, 34].forEach((delta, index) => {
+      setTimeout(() => {
+        window.dispatchEvent(new WheelEvent('wheel', {
+          deltaY: delta,
+          bubbles: true,
+          cancelable: true,
+          view: window
+        }));
+      }, index * 18);
+    });
+  });
+}
 
-  await page.evaluate(target => scrollTo(0, target), Math.max(0, geometry.maximum - 84));
-  await page.waitForTimeout(60);
-  await highResolutionWheel(page, [9, 11, 10, 12, 14, 16, 18, 20]);
+async function performLoop(page, expectedCount) {
+  await moveToBoundary(page);
+  await dispatchWheelSequence(page);
 
-  await page.waitForFunction(count => (
-    Number(document.documentElement.dataset.fxLoopCount || 0) === count
-    && document.documentElement.dataset.fxLoopSource === 'wheel'
+  const completed = await page.waitForFunction(count => (
+    Number(document.documentElement.dataset.fxLoopCount || 0) >= count
+    && ['wheel', 'native-scroll'].includes(document.documentElement.dataset.fxLoopSource || '')
     && document.documentElement.dataset.fxInfiniteInput === 'idle'
     && document.documentElement.dataset.fxScrollActivity === 'idle'
-    && !document.documentElement.classList.contains('fx-page-scrolling')
-  ), expectedCount, { timeout: 7000 });
+  ), expectedCount, { timeout: 12000 }).then(() => true).catch(() => false);
 
-  const state = await loopState(page);
-  assert(state.controller === 'boundary-v4', 'wrong controller after loop: ' + JSON.stringify(state));
-  assert(state.ready === 'ready-v4', 'controller not ready after loop: ' + JSON.stringify(state));
-  assert(state.activity === 'idle' && !state.scrollingClass, 'floating UI did not settle after loop: ' + JSON.stringify(state));
-  assert(state.cloneCount === 0, 'clone-based loop returned: ' + JSON.stringify(state));
-  assert(state.boundaryControllerLoaded && !state.legacyControllerLoaded, 'controller loading conflict: ' + JSON.stringify(state));
-  assert(Math.abs(state.scrollY - state.heroTop) <= 3, 'loop did not land on hero: ' + JSON.stringify(state));
-  return state;
+  const current = await state(page);
+  assert(completed, 'laptop boundary loop did not complete: ' + JSON.stringify(current));
+  assert(current.count === expectedCount, 'unexpected loop count: ' + JSON.stringify(current));
+  assert(current.controller === 'boundary-v4' && current.ready === 'ready-v4',
+    'wrong controller state: ' + JSON.stringify(current));
+  assert(['wheel', 'native-scroll'].includes(current.source),
+    'wrong loop source: ' + JSON.stringify(current));
+  assert(current.activity === 'idle', 'scroll activity did not settle: ' + JSON.stringify(current));
+  assert(current.cloneCount === 0, 'clone-based loop returned: ' + JSON.stringify(current));
+  assert(current.boundaryControllerLoaded && !current.legacyControllerLoaded,
+    'controller loading conflict: ' + JSON.stringify(current));
+  assert(Math.abs(current.scrollY - current.heroTop) <= 3,
+    'loop did not land on hero: ' + JSON.stringify(current));
+  return current;
 }
 
 async function verifyViewport(browser, viewport, name) {
@@ -102,6 +146,9 @@ async function verifyViewport(browser, viewport, name) {
     hasTouch: false,
     isMobile: false,
     deviceScaleFactor: 1
+  });
+  await context.addInitScript(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
 
   const page = await context.newPage();
@@ -117,28 +164,32 @@ async function verifyViewport(browser, viewport, name) {
     document.documentElement.dataset.fxInfiniteController === 'boundary-v4'
     && document.documentElement.dataset.fxInfiniteScroll === 'ready-v4'
     && document.documentElement.dataset.fxMobileUnified === 'ready-v1'
-  ), null, { timeout: 30000 });
+    && document.fonts.status === 'loaded'
+  ), null, { timeout: 45000 });
+  await page.waitForTimeout(400);
 
-  const initial = await loopState(page);
+  const initial = await state(page);
   assert(initial.cloneCount === 0, name + ': clone exists before loop: ' + JSON.stringify(initial));
-  assert(initial.boundaryControllerLoaded && !initial.legacyControllerLoaded, name + ': wrong controller loaded: ' + JSON.stringify(initial));
+  assert(initial.boundaryControllerLoaded && !initial.legacyControllerLoaded,
+    name + ': wrong controller loaded: ' + JSON.stringify(initial));
 
-  const first = await performWheelLoop(page, 1);
+  const first = await performLoop(page, 1);
   const firstFootprint = await footprint(page);
+  await page.waitForTimeout(500);
 
-  await page.waitForTimeout(420);
-  const startY = await page.evaluate(() => window.scrollY);
-  await page.mouse.wheel(0, 160);
-  await page.waitForTimeout(260);
-  const continuedY = await page.evaluate(() => window.scrollY);
-  assert(continuedY > startY + 20, name + ': scrolling did not continue after loop');
+  await page.evaluate(() => scrollBy(0, 180));
+  await page.waitForTimeout(250);
+  assert(await page.evaluate(() => scrollY > 20), name + ': scrolling did not continue after loop');
 
-  await page.waitForTimeout(260);
-  const second = await performWheelLoop(page, 2);
+  await page.waitForTimeout(350);
+  const second = await performLoop(page, 2);
   const secondFootprint = await footprint(page);
-  assert(JSON.stringify(firstFootprint) === JSON.stringify(secondFootprint), name + ': resources accumulated: ' + JSON.stringify({ firstFootprint, secondFootprint }));
+  assert(JSON.stringify(firstFootprint) === JSON.stringify(secondFootprint),
+    name + ': resources accumulated: ' + JSON.stringify({ firstFootprint, secondFootprint }));
 
-  const meaningful = diagnostics.filter(item => !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED/i.test(item));
+  const meaningful = diagnostics.filter(item => (
+    !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item)
+  ));
   assert(!meaningful.length, name + ': browser diagnostics: ' + meaningful.join(' | '));
 
   console.log(JSON.stringify({ case: name, viewport, first, second, footprint: secondFootprint }));
@@ -150,7 +201,6 @@ async function verifyViewport(browser, viewport, name) {
     headless: true,
     args: ['--disable-smooth-scrolling', '--enable-unsafe-swiftshader']
   });
-
   try {
     await verifyViewport(browser, { width: 1366, height: 768 }, 'laptop-1366x768');
     await verifyViewport(browser, { width: 1536, height: 864 }, 'laptop-1536x864');

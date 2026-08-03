@@ -61,9 +61,10 @@ async function assertPage(browser, pathname, name, viewport) {
   const toggle = page.locator('.fx-language-toggle:visible').first();
   const before = await page.locator('html').getAttribute('lang');
   await toggle.click();
-  await page.waitForTimeout(100);
-  const after = await page.locator('html').getAttribute('lang');
-  assert(before !== after && ['hu', 'en'].includes(after), `${name}: language toggle did not change the document language`);
+  await page.waitForFunction(previous => {
+    const currentLanguage = document.documentElement.lang;
+    return currentLanguage !== previous && ['hu', 'en'].includes(currentLanguage);
+  }, before, { timeout: 8000 });
 
   await context.close();
 }
@@ -99,10 +100,11 @@ async function assertKnownIssues(browser, viewport) {
   assert(await page.locator('[data-issue-record]:visible').count() === total, 'known-issues: reset did not restore all records');
 
   const toggle = page.locator('.fx-language-toggle:visible').first();
-  await toggle.click();
-  await page.waitForTimeout(100);
-  assert((await page.locator('html').getAttribute('lang')) === 'en', 'known-issues: English switch failed');
-  assert(/matching record/i.test(await page.locator('[data-issue-results]').textContent()), 'known-issues: result counter was not translated');
+  await toggle.evaluate(node => node.click());
+  await page.waitForFunction(() => {
+    const result = document.querySelector('[data-issue-results]')?.textContent || '';
+    return document.documentElement.lang === 'en' && /matching record/i.test(result);
+  }, null, { timeout: 8000 });
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 2, `known-issues: horizontal overflow ${overflow}px`);

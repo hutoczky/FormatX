@@ -60,8 +60,8 @@ function cleanLegacyReleaseCopy(html) {
     .replaceAll('V92 kiadási oldal', 'Hivatalos kiadási oldal')
     .replaceAll('site.css?v=20260718-v92', 'site.css')
     .replaceAll('<span>92.00</span><b>RELEASE DNA</b>', '<span>—</span><b>OFFICIAL RELEASE</b>')
-    .replaceAll('Teljes verzió letöltése', 'Windows nyilvános béta letöltése')
-    .replaceAll('Download full version', 'Download Windows public beta');
+    .replaceAll('Teljes verzió letöltése', 'Multiplatform nyilvános béta letöltése')
+    .replaceAll('Download full version', 'Download multiplatform public beta');
 }
 function noStore(response, head) {
   const headers = new Headers(response.headers);

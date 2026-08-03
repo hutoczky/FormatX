@@ -59,6 +59,28 @@
     history.replaceState({}, '', url.pathname + url.search + url.hash);
   }
 
+  function mobileMode() {
+    return matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  }
+
+  function placeContainer(container) {
+    if (!(container instanceof HTMLElement)) return;
+    if (mobileMode() && document.body && container.parentElement !== document.body) {
+      document.body.appendChild(container);
+    }
+    if (mobileMode()) {
+      container.hidden = false;
+      container.removeAttribute('aria-hidden');
+      container.style.setProperty('display', 'block', 'important');
+      container.style.setProperty('position', 'fixed', 'important');
+      container.style.setProperty('top', '14px', 'important');
+      container.style.setProperty('right', '70px', 'important');
+      container.style.setProperty('z-index', '10040', 'important');
+      container.style.setProperty('visibility', 'visible', 'important');
+      container.style.setProperty('opacity', '1', 'important');
+    }
+  }
+
   function createContainer() {
     const container = document.createElement('div');
     container.className = 'language-switch language-control fx-single-language-switch';
@@ -68,9 +90,11 @@
 
     const headerActions = document.querySelector('.header-actions');
     const legalHeader = document.querySelector('.legal-header-inner');
-    if (headerActions) headerActions.prepend(container);
+    if (mobileMode() && document.body) document.body.appendChild(container);
+    else if (headerActions) headerActions.prepend(container);
     else if (legalHeader) legalHeader.insertBefore(container, legalHeader.querySelector('.theme-control'));
     else document.body?.prepend(container);
+    placeContainer(container);
     return container;
   }
 
@@ -105,10 +129,23 @@
     toggle.lang = language;
     toggle.setAttribute('aria-label', language === 'hu' ? 'Váltás angol nyelvre' : 'Switch to Hungarian');
     toggle.title = language === 'hu' ? 'Váltás angol nyelvre' : 'Switch to Hungarian';
+    if (mobileMode()) {
+      toggle.hidden = false;
+      toggle.style.setProperty('display', 'inline-flex', 'important');
+      toggle.style.setProperty('visibility', 'visible', 'important');
+      toggle.style.setProperty('opacity', '1', 'important');
+    }
+  }
+
+  function publishLanguageChange(language) {
+    dispatchEvent(new CustomEvent('formatx:languagechange', {
+      detail: { language, source: 'single-language-toggle-v2' }
+    }));
   }
 
   function setLanguage(language, persist, container, toggle) {
     if (!SUPPORTED.has(language)) return;
+    const preservedHash = location.hash;
     if (persist) persistLanguage(language);
     applyBilingualCopy(language);
 
@@ -120,17 +157,25 @@
       window.FormatXI18n.setLanguage(language, persist);
     } else if (legacy) {
       legacy.click();
-    } else {
-      dispatchEvent(new CustomEvent('formatx:languagechange', { detail: { language } }));
     }
 
-    requestAnimationFrame(() => updateToggle(toggle, language));
+    publishLanguageChange(language);
+
+    requestAnimationFrame(() => {
+      if (preservedHash && location.hash !== preservedHash) {
+        const url = new URL(location.href);
+        url.hash = preservedHash;
+        history.replaceState({}, '', url.pathname + url.search + url.hash);
+      }
+      updateToggle(toggle, language);
+    });
   }
 
   function install() {
     const container = findContainer();
     if (!(container instanceof HTMLElement)) return false;
 
+    placeContainer(container);
     container.hidden = false;
     container.removeAttribute('aria-hidden');
     container.classList.add('language-switch', 'language-control', 'fx-single-language-switch');
@@ -152,6 +197,9 @@
       const current = SUPPORTED.has(ROOT.lang) ? ROOT.lang : storedLanguage();
       setLanguage(current === 'hu' ? 'en' : 'hu', true, container, toggle);
     });
+    container.addEventListener('click', event => {
+      if (event.target === container) toggle.click();
+    });
 
     container.appendChild(toggle);
     addEventListener('formatx:languagechange', event => {
@@ -164,14 +212,19 @@
 
     const languageObserver = new MutationObserver(() => {
       const language = SUPPORTED.has(ROOT.lang) ? ROOT.lang : storedLanguage();
+      placeContainer(container);
       updateToggle(toggle, language);
       hideLegacyControls(container);
     });
     languageObserver.observe(ROOT, { attributes: true, attributeFilter: ['lang'] });
 
-    const duplicateObserver = new MutationObserver(() => hideLegacyControls(container));
+    const duplicateObserver = new MutationObserver(() => {
+      placeContainer(container);
+      hideLegacyControls(container);
+    });
     duplicateObserver.observe(document.documentElement, { subtree: true, childList: true });
 
+    addEventListener('resize', () => placeContainer(container), { passive: true });
     ROOT.dataset.fxSingleLanguageToggle = 'ready';
     ROOT.dataset.fxSingleLanguageToggleVersion = '2';
     return true;

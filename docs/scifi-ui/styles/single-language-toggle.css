@@ -99,12 +99,20 @@
 
 @media (prefers-reduced-motion: reduce) {
   .fx-language-toggle {
+<<<<<<< HEAD
     transition: none;
+=======
+    transition: none !important;
+>>>>>>> origin/master
   }
 
   .fx-language-toggle:hover,
   .fx-language-toggle:focus-visible,
   .fx-language-toggle:active {
+<<<<<<< HEAD
     transform: none;
+=======
+    transform: none !important;
+>>>>>>> origin/master
   }
 }

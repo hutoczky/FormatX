@@ -2,73 +2,79 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v26') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v26';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v27') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v27';
 
   let genomeWebglRequested = false;
 
-  function ensureStabilityStyle() {
-    if (document.querySelector('link[data-fx-site-stability]')) return;
+  function ensureStyle(marker, href, readyKey, warning) {
+    if (document.querySelector('link[' + marker + ']')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/formatx-site-stability.css?v=20260729-stability-3';
-    link.dataset.fxSiteStability = 'true';
+    link.href = href;
+    link.setAttribute(marker, 'true');
     link.addEventListener('load', () => {
-      root.dataset.fxSiteStability = 'ready';
+      if (readyKey) root.dataset[readyKey] = 'ready';
     }, { once: true });
     link.addEventListener('error', () => {
-      root.dataset.fxSiteStability = 'failed';
-      console.warn('FormatX stability stylesheet failed to load.');
+      if (readyKey) root.dataset[readyKey] = 'failed';
+      console.warn(warning);
     }, { once: true });
     document.head.appendChild(link);
+  }
+
+  function ensureStabilityStyle() {
+    ensureStyle(
+      'data-fx-site-stability',
+      './styles/formatx-site-stability.css?v=20260729-stability-3',
+      'fxSiteStability',
+      'FormatX stability stylesheet failed to load.'
+    );
   }
 
   function ensureOrganismDockStyle() {
-    if (document.querySelector('link[data-fx-organism-voice-dock]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = './styles/organism-voice-dock.css?v=20260731-organism-dock-3';
-    link.dataset.fxOrganismVoiceDock = 'true';
-    link.addEventListener('load', () => {
-      root.dataset.fxOrganismDock = 'ready-v3';
-    }, { once: true });
-    link.addEventListener('error', () => {
-      root.dataset.fxOrganismDock = 'failed';
-      console.warn('FormatX Organism dock stylesheet failed to load.');
-    }, { once: true });
-    document.head.appendChild(link);
+    ensureStyle(
+      'data-fx-organism-voice-dock',
+      './styles/organism-voice-dock.css?v=20260731-organism-dock-3',
+      'fxOrganismDock',
+      'FormatX Organism dock stylesheet failed to load.'
+    );
   }
 
   function ensureOrganismSpeakingStyle() {
-    if (document.querySelector('link[data-fx-organism-speaking-visual]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = './styles/organism-speaking-visual.css?v=20260730-speaking-visual-1';
-    link.dataset.fxOrganismSpeakingVisual = 'true';
-    link.addEventListener('load', () => {
-      root.dataset.fxOrganismSpeakingVisual = 'ready';
-    }, { once: true });
-    link.addEventListener('error', () => {
-      root.dataset.fxOrganismSpeakingVisual = 'failed';
-      console.warn('FormatX Organism speaking visual failed to load.');
-    }, { once: true });
-    document.head.appendChild(link);
+    ensureStyle(
+      'data-fx-organism-speaking-visual',
+      './styles/organism-speaking-visual.css?v=20260730-speaking-visual-1',
+      'fxOrganismSpeakingVisual',
+      'FormatX Organism speaking visual failed to load.'
+    );
   }
 
   function ensureMobileReadabilityStyle() {
-    if (document.querySelector('link[data-fx-mobile-readability]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = './styles/formatx-mobile-readability.css?v=20260730-mobile-readability-1';
-    link.dataset.fxMobileReadability = 'true';
-    link.addEventListener('load', () => {
-      root.dataset.fxMobileReadability = 'ready';
-    }, { once: true });
-    link.addEventListener('error', () => {
-      root.dataset.fxMobileReadability = 'failed';
-      console.warn('FormatX mobile readability stylesheet failed to load.');
-    }, { once: true });
-    document.head.appendChild(link);
+    ensureStyle(
+      'data-fx-mobile-readability',
+      './styles/formatx-mobile-readability.css?v=20260730-mobile-readability-1',
+      'fxMobileReadability',
+      'FormatX mobile readability stylesheet failed to load.'
+    );
+  }
+
+  function ensureMobileHeroFlowStyle() {
+    ensureStyle(
+      'data-fx-mobile-hero-flow',
+      './styles/formatx-mobile-hero-flow.css',
+      'fxMobileHeroFlow',
+      'FormatX mobile hero flow stylesheet failed to load.'
+    );
+  }
+
+  function ensureDesktopLayoutStyle() {
+    ensureStyle(
+      'data-fx-desktop-unified',
+      './styles/formatx-desktop-unified.css',
+      'fxDesktopUnified',
+      'FormatX desktop composition stylesheet failed to load.'
+    );
   }
 
   function ensureDesktopLayoutStyle() {
@@ -169,6 +175,10 @@
   ensureOrganismDockStyle();
   ensureOrganismSpeakingStyle();
   ensureMobileReadabilityStyle();
+<<<<<<< HEAD
+=======
+  ensureMobileHeroFlowStyle();
+>>>>>>> origin/master
   ensureDesktopLayoutStyle();
   root.dataset.fxLocalQr = 'ready-v2';
   root.dataset.fxLegacyRenderer = 'retired';
@@ -188,12 +198,16 @@
   const queue = [
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
     './scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
+    './scripts/release-metadata.js',
+    './scripts/interaction-genome-export-stability.js',
     './scripts/platform-status.js?v=20260730-platform-status-1',
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
     './scripts/organism-core-controller.js?v=20260729-core-ui-2',
     './scripts/organism-voice.js?v=20260730-organism-voice-4',
     './scripts/organism-voice-stability.js?v=20260731-organism-stability-1',
+    './scripts/organism-master-sync.js?v=20260802-master-sync-1',
+    './scripts/formatx-audio-repair.js?v=20260728-ambient-score-v5',
     './scripts/organism-core-interaction.js?v=20260730-core-interaction-1',
     './scripts/synaptic-thought-genome.js?v=20260731-thought-genome-1',
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
@@ -201,27 +215,41 @@
     './scripts/formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4',
     './scripts/formatx-three-host-safe.js?v=20260729-safe-host-1',
     './scripts/formatx-render-visibility.js?v=20260730-render-visibility-2',
-    './scripts/formatx-audio-repair.js?v=20260728-ambient-score-v5',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
-    './scripts/interaction-genome.js?v=20260728-genome-3d-1'
+    './scripts/interaction-genome.js?v=20260728-genome-3d-1',
+    './scripts/formatx-language-copy-stability.js'
   ];
 
   function load(index) {
     if (index >= queue.length) {
-      root.dataset.fxTranscendLoader = 'safe-ready-v26';
+      root.dataset.fxTranscendProgress = '100';
+      root.dataset.fxTranscendLoader = 'safe-ready-v27';
       return;
     }
 
+    root.dataset.fxTranscendProgress = String(Math.round(index / queue.length * 100));
     const script = document.createElement('script');
     script.src = queue[index];
     script.async = false;
     script.dataset.fxTranscendModule = String(index);
-    script.addEventListener('load', () => load(index + 1), { once: true });
-    script.addEventListener('error', () => {
-      console.warn('FormatX optional module failed to load:', queue[index]);
-      root.dataset.fxTranscendLoader = 'safe-degraded-v26';
+
+    let settled = false;
+    let timeout = 0;
+    const finish = (ok, reason) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      if (!ok) {
+        console.warn('FormatX optional module did not complete:', queue[index], reason);
+        root.dataset.fxTranscendLoader = 'safe-degraded-v27';
+      }
+      root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
       load(index + 1);
-    }, { once: true });
+    };
+
+    timeout = setTimeout(() => finish(false, 'timeout'), 9000);
+    script.addEventListener('load', () => finish(true, 'load'), { once: true });
+    script.addEventListener('error', () => finish(false, 'error'), { once: true });
     document.head.appendChild(script);
   }
 
