@@ -1,9 +1,20 @@
-/* Mobile hero geometry guard: preserves the full visual system while keeping document flow deterministic. */
+/* Mobile hero geometry guard: full-width readable content with a dedicated control lane. */
 @media (max-width: 900px), (pointer: coarse) {
+  #hero {
+    box-sizing: border-box !important;
+    padding-bottom: max(44px, env(safe-area-inset-bottom, 0px)) !important;
+    overflow: visible !important;
+  }
+
   #hero .hero-grid {
+    box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-inline: 12px !important;
+    overflow: visible !important;
   }
 
   #hero .hero-copy {
@@ -13,12 +24,62 @@
     transform: none !important;
     translate: none !important;
     flex: 0 0 auto !important;
-    align-self: flex-start !important;
-    width: calc(100% - 108px) !important;
-    max-width: calc(100% - 108px) !important;
-    margin-left: 16px !important;
-    margin-right: 0 !important;
-    padding-right: 0 !important;
+    align-self: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding-inline: clamp(20px, 5.4vw, 28px) !important;
+    overflow: hidden !important;
+  }
+
+  /* The category definition already names the product category. Repeating the
+     same phrase as a kicker wastes the narrow mobile viewport. */
+  #hero .hero-copy > .kicker {
+    display: none !important;
+  }
+
+  #hero .fx-category-definition {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 clamp(24px, 5vw, 34px) !important;
+    font-size: clamp(15px, 4.1vw, 18px) !important;
+    line-height: 1.5 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #hero .fx-category-definition strong {
+    display: block !important;
+    margin-bottom: 10px !important;
+    font-size: clamp(13px, 3.7vw, 16px) !important;
+    line-height: 1.3 !important;
+  }
+
+  #hero .hero-title-main {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: clamp(46px, 14.4vw, 68px) !important;
+    line-height: .88 !important;
+    letter-spacing: -.065em !important;
+    white-space: nowrap !important;
+  }
+
+  #hero .hero-title-sub {
+    display: block !important;
+    max-width: 100% !important;
+    font-size: clamp(20px, 7vw, 31px) !important;
+    line-height: 1 !important;
+    letter-spacing: .16em !important;
+    white-space: nowrap !important;
+  }
+
+  #hero .hero-lead {
+    max-width: 100% !important;
+    font-size: clamp(15px, 4.1vw, 18px) !important;
+    line-height: 1.58 !important;
+    overflow-wrap: anywhere !important;
   }
 
   #hero .hero-space {
@@ -27,8 +88,9 @@
     transform: none !important;
     translate: none !important;
     flex: 0 0 auto !important;
-    margin-top: 24px !important;
-    min-height: clamp(320px, 50svh, 520px) !important;
+    width: 100% !important;
+    margin-top: 18px !important;
+    min-height: clamp(280px, 44svh, 460px) !important;
   }
 
   #hero .scroll-cue {
@@ -36,7 +98,8 @@
     inset: auto !important;
     transform: none !important;
     translate: none !important;
-    margin-top: 12px !important;
+    margin-top: 16px !important;
+    margin-bottom: 20px !important;
   }
 
   .fx-single-language-switch,
@@ -49,8 +112,8 @@
     display: inline-flex !important;
   }
 
-  /* The compact mobile dock already exposes the living-system controls.
-     Separate floating launchers must not cover the primary hero content. */
+  /* The compact mobile dock already exposes release controls. Extra launchers
+     must not cover the primary content. */
   .fx-genome-launcher,
   .fx-three-sound {
     display: none !important;
@@ -58,23 +121,38 @@
     pointer-events: none !important;
   }
 
+  /* Keep the thought control functional, but place it in the clear strip below
+     the fixed header instead of reserving a full vertical lane beside the copy. */
   .fx-organism-dialogue:not(.is-open) {
-    right: 10px !important;
-    bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
+    position: fixed !important;
+    top: max(82px, calc(70px + env(safe-area-inset-top, 0px))) !important;
+    right: 12px !important;
+    bottom: auto !important;
+    left: auto !important;
     width: 58px !important;
     max-width: 58px !important;
     justify-items: center !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 10030 !important;
   }
 
   .fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger {
     position: relative !important;
     inset: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
     transform: none !important;
     translate: none !important;
     z-index: 10030 !important;
+  }
+
+  /* Header and hero buttons already expose these actions. Hiding the duplicate
+     dock while the core is visible removes the fixed bar from the reading area. */
+  html.fx-organism-core-active .fx-organism-actionbar,
+  html[data-fx-mobile-core-visible="true"] .fx-organism-actionbar {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(16px) !important;
   }
 
   .fx-organism-console-shell {
@@ -98,9 +176,15 @@
 }
 
 @media (max-width: 430px) {
+  #hero .hero-grid {
+    padding-inline: 10px !important;
+  }
+
   #hero .hero-copy {
-    width: calc(100% - 104px) !important;
-    max-width: calc(100% - 104px) !important;
-    margin-left: 12px !important;
+    padding-inline: 18px !important;
+  }
+
+  #hero .hero-title-main {
+    font-size: clamp(44px, 14.1vw, 60px) !important;
   }
 }
