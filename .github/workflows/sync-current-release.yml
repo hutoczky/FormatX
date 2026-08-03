@@ -57,12 +57,8 @@ jobs:
           jq --argjson android_local "$android_local" '
             def clean: if type == "string" then gsub("^\\s+|\\s+$"; "") else . end;
             def multiplatform_asset:
-<<<<<<< HEAD
-              [.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.(zip|tar\\.gz|tar\\.xz)$"; "i"))] | first;
-=======
               ([.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.zip$"; "i"))] | first)
               // ([.assets[]? | select(.name | test("^FormatX-Suite-Pro-.*\\.(tar\\.gz|tar\\.xz)$"; "i"))] | first);
->>>>>>> origin/master
             def android_asset:
               [.assets[]? | select(.name | test("^FormatX-Suite-Pro-Android(?:-.*)?\\.apk$"; "i"))] | first;
             def checksum_asset:

@@ -77,22 +77,6 @@
     );
   }
 
-  function ensureDesktopLayoutStyle() {
-    if (document.querySelector('link[data-fx-desktop-unified]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = './styles/formatx-desktop-unified.css';
-    link.dataset.fxDesktopUnified = 'true';
-    link.addEventListener('load', () => {
-      root.dataset.fxDesktopUnified = 'ready';
-    }, { once: true });
-    link.addEventListener('error', () => {
-      root.dataset.fxDesktopUnified = 'failed';
-      console.warn('FormatX desktop composition stylesheet failed to load.');
-    }, { once: true });
-    document.head.appendChild(link);
-  }
-
   function refreshQrImages() {
     const selectedCurrency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR'
       ? 'EUR'
@@ -175,10 +159,7 @@
   ensureOrganismDockStyle();
   ensureOrganismSpeakingStyle();
   ensureMobileReadabilityStyle();
-<<<<<<< HEAD
-=======
   ensureMobileHeroFlowStyle();
->>>>>>> origin/master
   ensureDesktopLayoutStyle();
   root.dataset.fxLocalQr = 'ready-v2';
   root.dataset.fxLegacyRenderer = 'retired';

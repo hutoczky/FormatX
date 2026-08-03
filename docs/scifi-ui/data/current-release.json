@@ -22,15 +22,9 @@
       "size": 537088276,
       "digest": "sha256:085deb7fb64155bdc20e38f0445b7a5bc0cbd576273580ab80b671493d930e5a",
       "content_type": "application/zip",
-<<<<<<< HEAD
-      "created_at": "2026-07-31T16:10:07Z",
-      "updated_at": "2026-07-31T16:10:31Z",
-      "download_count": 1,
-=======
       "created_at": "2026-08-01T15:29:32Z",
       "updated_at": "2026-08-01T15:29:51Z",
       "download_count": 13,
->>>>>>> origin/master
       "source": "github_release_asset",
       "primary_platform": "linux-bazzite",
       "supported_platforms": [

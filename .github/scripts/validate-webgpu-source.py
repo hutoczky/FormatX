@@ -20,27 +20,13 @@ def require(label: str, condition: bool) -> None:
     RESULTS.append((label, bool(condition)))
 
 
-<<<<<<< HEAD
-def compact_platform_copy(value: str) -> str:
-    return value.replace("Linux / Bazzite", "Linux/Bazzite").replace(
-        "iOS / iPadOS", "iOS/iPadOS"
-    )
-
-
-=======
->>>>>>> origin/master
 def network_free(source: str) -> bool:
     return all(token not in source for token in ("fetch(", "XMLHttpRequest", "WebSocket"))
 
 
 status_data = load_json("docs/scifi-ui/data/platform-status.json")
 release_data = load_json("docs/scifi-ui/data/current-release.json")
-<<<<<<< HEAD
-readme = read("README.md")
-release_notes = read("RELEASE_NOTES.md")
-=======
 public_contract = load_json("docs/scifi-ui/data/public-platform-contract.json")
->>>>>>> origin/master
 loader = read("docs/scifi-ui/scripts/igloo-parity.js")
 intro = read("docs/scifi-ui/scripts/formatx-event-horizon.js")
 voice = read("docs/scifi-ui/scripts/organism-voice.js")
@@ -56,35 +42,18 @@ mobile_entry = read("docs/scifi-ui/scripts/mobile-webgl-entry.js")
 morph_engine = read("docs/scifi-ui/scripts/mobile-core-engine-v3.js")
 home = read("docs/scifi-ui/index.html")
 downloads = read("docs/scifi-ui/downloads/index.html")
-<<<<<<< HEAD
-=======
 platform_js = read("docs/scifi-ui/scripts/platform-status.js")
 platform_css = read("docs/scifi-ui/styles/platform-status.css")
 desktop_css = read("docs/scifi-ui/styles/formatx-desktop-unified.css")
->>>>>>> origin/master
 support = read("docs/scifi-ui/support.html")
 terms = read("docs/scifi-ui/terms.html")
 privacy = read("docs/scifi-ui/privacy.html")
 test_matrix = read("docs/scifi-ui/test-matrix.html")
-<<<<<<< HEAD
-platform_js = read("docs/scifi-ui/scripts/platform-status.js")
-platform_css = read("docs/scifi-ui/styles/platform-status.css")
-=======
->>>>>>> origin/master
 preview_worker = read("worker.js")
 production_worker = read("billing-worker/src/production-entry.js")
 preview_config = load_json("wrangler.jsonc")
 production_config = load_json("billing-worker/wrangler.jsonc")
 
-<<<<<<< HEAD
-expected_status = {
-    "Windows": "public_beta",
-    "Linux / Bazzite": "development",
-    "macOS": "planned",
-    "Web": "technical_preview",
-    "Android": "public_beta",
-    "iOS / iPadOS": "planned",
-=======
 expected = {
     "linux-bazzite": ("public_beta", "primary"),
     "windows": ("public_beta", "secondary"),
@@ -92,143 +61,11 @@ expected = {
     "web": ("technical_preview", "preview"),
     "macos": ("planned", "roadmap"),
     "ios": ("planned", "roadmap"),
->>>>>>> origin/master
 }
 actual = {
     item["id"]: (item["status"], item.get("support_role"))
     for item in status_data["platforms"]
 }
-<<<<<<< HEAD
-actual_status = {item["name"]: item["status"] for item in status_data["platforms"]}
-actual_support = {
-    item["name"]: item.get("support_role") for item in status_data["platforms"]
-}
-
-require("canonical platform status matrix", actual_status == expected_status)
-require("canonical platform support roles", actual_support == expected_support)
-require("product remains Public beta", status_data["product_release"]["status"] == "public_beta")
-require("no platform falsely claims Stable", "stable" not in actual_status.values())
-
-readme_normalized = compact_platform_copy(readme)
-notes_normalized = compact_platform_copy(release_notes)
-for platform in ("Windows", "Linux/Bazzite", "macOS", "Web", "Android", "iOS/iPadOS"):
-    require(f"README documents {platform}", platform in readme_normalized)
-    require(f"release notes document {platform}", platform in notes_normalized)
-for label in ("Public beta", "Development", "Technical preview", "Planned"):
-    require(f"README documents status {label}", label in readme)
-    require(f"release notes document status {label}", label in release_notes)
-require(
-    "README identifies Linux/Bazzite as primary direction",
-    "Linux/Bazzite az elsődleges fejlesztési irány" in readme_normalized,
-)
-require(
-    "release notes identify Linux/Bazzite as primary direction",
-    "Linux/Bazzite: **Development**, elsődleges fejlesztési irány"
-    in notes_normalized,
-)
-require("README identifies the project as independent and solo", "Független, egyszemélyes" in readme)
-
-require("release metadata is available", release_data.get("ok") is True)
-require("release metadata uses provenance schema 2", release_data.get("schema_version") == 2)
-require("release source is an official published GitHub release", release_data.get("source") == "github_published_release")
-require("release is not a prerelease", release_data.get("prerelease") is not True)
-require(
-    "Windows release has a SHA-256 digest",
-    str(release_data.get("channels", {}).get("windows", {}).get("digest", "")).startswith("sha256:"),
-)
-
-require("download page renders canonical platform status", "platform-status.js" in downloads and "data-platform-status-root" in downloads)
-require("platform renderer uses canonical JSON", "data/platform-status.json" in platform_js)
-require("platform badges remain readable", "font-size: 12px" in platform_css)
-require("hero CTA is status-aware", "hero-download" in platform_js and "downloads/" in platform_js)
-require("static hero CTA is a Windows public beta fallback", "Windows nyilvános béta letöltése" in home and 'data-release-download="windows"' in home)
-require("static hero contains no V92 release URL", "/releases/download/v92/" not in home and "FormatX-Suite-Pro-V92.zip" not in home)
-
-require("loader uses v26 ready marker", "safe-ready-v26" in loader)
-require("loader uses v26 degraded marker", "safe-degraded-v26" in loader)
-require("loader includes platform status", "platform-status.js?v=20260730-platform-status-1" in loader)
-require("loader includes Organism voice v4", "organism-voice.js?v=20260730-organism-voice-4" in loader)
-require("loader includes Thought Genome", "synaptic-thought-genome.js?v=20260731-thought-genome-1" in loader)
-require("loader includes Thought Genome disclosure", "synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1" in loader)
-require("loader includes unified mobile controller", "formatx-mobile-unified.js?v=20260731-mobile-unified-2" in loader)
-require("loader includes dock v3", "organism-voice-dock.css?v=20260731-organism-dock-3" in loader)
-require(
-    "loader module ordering",
-    loader.index("organism-voice.js")
-    < loader.index("synaptic-thought-genome.js")
-    < loader.index("synaptic-thought-disclosure.js")
-    < loader.index("formatx-three-host-safe.js"),
-)
-require("loader has no obsolete Natural Voice module", "organism-natural-voice" not in loader)
-
-require("intro stores returning-visitor state", "formatx:intro-seen-v1" in intro)
-require("intro has full first-visit mobile and desktop timing", "MOBILE_QUERY.matches?2100:2400" in intro)
-require("intro has reduced and returning timing", "returning?(MOBILE_QUERY.matches?620:760)" in intro and "REDUCE_QUERY.matches?180" in intro)
-require("intro has deterministic hard deadline", "hardDeadline=timelineDuration+exitDuration+1100" in intro)
-require("intro starts on DOM readiness", "DOMContentLoaded',start" in intro)
-require("intro has a skip control", "fx-intro-skip" in intro and "b.onclick=()=>exit" in intro)
-require("intro restores safely from bfcache", "bfcache-restore" in intro and "pageshow" in intro)
-require("intro fails open on runtime errors", "runtime-error" in intro and "promise-error" in intro)
-require("intro exposes audit mode", "lighthouse" in intro and "audit-skip" in intro)
-
-require("Organism speech is off by default", "let speechEnabled = false" in voice)
-require("Organism has a master switch", "fx-organism-master-toggle" in voice)
-require("Organism dialogue starts closed", "setOpen(false, false)" in voice and "hidden: ''" in voice)
-require("Organism response engine remains local", network_free(voice))
-require("Organism ranks available speech engines", "function voiceScore(voice)" in voice and "browser-default" in voice)
-require("Organism uses sentence speech chunks", "function splitSpeech(text)" in voice)
-require("Organism has a speech start watchdog", "speechWatchdog = window.setTimeout" in voice)
-require("dock reserves the desktop dialogue lane", "right: 430px !important" in voice_dock)
-require("dock protects ultrawide layouts", "min-aspect-ratio: 21/9" in voice_dock and "right: 440px !important" in voice_dock)
-
-require("Thought Genome remains local", network_free(genome))
-require("Thought Genome stores fingerprints only", "questionStored: false" in genome and "fingerprint-only" in genome)
-require("Thought Genome keeps at most twelve fingerprints", "MAX_HISTORY = 12" in genome and "slice(-MAX_HISTORY)" in genome)
-require("Thought Genome supports manual forms", "FORMS = ['auto', 0, 1, 2, 3, 4, 5]" in genome)
-require("Thought Genome layer does not intercept input", "pointer-events: none" in genome_css)
-require("Thought Genome supports reduced motion", "prefers-reduced-motion: reduce" in genome_css)
-require("advanced thought controls start closed", "details.open = false" in disclosure and "defaultOpen: false" in disclosure)
-require("only response text is a live region", "liveRegion: 'response-only'" in disclosure and "bubble.removeAttribute('aria-live')" in disclosure)
-require("advanced controls use progressive disclosure", ":not([open]) > .fx-thought-genome-controls" in disclosure_css)
-require("Organism master off hides the constellation", "data-fx-organism-dialogue-enabled='false'" in disclosure_css and ".fx-thought-genome-layer" in disclosure_css)
-
-require("mobile entry imports Morphing Organism V3", "mobile-core-engine-v3.js?v=20260731-morphing-organism-v3" in mobile_entry)
-require("mobile entry exposes V3 telemetry", "three-webgl-morphing-organism-v3" in mobile_entry)
-require("Morphing Organism wraps the stable V2 core", "startLivingCoreV2" in morph_engine and "mobile-core-engine-v2.js" in morph_engine)
-require("Morphing Organism exposes six forms", all(token in morph_engine for token in ("coreForm", "neuralForm", "organForm", "heartForm", "skeletonForm", "beaconForm")))
-require("Morphing Organism uses continuous shader morphing", "uFormA" in morph_engine and "uFormB" in morph_engine and "uMorph" in morph_engine)
-require("Morphing Organism listens to Thought Genome", "formatx:thoughtgenome" in morph_engine and "formatx:organismshape" in morph_engine)
-
-require("support has a private email route", "mailto:hutoczky@gmail.com" in support)
-require("support distinguishes private and public reports", "kizárólag privát csatornán" in support and "nem bizalmas hibánál" in support)
-require("support documents solo-project response limits", "egyszemélyes projekt" in support)
-require("terms document withdrawal", "Elállás és azonnali digitális teljesítés" in terms)
-require("terms document refunds", "Refund és hibás teljesítés" in terms)
-require("privacy identifies the controller", "Hutóczky József" in privacy)
-require("privacy documents local fingerprint storage", "nyers kérdésszöveget nem menti" in privacy and "legfeljebb 12 gondolatgenom-lenyomat" in privacy)
-require("public test matrix exists", "Nyilvános tesztmátrix" in test_matrix and "Ismert korlátozás" in test_matrix)
-require("test matrix does not claim Stable", "· Stable" not in test_matrix)
-
-require("preview Worker remains isolated from production domains", not preview_config.get("routes"))
-require("preview Worker remains on workers.dev", preview_config.get("workers_dev") is True)
-require("production Worker owns the content wrapper", production_config.get("main") == "src/production-content-entry.js")
-production_domains = [route.get("pattern") for route in production_config.get("routes", [])]
-require("production Worker owns both custom domains", production_domains == ["formatxsuite.com", "www.formatxsuite.com"])
-
-for source, label in ((preview_worker, "preview Worker"), (production_worker, "production Worker")):
-    require(f"{label} serves platform status assets", all(token in source for token in ("platform-status.json", "platform-status.js", "platform-status.css")))
-    require(f"{label} serves Organism assets", all(token in source for token in ("organism-voice.js", "organism-voice-dock.css", "synaptic-thought-genome.js", "synaptic-thought-disclosure.js")))
-    require(f"{label} serves Morphing Organism V3", "mobile-core-engine-v3.js" in source)
-    require(f"{label} has no obsolete Natural Voice route", "organism-natural-voice" not in source)
-
-failed = [label for label, passed in RESULTS if not passed]
-for label, passed in RESULTS:
-    print(("PASS" if passed else "FAIL"), label)
-
-if failed:
-    raise SystemExit("FormatX production architecture validation failed: " + "; ".join(failed))
-
-=======
 require("canonical Bazzite-first platform matrix", actual == expected)
 require("product remains Public beta", status_data["product_release"]["status"] == "public_beta")
 require("public package is multiplatform", status_data["product_release"].get("public_package") == "multiplatform")
@@ -347,5 +184,4 @@ for label, passed in RESULTS:
     print(("PASS" if passed else "FAIL"), label)
 if failed:
     raise SystemExit("FormatX production architecture validation failed: " + "; ".join(failed))
->>>>>>> origin/master
 print(f"FormatX production architecture validation passed: {len(RESULTS)} current contracts.")
