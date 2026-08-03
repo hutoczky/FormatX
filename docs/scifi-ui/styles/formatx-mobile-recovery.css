@@ -125,7 +125,7 @@ html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
     left: 50% !important;
     right: auto !important;
     bottom: 18px !important;
-    z-index: 98 !important;
+    z-index: var(--fx-layer-floating) !important;
     grid-template-columns: 28px auto !important;
     gap: 8px !important;
     min-height: 38px !important;
