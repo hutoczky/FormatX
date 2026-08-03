@@ -13,7 +13,7 @@
     if (document.querySelector('link[data-fx-organism-core-interaction-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/organism-core-interaction.css?v=20260730-core-interaction-1';
+    link.href = './styles/organism-core-interaction.css?v=20260803-single-mag-1';
     link.dataset.fxOrganismCoreInteractionStyle = 'true';
     document.head.appendChild(link);
   }
