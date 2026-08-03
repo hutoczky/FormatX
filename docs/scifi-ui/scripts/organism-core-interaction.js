@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  // Production deployment marker: duplicate MAG/Core hotfix, 2026-08-03.
   const ROOT = document.documentElement;
   if (ROOT.dataset.fxOrganismCoreInteraction === 'ready-v1') return;
   ROOT.dataset.fxOrganismCoreInteraction = 'loading-v1';
