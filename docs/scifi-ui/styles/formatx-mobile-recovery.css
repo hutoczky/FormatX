@@ -1,7 +1,7 @@
 @import url('./formatx-desktop-unified.css');
 @import url('./formatx-mobile-hero-flow.css');
 
-/* Production marker: duplicate floating-control hotfix validated on mobile and desktop. */
+/* Production marker v2: duplicate floating-control hotfix validated on mobile and desktop. */
 /* FormatX living-core visibility and responsive layout recovery. */
 html[data-fx-safe-three-gate="ready-v1"] body,
 html[data-fx-safe-three-gate="ready-v2"] body {
