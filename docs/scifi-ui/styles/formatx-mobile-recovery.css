@@ -117,6 +117,40 @@ html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
   padding-bottom: 20px;
 }
 
+/* The Interaction Genome is a separate feature, not a second Organism
+   thought trigger. On desktop it is presented as a compact dock action rather
+   than another circular side control. */
+@media (min-width: 901px) and (pointer: fine) {
+  .fx-genome-launcher {
+    left: 50% !important;
+    right: auto !important;
+    bottom: 18px !important;
+    z-index: 98 !important;
+    grid-template-columns: 28px auto !important;
+    gap: 8px !important;
+    min-height: 38px !important;
+    padding: 4px 11px 4px 5px !important;
+    border-radius: 11px !important;
+    transform: translateX(285px) !important;
+    background: linear-gradient(145deg, rgba(4, 13, 24, .96), rgba(11, 8, 24, .96)) !important;
+  }
+
+  .fx-genome-launcher:hover,
+  .fx-genome-launcher:focus-visible {
+    transform: translateX(285px) translateY(-2px) !important;
+  }
+
+  .fx-genome-launcher i {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+  }
+
+  .fx-genome-launcher b {
+    display: grid !important;
+  }
+}
+
 @media (min-width: 901px) and (max-aspect-ratio: 16/10) {
   html[data-fx-safe-three-gate="ready-v1"] .fx-three-stage-shell,
   html[data-fx-safe-three-gate="ready-v2"] .fx-three-stage-shell {
@@ -154,14 +188,9 @@ html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
     transform: none !important;
   }
 
-  .fx-three-sound {
-    right: 12px !important;
-    bottom: max(78px, calc(70px + env(safe-area-inset-bottom))) !important;
-  }
-
-  /* The full Interaction Genome remains available on desktop. On compact
-     screens its separate floating launcher is removed to prevent content and
-     action-dock overlap. */
+  /* Compact layouts already expose sound/voice from the Organism controls.
+     Extra fixed launchers would cover hero content and look duplicated. */
+  .fx-three-sound,
   .fx-genome-launcher {
     display: none !important;
   }
