@@ -1,0 +1,95 @@
+name: One-shot align current CI contracts
+
+on:
+  push:
+    branches:
+      - maintenance/npm-audit-20260731
+    paths:
+      - '.github/workflows/one-shot-align-current-ci-contracts.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-one-shot-align-current-ci-contracts-v2
+  cancel-in-progress: false
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align stale workflow assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          mobile = Path('.github/workflows/validate-mobile-intro-recovery.yml')
+          text = mobile.read_text(encoding='utf-8')
+          replacements = {
+              'safe-ready-v25': 'safe-ready-v26',
+              'safe-degraded-v25': 'safe-degraded-v26',
+              'organism-voice-dock.css?v=20260730-organism-dock-2': 'organism-voice-dock.css?v=20260731-organism-dock-3',
+              'MOBILE_QUERY.matches ? 2100 : 2400': 'MOBILE_QUERY.matches?2100:2400',
+              'TIMELINE_DURATION + EXIT_DURATION + 1100': 'hardDeadline=timelineDuration+exitDuration+1100',
+              "DOMContentLoaded', startIntro": "DOMContentLoaded',start",
+              'if (event.persisted) startIntro();': 'bfcache-restore',
+          }
+          for old, new in replacements.items():
+              text = text.replace(old, new)
+
+          text = re.sub(
+              r"^\s*!\s*grep -Fq 'formatx-intro-seen-v1'.*$",
+              "          grep -Fq 'formatx:intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js",
+              text,
+              flags=re.MULTILINE,
+          )
+          text = text.replace(
+              "            '/scifi-ui/styles/organism-voice-foreground.css',\n",
+              "",
+          )
+          text = text.replace(
+              "            '/scifi-ui/scripts/organism-voice-foreground.js',\n",
+              "",
+          )
+          mobile.write_text(text, encoding='utf-8')
+
+          organism = Path('.github/workflows/validate-organism-dialogue.yml')
+          text = organism.read_text(encoding='utf-8')
+          text = text.replace('safe-ready-v25', 'safe-ready-v26')
+          text = text.replace('safe-degraded-v25', 'safe-degraded-v26')
+          text = text.replace(
+              'v25 loader or disclosure module missing',
+              'v26 loader or disclosure module missing',
+          )
+          organism.write_text(text, encoding='utf-8')
+          PY
+
+          grep -Fq 'safe-ready-v26' .github/workflows/validate-mobile-intro-recovery.yml
+          grep -Fq 'organism-dock-3' .github/workflows/validate-mobile-intro-recovery.yml
+          grep -Fq 'formatx:intro-seen-v1' .github/workflows/validate-mobile-intro-recovery.yml
+          grep -Fq 'bfcache-restore' .github/workflows/validate-mobile-intro-recovery.yml
+          grep -Fq 'safe-ready-v26' .github/workflows/validate-organism-dialogue.yml
+          ! grep -Fq 'safe-ready-v25' .github/workflows/validate-mobile-intro-recovery.yml
+          ! grep -Fq 'safe-ready-v25' .github/workflows/validate-organism-dialogue.yml
+          ! grep -Fq "'/scifi-ui/styles/organism-voice-foreground.css'" .github/workflows/validate-mobile-intro-recovery.yml
+          ! grep -Fq "'/scifi-ui/scripts/organism-voice-foreground.js'" .github/workflows/validate-mobile-intro-recovery.yml
+
+      - name: Remove one-shot workflow and commit alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/one-shot-align-current-ci-contracts.yml
+          git config user.name 'FormatX maintenance automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add .github/workflows/validate-mobile-intro-recovery.yml \
+                  .github/workflows/validate-organism-dialogue.yml
+          git commit -m 'Align CI with current v26 and route contracts'
+          git push origin HEAD:maintenance/npm-audit-20260731

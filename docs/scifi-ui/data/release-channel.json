@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "updated": "2026-07-31",
   "source": {
     "type": "github_latest_release",
@@ -8,15 +8,23 @@
     "public_releases_url": "https://github.com/hutoczky/FormatX-Updates/releases/latest"
   },
   "channels": {
-    "windows": {
-      "status_source": "platform-status.json#windows",
+    "multiplatform": {
+      "status_sources": [
+        "platform-status.json#linux-bazzite",
+        "platform-status.json#windows"
+      ],
+      "primary_platform": "linux-bazzite",
+      "supported_platforms": [
+        "linux-bazzite",
+        "windows"
+      ],
       "asset_patterns": [
-        "^FormatX-Suite-Pro-.*\\.(zip|msix|msixbundle)$"
+        "^FormatX-Suite-Pro-.*\\.(zip|tar\\.gz|tar\\.xz)$"
       ],
       "required_for_active_download": true,
       "fallback": {
-        "hu": "Windows nyilvános béta letöltése",
-        "en": "Download Windows public beta"
+        "hu": "Multiplatform nyilvános béta letöltése",
+        "en": "Download multiplatform public beta"
       }
     },
     "android": {
@@ -32,15 +40,35 @@
       }
     }
   },
+  "public_display": {
+    "show_release_version": false,
+    "show_internal_component_versions": false,
+    "package_label": {
+      "hu": "Multiplatform nyilvános béta",
+      "en": "Multiplatform public beta"
+    }
+  },
   "version_normalization": {
-    "strip_prefixes": ["refs/tags/", "release-", "Release-"],
-    "display_tag_as_published": true,
+    "strip_prefixes": [
+      "refs/tags/",
+      "release-",
+      "Release-"
+    ],
+    "display_tag_as_published": false,
     "invent_when_missing": false
   },
   "evidence": {
     "prefer_release_asset_digest": true,
-    "checksum_asset_patterns": ["sha256", "checksums", "checksum"],
-    "signature_asset_patterns": [".sig", ".minisig", ".asc"],
+    "checksum_asset_patterns": [
+      "sha256",
+      "checksums",
+      "checksum"
+    ],
+    "signature_asset_patterns": [
+      ".sig",
+      ".minisig",
+      ".asc"
+    ],
     "release_notes_source": "release_body",
     "known_issues_source": "/scifi-ui/known-issues.html",
     "test_matrix_source": "/scifi-ui/test-matrix.html"
