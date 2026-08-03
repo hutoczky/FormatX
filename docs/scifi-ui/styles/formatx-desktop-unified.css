@@ -15,7 +15,7 @@
     height: min(960px, calc(100svh - 69px));
     max-height: min(100svh, 960px);
     min-height: 720px;
-    padding: clamp(76px, 8vh, 108px) 0 clamp(70px, 8vh, 100px);
+    padding: clamp(94px, 9.2vh, 126px) 0 clamp(70px, 8vh, 100px);
     align-items: center;
     overflow: clip;
   }
@@ -39,28 +39,35 @@
     left: auto;
     bottom: auto;
     display: grid;
-    grid-template-rows: auto 64px auto auto 76px auto auto;
+    grid-template-rows: repeat(7, auto);
+    row-gap: clamp(7px, 1.05vh, 14px);
     align-content: center;
     align-self: center;
-    width: min(680px, 100%);
+    width: min(700px, 100%);
     max-width: none;
     min-height: 0;
     margin: 0;
-    transform: translateY(-1.5vh);
+    transform: none;
+    overflow: visible;
   }
 
   html body.living-architecture #hero .hero-copy > .kicker {
     grid-row: 1;
+    margin-bottom: 0;
   }
 
   html body.living-architecture #hero .hero-copy > .fx-category-definition {
     grid-row: 2;
-    align-self: center;
-    overflow: hidden;
+    align-self: start;
+    width: min(620px, 100%);
+    max-width: 620px;
+    margin: 0;
+    overflow: visible;
   }
 
   html body.living-architecture #hero .hero-copy > #hero-title {
     grid-row: 3;
+    margin-block: clamp(2px, .5vh, 8px);
   }
 
   html body.living-architecture #hero .hero-copy > .hero-lead {
@@ -69,8 +76,9 @@
 
   html body.living-architecture #hero .hero-copy > .fx-method-inline {
     grid-row: 5;
-    align-self: center;
-    overflow: hidden;
+    align-self: start;
+    margin-block: clamp(4px, .7vh, 10px);
+    overflow: visible;
   }
 
   html body.living-architecture #hero .hero-copy > .hero-actions {
@@ -82,25 +90,25 @@
   }
 
   html body.living-architecture #hero .hero-title-main {
-    font-size: clamp(68px, 7.7vw, 138px);
-    line-height: .82;
+    font-size: clamp(66px, 7.1vw, 124px);
+    line-height: .84;
   }
 
   html body.living-architecture #hero .hero-title-sub {
-    font-size: clamp(28px, 3.15vw, 52px);
+    font-size: clamp(27px, 2.9vw, 48px);
   }
 
   html body.living-architecture #hero .hero-lead {
     max-width: 620px;
-    margin-top: clamp(18px, 2.4vh, 28px);
-    font-size: clamp(15px, 1.1vw, 19px);
-    line-height: 1.62;
+    margin-top: clamp(8px, 1.2vh, 16px);
+    font-size: clamp(15px, 1.05vw, 18px);
+    line-height: 1.58;
   }
 
   html body.living-architecture #hero .hero-actions {
     display: flex !important;
     width: min(620px, 100%);
-    margin-top: clamp(20px, 2.8vh, 32px);
+    margin-top: clamp(10px, 1.5vh, 20px);
     flex-wrap: wrap;
     gap: 12px;
   }
@@ -112,7 +120,7 @@
   html body.living-architecture #hero .hero-facts {
     display: flex !important;
     width: min(620px, 100%);
-    margin-top: clamp(16px, 2vh, 24px);
+    margin-top: clamp(8px, 1.2vh, 16px);
     flex-wrap: wrap;
   }
 
@@ -145,6 +153,15 @@
     transform: translateX(-50%);
   }
 
+  /* The hero already exposes download and navigation actions. The duplicate
+     fixed dock must not cover the composition while the core is active. */
+  html.fx-organism-core-active .fx-organism-actionbar {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(16px) !important;
+  }
+
   html body.living-architecture main > .scene:not(#hero) {
     min-height: clamp(760px, 94svh, 980px);
     padding-block: clamp(96px, 12vh, 150px);
@@ -155,13 +172,27 @@
   html body.living-architecture #hero {
     height: calc(100svh - 69px);
     min-height: 680px;
-    padding-top: 68px;
-    padding-bottom: 60px;
+    padding-top: 84px;
+    padding-bottom: 58px;
   }
 
   html body.living-architecture #hero .hero-copy {
-    grid-template-rows: auto 52px auto auto 62px auto auto;
+    grid-template-rows: repeat(7, auto);
+    row-gap: 6px;
     transform: none;
+  }
+
+  html body.living-architecture #hero .fx-category-definition {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  html body.living-architecture #hero .fx-category-definition strong {
+    margin-bottom: 4px;
+  }
+
+  html body.living-architecture #hero .fx-method-inline {
+    margin-block: 2px;
   }
 
   html body.living-architecture #hero .hero-space {
@@ -170,11 +201,20 @@
   }
 
   html body.living-architecture #hero .hero-title-main {
-    font-size: clamp(62px, 7vw, 112px);
+    font-size: clamp(60px, 6.5vw, 106px);
   }
 
   html body.living-architecture #hero .hero-lead {
-    line-height: 1.5;
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+
+  html body.living-architecture #hero .hero-actions {
+    margin-top: 6px;
+  }
+
+  html body.living-architecture #hero .hero-facts {
+    margin-top: 4px;
   }
 }
 
