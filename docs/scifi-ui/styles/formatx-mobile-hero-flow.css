@@ -188,3 +188,5 @@
     font-size: clamp(44px, 14.1vw, 60px) !important;
   }
 }
+
+/* Production deployment marker: 2026-08-03 hero-layout-hotfix. */
