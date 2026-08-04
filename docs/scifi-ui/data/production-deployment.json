@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_commit": "4391287f6727c6042fce69834858d6841f39dbac",
-  "feature": "mobile MAG control beside language selector",
-  "requested_at": "2026-08-02T20:20:00Z"
+  "source_commit": "0fc4fb905783dc43119a8a51121ebf36d105a708",
+  "feature": "official release metadata and merged multiplatform production fixes",
+  "requested_at": "2026-08-04T19:00:00Z"
 }
