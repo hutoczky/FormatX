@@ -1,0 +1,4 @@
+FormatX production deployment trigger
+Requested: 2026-08-04T15:54:00+02:00
+Source: current master
+Purpose: validate and deploy the current production candidate to both custom domains.
