@@ -1,5 +1,5 @@
 {
-  "deployment": "formatx-110-finish",
-  "requested_at": "2026-08-02T20:40:00+02:00",
-  "source_commit": "7aa709f2004af7dd3fd0e4dbe0cf7b2f4fe1c7dd"
+  "deployment": "formatx-legacy-free-multiplatform-public-release",
+  "requested_at": "2026-08-04T10:10:00+02:00",
+  "source_commit": "d01863ccff6a2afb875a04e88bb5dbd9fb33ca15"
 }
