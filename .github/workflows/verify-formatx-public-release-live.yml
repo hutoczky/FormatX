@@ -1,0 +1,94 @@
+name: Verify FormatX public release live
+run-name: Verify public release on both domains from ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/data/current-release.json'
+      - 'billing-worker/src/production-content-entry.js'
+      - '.github/workflows/verify-formatx-public-release-live.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  verify:
+    name: Verify multiplatform public release
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify both production domains
+        shell: bash
+        run: |
+          set -euo pipefail
+          for origin in https://formatxsuite.com https://www.formatxsuite.com; do
+            success=false
+            for attempt in $(seq 1 24); do
+              tmp="$(mktemp -d)"
+              if curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/?audit=${GITHUB_SHA}-${attempt}" > "$tmp/home.html" \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/data/current-release.json?audit=${GITHUB_SHA}-${attempt}" > "$tmp/release.json" \
+                && grep -Fq 'Multiplatform nyilvános béta letöltése' "$tmp/home.html" \
+                && grep -Fq 'Linux/Bazzite az elsődleges platform' "$tmp/home.html" \
+                && ! grep -Eqi 'FormatX Suite Pro V[0-9]+|Windows nyilvános béta letöltése|FormatX-Suite-Pro-V(29|92|120)|releases/tag/v(29|92|120)' "$tmp/home.html" \
+                && node - "$tmp/release.json" <<'NODE'
+          const fs = require('node:fs');
+          const file = process.argv[2];
+          const release = JSON.parse(fs.readFileSync(file, 'utf8'));
+          const channel = release.channels?.multiplatform;
+          if (release.ok !== true || release.schema_version !== 2) process.exit(1);
+          if (!channel || channel.available !== true) process.exit(1);
+          if (channel.primary_platform !== 'linux-bazzite') process.exit(1);
+          if (!Array.isArray(channel.supported_platforms)) process.exit(1);
+          if (!channel.supported_platforms.includes('linux-bazzite')) process.exit(1);
+          if (!channel.supported_platforms.includes('windows')) process.exit(1);
+          if (!/\.zip$/i.test(String(channel.name || ''))) process.exit(1);
+          if (!/^sha256:[a-f0-9]{64}$/i.test(String(channel.digest || ''))) process.exit(1);
+          NODE
+              then
+                success=true
+                rm -rf "$tmp"
+                break
+              fi
+              rm -rf "$tmp"
+              sleep 10
+            done
+            if [[ "$success" != true ]]; then
+              echo "Strict public release audit failed for $origin" >&2
+              exit 1
+            fi
+          done
+
+      - name: Publish strict live audit status
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          node --input-type=module - <<'NODE'
+          const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
+          const response = await fetch(
+            `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`,
+            {
+              method: 'POST',
+              headers: {
+                Accept: 'application/vnd.github+json',
+                Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                'X-GitHub-Api-Version': '2022-11-28',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                state,
+                context: 'FormatX strict live public release audit',
+                description: 'Both domains are Bazzite-first, multiplatform and free of legacy public version labels',
+                target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
+              }),
+            }
+          );
+          if (!response.ok) throw new Error(`Status publish failed: ${response.status} ${await response.text()}`);
+          NODE
