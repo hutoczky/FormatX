@@ -8,6 +8,7 @@ on:
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/data/current-release.json'
+      - 'docs/scifi-ui/data/production-deploy-marker.json'
       - 'billing-worker/src/production-content-entry.js'
       - '.github/workflows/verify-formatx-public-release-live.yml'
 
@@ -35,7 +36,7 @@ jobs:
                    "$origin/scifi-ui/data/current-release.json?audit=${GITHUB_SHA}-${attempt}" > "$tmp/release.json" \
                 && grep -Fq 'Multiplatform nyilvános béta letöltése' "$tmp/home.html" \
                 && grep -Fq 'Linux/Bazzite az elsődleges platform' "$tmp/home.html" \
-                && ! grep -Eqi 'FormatX Suite Pro V[0-9]+|Windows nyilvános béta letöltése|FormatX-Suite-Pro-V(29|92|120)|releases/tag/v(29|92|120)' "$tmp/home.html" \
+                && ! grep -Eqi 'FormatX Suite Pro V[0-9]+|Windows nyilvános béta letöltése|FormatX-Suite-Pro-V(29|92|120)|releases/tag/v[0-9]+' "$tmp/home.html" \
                 && node - "$tmp/release.json" <<'NODE'
           const fs = require('node:fs');
           const file = process.argv[2];
