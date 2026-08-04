@@ -75,6 +75,9 @@ export default {
 function cleanLegacyReleaseCopy(html) {
   return html
     .replaceAll('https://github.com/hutoczky/FormatX-Updates/releases/download/v92/FormatX-Suite-Pro-V92.zip', '/scifi-ui/downloads/')
+    .replace(/\bFormatX Suite Pro V\d+\b/gi, 'FormatX Suite Pro')
+    .replace(/\bWindows V\d+\b/gi, 'Windows')
+    .replace(/https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/tag\/v\d+/gi, 'https://github.com/hutoczky/FormatX-Updates/releases')
     .replaceAll('FormatX Suite Pro V92', 'FormatX Suite Pro')
     .replaceAll('Windows V92', 'Windows')
     .replaceAll('V92 kiadási oldal', 'Hivatalos kiadási oldal')
