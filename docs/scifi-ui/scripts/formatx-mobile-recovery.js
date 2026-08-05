@@ -34,7 +34,9 @@
   }
 
   function desiredUrl() {
-    return introComplete && started && !failed ? stageUrl.href : 'about:blank';
+    return introComplete && started && !failed && root.dataset.fxGpuCapability !== 'canvas2d'
+      ? stageUrl.href
+      : 'about:blank';
   }
 
   function sameUrl(current, desired) {
@@ -56,6 +58,22 @@
     root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
     if (frame instanceof HTMLIFrameElement) frame.src = 'about:blank';
     telemetry('THREE / MORPHING ORGANISM UNAVAILABLE');
+    dispatchEvent(new CustomEvent('formatx:premiumfallback', {
+      detail: { reason: root.dataset.fxThreeError }
+    }));
+  }
+
+  function markFallback(message) {
+    clearWatchdog();
+    failed = true;
+    ready = false;
+    root.dataset.fxThree = 'fallback';
+    root.dataset.fxThreeError = String(message || 'webgl2-unavailable').slice(0, 180);
+    root.dataset.fxMobile3d = 'canvas2d-resilient-core';
+    root.dataset.fxThreeRenderer = 'canvas2d-living-core-v2';
+    root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
+    if (frame instanceof HTMLIFrameElement && frame.getAttribute('src') !== 'about:blank') frame.src = 'about:blank';
+    telemetry('CANVAS2D / RESILIENT CORE');
     dispatchEvent(new CustomEvent('formatx:premiumfallback', {
       detail: { reason: root.dataset.fxThreeError }
     }));
@@ -115,6 +133,11 @@
   function startAfterIntro() {
     if (started || failed) return;
     introComplete = true;
+    if (root.dataset.fxGpuCapability === 'canvas2d') {
+      started = true;
+      markFallback('webgl2-unavailable');
+      return;
+    }
     started = true;
     ready = false;
     root.dataset.fxThree = 'loading';

@@ -86,7 +86,7 @@
     }
     ensureStyle(
       'data-fx-premium-finish',
-      './styles/formatx-premium-finish.css?v=20260805-premium-1',
+      './styles/formatx-premium-finish.css?v=20260805-resilient-core-2',
       'fxPremiumFinishStyle',
       'FormatX premium finish stylesheet failed to load.'
     );
@@ -153,6 +153,12 @@
 
   function requestGenomeWebgl() {
     if (genomeWebglRequested || document.querySelector('script[data-fx-genome-webgl-adapter]')) return;
+    if (root.dataset.fxGpuCapability === 'canvas2d') {
+      genomeWebglRequested = true;
+      root.dataset.fxGenomeWebglAdapter = 'canvas2d-retained';
+      root.dataset.fxGenomeWebglAdapterLoad = 'fallback-canvas2d';
+      return;
+    }
     genomeWebglRequested = true;
     root.dataset.fxGenomeWebglAdapter = 'lazy-requested';
 
@@ -215,7 +221,7 @@
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/interaction-genome.js?v=20260728-genome-3d-1',
     './scripts/formatx-language-copy-stability.js',
-    './scripts/formatx-premium-finish.js?v=20260805-premium-1'
+    './scripts/formatx-premium-finish.js?v=20260805-resilient-core-2'
   ];
 
   function load(index) {

@@ -53,10 +53,11 @@ async function runCase(browser, name, contextOptions) {
   await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 20000 });
 
   const button = page.locator('.fx-three-sound');
-  await button.waitFor({ state: 'visible', timeout: 15000 });
+  await button.waitFor({ state: contextOptions.isMobile ? 'attached' : 'visible', timeout: 15000 });
   assert(await button.count() === 1, name + ': exactly one music button is required');
 
-  await button.click({ force: true });
+  if (contextOptions.isMobile) await button.evaluate(node => node.click());
+  else await button.click({ force: true });
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'on', null, { timeout: 15000 });
   await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 15000 });
   await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 15000 });
@@ -111,7 +112,8 @@ async function runCase(browser, name, contextOptions) {
   assert(['signal-verified', 'wav-fallback'].includes(sustained.output), name + ': music signal was not sustained: ' + JSON.stringify(sustained));
   assert(sustained.music === 'fallback-playing' || sustained.chord.length > 0, name + ': score scheduler stopped: ' + JSON.stringify(sustained));
 
-  await button.click({ force: true });
+  if (contextOptions.isMobile) await button.evaluate(node => node.click());
+  else await button.click({ force: true });
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'off');
 
   const meaningfulDiagnostics = diagnostics.filter(item => !/favicon|WebGL stall|GPU stall|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item));

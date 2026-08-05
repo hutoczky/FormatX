@@ -31,6 +31,77 @@ html[data-fx-premium-finish='ready-v1'] .language-switch button:focus-visible {
   outline-offset: 4px;
 }
 
+.fx-resilient-core {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(0) scale(.985);
+  transition: opacity .65s ease, transform .9s cubic-bezier(.2,.8,.2,1);
+}
+
+.fx-resilient-core[data-active='true'] {
+  opacity: 1;
+  transform: translateZ(0) scale(1);
+}
+
+html[data-fx-premium-core='canvas2d-resilient'] #hero .hero-space {
+  isolation: isolate;
+}
+
+html[data-fx-premium-core='canvas2d-resilient'] #hero .hero-ring {
+  z-index: 1;
+  border-color: rgba(184, 246, 255, .21);
+  box-shadow: 0 0 44px rgba(50, 216, 224, .1);
+}
+
+html[data-fx-premium-core='canvas2d-resilient'] #hero .fx-organism-map {
+  z-index: 2;
+  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, .44));
+}
+
+html[data-fx-three='fallback'] .fx-three-stage-shell,
+html[data-fx-three='fallback'] #fx-three-frame {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+html[data-fx-three='fallback'] .fx-premium-core-status {
+  position: absolute;
+  z-index: 4;
+  right: 50%;
+  bottom: 2%;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px;
+  color: rgba(220, 249, 255, .78);
+  border: 1px solid rgba(125, 229, 255, .19);
+  border-radius: 999px;
+  background: rgba(2, 12, 20, .72);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, .28);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transform: translateX(50%);
+  backdrop-filter: blur(18px);
+}
+
+html[data-fx-three='fallback'] .fx-premium-core-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #75f4df;
+  box-shadow: 0 0 14px rgba(117, 244, 223, .88);
+}
+
 /* A failed renderer must never expose the iframe's default white document. */
 html[data-fx-three='error'] .fx-three-stage-shell,
 html[data-fx-three='error'] #fx-three-frame {
@@ -260,11 +331,6 @@ html[data-fx-three='error'] .fx-premium-core-status::before {
     display: none !important;
   }
 
-  html[data-fx-premium-finish='ready-v1'].fx-organism-core-active :where(.fx-genome-launcher, .fx-three-sound) {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
 }
 
 @media (max-width: 1099px) {

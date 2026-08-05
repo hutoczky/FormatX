@@ -216,7 +216,9 @@ function isCanonicalHomepageRequest(request, url) {
 }
 
 function createHomepageAssetRequest(request) {
-  const assetUrl = new URL('/scifi-ui/index.html', request.url);
+  // Cloudflare Assets canonicalises explicit index.html requests with a 307.
+  // Requesting the directory serves the same file directly, so the public root stays 200.
+  const assetUrl = new URL('/scifi-ui/', request.url);
   return new Request(assetUrl, request);
 }
 
