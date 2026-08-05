@@ -1,11 +1,17 @@
 (function () {
   'use strict';
 
-  // Production deployment revision: 20260805-root-homepage-1.
+  // Production deployment revision: 20260805-redirect-loop-guard-1.
 
   const root = document.documentElement;
   if (root.dataset.fxPremiumFinish === 'ready-v1') return;
   root.dataset.fxPremiumFinish = 'ready-v1';
+
+  function repairLegacyHomepageUrl() {
+    if (location.hostname !== 'www.formatxsuite.com') return;
+    if (!['/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html'].includes(location.pathname)) return;
+    history.replaceState(history.state, '', '/' + location.search + location.hash);
+  }
 
   function language() {
     return root.lang === 'en' ? 'en' : 'hu';
@@ -59,6 +65,7 @@
 
   const rendererObserver = new MutationObserver(syncRendererState);
   rendererObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three', 'lang'] });
+  repairLegacyHomepageUrl();
   document.addEventListener('click', handleHashNavigation, true);
   addEventListener('formatx:languagechange', ensureFallbackStatus);
   addEventListener('formatx:premiumfallback', syncRendererState);

@@ -33,12 +33,17 @@ const RATE_LIMITED_API_PATHS = new Set([
   '/api/admin/approve-bank-transfer',
 ]);
 
+const HOMEPAGE_PATHS = new Set([
+  '/',
+  '/index.html',
+  '/scifi-ui',
+  '/scifi-ui/',
+  '/scifi-ui/index.html',
+]);
+
 const CANONICAL_PAGE_REDIRECTS = new Map([
-  ['/', '/'],
   ['/index.html', '/'],
-  ['/scifi-ui', '/'],
-  ['/scifi-ui/', '/'],
-  ['/scifi-ui/index.html', '/'],
+  ['/scifi-ui', '/scifi-ui/'],
   ['/checkout.html', '/scifi-ui/checkout.html'],
 ]);
 
@@ -185,6 +190,12 @@ export function isLivingCorePath(pathname) {
 
 export function canonicalPageRedirect(request, url) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return null;
+
+  if (url.hostname === 'formatxsuite.com' && HOMEPAGE_PATHS.has(url.pathname)) {
+    const target = new URL('/', PUBLIC_ORIGIN);
+    target.search = url.search;
+    return Response.redirect(target.toString(), 308);
+  }
 
   const targetPath = CANONICAL_PAGE_REDIRECTS.get(url.pathname);
   if (!targetPath) return null;

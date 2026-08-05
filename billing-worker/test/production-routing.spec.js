@@ -112,12 +112,28 @@ describe('production routing and frame security', () => {
     expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/');
   });
 
-  it('redirects legacy homepage paths to the domain root and preserves the query string', () => {
+  it('normalises the no-slash legacy homepage path without sending it back to root', () => {
     const request = new Request('https://www.formatxsuite.com/scifi-ui?lang=hu');
     const response = canonicalPageRedirect(request, new URL(request.url));
 
     expect(response?.status).toBe(308);
-    expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/?lang=hu');
+    expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/scifi-ui/?lang=hu');
+  });
+
+  it.each([
+    '/scifi-ui/',
+    '/scifi-ui/index.html',
+  ])('never redirects the legacy homepage alias %s back to root', (pathname) => {
+    const request = new Request(`https://www.formatxsuite.com${pathname}`);
+    expect(canonicalPageRedirect(request, new URL(request.url))).toBeNull();
+  });
+
+  it('redirects an apex legacy homepage alias to the canonical www root', () => {
+    const request = new Request('https://formatxsuite.com/scifi-ui/?lang=en');
+    const response = canonicalPageRedirect(request, new URL(request.url));
+
+    expect(response?.status).toBe(308);
+    expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/?lang=en');
   });
 
   it('serves the homepage directly at the www domain root', async () => {
@@ -145,5 +161,28 @@ describe('production routing and frame security', () => {
   it('does not redirect the canonical www domain root', () => {
     const request = new Request('https://www.formatxsuite.com/');
     expect(canonicalPageRedirect(request, new URL(request.url))).toBeNull();
+  });
+
+  it.each([
+    '/scifi-ui/',
+    '/scifi-ui/index.html',
+  ])('serves legacy homepage alias %s with a 200 response', async (pathname) => {
+    const response = await productionWorker.fetch(
+      new Request(`https://www.formatxsuite.com${pathname}`),
+      {
+        ASSETS: {
+          async fetch(request) {
+            return new Response(`<!doctype html><title>${new URL(request.url).pathname}</title>`, {
+              headers: { 'Content-Type': 'text/html; charset=utf-8' },
+            });
+          },
+        },
+      },
+      {},
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Location')).toBeNull();
+    expect(response.headers.get('Link')).toBe('<https://www.formatxsuite.com/>; rel="canonical"');
   });
 });

@@ -26,8 +26,10 @@ assert.ok(webgpu.includes("} else if (false && fps > 108 && this.tier < 3) {"), 
 assert.ok(loader.includes("formatx-premium-finish.css?v=20260805-premium-1"), "premium finish CSS is not loaded last");
 assert.ok(loader.includes("formatx-premium-finish.js?v=20260805-premium-1"), "premium finish runtime is missing");
 assert.ok(premium.includes("a[href^=\"#\"]"), "root-safe hash navigation is missing");
+assert.ok(premium.includes("history.replaceState(history.state, '', '/' + location.search + location.hash)"), "legacy homepage URL repair is missing");
 assert.ok(premiumCss.includes("html[data-fx-three='error'] .fx-three-stage-shell"), "renderer failure fallback is missing");
 assert.ok(production.includes("new URL('/scifi-ui/index.html', request.url)"), "domain root does not serve the canonical homepage asset");
-assert.ok(production.includes("['/scifi-ui/', '/']"), "legacy homepage redirect is missing");
+assert.ok(production.includes("['/scifi-ui', '/scifi-ui/']"), "safe legacy homepage normalisation is missing");
+assert.ok(!production.includes("['/scifi-ui/', '/']"), "redirect-loop-prone legacy homepage redirect is present");
 
 console.log("FormatX 110% finish validation passed.");
