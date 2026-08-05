@@ -175,15 +175,21 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
-      - name: Deploy the validated production Worker
+      - name: Deploy with Wrangler or wait for the connected Cloudflare build
+        id: deploy_mode
         working-directory: billing-worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.FORMATX_CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_WORKERS_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID || 'ffd7d28ea7c6a510549dc9363619c8c5' }}
         run: |
           set -euo pipefail
-          test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
+          if [[ -z "$CLOUDFLARE_API_TOKEN" ]]; then
+            echo "mode=connected-cloudflare-build" >> "$GITHUB_OUTPUT"
+            echo "Wrangler token unavailable; the live smoke test will verify the connected Cloudflare Git deployment."
+            exit 0
+          fi
+          echo "mode=wrangler" >> "$GITHUB_OUTPUT"
           npx wrangler deploy
 
       - name: Smoke-test both custom domains and requested features
@@ -193,9 +199,11 @@ jobs:
           expected_release_version="$(node -p "require('./docs/scifi-ui/data/current-release.json').version")"
           expected_release_schema="$(node -p "require('./docs/scifi-ui/data/current-release.json').schema_version")"
           expected_release_digest="$(node -p "require('./docs/scifi-ui/data/current-release.json').channels?.windows?.digest || ''")"
+          expected_premium_revision="$(grep -Eo '202[0-9]{5}-[a-z0-9-]+' docs/scifi-ui/scripts/formatx-premium-finish.js | head -n 1)"
           test -n "$expected_loader_marker"
           test -n "$expected_release_version"
           test -n "$expected_release_schema"
+          test -n "$expected_premium_revision"
 
           for origin in https://formatxsuite.com https://www.formatxsuite.com; do
             success=false
@@ -209,6 +217,7 @@ jobs:
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/organism-master-sync.css?v=20260802-live-audit-1" > "$tmp/master.css" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260802-live-audit-1" > "$tmp/infinite.js" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/single-language-toggle.js?v=20260802-live-audit-1" > "$tmp/language.js" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-premium-finish.js?v=$expected_premium_revision" > "$tmp/premium.js" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/formatx-mobile-unified.css?v=20260802-live-audit-1" > "$tmp/mobile.css" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/assets/qr/business_lite-huf.svg?v=20260802-live-audit-1" > "$tmp/qr.svg" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/data/current-release.json" > "$tmp/release.json" \
@@ -223,6 +232,8 @@ jobs:
                 && grep -Fq 'html.fx-organism-master-disabled .fx-thought-genome-disclosure' "$tmp/master.css" \
                 && grep -Fq 'boundary-v4' "$tmp/infinite.js" \
                 && grep -Fq "toggle.className = 'fx-language-toggle'" "$tmp/language.js" \
+                && grep -Fq "$expected_premium_revision" "$tmp/premium.js" \
+                && grep -Fq "history.replaceState(history.state, '', '/' + location.search + location.hash)" "$tmp/premium.js" \
                 && grep -Fq 'Részletes licencfeltételek' "$tmp/license.html" \
                 && grep -Fq 'Detailed licence terms' "$tmp/license.html" \
                 && grep -Fq 'no text overlap' "$tmp/mobile.css" \
