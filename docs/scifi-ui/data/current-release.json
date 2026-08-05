@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "synced_at": "2026-08-04T18:50:31Z",
+  "synced_at": "2026-08-05T00:49:47Z",
   "ok": true,
   "source": "github_published_release",
   "repository": "hutoczky/FormatX-Updates",
@@ -24,7 +24,7 @@
       "content_type": "application/zip",
       "created_at": "2026-08-04T18:43:56Z",
       "updated_at": "2026-08-04T18:44:18Z",
-      "download_count": 0,
+      "download_count": 2,
       "source": "github_release_asset",
       "primary_platform": "linux-bazzite",
       "supported_platforms": [
