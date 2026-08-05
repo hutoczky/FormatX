@@ -1,4 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-03T22:03:00+02:00
-purpose=deploy current master with continuous clone-free scrolling and final responsive fixes
-verification=laptop wheel loop, performance contracts, Lighthouse, both custom domains
+requested_at=2026-08-05T02:56:00+02:00
+source_master=e6ca5fb79ddbccc9588b8bf18f937025d8937fb2
+purpose=deploy current Bazzite-first multiplatform public site and latest official release metadata
+verification=production validation, Cloudflare deploy, both custom domains, release metadata, no public V92/V120 or Windows-only CTA
