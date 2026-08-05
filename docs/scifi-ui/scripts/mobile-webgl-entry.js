@@ -77,7 +77,7 @@ async function startLivingCore() {
 
 startLivingCore().catch(error => {
   const message = error instanceof Error ? error.message : String(error);
-  console.error('FormatX morphing organism stage failed:', error);
+  console.warn('FormatX morphing organism switched to the resilient visual core:', message);
   try {
     const root = parent.document.documentElement;
     root.dataset.fxThree = 'error';

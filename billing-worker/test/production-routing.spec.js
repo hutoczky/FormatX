@@ -154,7 +154,7 @@ describe('production routing and frame security', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(assetPath).toBe('/scifi-ui/index.html');
+    expect(assetPath).toBe('/scifi-ui/');
     expect(response.headers.get('Link')).toBe('<https://www.formatxsuite.com/>; rel="canonical"');
   });
 
