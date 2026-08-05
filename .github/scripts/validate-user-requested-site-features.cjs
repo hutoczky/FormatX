@@ -81,7 +81,7 @@ requireFeature('Infinite scroll uses current boundary-v4 controller',
 requireFeature('Infinite scroll preserves native mobile scrolling and nested panels',
   includesAll(infinite, ["addEventListener('scroll', onScroll, { passive: true })", 'nestedScrollerCanConsume', 'dialogueOpen']));
 requireFeature('Infinite scroll never clones the page', !infinite.includes('cloneNode'));
-requireFeature('Loader uses boundary-v4 cache version', loader.includes('formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4'));
+requireFeature('Loader uses smooth boundary-v4 cache version', loader.includes('formatx-infinite-scroll.js?v=20260805-infinite-smooth-v5'));
 
 const qrFiles = [
   'docs/scifi-ui/assets/qr/business_lite-huf.svg',

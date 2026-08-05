@@ -16,8 +16,7 @@
   const WHEEL_CAPTURE_PX = 96;
   const TOUCH_THRESHOLD = 62;
   const BOUNDARY_EPSILON = 12;
-  const COOLDOWN_MS = 360;
-  const SETTLE_MS = 320;
+  const COOLDOWN_MS = 280;
   const NATIVE_LOOP_DELAY_MS = 180;
   const ACTIVITY_IDLE_MS = 140;
   const WHEEL_INTENT_IDLE_MS = 220;
@@ -36,6 +35,11 @@
   let lastExplicitInputAt = 0;
   let nativeLoopQueued = false;
   let activityTimer = 0;
+  let scrollFrame = 0;
+  let intentFrame = 0;
+  let publishedBoundary = '';
+
+  root.dataset.fxScrollScheduler = 'raf-coalesced-v1';
 
   function topNode() {
     return document.querySelector(TOP_SELECTOR);
@@ -100,8 +104,10 @@
   }
 
   function markActivity() {
-    root.dataset.fxScrollActivity = 'scrolling';
-    root.classList.add('fx-page-scrolling');
+    if (root.dataset.fxScrollActivity !== 'scrolling') {
+      root.dataset.fxScrollActivity = 'scrolling';
+      root.classList.add('fx-page-scrolling');
+    }
     clearTimeout(activityTimer);
     activityTimer = window.setTimeout(() => {
       if (!looping) markIdle();
@@ -110,8 +116,10 @@
 
   function markIdle() {
     clearTimeout(activityTimer);
-    root.dataset.fxScrollActivity = 'idle';
-    root.classList.remove('fx-page-scrolling');
+    if (root.dataset.fxScrollActivity !== 'idle') {
+      root.dataset.fxScrollActivity = 'idle';
+      root.classList.remove('fx-page-scrolling');
+    }
   }
 
   function resetWheelIntent() {
@@ -179,15 +187,33 @@
     }
   }
 
-  function onScroll() {
-    root.dataset.fxInfiniteBoundary = nearTop()
+  function queueWheelIntentCheck() {
+    if (intentFrame) return;
+    intentFrame = requestAnimationFrame(() => {
+      intentFrame = 0;
+      finishWheelIntentAtBoundary();
+    });
+  }
+
+  function publishScrollPosition() {
+    scrollFrame = 0;
+    const boundary = nearTop()
       ? 'top'
       : nearBottom()
         ? 'bottom'
         : 'middle';
+    if (boundary !== publishedBoundary) {
+      publishedBoundary = boundary;
+      root.dataset.fxInfiniteBoundary = boundary;
+    }
     markActivity();
-    requestAnimationFrame(finishWheelIntentAtBoundary);
+    queueWheelIntentCheck();
     if (nearBottom()) queueNativeBottomLoop();
+  }
+
+  function onScroll() {
+    if (scrollFrame) return;
+    scrollFrame = requestAnimationFrame(publishScrollPosition);
   }
 
   function replaceHash(direction) {
@@ -199,12 +225,9 @@
   }
 
   async function settleAt(target) {
-    const deadline = performance.now() + SETTLE_MS;
-    while (performance.now() < deadline) {
-      window.scrollTo(0, target);
-      await new Promise(resolve => requestAnimationFrame(resolve));
-    }
     window.scrollTo(0, target);
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    if (Math.abs(scrollY - target) > 1) window.scrollTo(0, target);
   }
 
   async function performLoop(direction, source) {
@@ -238,7 +261,8 @@
       }
     }));
 
-    await settleAt(target);
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (Math.abs(scrollY - target) > 1) window.scrollTo(0, target);
     root.classList.remove('fx-infinite-loop-jump');
     root.dataset.fxInfiniteInput = 'idle';
     publishReadyState();
@@ -267,7 +291,7 @@
         if (event.cancelable) event.preventDefault();
         finishWheelIntentAtBoundary();
       } else {
-        requestAnimationFrame(finishWheelIntentAtBoundary);
+        queueWheelIntentCheck();
       }
       return;
     }
@@ -280,7 +304,7 @@
         if (event.cancelable) event.preventDefault();
         finishWheelIntentAtBoundary();
       } else {
-        requestAnimationFrame(finishWheelIntentAtBoundary);
+        queueWheelIntentCheck();
       }
     }
   }

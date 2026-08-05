@@ -56,7 +56,7 @@ jobs:
           grep -Fq "boundary-v4" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "clonedContent: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "reinitialisedRenderer: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4" docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq "formatx-infinite-scroll.js?v=20260805-infinite-smooth-v5" docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq "formatx-desktop-unified.css" docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq "addEventListener('formatx:loop'" docs/scifi-ui/scripts/organism-core-controller.js
           ! grep -Fq "data-fx-loop-bridge" docs/scifi-ui/scripts/formatx-infinite-scroll.js

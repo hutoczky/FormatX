@@ -1,16 +1,21 @@
 (function () {
   'use strict';
 
-  // Production deployment revision: 20260805-resilient-living-core-2.
+  // Production deployment revision: 20260805-motion-gate-3.
 
   const root = document.documentElement;
   if (root.dataset.fxPremiumFinish === 'ready-v1') return;
   root.dataset.fxPremiumFinish = 'ready-v1';
 
-  const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
+  const parameters = new URLSearchParams(location.search);
+  const auditMode = parameters.get('lighthouse') === '1';
+  const automaticImmersive = parameters.get('immersive') === '1';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const palette = ['#6feee8', '#4fc9ff', '#6fffb2', '#ffb768', '#9c82ff', '#d7f7ff'];
   let resilientCore = null;
+
+  root.dataset.fxImmersive = automaticImmersive ? 'active' : 'standby';
+  root.dataset.fxThree = automaticImmersive ? (root.dataset.fxThree || 'intro-wait') : 'standby';
 
   function repairLegacyHomepageUrl() {
     if (location.hostname !== 'www.formatxsuite.com') return;
@@ -109,7 +114,7 @@
 
     function resize() {
       const box = host.getBoundingClientRect();
-      const dpr = Math.min(devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(devicePixelRatio || 1, 1.25);
       const width = Math.max(1, Math.round(box.width));
       const height = Math.max(1, Math.round(box.height));
       if (state.width === width && state.height === height && state.dpr === dpr) return;
@@ -124,7 +129,7 @@
     }
 
     function membranePath(cx, cy, radius, time, layer, scene) {
-      const points = state.width < 520 ? 52 : 72;
+      const points = state.width < 520 ? 44 : 58;
       const stretch = [1.04, 1.2, 1.02, 1.08, .91, .7][Math.round(scene)] || 1;
       const height = [1.09, 1.25, .96, 1.12, 1.29, 1.5][Math.round(scene)] || 1.09;
       const path = new Path2D();
@@ -162,7 +167,9 @@
     function draw(now) {
       state.frame = 0;
       if (!state.active || !state.visible || document.hidden) return;
-      const minimumInterval = reducedMotion.matches ? 1000 : 1000 / 30;
+      const mobile = state.width < 720 || matchMedia('(pointer: coarse)').matches;
+      const scrolling = root.dataset.fxScrollActivity === 'scrolling';
+      const minimumInterval = reducedMotion.matches ? 1000 : 1000 / (mobile ? 30 : 60);
       if (now - state.previous < minimumInterval) {
         state.frame = requestAnimationFrame(draw);
         return;
@@ -198,7 +205,7 @@
 
       context.save();
       context.globalCompositeOperation = 'screen';
-      for (let layer = 3; layer >= 0; layer -= 1) {
+      for (let layer = scrolling ? 1 : 3; layer >= 0; layer -= 1) {
         const layerRadius = radius * (1 - layer * .155);
         const path = membranePath(cx, cy, layerRadius, time, layer, state.scene);
         const fill = context.createRadialGradient(
@@ -217,7 +224,7 @@
         context.lineWidth = layer === 0 ? 1.35 : .8;
         context.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${.24 - layer * .025})`;
         context.shadowColor = `rgba(${rgb.r},${rgb.g},${rgb.b},.34)`;
-        context.shadowBlur = layer === 0 ? 19 : 9;
+        context.shadowBlur = scrolling ? 5 : layer === 0 ? 19 : 9;
         context.stroke(path);
       }
       context.restore();
@@ -235,7 +242,7 @@
       context.fill();
       context.shadowBlur = 0;
 
-      const particleCount = state.width < 520 ? 12 : 20;
+      const particleCount = scrolling ? 5 : state.width < 520 ? 10 : 16;
       for (let index = 0; index < particleCount; index += 1) {
         const seed = index * 9.71;
         const travel = (time * (.022 + index % 4 * .004) + index / particleCount) % 1;
@@ -308,6 +315,10 @@
 
     const sceneObserver = new MutationObserver(updateScene);
     sceneObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-scene', 'data-fx-three-scene'] });
+    const scrollObserver = new MutationObserver(() => {
+      schedule();
+    });
+    scrollObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-scroll-activity'] });
     document.addEventListener('visibilitychange', schedule);
     reducedMotion.addEventListener?.('change', schedule);
     addEventListener('pagehide', () => {
@@ -315,6 +326,7 @@
       resizeObserver?.disconnect();
       visibilityObserver?.disconnect();
       sceneObserver.disconnect();
+      scrollObserver.disconnect();
     }, { once: true });
 
     resize();
@@ -328,6 +340,12 @@
   function syncRendererState() {
     if (auditMode) {
       root.dataset.fxPremiumCore = 'static-audit';
+      return;
+    }
+
+    if (root.dataset.fxImmersive !== 'active') {
+      root.dataset.fxPremiumCore = 'static-standby';
+      resilientCore?.setActive(false);
       return;
     }
 
@@ -350,6 +368,37 @@
     if (hardFallback) ensureFallbackStatus();
   }
 
+  function updateLaunchCopy() {
+    const button = document.querySelector('.fx-immersive-launch');
+    if (!(button instanceof HTMLButtonElement)) return;
+    button.setAttribute('aria-label', language() === 'en'
+      ? 'Launch the living visual core'
+      : 'Az élő vizuális mag indítása');
+  }
+
+  function activateImmersive() {
+    if (auditMode || root.dataset.fxImmersive === 'active') return;
+    root.dataset.fxImmersive = 'active';
+    root.dataset.fxThree = root.dataset.fxGpuCapability === 'canvas2d' ? 'fallback' : 'intro-wait';
+    const button = document.querySelector('.fx-immersive-launch');
+    if (button instanceof HTMLButtonElement) {
+      button.setAttribute('aria-pressed', 'true');
+      button.disabled = true;
+    }
+    syncRendererState();
+    dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
+      detail: { capability: root.dataset.fxGpuCapability }
+    }));
+  }
+
+  function bindImmersiveLaunch() {
+    const button = document.querySelector('.fx-immersive-launch');
+    if (!(button instanceof HTMLButtonElement) || button.dataset.fxBound === 'true') return;
+    button.dataset.fxBound = 'true';
+    button.addEventListener('click', activateImmersive, { once: true });
+    updateLaunchCopy();
+  }
+
   function handleHashNavigation(event) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const anchor = event.target instanceof Element ? event.target.closest('a[href^="#"]') : null;
@@ -370,15 +419,25 @@
   }
 
   root.dataset.fxGpuCapability = rendererCapability();
-  if (root.dataset.fxGpuCapability === 'canvas2d') root.dataset.fxThree = 'fallback';
+  if (automaticImmersive && root.dataset.fxGpuCapability === 'canvas2d') root.dataset.fxThree = 'fallback';
 
   const rendererObserver = new MutationObserver(syncRendererState);
   rendererObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three', 'data-fx-scene', 'lang'] });
   repairLegacyHomepageUrl();
   document.addEventListener('click', handleHashNavigation, true);
-  addEventListener('formatx:languagechange', ensureFallbackStatus);
+  addEventListener('formatx:languagechange', () => {
+    updateLaunchCopy();
+    if (root.dataset.fxImmersive === 'active') ensureFallbackStatus();
+  });
   addEventListener('formatx:premiumfallback', syncRendererState);
+  const initialise = () => {
+    bindImmersiveLaunch();
+    syncRendererState();
+    if (automaticImmersive) dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
+      detail: { capability: root.dataset.fxGpuCapability, automatic: true }
+    }));
+  };
   document.readyState === 'loading'
-    ? document.addEventListener('DOMContentLoaded', syncRendererState, { once: true })
-    : syncRendererState();
+    ? document.addEventListener('DOMContentLoaded', initialise, { once: true })
+    : initialise();
 }());

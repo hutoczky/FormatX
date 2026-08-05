@@ -5,6 +5,8 @@
   const body = document.body;
   if (!body || root.dataset.fxThreeHost === 'safe-ready-v1') return;
 
+  const immersiveActive = () => root.dataset.fxImmersive === 'active';
+
   const INDEX = Object.freeze({
     SCENE: 0,
     SCROLL: 1,
@@ -30,7 +32,7 @@
   shared[INDEX.HEIGHT] = innerHeight;
   shared[INDEX.DPR] = devicePixelRatio || 1;
   shared[INDEX.REDUCED] = matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 0;
-  shared[INDEX.VISIBLE] = document.hidden ? 0 : 1;
+  shared[INDEX.VISIBLE] = !document.hidden && immersiveActive() ? 1 : 0;
   shared[INDEX.QUALITY_HINT] = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 1 : 2;
 
   try {
@@ -61,7 +63,7 @@
   const telemetry = document.createElement('aside');
   telemetry.className = 'fx-three-telemetry';
   telemetry.setAttribute('aria-live', 'polite');
-  telemetry.innerHTML = '<span>FORMATX / SAFE REAL 3D</span><strong data-fx-three-chapter>MAG</strong><small data-fx-three-telemetry>THREE / WAITING FOR INTRO</small>';
+  telemetry.innerHTML = '<span>FORMATX / SAFE REAL 3D</span><strong data-fx-three-chapter>MAG</strong><small data-fx-three-telemetry>CORE / CLICK TO ACTIVATE</small>';
   body.appendChild(telemetry);
 
   const guide = document.createElement('div');
@@ -71,8 +73,8 @@
   body.appendChild(guide);
 
   root.dataset.fxThreeHost = 'safe-ready-v1';
-  root.dataset.fxThree = 'intro-wait';
-  root.dataset.fxPerformance = 'safe';
+  root.dataset.fxThree = immersiveActive() ? 'intro-wait' : 'standby';
+  root.dataset.fxPerformance = immersiveActive() ? 'safe' : 'static-standby';
   root.dataset.fxInfinite = 'disabled-safe-mode';
 
   const sections = Array.from(document.querySelectorAll('main > .scene'));
@@ -147,6 +149,7 @@
   }
 
   function onPointerDown(event) {
+    if (!immersiveActive()) return;
     if (interactive(event.target)) return;
     if (event.pointerType === 'mouse' && event.button === 0) {
       mouseDrag = true;
@@ -167,6 +170,7 @@
   }
 
   function onPointerMove(event) {
+    if (!immersiveActive()) return;
     const x = event.clientX;
     const y = event.clientY;
     shared[INDEX.POINTER_VX] = clamp((x - previousPointerX) / 40, -1.5, 1.5);
@@ -188,6 +192,7 @@
   }
 
   function onPointerUp(event) {
+    if (!immersiveActive()) return;
     if (event.pointerType === 'mouse') {
       mouseDrag = false;
       root.classList.remove('fx-three-dragging');
@@ -202,6 +207,8 @@
   }
 
   function animate() {
+    raf = 0;
+    if (!immersiveActive() || document.hidden) return;
     velocity *= 0.9;
     orbitX = mix(orbitX, targetOrbitX, 0.08);
     orbitY = mix(orbitY, targetOrbitY, 0.08);
@@ -213,6 +220,17 @@
     raf = requestAnimationFrame(animate);
   }
 
+  function startAnimation() {
+    if (raf || !immersiveActive() || document.hidden) return;
+    raf = requestAnimationFrame(animate);
+  }
+
+  function stopAnimation() {
+    if (!raf) return;
+    cancelAnimationFrame(raf);
+    raf = 0;
+  }
+
   addEventListener('scroll', updateScroll, { passive: true });
   addEventListener('resize', updateViewport, { passive: true });
   addEventListener('pointerdown', onPointerDown, { passive: true });
@@ -220,7 +238,17 @@
   addEventListener('pointerup', onPointerUp, { passive: true });
   addEventListener('pointercancel', onPointerUp, { passive: true });
   document.addEventListener('visibilitychange', () => {
+    shared[INDEX.VISIBLE] = !document.hidden && immersiveActive() ? 1 : 0;
+    if (shared[INDEX.VISIBLE]) startAnimation();
+    else stopAnimation();
+  });
+  addEventListener('formatx:immersiveactivate', () => {
     shared[INDEX.VISIBLE] = document.hidden ? 0 : 1;
+    root.dataset.fxPerformance = 'safe';
+    if (root.dataset.fxThree === 'standby') root.dataset.fxThree = 'intro-wait';
+    updateViewport();
+    updateScene();
+    startAnimation();
   });
   document.addEventListener('formatx:languagechange', updateScene);
   frame.addEventListener('load', () => {
@@ -229,7 +257,7 @@
 
   updateViewport();
   updateScene();
-  animate();
+  startAnimation();
 
   addEventListener('pagehide', event => {
     if (event.persisted) return;

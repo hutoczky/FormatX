@@ -49,6 +49,134 @@ html[data-fx-premium-finish='ready-v1'] .language-switch button:focus-visible {
   transform: translateZ(0) scale(1);
 }
 
+html[data-fx-immersive='standby'] #hero .hero-space {
+  isolation: isolate;
+}
+
+html[data-fx-immersive='standby'] #hero .hero-space::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: min(66%, 470px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(131, 244, 238, .25);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 36%, rgba(229, 255, 255, .92) 0 5%, rgba(103, 239, 232, .62) 6% 13%, transparent 14%),
+    repeating-radial-gradient(circle, rgba(98, 230, 226, .16) 0 1px, transparent 2px 28px),
+    conic-gradient(from 24deg, rgba(32, 179, 177, .75), rgba(34, 92, 155, .38), rgba(50, 220, 194, .68), rgba(9, 43, 82, .56), rgba(32, 179, 177, .75));
+  box-shadow:
+    inset 0 0 72px rgba(221, 255, 255, .17),
+    inset -28px -36px 76px rgba(0, 18, 47, .68),
+    0 0 82px rgba(44, 213, 207, .17),
+    0 34px 90px rgba(0, 0, 0, .46);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.98);
+  transition: opacity .5s ease, transform .75s cubic-bezier(.2,.8,.2,1);
+}
+
+html[data-fx-immersive='active'] #hero .hero-space::before {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.fx-immersive-launch {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  left: 50%;
+  width: 124px;
+  aspect-ratio: 1;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  padding: 16px;
+  color: #ecffff;
+  border: 1px solid rgba(183, 255, 250, .46);
+  border-radius: 50%;
+  background: rgba(2, 14, 24, .76);
+  box-shadow: 0 0 0 8px rgba(71, 225, 216, .045), 0 22px 58px rgba(0, 0, 0, .52), inset 0 0 30px rgba(78, 229, 220, .09);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: opacity .45s ease, visibility .45s ease, border-color .2s ease, box-shadow .2s ease, transform .55s cubic-bezier(.2,.8,.2,1);
+  backdrop-filter: blur(16px) saturate(125%);
+}
+
+.fx-immersive-launch::before,
+.fx-immersive-launch::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.fx-immersive-launch::before {
+  inset: 8px;
+  border: 1px solid rgba(126, 241, 234, .2);
+  border-radius: 50%;
+}
+
+.fx-immersive-launch::after {
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 158px;
+  background: linear-gradient(transparent, rgba(117, 238, 232, .32), transparent);
+  transform: translate(-50%, -50%) rotate(43deg);
+}
+
+.fx-immersive-launch i {
+  width: 14px;
+  height: 14px;
+  margin: 0 auto 4px;
+  border: 1px solid #9efff5;
+  border-radius: 50%;
+  background: rgba(114, 255, 241, .22);
+  box-shadow: 0 0 18px rgba(105, 255, 239, .72);
+}
+
+.fx-immersive-launch strong {
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+
+.fx-immersive-launch span {
+  color: rgba(210, 247, 250, .72);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.fx-immersive-launch:hover,
+.fx-immersive-launch:focus-visible {
+  border-color: rgba(202, 255, 251, .86);
+  box-shadow: 0 0 0 10px rgba(71, 225, 216, .07), 0 24px 68px rgba(0, 0, 0, .56), 0 0 42px rgba(75, 231, 222, .18);
+  outline: 2px solid rgba(157, 255, 248, .88);
+  outline-offset: 5px;
+  transform: translate(-50%, -50%) scale(1.035);
+}
+
+html[data-fx-immersive='active'] .fx-immersive-launch {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1.18);
+}
+
+html[data-fx-immersive='standby'] .fx-three-stage-shell,
+html[data-fx-immersive='standby'] .fx-three-telemetry,
+html[data-fx-immersive='standby'] .fx-three-guide {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html[data-fx-immersive='standby'] #hero .fx-organism-map {
+  z-index: 2;
+}
+
 html[data-fx-premium-core='canvas2d-resilient'] #hero .hero-space {
   isolation: isolate;
 }
@@ -381,10 +509,24 @@ html[data-fx-three='error'] .fx-premium-core-status::before {
   html[data-fx-three='error'] .fx-premium-core-status {
     bottom: 0;
   }
+
+  html[data-fx-immersive='standby'] #hero .hero-space::before {
+    width: min(72vw, 430px);
+  }
+
+  .fx-immersive-launch {
+    width: 112px;
+    backdrop-filter: blur(12px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html[data-fx-three='error'] #hero .hero-space::before {
     animation: none !important;
+  }
+
+  .fx-immersive-launch,
+  html[data-fx-immersive] #hero .hero-space::before {
+    transition: none !important;
   }
 }

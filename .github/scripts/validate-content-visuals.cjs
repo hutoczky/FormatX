@@ -112,6 +112,17 @@ async function commonAssertions(page, mobile) {
   assert(method === 4, `FormatX Method must have four steps, found ${method}`);
   const visibleLanguageControls = await page.locator('.fx-language-toggle:visible, .language-switch [data-language]:visible, .language-control [data-language-choice]:visible').count();
   assert(visibleLanguageControls <= 1, `More than one visible language control: ${visibleLanguageControls}`);
+  const immersive = await page.evaluate(() => ({
+    mode: document.documentElement.dataset.fxImmersive || '',
+    coreCanvases: document.querySelectorAll('.fx-resilient-core').length,
+    frameSource: document.getElementById('fx-three-frame')?.getAttribute('src') || ''
+  }));
+  if (immersive.mode === 'standby') {
+    const launch = await visibleBox(page, '.fx-immersive-launch');
+    assert(launch.width >= 100 && launch.height >= 100, 'Living Core launch target is too small');
+    assert(immersive.coreCanvases === 0, 'Canvas renderer started before user activation');
+    assert(!immersive.frameSource || immersive.frameSource === 'about:blank', 'Three iframe started before user activation');
+  }
   if (mobile) {
     const menu = await visibleBox(page, '#menu-toggle');
     assert(menu.width >= 40 && menu.height >= 40, 'Mobile menu target is too small');
@@ -160,6 +171,11 @@ async function publicPage(browser, name, pathname, expectedSelector, viewport = 
   englishUrl.searchParams.set('lang', 'en');
   try {
     await capture(browser, 'desktop-hero-hu', { width: 1440, height: 900 });
+    await capture(browser, 'desktop-immersive-active', { width: 1440, height: 900 }, async page => {
+      await page.locator('.fx-immersive-launch').click();
+      await page.waitForFunction(() => document.documentElement.dataset.fxImmersive === 'active');
+      assert((await page.locator('.fx-immersive-launch').getAttribute('aria-pressed')) === 'true', 'Living Core launch did not expose its active state');
+    });
     await capture(browser, 'mobile-hero-hu', { width: 390, height: 844 });
     await capture(browser, 'mobile-hero-wide', { width: 430, height: 932 });
     await capture(browser, 'small-height-hero', { width: 1366, height: 600 });
