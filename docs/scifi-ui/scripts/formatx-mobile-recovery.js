@@ -6,7 +6,7 @@
 
   root.dataset.fxSafeThreeGate = 'ready-v2';
   root.dataset.fxMobileRecovery = 'morphing-organism-all-devices-v3';
-  root.dataset.fxThree = 'intro-wait';
+  root.dataset.fxThree = root.dataset.fxImmersive === 'active' ? 'intro-wait' : 'standby';
   root.classList.add('fx-mobile-stable-3d');
 
   const stageUrl = new URL('./three-stage-mobile.html', document.baseURI);
@@ -22,6 +22,10 @@
   let failed = false;
   let ready = false;
 
+  function immersiveActive() {
+    return root.dataset.fxImmersive === 'active';
+  }
+
   function telemetry(text) {
     const output = document.querySelector('[data-fx-three-telemetry]');
     if (output) output.textContent = text;
@@ -34,7 +38,7 @@
   }
 
   function desiredUrl() {
-    return introComplete && started && !failed && root.dataset.fxGpuCapability !== 'canvas2d'
+    return immersiveActive() && introComplete && started && !failed && root.dataset.fxGpuCapability !== 'canvas2d'
       ? stageUrl.href
       : 'about:blank';
   }
@@ -100,9 +104,12 @@
 
     ready = false;
     root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
-    root.dataset.fxThree = desired === 'about:blank' ? 'intro-wait' : 'loading';
-    root.dataset.fxMobile3d = desired === 'about:blank' ? 'intro-wait' : 'morphing-organism-stage-starting';
-    telemetry(desired === 'about:blank' ? 'THREE / WAITING FOR INTRO' : 'THREE / MORPHING ORGANISM STARTING');
+    const waitingState = immersiveActive() ? 'intro-wait' : 'standby';
+    root.dataset.fxThree = desired === 'about:blank' ? waitingState : 'loading';
+    root.dataset.fxMobile3d = desired === 'about:blank' ? waitingState : 'morphing-organism-stage-starting';
+    telemetry(desired === 'about:blank'
+      ? immersiveActive() ? 'THREE / WAITING FOR INTRO' : 'CORE / CLICK TO ACTIVATE'
+      : 'THREE / MORPHING ORGANISM STARTING');
     frame.src = desired;
   }
 
@@ -130,9 +137,15 @@
     }, 15000);
   }
 
-  function startAfterIntro() {
+  function tryStart() {
     if (started || failed) return;
-    introComplete = true;
+    if (!introComplete || !immersiveActive()) {
+      root.dataset.fxThree = immersiveActive() ? 'intro-wait' : 'standby';
+      root.dataset.fxMobile3d = immersiveActive() ? 'intro-wait' : 'standby';
+      telemetry(immersiveActive() ? 'THREE / WAITING FOR INTRO' : 'CORE / CLICK TO ACTIVATE');
+      enforceFrameSource();
+      return;
+    }
     if (root.dataset.fxGpuCapability === 'canvas2d') {
       started = true;
       markFallback('webgl2-unavailable');
@@ -147,14 +160,19 @@
     armWatchdog();
   }
 
+  function startAfterIntro() {
+    introComplete = true;
+    tryStart();
+  }
+
   function resetForRestoredPage() {
     clearWatchdog();
     introComplete = false;
     started = false;
     failed = false;
     ready = false;
-    root.dataset.fxThree = 'intro-wait';
-    root.dataset.fxMobile3d = 'intro-wait';
+    root.dataset.fxThree = immersiveActive() ? 'intro-wait' : 'standby';
+    root.dataset.fxMobile3d = immersiveActive() ? 'intro-wait' : 'standby';
     root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
     findFrame();
     enforceFrameSource();
@@ -169,6 +187,7 @@
   stateObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three'] });
 
   document.addEventListener('formatx:introcomplete', startAfterIntro);
+  addEventListener('formatx:immersiveactivate', tryStart);
   addEventListener('formatx:threeready', markReady);
   document.addEventListener('formatx:threeready', markReady);
   addEventListener('formatx:threeerror', event => {
@@ -188,5 +207,5 @@
   }, { once: true });
 
   findFrame();
-  if (introComplete) startAfterIntro();
+  if (introComplete) tryStart();
 }());

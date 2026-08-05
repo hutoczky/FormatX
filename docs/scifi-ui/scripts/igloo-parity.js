@@ -86,7 +86,7 @@
     }
     ensureStyle(
       'data-fx-premium-finish',
-      './styles/formatx-premium-finish.css?v=20260805-resilient-core-2',
+      './styles/formatx-premium-finish.css?v=20260805-motion-gate-3',
       'fxPremiumFinishStyle',
       'FormatX premium finish stylesheet failed to load.'
     );
@@ -215,13 +215,13 @@
     './scripts/synaptic-thought-genome.js?v=20260731-thought-genome-1',
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
     './scripts/formatx-mobile-unified.js?v=20260731-mobile-unified-2',
-    './scripts/formatx-infinite-scroll.js?v=20260730-infinite-boundary-v4',
-    './scripts/formatx-three-host-safe.js?v=20260729-safe-host-1',
-    './scripts/formatx-render-visibility.js?v=20260730-render-visibility-2',
+    './scripts/formatx-infinite-scroll.js?v=20260805-infinite-smooth-v5',
+    './scripts/formatx-three-host-safe.js?v=20260805-immersive-host-2',
+    './scripts/formatx-render-visibility.js?v=20260805-immersive-visibility-3',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/interaction-genome.js?v=20260728-genome-3d-1',
     './scripts/formatx-language-copy-stability.js',
-    './scripts/formatx-premium-finish.js?v=20260805-resilient-core-2'
+    './scripts/formatx-premium-finish.js?v=20260805-motion-gate-3'
   ];
 
   function load(index) {

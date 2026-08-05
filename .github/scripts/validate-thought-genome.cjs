@@ -46,7 +46,7 @@ async function verify(viewport, mobile) {
       }
     });
 
-    await page.goto(TEST_URL + '?lang=hu', { waitUntil: 'domcontentloaded' });
+    await page.goto(TEST_URL + '?lang=hu&immersive=1', { waitUntil: 'domcontentloaded' });
     await waitRuntime(page);
 
     const initial = await page.evaluate(() => {

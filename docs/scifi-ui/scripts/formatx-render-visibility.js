@@ -31,6 +31,7 @@
 
   function shouldRender() {
     return !document.hidden
+      && root.dataset.fxImmersive === 'active'
       && root.classList.contains('fx-intro-complete')
       && !root.classList.contains('fx-organism-menu-open')
       && !document.body?.classList.contains('fx-organism-panel-open')
@@ -70,6 +71,7 @@
 
   document.addEventListener('visibilitychange', schedule);
   document.addEventListener('formatx:introcomplete', schedule);
+  addEventListener('formatx:immersiveactivate', schedule);
   addEventListener('formatx:organismpanelopen', schedule);
   addEventListener('formatx:organismpanelclose', schedule);
   addEventListener('scroll', schedule, { passive: true });

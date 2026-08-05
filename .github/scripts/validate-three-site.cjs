@@ -4,6 +4,10 @@ const { chromium, firefox } = require('playwright');
 
 const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
 const CHROMIUM_ARGS = ['--enable-unsafe-swiftshader'];
+const immersiveUrl = parameters => TEST_URL
+  + (TEST_URL.includes('?') ? '&' : '?')
+  + 'immersive=1'
+  + (parameters ? '&' + parameters : '');
 
 function assert(value, message) {
   if (!value) throw new Error(message);
@@ -203,7 +207,7 @@ async function desktop(browserType, name) {
     const page = await context.newPage();
     const diagnostics = [];
     attachDiagnostics(page, diagnostics);
-    await page.goto(TEST_URL + '?lang=hu', { waitUntil: 'domcontentloaded' });
+    await page.goto(immersiveUrl('lang=hu'), { waitUntil: 'domcontentloaded' });
     await verifyCommon(page, name, diagnostics, 300, 300);
 
     await openOrganismPanel(page, 'experience');
@@ -239,7 +243,7 @@ async function skipIntro() {
     const page = await browser.newPage({ viewport: { width: 1280, height: 840 } });
     const diagnostics = [];
     attachDiagnostics(page, diagnostics);
-    await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
+    await page.goto(immersiveUrl(), { waitUntil: 'domcontentloaded' });
     const button = page.locator('.fx-intro-skip');
     await button.waitFor({ state: 'visible', timeout: 3000 });
     const started = Date.now();
@@ -259,7 +263,7 @@ async function reducedMotion() {
     const page = await context.newPage();
     const diagnostics = [];
     attachDiagnostics(page, diagnostics);
-    await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
+    await page.goto(immersiveUrl(), { waitUntil: 'domcontentloaded' });
     const state = await verifyCommon(page, 'reduced-motion', diagnostics, 260, 260);
     assert(state.cloneCount === 0 && state.infiniteController === 'boundary-v3', 'reduced motion must retain clone-free infinite scrolling');
     await context.close();
@@ -275,7 +279,7 @@ async function mobile() {
     const page = await context.newPage();
     const diagnostics = [];
     attachDiagnostics(page, diagnostics);
-    await page.goto(TEST_URL + '?lang=hu', { waitUntil: 'domcontentloaded' });
+    await page.goto(immersiveUrl('lang=hu'), { waitUntil: 'domcontentloaded' });
     await verifyCommon(page, 'mobile', diagnostics, 300, 600);
     await page.locator('#menu-toggle').click();
     assert(await page.locator('#main-nav').evaluate(node => node.classList.contains('open')), 'mobile menu');
