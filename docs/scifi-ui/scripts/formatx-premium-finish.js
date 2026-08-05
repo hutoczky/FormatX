@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  // Production deployment revision: 20260805-root-homepage-1.
+
   const root = document.documentElement;
   if (root.dataset.fxPremiumFinish === 'ready-v1') return;
   root.dataset.fxPremiumFinish = 'ready-v1';
