@@ -165,7 +165,9 @@ check(
 check(
   'desktop-layout',
   desktopCss.includes('grid-template-columns')
-    && desktopCss.includes('min(100svh, 960px)')
+    && desktopCss.includes('height: min(860px, calc(100svh - 69px))')
+    && desktopCss.includes('max-height: min(860px, calc(100svh - 69px))')
+    && desktopCss.includes('min-height: 680px')
     && desktopCss.includes('max-height: 820px')
     && desktopCss.includes('min-width: 1100px'),
   'Desktop hero composition contract is incomplete'
