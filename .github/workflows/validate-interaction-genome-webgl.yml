@@ -11,6 +11,7 @@ on:
       - 'docs/scifi-ui/styles/interaction-genome-webgl.css'
       - 'docs/scifi-ui/styles/formatx-4k-polish.css'
       - 'docs/scifi-ui/scripts/living-architecture.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
       - '.github/scripts/validate-interaction-genome-webgl.cjs'
       - '.github/workflows/validate-interaction-genome-webgl.yml'
 
@@ -42,6 +43,7 @@ jobs:
           node --check docs/scifi-ui/scripts/interaction-genome-webgl.js
           node --check docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
           node --check docs/scifi-ui/scripts/living-architecture.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check .github/scripts/validate-interaction-genome-webgl.cjs
           grep -Fq "getContext('webgl2'" docs/scifi-ui/scripts/interaction-genome-webgl.js
           grep -Fq "drawElementsInstanced" docs/scifi-ui/scripts/interaction-genome-webgl.js
@@ -53,7 +55,7 @@ jobs:
           grep -Fq "drag-suppressed-click" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
           grep -Fq "ResizeObserver" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
           grep -Fq "visibilitychange" docs/scifi-ui/scripts/interaction-genome-webgl-adapter.js
-          grep -Fq "interaction-genome-webgl-adapter.js?v=20260728-cinematic-v3-gesture-safe" docs/scifi-ui/scripts/living-architecture.js
+          grep -Fq "interaction-genome-webgl-adapter.js?v=20260729-genome-webgl-lazy-1" docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'data-renderer="webgl2-cinematic-pbr"' docs/scifi-ui/styles/interaction-genome-webgl.css
           grep -Fq "FormatX 4K Polish v2" docs/scifi-ui/styles/formatx-4k-polish.css
 
