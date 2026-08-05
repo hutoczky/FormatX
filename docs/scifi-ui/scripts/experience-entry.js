@@ -186,19 +186,19 @@ async function loadWebGpuModule() {
   source = replaceRequired(
     source,
     'this.maxCount = reduced ? 60000 : mobile ? 260000 : 500000;',
-    'this.maxCount = reduced ? 18000 : mobile ? 60000 : 100000;',
+    'this.maxCount = reduced ? 8000 : mobile ? 18000 : 32000;',
     'maximum particle count'
   );
   source = replaceRequired(
     source,
     'this.counts = reduced ? [18000, 30000, 45000, 60000] : mobile ? [45000, 90000, 160000, 260000] : [80000, 170000, 320000, 500000];',
-    'this.counts = reduced ? [3000, 6000, 11000, 18000] : mobile ? [9000, 19000, 36000, 60000] : [15000, 32000, 60000, 100000];',
+    'this.counts = reduced ? [1800, 3500, 5500, 8000] : mobile ? [3500, 7000, 12000, 18000] : [6000, 12000, 22000, 32000];',
     'particle quality tiers'
   );
   source = replaceRequired(
     source,
     'this.pointScale = uniform(mobile ? 0.034 : 0.028);',
-    'this.pointScale = uniform(mobile ? 0.026 : 0.021);',
+    'this.pointScale = uniform(mobile ? 0.018 : 0.015);',
     'base particle size'
   );
   source = replaceRequired(
@@ -222,7 +222,7 @@ async function loadWebGpuModule() {
   source = replaceRequired(
     source,
     'material.opacityNode = shapeCircle().mul(float(0.14).add(seedNode.z.mul(0.5)));',
-    'material.opacityNode = shapeCircle().mul(float(0.07).add(seedNode.z.mul(0.26)));',
+    'material.opacityNode = shapeCircle().mul(float(0.045).add(seedNode.z.mul(0.18)));',
     'particle opacity'
   );
   source = replaceRequired(
@@ -234,7 +234,7 @@ async function loadWebGpuModule() {
   source = replaceRequired(
     source,
     'this.pointScale.value = [0.022, 0.027, 0.032, 0.036][this.tier];',
-    'this.pointScale.value = [0.015, 0.018, 0.021, 0.024][this.tier];',
+    'this.pointScale.value = [0.011, 0.013, 0.015, 0.017][this.tier];',
     'particle tier size'
   );
   source = replaceRequired(

@@ -8,6 +8,9 @@ on:
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/scripts/webgl-fallback-loader.js'
       - 'docs/scifi-ui/scripts/experience-entry.js'
+      - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
+      - 'docs/scifi-ui/styles/formatx-premium-finish.css'
+      - 'billing-worker/src/production-with-license.js'
       - '.github/scripts/validate-formatx-110.cjs'
       - '.github/workflows/validate-formatx-110.yml'
   push:
@@ -17,6 +20,9 @@ on:
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/scripts/webgl-fallback-loader.js'
       - 'docs/scifi-ui/scripts/experience-entry.js'
+      - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
+      - 'docs/scifi-ui/styles/formatx-premium-finish.css'
+      - 'billing-worker/src/production-with-license.js'
       - '.github/scripts/validate-formatx-110.cjs'
       - '.github/workflows/validate-formatx-110.yml'
 
@@ -42,6 +48,8 @@ jobs:
           node --check docs/scifi-ui/scripts/single-language-toggle.js
           node --check docs/scifi-ui/scripts/webgl-fallback-loader.js
           node --check docs/scifi-ui/scripts/experience-entry.js
+          node --check docs/scifi-ui/scripts/formatx-premium-finish.js
+          node --check billing-worker/src/production-with-license.js
           node .github/scripts/validate-formatx-110.cjs
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-user-requested-site-features.cjs

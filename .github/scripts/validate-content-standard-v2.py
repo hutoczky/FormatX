@@ -115,8 +115,10 @@ def validate_public_pages_v2() -> None:
                 module.fail(f"{name} public-page wrapper missing {token}")
 
     sitemap = module.read("docs/sitemap.xml")
+    if "<loc>https://www.formatxsuite.com/</loc>" not in sitemap:
+        module.fail("Sitemap missing canonical root homepage")
     for url in [
-        "/scifi-ui/", "/scifi-ui/downloads/", "/scifi-ui/method.html",
+        "/scifi-ui/downloads/", "/scifi-ui/method.html",
         "/scifi-ui/verification.html", "/scifi-ui/test-matrix.html",
         "/scifi-ui/known-issues.html", "/scifi-ui/security.html",
         "/scifi-ui/decision-log.html", "/scifi-ui/support.html",

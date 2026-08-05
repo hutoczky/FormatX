@@ -1,7 +1,7 @@
 import baseWorker from './production-entry.js';
 
 const HTML_PATHS = new Set([
-  '/scifi-ui/', '/scifi-ui/index.html', '/scifi-ui/license.html',
+  '/', '/scifi-ui/', '/scifi-ui/index.html', '/scifi-ui/license.html',
   '/scifi-ui/support.html', '/scifi-ui/terms.html', '/scifi-ui/privacy.html',
   '/scifi-ui/checkout.html', '/scifi-ui/downloads/', '/scifi-ui/downloads/index.html',
   '/scifi-ui/downloads/android.html', '/scifi-ui/test-matrix.html',
@@ -24,7 +24,9 @@ const NO_STORE_PATHS = new Set([
   '/scifi-ui/scripts/formatx-organism-trust.js',
   '/scifi-ui/scripts/formatx-organism-semantic-state.js',
   '/scifi-ui/scripts/public-evidence-pages.js', '/scifi-ui/scripts/formatx-seo.js',
-  '/scifi-ui/styles/formatx-content-standard.css'
+  '/scifi-ui/scripts/formatx-premium-finish.js',
+  '/scifi-ui/styles/formatx-content-standard.css',
+  '/scifi-ui/styles/formatx-premium-finish.css'
 ]);
 
 const LANGUAGE_ASSETS = [

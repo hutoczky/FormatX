@@ -1,8 +1,9 @@
 const APK_ASSET_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const APK_DOWNLOAD_PATH = '/download/android';
 const APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.2.apk';
-const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
+const SCIFI_ENTRY_PATHS = new Set(['/', '/scifi-ui/', '/scifi-ui/index.html']);
 const LANGUAGE_PAGE_PATHS = new Set([
+  '/',
   '/scifi-ui/',
   '/scifi-ui/index.html',
   '/scifi-ui/license.html',
@@ -60,6 +61,8 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/styles/organism-speaking-visual.css',
   '/scifi-ui/styles/synaptic-thought-genome.css',
   '/scifi-ui/styles/synaptic-thought-disclosure.css',
+  '/scifi-ui/styles/formatx-premium-finish.css',
+  '/scifi-ui/scripts/formatx-premium-finish.js',
   '/scifi-ui/scripts/formatx-event-horizon.js',
 ]);
 const REPLACEMENTS = [

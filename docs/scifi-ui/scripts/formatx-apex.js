@@ -74,7 +74,7 @@
       const href = anchor.getAttribute('href');
       if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
       try {
-        const url = new URL(href, location.href);
+        const url = new URL(href, document.baseURI);
         if (url.origin !== location.origin) return;
         if (!url.pathname.endsWith('.html') && !url.pathname.endsWith('/')) return;
         url.searchParams.set('lang', language);

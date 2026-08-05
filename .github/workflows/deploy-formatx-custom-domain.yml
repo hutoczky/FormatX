@@ -82,6 +82,7 @@ jobs:
           node --check docs/scifi-ui/scripts/public-evidence-pages.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/formatx-premium-finish.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
           node --check docs/scifi-ui/scripts/formatx-license-links.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
@@ -158,7 +159,7 @@ jobs:
     timeout-minutes: 20
     environment:
       name: production
-      url: https://www.formatxsuite.com/scifi-ui/
+      url: https://www.formatxsuite.com/
     steps:
       - name: Check out validated commit
         uses: actions/checkout@v4
@@ -200,7 +201,7 @@ jobs:
             success=false
             for attempt in $(seq 1 12); do
               tmp="$(mktemp -d)"
-              if curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/" > "$tmp/home.html" \
+              if curl --fail --silent --show-error --location --max-time 30 "$origin/" > "$tmp/home.html" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/license.html" > "$tmp/license.html" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/igloo-parity.js?v=20260802-live-audit-1" > "$tmp/loader.js" \
                 && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/organism-voice.js?v=20260802-live-audit-1" > "$tmp/voice.js" \
@@ -225,6 +226,8 @@ jobs:
                 && grep -Fq 'Részletes licencfeltételek' "$tmp/license.html" \
                 && grep -Fq 'Detailed licence terms' "$tmp/license.html" \
                 && grep -Fq 'no text overlap' "$tmp/mobile.css" \
+                && grep -Fq 'data-fx-premium-finish' "$tmp/home.html" \
+                && grep -Fq '<base href="/scifi-ui/">' "$tmp/home.html" \
                 && grep -Fq '<svg' "$tmp/qr.svg" \
                 && node - "$tmp/release.json" "$expected_release_version" "$expected_release_schema" "$expected_release_digest" <<'NODE'
           const fs = require('node:fs');

@@ -1,7 +1,8 @@
 import productionWorker from './production-with-license.js';
 
-const SCIFI_ENTRY_PATHS = new Set(['/scifi-ui/', '/scifi-ui/index.html']);
+const SCIFI_ENTRY_PATHS = new Set(['/', '/scifi-ui/', '/scifi-ui/index.html']);
 const LANGUAGE_PAGE_PATHS = new Set([
+  '/',
   '/scifi-ui/',
   '/scifi-ui/index.html',
   '/scifi-ui/license.html',
@@ -66,6 +67,8 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/styles/organism-speaking-visual.css',
   '/scifi-ui/styles/synaptic-thought-genome.css',
   '/scifi-ui/styles/synaptic-thought-disclosure.css',
+  '/scifi-ui/styles/formatx-premium-finish.css',
+  '/scifi-ui/scripts/formatx-premium-finish.js',
 ]);
 
 const EMBEDDABLE_STAGE_CSP = [

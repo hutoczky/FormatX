@@ -54,7 +54,7 @@
   }
 
   function checkoutHref(planId, selectedCurrency) {
-    const url = new URL('./checkout.html', location.href);
+    const url = new URL('./checkout.html', document.baseURI);
     url.searchParams.set('plan', planId);
     url.searchParams.set('cycle', 'monthly');
     url.searchParams.set('currency', selectedCurrency);

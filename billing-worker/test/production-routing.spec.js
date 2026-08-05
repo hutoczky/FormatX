@@ -109,14 +109,41 @@ describe('production routing and frame security', () => {
     const response = canonicalPageRedirect(request, new URL(request.url));
 
     expect(response?.status).toBe(308);
-    expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/scifi-ui/');
+    expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/');
   });
 
-  it('preserves the www origin and query string on canonical redirects', () => {
+  it('redirects legacy homepage paths to the domain root and preserves the query string', () => {
     const request = new Request('https://www.formatxsuite.com/scifi-ui?lang=hu');
     const response = canonicalPageRedirect(request, new URL(request.url));
 
     expect(response?.status).toBe(308);
-    expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/scifi-ui/?lang=hu');
+    expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/?lang=hu');
+  });
+
+  it('serves the homepage directly at the www domain root', async () => {
+    let assetPath = '';
+    const response = await productionWorker.fetch(
+      new Request('https://www.formatxsuite.com/'),
+      {
+        ASSETS: {
+          async fetch(request) {
+            assetPath = new URL(request.url).pathname;
+            return new Response('<!doctype html><title>FORMATX</title>', {
+              headers: { 'Content-Type': 'text/html; charset=utf-8' },
+            });
+          },
+        },
+      },
+      {},
+    );
+
+    expect(response.status).toBe(200);
+    expect(assetPath).toBe('/scifi-ui/index.html');
+    expect(response.headers.get('Link')).toBe('<https://www.formatxsuite.com/>; rel="canonical"');
+  });
+
+  it('does not redirect the canonical www domain root', () => {
+    const request = new Request('https://www.formatxsuite.com/');
+    expect(canonicalPageRedirect(request, new URL(request.url))).toBeNull();
   });
 });

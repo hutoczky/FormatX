@@ -39,7 +39,7 @@ describe('production entry iframe security', () => {
 
   it('keeps the main product page protected from framing', async () => {
     const response = await productionEntry.fetch(
-      new Request('https://www.formatxsuite.com/scifi-ui/'),
+      new Request('https://www.formatxsuite.com/'),
       createEnvironment(),
       {},
     );

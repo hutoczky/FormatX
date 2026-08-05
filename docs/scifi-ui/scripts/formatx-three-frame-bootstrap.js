@@ -15,7 +15,7 @@
   }
 
   const telemetry = document.querySelector('[data-fx-three-telemetry]');
-  const stageUrl = new URL('./three-stage.html', location.href);
+  const stageUrl = new URL('./three-stage.html', document.baseURI);
   stageUrl.searchParams.set('v', '20260727-webgpu-1-20260729-interactions-5-true-depth-7');
   const readyDeadline = 20000;
 

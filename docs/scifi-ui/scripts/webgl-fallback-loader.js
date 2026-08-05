@@ -293,7 +293,7 @@ export async function startWebGLExperience() {
   source = replaceRequired(
     source,
     'gl_PointSize = (0.8 + aSeed.w * 2.1) * uPixelRatio * clamp(perspective, 0.45, 4.5) * mix(0.82, 1.12, uQuality);',
-    'gl_PointSize = (0.58 + aSeed.w * 1.38) * uPixelRatio * clamp(perspective, 0.45, 4.2) * mix(0.74, 1.0, uQuality);',
+    'gl_PointSize = (0.42 + aSeed.w * 0.92) * uPixelRatio * clamp(perspective, 0.45, 3.8) * mix(0.7, 0.92, uQuality);',
     'particle point size'
   );
   source = replaceRequired(
@@ -305,19 +305,19 @@ export async function startWebGLExperience() {
   source = replaceRequired(
     source,
     'this.maxCount = mobile ? 7000 : 14000;',
-    'this.maxCount = mobile ? 1800 : 3500;',
+    'this.maxCount = mobile ? 1200 : 2400;',
     'maximum particle count'
   );
   source = replaceRequired(
     source,
     'this.setCount(mobile ? 3200 : 8500);',
-    'this.setCount(mobile ? 800 : 1900);',
+    'this.setCount(mobile ? 520 : 1250);',
     'initial particle count'
   );
   source = replaceRequired(
     source,
     'const particles = this.mobile ? [1300, 2400, 4000, 6200] : [2200, 4800, 8500, 12500];',
-    'const particles = this.mobile ? [400, 650, 1100, 1700] : [600, 1200, 1900, 3100];',
+    'const particles = this.mobile ? [260, 450, 760, 1150] : [420, 760, 1300, 2200];',
     'particle quality tiers'
   );
   source = replaceRequired(

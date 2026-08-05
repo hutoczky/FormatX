@@ -77,6 +77,21 @@
     );
   }
 
+  function ensurePremiumFinishStyle() {
+    const existing = document.querySelector('link[data-fx-premium-finish]');
+    if (existing) {
+      document.head.appendChild(existing);
+      root.dataset.fxPremiumFinishStyle = 'ready';
+      return;
+    }
+    ensureStyle(
+      'data-fx-premium-finish',
+      './styles/formatx-premium-finish.css?v=20260805-premium-1',
+      'fxPremiumFinishStyle',
+      'FormatX premium finish stylesheet failed to load.'
+    );
+  }
+
   function refreshQrImages() {
     const selectedCurrency = document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR'
       ? 'EUR'
@@ -161,6 +176,7 @@
   ensureMobileReadabilityStyle();
   ensureMobileHeroFlowStyle();
   ensureDesktopLayoutStyle();
+  ensurePremiumFinishStyle();
   root.dataset.fxLocalQr = 'ready-v2';
   root.dataset.fxLegacyRenderer = 'retired';
   root.dataset.fxRenderer = 'three-host-safe';
@@ -198,7 +214,8 @@
     './scripts/formatx-render-visibility.js?v=20260730-render-visibility-2',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/interaction-genome.js?v=20260728-genome-3d-1',
-    './scripts/formatx-language-copy-stability.js'
+    './scripts/formatx-language-copy-stability.js',
+    './scripts/formatx-premium-finish.js?v=20260805-premium-1'
   ];
 
   function load(index) {

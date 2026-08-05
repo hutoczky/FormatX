@@ -231,8 +231,12 @@ check(
   'Privacy notice is incomplete'
 );
 
+check(
+  'sitemap-root',
+  sitemap.includes('<loc>https://www.formatxsuite.com/</loc>'),
+  'Sitemap missing canonical root homepage'
+);
 for (const route of [
-  '/scifi-ui/',
   '/scifi-ui/downloads/',
   '/scifi-ui/known-issues.html',
   '/scifi-ui/security.html',

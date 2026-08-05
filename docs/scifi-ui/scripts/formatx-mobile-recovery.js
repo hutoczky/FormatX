@@ -9,7 +9,7 @@
   root.dataset.fxThree = 'intro-wait';
   root.classList.add('fx-mobile-stable-3d');
 
-  const stageUrl = new URL('./three-stage-mobile.html', location.href);
+  const stageUrl = new URL('./three-stage-mobile.html', document.baseURI);
   stageUrl.searchParams.set('v', '20260729-living-stage-v2');
 
   let frame = null;
@@ -54,7 +54,11 @@
     root.dataset.fxThreeError = String(message || 'morphing-organism-startup-failed').slice(0, 180);
     root.dataset.fxMobile3d = 'morphing-organism-stage-error';
     root.classList.remove('fx-three-frame-loaded', 'fx-three-engine-ready');
+    if (frame instanceof HTMLIFrameElement) frame.src = 'about:blank';
     telemetry('THREE / MORPHING ORGANISM UNAVAILABLE');
+    dispatchEvent(new CustomEvent('formatx:premiumfallback', {
+      detail: { reason: root.dataset.fxThreeError }
+    }));
   }
 
   function markReady() {

@@ -34,10 +34,11 @@ const RATE_LIMITED_API_PATHS = new Set([
 ]);
 
 const CANONICAL_PAGE_REDIRECTS = new Map([
-  ['/', '/scifi-ui/'],
-  ['/index.html', '/scifi-ui/'],
-  ['/scifi-ui', '/scifi-ui/'],
-  ['/scifi-ui/index.html', '/scifi-ui/'],
+  ['/', '/'],
+  ['/index.html', '/'],
+  ['/scifi-ui', '/'],
+  ['/scifi-ui/', '/'],
+  ['/scifi-ui/index.html', '/'],
   ['/checkout.html', '/scifi-ui/checkout.html'],
 ]);
 
@@ -156,7 +157,10 @@ export default {
       return secureResponse(apkResponse, url);
     }
 
-    let response = await liveWorker.fetch(request, env, ctx);
+    const liveRequest = isCanonicalHomepageRequest(request, url)
+      ? createHomepageAssetRequest(request)
+      : request;
+    let response = await liveWorker.fetch(liveRequest, env, ctx);
 
     if (url.pathname === '/api/health') {
       response = await annotateHealthResponse(response, salesReady);
@@ -190,7 +194,19 @@ export function canonicalPageRedirect(request, url) {
     : url.origin;
   const target = new URL(targetPath, targetOrigin);
   target.search = url.search;
+  if (target.href === url.href) return null;
   return Response.redirect(target.toString(), 308);
+}
+
+function isCanonicalHomepageRequest(request, url) {
+  return (request.method === 'GET' || request.method === 'HEAD')
+    && url.hostname === 'www.formatxsuite.com'
+    && url.pathname === '/';
+}
+
+function createHomepageAssetRequest(request) {
+  const assetUrl = new URL('/scifi-ui/index.html', request.url);
+  return new Request(assetUrl, request);
 }
 
 export function createAudioTestWav() {
@@ -348,8 +364,8 @@ export function secureResponse(response, url) {
   headers.delete('X-Powered-By');
 
   if (contentType.includes('text/html')) {
-    const canonicalPath = url.pathname === '/scifi-ui/index.html'
-      ? '/scifi-ui/'
+    const canonicalPath = ['/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html'].includes(url.pathname)
+      ? '/'
       : url.pathname;
     headers.set('Link', `<${PUBLIC_ORIGIN}${canonicalPath}>; rel="canonical"`);
     const contentSecurityPolicy = isThreeStage
