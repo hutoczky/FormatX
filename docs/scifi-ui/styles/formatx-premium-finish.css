@@ -331,11 +331,6 @@ html[data-fx-three='error'] .fx-premium-core-status::before {
     display: none !important;
   }
 
-  html[data-fx-premium-finish='ready-v1'].fx-organism-core-active :where(.fx-genome-launcher, .fx-three-sound) {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
 }
 
 @media (max-width: 1099px) {

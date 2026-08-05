@@ -45,6 +45,7 @@ downloads = read("docs/scifi-ui/downloads/index.html")
 platform_js = read("docs/scifi-ui/scripts/platform-status.js")
 platform_css = read("docs/scifi-ui/styles/platform-status.css")
 desktop_css = read("docs/scifi-ui/styles/formatx-desktop-unified.css")
+premium_css = read("docs/scifi-ui/styles/formatx-premium-finish.css")
 support = read("docs/scifi-ui/support.html")
 terms = read("docs/scifi-ui/terms.html")
 privacy = read("docs/scifi-ui/privacy.html")
@@ -118,7 +119,14 @@ require(
 require("loader has no obsolete Natural Voice module", "organism-natural-voice" not in loader)
 
 require("desktop hero is two-column", "grid-template-columns" in desktop_css and "#hero .hero-grid" in desktop_css)
-require("desktop hero height is bounded", "min(100svh, 960px)" in desktop_css)
+require(
+    "desktop hero height is bounded",
+    "min(100svh, 960px)" in desktop_css
+    or (
+        "height: min(880px, calc(100svh - 68px))" in premium_css
+        and "max-height: 880px" in premium_css
+    ),
+)
 require("laptop-height desktop rule exists", "max-height: 820px" in desktop_css)
 require("desktop composition leaves mobile untouched", "min-width: 1100px" in desktop_css)
 require("desktop composition supports reduced motion", "prefers-reduced-motion: reduce" in desktop_css)
