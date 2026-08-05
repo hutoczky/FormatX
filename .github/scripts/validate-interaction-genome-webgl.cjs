@@ -27,7 +27,9 @@ async function clearIntro(page) {
 
 async function openGenome(page) {
   await page.waitForFunction(() => window.FormatXInteractionGenome
-    && document.documentElement.dataset.fxGenomeWebglAdapter === 'ready-v3', null, { timeout: 90000 });
+    && document.querySelector('.fx-genome-launcher'), null, { timeout: 90000 });
+  await page.locator('.fx-genome-launcher').click({ force: true });
+  await page.waitForFunction(() => document.documentElement.dataset.fxGenomeWebglAdapter === 'ready-v3', null, { timeout: 90000 });
 
   await page.evaluate(() => {
     const api = window.FormatXInteractionGenome;
