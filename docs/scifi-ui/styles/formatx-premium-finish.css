@@ -99,6 +99,7 @@ html[data-fx-immersive='active'] #hero .hero-space::before {
   background: rgba(2, 14, 24, .76);
   box-shadow: 0 0 0 8px rgba(71, 225, 216, .045), 0 22px 58px rgba(0, 0, 0, .52), inset 0 0 30px rgba(78, 229, 220, .09);
   cursor: pointer;
+  pointer-events: auto;
   transform: translate(-50%, -50%);
   transition: opacity .45s ease, visibility .45s ease, border-color .2s ease, box-shadow .2s ease, transform .55s cubic-bezier(.2,.8,.2,1);
   backdrop-filter: blur(16px) saturate(125%);
