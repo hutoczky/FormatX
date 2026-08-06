@@ -1,0 +1,109 @@
+name: Validate mobile showcase and feedback
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-feedback.js'
+      - 'docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg'
+      - 'billing-worker/src/feedback-api.js'
+      - 'billing-worker/src/feedback-schema.js'
+      - 'billing-worker/src/production-feedback-entry.js'
+      - 'billing-worker/src/production-content-entry.js'
+      - 'billing-worker/wrangler.jsonc'
+      - '.github/scripts/validate-mobile-showcase-feedback.cjs'
+      - '.github/workflows/mobile-showcase-feedback-smoke.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-feedback.js'
+      - 'docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg'
+      - 'billing-worker/src/feedback-api.js'
+      - 'billing-worker/src/feedback-schema.js'
+      - 'billing-worker/src/production-feedback-entry.js'
+      - 'billing-worker/src/production-content-entry.js'
+      - 'billing-worker/wrangler.jsonc'
+      - '.github/scripts/validate-mobile-showcase-feedback.cjs'
+      - '.github/workflows/mobile-showcase-feedback-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax and contracts
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-feedback.js
+          node --check .github/scripts/validate-mobile-showcase-feedback.cjs
+          node .github/scripts/validate-mobile-showcase-feedback.cjs
+      - name: Validate production Worker bundle
+        working-directory: billing-worker
+        run: |
+          npm ci
+          npx wrangler deploy --dry-run --outdir ../.wrangler-mobile-feedback
+
+  production-smoke:
+    if: github.event_name == 'push'
+    needs: validate-candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Wait for Cloudflare production and verify public services
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          BASE='https://www.formatxsuite.com'
+          SUMMARY="$BASE/api/feedback/summary"
+          SUBMIT="$BASE/api/feedback"
+          ASSET="$BASE/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg?v=20260806-mobile-compatible-2"
+          PAYLOAD='{"overall":5,"usability":5,"performance":5,"design":5,"features":5,"comment":"","display_name":"","contact_email":"","publish_permission":false,"privacy_consent":true,"website":"formatx-production-smoke-probe","locale":"hu","source":"github-production-smoke","page_path":"/"}'
+
+          for attempt in $(seq 1 30); do
+            echo "Production smoke attempt $attempt/30"
+            rm -f /tmp/fx-summary.json /tmp/fx-submit.json /tmp/fx-asset.svg
+            summary_code="$(curl -sS --max-time 20 -o /tmp/fx-summary.json -w '%{http_code}' "$SUMMARY" || true)"
+            submit_code="$(curl -sS --max-time 20 -o /tmp/fx-submit.json -w '%{http_code}' \
+              -X POST "$SUBMIT" \
+              -H 'Origin: https://www.formatxsuite.com' \
+              -H 'Content-Type: application/json' \
+              -H 'Accept: application/json' \
+              --data "$PAYLOAD" || true)"
+            asset_code="$(curl -sS --max-time 20 -o /tmp/fx-asset.svg -w '%{http_code}' "$ASSET" || true)"
+
+            if [[ "$summary_code" == '200' && "$submit_code" == '202' && "$asset_code" == '200' ]]; then
+              python3 - <<'PY'
+          import json
+          from pathlib import Path
+          summary=json.loads(Path('/tmp/fx-summary.json').read_text())
+          submit=json.loads(Path('/tmp/fx-submit.json').read_text())
+          asset=Path('/tmp/fx-asset.svg').read_text()
+          assert summary.get('ok') is True, summary
+          assert isinstance(summary.get('count'), int), summary
+          assert submit.get('ok') is True, submit
+          assert submit.get('state') == 'pending-moderation', submit
+          assert '<svg' in asset and '</svg>' in asset, 'compatible SVG missing'
+          assert 'data:image/webp' not in asset.lower(), 'WebP nesting returned in compatible asset'
+          assert '<image' not in asset.lower(), 'nested raster image returned in compatible asset'
+          print('Live FormatX feedback and mobile showcase smoke passed.')
+          PY
+              exit 0
+            fi
+
+            echo "summary=$summary_code submit=$submit_code asset=$asset_code"
+            [[ -s /tmp/fx-summary.json ]] && cat /tmp/fx-summary.json || true
+            [[ -s /tmp/fx-submit.json ]] && cat /tmp/fx-submit.json || true
+            sleep 12
+          done
+
+          echo 'Production smoke did not become healthy within the retry window.' >&2
+          exit 1
