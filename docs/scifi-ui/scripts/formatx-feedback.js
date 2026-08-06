@@ -15,7 +15,6 @@
       success: 'Köszönjük. A visszajelzés moderálásra vár, és csak jóváhagyás után kerülhet bele a nyilvános átlagba.',
       error: 'A visszajelzés most nem küldhető el. Ellenőrizd a mezőket, majd próbáld újra.',
       selectAll: 'Minden értékelési kategóriát tölts ki 1 és 5 között.',
-      openLive: 'A Live OS megnyitása',
     },
     en: {
       rating: 'rating',
@@ -26,14 +25,14 @@
       success: 'Thank you. The submission is awaiting moderation and can affect the public average only after approval.',
       error: 'Feedback could not be sent. Check the fields and try again.',
       selectAll: 'Rate every category from 1 to 5.',
-      openLive: 'Open Live OS',
     },
   };
 
   const language = () => root.lang === 'en' ? 'en' : 'hu';
   const copy = () => COPY[language()];
 
-  function syncBilingual(scope = document) {
+  function syncBilingual(scope) {
+    if (!scope) return;
     scope.querySelectorAll('[data-hu][data-en]').forEach(element => {
       if (element.matches('input, textarea')) {
         if (element.dataset.huPlaceholder && element.dataset.enPlaceholder) {
@@ -42,6 +41,17 @@
         return;
       }
       element.textContent = element.dataset[language()];
+    });
+  }
+
+  function syncLiveOsCtas() {
+    document.querySelectorAll('[data-fx-live-os-cta]').forEach(element => {
+      const label = element.querySelector('[data-hu][data-en]');
+      if (label) {
+        label.textContent = label.dataset[language()];
+      } else if (element.dataset.hu && element.dataset.en) {
+        element.textContent = element.dataset[language()];
+      }
     });
   }
 
@@ -205,6 +215,7 @@
       button.dataset.bound = 'true';
       button.addEventListener('click', openLiveOs);
     });
+    syncLiveOsCtas();
     if (!section) return;
     section.querySelectorAll('[data-rating-group]').forEach(buildRatingGroup);
     syncBilingual(section);
@@ -218,15 +229,16 @@
   }
 
   addEventListener('formatx:languagechange', () => {
-    syncBilingual(document);
-    document.querySelectorAll('[data-rating-group] legend').forEach(legend => {
+    const section = document.getElementById('user-feedback');
+    syncBilingual(section);
+    syncLiveOsCtas();
+    document.querySelectorAll('#user-feedback [data-rating-group] legend').forEach(legend => {
       legend.textContent = legend.dataset[language()];
     });
-    document.querySelectorAll('.fx-rating-stars label[data-value] .sr-only').forEach(label => {
+    document.querySelectorAll('#user-feedback .fx-rating-stars label[data-value] .sr-only').forEach(label => {
       const value = label.closest('label').dataset.value;
       label.textContent = `${value} / 5 ${copy().rating}`;
     });
-    const section = document.getElementById('user-feedback');
     if (section) loadSummary(section);
   });
 
