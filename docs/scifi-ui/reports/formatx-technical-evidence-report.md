@@ -62,6 +62,8 @@ A moderáció a Cloudflare Access e-mail-kódos védelemmel ellátott tulajdonos
 - a kapcsolati e-mail és a közzétételi engedély kizárólag az adminnak látható;
 - a felhasználói szöveg HTML-ként nem hajtódik végre.
 
+A production D1 adatbázis kompatibilitását idempotens runtime migráció biztosítja. A visszajelző kérés előtt ellenőrzi a `user_feedback` tábla oszlopait, adatvesztés nélkül pótolja a hiányzó mezőket, majd létrehozza a szükséges indexeket. Ez kezeli a korábbi és az új visszajelző séma közötti eltérést.
+
 ## 5. Adatvédelmi határ
 
 A Live OS parancsértelmezése helyben fut. A beírt parancsot nem küldi külső AI-szolgáltatásnak. A weboldal csak a böngésző által ténylegesen elérhető képességeket méri, és nem talál ki mély operációsrendszer-adatokat.
