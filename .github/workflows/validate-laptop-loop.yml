@@ -1,26 +1,22 @@
-name: Validate FormatX clone-free laptop loop
-run-name: Validate laptop wheel loop from ${{ github.sha }}
+name: Validate FormatX jump-free scrolling
+run-name: Validate native scrolling from ${{ github.sha }}
 
 on:
   workflow_dispatch:
   push:
     branches: [master]
     paths:
-      - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
-      - 'docs/scifi-ui/scripts/organism-core-controller.js'
-      - 'docs/scifi-ui/styles/formatx-site-stability.css'
-      - 'docs/scifi-ui/styles/formatx-desktop-unified.css'
+      - 'docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js'
+      - 'docs/scifi-ui/data/public-platform-contract.json'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
   pull_request:
     branches: [master]
     paths:
-      - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
-      - 'docs/scifi-ui/scripts/organism-core-controller.js'
-      - 'docs/scifi-ui/styles/formatx-site-stability.css'
-      - 'docs/scifi-ui/styles/formatx-desktop-unified.css'
+      - 'docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js'
+      - 'docs/scifi-ui/data/public-platform-contract.json'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
 
@@ -29,7 +25,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-laptop-loop-${{ github.ref }}
+  group: formatx-native-scroll-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -45,60 +41,63 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Validate controller source
+      - name: Validate native scroll source
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          node --check docs/scifi-ui/scripts/organism-core-controller.js
-          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
-          grep -Fq "boundary-v4" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "clonedContent: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "reinitialisedRenderer: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "formatx-infinite-scroll.js?v=20260805-infinite-smooth-v5" docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq "formatx-desktop-unified.css" docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq "addEventListener('formatx:loop'" docs/scifi-ui/scripts/organism-core-controller.js
-          ! grep -Fq "data-fx-loop-bridge" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq "cloneNode" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          python3 -m json.tool docs/scifi-ui/data/public-platform-contract.json >/dev/null
+          grep -Fq "native-v5" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "automaticLoop: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "jumpFree: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq '"automatic_scroll_loop": false' docs/scifi-ui/data/public-platform-contract.json
+          grep -Fq '"forced_scroll_transfer": false' docs/scifi-ui/data/public-platform-contract.json
+          ! grep -Fq "scrollTo(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "preventDefault" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "performLoop" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "addEventListener('touch" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "scrollTo(" docs/scifi-ui/scripts/formatx-infinite-loop-controller-v2.js
 
       - name: Install Chromium
         shell: bash
         run: |
           set -euo pipefail
-          npm install --prefix "$RUNNER_TEMP/formatx-laptop-loop" --no-audit --no-fund playwright@1.62.0
-          "$RUNNER_TEMP/formatx-laptop-loop/node_modules/.bin/playwright" install --with-deps chromium
+          npm install --prefix "$RUNNER_TEMP/formatx-native-scroll" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-native-scroll/node_modules/.bin/playwright" install --with-deps chromium
 
       - name: Start website
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-laptop-loop-http.log" 2>&1 &
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-native-scroll-http.log" 2>&1 &
           for attempt in $(seq 1 40); do
             curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
             sleep 0.25
           done
-          cat "$RUNNER_TEMP/formatx-laptop-loop-http.log"
+          cat "$RUNNER_TEMP/formatx-native-scroll-http.log"
           exit 1
 
-      - name: Verify laptop wheel and touchpad continuity
+      - name: Verify mobile, laptop and Full HD scrolling
         env:
-          NODE_PATH: ${{ runner.temp }}/formatx-laptop-loop/node_modules
+          NODE_PATH: ${{ runner.temp }}/formatx-native-scroll/node_modules
         shell: bash
         run: |
           set -o pipefail
-          node .github/scripts/validate-laptop-continuous-loop.cjs 2>&1 | tee laptop-continuous-loop-report.txt
+          node .github/scripts/validate-laptop-continuous-loop.cjs 2>&1 | tee native-scroll-report.txt
 
-      - name: Upload laptop loop report
+      - name: Upload native scroll report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-laptop-boundary-loop-report
-          path: laptop-continuous-loop-report.txt
+          name: formatx-native-scroll-report
+          path: native-scroll-report.txt
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Publish laptop loop status
+      - name: Publish native scroll status
         if: always() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -107,13 +106,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Boundary-v4 loops passed at both laptop sizes'
+            description='Native jump-free scrolling passed on mobile, HD and Full HD'
           else
             state='failure'
-            description='Laptop boundary-v4 validation failed'
+            description='Native scrolling validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX clone-free laptop loop' \
+            -f context='FormatX jump-free scrolling' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

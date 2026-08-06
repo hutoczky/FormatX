@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "public_copy": {
     "primary_system": "linux-bazzite",
     "supported_secondary_platforms": [
@@ -12,9 +12,13 @@
   "layout_contract": {
     "desktop_composition_preloaded": true,
     "mobile_layout_unchanged": true,
-    "infinite_scroll_controller": "boundary-v4",
+    "infinite_scroll_controller": "boundary-v4-retired",
+    "scroll_controller": "native-v5",
+    "automatic_scroll_loop": false,
     "clone_based_loop": false,
-    "fine_pointer_scroll_mode": "continuous",
+    "fine_pointer_scroll_mode": "native-continuous",
+    "coarse_pointer_scroll_mode": "native-continuous",
+    "forced_scroll_transfer": false,
     "language_switch_preserves_scene_hash": true
   },
   "source_of_truth": {
