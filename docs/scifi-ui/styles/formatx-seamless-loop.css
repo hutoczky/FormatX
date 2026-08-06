@@ -1,0 +1,183 @@
+/* Seamless loop and release-centre contract. */
+
+html.fx-seamless-loop-transfer,
+html.fx-seamless-loop-transfer body {
+  scroll-behavior: auto !important;
+  scroll-snap-type: none !important;
+}
+
+.fx-loop-bridge {
+  position: relative;
+  z-index: var(--fx-layer-content, 220);
+  min-height: 100svh;
+  overflow: clip;
+  background: #02070d;
+  contain: layout paint style;
+}
+
+.fx-loop-bridge > #hero.fx-loop-hero-clone {
+  display: block !important;
+  min-height: 100svh !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+.fx-loop-bridge .fx-loop-hero-clone .fx-immersive-launch,
+.fx-loop-bridge .fx-loop-hero-clone .fx-organism-map,
+.fx-loop-bridge .fx-loop-hero-clone .scroll-cue,
+.fx-loop-bridge .fx-loop-hero-clone .hero-actions,
+.fx-loop-bridge .fx-loop-hero-clone .hero-facts {
+  pointer-events: none !important;
+}
+
+.fx-loop-bridge::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 30;
+  height: min(18svh, 180px);
+  background: linear-gradient(180deg, #02070d, transparent);
+  pointer-events: none;
+}
+
+body > .site-footer {
+  min-height: auto !important;
+  margin-bottom: 0 !important;
+}
+
+.fx-organism-panel[data-fx-release-panel='stable-v2'] {
+  padding-bottom: max(64px, calc(32px + env(safe-area-inset-bottom))) !important;
+}
+
+.fx-release-download-hub {
+  display: grid;
+  gap: 22px;
+  margin: 30px 0 12px;
+  padding: clamp(22px, 4vw, 38px);
+  border: 1px solid rgba(var(--fx-panel-accent), .24);
+  border-radius: 24px;
+  background:
+    linear-gradient(145deg, rgba(7, 20, 30, .92), rgba(2, 9, 16, .96)),
+    radial-gradient(circle at 88% 8%, rgba(var(--fx-panel-accent), .15), transparent 42%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .02), 0 24px 70px rgba(0, 0, 0, .28);
+}
+
+.fx-release-download-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: start;
+}
+
+.fx-release-download-head h3 {
+  max-width: 18ch;
+  margin: 8px 0 12px;
+  color: #f2fbff;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.02;
+  letter-spacing: -.035em;
+}
+
+.fx-release-download-head p:last-child {
+  max-width: 62ch;
+  margin: 0;
+  color: rgba(225, 241, 248, .7);
+  line-height: 1.65;
+}
+
+.fx-release-download-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  color: #bdf8d0;
+  border: 1px solid rgba(93, 240, 155, .35);
+  border-radius: 999px;
+  background: rgba(93, 240, 155, .08);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9px;
+  letter-spacing: .14em;
+  white-space: nowrap;
+}
+
+.fx-release-download-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.fx-release-download-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 16px 48px 16px 18px;
+  color: rgba(235, 249, 255, .86);
+  border: 1px solid rgba(var(--fx-panel-accent), .2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .025);
+  text-decoration: none;
+  font-weight: 760;
+  letter-spacing: .02em;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.fx-release-download-card::after {
+  content: '↗';
+  position: absolute;
+  right: 18px;
+  color: rgba(var(--fx-panel-accent), .92);
+  font-size: 20px;
+}
+
+.fx-release-download-card:hover,
+.fx-release-download-card:focus-visible {
+  border-color: rgba(var(--fx-panel-accent), .55);
+  background: rgba(var(--fx-panel-accent), .1);
+  transform: translateY(-2px);
+}
+
+.fx-release-download-card.is-primary {
+  color: #031018;
+  border-color: transparent;
+  background: linear-gradient(105deg, #dffaff, #80dff3 58%, #c8b6ff);
+}
+
+.fx-release-download-card.is-primary::after {
+  color: #031018;
+}
+
+.fx-release-download-note {
+  margin: 0;
+  padding-top: 16px;
+  color: rgba(221, 239, 247, .58);
+  border-top: 1px solid rgba(var(--fx-panel-accent), .12);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .fx-release-download-head,
+  .fx-release-download-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fx-release-download-badge {
+    justify-self: start;
+  }
+
+  .fx-release-download-card {
+    min-height: 58px;
+  }
+
+  .fx-loop-bridge::before {
+    height: 12svh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-release-download-card {
+    transition-duration: .01ms !important;
+  }
+}
