@@ -10,13 +10,14 @@ const runtime = read('docs/scifi-ui/scripts/formatx-product-showcase.js');
 const loader = read('docs/scifi-ui/scripts/formatx-origin-proof.js');
 const styles = read('docs/scifi-ui/styles/formatx-product-showcase.css');
 
-const images = [
+const rasterProofImages = [
   'control-center.svg',
   'live-system-monitor.svg',
   'diagnostics.svg',
-  'portable-installer.svg',
   'usb-creator.svg'
 ];
+const nativeVectorImages = ['portable-installer.svg'];
+const images = [...rasterProofImages, ...nativeVectorImages];
 
 assert.match(runtime, /const ITEMS = \[/, 'showcase item registry missing');
 assert.match(runtime, /fx-product-showcase__dialog/, 'full-size dialog missing');
@@ -27,12 +28,23 @@ assert.match(loader, /formatx-product-showcase\.js\?v=20260806-real-product-1/, 
 assert.match(styles, /prefers-reduced-motion: reduce/, 'reduced-motion treatment missing');
 assert.match(styles, /content-visibility: auto/, 'offscreen rendering optimisation missing');
 
-for (const image of images) {
+for (const image of rasterProofImages) {
   const file = `docs/scifi-ui/assets/images/product-showcase/${image}`;
   assert.ok(exists(file), `missing product screen: ${image}`);
   const source = read(file);
   assert.match(source, /data:image\/webp;base64,/, `embedded WebP payload missing: ${image}`);
   assert.ok(source.length > 5000, `product screen payload is unexpectedly small: ${image}`);
+}
+
+for (const image of nativeVectorImages) {
+  const file = `docs/scifi-ui/assets/images/product-showcase/${image}`;
+  assert.ok(exists(file), `missing product screen: ${image}`);
+  const source = read(file);
+  assert.match(source, /^<svg[\s\S]*<\/svg>\s*$/, `native SVG is malformed: ${image}`);
+  assert.doesNotMatch(source, /data:image\/webp/i, `native SVG must not embed WebP: ${image}`);
+  assert.doesNotMatch(source, /<image\b/i, `native SVG must not embed a nested raster image: ${image}`);
+  assert.match(source, /Teljes cross-platform csomag/, `portable installer state missing: ${image}`);
+  assert.ok(source.length > 5000, `native SVG proof is unexpectedly small: ${image}`);
 }
 
 assert.equal((runtime.match(/image: '/g) || []).length, images.length, 'showcase item count does not match uploaded images');
