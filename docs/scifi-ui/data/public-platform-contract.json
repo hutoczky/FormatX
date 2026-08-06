@@ -12,6 +12,7 @@
   "layout_contract": {
     "desktop_composition_preloaded": true,
     "mobile_layout_unchanged": true,
+    "infinite_scroll_controller": "boundary-v4-retired",
     "scroll_controller": "native-v5",
     "automatic_scroll_loop": false,
     "clone_based_loop": false,
