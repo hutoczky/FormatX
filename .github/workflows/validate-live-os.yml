@@ -5,6 +5,8 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-live-os.js'
+      - 'docs/scifi-ui/scripts/formatx-live-os-core.js'
+      - 'docs/scifi-ui/scripts/formatx-live-os-fallback.js'
       - 'docs/scifi-ui/styles/formatx-live-os.css'
       - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
       - '.github/scripts/validate-live-os.cjs'
@@ -14,6 +16,8 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-live-os.js'
+      - 'docs/scifi-ui/scripts/formatx-live-os-core.js'
+      - 'docs/scifi-ui/scripts/formatx-live-os-fallback.js'
       - 'docs/scifi-ui/styles/formatx-live-os.css'
       - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
       - '.github/scripts/validate-live-os.cjs'
@@ -38,6 +42,8 @@ jobs:
       - name: Validate JavaScript syntax
         run: |
           node --check docs/scifi-ui/scripts/formatx-live-os.js
+          node --check docs/scifi-ui/scripts/formatx-live-os-core.js
+          node --check docs/scifi-ui/scripts/formatx-live-os-fallback.js
           node --check docs/scifi-ui/scripts/formatx-origin-proof.js
           node --check .github/scripts/validate-live-os-browser.cjs
       - name: Validate Live OS contract
@@ -55,7 +61,7 @@ jobs:
           done
           cat "$RUNNER_TEMP/formatx-live-os-http.log"
           exit 1
-      - name: Test desktop, mobile, commands, diagnostics and functional 3D
+      - name: Test desktop, mobile, commands, diagnostics and functional topology
         run: node .github/scripts/validate-live-os-browser.cjs
       - name: Upload Live OS evidence
         if: always()
