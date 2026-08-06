@@ -244,7 +244,7 @@ jobs:
           assert "fxInfiniteCloneMode = 'visual-bridge'" in loop, 'visual bridge missing'
           assert 'clonedHeroOnly: true' in loop, 'Hero-only loop contract missing'
           assert 'id="user-feedback"' in home, 'feedback section missing'
-          assert 'data-fx-category-title' in home and 'Technikusi operációs réteg' in home, 'static category semantics missing'
+          assert 'data-fx-category-title' in home and 'Egy élő operációs réteg technikusi munkához.' in home, 'static category semantics missing'
           assert 'FormatX-Updates/releases/latest' in downloads, 'latest release fallback missing'
           assert 'Támogatás' in support or 'Support' in support, 'support page invalid'
           assert '<svg' in portable and '</svg>' in portable, 'portable installer SVG missing'
