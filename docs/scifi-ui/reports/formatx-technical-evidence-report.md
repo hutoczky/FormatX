@@ -62,7 +62,7 @@ A moderáció a Cloudflare Access e-mail-kódos védelemmel ellátott tulajdonos
 - a kapcsolati e-mail és a közzétételi engedély kizárólag az adminnak látható;
 - a felhasználói szöveg HTML-ként nem hajtódik végre.
 
-A production D1 adatbázis kompatibilitását idempotens runtime migráció biztosítja. A visszajelző kérés előtt ellenőrzi a `user_feedback` tábla oszlopait, adatvesztés nélkül pótolja a hiányzó mezőket, majd létrehozza a szükséges indexeket. Ez kezeli a korábbi és az új visszajelző séma közötti eltérést.
+A production D1 adatbázis verziózott, helyreállításra képes sémafolyamatot használ. Ha a korábbi `user_feedback` tábla nem felel meg a kanonikus sémának, a Worker új táblát épít, a meglévő rekordokat ellenőrzött alapértékekkel átmásolja, majd újra létrehozza a szükséges indexeket. Sikertelen helyreállításkor kontrollált 503-as JSON-válasz és incidensazonosító készül, nem nyers HTTP 500 hibaoldal.
 
 ## 5. Adatvédelmi határ
 
@@ -72,7 +72,38 @@ A visszajelző a visszaélések korlátozásához egyirányú hálózati azonos�
 
 Adatvédelem: https://www.formatxsuite.com/scifi-ui/privacy.html
 
-## 6. Nyílt bizonyítékhiányok
+## 6. Teljes oldal audit és folytonos görgetés
+
+A nyilvános felület statikus integritáskapuja ellenőrzi:
+
+- a publikus HTML-oldalak helyi hivatkozásait és assetjeit;
+- a duplikált HTML-azonosítókat;
+- a képek alternatív szövegét;
+- a külső lapnyitások `noopener` védelmét;
+- a CSP-vel ütköző inline eseménykezelőket;
+- a letöltési fallback útvonalakat;
+- a Hordozható telepítő rasztermentes SVG-jét;
+- a főoldal statikus, kereshető kategóriaszemantikáját.
+
+A `seamless-v6` görgető natív wheel-, touch- és billentyűzetes inputot használ. Az oldal végén egy inaktív, Hero-only vizuális híd tartja meg a képi folytonosságot, majd a rendszer az azonos relatív vizuális pozícióra vált. A teljes oldal nem kerül klónozásra. Mobilon a böngésző címsávjának magasságváltozása nem építi újra a hidat; újraépítés csak valódi szélesség- vagy tájolásváltozáskor történik.
+
+## 7. Letöltési és publikus útvonalak
+
+A letöltési oldal JavaScript nélkül is a legfrissebb GitHub Release oldalra mutat. Hiteles kiadási metaadat esetén a kliens közvetlen kiadási csomagra frissítheti a hivatkozást.
+
+A fő publikus rövid útvonalak 308-as kanonikus átirányítást kapnak, többek között:
+
+- `/downloads/`;
+- `/support.html`;
+- `/privacy.html`;
+- `/terms.html`;
+- `/verification.html`;
+- `/test-matrix.html`;
+- `/known-issues.html`.
+
+A nem `www` domain publikus GET és HEAD kérései a kanonikus `www.formatxsuite.com` címre kerülnek.
+
+## 8. Nyílt bizonyítékhiányok
 
 Jelenleg nincs publikálva:
 
