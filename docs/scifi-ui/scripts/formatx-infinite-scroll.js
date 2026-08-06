@@ -24,6 +24,15 @@
   root.dataset.fxScrollJumpGuard = 'visual-match-v2';
   root.classList.remove('fx-infinite-loop-jump', 'fx-three-loop-transfer', 'fx-precision-wheel');
 
+  function ensureStyle() {
+    if (document.querySelector('link[data-fx-seamless-loop-style]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260806-seamless-v6';
+    link.dataset.fxSeamlessLoopStyle = 'true';
+    document.head.appendChild(link);
+  }
+
   function language() {
     return root.lang === 'en' ? 'en' : 'hu';
   }
@@ -36,11 +45,18 @@
     });
   }
 
-  function dedupeFooterLinks(footer) {
+  function repairFooterCopy(footer) {
+    const licence = footer.querySelector('[data-fx-licence-link]');
+    if (licence) {
+      licence.dataset.hu = 'Licencfeltételek';
+      licence.dataset.en = 'Licence terms';
+      licence.textContent = language() === 'en' ? 'Licence terms' : 'Licencfeltételek';
+    }
+
     footer.querySelectorAll('nav').forEach(nav => {
       const seen = new Set();
       Array.from(nav.querySelectorAll('a[href]')).forEach(link => {
-        const key = new URL(link.getAttribute('href'), document.baseURI).href + '|' + link.textContent.trim().toLocaleLowerCase();
+        const key = new URL(link.getAttribute('href'), document.baseURI).href;
         if (seen.has(key)) link.remove();
         else seen.add(key);
       });
@@ -135,7 +151,7 @@
       main.insertAdjacentElement('afterend', footer);
     }
     footer.dataset.fxFooterFlow = 'document';
-    dedupeFooterLinks(footer);
+    repairFooterCopy(footer);
 
     if (panel) {
       panel.dataset.fxReleasePanel = 'stable-v2';
@@ -145,6 +161,7 @@
   }
 
   function neutraliseClone(clone) {
+    clone.id = 'fx-loop-hero-bridge';
     clone.dataset.fxLoopClone = 'true';
     clone.classList.add('fx-loop-hero-clone');
     clone.setAttribute('aria-hidden', 'true');
@@ -217,7 +234,7 @@
     if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return;
 
     const bridgeTop = bridge.offsetTop;
-    const threshold = bridgeTop + Math.max(32, Math.min(innerHeight * .22, 220));
+    const threshold = bridgeTop + Math.max(36, Math.min(innerHeight * .18, 180));
     if (scrollY < threshold || scrollY > documentEnd() + 2) return;
 
     const relative = Math.max(0, Math.min(scrollY - bridgeTop, Math.max(0, sourceHero.offsetHeight - 2)));
@@ -261,6 +278,7 @@
   }
 
   function initialise() {
+    ensureStyle();
     repairReleasePanel();
     buildBridge();
     root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
@@ -285,6 +303,8 @@
   addEventListener('formatx:organismpanelclose', () => scheduleRepair(true));
   addEventListener('formatx:languagechange', () => {
     setBilingualText(bridge);
+    const footer = document.querySelector('.site-footer');
+    if (footer) repairFooterCopy(footer);
     const panel = document.querySelector('[data-organism-panel="resources"]');
     if (panel) syncReleaseHub(panel);
   });
