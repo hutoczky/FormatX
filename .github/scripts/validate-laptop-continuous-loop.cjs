@@ -9,9 +9,8 @@ function assert(value, message) {
 }
 
 async function clearIntro(page) {
-  const skip = page.locator('.fx-intro-skip');
-  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
   await page.evaluate(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
     root.classList.remove('fx-intro-running', 'fx-intro-pending');
@@ -21,136 +20,91 @@ async function clearIntro(page) {
       overlay.style.display = 'none';
       overlay.setAttribute('aria-hidden', 'true');
     }
+    document.body?.classList.remove('fx-organism-panel-open');
     document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
   });
 }
 
-async function closeInteractiveLayers(page) {
-  await page.evaluate(() => {
-    document.querySelector('.fx-organism-thought-close')?.click();
-    document.querySelector('.fx-organism-console-close')?.click();
-    const dialogue = document.querySelector('.fx-organism-dialogue');
-    if (dialogue instanceof HTMLElement) {
-      dialogue.classList.remove('is-open');
-      dialogue.hidden = true;
-      dialogue.setAttribute('aria-hidden', 'true');
-    }
-    const consoleRoot = document.getElementById('fx-organism-console');
-    if (consoleRoot instanceof HTMLElement) {
-      consoleRoot.classList.remove('is-authorised-open');
-      consoleRoot.hidden = true;
-      consoleRoot.setAttribute('aria-hidden', 'true');
-      consoleRoot.style.setProperty('display', 'none');
-    }
-    document.body.classList.remove('fx-organism-panel-open');
-  });
-}
-
-async function state(page) {
+async function snapshot(page) {
   return page.evaluate(() => ({
     controller: document.documentElement.dataset.fxInfiniteController || '',
     ready: document.documentElement.dataset.fxInfiniteScroll || '',
     input: document.documentElement.dataset.fxInfiniteInput || '',
-    activity: document.documentElement.dataset.fxScrollActivity || '',
-    count: Number(document.documentElement.dataset.fxLoopCount || 0),
-    source: document.documentElement.dataset.fxLoopSource || '',
+    automaticLoop: document.documentElement.dataset.fxAutomaticLoop || '',
+    jumpGuard: document.documentElement.dataset.fxScrollJumpGuard || '',
     scrollY,
     maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
-    heroTop: document.getElementById('hero')?.getBoundingClientRect().top + scrollY,
+    loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
     cloneCount: document.querySelectorAll('[data-fx-loop-bridge]').length,
-    legacyControllerLoaded: Array.from(document.scripts).some(script => (
-      /formatx-infinite-loop-(?:fix|controller-v2)\.js/.test(script.src)
-    )),
-    boundaryControllerLoaded: Array.from(document.scripts).some(script => (
-      /formatx-infinite-scroll\.js/.test(script.src)
-    ))
+    jumpClass: document.documentElement.classList.contains('fx-infinite-loop-jump')
+      || document.documentElement.classList.contains('fx-three-loop-transfer'),
+    runtime: document.documentElement.__FORMATX_INFINITE_SCROLL__ || null
   }));
 }
 
-async function footprint(page) {
-  return page.evaluate(() => {
-    const frames = Array.from(document.querySelectorAll('.fx-three-stage-shell iframe'));
-    const frameCanvases = frames.reduce((count, frame) => {
-      try {
-        return count + (frame.contentDocument?.querySelectorAll('canvas').length || 0);
-      } catch (_) {
-        return count;
-      }
-    }, 0);
-    return {
-      frames: frames.length,
-      canvases: document.querySelectorAll('canvas').length + frameCanvases,
-      modules: document.querySelectorAll('script[data-fx-transcend-module]').length,
-      stageShells: document.querySelectorAll('.fx-three-stage-shell').length,
-      loopBridges: document.querySelectorAll('[data-fx-loop-bridge]').length
-    };
-  });
-}
-
-async function moveToBoundary(page) {
-  await closeInteractiveLayers(page);
+async function verifyNoAutomaticJump(page, name) {
   await page.evaluate(() => {
     const maximum = Math.max(0, document.documentElement.scrollHeight - innerHeight);
-    scrollTo(0, Math.max(0, maximum - 8));
+    scrollTo(0, Math.max(0, maximum - 4));
   });
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(900);
+
+  const afterNativeSettle = await snapshot(page);
+  assert(afterNativeSettle.maximum - afterNativeSettle.scrollY <= 24,
+    name + ': the page jumped away from the bottom: ' + JSON.stringify(afterNativeSettle));
+  assert(afterNativeSettle.loopCount === 0,
+    name + ': an automatic loop was recorded: ' + JSON.stringify(afterNativeSettle));
+  assert(!afterNativeSettle.jumpClass,
+    name + ': a forced-scroll transfer class remained active: ' + JSON.stringify(afterNativeSettle));
+
+  await page.mouse.wheel(0, 1200);
+  await page.waitForTimeout(500);
+  const afterWheel = await snapshot(page);
+  assert(afterWheel.maximum - afterWheel.scrollY <= 24,
+    name + ': wheel input caused a backward jump: ' + JSON.stringify(afterWheel));
+  assert(afterWheel.loopCount === 0,
+    name + ': wheel input triggered the retired loop: ' + JSON.stringify(afterWheel));
+
+  await page.keyboard.press('End');
+  await page.waitForTimeout(350);
+  const afterKeyboard = await snapshot(page);
+  assert(afterKeyboard.maximum - afterKeyboard.scrollY <= 24,
+    name + ': End key caused a backward jump: ' + JSON.stringify(afterKeyboard));
 }
 
-async function dispatchWheelSequence(page) {
-  await page.evaluate(() => {
-    [18, 22, 26, 30, 34].forEach((delta, index) => {
-      setTimeout(() => {
-        window.dispatchEvent(new WheelEvent('wheel', {
-          deltaY: delta,
-          bubbles: true,
-          cancelable: true,
-          view: window
-        }));
-      }, index * 18);
-    });
+async function verifyProgressiveScroll(page, name) {
+  const positions = await page.evaluate(async () => {
+    const values = [];
+    const maximum = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    const start = Math.round(maximum * 0.45);
+    const end = Math.round(maximum * 0.82);
+    scrollTo(0, start);
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    for (let index = 1; index <= 18; index += 1) {
+      const target = Math.round(start + (end - start) * index / 18);
+      scrollTo(0, target);
+      await new Promise(resolve => setTimeout(resolve, 45));
+      values.push(scrollY);
+    }
+    return values;
   });
+
+  for (let index = 1; index < positions.length; index += 1) {
+    assert(positions[index] + 8 >= positions[index - 1],
+      name + ': scrolling moved backwards unexpectedly: ' + JSON.stringify(positions));
+  }
 }
 
-async function performLoop(page, expectedCount) {
-  await moveToBoundary(page);
-  await dispatchWheelSequence(page);
-
-  const completed = await page.waitForFunction(count => (
-    Number(document.documentElement.dataset.fxLoopCount || 0) >= count
-    && ['wheel', 'native-scroll'].includes(document.documentElement.dataset.fxLoopSource || '')
-    && document.documentElement.dataset.fxInfiniteInput === 'idle'
-    && document.documentElement.dataset.fxScrollActivity === 'idle'
-  ), expectedCount, { timeout: 12000 }).then(() => true).catch(() => false);
-
-  const current = await state(page);
-  assert(completed, 'laptop boundary loop did not complete: ' + JSON.stringify(current));
-  assert(current.count === expectedCount, 'unexpected loop count: ' + JSON.stringify(current));
-  assert(current.controller === 'boundary-v4' && current.ready === 'ready-v4',
-    'wrong controller state: ' + JSON.stringify(current));
-  assert(['wheel', 'native-scroll'].includes(current.source),
-    'wrong loop source: ' + JSON.stringify(current));
-  assert(current.activity === 'idle', 'scroll activity did not settle: ' + JSON.stringify(current));
-  assert(current.cloneCount === 0, 'clone-based loop returned: ' + JSON.stringify(current));
-  assert(current.boundaryControllerLoaded && !current.legacyControllerLoaded,
-    'controller loading conflict: ' + JSON.stringify(current));
-  assert(Math.abs(current.scrollY - current.heroTop) <= 3,
-    'loop did not land on hero: ' + JSON.stringify(current));
-  return current;
-}
-
-async function verifyViewport(browser, viewport, name) {
+async function verifyViewport(browser, viewport, name, mobile) {
   const context = await browser.newContext({
     viewport,
     locale: 'hu-HU',
     colorScheme: 'dark',
-    hasTouch: false,
-    isMobile: false,
-    deviceScaleFactor: 1
+    hasTouch: mobile,
+    isMobile: mobile,
+    deviceScaleFactor: mobile ? 2 : 1
   });
-  await context.addInitScript(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-  });
-
   const page = await context.newPage();
   const diagnostics = [];
   page.on('pageerror', error => diagnostics.push('pageerror: ' + String(error)));
@@ -158,41 +112,33 @@ async function verifyViewport(browser, viewport, name) {
     if (message.type() === 'error') diagnostics.push('console-error: ' + message.text());
   });
 
-  await page.goto(TEST_URL + '?lang=hu&loop-test=4', { waitUntil: 'domcontentloaded' });
+  await page.goto(TEST_URL + '?lang=hu&scroll-test=native-v5', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
   await page.waitForFunction(() => (
-    document.documentElement.dataset.fxInfiniteController === 'boundary-v4'
-    && document.documentElement.dataset.fxInfiniteScroll === 'ready-v4'
-    && document.documentElement.dataset.fxMobileUnified === 'ready-v1'
-    && document.fonts.status === 'loaded'
+    document.documentElement.dataset.fxInfiniteController === 'native-v5'
+    && document.documentElement.dataset.fxInfiniteScroll === 'ready-native-v5'
+    && document.documentElement.dataset.fxAutomaticLoop === 'disabled'
   ), null, { timeout: 45000 });
-  await page.waitForTimeout(400);
-
-  const initial = await state(page);
-  assert(initial.cloneCount === 0, name + ': clone exists before loop: ' + JSON.stringify(initial));
-  assert(initial.boundaryControllerLoaded && !initial.legacyControllerLoaded,
-    name + ': wrong controller loaded: ' + JSON.stringify(initial));
-
-  const first = await performLoop(page, 1);
-  const firstFootprint = await footprint(page);
   await page.waitForTimeout(500);
 
-  await page.evaluate(() => scrollBy(0, 180));
-  await page.waitForTimeout(250);
-  assert(await page.evaluate(() => scrollY > 20), name + ': scrolling did not continue after loop');
+  const initial = await snapshot(page);
+  assert(initial.cloneCount === 0, name + ': clone-based loop returned: ' + JSON.stringify(initial));
+  assert(initial.controller === 'native-v5', name + ': native controller missing: ' + JSON.stringify(initial));
+  assert(initial.ready === 'ready-native-v5', name + ': native scroll state missing: ' + JSON.stringify(initial));
+  assert(initial.automaticLoop === 'disabled', name + ': automatic loop not disabled: ' + JSON.stringify(initial));
+  assert(initial.jumpGuard === 'ready-v1', name + ': jump guard missing: ' + JSON.stringify(initial));
+  assert(initial.runtime?.automaticLoop === false && initial.runtime?.jumpFree === true,
+    name + ': runtime contract is not jump-free: ' + JSON.stringify(initial));
 
-  await page.waitForTimeout(350);
-  const second = await performLoop(page, 2);
-  const secondFootprint = await footprint(page);
-  assert(JSON.stringify(firstFootprint) === JSON.stringify(secondFootprint),
-    name + ': resources accumulated: ' + JSON.stringify({ firstFootprint, secondFootprint }));
+  await verifyProgressiveScroll(page, name);
+  await verifyNoAutomaticJump(page, name);
 
   const meaningful = diagnostics.filter(item => (
     !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item)
   ));
   assert(!meaningful.length, name + ': browser diagnostics: ' + meaningful.join(' | '));
 
-  console.log(JSON.stringify({ case: name, viewport, first, second, footprint: secondFootprint }));
+  console.log(JSON.stringify({ case: name, viewport, state: await snapshot(page) }));
   await context.close();
 }
 
@@ -202,8 +148,9 @@ async function verifyViewport(browser, viewport, name) {
     args: ['--disable-smooth-scrolling', '--enable-unsafe-swiftshader']
   });
   try {
-    await verifyViewport(browser, { width: 1366, height: 768 }, 'laptop-1366x768');
-    await verifyViewport(browser, { width: 1536, height: 864 }, 'laptop-1536x864');
+    await verifyViewport(browser, { width: 412, height: 915 }, 'mobile-412x915', true);
+    await verifyViewport(browser, { width: 1366, height: 768 }, 'laptop-1366x768', false);
+    await verifyViewport(browser, { width: 1920, height: 1080 }, 'full-hd-1920x1080', false);
   } finally {
     await browser.close();
   }
