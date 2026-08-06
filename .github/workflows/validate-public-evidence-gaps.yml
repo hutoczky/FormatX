@@ -1,0 +1,68 @@
+name: Validate public evidence and feedback
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'billing-worker/src/feedback-api.js'
+      - 'billing-worker/src/production-feedback-entry.js'
+      - 'billing-worker/src/production-content-entry.js'
+      - 'billing-worker/license-migrations/0002_user_feedback.sql'
+      - 'docs/scifi-ui/scripts/formatx-feedback.js'
+      - 'docs/scifi-ui/styles/formatx-feedback.css'
+      - 'docs/scifi-ui/technical-report.html'
+      - 'docs/scifi-ui/reports/formatx-technical-evidence-report.md'
+      - 'docs/sitemap.xml'
+      - '.github/scripts/validate-public-evidence-gaps.cjs'
+      - '.github/workflows/validate-public-evidence-gaps.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'billing-worker/src/feedback-api.js'
+      - 'billing-worker/src/production-feedback-entry.js'
+      - 'billing-worker/src/production-content-entry.js'
+      - 'billing-worker/license-migrations/0002_user_feedback.sql'
+      - 'docs/scifi-ui/scripts/formatx-feedback.js'
+      - 'docs/scifi-ui/styles/formatx-feedback.css'
+      - 'docs/scifi-ui/technical-report.html'
+      - 'docs/scifi-ui/reports/formatx-technical-evidence-report.md'
+      - 'docs/sitemap.xml'
+      - '.github/scripts/validate-public-evidence-gaps.cjs'
+      - '.github/workflows/validate-public-evidence-gaps.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check billing-worker/src/feedback-api.js
+          node --check billing-worker/src/production-feedback-entry.js
+          node --check billing-worker/src/production-content-entry.js
+          node --check docs/scifi-ui/scripts/formatx-feedback.js
+          node --check .github/scripts/validate-public-evidence-gaps.cjs
+      - name: Validate evidence and feedback contracts
+        run: node .github/scripts/validate-public-evidence-gaps.cjs
+      - name: Validate production Worker bundle
+        working-directory: billing-worker
+        run: |
+          npm ci
+          npx wrangler deploy --dry-run --outdir ../.wrangler-feedback-candidate
+      - name: Upload candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-public-evidence-feedback-candidate
+          path: .wrangler-feedback-candidate
+          if-no-files-found: error
+          retention-days: 7

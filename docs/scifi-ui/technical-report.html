@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="hu" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A FormatX Suite Pro nyilvános technikai bizonyítékriportja: teljesítménykapuk, tesztelési modell, biztonsági korlátok és bizonyítékhiányok.">
+  <meta name="theme-color" content="#050a10">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://www.formatxsuite.com/scifi-ui/technical-report.html">
+  <title>Technikai bizonyítékriport | FormatX Suite Pro</title>
+  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
+  <link rel="stylesheet" href="./styles/site.css">
+  <link rel="stylesheet" href="./styles/formatx-content-standard.css">
+  <script defer src="./scripts/site.js"></script>
+</head>
+<body data-fx-public-page="technical-report">
+  <main id="main-content" class="fx-page-shell">
+    <section class="fx-page-hero">
+      <p class="section-index" data-hu="NYILVÁNOS TECHNIKAI RIPORT · 2026-08-06" data-en="PUBLIC TECHNICAL REPORT · 2026-08-06">NYILVÁNOS TECHNIKAI RIPORT · 2026-08-06</p>
+      <h1 data-hu="Bizonyítható állítások, látható korlátok" data-en="Verifiable claims, visible limitations">Bizonyítható állítások, látható korlátok</h1>
+      <p data-hu="Ez a riport elkülöníti a CI által ellenőrzött webes tulajdonságokat, a valós alkalmazásképeket, a még hiányzó külső bizonyítékokat és a nem garantálható teljesítményállításokat." data-en="This report separates CI-verified web properties, genuine application captures, missing external evidence and performance claims that cannot be guaranteed.">Ez a riport elkülöníti a CI által ellenőrzött webes tulajdonságokat, a valós alkalmazásképeket, a még hiányzó külső bizonyítékokat és a nem garantálható teljesítményállításokat.</p>
+      <nav class="fx-page-nav" aria-label="Riportműveletek">
+        <a href="./reports/formatx-technical-evidence-report.md" download data-hu="Riport letöltése (.md)" data-en="Download report (.md)">Riport letöltése (.md)</a>
+        <a href="./verification.html" data-hu="Bizonyítéki központ" data-en="Verification centre">Bizonyítéki központ</a>
+        <a href="./test-matrix.html" data-hu="Tesztmátrix" data-en="Test matrix">Tesztmátrix</a>
+        <a href="https://github.com/hutoczky/FormatX/actions" target="_blank" rel="noopener noreferrer">GitHub Actions ↗</a>
+      </nav>
+    </section>
+
+    <section class="fx-evidence-grid" aria-labelledby="report-gates">
+      <article class="fx-evidence-card">
+        <p class="section-index">01 / LIGHTHOUSE</p>
+        <h2 id="report-gates" data-hu="Kötelező teljesítménykapuk" data-en="Mandatory performance gates">Kötelező teljesítménykapuk</h2>
+        <dl class="fx-data-list">
+          <div><dt>Performance</dt><dd>≥ 90</dd></div>
+          <div><dt>Accessibility</dt><dd>≥ 95</dd></div>
+          <div><dt>Best Practices</dt><dd>≥ 95</dd></div>
+          <div><dt>SEO</dt><dd>≥ 90</dd></div>
+          <div><dt>LCP</dt><dd>≤ 2.5 s</dd></div>
+          <div><dt>CLS</dt><dd>≤ 0.10</dd></div>
+          <div><dt data-hu="Szerverválasz" data-en="Server response">Szerverválasz</dt><dd>≤ 600 ms</dd></div>
+        </dl>
+        <p data-hu="A kapuk minimumkövetelmények. Nem állítják, hogy minden eszközön vagy minden hálózaton pontosan ugyanaz az eredmény születik." data-en="These are minimum gates. They do not claim identical results on every device or network.">A kapuk minimumkövetelmények. Nem állítják, hogy minden eszközön vagy minden hálózaton pontosan ugyanaz az eredmény születik.</p>
+      </article>
+
+      <article class="fx-evidence-card">
+        <p class="section-index">02 / LIVE OS</p>
+        <h2 data-hu="Ellenőrzött interaktív réteg" data-en="Verified interactive layer">Ellenőrzött interaktív réteg</h2>
+        <ul>
+          <li data-hu="Desktop és mobil Playwright-böngészőteszt." data-en="Desktop and mobile Playwright browser test.">Desktop és mobil Playwright-böngészőteszt.</li>
+          <li data-hu="Magyar és angol természetes nyelvű parancsok." data-en="Hungarian and English natural-language commands.">Magyar és angol természetes nyelvű parancsok.</li>
+          <li data-hu="Valós böngésző-, kijelző-, hálózati és WebGL-képességadatok." data-en="Real browser, display, network and WebGL capability data.">Valós böngésző-, kijelző-, hálózati és WebGL-képességadatok.</li>
+          <li data-hu="Three.js tárolótérkép és WebGL nélküli Canvas tartalék mód." data-en="Three.js storage topology with a Canvas fallback when WebGL is unavailable.">Three.js tárolótérkép és WebGL nélküli Canvas tartalék mód.</li>
+          <li data-hu="A grafikus motor csak kérésre töltődik be." data-en="The graphics engine loads only on request.">A grafikus motor csak kérésre töltődik be.</li>
+        </ul>
+      </article>
+
+      <article class="fx-evidence-card">
+        <p class="section-index">03 / PRODUCT</p>
+        <h2 data-hu="Valódi termékbizonyíték" data-en="Genuine product evidence">Valódi termékbizonyíték</h2>
+        <p data-hu="A főoldali termékképek a működő FormatX Suite Pro alkalmazásból származnak. Nem dekoratív mockupként vannak megjelölve." data-en="Homepage product captures come from the working FormatX Suite Pro application. They are not presented as decorative mockups.">A főoldali termékképek a működő FormatX Suite Pro alkalmazásból származnak. Nem dekoratív mockupként vannak megjelölve.</p>
+        <p data-hu="A nyilvános kiadás, digest, aláírás-elérhetőség, platformállapot és ismert korlátozások külön adatrekordokból ellenőrizhetők." data-en="Public release, digest, signature availability, platform state and known limitations can be checked in separate canonical records.">A nyilvános kiadás, digest, aláírás-elérhetőség, platformállapot és ismert korlátozások külön adatrekordokból ellenőrizhetők.</p>
+      </article>
+
+      <article class="fx-evidence-card fx-evidence-gap">
+        <p class="section-index">04 / EXTERNAL</p>
+        <h2 data-hu="Még hiányzó külső bizonyíték" data-en="External evidence still missing">Még hiányzó külső bizonyíték</h2>
+        <ul>
+          <li data-hu="Nincs publikált független szakmai teszt." data-en="No independent professional review has been published.">Nincs publikált független szakmai teszt.</li>
+          <li data-hu="Nincs hitelesített ügyfélesettanulmány." data-en="No verified customer case study has been published.">Nincs hitelesített ügyfélesettanulmány.</li>
+          <li data-hu="Nincs Awwwards- vagy más zsűridíj." data-en="No Awwwards or equivalent jury award has been received.">Nincs Awwwards- vagy más zsűridíj.</li>
+          <li data-hu="A 120 FPS élmény nem garantálható: a kijelzőtől, GPU-tól és böngészőtől függ." data-en="A 120 FPS experience cannot be guaranteed; it depends on display, GPU and browser.">A 120 FPS élmény nem garantálható: a kijelzőtől, GPU-tól és böngészőtől függ.</li>
+        </ul>
+      </article>
+
+      <article class="fx-evidence-card">
+        <p class="section-index">05 / FEEDBACK</p>
+        <h2 data-hu="Moderált felhasználói értékelés" data-en="Moderated user ratings">Moderált felhasználói értékelés</h2>
+        <p data-hu="A főoldali értékelő valós beküldéseket fogad. A nyilvános átlag kizárólag jóváhagyott értékelésekből készül; a függőben lévő vagy elutasított bejegyzések nem számítanak bele." data-en="The homepage rating form accepts genuine submissions. The public average includes approved ratings only; pending or rejected entries never affect it.">A főoldali értékelő valós beküldéseket fogad. A nyilvános átlag kizárólag jóváhagyott értékelésekből készül; a függőben lévő vagy elutasított bejegyzések nem számítanak bele.</p>
+        <p data-hu="Az e-mail-cím opcionális, nem kerül nyilvánosságra, és csak kapcsolatfelvételre használható." data-en="Email is optional, never made public and may only be used for follow-up contact.">Az e-mail-cím opcionális, nem kerül nyilvánosságra, és csak kapcsolatfelvételre használható.</p>
+      </article>
+
+      <article class="fx-evidence-card">
+        <p class="section-index">06 / PRIVACY</p>
+        <h2 data-hu="Adatvédelmi határ" data-en="Privacy boundary">Adatvédelmi határ</h2>
+        <p data-hu="A Live OS parancsértelmezése helyben fut, és nem továbbítja a beírt parancsot külső AI-szolgáltatásnak. A mély operációsrendszer-adatokat a weboldal nem találja ki; csak a böngésző által ténylegesen elérhető képességeket méri." data-en="Live OS command interpretation runs locally and does not upload commands to an external AI service. The website does not invent deep operating-system data; it measures only capabilities actually exposed by the browser.">A Live OS parancsértelmezése helyben fut, és nem továbbítja a beírt parancsot külső AI-szolgáltatásnak. A mély operációsrendszer-adatokat a weboldal nem találja ki; csak a böngésző által ténylegesen elérhető képességeket méri.</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
