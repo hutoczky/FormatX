@@ -56,7 +56,10 @@ function localTargetExists(pageFile, html, rawValue) {
   const relative = pathname.replace(/^\//, '');
   let target = path.join(docs, relative);
   if (pathname.endsWith('/')) target = path.join(target, 'index.html');
-  return fs.existsSync(target);
+  if (fs.existsSync(target)) return true;
+  if (fs.existsSync(target + '.html')) return true;
+  if (fs.existsSync(path.join(target, 'index.html'))) return true;
+  return false;
 }
 
 const htmlFiles = walk(publicRoot).filter(file => file.endsWith('.html'));
@@ -78,7 +81,8 @@ for (const file of htmlFiles) {
   for (const tag of html.matchAll(/<(?:a|link|script|img|source)\b[^>]*>/gi)) {
     const attrs = attributes(tag[0]);
     const value = attrs.href || attrs.src || attrs.srcset;
-    if (value && !localTargetExists(file, html, value.split(/\s+/)[0])) {
+    const firstCandidate = value ? value.split(/\s+/)[0].replace(/,$/, '') : '';
+    if (firstCandidate && !localTargetExists(file, html, firstCandidate)) {
       report(`${label}: missing local target ${value}`);
     }
     if (tag[0].toLowerCase().startsWith('<img') && !Object.hasOwn(attrs, 'alt')) {
