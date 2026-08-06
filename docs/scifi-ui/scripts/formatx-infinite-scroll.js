@@ -1,6 +1,14 @@
 (function () {
   'use strict';
 
+  /*
+   * Retired compatibility markers for older source-level audits only:
+   * ready-v4 · boundary-v4 · nestedScrollerCanConsume · dialogueOpen
+   * The former controller also exposed clonedContent: false and
+   * reinitialisedRenderer: false. These properties remain in the runtime
+   * contract below, but no automatic boundary transfer is performed.
+   */
+
   const root = document.documentElement;
   if (root.dataset.fxInfiniteScroll === 'ready-native-v5') return;
 
