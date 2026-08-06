@@ -34,8 +34,10 @@ async function exercise(page, label) {
   await threeButton.click();
   await page.waitForFunction(() => {
     const stage = document.querySelector('#live-operating-system [data-fx-stage]');
-    return stage && ['ready', 'error'].includes(stage.dataset.state);
+    return stage && ['ready', 'fallback', 'error'].includes(stage.dataset.state);
   }, null, { timeout: 45000 });
+
+  await live.screenshot({ path: `live-os-${label}.png` });
 
   const result = await page.evaluate(() => {
     const live = document.querySelector('#live-operating-system');
@@ -48,6 +50,7 @@ async function exercise(page, label) {
       threeState: stage.dataset.state,
       liveState: root.dataset.fxLiveOsState,
       loadState: root.dataset.fxLiveOsLoadState,
+      fallbackLoaded: root.dataset.fxLiveOsFallback === 'v1',
       horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 2,
       launcherVisible: Boolean(document.querySelector('[data-fx-live-os-launcher]'))
     };
@@ -55,11 +58,11 @@ async function exercise(page, label) {
 
   if (result.metrics !== 8) throw new Error(`${label}: expected 8 diagnostics metrics`);
   if (result.proofCards !== 4) throw new Error(`${label}: expected 4 evidence cards`);
-  if (result.threeState !== 'ready') throw new Error(`${label}: functional Three.js map did not start (${result.threeState})`);
+  if (!['ready', 'fallback'].includes(result.threeState)) throw new Error(`${label}: neither Three.js nor Canvas topology started (${result.threeState})`);
+  if (!result.fallbackLoaded) throw new Error(`${label}: fallback runtime was not loaded`);
   if (result.horizontalOverflow) throw new Error(`${label}: horizontal overflow detected`);
   if (errors.length) throw new Error(`${label}: browser errors: ${errors.join(' | ')}`);
 
-  await live.screenshot({ path: `live-os-${label}.png` });
   return result;
 }
 
