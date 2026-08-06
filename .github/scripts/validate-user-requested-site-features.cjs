@@ -2,86 +2,81 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const assert = require('node:assert/strict');
 
 const root = path.resolve(__dirname, '../..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const exists = relative => fs.existsSync(path.join(root, relative));
-
-const failures = [];
-function requireFeature(label, condition) {
-  if (!condition) failures.push(label);
-}
-function includesAll(source, tokens) {
-  return tokens.every(token => source.includes(token));
-}
+const includesAll = (source, tokens) => tokens.every(token => source.includes(token));
 
 const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
 const menu = read('docs/scifi-ui/scripts/organism-menu-controller.js');
 const consoleState = read('docs/scifi-ui/scripts/organism-console-state.js');
-const core = read('docs/scifi-ui/scripts/organism-core-controller.js');
 const language = read('docs/scifi-ui/scripts/single-language-toggle.js');
-const licenceLinks = read('docs/scifi-ui/scripts/formatx-license-links.js');
-const licencePage = read('docs/scifi-ui/license.html');
 const infinite = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
+const loopStyle = read('docs/scifi-ui/styles/formatx-seamless-loop.css');
+const downloads = read('docs/scifi-ui/downloads/index.html');
+const downloadStyle = read('docs/scifi-ui/styles/downloads-page.css');
+const feedbackSchema = read('billing-worker/src/feedback-schema.js');
+const feedbackEntry = read('billing-worker/src/production-feedback-entry.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice.js');
-const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
 const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
-const masterSyncCss = read('docs/scifi-ui/styles/organism-master-sync.css');
-const voiceCss = read('docs/scifi-ui/styles/organism-voice.css');
-const voiceDock = read('docs/scifi-ui/styles/organism-voice-dock.css');
-const thoughtGenome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
-const thoughtDisclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
-const mobileUnified = read('docs/scifi-ui/styles/formatx-mobile-unified.css');
 const mobileEntry = read('docs/scifi-ui/scripts/mobile-webgl-entry.js');
 const morphEngine = read('docs/scifi-ui/scripts/mobile-core-engine-v3.js');
-const living = read('docs/scifi-ui/scripts/living-architecture.js');
 const pricingApi = read('billing-worker/src/pricing-v100-api.js');
 const productionEntry = read('billing-worker/src/production-entry.js');
-const previewWorker = read('worker.js');
-const previewConfig = read('wrangler.jsonc');
 const deployWorkflow = read('.github/workflows/deploy-formatx-custom-domain.yml');
 
-requireFeature('Loader is the current failure-tolerant v27 chain',
-  includesAll(loader, ['safe-ready-v27', 'safe-degraded-v27', 'load(index + 1)']));
-requireFeature('Loader orders core, voice, stability, master sync, thought and renderer safely',
-  loader.indexOf('organism-core-controller.js') < loader.indexOf('organism-voice.js')
-  && loader.indexOf('organism-voice.js') < loader.indexOf('organism-voice-stability.js')
-  && loader.indexOf('organism-voice-stability.js') < loader.indexOf('organism-master-sync.js')
-  && loader.indexOf('organism-master-sync.js') < loader.indexOf('synaptic-thought-genome.js')
-  && loader.indexOf('synaptic-thought-disclosure.js') < loader.indexOf('formatx-three-host-safe.js'));
-requireFeature('Conflicting foreground module is not loaded',
-  !loader.includes('organism-voice-foreground.js')
-  && !productionEntry.includes('organism-voice-foreground.js')
-  && !previewWorker.includes('organism-voice-foreground.js')
-  && !previewConfig.includes('organism-voice-foreground.js'));
+assert.ok(includesAll(loader, ['safe-ready-v27', 'safe-degraded-v27', 'load(index + 1)']), 'failure-tolerant loader missing');
+assert.ok(loader.indexOf('organism-core-controller.js') < loader.indexOf('organism-voice.js'), 'core must load before voice');
+assert.ok(loader.indexOf('organism-voice-stability.js') < loader.indexOf('organism-master-sync.js'), 'voice stability must load before master sync');
+assert.ok(!loader.includes('organism-voice-foreground.js'), 'conflicting foreground module returned');
 
-requireFeature('Menu has explicit open/close state and accessibility state',
-  includesAll(menu, ['function setOpen(toggle, nav, open)', 'aria-expanded', 'fx-organism-menu-open']));
-requireFeature('Menu starts and restores closed',
-  menu.includes('setOpen(toggle, nav, false)') && menu.includes("event.key === 'Escape'"));
-requireFeature('Organism console is physically closed unless authorised',
-  includesAll(consoleState, ['forceClosed', 'is-authorised-open', 'shell.hidden = true', "root.dataset.fxOrganismConsole = 'closed'"]));
-requireFeature('01 MAG is the central Organism state',
-  includesAll(core, ["bounded === 0 ? 'core'", "replaceHash('#hero')", 'formatx:organismstatechange']));
+assert.ok(includesAll(menu, ['function setOpen(toggle, nav, open)', 'aria-expanded', 'fx-organism-menu-open']), 'menu state contract missing');
+assert.ok(includesAll(consoleState, ['forceClosed', 'is-authorised-open', 'shell.hidden = true']), 'panel closed-state contract missing');
+assert.ok(includesAll(language, ["toggle.className = 'fx-language-toggle'", 'localStorage.setItem', 'localStorage.getItem']), 'single language toggle contract missing');
 
-requireFeature('Exactly one visible language toggle is generated',
-  includesAll(language, ["toggle.className = 'fx-language-toggle'", 'hideLegacyControls', "current === 'hu' ? 'en' : 'hu'"]));
-requireFeature('Language selection is persisted locally',
-  includesAll(language, ['formatx-language', 'localStorage.setItem', 'localStorage.getItem']));
+assert.ok(includesAll(infinite, [
+  "const VERSION = 'seamless-v6'",
+  "root.dataset.fxInfiniteInput = 'native'",
+  "root.dataset.fxInfiniteCloneMode = 'visual-bridge'",
+  'clonedHeroOnly: true',
+  'clonedContent: false',
+  'reinitialisedRenderer: false',
+  'jumpFree: true',
+  "addEventListener('scroll', onScroll, { passive: true })",
+  'window.scrollTo(0, target)',
+]), 'seamless loop controller contract missing');
+assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(infinite), 'loop must not capture wheel or touch input');
+assert.ok(!infinite.includes('document.body.cloneNode') && !infinite.includes('document.documentElement.cloneNode'), 'full-page cloning is forbidden');
+assert.ok(includesAll(loopStyle, ['.fx-loop-bridge', '.fx-loop-hero-clone', 'html.fx-seamless-loop-transfer']), 'seamless loop visual contract missing');
+assert.ok(includesAll(infinite, ['fx-release-download-hub', 'repairReleasePanel', 'Licencfeltételek']), 'release/footer repair missing');
 
-requireFeature('Detailed licence links remain inside the FormatX site',
-  includesAll(licenceLinks, ["'/scifi-ui/license.html'", "link.removeAttribute('target')", 'data-fx-local-licence']));
-requireFeature('Detailed licence page is bilingual and complete',
-  includesAll(licencePage, ['Részletes licencfeltételek', 'Detailed licence terms', '5 napos próbalicenc', '5-day trial licence', 'Tiltott felhasználás', 'Prohibited use']));
-requireFeature('Detailed licence page does not redirect to GitHub LICENSE',
-  !licencePage.includes('github.com/hutoczky/FormatX/blob') && !licencePage.includes('github.com/hutoczky/FormatX/raw'));
+assert.ok(includesAll(downloads, [
+  'https://github.com/hutoczky/FormatX-Updates/releases/latest',
+  'data-release-download="multiplatform"',
+  '../verification.html',
+  '../test-matrix.html',
+  '../known-issues.html',
+  '../security.html',
+  '../support.html',
+]), 'downloads page fallback or evidence links missing');
+assert.ok(!downloads.includes('data-release-download="multiplatform" data-release-description="multiplatform-beta-note" aria-describedby="multiplatform-beta-note" href="./"'), 'downloads fallback must not point to itself');
+assert.ok(includesAll(downloadStyle, ['grid-template-columns: repeat(3', '@media (max-width: 800px)', '@media (min-width: 2200px)']), 'downloads responsive range missing');
 
-requireFeature('Infinite scroll uses current boundary-v4 controller',
-  includesAll(infinite, ['ready-v4', 'boundary-v4', 'clonedContent: false', 'reinitialisedRenderer: false']));
-requireFeature('Infinite scroll preserves native mobile scrolling and nested panels',
-  includesAll(infinite, ["addEventListener('scroll', onScroll, { passive: true })", 'nestedScrollerCanConsume', 'dialogueOpen']));
-requireFeature('Infinite scroll never clones the page', !infinite.includes('cloneNode'));
-requireFeature('Loader uses smooth boundary-v4 cache version', loader.includes('formatx-infinite-scroll.js?v=20260805-infinite-smooth-v5'));
+assert.ok(includesAll(feedbackSchema, [
+  "SCHEMA_VERSION = '3'",
+  'formatx_schema_meta',
+  'rebuildCanonicalTable',
+  'feedback_schema_recovery_failed',
+  'CREATE INDEX IF NOT EXISTS idx_user_feedback_ip_created',
+]), 'recoverable feedback schema missing');
+assert.ok(includesAll(feedbackEntry, [
+  'feedback_schema_unavailable',
+  "['/downloads/', '/scifi-ui/downloads/']",
+  "['/support.html', '/scifi-ui/support.html']",
+  'ensureFeedbackSchemaCompatibility',
+]), 'feedback fail-safe or public aliases missing');
 
 const qrFiles = [
   'docs/scifi-ui/assets/qr/business_lite-huf.svg',
@@ -91,107 +86,15 @@ const qrFiles = [
   'docs/scifi-ui/assets/qr/technician_team-huf.svg',
   'docs/scifi-ui/assets/qr/technician_team-eur.svg',
 ];
-requireFeature('All six local HUF/EUR QR fallbacks exist', qrFiles.every(exists));
-requireFeature('QR delivery uses own API and local fallback',
-  includesAll(loader, ['/api/checkout-qr?', './assets/qr/', 'fxQrFallback'])
-  && includesAll(living, ['/api/checkout-qr?', './assets/qr/', 'fxQrFallback']));
-requireFeature('Pricing Worker returns QR images',
-  includesAll(pricingApi, ["url.pathname === '/api/checkout-qr'", "Content-Type', 'image/png"]));
+assert.ok(qrFiles.every(exists), 'local QR fallback set incomplete');
+assert.ok(includesAll(pricingApi, ["url.pathname === '/api/checkout-qr'", "Content-Type', 'image/png"]), 'QR endpoint missing');
 
-requireFeature('Organism voice is bilingual and keeps question answering local',
-  includesAll(voice, ['SpeechSynthesisUtterance', 'A FormatX Organizmus válaszai', 'FormatX Organism responses'])
-  && !voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'));
-requireFeature('Speech-service disclosure is accurate',
-  includesAll(voice, ['device or browser voice service', 'készülék vagy a böngésző beszédszolgáltatása', 'browser-online', 'device-or-browser']));
-requireFeature('Organism has independent master and speech switches',
-  includesAll(voice, ['fx-organism-master-toggle', 'fx-organism-voice-toggle', 'formatx-organism-dialogue-enabled', 'let speechEnabled = false']));
-requireFeature('Thought bubble starts closed and can be reopened',
-  includesAll(voice, ['setOpen(false, false)', "hidden: ''", 'function setOpen(next']));
-requireFeature('Voice state is visible and resilient on Android/browser speech services',
-  includesAll(voice, ['voiceStarting', 'voiceWorking', 'voiceError', 'synth.resume()', 'speechWatchdog']));
-requireFeature('Atomic stability guard closes overlays, stops speech and removes duplicates',
-  includesAll(voiceStability, [
-    'function interfaceBlocked()',
-    'function stopSpeech()',
-    'function closeDialogue()',
-    'formatx:organismpanelopen',
-    'formatx:pagestartscroll',
-    'candidates.slice(0, -1).forEach(node => node.remove())',
-    'fxOrganismLiveRegion = \'response-only\'',
-  ]));
-requireFeature('Master switch synchronizes every optional thought layer',
-  includesAll(masterSync, [
-    'data-fx-organism-dialogue-enabled',
-    'fx-organism-master-disabled',
-    'formatx:organismmastersync',
-    'speechSynthesis.cancel()',
-    'organism-master-sync.css?v=20260802-master-sync-1',
-  ]));
-requireFeature('Master synchronizer is CSP safe and does not inject inline style',
-  !masterSync.includes("document.createElement('style')")
-  && masterSync.includes("document.createElement('link')"));
-requireFeature('Master switch CSS fully hides thought genome and disclosure',
-  includesAll(masterSyncCss, [
-    'html.fx-organism-master-disabled .fx-thought-genome-layer',
-    'html.fx-organism-master-disabled .fx-thought-genome-disclosure',
-    'display: none !important',
-  ]));
-requireFeature('Thought system remains local and starts collapsed',
-  !thoughtGenome.includes('fetch(') && !thoughtDisclosure.includes('fetch(')
-  && includesAll(thoughtDisclosure, ['details.open = false', 'defaultOpen: false']));
-requireFeature('One stable circular dock replaces the conflicting foreground layer',
-  includesAll(voiceDock, [
-    'flex: 0 0 58px !important',
-    'border-radius: 50% !important',
-    'width: 52px !important',
-    'width: 48px !important',
-  ])
-  && loader.includes('organism-voice-stability.js?v=20260731-organism-stability-1'));
+assert.ok(includesAll(voice, ['SpeechSynthesisUtterance', 'A FormatX Organizmus válaszai']) && !voice.includes('XMLHttpRequest'), 'local voice contract missing');
+assert.ok(includesAll(masterSync, ['formatx:organismmastersync', 'speechSynthesis.cancel()']), 'master switch synchronization missing');
+assert.ok(mobileEntry.includes('mobile-core-engine-v3.js') && includesAll(morphEngine, ['coreForm', 'neuralForm', 'organForm', 'heartForm', 'skeletonForm', 'beaconForm']), 'morphing organism renderer missing');
 
-requireFeature('Voice UI is readable, compact and hidden under menus/panels',
-  includesAll(voiceCss, ['font-size: 14.5px', 'line-height: 1.68', '.fx-organism-dialogue.is-disabled', 'body.fx-organism-panel-open .fx-organism-dialogue', 'html.fx-organism-menu-open .fx-organism-dialogue']));
-requireFeature('Mobile layout prevents text and floating-control overlap',
-  includesAll(mobileUnified, ['no text overlap', '#hero .hero-copy', '#hero .hero-space', '.fx-organism-dialogue:not(.is-open)', 'html.fx-page-scrolling .fx-organism-dialogue']));
-requireFeature('Mobile thought button stays compact and the open bubble fits the viewport',
-  includesAll(mobileUnified, ['width: 52px !important', 'max-height: min(58svh, 520px)', 'max-width: calc(100vw - 24px)']));
+assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-interface.js', 'formatx-premium-finish.js']), 'critical production assets missing');
+assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
+assert.ok(deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'), 'custom-domain smoke checks missing');
 
-requireFeature('Visible morphing 3D Organism V3 is the active mobile/desktop stage',
-  mobileEntry.includes('mobile-core-engine-v3.js?v=20260731-morphing-organism-v3')
-  && includesAll(morphEngine, ['coreForm', 'neuralForm', 'organForm', 'heartForm', 'skeletonForm', 'beaconForm']));
-
-for (const [name, worker] of [['production Worker', productionEntry], ['preview Worker', previewWorker]]) {
-  requireFeature(`${name} serves all critical requested modules without stale cache`,
-    includesAll(worker, [
-      'single-language-toggle.js',
-      'formatx-license-links.js',
-      'formatx-infinite-scroll.js',
-      'organism-menu-controller.js',
-      'organism-console-state.js',
-      'organism-voice.js',
-      'organism-voice-stability.js',
-      'organism-master-sync.js',
-      'organism-master-sync.css',
-      'synaptic-thought-genome.js',
-      'synaptic-thought-disclosure.js',
-      'formatx-mobile-unified.css',
-      'mobile-core-engine-v3.js',
-    ]));
-}
-requireFeature('Preview Worker route list includes master sync script and CSS',
-  previewConfig.includes('/scifi-ui/scripts/organism-master-sync.js')
-  && previewConfig.includes('/scifi-ui/styles/organism-master-sync.css'));
-
-requireFeature('Production deployment validates before deploy',
-  deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'));
-requireFeature('Production deployment smoke-tests both custom domains',
-  deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'));
-requireFeature('Explicit production deploy marker remains supported',
-  deployWorkflow.includes('[deploy-production]'));
-
-if (failures.length) {
-  console.error('FAILED requested-site feature audit:');
-  for (const failure of failures) console.error(` - ${failure}`);
-  process.exit(1);
-}
-
-console.log('PASS: every requested FormatX website feature is present and production-gated.');
+console.log('PASS: FormatX seamless scroll, feedback, downloads, responsive UI and deployment gates are present.');

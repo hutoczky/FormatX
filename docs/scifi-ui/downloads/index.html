@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="FormatX Suite Pro ellenőrizhető multiplatform béta letöltések és irányadó platformállapotok.">
+  <meta name="description" content="FormatX Suite Pro ellenőrizhető multiplatform béta letöltések, platformállapotok és kiadási bizonyítékok.">
   <meta name="theme-color" content="#030817">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self';base-uri 'self';object-src 'none';script-src 'self';style-src 'self';img-src 'self' data:;connect-src 'self';form-action 'none'">
   <link rel="canonical" href="https://www.formatxsuite.com/scifi-ui/downloads/">
@@ -27,8 +27,8 @@
 <body>
   <main class="fx-download-page">
     <header class="fx-download-header">
-      <a class="brand" href="../index.html"><strong>FORMATX SUITE PRO</strong></a>
-      <div class="language-switch"><button data-language="hu">HU</button><button data-language="en">EN</button></div>
+      <a class="brand" href="../index.html" aria-label="FormatX Suite Pro főoldal"><strong>FORMATX SUITE PRO</strong></a>
+      <div class="language-switch" role="group" aria-label="Nyelv / Language"><button type="button" data-language="hu">HU</button><button type="button" data-language="en">EN</button></div>
     </header>
 
     <section class="fx-download-intro">
@@ -40,8 +40,8 @@
     <section class="fx-download-actions" aria-label="Elérhető letöltések">
       <article class="fx-download-action">
         <h2 data-hu="Bazzite/Linux elsődleges · Windows támogatott" data-en="Bazzite/Linux primary · Windows supported">Bazzite/Linux elsődleges · Windows támogatott</h2>
-        <p data-hu="Egyetlen hivatalos multiplatform nyilvános béta csomag. A gomb csak szinkronizált, hiteles kiadási metaadat esetén mutat közvetlen letöltésre." data-en="One official multiplatform public beta package. The button points to a direct download only when synchronized, trusted release metadata is available.">Egyetlen hivatalos multiplatform nyilvános béta csomag. A gomb csak szinkronizált, hiteles kiadási metaadat esetén mutat közvetlen letöltésre.</p>
-        <a data-release-download="multiplatform" data-release-description="multiplatform-beta-note" aria-describedby="multiplatform-beta-note" href="./">
+        <p data-hu="Egyetlen hivatalos multiplatform nyilvános béta csomag. JavaScript nélkül a gomb a legfrissebb GitHub-kiadást nyitja meg; hiteles metaadat esetén közvetlenül a kiadási csomagra frissül." data-en="One official multiplatform public beta package. Without JavaScript the button opens the latest GitHub release; trusted metadata upgrades it to the direct release asset.">Egyetlen hivatalos multiplatform nyilvános béta csomag. JavaScript nélkül a gomb a legfrissebb GitHub-kiadást nyitja meg; hiteles metaadat esetén közvetlenül a kiadási csomagra frissül.</p>
+        <a data-release-download="multiplatform" data-release-description="multiplatform-beta-note" aria-describedby="multiplatform-beta-note" href="https://github.com/hutoczky/FormatX-Updates/releases/latest" rel="noopener noreferrer">
           <span data-release-download-label data-hu="Multiplatform nyilvános béta letöltése" data-en="Download multiplatform public beta">Multiplatform nyilvános béta letöltése</span>
         </a>
         <small id="multiplatform-beta-note" data-hu="Bazzite/Linux az elsődleges rendszer; a Windows támogatott. Nem Stable kiadás." data-en="Bazzite/Linux is primary; Windows is supported. Not a Stable release.">Bazzite/Linux az elsődleges rendszer; a Windows támogatott. Nem Stable kiadás.</small>
@@ -60,12 +60,20 @@
       </article>
     </section>
 
+    <section class="fx-download-proof" aria-labelledby="fx-download-proof-title">
+      <p class="eyebrow">RELEASE INTEGRITY</p>
+      <h2 id="fx-download-proof-title" data-hu="Letöltés előtt ellenőrizhető." data-en="Verifiable before download.">Letöltés előtt ellenőrizhető.</h2>
+      <p data-hu="A kiadási oldal, a tesztmátrix, az ismert hibák és a biztonsági leírás nyilvánosan megnyitható. Hiányzó bizonyítékot nem jelölünk sikeres ellenőrzésként." data-en="The release page, test matrix, known issues and security description are public. Missing evidence is never presented as a successful verification.">A kiadási oldal, a tesztmátrix, az ismert hibák és a biztonsági leírás nyilvánosan megnyitható. Hiányzó bizonyítékot nem jelölünk sikeres ellenőrzésként.</p>
+    </section>
+
     <div data-platform-status-root></div>
-    <nav class="fx-page-nav">
+    <nav class="fx-page-nav" aria-label="Letöltési információk">
       <a href="../verification.html">Bizonyíték</a>
       <a href="../test-matrix.html">Tesztek</a>
       <a href="../known-issues.html">Ismert hibák</a>
-      <a data-release-page-url aria-disabled="true">Hivatalos kiadás</a>
+      <a href="../security.html">Biztonság</a>
+      <a href="../support.html">Támogatás</a>
+      <a data-release-page-url href="https://github.com/hutoczky/FormatX-Updates/releases/latest" rel="noopener noreferrer">Hivatalos kiadás</a>
     </nav>
   </main>
 </body>
