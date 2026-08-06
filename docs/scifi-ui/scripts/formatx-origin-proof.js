@@ -117,3 +117,22 @@
     languageObserver.disconnect();
   }, { once: true });
 }());
+
+(function loadProductShowcase() {
+  'use strict';
+  const root = document.documentElement;
+  if (root.dataset.fxProductShowcaseLoader === 'v1') return;
+  root.dataset.fxProductShowcaseLoader = 'v1';
+
+  const stylesheet = document.createElement('link');
+  stylesheet.rel = 'stylesheet';
+  stylesheet.href = './styles/formatx-product-showcase.css?v=20260806-real-product-1';
+  stylesheet.dataset.fxProductShowcaseStyle = 'true';
+  document.head.appendChild(stylesheet);
+
+  const script = document.createElement('script');
+  script.src = './scripts/formatx-product-showcase.js?v=20260806-real-product-1';
+  script.defer = true;
+  script.dataset.fxProductShowcaseScript = 'true';
+  document.head.appendChild(script);
+}());
