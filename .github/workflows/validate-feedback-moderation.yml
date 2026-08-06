@@ -5,6 +5,8 @@ on:
     branches: [master]
     paths:
       - 'billing-worker/src/feedback-api.js'
+      - 'billing-worker/src/feedback-schema.js'
+      - 'billing-worker/src/production-feedback-entry.js'
       - 'docs/fx-owner-license/index.html'
       - 'docs/fx-owner-license/feedback.html'
       - 'docs/fx-owner-license/feedback-admin.js'
@@ -15,6 +17,8 @@ on:
     branches: [master]
     paths:
       - 'billing-worker/src/feedback-api.js'
+      - 'billing-worker/src/feedback-schema.js'
+      - 'billing-worker/src/production-feedback-entry.js'
       - 'docs/fx-owner-license/index.html'
       - 'docs/fx-owner-license/feedback.html'
       - 'docs/fx-owner-license/feedback-admin.js'
@@ -40,9 +44,11 @@ jobs:
       - name: Validate JavaScript syntax
         run: |
           node --check billing-worker/src/feedback-api.js
+          node --check billing-worker/src/feedback-schema.js
+          node --check billing-worker/src/production-feedback-entry.js
           node --check docs/fx-owner-license/feedback-admin.js
           node --check .github/scripts/validate-feedback-moderation.cjs
-      - name: Validate moderation contracts
+      - name: Validate moderation and migration contracts
         run: node .github/scripts/validate-feedback-moderation.cjs
       - name: Validate production Worker bundle
         working-directory: billing-worker
