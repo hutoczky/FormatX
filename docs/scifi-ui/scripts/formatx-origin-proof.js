@@ -206,3 +206,129 @@
     clearInterval(targetRetry);
   }, { once: true });
 }());
+
+(function loadLiveOperatingSystemLayer() {
+  'use strict';
+
+  const root = document.documentElement;
+  if (root.dataset.fxLiveOsLoader === 'v1') return;
+  root.dataset.fxLiveOsLoader = 'v1';
+
+  let loaded = false;
+  let observer = null;
+  let retryTimer = 0;
+
+  function ensureLauncher() {
+    if (document.querySelector('[data-fx-live-os-launcher]')) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.fxLiveOsLauncher = 'true';
+    button.setAttribute('aria-label', root.lang === 'en' ? 'FormatX command' : 'FormatX parancs');
+    button.title = (root.lang === 'en' ? 'FormatX command' : 'FormatX parancs') + ' · Ctrl/⌘ K';
+    button.innerHTML = '<span>Live OS</span>';
+    Object.assign(button.style, {
+      position: 'fixed',
+      right: '18px',
+      bottom: '18px',
+      zIndex: '2147482000',
+      minWidth: '54px',
+      minHeight: '54px',
+      padding: '0 14px',
+      border: '1px solid rgba(44,231,243,.68)',
+      borderRadius: '999px',
+      background: 'rgba(5,18,31,.92)',
+      color: '#effcff',
+      boxShadow: '0 16px 50px rgba(0,0,0,.4),0 0 28px rgba(44,231,243,.12)',
+      cursor: 'pointer',
+      font: '800 12px/1 system-ui,sans-serif',
+      letterSpacing: '.04em'
+    });
+    button.addEventListener('click', () => {
+      inject();
+      setTimeout(() => dispatchEvent(new CustomEvent('formatx:open-live-os')), 0);
+    });
+    document.body.appendChild(button);
+  }
+
+  function inject() {
+    if (loaded) return;
+    loaded = true;
+    if (observer) observer.disconnect();
+    clearInterval(retryTimer);
+    root.dataset.fxLiveOsLoadState = 'loading';
+
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = './styles/formatx-live-os.css?v=20260806-live-os-1';
+    stylesheet.dataset.fxLiveOsStyle = 'true';
+    document.head.appendChild(stylesheet);
+
+    const script = document.createElement('script');
+    script.src = './scripts/formatx-live-os.js?v=20260806-live-os-1';
+    script.async = true;
+    script.dataset.fxLiveOsScript = 'true';
+    script.addEventListener('load', () => {
+      root.dataset.fxLiveOsLoadState = 'ready';
+      dispatchEvent(new CustomEvent('formatx:open-live-os-ready'));
+    }, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxLiveOsLoadState = 'error'; }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function triggerTarget() {
+    return document.getElementById('product-showcase')
+      || document.querySelector('section#capabilities, section[data-organ="organs"]');
+  }
+
+  function arm() {
+    if (loaded || observer) return true;
+    const trigger = triggerTarget();
+    if (!trigger) return false;
+    if (!('IntersectionObserver' in window)) {
+      inject();
+      return true;
+    }
+    observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) inject();
+    }, { rootMargin: '520px 0px', threshold: 0.01 });
+    observer.observe(trigger);
+    root.dataset.fxLiveOsLoadState = 'armed';
+    return true;
+  }
+
+  function ensureArmed() {
+    ensureLauncher();
+    if (arm()) {
+      clearInterval(retryTimer);
+      retryTimer = 0;
+      return;
+    }
+    if (!retryTimer) {
+      let attempts = 0;
+      retryTimer = window.setInterval(() => {
+        attempts += 1;
+        if (arm() || attempts >= 80) {
+          clearInterval(retryTimer);
+          retryTimer = 0;
+          if (attempts >= 80 && !loaded) root.dataset.fxLiveOsLoadState = 'missing-target';
+        }
+      }, 250);
+    }
+  }
+
+  addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      inject();
+      setTimeout(() => dispatchEvent(new CustomEvent('formatx:open-live-os')), 0);
+    }
+  });
+
+  if (document.readyState === 'loading') addEventListener('DOMContentLoaded', ensureArmed, { once: true });
+  else ensureArmed();
+  ['pageshow', 'formatx:livingready', 'formatx:loop', 'formatx:productshowcaseready'].forEach(name => addEventListener(name, ensureArmed));
+  addEventListener('pagehide', () => {
+    if (observer) observer.disconnect();
+    clearInterval(retryTimer);
+  }, { once: true });
+}());
