@@ -1,10 +1,11 @@
-name: Validate mobile showcase and feedback
+name: Validate mobile showcase, feedback and responsive matrix
 
 on:
   pull_request:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-feedback.js'
+      - 'docs/scifi-ui/styles/formatx-feedback.css'
       - 'docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg'
       - 'billing-worker/src/feedback-api.js'
       - 'billing-worker/src/feedback-schema.js'
@@ -12,11 +13,13 @@ on:
       - 'billing-worker/src/production-content-entry.js'
       - 'billing-worker/wrangler.jsonc'
       - '.github/scripts/validate-mobile-showcase-feedback.cjs'
+      - '.github/scripts/validate-responsive-production-matrix.cjs'
       - '.github/workflows/mobile-showcase-feedback-smoke.yml'
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-feedback.js'
+      - 'docs/scifi-ui/styles/formatx-feedback.css'
       - 'docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg'
       - 'billing-worker/src/feedback-api.js'
       - 'billing-worker/src/feedback-schema.js'
@@ -24,11 +27,16 @@ on:
       - 'billing-worker/src/production-content-entry.js'
       - 'billing-worker/wrangler.jsonc'
       - '.github/scripts/validate-mobile-showcase-feedback.cjs'
+      - '.github/scripts/validate-responsive-production-matrix.cjs'
       - '.github/workflows/mobile-showcase-feedback-smoke.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: formatx-feedback-responsive-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate-candidate:
@@ -45,6 +53,7 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/formatx-feedback.js
           node --check .github/scripts/validate-mobile-showcase-feedback.cjs
+          node --check .github/scripts/validate-responsive-production-matrix.cjs
           node .github/scripts/validate-mobile-showcase-feedback.cjs
       - name: Validate production Worker bundle
         working-directory: billing-worker
@@ -56,8 +65,14 @@ jobs:
     if: github.event_name == 'push'
     needs: validate-candidate
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 30
     steps:
+      - name: Check out deployed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
       - name: Wait for Cloudflare production and verify public services
         shell: bash
         run: |
@@ -94,16 +109,39 @@ jobs:
           assert '<svg' in asset and '</svg>' in asset, 'compatible SVG missing'
           assert 'data:image/webp' not in asset.lower(), 'WebP nesting returned in compatible asset'
           assert '<image' not in asset.lower(), 'nested raster image returned in compatible asset'
-          print('Live FormatX feedback and mobile showcase smoke passed.')
+          print('Live FormatX feedback and mobile showcase API smoke passed.')
           PY
-              exit 0
+              break
             fi
 
             echo "summary=$summary_code submit=$submit_code asset=$asset_code"
             [[ -s /tmp/fx-summary.json ]] && cat /tmp/fx-summary.json || true
             [[ -s /tmp/fx-submit.json ]] && cat /tmp/fx-submit.json || true
+            if [[ "$attempt" == '30' ]]; then
+              echo 'Production smoke did not become healthy within the retry window.' >&2
+              exit 1
+            fi
             sleep 12
           done
-
-          echo 'Production smoke did not become healthy within the retry window.' >&2
-          exit 1
+      - name: Install Chromium for the responsive matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-responsive" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-responsive/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify HD, Full HD, QHD, 4K, 8K and ultrawide layouts
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-responsive/node_modules
+          FORMATX_TEST_URL: https://www.formatxsuite.com/
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-responsive-production-matrix.cjs 2>&1 | tee responsive-production-matrix.txt
+      - name: Upload responsive matrix report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-responsive-production-matrix
+          path: responsive-production-matrix.txt
+          if-no-files-found: warn
+          retention-days: 7
