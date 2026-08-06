@@ -118,21 +118,91 @@
   }, { once: true });
 }());
 
-(function loadProductShowcase() {
+(function loadProductShowcaseNearViewport() {
   'use strict';
+
   const root = document.documentElement;
-  if (root.dataset.fxProductShowcaseLoader === 'v1') return;
-  root.dataset.fxProductShowcaseLoader = 'v1';
+  if (root.dataset.fxProductShowcaseLoader === 'v2') return;
+  root.dataset.fxProductShowcaseLoader = 'v2';
 
-  const stylesheet = document.createElement('link');
-  stylesheet.rel = 'stylesheet';
-  stylesheet.href = './styles/formatx-product-showcase.css?v=20260806-real-product-1';
-  stylesheet.dataset.fxProductShowcaseStyle = 'true';
-  document.head.appendChild(stylesheet);
+  let observer = null;
+  let targetRetry = 0;
+  let loaded = false;
 
-  const script = document.createElement('script');
-  script.src = './scripts/formatx-product-showcase.js?v=20260806-real-product-1';
-  script.defer = true;
-  script.dataset.fxProductShowcaseScript = 'true';
-  document.head.appendChild(script);
+  function inject() {
+    if (loaded) return;
+    loaded = true;
+    root.dataset.fxProductShowcaseLoadState = 'loading';
+    if (observer) observer.disconnect();
+    clearInterval(targetRetry);
+
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = './styles/formatx-product-showcase.css?v=20260806-real-product-1';
+    stylesheet.dataset.fxProductShowcaseStyle = 'true';
+    document.head.appendChild(stylesheet);
+
+    const script = document.createElement('script');
+    script.src = './scripts/formatx-product-showcase.js?v=20260806-real-product-1';
+    script.async = true;
+    script.dataset.fxProductShowcaseScript = 'true';
+    script.addEventListener('load', () => { root.dataset.fxProductShowcaseLoadState = 'ready'; }, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxProductShowcaseLoadState = 'error'; }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function findTrigger() {
+    const candidates = Array.from(document.querySelectorAll('section#capabilities, section[data-organ="organs"]'));
+    return candidates.find(section => section.isConnected && !section.closest('[data-fx-loop-bridge="true"]'))
+      || candidates.find(section => section.isConnected)
+      || null;
+  }
+
+  function arm() {
+    if (loaded || observer) return true;
+    const trigger = findTrigger();
+    if (!trigger) return false;
+
+    if (!('IntersectionObserver' in window)) {
+      inject();
+      return true;
+    }
+
+    observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) inject();
+    }, { rootMargin: '240px 0px', threshold: 0.01 });
+    observer.observe(trigger);
+    root.dataset.fxProductShowcaseLoadState = 'armed';
+    return true;
+  }
+
+  function ensureArmed() {
+    if (arm()) {
+      clearInterval(targetRetry);
+      targetRetry = 0;
+      return;
+    }
+    if (!targetRetry) {
+      let attempts = 0;
+      targetRetry = window.setInterval(() => {
+        attempts += 1;
+        if (arm() || attempts >= 80) {
+          clearInterval(targetRetry);
+          targetRetry = 0;
+          if (attempts >= 80 && !loaded) root.dataset.fxProductShowcaseLoadState = 'missing-target';
+        }
+      }, 250);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    addEventListener('DOMContentLoaded', ensureArmed, { once: true });
+  } else {
+    ensureArmed();
+  }
+  ['pageshow', 'formatx:livingready', 'formatx:loop'].forEach(name => addEventListener(name, ensureArmed));
+  addEventListener('pagehide', () => {
+    if (observer) observer.disconnect();
+    clearInterval(targetRetry);
+  }, { once: true });
 }());
