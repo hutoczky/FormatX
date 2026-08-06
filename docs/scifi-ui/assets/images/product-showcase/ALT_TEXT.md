@@ -1,5 +1,0 @@
-- Control Centre: the FormatX Suite Pro dashboard with module cards and live status indicators.
-- Live System Monitor: real-time network, processor and sensor telemetry in the FormatX interface.
-- Diagnostics: processor, memory, network and temperature diagnostics.
-- Portable Installer: current-system and cross-platform installation package options.
-- USB Creator: empty state waiting for an ISO image and target USB media.
