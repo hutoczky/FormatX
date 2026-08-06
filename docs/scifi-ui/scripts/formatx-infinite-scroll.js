@@ -1,3 +1,4 @@
+/* FormatX production revision: 20260806-native-scroll-no-jump-1 */
 (function () {
   'use strict';
 
