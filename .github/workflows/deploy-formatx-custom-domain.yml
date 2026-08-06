@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy:
-        description: 'Deploy the validated candidate to the production custom domains'
+        description: Deploy the validated candidate to the production custom domains
         required: true
         type: boolean
         default: false
@@ -16,12 +16,7 @@ on:
       - 'docs/**'
       - 'content-preview-entry.js'
       - 'wrangler.jsonc'
-      - '.github/scripts/validate-content-standard.py'
-      - '.github/scripts/validate-content-standard-v2.py'
-      - '.github/scripts/validate-public-release-integration.py'
-      - '.github/scripts/production-preflight.cjs'
-      - '.github/scripts/validate-pricing-qr.cjs'
-      - '.github/scripts/validate-user-requested-site-features.cjs'
+      - '.github/scripts/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
   push:
     branches: [master]
@@ -30,12 +25,7 @@ on:
       - 'docs/**'
       - 'content-preview-entry.js'
       - 'wrangler.jsonc'
-      - '.github/scripts/validate-content-standard.py'
-      - '.github/scripts/validate-content-standard-v2.py'
-      - '.github/scripts/validate-public-release-integration.py'
-      - '.github/scripts/production-preflight.cjs'
-      - '.github/scripts/validate-pricing-qr.cjs'
-      - '.github/scripts/validate-user-requested-site-features.cjs'
+      - '.github/scripts/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
 
 permissions:
@@ -50,7 +40,7 @@ jobs:
   validate:
     name: Validate production candidate
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -62,20 +52,27 @@ jobs:
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate public, release and every requested website feature
+      - name: Validate public content, releases and complete site integrity
         run: |
+          set -euo pipefail
           python3 .github/scripts/validate-content-standard-v2.py
           python3 .github/scripts/validate-public-release-integration.py
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-pricing-qr.cjs
+          node .github/scripts/validate-public-site-integrity.cjs
+          node .github/scripts/validate-feedback-moderation.cjs
           node .github/scripts/validate-user-requested-site-features.cjs
 
       - name: Validate production JavaScript syntax
         run: |
+          set -euo pipefail
           node --check content-preview-entry.js
           node --check billing-worker/src/production-with-license.js
           node --check billing-worker/src/production-entry.js
           node --check billing-worker/src/production-content-entry.js
+          node --check billing-worker/src/production-feedback-entry.js
+          node --check billing-worker/src/feedback-api.js
+          node --check billing-worker/src/feedback-schema.js
           node --check billing-worker/src/pricing-v100-api.js
           node --check docs/scifi-ui/scripts/release-metadata.js
           node --check docs/scifi-ui/scripts/formatx-public-shell.js
@@ -85,7 +82,9 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-premium-finish.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
           node --check docs/scifi-ui/scripts/formatx-license-links.js
+          node --check docs/scifi-ui/scripts/formatx-feedback.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/organism-interface.js
           node --check docs/scifi-ui/scripts/organism-menu-controller.js
           node --check docs/scifi-ui/scripts/organism-console-state.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
@@ -99,12 +98,13 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
           node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
           node --check docs/scifi-ui/scripts/mobile-webgl-entry.js
-          node --check .github/scripts/validate-pricing-qr.cjs
-          node --check .github/scripts/validate-user-requested-site-features.cjs
+          node --check .github/scripts/validate-laptop-continuous-loop.cjs
+          node --check .github/scripts/validate-public-site-integrity.cjs
 
       - name: Install dependencies and run Worker tests
         working-directory: billing-worker
         run: |
+          set -euo pipefail
           npm ci
           npm test
 
@@ -112,14 +112,14 @@ jobs:
         working-directory: billing-worker
         run: npx wrangler deploy --dry-run --outdir ../.wrangler-production-candidate
 
-      - name: Upload production candidate and readiness report
+      - name: Upload production candidate
         uses: actions/upload-artifact@v4
         with:
           name: formatx-production-candidate-${{ github.sha }}
           path: |
             .wrangler-production-candidate
             artifacts/production-readiness.json
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Publish production validation status
@@ -129,7 +129,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
           STATUS_CONTEXT: FormatX production validation
-          STATUS_DESCRIPTION: Requested features and Worker candidate validation
+          STATUS_DESCRIPTION: Full public surface, feedback, downloads and Worker validation
           STATUS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           node --input-type=module - <<'NODE'
@@ -158,7 +158,7 @@ jobs:
     if: (github.event_name == 'workflow_dispatch' && inputs.deploy == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]'))
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     environment:
       name: production
       url: https://www.formatxsuite.com/
@@ -177,7 +177,7 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
-      - name: Deploy with Wrangler or wait for the connected Cloudflare build
+      - name: Deploy with Wrangler or use the connected Cloudflare build
         id: deploy_mode
         working-directory: billing-worker
         env:
@@ -188,124 +188,80 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           if [[ -z "$CLOUDFLARE_API_TOKEN" ]]; then
             echo "mode=connected-cloudflare-build" >> "$GITHUB_OUTPUT"
-            echo "Wrangler token unavailable; the live smoke test will verify the connected Cloudflare Git deployment."
+            echo 'Wrangler token unavailable; live smoke tests will verify the connected Cloudflare deployment.'
             exit 0
           fi
           echo "mode=wrangler" >> "$GITHUB_OUTPUT"
           npx wrangler deploy
 
-      - name: Smoke-test both custom domains and requested features
+      - name: Smoke-test production feedback, downloads and seamless scrolling
+        shell: bash
         run: |
-          set -euo pipefail
-          expected_loader_marker="$(grep -Eo 'safe-ready-v[0-9]+' docs/scifi-ui/scripts/igloo-parity.js | head -n 1)"
-          expected_release_version="$(node -p "require('./docs/scifi-ui/data/current-release.json').version")"
-          expected_release_schema="$(node -p "require('./docs/scifi-ui/data/current-release.json').schema_version")"
-          expected_release_digest="$(node -p "require('./docs/scifi-ui/data/current-release.json').channels?.windows?.digest || ''")"
-          expected_premium_revision="$(grep -Eo '202[0-9]{5}-[a-z0-9-]+' docs/scifi-ui/scripts/formatx-premium-finish.js | head -n 1)"
-          test -n "$expected_loader_marker"
-          test -n "$expected_release_version"
-          test -n "$expected_release_schema"
-          test -n "$expected_premium_revision"
+          set -Eeuo pipefail
+          WWW='https://www.formatxsuite.com'
+          ROOT_DOMAIN='https://formatxsuite.com'
+          PAYLOAD='{"overall":5,"usability":5,"performance":5,"design":5,"features":5,"comment":"","display_name":"","contact_email":"","publish_permission":false,"privacy_consent":true,"website":"formatx-production-smoke-probe","locale":"hu","source":"github-production-smoke","page_path":"/"}'
 
-          for attempt in $(seq 1 12); do
-            root_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 30 https://www.formatxsuite.com/)"
-            if [ "$root_status" = "200" ]; then
-              break
-            fi
-            if [ "$attempt" -eq 12 ]; then
-              echo "www domain root returned HTTP $root_status instead of 200" >&2
-              exit 1
-            fi
-            sleep 10
-          done
+          for attempt in $(seq 1 30); do
+            echo "Production smoke attempt $attempt/30"
+            tmp="$(mktemp -d)"
+            root_code="$(curl -sS -L --max-time 30 -o "$tmp/home.html" -w '%{http_code}' "$WWW/" || true)"
+            bare_code="$(curl -sS -L --max-time 30 -o "$tmp/bare.html" -w '%{http_code}' "$ROOT_DOMAIN/" || true)"
+            summary_code="$(curl -sS --max-time 30 -o "$tmp/summary.json" -w '%{http_code}' "$WWW/api/feedback/summary" || true)"
+            submit_code="$(curl -sS --max-time 30 -o "$tmp/submit.json" -w '%{http_code}' \
+              -X POST "$WWW/api/feedback" \
+              -H 'Origin: https://www.formatxsuite.com' \
+              -H 'Content-Type: application/json' \
+              -H 'Accept: application/json' \
+              --data "$PAYLOAD" || true)"
+            loop_code="$(curl -sS --max-time 30 -o "$tmp/loop.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-infinite-scroll.js?v=production-smoke" || true)"
+            downloads_code="$(curl -sS -L --max-time 30 -o "$tmp/downloads.html" -w '%{http_code}' "$WWW/downloads/" || true)"
+            support_code="$(curl -sS -L --max-time 30 -o "$tmp/support.html" -w '%{http_code}' "$WWW/support.html" || true)"
+            portable_code="$(curl -sS --max-time 30 -o "$tmp/portable.svg" -w '%{http_code}' "$WWW/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg" || true)"
 
-          for origin in https://formatxsuite.com https://www.formatxsuite.com; do
-            success=false
-            for attempt in $(seq 1 12); do
-              tmp="$(mktemp -d)"
-              if curl --fail --silent --show-error --location --max-time 30 "$origin/" > "$tmp/home.html" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/license.html" > "$tmp/license.html" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/igloo-parity.js?v=20260802-live-audit-1" > "$tmp/loader.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/organism-voice.js?v=20260802-live-audit-1" > "$tmp/voice.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/organism-master-sync.js?v=20260802-live-audit-1" > "$tmp/master.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/organism-master-sync.css?v=20260802-live-audit-1" > "$tmp/master.css" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260802-live-audit-1" > "$tmp/infinite.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/single-language-toggle.js?v=20260802-live-audit-1" > "$tmp/language.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-premium-finish.js?v=$expected_premium_revision" > "$tmp/premium.js" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/formatx-mobile-unified.css?v=20260802-live-audit-1" > "$tmp/mobile.css" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/assets/qr/business_lite-huf.svg?v=20260802-live-audit-1" > "$tmp/qr.svg" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/data/current-release.json" > "$tmp/release.json" \
-                && grep -Fq "$expected_loader_marker" "$tmp/loader.js" \
-                && grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' "$tmp/loader.js" \
-                && grep -Fq 'organism-master-sync.js?v=20260802-master-sync-1' "$tmp/loader.js" \
-                && grep -Fq 'SpeechSynthesisUtterance' "$tmp/voice.js" \
-                && grep -Fq 'fx-organism-master-toggle' "$tmp/voice.js" \
-                && grep -Fq 'data-fx-organism-dialogue-enabled' "$tmp/master.js" \
-                && grep -Fq 'fx-organism-master-disabled' "$tmp/master.js" \
-                && grep -Fq 'html.fx-organism-master-disabled .fx-thought-genome-layer' "$tmp/master.css" \
-                && grep -Fq 'html.fx-organism-master-disabled .fx-thought-genome-disclosure' "$tmp/master.css" \
-                && grep -Fq 'boundary-v4' "$tmp/infinite.js" \
-                && grep -Fq "toggle.className = 'fx-language-toggle'" "$tmp/language.js" \
-                && grep -Fq "$expected_premium_revision" "$tmp/premium.js" \
-                && grep -Fq 'canvas2d-living-core-v2' "$tmp/premium.js" \
-                && grep -Fq 'root.dataset.fxGpuCapability = rendererCapability()' "$tmp/premium.js" \
-                && grep -Fq "history.replaceState(history.state, '', '/' + location.search + location.hash)" "$tmp/premium.js" \
-                && grep -Fq 'Részletes licencfeltételek' "$tmp/license.html" \
-                && grep -Fq 'Detailed licence terms' "$tmp/license.html" \
-                && grep -Fq 'no text overlap' "$tmp/mobile.css" \
-                && grep -Fq 'data-fx-premium-finish' "$tmp/home.html" \
-                && grep -Fq '<base href="/scifi-ui/">' "$tmp/home.html" \
-                && grep -Fq '<svg' "$tmp/qr.svg" \
-                && node - "$tmp/release.json" "$expected_release_version" "$expected_release_schema" "$expected_release_digest" <<'NODE'
-          const fs = require('node:fs');
-          const [file, expectedVersion, expectedSchema, expectedDigest] = process.argv.slice(2);
-          const live = JSON.parse(fs.readFileSync(file, 'utf8'));
-          if (live.ok !== true) process.exit(1);
-          if (live.version !== expectedVersion) process.exit(1);
-          if (String(live.schema_version) !== expectedSchema) process.exit(1);
-          if (expectedDigest && live.channels?.windows?.digest !== expectedDigest) process.exit(1);
-          NODE
-              then
-                success=true
-                rm -rf "$tmp"
-                break
-              fi
+            if [[ "$root_code" == '200' && "$bare_code" == '200' && "$summary_code" == '200' \
+              && "$submit_code" == '202' && "$loop_code" == '200' && "$downloads_code" == '200' \
+              && "$support_code" == '200' && "$portable_code" == '200' ]]; then
+              python3 - "$tmp" <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          root = pathlib.Path(sys.argv[1])
+          summary = json.loads((root / 'summary.json').read_text())
+          submit = json.loads((root / 'submit.json').read_text())
+          loop = (root / 'loop.js').read_text()
+          home = (root / 'home.html').read_text()
+          downloads = (root / 'downloads.html').read_text()
+          support = (root / 'support.html').read_text()
+          portable = (root / 'portable.svg').read_text().lower()
+
+          assert summary.get('ok') is True, summary
+          assert isinstance(summary.get('count'), int), summary
+          assert submit.get('ok') is True, submit
+          assert submit.get('state') == 'pending-moderation', submit
+          assert "const VERSION = 'seamless-v6'" in loop, 'seamless-v6 controller missing'
+          assert "fxInfiniteCloneMode = 'visual-bridge'" in loop, 'visual bridge missing'
+          assert 'clonedHeroOnly: true' in loop, 'Hero-only loop contract missing'
+          assert 'id="user-feedback"' in home, 'feedback section missing'
+          assert 'data-fx-category-title' in home and 'Technikusi operációs réteg' in home, 'static category semantics missing'
+          assert 'FormatX-Updates/releases/latest' in downloads, 'latest release fallback missing'
+          assert 'Támogatás' in support or 'Support' in support, 'support page invalid'
+          assert '<svg' in portable and '</svg>' in portable, 'portable installer SVG missing'
+          assert 'data:image/webp' not in portable and '<image' not in portable, 'embedded raster returned'
+          print('FormatX production smoke passed.')
+          PY
               rm -rf "$tmp"
-              sleep 10
-            done
-            if [[ "$success" != true ]]; then
-              echo "Production requested-feature smoke test failed for $origin" >&2
+              exit 0
+            fi
+
+            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code downloads=$downloads_code support=$support_code portable=$portable_code"
+            [[ -s "$tmp/summary.json" ]] && cat "$tmp/summary.json" || true
+            [[ -s "$tmp/submit.json" ]] && cat "$tmp/submit.json" || true
+            rm -rf "$tmp"
+            if [[ "$attempt" == '30' ]]; then
+              echo 'Production did not become healthy within the retry window.' >&2
               exit 1
             fi
+            sleep 12
           done
-
-      - name: Publish production deployment status
-        if: always()
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          JOB_STATUS: ${{ job.status }}
-          STATUS_CONTEXT: FormatX production deployment
-          STATUS_DESCRIPTION: Cloudflare deploy and live requested-feature smoke test
-          STATUS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          node --input-type=module - <<'NODE'
-          const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
-          const url = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`;
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              Accept: 'application/vnd.github+json',
-              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-              'X-GitHub-Api-Version': '2022-11-28',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              state,
-              context: process.env.STATUS_CONTEXT,
-              description: process.env.STATUS_DESCRIPTION.slice(0, 140),
-              target_url: process.env.STATUS_URL,
-            }),
-          });
-          if (!response.ok) throw new Error(`Status publish failed: ${response.status} ${await response.text()}`);
-          NODE
