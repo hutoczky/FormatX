@@ -1,13 +1,15 @@
 body {
   margin: 0;
-  background: #030817;
+  background:
+    radial-gradient(circle at 82% 8%, rgba(53, 217, 255, .09), transparent 34%),
+    #030817;
   color: #f4faff;
 }
 
 .fx-download-page {
   width: min(1180px, calc(100% - 28px));
   margin: auto;
-  padding: 40px 0 80px;
+  padding: clamp(24px, 4vw, 56px) 0 clamp(64px, 8vw, 120px);
 }
 
 .fx-download-header {
@@ -17,18 +19,27 @@ body {
   gap: 18px;
 }
 
+.fx-download-header .brand {
+  color: #f4faff;
+  text-decoration: none;
+  letter-spacing: .12em;
+}
+
 .fx-download-intro {
   max-width: 840px;
-  margin: 52px 0 30px;
+  margin: clamp(44px, 8vw, 92px) 0 30px;
 }
 
 .fx-download-intro h1 {
+  max-width: 12ch;
   font-size: clamp(2.2rem, 6vw, 5rem);
   line-height: .95;
+  text-wrap: balance;
 }
 
 .fx-download-intro p,
-.fx-download-action p {
+.fx-download-action p,
+.fx-download-proof p {
   color: #bed0dc;
   line-height: 1.65;
 }
@@ -37,26 +48,47 @@ body {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  margin: 28px 0 46px;
+  margin: 28px 0 32px;
 }
 
 .fx-download-action {
+  display: flex;
+  min-width: 0;
+  min-height: 300px;
+  flex-direction: column;
   padding: 22px;
   border: 1px solid #23445d;
   border-radius: 20px;
-  background: #071426;
+  background: linear-gradient(145deg, #09192b, #05101f);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .22);
+}
+
+.fx-download-action h2 {
+  margin-top: 0;
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 .fx-download-action a {
   display: inline-flex;
-  min-height: 44px;
+  min-height: 48px;
   align-items: center;
+  justify-content: center;
+  margin-top: auto;
   padding: 0 16px;
   border-radius: 12px;
   background: #35d9ff;
   color: #00111d;
+  text-align: center;
   text-decoration: none;
   font-weight: 800;
+  transition: transform .18s ease, filter .18s ease;
+}
+
+.fx-download-action a:hover,
+.fx-download-action a:focus-visible {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
 }
 
 .fx-download-action a.secondary {
@@ -64,9 +96,87 @@ body {
   color: #f4faff;
 }
 
+.fx-download-action small {
+  display: block;
+  margin-top: 12px;
+  color: #8da6b8;
+  line-height: 1.5;
+}
+
+.fx-download-proof {
+  margin: 24px 0 42px;
+  padding: clamp(22px, 4vw, 38px);
+  border: 1px solid rgba(53, 217, 255, .24);
+  border-radius: 22px;
+  background: rgba(7, 20, 38, .78);
+}
+
+.fx-download-proof h2 {
+  max-width: 18ch;
+  margin: 8px 0 12px;
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  line-height: 1.05;
+}
+
+.fx-page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 34px;
+}
+
+.fx-page-nav a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 0 14px;
+  color: #dceef8;
+  border: 1px solid #23445d;
+  border-radius: 999px;
+  background: #071426;
+  text-decoration: none;
+}
+
+.fx-page-nav a:hover,
+.fx-page-nav a:focus-visible {
+  border-color: #35d9ff;
+  color: #fff;
+}
+
+@media (min-width: 2200px) {
+  .fx-download-page {
+    width: min(1500px, calc(100% - 8vw));
+  }
+
+  .fx-download-actions {
+    gap: 22px;
+  }
+
+  .fx-download-action {
+    min-height: 340px;
+    padding: 30px;
+  }
+}
+
 @media (max-width: 800px) {
+  .fx-download-page {
+    width: min(100% - 22px, 720px);
+  }
+
+  .fx-download-header {
+    align-items: flex-start;
+  }
+
   .fx-download-actions {
     grid-template-columns: 1fr;
+  }
+
+  .fx-download-action {
+    min-height: 0;
+  }
+
+  .fx-download-action a {
+    margin-top: 16px;
   }
 }
 
