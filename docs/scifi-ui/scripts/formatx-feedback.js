@@ -2,8 +2,13 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxFeedback === 'v1') return;
-  root.dataset.fxFeedback = 'v1';
+  if (root.dataset.fxFeedback === 'v2') return;
+  root.dataset.fxFeedback = 'v2';
+
+  const FEEDBACK_SUMMARY_URL = '/api/feedback/summary';
+  const FEEDBACK_SUBMIT_URL = '/api/feedback';
+  const PORTABLE_INSTALLER_ASSET = '/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg?v=20260806-mobile-compatible-2';
+  const REQUEST_TIMEOUT_MS = 15000;
 
   const COPY = {
     hu: {
@@ -13,8 +18,10 @@
       published: (average, count) => `${average.toFixed(1)} / 5 · ${count} jóváhagyott értékelés`,
       submitting: 'Visszajelzés küldése…',
       success: 'Köszönjük. A visszajelzés moderálásra vár, és csak jóváhagyás után kerülhet bele a nyilvános átlagba.',
-      error: 'A visszajelzés most nem küldhető el. Ellenőrizd a mezőket, majd próbáld újra.',
+      error: 'A visszajelzés most nem küldhető el. Ellenőrizd a kapcsolatot, majd próbáld újra.',
+      timeout: 'A visszajelző szolgáltatás nem válaszolt időben. Próbáld meg újra.',
       selectAll: 'Minden értékelési kategóriát tölts ki 1 és 5 között.',
+      privacy: 'Az adatkezelési tájékoztató elfogadása kötelező.',
     },
     en: {
       rating: 'rating',
@@ -23,8 +30,10 @@
       published: (average, count) => `${average.toFixed(1)} / 5 · ${count} approved rating${count === 1 ? '' : 's'}`,
       submitting: 'Sending feedback…',
       success: 'Thank you. The submission is awaiting moderation and can affect the public average only after approval.',
-      error: 'Feedback could not be sent. Check the fields and try again.',
+      error: 'Feedback could not be sent. Check the connection and try again.',
+      timeout: 'The feedback service did not respond in time. Please try again.',
       selectAll: 'Rate every category from 1 to 5.',
+      privacy: 'Accepting the privacy notice is required.',
     },
   };
 
@@ -47,12 +56,62 @@
   function syncLiveOsCtas() {
     document.querySelectorAll('[data-fx-live-os-cta]').forEach(element => {
       const label = element.querySelector('[data-hu][data-en]');
-      if (label) {
-        label.textContent = label.dataset[language()];
-      } else if (element.dataset.hu && element.dataset.en) {
-        element.textContent = element.dataset[language()];
-      }
+      if (label) label.textContent = label.dataset[language()];
+      else if (element.dataset.hu && element.dataset.en) element.textContent = element.dataset[language()];
     });
+  }
+
+  function patchPortableInstallerImages(scope = document) {
+    const images = [];
+    if (scope instanceof HTMLImageElement) images.push(scope);
+    if (scope.querySelectorAll) {
+      images.push(...scope.querySelectorAll('img[src*="product-showcase/portable-installer.svg"], img[data-fx-portable-installer]'));
+    }
+    images.forEach(image => {
+      if (image.dataset.fxPortableInstallerPatched === 'true') return;
+      image.dataset.fxPortableInstallerPatched = 'true';
+      image.dataset.fxPortableInstaller = 'compatible';
+      image.src = PORTABLE_INSTALLER_ASSET;
+    });
+  }
+
+  const showcaseObserver = new MutationObserver(entries => {
+    entries.forEach(entry => entry.addedNodes.forEach(node => {
+      if (node.nodeType === Node.ELEMENT_NODE) patchPortableInstallerImages(node);
+    }));
+  });
+
+  async function fetchJson(url, options = {}) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        ...options,
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/json',
+          ...(options.headers || {}),
+        },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const error = new Error(data.message || `HTTP ${response.status}`);
+        error.status = response.status;
+        error.code = data.error || '';
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      if (error && error.name === 'AbortError') {
+        const timeoutError = new Error(copy().timeout);
+        timeoutError.code = 'timeout';
+        throw timeoutError;
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   function buildRatingGroup(host) {
@@ -106,16 +165,12 @@
 
   async function loadSummary(section) {
     const output = section.querySelector('[data-fx-feedback-summary]');
-    if (!output) return;
+    if (!output || output.dataset.loading === 'true') return;
+    output.dataset.loading = 'true';
     output.textContent = copy().loading;
     output.dataset.state = 'loading';
     try {
-      const response = await fetch('/api/feedback/summary', {
-        headers: { Accept: 'application/json' },
-        credentials: 'same-origin',
-      });
-      if (!response.ok) throw new Error(`summary ${response.status}`);
-      const data = await response.json();
+      const data = await fetchJson(FEEDBACK_SUMMARY_URL);
       if (!data.count || !data.average) {
         output.textContent = copy().empty;
         output.dataset.state = 'empty';
@@ -129,6 +184,8 @@
       console.warn('FormatX feedback summary unavailable', error);
       output.textContent = copy().empty;
       output.dataset.state = 'unavailable';
+    } finally {
+      delete output.dataset.loading;
     }
   }
 
@@ -151,6 +208,12 @@
       status.dataset.state = 'error';
       return;
     }
+    if (form.elements.privacy_consent?.checked !== true) {
+      status.textContent = copy().privacy;
+      status.dataset.state = 'error';
+      form.elements.privacy_consent?.focus();
+      return;
+    }
 
     const payload = {
       ...ratings,
@@ -158,7 +221,7 @@
       display_name: form.elements.display_name?.value || '',
       contact_email: form.elements.contact_email?.value || '',
       publish_permission: form.elements.publish_permission?.checked === true,
-      privacy_consent: form.elements.privacy_consent?.checked === true,
+      privacy_consent: true,
       website: form.elements.website?.value || '',
       locale: language(),
       source: 'formatxsuite-homepage',
@@ -169,28 +232,22 @@
     status.textContent = copy().submitting;
     status.dataset.state = 'loading';
     try {
-      const response = await fetch('/api/feedback', {
+      await fetchJson(FEEDBACK_SUBMIT_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || `feedback ${response.status}`);
       form.reset();
       form.querySelectorAll('.fx-rating-stars').forEach(stars => paintStars(stars));
       status.textContent = copy().success;
       status.dataset.state = 'success';
       form.dataset.submitted = 'true';
+      setTimeout(() => loadSummary(document.getElementById('user-feedback')), 500);
     } catch (error) {
       console.warn('FormatX feedback submission failed', error);
-      status.textContent = error.message && !/^feedback \d+$/.test(error.message)
-        ? error.message
-        : copy().error;
+      status.textContent = error && error.message ? error.message : copy().error;
       status.dataset.state = 'error';
+      status.dataset.errorCode = error && error.code ? error.code : 'request_failed';
     } finally {
       submit.disabled = false;
     }
@@ -203,19 +260,19 @@
       return;
     }
     document.getElementById('live-os-overview')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setTimeout(() => {
-      document.querySelector('[data-fx-live-os-launcher]')?.click();
-    }, 450);
+    setTimeout(() => document.querySelector('[data-fx-live-os-launcher]')?.click(), 450);
   }
 
   function initialise() {
-    const section = document.getElementById('user-feedback');
+    patchPortableInstallerImages();
     document.querySelectorAll('[data-fx-live-os-cta]').forEach(button => {
       if (button.dataset.bound === 'true') return;
       button.dataset.bound = 'true';
       button.addEventListener('click', openLiveOs);
     });
     syncLiveOsCtas();
+
+    const section = document.getElementById('user-feedback');
     if (!section) return;
     section.querySelectorAll('[data-rating-group]').forEach(buildRatingGroup);
     syncBilingual(section);
@@ -242,10 +299,11 @@
     if (section) loadSummary(section);
   });
 
-  if (document.readyState === 'loading') {
-    addEventListener('DOMContentLoaded', initialise, { once: true });
-  } else {
-    initialise();
-  }
+  if (document.body) showcaseObserver.observe(document.body, { childList: true, subtree: true });
+  else addEventListener('DOMContentLoaded', () => showcaseObserver.observe(document.body, { childList: true, subtree: true }), { once: true });
+
+  if (document.readyState === 'loading') addEventListener('DOMContentLoaded', initialise, { once: true });
+  else initialise();
   ['pageshow', 'formatx:livingready', 'formatx:loop'].forEach(name => addEventListener(name, initialise));
+  addEventListener('pagehide', () => showcaseObserver.disconnect(), { once: true });
 }());
