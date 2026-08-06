@@ -1,0 +1,37 @@
+name: Validate FormatX Live OS
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-live-os.js'
+      - 'docs/scifi-ui/styles/formatx-live-os.css'
+      - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
+      - '.github/scripts/validate-live-os.cjs'
+      - '.github/workflows/validate-live-os.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-live-os.js'
+      - 'docs/scifi-ui/styles/formatx-live-os.css'
+      - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
+      - '.github/scripts/validate-live-os.cjs'
+      - '.github/workflows/validate-live-os.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Validate JavaScript syntax
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-live-os.js
+          node --check docs/scifi-ui/scripts/formatx-origin-proof.js
+      - name: Validate Live OS contract
+        run: node .github/scripts/validate-live-os.cjs
