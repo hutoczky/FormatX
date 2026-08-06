@@ -32,28 +32,10 @@
       en: ['04 / PORTABLE INSTALLER', 'One project, multiple target environments.', 'Build an optimized current-system package or a complete cross-platform bundle with Linux, Windows and macOS launchers.']
     },
     {
-      image: 'partition-manager.svg',
-      accent: 'amber',
-      hu: ['05 / PARTÍCIÓKEZELÉS', 'Módosítás előtt célazonosítás és megerősítés.', 'Létrehozás, törlés és átméretezés állapotkártyákkal, műveleti naplóval és elkülönített veszélyes műveletekkel.'],
-      en: ['05 / PARTITION MANAGEMENT', 'Target identification and confirmation before change.', 'Create, delete and resize with state cards, an operation log and clearly separated destructive actions.']
-    },
-    {
-      image: 'disk-formatting.svg',
-      accent: 'red',
-      hu: ['06 / LEMEZFORMÁZÁS', 'A kritikus lépés pontosan látható.', 'A kiválasztott eszköz, célfájlrendszer és megerősítési állapot a végrehajtás előtt egyértelműen ellenőrizhető.'],
-      en: ['06 / DISK FORMATTING', 'The critical step stays explicit.', 'The selected device, target file system and confirmation state remain clearly visible before execution.']
-    },
-    {
       image: 'usb-creator.svg',
       accent: 'cyan',
-      hu: ['07 / USB KÉSZÍTŐ', 'Automatikus forrás- és céleszköz-felismerés.', 'ISO-képből indítható adathordozó készül valós idejű folyamattal, állapotjelzéssel és naplóval. A képen az üres, eszközre váró állapot látható.'],
-      en: ['07 / USB CREATOR', 'Automatic source and target detection.', 'Create bootable media from an ISO with real-time progress, state feedback and logging. The image shows the empty state waiting for media.']
-    },
-    {
-      image: 'system-architecture.svg',
-      accent: 'magenta',
-      hu: ['08 / RENDSZERARCHITEKTÚRA', 'A működési modell dokumentálva marad.', 'Kiadási adatok, platformstratégia, biztonsági folyamat és modulstruktúra ugyanabban a termékben, nem külön marketingígéretként.'],
-      en: ['08 / SYSTEM ARCHITECTURE', 'The operating model remains documented.', 'Release data, platform strategy, safety workflow and module structure live inside the product instead of existing only as marketing claims.']
+      hu: ['05 / USB KÉSZÍTŐ', 'Automatikus forrás- és céleszköz-felismerés.', 'ISO-képből indítható adathordozó készül valós idejű folyamattal, állapotjelzéssel és naplóval. A képen az üres, eszközre váró állapot látható.'],
+      en: ['05 / USB CREATOR', 'Automatic source and target detection.', 'Create bootable media from an ISO with real-time progress, state feedback and logging. The image shows the empty state waiting for media.']
     }
   ];
 
@@ -106,7 +88,7 @@
       '<div class="fx-product-showcase__grid" data-showcase-grid></div>',
       '<dialog class="fx-product-showcase__dialog" data-showcase-dialog aria-labelledby="fx-showcase-dialog-title">',
       '  <button type="button" class="fx-product-showcase__close" data-showcase-close></button>',
-      '  <figure><img data-showcase-dialog-image width="1600" height="837" alt=""><figcaption><span data-showcase-dialog-eyebrow></span><h3 id="fx-showcase-dialog-title" data-showcase-dialog-title></h3><p data-showcase-dialog-description></p></figcaption></figure>',
+      '  <figure><img data-showcase-dialog-image width="800" height="418" alt=""><figcaption><span data-showcase-dialog-eyebrow></span><h3 id="fx-showcase-dialog-title" data-showcase-dialog-title></h3><p data-showcase-dialog-description></p></figcaption></figure>',
       '</dialog>'
     ].join('');
 
@@ -122,7 +104,7 @@
     if (index === 0) article.classList.add('fx-product-showcase__card--hero');
     article.innerHTML = [
       '<button type="button" data-showcase-index="' + index + '">',
-      '  <span class="fx-product-showcase__media"><img src="' + ASSET_ROOT + item.image + '" loading="lazy" decoding="async" width="1600" height="837" alt=""><i aria-hidden="true"></i></span>',
+      '  <span class="fx-product-showcase__media"><img src="' + ASSET_ROOT + item.image + '" loading="lazy" decoding="async" width="800" height="418" alt=""><i aria-hidden="true"></i></span>',
       '  <span class="fx-product-showcase__copy"><small></small><strong></strong><span></span><b aria-hidden="true">↗</b></span>',
       '</button>'
     ].join('');
