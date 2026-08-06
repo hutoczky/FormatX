@@ -43,6 +43,8 @@ assert.match(feedbackApi, /'pending'/, 'new feedback must start as pending moder
 assert.match(feedbackApi, /privacy_consent/, 'privacy consent validation missing');
 assert.match(feedbackApi, /PUBLIC_API_RATE_LIMIT/, 'public API rate limiting missing');
 assert.match(feedbackApi, /hashRequestIdentity/, 'raw network identifier must not be stored');
+assert.match(feedbackApi, /No review text or email address is exposed/, 'summary privacy disclosure missing');
+assert.doesNotMatch(feedbackApi, /SELECT[\s\S]{0,240}(comment|contact_email)[\s\S]{0,240}WHERE status = 'approved'/, 'summary endpoint must not select review text or email');
 assert.doesNotMatch(feedbackApi, /CF-Connecting-IP[^\n]+INSERT/, 'raw IP must not be inserted');
 
 assert.match(migration, /CREATE TABLE IF NOT EXISTS user_feedback/, 'feedback table migration missing');
