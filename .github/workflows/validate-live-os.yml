@@ -1,0 +1,76 @@
+name: Validate FormatX Live OS
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-live-os.js'
+      - 'docs/scifi-ui/scripts/formatx-live-os-core.js'
+      - 'docs/scifi-ui/scripts/formatx-live-os-fallback.js'
+      - 'docs/scifi-ui/styles/formatx-live-os.css'
+      - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
+      - '.github/scripts/validate-live-os.cjs'
+      - '.github/scripts/validate-live-os-browser.cjs'
+      - '.github/workflows/validate-live-os.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-live-os.js'
+      - 'docs/scifi-ui/scripts/formatx-live-os-core.js'
+      - 'docs/scifi-ui/scripts/formatx-live-os-fallback.js'
+      - 'docs/scifi-ui/styles/formatx-live-os.css'
+      - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
+      - '.github/scripts/validate-live-os.cjs'
+      - '.github/scripts/validate-live-os-browser.cjs'
+      - '.github/workflows/validate-live-os.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Validate JavaScript syntax
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-live-os.js
+          node --check docs/scifi-ui/scripts/formatx-live-os-core.js
+          node --check docs/scifi-ui/scripts/formatx-live-os-fallback.js
+          node --check docs/scifi-ui/scripts/formatx-origin-proof.js
+          node --check .github/scripts/validate-live-os-browser.cjs
+      - name: Validate Live OS contract
+        run: node .github/scripts/validate-live-os.cjs
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start static website
+        run: |
+          python3 -m http.server 4182 --directory docs > "$RUNNER_TEMP/formatx-live-os-http.log" 2>&1 &
+          for attempt in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:4182/scifi-ui/index.html >/dev/null && exit 0
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/formatx-live-os-http.log"
+          exit 1
+      - name: Test desktop, mobile, commands, diagnostics and functional topology
+        run: node .github/scripts/validate-live-os-browser.cjs
+      - name: Upload Live OS evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-live-os-evidence
+          path: |
+            live-os-browser-report.json
+            live-os-desktop.png
+            live-os-mobile.png
+          if-no-files-found: warn
+          retention-days: 7
