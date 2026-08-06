@@ -12,6 +12,7 @@
   let activityTimer = 0;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
+  let layoutWidth = innerWidth;
 
   if (root.dataset.fxInfiniteController === VERSION) return;
 
@@ -268,6 +269,13 @@
     }, 60);
   }
 
+  function onResize() {
+    const nextWidth = innerWidth;
+    const widthChanged = Math.abs(nextWidth - layoutWidth) > 8;
+    if (widthChanged) layoutWidth = nextWidth;
+    scheduleRepair(widthChanged);
+  }
+
   function onPanelOpen(event) {
     if (event.detail?.id !== 'resources') return;
     const panel = document.querySelector('[data-organism-panel="resources"]');
@@ -296,7 +304,7 @@
   }
 
   addEventListener('scroll', onScroll, { passive: true });
-  addEventListener('resize', () => scheduleRepair(true), { passive: true });
+  addEventListener('resize', onResize, { passive: true });
   addEventListener('pageshow', () => scheduleRepair(true), { passive: true });
   addEventListener('formatx:organisminterfaceready', () => scheduleRepair(true));
   addEventListener('formatx:organismpanelopen', onPanelOpen);
