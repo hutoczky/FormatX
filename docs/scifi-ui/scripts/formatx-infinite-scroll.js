@@ -1,45 +1,201 @@
-/* FormatX production revision: 20260806-native-scroll-no-jump-1 */
 (function () {
   'use strict';
 
-  /*
-   * Retired compatibility markers for older source-level audits only:
-   * ready-v4 · boundary-v4 · nestedScrollerCanConsume · dialogueOpen
-   * The former controller also exposed clonedContent: false and
-   * reinitialisedRenderer: false. These properties remain in the runtime
-   * contract below, but no automatic boundary transfer is performed.
-   */
-
   const root = document.documentElement;
-  if (root.dataset.fxInfiniteScroll === 'ready-native-v5') return;
-
-  const ACTIVITY_IDLE_MS = 160;
-  const BOUNDARY_EPSILON = 12;
-  let activityTimer = 0;
+  const VERSION = 'seamless-v6';
+  const LOOP_GUARD_MS = 420;
+  const ACTIVITY_IDLE_MS = 170;
+  let bridge = null;
+  let sourceHero = null;
+  let transferLockedUntil = 0;
   let scrollFrame = 0;
-  let publishedBoundary = '';
+  let activityTimer = 0;
+  let loopCount = Number(root.dataset.fxLoopCount || 0);
+  let repairTimer = 0;
 
-  root.dataset.fxInfiniteScroll = 'ready-native-v5';
-  root.dataset.fxInfiniteController = 'native-v5';
-  root.dataset.fxInfiniteCloneMode = 'none';
+  if (root.dataset.fxInfiniteController === VERSION) return;
+
+  root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
+  root.dataset.fxInfiniteController = VERSION;
+  root.dataset.fxInfiniteCloneMode = 'visual-bridge';
   root.dataset.fxInfiniteInput = 'native';
   root.dataset.fxScrollActivity = 'idle';
-  root.dataset.fxAutomaticLoop = 'disabled';
-  root.dataset.fxScrollJumpGuard = 'ready-v1';
-  root.classList.remove(
-    'fx-infinite-loop-jump',
-    'fx-three-loop-transfer',
-    'fx-precision-wheel'
-  );
+  root.dataset.fxAutomaticLoop = 'enabled';
+  root.dataset.fxScrollJumpGuard = 'visual-match-v2';
+  root.classList.remove('fx-infinite-loop-jump', 'fx-three-loop-transfer', 'fx-precision-wheel');
+
+  function language() {
+    return root.lang === 'en' ? 'en' : 'hu';
+  }
+
+  function setBilingualText(scope) {
+    if (!scope) return;
+    scope.querySelectorAll('[data-hu][data-en]').forEach(element => {
+      if (element.matches('input,textarea')) return;
+      element.textContent = element.dataset[language()];
+    });
+  }
+
+  function dedupeFooterLinks(footer) {
+    footer.querySelectorAll('nav').forEach(nav => {
+      const seen = new Set();
+      Array.from(nav.querySelectorAll('a[href]')).forEach(link => {
+        const key = new URL(link.getAttribute('href'), document.baseURI).href + '|' + link.textContent.trim().toLocaleLowerCase();
+        if (seen.has(key)) link.remove();
+        else seen.add(key);
+      });
+    });
+  }
+
+  function actionLink(className, href, hu, en, external) {
+    const anchor = document.createElement('a');
+    anchor.className = className;
+    anchor.href = href;
+    anchor.dataset.hu = hu;
+    anchor.dataset.en = en;
+    anchor.textContent = language() === 'en' ? en : hu;
+    if (external) {
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+    }
+    return anchor;
+  }
+
+  function buildReleaseHub(panel) {
+    let hub = panel.querySelector('.fx-release-download-hub');
+    if (hub) return hub;
+
+    hub = document.createElement('section');
+    hub.className = 'fx-release-download-hub';
+    hub.setAttribute('aria-labelledby', 'fx-release-download-title');
+
+    const head = document.createElement('div');
+    head.className = 'fx-release-download-head';
+    const copy = document.createElement('div');
+    const kicker = document.createElement('p');
+    kicker.className = 'section-index';
+    kicker.dataset.hu = 'KÖZVETLEN KIADÁSI KÖZPONT';
+    kicker.dataset.en = 'DIRECT RELEASE CENTRE';
+    const title = document.createElement('h3');
+    title.id = 'fx-release-download-title';
+    title.dataset.hu = 'Letöltés, kiadás és támogatás egy helyen.';
+    title.dataset.en = 'Downloads, releases and support in one place.';
+    const lead = document.createElement('p');
+    lead.dataset.hu = 'A gombok valódi FormatX útvonalakra mutatnak. A multiplatform csomag Bazzite/Linux elsődleges és Windows támogatott nyilvános béta.';
+    lead.dataset.en = 'Buttons point to real FormatX routes. The multiplatform package is a public beta with Bazzite/Linux primary and Windows supported.';
+    copy.append(kicker, title, lead);
+
+    const badge = document.createElement('span');
+    badge.className = 'fx-release-download-badge';
+    badge.dataset.hu = 'NYILVÁNOS BÉTA';
+    badge.dataset.en = 'PUBLIC BETA';
+    head.append(copy, badge);
+
+    const grid = document.createElement('div');
+    grid.className = 'fx-release-download-grid';
+    const download = actionLink('fx-release-download-card is-primary', '/scifi-ui/downloads/', 'Multiplatform béta', 'Multiplatform beta');
+    download.dataset.fxReleaseAction = 'multiplatform';
+    const android = actionLink('fx-release-download-card', '/download/android', 'Android APK', 'Android APK');
+    const release = actionLink('fx-release-download-card', 'https://github.com/hutoczky/FormatX-Updates/releases', 'Kiadási részletek', 'Release details', true);
+    release.dataset.fxReleaseAction = 'release';
+    const support = actionLink('fx-release-download-card', '/scifi-ui/support.html', 'Támogatás', 'Support');
+    grid.append(download, android, release, support);
+
+    const note = document.createElement('p');
+    note.className = 'fx-release-download-note';
+    note.dataset.hu = 'A letöltési oldal mindig jelzi a platform állapotát, a kiadás érettségét és az ellenőrizhető kiadási információkat.';
+    note.dataset.en = 'The downloads page always shows platform status, release maturity and verifiable release information.';
+
+    hub.append(head, grid, note);
+    const releaseLayout = panel.querySelector('.release-layout');
+    if (releaseLayout) releaseLayout.insertAdjacentElement('afterend', hub);
+    else panel.prepend(hub);
+    setBilingualText(hub);
+    return hub;
+  }
+
+  function syncReleaseHub(panel) {
+    const hub = buildReleaseHub(panel);
+    const heroDownload = document.getElementById('hero-download');
+    const releasePage = document.getElementById('release-page-link');
+    const direct = hub.querySelector('[data-fx-release-action="multiplatform"]');
+    const release = hub.querySelector('[data-fx-release-action="release"]');
+    if (direct && heroDownload?.href) direct.href = heroDownload.href;
+    if (release && releasePage?.href) release.href = releasePage.href;
+    setBilingualText(hub);
+  }
+
+  function repairReleasePanel() {
+    const main = document.getElementById('main-content');
+    const footer = document.querySelector('.site-footer');
+    const panel = document.querySelector('[data-organism-panel="resources"]');
+    if (!main || !footer) return false;
+
+    if (footer.closest('.fx-organism-panel') || footer.parentElement !== document.body) {
+      main.insertAdjacentElement('afterend', footer);
+    }
+    footer.dataset.fxFooterFlow = 'document';
+    dedupeFooterLinks(footer);
+
+    if (panel) {
+      panel.dataset.fxReleasePanel = 'stable-v2';
+      syncReleaseHub(panel);
+    }
+    return true;
+  }
+
+  function neutraliseClone(clone) {
+    clone.dataset.fxLoopClone = 'true';
+    clone.classList.add('fx-loop-hero-clone');
+    clone.setAttribute('aria-hidden', 'true');
+    clone.setAttribute('inert', '');
+
+    clone.querySelectorAll('[id]').forEach((element, index) => {
+      element.id = 'fx-loop-clone-' + index;
+    });
+    clone.querySelectorAll('[aria-labelledby],[aria-controls],[for]').forEach(element => {
+      element.removeAttribute('aria-labelledby');
+      element.removeAttribute('aria-controls');
+      element.removeAttribute('for');
+    });
+    clone.querySelectorAll('a,button,input,select,textarea,[tabindex]').forEach(element => {
+      element.setAttribute('tabindex', '-1');
+      element.setAttribute('aria-hidden', 'true');
+      if ('disabled' in element) element.disabled = true;
+      if (element instanceof HTMLAnchorElement) element.removeAttribute('href');
+    });
+    clone.querySelectorAll('canvas,iframe,video,audio').forEach(element => element.remove());
+    setBilingualText(clone);
+  }
+
+  function removeBridge() {
+    bridge?.remove();
+    bridge = null;
+    root.dataset.fxLoopBridge = 'missing';
+  }
+
+  function buildBridge() {
+    if (!repairReleasePanel()) return false;
+    const footer = document.querySelector('body > .site-footer');
+    sourceHero = document.querySelector('#main-content > #hero');
+    if (!footer || !sourceHero) return false;
+
+    removeBridge();
+    const clone = sourceHero.cloneNode(true);
+    neutraliseClone(clone);
+
+    bridge = document.createElement('div');
+    bridge.className = 'fx-loop-bridge';
+    bridge.dataset.fxLoopBridge = VERSION;
+    bridge.setAttribute('aria-hidden', 'true');
+    bridge.appendChild(clone);
+    footer.insertAdjacentElement('afterend', bridge);
+    root.dataset.fxLoopBridge = 'ready-v2';
+    return true;
+  }
 
   function documentEnd() {
     return Math.max(0, document.documentElement.scrollHeight - innerHeight);
-  }
-
-  function currentBoundary() {
-    if (scrollY <= BOUNDARY_EPSILON) return 'top';
-    if (documentEnd() - scrollY <= BOUNDARY_EPSILON) return 'bottom';
-    return 'middle';
   }
 
   function markIdle() {
@@ -49,50 +205,96 @@
     root.classList.remove('fx-page-scrolling');
   }
 
-  function publishPosition() {
+  function transferIfNeeded() {
     scrollFrame = 0;
-    const boundary = currentBoundary();
-    if (boundary !== publishedBoundary) {
-      publishedBoundary = boundary;
-      root.dataset.fxInfiniteBoundary = boundary;
-    }
-
     root.dataset.fxScrollActivity = 'scrolling';
     root.classList.add('fx-page-scrolling');
     clearTimeout(activityTimer);
     activityTimer = window.setTimeout(markIdle, ACTIVITY_IDLE_MS);
+
+    if (!bridge || !sourceHero || Date.now() < transferLockedUntil) return;
+    if (document.body.classList.contains('fx-organism-panel-open')) return;
+    if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return;
+
+    const bridgeTop = bridge.offsetTop;
+    const threshold = bridgeTop + Math.max(32, Math.min(innerHeight * .22, 220));
+    if (scrollY < threshold || scrollY > documentEnd() + 2) return;
+
+    const relative = Math.max(0, Math.min(scrollY - bridgeTop, Math.max(0, sourceHero.offsetHeight - 2)));
+    const target = sourceHero.offsetTop + relative;
+    transferLockedUntil = Date.now() + LOOP_GUARD_MS;
+    root.classList.add('fx-seamless-loop-transfer');
+    root.dataset.fxInfiniteInput = 'visual-transfer';
+    loopCount += 1;
+    root.dataset.fxLoopCount = String(loopCount);
+    root.dataset.fxLoopSource = 'visual-bridge';
+    window.scrollTo(0, target);
+    dispatchEvent(new CustomEvent('formatx:loop', {
+      detail: { count: loopCount, source: 'visual-bridge', relative }
+    }));
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      root.classList.remove('fx-seamless-loop-transfer');
+      root.dataset.fxInfiniteInput = 'native';
+    }));
   }
 
   function onScroll() {
     if (scrollFrame) return;
-    scrollFrame = requestAnimationFrame(publishPosition);
+    scrollFrame = requestAnimationFrame(transferIfNeeded);
   }
 
-  root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
-    version: 'native-v5',
-    automaticLoop: false,
-    clonedContent: false,
-    reinitialisedRenderer: false,
-    jumpFree: true
-  });
+  function scheduleRepair(rebuildBridge) {
+    clearTimeout(repairTimer);
+    repairTimer = window.setTimeout(() => {
+      repairReleasePanel();
+      if (rebuildBridge !== false && !document.body.classList.contains('fx-organism-panel-open')) buildBridge();
+    }, 60);
+  }
+
+  function onPanelOpen(event) {
+    if (event.detail?.id !== 'resources') return;
+    const panel = document.querySelector('[data-organism-panel="resources"]');
+    if (panel) {
+      syncReleaseHub(panel);
+      panel.scrollTop = 0;
+    }
+  }
+
+  function initialise() {
+    repairReleasePanel();
+    buildBridge();
+    root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
+      version: VERSION,
+      automaticLoop: true,
+      visualBridge: true,
+      clonedContent: false,
+      clonedHeroOnly: true,
+      reinitialisedRenderer: false,
+      jumpFree: true
+    });
+    root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
+    root.dataset.fxInfiniteController = VERSION;
+    onScroll();
+  }
 
   addEventListener('scroll', onScroll, { passive: true });
-  addEventListener('resize', onScroll, { passive: true });
-  addEventListener('pageshow', () => {
-    root.dataset.fxInfiniteInput = 'native';
-    root.classList.remove(
-      'fx-infinite-loop-jump',
-      'fx-three-loop-transfer',
-      'fx-precision-wheel'
-    );
-    onScroll();
-  }, { passive: true });
+  addEventListener('resize', () => scheduleRepair(true), { passive: true });
+  addEventListener('pageshow', () => scheduleRepair(true), { passive: true });
+  addEventListener('formatx:organisminterfaceready', () => scheduleRepair(true));
+  addEventListener('formatx:organismpanelopen', onPanelOpen);
+  addEventListener('formatx:organismpanelclose', () => scheduleRepair(true));
+  addEventListener('formatx:languagechange', () => {
+    setBilingualText(bridge);
+    const panel = document.querySelector('[data-organism-panel="resources"]');
+    if (panel) syncReleaseHub(panel);
+  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
+  else initialise();
 
   addEventListener('pagehide', () => {
     cancelAnimationFrame(scrollFrame);
     clearTimeout(activityTimer);
+    clearTimeout(repairTimer);
   }, { once: true });
-
-  onScroll();
-  markIdle();
 }());
