@@ -1,0 +1,10 @@
+{
+  "version": "20260806-real-product-1",
+  "screens": [
+    "control-center.svg",
+    "live-system-monitor.svg",
+    "diagnostics.svg",
+    "portable-installer.svg",
+    "usb-creator.svg"
+  ]
+}
