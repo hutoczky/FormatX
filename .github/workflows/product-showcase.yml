@@ -1,0 +1,39 @@
+name: FormatX product showcase
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/assets/images/product-showcase/**'
+      - 'docs/scifi-ui/scripts/formatx-product-showcase.js'
+      - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
+      - 'docs/scifi-ui/styles/formatx-product-showcase.css'
+      - '.github/scripts/validate-product-showcase.cjs'
+      - '.github/workflows/product-showcase.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/assets/images/product-showcase/**'
+      - 'docs/scifi-ui/scripts/formatx-product-showcase.js'
+      - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
+      - 'docs/scifi-ui/styles/formatx-product-showcase.css'
+      - '.github/scripts/validate-product-showcase.cjs'
+      - '.github/workflows/product-showcase.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Validate JavaScript syntax
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-product-showcase.js
+          node --check docs/scifi-ui/scripts/formatx-origin-proof.js
+      - name: Validate product showcase contract
+        run: node .github/scripts/validate-product-showcase.cjs
