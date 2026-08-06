@@ -16,7 +16,7 @@
 
   const isEnglish = () => root.lang === 'en';
   const text = () => isEnglish() ? {
-    active: 'WebGL is unavailable. Interactive Canvas topology is active.',
+    active: 'WebGL is unavailable. The interactive Canvas topology is active instead.',
     stopped: 'Canvas topology stopped.',
     selected: 'Selected object',
     smart: 'SMART state',
@@ -28,7 +28,7 @@
     stop: 'Stop topology',
     flow: 'Verification flow is active.'
   } : {
-    active: 'A WebGL nem érhető el. Az interaktív Canvas-térkép aktív.',
+    active: 'A WebGL nem érhető el. Helyette az interaktív Canvas-térkép aktív.',
     stopped: 'A Canvas-térkép leállítva.',
     selected: 'Kiválasztott elem',
     smart: 'SMART állapot',
@@ -54,6 +54,13 @@
     spans[2].textContent = copy.safety + ': ' + (drive.smart === 'verified' ? copy.verified : copy.warning);
   }
 
+  function setOutput(section, message, success = true) {
+    const output = section.querySelector('[data-fx-output]');
+    if (!output) return;
+    output.className = 'fx-live-os__output fx-live-os__output--' + (success ? 'success' : 'warning');
+    output.textContent = message;
+  }
+
   function startFallback(stage) {
     if (engine && engine.stage === stage) return;
     if (engine) engine.dispose();
@@ -70,18 +77,32 @@
     let scan = 0;
     let rotation = 0;
     let dragging = false;
+    let moved = false;
     let previousX = 0;
     let frame = 0;
     let disposed = false;
     const hitAreas = [];
 
+    function layout(width) {
+      const compact = width < 560;
+      return {
+        compact,
+        height: compact ? 540 : Math.max(390, stage.getBoundingClientRect().height),
+        boxWidth: compact ? Math.max(126, Math.min(168, width * .72)) : Math.max(118, Math.min(190, width * .19)),
+        boxHeight: compact ? 104 : Math.max(92, Math.min(130, stage.getBoundingClientRect().height * .28))
+      };
+    }
+
     function resize() {
       const rect = stage.getBoundingClientRect();
+      const spec = layout(rect.width);
+      stage.style.minHeight = spec.height + 'px';
+      const fresh = stage.getBoundingClientRect();
       const dpr = Math.min(devicePixelRatio || 1, 1.5);
-      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-      canvas.height = Math.max(260, Math.floor(rect.height * dpr));
-      canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
+      canvas.width = Math.max(1, Math.floor(fresh.width * dpr));
+      canvas.height = Math.max(260, Math.floor(spec.height * dpr));
+      canvas.style.width = fresh.width + 'px';
+      canvas.style.height = spec.height + 'px';
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
       draw(performance.now());
     }
@@ -117,18 +138,24 @@
       context.restore();
     }
 
-    function drivePosition(index, width, height) {
+    function drivePosition(index, width, height, spec) {
+      if (spec.compact) {
+        return {
+          x: width / 2 + Math.sin(rotation + index) * 5,
+          y: 98 + index * 162
+        };
+      }
       const spacing = Math.min(width * .29, 240);
-      const centre = width / 2;
-      const x = centre + (index - 1) * spacing + Math.sin(rotation + index * .8) * 12;
-      const y = height * .48 + Math.cos(rotation * .7 + index) * 10;
-      return { x, y };
+      return {
+        x: width / 2 + (index - 1) * spacing + Math.sin(rotation + index * .8) * 12,
+        y: height * .48 + Math.cos(rotation * .7 + index) * 10
+      };
     }
 
-    function drawDrive(drive, index, width, height, now) {
-      const position = drivePosition(index, width, height);
-      const boxWidth = Math.max(118, Math.min(190, width * .19));
-      const boxHeight = Math.max(92, Math.min(130, height * .28));
+    function drawDrive(drive, index, width, height, now, spec) {
+      const position = drivePosition(index, width, height, spec);
+      const boxWidth = spec.boxWidth;
+      const boxHeight = spec.boxHeight;
       const x = position.x - boxWidth / 2;
       const y = position.y - boxHeight / 2;
       const active = selected === index;
@@ -146,15 +173,15 @@
       context.stroke();
 
       context.fillStyle = '#eefaff';
-      context.font = '700 12px system-ui, sans-serif';
-      context.fillText(drive.name, x + 12, y + 22);
+      context.font = '700 11px system-ui, sans-serif';
+      context.fillText(drive.name, x + 12, y + 21);
       context.fillStyle = drive.smart === 'verified' ? '#62ff91' : '#ffb548';
-      context.font = '800 9px system-ui, sans-serif';
-      context.fillText('SMART · ' + drive.smart.toUpperCase(), x + 12, y + 39);
+      context.font = '800 8px system-ui, sans-serif';
+      context.fillText('SMART · ' + drive.smart.toUpperCase(), x + 12, y + 37);
 
       const gap = 4;
-      const partitionY = y + 55;
-      const partitionHeight = boxHeight - 70;
+      const partitionY = y + 52;
+      const partitionHeight = boxHeight - 66;
       const partitionWidth = (boxWidth - 24 - gap * (drive.partitions - 1)) / drive.partitions;
       for (let p = 0; p < drive.partitions; p += 1) {
         const px = x + 12 + p * (partitionWidth + gap);
@@ -172,16 +199,16 @@
       context.restore();
     }
 
-    function drawFlows(width, height, now) {
+    function drawFlows(width, height, now, spec) {
       if (scan <= .01) return;
       context.save();
       context.globalCompositeOperation = 'lighter';
       for (let i = 0; i < 22; i += 1) {
-        const from = drivePosition(i % 2, width, height);
-        const to = drivePosition((i % 2) + 1, width, height);
+        const from = drivePosition(i % 2, width, height, spec);
+        const to = drivePosition((i % 2) + 1, width, height, spec);
         const t = (now * .00036 + i / 22) % 1;
-        const x = from.x + (to.x - from.x) * t;
-        const y = from.y + (to.y - from.y) * t - Math.sin(t * Math.PI) * (34 + (i % 3) * 10);
+        const x = from.x + (to.x - from.x) * t + (spec.compact ? Math.sin(t * Math.PI) * 24 : 0);
+        const y = from.y + (to.y - from.y) * t - (spec.compact ? 0 : Math.sin(t * Math.PI) * (34 + (i % 3) * 10));
         context.beginPath();
         context.fillStyle = i % 2 ? '#29e6ff' : '#62ff91';
         context.shadowColor = context.fillStyle;
@@ -196,16 +223,17 @@
       if (disposed) return;
       const rect = stage.getBoundingClientRect();
       const width = Math.max(1, rect.width);
-      const height = Math.max(260, rect.height);
+      const spec = layout(width);
+      const height = spec.height;
       context.clearRect(0, 0, width, height);
-      const gradient = context.createRadialGradient(width / 2, height / 2, 10, width / 2, height / 2, width * .55);
+      const gradient = context.createRadialGradient(width / 2, height / 2, 10, width / 2, height / 2, width * .65);
       gradient.addColorStop(0, 'rgba(20,71,92,.28)');
       gradient.addColorStop(1, 'rgba(1,7,13,.96)');
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
       drawGrid(width, height);
-      DRIVES.forEach((drive, index) => drawDrive(drive, index, width, height, now));
-      drawFlows(width, height, now);
+      DRIVES.forEach((drive, index) => drawDrive(drive, index, width, height, now, spec));
+      drawFlows(width, height, now, spec);
       scan = Math.max(0, scan - .008);
       rotation += scan > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches ? .002 : 0;
       if (scan > 0 || dragging) frame = requestAnimationFrame(draw);
@@ -230,24 +258,27 @@
 
     function onPointerDown(event) {
       dragging = true;
+      moved = false;
       previousX = event.clientX;
       canvas.setPointerCapture?.(event.pointerId);
     }
     function onPointerMove(event) {
       if (!dragging) return;
-      rotation += (event.clientX - previousX) * .004;
+      const dx = event.clientX - previousX;
+      if (Math.abs(dx) > 3) moved = true;
+      rotation += dx * .004;
       previousX = event.clientX;
       requestDraw();
     }
     function onPointerUp(event) {
-      const delta = Math.abs(event.clientX - previousX);
       dragging = false;
-      if (delta < 5) selectAt(event.clientX, event.clientY);
+      if (!moved) selectAt(event.clientX, event.clientY);
       requestDraw();
     }
     function onScan() {
       scan = 1;
       status.textContent = text().flow;
+      setOutput(section, text().flow, true);
       requestDraw();
     }
     function onToggle(event) {
@@ -256,8 +287,10 @@
       event.stopImmediatePropagation();
       dispose();
       stage.dataset.state = 'idle';
+      stage.style.minHeight = '';
       status.textContent = text().stopped;
       toggle.textContent = text().start;
+      setOutput(section, text().stopped, true);
     }
 
     function dispose() {
@@ -283,13 +316,13 @@
     stage.dataset.state = 'fallback';
     status.textContent = text().active;
     toggle.textContent = text().stop;
+    setOutput(section, text().active, true);
     updateObject(section, selected);
     resize();
   }
 
   function inspect() {
-    const stages = document.querySelectorAll('.fx-live-os [data-fx-stage]');
-    stages.forEach(stage => {
+    document.querySelectorAll('.fx-live-os [data-fx-stage]').forEach(stage => {
       if (stage.dataset.state === 'error') startFallback(stage);
     });
   }
@@ -300,9 +333,11 @@
   addEventListener('pageshow', inspect);
   addEventListener('formatx:languagechange', () => {
     if (!engine) return;
-    const status = engine.stage.querySelector('[data-fx-three-state]');
-    status.textContent = text().active;
-    engine.stage.closest('.fx-live-os').querySelector('[data-fx-three]').textContent = text().stop;
+    const section = engine.stage.closest('.fx-live-os');
+    engine.stage.querySelector('[data-fx-three-state]').textContent = text().active;
+    section.querySelector('[data-fx-three]').textContent = text().stop;
+    setOutput(section, text().active, true);
+    updateObject(section, 0);
   });
   addEventListener('pagehide', () => {
     observer.disconnect();
