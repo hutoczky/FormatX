@@ -54,6 +54,14 @@ A főoldali értékelő 1–5 közötti pontokat fogad az alábbi területekre:
 
 A beküldések alapállapota `pending`. A nyilvános átlag kizárólag `approved` állapotú, moderált értékelésekből készül. A függőben lévő vagy elutasított bejegyzések nem számítanak bele. A szöveges visszajelzés és az opcionális e-mail-cím nem jelenik meg a nyilvános összesítő API-ban.
 
+A moderáció a Cloudflare Access e-mail-kódos védelemmel ellátott tulajdonosi központban történik:
+
+- admin oldal: `/fx-owner-license/feedback.html`;
+- állapotok: `pending`, `approved`, `rejected`;
+- műveletek: jóváhagyás, elutasítás, visszaállítás és végleges törlés;
+- a kapcsolati e-mail és a közzétételi engedély kizárólag az adminnak látható;
+- a felhasználói szöveg HTML-ként nem hajtódik végre.
+
 ## 5. Adatvédelmi határ
 
 A Live OS parancsértelmezése helyben fut. A beírt parancsot nem küldi külső AI-szolgáltatásnak. A weboldal csak a böngésző által ténylegesen elérhető képességeket méri, és nem talál ki mély operációsrendszer-adatokat.
