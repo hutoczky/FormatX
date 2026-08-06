@@ -112,16 +112,32 @@ async function submitFeedback(request, env) {
 
   const contentLength = Number(request.headers.get('Content-Length') || 0);
   if (contentLength > MAX_BODY_BYTES) {
-    return json({ error: 'payload_too_large' }, 413, request);
+    return json({ error: 'payload_too_large', message: 'A visszajelzés adatcsomagja túl nagy.' }, 413, request);
   }
 
   const rateLimited = await applyRateLimit(request, env);
   if (rateLimited) return rateLimited;
 
-  const payload = await readJson(request);
+  let payload;
+  try {
+    payload = await readJson(request);
+  } catch (error) {
+    const tooLarge = error instanceof Error && error.message === 'Payload too large';
+    return json({
+      error: tooLarge ? 'payload_too_large' : 'invalid_json',
+      message: tooLarge
+        ? 'A visszajelzés adatcsomagja túl nagy.'
+        : 'A visszajelzés csak érvényes JSON-adatcsomagként küldhető.',
+    }, tooLarge ? 413 : 400, request);
+  }
+
   const validation = validateFeedbackPayload(payload);
   if (!validation.ok) {
-    return json({ error: 'invalid_feedback', fields: validation.errors }, 400, request);
+    return json({
+      error: 'invalid_feedback',
+      message: 'Egy vagy több értékelési mező hibás vagy hiányzik.',
+      fields: validation.errors,
+    }, 400, request);
   }
 
   // Honeypot: return a neutral accepted response without storing bot content.
@@ -288,6 +304,8 @@ function response(body, status, request, extraHeaders = {}) {
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'no-referrer',
     'Cross-Origin-Resource-Policy': 'same-origin',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
     ...extraHeaders,
   });
   if (origin && sameOrigin(request)) {
