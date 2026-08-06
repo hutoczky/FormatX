@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="418" viewBox="0 0 800 418" role="img" aria-labelledby="title desc">
+  <title id="title">FormatX hordozható telepítő</title>
+  <desc id="desc">A FormatX Suite Pro cross-platform hordozható telepítő felülete Linux, Windows és macOS indítókkal.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07111d"/><stop offset="1" stop-color="#0a1727"/></linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#24e8ff"/><stop offset="1" stop-color="#67f7d4"/></linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#2bdff4" stroke-opacity=".07"/></pattern>
+  </defs>
+  <rect width="800" height="418" fill="url(#bg)"/>
+  <rect width="800" height="418" fill="url(#grid)"/>
+  <rect x="0" y="0" width="800" height="36" fill="#182233"/>
+  <circle cx="18" cy="18" r="4" fill="#24e8ff"/><text x="32" y="23" font-family="system-ui,sans-serif" font-size="12" fill="#dceafa">FormatX Suite Pro · Hordozható telepítő</text>
+  <rect x="12" y="48" width="124" height="356" rx="10" fill="#081521" stroke="#29465b"/>
+  <rect x="24" y="65" width="100" height="54" rx="8" fill="#0d1e2d" stroke="#24e8ff"/>
+  <rect x="34" y="76" width="28" height="28" rx="6" fill="#102b3b" stroke="#24e8ff"/><text x="48" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="700" fill="#24e8ff">FX</text>
+  <text x="69" y="84" font-family="system-ui,sans-serif" font-size="8" font-weight="700" fill="#e9f4ff">FORMATX</text><text x="69" y="99" font-family="system-ui,sans-serif" font-size="7" fill="#8ca6b8">SUITE PRO</text>
+  <g font-family="system-ui,sans-serif" font-size="8" fill="#a8bac8">
+    <rect x="24" y="135" width="100" height="25" rx="5" fill="#102131" stroke="#24e8ff"/><text x="34" y="151" fill="#eafcff">Áttekintés</text>
+    <text x="26" y="181" fill="#24e8ff" font-weight="700">MODULOK</text>
+    <rect x="24" y="190" width="100" height="30" rx="5" fill="#0a1825" stroke="#263d50"/><text x="34" y="208">Eszközkezelés</text>
+    <rect x="24" y="229" width="100" height="30" rx="5" fill="#0a1825" stroke="#263d50"/><text x="34" y="247">Rendszer</text>
+    <rect x="24" y="268" width="100" height="30" rx="5" fill="#0a1825" stroke="#263d50"/><text x="34" y="286">Haladó</text>
+    <rect x="24" y="307" width="100" height="30" rx="5" fill="#0a1825" stroke="#263d50"/><text x="34" y="325">Információ</text>
+    <rect x="24" y="346" width="100" height="42" rx="5" fill="#0d2632" stroke="#24e8ff"/><text x="34" y="363" fill="#24e8ff" font-weight="700">Telepítés</text><text x="34" y="377" fill="#d6e6ee">Hordozható csomag</text>
+  </g>
+  <text x="157" y="68" font-family="system-ui,sans-serif" font-size="17" font-weight="750" fill="#f1f7ff">Hordozható telepítő</text>
+  <text x="157" y="86" font-family="system-ui,sans-serif" font-size="9" fill="#8fa8ba">Pendrive-ra, külső SSD-re vagy kiválasztott mappába telepítés.</text>
+  <g transform="translate(165 104)">
+    <rect width="588" height="276" rx="12" fill="#07131f" fill-opacity=".96" stroke="#35e7f7" stroke-width="1.4"/>
+    <text x="16" y="25" font-family="system-ui,sans-serif" font-size="15" font-weight="750" fill="#ecf6ff">Kompatibilis / hordozható telepítő</text>
+    <rect x="16" y="39" width="270" height="30" rx="7" fill="#0c1a28" stroke="#315066"/><text x="151" y="58" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#bdd0dc">Csak aktuális rendszerhez</text>
+    <rect x="292" y="39" width="222" height="30" rx="7" fill="url(#cyan)" filter="url(#glow)"/><text x="403" y="58" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" font-weight="800" fill="#041219">Teljes cross-platform csomag</text>
+    <rect x="520" y="39" width="52" height="30" rx="7" fill="#0c1a28" stroke="#315066"/><text x="546" y="58" text-anchor="middle" font-family="system-ui,sans-serif" font-size="8" fill="#bdd0dc">Bezárás</text>
+    <rect x="16" y="78" width="556" height="28" rx="6" fill="#091723" stroke="#29465b"/><text x="28" y="96" font-family="ui-monospace,monospace" font-size="8" fill="#c9d8e2">/tmp/Applications/FormatX</text>
+    <g font-family="system-ui,sans-serif" font-size="8" font-weight="650" fill="#d6e5ed">
+      <rect x="16" y="114" width="172" height="28" rx="6" fill="#0b1a27" stroke="#29465b"/><text x="102" y="132" text-anchor="middle">Mappa választása</text>
+      <rect x="195" y="114" width="172" height="28" rx="6" fill="#0b1a27" stroke="#29465b"/><text x="281" y="132" text-anchor="middle">Státusz frissítés</text>
+      <rect x="374" y="114" width="198" height="28" rx="6" fill="#0b1a27" stroke="#29465b"/><text x="473" y="132" text-anchor="middle">Célhely ellenőrzése</text>
+    </g>
+    <rect x="16" y="151" width="215" height="31" rx="6" fill="url(#cyan)"/><text x="123" y="171" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" font-weight="800" fill="#041219">Telepítés indítása</text>
+    <rect x="238" y="151" width="334" height="31" rx="6" fill="#0b1a27" stroke="#29465b"/><text x="405" y="171" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#a9bdca">Telepített csomag megnyitása</text>
+    <g font-family="system-ui,sans-serif" font-size="8.5" fill="#d9e8ef">
+      <rect x="20" y="194" width="12" height="12" rx="3" fill="#24e8ff"/><path d="m23 200 3 3 5-7" fill="none" stroke="#04202a" stroke-width="1.8"/><text x="40" y="204">Linux indítófájlt is készítsen</text>
+      <rect x="220" y="194" width="12" height="12" rx="3" fill="#24e8ff"/><path d="m223 200 3 3 5-7" fill="none" stroke="#04202a" stroke-width="1.8"/><text x="240" y="204">Windows EXE indítót is készítsen</text>
+      <rect x="430" y="194" width="12" height="12" rx="3" fill="#24e8ff"/><path d="m433 200 3 3 5-7" fill="none" stroke="#04202a" stroke-width="1.8"/><text x="450" y="204">macOS indítófájlt is készítsen</text>
+      <rect x="20" y="218" width="12" height="12" rx="3" fill="#24e8ff"/><path d="m23 224 3 3 5-7" fill="none" stroke="#04202a" stroke-width="1.8"/><text x="40" y="228">Indító kihelyezése az alkalmazásmenübe</text>
+      <rect x="20" y="242" width="12" height="12" rx="3" fill="#24e8ff"/><path d="m23 248 3 3 5-7" fill="none" stroke="#04202a" stroke-width="1.8"/><text x="40" y="252">Megerősítem, hogy értem a műveletet</text>
+    </g>
+    <rect x="245" y="235" width="327" height="17" rx="4" fill="#0b1a27"/><rect x="245" y="235" width="201" height="17" rx="4" fill="#173f50"/><text x="408" y="247" text-anchor="middle" font-family="ui-monospace,monospace" font-size="7" fill="#aeefff">Cross-platform csomag · Linux · Windows · macOS</text>
+  </g>
+  <rect x="151" y="397" width="612" height="2" fill="#24e8ff" opacity=".7"/>
+</svg>
