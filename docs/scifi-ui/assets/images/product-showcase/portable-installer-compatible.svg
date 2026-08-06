@@ -50,4 +50,5 @@
     <rect x="245" y="235" width="327" height="17" rx="4" fill="#0b1a27"/><rect x="245" y="235" width="201" height="17" rx="4" fill="#173f50"/><text x="408" y="247" text-anchor="middle" font-family="ui-monospace,monospace" font-size="7" fill="#aeefff">Cross-platform csomag · Linux · Windows · macOS</text>
   </g>
   <rect x="151" y="397" width="612" height="2" fill="#24e8ff" opacity=".7"/>
+  <!-- production-deploy: feedback-responsive-matrix-2026-08-06 -->
 </svg>
