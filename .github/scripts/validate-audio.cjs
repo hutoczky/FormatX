@@ -34,6 +34,40 @@ async function clearIntro(page) {
   });
 }
 
+async function activationSnapshot(page) {
+  return page.evaluate(() => {
+    const root = document.documentElement;
+    const button = document.querySelector('.fx-three-sound');
+    return {
+      owner: root.dataset.fxAudioOwner || '',
+      state: root.dataset.fxAudioState || '',
+      level: root.dataset.fxAudioLevel || '',
+      context: root.dataset.fxAudioContext || '',
+      output: root.dataset.fxAudioOutput || '',
+      music: root.dataset.fxAudioMusic || '',
+      fallback: root.dataset.fxAudioFallback || '',
+      error: root.dataset.fxAudioError || '',
+      buttonOwner: button?.dataset.fxAudioOwner || '',
+      buttonState: button?.dataset.fxAudioState || '',
+      pressed: button?.getAttribute('aria-pressed') || '',
+      label: button?.querySelector('span')?.textContent || '',
+      connected: Boolean(button?.isConnected),
+      buttonCount: document.querySelectorAll('.fx-three-sound').length,
+      nextgen: root.dataset.fxNextgenControls || '',
+    };
+  });
+}
+
+async function waitForAudioOn(page, name) {
+  const ready = await page.waitForFunction(
+    () => document.documentElement.dataset.fxAudioState === 'on',
+    null,
+    { timeout: 15000 }
+  ).then(() => true).catch(() => false);
+  if (ready) return;
+  throw new Error(name + ': professional score did not enter ON state: ' + JSON.stringify(await activationSnapshot(page)));
+}
+
 async function runCase(browser, name, contextOptions) {
   const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
@@ -58,7 +92,7 @@ async function runCase(browser, name, contextOptions) {
 
   if (contextOptions.isMobile) await button.evaluate(node => node.click());
   else await button.click({ force: true });
-  await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'on', null, { timeout: 15000 });
+  await waitForAudioOn(page, name);
   await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 15000 });
   await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 15000 });
   await page.waitForFunction(() => {
