@@ -2,8 +2,8 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxReleaseMetadata === 'ready-v5') return;
-  ROOT.dataset.fxReleaseMetadata = 'loading-v5';
+  if (ROOT.dataset.fxReleaseMetadata === 'ready-v6') return;
+  ROOT.dataset.fxReleaseMetadata = 'loading-v6';
 
   const RELEASE_URL = '/scifi-ui/data/current-release.json';
   const FALLBACK = Object.freeze({
@@ -39,27 +39,25 @@
   const copy = () => FALLBACK[language()];
   const safeText = value => typeof value === 'string' ? value.trim() : '';
 
-  function isAllowedDownloadUrl(value) {
+  function firstPartyUrl(value) {
     try {
       const url = new URL(value, location.origin);
-      if (url.origin === location.origin) return true;
-      return url.protocol === 'https:'
-        && url.hostname === 'github.com'
-        && url.pathname.startsWith('/hutoczky/FormatX-Updates/releases/download/');
+      return url.origin === location.origin ? url : null;
     } catch (_) {
-      return false;
+      return null;
     }
   }
 
+  function isAllowedDownloadUrl(value) {
+    const url = firstPartyUrl(value);
+    if (!url) return false;
+    return ['/download/multiplatform', '/download/android', '/download/android-native-beta'].includes(url.pathname)
+      || url.pathname.startsWith('/scifi-ui/downloads/');
+  }
+
   function isAllowedReleaseUrl(value) {
-    try {
-      const url = new URL(value, location.origin);
-      return url.protocol === 'https:'
-        && url.hostname === 'github.com'
-        && url.pathname.startsWith('/hutoczky/FormatX-Updates/releases/');
-    } catch (_) {
-      return false;
-    }
+    const url = firstPartyUrl(value);
+    return Boolean(url && url.pathname.startsWith('/scifi-ui/'));
   }
 
   function releaseDate(value = state.release?.published_at) {
@@ -89,14 +87,9 @@
 
   function packageAsset() {
     if (!state.available) return null;
-    const asset = state.release?.channels?.multiplatform
-      || state.release?.channels?.windows;
+    const asset = state.release?.channels?.multiplatform;
     if (!asset || asset.available !== true || !isAllowedDownloadUrl(asset.download_url)) return null;
     return asset;
-  }
-
-  function packageLabel() {
-    return copy().package;
   }
 
   function integrityLabel() {
@@ -137,7 +130,7 @@
       || '';
     if (defaultDescription) link.dataset.releaseDescription = defaultDescription;
 
-    labelTarget.textContent = packageLabel();
+    labelTarget.textContent = copy().package;
     link.dataset.releaseState = asset ? 'available' : 'metadata-unavailable';
     link.dataset.releaseChannel = 'multiplatform';
     link.removeAttribute('download');
@@ -146,12 +139,9 @@
       link.href = asset.download_url;
       link.removeAttribute('aria-disabled');
       link.classList.remove('is-disabled', 'is-metadata-fallback');
-      if (link.dataset.releaseDescription) {
-        link.setAttribute('aria-describedby', link.dataset.releaseDescription);
-      } else {
-        link.removeAttribute('aria-describedby');
-      }
-      link.title = packageLabel();
+      if (link.dataset.releaseDescription) link.setAttribute('aria-describedby', link.dataset.releaseDescription);
+      else link.removeAttribute('aria-describedby');
+      link.title = copy().package;
     } else {
       link.href = '/scifi-ui/downloads/';
       link.setAttribute('aria-describedby', ensureFallbackNotice().id);
@@ -198,7 +188,7 @@
     ).forEach(updateDownloadLink);
     updateEvidenceLinks();
     ensureFallbackNotice();
-    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v5' : 'fallback-v5';
+    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v6' : 'fallback-v6';
     ROOT.dataset.fxReleaseSchema = String(state.release?.schema_version || 0);
     ROOT.__FORMATX_RELEASE_METADATA__ = Object.freeze({ ...state });
     dispatchEvent(new CustomEvent('formatx:releasemetadataready', { detail: ROOT.__FORMATX_RELEASE_METADATA__ }));
@@ -209,7 +199,7 @@
       const response = await fetch(RELEASE_URL, { cache: 'no-store', credentials: 'same-origin' });
       if (!response.ok) throw new Error(`${RELEASE_URL}: ${response.status}`);
       const release = await response.json();
-      const official = release?.source === 'github_published_release'
+      const official = release?.source === 'formatx_release_service'
         && isAllowedReleaseUrl(release.release_url)
         && release.prerelease !== true;
       state = {
