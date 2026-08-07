@@ -14,6 +14,7 @@ const menu = read('docs/scifi-ui/scripts/organism-menu-controller.js');
 const consoleState = read('docs/scifi-ui/scripts/organism-console-state.js');
 const language = read('docs/scifi-ui/scripts/single-language-toggle.js');
 const infinite = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
+const legacyLoopFix = read('docs/scifi-ui/scripts/formatx-infinite-loop-fix.js');
 const loopStyle = read('docs/scifi-ui/styles/formatx-seamless-loop.css');
 const downloads = read('docs/scifi-ui/downloads/index.html');
 const downloadStyle = read('docs/scifi-ui/styles/downloads-page.css');
@@ -43,23 +44,31 @@ assert.ok(includesAll(language, ["toggle.className = 'fx-language-toggle'", 'loc
 
 assert.ok(includesAll(infinite, [
   "const VERSION = 'seamless-v6'",
+  "const REVISION = 'ratio-v4'",
   "root.dataset.fxInfiniteInput = 'native'",
-  "root.dataset.fxInfiniteCloneMode = 'none'",
-  "root.dataset.fxAutomaticLoop = 'disabled'",
-  "root.dataset.fxScrollJumpGuard = 'native-position-v1'",
-  'automaticLoop: false',
-  'visualBridge: false',
-  'clonedHeroOnly: false',
+  "root.dataset.fxInfiniteCloneMode = 'hero-visual-bridge'",
+  "root.dataset.fxAutomaticLoop = 'enabled'",
+  "root.dataset.fxScrollJumpGuard = 'visual-ratio-v4'",
+  'automaticLoop: true',
+  'visualBridge: true',
+  'clonedHeroOnly: true',
   'clonedContent: false',
-  'nativePositionOnly: true',
+  'ratioMatchedLanding: true',
+  'frameStableLanding: true',
+  'inputInterception: false',
   'jumpFree: true',
   "addEventListener('scroll', onScroll, { passive: true })",
-  'removeLegacyLoopArtifacts',
-]), 'native continuous scroll controller contract missing');
-assert.ok(!infinite.includes('window.scrollTo(') && !infinite.includes('scrollIntoView('), 'scroll runtime must never move the page automatically');
-assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(infinite), 'scroll runtime must not capture wheel or touch input');
-assert.ok(!infinite.includes('cloneNode(true)') && !infinite.includes('document.body.cloneNode') && !infinite.includes('document.documentElement.cloneNode'), 'scroll runtime must not clone page content');
-assert.ok(includesAll(loopStyle, ["scroll-snap-type: none !important", "scroll-snap-align: none !important"]), 'native scroll must disable section snapping');
+  'cloneNode(true)',
+  'hero-visual-bridge',
+  'repairReleasePanel',
+]), 'seamless cyclic scroll controller contract missing');
+assert.ok(infinite.includes('window.scrollTo({ top: target'), 'seamless loop boundary landing missing');
+assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(infinite), 'seamless scroll must not capture wheel or touch input');
+assert.ok(!infinite.includes("addEventListener('wheel'") && !infinite.includes("addEventListener('touchmove'"), 'wheel/touch interception returned');
+assert.ok(!infinite.includes('document.body.cloneNode') && !infinite.includes('document.documentElement.cloneNode'), 'scroll runtime must never clone the full page');
+assert.ok(includesAll(loopStyle, ["scroll-snap-type: none !important", "scroll-snap-align: none !important", '.fx-loop-bridge']), 'seamless scroll styling or snap protection missing');
+assert.ok(!legacyLoopFix.includes("addEventListener('scroll'") && !legacyLoopFix.includes('scrollTo('), 'retired legacy loop controller still moves the page');
+assert.ok(legacyLoopFix.includes("fxLegacyScrollController = 'disabled'"), 'retired legacy loop controller marker missing');
 assert.ok(includesAll(infinite, ['fx-release-download-hub', 'repairReleasePanel', 'Licencfeltételek']), 'release/footer repair missing');
 assert.ok(includesAll(infinite, ['TELJES VERZIÓ', '5 napos próbalicenc']), 'full release and five-day trial copy missing from release hub');
 
@@ -148,4 +157,4 @@ assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 assert.ok(deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'), 'custom-domain smoke checks missing');
 
-console.log('PASS: FormatX native continuous scrolling has no automatic jumps; deferred rendering, feedback, downloads, responsive UI and deployment gates remain present.');
+console.log('PASS: FormatX seamless cyclic scrolling, deferred rendering, feedback, downloads, responsive UI and deployment gates remain present.');
