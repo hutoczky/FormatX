@@ -1,0 +1,92 @@
+name: Validate Android release integrity
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk'
+      - 'docs/scifi-ui/data/current-release.json'
+      - '.github/workflows/validate-android-release-integrity.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk'
+      - 'docs/scifi-ui/data/current-release.json'
+      - '.github/workflows/validate-android-release-integrity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-android-integrity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Compute official Android APK SHA-256
+        id: digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk='docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk'
+          test -s "$apk"
+          sha="$(sha256sum "$apk" | awk '{print $1}')"
+          printf 'sha256:%s\n' "$sha" | tee android-sha256.txt
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Compare with canonical release metadata when published
+        env:
+          ACTUAL_SHA: ${{ steps.digest.outputs.sha }}
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const release = JSON.parse(fs.readFileSync('docs/scifi-ui/data/current-release.json', 'utf8'));
+          const expected = release?.channels?.android?.digest;
+          const actual = `sha256:${process.env.ACTUAL_SHA}`;
+          if (expected == null || expected === '') {
+            console.log(`Android canonical digest not published yet. Computed: ${actual}`);
+            process.exit(0);
+          }
+          if (expected.toLowerCase() !== actual.toLowerCase()) {
+            console.error(`Android digest mismatch: expected ${expected}, actual ${actual}`);
+            process.exit(1);
+          }
+          console.log(`Android digest verified: ${actual}`);
+          NODE
+
+      - name: Upload computed digest
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-android-release-digest
+          path: android-sha256.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish Android integrity status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Official Android APK SHA-256 computed and metadata check passed'
+          else
+            state='failure'
+            description='FormatX Android release integrity validation failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX Android release integrity' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
