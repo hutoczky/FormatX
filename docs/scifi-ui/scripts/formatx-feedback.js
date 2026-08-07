@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxFeedback === 'v2') return;
-  root.dataset.fxFeedback = 'v2';
+  if (root.dataset.fxFeedback === 'v3') return;
+  root.dataset.fxFeedback = 'v3';
 
   const FEEDBACK_SUMMARY_URL = '/api/feedback/summary';
   const FEEDBACK_SUBMIT_URL = '/api/feedback';
@@ -22,6 +22,11 @@
       timeout: 'A visszajelző szolgáltatás nem válaszolt időben. Próbáld meg újra.',
       selectAll: 'Minden értékelési kategóriát tölts ki 1 és 5 között.',
       privacy: 'Az adatkezelési tájékoztató elfogadása kötelező.',
+      publicTitle: 'Jóváhagyott hozzászólások',
+      publicNote: 'Csak moderált, kifejezett közzétételi engedéllyel beküldött vélemény jelenhet meg itt.',
+      publicEmpty: 'Még nincs közzétételre engedélyezett szöveges hozzászólás.',
+      anonymous: 'Névtelen felhasználó',
+      approved: 'jóváhagyva',
     },
     en: {
       rating: 'rating',
@@ -34,11 +39,19 @@
       timeout: 'The feedback service did not respond in time. Please try again.',
       selectAll: 'Rate every category from 1 to 5.',
       privacy: 'Accepting the privacy notice is required.',
+      publicTitle: 'Approved comments',
+      publicNote: 'Only moderated reviews submitted with explicit publication permission can appear here.',
+      publicEmpty: 'No text comment has been approved for publication yet.',
+      anonymous: 'Anonymous user',
+      approved: 'approved',
     },
   };
 
   const language = () => root.lang === 'en' ? 'en' : 'hu';
   const copy = () => COPY[language()];
+  let feedbackActivated = false;
+  let feedbackObserver = null;
+  let latestSummary = null;
 
   function syncBilingual(scope) {
     if (!scope) return;
@@ -71,15 +84,11 @@
       if (image.dataset.fxPortableInstallerPatched === 'true') return;
       image.dataset.fxPortableInstallerPatched = 'true';
       image.dataset.fxPortableInstaller = 'compatible';
+      image.loading = 'lazy';
+      image.decoding = 'async';
       image.src = PORTABLE_INSTALLER_ASSET;
     });
   }
-
-  const showcaseObserver = new MutationObserver(entries => {
-    entries.forEach(entry => entry.addedNodes.forEach(node => {
-      if (node.nodeType === Node.ELEMENT_NODE) patchPortableInstallerImages(node);
-    }));
-  });
 
   async function fetchJson(url, options = {}) {
     const controller = new AbortController();
@@ -163,27 +172,127 @@
     });
   }
 
-  async function loadSummary(section) {
+  function ensurePublicReviewsHost(section) {
+    let host = section.querySelector('[data-fx-feedback-public]');
+    if (host) return host;
+
+    host = document.createElement('section');
+    host.className = 'fx-feedback-public';
+    host.dataset.fxFeedbackPublic = 'true';
+    host.setAttribute('aria-labelledby', 'fx-feedback-public-title');
+
+    const head = document.createElement('div');
+    head.className = 'fx-feedback-public-head';
+    const title = document.createElement('h3');
+    title.id = 'fx-feedback-public-title';
+    title.dataset.hu = COPY.hu.publicTitle;
+    title.dataset.en = COPY.en.publicTitle;
+    const note = document.createElement('p');
+    note.dataset.hu = COPY.hu.publicNote;
+    note.dataset.en = COPY.en.publicNote;
+    head.append(title, note);
+
+    const list = document.createElement('div');
+    list.className = 'fx-feedback-public-grid';
+    list.dataset.fxFeedbackPublicList = 'true';
+    list.setAttribute('aria-live', 'polite');
+
+    host.append(head, list);
+    const form = section.querySelector('[data-fx-feedback-form]');
+    if (form) form.before(host);
+    else section.append(host);
+    syncBilingual(host);
+    return host;
+  }
+
+  function reviewDate(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return new Intl.DateTimeFormat(language() === 'en' ? 'en-GB' : 'hu-HU', {
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(date);
+  }
+
+  function renderPublicReviews(section, reviews) {
+    const host = ensurePublicReviewsHost(section);
+    syncBilingual(host);
+    const list = host.querySelector('[data-fx-feedback-public-list]');
+    if (!list) return;
+    list.replaceChildren();
+
+    if (!Array.isArray(reviews) || reviews.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'fx-feedback-public-empty';
+      empty.textContent = copy().publicEmpty;
+      list.append(empty);
+      host.dataset.state = 'empty';
+      return;
+    }
+
+    reviews.slice(0, 6).forEach(review => {
+      const article = document.createElement('article');
+      article.className = 'fx-feedback-public-card';
+
+      const rating = Math.max(1, Math.min(5, Number(review.overall || 0)));
+      const stars = document.createElement('div');
+      stars.className = 'fx-feedback-public-stars';
+      stars.textContent = `${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}`;
+      stars.setAttribute('aria-label', `${rating} / 5`);
+
+      const quote = document.createElement('blockquote');
+      const paragraph = document.createElement('p');
+      paragraph.textContent = String(review.comment || '').trim();
+      quote.append(paragraph);
+
+      const footer = document.createElement('footer');
+      const name = document.createElement('strong');
+      name.textContent = String(review.display_name || '').trim() || copy().anonymous;
+      const meta = document.createElement('span');
+      const date = reviewDate(review.approved_at);
+      meta.textContent = date ? `${copy().approved}: ${date}` : copy().approved;
+      footer.append(name, meta);
+
+      article.append(stars, quote, footer);
+      list.append(article);
+    });
+    host.dataset.state = 'published';
+  }
+
+  function renderSummary(section, data) {
+    const output = section.querySelector('[data-fx-feedback-summary]');
+    if (!output) return;
+    if (!data?.count || !data?.average) {
+      output.textContent = copy().empty;
+      output.dataset.state = 'empty';
+    } else {
+      output.textContent = copy().published(Number(data.average.overall), Number(data.count));
+      output.dataset.state = 'published';
+      output.dataset.count = String(data.count);
+      output.dataset.average = String(data.average.overall);
+    }
+    renderPublicReviews(section, data?.reviews || []);
+  }
+
+  async function loadSummary(section, force = false) {
     const output = section.querySelector('[data-fx-feedback-summary]');
     if (!output || output.dataset.loading === 'true') return;
+    if (latestSummary && !force) {
+      renderSummary(section, latestSummary);
+      return;
+    }
     output.dataset.loading = 'true';
     output.textContent = copy().loading;
     output.dataset.state = 'loading';
     try {
       const data = await fetchJson(FEEDBACK_SUMMARY_URL);
-      if (!data.count || !data.average) {
-        output.textContent = copy().empty;
-        output.dataset.state = 'empty';
-        return;
-      }
-      output.textContent = copy().published(Number(data.average.overall), Number(data.count));
-      output.dataset.state = 'published';
-      output.dataset.count = String(data.count);
-      output.dataset.average = String(data.average.overall);
+      latestSummary = data;
+      renderSummary(section, data);
     } catch (error) {
       console.warn('FormatX feedback summary unavailable', error);
       output.textContent = copy().empty;
       output.dataset.state = 'unavailable';
+      renderPublicReviews(section, []);
     } finally {
       delete output.dataset.loading;
     }
@@ -242,7 +351,7 @@
       status.textContent = copy().success;
       status.dataset.state = 'success';
       form.dataset.submitted = 'true';
-      setTimeout(() => loadSummary(document.getElementById('user-feedback')), 500);
+      setTimeout(() => loadSummary(document.getElementById('user-feedback'), true), 500);
     } catch (error) {
       console.warn('FormatX feedback submission failed', error);
       status.textContent = error && error.message ? error.message : copy().error;
@@ -263,6 +372,36 @@
     setTimeout(() => document.querySelector('[data-fx-live-os-launcher]')?.click(), 450);
   }
 
+  function activateFeedbackSection(section) {
+    if (!section || feedbackActivated) return;
+    feedbackActivated = true;
+    feedbackObserver?.disconnect();
+    feedbackObserver = null;
+    section.querySelectorAll('[data-rating-group]').forEach(buildRatingGroup);
+    syncBilingual(section);
+    ensurePublicReviewsHost(section);
+    const form = section.querySelector('[data-fx-feedback-form]');
+    if (form && form.dataset.bound !== 'true') {
+      form.dataset.bound = 'true';
+      form.addEventListener('submit', submitFeedback);
+    }
+    loadSummary(section);
+    root.dataset.fxFeedbackState = 'ready-visible';
+  }
+
+  function prepareFeedbackSection(section) {
+    if (!section || feedbackActivated || feedbackObserver) return;
+    if (!('IntersectionObserver' in window)) {
+      activateFeedbackSection(section);
+      return;
+    }
+    root.dataset.fxFeedbackState = 'deferred';
+    feedbackObserver = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) activateFeedbackSection(section);
+    }, { rootMargin: '800px 0px', threshold: 0 });
+    feedbackObserver.observe(section);
+  }
+
   function initialise() {
     patchPortableInstallerImages();
     document.querySelectorAll('[data-fx-live-os-cta]').forEach(button => {
@@ -274,21 +413,15 @@
 
     const section = document.getElementById('user-feedback');
     if (!section) return;
-    section.querySelectorAll('[data-rating-group]').forEach(buildRatingGroup);
     syncBilingual(section);
-    const form = section.querySelector('[data-fx-feedback-form]');
-    if (form && form.dataset.bound !== 'true') {
-      form.dataset.bound = 'true';
-      form.addEventListener('submit', submitFeedback);
-    }
-    loadSummary(section);
-    root.dataset.fxFeedbackState = 'ready';
+    prepareFeedbackSection(section);
   }
 
   addEventListener('formatx:languagechange', () => {
     const section = document.getElementById('user-feedback');
     syncBilingual(section);
     syncLiveOsCtas();
+    if (!feedbackActivated) return;
     document.querySelectorAll('#user-feedback [data-rating-group] legend').forEach(legend => {
       legend.textContent = legend.dataset[language()];
     });
@@ -296,14 +429,14 @@
       const value = label.closest('label').dataset.value;
       label.textContent = `${value} / 5 ${copy().rating}`;
     });
-    if (section) loadSummary(section);
+    if (section && latestSummary) renderSummary(section, latestSummary);
   });
-
-  if (document.body) showcaseObserver.observe(document.body, { childList: true, subtree: true });
-  else addEventListener('DOMContentLoaded', () => showcaseObserver.observe(document.body, { childList: true, subtree: true }), { once: true });
 
   if (document.readyState === 'loading') addEventListener('DOMContentLoaded', initialise, { once: true });
   else initialise();
   ['pageshow', 'formatx:livingready', 'formatx:loop'].forEach(name => addEventListener(name, initialise));
-  addEventListener('pagehide', () => showcaseObserver.disconnect(), { once: true });
+  addEventListener('pagehide', () => {
+    feedbackObserver?.disconnect();
+    feedbackObserver = null;
+  }, { once: true });
 }());
