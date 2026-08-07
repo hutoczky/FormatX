@@ -9,6 +9,7 @@
   let sourceHero = null;
   let transferLockedUntil = 0;
   let scrollFrame = 0;
+  let landingFrame = 0;
   let activityTimer = 0;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
@@ -22,14 +23,14 @@
   root.dataset.fxInfiniteInput = 'native';
   root.dataset.fxScrollActivity = 'idle';
   root.dataset.fxAutomaticLoop = 'enabled';
-  root.dataset.fxScrollJumpGuard = 'visual-match-v2';
+  root.dataset.fxScrollJumpGuard = 'visual-match-v3';
   root.classList.remove('fx-infinite-loop-jump', 'fx-three-loop-transfer', 'fx-precision-wheel');
 
   function ensureStyle() {
     if (document.querySelector('link[data-fx-seamless-loop-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260806-seamless-v6';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260807-seamless-v6-landing-1';
     link.dataset.fxSeamlessLoopStyle = 'true';
     document.head.appendChild(link);
   }
@@ -223,6 +224,35 @@
     root.classList.remove('fx-page-scrolling');
   }
 
+  function landingTarget(relative) {
+    sourceHero = document.querySelector('#main-content > #hero');
+    if (!sourceHero) return null;
+    const bounded = Math.max(0, Math.min(relative, Math.max(0, sourceHero.offsetHeight - 2)));
+    return sourceHero.offsetTop + bounded;
+  }
+
+  function landAt(relative) {
+    const target = landingTarget(relative);
+    if (target == null) return;
+    window.scrollTo({ top: target, left: 0, behavior: 'auto' });
+    root.dataset.fxLoopLanding = String(Math.round(target));
+  }
+
+  function finishLanding(relative) {
+    cancelAnimationFrame(landingFrame);
+    landAt(relative);
+    landingFrame = requestAnimationFrame(() => {
+      landAt(relative);
+      landingFrame = requestAnimationFrame(() => {
+        landAt(relative);
+        root.classList.remove('fx-seamless-loop-transfer');
+        root.dataset.fxInfiniteInput = 'native';
+        root.dataset.fxLoopLandingState = 'settled';
+        landingFrame = 0;
+      });
+    });
+  }
+
   function transferIfNeeded() {
     scrollFrame = 0;
     root.dataset.fxScrollActivity = 'scrolling';
@@ -239,21 +269,22 @@
     if (scrollY < threshold || scrollY > documentEnd() + 2) return;
 
     const relative = Math.max(0, Math.min(scrollY - bridgeTop, Math.max(0, sourceHero.offsetHeight - 2)));
-    const target = sourceHero.offsetTop + relative;
     transferLockedUntil = Date.now() + LOOP_GUARD_MS;
     root.classList.add('fx-seamless-loop-transfer');
     root.dataset.fxInfiniteInput = 'visual-transfer';
+    root.dataset.fxLoopLandingState = 'stabilising';
     loopCount += 1;
     root.dataset.fxLoopCount = String(loopCount);
     root.dataset.fxLoopSource = 'visual-bridge';
-    window.scrollTo(0, target);
+
+    // Notify the rest of the organism first. Some listeners normalise panel/core
+    // state synchronously or on the next animation frame and can change layout.
+    // The landing is therefore applied after that notification and reaffirmed
+    // for two frames, while scroll behaviour remains forced to auto.
     dispatchEvent(new CustomEvent('formatx:loop', {
       detail: { count: loopCount, source: 'visual-bridge', relative }
     }));
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      root.classList.remove('fx-seamless-loop-transfer');
-      root.dataset.fxInfiniteInput = 'native';
-    }));
+    finishLanding(relative);
   }
 
   function onScroll() {
@@ -296,6 +327,7 @@
       clonedContent: false,
       clonedHeroOnly: true,
       reinitialisedRenderer: false,
+      frameStableLanding: true,
       jumpFree: true
     });
     root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
@@ -322,6 +354,7 @@
 
   addEventListener('pagehide', () => {
     cancelAnimationFrame(scrollFrame);
+    cancelAnimationFrame(landingFrame);
     clearTimeout(activityTimer);
     clearTimeout(repairTimer);
   }, { once: true });
