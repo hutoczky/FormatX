@@ -49,7 +49,10 @@ for (const marker of [
 }
 assert.match(matrix, /horizontal document overflow/, 'matrix must detect horizontal overflow');
 assert.match(matrix, /naturalWidth > 0/, 'matrix must detect broken product images');
-assert.match(matrix, /portable-installer-compatible\.svg/, 'matrix must verify compatible portable installer asset');
+assert.ok(
+  matrix.includes('portable-installer-compatible') && matrix.includes('old portable installer image still active'),
+  'matrix must verify compatible portable installer asset'
+);
 assert.match(matrix, /ratingColumns/, 'matrix must verify feedback rating layout');
 
 assert.match(schema, /PRAGMA table_info\(user_feedback\)/, 'D1 feedback schema verification is missing');
