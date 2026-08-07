@@ -178,10 +178,13 @@ jobs:
           grep -Fq "DOMContentLoaded',start" docs/scifi-ui/scripts/formatx-event-horizon.js
           grep -Fq 'bfcache-restore' docs/scifi-ui/scripts/formatx-event-horizon.js
           grep -Fq 'formatx:intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'public_beta' docs/scifi-ui/data/platform-status.json
+          grep -Fq '"status": "full_release"' docs/scifi-ui/data/platform-status.json
+          grep -Fq '"trial_days": 5' docs/scifi-ui/data/platform-status.json
           grep -Fq '"id": "linux-bazzite"' docs/scifi-ui/data/platform-status.json
           grep -Fq '"public_package": "multiplatform"' docs/scifi-ui/data/platform-status.json
           grep -Fq '"download_channel": "multiplatform"' docs/scifi-ui/data/public-platform-contract.json
+          grep -Fq '"release_maturity": "full_release"' docs/scifi-ui/data/public-platform-contract.json
+          grep -Fq '"trial_days": 5' docs/scifi-ui/data/public-platform-contract.json
           grep -Fq 'data-release-download="multiplatform"' docs/scifi-ui/index.html
           ! grep -Fq '92.00' docs/scifi-ui/index.html
           grep -Fq 'fx-organism-master-toggle' docs/scifi-ui/scripts/organism-voice.js
@@ -201,12 +204,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'boundary-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'ready-v4' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "const VERSION = 'seamless-v6'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "fxInfiniteCloneMode = 'visual-bridge'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'clonedHeroOnly: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'reinitialisedRenderer: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'jumpFree: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'cloneNode(true)' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'neutraliseClone' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'data-fx-mobile-core-visible="false"' docs/scifi-ui/styles/formatx-mobile-readability.css
           grep -Fq -- '--fx-mobile-dock-height: 54px' docs/scifi-ui/styles/formatx-mobile-unified.css
           grep -Fq 'max-height: 820px' docs/scifi-ui/styles/formatx-desktop-unified.css
-          ! grep -Fq 'cloneNode' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq "addEventListener('click'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
