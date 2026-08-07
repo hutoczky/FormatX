@@ -2,8 +2,8 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxContentStandard === 'ready-v1') return;
-  ROOT.dataset.fxContentStandard = 'loading-v1';
+  if (ROOT.dataset.fxContentStandard === 'ready-v2') return;
+  ROOT.dataset.fxContentStandard = 'loading-v2';
 
   const URLS = Object.freeze({
     status: '/scifi-ui/data/platform-status.json',
@@ -97,8 +97,8 @@
       span.dataset.releaseDownloadLabel = 'true';
       setBilingual(
         span,
-        'Multiplatform nyilvános béta letöltése',
-        'Download multiplatform public beta'
+        'Teljes multiplatform verzió letöltése',
+        'Download full multiplatform version'
       );
     }
 
@@ -107,8 +107,8 @@
       const span = android.querySelector('span') || android;
       setBilingual(
         span,
-        'Android nyilvános béta letöltése',
-        'Download Android public beta'
+        'Android teljes verzió letöltése',
+        'Download Android full version'
       );
     }
   }
@@ -149,7 +149,7 @@
       labels[0].querySelector('b').textContent = 'METHOD STEP';
     }
     if (labels[1]) {
-      labels[1].querySelector('span').textContent = 'BETA';
+      labels[1].querySelector('span').textContent = 'FULL';
       labels[1].querySelector('b').textContent = 'PUBLIC RELEASE';
       labels[1].dataset.releaseTelemetry = 'true';
     }
@@ -163,7 +163,7 @@
 
   function updateReleaseTelemetry() {
     const target = document.querySelector('#hero .hero-label[data-release-telemetry] span');
-    if (target) target.textContent = 'BETA';
+    if (target) target.textContent = 'FULL';
   }
 
   function ensureTrustStrip() {
@@ -282,7 +282,7 @@
     const strip = document.querySelector('.fx-trust-strip');
     if (strip) translateTrustStrip(strip);
     ensureIndependentOrigin();
-    ROOT.dataset.fxContentStandard = 'ready-v1';
+    ROOT.dataset.fxContentStandard = 'ready-v2';
   }
 
   async function init() {
