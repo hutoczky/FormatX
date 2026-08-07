@@ -2,19 +2,19 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxLanguageCopyStability === 'ready-v1') return;
-  root.dataset.fxLanguageCopyStability = 'loading-v1';
+  if (root.dataset.fxLanguageCopyStability === 'ready-v2') return;
+  root.dataset.fxLanguageCopyStability = 'loading-v2';
 
   const COPY = Object.freeze({
     hu: {
       nav: ['Működés', 'Modulok', 'Licenc és árak', 'Biztonság', 'Letöltés'],
       trial: 'napos próbalicenc',
-      download: 'Multiplatform nyilvános béta letöltése'
+      download: 'Teljes multiplatform verzió letöltése'
     },
     en: {
       nav: ['Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads'],
       trial: 'day trial licence',
-      download: 'Download multiplatform public beta'
+      download: 'Download full multiplatform version'
     }
   });
 
@@ -57,7 +57,7 @@
       }
 
       root.dataset.fxLanguageCopy = language();
-      root.dataset.fxLanguageCopyStability = 'ready-v1';
+      root.dataset.fxLanguageCopyStability = 'ready-v2';
     } finally {
       rendering = false;
     }
