@@ -25,5 +25,9 @@
     "live_mobile_hero",
     "android_release_integrity",
     "production_deploy_smoke"
-  ]
+  ],
+  "performance_contract": {
+    "intro_audit_fast_path": "no_animation_tree_walk",
+    "lighthouse_gate": "passed_before_final_deploy"
+  }
 }
