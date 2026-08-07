@@ -168,7 +168,8 @@
     backdrop-filter: blur(20px) saturate(125%) !important;
   }
 
-  /* Thought on the right; DNA and sound on the left, all above the action dock. */
+  /* Thought remains lower-right and DNA lower-left. Music owns a dedicated
+     upper-right slot below the fixed header so all three remain clickable. */
   html body .fx-organism-dialogue {
     top: auto !important;
     right: max(14px, env(safe-area-inset-right)) !important;
@@ -196,12 +197,12 @@
   }
 
   html body .fx-three-sound {
-    top: auto !important;
-    right: auto !important;
-    bottom: max(96px, calc(env(safe-area-inset-bottom) + 86px)) !important;
-    left: max(82px, calc(env(safe-area-inset-left) + 70px)) !important;
-    transform: scale(.82) !important;
-    transform-origin: left bottom !important;
+    top: 138px !important;
+    right: max(10px, env(safe-area-inset-right)) !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    transform-origin: center !important;
   }
 
   html body .fx-organism-dialogue.is-open ~ .fx-genome-launcher,
