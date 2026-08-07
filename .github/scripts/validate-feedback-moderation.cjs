@@ -32,13 +32,20 @@ assert.match(api, /status === 'approved' \? now : null/, 'approved timestamp han
 assert.match(api, /DELETE FROM user_feedback/, 'permanent deletion workflow missing');
 assert.match(api, /origin_not_allowed/, 'same-origin mutation protection missing');
 assert.doesNotMatch(api, /contact_email[^\n]+feedbackSummary/, 'public summary must not expose email');
-assert.doesNotMatch(api, /SCHEMA_SQL|ensureFeedbackSchemaCompatibility|ensureFeedbackSchema\(/, 'normal feedback API path must not execute schema preflight or duplicate DDL');
+assert.doesNotMatch(api, /SCHEMA_SQL|ensureFeedbackSchemaCompatibility|ensureFeedbackSchema\(/, 'normal feedback API path must not execute blanket schema preflight or duplicate DDL');
+assert.match(api, /import \{ createFeedbackTableIfMissing \} from '.\/feedback-schema\.js'/, 'on-demand table bootstrap import missing');
+assert.match(api, /async function runWithFeedbackTable/, 'missing-table retry wrapper missing');
+assert.match(api, /classifyFeedbackError\(error\) !== 'feedback_table_missing'/, 'bootstrap must be limited to a proven missing-table error');
+assert.match(api, /await createFeedbackTableIfMissing\(database\)/, 'missing table is not bootstrapped on demand');
 assert.match(api, /diagnostic: 'database_binding_unavailable'/, 'D1 binding diagnostic missing');
 assert.match(api, /function classifyFeedbackError/, 'safe D1 failure classification missing');
 assert.match(api, /feedback_table_missing/, 'missing-table diagnostic missing');
 
 assert.match(schema, /PRAGMA table_info\(user_feedback\)/, 'maintenance schema inspection missing');
-assert.match(schema, /SCHEMA_VERSION = '5'/, 'feedback maintenance schema version must be v5');
+assert.match(schema, /SCHEMA_VERSION = '6'/, 'feedback maintenance schema version must be v6');
+assert.match(schema, /export async function createFeedbackTableIfMissing/, 'on-demand feedback table bootstrap missing');
+assert.match(schema, /database\.prepare\(createTableSql\(\)\)\.run\(\)/, 'bootstrap must create the canonical table with a single prepared D1 statement');
+assert.match(schema, /bootstrapPromise/, 'bootstrap race protection missing');
 assert.match(schema, /if \(hasCanonicalColumns\(columns\)\) return;/, 'maintenance read-only fast path missing');
 assert.match(schema, /ALTER TABLE user_feedback ADD COLUMN/, 'non-destructive missing-column migration missing');
 assert.doesNotMatch(schema, /DROP TABLE user_feedback/, 'schema recovery must never drop live feedback data');
@@ -63,4 +70,4 @@ assert.doesNotMatch(script, /innerHTML\s*=/, 'untrusted feedback must not be ren
 assert.match(style, /\.feedback-layout/, 'moderation layout styling missing');
 assert.match(style, /@media\(max-width:/, 'moderation mobile layout missing');
 
-console.log('FormatX feedback validation passed: direct D1 routing, safe diagnostics and protected moderation are intact.');
+console.log('FormatX feedback validation passed: direct D1 routing, on-demand missing-table bootstrap and protected moderation are intact.');
