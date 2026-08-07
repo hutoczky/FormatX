@@ -60,7 +60,7 @@ async function waitPublicState(page, language) {
     const download = document.querySelector('#hero-download span')?.textContent.trim() || '';
     const trial = document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '';
     return document.documentElement.lang === lang
-      && document.documentElement.dataset.fxLanguageCopyStability === 'ready-v1'
+      && document.documentElement.dataset.fxLanguageCopyStability === 'ready-v4'
       && Boolean(document.querySelector('.fx-language-toggle'))
       && downloads.includes(download)
       && trials.includes(trial)
