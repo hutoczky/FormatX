@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "updated": "2026-07-31",
+  "schema_version": 2,
+  "updated": "2026-08-07",
   "severity_labels": {
     "critical": {"hu": "Kritikus", "en": "Critical"},
     "high": {"hu": "Magas", "en": "High"},
@@ -17,58 +17,58 @@
   },
   "items": [
     {
-      "id": "FX-LIMIT-LINUX-PACKAGE",
-      "type": "limitation",
+      "id": "FX-LIMIT-LINUX-EVIDENCE",
+      "type": "evidence_gap",
       "platform": "Linux / Bazzite",
-      "affected_version": null,
+      "affected_version": "current full release",
       "problem": {
-        "hu": "A natív Linux/Bazzite-kiadás aktív fejlesztés alatt áll, ezért jelenleg nincs nyilvános natív csomag.",
-        "en": "The native Linux/Bazzite edition is under active development, so no public native package is currently available."
+        "hu": "A teljes Linux/Bazzite csomag nyilvánosan elérhető, de a hardverenkénti, végponttól végpontig közzétett tesztbizonyíték még nem teljes.",
+        "en": "The full Linux/Bazzite package is publicly available, but published hardware-specific end-to-end test evidence is not yet complete."
       },
-      "severity": "information",
+      "severity": "medium",
       "workaround": {
-        "hu": "A webes technikai előnézet használható a termékkoncepció és a dokumentáció megtekintésére, de nem helyettesít natív meghajtóműveleteket.",
-        "en": "The web technical preview can be used to inspect the product concept and documentation, but it does not replace native drive operations."
+        "hu": "Telepítés előtt ellenőrizd a kiadási digestet. Kritikus meghajtóművelet előtt készíts külön mentést, és ellenőrizd a nyilvános tesztmátrixot. A teljes kiadás nem azonos a bizonyítékokhoz kötött Stable minősítéssel.",
+        "en": "Verify the release digest before installation. Create an independent backup before critical drive operations and review the public test matrix. Full release is not the same as the evidence-gated Stable designation."
       },
-      "fix_status": "planned",
-      "issue_url": null,
-      "last_updated": "2026-07-31"
+      "fix_status": "investigating",
+      "issue_url": "https://github.com/hutoczky/FormatX/issues",
+      "last_updated": "2026-08-07"
     },
     {
       "id": "FX-LIMIT-WEB-NATIVE",
       "type": "limitation",
       "platform": "Web",
-      "affected_version": null,
+      "affected_version": "technical preview",
       "problem": {
         "hu": "A böngészős Organizmus-UI technikai előnézet, és biztonsági okból nem végez natív meghajtóírást, formázást vagy törlést.",
         "en": "The browser Organism UI is a technical preview and, for safety reasons, does not perform native drive writing, formatting or erasure."
       },
       "severity": "information",
       "workaround": {
-        "hu": "Natív művelethez csak olyan kiadást használj, amelyhez a letöltési központ tényleges, ellenőrzött csomagot jelez.",
-        "en": "For native operations, use only an edition for which the download centre confirms an actual verified package."
+        "hu": "Natív művelethez a letöltési központban elérhető, támogatott natív kiadást használd.",
+        "en": "For native operations, use a supported native release available through the download centre."
       },
       "fix_status": "open",
       "issue_url": null,
-      "last_updated": "2026-07-31"
+      "last_updated": "2026-08-07"
     },
     {
       "id": "FX-LIMIT-PUBLIC-EVIDENCE",
       "type": "evidence_gap",
-      "platform": "Windows / Android",
-      "affected_version": null,
+      "platform": "Linux / Bazzite / Windows / Android",
+      "affected_version": "current full release",
       "problem": {
-        "hu": "A nyilvános, hardverenkénti végponttól végpontig tesztbizonyíték még nem teljes.",
-        "en": "Public hardware-specific end-to-end test evidence is not yet complete."
+        "hu": "A nyilvános, hardverenkénti végponttól végpontig tesztbizonyíték még nem teljes minden támogatott natív platformon. Emiatt egyik platform sem teljesíti még a külön Stable bizonyítékkaput.",
+        "en": "Published hardware-specific end-to-end test evidence is not yet complete across every supported native platform. Therefore no platform currently passes the separate Stable evidence gate."
       },
       "severity": "medium",
       "workaround": {
-        "hu": "A kiadást bétaállapotként kezeld, ellenőrizd a csomag hashét, és kritikus művelet előtt készíts külön mentést.",
-        "en": "Treat the release as beta, verify the package digest and create an independent backup before any critical operation."
+        "hu": "A csomagot teljes kiadásként használd, de kritikus művelet előtt ellenőrizd a digestet, készíts külön mentést, és vedd figyelembe a nyilvános tesztmátrix hiányzó bizonyítékait.",
+        "en": "Use the package as a full release, but verify its digest, create an independent backup before critical operations and account for missing evidence in the public test matrix."
       },
       "fix_status": "investigating",
       "issue_url": "https://github.com/hutoczky/FormatX/issues",
-      "last_updated": "2026-07-31"
+      "last_updated": "2026-08-07"
     },
     {
       "id": "FX-LIMIT-MACOS-IOS",
@@ -86,7 +86,7 @@
       },
       "fix_status": "planned",
       "issue_url": null,
-      "last_updated": "2026-07-31"
+      "last_updated": "2026-08-07"
     }
   ]
 }
