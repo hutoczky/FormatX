@@ -26,7 +26,7 @@
   function ensureStabilityStyle() {
     ensureStyle(
       'data-fx-site-stability',
-      './styles/formatx-site-stability.css?v=20260729-stability-3',
+      './styles/formatx-site-stability.css?v=20260807-audio-slot-2',
       'fxSiteStability',
       'FormatX stability stylesheet failed to load.'
     );
@@ -53,7 +53,7 @@
   function ensureMobileReadabilityStyle() {
     ensureStyle(
       'data-fx-mobile-readability',
-      './styles/formatx-mobile-readability.css?v=20260730-mobile-readability-1',
+      './styles/formatx-mobile-readability.css?v=20260807-audio-slot-2',
       'fxMobileReadability',
       'FormatX mobile readability stylesheet failed to load.'
     );
@@ -62,7 +62,7 @@
   function ensureMobileHeroFlowStyle() {
     ensureStyle(
       'data-fx-mobile-hero-flow',
-      './styles/formatx-mobile-hero-flow.css',
+      './styles/formatx-mobile-hero-flow.css?v=20260807-audio-slot-2',
       'fxMobileHeroFlow',
       'FormatX mobile hero flow stylesheet failed to load.'
     );
@@ -202,7 +202,7 @@
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
     './scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
     './scripts/release-metadata.js?v=20260807-full-release-1',
-    './scripts/interaction-genome-export-stability.js?v=20260807-full-release-1',
+    './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2',
     './scripts/platform-status.js?v=20260807-full-release-1',
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
