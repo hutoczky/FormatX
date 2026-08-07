@@ -7,6 +7,7 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
+      - 'docs/scifi-ui/scripts/formatx-nextgen-controls.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'billing-worker/src/production-with-license.js'
@@ -17,6 +18,7 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
+      - 'docs/scifi-ui/scripts/formatx-nextgen-controls.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'billing-worker/src/production-with-license.js'
@@ -52,6 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-audio-repair.js
+          node --check docs/scifi-ui/scripts/formatx-nextgen-controls.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check billing-worker/src/production-with-license.js
@@ -66,6 +69,8 @@ jobs:
           grep -Fq "createStereoPanner" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "OfflineAudioContext" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "signal-verified" docs/scifi-ui/scripts/formatx-audio-repair.js
+          grep -Fq "professionalAudioOwnsButton" docs/scifi-ui/scripts/formatx-nextgen-controls.js
+          grep -Fq "root.dataset.fxAudioOwner === 'professional-v6'" docs/scifi-ui/scripts/formatx-nextgen-controls.js
           grep -Fq "autoplay=(self)" billing-worker/src/production-with-license.js
           ! grep -Fq "'autoplay=()'" billing-worker/src/production-with-license.js
 
