@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  // Production deployment revision: 20260805-motion-gate-3.
+  // Production deployment revision: 20260808-core-click-4.
 
   const root = document.documentElement;
   if (root.dataset.fxPremiumFinish === 'ready-v1') return;
@@ -376,10 +376,14 @@
       : 'Az élő vizuális mag indítása');
   }
 
-  function activateImmersive() {
-    if (auditMode || root.dataset.fxImmersive === 'active') return;
+  function activateImmersive(source = 'direct') {
+    if (auditMode) return;
+    const wasActive = root.dataset.fxImmersive === 'active';
     root.dataset.fxImmersive = 'active';
-    root.dataset.fxThree = root.dataset.fxGpuCapability === 'canvas2d' ? 'fallback' : 'intro-wait';
+    if (!wasActive || !root.dataset.fxThree || root.dataset.fxThree === 'standby') {
+      root.dataset.fxThree = root.dataset.fxGpuCapability === 'canvas2d' ? 'fallback' : 'intro-wait';
+    }
+    root.dataset.fxCoreActivation = source;
     const button = document.querySelector('.fx-immersive-launch');
     if (button instanceof HTMLButtonElement) {
       button.setAttribute('aria-pressed', 'true');
@@ -387,15 +391,58 @@
     }
     syncRendererState();
     dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
-      detail: { capability: root.dataset.fxGpuCapability }
+      detail: {
+        capability: root.dataset.fxGpuCapability,
+        source,
+        reactivation: wasActive
+      }
     }));
+  }
+
+  function coreActivationHit(event) {
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('.fx-immersive-launch, [data-organ-node="0"]')) return true;
+
+    const host = document.querySelector('#hero .hero-space');
+    if (!host) return false;
+    const rect = host.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return false;
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) return false;
+
+    const interactive = target?.closest('a,button,input,select,textarea,summary,[role="button"]');
+    if (interactive) return false;
+
+    const dx = event.clientX - (rect.left + rect.width * .5);
+    const dy = event.clientY - (rect.top + rect.height * .5);
+    const radius = Math.min(rect.width, rect.height) * .31;
+    return dx * dx + dy * dy <= radius * radius;
+  }
+
+  function handleCoreActivation(event) {
+    if (auditMode || root.dataset.fxImmersive === 'active') return;
+    if (event.type === 'click' && event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (!coreActivationHit(event)) return;
+    activateImmersive(event.target instanceof Element && event.target.closest('[data-organ-node="0"]')
+      ? 'core-node'
+      : 'core-pointer');
   }
 
   function bindImmersiveLaunch() {
     const button = document.querySelector('.fx-immersive-launch');
-    if (!(button instanceof HTMLButtonElement) || button.dataset.fxBound === 'true') return;
-    button.dataset.fxBound = 'true';
-    button.addEventListener('click', activateImmersive, { once: true });
+    if (button instanceof HTMLButtonElement && button.dataset.fxBound !== 'true') {
+      button.dataset.fxBound = 'true';
+      button.addEventListener('click', () => activateImmersive('launch-button'));
+    }
+
+    const coreNode = document.querySelector('[data-organ-node="0"]');
+    if (coreNode instanceof HTMLAnchorElement && coreNode.dataset.fxCoreActivationBound !== 'true') {
+      coreNode.dataset.fxCoreActivationBound = 'true';
+      coreNode.addEventListener('click', () => activateImmersive('core-node'));
+      coreNode.setAttribute('aria-label', language() === 'en'
+        ? 'Core — launch the living visual core'
+        : 'Mag — az élő vizuális mag indítása');
+    }
     updateLaunchCopy();
   }
 
@@ -424,9 +471,14 @@
   const rendererObserver = new MutationObserver(syncRendererState);
   rendererObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-three', 'data-fx-scene', 'lang'] });
   repairLegacyHomepageUrl();
+  document.addEventListener('click', handleCoreActivation, true);
   document.addEventListener('click', handleHashNavigation, true);
   addEventListener('formatx:languagechange', () => {
     updateLaunchCopy();
+    const coreNode = document.querySelector('[data-organ-node="0"]');
+    if (coreNode instanceof HTMLAnchorElement) coreNode.setAttribute('aria-label', language() === 'en'
+      ? 'Core — launch the living visual core'
+      : 'Mag — az élő vizuális mag indítása');
     if (root.dataset.fxImmersive === 'active') ensureFallbackStatus();
   });
   addEventListener('formatx:premiumfallback', syncRendererState);
