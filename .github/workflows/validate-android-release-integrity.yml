@@ -46,7 +46,7 @@ jobs:
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "size=$size" >> "$GITHUB_OUTPUT"
 
-      - name: Compare with canonical release metadata when published
+      - name: Compare with canonical release metadata
         env:
           ACTUAL_SHA: ${{ steps.digest.outputs.sha }}
           ACTUAL_SIZE: ${{ steps.digest.outputs.size }}
@@ -55,22 +55,23 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const release = JSON.parse(fs.readFileSync('docs/scifi-ui/data/current-release.json', 'utf8'));
-          const channel = release?.channels?.android || {};
+          const expectedDigest = release?.channels?.android?.digest;
+          const expectedSize = release?.channels?.android?.size;
           const actualDigest = `sha256:${process.env.ACTUAL_SHA}`;
           const actualSize = Number(process.env.ACTUAL_SIZE);
-          if (channel.digest != null && channel.digest !== '' && channel.digest.toLowerCase() !== actualDigest.toLowerCase()) {
-            console.error(`Android digest mismatch: expected ${channel.digest}, actual ${actualDigest}`);
+          if (!expectedDigest || !Number.isInteger(expectedSize) || expectedSize <= 0) {
+            console.error('Android canonical integrity metadata is incomplete.');
             process.exit(1);
           }
-          if (channel.size != null && Number(channel.size) !== actualSize) {
-            console.error(`Android size mismatch: expected ${channel.size}, actual ${actualSize}`);
+          if (expectedDigest.toLowerCase() !== actualDigest.toLowerCase()) {
+            console.error(`Android digest mismatch: expected ${expectedDigest}, actual ${actualDigest}`);
             process.exit(1);
           }
-          if (channel.digest == null || channel.digest === '' || channel.size == null) {
-            console.log(`Android canonical integrity metadata incomplete. Computed size=${actualSize}, digest=${actualDigest}`);
-          } else {
-            console.log(`Android integrity verified: size=${actualSize}, digest=${actualDigest}`);
+          if (expectedSize !== actualSize) {
+            console.error(`Android size mismatch: expected ${expectedSize}, actual ${actualSize}`);
+            process.exit(1);
           }
+          console.log(`Android integrity verified: size=${actualSize}, digest=${actualDigest}`);
           NODE
 
       - name: Upload computed integrity evidence
@@ -91,7 +92,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Official Android APK size/SHA-256 computed and metadata check passed'
+            description='Official Android APK size and SHA-256 match canonical release metadata'
           else
             state='failure'
             description='FormatX Android release integrity validation failed'
