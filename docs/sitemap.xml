@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url><loc>https://www.formatxsuite.com/</loc><lastmod>2026-08-06</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://www.formatxsuite.com/scifi-ui/downloads/</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.formatxsuite.com/</loc><lastmod>2026-08-07</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://www.formatxsuite.com/scifi-ui/downloads/</loc><lastmod>2026-08-07</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.formatxsuite.com/scifi-ui/android/</loc><lastmod>2026-08-07</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.formatxsuite.com/scifi-ui/method.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.formatxsuite.com/scifi-ui/verification.html</loc><lastmod>2026-08-06</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://www.formatxsuite.com/scifi-ui/technical-report.html</loc><lastmod>2026-08-06</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://www.formatxsuite.com/scifi-ui/test-matrix.html</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://www.formatxsuite.com/scifi-ui/known-issues.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.formatxsuite.com/scifi-ui/verification.html</loc><lastmod>2026-08-07</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.formatxsuite.com/scifi-ui/technical-report.html</loc><lastmod>2026-08-07</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.formatxsuite.com/scifi-ui/test-matrix.html</loc><lastmod>2026-08-07</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.formatxsuite.com/scifi-ui/known-issues.html</loc><lastmod>2026-08-07</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.formatxsuite.com/scifi-ui/security.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.formatxsuite.com/scifi-ui/decision-log.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://www.formatxsuite.com/scifi-ui/license.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.formatxsuite.com/scifi-ui/terms.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.formatxsuite.com/scifi-ui/terms.html</loc><lastmod>2026-08-07</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.formatxsuite.com/scifi-ui/privacy.html</loc><lastmod>2026-08-06</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.formatxsuite.com/scifi-ui/support.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
