@@ -95,6 +95,10 @@ def validate_public_shell() -> None:
         "TELJES VERZIÓ", "FULL RELEASE", "MutationObserver",
     ])
     require(
+        "['NATÍV BÉTA'" not in guard and "['NATIVE BETA'" not in guard,
+        "Full release guard must preserve explicitly named beta channels",
+    )
+    require(
         "fetch(" not in shell and "XMLHttpRequest" not in shell and "WebSocket" not in shell,
         "Public shell must remain local",
     )
@@ -114,6 +118,7 @@ def validate_public_shell() -> None:
 
 def validate_release_sync() -> None:
     workflow = read(".github/workflows/sync-current-release.yml")
+    android_integrity_workflow = read(".github/workflows/validate-android-release-integrity.yml")
     release_script = read(SCIFI / "scripts/release-metadata.js")
     platform = load_json(SCIFI / "data/platform-status.json")
     release = load_json(SCIFI / "data/current-release.json")
@@ -124,8 +129,13 @@ def validate_release_sync() -> None:
         "source_release_id", "source_updated_at", "target_commitish",
         "multiplatform_asset", "primary_platform: \"linux-bazzite\"",
         "supported_platforms: [\"linux-bazzite\", \"windows\"]",
-        "android_local", "integrity", "del(.synced_at)", "cmp -s",
+        "android_local", "android_local_size", "android_local_digest", "sha256sum",
+        "integrity", "del(.synced_at, .channels.android.updated_at)", "cmp -s",
         "preserving the existing synced_at value", "--retry-all-errors",
+    ])
+    require_tokens(android_integrity_workflow, "Android integrity workflow", [
+        "FormatX-Suite-Pro-Android.apk", "sha256sum", "stat -c '%s'",
+        "channels?.android?.digest", "FormatX Android release integrity",
     ])
     require_tokens(release_script, "Release metadata controller", [
         "ready-v5", "isAllowedReleaseUrl", "formatBytes", "integrityLabel",
@@ -147,10 +157,24 @@ def validate_release_sync() -> None:
         and release_url.path.startswith("/hutoczky/FormatX-Updates/releases/"),
         "Current release URL is not official",
     )
+
     package = canonical_package(release)
     require(package.get("available") is True, "Official package is unavailable")
     require(official_download(str(package.get("download_url") or "")), "Package URL is not official")
-    require(str(package.get("digest") or "").startswith("sha256:"), "Package SHA-256 digest is missing")
+    require(
+        bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(package.get("digest") or ""))),
+        "Package SHA-256 digest is missing or malformed",
+    )
+
+    android = release.get("channels", {}).get("android") or {}
+    require(android.get("available") is True, "Official Android package is unavailable")
+    require(android.get("download_url") == "/download/android", "Android canonical worker download route is invalid")
+    require(isinstance(android.get("size"), int) and android.get("size", 0) > 0, "Android package size is missing")
+    require(
+        bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(android.get("digest") or ""))),
+        "Android SHA-256 digest is missing or malformed",
+    )
+
     require(
         release.get("integrity", {}).get("status") in {
             "package_only", "digest_published", "digest_and_signature_published"
@@ -163,10 +187,9 @@ def validate_release_sync() -> None:
     require(public_copy.get("download_channel") == "multiplatform", "Public download channel is not multiplatform")
     require(public_copy.get("release_maturity") == "full_release", "Public release maturity is not full_release")
     require(public_copy.get("trial_days") == 5, "Public contract trial is not five days")
-    require(
-        "windows" in (public_copy.get("supported_secondary_platforms") or []),
-        "Windows is not a supported secondary platform",
-    )
+    secondary = public_copy.get("supported_secondary_platforms") or []
+    require("windows" in secondary, "Windows is not a supported secondary platform")
+    require("android" in secondary, "Android is not a supported secondary platform")
     require(public_copy.get("public_release_version_visible") is False, "Public release version must remain hidden")
 
 
@@ -196,7 +219,7 @@ def main() -> int:
         for error in ERRORS:
             print(f" - {error}", file=sys.stderr)
         return 1
-    print("FormatX public pages, full release status, five-day trial, official release provenance and Worker ownership are valid.")
+    print("FormatX public pages, full release status, five-day trial, Android/multiplatform integrity, official release provenance and Worker ownership are valid.")
     return 0
 
 
