@@ -38,6 +38,10 @@ async function activationSnapshot(page) {
   return page.evaluate(() => {
     const root = document.documentElement;
     const button = document.querySelector('.fx-three-sound');
+    const rect = button?.getBoundingClientRect();
+    const x = rect ? rect.left + rect.width / 2 : 0;
+    const y = rect ? rect.top + rect.height / 2 : 0;
+    const hit = rect ? document.elementFromPoint(x, y) : null;
     return {
       owner: root.dataset.fxAudioOwner || '',
       state: root.dataset.fxAudioState || '',
@@ -54,8 +58,18 @@ async function activationSnapshot(page) {
       connected: Boolean(button?.isConnected),
       buttonCount: document.querySelectorAll('.fx-three-sound').length,
       nextgen: root.dataset.fxNextgenControls || '',
+      rect: rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height } : null,
+      hitTag: hit?.tagName || '',
+      hitClass: hit instanceof Element ? hit.className : '',
+      hitLiveOs: Boolean(hit instanceof Element && hit.closest('[data-fx-live-os-launcher]')),
+      hitSound: Boolean(button && hit instanceof Node && (hit === button || button.contains(hit)))
     };
   });
+}
+
+async function assertClickable(page, name) {
+  const snapshot = await activationSnapshot(page);
+  assert(snapshot.hitSound, name + ': music button is covered by another layer: ' + JSON.stringify(snapshot));
 }
 
 async function waitForAudioOn(page, name) {
@@ -89,9 +103,10 @@ async function runCase(browser, name, contextOptions) {
   const button = page.locator('.fx-three-sound');
   await button.waitFor({ state: contextOptions.isMobile ? 'attached' : 'visible', timeout: 15000 });
   assert(await button.count() === 1, name + ': exactly one music button is required');
+  await assertClickable(page, name);
 
   if (contextOptions.isMobile) await button.evaluate(node => node.click());
-  else await button.click({ force: true });
+  else await button.click();
   await waitForAudioOn(page, name);
   await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 15000 });
   await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 15000 });
@@ -147,7 +162,7 @@ async function runCase(browser, name, contextOptions) {
   assert(sustained.music === 'fallback-playing' || sustained.chord.length > 0, name + ': score scheduler stopped: ' + JSON.stringify(sustained));
 
   if (contextOptions.isMobile) await button.evaluate(node => node.click());
-  else await button.click({ force: true });
+  else await button.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'off');
 
   const meaningfulDiagnostics = diagnostics.filter(item => !/favicon|WebGL stall|GPU stall|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item));
