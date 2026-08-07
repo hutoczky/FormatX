@@ -42,6 +42,36 @@ async function activationSnapshot(page) {
     const x = rect ? rect.left + rect.width / 2 : 0;
     const y = rect ? rect.top + rect.height / 2 : 0;
     const hit = rect ? document.elementFromPoint(x, y) : null;
+    const computed = button ? getComputedStyle(button) : null;
+    const matchedRules = [];
+
+    const scanRules = (rules, href, condition = '') => {
+      for (const rule of Array.from(rules || [])) {
+        if (rule instanceof CSSMediaRule) {
+          if (matchMedia(rule.conditionText).matches) scanRules(rule.cssRules, href, rule.conditionText);
+          continue;
+        }
+        if (rule instanceof CSSSupportsRule) {
+          scanRules(rule.cssRules, href, condition);
+          continue;
+        }
+        if (!(rule instanceof CSSStyleRule) || !button) continue;
+        let matches = false;
+        try { matches = button.matches(rule.selectorText); } catch (_) {}
+        if (!matches) continue;
+        const style = rule.style;
+        const relevant = ['top', 'right', 'bottom', 'left', 'display', 'visibility', 'transform', 'pointer-events']
+          .filter(name => style.getPropertyValue(name))
+          .map(name => `${name}:${style.getPropertyValue(name)}${style.getPropertyPriority(name) ? ' !important' : ''}`)
+          .join(';');
+        if (relevant) matchedRules.push({ href, condition, selector: rule.selectorText, style: relevant });
+      }
+    };
+
+    for (const sheet of Array.from(document.styleSheets)) {
+      try { scanRules(sheet.cssRules, sheet.href || 'inline'); } catch (_) {}
+    }
+
     return {
       owner: root.dataset.fxAudioOwner || '',
       state: root.dataset.fxAudioState || '',
@@ -58,10 +88,27 @@ async function activationSnapshot(page) {
       connected: Boolean(button?.isConnected),
       buttonCount: document.querySelectorAll('.fx-three-sound').length,
       nextgen: root.dataset.fxNextgenControls || '',
+      inlineStyle: button?.getAttribute('style') || '',
+      computed: computed ? {
+        top: computed.top,
+        right: computed.right,
+        bottom: computed.bottom,
+        left: computed.left,
+        display: computed.display,
+        visibility: computed.visibility,
+        transform: computed.transform,
+        pointerEvents: computed.pointerEvents,
+        zIndex: computed.zIndex
+      } : null,
+      matchedRules,
       rect: rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height } : null,
       hitTag: hit?.tagName || '',
       hitClass: hit instanceof Element ? hit.className : '',
+      hitId: hit instanceof Element ? hit.id : '',
+      hitText: hit instanceof Element ? (hit.textContent || '').trim().slice(0, 80) : '',
+      hitParent: hit instanceof Element ? `${hit.parentElement?.tagName || ''}.${hit.parentElement?.className || ''}` : '',
       hitLiveOs: Boolean(hit instanceof Element && hit.closest('[data-fx-live-os-launcher]')),
+      hitThought: Boolean(hit instanceof Element && hit.closest('.fx-organism-thought-trigger')),
       hitSound: Boolean(button && hit instanceof Node && (hit === button || button.contains(hit)))
     };
   });
