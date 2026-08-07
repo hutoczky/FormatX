@@ -104,7 +104,8 @@ body > .site-footer {
   margin-bottom: 0 !important;
 }
 
-.fx-organism-panel[data-fx-release-panel='stable-v2'] {
+.fx-organism-panel[data-fx-release-panel='stable-v2'],
+.fx-organism-panel[data-fx-release-panel='stable-v3'] {
   padding-bottom: max(64px, calc(32px + env(safe-area-inset-bottom))) !important;
 }
 
