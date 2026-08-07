@@ -1,5 +1,3 @@
-import { ensureFeedbackSchemaCompatibility } from './feedback-schema.js';
-
 const FEEDBACK_PATH = '/api/feedback';
 const SUMMARY_PATH = '/api/feedback/summary';
 const ADMIN_FEEDBACK_ROOT = '/fx-owner-license/api/feedback';
@@ -26,13 +24,10 @@ export async function handleFeedbackRequest(request, env) {
   }
 
   if (!env.LICENSE_DB) {
-    return json({ error: 'feedback_unavailable', message: 'A visszajelző adatbázis nem érhető el.' }, 503, request);
+    return json({ error: 'feedback_unavailable', diagnostic: 'database_binding_unavailable', message: 'A visszajelző adatbázis nem érhető el.' }, 503, request);
   }
 
   try {
-    // One central compatibility check. Its normal path is read-only and cached per isolate.
-    await ensureFeedbackSchemaCompatibility(env.LICENSE_DB);
-
     if (isAdminPath) {
       return await handleAdminFeedbackRequest(request, env, url);
     }
@@ -47,12 +42,32 @@ export async function handleFeedbackRequest(request, env) {
 
     return json({ error: 'method_not_allowed' }, 405, request, { Allow: 'GET, POST, OPTIONS' });
   } catch (error) {
-    console.error('FormatX feedback API error', error);
+    const incident = crypto.randomUUID();
+    const diagnostic = classifyFeedbackError(error);
+    console.error('FormatX feedback API error', {
+      incident,
+      diagnostic,
+      message: error instanceof Error ? error.message : String(error),
+    });
     return json({
       error: 'feedback_error',
-      message: 'A visszajelzés most nem kezelhető. Próbáld meg később.',
-    }, 500, request);
+      diagnostic,
+      incident,
+      message: 'A visszajelzés adatbázis-művelete most nem sikerült. A hiba azonosítója naplózva lett.',
+    }, 503, request, { 'Retry-After': '30' });
   }
+}
+
+function classifyFeedbackError(error) {
+  const message = String(error instanceof Error ? error.message : error).toLowerCase();
+  if (message.includes('no such table')) return 'feedback_table_missing';
+  if (message.includes('no such column')) return 'feedback_column_missing';
+  if (message.includes('readonly') || message.includes('read-only')) return 'database_read_only';
+  if (message.includes('too many requests') || message.includes('rate limit')) return 'database_rate_limited';
+  if (message.includes('quota') || message.includes('limit exceeded')) return 'database_quota_exceeded';
+  if (message.includes('locked') || message.includes('busy')) return 'database_busy';
+  if (message.includes('prepare') || message.includes('d1_error')) return 'database_query_failed';
+  return 'database_operation_failed';
 }
 
 async function feedbackSummary(database, request) {
@@ -121,7 +136,7 @@ async function submitFeedback(request, env) {
     }, 400, request);
   }
 
-  // Honeypot: return a neutral accepted response without storing bot content.
+  // Honeypot: a production smoke test and bots are accepted without a DB write.
   if (cleanText(payload.website, 200)) {
     return json({ ok: true, state: 'pending-moderation' }, 202, request);
   }
@@ -201,32 +216,19 @@ async function handleAdminFeedbackRequest(request, env, url) {
   }
 
   const relative = url.pathname.slice(ADMIN_FEEDBACK_ROOT.length) || '/';
-  if (relative === '/' && request.method === 'GET') {
-    return adminListFeedback(request, env, url, admin.email);
-  }
-  if (relative === '/summary' && request.method === 'GET') {
-    return adminFeedbackSummary(request, env, admin.email);
-  }
+  if (relative === '/' && request.method === 'GET') return adminListFeedback(request, env, url, admin.email);
+  if (relative === '/summary' && request.method === 'GET') return adminFeedbackSummary(request, env, admin.email);
 
   const recordMatch = relative.match(/^\/([0-9a-f-]{36})$/i);
-  if (recordMatch && request.method === 'GET') {
-    return adminFeedbackDetail(request, env, recordMatch[1], admin.email);
-  }
-  if (recordMatch && request.method === 'PATCH') {
-    return adminUpdateFeedback(request, env, recordMatch[1], admin.email);
-  }
-  if (recordMatch && request.method === 'DELETE') {
-    return adminDeleteFeedback(request, env, recordMatch[1], admin.email);
-  }
-
+  if (recordMatch && request.method === 'GET') return adminFeedbackDetail(request, env, recordMatch[1], admin.email);
+  if (recordMatch && request.method === 'PATCH') return adminUpdateFeedback(request, env, recordMatch[1], admin.email);
+  if (recordMatch && request.method === 'DELETE') return adminDeleteFeedback(request, env, recordMatch[1], admin.email);
   return json({ ok: false, error: 'not_found' }, 404, request);
 }
 
 async function adminListFeedback(request, env, url, actorEmail) {
   const status = url.searchParams.get('status') || 'pending';
-  if (!ALLOWED_STATUSES.has(status) && status !== 'all') {
-    return json({ ok: false, error: 'invalid_status' }, 400, request);
-  }
+  if (!ALLOWED_STATUSES.has(status) && status !== 'all') return json({ ok: false, error: 'invalid_status' }, 400, request);
   const limit = Math.min(200, Math.max(1, Number.parseInt(url.searchParams.get('limit') || '100', 10) || 100));
   const where = status === 'all' ? '' : 'WHERE status = ?1';
   const statement = env.LICENSE_DB.prepare(`
@@ -245,8 +247,7 @@ async function adminListFeedback(request, env, url, actorEmail) {
 
 async function adminFeedbackSummary(request, env, actorEmail) {
   const row = await env.LICENSE_DB.prepare(`
-    SELECT
-      COUNT(*) AS total,
+    SELECT COUNT(*) AS total,
       SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
       SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
       SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
@@ -257,10 +258,8 @@ async function adminFeedbackSummary(request, env, actorEmail) {
     ok: true,
     actor: actorEmail,
     summary: {
-      total: Number(row?.total || 0),
-      pending: Number(row?.pending || 0),
-      approved: Number(row?.approved || 0),
-      rejected: Number(row?.rejected || 0),
+      total: Number(row?.total || 0), pending: Number(row?.pending || 0),
+      approved: Number(row?.approved || 0), rejected: Number(row?.rejected || 0),
       public_average: row?.public_average == null ? null : Number(row.public_average),
     },
   }, request);
@@ -281,26 +280,15 @@ async function adminFeedbackDetail(request, env, id, actorEmail) {
 
 async function adminUpdateFeedback(request, env, id, actorEmail) {
   let body;
-  try {
-    body = await readJson(request);
-  } catch {
-    return json({ ok: false, error: 'invalid_json' }, 400, request);
-  }
+  try { body = await readJson(request); } catch { return json({ ok: false, error: 'invalid_json' }, 400, request); }
   const status = String(body.status || '').trim();
-  if (!ALLOWED_STATUSES.has(status)) {
-    return json({ ok: false, error: 'invalid_status' }, 400, request);
-  }
+  if (!ALLOWED_STATUSES.has(status)) return json({ ok: false, error: 'invalid_status' }, 400, request);
   const note = cleanText(body.moderation_note, 1000);
   const existing = await env.LICENSE_DB.prepare('SELECT id, status FROM user_feedback WHERE id = ?1').bind(id).first();
   if (!existing) return json({ ok: false, error: 'feedback_not_found' }, 404, request);
   const now = new Date().toISOString();
   await env.LICENSE_DB.prepare(`
-    UPDATE user_feedback
-    SET status = ?1,
-        moderation_note = ?2,
-        approved_at = ?3,
-        updated_at = ?4
-    WHERE id = ?5
+    UPDATE user_feedback SET status = ?1, moderation_note = ?2, approved_at = ?3, updated_at = ?4 WHERE id = ?5
   `).bind(status, note, status === 'approved' ? now : null, now, id).run();
   console.log('FormatX feedback moderation', JSON.stringify({ actor: actorEmail, id, from: existing.status, to: status }));
   return adminFeedbackDetail(request, env, id, actorEmail);
@@ -345,27 +333,14 @@ async function verifyAccessJwt(token, teamDomain, audience) {
   const keys = await getAccessJwks(jwksUrl);
   const jwk = keys.find((key) => key.kid === header.kid);
   if (!jwk) throw new Error('unknown_kid');
-  const cryptoKey = await crypto.subtle.importKey(
-    'jwk',
-    jwk,
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['verify'],
-  );
-  const valid = await crypto.subtle.verify(
-    'RSASSA-PKCS1-v1_5',
-    cryptoKey,
-    base64UrlDecode(parts[2]),
-    textEncoder.encode(`${parts[0]}.${parts[1]}`),
-  );
+  const cryptoKey = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
+  const valid = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', cryptoKey, base64UrlDecode(parts[2]), textEncoder.encode(`${parts[0]}.${parts[1]}`));
   if (!valid) throw new Error('signature_invalid');
   return payload;
 }
 
 async function getAccessJwks(url) {
-  if (accessJwksCache.url === url && accessJwksCache.expiresAt > Date.now()) {
-    return accessJwksCache.keys;
-  }
+  if (accessJwksCache.url === url && accessJwksCache.expiresAt > Date.now()) return accessJwksCache.keys;
   const jwksResponse = await fetch(url, { headers: { Accept: 'application/json' } });
   if (!jwksResponse.ok) throw new Error(`jwks_${jwksResponse.status}`);
   const payload = await jwksResponse.json();
@@ -376,23 +351,16 @@ async function getAccessJwks(url) {
 
 export function validateFeedbackPayload(payload) {
   const errors = {};
-  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-    return { ok: false, errors: { payload: 'Hiányzó vagy hibás adatcsomag.' } };
-  }
-
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return { ok: false, errors: { payload: 'Hiányzó vagy hibás adatcsomag.' } };
   for (const field of ['overall', 'usability', 'performance', 'design', 'features']) {
     const value = Number(payload[field]);
-    if (!Number.isInteger(value) || value < 1 || value > 5) {
-      errors[field] = '1 és 5 közötti egész szám szükséges.';
-    }
+    if (!Number.isInteger(value) || value < 1 || value > 5) errors[field] = '1 és 5 közötti egész szám szükséges.';
   }
-
   if (String(payload.comment || '').length > MAX_COMMENT_LENGTH) errors.comment = `Legfeljebb ${MAX_COMMENT_LENGTH} karakter.`;
   if (String(payload.display_name || '').length > MAX_NAME_LENGTH) errors.display_name = `Legfeljebb ${MAX_NAME_LENGTH} karakter.`;
   if (String(payload.contact_email || '').length > MAX_EMAIL_LENGTH) errors.contact_email = `Legfeljebb ${MAX_EMAIL_LENGTH} karakter.`;
   if (payload.contact_email && !isValidEmail(payload.contact_email)) errors.contact_email = 'Érvénytelen e-mail-cím.';
   if (payload.privacy_consent !== true) errors.privacy_consent = 'Az adatkezelési tájékoztató elfogadása kötelező.';
-
   return { ok: Object.keys(errors).length === 0, errors };
 }
 
@@ -402,16 +370,11 @@ async function applyRateLimit(request, env) {
   const key = await hashRequestIdentity(request, env, 'ratelimit');
   const result = await limiter.limit({ key: `feedback:${key}` });
   if (result.success) return null;
-  return json({
-    error: 'rate_limited',
-    message: 'Túl sok kérés érkezett. Várj egy percet, majd próbáld újra.',
-  }, 429, request, { 'Retry-After': '60' });
+  return json({ error: 'rate_limited', message: 'Túl sok kérés érkezett. Várj egy percet, majd próbáld újra.' }, 429, request, { 'Retry-After': '60' });
 }
 
 async function hashRequestIdentity(request, env, purpose = 'storage') {
-  const ip = request.headers.get('CF-Connecting-IP')
-    || request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim()
-    || 'unknown';
+  const ip = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() || 'unknown';
   const secret = env.FEEDBACK_HASH_PEPPER || env.FORMATX_ISSUER_KEY_ID || 'formatx-feedback-v1';
   const input = textEncoder.encode(`${purpose}|${secret}|${ip}`);
   const digest = await crypto.subtle.digest('SHA-256', input);
@@ -421,11 +384,7 @@ async function hashRequestIdentity(request, env, purpose = 'storage') {
 function sameOrigin(request) {
   const origin = request.headers.get('Origin');
   if (!origin) return true;
-  try {
-    return new URL(origin).origin === new URL(request.url).origin;
-  } catch {
-    return false;
-  }
+  try { return new URL(origin).origin === new URL(request.url).origin; } catch { return false; }
 }
 
 async function readJson(request) {
@@ -437,55 +396,24 @@ async function readJson(request) {
 }
 
 function cleanText(value, maxLength) {
-  return String(value || '')
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
-    .trim()
-    .slice(0, maxLength);
+  return String(value || '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, maxLength);
 }
-
-function normaliseEmail(value) {
-  return cleanText(value, MAX_EMAIL_LENGTH).toLowerCase();
-}
-
-function isValidEmail(value) {
-  const email = normaliseEmail(value);
-  return !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function normalisePagePath(value) {
-  const text = cleanText(value, 240);
-  if (!text.startsWith('/')) return '/';
-  return text.split(/[?#]/, 1)[0] || '/';
-}
-
-function adminEmails(env) {
-  return new Set(String(env.ADMIN_EMAILS || '')
-    .split(',')
-    .map(email => email.trim().toLowerCase())
-    .filter(Boolean));
-}
-
+function normaliseEmail(value) { return cleanText(value, MAX_EMAIL_LENGTH).toLowerCase(); }
+function isValidEmail(value) { const email = normaliseEmail(value); return !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+function normalisePagePath(value) { const text = cleanText(value, 240); if (!text.startsWith('/')) return '/'; return text.split(/[?#]/, 1)[0] || '/'; }
+function adminEmails(env) { return new Set(String(env.ADMIN_EMAILS || '').split(',').map(email => email.trim().toLowerCase()).filter(Boolean)); }
 function base64UrlDecode(value) {
   const raw = String(value);
   const padded = raw.replaceAll('-', '+').replaceAll('_', '/').padEnd(Math.ceil(raw.length / 4) * 4, '=');
   const binary = atob(padded);
   return Uint8Array.from(binary, character => character.charCodeAt(0));
 }
-
 function adminJson(payload, request, status = 200) {
-  return json(payload, status, request, {
-    'Cache-Control': 'no-store, max-age=0',
-    'X-Robots-Tag': 'noindex, nofollow,noarchive'.replace('nofollow,noarchive', 'nofollow, noarchive'),
-  });
+  return json(payload, status, request, { 'Cache-Control': 'no-store, max-age=0', 'X-Robots-Tag': 'noindex, nofollow, noarchive' });
 }
-
 function json(payload, status, request, extraHeaders = {}) {
-  return response(JSON.stringify(payload), status, request, {
-    'Content-Type': 'application/json; charset=utf-8',
-    ...extraHeaders,
-  });
+  return response(JSON.stringify(payload), status, request, { 'Content-Type': 'application/json; charset=utf-8', ...extraHeaders });
 }
-
 function response(body, status, request, extraHeaders = {}) {
   const origin = request.headers.get('Origin');
   const headers = new Headers({
@@ -506,10 +434,4 @@ function response(body, status, request, extraHeaders = {}) {
   return new Response(body, { status, headers });
 }
 
-export const feedbackConstants = Object.freeze({
-  FEEDBACK_PATH,
-  SUMMARY_PATH,
-  ADMIN_FEEDBACK_ROOT,
-  CONSENT_VERSION,
-  ALLOWED_STATUSES,
-});
+export const feedbackConstants = Object.freeze({ FEEDBACK_PATH, SUMMARY_PATH, ADMIN_FEEDBACK_ROOT, CONSENT_VERSION, ALLOWED_STATUSES });
