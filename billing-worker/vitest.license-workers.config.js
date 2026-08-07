@@ -1,5 +1,6 @@
 import { createHash, generateKeyPairSync, pbkdf2Sync } from 'node:crypto';
-import { defineWorkersConfig, readD1Migrations } from '@cloudflare/vitest-pool-workers/config';
+import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-pool-workers';
+import { defineConfig } from 'vitest/config';
 
 const password = 'FormatX-Test-Owner-Password-2026';
 const salt = Buffer.from('formatx-license-test-salt-2026', 'utf8');
@@ -16,7 +17,24 @@ const issuerFingerprint = createHash('sha256')
 const issuerKeyId = `formatx-license-issuer-${issuerFingerprint.slice(0, 16)}`;
 const migrations = await readD1Migrations('./license-migrations');
 
-export default defineWorkersConfig({
+export default defineConfig({
+  plugins: [
+    cloudflareTest({
+      wrangler: {
+        configPath: './wrangler.license-test.jsonc',
+      },
+      miniflare: {
+        bindings: {
+          TEST_MIGRATIONS: migrations,
+          ADMIN_PASSWORD_RECORD: passwordRecord,
+          TEST_ADMIN_PASSWORD: password,
+          FORMATX_ISSUER_PRIVATE_KEY: issuerPrivateKey,
+          FORMATX_ISSUER_PUBLIC_KEY: issuerPublicKey,
+          FORMATX_ISSUER_KEY_ID: issuerKeyId,
+        },
+      },
+    }),
+  ],
   test: {
     include: [
       'test/license-center.spec.js',
@@ -24,22 +42,5 @@ export default defineWorkersConfig({
       'test/production-routing.spec.js',
     ],
     setupFiles: ['./test/license-center.setup.js'],
-    poolOptions: {
-      workers: {
-        wrangler: {
-          configPath: './wrangler.license-test.jsonc',
-        },
-        miniflare: {
-          bindings: {
-            TEST_MIGRATIONS: migrations,
-            ADMIN_PASSWORD_RECORD: passwordRecord,
-            TEST_ADMIN_PASSWORD: password,
-            FORMATX_ISSUER_PRIVATE_KEY: issuerPrivateKey,
-            FORMATX_ISSUER_PUBLIC_KEY: issuerPublicKey,
-            FORMATX_ISSUER_KEY_ID: issuerKeyId,
-          },
-        },
-      },
-    },
   },
 });
