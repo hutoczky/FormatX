@@ -20,6 +20,10 @@ const downloadStyle = read('docs/scifi-ui/styles/downloads-page.css');
 const feedbackApi = read('billing-worker/src/feedback-api.js');
 const feedbackSchema = read('billing-worker/src/feedback-schema.js');
 const feedbackEntry = read('billing-worker/src/production-feedback-entry.js');
+const feedbackUi = read('docs/scifi-ui/scripts/formatx-feedback.js');
+const feedbackPublicStyle = read('docs/scifi-ui/styles/formatx-feedback-public.css');
+const living = read('docs/scifi-ui/scripts/living-architecture.js');
+const apex = read('docs/scifi-ui/scripts/formatx-apex.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice.js');
 const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
 const mobileEntry = read('docs/scifi-ui/scripts/mobile-webgl-entry.js');
@@ -89,13 +93,39 @@ assert.ok(includesAll(feedbackApi, [
   "classifyFeedbackError(error) !== 'feedback_table_missing'",
   'await createFeedbackTableIfMissing(database)',
   'database_binding_unavailable',
-]), 'targeted missing-table feedback bootstrap or safe diagnostics missing');
+  'publish_permission = 1',
+  'SELECT overall, comment, display_name, locale, approved_at',
+  'reviews,',
+]), 'targeted feedback bootstrap or consent-gated public review API missing');
 assert.ok(includesAll(feedbackEntry, [
   "['/downloads/', '/scifi-ui/downloads/']",
   "['/support.html', '/scifi-ui/support.html']",
   'handleFeedbackRequest(request, env)',
 ]), 'feedback direct routing or public aliases missing');
 assert.ok(!feedbackEntry.includes('ensureFeedbackSchemaCompatibility') && !feedbackEntry.includes('schemaFailure'), 'blocking feedback schema preflight returned');
+assert.ok(includesAll(feedbackUi, [
+  'function renderPublicReviews',
+  "rootMargin: '800px 0px'",
+  'paragraph.textContent',
+  'formatx-feedback-public.css',
+]), 'lazy approved public comment rendering missing');
+assert.ok(includesAll(feedbackPublicStyle, ['.fx-feedback-public-card', 'content-visibility: auto', 'contain: layout paint style']), 'public comment rendering containment missing');
+
+assert.ok(includesAll(living, [
+  "ROOT.dataset.fxThreeLoader = 'deferred-user-activation'",
+  "addEventListener('formatx:immersiveactivate', loadThreeExperience, { once: true })",
+  "rootMargin: '700px 0px'",
+  'qrDockActivated',
+  "image.loading = 'lazy'",
+]), 'heavy Organism or QR work is not deferred until needed');
+assert.ok(!living.includes("document.addEventListener('formatx:introcomplete', loadThreeExperience"), 'heavy Organism renderer must not auto-load after intro');
+assert.ok(includesAll(apex, [
+  "const RELEASE_API = './data/current-release.json'",
+  'requestAnimationFrame(progress)',
+  'requestAnimationFrame(apply)',
+  "ROOT.dataset.fxApex = 'controller-performance-v2'",
+]), 'frame-throttled interaction or local release metadata contract missing');
+assert.ok(!apex.includes('https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest'), 'homepage must not call GitHub release API directly');
 
 const qrFiles = [
   'docs/scifi-ui/assets/qr/business_lite-huf.svg',
@@ -116,4 +146,4 @@ assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 assert.ok(deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'), 'custom-domain smoke checks missing');
 
-console.log('PASS: FormatX seamless scroll, full release/trial copy, targeted feedback table bootstrap, downloads, responsive UI and deployment gates are present.');
+console.log('PASS: FormatX seamless scroll, deferred heavy rendering, lazy QR/feedback work, consent-gated public comments, downloads, responsive UI and deployment gates are present.');
