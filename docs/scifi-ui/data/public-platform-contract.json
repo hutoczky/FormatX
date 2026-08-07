@@ -1,21 +1,21 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "public_copy": {
     "primary_system": "linux-bazzite",
-    "supported_secondary_platforms": [
-      "windows"
-    ],
+    "supported_secondary_platforms": ["windows", "android"],
     "download_channel": "multiplatform",
     "public_release_version_visible": false,
-    "release_maturity": "public_beta"
+    "release_maturity": "full_release",
+    "trial_days": 5
   },
   "layout_contract": {
     "desktop_composition_preloaded": true,
     "mobile_layout_unchanged": true,
-    "infinite_scroll_controller": "boundary-v4-retired",
-    "scroll_controller": "native-v5",
-    "automatic_scroll_loop": false,
+    "infinite_scroll_controller": "seamless-v6",
+    "scroll_controller": "seamless-v6",
+    "automatic_scroll_loop": true,
     "clone_based_loop": false,
+    "hero_visual_bridge": true,
     "fine_pointer_scroll_mode": "native-continuous",
     "coarse_pointer_scroll_mode": "native-continuous",
     "forced_scroll_transfer": false,
