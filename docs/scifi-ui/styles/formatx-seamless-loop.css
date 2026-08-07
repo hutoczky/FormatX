@@ -1,5 +1,20 @@
 /* Seamless loop and release-centre contract. */
 
+/* The Organism interface enables y proximity snapping on desktop. That
+   conflicts with the seamless visual hand-off because the browser can snap a
+   valid relative Hero landing back to Hero start. seamless-v6 owns scrolling,
+   so snapping stays disabled for the complete continuous-scroll session. */
+html[data-fx-infinite-controller='seamless-v6'],
+html[data-fx-infinite-controller='seamless-v6'] body {
+  scroll-snap-type: none !important;
+}
+
+html[data-fx-infinite-controller='seamless-v6'] #hero,
+html[data-fx-infinite-controller='seamless-v6'] main > .scene {
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+}
+
 html.fx-seamless-loop-transfer,
 html.fx-seamless-loop-transfer body {
   scroll-behavior: auto !important;
