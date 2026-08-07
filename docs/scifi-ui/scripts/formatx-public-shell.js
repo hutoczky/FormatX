@@ -2,7 +2,7 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxPublicShell === 'ready-v2') return;
+  if (ROOT.dataset.fxPublicShell === 'ready-v3') return;
 
   const PUBLIC_PATHS = new Set([
     '/scifi-ui/method.html',
@@ -21,7 +21,7 @@
   ]);
 
   if (!PUBLIC_PATHS.has(location.pathname) && !document.body.dataset.fxPublicPage) return;
-  ROOT.dataset.fxPublicShell = 'loading-v2';
+  ROOT.dataset.fxPublicShell = 'loading-v3';
 
   const NAV = Object.freeze({
     hu: [
@@ -66,6 +66,15 @@
     if (text !== undefined) element.textContent = text;
     return element;
   };
+
+  function ensureFullReleaseGuard() {
+    if (document.querySelector('script[data-fx-full-release-guard]')) return;
+    const script = document.createElement('script');
+    script.src = '/scifi-ui/scripts/formatx-full-release-guard.js?v=20260807-full-release-1';
+    script.defer = true;
+    script.dataset.fxFullReleaseGuard = 'true';
+    document.head.appendChild(script);
+  }
 
   function isCurrent(href) {
     return location.pathname === href || (href.endsWith('/') && location.pathname === href + 'index.html');
@@ -235,7 +244,8 @@
     ensureHeader();
     ensureFooter();
     syncReleaseBadge();
-    ROOT.dataset.fxPublicShell = 'ready-v2';
+    ensureFullReleaseGuard();
+    ROOT.dataset.fxPublicShell = 'ready-v3';
     dispatchEvent(new CustomEvent('formatx:publicshellready'));
   }
 
