@@ -74,7 +74,7 @@ jobs:
           grep -Fq "professionalAudioOwnsButton" docs/scifi-ui/scripts/formatx-nextgen-controls.js
           grep -Fq "root.dataset.fxAudioOwner === 'professional-v6'" docs/scifi-ui/scripts/formatx-nextgen-controls.js
           grep -Fq "top: 90px !important" docs/scifi-ui/styles/formatx-site-stability.css
-          grep -Fq "top: 72px !important" docs/scifi-ui/styles/formatx-site-stability.css
+          grep -Fq "top: 138px !important" docs/scifi-ui/styles/formatx-site-stability.css
           grep -Fq "autoplay=(self)" billing-worker/src/production-with-license.js
           ! grep -Fq "'autoplay=()'" billing-worker/src/production-with-license.js
 
