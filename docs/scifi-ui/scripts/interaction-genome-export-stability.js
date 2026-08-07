@@ -63,8 +63,11 @@
     const sound = document.querySelector('.fx-three-sound');
     setImportant(sound, 'box-sizing', 'border-box');
     setImportant(sound, 'display', 'inline-flex');
+    setImportant(sound, 'visibility', 'visible');
+    setImportant(sound, 'opacity', '1');
+    setImportant(sound, 'pointer-events', 'auto');
     setImportant(sound, 'position', 'fixed');
-    setImportant(sound, 'top', '72px');
+    setImportant(sound, 'top', '138px');
     setImportant(sound, 'right', '10px');
     setImportant(sound, 'bottom', 'auto');
     setImportant(sound, 'left', 'auto');
