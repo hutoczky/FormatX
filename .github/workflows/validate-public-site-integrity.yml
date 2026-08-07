@@ -6,6 +6,7 @@ on:
       - 'docs/**'
       - 'billing-worker/src/**'
       - '.github/scripts/validate-public-site-integrity.cjs'
+      - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
   push:
     branches: [master]
@@ -13,16 +14,21 @@ on:
       - 'docs/**'
       - 'billing-worker/src/**'
       - '.github/scripts/validate-public-site-integrity.cjs'
+      - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: formatx-public-site-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,3 +40,23 @@ jobs:
         run: node .github/scripts/validate-feedback-moderation.cjs
       - name: Validate requested site features
         run: node .github/scripts/validate-user-requested-site-features.cjs
+      - name: Validate browser test syntax
+        run: node --check .github/scripts/validate-public-pages-browser.cjs
+      - name: Install Playwright Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-public-browser" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-public-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start static public site
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-public-http.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/verification.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-public-http.log"
+          exit 1
+      - name: Validate public pages in desktop and mobile Chromium
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-public-browser/node_modules
+          FORMATX_PUBLIC_ORIGIN: http://127.0.0.1:4178
+        run: node .github/scripts/validate-public-pages-browser.cjs
