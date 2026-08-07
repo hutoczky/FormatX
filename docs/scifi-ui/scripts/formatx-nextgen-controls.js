@@ -210,9 +210,12 @@
 
   const soundButton = document.querySelector('.fx-three-sound');
   let soundtrack = null;
-  if (soundButton instanceof HTMLButtonElement) {
+  const professionalAudioOwnsButton = soundButton instanceof HTMLButtonElement
+    && (soundButton.dataset.fxAudioOwner === 'professional-v6' || root.dataset.fxAudioOwner === 'professional-v6');
+  if (soundButton instanceof HTMLButtonElement && !professionalAudioOwnsButton) {
     soundtrack = new GenerativeSoundtrack(soundButton);
     soundButton.addEventListener('click', event => {
+      if (soundButton.dataset.fxAudioOwner === 'professional-v6' || root.dataset.fxAudioOwner === 'professional-v6') return;
       event.stopImmediatePropagation();
       soundtrack.setEnabled(!soundtrack.enabled);
     }, true);
