@@ -8,10 +8,13 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
       - 'docs/scifi-ui/scripts/formatx-nextgen-controls.js'
+      - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
       - 'docs/scifi-ui/styles/formatx-mobile-readability.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-hero-flow.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/test/production-routing.spec.js'
       - '.github/scripts/validate-audio.cjs'
@@ -21,10 +24,13 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
       - 'docs/scifi-ui/scripts/formatx-nextgen-controls.js'
+      - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
       - 'docs/scifi-ui/styles/formatx-mobile-readability.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-hero-flow.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/test/production-routing.spec.js'
       - '.github/scripts/validate-audio.cjs'
@@ -59,6 +65,7 @@ jobs:
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-audio-repair.js
           node --check docs/scifi-ui/scripts/formatx-nextgen-controls.js
+          node --check docs/scifi-ui/scripts/interaction-genome-export-stability.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check billing-worker/src/production-with-license.js
@@ -75,6 +82,10 @@ jobs:
           grep -Fq "signal-verified" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "professionalAudioOwnsButton" docs/scifi-ui/scripts/formatx-nextgen-controls.js
           grep -Fq "root.dataset.fxAudioOwner === 'professional-v6'" docs/scifi-ui/scripts/formatx-nextgen-controls.js
+          grep -Fq "setImportant(sound, 'top', '138px')" docs/scifi-ui/scripts/interaction-genome-export-stability.js
+          grep -Fq "setImportant(sound, 'visibility', 'visible')" docs/scifi-ui/scripts/interaction-genome-export-stability.js
+          grep -Fq "setImportant(sound, 'pointer-events', 'auto')" docs/scifi-ui/scripts/interaction-genome-export-stability.js
+          grep -Fq "20260807-audio-slot-2" docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq "top: 90px !important" docs/scifi-ui/styles/formatx-site-stability.css
           grep -Fq "html body .fx-three-sound" docs/scifi-ui/styles/formatx-mobile-readability.css
           grep -Fq "top: 138px !important" docs/scifi-ui/styles/formatx-mobile-readability.css
