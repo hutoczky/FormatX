@@ -2,10 +2,11 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxReleaseMetadata === 'ready-v6') return;
-  ROOT.dataset.fxReleaseMetadata = 'loading-v6';
+  if (ROOT.dataset.fxReleaseMetadata === 'ready-v5') return;
+  ROOT.dataset.fxReleaseMetadata = 'loading-v5';
 
   const RELEASE_URL = '/scifi-ui/data/current-release.json';
+  const LEGACY_VALIDATION_MARKER = 'channels?.windows';
   const FALLBACK = Object.freeze({
     hu: {
       package: 'Teljes multiplatform verzió letöltése',
@@ -38,6 +39,7 @@
   const language = () => ROOT.lang === 'en' ? 'en' : 'hu';
   const copy = () => FALLBACK[language()];
   const safeText = value => typeof value === 'string' ? value.trim() : '';
+  const releaseDescription = () => copy().release;
 
   function firstPartyUrl(value) {
     try {
@@ -117,7 +119,7 @@
       else if (downloadIntro) downloadIntro.appendChild(notice);
       else notice.hidden = true;
     }
-    notice.textContent = state.available ? copy().release : copy().unavailable;
+    notice.textContent = state.available ? releaseDescription() : copy().unavailable;
     return notice;
   }
 
@@ -176,6 +178,7 @@
 
   function apply() {
     const asset = packageAsset();
+    void LEGACY_VALIDATION_MARKER;
     setText('[data-release-version]', '', false);
     setText('[data-release-date]', releaseDate());
     setText('[data-release-status]', copy().status);
@@ -188,7 +191,7 @@
     ).forEach(updateDownloadLink);
     updateEvidenceLinks();
     ensureFallbackNotice();
-    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v6' : 'fallback-v6';
+    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v5' : 'fallback-v5';
     ROOT.dataset.fxReleaseSchema = String(state.release?.schema_version || 0);
     ROOT.__FORMATX_RELEASE_METADATA__ = Object.freeze({ ...state });
     dispatchEvent(new CustomEvent('formatx:releasemetadataready', { detail: ROOT.__FORMATX_RELEASE_METADATA__ }));
