@@ -62,6 +62,14 @@ function localTargetExists(pageFile, html, rawValue) {
   return false;
 }
 
+function read(relative) {
+  return fs.readFileSync(path.join(repo, relative), 'utf8');
+}
+
+function json(relative) {
+  return JSON.parse(read(relative));
+}
+
 const htmlFiles = walk(publicRoot).filter(file => file.endsWith('.html'));
 assert.ok(htmlFiles.length >= 10, 'unexpectedly small public HTML surface');
 
@@ -97,25 +105,94 @@ for (const file of htmlFiles) {
   if (/http:\/\//i.test(html)) report(`${label}: insecure http URL found`);
 }
 
-const homepage = fs.readFileSync(path.join(publicRoot, 'index.html'), 'utf8');
-const productionContent = fs.readFileSync(path.join(repo, 'billing-worker/src/production-content-entry.js'), 'utf8');
-const downloads = fs.readFileSync(path.join(publicRoot, 'downloads/index.html'), 'utf8');
-const portable = fs.readFileSync(path.join(publicRoot, 'assets/images/product-showcase/portable-installer-compatible.svg'), 'utf8');
-const aliases = fs.readFileSync(path.join(repo, 'billing-worker/src/production-feedback-entry.js'), 'utf8');
-const loop = fs.readFileSync(path.join(publicRoot, 'scripts/formatx-infinite-scroll.js'), 'utf8');
-const guard = fs.readFileSync(path.join(publicRoot, 'scripts/formatx-full-release-guard.js'), 'utf8');
+const homepage = read('docs/scifi-ui/index.html');
+const productionContent = read('billing-worker/src/production-content-entry.js');
+const downloads = read('docs/scifi-ui/downloads/index.html');
+const portable = read('docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg');
+const aliases = read('billing-worker/src/production-feedback-entry.js');
+const loop = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
+const guard = read('docs/scifi-ui/scripts/formatx-full-release-guard.js');
+const seo = read('docs/scifi-ui/scripts/formatx-seo.js');
+const evidenceRenderer = read('docs/scifi-ui/scripts/public-evidence-pages.js');
+const androidPage = read('docs/scifi-ui/android/index.html');
+const androidManifest = json('docs/scifi-ui/downloads/android-native-update.json');
+const platformStatus = json('docs/scifi-ui/data/platform-status.json');
+const currentRelease = json('docs/scifi-ui/data/current-release.json');
+const knownIssues = json('docs/scifi-ui/data/known-issues.json');
+const testMatrix = json('docs/scifi-ui/data/test-matrix.json');
 
 if ((homepage.match(/<h1\b/gi) || []).length !== 1) report('homepage: exactly one h1 is required');
 const feedbackAvailable = homepage.includes('id="user-feedback"')
   || (productionContent.includes('id="user-feedback"') && productionContent.includes('USER_FEEDBACK_SECTION'));
 if (!feedbackAvailable) report('homepage: user feedback section missing from static page and production injection');
 if (!homepage.includes('id="resources"')) report('homepage: release section missing');
+if (!homepage.includes('Teljes multiplatform verzió letöltése') || !homepage.includes('Download full multiplatform version')) {
+  report('homepage: static full-release download copy missing');
+}
+if (/\b(?:nyilvános béta|public beta)\b/i.test(homepage)) report('homepage: retired generic beta wording remains in static source');
+if (/Windows, macOS, web és Android hozzáférés támogatott|Windows, macOS, web and Android access are supported/i.test(homepage)) {
+  report('homepage: planned/preview platforms are presented as supported');
+}
+if (/A stabil csomagok|Stable packages and release information/i.test(homepage)) {
+  report('homepage: evidence-gated Stable is overstated');
+}
+
 if (/data-release-download="multiplatform"[^>]+href=["']\.\/?["']/i.test(downloads)) report('downloads: primary fallback points to itself');
 if (!downloads.includes('FormatX-Updates/releases/latest')) report('downloads: JavaScript-free latest release fallback missing');
 if (!downloads.includes('Teljes multiplatform verzió letöltése') || !downloads.includes('5 napos próbalicenc')) {
   report('downloads: full release / five-day trial copy missing');
 }
-if (/\b(?:nyilvános béta|public beta)\b/i.test(downloads)) report('downloads: retired beta wording remains');
+if (/\b(?:nyilvános béta|public beta)\b/i.test(downloads)) report('downloads: retired generic beta wording remains');
+
+if (/\b(?:Public beta product status|FormatX beta|bétaállapot|beta package|Overall status['"],?\s*value:['"]Public beta)/i.test(seo)) {
+  report('SEO: retired generic beta metadata remains');
+}
+if (!seo.includes("value:'Full release'") || !seo.includes("value:'5 days'")) report('SEO: full release/trial structured data missing');
+if (/Windows \(Public beta\)|Linux\/Bazzite \(Development\)/i.test(seo)) report('SEO: stale platform maturity remains');
+if (/operatingSystem:'[^']*(?:macOS|iOS|Web)/i.test(seo)) report('SEO: planned/preview surface included as supported operating system');
+
+if (!evidenceRenderer.includes('release?.channels?.multiplatform')) report('verification renderer: canonical multiplatform channel missing');
+if (/language\(\) === 'en' \? 'Public beta' : 'Nyilvános béta'/i.test(evidenceRenderer)) report('verification renderer: retired beta status remains');
+if (!evidenceRenderer.includes("'Full release'") || !evidenceRenderer.includes("'Teljes verzió'")) report('verification renderer: full-release status missing');
+
+if (platformStatus.product_release?.status !== 'full_release') report('platform status: product is not full_release');
+if (platformStatus.product_release?.trial_days !== 5) report('platform status: trial_days must be 5');
+const byId = Object.fromEntries(platformStatus.platforms.map(platform => [platform.id, platform]));
+for (const id of ['linux-bazzite', 'windows', 'android']) {
+  if (byId[id]?.status !== 'full_release') report(`platform status: ${id} must be full_release`);
+}
+if (byId.web?.status !== 'technical_preview') report('platform status: web must remain technical_preview');
+for (const id of ['macos', 'ios']) {
+  if (byId[id]?.status !== 'planned') report(`platform status: ${id} must remain planned`);
+}
+
+const multi = currentRelease.channels?.multiplatform;
+if (!currentRelease.ok || !multi?.available) report('current release: public multiplatform package unavailable');
+if (!Array.isArray(multi?.supported_platforms) || !multi.supported_platforms.includes('linux-bazzite') || !multi.supported_platforms.includes('windows')) {
+  report('current release: canonical supported platform list incomplete');
+}
+if (!/^sha256:[0-9a-f]{64}$/i.test(multi?.digest || '')) report('current release: package SHA-256 digest missing');
+
+const knownIssueText = JSON.stringify(knownIssues);
+if (/no public native package is currently available|nincs nyilvános natív csomag|Treat the release as beta|kiadást bétaállapotként kezeld/i.test(knownIssueText)) {
+  report('known issues: stale full-release contradiction remains');
+}
+if (knownIssues.updated !== '2026-08-07') report('known issues: audit date is stale');
+
+const matrixText = JSON.stringify(testMatrix);
+if (/Install the public beta package|nyilvános béta csomag|edition is in Development and no public native package|native edition is in Development/i.test(matrixText)) {
+  report('test matrix: stale release maturity remains');
+}
+const linuxCase = testMatrix.cases.find(item => item.id === 'FX-LINUX-NATIVE-001');
+if (!linuxCase || linuxCase.status === 'blocked') report('test matrix: Linux full release must not be blocked solely for package availability');
+
+if (!/beta$/i.test(androidManifest.versionName || '')) report('Android Native manifest: expected separate beta channel marker');
+if (!androidPage.includes('/download/android') || !androidPage.includes('ANDROID TELJES VERZIÓ')) report('Android page: canonical full-release route missing');
+if (!androidPage.includes('NATÍV BÉTA') || !androidPage.includes('android-native-v1.1.0-beta')) report('Android page: Native beta channel is not explicitly separated');
+if (/WEBVIEW NÉLKÜLI NATÍV TELJES KIADÁS|current native edition is the full release|jelenlegi natív kiadás a teljes verzió/i.test(androidPage)) {
+  report('Android page: Native beta is falsely presented as full release');
+}
+
 if (/data:image\/webp|<image\b/i.test(portable)) report('portable installer: embedded raster/WebP is forbidden');
 if (!loop.includes("const VERSION = 'seamless-v6'") || !loop.includes('clonedHeroOnly: true')) report('homepage: seamless loop contract missing');
 if (!guard.includes("fxFullRelease = 'full-release'") || !guard.includes("fxTrialDays = '5'")) report('full-release guard contract missing');
@@ -134,4 +211,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`PASS: ${htmlFiles.length} public HTML pages, local targets, IDs, images, CSP hooks, feedback injection, full-release copy, downloads, aliases and seamless loop validated.`);
+console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, full-release truth, SEO, evidence data, Android channel separation, downloads, aliases and seamless loop validated.`);
