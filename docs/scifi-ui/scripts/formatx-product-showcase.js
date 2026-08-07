@@ -26,7 +26,7 @@
       en: ['03 / DIAGNOSTICS', 'Assess the environment before acting.', 'Hardware, permissions, package manager, drive and sensor information in one diagnostic view.']
     },
     {
-      image: 'portable-installer.svg',
+      image: 'portable-installer-compatible.svg',
       accent: 'cyan',
       hu: ['04 / HORDOZHATÓ TELEPÍTŐ', 'Egy projektből több célkörnyezet.', 'Aktuális rendszerre optimalizált vagy teljes cross-platform csomag készíthető Linux-, Windows- és macOS-indítókkal.'],
       en: ['04 / PORTABLE INSTALLER', 'One project, multiple target environments.', 'Build an optimized current-system package or a complete cross-platform bundle with Linux, Windows and macOS launchers.']
