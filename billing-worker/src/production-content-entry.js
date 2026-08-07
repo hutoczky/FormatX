@@ -19,7 +19,7 @@ const NO_STORE_PATHS = new Set([
   '/scifi-ui/data/test-matrix.json', '/scifi-ui/data/known-issues.json',
   '/scifi-ui/data/stable-gate.json', '/scifi-ui/data/decision-log.json',
   '/scifi-ui/data/workflow-cases.json', '/scifi-ui/scripts/release-metadata.js',
-  '/scifi-ui/scripts/platform-status.js',
+  '/scifi-ui/scripts/platform-status.js', '/scifi-ui/scripts/site.js',
   '/scifi-ui/scripts/formatx-public-shell.js',
   '/scifi-ui/scripts/formatx-content-standard.js',
   '/scifi-ui/scripts/formatx-content-finalizer.js',
@@ -33,6 +33,7 @@ const NO_STORE_PATHS = new Set([
   '/scifi-ui/styles/formatx-premium-finish.css',
   '/scifi-ui/styles/formatx-feedback.css',
   '/scifi-ui/technical-report.html',
+  '/scifi-ui/android/', '/scifi-ui/android/index.html',
   '/scifi-ui/reports/formatx-technical-evidence-report.md'
 ]);
 
@@ -45,7 +46,7 @@ const CONTENT_ASSETS = [
   '<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260807-full-release-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>',
-  '<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260731-seo-2"></script>',
+  '<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260807-full-release-seo-3"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-finalizer.js?v=20260731-content-final-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-platform-surface-finalizer.js?v=20260731-platform-final-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-organism-trust.js?v=20260731-organism-trust-1"></script>',
@@ -62,7 +63,7 @@ const STATIC_LIVE_OS_SECTION = `
     <section id="live-os-overview" class="fx-static-live-os" aria-labelledby="live-os-overview-title" itemscope itemtype="https://schema.org/SoftwareApplication">
       <meta itemprop="name" content="FormatX Suite Pro">
       <meta itemprop="applicationCategory" content="UtilitiesApplication">
-      <meta itemprop="operatingSystem" content="Linux, Bazzite, Windows, macOS, Android, Web">
+      <meta itemprop="operatingSystem" content="Linux, Bazzite, Windows, Android">
       <meta itemprop="url" content="https://www.formatxsuite.com/">
       <div class="fx-static-live-os__head">
         <div>
@@ -75,7 +76,7 @@ const STATIC_LIVE_OS_SECTION = `
         <article><strong data-hu="Természetes nyelvű vezérlés" data-en="Natural-language control">Természetes nyelvű vezérlés</strong><p data-hu="Magyar vagy angol paranccsal kereshetsz, navigálhatsz, diagnosztikát és bemutatót indíthatsz." data-en="Use Hungarian or English commands to search, navigate, run diagnostics and start the guided demo.">Magyar vagy angol paranccsal kereshetsz, navigálhatsz, diagnosztikát és bemutatót indíthatsz.</p></article>
         <article><strong data-hu="Valós munkamenet-adatok" data-en="Real session data">Valós munkamenet-adatok</strong><p data-hu="Kijelzőfrissítés, képkockaidő, inputkésés, böngésző-, hálózati és WebGL-képességadatok." data-en="Display cadence, frame timing, input latency, browser, network and WebGL capability data.">Kijelzőfrissítés, képkockaidő, inputkésés, böngésző-, hálózati és WebGL-képességadatok.</p></article>
         <article><strong data-hu="Funkcionális 3D / Canvas térkép" data-en="Functional 3D / Canvas topology">Funkcionális 3D / Canvas térkép</strong><p data-hu="Meghajtók, partíciók, SMART-állapotok és ellenőrzési adatfolyamok. WebGL nélkül interaktív Canvas mód működik." data-en="Drives, partitions, SMART states and verification flows. An interactive Canvas mode works without WebGL.">Meghajtók, partíciók, SMART-állapotok és ellenőrzési adatfolyamok. WebGL nélkül interaktív Canvas mód működik.</p></article>
-        <article><strong data-hu="Nyilvános bizonyíték" data-en="Public evidence">Nyilvános bizonyíték</strong><p data-hu="Lighthouse-kapuk, mobiltesztek, valós termékképek, kiadási rekordok és nyílt bizonyítékhiányok." data-en="Lighthouse gates, mobile tests, genuine product captures, release records and open evidence gaps.">Lighthouse-kapuk, mobiltesztek, valós termékképek, kiadási rekordok és nyílt bizonyítékhiányok.</p></article>
+        <article><strong data-hu="Nyilvános bizonyíték" data-en="Public evidence">Nyilvános bizonyíték</strong><p data-hu="CI-kapuk, mobiltesztek, valós termékképek, kiadási rekordok és nyílt bizonyítékhiányok." data-en="CI gates, mobile tests, genuine product captures, release records and open evidence gaps.">CI-kapuk, mobiltesztek, valós termékképek, kiadási rekordok és nyílt bizonyítékhiányok.</p></article>
       </div>
       <ul class="fx-static-live-os__facts" aria-label="Live OS tulajdonságok">
         <li data-hu="Helyben futó parancsértelmezés" data-en="Local command interpretation">Helyben futó parancsértelmezés</li>
