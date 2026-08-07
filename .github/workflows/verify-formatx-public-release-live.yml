@@ -15,6 +15,7 @@ on:
       - 'docs/scifi-ui/scripts/release-metadata.js'
       - 'docs/scifi-ui/scripts/platform-status.js'
       - 'docs/scifi-ui/data/production-deploy-marker.json'
+      - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/src/production-content-entry.js'
       - '.github/workflows/verify-formatx-public-release-live.yml'
 
@@ -44,29 +45,48 @@ jobs:
                    "$origin/scifi-ui/data/platform-status.json?audit=${GITHUB_SHA}-${attempt}" > "$tmp/platform.json" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/data/current-release.json?audit=${GITHUB_SHA}-${attempt}" > "$tmp/release.json" \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/api/public-release?audit=${GITHUB_SHA}-${attempt}" > "$tmp/release-api.json" \
                 && grep -Fq 'Teljes multiplatform verzió letöltése' "$tmp/home.html" \
                 && grep -Fq 'Teljes multiplatform verzió letöltése' "$tmp/downloads.html" \
                 && grep -Fq '5 napos próbalicenc' "$tmp/downloads.html" \
-                && ! grep -Eqi 'Multiplatform nyilvános béta|Multiplatform public beta|NATÍV BÉTA|NATIVE BETA|Windows nyilvános béta letöltése' "$tmp/home.html" "$tmp/downloads.html" \
-                && node - "$tmp/platform.json" "$tmp/release.json" <<'NODE'
+                && ! grep -Eqi 'Multiplatform nyilvános béta|Multiplatform public beta|Windows nyilvános béta letöltése' "$tmp/home.html" "$tmp/downloads.html" \
+                && ! grep -Eqi 'github|githubusercontent' "$tmp/release.json" "$tmp/release-api.json" \
+                && node - "$tmp/platform.json" "$tmp/release.json" "$tmp/release-api.json" <<'NODE'
           const fs = require('node:fs');
           const platform = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
           const release = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
+          const api = JSON.parse(fs.readFileSync(process.argv[4], 'utf8'));
+
           if (platform.product_release?.status !== 'full_release') process.exit(1);
           if (platform.product_release?.trial_days !== 5) process.exit(1);
           const byId = Object.fromEntries((platform.platforms || []).map(item => [item.id, item]));
           for (const id of ['linux-bazzite', 'windows', 'android']) {
             if (byId[id]?.status !== 'full_release') process.exit(1);
           }
+          if (byId.web?.status !== 'technical_preview') process.exit(1);
+          if (byId.macos?.status !== 'planned' || byId.ios?.status !== 'planned') process.exit(1);
+
           const channel = release.channels?.multiplatform;
-          if (release.ok !== true || release.schema_version !== 2) process.exit(1);
+          const android = release.channels?.android;
+          if (release.ok !== true || release.schema_version !== 3) process.exit(1);
+          if (release.source !== 'formatx_release_service') process.exit(1);
           if (release.prerelease === true) process.exit(1);
+          if (release.release_url !== '/scifi-ui/downloads/') process.exit(1);
           if (!channel || channel.available !== true) process.exit(1);
+          if (channel.source !== 'formatx_release_service') process.exit(1);
+          if (channel.download_url !== '/download/multiplatform') process.exit(1);
           if (channel.primary_platform !== 'linux-bazzite') process.exit(1);
           if (!Array.isArray(channel.supported_platforms)) process.exit(1);
           if (!channel.supported_platforms.includes('linux-bazzite')) process.exit(1);
           if (!channel.supported_platforms.includes('windows')) process.exit(1);
           if (!/^sha256:[a-f0-9]{64}$/i.test(String(channel.digest || ''))) process.exit(1);
+          if (!android || android.available !== true || android.download_url !== '/download/android') process.exit(1);
+
+          if (api.draft !== false || api.prerelease === true) process.exit(1);
+          if (api.html_url !== '/scifi-ui/downloads/') process.exit(1);
+          if (!Array.isArray(api.assets) || api.assets.length < 1) process.exit(1);
+          if (api.assets[0]?.browser_download_url !== '/download/multiplatform') process.exit(1);
           NODE
               then
                 success=true
@@ -77,7 +97,7 @@ jobs:
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Strict full-release audit failed for $origin" >&2
+              echo "Strict first-party full-release audit failed for $origin" >&2
               exit 1
             fi
           done
@@ -103,7 +123,7 @@ jobs:
               body: JSON.stringify({
                 state,
                 context: 'FormatX strict live public release audit',
-                description: 'Both domains expose full release status with a five-day trial licence',
+                description: 'Both domains expose the first-party full release and five-day trial contract',
                 target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
               }),
             }
