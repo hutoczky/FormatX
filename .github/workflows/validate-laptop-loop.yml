@@ -1,5 +1,5 @@
-name: Validate FormatX seamless cyclic scrolling
-run-name: Validate seamless scrolling from ${{ github.sha }}
+name: Validate FormatX native no-jump scrolling
+run-name: Validate native scrolling from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-seamless-scroll-${{ github.ref }}
+  group: formatx-native-scroll-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Validate seamless scroll source
+      - name: Validate native scroll source
         shell: bash
         run: |
           set -euo pipefail
@@ -47,15 +47,19 @@ jobs:
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           python3 -m json.tool docs/scifi-ui/data/public-platform-contract.json >/dev/null
           grep -Fq "const VERSION = 'seamless-v6'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "automaticLoop: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "visualBridge: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "automaticLoop: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "visualBridge: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "clonedContent: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "clonedHeroOnly: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "clonedHeroOnly: false" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "nativePositionOnly: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "jumpFree: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "requestAnimationFrame(transferIfNeeded)" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq '"automatic_scroll_loop": true' docs/scifi-ui/data/public-platform-contract.json
-          grep -Fq '"hero_visual_bridge": true' docs/scifi-ui/data/public-platform-contract.json
+          grep -Fq '"automatic_scroll_loop": false' docs/scifi-ui/data/public-platform-contract.json
+          grep -Fq '"hero_visual_bridge": false' docs/scifi-ui/data/public-platform-contract.json
           grep -Fq '"forced_scroll_transfer": false' docs/scifi-ui/data/public-platform-contract.json
+          grep -Fq '"automatic_page_position_changes": false' docs/scifi-ui/data/public-platform-contract.json
+          ! grep -Fq "window.scrollTo(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "scrollIntoView(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq "cloneNode(true)" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "preventDefault" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
@@ -64,39 +68,39 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --prefix "$RUNNER_TEMP/formatx-seamless-scroll" --no-audit --no-fund playwright@1.62.0
-          "$RUNNER_TEMP/formatx-seamless-scroll/node_modules/.bin/playwright" install --with-deps chromium
+          npm install --prefix "$RUNNER_TEMP/formatx-native-scroll" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-native-scroll/node_modules/.bin/playwright" install --with-deps chromium
 
       - name: Start website
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-seamless-scroll-http.log" 2>&1 &
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-native-scroll-http.log" 2>&1 &
           for attempt in $(seq 1 40); do
             curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
             sleep 0.25
           done
-          cat "$RUNNER_TEMP/formatx-seamless-scroll-http.log"
+          cat "$RUNNER_TEMP/formatx-native-scroll-http.log"
           exit 1
 
-      - name: Verify mobile, laptop and Full HD seamless scrolling
+      - name: Verify mobile, laptop and Full HD native scrolling
         env:
-          NODE_PATH: ${{ runner.temp }}/formatx-seamless-scroll/node_modules
+          NODE_PATH: ${{ runner.temp }}/formatx-native-scroll/node_modules
         shell: bash
         run: |
           set -o pipefail
-          node .github/scripts/validate-laptop-continuous-loop.cjs 2>&1 | tee seamless-scroll-report.txt
+          node .github/scripts/validate-laptop-continuous-loop.cjs 2>&1 | tee native-scroll-report.txt
 
-      - name: Upload seamless scroll report
+      - name: Upload native scroll report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-seamless-scroll-report
-          path: seamless-scroll-report.txt
+          name: formatx-native-scroll-report
+          path: native-scroll-report.txt
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Publish seamless scroll status
+      - name: Publish native scroll status
         if: always() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -105,13 +109,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Seamless cyclic scrolling passed on mobile, HD and Full HD'
+            description='Native no-jump scrolling passed on mobile, HD and Full HD'
           else
             state='failure'
-            description='Seamless cyclic scrolling validation failed'
+            description='Native no-jump scrolling validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX seamless cyclic scrolling' \
+            -f context='FormatX native no-jump scrolling' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
