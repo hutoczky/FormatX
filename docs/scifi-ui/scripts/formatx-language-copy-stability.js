@@ -2,19 +2,21 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxLanguageCopyStability === 'ready-v2') return;
-  root.dataset.fxLanguageCopyStability = 'loading-v2';
+  if (root.dataset.fxLanguageCopyStability === 'ready-v3') return;
+  root.dataset.fxLanguageCopyStability = 'loading-v3';
 
   const COPY = Object.freeze({
     hu: {
       nav: ['Működés', 'Modulok', 'Licenc és árak', 'Biztonság', 'Letöltés'],
       trial: 'napos próbalicenc',
-      download: 'Teljes multiplatform verzió letöltése'
+      download: 'Teljes multiplatform verzió letöltése',
+      releaseName: 'Teljes multiplatform verzió'
     },
     en: {
       nav: ['Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads'],
       trial: 'day trial licence',
-      download: 'Download full multiplatform version'
+      download: 'Download full multiplatform version',
+      releaseName: 'Full multiplatform version'
     }
   });
 
@@ -56,8 +58,16 @@
         downloadLink.dataset.releaseChannel = 'multiplatform';
       }
 
+      const releaseName = document.getElementById('release-name');
+      setText(releaseName, hu.releaseName, en.releaseName);
+
+      const telemetryValue = document.querySelector('#hero .hero-label.b span, #hero .hero-label[data-release-telemetry] span');
+      if (telemetryValue && telemetryValue.textContent !== 'FULL') telemetryValue.textContent = 'FULL';
+      const telemetryLabel = document.querySelector('#hero .hero-label.b b, #hero .hero-label[data-release-telemetry] b');
+      if (telemetryLabel && telemetryLabel.textContent !== 'PUBLIC RELEASE') telemetryLabel.textContent = 'PUBLIC RELEASE';
+
       root.dataset.fxLanguageCopy = language();
-      root.dataset.fxLanguageCopyStability = 'ready-v2';
+      root.dataset.fxLanguageCopyStability = 'ready-v3';
     } finally {
       rendering = false;
     }
@@ -70,18 +80,23 @@
 
   addEventListener('formatx:languagechange', schedule);
   addEventListener('formatx:releasemetadataready', schedule);
+  addEventListener('formatx:platformstatusready', schedule);
   addEventListener('pageshow', schedule);
 
   const languageObserver = new MutationObserver(schedule);
   languageObserver.observe(root, { attributes: true, attributeFilter: ['lang'] });
 
   const copyObserver = new MutationObserver(schedule);
-  const nav = document.getElementById('main-nav');
-  if (nav) copyObserver.observe(nav, { subtree: true, childList: true, characterData: true });
-  const trial = document.querySelector('.hero-facts > span:nth-child(3) small');
-  if (trial) copyObserver.observe(trial, { subtree: true, childList: true, characterData: true });
-  const download = document.getElementById('hero-download');
-  if (download) copyObserver.observe(download, { subtree: true, childList: true, characterData: true });
+  [
+    document.getElementById('main-nav'),
+    document.querySelector('.hero-facts > span:nth-child(3) small'),
+    document.getElementById('hero-download'),
+    document.getElementById('release-name'),
+    document.querySelector('#hero .hero-label.b'),
+    document.querySelector('#hero .hero-label[data-release-telemetry]')
+  ].filter(Boolean).forEach(node => {
+    copyObserver.observe(node, { subtree: true, childList: true, characterData: true });
+  });
 
   render();
   setTimeout(render, 0);
