@@ -37,7 +37,7 @@ export function createSalesUnavailablePage() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="robots" content="noindex">
+  <meta name="robots" content="noindex,nofollow,noarchive">
   <title>Licencvásárlás előkészítés alatt | FormatX Suite Pro</title>
   <link rel="stylesheet" href="/scifi-ui/styles/site.css">
 </head>
@@ -45,10 +45,10 @@ export function createSalesUnavailablePage() {
   <a class="skip-link" href="#main-content">Ugrás a tartalomra</a>
   <main id="main-content" class="legal-main">
     <article class="content-width legal-document">
-      <p class="eyebrow">ÉRTÉKESÍTÉSI ÁLLAPOT · PUBLIC BETA</p>
+      <p class="eyebrow">ÉRTÉKESÍTÉSI ÁLLAPOT · TELJES KIADÁS</p>
       <h1>Az új licencvásárlás átmenetileg nem indítható</h1>
-      <p class="legal-lead">A FormatX V92 nyilvános béta és az 5 napos próbalicenc letölthető marad, de az éles fizetési folyamat a teljes üzemeltetői cím, adószám, számlázási szolgáltató, fogyasztóvédelmi és adatkezelési adatok jóváhagyásáig zárolva van.</p>
-      <p><strong>English:</strong> FormatX V92 remains available as a public beta with a 5-day trial, but new purchases are disabled until the complete merchant address, tax ID, invoicing provider, consumer-information and privacy details have been approved.</p>
+      <p class="legal-lead">A FormatX teljes kiadása és az 5 napos próbalicenc letölthető marad. Az új fizetős licencvásárlás viszont addig zárolva van, amíg a teljes üzemeltetői cím, adószám, számlázási szolgáltató és a szükséges jogi adatok jóváhagyása nem teljes.</p>
+      <p><strong>English:</strong> The FormatX full release and its 5-day trial licence remain available. New paid licence purchases stay disabled until the complete merchant address, tax ID, invoicing provider and required legal information have been approved.</p>
       <div class="legal-actions">
         <a class="button primary" href="/scifi-ui/downloads/">Letöltések és platformállapot</a>
         <a class="button secondary" href="/scifi-ui/support.html">Támogatás</a>
