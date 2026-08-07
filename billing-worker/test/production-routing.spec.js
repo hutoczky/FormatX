@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import productionWorker, {
   canonicalPageRedirect,
+  concealUpstreamText,
   createAudioTestWav,
   isLivingCorePath,
   isThreeStagePath,
@@ -47,19 +48,40 @@ describe('production routing and frame security', () => {
     expect(response.headers.get('X-Frame-Options')).toBe('DENY');
     expect(policy).toContain("frame-ancestors 'none'");
     expect(policy).toContain("script-src 'self' https://cdn.jsdelivr.net");
-    expect(policy).toContain('https://api.github.com');
+    expect(policy).toContain("connect-src 'self' https://cdn.jsdelivr.net");
+    expect(policy.toLowerCase()).not.toContain('github');
     expect(policy).not.toContain('blob:');
     expect(policy).not.toContain('https://unpkg.com');
   });
 
-  it('keeps ordinary HTML pages protected from framing', () => {
+  it('keeps ordinary HTML pages protected from framing and upstream-host disclosure', () => {
     const response = secureResponse(new Response('<!doctype html>', {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     }), new URL('https://www.formatxsuite.com/scifi-ui/'));
+    const policy = response.headers.get('Content-Security-Policy') || '';
 
     expect(response.headers.get('X-Frame-Options')).toBe('DENY');
-    expect(response.headers.get('Content-Security-Policy')).toContain("frame-ancestors 'none'");
-    expect(response.headers.get('Content-Security-Policy')).not.toContain('https://cdn.jsdelivr.net');
+    expect(policy).toContain("frame-ancestors 'none'");
+    expect(policy).not.toContain('https://cdn.jsdelivr.net');
+    expect(policy.toLowerCase()).not.toContain('github');
+  });
+
+  it('maps upstream public references to first-party FormatX routes', () => {
+    const input = [
+      'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest',
+      'https://github.com/hutoczky/FormatX-Updates/releases/download/v127/FormatX-Suite-Pro-V127.zip',
+      'https://github.com/hutoczky/FormatX/issues/new',
+      'https://raw.githubusercontent.com/hutoczky/FormatX/master/docs/scifi-ui/downloads/FormatX-Native-Android.apk',
+      'GitHub Releases',
+    ].join('\n');
+    const output = concealUpstreamText(input);
+
+    expect(output).toContain('/api/public-release');
+    expect(output).toContain('/download/multiplatform');
+    expect(output).toContain('/download/android-native-beta');
+    expect(output).toContain('/scifi-ui/support.html');
+    expect(output.toLowerCase()).not.toContain('github');
+    expect(output.toLowerCase()).not.toContain('githubusercontent');
   });
 
   it('allows same-origin user-activated audio without opening microphone access', () => {
@@ -102,6 +124,57 @@ describe('production routing and frame security', () => {
     expect(String.fromCharCode(...bytes.slice(0, 4))).toBe('RIFF');
     expect(String.fromCharCode(...bytes.slice(8, 12))).toBe('WAVE');
     expect(bytes.byteLength).toBeGreaterThan(4000);
+  });
+
+  it('serves sanitised first-party release metadata', async () => {
+    const rawRelease = {
+      schema_version: 2,
+      ok: true,
+      source: 'github_published_release',
+      repository: 'hutoczky/FormatX-Updates',
+      source_release_id: 123,
+      version: 'v127',
+      release_name: 'FormatX Suite Pro V127',
+      published_at: '2026-08-06T11:31:54Z',
+      release_url: 'https://github.com/hutoczky/FormatX-Updates/releases/tag/v127',
+      channels: {
+        multiplatform: {
+          available: true,
+          name: 'FormatX-Suite-Pro-V127.zip',
+          download_url: 'https://github.com/hutoczky/FormatX-Updates/releases/download/v127/FormatX-Suite-Pro-V127.zip',
+          size: 12345,
+          digest: `sha256:${'a'.repeat(64)}`,
+          content_type: 'application/zip',
+          primary_platform: 'linux-bazzite',
+          supported_platforms: ['linux-bazzite', 'windows'],
+        },
+        android: { available: true, name: 'FormatX-Suite-Pro-Android.apk', download_url: '/download/android' },
+      },
+      integrity: { status: 'digest_published' },
+    };
+    const response = await productionWorker.fetch(
+      new Request('https://www.formatxsuite.com/scifi-ui/data/current-release.json'),
+      {
+        ASSETS: {
+          async fetch() {
+            return new Response(JSON.stringify(rawRelease), {
+              headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            });
+          },
+        },
+      },
+      {},
+    );
+    const text = await response.text();
+    const payload = JSON.parse(text);
+
+    expect(response.status).toBe(200);
+    expect(payload.source).toBe('formatx_release_service');
+    expect(payload.repository).toBeUndefined();
+    expect(payload.source_release_id).toBeUndefined();
+    expect(payload.release_url).toBe('/scifi-ui/downloads/');
+    expect(payload.channels.multiplatform.download_url).toBe('/download/multiplatform');
+    expect(text.toLowerCase()).not.toContain('github');
   });
 
   it('redirects the apex domain to the canonical www product page', () => {
