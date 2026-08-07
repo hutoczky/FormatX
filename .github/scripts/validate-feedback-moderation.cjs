@@ -32,23 +32,27 @@ assert.match(api, /status === 'approved' \? now : null/, 'approved timestamp han
 assert.match(api, /DELETE FROM user_feedback/, 'permanent deletion workflow missing');
 assert.match(api, /origin_not_allowed/, 'same-origin mutation protection missing');
 assert.doesNotMatch(api, /contact_email[^\n]+feedbackSummary/, 'public summary must not expose email');
+assert.match(api, /import \{ ensureFeedbackSchemaCompatibility \} from '.\/feedback-schema\.js'/, 'feedback API must use the central schema guard');
+assert.doesNotMatch(api, /const SCHEMA_SQL/, 'feedback API must not duplicate runtime DDL');
+assert.doesNotMatch(api, /async function ensureFeedbackSchema\(/, 'legacy duplicate schema initializer must be removed');
 
 assert.match(schema, /PRAGMA table_info\(user_feedback\)/, 'runtime schema inspection missing');
-assert.match(schema, /SCHEMA_VERSION = '4'/, 'feedback schema version must be v4');
+assert.match(schema, /SCHEMA_VERSION = '5'/, 'feedback schema version must be v5');
+assert.match(schema, /if \(hasCanonicalColumns\(columns\)\) return;/, 'read-only compatible-schema fast path missing');
 assert.match(schema, /ALTER TABLE user_feedback ADD COLUMN/, 'non-destructive missing-column migration missing');
 assert.match(schema, /duplicate column/, 'concurrent additive migration handling missing');
 assert.match(schema, /feedback_schema_column_missing/, 'post-recovery verification missing');
 assert.match(schema, /CREATE INDEX IF NOT EXISTS idx_user_feedback_ip_created/, 'feedback IP index migration missing');
-assert.match(schema, /schemaReadyPromise/, 'per-isolate migration cache missing');
+assert.match(schema, /schemaReadyPromise/, 'per-isolate schema check cache missing');
 assert.match(schema, /saveSchemaVersionBestEffort/, 'best-effort schema metadata recording missing');
 assert.doesNotMatch(schema, /DROP TABLE user_feedback/, 'runtime schema recovery must never drop live feedback data');
 assert.doesNotMatch(schema, /ALTER TABLE[^\n]+RENAME TO user_feedback/, 'runtime schema recovery must not rename a recovery table into place');
 assert.doesNotMatch(schema, /RECOVERY_TABLE/, 'destructive recovery-table path must be retired');
 
-assert.match(entry, /ensureFeedbackSchemaCompatibility/, 'production entry does not run the migration');
+assert.match(entry, /ensureFeedbackSchemaCompatibility/, 'production entry does not run the schema guard');
 assert.match(entry, /feedback_schema_unavailable/, 'controlled schema failure response missing');
-assert.match(entry, /isFeedbackRequestPath/, 'production entry does not scope migration to feedback requests');
-assert.ok(entry.indexOf('ensureFeedbackSchemaCompatibility') < entry.indexOf('handleFeedbackRequest(request, env)'), 'migration must run before feedback API handling');
+assert.match(entry, /isFeedbackRequestPath/, 'production entry does not scope the schema guard to feedback requests');
+assert.ok(entry.indexOf('ensureFeedbackSchemaCompatibility') < entry.indexOf('handleFeedbackRequest(request, env)'), 'schema guard must run before feedback API handling');
 
 assert.match(index, /feedback\.html/, 'owner centre feedback navigation missing');
 assert.match(page, /noindex,nofollow,noarchive/, 'moderation page must not be indexed');
@@ -66,4 +70,4 @@ assert.doesNotMatch(script, /innerHTML\s*=/, 'untrusted feedback must not be ren
 assert.match(style, /\.feedback-layout/, 'moderation layout styling missing');
 assert.match(style, /@media\(max-width:/, 'moderation mobile layout missing');
 
-console.log('FormatX protected feedback and non-destructive D1 schema recovery validation passed.');
+console.log('FormatX feedback validation passed: central read-only fast path, non-destructive recovery and protected moderation are intact.');
