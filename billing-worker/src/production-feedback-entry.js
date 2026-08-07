@@ -1,9 +1,5 @@
 import productionWorker from './production-entry.js';
 import { handleFeedbackRequest } from './feedback-api.js';
-import {
-  ensureFeedbackSchemaCompatibility,
-  isFeedbackRequestPath,
-} from './feedback-schema.js';
 
 const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';
 const HOMEPAGE_PATHS = new Set(['/', '/scifi-ui/', '/scifi-ui/index.html']);
@@ -44,30 +40,6 @@ function canonicalPublicRedirect(request, url) {
   return Response.redirect(target.toString(), 308);
 }
 
-function schemaFailure(error) {
-  const incident = crypto.randomUUID();
-  console.error('FormatX feedback schema recovery failed', {
-    incident,
-    message: error instanceof Error ? error.message : String(error),
-  });
-  return new Response(JSON.stringify({
-    ok: false,
-    error: 'feedback_schema_unavailable',
-    incident,
-    message: 'A visszajelző adatbázis automatikus helyreállítása még nem fejeződött be. Próbáld újra rövidesen.',
-  }), {
-    status: 503,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store, max-age=0',
-      'Retry-After': '30',
-      'X-Content-Type-Options': 'nosniff',
-      'Cross-Origin-Resource-Policy': 'same-origin',
-      'Referrer-Policy': 'no-referrer',
-    },
-  });
-}
-
 async function stabiliseHomepageSemantics(request, url, response) {
   if (request.method !== 'GET' || !response.ok || !HOMEPAGE_PATHS.has(url.pathname)) return response;
   const contentType = response.headers.get('Content-Type') || '';
@@ -95,16 +67,11 @@ export default {
     const redirect = canonicalPublicRedirect(request, url);
     if (redirect) return redirect;
 
-    if (isFeedbackRequestPath(url.pathname)) {
-      try {
-        await ensureFeedbackSchemaCompatibility(env.LICENSE_DB);
-      } catch (error) {
-        return schemaFailure(error);
-      }
-    }
-
+    // Feedback requests go straight to their real SELECT/INSERT operation.
+    // Schema maintenance is never allowed to block a healthy database request.
     const feedbackResponse = await handleFeedbackRequest(request, env);
     if (feedbackResponse) return feedbackResponse;
+
     const response = await productionWorker.fetch(request, env, ctx);
     return stabiliseHomepageSemantics(request, url, response);
   },
