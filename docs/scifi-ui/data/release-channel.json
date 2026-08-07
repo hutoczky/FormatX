@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "updated": "2026-07-31",
+  "schema_version": 3,
+  "updated": "2026-08-07",
   "source": {
     "type": "github_latest_release",
     "repository": "hutoczky/FormatX-Updates",
@@ -23,8 +23,8 @@
       ],
       "required_for_active_download": true,
       "fallback": {
-        "hu": "Multiplatform nyilvános béta letöltése",
-        "en": "Download multiplatform public beta"
+        "hu": "Teljes multiplatform verzió letöltése",
+        "en": "Download full multiplatform version"
       }
     },
     "android": {
@@ -35,8 +35,8 @@
       ],
       "required_for_active_download": true,
       "fallback": {
-        "hu": "Android nyilvános béta",
-        "en": "Android public beta"
+        "hu": "Android teljes verzió",
+        "en": "Android full version"
       }
     }
   },
@@ -44,8 +44,12 @@
     "show_release_version": false,
     "show_internal_component_versions": false,
     "package_label": {
-      "hu": "Multiplatform nyilvános béta",
-      "en": "Multiplatform public beta"
+      "hu": "Teljes multiplatform verzió",
+      "en": "Full multiplatform version"
+    },
+    "trial_label": {
+      "hu": "5 napos próbalicenc",
+      "en": "5-day trial licence"
     }
   },
   "version_normalization": {
