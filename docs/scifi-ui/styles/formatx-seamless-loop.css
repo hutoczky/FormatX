@@ -1,16 +1,15 @@
 /* Seamless loop and release-centre contract. */
 
-/* The Organism interface enables y proximity snapping on desktop. That
-   conflicts with the seamless visual hand-off because the browser can snap a
-   valid relative Hero landing back to Hero start. seamless-v6 owns scrolling,
-   so snapping stays disabled for the complete continuous-scroll session. */
-html[data-fx-infinite-controller='seamless-v6'],
-html[data-fx-infinite-controller='seamless-v6'] body {
+/* The seamless controller owns the end-of-page hand-off. Scroll snapping must
+   stay disabled or the browser can pull the ratio-matched Hero landing back to
+   the start of the section after the transfer. */
+html[data-fx-infinite-controller='seamless-v7'],
+html[data-fx-infinite-controller='seamless-v7'] body {
   scroll-snap-type: none !important;
 }
 
-html[data-fx-infinite-controller='seamless-v6'] #hero,
-html[data-fx-infinite-controller='seamless-v6'] main > .scene {
+html[data-fx-infinite-controller='seamless-v7'] #hero,
+html[data-fx-infinite-controller='seamless-v7'] main > .scene {
   scroll-snap-align: none !important;
   scroll-snap-stop: normal !important;
 }
@@ -19,6 +18,7 @@ html.fx-seamless-loop-transfer,
 html.fx-seamless-loop-transfer body {
   scroll-behavior: auto !important;
   scroll-snap-type: none !important;
+  overflow-anchor: none !important;
 }
 
 .fx-loop-bridge {
@@ -28,88 +28,37 @@ html.fx-seamless-loop-transfer body {
   overflow: clip;
   background: #02070d;
   contain: layout paint style;
+  pointer-events: none;
+  user-select: none;
 }
 
+/* Keep the clone visually as close as possible to the real Hero. The runtime
+   neutralises IDs and interactivity, so there is no duplicate semantic tree. */
 .fx-loop-bridge > .fx-loop-hero-clone {
   position: relative;
   display: block !important;
+  width: 100%;
   min-height: 100svh !important;
   margin: 0 !important;
-  overflow: clip;
   pointer-events: none !important;
   user-select: none !important;
 }
 
-.fx-loop-hero-clone .hero-grid {
-  position: relative;
-  display: block;
-  min-height: 100svh;
-  padding: 0;
-}
-
-.fx-loop-hero-clone .hero-copy {
-  position: absolute;
-  left: clamp(24px, 6vw, 108px);
-  bottom: clamp(108px, 13vh, 172px);
-  z-index: 5;
-  width: min(560px, calc(100vw - 48px));
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
-}
-
-.fx-loop-hero-clone .hero-copy::before,
-.fx-loop-hero-clone .hero-copy::after {
-  display: none;
-}
-
-.fx-loop-hero-clone .hero-title-main {
-  font-size: clamp(58px, 10vw, 162px);
-  line-height: .78;
-  letter-spacing: -.07em;
-  text-shadow: 0 0 42px rgba(104, 221, 255, .12);
-}
-
-.fx-loop-hero-clone .hero-title-sub {
-  margin-top: 10px;
-  font-size: clamp(24px, 4vw, 58px);
-  letter-spacing: .18em;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(222, 244, 252, .42);
-}
-
-.fx-loop-hero-clone .hero-lead {
-  max-width: 520px;
-  margin-top: 26px;
-  color: rgba(225, 240, 247, .76);
-  font-size: clamp(15px, 1.35vw, 20px);
-  line-height: 1.72;
-}
-
-.fx-loop-hero-clone .hero-space {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.fx-loop-hero-clone .fx-immersive-launch,
-.fx-loop-hero-clone .fx-organism-map,
-.fx-loop-hero-clone .scroll-cue,
-.fx-loop-hero-clone .hero-actions,
-.fx-loop-hero-clone .hero-facts {
-  display: none !important;
+.fx-loop-hero-clone,
+.fx-loop-hero-clone * {
   pointer-events: none !important;
+}
+
+.fx-loop-hero-clone [hidden] {
+  display: none !important;
 }
 
 .fx-loop-bridge::before {
   content: '';
   position: absolute;
   inset: 0 0 auto;
-  z-index: 30;
-  height: min(18svh, 180px);
+  z-index: 50;
+  height: min(10svh, 120px);
   background: linear-gradient(180deg, #02070d, transparent);
   pointer-events: none;
 }
@@ -231,29 +180,6 @@ body > .site-footer {
   line-height: 1.6;
 }
 
-@media (max-width: 900px) {
-  .fx-loop-hero-clone .hero-copy {
-    left: 22px;
-    right: 22px;
-    bottom: 128px;
-    width: auto;
-  }
-
-  .fx-loop-hero-clone .hero-title-main {
-    font-size: clamp(54px, 18vw, 92px);
-  }
-
-  .fx-loop-hero-clone .hero-title-sub {
-    font-size: clamp(22px, 8vw, 40px);
-  }
-
-  .fx-loop-hero-clone .hero-lead {
-    max-width: 36ch;
-    font-size: 14px;
-    line-height: 1.58;
-  }
-}
-
 @media (max-width: 700px) {
   .fx-release-download-head,
   .fx-release-download-grid {
@@ -269,7 +195,7 @@ body > .site-footer {
   }
 
   .fx-loop-bridge::before {
-    height: 12svh;
+    height: 8svh;
   }
 }
 
