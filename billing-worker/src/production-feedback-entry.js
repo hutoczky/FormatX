@@ -54,12 +54,13 @@ function schemaFailure(error) {
     ok: false,
     error: 'feedback_schema_unavailable',
     incident,
-    message: 'A visszajelző adatbázis helyreállítása folyamatban van. Töltsd újra az oldalt, majd próbáld újra.',
+    message: 'A visszajelző adatbázis automatikus helyreállítása még nem fejeződött be. Próbáld újra rövidesen.',
   }), {
     status: 503,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store, max-age=0',
+      'Retry-After': '30',
       'X-Content-Type-Options': 'nosniff',
       'Cross-Origin-Resource-Policy': 'same-origin',
       'Referrer-Policy': 'no-referrer',
