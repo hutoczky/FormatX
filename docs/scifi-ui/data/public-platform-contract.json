@@ -21,13 +21,14 @@
     "desktop_composition_preloaded": true,
     "mobile_layout_unchanged": true,
     "infinite_scroll_controller": "seamless-v6",
-    "scroll_controller": "seamless-v6",
-    "automatic_scroll_loop": true,
+    "scroll_controller": "native-continuous",
+    "automatic_scroll_loop": false,
     "clone_based_loop": false,
-    "hero_visual_bridge": true,
+    "hero_visual_bridge": false,
     "fine_pointer_scroll_mode": "native-continuous",
     "coarse_pointer_scroll_mode": "native-continuous",
     "forced_scroll_transfer": false,
+    "automatic_page_position_changes": false,
     "language_switch_preserves_scene_hash": true
   },
   "source_of_truth": {
