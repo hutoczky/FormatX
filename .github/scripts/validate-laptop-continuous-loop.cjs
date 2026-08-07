@@ -31,13 +31,14 @@ async function ensureScrollRuntime(page) {
     && document.documentElement.__FORMATX_INFINITE_SCROLL__?.revision === 'ratio-v4'
   ));
   if (loaded) return;
-  const runtimeUrl = await page.evaluate(() => new URL('./scripts/formatx-infinite-scroll.js?v=20260808-seamless-ratio-v4-test', document.baseURI).href);
+  const runtimeUrl = await page.evaluate(() => new URL('./scripts/formatx-infinite-scroll.js?v=20260808-seamless-ratio-v5-test', document.baseURI).href);
   await page.addScriptTag({ url: runtimeUrl });
 }
 
 async function snapshot(page) {
   return page.evaluate(() => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+    const clone = bridge?.querySelector('.fx-loop-hero-clone');
     const hero = document.querySelector('#main-content > #hero');
     return {
       controller: document.documentElement.dataset.fxInfiniteController || '',
@@ -54,6 +55,7 @@ async function snapshot(page) {
       maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
       bridgeTop: bridge?.offsetTop ?? -1,
       bridgeHeight: bridge?.offsetHeight ?? 0,
+      bridgeVisualHeight: clone?.offsetHeight ?? 0,
       heroTop: hero?.offsetTop ?? -1,
       heroHeight: hero?.offsetHeight ?? 0,
       loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
@@ -97,12 +99,16 @@ async function verifyProgressiveScroll(page, name) {
 
 async function triggerLoop(page, name) {
   const before = await snapshot(page);
-  assert(before.bridgeTop >= 0 && before.bridgeHeight > 0 && before.heroHeight > 0,
+  assert(before.bridgeTop >= 0 && before.bridgeHeight > 0 && before.bridgeVisualHeight > 0 && before.heroHeight > 0,
     name + ': missing loop geometry: ' + JSON.stringify(before));
 
-  const threshold = before.bridgeTop + Math.max(72, Math.min(before.viewportHeight * .34, 360));
-  const target = Math.min(before.maximum - 4, Math.max(threshold + 48, before.bridgeTop + before.bridgeHeight * .58));
-  const expectedRatio = Math.max(0, Math.min(1, (target - before.bridgeTop) / before.bridgeHeight));
+  const thresholdDepth = Math.max(48, Math.min(before.viewportHeight * .28, 300));
+  const threshold = before.bridgeTop + Math.min(thresholdDepth, Math.max(0, before.bridgeVisualHeight - 2));
+  assert(before.maximum >= threshold + 8,
+    name + ': loop seam is not physically reachable: ' + JSON.stringify({ before, threshold }));
+
+  const target = Math.min(before.maximum - 4, threshold + Math.max(24, Math.min(before.viewportHeight * .08, 80)));
+  const expectedRatio = Math.max(0, Math.min(1, (target - before.bridgeTop) / before.bridgeVisualHeight));
   const expectedLanding = before.heroTop + Math.min(Math.max(0, before.heroHeight - 2), Math.round(before.heroHeight * expectedRatio));
 
   await page.evaluate(y => scrollTo(0, y), target);
@@ -144,7 +150,7 @@ async function verifyViewport(browser, viewport, name, mobile, cycles = 1) {
     if (message.type() === 'error') diagnostics.push('console-error: ' + message.text());
   });
 
-  await page.goto(TEST_URL + '?lang=hu&scroll-test=seamless-ratio-v4', { waitUntil: 'domcontentloaded' });
+  await page.goto(TEST_URL + '?lang=hu&scroll-test=seamless-ratio-v5', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
   await ensureScrollRuntime(page);
   await page.waitForFunction(() => (
@@ -170,6 +176,7 @@ async function verifyViewport(browser, viewport, name, mobile, cycles = 1) {
     && initial.runtime?.clonedHeroOnly === true
     && initial.runtime?.ratioMatchedLanding === true
     && initial.runtime?.frameStableLanding === true
+    && initial.runtime?.reachableSeam === true
     && initial.runtime?.inputInterception === false
     && initial.runtime?.jumpFree === true,
     name + ': seamless runtime contract missing: ' + JSON.stringify(initial));
