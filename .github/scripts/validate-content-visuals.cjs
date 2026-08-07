@@ -102,14 +102,14 @@ async function commonAssertions(page, mobile) {
   const cta = await visibleBox(page, '#hero-download');
   assert(title.width > 100 && title.height > 20, 'Hero title is not visible');
   assert(lead.text.length > 80 && lead.height > 20, 'Concrete product definition is not visible');
-  assert(/multiplatform|public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not communicate multiplatform beta status');
+  assert(/teljes|full|multiplatform/i.test(cta.text) && !/public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not communicate full-release status');
   assert(!overlap(lead, cta), 'Primary CTA overlaps the hero product definition');
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 2, `Horizontal overflow detected: ${overflow}px`);
   const category = await page.locator('.fx-category-definition').first().textContent();
   assert(/Technikusi operációs réteg|Technician Operating Layer/.test(category || ''), 'Product category is missing');
-  const method = await page.locator('.fx-method-inline li').count();
-  assert(method === 4, `FormatX Method must have four steps, found ${method}`);
+  const method = await page.locator('.fx-method-inline:visible').first().locator('li').count();
+  assert(method === 4, `Visible FormatX Method must have four steps, found ${method}`);
   const visibleLanguageControls = await page.locator('.fx-language-toggle:visible, .language-switch [data-language]:visible, .language-control [data-language-choice]:visible').count();
   assert(visibleLanguageControls <= 1, `More than one visible language control: ${visibleLanguageControls}`);
   const immersive = await page.evaluate(() => ({
