@@ -76,20 +76,17 @@ assert.ok(includesAll(feedbackSchema, [
   "SCHEMA_VERSION = '5'",
   'if (hasCanonicalColumns(columns)) return;',
   'ALTER TABLE user_feedback ADD COLUMN',
-  'feedback_schema_column_missing',
-  'saveSchemaVersionBestEffort',
-  'CREATE INDEX IF NOT EXISTS idx_user_feedback_ip_created',
-]), 'read-only fast-path feedback schema missing');
+]), 'non-destructive maintenance migration missing');
 assert.ok(!feedbackSchema.includes('DROP TABLE user_feedback'), 'feedback recovery must never drop the live table');
 assert.ok(!feedbackSchema.includes('RECOVERY_TABLE'), 'legacy destructive feedback recovery path returned');
-assert.ok(feedbackApi.includes("import { ensureFeedbackSchemaCompatibility } from './feedback-schema.js';"), 'feedback API must use central schema compatibility');
-assert.ok(!feedbackApi.includes('const SCHEMA_SQL'), 'feedback API duplicate DDL returned');
+assert.ok(!feedbackApi.includes('ensureFeedbackSchemaCompatibility') && !feedbackApi.includes('const SCHEMA_SQL'), 'normal feedback API path must not run schema maintenance');
+assert.ok(includesAll(feedbackApi, ['classifyFeedbackError', 'feedback_table_missing', 'database_binding_unavailable']), 'feedback safe diagnostics missing');
 assert.ok(includesAll(feedbackEntry, [
-  'feedback_schema_unavailable',
   "['/downloads/', '/scifi-ui/downloads/']",
   "['/support.html', '/scifi-ui/support.html']",
-  'ensureFeedbackSchemaCompatibility',
-]), 'feedback fail-safe or public aliases missing');
+  'handleFeedbackRequest(request, env)',
+]), 'feedback direct routing or public aliases missing');
+assert.ok(!feedbackEntry.includes('ensureFeedbackSchemaCompatibility') && !feedbackEntry.includes('schemaFailure'), 'blocking feedback schema preflight returned');
 
 const qrFiles = [
   'docs/scifi-ui/assets/qr/business_lite-huf.svg',
@@ -110,4 +107,4 @@ assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 assert.ok(deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'), 'custom-domain smoke checks missing');
 
-console.log('PASS: FormatX seamless scroll, full release/trial copy, read-only feedback fast path, downloads, responsive UI and deployment gates are present.');
+console.log('PASS: FormatX seamless scroll, full release/trial copy, direct feedback D1 routing, downloads, responsive UI and deployment gates are present.');
