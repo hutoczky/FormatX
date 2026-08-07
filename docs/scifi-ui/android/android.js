@@ -5,7 +5,7 @@
   const versionNode = document.getElementById('androidVersion');
   const navigationLinks = Array.from(document.querySelectorAll('.bottom-nav a'));
   const updateManifestUrl = '../downloads/android-native-update.json';
-  const verifiedApkUrl = 'https://raw.githubusercontent.com/hutoczky/FormatX/master/docs/scifi-ui/downloads/FormatX-Native-Android.apk';
+  const verifiedApkUrl = '/download/android-native-beta';
 
   function initialLanguage() {
     const query = new URLSearchParams(window.location.search).get('lang');
@@ -45,8 +45,8 @@
     ).forEach(function (link) {
       link.href = verifiedApkUrl;
       link.removeAttribute('download');
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
+      link.removeAttribute('target');
+      link.removeAttribute('rel');
     });
   }
 
