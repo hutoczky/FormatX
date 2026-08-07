@@ -28,12 +28,16 @@ async function waitForReady(page, name) {
   );
 
   const launch = page.locator('.fx-immersive-launch');
-  await launch.waitFor({ state: 'attached', timeout: 10000 });
-  await launch.evaluate(node => node.click());
+  await launch.waitFor({ state: 'visible', timeout: 10000 });
+  await launch.click({ timeout: 5000 });
   await page.waitForFunction(
     () => document.documentElement.dataset.fxImmersive === 'active',
     null,
     { timeout: 5000 }
+  );
+  assert(
+    await page.evaluate(() => Boolean(document.documentElement.dataset.fxCoreActivation)),
+    `${name}: real pointer click did not register a core activation source`
   );
 
   await page.waitForFunction(
@@ -224,7 +228,7 @@ async function validateViewport(browser, name, viewport, mobile) {
     await validateViewport(browser, 'desktop', { width: 1440, height: 900 }, false);
     await validateViewport(browser, 'mobile', { width: 390, height: 844 }, true);
     console.log(
-      'PASS: deferred Organism activation and thought genome disclosure are bilingual, switchable and responsive.'
+      'PASS: real pointer core activation plus thought genome disclosure are bilingual, switchable and responsive.'
     );
   } finally {
     await browser.close();
