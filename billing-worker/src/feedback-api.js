@@ -88,6 +88,24 @@ async function feedbackSummary(database, request) {
     WHERE status = 'approved'
   `).first());
 
+  const publicRows = await runWithFeedbackTable(database, () => database.prepare(`
+    SELECT overall, comment, display_name, locale, approved_at
+    FROM user_feedback
+    WHERE status = 'approved'
+      AND publish_permission = 1
+      AND LENGTH(TRIM(COALESCE(comment, ''))) > 0
+    ORDER BY COALESCE(approved_at, updated_at, created_at) DESC
+    LIMIT 6
+  `).all());
+
+  const reviews = (publicRows?.results || []).map((review) => ({
+    overall: Math.max(1, Math.min(5, Number(review.overall || 0))),
+    comment: cleanText(review.comment, MAX_COMMENT_LENGTH),
+    display_name: cleanText(review.display_name, MAX_NAME_LENGTH) || null,
+    locale: review.locale === 'en' ? 'en' : 'hu',
+    approved_at: review.approved_at || null,
+  })).filter((review) => review.comment);
+
   const count = Number(row?.count || 0);
   return json({
     ok: true,
@@ -100,9 +118,10 @@ async function feedbackSummary(database, request) {
       design: Number(row.design),
       features: Number(row.features),
     } : null,
+    reviews,
     updated_at: row?.updated_at || null,
-    moderation: 'Only approved, genuine submissions are included. No review text or email address is exposed by this endpoint.',
-  }, 200, request, { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=600' });
+    moderation: 'Averages include only approved submissions. Public review text is returned only for approved records with explicit publication permission. Contact email and internal moderation data are never exposed.',
+  }, 200, request, { 'Cache-Control': 'public, max-age=120, stale-while-revalidate=600' });
 }
 
 async function submitFeedback(request, env) {
