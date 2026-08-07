@@ -61,6 +61,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-public-shell.js
           node --check docs/scifi-ui/scripts/public-evidence-pages.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
@@ -205,19 +206,25 @@ jobs:
         run: |
           set -euo pipefail
           grep -Fq "const VERSION = 'seamless-v6'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "fxInfiniteCloneMode = 'none'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "fxAutomaticLoop = 'disabled'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "fxScrollJumpGuard = 'native-position-v1'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "const REVISION = 'ratio-v4'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "fxInfiniteCloneMode = 'hero-visual-bridge'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "fxAutomaticLoop = 'enabled'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "fxScrollJumpGuard = 'visual-ratio-v4'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'clonedHeroOnly: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'visualBridge: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'nativePositionOnly: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'clonedHeroOnly: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'visualBridge: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'ratioMatchedLanding: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'frameStableLanding: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'inputInterception: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'jumpFree: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq 'window.scrollTo(' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq 'scrollIntoView(' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq 'cloneNode(true)' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'cloneNode(true)' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'window.scrollTo({ top: target' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "fxLegacyScrollController = 'disabled'" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
+          ! grep -Fq "addEventListener('scroll'" docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
+          ! grep -Fq 'scrollTo(' docs/scifi-ui/scripts/formatx-infinite-loop-fix.js
           grep -Fq 'data-fx-mobile-core-visible="false"' docs/scifi-ui/styles/formatx-mobile-readability.css
           grep -Fq -- '--fx-mobile-dock-height: 54px' docs/scifi-ui/styles/formatx-mobile-unified.css
           grep -Fq 'max-height: 820px' docs/scifi-ui/styles/formatx-desktop-unified.css
           ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq 'preventDefault' docs/scifi-ui/scripts/formatx-infinite-scroll.js
