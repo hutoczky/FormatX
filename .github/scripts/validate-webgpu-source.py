@@ -56,9 +56,9 @@ preview_config = load_json("wrangler.jsonc")
 production_config = load_json("billing-worker/wrangler.jsonc")
 
 expected = {
-    "linux-bazzite": ("public_beta", "primary"),
-    "windows": ("public_beta", "secondary"),
-    "android": ("public_beta", "preview"),
+    "linux-bazzite": ("full_release", "primary"),
+    "windows": ("full_release", "secondary"),
+    "android": ("full_release", "secondary"),
     "web": ("technical_preview", "preview"),
     "macos": ("planned", "roadmap"),
     "ios": ("planned", "roadmap"),
@@ -68,9 +68,10 @@ actual = {
     for item in status_data["platforms"]
 }
 require("canonical Bazzite-first platform matrix", actual == expected)
-require("product remains Public beta", status_data["product_release"]["status"] == "public_beta")
+require("product is a full release", status_data["product_release"]["status"] == "full_release")
+require("full release keeps five-day trial", status_data["product_release"].get("trial_days") == 5)
 require("public package is multiplatform", status_data["product_release"].get("public_package") == "multiplatform")
-require("no platform falsely claims Stable", all(item[0] != "stable" for item in actual.values()))
+require("no platform falsely claims evidence-gated Stable", all(item[0] != "stable" for item in actual.values()))
 
 channels = release_data.get("channels", {})
 package = channels.get("multiplatform") or channels.get("windows") or {}
@@ -82,6 +83,8 @@ require("official package is available", package.get("available") is True)
 require("official package has SHA-256", str(package.get("digest") or "").startswith("sha256:"))
 require("Bazzite/Linux is public primary", public_copy.get("primary_system") == "linux-bazzite")
 require("public download contract is multiplatform", public_copy.get("download_channel") == "multiplatform")
+require("public maturity is full release", public_copy.get("release_maturity") == "full_release")
+require("public contract keeps five-day trial", public_copy.get("trial_days") == 5)
 require(
     "Windows is supported secondarily",
     "windows" in (public_copy.get("supported_secondary_platforms") or []),
@@ -91,6 +94,9 @@ require("public release version remains hidden", public_copy.get("public_release
 require("downloads use multiplatform release metadata", 'data-release-download="multiplatform"' in downloads)
 require("downloads describe Bazzite/Linux as primary", "Bazzite/Linux elsődleges" in downloads)
 require("downloads describe Windows as supported", "Windows támogatott" in downloads)
+require("downloads expose full release", "Teljes multiplatform verzió letöltése" in downloads)
+require("downloads expose five-day trial", "5 napos próbalicenc" in downloads)
+require("downloads contain no beta wording", "nyilvános béta" not in downloads.lower() and "public beta" not in downloads.lower())
 require("downloads contain no V92 asset", "/releases/download/v92/" not in downloads)
 require("static home contains no V92 asset", "/releases/download/v92/" not in home and "FormatX-Suite-Pro-V92.zip" not in home)
 require("static hero CTA is multiplatform", 'data-release-download="multiplatform"' in home)
@@ -169,9 +175,11 @@ require("Morphing Organism uses continuous morphing", "uFormA" in morph_engine a
 
 require("platform renderer uses canonical JSON", "data/platform-status.json" in platform_js)
 require("platform renderer says Bazzite/Linux primary", "Bazzite/Linux" in platform_js and "elsődleges" in platform_js)
+require("platform renderer says full release", "full release" in platform_js.lower() and "5 napos próbalicenc" in platform_js)
 require("platform badges remain readable", "font-size: 12px" in platform_css)
 require("support has a private email route", "mailto:hutoczky@gmail.com" in support)
 require("terms document withdrawal", "Elállás" in terms)
+require("terms document full release", "teljes verzió / full release" in terms.lower())
 require("privacy documents local fingerprint storage", "nyers kérdésszöveget nem menti" in privacy)
 require("public test matrix exists", "Nyilvános tesztmátrix" in test_matrix)
 require("test matrix does not claim Stable", "· Stable" not in test_matrix)
