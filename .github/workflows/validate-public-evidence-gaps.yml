@@ -58,11 +58,11 @@ jobs:
         working-directory: billing-worker
         run: |
           npm ci
-          npx wrangler deploy --dry-run --outdir ../.wrangler-feedback-candidate
+          npx wrangler deploy --dry-run --outdir ../wrangler-feedback-candidate
       - name: Upload candidate
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: formatx-public-evidence-feedback-candidate
-          path: .wrangler-feedback-candidate
+          path: wrangler-feedback-candidate
           if-no-files-found: error
           retention-days: 7
