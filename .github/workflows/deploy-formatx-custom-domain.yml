@@ -78,6 +78,8 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-public-shell.js
           node --check docs/scifi-ui/scripts/public-evidence-pages.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/formatx-apex.js
+          node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/formatx-premium-finish.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
@@ -194,7 +196,7 @@ jobs:
           echo "mode=wrangler" >> "$GITHUB_OUTPUT"
           npx wrangler deploy
 
-      - name: Smoke-test production feedback, downloads and seamless scrolling
+      - name: Smoke-test production performance, public comments, downloads and scrolling
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -215,14 +217,19 @@ jobs:
               -H 'Accept: application/json' \
               --data "$PAYLOAD" || true)"
             loop_code="$(curl -sS --max-time 30 -o "$tmp/loop.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-infinite-scroll.js?v=production-smoke" || true)"
+            living_code="$(curl -sS --max-time 30 -o "$tmp/living.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/living-architecture.js?v=production-smoke" || true)"
+            apex_code="$(curl -sS --max-time 30 -o "$tmp/apex.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-apex.js?v=production-smoke" || true)"
+            feedback_code="$(curl -sS --max-time 30 -o "$tmp/feedback.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-feedback.js?v=production-smoke" || true)"
+            feedback_style_code="$(curl -sS --max-time 30 -o "$tmp/feedback-public.css" -w '%{http_code}' "$WWW/scifi-ui/styles/formatx-feedback-public.css?v=production-smoke" || true)"
             downloads_code="$(curl -sS -L --max-time 30 -o "$tmp/downloads.html" -w '%{http_code}' "$WWW/downloads/" || true)"
             support_code="$(curl -sS -L --max-time 30 -o "$tmp/support.html" -w '%{http_code}' "$WWW/support.html" || true)"
             portable_code="$(curl -sS --max-time 30 -o "$tmp/portable.svg" -w '%{http_code}' "$WWW/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg" || true)"
 
             if [[ "$root_code" == '200' && "$bare_code" == '200' && "$summary_code" == '200' \
-              && "$submit_code" == '202' && "$loop_code" == '200' && "$downloads_code" == '200' \
-              && "$support_code" == '200' && "$portable_code" == '200' ]]; then
-              python3 - "$tmp" <<'PY'
+              && "$submit_code" == '202' && "$loop_code" == '200' && "$living_code" == '200' \
+              && "$apex_code" == '200' && "$feedback_code" == '200' && "$feedback_style_code" == '200' \
+              && "$downloads_code" == '200' && "$support_code" == '200' && "$portable_code" == '200' ]]; then
+              if python3 - "$tmp" <<'PY'
           import json
           import pathlib
           import sys
@@ -231,6 +238,10 @@ jobs:
           summary = json.loads((root / 'summary.json').read_text())
           submit = json.loads((root / 'submit.json').read_text())
           loop = (root / 'loop.js').read_text()
+          living = (root / 'living.js').read_text()
+          apex = (root / 'apex.js').read_text()
+          feedback = (root / 'feedback.js').read_text()
+          feedback_public = (root / 'feedback-public.css').read_text()
           home = (root / 'home.html').read_text()
           downloads = (root / 'downloads.html').read_text()
           support = (root / 'support.html').read_text()
@@ -238,29 +249,48 @@ jobs:
 
           assert summary.get('ok') is True, summary
           assert isinstance(summary.get('count'), int), summary
+          assert isinstance(summary.get('reviews'), list), summary
+          for review in summary.get('reviews', []):
+              assert set(review).issubset({'overall', 'comment', 'display_name', 'locale', 'approved_at'}), review
+              assert isinstance(review.get('comment'), str) and review['comment'].strip(), review
+              assert 1 <= int(review.get('overall', 0)) <= 5, review
+          assert 'contact_email' not in json.dumps(summary), summary
+          assert 'ip_hash' not in json.dumps(summary), summary
+          assert 'user_agent' not in json.dumps(summary), summary
+          assert 'moderation_note' not in json.dumps(summary), summary
+
           assert submit.get('ok') is True, submit
           assert submit.get('state') == 'pending-moderation', submit
           assert "const VERSION = 'seamless-v6'" in loop, 'seamless-v6 controller missing'
           assert "fxInfiniteCloneMode = 'visual-bridge'" in loop, 'visual bridge missing'
           assert 'clonedHeroOnly: true' in loop, 'Hero-only loop contract missing'
+          assert "deferred-user-activation" in living, 'immersive engine is not user-deferred'
+          assert "rootMargin: '700px 0px'" in living, 'QR work is not viewport-deferred'
+          assert "const RELEASE_API = './data/current-release.json'" in apex, 'homepage still depends on remote release API'
+          assert 'requestAnimationFrame(progress)' in apex and 'requestAnimationFrame(apply)' in apex, 'scroll/pointer work is not frame-throttled'
+          assert 'function renderPublicReviews' in feedback, 'approved public comment renderer missing'
+          assert "rootMargin: '800px 0px'" in feedback, 'feedback UI is not viewport-deferred'
+          assert '.fx-feedback-public-card' in feedback_public, 'public comment styles missing'
           assert 'id="user-feedback"' in home, 'feedback section missing'
           assert 'data-fx-category-title' in home and 'Egy élő operációs réteg technikusi munkához.' in home, 'static category semantics missing'
           assert 'FormatX-Updates/releases/latest' in downloads, 'latest release fallback missing'
           assert 'Támogatás' in support or 'Support' in support, 'support page invalid'
           assert '<svg' in portable and '</svg>' in portable, 'portable installer SVG missing'
           assert 'data:image/webp' not in portable and '<image' not in portable, 'embedded raster returned'
-          print('FormatX production smoke passed.')
+          print('FormatX production performance/public-comments smoke passed.')
           PY
-              rm -rf "$tmp"
-              exit 0
+              then
+                rm -rf "$tmp"
+                exit 0
+              fi
             fi
 
-            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code downloads=$downloads_code support=$support_code portable=$portable_code"
+            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code living=$living_code apex=$apex_code feedback=$feedback_code feedback_style=$feedback_style_code downloads=$downloads_code support=$support_code portable=$portable_code"
             [[ -s "$tmp/summary.json" ]] && cat "$tmp/summary.json" || true
             [[ -s "$tmp/submit.json" ]] && cat "$tmp/submit.json" || true
             rm -rf "$tmp"
             if [[ "$attempt" == '30' ]]; then
-              echo 'Production did not become healthy within the retry window.' >&2
+              echo 'Production did not become healthy with the requested performance/public-comment contract within the retry window.' >&2
               exit 1
             fi
             sleep 12
