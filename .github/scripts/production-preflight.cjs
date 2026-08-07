@@ -37,6 +37,7 @@ const preview = json('wrangler.jsonc');
 const release = json('docs/scifi-ui/data/current-release.json');
 const publicContract = json('docs/scifi-ui/data/public-platform-contract.json');
 const packageAsset = release.channels?.multiplatform || release.channels?.windows || null;
+const androidAsset = release.channels?.android || null;
 const syncWorkflow = read('.github/workflows/sync-current-release.yml');
 const home = read('docs/scifi-ui/index.html');
 const downloads = read('docs/scifi-ui/downloads/index.html');
@@ -101,11 +102,21 @@ check(
   'Official package or SHA-256 digest is invalid'
 );
 check(
+  'android-package-integrity',
+  androidAsset?.available === true
+    && androidAsset?.download_url === '/download/android'
+    && Number.isInteger(androidAsset?.size)
+    && androidAsset.size > 0
+    && /^sha256:[a-f0-9]{64}$/i.test(androidAsset?.digest || ''),
+  'Official Android package size or SHA-256 digest is invalid'
+);
+check(
   'public-platform-contract',
   publicContract.public_copy?.primary_system === 'linux-bazzite'
     && publicContract.public_copy?.download_channel === 'multiplatform'
     && publicContract.public_copy?.public_release_version_visible === false
-    && publicContract.public_copy?.supported_secondary_platforms?.includes('windows'),
+    && publicContract.public_copy?.supported_secondary_platforms?.includes('windows')
+    && publicContract.public_copy?.supported_secondary_platforms?.includes('android'),
   'Public Bazzite-first multiplatform contract is invalid'
 );
 check(
@@ -137,6 +148,7 @@ check(
   releaseController.includes('if (!state.available) return null;')
     && releaseController.includes('releaseDescription')
     && releaseController.includes("setText('[data-release-version]', '', false)")
+    && releaseController.includes('channels?.multiplatform')
     && releaseController.includes('channels?.windows'),
   'Public download controller does not enforce trust, accessibility, hidden versions and legacy channel normalization'
 );
@@ -156,9 +168,13 @@ check(
 );
 check(
   'release-sync-deterministic',
-  syncWorkflow.includes('del(.synced_at)')
+  syncWorkflow.includes('del(.synced_at, .channels.android.updated_at)')
     && syncWorkflow.includes('cmp -s')
-    && syncWorkflow.includes('--retry-all-errors'),
+    && syncWorkflow.includes('--retry-all-errors')
+    && syncWorkflow.includes('android_local_size')
+    && syncWorkflow.includes('android_local_digest')
+    && syncWorkflow.includes('sha256sum')
+    && syncWorkflow.includes("stat -c '%s'"),
   'Release sync is not deterministic and resilient'
 );
 
@@ -238,6 +254,7 @@ check(
 );
 for (const route of [
   '/scifi-ui/downloads/',
+  '/scifi-ui/android/',
   '/scifi-ui/known-issues.html',
   '/scifi-ui/security.html',
   '/scifi-ui/privacy.html',
@@ -263,6 +280,7 @@ for (const relative of [
   '.github/scripts/validate-public-pages-browser.cjs',
   '.github/scripts/validate-thought-disclosure-browser.cjs',
   '.github/workflows/validate-organism-dialogue.yml',
+  '.github/workflows/validate-android-release-integrity.yml',
 ]) {
   check(
     `required-${relative}`,
@@ -281,6 +299,8 @@ const report = {
     internal_version: release.version || null,
     public_version_visible: false,
     package_digest: packageAsset?.digest || null,
+    android_package_digest: androidAsset?.digest || null,
+    android_package_size: androidAsset?.size || null,
     primary_platform: publicContract.public_copy?.primary_system || null,
     supported_platforms: [
       publicContract.public_copy?.primary_system,
