@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-08-07",
+  "scope": "full public FormatX site and production delivery",
+  "release_model": {
+    "product": "full_release",
+    "trial_days": 5,
+    "primary_platform": "linux-bazzite",
+    "supported_secondary_platforms": ["windows", "android"],
+    "web": "technical_preview",
+    "planned": ["macos", "ios-ipados"],
+    "stable_designation": "separate_evidence_gate"
+  },
+  "integrity_contract": {
+    "multiplatform_sha256_required": true,
+    "android_size_required": true,
+    "android_sha256_required": true,
+    "detached_signature_asset": "not_published"
+  },
+  "validation_contract": [
+    "production_preflight",
+    "public_site_static_integrity",
+    "desktop_mobile_chromium_public_pages",
+    "lighthouse_quality_gate",
+    "live_mobile_hero",
+    "android_release_integrity"
+  ]
+}
