@@ -73,14 +73,23 @@ assert.ok(!/\b(?:nyilvános béta|public beta)\b/i.test(downloads), 'retired bet
 assert.ok(includesAll(downloadStyle, ['grid-template-columns: repeat(3', '@media (max-width: 800px)', '@media (min-width: 2200px)']), 'downloads responsive range missing');
 
 assert.ok(includesAll(feedbackSchema, [
-  "SCHEMA_VERSION = '5'",
+  "SCHEMA_VERSION = '6'",
+  'export async function createFeedbackTableIfMissing',
+  'database.prepare(createTableSql()).run()',
+  'bootstrapPromise',
   'if (hasCanonicalColumns(columns)) return;',
   'ALTER TABLE user_feedback ADD COLUMN',
-]), 'non-destructive maintenance migration missing');
+]), 'on-demand bootstrap or non-destructive feedback maintenance missing');
 assert.ok(!feedbackSchema.includes('DROP TABLE user_feedback'), 'feedback recovery must never drop the live table');
 assert.ok(!feedbackSchema.includes('RECOVERY_TABLE'), 'legacy destructive feedback recovery path returned');
-assert.ok(!feedbackApi.includes('ensureFeedbackSchemaCompatibility') && !feedbackApi.includes('const SCHEMA_SQL'), 'normal feedback API path must not run schema maintenance');
-assert.ok(includesAll(feedbackApi, ['classifyFeedbackError', 'feedback_table_missing', 'database_binding_unavailable']), 'feedback safe diagnostics missing');
+assert.ok(!feedbackApi.includes('ensureFeedbackSchemaCompatibility') && !feedbackApi.includes('const SCHEMA_SQL'), 'normal feedback API path must not run blanket schema maintenance');
+assert.ok(includesAll(feedbackApi, [
+  "import { createFeedbackTableIfMissing } from './feedback-schema.js';",
+  'runWithFeedbackTable',
+  "classifyFeedbackError(error) !== 'feedback_table_missing'",
+  'await createFeedbackTableIfMissing(database)',
+  'database_binding_unavailable',
+]), 'targeted missing-table feedback bootstrap or safe diagnostics missing');
 assert.ok(includesAll(feedbackEntry, [
   "['/downloads/', '/scifi-ui/downloads/']",
   "['/support.html', '/scifi-ui/support.html']",
@@ -107,4 +116,4 @@ assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 assert.ok(deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'), 'custom-domain smoke checks missing');
 
-console.log('PASS: FormatX seamless scroll, full release/trial copy, direct feedback D1 routing, downloads, responsive UI and deployment gates are present.');
+console.log('PASS: FormatX seamless scroll, full release/trial copy, targeted feedback table bootstrap, downloads, responsive UI and deployment gates are present.');
