@@ -13,6 +13,7 @@ const required = [
   'billing-worker/license-migrations/0002_user_feedback.sql',
   'docs/scifi-ui/scripts/formatx-feedback.js',
   'docs/scifi-ui/styles/formatx-feedback.css',
+  'docs/scifi-ui/styles/formatx-feedback-public.css',
   'docs/scifi-ui/technical-report.html',
   'docs/scifi-ui/reports/formatx-technical-evidence-report.md',
   'docs/sitemap.xml',
@@ -23,10 +24,14 @@ const contentEntry = read('billing-worker/src/production-content-entry.js');
 const feedbackApi = read('billing-worker/src/feedback-api.js');
 const feedbackUi = read('docs/scifi-ui/scripts/formatx-feedback.js');
 const feedbackCss = read('docs/scifi-ui/styles/formatx-feedback.css');
+const feedbackPublicCss = read('docs/scifi-ui/styles/formatx-feedback-public.css');
 const migration = read('billing-worker/license-migrations/0002_user_feedback.sql');
 const report = read('docs/scifi-ui/technical-report.html');
 const reportDownload = read('docs/scifi-ui/reports/formatx-technical-evidence-report.md');
 const sitemap = read('docs/sitemap.xml');
+const summaryStart = feedbackApi.indexOf('async function feedbackSummary');
+const summaryEnd = feedbackApi.indexOf('async function submitFeedback');
+const publicSummary = summaryStart >= 0 && summaryEnd > summaryStart ? feedbackApi.slice(summaryStart, summaryEnd) : '';
 
 assert.match(contentEntry, /production-feedback-entry\.js/, 'production feedback wrapper is not active');
 assert.match(contentEntry, /id=\"live-os-overview\"/, 'static indexable Live OS section missing');
@@ -38,13 +43,15 @@ assert.match(contentEntry, /fx-noscript-proof/, 'noscript evidence fallback miss
 assert.match(contentEntry, /technical-report\.html/, 'technical report link missing');
 assert.match(contentEntry, /Felhasználói értékelés és visszajelzés/, 'privacy disclosure injection missing');
 
-assert.match(feedbackApi, /WHERE status = 'approved'/, 'public average must use approved feedback only');
+assert.match(publicSummary, /WHERE status = 'approved'/, 'public average must use approved feedback only');
+assert.match(publicSummary, /publish_permission = 1/, 'public text must require explicit publication permission');
+assert.match(publicSummary, /SELECT overall, comment, display_name, locale, approved_at/, 'approved public review projection missing');
+assert.doesNotMatch(publicSummary, /contact_email|ip_hash|user_agent|moderation_note|consent_version/, 'public feedback summary exposes private data');
 assert.match(feedbackApi, /'pending'/, 'new feedback must start as pending moderation');
 assert.match(feedbackApi, /privacy_consent/, 'privacy consent validation missing');
 assert.match(feedbackApi, /PUBLIC_API_RATE_LIMIT/, 'public API rate limiting missing');
 assert.match(feedbackApi, /hashRequestIdentity/, 'raw network identifier must not be stored');
-assert.match(feedbackApi, /No review text or email address is exposed/, 'summary privacy disclosure missing');
-assert.doesNotMatch(feedbackApi, /SELECT[\s\S]{0,240}(comment|contact_email)[\s\S]{0,240}WHERE status = 'approved'/, 'summary endpoint must not select review text or email');
+assert.match(feedbackApi, /explicit publication permission/, 'summary privacy/publication disclosure missing');
 assert.doesNotMatch(feedbackApi, /CF-Connecting-IP[^\n]+INSERT/, 'raw IP must not be inserted');
 
 assert.match(migration, /CREATE TABLE IF NOT EXISTS user_feedback/, 'feedback table migration missing');
@@ -56,8 +63,13 @@ assert.match(feedbackUi, /\/api\/feedback\/summary/, 'feedback summary endpoint 
 assert.match(feedbackUi, /method: 'POST'/, 'feedback submission POST missing');
 assert.match(feedbackUi, /pending moderation|moderálásra vár/, 'moderation messaging missing');
 assert.match(feedbackUi, /data-fx-live-os-launcher/, 'Live OS CTA integration missing');
+assert.match(feedbackUi, /renderPublicReviews/, 'approved comments are not rendered publicly');
+assert.match(feedbackUi, /paragraph\.textContent/, 'approved comments must use safe text rendering');
+assert.match(feedbackUi, /rootMargin: '800px 0px'/, 'feedback work must be deferred until close to the viewport');
 assert.match(feedbackCss, /\.fx-rating-stars/, 'star rating styling missing');
 assert.match(feedbackCss, /prefers-reduced-motion/, 'reduced-motion feedback styling missing');
+assert.match(feedbackPublicCss, /\.fx-feedback-public-card/, 'approved review card styling missing');
+assert.match(feedbackPublicCss, /contain: layout paint style/, 'approved review rendering containment missing');
 
 assert.match(report, /Kötelező teljesítménykapuk/, 'technical gate section missing');
 assert.match(report, /No independent professional review has been published|Nincs publikált független szakmai teszt/, 'honest external evidence gap missing');
@@ -98,7 +110,7 @@ assert.match(sitemap, /technical-report\.html/, 'technical report is absent from
   assert.ok(invalid.errors.contact_email);
   assert.ok(invalid.errors.privacy_consent);
 
-  console.log('FormatX public evidence and moderated feedback validation passed.');
+  console.log('FormatX public evidence, lazy feedback and consent-gated public comment validation passed.');
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;
