@@ -32,13 +32,13 @@
   function ensureStyle() {
     let link = document.querySelector('link[data-fx-seamless-loop-style]');
     if (link) {
-      const wanted = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-ratio-v4';
-      if (!link.href.includes('20260808-seamless-ratio-v4')) link.href = wanted;
+      const wanted = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-ratio-v5';
+      if (!link.href.includes('20260808-seamless-ratio-v5')) link.href = wanted;
       return;
     }
     link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-ratio-v4';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-ratio-v5';
     link.dataset.fxSeamlessLoopStyle = 'true';
     document.head.appendChild(link);
   }
@@ -206,7 +206,7 @@
     bridge.setAttribute('aria-hidden', 'true');
     bridge.appendChild(clone);
     footer.insertAdjacentElement('afterend', bridge);
-    root.dataset.fxLoopBridge = 'ready-ratio-v4';
+    root.dataset.fxLoopBridge = 'ready-ratio-v5';
     return true;
   }
 
@@ -261,10 +261,15 @@
     if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return;
 
     const bridgeTop = bridge.offsetTop;
-    const bridgeHeight = Math.max(1, bridge.offsetHeight);
-    const threshold = bridgeTop + Math.max(72, Math.min(innerHeight * .34, 360));
+    const clone = bridge.querySelector('.fx-loop-hero-clone');
+    const visualHeight = Math.max(1, clone?.offsetHeight || sourceHero.offsetHeight || innerHeight);
+    const thresholdDepth = Math.max(48, Math.min(innerHeight * .28, 300));
+    const threshold = bridgeTop + Math.min(thresholdDepth, Math.max(0, visualHeight - 2));
+    root.dataset.fxLoopThreshold = String(Math.round(threshold));
+    root.dataset.fxLoopVisualHeight = String(Math.round(visualHeight));
     if (scrollY < threshold) return;
-    const ratio = Math.max(0, Math.min(1, (scrollY - bridgeTop) / bridgeHeight));
+
+    const ratio = Math.max(0, Math.min(1, (scrollY - bridgeTop) / visualHeight));
     const target = landingTarget(ratio);
     if (target == null) return;
 
@@ -276,7 +281,7 @@
     root.dataset.fxLoopCount = String(loopCount);
     root.dataset.fxLoopSource = 'hero-visual-bridge';
     landAt(target);
-    settleLanding(target, { count: loopCount, source: 'hero-visual-bridge', ratio, target, revision: REVISION });
+    settleLanding(target, { count: loopCount, source: 'hero-visual-bridge', ratio, target, revision: REVISION, visualHeight });
   }
 
   function onScroll() {
@@ -319,6 +324,7 @@
       clonedHeroOnly: true,
       frameStableLanding: true,
       ratioMatchedLanding: true,
+      reachableSeam: true,
       inputInterception: false,
       jumpFree: true
     });
