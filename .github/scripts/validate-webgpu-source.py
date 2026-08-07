@@ -104,7 +104,7 @@ require("static hero has no numeric release DNA", "92.00" not in home)
 
 require("loader uses v27 ready marker", "safe-ready-v27" in loader)
 require("loader uses v27 degraded marker", "safe-degraded-v27" in loader)
-require("loader includes platform status", "platform-status.js?v=20260730-platform-status-1" in loader)
+require("loader includes full-release platform status", "platform-status.js?v=20260807-full-release-1" in loader)
 require("loader includes Organism voice v4", "organism-voice.js?v=20260730-organism-voice-4" in loader)
 require("loader includes voice stability", "organism-voice-stability.js?v=20260731-organism-stability-1" in loader)
 require("loader includes master synchronizer", "organism-master-sync.js?v=20260802-master-sync-1" in loader)
