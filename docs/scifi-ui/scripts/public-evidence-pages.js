@@ -132,22 +132,25 @@
 
   function releaseCard(release) {
     const article = create('article', 'fx-evidence-card');
-    const windows = release?.channels?.windows;
+    const multiplatform = release?.channels?.multiplatform;
     const evidence = release?.evidence || {};
+    const integrity = release?.integrity || {};
     article.append(
       create('h2', '', language() === 'en' ? 'Current official release' : 'Aktuális hivatalos kiadás'),
       dataList([
         [language() === 'en' ? 'Version' : 'Verzió', release?.version],
         [language() === 'en' ? 'Published' : 'Kiadás dátuma', release?.published_at],
-        [language() === 'en' ? 'Status' : 'Állapot', language() === 'en' ? 'Public beta' : 'Nyilvános béta'],
-        [language() === 'en' ? 'Windows package' : 'Windows-csomag', windows?.available ? windows.name : null],
-        ['SHA-256 / digest', windows?.digest],
+        [language() === 'en' ? 'Status' : 'Állapot', language() === 'en' ? 'Full release' : 'Teljes verzió'],
+        [language() === 'en' ? 'Multiplatform package' : 'Multiplatform csomag', multiplatform?.available ? multiplatform.name : null],
+        ['SHA-256 / digest', multiplatform?.digest],
+        [language() === 'en' ? 'Package integrity' : 'Csomagintegritás', integrity.status || null],
         [language() === 'en' ? 'Signature proof' : 'Aláírási bizonyíték', evidence.signature_asset_url ? (language() === 'en' ? 'Published' : 'Közzétéve') : null]
       ])
     );
     const navigation = create('div', 'fx-page-nav');
     navigation.append(
       link(release?.release_url, language() === 'en' ? 'Official release' : 'Hivatalos kiadás', !release?.release_url),
+      link(multiplatform?.download_url, language() === 'en' ? 'Download package' : 'Csomag letöltése', !multiplatform?.download_url),
       link(evidence.checksum_asset_url, language() === 'en' ? 'Checksum asset' : 'Ellenőrzőösszeg', !evidence.checksum_asset_url),
       link(evidence.signature_asset_url, language() === 'en' ? 'Signature proof' : 'Aláírás', !evidence.signature_asset_url)
     );
