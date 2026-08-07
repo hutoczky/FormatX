@@ -3,9 +3,10 @@ const FEEDBACK_PATHS = new Set([
   '/api/feedback/summary',
 ]);
 const ADMIN_FEEDBACK_ROOT = '/fx-owner-license/api/feedback';
-const SCHEMA_VERSION = '5';
+const SCHEMA_VERSION = '6';
 const SCHEMA_KEY = 'feedback_schema_version';
 let schemaReadyPromise = null;
+let bootstrapPromise = null;
 
 const REQUIRED_COLUMNS = Object.freeze({
   id: "TEXT NOT NULL DEFAULT ''",
@@ -36,31 +37,30 @@ const UUID_SQL = "lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) 
 const NOW_SQL = "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
 
 function createTableSql() {
-  return `
-CREATE TABLE IF NOT EXISTS user_feedback (
-  id TEXT PRIMARY KEY,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
-  overall INTEGER NOT NULL CHECK (overall BETWEEN 1 AND 5),
-  usability INTEGER NOT NULL CHECK (usability BETWEEN 1 AND 5),
-  performance INTEGER NOT NULL CHECK (performance BETWEEN 1 AND 5),
-  design INTEGER NOT NULL CHECK (design BETWEEN 1 AND 5),
-  features INTEGER NOT NULL CHECK (features BETWEEN 1 AND 5),
-  comment TEXT NOT NULL DEFAULT '',
-  display_name TEXT NOT NULL DEFAULT '',
-  contact_email TEXT NOT NULL DEFAULT '',
-  publish_permission INTEGER NOT NULL DEFAULT 0 CHECK (publish_permission IN (0, 1)),
-  privacy_consent INTEGER NOT NULL DEFAULT 1 CHECK (privacy_consent IN (0, 1)),
-  consent_version TEXT NOT NULL,
-  locale TEXT NOT NULL DEFAULT 'hu',
-  source TEXT NOT NULL DEFAULT 'website',
-  page_path TEXT NOT NULL DEFAULT '/',
-  ip_hash TEXT NOT NULL,
-  user_agent TEXT NOT NULL DEFAULT '',
-  moderation_note TEXT NOT NULL DEFAULT '',
-  approved_at TEXT
-);`;
+  return `CREATE TABLE IF NOT EXISTS user_feedback (
+    id TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    overall INTEGER NOT NULL CHECK (overall BETWEEN 1 AND 5),
+    usability INTEGER NOT NULL CHECK (usability BETWEEN 1 AND 5),
+    performance INTEGER NOT NULL CHECK (performance BETWEEN 1 AND 5),
+    design INTEGER NOT NULL CHECK (design BETWEEN 1 AND 5),
+    features INTEGER NOT NULL CHECK (features BETWEEN 1 AND 5),
+    comment TEXT NOT NULL DEFAULT '',
+    display_name TEXT NOT NULL DEFAULT '',
+    contact_email TEXT NOT NULL DEFAULT '',
+    publish_permission INTEGER NOT NULL DEFAULT 0 CHECK (publish_permission IN (0, 1)),
+    privacy_consent INTEGER NOT NULL DEFAULT 1 CHECK (privacy_consent IN (0, 1)),
+    consent_version TEXT NOT NULL,
+    locale TEXT NOT NULL DEFAULT 'hu',
+    source TEXT NOT NULL DEFAULT 'website',
+    page_path TEXT NOT NULL DEFAULT '/',
+    ip_hash TEXT NOT NULL,
+    user_agent TEXT NOT NULL DEFAULT '',
+    moderation_note TEXT NOT NULL DEFAULT '',
+    approved_at TEXT
+  )`;
 }
 
 export function isFeedbackRequestPath(pathname) {
@@ -68,6 +68,23 @@ export function isFeedbackRequestPath(pathname) {
     || pathname.startsWith(`${ADMIN_FEEDBACK_ROOT}/`);
 }
 
+// Used only after a real query proves that the table is absent.
+export async function createFeedbackTableIfMissing(database) {
+  if (!database) throw new Error('feedback_database_unavailable');
+  if (!bootstrapPromise) {
+    bootstrapPromise = (async () => {
+      await database.prepare(createTableSql()).run();
+      await createIndexesBestEffort(database);
+    })().catch((error) => {
+      bootstrapPromise = null;
+      throw error;
+    });
+  }
+  return bootstrapPromise;
+}
+
+// Maintenance-only compatibility helper. It is intentionally not called on every
+// public feedback request.
 export async function ensureFeedbackSchemaCompatibility(database) {
   if (!database) throw new Error('feedback_database_unavailable');
   if (!schemaReadyPromise) {
@@ -80,23 +97,18 @@ export async function ensureFeedbackSchemaCompatibility(database) {
 }
 
 async function migrateFeedbackSchema(database) {
-  // Normal production path: one read-only schema inspection and zero DDL/UPDATE.
-  // This keeps ordinary feedback reads/submissions out of D1 maintenance work.
   let columns = await readColumns(database);
   if (hasCanonicalColumns(columns)) return;
 
-  // Empty PRAGMA means a fresh database/table. Only then create the canonical table.
   if (columns.size === 0) {
-    await database.exec(createTableSql());
+    await createFeedbackTableIfMissing(database);
     columns = await readColumns(database);
   }
 
-  // Existing older tables are repaired additively. Live feedback data is never
-  // dropped, copied to a recovery table or renamed during a request.
   for (const [name, definition] of Object.entries(REQUIRED_COLUMNS)) {
     if (columns.has(name)) continue;
     try {
-      await database.exec(`ALTER TABLE user_feedback ADD COLUMN ${name} ${definition};`);
+      await database.prepare(`ALTER TABLE user_feedback ADD COLUMN ${name} ${definition}`).run();
     } catch (error) {
       const message = String(error instanceof Error ? error.message : error).toLowerCase();
       if (!message.includes('duplicate column')) throw error;
@@ -107,8 +119,6 @@ async function migrateFeedbackSchema(database) {
   const missing = Object.keys(REQUIRED_COLUMNS).filter(name => !columns.has(name));
   if (missing.length) throw new Error(`feedback_schema_column_missing:${missing.join(',')}`);
 
-  // Data cleanup is a recovery-only operation. It never runs when the live schema
-  // is already compatible.
   await normaliseRecoveredRows(database);
   await createIndexesBestEffort(database);
   await saveSchemaVersionBestEffort(database);
@@ -146,12 +156,8 @@ async function normaliseRecoveredRows(database) {
 
 async function createIndexesBestEffort(database) {
   try {
-    await database.exec(`
-      CREATE INDEX IF NOT EXISTS idx_user_feedback_status_created
-        ON user_feedback(status, created_at DESC);
-      CREATE INDEX IF NOT EXISTS idx_user_feedback_ip_created
-        ON user_feedback(ip_hash, created_at DESC);
-    `);
+    await database.prepare('CREATE INDEX IF NOT EXISTS idx_user_feedback_status_created ON user_feedback(status, created_at DESC)').run();
+    await database.prepare('CREATE INDEX IF NOT EXISTS idx_user_feedback_ip_created ON user_feedback(ip_hash, created_at DESC)').run();
   } catch (error) {
     console.warn('FormatX feedback index maintenance skipped', {
       message: error instanceof Error ? error.message : String(error),
@@ -161,13 +167,11 @@ async function createIndexesBestEffort(database) {
 
 async function saveSchemaVersionBestEffort(database) {
   try {
-    await database.exec(`
-      CREATE TABLE IF NOT EXISTS formatx_schema_meta (
-        key TEXT PRIMARY KEY,
-        value TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      );
-    `);
+    await database.prepare(`CREATE TABLE IF NOT EXISTS formatx_schema_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`).run();
     await database.prepare(`
       INSERT INTO formatx_schema_meta (key, value, updated_at)
       VALUES (?1, ?2, ?3)
