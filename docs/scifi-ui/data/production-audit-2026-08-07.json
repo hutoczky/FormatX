@@ -20,9 +20,10 @@
   "validation_contract": [
     "production_preflight",
     "public_site_static_integrity",
-    "desktop_mobile_chromium_public_pages",
+    "desktop_mobile_chromium_public_pages_v3",
     "lighthouse_quality_gate",
     "live_mobile_hero",
-    "android_release_integrity"
+    "android_release_integrity",
+    "production_deploy_smoke"
   ]
 }
