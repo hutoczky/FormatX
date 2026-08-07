@@ -11,9 +11,9 @@
     "test:license": "vitest --config vitest.license-workers.config.js --run"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.12.4",
-    "vitest": "~3.2.0",
-    "wrangler": "^4.90.0"
+    "@cloudflare/vitest-pool-workers": "^0.18.8",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.118.0"
   },
   "type": "module"
 }
