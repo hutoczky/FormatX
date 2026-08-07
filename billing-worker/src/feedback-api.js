@@ -1,3 +1,5 @@
+import { createFeedbackTableIfMissing } from './feedback-schema.js';
+
 const FEEDBACK_PATH = '/api/feedback';
 const SUMMARY_PATH = '/api/feedback/summary';
 const ADMIN_FEEDBACK_ROOT = '/fx-owner-license/api/feedback';
@@ -28,18 +30,9 @@ export async function handleFeedbackRequest(request, env) {
   }
 
   try {
-    if (isAdminPath) {
-      return await handleAdminFeedbackRequest(request, env, url);
-    }
-
-    if (request.method === 'GET' && url.pathname === SUMMARY_PATH) {
-      return await feedbackSummary(env.LICENSE_DB, request);
-    }
-
-    if (request.method === 'POST' && url.pathname === FEEDBACK_PATH) {
-      return await submitFeedback(request, env);
-    }
-
+    if (isAdminPath) return await handleAdminFeedbackRequest(request, env, url);
+    if (request.method === 'GET' && url.pathname === SUMMARY_PATH) return await feedbackSummary(env.LICENSE_DB, request);
+    if (request.method === 'POST' && url.pathname === FEEDBACK_PATH) return await submitFeedback(request, env);
     return json({ error: 'method_not_allowed' }, 405, request, { Allow: 'GET, POST, OPTIONS' });
   } catch (error) {
     const incident = crypto.randomUUID();
@@ -63,6 +56,7 @@ function classifyFeedbackError(error) {
   if (message.includes('no such table')) return 'feedback_table_missing';
   if (message.includes('no such column')) return 'feedback_column_missing';
   if (message.includes('readonly') || message.includes('read-only')) return 'database_read_only';
+  if (message.includes('not authorized') || message.includes('permission')) return 'database_write_denied';
   if (message.includes('too many requests') || message.includes('rate limit')) return 'database_rate_limited';
   if (message.includes('quota') || message.includes('limit exceeded')) return 'database_quota_exceeded';
   if (message.includes('locked') || message.includes('busy')) return 'database_busy';
@@ -70,8 +64,18 @@ function classifyFeedbackError(error) {
   return 'database_operation_failed';
 }
 
+async function runWithFeedbackTable(database, operation) {
+  try {
+    return await operation();
+  } catch (error) {
+    if (classifyFeedbackError(error) !== 'feedback_table_missing') throw error;
+    await createFeedbackTableIfMissing(database);
+    return operation();
+  }
+}
+
 async function feedbackSummary(database, request) {
-  const row = await database.prepare(`
+  const row = await runWithFeedbackTable(database, () => database.prepare(`
     SELECT
       COUNT(*) AS count,
       ROUND(AVG(overall), 2) AS overall,
@@ -82,7 +86,7 @@ async function feedbackSummary(database, request) {
       MAX(approved_at) AS updated_at
     FROM user_feedback
     WHERE status = 'approved'
-  `).first();
+  `).first());
 
   const count = Number(row?.count || 0);
   return json({
@@ -137,17 +141,15 @@ async function submitFeedback(request, env) {
   }
 
   // Honeypot: a production smoke test and bots are accepted without a DB write.
-  if (cleanText(payload.website, 200)) {
-    return json({ ok: true, state: 'pending-moderation' }, 202, request);
-  }
+  if (cleanText(payload.website, 200)) return json({ ok: true, state: 'pending-moderation' }, 202, request);
 
   const ipHash = await hashRequestIdentity(request, env);
-  const recent = await env.LICENSE_DB.prepare(`
+  const recent = await runWithFeedbackTable(env.LICENSE_DB, () => env.LICENSE_DB.prepare(`
     SELECT COUNT(*) AS count
     FROM user_feedback
     WHERE ip_hash = ?1
       AND created_at >= datetime('now', '-24 hours')
-  `).bind(ipHash).first();
+  `).bind(ipHash).first());
 
   if (Number(recent?.count || 0) >= 3) {
     return json({
@@ -214,6 +216,8 @@ async function handleAdminFeedbackRequest(request, env, url) {
   if (!['GET', 'HEAD'].includes(request.method) && !sameOrigin(request)) {
     return json({ ok: false, error: 'origin_not_allowed' }, 403, request);
   }
+
+  await runWithFeedbackTable(env.LICENSE_DB, () => env.LICENSE_DB.prepare('SELECT 1 FROM user_feedback LIMIT 1').first());
 
   const relative = url.pathname.slice(ADMIN_FEEDBACK_ROOT.length) || '/';
   if (relative === '/' && request.method === 'GET') return adminListFeedback(request, env, url, admin.email);
@@ -287,9 +291,8 @@ async function adminUpdateFeedback(request, env, id, actorEmail) {
   const existing = await env.LICENSE_DB.prepare('SELECT id, status FROM user_feedback WHERE id = ?1').bind(id).first();
   if (!existing) return json({ ok: false, error: 'feedback_not_found' }, 404, request);
   const now = new Date().toISOString();
-  await env.LICENSE_DB.prepare(`
-    UPDATE user_feedback SET status = ?1, moderation_note = ?2, approved_at = ?3, updated_at = ?4 WHERE id = ?5
-  `).bind(status, note, status === 'approved' ? now : null, now, id).run();
+  await env.LICENSE_DB.prepare('UPDATE user_feedback SET status = ?1, moderation_note = ?2, approved_at = ?3, updated_at = ?4 WHERE id = ?5')
+    .bind(status, note, status === 'approved' ? now : null, now, id).run();
   console.log('FormatX feedback moderation', JSON.stringify({ actor: actorEmail, id, from: existing.status, to: status }));
   return adminFeedbackDetail(request, env, id, actorEmail);
 }
