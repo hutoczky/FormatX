@@ -108,6 +108,14 @@ html.fx-organism-core-active .fx-three-stage-shell {
   z-index: var(--fx-layer-floating) !important;
 }
 
+/* The Live OS launcher occupies the lower-right corner. Keep the professional
+   score control physically separate so both controls remain real click targets. */
+.fx-three-sound {
+  right: 18px !important;
+  bottom: 84px !important;
+  pointer-events: auto !important;
+}
+
 .topbar {
   z-index: var(--fx-layer-header) !important;
 }
@@ -193,6 +201,13 @@ html.fx-organism-menu-open .fx-genome-launcher {
   pointer-events: none !important;
 }
 
+html.fx-organism-menu-open .fx-three-sound,
+body.fx-organism-panel-open .fx-three-sound {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 body.fx-organism-panel-open #menu-toggle,
 body.fx-organism-panel-open #main-nav,
 body.fx-organism-panel-open .fx-organism-actionbar,
@@ -236,6 +251,14 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
     display: grid !important;
     grid-template-columns: 1fr;
     width: 100%;
+  }
+
+  /* Mobile keeps music near the top-right; the Live OS launcher remains at
+     the lower-right. This avoids overlap with safe-area and bottom controls. */
+  .fx-three-sound {
+    top: 72px !important;
+    right: 10px !important;
+    bottom: auto !important;
   }
 
   .fx-organism-console.is-authorised-open {
