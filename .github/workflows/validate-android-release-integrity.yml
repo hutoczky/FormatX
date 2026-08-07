@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Compute official Android APK SHA-256
+      - name: Compute official Android APK integrity
         id: digest
         shell: bash
         run: |
@@ -38,36 +38,47 @@ jobs:
           apk='docs/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk'
           test -s "$apk"
           sha="$(sha256sum "$apk" | awk '{print $1}')"
-          printf 'sha256:%s\n' "$sha" | tee android-sha256.txt
+          size="$(stat -c '%s' "$apk")"
+          {
+            printf 'size:%s\n' "$size"
+            printf 'sha256:%s\n' "$sha"
+          } | tee android-integrity.txt
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "size=$size" >> "$GITHUB_OUTPUT"
 
       - name: Compare with canonical release metadata when published
         env:
           ACTUAL_SHA: ${{ steps.digest.outputs.sha }}
+          ACTUAL_SIZE: ${{ steps.digest.outputs.size }}
         shell: bash
         run: |
           node <<'NODE'
           const fs = require('node:fs');
           const release = JSON.parse(fs.readFileSync('docs/scifi-ui/data/current-release.json', 'utf8'));
-          const expected = release?.channels?.android?.digest;
-          const actual = `sha256:${process.env.ACTUAL_SHA}`;
-          if (expected == null || expected === '') {
-            console.log(`Android canonical digest not published yet. Computed: ${actual}`);
-            process.exit(0);
-          }
-          if (expected.toLowerCase() !== actual.toLowerCase()) {
-            console.error(`Android digest mismatch: expected ${expected}, actual ${actual}`);
+          const channel = release?.channels?.android || {};
+          const actualDigest = `sha256:${process.env.ACTUAL_SHA}`;
+          const actualSize = Number(process.env.ACTUAL_SIZE);
+          if (channel.digest != null && channel.digest !== '' && channel.digest.toLowerCase() !== actualDigest.toLowerCase()) {
+            console.error(`Android digest mismatch: expected ${channel.digest}, actual ${actualDigest}`);
             process.exit(1);
           }
-          console.log(`Android digest verified: ${actual}`);
+          if (channel.size != null && Number(channel.size) !== actualSize) {
+            console.error(`Android size mismatch: expected ${channel.size}, actual ${actualSize}`);
+            process.exit(1);
+          }
+          if (channel.digest == null || channel.digest === '' || channel.size == null) {
+            console.log(`Android canonical integrity metadata incomplete. Computed size=${actualSize}, digest=${actualDigest}`);
+          } else {
+            console.log(`Android integrity verified: size=${actualSize}, digest=${actualDigest}`);
+          }
           NODE
 
-      - name: Upload computed digest
+      - name: Upload computed integrity evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: formatx-android-release-digest
-          path: android-sha256.txt
+          name: formatx-android-release-integrity
+          path: android-integrity.txt
           if-no-files-found: error
           retention-days: 30
 
@@ -80,7 +91,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Official Android APK SHA-256 computed and metadata check passed'
+            description='Official Android APK size/SHA-256 computed and metadata check passed'
           else
             state='failure'
             description='FormatX Android release integrity validation failed'
