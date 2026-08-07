@@ -24,13 +24,13 @@ const NAVIGATION = Object.freeze({
 });
 
 const DOWNLOAD_LABELS = Object.freeze({
-  hu: ['Multiplatform nyilvános béta letöltése', 'Multiplatform nyilvános béta'],
-  en: ['Download multiplatform public beta', 'Multiplatform public beta']
+  hu: ['Teljes multiplatform verzió letöltése', 'Teljes multiplatform verzió'],
+  en: ['Download full multiplatform version', 'Full multiplatform version']
 });
 
 const TRIAL_LABELS = Object.freeze({
-  hu: ['napos próbalicenc', 'napos teljes próba', 'nap teljes próba'],
-  en: ['day trial licence', 'day full trial']
+  hu: ['napos próbalicenc', 'napos teljes próba', 'nap teljes próba', 'napos kezdőlicenc'],
+  en: ['day trial licence', 'day full trial', 'day initial licence']
 });
 
 function matchesOne(actual, expectedSets) {
@@ -92,7 +92,7 @@ async function readCopy(page) {
     visibleLanguageButtons: Array.from(
       document.querySelectorAll('.fx-language-toggle, .language-switch [data-language]')
     ).filter(node => getComputedStyle(node).display !== 'none' && !node.hidden).length,
-    legacyVersionCopy: /\bV(?:29|92|120|121)\b|92\.00|Windows nyilvános béta letöltése|Download Windows public beta/i.test(
+    retiredReleaseCopy: /\bV(?:29|92|120|121)\b|92\.00|Windows nyilvános béta letöltése|Download Windows public beta|Multiplatform nyilvános béta|Multiplatform public beta|NATÍV BÉTA|NATIVE BETA/i.test(
       document.body.innerText
     ),
     horizontalOverflow: Math.max(
@@ -117,8 +117,8 @@ function assertHungarian(state, name) {
     name + ': Hungarian footer licence mismatch: ' + JSON.stringify(state));
   assert(state.visibleLanguageButtons === 1,
     name + ': exactly one visible language button required: ' + JSON.stringify(state));
-  assert(!state.legacyVersionCopy,
-    name + ': public version or Windows-only copy remains: ' + JSON.stringify(state));
+  assert(!state.retiredReleaseCopy,
+    name + ': retired beta/version copy remains: ' + JSON.stringify(state));
   assert(state.horizontalOverflow <= 1,
     name + ': horizontal overflow: ' + JSON.stringify(state));
 }
@@ -138,8 +138,8 @@ function assertEnglish(state, name) {
     name + ': English footer licence mismatch: ' + JSON.stringify(state));
   assert(state.visibleLanguageButtons === 1,
     name + ': exactly one visible language button required: ' + JSON.stringify(state));
-  assert(!state.legacyVersionCopy,
-    name + ': public version or Windows-only copy remains: ' + JSON.stringify(state));
+  assert(!state.retiredReleaseCopy,
+    name + ': retired beta/version copy remains: ' + JSON.stringify(state));
   assert(state.horizontalOverflow <= 1,
     name + ': horizontal overflow: ' + JSON.stringify(state));
 }
@@ -182,7 +182,7 @@ async function testViewport(browser, viewport, name, mobile) {
   try {
     await testViewport(browser, { width: 1440, height: 900 }, 'desktop', false);
     await testViewport(browser, { width: 390, height: 844 }, 'mobile', true);
-    console.log('PASS FormatX bilingual labels, multiplatform CTA and licence clarification');
+    console.log('PASS FormatX bilingual full-release labels and 5-day trial licence');
   } finally {
     await browser.close();
   }
