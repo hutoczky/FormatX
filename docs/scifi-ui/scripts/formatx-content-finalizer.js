@@ -214,7 +214,7 @@
       labels[0].querySelector('b').textContent = 'METHOD STEP';
     }
     if (labels[1]) {
-      labels[1].querySelector('span').textContent = 'BETA';
+      labels[1].querySelector('span').textContent = 'FULL';
       labels[1].querySelector('b').textContent = 'PUBLIC RELEASE';
     }
     if (labels[2]) {
@@ -235,8 +235,8 @@
 
     bilingual(
       label,
-      'Multiplatform nyilvános béta letöltése',
-      'Download multiplatform public beta'
+      'Teljes multiplatform verzió letöltése',
+      'Download full multiplatform version'
     );
     label.dataset.releaseDownloadLabel = 'true';
     link.dataset.releaseDownload = 'multiplatform';
@@ -292,7 +292,7 @@
     updateTelemetry();
     ensureLicenceLink();
     finalizeMobileControls();
-    ROOT.dataset.fxContentFinalizer = 'ready-v2';
+    ROOT.dataset.fxContentFinalizer = 'ready-v3';
   }
 
   [
