@@ -20,6 +20,10 @@ def canonical_package(data: dict) -> dict:
     return channels.get("multiplatform") or channels.get("windows") or {}
 
 
+def valid_sha256(value: object) -> bool:
+    return bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(value or "")))
+
+
 def validate_release_metadata_v2() -> None:
     data = module.load_json(module.SCIFI / "data/current-release.json")
     public_contract = module.load_json(module.SCIFI / "data/public-platform-contract.json")
@@ -39,13 +43,24 @@ def validate_release_metadata_v2() -> None:
             or not release_url.path.startswith("/hutoczky/FormatX-Updates/releases/")
         ):
             module.fail("Release URL is not an official FormatX-Updates release")
+
         package = canonical_package(data)
         if package.get("available") is not True:
             module.fail("Schema 2 release lacks the official package")
         elif not module.official_download(str(package.get("download_url") or "")):
             module.fail("Official package URL is not valid")
-        if not str(package.get("digest") or "").startswith("sha256:"):
-            module.fail("Official package digest is missing")
+        if not valid_sha256(package.get("digest")):
+            module.fail("Official package digest is missing or malformed")
+
+        android = data.get("channels", {}).get("android") or {}
+        if android.get("available") is not True:
+            module.fail("Schema 2 release lacks the official Android package")
+        if android.get("download_url") != "/download/android":
+            module.fail("Official Android package does not use the canonical worker route")
+        if not isinstance(android.get("size"), int) or android.get("size", 0) <= 0:
+            module.fail("Official Android package size is missing")
+        if not valid_sha256(android.get("digest")):
+            module.fail("Official Android package digest is missing or malformed")
 
         public_copy = public_contract.get("public_copy", {})
         if public_copy.get("primary_system") != "linux-bazzite":
@@ -59,6 +74,8 @@ def validate_release_metadata_v2() -> None:
         supported = set(public_copy.get("supported_secondary_platforms") or [])
         if "windows" not in supported:
             module.fail("Windows is not listed as a supported secondary platform")
+        if "android" not in supported:
+            module.fail("Android is not listed as a supported secondary platform")
     else:
         package = canonical_package(data)
         if data.get("version") is not None:
@@ -71,8 +88,12 @@ def validate_release_metadata_v2() -> None:
         "FormatX-Updates/releases?per_page=30",
         "multiplatform_asset",
         "source_release_id",
+        "android_local_size",
+        "android_local_digest",
+        "sha256sum",
+        "stat -c '%s'",
         "integrity",
-        "del(.synced_at)",
+        "del(.synced_at, .channels.android.updated_at)",
         "cmp -s",
         "git commit -m 'Sync official current release metadata'",
     ]:
@@ -82,7 +103,7 @@ def validate_release_metadata_v2() -> None:
 
 def validate_public_pages_v2() -> None:
     pages = [
-        "downloads/index.html", "method.html", "verification.html",
+        "downloads/index.html", "android/index.html", "method.html", "verification.html",
         "test-matrix.html", "known-issues.html", "security.html",
         "decision-log.html", "license.html", "terms.html", "privacy.html", "support.html"
     ]
@@ -114,6 +135,16 @@ def validate_public_pages_v2() -> None:
     if re.search(r"\b(beta|béta)\b", module.visible_text(module.SCIFI / "downloads/index.html"), re.I):
         module.fail("Downloads page still exposes retired beta wording")
 
+    android = module.read("docs/scifi-ui/android/index.html")
+    for token in [
+        'href="/download/android"',
+        "ANDROID TELJES VERZIÓ",
+        "NATÍV BÉTA",
+        "android-native-v1.1.0-beta",
+    ]:
+        if token not in android:
+            module.fail(f"Android page missing channel truth contract: {token}")
+
     production = module.read("billing-worker/src/production-content-entry.js")
     preview = module.read("content-preview-entry.js")
     for source, name in [(production, "production"), (preview, "preview")]:
@@ -125,7 +156,7 @@ def validate_public_pages_v2() -> None:
     if "<loc>https://www.formatxsuite.com/</loc>" not in sitemap:
         module.fail("Sitemap missing canonical root homepage")
     for url in [
-        "/scifi-ui/downloads/", "/scifi-ui/method.html",
+        "/scifi-ui/downloads/", "/scifi-ui/android/", "/scifi-ui/method.html",
         "/scifi-ui/verification.html", "/scifi-ui/test-matrix.html",
         "/scifi-ui/known-issues.html", "/scifi-ui/security.html",
         "/scifi-ui/decision-log.html", "/scifi-ui/support.html",
