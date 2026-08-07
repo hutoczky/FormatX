@@ -91,6 +91,7 @@ const paymentCancel = read('docs/scifi-ui/payment/cancel.html');
 const sitemap = read('docs/sitemap.xml');
 const androidManifest = json('docs/scifi-ui/downloads/android-native-update.json');
 const platformStatus = json('docs/scifi-ui/data/platform-status.json');
+const publicContract = json('docs/scifi-ui/data/public-platform-contract.json');
 const currentRelease = json('docs/scifi-ui/data/current-release.json');
 const knownIssues = json('docs/scifi-ui/data/known-issues.json');
 const testMatrix = json('docs/scifi-ui/data/test-matrix.json');
@@ -139,6 +140,11 @@ for (const id of ['linux-bazzite', 'windows', 'android']) if (byId[id]?.status !
 if (byId.web?.status !== 'technical_preview') report('platform status: web must remain technical_preview');
 for (const id of ['macos', 'ios']) if (byId[id]?.status !== 'planned') report(`platform status: ${id} must remain planned`);
 
+if (publicContract.layout_contract?.automatic_scroll_loop !== false) report('public layout contract: automatic scroll loop must be disabled');
+if (publicContract.layout_contract?.forced_scroll_transfer !== false) report('public layout contract: forced scroll transfer must be disabled');
+if (publicContract.layout_contract?.automatic_page_position_changes !== false) report('public layout contract: automatic page position changes must be disabled');
+if (publicContract.layout_contract?.hero_visual_bridge !== false) report('public layout contract: visual loop bridge must be disabled');
+
 const multi = currentRelease.channels?.multiplatform;
 if (!currentRelease.ok || !multi?.available) report('current release: public multiplatform package unavailable');
 if (!Array.isArray(multi?.supported_platforms) || !multi.supported_platforms.includes('linux-bazzite') || !multi.supported_platforms.includes('windows')) report('current release: canonical supported platform list incomplete');
@@ -171,7 +177,9 @@ for (const [name, source] of [['payment success', paymentSuccess], ['payment can
 }
 
 if (/data:image\/webp|<image\b/i.test(portable)) report('portable installer: embedded raster/WebP is forbidden');
-if (!loop.includes("const VERSION = 'seamless-v6'") || !loop.includes('clonedHeroOnly: true')) report('homepage: seamless loop contract missing');
+if (!loop.includes("const VERSION = 'seamless-v6'")) report('homepage: scroll controller version missing');
+if (!loop.includes("root.dataset.fxAutomaticLoop = 'disabled'") || !loop.includes('nativePositionOnly: true')) report('homepage: native no-jump scroll contract missing');
+if (loop.includes('window.scrollTo(') || loop.includes('scrollIntoView(') || loop.includes('cloneNode(true)')) report('homepage: scroll runtime can still move or clone the page automatically');
 for (const token of [
   "['/downloads/', '/scifi-ui/downloads/']",
   "['/support.html', '/scifi-ui/support.html']",
@@ -184,4 +192,4 @@ if (failures.length) {
   failures.forEach(item => console.error(' - ' + item));
   process.exit(1);
 }
-console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, Android channel/download separation, legal gate, transactional noindex, downloads, aliases and seamless loop validated.`);
+console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, Android channel/download separation, legal gate, transactional noindex, native no-jump scrolling, downloads and aliases validated.`);
