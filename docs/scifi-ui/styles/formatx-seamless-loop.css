@@ -3,13 +3,13 @@
 /* The seamless controller owns the end-of-page hand-off. Scroll snapping must
    stay disabled or the browser can pull the ratio-matched Hero landing back to
    the start of the section after the transfer. */
-html[data-fx-infinite-controller='seamless-v7'],
-html[data-fx-infinite-controller='seamless-v7'] body {
+html[data-fx-infinite-controller='seamless-v6'],
+html[data-fx-infinite-controller='seamless-v6'] body {
   scroll-snap-type: none !important;
 }
 
-html[data-fx-infinite-controller='seamless-v7'] #hero,
-html[data-fx-infinite-controller='seamless-v7'] main > .scene {
+html[data-fx-infinite-controller='seamless-v6'] #hero,
+html[data-fx-infinite-controller='seamless-v6'] main > .scene {
   scroll-snap-align: none !important;
   scroll-snap-stop: normal !important;
 }
