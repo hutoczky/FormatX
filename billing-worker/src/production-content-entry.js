@@ -29,6 +29,8 @@ const NO_STORE_PATHS = new Set([
   '/scifi-ui/scripts/public-evidence-pages.js', '/scifi-ui/scripts/formatx-seo.js',
   '/scifi-ui/scripts/formatx-premium-finish.js',
   '/scifi-ui/scripts/formatx-feedback.js',
+  '/scifi-ui/scripts/formatx-infinite-scroll.js',
+  '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/formatx-content-standard.css',
   '/scifi-ui/styles/formatx-premium-finish.css',
   '/scifi-ui/styles/formatx-feedback.css',
@@ -56,8 +58,11 @@ const FEEDBACK_ASSETS = [
   '<link rel="stylesheet" data-fx-feedback-style="true" href="/scifi-ui/styles/formatx-feedback.css?v=20260806-feedback-1">',
   '<script defer data-fx-feedback-script="true" src="/scifi-ui/scripts/formatx-feedback.js?v=20260806-feedback-1"></script>'
 ].join('\n');
+const SCROLL_ASSET = '<script defer data-fx-seamless-scroll-runtime="true" src="/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260808-seamless-ratio-v4"></script>';
 
 const HERO_LIVE_OS_CTA = '<button type="button" class="button button-solid magnetic" data-fx-live-os-cta data-hu="Live OS kipróbálása" data-en="Try Live OS"><span data-hu="Live OS kipróbálása" data-en="Try Live OS">Live OS kipróbálása</span><i>↗</i></button>';
+
+const CATEGORY_STATIC_HEAD = '<header><p class="section-index" data-fx-category-eyebrow data-hu="01.5 — SAJÁT TECHNIKUSI KATEGÓRIA" data-en="01.5 — INDEPENDENT TECHNICIAN CATEGORY">01.5 — SAJÁT TECHNIKUSI KATEGÓRIA</p><h2 id="fx-category-title" data-fx-category-title data-hu="Nem landing page. Működő technikusi rendszerfelület." data-en="Not a landing page. An operational technician system surface.">Nem landing page. Működő technikusi rendszerfelület.</h2><p data-fx-category-lead data-hu="A FormatX a diagnosztikát, a tervet, a kontrollált végrehajtást és az ellenőrizhető eredményt egyetlen, használható rendszerélménnyé kapcsolja össze." data-en="FormatX combines diagnostics, planning, controlled execution and verifiable outcomes into one usable system experience.">A FormatX a diagnosztikát, a tervet, a kontrollált végrehajtást és az ellenőrizhető eredményt egyetlen, használható rendszerélménnyé kapcsolja össze.</p></header>';
 
 const STATIC_LIVE_OS_SECTION = `
     <section id="live-os-overview" class="fx-static-live-os" aria-labelledby="live-os-overview-title" itemscope itemtype="https://schema.org/SoftwareApplication">
@@ -135,14 +140,9 @@ export default {
     if (!(response.headers.get('Content-Type') || '').includes('text/html')) return response;
 
     let html = cleanLegacyReleaseCopy(await response.text());
-    if (!html.includes('data-fx-single-language-style') && !html.includes('single-language-toggle.css')) {
-      html = html.replace('</head>', LANGUAGE_ASSETS + '\n</head>');
-    }
-    if (!html.includes('data-fx-content-standard-style') && !html.includes('formatx-content-standard.css')) {
-      html = html.replace('</head>', CONTENT_ASSETS + '\n</head>');
-    } else if (!html.includes('formatx-public-shell.js')) {
-      html = html.replace('</head>', '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>\n</head>');
-    }
+    if (!html.includes('data-fx-single-language-style') && !html.includes('single-language-toggle.css')) html = html.replace('</head>', LANGUAGE_ASSETS + '\n</head>');
+    if (!html.includes('data-fx-content-standard-style') && !html.includes('formatx-content-standard.css')) html = html.replace('</head>', CONTENT_ASSETS + '\n</head>');
+    else if (!html.includes('formatx-public-shell.js')) html = html.replace('</head>', '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>\n</head>');
 
     if (HOMEPAGE_PATHS.has(url.pathname)) html = enhanceHomepageHtml(html);
     if (url.pathname === '/scifi-ui/verification.html') html = enhanceVerificationHtml(html);
@@ -159,20 +159,15 @@ export default {
 };
 
 function enhanceHomepageHtml(html) {
-  if (!html.includes('data-fx-feedback-style')) {
-    html = html.replace('</head>', FEEDBACK_ASSETS + '\n</head>');
-  }
-  html = html.replace(
-    '<body id="top" class="living-architecture">',
-    '<body id="top" class="living-architecture" itemscope itemtype="https://schema.org/WebSite">'
-  );
-  if (!html.includes('data-fx-live-os-cta')) {
-    html = html.replace('<div class="hero-actions">', `<div class="hero-actions">${HERO_LIVE_OS_CTA}`);
-  }
+  if (!html.includes('data-fx-feedback-style')) html = html.replace('</head>', FEEDBACK_ASSETS + '\n</head>');
+  if (!html.includes('data-fx-seamless-scroll-runtime')) html = html.replace('</head>', SCROLL_ASSET + '\n</head>');
+  html = html.replace('<body id="top" class="living-architecture">', '<body id="top" class="living-architecture" itemscope itemtype="https://schema.org/WebSite">');
+  if (!html.includes('data-fx-live-os-cta')) html = html.replace('<div class="hero-actions">', `<div class="hero-actions">${HERO_LIVE_OS_CTA}`);
   if (!html.includes('id="live-os-overview"')) {
     const categoryMarker = '    <section class="fx-category-deck fx-category-deck--standalone"';
     html = html.replace(categoryMarker, `${STATIC_LIVE_OS_SECTION}\n\n${categoryMarker}`);
   }
+  html = html.replace(/<header><p class="section-index" data-fx-category-eyebrow><\/p><h2 id="fx-category-title" data-fx-category-title><\/h2><p data-fx-category-lead><\/p><\/header>/, CATEGORY_STATIC_HEAD);
   if (!html.includes('id="user-feedback"')) {
     const resourceMarker = '    <section id="resources"';
     if (html.includes(resourceMarker)) html = html.replace(resourceMarker, `${USER_FEEDBACK_SECTION}\n\n${resourceMarker}`);
@@ -184,22 +179,13 @@ function enhanceHomepageHtml(html) {
 
 function enhanceVerificationHtml(html) {
   if (html.includes('/scifi-ui/technical-report.html')) return html;
-  return html.replace(
-    '<div class="fx-evidence-grid" data-verification-root></div>',
-    '<section class="fx-evidence-card"><h2>Technikai bizonyítékriport</h2><p>A teljesítménykapuk, Live OS böngészőtesztek, adatvédelmi határok és nyílt bizonyítékhiányok külön, letölthető riportban is elérhetők.</p><nav class="fx-page-nav"><a href="/scifi-ui/technical-report.html">Riport megnyitása</a><a href="/scifi-ui/reports/formatx-technical-evidence-report.md" download>Riport letöltése (.md)</a></nav></section><div class="fx-evidence-grid" data-verification-root></div>'
-  );
+  return html.replace('<div class="fx-evidence-grid" data-verification-root></div>', '<section class="fx-evidence-card"><h2>Technikai bizonyítékriport</h2><p>A teljesítménykapuk, Live OS böngészőtesztek, adatvédelmi határok és nyílt bizonyítékhiányok külön, letölthető riportban is elérhetők.</p><nav class="fx-page-nav"><a href="/scifi-ui/technical-report.html">Riport megnyitása</a><a href="/scifi-ui/reports/formatx-technical-evidence-report.md" download>Riport letöltése (.md)</a></nav></section><div class="fx-evidence-grid" data-verification-root></div>');
 }
 
 function enhancePrivacyHtml(html) {
   if (html.includes('Felhasználói értékelés és visszajelzés')) return html;
-  html = html.replace(
-    '<li><strong>Biztonsági és működési napló:</strong>',
-    '<li><strong>Felhasználói értékelés és visszajelzés:</strong> 1–5 közötti értékelések, opcionális megjelenítendő név, szöveges vélemény és kapcsolati e-mail, közzétételi hozzájárulás, időpont, egyirányú hálózati azonosító-lenyomat és technikai kérésadat. Jogalap: hozzájárulás, illetve a visszaélések megelőzéséhez és a szolgáltatás fejlesztéséhez fűződő jogos érdek. A nyilvános átlag csak jóváhagyott értékeléseket tartalmaz; az e-mail-cím nem nyilvános.</li>\n        <li><strong>Biztonsági és működési napló:</strong>'
-  );
-  html = html.replace(
-    '<li><strong>Biztonsági és hibakeresési napló:</strong>',
-    '<li><strong>Felhasználói visszajelzés:</strong> a függőben lévő vagy elutasított beküldés legfeljebb 12 hónap; jóváhagyott értékelés a hozzájárulás visszavonásáig vagy legfeljebb 3 évig. A kapcsolati e-mail korábban törölhető az érintett kérelmére.</li>\n        <li><strong>Biztonsági és hibakeresési napló:</strong>'
-  );
+  html = html.replace('<li><strong>Biztonsági és működési napló:</strong>', '<li><strong>Felhasználói értékelés és visszajelzés:</strong> 1–5 közötti értékelések, opcionális megjelenítendő név, szöveges vélemény és kapcsolati e-mail, közzétételi hozzájárulás, időpont, egyirányú hálózati azonosító-lenyomat és technikai kérésadat. Jogalap: hozzájárulás, illetve a visszaélések megelőzéséhez és a szolgáltatás fejlesztéséhez fűződő jogos érdek. A nyilvános átlag csak jóváhagyott értékeléseket tartalmaz; az e-mail-cím nem nyilvános.</li>\n        <li><strong>Biztonsági és működési napló:</strong>');
+  html = html.replace('<li><strong>Biztonsági és hibakeresési napló:</strong>', '<li><strong>Felhasználói visszajelzés:</strong> a függőben lévő vagy elutasított beküldés legfeljebb 12 hónap; jóváhagyott értékelés a hozzájárulás visszavonásáig vagy legfeljebb 3 évig. A kapcsolati e-mail korábban törölhető az érintett kérelmére.</li>\n        <li><strong>Biztonsági és hibakeresési napló:</strong>');
   return html;
 }
 
@@ -234,9 +220,5 @@ function noStore(response, withoutBody) {
   headers.set('Cache-Control', 'no-store, max-age=0');
   headers.set('Pragma', 'no-cache');
   headers.delete('ETag');
-  return new Response(withoutBody ? null : response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers
-  });
+  return new Response(withoutBody ? null : response.body, { status: response.status, statusText: response.statusText, headers });
 }
