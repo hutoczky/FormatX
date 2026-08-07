@@ -15,7 +15,7 @@
   }
 
   const LANG_KEY = 'formatx-language';
-  const RELEASE_API = 'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest';
+  const RELEASE_API = './data/current-release.json';
   const DOWNLOAD_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
   const PAGE_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/';
   const PRICES = { HUF: 15900, EUR: 44 };
@@ -85,10 +85,7 @@
 
   function money(value, currency) {
     return new Intl.NumberFormat(language === 'hu' ? 'hu-HU' : 'en-GB', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 0
     }).format(value);
   }
 
@@ -144,30 +141,26 @@
 
   function trusted(value, prefix) {
     try {
-      const url = new URL(value);
+      const url = new URL(value, location.origin);
       return url.protocol === 'https:' && url.href.startsWith(prefix);
-    } catch (_) {
-      return false;
-    }
+    } catch (_) { return false; }
   }
 
   async function latestRelease() {
     try {
-      const response = await fetch(RELEASE_API, { headers: { Accept: 'application/vnd.github+json' } });
+      const response = await fetch(RELEASE_API, { cache: 'no-store', credentials: 'same-origin' });
       if (!response.ok) throw new Error('Release lookup failed');
       const payload = await response.json();
-      const match = String(payload.tag_name || '').match(/^v?(\d+)$/i);
-      if (!match || payload.draft || payload.prerelease || !Array.isArray(payload.assets)) throw new Error('Invalid release');
-      const version = 'V' + match[1];
-      const asset = payload.assets.find(item => item?.name === 'FormatX-Suite-Pro-' + version + '.zip');
-      if (!asset || !trusted(asset.browser_download_url, DOWNLOAD_PREFIX) || !trusted(payload.html_url, PAGE_PREFIX)) throw new Error('Untrusted release');
+      const asset = payload?.channels?.multiplatform;
+      if (payload?.ok !== true || payload?.prerelease === true || !asset?.available) throw new Error('Invalid release');
+      if (!trusted(asset.download_url, DOWNLOAD_PREFIX) || !trusted(payload.release_url, PAGE_PREFIX)) throw new Error('Untrusted release');
       const download = document.getElementById('hero-download');
       const name = document.getElementById('release-name');
       const date = document.getElementById('release-published');
       const page = document.getElementById('release-page-link');
-      if (download) download.href = asset.browser_download_url;
-      if (name) name.textContent = 'FormatX Suite Pro ' + version;
-      if (page) page.href = payload.html_url;
+      if (download) download.href = asset.download_url;
+      if (name) name.textContent = 'FormatX Suite Pro';
+      if (page) page.href = payload.release_url;
       if (date) {
         const published = new Date(payload.published_at);
         date.textContent = Number.isNaN(published.getTime())
@@ -220,15 +213,25 @@
       }, { threshold: [0.2, 0.4, 0.6] });
       sceneSections.forEach(section => observer.observe(section));
     }
+
+    let progressFrame = 0;
     const progress = () => {
+      progressFrame = 0;
       const range = Math.max(1, document.documentElement.scrollHeight - innerHeight);
       const value = Math.max(0, Math.min(1, scrollY / range));
       ROOT.style.setProperty('--progress', value.toFixed(5));
       ROOT.classList.toggle('fx-page-scrolled', scrollY > 24);
     };
+    const scheduleProgress = () => {
+      if (progressFrame) return;
+      progressFrame = requestAnimationFrame(progress);
+    };
     progress();
-    addEventListener('scroll', progress, { passive: true });
-    addEventListener('resize', progress, { passive: true });
+    addEventListener('scroll', scheduleProgress, { passive: true });
+    addEventListener('resize', scheduleProgress, { passive: true });
+    addEventListener('pagehide', () => {
+      if (progressFrame) cancelAnimationFrame(progressFrame);
+    }, { once: true });
   }
 
   function updateFlow(index) {
@@ -266,10 +269,22 @@
   }
 
   function pointerVariables() {
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+    const apply = () => {
+      frame = 0;
+      ROOT.style.setProperty('--px', (x / Math.max(1, innerWidth) * 2 - 1).toFixed(3));
+      ROOT.style.setProperty('--py', (y / Math.max(1, innerHeight) * 2 - 1).toFixed(3));
+    };
     addEventListener('pointermove', event => {
-      ROOT.style.setProperty('--px', (event.clientX / Math.max(1, innerWidth) * 2 - 1).toFixed(3));
-      ROOT.style.setProperty('--py', (event.clientY / Math.max(1, innerHeight) * 2 - 1).toFixed(3));
+      x = event.clientX;
+      y = event.clientY;
+      if (!frame) frame = requestAnimationFrame(apply);
     }, { passive: true });
+    addEventListener('pagehide', () => {
+      if (frame) cancelAnimationFrame(frame);
+    }, { once: true });
   }
 
   function initialise() {
@@ -282,7 +297,7 @@
     updatePrice();
     latestRelease();
     setScene(activeScene);
-    ROOT.dataset.fxApex = 'controller-only';
+    ROOT.dataset.fxApex = 'controller-performance-v2';
     ROOT.dataset.fxRenderer = 'three-host';
     dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
   }
