@@ -3,7 +3,7 @@ const FEEDBACK_PATHS = new Set([
   '/api/feedback/summary',
 ]);
 const ADMIN_FEEDBACK_ROOT = '/fx-owner-license/api/feedback';
-const SCHEMA_VERSION = '4';
+const SCHEMA_VERSION = '5';
 const SCHEMA_KEY = 'feedback_schema_version';
 let schemaReadyPromise = null;
 
@@ -80,17 +80,24 @@ export async function ensureFeedbackSchemaCompatibility(database) {
 }
 
 async function migrateFeedbackSchema(database) {
-  // New installations get the canonical table immediately. Existing installations
-  // are repaired additively below; no live feedback data is dropped or renamed.
-  await database.exec(createTableSql());
-
+  // Normal production path: one read-only schema inspection and zero DDL/UPDATE.
+  // This keeps ordinary feedback reads/submissions out of D1 maintenance work.
   let columns = await readColumns(database);
+  if (hasCanonicalColumns(columns)) return;
+
+  // Empty PRAGMA means a fresh database/table. Only then create the canonical table.
+  if (columns.size === 0) {
+    await database.exec(createTableSql());
+    columns = await readColumns(database);
+  }
+
+  // Existing older tables are repaired additively. Live feedback data is never
+  // dropped, copied to a recovery table or renamed during a request.
   for (const [name, definition] of Object.entries(REQUIRED_COLUMNS)) {
     if (columns.has(name)) continue;
     try {
       await database.exec(`ALTER TABLE user_feedback ADD COLUMN ${name} ${definition};`);
     } catch (error) {
-      // Multiple Worker isolates can race on the same missing column.
       const message = String(error instanceof Error ? error.message : error).toLowerCase();
       if (!message.includes('duplicate column')) throw error;
     }
@@ -98,38 +105,30 @@ async function migrateFeedbackSchema(database) {
 
   columns = await readColumns(database);
   const missing = Object.keys(REQUIRED_COLUMNS).filter(name => !columns.has(name));
-  if (missing.length) {
-    throw new Error(`feedback_schema_column_missing:${missing.join(',')}`);
-  }
+  if (missing.length) throw new Error(`feedback_schema_column_missing:${missing.join(',')}`);
 
-  await normaliseAndIndex(database);
+  // Data cleanup is a recovery-only operation. It never runs when the live schema
+  // is already compatible.
+  await normaliseRecoveredRows(database);
+  await createIndexesBestEffort(database);
   await saveSchemaVersionBestEffort(database);
 }
 
-async function normaliseAndIndex(database) {
+function hasCanonicalColumns(columns) {
+  return Object.keys(REQUIRED_COLUMNS).every(name => columns.has(name));
+}
+
+async function normaliseRecoveredRows(database) {
   await database.exec(`
-    UPDATE user_feedback
-    SET id = ${UUID_SQL}
-    WHERE id IS NULL OR trim(CAST(id AS TEXT)) = '';
-
-    UPDATE user_feedback
-    SET created_at = ${NOW_SQL}
-    WHERE created_at IS NULL OR trim(CAST(created_at AS TEXT)) = '';
-
-    UPDATE user_feedback
-    SET updated_at = created_at
-    WHERE updated_at IS NULL OR trim(CAST(updated_at AS TEXT)) = '';
-
-    UPDATE user_feedback
-    SET status = 'pending'
-    WHERE status IS NULL OR status NOT IN ('pending', 'approved', 'rejected');
-
+    UPDATE user_feedback SET id = ${UUID_SQL} WHERE id IS NULL OR trim(CAST(id AS TEXT)) = '';
+    UPDATE user_feedback SET created_at = ${NOW_SQL} WHERE created_at IS NULL OR trim(CAST(created_at AS TEXT)) = '';
+    UPDATE user_feedback SET updated_at = created_at WHERE updated_at IS NULL OR trim(CAST(updated_at AS TEXT)) = '';
+    UPDATE user_feedback SET status = 'pending' WHERE status IS NULL OR status NOT IN ('pending', 'approved', 'rejected');
     UPDATE user_feedback SET overall = 1 WHERE overall IS NULL OR CAST(overall AS INTEGER) NOT BETWEEN 1 AND 5;
     UPDATE user_feedback SET usability = 1 WHERE usability IS NULL OR CAST(usability AS INTEGER) NOT BETWEEN 1 AND 5;
     UPDATE user_feedback SET performance = 1 WHERE performance IS NULL OR CAST(performance AS INTEGER) NOT BETWEEN 1 AND 5;
     UPDATE user_feedback SET design = 1 WHERE design IS NULL OR CAST(design AS INTEGER) NOT BETWEEN 1 AND 5;
     UPDATE user_feedback SET features = 1 WHERE features IS NULL OR CAST(features AS INTEGER) NOT BETWEEN 1 AND 5;
-
     UPDATE user_feedback SET comment = '' WHERE comment IS NULL;
     UPDATE user_feedback SET display_name = '' WHERE display_name IS NULL;
     UPDATE user_feedback SET contact_email = '' WHERE contact_email IS NULL;
@@ -142,12 +141,22 @@ async function normaliseAndIndex(database) {
     UPDATE user_feedback SET ip_hash = '' WHERE ip_hash IS NULL;
     UPDATE user_feedback SET user_agent = '' WHERE user_agent IS NULL;
     UPDATE user_feedback SET moderation_note = '' WHERE moderation_note IS NULL;
-
-    CREATE INDEX IF NOT EXISTS idx_user_feedback_status_created
-      ON user_feedback(status, created_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_user_feedback_ip_created
-      ON user_feedback(ip_hash, created_at DESC);
   `);
+}
+
+async function createIndexesBestEffort(database) {
+  try {
+    await database.exec(`
+      CREATE INDEX IF NOT EXISTS idx_user_feedback_status_created
+        ON user_feedback(status, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_user_feedback_ip_created
+        ON user_feedback(ip_hash, created_at DESC);
+    `);
+  } catch (error) {
+    console.warn('FormatX feedback index maintenance skipped', {
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 async function saveSchemaVersionBestEffort(database) {
@@ -165,8 +174,6 @@ async function saveSchemaVersionBestEffort(database) {
       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
     `).bind(SCHEMA_KEY, SCHEMA_VERSION, new Date().toISOString()).run();
   } catch (error) {
-    // Metadata is diagnostic only. Do not take the public feedback API offline
-    // when the functional feedback table has already been repaired successfully.
     console.warn('FormatX feedback schema metadata write skipped', {
       message: error instanceof Error ? error.message : String(error),
     });
@@ -181,4 +188,5 @@ async function readColumns(database) {
 export const feedbackSchemaInternals = Object.freeze({
   REQUIRED_COLUMNS,
   SCHEMA_VERSION,
+  hasCanonicalColumns,
 });
