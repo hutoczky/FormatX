@@ -1,6 +1,6 @@
 {
-  "schema_version": 4,
-  "updated": "2026-07-31",
+  "schema_version": 5,
+  "updated": "2026-08-07",
   "canonical": true,
   "product_category": {
     "hu": "Technikusi operációs réteg",
@@ -11,93 +11,56 @@
     }
   },
   "method": {
-    "hu": [
-      "Felderítés",
-      "Terv",
-      "Kontrollált végrehajtás",
-      "Visszaellenőrzés"
-    ],
-    "en": [
-      "Discover",
-      "Plan",
-      "Controlled execution",
-      "Verify"
-    ]
+    "hu": ["Felderítés", "Terv", "Kontrollált végrehajtás", "Visszaellenőrzés"],
+    "en": ["Discover", "Plan", "Controlled execution", "Verify"]
   },
   "product_release": {
-    "status": "public_beta",
+    "status": "full_release",
     "trial_days": 5,
     "activation": "manual_bank_verification",
     "version_source": "/scifi-ui/data/release-channel.json",
     "public_package": "multiplatform"
   },
   "status_labels": {
-    "stable": {
-      "hu": "Stabil",
-      "en": "Stable"
-    },
-    "public_beta": {
-      "hu": "Nyilvános béta",
-      "en": "Public beta"
-    },
-    "technical_preview": {
-      "hu": "Technikai előnézet",
-      "en": "Technical preview"
-    },
-    "development": {
-      "hu": "Fejlesztés alatt",
-      "en": "Development"
-    },
-    "planned": {
-      "hu": "Tervezett",
-      "en": "Planned"
-    }
+    "stable": {"hu": "Stabil", "en": "Stable"},
+    "full_release": {"hu": "Teljes verzió", "en": "Full release"},
+    "technical_preview": {"hu": "Technikai előnézet", "en": "Technical preview"},
+    "development": {"hu": "Fejlesztés alatt", "en": "Development"},
+    "planned": {"hu": "Tervezett", "en": "Planned"}
   },
   "support_role_labels": {
-    "primary": {
-      "hu": "Elsődleges rendszer és támogatási irány",
-      "en": "Primary system and support direction"
-    },
-    "secondary": {
-      "hu": "Támogatott másodlagos platform",
-      "en": "Supported secondary platform"
-    },
-    "preview": {
-      "hu": "Kiegészítő előnézet",
-      "en": "Supplementary preview"
-    },
-    "roadmap": {
-      "hu": "Fejlesztési ütemterv",
-      "en": "Roadmap"
-    }
+    "primary": {"hu": "Elsődleges rendszer és támogatási irány", "en": "Primary system and support direction"},
+    "secondary": {"hu": "Támogatott másodlagos platform", "en": "Supported secondary platform"},
+    "preview": {"hu": "Kiegészítő felület", "en": "Supplementary surface"},
+    "roadmap": {"hu": "Fejlesztési ütemterv", "en": "Roadmap"}
   },
   "platforms": [
     {
       "id": "linux-bazzite",
       "name": "Bazzite / Linux",
       "support_role": "primary",
-      "status": "public_beta",
+      "status": "full_release",
       "public_package_policy": "multiplatform_release_metadata_required",
-      "hu": "A Bazzite/Linux a FormatX elsődleges rendszere és hosszú távú támogatási platformja. A nyilvános béta a hivatalos multiplatform csomag része.",
-      "en": "Bazzite/Linux is the primary FormatX system and long-term support platform. Its public beta is included in the official multiplatform package."
+      "hu": "A Bazzite/Linux a FormatX elsődleges rendszere és hosszú távú támogatási platformja. A teljes verzió a hivatalos multiplatform csomag része, 5 napos próbalicenccel.",
+      "en": "Bazzite/Linux is the primary FormatX system and long-term support platform. The full version is included in the official multiplatform package with a 5-day trial licence."
     },
     {
       "id": "windows",
       "name": "Windows",
       "support_role": "secondary",
-      "status": "public_beta",
+      "status": "full_release",
       "public_package_policy": "multiplatform_release_metadata_required",
-      "hu": "A Windows támogatott másodlagos platform. Külön Windows-csomag helyett ugyanaz a hivatalos multiplatform nyilvános béta tölthető le.",
-      "en": "Windows is a supported secondary platform. The same official multiplatform public beta is provided instead of a separate Windows-only package."
+      "hu": "A Windows támogatott másodlagos platform. Ugyanaz a hivatalos teljes multiplatform verzió érhető el, 5 napos próbalicenccel.",
+      "en": "Windows is a supported secondary platform. The same official full multiplatform version is available with a 5-day trial licence."
     },
     {
       "id": "android",
       "name": "Android",
-      "support_role": "preview",
-      "status": "public_beta",
+      "support_role": "secondary",
+      "status": "full_release",
       "public_package_policy": "configured_endpoint_required",
-      "hu": "Az Android-kiadás külön nyilvános béta. Közvetlenül telepíthető csomag csak ellenőrzött letöltési végpont esetén jelenhet meg; ez még nem végleges áruházi kiadás.",
-      "en": "The Android edition is a separate public beta. A direct-install package may be shown only when a verified download endpoint exists; it is not yet a final store release."
+      "hu": "Az Android-kiadás teljes verzióként érhető el a hitelesített letöltési végponton, 5 napos próbalicenccel.",
+      "en": "The Android edition is available as a full release through the verified download endpoint with a 5-day trial licence."
     },
     {
       "id": "web",
