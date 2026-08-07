@@ -2,7 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'seamless-v7';
+  const VERSION = 'seamless-v6';
+  const REVISION = 'ratio-v4';
   const LOOP_GUARD_MS = 520;
   const ACTIVITY_IDLE_MS = 170;
   let bridge = null;
@@ -19,32 +20,30 @@
 
   root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
   root.dataset.fxInfiniteController = VERSION;
-  root.dataset.fxScrollAuthority = VERSION;
+  root.dataset.fxScrollAuthority = VERSION + '-' + REVISION;
   root.dataset.fxInfiniteCloneMode = 'hero-visual-bridge';
   root.dataset.fxInfiniteInput = 'native';
   root.dataset.fxScrollActivity = 'idle';
   root.dataset.fxAutomaticLoop = 'enabled';
-  root.dataset.fxScrollJumpGuard = 'visual-ratio-v1';
+  root.dataset.fxScrollJumpGuard = 'visual-ratio-v4';
   root.dataset.fxLoopBridge = 'building';
   root.classList.remove('fx-infinite-loop-jump', 'fx-three-loop-transfer', 'fx-precision-wheel');
 
   function ensureStyle() {
     let link = document.querySelector('link[data-fx-seamless-loop-style]');
     if (link) {
-      const wanted = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-v7';
-      if (!link.href.includes('20260808-seamless-v7')) link.href = wanted;
+      const wanted = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-ratio-v4';
+      if (!link.href.includes('20260808-seamless-ratio-v4')) link.href = wanted;
       return;
     }
     link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-v7';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-ratio-v4';
     link.dataset.fxSeamlessLoopStyle = 'true';
     document.head.appendChild(link);
   }
 
-  function language() {
-    return root.lang === 'en' ? 'en' : 'hu';
-  }
+  function language() { return root.lang === 'en' ? 'en' : 'hu'; }
 
   function setBilingualText(scope) {
     if (!scope) return;
@@ -91,7 +90,6 @@
     hub = document.createElement('section');
     hub.className = 'fx-release-download-hub';
     hub.setAttribute('aria-labelledby', 'fx-release-download-title');
-
     const head = document.createElement('div');
     head.className = 'fx-release-download-head';
     const copy = document.createElement('div');
@@ -107,7 +105,6 @@
     lead.dataset.hu = 'A FormatX teljes verzió. A Bazzite/Linux az elsődleges rendszer, a Windows támogatott platform ugyanabban a multiplatform csomagban. Az első használat 5 napos próbalicenccel indul.';
     lead.dataset.en = 'FormatX is a full release. Bazzite/Linux is the primary system and Windows is supported in the same multiplatform package. First use starts with a 5-day trial licence.';
     copy.append(kicker, title, lead);
-
     const badge = document.createElement('span');
     badge.className = 'fx-release-download-badge';
     badge.dataset.hu = 'TELJES VERZIÓ';
@@ -128,7 +125,6 @@
     note.className = 'fx-release-download-note';
     note.dataset.hu = 'Teljes verzió · 5 napos próbalicenc. A letöltési oldal jelzi a platform állapotát és az ellenőrizhető kiadási információkat.';
     note.dataset.en = 'Full release · 5-day trial licence. The downloads page shows platform status and verifiable release information.';
-
     hub.append(head, grid, note);
     const releaseLayout = panel.querySelector('.release-layout');
     if (releaseLayout) releaseLayout.insertAdjacentElement('afterend', hub);
@@ -158,9 +154,7 @@
     const footer = document.querySelector('.site-footer');
     const panel = document.querySelector('[data-organism-panel="resources"]');
     if (!main || !footer) return false;
-    if (footer.closest('.fx-organism-panel') || footer.parentElement !== document.body) {
-      main.insertAdjacentElement('afterend', footer);
-    }
+    if (footer.closest('.fx-organism-panel') || footer.parentElement !== document.body) main.insertAdjacentElement('afterend', footer);
     footer.dataset.fxFooterFlow = 'document';
     repairFooterCopy(footer);
     if (panel) {
@@ -176,9 +170,7 @@
     clone.classList.add('fx-loop-hero-clone');
     clone.setAttribute('aria-hidden', 'true');
     clone.setAttribute('inert', '');
-    clone.querySelectorAll('[id]').forEach((element, index) => {
-      element.id = 'fx-loop-clone-' + index;
-    });
+    clone.querySelectorAll('[id]').forEach((element, index) => { element.id = 'fx-loop-clone-' + index; });
     clone.querySelectorAll('[aria-labelledby],[aria-controls],[for]').forEach(element => {
       element.removeAttribute('aria-labelledby');
       element.removeAttribute('aria-controls');
@@ -205,7 +197,6 @@
     const footer = document.querySelector('body > .site-footer');
     sourceHero = document.querySelector('#main-content > #hero');
     if (!footer || !sourceHero) return false;
-
     removeBridge();
     const clone = sourceHero.cloneNode(true);
     neutraliseClone(clone);
@@ -215,7 +206,7 @@
     bridge.setAttribute('aria-hidden', 'true');
     bridge.appendChild(clone);
     footer.insertAdjacentElement('afterend', bridge);
-    root.dataset.fxLoopBridge = 'ready-v3';
+    root.dataset.fxLoopBridge = 'ready-ratio-v4';
     return true;
   }
 
@@ -246,9 +237,7 @@
     const settle = () => {
       landAt(target);
       frame += 1;
-      if (frame === 2) {
-        dispatchEvent(new CustomEvent('formatx:loop', { detail }));
-      }
+      if (frame === 2) dispatchEvent(new CustomEvent('formatx:loop', { detail }));
       if (frame < 5) {
         landingFrame = requestAnimationFrame(settle);
         return;
@@ -267,7 +256,6 @@
     root.classList.add('fx-page-scrolling');
     clearTimeout(activityTimer);
     activityTimer = window.setTimeout(markIdle, ACTIVITY_IDLE_MS);
-
     if (!bridge || !sourceHero || Date.now() < transferLockedUntil) return;
     if (document.hidden || document.body.classList.contains('fx-organism-panel-open')) return;
     if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return;
@@ -276,7 +264,6 @@
     const bridgeHeight = Math.max(1, bridge.offsetHeight);
     const threshold = bridgeTop + Math.max(72, Math.min(innerHeight * .34, 360));
     if (scrollY < threshold) return;
-
     const ratio = Math.max(0, Math.min(1, (scrollY - bridgeTop) / bridgeHeight));
     const target = landingTarget(ratio);
     if (target == null) return;
@@ -288,14 +275,8 @@
     loopCount += 1;
     root.dataset.fxLoopCount = String(loopCount);
     root.dataset.fxLoopSource = 'hero-visual-bridge';
-
     landAt(target);
-    settleLanding(target, {
-      count: loopCount,
-      source: 'hero-visual-bridge',
-      ratio,
-      target
-    });
+    settleLanding(target, { count: loopCount, source: 'hero-visual-bridge', ratio, target, revision: REVISION });
   }
 
   function onScroll() {
@@ -331,6 +312,7 @@
     buildBridge();
     root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
       version: VERSION,
+      revision: REVISION,
       automaticLoop: true,
       visualBridge: true,
       clonedContent: false,
@@ -342,7 +324,7 @@
     });
     root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
     root.dataset.fxInfiniteController = VERSION;
-    root.dataset.fxScrollAuthority = VERSION;
+    root.dataset.fxScrollAuthority = VERSION + '-' + REVISION;
     onScroll();
   }
 
