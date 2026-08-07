@@ -254,10 +254,10 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
     width: 100%;
   }
 
-  /* Mobile uses the same dedicated upper-right audio slot with a tighter
-     offset to preserve screen space and safe-area clearance. */
+  /* Mobile clears the complete fixed header/control band before showing the
+     audio button; Live OS and thought controls stay in the lower-right. */
   .fx-three-sound {
-    top: 72px !important;
+    top: 138px !important;
     right: 10px !important;
     bottom: auto !important;
   }
