@@ -8,6 +8,15 @@
     "release_maturity": "full_release",
     "trial_days": 5
   },
+  "public_delivery": {
+    "first_party_only": true,
+    "public_origin": "https://www.formatxsuite.com",
+    "release_metadata_route": "/scifi-ui/data/current-release.json",
+    "multiplatform_download_route": "/download/multiplatform",
+    "android_download_route": "/download/android",
+    "native_beta_download_route": "/download/android-native-beta",
+    "upstream_provider_visible": false
+  },
   "layout_contract": {
     "desktop_composition_preloaded": true,
     "mobile_layout_unchanged": true,
