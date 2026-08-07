@@ -2,83 +2,19 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxInfiniteFix === 'ready') return;
-  root.dataset.fxInfiniteFix = 'ready';
-  root.dataset.fxInfiniteController = 'authoritative';
-  root.dataset.fxAudioLabelFix = 'v1';
-
-  let transferring = false;
-  let settleFrame = 0;
-
-  function elements() {
-    return {
-      hero: document.getElementById('hero'),
-      clone: document.querySelector('[data-fx-loop-bridge="true"]')
-    };
-  }
-
-  function metrics(clone) {
-    const maximumScroll = Math.max(0, document.documentElement.scrollHeight - innerHeight);
-    const cloneReach = Math.max(clone.offsetTop, clone.offsetTop + clone.offsetHeight - innerHeight);
-    return {
-      maximumScroll,
-      trigger: Math.min(maximumScroll, cloneReach) - 2
-    };
-  }
-
-  function settleTransfer(target, count, attempt) {
-    cancelAnimationFrame(settleFrame);
-    settleFrame = requestAnimationFrame(() => {
-      if (Math.abs(scrollY - target) > 2 && attempt < 5) {
-        scrollTo(0, target);
-        settleTransfer(target, count, attempt + 1);
-        return;
-      }
-
-      root.dataset.fxLoopCount = String(count);
-      root.classList.remove('fx-three-loop-transfer');
-      transferring = false;
-      settleFrame = 0;
-      dispatchEvent(new CustomEvent('formatx:loop', {
-        detail: { count, source: 'authoritative-controller', target, actual: scrollY }
-      }));
-    });
-  }
-
-  function transferAtBoundary(event) {
-    const { hero, clone } = elements();
-    if (!hero || !clone) return;
-    const { trigger } = metrics(clone);
-    if (scrollY < trigger) return;
-
-    if (event && typeof event.stopImmediatePropagation === 'function') {
-      event.stopImmediatePropagation();
-    }
-    if (transferring) return;
-
-    transferring = true;
-    const baseline = Number(root.dataset.fxLoopCount || 0);
-    const maximumRelative = Math.max(0, clone.offsetHeight - innerHeight);
-    const relative = Math.max(0, Math.min(maximumRelative, scrollY - clone.offsetTop));
-    const target = Math.max(0, hero.offsetTop + relative);
-    root.classList.add('fx-three-loop-transfer');
-
-    requestAnimationFrame(() => {
-      scrollTo(0, target);
-      settleTransfer(target, baseline + 1, 0);
-    });
-  }
+  if (root.dataset.fxInfiniteFix === 'retired-seamless-v7') return;
+  root.dataset.fxInfiniteFix = 'retired-seamless-v7';
+  root.dataset.fxLegacyScrollController = 'disabled';
+  root.dataset.fxAudioLabelFix = 'v2';
 
   function syncAudioActionLabel() {
     const button = document.querySelector('.fx-three-sound');
     const label = button?.querySelector('span');
     if (!button || !label) return;
-
     const state = button.dataset.fxAudioState || root.dataset.fxAudioState || 'off';
     const english = root.lang === 'en';
     let nextLabel;
     let nextAria;
-
     if (state === 'pending') {
       nextLabel = english ? 'STARTING…' : 'INDÍTÁS…';
       nextAria = english ? 'Starting the cinematic score' : 'Filmes zene indítása';
@@ -92,60 +28,25 @@
       nextLabel = english ? 'MUSIC ON' : 'ZENE BE';
       nextAria = english ? 'Enable the cinematic score' : 'Filmes zene bekapcsolása';
     }
-
     if (label.textContent !== nextLabel) label.textContent = nextLabel;
     if (button.getAttribute('aria-label') !== nextAria) button.setAttribute('aria-label', nextAria);
   }
 
-  function loadOriginProofLayer() {
-    if (document.querySelector('script[data-fx-origin-proof-script]')) return;
+  function loadScript(marker, src, readyKey) {
+    if (document.querySelector('script[' + marker + ']')) return;
     const script = document.createElement('script');
-    script.src = './scripts/formatx-origin-proof.js?v=20260728-origin-proof-v1';
+    script.src = src;
     script.async = false;
-    script.dataset.fxOriginProofScript = 'true';
-    script.addEventListener('load', () => {
-      root.dataset.fxOriginProofLayer = 'ready';
-    }, { once: true });
-    script.addEventListener('error', () => {
-      root.dataset.fxOriginProofLayer = 'error';
-    }, { once: true });
-    document.head.appendChild(script);
-  }
-
-  function loadCategoryDeckStabilizer() {
-    if (document.querySelector('script[data-fx-category-deck-stabilizer]')) return;
-    const script = document.createElement('script');
-    script.src = './scripts/formatx-category-deck-stabilizer.js?v=20260728-category-deck-v1';
-    script.async = false;
-    script.dataset.fxCategoryDeckStabilizer = 'true';
-    script.addEventListener('load', () => {
-      root.dataset.fxCategoryDeckStabilizerLayer = 'ready';
-    }, { once: true });
-    script.addEventListener('error', () => {
-      root.dataset.fxCategoryDeckStabilizerLayer = 'error';
-    }, { once: true });
-    document.head.appendChild(script);
-  }
-
-  function loadSimulatorEntryLayer() {
-    if (document.querySelector('script[data-fx-simulator-entry-script]')) return;
-    const script = document.createElement('script');
-    script.src = './scripts/project-simulator-entry.js?v=20260728-operational-twin-1';
-    script.async = false;
-    script.dataset.fxSimulatorEntryScript = 'true';
-    script.addEventListener('load', () => {
-      root.dataset.fxSimulatorEntryLayer = 'ready';
-    }, { once: true });
-    script.addEventListener('error', () => {
-      root.dataset.fxSimulatorEntryLayer = 'error';
-    }, { once: true });
+    script.setAttribute(marker, 'true');
+    script.addEventListener('load', () => { if (readyKey) root.dataset[readyKey] = 'ready'; }, { once: true });
+    script.addEventListener('error', () => { if (readyKey) root.dataset[readyKey] = 'error'; }, { once: true });
     document.head.appendChild(script);
   }
 
   function loadDependentLayers() {
-    loadCategoryDeckStabilizer();
-    loadOriginProofLayer();
-    loadSimulatorEntryLayer();
+    loadScript('data-fx-category-deck-stabilizer', './scripts/formatx-category-deck-stabilizer.js?v=20260728-category-deck-v1', 'fxCategoryDeckStabilizerLayer');
+    loadScript('data-fx-origin-proof-script', './scripts/formatx-origin-proof.js?v=20260728-origin-proof-v1', 'fxOriginProofLayer');
+    loadScript('data-fx-simulator-entry-script', './scripts/project-simulator-entry.js?v=20260728-operational-twin-1', 'fxSimulatorEntryLayer');
   }
 
   function loadCategoryLayer() {
@@ -156,25 +57,17 @@
       style.dataset.fxCategoryStyle = 'true';
       document.head.appendChild(style);
     }
-
     const existing = document.querySelector('script[data-fx-category-script]');
     if (existing) {
       loadDependentLayers();
       return;
     }
-
     const script = document.createElement('script');
     script.src = './scripts/formatx-category-positioning.js?v=20260728-category-v1';
     script.async = false;
     script.dataset.fxCategoryScript = 'true';
-    script.addEventListener('load', () => {
-      root.dataset.fxCategoryLayer = 'ready';
-      loadDependentLayers();
-    }, { once: true });
-    script.addEventListener('error', () => {
-      root.dataset.fxCategoryLayer = 'error';
-      loadDependentLayers();
-    }, { once: true });
+    script.addEventListener('load', loadDependentLayers, { once: true });
+    script.addEventListener('error', loadDependentLayers, { once: true });
     document.head.appendChild(script);
   }
 
@@ -186,25 +79,17 @@
     subtree: true
   });
 
-  addEventListener('scroll', transferAtBoundary, { capture: true, passive: true });
-  addEventListener('resize', transferAtBoundary, { capture: true, passive: true });
   addEventListener('pageshow', () => {
-    transferAtBoundary();
     syncAudioActionLabel();
     loadCategoryLayer();
   }, { passive: true });
   addEventListener('formatx:languagechange', syncAudioActionLabel);
   document.addEventListener('click', event => {
-    if (event.target instanceof Element && event.target.closest('.fx-three-sound')) {
-      queueMicrotask(syncAudioActionLabel);
-    }
+    if (event.target instanceof Element && event.target.closest('.fx-three-sound')) queueMicrotask(syncAudioActionLabel);
   }, true);
 
   syncAudioActionLabel();
   loadCategoryLayer();
 
-  addEventListener('pagehide', () => {
-    cancelAnimationFrame(settleFrame);
-    audioLabelObserver.disconnect();
-  }, { once: true });
+  addEventListener('pagehide', () => audioLabelObserver.disconnect(), { once: true });
 }());
