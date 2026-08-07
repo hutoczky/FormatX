@@ -19,6 +19,7 @@ const NO_STORE_PATHS = new Set([
   '/scifi-ui/data/test-matrix.json', '/scifi-ui/data/known-issues.json',
   '/scifi-ui/data/stable-gate.json', '/scifi-ui/data/decision-log.json',
   '/scifi-ui/data/workflow-cases.json', '/scifi-ui/scripts/release-metadata.js',
+  '/scifi-ui/scripts/platform-status.js',
   '/scifi-ui/scripts/formatx-public-shell.js',
   '/scifi-ui/scripts/formatx-content-standard.js',
   '/scifi-ui/scripts/formatx-content-finalizer.js',
@@ -41,7 +42,7 @@ const LANGUAGE_ASSETS = [
 ].join('\n');
 const CONTENT_ASSETS = [
   '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-2">',
-  '<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260731-release-2"></script>',
+  '<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260807-full-release-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260731-seo-2"></script>',
@@ -212,8 +213,19 @@ function cleanLegacyReleaseCopy(html) {
     .replaceAll('V92 kiadási oldal', 'Hivatalos kiadási oldal')
     .replaceAll('site.css?v=20260718-v92', 'site.css')
     .replaceAll('<span>92.00</span><b>RELEASE DNA</b>', '<span>—</span><b>OFFICIAL RELEASE</b>')
-    .replaceAll('Teljes verzió letöltése', 'Multiplatform nyilvános béta letöltése')
-    .replaceAll('Download full version', 'Download multiplatform public beta');
+    .replaceAll('Multiplatform nyilvános béta letöltése', 'Teljes multiplatform verzió letöltése')
+    .replaceAll('Download multiplatform public beta', 'Download full multiplatform version')
+    .replaceAll('Multiplatform nyilvános béta', 'Teljes multiplatform verzió')
+    .replaceAll('Multiplatform public beta', 'Full multiplatform version')
+    .replaceAll('Android nyilvános béta', 'Android teljes verzió')
+    .replaceAll('Android public beta', 'Android full version')
+    .replaceAll('Android · Public beta', 'Android · Full release')
+    .replaceAll('aktuális csomag multiplatform nyilvános béta', 'aktuális csomag teljes multiplatform kiadás')
+    .replaceAll('current package is a multiplatform public beta', 'current package is the full multiplatform release')
+    .replaceAll('nyilvános béta csomag', 'teljes multiplatform csomag')
+    .replaceAll('public beta package', 'full multiplatform package')
+    .replaceAll('Teljes verzió letöltése', 'Teljes multiplatform verzió letöltése')
+    .replaceAll('Download full version', 'Download full multiplatform version');
 }
 
 function noStore(response, withoutBody) {
