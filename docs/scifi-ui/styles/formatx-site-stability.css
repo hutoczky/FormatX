@@ -108,11 +108,12 @@ html.fx-organism-core-active .fx-three-stage-shell {
   z-index: var(--fx-layer-floating) !important;
 }
 
-/* The Live OS launcher occupies the lower-right corner. Keep the professional
-   score control physically separate so both controls remain real click targets. */
+/* Dedicated audio slot: the lower-right area is occupied by the Live OS
+   launcher and the Organism thought trigger. Keep music in the upper-right. */
 .fx-three-sound {
+  top: 90px !important;
   right: 18px !important;
-  bottom: 84px !important;
+  bottom: auto !important;
   pointer-events: auto !important;
 }
 
@@ -253,8 +254,8 @@ html.fx-infinite-loop-jump .fx-three-stage-shell {
     width: 100%;
   }
 
-  /* Mobile keeps music near the top-right; the Live OS launcher remains at
-     the lower-right. This avoids overlap with safe-area and bottom controls. */
+  /* Mobile uses the same dedicated upper-right audio slot with a tighter
+     offset to preserve screen space and safe-area clearance. */
   .fx-three-sound {
     top: 72px !important;
     right: 10px !important;
