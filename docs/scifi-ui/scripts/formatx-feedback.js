@@ -8,6 +8,7 @@
   const FEEDBACK_SUMMARY_URL = '/api/feedback/summary';
   const FEEDBACK_SUBMIT_URL = '/api/feedback';
   const PORTABLE_INSTALLER_ASSET = '/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg?v=20260806-mobile-compatible-2';
+  const PUBLIC_REVIEW_STYLE = '/scifi-ui/styles/formatx-feedback-public.css?v=20260807-public-reviews-1';
   const REQUEST_TIMEOUT_MS = 15000;
 
   const COPY = {
@@ -52,6 +53,15 @@
   let feedbackActivated = false;
   let feedbackObserver = null;
   let latestSummary = null;
+
+  function ensurePublicReviewStyles() {
+    if (document.querySelector('link[data-fx-feedback-public-style]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = PUBLIC_REVIEW_STYLE;
+    link.dataset.fxFeedbackPublicStyle = 'true';
+    document.head.append(link);
+  }
 
   function syncBilingual(scope) {
     if (!scope) return;
@@ -377,6 +387,7 @@
     feedbackActivated = true;
     feedbackObserver?.disconnect();
     feedbackObserver = null;
+    ensurePublicReviewStyles();
     section.querySelectorAll('[data-rating-group]').forEach(buildRatingGroup);
     syncBilingual(section);
     ensurePublicReviewsHost(section);
