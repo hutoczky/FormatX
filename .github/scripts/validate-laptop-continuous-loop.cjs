@@ -38,6 +38,7 @@ async function snapshot(page) {
       jumpGuard: document.documentElement.dataset.fxScrollJumpGuard || '',
       bridgeState: document.documentElement.dataset.fxLoopBridge || '',
       scrollY,
+      viewportHeight: innerHeight,
       maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
       loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
       bridgeCount: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
@@ -46,6 +47,7 @@ async function snapshot(page) {
       transferClass: document.documentElement.classList.contains('fx-seamless-loop-transfer'),
       runtime: document.documentElement.__FORMATX_INFINITE_SCROLL__ || null,
       bridgeTop: bridge?.offsetTop || 0,
+      bridgeHeight: bridge?.offsetHeight || 0,
       sourceTop: source?.offsetTop || 0,
       sourceHeight: source?.offsetHeight || 0,
       cloneHeight: clone?.offsetHeight || 0,
@@ -83,7 +85,9 @@ async function verifyProgressiveScroll(page, name) {
 
 async function verifySeamlessTransfer(page, name) {
   const before = await snapshot(page);
-  const relative = Math.max(60, Math.min(140, Math.round(before.sourceHeight * .12)));
+  const relative = Math.max(60, Math.min(140, Math.round(before.viewportHeight * .12)));
+  assert(relative < before.cloneHeight,
+    name + ': transfer point falls outside visual bridge: ' + JSON.stringify({ relative, before }));
   await page.evaluate(relativeOffset => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     scrollTo(0, (bridge?.offsetTop || 0) + relativeOffset);
@@ -133,8 +137,8 @@ async function verifyViewport(browser, viewport, name, mobile) {
   assert(initial.heroIdCount === 1, name + ': duplicate #hero id detected: ' + JSON.stringify(initial));
   assert(initial.sourceTitle && initial.sourceTitle === initial.cloneTitle,
     name + ': visual bridge title differs from source hero: ' + JSON.stringify(initial));
-  assert(Math.abs(initial.sourceHeight - initial.cloneHeight) <= 4,
-    name + ': visual bridge height differs from source hero: ' + JSON.stringify(initial));
+  assert(initial.cloneHeight >= initial.viewportHeight - 4 && initial.bridgeHeight >= initial.viewportHeight - 4,
+    name + ': visual bridge must cover the full viewport: ' + JSON.stringify(initial));
   assert(initial.footerInFlow && !initial.footerInPanel,
     name + ': footer must remain in document flow, not inside the release dialog: ' + JSON.stringify(initial));
   assert(initial.runtime?.automaticLoop === true && initial.runtime?.jumpFree === true,
