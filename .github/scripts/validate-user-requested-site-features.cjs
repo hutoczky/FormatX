@@ -72,12 +72,14 @@ assert.ok(!/\b(?:nyilvános béta|public beta)\b/i.test(downloads), 'retired bet
 assert.ok(includesAll(downloadStyle, ['grid-template-columns: repeat(3', '@media (max-width: 800px)', '@media (min-width: 2200px)']), 'downloads responsive range missing');
 
 assert.ok(includesAll(feedbackSchema, [
-  "SCHEMA_VERSION = '3'",
-  'formatx_schema_meta',
-  'rebuildCanonicalTable',
-  'feedback_schema_recovery_failed',
+  "SCHEMA_VERSION = '4'",
+  'ALTER TABLE user_feedback ADD COLUMN',
+  'feedback_schema_column_missing',
+  'saveSchemaVersionBestEffort',
   'CREATE INDEX IF NOT EXISTS idx_user_feedback_ip_created',
-]), 'recoverable feedback schema missing');
+]), 'non-destructive recoverable feedback schema missing');
+assert.ok(!feedbackSchema.includes('DROP TABLE user_feedback'), 'feedback recovery must never drop the live table');
+assert.ok(!feedbackSchema.includes('RECOVERY_TABLE'), 'legacy destructive feedback recovery path returned');
 assert.ok(includesAll(feedbackEntry, [
   'feedback_schema_unavailable',
   "['/downloads/', '/scifi-ui/downloads/']",
@@ -104,4 +106,4 @@ assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 assert.ok(deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'), 'custom-domain smoke checks missing');
 
-console.log('PASS: FormatX seamless scroll, full release/trial copy, feedback, downloads, responsive UI and deployment gates are present.');
+console.log('PASS: FormatX seamless scroll, full release/trial copy, non-destructive feedback recovery, downloads, responsive UI and deployment gates are present.');
