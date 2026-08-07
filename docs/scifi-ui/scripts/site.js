@@ -91,11 +91,18 @@
   function trustedAssetUrl(value) {
     try {
       const url = new URL(value, location.origin);
-      return url.origin === location.origin || (
-        url.protocol === 'https:' &&
-        url.hostname === 'github.com' &&
-        url.pathname.startsWith('/hutoczky/FormatX-Updates/releases/download/')
-      );
+      return url.origin === location.origin && [
+        '/download/multiplatform',
+        '/download/android',
+        '/download/android-native-beta',
+      ].includes(url.pathname);
+    } catch (_) { return false; }
+  }
+
+  function trustedPageUrl(value) {
+    try {
+      const url = new URL(value, location.origin);
+      return url.origin === location.origin && url.pathname.startsWith('/scifi-ui/');
     } catch (_) { return false; }
   }
 
@@ -117,7 +124,7 @@
   }
 
   function renderRelease(data) {
-    const asset = data?.channels?.multiplatform || data?.channels?.windows;
+    const asset = data?.channels?.multiplatform;
     const available = data?.ok === true && asset?.available === true && trustedAssetUrl(asset.download_url);
     const state = copy('Teljes multiplatform verzió', 'Full multiplatform version');
     const unavailable = copy('A hivatalos csomag metaadata nem érhető el.', 'Official package metadata is unavailable.');
@@ -131,17 +138,19 @@
     setText('download-size', available ? formatBytes(asset.size) : unavailable);
     setText('release-sha256', asset?.digest || copy('Nincs közzétett digest', 'No published digest'));
     setText('release-api-note', available
-      ? copy('A kiadási adatok a szinkronizált hivatalos metaadatból származnak.', 'Release data comes from synchronized official metadata.')
+      ? copy('A kiadási adatok a FormatX hivatalos kiadási szolgáltatásából származnak.', 'Release data comes from the official FormatX release service.')
       : unavailable);
 
     for (const id of ['hero-download', 'download-primary']) setLink(id, available ? asset.download_url : null);
-    const pageUrl = typeof data?.release_url === 'string' && data.release_url.startsWith('https://github.com/hutoczky/FormatX-Updates/releases/') ? data.release_url : null;
+    const pageUrl = typeof data?.release_url === 'string' && trustedPageUrl(data.release_url) ? data.release_url : null;
     for (const id of ['release-page-link', 'download-release-page']) {
       const element = document.getElementById(id);
       if (!(element instanceof HTMLAnchorElement)) continue;
       if (pageUrl) {
         element.href = pageUrl;
         element.removeAttribute('aria-disabled');
+        element.removeAttribute('target');
+        element.removeAttribute('rel');
       } else {
         element.removeAttribute('href');
         element.setAttribute('aria-disabled', 'true');
