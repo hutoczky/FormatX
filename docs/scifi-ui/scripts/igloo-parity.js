@@ -201,9 +201,9 @@
   const queue = [
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
     './scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
-    './scripts/release-metadata.js',
-    './scripts/interaction-genome-export-stability.js',
-    './scripts/platform-status.js?v=20260730-platform-status-1',
+    './scripts/release-metadata.js?v=20260807-full-release-1',
+    './scripts/interaction-genome-export-stability.js?v=20260807-full-release-1',
+    './scripts/platform-status.js?v=20260807-full-release-1',
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
     './scripts/organism-core-controller.js?v=20260729-core-ui-2',
@@ -215,12 +215,12 @@
     './scripts/synaptic-thought-genome.js?v=20260731-thought-genome-1',
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
     './scripts/formatx-mobile-unified.js?v=20260731-mobile-unified-2',
-    './scripts/formatx-infinite-scroll.js?v=20260805-infinite-smooth-v5',
+    './scripts/formatx-infinite-scroll.js?v=20260807-seamless-v6',
     './scripts/formatx-three-host-safe.js?v=20260805-immersive-host-2',
     './scripts/formatx-render-visibility.js?v=20260805-immersive-visibility-3',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/interaction-genome.js?v=20260728-genome-3d-1',
-    './scripts/formatx-language-copy-stability.js',
+    './scripts/formatx-language-copy-stability.js?v=20260807-full-release-1',
     './scripts/formatx-premium-finish.js?v=20260805-motion-gate-3'
   ];
 
