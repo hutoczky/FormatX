@@ -5,9 +5,11 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const feedback = read('docs/scifi-ui/scripts/formatx-feedback.js');
+const showcase = read('docs/scifi-ui/scripts/formatx-product-showcase.js');
 const styles = read('docs/scifi-ui/styles/formatx-feedback.css');
 const compatible = read('docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg');
 const schema = read('billing-worker/src/feedback-schema.js');
+const api = read('billing-worker/src/feedback-api.js');
 const entry = read('billing-worker/src/production-feedback-entry.js');
 const workerConfig = read('billing-worker/wrangler.jsonc');
 const matrix = read('.github/scripts/validate-responsive-production-matrix.cjs');
@@ -20,8 +22,9 @@ assert.match(compatible, /Linux indítófájlt/, 'portable installer visual is m
 assert.match(compatible, /Windows EXE/, 'portable installer visual is missing Windows launcher state');
 assert.match(compatible, /macOS indítófájlt/, 'portable installer visual is missing macOS launcher state');
 
-assert.match(feedback, /portable-installer-compatible\.svg\?v=/, 'mobile compatibility replacement is missing');
-assert.match(feedback, /MutationObserver/, 'dynamically inserted showcase images are not monitored');
+assert.match(showcase, /image: 'portable-installer-compatible\.svg'/, 'showcase does not use the compatible portable installer asset at source');
+assert.doesNotMatch(showcase, /image: 'portable-installer\.svg'/, 'showcase still generates the obsolete portable installer asset');
+assert.match(feedback, /portable-installer-compatible\.svg\?v=/, 'cached legacy mobile compatibility fallback is missing');
 assert.match(feedback, /FEEDBACK_SUMMARY_URL = '\/api\/feedback\/summary'/, 'feedback summary endpoint is missing');
 assert.match(feedback, /FEEDBACK_SUBMIT_URL = '\/api\/feedback'/, 'feedback submit endpoint is missing');
 assert.match(feedback, /privacy_consent: true/, 'privacy consent is not sent explicitly');
@@ -55,8 +58,15 @@ assert.ok(
 );
 assert.match(matrix, /ratingColumns/, 'matrix must verify feedback rating layout');
 
+assert.match(schema, /SCHEMA_VERSION = '6'/, 'current D1 feedback schema version is missing');
 assert.match(schema, /PRAGMA table_info\(user_feedback\)/, 'D1 feedback schema verification is missing');
-assert.match(entry, /ensureFeedbackSchemaCompatibility/, 'feedback entry must migrate the D1 schema before handling requests');
+assert.match(schema, /createFeedbackTableIfMissing/, 'targeted feedback bootstrap is missing');
+assert.match(schema, /ALTER TABLE user_feedback ADD COLUMN/, 'non-destructive feedback column repair is missing');
+assert.doesNotMatch(schema, /DROP TABLE user_feedback/, 'feedback recovery must never drop the live table');
+assert.match(api, /runWithFeedbackTable/, 'feedback API targeted table bootstrap wrapper is missing');
+assert.match(api, /createFeedbackTableIfMissing/, 'feedback API cannot recover a missing feedback table');
+assert.doesNotMatch(entry, /ensureFeedbackSchemaCompatibility/, 'legacy blocking blanket feedback migration returned');
+assert.match(entry, /handleFeedbackRequest\(request, env\)/, 'feedback routing is missing');
 assert.match(workerConfig, /"main": "src\/production-content-entry\.js"/, 'unexpected production Worker entry');
 
 console.log('FormatX mobile showcase, feedback and responsive matrix validation passed.');
