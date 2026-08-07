@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxLanguageCopyStability === 'ready-v3') return;
-  root.dataset.fxLanguageCopyStability = 'loading-v3';
+  if (root.dataset.fxLanguageCopyStability === 'ready-v4') return;
+  root.dataset.fxLanguageCopyStability = 'loading-v4';
 
   const COPY = Object.freeze({
     hu: {
@@ -22,6 +22,15 @@
 
   let scheduled = 0;
   let rendering = false;
+
+  function ensureGuard() {
+    if (document.querySelector('script[data-fx-full-release-guard]')) return;
+    const script = document.createElement('script');
+    script.src = '/scifi-ui/scripts/formatx-full-release-guard.js?v=20260807-full-release-1';
+    script.defer = true;
+    script.dataset.fxFullReleaseGuard = 'true';
+    document.head.appendChild(script);
+  }
 
   function language() {
     return root.lang === 'en' ? 'en' : 'hu';
@@ -67,7 +76,7 @@
       if (telemetryLabel && telemetryLabel.textContent !== 'PUBLIC RELEASE') telemetryLabel.textContent = 'PUBLIC RELEASE';
 
       root.dataset.fxLanguageCopy = language();
-      root.dataset.fxLanguageCopyStability = 'ready-v3';
+      root.dataset.fxLanguageCopyStability = 'ready-v4';
     } finally {
       rendering = false;
     }
@@ -98,6 +107,7 @@
     copyObserver.observe(node, { subtree: true, childList: true, characterData: true });
   });
 
+  ensureGuard();
   render();
   setTimeout(render, 0);
   setTimeout(render, 250);
