@@ -27,7 +27,7 @@ async function clearIntro(page) {
 
 async function snapshot(page) {
   return page.evaluate(() => {
-    const bridge = document.querySelector('[data-fx-loop-bridge]');
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     const source = document.querySelector('#main-content > #hero');
     const clone = bridge?.querySelector('.fx-loop-hero-clone');
     return {
@@ -40,7 +40,8 @@ async function snapshot(page) {
       scrollY,
       maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
       loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
-      bridgeCount: document.querySelectorAll('[data-fx-loop-bridge]').length,
+      bridgeCount: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
+      cloneCount: document.querySelectorAll('.fx-loop-bridge [data-fx-loop-clone="true"]').length,
       heroIdCount: document.querySelectorAll('#hero').length,
       transferClass: document.documentElement.classList.contains('fx-seamless-loop-transfer'),
       runtime: document.documentElement.__FORMATX_INFINITE_SCROLL__ || null,
@@ -58,7 +59,7 @@ async function snapshot(page) {
 
 async function verifyProgressiveScroll(page, name) {
   const positions = await page.evaluate(async () => {
-    const bridge = document.querySelector('[data-fx-loop-bridge]');
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     const maximumBeforeBridge = Math.max(0, (bridge?.offsetTop || document.documentElement.scrollHeight) - innerHeight - 80);
     const start = Math.round(maximumBeforeBridge * .35);
     const end = Math.round(maximumBeforeBridge * .78);
@@ -84,7 +85,7 @@ async function verifySeamlessTransfer(page, name) {
   const before = await snapshot(page);
   const relative = Math.max(60, Math.min(140, Math.round(before.sourceHeight * .12)));
   await page.evaluate(relativeOffset => {
-    const bridge = document.querySelector('[data-fx-loop-bridge]');
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     scrollTo(0, (bridge?.offsetTop || 0) + relativeOffset);
   }, relative);
   await page.waitForFunction(previous => Number(document.documentElement.dataset.fxLoopCount || 0) > previous,
@@ -127,7 +128,8 @@ async function verifyViewport(browser, viewport, name, mobile) {
   await page.waitForTimeout(500);
 
   const initial = await snapshot(page);
-  assert(initial.bridgeCount === 1, name + ': exactly one visual bridge required: ' + JSON.stringify(initial));
+  assert(initial.bridgeCount === 1, name + ': exactly one visual bridge container required: ' + JSON.stringify(initial));
+  assert(initial.cloneCount === 1, name + ': exactly one inert Hero clone required: ' + JSON.stringify(initial));
   assert(initial.heroIdCount === 1, name + ': duplicate #hero id detected: ' + JSON.stringify(initial));
   assert(initial.sourceTitle && initial.sourceTitle === initial.cloneTitle,
     name + ': visual bridge title differs from source hero: ' + JSON.stringify(initial));
