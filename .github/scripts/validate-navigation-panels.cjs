@@ -32,7 +32,11 @@ async function waitForInterface(page) {
       && root.dataset.fxOrganismCoreController === 'ready'
       && root.dataset.fxOrganismConsoleState === 'ready'
       && root.dataset.fxSingleLanguageToggle === 'ready'
-      && root.dataset.fxInfiniteScroll === 'ready-v4'
+      && root.dataset.fxInfiniteController === 'seamless-v6'
+      && root.dataset.fxInfiniteScroll === 'ready-seamless-v6'
+      && root.dataset.fxInfiniteInput === 'native'
+      && root.dataset.fxAutomaticLoop === 'enabled'
+      && root.dataset.fxLoopBridge === 'ready-v2'
       && root.dataset.fxInteractionGenomeExport === 'ready'
       && root.dataset.fxOrganismMasterSync === 'ready-v1'
       && root.dataset.fxTranscendLoader === 'safe-ready-v27';
@@ -195,41 +199,75 @@ async function resourceFootprint(page) {
       frames: frames.length,
       canvases: document.querySelectorAll('canvas').length + frameCanvases,
       modules: document.querySelectorAll('script[data-fx-transcend-module]').length,
-      loopBridges: document.querySelectorAll('[data-fx-loop-bridge]').length,
+      loopBridges: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
+      loopClones: document.querySelectorAll('.fx-loop-bridge [data-fx-loop-clone="true"]').length,
+      heroIds: document.querySelectorAll('#hero').length,
       stageShells: document.querySelectorAll('.fx-three-stage-shell').length,
     };
   });
 }
 
 async function completeLoop(page, expectedCount) {
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  await page.waitForFunction(count => (
-    Number(document.documentElement.dataset.fxLoopCount || 0) === count
-    && ['native-scroll', 'wheel'].includes(document.documentElement.dataset.fxLoopSource || '')
-    && document.documentElement.dataset.fxInfiniteInput === 'idle'
-  ), expectedCount, { timeout: 12000 });
-  await assertCore(page);
+  const before = await page.evaluate(() => {
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+    const hero = document.querySelector('#main-content > #hero');
+    return {
+      loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
+      bridgeTop: bridge?.offsetTop || 0,
+      cloneHeight: bridge?.querySelector('.fx-loop-hero-clone')?.offsetHeight || 0,
+      viewportHeight: innerHeight,
+      heroTop: hero?.offsetTop || 0
+    };
+  });
+  if (!before.bridgeTop || !before.cloneHeight) throw new Error(`Seamless loop bridge is unavailable: ${JSON.stringify(before)}`);
 
-  const position = await page.evaluate(() => ({
+  const threshold = Math.max(36, Math.min(before.viewportHeight * .18, 180));
+  const relative = Math.round(Math.min(before.cloneHeight - 24, threshold + 48));
+  if (!(relative > threshold)) throw new Error(`Loop probe is before transfer threshold: ${JSON.stringify({ before, threshold, relative })}`);
+
+  await page.evaluate(({ bridgeTop, relative }) => window.scrollTo(0, bridgeTop + relative), {
+    bridgeTop: before.bridgeTop,
+    relative
+  });
+  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) === count,
+    expectedCount, { timeout: 12000 });
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxInfiniteInput === 'native'
+    && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
+  ), null, { timeout: 5000 });
+  await page.waitForTimeout(120);
+
+  const position = await page.evaluate(relativeOffset => ({
     y: window.scrollY,
-    hero: document.getElementById('hero')?.getBoundingClientRect().top + window.scrollY,
-  }));
-  if (!Number.isFinite(position.hero) || Math.abs(position.y - position.hero) > 3) {
-    throw new Error(`Infinite scroll did not return to hero: ${JSON.stringify(position)}`);
+    hero: document.querySelector('#main-content > #hero')?.offsetTop || 0,
+    relative: relativeOffset,
+    source: document.documentElement.dataset.fxLoopSource || '',
+    controller: document.documentElement.dataset.fxInfiniteController || '',
+  }), relative);
+  if (position.controller !== 'seamless-v6' || position.source !== 'visual-bridge') {
+    throw new Error(`Unexpected seamless loop state: ${JSON.stringify(position)}`);
   }
+  if (Math.abs(position.y - (position.hero + relative)) > 48) {
+    throw new Error(`Seamless loop did not preserve visual position: ${JSON.stringify(position)}`);
+  }
+  await assertCore(page);
 }
 
 async function assertInfiniteScrolling(page) {
+  const initial = await resourceFootprint(page);
+  if (initial.loopBridges !== 1 || initial.loopClones !== 1 || initial.heroIds !== 1) {
+    throw new Error(`Invalid seamless loop footprint: ${JSON.stringify(initial)}`);
+  }
+
   await completeLoop(page, 1);
   const first = await resourceFootprint(page);
-  if (first.loopBridges !== 0) throw new Error(`Clone-based loop bridge returned: ${JSON.stringify(first)}`);
 
   await page.waitForTimeout(500);
   await completeLoop(page, 2);
   const second = await resourceFootprint(page);
 
   if (JSON.stringify(first) !== JSON.stringify(second)) {
-    throw new Error(`Resources accumulated between infinite-scroll cycles: ${JSON.stringify({ first, second })}`);
+    throw new Error(`Resources accumulated between seamless-scroll cycles: ${JSON.stringify({ first, second })}`);
   }
 }
 
@@ -297,7 +335,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX language toggle, navigation, panels and two stable infinite-scroll cycles');
+    console.log('PASS FormatX language toggle, navigation, panels and two stable seamless-v6 cycles');
   } finally {
     await browser.close();
   }
