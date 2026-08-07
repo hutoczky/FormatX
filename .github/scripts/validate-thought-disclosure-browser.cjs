@@ -11,12 +11,31 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function waitForReady(page) {
+async function waitForReady(page, name) {
   await page.waitForFunction(
     () => document.documentElement.classList.contains('fx-intro-complete'),
     null,
     { timeout: 20000 }
   );
+
+  assert(
+    await page.evaluate(() => document.documentElement.dataset.fxImmersive !== 'active'),
+    `${name}: immersive renderer started before explicit user activation`
+  );
+  assert(
+    await page.evaluate(() => document.documentElement.dataset.fxThreeLoader === 'deferred-user-activation'),
+    `${name}: heavy Organism loader was not deferred`
+  );
+
+  const launch = page.locator('.fx-immersive-launch');
+  await launch.waitFor({ state: 'attached', timeout: 10000 });
+  await launch.evaluate(node => node.click());
+  await page.waitForFunction(
+    () => document.documentElement.dataset.fxImmersive === 'active',
+    null,
+    { timeout: 5000 }
+  );
+
   await page.waitForFunction(
     () => document.documentElement.dataset.fxOrganismVoice === 'ready-v3',
     null,
@@ -52,7 +71,7 @@ async function validateViewport(browser, name, viewport, mobile) {
     localStorage.removeItem('formatx-thought-genome-enabled');
   });
   await page.goto(testUrl.href, { waitUntil: 'domcontentloaded' });
-  await waitForReady(page);
+  await waitForReady(page, name);
 
   const trigger = page.locator('.fx-organism-thought-trigger');
   const bubble = page.locator('.fx-organism-thought');
@@ -205,7 +224,7 @@ async function validateViewport(browser, name, viewport, mobile) {
     await validateViewport(browser, 'desktop', { width: 1440, height: 900 }, false);
     await validateViewport(browser, 'mobile', { width: 390, height: 844 }, true);
     console.log(
-      'PASS: thought genome disclosure is compact, bilingual, switchable and responsive.'
+      'PASS: deferred Organism activation and thought genome disclosure are bilingual, switchable and responsive.'
     );
   } finally {
     await browser.close();
