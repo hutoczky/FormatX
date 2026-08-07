@@ -9,6 +9,7 @@
   let sourceHero = null;
   let transferLockedUntil = 0;
   let scrollFrame = 0;
+  let landingFrame = 0;
   let activityTimer = 0;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
@@ -22,14 +23,14 @@
   root.dataset.fxInfiniteInput = 'native';
   root.dataset.fxScrollActivity = 'idle';
   root.dataset.fxAutomaticLoop = 'enabled';
-  root.dataset.fxScrollJumpGuard = 'visual-match-v2';
+  root.dataset.fxScrollJumpGuard = 'visual-match-v3';
   root.classList.remove('fx-infinite-loop-jump', 'fx-three-loop-transfer', 'fx-precision-wheel');
 
   function ensureStyle() {
     if (document.querySelector('link[data-fx-seamless-loop-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260806-seamless-v6';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260807-seamless-v6-landing-1';
     link.dataset.fxSeamlessLoopStyle = 'true';
     document.head.appendChild(link);
   }
@@ -98,21 +99,21 @@
     title.dataset.hu = 'Letöltés, kiadás és támogatás egy helyen.';
     title.dataset.en = 'Downloads, releases and support in one place.';
     const lead = document.createElement('p');
-    lead.dataset.hu = 'A gombok valódi FormatX útvonalakra mutatnak. A multiplatform csomag Bazzite/Linux elsődleges és Windows támogatott nyilvános béta.';
-    lead.dataset.en = 'Buttons point to real FormatX routes. The multiplatform package is a public beta with Bazzite/Linux primary and Windows supported.';
+    lead.dataset.hu = 'A FormatX teljes verzió. A Bazzite/Linux az elsődleges rendszer, a Windows támogatott platform ugyanabban a multiplatform csomagban. Az első használat 5 napos próbalicenccel indul.';
+    lead.dataset.en = 'FormatX is a full release. Bazzite/Linux is the primary system and Windows is supported in the same multiplatform package. First use starts with a 5-day trial licence.';
     copy.append(kicker, title, lead);
 
     const badge = document.createElement('span');
     badge.className = 'fx-release-download-badge';
-    badge.dataset.hu = 'NYILVÁNOS BÉTA';
-    badge.dataset.en = 'PUBLIC BETA';
+    badge.dataset.hu = 'TELJES VERZIÓ';
+    badge.dataset.en = 'FULL RELEASE';
     head.append(copy, badge);
 
     const grid = document.createElement('div');
     grid.className = 'fx-release-download-grid';
-    const download = actionLink('fx-release-download-card is-primary', '/scifi-ui/downloads/', 'Multiplatform béta', 'Multiplatform beta');
+    const download = actionLink('fx-release-download-card is-primary', '/scifi-ui/downloads/', 'Teljes multiplatform verzió', 'Full multiplatform version');
     download.dataset.fxReleaseAction = 'multiplatform';
-    const android = actionLink('fx-release-download-card', '/download/android', 'Android APK', 'Android APK');
+    const android = actionLink('fx-release-download-card', '/download/android', 'Android teljes verzió', 'Android full version');
     const release = actionLink('fx-release-download-card', 'https://github.com/hutoczky/FormatX-Updates/releases', 'Kiadási részletek', 'Release details', true);
     release.dataset.fxReleaseAction = 'release';
     const support = actionLink('fx-release-download-card', '/scifi-ui/support.html', 'Támogatás', 'Support');
@@ -120,8 +121,8 @@
 
     const note = document.createElement('p');
     note.className = 'fx-release-download-note';
-    note.dataset.hu = 'A letöltési oldal mindig jelzi a platform állapotát, a kiadás érettségét és az ellenőrizhető kiadási információkat.';
-    note.dataset.en = 'The downloads page always shows platform status, release maturity and verifiable release information.';
+    note.dataset.hu = 'Teljes verzió · 5 napos próbalicenc. A letöltési oldal jelzi a platform állapotát és az ellenőrizhető kiadási információkat.';
+    note.dataset.en = 'Full release · 5-day trial licence. The downloads page shows platform status and verifiable release information.';
 
     hub.append(head, grid, note);
     const releaseLayout = panel.querySelector('.release-layout');
@@ -155,7 +156,7 @@
     repairFooterCopy(footer);
 
     if (panel) {
-      panel.dataset.fxReleasePanel = 'stable-v2';
+      panel.dataset.fxReleasePanel = 'stable-v3';
       syncReleaseHub(panel);
     }
     return true;
@@ -223,6 +224,35 @@
     root.classList.remove('fx-page-scrolling');
   }
 
+  function landingTarget(relative) {
+    sourceHero = document.querySelector('#main-content > #hero');
+    if (!sourceHero) return null;
+    const bounded = Math.max(0, Math.min(relative, Math.max(0, sourceHero.offsetHeight - 2)));
+    return sourceHero.offsetTop + bounded;
+  }
+
+  function landAt(relative) {
+    const target = landingTarget(relative);
+    if (target == null) return;
+    window.scrollTo({ top: target, left: 0, behavior: 'auto' });
+    root.dataset.fxLoopLanding = String(Math.round(target));
+  }
+
+  function finishLanding(relative) {
+    cancelAnimationFrame(landingFrame);
+    landAt(relative);
+    landingFrame = requestAnimationFrame(() => {
+      landAt(relative);
+      landingFrame = requestAnimationFrame(() => {
+        landAt(relative);
+        root.classList.remove('fx-seamless-loop-transfer');
+        root.dataset.fxInfiniteInput = 'native';
+        root.dataset.fxLoopLandingState = 'settled';
+        landingFrame = 0;
+      });
+    });
+  }
+
   function transferIfNeeded() {
     scrollFrame = 0;
     root.dataset.fxScrollActivity = 'scrolling';
@@ -239,21 +269,22 @@
     if (scrollY < threshold || scrollY > documentEnd() + 2) return;
 
     const relative = Math.max(0, Math.min(scrollY - bridgeTop, Math.max(0, sourceHero.offsetHeight - 2)));
-    const target = sourceHero.offsetTop + relative;
     transferLockedUntil = Date.now() + LOOP_GUARD_MS;
     root.classList.add('fx-seamless-loop-transfer');
     root.dataset.fxInfiniteInput = 'visual-transfer';
+    root.dataset.fxLoopLandingState = 'stabilising';
     loopCount += 1;
     root.dataset.fxLoopCount = String(loopCount);
     root.dataset.fxLoopSource = 'visual-bridge';
-    window.scrollTo(0, target);
+
+    // Notify the rest of the organism first. Some listeners normalise panel/core
+    // state synchronously or on the next animation frame and can change layout.
+    // The landing is therefore applied after that notification and reaffirmed
+    // for two frames, while scroll behaviour remains forced to auto.
     dispatchEvent(new CustomEvent('formatx:loop', {
       detail: { count: loopCount, source: 'visual-bridge', relative }
     }));
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      root.classList.remove('fx-seamless-loop-transfer');
-      root.dataset.fxInfiniteInput = 'native';
-    }));
+    finishLanding(relative);
   }
 
   function onScroll() {
@@ -296,6 +327,7 @@
       clonedContent: false,
       clonedHeroOnly: true,
       reinitialisedRenderer: false,
+      frameStableLanding: true,
       jumpFree: true
     });
     root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
@@ -322,6 +354,7 @@
 
   addEventListener('pagehide', () => {
     cancelAnimationFrame(scrollFrame);
+    cancelAnimationFrame(landingFrame);
     clearTimeout(activityTimer);
     clearTimeout(repairTimer);
   }, { once: true });

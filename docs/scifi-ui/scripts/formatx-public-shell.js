@@ -2,7 +2,7 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxPublicShell === 'ready-v1') return;
+  if (ROOT.dataset.fxPublicShell === 'ready-v3') return;
 
   const PUBLIC_PATHS = new Set([
     '/scifi-ui/method.html',
@@ -21,7 +21,7 @@
   ]);
 
   if (!PUBLIC_PATHS.has(location.pathname) && !document.body.dataset.fxPublicPage) return;
-  ROOT.dataset.fxPublicShell = 'loading-v1';
+  ROOT.dataset.fxPublicShell = 'loading-v3';
 
   const NAV = Object.freeze({
     hu: [
@@ -66,6 +66,15 @@
     if (text !== undefined) element.textContent = text;
     return element;
   };
+
+  function ensureFullReleaseGuard() {
+    if (document.querySelector('script[data-fx-full-release-guard]')) return;
+    const script = document.createElement('script');
+    script.src = '/scifi-ui/scripts/formatx-full-release-guard.js?v=20260807-full-release-1';
+    script.defer = true;
+    script.dataset.fxFullReleaseGuard = 'true';
+    document.head.appendChild(script);
+  }
 
   function isCurrent(href) {
     return location.pathname === href || (href.endsWith('/') && location.pathname === href + 'index.html');
@@ -184,8 +193,8 @@
     if (!badge) {
       badge = create('span', 'fx-public-release-badge');
       badge.dataset.publicReleaseBadge = 'true';
-      badge.dataset.hu = 'BÉTA';
-      badge.dataset.en = 'BETA';
+      badge.dataset.hu = 'TELJES VERZIÓ';
+      badge.dataset.en = 'FULL RELEASE';
       badge.textContent = language() === 'en' ? badge.dataset.en : badge.dataset.hu;
       tools.insertBefore(badge, themeControl || languageControl);
     }
@@ -215,11 +224,11 @@
     if (!badge) return;
     const release = detail?.release || ROOT.__FORMATX_RELEASE_METADATA__?.release;
     const version = release?.ok === true && typeof release.version === 'string' ? release.version.trim() : '';
-    badge.textContent = version || (language() === 'en' ? 'BETA' : 'BÉTA');
-    badge.dataset.state = version ? 'synchronised' : 'fallback';
+    badge.textContent = language() === 'en' ? 'FULL RELEASE' : 'TELJES VERZIÓ';
+    badge.dataset.state = version ? 'synchronised' : 'full-release';
     badge.title = language() === 'en'
-      ? (version ? `Official public beta: ${version}` : 'Official release metadata unavailable')
-      : (version ? `Hivatalos nyilvános béta: ${version}` : 'A hivatalos kiadási metaadat nem érhető el');
+      ? (version ? `Official full release metadata: ${version}` : 'Full release · official release metadata unavailable')
+      : (version ? `Hivatalos teljes verzió metaadata: ${version}` : 'Teljes verzió · a hivatalos kiadási metaadat nem érhető el');
   }
 
   function syncLanguage() {
@@ -235,7 +244,8 @@
     ensureHeader();
     ensureFooter();
     syncReleaseBadge();
-    ROOT.dataset.fxPublicShell = 'ready-v1';
+    ensureFullReleaseGuard();
+    ROOT.dataset.fxPublicShell = 'ready-v3';
     dispatchEvent(new CustomEvent('formatx:publicshellready'));
   }
 

@@ -27,7 +27,7 @@ async function clearIntro(page) {
 
 async function snapshot(page) {
   return page.evaluate(() => {
-    const bridge = document.querySelector('[data-fx-loop-bridge]');
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     const source = document.querySelector('#main-content > #hero');
     const clone = bridge?.querySelector('.fx-loop-hero-clone');
     return {
@@ -38,13 +38,16 @@ async function snapshot(page) {
       jumpGuard: document.documentElement.dataset.fxScrollJumpGuard || '',
       bridgeState: document.documentElement.dataset.fxLoopBridge || '',
       scrollY,
+      viewportHeight: innerHeight,
       maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
       loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
-      bridgeCount: document.querySelectorAll('[data-fx-loop-bridge]').length,
+      bridgeCount: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
+      cloneCount: document.querySelectorAll('.fx-loop-bridge [data-fx-loop-clone="true"]').length,
       heroIdCount: document.querySelectorAll('#hero').length,
       transferClass: document.documentElement.classList.contains('fx-seamless-loop-transfer'),
       runtime: document.documentElement.__FORMATX_INFINITE_SCROLL__ || null,
       bridgeTop: bridge?.offsetTop || 0,
+      bridgeHeight: bridge?.offsetHeight || 0,
       sourceTop: source?.offsetTop || 0,
       sourceHeight: source?.offsetHeight || 0,
       cloneHeight: clone?.offsetHeight || 0,
@@ -58,7 +61,7 @@ async function snapshot(page) {
 
 async function verifyProgressiveScroll(page, name) {
   const positions = await page.evaluate(async () => {
-    const bridge = document.querySelector('[data-fx-loop-bridge]');
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     const maximumBeforeBridge = Math.max(0, (bridge?.offsetTop || document.documentElement.scrollHeight) - innerHeight - 80);
     const start = Math.round(maximumBeforeBridge * .35);
     const end = Math.round(maximumBeforeBridge * .78);
@@ -82,9 +85,17 @@ async function verifyProgressiveScroll(page, name) {
 
 async function verifySeamlessTransfer(page, name) {
   const before = await snapshot(page);
-  const relative = Math.max(60, Math.min(140, Math.round(before.sourceHeight * .12)));
+  // Keep the probe after the exact runtime threshold:
+  // bridgeTop + max(36, min(innerHeight * .18, 180)).
+  const runtimeThreshold = Math.max(36, Math.min(before.viewportHeight * .18, 180));
+  const relative = Math.round(Math.min(before.cloneHeight - 24, runtimeThreshold + 48));
+  assert(relative > runtimeThreshold,
+    name + ': transfer point must be beyond the runtime threshold: ' + JSON.stringify({ relative, runtimeThreshold, before }));
+  assert(relative < before.cloneHeight,
+    name + ': transfer point falls outside visual bridge: ' + JSON.stringify({ relative, before }));
+
   await page.evaluate(relativeOffset => {
-    const bridge = document.querySelector('[data-fx-loop-bridge]');
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     scrollTo(0, (bridge?.offsetTop || 0) + relativeOffset);
   }, relative);
   await page.waitForFunction(previous => Number(document.documentElement.dataset.fxLoopCount || 0) > previous,
@@ -127,12 +138,13 @@ async function verifyViewport(browser, viewport, name, mobile) {
   await page.waitForTimeout(500);
 
   const initial = await snapshot(page);
-  assert(initial.bridgeCount === 1, name + ': exactly one visual bridge required: ' + JSON.stringify(initial));
+  assert(initial.bridgeCount === 1, name + ': exactly one visual bridge container required: ' + JSON.stringify(initial));
+  assert(initial.cloneCount === 1, name + ': exactly one inert Hero clone required: ' + JSON.stringify(initial));
   assert(initial.heroIdCount === 1, name + ': duplicate #hero id detected: ' + JSON.stringify(initial));
   assert(initial.sourceTitle && initial.sourceTitle === initial.cloneTitle,
     name + ': visual bridge title differs from source hero: ' + JSON.stringify(initial));
-  assert(Math.abs(initial.sourceHeight - initial.cloneHeight) <= 4,
-    name + ': visual bridge height differs from source hero: ' + JSON.stringify(initial));
+  assert(initial.cloneHeight >= initial.viewportHeight - 4 && initial.bridgeHeight >= initial.viewportHeight - 4,
+    name + ': visual bridge must cover the full viewport: ' + JSON.stringify(initial));
   assert(initial.footerInFlow && !initial.footerInPanel,
     name + ': footer must remain in document flow, not inside the release dialog: ' + JSON.stringify(initial));
   assert(initial.runtime?.automaticLoop === true && initial.runtime?.jumpFree === true,

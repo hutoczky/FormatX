@@ -2,16 +2,16 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxReleaseMetadata === 'ready-v4') return;
-  ROOT.dataset.fxReleaseMetadata = 'loading-v4';
+  if (ROOT.dataset.fxReleaseMetadata === 'ready-v5') return;
+  ROOT.dataset.fxReleaseMetadata = 'loading-v5';
 
   const RELEASE_URL = '/scifi-ui/data/current-release.json';
   const FALLBACK = Object.freeze({
     hu: {
-      package: 'Multiplatform nyilvános béta letöltése',
+      package: 'Teljes multiplatform verzió letöltése',
       unavailable: 'A hivatalos multiplatform csomag metaadata jelenleg nem érhető el.',
-      beta: 'Bazzite/Linux az elsődleges platform; a Windows támogatott ugyanebben a nyilvános béta csomagban.',
-      status: 'Multiplatform nyilvános béta',
+      release: 'Bazzite/Linux az elsődleges platform; a Windows támogatott ugyanebben a teljes multiplatform verzióban. A használat 5 napos próbalicenccel indul.',
+      status: 'Teljes multiplatform verzió',
       unknown: 'Nincs közzétett adat',
       integrity: {
         package_only: 'Csomag közzétéve; külön integritási bizonyíték nincs',
@@ -20,10 +20,10 @@
       }
     },
     en: {
-      package: 'Download multiplatform public beta',
+      package: 'Download full multiplatform version',
       unavailable: 'Official multiplatform package metadata is currently unavailable.',
-      beta: 'Bazzite/Linux is the primary platform; Windows is supported in the same public beta package.',
-      status: 'Multiplatform public beta',
+      release: 'Bazzite/Linux is the primary platform; Windows is supported in the same full multiplatform version. Use starts with a 5-day trial licence.',
+      status: 'Full multiplatform version',
       unknown: 'No published data',
       integrity: {
         package_only: 'Package published; no separate integrity proof',
@@ -124,7 +124,7 @@
       else if (downloadIntro) downloadIntro.appendChild(notice);
       else notice.hidden = true;
     }
-    notice.textContent = state.available ? copy().beta : copy().unavailable;
+    notice.textContent = state.available ? copy().release : copy().unavailable;
     return notice;
   }
 
@@ -198,7 +198,7 @@
     ).forEach(updateDownloadLink);
     updateEvidenceLinks();
     ensureFallbackNotice();
-    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v4' : 'fallback-v4';
+    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v5' : 'fallback-v5';
     ROOT.dataset.fxReleaseSchema = String(state.release?.schema_version || 0);
     ROOT.__FORMATX_RELEASE_METADATA__ = Object.freeze({ ...state });
     dispatchEvent(new CustomEvent('formatx:releasemetadataready', { detail: ROOT.__FORMATX_RELEASE_METADATA__ }));

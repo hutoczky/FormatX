@@ -15,6 +15,7 @@ const DATA_PATHS = new Set([
   '/scifi-ui/data/test-matrix.json', '/scifi-ui/data/known-issues.json',
   '/scifi-ui/data/stable-gate.json', '/scifi-ui/data/decision-log.json',
   '/scifi-ui/data/workflow-cases.json', '/scifi-ui/scripts/release-metadata.js',
+  '/scifi-ui/scripts/platform-status.js',
   '/scifi-ui/scripts/formatx-public-shell.js',
   '/scifi-ui/scripts/formatx-content-standard.js',
   '/scifi-ui/scripts/formatx-content-finalizer.js',
@@ -25,7 +26,7 @@ const DATA_PATHS = new Set([
   '/scifi-ui/styles/formatx-content-standard.css'
 ]);
 const LANGUAGE = '<link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260731-language-unified-1">\n<script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260731-language-unified-1"></script>';
-const ASSETS = '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-2">\n<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260731-release-2"></script>\n<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260731-seo-2"></script>\n<script defer src="/scifi-ui/scripts/formatx-content-finalizer.js?v=20260731-content-final-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-platform-surface-finalizer.js?v=20260731-platform-final-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-organism-trust.js?v=20260731-organism-trust-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-organism-semantic-state.js?v=20260731-organism-semantic-1"></script>';
+const ASSETS = '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-2">\n<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260807-full-release-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260731-seo-2"></script>\n<script defer src="/scifi-ui/scripts/formatx-content-finalizer.js?v=20260731-content-final-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-platform-surface-finalizer.js?v=20260731-platform-final-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-organism-trust.js?v=20260731-organism-trust-1"></script>\n<script defer src="/scifi-ui/scripts/formatx-organism-semantic-state.js?v=20260731-organism-semantic-1"></script>';
 
 export default {
   async fetch(request, env, ctx) {
@@ -60,8 +61,14 @@ function cleanLegacyReleaseCopy(html) {
     .replaceAll('V92 kiadási oldal', 'Hivatalos kiadási oldal')
     .replaceAll('site.css?v=20260718-v92', 'site.css')
     .replaceAll('<span>92.00</span><b>RELEASE DNA</b>', '<span>—</span><b>OFFICIAL RELEASE</b>')
-    .replaceAll('Teljes verzió letöltése', 'Multiplatform nyilvános béta letöltése')
-    .replaceAll('Download full version', 'Download multiplatform public beta');
+    .replaceAll('Multiplatform nyilvános béta letöltése', 'Teljes multiplatform verzió letöltése')
+    .replaceAll('Download multiplatform public beta', 'Download full multiplatform version')
+    .replaceAll('Multiplatform nyilvános béta', 'Teljes multiplatform verzió')
+    .replaceAll('Multiplatform public beta', 'Full multiplatform version')
+    .replaceAll('Android nyilvános béta', 'Android teljes verzió')
+    .replaceAll('Android public beta', 'Android full version')
+    .replaceAll('Teljes verzió letöltése', 'Teljes multiplatform verzió letöltése')
+    .replaceAll('Download full version', 'Download full multiplatform version');
 }
 function noStore(response, head) {
   const headers = new Headers(response.headers);

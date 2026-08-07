@@ -43,14 +43,18 @@ assert.ok(includesAll(infinite, [
   'clonedHeroOnly: true',
   'clonedContent: false',
   'reinitialisedRenderer: false',
+  'frameStableLanding: true',
   'jumpFree: true',
   "addEventListener('scroll', onScroll, { passive: true })",
-  'window.scrollTo(0, target)',
+  "window.scrollTo({ top: target, left: 0, behavior: 'auto' })",
+  "root.dataset.fxLoopLandingState = 'stabilising'",
+  "root.dataset.fxLoopLandingState = 'settled'",
 ]), 'seamless loop controller contract missing');
 assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(infinite), 'loop must not capture wheel or touch input');
 assert.ok(!infinite.includes('document.body.cloneNode') && !infinite.includes('document.documentElement.cloneNode'), 'full-page cloning is forbidden');
 assert.ok(includesAll(loopStyle, ['.fx-loop-bridge', '.fx-loop-hero-clone', 'html.fx-seamless-loop-transfer']), 'seamless loop visual contract missing');
 assert.ok(includesAll(infinite, ['fx-release-download-hub', 'repairReleasePanel', 'Licencfeltételek']), 'release/footer repair missing');
+assert.ok(includesAll(infinite, ['TELJES VERZIÓ', '5 napos próbalicenc']), 'full release and five-day trial copy missing from release hub');
 
 assert.ok(includesAll(downloads, [
   'https://github.com/hutoczky/FormatX-Updates/releases/latest',
@@ -60,8 +64,11 @@ assert.ok(includesAll(downloads, [
   '../known-issues.html',
   '../security.html',
   '../support.html',
-]), 'downloads page fallback or evidence links missing');
+  'Teljes multiplatform verzió letöltése',
+  '5 napos próbalicenc',
+]), 'downloads page fallback, full release, trial or evidence links missing');
 assert.ok(!downloads.includes('data-release-download="multiplatform" data-release-description="multiplatform-beta-note" aria-describedby="multiplatform-beta-note" href="./"'), 'downloads fallback must not point to itself');
+assert.ok(!/\b(?:nyilvános béta|public beta)\b/i.test(downloads), 'retired beta wording remains on downloads page');
 assert.ok(includesAll(downloadStyle, ['grid-template-columns: repeat(3', '@media (max-width: 800px)', '@media (min-width: 2200px)']), 'downloads responsive range missing');
 
 assert.ok(includesAll(feedbackSchema, [
@@ -97,4 +104,4 @@ assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 assert.ok(deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'), 'custom-domain smoke checks missing');
 
-console.log('PASS: FormatX seamless scroll, feedback, downloads, responsive UI and deployment gates are present.');
+console.log('PASS: FormatX seamless scroll, full release/trial copy, feedback, downloads, responsive UI and deployment gates are present.');

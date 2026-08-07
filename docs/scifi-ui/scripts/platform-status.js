@@ -80,8 +80,8 @@
       ? 'One honest status matrix across every surface.'
       : 'Egyetlen valós állapotmátrix minden felületen.';
     lead.textContent = lang === 'en'
-      ? 'Bazzite/Linux is the primary FormatX system. Windows is supported as a secondary platform in the same multiplatform public beta package.'
-      : 'A Bazzite/Linux a FormatX elsődleges rendszere. A Windows támogatott másodlagos platform ugyanabban a multiplatform nyilvános béta csomagban.';
+      ? 'FormatX is a full release. Bazzite/Linux is the primary system and Windows is a supported secondary platform in the same full multiplatform package. Use starts with a 5-day trial licence.'
+      : 'A FormatX teljes verzió. A Bazzite/Linux az elsődleges rendszer, a Windows támogatott másodlagos platform ugyanabban a teljes multiplatform csomagban. A használat 5 napos próbalicenccel indul.';
     copy.append(eyebrow, heading, lead);
 
     const release = document.createElement('div');
@@ -89,11 +89,11 @@
     release.append(
       badge(data.product_release.status, data.status_labels, lang),
       Object.assign(document.createElement('strong'), {
-        textContent: lang === 'en' ? 'Multiplatform package' : 'Multiplatform csomag'
+        textContent: lang === 'en' ? 'Full multiplatform package' : 'Teljes multiplatform csomag'
       }),
       Object.assign(document.createElement('small'), {
         textContent: lang === 'en'
-          ? 'Bazzite/Linux primary · Windows supported · 5-day trial'
+          ? 'Bazzite/Linux primary · Windows supported · 5-day trial licence'
           : 'Bazzite/Linux elsődleges · Windows támogatott · 5 napos próbalicenc'
       })
     );
@@ -106,8 +106,8 @@
     const note = document.createElement('p');
     note.className = 'fx-platform-status-note';
     note.append(document.createTextNode(lang === 'en'
-      ? 'Bazzite/Linux and Windows are both Public beta, but their support priority differs: Bazzite/Linux is primary and Windows is secondary supported. No platform is labelled Stable. '
-      : 'A Bazzite/Linux és a Windows egyaránt nyilvános béta, de a támogatási prioritás eltér: a Bazzite/Linux elsődleges, a Windows támogatott másodlagos platform. Egyik platform sem Stable. '));
+      ? 'Bazzite/Linux, Windows and Android are published as full releases. The independent evidence-gated Stable designation remains a separate verification level. '
+      : 'A Bazzite/Linux, a Windows és az Android teljes verzióként jelenik meg. A független bizonyítékokhoz kötött Stable minősítés ettől külön ellenőrzési szint. '));
     const matrixLink = document.createElement('a');
     matrixLink.href = '/scifi-ui/test-matrix.html';
     matrixLink.textContent = lang === 'en' ? 'Open public test matrix' : 'Nyilvános tesztmátrix megnyitása';
@@ -137,8 +137,8 @@
       badge(data.product_release.status, data.status_labels, lang),
       Object.assign(document.createElement('span'), {
         textContent: lang === 'en'
-          ? 'Bazzite/Linux primary system · Windows supported · one multiplatform package'
-          : 'Bazzite/Linux elsődleges rendszer · Windows támogatott · egy multiplatform csomag'
+          ? 'Bazzite/Linux primary · Windows supported · full version · 5-day trial licence'
+          : 'Bazzite/Linux elsődleges · Windows támogatott · teljes verzió · 5 napos próbalicenc'
       })
     );
 
@@ -150,8 +150,8 @@
       const label = download.querySelector('[data-release-download-label], span');
       if (label) {
         label.textContent = lang === 'en'
-          ? 'Multiplatform public beta'
-          : 'Multiplatform nyilvános béta';
+          ? 'Full multiplatform version'
+          : 'Teljes multiplatform verzió';
       }
     }
   }
@@ -173,8 +173,8 @@
       badge(data.product_release.status, data.status_labels, lang),
       Object.assign(document.createElement('div'), {
         innerHTML: lang === 'en'
-          ? '<strong>The current package is a multiplatform public beta.</strong><span>Bazzite/Linux is primary; Windows is supported as a secondary platform. No platform is currently labelled Stable.</span>'
-          : '<strong>Az aktuális csomag multiplatform nyilvános béta.</strong><span>A Bazzite/Linux elsődleges; a Windows támogatott másodlagos platform. Jelenleg egyik platform sem kap Stable címkét.</span>'
+          ? '<strong>The current package is the full multiplatform release.</strong><span>Bazzite/Linux is primary; Windows is supported as a secondary platform. The licence starts with a 5-day trial period.</span>'
+          : '<strong>Az aktuális csomag a teljes multiplatform kiadás.</strong><span>A Bazzite/Linux elsődleges; a Windows támogatott másodlagos platform. A licenc 5 napos próbaidővel indul.</span>'
       })
     );
   }
@@ -204,8 +204,8 @@
 
     const lang = language();
     statusRow.querySelector('span').textContent = lang === 'en'
-      ? 'I understand that the current multiplatform package is a Public beta, not a Stable release, and platform capabilities differ according to the published status matrix.'
-      : 'Tudomásul veszem, hogy az aktuális multiplatform csomag nyilvános béta, nem Stable kiadás, és a platformok képességei a közzétett állapotmátrix szerint eltérnek.';
+      ? 'I understand that FormatX is the full release and that first use starts with a 5-day trial licence before a paid licence is required.'
+      : 'Tudomásul veszem, hogy a FormatX teljes verzió, és az első használat 5 napos próbalicenccel indul, amely után fizetős licenc szükséges.';
     immediateRow.querySelector('span').innerHTML = lang === 'en'
       ? 'I expressly request activation immediately after payment verification. If I qualify as a consumer, I acknowledge the digital-performance and withdrawal information in the <a href="./terms.html" target="_blank" rel="noopener">terms of use</a>.'
       : 'Kifejezetten kérem az aktiválást a jóváírás ellenőrzése után. Ha fogyasztónak minősülök, tudomásul veszem a <a href="./terms.html" target="_blank" rel="noopener">felhasználási feltételekben</a> szereplő digitális teljesítési és elállási tájékoztatást.';
@@ -222,8 +222,8 @@
     const status = platform => text(data.status_labels[platform?.status], lang);
 
     return lang === 'en'
-      ? `Bazzite/Linux is the primary FormatX system and is currently ${status(bazzite)}. Windows is a supported secondary platform and is currently ${status(windows)}. Both use the same multiplatform public beta package. macOS: ${status(macos)}; Web: ${status(web)}; Android: ${status(android)}; iOS/iPadOS: ${status(ios)}. No platform is currently labelled Stable.`
-      : `A Bazzite/Linux a FormatX elsődleges rendszere, jelenlegi állapota: ${status(bazzite)}. A Windows támogatott másodlagos platform, jelenlegi állapota: ${status(windows)}. Mindkettő ugyanazt a multiplatform nyilvános béta csomagot használja. macOS: ${status(macos)}; Web: ${status(web)}; Android: ${status(android)}; iOS/iPadOS: ${status(ios)}. Jelenleg egyik platform sem kap Stable címkét.`;
+      ? `FormatX is a full release with a 5-day trial licence. Bazzite/Linux is the primary system and is currently ${status(bazzite)}. Windows is a supported secondary platform and is currently ${status(windows)}. Android: ${status(android)}; Web: ${status(web)}; macOS: ${status(macos)}; iOS/iPadOS: ${status(ios)}.`
+      : `A FormatX teljes verzió, 5 napos próbalicenccel. A Bazzite/Linux az elsődleges rendszer, jelenlegi állapota: ${status(bazzite)}. A Windows támogatott másodlagos platform, jelenlegi állapota: ${status(windows)}. Android: ${status(android)}; Web: ${status(web)}; macOS: ${status(macos)}; iOS/iPadOS: ${status(ios)}.`;
   }
 
   function publishOrganismAnswer(answer) {
@@ -248,7 +248,7 @@
       if (!(form instanceof HTMLFormElement) || !form.matches('.fx-organism-question')) return;
       const input = form.querySelector('input');
       const query = String(input?.value || '').toLocaleLowerCase(language() === 'en' ? 'en' : 'hu');
-      if (!/(platform|állapot|status|stable|stabil|beta|béta|windows|linux|bazzite|macos|android|ios|letölt|download|release|kiadás|multiplatform)/i.test(query)) return;
+      if (!/(platform|állapot|status|stable|stabil|beta|béta|windows|linux|bazzite|macos|android|ios|letölt|download|release|kiadás|multiplatform|próba|trial)/i.test(query)) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       const answer = canonicalStatusAnswer(data);

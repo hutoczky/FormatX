@@ -43,7 +43,10 @@ assert.ok(premium.includes("const scrolling = root.dataset.fxScrollActivity === 
 assert.ok(premiumCss.includes("html[data-fx-immersive='standby'] #hero .hero-space::before"), "static FormatX identity preview is missing");
 assert.ok(threeHost.includes("if (!immersiveActive() || document.hidden) return;"), "Three host still renders while inactive");
 assert.ok(mobileRecovery.includes("immersiveActive() && introComplete"), "Three iframe is not protected by the activation gate");
-assert.ok(infinite.includes("raf-coalesced-v1"), "scroll events are not frame-coalesced");
+assert.ok(infinite.includes("const VERSION = 'seamless-v6'"), "current seamless scroll controller is missing");
+assert.ok(infinite.includes("if (scrollFrame) return;") && infinite.includes("scrollFrame = requestAnimationFrame(transferIfNeeded);"), "scroll events are not frame-coalesced");
+assert.ok(infinite.includes("clonedHeroOnly: true") && infinite.includes("jumpFree: true"), "seamless visual bridge contract is missing");
+assert.ok(!infinite.includes("addEventListener('wheel'") && !infinite.includes("addEventListener('touchmove'"), "scroll input must remain native");
 assert.ok(!infinite.includes("const SETTLE_MS"), "legacy repeated scroll settling remains active");
 assert.ok(mobileRecovery.includes("markFallback('webgl2-unavailable')"), "unsupported WebGL2 still reaches the iframe engine");
 assert.ok(production.includes("new URL('/scifi-ui/', request.url)"), "domain root does not serve the canonical homepage asset without an asset redirect");

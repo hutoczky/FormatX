@@ -61,6 +61,7 @@ def validate_known_issues() -> None:
         'data-issue-controls', 'data-issue-search', 'data-issue-filter="platform"',
         'data-issue-filter="severity"', 'data-issue-filter="status"',
         'data-issue-results', 'data-issues-root', 'hreflang="hu"', 'hreflang="en"',
+        'teljes kiadás',
     ])
     require_tokens(controller, "Known-issues controller", [
         "configureIssueControls", "applyIssueFilters", "renderIssueSummary",
@@ -78,14 +79,20 @@ def validate_known_issues() -> None:
 
 def validate_public_shell() -> None:
     shell = read(SCIFI / "scripts/formatx-public-shell.js")
+    guard = read(SCIFI / "scripts/formatx-full-release-guard.js")
     css = read(SCIFI / "styles/formatx-content-standard.css")
     production = read("billing-worker/src/production-content-entry.js")
     preview = read("content-preview-entry.js")
     wrangler = read("wrangler.jsonc")
     require_tokens(shell, "Public shell", [
-        "ready-v1", "PUBLIC_PATHS", "ensureHeader", "ensureFooter",
+        "ready-v3", "PUBLIC_PATHS", "ensureHeader", "ensureFooter",
         "findOrCreateLanguageControl", "aria-current", "formatx:releasemetadataready",
         "/scifi-ui/known-issues.html", "/scifi-ui/support.html", "/scifi-ui/license.html",
+        "TELJES VERZIÓ", "FULL RELEASE", "ensureFullReleaseGuard",
+    ])
+    require_tokens(guard, "Full release guard", [
+        "fxFullRelease = 'full-release'", "fxTrialDays = '5'",
+        "TELJES VERZIÓ", "FULL RELEASE", "MutationObserver",
     ])
     require(
         "fetch(" not in shell and "XMLHttpRequest" not in shell and "WebSocket" not in shell,
@@ -108,6 +115,7 @@ def validate_public_shell() -> None:
 def validate_release_sync() -> None:
     workflow = read(".github/workflows/sync-current-release.yml")
     release_script = read(SCIFI / "scripts/release-metadata.js")
+    platform = load_json(SCIFI / "data/platform-status.json")
     release = load_json(SCIFI / "data/current-release.json")
     public_contract = load_json(SCIFI / "data/public-platform-contract.json")
 
@@ -120,12 +128,15 @@ def validate_release_sync() -> None:
         "preserving the existing synced_at value", "--retry-all-errors",
     ])
     require_tokens(release_script, "Release metadata controller", [
-        "ready-v4", "isAllowedReleaseUrl", "formatBytes", "integrityLabel",
+        "ready-v5", "isAllowedReleaseUrl", "formatBytes", "integrityLabel",
         "channels?.multiplatform", "channels?.windows", "data-release-integrity",
         "data-release-source-updated", "current-release.json",
         "setText('[data-release-version]', '', false)",
+        "5-day trial licence", "Teljes multiplatform verzió letöltése",
     ])
 
+    require(platform.get("product_release", {}).get("status") == "full_release", "Product status is not full_release")
+    require(platform.get("product_release", {}).get("trial_days") == 5, "Product trial is not five days")
     require(release.get("schema_version") == 2, "Current release is not schema 2")
     require(release.get("source") == "github_published_release", "Current release source is not canonical")
     require(release.get("prerelease") is not True, "Current official release must not be a prerelease")
@@ -150,6 +161,8 @@ def validate_release_sync() -> None:
     public_copy = public_contract.get("public_copy", {})
     require(public_copy.get("primary_system") == "linux-bazzite", "Public primary platform is not Bazzite/Linux")
     require(public_copy.get("download_channel") == "multiplatform", "Public download channel is not multiplatform")
+    require(public_copy.get("release_maturity") == "full_release", "Public release maturity is not full_release")
+    require(public_copy.get("trial_days") == 5, "Public contract trial is not five days")
     require(
         "windows" in (public_copy.get("supported_secondary_platforms") or []),
         "Windows is not a supported secondary platform",
@@ -183,7 +196,7 @@ def main() -> int:
         for error in ERRORS:
             print(f" - {error}", file=sys.stderr)
         return 1
-    print("FormatX public pages, official release provenance, multiplatform public contract and Worker ownership are valid.")
+    print("FormatX public pages, full release status, five-day trial, official release provenance and Worker ownership are valid.")
     return 0
 
 

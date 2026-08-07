@@ -1,5 +1,5 @@
 name: Verify FormatX public release live
-run-name: Verify public release on both domains from ${{ github.sha }}
+run-name: Verify full release on both domains from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -7,7 +7,13 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/downloads/index.html'
       - 'docs/scifi-ui/data/current-release.json'
+      - 'docs/scifi-ui/data/platform-status.json'
+      - 'docs/scifi-ui/data/release-channel.json'
+      - 'docs/scifi-ui/data/public-platform-contract.json'
+      - 'docs/scifi-ui/scripts/release-metadata.js'
+      - 'docs/scifi-ui/scripts/platform-status.js'
       - 'docs/scifi-ui/data/production-deploy-marker.json'
       - 'billing-worker/src/production-content-entry.js'
       - '.github/workflows/verify-formatx-public-release-live.yml'
@@ -18,7 +24,7 @@ permissions:
 
 jobs:
   verify:
-    name: Verify multiplatform public release
+    name: Verify full multiplatform release
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -33,22 +39,33 @@ jobs:
               if curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/?audit=${GITHUB_SHA}-${attempt}" > "$tmp/home.html" \
                 && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/downloads/?audit=${GITHUB_SHA}-${attempt}" > "$tmp/downloads.html" \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/data/platform-status.json?audit=${GITHUB_SHA}-${attempt}" > "$tmp/platform.json" \
+                && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/data/current-release.json?audit=${GITHUB_SHA}-${attempt}" > "$tmp/release.json" \
-                && grep -Fq 'Multiplatform nyilvános béta letöltése' "$tmp/home.html" \
-                && grep -Fq 'Linux/Bazzite az elsődleges platform' "$tmp/home.html" \
-                && ! grep -Eqi 'FormatX Suite Pro V[0-9]+|Windows nyilvános béta letöltése|FormatX-Suite-Pro-V(29|92|120)|releases/tag/v[0-9]+' "$tmp/home.html" \
-                && node - "$tmp/release.json" <<'NODE'
+                && grep -Fq 'Teljes multiplatform verzió letöltése' "$tmp/home.html" \
+                && grep -Fq 'Teljes multiplatform verzió letöltése' "$tmp/downloads.html" \
+                && grep -Fq '5 napos próbalicenc' "$tmp/downloads.html" \
+                && ! grep -Eqi 'Multiplatform nyilvános béta|Multiplatform public beta|NATÍV BÉTA|NATIVE BETA|Windows nyilvános béta letöltése' "$tmp/home.html" "$tmp/downloads.html" \
+                && node - "$tmp/platform.json" "$tmp/release.json" <<'NODE'
           const fs = require('node:fs');
-          const file = process.argv[2];
-          const release = JSON.parse(fs.readFileSync(file, 'utf8'));
+          const platform = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          const release = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
+          if (platform.product_release?.status !== 'full_release') process.exit(1);
+          if (platform.product_release?.trial_days !== 5) process.exit(1);
+          const byId = Object.fromEntries((platform.platforms || []).map(item => [item.id, item]));
+          for (const id of ['linux-bazzite', 'windows', 'android']) {
+            if (byId[id]?.status !== 'full_release') process.exit(1);
+          }
           const channel = release.channels?.multiplatform;
           if (release.ok !== true || release.schema_version !== 2) process.exit(1);
+          if (release.prerelease === true) process.exit(1);
           if (!channel || channel.available !== true) process.exit(1);
           if (channel.primary_platform !== 'linux-bazzite') process.exit(1);
           if (!Array.isArray(channel.supported_platforms)) process.exit(1);
           if (!channel.supported_platforms.includes('linux-bazzite')) process.exit(1);
           if (!channel.supported_platforms.includes('windows')) process.exit(1);
-          if (!/\.zip$/i.test(String(channel.name || ''))) process.exit(1);
           if (!/^sha256:[a-f0-9]{64}$/i.test(String(channel.digest || ''))) process.exit(1);
           NODE
               then
@@ -60,7 +77,7 @@ jobs:
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Strict public release audit failed for $origin" >&2
+              echo "Strict full-release audit failed for $origin" >&2
               exit 1
             fi
           done
@@ -86,7 +103,7 @@ jobs:
               body: JSON.stringify({
                 state,
                 context: 'FormatX strict live public release audit',
-                description: 'Both domains are Bazzite-first, multiplatform and free of legacy public version labels',
+                description: 'Both domains expose full release status with a five-day trial licence',
                 target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
               }),
             }

@@ -52,6 +52,10 @@ def validate_release_metadata_v2() -> None:
             module.fail("Bazzite/Linux is not the public primary platform")
         if public_copy.get("download_channel") != "multiplatform":
             module.fail("Public download channel is not multiplatform")
+        if public_copy.get("release_maturity") != "full_release":
+            module.fail("Public release maturity is not full_release")
+        if public_copy.get("trial_days") != 5:
+            module.fail("Public release contract must declare a 5-day trial licence")
         supported = set(public_copy.get("supported_secondary_platforms") or [])
         if "windows" not in supported:
             module.fail("Windows is not listed as a supported secondary platform")
@@ -102,10 +106,13 @@ def validate_public_pages_v2() -> None:
         'data-release-download="multiplatform"',
         "Bazzite/Linux elsődleges",
         "Windows támogatott",
-        "Multiplatform nyilvános béta letöltése",
+        "Teljes multiplatform verzió letöltése",
+        "5 napos próbalicenc",
     ]:
         if token not in downloads:
-            module.fail(f"Downloads page missing multiplatform contract: {token}")
+            module.fail(f"Downloads page missing full-release contract: {token}")
+    if re.search(r"\b(beta|béta)\b", module.visible_text(module.SCIFI / "downloads/index.html"), re.I):
+        module.fail("Downloads page still exposes retired beta wording")
 
     production = module.read("billing-worker/src/production-content-entry.js")
     preview = module.read("content-preview-entry.js")
