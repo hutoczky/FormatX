@@ -245,8 +245,8 @@
       const download = document.getElementById('hero-download');
       if (download) {
         const label = download.querySelector('[data-release-download-label], span') || download;
-        const hu = 'Multiplatform nyilvános béta letöltése';
-        const en = 'Download multiplatform public beta';
+        const hu = 'Teljes multiplatform verzió letöltése';
+        const en = 'Download full multiplatform version';
         label.dataset.hu = hu;
         label.dataset.en = en;
         label.dataset.releaseDownloadLabel = 'true';
@@ -258,13 +258,13 @@
 
       const telemetryValue = document.querySelector('#hero .hero-label.b span');
       const telemetryLabel = document.querySelector('#hero .hero-label.b b');
-      setText(telemetryValue, 'BETA');
+      setText(telemetryValue, 'FULL');
       setText(telemetryLabel, 'PUBLIC RELEASE');
 
       const releaseName = document.getElementById('release-name');
       setText(releaseName, language() === 'en'
-        ? 'Multiplatform public beta'
-        : 'Multiplatform nyilvános béta');
+        ? 'Full multiplatform version'
+        : 'Teljes multiplatform verzió');
 
       const footer = document.querySelector('.site-footer');
       let licence = footer?.querySelector('[data-fx-licence-link], [data-fx-local-licence]');
