@@ -44,20 +44,22 @@ assert.ok(includesAll(language, ["toggle.className = 'fx-language-toggle'", 'loc
 assert.ok(includesAll(infinite, [
   "const VERSION = 'seamless-v6'",
   "root.dataset.fxInfiniteInput = 'native'",
-  "root.dataset.fxInfiniteCloneMode = 'visual-bridge'",
-  'clonedHeroOnly: true',
+  "root.dataset.fxInfiniteCloneMode = 'none'",
+  "root.dataset.fxAutomaticLoop = 'disabled'",
+  "root.dataset.fxScrollJumpGuard = 'native-position-v1'",
+  'automaticLoop: false',
+  'visualBridge: false',
+  'clonedHeroOnly: false',
   'clonedContent: false',
-  'reinitialisedRenderer: false',
-  'frameStableLanding: true',
+  'nativePositionOnly: true',
   'jumpFree: true',
   "addEventListener('scroll', onScroll, { passive: true })",
-  "window.scrollTo({ top: target, left: 0, behavior: 'auto' })",
-  "root.dataset.fxLoopLandingState = 'stabilising'",
-  "root.dataset.fxLoopLandingState = 'settled'",
-]), 'seamless loop controller contract missing');
-assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(infinite), 'loop must not capture wheel or touch input');
-assert.ok(!infinite.includes('document.body.cloneNode') && !infinite.includes('document.documentElement.cloneNode'), 'full-page cloning is forbidden');
-assert.ok(includesAll(loopStyle, ['.fx-loop-bridge', '.fx-loop-hero-clone', 'html.fx-seamless-loop-transfer']), 'seamless loop visual contract missing');
+  'removeLegacyLoopArtifacts',
+]), 'native continuous scroll controller contract missing');
+assert.ok(!infinite.includes('window.scrollTo(') && !infinite.includes('scrollIntoView('), 'scroll runtime must never move the page automatically');
+assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(infinite), 'scroll runtime must not capture wheel or touch input');
+assert.ok(!infinite.includes('cloneNode(true)') && !infinite.includes('document.body.cloneNode') && !infinite.includes('document.documentElement.cloneNode'), 'scroll runtime must not clone page content');
+assert.ok(includesAll(loopStyle, ["scroll-snap-type: none !important", "scroll-snap-align: none !important"]), 'native scroll must disable section snapping');
 assert.ok(includesAll(infinite, ['fx-release-download-hub', 'repairReleasePanel', 'Licencfeltételek']), 'release/footer repair missing');
 assert.ok(includesAll(infinite, ['TELJES VERZIÓ', '5 napos próbalicenc']), 'full release and five-day trial copy missing from release hub');
 
@@ -146,4 +148,4 @@ assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 assert.ok(deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'), 'custom-domain smoke checks missing');
 
-console.log('PASS: FormatX seamless scroll, deferred heavy rendering, lazy QR/feedback work, consent-gated public comments, downloads, responsive UI and deployment gates are present.');
+console.log('PASS: FormatX native continuous scrolling has no automatic jumps; deferred rendering, feedback, downloads, responsive UI and deployment gates remain present.');
