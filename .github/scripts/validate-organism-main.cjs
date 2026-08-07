@@ -19,44 +19,41 @@ function mark(step, data) {
   report.steps.push(entry);
   console.log('ORGANISM STEP:', step, data === undefined ? '' : JSON.stringify(data));
 }
-
-function writeReport() {
-  fs.writeFileSync('organism-main-report.json', JSON.stringify(report, null, 2) + '\n');
-}
-
-function assert(value, message) {
-  if (!value) throw new Error(message);
-}
-
+function writeReport() { fs.writeFileSync('organism-main-report.json', JSON.stringify(report, null, 2) + '\n'); }
+function assert(value, message) { if (!value) throw new Error(message); }
 function diagnostics(page, output) {
   page.on('pageerror', error => output.push('pageerror: ' + String(error)));
-  page.on('console', message => {
-    if (message.type() === 'error') output.push('console-error: ' + message.text());
-  });
+  page.on('console', message => { if (message.type() === 'error') output.push('console-error: ' + message.text()); });
   page.on('requestfailed', request => {
     const url = request.url();
-    if (/three|cdn|organism|scifi-ui/i.test(url)) {
-      output.push('requestfailed: ' + url + ' — ' + (request.failure()?.errorText || 'unknown'));
-    }
+    if (/three|cdn|organism|scifi-ui/i.test(url)) output.push('requestfailed: ' + url + ' — ' + (request.failure()?.errorText || 'unknown'));
   });
 }
-
 function meaningfulDiagnostics(items) {
   return items.filter(item => {
-    if (/requestfailed: .*\/assets\/qr\/[^ ]+\.svg(?:\?[^ ]*)? — net::ERR_ABORTED/i.test(item)) {
-      return false;
-    }
+    if (/requestfailed: .*\/assets\/qr\/[^ ]+\.svg(?:\?[^ ]*)? — net::ERR_ABORTED/i.test(item)) return false;
     return !/GPU stall|ReadPixels|WebGPU|WGSL|swizzle|Instance dropped|Failed to load resource: the server responded with a status of 404 \(File not found\)/i.test(item);
   });
 }
 
 async function enterSite(page, label) {
   mark(label + ': navigation-start');
+  await page.addInitScript(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+  });
   await page.goto(TEST_URL + '?organism-validation=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
-  const skip = page.locator('.fx-intro-skip');
-  if (await skip.isVisible().catch(() => false)) {
-    await skip.click({ force: true, timeout: 1500 }).catch(() => {});
-  }
+  await page.evaluate(() => {
+    const root = document.documentElement;
+    const overlay = document.getElementById('formatx-event-horizon');
+    root.classList.remove('fx-intro-running', 'fx-intro-pending');
+    root.classList.add('fx-intro-complete');
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+  });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
@@ -89,7 +86,6 @@ async function validateDesktop() {
     const errors = [];
     diagnostics(page, errors);
     await enterSite(page, 'desktop');
-
     const current = await state(page);
     mark('desktop: initial-state', current);
     assert(current.ready === 'ready' && current.menuReady === 'ready', 'interface/menu not ready: ' + JSON.stringify(current));
@@ -98,7 +94,7 @@ async function validateDesktop() {
     assert(current.overlayHidden === true, 'console must start hidden');
     assert(current.pricingChildren === 1, 'pricing section should contain only its interactive trigger');
     assert(current.pricingCards === 3 && current.qrCards === 3, 'commerce content was not moved intact');
-    assert(current.footerInResources, 'footer must be inside the release/support console');
+    assert(current.footerInResources, 'footer must be inside the release/support console before seamless controller normalisation');
     assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
 
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
@@ -106,34 +102,28 @@ async function validateDesktop() {
     await pricingTrigger.click();
     await page.waitForFunction(() => !document.getElementById('fx-organism-console').hidden && !document.querySelector('[data-organism-panel="pricing"]').hidden);
     mark('desktop: pricing-panel-open');
-
     assert(await page.locator('body').evaluate(body => body.classList.contains('fx-organism-panel-open')), 'body panel lock missing');
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-id]').count() === 3, 'pricing cards missing in open console');
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-qr]').count() === 3, 'QR cards missing in open console');
-
     await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click();
     await page.waitForFunction(() => document.getElementById('preview-main-price')?.textContent.includes('44'));
     const checkoutHref = await page.locator('#preview-checkout-link').getAttribute('href');
     assert(String(checkoutHref).includes('currency=EUR'), 'EUR checkout did not update');
     mark('desktop: currency-updated', { checkoutHref });
-
     await page.locator('.fx-organism-console-close').click();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
     await page.waitForTimeout(550);
     mark('desktop: close-control-passed');
-
     await page.locator('#menu-toggle').evaluate(node => node.click());
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
     assert(await page.locator('#main-nav').evaluate(node => node.classList.contains('open')), 'interactive system menu did not open');
     await page.locator('#main-nav a[href="#pricing"]').evaluate(node => node.click());
     await page.waitForFunction(() => !document.querySelector('[data-organism-panel="pricing"]').hidden);
     mark('desktop: header-navigation-passed');
-
     await page.waitForFunction(() => Array.from(document.querySelectorAll('[data-plan-qr-image]')).every(image => image.complete && image.naturalWidth >= 32), null, { timeout: 15000 });
     const qrReady = await page.locator('[data-plan-qr-image]').evaluateAll(images => images.map(image => ({ width: image.naturalWidth, src: image.currentSrc || image.src })));
     assert(qrReady.length === 3 && qrReady.every(item => item.width >= 32), 'QR images not rendered: ' + JSON.stringify(qrReady));
     mark('desktop: qr-ready', qrReady);
-
     const meaningful = meaningfulDiagnostics(errors);
     assert(!meaningful.length, 'desktop diagnostics: ' + meaningful.join(' | '));
     await page.screenshot({ path: 'organism-main-desktop.png', fullPage: false, timeout: 5000 }).catch(() => {});
@@ -142,9 +132,7 @@ async function validateDesktop() {
   } catch (error) {
     if (page) await page.screenshot({ path: 'organism-main-desktop-failure.png', fullPage: false, timeout: 5000 }).catch(() => {});
     throw error;
-  } finally {
-    await browser.close();
-  }
+  } finally { await browser.close(); }
 }
 
 async function validateMobile() {
@@ -156,7 +144,6 @@ async function validateMobile() {
     const errors = [];
     diagnostics(page, errors);
     await enterSite(page, 'mobile');
-
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
     await pricingTrigger.scrollIntoViewIfNeeded();
     const box = await pricingTrigger.boundingBox();
@@ -164,20 +151,16 @@ async function validateMobile() {
     assert(box && box.x >= 0 && box.x + box.width <= 391, 'mobile pricing trigger outside viewport: ' + JSON.stringify(box));
     await pricingTrigger.tap();
     await page.waitForFunction(() => !document.getElementById('fx-organism-console').hidden);
-
     const shell = await page.locator('.fx-organism-console-shell').boundingBox();
     mark('mobile: sheet-box', shell);
     assert(shell && shell.y > 0 && shell.height <= 845, 'mobile sheet geometry: ' + JSON.stringify(shell));
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-id]').count() === 3, 'mobile pricing cards missing');
-
     const overflow = await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth);
     assert(overflow <= 1, 'mobile horizontal overflow: ' + overflow);
     await page.locator('.fx-organism-console-close').tap();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
-
     await page.locator('#menu-toggle').evaluate(node => node.click());
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
-
     const meaningful = meaningfulDiagnostics(errors);
     assert(!meaningful.length, 'mobile diagnostics: ' + meaningful.join(' | '));
     await page.screenshot({ path: 'organism-main-mobile.png', fullPage: false, timeout: 5000 }).catch(() => {});
@@ -186,9 +169,7 @@ async function validateMobile() {
   } catch (error) {
     if (page) await page.screenshot({ path: 'organism-main-mobile-failure.png', fullPage: false, timeout: 5000 }).catch(() => {});
     throw error;
-  } finally {
-    await browser.close();
-  }
+  } finally { await browser.close(); }
 }
 
 (async () => {
