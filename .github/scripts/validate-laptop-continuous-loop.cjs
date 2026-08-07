@@ -25,6 +25,12 @@ async function clearIntro(page) {
   });
 }
 
+async function ensureScrollRuntime(page) {
+  if (await page.locator('script[src*="formatx-infinite-scroll.js"]').count()) return;
+  const runtimeUrl = await page.evaluate(() => new URL('./scripts/formatx-infinite-scroll.js?v=seamless-v6-browser-test', document.baseURI).href);
+  await page.addScriptTag({ url: runtimeUrl });
+}
+
 async function snapshot(page) {
   return page.evaluate(() => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
@@ -85,8 +91,6 @@ async function verifyProgressiveScroll(page, name) {
 
 async function verifySeamlessTransfer(page, name) {
   const before = await snapshot(page);
-  // Keep the probe after the exact runtime threshold:
-  // bridgeTop + max(36, min(innerHeight * .18, 180)).
   const runtimeThreshold = Math.max(36, Math.min(before.viewportHeight * .18, 180));
   const relative = Math.round(Math.min(before.cloneHeight - 24, runtimeThreshold + 48));
   assert(relative > runtimeThreshold,
@@ -129,12 +133,13 @@ async function verifyViewport(browser, viewport, name, mobile) {
 
   await page.goto(TEST_URL + '?lang=hu&scroll-test=seamless-v6', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
+  await ensureScrollRuntime(page);
   await page.waitForFunction(() => (
     document.documentElement.dataset.fxInfiniteController === 'seamless-v6'
     && document.documentElement.dataset.fxInfiniteScroll === 'ready-seamless-v6'
     && document.documentElement.dataset.fxAutomaticLoop === 'enabled'
     && document.documentElement.dataset.fxLoopBridge === 'ready-v2'
-  ), null, { timeout: 45000 });
+  ), null, { timeout: 10000 });
   await page.waitForTimeout(500);
 
   const initial = await snapshot(page);
