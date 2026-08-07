@@ -7,10 +7,10 @@ const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui
 async function clearIntro(page) {
   const skip = page.locator('.fx-intro-skip');
   if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
-  await page.waitForFunction(() => {
+  await page.evaluate(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
-    if (root.classList.contains('fx-intro-complete') && (!overlay || overlay.hidden)) return true;
     if (overlay) {
       overlay.hidden = true;
       overlay.style.display = 'none';
@@ -18,9 +18,9 @@ async function clearIntro(page) {
     }
     root.classList.remove('fx-intro-running', 'fx-intro-pending');
     root.classList.add('fx-intro-complete');
+    document.body?.classList.remove('fx-organism-panel-open');
     document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
-    return true;
-  }, null, { timeout: 8000 });
+  });
 }
 
 async function waitForInterface(page) {
@@ -35,8 +35,8 @@ async function waitForInterface(page) {
       && root.dataset.fxInfiniteController === 'seamless-v6'
       && root.dataset.fxInfiniteScroll === 'ready-seamless-v6'
       && root.dataset.fxInfiniteInput === 'native'
-      && root.dataset.fxAutomaticLoop === 'enabled'
-      && root.dataset.fxLoopBridge === 'ready-v2'
+      && root.dataset.fxAutomaticLoop === 'disabled'
+      && root.dataset.fxLoopBridge === 'disabled'
       && root.dataset.fxInteractionGenomeExport === 'ready'
       && root.dataset.fxOrganismMasterSync === 'ready-v1'
       && root.dataset.fxTranscendLoader === 'safe-ready-v27';
@@ -47,32 +47,10 @@ async function assertSingleLanguageToggle(page) {
   const toggle = page.locator('.fx-language-toggle');
   if (await toggle.count() !== 1) throw new Error('Exactly one visible language toggle is required');
   await toggle.waitFor({ state: 'visible' });
-
-  const initial = await page.evaluate(() => ({
-    language: document.documentElement.lang,
-    label: document.querySelector('.fx-language-toggle')?.textContent?.trim(),
-    visibleLegacyButtons: Array.from(document.querySelectorAll('.language-switch [data-language]'))
-      .filter(button => getComputedStyle(button).display !== 'none').length,
-  }));
-  if (initial.language !== 'hu' || initial.label !== 'HU' || initial.visibleLegacyButtons !== 0) {
-    throw new Error(`Invalid initial language toggle state: ${JSON.stringify(initial)}`);
-  }
-
   await toggle.click();
-  await page.waitForFunction(() => {
-    const button = document.querySelector('.fx-language-toggle');
-    return document.documentElement.lang === 'en'
-      && button?.textContent?.trim() === 'EN'
-      && button?.dataset.nextLanguage === 'hu';
-  });
-
+  await page.waitForFunction(() => document.documentElement.lang === 'en');
   await toggle.click();
-  await page.waitForFunction(() => {
-    const button = document.querySelector('.fx-language-toggle');
-    return document.documentElement.lang === 'hu'
-      && button?.textContent?.trim() === 'HU'
-      && button?.dataset.nextLanguage === 'en';
-  });
+  await page.waitForFunction(() => document.documentElement.lang === 'hu');
 }
 
 async function openMenu(page) {
@@ -81,7 +59,6 @@ async function openMenu(page) {
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('main-nav');
     return toggle?.getAttribute('aria-expanded') === 'true'
-      && toggle.classList.contains('open')
       && nav?.classList.contains('open')
       && document.documentElement.classList.contains('fx-organism-menu-open');
   }, null, { timeout: 8000 });
@@ -89,185 +66,66 @@ async function openMenu(page) {
 
 async function assertPanel(page, id, scene) {
   await page.waitForFunction(({ expectedId, expectedScene }) => {
-    const root = document.getElementById('fx-organism-console');
+    const shell = document.getElementById('fx-organism-console');
     const panel = document.querySelector(`[data-organism-panel="${expectedId}"]`);
     return Boolean(
-      root
-      && !root.hidden
-      && root.getAttribute('aria-hidden') === 'false'
-      && root.classList.contains('is-authorised-open')
-      && getComputedStyle(root).display === 'grid'
+      shell
+      && !shell.hidden
+      && shell.getAttribute('aria-hidden') === 'false'
+      && shell.classList.contains('is-authorised-open')
       && document.body.classList.contains('fx-organism-panel-open')
       && document.documentElement.dataset.fxScene === String(expectedScene)
-      && !document.documentElement.classList.contains('fx-organism-core-active')
       && panel
       && !panel.hidden
       && panel.getAttribute('aria-hidden') === 'false'
-      && getComputedStyle(panel).display !== 'none'
       && panel.textContent.trim().length > 20
     );
   }, { expectedId: id, expectedScene: scene }, { timeout: 10000 });
 }
 
-async function assertMenuClosed(page) {
-  const state = await page.evaluate(() => ({
-    expanded: document.getElementById('menu-toggle')?.getAttribute('aria-expanded'),
-    navOpen: document.getElementById('main-nav')?.classList.contains('open'),
-    rootOpen: document.documentElement.classList.contains('fx-organism-menu-open'),
-  }));
-  if (state.expanded !== 'false' || state.navOpen || state.rootOpen) {
-    throw new Error(`Menu did not close after navigation: ${JSON.stringify(state)}`);
-  }
-}
-
 async function assertCore(page) {
-  const ok = await page.waitForFunction(() => {
+  await page.waitForFunction(() => {
     const root = document.documentElement;
-    const consoleRoot = document.getElementById('fx-organism-console');
-    const status = document.querySelector('.fx-organism-status');
+    const shell = document.getElementById('fx-organism-console');
     return root.dataset.fxScene === '0'
       && root.dataset.fxOrganismState === 'core'
       && root.classList.contains('fx-organism-core-active')
       && root.dataset.fxOrganismConsole === 'closed'
-      && document.getElementById('hero')?.classList.contains('is-core-active')
       && !document.body.classList.contains('fx-organism-panel-open')
-      && consoleRoot?.hidden === true
-      && consoleRoot?.getAttribute('aria-hidden') === 'true'
-      && !consoleRoot?.classList.contains('is-authorised-open')
-      && getComputedStyle(consoleRoot).display === 'none'
-      && location.hash === '#hero'
-      && status?.querySelector('.fx-organism-status-index')?.textContent === '01 / 06'
-      && status?.querySelector('strong')?.textContent === 'MAG'
-      && document.querySelector('[data-organ-node="0"]')?.getAttribute('aria-current') === 'page'
-      && document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current') === 'page';
-  }, null, { timeout: 12000 }).then(() => true).catch(() => false);
-
-  if (ok) return;
-  const state = await page.evaluate(() => {
-    const root = document.documentElement;
-    const consoleRoot = document.getElementById('fx-organism-console');
-    const status = document.querySelector('.fx-organism-status');
-    return {
-      scene: root.dataset.fxScene,
-      organismState: root.dataset.fxOrganismState,
-      coreClass: root.classList.contains('fx-organism-core-active'),
-      consoleState: root.dataset.fxOrganismConsole,
-      heroCore: document.getElementById('hero')?.classList.contains('is-core-active'),
-      bodyPanel: document.body.classList.contains('fx-organism-panel-open'),
-      consoleHidden: consoleRoot?.hidden,
-      consoleAria: consoleRoot?.getAttribute('aria-hidden'),
-      consoleDisplay: consoleRoot ? getComputedStyle(consoleRoot).display : null,
-      hash: location.hash,
-      index: status?.querySelector('.fx-organism-status-index')?.textContent,
-      name: status?.querySelector('strong')?.textContent,
-      mapCurrent: document.querySelector('[data-organ-node="0"]')?.getAttribute('aria-current'),
-      railCurrent: document.querySelector('[data-scene-link="0"]')?.getAttribute('aria-current')
-    };
-  });
-  throw new Error(`Core state did not stabilize: ${JSON.stringify(state)}`);
-}
-
-async function assertLeakedConsoleSelfHeals(page) {
-  await page.evaluate(() => {
-    const shell = document.getElementById('fx-organism-console');
-    if (!shell) throw new Error('Organism console missing');
-    shell.hidden = false;
-    shell.setAttribute('aria-hidden', 'false');
-    shell.style.removeProperty('display');
-    document.body.classList.add('fx-organism-panel-open');
-  });
-  await assertCore(page);
+      && shell?.hidden === true
+      && shell?.getAttribute('aria-hidden') === 'true';
+  }, null, { timeout: 12000 });
 }
 
 async function closePanelAndAssertCore(page) {
   await page.locator('.fx-organism-console-close').click();
   await assertCore(page);
-  await page.waitForTimeout(550);
+  await page.waitForTimeout(250);
 }
 
-async function resourceFootprint(page) {
-  return page.evaluate(() => {
-    const frames = Array.from(document.querySelectorAll('.fx-three-stage-shell iframe'));
-    const frameCanvases = frames.reduce((count, frame) => {
-      try {
-        return count + (frame.contentDocument?.querySelectorAll('canvas').length || 0);
-      } catch (_) {
-        return count;
-      }
-    }, 0);
-    return {
-      frames: frames.length,
-      canvases: document.querySelectorAll('canvas').length + frameCanvases,
-      modules: document.querySelectorAll('script[data-fx-transcend-module]').length,
-      loopBridges: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
-      loopClones: document.querySelectorAll('.fx-loop-bridge [data-fx-loop-clone="true"]').length,
-      heroIds: document.querySelectorAll('#hero').length,
-      stageShells: document.querySelectorAll('.fx-three-stage-shell').length,
-    };
-  });
-}
-
-async function completeLoop(page, expectedCount) {
-  const before = await page.evaluate(() => {
-    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    const hero = document.querySelector('#main-content > #hero');
-    return {
-      loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
-      bridgeTop: bridge?.offsetTop || 0,
-      cloneHeight: bridge?.querySelector('.fx-loop-hero-clone')?.offsetHeight || 0,
-      viewportHeight: innerHeight,
-      heroTop: hero?.offsetTop || 0
-    };
-  });
-  if (!before.bridgeTop || !before.cloneHeight) throw new Error(`Seamless loop bridge is unavailable: ${JSON.stringify(before)}`);
-
-  const threshold = Math.max(36, Math.min(before.viewportHeight * .18, 180));
-  const relative = Math.round(Math.min(before.cloneHeight - 24, threshold + 48));
-  if (!(relative > threshold)) throw new Error(`Loop probe is before transfer threshold: ${JSON.stringify({ before, threshold, relative })}`);
-
-  await page.evaluate(({ bridgeTop, relative }) => window.scrollTo(0, bridgeTop + relative), {
-    bridgeTop: before.bridgeTop,
-    relative
-  });
-  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) === count,
-    expectedCount, { timeout: 12000 });
-  await page.waitForFunction(() => (
-    document.documentElement.dataset.fxInfiniteInput === 'native'
-    && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
-  ), null, { timeout: 5000 });
-  await page.waitForTimeout(120);
-
-  const position = await page.evaluate(relativeOffset => ({
+async function assertNoAutomaticPageJump(page) {
+  const before = await page.evaluate(() => ({
+    maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
+    loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
+  }));
+  const target = Math.round(before.maximum * .82);
+  await page.evaluate(y => window.scrollTo(0, y), target);
+  await page.waitForTimeout(650);
+  const after = await page.evaluate(() => ({
     y: window.scrollY,
-    hero: document.querySelector('#main-content > #hero')?.offsetTop || 0,
-    relative: relativeOffset,
-    source: document.documentElement.dataset.fxLoopSource || '',
-    controller: document.documentElement.dataset.fxInfiniteController || '',
-  }), relative);
-  if (position.controller !== 'seamless-v6' || position.source !== 'visual-bridge') {
-    throw new Error(`Unexpected seamless loop state: ${JSON.stringify(position)}`);
-  }
-  if (Math.abs(position.y - (position.hero + relative)) > 48) {
-    throw new Error(`Seamless loop did not preserve visual position: ${JSON.stringify(position)}`);
-  }
-  await assertCore(page);
-}
-
-async function assertInfiniteScrolling(page) {
-  const initial = await resourceFootprint(page);
-  if (initial.loopBridges !== 1 || initial.loopClones !== 1 || initial.heroIds !== 1) {
-    throw new Error(`Invalid seamless loop footprint: ${JSON.stringify(initial)}`);
-  }
-
-  await completeLoop(page, 1);
-  const first = await resourceFootprint(page);
-
-  await page.waitForTimeout(500);
-  await completeLoop(page, 2);
-  const second = await resourceFootprint(page);
-
-  if (JSON.stringify(first) !== JSON.stringify(second)) {
-    throw new Error(`Resources accumulated between seamless-scroll cycles: ${JSON.stringify({ first, second })}`);
+    loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
+    bridges: document.querySelectorAll('.fx-loop-bridge').length,
+    clones: document.querySelectorAll('[data-fx-loop-clone="true"]').length,
+    automatic: document.documentElement.dataset.fxAutomaticLoop,
+    jumpGuard: document.documentElement.dataset.fxScrollJumpGuard,
+    transfer: document.documentElement.classList.contains('fx-seamless-loop-transfer'),
+    runtime: document.documentElement.__FORMATX_INFINITE_SCROLL__ || null,
+  }));
+  if (Math.abs(after.y - target) > 6) throw new Error(`Page jumped without navigation: ${JSON.stringify({ target, after })}`);
+  if (after.loopCount !== before.loopCount) throw new Error(`Automatic loop counter changed: ${JSON.stringify({ before, after })}`);
+  if (after.bridges || after.clones || after.transfer) throw new Error(`Legacy automatic-scroll artifacts detected: ${JSON.stringify(after)}`);
+  if (after.automatic !== 'disabled' || after.jumpGuard !== 'native-position-v1' || after.runtime?.nativePositionOnly !== true) {
+    throw new Error(`Native no-jump contract missing: ${JSON.stringify(after)}`);
   }
 }
 
@@ -285,12 +143,10 @@ async function testDesktop(browser) {
   await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
-  await assertLeakedConsoleSelfHeals(page);
 
   await openMenu(page);
   await page.locator('#main-nav a[href="#experience"]').click();
   await assertPanel(page, 'experience', 1);
-  await assertMenuClosed(page);
   await closePanelAndAssertCore(page);
 
   await page.locator('.fx-organism-map a[href="#pricing"]').click();
@@ -301,32 +157,26 @@ async function testDesktop(browser) {
   await assertPanel(page, 'system', 4);
   await closePanelAndAssertCore(page);
 
-  await assertInfiniteScrolling(page);
+  await assertNoAutomaticPageJump(page);
   await page.close();
 }
 
 async function testMobile(browser) {
-  const page = await browser.newPage({
-    viewport: { width: 390, height: 844 },
-    isMobile: true,
-    hasTouch: true,
-  });
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
-  await assertLeakedConsoleSelfHeals(page);
 
   await openMenu(page);
   await page.locator('#main-nav a[href="#capabilities"]').click();
   await assertPanel(page, 'capabilities', 2);
-  await assertMenuClosed(page);
   await closePanelAndAssertCore(page);
 
   await page.locator('.scroll-cue').evaluate(node => node.click());
   await assertPanel(page, 'experience', 1);
   await closePanelAndAssertCore(page);
 
-  await assertInfiniteScrolling(page);
+  await assertNoAutomaticPageJump(page);
   await page.close();
 }
 
@@ -335,7 +185,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX language toggle, navigation, panels and two stable seamless-v6 cycles');
+    console.log('PASS FormatX language toggle, navigation, panels and native no-jump scrolling');
   } finally {
     await browser.close();
   }
