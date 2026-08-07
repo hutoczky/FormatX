@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "synced_at": "2026-08-07T12:31:27Z",
+  "synced_at": "2026-08-07T12:34:56Z",
   "ok": true,
   "source": "github_published_release",
   "repository": "hutoczky/FormatX-Updates",
@@ -37,8 +37,8 @@
       "asset_id": null,
       "name": "FormatX-Suite-Pro-Android.apk",
       "download_url": "/download/android",
-      "size": null,
-      "digest": null,
+      "size": 906731,
+      "digest": "sha256:ac8add4fa5d1532c35f6994fe22a97ca8400781ce272f8577d313628e509b69f",
       "content_type": "application/vnd.android.package-archive",
       "created_at": null,
       "updated_at": null,
