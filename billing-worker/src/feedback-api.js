@@ -1,3 +1,5 @@
+import { ensureFeedbackSchemaCompatibility } from './feedback-schema.js';
+
 const FEEDBACK_PATH = '/api/feedback';
 const SUMMARY_PATH = '/api/feedback/summary';
 const ADMIN_FEEDBACK_ROOT = '/fx-owner-license/api/feedback';
@@ -11,35 +13,6 @@ const ALLOWED_STATUSES = new Set(['pending', 'approved', 'rejected']);
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 let accessJwksCache = { url: '', expiresAt: 0, keys: [] };
-
-const SCHEMA_SQL = `
-CREATE TABLE IF NOT EXISTS user_feedback (
-  id TEXT PRIMARY KEY,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
-  overall INTEGER NOT NULL CHECK (overall BETWEEN 1 AND 5),
-  usability INTEGER NOT NULL CHECK (usability BETWEEN 1 AND 5),
-  performance INTEGER NOT NULL CHECK (performance BETWEEN 1 AND 5),
-  design INTEGER NOT NULL CHECK (design BETWEEN 1 AND 5),
-  features INTEGER NOT NULL CHECK (features BETWEEN 1 AND 5),
-  comment TEXT NOT NULL DEFAULT '',
-  display_name TEXT NOT NULL DEFAULT '',
-  contact_email TEXT NOT NULL DEFAULT '',
-  publish_permission INTEGER NOT NULL DEFAULT 0 CHECK (publish_permission IN (0, 1)),
-  privacy_consent INTEGER NOT NULL DEFAULT 1 CHECK (privacy_consent IN (0, 1)),
-  consent_version TEXT NOT NULL,
-  locale TEXT NOT NULL DEFAULT 'hu',
-  source TEXT NOT NULL DEFAULT 'website',
-  page_path TEXT NOT NULL DEFAULT '/',
-  ip_hash TEXT NOT NULL,
-  user_agent TEXT NOT NULL DEFAULT '',
-  moderation_note TEXT NOT NULL DEFAULT '',
-  approved_at TEXT
-);
-CREATE INDEX IF NOT EXISTS idx_user_feedback_status_created ON user_feedback(status, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_user_feedback_ip_created ON user_feedback(ip_hash, created_at DESC);
-`;
 
 export async function handleFeedbackRequest(request, env) {
   const url = new URL(request.url);
@@ -57,7 +30,8 @@ export async function handleFeedbackRequest(request, env) {
   }
 
   try {
-    await ensureFeedbackSchema(env.LICENSE_DB);
+    // One central compatibility check. Its normal path is read-only and cached per isolate.
+    await ensureFeedbackSchemaCompatibility(env.LICENSE_DB);
 
     if (isAdminPath) {
       return await handleAdminFeedbackRequest(request, env, url);
@@ -79,10 +53,6 @@ export async function handleFeedbackRequest(request, env) {
       message: 'A visszajelzés most nem kezelhető. Próbáld meg később.',
     }, 500, request);
   }
-}
-
-async function ensureFeedbackSchema(database) {
-  await database.exec(SCHEMA_SQL);
 }
 
 async function feedbackSummary(database, request) {
@@ -396,9 +366,9 @@ async function getAccessJwks(url) {
   if (accessJwksCache.url === url && accessJwksCache.expiresAt > Date.now()) {
     return accessJwksCache.keys;
   }
-  const response = await fetch(url, { headers: { Accept: 'application/json' } });
-  if (!response.ok) throw new Error(`jwks_${response.status}`);
-  const payload = await response.json();
+  const jwksResponse = await fetch(url, { headers: { Accept: 'application/json' } });
+  if (!jwksResponse.ok) throw new Error(`jwks_${jwksResponse.status}`);
+  const payload = await jwksResponse.json();
   const keys = Array.isArray(payload.keys) ? payload.keys : [];
   accessJwksCache = { url, expiresAt: Date.now() + 5 * 60 * 1000, keys };
   return keys;
@@ -505,7 +475,7 @@ function base64UrlDecode(value) {
 function adminJson(payload, request, status = 200) {
   return json(payload, status, request, {
     'Cache-Control': 'no-store, max-age=0',
-    'X-Robots-Tag': 'noindex, nofollow, noarchive',
+    'X-Robots-Tag': 'noindex, nofollow,noarchive'.replace('nofollow,noarchive', 'nofollow, noarchive'),
   });
 }
 
