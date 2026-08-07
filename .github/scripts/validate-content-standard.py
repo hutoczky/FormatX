@@ -71,9 +71,9 @@ def official_download(value: str) -> bool:
 def validate_platform_status() -> None:
     data = load_json(SCIFI / "data/platform-status.json")
     expected = {
-        "linux-bazzite": ("public_beta", "primary"),
-        "windows": ("public_beta", "secondary"),
-        "android": ("public_beta", "preview"),
+        "linux-bazzite": ("full_release", "primary"),
+        "windows": ("full_release", "secondary"),
+        "android": ("full_release", "secondary"),
         "web": ("technical_preview", "preview"),
         "macos": ("planned", "roadmap"),
         "ios": ("planned", "roadmap"),
@@ -96,15 +96,36 @@ def validate_platform_status() -> None:
         "Discover", "Plan", "Controlled execution", "Verify"
     ]:
         fail("English FormatX Method mismatch")
-    if data.get("product_release", {}).get("public_package") != "multiplatform":
+    release = data.get("product_release", {})
+    if release.get("public_package") != "multiplatform":
         fail("Canonical product release is not marked multiplatform")
-    if "name" in data.get("product_release", {}):
+    if release.get("status") != "full_release":
+        fail("Canonical product release is not marked full_release")
+    if release.get("trial_days") != 5:
+        fail("Canonical trial licence must be exactly 5 days")
+    if "name" in release:
         fail("platform-status.json must not contain a hardcoded release name")
     for item in data.get("platforms", []):
         if "version" in item:
             fail(f"Platform status contains hardcoded version: {item.get('id')}")
         if item.get("status") == "stable":
-            fail(f"Stable is not permitted for current platform: {item.get('id')}")
+            fail(f"Stable evidence label is not permitted without the separate gate: {item.get('id')}")
+        if item.get("status") == "public_beta":
+            fail(f"Retired public_beta status remains: {item.get('id')}")
+
+    contract = load_json(SCIFI / "data/public-platform-contract.json")
+    public_copy = contract.get("public_copy", {})
+    if public_copy.get("release_maturity") != "full_release":
+        fail("Public platform contract is not full_release")
+    if public_copy.get("trial_days") != 5:
+        fail("Public platform contract does not declare a 5-day trial")
+
+    channel = load_json(SCIFI / "data/release-channel.json")
+    display = channel.get("public_display", {})
+    if "béta" in json.dumps(display, ensure_ascii=False).lower() or "beta" in json.dumps(display).lower():
+        fail("Release channel public display still contains beta wording")
+    if display.get("trial_label", {}).get("hu") != "5 napos próbalicenc":
+        fail("Release channel Hungarian trial label mismatch")
 
 
 def validate_release_metadata() -> None:
@@ -181,7 +202,7 @@ def validate_evidence() -> None:
 
 def validate_public_pages() -> None:
     pages = [
-        "index.html", "downloads/index.html", "method.html", "verification.html",
+        "downloads/index.html", "method.html", "verification.html",
         "test-matrix.html", "known-issues.html", "security.html",
         "decision-log.html", "license.html", "terms.html", "privacy.html", "support.html"
     ]
@@ -197,6 +218,8 @@ def validate_public_pages() -> None:
             fail(f"False team/company voice remains in {page}")
         if re.search(r"\b(világelső|piacvezető|world[- ]leading|market leader)\b", text, re.I):
             fail(f"Unsupported leadership claim remains in {page}")
+        if page in {"downloads/index.html", "terms.html", "known-issues.html"} and re.search(r"\b(beta|béta)\b", text, re.I):
+            fail(f"Retired beta wording remains visible in current-release page: {page}")
 
 
 def validate_runtime_contract() -> None:
@@ -218,11 +241,17 @@ def validate_runtime_contract() -> None:
 
     release_script = read(SCIFI / "scripts/release-metadata.js")
     for token in [
-        "current-release.json", "ready-v4", "channels?.multiplatform",
-        "data-release-download=\"multiplatform\"", "setText('[data-release-version]', '', false)"
+        "current-release.json", "ready-v5", "channels?.multiplatform",
+        "data-release-download=\"multiplatform\"", "setText('[data-release-version]', '', false)",
+        "5-day trial licence", "Teljes multiplatform verzió letöltése"
     ]:
         if token not in release_script:
             fail(f"Release metadata controller missing {token}")
+
+    platform_script = read(SCIFI / "scripts/platform-status.js")
+    for token in ["full release", "5-day trial licence", "5 napos próbalicenc"]:
+        if token.lower() not in platform_script.lower():
+            fail(f"Platform status controller missing full-release contract: {token}")
 
     downloads = read(SCIFI / "downloads/index.html")
     if 'data-release-download="multiplatform"' not in downloads:
@@ -231,9 +260,9 @@ def validate_runtime_contract() -> None:
         if legacy in downloads:
             fail(f"Downloads page contains historical release copy: {legacy}")
 
-    home = read(SCIFI / "index.html")
-    if "/releases/download/v92/" in home or "FormatX-Suite-Pro-V92.zip" in home:
-        fail("Static home page still contains the V92 release asset")
+    production_lower = production.lower()
+    if ".replaceall('teljes verzió letöltése', 'multiplatform nyilvános béta letöltése')" in production_lower:
+        fail("Production still rewrites full release copy back to beta")
 
 
 def main() -> int:
@@ -247,7 +276,7 @@ def main() -> int:
         for error in ERRORS:
             print(f" - {error}", file=sys.stderr)
         return 1
-    print("FormatX content, multiplatform release, evidence and trust contracts are valid.")
+    print("FormatX full release, 5-day trial, evidence and trust contracts are valid.")
     return 0
 
 
