@@ -35,6 +35,8 @@
   const nodes = Array.from(document.querySelectorAll('[data-organ-node]'));
   let qrGeneration = 0;
   let threeLoadStarted = false;
+  let qrDockActivated = false;
+  let qrDockObserver = null;
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -80,7 +82,7 @@
   function loadThreeExperience() {
     if (threeLoadStarted) return;
     threeLoadStarted = true;
-    ROOT.dataset.fxThreeLoader = 'starting-after-intro';
+    ROOT.dataset.fxThreeLoader = 'starting-on-demand';
 
     if (!document.querySelector('link[data-fx-cryosphere-style]')) {
       const style = document.createElement('link');
@@ -135,16 +137,16 @@
       document.head.appendChild(menuScript);
     }
 
-    ROOT.dataset.fxThreeLoader = 'requested';
+    ROOT.dataset.fxThreeLoader = 'requested-on-demand';
   }
 
   function scheduleThreeExperience() {
-    if (ROOT.classList.contains('fx-intro-complete')) {
+    if (ROOT.dataset.fxImmersive === 'active') {
       loadThreeExperience();
       return;
     }
-    ROOT.dataset.fxThreeLoader = 'waiting-for-intro';
-    document.addEventListener('formatx:introcomplete', loadThreeExperience, { once: true });
+    ROOT.dataset.fxThreeLoader = 'deferred-user-activation';
+    addEventListener('formatx:immersiveactivate', loadThreeExperience, { once: true });
   }
 
   function revealQrDock() {
@@ -156,6 +158,30 @@
     dock.style.setProperty('transform', 'none', 'important');
     dock.style.setProperty('filter', 'none', 'important');
     dock.dataset.fxQrVisible = 'true';
+  }
+
+  function activateQrDock() {
+    if (qrDockActivated) return;
+    qrDockActivated = true;
+    ROOT.dataset.fxQrLoading = 'active-near-viewport';
+    qrDockObserver?.disconnect();
+    qrDockObserver = null;
+    updateCommerce();
+  }
+
+  function prepareQrDock() {
+    const dock = document.getElementById('formatx-plan-qr-dock');
+    revealQrDock();
+    if (!dock) return;
+    if (!('IntersectionObserver' in window)) {
+      activateQrDock();
+      return;
+    }
+    ROOT.dataset.fxQrLoading = 'deferred';
+    qrDockObserver = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) activateQrDock();
+    }, { rootMargin: '700px 0px', threshold: 0 });
+    qrDockObserver.observe(dock);
   }
 
   function syncScene() {
@@ -179,6 +205,7 @@
 
     card.classList.remove('is-qr-ready', 'is-qr-error');
     card.classList.add('is-qr-loading');
+    image.loading = 'lazy';
     image.decoding = 'async';
     image.dataset.fxQrFallback = 'false';
 
@@ -247,18 +274,25 @@
           + (language() === 'hu' ? 'fizetési oldal megnyitása' : 'open payment'));
       }
       if (!image) return;
+      image.loading = 'lazy';
+      image.decoding = 'async';
       image.alt = plan.name + ' — '
         + (language() === 'hu' ? 'fizetési oldal QR-kódja' : 'payment page QR code');
-      loadQrImage(card, image, planId, selectedCurrency, generation);
+      if (qrDockActivated) loadQrImage(card, image, planId, selectedCurrency, generation);
     });
   }
 
   function bind() {
     const observer = new MutationObserver(entries => {
-      if (entries.some(entry => entry.type === 'attributes' && (entry.attributeName === 'data-fx-scene' || entry.attributeName === 'lang'))) {
-        syncScene();
-        updateCommerce();
+      let sceneChanged = false;
+      let languageChanged = false;
+      for (const entry of entries) {
+        if (entry.type !== 'attributes') continue;
+        if (entry.attributeName === 'data-fx-scene') sceneChanged = true;
+        if (entry.attributeName === 'lang') languageChanged = true;
       }
+      if (sceneChanged || languageChanged) syncScene();
+      if (languageChanged) updateCommerce();
     });
     observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
     document.addEventListener('click', event => {
@@ -276,16 +310,22 @@
       revealQrDock();
       updateCommerce();
     });
+    addEventListener('pagehide', () => {
+      observer.disconnect();
+      qrDockObserver?.disconnect();
+      qrDockObserver = null;
+    }, { once: true });
   }
 
   function initialise() {
-    ROOT.dataset.fxQrOwner = 'living-v2';
+    ROOT.dataset.fxQrOwner = 'living-v3-performance';
     scheduleThreeExperience();
     revealQrDock();
     syncScene();
     updateCommerce();
+    prepareQrDock();
     bind();
-    ROOT.dataset.fxLivingArchitecture = 'ready';
+    ROOT.dataset.fxLivingArchitecture = 'ready-performance-v3';
     dispatchEvent(new CustomEvent('formatx:livingready'));
   }
 
