@@ -2,6 +2,7 @@
 
 const { chromium } = require('playwright');
 
+// Regression contract: the living core must activate through real browser hit-testing.
 const baseUrl = process.env.FORMATX_TEST_URL
   || 'http://127.0.0.1:4178/scifi-ui/index.html';
 const testUrl = new URL(baseUrl);
@@ -130,7 +131,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   );
   assert(
     await controls.isVisible(),
-    `${name}: advanced controls did not appear after explicit opening`
+    `${name}: advanced thought controls did not appear after explicit opening`
   );
   const openBox = await bubble.boundingBox();
   assert(
