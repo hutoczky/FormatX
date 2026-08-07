@@ -172,7 +172,7 @@ jobs:
           ! grep -Fq 'organism-natural-voice' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'min-aspect-ratio: 21/9' docs/scifi-ui/styles/organism-voice-dock.css
           grep -Fq 'right: 440px !important' docs/scifi-ui/styles/organism-voice-dock.css
-          grep -Fq 'platform-status.js?v=20260730-platform-status-1' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'platform-status.js?v=20260807-full-release-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'MOBILE_QUERY.matches?2100:2400' docs/scifi-ui/scripts/formatx-event-horizon.js
           grep -Fq 'hardDeadline=timelineDuration+exitDuration+1100' docs/scifi-ui/scripts/formatx-event-horizon.js
           grep -Fq "DOMContentLoaded',start" docs/scifi-ui/scripts/formatx-event-horizon.js
