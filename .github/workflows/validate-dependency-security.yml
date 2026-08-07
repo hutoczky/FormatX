@@ -1,0 +1,64 @@
+name: Validate dependency security
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'billing-worker/package.json'
+      - 'billing-worker/package-lock.json'
+      - '.github/workflows/validate-dependency-security.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'billing-worker/package.json'
+      - 'billing-worker/package-lock.json'
+      - '.github/workflows/validate-dependency-security.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-dependency-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: billing-worker/package-lock.json
+
+      - name: Install locked dependencies
+        working-directory: billing-worker
+        run: npm ci
+
+      - name: Block high or critical npm vulnerabilities
+        working-directory: billing-worker
+        run: npm audit --audit-level=high
+
+      - name: Publish dependency security status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Locked Worker dependencies pass high/critical npm audit'
+          else
+            state='failure'
+            description='High/critical dependency security audit failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX dependency security' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
