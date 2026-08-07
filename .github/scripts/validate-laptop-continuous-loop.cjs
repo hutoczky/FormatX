@@ -85,9 +85,15 @@ async function verifyProgressiveScroll(page, name) {
 
 async function verifySeamlessTransfer(page, name) {
   const before = await snapshot(page);
-  const relative = Math.max(60, Math.min(140, Math.round(before.viewportHeight * .12)));
+  // Keep the probe after the exact runtime threshold:
+  // bridgeTop + max(36, min(innerHeight * .18, 180)).
+  const runtimeThreshold = Math.max(36, Math.min(before.viewportHeight * .18, 180));
+  const relative = Math.round(Math.min(before.cloneHeight - 24, runtimeThreshold + 48));
+  assert(relative > runtimeThreshold,
+    name + ': transfer point must be beyond the runtime threshold: ' + JSON.stringify({ relative, runtimeThreshold, before }));
   assert(relative < before.cloneHeight,
     name + ': transfer point falls outside visual bridge: ' + JSON.stringify({ relative, before }));
+
   await page.evaluate(relativeOffset => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     scrollTo(0, (bridge?.offsetTop || 0) + relativeOffset);
