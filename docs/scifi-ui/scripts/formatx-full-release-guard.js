@@ -2,14 +2,15 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxFullReleaseGuard === 'ready-v1') return;
-  root.dataset.fxFullReleaseGuard = 'loading-v1';
+  if (root.dataset.fxFullReleaseGuard === 'ready-v2') return;
+  root.dataset.fxFullReleaseGuard = 'loading-v2';
 
+  /*
+   * Only retired product-level labels are normalised here. Generic words such
+   * as "beta" and explicitly named beta channels must remain untouched: the
+   * product can be a full release while a separate experimental channel is beta.
+   */
   const EXACT = new Map([
-    ['Nyilvános béta', 'Teljes verzió'],
-    ['Public beta', 'Full release'],
-    ['BÉTA', 'TELJES VERZIÓ'],
-    ['BETA', 'FULL RELEASE'],
     ['Multiplatform nyilvános béta', 'Teljes multiplatform verzió'],
     ['Multiplatform public beta', 'Full multiplatform version'],
     ['Multiplatform nyilvános béta letöltése', 'Teljes multiplatform verzió letöltése'],
@@ -17,18 +18,12 @@
     ['Android nyilvános béta', 'Android teljes verzió'],
     ['Android public beta', 'Android full release'],
     ['Android nyilvános béta letöltése', 'Android teljes verzió letöltése'],
-    ['Download Android public beta', 'Download Android full version'],
-    ['NATÍV BÉTA', 'TELJES VERZIÓ'],
-    ['NATIVE BETA', 'FULL RELEASE']
+    ['Download Android public beta', 'Download Android full version']
   ]);
 
   const PHRASES = [
-    [/\bhivatalos nyilvános béta\b/gi, 'hivatalos teljes verzió'],
-    [/\bofficial public beta\b/gi, 'official full release'],
     [/\bmultiplatform nyilvános béta\b/gi, 'teljes multiplatform verzió'],
-    [/\bmultiplatform public beta\b/gi, 'full multiplatform version'],
-    [/\bnyilvános béta csomag\b/gi, 'teljes multiplatform csomag'],
-    [/\bpublic beta package\b/gi, 'full multiplatform package']
+    [/\bmultiplatform public beta\b/gi, 'full multiplatform version']
   ];
 
   let scheduled = 0;
@@ -116,7 +111,7 @@
       enforceCanonicalRelease();
       root.dataset.fxFullRelease = 'full-release';
       root.dataset.fxTrialDays = '5';
-      root.dataset.fxFullReleaseGuard = 'ready-v1';
+      root.dataset.fxFullReleaseGuard = 'ready-v2';
     } finally {
       applying = false;
     }
