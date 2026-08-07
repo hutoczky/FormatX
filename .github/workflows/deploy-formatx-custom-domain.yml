@@ -196,18 +196,18 @@ jobs:
           echo "mode=wrangler" >> "$GITHUB_OUTPUT"
           npx wrangler deploy
 
-      - name: Smoke-test production performance, public comments, downloads and scrolling
+      - name: Smoke-test production performance, first-party delivery and public comments
         shell: bash
         run: |
           set -Eeuo pipefail
           WWW='https://www.formatxsuite.com'
           ROOT_DOMAIN='https://formatxsuite.com'
-          PAYLOAD='{"overall":5,"usability":5,"performance":5,"design":5,"features":5,"comment":"","display_name":"","contact_email":"","publish_permission":false,"privacy_consent":true,"website":"formatx-production-smoke-probe","locale":"hu","source":"github-production-smoke","page_path":"/"}'
+          PAYLOAD='{"overall":5,"usability":5,"performance":5,"design":5,"features":5,"comment":"","display_name":"","contact_email":"","publish_permission":false,"privacy_consent":true,"website":"formatx-production-smoke-probe","locale":"hu","source":"formatx-production-smoke","page_path":"/"}'
 
           for attempt in $(seq 1 30); do
             echo "Production smoke attempt $attempt/30"
             tmp="$(mktemp -d)"
-            root_code="$(curl -sS -L --max-time 30 -o "$tmp/home.html" -w '%{http_code}' "$WWW/" || true)"
+            root_code="$(curl -sS -L --max-time 30 -D "$tmp/home.headers" -o "$tmp/home.html" -w '%{http_code}' "$WWW/" || true)"
             bare_code="$(curl -sS -L --max-time 30 -o "$tmp/bare.html" -w '%{http_code}' "$ROOT_DOMAIN/" || true)"
             summary_code="$(curl -sS --max-time 30 -o "$tmp/summary.json" -w '%{http_code}' "$WWW/api/feedback/summary" || true)"
             submit_code="$(curl -sS --max-time 30 -o "$tmp/submit.json" -w '%{http_code}' \
@@ -221,14 +221,19 @@ jobs:
             apex_code="$(curl -sS --max-time 30 -o "$tmp/apex.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-apex.js?v=production-smoke" || true)"
             feedback_code="$(curl -sS --max-time 30 -o "$tmp/feedback.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-feedback.js?v=production-smoke" || true)"
             feedback_style_code="$(curl -sS --max-time 30 -o "$tmp/feedback-public.css" -w '%{http_code}' "$WWW/scifi-ui/styles/formatx-feedback-public.css?v=production-smoke" || true)"
-            downloads_code="$(curl -sS -L --max-time 30 -o "$tmp/downloads.html" -w '%{http_code}' "$WWW/downloads/" || true)"
+            downloads_code="$(curl -sS -L --max-time 30 -D "$tmp/downloads.headers" -o "$tmp/downloads.html" -w '%{http_code}' "$WWW/downloads/" || true)"
             support_code="$(curl -sS -L --max-time 30 -o "$tmp/support.html" -w '%{http_code}' "$WWW/support.html" || true)"
+            release_code="$(curl -sS --max-time 30 -o "$tmp/release.json" -w '%{http_code}' "$WWW/scifi-ui/data/current-release.json" || true)"
+            release_api_code="$(curl -sS --max-time 30 -o "$tmp/release-api.json" -w '%{http_code}' "$WWW/api/public-release" || true)"
+            package_code="$(curl -sS --max-time 45 --range 0-0 -D "$tmp/package.headers" -o "$tmp/package.bin" -w '%{http_code}' "$WWW/download/multiplatform" || true)"
             portable_code="$(curl -sS --max-time 30 -o "$tmp/portable.svg" -w '%{http_code}' "$WWW/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg" || true)"
 
             if [[ "$root_code" == '200' && "$bare_code" == '200' && "$summary_code" == '200' \
               && "$submit_code" == '202' && "$loop_code" == '200' && "$living_code" == '200' \
               && "$apex_code" == '200' && "$feedback_code" == '200' && "$feedback_style_code" == '200' \
-              && "$downloads_code" == '200' && "$support_code" == '200' && "$portable_code" == '200' ]]; then
+              && "$downloads_code" == '200' && "$support_code" == '200' && "$release_code" == '200' \
+              && "$release_api_code" == '200' && ( "$package_code" == '200' || "$package_code" == '206' ) \
+              && "$portable_code" == '200' ]]; then
               if python3 - "$tmp" <<'PY'
           import json
           import pathlib
@@ -237,14 +242,19 @@ jobs:
           root = pathlib.Path(sys.argv[1])
           summary = json.loads((root / 'summary.json').read_text())
           submit = json.loads((root / 'submit.json').read_text())
+          release = json.loads((root / 'release.json').read_text())
+          release_api = json.loads((root / 'release-api.json').read_text())
           loop = (root / 'loop.js').read_text()
           living = (root / 'living.js').read_text()
           apex = (root / 'apex.js').read_text()
           feedback = (root / 'feedback.js').read_text()
           feedback_public = (root / 'feedback-public.css').read_text()
           home = (root / 'home.html').read_text()
+          home_headers = (root / 'home.headers').read_text()
           downloads = (root / 'downloads.html').read_text()
+          downloads_headers = (root / 'downloads.headers').read_text()
           support = (root / 'support.html').read_text()
+          package_headers = (root / 'package.headers').read_text()
           portable = (root / 'portable.svg').read_text().lower()
 
           assert summary.get('ok') is True, summary
@@ -273,11 +283,20 @@ jobs:
           assert '.fx-feedback-public-card' in feedback_public, 'public comment styles missing'
           assert 'id="user-feedback"' in home, 'feedback section missing'
           assert 'data-fx-category-title' in home and 'Egy élő operációs réteg technikusi munkához.' in home, 'static category semantics missing'
-          assert 'FormatX-Updates/releases/latest' in downloads, 'latest release fallback missing'
           assert 'Támogatás' in support or 'Support' in support, 'support page invalid'
+          assert release.get('ok') is True, release
+          assert release.get('source') == 'formatx_release_service', release
+          assert release.get('release_url') == '/scifi-ui/downloads/', release
+          assert release.get('channels', {}).get('multiplatform', {}).get('download_url') == '/download/multiplatform', release
+          assert release.get('channels', {}).get('android', {}).get('download_url') == '/download/android', release
+          assert release_api.get('html_url') == '/scifi-ui/downloads/', release_api
+          assert release_api.get('assets', [{}])[0].get('browser_download_url') == '/download/multiplatform', release_api
+          for public_text in [home, home_headers, downloads, downloads_headers, support, json.dumps(release), json.dumps(release_api), package_headers]:
+              assert 'github' not in public_text.lower(), 'upstream source leaked into a public response'
+              assert 'githubusercontent' not in public_text.lower(), 'upstream asset host leaked into a public response'
           assert '<svg' in portable and '</svg>' in portable, 'portable installer SVG missing'
           assert 'data:image/webp' not in portable and '<image' not in portable, 'embedded raster returned'
-          print('FormatX production performance/public-comments smoke passed.')
+          print('FormatX production first-party delivery/public-comments smoke passed.')
           PY
               then
                 rm -rf "$tmp"
@@ -285,12 +304,13 @@ jobs:
               fi
             fi
 
-            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code living=$living_code apex=$apex_code feedback=$feedback_code feedback_style=$feedback_style_code downloads=$downloads_code support=$support_code portable=$portable_code"
+            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code living=$living_code apex=$apex_code feedback=$feedback_code feedback_style=$feedback_style_code downloads=$downloads_code support=$support_code release=$release_code release_api=$release_api_code package=$package_code portable=$portable_code"
             [[ -s "$tmp/summary.json" ]] && cat "$tmp/summary.json" || true
             [[ -s "$tmp/submit.json" ]] && cat "$tmp/submit.json" || true
+            [[ -s "$tmp/release.json" ]] && cat "$tmp/release.json" || true
             rm -rf "$tmp"
             if [[ "$attempt" == '30' ]]; then
-              echo 'Production did not become healthy with the requested performance/public-comment contract within the retry window.' >&2
+              echo 'Production did not become healthy with the first-party delivery contract within the retry window.' >&2
               exit 1
             fi
             sleep 12
