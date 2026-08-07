@@ -75,6 +75,9 @@ for (const file of htmlFiles) {
 const homepage = read('docs/scifi-ui/index.html');
 const productionContent = read('billing-worker/src/production-content-entry.js');
 const downloads = read('docs/scifi-ui/downloads/index.html');
+const legacyAndroidDownload = read('docs/scifi-ui/downloads/android.html');
+const support = read('docs/scifi-ui/support.html');
+const siteRuntime = read('docs/scifi-ui/scripts/site.js');
 const portable = read('docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg');
 const aliases = read('billing-worker/src/production-feedback-entry.js');
 const loop = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
@@ -101,10 +104,24 @@ if (/\b(?:nyilvános béta|public beta)\b/i.test(homepage)) report('homepage: re
 if (/Windows, macOS, web és Android hozzáférés támogatott|Windows, macOS, web and Android access are supported/i.test(homepage)) report('homepage: planned/preview platforms are presented as supported');
 if (/A stabil csomagok|Stable packages and release information/i.test(homepage)) report('homepage: evidence-gated Stable is overstated');
 
+if (!productionContent.includes('itemprop="operatingSystem" content="Linux, Bazzite, Windows, Android"')) report('production structured data: canonical native operating-system list missing');
+if (/itemprop="operatingSystem" content="[^"]*(?:macOS|Web|iOS)/i.test(productionContent)) report('production structured data: planned/preview surface presented as supported OS');
+if (/Lighthouse-kapuk|Lighthouse gates/.test(productionContent)) report('production Live OS evidence copy must use generic verified CI gates rather than an unscoped Lighthouse claim');
+
 if (/data-release-download="multiplatform"[^>]+href=["']\.\/?["']/i.test(downloads)) report('downloads: primary fallback points to itself');
 if (!downloads.includes('FormatX-Updates/releases/latest')) report('downloads: JavaScript-free latest release fallback missing');
 if (!downloads.includes('Teljes multiplatform verzió letöltése') || !downloads.includes('5 napos próbalicenc')) report('downloads: full release / five-day trial copy missing');
 if (/\b(?:nyilvános béta|public beta)\b/i.test(downloads)) report('downloads: retired generic beta wording remains');
+
+if (/Android-1\.0\.4|release-unsigned\.aab/i.test(legacyAndroidDownload)) report('legacy Android download page: stale hard-coded package link remains');
+if (!legacyAndroidDownload.includes('href="/download/android"')) report('legacy Android download page: canonical worker download route missing');
+if (!/<meta\s+name="robots"\s+content="noindex,follow">/i.test(legacyAndroidDownload)) report('legacy Android download page: compatibility noindex missing');
+if (!legacyAndroidDownload.includes('rel="canonical" href="https://www.formatxsuite.com/scifi-ui/android/"')) report('legacy Android download page: Android canonical target missing');
+
+if (/Platform és irányadó állapot:\s*Public beta/i.test(support)) report('support: stale Public beta reporting state remains');
+if (!support.includes('Full release, Technical preview vagy Planned')) report('support: canonical issue-report release states missing');
+if (/const state = copy\('Nyilvános béta', 'Public beta'\)/.test(siteRuntime) || /public-beta-available/.test(siteRuntime)) report('shared site runtime: retired beta release state remains');
+if (!siteRuntime.includes("data?.channels?.multiplatform")) report('shared site runtime: canonical multiplatform channel missing');
 
 if (/\b(?:Public beta product status|FormatX beta|bétaállapot|beta package|Overall status['"],?\s*value:['"]Public beta)/i.test(seo)) report('SEO: retired generic beta metadata remains');
 if (!seo.includes("value:'Full release'") || !seo.includes("value:'5 days'")) report('SEO: full release/trial structured data missing');
@@ -143,6 +160,10 @@ if (!androidPage.includes('rel="canonical" href="https://www.formatxsuite.com/sc
 if (/WEBVIEW NÉLKÜLI NATÍV TELJES KIADÁS|current native edition is the full release|jelenlegi natív kiadás a teljes verzió/i.test(androidPage)) report('Android page: Native beta is falsely presented as full release');
 if (!sitemap.includes('https://www.formatxsuite.com/scifi-ui/android/')) report('sitemap: Android release-status page missing');
 
+if (guard.includes("['NATÍV BÉTA'") || guard.includes("['NATIVE BETA'") || guard.includes("['BÉTA'") || guard.includes("['BETA'")) report('full-release guard: legitimate beta channel labels would be rewritten');
+if (guard.includes("['Nyilvános béta'") || guard.includes("['Public beta'")) report('full-release guard: generic beta wording is over-broad; guard must target retired product-level labels only');
+if (!guard.includes("fxFullRelease = 'full-release'") || !guard.includes("fxTrialDays = '5'")) report('full-release guard contract missing');
+
 if (/PUBLIC BETA|FormatX V92|nyilvános béta|public beta/i.test(salesGate)) report('sales gate: retired beta/V92 copy remains');
 if (!salesGate.includes('TELJES KIADÁS') || !salesGate.includes('5 napos próbalicenc')) report('sales gate: full-release/trial truth missing');
 for (const [name, source] of [['payment success', paymentSuccess], ['payment cancel', paymentCancel]]) {
@@ -151,7 +172,6 @@ for (const [name, source] of [['payment success', paymentSuccess], ['payment can
 
 if (/data:image\/webp|<image\b/i.test(portable)) report('portable installer: embedded raster/WebP is forbidden');
 if (!loop.includes("const VERSION = 'seamless-v6'") || !loop.includes('clonedHeroOnly: true')) report('homepage: seamless loop contract missing');
-if (!guard.includes("fxFullRelease = 'full-release'") || !guard.includes("fxTrialDays = '5'")) report('full-release guard contract missing');
 for (const token of [
   "['/downloads/', '/scifi-ui/downloads/']",
   "['/support.html', '/scifi-ui/support.html']",
@@ -164,4 +184,4 @@ if (failures.length) {
   failures.forEach(item => console.error(' - ' + item));
   process.exit(1);
 }
-console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, evidence data, Android channel separation, legal gate, transactional noindex, downloads, aliases and seamless loop validated.`);
+console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, Android channel/download separation, legal gate, transactional noindex, downloads, aliases and seamless loop validated.`);
