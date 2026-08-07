@@ -24,7 +24,10 @@ html.fx-seamless-loop-transfer body {
 .fx-loop-bridge {
   position: relative;
   z-index: var(--fx-layer-content, 220);
-  min-height: 100svh;
+  box-sizing: border-box;
+  /* The extra runway makes the transfer threshold reachable even when the
+     Hero itself is exactly one viewport tall. It is not part of ratio math. */
+  min-height: calc(100svh + min(42svh, 420px));
   overflow: clip;
   background: #02070d;
   contain: layout paint style;
