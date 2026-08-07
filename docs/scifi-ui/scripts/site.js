@@ -5,13 +5,8 @@
   const THEME_KEY = 'formatx-site-theme';
   const RELEASE_URL = '/scifi-ui/data/current-release.json';
 
-  function language() {
-    return ROOT.lang === 'en' ? 'en' : 'hu';
-  }
-
-  function copy(hu, en) {
-    return language() === 'en' ? en : hu;
-  }
+  function language() { return ROOT.lang === 'en' ? 'en' : 'hu'; }
+  function copy(hu, en) { return language() === 'en' ? en : hu; }
 
   function themePreference() {
     const query = new URLSearchParams(location.search).get('theme');
@@ -56,15 +51,9 @@
       nav.classList.toggle('open', open);
       button.setAttribute('aria-expanded', String(open));
     });
-    nav.addEventListener('click', event => {
-      if (event.target.closest('a')) close();
-    });
-    addEventListener('keydown', event => {
-      if (event.key === 'Escape') close();
-    });
-    addEventListener('resize', () => {
-      if (innerWidth > 980) close();
-    });
+    nav.addEventListener('click', event => { if (event.target.closest('a')) close(); });
+    addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+    addEventListener('resize', () => { if (innerWidth > 980) close(); });
   }
 
   function initialiseReveal() {
@@ -88,9 +77,7 @@
     if (!Number.isFinite(bytes) || bytes <= 0) return copy('Nincs közzétett adat', 'No published data');
     const unit = bytes >= 1024 ** 3 ? 'GiB' : 'MiB';
     const divisor = unit === 'GiB' ? 1024 ** 3 : 1024 ** 2;
-    return new Intl.NumberFormat(language() === 'en' ? 'en-GB' : 'hu-HU', {
-      maximumFractionDigits: 2
-    }).format(bytes / divisor) + ' ' + unit;
+    return new Intl.NumberFormat(language() === 'en' ? 'en-GB' : 'hu-HU', { maximumFractionDigits: 2 }).format(bytes / divisor) + ' ' + unit;
   }
 
   function formatDate(value) {
@@ -109,9 +96,7 @@
         url.hostname === 'github.com' &&
         url.pathname.startsWith('/hutoczky/FormatX-Updates/releases/download/')
       );
-    } catch (_) {
-      return false;
-    }
+    } catch (_) { return false; }
   }
 
   function setText(id, value) {
@@ -132,38 +117,37 @@
   }
 
   function renderRelease(data) {
-    const version = typeof data?.version === 'string' ? data.version.trim() : '';
-    const windows = data?.channels?.windows;
-    const available = data?.ok === true && windows?.available === true && trustedAssetUrl(windows.download_url);
-    const state = copy('Nyilvános béta', 'Public beta');
+    const asset = data?.channels?.multiplatform || data?.channels?.windows;
+    const available = data?.ok === true && asset?.available === true && trustedAssetUrl(asset.download_url);
+    const state = copy('Teljes multiplatform verzió', 'Full multiplatform version');
     const unavailable = copy('A hivatalos csomag metaadata nem érhető el.', 'Official package metadata is unavailable.');
 
-    setText('hero-version', version || state);
+    setText('hero-version', state);
     setText('release-state', state);
-    setText('release-name', data?.release_name || version || unavailable);
+    setText('release-name', available ? 'FormatX Suite Pro' : unavailable);
     setText('release-published', data?.published_at ? formatDate(data.published_at) : unavailable);
-    setText('download-file-name', available ? windows.name : unavailable);
-    setText('download-version', version || state);
-    setText('download-size', available ? formatBytes(windows.size) : unavailable);
-    setText('release-sha256', windows?.digest || copy('Nincs közzétett digest', 'No published digest'));
+    setText('download-file-name', available ? copy('FormatX Suite Pro multiplatform csomag', 'FormatX Suite Pro multiplatform package') : unavailable);
+    setText('download-version', state);
+    setText('download-size', available ? formatBytes(asset.size) : unavailable);
+    setText('release-sha256', asset?.digest || copy('Nincs közzétett digest', 'No published digest'));
     setText('release-api-note', available
       ? copy('A kiadási adatok a szinkronizált hivatalos metaadatból származnak.', 'Release data comes from synchronized official metadata.')
       : unavailable);
 
-    for (const id of ['hero-download', 'download-primary']) setLink(id, available ? windows.download_url : null);
+    for (const id of ['hero-download', 'download-primary']) setLink(id, available ? asset.download_url : null);
     const pageUrl = typeof data?.release_url === 'string' && data.release_url.startsWith('https://github.com/hutoczky/FormatX-Updates/releases/') ? data.release_url : null;
     for (const id of ['release-page-link', 'download-release-page']) {
-      const link = document.getElementById(id);
-      if (!(link instanceof HTMLAnchorElement)) continue;
+      const element = document.getElementById(id);
+      if (!(element instanceof HTMLAnchorElement)) continue;
       if (pageUrl) {
-        link.href = pageUrl;
-        link.removeAttribute('aria-disabled');
+        element.href = pageUrl;
+        element.removeAttribute('aria-disabled');
       } else {
-        link.removeAttribute('href');
-        link.setAttribute('aria-disabled', 'true');
+        element.removeAttribute('href');
+        element.setAttribute('aria-disabled', 'true');
       }
     }
-    ROOT.dataset.releaseState = available ? 'public-beta-available' : 'metadata-unavailable';
+    ROOT.dataset.releaseState = available ? 'full-release-available' : 'metadata-unavailable';
   }
 
   async function loadRelease() {
@@ -172,7 +156,7 @@
       if (!response.ok) throw new Error(String(response.status));
       renderRelease(await response.json());
     } catch (_) {
-      renderRelease({ ok: false, version: null, channels: { windows: { available: false } } });
+      renderRelease({ ok: false, channels: { multiplatform: { available: false } } });
     }
   }
 
@@ -181,10 +165,10 @@
     const value = document.getElementById('release-sha256');
     if (!button || !value) return;
     button.addEventListener('click', async () => {
-      const text = value.textContent.trim();
-      if (!/^sha256:[a-f0-9]{64}$/i.test(text)) return;
+      const checksum = value.textContent.trim();
+      if (!/^sha256:[a-f0-9]{64}$/i.test(checksum)) return;
       try {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(checksum);
         button.textContent = copy('Másolva', 'Copied');
       } catch (_) {
         button.textContent = copy('Másolás sikertelen', 'Copy failed');
