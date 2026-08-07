@@ -70,7 +70,7 @@
   function ensureFullReleaseGuard() {
     if (document.querySelector('script[data-fx-full-release-guard]')) return;
     const script = document.createElement('script');
-    script.src = '/scifi-ui/scripts/formatx-full-release-guard.js?v=20260807-full-release-1';
+    script.src = '/scifi-ui/scripts/formatx-full-release-guard.js?v=20260807-full-release-guard-v2';
     script.defer = true;
     script.dataset.fxFullReleaseGuard = 'true';
     document.head.appendChild(script);
