@@ -11,6 +11,7 @@ on:
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-readability.css'
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/test/production-routing.spec.js'
       - '.github/scripts/validate-audio.cjs'
@@ -23,6 +24,7 @@ on:
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'
       - 'docs/scifi-ui/styles/formatx-site-stability.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-readability.css'
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/test/production-routing.spec.js'
       - '.github/scripts/validate-audio.cjs'
@@ -74,7 +76,9 @@ jobs:
           grep -Fq "professionalAudioOwnsButton" docs/scifi-ui/scripts/formatx-nextgen-controls.js
           grep -Fq "root.dataset.fxAudioOwner === 'professional-v6'" docs/scifi-ui/scripts/formatx-nextgen-controls.js
           grep -Fq "top: 90px !important" docs/scifi-ui/styles/formatx-site-stability.css
-          grep -Fq "top: 138px !important" docs/scifi-ui/styles/formatx-site-stability.css
+          grep -Fq "html body .fx-three-sound" docs/scifi-ui/styles/formatx-mobile-readability.css
+          grep -Fq "top: 138px !important" docs/scifi-ui/styles/formatx-mobile-readability.css
+          grep -Fq "right: max(10px, env(safe-area-inset-right)) !important" docs/scifi-ui/styles/formatx-mobile-readability.css
           grep -Fq "autoplay=(self)" billing-worker/src/production-with-license.js
           ! grep -Fq "'autoplay=()'" billing-worker/src/production-with-license.js
 
