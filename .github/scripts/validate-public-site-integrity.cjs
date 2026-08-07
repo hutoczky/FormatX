@@ -98,18 +98,27 @@ for (const file of htmlFiles) {
 }
 
 const homepage = fs.readFileSync(path.join(publicRoot, 'index.html'), 'utf8');
+const productionContent = fs.readFileSync(path.join(repo, 'billing-worker/src/production-content-entry.js'), 'utf8');
 const downloads = fs.readFileSync(path.join(publicRoot, 'downloads/index.html'), 'utf8');
 const portable = fs.readFileSync(path.join(publicRoot, 'assets/images/product-showcase/portable-installer-compatible.svg'), 'utf8');
 const aliases = fs.readFileSync(path.join(repo, 'billing-worker/src/production-feedback-entry.js'), 'utf8');
 const loop = fs.readFileSync(path.join(publicRoot, 'scripts/formatx-infinite-scroll.js'), 'utf8');
+const guard = fs.readFileSync(path.join(publicRoot, 'scripts/formatx-full-release-guard.js'), 'utf8');
 
 if ((homepage.match(/<h1\b/gi) || []).length !== 1) report('homepage: exactly one h1 is required');
-if (!homepage.includes('id="user-feedback"')) report('homepage: user feedback section missing');
+const feedbackAvailable = homepage.includes('id="user-feedback"')
+  || (productionContent.includes('id="user-feedback"') && productionContent.includes('USER_FEEDBACK_SECTION'));
+if (!feedbackAvailable) report('homepage: user feedback section missing from static page and production injection');
 if (!homepage.includes('id="resources"')) report('homepage: release section missing');
 if (/data-release-download="multiplatform"[^>]+href=["']\.\/?["']/i.test(downloads)) report('downloads: primary fallback points to itself');
 if (!downloads.includes('FormatX-Updates/releases/latest')) report('downloads: JavaScript-free latest release fallback missing');
+if (!downloads.includes('Teljes multiplatform verzió letöltése') || !downloads.includes('5 napos próbalicenc')) {
+  report('downloads: full release / five-day trial copy missing');
+}
+if (/\b(?:nyilvános béta|public beta)\b/i.test(downloads)) report('downloads: retired beta wording remains');
 if (/data:image\/webp|<image\b/i.test(portable)) report('portable installer: embedded raster/WebP is forbidden');
 if (!loop.includes("const VERSION = 'seamless-v6'") || !loop.includes('clonedHeroOnly: true')) report('homepage: seamless loop contract missing');
+if (!guard.includes("fxFullRelease = 'full-release'") || !guard.includes("fxTrialDays = '5'")) report('full-release guard contract missing');
 for (const token of [
   "['/downloads/', '/scifi-ui/downloads/']",
   "['/support.html', '/scifi-ui/support.html']",
@@ -125,4 +134,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`PASS: ${htmlFiles.length} public HTML pages, local targets, IDs, images, CSP hooks, downloads, aliases and seamless loop validated.`);
+console.log(`PASS: ${htmlFiles.length} public HTML pages, local targets, IDs, images, CSP hooks, feedback injection, full-release copy, downloads, aliases and seamless loop validated.`);
