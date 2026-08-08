@@ -19,13 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live SEO, hierarchy, proof, accessibility and scroll contract
+      - name: Verify live SEO, hierarchy, proof, native Apex and scroll contract
         shell: bash
         run: |
           set -euo pipefail
           HOME_HTML="$RUNNER_TEMP/formatx-home.html"
           AWARD_CSS="$RUNNER_TEMP/formatx-award-readiness.css"
           SEO_JS="$RUNNER_TEMP/formatx-seo.js"
+          PARITY_JS="$RUNNER_TEMP/igloo-parity.js"
+          APEX_JS="$RUNNER_TEMP/formatx-apex-native.js"
+          FALLBACK_JS="$RUNNER_TEMP/formatx-three-host-safe.js"
 
           for attempt in $(seq 1 18); do
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
@@ -45,7 +48,7 @@ jobs:
               fi
             fi
             if [ "$attempt" -eq 18 ]; then
-              echo 'Live homepage did not expose the complete award-readiness v2 + seamless-scroll contract.' >&2
+              echo 'Live homepage did not expose the complete award-tier + seamless-scroll contract.' >&2
               sed -n '1,200p' "$HOME_HTML" 2>/dev/null || true
               exit 1
             fi
@@ -70,6 +73,56 @@ jobs:
           grep -Fq 'canonicalizeSoftwareSchema' "$SEO_JS"
           grep -Fq "fxCanonicalSoftwareSchema='jsonld-only'" "$SEO_JS"
 
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
+            'https://www.formatxsuite.com/scifi-ui/scripts/igloo-parity.js?v=native-apex-live' \
+            -o "$PARITY_JS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
+            'https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?v=native-apex-live' \
+            -o "$APEX_JS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
+            'https://www.formatxsuite.com/scifi-ui/scripts/formatx-three-host-safe.js?v=native-apex-live' \
+            -o "$FALLBACK_JS"
+
+          grep -Fq 'safe-ready-v28' "$PARITY_JS"
+          grep -Fq 'formatx-apex-native.js?v=20260808-native-apex-1' "$PARITY_JS"
+          grep -Fq 'formatx-three-host-safe.js?v=20260808-native-apex-fallback-1' "$PARITY_JS"
+          grep -Fq 'prefers-reduced-motion: reduce' "$PARITY_JS"
+          python3 - "$PARITY_JS" "$APEX_JS" "$FALLBACK_JS" <<'PY'
+          import pathlib
+          import sys
+
+          parity = pathlib.Path(sys.argv[1]).read_text()
+          apex = pathlib.Path(sys.argv[2]).read_text()
+          fallback = pathlib.Path(sys.argv[3]).read_text()
+
+          assert parity.index('formatx-apex-native.js') < parity.index('formatx-three-host-safe.js')
+          for token in [
+              "getContext('webgl2'",
+              '#define MAX_STEPS',
+              'float fbm(',
+              'vec2 core(',
+              'vec2 nerves(',
+              'vec2 organs(',
+              'vec2 commerce(',
+              'vec2 skeleton(',
+              'vec2 beacon(',
+              'createFooterField',
+              'createSoundscape',
+              "fxScrollOwnership='seamless-v7'",
+              "fxSectionSnap='disabled'",
+              "fxInputInterception='none'",
+          ]:
+              assert token in apex, token
+          assert 'scrollTo(' not in apex
+          assert "addEventListener('wheel'" not in apex
+          assert "addEventListener('touchmove'" not in apex
+          assert "addEventListener('touchstart'" not in apex
+          assert 'http://' not in apex and 'https://' not in apex
+          assert "root.dataset.fxNativeApex === 'ready'" in fallback
+          assert "root.dataset.fxThreeHost = 'native-apex'" in fallback
+          assert 'fxThreeFallback' in fallback
+          PY
+
           ! grep -Fqi 'Multiplatform nyilvános béta' "$HOME_HTML"
           ! grep -Fqi 'multiplatform public beta' "$HOME_HTML"
 
@@ -85,10 +138,10 @@ jobs:
           set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live award-tier v2 SEO, hierarchy, a11y and scroll contract verified'
+            description='Live award-tier + native Apex Igloo-floor + seamless-v7 verified'
           else
             state='failure'
-            description='Live award-readiness v2 contract verification failed'
+            description='Live award-tier / native Apex contract verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
