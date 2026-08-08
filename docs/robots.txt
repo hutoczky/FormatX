@@ -1,4 +1,4 @@
-# FormatX production surface audited 2026-08-08
+# FormatX production surface audited 2026-08-08; native no-jump smoke aligned
 User-agent: *
 Allow: /
 Disallow: /api/
