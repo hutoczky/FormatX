@@ -51,8 +51,14 @@ jobs:
             -D "$HEADERS" -o "$MOBILE_CSS"
 
           grep -Fq 'translate3d(0, -5.5svh, 0) scale(1.34)' "$MOBILE_CSS"
-          grep -Fq 'brightness(1.24)' "$MOBILE_CSS"
-          grep -Fq 'data-fx-native-apex="ready"' "$MOBILE_CSS"
+          grep -Fq 'brightness(1.32)' "$MOBILE_CSS"
+          grep -Fq 'html[data-fx-native-apex="ready"] #hero .hero-space::before' "$MOBILE_CSS"
+          grep -Fq 'html[data-fx-native-apex="ready"] #hero .hero-space::after' "$MOBILE_CSS"
+          grep -Fq 'html[data-fx-native-apex="ready"] .fx-resilient-core' "$MOBILE_CSS"
+          grep -Fq 'html[data-fx-native-apex="ready"] #fx-apex-canvas' "$MOBILE_CSS"
+          grep -Fq 'html[data-fx-native-apex="ready"] .fx-three-stage-shell' "$MOBILE_CSS"
+          grep -Fq '.fx-transcend-hud[data-fx-native-apex="true"]' "$MOBILE_CSS"
+          grep -Fq 'display: none !important' "$MOBILE_CSS"
           grep -Fq 'prefers-reduced-motion: reduce' "$MOBILE_CSS"
           grep -Eiq '^cache-control:.*no-store' "$HEADERS"
 
@@ -68,10 +74,10 @@ jobs:
           set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live mobile Apex CSS bootstrap, rules and no-store delivery verified'
+            description='Live mobile Apex is authoritative; legacy core layers are retired'
           else
             state='failure'
-            description='Live mobile Apex composition delivery verification failed'
+            description='Live mobile Apex single-renderer verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
