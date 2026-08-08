@@ -1,4 +1,5 @@
 /* FormatX native continuous scroll policy.
+   Production revision: 2026-08-08 wheel-v1.
    This stylesheet is intentionally small and loaded before optional/immersive
    modules. It prevents any legacy chapter or scene stylesheet from turning
    ordinary wheel/touch scrolling into section snapping. */
