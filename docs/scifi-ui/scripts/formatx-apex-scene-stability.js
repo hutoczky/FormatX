@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const root=document.documentElement;
-  if(root.dataset.fxApexSceneStability==='ready-v17')return;
+  if(root.dataset.fxApexSceneStability==='ready-v18')return;
 
   function ensureMobileCompositionStyle(){
     if(document.querySelector('link[data-fx-mobile-apex-composition]'))return;
@@ -16,16 +16,16 @@
     if(!document.querySelector('link[data-fx-core-mesh3d-style]')){
       const link=document.createElement('link');
       link.rel='stylesheet';
-      link.href='./styles/formatx-core-mesh3d.css?v=20260808-true-mesh3d-v8';
+      link.href='./styles/formatx-core-mesh3d.css?v=20260809-true-mesh3d-v10';
       link.dataset.fxCoreMesh3dStyle='true';
       document.head.appendChild(link);
     }
     if(document.querySelector('script[data-fx-core-mesh3d-runtime]'))return;
     const script=document.createElement('script');
-    script.src='./scripts/formatx-core-mesh3d-v8.js?v=20260808-true-mesh3d-v8';
+    script.src='./scripts/formatx-core-mesh3d-v10.js?v=20260809-true-mesh3d-v10';
     script.async=false;
     script.dataset.fxCoreMesh3dRuntime='true';
-    script.addEventListener('load',()=>{root.dataset.fxCoreMesh3dLoad='ready-v8';},{once:true});
+    script.addEventListener('load',()=>{root.dataset.fxCoreMesh3dLoad='ready-v10';},{once:true});
     script.addEventListener('error',()=>{root.dataset.fxCoreMesh3dLoad='failed';},{once:true});
     document.head.appendChild(script);
   }
@@ -33,10 +33,10 @@
   function ensureFractureNetwork(){
     if(document.querySelector('script[data-fx-core-fracture3d-runtime]'))return;
     const script=document.createElement('script');
-    script.src='./scripts/formatx-core-fracture3d-v9.js?v=20260808-fracture3d-v9';
+    script.src='./scripts/formatx-core-fracture3d-v10.js?v=20260809-fracture3d-v10';
     script.async=false;
     script.dataset.fxCoreFracture3dRuntime='true';
-    script.addEventListener('load',()=>{root.dataset.fxCoreFracture3dLoad='ready-v9';},{once:true});
+    script.addEventListener('load',()=>{root.dataset.fxCoreFracture3dLoad='ready-v10';},{once:true});
     script.addEventListener('error',()=>{root.dataset.fxCoreFracture3dLoad='failed';},{once:true});
     document.head.appendChild(script);
   }
@@ -65,19 +65,19 @@
     );
     next=next.replace(
       "float angle=mix(-.035+sin(uTime*.11)*.022,travelAngle,1.-coreWeight);",
-      "float angle=mix(.012+sin(uTime*.11)*.012,travelAngle,1.-coreWeight);"
+      "float angle=mix(.010+sin(uTime*.11)*.010,travelAngle,1.-coreWeight);"
     );
     next=next.replace(
       "float radius=mix(6.02,travelRadius,1.-coreWeight);",
-      "float radius=mix(5.90,travelRadius,1.-coreWeight);"
+      "float radius=mix(5.94,travelRadius,1.-coreWeight);"
     );
     next=next.replace(
       "float focal=mix(1.92,1.72,1.-coreWeight);",
-      "float focal=mix(2.00,1.72,1.-coreWeight);"
+      "float focal=mix(2.02,1.72,1.-coreWeight);"
     );
     next=next.replace(
       "float halo=exp(-3.2*coreDistance)*coreWeight;\n        float cross=(exp(-abs(uv.x)*105.)+exp(-abs(uv.y)*82.))*exp(-coreDistance*2.45)*coreWeight;\n        float auraRings=(exp(-abs(coreDistance-.125)*72.)+exp(-abs(coreDistance-.205)*58.)*.7+exp(-abs(coreDistance-.292)*48.)*.42)*coreWeight;\n        c+=halo*vec3(.038,.24,.38);\n        c+=cross*vec3(.12,.58,.88)*.31;\n        c+=auraRings*mix(vec3(.04,.38,.64),vec3(.36,.10,.72),sat(uScroll*.5))*.18;",
-      "float meshBeat=.5+.5*sin(uTime*1.55);\n        float halo=exp(-3.55*coreDistance)*coreWeight;\n        float cross=(exp(-abs(uv.x)*160.)+exp(-abs(uv.y)*136.))*exp(-coreDistance*3.10)*coreWeight;\n        float waterMask=smoothstep(.42,.98,-uv.y)*coreWeight;\n        float waterRipple=.5+.5*sin(uv.y*164.+sin(uv.x*13.)*1.6+uTime*.25);\n        c+=halo*vec3(.010,.090,.165)*(.88+.12*meshBeat);\n        c+=cross*vec3(.10,.50,.78)*.085;\n        c+=waterMask*vec3(.004,.045,.080)*(.045+.055*waterRipple);"
+      "float meshBeat=.5+.5*sin(uTime*1.55);\n        float halo=exp(-3.85*coreDistance)*coreWeight;\n        float cross=(exp(-abs(uv.x)*176.)+exp(-abs(uv.y)*148.))*exp(-coreDistance*3.35)*coreWeight;\n        float waterMask=smoothstep(.46,.99,-uv.y)*coreWeight;\n        float waterRipple=.5+.5*sin(uv.y*168.+sin(uv.x*13.)*1.5+uTime*.24);\n        c+=halo*vec3(.008,.070,.135)*(.88+.12*meshBeat);\n        c+=cross*vec3(.08,.40,.66)*.060;\n        c+=waterMask*vec3(.003,.038,.070)*(.040+.050*waterRipple);"
     );
     return next;
   }
@@ -87,13 +87,13 @@
       const patched=meshBackgroundShader(source);
       const complete=[
         'if(uScene<.92)return vec2(10.,1.)',
-        'float halo=exp(-3.55*coreDistance)*coreWeight',
-        'float cross=(exp(-abs(uv.x)*160.)',
-        'float angle=mix(.012+sin(uTime*.11)*.012'
+        'float halo=exp(-3.85*coreDistance)*coreWeight',
+        'float cross=(exp(-abs(uv.x)*176.)',
+        'float angle=mix(.010+sin(uTime*.11)*.010'
       ].every(marker=>patched.includes(marker));
       if(patched!==source&&complete){
         shaderPatched=true;
-        root.dataset.fxApexReferenceShader='mesh-background-no-2d-reactor-v18';
+        root.dataset.fxApexReferenceShader='mesh-background-reference-v19';
         root.dataset.fxSdfCore='disabled-before-scene-0.92';
         root.dataset.fxScreenSpaceReactor='retired-for-real-3d-reactor';
         source=patched;
@@ -140,20 +140,20 @@
   addEventListener('formatx:loop',()=>{smoothedScene=null;});
   addEventListener('formatx:nativeapexready',ensureTrueMeshAssets,{once:true});
   addEventListener('formatx:coremesh3dready',event=>{
-    if(event.detail?.version==='v8')ensureFractureNetwork();
-    root.dataset.fxNativeApexVisual=event.detail?.version==='v8'
-      ?'reference-two-sided-fractured-true-mesh3d-v18'
-      :'reference-additive-layered-true-mesh3d-v16';
+    if(event.detail?.version==='v10')ensureFractureNetwork();
+    root.dataset.fxNativeApexVisual=event.detail?.version==='v10'
+      ?'reference-narrow-fractured-true-mesh3d-v19'
+      :'reference-two-sided-fractured-true-mesh3d-v18';
     root.dataset.fxNativeApexRenderer='webgl2-indexed-mesh-plus-indexed-fracture-lines';
     root.dataset.fxCoreMobileComposition=root.dataset.fxNativeApexVisual;
   });
 
   if(root.dataset.fxNativeApex==='ready')ensureTrueMeshAssets();
-  if(root.dataset.fxCoreMesh3d==='ready-v8')ensureFractureNetwork();
+  if(root.dataset.fxCoreMesh3d==='ready-v10')ensureFractureNetwork();
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refreshSections,{once:true});
   else refreshSections();
 
-  root.dataset.fxApexSceneStability='ready-v17';
+  root.dataset.fxApexSceneStability='ready-v18';
   root.dataset.fxCoreHold='stable-before-morph';
-  root.dataset.fxCoreMobileComposition='true-mesh3d-v8-plus-fracture-v9-pending';
+  root.dataset.fxCoreMobileComposition='true-mesh3d-v10-plus-fracture-v10-pending';
 }());
