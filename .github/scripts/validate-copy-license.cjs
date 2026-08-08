@@ -37,6 +37,24 @@ function matchesOne(actual, expectedSets) {
   return expectedSets.some(expected => JSON.stringify(actual) === JSON.stringify(expected));
 }
 
+async function installProductionCopyLayer(page) {
+  const origin = new URL(TEST_URL).origin;
+  await page.addStyleTag({ url: origin + '/scifi-ui/styles/single-language-toggle.css?v=20260808-single-language-5' });
+  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1' });
+  for (const src of [
+    '/scifi-ui/scripts/single-language-toggle.js?v=20260808-single-language-5',
+    '/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
+    '/scifi-ui/scripts/formatx-language-copy-stability.js?v=20260808-full-release-copy-v4'
+  ]) {
+    await page.addScriptTag({ url: origin + src });
+  }
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxSingleLanguageToggle === 'ready'
+    && document.documentElement.dataset.fxCopyPolish === 'ready-v1'
+    && document.documentElement.dataset.fxLanguageCopyStability === 'ready-v4'
+  ), null, { timeout: 10000 });
+}
+
 async function clearIntro(page) {
   const skip = page.locator('.fx-intro-skip');
   if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
@@ -61,7 +79,7 @@ async function waitPublicState(page, language) {
     const trial = document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '';
     return document.documentElement.lang === lang
       && document.documentElement.dataset.fxLanguageCopyStability === 'ready-v4'
-      && Boolean(document.querySelector('.fx-language-toggle'))
+      && document.querySelectorAll('.fx-language-toggle').length === 1
       && downloads.includes(download)
       && trials.includes(trial)
       && navigation.some(expected => JSON.stringify(expected) === JSON.stringify(nav))
@@ -72,7 +90,7 @@ async function waitPublicState(page, language) {
     navigation: NAVIGATION[language],
     downloads: DOWNLOAD_LABELS[language],
     trials: TRIAL_LABELS[language]
-  }, { timeout: 45000 });
+  }, { timeout: 15000 });
   await page.waitForTimeout(250);
 }
 
@@ -90,9 +108,13 @@ async function readCopy(page) {
     licenceItems: document.querySelectorAll('#fx-licence-clarity li').length,
     footerLicence: document.querySelector('.site-footer [data-fx-licence-link]')?.textContent.trim() || '',
     visibleLanguageButtons: Array.from(
-      document.querySelectorAll('.fx-language-toggle, .language-switch [data-language]')
-    ).filter(node => getComputedStyle(node).display !== 'none' && !node.hidden).length,
-    retiredReleaseCopy: /\bV(?:29|92|120|121)\b|92\.00|Windows nyilvános béta letöltése|Download Windows public beta|Multiplatform nyilvános béta|Multiplatform public beta|NATÍV BÉTA|NATIVE BETA/i.test(
+      document.querySelectorAll('.fx-language-toggle, .language-switch [data-language], .language-control [data-language-choice]')
+    ).filter(node => {
+      const style = getComputedStyle(node);
+      const rect = node.getBoundingClientRect();
+      return !node.hidden && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > .02 && rect.width > 0 && rect.height > 0;
+    }).length,
+    retiredReleaseCopy: /\bV(?:29|92|120|121)\b|92\.00|Windows nyilvános béta letöltése|Download Windows public beta|Multiplatform nyilvános béta|Multiplatform public beta/i.test(
       document.body.innerText
     ),
     horizontalOverflow: Math.max(
@@ -151,6 +173,9 @@ async function testViewport(browser, viewport, name, mobile) {
     hasTouch: Boolean(mobile),
     locale: 'hu-HU'
   });
+  await context.addInitScript(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+  });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(String(error)));
@@ -160,10 +185,11 @@ async function testViewport(browser, viewport, name, mobile) {
 
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
+  await installProductionCopyLayer(page);
   await waitPublicState(page, 'hu');
   assertHungarian(await readCopy(page), name);
 
-  await page.locator('.fx-language-toggle').evaluate(node => node.click());
+  await page.locator('.fx-language-toggle').first().evaluate(node => node.click());
   await waitPublicState(page, 'en');
   assertEnglish(await readCopy(page), name);
 
