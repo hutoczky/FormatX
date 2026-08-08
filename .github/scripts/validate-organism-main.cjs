@@ -54,8 +54,9 @@ async function enterSite(page, label) {
     }
     document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
   });
-  await page.locator('.fx-immersive-launch').waitFor({ state: 'attached', timeout: 10000 });
-  await page.locator('.fx-immersive-launch').evaluate(node => node.click());
+  const launch = page.locator('#main-content > #hero .fx-immersive-launch').first();
+  await launch.waitFor({ state: 'attached', timeout: 10000 });
+  await launch.evaluate(node => node.click());
   await page.waitForFunction(() => document.documentElement.dataset.fxImmersive === 'active', null, { timeout: 10000 });
   mark(label + ': immersive-activated');
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 45000 });
