@@ -2,7 +2,24 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxApexSceneStability === 'ready-v1') return;
+  if (root.dataset.fxApexSceneStability === 'ready-v2') return;
+
+  function ensureMobileCompositionStyle() {
+    if (document.querySelector('link[data-fx-mobile-apex-composition]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/formatx-mobile-apex-composition.css?v=20260808-core-mobile-1';
+    link.dataset.fxMobileApexComposition = 'true';
+    link.addEventListener('load', () => {
+      root.dataset.fxMobileApexComposition = 'ready-v1';
+    }, { once: true });
+    link.addEventListener('error', () => {
+      root.dataset.fxMobileApexComposition = 'failed';
+    }, { once: true });
+    document.head.appendChild(link);
+  }
+
+  ensureMobileCompositionStyle();
 
   const Context = window.WebGL2RenderingContext;
   if (!Context || !Context.prototype) {
@@ -84,6 +101,7 @@
     refreshSections();
   }
 
-  root.dataset.fxApexSceneStability = 'ready-v1';
+  root.dataset.fxApexSceneStability = 'ready-v2';
   root.dataset.fxCoreHold = 'stable-before-morph';
+  root.dataset.fxCoreMobileComposition = 'zoomed-readable-v1';
 }());
