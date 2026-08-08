@@ -39,10 +39,13 @@
     "native_scroll_regression_fix": "2026-08-08",
     "seamless_scroll_regression_fix": "2026-08-08",
     "production_scroll_revision": "seamless-v7-critical-bootstrap-1",
+    "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
+    "core_scene_scroll_ownership": "seamless-v7-only",
+    "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
     "language_switch_preserves_scene_hash": true
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-native-apex-igloo-floor-production1",
+    "award_readiness_revision": "2026-08-08-native-apex-core-mobile-dialogue-production2",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -81,6 +84,8 @@
     "enhanced_key_touch_targets_css_px": 44,
     "high_visibility_keyboard_focus": true,
     "reduced_motion_treatment": true,
+    "mobile_visual_viewport_dialogue_guard": true,
+    "mobile_virtual_keyboard_overlap_guard": true,
     "lighthouse_desktop_runs": 3,
     "lighthouse_mobile_runs": 3,
     "lighthouse_thresholds": {
