@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxTranscendLoader === 'safe-ready-v27') return;
-  root.dataset.fxTranscendLoader = 'safe-loading-v27';
+  if (root.dataset.fxTranscendLoader === 'safe-ready-v28') return;
+  root.dataset.fxTranscendLoader = 'safe-loading-v28';
 
   let genomeWebglRequested = false;
 
@@ -201,7 +201,7 @@
   ensurePremiumFinishStyle();
   root.dataset.fxLocalQr = 'ready-v2';
   root.dataset.fxLegacyRenderer = 'retired';
-  root.dataset.fxRenderer = 'three-host-safe';
+  root.dataset.fxRenderer = 'native-apex-preferred';
   refreshQrImages();
 
   document.addEventListener('click', event => {
@@ -232,7 +232,8 @@
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
     './scripts/formatx-mobile-unified.js?v=20260731-mobile-unified-2',
     './scripts/formatx-infinite-scroll.js?v=20260808-seamless-v7',
-    './scripts/formatx-three-host-safe.js?v=20260805-immersive-host-2',
+    './scripts/formatx-apex-native.js?v=20260808-native-apex-1',
+    './scripts/formatx-three-host-safe.js?v=20260808-native-apex-fallback-1',
     './scripts/formatx-render-visibility.js?v=20260805-immersive-visibility-3',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/interaction-genome.js?v=20260728-genome-3d-1',
@@ -244,13 +245,21 @@
   function load(index) {
     if (index >= queue.length) {
       root.dataset.fxTranscendProgress = '100';
-      root.dataset.fxTranscendLoader = 'safe-ready-v27';
+      root.dataset.fxTranscendLoader = 'safe-ready-v28';
+      return;
+    }
+
+    const source = queue[index];
+    if (source.includes('formatx-apex-native.js') && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.dataset.fxNativeApex = 'reduced-motion-fallback';
+      root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
+      load(index + 1);
       return;
     }
 
     root.dataset.fxTranscendProgress = String(Math.round(index / queue.length * 100));
     const script = document.createElement('script');
-    script.src = queue[index];
+    script.src = source;
     script.async = false;
     script.dataset.fxTranscendModule = String(index);
 
@@ -261,8 +270,8 @@
       settled = true;
       clearTimeout(timeout);
       if (!ok) {
-        console.warn('FormatX optional module did not complete:', queue[index], reason);
-        root.dataset.fxTranscendLoader = 'safe-degraded-v27';
+        console.warn('FormatX optional module did not complete:', source, reason);
+        root.dataset.fxTranscendLoader = 'safe-degraded-v28';
       }
       root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
       load(index + 1);
