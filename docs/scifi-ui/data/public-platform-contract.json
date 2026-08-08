@@ -42,7 +42,14 @@
     "language_switch_preserves_scene_hash": true
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-proof-seo-a11y-production2",
+    "award_readiness_revision": "2026-08-08-award-tier-v2",
+    "market_ambition": {
+      "hungary": "top-1-target-not-claimed-without-external-ranking",
+      "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
+    },
+    "first_response_product_positioning": true,
+    "hero_factual_trustline": true,
+    "canonical_software_schema": "jsonld-only-after-render",
     "server_rendered_software_application_schema": true,
     "software_application_offer_price_present": true,
     "public_proof_layer": true,
@@ -53,6 +60,9 @@
       "/scifi-ui/downloads/"
     ],
     "proof_delivery": "first-party-only",
+    "editorial_typography_polish": true,
+    "progressive_scroll_driven_motion": true,
+    "fine_pointer_motion_only": true,
     "wcag_target": "2.2-AA-plus",
     "enhanced_key_touch_targets_css_px": 44,
     "high_visibility_keyboard_focus": true,
