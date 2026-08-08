@@ -80,27 +80,39 @@ async function snapshot(page) {
 }
 
 async function verifyProgressiveScroll(page, name) {
-  const positions = await page.evaluate(async () => {
+  const result = await page.evaluate(async () => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    if (!bridge) return [];
-    const start = Math.round(bridge.offsetTop * .12);
-    const end = Math.max(start + 80, Math.round(bridge.offsetTop * .82));
-    const values = [];
+    const clone = bridge?.querySelector('.fx-loop-hero-clone');
+    if (!bridge || !clone) return { positions: [], start: 0, end: 0, threshold: 0 };
+
+    const bridgeTop = bridge.offsetTop;
+    const visualHeight = Math.max(1, clone.offsetHeight);
+    const thresholdDepth = Math.max(48, Math.min(innerHeight * .28, 300));
+    const threshold = bridgeTop + Math.min(thresholdDepth, Math.max(0, visualHeight - 2));
+    const maximum = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    const safety = Math.max(64, Math.min(innerHeight * .08, 240));
+    const end = Math.max(0, Math.min(maximum, bridgeTop - safety, threshold - safety));
+    const span = Math.max(360, Math.min(innerHeight * .9, 1800));
+    const start = Math.max(0, end - span);
+    const positions = [];
+
     scrollTo(0, start);
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     for (let index = 1; index <= 18; index += 1) {
       const target = Math.round(start + (end - start) * index / 18);
       scrollTo(0, target);
       await new Promise(resolve => setTimeout(resolve, 32));
-      values.push(scrollY);
+      positions.push(scrollY);
     }
-    return values;
+    return { positions, start, end, threshold };
   });
 
-  assert(positions.length === 18, name + ': progressive scroll did not collect enough positions');
-  for (let index = 1; index < positions.length; index += 1) {
-    assert(positions[index] + 8 >= positions[index - 1],
-      name + ': ordinary scrolling moved backwards before the loop seam: ' + JSON.stringify(positions));
+  assert(result.positions.length === 18, name + ': progressive scroll did not collect enough positions');
+  assert(result.end < result.threshold,
+    name + ': normal-scroll probe crossed the loop seam: ' + JSON.stringify(result));
+  for (let index = 1; index < result.positions.length; index += 1) {
+    assert(result.positions[index] + 8 >= result.positions[index - 1],
+      name + ': ordinary scrolling moved backwards before the loop seam: ' + JSON.stringify(result));
   }
 }
 
@@ -193,6 +205,7 @@ async function verifyViewport(browser, viewport, name, mobile, cycles = 1) {
     && initial.runtime?.ratioMatchedLanding === true
     && initial.runtime?.frameStableLanding === true
     && initial.runtime?.reachableSeam === true
+    && initial.runtime?.guardRetry === true
     && initial.runtime?.inputInterception === false
     && initial.runtime?.jumpFree === true,
     name + ': seamless runtime contract missing: ' + JSON.stringify(initial));
