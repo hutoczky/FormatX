@@ -58,9 +58,12 @@ html.fx-seamless-loop-transfer body {
 }
 
 .fx-loop-bridge {
+  --fx-loop-runway: max(320px, 24svh);
   position: relative;
   z-index: var(--fx-layer-content, 220);
-  min-height: 100svh;
+  min-height: calc(100svh + var(--fx-loop-runway));
+  padding-bottom: var(--fx-loop-runway);
+  box-sizing: border-box;
   overflow: clip;
   background: #02070d;
   contain: layout paint style;
