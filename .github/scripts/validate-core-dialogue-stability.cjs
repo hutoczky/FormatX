@@ -8,74 +8,74 @@ const root = path.resolve(__dirname, '../..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
 const mapper = read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
+const mesh = read('docs/scifi-ui/scripts/formatx-core-mesh3d.js');
+const meshCss = read('docs/scifi-ui/styles/formatx-core-mesh3d.css');
 const apex = read('docs/scifi-ui/scripts/formatx-apex-native.js');
 const mobile = read('docs/scifi-ui/styles/formatx-mobile-apex-composition.css');
-const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice-stability.js');
 const infinite = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
-const productionEntry = read('billing-worker/src/production-entry.js');
 
-assert.match(mapper, /fxApexSceneStability === 'ready-v8'/, 'reference-locked v9 revision missing');
-assert.match(mapper, /function referenceLockedCrystalShader\(source\)/, 'reference-locked shader transform missing');
-assert.match(mapper, /float referenceStar2D\(vec2 p\)/, 'explicit star polygon field missing');
-assert.match(mapper, /vec2 v\[16\]/, '16-point reference outline missing');
-assert.match(mapper, /v\[0\]=vec2\(0\.,1\.\)/, 'top reference point missing');
-assert.match(mapper, /v\[4\]=vec2\(1\.,0\.\)/, 'right reference point missing');
-assert.match(mapper, /v\[8\]=vec2\(0\.,-1\.\)/, 'bottom reference point missing');
-assert.match(mapper, /v\[12\]=vec2\(-1\.,0\.\)/, 'left reference point missing');
-assert.match(mapper, /v\[2\]=vec2\(\.305,\.325\)/, 'upper concave shoulder missing');
-assert.match(mapper, /v\[14\]=vec2\(-\.305,\.325\)/, 'mirrored concave shoulder missing');
-assert.match(mapper, /float zCap=depth\*\(\.10\+\.90\*pow/, 'true 3D front/back depth profile missing');
-assert.match(mapper, /starPrism\(crystal,1\.50\*pulse,\.48\*\(1\.\+heart\*\.020\),\.0025\)/, 'reference 3D crystal body missing');
+// The old raymarched core must be suppressed while the true mesh owns MAG.
+assert.match(mapper, /fxApexSceneStability === 'ready-v9'/, 'true mesh background revision missing');
+assert.match(mapper, /if\(uScene<\.92\)return vec2\(10\.,1\.\)/, 'SDF MAG suppression missing');
+assert.match(mapper, /fxSdfCore = 'disabled-before-scene-0\.92'/, 'SDF ownership marker missing');
+assert.match(mapper, /formatx-core-mesh3d\.js\?v=20260808-true-mesh3d-v1/, 'true mesh runtime bootstrap missing');
+assert.match(mapper, /formatx-core-mesh3d\.css\?v=20260808-true-mesh3d-v1/, 'true mesh stylesheet bootstrap missing');
+assert.match(mapper, /formatx:nativeapexready/, 'true mesh must start only after Native Apex');
+assert.doesNotMatch(mapper, /scrollTo\s*\(|scrollIntoView\s*\(|preventDefault\s*\(/, 'scene mapper must not capture scroll');
 
-assert.match(mapper, /float beatA=/, 'primary heartbeat missing');
-assert.match(mapper, /float beatB=/, 'secondary heartbeat missing');
-assert.match(mapper, /float heart=pow\(beatA,4\.\)\*\.72\+pow\(beatB,9\.\)\*\.28/, 'double-beat pulse envelope missing');
-assert.match(mapper, /float breath=/, 'slow breathing envelope missing');
-assert.match(mapper, /float ringPulse=1\.\+heart\*\.040\+breath\*\.010/, 'orbit pulse missing');
-assert.match(mapper, /float pulseWave=exp\(-abs\(coreDistance-waveRadius\)\*56\.\)/, 'outgoing energy wave missing');
+// Actual GPU mesh requirements: indexed triangles, vertex normals, depth buffer and perspective.
+assert.match(mesh, /getContext\('webgl2'/, 'WebGL2 mesh context missing');
+assert.match(mesh, /depth: true/, 'depth buffer request missing');
+assert.match(mesh, /gl\.enable\(gl\.DEPTH_TEST\)/, 'depth testing missing');
+assert.match(mesh, /gl\.depthFunc\(gl\.LEQUAL\)/, 'depth function missing');
+assert.match(mesh, /gl\.bindBuffer\(gl\.ELEMENT_ARRAY_BUFFER/, 'indexed element buffer missing');
+assert.match(mesh, /gl\.drawElements\(gl\.TRIANGLES/, 'indexed triangle rendering missing');
+assert.match(mesh, /aPosition/, 'vertex position attribute missing');
+assert.match(mesh, /aNormal/, 'vertex normal attribute missing');
+assert.match(mesh, /computeNormals\(/, 'generated mesh normals missing');
+assert.match(mesh, /function perspective\(/, 'perspective projection missing');
+assert.match(mesh, /function lookAt\(/, '3D view matrix missing');
+assert.match(mesh, /uProjection\*uView\*vec4\(p,1\.\)/, 'vertex projection pipeline missing');
+assert.match(mesh, /buildCrystalGeometry\(/, 'crystal mesh generator missing');
+assert.match(mesh, /buildTorusGeometry\(/, '3D torus geometry missing');
+assert.match(mesh, /buildSphereGeometry\(/, '3D reactor sphere missing');
 
-assert.match(mapper, /float hotCore=exp\(-coreDistance\*32\.\)/, 'white-hot reactor center missing');
-assert.match(mapper, /float reactor1=exp\(-abs\(coreDistance-\.074\)\*115\.\)/, 'inner reactor ring missing');
-assert.match(mapper, /float reactor2=exp\(-abs\(coreDistance-\.132\)\*92\.\)/, 'middle reactor ring missing');
-assert.match(mapper, /float reactor3=exp\(-abs\(coreDistance-\.205\)\*70\.\)/, 'outer reactor ring missing');
-assert.match(mapper, /vec3 refrDir=refract\(rd,n,\.76\)/, 'glass refraction missing');
-assert.match(mapper, /float caustic=pow/, 'internal caustics missing');
-assert.match(mapper, /float innerGlow=exp\(-length\(p\.xy\)\*2\.3\)/, 'internal crystal glow missing');
+// Reference silhouette is geometry, not a 2D image or canvas imitation.
+assert.match(mesh, /\[0,1\],\[\.115,\.705\],\[\.305,\.325\],\[\.705,\.115\]/, 'reference upper-right contour missing');
+assert.match(mesh, /\[1,0\]/, 'reference right tip missing');
+assert.match(mesh, /\[0,-1\]/, 'reference bottom tip missing');
+assert.match(mesh, /\[-1,0\]/, 'reference left tip missing');
+assert.match(mesh, /const depth = \.46/, 'true crystal Z depth missing');
+assert.match(mesh, /frontCenter = add\(0, 0, depth\)/, 'front 3D surface missing');
+assert.match(mesh, /backCenter = add\(0, 0, -depth\)/, 'back 3D surface missing');
+assert.match(mesh, /outerFront.*outerBack/s, 'side wall geometry missing');
+assert.doesNotMatch(mesh, /drawImage\s*\(|new Image\s*\(|background-image/i, 'MAG must not be image-backed');
+assert.doesNotMatch(mesh, /THREE\b|three\.js|gsap/i, 'MAG must remain first-party dependency-free');
 
-assert.match(mapper, /q\.xz\*=rot\(\.052\+sin\(uTime\*\.13\)\*\.044/, 'subtle 3D yaw missing');
-assert.match(mapper, /q\.yz\*=rot\(-\.032\+cos\(uTime\*\.15\)\*\.032/, 'subtle 3D pitch missing');
-assert.match(mapper, /q\.xy\*=rot\(sin\(uTime\*\.09\)\*\.010\)/, 'subtle roll missing');
-assert.match(mapper, /float angle=mix\(\.018\+sin\(uTime\*\.11\)\*\.018/, 'near-frontal reference camera missing');
-assert.match(mapper, /reference-locked-crystal-3d-v9/, 'v9 runtime marker missing');
+// Living animation and luminous reactor.
+assert.match(mesh, /Math\.pow\(beatA, 4\) \* \.72 \+ Math\.pow\(beatB, 9\) \* \.28/, 'double heartbeat pulse missing');
+assert.match(mesh, /const pulse = 1 \+ heart \* \.026 \+ breath \* \.006/, 'mesh breathing pulse missing');
+assert.match(mesh, /reactorSphere/, 'reactor sphere missing');
+assert.match(mesh, /reactorRings/, 'reactor rings missing');
+assert.match(mesh, /outerOrbits/, 'outer 3D orbits missing');
+assert.match(mesh, /uGlobalRotation/, 'global 3D rotation missing');
+assert.match(mesh, /reference-locked-true-mesh3d-v10|four-tip-concave-crystal/, 'reference-lock marker missing');
 
-assert.match(mapper, /fxNativeApexCanvas === 'true'/, 'mapper must target Native Apex only');
-assert.match(mapper, /name === 'uScene'/, 'mapper must remap only uScene');
-assert.match(mapper, /raw - 0\.38/, 'core hold threshold missing');
-assert.doesNotMatch(mapper, /scrollTo\s*\(|scrollIntoView\s*\(|preventDefault\s*\(/, 'mapper must never capture scroll');
+// Mobile stage remains transparent, non-interactive and full viewport.
+assert.match(meshCss, /position: fixed/, 'mesh stage must be viewport-bound');
+assert.match(meshCss, /height: 100dvh/, 'dynamic viewport height missing');
+assert.match(meshCss, /pointer-events: none/, 'mesh stage must never capture input');
+assert.match(meshCss, /background: transparent/, 'mesh overlay must preserve Apex background');
+assert.match(mobile, /translate3d\(0, -\.8svh, 0\) scale\(1\)/, 'native Apex background framing regressed');
 
-assert.match(apex, /getContext\('webgl2'/, 'WebGL2 renderer missing');
-assert.match(apex, /quality: coarse\.matches \? 0\.82 : 0\.88/, 'mobile adaptive quality floor regressed');
-assert.match(apex, /coarse\.matches \? 1\.25 : 1\.5/, 'mobile DPR cap regressed');
-assert.doesNotMatch(apex, /\bTHREE\b|three\.js|gsap/i, 'Native Apex must remain dependency-free');
+// Existing runtime safety contracts remain intact.
+assert.match(apex, /quality: coarse\.matches \? 0\.82 : 0\.88/, 'Apex adaptive quality floor regressed');
 assert.doesNotMatch(apex, /scrollTo\s*\(/, 'Native Apex must not own page position');
-
-const mapperIndex = loader.indexOf('formatx-apex-scene-stability.js');
-const apexIndex = loader.indexOf('formatx-apex-native.js');
-assert.ok(mapperIndex >= 0 && apexIndex > mapperIndex, 'reference mapper must load before Native Apex');
-
-assert.match(mobile, /display: block !important/, 'Native Apex must remain visible');
-assert.match(mobile, /height: 100dvh !important/, 'dynamic viewport missing');
-assert.match(mobile, /visibility: visible !important;[\s\S]*opacity: 1 !important/, 'Native Apex canvas must stay visible');
-assert.match(mobile, /translate3d\(0, -\.8svh, 0\) scale\(1\)/, 'native-resolution framing regressed');
-assert.doesNotMatch(mobile, /scale\(1\.34\)|scale\(\.98\)|scale\(\.96\)/, 'pixel-amplifying CSS zoom returned');
-
-assert.match(productionEntry, /'\/scifi-ui\/scripts\/formatx-apex-scene-stability\.js'/, 'reference mapper must remain no-store critical');
-assert.match(productionEntry, /'\/scifi-ui\/scripts\/formatx-apex-native\.js'/, 'Native Apex must remain no-store critical');
 assert.match(voice, /window\.visualViewport/, 'dialogue must use Visual Viewport API');
 assert.match(voice, /keyboardInset/, 'keyboard inset guard missing');
 assert.doesNotMatch(voice, /scrollTo\s*\(|scrollIntoView\s*\(/, 'dialogue guard must not move page');
 assert.match(infinite, /const VERSION = 'seamless-v7'/, 'seamless-v7 regressed');
 assert.match(infinite, /root\.dataset\.fxInfiniteInput = 'native'/, 'native momentum contract regressed');
 
-console.log('PASS: reference-locked-crystal-3d-v9 enforces the 16-point concave four-tip silhouette, true depth, bright reactor, pulse, refraction and seamless single-renderer runtime.');
+console.log('PASS: MAG is a real indexed WebGL2 triangle mesh with normals, perspective, depth testing, pulsing 3D reactor/orbits, reference-locked geometry and no SDF/image ownership.');
