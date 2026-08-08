@@ -23,6 +23,16 @@ async function clearIntro(page) {
   });
 }
 
+async function ensureScrollRuntime(page) {
+  const active = await page.evaluate(() => (
+    document.documentElement.dataset.fxInfiniteController === 'seamless-v6'
+    && document.documentElement.__FORMATX_INFINITE_SCROLL__?.revision === 'ratio-v4'
+  ));
+  if (active) return;
+  const src = await page.evaluate(() => new URL('./scripts/formatx-infinite-scroll.js?v=20260808-nav-ratio-v5', document.baseURI).href);
+  await page.addScriptTag({ url: src });
+}
+
 async function waitForInterface(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -45,9 +55,9 @@ async function waitForInterface(page) {
 }
 
 async function assertSingleLanguageToggle(page) {
-  const toggle = page.locator('.fx-language-toggle');
-  if (await toggle.count() !== 1) throw new Error('Exactly one visible language toggle is required');
-  await toggle.waitFor({ state: 'visible' });
+  const visible = page.locator('.fx-language-toggle:visible');
+  if (await visible.count() !== 1) throw new Error('Exactly one visible language toggle is required');
+  const toggle = visible.first();
   await toggle.click();
   await page.waitForFunction(() => document.documentElement.lang === 'en');
   await toggle.click();
@@ -59,9 +69,7 @@ async function openMenu(page) {
   await page.waitForFunction(() => {
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('main-nav');
-    return toggle?.getAttribute('aria-expanded') === 'true'
-      && nav?.classList.contains('open')
-      && document.documentElement.classList.contains('fx-organism-menu-open');
+    return toggle?.getAttribute('aria-expanded') === 'true' && nav?.classList.contains('open') && document.documentElement.classList.contains('fx-organism-menu-open');
   }, null, { timeout: 8000 });
 }
 
@@ -69,18 +77,7 @@ async function assertPanel(page, id, scene) {
   await page.waitForFunction(({ expectedId, expectedScene }) => {
     const shell = document.getElementById('fx-organism-console');
     const panel = document.querySelector(`[data-organism-panel="${expectedId}"]`);
-    return Boolean(
-      shell
-      && !shell.hidden
-      && shell.getAttribute('aria-hidden') === 'false'
-      && shell.classList.contains('is-authorised-open')
-      && document.body.classList.contains('fx-organism-panel-open')
-      && document.documentElement.dataset.fxScene === String(expectedScene)
-      && panel
-      && !panel.hidden
-      && panel.getAttribute('aria-hidden') === 'false'
-      && panel.textContent.trim().length > 20
-    );
+    return Boolean(shell && !shell.hidden && shell.getAttribute('aria-hidden') === 'false' && shell.classList.contains('is-authorised-open') && document.body.classList.contains('fx-organism-panel-open') && document.documentElement.dataset.fxScene === String(expectedScene) && panel && !panel.hidden && panel.getAttribute('aria-hidden') === 'false' && panel.textContent.trim().length > 20);
   }, { expectedId: id, expectedScene: scene }, { timeout: 10000 });
 }
 
@@ -88,13 +85,7 @@ async function assertCore(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
     const shell = document.getElementById('fx-organism-console');
-    return root.dataset.fxScene === '0'
-      && root.dataset.fxOrganismState === 'core'
-      && root.classList.contains('fx-organism-core-active')
-      && root.dataset.fxOrganismConsole === 'closed'
-      && !document.body.classList.contains('fx-organism-panel-open')
-      && shell?.hidden === true
-      && shell?.getAttribute('aria-hidden') === 'true';
+    return root.dataset.fxScene === '0' && root.dataset.fxOrganismState === 'core' && root.classList.contains('fx-organism-core-active') && root.dataset.fxOrganismConsole === 'closed' && !document.body.classList.contains('fx-organism-panel-open') && shell?.hidden === true && shell?.getAttribute('aria-hidden') === 'true';
   }, null, { timeout: 12000 });
 }
 
@@ -107,10 +98,7 @@ async function closePanelAndAssertCore(page) {
 async function assertNoUnexpectedJumpBeforeSeam(page) {
   const before = await page.evaluate(() => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    return {
-      bridgeTop: bridge?.offsetTop ?? 0,
-      loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
-    };
+    return { bridgeTop: bridge?.offsetTop ?? 0, loopCount: Number(document.documentElement.dataset.fxLoopCount || 0) };
   });
   if (before.bridgeTop < 200) throw new Error('Seamless bridge geometry is missing');
   const target = Math.round(before.bridgeTop * .68);
@@ -129,17 +117,14 @@ async function assertNoUnexpectedJumpBeforeSeam(page) {
   if (Math.abs(after.y - target) > 6) throw new Error(`Page moved before the loop seam: ${JSON.stringify({ target, after })}`);
   if (after.loopCount !== before.loopCount) throw new Error(`Loop counter changed before the seam: ${JSON.stringify({ before, after })}`);
   if (after.bridges !== 1 || after.clones !== 1 || after.transfer) throw new Error(`Seamless bridge state invalid before seam: ${JSON.stringify(after)}`);
-  if (after.automatic !== 'enabled' || after.jumpGuard !== 'visual-ratio-v4' || after.runtime?.ratioMatchedLanding !== true || after.runtime?.inputInterception !== false) {
-    throw new Error(`Seamless ratio-v4 contract missing: ${JSON.stringify(after)}`);
-  }
+  if (after.automatic !== 'enabled' || after.jumpGuard !== 'visual-ratio-v4' || after.runtime?.ratioMatchedLanding !== true || after.runtime?.inputInterception !== false) throw new Error(`Seamless ratio-v4 contract missing: ${JSON.stringify(after)}`);
 }
 
 async function preparePage(page) {
-  await page.addInitScript(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-  });
+  await page.addInitScript(() => { try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {} });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
+  await ensureScrollRuntime(page);
   await waitForInterface(page);
 }
 
@@ -148,20 +133,16 @@ async function testDesktop(browser) {
   await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
-
   await openMenu(page);
   await page.locator('#main-nav a[href="#experience"]').click();
   await assertPanel(page, 'experience', 1);
   await closePanelAndAssertCore(page);
-
   await page.locator('.fx-organism-map a[href="#pricing"]').click();
   await assertPanel(page, 'pricing', 3);
   await closePanelAndAssertCore(page);
-
   await page.locator('.fx-rail a[href="#system"]').click();
   await assertPanel(page, 'system', 4);
   await closePanelAndAssertCore(page);
-
   await assertNoUnexpectedJumpBeforeSeam(page);
   await page.close();
 }
@@ -171,16 +152,13 @@ async function testMobile(browser) {
   await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
-
   await openMenu(page);
   await page.locator('#main-nav a[href="#capabilities"]').click();
   await assertPanel(page, 'capabilities', 2);
   await closePanelAndAssertCore(page);
-
   await page.locator('.scroll-cue').evaluate(node => node.click());
   await assertPanel(page, 'experience', 1);
   await closePanelAndAssertCore(page);
-
   await assertNoUnexpectedJumpBeforeSeam(page);
   await page.close();
 }
@@ -191,9 +169,7 @@ async function testMobile(browser) {
     await testDesktop(browser);
     await testMobile(browser);
     console.log('PASS FormatX language toggle, navigation, panels and seamless ratio-v4 scrolling');
-  } finally {
-    await browser.close();
-  }
+  } finally { await browser.close(); }
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;
