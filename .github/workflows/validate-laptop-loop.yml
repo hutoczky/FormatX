@@ -68,6 +68,8 @@ jobs:
           grep -Fq "sectionSnapDisabled: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "jumpFree: true" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq '"scroll_controller": "seamless-continuous"' docs/scifi-ui/data/public-platform-contract.json
+          grep -Fq '"scroll_runtime_load": "critical-startup"' docs/scifi-ui/data/public-platform-contract.json
+          grep -Fq '"scroll_runtime_independent_of_immersive": true' docs/scifi-ui/data/public-platform-contract.json
           grep -Fq '"automatic_scroll_loop": true' docs/scifi-ui/data/public-platform-contract.json
           grep -Fq '"hero_visual_bridge": true' docs/scifi-ui/data/public-platform-contract.json
           grep -Fq '"mobile_transfer_deferred_until_scroll_idle": true' docs/scifi-ui/data/public-platform-contract.json
@@ -78,7 +80,11 @@ jobs:
           grep -Fq "scroll-snap-type: none !important" docs/scifi-ui/styles/formatx-continuous-scroll.css
           grep -Fq "scroll-snap-align: none !important" docs/scifi-ui/styles/formatx-continuous-scroll.css
           grep -Fq 'data-fx-continuous-scroll-style' billing-worker/src/production-entry.js
+          grep -Fq 'data-fx-seamless-loop-style' billing-worker/src/production-entry.js
+          grep -Fq 'data-fx-seamless-scroll-runtime' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/styles/formatx-continuous-scroll.css' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/styles/formatx-seamless-loop.css' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/scripts/formatx-infinite-scroll.js' billing-worker/src/production-entry.js
           grep -Fq "page.mouse.wheel(0, 220)" .github/scripts/validate-laptop-continuous-loop.cjs
           grep -Fq "mobile loop transferred while touch/momentum ownership was still active" .github/scripts/validate-laptop-continuous-loop.cjs
           grep -Fq "cloneNode(true)" docs/scifi-ui/scripts/formatx-infinite-scroll.js
@@ -133,7 +139,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Seamless loop passed: desktop wheel and mobile momentum handoff'
+            description='Seamless loop + critical startup bootstrap passed'
           else
             state='failure'
             description='Seamless continuous scrolling validation failed'
