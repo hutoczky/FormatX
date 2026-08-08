@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live reference crystal v4 Apex delivery
+      - name: Verify live reference crystal true 3D v5 delivery
         shell: bash
         run: |
           set -euo pipefail
@@ -68,7 +68,7 @@ jobs:
           grep -Fq 'visibility: visible !important' "$MOBILE_CSS"
           grep -Fq 'opacity: 1 !important' "$MOBILE_CSS"
 
-          # Native-resolution mobile composition: shader camera owns framing.
+          # Native-resolution mobile composition: shader owns geometry and perspective.
           grep -Fq 'translate3d(0, -.8svh, 0) scale(1)' "$MOBILE_CSS"
           grep -Fq 'brightness(1.18)' "$MOBILE_CSS"
           ! grep -Fq 'scale(1.34)' "$MOBILE_CSS"
@@ -83,20 +83,26 @@ jobs:
           grep -Fq 'quality: coarse.matches ? 0.82 : 0.88' "$APEX_JS"
           grep -Fq 'coarse.matches ? 1.25 : 1.5' "$APEX_JS"
 
-          # Reference-v4 fragment transform: this is what turns the rounded four-lobe
-          # base into the requested sharp concave luminous crystal at compile time.
-          grep -Fq "fxApexSceneStability === 'ready-v3'" "$MAPPER_JS"
+          # Reference true-3D fragment transform: front/back volume, perspective,
+          # multi-axis rotation, multi-plane orbit rings and depth lighting are required.
+          grep -Fq "fxApexSceneStability === 'ready-v4'" "$MAPPER_JS"
           grep -Fq 'function referenceCrystalShader(source)' "$MAPPER_JS"
-          grep -Fq 'pow(abs(cos(2.*a)),4.8)' "$MAPPER_JS"
-          grep -Fq 'mix(.255,1.,lobes)' "$MAPPER_JS"
-          grep -Fq 'starPrism(crystal,1.48*pulse,.205,.014)' "$MAPPER_JS"
-          grep -Fq 'float nucleus=sphere(q,.265' "$MAPPER_JS"
-          grep -Fq 'float radius=mix(5.68,travelRadius,1.-coreWeight)' "$MAPPER_JS"
-          grep -Fq 'float focal=mix(1.96,1.72,1.-coreWeight)' "$MAPPER_JS"
-          grep -Fq 'float coreOrb=exp(-coreDistance*17.5)' "$MAPPER_JS"
+          grep -Fq 'pow(abs(cos(2.*a)),7.2)' "$MAPPER_JS"
+          grep -Fq 'float zTaper=' "$MAPPER_JS"
+          grep -Fq 'mix(.19,1.,lobes)*mix(.14,1.,zTaper)' "$MAPPER_JS"
+          grep -Fq 'starPrism(crystal,1.48*pulse,.52,.010)' "$MAPPER_JS"
+          grep -Fq 'q.xz*=rot(.17+sin(uTime*.13)*.12' "$MAPPER_JS"
+          grep -Fq 'q.yz*=rot(-.11+cos(uTime*.15)*.08' "$MAPPER_JS"
+          grep -Fq 'q.xy*=rot(sin(uTime*.09)*.022)' "$MAPPER_JS"
+          grep -Fq 'ring.xz*=rot(.18' "$MAPPER_JS"
+          grep -Fq 'ring.xz*=rot(-.29' "$MAPPER_JS"
+          grep -Fq 'ring.xz*=rot(.34' "$MAPPER_JS"
+          grep -Fq 'float nucleus=sphere(q,.270' "$MAPPER_JS"
+          grep -Fq 'float angle=mix(.105+sin(uTime*.11)*.050' "$MAPPER_JS"
+          grep -Fq 'float radius=mix(5.82,travelRadius,1.-coreWeight)' "$MAPPER_JS"
+          grep -Fq 'float depthFacet=pow(sat(1.-abs(n.z)),2.2)' "$MAPPER_JS"
           grep -Fq 'float waterMask=smoothstep(.30,.92,-uv.y)' "$MAPPER_JS"
-          grep -Fq 'float facetAngle=atan(p.y,p.x)' "$MAPPER_JS"
-          grep -Fq 'reference-crystal-v4' "$MAPPER_JS"
+          grep -Fq 'reference-crystal-true3d-v5' "$MAPPER_JS"
           grep -Eiq '^cache-control:.*no-store' "$MAPPER_HEADERS"
 
           # Negative ownership contract: all legacy/fallback cores stay retired.
@@ -122,10 +128,10 @@ jobs:
           set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live reference-crystal-v4 Apex is native, sharp, luminous and single-renderer'
+            description='Live reference crystal is volumetric true 3D with perspective and multi-plane orbits'
           else
             state='failure'
-            description='Live reference-crystal-v4 Apex verification failed'
+            description='Live true-3D reference crystal verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
