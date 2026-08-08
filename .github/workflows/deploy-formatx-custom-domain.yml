@@ -134,7 +134,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
           STATUS_CONTEXT: FormatX production validation
-          STATUS_DESCRIPTION: Full public surface, seamless scrolling, feedback, downloads and Worker validation
+          STATUS_DESCRIPTION: Full public surface, feedback, downloads and Worker validation
           STATUS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           node --input-type=module - <<'NODE'
@@ -199,7 +199,7 @@ jobs:
           echo "mode=wrangler" >> "$GITHUB_OUTPUT"
           npx wrangler deploy
 
-      - name: Smoke-test production performance, first-party delivery, seamless scrolling and public comments
+      - name: Smoke-test production performance, first-party delivery and public comments
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -220,7 +220,6 @@ jobs:
               -H 'Accept: application/json' \
               --data "$PAYLOAD" || true)"
             loop_code="$(curl -sS --max-time 30 -o "$tmp/loop.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-infinite-scroll.js?v=production-smoke" || true)"
-            loop_style_code="$(curl -sS --max-time 30 -o "$tmp/loop.css" -w '%{http_code}' "$WWW/scifi-ui/styles/formatx-seamless-loop.css?v=production-smoke" || true)"
             living_code="$(curl -sS --max-time 30 -o "$tmp/living.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/living-architecture.js?v=production-smoke" || true)"
             apex_code="$(curl -sS --max-time 30 -o "$tmp/apex.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-apex.js?v=production-smoke" || true)"
             feedback_code="$(curl -sS --max-time 30 -o "$tmp/feedback.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-feedback.js?v=production-smoke" || true)"
@@ -236,12 +235,12 @@ jobs:
             portable_code="$(curl -sS --max-time 30 -o "$tmp/portable.svg" -w '%{http_code}' "$WWW/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg" || true)"
 
             if [[ "$root_code" == '200' && "$bare_code" == '200' && "$summary_code" == '200' \
-              && "$submit_code" == '202' && "$loop_code" == '200' && "$loop_style_code" == '200' \
-              && "$living_code" == '200' && "$apex_code" == '200' && "$feedback_code" == '200' \
-              && "$feedback_style_code" == '200' && "$downloads_code" == '200' && "$android_code" == '200' \
-              && "$verification_code" == '200' && "$known_issues_code" == '200' && "$support_code" == '200' \
-              && "$release_code" == '200' && "$release_api_code" == '200' \
-              && ( "$package_code" == '200' || "$package_code" == '206' ) && "$portable_code" == '200' ]]; then
+              && "$submit_code" == '202' && "$loop_code" == '200' && "$living_code" == '200' \
+              && "$apex_code" == '200' && "$feedback_code" == '200' && "$feedback_style_code" == '200' \
+              && "$downloads_code" == '200' && "$android_code" == '200' && "$verification_code" == '200' \
+              && "$known_issues_code" == '200' && "$support_code" == '200' && "$release_code" == '200' \
+              && "$release_api_code" == '200' && ( "$package_code" == '200' || "$package_code" == '206' ) \
+              && "$portable_code" == '200' ]]; then
               if python3 - "$tmp" <<'PY'
           import json
           import pathlib
@@ -253,7 +252,6 @@ jobs:
           release = json.loads((root / 'release.json').read_text())
           release_api = json.loads((root / 'release-api.json').read_text())
           loop = (root / 'loop.js').read_text()
-          loop_css = (root / 'loop.css').read_text()
           living = (root / 'living.js').read_text()
           apex = (root / 'apex.js').read_text()
           feedback = (root / 'feedback.js').read_text()
@@ -284,17 +282,11 @@ jobs:
           assert submit.get('ok') is True, submit
           assert submit.get('state') == 'pending-moderation', submit
           assert "const VERSION = 'seamless-v6'" in loop, 'seamless-v6 controller missing'
-          assert "fxInfiniteCloneMode = 'visual-bridge'" in loop, 'seamless Hero bridge contract missing'
-          assert "fxAutomaticLoop = 'enabled'" in loop, 'automatic seamless loop is not enabled'
-          assert 'clonedHeroOnly: true' in loop and 'clonedContent: false' in loop, 'Hero-only inert bridge contract missing'
-          assert 'sectionSnapDisabled: true' in loop, 'section snap suppression contract missing'
-          assert "root.classList.add('fx-continuous-scroll-mode')" in loop, 'continuous-scroll class missing'
-          assert 'sourceHero.cloneNode(true)' in loop, 'Hero visual bridge clone missing'
-          assert "window.scrollTo({ top: target, left: 0, behavior: 'auto' })" in loop, 'boundary handoff landing missing'
-          assert "addEventListener('wheel'" not in loop and "addEventListener('touchmove'" not in loop and 'preventDefault' not in loop, 'wheel or touch input is being intercepted'
-          assert 'document.body.cloneNode' not in loop and 'document.documentElement.cloneNode' not in loop, 'full-page cloning is forbidden'
-          assert 'scroll-snap-type: none !important' in loop_css, 'root section snapping is not disabled'
-          assert 'scroll-snap-align: none !important' in loop_css, 'section snap alignment is not disabled'
+          assert "fxInfiniteCloneMode = 'none'" in loop, 'native cloneMode=none contract missing'
+          assert "fxAutomaticLoop = 'disabled'" in loop, 'automatic loop is not disabled'
+          assert 'clonedHeroOnly: false' in loop, 'legacy hero cloning is still enabled'
+          assert 'nativePositionOnly: true' in loop, 'native-position-only scroll contract missing'
+          assert 'window.scrollTo(' not in loop and 'scrollIntoView(' not in loop and 'cloneNode(true)' not in loop, 'scroll runtime can still move or clone the page automatically'
           assert "deferred-user-activation" in living, 'immersive engine is not user-deferred'
           assert "rootMargin: '700px 0px'" in living, 'QR work is not viewport-deferred'
           assert "const RELEASE_API = './data/current-release.json'" in apex, 'homepage still depends on remote release API'
@@ -321,7 +313,7 @@ jobs:
               assert 'githubusercontent' not in public_text.lower(), 'upstream asset host leaked into a public response'
           assert '<svg' in portable and '</svg>' in portable, 'portable installer SVG missing'
           assert 'data:image/webp' not in portable and '<image' not in portable, 'embedded raster returned'
-          print('FormatX production first-party delivery/seamless-scroll/public-comments smoke passed.')
+          print('FormatX production first-party delivery/public-comments smoke passed.')
           PY
               then
                 rm -rf "$tmp"
@@ -329,13 +321,13 @@ jobs:
               fi
             fi
 
-            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code loop_style=$loop_style_code living=$living_code apex=$apex_code feedback=$feedback_code feedback_style=$feedback_style_code downloads=$downloads_code android=$android_code verification=$verification_code known_issues=$known_issues_code support=$support_code release=$release_code release_api=$release_api_code package=$package_code portable=$portable_code"
+            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code living=$living_code apex=$apex_code feedback=$feedback_code feedback_style=$feedback_style_code downloads=$downloads_code android=$android_code verification=$verification_code known_issues=$known_issues_code support=$support_code release=$release_code release_api=$release_api_code package=$package_code portable=$portable_code"
             [[ -s "$tmp/summary.json" ]] && cat "$tmp/summary.json" || true
             [[ -s "$tmp/submit.json" ]] && cat "$tmp/submit.json" || true
             [[ -s "$tmp/release.json" ]] && cat "$tmp/release.json" || true
             rm -rf "$tmp"
             if [[ "$attempt" == '30' ]]; then
-              echo 'Production did not become healthy with the first-party delivery and seamless-scroll contract within the retry window.' >&2
+              echo 'Production did not become healthy with the first-party delivery contract within the retry window.' >&2
               exit 1
             fi
             sleep 12
