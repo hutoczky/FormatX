@@ -35,8 +35,8 @@
     targetPointerX: 0,
     targetPointerY: 0,
     lastScrollY: scrollY,
-    quality: coarse.matches ? 0.72 : 0.86,
-    targetQuality: coarse.matches ? 0.72 : 0.86,
+    quality: coarse.matches ? 0.82 : 0.88,
+    targetQuality: coarse.matches ? 0.82 : 0.88,
     fps: 0,
     sound: false
   };
@@ -66,10 +66,10 @@
     hud.innerHTML = [
       '<div class="fx-transcend-chapter">',
       '<span data-fx-apex-chapter>01</span>',
-      '<div><small>FORMATX / NATIVE APEX</small><strong data-fx-apex-title>MAG</strong><p data-fx-apex-copy>TRUE 3D CRYSTAL CORE</p></div>',
+      '<div><small>FORMATX / NATIVE APEX</small><strong data-fx-apex-title>MAG</strong><p data-fx-apex-copy>LUMINOUS 3D ENERGY CRYSTAL</p></div>',
       '</div>',
       '<div class="fx-transcend-progress" aria-hidden="true"><i></i><b></b></div>',
-      '<div class="fx-transcend-telemetry" aria-hidden="true"><span>GPU</span><b data-fx-apex-mode>WEBGL2 / CRYSTAL SDF</b><span>FPS</span><b data-fx-apex-fps>—</b></div>'
+      '<div class="fx-transcend-telemetry" aria-hidden="true"><span>GPU</span><b data-fx-apex-mode>WEBGL2 / STAR CRYSTAL SDF</b><span>FPS</span><b data-fx-apex-fps>—</b></div>'
     ].join('');
 
     const sound = element('button', 'fx-transcend-sound');
@@ -153,7 +153,7 @@
 
       #define TAU 6.28318530718
       #define FAR 16.0
-      #define MAX_STEPS 82
+      #define MAX_STEPS 86
 
       mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
       float sat(float x){return clamp(x,0.,1.);}
@@ -173,39 +173,51 @@
       float torus(vec3 p,vec2 t){vec2 q=vec2(length(p.xz)-t.x,p.y);return length(q)-t.y;}
       float smin(float a,float b,float k){float h=clamp(.5+.5*(b-a)/k,0.,1.);return mix(b,a,h)-k*h*(1.-h);}
       vec2 unite(vec2 a,vec2 b){return a.x<b.x?a:b;}
+      float starPrism(vec3 p,float radius,float depth,float rounding){
+        float a=atan(p.y,p.x);
+        float lobes=pow(abs(cos(2.*a)),.48);
+        float radial=radius*mix(.56,1.,lobes);
+        float d2=length(p.xy)-radial;
+        float dz=abs(p.z)-depth;
+        vec2 w=vec2(d2,dz);
+        return min(max(w.x,w.y),0.)+length(max(w,0.))-rounding;
+      }
 
       vec2 core(vec3 p){
         vec3 q=p;
-        q.xz*=rot(uTime*.17+uScroll*.72);
-        q.xy*=rot(sin(uTime*.19)*.11+uPointer.x*.055);
-        q.yz*=rot(cos(uTime*.16)*.075+uPointer.y*.045);
+        q.xz*=rot(sin(uTime*.13)*.105+uPointer.x*.045);
+        q.yz*=rot(cos(uTime*.15)*.065+uPointer.y*.04);
         float pulse=1.+sin(uTime*1.72)*.018;
 
         vec3 crystal=q;
-        crystal.y/=1.28;
-        float shell=octa(crystal,1.20*pulse);
-        vec3 facet=crystal;
-        facet.xz*=rot(.78539816);
-        shell=max(shell,octa(facet,1.07*pulse)-.075);
-        shell+=(fbm(crystal*4.1)-.5)*.022;
+        crystal.y/=1.16;
+        float shell=starPrism(crystal,1.43*pulse,.32,.032);
+        shell+=(fbm(crystal*4.6)-.5)*.014;
         vec2 result=vec2(shell,1.);
 
-        float nucleus=sphere(q,.245+sin(uTime*2.2)*.018);
+        float nucleus=sphere(q,.215+sin(uTime*2.2)*.018);
         result=unite(result,vec2(nucleus,7.));
 
         for(int i=0;i<4;i++){
-          float fi=float(i),a=fi*1.57079633+.78539816;
-          vec3 end=vec3(cos(a)*1.23,sin(a)*1.23,0.);
-          result=unite(result,vec2(capsule(q,end*.29,end,.027),3.));
+          float fi=float(i),a=fi*1.57079633;
+          vec3 end=vec3(cos(a)*1.48,sin(a)*1.62,0.);
+          result=unite(result,vec2(capsule(q,end*.18,end,.018),3.));
+          result=unite(result,vec2(sphere(q-end*.56,.028),6.));
         }
-        result=unite(result,vec2(capsule(q,vec3(0,-1.38,0),vec3(0,1.38,0),.021),3.));
+        for(int i=0;i<4;i++){
+          float fi=float(i),a=fi*1.57079633+.78539816;
+          vec3 end=vec3(cos(a)*.96,sin(a)*1.06,0.);
+          result=unite(result,vec2(capsule(q,end*.30,end,.010),4.));
+        }
+        result=unite(result,vec2(capsule(q,vec3(-1.52,0,0),vec3(1.52,0,0),.014),3.));
+        result=unite(result,vec2(capsule(q,vec3(0,-1.68,0),vec3(0,1.68,0),.014),3.));
 
         vec3 ring=q;ring.yz*=rot(1.57079633);
-        result=unite(result,vec2(torus(ring,vec2(.84,.016)),5.));
-        ring=q;ring.xy*=rot(.62+uTime*.025);
-        result=unite(result,vec2(torus(ring,vec2(.96,.014)),5.));
-        ring=q;ring.xy*=rot(-.72-uTime*.021);
-        result=unite(result,vec2(torus(ring,vec2(1.08,.012)),6.));
+        result=unite(result,vec2(torus(ring,vec2(.62,.011)),5.));
+        ring=q;ring.yz*=rot(1.57079633);ring.xy*=rot(.36+uTime*.018);
+        result=unite(result,vec2(torus(ring,vec2(.83,.010)),5.));
+        ring=q;ring.yz*=rot(1.57079633);ring.xy*=rot(-.44-uTime*.016);
+        result=unite(result,vec2(torus(ring,vec2(1.08,.009)),6.));
         return result;
       }
       vec2 nerves(vec3 p){
@@ -259,75 +271,83 @@
         if(floorBlend>.001){float floorD=p.y+2.18+(noise3(vec3(p.xz*.65,uTime*.018))-.5)*.045;if(floorD<result.x)result=vec2(mix(result.x,floorD,floorBlend),10.);}
         return result;
       }
-      vec3 normalAt(vec3 p){vec2 e=vec2(.0022,0);return normalize(vec3(mapScene(p+e.xyy).x-mapScene(p-e.xyy).x,mapScene(p+e.yxy).x-mapScene(p-e.yxy).x,mapScene(p+e.yyx).x-mapScene(p-e.yyx).x));}
+      vec3 normalAt(vec3 p){vec2 e=vec2(.0020,0);return normalize(vec3(mapScene(p+e.xyy).x-mapScene(p-e.xyy).x,mapScene(p+e.yxy).x-mapScene(p-e.yxy).x,mapScene(p+e.yyx).x-mapScene(p-e.yyx).x));}
       mat3 camera(vec3 ro,vec3 target){vec3 f=normalize(target-ro),r=normalize(cross(f,vec3(0,1,0)));return mat3(r,normalize(cross(r,f)),f);}
       vec3 background(vec3 rd){
         float horizon=pow(sat(1.-abs(rd.y)),4.);float aurora=pow(sat(sin(rd.x*5.2+uTime*.075+uScroll*4.)*.5+.5),10.)*pow(sat(rd.y+.38),2.);
-        float stars=step(.998,hash21(floor((rd.xy+1.)*vec2(520.,320.))));
-        vec3 c=mix(vec3(.0015,.0045,.010),vec3(.012,.040,.068),horizon);c+=aurora*mix(vec3(.005,.21,.27),vec3(.24,.055,.34),sat(uScroll))*.38;c+=stars*vec3(.44,.7,1.);return c;
+        float stars=step(.998,hash21(floor((rd.xy+1.)*vec2(560.,340.))));
+        vec3 c=mix(vec3(.0012,.004,.010),vec3(.010,.038,.068),horizon);
+        c+=aurora*mix(vec3(.004,.22,.30),vec3(.27,.052,.38),sat(uScroll))*.40;
+        c+=stars*vec3(.48,.76,1.08);
+        return c;
       }
       vec3 material(float id,float fresnel,float diffuse,float pulse){
-        vec3 cyan=vec3(.11,.68,.92),ice=vec3(.70,.96,1.),violet=vec3(.57,.27,.96),white=vec3(.92,.99,1.);
-        if(id<1.5)return mix(vec3(.025,.18,.26),ice,.22+diffuse*.34+fresnel*.48);
-        if(id<4.5)return mix(cyan,ice,.45+fresnel*.4);
-        if(id<6.5)return mix(cyan,violet,.34+.34*sin(uTime*.3)+fresnel*.22);
-        if(id<7.5)return white*(1.3+pulse*.65);
+        vec3 cyan=vec3(.08,.72,1.02),ice=vec3(.73,.98,1.12),violet=vec3(.64,.26,1.04),white=vec3(.96,1.04,1.12);
+        if(id<1.5){vec3 glass=mix(vec3(.012,.16,.25),cyan,.24+fresnel*.58);return mix(glass,ice,diffuse*.30+fresnel*.18);}
+        if(id<4.5)return mix(cyan,ice,.52+fresnel*.38);
+        if(id<6.5)return mix(cyan,violet,.34+.28*sin(uTime*.3)+fresnel*.26);
+        if(id<7.5)return white*(1.65+pulse*.90);
         if(id<8.5)return mix(vec3(1.,.20,.05),vec3(1.,.72,.18),pulse);
         if(id<9.5)return vec3(.34,.87,1.)*(1.35+pulse);
-        return mix(vec3(.009,.018,.028),vec3(.055,.13,.18),diffuse);
+        return mix(vec3(.008,.018,.030),vec3(.050,.14,.20),diffuse);
       }
       void main(){
         vec2 uv=(gl_FragCoord.xy*2.-uResolution)/uResolution.y;
         float coreWeight=1.-smoothstep(.58,1.08,uScene);
         float travelAngle=-.62+uScroll*5.7+sin(uTime*.08)*.03;
-        float angle=mix(-.30+sin(uTime*.115)*.055,travelAngle,1.-coreWeight);
+        float angle=mix(-.035+sin(uTime*.11)*.022,travelAngle,1.-coreWeight);
         float travelRadius=5.0-.38*sin(uScroll*3.14159)-.34*smoothstep(4.2,5.,uScene);
-        float radius=mix(6.25,travelRadius,1.-coreWeight);
-        float cameraY=mix(.03,.15+sin(uScroll*TAU)*.38+uPointer.y*.2,1.-coreWeight);
+        float radius=mix(6.02,travelRadius,1.-coreWeight);
+        float cameraY=mix(.02,.15+sin(uScroll*TAU)*.38+uPointer.y*.2,1.-coreWeight);
         vec3 ro=vec3(sin(angle)*radius,cameraY,cos(angle)*radius);
-        vec3 target=vec3(uPointer.x*.10,mix(-.01,.28,smoothstep(4.,5.,uScene)),0.);
-        float focal=mix(1.94,1.72,1.-coreWeight);
+        vec3 target=vec3(uPointer.x*.065,mix(-.015,.28,smoothstep(4.,5.,uScene)),0.);
+        float focal=mix(1.92,1.72,1.-coreWeight);
         vec3 rd=camera(ro,target)*normalize(vec3(uv,focal));
 
         float distance=0.,id=0.,glow=0.;vec3 p=ro;
         for(int i=0;i<MAX_STEPS;i++){
-          if(float(i)>mix(48.,80.,uQuality))break;
+          if(float(i)>mix(52.,84.,uQuality))break;
           p=ro+rd*distance;vec2 hit=mapScene(p);id=hit.y;
-          glow+=exp(-12.*abs(hit.x))*.0038;
-          if(abs(hit.x)<mix(.0032,.00135,uQuality)||distance>FAR)break;
-          distance+=hit.x*.70;
+          glow+=exp(-11.*abs(hit.x))*.0046;
+          if(abs(hit.x)<mix(.0028,.00115,uQuality)||distance>FAR)break;
+          distance+=hit.x*.68;
         }
 
         vec3 c=background(rd);
-        float halo=exp(-3.7*length(uv))*coreWeight;
-        float cross=(exp(-abs(uv.x)*88.)+exp(-abs(uv.y)*70.))*exp(-length(uv)*2.8)*coreWeight;
-        c+=halo*vec3(.035,.20,.30)+cross*vec3(.08,.42,.62)*.17;
+        float coreDistance=length(uv);
+        float halo=exp(-3.2*coreDistance)*coreWeight;
+        float cross=(exp(-abs(uv.x)*105.)+exp(-abs(uv.y)*82.))*exp(-coreDistance*2.45)*coreWeight;
+        float auraRings=(exp(-abs(coreDistance-.125)*72.)+exp(-abs(coreDistance-.205)*58.)*.7+exp(-abs(coreDistance-.292)*48.)*.42)*coreWeight;
+        c+=halo*vec3(.038,.24,.38);
+        c+=cross*vec3(.12,.58,.88)*.31;
+        c+=auraRings*mix(vec3(.04,.38,.64),vec3(.36,.10,.72),sat(uScroll*.5))*.18;
 
         if(distance<FAR){
-          vec3 n=normalAt(p),key=normalize(vec3(-.55,.78,.42));
-          float d=max(dot(n,key),0.),f=pow(1.-max(dot(n,-rd),0.),3.);
+          vec3 n=normalAt(p),key=normalize(vec3(-.48,.82,.37));
+          float d=max(dot(n,key),0.),f=pow(1.-max(dot(n,-rd),0.),2.65);
           float pulse=.5+.5*sin(uTime*2.2);
           vec3 base=material(id,f,d,pulse);
           vec3 refl=background(reflect(rd,n));
-          float crystal=sat((fbm(p*5.4)-.34)*1.55);
+          float crystal=sat((fbm(p*6.0)-.33)*1.65);
           if(id<1.5){
-            c=mix(refl,base,.42+d*.19);
-            c+=f*vec3(.22,.72,1.05)*.92;
-            c+=crystal*vec3(.08,.28,.42);
+            c=mix(refl,base,.49+d*.16);
+            c+=f*vec3(.26,.86,1.30)*1.18;
+            c+=crystal*vec3(.09,.35,.54);
+            c+=pow(max(dot(n,key),0.),10.)*vec3(.72,1.0,1.18)*.82;
           }else{
-            c=mix(base,refl,.16+f*.26);
-            c*=.34+d*.82;
-            c+=f*vec3(.20,.58,.82)*.46;
+            c=mix(base,refl,.14+f*.24);
+            c*=.38+d*.84;
+            c+=f*vec3(.22,.64,.94)*.52;
           }
-          if(id>6.5&&id<7.5)c+=vec3(.34,.92,1.25)*(1.1+pulse*.9);
+          if(id>6.5&&id<7.5)c+=vec3(.42,1.02,1.42)*(1.25+pulse);
         }
 
-        c+=glow*mix(vec3(.14,.72,1.1),vec3(.66,.24,1.05),sat(uScroll));
-        float aberration=(uv.x*uPointer.x+uv.y*uPointer.y)*.008+uVelocity*.0015;
-        c.r*=1.+aberration;c.b*=1.-aberration*.65;
-        float vignette=1.-smoothstep(.42,1.22,length(uv));c*=.78+.22*vignette;
-        c=c/(1.+c);c=pow(c,vec3(.84,.89,.96));
-        c+=(hash21(gl_FragCoord.xy+fract(uTime)*91.)-.5)/320.;
+        c+=glow*mix(vec3(.16,.82,1.22),vec3(.74,.24,1.12),sat(uScroll));
+        float aberration=(uv.x*uPointer.x+uv.y*uPointer.y)*.006+uVelocity*.0012;
+        c.r*=1.+aberration;c.b*=1.-aberration*.60;
+        float vignette=1.-smoothstep(.48,1.25,length(uv));c*=.80+.20*vignette;
+        c=c/(1.+c);c=pow(c,vec3(.80,.87,.95));
+        c+=(hash21(gl_FragCoord.xy+fract(uTime)*91.)-.5)/340.;
         outColor=vec4(c,1.);
       }
     `;
@@ -359,8 +379,8 @@
     const started = performance.now();
 
     function resize() {
-      const dpr = Math.min(devicePixelRatio || 1, coarse.matches ? 1.22 : 1.5);
-      const scale = clamp(state.quality, coarse.matches ? .58 : .56, 1);
+      const dpr = Math.min(devicePixelRatio || 1, coarse.matches ? 1.25 : 1.5);
+      const scale = clamp(state.quality, coarse.matches ? .62 : .56, 1);
       width = Math.max(2, Math.floor(innerWidth * dpr * scale));
       height = Math.max(2, Math.floor(innerHeight * dpr * scale));
       if (canvas.width !== width || canvas.height !== height) {
@@ -380,11 +400,11 @@
       state.fps = fps;
       frames = 0;
       sampleStarted = now;
-      const min = coarse.matches ? .58 : .56;
-      const max = coarse.matches ? .86 : 1;
-      if (fps < (coarse.matches ? 28 : 45)) state.targetQuality = clamp(state.targetQuality - .06, min, max);
-      else if (fps > (coarse.matches ? 34 : 57)) state.targetQuality = clamp(state.targetQuality + .03, min, max);
-      if (Math.abs(state.targetQuality - state.quality) > .04) {
+      const min = coarse.matches ? .62 : .56;
+      const max = coarse.matches ? .92 : 1;
+      if (fps < (coarse.matches ? 28 : 45)) state.targetQuality = clamp(state.targetQuality - .055, min, max);
+      else if (fps > (coarse.matches ? 34 : 57)) state.targetQuality = clamp(state.targetQuality + .028, min, max);
+      if (Math.abs(state.targetQuality - state.quality) > .035) {
         state.quality = state.targetQuality;
         resize();
       }
@@ -422,7 +442,7 @@
     resize();
     if (state.reduced) render(started + 16);
     else raf = requestAnimationFrame(render);
-    mode.textContent = 'WEBGL2 / CRYSTAL SDF';
+    mode.textContent = 'WEBGL2 / STAR CRYSTAL SDF';
 
     return {
       destroy() {
@@ -536,15 +556,15 @@
 
   root.dataset.fxTranscend='ready';
   root.dataset.fxNativeApex='ready';
-  root.dataset.fxNativeApexRenderer=surface.canvas.getContext('webgl2')?'webgl2-crystal-sdf':'canvas2d-safe';
-  root.dataset.fxNativeApexVisual='crystal-core-v2';
+  root.dataset.fxNativeApexRenderer=surface.canvas.getContext('webgl2')?'webgl2-star-crystal-sdf':'canvas2d-safe';
+  root.dataset.fxNativeApexVisual='luminous-star-core-v3';
   root.dataset.fxScrollOwnership='seamless-v7';
   root.dataset.fxSectionSnap='disabled';
   root.dataset.fxInputInterception='none';
   root.dataset.fxApexBenchmark='igloo-floor-plus-functional-system';
   updateScroll();
   animateState();
-  dispatchEvent(new CustomEvent('formatx:nativeapexready',{detail:{renderer:root.dataset.fxNativeApexRenderer,visual:'crystal-core-v2',scrollOwnership:'seamless-v7'}}));
+  dispatchEvent(new CustomEvent('formatx:nativeapexready',{detail:{renderer:root.dataset.fxNativeApexRenderer,visual:'luminous-star-core-v3',scrollOwnership:'seamless-v7'}}));
 
   addEventListener('pagehide',()=>{renderer?.destroy();footerField?.destroy();soundscape?.destroy();},{once:true});
 }());
