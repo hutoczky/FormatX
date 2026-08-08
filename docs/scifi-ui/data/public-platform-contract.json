@@ -41,8 +41,8 @@
     "production_scroll_revision": "seamless-v7-critical-bootstrap-1",
     "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
     "core_scene_scroll_ownership": "seamless-v7-only",
-    "mobile_core_composition": "cinematic-reactive-fractured-true-mesh3d-v20",
-    "mobile_core_composition_delivery": "native-apex-ready-bootstrap-versioned-v11",
+    "mobile_core_composition": "cinematic-reactive-fractured-true-mesh3d-v21",
+    "mobile_core_composition_delivery": "native-apex-ready-bootstrap-versioned-v11b",
     "mobile_core_renderer_authority": "indexed-webgl2-mesh-cinematic-plus-indexed-webgl2-fracture-lines",
     "mobile_core_renderer_visibility": "transparent-overlay-above-apex-background",
     "mobile_core_css_pixel_zoom": false,
@@ -53,11 +53,11 @@
     "legacy_hide_contracts_overridden_by_native_ownership": true,
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
     "language_switch_preserves_scene_hash": true,
-    "core_cinematic_contract": "film-reactive-v1",
-    "deployment_revision": "2026-08-09-cinematic-reactive-true-mesh3d-v20-live-1"
+    "core_cinematic_contract": "film-reactive-v1-frame-independent-wake",
+    "deployment_revision": "2026-08-09-cinematic-reactive-true-mesh3d-v21-live-2"
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-09-cinematic-reactive-true-mesh3d-v20-production26",
+    "award_readiness_revision": "2026-08-09-cinematic-reactive-true-mesh3d-v21-production27",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -76,7 +76,7 @@
       "section_scroll_snap": false,
       "wheel_or_touch_scroll_capture": false
     },
-    "native_apex_visual": "cinematic-reactive-fractured-true-mesh3d-v20",
+    "native_apex_visual": "cinematic-reactive-fractured-true-mesh3d-v21",
     "mag_true_geometry_renderer": "webgl2-indexed-triangle-mesh-v11",
     "mag_fragment_sdf_geometry": false,
     "mag_image_backed": false,
@@ -115,7 +115,7 @@
     "mag_pulsing_reactor": true,
     "mag_pulsing_orbits": true,
     "mag_multi_axis_rotation": true,
-    "mag_cinematic_contract": "film-reactive-v1",
+    "mag_cinematic_contract": "film-reactive-v1-frame-independent-wake",
     "mag_cinematic_state_machine": true,
     "mag_independent_internal_layer_motion": true,
     "mag_activation_reactive": true,
@@ -123,6 +123,10 @@
     "mag_speech_reactive": true,
     "mag_energy_dependent_orbit_acceleration": true,
     "mag_event_surge_decay": true,
+    "mag_frame_rate_independent_event_kick": true,
+    "mag_activation_immediate_energy": 0.60,
+    "mag_response_immediate_energy": 0.74,
+    "mag_speech_immediate_energy": 0.80,
     "mag_shared_cinematic_energy_with_fractures": true,
     "mag_reduced_motion_respected": true,
     "mag_reference_target": "four-tip-luminous-crystal-sci-fi-film-core",
