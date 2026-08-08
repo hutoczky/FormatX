@@ -54,7 +54,6 @@ function install(){
   const software={
     '@type':'SoftwareApplication','@id':O+'/#software',name:'FormatX Suite Pro',description:P['/'].en[1],applicationCategory:'UtilitiesApplication',operatingSystem:'Linux/Bazzite; Windows; Android',url:O+'/',downloadUrl:O+'/download/multiplatform',image:IMAGE,license:O+'/scifi-ui/license.html',
     offers:{'@type':'Offer',name:'Business Lite',price:'7900',priceCurrency:'HUF',availability:'https://schema.org/InStock',url:O+'/scifi-ui/checkout.html?plan=business_lite&cycle=monthly&currency=HUF'},
-    sameAs:['https://github.com/hutoczky/FormatX','https://github.com/hutoczky/FormatX-Updates/releases'],
     additionalProperty:[
       {'@type':'PropertyValue',name:'Category',value:'Technician Operating Layer'},
       {'@type':'PropertyValue',name:'Method',value:'Discover → Plan → Controlled execution → Verify'},
