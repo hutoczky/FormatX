@@ -1,4 +1,4 @@
-/* FormatX award-readiness layer: compact proof, keyboard clarity and touch ergonomics. */
+/* FormatX award-readiness v2: hierarchy, proof, focus, touch ergonomics and restrained motion. */
 
 :root {
   --fx-proof-surface: rgba(4, 15, 26, .72);
@@ -6,6 +6,13 @@
   --fx-proof-text: rgba(232, 250, 255, .92);
   --fx-proof-muted: rgba(190, 222, 232, .72);
   --fx-focus-ring: #9ef7ff;
+  --fx-award-copy-max: 62ch;
+  --fx-award-radius: 20px;
+}
+
+html {
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
 }
 
 html :where(a[href], button, input, select, textarea, [tabindex]:not([tabindex='-1'])):focus-visible {
@@ -18,12 +25,79 @@ html :where(section[id], main [id]) {
   scroll-margin-top: max(88px, 10svh);
 }
 
+html[data-fx-award-positioning='v2'] .hero-copy {
+  max-width: 720px;
+}
+
+html[data-fx-award-positioning='v2'] .hero-title-main {
+  letter-spacing: -.055em;
+  line-height: .82;
+  text-wrap: balance;
+}
+
+html[data-fx-award-positioning='v2'] .hero-title-sub {
+  letter-spacing: .18em;
+}
+
+html[data-fx-award-positioning='v2'] .hero-lead {
+  max-width: 54ch;
+  font-size: clamp(1rem, .72rem + .55vw, 1.28rem);
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+
+html[data-fx-award-positioning='v2'] .hero-actions {
+  gap: 10px;
+  align-items: stretch;
+}
+
+.fx-hero-trustline {
+  max-width: var(--fx-award-copy-max);
+  margin: 14px 0 0;
+  color: rgba(202, 231, 239, .7);
+  font-size: clamp(.72rem, .67rem + .12vw, .8rem);
+  font-weight: 650;
+  line-height: 1.55;
+  letter-spacing: .035em;
+  text-wrap: balance;
+}
+
+.fx-hero-trustline::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 9px 1px 0;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 14px rgba(158, 247, 255, .32);
+}
+
+html[data-fx-award-positioning='v2'] .section-heading h2 {
+  max-width: 17ch;
+  text-wrap: balance;
+}
+
+html[data-fx-award-positioning='v2'] :where(.section-heading, .fx-static-live-os__head, .release-layout) p {
+  text-wrap: pretty;
+}
+
+html[data-fx-award-positioning='v2'] :where(.card, .price-card, .system-grid > article, .flow-chapters > article) {
+  border-radius: var(--fx-award-radius);
+}
+
+html[data-fx-award-positioning='v2'] .price-card.featured {
+  box-shadow: 0 26px 90px rgba(0, 0, 0, .28), 0 0 0 1px rgba(158, 247, 255, .08);
+}
+
 .fx-award-proof {
   position: relative;
   z-index: 2;
   width: min(1480px, calc(100% - clamp(32px, 8vw, 144px)));
   margin: clamp(18px, 3vw, 42px) auto clamp(28px, 5vw, 72px);
   padding: clamp(20px, 3vw, 36px);
+  overflow: clip;
+  contain: layout paint style;
   border: 1px solid var(--fx-proof-line);
   border-radius: 22px;
   background:
@@ -31,6 +105,16 @@ html :where(section[id], main [id]) {
     linear-gradient(145deg, rgba(7, 22, 36, .78), var(--fx-proof-surface));
   box-shadow: 0 24px 70px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(218, 252, 255, .045);
   backdrop-filter: blur(20px) saturate(120%);
+}
+
+.fx-award-proof::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: min(46%, 520px);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(158, 247, 255, .68), rgba(158, 247, 255, 0));
+  pointer-events: none;
 }
 
 .fx-award-proof__head {
@@ -51,6 +135,7 @@ html :where(section[id], main [id]) {
   color: var(--fx-proof-text);
   font-size: clamp(1.55rem, 2.5vw, 2.65rem);
   line-height: 1.02;
+  letter-spacing: -.035em;
   text-wrap: balance;
 }
 
@@ -59,6 +144,7 @@ html :where(section[id], main [id]) {
   margin: 0;
   color: var(--fx-proof-muted);
   line-height: 1.65;
+  text-wrap: pretty;
 }
 
 .fx-award-proof__grid {
@@ -76,7 +162,7 @@ html :where(section[id], main [id]) {
   border-radius: 15px;
   background: rgba(5, 17, 29, .56);
   text-decoration: none;
-  transition: transform .2s ease, border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+  transition: transform .24s cubic-bezier(.2,.8,.2,1), border-color .2s ease, background-color .2s ease, box-shadow .24s ease;
 }
 
 .fx-award-proof__grid a::after {
@@ -86,13 +172,7 @@ html :where(section[id], main [id]) {
   right: 15px;
   color: rgba(158, 247, 255, .72);
   font-size: .8rem;
-}
-
-.fx-award-proof__grid a:hover {
-  border-color: rgba(158, 247, 255, .3);
-  background: rgba(8, 27, 43, .72);
-  box-shadow: 0 16px 34px rgba(0, 0, 0, .18);
-  transform: translateY(-2px);
+  transition: transform .24s cubic-bezier(.2,.8,.2,1), opacity .2s ease;
 }
 
 .fx-award-proof__grid strong,
@@ -112,6 +192,44 @@ html :where(section[id], main [id]) {
   color: var(--fx-proof-muted);
   font-size: .78rem;
   line-height: 1.5;
+  text-wrap: pretty;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-fx-award-positioning='v2'] :where(.button, .price-card, .card, .system-grid > article) {
+    transition-timing-function: cubic-bezier(.2,.8,.2,1);
+  }
+
+  html[data-fx-award-positioning='v2'] :where(.card, .system-grid > article):hover {
+    transform: translateY(-3px);
+  }
+
+  .fx-award-proof__grid a:hover {
+    border-color: rgba(158, 247, 255, .3);
+    background: rgba(8, 27, 43, .72);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, .18);
+    transform: translateY(-3px);
+  }
+
+  .fx-award-proof__grid a:hover::after {
+    opacity: 1;
+    transform: translate(2px, -2px);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fx-award-proof {
+      animation: fx-award-proof-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 28%;
+    }
+  }
+}
+
+@keyframes fx-award-proof-reveal {
+  from { opacity: .62; transform: translateY(22px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @media (max-width: 980px) {
@@ -124,6 +242,17 @@ html :where(section[id], main [id]) {
   }
 }
 
+@media (max-width: 760px) {
+  html[data-fx-award-positioning='v2'] .hero-lead {
+    max-width: 48ch;
+    line-height: 1.56;
+  }
+
+  .fx-hero-trustline {
+    max-width: 46ch;
+  }
+}
+
 @media (max-width: 620px) {
   .fx-award-proof {
     width: min(100% - 24px, 760px);
@@ -133,6 +262,11 @@ html :where(section[id], main [id]) {
 
   .fx-award-proof__grid {
     grid-template-columns: 1fr;
+  }
+
+  .fx-hero-trustline {
+    margin-top: 12px;
+    font-size: .72rem;
   }
 }
 
@@ -149,13 +283,16 @@ html :where(section[id], main [id]) {
 @media (prefers-reduced-motion: reduce) {
   .fx-award-proof *,
   .fx-award-proof *::before,
-  .fx-award-proof *::after {
+  .fx-award-proof *::after,
+  html[data-fx-award-positioning='v2'] :where(.button, .card, .price-card, .system-grid > article) {
     transition-duration: .001ms !important;
     animation-duration: .001ms !important;
     animation-iteration-count: 1 !important;
   }
 
-  .fx-award-proof__grid a:hover {
-    transform: none;
+  .fx-award-proof,
+  .fx-award-proof__grid a:hover,
+  html[data-fx-award-positioning='v2'] :where(.card, .system-grid > article):hover {
+    transform: none !important;
   }
 }
