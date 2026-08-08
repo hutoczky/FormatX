@@ -33,6 +33,12 @@ async function ensureScrollRuntime(page) {
   await page.addScriptTag({ url: src });
 }
 
+async function activateImmersive(page) {
+  await page.locator('.fx-immersive-launch').waitFor({ state: 'attached', timeout: 10000 });
+  await page.locator('.fx-immersive-launch').evaluate(node => node.click());
+  await page.waitForFunction(() => document.documentElement.dataset.fxImmersive === 'active', null, { timeout: 10000 });
+}
+
 async function waitForInterface(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -101,7 +107,7 @@ async function assertNoUnexpectedJumpBeforeSeam(page) {
     return { bridgeTop: bridge?.offsetTop ?? 0, loopCount: Number(document.documentElement.dataset.fxLoopCount || 0) };
   });
   if (before.bridgeTop < 200) throw new Error('Seamless bridge geometry is missing');
-  const target = Math.round(before.bridgeTop * .68);
+  const target = Math.max(0, before.bridgeTop - 96);
   await page.evaluate(y => window.scrollTo(0, y), target);
   await page.waitForTimeout(650);
   const after = await page.evaluate(() => ({
@@ -125,6 +131,7 @@ async function preparePage(page) {
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
   await ensureScrollRuntime(page);
+  await activateImmersive(page);
   await waitForInterface(page);
 }
 
