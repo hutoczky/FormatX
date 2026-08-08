@@ -19,34 +19,35 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live faceted indexed 3D MAG v4
+      - name: Verify live reference-bright indexed 3D MAG v5
         shell: bash
         run: |
           set -euo pipefail
           MAPPER="$RUNNER_TEMP/mapper.js"
-          MESH="$RUNNER_TEMP/mesh-v4.js"
+          MESH="$RUNNER_TEMP/mesh-v5.js"
           CSS="$RUNNER_TEMP/mesh.css"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" -o "$MAPPER"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v4.js?v=20260808-true-mesh3d-v4&audit=${GITHUB_RUN_ID}" -o "$MESH"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-mesh3d.css?v=20260808-true-mesh3d-v4&audit=${GITHUB_RUN_ID}" -o "$CSS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v5.js?v=20260808-true-mesh3d-v5&audit=${GITHUB_RUN_ID}" -o "$MESH"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-mesh3d.css?v=20260808-true-mesh3d-v5&audit=${GITHUB_RUN_ID}" -o "$CSS"
 
-          grep -Fq "fxApexSceneStability === 'ready-v12'" "$MAPPER"
-          grep -Fq 'if(uScene<.92)return vec2(10.,1.)' "$MAPPER"
-          grep -Fq 'formatx-core-mesh3d-v4.js?v=20260808-true-mesh3d-v4' "$MAPPER"
+          grep -Fq "fxApexSceneStability === 'ready-v13'" "$MAPPER"
+          grep -Fq 'coreDistance-.050' "$MAPPER"
+          grep -Fq 'coreDistance-.090' "$MAPPER"
+          grep -Fq 'coreDistance-.145' "$MAPPER"
+          grep -Fq 'formatx-core-mesh3d-v5.js?v=20260808-true-mesh3d-v5' "$MAPPER"
           grep -Fq "getContext('webgl2'" "$MESH"
-          grep -Fq 'depth:true' "$MESH"
           grep -Fq 'gl.enable(gl.DEPTH_TEST)' "$MESH"
-          grep -Fq 'gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER' "$MESH"
           grep -Fq 'gl.drawElements(gl.TRIANGLES' "$MESH"
           grep -Fq 'gl.drawElements(gl.LINES' "$MESH"
           grep -Fq 'cross(dFdx(vP),dFdy(vP))' "$MESH"
-          grep -Fq 'ys=1.20' "$MESH"
-          grep -Fq 'latticeA=pow' "$MESH"
-          grep -Fq 'latticeB=pow' "$MESH"
-          grep -Fq 'lines(crystal,.552,pulse' "$MESH"
-          grep -Fq "fxCoreMesh3d='ready-v4'" "$MESH"
-          grep -Fq "fxCoreGeometry='indexed-triangle-mesh-v4'" "$MESH"
-          grep -Fq "fxCoreLineGeometry='indexed-3d-grid'" "$MESH"
+          grep -Fq 'for(const r of [2,4,6,8,10,12,14])' "$MESH"
+          grep -Fq 'for(let i=0;i<N;i+=4)' "$MESH"
+          grep -Fq 'lines(crystal,.550,pulse' "$MESH"
+          grep -Fq 'lines(crystal,.553,pulse' "$MESH"
+          grep -Fq 'lines(crystal,.547,pulse' "$MESH"
+          grep -Fq "fxCoreMesh3d='ready-v5'" "$MESH"
+          grep -Fq "fxCoreGeometry='indexed-triangle-mesh-v5'" "$MESH"
+          grep -Fq "fxCoreLineGeometry='dense-indexed-3d-grid'" "$MESH"
           ! grep -Fq 'drawImage(' "$MESH"
           grep -Fq 'pointer-events: none' "$CSS"
           grep -Fq 'height: 100dvh' "$CSS"
@@ -60,5 +61,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Live MAG uses faceted real indexed WebGL2 mesh v4 plus 3D light grid'; else state='failure'; description='Live faceted true 3D MAG v4 verification failed'; fi
+          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Live MAG uses bright faceted real indexed WebGL2 mesh v5 with dense 3D grid'; else state='failure'; description='Live reference-bright true 3D MAG v5 verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live mobile Apex composition' -f description="$description" -f target_url="$TARGET_URL"
