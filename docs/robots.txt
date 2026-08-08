@@ -1,3 +1,4 @@
+# FormatX production surface audited 2026-08-08
 User-agent: *
 Allow: /
 Disallow: /api/
