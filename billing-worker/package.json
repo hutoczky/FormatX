@@ -6,7 +6,7 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "start": "wrangler dev",
-    "test": "npm run test:billing && npm run test:license",
+    "test": "node ../.github/scripts/validate-award-readiness.cjs && npm run test:billing && npm run test:license",
     "test:billing": "vitest --config vitest.config.js --run test/index.spec.js",
     "test:license": "vitest --config vitest.license-workers.config.js --run"
   },
