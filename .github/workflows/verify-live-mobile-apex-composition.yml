@@ -19,14 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live luminous star-core Apex delivery
+      - name: Verify live reference crystal v4 Apex delivery
         shell: bash
         run: |
           set -euo pipefail
           HOME_HTML="$RUNNER_TEMP/formatx-home.html"
           MOBILE_CSS="$RUNNER_TEMP/formatx-mobile-apex-composition.css"
           APEX_JS="$RUNNER_TEMP/formatx-apex-native.js"
+          MAPPER_JS="$RUNNER_TEMP/formatx-apex-scene-stability.js"
           HEADERS="$RUNNER_TEMP/formatx-mobile-apex-headers.txt"
+          MAPPER_HEADERS="$RUNNER_TEMP/formatx-reference-mapper-headers.txt"
           REV='20260808-mobile-apex-live-2'
 
           for attempt in $(seq 1 18); do
@@ -53,6 +55,9 @@ jobs:
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
             "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?audit=${GITHUB_RUN_ID}" \
             -o "$APEX_JS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
+            "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" \
+            -D "$MAPPER_HEADERS" -o "$MAPPER_JS"
 
           # Positive visibility contract: Native Apex must actually be in the render tree.
           grep -Fq 'html[data-fx-native-apex="ready"] .fx-transcend-shell[data-fx-native-apex="true"]' "$MOBILE_CSS"
@@ -70,16 +75,29 @@ jobs:
           ! grep -Fq 'scale(.98)' "$MOBILE_CSS"
           ! grep -Fq 'scale(.96)' "$MOBILE_CSS"
 
-          # Actual live WebGL2/SDF implementation, not an image or CSS substitute.
+          # Single base WebGL2/SDF renderer remains authoritative.
           grep -Fq "getContext('webgl2'" "$APEX_JS"
           grep -Fq "fxNativeApexVisual='luminous-star-core-v3'" "$APEX_JS"
           grep -Fq 'WEBGL2 / STAR CRYSTAL SDF' "$APEX_JS"
           grep -Fq 'float starPrism(' "$APEX_JS"
-          grep -Fq 'float auraRings=' "$APEX_JS"
-          grep -Fq 'float angle=mix(-.035+sin(uTime*.11)*.022,travelAngle,1.-coreWeight)' "$APEX_JS"
-          grep -Fq 'float radius=mix(6.02,travelRadius,1.-coreWeight)' "$APEX_JS"
           grep -Fq 'quality: coarse.matches ? 0.82 : 0.88' "$APEX_JS"
           grep -Fq 'coarse.matches ? 1.25 : 1.5' "$APEX_JS"
+
+          # Reference-v4 fragment transform: this is what turns the rounded four-lobe
+          # base into the requested sharp concave luminous crystal at compile time.
+          grep -Fq "fxApexSceneStability === 'ready-v3'" "$MAPPER_JS"
+          grep -Fq 'function referenceCrystalShader(source)' "$MAPPER_JS"
+          grep -Fq 'pow(abs(cos(2.*a)),4.8)' "$MAPPER_JS"
+          grep -Fq 'mix(.255,1.,lobes)' "$MAPPER_JS"
+          grep -Fq 'starPrism(crystal,1.48*pulse,.205,.014)' "$MAPPER_JS"
+          grep -Fq 'float nucleus=sphere(q,.265' "$MAPPER_JS"
+          grep -Fq 'float radius=mix(5.68,travelRadius,1.-coreWeight)' "$MAPPER_JS"
+          grep -Fq 'float focal=mix(1.96,1.72,1.-coreWeight)' "$MAPPER_JS"
+          grep -Fq 'float coreOrb=exp(-coreDistance*17.5)' "$MAPPER_JS"
+          grep -Fq 'float waterMask=smoothstep(.30,.92,-uv.y)' "$MAPPER_JS"
+          grep -Fq 'float facetAngle=atan(p.y,p.x)' "$MAPPER_JS"
+          grep -Fq 'reference-crystal-v4' "$MAPPER_JS"
+          grep -Eiq '^cache-control:.*no-store' "$MAPPER_HEADERS"
 
           # Negative ownership contract: all legacy/fallback cores stay retired.
           grep -Fq 'html[data-fx-native-apex="ready"] #hero .hero-space::before' "$MOBILE_CSS"
@@ -104,10 +122,10 @@ jobs:
           set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live luminous star-crystal Apex is visible, native and single-renderer'
+            description='Live reference-crystal-v4 Apex is native, sharp, luminous and single-renderer'
           else
             state='failure'
-            description='Live luminous star-crystal Apex verification failed'
+            description='Live reference-crystal-v4 Apex verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
