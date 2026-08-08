@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-08-08",
+  "scope": "full public FormatX site, release delivery, browser behaviour, production Worker and public APIs",
+  "audited_release": {
+    "version": "v128",
+    "product_status": "full_release",
+    "trial_days": 5,
+    "primary_platform": "linux-bazzite",
+    "supported_secondary_platforms": ["windows", "android"],
+    "web": "technical_preview",
+    "planned": ["macos", "ios-ipados"]
+  },
+  "release_integrity": {
+    "multiplatform_available": true,
+    "multiplatform_sha256": "sha256:fb07131fb0afe7b1153eeb2f9603e10216521240102824ebaf0826e8e20e5350",
+    "android_available": true,
+    "android_size_bytes": 906731,
+    "android_sha256": "sha256:ac8add4fa5d1532c35f6994fe22a97ca8400781ce272f8577d313628e509b69f",
+    "detached_signature_asset": "not_published"
+  },
+  "validated_surfaces": [
+    "/",
+    "/downloads/",
+    "/scifi-ui/android/",
+    "/scifi-ui/verification.html",
+    "/scifi-ui/known-issues.html",
+    "/support.html",
+    "/api/feedback/summary",
+    "/api/feedback",
+    "/scifi-ui/data/current-release.json",
+    "/api/public-release",
+    "/download/multiplatform"
+  ],
+  "validation_results": {
+    "production_validation": "passed",
+    "production_worker_tests": "passed",
+    "production_worker_dry_run_build": "passed",
+    "production_live_smoke": "passed_first_attempt",
+    "public_site_static_integrity": "passed",
+    "desktop_mobile_chromium_public_pages": "passed",
+    "native_continuous_scrolling": "passed",
+    "live_mobile_hero": "passed",
+    "strict_lighthouse_desktop": "passed_3_runs",
+    "strict_lighthouse_mobile": "passed_3_runs",
+    "worker_dependency_vulnerabilities": 0
+  },
+  "lighthouse_thresholds": {
+    "performance_min": 0.9,
+    "accessibility_min": 1.0,
+    "best_practices_min": 1.0,
+    "seo_min": 1.0,
+    "lcp_max_ms": 2500,
+    "cls_max": 0.1,
+    "ttfb_max_ms": 600
+  },
+  "truth_contract": {
+    "generic_public_beta_copy_for_product": "forbidden",
+    "full_release_and_stable_designation_are_distinct": true,
+    "android_full_release_and_native_beta_are_separate_channels": true,
+    "planned_platforms_must_not_be_presented_as_supported": true,
+    "transaction_pages_noindex": true,
+    "public_responses_must_not_leak_upstream_asset_hosts": true
+  },
+  "known_non_blocking_items": [
+    "No detached signature asset is published for the current release; SHA-256 digests are published.",
+    "GitHub-hosted Actions emit upstream Node runtime deprecation warnings; application Worker dependencies audited with zero vulnerabilities."
+  ],
+  "deployment_intent": "deploy this validated master state to the FormatX production custom domains"
+}
