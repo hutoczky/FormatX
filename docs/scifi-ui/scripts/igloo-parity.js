@@ -231,7 +231,7 @@
     './scripts/synaptic-thought-genome.js?v=20260731-thought-genome-1',
     './scripts/synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1',
     './scripts/formatx-mobile-unified.js?v=20260731-mobile-unified-2',
-    './scripts/formatx-infinite-scroll.js?v=20260807-seamless-v6',
+    './scripts/formatx-infinite-scroll.js?v=20260808-seamless-v7',
     './scripts/formatx-three-host-safe.js?v=20260805-immersive-host-2',
     './scripts/formatx-render-visibility.js?v=20260805-immersive-visibility-3',
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
