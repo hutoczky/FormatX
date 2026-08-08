@@ -1,0 +1,69 @@
+name: Validate FormatX Igloo floor
+run-name: Igloo-floor gate for ${{ github.sha }}
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-apex-native.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/formatx-three-host-safe.js'
+      - 'docs/scifi-ui/styles/formatx-transcend.css'
+      - 'docs/scifi-ui/data/public-platform-contract.json'
+      - '.github/scripts/validate-igloo-floor.cjs'
+      - '.github/workflows/validate-igloo-floor.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-apex-native.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/formatx-three-host-safe.js'
+      - 'docs/scifi-ui/styles/formatx-transcend.css'
+      - 'docs/scifi-ui/data/public-platform-contract.json'
+      - '.github/scripts/validate-igloo-floor.cjs'
+      - '.github/workflows/validate-igloo-floor.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  validate-igloo-floor:
+    name: Validate native Apex above Igloo floor
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate native procedural GPU and scroll ownership
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-apex-native.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
+          node --check .github/scripts/validate-igloo-floor.cjs
+          node .github/scripts/validate-igloo-floor.cjs
+
+      - name: Publish Igloo-floor status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+          JOB_STATUS: ${{ job.status }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Native procedural GPU + safe fallback + seamless-v7 floor verified'
+          else
+            state='failure'
+            description='Igloo-floor native Apex gate failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX Igloo floor gate' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"
