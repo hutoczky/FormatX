@@ -1,0 +1,81 @@
+name: Verify FormatX live award readiness
+run-name: Live award-readiness audit for ${{ github.event.workflow_run.head_sha }}
+
+on:
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  verify-live-award-readiness:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      contains(github.event.workflow_run.head_commit.message, '[deploy-production]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify live SEO, proof, accessibility and scroll contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          HOME_HTML="$RUNNER_TEMP/formatx-home.html"
+          AWARD_CSS="$RUNNER_TEMP/formatx-award-readiness.css"
+
+          for attempt in $(seq 1 18); do
+            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
+              "https://www.formatxsuite.com/?award_audit=${GITHUB_RUN_ID}-${attempt}" -o "$HOME_HTML"; then
+              if grep -Fq 'data-fx-award-proof' "$HOME_HTML" \
+                && grep -Fq 'id="formatx-structured-data"' "$HOME_HTML" \
+                && grep -Fq '"offers":{"@type":"Offer"' "$HOME_HTML" \
+                && grep -Fq '"price":"7900"' "$HOME_HTML" \
+                && grep -Fq 'data-fx-award-readiness-style="true"' "$HOME_HTML" \
+                && grep -Fq 'formatx-infinite-scroll.js?v=20260808-seamless-v7-bootstrap-1' "$HOME_HTML"; then
+                break
+              fi
+            fi
+            if [ "$attempt" -eq 18 ]; then
+              echo 'Live homepage did not expose the complete award-readiness + seamless-scroll contract.' >&2
+              sed -n '1,180p' "$HOME_HTML" 2>/dev/null || true
+              exit 1
+            fi
+            sleep 5
+          done
+
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
+            'https://www.formatxsuite.com/scifi-ui/styles/formatx-award-readiness.css?v=20260808-award-readiness-1' \
+            -o "$AWARD_CSS"
+          grep -Fq ':focus-visible' "$AWARD_CSS"
+          grep -Fq 'min-block-size: 44px' "$AWARD_CSS"
+          grep -Fq 'prefers-reduced-motion: reduce' "$AWARD_CSS"
+          grep -Fq 'scroll-margin-top:' "$AWARD_CSS"
+
+          ! grep -Fqi 'Multiplatform nyilvános béta' "$HOME_HTML"
+          ! grep -Fqi 'multiplatform public beta' "$HOME_HTML"
+
+      - name: Publish live award-readiness status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          JOB_STATUS: ${{ job.status }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Live SEO, proof, a11y and seamless-scroll contract verified'
+          else
+            state='failure'
+            description='Live award-readiness contract verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX live award readiness' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"
