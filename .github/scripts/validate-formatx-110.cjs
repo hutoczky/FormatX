@@ -43,12 +43,13 @@ assert.ok(premium.includes("const scrolling = root.dataset.fxScrollActivity === 
 assert.ok(premiumCss.includes("html[data-fx-immersive='standby'] #hero .hero-space::before"), "static FormatX identity preview is missing");
 assert.ok(threeHost.includes("if (!immersiveActive() || document.hidden) return;"), "Three host still renders while inactive");
 assert.ok(mobileRecovery.includes("immersiveActive() && introComplete"), "Three iframe is not protected by the activation gate");
-assert.ok(infinite.includes("const VERSION = 'seamless-v6'"), "current scroll controller is missing");
-assert.ok(infinite.includes("root.dataset.fxAutomaticLoop = 'disabled'"), "automatic page loop is not disabled");
-assert.ok(infinite.includes("nativePositionOnly: true") && infinite.includes("jumpFree: true"), "native no-jump scroll contract is missing");
-assert.ok(!infinite.includes("window.scrollTo(") && !infinite.includes("scrollIntoView("), "scroll controller must not move page position automatically");
-assert.ok(!infinite.includes("cloneNode(true)"), "automatic loop clone returned");
+assert.ok(infinite.includes("const VERSION = 'seamless-v7'"), "current seamless scroll controller is missing");
+assert.ok(infinite.includes("root.dataset.fxAutomaticLoop = 'enabled'"), "automatic seamless page loop is not enabled");
+assert.ok(infinite.includes("visualBridge: true") && infinite.includes("clonedHeroOnly: true") && infinite.includes("jumpFree: true"), "seamless visual bridge contract is missing");
+assert.ok(infinite.includes("mobileTransfer: 'scrollend-or-idle'") && infinite.includes("mobileNativeMomentumPreserved: true"), "mobile momentum-safe handoff contract is missing");
+assert.ok(infinite.includes("window.scrollTo(") && infinite.includes("sourceHero.cloneNode(true)"), "seamless boundary transfer implementation is missing");
 assert.ok(!infinite.includes("addEventListener('wheel'") && !infinite.includes("addEventListener('touchmove'"), "scroll input must remain native");
+assert.ok(!infinite.includes("preventDefault"), "scroll runtime must not cancel native wheel/touch input");
 assert.ok(!infinite.includes("const SETTLE_MS"), "legacy repeated scroll settling remains active");
 assert.ok(mobileRecovery.includes("markFallback('webgl2-unavailable')"), "unsupported WebGL2 still reaches the iframe engine");
 assert.ok(production.includes("new URL('/scifi-ui/', request.url)"), "domain root does not serve the canonical homepage asset without an asset redirect");
