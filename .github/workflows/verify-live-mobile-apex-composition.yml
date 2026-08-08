@@ -19,20 +19,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live calibrated indexed 3D MAG v2
+      - name: Verify live luminous indexed 3D MAG v3
         shell: bash
         run: |
           set -euo pipefail
           MAPPER="$RUNNER_TEMP/mapper.js"
-          MESH="$RUNNER_TEMP/mesh-v2.js"
+          MESH="$RUNNER_TEMP/mesh-v3.js"
           CSS="$RUNNER_TEMP/mesh.css"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" -o "$MAPPER"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v2.js?v=20260808-true-mesh3d-v2&audit=${GITHUB_RUN_ID}" -o "$MESH"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-mesh3d.css?v=20260808-true-mesh3d-v2&audit=${GITHUB_RUN_ID}" -o "$CSS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v3.js?v=20260808-true-mesh3d-v3&audit=${GITHUB_RUN_ID}" -o "$MESH"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-mesh3d.css?v=20260808-true-mesh3d-v3&audit=${GITHUB_RUN_ID}" -o "$CSS"
 
-          grep -Fq "fxApexSceneStability === 'ready-v10'" "$MAPPER"
+          grep -Fq "fxApexSceneStability === 'ready-v11'" "$MAPPER"
           grep -Fq 'if(uScene<.92)return vec2(10.,1.)' "$MAPPER"
-          grep -Fq 'formatx-core-mesh3d-v2.js?v=20260808-true-mesh3d-v2' "$MAPPER"
+          grep -Fq 'formatx-core-mesh3d-v3.js?v=20260808-true-mesh3d-v3' "$MAPPER"
           grep -Fq "getContext('webgl2'" "$MESH"
           grep -Fq 'depth:true' "$MESH"
           grep -Fq 'gl.enable(gl.DEPTH_TEST)' "$MESH"
@@ -40,12 +40,13 @@ jobs:
           grep -Fq 'gl.drawElements(gl.TRIANGLES' "$MESH"
           grep -Fq 'aPosition' "$MESH"
           grep -Fq 'aNormal' "$MESH"
-          grep -Fq 'function perspective(' "$MESH"
-          grep -Fq '[0,1],[.10,.76],[.27,.40],[.67,.11]' "$MESH"
-          grep -Fq 'core=upload(sphere(.080))' "$MESH"
+          grep -Fq 'ys=1.20' "$MESH"
+          grep -Fq 'latticeA=pow' "$MESH"
+          grep -Fq 'latticeB=pow' "$MESH"
+          grep -Fq 'core=up(sphere(.068))' "$MESH"
           grep -Fq 'draw(crystal,0,.55,pulse' "$MESH"
-          grep -Fq "fxCoreMesh3d='ready-v2'" "$MESH"
-          grep -Fq "fxCoreGeometry='indexed-triangle-mesh-v2'" "$MESH"
+          grep -Fq "fxCoreMesh3d='ready-v3'" "$MESH"
+          grep -Fq "fxCoreGeometry='indexed-triangle-mesh-v3'" "$MESH"
           ! grep -Fq 'drawImage(' "$MESH"
           grep -Fq 'pointer-events: none' "$CSS"
           grep -Fq 'height: 100dvh' "$CSS"
@@ -59,5 +60,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Live MAG uses calibrated real indexed WebGL2 mesh v2'; else state='failure'; description='Live calibrated true 3D MAG v2 verification failed'; fi
+          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Live MAG uses luminous real indexed WebGL2 mesh v3'; else state='failure'; description='Live luminous true 3D MAG v3 verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live mobile Apex composition' -f description="$description" -f target_url="$TARGET_URL"
