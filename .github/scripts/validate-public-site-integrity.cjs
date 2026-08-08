@@ -78,6 +78,11 @@ const downloads = read('docs/scifi-ui/downloads/index.html');
 const legacyAndroidDownload = read('docs/scifi-ui/downloads/android.html');
 const support = read('docs/scifi-ui/support.html');
 const siteRuntime = read('docs/scifi-ui/scripts/site.js');
+const checkoutPage = read('docs/scifi-ui/checkout.html');
+const checkoutRuntime = read('docs/scifi-ui/scripts/checkout-v100.js');
+const pricingApi = read('billing-worker/src/pricing-v100-api.js');
+const liveEntry = read('billing-worker/src/live-entry.js');
+const productionWorker = read('billing-worker/src/production-with-license.js');
 const portable = read('docs/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg');
 const aliases = read('billing-worker/src/production-feedback-entry.js');
 const loop = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
@@ -124,6 +129,31 @@ if (!support.includes('Full release, Technical preview vagy Planned')) report('s
 if (/const state = copy\('Nyilvános béta', 'Public beta'\)/.test(siteRuntime) || /public-beta-available/.test(siteRuntime)) report('shared site runtime: retired beta release state remains');
 if (!siteRuntime.includes("data?.channels?.multiplatform")) report('shared site runtime: canonical multiplatform channel missing');
 
+const canonicalPrices = [
+  ['Business Lite HUF monthly', 'monthly: 7900'],
+  ['Business Lite HUF annual', 'annual: 79000'],
+  ['Business Pro HUF monthly', 'monthly: 15900'],
+  ['Business Pro HUF annual', 'annual: 159000'],
+  ['Technician Team HUF monthly', 'monthly: 29900'],
+  ['Technician Team HUF annual', 'annual: 299000'],
+  ['Business Lite EUR monthly', 'monthly: 22'],
+  ['Business Pro EUR monthly', 'monthly: 44'],
+  ['Technician Team EUR monthly', 'monthly: 83'],
+];
+for (const [label, token] of canonicalPrices) {
+  if (!checkoutRuntime.includes(token)) report(`checkout pricing: missing ${label}`);
+  if (!pricingApi.includes(token)) report(`pricing API: missing ${label}`);
+  if (!liveEntry.includes(token)) report(`legacy live fallback pricing: missing ${label}`);
+}
+if (!checkoutPage.includes('checkout-v100.js') || checkoutPage.includes('scripts/checkout.js') || checkoutPage.includes('scripts/billing.js')) report('checkout: retired pricing runtime is referenced');
+if (!checkoutRuntime.includes('new Uint8Array(12)') || !checkoutRuntime.includes("return 'FX-' + ymd + '-' + random")) report('checkout: high-entropy order reference generation missing');
+for (const [name, source] of [['pricing API', pricingApi], ['live entry', liveEntry]]) {
+  if (!source.includes('SECURE_ORDER_REFERENCE = /^FX-\\d{8}-[A-F0-9]{24}$/')) report(`${name}: secure order-reference format missing`);
+  if (!source.includes('LEGACY_ORDER_REFERENCE')) report(`${name}: backward-compatible legacy order-reference validation missing`);
+}
+if (!liveEntry.includes("return jsonResponse({ error: 'Érvénytelen rendelési azonosító.' }, 400, corsHeaders);")) report('order status: invalid-reference rejection missing');
+if (!productionWorker.includes("'/api/session-status'")) report('order status: production rate-limit route missing');
+
 if (/\b(?:Public beta product status|FormatX beta|bétaállapot|beta package|Overall status['"],?\s*value:['"]Public beta)/i.test(seo)) report('SEO: retired generic beta metadata remains');
 if (!seo.includes("value:'Full release'") || !seo.includes("value:'5 days'")) report('SEO: full release/trial structured data missing');
 if (/Windows \(Public beta\)|Linux\/Bazzite \(Development\)/i.test(seo)) report('SEO: stale platform maturity remains');
@@ -161,10 +191,12 @@ if (!linuxCase || linuxCase.status === 'blocked') report('test matrix: Linux ful
 
 if (!/beta$/i.test(androidManifest.versionName || '')) report('Android Native manifest: expected separate beta channel marker');
 if (!androidPage.includes('/download/android') || !androidPage.includes('ANDROID TELJES VERZIÓ')) report('Android page: canonical full-release route missing');
-if (!androidPage.includes('NATÍV BÉTA') || !androidPage.includes('android-native-v1.1.0-beta')) report('Android page: Native beta channel is not explicitly separated');
+if (!androidPage.includes('NATÍV BÉTA') || !androidPage.includes('/download/android-native-beta')) report('Android page: Native beta channel/download route is not explicitly separated');
+if (androidPage.includes('android-native-v1.1.0-beta')) report('Android page: upstream Native beta release URL must not be exposed as the action');
 if (!androidPage.includes('rel="canonical" href="https://www.formatxsuite.com/scifi-ui/android/"')) report('Android page: canonical URL missing');
 if (/WEBVIEW NÉLKÜLI NATÍV TELJES KIADÁS|current native edition is the full release|jelenlegi natív kiadás a teljes verzió/i.test(androidPage)) report('Android page: Native beta is falsely presented as full release');
 if (!sitemap.includes('https://www.formatxsuite.com/scifi-ui/android/')) report('sitemap: Android release-status page missing');
+if (!productionWorker.includes("'/download/android-native-beta'")) report('production worker: Native beta download route missing');
 
 if (guard.includes("['NATÍV BÉTA'") || guard.includes("['NATIVE BETA'") || guard.includes("['BÉTA'") || guard.includes("['BETA'")) report('full-release guard: legitimate beta channel labels would be rewritten');
 if (guard.includes("['Nyilvános béta'") || guard.includes("['Public beta'")) report('full-release guard: generic beta wording is over-broad; guard must target retired product-level labels only');
@@ -192,4 +224,4 @@ if (failures.length) {
   failures.forEach(item => console.error(' - ' + item));
   process.exit(1);
 }
-console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, Android channel/download separation, legal gate, transactional noindex, native no-jump scrolling, downloads and aliases validated.`);
+console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, pricing parity, secure order references, Android channel/download separation, legal gate, transactional noindex, native no-jump scrolling, downloads and aliases validated.`);
