@@ -41,6 +41,34 @@
     "production_scroll_revision": "seamless-v7-critical-bootstrap-1",
     "language_switch_preserves_scene_hash": true
   },
+  "quality_contract": {
+    "award_readiness_revision": "2026-08-08-proof-seo-a11y-1",
+    "server_rendered_software_application_schema": true,
+    "software_application_offer_price_present": true,
+    "public_proof_layer": true,
+    "proof_links": [
+      "/scifi-ui/verification.html",
+      "/scifi-ui/technical-report.html",
+      "/scifi-ui/security.html",
+      "https://github.com/hutoczky/FormatX-Updates/releases"
+    ],
+    "wcag_target": "2.2-AA-plus",
+    "enhanced_key_touch_targets_css_px": 44,
+    "high_visibility_keyboard_focus": true,
+    "reduced_motion_treatment": true,
+    "lighthouse_desktop_runs": 3,
+    "lighthouse_mobile_runs": 3,
+    "lighthouse_thresholds": {
+      "performance_min": 0.9,
+      "accessibility_min": 1.0,
+      "best_practices_min": 1.0,
+      "seo_min": 1.0,
+      "lcp_max_ms": 2500,
+      "cls_max": 0.1
+    },
+    "field_inp_rum": "not_claimed_without_real_user_data",
+    "independent_professional_review": "not_published"
+  },
   "source_of_truth": {
     "platform_status": "/scifi-ui/data/platform-status.json",
     "release_metadata": "/scifi-ui/data/current-release.json"
