@@ -17,6 +17,7 @@ const LANGUAGE_PAGE_PATHS = new Set([
   '/scifi-ui/payment/success.html',
   '/scifi-ui/payment/cancel.html',
 ]);
+const CONTINUOUS_SCROLL_ASSET = '  <link rel="stylesheet" data-fx-continuous-scroll-style="true" href="/scifi-ui/styles/formatx-continuous-scroll.css?v=20260808-native-continuous-1">\n';
 const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260729-single-language-3">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260729-single-language-2"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
 const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
 const STATUS_ASSETS = '  <link rel="stylesheet" data-fx-platform-status-style="true" href="/scifi-ui/styles/platform-status.css?v=20260730-platform-status-2">\n  <script defer src="/scifi-ui/scripts/platform-status.js?v=20260730-platform-status-2"></script>\n';
@@ -30,6 +31,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/data/platform-status.json',
   '/scifi-ui/scripts/platform-status.js',
   '/scifi-ui/styles/platform-status.css',
+  '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/scripts/formatx-event-horizon.js',
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
@@ -129,6 +131,9 @@ async function applyStartupSafety(request, url, response) {
   let html = await response.text();
   if (SCIFI_ENTRY_PATHS.has(url.pathname)) {
     for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
+    if (!html.includes('data-fx-continuous-scroll-style')) {
+      html = html.replace('</head>', CONTINUOUS_SCROLL_ASSET + '</head>');
+    }
   }
   if (!html.includes('data-fx-single-language-style')) {
     html = html.replace('</head>', LANGUAGE_ASSETS + '</head>');
