@@ -9,6 +9,8 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
 const mapper = read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
 const mobileComposition = read('docs/scifi-ui/styles/formatx-mobile-apex-composition.css');
+const siteStability = read('docs/scifi-ui/styles/formatx-site-stability.css');
+const threeHost = read('docs/scifi-ui/styles/formatx-three-host.css');
 const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
 const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
 const infinite = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
@@ -26,9 +28,14 @@ assert.doesNotMatch(mapper, /scrollTo\s*\(/, 'scene mapper must never move the p
 assert.doesNotMatch(mapper, /scrollIntoView\s*\(/, 'scene mapper must never move the page through element scrolling');
 assert.doesNotMatch(mapper, /preventDefault\s*\(/, 'scene mapper must not capture native scrolling');
 
+assert.match(mobileComposition, /html\[data-fx-native-apex="ready"\] \.fx-transcend-shell\[data-fx-native-apex="true"\]/, 'Native Apex ownership selector missing');
+assert.match(mobileComposition, /z-index: var\(--fx-layer-stage, 120\) !important/, 'Native Apex must own the stage layer');
+assert.match(mobileComposition, /display: block !important/, 'Native Apex shell must explicitly re-enter the render tree');
+assert.match(mobileComposition, /height: 100dvh !important/, 'Native Apex must use the dynamic mobile viewport');
+assert.match(mobileComposition, /> \.fx-transcend-canvas\[data-fx-native-apex-canvas="true"\]/, 'Native Apex canvas ownership selector missing');
+assert.match(mobileComposition, /visibility: visible !important;[\s\S]*opacity: 1 !important/, 'Native Apex canvas must be explicitly visible');
 assert.match(mobileComposition, /translate3d\(0, -5\.5svh, 0\) scale\(1\.34\)/, 'mobile Native Apex core must be raised and enlarged');
 assert.match(mobileComposition, /brightness\(1\.32\)/, 'mobile Native Apex core readability boost missing');
-assert.match(mobileComposition, /data-fx-native-apex="ready"/, 'mobile composition must only apply when Native Apex is ready');
 assert.match(mobileComposition, /#hero \.hero-space::before/, 'legacy hero fallback core hard-retire guard missing');
 assert.match(mobileComposition, /#hero \.hero-space::after/, 'legacy hero fallback halo hard-retire guard missing');
 assert.match(mobileComposition, /\.fx-resilient-core/, 'resilient legacy canvas hard-retire guard missing');
@@ -36,6 +43,12 @@ assert.match(mobileComposition, /#fx-apex-canvas/, 'legacy apex canvas hard-reti
 assert.match(mobileComposition, /\.fx-three-stage-shell/, 'legacy three stage hard-retire guard missing');
 assert.match(mobileComposition, /\.fx-transcend-hud\[data-fx-native-apex="true"\][\s\S]*display: none !important/, 'mobile duplicate Native Apex HUD must be hidden');
 assert.match(mobileComposition, /prefers-reduced-motion: reduce/, 'mobile composition reduced-motion treatment missing');
+
+/* These legacy rules are the historical source of the black-screen regression.
+   Keep them visible to the test so the high-specificity ownership override can
+   never be removed while either compatibility stylesheet still hides the shell. */
+assert.match(siteStability, /\.fx-transcend-shell,[\s\S]*display: none !important/, 'expected legacy site-stability hide contract changed; review ownership guard');
+assert.match(threeHost, /html\[data-fx-three-host="ready"\][\s\S]*\.fx-transcend-shell,[\s\S]*display: none !important/, 'expected legacy Three-host hide contract changed; review ownership guard');
 
 const mapperIndex = loader.indexOf('formatx-apex-scene-stability.js');
 const apexIndex = loader.indexOf('formatx-apex-native.js');
@@ -59,4 +72,4 @@ assert.doesNotMatch(voiceStability, /scrollIntoView\s*\(/, 'voice stability must
 assert.match(infinite, /const VERSION = 'seamless-v7'/, 'seamless-v7 scroll ownership regressed');
 assert.match(infinite, /root\.dataset\.fxInfiniteInput = 'native'/, 'native scroll input contract regressed');
 
-console.log('PASS: Native Apex owns the mobile core exclusively; legacy fallback visuals and duplicate HUD are retired while seamless-v7 and dialogue viewport guards remain intact.');
+console.log('PASS: Native Apex is the single visible mobile core stage, outranks legacy hide contracts, and preserves seamless-v7 plus dialogue viewport guards.');
