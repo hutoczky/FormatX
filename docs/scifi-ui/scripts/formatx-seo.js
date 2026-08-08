@@ -4,7 +4,7 @@
 const R=document.documentElement;
 const O='https://www.formatxsuite.com';
 const IMAGE=O+'/scifi-ui/assets/images/formatx-technician-console.png';
-const AWARD_STYLE='/scifi-ui/styles/formatx-award-readiness.css?v=20260808-award-readiness-1';
+const AWARD_STYLE='/scifi-ui/styles/formatx-award-readiness.css?v=20260808-award-readiness-2';
 const P={
   '/':{hu:['FormatX Suite Pro | Technikusi operációs réteg','Független technikusi operációs réteg diagnosztikához, telepítéshez, meghajtókezeléshez és ellenőrizhető karbantartáshoz. Teljes kiadás 5 napos próbalicenccel.'],en:['FormatX Suite Pro | Technician Operating Layer','An independent technician operating layer for diagnostics, installation, drive management and verifiable maintenance. Full release with a 5-day trial licence.']},
   '/scifi-ui/downloads/':{hu:['Letöltések és platformállapot | FormatX','A FormatX teljes multiplatform kiadása: Bazzite/Linux elsődleges, Windows támogatott, Android külön teljes kiadás; 5 napos próbalicenccel.'],en:['Downloads and platform status | FormatX','FormatX full release: Bazzite/Linux primary, Windows supported, with a separate Android full release and a 5-day trial licence.']},
@@ -28,10 +28,12 @@ function link(rel,href,hl){const q=hl?`link[rel="${rel}"][hreflang="${hl}"]`:`li
 function meta(sel,name,value){let x=document.head.querySelector(sel);if(!x){x=document.createElement('meta');if(name.startsWith('og:'))x.setAttribute('property',name);else x.name=name;document.head.append(x)}x.content=value}
 function release(){return R.__FORMATX_RELEASE_METADATA__?.release||null}
 function ensureAwardStyle(){if(document.head.querySelector('link[data-fx-award-readiness-style]'))return;const x=document.createElement('link');x.rel='stylesheet';x.href=AWARD_STYLE;x.dataset.fxAwardReadinessStyle='true';document.head.append(x)}
+function canonicalizeSoftwareSchema(){const x=document.querySelector('#live-os-overview[itemscope][itemtype="https://schema.org/SoftwareApplication"]');if(!x)return;x.removeAttribute('itemscope');x.removeAttribute('itemtype');x.querySelectorAll('meta[itemprop]').forEach(n=>n.remove());x.querySelectorAll('[itemprop]').forEach(n=>n.removeAttribute('itemprop'));R.dataset.fxCanonicalSoftwareSchema='jsonld-only'}
 function install(){
   ensureAwardStyle();
+  canonicalizeSoftwareSchema();
   const p=path();
-  if(NOINDEX.has(p)){meta('meta[name="robots"]','robots','noindex,nofollow,noarchive');R.dataset.fxSeo='ready-v6';return}
+  if(NOINDEX.has(p)){meta('meta[name="robots"]','robots','noindex,nofollow,noarchive');R.dataset.fxSeo='ready-v7';return}
   const u=O+p,c=P[p]||P['/'],v=c[lang()];
   document.title=v[0];
   meta('meta[name="description"]','description',v[1]);
@@ -68,7 +70,7 @@ function install(){
   if(rel?.version)software.softwareVersion=rel.version;if(rel?.published_at)software.datePublished=rel.published_at;if(rel?.release_url)software.releaseNotes=new URL(rel.release_url,O).href;
   let s=document.getElementById('formatx-structured-data');if(!s){s=document.createElement('script');s.id='formatx-structured-data';s.type='application/ld+json';document.head.append(s)}
   s.textContent=JSON.stringify({'@context':'https://schema.org','@graph':[{'@type':'WebSite','@id':O+'/#website',url:O+'/',name:'FormatX Suite Pro',inLanguage:['hu-HU','en-GB']},software,{'@type':'WebPage','@id':u+'#webpage',url:u,name:v[0],description:v[1],isPartOf:{'@id':O+'/#website'},about:{'@id':O+'/#software'},inLanguage:lang()==='en'?'en-GB':'hu-HU'}]});
-  R.dataset.fxSeo='ready-v6';
+  R.dataset.fxSeo='ready-v7';
 }
 addEventListener('formatx:languagechange',install);addEventListener('formatx:releasemetadataready',install);document.readyState==='loading'?document.addEventListener('DOMContentLoaded',install,{once:true}):install();
 }());
