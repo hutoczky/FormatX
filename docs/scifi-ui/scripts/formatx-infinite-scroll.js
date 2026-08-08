@@ -3,45 +3,28 @@
 
   const root = document.documentElement;
   const VERSION = 'seamless-v6';
-  const LOOP_GUARD_MS = 420;
   const ACTIVITY_IDLE_MS = 170;
-  const MOBILE_FLOW_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  let bridge = null;
-  let sourceHero = null;
-  let transferLockedUntil = 0;
-  let scrollFrame = 0;
-  let landingFrame = 0;
   let activityTimer = 0;
-  let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
-  let layoutWidth = innerWidth;
-  let lastMobileFlow = MOBILE_FLOW_QUERY.matches;
 
   if (root.dataset.fxInfiniteController === VERSION) return;
 
   root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
   root.dataset.fxInfiniteController = VERSION;
+  root.dataset.fxInfiniteCloneMode = 'none';
   root.dataset.fxInfiniteInput = 'native';
   root.dataset.fxScrollActivity = 'idle';
+  root.dataset.fxAutomaticLoop = 'disabled';
+  root.dataset.fxScrollJumpGuard = 'native-position-v1';
+  root.dataset.fxLoopBridge = 'disabled';
   root.dataset.fxScrollSnap = 'disabled';
-  root.classList.add('fx-continuous-scroll-mode');
-  root.classList.remove('fx-infinite-loop-jump', 'fx-three-loop-transfer', 'fx-precision-wheel');
-
-  function isMobileFlow() {
-    return MOBILE_FLOW_QUERY.matches;
-  }
-
-  function syncModeMarkers() {
-    const mobile = isMobileFlow();
-    root.dataset.fxMobileScrollMode = mobile ? 'native-no-jump' : 'desktop-seamless-loop';
-    root.dataset.fxInfiniteCloneMode = mobile ? 'none' : 'visual-bridge';
-    root.dataset.fxAutomaticLoop = mobile ? 'disabled' : 'enabled';
-    root.dataset.fxScrollJumpGuard = mobile ? 'native-position-v2' : 'visual-match-v3';
-    if (mobile) root.classList.add('fx-mobile-native-scroll');
-    else root.classList.remove('fx-mobile-native-scroll');
-  }
-
-  syncModeMarkers();
+  root.classList.add('fx-continuous-scroll-mode', 'fx-mobile-native-scroll');
+  root.classList.remove(
+    'fx-infinite-loop-jump',
+    'fx-three-loop-transfer',
+    'fx-precision-wheel',
+    'fx-seamless-loop-transfer'
+  );
 
   function ensureStyle() {
     if (document.querySelector('link[data-fx-seamless-loop-style]')) return;
@@ -160,7 +143,14 @@
     setBilingualText(hub);
   }
 
+  function removeLegacyLoopArtifacts() {
+    document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"]').forEach(element => element.remove());
+    root.classList.remove('fx-seamless-loop-transfer', 'fx-infinite-loop-jump', 'fx-three-loop-transfer');
+    root.dataset.fxLoopBridge = 'disabled';
+  }
+
   function repairReleasePanel() {
+    removeLegacyLoopArtifacts();
     const main = document.getElementById('main-content');
     const footer = document.querySelector('.site-footer');
     const panel = document.querySelector('[data-organism-panel="resources"]');
@@ -179,68 +169,6 @@
     return true;
   }
 
-  function neutraliseClone(clone) {
-    clone.id = 'fx-loop-hero-bridge';
-    clone.dataset.fxLoopClone = 'true';
-    clone.classList.add('fx-loop-hero-clone');
-    clone.setAttribute('aria-hidden', 'true');
-    clone.setAttribute('inert', '');
-
-    clone.querySelectorAll('[id]').forEach((element, index) => {
-      element.id = 'fx-loop-clone-' + index;
-    });
-    clone.querySelectorAll('[aria-labelledby],[aria-controls],[for]').forEach(element => {
-      element.removeAttribute('aria-labelledby');
-      element.removeAttribute('aria-controls');
-      element.removeAttribute('for');
-    });
-    clone.querySelectorAll('a,button,input,select,textarea,[tabindex]').forEach(element => {
-      element.setAttribute('tabindex', '-1');
-      element.setAttribute('aria-hidden', 'true');
-      if ('disabled' in element) element.disabled = true;
-      if (element instanceof HTMLAnchorElement) element.removeAttribute('href');
-    });
-    clone.querySelectorAll('canvas,iframe,video,audio').forEach(element => element.remove());
-    setBilingualText(clone);
-  }
-
-  function removeBridge() {
-    bridge?.remove();
-    document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"]').forEach(element => {
-      if (element !== bridge) element.remove();
-    });
-    bridge = null;
-    root.dataset.fxLoopBridge = isMobileFlow() ? 'disabled-mobile' : 'missing';
-  }
-
-  function buildBridge() {
-    if (isMobileFlow()) {
-      removeBridge();
-      return false;
-    }
-    if (!repairReleasePanel()) return false;
-    const footer = document.querySelector('body > .site-footer');
-    sourceHero = document.querySelector('#main-content > #hero');
-    if (!footer || !sourceHero) return false;
-
-    removeBridge();
-    const clone = sourceHero.cloneNode(true);
-    neutraliseClone(clone);
-
-    bridge = document.createElement('div');
-    bridge.className = 'fx-loop-bridge';
-    bridge.dataset.fxLoopBridge = VERSION;
-    bridge.setAttribute('aria-hidden', 'true');
-    bridge.appendChild(clone);
-    footer.insertAdjacentElement('afterend', bridge);
-    root.dataset.fxLoopBridge = 'ready-v2';
-    return true;
-  }
-
-  function documentEnd() {
-    return Math.max(0, document.documentElement.scrollHeight - innerHeight);
-  }
-
   function markIdle() {
     clearTimeout(activityTimer);
     activityTimer = 0;
@@ -248,162 +176,61 @@
     root.classList.remove('fx-page-scrolling');
   }
 
-  function landingTarget(relative) {
-    sourceHero = document.querySelector('#main-content > #hero');
-    if (!sourceHero) return null;
-    const bounded = Math.max(0, Math.min(relative, Math.max(0, sourceHero.offsetHeight - 2)));
-    return sourceHero.offsetTop + bounded;
-  }
-
-  function landAt(relative) {
-    if (isMobileFlow()) return;
-    const target = landingTarget(relative);
-    if (target == null) return;
-    window.scrollTo({ top: target, left: 0, behavior: 'auto' });
-    root.dataset.fxLoopLanding = String(Math.round(target));
-  }
-
-  function finishLanding(relative) {
-    if (isMobileFlow()) return;
-    cancelAnimationFrame(landingFrame);
-    landAt(relative);
-    landingFrame = requestAnimationFrame(() => {
-      landAt(relative);
-      landingFrame = requestAnimationFrame(() => {
-        landAt(relative);
-        root.classList.remove('fx-seamless-loop-transfer');
-        root.dataset.fxInfiniteInput = 'native';
-        root.dataset.fxLoopLandingState = 'settled';
-        landingFrame = 0;
-      });
-    });
-  }
-
-  function transferIfNeeded() {
-    scrollFrame = 0;
+  function onScroll() {
     root.dataset.fxScrollActivity = 'scrolling';
     root.classList.add('fx-page-scrolling');
     clearTimeout(activityTimer);
     activityTimer = window.setTimeout(markIdle, ACTIVITY_IDLE_MS);
-
-    /* Touch/coarse-pointer scrolling stays 100% native. Programmatic scrollTo
-       cancels Android/iOS momentum and is the source of the visible stop. */
-    if (isMobileFlow()) return;
-    if (!bridge || !sourceHero || Date.now() < transferLockedUntil) return;
-    if (document.body.classList.contains('fx-organism-panel-open')) return;
-    if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return;
-
-    const bridgeTop = bridge.offsetTop;
-    const threshold = bridgeTop + Math.max(36, Math.min(innerHeight * .18, 180));
-    if (scrollY < threshold || scrollY > documentEnd() + 2) return;
-
-    const relative = Math.max(0, Math.min(scrollY - bridgeTop, Math.max(0, sourceHero.offsetHeight - 2)));
-    transferLockedUntil = Date.now() + LOOP_GUARD_MS;
-    root.classList.add('fx-seamless-loop-transfer');
-    root.dataset.fxInfiniteInput = 'visual-transfer';
-    root.dataset.fxLoopLandingState = 'stabilising';
-    loopCount += 1;
-    root.dataset.fxLoopCount = String(loopCount);
-    root.dataset.fxLoopSource = 'visual-bridge';
-
-    dispatchEvent(new CustomEvent('formatx:loop', {
-      detail: { count: loopCount, source: 'visual-bridge', relative }
-    }));
-    finishLanding(relative);
   }
 
-  function onScroll() {
-    if (scrollFrame) return;
-    scrollFrame = requestAnimationFrame(transferIfNeeded);
-  }
-
-  function applyFlowMode(rebuildDesktopBridge) {
-    syncModeMarkers();
-    if (isMobileFlow()) {
-      cancelAnimationFrame(landingFrame);
-      landingFrame = 0;
-      root.classList.remove('fx-seamless-loop-transfer');
-      root.dataset.fxInfiniteInput = 'native';
-      root.dataset.fxLoopLandingState = 'native-mobile';
-      removeBridge();
-      repairReleasePanel();
-      return;
-    }
-    if (rebuildDesktopBridge !== false) buildBridge();
-  }
-
-  function scheduleRepair(rebuildBridge) {
+  function scheduleRepair() {
     clearTimeout(repairTimer);
-    repairTimer = window.setTimeout(() => {
-      repairReleasePanel();
-      applyFlowMode(rebuildBridge);
-    }, 60);
-  }
-
-  function onResize() {
-    const nextWidth = innerWidth;
-    const widthChanged = Math.abs(nextWidth - layoutWidth) > 8;
-    const modeChanged = lastMobileFlow !== isMobileFlow();
-    if (widthChanged) layoutWidth = nextWidth;
-    if (modeChanged) lastMobileFlow = isMobileFlow();
-    scheduleRepair(widthChanged || modeChanged);
+    repairTimer = window.setTimeout(repairReleasePanel, 60);
   }
 
   function onPanelOpen(event) {
     if (event.detail?.id !== 'resources') return;
     const panel = document.querySelector('[data-organism-panel="resources"]');
-    if (panel) {
-      syncReleaseHub(panel);
-      panel.scrollTop = 0;
-    }
+    if (panel) syncReleaseHub(panel);
   }
 
   function initialise() {
     ensureStyle();
     repairReleasePanel();
-    applyFlowMode(true);
     root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
       version: VERSION,
-      mobileFlow: 'native-no-jump',
-      desktopFlow: 'visual-bridge',
-      automaticLoopOnMobile: false,
-      automaticLoopOnDesktop: true,
+      automaticLoop: false,
+      visualBridge: false,
       clonedContent: false,
-      clonedHeroOnlyOnDesktop: true,
+      clonedHeroOnly: false,
       reinitialisedRenderer: false,
+      frameStableLanding: false,
+      jumpFree: true,
+      nativePositionOnly: true,
       mobileNativeMomentumPreserved: true,
-      jumpFreeMobile: true,
       sectionSnapDisabled: true
     });
     root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
     root.dataset.fxInfiniteController = VERSION;
-    onScroll();
   }
 
   addEventListener('scroll', onScroll, { passive: true });
-  addEventListener('resize', onResize, { passive: true });
-  addEventListener('pageshow', () => scheduleRepair(true), { passive: true });
-  addEventListener('formatx:organisminterfaceready', () => scheduleRepair(true));
+  addEventListener('resize', scheduleRepair, { passive: true });
+  addEventListener('pageshow', scheduleRepair, { passive: true });
+  addEventListener('formatx:organisminterfaceready', scheduleRepair);
   addEventListener('formatx:organismpanelopen', onPanelOpen);
-  addEventListener('formatx:organismpanelclose', () => scheduleRepair(true));
+  addEventListener('formatx:organismpanelclose', scheduleRepair);
   addEventListener('formatx:languagechange', () => {
-    setBilingualText(bridge);
     const footer = document.querySelector('.site-footer');
     if (footer) repairFooterCopy(footer);
     const panel = document.querySelector('[data-organism-panel="resources"]');
     if (panel) syncReleaseHub(panel);
-  });
-  MOBILE_FLOW_QUERY.addEventListener?.('change', () => {
-    lastMobileFlow = isMobileFlow();
-    scheduleRepair(true);
   });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
   else initialise();
 
   addEventListener('pagehide', () => {
-    cancelAnimationFrame(scrollFrame);
-    cancelAnimationFrame(landingFrame);
     clearTimeout(activityTimer);
     clearTimeout(repairTimer);
   }, { once: true });
