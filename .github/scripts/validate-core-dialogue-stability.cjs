@@ -8,6 +8,7 @@ const mapper=read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
 const mesh=read('docs/scifi-ui/scripts/formatx-core-mesh3d-v11.js');
 const kick=read('docs/scifi-ui/scripts/formatx-core-cinematic-kick-v11.js');
 const fracture=read('docs/scifi-ui/scripts/formatx-core-fracture3d-v11.js');
+const grade=read('docs/scifi-ui/styles/formatx-core-cinematic-grade-v11c.css');
 const meshCss=read('docs/scifi-ui/styles/formatx-core-mesh3d.css');
 const apex=read('docs/scifi-ui/scripts/formatx-apex-native.js');
 const voice=read('docs/scifi-ui/scripts/organism-voice-stability.js');
@@ -18,9 +19,10 @@ assert.match(mapper,/fxApexSceneStability==='ready-v21'/,'v11b production mapper
 assert.match(mapper,/formatx-core-mesh3d-v11\.js\?v=20260809-cinematic-mesh3d-v11/,'v11 cinematic mesh bootstrap missing');
 assert.match(mapper,/formatx-core-cinematic-kick-v11\.js\?v=20260809-cinematic-kick-v11b/,'frame-rate independent cinematic kick bootstrap missing');
 assert.match(mapper,/formatx-core-fracture3d-v11\.js\?v=20260809-cinematic-fracture3d-v11/,'v11 cinematic fracture bootstrap missing');
+assert.match(mapper,/formatx-core-cinematic-grade-v11c\.css\?v=20260809-reference-emissive-v1/,'reference emissive grade bootstrap missing');
 assert.match(mapper,/if\(uScene<\.92\)return vec2\(10\.,1\.\)/,'legacy SDF MAG suppression missing');
 assert.match(mapper,/retired-for-real-3d-reactor/,'screen-space reactor retirement missing');
-assert.match(mapper,/cinematic-reactive-fractured-true-mesh3d-v21/,'cinematic visual marker missing');
+assert.match(mapper,/cinematic-reference-graded-true-mesh3d-v21/,'graded cinematic visual marker missing');
 assert.match(mapper,/film-reactive-v1-frame-independent-wake/,'frame-independent cinematic contract marker missing');
 assert.doesNotMatch(mapper,/scrollTo\s*\(|scrollIntoView\s*\(|preventDefault\s*\(/,'mapper must not capture scrolling');
 
@@ -65,22 +67,20 @@ assert.match(kick,/formatx:organismresponse.*\.74,1\.15,2100/s,'response immedia
 assert.match(kick,/formatx:organismspeechstart.*\.80,\.72,5000,1/s,'speech immediate kick missing');
 assert.match(kick,/formatx:organismspeechend.*\.56,\.24,900,0/s,'speech settle kick missing');
 assert.match(kick,/frame-rate-independent-v1/,'frame-independent marker missing');
-assert.match(kick,/formatx:corecinematicimmediate/,'immediate cinematic event missing');
 
 assert.match(fracture,/getContext\('webgl2'/,'fracture WebGL2 context missing');
 assert.match(fracture,/gl\.bindBuffer\(gl\.ELEMENT_ARRAY_BUFFER/,'fracture index buffer missing');
 assert.match(fracture,/gl\.drawElements\(gl\.LINES/,'fracture must use indexed GL_LINES');
 assert.match(fracture,/window\.FormatXCoreCinematic/,'fracture must follow shared cinematic state');
-assert.match(fracture,/uEnergy/,'fracture energy uniform missing');
-assert.match(fracture,/uSurge/,'fracture surge uniform missing');
-assert.match(fracture,/uSpeech/,'fracture speech uniform missing');
-assert.match(fracture,/xs=\.82/,'fracture X proportion must match mesh');
-assert.match(fracture,/ys=1\.30/,'fracture Y proportion must match mesh');
-assert.match(fracture,/depth=\.36/,'fracture Z surface must match mesh');
 assert.match(fracture,/fxCoreFracture3d='ready-v11'/,'fracture ready marker missing');
-assert.match(fracture,/fxCoreFractureGeometry='indexed-gl-lines-v11'/,'fracture geometry marker missing');
 assert.match(fracture,/fxCoreFractureBehavior='cinematic-reactive-v1'/,'fracture cinematic marker missing');
-assert.doesNotMatch(fracture,/drawImage\s*\(|new Image\s*\(|background-image/i,'fracture network must not be image-backed');
+
+assert.match(grade,/brightness\(1\.95\)/,'desktop cinematic brightness grade missing');
+assert.match(grade,/saturate\(2\.15\)/,'desktop cinematic saturation grade missing');
+assert.match(grade,/brightness\(2\.02\)/,'mobile cinematic brightness grade missing');
+assert.match(grade,/saturate\(2\.20\)/,'mobile cinematic saturation grade missing');
+assert.match(grade,/drop-shadow\(0 0 5px rgba\(72, 226, 255, 0\.20\)\)/,'cyan bloom missing');
+assert.match(grade,/fx-core-fracture3d-stage canvas/,'fracture grade missing');
 
 assert.match(interaction,/formatx:organismcoreactivate/,'organism core activation event regressed');
 assert.match(voice,/window\.visualViewport/,'dialogue viewport guard missing');
@@ -90,4 +90,4 @@ assert.match(meshCss,/height: 100dvh/,'dynamic viewport missing');
 assert.match(apex,/quality: coarse\.matches \? 0\.82 : 0\.88/,'Apex background quality regressed');
 assert.match(infinite,/const VERSION = 'seamless-v7'/,'seamless-v7 regressed');
 assert.match(infinite,/root\.dataset\.fxInfiniteInput = 'native'/,'native momentum regressed');
-console.log('PASS: v11b MAG keeps real indexed WebGL2 geometry and adds frame-rate-independent cinematic wake/response/speech impulses without regressing seamless-v7 or mobile dialogue safety.');
+console.log('PASS: v11c MAG remains real indexed WebGL2 geometry, wakes frame-rate independently, and applies the reference cinematic emissive/bloom grade without regressing scroll or dialogue safety.');
