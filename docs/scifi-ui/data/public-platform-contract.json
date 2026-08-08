@@ -41,8 +41,8 @@
     "production_scroll_revision": "seamless-v7-critical-bootstrap-1",
     "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
     "core_scene_scroll_ownership": "seamless-v7-only",
-    "mobile_core_composition": "reference-bright-faceted-true-mesh3d-v14",
-    "mobile_core_composition_delivery": "native-apex-ready-bootstrap-versioned-v5",
+    "mobile_core_composition": "reference-layered-glass-true-mesh3d-v15",
+    "mobile_core_composition_delivery": "native-apex-ready-bootstrap-versioned-v6",
     "mobile_core_renderer_authority": "indexed-webgl2-mesh-exclusive-for-mag",
     "mobile_core_renderer_visibility": "transparent-overlay-above-apex-background",
     "mobile_core_css_pixel_zoom": false,
@@ -52,10 +52,10 @@
     "legacy_hide_contracts_overridden_by_native_ownership": true,
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
     "language_switch_preserves_scene_hash": true,
-    "deployment_revision": "2026-08-08-reference-bright-faceted-true-mesh3d-v14-live-1"
+    "deployment_revision": "2026-08-08-reference-layered-glass-true-mesh3d-v15-live-1"
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-reference-bright-faceted-true-mesh3d-v14-production20",
+    "award_readiness_revision": "2026-08-08-reference-layered-glass-true-mesh3d-v15-production21",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -74,14 +74,13 @@
       "section_scroll_snap": false,
       "wheel_or_touch_scroll_capture": false
     },
-    "native_apex_visual": "reference-bright-faceted-true-mesh3d-v14",
-    "mag_true_geometry_renderer": "webgl2-indexed-triangle-mesh-v5",
+    "native_apex_visual": "reference-layered-glass-true-mesh3d-v15",
+    "mag_true_geometry_renderer": "webgl2-indexed-triangle-mesh-v6",
     "mag_fragment_sdf_geometry": false,
     "mag_image_backed": false,
     "mag_element_array_buffer": true,
     "mag_draw_elements_triangles": true,
     "mag_indexed_3d_light_grid": true,
-    "mag_dense_indexed_3d_grid": true,
     "mag_draw_elements_lines": true,
     "mag_faceted_derivative_normals": true,
     "mag_per_vertex_normals": true,
@@ -98,6 +97,8 @@
     "mag_reactor_sphere_radius": 0.064,
     "mag_actual_3d_reactor_tori": 3,
     "mag_actual_3d_outer_orbits": 2,
+    "mag_real_glass_mesh_layers": 3,
+    "mag_nested_real_mesh_surfaces": true,
     "mag_glass_fresnel_shading": true,
     "mag_internal_caustic_shading": true,
     "mag_internal_cyan_lattice": true,
