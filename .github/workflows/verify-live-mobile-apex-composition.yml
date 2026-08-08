@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live reference luminous crystal v7
+      - name: Verify live pulsing luminous crystal v8
         shell: bash
         run: |
           set -euo pipefail
@@ -33,7 +33,7 @@ jobs:
 
           for attempt in $(seq 1 18); do
             curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
-              "https://www.formatxsuite.com/?reference_v7_audit=${GITHUB_RUN_ID}-${attempt}" \
+              "https://www.formatxsuite.com/?pulse_v8_audit=${GITHUB_RUN_ID}-${attempt}" \
               -o "$HOME_HTML" || true
             if grep -Fq 'data-fx-mobile-apex-composition="true"' "$HOME_HTML" \
               && grep -Fq "formatx-mobile-apex-composition.css?v=${REV}" "$HOME_HTML"; then
@@ -68,26 +68,24 @@ jobs:
           grep -Fq 'quality: coarse.matches ? 0.82 : 0.88' "$APEX_JS"
           grep -Fq 'coarse.matches ? 1.25 : 1.5' "$APEX_JS"
 
-          # Reference-fit v7: broad continuous four-point crystal, central cavity,
-          # luminous reactor, subtle 3D and transmissive glass are all mandatory.
-          grep -Fq "fxApexSceneStability === 'ready-v6'" "$MAPPER_JS"
+          # Visual reference + living pulse are both mandatory.
+          grep -Fq "fxApexSceneStability === 'ready-v7'" "$MAPPER_JS"
           grep -Fq 'function referenceLuminousCrystalShader(source)' "$MAPPER_JS"
-          grep -Fq 'pow(abs(cos(2.*a)),2.15)' "$MAPPER_JS"
           grep -Fq 'float radial=radius*mix(.47,1.,axis)' "$MAPPER_JS"
           grep -Fq 'float zCap=depth*pow(max(0.,1.-pow(rn,1.72)),.58)' "$MAPPER_JS"
-          grep -Fq 'starPrism(crystal,1.54*pulse,.62,.004)' "$MAPPER_JS"
-          grep -Fq 'float cavity=sphere(crystal,.455)' "$MAPPER_JS"
-          grep -Fq 'shell=max(shell,-cavity)' "$MAPPER_JS"
-          grep -Fq 'float nucleus=sphere(q,.245' "$MAPPER_JS"
-          grep -Fq 'torus(ring,vec2(.43,.016))' "$MAPPER_JS"
-          grep -Fq 'torus(ring,vec2(.58,.012))' "$MAPPER_JS"
-          grep -Fq 'torus(ring,vec2(.78,.010))' "$MAPPER_JS"
-          grep -Fq 'float coreOrb=exp(-coreDistance*9.4)' "$MAPPER_JS"
-          grep -Fq 'float coreBloom=exp(-coreDistance*4.8)' "$MAPPER_JS"
+          grep -Fq 'starPrism(crystal,1.54*pulse,.62*(1.+heart*.025),.004)' "$MAPPER_JS"
+          grep -Fq 'float cavity=sphere(crystal,.455+heart*.018)' "$MAPPER_JS"
+          grep -Fq 'float beatA=.5+.5*sin(uTime*1.55)' "$MAPPER_JS"
+          grep -Fq 'float beatB=.5+.5*sin(uTime*3.10-.78)' "$MAPPER_JS"
+          grep -Fq 'float heart=pow(beatA,4.)*.72+pow(beatB,9.)*.28' "$MAPPER_JS"
+          grep -Fq 'float breath=.5+.5*sin(uTime*.62-.4)' "$MAPPER_JS"
+          grep -Fq 'float ringPulse=1.+heart*.055+breath*.012' "$MAPPER_JS"
+          grep -Fq 'float screenHeart=pow(screenBeatA,4.)*.72+pow(screenBeatB,9.)*.28' "$MAPPER_JS"
+          grep -Fq 'float pulseWave=exp(-abs(coreDistance-waveRadius)*54.)' "$MAPPER_JS"
+          grep -Fq 'float coreOrb=exp(-coreDistance*9.4)*coreWeight*(.82+screenHeart*.78)' "$MAPPER_JS"
           grep -Fq 'vec3 refrDir=refract(rd,n,.75)' "$MAPPER_JS"
-          grep -Fq 'float axisVein=exp(-abs(p.x)*17.)+exp(-abs(p.y)*17.)' "$MAPPER_JS"
           grep -Fq 'float angle=mix(.042+sin(uTime*.11)*.030' "$MAPPER_JS"
-          grep -Fq 'reference-luminous-crystal-v7' "$MAPPER_JS"
+          grep -Fq 'reference-luminous-crystal-pulse-v8' "$MAPPER_JS"
 
           grep -Fq 'html[data-fx-native-apex="ready"] #fx-apex-canvas' "$MOBILE_CSS"
           grep -Fq 'html[data-fx-native-apex="ready"] .fx-three-stage-shell' "$MOBILE_CSS"
@@ -106,10 +104,10 @@ jobs:
           set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live reference luminous crystal v7 matches broad glass silhouette and reactor contract'
+            description='Live luminous crystal v8 has heartbeat, breathing body, pulsing reactor and energy wave'
           else
             state='failure'
-            description='Live reference luminous crystal v7 verification failed'
+            description='Live pulsing luminous crystal v8 verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
