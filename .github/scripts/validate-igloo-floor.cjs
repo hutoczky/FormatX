@@ -3,6 +3,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '../..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -13,6 +14,14 @@ const fallback = read('docs/scifi-ui/scripts/formatx-three-host-safe.js');
 const transcendCss = read('docs/scifi-ui/styles/formatx-transcend.css');
 const productionEntry = read('billing-worker/src/production-entry.js');
 const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
+
+for (const [filename, source] of [
+  ['formatx-apex-native.js', apex],
+  ['igloo-parity.js', loader],
+  ['formatx-three-host-safe.js', fallback],
+]) {
+  assert.doesNotThrow(() => new vm.Script(source, { filename }), `${filename} contains invalid JavaScript`);
+}
 
 assert.match(apex, /getContext\('webgl2'/, 'native WebGL2 renderer missing');
 assert.match(apex, /#define MAX_STEPS/, 'procedural raymarching step budget missing');
