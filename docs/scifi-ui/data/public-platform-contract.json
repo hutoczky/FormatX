@@ -54,10 +54,10 @@
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
     "language_switch_preserves_scene_hash": true,
     "core_cinematic_contract": "film-reactive-v1-frame-independent-wake",
-    "deployment_revision": "2026-08-09-cinematic-reactive-true-mesh3d-v21-live-2"
+    "deployment_revision": "2026-08-09-cinematic-reactive-true-mesh3d-v21-live-3"
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-09-cinematic-reactive-true-mesh3d-v21-production27",
+    "award_readiness_revision": "2026-08-09-cinematic-reactive-true-mesh3d-v21-production28",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -131,6 +131,7 @@
     "mag_reduced_motion_respected": true,
     "mag_reference_target": "four-tip-luminous-crystal-sci-fi-film-core",
     "live_visual_reference_capture": true,
+    "live_visual_reference_capture_position": "mobile-scroll-650px",
     "live_cinematic_state_capture": true,
     "first_response_product_positioning": true,
     "hero_factual_trustline": true,
