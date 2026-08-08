@@ -27,8 +27,14 @@ assert.doesNotMatch(mapper, /scrollIntoView\s*\(/, 'scene mapper must never move
 assert.doesNotMatch(mapper, /preventDefault\s*\(/, 'scene mapper must not capture native scrolling');
 
 assert.match(mobileComposition, /translate3d\(0, -5\.5svh, 0\) scale\(1\.34\)/, 'mobile Native Apex core must be raised and enlarged');
-assert.match(mobileComposition, /brightness\(1\.24\)/, 'mobile Native Apex core readability boost missing');
+assert.match(mobileComposition, /brightness\(1\.32\)/, 'mobile Native Apex core readability boost missing');
 assert.match(mobileComposition, /data-fx-native-apex="ready"/, 'mobile composition must only apply when Native Apex is ready');
+assert.match(mobileComposition, /#hero \.hero-space::before/, 'legacy hero fallback core hard-retire guard missing');
+assert.match(mobileComposition, /#hero \.hero-space::after/, 'legacy hero fallback halo hard-retire guard missing');
+assert.match(mobileComposition, /\.fx-resilient-core/, 'resilient legacy canvas hard-retire guard missing');
+assert.match(mobileComposition, /#fx-apex-canvas/, 'legacy apex canvas hard-retire guard missing');
+assert.match(mobileComposition, /\.fx-three-stage-shell/, 'legacy three stage hard-retire guard missing');
+assert.match(mobileComposition, /\.fx-transcend-hud\[data-fx-native-apex="true"\][\s\S]*display: none !important/, 'mobile duplicate Native Apex HUD must be hidden');
 assert.match(mobileComposition, /prefers-reduced-motion: reduce/, 'mobile composition reduced-motion treatment missing');
 
 const mapperIndex = loader.indexOf('formatx-apex-scene-stability.js');
@@ -53,4 +59,4 @@ assert.doesNotMatch(voiceStability, /scrollIntoView\s*\(/, 'voice stability must
 assert.match(infinite, /const VERSION = 'seamless-v7'/, 'seamless-v7 scroll ownership regressed');
 assert.match(infinite, /root\.dataset\.fxInfiniteInput = 'native'/, 'native scroll input contract regressed');
 
-console.log('PASS: Native Apex core hold/morph, direct mobile composition delivery and Organism visual-viewport stability are guarded without taking scroll ownership.');
+console.log('PASS: Native Apex owns the mobile core exclusively; legacy fallback visuals and duplicate HUD are retired while seamless-v7 and dialogue viewport guards remain intact.');
