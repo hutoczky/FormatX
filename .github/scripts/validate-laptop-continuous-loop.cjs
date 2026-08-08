@@ -25,7 +25,32 @@ async function clearIntro(page) {
   });
 }
 
+async function ensureContinuousPolicy(page) {
+  if (!await page.locator('link[data-fx-continuous-scroll-style]').count()) {
+    await page.addStyleTag({ url: new URL('/scifi-ui/styles/formatx-continuous-scroll.css?v=wheel-regression-test', TEST_URL).href });
+  }
+}
+
+async function simulateOrganismSnapConflict(page) {
+  if (!await page.locator('link[data-fx-test-organism-style]').count()) {
+    await page.evaluate(origin => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = origin + '/scifi-ui/styles/organism-interface.css?v=wheel-regression-test';
+      link.dataset.fxTestOrganismStyle = 'true';
+      document.head.appendChild(link);
+    }, new URL(TEST_URL).origin);
+    await page.waitForFunction(() => {
+      const link = document.querySelector('link[data-fx-test-organism-style]');
+      return Boolean(link?.sheet);
+    });
+  }
+  await page.evaluate(() => document.documentElement.classList.add('fx-organism-interface-ready'));
+}
+
 async function ensureScrollRuntime(page) {
+  await ensureContinuousPolicy(page);
+  await simulateOrganismSnapConflict(page);
   if (await page.locator('script[src*="formatx-infinite-scroll.js"]').count()) return;
   const runtimeUrl = await page.evaluate(() => new URL('./scripts/formatx-infinite-scroll.js?v=native-scroll-browser-test', document.baseURI).href);
   await page.addScriptTag({ url: runtimeUrl });
@@ -39,7 +64,8 @@ async function snapshot(page) {
     automaticLoop: document.documentElement.dataset.fxAutomaticLoop || '',
     jumpGuard: document.documentElement.dataset.fxScrollJumpGuard || '',
     bridgeState: document.documentElement.dataset.fxLoopBridge || '',
-    scrollSnapType: getComputedStyle(document.documentElement).scrollSnapType,
+    rootScrollSnapType: getComputedStyle(document.documentElement).scrollSnapType,
+    bodyScrollSnapType: getComputedStyle(document.body).scrollSnapType,
     sceneSnap: Array.from(document.querySelectorAll('#hero, main > .scene')).map(node => getComputedStyle(node).scrollSnapAlign),
     scrollY,
     viewportHeight: innerHeight,
@@ -76,6 +102,36 @@ async function verifyProgressiveScroll(page, name) {
     assert(positions[index] + 8 >= positions[index - 1],
       name + ': ordinary scrolling moved backwards or snapped to a previous section: ' + JSON.stringify(positions));
   }
+}
+
+async function verifyRealWheelContinuity(page, name) {
+  const geometry = await snapshot(page);
+  const start = Math.max(80, Math.round(geometry.maximum * .12));
+  await page.evaluate(y => scrollTo(0, y), start);
+  await page.waitForTimeout(120);
+  await page.mouse.move(Math.round((await page.viewportSize()).width / 2), Math.round((await page.viewportSize()).height / 2));
+
+  const positions = [await page.evaluate(() => scrollY)];
+  for (let index = 0; index < 12; index += 1) {
+    await page.mouse.wheel(0, 220);
+    await page.waitForTimeout(70);
+    positions.push(await page.evaluate(() => scrollY));
+  }
+
+  let forwardSteps = 0;
+  for (let index = 1; index < positions.length; index += 1) {
+    if (positions[index] > positions[index - 1] + 2) forwardSteps += 1;
+    assert(positions[index] + 6 >= positions[index - 1],
+      name + ': real wheel input moved backwards at a chapter boundary: ' + JSON.stringify(positions));
+  }
+  assert(forwardSteps >= 8,
+    name + ': real wheel input did not produce continuous forward movement: ' + JSON.stringify(positions));
+
+  const idleStart = await page.evaluate(() => scrollY);
+  await page.waitForTimeout(720);
+  const idleEnd = await page.evaluate(() => scrollY);
+  assert(Math.abs(idleEnd - idleStart) <= 6,
+    name + ': page snapped after wheel input stopped: ' + JSON.stringify({ idleStart, idleEnd, positions }));
 }
 
 async function verifyNoAutomaticJump(page, name) {
@@ -135,10 +191,12 @@ async function verifyViewport(browser, viewport, name, mobile) {
     && initial.runtime?.jumpFree === true
     && initial.runtime?.sectionSnapDisabled === true,
     name + ': native scroll runtime contract missing: ' + JSON.stringify(initial));
-  assert(initial.scrollSnapType === 'none', name + ': root scroll snapping is still active: ' + JSON.stringify(initial));
-  assert(initial.sceneSnap.every(value => value === 'none'), name + ': a section still has snap alignment: ' + JSON.stringify(initial));
+  assert(initial.rootScrollSnapType === 'none', name + ': root scroll snapping is active under Organism CSS: ' + JSON.stringify(initial));
+  assert(initial.bodyScrollSnapType === 'none', name + ': body scroll snapping is active under Organism CSS: ' + JSON.stringify(initial));
+  assert(initial.sceneSnap.every(value => value === 'none'), name + ': a chapter/scene still has snap alignment: ' + JSON.stringify(initial));
 
   await verifyProgressiveScroll(page, name);
+  if (!mobile) await verifyRealWheelContinuity(page, name);
   await verifyNoAutomaticJump(page, name);
 
   const meaningful = diagnostics.filter(item => (
