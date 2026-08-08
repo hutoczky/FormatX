@@ -54,9 +54,14 @@ async function enterSite(page, label) {
     }
     document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
   });
-  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
-  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 30000 });
+  await page.locator('.fx-immersive-launch').waitFor({ state: 'attached', timeout: 10000 });
+  await page.locator('.fx-immersive-launch').evaluate(node => node.click());
+  await page.waitForFunction(() => document.documentElement.dataset.fxImmersive === 'active', null, { timeout: 10000 });
+  mark(label + ': immersive-activated');
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 45000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxOrganismMenu === 'ready', null, { timeout: 45000 });
   await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxInfiniteController === 'seamless-v6', null, { timeout: 30000 });
   mark(label + ': site-ready');
 }
 
@@ -73,6 +78,8 @@ async function state(page) {
     qrCards: document.querySelectorAll('[data-organism-panel="pricing"] [data-plan-qr]').length,
     overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
     footerInResources: Boolean(document.querySelector('[data-organism-panel="resources"] .site-footer')),
+    footerInFlow: Boolean(document.querySelector('body > .site-footer')),
+    scrollController: document.documentElement.dataset.fxInfiniteController || '',
     scripts: Array.from(document.scripts, item => item.src || '').join('|')
   }));
 }
@@ -89,12 +96,13 @@ async function validateDesktop() {
     const current = await state(page);
     mark('desktop: initial-state', current);
     assert(current.ready === 'ready' && current.menuReady === 'ready', 'interface/menu not ready: ' + JSON.stringify(current));
+    assert(current.scrollController === 'seamless-v6', 'seamless controller not active: ' + JSON.stringify(current));
     assert(current.triggers === 5 && current.panels === 5, 'chapter/panel count: ' + JSON.stringify(current));
     assert(current.actionLinks === 3, 'action bar links: ' + JSON.stringify(current));
     assert(current.overlayHidden === true, 'console must start hidden');
     assert(current.pricingChildren === 1, 'pricing section should contain only its interactive trigger');
     assert(current.pricingCards === 3 && current.qrCards === 3, 'commerce content was not moved intact');
-    assert(current.footerInResources, 'footer must be inside the release/support console before seamless controller normalisation');
+    assert(current.footerInFlow && !current.footerInResources, 'footer must be normalised into document flow by seamless controller');
     assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
 
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
