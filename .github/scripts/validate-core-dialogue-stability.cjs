@@ -6,6 +6,7 @@ const root=path.resolve(__dirname,'../..');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
 const mapper=read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
 const mesh=read('docs/scifi-ui/scripts/formatx-core-mesh3d-v11.js');
+const kick=read('docs/scifi-ui/scripts/formatx-core-cinematic-kick-v11.js');
 const fracture=read('docs/scifi-ui/scripts/formatx-core-fracture3d-v11.js');
 const meshCss=read('docs/scifi-ui/styles/formatx-core-mesh3d.css');
 const apex=read('docs/scifi-ui/scripts/formatx-apex-native.js');
@@ -13,13 +14,14 @@ const voice=read('docs/scifi-ui/scripts/organism-voice-stability.js');
 const interaction=read('docs/scifi-ui/scripts/organism-core-interaction.js');
 const infinite=read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
 
-assert.match(mapper,/fxApexSceneStability==='ready-v20'/,'v11 production mapper missing');
+assert.match(mapper,/fxApexSceneStability==='ready-v21'/,'v11b production mapper missing');
 assert.match(mapper,/formatx-core-mesh3d-v11\.js\?v=20260809-cinematic-mesh3d-v11/,'v11 cinematic mesh bootstrap missing');
+assert.match(mapper,/formatx-core-cinematic-kick-v11\.js\?v=20260809-cinematic-kick-v11b/,'frame-rate independent cinematic kick bootstrap missing');
 assert.match(mapper,/formatx-core-fracture3d-v11\.js\?v=20260809-cinematic-fracture3d-v11/,'v11 cinematic fracture bootstrap missing');
 assert.match(mapper,/if\(uScene<\.92\)return vec2\(10\.,1\.\)/,'legacy SDF MAG suppression missing');
 assert.match(mapper,/retired-for-real-3d-reactor/,'screen-space reactor retirement missing');
-assert.match(mapper,/cinematic-reactive-fractured-true-mesh3d-v20/,'cinematic visual marker missing');
-assert.match(mapper,/fxCoreCinematicContract='film-reactive-v1'/,'cinematic contract marker missing');
+assert.match(mapper,/cinematic-reactive-fractured-true-mesh3d-v21/,'cinematic visual marker missing');
+assert.match(mapper,/film-reactive-v1-frame-independent-wake/,'frame-independent cinematic contract marker missing');
 assert.doesNotMatch(mapper,/scrollTo\s*\(|scrollIntoView\s*\(|preventDefault\s*\(/,'mapper must not capture scrolling');
 
 assert.match(mesh,/getContext\('webgl2'/,'WebGL2 mesh context missing');
@@ -44,12 +46,6 @@ assert.match(mesh,/up\(torus\(\.47,\.0046\)\)/,'outer real reactor torus missing
 assert.match(mesh,/hBeam=up\(box\(\.92,\.006,\.005\)\)/,'horizontal flare geometry missing');
 assert.match(mesh,/vBeam=up\(box\(\.006,1\.05,\.005\)\)/,'vertical flare geometry missing');
 assert.match(mesh,/window\.FormatXCoreCinematic=\{version:'film-reactive-v1'/,'shared cinematic state missing');
-assert.match(mesh,/formatx:organismcoreactivate/,'core activation reaction missing');
-assert.match(mesh,/formatx:organismresponse/,'response energy impulse missing');
-assert.match(mesh,/formatx:organismspeechstart/,'speech-active reactor state missing');
-assert.match(mesh,/formatx:organismspeechend/,'speech settle state missing');
-assert.match(mesh,/formatx:corecinematicpulse/,'cinematic pulse event missing');
-assert.match(mesh,/cinematic\.surge\*=Math\.exp\(-dt\*1\.75\)/,'energy surge decay missing');
 assert.match(mesh,/outerRot=.*midRot=.*innerRot=/s,'independent layer rotations missing');
 assert.match(mesh,/reactorPulse=1\+heart\*/,'reactor pulse envelope missing');
 assert.match(mesh,/orbSpeed=\.010\+\.026\*cinematic\.energy/,'energy-dependent orbit acceleration missing');
@@ -61,6 +57,15 @@ assert.match(mesh,/fxCoreGlassPass='independent-layer-motion'/,'independent glas
 assert.match(mesh,/fxCoreReactorGeometry='cinematic-reactive-sphere-plus-3-tori-plus-2-box-beams'/,'cinematic reactor geometry marker missing');
 assert.doesNotMatch(mesh,/drawImage\s*\(|new Image\s*\(|background-image/i,'MAG must not be image-backed');
 assert.doesNotMatch(mesh,/THREE\b|three\.js|gsap/i,'third-party scene framework forbidden');
+
+assert.match(kick,/fxCoreCinematicKick==='ready-v1'/,'cinematic immediate-kick guard missing');
+assert.match(kick,/energy=Math\.max\(Number\(c\.energy\)\|\|0,energy\)/,'frame-rate independent energy assignment missing');
+assert.match(kick,/formatx:organismcoreactivate.*\.60,1\.00,1600/s,'activation immediate kick missing');
+assert.match(kick,/formatx:organismresponse.*\.74,1\.15,2100/s,'response immediate kick missing');
+assert.match(kick,/formatx:organismspeechstart.*\.80,\.72,5000,1/s,'speech immediate kick missing');
+assert.match(kick,/formatx:organismspeechend.*\.56,\.24,900,0/s,'speech settle kick missing');
+assert.match(kick,/frame-rate-independent-v1/,'frame-independent marker missing');
+assert.match(kick,/formatx:corecinematicimmediate/,'immediate cinematic event missing');
 
 assert.match(fracture,/getContext\('webgl2'/,'fracture WebGL2 context missing');
 assert.match(fracture,/gl\.bindBuffer\(gl\.ELEMENT_ARRAY_BUFFER/,'fracture index buffer missing');
@@ -85,4 +90,4 @@ assert.match(meshCss,/height: 100dvh/,'dynamic viewport missing');
 assert.match(apex,/quality: coarse\.matches \? 0\.82 : 0\.88/,'Apex background quality regressed');
 assert.match(infinite,/const VERSION = 'seamless-v7'/,'seamless-v7 regressed');
 assert.match(infinite,/root\.dataset\.fxInfiniteInput = 'native'/,'native momentum regressed');
-console.log('PASS: v11 MAG is a real indexed WebGL2 crystal with cinematic state transitions, independent internal motion, reactive reactor/orbits, speech response and shared 3D fracture energy.');
+console.log('PASS: v11b MAG keeps real indexed WebGL2 geometry and adds frame-rate-independent cinematic wake/response/speech impulses without regressing seamless-v7 or mobile dialogue safety.');
