@@ -42,10 +42,8 @@
       }
 
       const coreNode = document.querySelector('[data-organ-node="0"]');
-      if (coreNode instanceof HTMLAnchorElement) {
-        setAttributeIfChanged(coreNode, 'aria-label', language() === 'en'
-          ? '01 CORE — launch the living visual core'
-          : '01 MAG — az élő vizuális mag indítása');
+      if (coreNode instanceof HTMLAnchorElement && coreNode.hasAttribute('aria-label')) {
+        coreNode.removeAttribute('aria-label');
       }
 
       document.querySelectorAll('.fx-plan-qr-link').forEach(link => {
