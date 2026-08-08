@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@latest
           npx playwright install --with-deps chromium
 
-      - name: Capture additive layered live mobile MAG v7
+      - name: Capture live mobile MAG v8 plus true 3D fracture v9
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -40,30 +40,78 @@ jobs:
           const { chromium } = require('playwright');
           const fs = require('node:fs');
           (async () => {
-            const browser = await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
-            const context = await browser.newContext({viewport:{width:753,height:1536},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']
+            });
+            const context = await browser.newContext({
+              viewport: { width: 753, height: 1536 },
+              deviceScaleFactor: 1,
+              isMobile: true,
+              hasTouch: true,
+              locale: 'hu-HU'
+            });
             const page = await context.newPage();
-            await page.goto(`https://www.formatxsuite.com/?mesh3d_v7_visual=${process.env.RUN_ID}`,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.goto(`https://www.formatxsuite.com/?true3d_v9_visual=${process.env.RUN_ID}`, {
+              waitUntil: 'domcontentloaded', timeout: 45000
+            });
             await page.waitForTimeout(1200);
-            await page.evaluate(() => {const r=document.documentElement;r.lang='hu';r.dataset.fxImmersive='active';r.classList.add('fx-intro-complete');dispatchEvent(new CustomEvent('formatx:immersiveactivate'));document.dispatchEvent(new CustomEvent('formatx:introcomplete'));});
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMesh3d === 'ready-v7',null,{timeout:30000});
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreGeometry === 'indexed-triangle-mesh-v7',null,{timeout:10000});
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreReactorGeometry === 'sphere-plus-3-tori',null,{timeout:10000});
-            await page.waitForTimeout(2400);
-            const state=await page.evaluate(()=>({mesh:document.documentElement.dataset.fxCoreMesh3d,geometry:document.documentElement.dataset.fxCoreGeometry,depth:document.documentElement.dataset.fxCoreDepthBuffer,layers:document.documentElement.dataset.fxCoreGlassLayers,reactor:document.documentElement.dataset.fxCoreReactorGeometry,camera:document.documentElement.dataset.fxCoreCamera,sdf:document.documentElement.dataset.fxSdfCore,screenReactor:document.documentElement.dataset.fxScreenSpaceReactor,renderer:document.documentElement.dataset.fxCoreRenderer,visual:document.documentElement.dataset.fxNativeApexVisual}));
-            fs.writeFileSync('mag-state.json',JSON.stringify(state,null,2));
-            if(state.mesh!=='ready-v7'||state.geometry!=='indexed-triangle-mesh-v7'||state.depth!=='enabled'||state.reactor!=='sphere-plus-3-tori'||state.camera!=='perspective')throw new Error(`Unexpected mesh state ${JSON.stringify(state)}`);
-            await page.screenshot({path:'mag-top.png',fullPage:false});
-            for (const [name,y] of [['mag-mid.png',420],['mag-reference-view.png',650]]) {await page.evaluate(y=>scrollTo(0,Math.min(y,document.documentElement.scrollHeight-innerHeight)),y);await page.waitForTimeout(900);await page.screenshot({path:name,fullPage:false});}
+            await page.evaluate(() => {
+              const r=document.documentElement;
+              r.lang='hu';
+              r.dataset.fxImmersive='active';
+              r.classList.add('fx-intro-complete');
+              dispatchEvent(new CustomEvent('formatx:immersiveactivate'));
+              document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+            });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMesh3d === 'ready-v8', null, { timeout: 30000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreGeometry === 'indexed-triangle-mesh-v8', null, { timeout: 10000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreFracture3d === 'ready-v9', null, { timeout: 30000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreFractureGeometry === 'indexed-gl-lines', null, { timeout: 10000 });
+            await page.waitForTimeout(2600);
+
+            const state = await page.evaluate(() => ({
+              mapper: document.documentElement.dataset.fxApexSceneStability,
+              mesh: document.documentElement.dataset.fxCoreMesh3d,
+              geometry: document.documentElement.dataset.fxCoreGeometry,
+              depth: document.documentElement.dataset.fxCoreDepthBuffer,
+              glass: document.documentElement.dataset.fxCoreGlassPass,
+              reactor: document.documentElement.dataset.fxCoreReactorGeometry,
+              fracture: document.documentElement.dataset.fxCoreFracture3d,
+              fractureGeometry: document.documentElement.dataset.fxCoreFractureGeometry,
+              fractureSegments: document.documentElement.dataset.fxCoreFractureSegments,
+              camera: document.documentElement.dataset.fxCoreCamera,
+              screenReactor: document.documentElement.dataset.fxScreenSpaceReactor,
+              visual: document.documentElement.dataset.fxNativeApexVisual
+            }));
+            fs.writeFileSync('mag-state.json', JSON.stringify(state,null,2));
+            if (
+              state.mapper !== 'ready-v17' ||
+              state.mesh !== 'ready-v8' ||
+              state.geometry !== 'indexed-triangle-mesh-v8' ||
+              state.depth !== 'enabled' ||
+              state.glass !== 'two-sided-back-front' ||
+              state.fracture !== 'ready-v9' ||
+              state.fractureGeometry !== 'indexed-gl-lines' ||
+              state.camera !== 'perspective' ||
+              state.screenReactor !== 'retired-for-real-3d-reactor'
+            ) throw new Error(`Unexpected true 3D state: ${JSON.stringify(state)}`);
+
+            await page.screenshot({ path:'mag-top.png', fullPage:false });
+            for (const [name,y] of [['mag-mid.png',420],['mag-reference-view.png',650]]) {
+              await page.evaluate(y => scrollTo(0,Math.min(y,document.documentElement.scrollHeight-innerHeight)), y);
+              await page.waitForTimeout(900);
+              await page.screenshot({ path:name, fullPage:false });
+            }
             await browser.close();
-          })().catch(error=>{console.error(error);process.exit(1);});
+          })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
       - name: Upload MAG visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-true-mesh3d-mag-v7-${{ github.run_id }}
+          name: live-true-mesh3d-mag-v8-fracture-v9-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/mag-visual/mag-top.png
             ${{ runner.temp }}/mag-visual/mag-mid.png
@@ -81,5 +129,15 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Additive layered true 3D MAG v7 rendered and screenshots captured'; else state='failure'; description='Additive layered true 3D MAG v7 visual capture failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='True indexed 3D MAG v8 plus 3D fracture v9 rendered and screenshots captured'
+          else
+            state='failure'
+            description='True 3D MAG v8/v9 visual capture failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX live true 3D MAG visual' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"
