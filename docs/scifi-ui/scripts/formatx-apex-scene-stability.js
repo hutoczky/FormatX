@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxApexSceneStability === 'ready-v11') return;
+  if (root.dataset.fxApexSceneStability === 'ready-v12') return;
 
   function ensureMobileCompositionStyle() {
     if (document.querySelector('link[data-fx-mobile-apex-composition]')) return;
@@ -19,7 +19,7 @@
     if (!document.querySelector('link[data-fx-core-mesh3d-style]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = './styles/formatx-core-mesh3d.css?v=20260808-true-mesh3d-v3';
+      link.href = './styles/formatx-core-mesh3d.css?v=20260808-true-mesh3d-v4';
       link.dataset.fxCoreMesh3dStyle = 'true';
       link.addEventListener('load', () => { root.dataset.fxCoreMesh3dStyle = 'ready'; }, { once: true });
       link.addEventListener('error', () => { root.dataset.fxCoreMesh3dStyle = 'failed'; }, { once: true });
@@ -27,10 +27,10 @@
     }
     if (document.querySelector('script[data-fx-core-mesh3d-runtime]')) return;
     const script = document.createElement('script');
-    script.src = './scripts/formatx-core-mesh3d-v3.js?v=20260808-true-mesh3d-v3';
+    script.src = './scripts/formatx-core-mesh3d-v4.js?v=20260808-true-mesh3d-v4';
     script.async = false;
     script.dataset.fxCoreMesh3dRuntime = 'true';
-    script.addEventListener('load', () => { root.dataset.fxCoreMesh3dLoad = 'ready-v3'; }, { once: true });
+    script.addEventListener('load', () => { root.dataset.fxCoreMesh3dLoad = 'ready-v4'; }, { once: true });
     script.addEventListener('error', () => { root.dataset.fxCoreMesh3dLoad = 'failed'; }, { once: true });
     document.head.appendChild(script);
   }
@@ -94,7 +94,7 @@
       ].every(marker => patched.includes(marker));
       if (patched !== source && complete) {
         shaderPatched = true;
-        root.dataset.fxApexReferenceShader = 'reference-mesh3d-background-v12';
+        root.dataset.fxApexReferenceShader = 'reference-mesh3d-background-v13';
         root.dataset.fxSdfCore = 'disabled-before-scene-0.92';
         source = patched;
         queueMicrotask(() => {
@@ -142,11 +142,13 @@
   addEventListener('formatx:nativeapexready', ensureTrueMeshAssets, { once: true });
   addEventListener('formatx:coremesh3dready', event => {
     const version = event.detail?.version;
-    root.dataset.fxNativeApexVisual = version === 'v3'
-      ? 'reference-luminous-true-mesh3d-v12'
-      : version === 'v2'
-        ? 'reference-calibrated-true-mesh3d-v11'
-        : 'reference-locked-true-mesh3d-v10';
+    root.dataset.fxNativeApexVisual = version === 'v4'
+      ? 'reference-faceted-true-mesh3d-v13'
+      : version === 'v3'
+        ? 'reference-luminous-true-mesh3d-v12'
+        : version === 'v2'
+          ? 'reference-calibrated-true-mesh3d-v11'
+          : 'reference-locked-true-mesh3d-v10';
     root.dataset.fxNativeApexRenderer = 'webgl2-indexed-mesh-plus-apex-background';
     root.dataset.fxCoreMobileComposition = root.dataset.fxNativeApexVisual;
   });
@@ -155,7 +157,7 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refreshSections, { once: true });
   else refreshSections();
 
-  root.dataset.fxApexSceneStability = 'ready-v11';
+  root.dataset.fxApexSceneStability = 'ready-v12';
   root.dataset.fxCoreHold = 'stable-before-morph';
-  root.dataset.fxCoreMobileComposition = 'true-mesh3d-v3-pending';
+  root.dataset.fxCoreMobileComposition = 'true-mesh3d-v4-pending';
 }());
