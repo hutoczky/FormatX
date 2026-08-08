@@ -15,7 +15,7 @@ const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js')
 const infinite = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
 const productionEntry = read('billing-worker/src/production-entry.js');
 
-assert.match(mapper, /fxApexSceneStability === 'ready-v6'/, 'reference luminous v7 mapper revision missing');
+assert.match(mapper, /fxApexSceneStability === 'ready-v7'/, 'pulsing luminous v8 mapper revision missing');
 assert.match(mapper, /fxNativeApexCanvas === 'true'/, 'scene mapper must target only Native Apex canvas');
 assert.match(mapper, /name === 'uScene'/, 'scene mapper must only remap uScene');
 assert.match(mapper, /raw - 0\.38/, 'core hold threshold missing');
@@ -23,17 +23,28 @@ assert.match(mapper, /0\.50/, 'deliberate morph window missing');
 assert.match(mapper, /smoothedScene \+= \(target - smoothedScene\) \* 0\.115/, 'scene smoothing missing');
 assert.doesNotMatch(mapper, /scrollTo\s*\(|scrollIntoView\s*\(|preventDefault\s*\(/, 'mapper must not capture native scrolling');
 
-// Reference-fit v7: broad four-point membrane rather than narrow propeller wings.
+// Reference-fit glass silhouette and real 3D cavity.
 assert.match(mapper, /function referenceLuminousCrystalShader\(source\)/, 'reference luminous shader transform missing');
 assert.match(mapper, /pow\(abs\(cos\(2\.\*a\)\),2\.15\)/, 'four-point star profile missing');
-assert.match(mapper, /float radial=radius\*mix\(\.47,1\.,axis\)/, 'reference silhouette width/concavity missing');
+assert.match(mapper, /float radial=radius\*mix\(\.47,1\.,axis\)/, 'reference silhouette width missing');
 assert.match(mapper, /float zCap=depth\*pow\(max\(0\.,1\.-pow\(rn,1\.72\)\),\.58\)/, 'continuous front/back volume missing');
-assert.match(mapper, /starPrism\(crystal,1\.54\*pulse,\.62,\.004\)/, 'reference crystal body depth missing');
-assert.match(mapper, /float cavity=sphere\(crystal,\.455\)/, 'central reactor cavity missing');
+assert.match(mapper, /starPrism\(crystal,1\.54\*pulse,\.62\*\(1\.\+heart\*\.025\),\.004\)/, 'breathing 3D crystal body missing');
+assert.match(mapper, /float cavity=sphere\(crystal,\.455\+heart\*\.018\)/, 'pulsing reactor cavity missing');
 assert.match(mapper, /shell=max\(shell,-cavity\)/, 'central cavity subtraction missing');
-assert.match(mapper, /float nucleus=sphere\(q,\.245/, 'emissive nucleus missing');
 
-// Subtle perspective must reveal 3D without distorting the reference silhouette.
+// Heartbeat and breathing contract: not a CSS scale trick.
+assert.match(mapper, /float beatA=\.5\+\.5\*sin\(uTime\*1\.55\)/, 'primary heartbeat oscillator missing');
+assert.match(mapper, /float beatB=\.5\+\.5\*sin\(uTime\*3\.10-\.78\)/, 'secondary heartbeat oscillator missing');
+assert.match(mapper, /float heart=pow\(beatA,4\.\)\*\.72\+pow\(beatB,9\.\)\*\.28/, 'double-beat envelope missing');
+assert.match(mapper, /float breath=\.5\+\.5\*sin\(uTime\*\.62-\.4\)/, 'slow breathing envelope missing');
+assert.match(mapper, /float pulse=1\.\+heart\*\.040\+breath\*\.010/, 'body pulse amplitude missing');
+assert.match(mapper, /float nucleus=sphere\(q,\.245\+heart\*\.050/, 'reactor nucleus pulse missing');
+assert.match(mapper, /float ringPulse=1\.\+heart\*\.055\+breath\*\.012/, 'orbit expansion pulse missing');
+assert.match(mapper, /\.43\*ringPulse/, 'inner pulsing orbit missing');
+assert.match(mapper, /\.58\*ringPulse/, 'middle pulsing orbit missing');
+assert.match(mapper, /\.78\*ringPulse/, 'outer pulsing orbit missing');
+
+// Subtle perspective keeps the reference silhouette readable.
 assert.match(mapper, /q\.xz\*=rot\(\.080\+sin\(uTime\*\.13\)\*\.062/, 'subtle 3D yaw missing');
 assert.match(mapper, /q\.yz\*=rot\(-\.050\+cos\(uTime\*\.15\)\*\.044/, 'subtle 3D pitch missing');
 assert.match(mapper, /q\.xy\*=rot\(sin\(uTime\*\.09\)\*\.014\)/, 'subtle roll missing');
@@ -41,16 +52,15 @@ assert.match(mapper, /float angle=mix\(\.042\+sin\(uTime\*\.11\)\*\.030/, 'refer
 assert.match(mapper, /float radius=mix\(5\.72,travelRadius,1\.-coreWeight\)/, 'reference camera distance missing');
 assert.match(mapper, /float focal=mix\(1\.96,1\.72,1\.-coreWeight\)/, 'reference focal length missing');
 
-// Concentric reactor rings, large core bloom and glass transmission.
-assert.match(mapper, /torus\(ring,vec2\(\.43,\.016\)\)/, 'inner reactor ring missing');
-assert.match(mapper, /torus\(ring,vec2\(\.58,\.012\)\)/, 'middle reactor ring missing');
-assert.match(mapper, /torus\(ring,vec2\(\.78,\.010\)\)/, 'outer reactor ring missing');
-assert.match(mapper, /float coreOrb=exp\(-coreDistance\*9\.4\)/, 'large central energy orb missing');
-assert.match(mapper, /float coreBloom=exp\(-coreDistance\*4\.8\)/, 'wide core bloom missing');
+// Pulsating screen-space light, glass transmission and outward energy wave.
+assert.match(mapper, /float screenHeart=pow\(screenBeatA,4\.\)\*\.72\+pow\(screenBeatB,9\.\)\*\.28/, 'screen-space heartbeat envelope missing');
+assert.match(mapper, /float waveRadius=\.19\+screenHeart\*\.055/, 'pulse wave radius missing');
+assert.match(mapper, /float pulseWave=exp\(-abs\(coreDistance-waveRadius\)\*54\.\)/, 'outward pulse wave missing');
+assert.match(mapper, /float coreOrb=exp\(-coreDistance\*9\.4\).*screenHeart/, 'heartbeat-driven core orb missing');
+assert.match(mapper, /float coreBloom=exp\(-coreDistance\*4\.8\).*screenHeart/, 'heartbeat-driven core bloom missing');
 assert.match(mapper, /vec3 refrDir=refract\(rd,n,\.75\)/, 'glass refraction missing');
 assert.match(mapper, /float caustic=pow/, 'internal caustics missing');
-assert.match(mapper, /float axisVein=exp\(-abs\(p\.x\)\*17\.\)\+exp\(-abs\(p\.y\)\*17\.\)/, 'luminous crystal axis veins missing');
-assert.match(mapper, /reference-luminous-crystal-v7/, 'v7 runtime marker missing');
+assert.match(mapper, /reference-luminous-crystal-pulse-v8/, 'v8 runtime marker missing');
 
 assert.match(apex, /getContext\('webgl2'/, 'native WebGL2 renderer missing');
 assert.match(apex, /float starPrism\(/, 'base SDF missing');
@@ -78,4 +88,4 @@ assert.doesNotMatch(voiceStability, /scrollTo\s*\(|scrollIntoView\s*\(/, 'dialog
 assert.match(infinite, /const VERSION = 'seamless-v7'/, 'seamless-v7 scroll ownership regressed');
 assert.match(infinite, /root\.dataset\.fxInfiniteInput = 'native'/, 'native momentum contract regressed');
 
-console.log('PASS: reference-luminous-crystal-v7 enforces the broad four-point glass silhouette, reactor cavity, bright core, subtle true-3D perspective and first-party seamless runtime.');
+console.log('PASS: reference-luminous-crystal-pulse-v8 enforces the broad glass reference silhouette plus living heartbeat, breathing geometry, pulsing reactor, expanding orbits and outward energy wave.');
