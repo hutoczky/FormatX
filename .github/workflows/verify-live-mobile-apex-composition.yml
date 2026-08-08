@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live mobile Apex stylesheet delivery
+      - name: Verify live mobile Apex visible single-renderer delivery
         shell: bash
         run: |
           set -euo pipefail
@@ -50,8 +50,20 @@ jobs:
             "https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-apex-composition.css?v=${REV}&audit=${GITHUB_RUN_ID}" \
             -D "$HEADERS" -o "$MOBILE_CSS"
 
+          # Positive visibility contract: Native Apex must actually be in the render tree.
+          grep -Fq 'html[data-fx-native-apex="ready"] .fx-transcend-shell[data-fx-native-apex="true"]' "$MOBILE_CSS"
+          grep -Fq 'z-index: var(--fx-layer-stage, 120) !important' "$MOBILE_CSS"
+          grep -Fq 'display: block !important' "$MOBILE_CSS"
+          grep -Fq 'height: 100dvh !important' "$MOBILE_CSS"
+          grep -Fq '> .fx-transcend-canvas[data-fx-native-apex-canvas="true"]' "$MOBILE_CSS"
+          grep -Fq 'visibility: visible !important' "$MOBILE_CSS"
+          grep -Fq 'opacity: 1 !important' "$MOBILE_CSS"
+
+          # Mobile composition contract.
           grep -Fq 'translate3d(0, -5.5svh, 0) scale(1.34)' "$MOBILE_CSS"
           grep -Fq 'brightness(1.32)' "$MOBILE_CSS"
+
+          # Negative ownership contract: all legacy/fallback cores stay retired.
           grep -Fq 'html[data-fx-native-apex="ready"] #hero .hero-space::before' "$MOBILE_CSS"
           grep -Fq 'html[data-fx-native-apex="ready"] #hero .hero-space::after' "$MOBILE_CSS"
           grep -Fq 'html[data-fx-native-apex="ready"] .fx-resilient-core' "$MOBILE_CSS"
@@ -74,10 +86,10 @@ jobs:
           set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live mobile Apex is authoritative; legacy core layers are retired'
+            description='Live mobile Apex is visible and authoritative; legacy core layers are retired'
           else
             state='failure'
-            description='Live mobile Apex single-renderer verification failed'
+            description='Live mobile Apex visibility / single-renderer verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
