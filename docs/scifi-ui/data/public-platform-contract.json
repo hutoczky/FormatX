@@ -43,13 +43,15 @@
     "core_scene_scroll_ownership": "seamless-v7-only",
     "mobile_core_composition": "raised-enlarged-readable-v1",
     "mobile_core_composition_delivery": "critical-server-bootstrap-no-store-v2",
-    "mobile_core_renderer_authority": "native-apex-exclusive-v1",
+    "mobile_core_renderer_authority": "native-apex-exclusive-v2",
+    "mobile_core_renderer_visibility": "native-apex-stage-layer-visible-v2",
     "legacy_core_visuals_retired_when_native_apex_ready": true,
+    "legacy_hide_contracts_overridden_by_native_ownership": true,
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
     "language_switch_preserves_scene_hash": true
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-native-apex-single-core-production6",
+    "award_readiness_revision": "2026-08-08-native-apex-visible-single-core-production7",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -92,6 +94,8 @@
     "mobile_native_apex_direct_delivery_guard": true,
     "mobile_native_apex_live_delivery_audit": true,
     "mobile_native_apex_single_renderer_guard": true,
+    "mobile_native_apex_positive_visibility_guard": true,
+    "mobile_native_apex_legacy_hide_override_guard": true,
     "mobile_native_apex_duplicate_hud_retired": true,
     "mobile_visual_viewport_dialogue_guard": true,
     "mobile_virtual_keyboard_overlap_guard": true,
