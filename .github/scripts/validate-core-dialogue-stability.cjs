@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, '../..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
 const mapper = read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
+const apex = read('docs/scifi-ui/scripts/formatx-apex-native.js');
 const mobileComposition = read('docs/scifi-ui/styles/formatx-mobile-apex-composition.css');
 const siteStability = read('docs/scifi-ui/styles/formatx-site-stability.css');
 const threeHost = read('docs/scifi-ui/styles/formatx-three-host.css');
@@ -23,10 +24,19 @@ assert.match(mapper, /0\.50/, 'deliberate morph window is missing');
 assert.match(mapper, /smoothedScene \+= \(target - smoothedScene\) \* 0\.115/, 'scene smoothing is missing');
 assert.match(mapper, /Math\.abs\(target - smoothedScene\) > 2\.25/, 'loop transfer snap guard is missing');
 assert.match(mapper, /formatx-mobile-apex-composition\.css\?v=20260808-core-mobile-1/, 'mapper fallback mobile Apex composition stylesheet is not loaded');
-assert.match(mapper, /fxCoreMobileComposition = 'zoomed-readable-v1'/, 'mobile Apex composition contract marker missing');
 assert.doesNotMatch(mapper, /scrollTo\s*\(/, 'scene mapper must never move the page');
 assert.doesNotMatch(mapper, /scrollIntoView\s*\(/, 'scene mapper must never move the page through element scrolling');
 assert.doesNotMatch(mapper, /preventDefault\s*\(/, 'scene mapper must not capture native scrolling');
+
+assert.match(apex, /fxNativeApexVisual='crystal-core-v2'/, 'true 3D crystal-core revision marker missing');
+assert.match(apex, /vec3 crystal=q;/, 'faceted crystal shell is missing');
+assert.match(apex, /ring\.yz\*=rot\(1\.57079633\)/, 'front-facing 3D energy ring is missing');
+assert.match(apex, /capsule\(q,vec3\(0,-1\.38,0\),vec3\(0,1\.38,0\),\.021\)/, 'vertical crystal energy spine is missing');
+assert.match(apex, /float coreWeight=1\.-smoothstep\(\.58,1\.08,uScene\)/, 'dedicated core camera framing is missing');
+assert.match(apex, /float radius=mix\(6\.25,travelRadius,1\.-coreWeight\)/, 'core camera distance must prevent mobile over-zoom');
+assert.match(apex, /quality: coarse\.matches \? 0\.72 : 0\.86/, 'mobile Native Apex must start above the old low-resolution quality floor');
+assert.match(apex, /coarse\.matches \? 1\.22 : 1\.5/, 'mobile render DPR quality floor is missing');
+assert.match(apex, /WEBGL2 \/ CRYSTAL SDF/, 'crystal SDF renderer mode marker missing');
 
 assert.match(mobileComposition, /html\[data-fx-native-apex="ready"\] \.fx-transcend-shell\[data-fx-native-apex="true"\]/, 'Native Apex ownership selector missing');
 assert.match(mobileComposition, /z-index: var\(--fx-layer-stage, 120\) !important/, 'Native Apex must own the stage layer');
@@ -34,8 +44,9 @@ assert.match(mobileComposition, /display: block !important/, 'Native Apex shell 
 assert.match(mobileComposition, /height: 100dvh !important/, 'Native Apex must use the dynamic mobile viewport');
 assert.match(mobileComposition, /> \.fx-transcend-canvas\[data-fx-native-apex-canvas="true"\]/, 'Native Apex canvas ownership selector missing');
 assert.match(mobileComposition, /visibility: visible !important;[\s\S]*opacity: 1 !important/, 'Native Apex canvas must be explicitly visible');
-assert.match(mobileComposition, /translate3d\(0, -5\.5svh, 0\) scale\(1\.34\)/, 'mobile Native Apex core must be raised and enlarged');
-assert.match(mobileComposition, /brightness\(1\.32\)/, 'mobile Native Apex core readability boost missing');
+assert.match(mobileComposition, /translate3d\(0, -1\.5svh, 0\) scale\(\.98\)/, 'mobile core must use shader framing instead of CSS over-zoom');
+assert.match(mobileComposition, /brightness\(1\.14\)/, 'mobile crystal readability treatment missing');
+assert.doesNotMatch(mobileComposition, /scale\(1\.34\)/, 'old pixel-amplifying mobile core zoom returned');
 assert.match(mobileComposition, /#hero \.hero-space::before/, 'legacy hero fallback core hard-retire guard missing');
 assert.match(mobileComposition, /#hero \.hero-space::after/, 'legacy hero fallback halo hard-retire guard missing');
 assert.match(mobileComposition, /\.fx-resilient-core/, 'resilient legacy canvas hard-retire guard missing');
@@ -44,9 +55,6 @@ assert.match(mobileComposition, /\.fx-three-stage-shell/, 'legacy three stage ha
 assert.match(mobileComposition, /\.fx-transcend-hud\[data-fx-native-apex="true"\][\s\S]*display: none !important/, 'mobile duplicate Native Apex HUD must be hidden');
 assert.match(mobileComposition, /prefers-reduced-motion: reduce/, 'mobile composition reduced-motion treatment missing');
 
-/* These legacy rules are the historical source of the black-screen regression.
-   Keep them visible to the test so the high-specificity ownership override can
-   never be removed while either compatibility stylesheet still hides the shell. */
 assert.match(siteStability, /\.fx-transcend-shell,[\s\S]*display: none !important/, 'expected legacy site-stability hide contract changed; review ownership guard');
 assert.match(threeHost, /html\[data-fx-three-host="ready"\][\s\S]*\.fx-transcend-shell,[\s\S]*display: none !important/, 'expected legacy Three-host hide contract changed; review ownership guard');
 
@@ -72,4 +80,4 @@ assert.doesNotMatch(voiceStability, /scrollIntoView\s*\(/, 'voice stability must
 assert.match(infinite, /const VERSION = 'seamless-v7'/, 'seamless-v7 scroll ownership regressed');
 assert.match(infinite, /root\.dataset\.fxInfiniteInput = 'native'/, 'native scroll input contract regressed');
 
-console.log('PASS: Native Apex is the single visible mobile core stage, outranks legacy hide contracts, and preserves seamless-v7 plus dialogue viewport guards.');
+console.log('PASS: true 3D crystal Native Apex uses dedicated mobile framing and higher adaptive render quality while preserving single-renderer ownership, seamless-v7 and dialogue viewport guards.');
