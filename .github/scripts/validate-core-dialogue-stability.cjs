@@ -24,20 +24,33 @@ assert.match(mapper, /0\.50/, 'deliberate morph window is missing');
 assert.match(mapper, /smoothedScene \+= \(target - smoothedScene\) \* 0\.115/, 'scene smoothing is missing');
 assert.match(mapper, /Math\.abs\(target - smoothedScene\) > 2\.25/, 'loop transfer snap guard is missing');
 assert.match(mapper, /formatx-mobile-apex-composition\.css\?v=20260808-core-mobile-1/, 'mapper fallback mobile Apex composition stylesheet is not loaded');
+assert.match(mapper, /fxApexSceneStability === 'ready-v3'/, 'reference crystal scene-stability revision missing');
+assert.match(mapper, /function referenceCrystalShader\(source\)/, 'reference crystal shader transform missing');
+assert.match(mapper, /pow\(abs\(cos\(2\.\*a\)\),4\.8\)/, 'sharp four-point reference silhouette missing');
+assert.match(mapper, /mix\(\.255,1\.,lobes\)/, 'deep concave reference silhouette missing');
+assert.match(mapper, /starPrism\(crystal,1\.48\*pulse,\.205,\.014\)/, 'thin 3D reference crystal shell missing');
+assert.match(mapper, /float nucleus=sphere\(q,\.265/, 'larger emissive reference nucleus missing');
+assert.match(mapper, /float radius=mix\(5\.68,travelRadius,1\.-coreWeight\)/, 'reference camera distance missing');
+assert.match(mapper, /float focal=mix\(1\.96,1\.72,1\.-coreWeight\)/, 'reference frontal camera focal length missing');
+assert.match(mapper, /float coreOrb=exp\(-coreDistance\*17\.5\)/, 'reference central energy orb missing');
+assert.match(mapper, /float waterMask=smoothstep\(\.30,\.92,-uv\.y\)/, 'reference water-reflection field missing');
+assert.match(mapper, /float facetAngle=atan\(p\.y,p\.x\)/, 'reference luminous facet veins missing');
+assert.match(mapper, /reference-crystal-v4/, 'reference crystal runtime marker missing');
 assert.doesNotMatch(mapper, /scrollTo\s*\(/, 'scene mapper must never move the page');
 assert.doesNotMatch(mapper, /scrollIntoView\s*\(/, 'scene mapper must never move the page through element scrolling');
 assert.doesNotMatch(mapper, /preventDefault\s*\(/, 'scene mapper must not capture native scrolling');
 
-assert.match(apex, /fxNativeApexVisual='luminous-star-core-v3'/, 'luminous star-core revision marker missing');
-assert.match(apex, /float starPrism\(/, 'four-wing concave star crystal SDF is missing');
-assert.match(apex, /float lobes=pow\(abs\(cos\(2\.\*a\)\),\.48\)/, 'curved four-wing crystal silhouette is missing');
+/* The base renderer remains the single WebGL2 owner; the scene-stability layer
+   transforms only its fragment shader before compilation. Keep these source
+   signatures so a future base rewrite cannot silently bypass reference-v4. */
+assert.match(apex, /fxNativeApexVisual='luminous-star-core-v3'/, 'base luminous star-core source marker missing');
+assert.match(apex, /float starPrism\(/, 'base star crystal SDF is missing');
+assert.match(apex, /float lobes=pow\(abs\(cos\(2\.\*a\)\),\.48\)/, 'reference patch target signature changed');
 assert.match(apex, /ring\.yz\*=rot\(1\.57079633\)/, 'front-facing 3D energy ring is missing');
 assert.match(apex, /capsule\(q,vec3\(-1\.52,0,0\),vec3\(1\.52,0,0\),\.014\)/, 'horizontal luminous crystal axis is missing');
 assert.match(apex, /capsule\(q,vec3\(0,-1\.68,0\),vec3\(0,1\.68,0\),\.014\)/, 'vertical luminous crystal axis is missing');
 assert.match(apex, /float auraRings=/, 'screen-space energy aura rings are missing');
 assert.match(apex, /float coreWeight=1\.-smoothstep\(\.58,1\.08,uScene\)/, 'dedicated core camera framing is missing');
-assert.match(apex, /float angle=mix\(-\.035\+sin\(uTime\*\.11\)\*\.022,travelAngle,1\.-coreWeight\)/, 'core camera must remain almost frontal');
-assert.match(apex, /float radius=mix\(6\.02,travelRadius,1\.-coreWeight\)/, 'core camera distance must frame the four-wing crystal');
 assert.match(apex, /quality: coarse\.matches \? 0\.82 : 0\.88/, 'mobile Native Apex must start at the high-quality star-core floor');
 assert.match(apex, /coarse\.matches \? 1\.25 : 1\.5/, 'mobile render DPR quality floor is missing');
 assert.match(apex, /WEBGL2 \/ STAR CRYSTAL SDF/, 'star crystal SDF renderer mode marker missing');
@@ -64,7 +77,7 @@ assert.match(threeHost, /html\[data-fx-three-host="ready"\][\s\S]*\.fx-transcend
 
 const mapperIndex = loader.indexOf('formatx-apex-scene-stability.js');
 const apexIndex = loader.indexOf('formatx-apex-native.js');
-assert.ok(mapperIndex >= 0 && apexIndex > mapperIndex, 'scene mapper must load immediately before Native Apex');
+assert.ok(mapperIndex >= 0 && apexIndex > mapperIndex, 'reference shader mapper must load immediately before Native Apex');
 assert.match(loader, /organism-voice-stability\.js\?v=20260808-mobile-visual-viewport-1/, 'mobile voice viewport revision is not loaded');
 
 assert.match(productionEntry, /data-fx-mobile-apex-composition="true"/, 'mobile Apex composition must be server-bootstrapped on the homepage');
@@ -84,4 +97,4 @@ assert.doesNotMatch(voiceStability, /scrollIntoView\s*\(/, 'voice stability must
 assert.match(infinite, /const VERSION = 'seamless-v7'/, 'seamless-v7 scroll ownership regressed');
 assert.match(infinite, /root\.dataset\.fxInfiniteInput = 'native'/, 'native scroll input contract regressed');
 
-console.log('PASS: luminous four-wing star crystal Native Apex uses frontal true-3D framing, high mobile render quality and energy lighting while preserving single-renderer ownership, seamless-v7 and dialogue viewport guards.');
+console.log('PASS: reference-crystal-v4 sharp four-wing WebGL2 geometry, energy lighting and water reflection are enforced while single-renderer ownership, seamless-v7 and dialogue viewport guards remain intact.');
