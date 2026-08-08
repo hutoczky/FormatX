@@ -19,12 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live mobile Apex visible single-renderer delivery
+      - name: Verify live true 3D mobile Apex delivery
         shell: bash
         run: |
           set -euo pipefail
           HOME_HTML="$RUNNER_TEMP/formatx-home.html"
           MOBILE_CSS="$RUNNER_TEMP/formatx-mobile-apex-composition.css"
+          APEX_JS="$RUNNER_TEMP/formatx-apex-native.js"
           HEADERS="$RUNNER_TEMP/formatx-mobile-apex-headers.txt"
           REV='20260808-mobile-apex-live-2'
 
@@ -49,6 +50,9 @@ jobs:
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
             "https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-apex-composition.css?v=${REV}&audit=${GITHUB_RUN_ID}" \
             -D "$HEADERS" -o "$MOBILE_CSS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
+            "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?audit=${GITHUB_RUN_ID}" \
+            -o "$APEX_JS"
 
           # Positive visibility contract: Native Apex must actually be in the render tree.
           grep -Fq 'html[data-fx-native-apex="ready"] .fx-transcend-shell[data-fx-native-apex="true"]' "$MOBILE_CSS"
@@ -59,9 +63,20 @@ jobs:
           grep -Fq 'visibility: visible !important' "$MOBILE_CSS"
           grep -Fq 'opacity: 1 !important' "$MOBILE_CSS"
 
-          # Mobile composition contract.
-          grep -Fq 'translate3d(0, -5.5svh, 0) scale(1.34)' "$MOBILE_CSS"
-          grep -Fq 'brightness(1.32)' "$MOBILE_CSS"
+          # True 3D mobile composition: shader owns framing; CSS must not enlarge pixels.
+          grep -Fq 'translate3d(0, -1.5svh, 0) scale(.98)' "$MOBILE_CSS"
+          grep -Fq 'brightness(1.14)' "$MOBILE_CSS"
+          ! grep -Fq 'scale(1.34)' "$MOBILE_CSS"
+
+          # Actual live WebGL2/SDF implementation, not an image or CSS substitute.
+          grep -Fq "getContext('webgl2'" "$APEX_JS"
+          grep -Fq "fxNativeApexVisual='crystal-core-v2'" "$APEX_JS"
+          grep -Fq 'WEBGL2 / CRYSTAL SDF' "$APEX_JS"
+          grep -Fq 'vec3 crystal=q;' "$APEX_JS"
+          grep -Fq 'ring.yz*=rot(1.57079633)' "$APEX_JS"
+          grep -Fq 'float radius=mix(6.25,travelRadius,1.-coreWeight)' "$APEX_JS"
+          grep -Fq 'quality: coarse.matches ? 0.72 : 0.86' "$APEX_JS"
+          grep -Fq 'coarse.matches ? 1.22 : 1.5' "$APEX_JS"
 
           # Negative ownership contract: all legacy/fallback cores stay retired.
           grep -Fq 'html[data-fx-native-apex="ready"] #hero .hero-space::before' "$MOBILE_CSS"
@@ -86,10 +101,10 @@ jobs:
           set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live mobile Apex is visible and authoritative; legacy core layers are retired'
+            description='Live true 3D crystal Apex is visible, native and single-renderer'
           else
             state='failure'
-            description='Live mobile Apex visibility / single-renderer verification failed'
+            description='Live true 3D crystal Apex verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
