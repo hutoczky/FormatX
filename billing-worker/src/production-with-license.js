@@ -35,6 +35,7 @@ const CHECKOUT_PATHS = new Set([
 
 const RATE_LIMITED_API_PATHS = new Set([
   '/api/payment-confirmation',
+  '/api/session-status',
   '/api/admin/approve-bank-transfer',
 ]);
 
@@ -623,7 +624,7 @@ export function concealUpstreamText(value) {
     .replace(/https:\/\/api\.github\.com\/repos\/hutoczky\/FormatX-Updates\/releases\/latest/gi, PUBLIC_RELEASE_API_PATH)
     .replace(/https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\/[^"'\s<>()]+/gi, MULTIPLATFORM_DOWNLOAD_PATH)
     .replace(/https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/(?:latest|tag\/[^"'\s<>()]+)/gi, '/scifi-ui/downloads/')
-    .replace(/https:\/\/github\.com\/hutoczky\/FormatX\/releases\/tag\/android-native-v1\.1\.0-beta/gi, '/scifi-ui/android/')
+    .replace(/https:\/\/github\.com\/hutoczky\/FormatX\/releases\/tag\/android-native-v1\.1\.0-beta/gi, '/download/android-native-beta')
     .replace(/https:\/\/github\.com\/hutoczky\/FormatX\/issues(?:\/new)?/gi, '/scifi-ui/support.html')
     .replace(/https:\/\/github\.com\/hutoczky\/FormatX(?:\/)?/gi, '/')
     .replace(/https:\/\/api\.github\.com(?:\/[^"'\s<>()]*)?/gi, PUBLIC_RELEASE_API_PATH)
