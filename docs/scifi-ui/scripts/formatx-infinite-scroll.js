@@ -32,7 +32,7 @@
     if (document.querySelector('link[data-fx-seamless-loop-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-v6-restored-1';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-v6-restored-2';
     link.dataset.fxSeamlessLoopStyle = 'true';
     document.head.appendChild(link);
   }
