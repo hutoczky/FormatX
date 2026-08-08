@@ -22,6 +22,8 @@
     "mobile_layout_unchanged": true,
     "infinite_scroll_controller": "seamless-v7",
     "scroll_controller": "seamless-continuous",
+    "scroll_runtime_load": "critical-startup",
+    "scroll_runtime_independent_of_immersive": true,
     "automatic_scroll_loop": true,
     "clone_based_loop": true,
     "cloned_hero_only": true,
@@ -36,7 +38,7 @@
     "section_scroll_snap": false,
     "native_scroll_regression_fix": "2026-08-08",
     "seamless_scroll_regression_fix": "2026-08-08",
-    "production_scroll_revision": "seamless-v7-runway1",
+    "production_scroll_revision": "seamless-v7-critical-bootstrap-1",
     "language_switch_preserves_scene_hash": true
   },
   "source_of_truth": {
