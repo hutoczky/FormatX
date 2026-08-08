@@ -13,11 +13,13 @@ function assert(condition, message) {
 }
 
 async function injectContentLayer(page) {
+  await page.addStyleTag({ url: origin + '/scifi-ui/styles/single-language-toggle.css?v=20260808-single-language-5' });
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-content-standard.css' });
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-readability.css' });
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-unified.css' });
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-hero-flow.css' });
   for (const src of [
+    '/scifi-ui/scripts/single-language-toggle.js?v=20260808-single-language-5',
     '/scifi-ui/scripts/release-metadata.js',
     '/scifi-ui/scripts/formatx-content-standard.js',
     '/scifi-ui/scripts/formatx-content-finalizer.js',
@@ -26,6 +28,7 @@ async function injectContentLayer(page) {
   ]) {
     await page.addScriptTag({ url: origin + src });
   }
+  await page.waitForFunction(() => document.documentElement.dataset.fxSingleLanguageToggle === 'ready', null, { timeout: 8000 });
   await page.waitForTimeout(2600);
 }
 
@@ -111,7 +114,7 @@ async function commonAssertions(page, mobile) {
   const method = await page.locator('.fx-method-inline:visible').first().locator('li').count();
   assert(method === 4, `Visible FormatX Method must have four steps, found ${method}`);
   const visibleLanguageControls = await page.locator('.fx-language-toggle:visible, .language-switch [data-language]:visible, .language-control [data-language-choice]:visible').count();
-  assert(visibleLanguageControls <= 1, `More than one visible language control: ${visibleLanguageControls}`);
+  assert(visibleLanguageControls === 1, `Exactly one visible language control is required, found ${visibleLanguageControls}`);
   const immersive = await page.evaluate(() => ({
     mode: document.documentElement.dataset.fxImmersive || '',
     coreCanvases: document.querySelectorAll('.fx-resilient-core').length,
