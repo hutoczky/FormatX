@@ -43,6 +43,7 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
   '/scifi-ui/scripts/igloo-parity.js',
+  '/scifi-ui/scripts/formatx-apex-scene-stability.js',
   '/scifi-ui/scripts/formatx-apex-native.js',
   '/scifi-ui/scripts/formatx-three-host-safe.js',
   '/scifi-ui/styles/igloo-parity.css',
