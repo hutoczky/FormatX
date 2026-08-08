@@ -127,12 +127,12 @@ $tf/
 # Guidance Automation Toolkit
 *.gpState
 
-# ReSharper is a .NET coding add-in
+# ReSharper is a .NET code quality analysis tool
 _ReSharper*/
 *.[Rr]e[Ss]harper
 *.DotSettings.user
 
-# TeamCity is a build add-in
+# TeamCity*
 _TeamCity*
 
 # DotCover is a Code Coverage Tool
@@ -187,9 +187,7 @@ publish/
 *.pubxml
 *.publishproj
 
-# Microsoft Azure Web App publish settings. Comment the next line if you want to
-# checkin your Azure Web App publish settings, but sensitive information contained
-# in these scripts will be unencrypted
+# Microsoft Azure Web App publish settings. Comment the next line if you want to checkin your Azure Web App publish settings, but sensitive information contained in these scripts will be unencrypted
 PublishScripts/
 
 # NuGet Packages
@@ -361,6 +359,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
 # Billing environment files
 .env
 .env.*
@@ -372,3 +371,7 @@ billing-worker/.wrangler/
 .wrangler
 .dev.vars*
 !.dev.vars.example
+
+# Generated web-audit output. CI uploads these as workflow artifacts instead.
+.lighthouseci/
+lighthouse-output.txt
