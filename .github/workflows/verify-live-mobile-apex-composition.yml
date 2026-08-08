@@ -19,20 +19,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live true indexed 3D MAG v8 plus fracture v9
+      - name: Verify live reference-proportioned indexed 3D MAG v10
         shell: bash
         run: |
           set -euo pipefail
           MAPPER="$RUNNER_TEMP/mapper.js"
-          MESH="$RUNNER_TEMP/mesh-v8.js"
-          FRACTURE="$RUNNER_TEMP/fracture-v9.js"
+          MESH="$RUNNER_TEMP/mesh-v10.js"
+          FRACTURE="$RUNNER_TEMP/fracture-v10.js"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" -o "$MAPPER"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v8.js?v=20260808-true-mesh3d-v8&audit=${GITHUB_RUN_ID}" -o "$MESH"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-fracture3d-v9.js?v=20260808-fracture3d-v9&audit=${GITHUB_RUN_ID}" -o "$FRACTURE"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v10.js?v=20260809-true-mesh3d-v10&audit=${GITHUB_RUN_ID}" -o "$MESH"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-fracture3d-v10.js?v=20260809-fracture3d-v10&audit=${GITHUB_RUN_ID}" -o "$FRACTURE"
 
-          grep -Fq "fxApexSceneStability='ready-v17'" "$MAPPER"
-          grep -Fq 'formatx-core-mesh3d-v8.js?v=20260808-true-mesh3d-v8' "$MAPPER"
-          grep -Fq 'formatx-core-fracture3d-v9.js?v=20260808-fracture3d-v9' "$MAPPER"
+          grep -Fq "fxApexSceneStability='ready-v18'" "$MAPPER"
+          grep -Fq 'formatx-core-mesh3d-v10.js?v=20260809-true-mesh3d-v10' "$MAPPER"
+          grep -Fq 'formatx-core-fracture3d-v10.js?v=20260809-fracture3d-v10' "$MAPPER"
           grep -Fq 'retired-for-real-3d-reactor' "$MAPPER"
 
           grep -Fq "getContext('webgl2'" "$MESH"
@@ -41,16 +41,22 @@ jobs:
           grep -Fq 'gl.cullFace(gl.FRONT)' "$MESH"
           grep -Fq 'gl.cullFace(gl.BACK)' "$MESH"
           grep -Fq 'gl.drawElements(gl.TRIANGLES' "$MESH"
-          grep -Fq "fxCoreMesh3d='ready-v8'" "$MESH"
-          grep -Fq "fxCoreGeometry='indexed-triangle-mesh-v8'" "$MESH"
-          grep -Fq "fxCoreReactorGeometry='sphere-plus-3-tori-plus-2-box-beams'" "$MESH"
+          grep -Fq 'xs=.82' "$MESH"
+          grep -Fq 'ys=1.30' "$MESH"
+          grep -Fq 'core=up(sphere(.060))' "$MESH"
+          grep -Fq 'up(torus(.23,.0055))' "$MESH"
+          grep -Fq "fxCoreMesh3d='ready-v10'" "$MESH"
+          grep -Fq "fxCoreGeometry='indexed-triangle-mesh-v10'" "$MESH"
+          grep -Fq "fxCoreProportion='x0.82-y1.30'" "$MESH"
 
           grep -Fq "getContext('webgl2'" "$FRACTURE"
           grep -Fq 'gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER' "$FRACTURE"
           grep -Fq 'gl.drawElements(gl.LINES' "$FRACTURE"
-          grep -Fq 'point(r1,i1,.008)' "$FRACTURE"
-          grep -Fq "fxCoreFracture3d='ready-v9'" "$FRACTURE"
-          grep -Fq "fxCoreFractureGeometry='indexed-gl-lines'" "$FRACTURE"
+          grep -Fq 'xs=.82' "$FRACTURE"
+          grep -Fq 'ys=1.30' "$FRACTURE"
+          grep -Fq "fxCoreFracture3d='ready-v10'" "$FRACTURE"
+          grep -Fq "fxCoreFractureGeometry='indexed-gl-lines-v10'" "$FRACTURE"
+          grep -Fq "fxCoreFractureAlignment='x0.82-y1.30'" "$FRACTURE"
 
           ! grep -Fq 'drawImage(' "$MESH"
           ! grep -Fq 'drawImage(' "$FRACTURE"
@@ -66,10 +72,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live MAG uses true indexed 3D mesh v8 plus indexed 3D fracture network v9'
+            description='Live MAG uses reference-proportioned true indexed WebGL2 mesh v10 plus aligned 3D fracture v10'
           else
             state='failure'
-            description='Live true 3D MAG v8/v9 verification failed'
+            description='Live reference-proportioned true 3D MAG v10 verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
