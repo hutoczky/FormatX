@@ -32,9 +32,11 @@ const pricingApi = read('billing-worker/src/pricing-v100-api.js');
 const productionEntry = read('billing-worker/src/production-entry.js');
 const deployWorkflow = read('.github/workflows/deploy-formatx-custom-domain.yml');
 
-assert.ok(includesAll(loader, ['safe-ready-v27', 'safe-degraded-v27', 'load(index + 1)']), 'failure-tolerant loader missing');
+assert.ok(includesAll(loader, ['safe-ready-v28', 'safe-degraded-v28', 'load(index + 1)']), 'failure-tolerant loader missing');
 assert.ok(loader.indexOf('organism-core-controller.js') < loader.indexOf('organism-voice.js'), 'core must load before voice');
 assert.ok(loader.indexOf('organism-voice-stability.js') < loader.indexOf('organism-master-sync.js'), 'voice stability must load before master sync');
+assert.ok(loader.indexOf('formatx-infinite-scroll.js') < loader.indexOf('formatx-apex-native.js'), 'seamless-v7 must initialise before native Apex');
+assert.ok(loader.indexOf('formatx-apex-native.js') < loader.indexOf('formatx-three-host-safe.js'), 'native Apex must precede the safe Three fallback');
 assert.ok(!loader.includes('organism-voice-foreground.js'), 'conflicting foreground module returned');
 
 assert.ok(includesAll(menu, ['function setOpen(toggle, nav, open)', 'aria-expanded', 'fx-organism-menu-open']), 'menu state contract missing');
@@ -153,4 +155,5 @@ assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 assert.ok(deployWorkflow.includes('https://formatxsuite.com') && deployWorkflow.includes('https://www.formatxsuite.com'), 'custom-domain smoke checks missing');
 
-console.log('PASS: FormatX seamless continuous scrolling preserves desktop wheel flow and mobile momentum before the visual loop handoff; deferred rendering, feedback, downloads, responsive UI and deployment gates remain present.');
+require('./validate-igloo-floor.cjs');
+console.log('PASS: FormatX seamless continuous scrolling preserves desktop wheel flow and mobile momentum before the visual loop handoff; native Apex, deferred rendering, feedback, downloads, responsive UI and deployment gates remain present.');
