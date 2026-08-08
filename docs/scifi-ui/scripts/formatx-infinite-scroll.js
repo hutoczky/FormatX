@@ -13,6 +13,7 @@
   let landingFrame = 0;
   let activityTimer = 0;
   let repairTimer = 0;
+  let unlockTimer = 0;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let layoutWidth = innerWidth;
 
@@ -256,7 +257,15 @@
     root.classList.add('fx-page-scrolling');
     clearTimeout(activityTimer);
     activityTimer = window.setTimeout(markIdle, ACTIVITY_IDLE_MS);
-    if (!bridge || !sourceHero || Date.now() < transferLockedUntil) return;
+    if (!bridge || !sourceHero) return;
+    const lockRemaining = transferLockedUntil - Date.now();
+    if (lockRemaining > 0) {
+      clearTimeout(unlockTimer);
+      unlockTimer = window.setTimeout(onScroll, lockRemaining + 24);
+      root.dataset.fxLoopGuardRemaining = String(Math.ceil(lockRemaining));
+      return;
+    }
+    root.dataset.fxLoopGuardRemaining = '0';
     if (document.hidden || document.body.classList.contains('fx-organism-panel-open')) return;
     if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running')) return;
 
@@ -325,6 +334,7 @@
       frameStableLanding: true,
       ratioMatchedLanding: true,
       reachableSeam: true,
+      guardRetry: true,
       inputInterception: false,
       jumpFree: true
     });
@@ -356,5 +366,6 @@
     cancelAnimationFrame(landingFrame);
     clearTimeout(activityTimer);
     clearTimeout(repairTimer);
+    clearTimeout(unlockTimer);
   }, { once: true });
 }());
