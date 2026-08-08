@@ -12,6 +12,7 @@ const mobileComposition = read('docs/scifi-ui/styles/formatx-mobile-apex-composi
 const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
 const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
 const infinite = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
+const productionEntry = read('billing-worker/src/production-entry.js');
 
 assert.match(mapper, /fxNativeApexCanvas === 'true'/, 'scene mapper must target only the Native Apex canvas');
 assert.match(mapper, /name === 'uScene'/, 'scene mapper must only remap the uScene uniform');
@@ -19,7 +20,7 @@ assert.match(mapper, /raw - 0\.38/, 'core hold threshold is missing');
 assert.match(mapper, /0\.50/, 'deliberate morph window is missing');
 assert.match(mapper, /smoothedScene \+= \(target - smoothedScene\) \* 0\.115/, 'scene smoothing is missing');
 assert.match(mapper, /Math\.abs\(target - smoothedScene\) > 2\.25/, 'loop transfer snap guard is missing');
-assert.match(mapper, /formatx-mobile-apex-composition\.css\?v=20260808-core-mobile-1/, 'corrected mobile Apex composition stylesheet is not loaded');
+assert.match(mapper, /formatx-mobile-apex-composition\.css\?v=20260808-core-mobile-1/, 'mapper fallback mobile Apex composition stylesheet is not loaded');
 assert.match(mapper, /fxCoreMobileComposition = 'zoomed-readable-v1'/, 'mobile Apex composition contract marker missing');
 assert.doesNotMatch(mapper, /scrollTo\s*\(/, 'scene mapper must never move the page');
 assert.doesNotMatch(mapper, /scrollIntoView\s*\(/, 'scene mapper must never move the page through element scrolling');
@@ -35,6 +36,11 @@ const apexIndex = loader.indexOf('formatx-apex-native.js');
 assert.ok(mapperIndex >= 0 && apexIndex > mapperIndex, 'scene mapper must load immediately before Native Apex');
 assert.match(loader, /organism-voice-stability\.js\?v=20260808-mobile-visual-viewport-1/, 'mobile voice viewport revision is not loaded');
 
+assert.match(productionEntry, /data-fx-mobile-apex-composition="true"/, 'mobile Apex composition must be server-bootstrapped on the homepage');
+assert.match(productionEntry, /formatx-mobile-apex-composition\.css\?v=20260808-mobile-apex-live-2/, 'mobile Apex production cache-busting revision missing');
+assert.match(productionEntry, /'\/scifi-ui\/styles\/formatx-mobile-apex-composition\.css'/, 'mobile Apex composition must be a no-store critical production asset');
+assert.match(productionEntry, /if \(!html\.includes\('data-fx-mobile-apex-composition'\)\)/, 'production homepage injection guard missing');
+
 assert.match(voiceStability, /window\.visualViewport/, 'mobile dialogue must use the Visual Viewport API');
 assert.match(voiceStability, /keyboardInset/, 'keyboard inset compensation is missing');
 assert.match(voiceStability, /shell\.style\.bottom = bottomInset \+ 'px'/, 'dialogue bottom anchoring is not keyboard-aware');
@@ -47,4 +53,4 @@ assert.doesNotMatch(voiceStability, /scrollIntoView\s*\(/, 'voice stability must
 assert.match(infinite, /const VERSION = 'seamless-v7'/, 'seamless-v7 scroll ownership regressed');
 assert.match(infinite, /root\.dataset\.fxInfiniteInput = 'native'/, 'native scroll input contract regressed');
 
-console.log('PASS: Native Apex core hold/morph, mobile core composition and Organism visual-viewport stability are guarded without taking scroll ownership.');
+console.log('PASS: Native Apex core hold/morph, direct mobile composition delivery and Organism visual-viewport stability are guarded without taking scroll ownership.');
