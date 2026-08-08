@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@latest
           npx playwright install --with-deps chromium
 
-      - name: Capture live mobile MAG v8 plus true 3D fracture v9
+      - name: Capture cinematic live mobile MAG v11 states
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -52,7 +52,7 @@ jobs:
               locale: 'hu-HU'
             });
             const page = await context.newPage();
-            await page.goto(`https://www.formatxsuite.com/?true3d_v9_visual=${process.env.RUN_ID}`, {
+            await page.goto(`https://www.formatxsuite.com/?cinematic_v11_visual=${process.env.RUN_ID}`, {
               waitUntil: 'domcontentloaded', timeout: 45000
             });
             await page.waitForTimeout(1200);
@@ -64,45 +64,76 @@ jobs:
               dispatchEvent(new CustomEvent('formatx:immersiveactivate'));
               document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
             });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMesh3d === 'ready-v8', null, { timeout: 30000 });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreGeometry === 'indexed-triangle-mesh-v8', null, { timeout: 10000 });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreFracture3d === 'ready-v9', null, { timeout: 30000 });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreFractureGeometry === 'indexed-gl-lines', null, { timeout: 10000 });
-            await page.waitForTimeout(2600);
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMesh3d === 'ready-v11', null, { timeout: 30000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreGeometry === 'indexed-triangle-mesh-v11', null, { timeout: 10000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreFracture3d === 'ready-v11', null, { timeout: 30000 });
+            await page.waitForFunction(() => window.FormatXCoreCinematic?.version === 'film-reactive-v1', null, { timeout: 10000 });
+            await page.waitForTimeout(1600);
 
-            const state = await page.evaluate(() => ({
+            const idle = await page.evaluate(() => ({
               mapper: document.documentElement.dataset.fxApexSceneStability,
               mesh: document.documentElement.dataset.fxCoreMesh3d,
               geometry: document.documentElement.dataset.fxCoreGeometry,
-              depth: document.documentElement.dataset.fxCoreDepthBuffer,
-              glass: document.documentElement.dataset.fxCoreGlassPass,
-              reactor: document.documentElement.dataset.fxCoreReactorGeometry,
               fracture: document.documentElement.dataset.fxCoreFracture3d,
-              fractureGeometry: document.documentElement.dataset.fxCoreFractureGeometry,
-              fractureSegments: document.documentElement.dataset.fxCoreFractureSegments,
+              cinematic: document.documentElement.dataset.fxCoreCinematic,
+              state: window.FormatXCoreCinematic?.state,
+              energy: window.FormatXCoreCinematic?.energy,
+              surge: window.FormatXCoreCinematic?.surge,
+              depth: document.documentElement.dataset.fxCoreDepthBuffer,
               camera: document.documentElement.dataset.fxCoreCamera,
-              screenReactor: document.documentElement.dataset.fxScreenSpaceReactor,
-              visual: document.documentElement.dataset.fxNativeApexVisual
+              screenReactor: document.documentElement.dataset.fxScreenSpaceReactor
             }));
-            fs.writeFileSync('mag-state.json', JSON.stringify(state,null,2));
-            if (
-              state.mapper !== 'ready-v17' ||
-              state.mesh !== 'ready-v8' ||
-              state.geometry !== 'indexed-triangle-mesh-v8' ||
-              state.depth !== 'enabled' ||
-              state.glass !== 'two-sided-back-front' ||
-              state.fracture !== 'ready-v9' ||
-              state.fractureGeometry !== 'indexed-gl-lines' ||
-              state.camera !== 'perspective' ||
-              state.screenReactor !== 'retired-for-real-3d-reactor'
-            ) throw new Error(`Unexpected true 3D state: ${JSON.stringify(state)}`);
+            await page.screenshot({ path:'mag-idle.png', fullPage:false });
 
-            await page.screenshot({ path:'mag-top.png', fullPage:false });
-            for (const [name,y] of [['mag-mid.png',420],['mag-reference-view.png',650]]) {
-              await page.evaluate(y => scrollTo(0,Math.min(y,document.documentElement.scrollHeight-innerHeight)), y);
-              await page.waitForTimeout(900);
-              await page.screenshot({ path:name, fullPage:false });
-            }
+            await page.evaluate(() => {
+              dispatchEvent(new CustomEvent('formatx:organismcoreactivate',{detail:{source:'visual-audit',scene:0,userInitiated:true}}));
+              dispatchEvent(new CustomEvent('formatx:organismresponse',{detail:{text:'audit',scene:0,language:'hu',localOnly:true}}));
+            });
+            await page.waitForTimeout(700);
+            const awake = await page.evaluate(() => ({
+              state: window.FormatXCoreCinematic?.state,
+              energy: window.FormatXCoreCinematic?.energy,
+              surge: window.FormatXCoreCinematic?.surge
+            }));
+            await page.screenshot({ path:'mag-awake.png', fullPage:false });
+
+            await page.evaluate(() => dispatchEvent(new CustomEvent('formatx:organismspeechstart',{detail:{text:'audit',explicit:true}})));
+            await page.waitForTimeout(850);
+            const speaking = await page.evaluate(() => ({
+              state: window.FormatXCoreCinematic?.state,
+              energy: window.FormatXCoreCinematic?.energy,
+              surge: window.FormatXCoreCinematic?.surge,
+              speech: window.FormatXCoreCinematic?.speech
+            }));
+            await page.screenshot({ path:'mag-speaking.png', fullPage:false });
+
+            await page.evaluate(() => dispatchEvent(new CustomEvent('formatx:organismspeechend',{detail:{text:'audit',explicit:true}})));
+            await page.waitForTimeout(900);
+            const settling = await page.evaluate(() => ({
+              state: window.FormatXCoreCinematic?.state,
+              energy: window.FormatXCoreCinematic?.energy,
+              speech: window.FormatXCoreCinematic?.speech
+            }));
+            await page.screenshot({ path:'mag-settling.png', fullPage:false });
+
+            const state={idle,awake,speaking,settling};
+            fs.writeFileSync('mag-state.json',JSON.stringify(state,null,2));
+            if (
+              idle.mapper !== 'ready-v20' ||
+              idle.mesh !== 'ready-v11' ||
+              idle.geometry !== 'indexed-triangle-mesh-v11' ||
+              idle.fracture !== 'ready-v11' ||
+              idle.cinematic !== 'film-reactive-v1' ||
+              idle.depth !== 'enabled' ||
+              idle.camera !== 'perspective' ||
+              idle.screenReactor !== 'retired-for-real-3d-reactor' ||
+              !(awake.energy > idle.energy + 0.20) ||
+              !(awake.surge > 0.12) ||
+              speaking.speech !== 1 ||
+              !(speaking.energy > 0.65) ||
+              settling.speech !== 0
+            ) throw new Error(`Unexpected cinematic true 3D state: ${JSON.stringify(state)}`);
+
             await browser.close();
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
@@ -111,11 +142,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-true-mesh3d-mag-v8-fracture-v9-${{ github.run_id }}
+          name: live-cinematic-true-mesh3d-mag-v11-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-visual/mag-top.png
-            ${{ runner.temp }}/mag-visual/mag-mid.png
-            ${{ runner.temp }}/mag-visual/mag-reference-view.png
+            ${{ runner.temp }}/mag-visual/mag-idle.png
+            ${{ runner.temp }}/mag-visual/mag-awake.png
+            ${{ runner.temp }}/mag-visual/mag-speaking.png
+            ${{ runner.temp }}/mag-visual/mag-settling.png
             ${{ runner.temp }}/mag-visual/mag-state.json
           if-no-files-found: error
           retention-days: 7
@@ -131,10 +163,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='True indexed 3D MAG v8 plus 3D fracture v9 rendered and screenshots captured'
+            description='Cinematic true 3D MAG v11 reacted to activation, response and speech; visual states captured'
           else
             state='failure'
-            description='True 3D MAG v8/v9 visual capture failed'
+            description='Cinematic true 3D MAG v11 visual/state capture failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
