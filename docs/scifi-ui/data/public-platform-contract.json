@@ -42,10 +42,24 @@
     "language_switch_preserves_scene_hash": true
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-award-tier-v2-production",
+    "award_readiness_revision": "2026-08-08-native-apex-igloo-floor-v1",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
+    },
+    "benchmark_floor": {
+      "policy": "igloo-inc-is-mandatory-minimum-reference",
+      "external_superiority_claim": false,
+      "native_first_party_procedural_gpu": true,
+      "functional_six_scene_morphing": true,
+      "adaptive_gpu_quality_from_measured_fps": true,
+      "canvas2d_safe_fallback": true,
+      "generative_audio": "explicit-user-opt-in",
+      "particle_typography_footer": true,
+      "third_party_scene_framework_required": false,
+      "scroll_ownership": "seamless-v7-only",
+      "section_scroll_snap": false,
+      "wheel_or_touch_scroll_capture": false
     },
     "first_response_product_positioning": true,
     "hero_factual_trustline": true,
