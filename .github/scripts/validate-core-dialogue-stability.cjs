@@ -28,15 +28,19 @@ assert.doesNotMatch(mapper, /scrollTo\s*\(/, 'scene mapper must never move the p
 assert.doesNotMatch(mapper, /scrollIntoView\s*\(/, 'scene mapper must never move the page through element scrolling');
 assert.doesNotMatch(mapper, /preventDefault\s*\(/, 'scene mapper must not capture native scrolling');
 
-assert.match(apex, /fxNativeApexVisual='crystal-core-v2'/, 'true 3D crystal-core revision marker missing');
-assert.match(apex, /vec3 crystal=q;/, 'faceted crystal shell is missing');
+assert.match(apex, /fxNativeApexVisual='luminous-star-core-v3'/, 'luminous star-core revision marker missing');
+assert.match(apex, /float starPrism\(/, 'four-wing concave star crystal SDF is missing');
+assert.match(apex, /float lobes=pow\(abs\(cos\(2\.\*a\)\),\.48\)/, 'curved four-wing crystal silhouette is missing');
 assert.match(apex, /ring\.yz\*=rot\(1\.57079633\)/, 'front-facing 3D energy ring is missing');
-assert.match(apex, /capsule\(q,vec3\(0,-1\.38,0\),vec3\(0,1\.38,0\),\.021\)/, 'vertical crystal energy spine is missing');
+assert.match(apex, /capsule\(q,vec3\(-1\.52,0,0\),vec3\(1\.52,0,0\),\.014\)/, 'horizontal luminous crystal axis is missing');
+assert.match(apex, /capsule\(q,vec3\(0,-1\.68,0\),vec3\(0,1\.68,0\),\.014\)/, 'vertical luminous crystal axis is missing');
+assert.match(apex, /float auraRings=/, 'screen-space energy aura rings are missing');
 assert.match(apex, /float coreWeight=1\.-smoothstep\(\.58,1\.08,uScene\)/, 'dedicated core camera framing is missing');
-assert.match(apex, /float radius=mix\(6\.25,travelRadius,1\.-coreWeight\)/, 'core camera distance must prevent mobile over-zoom');
-assert.match(apex, /quality: coarse\.matches \? 0\.72 : 0\.86/, 'mobile Native Apex must start above the old low-resolution quality floor');
-assert.match(apex, /coarse\.matches \? 1\.22 : 1\.5/, 'mobile render DPR quality floor is missing');
-assert.match(apex, /WEBGL2 \/ CRYSTAL SDF/, 'crystal SDF renderer mode marker missing');
+assert.match(apex, /float angle=mix\(-\.035\+sin\(uTime\*\.11\)\*\.022,travelAngle,1\.-coreWeight\)/, 'core camera must remain almost frontal');
+assert.match(apex, /float radius=mix\(6\.02,travelRadius,1\.-coreWeight\)/, 'core camera distance must frame the four-wing crystal');
+assert.match(apex, /quality: coarse\.matches \? 0\.82 : 0\.88/, 'mobile Native Apex must start at the high-quality star-core floor');
+assert.match(apex, /coarse\.matches \? 1\.25 : 1\.5/, 'mobile render DPR quality floor is missing');
+assert.match(apex, /WEBGL2 \/ STAR CRYSTAL SDF/, 'star crystal SDF renderer mode marker missing');
 
 assert.match(mobileComposition, /html\[data-fx-native-apex="ready"\] \.fx-transcend-shell\[data-fx-native-apex="true"\]/, 'Native Apex ownership selector missing');
 assert.match(mobileComposition, /z-index: var\(--fx-layer-stage, 120\) !important/, 'Native Apex must own the stage layer');
@@ -44,9 +48,9 @@ assert.match(mobileComposition, /display: block !important/, 'Native Apex shell 
 assert.match(mobileComposition, /height: 100dvh !important/, 'Native Apex must use the dynamic mobile viewport');
 assert.match(mobileComposition, /> \.fx-transcend-canvas\[data-fx-native-apex-canvas="true"\]/, 'Native Apex canvas ownership selector missing');
 assert.match(mobileComposition, /visibility: visible !important;[\s\S]*opacity: 1 !important/, 'Native Apex canvas must be explicitly visible');
-assert.match(mobileComposition, /translate3d\(0, -1\.5svh, 0\) scale\(\.98\)/, 'mobile core must use shader framing instead of CSS over-zoom');
-assert.match(mobileComposition, /brightness\(1\.14\)/, 'mobile crystal readability treatment missing');
-assert.doesNotMatch(mobileComposition, /scale\(1\.34\)/, 'old pixel-amplifying mobile core zoom returned');
+assert.match(mobileComposition, /translate3d\(0, -\.8svh, 0\) scale\(1\)/, 'mobile core must use native-resolution star-core framing');
+assert.match(mobileComposition, /brightness\(1\.18\)/, 'mobile luminous crystal readability treatment missing');
+assert.doesNotMatch(mobileComposition, /scale\(1\.34\)|scale\(\.98\)|scale\(\.96\)/, 'pixel-amplifying mobile core zoom returned');
 assert.match(mobileComposition, /#hero \.hero-space::before/, 'legacy hero fallback core hard-retire guard missing');
 assert.match(mobileComposition, /#hero \.hero-space::after/, 'legacy hero fallback halo hard-retire guard missing');
 assert.match(mobileComposition, /\.fx-resilient-core/, 'resilient legacy canvas hard-retire guard missing');
@@ -80,4 +84,4 @@ assert.doesNotMatch(voiceStability, /scrollIntoView\s*\(/, 'voice stability must
 assert.match(infinite, /const VERSION = 'seamless-v7'/, 'seamless-v7 scroll ownership regressed');
 assert.match(infinite, /root\.dataset\.fxInfiniteInput = 'native'/, 'native scroll input contract regressed');
 
-console.log('PASS: true 3D crystal Native Apex uses dedicated mobile framing and higher adaptive render quality while preserving single-renderer ownership, seamless-v7 and dialogue viewport guards.');
+console.log('PASS: luminous four-wing star crystal Native Apex uses frontal true-3D framing, high mobile render quality and energy lighting while preserving single-renderer ownership, seamless-v7 and dialogue viewport guards.');
