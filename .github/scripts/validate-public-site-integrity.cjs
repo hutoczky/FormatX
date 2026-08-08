@@ -170,12 +170,11 @@ for (const id of ['linux-bazzite', 'windows', 'android']) if (byId[id]?.status !
 if (byId.web?.status !== 'technical_preview') report('platform status: web must remain technical_preview');
 for (const id of ['macos', 'ios']) if (byId[id]?.status !== 'planned') report(`platform status: ${id} must remain planned`);
 
-if (publicContract.layout_contract?.automatic_scroll_loop !== true) report('public layout contract: seamless automatic scroll loop must be enabled');
-if (publicContract.layout_contract?.forced_scroll_transfer !== false) report('public layout contract: wheel/touch input must remain native; no forced input transfer allowed');
-if (publicContract.layout_contract?.automatic_page_position_changes !== true) report('public layout contract: seamless boundary handoff must be enabled');
-if (publicContract.layout_contract?.hero_visual_bridge !== true) report('public layout contract: Hero visual bridge must be enabled');
-if (publicContract.layout_contract?.cloned_hero_only !== true) report('public layout contract: only the inert Hero may be cloned for the loop bridge');
-if (publicContract.layout_contract?.boundary_handoff_only !== true) report('public layout contract: automatic positioning must be boundary-only');
+if (publicContract.layout_contract?.scroll_controller !== 'native-continuous') report('public layout contract: scroll controller must remain native-continuous');
+if (publicContract.layout_contract?.automatic_scroll_loop !== false) report('public layout contract: automatic scroll loop must be disabled');
+if (publicContract.layout_contract?.forced_scroll_transfer !== false) report('public layout contract: forced scroll transfer must be disabled');
+if (publicContract.layout_contract?.automatic_page_position_changes !== false) report('public layout contract: automatic page position changes must be disabled');
+if (publicContract.layout_contract?.hero_visual_bridge !== false) report('public layout contract: visual loop bridge must be disabled');
 if (publicContract.layout_contract?.section_scroll_snap !== false) report('public layout contract: section scroll snapping must remain disabled');
 
 const multi = currentRelease.channels?.multiplatform;
@@ -213,12 +212,10 @@ for (const [name, source] of [['payment success', paymentSuccess], ['payment can
 
 if (/data:image\/webp|<image\b/i.test(portable)) report('portable installer: embedded raster/WebP is forbidden');
 if (!loop.includes("const VERSION = 'seamless-v6'")) report('homepage: scroll controller version missing');
-if (!loop.includes("root.dataset.fxAutomaticLoop = 'enabled'") || !loop.includes('automaticLoop: true')) report('homepage: seamless cyclic scroll loop is not enabled');
-if (!loop.includes("root.dataset.fxInfiniteCloneMode = 'visual-bridge'") || !loop.includes('clonedHeroOnly: true')) report('homepage: inert Hero visual bridge contract missing');
-if (!loop.includes('sectionSnapDisabled: true') || !loop.includes("root.classList.add('fx-continuous-scroll-mode')")) report('homepage: section snap suppression missing');
-if (!loop.includes('sourceHero.cloneNode(true)') || !loop.includes('window.scrollTo({ top: target')) report('homepage: seamless boundary handoff implementation missing');
+if (!loop.includes("root.dataset.fxAutomaticLoop = 'disabled'") || !loop.includes('nativePositionOnly: true')) report('homepage: native no-jump scroll contract missing');
+if (!loop.includes('sectionSnapDisabled: true') || !loop.includes("root.classList.add('fx-continuous-scroll-mode'")) report('homepage: native scroll snap suppression missing');
+if (loop.includes('window.scrollTo(') || loop.includes('scrollIntoView(') || loop.includes('cloneNode(true)')) report('homepage: scroll runtime can still move or clone the page automatically');
 if (/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(loop)) report('homepage: scroll runtime captures wheel or touch input');
-if (loop.includes('document.body.cloneNode') || loop.includes('document.documentElement.cloneNode')) report('homepage: full-page cloning is forbidden');
 for (const token of [
   "['/downloads/', '/scifi-ui/downloads/']",
   "['/support.html', '/scifi-ui/support.html']",
@@ -231,4 +228,4 @@ if (failures.length) {
   failures.forEach(item => console.error(' - ' + item));
   process.exit(1);
 }
-console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, pricing parity, secure order references, Android channel/download separation, legal gate, transactional noindex, seamless continuous cyclic scrolling, downloads and aliases validated.`);
+console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, pricing parity, secure order references, Android channel/download separation, legal gate, transactional noindex, native no-jump scrolling, downloads and aliases validated.`);
