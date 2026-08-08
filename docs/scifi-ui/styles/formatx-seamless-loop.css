@@ -1,14 +1,15 @@
 /* Seamless loop and release-centre contract. */
 
-/* Desktop seamless-v6 owns scroll positioning, so section snapping must never
-   pull a valid landing back to a chapter boundary. */
-html[data-fx-infinite-controller='seamless-v6'],
-html[data-fx-infinite-controller='seamless-v6'] body {
+/* seamless-v7 owns only the visual boundary handoff. Ordinary wheel/touch
+   scrolling remains native, while section snapping stays disabled so the
+   browser cannot pull a valid landing back to a chapter boundary. */
+html[data-fx-infinite-controller='seamless-v7'],
+html[data-fx-infinite-controller='seamless-v7'] body {
   scroll-snap-type: none !important;
 }
 
-html[data-fx-infinite-controller='seamless-v6'] #hero,
-html[data-fx-infinite-controller='seamless-v6'] main > .scene {
+html[data-fx-infinite-controller='seamless-v7'] #hero,
+html[data-fx-infinite-controller='seamless-v7'] main > .scene {
   scroll-snap-align: none !important;
   scroll-snap-stop: normal !important;
 }
@@ -19,16 +20,16 @@ html.fx-seamless-loop-transfer body {
   scroll-snap-type: none !important;
 }
 
-/* Touch devices are deliberately different from desktop. Native browser
-   momentum must remain in control from the first touch until scrolling ends.
-   No section snapping, no smooth-scroll interception and no loop bridge. */
+/* Touch/coarse-pointer devices keep native browser momentum from touchstart
+   through scrollend. The Hero bridge remains visible, but the programmatic
+   visual handoff is deferred until touch/momentum ownership has ended. */
 @media (max-width: 900px), (pointer: coarse) {
   html,
   body,
   html.fx-organism-interface-ready,
   html.fx-organism-interface-ready body,
-  html[data-fx-infinite-controller='seamless-v6'],
-  html[data-fx-infinite-controller='seamless-v6'] body {
+  html[data-fx-infinite-controller='seamless-v7'],
+  html[data-fx-infinite-controller='seamless-v7'] body {
     scroll-snap-type: none !important;
     scroll-behavior: auto !important;
     overflow-y: auto !important;
@@ -49,6 +50,7 @@ html.fx-seamless-loop-transfer body {
     touch-action: pan-y pinch-zoom !important;
   }
 
+  /* Compatibility cleanup only: seamless-v7 removes these legacy markers. */
   html.fx-mobile-native-scroll .fx-loop-bridge,
   html[data-fx-mobile-scroll-mode='native-no-jump'] .fx-loop-bridge {
     display: none !important;
