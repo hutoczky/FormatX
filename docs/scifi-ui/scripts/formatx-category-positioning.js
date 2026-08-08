@@ -15,14 +15,14 @@
       nav: ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
       facts: [
         ['06', 'ellenőrizhető modul'],
-        ['05', 'hozzáférési környezet'],
+        ['03', 'támogatott natív platform'],
         ['05', 'nap teljes próba']
       ],
       deckEyebrow: 'FORMATX / CATEGORY DEFINITION',
       deckTitle: 'Nem egy szebb segédprogram. Saját technikusi kategória.',
       deckLead: 'A vizuális világ egyedi, de a termékígéret mérhető: lásd a valós állapotot, tudd előre a műveleti tervet, és kapj ellenőrizhető eredményt.',
       deckCards: [
-        ['MI EZ?', 'Letölthető Windows-csomag, Linux/Bazzite-központú rendszerlogika, macOS-, web- és Android-hozzáféréssel.'],
+        ['MI EZ?', 'Linux/Bazzite-elsődleges technikusi operációs réteg, Windows és Android Full release támogatással. A web Technical preview; macOS és iOS/iPadOS Planned.'],
         ['KINEK?', 'Egyéni technikusoknak, szervizeknek és olyan csapatoknak, amelyek több gépet kezelnek következetes munkafolyamatban.'],
         ['MIT KEZEL?', 'ISO→USB, formázás, partíciótervezés, biztonságos törlés, SMART, diagnosztika és AI-alapú döntéstámogatás.'],
         ['MIÉRT MÁS?', 'Felderítés → terv → kontrollált végrehajtás → visszaellenőrzés. Kitalált telemetria és vak műveletek nélkül.']
@@ -48,10 +48,10 @@
       proofStory: 'A projekt abból a problémából indult, hogy a technikusi eszközök gyakran szétszórtak, platformfüggők vagy nem mutatják meg elég világosan, mi fog történni egy kritikus művelet során. A FormatX célja ezért nem egy újabb eszköztár, hanem egy közös operációs réteg: ugyanaz a felmérési, tervezési, végrehajtási és ellenőrzési logika minden támogatott környezetben.',
       proofStatement: 'A jövőkép: a technikus egyetlen felületen lássa, mit tud a rendszer, mit készül végrehajtani, és mi lett ténylegesen ellenőrizve.',
       proofCards: [
-        ['KIADÁSI LÁNC', 'A stabil csomag kizárólag a hivatalos GitHub Releases csatornáról érkezhet, pontos VNN assetnévvel.'],
-        ['INTEGRITÁS', 'SHA-256 és Ed25519 ellenőrzés; eltérő vagy hiányos csomagnál a frissítési folyamat fail-closed módon leáll.'],
+        ['KIADÁSI LÁNC', 'A teljes kiadás hivatalos csomagja az ellenőrzött FormatX kiadási csatornából származik. A külön Stable minősítéshez további nyilvános tesztbizonyíték szükséges.'],
+        ['INTEGRITÁS', 'A jelenlegi kiadási metaadat SHA-256 digestet közöl. Külön checksum- vagy aláírási bizonyíték csak tényleges publikálás esetén jelenhet meg.'],
         ['BIZTONSÁGI MODELL', 'Célmeghajtó-azonosítás, többlépcsős megerősítés, naplózott végrehajtás és dokumentálható végeredmény.'],
-        ['PLATFORMSTRATÉGIA', 'Linux/Bazzite az elsődleges irány; Windows, macOS, web és Android hozzáférés támogatott.']
+        ['PLATFORMSTRATÉGIA', 'Linux/Bazzite az elsődleges platform. Windows és Android Full release; web Technical preview; macOS és iOS/iPadOS Planned.']
       ],
       footer: 'Letölthető, ellenőrizhető technikusi operációs réteg meghajtókezeléshez, diagnosztikához, telepítéshez és biztonságos rendszerkarbantartáshoz.'
     },
@@ -64,14 +64,14 @@
       nav: ['How it works', 'Modules', 'Licences', 'Proof', 'Download'],
       facts: [
         ['06', 'verifiable modules'],
-        ['05', 'access environments'],
+        ['03', 'supported native platforms'],
         ['05', 'day full trial']
       ],
       deckEyebrow: 'FORMATX / CATEGORY DEFINITION',
       deckTitle: 'Not a prettier utility. A technician category of its own.',
       deckLead: 'The visual world is distinctive, but the product promise is measurable: see the real state, know the execution plan and receive a verifiable outcome.',
       deckCards: [
-        ['WHAT IS IT?', 'A downloadable Windows package with Linux/Bazzite-first system logic plus macOS, web and Android access.'],
+        ['WHAT IS IT?', 'A Linux/Bazzite-first technician operating layer with Windows and Android Full release support. Web is a Technical preview; macOS and iOS/iPadOS are Planned.'],
         ['WHO IS IT FOR?', 'Independent technicians, service businesses and teams managing multiple machines through one consistent workflow.'],
         ['WHAT DOES IT HANDLE?', 'ISO-to-USB, formatting, partition planning, secure erase, SMART, diagnostics and AI-assisted guidance.'],
         ['WHY IS IT DIFFERENT?', 'Discover → plan → controlled execution → verification. No fabricated telemetry and no blind operations.']
@@ -97,10 +97,10 @@
       proofStory: 'The project began with a practical problem: technician tools are often fragmented, platform-bound or fail to explain clearly what a critical operation will do. FormatX is therefore not another toolbox. It is a shared operating layer that applies the same assess, plan, execute and verify logic across every supported environment.',
       proofStatement: 'The vision: one interface where the technician can see what the system knows, what it is about to execute and what was actually verified.',
       proofCards: [
-        ['RELEASE CHAIN', 'Stable packages can only come from the official GitHub Releases channel with an exact VNN asset name.'],
-        ['INTEGRITY', 'SHA-256 and Ed25519 verification; a missing or mismatched package stops the update flow in fail-closed mode.'],
+        ['RELEASE CHAIN', 'The official full-release package comes from the verified FormatX release channel. The separate Stable designation requires additional published test evidence.'],
+        ['INTEGRITY', 'Current release metadata publishes a SHA-256 digest. Separate checksum or signature proof may appear only when it has actually been published.'],
         ['SAFETY MODEL', 'Target identification, multi-step confirmation, logged execution and a documentable final result.'],
-        ['PLATFORM STRATEGY', 'Linux/Bazzite is the primary direction; Windows, macOS, web and Android access are supported.']
+        ['PLATFORM STRATEGY', 'Linux/Bazzite is primary. Windows and Android are Full release; Web is a Technical preview; macOS and iOS/iPadOS are Planned.']
       ],
       footer: 'A downloadable, verifiable technician operating layer for drive management, diagnostics, deployment and safe system maintenance.'
     }
