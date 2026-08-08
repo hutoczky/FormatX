@@ -32,11 +32,11 @@ async function waitForInterface(page) {
       && root.dataset.fxOrganismCoreController === 'ready'
       && root.dataset.fxOrganismConsoleState === 'ready'
       && root.dataset.fxSingleLanguageToggle === 'ready'
-      && root.dataset.fxInfiniteController === 'seamless-v6'
-      && root.dataset.fxInfiniteScroll === 'ready-seamless-v6'
+      && root.dataset.fxInfiniteController === 'seamless-v7'
+      && root.dataset.fxInfiniteScroll === 'ready-seamless-v7'
       && root.dataset.fxInfiniteInput === 'native'
-      && root.dataset.fxAutomaticLoop === 'disabled'
-      && root.dataset.fxLoopBridge === 'disabled'
+      && root.dataset.fxAutomaticLoop === 'enabled'
+      && root.dataset.fxLoopBridge === 'ready-v3'
       && root.dataset.fxInteractionGenomeExport === 'ready'
       && root.dataset.fxOrganismMasterSync === 'ready-v1'
       && root.dataset.fxTranscendLoader === 'safe-ready-v27';
@@ -103,30 +103,37 @@ async function closePanelAndAssertCore(page) {
   await page.waitForTimeout(250);
 }
 
-async function assertNoAutomaticPageJump(page) {
-  const before = await page.evaluate(() => ({
-    maximum: Math.max(0, document.documentElement.scrollHeight - innerHeight),
-    loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
-  }));
-  const target = Math.round(before.maximum * .82);
+async function assertStableOrdinaryScroll(page) {
+  const before = await page.evaluate(() => {
+    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+    return {
+      bridgeTop: bridge?.offsetTop || 0,
+      loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
+      viewport: innerHeight,
+    };
+  });
+  const safeMaximum = Math.max(0, before.bridgeTop - before.viewport - 180);
+  const target = Math.round(safeMaximum * .76);
   await page.evaluate(y => window.scrollTo(0, y), target);
   await page.waitForTimeout(650);
   const after = await page.evaluate(() => ({
     y: window.scrollY,
     loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
-    bridges: document.querySelectorAll('.fx-loop-bridge').length,
+    bridges: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
     clones: document.querySelectorAll('[data-fx-loop-clone="true"]').length,
     automatic: document.documentElement.dataset.fxAutomaticLoop,
     jumpGuard: document.documentElement.dataset.fxScrollJumpGuard,
     transfer: document.documentElement.classList.contains('fx-seamless-loop-transfer'),
     runtime: document.documentElement.__FORMATX_INFINITE_SCROLL__ || null,
+    rootSnap: getComputedStyle(document.documentElement).scrollSnapType,
   }));
-  if (Math.abs(after.y - target) > 6) throw new Error(`Page jumped without navigation: ${JSON.stringify({ target, after })}`);
-  if (after.loopCount !== before.loopCount) throw new Error(`Automatic loop counter changed: ${JSON.stringify({ before, after })}`);
-  if (after.bridges || after.clones || after.transfer) throw new Error(`Legacy automatic-scroll artifacts detected: ${JSON.stringify(after)}`);
-  if (after.automatic !== 'disabled' || after.jumpGuard !== 'native-position-v1' || after.runtime?.nativePositionOnly !== true) {
-    throw new Error(`Native no-jump contract missing: ${JSON.stringify(after)}`);
+  if (Math.abs(after.y - target) > 6) throw new Error(`Ordinary page position changed away from the loop boundary: ${JSON.stringify({ target, after })}`);
+  if (after.loopCount !== before.loopCount) throw new Error(`Loop counter changed away from the visual bridge: ${JSON.stringify({ before, after })}`);
+  if (after.bridges !== 1 || after.clones !== 1 || after.transfer) throw new Error(`Seamless bridge state invalid during normal navigation: ${JSON.stringify(after)}`);
+  if (after.automatic !== 'enabled' || after.jumpGuard !== 'visual-match-v4' || after.runtime?.automaticLoop !== true || after.runtime?.mobileNativeMomentumPreserved !== true) {
+    throw new Error(`Seamless-v7 navigation contract missing: ${JSON.stringify(after)}`);
   }
+  if (after.rootSnap !== 'none') throw new Error(`Section snap returned during normal navigation: ${JSON.stringify(after)}`);
 }
 
 async function preparePage(page) {
@@ -157,7 +164,7 @@ async function testDesktop(browser) {
   await assertPanel(page, 'system', 4);
   await closePanelAndAssertCore(page);
 
-  await assertNoAutomaticPageJump(page);
+  await assertStableOrdinaryScroll(page);
   await page.close();
 }
 
@@ -176,7 +183,7 @@ async function testMobile(browser) {
   await assertPanel(page, 'experience', 1);
   await closePanelAndAssertCore(page);
 
-  await assertNoAutomaticPageJump(page);
+  await assertStableOrdinaryScroll(page);
   await page.close();
 }
 
@@ -185,7 +192,7 @@ async function testMobile(browser) {
   try {
     await testDesktop(browser);
     await testMobile(browser);
-    console.log('PASS FormatX language toggle, navigation, panels and native no-jump scrolling');
+    console.log('PASS FormatX language toggle, navigation, panels and seamless-v7 ordinary scrolling');
   } finally {
     await browser.close();
   }
