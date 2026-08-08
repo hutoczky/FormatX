@@ -24,7 +24,8 @@ assert.match(worker, /data-fx-award-proof/, 'public proof layer missing from fir
 assert.match(worker, /verification\.html/, 'public proof layer must link to verification');
 assert.match(worker, /technical-report\.html/, 'public proof layer must link to technical report');
 assert.match(worker, /security\.html/, 'public proof layer must link to security model');
-assert.match(worker, /FormatX-Updates\/releases/, 'public proof layer must link to release evidence');
+assert.match(worker, /\/scifi-ui\/downloads\//, 'public proof layer must link to first-party release evidence');
+assert.doesNotMatch(worker, /github\.com/i, 'server-rendered homepage proof/schema must remain first-party');
 
 assert.match(seo, /offers:\s*\{/, 'client SoftwareApplication offer missing');
 assert.match(seo, /price:'7900'/, 'client SoftwareApplication offers.price missing');
@@ -32,6 +33,7 @@ assert.match(seo, /priceCurrency:'HUF'/, 'client SoftwareApplication priceCurren
 assert.match(seo, /twitter:card/, 'client social preview metadata missing');
 assert.match(seo, /ready-v6/, 'SEO runtime revision must remain on the award-readiness contract');
 assert.match(seo, /data-fx-award-readiness-style|fxAwardReadinessStyle/, 'award-readiness CSS fallback loader missing');
+assert.doesNotMatch(seo, /github\.com/i, 'client SEO identity metadata must remain first-party');
 
 assert.match(css, /:focus-visible/, 'high-visibility keyboard focus styling missing');
 assert.match(css, /outline:\s*2px solid/, 'focus indicator size regressed below award-readiness target');
@@ -46,5 +48,6 @@ const publicContract = JSON.parse(contract);
 assert.equal(publicContract.layout_contract?.infinite_scroll_controller, 'seamless-v7', 'scroll regression detected while applying award polish');
 assert.equal(publicContract.layout_contract?.automatic_scroll_loop, true, 'infinite scrolling must remain enabled');
 assert.equal(publicContract.layout_contract?.mobile_native_momentum_preserved, true, 'mobile native momentum contract regressed');
+assert.equal(publicContract.public_delivery?.first_party_only, true, 'first-party public delivery contract regressed');
 
-console.log('FormatX award-readiness SEO, proof, accessibility and scroll-preservation validation passed.');
+console.log('FormatX award-readiness SEO, proof, accessibility, first-party and scroll-preservation validation passed.');
