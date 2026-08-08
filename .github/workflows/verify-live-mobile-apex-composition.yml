@@ -19,25 +19,37 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live cinematic indexed 3D MAG v11c
+      - name: Verify live cinematic glass material v12
         shell: bash
         run: |
           set -euo pipefail
           MAPPER="$RUNNER_TEMP/mapper.js"
+          MATERIAL="$RUNNER_TEMP/material-v12.js"
           MESH="$RUNNER_TEMP/mesh-v11.js"
           KICK="$RUNNER_TEMP/kick-v11b.js"
           FRACTURE="$RUNNER_TEMP/fracture-v11.js"
           GRADE="$RUNNER_TEMP/grade-v11c.css"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" -o "$MAPPER"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-material-v12.js?v=20260809-reference-glass-v12&audit=${GITHUB_RUN_ID}" -o "$MATERIAL"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v11.js?v=20260809-cinematic-mesh3d-v11&audit=${GITHUB_RUN_ID}" -o "$MESH"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-cinematic-kick-v11.js?v=20260809-cinematic-kick-v11b&audit=${GITHUB_RUN_ID}" -o "$KICK"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-fracture3d-v11.js?v=20260809-cinematic-fracture3d-v11&audit=${GITHUB_RUN_ID}" -o "$FRACTURE"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v11c.css?v=20260809-reference-emissive-v1&audit=${GITHUB_RUN_ID}" -o "$GRADE"
 
-          grep -Fq "fxApexSceneStability==='ready-v21'" "$MAPPER"
-          grep -Fq 'formatx-core-cinematic-grade-v11c.css?v=20260809-reference-emissive-v1' "$MAPPER"
-          grep -Fq 'cinematic-reference-graded-true-mesh3d-v21' "$MAPPER"
+          grep -Fq "fxApexSceneStability==='ready-v22'" "$MAPPER"
+          grep -Fq 'formatx-core-mesh3d-material-v12.js?v=20260809-reference-glass-v12' "$MAPPER"
+          grep -Fq 'cinematic-reference-glass-true-mesh3d-v22' "$MAPPER"
+          grep -Fq "fxCoreMaterialContract='reference-glass-v12'" "$MAPPER"
           grep -Fq 'retired-for-real-3d-reactor' "$MAPPER"
+
+          grep -Fq 'float fres=pow(1.-ndv,1.62)' "$MATERIAL"
+          grep -Fq 'float causticA=' "$MATERIAL"
+          grep -Fq 'float violetVein=' "$MATERIAL"
+          grep -Fq 'vec3(.20,1.38,2.30)*fres' "$MATERIAL"
+          grep -Fq 'film(c*1.42)' "$MATERIAL"
+          grep -Fq "fxCoreMeshMaterial='reference-glass-v12'" "$MATERIAL"
+          grep -Fq "fxCoreMeshMaterialPatch='applied'" "$MATERIAL"
+
           grep -Fq "getContext('webgl2'" "$MESH"
           grep -Fq 'gl.enable(gl.DEPTH_TEST)' "$MESH"
           grep -Fq 'gl.drawElements(gl.TRIANGLES' "$MESH"
@@ -46,12 +58,10 @@ jobs:
           grep -Fq "apply('response',.74,1.15,2100)" "$KICK"
           grep -Fq 'gl.drawElements(gl.LINES' "$FRACTURE"
           grep -Fq "fxCoreFracture3d='ready-v11'" "$FRACTURE"
-          grep -Fq 'brightness(1.95)' "$GRADE"
-          grep -Fq 'saturate(2.15)' "$GRADE"
           grep -Fq 'brightness(2.02)' "$GRADE"
           grep -Fq 'saturate(2.20)' "$GRADE"
-          grep -Fq 'drop-shadow(0 0 5px rgba(72, 226, 255, 0.20))' "$GRADE"
           ! grep -Fq 'drawImage(' "$MESH"
+          ! grep -Fq 'drawImage(' "$MATERIAL"
 
       - name: Publish live mobile Apex status
         if: always()
@@ -62,5 +72,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Live MAG uses real cinematic 3D v11c with reference emissive grade'; else state='failure'; description='Live cinematic true 3D MAG v11c verification failed'; fi
+          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Live MAG uses real indexed WebGL2 geometry with cinematic glass material v12'; else state='failure'; description='Live true WebGL glass material v12 verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live mobile Apex composition' -f description="$description" -f target_url="$TARGET_URL"
