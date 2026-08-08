@@ -30,6 +30,7 @@
     "forced_scroll_transfer": false,
     "automatic_page_position_changes": false,
     "section_scroll_snap": false,
+    "native_scroll_regression_fix": "2026-08-08",
     "language_switch_preserves_scene_hash": true
   },
   "source_of_truth": {
