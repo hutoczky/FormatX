@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const root=document.documentElement;
-  if(root.dataset.fxApexSceneStability==='ready-v20')return;
+  if(root.dataset.fxApexSceneStability==='ready-v21')return;
 
   function ensureMobileCompositionStyle(){
     if(document.querySelector('link[data-fx-mobile-apex-composition]'))return;
@@ -38,6 +38,17 @@
     script.dataset.fxCoreFracture3dRuntime='true';
     script.addEventListener('load',()=>{root.dataset.fxCoreFracture3dLoad='ready-v11';},{once:true});
     script.addEventListener('error',()=>{root.dataset.fxCoreFracture3dLoad='failed';},{once:true});
+    document.head.appendChild(script);
+  }
+
+  function ensureCinematicKick(){
+    if(document.querySelector('script[data-fx-core-cinematic-kick]'))return;
+    const script=document.createElement('script');
+    script.src='./scripts/formatx-core-cinematic-kick-v11.js?v=20260809-cinematic-kick-v11b';
+    script.async=false;
+    script.dataset.fxCoreCinematicKick='true';
+    script.addEventListener('load',()=>{root.dataset.fxCoreCinematicKickLoad='ready-v1';},{once:true});
+    script.addEventListener('error',()=>{root.dataset.fxCoreCinematicKickLoad='failed';},{once:true});
     document.head.appendChild(script);
   }
 
@@ -93,7 +104,7 @@
       ].every(marker=>patched.includes(marker));
       if(patched!==source&&complete){
         shaderPatched=true;
-        root.dataset.fxApexReferenceShader='mesh-background-reference-v20';
+        root.dataset.fxApexReferenceShader='mesh-background-reference-v21';
         root.dataset.fxSdfCore='disabled-before-scene-0.92';
         root.dataset.fxScreenSpaceReactor='retired-for-real-3d-reactor';
         source=patched;
@@ -140,21 +151,27 @@
   addEventListener('formatx:loop',()=>{smoothedScene=null;});
   addEventListener('formatx:nativeapexready',ensureTrueMeshAssets,{once:true});
   addEventListener('formatx:coremesh3dready',event=>{
-    if(event.detail?.version==='v11')ensureFractureNetwork();
+    if(event.detail?.version==='v11'){
+      ensureCinematicKick();
+      ensureFractureNetwork();
+    }
     root.dataset.fxNativeApexVisual=event.detail?.version==='v11'
-      ?'cinematic-reactive-fractured-true-mesh3d-v20'
+      ?'cinematic-reactive-fractured-true-mesh3d-v21'
       :'reference-narrow-fractured-true-mesh3d-v19';
     root.dataset.fxNativeApexRenderer='webgl2-indexed-mesh-cinematic-plus-indexed-fracture-lines';
     root.dataset.fxCoreMobileComposition=root.dataset.fxNativeApexVisual;
   });
 
   if(root.dataset.fxNativeApex==='ready')ensureTrueMeshAssets();
-  if(root.dataset.fxCoreMesh3d==='ready-v11')ensureFractureNetwork();
+  if(root.dataset.fxCoreMesh3d==='ready-v11'){
+    ensureCinematicKick();
+    ensureFractureNetwork();
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refreshSections,{once:true});
   else refreshSections();
 
-  root.dataset.fxApexSceneStability='ready-v20';
+  root.dataset.fxApexSceneStability='ready-v21';
   root.dataset.fxCoreHold='stable-before-morph';
-  root.dataset.fxCoreCinematicContract='film-reactive-v1';
-  root.dataset.fxCoreMobileComposition='true-mesh3d-v11-plus-fracture-v11-pending';
+  root.dataset.fxCoreCinematicContract='film-reactive-v1-frame-independent-wake';
+  root.dataset.fxCoreMobileComposition='true-mesh3d-v11-plus-kick-v11b-plus-fracture-v11-pending';
 }());
