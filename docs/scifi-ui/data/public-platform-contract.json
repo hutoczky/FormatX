@@ -42,7 +42,7 @@
     "language_switch_preserves_scene_hash": true
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-native-apex-igloo-floor-v1",
+    "award_readiness_revision": "2026-08-08-native-apex-igloo-floor-production1",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
