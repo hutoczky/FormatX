@@ -51,10 +51,11 @@
     "legacy_core_visuals_retired_when_native_apex_ready": true,
     "legacy_hide_contracts_overridden_by_native_ownership": true,
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
-    "language_switch_preserves_scene_hash": true
+    "language_switch_preserves_scene_hash": true,
+    "deployment_revision": "2026-08-08-true-3d-crystal-core-live-1"
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-true-3d-crystal-core-production8",
+    "award_readiness_revision": "2026-08-08-true-3d-crystal-core-production9",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
