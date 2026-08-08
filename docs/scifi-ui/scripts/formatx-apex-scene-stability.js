@@ -12,6 +12,17 @@
     document.head.appendChild(link);
   }
 
+  function ensureCinematicGrade(){
+    if(document.querySelector('link[data-fx-core-cinematic-grade]'))return;
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href='./styles/formatx-core-cinematic-grade-v11c.css?v=20260809-reference-emissive-v1';
+    link.dataset.fxCoreCinematicGrade='true';
+    link.addEventListener('load',()=>{root.dataset.fxCoreCinematicGrade='reference-emissive-v1';},{once:true});
+    link.addEventListener('error',()=>{root.dataset.fxCoreCinematicGrade='failed';},{once:true});
+    document.head.appendChild(link);
+  }
+
   function ensureTrueMeshAssets(){
     if(!document.querySelector('link[data-fx-core-mesh3d-style]')){
       const link=document.createElement('link');
@@ -31,12 +42,13 @@
   }
 
   function ensureFractureNetwork(){
-    if(document.querySelector('script[data-fx-core-fracture3d-runtime]'))return;
+    const existing=document.querySelector('script[data-fx-core-fracture3d-runtime]');
+    if(existing){if(root.dataset.fxCoreFracture3d==='ready-v11')ensureCinematicGrade();return;}
     const script=document.createElement('script');
     script.src='./scripts/formatx-core-fracture3d-v11.js?v=20260809-cinematic-fracture3d-v11';
     script.async=false;
     script.dataset.fxCoreFracture3dRuntime='true';
-    script.addEventListener('load',()=>{root.dataset.fxCoreFracture3dLoad='ready-v11';},{once:true});
+    script.addEventListener('load',()=>{root.dataset.fxCoreFracture3dLoad='ready-v11';ensureCinematicGrade();},{once:true});
     script.addEventListener('error',()=>{root.dataset.fxCoreFracture3dLoad='failed';},{once:true});
     document.head.appendChild(script);
   }
@@ -156,7 +168,7 @@
       ensureFractureNetwork();
     }
     root.dataset.fxNativeApexVisual=event.detail?.version==='v11'
-      ?'cinematic-reactive-fractured-true-mesh3d-v21'
+      ?'cinematic-reference-graded-true-mesh3d-v21'
       :'reference-narrow-fractured-true-mesh3d-v19';
     root.dataset.fxNativeApexRenderer='webgl2-indexed-mesh-cinematic-plus-indexed-fracture-lines';
     root.dataset.fxCoreMobileComposition=root.dataset.fxNativeApexVisual;
@@ -167,11 +179,12 @@
     ensureCinematicKick();
     ensureFractureNetwork();
   }
+  if(root.dataset.fxCoreFracture3d==='ready-v11')ensureCinematicGrade();
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refreshSections,{once:true});
   else refreshSections();
 
   root.dataset.fxApexSceneStability='ready-v21';
   root.dataset.fxCoreHold='stable-before-morph';
   root.dataset.fxCoreCinematicContract='film-reactive-v1-frame-independent-wake';
-  root.dataset.fxCoreMobileComposition='true-mesh3d-v11-plus-kick-v11b-plus-fracture-v11-pending';
+  root.dataset.fxCoreMobileComposition='true-mesh3d-v11-plus-kick-v11b-plus-fracture-v11-plus-reference-grade-pending';
 }());
