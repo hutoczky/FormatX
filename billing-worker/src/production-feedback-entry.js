@@ -2,6 +2,7 @@ import productionWorker from './production-entry.js';
 import { handleFeedbackRequest } from './feedback-api.js';
 
 const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';
+const SECURE_ORDER_REFERENCE = /^FX-\d{8}-[A-F0-9]{24}$/;
 const HOMEPAGE_PATHS = new Set(['/', '/scifi-ui/', '/scifi-ui/index.html']);
 const PUBLIC_PAGE_ALIASES = new Map([
   ['/downloads', '/scifi-ui/downloads/'],
@@ -40,6 +41,41 @@ function canonicalPublicRedirect(request, url) {
   return Response.redirect(target.toString(), 308);
 }
 
+export async function redactLegacySessionStatus(request, url, response) {
+  if (request.method !== 'GET' || url.pathname !== '/api/session-status' || !response.ok) return response;
+  const reference = String(
+    url.searchParams.get('session_id') || url.searchParams.get('order_reference') || ''
+  ).trim().toUpperCase();
+  if (SECURE_ORDER_REFERENCE.test(reference)) return response;
+  if (!(response.headers.get('Content-Type') || '').includes('application/json')) return response;
+
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (_) {
+    return response;
+  }
+
+  const headers = new Headers(response.headers);
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  headers.set('Cache-Control', 'no-store');
+
+  return new Response(JSON.stringify({
+    ...payload,
+    license_key: null,
+    legacy_reference: true,
+    license_key_available: false,
+    message: payload.license_active
+      ? 'A licenc aktív. Régi, rövid rendelési azonosítóval a licenckulcs biztonsági okból nem jeleníthető meg; kérj privát támogatást.'
+      : payload.message,
+  }), {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 async function stabiliseHomepageSemantics(request, url, response) {
   if (request.method !== 'GET' || !response.ok || !HOMEPAGE_PATHS.has(url.pathname)) return response;
   const contentType = response.headers.get('Content-Type') || '';
@@ -72,7 +108,8 @@ export default {
     const feedbackResponse = await handleFeedbackRequest(request, env);
     if (feedbackResponse) return feedbackResponse;
 
-    const response = await productionWorker.fetch(request, env, ctx);
+    let response = await productionWorker.fetch(request, env, ctx);
+    response = await redactLegacySessionStatus(request, url, response);
     return stabiliseHomepageSemantics(request, url, response);
   },
 };
