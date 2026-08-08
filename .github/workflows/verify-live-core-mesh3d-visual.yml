@@ -1,0 +1,128 @@
+name: Verify live true 3D MAG visual
+run-name: Capture true 3D MAG for ${{ github.event.workflow_run.head_sha }}
+
+on:
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  capture-live-mag:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      contains(github.event.workflow_run.head_commit.message, '[deploy-production]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install Chromium capture runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/mag-visual"
+          cd "$RUNNER_TEMP/mag-visual"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@latest
+          npx playwright install --with-deps chromium
+
+      - name: Capture live mobile MAG
+        shell: bash
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/mag-visual"
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('node:fs');
+
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist']
+            });
+            const context = await browser.newContext({
+              viewport: { width: 753, height: 1536 },
+              deviceScaleFactor: 1,
+              isMobile: true,
+              hasTouch: true
+            });
+            const page = await context.newPage();
+            await page.goto(`https://www.formatxsuite.com/?mesh3d_visual=${process.env.RUN_ID}`, {
+              waitUntil: 'domcontentloaded',
+              timeout: 45000
+            });
+            await page.waitForTimeout(1200);
+            await page.evaluate(() => {
+              const root = document.documentElement;
+              root.dataset.fxImmersive = 'active';
+              root.classList.add('fx-intro-complete');
+              dispatchEvent(new CustomEvent('formatx:immersiveactivate'));
+              document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+            });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMesh3d === 'ready-v1', null, { timeout: 30000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreGeometry === 'indexed-triangle-mesh', null, { timeout: 10000 });
+            await page.waitForTimeout(2500);
+
+            const state = await page.evaluate(() => ({
+              mesh: document.documentElement.dataset.fxCoreMesh3d,
+              geometry: document.documentElement.dataset.fxCoreGeometry,
+              depth: document.documentElement.dataset.fxCoreDepthBuffer,
+              camera: document.documentElement.dataset.fxCoreCamera,
+              sdf: document.documentElement.dataset.fxSdfCore,
+              renderer: document.documentElement.dataset.fxCoreRenderer
+            }));
+            fs.writeFileSync('mag-state.json', JSON.stringify(state, null, 2));
+            if (state.mesh !== 'ready-v1' || state.geometry !== 'indexed-triangle-mesh' || state.depth !== 'enabled' || state.camera !== 'perspective') {
+              throw new Error(`Unexpected mesh state: ${JSON.stringify(state)}`);
+            }
+
+            await page.screenshot({ path: 'mag-top.png', fullPage: false });
+            await page.evaluate(() => scrollTo(0, Math.min(520, document.documentElement.scrollHeight - innerHeight)));
+            await page.waitForTimeout(1200);
+            await page.screenshot({ path: 'mag-mid.png', fullPage: false });
+            await browser.close();
+          })().catch(error => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Upload MAG visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-true-mesh3d-mag-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/mag-visual/mag-top.png
+            ${{ runner.temp }}/mag-visual/mag-mid.png
+            ${{ runner.temp }}/mag-visual/mag-state.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Publish visual capture status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          JOB_STATUS: ${{ job.status }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Live true 3D MAG rendered and mobile screenshots captured'
+          else
+            state='failure'
+            description='Live true 3D MAG visual capture failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX live true 3D MAG visual' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"
