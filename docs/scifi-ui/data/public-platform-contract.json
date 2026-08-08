@@ -41,8 +41,8 @@
     "production_scroll_revision": "seamless-v7-critical-bootstrap-1",
     "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
     "core_scene_scroll_ownership": "seamless-v7-only",
-    "mobile_core_composition": "cinematic-reference-graded-true-mesh3d-v21",
-    "mobile_core_composition_delivery": "native-apex-ready-bootstrap-versioned-v11c",
+    "mobile_core_composition": "cinematic-reference-glass-true-mesh3d-v22",
+    "mobile_core_composition_delivery": "native-apex-ready-material-v12-mesh-v11",
     "mobile_core_renderer_authority": "indexed-webgl2-mesh-cinematic-plus-indexed-webgl2-fracture-lines",
     "mobile_core_renderer_visibility": "transparent-overlay-above-apex-background",
     "mobile_core_css_pixel_zoom": false,
@@ -54,10 +54,11 @@
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
     "language_switch_preserves_scene_hash": true,
     "core_cinematic_contract": "film-reactive-v1-frame-independent-wake",
-    "deployment_revision": "2026-08-09-cinematic-reference-grade-v11c-live-4"
+    "core_material_contract": "reference-glass-v12",
+    "deployment_revision": "2026-08-09-cinematic-reference-glass-v12-live-5"
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-09-cinematic-reference-grade-v11c-production29",
+    "award_readiness_revision": "2026-08-09-cinematic-reference-glass-v12-production30",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -76,7 +77,7 @@
       "section_scroll_snap": false,
       "wheel_or_touch_scroll_capture": false
     },
-    "native_apex_visual": "cinematic-reference-graded-true-mesh3d-v21",
+    "native_apex_visual": "cinematic-reference-glass-true-mesh3d-v22",
     "mag_true_geometry_renderer": "webgl2-indexed-triangle-mesh-v11",
     "mag_fragment_sdf_geometry": false,
     "mag_image_backed": false,
@@ -106,6 +107,11 @@
     "mag_fracture_renderer": "indexed-webgl2-gl-lines-v11",
     "mag_fracture_surface_attached": true,
     "mag_fracture_cyan_violet": true,
+    "mag_material_shader": "reference-glass-v12",
+    "mag_actual_webgl_material_patch": true,
+    "mag_film_tonemap": "exponential",
+    "mag_internal_caustics_shader": true,
+    "mag_violet_vein_shader": true,
     "mag_glass_fresnel_shading": true,
     "mag_internal_caustic_shading": true,
     "mag_internal_cyan_veins": true,
