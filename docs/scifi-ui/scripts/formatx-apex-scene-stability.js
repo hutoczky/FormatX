@@ -15,6 +15,26 @@
     document.head.appendChild(link);
   }
 
+  function ensureTrueMeshAssets() {
+    if (!document.querySelector('link[data-fx-core-mesh3d-style]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = './styles/formatx-core-mesh3d.css?v=20260808-true-mesh3d-v1';
+      link.dataset.fxCoreMesh3dStyle = 'true';
+      link.addEventListener('load', () => { root.dataset.fxCoreMesh3dStyle = 'ready'; }, { once: true });
+      link.addEventListener('error', () => { root.dataset.fxCoreMesh3dStyle = 'failed'; }, { once: true });
+      document.head.appendChild(link);
+    }
+    if (document.querySelector('script[data-fx-core-mesh3d-runtime]')) return;
+    const script = document.createElement('script');
+    script.src = './scripts/formatx-core-mesh3d.js?v=20260808-true-mesh3d-v1';
+    script.async = false;
+    script.dataset.fxCoreMesh3dRuntime = 'true';
+    script.addEventListener('load', () => { root.dataset.fxCoreMesh3dLoad = 'ready'; }, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxCoreMesh3dLoad = 'failed'; }, { once: true });
+    document.head.appendChild(script);
+  }
+
   ensureMobileCompositionStyle();
 
   const Context = window.WebGL2RenderingContext;
@@ -140,12 +160,14 @@
   addEventListener('resize', refreshSections, { passive: true });
   addEventListener('orientationchange', refreshSections, { passive: true });
   addEventListener('formatx:loop', () => { smoothedScene = null; });
+  addEventListener('formatx:nativeapexready', ensureTrueMeshAssets, { once: true });
   addEventListener('formatx:coremesh3dready', () => {
     root.dataset.fxNativeApexVisual = 'reference-locked-true-mesh3d-v10';
     root.dataset.fxNativeApexRenderer = 'webgl2-indexed-mesh-plus-apex-background';
     root.dataset.fxCoreMobileComposition = 'reference-locked-true-mesh3d-v10';
   });
 
+  if (root.dataset.fxNativeApex === 'ready') ensureTrueMeshAssets();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refreshSections, { once: true });
   else refreshSections();
 
