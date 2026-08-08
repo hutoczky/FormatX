@@ -68,6 +68,13 @@ async function snapshot(page) {
       footerInFlow: Boolean(document.querySelector('body > .site-footer')),
       horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body?.scrollWidth || 0) - innerWidth,
       bridgeInert: Boolean(document.querySelector('.fx-loop-hero-clone[inert][aria-hidden="true"]')),
+      introRunning: document.documentElement.classList.contains('fx-intro-running'),
+      introComplete: document.documentElement.classList.contains('fx-intro-complete'),
+      menuOpen: document.documentElement.classList.contains('fx-organism-menu-open'),
+      panelOpen: document.body?.classList.contains('fx-organism-panel-open') || false,
+      hidden: document.hidden,
+      declaredThreshold: Number(document.documentElement.dataset.fxLoopThreshold || 0),
+      declaredVisualHeight: Number(document.documentElement.dataset.fxLoopVisualHeight || 0),
     };
   });
 }
@@ -112,7 +119,12 @@ async function triggerLoop(page, name) {
   const expectedLanding = before.heroTop + Math.min(Math.max(0, before.heroHeight - 2), Math.round(before.heroHeight * expectedRatio));
 
   await page.evaluate(y => scrollTo(0, y), target);
-  await page.waitForFunction(previous => Number(document.documentElement.dataset.fxLoopCount || 0) > previous, before.loopCount, { timeout: 5000 });
+  try {
+    await page.waitForFunction(previous => Number(document.documentElement.dataset.fxLoopCount || 0) > previous, before.loopCount, { timeout: 5000 });
+  } catch (_) {
+    const blocked = await snapshot(page);
+    throw new Error(name + ': loop did not start after reaching seam: ' + JSON.stringify({ target, threshold, before, blocked }));
+  }
   await page.waitForFunction(() => (
     document.documentElement.dataset.fxLoopLandingState === 'settled'
     && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
@@ -143,6 +155,9 @@ async function verifyViewport(browser, viewport, name, mobile, cycles = 1) {
     isMobile: mobile,
     deviceScaleFactor: mobile ? 2 : 1
   });
+  await context.addInitScript(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+  });
   const page = await context.newPage();
   const diagnostics = [];
   page.on('pageerror', error => diagnostics.push('pageerror: ' + String(error)));
@@ -159,6 +174,7 @@ async function verifyViewport(browser, viewport, name, mobile, cycles = 1) {
     && document.documentElement.dataset.fxInfiniteInput === 'native'
     && document.documentElement.dataset.fxAutomaticLoop === 'enabled'
     && document.documentElement.dataset.fxLoopBridge.startsWith('ready')
+    && !document.documentElement.classList.contains('fx-intro-running')
   ), null, { timeout: 10000 });
   await page.waitForTimeout(300);
 
