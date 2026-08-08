@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@latest
           npx playwright install --with-deps chromium
 
-      - name: Capture faceted live mobile MAG v4
+      - name: Capture reference-bright live mobile MAG v5
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -43,15 +43,15 @@ jobs:
             const browser = await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
             const context = await browser.newContext({viewport:{width:753,height:1536},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU'});
             const page = await context.newPage();
-            await page.goto(`https://www.formatxsuite.com/?mesh3d_v4_visual=${process.env.RUN_ID}`,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.goto(`https://www.formatxsuite.com/?mesh3d_v5_visual=${process.env.RUN_ID}`,{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForTimeout(1200);
             await page.evaluate(() => {const r=document.documentElement;r.lang='hu';r.dataset.fxImmersive='active';r.classList.add('fx-intro-complete');dispatchEvent(new CustomEvent('formatx:immersiveactivate'));document.dispatchEvent(new CustomEvent('formatx:introcomplete'));});
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMesh3d === 'ready-v4',null,{timeout:30000});
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreGeometry === 'indexed-triangle-mesh-v4',null,{timeout:10000});
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMesh3d === 'ready-v5',null,{timeout:30000});
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreGeometry === 'indexed-triangle-mesh-v5',null,{timeout:10000});
             await page.waitForTimeout(2400);
             const state=await page.evaluate(()=>({mesh:document.documentElement.dataset.fxCoreMesh3d,geometry:document.documentElement.dataset.fxCoreGeometry,depth:document.documentElement.dataset.fxCoreDepthBuffer,normals:document.documentElement.dataset.fxCoreNormals,lines:document.documentElement.dataset.fxCoreLineGeometry,camera:document.documentElement.dataset.fxCoreCamera,sdf:document.documentElement.dataset.fxSdfCore,renderer:document.documentElement.dataset.fxCoreRenderer,visual:document.documentElement.dataset.fxNativeApexVisual}));
             fs.writeFileSync('mag-state.json',JSON.stringify(state,null,2));
-            if(state.mesh!=='ready-v4'||state.geometry!=='indexed-triangle-mesh-v4'||state.depth!=='enabled'||state.lines!=='indexed-3d-grid'||state.camera!=='perspective')throw new Error(`Unexpected mesh state ${JSON.stringify(state)}`);
+            if(state.mesh!=='ready-v5'||state.geometry!=='indexed-triangle-mesh-v5'||state.depth!=='enabled'||state.lines!=='dense-indexed-3d-grid'||state.camera!=='perspective')throw new Error(`Unexpected mesh state ${JSON.stringify(state)}`);
             await page.screenshot({path:'mag-top.png',fullPage:false});
             for (const [name,y] of [['mag-mid.png',420],['mag-reference-view.png',650]]) {await page.evaluate(y=>scrollTo(0,Math.min(y,document.documentElement.scrollHeight-innerHeight)),y);await page.waitForTimeout(900);await page.screenshot({path:name,fullPage:false});}
             await browser.close();
@@ -62,7 +62,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-true-mesh3d-mag-v4-${{ github.run_id }}
+          name: live-true-mesh3d-mag-v5-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/mag-visual/mag-top.png
             ${{ runner.temp }}/mag-visual/mag-mid.png
@@ -80,5 +80,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Faceted true 3D MAG v4 rendered and screenshots captured'; else state='failure'; description='Faceted true 3D MAG v4 visual capture failed'; fi
+          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Reference-bright true 3D MAG v5 rendered and screenshots captured'; else state='failure'; description='Reference-bright true 3D MAG v5 visual capture failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
