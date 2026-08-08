@@ -42,7 +42,7 @@
     "language_switch_preserves_scene_hash": true
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-proof-seo-a11y-production1",
+    "award_readiness_revision": "2026-08-08-proof-seo-a11y-production2",
     "server_rendered_software_application_schema": true,
     "software_application_offer_price_present": true,
     "public_proof_layer": true,
@@ -50,8 +50,9 @@
       "/scifi-ui/verification.html",
       "/scifi-ui/technical-report.html",
       "/scifi-ui/security.html",
-      "https://github.com/hutoczky/FormatX-Updates/releases"
+      "/scifi-ui/downloads/"
     ],
+    "proof_delivery": "first-party-only",
     "wcag_target": "2.2-AA-plus",
     "enhanced_key_touch_targets_css_px": 44,
     "high_visibility_keyboard_focus": true,
