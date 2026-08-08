@@ -82,6 +82,9 @@ jobs:
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/formatx-premium-finish.js
+          node --check docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js
+          node --check docs/scifi-ui/scripts/formatx-accessibility-finalizer.js
+          node --check docs/scifi-ui/scripts/formatx-organism-truth-guard.js
           node --check docs/scifi-ui/scripts/single-language-toggle.js
           node --check docs/scifi-ui/scripts/formatx-license-links.js
           node --check docs/scifi-ui/scripts/formatx-feedback.js
@@ -222,6 +225,9 @@ jobs:
             feedback_code="$(curl -sS --max-time 30 -o "$tmp/feedback.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-feedback.js?v=production-smoke" || true)"
             feedback_style_code="$(curl -sS --max-time 30 -o "$tmp/feedback-public.css" -w '%{http_code}' "$WWW/scifi-ui/styles/formatx-feedback-public.css?v=production-smoke" || true)"
             downloads_code="$(curl -sS -L --max-time 30 -D "$tmp/downloads.headers" -o "$tmp/downloads.html" -w '%{http_code}' "$WWW/downloads/" || true)"
+            android_code="$(curl -sS -L --max-time 30 -o "$tmp/android.html" -w '%{http_code}' "$WWW/scifi-ui/android/" || true)"
+            verification_code="$(curl -sS -L --max-time 30 -o "$tmp/verification.html" -w '%{http_code}' "$WWW/scifi-ui/verification.html" || true)"
+            known_issues_code="$(curl -sS -L --max-time 30 -o "$tmp/known-issues.html" -w '%{http_code}' "$WWW/scifi-ui/known-issues.html" || true)"
             support_code="$(curl -sS -L --max-time 30 -o "$tmp/support.html" -w '%{http_code}' "$WWW/support.html" || true)"
             release_code="$(curl -sS --max-time 30 -o "$tmp/release.json" -w '%{http_code}' "$WWW/scifi-ui/data/current-release.json" || true)"
             release_api_code="$(curl -sS --max-time 30 -o "$tmp/release-api.json" -w '%{http_code}' "$WWW/api/public-release" || true)"
@@ -231,7 +237,8 @@ jobs:
             if [[ "$root_code" == '200' && "$bare_code" == '200' && "$summary_code" == '200' \
               && "$submit_code" == '202' && "$loop_code" == '200' && "$living_code" == '200' \
               && "$apex_code" == '200' && "$feedback_code" == '200' && "$feedback_style_code" == '200' \
-              && "$downloads_code" == '200' && "$support_code" == '200' && "$release_code" == '200' \
+              && "$downloads_code" == '200' && "$android_code" == '200' && "$verification_code" == '200' \
+              && "$known_issues_code" == '200' && "$support_code" == '200' && "$release_code" == '200' \
               && "$release_api_code" == '200' && ( "$package_code" == '200' || "$package_code" == '206' ) \
               && "$portable_code" == '200' ]]; then
               if python3 - "$tmp" <<'PY'
@@ -253,6 +260,9 @@ jobs:
           home_headers = (root / 'home.headers').read_text()
           downloads = (root / 'downloads.html').read_text()
           downloads_headers = (root / 'downloads.headers').read_text()
+          android = (root / 'android.html').read_text()
+          verification = (root / 'verification.html').read_text()
+          known_issues = (root / 'known-issues.html').read_text()
           support = (root / 'support.html').read_text()
           package_headers = (root / 'package.headers').read_text()
           portable = (root / 'portable.svg').read_text().lower()
@@ -272,8 +282,11 @@ jobs:
           assert submit.get('ok') is True, submit
           assert submit.get('state') == 'pending-moderation', submit
           assert "const VERSION = 'seamless-v6'" in loop, 'seamless-v6 controller missing'
-          assert "fxInfiniteCloneMode = 'visual-bridge'" in loop, 'visual bridge missing'
-          assert 'clonedHeroOnly: true' in loop, 'Hero-only loop contract missing'
+          assert "fxInfiniteCloneMode = 'none'" in loop, 'native cloneMode=none contract missing'
+          assert "fxAutomaticLoop = 'disabled'" in loop, 'automatic loop is not disabled'
+          assert 'clonedHeroOnly: false' in loop, 'legacy hero cloning is still enabled'
+          assert 'nativePositionOnly: true' in loop, 'native-position-only scroll contract missing'
+          assert 'window.scrollTo(' not in loop and 'scrollIntoView(' not in loop and 'cloneNode(true)' not in loop, 'scroll runtime can still move or clone the page automatically'
           assert "deferred-user-activation" in living, 'immersive engine is not user-deferred'
           assert "rootMargin: '700px 0px'" in living, 'QR work is not viewport-deferred'
           assert "const RELEASE_API = './data/current-release.json'" in apex, 'homepage still depends on remote release API'
@@ -283,6 +296,10 @@ jobs:
           assert '.fx-feedback-public-card' in feedback_public, 'public comment styles missing'
           assert 'id="user-feedback"' in home, 'feedback section missing'
           assert 'data-fx-category-title' in home and 'Egy élő operációs réteg technikusi munkához.' in home, 'static category semantics missing'
+          assert 'Public beta' not in home and 'Nyilvános béta' not in home, 'retired product-level beta copy returned on homepage'
+          assert 'ANDROID TELJES VERZIÓ' in android and '/download/android-native-beta' in android, 'Android full-release/Native-beta separation missing'
+          assert 'data-verification-root' in verification, 'verification page invalid'
+          assert 'data-issues-root' in known_issues, 'known-issues page invalid'
           assert 'Támogatás' in support or 'Support' in support, 'support page invalid'
           assert release.get('ok') is True, release
           assert release.get('source') == 'formatx_release_service', release
@@ -291,7 +308,7 @@ jobs:
           assert release.get('channels', {}).get('android', {}).get('download_url') == '/download/android', release
           assert release_api.get('html_url') == '/scifi-ui/downloads/', release_api
           assert release_api.get('assets', [{}])[0].get('browser_download_url') == '/download/multiplatform', release_api
-          for public_text in [home, home_headers, downloads, downloads_headers, support, json.dumps(release), json.dumps(release_api), package_headers]:
+          for public_text in [home, home_headers, downloads, downloads_headers, android, verification, known_issues, support, json.dumps(release), json.dumps(release_api), package_headers]:
               assert 'github' not in public_text.lower(), 'upstream source leaked into a public response'
               assert 'githubusercontent' not in public_text.lower(), 'upstream asset host leaked into a public response'
           assert '<svg' in portable and '</svg>' in portable, 'portable installer SVG missing'
@@ -304,7 +321,7 @@ jobs:
               fi
             fi
 
-            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code living=$living_code apex=$apex_code feedback=$feedback_code feedback_style=$feedback_style_code downloads=$downloads_code support=$support_code release=$release_code release_api=$release_api_code package=$package_code portable=$portable_code"
+            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code living=$living_code apex=$apex_code feedback=$feedback_code feedback_style=$feedback_style_code downloads=$downloads_code android=$android_code verification=$verification_code known_issues=$known_issues_code support=$support_code release=$release_code release_api=$release_api_code package=$package_code portable=$portable_code"
             [[ -s "$tmp/summary.json" ]] && cat "$tmp/summary.json" || true
             [[ -s "$tmp/submit.json" ]] && cat "$tmp/submit.json" || true
             [[ -s "$tmp/release.json" ]] && cat "$tmp/release.json" || true
