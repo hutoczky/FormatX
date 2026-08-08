@@ -44,6 +44,8 @@ const downloads = read('docs/scifi-ui/downloads/index.html');
 const releaseController = read('docs/scifi-ui/scripts/release-metadata.js');
 const desktopCss = read('docs/scifi-ui/styles/formatx-desktop-unified.css');
 const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
+const nativeApex = read('docs/scifi-ui/scripts/formatx-apex-native.js');
+const safeThreeHost = read('docs/scifi-ui/scripts/formatx-three-host-safe.js');
 const voice = read('docs/scifi-ui/scripts/organism-voice.js');
 const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
 const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
@@ -190,12 +192,36 @@ check(
 );
 check(
   'organism-loader',
-  loader.includes('safe-ready-v27')
-    && loader.includes('safe-degraded-v27')
+  loader.includes('safe-ready-v28')
+    && loader.includes('safe-degraded-v28')
     && loader.includes('formatx-desktop-unified.css')
     && loader.includes('organism-master-sync.js?v=20260802-master-sync-1')
-    && loader.includes('synaptic-thought-disclosure.js'),
-  'Current Organism loader contract is missing'
+    && loader.includes('synaptic-thought-disclosure.js')
+    && loader.includes('formatx-apex-native.js?v=20260808-native-apex-1')
+    && loader.indexOf('formatx-apex-native.js') < loader.indexOf('formatx-three-host-safe.js'),
+  'Current Organism / Native Apex loader contract is missing'
+);
+check(
+  'native-apex-floor',
+  nativeApex.includes("getContext('webgl2'")
+    && nativeApex.includes('#define MAX_STEPS')
+    && nativeApex.includes('float fbm(')
+    && nativeApex.includes('vec2 core(')
+    && nativeApex.includes('vec2 nerves(')
+    && nativeApex.includes('vec2 organs(')
+    && nativeApex.includes('vec2 commerce(')
+    && nativeApex.includes('vec2 skeleton(')
+    && nativeApex.includes('vec2 beacon(')
+    && nativeApex.includes("fxScrollOwnership='seamless-v7'")
+    && nativeApex.includes("fxSectionSnap='disabled'")
+    && !nativeApex.includes('scrollTo(')
+    && !nativeApex.includes("addEventListener('wheel'")
+    && !nativeApex.includes("addEventListener('touchmove'")
+    && safeThreeHost.includes("root.dataset.fxNativeApex === 'ready'")
+    && safeThreeHost.includes("root.dataset.fxThreeHost = 'native-apex'")
+    && publicContract.quality_contract?.benchmark_floor?.policy === 'igloo-inc-is-mandatory-minimum-reference'
+    && publicContract.quality_contract?.benchmark_floor?.external_superiority_claim === false,
+  'Native Apex Igloo-floor production contract is incomplete'
 );
 check(
   'organism-safe-defaults',
@@ -276,11 +302,14 @@ for (const relative of [
   'docs/scifi-ui/scripts/formatx-public-shell.js',
   'docs/scifi-ui/scripts/public-evidence-pages.js',
   'docs/scifi-ui/scripts/organism-master-sync.js',
+  'docs/scifi-ui/scripts/formatx-apex-native.js',
   '.github/scripts/validate-public-release-integration.py',
   '.github/scripts/validate-public-pages-browser.cjs',
   '.github/scripts/validate-thought-disclosure-browser.cjs',
+  '.github/scripts/validate-igloo-floor.cjs',
   '.github/workflows/validate-organism-dialogue.yml',
   '.github/workflows/validate-android-release-integrity.yml',
+  '.github/workflows/validate-igloo-floor.yml',
 ]) {
   check(
     `required-${relative}`,
