@@ -9,6 +9,8 @@ on:
       - 'docs/scifi-ui/scripts/organism-voice-stability.js'
       - 'docs/scifi-ui/scripts/organism-master-sync.js'
       - 'docs/scifi-ui/scripts/organism-core-interaction.js'
+      - 'docs/scifi-ui/scripts/formatx-organism-truth-guard.js'
+      - 'docs/scifi-ui/scripts/formatx-accessibility-finalizer.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-disclosure.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-unified.js'
@@ -32,6 +34,8 @@ on:
       - 'docs/scifi-ui/scripts/organism-voice-stability.js'
       - 'docs/scifi-ui/scripts/organism-master-sync.js'
       - 'docs/scifi-ui/scripts/organism-core-interaction.js'
+      - 'docs/scifi-ui/scripts/formatx-organism-truth-guard.js'
+      - 'docs/scifi-ui/scripts/formatx-accessibility-finalizer.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-disclosure.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-unified.js'
@@ -75,6 +79,8 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-voice-stability.js
           node --check docs/scifi-ui/scripts/organism-master-sync.js
           node --check docs/scifi-ui/scripts/organism-core-interaction.js
+          node --check docs/scifi-ui/scripts/formatx-organism-truth-guard.js
+          node --check docs/scifi-ui/scripts/formatx-accessibility-finalizer.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
@@ -87,6 +93,8 @@ jobs:
           const fs = require('fs');
           const read = file => fs.readFileSync(file, 'utf8');
           const voice = read('docs/scifi-ui/scripts/organism-voice.js');
+          const truthGuard = read('docs/scifi-ui/scripts/formatx-organism-truth-guard.js');
+          const accessibility = read('docs/scifi-ui/scripts/formatx-accessibility-finalizer.js');
           const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
           const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
           const masterCss = read('docs/scifi-ui/styles/organism-master-sync.css');
@@ -105,6 +113,10 @@ jobs:
             [voice.includes('setOpen(false, false)'), 'dialogue does not start closed'],
             [voice.includes('ROOT.dataset.fxOrganismDialogueEnabled'), 'master state marker missing'],
             [!voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'), 'voice answer engine must remain network-free'],
+            [truthGuard.includes('Linux/Bazzite is the primary platform') && truthGuard.includes('Windows and Android are supported Full release platforms'), 'canonical Organism platform truth missing'],
+            [truthGuard.includes('Separate Ed25519 signature proof may be claimed only when it has actually been published'), 'conditional signature-evidence truth missing'],
+            [!truthGuard.includes('fetch(') && !truthGuard.includes('XMLHttpRequest') && !truthGuard.includes('WebSocket'), 'Organism truth guard must remain network-free'],
+            [accessibility.includes('formatx-organism-truth-guard.js?v=20260808-truth-1'), 'Organism truth guard is not loaded after interactive modules'],
             [voiceStability.includes('function interfaceBlocked()') && voiceStability.includes('function stopSpeech()'), 'voice overlay stability guard missing'],
             [masterSync.includes('data-fx-organism-dialogue-enabled') && masterSync.includes('fx-organism-master-disabled'), 'master synchronizer does not observe the Organism switch'],
             [masterSync.includes('organism-master-sync.css?v=20260802-master-sync-1'), 'CSP-safe master stylesheet link missing'],
@@ -134,7 +146,7 @@ jobs:
 
           const failed = checks.filter(([ok]) => !ok).map(([, message]) => message);
           if (failed.length) throw new Error(failed.join('; '));
-          console.log('PASS: current Organism dialogue, master switch, privacy, accessibility and routing contracts are valid.');
+          console.log('PASS: current Organism dialogue, canonical truth guard, master switch, privacy, accessibility and routing contracts are valid.');
           NODE
 
       - name: Install Playwright Chromium
