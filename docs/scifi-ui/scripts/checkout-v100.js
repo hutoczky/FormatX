@@ -102,7 +102,10 @@
       String(date.getMonth() + 1).padStart(2, '0'),
       String(date.getDate()).padStart(2, '0')
     ].join('');
-    const random = crypto.getRandomValues(new Uint32Array(1))[0].toString(36).slice(-6).toUpperCase();
+    const bytes = crypto.getRandomValues(new Uint8Array(12));
+    const random = Array.from(bytes, function (byte) {
+      return byte.toString(16).padStart(2, '0');
+    }).join('').toUpperCase();
     return 'FX-' + ymd + '-' + random;
   }
 
