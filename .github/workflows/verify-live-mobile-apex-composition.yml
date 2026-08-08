@@ -19,34 +19,41 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live additive layered indexed 3D MAG v7
+      - name: Verify live true indexed 3D MAG v8 plus fracture v9
         shell: bash
         run: |
           set -euo pipefail
           MAPPER="$RUNNER_TEMP/mapper.js"
-          MESH="$RUNNER_TEMP/mesh-v7.js"
+          MESH="$RUNNER_TEMP/mesh-v8.js"
+          FRACTURE="$RUNNER_TEMP/fracture-v9.js"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" -o "$MAPPER"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v7.js?v=20260808-true-mesh3d-v7&audit=${GITHUB_RUN_ID}" -o "$MESH"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v8.js?v=20260808-true-mesh3d-v8&audit=${GITHUB_RUN_ID}" -o "$MESH"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-fracture3d-v9.js?v=20260808-fracture3d-v9&audit=${GITHUB_RUN_ID}" -o "$FRACTURE"
 
-          grep -Fq "fxApexSceneStability === 'ready-v15'" "$MAPPER"
+          grep -Fq "fxApexSceneStability='ready-v17'" "$MAPPER"
+          grep -Fq 'formatx-core-mesh3d-v8.js?v=20260808-true-mesh3d-v8' "$MAPPER"
+          grep -Fq 'formatx-core-fracture3d-v9.js?v=20260808-fracture3d-v9' "$MAPPER"
           grep -Fq 'retired-for-real-3d-reactor' "$MAPPER"
-          grep -Fq 'formatx-core-mesh3d-v7.js?v=20260808-true-mesh3d-v7' "$MAPPER"
+
           grep -Fq "getContext('webgl2'" "$MESH"
-          grep -Fq 'depth: true' "$MESH"
           grep -Fq 'gl.enable(gl.DEPTH_TEST)' "$MESH"
+          grep -Fq 'gl.enable(gl.CULL_FACE)' "$MESH"
+          grep -Fq 'gl.cullFace(gl.FRONT)' "$MESH"
+          grep -Fq 'gl.cullFace(gl.BACK)' "$MESH"
           grep -Fq 'gl.drawElements(gl.TRIANGLES' "$MESH"
-          grep -Fq 'gl.blendFunc(gl.SRC_ALPHA,gl.ONE)' "$MESH"
-          grep -Fq 'drawTriangles(crystal,0,.455,pulse' "$MESH"
-          grep -Fq 'drawTriangles(crystal,0,.505,pulse' "$MESH"
-          grep -Fq 'drawTriangles(crystal,0,.550,pulse' "$MESH"
-          grep -Fq 'drawTriangles(crystal,0,.563,pulse' "$MESH"
-          grep -Fq 'buildTorus(.34,.006)' "$MESH"
-          grep -Fq 'buildTorus(.50,.0055)' "$MESH"
-          grep -Fq 'buildTorus(.66,.005)' "$MESH"
-          grep -Fq "fxCoreMesh3d='ready-v7'" "$MESH"
-          grep -Fq "fxCoreGeometry='indexed-triangle-mesh-v7'" "$MESH"
-          grep -Fq "fxCoreReactorGeometry='sphere-plus-3-tori'" "$MESH"
+          grep -Fq "fxCoreMesh3d='ready-v8'" "$MESH"
+          grep -Fq "fxCoreGeometry='indexed-triangle-mesh-v8'" "$MESH"
+          grep -Fq "fxCoreReactorGeometry='sphere-plus-3-tori-plus-2-box-beams'" "$MESH"
+
+          grep -Fq "getContext('webgl2'" "$FRACTURE"
+          grep -Fq 'gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER' "$FRACTURE"
+          grep -Fq 'gl.drawElements(gl.LINES' "$FRACTURE"
+          grep -Fq 'point(r1,i1,.008)' "$FRACTURE"
+          grep -Fq "fxCoreFracture3d='ready-v9'" "$FRACTURE"
+          grep -Fq "fxCoreFractureGeometry='indexed-gl-lines'" "$FRACTURE"
+
           ! grep -Fq 'drawImage(' "$MESH"
+          ! grep -Fq 'drawImage(' "$FRACTURE"
 
       - name: Publish live mobile Apex status
         if: always()
@@ -57,5 +64,15 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Live MAG uses additive layered real indexed WebGL2 mesh v7 and real 3D reactor'; else state='failure'; description='Live additive true 3D MAG v7 verification failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live mobile Apex composition' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Live MAG uses true indexed 3D mesh v8 plus indexed 3D fracture network v9'
+          else
+            state='failure'
+            description='Live true 3D MAG v8/v9 verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX live mobile Apex composition' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"
