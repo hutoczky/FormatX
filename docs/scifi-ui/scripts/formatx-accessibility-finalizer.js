@@ -17,6 +17,15 @@
     if (element.getAttribute(name) !== value) element.setAttribute(name, value);
   }
 
+  function ensureOrganismTruthGuard() {
+    if (document.querySelector('script[data-fx-organism-truth-guard]')) return;
+    const script = document.createElement('script');
+    script.src = './scripts/formatx-organism-truth-guard.js?v=20260808-truth-1';
+    script.defer = true;
+    script.dataset.fxOrganismTruthGuard = 'true';
+    document.head.appendChild(script);
+  }
+
   function apply() {
     scheduled = 0;
     if (applying) return;
@@ -91,6 +100,7 @@
     if (scheduled) cancelAnimationFrame(scheduled);
   }, { once: true });
 
+  ensureOrganismTruthGuard();
   document.readyState === 'loading'
     ? document.addEventListener('DOMContentLoaded', schedule, { once: true })
     : schedule();
