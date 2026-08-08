@@ -53,7 +53,7 @@
     "legacy_hide_contracts_overridden_by_native_ownership": true,
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
     "language_switch_preserves_scene_hash": true,
-    "deployment_revision": "2026-08-08-volumetric-glass-crystal-v6-live-1"
+    "deployment_revision": "2026-08-08-volumetric-glass-crystal-v6-live-2"
   },
   "quality_contract": {
     "award_readiness_revision": "2026-08-08-volumetric-glass-crystal-v6-production13",
