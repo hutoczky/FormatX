@@ -1,0 +1,46 @@
+/* FormatX native continuous scroll policy.
+   This stylesheet is intentionally small and loaded before optional/immersive
+   modules. It prevents any legacy chapter or scene stylesheet from turning
+   ordinary wheel/touch scrolling into section snapping. */
+
+html,
+body,
+html.fx-organism-interface-ready,
+html.fx-organism-interface-ready body,
+html[data-fx-infinite-controller],
+html[data-fx-infinite-controller] body {
+  scroll-snap-type: none !important;
+}
+
+#hero,
+main > .scene,
+.fx-organism-interface-ready #hero,
+.fx-organism-interface-ready main > .scene:not(#hero),
+.fx-organism-chapter,
+.fx-organism-chapter-trigger {
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+}
+
+html,
+body {
+  overscroll-behavior-y: auto;
+}
+
+@media (pointer: coarse), (max-width: 900px) {
+  html,
+  body {
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+    touch-action: pan-y pinch-zoom !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  #main-content,
+  #hero,
+  main > .scene,
+  .fx-organism-chapter,
+  .fx-organism-chapter-trigger {
+    touch-action: pan-y pinch-zoom !important;
+  }
+}
