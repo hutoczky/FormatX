@@ -6,12 +6,14 @@ on:
     paths:
       - 'docs/scifi-ui/**'
       - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/**'
       - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
   workflow_dispatch:
 
@@ -26,7 +28,7 @@ concurrency:
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -39,12 +41,27 @@ jobs:
       - name: Install dependencies
         run: npm install -g @lhci/cli@0.13.x
 
-      - name: Run Lighthouse CI
-        id: lighthouse
+      - name: Run desktop Lighthouse CI
+        id: lighthouse_desktop
         shell: bash
         run: |
           set -o pipefail
-          lhci autorun --rc=lighthouserc.json 2>&1 | tee lighthouse-output.txt
+          rm -rf .lighthouseci
+          lhci autorun --rc=lighthouserc.json 2>&1 | tee lighthouse-desktop-output.txt
+          mkdir -p lighthouse-results/desktop
+          cp -a .lighthouseci/. lighthouse-results/desktop/
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Run mobile Lighthouse CI
+        id: lighthouse_mobile
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf .lighthouseci
+          lhci autorun --rc=lighthouserc.mobile.json 2>&1 | tee lighthouse-mobile-output.txt
+          mkdir -p lighthouse-results/mobile
+          cp -a .lighthouseci/. lighthouse-results/mobile/
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
@@ -54,8 +71,9 @@ jobs:
         with:
           name: lighthouse-results
           path: |
-            .lighthouseci/
-            lighthouse-output.txt
+            lighthouse-results/
+            lighthouse-desktop-output.txt
+            lighthouse-mobile-output.txt
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 30
@@ -66,16 +84,17 @@ jobs:
           {
             echo "## Lighthouse CI Results"
             echo
-            echo "Production: https://www.formatxsuite.com/"
+            echo "Validated surfaces: desktop + mobile"
             echo
-            echo "### Thresholds"
+            echo "### Strict thresholds"
             echo "- Performance ≥ 0.90"
-            echo "- Accessibility ≥ 0.95"
-            echo "- Best practices ≥ 0.95"
-            echo "- SEO ≥ 0.90"
-            echo "- LCP < 2.5s"
-            echo "- CLS < 0.10"
-            echo "- TTFB < 600ms"
+            echo "- Accessibility = 1.00"
+            echo "- Best practices = 1.00"
+            echo "- SEO = 1.00"
+            echo "- LCP ≤ 2.5s"
+            echo "- CLS ≤ 0.10"
+            echo "- TTFB ≤ 600ms"
+            echo "- 3 runs per viewport profile"
             echo
             echo "The production site is deployed as one Cloudflare Worker with Static Assets."
           } >> "$GITHUB_STEP_SUMMARY"
@@ -89,10 +108,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Lighthouse performance, accessibility, best-practices and SEO gates passed'
+            description='Strict desktop and mobile Lighthouse quality gates passed'
           else
             state='failure'
-            description='FormatX Lighthouse quality gate failed'
+            description='Desktop or mobile Lighthouse quality gate failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
