@@ -11,6 +11,7 @@ const apex = read('docs/scifi-ui/scripts/formatx-apex-native.js');
 const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
 const fallback = read('docs/scifi-ui/scripts/formatx-three-host-safe.js');
 const transcendCss = read('docs/scifi-ui/styles/formatx-transcend.css');
+const productionEntry = read('billing-worker/src/production-entry.js');
 const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
 
 assert.match(apex, /getContext\('webgl2'/, 'native WebGL2 renderer missing');
@@ -54,9 +55,20 @@ assert.match(fallback, /fxThreeFallback/, 'safe renderer fallback state missing'
 assert.match(transcendCss, /\.fx-transcend-canvas/, 'cinematic native Apex surface styling missing');
 assert.match(transcendCss, /\.fx-transcend-footer/, 'particle footer styling missing');
 
+assert.match(productionEntry, /'\/scifi-ui\/scripts\/formatx-apex-native\.js'/, 'native Apex is not protected as a no-store production asset');
+assert.match(productionEntry, /'\/scifi-ui\/scripts\/formatx-three-host-safe\.js'/, 'safe fallback host is not protected as a no-store production asset');
+assert.match(productionEntry, /'\/scifi-ui\/styles\/formatx-transcend\.css'/, 'native Apex cinematic CSS is not protected as a no-store production asset');
+
 assert.equal(contract.layout_contract?.infinite_scroll_controller, 'seamless-v7', 'infinite-scroll controller regressed');
 assert.equal(contract.layout_contract?.section_scroll_snap, false, 'section scroll snap regressed');
 assert.equal(contract.layout_contract?.mobile_native_momentum_preserved, true, 'mobile momentum contract regressed');
 assert.equal(contract.public_delivery?.first_party_only, true, 'first-party delivery contract regressed');
+assert.equal(contract.quality_contract?.benchmark_floor?.policy, 'igloo-inc-is-mandatory-minimum-reference', 'Igloo minimum benchmark policy missing');
+assert.equal(contract.quality_contract?.benchmark_floor?.native_first_party_procedural_gpu, true, 'native procedural GPU benchmark requirement missing');
+assert.equal(contract.quality_contract?.benchmark_floor?.functional_six_scene_morphing, true, 'six-scene functional morph benchmark requirement missing');
+assert.equal(contract.quality_contract?.benchmark_floor?.adaptive_gpu_quality_from_measured_fps, true, 'adaptive measured-FPS quality benchmark missing');
+assert.equal(contract.quality_contract?.benchmark_floor?.third_party_scene_framework_required, false, 'native renderer unexpectedly requires a third-party scene framework');
+assert.equal(contract.quality_contract?.benchmark_floor?.scroll_ownership, 'seamless-v7-only', 'Igloo-floor contract does not preserve seamless-v7 scroll ownership');
+assert.equal(contract.quality_contract?.benchmark_floor?.external_superiority_claim, false, 'external superiority must not be claimed without independent validation');
 
-console.log('FormatX Igloo-floor native procedural GPU, fallback and seamless-scroll gate passed.');
+console.log('FormatX Igloo-floor native procedural GPU, production delivery, fallback and seamless-scroll gate passed.');
