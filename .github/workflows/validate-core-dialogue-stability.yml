@@ -1,0 +1,56 @@
+name: Validate FormatX core and mobile dialogue stability
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-apex-scene-stability.js'
+      - 'docs/scifi-ui/scripts/formatx-apex-native.js'
+      - 'docs/scifi-ui/scripts/organism-voice-stability.js'
+      - 'docs/scifi-ui/scripts/igloo-parity.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
+      - '.github/scripts/validate-core-dialogue-stability.cjs'
+      - '.github/workflows/validate-core-dialogue-stability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  validate-core-dialogue-stability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate core animation and mobile visual viewport
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-apex-scene-stability.js
+          node --check docs/scifi-ui/scripts/organism-voice-stability.js
+          node --check docs/scifi-ui/scripts/igloo-parity.js
+          node .github/scripts/validate-core-dialogue-stability.cjs
+
+      - name: Publish stability status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          SHA: ${{ github.sha }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Core animation and mobile dialogue viewport stability verified'
+          else
+            state='failure'
+            description='Core animation or mobile dialogue viewport stability failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX core and mobile dialogue stability' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"
