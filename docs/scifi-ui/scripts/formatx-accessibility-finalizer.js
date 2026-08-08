@@ -12,24 +12,29 @@
     return root.lang === 'en' ? 'en' : 'hu';
   }
 
+  function setAttributeIfChanged(element, name, value) {
+    if (!(element instanceof Element)) return;
+    if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+  }
+
   function apply() {
     scheduled = 0;
     if (applying) return;
     applying = true;
     try {
       const brand = document.querySelector('.topbar > a.brand');
-      brand?.removeAttribute('aria-label');
+      if (brand?.hasAttribute('aria-label')) brand.removeAttribute('aria-label');
 
       const immersive = document.querySelector('.fx-immersive-launch');
       if (immersive instanceof HTMLButtonElement) {
-        immersive.setAttribute('aria-label', language() === 'en'
+        setAttributeIfChanged(immersive, 'aria-label', language() === 'en'
           ? 'LIVING CORE LAUNCH — launch the living visual core'
           : 'ÉLŐ MAG INDÍTÁS — az élő vizuális mag indítása');
       }
 
       const coreNode = document.querySelector('[data-organ-node="0"]');
       if (coreNode instanceof HTMLAnchorElement) {
-        coreNode.setAttribute('aria-label', language() === 'en'
+        setAttributeIfChanged(coreNode, 'aria-label', language() === 'en'
           ? '01 CORE — launch the living visual core'
           : '01 MAG — az élő vizuális mag indítása');
       }
@@ -38,19 +43,18 @@
         if (!(link instanceof HTMLAnchorElement)) return;
         const card = link.closest('[data-plan-qr]');
         const planName = card?.querySelector('.fx-plan-qr-copy strong')?.textContent?.trim() || 'FormatX';
-        link.setAttribute('aria-label', language() === 'en'
+        setAttributeIfChanged(link, 'aria-label', language() === 'en'
           ? 'QR — open ' + planName + ' payment page'
           : 'QR — ' + planName + ' fizetési oldal megnyitása');
       });
 
       const launcher = document.querySelector('[data-fx-live-os-launcher]');
       if (launcher instanceof HTMLButtonElement) {
-        launcher.setAttribute('aria-label', language() === 'en'
+        const label = language() === 'en'
           ? 'Live OS — FormatX command'
-          : 'Live OS — FormatX parancs');
-        launcher.title = language() === 'en'
-          ? 'Live OS — FormatX command · Ctrl/⌘ K'
-          : 'Live OS — FormatX parancs · Ctrl/⌘ K';
+          : 'Live OS — FormatX parancs';
+        setAttributeIfChanged(launcher, 'aria-label', label);
+        if (launcher.title !== label + ' · Ctrl/⌘ K') launcher.title = label + ' · Ctrl/⌘ K';
       }
     } finally {
       applying = false;
