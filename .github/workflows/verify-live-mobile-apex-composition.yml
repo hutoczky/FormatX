@@ -19,24 +19,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live pulsing luminous crystal v8
+      - name: Verify live true indexed 3D MAG
         shell: bash
         run: |
           set -euo pipefail
           HOME_HTML="$RUNNER_TEMP/formatx-home.html"
           MOBILE_CSS="$RUNNER_TEMP/formatx-mobile-apex-composition.css"
-          APEX_JS="$RUNNER_TEMP/formatx-apex-native.js"
           MAPPER_JS="$RUNNER_TEMP/formatx-apex-scene-stability.js"
-          CSS_HEADERS="$RUNNER_TEMP/mobile-css-headers.txt"
+          MESH_JS="$RUNNER_TEMP/formatx-core-mesh3d.js"
+          MESH_CSS="$RUNNER_TEMP/formatx-core-mesh3d.css"
           MAPPER_HEADERS="$RUNNER_TEMP/mapper-headers.txt"
+          MESH_HEADERS="$RUNNER_TEMP/mesh-headers.txt"
           REV='20260808-mobile-apex-live-2'
 
           for attempt in $(seq 1 18); do
             curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
-              "https://www.formatxsuite.com/?pulse_v8_audit=${GITHUB_RUN_ID}-${attempt}" \
+              "https://www.formatxsuite.com/?true_mesh3d_audit=${GITHUB_RUN_ID}-${attempt}" \
               -o "$HOME_HTML" || true
-            if grep -Fq 'data-fx-mobile-apex-composition="true"' "$HOME_HTML" \
-              && grep -Fq "formatx-mobile-apex-composition.css?v=${REV}" "$HOME_HTML"; then
+            if grep -Fq 'data-fx-mobile-apex-composition="true"' "$HOME_HTML"; then
               break
             fi
             if [ "$attempt" -eq 18 ]; then
@@ -48,48 +48,67 @@ jobs:
 
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
             "https://www.formatxsuite.com/scifi-ui/styles/formatx-mobile-apex-composition.css?v=${REV}&audit=${GITHUB_RUN_ID}" \
-            -D "$CSS_HEADERS" -o "$MOBILE_CSS"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
-            "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?audit=${GITHUB_RUN_ID}" \
-            -o "$APEX_JS"
+            -o "$MOBILE_CSS"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
             "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" \
             -D "$MAPPER_HEADERS" -o "$MAPPER_JS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
+            "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d.js?v=20260808-true-mesh3d-v1&audit=${GITHUB_RUN_ID}" \
+            -D "$MESH_HEADERS" -o "$MESH_JS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' \
+            "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-mesh3d.css?v=20260808-true-mesh3d-v1&audit=${GITHUB_RUN_ID}" \
+            -o "$MESH_CSS"
 
+          # Existing mobile background remains native-resolution and visible.
           grep -Fq 'display: block !important' "$MOBILE_CSS"
           grep -Fq 'height: 100dvh !important' "$MOBILE_CSS"
-          grep -Fq 'visibility: visible !important' "$MOBILE_CSS"
-          grep -Fq 'opacity: 1 !important' "$MOBILE_CSS"
           grep -Fq 'translate3d(0, -.8svh, 0) scale(1)' "$MOBILE_CSS"
-          ! grep -Fq 'scale(1.34)' "$MOBILE_CSS"
 
-          grep -Fq "getContext('webgl2'" "$APEX_JS"
-          grep -Fq 'float starPrism(' "$APEX_JS"
-          grep -Fq 'quality: coarse.matches ? 0.82 : 0.88' "$APEX_JS"
-          grep -Fq 'coarse.matches ? 1.25 : 1.5' "$APEX_JS"
+          # SDF core is explicitly retired while the true mesh owns MAG.
+          grep -Fq "fxApexSceneStability === 'ready-v9'" "$MAPPER_JS"
+          grep -Fq 'if(uScene<.92)return vec2(10.,1.)' "$MAPPER_JS"
+          grep -Fq "fxSdfCore = 'disabled-before-scene-0.92'" "$MAPPER_JS"
+          grep -Fq 'formatx-core-mesh3d.js?v=20260808-true-mesh3d-v1' "$MAPPER_JS"
+          grep -Fq 'formatx-core-mesh3d.css?v=20260808-true-mesh3d-v1' "$MAPPER_JS"
 
-          # Visual reference + living pulse are both mandatory.
-          grep -Fq "fxApexSceneStability === 'ready-v7'" "$MAPPER_JS"
-          grep -Fq 'function referenceLuminousCrystalShader(source)' "$MAPPER_JS"
-          grep -Fq 'float radial=radius*mix(.47,1.,axis)' "$MAPPER_JS"
-          grep -Fq 'float zCap=depth*pow(max(0.,1.-pow(rn,1.72)),.58)' "$MAPPER_JS"
-          grep -Fq 'starPrism(crystal,1.54*pulse,.62*(1.+heart*.025),.004)' "$MAPPER_JS"
-          grep -Fq 'float cavity=sphere(crystal,.455+heart*.018)' "$MAPPER_JS"
-          grep -Fq 'float beatA=.5+.5*sin(uTime*1.55)' "$MAPPER_JS"
-          grep -Fq 'float beatB=.5+.5*sin(uTime*3.10-.78)' "$MAPPER_JS"
-          grep -Fq 'float heart=pow(beatA,4.)*.72+pow(beatB,9.)*.28' "$MAPPER_JS"
-          grep -Fq 'float breath=.5+.5*sin(uTime*.62-.4)' "$MAPPER_JS"
-          grep -Fq 'float ringPulse=1.+heart*.055+breath*.012' "$MAPPER_JS"
-          grep -Fq 'float screenHeart=pow(screenBeatA,4.)*.72+pow(screenBeatB,9.)*.28' "$MAPPER_JS"
-          grep -Fq 'float pulseWave=exp(-abs(coreDistance-waveRadius)*54.)' "$MAPPER_JS"
-          grep -Fq 'float coreOrb=exp(-coreDistance*9.4)*coreWeight*(.82+screenHeart*.78)' "$MAPPER_JS"
-          grep -Fq 'vec3 refrDir=refract(rd,n,.75)' "$MAPPER_JS"
-          grep -Fq 'float angle=mix(.042+sin(uTime*.11)*.030' "$MAPPER_JS"
-          grep -Fq 'reference-luminous-crystal-pulse-v8' "$MAPPER_JS"
+          # Real 3D: vertex/index buffers, normals, depth test and perspective.
+          grep -Fq "getContext('webgl2'" "$MESH_JS"
+          grep -Fq 'depth: true' "$MESH_JS"
+          grep -Fq 'gl.enable(gl.DEPTH_TEST)' "$MESH_JS"
+          grep -Fq 'gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER' "$MESH_JS"
+          grep -Fq 'gl.drawElements(gl.TRIANGLES' "$MESH_JS"
+          grep -Fq 'aPosition' "$MESH_JS"
+          grep -Fq 'aNormal' "$MESH_JS"
+          grep -Fq 'computeNormals(' "$MESH_JS"
+          grep -Fq 'function perspective(' "$MESH_JS"
+          grep -Fq 'function lookAt(' "$MESH_JS"
+          grep -Fq 'uProjection*uView*vec4(p,1.)' "$MESH_JS"
 
-          grep -Fq 'html[data-fx-native-apex="ready"] #fx-apex-canvas' "$MOBILE_CSS"
-          grep -Fq 'html[data-fx-native-apex="ready"] .fx-three-stage-shell' "$MOBILE_CSS"
-          grep -Eiq '^cache-control:.*no-store' "$CSS_HEADERS"
+          # Reference geometry: four tips, concave shoulders, front/back surfaces and side walls.
+          grep -Fq '[0,1],[.115,.705],[.305,.325],[.705,.115]' "$MESH_JS"
+          grep -Fq '[1,0]' "$MESH_JS"
+          grep -Fq '[0,-1]' "$MESH_JS"
+          grep -Fq '[-1,0]' "$MESH_JS"
+          grep -Fq 'const depth = .46' "$MESH_JS"
+          grep -Fq 'frontCenter = add(0, 0, depth)' "$MESH_JS"
+          grep -Fq 'backCenter = add(0, 0, -depth)' "$MESH_JS"
+          grep -Fq 'outerFront = front[rings - 1]' "$MESH_JS"
+
+          # Actual 3D reactor/orbits and living pulse.
+          grep -Fq 'buildSphereGeometry(.165)' "$MESH_JS"
+          grep -Fq 'buildTorusGeometry(.29, .012)' "$MESH_JS"
+          grep -Fq 'buildTorusGeometry(.88, .008)' "$MESH_JS"
+          grep -Fq 'Math.pow(beatA, 4) * .72 + Math.pow(beatB, 9) * .28' "$MESH_JS"
+          grep -Fq 'const pulse = 1 + heart * .026 + breath * .006' "$MESH_JS"
+          grep -Fq "fxCoreGeometry = 'indexed-triangle-mesh'" "$MESH_JS"
+          grep -Fq "fxCoreDepthBuffer = 'enabled'" "$MESH_JS"
+          grep -Fq "fxCoreCamera = 'perspective'" "$MESH_JS"
+          ! grep -Fq 'drawImage(' "$MESH_JS"
+          ! grep -Fqi 'three.js' "$MESH_JS"
+
+          grep -Fq 'pointer-events: none' "$MESH_CSS"
+          grep -Fq 'height: 100dvh' "$MESH_CSS"
+          grep -Fq 'background: transparent' "$MESH_CSS"
           grep -Eiq '^cache-control:.*no-store' "$MAPPER_HEADERS"
 
       - name: Publish live mobile Apex status
@@ -104,10 +123,10 @@ jobs:
           set -euo pipefail
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live luminous crystal v8 has heartbeat, breathing body, pulsing reactor and energy wave'
+            description='Live MAG uses real indexed WebGL2 mesh geometry, depth, normals, perspective and pulsing 3D reactor'
           else
             state='failure'
-            description='Live pulsing luminous crystal v8 verification failed'
+            description='Live true indexed 3D MAG verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
