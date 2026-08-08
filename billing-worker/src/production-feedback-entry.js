@@ -93,9 +93,11 @@ const HOMEPAGE_SEO = [
   '<meta name="twitter:title" content="FormatX Suite Pro | Technician Operating Layer">',
   '<meta name="twitter:description" content="Technician operating layer for diagnostics, installation, drive management and verifiable maintenance.">',
   '<meta name="twitter:image" content="https://www.formatxsuite.com/scifi-ui/assets/images/formatx-technician-console.png">',
-  '<link rel="stylesheet" data-fx-award-readiness-style="true" href="/scifi-ui/styles/formatx-award-readiness.css?v=20260808-award-readiness-1">',
+  '<link rel="stylesheet" data-fx-award-readiness-style="true" href="/scifi-ui/styles/formatx-award-readiness.css?v=20260808-award-readiness-2">',
   `<script id="formatx-structured-data" type="application/ld+json">${HOMEPAGE_STRUCTURED_DATA}</script>`
 ].join('\n');
+
+const HERO_TRUSTLINE = '<p class="fx-hero-trustline" data-fx-hero-trustline data-hu="Teljes kiadás · 5 napos próbalicenc · Bazzite/Linux elsődleges · Windows és Android támogatott" data-en="Full release · 5-day trial licence · Bazzite/Linux primary · Windows and Android supported">Teljes kiadás · 5 napos próbalicenc · Bazzite/Linux elsődleges · Windows és Android támogatott</p>';
 
 const HOMEPAGE_PROOF_STRIP = `
     <section class="fx-award-proof" data-fx-award-proof aria-labelledby="fx-award-proof-title">
@@ -171,8 +173,18 @@ async function stabiliseHomepageSemantics(request, url, response) {
   const staticCategory = '<p class="section-index" data-fx-category-eyebrow data-hu="FORMATX TECHNICIAN OPERATING LAYER" data-en="FORMATX TECHNICIAN OPERATING LAYER">FORMATX TECHNICIAN OPERATING LAYER</p><h2 id="fx-category-title" data-fx-category-title data-hu="Egy élő operációs réteg technikusi munkához." data-en="A living operating layer for technician workflows.">Egy élő operációs réteg technikusi munkához.</h2><p data-fx-category-lead data-hu="Felderítés, tervezés, kontrollált végrehajtás és visszaellenőrzés egy közös, ellenőrizhető rendszerben." data-en="Discovery, planning, controlled execution and verification in one shared, verifiable system.">Felderítés, tervezés, kontrollált végrehajtás és visszaellenőrzés egy közös, ellenőrizhető rendszerben.</p>';
   html = html.replace(emptyCategory, staticCategory);
 
+  html = html
+    .replace('<html lang="hu"', '<html lang="hu" data-fx-award-positioning="v2"')
+    .replace('<title>FormatX Suite Pro | Living System Architecture</title>', '<title>FormatX Suite Pro | Technikusi operációs réteg</title>')
+    .replace('content="FormatX Suite Pro — élő rendszerarchitektúraként bemutatott, interaktív technikusi platform meghajtókezeléshez, diagnosztikához, telepítéshez és biztonságos rendszerkarbantartáshoz."', 'content="Független technikusi operációs réteg diagnosztikához, telepítéshez, meghajtókezeléshez és ellenőrizhető karbantartáshoz. Teljes kiadás 5 napos próbalicenccel."')
+    .replace('content="FormatX Suite Pro — Living System Architecture"', 'content="FormatX Suite Pro | Technikusi operációs réteg"')
+    .replace('content="Egy élő rendszerépület, amely felderít, tervez, végrehajt és ellenőriz."', 'content="Felderítés, tervezés, kontrollált végrehajtás és visszaellenőrzés egyetlen technikusi operációs rétegben."');
+
   if (!html.includes('data-fx-award-readiness-style')) {
     html = html.replace('</head>', `${HOMEPAGE_SEO}\n</head>`);
+  }
+  if (!html.includes('data-fx-hero-trustline')) {
+    html = html.replace('<div class="hero-facts">', `${HERO_TRUSTLINE}\n          <div class="hero-facts">`);
   }
   if (!html.includes('data-fx-award-proof')) {
     const categoryMarker = '    <section class="fx-category-deck fx-category-deck--standalone"';
