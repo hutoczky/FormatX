@@ -5,7 +5,7 @@
       "url": [
         "./scifi-ui/index.html?lighthouse=1"
       ],
-      "numberOfRuns": 1,
+      "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",
         "chromeFlags": "--headless=new --no-sandbox --disable-dev-shm-usage --force-prefers-reduced-motion",
