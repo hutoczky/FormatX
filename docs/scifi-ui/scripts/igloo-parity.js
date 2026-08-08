@@ -59,6 +59,15 @@
     );
   }
 
+  function ensureReadabilityFloorStyle() {
+    ensureStyle(
+      'data-fx-readability-floor',
+      './styles/formatx-readability-floor.css?v=20260808-a11y-floor-1',
+      'fxReadabilityFloor',
+      'FormatX readability floor stylesheet failed to load.'
+    );
+  }
+
   function ensureMobileHeroFlowStyle() {
     ensureStyle(
       'data-fx-mobile-hero-flow',
@@ -114,7 +123,13 @@
         + '&lang=' + encodeURIComponent(language)
         + '&source=pricing-qr';
 
-      if (link instanceof HTMLAnchorElement) link.href = checkoutSource;
+      if (link instanceof HTMLAnchorElement) {
+        link.href = checkoutSource;
+        const planName = card.querySelector('.fx-plan-qr-copy strong')?.textContent?.trim() || plan;
+        link.setAttribute('aria-label', language === 'en'
+          ? 'QR — open ' + planName + ' payment page'
+          : 'QR — ' + planName + ' fizetési oldal megnyitása');
+      }
 
       card.classList.remove('is-qr-ready', 'is-qr-error');
       card.classList.add('is-qr-loading');
@@ -180,6 +195,7 @@
   ensureOrganismDockStyle();
   ensureOrganismSpeakingStyle();
   ensureMobileReadabilityStyle();
+  ensureReadabilityFloorStyle();
   ensureMobileHeroFlowStyle();
   ensureDesktopLayoutStyle();
   ensurePremiumFinishStyle();
