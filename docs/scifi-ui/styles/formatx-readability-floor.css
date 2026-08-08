@@ -24,6 +24,12 @@
   line-height: 1.35 !important;
 }
 
+.fx-organism-status small {
+  color: #aab8c2 !important;
+  font-size: max(10px, .67rem) !important;
+  line-height: 1.35 !important;
+}
+
 :where(
   .fx-platform-status-badge,
   .fx-product-release-state small,
