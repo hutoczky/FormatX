@@ -140,10 +140,12 @@ def validate_public_pages_v2() -> None:
         'href="/download/android"',
         "ANDROID TELJES VERZIÓ",
         "NATÍV BÉTA",
-        "android-native-v1.1.0-beta",
+        'href="/download/android-native-beta"',
     ]:
         if token not in android:
             module.fail(f"Android page missing channel truth contract: {token}")
+    if "android-native-v1.1.0-beta" in android:
+        module.fail("Android page must use the first-party Native beta download route instead of an upstream release URL")
 
     production = module.read("billing-worker/src/production-content-entry.js")
     preview = module.read("content-preview-entry.js")
