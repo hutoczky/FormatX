@@ -1,218 +1,144 @@
 'use strict';
 
 const { chromium } = require('playwright');
+const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu';
 
-const TEST_URL = process.env.FORMATX_TEST_URL
-  || 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu';
+function assert(value, message) { if (!value) throw new Error(message); }
 
-function assert(condition, message) {
-  if (!condition) throw new Error(message);
-}
-
-const NAVIGATION = Object.freeze({
+const NAV = {
   hu: [
     ['Működés', 'Modulok', 'Licenc és árak', 'Biztonság', 'Letöltés'],
     ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
-    ['Hogyan működik', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
-    ['Idegrendszer — Hogyan működik', 'Szervek — Funkciók és modulok', 'Kereskedelmi szív — Licencek és árak', 'Váz — Technológia és biztonság', 'Jeladó — Letöltés és bizonyítékok']
+    ['Hogyan működik', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés']
   ],
   en: [
     ['Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads'],
-    ['How it works', 'Modules', 'Licences', 'Proof', 'Download'],
-    ['Nervous system — How it works', 'Organs — Functions and modules', 'Commerce heart — Licences and pricing', 'Skeleton — Technology and safety', 'Beacon — Downloads and evidence']
+    ['How it works', 'Modules', 'Licences', 'Proof', 'Download']
   ]
-});
-
-const DOWNLOAD_LABELS = Object.freeze({
-  hu: ['Teljes multiplatform verzió letöltése', 'Teljes multiplatform verzió'],
-  en: ['Download full multiplatform version', 'Full multiplatform version']
-});
-
-const TRIAL_LABELS = Object.freeze({
+};
+const DOWNLOAD = {
+  hu: ['Teljes verzió – 5 napos próbalicenc', 'Teljes multiplatform verzió letöltése', 'Teljes multiplatform verzió'],
+  en: ['Full version – 5-day trial', 'Download full multiplatform version', 'Full multiplatform version']
+};
+const TRIAL = {
   hu: ['napos próbalicenc', 'napos teljes próba', 'nap teljes próba', 'napos kezdőlicenc'],
   en: ['day trial licence', 'day full trial', 'day initial licence']
-});
+};
 
-function matchesOne(actual, expectedSets) {
-  return expectedSets.some(expected => JSON.stringify(actual) === JSON.stringify(expected));
+function matchesNavigation(actual, language) {
+  return NAV[language].some(expected => JSON.stringify(expected) === JSON.stringify(actual));
 }
 
-async function installProductionCopyLayer(page) {
+async function installProductionCopy(page) {
   const origin = new URL(TEST_URL).origin;
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/single-language-toggle.css?v=20260808-single-language-5' });
   await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1' });
-  for (const src of [
-    '/scifi-ui/scripts/single-language-toggle.js?v=20260808-single-language-5',
-    '/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
-    '/scifi-ui/scripts/formatx-language-copy-stability.js?v=20260808-full-release-copy-v4'
-  ]) {
-    await page.addScriptTag({ url: origin + src });
-  }
+  await page.addScriptTag({ url: origin + '/scifi-ui/scripts/single-language-toggle.js?v=20260808-single-language-5' });
+  await page.addScriptTag({ url: origin + '/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1' });
   await page.waitForFunction(() => (
     document.documentElement.dataset.fxSingleLanguageToggle === 'ready'
     && document.documentElement.dataset.fxCopyPolish === 'ready-v1'
-    && document.documentElement.dataset.fxLanguageCopyStability === 'ready-v4'
-  ), null, { timeout: 10000 });
+    && document.querySelectorAll('.fx-language-toggle').length === 1
+    && Boolean(document.getElementById('fx-licence-clarity'))
+    && Boolean(document.querySelector('.site-footer [data-fx-licence-link]'))
+  ), null, { timeout: 12000 });
 }
 
 async function clearIntro(page) {
-  const skip = page.locator('.fx-intro-skip');
-  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
   await page.evaluate(() => {
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
     root.classList.remove('fx-intro-running', 'fx-intro-pending', 'fx-intro-reveal');
     root.classList.add('fx-intro-complete');
-    if (overlay) {
-      overlay.hidden = true;
-      overlay.style.display = 'none';
-      overlay.setAttribute('aria-hidden', 'true');
-    }
+    if (overlay) { overlay.hidden = true; overlay.style.display = 'none'; overlay.setAttribute('aria-hidden', 'true'); }
     document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
   });
 }
 
-async function waitPublicState(page, language) {
-  await page.waitForFunction(({ lang, navigation, downloads, trials }) => {
+async function waitLanguage(page, language) {
+  await page.waitForFunction(({ lang, navOptions, downloads, trials }) => {
     const nav = Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim());
     const download = document.querySelector('#hero-download span')?.textContent.trim() || '';
     const trial = document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '';
+    const visibleControls = Array.from(document.querySelectorAll('.fx-language-toggle, [data-language], [data-language-choice]')).filter(node => {
+      const style = getComputedStyle(node);
+      const rect = node.getBoundingClientRect();
+      return !node.hidden && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > .02 && rect.width > 0 && rect.height > 0;
+    }).length;
     return document.documentElement.lang === lang
-      && document.documentElement.dataset.fxLanguageCopyStability === 'ready-v4'
-      && document.querySelectorAll('.fx-language-toggle').length === 1
+      && navOptions.some(expected => JSON.stringify(expected) === JSON.stringify(nav))
       && downloads.includes(download)
       && trials.includes(trial)
-      && navigation.some(expected => JSON.stringify(expected) === JSON.stringify(nav))
-      && Boolean(document.querySelector('.site-footer [data-fx-licence-link]'))
+      && visibleControls === 1
       && Boolean(document.getElementById('fx-licence-clarity'));
-  }, {
-    lang: language,
-    navigation: NAVIGATION[language],
-    downloads: DOWNLOAD_LABELS[language],
-    trials: TRIAL_LABELS[language]
-  }, { timeout: 15000 });
-  await page.waitForTimeout(250);
+  }, { lang: language, navOptions: NAV[language], downloads: DOWNLOAD[language], trials: TRIAL[language] }, { timeout: 12000 });
 }
 
-async function readCopy(page) {
+async function state(page) {
   return page.evaluate(() => ({
     lang: document.documentElement.lang,
     nav: Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim()),
-    heroDownload: document.querySelector('#hero-download span')?.textContent.trim() || '',
-    trialLabel: document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '',
-    pricingTitle: Array.from(
-      document.querySelectorAll('#pricing-title > span, #pricing-title > em'),
-      node => node.textContent.trim()
-    ).join(' '),
+    download: document.querySelector('#hero-download span')?.textContent.trim() || '',
+    trial: document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '',
+    pricing: Array.from(document.querySelectorAll('#pricing-title > span, #pricing-title > em'), node => node.textContent.trim()).join(' '),
     licenceTitle: document.getElementById('fx-licence-clarity-title')?.textContent.trim() || '',
     licenceItems: document.querySelectorAll('#fx-licence-clarity li').length,
     footerLicence: document.querySelector('.site-footer [data-fx-licence-link]')?.textContent.trim() || '',
-    visibleLanguageButtons: Array.from(
-      document.querySelectorAll('.fx-language-toggle, .language-switch [data-language], .language-control [data-language-choice]')
-    ).filter(node => {
+    visibleControls: Array.from(document.querySelectorAll('.fx-language-toggle, [data-language], [data-language-choice]')).filter(node => {
       const style = getComputedStyle(node);
       const rect = node.getBoundingClientRect();
       return !node.hidden && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > .02 && rect.width > 0 && rect.height > 0;
     }).length,
-    retiredReleaseCopy: /\bV(?:29|92|120|121)\b|92\.00|Windows nyilvános béta letöltése|Download Windows public beta|Multiplatform nyilvános béta|Multiplatform public beta/i.test(
-      document.body.innerText
-    ),
-    horizontalOverflow: Math.max(
-      document.documentElement.scrollWidth,
-      document.body.scrollWidth
-    ) - innerWidth
+    retired: /\bV(?:29|92|120|121)\b|92\.00|Windows nyilvános béta letöltése|Download Windows public beta|Multiplatform nyilvános béta|Multiplatform public beta/i.test(document.body.innerText),
+    overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth
   }));
 }
 
-function assertHungarian(state, name) {
-  assert(state.lang === 'hu', name + ': Hungarian language state missing: ' + JSON.stringify(state));
-  assert(matchesOne(state.nav, NAVIGATION.hu), name + ': Hungarian navigation mismatch: ' + JSON.stringify(state));
-  assert(DOWNLOAD_LABELS.hu.includes(state.heroDownload),
-    name + ': Hungarian download label mismatch: ' + JSON.stringify(state));
-  assert(TRIAL_LABELS.hu.includes(state.trialLabel),
-    name + ': Hungarian trial label mismatch: ' + JSON.stringify(state));
-  assert(state.pricingTitle === 'A licenccsomag a munkádhoz igazodik.',
-    name + ': Hungarian pricing heading mismatch: ' + JSON.stringify(state));
-  assert(state.licenceTitle === 'Mit ad a FormatX licenc?' && state.licenceItems === 4,
-    name + ': Hungarian licence clarification mismatch: ' + JSON.stringify(state));
-  assert(state.footerLicence === 'Licenc',
-    name + ': Hungarian footer licence mismatch: ' + JSON.stringify(state));
-  assert(state.visibleLanguageButtons === 1,
-    name + ': exactly one visible language button required: ' + JSON.stringify(state));
-  assert(!state.retiredReleaseCopy,
-    name + ': retired beta/version copy remains: ' + JSON.stringify(state));
-  assert(state.horizontalOverflow <= 1,
-    name + ': horizontal overflow: ' + JSON.stringify(state));
+function check(value, language, label) {
+  assert(value.lang === language, `${label}: language mismatch: ${JSON.stringify(value)}`);
+  assert(matchesNavigation(value.nav, language), `${label}: navigation mismatch: ${JSON.stringify(value)}`);
+  assert(DOWNLOAD[language].includes(value.download), `${label}: full-release CTA mismatch: ${JSON.stringify(value)}`);
+  assert(TRIAL[language].includes(value.trial), `${label}: trial label mismatch: ${JSON.stringify(value)}`);
+  assert(value.visibleControls === 1, `${label}: exactly one visible language control required: ${JSON.stringify(value)}`);
+  assert(value.licenceItems === 4, `${label}: licence clarity must contain four items: ${JSON.stringify(value)}`);
+  if (language === 'hu') {
+    assert(value.pricing === 'A licenccsomag a munkádhoz igazodik.', `${label}: Hungarian pricing title mismatch: ${JSON.stringify(value)}`);
+    assert(value.licenceTitle === 'Mit ad a FormatX licenc?', `${label}: Hungarian licence title mismatch: ${JSON.stringify(value)}`);
+    assert(value.footerLicence === 'Licenc', `${label}: Hungarian footer licence mismatch: ${JSON.stringify(value)}`);
+  } else {
+    assert(value.pricing === 'The licence plan fits your work.', `${label}: English pricing title mismatch: ${JSON.stringify(value)}`);
+    assert(value.licenceTitle === 'What does the FormatX licence grant?', `${label}: English licence title mismatch: ${JSON.stringify(value)}`);
+    assert(value.footerLicence === 'Licence', `${label}: English footer licence mismatch: ${JSON.stringify(value)}`);
+  }
+  assert(!value.retired, `${label}: retired beta/version copy remains: ${JSON.stringify(value)}`);
+  assert(value.overflow <= 1, `${label}: horizontal overflow: ${JSON.stringify(value)}`);
 }
 
-function assertEnglish(state, name) {
-  assert(state.lang === 'en', name + ': English language state missing: ' + JSON.stringify(state));
-  assert(matchesOne(state.nav, NAVIGATION.en), name + ': English navigation mismatch: ' + JSON.stringify(state));
-  assert(DOWNLOAD_LABELS.en.includes(state.heroDownload),
-    name + ': English download label mismatch: ' + JSON.stringify(state));
-  assert(TRIAL_LABELS.en.includes(state.trialLabel),
-    name + ': English trial label mismatch: ' + JSON.stringify(state));
-  assert(state.pricingTitle === 'The licence plan fits your work.',
-    name + ': English pricing heading mismatch: ' + JSON.stringify(state));
-  assert(state.licenceTitle === 'What does the FormatX licence grant?' && state.licenceItems === 4,
-    name + ': English licence clarification mismatch: ' + JSON.stringify(state));
-  assert(state.footerLicence === 'Licence',
-    name + ': English footer licence mismatch: ' + JSON.stringify(state));
-  assert(state.visibleLanguageButtons === 1,
-    name + ': exactly one visible language button required: ' + JSON.stringify(state));
-  assert(!state.retiredReleaseCopy,
-    name + ': retired beta/version copy remains: ' + JSON.stringify(state));
-  assert(state.horizontalOverflow <= 1,
-    name + ': horizontal overflow: ' + JSON.stringify(state));
-}
-
-async function testViewport(browser, viewport, name, mobile) {
-  const context = await browser.newContext({
-    viewport,
-    isMobile: Boolean(mobile),
-    hasTouch: Boolean(mobile),
-    locale: 'hu-HU'
-  });
-  await context.addInitScript(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-  });
+async function verify(browser, viewport, label, mobile) {
+  const context = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile, locale: 'hu-HU' });
+  await context.addInitScript(() => { try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {} });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(String(error)));
-  page.on('console', message => {
-    if (message.type() === 'error') errors.push(message.text());
-  });
-
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
-  await installProductionCopyLayer(page);
-  await waitPublicState(page, 'hu');
-  assertHungarian(await readCopy(page), name);
-
-  await page.locator('.fx-language-toggle').first().evaluate(node => node.click());
-  await waitPublicState(page, 'en');
-  assertEnglish(await readCopy(page), name);
-
-  const meaningful = errors.filter(item => (
-    !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*(?:403|404)/i.test(item)
-  ));
-  assert(!meaningful.length, name + ': browser errors: ' + meaningful.join(' | '));
+  await installProductionCopy(page);
+  await waitLanguage(page, 'hu');
+  check(await state(page), 'hu', label + '-hu');
+  await page.locator('.fx-language-toggle:visible').first().click();
+  await waitLanguage(page, 'en');
+  check(await state(page), 'en', label + '-en');
+  const meaningful = errors.filter(item => !/favicon|WebGL|WebGPU|GPU|net::ERR_ABORTED|Failed to load resource:.*(?:403|404)/i.test(item));
+  assert(!meaningful.length, `${label}: browser errors: ${meaningful.join(' | ')}`);
   await context.close();
 }
 
 (async () => {
-  const browser = await chromium.launch({
-    headless: true,
-    args: ['--enable-unsafe-swiftshader']
-  });
+  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
   try {
-    await testViewport(browser, { width: 1440, height: 900 }, 'desktop', false);
-    await testViewport(browser, { width: 390, height: 844 }, 'mobile', true);
-    console.log('PASS FormatX bilingual full-release labels and 5-day trial licence');
-  } finally {
-    await browser.close();
-  }
-})().catch(error => {
-  console.error(error.stack || error);
-  process.exit(1);
-});
+    await verify(browser, { width: 1440, height: 900 }, 'desktop', false);
+    await verify(browser, { width: 390, height: 844 }, 'mobile', true);
+    console.log('PASS FormatX bilingual full-release labels, single language control and 5-day trial licence');
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error.stack || error); process.exit(1); });
