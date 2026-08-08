@@ -8,6 +8,9 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/styles/formatx-seamless-loop.css'
+      - 'docs/scifi-ui/styles/formatx-continuous-scroll.css'
+      - 'docs/scifi-ui/styles/organism-interface.css'
+      - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/data/public-platform-contract.json'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
@@ -16,6 +19,9 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/styles/formatx-seamless-loop.css'
+      - 'docs/scifi-ui/styles/formatx-continuous-scroll.css'
+      - 'docs/scifi-ui/styles/organism-interface.css'
+      - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/data/public-platform-contract.json'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
@@ -47,6 +53,7 @@ jobs:
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
+          node --input-type=module --check < billing-worker/src/production-entry.js
           python3 -m json.tool docs/scifi-ui/data/public-platform-contract.json >/dev/null
           grep -Fq "const VERSION = 'seamless-v6'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "root.dataset.fxAutomaticLoop = 'disabled'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
@@ -65,6 +72,12 @@ jobs:
           grep -Fq '"section_scroll_snap": false' docs/scifi-ui/data/public-platform-contract.json
           grep -Fq "scroll-snap-type: none !important" docs/scifi-ui/styles/formatx-seamless-loop.css
           grep -Fq "scroll-snap-align: none !important" docs/scifi-ui/styles/formatx-seamless-loop.css
+          grep -Fq "scroll-snap-type: none !important" docs/scifi-ui/styles/formatx-continuous-scroll.css
+          grep -Fq "scroll-snap-align: none !important" docs/scifi-ui/styles/formatx-continuous-scroll.css
+          grep -Fq 'data-fx-continuous-scroll-style' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/styles/formatx-continuous-scroll.css' billing-worker/src/production-entry.js
+          grep -Fq "page.mouse.wheel(0, 220)" .github/scripts/validate-laptop-continuous-loop.cjs
+          grep -Fq "page snapped after wheel input stopped" .github/scripts/validate-laptop-continuous-loop.cjs
           ! grep -Fq "cloneNode(true)" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "window.scrollTo(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "scrollIntoView(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
@@ -117,10 +130,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Native no-jump scrolling passed on mobile, HD and Full HD'
+            description='Real wheel + Organism conflict passed on mobile, HD and Full HD'
           else
             state='failure'
-            description='Native no-jump scrolling validation failed'
+            description='Native continuous scrolling validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
