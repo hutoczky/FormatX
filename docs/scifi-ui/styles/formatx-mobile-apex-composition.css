@@ -1,8 +1,38 @@
-/* FormatX Native Apex mobile composition correction — keep one authoritative core renderer. */
+/* FormatX Native Apex ownership + mobile composition — one authoritative visible core. */
 
-/* Native Apex owns the visual core whenever it is ready. Legacy fallback layers must
-   never remain visible just because an older Three/fallback state is written later. */
+/* Native Apex is the canonical visual stage whenever it reaches ready.
+   These selectors intentionally outrank the legacy site-stability and Three-host
+   compatibility rules that used to hide .fx-transcend-shell with !important. */
+html[data-fx-native-apex="ready"] .fx-transcend-shell[data-fx-native-apex="true"] {
+  position: fixed !important;
+  z-index: var(--fx-layer-stage, 120) !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  isolation: isolate;
+}
+
+html[data-fx-native-apex="ready"] .fx-transcend-shell[data-fx-native-apex="true"] > .fx-transcend-canvas[data-fx-native-apex-canvas="true"] {
+  position: fixed !important;
+  z-index: 1 !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+/* Native Apex owns the visual core. Legacy canvases, old Three stages and CSS
+   fallback planets must never coexist with it. */
 html[data-fx-native-apex="ready"] #fx-apex-canvas,
+html[data-fx-native-apex="ready"] #fx-particle-canvas,
 html[data-fx-native-apex="ready"] .fx-three-stage-shell,
 html[data-fx-native-apex="ready"] .fx-three-telemetry,
 html[data-fx-native-apex="ready"] .fx-three-guide,
@@ -24,6 +54,14 @@ html[data-fx-native-apex="ready"] #hero .hero-space::after {
   animation: none !important;
   background: none !important;
   box-shadow: none !important;
+}
+
+/* Interactive overlays remain above the stage; when a system menu/panel owns
+   the screen the stage is visually suspended without destroying its context. */
+html.fx-organism-menu-open[data-fx-native-apex="ready"] .fx-transcend-shell[data-fx-native-apex="true"],
+body.fx-organism-panel-open .fx-transcend-shell[data-fx-native-apex="true"] {
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 
 @media (max-width: 820px), (pointer: coarse) {
@@ -50,12 +88,20 @@ html[data-fx-native-apex="ready"] #hero .hero-space::after {
     box-shadow: inset 0 0 62px rgba(0, 0, 0, .20);
   }
 
-  /* The header already carries the active MAG state on compact layouts. Keeping a
-     second fixed chapter card covers real content, so the cinematic HUD is desktop-only. */
+  /* Compact layout already exposes the active MAG state in the header. */
   html[data-fx-native-apex="ready"] .fx-transcend-hud[data-fx-native-apex="true"] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
+  }
+
+  /* Native sound is intentionally desktop-only; mobile already has the unified
+     audio/Organism controls and must not gain another floating button. */
+  html[data-fx-native-apex="ready"] .fx-transcend-sound[data-fx-native-apex="true"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 }
 
