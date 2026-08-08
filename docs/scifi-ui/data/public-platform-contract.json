@@ -47,7 +47,7 @@
     "language_switch_preserves_scene_hash": true
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-native-apex-mobile-core-live-delivery-production4",
+    "award_readiness_revision": "2026-08-08-native-apex-mobile-core-live-audited-production5",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -88,6 +88,7 @@
     "reduced_motion_treatment": true,
     "mobile_native_apex_readability_guard": true,
     "mobile_native_apex_direct_delivery_guard": true,
+    "mobile_native_apex_live_delivery_audit": true,
     "mobile_visual_viewport_dialogue_guard": true,
     "mobile_virtual_keyboard_overlap_guard": true,
     "lighthouse_desktop_runs": 3,
