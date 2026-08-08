@@ -1,9 +1,7 @@
 /* Seamless loop and release-centre contract. */
 
-/* The Organism interface enables y proximity snapping on desktop. That
-   conflicts with the seamless visual hand-off because the browser can snap a
-   valid relative Hero landing back to Hero start. seamless-v6 owns scrolling,
-   so snapping stays disabled for the complete continuous-scroll session. */
+/* Desktop seamless-v6 owns scroll positioning, so section snapping must never
+   pull a valid landing back to a chapter boundary. */
 html[data-fx-infinite-controller='seamless-v6'],
 html[data-fx-infinite-controller='seamless-v6'] body {
   scroll-snap-type: none !important;
@@ -19,6 +17,42 @@ html.fx-seamless-loop-transfer,
 html.fx-seamless-loop-transfer body {
   scroll-behavior: auto !important;
   scroll-snap-type: none !important;
+}
+
+/* Touch devices are deliberately different from desktop. Native browser
+   momentum must remain in control from the first touch until scrolling ends.
+   No section snapping, no smooth-scroll interception and no loop bridge. */
+@media (max-width: 900px), (pointer: coarse) {
+  html,
+  body,
+  html.fx-organism-interface-ready,
+  html.fx-organism-interface-ready body,
+  html[data-fx-infinite-controller='seamless-v6'],
+  html[data-fx-infinite-controller='seamless-v6'] body {
+    scroll-snap-type: none !important;
+    scroll-behavior: auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+    touch-action: pan-y pinch-zoom !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  #main-content,
+  #hero,
+  main > .scene,
+  .fx-organism-interface-ready #hero,
+  .fx-organism-interface-ready main > .scene:not(#hero),
+  .fx-organism-chapter,
+  .fx-organism-chapter-trigger {
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  html.fx-mobile-native-scroll .fx-loop-bridge,
+  html[data-fx-mobile-scroll-mode='native-no-jump'] .fx-loop-bridge {
+    display: none !important;
+  }
 }
 
 .fx-loop-bridge {
