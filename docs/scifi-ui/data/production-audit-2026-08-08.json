@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "audit_date": "2026-08-08",
-  "scope": "full public FormatX site, release delivery, browser behaviour, production Worker and public APIs",
+  "scope": "full public FormatX site, release delivery, browser behaviour, seamless scrolling, production Worker and public APIs",
   "audited_release": {
     "version": "v128",
     "product_status": "full_release",
@@ -36,14 +36,31 @@
     "production_validation": "passed",
     "production_worker_tests": "passed",
     "production_worker_dry_run_build": "passed",
-    "production_live_smoke": "passed_first_attempt",
     "public_site_static_integrity": "passed",
     "desktop_mobile_chromium_public_pages": "passed",
-    "native_continuous_scrolling": "passed",
+    "seamless_v7_continuous_scrolling": "passed",
+    "mobile_native_momentum_handoff": "passed",
+    "section_scroll_snap": "disabled",
     "live_mobile_hero": "passed",
+    "strict_live_public_release_audit": "passed",
     "strict_lighthouse_desktop": "passed_3_runs",
     "strict_lighthouse_mobile": "passed_3_runs",
-    "worker_dependency_vulnerabilities": 0
+    "worker_dependency_vulnerabilities": 0,
+    "production_live_smoke": "required_after_this_deploy_commit"
+  },
+  "scroll_contract": {
+    "controller": "seamless-v7",
+    "input": "native",
+    "automatic_loop": true,
+    "hero_visual_bridge": true,
+    "cloned_hero_only": true,
+    "cloned_interactive_content": false,
+    "desktop_boundary_handoff": "immediate_visual_match",
+    "mobile_boundary_handoff": "scrollend_or_idle",
+    "mobile_native_momentum_preserved": true,
+    "wheel_interception": false,
+    "touchmove_interception": false,
+    "section_scroll_snap": false
   },
   "lighthouse_thresholds": {
     "performance_min": 0.9,
@@ -66,5 +83,5 @@
     "No detached signature asset is published for the current release; SHA-256 digests are published.",
     "GitHub-hosted Actions emit upstream Node runtime deprecation warnings; application Worker dependencies audited with zero vulnerabilities."
   ],
-  "deployment_intent": "deploy this validated master state to the FormatX production custom domains"
+  "deployment_intent": "deploy this validated seamless-v7 master state to the FormatX production custom domains and require live smoke validation"
 }
