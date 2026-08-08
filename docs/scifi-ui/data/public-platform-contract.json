@@ -41,7 +41,7 @@
     "production_scroll_revision": "seamless-v7-critical-bootstrap-1",
     "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
     "core_scene_scroll_ownership": "seamless-v7-only",
-    "mobile_core_composition": "volumetric-glass-crystal-v6-native-resolution",
+    "mobile_core_composition": "reference-luminous-crystal-pulse-v8-native-resolution",
     "mobile_core_composition_delivery": "critical-server-bootstrap-no-store-v2",
     "mobile_core_renderer_authority": "native-apex-exclusive-v2",
     "mobile_core_renderer_visibility": "native-apex-stage-layer-visible-v2",
@@ -53,10 +53,10 @@
     "legacy_hide_contracts_overridden_by_native_ownership": true,
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
     "language_switch_preserves_scene_hash": true,
-    "deployment_revision": "2026-08-08-volumetric-glass-crystal-v6-live-2"
+    "deployment_revision": "2026-08-08-reference-luminous-crystal-pulse-v8-live-1"
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-volumetric-glass-crystal-v6-production13",
+    "award_readiness_revision": "2026-08-08-reference-luminous-crystal-pulse-v8-production14",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -75,12 +75,13 @@
       "section_scroll_snap": false,
       "wheel_or_touch_scroll_capture": false
     },
-    "native_apex_visual": "volumetric-glass-crystal-v6",
+    "native_apex_visual": "reference-luminous-crystal-pulse-v8",
     "native_apex_true_3d_webgl2_sdf": true,
-    "native_apex_tapered_crystal_wings": true,
+    "native_apex_broad_four_point_glass_membrane": true,
     "native_apex_deep_concave_crystal_silhouette": true,
     "native_apex_front_back_tapered_volume": true,
-    "native_apex_crystal_depth": 0.58,
+    "native_apex_crystal_depth": 0.62,
+    "native_apex_central_reactor_cavity": true,
     "native_apex_perspective_core_camera": true,
     "native_apex_persistent_3d_yaw_pitch": true,
     "native_apex_multi_axis_rotation": true,
@@ -92,9 +93,13 @@
     "native_apex_emissive_nucleus": true,
     "native_apex_luminous_cross_axes": true,
     "native_apex_luminous_facet_veins": true,
-    "native_apex_depth_sensitive_facet_lighting": true,
     "native_apex_water_reflection_field": true,
     "native_apex_fresnel_reflection_shading": true,
+    "native_apex_double_heartbeat_pulse": true,
+    "native_apex_slow_breathing_envelope": true,
+    "native_apex_pulsing_reactor_nucleus": true,
+    "native_apex_expanding_orbit_pulse": true,
+    "native_apex_outward_energy_pulse_wave": true,
     "native_apex_mobile_shader_camera": true,
     "reference_shader_transform_scoped_to_native_apex": true,
     "reference_shader_transform_restores_webgl_prototype": true,
