@@ -37,6 +37,8 @@ const PLAN_CATALOG = {
 
 const BILLING_CYCLES = new Set(['monthly', 'annual']);
 const SUPPORTED_CURRENCIES = new Set(['HUF', 'EUR']);
+const SECURE_ORDER_REFERENCE = /^FX-\d{8}-[A-F0-9]{24}$/;
+const LEGACY_ORDER_REFERENCE = /^FX-\d{8}-[A-Z0-9]{3,8}$/;
 
 export async function handleV100PricingRequest(request, env) {
   const url = new URL(request.url);
@@ -49,8 +51,6 @@ export async function handleV100PricingRequest(request, env) {
     return null;
   }
 
-  // Preserve the existing legal sales gate. When sales are disabled, the
-  // production worker returns the standard unavailable response.
   if (!isSalesLegallyReady(env)) return null;
 
   const rateLimited = await enforceRateLimit(request, env, url.pathname);
@@ -120,7 +120,7 @@ async function handleCreateCheckoutSession(request, env) {
   const billingCycle = payload.billing_cycle;
   const currency = normaliseCurrency(payload.currency);
   const amount = plan.prices[currency][billingCycle];
-  const orderReference = payload.order_reference.trim();
+  const orderReference = payload.order_reference.trim().toUpperCase();
   const account = getBankAccount(env);
   const paymentUri = buildPaytoUri(account, amount, currency, orderReference);
   const qrPayload = currency === 'EUR'
@@ -196,6 +196,11 @@ async function handleCreateCheckoutSession(request, env) {
   }, 200, corsHeaders);
 }
 
+function isValidOrderReference(value) {
+  const reference = String(value || '').trim().toUpperCase();
+  return SECURE_ORDER_REFERENCE.test(reference) || LEGACY_ORDER_REFERENCE.test(reference);
+}
+
 function validateCheckoutRequest(payload) {
   if (!payload || typeof payload !== 'object') return 'Hiányzó kérés törzs.';
   if (!PLAN_CATALOG[payload.plan_id]) return 'Ismeretlen csomag.';
@@ -205,7 +210,7 @@ function validateCheckoutRequest(payload) {
   if (!payload.contact_name?.trim()) return 'A kapcsolattartó neve kötelező.';
   if (!payload.email?.includes('@')) return 'Érvényes e-mail-cím szükséges.';
   if (!payload.billing_address?.trim()) return 'A számlázási cím kötelező.';
-  if (!/^FX-\d{8}-[A-Z0-9]{3,8}$/.test(payload.order_reference || '')) return 'Érvénytelen rendelési azonosító.';
+  if (!isValidOrderReference(payload.order_reference)) return 'Érvénytelen rendelési azonosító.';
   return null;
 }
 
