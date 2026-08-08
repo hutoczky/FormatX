@@ -4,9 +4,11 @@
   const ROOT = document.documentElement;
   const STORAGE_KEY = 'formatx-language';
   const SUPPORTED = new Set(['hu', 'en']);
-  if (ROOT.dataset.fxSingleLanguageToggle === 'ready' && ROOT.dataset.fxSingleLanguageToggleVersion === '3') return;
+  const VERSION = '4';
+  const currentState = ROOT.dataset.fxSingleLanguageToggle;
+  if (ROOT.dataset.fxSingleLanguageToggleVersion === VERSION && (currentState === 'loading' || currentState === 'ready')) return;
   ROOT.dataset.fxSingleLanguageToggle = 'loading';
-  ROOT.dataset.fxSingleLanguageToggleVersion = '3';
+  ROOT.dataset.fxSingleLanguageToggleVersion = VERSION;
 
   function ownScript() {
     return document.currentScript
@@ -22,7 +24,7 @@
     if (document.querySelector('link[data-fx-single-language-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = assetUrl('../styles/single-language-toggle.css?v=20260808-single-language-4');
+    link.href = assetUrl('../styles/single-language-toggle.css?v=20260808-single-language-5');
     link.dataset.fxSingleLanguageStyle = 'true';
     document.head.appendChild(link);
   }
@@ -120,15 +122,17 @@
     return Array.from(container.querySelectorAll('[data-language], [data-language-choice]'));
   }
 
-  function hideLegacyControls(primaryContainer) {
+  function hideLegacyControls(primaryContainer, activeToggle) {
+    document.querySelectorAll('[data-language], [data-language-choice]').forEach(forceHidden);
+    document.querySelectorAll('.fx-language-toggle').forEach(button => {
+      if (button !== activeToggle) button.remove();
+    });
     document.querySelectorAll('.language-switch, .language-control').forEach(container => {
       if (container !== primaryContainer) {
         container.querySelectorAll('.fx-language-toggle').forEach(button => button.remove());
         forceHidden(container);
       }
     });
-    legacyButtons(primaryContainer).forEach(forceHidden);
-    const activeToggle = primaryContainer.querySelector('.fx-language-toggle');
     if (activeToggle) clearForcedHidden(activeToggle);
   }
 
@@ -149,7 +153,7 @@
   }
 
   function publishLanguageChange(language) {
-    dispatchEvent(new CustomEvent('formatx:languagechange', { detail: { language, source: 'single-language-toggle-v3' } }));
+    dispatchEvent(new CustomEvent('formatx:languagechange', { detail: { language, source: 'single-language-toggle-v4' } }));
   }
 
   function setLanguage(language, persist, container, toggle) {
@@ -168,21 +172,22 @@
         history.replaceState({}, '', url.pathname + url.search + url.hash);
       }
       updateToggle(toggle, language);
-      hideLegacyControls(container);
+      hideLegacyControls(container, toggle);
     });
   }
 
   function install() {
+    if (ROOT.dataset.fxSingleLanguageToggle === 'ready' && ROOT.dataset.fxSingleLanguageToggleVersion === VERSION) return true;
     const container = findContainer();
     if (!(container instanceof HTMLElement)) return false;
     placeContainer(container);
     container.hidden = false;
     container.removeAttribute('aria-hidden');
     container.classList.add('language-switch', 'language-control', 'fx-single-language-switch');
-    container.dataset.fxSingleLanguageToggle = 'ready-v3';
+    container.dataset.fxSingleLanguageToggle = 'ready-v4';
     container.dataset.i18nControl = 'true';
 
-    container.querySelectorAll('.fx-language-toggle').forEach(button => button.remove());
+    document.querySelectorAll('.fx-language-toggle').forEach(button => button.remove());
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'fx-language-toggle';
@@ -191,7 +196,7 @@
     applyBilingualCopy(initial);
     updateToggle(toggle, initial);
     container.appendChild(toggle);
-    hideLegacyControls(container);
+    hideLegacyControls(container, toggle);
 
     toggle.addEventListener('click', () => {
       const current = SUPPORTED.has(ROOT.lang) ? ROOT.lang : storedLanguage();
@@ -206,7 +211,7 @@
       if (SUPPORTED.has(language)) {
         applyBilingualCopy(language);
         updateToggle(toggle, language);
-        hideLegacyControls(container);
+        hideLegacyControls(container, toggle);
       }
     });
 
@@ -214,17 +219,17 @@
       const language = SUPPORTED.has(ROOT.lang) ? ROOT.lang : storedLanguage();
       placeContainer(container);
       updateToggle(toggle, language);
-      hideLegacyControls(container);
+      hideLegacyControls(container, toggle);
     });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'], subtree: false, childList: false });
 
-    const duplicates = new MutationObserver(() => hideLegacyControls(container));
+    const duplicates = new MutationObserver(() => hideLegacyControls(container, toggle));
     duplicates.observe(document.documentElement, { subtree: true, childList: true });
     addEventListener('resize', () => placeContainer(container), { passive: true });
     addEventListener('pagehide', () => { observer.disconnect(); duplicates.disconnect(); }, { once: true });
 
     ROOT.dataset.fxSingleLanguageToggle = 'ready';
-    ROOT.dataset.fxSingleLanguageToggleVersion = '3';
+    ROOT.dataset.fxSingleLanguageToggleVersion = VERSION;
     return true;
   }
 
