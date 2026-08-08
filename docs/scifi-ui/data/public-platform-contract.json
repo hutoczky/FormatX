@@ -42,7 +42,7 @@
     "language_switch_preserves_scene_hash": true
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-08-proof-seo-a11y-1",
+    "award_readiness_revision": "2026-08-08-proof-seo-a11y-production1",
     "server_rendered_software_application_schema": true,
     "software_application_offer_price_present": true,
     "public_proof_layer": true,
