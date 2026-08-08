@@ -12,9 +12,72 @@
 
   let retryTimer = 0;
   let attempts = 0;
+  let accessibilityScheduled = false;
 
   function language() {
     return root.lang === 'en' ? 'en' : 'hu';
+  }
+
+  function setAttributeIfChanged(element, name, value) {
+    if (!(element instanceof Element)) return;
+    if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+  }
+
+  function ensureReadabilityFloor() {
+    if (document.querySelector('link[data-fx-early-readability-floor]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/formatx-readability-floor.css?v=20260808-a11y-floor-2';
+    link.dataset.fxEarlyReadabilityFloor = 'true';
+    document.head.appendChild(link);
+  }
+
+  function syncAccessibility() {
+    accessibilityScheduled = false;
+    ensureReadabilityFloor();
+
+    const brand = document.querySelector('.topbar > a.brand');
+    if (brand?.hasAttribute('aria-label')) brand.removeAttribute('aria-label');
+
+    const immersive = document.querySelector('.fx-immersive-launch');
+    if (immersive instanceof HTMLButtonElement) {
+      setAttributeIfChanged(immersive, 'aria-label', language() === 'en'
+        ? 'LIVING CORE LAUNCH — launch the living visual core'
+        : 'ÉLŐ MAG INDÍTÁS — az élő vizuális mag indítása');
+    }
+
+    const coreNode = document.querySelector('[data-organ-node="0"]');
+    if (coreNode instanceof HTMLAnchorElement) {
+      setAttributeIfChanged(coreNode, 'aria-label', language() === 'en'
+        ? '01 CORE — launch the living visual core'
+        : '01 MAG — az élő vizuális mag indítása');
+    }
+
+    document.querySelectorAll('.fx-plan-qr-link').forEach(link => {
+      if (!(link instanceof HTMLAnchorElement)) return;
+      const card = link.closest('[data-plan-qr]');
+      const planName = card?.querySelector('.fx-plan-qr-copy strong')?.textContent?.trim() || 'FormatX';
+      setAttributeIfChanged(link, 'aria-label', language() === 'en'
+        ? 'QR — open ' + planName + ' payment page'
+        : 'QR — ' + planName + ' fizetési oldal megnyitása');
+    });
+
+    const launcher = document.querySelector('[data-fx-live-os-launcher]');
+    if (launcher instanceof HTMLButtonElement) {
+      const label = language() === 'en'
+        ? 'Live OS — FormatX command'
+        : 'Live OS — FormatX parancs';
+      setAttributeIfChanged(launcher, 'aria-label', label);
+      if (launcher.title !== label + ' · Ctrl/⌘ K') launcher.title = label + ' · Ctrl/⌘ K';
+    }
+
+    root.dataset.fxEarlyAccessibility = 'ready-v2';
+  }
+
+  function scheduleAccessibility() {
+    if (accessibilityScheduled) return;
+    accessibilityScheduled = true;
+    queueMicrotask(syncAccessibility);
   }
 
   function syncNavigation() {
@@ -48,6 +111,7 @@
     root.dataset.fxCategoryDeckState = 'ready';
     root.dataset.fxCategoryLayer = 'ready';
     syncNavigation();
+    scheduleAccessibility();
     dispatchEvent(new CustomEvent('formatx:languagechange', {
       detail: { language: language(), source: 'category-deck-stabilizer' }
     }));
@@ -78,19 +142,35 @@
     }
   }
 
-  const structureObserver = new MutationObserver(() => {
+  const structureObserver = new MutationObserver(entries => {
     const standalone = Array.from(document.querySelectorAll('.fx-category-deck'))
       .find(deck => !deck.closest('#hero'));
     const heroDeck = document.querySelector('#hero .fx-category-deck');
     if (!standalone || heroDeck) queueMicrotask(ensure);
+    if (entries.some(entry => entry.type === 'childList' || entry.attributeName === 'aria-label')) {
+      scheduleAccessibility();
+    }
   });
-  structureObserver.observe(root, { childList: true, subtree: true });
+  structureObserver.observe(root, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['aria-label']
+  });
 
+  ensureReadabilityFloor();
+  syncAccessibility();
   ensure();
   ['DOMContentLoaded', 'pageshow', 'formatx:livingready', 'formatx:threeready', 'formatx:loop'].forEach(name => {
-    addEventListener(name, ensure);
+    addEventListener(name, () => {
+      ensure();
+      scheduleAccessibility();
+    });
   });
-  addEventListener('formatx:languagechange', () => queueMicrotask(syncNavigation));
+  addEventListener('formatx:languagechange', () => queueMicrotask(() => {
+    syncNavigation();
+    syncAccessibility();
+  }));
 
   addEventListener('pagehide', () => {
     clearInterval(retryTimer);
