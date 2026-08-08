@@ -237,7 +237,8 @@
     './scripts/formatx-living-core-launcher.js?v=20260727-living-core-1',
     './scripts/interaction-genome.js?v=20260728-genome-3d-1',
     './scripts/formatx-language-copy-stability.js?v=20260807-full-release-1',
-    './scripts/formatx-premium-finish.js?v=20260805-motion-gate-3'
+    './scripts/formatx-premium-finish.js?v=20260805-motion-gate-3',
+    './scripts/formatx-accessibility-finalizer.js?v=20260808-a11y-1'
   ];
 
   function load(index) {
