@@ -58,10 +58,6 @@ const HOMEPAGE_STRUCTURED_DATA = JSON.stringify({
         availability: 'https://schema.org/InStock',
         url: `${PUBLIC_ORIGIN}/scifi-ui/checkout.html?plan=business_lite&cycle=monthly&currency=HUF`
       },
-      sameAs: [
-        'https://github.com/hutoczky/FormatX',
-        'https://github.com/hutoczky/FormatX-Updates/releases'
-      ],
       additionalProperty: [
         { '@type': 'PropertyValue', name: 'Category', value: 'Technician Operating Layer' },
         { '@type': 'PropertyValue', name: 'Method', value: 'Discover → Plan → Controlled execution → Verify' },
@@ -114,7 +110,7 @@ const HOMEPAGE_PROOF_STRIP = `
         <a href="/scifi-ui/verification.html"><strong data-hu="Nyilvános ellenőrzés" data-en="Public verification">Nyilvános ellenőrzés</strong><span data-hu="Tesztmátrix, ismert korlátok és bizonyítékállapot." data-en="Test matrix, known limitations and evidence state.">Tesztmátrix, ismert korlátok és bizonyítékállapot.</span></a>
         <a href="/scifi-ui/technical-report.html"><strong data-hu="Technikai riport" data-en="Technical report">Technikai riport</strong><span data-hu="Lighthouse-, CI- és böngészőkapuk, nyílt bizonyítékhiányokkal." data-en="Lighthouse, CI and browser gates with open evidence gaps.">Lighthouse-, CI- és böngészőkapuk, nyílt bizonyítékhiányokkal.</span></a>
         <a href="/scifi-ui/security.html"><strong data-hu="Biztonsági modell" data-en="Safety model">Biztonsági modell</strong><span data-hu="SHA-256 digest, célmeghajtó-védelem és kontrollhatárok." data-en="SHA-256 digest, target protection and control boundaries.">SHA-256 digest, célmeghajtó-védelem és kontrollhatárok.</span></a>
-        <a href="https://github.com/hutoczky/FormatX-Updates/releases" target="_blank" rel="noopener noreferrer"><strong data-hu="Kiadási bizonyíték" data-en="Release evidence">Kiadási bizonyíték</strong><span data-hu="Publikált csomagok és visszakövethető kiadástörténet a GitHubon." data-en="Published packages and traceable release history on GitHub.">Publikált csomagok és visszakövethető kiadástörténet a GitHubon.</span></a>
+        <a href="/scifi-ui/downloads/"><strong data-hu="Kiadási bizonyíték" data-en="Release evidence">Kiadási bizonyíték</strong><span data-hu="Aktuális kiadási csatorna, csomagállapot és first-party letöltési útvonal." data-en="Current release channel, package state and first-party download route.">Aktuális kiadási csatorna, csomagállapot és first-party letöltési útvonal.</span></a>
       </nav>
     </section>`;
 
