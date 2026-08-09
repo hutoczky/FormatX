@@ -1,5 +1,5 @@
 name: Verify live real3D reference position
-run-name: Capture uploaded-reference MAG v30 at clean scroll-zero position for ${{ github.event.workflow_run.head_sha }}
+run-name: Measure uploaded-reference MAG v30 white-core position for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -37,9 +37,132 @@ jobs:
           set -euo pipefail
           cd "$RUNNER_TEMP/real3d-ref"
           node <<'NODE'
-          const { chromium }=require('playwright');const { PNG }=require('pngjs');const fs=require('node:fs');
-          function metrics(file){const image=PNG.sync.read(fs.readFileSync(file));let count=0,sumX=0,sumY=0,minX=image.width,maxX=0,minY=image.height,maxY=0;for(let y=20;y<Math.min(image.height,1230);y++)for(let x=15;x<image.width-15;x++){const o=(image.width*y+x)<<2,r=image.data[o]/255,g=image.data[o+1]/255,b=image.data[o+2]/255,l=.2126*r+.7152*g+.0722*b,mx=Math.max(r,g,b),mn=Math.min(r,g,b),s=mx?(mx-mn)/mx:0;const spectral=(b>r*1.12&&g>r*1.02)||(b>g*1.06&&r>g*.64);if(l<=.095||s<=.32||!spectral)continue;count++;sumX+=x;sumY+=y;minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}return{qualifying_pixels:count,centroid_x:count?sumX/count:null,centroid_y:count?sumY/count:null,bounds:count?{minX,maxX,minY,maxY,width:maxX-minX+1,height:maxY-minY+1}:null};}
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});const context=await browser.newContext({viewport:{width:753,height:1536},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU'});const page=await context.newPage();await page.goto(`https://www.formatxsuite.com/?real3d_ref30=${process.env.RUN_ID}`,{waitUntil:'domcontentloaded',timeout:45000});await page.evaluate(()=>{const root=document.documentElement;root.lang='hu';root.classList.add('fx-intro-complete');document.getElementById('formatx-event-horizon')?.remove();scrollTo(0,0);});await page.waitForFunction(()=>document.documentElement.dataset.fxCoreReferenceLock==='ready-v30',null,{timeout:60000});await page.waitForTimeout(1800);if(await page.evaluate(()=>scrollY)!==0)throw new Error('reference audit must remain at scrollY=0');await page.screenshot({path:'mag-reference-v30-scroll0.png',fullPage:false});const visual=metrics('mag-reference-v30-scroll0.png');const state=await page.evaluate(()=>({reference:document.documentElement.dataset.fxCoreReferenceLock,referenceRevision:document.documentElement.dataset.fxCoreReferenceRevision,framing:document.documentElement.dataset.fxCoreReferenceFraming,visual:document.documentElement.dataset.fxCoreVisualRevision,geometry:document.documentElement.dataset.fxCoreGeometry,scrollY,stages:document.querySelectorAll('.fx-core-real3d-stage').length,v26Stages:document.querySelectorAll('.fx-reference-core-v26-stage').length,oldStages:document.querySelectorAll('.fx-core-mesh3d-stage,.fx-core-fracture3d-stage').length}));const target={centroid_x:[315,438],centroid_y:[500,735],bounds_width:[500,753],bounds_height:[650,1210],minimum_qualifying_pixels:5500};fs.writeFileSync('reference-position-metrics.json',JSON.stringify({target,measured:visual,state},null,2));console.log('REFERENCE_POSITION_V30',JSON.stringify({visual,state,target}));const b=visual.bounds;const positionOk=visual.qualifying_pixels>=target.minimum_qualifying_pixels&&visual.centroid_x>=target.centroid_x[0]&&visual.centroid_x<=target.centroid_x[1]&&visual.centroid_y>=target.centroid_y[0]&&visual.centroid_y<=target.centroid_y[1]&&b&&b.width>=target.bounds_width[0]&&b.height>=target.bounds_height[0];const runtimeOk=state.reference==='ready-v30'&&state.referenceRevision==='uploaded-reference-20260810'&&state.framing==='mobile-core-center-40pct-shell-height-75pct'&&state.visual==='v30-reference-lock'&&state.geometry==='concave-four-sail-indexed-mesh-v30'&&state.scrollY===0&&state.stages===1&&state.v26Stages===0&&state.oldStages===0;if(!runtimeOk||!positionOk)throw new Error(`v30 reference position invalid: ${JSON.stringify({visual,state,target})}`);await browser.close();})().catch(e=>{console.error(e);process.exit(1);});
+          const { chromium } = require('playwright');
+          const { PNG } = require('pngjs');
+          const fs = require('node:fs');
+
+          function coreMetrics(file) {
+            const image = PNG.sync.read(fs.readFileSync(file));
+            const search = {
+              x0: Math.max(0, Math.round(image.width * 0.30)),
+              x1: Math.min(image.width, Math.round(image.width * 0.70)),
+              y0: Math.max(0, Math.round(image.height * 0.27)),
+              y1: Math.min(image.height, Math.round(image.height * 0.52)),
+            };
+            let peak = { luminance: -1, x: null, y: null };
+            for (let y = search.y0; y < search.y1; y += 1) {
+              for (let x = search.x0; x < search.x1; x += 1) {
+                const o = (image.width * y + x) << 2;
+                const r = image.data[o] / 255;
+                const g = image.data[o + 1] / 255;
+                const b = image.data[o + 2] / 255;
+                const luminance = .2126 * r + .7152 * g + .0722 * b;
+                const whiteCyan = Math.min(g, b) >= .42 && b >= r * .92;
+                if (whiteCyan && luminance > peak.luminance) peak = { luminance, x, y };
+              }
+            }
+            if (peak.x === null) return { search, peak, qualifying_pixels: 0, centroid_x: null, centroid_y: null };
+
+            const radius = Math.round(Math.min(image.width, image.height) * 0.075);
+            const threshold = Math.max(.48, peak.luminance * .64);
+            let pixels = 0, weight = 0, sumX = 0, sumY = 0;
+            for (let y = Math.max(search.y0, peak.y - radius); y <= Math.min(search.y1 - 1, peak.y + radius); y += 1) {
+              for (let x = Math.max(search.x0, peak.x - radius); x <= Math.min(search.x1 - 1, peak.x + radius); x += 1) {
+                const dx = x - peak.x, dy = y - peak.y;
+                if (dx * dx + dy * dy > radius * radius) continue;
+                const o = (image.width * y + x) << 2;
+                const r = image.data[o] / 255;
+                const g = image.data[o + 1] / 255;
+                const b = image.data[o + 2] / 255;
+                const luminance = .2126 * r + .7152 * g + .0722 * b;
+                if (luminance < threshold || Math.min(g, b) < .34 || b < r * .88) continue;
+                const w = Math.pow(Math.max(.001, luminance - threshold + .08), 2);
+                pixels += 1; weight += w; sumX += x * w; sumY += y * w;
+              }
+            }
+            return {
+              search,
+              peak,
+              radius,
+              threshold,
+              qualifying_pixels: pixels,
+              centroid_x: weight ? sumX / weight : null,
+              centroid_y: weight ? sumY / weight : null,
+            };
+          }
+
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
+            });
+            const context = await browser.newContext({
+              viewport: { width: 753, height: 1536 },
+              deviceScaleFactor: 1,
+              isMobile: true,
+              hasTouch: true,
+              locale: 'hu-HU'
+            });
+            const page = await context.newPage();
+            await page.goto(`https://www.formatxsuite.com/?real3d_ref30=${process.env.RUN_ID}`, {
+              waitUntil: 'domcontentloaded', timeout: 45000
+            });
+            await page.evaluate(() => {
+              const root = document.documentElement;
+              root.lang = 'hu';
+              root.classList.add('fx-intro-complete');
+              document.getElementById('formatx-event-horizon')?.remove();
+              scrollTo(0, 0);
+            });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreReferenceLock === 'ready-v30', null, { timeout: 60000 });
+            await page.waitForTimeout(1800);
+            if (await page.evaluate(() => scrollY) !== 0) throw new Error('reference audit must remain at scrollY=0');
+
+            await page.screenshot({ path: 'mag-reference-v30-scroll0.png', fullPage: false });
+            const visual = coreMetrics('mag-reference-v30-scroll0.png');
+            const state = await page.evaluate(() => ({
+              reference: document.documentElement.dataset.fxCoreReferenceLock,
+              referenceRevision: document.documentElement.dataset.fxCoreReferenceRevision,
+              framing: document.documentElement.dataset.fxCoreReferenceFraming,
+              material: document.documentElement.dataset.fxCoreReferenceMaterial,
+              visual: document.documentElement.dataset.fxCoreVisualRevision,
+              geometry: document.documentElement.dataset.fxCoreGeometry,
+              scrollY,
+              stages: document.querySelectorAll('.fx-core-real3d-stage').length,
+              v26Stages: document.querySelectorAll('.fx-reference-core-v26-stage').length,
+              oldStages: document.querySelectorAll('.fx-core-mesh3d-stage,.fx-core-fracture3d-stage').length
+            }));
+
+            const target = {
+              white_core_centroid_x: [340, 410],
+              white_core_centroid_y: [560, 690],
+              peak_luminance_minimum: .68,
+              minimum_qualifying_pixels: 20
+            };
+            fs.writeFileSync('reference-position-metrics.json', JSON.stringify({ target, measured: visual, state }, null, 2));
+            console.log('REFERENCE_POSITION_V30', JSON.stringify({ visual, state, target }));
+
+            const positionOk = visual.qualifying_pixels >= target.minimum_qualifying_pixels
+              && visual.peak.luminance >= target.peak_luminance_minimum
+              && visual.centroid_x >= target.white_core_centroid_x[0]
+              && visual.centroid_x <= target.white_core_centroid_x[1]
+              && visual.centroid_y >= target.white_core_centroid_y[0]
+              && visual.centroid_y <= target.white_core_centroid_y[1];
+            const runtimeOk = state.reference === 'ready-v30'
+              && state.referenceRevision === 'uploaded-reference-20260810'
+              && state.framing === 'mobile-core-center-40pct-shell-height-75pct'
+              && state.material === 'dense-luminous-glass-filaments-v30'
+              && state.visual === 'v30-reference-lock'
+              && state.geometry === 'concave-four-sail-indexed-mesh-v30'
+              && state.scrollY === 0
+              && state.stages === 1
+              && state.v26Stages === 0
+              && state.oldStages === 0;
+            if (!runtimeOk || !positionOk) {
+              throw new Error(`v30 white-core position invalid: ${JSON.stringify({ visual, state, target })}`);
+            }
+            await browser.close();
+          })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
       - name: Upload reference-position evidence
@@ -62,5 +185,15 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Uploaded-reference MAG v30 position passed at scrollY=0'; else state=failure; description='Uploaded-reference MAG v30 position failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX real3D reference-position audit' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Uploaded-reference MAG v30 white-core position passed at scrollY=0'
+          else
+            state=failure
+            description='Uploaded-reference MAG v30 white-core position failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX real3D reference-position audit' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"
