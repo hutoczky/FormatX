@@ -38,7 +38,7 @@ assert.doesNotMatch(src, /backgroundImage|background-image/i, 'renderer must not
 assert.match(css, /pointer-events:\s*none/, '3D stage must never capture scrolling or touch input');
 assert.match(css, /100dvh/, 'dynamic mobile viewport support missing');
 assert.match(css, /data-fx-reference-core="ready-v26"/, 'v26 presentation state missing');
-assert.match(entry, /formatx-reference-core-v26\.js\?v=20260809-reference-crystal-v26-1/, 'production v26 script injection missing');
-assert.match(entry, /formatx-reference-core-v26\.css\?v=20260809-reference-crystal-v26-1/, 'production v26 CSS injection missing');
+assert.match(entry, /formatx-reference-core-v26\.js\?v=20260809-reference-crystal-v26-\d+/, 'production v26 script injection missing');
+assert.match(entry, /formatx-reference-core-v26\.css\?v=20260809-reference-crystal-v26-\d+/, 'production v26 CSS injection missing');
 assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-core-v26\.js/, 'v26 asset no-store protection missing');
 console.log('PASS: FormatX reference core v26 is a native indexed WebGL2 crystal with depth, perspective, independent 3D reactor motion, procedural glass shading, bloom and adaptive rendering; no image-backed or third-party 3D shortcut detected.');
