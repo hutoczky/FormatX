@@ -58,17 +58,19 @@ jobs:
 
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v30-authority' -o "$REFERENCE_BOOTSTRAP"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v30-bootstrap' -o "$CORE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-lock-v30.js?v=live-v30-mag' -o "$REFERENCE_MAG"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-reference-lock-v30.css?v=live-v30-mag' -o "$REFERENCE_CSS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-lock-v30.js?v=live-v30-mag-r2' -o "$REFERENCE_MAG"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-reference-lock-v30.css?v=live-v30-mag-r2' -o "$REFERENCE_CSS"
 
           grep -Fq "const WEBGPU_PREVIEW = params.get('webgpu') === '1'" "$REFERENCE_BOOTSTRAP"
           grep -Fq "root.dataset.fxReferenceCore = 'production-v30-reference-lock-authority'" "$REFERENCE_BOOTSTRAP"
           grep -Fq "root.dataset.fxGpuPreference = 'webgl2-v30-uploaded-reference-production'" "$REFERENCE_BOOTSTRAP"
           grep -Fq "BOOTSTRAP='reference-lock-v30'" "$CORE_BOOTSTRAP"
-          grep -Fq 'formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-1' "$CORE_BOOTSTRAP"
+          grep -Fq 'formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-2' "$CORE_BOOTSTRAP"
+          grep -Fq 'formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-2' "$CORE_BOOTSTRAP"
           grep -Fq "const VERSION='v30-reference-lock'" "$REFERENCE_MAG"
           grep -Fq "fxCoreReferenceRevision='uploaded-reference-20260810'" "$REFERENCE_MAG"
           grep -Fq "fxCoreReferenceFraming='mobile-core-center-40pct-shell-height-75pct'" "$REFERENCE_MAG"
+          grep -Fq "fxCoreReferenceMaterial='dense-luminous-glass-filaments-v30'" "$REFERENCE_MAG"
           grep -Fq 'function crystal(' "$REFERENCE_MAG"
           grep -Fq 'function torus(' "$REFERENCE_MAG"
           grep -Fq 'function sphere(' "$REFERENCE_MAG"
@@ -76,6 +78,7 @@ jobs:
           ! grep -Eq 'drawImage[[:space:]]*\(|new[[:space:]]+Image[[:space:]]*\(' "$REFERENCE_MAG"
           grep -Fq -- '--fx-core-x:50%' "$REFERENCE_CSS"
           grep -Fq 'perspective(560px) rotateX(63deg)' "$REFERENCE_CSS"
+          grep -Fq 'filter:saturate(1.42) contrast(1.06) brightness(1.24)' "$REFERENCE_CSS"
 
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/igloo-parity.js?v=native-apex-live' -o "$PARITY_JS"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?v=native-apex-live' -o "$APEX_JS"
@@ -99,5 +102,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live award-tier + reference-lock v30 MAG + native Apex + seamless-v7 verified'; else state=failure; description='Live award-tier / reference-lock v30 / native Apex verification failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live award-tier + stable reference-lock v30 r2 MAG + native Apex + seamless-v7 verified'; else state=failure; description='Live award-tier / reference-lock v30 r2 / native Apex verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="$TARGET_URL"
