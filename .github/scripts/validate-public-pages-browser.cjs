@@ -6,6 +6,7 @@ const origin = process.env.FORMATX_PUBLIC_ORIGIN || 'http://127.0.0.1:4178';
 const pages = [
   ['/scifi-ui/method.html', 'method'],
   ['/scifi-ui/verification.html', 'verification'],
+  ['/scifi-ui/technical-report.html', 'technical-report'],
   ['/scifi-ui/test-matrix.html', 'test-matrix'],
   ['/scifi-ui/known-issues.html', 'known-issues'],
   ['/scifi-ui/security.html', 'security'],
@@ -123,6 +124,37 @@ async function assertKnownIssues(browser, viewport, name) {
   await context.close();
 }
 
+async function assertAndroidStatus(browser, viewport, name) {
+  const context = await browser.newContext({ viewport });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(origin + '/scifi-ui/android/', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(200);
+
+  assert(errors.length === 0, `${name}: page errors: ${errors.join(' | ')}`);
+  assert(await page.locator('h1').count() === 1, `${name}: exactly one h1 is required`);
+  assert(await page.locator('a[href="/download/android"]').count() >= 2, `${name}: official Android full-release links missing`);
+  assert(await page.locator('a[href*="android-native-v1.1.0-beta"]').count() >= 1, `${name}: Native beta channel link missing`);
+  const text = await page.locator('body').innerText();
+  assert(/ANDROID TELJES|Android full release/i.test(text), `${name}: full-release copy missing`);
+  assert(/NATÍV BÉTA|Native beta/i.test(text), `${name}: beta-channel separation missing`);
+  const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+  assert(canonical === 'https://www.formatxsuite.com/scifi-ui/android/', `${name}: canonical URL mismatch`);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  assert(overflow <= 2, `${name}: horizontal overflow ${overflow}px`);
+
+  const button = page.locator('#languageButton');
+  assert(await button.count() === 1, `${name}: language button missing`);
+  const before = await page.locator('html').getAttribute('lang');
+  await button.click();
+  await page.waitForFunction(previous => document.documentElement.lang !== previous, before, { timeout: 5000 });
+  assert(await page.locator('html').getAttribute('lang') === 'en', `${name}: English language switch failed`);
+
+  console.log(`PASS ${name}`);
+  await context.close();
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -134,7 +166,9 @@ async function assertKnownIssues(browser, viewport, name) {
     }
     await assertKnownIssues(browser, { width: 1440, height: 900 }, 'known-issues-filter-desktop');
     await assertKnownIssues(browser, { width: 390, height: 844 }, 'known-issues-filter-mobile');
-    console.log('PASS: public shell, skip navigation, language control, known-issues filters and responsive layouts are valid.');
+    await assertAndroidStatus(browser, { width: 1440, height: 900 }, 'android-status-desktop');
+    await assertAndroidStatus(browser, { width: 390, height: 844 }, 'android-status-mobile');
+    console.log('PASS: public shell, technical report, Android status, skip navigation, language control, known-issues filters and responsive layouts are valid.');
   } finally {
     await browser.close();
   }
