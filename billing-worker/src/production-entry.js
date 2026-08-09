@@ -23,6 +23,10 @@ const CONTINUOUS_SCROLL_ASSET = [
   '  <script defer data-fx-seamless-scroll-runtime="true" src="/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260808-seamless-v7-bootstrap-1"></script>',
 ].join('\n') + '\n';
 const MOBILE_APEX_COMPOSITION_ASSET = '  <link rel="stylesheet" data-fx-mobile-apex-composition="true" href="/scifi-ui/styles/formatx-mobile-apex-composition.css?v=20260808-mobile-apex-live-2">\n';
+const REFERENCE_CORE_ASSETS = [
+  '  <link rel="stylesheet" data-fx-reference-core-v26="true" href="/scifi-ui/styles/formatx-reference-core-v26.css?v=20260809-reference-crystal-v26-1">',
+  '  <script defer data-fx-reference-core-v26="true" src="/scifi-ui/scripts/formatx-reference-core-v26.js?v=20260809-reference-crystal-v26-1"></script>',
+].join('\n') + '\n';
 const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260729-single-language-3">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260729-single-language-2"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
 const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
 const STATUS_ASSETS = '  <link rel="stylesheet" data-fx-platform-status-style="true" href="/scifi-ui/styles/platform-status.css?v=20260730-platform-status-2">\n  <script defer src="/scifi-ui/scripts/platform-status.js?v=20260730-platform-status-2"></script>\n';
@@ -39,6 +43,8 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/formatx-mobile-apex-composition.css',
+  '/scifi-ui/scripts/formatx-reference-core-v26.js',
+  '/scifi-ui/styles/formatx-reference-core-v26.css',
   '/scifi-ui/scripts/formatx-event-horizon.js',
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
@@ -151,6 +157,9 @@ async function applyStartupSafety(request, url, response) {
     }
     if (!html.includes('data-fx-mobile-apex-composition')) {
       html = html.replace('</head>', MOBILE_APEX_COMPOSITION_ASSET + '</head>');
+    }
+    if (!html.includes('data-fx-reference-core-v26')) {
+      html = html.replace('</head>', REFERENCE_CORE_ASSETS + '</head>');
     }
   }
   if (!html.includes('data-fx-single-language-style')) {
