@@ -1,8 +1,8 @@
 {
-  "schema_version": 6,
+  "schema_version": 7,
   "audit_date": "2026-08-10",
-  "deployment_iteration": 6,
-  "scope": "uploaded-reference production MAG with one WebGL2 context, calibrated four-sail geometry, translucent cyan/violet glass-volume surfaces, moving white reactor, live screenshot evidence and production deployment",
+  "deployment_iteration": 7,
+  "scope": "uploaded-reference production MAG with one WebGL2 context, calibrated four-sail geometry, glass-dominant translucent cyan/violet surfaces, sparse light veins, moving white reactor, live screenshot evidence and production deployment",
   "audited_release": {
     "version": "v130",
     "product_status": "full_release",
@@ -12,22 +12,28 @@
   },
   "reference_contract": {
     "target": "user-supplied four-tip luminous crystalline sci-fi core reference, 2026-08-10",
-    "production_authority": "uploaded-reference lock v30 r3",
-    "renderer": "/scifi-ui/scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-3",
-    "presentation": "/scifi-ui/styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-3",
+    "production_authority": "uploaded-reference lock v30 r4",
+    "renderer": "/scifi-ui/scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-4",
+    "presentation": "/scifi-ui/styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-4",
     "image_backed": false,
     "webgl2_context_count": 1,
-    "geometry": "indexed concave four-sail crystal, mobile vertical multiplier 1.50",
-    "surface": "translucent-volume-pass-r3",
+    "geometry": "indexed concave four-sail crystal, p-norm 0.68, mobile vertical multiplier 1.50",
+    "surface": "glass-dominant-sparse-veins-r4",
     "surface_passes": {
-      "detailed_cyan_shell": 2,
-      "uniform_cyan_glass": 1,
-      "uniform_violet_glass": 1,
-      "fresnel_rim": 1,
-      "indexed_filament_passes": 2
+      "base_glass_shell": 1,
+      "cyan_translucent_glass": 1,
+      "violet_translucent_glass": 1,
+      "additive_detail_shell": 1,
+      "fresnel_rim": 1
     },
-    "reactor": "moving white-cyan sphere plus four thin 3D torus rings",
-    "outer_orbits": "three low-opacity cyan/violet 3D tori",
+    "veins": {
+      "transverse_levels": [2, 4, 6, 8, 10, 12],
+      "longitudinal_count_approx": 12,
+      "cyan_line_opacity": 0.22,
+      "violet_line_opacity": 0.055
+    },
+    "reactor": "moving white-cyan sphere plus four thin real 3D torus rings",
+    "outer_orbits": "three low-opacity cyan/violet real 3D tori",
     "canvas_filter": "saturate(1.42) contrast(1.06) brightness(1.24)",
     "performance_target": "adaptive 60-plus FPS",
     "scroll_capture": false,
@@ -43,5 +49,5 @@
     "live_award_readiness": "required",
     "direct_reference_screenshot_comparison": "required"
   },
-  "acceptance_policy": "Do not call the visual exact merely because CI is green. The final live Chromium screenshot must show materially filled luminous glass surfaces rather than a wireframe-dominant crystal when compared directly with the user reference."
+  "acceptance_policy": "Do not call the visual exact merely because CI is green. The final live Chromium screenshot must be compared directly with the uploaded reference, with glass surfaces visibly dominant over the geometric light-vein grid."
 }
