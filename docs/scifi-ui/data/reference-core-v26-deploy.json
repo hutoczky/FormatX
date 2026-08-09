@@ -4,6 +4,7 @@
   "version": "v26",
   "deployment_intent": "production",
   "visual_target": "four-tip transparent crystalline living core",
+  "visual_calibration": "reference-glass-calibration-2",
   "rendering": {
     "api": "WebGL2",
     "indexed_geometry": true,
@@ -30,9 +31,10 @@
   },
   "live_visual_gate": {
     "workflow": "Verify live true 3D MAG visual",
-    "revision": "v26-mobile-desktop",
+    "revision": "v26-mobile-desktop-calibration-2",
     "captures": ["753x1536 mobile", "1440x1000 desktop"],
-    "runtime_assertions": ["WebGL2", "depth", "perspective", "indexed crystal", "no legacy stage", "no image backing"]
+    "runtime_assertions": ["WebGL2", "depth", "perspective", "indexed crystal", "no legacy stage", "no image backing"],
+    "known_external_noise": "Cloudflare analytics beacon blocked by first-party CSP is ignored by the visual gate"
   },
   "deployed_at": "2026-08-09"
 }
