@@ -16,32 +16,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify broad high-dynamic MAG v19 live
+      - name: Verify distributed high-dynamic MAG v20 live
         shell: bash
         run: |
           set -euo pipefail
           MAPPER="$RUNNER_TEMP/mapper.js"; MATERIAL="$RUNNER_TEMP/material.js"; SHAPE="$RUNNER_TEMP/shape.js"; GEOMETRY="$RUNNER_TEMP/geometry.js"; GRADE="$RUNNER_TEMP/grade.css"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" -o "$MAPPER"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-material-v19.js?v=20260809-broad-hdr-facets-v19&audit=${GITHUB_RUN_ID}" -o "$MATERIAL"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-material-v20.js?v=20260809-distributed-hdr-facets-v20&audit=${GITHUB_RUN_ID}" -o "$MATERIAL"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-shape-v14.js?v=20260809-reference-ratio-v14&audit=${GITHUB_RUN_ID}" -o "$SHAPE"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-geometry-v13.js?v=20260809-true-3d-scale-v13&audit=${GITHUB_RUN_ID}" -o "$GEOMETRY"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v19.css?v=20260809-broad-facets-v19&audit=${GITHUB_RUN_ID}" -o "$GRADE"
-          grep -Fq "fxApexSceneStability==='ready-v29'" "$MAPPER"
-          grep -Fq 'formatx-core-mesh3d-material-v19.js?v=20260809-broad-hdr-facets-v19' "$MAPPER"
-          grep -Fq 'formatx-core-cinematic-grade-v19.css?v=20260809-broad-facets-v19' "$MAPPER"
-          grep -Fq "fxCoreVisualCalibration='reference-polygon-contrast-v19'" "$MAPPER"
-          grep -Fq 'cinematic-broad-hdr-reference-glass-v29' "$MAPPER"
-          grep -Fq "fxCoreHighlightModel='broad-high-dynamic-facets-v19'" "$MATERIAL"
-          grep -Fq "fxCoreMeshMaterial='reference-glass-v19'" "$MATERIAL"
-          grep -Fq 'float planeGlow=' "$MATERIAL"
-          grep -Fq 'float webA=' "$MATERIAL"
-          grep -Fq 'float micro=' "$MATERIAL"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v20.css?v=20260809-distributed-hdr-v20&audit=${GITHUB_RUN_ID}" -o "$GRADE"
+          grep -Fq "fxApexSceneStability==='ready-v30'" "$MAPPER"
+          grep -Fq 'formatx-core-mesh3d-material-v20.js?v=20260809-distributed-hdr-facets-v20' "$MAPPER"
+          grep -Fq 'formatx-core-cinematic-grade-v20.css?v=20260809-distributed-hdr-v20' "$MAPPER"
+          grep -Fq "fxCoreVisualCalibration='reference-polygon-contrast-v20'" "$MAPPER"
+          grep -Fq 'cinematic-distributed-hdr-reference-glass-v30' "$MAPPER"
+          grep -Fq "fxCoreHighlightModel='distributed-high-dynamic-facets-v20'" "$MATERIAL"
+          grep -Fq "fxCoreHighlightCoverage='facet-web-axis-ring-distribution-v20'" "$MATERIAL"
+          grep -Fq "fxCoreMeshMaterial='reference-glass-v20'" "$MATERIAL"
+          grep -Fq 'float planeGlow=sm(.34,.72,face)' "$MATERIAL"
+          grep -Fq 'float hAxis=exp(-abs(cp.y)*11.0)' "$MATERIAL"
+          grep -Fq 'float ringGlow=' "$MATERIAL"
           grep -Fq "fxCoreShapeMesh='applied-v14'" "$SHAPE"
           grep -Fq "fxCoreShapeFracture='applied-v14'" "$SHAPE"
           grep -Fq 'value*1.15' "$GEOMETRY"
-          grep -Fq 'brightness(2.10)' "$GRADE"
-          grep -Fq 'saturate(1.02)' "$GRADE"
-          grep -Fq 'opacity: 0.74' "$GRADE"
+          grep -Fq 'brightness(2.06)' "$GRADE"
+          grep -Fq 'opacity: 0.82' "$GRADE"
+          grep -Fq 'brightness(1.68)' "$GRADE"
       - name: Publish live mobile Apex status
         if: always()
         env:
@@ -51,5 +52,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live MAG uses broad high-dynamic centered true-3D reference material v19'; else state=failure; description='Live broad high-dynamic MAG v19 verification failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live MAG uses distributed HDR centered true-3D reference material v20'; else state=failure; description='Live distributed HDR MAG v20 verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live mobile Apex composition' -f description="$description" -f target_url="$TARGET_URL"
