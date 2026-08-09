@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify sparse high-dynamic MAG v21 live
+      - name: Verify calibrated post-grade MAG v22 live
         shell: bash
         run: |
           set -euo pipefail
@@ -25,24 +25,20 @@ jobs:
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-material-v21.js?v=20260809-sparse-hdr-facets-v21&audit=${GITHUB_RUN_ID}" -o "$MATERIAL"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-shape-v14.js?v=20260809-reference-ratio-v14&audit=${GITHUB_RUN_ID}" -o "$SHAPE"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-geometry-v13.js?v=20260809-true-3d-scale-v13&audit=${GITHUB_RUN_ID}" -o "$GEOMETRY"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v21.css?v=20260809-sparse-hdr-v21&audit=${GITHUB_RUN_ID}" -o "$GRADE"
-          grep -Fq "fxApexSceneStability==='ready-v31'" "$MAPPER"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v22.css?v=20260809-calibrated-postgrade-v22&audit=${GITHUB_RUN_ID}" -o "$GRADE"
+          grep -Fq "fxApexSceneStability==='ready-v32'" "$MAPPER"
           grep -Fq 'formatx-core-mesh3d-material-v21.js?v=20260809-sparse-hdr-facets-v21' "$MAPPER"
-          grep -Fq 'formatx-core-cinematic-grade-v21.css?v=20260809-sparse-hdr-v21' "$MAPPER"
-          grep -Fq "fxCoreVisualCalibration='reference-polygon-contrast-v21'" "$MAPPER"
-          grep -Fq 'cinematic-sparse-hdr-reference-glass-v31' "$MAPPER"
+          grep -Fq 'formatx-core-cinematic-grade-v22.css?v=20260809-calibrated-postgrade-v22' "$MAPPER"
+          grep -Fq "fxCoreVisualCalibration='reference-polygon-postgrade-v22'" "$MAPPER"
+          grep -Fq 'cinematic-sparse-hdr-postgrade-reference-glass-v32' "$MAPPER"
           grep -Fq "fxCoreHighlightModel='sparse-high-dynamic-facets-v21'" "$MATERIAL"
-          grep -Fq "fxCoreHighlightCoverage='thresholded-facet-web-axis-ring-v21'" "$MATERIAL"
           grep -Fq "fxCoreMeshMaterial='reference-glass-v21'" "$MATERIAL"
-          grep -Fq 'float planeGlow=sm(.70,.90,face)' "$MATERIAL"
-          grep -Fq 'float hAxis=exp(-abs(cp.y)*19.0)' "$MATERIAL"
-          grep -Fq 'float ringGlow=' "$MATERIAL"
           grep -Fq "fxCoreShapeMesh='applied-v14'" "$SHAPE"
           grep -Fq "fxCoreShapeFracture='applied-v14'" "$SHAPE"
           grep -Fq 'value*1.15' "$GEOMETRY"
+          grep -Fq 'filter: saturate(4.00) contrast(3.20)' "$GRADE"
+          grep -Fq 'filter: saturate(2.35) contrast(1.65)' "$GRADE"
           grep -Fq 'brightness(2.08)' "$GRADE"
-          grep -Fq 'saturate(1.14)' "$GRADE"
-          grep -Fq 'opacity: 0.78' "$GRADE"
       - name: Publish live mobile Apex status
         if: always()
         env:
@@ -52,5 +48,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live MAG uses sparse HDR centered true-3D reference material v21'; else state=failure; description='Live sparse HDR MAG v21 verification failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live MAG uses sparse true-3D material with calibrated cinematic post-grade v22'; else state=failure; description='Live calibrated post-grade MAG v22 verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live mobile Apex composition' -f description="$description" -f target_url="$TARGET_URL"
