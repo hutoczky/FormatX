@@ -14,24 +14,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify emissive-alpha MAG v25 live
+      - name: Verify balanced emissive-alpha MAG v26 live
         shell: bash
         run: |
           set -euo pipefail
           MAPPER="$RUNNER_TEMP/mapper.js"; MATERIAL="$RUNNER_TEMP/material.js"; SHAPE="$RUNNER_TEMP/shape.js"; GEOMETRY="$RUNNER_TEMP/geometry.js"; GRADE="$RUNNER_TEMP/grade.css"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" -o "$MAPPER"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-material-v25.js?v=20260809-emissive-alpha-network-v25&audit=${GITHUB_RUN_ID}" -o "$MATERIAL"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-material-v26.js?v=20260809-balanced-emissive-alpha-v26&audit=${GITHUB_RUN_ID}" -o "$MATERIAL"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-shape-v14.js?v=20260809-reference-ratio-v14&audit=${GITHUB_RUN_ID}" -o "$SHAPE"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-geometry-v13.js?v=20260809-true-3d-scale-v13&audit=${GITHUB_RUN_ID}" -o "$GEOMETRY"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v23.css?v=20260809-reference-network-v23&audit=${GITHUB_RUN_ID}" -o "$GRADE"
-          grep -Fq 'ready-v35' "$MAPPER"
-          grep -Fq 'formatx-core-mesh3d-material-v25.js?v=20260809-emissive-alpha-network-v25' "$MAPPER"
-          grep -Fq "fxCoreVisualCalibration='reference-emissive-alpha-network-v25'" "$MAPPER"
-          grep -Fq 'cinematic-emissive-alpha-network-v35' "$MAPPER"
-          grep -Fq "fxCoreHighlightModel='emissive-alpha-network-v25'" "$MATERIAL"
-          grep -Fq "fxCoreHighlightCoverage='network-alpha-independent-v25'" "$MATERIAL"
-          grep -Fq "fxCoreMeshMaterial='reference-glass-v25'" "$MATERIAL"
-          grep -Fq 'float emissiveAlpha=.34*web+.26*axis+.22*ridge+.18*rings+.32*node+.34*spec+.14*violet' "$MATERIAL"
+          grep -Fq 'ready-v36' "$MAPPER"
+          grep -Fq 'formatx-core-mesh3d-material-v26.js?v=20260809-balanced-emissive-alpha-v26' "$MAPPER"
+          grep -Fq "fxCoreVisualCalibration='reference-balanced-emissive-alpha-v26'" "$MAPPER"
+          grep -Fq 'cinematic-balanced-emissive-alpha-v36' "$MAPPER"
+          grep -Fq "fxCoreHighlightModel='balanced-emissive-alpha-network-v26'" "$MATERIAL"
+          grep -Fq "fxCoreHighlightCoverage='reference-balanced-network-alpha-v26'" "$MATERIAL"
+          grep -Fq "fxCoreMeshMaterial='reference-glass-v26'" "$MATERIAL"
+          grep -Fq 'float emissiveAlpha=.25*web+.20*axis+.16*ridge+.13*rings+.28*node+.34*spec+.11*violet' "$MATERIAL"
           grep -Fq 'alphaBase+emissiveAlpha' "$MATERIAL"
           grep -Fq "fxCoreShapeMesh='applied-v14'" "$SHAPE"
           grep -Fq "fxCoreShapeFracture='applied-v14'" "$SHAPE"
@@ -48,5 +48,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live MAG uses independent emissive-alpha true-3D energy network v25'; else state=failure; description='Live emissive-alpha MAG v25 verification failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live MAG uses balanced emissive-alpha true-3D energy network v26'; else state=failure; description='Live balanced emissive-alpha MAG v26 verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live mobile Apex composition' -f description="$description" -f target_url="$TARGET_URL"
