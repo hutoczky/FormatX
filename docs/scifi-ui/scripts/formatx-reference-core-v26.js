@@ -142,7 +142,7 @@
       float h=pow(1.0-abs(d.y),4.0);
       float c=pow(sat(dot(d,normalize(vec3(-.45,.30,.84)))),26.0);
       float m=pow(sat(dot(d,normalize(vec3(.54,-.12,.83)))),22.0);
-      return vec3(.002,.012,.040)+vec3(.02,.54,1.30)*(h*.16+c*.92)+vec3(.72,.025,1.26)*(m*.68+h*.055);
+      return vec3(.004,.020,.065)+vec3(.025,.62,1.42)*(h*.22+c*1.06)+vec3(.78,.035,1.34)*(m*.76+h*.075);
     }
     void main(){
       vec3 V=normalize(uCamera-vWorld);
@@ -151,51 +151,54 @@
       if(!gl_FrontFacing)F=-F;
       N=normalize(mix(N,F,.28));
       float ndv=sat(abs(dot(N,V)));
-      float fres=pow(1.0-ndv,4.5);
-      vec3 cyan=vec3(.015,.78,1.62);
-      vec3 blue=vec3(.008,.19,1.12);
-      vec3 violet=vec3(.82,.035,1.46);
+      float fres=pow(1.0-ndv,4.2);
+      vec3 cyan=vec3(.018,.84,1.72);
+      vec3 blue=vec3(.010,.26,1.22);
+      vec3 violet=vec3(.86,.045,1.52);
 
       if(uMaterial<.5){
         vec2 p=vObject.xy;
         float r=length(p);
         float a=atan(p.y,p.x);
         float diamond=pow(pow(abs(p.x)/1.12,.62)+pow(abs(p.y)/1.26,.62),1.0/.62);
-        float membrane=band(diamond,.22,.018)+band(diamond,.40,.021)*.82+band(diamond,.59,.025)*.62+band(diamond,.78,.031)*.42;
-        float rings=band(r,.15,.012)+band(r,.24,.015)*.78+band(r,.34,.019)*.55+band(r,.46,.024)*.34;
-        float axes=exp(-abs(p.x)*24.0)+exp(-abs(p.y)*21.0);
-        float diagonal=(exp(-abs(p.x-p.y*.88)*22.0)+exp(-abs(p.x+p.y*.88)*22.0))*.35;
-        float veins=(linef(a*3.0+diamond*31.0-uTime*.18,18.0)*.72+linef(a*5.0-diamond*37.0+uTime*.13,22.0)*.53+linef((p.x*.8+p.y)*34.0+uTime*.15,24.0)*.28)*smoothstep(.11,.28,r)*(1.0-smoothstep(.78,1.02,diamond));
+        float inside=1.0-smoothstep(.44,1.02,diamond);
+        float membrane=band(diamond,.20,.020)+band(diamond,.38,.023)*.88+band(diamond,.57,.027)*.72+band(diamond,.76,.032)*.54;
+        float rings=band(r,.15,.013)+band(r,.24,.016)*.84+band(r,.34,.020)*.62+band(r,.46,.025)*.40;
+        float axes=exp(-abs(p.x)*23.0)+exp(-abs(p.y)*20.0);
+        float diagonal=(exp(-abs(p.x-p.y*.88)*21.0)+exp(-abs(p.x+p.y*.88)*21.0))*.40;
+        float veins=(linef(a*3.0+diamond*31.0-uTime*.18,17.0)*.76+linef(a*5.0-diamond*37.0+uTime*.13,21.0)*.60+linef((p.x*.8+p.y)*34.0+uTime*.15,23.0)*.34)*smoothstep(.10,.25,r)*(1.0-smoothstep(.80,1.02,diamond));
         float spectrum=.5+.5*sin(a*5.0+r*14.0-uTime*.31+uLayer);
-        float purple=pow(.5+.5*cos(a*4.0-r*11.0+uTime*.24),14.0)*smoothstep(.17,.72,r)*(1.0-smoothstep(.72,.98,diamond));
+        float purple=pow(.5+.5*cos(a*4.0-r*11.0+uTime*.24),13.0)*smoothstep(.16,.70,r)*(1.0-smoothstep(.72,.98,diamond));
+        float coreLight=exp(-r*r*5.2)*(1.0-smoothstep(.32,.88,abs(vObject.z)));
         vec3 I=-V;
         vec3 reflected=env(reflect(I,N));
         vec3 refracted=env(refract(I,N,.68));
-        float depth=.10+.33*(1.0-sat(abs(vObject.z)/.48))+.14*(1.0-ndv);
-        vec3 absorb=exp(-vec3(1.72,.36,.10)*depth);
-        vec3 glass=mix(refracted*absorb,reflected,.12+fres*.80);
-        glass+=mix(blue,cyan,spectrum)*(.055+.16*fres);
-        glass+=violet*(purple*.22+(1.0-spectrum)*.035);
-        vec3 emission=cyan*(membrane*.47+rings*.56+axes*.105+diagonal*.11+veins*.68);
-        emission+=violet*(purple*.76+veins*.18+membrane*(1.0-spectrum)*.09);
-        float spec=pow(sat(dot(reflect(-normalize(vec3(-.35,.74,.57)),N),V)),70.0);
-        emission+=vec3(1.0,.98,.95)*spec*1.15;
-        float alpha=uOpacity*(.18+.38*fres+.11*membrane+.08*veins+.08*spec);
-        fragColor=vec4(glass*.70+emission*(.48+.24*uEnergy),sat(alpha));
+        float depth=.10+.34*(1.0-sat(abs(vObject.z)/.48))+.15*(1.0-ndv);
+        vec3 absorb=exp(-vec3(1.55,.30,.075)*depth);
+        vec3 glass=mix(refracted*absorb,reflected,.16+fres*.74);
+        glass+=cyan*(.070+.105*inside+.080*fres)+blue*.040;
+        glass+=mix(blue,cyan,spectrum)*(.085+.20*fres);
+        glass+=violet*(purple*.24+(1.0-spectrum)*.045);
+        vec3 emission=cyan*(membrane*.78+rings*.72+axes*.20+diagonal*.20+veins*.92+coreLight*.30+fres*.22);
+        emission+=violet*(purple*.94+veins*.24+membrane*(1.0-spectrum)*.14+diagonal*.05);
+        float spec=pow(sat(dot(reflect(-normalize(vec3(-.35,.74,.57)),N),V)),66.0);
+        emission+=vec3(1.0,.99,.96)*spec*1.38;
+        float alpha=uOpacity*(.31+.26*fres+.12*inside+.10*membrane+.07*veins+.07*spec);
+        fragColor=vec4(glass*.96+emission*(.72+.22*uEnergy),sat(alpha));
         return;
       }
       if(uMaterial<1.5){
         float facing=.45+.55*sat(dot(N,V));
-        float pulse=.68+.32*sin(uTime*2.15+uLayer*2.0);
+        float pulse=.72+.28*sin(uTime*2.15+uLayer*2.0);
         vec3 c=mix(cyan,violet,sat(.5+.5*sin(uTime*.74+uLayer)));
-        float core=pow(facing,1.8)+pow(fres,2.0)*1.6;
-        fragColor=vec4(c*(1.25+core*2.5+uEnergy*.8)*pulse,uOpacity*(.72+.28*facing));
+        float core=pow(facing,1.7)+pow(fres,2.0)*1.4;
+        fragColor=vec4(c*(1.08+core*2.15+uEnergy*.62)*pulse,uOpacity*(.72+.28*facing));
         return;
       }
       if(uMaterial<2.5){
-        float rim=pow(1.0-ndv,2.6);
+        float rim=pow(1.0-ndv,2.4);
         vec3 c=mix(cyan,violet,sat(.5+.5*sin(uTime*.55+uLayer*1.9)));
-        fragColor=vec4(c*(1.15+rim*2.8+uEnergy*.7),uOpacity*(.68+rim*.30));
+        fragColor=vec4(c*(.92+rim*2.10+uEnergy*.44),uOpacity*(.60+rim*.28));
         return;
       }
       if(uMaterial<3.5){
@@ -209,7 +212,7 @@
         return;
       }
       vec3 c=mix(cyan,violet,sat(.5+.5*sin(vObject.x*8.0+vObject.y*7.0+uTime*.7+uLayer)));
-      fragColor=vec4(c*(1.25+uEnergy*.7),uOpacity);
+      fragColor=vec4(c*(1.36+uEnergy*.74),uOpacity);
     }`;
 
   const POINT_VERTEX = `#version 300 es
@@ -235,7 +238,7 @@
       vec2 p=gl_PointCoord-.5; float d=length(p); if(d>.5)discard;
       float a=smoothstep(.5,.05,d);
       vec3 c=mix(vec3(.08,.58,1.55),vec3(.78,.08,1.40),step(.72,vSeed));
-      fragColor=vec4(c*(1.0+a*1.4),a*(.22+vSeed*.42));
+      fragColor=vec4(c*(1.0+a*1.4),a*(.20+vSeed*.38));
     }`;
 
   const POST_VERTEX = `#version 300 es
@@ -259,7 +262,7 @@
         ba=max(ba,max(a.a,max(b.a,c.a)));
       }
       vec3 color=base.rgb+bloom*uBloom;
-      float alpha=max(base.a,ba*.36);
+      float alpha=max(base.a,ba*.34);
       fragColor=vec4(color,alpha);
     }`;
 
@@ -370,7 +373,7 @@
     return { positions: new Float32Array(positions), normals: new Float32Array(normals), indices: new Uint16Array(indices) };
   }
   function torusGeometry(radialSegments, tubeSegments) {
-    const positions = [], normals = [], indices = [], radius = 1, tube = .026;
+    const positions = [], normals = [], indices = [], radius = 1, tube = .0135;
     for (let r = 0; r <= radialSegments; r += 1) {
       const u = r / radialSegments * Math.PI * 2, cu = Math.cos(u), su = Math.sin(u);
       for (let s = 0; s <= tubeSegments; s += 1) {
@@ -530,7 +533,7 @@
     const baseX = mobile ? 0 : horizontalHalf * .37;
     const baseY = mobile ? .18 : .02;
     const scale = mobile ? .84 : 1.02;
-    const energy = .72 + Math.sin(time * 1.34) * .12;
+    const energy = .78 + Math.sin(time * 1.34) * .10;
     const camera = new Float32Array([pointerX * .10, -pointerY * .075, cameraZ]);
     const projection = perspective(fov, aspect, .1, 40);
     const view = lookAt(camera, [0, 0, 0], [0, 1, 0]);
@@ -542,7 +545,7 @@
       rotationX(Math.cos(time * .23) * .045 - pointerY * .055),
       scaling(scale * (1 + Math.sin(time * .84) * .008), scale, scale)
     );
-    const coreOffset = [baseX + Math.sin(time * 1.09) * .042, baseY + Math.cos(time * .91) * .036, Math.sin(time * .67) * .050];
+    const coreOffset = [baseX + Math.sin(time * 1.09) * .036, baseY + Math.cos(time * .91) * .031, Math.sin(time * .67) * .042];
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
     gl.viewport(0, 0, width, height);
@@ -556,12 +559,13 @@
     drawMesh(plane, floorModel, 3, .78, 0);
 
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-    const ringPulse = 1 + Math.sin(time * 1.4) * .018;
-    drawMesh(torus, compose(translation(...coreOffset), rotationX(.24 + time * .14), rotationY(.38 + time * .19), rotationZ(time * .31), scaling(.50 * ringPulse, .50 * ringPulse, .50 * ringPulse)), 2, .58, .2);
-    drawMesh(torus, compose(translation(...coreOffset), rotationX(1.08 + time * .21), rotationY(-.43 + time * .13), rotationZ(-time * .24), scaling(.37, .37, .37)), 2, .62, 1.4);
-    drawMesh(torus, compose(translation(...coreOffset), rotationX(-.72 + time * .18), rotationY(.82 - time * .17), rotationZ(time * .16), scaling(.255, .255, .255)), 2, .68, 2.6);
-    drawMesh(sphere, compose(translation(...coreOffset), scaling(.19, .19, .19)), 1, .24, 1.0);
-    drawMesh(sphere, compose(translation(...coreOffset), scaling(.092 + Math.sin(time * 2.1) * .006, .092 + Math.sin(time * 2.1) * .006, .092 + Math.sin(time * 2.1) * .006)), 1, .92, 2.0);
+    const ringPulse = 1 + Math.sin(time * 1.4) * .015;
+    drawMesh(torus, compose(translation(...coreOffset), rotationX(.52 + time * .11), rotationY(.26 + time * .13), rotationZ(time * .24), scaling(.36 * ringPulse, .36 * ringPulse, .36 * ringPulse)), 2, .40, .2);
+    drawMesh(torus, compose(translation(...coreOffset), rotationX(1.02 + time * .16), rotationY(-.38 + time * .10), rotationZ(-time * .18), scaling(.275, .275, .275)), 2, .44, 1.4);
+    drawMesh(torus, compose(translation(...coreOffset), rotationX(-.68 + time * .14), rotationY(.74 - time * .13), rotationZ(time * .12), scaling(.195, .195, .195)), 2, .50, 2.6);
+    drawMesh(sphere, compose(translation(...coreOffset), scaling(.145, .145, .145)), 1, .16, 1.0);
+    const reactorScale = .078 + Math.sin(time * 2.1) * .005;
+    drawMesh(sphere, compose(translation(...coreOffset), scaling(reactorScale, reactorScale, reactorScale)), 1, .96, 2.0);
 
     gl.useProgram(pointProgram);
     gl.uniformMatrix4fv(pointLoc.projection, false, projection); gl.uniformMatrix4fv(pointLoc.view, false, view); gl.uniformMatrix4fv(pointLoc.model, false, compose(translation(baseX, baseY, -.12), rotationZ(time * .026), scaling(scale, scale, scale))); gl.uniform1f(pointLoc.time, time); gl.uniform1f(pointLoc.pointScale, Math.min(devicePixelRatio || 1, 1.6) * 8.5);
@@ -569,15 +573,15 @@
 
     gl.useProgram(meshProgram); setMeshCommon(projection, view, camera, time, energy);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.enable(gl.CULL_FACE); gl.cullFace(gl.FRONT); drawMesh(crystal, shellModel, 0, .58, .35);
-    gl.cullFace(gl.BACK); drawMesh(crystal, shellModel, 0, .82, .95);
+    gl.enable(gl.CULL_FACE); gl.cullFace(gl.FRONT); drawMesh(crystal, shellModel, 0, .70, .35);
+    gl.cullFace(gl.BACK); drawMesh(crystal, shellModel, 0, .94, .95);
     gl.disable(gl.CULL_FACE);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE); drawCrystalLines(shellModel, .24 + energy * .08, 1.7);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE); drawCrystalLines(shellModel, .44 + energy * .08, 1.7);
     gl.depthMask(true);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, width, height); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.disable(gl.BLEND);
-    gl.useProgram(postProgram); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, colorTexture); gl.uniform1i(postLoc.scene, 0); gl.uniform2f(postLoc.texel, 1 / width, 1 / height); gl.uniform1f(postLoc.bloom, mobile ? .90 : 1.06); gl.bindVertexArray(null); gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.useProgram(postProgram); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, colorTexture); gl.uniform1i(postLoc.scene, 0); gl.uniform2f(postLoc.texel, 1 / width, 1 / height); gl.uniform1f(postLoc.bloom, mobile ? .82 : .94); gl.bindVertexArray(null); gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
   function destroy() {
@@ -605,6 +609,7 @@
   root.dataset.fxReferenceCoreGeometry = 'true-indexed-four-tip-concave-crystal';
   root.dataset.fxReferenceCoreDepth = 'depth-buffer-perspective';
   root.dataset.fxReferenceCoreAnimation = 'independent-shell-reactor-orbits';
+  root.dataset.fxReferenceCoreVisual = 'reference-glass-calibration-2';
   retireLegacyStages();
   const observer = new MutationObserver(retireLegacyStages);
   observer.observe(document.body, { childList: true });
