@@ -28,5 +28,11 @@
     "mobile": "adaptive WebGL2 geometry and DPR cap",
     "fallback": "legacy safe visual remains if v26 cannot initialise"
   },
+  "live_visual_gate": {
+    "workflow": "Verify live true 3D MAG visual",
+    "revision": "v26-mobile-desktop",
+    "captures": ["753x1536 mobile", "1440x1000 desktop"],
+    "runtime_assertions": ["WebGL2", "depth", "perspective", "indexed crystal", "no legacy stage", "no image backing"]
+  },
   "deployed_at": "2026-08-09"
 }
