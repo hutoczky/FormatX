@@ -128,7 +128,7 @@ body.fx-organism-panel-open .fx-core-real3d-stage {
     inset: auto !important;
     order: -1 !important;
     width: 100% !important;
-    min-height: clamp(560px, 62svh, 880px) !important;
+    min-height: clamp(576px, 63svh, 896px) !important;
     opacity: 1 !important;
     transform: none !important;
   }
