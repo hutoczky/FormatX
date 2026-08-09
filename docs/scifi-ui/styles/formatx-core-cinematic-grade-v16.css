@@ -1,0 +1,48 @@
+.fx-core-mesh3d-canvas {
+  filter:
+    brightness(1.75)
+    saturate(1.04)
+    contrast(1.09)
+    drop-shadow(0 0 5px rgba(92, 232, 255, 0.18))
+    drop-shadow(0 0 11px rgba(126, 94, 255, 0.08)) !important;
+}
+
+.fx-core-fracture3d-stage canvas {
+  opacity: 0.54;
+  filter:
+    brightness(1.10)
+    saturate(1.36)
+    contrast(1.07)
+    drop-shadow(0 0 3px rgba(92, 232, 255, 0.13))
+    drop-shadow(0 0 5px rgba(194, 78, 255, 0.08));
+}
+
+@media (max-width: 820px), (pointer: coarse) {
+  .fx-core-mesh3d-canvas {
+    filter:
+      brightness(1.82)
+      saturate(1.06)
+      contrast(1.09)
+      drop-shadow(0 0 4px rgba(92, 232, 255, 0.17))
+      drop-shadow(0 0 9px rgba(126, 94, 255, 0.07)) !important;
+  }
+  .fx-core-fracture3d-stage canvas {
+    opacity: 0.50;
+    filter:
+      brightness(1.12)
+      saturate(1.38)
+      contrast(1.07)
+      drop-shadow(0 0 3px rgba(92, 232, 255, 0.12))
+      drop-shadow(0 0 5px rgba(194, 78, 255, 0.08));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-core-mesh3d-canvas {
+    filter: brightness(1.52) saturate(1.02) contrast(1.07) !important;
+  }
+  .fx-core-fracture3d-stage canvas {
+    opacity: 0.42;
+    filter: brightness(1.02) saturate(1.22) contrast(1.05) !important;
+  }
+}
