@@ -49,6 +49,8 @@
     "production_validation_with_reference_v24_authority_gate": "passed",
     "public_site_integrity_static_and_desktop_mobile_chromium": "passed",
     "real3d_reference_v24_production_and_webgpu_preview_contract": "passed",
+    "strict_desktop_mobile_lighthouse": "passed_on_previous_deploy_of_same_site_content",
+    "production_live_smoke": "passed_on_previous_deploy_of_same_site_content",
     "release_truth_and_platform_contract": "passed",
     "transaction_pages_noindex": "passed",
     "android_full_release_vs_native_beta_separation": "passed"
@@ -59,8 +61,10 @@
     "production_worker_dry_run_build": "required_again_on_deploy_commit",
     "public_site_static_integrity": "required_again_on_deploy_commit",
     "desktop_mobile_chromium_public_pages": "required_again_on_deploy_commit",
-    "strict_lighthouse": "required_by_lighthouse_ci",
-    "production_live_smoke": "required_after_deployment"
+    "strict_lighthouse": "required_again_by_lighthouse_ci",
+    "production_live_smoke": "required_after_deployment",
+    "live_reference_v24_mag_authority": "required_after_deployment",
+    "live_native_apex_and_seamless_scroll": "required_after_deployment"
   },
   "truth_contract": {
     "generic_public_beta_copy_for_product": "forbidden",
@@ -76,5 +80,5 @@
     "Field INP is not claimed without real-user monitoring data.",
     "The WebGPU v29 renderer remains a preview until it reaches reference geometry parity."
   ],
-  "deployment_intent": "deploy this validated v130 master state to the FormatX production custom domains and accept the deployment only after the live production smoke test passes"
+  "deployment_intent": "final deploy of the validated v130 master state; accept only after production smoke, strict Lighthouse and live reference-v24 MAG verification all pass"
 }
