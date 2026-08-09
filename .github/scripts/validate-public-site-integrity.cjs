@@ -146,6 +146,7 @@ for (const [label, token] of canonicalPrices) {
   if (!liveEntry.includes(token)) report(`legacy live fallback pricing: missing ${label}`);
 }
 if (!checkoutPage.includes('checkout-v100.js') || checkoutPage.includes('scripts/checkout.js') || checkoutPage.includes('scripts/billing.js')) report('checkout: retired pricing runtime is referenced');
+if (!/<meta\s+name="robots"\s+content="noindex,nofollow,noarchive">/i.test(checkoutPage)) report('checkout: transactional noindex contract missing');
 if (!checkoutRuntime.includes('new Uint8Array(12)') || !checkoutRuntime.includes("return 'FX-' + ymd + '-' + random")) report('checkout: high-entropy order reference generation missing');
 for (const [name, source] of [['pricing API', pricingApi], ['live entry', liveEntry]]) {
   if (!source.includes('SECURE_ORDER_REFERENCE = /^FX-\\d{8}-[A-F0-9]{24}$/')) report(`${name}: secure order-reference format missing`);
@@ -236,4 +237,4 @@ if (failures.length) {
   failures.forEach(item => console.error(' - ' + item));
   process.exit(1);
 }
-console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, pricing parity, secure order references, Android channel/download separation, legal gate, transactional noindex, seamless-v7 scrolling, downloads and aliases validated.`);
+console.log(`PASS: ${htmlFiles.length} public HTML pages, links, IDs, images, CSP hooks, release truth, SEO, support, pricing parity, secure order references, Android channel/download separation, legal gate, transactional checkout/status noindex, seamless-v7 scrolling, downloads and aliases validated.`);
