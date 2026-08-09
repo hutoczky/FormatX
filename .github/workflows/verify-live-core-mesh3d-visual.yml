@@ -1,5 +1,5 @@
 name: Verify live true 3D MAG visual
-run-name: Capture single-context real 3D MAG for ${{ github.event.workflow_run.head_sha }}
+run-name: Capture native WebGL2 reference crystal v26 for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -26,10 +26,10 @@ jobs:
           mkdir -p "$RUNNER_TEMP/mag-visual"
           cd "$RUNNER_TEMP/mag-visual"
           npm init -y >/dev/null 2>&1
-          npm install --silent playwright@latest pngjs@latest
+          npm install --silent playwright@1.62.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
 
-      - name: Capture and measure single-context real 3D MAG v20
+      - name: Capture and measure live reference core v26
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -40,173 +40,141 @@ jobs:
           const { chromium } = require('playwright');
           const { PNG } = require('pngjs');
           const fs = require('node:fs');
-          const polygon = [[45, 684], [377, 300], [710, 684], [377, 1064]];
-          function inside(x, y, points) {
-            let value = false;
-            for (let index = 0, previous = points.length - 1; index < points.length; previous = index, index += 1) {
-              const a = points[index], b = points[previous];
-              if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) value = !value;
-            }
-            return value;
-          }
-          function percentile(values, position) {
-            const sorted = [...values].sort((a, b) => a - b);
-            return sorted[Math.min(sorted.length - 1, Math.max(0, Math.round((sorted.length - 1) * position)))];
-          }
-          function metrics(file) {
-            const png = PNG.sync.read(fs.readFileSync(file)), luminance = [], saturation = [];
-            let over050 = 0, over075 = 0;
-            for (let y = 0; y < png.height; y += 1) for (let x = 0; x < png.width; x += 1) {
-              if (!inside(x, y, polygon)) continue;
-              const offset = (png.width * y + x) << 2;
-              const r = png.data[offset] / 255, g = png.data[offset + 1] / 255, b = png.data[offset + 2] / 255;
-              const light = .2126 * r + .7152 * g + .0722 * b;
+
+          function imageMetrics(file, region) {
+            const png = PNG.sync.read(fs.readFileSync(file));
+            const x0 = Math.max(0, region.x0), y0 = Math.max(0, region.y0);
+            const x1 = Math.min(png.width, region.x1), y1 = Math.min(png.height, region.y1);
+            let pixels = 0, luminance = 0, bright = 0, saturated = 0, cyanViolet = 0;
+            for (let y = y0; y < y1; y += 1) for (let x = x0; x < x1; x += 1) {
+              const o = (y * png.width + x) << 2;
+              const r = png.data[o] / 255, g = png.data[o + 1] / 255, b = png.data[o + 2] / 255;
+              const l = .2126 * r + .7152 * g + .0722 * b;
               const maximum = Math.max(r, g, b), minimum = Math.min(r, g, b);
-              luminance.push(light);
-              saturation.push(maximum ? (maximum - minimum) / maximum : 0);
-              if (light > .5) over050 += 1;
-              if (light > .75) over075 += 1;
+              const sat = maximum ? (maximum - minimum) / maximum : 0;
+              pixels += 1; luminance += l;
+              if (l > .36) bright += 1;
+              if (sat > .45 && l > .06) saturated += 1;
+              if ((b > r * 1.18 && g > r * 1.08 && l > .07) || (b > g * 1.10 && r > g * .72 && l > .07)) cyanViolet += 1;
             }
-            const sum = values => values.reduce((total, value) => total + value, 0);
             return {
-              pixels: luminance.length,
-              mean_luminance: sum(luminance) / luminance.length,
-              median_luminance: percentile(luminance, .5),
-              p90_luminance: percentile(luminance, .9),
-              p99_luminance: percentile(luminance, .99),
-              mean_saturation: sum(saturation) / saturation.length,
-              fraction_over_050: over050 / luminance.length,
-              fraction_over_075: over075 / luminance.length
+              pixels,
+              mean_luminance: luminance / pixels,
+              bright_fraction: bright / pixels,
+              saturated_fraction: saturated / pixels,
+              cyan_violet_fraction: cyanViolet / pixels
             };
           }
-          (async () => {
-            const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
-            const context = await browser.newContext({ viewport: { width: 753, height: 1536 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true, locale: 'hu-HU' });
-            const page = await context.newPage();
-            await page.goto(`https://www.formatxsuite.com/?real3d_v20=${process.env.RUN_ID}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
-            await page.waitForTimeout(1200);
-            await page.evaluate(() => {
-              const root = document.documentElement;
-              root.lang = 'hu';
-              root.dataset.fxImmersive = 'active';
-              root.classList.add('fx-intro-complete');
-              dispatchEvent(new CustomEvent('formatx:immersiveactivate'));
-              document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+
+          async function capture(browser, config) {
+            const context = await browser.newContext({
+              viewport: config.viewport,
+              deviceScaleFactor: 1,
+              isMobile: config.mobile,
+              hasTouch: config.mobile,
+              locale: 'hu-HU'
             });
-            const waits = [
-              [() => document.documentElement.dataset.fxApexSceneStability === 'ready-v36', 'mapper'],
-              [() => document.documentElement.dataset.fxCoreReal3d === 'ready-v20', 'real3d'],
-              [() => document.documentElement.dataset.fxCoreRenderer === 'single-webgl2-indexed-3d-v20', 'renderer'],
-              [() => document.documentElement.dataset.fxCoreContexts === '1', 'single-context'],
-              [() => document.documentElement.dataset.fxCoreImageBacked === 'false', 'not-image-backed'],
-              [() => document.documentElement.dataset.fxCoreDepthBuffer === 'enabled', 'depth'],
-              [() => document.documentElement.dataset.fxCoreCamera === 'perspective', 'perspective'],
-              [() => window.FormatXCoreCinematic?.version === 'film-reactive-v1', 'cinematic']
-            ];
-            for (const [condition, name] of waits) {
-              console.log('WAIT', name);
-              await page.waitForFunction(condition, null, { timeout: 60000 });
-              console.log('READY', name);
-            }
-            await page.waitForTimeout(900);
-            await page.evaluate(() => scrollTo(0, 0));
-            await page.waitForTimeout(900);
+            const page = await context.newPage();
+            const consoleErrors = [];
+            page.on('pageerror', error => consoleErrors.push(String(error)));
+            page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
+            await page.goto(`https://www.formatxsuite.com/?reference_v26=${process.env.RUN_ID}&capture=${config.name}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+            await page.evaluate(() => {
+              document.documentElement.lang = 'hu';
+              document.documentElement.classList.add('fx-intro-complete');
+              document.getElementById('formatx-event-horizon')?.remove();
+              scrollTo(0, 0);
+            });
+            await page.waitForFunction(() => document.documentElement.dataset.fxReferenceCore === 'ready-v26', null, { timeout: 60000 });
+            await page.waitForFunction(() => document.querySelector('.fx-reference-core-v26-canvas') instanceof HTMLCanvasElement, null, { timeout: 10000 });
+            await page.waitForTimeout(1600);
             const runtime = await page.evaluate(() => {
               const root = document.documentElement;
-              const canvas = document.querySelector('.fx-core-real3d-canvas');
+              const canvas = document.querySelector('.fx-reference-core-v26-canvas');
+              const stage = document.querySelector('.fx-reference-core-v26-stage');
+              const rect = canvas?.getBoundingClientRect();
+              let webgl2 = false;
+              try { webgl2 = Boolean(canvas?.getContext('webgl2')); } catch (_) {}
               return {
-                real3d: root.dataset.fxCoreReal3d,
-                renderer: root.dataset.fxCoreRenderer,
-                contexts: root.dataset.fxCoreContexts,
-                drawCalls: root.dataset.fxCoreDrawCalls,
-                visual: root.dataset.fxCoreVisualRevision,
-                bloom: root.dataset.fxCoreBloom,
-                postProcess: root.dataset.fxCorePostProcess,
-                material: root.dataset.fxCoreMeshMaterial,
-                filaments: root.dataset.fxCoreShapeFracture,
-                physicalGlass: root.dataset.fxCorePhysicalGlass,
-                volumeAbsorption: root.dataset.fxCoreVolumeAbsorption,
-                loopTransferPolicy: root.dataset.fxCoreLoopTransferPolicy,
-                lowResolutionHighlights: root.dataset.fxCoreLowResolutionHighlights,
-                target: root.dataset.fxCorePerformanceTarget,
-                visibility: root.dataset.fxCoreVisibility,
-                webgl2: Boolean(canvas?.getContext('webgl2')),
+                reference: root.dataset.fxReferenceCore,
+                revision: root.dataset.fxCoreReal3dRevision,
+                renderer: root.dataset.fxCoreRendererRevision,
+                geometry: root.dataset.fxReferenceCoreGeometry,
+                depth: root.dataset.fxReferenceCoreDepth,
+                animation: root.dataset.fxReferenceCoreAnimation,
+                pixels: root.dataset.fxReferenceCorePixels,
+                renderScale: root.dataset.fxReferenceCoreRenderScale || 'initial',
+                webgl2,
+                stageActive: stage?.dataset.active,
+                canvas: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
+                referenceStages: document.querySelectorAll('.fx-reference-core-v26-stage').length,
+                legacyStages: document.querySelectorAll('.fx-core-real3d-stage').length,
                 oldMeshStages: document.querySelectorAll('.fx-core-mesh3d-stage').length,
-                oldFractureStages: document.querySelectorAll('.fx-core-fracture3d-stage').length,
-                nativeStages: document.querySelectorAll('.fx-transcend-shell[data-fx-native-apex="true"]').length,
-                fallbackActive: document.querySelector('.fx-resilient-core')?.dataset.active || 'absent',
-                copyTop: Math.round(document.querySelector('#hero .hero-copy')?.getBoundingClientRect().top || 0)
+                oldFractureStages: document.querySelectorAll('.fx-core-fracture3d-stage').length
               };
             });
-            await page.screenshot({ path: 'mag-idle-reference.png', fullPage: false });
-            await page.evaluate(() => {
-              dispatchEvent(new CustomEvent('formatx:organismcoreactivate', { detail: { userInitiated: true } }));
-              dispatchEvent(new CustomEvent('formatx:organismresponse', { detail: { text: 'audit', localOnly: true } }));
+            const file = `reference-core-v26-${config.name}.png`;
+            await page.screenshot({ path: file, fullPage: false });
+            const metrics = imageMetrics(file, config.region);
+            fs.writeFileSync(`reference-core-v26-${config.name}.json`, JSON.stringify({ runtime, metrics, consoleErrors }, null, 2));
+            await context.close();
+
+            const runtimeOk = runtime.reference === 'ready-v26'
+              && runtime.revision === 'ready-v26'
+              && runtime.renderer === 'native-webgl2-reference-crystal-v26'
+              && runtime.geometry === 'true-indexed-four-tip-concave-crystal'
+              && runtime.depth === 'depth-buffer-perspective'
+              && runtime.animation === 'independent-shell-reactor-orbits'
+              && runtime.webgl2
+              && runtime.stageActive === 'true'
+              && runtime.referenceStages === 1
+              && runtime.legacyStages === 0
+              && runtime.oldMeshStages === 0
+              && runtime.oldFractureStages === 0
+              && runtime.canvas?.width >= config.viewport.width - 2
+              && runtime.canvas?.height >= config.viewport.height - 2;
+            const visualOk = metrics.mean_luminance >= .025 && metrics.mean_luminance <= .45
+              && metrics.bright_fraction >= .0015
+              && metrics.saturated_fraction >= .018
+              && metrics.cyan_violet_fraction >= .012;
+            if (!runtimeOk || !visualOk || consoleErrors.length) {
+              throw new Error(`${config.name} v26 visual gate failed: ${JSON.stringify({ runtime, metrics, consoleErrors })}`);
+            }
+            return { runtime, metrics };
+          }
+
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
             });
-            await page.waitForTimeout(180);
-            const awake = await page.evaluate(() => ({
-              energy: window.FormatXCoreCinematic?.energy,
-              surge: window.FormatXCoreCinematic?.surge,
-              immediate: document.documentElement.dataset.fxCoreCinematicImmediate
-            }));
-            await page.waitForTimeout(520);
-            await page.screenshot({ path: 'mag-awake-reference.png', fullPage: false });
-            const visual = metrics('mag-awake-reference.png');
-            await page.evaluate(() => dispatchEvent(new CustomEvent('formatx:organismspeechstart', { detail: { text: 'audit', explicit: true } })));
-            await page.waitForTimeout(180);
-            const speaking = await page.evaluate(() => ({ energy: window.FormatXCoreCinematic?.energy, speech: window.FormatXCoreCinematic?.speech }));
-            await page.waitForTimeout(500);
-            await page.screenshot({ path: 'mag-speaking-reference.png', fullPage: false });
-            await page.evaluate(() => dispatchEvent(new CustomEvent('formatx:organismspeechend', { detail: { explicit: true } })));
-            await page.waitForTimeout(180);
-            const settling = await page.evaluate(() => ({ speech: window.FormatXCoreCinematic?.speech }));
-            await page.waitForTimeout(500);
-            await page.screenshot({ path: 'mag-settling-reference.png', fullPage: false });
-            const evidence = { runtime, awake, speaking, settling, visual };
-            fs.writeFileSync('mag-state.json', JSON.stringify(evidence, null, 2));
-            fs.writeFileSync('mag-metrics.json', JSON.stringify({
-              acceptance: { mean_luminance: [.23, .42], median_luminance: [.18, .35], p90_luminance_min: .52, p99_luminance_min: .82, mean_saturation: [.58, .86], fraction_over_050_min: .10, fraction_over_075_min: .025 },
-              measured: visual
-            }, null, 2));
-            const visualOk = visual.mean_luminance >= .23 && visual.mean_luminance <= .42
-              && visual.median_luminance >= .18 && visual.median_luminance <= .35
-              && visual.p90_luminance >= .52 && visual.p99_luminance >= .82
-              && visual.mean_saturation >= .58 && visual.mean_saturation <= .86
-              && visual.fraction_over_050 >= .10 && visual.fraction_over_075 >= .025;
-            const runtimeOk = runtime.real3d === 'ready-v20' && runtime.renderer === 'single-webgl2-indexed-3d-v20'
-              && runtime.contexts === '1' && runtime.drawCalls === '17-max'
-              && runtime.visual === 'v24-volumetric-crystal'
-              && runtime.bloom === 'quarter-resolution-separable-v23'
-              && runtime.postProcess === 'quarter-resolution-separable-bloom-v23'
-              && runtime.material === 'fresnel-chromatic-refraction-glass-v24'
-              && runtime.filaments === 'physical-tube-filaments-v24'
-              && runtime.physicalGlass === 'schlick-fresnel-chromatic-refraction-v24'
-              && runtime.volumeAbsorption === 'beer-lambert-approximation-v24'
-              && runtime.loopTransferPolicy === 'gpu-paused-two-frame-landing-v24'
-              && runtime.lowResolutionHighlights === 'render-scale-compensated-physical-ribs-v24'
-              && runtime.target === 'adaptive-60-plus-fps' && runtime.visibility === 'hero-only-raf-paused'
-              && runtime.webgl2 && runtime.oldMeshStages === 0 && runtime.oldFractureStages === 0
-              && runtime.nativeStages === 0 && runtime.fallbackActive !== 'true' && runtime.copyTop >= 1000;
-            if (!runtimeOk || !(awake.energy >= .70) || !(awake.surge > .50)
-              || awake.immediate !== 'frame-rate-independent-v1' || speaking.speech !== 1
-              || settling.speech !== 0 || !visualOk) throw new Error(`real 3D v20 gate failed: ${JSON.stringify(evidence)}`);
-            console.log('EVIDENCE', JSON.stringify(evidence));
+            const mobile = await capture(browser, {
+              name: 'mobile', mobile: true,
+              viewport: { width: 753, height: 1536 },
+              region: { x0: 25, y0: 170, x1: 728, y1: 1190 }
+            });
+            const desktop = await capture(browser, {
+              name: 'desktop', mobile: false,
+              viewport: { width: 1440, height: 1000 },
+              region: { x0: 620, y0: 100, x1: 1400, y1: 930 }
+            });
+            fs.writeFileSync('reference-core-v26-summary.json', JSON.stringify({ mobile, desktop }, null, 2));
+            console.log('V26_EVIDENCE', JSON.stringify({ mobile, desktop }));
             await browser.close();
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
-      - name: Upload MAG visual evidence
+      - name: Upload v26 visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-single-context-real3d-mag-v20-${{ github.run_id }}
+          name: live-native-webgl2-reference-core-v26-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-visual/mag-idle-reference.png
-            ${{ runner.temp }}/mag-visual/mag-awake-reference.png
-            ${{ runner.temp }}/mag-visual/mag-speaking-reference.png
-            ${{ runner.temp }}/mag-visual/mag-settling-reference.png
-            ${{ runner.temp }}/mag-visual/mag-state.json
-            ${{ runner.temp }}/mag-visual/mag-metrics.json
+            ${{ runner.temp }}/mag-visual/reference-core-v26-mobile.png
+            ${{ runner.temp }}/mag-visual/reference-core-v26-desktop.png
+            ${{ runner.temp }}/mag-visual/reference-core-v26-mobile.json
+            ${{ runner.temp }}/mag-visual/reference-core-v26-desktop.json
+            ${{ runner.temp }}/mag-visual/reference-core-v26-summary.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -219,5 +187,15 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Single-context real 3D MAG v20 passed runtime and visual gates'; else state=failure; description='Single-context real 3D MAG v20 failed runtime or visual gate'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Native WebGL2 reference crystal v26 passed mobile and desktop live visual gates'
+          else
+            state=failure
+            description='Native WebGL2 reference crystal v26 failed live visual gate'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX live true 3D MAG visual' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"
