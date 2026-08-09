@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@1.62.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
 
-      - name: Capture and measure live reference-lock v30
+      - name: Capture and measure live reference-lock v30 r4
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -69,6 +69,7 @@ jobs:
               reference:document.documentElement.dataset.fxCoreReferenceLock||null,
               referenceLoad:document.documentElement.dataset.fxCoreReferenceLockLoad||null,
               real3d:document.documentElement.dataset.fxCoreReal3d||null,
+              surface:document.documentElement.dataset.fxCoreReferenceSurface||null,
               error:document.documentElement.dataset.fxCoreReal3dError||null,
               scripts:[...document.scripts].map(s=>s.src).filter(src=>src.includes('reference-lock-v30')),
               styles:[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>l.href).filter(src=>src.includes('reference-lock-v30'))
@@ -90,16 +91,16 @@ jobs:
             const runtime=await page.evaluate(()=>{
               const root=document.documentElement,canvas=document.querySelector('.fx-core-real3d-canvas'),stage=document.querySelector('.fx-core-real3d-stage'),rect=canvas?.getBoundingClientRect();
               let webgl2=false;try{webgl2=Boolean(canvas?.getContext('webgl2'));}catch(_){}
-              return {reference:root.dataset.fxCoreReferenceLock,referenceRevision:root.dataset.fxCoreReferenceRevision,framing:root.dataset.fxCoreReferenceFraming,material:root.dataset.fxCoreReferenceMaterial,visual:root.dataset.fxCoreVisualRevision,geometry:root.dataset.fxCoreGeometry,reactor:root.dataset.fxCoreInternalReactor,orbits:root.dataset.fxCoreSpectralOrbits,performance:root.dataset.fxCorePerformance,imageBacked:root.dataset.fxCoreImageBacked,webgl2,stageActive:stage?.dataset.active,canvas:rect?{x:rect.x,y:rect.y,width:rect.width,height:rect.height}:null,stages:document.querySelectorAll('.fx-core-real3d-stage').length,v26Stages:document.querySelectorAll('.fx-reference-core-v26-stage').length,oldMeshStages:document.querySelectorAll('.fx-core-mesh3d-stage').length,oldFractureStages:document.querySelectorAll('.fx-core-fracture3d-stage').length};
+              return {reference:root.dataset.fxCoreReferenceLock,referenceRevision:root.dataset.fxCoreReferenceRevision,framing:root.dataset.fxCoreReferenceFraming,material:root.dataset.fxCoreReferenceMaterial,surface:root.dataset.fxCoreReferenceSurface,visual:root.dataset.fxCoreVisualRevision,geometry:root.dataset.fxCoreGeometry,reactor:root.dataset.fxCoreInternalReactor,orbits:root.dataset.fxCoreSpectralOrbits,performance:root.dataset.fxCorePerformance,imageBacked:root.dataset.fxCoreImageBacked,webgl2,stageActive:stage?.dataset.active,canvas:rect?{x:rect.x,y:rect.y,width:rect.width,height:rect.height}:null,stages:document.querySelectorAll('.fx-core-real3d-stage').length,v26Stages:document.querySelectorAll('.fx-reference-core-v26-stage').length,oldMeshStages:document.querySelectorAll('.fx-core-mesh3d-stage').length,oldFractureStages:document.querySelectorAll('.fx-core-fracture3d-stage').length};
             });
             const file=`reference-lock-v30-${cfg.name}.png`;await page.screenshot({path:file,fullPage:false});const visual=metrics(file,cfg.region);
             fs.writeFileSync(`reference-lock-v30-${cfg.name}.json`,JSON.stringify({runtime,visual,errors},null,2));
             await context.close();
             const coverage=.97;
-            const runtimeOk=runtime.reference==='ready-v30'&&runtime.referenceRevision==='uploaded-reference-20260810'&&runtime.framing==='mobile-core-center-40pct-shell-height-75pct'&&runtime.material==='dense-luminous-glass-filaments-v30'&&runtime.visual==='v30-reference-lock'&&runtime.geometry==='concave-four-sail-indexed-mesh-v30'&&runtime.reactor==='moving-white-core-four-rings-v30'&&runtime.orbits==='cyan-violet-3d-v30'&&runtime.performance==='adaptive-60-plus-fps'&&runtime.imageBacked==='false'&&runtime.webgl2&&runtime.stageActive==='true'&&runtime.stages===1&&runtime.v26Stages===0&&runtime.oldMeshStages===0&&runtime.oldFractureStages===0&&runtime.canvas?.width>=cfg.viewport.width*coverage&&runtime.canvas?.height>=cfg.viewport.height*coverage;
+            const runtimeOk=runtime.reference==='ready-v30'&&runtime.referenceRevision==='uploaded-reference-20260810'&&runtime.framing==='mobile-core-center-40pct-shell-height-75pct'&&runtime.material==='dense-luminous-glass-filaments-v30'&&runtime.surface==='glass-dominant-sparse-veins-r4'&&runtime.visual==='v30-reference-lock'&&runtime.geometry==='concave-four-sail-indexed-mesh-v30'&&runtime.reactor==='moving-white-core-four-rings-v30'&&runtime.orbits==='cyan-violet-3d-v30'&&runtime.performance==='adaptive-60-plus-fps'&&runtime.imageBacked==='false'&&runtime.webgl2&&runtime.stageActive==='true'&&runtime.stages===1&&runtime.v26Stages===0&&runtime.oldMeshStages===0&&runtime.oldFractureStages===0&&runtime.canvas?.width>=cfg.viewport.width*coverage&&runtime.canvas?.height>=cfg.viewport.height*coverage;
             const b=visual.bounds;
             const visualOk=visual.mean_luminance>=.018&&visual.mean_luminance<=.52&&visual.bright_fraction>=.001&&visual.saturated_fraction>=.012&&visual.cyan_violet_fraction>=.009&&b&&b.width>=cfg.minWidth&&b.height>=cfg.minHeight&&b.centerY>=cfg.centerYMin&&b.centerY<=cfg.centerYMax;
-            if(!runtimeOk||!visualOk||errors.length)throw new Error(`${cfg.name} v30 visual gate failed: ${JSON.stringify({runtime,visual,errors,coverage})}`);
+            if(!runtimeOk||!visualOk||errors.length)throw new Error(`${cfg.name} v30 r4 visual gate failed: ${JSON.stringify({runtime,visual,errors,coverage})}`);
             return {runtime,visual};
           }
 
@@ -107,17 +108,17 @@ jobs:
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
             const mobile=await capture(browser,{name:'mobile',mobile:true,viewport:{width:753,height:1536},region:{x0:15,y0:0,x1:738,y1:1240},minWidth:460,minHeight:650,centerYMin:430,centerYMax:780});
             const desktop=await capture(browser,{name:'desktop',mobile:false,viewport:{width:1440,height:1000},region:{x0:560,y0:40,x1:1430,y1:960},minWidth:380,minHeight:360,centerYMin:230,centerYMax:720});
-            fs.writeFileSync('reference-lock-v30-summary.json',JSON.stringify({mobile,desktop},null,2));
-            console.log('V30_REFERENCE_EVIDENCE',JSON.stringify({mobile,desktop}));
+            fs.writeFileSync('reference-lock-v30-summary.json',JSON.stringify({surface:'glass-dominant-sparse-veins-r4',mobile,desktop},null,2));
+            console.log('V30_REFERENCE_EVIDENCE',JSON.stringify({surface:'glass-dominant-sparse-veins-r4',mobile,desktop}));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1);});
           NODE
 
-      - name: Upload v30 visual evidence
+      - name: Upload v30 r4 visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-reference-lock-v30-${{ github.run_id }}
+          name: live-reference-lock-v30-r4-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/mag-visual/reference-lock-v30-mobile.png
             ${{ runner.temp }}/mag-visual/reference-lock-v30-desktop.png
@@ -136,5 +137,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Stable uploaded-reference WebGL2 MAG v30 r2 passed live mobile and desktop visual gates'; else state=failure; description='Uploaded-reference MAG v30 r2 failed live visual gate'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Glass-dominant uploaded-reference WebGL2 MAG v30 r4 passed live mobile and desktop visual gates'; else state=failure; description='Uploaded-reference MAG v30 r4 failed live visual gate'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
