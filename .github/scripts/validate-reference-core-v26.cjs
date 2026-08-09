@@ -74,7 +74,12 @@ assert.match(mobileCss, /hero-copy[\s\S]*order:\s*-1\s*!important/, 'mobile hero
 assert.match(mobileCss, /hero-space[\s\S]*order:\s*0\s*!important/, 'mobile preview stage must follow readable hero copy');
 assert.match(mobileCss, /data-fx-webgpu-core="ready-v29"/, 'mobile WebGPU preview composition contract missing');
 
-assert.match(entry, /formatx-reference-core-v26\.js\?v=20260809-reference-crystal-v26-\d+/, 'production compatibility/bootstrap injection missing');
-assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-core-v26\.js/, 'bootstrap no-store protection missing');
+assert.match(entry, /const WEBGPU_PREVIEW_ASSETS = [\s\S]*formatx-reference-core-v26\.js\?v=20260809-reference-crystal-v26-\d+/, 'WebGPU preview asset bundle missing');
+assert.match(entry, /const webgpuPreview = url\.searchParams\.get\('webgpu'\) === '1'/, 'production wrapper must inspect explicit WebGPU preview opt-in');
+assert.match(entry, /if \(webgpuPreview && !html\.includes\('data-fx-reference-core-v26'\)\)/, 'v26 preview assets must load only for explicit WebGPU preview');
+assert.doesNotMatch(entry, /CINEMATIC_CORE_ASSETS/, 'retired v27 cinematic bundle must not be injected into the production hot path');
+assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-core-v26\.js/, 'preview bootstrap no-store protection missing');
+assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-lock-v30\.js/, 'production v30 renderer no-store protection missing');
+assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-lock-v30\.css/, 'production v30 presentation no-store protection missing');
 
-console.log('PASS: uploaded-reference v30 cache revision 2 indexed WebGL2 MAG is the stable production authority; WebGPU v29 remains a real indexed 3D opt-in preview with automatic WebGL2 v28 preview fallback.');
+console.log('PASS: uploaded-reference v30 cache revision 2 indexed WebGL2 MAG is the lean stable production authority; v26/v29 loads only for explicit WebGPU preview and retired v27 stays off the production hot path.');
