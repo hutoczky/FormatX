@@ -1,0 +1,8 @@
+{
+  "revision": "2026-08-09-single-context-real3d-v20-revalidation",
+  "renderer": "formatx-core-real3d-v20",
+  "webgl_contexts": 1,
+  "geometry": "indexed-triangles-lines-sphere-tori-beams",
+  "visual_gate": "strict-reference-pixel-metrics",
+  "purpose": "clean-uninterrupted-live-revalidation-before-reference-tuning"
+}
