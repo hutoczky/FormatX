@@ -1,0 +1,34 @@
+name: Validate single-context real3D v21
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
+      - 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'
+      - '.github/scripts/validate-real3d-core-v21-release.cjs'
+      - '.github/workflows/validate-real3d-core-v21.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  validate-real3d-v21:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate v21 reference-shaped real3D engine
+        run: node .github/scripts/validate-real3d-core-v21-release.cjs
+      - name: Validate JavaScript syntax
+        run: node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+      - name: Publish source status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+          JOB_STATUS: ${{ job.status }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Single-context real3D v21 reference geometry and shader contract passed'; else state=failure; description='Single-context real3D v21 source contract failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX real3D v21 source contract' -f description="$description" -f target_url="$TARGET_URL"
