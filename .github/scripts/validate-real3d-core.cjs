@@ -5,31 +5,41 @@ const path = require('node:path');
 const assert = require('node:assert/strict');
 
 const repo = path.resolve(__dirname, '../..');
-const production = fs.readFileSync(path.join(repo, 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'), 'utf8');
-const productionStyle = fs.readFileSync(path.join(repo, 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'), 'utf8');
+const productionBootstrap = fs.readFileSync(path.join(repo, 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'), 'utf8');
+const production = fs.readFileSync(path.join(repo, 'docs/scifi-ui/scripts/formatx-reference-lock-v30.js'), 'utf8');
+const productionStyle = fs.readFileSync(path.join(repo, 'docs/scifi-ui/styles/formatx-reference-lock-v30.css'), 'utf8');
 const loader = fs.readFileSync(path.join(repo, 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'), 'utf8');
 const previewWebgl = fs.readFileSync(path.join(repo, 'docs/scifi-ui/scripts/formatx-orbital-core-v28.js'), 'utf8');
 const previewMobile = fs.readFileSync(path.join(repo, 'docs/scifi-ui/styles/formatx-real3d-mobile-v29.css'), 'utf8');
 
-// Production: reference-calibrated v24 MAG.
-assert.match(production, /getContext\(['"]webgl2['"]/i, 'production core must use a real WebGL2 context');
+// Production: uploaded-reference-locked v30 MAG behind a compatibility bootstrap.
+assert.match(productionBootstrap, /reference-lock-v30/, 'production compatibility bootstrap must select v30');
+assert.equal((productionBootstrap.match(/getContext\(['"]webgl2['"]/gi) || []).length, 0, 'bootstrap must not create a duplicate WebGL2 context');
+assert.equal((production.match(/getContext\(['"]webgl2['"]/gi) || []).length, 1, 'production v30 core must use exactly one real WebGL2 context');
 assert.match(production, /gl\.enable\(gl\.DEPTH_TEST\)/, 'production depth testing must be enabled');
-assert.match(production, /function\s+perspective\s*\(/, 'production perspective projection is required');
-assert.match(production, /function\s+starGeometry\s*\(/, 'reference four-tip crystalline geometry is required');
-assert.match(production, /function\s+sphereGeometry\s*\(/, 'production volumetric reactor geometry is required');
-assert.match(production, /function\s+torusGeometry\s*\(/, 'production 3D reactor torus geometry is required');
-assert.match(production, /function\s+crystalFilamentGeometry\s*\(/, 'production physical crystal filament geometry is required');
+assert.match(production, /function\s+persp\s*\(/, 'production perspective projection is required');
+assert.match(production, /function\s+crystal\s*\(/, 'reference four-tip crystalline geometry is required');
+assert.match(production, /function\s+sphere\s*\(/, 'production moving reactor sphere geometry is required');
+assert.match(production, /function\s+torus\s*\(/, 'production real 3D reactor/orbit torus geometry is required');
 assert.match(production, /gl\.drawElements\(gl\.TRIANGLES/, 'production indexed triangle rendering is required');
-assert.match(production, /fxCoreReal3d\s*=\s*['"]ready-v20['"]/, 'production renderer state marker is missing');
-assert.match(production, /v24-volumetric-crystal/, 'reference v24 visual revision is missing');
-assert.doesNotMatch(production, /drawImage\s*\(|new\s+Image\s*\(/i, 'production core must not substitute raster imagery');
-assert.match(productionStyle, /pointer-events:\s*none/, 'production 3D stage must not capture pointer or scroll input');
-assert.match(productionStyle, /clamp\(576px, 63svh, 896px\)/, 'production mobile reference composition is missing');
+assert.match(production, /gl\.drawElements\(gl\.LINES/, 'production indexed crystal-rib rendering is required');
+assert.match(production, /fxCoreReal3d='ready-v20'/, 'production compatibility renderer state marker is missing');
+assert.match(production, /fxCoreReferenceLock='ready-v30'/, 'production v30 reference lock marker is missing');
+assert.match(production, /uploaded-reference-20260810/, 'uploaded visual reference revision is missing');
+assert.match(production, /p=\.68/, 'reference concave p-norm silhouette is missing');
+assert.match(production, /const rs=\[\.20,\.29,\.39,\.51\]/, 'four real inner reactor rings are missing');
+assert.match(production, /const drift=/, 'moving internal white-cyan core is missing');
+assert.match(production, /adaptive-60-plus-fps/, 'adaptive high-frame-rate target is missing');
+assert.doesNotMatch(production, /drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(/i, 'production core must not substitute raster imagery');
+assert.doesNotMatch(production, /THREE\b|three\.js|babylon|playcanvas|model-viewer/i, 'production core must remain native first-party 3D');
+assert.match(productionStyle, /pointer-events:none/, 'production 3D stage must not capture pointer or scroll input');
+assert.match(productionStyle, /--fx-core-x:50%/, 'portrait/mobile reference composition must be centered');
+assert.match(productionStyle, /perspective\(560px\) rotateX\(63deg\)/, 'reference perspective energy floor is missing');
 
 // Compatibility loader: never override production automatically with the geometrically different v29 preview.
 assert.match(loader, /const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/, 'WebGPU preview must require explicit ?webgpu=1 opt-in');
-assert.match(loader, /production-v24-authority/, 'loader must expose reference v24 production authority');
-assert.match(loader, /webgl2-v24-reference-production/, 'loader must expose production WebGL2 reference state');
+assert.match(loader, /production-v30-reference-lock-authority/, 'loader must expose v30 production authority');
+assert.match(loader, /webgl2-v30-uploaded-reference-production/, 'loader must expose production v30 WebGL2 reference state');
 assert.match(loader, /if \(!WEBGPU_PREVIEW\)[\s\S]*return;/, 'production path must exit before loading the v29/v28 preview renderer');
 assert.match(loader, /formatx-webgpu-core-v29\.js/, 'WebGPU v29 preview route is missing');
 assert.match(loader, /formatx-orbital-core-v28\.js/, 'WebGL2 v28 preview fallback route is missing');
@@ -47,4 +57,4 @@ assert.doesNotMatch(previewWebgl, /drawImage\s*\(|new\s+Image\s*\(/i, 'preview f
 assert.match(previewMobile, /data-fx-orbital-core="ready-v28"/, 'preview mobile layout must bind to the actual WebGL renderer state');
 assert.doesNotMatch(previewMobile, /background-image\s*:\s*url\(/i, 'preview real-3D composition must not substitute a poster image');
 
-console.log('PASS: FormatX production uses the reference-calibrated indexed WebGL2 v24 MAG; WebGPU v29 is explicit preview only with a genuine indexed WebGL2 v28 fallback.');
+console.log('PASS: FormatX production uses uploaded-reference lock v30 as a single-context indexed WebGL2 MAG; WebGPU v29 remains explicit preview only with a genuine indexed WebGL2 v28 fallback.');
