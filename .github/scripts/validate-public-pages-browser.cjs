@@ -124,12 +124,36 @@ async function assertKnownIssues(browser, viewport, name) {
   await context.close();
 }
 
-async function assertAndroidStatus(browser, viewport, name) {
+async function assertTechnicalReport(browser, viewport, name) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto(origin + '/scifi-ui/android/', { waitUntil: 'domcontentloaded' });
+  await page.goto(origin + '/scifi-ui/technical-report.html', { waitUntil: 'domcontentloaded' });
+  await ensureRuntime(page, name);
+  await page.waitForTimeout(150);
+
+  assert(errors.length === 0, `${name}: page errors: ${errors.join(' | ')}`);
+  assert(await page.locator('meta[http-equiv="Content-Security-Policy"]').count() === 1, `${name}: standalone CSP meta missing`);
+  assert(await page.locator('.fx-public-footer a[aria-current="page"][href="/scifi-ui/technical-report.html"]').count() === 1, `${name}: canonical current-page navigation missing`);
+  const text = await page.locator('main').innerText();
+  assert(/reference-lock v30/i.test(text), `${name}: v30 production authority claim missing`);
+  assert(/seamless-v7/i.test(text), `${name}: seamless-v7 scroll state missing`);
+  assert(/5 napos próbalicenc|5-day trial licence/i.test(text), `${name}: five-day trial truth missing`);
+  assert(/detached signature/i.test(text), `${name}: missing-signature limitation is not disclosed`);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  assert(overflow <= 2, `${name}: horizontal overflow ${overflow}px`);
+
+  console.log(`PASS ${name}`);
+  await context.close();
+}
+
+async function assertAndroidStatus(browser, viewport, name) {
+  const context = await browser.newContext({ viewport, locale: 'hu-HU' });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(origin + '/scifi-ui/android/?lang=hu', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(200);
 
   assert(errors.length === 0, `${name}: page errors: ${errors.join(' | ')}`);
@@ -147,9 +171,10 @@ async function assertAndroidStatus(browser, viewport, name) {
   const button = page.locator('#languageButton');
   assert(await button.count() === 1, `${name}: language button missing`);
   const before = await page.locator('html').getAttribute('lang');
+  assert(before === 'hu', `${name}: explicit Hungarian query language was not applied`);
   await button.click();
   await page.waitForFunction(previous => document.documentElement.lang !== previous, before, { timeout: 5000 });
-  assert(await page.locator('html').getAttribute('lang') === 'en', `${name}: English language switch failed`);
+  assert(await page.locator('html').getAttribute('lang') === 'en', `${name}: HU to EN language switch failed`);
 
   console.log(`PASS ${name}`);
   await context.close();
@@ -166,9 +191,11 @@ async function assertAndroidStatus(browser, viewport, name) {
     }
     await assertKnownIssues(browser, { width: 1440, height: 900 }, 'known-issues-filter-desktop');
     await assertKnownIssues(browser, { width: 390, height: 844 }, 'known-issues-filter-mobile');
+    await assertTechnicalReport(browser, { width: 1440, height: 900 }, 'technical-report-truth-desktop');
+    await assertTechnicalReport(browser, { width: 390, height: 844 }, 'technical-report-truth-mobile');
     await assertAndroidStatus(browser, { width: 1440, height: 900 }, 'android-status-desktop');
     await assertAndroidStatus(browser, { width: 390, height: 844 }, 'android-status-mobile');
-    console.log('PASS: public shell, technical report, Android status, skip navigation, language control, known-issues filters and responsive layouts are valid.');
+    console.log('PASS: public shell, technical report truth, Android status, skip navigation, language control, known-issues filters and responsive layouts are valid.');
   } finally {
     await browser.close();
   }
