@@ -1,52 +1,33 @@
 'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'../..');
+const read=file=>fs.readFileSync(path.join(root,file),'utf8');
+const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
+const runtime=read('docs/scifi-ui/scripts/formatx-reference-lock-v30.js');
+const premium=read('docs/scifi-ui/scripts/formatx-premium-finish.js');
+const style=read('docs/scifi-ui/styles/formatx-reference-lock-v30.css');
+const homepage=read('docs/scifi-ui/index.html');
 
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
+assert.match(bootstrap,/reference-lock-v30/,'v30 production bootstrap missing');
+assert.match(bootstrap,/fxCoreReal3d='ready-v20'/,'bootstrap must reserve single-renderer ownership before async load');
+assert.match(runtime,/const STARTUP_REVISION='v22-mobile-safe'/,'mobile-safe startup compatibility marker missing');
+assert.match(runtime,/powerPreference:mobile\?'default':'high-performance'/,'mobile must request default power preference');
+assert.match(runtime,/webglcontextcreationerror/,'context creation error reporting missing');
+assert.match(runtime,/webglcontextlost/,'context loss handling missing');
+assert.match(runtime,/fxCoreReal3dStartup='ready-'\+STARTUP_REVISION/,'startup ready marker missing');
+assert.match(runtime,/const mobile=coarse\.matches\|\|innerWidth\/Math\.max\(1,innerHeight\)<1\.08/,'portrait/mobile detection missing');
+assert.match(runtime,/mobile\?1\.35:1\.65/,'bounded DPR policy missing');
+assert.match(runtime,/mobile\?1450000:2350000/,'pixel budget policy missing');
+assert.match(runtime,/Math\.min\(1,Math\.sqrt\(budget\/\(w\*h\*d\*d\)\)\)/,'pixel-budget scaling missing');
+assert.match(runtime,/adaptive-60-plus-fps/,'adaptive 60+ FPS target missing');
+assert.equal((runtime.match(/getContext\('webgl2'/g)||[]).length,1,'reference lock must create exactly one WebGL2 context');
+assert.doesNotMatch(runtime,/desynchronized\s*:/,'desynchronized context mode remains forbidden on mobile');
+assert.match(premium,/if \(document\.querySelector\('script\[data-fx-core-real3d="true"\]'\)\) return 'webgl2-pending'/,'dedicated renderer must bypass extra preflight contexts');
+assert.match(premium,/addEventListener\('formatx:core3dfallback', handleCoreFallback\)/,'GPU failure must activate resilient fallback');
+assert.match(style,/pointer-events:none/,'reference GPU stage must never capture touch input');
+assert.match(style,/--fx-core-x:50%/,'portrait composition must be centered like the uploaded reference');
+assert.ok(homepage.includes('formatx-core-real3d-v20.js?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11'),'stable compatibility bootstrap URL missing from homepage');
 
-const root = path.resolve(__dirname, '../..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
-const runtime = read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
-const premium = read('docs/scifi-ui/scripts/formatx-premium-finish.js');
-const style = read('docs/scifi-ui/styles/formatx-core-real3d-v20.css');
-const homepage = read('docs/scifi-ui/index.html');
-const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
-
-for (const token of [
-  "const STARTUP_REVISION = 'v22-mobile-safe'",
-  'function acquireContext(attributes, profile)',
-  "const primaryProfile = coarse.matches ? 'mobile-default' : 'desktop-high-performance'",
-  "powerPreference: coarse.matches ? 'default' : 'high-performance'",
-  "}, 'safe-retry')",
-  "emitCoreFallback('context-unavailable'",
-  "addEventListener('webglcontextcreationerror'",
-  "addEventListener('webglcontextlost'",
-  "addEventListener('webglcontextrestored'",
-  "root.dataset.fxCoreReal3dStartup = 'ready-' + STARTUP_REVISION",
-  "const VISUAL_REVISION = 'v24-volumetric-crystal'",
-  'root.dataset.fxCoreVisualRevision = VISUAL_REVISION',
-  'p = .68',
-  'scaling(scaleX,scaleY,scaleY)',
-  "root.dataset.fxCoreContextPolicy = mobile ? 'mobile-default-no-probe' : 'desktop-high-performance-no-probe'"
-]) assert.ok(runtime.includes(token), `mobile-safe real3D startup contract missing: ${token}`);
-
-assert.equal((runtime.match(/getContext\('webgl2'/g) || []).length, 1, 'active engine source must have one WebGL2 acquisition site');
-assert.doesNotMatch(runtime, /desynchronized\s*:/, 'desynchronized context mode is forbidden for the mobile-safe startup');
-assert.match(premium, /if \(document\.querySelector\('script\[data-fx-core-real3d="true"\]'\)\) return 'webgl2-pending'/, 'dedicated engine must bypass the preflight probe context');
-assert.match(premium, /addEventListener\('formatx:core3dfallback', handleCoreFallback\)/, 'GPU failure must activate the resilient fallback without exposing the legacy oval');
-assert.match(style, /data-fx-core-real3d="context-unavailable"[\s\S]{0,700}#hero \.hero-ring/, 'legacy oval must be hidden when WebGL2 cannot start');
-assert.ok(homepage.includes('v=20260809-real3d-v24-volumetric-crystal-r3'), 'v24 r3 visual cache revision is not bootstrapped');
-
-const quality = contract.quality_contract;
-assert.equal(quality.mag_startup_revision, 'v22-mobile-safe');
-assert.equal(quality.mag_preflight_probe_context_count, 0);
-assert.equal(quality.mag_mobile_context_power_preference, 'default');
-assert.equal(quality.mag_desynchronized_context, false);
-assert.equal(quality.mag_reference_pnorm_exponent, 0.68);
-assert.equal(quality.mag_mobile_geometric_scale_x, 0.88);
-assert.equal(quality.mag_mobile_geometric_scale_yz, 0.94);
-assert.equal(quality.mag_mobile_dpr_cap_high, 1.45);
-assert.equal(quality.mag_webgl_context_count, 1);
-assert.equal(quality.mag_frame_rate_target, '60-plus-display-refresh-uncapped');
-
-console.log('PASS: real3D v22 mobile startup uses no probe context, safe Android context attributes, one active WebGL2 acquisition site and bounded recovery.');
+console.log('PASS: reference-lock v30 keeps the mobile-safe single-WebGL2 startup contract, centered portrait geometry, bounded DPR/pixel budget and resilient fallback.');
