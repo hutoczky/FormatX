@@ -33,8 +33,10 @@ assert.ok(homepage.includes('formatx-core-real3d-v20.js'),'homepage real3D boots
 assert.match(style,/pointer-events:none/,'stage must not intercept input');
 assert.match(style,/100dvh/,'dynamic viewport sizing missing');
 assert.match(style,/--fx-core-x:50%/,'portrait reference centering missing');
+assert.match(style,/40\.2%/,'reference core/horizon vertical alignment missing');
+assert.match(style,/top:47\.5%/,'reference perspective floor start missing');
 assert.match(style,/perspective\(560px\) rotateX\(63deg\)/,'reference floor perspective missing');
-assert.match(style,/saturate\(1\.42\) contrast\(1\.06\) brightness\(1\.24\)/,'reference spectral grade missing');
+assert.match(style,/saturate\(1\.25\) contrast\(1\.16\) brightness\(2\.60\)/,'reference luminance calibration missing');
 const q=contract.quality_contract;
 assert.equal(q.mag_image_backed,false);assert.equal(q.mag_webgl_context_count,1);assert.equal(q.mag_paused_outside_hero,true);assert.equal(q.mag_reference_target,'four-tip-luminous-crystal-sci-fi-film-core');
-console.log('PASS: glass-dominant sparse-vein reference MAG r4 uses one indexed WebGL2 context, real translucent surfaces, thin 3D reactor rings and no raster substitute.');
+console.log('PASS: reference MAG uses one indexed WebGL2 context, glass-dominant sparse veins, calibrated 40.2% horizon and reference luminance grade.');
