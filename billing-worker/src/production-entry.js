@@ -27,6 +27,10 @@ const REFERENCE_CORE_ASSETS = [
   '  <link rel="stylesheet" data-fx-reference-core-v26="true" href="/scifi-ui/styles/formatx-reference-core-v26.css?v=20260809-reference-crystal-v26-1">',
   '  <script defer data-fx-reference-core-v26="true" src="/scifi-ui/scripts/formatx-reference-core-v26.js?v=20260809-reference-crystal-v26-1"></script>',
 ].join('\n') + '\n';
+const CINEMATIC_CORE_ASSETS = [
+  '  <link rel="stylesheet" data-fx-cinematic-core-v27="true" href="/scifi-ui/styles/formatx-cinematic-core-v27.css?v=20260809-cinematic-core-v27-1">',
+  '  <script defer data-fx-cinematic-core-v27="true" src="/scifi-ui/scripts/formatx-cinematic-core-v27.js?v=20260809-cinematic-core-v27-1"></script>',
+].join('\n') + '\n';
 const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260729-single-language-3">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260729-single-language-2"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
 const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
 const STATUS_ASSETS = '  <link rel="stylesheet" data-fx-platform-status-style="true" href="/scifi-ui/styles/platform-status.css?v=20260730-platform-status-2">\n  <script defer src="/scifi-ui/scripts/platform-status.js?v=20260730-platform-status-2"></script>\n';
@@ -45,6 +49,8 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/styles/formatx-mobile-apex-composition.css',
   '/scifi-ui/scripts/formatx-reference-core-v26.js',
   '/scifi-ui/styles/formatx-reference-core-v26.css',
+  '/scifi-ui/scripts/formatx-cinematic-core-v27.js',
+  '/scifi-ui/styles/formatx-cinematic-core-v27.css',
   '/scifi-ui/scripts/formatx-event-horizon.js',
   '/scifi-ui/scripts/formatx-mobile-recovery.js',
   '/scifi-ui/scripts/living-architecture.js',
@@ -160,6 +166,9 @@ async function applyStartupSafety(request, url, response) {
     }
     if (!html.includes('data-fx-reference-core-v26')) {
       html = html.replace('</head>', REFERENCE_CORE_ASSETS + '</head>');
+    }
+    if (!html.includes('data-fx-cinematic-core-v27')) {
+      html = html.replace('</head>', CINEMATIC_CORE_ASSETS + '</head>');
     }
   }
   if (!html.includes('data-fx-single-language-style')) {
