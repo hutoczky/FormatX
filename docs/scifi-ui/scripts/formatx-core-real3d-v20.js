@@ -5,6 +5,7 @@
   const VERSION = 'v21';
   const STARTUP_REVISION = 'v22-mobile-safe';
   const VISUAL_REVISION = 'v24-volumetric-crystal';
+  const REFERENCE_REVISION = 'v25-living-glass-moving-core';
   const RECOVERY_KEY = 'formatx-real3d-v22-recovery';
   function emitCoreFallback(reason, message) {
     root.dataset.fxCoreReal3d = reason;
@@ -122,11 +123,20 @@
     layout(location=0) in vec3 aPosition;
     layout(location=1) in vec3 aNormal;
     uniform mat4 uProjection; uniform mat4 uView; uniform mat4 uModel;
+    uniform float uTime; uniform float uMaterial;
     out vec3 vWorld; out vec3 vNormal; out vec3 vObject;
     void main(){
-      vec4 world=uModel*vec4(aPosition,1.0);
+      vec3 position=aPosition;
+      if(uMaterial<.5){
+        float radial=length(position.xy);
+        float angle=atan(position.y,position.x);
+        float envelope=sin(clamp(radial,0.0,1.0)*3.14159265);
+        position.z+=sin(angle*4.0+radial*11.0-uTime*.11)*.011*envelope;
+        position.xy+=vec2(cos(angle*3.0-uTime*.07),sin(angle*5.0+uTime*.06))*.0035*envelope;
+      }
+      vec4 world=uModel*vec4(position,1.0);
       vWorld=world.xyz;
-      vObject=aPosition;
+      vObject=position;
       vNormal=normalize(transpose(inverse(mat3(uModel)))*aNormal);
       gl_Position=uProjection*uView*world;
     }`;
@@ -140,6 +150,7 @@
     float sat(float value){return clamp(value,0.0,1.0);}
     float band(float value,float center,float width){return exp(-abs(value-center)/max(.0001,width));}
     float fifth(float value){float squared=value*value;return squared*squared*value;}
+    float filament(float value,float width){return pow(max(0.0,1.0-abs(sin(value))),width);}
     vec3 environmentRadiance(vec3 direction){
       vec3 ray=normalize(direction);
       float horizon=fifth(1.0-abs(ray.y));
@@ -156,7 +167,7 @@
       vec3 smoothNormal=normalize(vNormal);
       vec3 faceNormal=normalize(cross(dFdx(vWorld),dFdy(vWorld)));
       if(!gl_FrontFacing)faceNormal=-faceNormal;
-      vec3 normal=normalize(mix(smoothNormal,faceNormal,.58));
+      vec3 normal=normalize(mix(smoothNormal,faceNormal,.34));
       float ndv=sat(abs(dot(normal,viewDir)));
       float fresnel=.04+.96*fifth(1.0-ndv);
       vec3 lightA=normalize(vec3(-.38,.82,.56));
@@ -176,11 +187,21 @@
       float violetArc=pow(.5+.5*cos(polar*4.0-radial*10.0+uTime*.10),18.0)*smoothstep(.18,.54,radial)*(1.0-smoothstep(.58,.88,radial));
       float caustic=pow(abs(sin(vObject.x*13.0-vObject.y*9.0+normal.z*3.0+uLayer)),28.0);
       float facet=pow(sat(abs(dot(faceNormal,lightA))),4.0);
+      float flowA=filament(polar*3.0+diamond*27.0+sin(polar*5.0)*.72-uTime*.055,14.0);
+      float flowB=filament(polar*5.0-diamond*33.0+sin(polar*3.0+uLayer)*.90+uTime*.043,18.0);
+      float flowC=filament((p.x*.72+p.y)*34.0+sin(p.y*12.0-uTime*.09)*1.10,22.0);
+      float livingVeins=(flowA*.72+flowB*.55+flowC*.34)*smoothstep(.10,.28,radial)*(1.0-smoothstep(.82,1.02,diamond));
+      float innerHalo=band(radial,.20,.034)+band(radial,.29,.026)*.74+band(radial,.39,.022)*.52;
+      float sideSpectrum=pow(.5+.5*sin(polar*7.0+radial*13.0-uTime*.20),6.0)*smoothstep(.16,.72,abs(p.x))*(1.0-smoothstep(.78,1.02,diamond));
+      float starGlint=pow(sat(specA+specB*.62+caustic*.30),5.0);
+      float volumeField=pow(sat(1.0-diamond),1.34)*(.46+.54*(1.0-ndv));
+      float sailField=(1.0-smoothstep(.10,1.02,diamond))*(.38+.62*(1.0-ndv));
+      float coreVeil=exp(-radial*radial*72.0)*smoothstep(.12,.36,vObject.z);
       float pulse=.5+.5*sin(uTime*1.48);
       float activity=sat(uEnergy*.72+uSurge*.52+uSpeech*.34);
-      vec3 cyan=vec3(.01,.66,1.42);
-      vec3 electric=vec3(.02,.24,.96);
-      vec3 violet=vec3(.74,.045,1.30);
+      vec3 cyan=vec3(.005,.57,1.52);
+      vec3 electric=vec3(.008,.19,1.18);
+      vec3 violet=vec3(.68,.035,1.34);
       if(uMaterial<.5){
         vec3 incident=-viewDir;
         vec3 reflected=environmentRadiance(reflect(incident,normal));
@@ -198,11 +219,16 @@
         glass+=vec3(.006,.070,.190)*(1.0-fresnel);
         glass+=mix(electric,cyan,sat(.14+spectral*.34+normal.y*.12))*(.10+.18*(1.0-absorption.r));
         glass=mix(glass,glass+violet*.36,sat((1.0-spectral)*.18+violetArc*.38+normal.x*.06));
-        vec3 emission=cyan*(membrane*.58+reactorRings*.70+axisX*.24+axisY*.22+diagonal*.14);
-        emission+=violet*(violetArc*.88+membrane*.20+diagonal*.18);
-        emission+=vec3(.18,.78,1.44)*(specA*2.38+specB*1.24+caustic*.52);
-        vec3 color=(glass*(.82+body+.14*spectral)+emission)*1.44;
-        float alpha=uOpacity*(.24+.58*fresnel+.15*facet+.15*membrane+.18*reactorRings+.18*(1.0-absorption.r)+.05*activity);
+        glass+=mix(electric,cyan,.62)*volumeField*.34;
+        glass+=mix(electric,cyan,spectral)*sailField*.23;
+        vec3 emission=cyan*(membrane*.48+reactorRings*.62+innerHalo*.48+axisX*.19+axisY*.18+diagonal*.12+livingVeins*.74);
+        emission+=violet*(violetArc*.96+membrane*.18+diagonal*.17+flowB*.46+livingVeins*.22+sideSpectrum*.72);
+        emission+=mix(electric,cyan,.68)*volumeField*(.38+.15*activity);
+        emission+=mix(electric,cyan,.54)*sailField*(.15+.06*activity);
+        emission+=cyan*coreVeil*.10;
+        emission+=vec3(.18,.82,1.62)*(specA*2.62+specB*1.34+caustic*.56+starGlint*.72);
+        vec3 color=(glass*(.78+body+.13*spectral)+emission)*1.50;
+        float alpha=uOpacity*(.22+.56*fresnel+.13*facet+.13*membrane+.15*reactorRings+.13*livingVeins+.035*sideSpectrum+.08*volumeField+.045*sailField+.11*coreVeil+.17*(1.0-absorption.r)+.045*activity);
         fragColor=vec4(color,alpha);
       }else if(uMaterial<1.5){
         float center=pow(ndv,1.55);
@@ -221,9 +247,11 @@
         float railGlint=filamentMask*pow(.5+.5*cos((vObject.x*1.14+vObject.y)*52.0),8.0);
         ring+=vec3(.025,.58,1.45)*(.27+edgeSpec*.90);
         ring+=vec3(.46,.98,1.30)*edgeSpec*1.15;
-        ring+=vec3(.42,1.42,1.82)*railGlint*2.20;
-        ring*=1.34+activity*.55+pulse*.09;
-        float compensatedAlpha=mix(.82,.62,smoothstep(.52,.80,uRenderScale));
+        float travellingSpark=pow(.5+.5*cos((vObject.x-vObject.y*.64)*41.0-uTime*.42+uLayer*2.0),24.0);
+        ring+=vec3(.42,1.42,1.82)*railGlint*2.26;
+        ring+=mix(cyan,violet,.38)*travellingSpark*(.32+.42*activity);
+        ring*=1.38+activity*.57+pulse*.09;
+        float compensatedAlpha=mix(.74,.54,smoothstep(.52,.80,uRenderScale));
         float ringAlpha=.52+.38*fresnel+.14*activity;
         ringAlpha=max(ringAlpha,compensatedAlpha*filamentMask);
         fragColor=vec4(ring,uOpacity*ringAlpha);
@@ -237,10 +265,10 @@
     void main(){fragColor=vec4(uColor*(.72+uEnergy*.58),uOpacity);}`;
   const POINT_VERTEX = `#version 300 es
     precision highp float; layout(location=0) in vec3 aPosition; uniform mat4 uProjection; uniform mat4 uView; uniform mat4 uModel; uniform float uTime; uniform float uDpr; out float vPulse;
-    void main(){float phase=float(gl_VertexID)*1.618; vec3 point=aPosition; point.z+=sin(uTime*.24+phase)*.055; gl_Position=uProjection*uView*uModel*vec4(point,1.0); vPulse=.55+.45*sin(uTime*.52+phase*2.1); gl_PointSize=(1.1+vPulse*1.7)*uDpr;}`;
+    void main(){float phase=float(gl_VertexID)*1.618; vec3 point=aPosition; point.x+=sin(uTime*.11+phase)*.018; point.y+=cos(uTime*.09+phase*1.37)*.022; point.z+=sin(uTime*.24+phase)*.070; gl_Position=uProjection*uView*uModel*vec4(point,1.0); vPulse=.55+.45*sin(uTime*.52+phase*2.1); gl_PointSize=(.95+vPulse*1.85)*uDpr;}`;
   const POINT_FRAGMENT = `#version 300 es
     precision highp float; in float vPulse; out vec4 fragColor;
-    void main(){vec2 p=gl_PointCoord-.5; float glow=smoothstep(.5,0.0,length(p)); if(glow<=.01)discard; fragColor=vec4(mix(vec3(.03,.46,1.0),vec3(.68,.08,1.08),vPulse),glow*glow*.48);}`;
+    void main(){vec2 p=gl_PointCoord-.5; float glow=smoothstep(.5,.02,length(p)); if(glow<=.01)discard; vec3 dust=mix(vec3(.015,.40,1.22),vec3(.72,.035,1.24),vPulse); fragColor=vec4(dust*(.72+vPulse*.58),glow*glow*(.34+vPulse*.24));}`;
   const POST_VERTEX = `#version 300 es
     precision highp float;
     out vec2 vUv;
@@ -284,11 +312,19 @@
     void main(){
       vec4 scene=texture(uScene,vUv);
       vec3 bloom=texture(uBloom,vUv).rgb;
-      vec3 color=scene.rgb+bloom*(1.76+uEnergy*.46);
-      color=vec3(1.0)-exp(-color*(1.34+uEnergy*.13));
+      float bloomPeak=max(max(bloom.r,bloom.g),bloom.b);
+      float violetMix=clamp(abs(vUv.x-.5)*1.38+(.5+.5*sin((vUv.x-.5)*11.0+(vUv.y-.43)*7.0))*.18,0.0,1.0);
+      vec3 bloomTint=mix(vec3(.025,.70,1.30),vec3(.86,.035,1.24),violetMix*.82);
+      bloom=mix(bloom,bloomPeak*bloomTint,.72);
+      vec3 color=scene.rgb+bloom*(3.75+uEnergy*.85);
+      color=vec3(1.0)-exp(-color*(2.00+uEnergy*.21));
       color=pow(max(color,vec3(0.0)),vec3(.92));
       float luminance=dot(color,vec3(.2126,.7152,.0722));
-      color=max(vec3(0.0),mix(vec3(luminance),color,1.80));
+      color=max(vec3(0.0),mix(vec3(luminance),color,1.90));
+      float highlightPeak=max(max(color.r,color.g),color.b);
+      color=min(vec3(1.0),color*(1.0+.22*highlightPeak*highlightPeak));
+      float finalLuminance=dot(color,vec3(.2126,.7152,.0722));
+      color=min(vec3(1.0),max(vec3(0.0),mix(vec3(finalLuminance),color,2.55)));
       float aura=max(max(bloom.r,bloom.g),bloom.b);
       fragColor=vec4(color,clamp(scene.a+aura*.36,0.0,1.0));
     }`;
@@ -395,33 +431,51 @@
     }
     const outer = [];
     for (let segment = 0; segment < angularSegments; segment += 1) outer.push([...crystalSurfacePoint(segment / angularSegments * Math.PI * 2, 1, .008), 1]);
-    addTube(outer, true, .0125);
-    for (const contour of [.43, .68]) {
-      const path = [], segments = Math.round(angularSegments * .72);
-      for (let segment = 0; segment < segments; segment += 1) path.push([...crystalSurfacePoint(segment / segments * Math.PI * 2, contour, .010), .72]);
-      addTube(path, true, .0105);
+    addTube(outer, true, .0090);
+    for (const contour of [.54, .82]) {
+      const path = [], segments = Math.round(angularSegments * (contour < .4 ? .52 : .72));
+      for (let segment = 0; segment < segments; segment += 1) {
+        const angle = segment / segments * Math.PI * 2;
+        const ripple = Math.sin(angle * (contour < .4 ? 5 : 3) + contour * 11) * .014;
+        path.push([...crystalSurfacePoint(angle, contour + ripple, .009 + Math.sin(angle * 4) * .004), .58]);
+      }
+      addTube(path, true, contour < .4 ? .0062 : .0072);
     }
-    for (let spoke = 0; spoke < 8; spoke += 1) {
-      const cardinal = spoke % 2 === 0, end = cardinal ? 1 : .78, samples = cardinal ? 18 : 13, path = [];
+    for (let spoke = 0; spoke < 14; spoke += 1) {
+      const cardinal = spoke % 7 === 0 || spoke % 7 === 3, end = cardinal ? 1 : .82 + (spoke % 3) * .055, samples = cardinal ? 22 : 16, path = [];
       for (let sample = 0; sample < samples; sample += 1) {
         const t = .055 + (end - .055) * sample / (samples - 1);
-        path.push([...crystalSurfacePoint(spoke * Math.PI / 4, t, .012), cardinal ? 1.10 - t * .24 : .58]);
+        const baseAngle = spoke * Math.PI * 2 / 14;
+        const curl = Math.sin(Math.PI * t) * (spoke % 2 ? .31 : -.27) + Math.sin(t * 8 + spoke) * .055 * (1 - t * .42);
+        path.push([...crystalSurfacePoint(baseAngle + curl, t, .011 + Math.sin(t * 10 + spoke) * .004), cardinal ? 1.02 - t * .22 : .46]);
       }
-      addTube(path, false, cardinal ? .0125 : .0100);
+      addTube(path, false, cardinal ? .0082 : .0060);
+    }
+    for (let branch = 0; branch < 6; branch += 1) {
+      const path = [], samples = 19, direction = branch % 2 ? 1 : -1;
+      for (let sample = 0; sample < samples; sample += 1) {
+        const progress = sample / (samples - 1);
+        const t = .24 + progress * (.56 + (branch % 3) * .055);
+        const baseAngle = branch * Math.PI / 3 + .24;
+        const angle = baseAngle + direction * (progress * .76 + Math.sin(progress * Math.PI) * .19);
+        const lift = .014 + Math.sin(progress * Math.PI * 3 + branch) * .006;
+        path.push([...crystalSurfacePoint(angle, t, lift), .42 + Math.sin(progress * Math.PI) * .18]);
+      }
+      addTube(path, false, .0054);
     }
     return { positions: new Float32Array(positions), normals: new Float32Array(normals), indices: new Uint16Array(indices) };
   }
   function boxGeometry() { const positions = [], normals = [], indices = []; const faces = [[[ -1,-1,1],[1,-1,1],[1,1,1],[-1,1,1],[0,0,1]],[[1,-1,-1],[-1,-1,-1],[-1,1,-1],[1,1,-1],[0,0,-1]],[[1,-1,1],[1,-1,-1],[1,1,-1],[1,1,1],[1,0,0]],[[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1],[-1,0,0]],[[-1,1,1],[1,1,1],[1,1,-1],[-1,1,-1],[0,1,0]],[[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1],[0,-1,0]]]; for (const face of faces) { const start = positions.length / 3; for (let index = 0; index < 4; index += 1) { positions.push(...face[index]); normals.push(...face[4]); } indices.push(start, start + 1, start + 2, start, start + 2, start + 3); } return { positions: new Float32Array(positions), normals: new Float32Array(normals), indices: new Uint16Array(indices) }; }
-  function particleGeometry(count) { const positions = new Float32Array(count * 3); for (let index = 0; index < count; index += 1) { const angle = index * 2.399963, radius = .72 + (index % 17) / 17; positions[index * 3] = Math.cos(angle) * radius * 1.08; positions[index * 3 + 1] = Math.sin(angle) * radius * 1.22; positions[index * 3 + 2] = -.28 + (index % 11) / 11 * .48; } return positions; }
+  function particleGeometry(count) { const positions = new Float32Array(count * 3); for (let index = 0; index < count; index += 1) { const angle = index * 2.399963 + Math.sin(index * 1.73) * .22, radius = .36 + (index % 29) / 29 * 1.36; positions[index * 3] = Math.cos(angle) * radius * 1.18; positions[index * 3 + 1] = Math.sin(angle) * radius * 1.16; positions[index * 3 + 2] = -.42 + ((index * 7) % 31) / 31 * .84; } return positions; }
   function uploadMesh(geometry) { const vao = gl.createVertexArray(); gl.bindVertexArray(vao); const position = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, position); gl.bufferData(gl.ARRAY_BUFFER, geometry.positions, gl.STATIC_DRAW); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); const normal = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, normal); gl.bufferData(gl.ARRAY_BUFFER, geometry.normals, gl.STATIC_DRAW); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0); const index = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, geometry.indices, gl.STATIC_DRAW); let lineIndex = null; if (geometry.lineIndices?.length) { lineIndex = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lineIndex); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, geometry.lineIndices, gl.STATIC_DRAW); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index); } gl.bindVertexArray(null); return { vao, position, normal, index, lineIndex, count: geometry.indices.length, lineCount: geometry.lineIndices?.length || 0 }; }
   function uploadParticles(positions) { const vao = gl.createVertexArray(), buffer = gl.createBuffer(); gl.bindVertexArray(vao); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.bindVertexArray(null); return { vao, buffer, count: positions.length / 3 }; }
 
-  const star = uploadMesh(starGeometry(mobile ? 76 : 104, mobile ? 12 : 14));
+  const star = uploadMesh(starGeometry(mobile ? 96 : 128, mobile ? 16 : 18));
   const sphere = uploadMesh(sphereGeometry(mobile ? 26 : 36, mobile ? 18 : 24));
   const torus = uploadMesh(torusGeometry(mobile ? 44 : 64, mobile ? 7 : 10, .43, .0145));
-  const filaments = uploadMesh(crystalFilamentGeometry(mobile ? 64 : 88, mobile ? 6 : 7));
+  const filaments = uploadMesh(crystalFilamentGeometry(mobile ? 80 : 112, mobile ? 5 : 7));
   const beam = uploadMesh(boxGeometry());
-  const particles = uploadParticles(particleGeometry(mobile ? 64 : 112));
+  const particles = uploadParticles(particleGeometry(mobile ? 128 : 196));
   const meshUniforms = Object.fromEntries(['uProjection','uView','uModel','uCamera','uTime','uEnergy','uSurge','uSpeech','uOpacity','uMaterial','uLayer','uRenderScale'].map(name => [name, gl.getUniformLocation(meshProgram, name)]));
   const lineUniforms = Object.fromEntries(['uProjection','uView','uModel','uColor','uOpacity','uEnergy'].map(name => [name, gl.getUniformLocation(lineProgram, name)]));
   const pointUniforms = Object.fromEntries(['uProjection','uView','uModel','uTime','uDpr'].map(name => [name, gl.getUniformLocation(pointProgram, name)]));
@@ -473,7 +527,7 @@
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
     gl.bindTexture(gl.TEXTURE_2D, null);
   }
-  const cinematic = { version:'film-reactive-v1', energy:.34, targetEnergy:.34, surge:0, speech:0, heart:0, pulse:1, rotation:[0,0,0] };
+  const cinematic = { version:'film-reactive-v1', energy:.34, targetEnergy:.34, surge:0, speech:0, heart:0, pulse:1, rotation:[0,0,0], corePosition:[0,0,-.07] };
   window.FormatXCoreCinematic = cinematic;
   function wake(energy, surge, speech) { cinematic.energy = Math.max(cinematic.energy, energy); cinematic.targetEnergy = Math.max(cinematic.targetEnergy, energy); cinematic.surge = Math.max(cinematic.surge, surge); if (typeof speech === 'number') cinematic.speech = speech; root.dataset.fxCoreCinematicImmediate = 'frame-rate-independent-v1'; ensureRunning(); }
   addEventListener('formatx:organismcoreactivate', () => wake(.78,.68)); addEventListener('formatx:organismresponse', () => wake(.82,.72)); addEventListener('formatx:organismspeechstart', () => wake(.86,.64,1)); addEventListener('formatx:organismspeechend', () => { cinematic.speech = 0; cinematic.targetEnergy = .42; }); addEventListener('formatx:immersiveactivate', () => wake(.72,.52));
@@ -481,9 +535,9 @@
   const mobileCores = Number(navigator.hardwareConcurrency || 4), mobileMemory = Number(navigator.deviceMemory || 4);
   const highMobile = mobile && (mobileCores >= 6 || mobileMemory >= 6);
   let cssWidth=0, cssHeight=0, bufferWidth=0, bufferHeight=0, renderScale=mobile?(highMobile?.90:.76):.88, projection=identity();
-  const view=translation(0,0,-4.35), camera=[0,0,4.35]; let raf=0, transferResumeRaf=0, started=performance.now(), lastTime=started, sampleStarted=started, sampleFrames=0, introComplete=root.classList.contains('fx-intro-complete'), heroVisible=true, pointerX=0, pointerY=0;
+  const view=translation(0,0,-4.35), camera=[0,0,4.35]; let raf=0, transferResumeRaf=0, started=performance.now(), lastTime=started, sampleStarted=started, sampleFrames=0, introComplete=root.classList.contains('fx-intro-complete'), heroVisible=true, pointerX=0, pointerY=0, pointerTargetX=0, pointerTargetY=0, pointerStrength=0;
   function resize(force) { const nextWidth=Math.max(1,innerWidth), nextHeight=Math.max(1,innerHeight), dprCap=mobile?(highMobile?1.45:1.12):1.35, dpr=Math.min(devicePixelRatio||1,dprCap); let width=Math.round(nextWidth*dpr*renderScale), height=Math.round(nextHeight*dpr*renderScale); const pixelBudget=mobile?(highMobile?1450000:950000):2050000, budgetScale=Math.min(1,Math.sqrt(pixelBudget/Math.max(1,width*height))); width=Math.max(2,Math.round(width*budgetScale)); height=Math.max(2,Math.round(height*budgetScale)); if(!force&&nextWidth===cssWidth&&nextHeight===cssHeight&&width===bufferWidth&&height===bufferHeight)return; cssWidth=nextWidth;cssHeight=nextHeight;bufferWidth=width;bufferHeight=height;canvas.width=width;canvas.height=height;resizePostTargets(width,height);gl.viewport(0,0,width,height);projection=perspective((mobile?50:42)*Math.PI/180,nextWidth/nextHeight,.1,20);root.dataset.fxCoreReal3dResolution=width+'x'+height;root.dataset.fxCoreReal3dScale=renderScale.toFixed(2);root.dataset.fxCoreMobileQuality=mobile?(highMobile?'high-adaptive-bloom':'efficient-adaptive-bloom'):'desktop-adaptive-bloom'; }
-  function baseModel(time,pulse) { const x=mobile?0:.84, y=mobile?.40:.01, pointerFactor=mobile||reduced.matches?0:1, rx=(reduced.matches?.035:.055+Math.sin(time*.17)*.035)+pointerY*.11*pointerFactor, ry=(reduced.matches?-.095:-.115+Math.sin(time*.21)*.060)+pointerX*.15*pointerFactor, rz=reduced.matches?0:Math.sin(time*.13)*.014, scaleX=(mobile?.88:1.14)*pulse, scaleY=(mobile?.94:1.14)*pulse; cinematic.rotation=[rx,ry,rz]; return compose([translation(x,y,0),rotationX(rx),rotationY(ry),rotationZ(rz),scaling(scaleX,scaleY,scaleY)]); }
+  function baseModel(time,pulse) { const x=mobile?0:.84, y=mobile?.40:.01, pointerFactor=reduced.matches?0:(mobile?.34:1), rx=(reduced.matches?.035:.055+Math.sin(time*.17)*.035)+pointerY*.11*pointerFactor, ry=(reduced.matches?-.095:-.115+Math.sin(time*.21)*.060)+pointerX*.15*pointerFactor, rz=reduced.matches?0:Math.sin(time*.13)*.014+pointerX*pointerY*.018*pointerFactor, scaleX=(mobile?.88:1.14)*pulse, scaleY=(mobile?.94:1.14)*pulse; cinematic.rotation=[rx,ry,rz]; return compose([translation(x,y,0),rotationX(rx),rotationY(ry),rotationZ(rz),scaling(scaleX,scaleY,scaleY)]); }
   function bindCommon(programObject,uniforms,model,time){gl.useProgram(programObject);gl.uniformMatrix4fv(uniforms.uProjection,false,projection);gl.uniformMatrix4fv(uniforms.uView,false,view);gl.uniformMatrix4fv(uniforms.uModel,false,model);if(uniforms.uCamera)gl.uniform3f(uniforms.uCamera,camera[0],camera[1],camera[2]);if(uniforms.uTime)gl.uniform1f(uniforms.uTime,time);}
   function drawMesh(mesh,model,material,opacity,layer,time){bindCommon(meshProgram,meshUniforms,model,time);gl.uniform1f(meshUniforms.uEnergy,cinematic.energy);gl.uniform1f(meshUniforms.uSurge,cinematic.surge);gl.uniform1f(meshUniforms.uSpeech,cinematic.speech);gl.uniform1f(meshUniforms.uOpacity,opacity);gl.uniform1f(meshUniforms.uMaterial,material);gl.uniform1f(meshUniforms.uLayer,layer);gl.uniform1f(meshUniforms.uRenderScale,renderScale);gl.bindVertexArray(mesh.vao);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.index);gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);}
   function drawLines(mesh,model,color,opacity,time){if(!mesh.lineIndex||!mesh.lineCount)return;bindCommon(lineProgram,lineUniforms,model,time);gl.uniform3f(lineUniforms.uColor,color[0],color[1],color[2]);gl.uniform1f(lineUniforms.uOpacity,opacity);gl.uniform1f(lineUniforms.uEnergy,cinematic.energy+cinematic.surge*.5);gl.bindVertexArray(mesh.vao);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.lineIndex);gl.drawElements(gl.LINES,mesh.lineCount,gl.UNSIGNED_SHORT,0);}
@@ -498,7 +552,7 @@
     gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,bloomTextureB);gl.uniform1i(compositeUniforms.uBloom,1);
     gl.uniform1f(compositeUniforms.uEnergy,cinematic.energy+cinematic.surge*.35);gl.bindVertexArray(postVao);gl.drawArrays(gl.TRIANGLES,0,3);
   }
-  function updateCinematic(delta,time){const heartA=.5+.5*Math.sin(time*1.52),heartB=.5+.5*Math.sin(time*3.04-.72);cinematic.heart=Math.pow(heartA,5)*.72+Math.pow(heartB,9)*.28;cinematic.pulse=1+cinematic.heart*.021+Math.sin(time*.58)*.0035;const rate=1-Math.exp(-delta*2.6);cinematic.energy+=(cinematic.targetEnergy-cinematic.energy)*rate;cinematic.surge*=Math.exp(-delta*.72);cinematic.targetEnergy+=(.34-cinematic.targetEnergy)*(1-Math.exp(-delta*.34));}
+  function updateCinematic(delta,time){const heartA=.5+.5*Math.sin(time*1.52),heartB=.5+.5*Math.sin(time*3.04-.72);cinematic.heart=Math.pow(heartA,5)*.72+Math.pow(heartB,9)*.28;cinematic.pulse=1+cinematic.heart*.021+Math.sin(time*.58)*.0035;const rate=1-Math.exp(-delta*2.6),pointerRate=1-Math.exp(-delta*5.2);cinematic.energy+=(cinematic.targetEnergy-cinematic.energy)*rate;cinematic.surge*=Math.exp(-delta*.72);cinematic.targetEnergy+=(.34-cinematic.targetEnergy)*(1-Math.exp(-delta*.34));pointerX+=(pointerTargetX-pointerX)*pointerRate;pointerY+=(pointerTargetY-pointerY)*pointerRate;pointerStrength*=Math.exp(-delta*.48);}
   function drawFrame(now){
     const delta=Math.min(.05,Math.max(.001,(now-lastTime)/1000));lastTime=now;
     const time=reduced.matches?1.8:(now-started)/1000;
@@ -509,26 +563,37 @@
     gl.enable(gl.BLEND);gl.disable(gl.CULL_FACE);gl.disable(gl.DEPTH_TEST);gl.depthMask(false);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
     drawParticles(base,time);
 
-    const ringPulse=1+cinematic.heart*.026;
+    const ringPulse=1+cinematic.heart*.026, orbitDrive=.72+cinematic.energy*.46+cinematic.surge*.30+pointerStrength*.16;
     const ringModels=[
-      multiply(base,compose([translation(0,0,.015),rotationX(.045),rotationZ(time*.030),scaling(1.08*ringPulse,1.08*ringPulse,1.08*ringPulse)])),
-      multiply(base,compose([translation(0,0,.005),rotationY(.18),rotationX(-.16),rotationZ(-time*.024),scaling(.82,.82,.82)])),
-      multiply(base,compose([translation(0,0,.025),rotationY(-.24),rotationX(.26),rotationZ(time*.020),scaling(.60,.60,.60)])),
-      multiply(base,compose([translation(0,0,.04),rotationX(-.08),rotationZ(-time*.038),scaling(.40,.40,.40)]))
+      multiply(base,compose([translation(0,0,-.025),rotationY(-.10+pointerX*.13),rotationX(.24+pointerY*.12),rotationZ(time*.046*orbitDrive),scaling(1.10*ringPulse,1.10*ringPulse,1.10*ringPulse)])),
+      multiply(base,compose([translation(0,0,.010),rotationY(.32-pointerX*.16),rotationX(-.24+pointerY*.09),rotationZ(-time*.039*orbitDrive),scaling(.84,.84,.84)])),
+      multiply(base,compose([translation(0,0,.035),rotationY(-.38+pointerX*.12),rotationX(.34-pointerY*.11),rotationZ(time*.034*orbitDrive),scaling(.61,.61,.61)])),
+      multiply(base,compose([translation(0,0,.055),rotationY(.16-pointerX*.10),rotationX(-.13-pointerY*.08),rotationZ(-time*.056*orbitDrive),scaling(.42,.42,.42)]))
     ];
-    const halo=multiply(base,scaling(.20,.20,.20));
-    const reactorScale=.052*(1+cinematic.heart*.10),reactor=multiply(base,scaling(reactorScale,reactorScale,reactorScale));
-    const horizontalBeam=multiply(base,scaling(.93,.0028,.006)),verticalBeam=multiply(base,scaling(.0028,1.02,.006));
+    const coreMotion=reduced.matches?[0,0,-.07]:[
+      Math.sin(time*.31)*.050+Math.sin(time*.83)*.012+pointerX*pointerStrength*.018,
+      Math.cos(time*.27)*.038+Math.sin(time*.49)*.010-pointerY*pointerStrength*.014,
+      -.075+Math.sin(time*.19)*.105+Math.cos(time*.43)*.018
+    ];
+    cinematic.corePosition=coreMotion;
+    const coreAnchor=multiply(base,translation(coreMotion[0],coreMotion[1],coreMotion[2]));
+    const halo=multiply(coreAnchor,scaling(.22,.22,.22));
+    const reactorScale=.058*(1+cinematic.heart*.10),reactor=multiply(coreAnchor,scaling(reactorScale,reactorScale,reactorScale));
+    const horizontalBeam=multiply(coreAnchor,scaling(1.18,.0022,.005)),verticalBeam=multiply(coreAnchor,scaling(.0022,1.05,.005));
     const inner=multiply(base,scaling(.69,.69,.69));
+
+    /* Back glass -> internal reactor/orbits -> front glass: the light source stays physically inside the volume. */
     gl.disable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-    gl.cullFace(gl.FRONT);drawMesh(star,inner,0,.40,1,time);gl.cullFace(gl.BACK);drawMesh(star,inner,0,.52,1,time);
-    gl.cullFace(gl.FRONT);drawMesh(star,base,0,.64,0,time);gl.cullFace(gl.BACK);drawMesh(star,base,0,.80,0,time);
+    gl.cullFace(gl.FRONT);drawMesh(star,base,0,.48,0,time);drawMesh(star,inner,0,.32,1,time);
 
     gl.disable(gl.CULL_FACE);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.depthMask(true);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
     drawMesh(torus,ringModels[0],2,.74,0,time);drawMesh(torus,ringModels[1],2,.66,1,time);drawMesh(torus,ringModels[2],2,.58,2,time);drawMesh(torus,ringModels[3],2,.50,3,time);
-    drawMesh(filaments,base,2,.72,.45,time);
-    gl.disable(gl.DEPTH_TEST);gl.depthMask(false);drawMesh(sphere,halo,1,.30,1,time);drawMesh(sphere,reactor,1,.96,0,time);
     drawMesh(beam,horizontalBeam,2,.30+cinematic.surge*.05,0,time);drawMesh(beam,verticalBeam,2,.26+cinematic.surge*.045,1,time);
+    gl.disable(gl.DEPTH_TEST);gl.depthMask(false);drawMesh(sphere,halo,1,.31,1,time);drawMesh(sphere,reactor,1,.96,0,time);
+
+    gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+    drawMesh(star,inner,0,.45,1,time);drawMesh(star,base,0,.70,0,time);
+    gl.disable(gl.CULL_FACE);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);drawMesh(filaments,base,2,.60,.45,time);
     gl.depthMask(true);gl.bindVertexArray(null);
     if(postReady)compositeBloom();
 
@@ -536,11 +601,14 @@
     if(elapsed>=2400){const fps=sampleFrames/(elapsed/1000);root.dataset.fxCoreReal3dFps=fps.toFixed(1);sampleFrames=0;sampleStarted=now;const oldScale=renderScale;if(fps<56)renderScale=clamp(renderScale-(fps<45?.10:.06),mobile?.52:.58,1);else if(fps>72)renderScale=clamp(renderScale+.035,mobile?.52:.58,1);if(Math.abs(oldScale-renderScale)>.001)resize(true);root.dataset.fxCoreReal3dQuality=fps<56?'adapting-for-60fps':fps>=59?'60fps-ready':'balanced';}
   }
   function shouldRun(){if(document.hidden||!introComplete||!heroVisible)return false;if(root.classList.contains('fx-seamless-loop-transfer')||root.classList.contains('fx-organism-menu-open')||document.body.classList.contains('fx-organism-panel-open'))return false;return true;}
-  function frame(now){raf=0;if(!shouldRun()){stage.dataset.active='false';return;}stage.dataset.active='true';drawFrame(now);if(!reduced.matches)raf=requestAnimationFrame(frame);}
-  function ensureRunning(){if(!shouldRun()){stage.dataset.active='false';return;}stage.dataset.active='true';if(!raf){sampleStarted=performance.now();sampleFrames=0;lastTime=sampleStarted;raf=requestAnimationFrame(frame);}}
+  function shouldHoldLastFrame(){return !document.hidden&&introComplete&&heroVisible&&root.classList.contains('fx-seamless-loop-transfer');}
+  function frame(now){raf=0;if(!shouldRun()){stage.dataset.active=shouldHoldLastFrame()?'true':'false';return;}stage.dataset.active='true';drawFrame(now);if(!reduced.matches)raf=requestAnimationFrame(frame);}
+  function ensureRunning(){if(!shouldRun()){stage.dataset.active=shouldHoldLastFrame()?'true':'false';return;}stage.dataset.active='true';if(!raf){sampleStarted=performance.now();sampleFrames=0;lastTime=sampleStarted;raf=requestAnimationFrame(frame);}}
   function resumeAfterLoopTransfer(){transferResumeRaf=0;if(document.hidden)return;if(root.classList.contains('fx-seamless-loop-transfer')){transferResumeRaf=requestAnimationFrame(resumeAfterLoopTransfer);return;}ensureRunning();}
   function refreshVisibility(){const hero=document.getElementById('hero');if(!hero)return;const rectangle=hero.getBoundingClientRect();heroVisible=rectangle.bottom>innerHeight*.04&&rectangle.top<innerHeight*.96;if(!heroVisible&&raf){cancelAnimationFrame(raf);raf=0;stage.dataset.active='false';}else ensureRunning();}
-  document.addEventListener('formatx:introcomplete',()=>{introComplete=true;ensureRunning();},{once:true});document.addEventListener('visibilitychange',()=>{if(document.hidden&&raf){cancelAnimationFrame(raf);raf=0;stage.dataset.active='false';}else ensureRunning();});addEventListener('formatx:loop',()=>{if(raf)cancelAnimationFrame(raf);raf=0;stage.dataset.active='false';if(transferResumeRaf)cancelAnimationFrame(transferResumeRaf);transferResumeRaf=requestAnimationFrame(resumeAfterLoopTransfer);});addEventListener('resize',()=>{resize(true);refreshVisibility();},{passive:true});addEventListener('orientationchange',()=>{resize(true);refreshVisibility();},{passive:true});addEventListener('scroll',refreshVisibility,{passive:true});if(!mobile)addEventListener('pointermove',event=>{pointerX=clamp(event.clientX/Math.max(1,innerWidth)*2-1,-1,1);pointerY=clamp(event.clientY/Math.max(1,innerHeight)*2-1,-1,1);},{passive:true});
+  function trackPointer(event){pointerTargetX=clamp(event.clientX/Math.max(1,innerWidth)*2-1,-1,1);pointerTargetY=clamp(event.clientY/Math.max(1,innerHeight)*2-1,-1,1);pointerStrength=Math.min(1,pointerStrength+.34);cinematic.targetEnergy=Math.max(cinematic.targetEnergy,.46+pointerStrength*.16);ensureRunning();}
+  function releasePointer(){if(mobile){pointerTargetX=0;pointerTargetY=0;}pointerStrength=Math.max(pointerStrength,.28);}
+  document.addEventListener('formatx:introcomplete',()=>{introComplete=true;ensureRunning();},{once:true});document.addEventListener('visibilitychange',()=>{if(document.hidden&&raf){cancelAnimationFrame(raf);raf=0;stage.dataset.active='false';}else ensureRunning();});addEventListener('formatx:loop',()=>{if(raf)cancelAnimationFrame(raf);raf=0;stage.dataset.active='true';if(transferResumeRaf)cancelAnimationFrame(transferResumeRaf);transferResumeRaf=requestAnimationFrame(resumeAfterLoopTransfer);});addEventListener('resize',()=>{resize(true);refreshVisibility();},{passive:true});addEventListener('orientationchange',()=>{resize(true);refreshVisibility();},{passive:true});addEventListener('scroll',refreshVisibility,{passive:true});addEventListener('pointermove',trackPointer,{passive:true});addEventListener('pointerdown',trackPointer,{passive:true});addEventListener('pointerup',releasePointer,{passive:true});addEventListener('pointercancel',releasePointer,{passive:true});addEventListener('pointerleave',()=>{pointerTargetX=0;pointerTargetY=0;},{passive:true});
   function recoverOnceAfterContextRestore() {
     let alreadyRecovered = false;
     try {
@@ -561,6 +629,7 @@
   root.dataset.fxCoreReal3dHealth = 'ready';
   root.dataset.fxCoreReal3dStartup = 'ready-' + STARTUP_REVISION;
   root.dataset.fxCoreVisualRevision = VISUAL_REVISION;
+  root.dataset.fxCoreReferenceRevision = REFERENCE_REVISION;
   root.dataset.fxCoreReal3dRevision = 'ready-v21';
   root.dataset.fxCoreRenderer = 'single-webgl2-indexed-3d-v20';
   root.dataset.fxCoreRendererRevision = 'single-webgl2-indexed-3d-v21';
@@ -569,7 +638,12 @@
   root.dataset.fxCoreTriangles = String(Math.round((star.count * 4 + sphere.count * 2 + torus.count * 4 + filaments.count + beam.count * 2) / 3)); root.dataset.fxCoreIndexType = 'uint16-elements'; root.dataset.fxCoreFrameCap = 'display-refresh-uncapped'; root.dataset.fxCoreVisibility = 'hero-only-raf-paused'; root.dataset.fxCorePerformanceTarget = 'adaptive-60-plus-fps'; root.dataset.fxCorePostProcess = postReady ? 'quarter-resolution-separable-bloom-v23' : 'direct-render-safe-fallback';
   root.dataset.fxCoreMobileComposition = 'reference-crystal-portal-v24'; root.dataset.fxNativeApexRenderer = 'single-webgl2-indexed-3d-v21'; root.dataset.fxNativeApexVisual = 'cinematic-volumetric-crystal-portal-v24'; root.dataset.fxCoreMeshMaterial = 'fresnel-chromatic-refraction-glass-v24'; root.dataset.fxCoreHighlightModel = 'physical-crystal-ribs-and-caustics-v24'; root.dataset.fxCoreMaterialCenter = 'centered-object-space'; root.dataset.fxCoreShapeMesh = 'concave-pnorm-four-sail-volume-v24'; root.dataset.fxCoreShapeFracture = 'physical-tube-filaments-v24'; root.dataset.fxCoreGeometryScale = mobile ? '0.88x-0.94y-real3d-mobile' : '1.14-real3d-desktop'; root.dataset.fxCoreMesh3d = 'ready-real3d-v24'; root.dataset.fxCoreFracture3d = 'integrated-real3d-v24'; root.dataset.fxCoreCinematicGrade = 'separable-bloom-filmic-v24'; root.dataset.fxCorePhysicalGlass = 'schlick-fresnel-chromatic-refraction-v24'; root.dataset.fxCoreVolumeAbsorption = 'beer-lambert-approximation-v24';
   root.dataset.fxCoreLoopTransferPolicy = 'gpu-paused-two-frame-landing-v24';
+  root.dataset.fxCoreLoopFrameContinuity = 'gpu-paused-last-frame-visible-v25';
   root.dataset.fxCoreLowResolutionHighlights = 'render-scale-compensated-physical-ribs-v24';
+  root.dataset.fxCoreCorePlacement = 'inside-moving-volume-v25';
+  root.dataset.fxCoreOrbitInteraction = 'pointer-touch-speech-reactive-v25';
+  root.dataset.fxCoreReferenceDetail = 'thin-living-glass-veins-v25';
+  root.dataset.fxCoreMembraneMotion = 'vertex-deformed-living-glass-v25';
   root.dataset.fxGpuCapability = 'webgl2';
   root.dataset.fxCoreContextPolicy = mobile ? 'mobile-default-no-probe' : 'desktop-high-performance-no-probe';
   setTimeout(() => { try { sessionStorage.removeItem(RECOVERY_KEY); } catch (_) {} }, 12000);
