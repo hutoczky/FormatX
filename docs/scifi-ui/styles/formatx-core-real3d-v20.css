@@ -24,6 +24,26 @@
     radial-gradient(ellipse at var(--fx-core-x, 71%) 48%, rgba(123, 62, 231, .055) 0, transparent 42%);
 }
 
+.fx-core-real3d-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: -14vw;
+  right: -14vw;
+  top: 53%;
+  height: 62%;
+  pointer-events: none;
+  transform: perspective(520px) rotateX(61deg) translateY(3%);
+  transform-origin: 50% 0;
+  background:
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 0%, rgba(52, 188, 255, .20), rgba(26, 92, 176, .055) 28%, transparent 59%),
+    repeating-linear-gradient(180deg, rgba(53, 176, 255, .075) 0 1px, transparent 2px 13px),
+    linear-gradient(90deg, transparent 5%, rgba(40, 117, 215, .055) 34%, rgba(73, 204, 255, .10) 50%, rgba(115, 57, 218, .055) 68%, transparent 95%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .86), transparent 83%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, .86), transparent 83%);
+  opacity: .48;
+}
+
 .fx-core-real3d-canvas {
   position: absolute;
   z-index: 1;
@@ -41,21 +61,21 @@
   transition: opacity 420ms ease, visibility 0s;
 }
 
-html[data-fx-core-real3d="ready-v20"] #hero .hero-copy {
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) #hero .hero-copy {
   position: relative;
   z-index: 130;
 }
 
-html[data-fx-core-real3d="ready-v20"] #hero .fx-organism-map,
-html[data-fx-core-real3d="ready-v20"] #hero .fx-immersive-launch,
-html[data-fx-core-real3d="ready-v20"] #hero .hero-ring,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) #hero .fx-organism-map,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) #hero .fx-immersive-launch,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) #hero .hero-ring,
 html[data-fx-core-real3d="ready-v20"] #hero .hero-label,
 html[data-fx-core-real3d="ready-v20"] .fx-resilient-core,
 html[data-fx-core-real3d="ready-v20"] .fx-premium-core-status,
-html[data-fx-core-real3d="ready-v20"] .fx-three-stage-shell,
-html[data-fx-core-real3d="ready-v20"] .fx-core-mesh3d-stage,
-html[data-fx-core-real3d="ready-v20"] .fx-core-fracture3d-stage,
-html[data-fx-core-real3d="ready-v20"] .fx-transcend-shell[data-fx-native-apex="true"] {
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) .fx-three-stage-shell,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) .fx-core-mesh3d-stage,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) .fx-core-fracture3d-stage,
+html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) .fx-transcend-shell[data-fx-native-apex="true"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -80,12 +100,21 @@ body.fx-organism-panel-open .fx-core-real3d-stage {
       linear-gradient(180deg, rgba(1, 5, 11, .02), rgba(0, 2, 7, .17));
   }
 
-  html[data-fx-core-real3d="ready-v20"] body.living-architecture #hero {
+  .fx-core-real3d-stage::after {
+    top: 49%;
+    opacity: .42;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(54, 196, 255, .22), rgba(24, 92, 177, .055) 30%, transparent 61%),
+      repeating-linear-gradient(180deg, rgba(56, 179, 255, .07) 0 1px, transparent 2px 12px),
+      linear-gradient(90deg, transparent 2%, rgba(40, 117, 215, .05) 29%, rgba(77, 211, 255, .11) 50%, rgba(126, 61, 225, .055) 71%, transparent 98%);
+  }
+
+  html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) body.living-architecture #hero {
     min-height: auto !important;
     padding-top: max(82px, calc(env(safe-area-inset-top) + 72px)) !important;
   }
 
-  html[data-fx-core-real3d="ready-v20"] body.living-architecture #hero .hero-grid {
+  html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) body.living-architecture #hero .hero-grid {
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
@@ -93,18 +122,18 @@ body.fx-organism-panel-open .fx-core-real3d-stage {
     min-height: 0 !important;
   }
 
-  html[data-fx-core-real3d="ready-v20"] body.living-architecture #hero .hero-space {
+  html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) body.living-architecture #hero .hero-space {
     position: relative !important;
     z-index: 1 !important;
     inset: auto !important;
     order: -1 !important;
     width: 100% !important;
-    min-height: clamp(620px, 67svh, 940px) !important;
+    min-height: clamp(560px, 62svh, 880px) !important;
     opacity: 1 !important;
     transform: none !important;
   }
 
-  html[data-fx-core-real3d="ready-v20"] body.living-architecture #hero .hero-copy {
+  html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) body.living-architecture #hero .hero-copy {
     order: 2 !important;
     z-index: 130 !important;
     margin-top: 0 !important;

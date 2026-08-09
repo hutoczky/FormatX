@@ -1,11 +1,14 @@
-name: Validate single-context real3D v21
+name: Validate single-context real3D v22
 on:
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'
+      - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
+      - 'docs/scifi-ui/data/public-platform-contract.json'
       - '.github/scripts/validate-real3d-core-v21-release.cjs'
+      - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/workflows/validate-real3d-core-v21.yml'
   workflow_dispatch:
 permissions:
@@ -17,8 +20,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Validate v21 reference-shaped real3D engine
+      - name: Validate v22 reference-cinematic real3D engine
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
+      - name: Validate v22 mobile-safe startup
+        run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Validate JavaScript syntax
         run: node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
       - name: Publish source status
@@ -30,5 +35,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Single-context real3D v21 reference geometry and shader contract passed'; else state=failure; description='Single-context real3D v21 source contract failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX real3D v21 source contract' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Single-context real3D v22 reference geometry, shader and startup contract passed'; else state=failure; description='Single-context real3D v22 source contract failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX real3D v22 source contract' -f description="$description" -f target_url="$TARGET_URL"

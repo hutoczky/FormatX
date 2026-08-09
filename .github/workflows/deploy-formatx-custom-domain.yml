@@ -63,6 +63,7 @@ jobs:
           node .github/scripts/validate-feedback-moderation.cjs
           node .github/scripts/validate-user-requested-site-features.cjs
           node .github/scripts/validate-real3d-core-v20.cjs
+          node .github/scripts/validate-real3d-mobile-startup-v22.cjs
 
       - name: Validate production JavaScript syntax
         run: |
@@ -108,6 +109,7 @@ jobs:
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-public-site-integrity.cjs
           node --check .github/scripts/validate-real3d-core-v20.cjs
+          node --check .github/scripts/validate-real3d-mobile-startup-v22.cjs
 
       - name: Install dependencies and run Worker tests
         working-directory: billing-worker

@@ -251,10 +251,12 @@
     }
 
     const source = queue[index];
-    if (root.dataset.fxCoreReal3d === 'ready-v20'
+    const dedicatedCoreSettled = root.dataset.fxCoreReal3d === 'ready-v20'
+      || ['context-unavailable', 'webgl2-unavailable', 'shader-failed', 'context-lost'].includes(root.dataset.fxCoreReal3d);
+    if (dedicatedCoreSettled
       && (source.includes('formatx-apex-native.js') || source.includes('formatx-three-host-safe.js'))) {
-      root.dataset.fxNativeApex = 'retired-for-single-real3d-v20';
-      root.dataset.fxThreeHost = 'single-real3d-v20';
+      root.dataset.fxNativeApex = 'retired-for-dedicated-core-v22';
+      root.dataset.fxThreeHost = root.dataset.fxCoreReal3d === 'ready-v20' ? 'single-real3d-v22' : 'canvas2d-safety-fallback-v22';
       root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
       load(index + 1);
       return;
