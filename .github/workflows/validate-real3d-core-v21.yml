@@ -29,11 +29,11 @@ jobs:
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
-      - name: Validate legacy fallback safety contract
+      - name: Validate production reference-calibrated v24 safety contract
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
-      - name: Validate mobile-safe startup fallback
+      - name: Validate production mobile-safe startup
         run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-      - name: Validate WebGPU v29 and WebGL2 fallback contract
+      - name: Validate v24 production authority and opt-in WebGPU preview
         run: node .github/scripts/validate-reference-core-v26.cjs
       - name: Validate JavaScript syntax
         run: |
@@ -54,13 +54,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Native WebGPU v29 real3D and WebGL2 fallback contracts passed'
+            description='Reference v24 production MAG passed; WebGPU v29 preview and v28 fallback validated'
           else
             state=failure
-            description='Native real3D GPU core validation failed'
+            description='Native real3D production or preview validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
-            -f context='FormatX real3D WebGPU v29' \
+            -f context='FormatX real3D production v24' \
             -f description="$description" \
             -f target_url="$TARGET_URL"
