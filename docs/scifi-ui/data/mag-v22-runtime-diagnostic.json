@@ -1,0 +1,7 @@
+{
+  "revision": "2026-08-09-mag-v22-runtime-diagnostic",
+  "material": "reference-glass-v21",
+  "grade": "calibrated-postgrade-v22",
+  "runtime_diagnostics": "marker-by-marker-60s",
+  "pixel_gate": "unchanged-reference-gate"
+}
