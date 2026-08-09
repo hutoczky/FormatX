@@ -53,8 +53,22 @@ assert.match(css, /text-wrap:\s*pretty/, 'editorial text wrapping polish missing
 assert.match(css, /animation-timeline:\s*view\(\)/, 'progressive scroll-driven proof motion missing');
 assert.match(css, /@media \(hover: hover\) and \(pointer: fine\)/, 'fine-pointer-only hover polish missing');
 
-assert.match(sitemap, /<loc>https:\/\/www\.formatxsuite\.com\/<\/loc><lastmod>2026-08-08<\/lastmod>/,
-  'homepage sitemap lastmod does not advertise the current audited revision');
+function sitemapLastmod(url) {
+  const escaped = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = sitemap.match(new RegExp(`<url><loc>${escaped}<\\/loc><lastmod>(\\d{4}-\\d{2}-\\d{2})<\\/lastmod>`));
+  assert.ok(match, `sitemap lastmod missing for ${url}`);
+  assert.ok(!Number.isNaN(Date.parse(match[1] + 'T00:00:00Z')), `invalid sitemap lastmod for ${url}`);
+  return match[1];
+}
+
+assert.ok(
+  sitemapLastmod('https://www.formatxsuite.com/') >= '2026-08-08',
+  'homepage sitemap lastmod is older than the audited award-readiness baseline'
+);
+assert.ok(
+  sitemapLastmod('https://www.formatxsuite.com/scifi-ui/technical-report.html') >= '2026-08-10',
+  'technical-report sitemap lastmod is older than the current evidence report'
+);
 
 const publicContract = JSON.parse(contract);
 assert.equal(publicContract.layout_contract?.infinite_scroll_controller, 'seamless-v7', 'scroll regression detected while applying award polish');
@@ -62,4 +76,4 @@ assert.equal(publicContract.layout_contract?.automatic_scroll_loop, true, 'infin
 assert.equal(publicContract.layout_contract?.mobile_native_momentum_preserved, true, 'mobile native momentum contract regressed');
 assert.equal(publicContract.public_delivery?.first_party_only, true, 'first-party public delivery contract regressed');
 
-console.log('FormatX award-readiness v2 SEO, hierarchy, proof, accessibility, first-party and scroll-preservation validation passed.');
+console.log('FormatX award-readiness v2 SEO, hierarchy, proof, accessibility, first-party, sitemap freshness and scroll-preservation validation passed.');
