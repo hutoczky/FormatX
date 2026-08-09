@@ -1,0 +1,79 @@
+{
+  "schema_version": 3,
+  "audit_date": "2026-08-09",
+  "scope": "full public FormatX site, release delivery, browser behaviour, continuous scrolling, native 3D renderer ownership, production Worker, public APIs, SEO and transactional surfaces",
+  "audited_release": {
+    "version": "v130",
+    "product_status": "full_release",
+    "trial_days": 5,
+    "primary_platform": "linux-bazzite",
+    "supported_secondary_platforms": ["windows", "android"],
+    "web": "technical_preview",
+    "planned": ["macos", "ios-ipados"]
+  },
+  "release_integrity": {
+    "multiplatform_available": true,
+    "multiplatform_sha256": "sha256:10036483a06794ba0e1985c9402324248052a18720b3f4a561b768945a2b9187",
+    "android_available": true,
+    "android_size_bytes": 906731,
+    "android_sha256": "sha256:ac8add4fa5d1532c35f6994fe22a97ca8400781ce272f8577d313628e509b69f",
+    "detached_signature_asset": "not_published"
+  },
+  "renderer_policy": {
+    "production_authority": "reference-calibrated indexed WebGL2 v24 MAG",
+    "production_bootstrap": "/scifi-ui/scripts/formatx-core-real3d-v20.js",
+    "production_visual_revision": "v24-volumetric-crystal-r3-moving-core-r11",
+    "webgpu_v29": "opt-in-preview-only",
+    "webgpu_preview_query": "?webgpu=1",
+    "webgpu_preview_geometry": "indexed sphere plus 3D ribbon tubes and emitter",
+    "webgpu_preview_fallback": "indexed WebGL2 v28 preview fallback",
+    "promotion_requirement": "WebGPU may become production authority only after it reaches the same four-tip crystalline visual/reference contract without performance or accessibility regression"
+  },
+  "validated_surfaces": [
+    "/",
+    "/downloads/",
+    "/scifi-ui/android/",
+    "/scifi-ui/verification.html",
+    "/scifi-ui/known-issues.html",
+    "/support.html",
+    "/scifi-ui/payment/success.html",
+    "/scifi-ui/payment/cancel.html",
+    "/api/feedback/summary",
+    "/api/feedback",
+    "/scifi-ui/data/current-release.json",
+    "/api/public-release",
+    "/download/multiplatform",
+    "/download/android"
+  ],
+  "validation_results_before_deploy": {
+    "production_validation_with_reference_v24_authority_gate": "passed",
+    "real3d_reference_v24_production_and_webgpu_preview_contract": "passed",
+    "release_truth_and_platform_contract": "passed",
+    "transaction_pages_noindex": "passed",
+    "android_full_release_vs_native_beta_separation": "passed"
+  },
+  "required_on_this_deploy": {
+    "production_validation": "required",
+    "production_worker_tests": "required",
+    "production_worker_dry_run_build": "required",
+    "public_site_static_integrity": "required",
+    "desktop_mobile_chromium_public_pages": "required",
+    "strict_lighthouse": "required_by_lighthouse_ci",
+    "production_live_smoke": "required_after_deployment"
+  },
+  "truth_contract": {
+    "generic_public_beta_copy_for_product": "forbidden",
+    "full_release_and_stable_designation_are_distinct": true,
+    "android_full_release_and_native_beta_are_separate_channels": true,
+    "planned_platforms_must_not_be_presented_as_supported": true,
+    "transaction_pages_noindex": true,
+    "webgpu_preview_must_not_override_reference_production_mag": true,
+    "public_responses_must_not_leak_upstream_asset_hosts": true
+  },
+  "known_non_blocking_items": [
+    "No detached signature asset is published for the current release; SHA-256 digests are published.",
+    "Field INP is not claimed without real-user monitoring data.",
+    "The WebGPU v29 renderer remains a preview until it reaches reference geometry parity."
+  ],
+  "deployment_intent": "deploy this validated v130 master state to the FormatX production custom domains and accept the deployment only after the live production smoke test passes"
+}
