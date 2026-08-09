@@ -23,13 +23,9 @@ const CONTINUOUS_SCROLL_ASSET = [
   '  <script defer data-fx-seamless-scroll-runtime="true" src="/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260808-seamless-v7-bootstrap-1"></script>',
 ].join('\n') + '\n';
 const MOBILE_APEX_COMPOSITION_ASSET = '  <link rel="stylesheet" data-fx-mobile-apex-composition="true" href="/scifi-ui/styles/formatx-mobile-apex-composition.css?v=20260808-mobile-apex-live-2">\n';
-const REFERENCE_CORE_ASSETS = [
+const WEBGPU_PREVIEW_ASSETS = [
   '  <link rel="stylesheet" data-fx-reference-core-v26="true" href="/scifi-ui/styles/formatx-reference-core-v26.css?v=20260809-reference-crystal-v26-1">',
   '  <script defer data-fx-reference-core-v26="true" src="/scifi-ui/scripts/formatx-reference-core-v26.js?v=20260809-reference-crystal-v26-1"></script>',
-].join('\n') + '\n';
-const CINEMATIC_CORE_ASSETS = [
-  '  <link rel="stylesheet" data-fx-cinematic-core-v27="true" href="/scifi-ui/styles/formatx-cinematic-core-v27.css?v=20260809-cinematic-core-v27-1">',
-  '  <script defer data-fx-cinematic-core-v27="true" src="/scifi-ui/scripts/formatx-cinematic-core-v27.js?v=20260809-cinematic-core-v27-1"></script>',
 ].join('\n') + '\n';
 const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260729-single-language-3">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260729-single-language-2"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
 const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
@@ -58,6 +54,8 @@ const CRITICAL_STARTUP_ASSETS = new Set([
   '/scifi-ui/scripts/formatx-apex-scene-stability.js',
   '/scifi-ui/scripts/formatx-apex-native.js',
   '/scifi-ui/scripts/formatx-core-real3d-v20.js',
+  '/scifi-ui/scripts/formatx-reference-lock-v30.js',
+  '/scifi-ui/styles/formatx-reference-lock-v30.css',
   '/scifi-ui/scripts/formatx-three-host-safe.js',
   '/scifi-ui/styles/igloo-parity.css',
   '/scifi-ui/styles/formatx-transcend.css',
@@ -164,11 +162,9 @@ async function applyStartupSafety(request, url, response) {
     if (!html.includes('data-fx-mobile-apex-composition')) {
       html = html.replace('</head>', MOBILE_APEX_COMPOSITION_ASSET + '</head>');
     }
-    if (!html.includes('data-fx-reference-core-v26')) {
-      html = html.replace('</head>', REFERENCE_CORE_ASSETS + '</head>');
-    }
-    if (!html.includes('data-fx-cinematic-core-v27')) {
-      html = html.replace('</head>', CINEMATIC_CORE_ASSETS + '</head>');
+    const webgpuPreview = url.searchParams.get('webgpu') === '1';
+    if (webgpuPreview && !html.includes('data-fx-reference-core-v26')) {
+      html = html.replace('</head>', WEBGPU_PREVIEW_ASSETS + '</head>');
     }
   }
   if (!html.includes('data-fx-single-language-style')) {
@@ -221,6 +217,6 @@ function withNoStore(response, withoutBody) {
   return new Response(withoutBody ? null : response.body, {
     status: response.status,
     statusText: response.statusText,
-    headers,
+    headers
   });
 }
