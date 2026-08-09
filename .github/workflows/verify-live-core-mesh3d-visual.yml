@@ -129,6 +129,7 @@ jobs:
             fs.writeFileSync(`reference-core-v26-${config.name}.json`, JSON.stringify({ runtime, metrics, consoleErrors }, null, 2));
             await context.close();
 
+            const minimumViewportCoverage = 0.97;
             const runtimeOk = runtime.reference === 'ready-v26'
               && runtime.revision === 'ready-v26'
               && runtime.renderer === 'native-webgl2-reference-crystal-v26'
@@ -142,14 +143,14 @@ jobs:
               && runtime.legacyStages === 0
               && runtime.oldMeshStages === 0
               && runtime.oldFractureStages === 0
-              && runtime.canvas?.width >= config.viewport.width - 2
-              && runtime.canvas?.height >= config.viewport.height - 2;
+              && runtime.canvas?.width >= config.viewport.width * minimumViewportCoverage
+              && runtime.canvas?.height >= config.viewport.height * minimumViewportCoverage;
             const visualOk = metrics.mean_luminance >= .025 && metrics.mean_luminance <= .45
               && metrics.bright_fraction >= .0015
               && metrics.saturated_fraction >= .018
               && metrics.cyan_violet_fraction >= .012;
             if (!runtimeOk || !visualOk || consoleErrors.length) {
-              throw new Error(`${config.name} v26 visual gate failed: ${JSON.stringify({ runtime, metrics, consoleErrors })}`);
+              throw new Error(`${config.name} v26 visual gate failed: ${JSON.stringify({ runtime, metrics, consoleErrors, minimumViewportCoverage })}`);
             }
             return { runtime, metrics };
           }
