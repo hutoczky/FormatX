@@ -32,7 +32,6 @@ jobs:
           PARITY_JS="$RUNNER_TEMP/igloo-parity.js"
           APEX_JS="$RUNNER_TEMP/formatx-apex-native.js"
           FALLBACK_JS="$RUNNER_TEMP/formatx-three-host-safe.js"
-
           for attempt in $(seq 1 18); do
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/?award_audit=${GITHUB_RUN_ID}-${attempt}" -o "$HOME_HTML" \
               && grep -Fq 'data-fx-award-positioning="v2"' "$HOME_HTML" \
@@ -43,34 +42,30 @@ jobs:
               && grep -Fq 'data-fx-award-proof' "$HOME_HTML" \
               && grep -Fq 'id="formatx-structured-data"' "$HOME_HTML" \
               && grep -Fq 'formatx-infinite-scroll.js?v=20260808-seamless-v7-bootstrap-1' "$HOME_HTML" \
-              && grep -Fq 'formatx-core-real3d-v20.js?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11' "$HOME_HTML"; then
-              break
-            fi
+              && grep -Fq 'formatx-core-real3d-v20.js?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11' "$HOME_HTML"; then break; fi
             if [ "$attempt" -eq 18 ]; then echo 'Live homepage did not expose the complete award/reference contract.' >&2; exit 1; fi
             sleep 5
           done
-
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-award-readiness.css?v=award-live' -o "$AWARD_CSS"
           grep -Fq ':focus-visible' "$AWARD_CSS"
           grep -Fq 'min-block-size: 44px' "$AWARD_CSS"
           grep -Fq 'prefers-reduced-motion: reduce' "$AWARD_CSS"
           grep -Fq 'scroll-margin-top:' "$AWARD_CSS"
-
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v30-authority' -o "$REFERENCE_BOOTSTRAP"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v30-bootstrap' -o "$CORE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-lock-v30.js?v=live-v30-mag-r2' -o "$REFERENCE_MAG"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-reference-lock-v30.css?v=live-v30-mag-r2' -o "$REFERENCE_CSS"
-
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-lock-v30.js?v=live-v30-mag-r3' -o "$REFERENCE_MAG"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-reference-lock-v30.css?v=live-v30-mag-r3' -o "$REFERENCE_CSS"
           grep -Fq "const WEBGPU_PREVIEW = params.get('webgpu') === '1'" "$REFERENCE_BOOTSTRAP"
           grep -Fq "root.dataset.fxReferenceCore = 'production-v30-reference-lock-authority'" "$REFERENCE_BOOTSTRAP"
           grep -Fq "root.dataset.fxGpuPreference = 'webgl2-v30-uploaded-reference-production'" "$REFERENCE_BOOTSTRAP"
           grep -Fq "BOOTSTRAP='reference-lock-v30'" "$CORE_BOOTSTRAP"
-          grep -Fq 'formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-2' "$CORE_BOOTSTRAP"
-          grep -Fq 'formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-2' "$CORE_BOOTSTRAP"
+          grep -Fq 'formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-3' "$CORE_BOOTSTRAP"
+          grep -Fq 'formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-3' "$CORE_BOOTSTRAP"
           grep -Fq "const VERSION='v30-reference-lock'" "$REFERENCE_MAG"
           grep -Fq "fxCoreReferenceRevision='uploaded-reference-20260810'" "$REFERENCE_MAG"
           grep -Fq "fxCoreReferenceFraming='mobile-core-center-40pct-shell-height-75pct'" "$REFERENCE_MAG"
           grep -Fq "fxCoreReferenceMaterial='dense-luminous-glass-filaments-v30'" "$REFERENCE_MAG"
+          grep -Fq "fxCoreReferenceSurface='translucent-volume-pass-r3'" "$REFERENCE_MAG"
           grep -Fq 'function crystal(' "$REFERENCE_MAG"
           grep -Fq 'function torus(' "$REFERENCE_MAG"
           grep -Fq 'function sphere(' "$REFERENCE_MAG"
@@ -79,7 +74,6 @@ jobs:
           grep -Fq -- '--fx-core-x:50%' "$REFERENCE_CSS"
           grep -Fq 'perspective(560px) rotateX(63deg)' "$REFERENCE_CSS"
           grep -Fq 'filter:saturate(1.42) contrast(1.06) brightness(1.24)' "$REFERENCE_CSS"
-
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/igloo-parity.js?v=native-apex-live' -o "$PARITY_JS"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?v=native-apex-live' -o "$APEX_JS"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-three-host-safe.js?v=native-apex-live' -o "$FALLBACK_JS"
@@ -92,7 +86,6 @@ jobs:
           grep -Fq "root.dataset.fxNativeApex === 'ready'" "$FALLBACK_JS"
           ! grep -Fqi 'Multiplatform nyilvános béta' "$HOME_HTML"
           ! grep -Fqi 'multiplatform public beta' "$HOME_HTML"
-
       - name: Publish live award-readiness status
         if: always()
         env:
@@ -102,5 +95,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live award-tier + stable reference-lock v30 r2 MAG + native Apex + seamless-v7 verified'; else state=failure; description='Live award-tier / reference-lock v30 r2 / native Apex verification failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live award-tier + translucent reference-lock v30 r3 MAG + native Apex + seamless-v7 verified'; else state=failure; description='Live award-tier / reference-lock v30 r3 / native Apex verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="$TARGET_URL"
