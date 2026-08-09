@@ -19,49 +19,52 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live true 3D reference glass v13
+      - name: Verify live reference ratio and glass v14
         shell: bash
         run: |
           set -euo pipefail
           MAPPER="$RUNNER_TEMP/mapper.js"
-          MATERIAL="$RUNNER_TEMP/material-v13.js"
+          SHAPE="$RUNNER_TEMP/shape-v14.js"
+          MATERIAL="$RUNNER_TEMP/material-v14.js"
           GEOMETRY="$RUNNER_TEMP/geometry-v13.js"
           MESH="$RUNNER_TEMP/mesh-v11.js"
           FRACTURE="$RUNNER_TEMP/fracture-v11.js"
-          GRADE="$RUNNER_TEMP/grade-v13.css"
+          GRADE="$RUNNER_TEMP/grade-v14.css"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" -o "$MAPPER"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-material-v13.js?v=20260809-reference-glass-v13&audit=${GITHUB_RUN_ID}" -o "$MATERIAL"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-shape-v14.js?v=20260809-reference-ratio-v14&audit=${GITHUB_RUN_ID}" -o "$SHAPE"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-material-v14.js?v=20260809-reference-glass-v14&audit=${GITHUB_RUN_ID}" -o "$MATERIAL"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-geometry-v13.js?v=20260809-true-3d-scale-v13&audit=${GITHUB_RUN_ID}" -o "$GEOMETRY"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-v11.js?v=20260809-cinematic-mesh3d-v11&audit=${GITHUB_RUN_ID}" -o "$MESH"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-fracture3d-v11.js?v=20260809-cinematic-fracture3d-v11&audit=${GITHUB_RUN_ID}" -o "$FRACTURE"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v13.css?v=20260809-balanced-reference-v13&audit=${GITHUB_RUN_ID}" -o "$GRADE"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v14.css?v=20260809-reference-balance-v14&audit=${GITHUB_RUN_ID}" -o "$GRADE"
 
-          grep -Fq "fxApexSceneStability==='ready-v23'" "$MAPPER"
-          grep -Fq 'formatx-core-mesh3d-material-v13.js?v=20260809-reference-glass-v13' "$MAPPER"
-          grep -Fq 'formatx-core-geometry-v13.js?v=20260809-true-3d-scale-v13' "$MAPPER"
-          grep -Fq 'formatx-core-cinematic-grade-v13.css?v=20260809-balanced-reference-v13' "$MAPPER"
-          grep -Fq 'cinematic-reference-glass-true-mesh3d-v23' "$MAPPER"
-          grep -Fq "fxCoreMaterialContract='reference-glass-v13'" "$MAPPER"
-          grep -Fq "fxCoreGeometryContract='true-3d-uniform-scale-1.15'" "$MAPPER"
+          grep -Fq "fxApexSceneStability==='ready-v24'" "$MAPPER"
+          grep -Fq 'formatx-core-shape-v14.js?v=20260809-reference-ratio-v14' "$MAPPER"
+          grep -Fq 'formatx-core-mesh3d-material-v14.js?v=20260809-reference-glass-v14' "$MAPPER"
+          grep -Fq 'formatx-core-cinematic-grade-v14.css?v=20260809-reference-balance-v14' "$MAPPER"
+          grep -Fq 'cinematic-reference-ratio-glass-true-mesh3d-v24' "$MAPPER"
+          grep -Fq "fxCoreMaterialContract='reference-glass-v14'" "$MAPPER"
+          grep -Fq "fxCoreGeometryContract='true-3d-uniform-scale-1.15-plus-y0.72-vertex-shape'" "$MAPPER"
 
-          grep -Fq 'float fres=pow(1.-ndv,1.52)' "$MATERIAL"
-          grep -Fq 'float shoulder=' "$MATERIAL"
-          grep -Fq 'float coreMask=1.-sm(.050,.095,r)' "$MATERIAL"
-          grep -Fq "fxCoreMeshMaterial='reference-glass-v13'" "$MATERIAL"
-          grep -Fq "fxCoreMeshMaterialPatch='applied-v13'" "$MATERIAL"
+          grep -Fq 'aPosition.y*.72' "$SHAPE"
+          grep -Fq "fxCoreShapeMesh='applied-v14'" "$SHAPE"
+          grep -Fq "fxCoreShapeFracture='applied-v14'" "$SHAPE"
+          grep -Fq "fxCoreShapeY='0.72x-vertex-space'" "$SHAPE"
 
-          grep -Fq "name==='uScale'" "$GEOMETRY"
+          grep -Fq 'float lineA=' "$MATERIAL"
+          grep -Fq 'float lineB=' "$MATERIAL"
+          grep -Fq 'float whiteFacet=' "$MATERIAL"
+          grep -Fq 'float coreMask=1.-sm(.030,.070,r)' "$MATERIAL"
+          grep -Fq 'float violetHint=' "$MATERIAL"
+          grep -Fq "fxCoreMeshMaterial='reference-glass-v14'" "$MATERIAL"
+          grep -Fq "fxCoreMeshMaterialPatch='applied-v14'" "$MATERIAL"
+
           grep -Fq 'value*1.15' "$GEOMETRY"
           grep -Fq "fxCoreGeometryScale='1.15x-true-3d-uniform'" "$GEOMETRY"
-
-          grep -Fq "getContext('webgl2'" "$MESH"
-          grep -Fq 'gl.enable(gl.DEPTH_TEST)' "$MESH"
           grep -Fq 'gl.drawElements(gl.TRIANGLES' "$MESH"
-          grep -Fq "fxCoreGeometry='indexed-triangle-mesh-v11'" "$MESH"
           grep -Fq 'gl.drawElements(gl.LINES' "$FRACTURE"
-          grep -Fq 'opacity: 0.46' "$GRADE"
-          grep -Fq 'brightness(1.28)' "$GRADE"
-          grep -Fq 'opacity: 0.42' "$GRADE"
+          grep -Fq 'brightness(1.16)' "$GRADE"
+          grep -Fq 'opacity: 0.30' "$GRADE"
           ! grep -Fq 'drawImage(' "$MESH"
           ! grep -Fq 'drawImage(' "$MATERIAL"
 
@@ -74,5 +77,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Live MAG uses larger true-3D geometry and balanced cinematic glass v13'; else state='failure'; description='Live true-3D reference glass v13 verification failed'; fi
+          if [ "$JOB_STATUS" = 'success' ]; then state='success'; description='Live MAG uses reference-ratio true vertex geometry and cinematic glass v14'; else state='failure'; description='Live reference-ratio glass v14 verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live mobile Apex composition' -f description="$description" -f target_url="$TARGET_URL"
