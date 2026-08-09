@@ -1,7 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "audit_date": "2026-08-10",
-  "scope": "uploaded visual reference lock for the production FormatX MAG, single-context real 3D renderer ownership, mobile/desktop safety, production validation and live deployment",
+  "deployment_iteration": 2,
+  "scope": "uploaded visual reference lock for the production FormatX MAG, single-context real 3D renderer ownership, calibrated mobile framing, mobile/desktop visual evidence, production validation and live deployment",
   "audited_release": {
     "version": "v130",
     "product_status": "full_release",
@@ -26,7 +27,14 @@
     "interaction": "subtle pointer parallax plus organism activation/response/speech energy impulses",
     "reduced_motion": true,
     "scroll_capture": false,
-    "performance_target": "adaptive 60-plus FPS with bounded DPR and pixel budget"
+    "performance_target": "adaptive 60-plus FPS with bounded DPR and pixel budget",
+    "mobile_calibration": {
+      "core_vertical_position": "approximately 40 percent of viewport height",
+      "crystal_vertical_coverage_target": "approximately 75 percent of viewport height",
+      "crystal_vertical_geometry_multiplier": 1.5,
+      "reactor_ring_aspect": "preserved independently from shell vertical stretch",
+      "horizontal_alignment": "centered"
+    }
   },
   "release_integrity": {
     "multiplatform_sha256": "sha256:10036483a06794ba0e1985c9402324248052a18720b3f4a561b768945a2b9187",
@@ -39,9 +47,11 @@
     "worker_dry_run_build": "required",
     "public_site_integrity": "required",
     "real3d_reference_lock_v30": "required",
-    "mobile_safe_single_webgl2_startup": "required",
+    "live_mobile_desktop_visual_metrics": "required_after_deploy",
+    "live_reference_position_metrics": "required_after_deploy",
     "lighthouse": "required_by_site_change",
-    "production_live_smoke": "required_after_deploy"
+    "production_live_smoke": "required_after_deploy",
+    "live_award_readiness": "required_after_deploy"
   },
-  "acceptance_policy": "The reference-lock change is accepted as live only after the production deployment workflow passes validation and its live smoke checks. Exact visual parity remains subject to live screenshot/reference verification rather than source-code claims alone."
+  "acceptance_policy": "The calibrated reference-lock change is accepted only after production deployment, live smoke, Lighthouse, mobile/desktop live MAG visual metrics and scroll-zero reference-position metrics pass. Source-code presence alone is not sufficient."
 }
