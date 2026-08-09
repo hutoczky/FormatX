@@ -9,8 +9,8 @@ const src=read('docs/scifi-ui/scripts/formatx-reference-lock-v30.js');
 const css=read('docs/scifi-ui/styles/formatx-reference-lock-v30.css');
 
 assert.match(bootstrap,/reference-lock-v30/,'production bootstrap must select reference lock v30');
-assert.match(bootstrap,/formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-1/,'v30 renderer cache revision missing');
-assert.match(bootstrap,/formatx-reference-lock-v30\.css\?v=20260810-uploaded-reference-lock-1/,'v30 styling cache revision missing');
+assert.match(bootstrap,/formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-2/,'v30 renderer cache revision 2 missing');
+assert.match(bootstrap,/formatx-reference-lock-v30\.css\?v=20260810-uploaded-reference-lock-2/,'v30 styling cache revision 2 missing');
 assert.ok(bootstrap.includes("fxCoreReal3d='ready-v20'"),'legacy ownership compatibility marker missing');
 assert.match(bootstrap,/formatx:core3dfallback/,'bootstrap failure event missing');
 
@@ -47,6 +47,6 @@ assert.match(css,/pointer-events:none/,'GPU stage must not intercept interaction
 assert.match(css,/100dvh/,'dynamic viewport sizing missing');
 assert.match(css,/--fx-core-x:50%/,'portrait reference centering missing');
 assert.match(css,/perspective\(560px\) rotateX\(63deg\)/,'reference perspective floor missing');
-assert.match(css,/saturate\(1\.52\)/,'reference spectral grade missing');
+assert.match(css,/saturate\(1\.42\) contrast\(1\.06\) brightness\(1\.24\)/,'stable luminous reference grade missing');
 
-console.log('PASS: production MAG v30 is a single-context indexed WebGL2 dense luminous four-sail crystal locked to the uploaded reference, with a moving inner core, thin real 3D rings/orbits, dense cyan/violet filaments and adaptive 60+ FPS rendering.');
+console.log('PASS: production MAG v30 cache revision 2 is a single-context indexed WebGL2 stable luminous four-sail crystal locked to the uploaded reference, with a moving inner core, thin real 3D rings/orbits, dense cyan/violet filaments and adaptive 60+ FPS rendering.');
