@@ -7,6 +7,9 @@ on:
       - 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
       - 'docs/scifi-ui/styles/formatx-reference-core-v26.css'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-core-v27.js'
+      - 'docs/scifi-ui/scripts/formatx-orbital-core-v28.js'
+      - 'docs/scifi-ui/styles/formatx-orbital-core-v28.css'
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
       - 'docs/scifi-ui/data/public-platform-contract.json'
@@ -24,16 +27,18 @@ jobs:
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
-      - name: Validate legacy v24 renderer safety contract
+      - name: Validate legacy fallback safety contract
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
       - name: Validate mobile-safe startup fallback
         run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-      - name: Validate reference crystal v26 source contract
+      - name: Validate orbital glass core v28 source contract
         run: node .github/scripts/validate-reference-core-v26.cjs
       - name: Validate JavaScript syntax
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
+          node --check docs/scifi-ui/scripts/formatx-cinematic-core-v27.js
+          node --check docs/scifi-ui/scripts/formatx-orbital-core-v28.js
           node --check billing-worker/src/production-entry.js
       - name: Publish real3D status
         if: always()
@@ -46,13 +51,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Native WebGL2 reference crystal v26 and fallback safety contracts passed'
+            description='Native WebGL2 Orbital Core v28 and fallback safety contracts passed'
           else
             state=failure
-            description='Native real3D reference core validation failed'
+            description='Native real3D orbital core validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
-            -f context='FormatX real3D reference v26' \
+            -f context='FormatX real3D orbital v28' \
             -f description="$description" \
             -f target_url="$TARGET_URL"
