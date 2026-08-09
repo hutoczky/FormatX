@@ -109,7 +109,7 @@ jobs:
               console.log('READY', name);
             }
             await page.waitForTimeout(900);
-            await page.evaluate(() => scrollTo(0, Math.min(400, document.documentElement.scrollHeight - innerHeight)));
+            await page.evaluate(() => scrollTo(0, 0));
             await page.waitForTimeout(900);
             const runtime = await page.evaluate(() => {
               const root = document.documentElement;
@@ -125,7 +125,8 @@ jobs:
                 oldMeshStages: document.querySelectorAll('.fx-core-mesh3d-stage').length,
                 oldFractureStages: document.querySelectorAll('.fx-core-fracture3d-stage').length,
                 nativeStages: document.querySelectorAll('.fx-transcend-shell[data-fx-native-apex="true"]').length,
-                fallbackActive: document.querySelector('.fx-resilient-core')?.dataset.active || 'absent'
+                fallbackActive: document.querySelector('.fx-resilient-core')?.dataset.active || 'absent',
+                copyTop: Math.round(document.querySelector('#hero .hero-copy')?.getBoundingClientRect().top || 0)
               };
             });
             await page.screenshot({ path: 'mag-idle-reference.png', fullPage: false });
@@ -167,7 +168,7 @@ jobs:
               && runtime.contexts === '1' && runtime.drawCalls === '14-max'
               && runtime.target === 'adaptive-60-plus-fps' && runtime.visibility === 'hero-only-raf-paused'
               && runtime.webgl2 && runtime.oldMeshStages === 0 && runtime.oldFractureStages === 0
-              && runtime.nativeStages === 0 && runtime.fallbackActive !== 'true';
+              && runtime.nativeStages === 0 && runtime.fallbackActive !== 'true' && runtime.copyTop >= 1000;
             if (!runtimeOk || !(awake.energy >= .70) || !(awake.surge > .50)
               || awake.immediate !== 'frame-rate-independent-v1' || speaking.speech !== 1
               || settling.speech !== 0 || !visualOk) throw new Error(`real 3D v20 gate failed: ${JSON.stringify(evidence)}`);
