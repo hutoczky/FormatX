@@ -16,23 +16,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live reference-calibrated MAG v16
+      - name: Verify final reference grade v17
         shell: bash
         run: |
           set -euo pipefail
           MAPPER="$RUNNER_TEMP/mapper.js"; MATERIAL="$RUNNER_TEMP/material.js"; GRADE="$RUNNER_TEMP/grade.css"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-scene-stability.js?audit=${GITHUB_RUN_ID}" -o "$MAPPER"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-mesh3d-material-v15.js?v=20260809-object-space-center-v15&audit=${GITHUB_RUN_ID}" -o "$MATERIAL"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v16.css?v=20260809-reference-calibrated-v16&audit=${GITHUB_RUN_ID}" -o "$GRADE"
-          grep -Fq "fxApexSceneStability==='ready-v26'" "$MAPPER"
-          grep -Fq 'formatx-core-cinematic-grade-v16.css?v=20260809-reference-calibrated-v16' "$MAPPER"
-          grep -Fq "fxCoreVisualCalibration='reference-luminance-saturation-v16'" "$MAPPER"
-          grep -Fq 'cinematic-reference-calibrated-centered-glass-v26' "$MAPPER"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/scifi-ui/styles/formatx-core-cinematic-grade-v17.css?v=20260809-reference-final-v17&audit=${GITHUB_RUN_ID}" -o "$GRADE"
+          grep -Fq "fxApexSceneStability==='ready-v27'" "$MAPPER"
+          grep -Fq 'formatx-core-cinematic-grade-v17.css?v=20260809-reference-final-v17' "$MAPPER"
+          grep -Fq "fxCoreVisualCalibration='reference-final-luminance-facet-v17'" "$MAPPER"
+          grep -Fq 'cinematic-reference-final-centered-glass-v27' "$MAPPER"
           grep -Fq 'vec2 cp=vec2(vP.x,vP.y-.18)' "$MATERIAL"
           grep -Fq "fxCoreMaterialCenter='object-space-y-minus-0.18'" "$MATERIAL"
-          grep -Fq 'brightness(1.82)' "$GRADE"
-          grep -Fq 'saturate(1.06)' "$GRADE"
-          grep -Fq 'opacity: 0.50' "$GRADE"
+          grep -Fq 'brightness(2.46)' "$GRADE"
+          grep -Fq 'saturate(0.94)' "$GRADE"
+          grep -Fq 'opacity: 0.64' "$GRADE"
       - name: Publish live mobile Apex status
         if: always()
         env:
@@ -42,5 +42,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live MAG uses measured reference luminance/saturation calibration v16'; else state=failure; description='Live reference calibration v16 verification failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live MAG uses final measured reference luminance/facet grade v17'; else state=failure; description='Live final reference grade v17 verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live mobile Apex composition' -f description="$description" -f target_url="$TARGET_URL"
