@@ -1,50 +1,7 @@
 'use strict';
-const assert=require('node:assert/strict');
-const fs=require('node:fs');
-const path=require('node:path');
-const root=path.resolve(__dirname,'../..');
-const read=f=>fs.readFileSync(path.join(root,f),'utf8');
-const mapper=read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
-const material=read('docs/scifi-ui/scripts/formatx-core-mesh3d-material-v21.js');
-const shape=read('docs/scifi-ui/scripts/formatx-core-shape-v14.js');
-const geometry=read('docs/scifi-ui/scripts/formatx-core-geometry-v13.js');
-const mesh=read('docs/scifi-ui/scripts/formatx-core-mesh3d-v11.js');
-const fracture=read('docs/scifi-ui/scripts/formatx-core-fracture3d-v11.js');
-const grade=read('docs/scifi-ui/styles/formatx-core-cinematic-grade-v22.css');
-const kick=read('docs/scifi-ui/scripts/formatx-core-cinematic-kick-v11.js');
-const infinite=read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
-
-assert.match(mapper,/fxApexSceneStability==='ready-v32'/,'v22 mapper revision missing');
-assert.match(mapper,/formatx-core-mesh3d-material-v21\.js\?v=20260809-sparse-hdr-facets-v21/,'v21 material bootstrap missing');
-assert.match(mapper,/formatx-core-cinematic-grade-v22\.css\?v=20260809-calibrated-postgrade-v22/,'v22 grade bootstrap missing');
-assert.match(mapper,/reference-glass-v21-sparse-high-dynamic-facets/,'v21 material contract missing');
-assert.match(mapper,/reference-polygon-postgrade-v22/,'v22 calibration contract missing');
-assert.match(mapper,/cinematic-sparse-hdr-postgrade-reference-glass-v32/,'v22 visual marker missing');
-assert.doesNotMatch(mapper,/scrollTo\s*\(|scrollIntoView\s*\(|preventDefault\s*\(/,'mapper must not capture scrolling');
-
-assert.match(material,/vec2 cp=vec2\(vP\.x,vP\.y-\.18\)/,'object-space center correction missing');
-assert.match(material,/float planeGlow=sm\(\.70,\.90,face\)/,'sparse facet threshold missing');
-assert.match(material,/fxCoreHighlightModel='sparse-high-dynamic-facets-v21'/,'v21 highlight model marker missing');
-assert.match(material,/fxCoreHighlightCoverage='thresholded-facet-web-axis-ring-v21'/,'v21 highlight coverage marker missing');
-assert.match(material,/fxCoreMeshMaterial='reference-glass-v21'/,'v21 material marker missing');
-assert.doesNotMatch(material,/drawImage\s*\(|new Image\s*\(|background-image/i,'MAG material must remain procedural');
-
-assert.match(grade,/\.fx-core-mesh3d-stage\s*\{\s*filter: saturate\(3\.75\) contrast\(3\.05\)/s,'desktop post-grade missing');
-assert.match(grade,/filter: saturate\(4\.00\) contrast\(3\.20\)/,'mobile calibrated post-grade missing');
-assert.match(grade,/\.fx-core-fracture3d-stage\s*\{\s*filter: saturate\(2\.20\) contrast\(1\.55\)/s,'desktop fracture post-grade missing');
-assert.match(grade,/filter: saturate\(2\.35\) contrast\(1\.65\)/,'mobile fracture post-grade missing');
-assert.match(grade,/brightness\(2\.08\)/,'mobile base brightness missing');
-assert.match(grade,/saturate\(1\.14\)/,'mobile base saturation missing');
-
-assert.match(shape,/aPosition\.y\*\.72/,'reference Y ratio missing');
-assert.match(shape,/fxCoreShapeMesh='applied-v14'/,'mesh shape patch missing');
-assert.match(shape,/fxCoreShapeFracture='applied-v14'/,'fracture shape patch missing');
-assert.match(geometry,/value\*1\.15/,'true 3D scale multiplier missing');
-assert.match(mesh,/getContext\('webgl2'/,'WebGL2 mesh context missing');
-assert.match(mesh,/gl\.enable\(gl\.DEPTH_TEST\)/,'depth testing missing');
-assert.match(mesh,/gl\.drawElements\(gl\.TRIANGLES/,'indexed triangles missing');
-assert.match(fracture,/gl\.drawElements\(gl\.LINES/,'indexed fracture lines missing');
-assert.match(kick,/formatx:organismresponse.*\.74,1\.15,2100/s,'frame-rate independent response impulse missing');
-assert.match(infinite,/const VERSION = 'seamless-v7'/,'seamless-v7 regressed');
-assert.match(infinite,/root\.dataset\.fxInfiniteInput = 'native'/,'native momentum regressed');
-console.log('PASS: v22 preserves true sparse HDR WebGL geometry and adds a calibrated stage-level cinematic post-grade while protecting seamless-v7 native scrolling.');
+const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');const root=path.resolve(__dirname,'../..');const read=f=>fs.readFileSync(path.join(root,f),'utf8');
+const mapper=read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');const material=read('docs/scifi-ui/scripts/formatx-core-mesh3d-material-v23.js');const grade=read('docs/scifi-ui/styles/formatx-core-cinematic-grade-v23.css');const shape=read('docs/scifi-ui/scripts/formatx-core-shape-v14.js');const geometry=read('docs/scifi-ui/scripts/formatx-core-geometry-v13.js');const mesh=read('docs/scifi-ui/scripts/formatx-core-mesh3d-v11.js');const fracture=read('docs/scifi-ui/scripts/formatx-core-fracture3d-v11.js');const kick=read('docs/scifi-ui/scripts/formatx-core-cinematic-kick-v11.js');const infinite=read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
+assert.match(mapper,/ready-v33/);assert.match(mapper,/formatx-core-mesh3d-material-v23\.js\?v=20260809-reference-energy-network-v23/);assert.match(mapper,/formatx-core-cinematic-grade-v23\.css\?v=20260809-reference-network-v23/);assert.match(mapper,/reference-glass-v23-energy-network/);assert.match(mapper,/reference-energy-network-v23/);assert.match(mapper,/cinematic-reference-energy-network-v33/);assert.doesNotMatch(mapper,/scrollTo\s*\(|scrollIntoView\s*\(|preventDefault\s*\(/);
+assert.match(material,/vec2 cp=vec2\(vP\.x,vP\.y-\.18\)/);assert.match(material,/lineA=1\.-sm\(\.045,\.115,abs\(sin/);assert.match(material,/lineB=1\.-sm\(\.045,\.115,abs\(sin/);assert.match(material,/radialLine=1\.-sm\(\.040,\.105,abs\(sin/);assert.match(material,/float web=max\(max\(lineA,lineB\),radialLine\*\.92\)/);assert.match(material,/float ringGlow=/);assert.match(material,/float violetNode=/);assert.match(material,/float node=/);assert.match(material,/fxCoreHighlightModel='reference-energy-network-v23'/);assert.match(material,/fxCoreHighlightCoverage='controlled-10-20pct-network-v23'/);assert.match(material,/fxCoreMeshMaterial='reference-glass-v23'/);assert.match(material,/fxCoreMaterialCenter='object-space-y-minus-0\.18'/);assert.doesNotMatch(material,/drawImage\s*\(|new Image\s*\(|background-image/i);
+assert.match(grade,/\.fx-core-mesh3d-stage,\s*\.fx-core-fracture3d-stage\s*\{\s*filter: none/s);assert.match(grade,/brightness\(1\.98\)/);assert.match(grade,/saturate\(1\.28\)/);assert.match(grade,/opacity: 0\.68/);assert.match(shape,/aPosition\.y\*\.72/);assert.match(shape,/fxCoreShapeMesh='applied-v14'/);assert.match(shape,/fxCoreShapeFracture='applied-v14'/);assert.match(geometry,/value\*1\.15/);assert.match(mesh,/getContext\('webgl2'/);assert.match(mesh,/gl\.enable\(gl\.DEPTH_TEST\)/);assert.match(mesh,/gl\.drawElements\(gl\.TRIANGLES/);assert.match(fracture,/gl\.drawElements\(gl\.LINES/);assert.match(kick,/formatx:organismresponse.*\.74,1\.15,2100/s);assert.match(infinite,/const VERSION = 'seamless-v7'/);assert.match(infinite,/root\.dataset\.fxInfiniteInput = 'native'/);
+console.log('PASS: v23 uses a dark real WebGL glass body with controlled cyan/violet energy networks, real 3D geometry and native seamless-v7 scrolling.');
