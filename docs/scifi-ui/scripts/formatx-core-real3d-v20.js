@@ -340,11 +340,24 @@
       float luminance=dot(color,vec3(.2126,.7152,.0722));
       color=max(vec3(0.0),mix(vec3(luminance),color,1.90));
       float highlightPeak=max(max(color.r,color.g),color.b);
-      color=min(vec3(1.0),color*(1.0+.30*highlightPeak*highlightPeak));
+      color=min(vec3(1.0),color*(1.0+.50*highlightPeak*highlightPeak));
       float finalLuminance=dot(color,vec3(.2126,.7152,.0722));
-      color=min(vec3(1.0),max(vec3(0.0),mix(vec3(finalLuminance),color,5.20)));
+      color=min(vec3(1.0),max(vec3(0.0),mix(vec3(finalLuminance),color,8.00)));
+      float gradedPeak=max(max(color.r,color.g),color.b);
+      float gradedMinimum=min(min(color.r,color.g),color.b);
+      float gradedSaturation=gradedPeak>0.0?(gradedPeak-gradedMinimum)/gradedPeak:0.0;
+      float gradedLuminance=dot(color,lumaWeights);
+      vec3 finalSpectralTint=mix(vec3(.02,.96,1.0),vec3(.68,.44,1.0),violetMix*.36);
+      finalSpectralTint*=gradedPeak/max(.001,max(max(finalSpectralTint.r,finalSpectralTint.g),finalSpectralTint.b));
       float aura=max(max(bloom.r,bloom.g),bloom.b);
-      fragColor=vec4(color,clamp(scene.a+aura*.36,0.0,1.0));
+      float outputAlpha=clamp(scene.a+aura*.50,0.0,1.0);
+      float brightDisplayPreserve=smoothstep(.68,.82,gradedPeak*outputAlpha);
+      float whiteCorePreserve=smoothstep(.76,.94,scene.a)*smoothstep(.92,1.0,gradedPeak);
+      float finalSpectralMask=(1.0-smoothstep(.50,.78,gradedSaturation))*smoothstep(.05,.58,gradedPeak)*(1.0-.88*whiteCorePreserve)*(1.0-.92*brightDisplayPreserve);
+      color=mix(color,finalSpectralTint,finalSpectralMask*.58);
+      gradedPeak=max(max(color.r,color.g),color.b);
+      color=min(vec3(1.0),color*(1.42+.08*gradedPeak));
+      fragColor=vec4(color,outputAlpha);
     }`;
 
   function shader(type, source) { const output = gl.createShader(type); gl.shaderSource(output, source); gl.compileShader(output); if (!gl.getShaderParameter(output, gl.COMPILE_STATUS)) { const reason = gl.getShaderInfoLog(output) || 'shader compile failed'; gl.deleteShader(output); throw new Error(reason); } return output; }
