@@ -31,9 +31,11 @@
   },
   "live_visual_gate": {
     "workflow": "Verify live true 3D MAG visual",
-    "revision": "v26-mobile-desktop-calibration-2",
+    "revision": "v26-mobile-desktop-calibration-2-coverage-tolerance-1",
     "captures": ["753x1536 mobile", "1440x1000 desktop"],
     "runtime_assertions": ["WebGL2", "depth", "perspective", "indexed crystal", "no legacy stage", "no image backing"],
+    "minimum_viewport_coverage": 0.97,
+    "coverage_policy": "Allow intentional CSS safe-area/micro-margin while rejecting materially undersized render surfaces",
     "known_external_noise": "Cloudflare analytics beacon blocked by first-party CSP is ignored by the visual gate"
   },
   "reference_position_gate": {
