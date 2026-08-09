@@ -17,7 +17,8 @@ const referenceBootstrap = read('docs/scifi-ui/scripts/formatx-reference-core-v2
 const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
 
 assert.match(bootstrap, /reference-lock-v30/, 'production bootstrap must select reference-lock v30');
-assert.match(bootstrap, /formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-1/, 'reference-lock runtime route missing');
+assert.match(bootstrap, /formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-2/, 'reference-lock runtime cache revision 2 missing');
+assert.match(bootstrap, /formatx-reference-lock-v30\.css\?v=20260810-uploaded-reference-lock-2/, 'reference-lock style cache revision 2 missing');
 assert.equal((bootstrap.match(/getContext\('webgl2'/g) || []).length, 0, 'compatibility bootstrap must not create a second WebGL2 context');
 assert.equal((runtime.match(/getContext\('webgl2'/g) || []).length, 1, 'the production MAG renderer must own exactly one WebGL2 context');
 
@@ -57,6 +58,7 @@ assert.match(style, /pointer-events:none/, 'reference stage must not capture inp
 assert.match(style, /100dvh/, 'dynamic viewport sizing missing');
 assert.match(style, /--fx-core-x:50%/, 'mobile/portrait reference centering missing');
 assert.match(style, /perspective\(560px\) rotateX\(63deg\)/, 'reference energy-floor perspective missing');
+assert.match(style, /saturate\(1\.42\) contrast\(1\.06\) brightness\(1\.24\)/, 'stable luminous reference grade missing');
 assert.ok(loader.includes("root.dataset.fxCoreReal3d === 'ready-v20'"), 'legacy multi-context loader retirement is missing');
 assert.ok(mapper.includes("root.dataset.fxCoreReal3d==='ready-v20'"), 'legacy mesh mapper guard is missing');
 assert.ok(premium.includes("addEventListener('formatx:coremesh3dready', syncRendererState)"), 'Canvas2D fallback retirement hook is missing');
@@ -72,4 +74,4 @@ assert.equal(quality.mag_frame_rate_target, '60-plus-display-refresh-uncapped');
 assert.equal(quality.mag_paused_outside_hero, true);
 assert.equal(quality.mag_reference_target, 'four-tip-luminous-crystal-sci-fi-film-core');
 
-console.log('PASS: FormatX production uses one indexed WebGL2 context in dense-glass uploaded-reference lock v30, with four-sail crystal geometry, a moving inner reactor, thin real 3D rings, dense cyan/violet filaments, adaptive rendering and no image-backed core.');
+console.log('PASS: FormatX production uses one indexed WebGL2 context in stable luminous uploaded-reference lock v30 cache revision 2, with four-sail crystal geometry, a moving inner reactor, thin real 3D rings, dense cyan/violet filaments and no image-backed core.');
