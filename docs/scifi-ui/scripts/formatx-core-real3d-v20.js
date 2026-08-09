@@ -2,8 +2,8 @@
 'use strict';
 const root=document.documentElement;
 const BOOTSTRAP='reference-lock-v30';
-const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-4';
-const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-4';
+const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-5';
+const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-5';
 if(root.dataset.fxCoreReal3dBootstrap===BOOTSTRAP)return;
 root.dataset.fxCoreReal3dBootstrap=BOOTSTRAP;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
