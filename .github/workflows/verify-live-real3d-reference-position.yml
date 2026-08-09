@@ -62,7 +62,6 @@ jobs:
               }
             }
             if (peak.x === null) return { search, peak, qualifying_pixels: 0, centroid_x: null, centroid_y: null };
-
             const radius = Math.round(Math.min(image.width, image.height) * 0.075);
             const threshold = Math.max(.48, peak.luminance * .64);
             let pixels = 0, weight = 0, sumX = 0, sumY = 0;
@@ -80,41 +79,35 @@ jobs:
                 pixels += 1; weight += w; sumX += x * w; sumY += y * w;
               }
             }
-            return {
-              search,
-              peak,
-              radius,
-              threshold,
-              qualifying_pixels: pixels,
-              centroid_x: weight ? sumX / weight : null,
-              centroid_y: weight ? sumY / weight : null,
-            };
+            return {search,peak,radius,threshold,qualifying_pixels:pixels,centroid_x:weight?sumX/weight:null,centroid_y:weight?sumY/weight:null};
+          }
+
+          async function waitForRenderer(page) {
+            await page.waitForFunction(() => {
+              const root=document.documentElement;
+              const ref=root.dataset.fxCoreReferenceLock||'';
+              const real=root.dataset.fxCoreReal3d||'';
+              return ref==='ready-v30' || ref.startsWith('fallback-') || ref==='load-failed' || ['shader-failed','context-unavailable','webgl2-unavailable','context-lost','geometry-failed'].includes(real);
+            }, null, {timeout:60000});
+            const diagnostic=await page.evaluate(()=>({
+              reference:document.documentElement.dataset.fxCoreReferenceLock||null,
+              referenceLoad:document.documentElement.dataset.fxCoreReferenceLockLoad||null,
+              real3d:document.documentElement.dataset.fxCoreReal3d||null,
+              error:document.documentElement.dataset.fxCoreReal3dError||null,
+              scripts:[...document.scripts].map(s=>s.src).filter(src=>src.includes('reference-lock-v30')),
+              styles:[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>l.href).filter(src=>src.includes('reference-lock-v30'))
+            }));
+            console.log('V30_POSITION_STARTUP_DIAGNOSTIC',JSON.stringify(diagnostic));
+            if(diagnostic.reference!=='ready-v30') throw new Error(`v30 renderer startup failed before position audit: ${JSON.stringify(diagnostic)}`);
           }
 
           (async () => {
-            const browser = await chromium.launch({
-              headless: true,
-              args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
-            });
-            const context = await browser.newContext({
-              viewport: { width: 753, height: 1536 },
-              deviceScaleFactor: 1,
-              isMobile: true,
-              hasTouch: true,
-              locale: 'hu-HU'
-            });
+            const browser = await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context = await browser.newContext({viewport:{width:753,height:1536},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU'});
             const page = await context.newPage();
-            await page.goto(`https://www.formatxsuite.com/?real3d_ref30=${process.env.RUN_ID}`, {
-              waitUntil: 'domcontentloaded', timeout: 45000
-            });
-            await page.evaluate(() => {
-              const root = document.documentElement;
-              root.lang = 'hu';
-              root.classList.add('fx-intro-complete');
-              document.getElementById('formatx-event-horizon')?.remove();
-              scrollTo(0, 0);
-            });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreReferenceLock === 'ready-v30', null, { timeout: 60000 });
+            await page.goto(`https://www.formatxsuite.com/?real3d_ref30=${process.env.RUN_ID}`, {waitUntil:'domcontentloaded',timeout:45000});
+            await page.evaluate(() => {const root=document.documentElement;root.lang='hu';root.classList.add('fx-intro-complete');document.getElementById('formatx-event-horizon')?.remove();scrollTo(0,0);});
+            await waitForRenderer(page);
             await page.waitForTimeout(1800);
             if (await page.evaluate(() => scrollY) !== 0) throw new Error('reference audit must remain at scrollY=0');
 
@@ -133,12 +126,7 @@ jobs:
               oldStages: document.querySelectorAll('.fx-core-mesh3d-stage,.fx-core-fracture3d-stage').length
             }));
 
-            const target = {
-              white_core_centroid_x: [340, 410],
-              white_core_centroid_y: [560, 690],
-              peak_luminance_minimum: .68,
-              minimum_qualifying_pixels: 20
-            };
+            const target = {white_core_centroid_x:[340,410],white_core_centroid_y:[560,690],peak_luminance_minimum:.68,minimum_qualifying_pixels:20};
             fs.writeFileSync('reference-position-metrics.json', JSON.stringify({ target, measured: visual, state }, null, 2));
             console.log('REFERENCE_POSITION_V30', JSON.stringify({ visual, state, target }));
 
@@ -154,13 +142,8 @@ jobs:
               && state.material === 'dense-luminous-glass-filaments-v30'
               && state.visual === 'v30-reference-lock'
               && state.geometry === 'concave-four-sail-indexed-mesh-v30'
-              && state.scrollY === 0
-              && state.stages === 1
-              && state.v26Stages === 0
-              && state.oldStages === 0;
-            if (!runtimeOk || !positionOk) {
-              throw new Error(`v30 white-core position invalid: ${JSON.stringify({ visual, state, target })}`);
-            }
+              && state.scrollY === 0 && state.stages === 1 && state.v26Stages === 0 && state.oldStages === 0;
+            if (!runtimeOk || !positionOk) throw new Error(`v30 white-core position invalid: ${JSON.stringify({ visual, state, target })}`);
             await browser.close();
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
@@ -185,15 +168,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then
-            state=success
-            description='Uploaded-reference MAG v30 white-core position passed at scrollY=0'
-          else
-            state=failure
-            description='Uploaded-reference MAG v30 white-core position failed'
-          fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
-            -f state="$state" \
-            -f context='FormatX real3D reference-position audit' \
-            -f description="$description" \
-            -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Uploaded-reference MAG v30 r2 white-core position passed at scrollY=0'; else state=failure; description='Uploaded-reference MAG v30 r2 white-core position failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX real3D reference-position audit' -f description="$description" -f target_url="$TARGET_URL"
