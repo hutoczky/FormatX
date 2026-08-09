@@ -198,3 +198,5 @@
     filter: brightness(1.01) saturate(1.12) contrast(1.04) !important;
   }
 }
+
+/* Production deployment trigger: cinematic interaction v27. */
