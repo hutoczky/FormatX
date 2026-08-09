@@ -1,13 +1,12 @@
 /* FormatX Real3D Mobile v29
-   Authoritative composition for the native WebGL2 orbital core.
-   Goal: the core must read as an interactive 3D object, not a full-screen poster. */
+   Authoritative composition for both native WebGPU v29 and WebGL2 v28 fallback.
+   The 3D object is real GPU geometry; this file only frames it for readable mobile UX. */
 
-html[data-fx-orbital-core="ready-v28"] {
+html[data-fx-orbital-core="ready-v28"],
+html[data-fx-webgpu-core="ready-v29"] {
   --fx-real3d-core: 1;
 }
 
-/* When the real WebGL core is alive, retire every decorative substitute that
-   can visually flatten or duplicate the object. */
 html[data-fx-orbital-core="ready-v28"] #hero .hero-ring,
 html[data-fx-orbital-core="ready-v28"] #hero .hero-space::before,
 html[data-fx-orbital-core="ready-v28"] #hero .hero-space::after,
@@ -16,7 +15,16 @@ html[data-fx-orbital-core="ready-v28"] .fx-premium-core-status,
 html[data-fx-orbital-core="ready-v28"] .fx-three-stage-shell,
 html[data-fx-orbital-core="ready-v28"] .fx-transcend-shell,
 html[data-fx-orbital-core="ready-v28"] #fx-apex-canvas,
-html[data-fx-orbital-core="ready-v28"] #fx-particle-canvas {
+html[data-fx-orbital-core="ready-v28"] #fx-particle-canvas,
+html[data-fx-webgpu-core="ready-v29"] #hero .hero-ring,
+html[data-fx-webgpu-core="ready-v29"] #hero .hero-space::before,
+html[data-fx-webgpu-core="ready-v29"] #hero .hero-space::after,
+html[data-fx-webgpu-core="ready-v29"] .fx-resilient-core,
+html[data-fx-webgpu-core="ready-v29"] .fx-premium-core-status,
+html[data-fx-webgpu-core="ready-v29"] .fx-three-stage-shell,
+html[data-fx-webgpu-core="ready-v29"] .fx-transcend-shell,
+html[data-fx-webgpu-core="ready-v29"] #fx-apex-canvas,
+html[data-fx-webgpu-core="ready-v29"] #fx-particle-canvas {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -24,9 +32,8 @@ html[data-fx-orbital-core="ready-v28"] #fx-particle-canvas {
   animation: none !important;
 }
 
-/* Keep the native WebGL2 renderer crisp. The actual perspective/depth is
-   generated inside the canvas by the projection/view/model matrices. */
-html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-stage {
+html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-stage,
+html[data-fx-webgpu-core="ready-v29"] .fx-webgpu-core-v29-stage {
   display: block !important;
   visibility: visible !important;
   pointer-events: none !important;
@@ -34,63 +41,69 @@ html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-stage {
   perspective: 1200px;
 }
 
-html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas {
+html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas,
+html[data-fx-webgpu-core="ready-v29"] .fx-webgpu-core-v29-canvas {
   image-rendering: auto !important;
   backface-visibility: hidden;
   will-change: transform, filter;
 }
 
 @media (max-width: 900px), (pointer: coarse) {
-  /* The old mobile composition gave the visual almost a full viewport and it
-     read like a poster. Reserve a finite 3D stage and let content continue. */
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero {
+  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero,
+  html[data-fx-webgpu-core="ready-v29"] body.living-architecture #hero {
     min-height: 0 !important;
     height: auto !important;
     padding-top: max(78px, calc(env(safe-area-inset-top, 0px) + 68px)) !important;
-    padding-bottom: 54px !important;
+    padding-bottom: 52px !important;
     overflow: clip !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-grid {
+  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-grid,
+  html[data-fx-webgpu-core="ready-v29"] body.living-architecture #hero .hero-grid {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: clamp(18px, 4svh, 34px) !important;
     min-height: 0 !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-space {
+  /* Critical correction: text stays first. The 3D stage follows it instead of
+     taking over the entire first viewport. */
+  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-copy,
+  html[data-fx-webgpu-core="ready-v29"] body.living-architecture #hero .hero-copy {
     order: -1 !important;
-    min-height: clamp(390px, 49svh, 610px) !important;
-    height: clamp(390px, 49svh, 610px) !important;
-    max-height: 610px !important;
+    position: relative !important;
+    z-index: 180 !important;
+    margin-top: 0 !important;
+  }
+
+  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-space,
+  html[data-fx-webgpu-core="ready-v29"] body.living-architecture #hero .hero-space {
+    order: 0 !important;
+    min-height: clamp(300px, 42svh, 470px) !important;
+    height: clamp(300px, 42svh, 470px) !important;
+    max-height: 470px !important;
     margin: 0 !important;
     border-radius: 0 !important;
     overflow: visible !important;
   }
 
-  /* The WebGL scene remains true 3D; this only frames the already-rendered
-     perspective image so the object has breathing room on phones. */
-  html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas {
-    transform: translate3d(0, -5.5svh, 0) scale(.82) !important;
+  html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas,
+  html[data-fx-webgpu-core="ready-v29"] .fx-webgpu-core-v29-canvas {
+    transform: translate3d(0, 8svh, 0) scale(.58) !important;
     transform-origin: 50% 43% !important;
-    filter: saturate(1.20) contrast(1.06) brightness(1.06) !important;
+    filter: saturate(1.13) contrast(1.035) brightness(1.02) !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-stage::before {
+  html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-stage::before,
+  html[data-fx-webgpu-core="ready-v29"] .fx-webgpu-core-v29-stage::before {
     background:
-      radial-gradient(circle at 50% 37%, rgba(111, 224, 255, .12), transparent 10rem),
-      radial-gradient(circle at 50% 41%, rgba(46, 132, 255, .085), transparent 20rem),
-      radial-gradient(circle at 55% 43%, rgba(183, 54, 255, .045), transparent 24rem),
-      linear-gradient(180deg, rgba(1, 7, 16, .01), rgba(0, 3, 10, .07)) !important;
+      radial-gradient(circle at 50% 48%, rgba(111, 224, 255, .105), transparent 9rem),
+      radial-gradient(circle at 50% 49%, rgba(46, 132, 255, .070), transparent 18rem),
+      radial-gradient(circle at 54% 50%, rgba(183, 54, 255, .040), transparent 22rem) !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-copy {
-    z-index: 180 !important;
-    margin-top: -8px !important;
-  }
-
-  /* Floating controls get dedicated slots away from the 3D silhouette. */
-  html[data-fx-orbital-core="ready-v28"] .fx-organism-dialogue:not(.is-open) {
+  html[data-fx-orbital-core="ready-v28"] .fx-organism-dialogue:not(.is-open),
+  html[data-fx-webgpu-core="ready-v29"] .fx-organism-dialogue:not(.is-open) {
     top: max(118px, calc(env(safe-area-inset-top, 0px) + 104px)) !important;
     right: 10px !important;
     width: 52px !important;
@@ -98,20 +111,16 @@ html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas {
     z-index: 10220 !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] .fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger {
+  html[data-fx-orbital-core="ready-v28"] .fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger,
+  html[data-fx-webgpu-core="ready-v29"] .fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger {
     width: 52px !important;
     height: 52px !important;
     min-width: 52px !important;
     min-height: 52px !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] .fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger + *,
-  html[data-fx-orbital-core="ready-v28"] .fx-organism-dialogue:not(.is-open) [data-fx-thought-label] {
-    font-size: 11px !important;
-    line-height: 1.1 !important;
-  }
-
-  html[data-fx-orbital-core="ready-v28"] .fx-three-sound[data-fx-audio-engine="professional-v6"] {
+  html[data-fx-orbital-core="ready-v28"] .fx-three-sound[data-fx-audio-engine="professional-v6"],
+  html[data-fx-webgpu-core="ready-v29"] .fx-three-sound[data-fx-audio-engine="professional-v6"] {
     top: max(188px, calc(env(safe-area-inset-top, 0px) + 174px)) !important;
     right: 14px !important;
     bottom: auto !important;
@@ -123,29 +132,32 @@ html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas {
     z-index: 10210 !important;
   }
 
-  /* Content following the core gets a clear handoff instead of visually
-     overlapping the 3D object. */
   html[data-fx-orbital-core="ready-v28"] .fx-category-deck--standalone,
-  html[data-fx-orbital-core="ready-v28"] #experience {
+  html[data-fx-orbital-core="ready-v28"] #experience,
+  html[data-fx-webgpu-core="ready-v29"] .fx-category-deck--standalone,
+  html[data-fx-webgpu-core="ready-v29"] #experience {
     position: relative !important;
     z-index: 190 !important;
   }
 }
 
 @media (max-width: 480px) {
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-space {
-    min-height: clamp(360px, 46svh, 520px) !important;
-    height: clamp(360px, 46svh, 520px) !important;
+  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-space,
+  html[data-fx-webgpu-core="ready-v29"] body.living-architecture #hero .hero-space {
+    min-height: clamp(280px, 39svh, 420px) !important;
+    height: clamp(280px, 39svh, 420px) !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas {
-    transform: translate3d(0, -4.5svh, 0) scale(.78) !important;
+  html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas,
+  html[data-fx-webgpu-core="ready-v29"] .fx-webgpu-core-v29-canvas {
+    transform: translate3d(0, 9svh, 0) scale(.52) !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas {
-    transform: translate3d(0, -4svh, 0) scale(.80) !important;
+  html[data-fx-orbital-core="ready-v28"] .fx-orbital-core-v28-canvas,
+  html[data-fx-webgpu-core="ready-v29"] .fx-webgpu-core-v29-canvas {
+    transform: translate3d(0, 7svh, 0) scale(.54) !important;
     transition: none !important;
   }
 }
