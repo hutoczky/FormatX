@@ -159,7 +159,7 @@ async function assertAndroidStatus(browser, viewport, name) {
   assert(errors.length === 0, `${name}: page errors: ${errors.join(' | ')}`);
   assert(await page.locator('h1').count() === 1, `${name}: exactly one h1 is required`);
   assert(await page.locator('a[href="/download/android"]').count() >= 2, `${name}: official Android full-release links missing`);
-  assert(await page.locator('a[href*="android-native-v1.1.0-beta"]').count() >= 1, `${name}: Native beta channel link missing`);
+  assert(await page.locator('a[href="/download/android-native-beta"]').count() >= 1, `${name}: first-party Native beta download route missing`);
   const text = await page.locator('body').innerText();
   assert(/ANDROID TELJES|Android full release/i.test(text), `${name}: full-release copy missing`);
   assert(/NATÍV BÉTA|Native beta/i.test(text), `${name}: beta-channel separation missing`);
