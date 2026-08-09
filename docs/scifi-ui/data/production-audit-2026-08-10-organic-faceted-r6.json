@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-08-10",
+  "scope": "organic faceted refinement of the uploaded-reference production MAG",
+  "production_renderer": "/scifi-ui/scripts/formatx-reference-lock-v30.js",
+  "reference_target": "user-supplied four-tip luminous crystalline sci-fi core reference",
+  "changes": {
+    "regular_grid_replaced": true,
+    "transverse_veins": [3, 6, 9, 12],
+    "longitudinal_branch_count": 8,
+    "diagonal_branch_layers": [3, 5, 7, 9],
+    "procedural_organic_branch_shader": true,
+    "reactor_torus_thickness": 0.009,
+    "inner_ring_opacity_reduced": true,
+    "white_core_halo_increased": true,
+    "outer_orbit_opacity_reduced": true,
+    "image_backed": false,
+    "webgl2_context_count": 1,
+    "performance_target": "adaptive 60-plus FPS"
+  },
+  "acceptance": {
+    "production_validation": "required",
+    "production_smoke": "required",
+    "live_mobile_desktop_visual": "required",
+    "live_reference_position": "required",
+    "direct_screenshot_reference_comparison": "required"
+  }
+}
