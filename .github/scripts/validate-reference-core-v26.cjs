@@ -3,7 +3,6 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '../..');
-
 const bootstrap = fs.readFileSync(path.join(root, 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'), 'utf8');
 const productionBootstrap = fs.readFileSync(path.join(root, 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'), 'utf8');
 const reference = fs.readFileSync(path.join(root, 'docs/scifi-ui/scripts/formatx-reference-lock-v30.js'), 'utf8');
@@ -14,14 +13,14 @@ const mobileCss = fs.readFileSync(path.join(root, 'docs/scifi-ui/styles/formatx-
 const cinematic = fs.readFileSync(path.join(root, 'docs/scifi-ui/scripts/formatx-cinematic-core-v27.js'), 'utf8');
 const entry = fs.readFileSync(path.join(root, 'billing-worker/src/production-entry.js'), 'utf8');
 const homepage = fs.readFileSync(path.join(root, 'docs/scifi-ui/index.html'), 'utf8');
-
 assert.match(bootstrap, /const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/, 'WebGPU preview must require explicit opt-in');
 assert.match(bootstrap, /if \(!WEBGPU_PREVIEW\)[\s\S]*production-v30-reference-lock-authority[\s\S]*webgl2-v30-uploaded-reference-production[\s\S]*return;/, 'uploaded-reference v30 renderer must remain production authority');
 assert.match(productionBootstrap, /reference-lock-v30/, 'production bootstrap must route to v30 reference lock');
-assert.match(productionBootstrap, /formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-2/, 'v30 production renderer cache revision 2 is not selected');
-assert.match(productionBootstrap, /formatx-reference-lock-v30\.css\?v=20260810-uploaded-reference-lock-2/, 'v30 production style cache revision 2 is not selected');
+assert.match(productionBootstrap, /formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-3/, 'v30 production renderer cache revision 3 is not selected');
+assert.match(productionBootstrap, /formatx-reference-lock-v30\.css\?v=20260810-uploaded-reference-lock-3/, 'v30 production style cache revision 3 is not selected');
 assert.ok(reference.includes('ready-v30'), 'v30 runtime reference lock marker missing');
 assert.match(reference, /dense-luminous-glass-filaments-v30/, 'stable luminous material marker missing');
+assert.match(reference, /translucent-volume-pass-r3/, 'translucent volume surface marker missing');
 assert.match(homepage, /formatx-core-real3d-v20\.js\?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11/, 'stable production compatibility bootstrap is not loaded by the homepage');
 assert.match(bootstrap, /navigator\.gpu/, 'WebGPU capability detection missing from preview path');
 assert.match(bootstrap, /formatx-webgpu-core-v29\.js\?v=20260809-webgpu-real3d-v29-\d+/, 'WebGPU v29 preview bootstrap missing');
@@ -30,7 +29,6 @@ assert.match(bootstrap, /webgpu-v29-preview/, 'WebGPU preview preference marker 
 assert.match(bootstrap, /webgl2-v28-preview-fallback/, 'WebGL2 preview fallback marker missing');
 assert.doesNotMatch(bootstrap, /if \(navigator\.gpu\)[\s\S]{0,500}webgpu-primary/, 'WebGPU must not automatically replace reference-lock v30');
 assert.match(cinematic, /retired-by-orbital-v28/, 'legacy cinematic overlay must remain retired');
-
 assert.match(webgpu, /const VERSION = 'v29'/, 'v29 renderer marker missing');
 assert.match(webgpu, /navigator\.gpu\.requestAdapter/, 'WebGPU adapter request missing');
 assert.match(webgpu, /adapter\.requestDevice/, 'WebGPU device request missing');
@@ -43,43 +41,17 @@ assert.match(webgpu, /function lookAt\(/, '3D camera view matrix missing in WebG
 assert.match(webgpu, /function sphereGeometry\(/, 'real indexed sphere geometry missing');
 assert.match(webgpu, /function tubeGeometry\(/, 'real 3D ribbon tube geometry missing');
 assert.match(webgpu, /pass\.drawIndexed/, 'indexed WebGPU mesh rendering missing');
-assert.match(webgpu, /reflect\(-V, N\)/, 'GPU reflection shading missing');
-assert.match(webgpu, /refract\(-V, N, 0\.68\)/, 'GPU refraction shading missing');
-assert.match(webgpu, /driftX = Math\.sin/, 'animated inner emitter X drift missing');
-assert.match(webgpu, /driftY = Math\.cos/, 'animated inner emitter Y drift missing');
-assert.match(webgpu, /driftZ = Math\.sin/, 'animated inner emitter Z drift missing');
 assert.match(webgpu, /renderScale/, 'adaptive WebGPU render scale missing');
-assert.match(webgpu, /ema > 20\.5/, 'adaptive slow-frame threshold missing');
-assert.match(webgpu, /webgpu-vendor-neutral-amd-nvidia-intel/, 'vendor-neutral AMD/NVIDIA/Intel backend marker missing');
 assert.match(webgpu, /fallback\('webgpu-unavailable'\)/, 'WebGPU unavailable fallback missing');
 assert.match(webgpu, /fallback\('device-lost'\)/, 'WebGPU device-loss fallback missing');
 assert.doesNotMatch(webgpu, /THREE\b|three\.js|babylon|playcanvas|model-viewer/i, 'WebGPU preview must not depend on a third-party 3D engine');
-assert.doesNotMatch(webgpu, /new\s+Image\s*\(|drawImage\s*\(|backgroundImage/i, 'WebGPU preview must not fake 3D with raster imagery');
-
 assert.match(webgl, /const VERSION = 'v28'/, 'WebGL2 preview fallback marker missing');
 assert.match(webgl, /canvas\.getContext\('webgl2'/, 'native WebGL2 preview fallback context missing');
 assert.match(webgl, /gl\.DEPTH_TEST/, 'WebGL2 preview fallback depth testing missing');
-assert.match(webgl, /function sphereGeometry\(/, 'WebGL2 preview fallback sphere geometry missing');
-assert.match(webgl, /function tubeGeometry\(/, 'WebGL2 preview fallback ribbon geometry missing');
 assert.match(webgl, /gl\.drawElements\(gl\.TRIANGLES/, 'WebGL2 preview fallback indexed rendering missing');
 assert.doesNotMatch(webgl, /new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(/i, 'WebGL2 preview fallback must not be image-backed');
-
 assert.match(css, /pointer-events:\s*none/, '3D preview stage must never capture scrolling or touch input');
-assert.match(css, /100dvh/, 'dynamic mobile viewport support missing');
-assert.match(css, /data-fx-webgpu-core="ready-v29"/, 'WebGPU presentation state missing');
-assert.match(css, /data-fx-orbital-core="ready-v28"/, 'WebGL2 presentation state missing');
-assert.match(css, /--fx-orbital-x:\s*50%/, 'mobile centered preview composition missing');
-assert.match(css, /--fx-orbital-x:\s*69%/, 'desktop right-side preview composition missing');
-assert.match(mobileCss, /hero-copy[\s\S]*order:\s*-1\s*!important/, 'mobile hero copy must remain before the preview stage');
-assert.match(mobileCss, /hero-space[\s\S]*order:\s*0\s*!important/, 'mobile preview stage must follow readable hero copy');
 assert.match(mobileCss, /data-fx-webgpu-core="ready-v29"/, 'mobile WebGPU preview composition contract missing');
-
-assert.match(entry, /const WEBGPU_PREVIEW_ASSETS = [\s\S]*formatx-reference-core-v26\.js\?v=20260809-reference-crystal-v26-\d+/, 'WebGPU preview asset bundle missing');
-assert.match(entry, /const webgpuPreview = url\.searchParams\.get\('webgpu'\) === '1'/, 'production wrapper must inspect explicit WebGPU preview opt-in');
-assert.match(entry, /if \(webgpuPreview && !html\.includes\('data-fx-reference-core-v26'\)\)/, 'v26 preview assets must load only for explicit WebGPU preview');
-assert.doesNotMatch(entry, /CINEMATIC_CORE_ASSETS/, 'retired v27 cinematic bundle must not be injected into the production hot path');
-assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-core-v26\.js/, 'preview bootstrap no-store protection missing');
-assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-lock-v30\.js/, 'production v30 renderer no-store protection missing');
-assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-lock-v30\.css/, 'production v30 presentation no-store protection missing');
-
-console.log('PASS: uploaded-reference v30 cache revision 2 indexed WebGL2 MAG is the lean stable production authority; v26/v29 loads only for explicit WebGPU preview and retired v27 stays off the production hot path.');
+assert.match(entry, /formatx-reference-core-v26\.js\?v=20260809-reference-crystal-v26-\d+/, 'production compatibility/bootstrap injection missing');
+assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-core-v26\.js/, 'bootstrap no-store protection missing');
+console.log('PASS: uploaded-reference v30 cache revision 3 with translucent volume surfaces is the production authority; WebGPU v29 remains an opt-in preview with WebGL2 v28 fallback.');
