@@ -1,0 +1,118 @@
+/* FormatX cinematic core v20 — one WebGL2 stage, no image-backed core. */
+.fx-core-real3d-stage {
+  position: fixed;
+  z-index: 121;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  contain: strict;
+  isolation: isolate;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 420ms ease, visibility 0s linear 420ms;
+}
+
+.fx-core-real3d-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 46%, rgba(28, 161, 235, .105) 0, rgba(20, 95, 182, .045) 24%, transparent 52%),
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 48%, rgba(123, 62, 231, .055) 0, transparent 42%);
+}
+
+.fx-core-real3d-canvas {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  transform: translateZ(0);
+}
+
+.fx-core-real3d-stage[data-active="true"] {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 420ms ease, visibility 0s;
+}
+
+html[data-fx-core-real3d="ready-v20"] #hero .hero-copy {
+  position: relative;
+  z-index: 130;
+}
+
+html[data-fx-core-real3d="ready-v20"] #hero .fx-organism-map,
+html[data-fx-core-real3d="ready-v20"] #hero .fx-immersive-launch,
+html[data-fx-core-real3d="ready-v20"] #hero .hero-ring,
+html[data-fx-core-real3d="ready-v20"] #hero .hero-label,
+html[data-fx-core-real3d="ready-v20"] .fx-resilient-core,
+html[data-fx-core-real3d="ready-v20"] .fx-premium-core-status,
+html[data-fx-core-real3d="ready-v20"] .fx-three-stage-shell,
+html[data-fx-core-real3d="ready-v20"] .fx-core-mesh3d-stage,
+html[data-fx-core-real3d="ready-v20"] .fx-core-fracture3d-stage,
+html[data-fx-core-real3d="ready-v20"] .fx-transcend-shell[data-fx-native-apex="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.fx-organism-menu-open .fx-core-real3d-stage,
+body.fx-organism-panel-open .fx-core-real3d-stage {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+@media (max-width: 820px), (pointer: coarse) {
+  .fx-core-real3d-stage {
+    --fx-core-x: 50%;
+  }
+
+  .fx-core-real3d-stage::before {
+    background:
+      radial-gradient(ellipse at 50% 43%, rgba(32, 180, 244, .13) 0, rgba(20, 92, 180, .055) 25%, transparent 55%),
+      radial-gradient(ellipse at 50% 46%, rgba(133, 66, 241, .07) 0, transparent 46%),
+      linear-gradient(180deg, rgba(1, 5, 11, .02), rgba(0, 2, 7, .17));
+  }
+
+  html[data-fx-core-real3d="ready-v20"] body.living-architecture #hero {
+    min-height: auto !important;
+    padding-top: max(82px, calc(env(safe-area-inset-top) + 72px)) !important;
+  }
+
+  html[data-fx-core-real3d="ready-v20"] body.living-architecture #hero .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    min-height: 0 !important;
+  }
+
+  html[data-fx-core-real3d="ready-v20"] body.living-architecture #hero .hero-space {
+    position: relative !important;
+    z-index: 1 !important;
+    inset: auto !important;
+    order: -1 !important;
+    width: 100% !important;
+    min-height: clamp(620px, 67svh, 940px) !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  html[data-fx-core-real3d="ready-v20"] body.living-architecture #hero .hero-copy {
+    order: 2 !important;
+    z-index: 130 !important;
+    margin-top: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-core-real3d-stage {
+    transition-duration: 120ms;
+  }
+}

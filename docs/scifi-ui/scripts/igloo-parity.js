@@ -251,6 +251,15 @@
     }
 
     const source = queue[index];
+    if (root.dataset.fxCoreReal3d === 'ready-v20'
+      && (source.includes('formatx-apex-native.js') || source.includes('formatx-three-host-safe.js'))) {
+      root.dataset.fxNativeApex = 'retired-for-single-real3d-v20';
+      root.dataset.fxThreeHost = 'single-real3d-v20';
+      root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
+      load(index + 1);
+      return;
+    }
+
     if (source.includes('formatx-apex-native.js') && matchMedia('(prefers-reduced-motion: reduce)').matches) {
       root.dataset.fxNativeApex = 'reduced-motion-fallback';
       root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
