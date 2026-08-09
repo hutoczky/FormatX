@@ -1,5 +1,5 @@
-/* FormatX Orbital Core v28 — genuine WebGL2 glass sphere + independent 3D light ribbons.
-   The renderer remains real perspective 3D. This stylesheet only controls presentation/framing. */
+/* FormatX Real 3D presentation — WebGPU v29 primary, WebGL2 v28 fallback.
+   Both renderers use genuine perspective GPU geometry. */
 .fx-orbital-core-v28-stage {
   --fx-orbital-x: 69%;
   position: fixed;
@@ -64,39 +64,33 @@
   filter: saturate(1.12) contrast(1.03);
 }
 
-/* Keep the genuine 3D scene behind readable hero content. */
-html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero,
-html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-grid,
-html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-copy,
-html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-space {
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero .hero-grid,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero .hero-copy,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero .hero-space {
   position: relative;
 }
 
-html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-copy {
-  z-index: 32;
-}
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero .hero-copy { z-index: 32; }
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero .hero-space { z-index: 20; }
 
-html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-space {
-  z-index: 20;
-}
-
-html[data-fx-orbital-core="ready-v28"] .fx-reference-core-v26-stage,
-html[data-fx-orbital-core="ready-v28"] .fx-core-real3d-stage,
-html[data-fx-orbital-core="ready-v28"] .fx-core-mesh3d-stage,
-html[data-fx-orbital-core="ready-v28"] .fx-core-fracture3d-stage,
-html[data-fx-orbital-core="ready-v28"] .fx-three-stage-shell,
-html[data-fx-orbital-core="ready-v28"] .fx-transcend-shell[data-fx-native-apex="true"] {
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) .fx-reference-core-v26-stage,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) .fx-core-real3d-stage,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) .fx-core-mesh3d-stage,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) .fx-core-fracture3d-stage,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) .fx-three-stage-shell,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) .fx-transcend-shell[data-fx-native-apex="true"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
 }
 
-html[data-fx-orbital-core="ready-v28"] #hero .hero-ring,
-html[data-fx-orbital-core="ready-v28"] #hero .hero-label,
-html[data-fx-orbital-core="ready-v28"] #hero .fx-immersive-launch,
-html[data-fx-orbital-core="ready-v28"] #hero .fx-organism-map,
-html[data-fx-orbital-core="ready-v28"] .fx-resilient-core,
-html[data-fx-orbital-core="ready-v28"] .fx-premium-core-status {
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) #hero .hero-ring,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) #hero .hero-label,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) #hero .fx-immersive-launch,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) #hero .fx-organism-map,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) .fx-resilient-core,
+html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) .fx-premium-core-status {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -108,8 +102,6 @@ body.fx-organism-panel-open .fx-orbital-core-v28-stage {
   visibility: hidden !important;
 }
 
-/* Mobile: preserve the previous readable composition. The WebGL scene stays real 3D,
-   but its full-screen render target is visually framed instead of filling the page. */
 @media (max-width: 820px), (pointer: coarse) {
   .fx-orbital-core-v28-stage {
     --fx-orbital-x: 50%;
@@ -140,25 +132,25 @@ body.fx-organism-panel-open .fx-orbital-core-v28-stage {
       radial-gradient(ellipse at 55% 52%, rgba(174, 65, 255, .040), transparent 37%);
   }
 
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero {
+  html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero {
     min-height: auto !important;
     padding-top: max(84px, calc(env(safe-area-inset-top) + 74px)) !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-grid {
+  html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero .hero-grid {
     display: flex !important;
     flex-direction: column !important;
     gap: clamp(18px, 4svh, 34px) !important;
     min-height: 0 !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-copy {
+  html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero .hero-copy {
     order: -1 !important;
     position: relative !important;
     z-index: 32 !important;
   }
 
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-space {
+  html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero .hero-space {
     order: 0 !important;
     min-height: clamp(300px, 42svh, 470px) !important;
     width: 100% !important;
@@ -168,22 +160,14 @@ body.fx-organism-panel-open .fx-orbital-core-v28-stage {
 }
 
 @media (max-width: 430px) {
-  .fx-orbital-core-v28-canvas {
-    transform: translate3d(0, 9svh, 0) scale(.52);
-  }
-
-  html[data-fx-orbital-core="ready-v28"] body.living-architecture #hero .hero-space {
+  .fx-orbital-core-v28-canvas { transform: translate3d(0, 9svh, 0) scale(.52); }
+  html:is([data-fx-orbital-core="ready-v28"], [data-fx-webgpu-core="ready-v29"]) body.living-architecture #hero .hero-space {
     min-height: clamp(280px, 39svh, 420px) !important;
   }
 }
 
-@media (min-width: 1800px) {
-  .fx-orbital-core-v28-stage { --fx-orbital-x: 70%; }
-}
-
-@media (min-width: 3200px) {
-  .fx-orbital-core-v28-stage { --fx-orbital-x: 71%; }
-}
+@media (min-width: 1800px) { .fx-orbital-core-v28-stage { --fx-orbital-x: 70%; } }
+@media (min-width: 3200px) { .fx-orbital-core-v28-stage { --fx-orbital-x: 71%; } }
 
 @media (prefers-reduced-motion: reduce) {
   .fx-orbital-core-v28-stage { transition-duration: 80ms; }
