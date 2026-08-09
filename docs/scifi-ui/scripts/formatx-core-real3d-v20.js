@@ -135,7 +135,7 @@
     precision highp float;
     in vec3 vWorld; in vec3 vNormal; in vec3 vObject;
     uniform vec3 uCamera;
-    uniform float uTime; uniform float uEnergy; uniform float uSurge; uniform float uSpeech; uniform float uOpacity; uniform float uMaterial; uniform float uLayer;
+    uniform float uTime; uniform float uEnergy; uniform float uSurge; uniform float uSpeech; uniform float uOpacity; uniform float uMaterial; uniform float uLayer; uniform float uRenderScale;
     out vec4 fragColor;
     float sat(float value){return clamp(value,0.0,1.0);}
     float band(float value,float center,float width){return exp(-abs(value-center)/max(.0001,width));}
@@ -223,7 +223,10 @@
         ring+=vec3(.46,.98,1.30)*edgeSpec*1.15;
         ring+=vec3(.42,1.42,1.82)*railGlint*2.20;
         ring*=1.34+activity*.55+pulse*.09;
-        fragColor=vec4(ring,uOpacity*(.52+.38*fresnel+.14*activity));
+        float compensatedAlpha=mix(.82,.62,smoothstep(.52,.80,uRenderScale));
+        float ringAlpha=.52+.38*fresnel+.14*activity;
+        ringAlpha=max(ringAlpha,compensatedAlpha*filamentMask);
+        fragColor=vec4(ring,uOpacity*ringAlpha);
       }
     }`;
   const LINE_VERTEX = `#version 300 es
@@ -253,11 +256,13 @@
     uniform vec2 uTexel;
     uniform vec2 uDirection;
     uniform float uExtract;
+    uniform float uRenderScale;
     out vec4 fragColor;
     vec3 source(vec2 uv){
       vec4 sampleColor=texture(uInput,uv);
       float peak=max(max(sampleColor.r,sampleColor.g),sampleColor.b);
-      float mask=smoothstep(.34,.86,peak)*smoothstep(.015,.18,sampleColor.a);
+      float scaleMix=smoothstep(.52,.80,uRenderScale);
+      float mask=smoothstep(mix(.30,.34,scaleMix),mix(.74,.86,scaleMix),peak)*smoothstep(.015,.18,sampleColor.a);
       return mix(sampleColor.rgb,sampleColor.rgb*mask,uExtract);
     }
     void main(){
@@ -283,7 +288,7 @@
       color=vec3(1.0)-exp(-color*(1.34+uEnergy*.13));
       color=pow(max(color,vec3(0.0)),vec3(.92));
       float luminance=dot(color,vec3(.2126,.7152,.0722));
-      color=max(vec3(0.0),mix(vec3(luminance),color,1.65));
+      color=max(vec3(0.0),mix(vec3(luminance),color,1.80));
       float aura=max(max(bloom.r,bloom.g),bloom.b);
       fragColor=vec4(color,clamp(scene.a+aura*.36,0.0,1.0));
     }`;
@@ -417,10 +422,10 @@
   const filaments = uploadMesh(crystalFilamentGeometry(mobile ? 64 : 88, mobile ? 6 : 7));
   const beam = uploadMesh(boxGeometry());
   const particles = uploadParticles(particleGeometry(mobile ? 64 : 112));
-  const meshUniforms = Object.fromEntries(['uProjection','uView','uModel','uCamera','uTime','uEnergy','uSurge','uSpeech','uOpacity','uMaterial','uLayer'].map(name => [name, gl.getUniformLocation(meshProgram, name)]));
+  const meshUniforms = Object.fromEntries(['uProjection','uView','uModel','uCamera','uTime','uEnergy','uSurge','uSpeech','uOpacity','uMaterial','uLayer','uRenderScale'].map(name => [name, gl.getUniformLocation(meshProgram, name)]));
   const lineUniforms = Object.fromEntries(['uProjection','uView','uModel','uColor','uOpacity','uEnergy'].map(name => [name, gl.getUniformLocation(lineProgram, name)]));
   const pointUniforms = Object.fromEntries(['uProjection','uView','uModel','uTime','uDpr'].map(name => [name, gl.getUniformLocation(pointProgram, name)]));
-  const bloomUniforms = Object.fromEntries(['uInput','uTexel','uDirection','uExtract'].map(name => [name, gl.getUniformLocation(bloomProgram, name)]));
+  const bloomUniforms = Object.fromEntries(['uInput','uTexel','uDirection','uExtract','uRenderScale'].map(name => [name, gl.getUniformLocation(bloomProgram, name)]));
   const compositeUniforms = Object.fromEntries(['uScene','uBloom','uEnergy'].map(name => [name, gl.getUniformLocation(compositeProgram, name)]));
   const postVao = gl.createVertexArray();
   const sceneFramebuffer = gl.createFramebuffer();
@@ -480,10 +485,10 @@
   function resize(force) { const nextWidth=Math.max(1,innerWidth), nextHeight=Math.max(1,innerHeight), dprCap=mobile?(highMobile?1.45:1.12):1.35, dpr=Math.min(devicePixelRatio||1,dprCap); let width=Math.round(nextWidth*dpr*renderScale), height=Math.round(nextHeight*dpr*renderScale); const pixelBudget=mobile?(highMobile?1450000:950000):2050000, budgetScale=Math.min(1,Math.sqrt(pixelBudget/Math.max(1,width*height))); width=Math.max(2,Math.round(width*budgetScale)); height=Math.max(2,Math.round(height*budgetScale)); if(!force&&nextWidth===cssWidth&&nextHeight===cssHeight&&width===bufferWidth&&height===bufferHeight)return; cssWidth=nextWidth;cssHeight=nextHeight;bufferWidth=width;bufferHeight=height;canvas.width=width;canvas.height=height;resizePostTargets(width,height);gl.viewport(0,0,width,height);projection=perspective((mobile?50:42)*Math.PI/180,nextWidth/nextHeight,.1,20);root.dataset.fxCoreReal3dResolution=width+'x'+height;root.dataset.fxCoreReal3dScale=renderScale.toFixed(2);root.dataset.fxCoreMobileQuality=mobile?(highMobile?'high-adaptive-bloom':'efficient-adaptive-bloom'):'desktop-adaptive-bloom'; }
   function baseModel(time,pulse) { const x=mobile?0:.84, y=mobile?.40:.01, pointerFactor=mobile||reduced.matches?0:1, rx=(reduced.matches?.035:.055+Math.sin(time*.17)*.035)+pointerY*.11*pointerFactor, ry=(reduced.matches?-.095:-.115+Math.sin(time*.21)*.060)+pointerX*.15*pointerFactor, rz=reduced.matches?0:Math.sin(time*.13)*.014, scaleX=(mobile?.88:1.14)*pulse, scaleY=(mobile?.94:1.14)*pulse; cinematic.rotation=[rx,ry,rz]; return compose([translation(x,y,0),rotationX(rx),rotationY(ry),rotationZ(rz),scaling(scaleX,scaleY,scaleY)]); }
   function bindCommon(programObject,uniforms,model,time){gl.useProgram(programObject);gl.uniformMatrix4fv(uniforms.uProjection,false,projection);gl.uniformMatrix4fv(uniforms.uView,false,view);gl.uniformMatrix4fv(uniforms.uModel,false,model);if(uniforms.uCamera)gl.uniform3f(uniforms.uCamera,camera[0],camera[1],camera[2]);if(uniforms.uTime)gl.uniform1f(uniforms.uTime,time);}
-  function drawMesh(mesh,model,material,opacity,layer,time){bindCommon(meshProgram,meshUniforms,model,time);gl.uniform1f(meshUniforms.uEnergy,cinematic.energy);gl.uniform1f(meshUniforms.uSurge,cinematic.surge);gl.uniform1f(meshUniforms.uSpeech,cinematic.speech);gl.uniform1f(meshUniforms.uOpacity,opacity);gl.uniform1f(meshUniforms.uMaterial,material);gl.uniform1f(meshUniforms.uLayer,layer);gl.bindVertexArray(mesh.vao);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.index);gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);}
+  function drawMesh(mesh,model,material,opacity,layer,time){bindCommon(meshProgram,meshUniforms,model,time);gl.uniform1f(meshUniforms.uEnergy,cinematic.energy);gl.uniform1f(meshUniforms.uSurge,cinematic.surge);gl.uniform1f(meshUniforms.uSpeech,cinematic.speech);gl.uniform1f(meshUniforms.uOpacity,opacity);gl.uniform1f(meshUniforms.uMaterial,material);gl.uniform1f(meshUniforms.uLayer,layer);gl.uniform1f(meshUniforms.uRenderScale,renderScale);gl.bindVertexArray(mesh.vao);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.index);gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);}
   function drawLines(mesh,model,color,opacity,time){if(!mesh.lineIndex||!mesh.lineCount)return;bindCommon(lineProgram,lineUniforms,model,time);gl.uniform3f(lineUniforms.uColor,color[0],color[1],color[2]);gl.uniform1f(lineUniforms.uOpacity,opacity);gl.uniform1f(lineUniforms.uEnergy,cinematic.energy+cinematic.surge*.5);gl.bindVertexArray(mesh.vao);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.lineIndex);gl.drawElements(gl.LINES,mesh.lineCount,gl.UNSIGNED_SHORT,0);}
   function drawParticles(model,time){bindCommon(pointProgram,pointUniforms,model,time);gl.uniform1f(pointUniforms.uDpr,Math.min(devicePixelRatio||1,1.5));gl.bindVertexArray(particles.vao);gl.drawArrays(gl.POINTS,0,particles.count);}
-  function bloomPass(framebuffer,input,dirX,dirY,extract){gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);gl.viewport(0,0,bloomWidth,bloomHeight);gl.useProgram(bloomProgram);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,input);gl.uniform1i(bloomUniforms.uInput,0);gl.uniform2f(bloomUniforms.uTexel,1/Math.max(1,bloomWidth),1/Math.max(1,bloomHeight));gl.uniform2f(bloomUniforms.uDirection,dirX,dirY);gl.uniform1f(bloomUniforms.uExtract,extract);gl.bindVertexArray(postVao);gl.drawArrays(gl.TRIANGLES,0,3);}
+  function bloomPass(framebuffer,input,dirX,dirY,extract){gl.bindFramebuffer(gl.FRAMEBUFFER,framebuffer);gl.viewport(0,0,bloomWidth,bloomHeight);gl.useProgram(bloomProgram);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,input);gl.uniform1i(bloomUniforms.uInput,0);gl.uniform2f(bloomUniforms.uTexel,1/Math.max(1,bloomWidth),1/Math.max(1,bloomHeight));gl.uniform2f(bloomUniforms.uDirection,dirX,dirY);gl.uniform1f(bloomUniforms.uExtract,extract);gl.uniform1f(bloomUniforms.uRenderScale,renderScale);gl.bindVertexArray(postVao);gl.drawArrays(gl.TRIANGLES,0,3);}
   function compositeBloom(){
     gl.disable(gl.BLEND);gl.disable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);gl.depthMask(false);
     bloomPass(bloomFramebufferA,sceneTexture,1,0,1);
@@ -564,6 +569,7 @@
   root.dataset.fxCoreTriangles = String(Math.round((star.count * 4 + sphere.count * 2 + torus.count * 4 + filaments.count + beam.count * 2) / 3)); root.dataset.fxCoreIndexType = 'uint16-elements'; root.dataset.fxCoreFrameCap = 'display-refresh-uncapped'; root.dataset.fxCoreVisibility = 'hero-only-raf-paused'; root.dataset.fxCorePerformanceTarget = 'adaptive-60-plus-fps'; root.dataset.fxCorePostProcess = postReady ? 'quarter-resolution-separable-bloom-v23' : 'direct-render-safe-fallback';
   root.dataset.fxCoreMobileComposition = 'reference-crystal-portal-v24'; root.dataset.fxNativeApexRenderer = 'single-webgl2-indexed-3d-v21'; root.dataset.fxNativeApexVisual = 'cinematic-volumetric-crystal-portal-v24'; root.dataset.fxCoreMeshMaterial = 'fresnel-chromatic-refraction-glass-v24'; root.dataset.fxCoreHighlightModel = 'physical-crystal-ribs-and-caustics-v24'; root.dataset.fxCoreMaterialCenter = 'centered-object-space'; root.dataset.fxCoreShapeMesh = 'concave-pnorm-four-sail-volume-v24'; root.dataset.fxCoreShapeFracture = 'physical-tube-filaments-v24'; root.dataset.fxCoreGeometryScale = mobile ? '0.88x-0.94y-real3d-mobile' : '1.14-real3d-desktop'; root.dataset.fxCoreMesh3d = 'ready-real3d-v24'; root.dataset.fxCoreFracture3d = 'integrated-real3d-v24'; root.dataset.fxCoreCinematicGrade = 'separable-bloom-filmic-v24'; root.dataset.fxCorePhysicalGlass = 'schlick-fresnel-chromatic-refraction-v24'; root.dataset.fxCoreVolumeAbsorption = 'beer-lambert-approximation-v24';
   root.dataset.fxCoreLoopTransferPolicy = 'gpu-paused-two-frame-landing-v24';
+  root.dataset.fxCoreLowResolutionHighlights = 'render-scale-compensated-physical-ribs-v24';
   root.dataset.fxGpuCapability = 'webgl2';
   root.dataset.fxCoreContextPolicy = mobile ? 'mobile-default-no-probe' : 'desktop-high-performance-no-probe';
   setTimeout(() => { try { sessionStorage.removeItem(RECOVERY_KEY); } catch (_) {} }, 12000);

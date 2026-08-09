@@ -127,6 +127,7 @@ jobs:
                 physicalGlass: root.dataset.fxCorePhysicalGlass,
                 volumeAbsorption: root.dataset.fxCoreVolumeAbsorption,
                 loopTransferPolicy: root.dataset.fxCoreLoopTransferPolicy,
+                lowResolutionHighlights: root.dataset.fxCoreLowResolutionHighlights,
                 target: root.dataset.fxCorePerformanceTarget,
                 visibility: root.dataset.fxCoreVisibility,
                 webgl2: Boolean(canvas?.getContext('webgl2')),
@@ -182,6 +183,7 @@ jobs:
               && runtime.physicalGlass === 'schlick-fresnel-chromatic-refraction-v24'
               && runtime.volumeAbsorption === 'beer-lambert-approximation-v24'
               && runtime.loopTransferPolicy === 'gpu-paused-two-frame-landing-v24'
+              && runtime.lowResolutionHighlights === 'render-scale-compensated-physical-ribs-v24'
               && runtime.target === 'adaptive-60-plus-fps' && runtime.visibility === 'hero-only-raf-paused'
               && runtime.webgl2 && runtime.oldMeshStages === 0 && runtime.oldFractureStages === 0
               && runtime.nativeStages === 0 && runtime.fallbackActive !== 'true' && runtime.copyTop >= 1000;

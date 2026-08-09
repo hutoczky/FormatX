@@ -57,10 +57,10 @@
     "core_material_contract": "single-context-schlick-fresnel-chromatic-refraction-volume-absorption-plus-bloom-v24",
     "core_geometry_contract": "indexed-four-sail-volume-physical-tube-ribs-sphere-four-tori-beams-v24",
     "core_visual_calibration": "reference-volumetric-crystalline-portal-real3d-v24",
-    "deployment_revision": "2026-08-09-single-real3d-mag-v24-volumetric-crystal-r2"
+    "deployment_revision": "2026-08-09-single-real3d-mag-v24-volumetric-crystal-r3"
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-09-single-context-real3d-mag-v24-production42",
+    "award_readiness_revision": "2026-08-09-single-context-real3d-mag-v24-production43",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -202,6 +202,7 @@
     "mag_desktop_pixel_budget": 2050000,
     "mag_frame_rate_target": "60-plus-display-refresh-uncapped",
     "mag_adaptive_resolution_floor": 0.52,
+    "mag_low_resolution_highlight_compensation": "physical-ribs-only-render-scale-gain-v24",
     "mag_paused_outside_hero": true,
     "mag_paused_when_document_hidden": true,
     "mag_paused_during_seamless_loop_transfer": true,
