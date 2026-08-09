@@ -119,6 +119,13 @@ jobs:
                 renderer: root.dataset.fxCoreRenderer,
                 contexts: root.dataset.fxCoreContexts,
                 drawCalls: root.dataset.fxCoreDrawCalls,
+                visual: root.dataset.fxCoreVisualRevision,
+                bloom: root.dataset.fxCoreBloom,
+                postProcess: root.dataset.fxCorePostProcess,
+                material: root.dataset.fxCoreMeshMaterial,
+                filaments: root.dataset.fxCoreShapeFracture,
+                physicalGlass: root.dataset.fxCorePhysicalGlass,
+                volumeAbsorption: root.dataset.fxCoreVolumeAbsorption,
                 target: root.dataset.fxCorePerformanceTarget,
                 visibility: root.dataset.fxCoreVisibility,
                 webgl2: Boolean(canvas?.getContext('webgl2')),
@@ -165,7 +172,14 @@ jobs:
               && visual.mean_saturation >= .58 && visual.mean_saturation <= .86
               && visual.fraction_over_050 >= .10 && visual.fraction_over_075 >= .025;
             const runtimeOk = runtime.real3d === 'ready-v20' && runtime.renderer === 'single-webgl2-indexed-3d-v20'
-              && runtime.contexts === '1' && runtime.drawCalls === '14-max'
+              && runtime.contexts === '1' && runtime.drawCalls === '17-max'
+              && runtime.visual === 'v24-volumetric-crystal'
+              && runtime.bloom === 'quarter-resolution-separable-v23'
+              && runtime.postProcess === 'quarter-resolution-separable-bloom-v23'
+              && runtime.material === 'fresnel-chromatic-refraction-glass-v24'
+              && runtime.filaments === 'physical-tube-filaments-v24'
+              && runtime.physicalGlass === 'schlick-fresnel-chromatic-refraction-v24'
+              && runtime.volumeAbsorption === 'beer-lambert-approximation-v24'
               && runtime.target === 'adaptive-60-plus-fps' && runtime.visibility === 'hero-only-raf-paused'
               && runtime.webgl2 && runtime.oldMeshStages === 0 && runtime.oldFractureStages === 0
               && runtime.nativeStages === 0 && runtime.fallbackActive !== 'true' && runtime.copyTop >= 1000;

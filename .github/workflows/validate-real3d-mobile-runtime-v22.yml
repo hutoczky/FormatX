@@ -110,6 +110,11 @@ jobs:
                 contexts: root.dataset.fxCoreContexts,
                 renderer: root.dataset.fxCoreRenderer,
                 visual: root.dataset.fxCoreVisualRevision,
+                bloom: root.dataset.fxCoreBloom,
+                postProcess: root.dataset.fxCorePostProcess,
+                material: root.dataset.fxCoreMeshMaterial,
+                filaments: root.dataset.fxCoreShapeFracture,
+                physicalGlass: root.dataset.fxCorePhysicalGlass,
                 nativeApex: root.dataset.fxNativeApex,
                 requests: window.__fxWebgl2Requests,
                 canvasCount: document.querySelectorAll('.fx-core-real3d-canvas').length,
@@ -139,7 +144,12 @@ jobs:
             assert.equal(retry.policy, 'mobile-default-no-probe');
             assert.equal(retry.contexts, '1');
             assert.equal(retry.renderer, 'single-webgl2-indexed-3d-v20');
-            assert.equal(retry.visual, 'reference-cinematic-v22');
+            assert.equal(retry.visual, 'v24-volumetric-crystal');
+            assert.equal(retry.bloom, 'quarter-resolution-separable-v23');
+            assert.equal(retry.postProcess, 'quarter-resolution-separable-bloom-v23');
+            assert.equal(retry.material, 'fresnel-chromatic-refraction-glass-v24');
+            assert.equal(retry.filaments, 'physical-tube-filaments-v24');
+            assert.equal(retry.physicalGlass, 'schlick-fresnel-chromatic-refraction-v24');
             assert.equal(retry.canvasCount, 1);
             assert.equal(retry.fallbackActive, 'false');
             assert.equal(retry.legacyRingDisplay, 'none');

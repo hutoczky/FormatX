@@ -23,8 +23,9 @@ for (const token of [
   "addEventListener('webglcontextlost'",
   "addEventListener('webglcontextrestored'",
   "root.dataset.fxCoreReal3dStartup = 'ready-' + STARTUP_REVISION",
-  "root.dataset.fxCoreVisualRevision = 'reference-cinematic-v22'",
-  'p = .80',
+  "const VISUAL_REVISION = 'v24-volumetric-crystal'",
+  'root.dataset.fxCoreVisualRevision = VISUAL_REVISION',
+  'p = .68',
   'scaling(scaleX,scaleY,scaleY)',
   "root.dataset.fxCoreContextPolicy = mobile ? 'mobile-default-no-probe' : 'desktop-high-performance-no-probe'"
 ]) assert.ok(runtime.includes(token), `mobile-safe real3D startup contract missing: ${token}`);
@@ -34,17 +35,17 @@ assert.doesNotMatch(runtime, /desynchronized\s*:/, 'desynchronized context mode 
 assert.match(premium, /if \(document\.querySelector\('script\[data-fx-core-real3d="true"\]'\)\) return 'webgl2-pending'/, 'dedicated engine must bypass the preflight probe context');
 assert.match(premium, /addEventListener\('formatx:core3dfallback', handleCoreFallback\)/, 'GPU failure must activate the resilient fallback without exposing the legacy oval');
 assert.match(style, /data-fx-core-real3d="context-unavailable"[\s\S]{0,700}#hero \.hero-ring/, 'legacy oval must be hidden when WebGL2 cannot start');
-assert.ok(homepage.includes('v=20260809-real3d-v22-mobile-safe'), 'v22 startup cache revision is not bootstrapped');
+assert.ok(homepage.includes('v=20260809-real3d-v24-volumetric-crystal'), 'v24 visual cache revision is not bootstrapped');
 
 const quality = contract.quality_contract;
 assert.equal(quality.mag_startup_revision, 'v22-mobile-safe');
 assert.equal(quality.mag_preflight_probe_context_count, 0);
 assert.equal(quality.mag_mobile_context_power_preference, 'default');
 assert.equal(quality.mag_desynchronized_context, false);
-assert.equal(quality.mag_reference_pnorm_exponent, 0.80);
-assert.equal(quality.mag_mobile_geometric_scale_x, 0.96);
-assert.equal(quality.mag_mobile_geometric_scale_yz, 1.08);
-assert.equal(quality.mag_mobile_dpr_cap_high, 1.52);
+assert.equal(quality.mag_reference_pnorm_exponent, 0.68);
+assert.equal(quality.mag_mobile_geometric_scale_x, 0.88);
+assert.equal(quality.mag_mobile_geometric_scale_yz, 0.94);
+assert.equal(quality.mag_mobile_dpr_cap_high, 1.45);
 assert.equal(quality.mag_webgl_context_count, 1);
 assert.equal(quality.mag_frame_rate_target, '60-plus-display-refresh-uncapped');
 

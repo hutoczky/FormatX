@@ -1,4 +1,4 @@
-/* FormatX cinematic core v20 — one WebGL2 stage, no image-backed core. */
+/* FormatX volumetric crystal v24 — physical WebGL2 ribs, refractive glass and separable bloom. */
 .fx-core-real3d-stage {
   position: fixed;
   z-index: 121;
@@ -20,8 +20,10 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse at var(--fx-core-x, 71%) 46%, rgba(28, 161, 235, .105) 0, rgba(20, 95, 182, .045) 24%, transparent 52%),
-    radial-gradient(ellipse at var(--fx-core-x, 71%) 48%, rgba(123, 62, 231, .055) 0, transparent 42%);
+    radial-gradient(circle at var(--fx-core-x, 71%) 48%, rgba(205, 251, 255, .13) 0 1.5%, rgba(45, 218, 255, .12) 5%, transparent 18%),
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 47%, rgba(20, 183, 255, .16) 0, rgba(17, 92, 190, .075) 27%, transparent 56%),
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 49%, rgba(151, 50, 242, .105) 0, rgba(93, 35, 174, .045) 30%, transparent 49%),
+    linear-gradient(180deg, rgba(0, 4, 12, .01), rgba(0, 4, 13, .12));
 }
 
 .fx-core-real3d-stage::after {
@@ -36,12 +38,12 @@
   transform: perspective(520px) rotateX(61deg) translateY(3%);
   transform-origin: 50% 0;
   background:
-    radial-gradient(ellipse at var(--fx-core-x, 71%) 0%, rgba(52, 188, 255, .20), rgba(26, 92, 176, .055) 28%, transparent 59%),
-    repeating-linear-gradient(180deg, rgba(53, 176, 255, .075) 0 1px, transparent 2px 13px),
-    linear-gradient(90deg, transparent 5%, rgba(40, 117, 215, .055) 34%, rgba(73, 204, 255, .10) 50%, rgba(115, 57, 218, .055) 68%, transparent 95%);
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 0%, rgba(76, 222, 255, .27), rgba(29, 106, 198, .075) 31%, transparent 62%),
+    repeating-linear-gradient(180deg, rgba(62, 190, 255, .085) 0 1px, transparent 2px 12px),
+    linear-gradient(90deg, transparent 4%, rgba(39, 119, 223, .07) 31%, rgba(85, 219, 255, .135) 50%, rgba(145, 58, 229, .085) 70%, transparent 96%);
   -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .86), transparent 83%);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, .86), transparent 83%);
-  opacity: .48;
+  opacity: .58;
 }
 
 .fx-core-real3d-canvas {
@@ -52,6 +54,7 @@
   width: 100%;
   height: 100%;
   background: transparent;
+  filter: saturate(1.12) contrast(1.035);
   transform: translateZ(0);
 }
 
@@ -95,18 +98,19 @@ body.fx-organism-panel-open .fx-core-real3d-stage {
 
   .fx-core-real3d-stage::before {
     background:
-      radial-gradient(ellipse at 50% 43%, rgba(32, 180, 244, .13) 0, rgba(20, 92, 180, .055) 25%, transparent 55%),
-      radial-gradient(ellipse at 50% 46%, rgba(133, 66, 241, .07) 0, transparent 46%),
+      radial-gradient(circle at 50% 43%, rgba(204, 252, 255, .14) 0 1.5%, rgba(41, 213, 255, .12) 5%, transparent 18%),
+      radial-gradient(ellipse at 50% 43%, rgba(32, 180, 244, .17) 0, rgba(20, 92, 180, .07) 27%, transparent 57%),
+      radial-gradient(ellipse at 50% 46%, rgba(144, 55, 241, .10) 0, transparent 48%),
       linear-gradient(180deg, rgba(1, 5, 11, .02), rgba(0, 2, 7, .17));
   }
 
   .fx-core-real3d-stage::after {
     top: 49%;
-    opacity: .42;
+    opacity: .52;
     background:
-      radial-gradient(ellipse at 50% 0%, rgba(54, 196, 255, .22), rgba(24, 92, 177, .055) 30%, transparent 61%),
-      repeating-linear-gradient(180deg, rgba(56, 179, 255, .07) 0 1px, transparent 2px 12px),
-      linear-gradient(90deg, transparent 2%, rgba(40, 117, 215, .05) 29%, rgba(77, 211, 255, .11) 50%, rgba(126, 61, 225, .055) 71%, transparent 98%);
+      radial-gradient(ellipse at 50% 0%, rgba(62, 211, 255, .28), rgba(28, 104, 190, .075) 32%, transparent 63%),
+      repeating-linear-gradient(180deg, rgba(64, 195, 255, .085) 0 1px, transparent 2px 12px),
+      linear-gradient(90deg, transparent 2%, rgba(40, 117, 215, .065) 29%, rgba(83, 220, 255, .14) 50%, rgba(139, 61, 229, .08) 71%, transparent 98%);
   }
 
   html:is([data-fx-core-real3d="ready-v20"], [data-fx-core-real3d="context-unavailable"], [data-fx-core-real3d="webgl2-unavailable"], [data-fx-core-real3d="shader-failed"], [data-fx-core-real3d="context-lost"]) body.living-architecture #hero {

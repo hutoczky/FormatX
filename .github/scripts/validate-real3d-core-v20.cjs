@@ -23,6 +23,10 @@ for (const token of [
   'function starGeometry(',
   'function sphereGeometry(',
   'function torusGeometry(',
+  'function crystalFilamentGeometry(',
+  'function compositeBloom(',
+  'quarter-resolution-separable-bloom-v23',
+  'schlick-fresnel-chromatic-refraction-v24',
   "powerPreference: coarse.matches ? 'default' : 'high-performance'",
   "fxCorePerformanceTarget = 'adaptive-60-plus-fps'",
   "fxCoreVisibility = 'hero-only-raf-paused'"
@@ -39,7 +43,8 @@ assert.ok(premium.includes("addEventListener('formatx:coremesh3dready', syncRend
 const quality = contract.quality_contract;
 assert.equal(quality.mag_image_backed, false);
 assert.equal(quality.mag_webgl_context_count, 1);
-assert.equal(quality.mag_maximum_draw_calls, 14);
+assert.equal(quality.mag_maximum_draw_calls, 17);
+assert.equal(quality.mag_postprocess_bloom, true);
 assert.equal(quality.mag_frame_rate_target, '60-plus-display-refresh-uncapped');
 assert.equal(quality.mag_paused_outside_hero, true);
 
