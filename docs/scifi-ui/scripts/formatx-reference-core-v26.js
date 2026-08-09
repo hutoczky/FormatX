@@ -16,7 +16,7 @@
   if (!document.querySelector('link[data-fx-orbital-core-v28]')) {
     const style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = '/scifi-ui/styles/formatx-orbital-core-v28.css?v=20260809-reference-orb-v28-1';
+    style.href = '/scifi-ui/styles/formatx-orbital-core-v28.css?v=20260809-reference-orb-v28-2';
     style.dataset.fxOrbitalCoreV28 = 'true';
     style.addEventListener('load', () => { root.dataset.fxOrbitalStyle = 'ready-v28'; }, { once: true });
     style.addEventListener('error', () => { root.dataset.fxOrbitalStyle = 'failed-v28'; }, { once: true });
@@ -25,7 +25,7 @@
 
   if (!document.querySelector('script[data-fx-orbital-core-v28]')) {
     const script = document.createElement('script');
-    script.src = '/scifi-ui/scripts/formatx-orbital-core-v28.js?v=20260809-reference-orb-v28-1';
+    script.src = '/scifi-ui/scripts/formatx-orbital-core-v28.js?v=20260809-reference-orb-v28-2';
     script.defer = true;
     script.dataset.fxOrbitalCoreV28 = 'true';
     script.addEventListener('load', () => {
