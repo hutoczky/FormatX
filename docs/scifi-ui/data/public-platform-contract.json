@@ -41,8 +41,8 @@
     "production_scroll_revision": "seamless-v7-critical-bootstrap-1",
     "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
     "core_scene_scroll_ownership": "seamless-v7-only",
-    "mobile_core_composition": "cinematic-reference-ratio-glass-true-mesh3d-v24",
-    "mobile_core_composition_delivery": "native-apex-ready-shape-v14-material-v14-geometry-v13-mesh-v11",
+    "mobile_core_composition": "cinematic-reference-centered-glass-true-mesh3d-v25",
+    "mobile_core_composition_delivery": "native-apex-ready-shape-v14-material-v15-geometry-v13-mesh-v11",
     "mobile_core_renderer_authority": "indexed-webgl2-mesh-cinematic-plus-indexed-webgl2-fracture-lines",
     "mobile_core_renderer_visibility": "transparent-overlay-above-apex-background",
     "mobile_core_css_pixel_zoom": false,
@@ -54,12 +54,12 @@
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
     "language_switch_preserves_scene_hash": true,
     "core_cinematic_contract": "film-reactive-v1-frame-independent-wake",
-    "core_material_contract": "reference-glass-v14",
+    "core_material_contract": "reference-glass-v15-object-space-centered",
     "core_geometry_contract": "true-3d-uniform-scale-1.15-plus-y0.72-vertex-shape",
-    "deployment_revision": "2026-08-09-reference-ratio-glass-v14-live-7"
+    "deployment_revision": "2026-08-09-centered-object-space-glass-v15-live-8"
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-09-reference-ratio-glass-v14-production32",
+    "award_readiness_revision": "2026-08-09-centered-object-space-glass-v15-production33",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -78,7 +78,7 @@
       "section_scroll_snap": false,
       "wheel_or_touch_scroll_capture": false
     },
-    "native_apex_visual": "cinematic-reference-ratio-glass-true-mesh3d-v24",
+    "native_apex_visual": "cinematic-reference-centered-glass-true-mesh3d-v25",
     "mag_true_geometry_renderer": "webgl2-indexed-triangle-mesh-v11",
     "mag_fragment_sdf_geometry": false,
     "mag_image_backed": false,
@@ -116,10 +116,14 @@
     "mag_fracture_cyan_violet": true,
     "mag_fracture_desktop_canvas_opacity": 0.34,
     "mag_fracture_mobile_canvas_opacity": 0.30,
-    "mag_material_shader": "reference-glass-v14",
+    "mag_material_shader": "reference-glass-v15",
+    "mag_material_coordinate_space": "object-centered-after-renderer-y-offset-removal",
+    "mag_material_center_y_correction": -0.18,
+    "mag_reactor_radial_center_corrected": true,
     "mag_actual_webgl_material_patch": true,
     "mag_film_tonemap": "exponential-with-controlled-mid-tone-lift",
     "mag_bright_glass_facet_lines": true,
+    "mag_diagonal_glass_highlights": true,
     "mag_white_facet_highlights": true,
     "mag_compact_reactor_mask_shader": true,
     "mag_cyan_violet_ring_separation": true,
