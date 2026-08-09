@@ -1,5 +1,5 @@
 name: Verify live real3D reference position
-run-name: Capture real3D MAG at clean reference position for ${{ github.event.workflow_run.head_sha }}
+run-name: Capture reference crystal v26 at clean scroll-zero position for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -26,10 +26,10 @@ jobs:
           mkdir -p "$RUNNER_TEMP/real3d-ref"
           cd "$RUNNER_TEMP/real3d-ref"
           npm init -y >/dev/null 2>&1
-          npm install --silent playwright@latest pngjs@latest
+          npm install --silent playwright@1.62.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
 
-      - name: Capture single-context real3D at scroll zero
+      - name: Capture native WebGL2 v26 at scroll zero
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -40,45 +40,83 @@ jobs:
           const { chromium } = require('playwright');
           const { PNG } = require('pngjs');
           const fs = require('node:fs');
-          const polygon = [[45,684],[377,300],[710,684],[377,1064]];
-          function inside(x,y,p){let c=false;for(let i=0,j=p.length-1;i<p.length;j=i++){const A=p[i],B=p[j];if(((A[1]>y)!==(B[1]>y))&&(x<(B[0]-A[0])*(y-A[1])/(B[1]-A[1])+A[0]))c=!c;}return c;}
-          function pct(a,q){const b=[...a].sort((x,y)=>x-y);return b[Math.min(b.length-1,Math.max(0,Math.round((b.length-1)*q)))];}
-          function metrics(file){const p=PNG.sync.read(fs.readFileSync(file)),lum=[],sat=[];let o50=0,o75=0;for(let y=0;y<p.height;y++)for(let x=0;x<p.width;x++){if(!inside(x,y,polygon))continue;const i=(p.width*y+x)<<2,r=p.data[i]/255,g=p.data[i+1]/255,b=p.data[i+2]/255,l=.2126*r+.7152*g+.0722*b,mx=Math.max(r,g,b),mn=Math.min(r,g,b);lum.push(l);sat.push(mx?(mx-mn)/mx:0);if(l>.5)o50++;if(l>.75)o75++;}const sum=a=>a.reduce((x,y)=>x+y,0);return{pixels:lum.length,mean_luminance:sum(lum)/lum.length,median_luminance:pct(lum,.5),p90_luminance:pct(lum,.9),p99_luminance:pct(lum,.99),mean_saturation:sum(sat)/sat.length,fraction_over_050:o50/lum.length,fraction_over_075:o75/lum.length};}
-          (async()=>{
-            const browser=await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
-            const context=await browser.newContext({viewport:{width:753,height:1536},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU'});
-            const page=await context.newPage();
+
+          function metrics(file) {
+            const image = PNG.sync.read(fs.readFileSync(file));
+            let count = 0, sumX = 0, sumY = 0, minX = image.width, maxX = 0, minY = image.height, maxY = 0;
+            for (let y = 180; y < Math.min(image.height, 1260); y += 1) for (let x = 20; x < image.width - 20; x += 1) {
+              const offset = (image.width * y + x) << 2;
+              const r = image.data[offset] / 255, g = image.data[offset + 1] / 255, b = image.data[offset + 2] / 255;
+              const light = .2126 * r + .7152 * g + .0722 * b;
+              const maximum = Math.max(r, g, b), minimum = Math.min(r, g, b);
+              const saturation = maximum ? (maximum - minimum) / maximum : 0;
+              if (light <= .18 || saturation <= .35) continue;
+              count += 1; sumX += x; sumY += y;
+              minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+            }
+            return {
+              qualifying_pixels: count,
+              centroid_x: count ? sumX / count : null,
+              centroid_y: count ? sumY / count : null,
+              bounds: count ? { minX, maxX, minY, maxY } : null
+            };
+          }
+
+          (async () => {
+            const browser = await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context = await browser.newContext({viewport:{width:753,height:1536},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page = await context.newPage();
             await page.goto(`https://www.formatxsuite.com/?real3d_ref0=${process.env.RUN_ID}`,{waitUntil:'domcontentloaded',timeout:45000});
-            await page.waitForTimeout(1200);
-            await page.evaluate(()=>{const r=document.documentElement;r.lang='hu';r.dataset.fxImmersive='active';r.classList.add('fx-intro-complete');dispatchEvent(new CustomEvent('formatx:immersiveactivate'));document.dispatchEvent(new CustomEvent('formatx:introcomplete'));scrollTo(0,0);});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreReal3d==='ready-v20',null,{timeout:60000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreRenderer==='single-webgl2-indexed-3d-v20',null,{timeout:60000});
-            await page.waitForFunction(()=>window.FormatXCoreCinematic?.version==='film-reactive-v1',null,{timeout:60000});
-            await page.waitForTimeout(1500);
-            if(await page.evaluate(()=>scrollY)!==0) throw new Error('reference audit must remain at scrollY=0');
-            await page.screenshot({path:'mag-idle-scroll0.png',fullPage:false});
-            await page.evaluate(()=>{dispatchEvent(new CustomEvent('formatx:organismcoreactivate',{detail:{userInitiated:true}}));dispatchEvent(new CustomEvent('formatx:organismresponse',{detail:{text:'audit',localOnly:true}}));});
-            await page.waitForTimeout(700);
-            await page.screenshot({path:'mag-awake-scroll0.png',fullPage:false});
-            const visual=metrics('mag-awake-scroll0.png');
-            const state=await page.evaluate(()=>({real3d:document.documentElement.dataset.fxCoreReal3d,renderer:document.documentElement.dataset.fxCoreRenderer,contexts:document.documentElement.dataset.fxCoreContexts,drawCalls:document.documentElement.dataset.fxCoreDrawCalls,energy:window.FormatXCoreCinematic?.energy,surge:window.FormatXCoreCinematic?.surge,scrollY}));
-            fs.writeFileSync('reference-position-metrics.json',JSON.stringify({target:{mean_luminance:.326,median_luminance:.261,p90_luminance:.663,p99_luminance:.932,mean_saturation:.719},measured:visual,state},null,2));
-            console.log('REFERENCE_POSITION',JSON.stringify({visual,state}));
-            if(state.real3d!=='ready-v20'||state.renderer!=='single-webgl2-indexed-3d-v20'||state.contexts!=='1'||state.scrollY!==0) throw new Error('single real3D runtime/reference position invalid');
+            await page.evaluate(() => {
+              const root = document.documentElement;
+              root.lang = 'hu';
+              root.classList.add('fx-intro-complete');
+              document.getElementById('formatx-event-horizon')?.remove();
+              scrollTo(0,0);
+            });
+            await page.waitForFunction(() => document.documentElement.dataset.fxReferenceCore === 'ready-v26', null, {timeout:60000});
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreRendererRevision === 'native-webgl2-reference-crystal-v26', null, {timeout:10000});
+            await page.waitForTimeout(1700);
+            if (await page.evaluate(() => scrollY) !== 0) throw new Error('reference audit must remain at scrollY=0');
+            await page.screenshot({path:'mag-reference-v26-scroll0.png',fullPage:false});
+            const visual = metrics('mag-reference-v26-scroll0.png');
+            const state = await page.evaluate(() => ({
+              reference: document.documentElement.dataset.fxReferenceCore,
+              renderer: document.documentElement.dataset.fxCoreRendererRevision,
+              geometry: document.documentElement.dataset.fxReferenceCoreGeometry,
+              visual: document.documentElement.dataset.fxReferenceCoreVisual,
+              scrollY,
+              stages: document.querySelectorAll('.fx-reference-core-v26-stage').length,
+              legacyStages: document.querySelectorAll('.fx-core-real3d-stage,.fx-core-mesh3d-stage,.fx-core-fracture3d-stage').length
+            }));
+            fs.writeFileSync('reference-position-metrics.json', JSON.stringify({
+              target: { centroid_x:[320,430], centroid_y:[570,850], minimum_qualifying_pixels:5000 },
+              measured: visual,
+              state
+            }, null, 2));
+            console.log('REFERENCE_POSITION_V26', JSON.stringify({visual,state}));
+            const positionOk = visual.qualifying_pixels >= 5000
+              && visual.centroid_x >= 320 && visual.centroid_x <= 430
+              && visual.centroid_y >= 570 && visual.centroid_y <= 850;
+            const runtimeOk = state.reference === 'ready-v26'
+              && state.renderer === 'native-webgl2-reference-crystal-v26'
+              && state.geometry === 'true-indexed-four-tip-concave-crystal'
+              && state.visual === 'reference-glass-calibration-2'
+              && state.scrollY === 0 && state.stages === 1 && state.legacyStages === 0;
+            if (!runtimeOk || !positionOk) throw new Error(`v26 reference position invalid: ${JSON.stringify({visual,state})}`);
             await browser.close();
-          })().catch(e=>{console.error(e);process.exit(1);});
+          })().catch(e => { console.error(e); process.exit(1); });
           NODE
 
       - name: Upload reference-position evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-single-real3d-reference-position-${{ github.run_id }}
+          name: live-reference-core-v26-position-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/real3d-ref/mag-idle-scroll0.png
-            ${{ runner.temp }}/real3d-ref/mag-awake-scroll0.png
+            ${{ runner.temp }}/real3d-ref/mag-reference-v26-scroll0.png
             ${{ runner.temp }}/real3d-ref/reference-position-metrics.json
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
 
       - name: Publish reference-position status
@@ -90,5 +128,15 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Single real3D MAG reference-position evidence captured at scrollY=0'; else state=failure; description='Single real3D reference-position capture failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX real3D reference-position audit' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Native WebGL2 v26 MAG reference position passed at scrollY=0'
+          else
+            state=failure
+            description='Native WebGL2 v26 MAG reference position failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX real3D reference-position audit' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"
