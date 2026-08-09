@@ -5,6 +5,8 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'
+      - 'docs/scifi-ui/scripts/formatx-reference-lock-v30.js'
+      - 'docs/scifi-ui/styles/formatx-reference-lock-v30.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
       - 'docs/scifi-ui/styles/formatx-reference-core-v26.css'
       - 'docs/scifi-ui/scripts/formatx-cinematic-core-v27.js'
@@ -26,18 +28,19 @@ permissions:
 jobs:
   validate-real3d:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: Validate production reference-calibrated v24 safety contract
+      - name: Validate uploaded-reference locked production MAG
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
       - name: Validate production mobile-safe startup
         run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-      - name: Validate v24 production authority and opt-in WebGPU preview
+      - name: Validate compatibility preview renderers
         run: node .github/scripts/validate-reference-core-v26.cjs
       - name: Validate JavaScript syntax
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node --check docs/scifi-ui/scripts/formatx-reference-lock-v30.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
           node --check docs/scifi-ui/scripts/formatx-cinematic-core-v27.js
           node --check docs/scifi-ui/scripts/formatx-orbital-core-v28.js
@@ -54,13 +57,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Reference v24 production MAG passed; WebGPU v29 preview and v28 fallback validated'
+            description='Uploaded-reference lock v30 MAG passed single-context real3D and mobile safety gates'
           else
             state=failure
-            description='Native real3D production or preview validation failed'
+            description='Reference-lock v30 real3D validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
-            -f context='FormatX real3D production v24' \
+            -f context='FormatX real3D reference lock v30' \
             -f description="$description" \
             -f target_url="$TARGET_URL"
