@@ -47,6 +47,8 @@ assert.match(src, /float travellingSpark=/);
 assert.match(src, /float hueTravel=/);
 assert.match(src, /float hueBand=/);
 assert.match(src, /float layerViolet=/);
+assert.match(src, /if\(uLayer>1\.5\)ring=vec3\(\.46,\.006,1\.0\)/);
+assert.match(src, /drawMesh\(torus,ringModels\[3\],2,\.24,3,time\)/);
 assert.match(src, /float neutralMask=/);
 assert.match(src, /float crystalPresence=/);
 assert.match(src, /mix\(vec3\(finalLuminance\),color,5\.20\)/);

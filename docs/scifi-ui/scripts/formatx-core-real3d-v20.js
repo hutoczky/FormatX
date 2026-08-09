@@ -246,18 +246,19 @@
         fragColor=vec4(core*mix(1.0,2.2,reactor),alpha);
       }else{
         float hueBand=smoothstep(.64,.90,.5+.5*sin(polar*5.0+radial*19.0-uTime*.28+uLayer*1.8));
-        float layerViolet=smoothstep(1.2,2.2,uLayer)*.72;
-        float hueTravel=max(hueBand*.90,layerViolet);
+        float layerViolet=smoothstep(.60,1.60,uLayer)*.95;
+        float hueTravel=max(hueBand*.95,layerViolet);
         vec3 ring=mix(cyan,violet,hueTravel)*(.42+pow(ndv,1.55)*.54);
         float edgeSpec=specA*1.10+specB*.64;
         float filamentMask=1.0-smoothstep(.10,.24,abs(uLayer-.45));
         float railGlint=filamentMask*pow(.5+.5*cos((vObject.x*1.14+vObject.y)*52.0),8.0);
-        ring+=vec3(.004,.46,1.48)*(.24+edgeSpec*.58);
-        ring+=mix(vec3(.008,.88,1.48),vec3(.66,.018,1.36),hueTravel)*edgeSpec*.74;
+        ring+=mix(vec3(.004,.46,1.48),vec3(.28,.001,.92),hueTravel)*(.24+edgeSpec*.58);
+        ring+=mix(vec3(.008,.88,1.48),vec3(.34,.001,1.00),hueTravel)*edgeSpec*.74;
         float travellingSpark=pow(.5+.5*cos((vObject.x-vObject.y*.64)*41.0-uTime*.42+uLayer*2.0),24.0);
-        ring+=mix(vec3(.006,1.02,1.72),vec3(.72,.018,1.48),hueTravel)*railGlint*1.36;
+        ring+=mix(vec3(.006,1.02,1.72),vec3(.38,.001,1.08),hueTravel)*railGlint*1.36;
         ring+=mix(cyan,violet,.70)*travellingSpark*(.46+.58*activity);
         ring*=1.30+activity*.52+pulse*.08;
+        if(uLayer>1.5)ring=vec3(.46,.006,1.0)*(1.04+edgeSpec*.34+railGlint*.28+travellingSpark*.32+activity*.10);
         float compensatedAlpha=mix(.74,.54,smoothstep(.52,.80,uRenderScale));
         float ringAlpha=.52+.38*fresnel+.14*activity;
         ringAlpha=max(ringAlpha,compensatedAlpha*filamentMask);
@@ -326,7 +327,7 @@
       bloom=mix(bloom,bloomPeak*bloomTint,.72);
       vec3 spectralLiftTint=mix(vec3(.004,.92,1.34),vec3(.82,.018,1.30),violetMix*.78);
       float crystalPresence=smoothstep(.015,.42,scenePeak);
-      vec3 color=scene.rgb+bloom*(4.95+uEnergy*1.04)+(bloomPeak*.34+crystalPresence*.24)*spectralLiftTint;
+      vec3 color=scene.rgb+bloom*(5.35+uEnergy*1.10)+(bloomPeak*.34+crystalPresence*.24)*spectralLiftTint;
       color=vec3(1.0)-exp(-color*(2.16+uEnergy*.22));
       color=pow(max(color,vec3(0.0)),vec3(.92));
       float prePeak=max(max(color.r,color.g),color.b),preMinimum=min(min(color.r,color.g),color.b);
@@ -605,7 +606,7 @@
     gl.cullFace(gl.FRONT);drawMesh(star,base,0,.46,0,time);drawMesh(star,inner,0,.30,1,time);
 
     gl.disable(gl.CULL_FACE);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.depthMask(true);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
-    drawMesh(torus,ringModels[0],2,.74,0,time);drawMesh(torus,ringModels[1],2,.66,1,time);drawMesh(torus,ringModels[2],2,.58,2,time);drawMesh(torus,ringModels[3],2,.50,3,time);
+    drawMesh(torus,ringModels[0],2,.74,0,time);drawMesh(torus,ringModels[1],2,.66,1,time);
     drawMesh(beam,horizontalBeam,2,.30+cinematic.surge*.05,0,time);drawMesh(beam,verticalBeam,2,.26+cinematic.surge*.045,1,time);
     gl.disable(gl.DEPTH_TEST);gl.depthMask(false);drawMesh(sphere,halo,1,.24,1,time);drawMesh(sphere,reactor,1,.92,0,time);
 
@@ -614,6 +615,7 @@
     gl.disable(gl.CULL_FACE);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);drawMesh(filaments,base,2,.60,.45,time);
     gl.depthMask(true);gl.bindVertexArray(null);
     if(postReady)compositeBloom();
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,bufferWidth,bufferHeight);gl.disable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);drawMesh(torus,ringModels[2],2,.30,2,time);drawMesh(torus,ringModels[3],2,.24,3,time);
 
     sampleFrames+=1;const elapsed=now-sampleStarted;
     if(elapsed>=2400){const fps=sampleFrames/(elapsed/1000);root.dataset.fxCoreReal3dFps=fps.toFixed(1);sampleFrames=0;sampleStarted=now;const oldScale=renderScale;if(fps<56)renderScale=clamp(renderScale-(fps<45?.10:.06),mobile?.52:.58,1);else if(fps>72)renderScale=clamp(renderScale+.035,mobile?.52:.58,1);if(Math.abs(oldScale-renderScale)>.001)pendingResize=true;root.dataset.fxCoreReal3dQuality=fps<56?'adapting-for-60fps':fps>=59?'60fps-ready':'balanced';}
