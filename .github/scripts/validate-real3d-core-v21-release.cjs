@@ -26,5 +26,8 @@ assert.doesNotMatch(src,/THREE\b|three\.js|babylon|playcanvas|model-viewer/i,'th
 assert.match(css,/pointer-events:none/,'GPU stage must not intercept interaction');
 assert.match(css,/100dvh/,'dynamic viewport sizing missing');
 assert.match(css,/--fx-core-x:50%/,'portrait reference centering missing');
+assert.match(css,/40\.2%/,'reference core/horizon vertical alignment missing');
+assert.match(css,/top:47\.5%/,'reference floor start missing');
 assert.match(css,/perspective\(560px\) rotateX\(63deg\)/,'reference perspective floor missing');
-console.log('PASS: production MAG r4 is a single-context indexed WebGL2 glass-dominant four-sail crystal with sparse veins, real moving reactor and thin 3D rings.');
+assert.match(css,/saturate\(1\.25\) contrast\(1\.16\) brightness\(2\.60\)/,'reference luminance grade missing');
+console.log('PASS: production MAG is a single-context indexed WebGL2 glass-dominant four-sail crystal with calibrated reference luminance, horizon and floor.');
