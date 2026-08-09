@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-08-10",
+  "deployment_iteration": 8,
+  "target": "user-supplied four-tip luminous crystalline sci-fi core reference",
+  "renderer": "/scifi-ui/scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-5",
+  "style": "/scifi-ui/styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-5",
+  "production_contract": {
+    "single_webgl2_context": true,
+    "image_backed": false,
+    "geometry": "glass-dominant sparse-vein four-sail indexed crystal",
+    "reference_surface_marker": "glass-dominant-sparse-veins-r4",
+    "core_horizon_y": "40.2%",
+    "perspective_floor_y": "47.5%",
+    "canvas_grade": "saturate(1.25) contrast(1.16) brightness(2.60)",
+    "mobile_vertical_geometry_multiplier": 1.5,
+    "performance_target": "adaptive 60-plus FPS"
+  },
+  "acceptance": {
+    "production_validation": "required",
+    "production_smoke": "required",
+    "public_site_integrity": "required",
+    "lighthouse": "required",
+    "live_mobile_desktop_mag_visual": "required",
+    "live_white_core_position": "required",
+    "direct_live_screenshot_vs_uploaded_reference": "required"
+  },
+  "note": "CI green is not sufficient for exact-visual acceptance; the fresh production Chromium screenshot must be visually compared with the uploaded reference."
+}
