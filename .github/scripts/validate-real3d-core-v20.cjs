@@ -32,6 +32,8 @@ for (const token of [
   "fxCoreVisibility = 'hero-only-raf-paused'"
 ]) assert.ok(runtime.includes(token), `real 3D contract missing: ${token}`);
 
+assert.ok(runtime.includes("fxCoreLoopTransferPolicy = 'gpu-paused-two-frame-landing-v24'"), 'loop-transfer GPU pause marker missing');
+
 assert.doesNotMatch(runtime, /drawImage\s*\(|new\s+Image\s*\(|background-image\s*:/i, 'the MAG must not be image-backed');
 assert.doesNotMatch(runtime, /https?:\/\//, 'the MAG runtime must remain first-party and self-contained');
 assert.ok(homepage.includes('formatx-core-real3d-v20.css') && homepage.includes('formatx-core-real3d-v20.js'), 'v20 assets are not bootstrapped');
@@ -47,5 +49,6 @@ assert.equal(quality.mag_maximum_draw_calls, 17);
 assert.equal(quality.mag_postprocess_bloom, true);
 assert.equal(quality.mag_frame_rate_target, '60-plus-display-refresh-uncapped');
 assert.equal(quality.mag_paused_outside_hero, true);
+assert.equal(quality.mag_paused_during_seamless_loop_transfer, true);
 
 console.log('PASS: FormatX MAG is one self-contained indexed WebGL2 3D scene with depth, perspective, mobile-safe GPU selection, adaptive 60+ FPS targeting and no image-backed core.');

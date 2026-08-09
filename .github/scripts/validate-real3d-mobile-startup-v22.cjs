@@ -35,7 +35,7 @@ assert.doesNotMatch(runtime, /desynchronized\s*:/, 'desynchronized context mode 
 assert.match(premium, /if \(document\.querySelector\('script\[data-fx-core-real3d="true"\]'\)\) return 'webgl2-pending'/, 'dedicated engine must bypass the preflight probe context');
 assert.match(premium, /addEventListener\('formatx:core3dfallback', handleCoreFallback\)/, 'GPU failure must activate the resilient fallback without exposing the legacy oval');
 assert.match(style, /data-fx-core-real3d="context-unavailable"[\s\S]{0,700}#hero \.hero-ring/, 'legacy oval must be hidden when WebGL2 cannot start');
-assert.ok(homepage.includes('v=20260809-real3d-v24-volumetric-crystal'), 'v24 visual cache revision is not bootstrapped');
+assert.ok(homepage.includes('v=20260809-real3d-v24-volumetric-crystal-r2'), 'v24 r2 visual cache revision is not bootstrapped');
 
 const quality = contract.quality_contract;
 assert.equal(quality.mag_startup_revision, 'v22-mobile-safe');
