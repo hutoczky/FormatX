@@ -29,15 +29,20 @@ for (const token of [
   'function crystal(',
   'function sphere(',
   'function torus(',
-  "fxCoreReferenceLock='ready-v30'",
   "fxCoreVisualRevision='v30-reference-lock'",
   "fxCorePerformance='adaptive-60-plus-fps'",
   "fxCoreImageBacked='false'",
+  'uploaded-reference-20260810',
+  'dense-luminous-glass-filaments-v30',
   'IntersectionObserver',
   'webglcontextlost'
 ]) assert.ok(runtime.includes(token), `reference-lock real 3D contract missing: ${token}`);
+assert.ok(runtime.includes('ready-v30'), 'reference-lock runtime ready marker missing');
 
 assert.match(runtime, /p=\.68/, 'reference concave four-tip p-norm geometry missing');
+assert.match(runtime, /mobile\?1\.50:1/, 'reference mobile vertical shell calibration missing');
+assert.match(runtime, /t=\.018/, 'thin reference reactor/orbit torus calibration missing');
+assert.match(runtime, /for\(let k=1;k<=R;k\+\+\)/, 'dense shell contour calibration missing');
 assert.match(runtime, /const rs=\[\.20,\.29,\.39,\.51\]/, 'four real 3D inner reactor rings missing');
 assert.match(runtime, /const drift=/, 'moving central energy core missing');
 assert.match(runtime, /for\(const o of\[\[\.70/, 'outer cyan/violet 3D spectral rings missing');
@@ -67,4 +72,4 @@ assert.equal(quality.mag_frame_rate_target, '60-plus-display-refresh-uncapped');
 assert.equal(quality.mag_paused_outside_hero, true);
 assert.equal(quality.mag_reference_target, 'four-tip-luminous-crystal-sci-fi-film-core');
 
-console.log('PASS: FormatX production uses one indexed WebGL2 context in uploaded-reference lock v30, with four-sail crystal geometry, a moving inner reactor, real 3D rings, adaptive rendering and no image-backed core.');
+console.log('PASS: FormatX production uses one indexed WebGL2 context in dense-glass uploaded-reference lock v30, with four-sail crystal geometry, a moving inner reactor, thin real 3D rings, dense cyan/violet filaments, adaptive rendering and no image-backed core.');
