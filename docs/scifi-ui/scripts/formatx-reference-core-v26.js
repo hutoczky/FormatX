@@ -2,17 +2,32 @@
   'use strict';
 
   const root = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
+  const params = new URLSearchParams(location.search);
+  const AUDIT_MODE = params.get('lighthouse') === '1';
+  const WEBGPU_PREVIEW = params.get('webgpu') === '1';
+
   if (AUDIT_MODE) {
     root.dataset.fxReferenceCore = 'audit-skip-v29';
     root.dataset.fxWebgpuCore = 'audit-skip';
     root.dataset.fxOrbitalCore = 'audit-skip';
     return;
   }
+
+  // Production authority stays with the reference-calibrated v24 indexed WebGL2
+  // renderer already bootstrapped by index.html. The v29 WebGPU scene is real 3D,
+  // but it currently uses a sphere + ribbon geometry and therefore does not yet
+  // match the four-tip crystalline production reference closely enough.
+  if (!WEBGPU_PREVIEW) {
+    root.dataset.fxReferenceCore = 'production-v24-authority';
+    root.dataset.fxReal3dBootstrap = 'production-v24';
+    root.dataset.fxGpuPreference = 'webgl2-v24-reference-production';
+    return;
+  }
+
   if (root.dataset.fxReal3dBootstrap === 'ready-v29') return;
   root.dataset.fxReal3dBootstrap = 'loading-v29';
-  root.dataset.fxReferenceCore = 'retired-diamond-v26';
-  root.dataset.fxCoreGeometry = 'webgpu-real3d-requested-with-webgl2-fallback';
+  root.dataset.fxReferenceCore = 'preview-v29';
+  root.dataset.fxCoreGeometry = 'webgpu-real3d-preview-with-webgl2-v28-fallback';
 
   if (!document.querySelector('link[data-fx-orbital-core-v28]')) {
     const style = document.createElement('link');
@@ -38,17 +53,17 @@
   if (navigator.gpu) {
     script.src = '/scifi-ui/scripts/formatx-webgpu-core-v29.js?v=20260809-webgpu-real3d-v29-1';
     script.dataset.fxWebgpuCoreV29 = 'true';
-    root.dataset.fxGpuPreference = 'webgpu-primary';
+    root.dataset.fxGpuPreference = 'webgpu-v29-preview';
   } else {
     script.src = '/scifi-ui/scripts/formatx-orbital-core-v28.js?v=20260809-reference-orb-v28-3';
     script.dataset.fxOrbitalCoreV28 = 'true';
-    root.dataset.fxGpuPreference = 'webgl2-fallback';
+    root.dataset.fxGpuPreference = 'webgl2-v28-preview-fallback';
   }
   script.defer = true;
   script.addEventListener('load', () => { root.dataset.fxReal3dBootstrap = 'ready-v29'; }, { once: true });
   script.addEventListener('error', () => {
     root.dataset.fxReal3dBootstrap = 'failed-v29';
-    console.warn('FormatX real 3D core failed to load.');
+    console.warn('FormatX WebGPU preview core failed to load. Production v24 renderer remains available.');
   }, { once: true });
   document.head.appendChild(script);
 }());
