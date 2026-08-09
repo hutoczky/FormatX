@@ -66,6 +66,11 @@ jobs:
             };
           }
 
+          function knownExternalNoise(text) {
+            return /static\.cloudflareinsights\.com\/beacon\.min\.js/i.test(text)
+              && /Content Security Policy|script-src/i.test(text);
+          }
+
           async function capture(browser, config) {
             const context = await browser.newContext({
               viewport: config.viewport,
@@ -77,7 +82,11 @@ jobs:
             const page = await context.newPage();
             const consoleErrors = [];
             page.on('pageerror', error => consoleErrors.push(String(error)));
-            page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
+            page.on('console', message => {
+              if (message.type() !== 'error') return;
+              const text = message.text();
+              if (!knownExternalNoise(text)) consoleErrors.push(text);
+            });
             await page.goto(`https://www.formatxsuite.com/?reference_v26=${process.env.RUN_ID}&capture=${config.name}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
             await page.evaluate(() => {
               document.documentElement.lang = 'hu';
@@ -102,6 +111,7 @@ jobs:
                 geometry: root.dataset.fxReferenceCoreGeometry,
                 depth: root.dataset.fxReferenceCoreDepth,
                 animation: root.dataset.fxReferenceCoreAnimation,
+                visual: root.dataset.fxReferenceCoreVisual || 'unmarked',
                 pixels: root.dataset.fxReferenceCorePixels,
                 renderScale: root.dataset.fxReferenceCoreRenderScale || 'initial',
                 webgl2,
@@ -125,6 +135,7 @@ jobs:
               && runtime.geometry === 'true-indexed-four-tip-concave-crystal'
               && runtime.depth === 'depth-buffer-perspective'
               && runtime.animation === 'independent-shell-reactor-orbits'
+              && runtime.visual === 'reference-glass-calibration-2'
               && runtime.webgl2
               && runtime.stageActive === 'true'
               && runtime.referenceStages === 1
