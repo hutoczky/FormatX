@@ -1,0 +1,13 @@
+{
+  "revision":"2026-08-09-reference-shaped-single-real3d-v21-candidate",
+  "active_asset":"/scifi-ui/scripts/formatx-core-real3d-v20.js",
+  "runtime_revision":"ready-v21",
+  "compatibility_marker":"ready-v20",
+  "renderer_revision":"single-webgl2-indexed-3d-v21",
+  "geometry":"p-norm-four-tip-shell-v21",
+  "lighting":"axis-membrane-reactor-rings-v21",
+  "mobile_position":"upshift-y-0.50",
+  "reactor":"smaller-sphere-and-tori-v21",
+  "visual_gates":"existing-strict-plus-scroll0-reference-audit",
+  "status":"candidate"
+}
