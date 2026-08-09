@@ -1,8 +1,8 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "audit_date": "2026-08-10",
-  "deployment_iteration": 2,
-  "scope": "uploaded visual reference lock for the production FormatX MAG, single-context real 3D renderer ownership, calibrated mobile framing, mobile/desktop visual evidence, production validation and live deployment",
+  "deployment_iteration": 3,
+  "scope": "uploaded visual reference lock for the production FormatX MAG, single-context real 3D renderer ownership, calibrated mobile framing, dense luminous glass material, mobile/desktop visual evidence, white-core position evidence, production validation and live deployment",
   "audited_release": {
     "version": "v130",
     "product_status": "full_release",
@@ -21,8 +21,9 @@
     "webgl2_context_count": 1,
     "geometry": "indexed concave four-sail crystalline mesh",
     "silhouette": "long vertical needle tips, wide horizontal tips, concave transparent sails",
-    "reactor": "small moving white-cyan emitter inside the crystal with four real 3D rings",
-    "spectral_orbits": "real 3D cyan and violet rings around the body",
+    "material": "dense luminous cyan-blue glass with violet refraction and dual filament passes",
+    "reactor": "small moving white-cyan emitter inside the crystal with four thin real 3D rings",
+    "spectral_orbits": "thin real 3D cyan and violet rings around the body",
     "environment": "dark navy star field, cyan horizon and perspective energy floor",
     "interaction": "subtle pointer parallax plus organism activation/response/speech energy impulses",
     "reduced_motion": true,
@@ -34,6 +35,14 @@
       "crystal_vertical_geometry_multiplier": 1.5,
       "reactor_ring_aspect": "preserved independently from shell vertical stretch",
       "horizontal_alignment": "centered"
+    },
+    "material_calibration": {
+      "shell_opacity": "increased to match luminous glass body rather than wireframe appearance",
+      "contour_density": "every radial shell ring plus denser longitudinal filaments",
+      "filament_passes": ["cyan", "violet"],
+      "torus_tube_thickness": 0.018,
+      "outer_orbit_opacity": "reduced to keep the crystal body dominant",
+      "white_core": "preserved as the geometric position anchor"
     }
   },
   "release_integrity": {
@@ -48,10 +57,10 @@
     "public_site_integrity": "required",
     "real3d_reference_lock_v30": "required",
     "live_mobile_desktop_visual_metrics": "required_after_deploy",
-    "live_reference_position_metrics": "required_after_deploy",
+    "live_white_core_position_metrics": "required_after_deploy",
     "lighthouse": "required_by_site_change",
     "production_live_smoke": "required_after_deploy",
     "live_award_readiness": "required_after_deploy"
   },
-  "acceptance_policy": "The calibrated reference-lock change is accepted only after production deployment, live smoke, Lighthouse, mobile/desktop live MAG visual metrics and scroll-zero reference-position metrics pass. Source-code presence alone is not sufficient."
+  "acceptance_policy": "The dense-glass reference-lock change is accepted only after production deployment, live smoke, Lighthouse, mobile/desktop live MAG visual metrics and scroll-zero white-core position metrics pass. Final acceptance also requires direct visual comparison of the live Chromium screenshot with the uploaded reference."
 }
