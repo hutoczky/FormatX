@@ -5,6 +5,8 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '../..');
 
 const bootstrap = fs.readFileSync(path.join(root, 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'), 'utf8');
+const productionBootstrap = fs.readFileSync(path.join(root, 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'), 'utf8');
+const reference = fs.readFileSync(path.join(root, 'docs/scifi-ui/scripts/formatx-reference-lock-v30.js'), 'utf8');
 const webgpu = fs.readFileSync(path.join(root, 'docs/scifi-ui/scripts/formatx-webgpu-core-v29.js'), 'utf8');
 const webgl = fs.readFileSync(path.join(root, 'docs/scifi-ui/scripts/formatx-orbital-core-v28.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'docs/scifi-ui/styles/formatx-orbital-core-v28.css'), 'utf8');
@@ -14,13 +16,17 @@ const entry = fs.readFileSync(path.join(root, 'billing-worker/src/production-ent
 const homepage = fs.readFileSync(path.join(root, 'docs/scifi-ui/index.html'), 'utf8');
 
 assert.match(bootstrap, /const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/, 'WebGPU preview must require explicit opt-in');
-assert.match(bootstrap, /if \(!WEBGPU_PREVIEW\)[\s\S]*production-v24-authority[\s\S]*webgl2-v24-reference-production[\s\S]*return;/, 'reference-calibrated v24 renderer must remain the production authority');
-assert.match(homepage, /formatx-core-real3d-v20\.js\?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11/, 'production v24 real3D renderer is not bootstrapped by the homepage');
+assert.match(bootstrap, /if \(!WEBGPU_PREVIEW\)[\s\S]*production-v30-reference-lock-authority[\s\S]*webgl2-v30-uploaded-reference-production[\s\S]*return;/, 'uploaded-reference v30 renderer must remain production authority');
+assert.match(productionBootstrap, /reference-lock-v30/, 'production bootstrap must route to v30 reference lock');
+assert.match(productionBootstrap, /formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-1/, 'v30 production renderer is not selected');
+assert.match(reference, /fxCoreReferenceLock='ready-v30'/, 'v30 runtime reference lock marker missing');
+assert.match(homepage, /formatx-core-real3d-v20\.js\?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11/, 'stable production compatibility bootstrap is not loaded by the homepage');
 assert.match(bootstrap, /navigator\.gpu/, 'WebGPU capability detection missing from preview path');
 assert.match(bootstrap, /formatx-webgpu-core-v29\.js\?v=20260809-webgpu-real3d-v29-\d+/, 'WebGPU v29 preview bootstrap missing');
 assert.match(bootstrap, /formatx-orbital-core-v28\.js\?v=20260809-reference-orb-v28-\d+/, 'WebGL2 v28 preview fallback missing');
 assert.match(bootstrap, /webgpu-v29-preview/, 'WebGPU preview preference marker missing');
 assert.match(bootstrap, /webgl2-v28-preview-fallback/, 'WebGL2 preview fallback marker missing');
+assert.doesNotMatch(bootstrap, /if \(navigator\.gpu\)[\s\S]{0,500}webgpu-primary/, 'WebGPU must not automatically replace reference-lock v30');
 assert.match(cinematic, /retired-by-orbital-v28/, 'legacy cinematic overlay must remain retired');
 
 assert.match(webgpu, /const VERSION = 'v29'/, 'v29 renderer marker missing');
@@ -62,11 +68,11 @@ assert.match(css, /data-fx-webgpu-core="ready-v29"/, 'WebGPU presentation state 
 assert.match(css, /data-fx-orbital-core="ready-v28"/, 'WebGL2 presentation state missing');
 assert.match(css, /--fx-orbital-x:\s*50%/, 'mobile centered preview composition missing');
 assert.match(css, /--fx-orbital-x:\s*69%/, 'desktop right-side preview composition missing');
-assert.match(mobileCss, /hero-copy[\s\S]*order:\s*-1\s*!important/, 'mobile hero copy must remain before the 3D preview stage');
-assert.match(mobileCss, /hero-space[\s\S]*order:\s*0\s*!important/, 'mobile 3D preview stage must follow readable hero copy');
+assert.match(mobileCss, /hero-copy[\s\S]*order:\s*-1\s*!important/, 'mobile hero copy must remain before the preview stage');
+assert.match(mobileCss, /hero-space[\s\S]*order:\s*0\s*!important/, 'mobile preview stage must follow readable hero copy');
 assert.match(mobileCss, /data-fx-webgpu-core="ready-v29"/, 'mobile WebGPU preview composition contract missing');
 
 assert.match(entry, /formatx-reference-core-v26\.js\?v=20260809-reference-crystal-v26-\d+/, 'production compatibility/bootstrap injection missing');
 assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-core-v26\.js/, 'bootstrap no-store protection missing');
 
-console.log('PASS: production keeps the reference-calibrated v24 indexed WebGL2 MAG authoritative; WebGPU v29 remains a real indexed 3D opt-in preview with automatic WebGL2 v28 fallback.');
+console.log('PASS: uploaded-reference v30 indexed WebGL2 MAG is the production authority; WebGPU v29 remains a real indexed 3D opt-in preview with automatic WebGL2 v28 preview fallback.');
