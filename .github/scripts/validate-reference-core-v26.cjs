@@ -18,8 +18,10 @@ const homepage = fs.readFileSync(path.join(root, 'docs/scifi-ui/index.html'), 'u
 assert.match(bootstrap, /const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/, 'WebGPU preview must require explicit opt-in');
 assert.match(bootstrap, /if \(!WEBGPU_PREVIEW\)[\s\S]*production-v30-reference-lock-authority[\s\S]*webgl2-v30-uploaded-reference-production[\s\S]*return;/, 'uploaded-reference v30 renderer must remain production authority');
 assert.match(productionBootstrap, /reference-lock-v30/, 'production bootstrap must route to v30 reference lock');
-assert.match(productionBootstrap, /formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-1/, 'v30 production renderer is not selected');
-assert.match(reference, /fxCoreReferenceLock='ready-v30'/, 'v30 runtime reference lock marker missing');
+assert.match(productionBootstrap, /formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-2/, 'v30 production renderer cache revision 2 is not selected');
+assert.match(productionBootstrap, /formatx-reference-lock-v30\.css\?v=20260810-uploaded-reference-lock-2/, 'v30 production style cache revision 2 is not selected');
+assert.ok(reference.includes('ready-v30'), 'v30 runtime reference lock marker missing');
+assert.match(reference, /dense-luminous-glass-filaments-v30/, 'stable luminous material marker missing');
 assert.match(homepage, /formatx-core-real3d-v20\.js\?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11/, 'stable production compatibility bootstrap is not loaded by the homepage');
 assert.match(bootstrap, /navigator\.gpu/, 'WebGPU capability detection missing from preview path');
 assert.match(bootstrap, /formatx-webgpu-core-v29\.js\?v=20260809-webgpu-real3d-v29-\d+/, 'WebGPU v29 preview bootstrap missing');
@@ -75,4 +77,4 @@ assert.match(mobileCss, /data-fx-webgpu-core="ready-v29"/, 'mobile WebGPU previe
 assert.match(entry, /formatx-reference-core-v26\.js\?v=20260809-reference-crystal-v26-\d+/, 'production compatibility/bootstrap injection missing');
 assert.match(entry, /CRITICAL_STARTUP_ASSETS[\s\S]*formatx-reference-core-v26\.js/, 'bootstrap no-store protection missing');
 
-console.log('PASS: uploaded-reference v30 indexed WebGL2 MAG is the production authority; WebGPU v29 remains a real indexed 3D opt-in preview with automatic WebGL2 v28 preview fallback.');
+console.log('PASS: uploaded-reference v30 cache revision 2 indexed WebGL2 MAG is the stable production authority; WebGPU v29 remains a real indexed 3D opt-in preview with automatic WebGL2 v28 preview fallback.');
