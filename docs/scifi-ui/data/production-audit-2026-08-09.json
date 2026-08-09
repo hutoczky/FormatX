@@ -47,17 +47,18 @@
   ],
   "validation_results_before_deploy": {
     "production_validation_with_reference_v24_authority_gate": "passed",
+    "public_site_integrity_static_and_desktop_mobile_chromium": "passed",
     "real3d_reference_v24_production_and_webgpu_preview_contract": "passed",
     "release_truth_and_platform_contract": "passed",
     "transaction_pages_noindex": "passed",
     "android_full_release_vs_native_beta_separation": "passed"
   },
   "required_on_this_deploy": {
-    "production_validation": "required",
-    "production_worker_tests": "required",
-    "production_worker_dry_run_build": "required",
-    "public_site_static_integrity": "required",
-    "desktop_mobile_chromium_public_pages": "required",
+    "production_validation": "required_again_on_deploy_commit",
+    "production_worker_tests": "required_again_on_deploy_commit",
+    "production_worker_dry_run_build": "required_again_on_deploy_commit",
+    "public_site_static_integrity": "required_again_on_deploy_commit",
+    "desktop_mobile_chromium_public_pages": "required_again_on_deploy_commit",
     "strict_lighthouse": "required_by_lighthouse_ci",
     "production_live_smoke": "required_after_deployment"
   },
