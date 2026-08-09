@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "renderer": "FormatX Reference Core",
+  "version": "v26",
+  "deployment_intent": "production",
+  "visual_target": "four-tip transparent crystalline living core",
+  "rendering": {
+    "api": "WebGL2",
+    "indexed_geometry": true,
+    "depth_buffer": true,
+    "perspective_camera": true,
+    "procedural_glass_shader": true,
+    "post_process_bloom": true,
+    "image_backed": false,
+    "third_party_3d_engine": false
+  },
+  "animation": {
+    "display_synchronised": true,
+    "independent_shell_motion": true,
+    "independent_reactor_motion": true,
+    "multi_axis_orbits": true,
+    "pointer_parallax": true,
+    "adaptive_render_scale": true,
+    "reduced_motion_supported": true
+  },
+  "platform_strategy": {
+    "desktop": "high-performance WebGL2",
+    "mobile": "adaptive WebGL2 geometry and DPR cap",
+    "fallback": "legacy safe visual remains if v26 cannot initialise"
+  },
+  "deployed_at": "2026-08-09"
+}
