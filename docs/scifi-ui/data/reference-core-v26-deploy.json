@@ -36,5 +36,11 @@
     "runtime_assertions": ["WebGL2", "depth", "perspective", "indexed crystal", "no legacy stage", "no image backing"],
     "known_external_noise": "Cloudflare analytics beacon blocked by first-party CSP is ignored by the visual gate"
   },
+  "reference_position_gate": {
+    "workflow": "Verify live real3D reference position",
+    "revision": "v26-scroll-zero-centroid-1",
+    "viewport": "753x1536 mobile",
+    "requirements": ["scrollY=0", "v26 renderer active", "single v26 stage", "no legacy stage", "crystal centroid within reference window"]
+  },
   "deployed_at": "2026-08-09"
 }
