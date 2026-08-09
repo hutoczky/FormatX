@@ -1,8 +1,8 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "audit_date": "2026-08-10",
-  "deployment_iteration": 3,
-  "scope": "uploaded visual reference lock for the production FormatX MAG, single-context real 3D renderer ownership, calibrated mobile framing, dense luminous glass material, mobile/desktop visual evidence, white-core position evidence, production validation and live deployment",
+  "deployment_iteration": 4,
+  "scope": "uploaded visual reference lock for the production FormatX MAG, single-context real 3D renderer ownership, calibrated mobile framing, dense luminous glass material, corrected non-brittle static gates, mobile/desktop visual evidence, white-core position evidence, production validation and live deployment",
   "audited_release": {
     "version": "v130",
     "product_status": "full_release",
@@ -45,6 +45,13 @@
       "white_core": "preserved as the geometric position anchor"
     }
   },
+  "validation_model": {
+    "runtime_ready_marker": "ready-v30",
+    "material_marker": "dense-luminous-glass-filaments-v30",
+    "position_metric": "weighted centroid of the bright white-cyan reactor core within the central search window",
+    "shell_metric": "separate mobile/desktop live visual gate for spectral coverage, brightness and extent",
+    "background_excluded_from_position_metric": true
+  },
   "release_integrity": {
     "multiplatform_sha256": "sha256:10036483a06794ba0e1985c9402324248052a18720b3f4a561b768945a2b9187",
     "android_sha256": "sha256:ac8add4fa5d1532c35f6994fe22a97ca8400781ce272f8577d313628e509b69f",
@@ -62,5 +69,5 @@
     "production_live_smoke": "required_after_deploy",
     "live_award_readiness": "required_after_deploy"
   },
-  "acceptance_policy": "The dense-glass reference-lock change is accepted only after production deployment, live smoke, Lighthouse, mobile/desktop live MAG visual metrics and scroll-zero white-core position metrics pass. Final acceptance also requires direct visual comparison of the live Chromium screenshot with the uploaded reference."
+  "acceptance_policy": "The verified dense-glass reference-lock change is accepted only after production deployment, live smoke, Lighthouse, mobile/desktop live MAG visual metrics and scroll-zero white-core position metrics pass. Final acceptance also requires direct visual comparison of the live Chromium screenshot with the uploaded reference."
 }
