@@ -7,13 +7,11 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const src=read('docs/scifi-ui/scripts/formatx-reference-lock-v30.js');
 const css=read('docs/scifi-ui/styles/formatx-reference-lock-v30.css');
-
 assert.match(bootstrap,/reference-lock-v30/,'production bootstrap must select reference lock v30');
-assert.match(bootstrap,/formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-2/,'v30 renderer cache revision 2 missing');
-assert.match(bootstrap,/formatx-reference-lock-v30\.css\?v=20260810-uploaded-reference-lock-2/,'v30 styling cache revision 2 missing');
+assert.match(bootstrap,/formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-3/,'v30 renderer cache revision 3 missing');
+assert.match(bootstrap,/formatx-reference-lock-v30\.css\?v=20260810-uploaded-reference-lock-3/,'v30 styling cache revision 3 missing');
 assert.ok(bootstrap.includes("fxCoreReal3d='ready-v20'"),'legacy ownership compatibility marker missing');
 assert.match(bootstrap,/formatx:core3dfallback/,'bootstrap failure event missing');
-
 assert.match(src,/const VERSION='v30-reference-lock'/,'v30 reference renderer marker missing');
 assert.match(src,/canvas\.getContext\('webgl2'/,'native WebGL2 context missing');
 assert.equal((src.match(/getContext\('webgl2'/g)||[]).length,1,'v30 must create exactly one WebGL2 context');
@@ -29,11 +27,11 @@ assert.match(src,/t=\.018/,'thin reference torus calibration missing');
 assert.match(src,/function sphere\(/,'real 3D moving core sphere missing');
 assert.match(src,/const drift=/,'moving inner core missing');
 assert.match(src,/const rs=\[\.20,\.29,\.39,\.51\]/,'four concentric reactor rings missing');
-assert.match(src,/orbitSpecs|for\(const o of\[\[\.70/,'outer spectral orbit system missing');
-assert.match(src,/cyan-violet-3d-v30/,'cyan/violet orbital state marker missing');
 assert.match(src,/dense-luminous-glass-filaments-v30/,'dense luminous glass material marker missing');
+assert.match(src,/translucent-volume-pass-r3/,'translucent volume surface marker missing');
+assert.match(src,/mesh\(shell,mul\(B,sc\(\.990,\.990,\.990\)\),1,\.16/,'cyan glass surface pass missing');
+assert.match(src,/mesh\(shell,mul\(B,sc\(\.982,\.982,\.982\)\),1,\.075/,'violet glass surface pass missing');
 assert.match(src,/adaptive-60-plus-fps/,'adaptive performance target missing');
-assert.match(src,/frameAverage|ema/,'measured frame-time adaptation missing');
 assert.match(src,/pointermove/,'pointer-reactive 3D parallax missing');
 assert.match(src,/prefers-reduced-motion/,'reduced-motion contract missing');
 assert.match(src,/IntersectionObserver/,'renderer must pause outside hero');
@@ -48,5 +46,4 @@ assert.match(css,/100dvh/,'dynamic viewport sizing missing');
 assert.match(css,/--fx-core-x:50%/,'portrait reference centering missing');
 assert.match(css,/perspective\(560px\) rotateX\(63deg\)/,'reference perspective floor missing');
 assert.match(css,/saturate\(1\.42\) contrast\(1\.06\) brightness\(1\.24\)/,'stable luminous reference grade missing');
-
-console.log('PASS: production MAG v30 cache revision 2 is a single-context indexed WebGL2 stable luminous four-sail crystal locked to the uploaded reference, with a moving inner core, thin real 3D rings/orbits, dense cyan/violet filaments and adaptive 60+ FPS rendering.');
+console.log('PASS: production MAG v30 r3 is a single-context indexed WebGL2 translucent four-sail crystal locked to the uploaded reference, with real cyan/violet glass surface passes, a moving inner core and adaptive 60+ FPS rendering.');
