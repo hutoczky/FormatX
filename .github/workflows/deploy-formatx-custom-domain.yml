@@ -18,6 +18,7 @@ on:
       - 'wrangler.jsonc'
       - '.github/scripts/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
+      - '.github/workflows/verify-live-core-mesh3d-visual.yml'
   push:
     branches: [master]
     paths:
@@ -27,6 +28,7 @@ on:
       - 'wrangler.jsonc'
       - '.github/scripts/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
+      - '.github/workflows/verify-live-core-mesh3d-visual.yml'
 
 permissions:
   contents: read
