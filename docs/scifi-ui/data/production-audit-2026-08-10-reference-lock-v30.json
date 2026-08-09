@@ -1,8 +1,8 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "audit_date": "2026-08-10",
-  "deployment_iteration": 4,
-  "scope": "uploaded visual reference lock for the production FormatX MAG, single-context real 3D renderer ownership, calibrated mobile framing, dense luminous glass material, corrected non-brittle static gates, mobile/desktop visual evidence, white-core position evidence, production validation and live deployment",
+  "deployment_iteration": 5,
+  "scope": "uploaded visual reference lock for the production FormatX MAG, single-context real 3D ownership, calibrated mobile framing, proven shader, layered luminous glass material, cache-busted v30 r2 assets, diagnostic live startup gates, mobile/desktop visual evidence, white-core position evidence and live deployment",
   "audited_release": {
     "version": "v130",
     "product_status": "full_release",
@@ -14,14 +14,14 @@
     "target": "user-supplied four-tip luminous crystalline sci-fi core reference, 2026-08-10",
     "production_authority": "uploaded-reference lock v30",
     "bootstrap": "/scifi-ui/scripts/formatx-core-real3d-v20.js",
-    "renderer": "/scifi-ui/scripts/formatx-reference-lock-v30.js",
-    "presentation": "/scifi-ui/styles/formatx-reference-lock-v30.css",
+    "renderer": "/scifi-ui/scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-2",
+    "presentation": "/scifi-ui/styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-2",
     "image_backed": false,
     "third_party_3d_engine": false,
     "webgl2_context_count": 1,
     "geometry": "indexed concave four-sail crystalline mesh",
     "silhouette": "long vertical needle tips, wide horizontal tips, concave transparent sails",
-    "material": "dense luminous cyan-blue glass with violet refraction and dual filament passes",
+    "material": "stable proven shader plus layered luminous cyan-blue glass and dense cyan/violet indexed filaments",
     "reactor": "small moving white-cyan emitter inside the crystal with four thin real 3D rings",
     "spectral_orbits": "thin real 3D cyan and violet rings around the body",
     "environment": "dark navy star field, cyan horizon and perspective energy floor",
@@ -37,17 +37,20 @@
       "horizontal_alignment": "centered"
     },
     "material_calibration": {
-      "shell_opacity": "increased to match luminous glass body rather than wireframe appearance",
+      "shader": "restored previously proven live shader",
+      "shell_passes": 3,
       "contour_density": "every radial shell ring plus denser longitudinal filaments",
       "filament_passes": ["cyan", "violet"],
       "torus_tube_thickness": 0.018,
+      "canvas_filter": "saturate(1.42) contrast(1.06) brightness(1.24)",
       "outer_orbit_opacity": "reduced to keep the crystal body dominant",
-      "white_core": "preserved as the geometric position anchor"
+      "white_core": "preserved as geometric position anchor"
     }
   },
   "validation_model": {
     "runtime_ready_marker": "ready-v30",
     "material_marker": "dense-luminous-glass-filaments-v30",
+    "startup_diagnostics": ["fxCoreReferenceLock", "fxCoreReferenceLockLoad", "fxCoreReal3d", "fxCoreReal3dError", "loaded v30 script URL", "loaded v30 style URL"],
     "position_metric": "weighted centroid of the bright white-cyan reactor core within the central search window",
     "shell_metric": "separate mobile/desktop live visual gate for spectral coverage, brightness and extent",
     "background_excluded_from_position_metric": true
@@ -69,5 +72,5 @@
     "production_live_smoke": "required_after_deploy",
     "live_award_readiness": "required_after_deploy"
   },
-  "acceptance_policy": "The verified dense-glass reference-lock change is accepted only after production deployment, live smoke, Lighthouse, mobile/desktop live MAG visual metrics and scroll-zero white-core position metrics pass. Final acceptance also requires direct visual comparison of the live Chromium screenshot with the uploaded reference."
+  "acceptance_policy": "Iteration 5 is accepted only if the cache-busted stable v30 renderer reaches ready-v30 live, production smoke and Lighthouse pass, mobile/desktop visual metrics pass, white-core position passes, and the resulting live Chromium screenshot is directly compared with the uploaded reference."
 }
