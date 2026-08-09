@@ -22,7 +22,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/mag-visual"; cd "$RUNNER_TEMP/mag-visual"
           npm init -y >/dev/null 2>&1; npm install --silent playwright@latest; npx playwright install --with-deps chromium
-      - name: Capture centered object-space glass v15
+      - name: Capture reference-calibrated centered MAG v16
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -33,9 +33,9 @@ jobs:
           const { chromium }=require('playwright'); const fs=require('node:fs');
           (async()=>{const browser=await chromium.launch({headless:true,args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
           const context=await browser.newContext({viewport:{width:753,height:1536},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU'}); const page=await context.newPage();
-          await page.goto(`https://www.formatxsuite.com/?glass_v15_ref_visual=${process.env.RUN_ID}`,{waitUntil:'domcontentloaded',timeout:45000}); await page.waitForTimeout(1200);
+          await page.goto(`https://www.formatxsuite.com/?glass_v16_ref_visual=${process.env.RUN_ID}`,{waitUntil:'domcontentloaded',timeout:45000}); await page.waitForTimeout(1200);
           await page.evaluate(()=>{const r=document.documentElement;r.lang='hu';r.dataset.fxImmersive='active';r.classList.add('fx-intro-complete');dispatchEvent(new CustomEvent('formatx:immersiveactivate'));document.dispatchEvent(new CustomEvent('formatx:introcomplete'));});
-          for(const [expr,timeout] of [[()=>document.documentElement.dataset.fxApexSceneStability==='ready-v25',30000],[()=>document.documentElement.dataset.fxCoreMeshMaterial==='reference-glass-v15',30000],[()=>document.documentElement.dataset.fxCoreMeshMaterialPatch==='applied-v15',10000],[()=>document.documentElement.dataset.fxCoreMaterialCenter==='object-space-y-minus-0.18',10000],[()=>document.documentElement.dataset.fxCoreShapeMesh==='applied-v14',10000],[()=>document.documentElement.dataset.fxCoreShapeFracture==='applied-v14',30000],[()=>document.documentElement.dataset.fxCoreGeometryScale==='1.15x-true-3d-uniform',10000],[()=>document.documentElement.dataset.fxCoreMesh3d==='ready-v11',30000],[()=>document.documentElement.dataset.fxCoreFracture3d==='ready-v11',30000],[()=>document.documentElement.dataset.fxCoreCinematicGrade==='reference-balance-v14',10000],[()=>window.FormatXCoreCinematic?.version==='film-reactive-v1',10000]]) await page.waitForFunction(expr,null,{timeout});
+          for(const [expr,timeout] of [[()=>document.documentElement.dataset.fxApexSceneStability==='ready-v26',30000],[()=>document.documentElement.dataset.fxCoreMeshMaterial==='reference-glass-v15',30000],[()=>document.documentElement.dataset.fxCoreMaterialCenter==='object-space-y-minus-0.18',10000],[()=>document.documentElement.dataset.fxCoreShapeMesh==='applied-v14',10000],[()=>document.documentElement.dataset.fxCoreShapeFracture==='applied-v14',30000],[()=>document.documentElement.dataset.fxCoreGeometryScale==='1.15x-true-3d-uniform',10000],[()=>document.documentElement.dataset.fxCoreMesh3d==='ready-v11',30000],[()=>document.documentElement.dataset.fxCoreFracture3d==='ready-v11',30000],[()=>document.documentElement.dataset.fxCoreCinematicGrade==='reference-calibrated-v16',10000],[()=>window.FormatXCoreCinematic?.version==='film-reactive-v1',10000]]) await page.waitForFunction(expr,null,{timeout});
           await page.waitForTimeout(1200); await page.evaluate(()=>scrollTo(0,Math.min(400,document.documentElement.scrollHeight-innerHeight))); await page.waitForTimeout(900);
           const idle=await page.evaluate(()=>({mapper:document.documentElement.dataset.fxApexSceneStability,material:document.documentElement.dataset.fxCoreMeshMaterial,center:document.documentElement.dataset.fxCoreMaterialCenter,shapeMesh:document.documentElement.dataset.fxCoreShapeMesh,shapeFracture:document.documentElement.dataset.fxCoreShapeFracture,scale:document.documentElement.dataset.fxCoreGeometryScale,mesh:document.documentElement.dataset.fxCoreMesh3d,fracture:document.documentElement.dataset.fxCoreFracture3d,grade:document.documentElement.dataset.fxCoreCinematicGrade,energy:window.FormatXCoreCinematic?.energy,scrollY}));
           await page.screenshot({path:'mag-idle-reference.png',fullPage:false});
@@ -44,14 +44,14 @@ jobs:
           await page.evaluate(()=>dispatchEvent(new CustomEvent('formatx:organismspeechstart',{detail:{text:'audit',explicit:true}}))); await page.waitForTimeout(180); const speaking=await page.evaluate(()=>({energy:window.FormatXCoreCinematic?.energy,speech:window.FormatXCoreCinematic?.speech})); await page.waitForTimeout(620); await page.screenshot({path:'mag-speaking-reference.png',fullPage:false});
           await page.evaluate(()=>dispatchEvent(new CustomEvent('formatx:organismspeechend',{detail:{text:'audit',explicit:true}}))); await page.waitForTimeout(180); const settling=await page.evaluate(()=>({speech:window.FormatXCoreCinematic?.speech})); await page.waitForTimeout(620); await page.screenshot({path:'mag-settling-reference.png',fullPage:false});
           const state={idle,awake,speaking,settling};fs.writeFileSync('mag-state.json',JSON.stringify(state,null,2));
-          if(idle.mapper!=='ready-v25'||idle.material!=='reference-glass-v15'||idle.center!=='object-space-y-minus-0.18'||idle.shapeMesh!=='applied-v14'||idle.shapeFracture!=='applied-v14'||idle.scale!=='1.15x-true-3d-uniform'||idle.mesh!=='ready-v11'||idle.fracture!=='ready-v11'||idle.grade!=='reference-balance-v14'||idle.scrollY!==400||awake.immediate!=='frame-rate-independent-v1'||!(awake.energy>=.70)||!(awake.surge>.50)||speaking.speech!==1||!(speaking.energy>=.78)||settling.speech!==0) throw new Error(JSON.stringify(state));
+          if(idle.mapper!=='ready-v26'||idle.material!=='reference-glass-v15'||idle.center!=='object-space-y-minus-0.18'||idle.shapeMesh!=='applied-v14'||idle.shapeFracture!=='applied-v14'||idle.scale!=='1.15x-true-3d-uniform'||idle.mesh!=='ready-v11'||idle.fracture!=='ready-v11'||idle.grade!=='reference-calibrated-v16'||idle.scrollY!==400||awake.immediate!=='frame-rate-independent-v1'||!(awake.energy>=.70)||!(awake.surge>.50)||speaking.speech!==1||!(speaking.energy>=.78)||settling.speech!==0) throw new Error(JSON.stringify(state));
           await browser.close();})().catch(e=>{console.error(e);process.exit(1)});
           NODE
       - name: Upload MAG visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-centered-reference-glass-mag-v15-${{ github.run_id }}
+          name: live-reference-calibrated-centered-mag-v16-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/mag-visual/mag-idle-reference.png
             ${{ runner.temp }}/mag-visual/mag-awake-reference.png
@@ -69,5 +69,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Centered object-space true-3D MAG v15 captured and cinematic reactions verified'; else state=failure; description='Centered object-space MAG v15 visual verification failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference-calibrated centered true-3D MAG v16 captured and verified'; else state=failure; description='Reference-calibrated MAG v16 visual verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
