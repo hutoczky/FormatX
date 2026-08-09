@@ -1,0 +1,10 @@
+{
+  "revision":"2026-08-09-emissive-alpha-mag-v25-candidate",
+  "material":"reference-glass-v25",
+  "highlight_model":"emissive-alpha-network-v25",
+  "highlight_coverage":"network-alpha-independent-v25",
+  "grade":"reference-network-v23",
+  "geometry":"indexed-webgl2-mesh-v11-shape-v14-scale-v13",
+  "pixel_gate":"unchanged-reference-gate",
+  "status":"candidate-awaiting-live-chromium-validation"
+}
