@@ -1,0 +1,20 @@
+{
+  "revision": "2026-08-09-reference-shaped-single-real3d-v21-final",
+  "active_asset": "/scifi-ui/scripts/formatx-core-real3d-v20.js",
+  "compatibility_runtime": "ready-v20",
+  "engine_revision": "ready-v21",
+  "renderer_revision": "single-webgl2-indexed-3d-v21",
+  "webgl_contexts": 1,
+  "geometry": "reference-pnorm-four-tip-shell-v21",
+  "lighting": "axis-membrane-reactor-rings-v21",
+  "reactor": "smaller-sphere-and-three-tori-v21",
+  "mobile_composition": "reference-upshift-wide-real3d-v21",
+  "cinematic_state": "film-reactive-v1",
+  "performance_target": "adaptive-60-plus-fps",
+  "strict_existing_visual_gate": "passed-live",
+  "scroll0_reference_position_audit": "passed-live",
+  "reference_comparison": "v21-closer-than-v20",
+  "scroll_ownership": "seamless-v7-native",
+  "image_backed": false,
+  "status": "live-final-verification"
+}
