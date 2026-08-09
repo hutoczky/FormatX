@@ -1,0 +1,7 @@
+{
+  "revision":"2026-08-09-single-real3d-scroll0-reference-audit",
+  "renderer":"formatx-core-real3d-v20",
+  "capture_scroll_y":0,
+  "viewport":"753x1536-mobile",
+  "purpose":"measure-unoccluded-reference-composition-before-real3d-v21-tuning"
+}
