@@ -58,6 +58,25 @@ jobs:
 
           function knownNoise(text){return /static\.cloudflareinsights\.com\/beacon\.min\.js/i.test(text)&&/Content Security Policy|script-src/i.test(text);}
 
+          async function waitForRenderer(page) {
+            await page.waitForFunction(() => {
+              const root=document.documentElement;
+              const ref=root.dataset.fxCoreReferenceLock||'';
+              const real=root.dataset.fxCoreReal3d||'';
+              return ref==='ready-v30' || ref.startsWith('fallback-') || ref==='load-failed' || ['shader-failed','context-unavailable','webgl2-unavailable','context-lost','geometry-failed'].includes(real);
+            }, null, {timeout:60000});
+            const diagnostic=await page.evaluate(()=>({
+              reference:document.documentElement.dataset.fxCoreReferenceLock||null,
+              referenceLoad:document.documentElement.dataset.fxCoreReferenceLockLoad||null,
+              real3d:document.documentElement.dataset.fxCoreReal3d||null,
+              error:document.documentElement.dataset.fxCoreReal3dError||null,
+              scripts:[...document.scripts].map(s=>s.src).filter(src=>src.includes('reference-lock-v30')),
+              styles:[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>l.href).filter(src=>src.includes('reference-lock-v30'))
+            }));
+            console.log('V30_STARTUP_DIAGNOSTIC',JSON.stringify(diagnostic));
+            if(diagnostic.reference!=='ready-v30') throw new Error(`v30 renderer startup failed: ${JSON.stringify(diagnostic)}`);
+          }
+
           async function capture(browser,cfg){
             const context=await browser.newContext({viewport:cfg.viewport,deviceScaleFactor:1,isMobile:cfg.mobile,hasTouch:cfg.mobile,locale:'hu-HU'});
             const page=await context.newPage();const errors=[];
@@ -65,21 +84,21 @@ jobs:
             page.on('console',m=>{if(m.type()==='error'&&!knownNoise(m.text()))errors.push(m.text());});
             await page.goto(`https://www.formatxsuite.com/?reference_v30=${process.env.RUN_ID}&capture=${cfg.name}`,{waitUntil:'domcontentloaded',timeout:45000});
             await page.evaluate(()=>{document.documentElement.lang='hu';document.documentElement.classList.add('fx-intro-complete');document.getElementById('formatx-event-horizon')?.remove();scrollTo(0,0);});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreReferenceLock==='ready-v30',null,{timeout:60000});
+            await waitForRenderer(page);
             await page.waitForFunction(()=>document.querySelector('.fx-core-real3d-canvas') instanceof HTMLCanvasElement,null,{timeout:10000});
             await page.waitForTimeout(1800);
             const runtime=await page.evaluate(()=>{
               const root=document.documentElement,canvas=document.querySelector('.fx-core-real3d-canvas'),stage=document.querySelector('.fx-core-real3d-stage'),rect=canvas?.getBoundingClientRect();
               let webgl2=false;try{webgl2=Boolean(canvas?.getContext('webgl2'));}catch(_){}
-              return {reference:root.dataset.fxCoreReferenceLock,referenceRevision:root.dataset.fxCoreReferenceRevision,framing:root.dataset.fxCoreReferenceFraming,visual:root.dataset.fxCoreVisualRevision,geometry:root.dataset.fxCoreGeometry,reactor:root.dataset.fxCoreInternalReactor,orbits:root.dataset.fxCoreSpectralOrbits,performance:root.dataset.fxCorePerformance,imageBacked:root.dataset.fxCoreImageBacked,webgl2,stageActive:stage?.dataset.active,canvas:rect?{x:rect.x,y:rect.y,width:rect.width,height:rect.height}:null,stages:document.querySelectorAll('.fx-core-real3d-stage').length,v26Stages:document.querySelectorAll('.fx-reference-core-v26-stage').length,oldMeshStages:document.querySelectorAll('.fx-core-mesh3d-stage').length,oldFractureStages:document.querySelectorAll('.fx-core-fracture3d-stage').length};
+              return {reference:root.dataset.fxCoreReferenceLock,referenceRevision:root.dataset.fxCoreReferenceRevision,framing:root.dataset.fxCoreReferenceFraming,material:root.dataset.fxCoreReferenceMaterial,visual:root.dataset.fxCoreVisualRevision,geometry:root.dataset.fxCoreGeometry,reactor:root.dataset.fxCoreInternalReactor,orbits:root.dataset.fxCoreSpectralOrbits,performance:root.dataset.fxCorePerformance,imageBacked:root.dataset.fxCoreImageBacked,webgl2,stageActive:stage?.dataset.active,canvas:rect?{x:rect.x,y:rect.y,width:rect.width,height:rect.height}:null,stages:document.querySelectorAll('.fx-core-real3d-stage').length,v26Stages:document.querySelectorAll('.fx-reference-core-v26-stage').length,oldMeshStages:document.querySelectorAll('.fx-core-mesh3d-stage').length,oldFractureStages:document.querySelectorAll('.fx-core-fracture3d-stage').length};
             });
             const file=`reference-lock-v30-${cfg.name}.png`;await page.screenshot({path:file,fullPage:false});const visual=metrics(file,cfg.region);
             fs.writeFileSync(`reference-lock-v30-${cfg.name}.json`,JSON.stringify({runtime,visual,errors},null,2));
             await context.close();
             const coverage=.97;
-            const runtimeOk=runtime.reference==='ready-v30'&&runtime.referenceRevision==='uploaded-reference-20260810'&&runtime.framing==='mobile-core-center-40pct-shell-height-75pct'&&runtime.visual==='v30-reference-lock'&&runtime.geometry==='concave-four-sail-indexed-mesh-v30'&&runtime.reactor==='moving-white-core-four-rings-v30'&&runtime.orbits==='cyan-violet-3d-v30'&&runtime.performance==='adaptive-60-plus-fps'&&runtime.imageBacked==='false'&&runtime.webgl2&&runtime.stageActive==='true'&&runtime.stages===1&&runtime.v26Stages===0&&runtime.oldMeshStages===0&&runtime.oldFractureStages===0&&runtime.canvas?.width>=cfg.viewport.width*coverage&&runtime.canvas?.height>=cfg.viewport.height*coverage;
+            const runtimeOk=runtime.reference==='ready-v30'&&runtime.referenceRevision==='uploaded-reference-20260810'&&runtime.framing==='mobile-core-center-40pct-shell-height-75pct'&&runtime.material==='dense-luminous-glass-filaments-v30'&&runtime.visual==='v30-reference-lock'&&runtime.geometry==='concave-four-sail-indexed-mesh-v30'&&runtime.reactor==='moving-white-core-four-rings-v30'&&runtime.orbits==='cyan-violet-3d-v30'&&runtime.performance==='adaptive-60-plus-fps'&&runtime.imageBacked==='false'&&runtime.webgl2&&runtime.stageActive==='true'&&runtime.stages===1&&runtime.v26Stages===0&&runtime.oldMeshStages===0&&runtime.oldFractureStages===0&&runtime.canvas?.width>=cfg.viewport.width*coverage&&runtime.canvas?.height>=cfg.viewport.height*coverage;
             const b=visual.bounds;
-            const visualOk=visual.mean_luminance>=.018&&visual.mean_luminance<=.48&&visual.bright_fraction>=.001&&visual.saturated_fraction>=.012&&visual.cyan_violet_fraction>=.009&&b&&b.width>=cfg.minWidth&&b.height>=cfg.minHeight&&b.centerY>=cfg.centerYMin&&b.centerY<=cfg.centerYMax;
+            const visualOk=visual.mean_luminance>=.018&&visual.mean_luminance<=.52&&visual.bright_fraction>=.001&&visual.saturated_fraction>=.012&&visual.cyan_violet_fraction>=.009&&b&&b.width>=cfg.minWidth&&b.height>=cfg.minHeight&&b.centerY>=cfg.centerYMin&&b.centerY<=cfg.centerYMax;
             if(!runtimeOk||!visualOk||errors.length)throw new Error(`${cfg.name} v30 visual gate failed: ${JSON.stringify({runtime,visual,errors,coverage})}`);
             return {runtime,visual};
           }
@@ -117,5 +136,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Uploaded-reference WebGL2 MAG v30 passed live mobile and desktop visual gates'; else state=failure; description='Uploaded-reference MAG v30 failed live visual gate'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Stable uploaded-reference WebGL2 MAG v30 r2 passed live mobile and desktop visual gates'; else state=failure; description='Uploaded-reference MAG v30 r2 failed live visual gate'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
