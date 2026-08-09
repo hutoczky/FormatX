@@ -7,6 +7,7 @@ on:
       - 'billing-worker/src/**'
       - '.github/scripts/validate-public-site-integrity.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-real3d-core.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
   push:
     branches: [master]
@@ -15,6 +16,7 @@ on:
       - 'billing-worker/src/**'
       - '.github/scripts/validate-public-site-integrity.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-real3d-core.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
   workflow_dispatch:
 
@@ -37,6 +39,8 @@ jobs:
           node-version: '22'
       - name: Validate full public surface
         run: node .github/scripts/validate-public-site-integrity.cjs
+      - name: Validate native WebGL3D core
+        run: node .github/scripts/validate-real3d-core.cjs
       - name: Validate feedback and moderation
         run: node .github/scripts/validate-feedback-moderation.cjs
       - name: Validate requested site features
@@ -70,7 +74,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Static integrity and desktop/mobile Chromium public-page validation passed'
+            description='Static, WebGL3D and desktop/mobile Chromium validation passed'
           else
             state='failure'
             description='FormatX public-site integrity validation failed'
