@@ -193,13 +193,14 @@
       float livingVeins=(flowA*.72+flowB*.55+flowC*.34)*smoothstep(.10,.28,radial)*(1.0-smoothstep(.82,1.02,diamond));
       float innerHalo=band(radial,.20,.034)+band(radial,.29,.026)*.74+band(radial,.39,.022)*.52;
       float sideSpectrum=pow(.5+.5*sin(polar*7.0+radial*13.0-uTime*.20),6.0)*smoothstep(.16,.72,abs(p.x))*(1.0-smoothstep(.78,1.02,diamond));
+      float violetZone=smoothstep(.48,.82,spectral*.48+sideSpectrum*.70+flowB*.18);
       float starGlint=pow(sat(specA+specB*.62+caustic*.30),5.0);
       float volumeField=pow(sat(1.0-diamond),1.34)*(.46+.54*(1.0-ndv));
       float sailField=(1.0-smoothstep(.10,1.02,diamond))*(.38+.62*(1.0-ndv));
       float coreVeil=exp(-radial*radial*72.0)*smoothstep(.12,.36,vObject.z);
       float pulse=.5+.5*sin(uTime*1.48);
       float activity=sat(uEnergy*.72+uSurge*.52+uSpeech*.34);
-      vec3 cyan=vec3(.005,.57,1.52);
+      vec3 cyan=vec3(.005,.72,1.54);
       vec3 electric=vec3(.008,.19,1.18);
       vec3 violet=vec3(.68,.035,1.34);
       if(uMaterial<.5){
@@ -219,14 +220,17 @@
         glass+=vec3(.006,.070,.190)*(1.0-fresnel);
         glass+=mix(electric,cyan,sat(.14+spectral*.34+normal.y*.12))*(.10+.18*(1.0-absorption.r));
         glass=mix(glass,glass+violet*.36,sat((1.0-spectral)*.18+violetArc*.38+normal.x*.06));
+        float glassHue=sat(.5+.5*sin(polar*2.0+radial*8.0-uTime*.07));
+        vec3 glassTint=mix(vec3(.035,.94,1.28),vec3(.82,.065,1.24),glassHue);
+        glass=mix(glass,glass*glassTint,.42);
         glass+=mix(electric,cyan,.62)*volumeField*.34;
         glass+=mix(electric,cyan,spectral)*sailField*.23;
-        vec3 emission=cyan*(membrane*.48+reactorRings*.62+innerHalo*.48+axisX*.19+axisY*.18+diagonal*.12+livingVeins*.74);
-        emission+=violet*(violetArc*.96+membrane*.18+diagonal*.17+flowB*.46+livingVeins*.22+sideSpectrum*.72);
+        vec3 emission=cyan*(membrane*.48+reactorRings*.62+innerHalo*.48+axisX*.19+axisY*.18+diagonal*.12+livingVeins*.74)*(1.0-violetZone*.48);
+        emission+=violet*(violetArc*1.04+membrane*(.18+violetZone*.48)+diagonal*.17+flowB*.62+livingVeins*.28+sideSpectrum*1.28);
         emission+=mix(electric,cyan,.68)*volumeField*(.38+.15*activity);
         emission+=mix(electric,cyan,.54)*sailField*(.15+.06*activity);
         emission+=cyan*coreVeil*.10;
-        emission+=vec3(.18,.82,1.62)*(specA*2.62+specB*1.34+caustic*.56+starGlint*.72);
+        emission+=vec3(.012,.90,1.72)*(specA*2.62+specB*1.34+caustic*.56+starGlint*.72);
         vec3 color=(glass*(.78+body+.13*spectral)+emission)*1.50;
         float alpha=uOpacity*(.22+.56*fresnel+.13*facet+.13*membrane+.15*reactorRings+.13*livingVeins+.035*sideSpectrum+.08*volumeField+.045*sailField+.11*coreVeil+.17*(1.0-absorption.r)+.045*activity);
         fragColor=vec4(color,alpha);
@@ -241,16 +245,19 @@
         float alpha=uOpacity*(reactor*(.62+.30*center)+uLayer*(.08+.20*rim));
         fragColor=vec4(core*mix(1.0,2.2,reactor),alpha);
       }else{
-        vec3 ring=mix(cyan,violet,sat(uLayer*.18+spectral*.24));
+        float hueBand=smoothstep(.64,.90,.5+.5*sin(polar*5.0+radial*19.0-uTime*.28+uLayer*1.8));
+        float layerViolet=smoothstep(1.2,2.2,uLayer)*.72;
+        float hueTravel=max(hueBand*.90,layerViolet);
+        vec3 ring=mix(cyan,violet,hueTravel)*(.42+pow(ndv,1.55)*.54);
         float edgeSpec=specA*1.10+specB*.64;
         float filamentMask=1.0-smoothstep(.10,.24,abs(uLayer-.45));
         float railGlint=filamentMask*pow(.5+.5*cos((vObject.x*1.14+vObject.y)*52.0),8.0);
-        ring+=vec3(.025,.58,1.45)*(.27+edgeSpec*.90);
-        ring+=vec3(.46,.98,1.30)*edgeSpec*1.15;
+        ring+=vec3(.004,.46,1.48)*(.24+edgeSpec*.58);
+        ring+=mix(vec3(.008,.88,1.48),vec3(.66,.018,1.36),hueTravel)*edgeSpec*.74;
         float travellingSpark=pow(.5+.5*cos((vObject.x-vObject.y*.64)*41.0-uTime*.42+uLayer*2.0),24.0);
-        ring+=vec3(.42,1.42,1.82)*railGlint*2.26;
-        ring+=mix(cyan,violet,.38)*travellingSpark*(.32+.42*activity);
-        ring*=1.38+activity*.57+pulse*.09;
+        ring+=mix(vec3(.006,1.02,1.72),vec3(.72,.018,1.48),hueTravel)*railGlint*1.36;
+        ring+=mix(cyan,violet,.70)*travellingSpark*(.46+.58*activity);
+        ring*=1.30+activity*.52+pulse*.08;
         float compensatedAlpha=mix(.74,.54,smoothstep(.52,.80,uRenderScale));
         float ringAlpha=.52+.38*fresnel+.14*activity;
         ringAlpha=max(ringAlpha,compensatedAlpha*filamentMask);
@@ -312,19 +319,29 @@
     void main(){
       vec4 scene=texture(uScene,vUv);
       vec3 bloom=texture(uBloom,vUv).rgb;
+      float scenePeak=max(max(scene.r,scene.g),scene.b);
       float bloomPeak=max(max(bloom.r,bloom.g),bloom.b);
       float violetMix=clamp(abs(vUv.x-.5)*1.38+(.5+.5*sin((vUv.x-.5)*11.0+(vUv.y-.43)*7.0))*.18,0.0,1.0);
       vec3 bloomTint=mix(vec3(.025,.70,1.30),vec3(.86,.035,1.24),violetMix*.82);
       bloom=mix(bloom,bloomPeak*bloomTint,.72);
-      vec3 color=scene.rgb+bloom*(3.75+uEnergy*.85);
-      color=vec3(1.0)-exp(-color*(2.00+uEnergy*.21));
+      vec3 spectralLiftTint=mix(vec3(.004,.92,1.34),vec3(.82,.018,1.30),violetMix*.78);
+      float crystalPresence=smoothstep(.015,.42,scenePeak);
+      vec3 color=scene.rgb+bloom*(4.95+uEnergy*1.04)+(bloomPeak*.34+crystalPresence*.24)*spectralLiftTint;
+      color=vec3(1.0)-exp(-color*(2.16+uEnergy*.22));
       color=pow(max(color,vec3(0.0)),vec3(.92));
+      float prePeak=max(max(color.r,color.g),color.b),preMinimum=min(min(color.r,color.g),color.b);
+      float preSaturation=prePeak>0.0?(prePeak-preMinimum)/prePeak:0.0;
+      float neutralMask=(1.0-smoothstep(.10,.72,preSaturation))*smoothstep(.16,.48,prePeak)*(1.0-smoothstep(.995,1.0,prePeak));
+      vec3 neutralTint=mix(vec3(.06,1.08,1.24),vec3(.92,.24,1.20),violetMix*.54);
+      vec3 lumaWeights=vec3(.2126,.7152,.0722);
+      neutralTint*=dot(color,lumaWeights)/max(.001,dot(neutralTint,lumaWeights));
+      color=mix(color,neutralTint,neutralMask);
       float luminance=dot(color,vec3(.2126,.7152,.0722));
       color=max(vec3(0.0),mix(vec3(luminance),color,1.90));
       float highlightPeak=max(max(color.r,color.g),color.b);
-      color=min(vec3(1.0),color*(1.0+.22*highlightPeak*highlightPeak));
+      color=min(vec3(1.0),color*(1.0+.30*highlightPeak*highlightPeak));
       float finalLuminance=dot(color,vec3(.2126,.7152,.0722));
-      color=min(vec3(1.0),max(vec3(0.0),mix(vec3(finalLuminance),color,2.55)));
+      color=min(vec3(1.0),max(vec3(0.0),mix(vec3(finalLuminance),color,5.20)));
       float aura=max(max(bloom.r,bloom.g),bloom.b);
       fragColor=vec4(color,clamp(scene.a+aura*.36,0.0,1.0));
     }`;
@@ -535,7 +552,7 @@
   const mobileCores = Number(navigator.hardwareConcurrency || 4), mobileMemory = Number(navigator.deviceMemory || 4);
   const highMobile = mobile && (mobileCores >= 6 || mobileMemory >= 6);
   let cssWidth=0, cssHeight=0, bufferWidth=0, bufferHeight=0, renderScale=mobile?(highMobile?.90:.76):.88, projection=identity();
-  const view=translation(0,0,-4.35), camera=[0,0,4.35]; let raf=0, transferResumeRaf=0, started=performance.now(), lastTime=started, sampleStarted=started, sampleFrames=0, introComplete=root.classList.contains('fx-intro-complete'), heroVisible=true, pointerX=0, pointerY=0, pointerTargetX=0, pointerTargetY=0, pointerStrength=0;
+  const view=translation(0,0,-4.35), camera=[0,0,4.35]; let raf=0, transferResumeRaf=0, pendingResize=false, started=performance.now(), lastTime=started, sampleStarted=started, sampleFrames=0, introComplete=root.classList.contains('fx-intro-complete'), heroVisible=true, pointerX=0, pointerY=0, pointerTargetX=0, pointerTargetY=0, pointerStrength=0;
   function resize(force) { const nextWidth=Math.max(1,innerWidth), nextHeight=Math.max(1,innerHeight), dprCap=mobile?(highMobile?1.45:1.12):1.35, dpr=Math.min(devicePixelRatio||1,dprCap); let width=Math.round(nextWidth*dpr*renderScale), height=Math.round(nextHeight*dpr*renderScale); const pixelBudget=mobile?(highMobile?1450000:950000):2050000, budgetScale=Math.min(1,Math.sqrt(pixelBudget/Math.max(1,width*height))); width=Math.max(2,Math.round(width*budgetScale)); height=Math.max(2,Math.round(height*budgetScale)); if(!force&&nextWidth===cssWidth&&nextHeight===cssHeight&&width===bufferWidth&&height===bufferHeight)return; cssWidth=nextWidth;cssHeight=nextHeight;bufferWidth=width;bufferHeight=height;canvas.width=width;canvas.height=height;resizePostTargets(width,height);gl.viewport(0,0,width,height);projection=perspective((mobile?50:42)*Math.PI/180,nextWidth/nextHeight,.1,20);root.dataset.fxCoreReal3dResolution=width+'x'+height;root.dataset.fxCoreReal3dScale=renderScale.toFixed(2);root.dataset.fxCoreMobileQuality=mobile?(highMobile?'high-adaptive-bloom':'efficient-adaptive-bloom'):'desktop-adaptive-bloom'; }
   function baseModel(time,pulse) { const x=mobile?0:.84, y=mobile?.40:.01, pointerFactor=reduced.matches?0:(mobile?.34:1), rx=(reduced.matches?.035:.055+Math.sin(time*.17)*.035)+pointerY*.11*pointerFactor, ry=(reduced.matches?-.095:-.115+Math.sin(time*.21)*.060)+pointerX*.15*pointerFactor, rz=reduced.matches?0:Math.sin(time*.13)*.014+pointerX*pointerY*.018*pointerFactor, scaleX=(mobile?.88:1.14)*pulse, scaleY=(mobile?.94:1.14)*pulse; cinematic.rotation=[rx,ry,rz]; return compose([translation(x,y,0),rotationX(rx),rotationY(ry),rotationZ(rz),scaling(scaleX,scaleY,scaleY)]); }
   function bindCommon(programObject,uniforms,model,time){gl.useProgram(programObject);gl.uniformMatrix4fv(uniforms.uProjection,false,projection);gl.uniformMatrix4fv(uniforms.uView,false,view);gl.uniformMatrix4fv(uniforms.uModel,false,model);if(uniforms.uCamera)gl.uniform3f(uniforms.uCamera,camera[0],camera[1],camera[2]);if(uniforms.uTime)gl.uniform1f(uniforms.uTime,time);}
@@ -554,6 +571,7 @@
   }
   function updateCinematic(delta,time){const heartA=.5+.5*Math.sin(time*1.52),heartB=.5+.5*Math.sin(time*3.04-.72);cinematic.heart=Math.pow(heartA,5)*.72+Math.pow(heartB,9)*.28;cinematic.pulse=1+cinematic.heart*.021+Math.sin(time*.58)*.0035;const rate=1-Math.exp(-delta*2.6),pointerRate=1-Math.exp(-delta*5.2);cinematic.energy+=(cinematic.targetEnergy-cinematic.energy)*rate;cinematic.surge*=Math.exp(-delta*.72);cinematic.targetEnergy+=(.34-cinematic.targetEnergy)*(1-Math.exp(-delta*.34));pointerX+=(pointerTargetX-pointerX)*pointerRate;pointerY+=(pointerTargetY-pointerY)*pointerRate;pointerStrength*=Math.exp(-delta*.48);}
   function drawFrame(now){
+    if(pendingResize){pendingResize=false;resize(true);}
     const delta=Math.min(.05,Math.max(.001,(now-lastTime)/1000));lastTime=now;
     const time=reduced.matches?1.8:(now-started)/1000;
     updateCinematic(delta,time);resize(false);
@@ -577,28 +595,28 @@
     ];
     cinematic.corePosition=coreMotion;
     const coreAnchor=multiply(base,translation(coreMotion[0],coreMotion[1],coreMotion[2]));
-    const halo=multiply(coreAnchor,scaling(.22,.22,.22));
-    const reactorScale=.058*(1+cinematic.heart*.10),reactor=multiply(coreAnchor,scaling(reactorScale,reactorScale,reactorScale));
+    const halo=multiply(coreAnchor,scaling(.19,.19,.19));
+    const reactorScale=.047*(1+cinematic.heart*.10),reactor=multiply(coreAnchor,scaling(reactorScale,reactorScale,reactorScale));
     const horizontalBeam=multiply(coreAnchor,scaling(1.18,.0022,.005)),verticalBeam=multiply(coreAnchor,scaling(.0022,1.05,.005));
     const inner=multiply(base,scaling(.69,.69,.69));
 
     /* Back glass -> internal reactor/orbits -> front glass: the light source stays physically inside the volume. */
     gl.disable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-    gl.cullFace(gl.FRONT);drawMesh(star,base,0,.48,0,time);drawMesh(star,inner,0,.32,1,time);
+    gl.cullFace(gl.FRONT);drawMesh(star,base,0,.46,0,time);drawMesh(star,inner,0,.30,1,time);
 
     gl.disable(gl.CULL_FACE);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.depthMask(true);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
     drawMesh(torus,ringModels[0],2,.74,0,time);drawMesh(torus,ringModels[1],2,.66,1,time);drawMesh(torus,ringModels[2],2,.58,2,time);drawMesh(torus,ringModels[3],2,.50,3,time);
     drawMesh(beam,horizontalBeam,2,.30+cinematic.surge*.05,0,time);drawMesh(beam,verticalBeam,2,.26+cinematic.surge*.045,1,time);
-    gl.disable(gl.DEPTH_TEST);gl.depthMask(false);drawMesh(sphere,halo,1,.31,1,time);drawMesh(sphere,reactor,1,.96,0,time);
+    gl.disable(gl.DEPTH_TEST);gl.depthMask(false);drawMesh(sphere,halo,1,.24,1,time);drawMesh(sphere,reactor,1,.92,0,time);
 
     gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-    drawMesh(star,inner,0,.45,1,time);drawMesh(star,base,0,.70,0,time);
+    drawMesh(star,inner,0,.42,1,time);drawMesh(star,base,0,.66,0,time);
     gl.disable(gl.CULL_FACE);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);drawMesh(filaments,base,2,.60,.45,time);
     gl.depthMask(true);gl.bindVertexArray(null);
     if(postReady)compositeBloom();
 
     sampleFrames+=1;const elapsed=now-sampleStarted;
-    if(elapsed>=2400){const fps=sampleFrames/(elapsed/1000);root.dataset.fxCoreReal3dFps=fps.toFixed(1);sampleFrames=0;sampleStarted=now;const oldScale=renderScale;if(fps<56)renderScale=clamp(renderScale-(fps<45?.10:.06),mobile?.52:.58,1);else if(fps>72)renderScale=clamp(renderScale+.035,mobile?.52:.58,1);if(Math.abs(oldScale-renderScale)>.001)resize(true);root.dataset.fxCoreReal3dQuality=fps<56?'adapting-for-60fps':fps>=59?'60fps-ready':'balanced';}
+    if(elapsed>=2400){const fps=sampleFrames/(elapsed/1000);root.dataset.fxCoreReal3dFps=fps.toFixed(1);sampleFrames=0;sampleStarted=now;const oldScale=renderScale;if(fps<56)renderScale=clamp(renderScale-(fps<45?.10:.06),mobile?.52:.58,1);else if(fps>72)renderScale=clamp(renderScale+.035,mobile?.52:.58,1);if(Math.abs(oldScale-renderScale)>.001)pendingResize=true;root.dataset.fxCoreReal3dQuality=fps<56?'adapting-for-60fps':fps>=59?'60fps-ready':'balanced';}
   }
   function shouldRun(){if(document.hidden||!introComplete||!heroVisible)return false;if(root.classList.contains('fx-seamless-loop-transfer')||root.classList.contains('fx-organism-menu-open')||document.body.classList.contains('fx-organism-panel-open'))return false;return true;}
   function shouldHoldLastFrame(){return !document.hidden&&introComplete&&heroVisible&&root.classList.contains('fx-seamless-loop-transfer');}
@@ -608,7 +626,7 @@
   function refreshVisibility(){const hero=document.getElementById('hero');if(!hero)return;const rectangle=hero.getBoundingClientRect();heroVisible=rectangle.bottom>innerHeight*.04&&rectangle.top<innerHeight*.96;if(!heroVisible&&raf){cancelAnimationFrame(raf);raf=0;stage.dataset.active='false';}else ensureRunning();}
   function trackPointer(event){pointerTargetX=clamp(event.clientX/Math.max(1,innerWidth)*2-1,-1,1);pointerTargetY=clamp(event.clientY/Math.max(1,innerHeight)*2-1,-1,1);pointerStrength=Math.min(1,pointerStrength+.34);cinematic.targetEnergy=Math.max(cinematic.targetEnergy,.46+pointerStrength*.16);ensureRunning();}
   function releasePointer(){if(mobile){pointerTargetX=0;pointerTargetY=0;}pointerStrength=Math.max(pointerStrength,.28);}
-  document.addEventListener('formatx:introcomplete',()=>{introComplete=true;ensureRunning();},{once:true});document.addEventListener('visibilitychange',()=>{if(document.hidden&&raf){cancelAnimationFrame(raf);raf=0;stage.dataset.active='false';}else ensureRunning();});addEventListener('formatx:loop',()=>{if(raf)cancelAnimationFrame(raf);raf=0;stage.dataset.active='true';if(transferResumeRaf)cancelAnimationFrame(transferResumeRaf);transferResumeRaf=requestAnimationFrame(resumeAfterLoopTransfer);});addEventListener('resize',()=>{resize(true);refreshVisibility();},{passive:true});addEventListener('orientationchange',()=>{resize(true);refreshVisibility();},{passive:true});addEventListener('scroll',refreshVisibility,{passive:true});addEventListener('pointermove',trackPointer,{passive:true});addEventListener('pointerdown',trackPointer,{passive:true});addEventListener('pointerup',releasePointer,{passive:true});addEventListener('pointercancel',releasePointer,{passive:true});addEventListener('pointerleave',()=>{pointerTargetX=0;pointerTargetY=0;},{passive:true});
+  document.addEventListener('formatx:introcomplete',()=>{introComplete=true;ensureRunning();},{once:true});document.addEventListener('visibilitychange',()=>{if(document.hidden&&raf){cancelAnimationFrame(raf);raf=0;stage.dataset.active='false';}else ensureRunning();});addEventListener('formatx:loop',()=>{if(raf)cancelAnimationFrame(raf);raf=0;stage.dataset.active='true';if(transferResumeRaf)cancelAnimationFrame(transferResumeRaf);transferResumeRaf=requestAnimationFrame(resumeAfterLoopTransfer);});addEventListener('resize',()=>{pendingResize=true;refreshVisibility();},{passive:true});addEventListener('orientationchange',()=>{pendingResize=true;refreshVisibility();},{passive:true});addEventListener('scroll',refreshVisibility,{passive:true});addEventListener('pointermove',trackPointer,{passive:true});addEventListener('pointerdown',trackPointer,{passive:true});addEventListener('pointerup',releasePointer,{passive:true});addEventListener('pointercancel',releasePointer,{passive:true});addEventListener('pointerleave',()=>{pointerTargetX=0;pointerTargetY=0;},{passive:true});
   function recoverOnceAfterContextRestore() {
     let alreadyRecovered = false;
     try {
@@ -639,6 +657,7 @@
   root.dataset.fxCoreMobileComposition = 'reference-crystal-portal-v24'; root.dataset.fxNativeApexRenderer = 'single-webgl2-indexed-3d-v21'; root.dataset.fxNativeApexVisual = 'cinematic-volumetric-crystal-portal-v24'; root.dataset.fxCoreMeshMaterial = 'fresnel-chromatic-refraction-glass-v24'; root.dataset.fxCoreHighlightModel = 'physical-crystal-ribs-and-caustics-v24'; root.dataset.fxCoreMaterialCenter = 'centered-object-space'; root.dataset.fxCoreShapeMesh = 'concave-pnorm-four-sail-volume-v24'; root.dataset.fxCoreShapeFracture = 'physical-tube-filaments-v24'; root.dataset.fxCoreGeometryScale = mobile ? '0.88x-0.94y-real3d-mobile' : '1.14-real3d-desktop'; root.dataset.fxCoreMesh3d = 'ready-real3d-v24'; root.dataset.fxCoreFracture3d = 'integrated-real3d-v24'; root.dataset.fxCoreCinematicGrade = 'separable-bloom-filmic-v24'; root.dataset.fxCorePhysicalGlass = 'schlick-fresnel-chromatic-refraction-v24'; root.dataset.fxCoreVolumeAbsorption = 'beer-lambert-approximation-v24';
   root.dataset.fxCoreLoopTransferPolicy = 'gpu-paused-two-frame-landing-v24';
   root.dataset.fxCoreLoopFrameContinuity = 'gpu-paused-last-frame-visible-v25';
+  root.dataset.fxCoreAdaptiveResize = 'pre-draw-nonblank-v25';
   root.dataset.fxCoreLowResolutionHighlights = 'render-scale-compensated-physical-ribs-v24';
   root.dataset.fxCoreCorePlacement = 'inside-moving-volume-v25';
   root.dataset.fxCoreOrbitInteraction = 'pointer-touch-speech-reactive-v25';
