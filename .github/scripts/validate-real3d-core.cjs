@@ -23,10 +23,14 @@ assert.match(production, /function\s+sphere\s*\(/, 'production moving reactor sp
 assert.match(production, /function\s+torus\s*\(/, 'production real 3D reactor/orbit torus geometry is required');
 assert.match(production, /gl\.drawElements\(gl\.TRIANGLES/, 'production indexed triangle rendering is required');
 assert.match(production, /gl\.drawElements\(gl\.LINES/, 'production indexed crystal-rib rendering is required');
-assert.match(production, /fxCoreReal3d='ready-v20'/, 'production compatibility renderer state marker is missing');
-assert.match(production, /fxCoreReferenceLock='ready-v30'/, 'production v30 reference lock marker is missing');
-assert.match(production, /uploaded-reference-20260810/, 'uploaded visual reference revision is missing');
+assert.ok(production.includes("fxCoreReal3d='ready-v20'"), 'production compatibility renderer state marker is missing');
+assert.ok(production.includes('ready-v30'), 'production v30 reference lock ready marker is missing');
+assert.ok(production.includes('uploaded-reference-20260810'), 'uploaded visual reference revision is missing');
+assert.ok(production.includes('dense-luminous-glass-filaments-v30'), 'dense luminous reference material marker is missing');
 assert.match(production, /p=\.68/, 'reference concave p-norm silhouette is missing');
+assert.match(production, /mobile\?1\.50:1/, 'reference mobile vertical shell calibration is missing');
+assert.match(production, /t=\.018/, 'thin reference reactor/orbit torus calibration is missing');
+assert.match(production, /for\(let k=1;k<=R;k\+\+\)/, 'dense shell contour calibration is missing');
 assert.match(production, /const rs=\[\.20,\.29,\.39,\.51\]/, 'four real inner reactor rings are missing');
 assert.match(production, /const drift=/, 'moving internal white-cyan core is missing');
 assert.match(production, /adaptive-60-plus-fps/, 'adaptive high-frame-rate target is missing');
@@ -57,4 +61,4 @@ assert.doesNotMatch(previewWebgl, /drawImage\s*\(|new\s+Image\s*\(/i, 'preview f
 assert.match(previewMobile, /data-fx-orbital-core="ready-v28"/, 'preview mobile layout must bind to the actual WebGL renderer state');
 assert.doesNotMatch(previewMobile, /background-image\s*:\s*url\(/i, 'preview real-3D composition must not substitute a poster image');
 
-console.log('PASS: FormatX production uses uploaded-reference lock v30 as a single-context indexed WebGL2 MAG; WebGPU v29 remains explicit preview only with a genuine indexed WebGL2 v28 fallback.');
+console.log('PASS: FormatX production uses uploaded-reference lock v30 with dense luminous glass/filaments as a single-context indexed WebGL2 MAG; WebGPU v29 remains explicit preview only with a genuine indexed WebGL2 v28 fallback.');
