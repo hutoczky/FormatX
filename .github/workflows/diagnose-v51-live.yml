@@ -7,6 +7,10 @@ on:
       - '.github/workflows/diagnose-v51-live.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  statuses: write
+
 jobs:
   diagnose:
     runs-on: ubuntu-latest
@@ -55,9 +59,22 @@ jobs:
                 const br=parseFloat(cs.borderRadius)||0;
                 return r.width>120&&r.height>120&&r.width<500&&r.height<500&&(br>50||cs.backgroundImage!=='none')&&cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)>0;
               }).slice(0,80).map(describe);
-              return {dataset:{...document.documentElement.dataset},stacks,suspicious};
+              const scripts=[...document.scripts].map(s=>s.src).filter(src=>/formatx-core|reference-lock|mag-reference|mobile-mag/.test(src));
+              const styles=[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>l.href).filter(src=>/formatx-core|reference-lock|mag-reference|mobile-mag/.test(src));
+              return {dataset:{...document.documentElement.dataset},scripts,styles,stacks,suspicious};
             });
             console.log('FX_V51_LAYER_DIAGNOSTIC',JSON.stringify(dump,null,2));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
+
+      - name: Publish diagnostic status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live v51 layer diagnostic captured'; else state=failure; description='Live v51 layer diagnostic failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v51 layer diagnostic' -f description="$description" -f target_url="$TARGET_URL"
