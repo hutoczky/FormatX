@@ -1,5 +1,5 @@
 FormatX production deployment marker
 requested_at=2026-08-10
-source_master=021321613400cdb95bfe3119b98e6b449e619a79
-purpose=publish complete Full release website truth audit with 5-day trial, canonical V130 GitHub release trust, official Android full release, separate Native beta channel, feedback, seamless-v7 and corrected public evidence
-verification=production validation, public-site integrity, desktop/mobile Chromium, Lighthouse desktop/mobile, Cloudflare custom domains, release metadata, download routes, Android route, feedback summary/submission smoke, transactional noindex, no generic Public beta or visible V92
+source_master=ccf86e09f7b924a8520f56132884cbe6c433b43c
+purpose=publish guaranteed homepage hero start on fresh navigation and reload, preserve user scrolling after startup, retain seamless-v7 continuous loop, Full release product truth, 5-day trial and canonical release/download channels
+verification=production validation, mobile/laptop/Full-HD hero-first viewport regression gate, seamless continuous scrolling, public-site integrity, live mobile hero, Cloudflare custom-domain smoke, release metadata, downloads, Android, support and feedback routes
