@@ -58,6 +58,7 @@ async function snapshot(page) {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
     const source = document.querySelector('#main-content > #hero');
     const clone = bridge?.querySelector('.fx-loop-hero-clone');
+    const sourceRect = source?.getBoundingClientRect();
     return {
       controller: document.documentElement.dataset.fxInfiniteController || '',
       ready: document.documentElement.dataset.fxInfiniteScroll || '',
@@ -68,6 +69,8 @@ async function snapshot(page) {
       mobileMode: document.documentElement.dataset.fxMobileScrollMode || '',
       landingState: document.documentElement.dataset.fxLoopLandingState || '',
       loopSource: document.documentElement.dataset.fxLoopSource || '',
+      initialHeroGuard: document.documentElement.dataset.fxInitialHeroGuard || '',
+      initialHeroTop: Number(document.documentElement.dataset.fxInitialHeroTop || 0),
       rootScrollSnapType: getComputedStyle(document.documentElement).scrollSnapType,
       bodyScrollSnapType: getComputedStyle(document.body).scrollSnapType,
       sceneSnap: Array.from(document.querySelectorAll('#hero, main > .scene')).map(node => getComputedStyle(node).scrollSnapAlign),
@@ -84,7 +87,8 @@ async function snapshot(page) {
       bridgeHeight: bridge?.offsetHeight || 0,
       sourceTop: source?.offsetTop || 0,
       sourceHeight: source?.offsetHeight || 0,
-      cloneHeight: clone?.offsetHeight || 0,
+      sourceRectTop: sourceRect?.top ?? 999999,
+      sourceRectBottom: sourceRect?.bottom ?? -999999,
       sourceTitle: source?.querySelector('.hero-title-main')?.textContent?.trim() || '',
       cloneTitle: clone?.querySelector('.hero-title-main')?.textContent?.trim() || '',
       footerInPanel: Boolean(document.querySelector('[data-organism-panel="resources"] .site-footer')),
@@ -253,8 +257,15 @@ async function verifyViewport(browser, viewport, name, mobile) {
     && initial.runtime?.clonedHeroOnly === true
     && initial.runtime?.jumpFree === true
     && initial.runtime?.sectionSnapDisabled === true
-    && initial.runtime?.mobileNativeMomentumPreserved === true,
+    && initial.runtime?.mobileNativeMomentumPreserved === true
+    && initial.runtime?.initialHeroGuaranteed === true,
     name + ': seamless-v7 runtime contract missing: ' + JSON.stringify(initial));
+  assert(['initial', 'frame-1', 'frame-2', 'intro-complete'].includes(initial.initialHeroGuard),
+    name + ': initial hero guard did not settle: ' + JSON.stringify(initial));
+  assert(Math.abs(initial.scrollY - initial.sourceTop) <= 4,
+    name + ': page did not start at the real hero: ' + JSON.stringify(initial));
+  assert(initial.sourceRectTop <= 4 && initial.sourceRectBottom >= Math.min(240, initial.viewportHeight * .35),
+    name + ': hero is not visible in the first viewport: ' + JSON.stringify(initial));
   assert(initial.rootScrollSnapType === 'none' && initial.bodyScrollSnapType === 'none',
     name + ': root/body scroll snapping is active: ' + JSON.stringify(initial));
   assert(initial.sceneSnap.every(value => value === 'none'),
