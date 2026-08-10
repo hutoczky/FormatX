@@ -4,6 +4,11 @@
   const ROOT = document.documentElement;
   const THEME_KEY = 'formatx-site-theme';
   const RELEASE_URL = '/scifi-ui/data/current-release.json';
+  const LEGAL_I18N_PATHS = new Set([
+    '/scifi-ui/terms.html',
+    '/scifi-ui/privacy.html',
+    '/scifi-ui/support.html'
+  ]);
 
   function language() { return ROOT.lang === 'en' ? 'en' : 'hu'; }
   function copy(hu, en) { return language() === 'en' ? en : hu; }
@@ -71,6 +76,16 @@
       });
     }, { threshold: 0.12 });
     items.forEach(item => observer.observe(item));
+  }
+
+  function initialiseLegalPageI18n() {
+    if (!LEGAL_I18N_PATHS.has(location.pathname)) return;
+    if (document.querySelector('script[data-fx-legal-page-i18n]')) return;
+    const script = document.createElement('script');
+    script.src = '/scifi-ui/scripts/legal-page-i18n.js?v=20260810-legal-i18n-1';
+    script.defer = true;
+    script.dataset.fxLegalPageI18n = 'true';
+    document.head.appendChild(script);
   }
 
   function formatBytes(bytes) {
@@ -188,6 +203,7 @@
   initialiseTheme();
   initialiseMenu();
   initialiseReveal();
+  initialiseLegalPageI18n();
   initialiseCopy();
   loadRelease();
   addEventListener('formatx:languagechange', loadRelease);
