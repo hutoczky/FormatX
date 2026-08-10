@@ -104,24 +104,32 @@ async function checkoutCase(browser) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'en-GB' });
   const page = await context.newPage();
   await page.goto(BASE + 'checkout.html?plan=business_lite&cycle=monthly&currency=HUF&lang=en', { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => document.documentElement.dataset.fxCheckoutLanguage === 'authoritative-v4', null, { timeout: 15000 });
+  await page.waitForFunction(() => document.documentElement.dataset.fxCheckoutLanguage === 'authoritative-v5', null, { timeout: 15000 });
 
   let state = await page.evaluate(() => ({
     lang: document.documentElement.lang,
     title: document.title,
     heading: document.querySelector('.checkout-hero h1')?.textContent.trim(),
+    hero: document.querySelector('.checkout-hero')?.innerText || '',
     summary: document.getElementById('checkout-title')?.textContent.trim(),
     company: document.querySelector('#checkout-form .form-grid label:nth-child(4) > span')?.textContent.trim(),
+    businessConsent: document.querySelector('#business-buyer-consent + span')?.textContent.trim() || '',
+    businessRequired: document.getElementById('business-buyer-consent')?.required === true,
+    legalRequired: document.getElementById('checkout-consent')?.required === true,
     planOption: document.querySelector('#plan-id option:checked')?.textContent.trim(),
     switchCount: document.querySelectorAll('[data-checkout-language]').length,
     body: document.body.innerText
   }));
 
   assert.equal(state.lang, 'en');
-  assert.equal(state.title, 'Bank transfer | FormatX Suite Pro');
+  assert.equal(state.title, 'Business licence order by bank transfer | FormatX Suite Pro');
   assert.equal(state.heading, 'Direct bank transfer with QR');
+  assert.match(state.hero, /business or professional-purpose orders/i);
   assert.equal(state.summary, 'Summary');
   assert.equal(state.company, 'Company or business name');
+  assert.match(state.businessConsent, /not currently intended for consumer sales/i);
+  assert.equal(state.businessRequired, true);
+  assert.equal(state.legalRequired, true);
   assert.match(state.planOption, /month/);
   assert.equal(state.switchCount, 2);
   assert.doesNotMatch(state.body, /Rendelési adatok|Fizetendő|Kapcsolattartó neve|Mégsem/);
@@ -132,14 +140,14 @@ async function checkoutCase(browser) {
     lang: document.documentElement.lang,
     heading: document.querySelector('.checkout-hero h1')?.textContent.trim(),
     summary: document.getElementById('checkout-title')?.textContent.trim(),
+    businessConsent: document.querySelector('#business-buyer-consent + span')?.textContent.trim() || '',
     urlLanguage: new URL(location.href).searchParams.get('lang')
   }));
-  assert.deepEqual(state, {
-    lang: 'hu',
-    heading: 'Közvetlen banki átutalás QR-kóddal',
-    summary: 'Összegzés',
-    urlLanguage: 'hu'
-  });
+  assert.equal(state.lang, 'hu');
+  assert.equal(state.heading, 'Közvetlen banki átutalás QR-kóddal');
+  assert.equal(state.summary, 'Összegzés');
+  assert.match(state.businessConsent, /nem fogyasztói értékesítésre szolgál/i);
+  assert.equal(state.urlLanguage, 'hu');
 
   console.log(JSON.stringify({ case: 'checkout-language', state }));
   await context.close();
