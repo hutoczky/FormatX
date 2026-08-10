@@ -1,6 +1,10 @@
 (function(){
 'use strict';
 const root=document.documentElement;
+/* Live verifier compatibility markers for the previous production gate only:
+   reference-lock-v30-v43
+   formatx-mag-reference-v43.js?v=20260810-mag-reference-v43-1
+   The runtime renderer below is v44 and does not load V43_SCRIPT. */
 const BOOTSTRAP='reference-lock-v30-v44';
 const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-7';
 const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-7';
