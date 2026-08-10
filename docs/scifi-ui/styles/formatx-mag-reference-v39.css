@@ -1,0 +1,55 @@
+/* FormatX MAG reference v39 — keep native WebGL crystal visible while protecting mobile copy.
+   v33/v38 used opacity/visibility to hide the whole canvas when text entered the viewport.
+   v39 replaces that binary hide with a dynamic viewport clip driven by --fx-mag-clip-bottom. */
+
+.fx-core-real3d-stage[data-fx-v39-visible="true"]{
+  opacity:1!important;
+  visibility:visible!important;
+}
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-stage{
+    clip-path:none!important;
+    --fx-mag-clip-bottom:0px;
+  }
+
+  /* Override the old all-or-nothing text guard. The canvas remains visible. */
+  .fx-core-real3d-stage[data-fx-v39-visible="true"][data-fx-mobile-text-guard="text"],
+  .fx-core-real3d-stage[data-fx-v39-visible="true"][data-fx-mobile-text-guard="visual"]{
+    opacity:1!important;
+    visibility:visible!important;
+  }
+
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="text"] .fx-core-real3d-canvas,
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="visual"] .fx-core-real3d-canvas{
+    opacity:1!important;
+    visibility:visible!important;
+  }
+
+  /* Clip only the visual layers at the live top edge of hero-copy. */
+  .fx-core-real3d-canvas,
+  .fx-core-postfx-v31,
+  .fx-mag-v33-overlay{
+    clip-path:inset(0 0 var(--fx-mag-clip-bottom,0px) 0)!important;
+  }
+
+  /* Slightly stronger native crystal finish once the canvas is actually visible. */
+  .fx-core-real3d-canvas{
+    filter:saturate(1.34) contrast(1.27) brightness(1.20)
+      drop-shadow(0 0 4px rgba(226,255,255,.40))
+      drop-shadow(0 0 16px rgba(63,231,255,.24))
+      drop-shadow(0 0 34px rgba(42,149,255,.15))
+      drop-shadow(0 0 50px rgba(157,63,255,.09))!important;
+  }
+}
+
+@media(min-width:901px) and (pointer:fine){
+  .fx-core-real3d-stage[data-fx-v39-visible="true"]{
+    opacity:1!important;
+    visibility:visible!important;
+  }
+  .fx-core-real3d-canvas{
+    opacity:1!important;
+    visibility:visible!important;
+  }
+}
