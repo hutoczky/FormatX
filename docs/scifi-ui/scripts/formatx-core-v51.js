@@ -113,11 +113,11 @@ void main(){
   float violet=pow(.5+.5*cos(a*6.0-r*10.0+uT*.14+uPhase),14.0);
   vec3 cyan=vec3(.02,.92,1.48),blue=vec3(.02,.28,1.06),violetC=vec3(.78,.08,1.20),ice=vec3(.82,1.22,1.38);
   vec3 col=uTint*(.018+.10*fres);
-  col+=cyan*(.035+.44*fres+.18*vein+.08*rib+.06*four);
+  col+=cyan*(.055+.52*fres+.20*vein+.10*rib+.07*four);
   col+=blue*(.02+.07*facetB+.035*four);
   col+=violetC*(.018+.13*violet+.045*facetA);
-  col+=ice*(.16*pow(fres,1.35)+.10*facetA+.055*facetB);
-  float alpha=uA*S(.012+.26*fres+.055*vein+.030*rib+.040*facetA+.020*facetB+.018*four);
+  col+=ice*(.20*pow(fres,1.35)+.12*facetA+.065*facetB);
+  float alpha=uA*S(.035+.34*fres+.070*vein+.040*rib+.052*facetA+.026*facetB+.022*four);
   O=vec4(col,alpha);
 }`;
 
@@ -154,9 +154,11 @@ void main(){O=vec4(uTint,uA);}`;
     try{shellProgram=makeProgram(SHELL_VS,SHELL_FS);glowProgram=makeProgram(GLOW_VS,GLOW_FS);lineProgram=makeProgram(LINE_VS,LINE_FS);}catch(error){stage.remove();fail('shader-failed',error?.message||error);return;}
 
     function starRadius(theta){
-      const axis=Math.pow(Math.abs(Math.cos(theta*2)),1.55);
-      const micro=.012*Math.cos(theta*8);
-      return .53+.52*axis+micro;
+      const c=Math.max(1e-5,Math.abs(Math.cos(theta)));
+      const s=Math.max(1e-5,Math.abs(Math.sin(theta)));
+      const astroid=Math.pow(Math.pow(c,2/3)+Math.pow(s,2/3),-1.5);
+      const micro=.008*Math.cos(theta*8);
+      return 1.055*astroid+micro;
     }
 
     function crystal(angleSegments=mobile?96:132,radialSegments=mobile?10:14){
@@ -299,7 +301,7 @@ void main(){O=vec4(uTint,uA);}`;
     root.dataset.fxCoreReal3d='ready-v20';
     root.dataset.fxCoreRenderer='single-webgl2-reference-crystal-v51';
     root.dataset.fxCoreReferenceLock='ready-v51';
-    root.dataset.fxCoreReferenceRevision='reference-image-20260810-v51-radial-star-r7';
+    root.dataset.fxCoreReferenceRevision='reference-image-20260810-v51-astroid-crystal-r8';
     root.dataset.fxCoreReferenceGeometry='sharp-four-tip-concave-crystal-v51';
     root.dataset.fxCoreReferenceMaterial='layered-faceted-refractive-glass-v51';
     root.dataset.fxCoreInternalReactor='moving-white-nucleus-concentric-spectral-rings-v51';
