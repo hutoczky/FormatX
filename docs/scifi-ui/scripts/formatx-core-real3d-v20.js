@@ -5,7 +5,7 @@ const root=document.documentElement;
    reference-lock-v30-v43
    formatx-mag-reference-v43.js?v=20260810-mag-reference-v43-1
    The runtime renderer below is v44 + v46 + v47 and does not load V43_SCRIPT. */
-const BOOTSTRAP='reference-lock-v30-v47';
+const BOOTSTRAP='reference-lock-v30-v48';
 const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-7';
 const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-7';
 const POLISH_STYLE='./styles/formatx-reference-polish-v31.css?v=20260810-reference-polish-1';
@@ -18,6 +18,7 @@ const V39_STYLE='./styles/formatx-mag-reference-v39.css?v=20260810-mag-reference
 const V40_STYLE='./styles/formatx-mag-reference-v40.css?v=20260810-mag-reference-v40-1';
 const V41_STYLE='./styles/formatx-mag-reference-v41.css?v=20260810-mag-reference-v41-2';
 const V42_STYLE='./styles/formatx-mag-reference-v42.css?v=20260810-mag-reference-v42-1';
+const V48_STYLE='./styles/formatx-mag-layering-v48.css?v=20260810-mag-layering-v48-1';
 const POST_SCRIPT='./scripts/formatx-reference-postfx-v31.js?v=20260810-reference-postfx-1';
 const V33_SCRIPT='./scripts/formatx-mobile-mag-v33.js?v=20260810-mobile-mag-v33-2';
 const V44_SCRIPT='./scripts/formatx-mag-reference-v44.js?v=20260810-mag-reference-v44-1';
@@ -62,6 +63,8 @@ addStyle(V39_STYLE,'fx-mag-reference-v39');
 addStyle(V40_STYLE,'fx-mag-reference-v40');
 addStyle(V41_STYLE,'fx-mag-reference-v41');
 addStyle(V42_STYLE,'fx-mag-reference-v42');
+/* Load last: only changes mobile stacking order. MAG transparency/material stays untouched. */
+addStyle(V48_STYLE,'fx-mag-layering-v48');
 addScript(V33_SCRIPT,'fx-mobile-mag-v33');
 if(document.querySelector('script[data-fx-reference-lock-v30]'))return;
 const script=document.createElement('script');
