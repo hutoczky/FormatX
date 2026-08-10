@@ -1,5 +1,5 @@
 name: Verify FormatX live hotfix
-run-name: Verify live mobile hero + MAG v37 from ${{ github.sha }}
+run-name: Verify live mobile hero + MAG v38 from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -30,6 +30,8 @@ jobs:
               recovery_css="$(mktemp)"
               mag37_css="$(mktemp)"
               mag37_js="$(mktemp)"
+              mag38_css="$(mktemp)"
+              mag38_js="$(mktemp)"
               core_js="$(mktemp)"
               home="$(mktemp)"
               if curl --fail --silent --show-error --location --max-time 30 \
@@ -41,6 +43,10 @@ jobs:
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-mag-reference-v37.js?v=${GITHUB_SHA}-${attempt}" > "$mag37_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/styles/formatx-mag-reference-v38.css?v=${GITHUB_SHA}-${attempt}" > "$mag38_css" \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/scripts/formatx-mag-reference-v38.js?v=${GITHUB_SHA}-${attempt}" > "$mag38_js" \
+                && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_SHA}-${attempt}" > "$core_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/?v=${GITHUB_SHA}-${attempt}" > "$home" \
@@ -49,24 +55,25 @@ jobs:
                 && grep -Fq 'padding-bottom: max(104px' "$hero_css" \
                 && grep -Fq 'The Interaction Genome is a separate feature' "$recovery_css" \
                 && grep -Fq 'FormatX MAG reference v37' "$mag37_css" \
-                && grep -Fq 'old renderer is parked' "$mag37_css" \
-                && grep -Fq 'fxMagReferenceV37' "$mag37_js" \
                 && grep -Fq 'v37-native-volumetric-reference' "$mag37_js" \
-                && grep -Fq 'none-native-webgl-only' "$mag37_js" \
-                && grep -Fq 'formatx-mag-reference-v37.css?v=20260810-mag-reference-v37-1' "$core_js" \
-                && grep -Fq 'formatx-mag-reference-v37.js?v=20260810-mag-reference-v37-1' "$core_js" \
-                && ! grep -Fq 'addScript(V36_SCRIPT' "$core_js" \
+                && grep -Fq 'FormatX MAG reference v38' "$mag38_css" \
+                && grep -Fq 'data-fx-v38-visible' "$mag38_css" \
+                && grep -Fq 'fxMagReferenceV38' "$mag38_js" \
+                && grep -Fq 'v38-native-visible-reference' "$mag38_js" \
+                && grep -Fq 'reference-lock-v30-v38' "$core_js" \
+                && grep -Fq 'formatx-mag-reference-v38.css?v=20260810-mag-reference-v38-1' "$core_js" \
+                && grep -Fq 'formatx-mag-reference-v38.js?v=20260810-mag-reference-v38-1' "$core_js" \
                 && grep -Fq 'FormatX Suite Pro' "$home"
               then
                 success=true
-                rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$core_js" "$home"
+                rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$core_js" "$home"
                 break
               fi
-              rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$core_js" "$home"
+              rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$core_js" "$home"
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Live mobile hero / MAG v37 verification failed for $origin" >&2
+              echo "Live mobile hero / MAG v38 verification failed for $origin" >&2
               exit 1
             fi
           done
@@ -92,7 +99,7 @@ jobs:
               body: JSON.stringify({
                 state,
                 context: 'FormatX live mobile hero verification',
-                description: 'Both custom domains serve the mobile text guard and native MAG v37 assets',
+                description: 'Both custom domains serve native MAG v37 plus v38 stage visibility fix',
                 target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
               }),
             }
