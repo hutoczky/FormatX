@@ -98,6 +98,14 @@ async function snapshot(page) {
   });
 }
 
+async function waitForSettledTransfer(page, timeout = 3000) {
+  await page.waitForFunction(() => (
+    document.documentElement.dataset.fxLoopLandingState === 'settled'
+    && document.documentElement.dataset.fxInfiniteInput === 'native'
+    && !document.documentElement.classList.contains('fx-seamless-loop-transfer')
+  ), null, { timeout });
+}
+
 async function verifyProgressiveScroll(page, name) {
   const positions = await page.evaluate(async () => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
@@ -167,7 +175,7 @@ async function verifyDesktopTransfer(page, name) {
   }, relative);
   await page.waitForFunction(previous => Number(document.documentElement.dataset.fxLoopCount || 0) > previous,
     before.loopCount, { timeout: 5000 });
-  await page.waitForTimeout(220);
+  await waitForSettledTransfer(page);
 
   const after = await snapshot(page);
   assert(after.loopCount === before.loopCount + 1,
@@ -203,7 +211,7 @@ async function verifyMobileDeferredTransfer(page, name) {
   await page.evaluate(() => document.dispatchEvent(new Event('touchend', { bubbles: true })));
   await page.waitForFunction(previous => Number(document.documentElement.dataset.fxLoopCount || 0) > previous,
     before.loopCount, { timeout: 5000 });
-  await page.waitForTimeout(260);
+  await waitForSettledTransfer(page);
 
   const after = await snapshot(page);
   assert(after.loopCount === before.loopCount + 1,
