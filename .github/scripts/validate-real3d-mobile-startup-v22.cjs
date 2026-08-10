@@ -12,15 +12,18 @@ const homepage=read('docs/scifi-ui/index.html');
 
 assert.match(bootstrap,/reference-lock-v30/,'v30 production bootstrap missing');
 assert.match(bootstrap,/fxCoreReal3d='ready-v20'/,'bootstrap must reserve single-renderer ownership before async load');
-assert.match(runtime,/const STARTUP_REVISION='v22-mobile-safe'/,'mobile-safe startup compatibility marker missing');
+assert.match(bootstrap,/uploaded-reference-lock-7/,'reference-fit r7 cache revision missing');
+assert.match(runtime,/const STARTUP_REVISION='v23-reference-fit'/,'reference-fit startup compatibility marker missing');
 assert.match(runtime,/powerPreference:mobile\?'default':'high-performance'/,'mobile must request default power preference');
 assert.match(runtime,/webglcontextcreationerror/,'context creation error reporting missing');
 assert.match(runtime,/webglcontextlost/,'context loss handling missing');
 assert.match(runtime,/fxCoreReal3dStartup='ready-'\+STARTUP_REVISION/,'startup ready marker missing');
 assert.match(runtime,/const mobile=coarse\.matches\|\|innerWidth\/Math\.max\(1,innerHeight\)<1\.08/,'portrait/mobile detection missing');
-assert.match(runtime,/mobile\?1\.35:1\.65/,'bounded DPR policy missing');
-assert.match(runtime,/mobile\?1450000:2350000/,'pixel budget policy missing');
+assert.match(runtime,/mobile\?1\.45:1\.70/,'bounded high-DPI policy missing');
+assert.match(runtime,/mobile\?1750000:2500000/,'adaptive pixel budget policy missing');
 assert.match(runtime,/Math\.min\(1,Math\.sqrt\(budget\/\(w\*h\*d\*d\)\)\)/,'pixel-budget scaling missing');
+assert.match(runtime,/portrait=a<1\.08/,'portrait layout must be based on aspect ratio, not coarse pointer alone');
+assert.match(runtime,/portrait\?0:vw\*\.185,portrait\?\.04:\.01/,'portrait reactor must remain near the visual center');
 assert.match(runtime,/adaptive-60-plus-fps/,'adaptive 60+ FPS target missing');
 assert.equal((runtime.match(/getContext\('webgl2'/g)||[]).length,1,'reference lock must create exactly one WebGL2 context');
 assert.doesNotMatch(runtime,/desynchronized\s*:/,'desynchronized context mode remains forbidden on mobile');
@@ -28,6 +31,7 @@ assert.match(premium,/if \(document\.querySelector\('script\[data-fx-core-real3d
 assert.match(premium,/addEventListener\('formatx:core3dfallback', handleCoreFallback\)/,'GPU failure must activate resilient fallback');
 assert.match(style,/pointer-events:none/,'reference GPU stage must never capture touch input');
 assert.match(style,/--fx-core-x:50%/,'portrait composition must be centered like the uploaded reference');
+assert.match(style,/min-height:clamp\(500px,calc\(100vw \* 1\.12 \+ 72px\),860px\)/,'mobile hero space must track viewport width so the full core and copy remain visible');
 assert.ok(homepage.includes('formatx-core-real3d-v20.js?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11'),'stable compatibility bootstrap URL missing from homepage');
 
-console.log('PASS: reference-lock v30 keeps the mobile-safe single-WebGL2 startup contract, centered portrait geometry, bounded DPR/pixel budget and resilient fallback.');
+console.log('PASS: reference-lock v30 r7 keeps a single mobile-safe WebGL2 context, centered uploaded-reference geometry, bounded high-DPI rendering and resilient fallback.');
