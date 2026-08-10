@@ -33,7 +33,7 @@ for (const token of [
   'Math.cos(t * .63)',
   'IntersectionObserver',
   'webglcontextlost',
-  "root.dataset.fxCorePerformance = 'single-context-adaptive-60-plus-fps'"
+  "root.dataset.fxCorePerformance='single-context-adaptive-60-plus-fps'"
 ]) assert.ok(runtime.includes(token), `missing v51 contract: ${token}`);
 
 assert.match(runtime, /sharp-four-tip-concave-crystal-v51/);
