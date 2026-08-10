@@ -4,8 +4,8 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
-      - 'docs/scifi-ui/scripts/formatx-core-v50.js'
-      - 'docs/scifi-ui/styles/formatx-core-v50.css'
+      - 'docs/scifi-ui/scripts/formatx-core-v51.js'
+      - 'docs/scifi-ui/styles/formatx-core-v51.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
       - 'docs/scifi-ui/scripts/formatx-webgpu-core-v29.js'
       - 'docs/scifi-ui/scripts/formatx-orbital-core-v28.js'
@@ -27,9 +27,9 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: Validate rounded v50 production MAG
+      - name: Validate v51 reference crystal production MAG
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
-      - name: Validate v50 mobile-safe startup contract
+      - name: Validate v51 mobile-safe startup contract
         run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Validate production and preview renderer authority
         run: node .github/scripts/validate-reference-core-v26.cjs
@@ -38,7 +38,7 @@ jobs:
       - name: Validate JavaScript syntax
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          node --check docs/scifi-ui/scripts/formatx-core-v50.js
+          node --check docs/scifi-ui/scripts/formatx-core-v51.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
           node --check docs/scifi-ui/scripts/formatx-webgpu-core-v29.js
           node --check docs/scifi-ui/scripts/formatx-orbital-core-v28.js
@@ -55,13 +55,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Rounded living core v50 passed single-context, mobile framing and syntax gates'
+            description='Reference crystal v51 passed single-context, mobile framing and syntax gates'
           else
             state=failure
-            description='Rounded living core v50 validation failed'
+            description='Reference crystal v51 validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
-            -f context='FormatX rounded living core v50' \
+            -f context='FormatX reference crystal v51' \
             -f description="$description" \
             -f target_url="$TARGET_URL"
