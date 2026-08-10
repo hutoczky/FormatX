@@ -2,8 +2,8 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxOrganismVoice === 'ready-v3') return;
-  ROOT.dataset.fxOrganismVoice = 'loading-v3';
+  if (ROOT.dataset.fxOrganismVoice === 'ready-v4') return;
+  ROOT.dataset.fxOrganismVoice = 'loading-v4';
 
   const MAX_QUESTION_LENGTH = 180;
   const STORAGE_KEY = 'formatx-organism-dialogue-enabled';
@@ -47,16 +47,16 @@
       id: 'system',
       label: { hu: '05 / BIZTONSÁGI VÁZ', en: '05 / SAFETY SKELETON' },
       response: {
-        hu: 'A biztonsági váz célmeghajtó-védelmet, megerősítéseket, naplózást, SHA-256 ellenőrzést és Ed25519-aláírási bizonyítékot kapcsol a kritikus műveletekhez.',
-        en: 'The safety skeleton adds target-drive protection, confirmations, logging, SHA-256 verification and Ed25519 signature proof to critical operations.'
+        hu: 'A biztonsági váz célmeghajtó-védelmet, megerősítéseket, naplózást és SHA-256 integritásellenőrzést kapcsol a kritikus műveletekhez. Külön Ed25519-aláírási bizonyíték csak akkor jelenik meg, ha az adott kiadáshoz ténylegesen publikálták.',
+        en: 'The safety skeleton adds target-drive protection, confirmations, logging and SHA-256 integrity verification to critical operations. Separate Ed25519 signature proof is shown only when it has actually been published for that release.'
       }
     },
     {
       id: 'resources',
       label: { hu: '06 / JELADÓ', en: '06 / BEACON' },
       response: {
-        hu: 'A jeladó gyűjti össze az aktuális kiadást, az Android alkalmazást, a támogatást, a dokumentációt és a helyben megnyíló jogi információkat.',
-        en: 'The beacon collects the current release, the Android application, support, documentation and legal information that opens inside the FormatX site.'
+        hu: 'A jeladó gyűjti össze az aktuális teljes kiadást, az Android teljes verziót, a támogatást, a dokumentációt és a helyben megnyíló jogi információkat.',
+        en: 'The beacon collects the current full release, the Android full release, support, documentation and legal information that opens inside the FormatX site.'
       }
     }
   ]);
@@ -124,9 +124,9 @@
       ['licenc|licence|próba|5 nap', 'A teljes kiadáshoz 5 napos próbalicenc tartozik. A fizetős csomag az alkalmazás használatára ad korlátozott, nem kizárólagos és nem átruházható jogot. Automatikus megújítás nincs; a részletes licenc a FormatX honlapján nyílik meg.'],
       ['forráskód|nyílt forrás|másol|módosít|terjeszt', 'A FormatX nem nyílt forráskódú. A forráskód másolása, módosítása, közzététele, terjesztése vagy továbbértékesítése csak a szerző előzetes írásos engedélyével megengedett.'],
       ['qr|fizetés|bank|átutal', 'A csomag QR-kódja először a kiválasztott rendelési oldalt nyitja meg. A tényleges banki QR az adatok és a rendelési azonosító megadása után készül el. A rendszer nem végez automatikus terhelést.'],
-      ['biztonság|biztonságos|védelem|sha|ed25519', 'A FormatX biztonsági modellje célmeghajtó-védelmet, egyértelmű megerősítéseket, naplózott lépéseket, SHA-256 ellenőrzést és Ed25519-aláírási bizonyítékot használ.'],
-      ['platform|linux|bazzite|windows|macos|android', 'A Linux és Bazzite az elsődleges környezet. A honlap Windows-, macOS-, webes és Android-hozzáférést is felsorol; az Android APK a jeladó és a fő letöltési műveletek közül érhető el.'],
-      ['letölt|apk|release|kiadás', 'Az aktuális kiadás a fő letöltési gombból, az Android APK a külön Android műveletből, a kiadások és támogatási információk pedig a 06 JELADÓ panelből érhetők el.'],
+      ['biztonság|biztonságos|védelem|sha|ed25519', 'A FormatX biztonsági modellje célmeghajtó-védelmet, egyértelmű megerősítéseket, naplózott lépéseket és SHA-256 ellenőrzést használ. Külön Ed25519-aláírási bizonyíték csak tényleges publikálás esetén állítható.'],
+      ['platform|linux|bazzite|windows|macos|android|ios|web', 'A FormatX teljes verzió, 5 napos próbalicenccel. A Linux/Bazzite az elsődleges natív platform, a Windows támogatott másodlagos natív platform, az Android pedig külön hivatalos teljes kiadás. A web technikai előnézet; a macOS és az iOS/iPadOS tervezett.'],
+      ['letölt|apk|release|kiadás', 'A teljes multiplatform kiadás a fő letöltési műveletből, az Android teljes verzió a külön Android műveletből, a kiadások és támogatási információk pedig a 06 JELADÓ panelből érhetők el.'],
       ['modul|szerv|iso|formáz|partíció|smart|törlés', 'A hat rendszerszerv: ISO írás és ellenőrzés, formázás, partíciótervezés, biztonságos törlés, SMART-diagnosztika és AI-alapú magyarázat.'],
       ['adat|adatküldés|privát|kérdés hova', 'A kérdés feldolgozása és a válasz helyben, a böngészőben történik. Ha bekapcsolod a hangot, a felolvasást az eszközöd vagy a böngésződ beszédszolgáltatása végzi; az elérhető hang lehet helyi vagy online.'],
       ['köszön|köszi|rendben', 'Szívesen. A rendszer készen áll a következő kérdésre.']
@@ -138,9 +138,9 @@
       ['licence|license|trial|5 day', 'The full release includes a 5-day trial licence. A paid plan grants a limited, non-exclusive and non-transferable right to use the application. There is no automatic renewal, and the detailed licence opens inside the FormatX website.'],
       ['source code|open source|copy|modify|distribute', 'FormatX is not open-source software. Copying, modifying, publishing, distributing or reselling the source requires the author’s prior written permission.'],
       ['qr|payment|bank|transfer', 'A plan QR code first opens the selected checkout page. The actual bank-transfer QR is generated after order details and the order reference are entered. The system never charges automatically.'],
-      ['safety|secure|protection|sha|ed25519', 'The FormatX safety model uses target-drive protection, explicit confirmations, logged steps, SHA-256 verification and Ed25519 signature proof.'],
-      ['platform|linux|bazzite|windows|macos|android', 'Linux and Bazzite are the primary environment. The site also lists Windows, macOS, web and Android access; the Android APK is available from the beacon and the main download actions.'],
-      ['download|apk|release', 'The current release is available from the main download action, the Android APK from the Android action, and releases and support information from the 06 BEACON panel.'],
+      ['safety|secure|protection|sha|ed25519', 'The FormatX safety model uses target-drive protection, explicit confirmations, logged steps and SHA-256 verification. Separate Ed25519 signature proof may be claimed only when it has actually been published.'],
+      ['platform|linux|bazzite|windows|macos|android|ios|web', 'FormatX is a full release with a 5-day trial licence. Linux/Bazzite is the primary native platform, Windows is a supported secondary native platform, and Android is a separate official full release. The web surface is a technical preview; macOS and iOS/iPadOS are planned.'],
+      ['download|apk|release', 'The full multiplatform release is available from the main download action, the Android full release from the Android action, and releases and support information from the 06 BEACON panel.'],
       ['module|organ|iso|format|partition|smart|erase', 'The six system organs are ISO writing and verification, formatting, partition planning, secure erase, SMART diagnostics and AI-assisted guidance.'],
       ['data|privacy|send|question stored', 'Your question and the generated response are processed locally in the browser. When voice is enabled, playback is provided by your device or browser speech service, and the selected voice may be local or online.'],
       ['thanks|thank you|okay', 'You are welcome. The system is ready for the next question.']
@@ -171,21 +171,10 @@
   let speechPauseTimer = 0;
   let speechWatchdog = 0;
 
-  function language() {
-    return ROOT.lang === 'en' ? 'en' : 'hu';
-  }
-
-  function copy() {
-    return COPY[language()];
-  }
-
-  function readEnabled() {
-    try { return localStorage.getItem(STORAGE_KEY) !== 'false'; } catch (_) { return true; }
-  }
-
-  function storeEnabled(value) {
-    try { localStorage.setItem(STORAGE_KEY, String(Boolean(value))); } catch (_) {}
-  }
+  function language() { return ROOT.lang === 'en' ? 'en' : 'hu'; }
+  function copy() { return COPY[language()]; }
+  function readEnabled() { try { return localStorage.getItem(STORAGE_KEY) !== 'false'; } catch (_) { return true; } }
+  function storeEnabled(value) { try { localStorage.setItem(STORAGE_KEY, String(Boolean(value))); } catch (_) {} }
 
   function ensureStyle() {
     if (document.querySelector('link[data-fx-organism-voice-style]')) return;
@@ -206,60 +195,34 @@
   }
 
   function buildInterface() {
-    shell = create('aside', 'fx-organism-dialogue', {
-      'aria-label': copy().region,
-      'data-fx-organism-dialogue': 'ready-v3'
-    });
-    bubble = create('section', 'fx-organism-thought', {
-      hidden: '',
-      'aria-hidden': 'true',
-      'aria-live': 'polite',
-      'aria-atomic': 'true'
-    });
-
+    shell = create('aside', 'fx-organism-dialogue', { 'aria-label': copy().region, 'data-fx-organism-dialogue': 'ready-v4' });
+    bubble = create('section', 'fx-organism-thought', { hidden: '', 'aria-hidden': 'true', 'aria-live': 'polite', 'aria-atomic': 'true' });
     const head = create('header', 'fx-organism-thought-head');
     sceneLabel = create('span', 'fx-organism-thought-label');
     closeButton = create('button', 'fx-organism-thought-close', { type: 'button' });
     closeButton.textContent = '×';
     head.append(sceneLabel, closeButton);
-
     output = create('p', 'fx-organism-thought-output');
     form = create('form', 'fx-organism-question');
     const hiddenLabel = create('label', 'fx-visually-hidden', { for: 'fx-organism-question-input' });
-    input = create('input', '', {
-      id: 'fx-organism-question-input',
-      type: 'text',
-      maxlength: String(MAX_QUESTION_LENGTH),
-      autocomplete: 'off',
-      spellcheck: 'true'
-    });
+    input = create('input', '', { id: 'fx-organism-question-input', type: 'text', maxlength: String(MAX_QUESTION_LENGTH), autocomplete: 'off', spellcheck: 'true' });
     const ask = create('button', 'fx-organism-ask', { type: 'submit' });
     ask.textContent = '↗';
     form.append(hiddenLabel, input, ask);
-
     const controls = create('div', 'fx-organism-thought-controls');
     masterButton = create('button', 'fx-organism-master-toggle', { type: 'button', 'aria-pressed': 'true' });
     voiceButton = create('button', 'fx-organism-voice-toggle', { type: 'button', 'aria-pressed': 'false' });
     repeatButton = create('button', 'fx-organism-repeat', { type: 'button' });
     repeatButton.textContent = '↻';
     controls.append(masterButton, voiceButton, repeatButton);
-
     privacyNote = create('small', 'fx-organism-privacy');
     bubble.append(head, output, form, controls, privacyNote);
-
-    trigger = create('button', 'fx-organism-thought-trigger', {
-      type: 'button',
-      'aria-expanded': 'false'
-    });
+    trigger = create('button', 'fx-organism-thought-trigger', { type: 'button', 'aria-expanded': 'false' });
     trigger.innerHTML = '<span aria-hidden="true">💭</span><b>MAG</b>';
     shell.append(bubble, trigger);
     document.body.appendChild(shell);
-
     trigger.addEventListener('click', () => {
-      if (!enabled) {
-        setEnabled(true, true);
-        return;
-      }
+      if (!enabled) { setEnabled(true, true); return; }
       setOpen(!opened, true);
     });
     closeButton.addEventListener('click', () => setOpen(false, false));
@@ -276,10 +239,7 @@
   function setOpen(next, focusInput) {
     opened = enabled && Boolean(next);
     shell?.classList.toggle('is-open', opened);
-    if (bubble) {
-      bubble.hidden = !opened;
-      bubble.setAttribute('aria-hidden', String(!opened));
-    }
+    if (bubble) { bubble.hidden = !opened; bubble.setAttribute('aria-hidden', String(!opened)); }
     trigger?.setAttribute('aria-expanded', String(opened));
     ROOT.dataset.fxOrganismThought = opened ? 'open' : 'closed';
     if (opened && focusInput) requestAnimationFrame(() => input?.focus({ preventScroll: true }));
@@ -302,13 +262,7 @@
   }
 
   function fold(value) {
-    return String(value || '')
-      .toLocaleLowerCase(language() === 'hu' ? 'hu-HU' : 'en-GB')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9€£$\s-]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    return String(value || '').toLocaleLowerCase(language() === 'hu' ? 'hu-HU' : 'en-GB').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9€£$\s-]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
   function answerQuestion(question) {
@@ -324,10 +278,7 @@
     const question = String(input?.value || '').slice(0, MAX_QUESTION_LENGTH).trim();
     const answer = answerQuestion(question);
     showResponse(answer, language() === 'en' ? 'FORMATX / RESPONSE' : 'FORMATX / VÁLASZ', true, speechEnabled);
-    if (input) {
-      input.value = '';
-      input.focus({ preventScroll: true });
-    }
+    if (input) { input.value = ''; input.focus({ preventScroll: true }); }
     ROOT.dataset.fxOrganismLastIntent = answer === copy().unknown ? 'unknown' : 'matched';
   }
 
@@ -353,15 +304,9 @@
   function selectVoice() {
     if (!speechSupported) return null;
     const voices = synth.getVoices();
-    selectedVoice = voices
-      .map(voice => ({ voice, score: voiceScore(voice) }))
-      .sort((a, b) => b.score - a.score)[0]?.voice || null;
+    selectedVoice = voices.map(voice => ({ voice, score: voiceScore(voice) })).sort((a, b) => b.score - a.score)[0]?.voice || null;
     const descriptor = `${selectedVoice?.name || ''} ${selectedVoice?.voiceURI || ''}`.toLowerCase();
-    selectedVoiceQuality = /natural|neural|premium|enhanced|studio|expressive|wavenet/.test(descriptor)
-      ? 'premium'
-      : /google|microsoft|samsung|apple|siri|online/.test(descriptor)
-        ? 'enhanced'
-        : 'standard';
+    selectedVoiceQuality = /natural|neural|premium|enhanced|studio|expressive|wavenet/.test(descriptor) ? 'premium' : /google|microsoft|samsung|apple|siri|online/.test(descriptor) ? 'enhanced' : 'standard';
     ROOT.dataset.fxOrganismVoiceLanguage = selectedVoice?.lang || (language() === 'en' ? 'en-GB' : 'hu-HU');
     ROOT.dataset.fxOrganismVoiceName = selectedVoice?.name || 'browser-default';
     ROOT.dataset.fxOrganismVoiceQuality = selectedVoiceQuality;
@@ -372,23 +317,9 @@
   function prepareSpeechText(text) {
     let value = String(text || '').replace(/\s+/g, ' ').trim().replace(/FormatX/g, 'Format X');
     if (language() === 'hu') {
-      return value
-        .replace(/SHA-256/gi, 'SHA kettő öt hat')
-        .replace(/Ed25519/gi, 'Ed kettő öt öt egy kilenc')
-        .replace(/\bHUF\b/g, 'forint')
-        .replace(/\bEUR\b/g, 'euró')
-        .replace(/\bQR\b/g, 'kú er')
-        .replace(/\bAPK\b/g, 'á pé ká')
-        .replace(/\bAI\b/g, 'mesterséges intelligencia');
+      return value.replace(/SHA-256/gi, 'SHA kettő öt hat').replace(/Ed25519/gi, 'Ed kettő öt öt egy kilenc').replace(/\bHUF\b/g, 'forint').replace(/\bEUR\b/g, 'euró').replace(/\bQR\b/g, 'kú er').replace(/\bAPK\b/g, 'á pé ká').replace(/\bAI\b/g, 'mesterséges intelligencia');
     }
-    return value
-      .replace(/SHA-256/gi, 'S H A two fifty six')
-      .replace(/Ed25519/gi, 'Ed two five five one nine')
-      .replace(/\bHUF\b/g, 'H U F')
-      .replace(/\bEUR\b/g, 'euros')
-      .replace(/\bQR\b/g, 'Q R')
-      .replace(/\bAPK\b/g, 'A P K')
-      .replace(/\bAI\b/g, 'A I');
+    return value.replace(/SHA-256/gi, 'S H A two fifty six').replace(/Ed25519/gi, 'Ed two five five one nine').replace(/\bHUF\b/g, 'H U F').replace(/\bEUR\b/g, 'euros').replace(/\bQR\b/g, 'Q R').replace(/\bAPK\b/g, 'A P K').replace(/\bAI\b/g, 'A I');
   }
 
   function splitSpeech(text) {
@@ -401,26 +332,11 @@
     const isQuestion = /\?$/.test(chunk);
     const isFinal = index === count - 1;
     const baseRate = language() === 'en' ? 0.97 : 0.94;
-    return {
-      rate: Math.max(0.84, Math.min(1.05, baseRate + (selectedVoiceQuality === 'premium' ? 0.01 : -0.02) + (isFinal ? -0.01 : 0))),
-      pitch: Math.max(0.9, Math.min(1.08, (language() === 'en' ? 1.0 : 0.98) + (isQuestion ? 0.025 : 0))),
-      volume: 1
-    };
+    return { rate: Math.max(0.84, Math.min(1.05, baseRate + (selectedVoiceQuality === 'premium' ? 0.01 : -0.02) + (isFinal ? -0.01 : 0))), pitch: Math.max(0.9, Math.min(1.08, (language() === 'en' ? 1.0 : 0.98) + (isQuestion ? 0.025 : 0))), volume: 1 };
   }
 
-  function pauseAfter(chunk) {
-    if (/[:;]$/.test(chunk)) return 115;
-    if (/[,–—]$/.test(chunk)) return 70;
-    if (/[.!?]$/.test(chunk)) return 155;
-    return 90;
-  }
-
-  function clearSpeechTimers() {
-    clearTimeout(speechPauseTimer);
-    clearTimeout(speechWatchdog);
-    speechPauseTimer = 0;
-    speechWatchdog = 0;
-  }
+  function pauseAfter(chunk) { if (/[:;]$/.test(chunk)) return 115; if (/[,–—]$/.test(chunk)) return 70; if (/[.!?]$/.test(chunk)) return 155; return 90; }
+  function clearSpeechTimers() { clearTimeout(speechPauseTimer); clearTimeout(speechWatchdog); speechPauseTimer = 0; speechWatchdog = 0; }
 
   function finishSpeech(run, text, explicit) {
     if (run !== speechRun) return;
@@ -428,14 +344,7 @@
     ROOT.dataset.fxOrganismSpeech = 'idle';
     shell?.classList.remove('is-speaking');
     privacyNote.textContent = `${copy().voiceWorking}${selectedVoice ? ' · ' + selectedVoice.name : ''}`;
-    dispatchEvent(new CustomEvent('formatx:organismspeechend', {
-      detail: {
-        text,
-        explicit: Boolean(explicit),
-        voice: selectedVoice?.name || 'browser-default',
-        service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser'
-      }
-    }));
+    dispatchEvent(new CustomEvent('formatx:organismspeechend', { detail: { text, explicit: Boolean(explicit), voice: selectedVoice?.name || 'browser-default', service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser' } }));
   }
 
   function failSpeech(run) {
@@ -454,118 +363,57 @@
     const chunks = splitSpeech(text);
     if (!chunks.length) return;
     selectVoice();
-
     const speakChunk = (index, fallback) => {
       if (run !== speechRun || !speechEnabled) return;
-      if (index >= chunks.length) {
-        finishSpeech(run, text, explicit);
-        return;
-      }
-
+      if (index >= chunks.length) { finishSpeech(run, text, explicit); return; }
       const chunk = chunks[index];
       const utterance = new SpeechSynthesisUtterance(chunk);
       utterance.lang = language() === 'en' ? 'en-GB' : 'hu-HU';
       const profile = prosody(chunk, index, chunks.length);
-      utterance.rate = profile.rate;
-      utterance.pitch = profile.pitch;
-      utterance.volume = profile.volume;
+      utterance.rate = profile.rate; utterance.pitch = profile.pitch; utterance.volume = profile.volume;
       if (!fallback && selectedVoice) utterance.voice = selectedVoice;
       let started = false;
-
       speechWatchdog = window.setTimeout(() => {
         if (run !== speechRun || started) return;
-        if (!fallback) {
-          try { synth.cancel(); } catch (_) {}
-          selectedVoice = null;
-          window.setTimeout(() => speakChunk(index, true), 90);
-        } else {
-          failSpeech(run);
-        }
+        if (!fallback) { try { synth.cancel(); } catch (_) {} selectedVoice = null; window.setTimeout(() => speakChunk(index, true), 90); }
+        else failSpeech(run);
       }, 1800);
-
       utterance.addEventListener('start', () => {
         if (run !== speechRun) return;
-        started = true;
-        clearTimeout(speechWatchdog);
-        ROOT.dataset.fxOrganismSpeech = 'speaking';
-        ROOT.dataset.fxOrganismSpeechMode = 'sentence-prosody-v3';
-        shell?.classList.add('is-speaking');
+        started = true; clearTimeout(speechWatchdog); ROOT.dataset.fxOrganismSpeech = 'speaking'; ROOT.dataset.fxOrganismSpeechMode = 'sentence-prosody-v4'; shell?.classList.add('is-speaking');
         privacyNote.textContent = `${copy().voiceWorking}${utterance.voice?.name ? ' · ' + utterance.voice.name : ''}`;
-        dispatchEvent(new CustomEvent('formatx:organismspeechstart', {
-          detail: {
-            text,
-            explicit: Boolean(explicit),
-            voice: utterance.voice?.name || selectedVoice?.name || 'browser-default',
-            quality: selectedVoiceQuality,
-            service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser',
-            chunks: chunks.length
-          }
-        }));
+        dispatchEvent(new CustomEvent('formatx:organismspeechstart', { detail: { text, explicit: Boolean(explicit), voice: utterance.voice?.name || selectedVoice?.name || 'browser-default', quality: selectedVoiceQuality, service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser', chunks: chunks.length } }));
       }, { once: true });
-
-      utterance.addEventListener('end', () => {
-        if (run !== speechRun) return;
-        clearTimeout(speechWatchdog);
-        speechPauseTimer = window.setTimeout(() => speakChunk(index + 1, false), pauseAfter(chunk));
-      }, { once: true });
-
+      utterance.addEventListener('end', () => { if (run !== speechRun) return; clearTimeout(speechWatchdog); speechPauseTimer = window.setTimeout(() => speakChunk(index + 1, false), pauseAfter(chunk)); }, { once: true });
       utterance.addEventListener('error', event => {
         if (run !== speechRun) return;
         clearTimeout(speechWatchdog);
         if (event.error === 'canceled' || event.error === 'interrupted') return;
-        if (!fallback) {
-          selectedVoice = null;
-          window.setTimeout(() => speakChunk(index, true), 90);
-        } else {
-          failSpeech(run);
-        }
-      }, { once: true });
-
-      try {
-        synth.resume();
-        synth.speak(utterance);
-      } catch (_) {
-        if (!fallback) window.setTimeout(() => speakChunk(index, true), 90);
+        if (!fallback) { selectedVoice = null; window.setTimeout(() => speakChunk(index, true), 90); }
         else failSpeech(run);
-      }
+      }, { once: true });
+      try { synth.resume(); synth.speak(utterance); } catch (_) { if (!fallback) window.setTimeout(() => speakChunk(index, true), 90); else failSpeech(run); }
     };
-
     privacyNote.textContent = copy().voiceStarting;
     ROOT.dataset.fxOrganismSpeech = 'starting';
-    if (synth.speaking || synth.pending) {
-      try { synth.cancel(); } catch (_) {}
-      window.setTimeout(() => speakChunk(0, false), 80);
-    } else {
-      speakChunk(0, false);
-    }
+    if (synth.speaking || synth.pending) { try { synth.cancel(); } catch (_) {} window.setTimeout(() => speakChunk(0, false), 80); }
+    else speakChunk(0, false);
   }
 
   function stopSpeech() {
-    speechRun += 1;
-    clearSpeechTimers();
-    if (speechSupported) {
-      try { synth.cancel(); } catch (_) {}
-    }
-    ROOT.dataset.fxOrganismSpeech = 'idle';
-    shell?.classList.remove('is-speaking');
+    speechRun += 1; clearSpeechTimers();
+    if (speechSupported) { try { synth.cancel(); } catch (_) {} }
+    ROOT.dataset.fxOrganismSpeech = 'idle'; shell?.classList.remove('is-speaking');
   }
 
   function toggleVoice() {
     if (!enabled) return;
-    if (!speechSupported) {
-      showResponse(copy().unsupported, '', true, false);
-      return;
-    }
+    if (!speechSupported) { showResponse(copy().unsupported, '', true, false); return; }
     speechEnabled = !speechEnabled;
     ROOT.dataset.fxOrganismVoiceEnabled = String(speechEnabled);
     updateLanguage();
-    if (speechEnabled) {
-      selectVoice();
-      speak(copy().voiceReady, true);
-    } else {
-      stopSpeech();
-      privacyNote.textContent = copy().privacy;
-    }
+    if (speechEnabled) { selectVoice(); speak(copy().voiceReady, true); }
+    else { stopSpeech(); privacyNote.textContent = copy().privacy; }
   }
 
   function showResponse(text, labelText, open, shouldSpeak) {
@@ -575,9 +423,7 @@
     if (sceneLabel) sceneLabel.textContent = labelText || SCENES[currentScene].label[language()];
     if (open) setOpen(true, false);
     ROOT.dataset.fxOrganismResponse = 'ready';
-    dispatchEvent(new CustomEvent('formatx:organismresponse', {
-      detail: { text: currentText, scene: currentScene, language: language(), localOnly: true }
-    }));
+    dispatchEvent(new CustomEvent('formatx:organismresponse', { detail: { text: currentText, scene: currentScene, language: language(), localOnly: true } }));
     if (shouldSpeak) speak(currentText, false);
   }
 
@@ -600,42 +446,22 @@
     input.setAttribute('aria-label', words.inputLabel);
     form.querySelector('label').textContent = words.inputLabel;
     const ask = form.querySelector('.fx-organism-ask');
-    ask.setAttribute('aria-label', words.ask);
-    ask.title = words.ask;
+    ask.setAttribute('aria-label', words.ask); ask.title = words.ask;
     masterButton.textContent = enabled ? '◉ ' + words.organismOn : '○ ' + words.organismOff;
     masterButton.setAttribute('aria-pressed', String(enabled));
-    masterButton.setAttribute('aria-label', enabled ? words.disable : words.enable);
-    masterButton.title = enabled ? words.disable : words.enable;
+    masterButton.setAttribute('aria-label', enabled ? words.disable : words.enable); masterButton.title = enabled ? words.disable : words.enable;
     voiceButton.textContent = speechEnabled ? '🔊 ' + words.voiceOn : '🔇 ' + words.voiceOff;
     voiceButton.setAttribute('aria-pressed', String(speechEnabled));
-    voiceButton.setAttribute('aria-label', speechEnabled ? words.voiceDisable : words.voiceEnable);
-    voiceButton.title = speechEnabled ? words.voiceDisable : words.voiceEnable;
+    voiceButton.setAttribute('aria-label', speechEnabled ? words.voiceDisable : words.voiceEnable); voiceButton.title = speechEnabled ? words.voiceDisable : words.voiceEnable;
     voiceButton.disabled = !enabled || !speechSupported;
-    repeatButton.setAttribute('aria-label', words.repeat);
-    repeatButton.title = words.repeat;
-    repeatButton.disabled = !enabled || !speechSupported || !speechEnabled;
-    if (ROOT.dataset.fxOrganismSpeech !== 'speaking' && ROOT.dataset.fxOrganismSpeech !== 'starting') {
-      privacyNote.textContent = words.privacy;
-    }
-    selectedVoice = null;
-    selectVoice();
-    if (enabled) {
-      const item = SCENES[currentScene];
-      currentText = currentText || item.response[language()];
-      output.textContent = currentText;
-      sceneLabel.textContent = item.label[language()];
-    }
+    repeatButton.setAttribute('aria-label', words.repeat); repeatButton.title = words.repeat; repeatButton.disabled = !enabled || !speechSupported || !speechEnabled;
+    if (ROOT.dataset.fxOrganismSpeech !== 'speaking' && ROOT.dataset.fxOrganismSpeech !== 'starting') privacyNote.textContent = words.privacy;
+    selectedVoice = null; selectVoice();
+    if (enabled) { const item = SCENES[currentScene]; currentText = currentText || item.response[language()]; output.textContent = currentText; sceneLabel.textContent = item.label[language()]; }
   }
 
-  function handleStateChange(event) {
-    const recentGesture = performance.now() - lastUserGesture < 1400;
-    showScene(event.detail?.scene, enabled && speechEnabled && recentGesture);
-  }
-
-  function noteUserGesture() {
-    lastUserGesture = performance.now();
-    try { synth?.resume(); } catch (_) {}
-  }
+  function handleStateChange(event) { const recentGesture = performance.now() - lastUserGesture < 1400; showScene(event.detail?.scene, enabled && speechEnabled && recentGesture); }
+  function noteUserGesture() { lastUserGesture = performance.now(); try { synth?.resume(); } catch (_) {} }
 
   function initialise() {
     ensureStyle();
@@ -644,77 +470,28 @@
     currentText = copy().welcome;
     setEnabled(enabled, false);
     setOpen(false, false);
-
     document.addEventListener('pointerdown', noteUserGesture, { capture: true, passive: true });
     document.addEventListener('keydown', noteUserGesture, true);
     addEventListener('formatx:organismstatechange', handleStateChange);
-    addEventListener('formatx:languagechange', () => {
-      stopSpeech();
-      currentText = SCENES[currentScene].response[language()];
-      updateLanguage();
-    });
+    addEventListener('formatx:languagechange', () => { stopSpeech(); currentText = SCENES[currentScene].response[language()]; updateLanguage(); });
     addEventListener('pagehide', stopSpeech);
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stopSpeech();
-    });
-
-    if (speechSupported) {
-      selectVoice();
-      synth.addEventListener?.('voiceschanged', () => {
-        selectedVoice = null;
-        selectVoice();
-      });
-    }
-
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stopSpeech(); });
+    if (speechSupported) { selectVoice(); synth.addEventListener?.('voiceschanged', () => { selectedVoice = null; selectVoice(); }); }
     window.FormatXOrganismVoice = Object.freeze({
-      ask(question) {
-        if (!enabled) return '';
-        const answer = answerQuestion(question);
-        showResponse(answer, language() === 'en' ? 'FORMATX / RESPONSE' : 'FORMATX / VÁLASZ', true, speechEnabled);
-        return answer;
-      },
-      say(text) {
-        if (enabled) showResponse(String(text || ''), '', true, speechEnabled);
-      },
+      ask(question) { if (!enabled) return ''; const answer = answerQuestion(question); showResponse(answer, language() === 'en' ? 'FORMATX / RESPONSE' : 'FORMATX / VÁLASZ', true, speechEnabled); return answer; },
+      say(text) { if (enabled) showResponse(String(text || ''), '', true, speechEnabled); },
       open() { if (enabled) setOpen(true, false); },
       close() { setOpen(false, false); },
       setEnabled(value) { setEnabled(Boolean(value), false); },
-      setVoiceEnabled(value) {
-        speechEnabled = Boolean(value) && enabled && speechSupported;
-        ROOT.dataset.fxOrganismVoiceEnabled = String(speechEnabled);
-        updateLanguage();
-        if (speechEnabled) speak(copy().voiceReady, true);
-        else stopSpeech();
-      },
-      voiceInfo() {
-        return Object.freeze({
-          name: selectedVoice?.name || 'browser-default',
-          language: selectedVoice?.lang || (language() === 'en' ? 'en-GB' : 'hu-HU'),
-          quality: selectedVoiceQuality,
-          localService: selectedVoice?.localService !== false,
-          service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser',
-          mode: 'sentence-prosody-v3'
-        });
-      }
+      setVoiceEnabled(value) { speechEnabled = Boolean(value) && enabled && speechSupported; ROOT.dataset.fxOrganismVoiceEnabled = String(speechEnabled); updateLanguage(); if (speechEnabled) speak(copy().voiceReady, true); else stopSpeech(); },
+      voiceInfo() { return Object.freeze({ name: selectedVoice?.name || 'browser-default', language: selectedVoice?.lang || (language() === 'en' ? 'en-GB' : 'hu-HU'), quality: selectedVoiceQuality, localService: selectedVoice?.localService !== false, service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser', mode: 'sentence-prosody-v4' }); }
     });
-
-    ROOT.dataset.fxOrganismVoice = 'ready-v3';
+    ROOT.dataset.fxOrganismVoice = 'ready-v4';
     ROOT.dataset.fxOrganismVoiceEnabled = 'false';
     ROOT.dataset.fxOrganismDialogueEnabled = String(enabled);
     ROOT.dataset.fxOrganismSpeech = 'idle';
-    ROOT.dataset.fxOrganismSpeechCompatibility = 'adaptive-v3';
-    dispatchEvent(new CustomEvent('formatx:organismvoiceready', {
-      detail: {
-        speechSupported,
-        responseLocalOnly: true,
-        scenes: SCENES.length,
-        enabled,
-        voice: selectedVoice?.name || 'browser-default',
-        quality: selectedVoiceQuality,
-        service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser',
-        mode: 'sentence-prosody-v3'
-      }
-    }));
+    ROOT.dataset.fxOrganismSpeechCompatibility = 'adaptive-v4';
+    dispatchEvent(new CustomEvent('formatx:organismvoiceready', { detail: { speechSupported, responseLocalOnly: true, scenes: SCENES.length, enabled, voice: selectedVoice?.name || 'browser-default', quality: selectedVoiceQuality, service: selectedVoice?.localService === false ? 'browser-online' : 'device-or-browser', mode: 'sentence-prosody-v4' } }));
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
