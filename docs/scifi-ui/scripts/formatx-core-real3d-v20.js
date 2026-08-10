@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const BOOTSTRAP='reference-lock-v30-v38';
+const BOOTSTRAP='reference-lock-v30-v39';
 const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-7';
 const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-7';
 const POLISH_STYLE='./styles/formatx-reference-polish-v31.css?v=20260810-reference-polish-1';
@@ -10,10 +10,12 @@ const GUARD_STYLE='./styles/formatx-mobile-text-guard-v32.css?v=20260810-mobile-
 const V33_STYLE='./styles/formatx-mobile-mag-v33.css?v=20260810-mobile-mag-v33-2';
 const V37_STYLE='./styles/formatx-mag-reference-v37.css?v=20260810-mag-reference-v37-1';
 const V38_STYLE='./styles/formatx-mag-reference-v38.css?v=20260810-mag-reference-v38-1';
+const V39_STYLE='./styles/formatx-mag-reference-v39.css?v=20260810-mag-reference-v39-1';
 const POST_SCRIPT='./scripts/formatx-reference-postfx-v31.js?v=20260810-reference-postfx-1';
 const V33_SCRIPT='./scripts/formatx-mobile-mag-v33.js?v=20260810-mobile-mag-v33-2';
 const V37_SCRIPT='./scripts/formatx-mag-reference-v37.js?v=20260810-mag-reference-v37-1';
 const V38_SCRIPT='./scripts/formatx-mag-reference-v38.js?v=20260810-mag-reference-v38-1';
+const V39_SCRIPT='./scripts/formatx-mag-reference-v39.js?v=20260810-mag-reference-v39-1';
 if(root.dataset.fxCoreReal3dBootstrap===BOOTSTRAP)return;
 root.dataset.fxCoreReal3dBootstrap=BOOTSTRAP;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
@@ -47,6 +49,7 @@ addStyle(GUARD_STYLE,'fx-mobile-text-guard-v32');
 addStyle(V33_STYLE,'fx-mobile-mag-v33');
 addStyle(V37_STYLE,'fx-mag-reference-v37');
 addStyle(V38_STYLE,'fx-mag-reference-v38');
+addStyle(V39_STYLE,'fx-mag-reference-v39');
 addScript(V33_SCRIPT,'fx-mobile-mag-v33');
 if(document.querySelector('script[data-fx-reference-lock-v30]'))return;
 const script=document.createElement('script');
@@ -64,6 +67,7 @@ script.addEventListener('load',()=>{
   }
   addScript(V37_SCRIPT,'fx-mag-reference-v37');
   addScript(V38_SCRIPT,'fx-mag-reference-v38');
+  addScript(V39_SCRIPT,'fx-mag-reference-v39');
 },{once:true});
 script.addEventListener('error',()=>{
   root.dataset.fxCoreReal3d='context-unavailable';
