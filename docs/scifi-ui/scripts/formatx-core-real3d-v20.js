@@ -48,7 +48,7 @@
   }
 
   function addCoreScript(src) {
-    if (document.querySelector('script[data-fx-core-v51-script]')) return;
+    if (document.querySelector('script[data-fx-core-v51-script], script[src*="formatx-core-v51.js"]')) return;
     const script = document.createElement('script');
     script.src = src;
     script.async = false;
@@ -68,7 +68,7 @@
   }
 
   function addMobileSafeScript(src, done) {
-    const existing = document.querySelector('script[data-fx-core-mobile-safe-v52]');
+    const existing = document.querySelector('script[data-fx-core-mobile-safe-v52], script[src*="formatx-core-mobile-compat-v52.js"]');
     if (existing) {
       if (root.dataset.fxCoreMobileCompat === 'ready-v52') {
         done?.();
