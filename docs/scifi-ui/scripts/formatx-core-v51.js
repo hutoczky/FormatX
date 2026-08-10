@@ -193,6 +193,7 @@ void main(){
 
   float a=atan(vP.y,vP.x);
   float r=length(vP.xy);
+  float outerFade=smoothstep(.27,.58,r);
   float axis=pow(abs(cos(a*2.0)),2.0);
   float facetA=pow(.5+.5*cos(a*12.0 + r*24.0 - uT*.18 + uPhase),22.0);
   float facetB=pow(.5+.5*cos(a*20.0 - r*31.0 + uT*.13 + uPhase*.61),30.0);
@@ -206,12 +207,13 @@ void main(){
   vec3 ice=vec3(.90,1.34,1.52);
 
   vec3 col=uTint*(.008+.075*fres);
-  col+=cyan*(.018+.43*fres+.18*vein+.090*rib+.070*axis);
-  col+=blue*(.014+.070*facetB+.035*axis);
-  col+=violetC*(.012+.14*violet+.055*facetA);
-  col+=ice*(.16*pow(fres,1.30)+.11*facetA+.065*facetB);
+  col+=cyan*(.018+.47*fres+.20*vein+.098*rib+.080*axis);
+  col+=blue*(.014+.075*facetB+.040*axis);
+  col+=violetC*(.012+.15*violet+.060*facetA);
+  col+=ice*(.18*pow(fres,1.30)+.12*facetA+.070*facetB);
+  col*=.45+.55*outerFade;
 
-  float alpha=uA*S(.0025+.145*fres+.048*vein+.022*rib+.032*facetA+.016*facetB+.010*axis);
+  float alpha=uA*S(.002+.165*fres+.052*vein+.024*rib+.034*facetA+.017*facetB+.012*axis)*outerFade;
   O=vec4(col,alpha);
 }`;
 
@@ -611,13 +613,14 @@ void main(){
       gl.bindVertexArray(shell.vao);
       gl.enable(gl.DEPTH_TEST);
       gl.depthMask(false);
-      gl.disable(gl.CULL_FACE);
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
       const layers = [
-        { s: 1.000, z: 0, rot: 0, a: .42, tint: [.06, .70, 1.30], phase: .0 },
-        { s: .930, z: .014, rot: .010, a: .12, tint: [.45, .22, 1.24], phase: 1.9 }
+        { s: 1.000, z: 0, rot: 0, a: .46, tint: [.06, .70, 1.30], phase: .0 },
+        { s: .930, z: .014, rot: .010, a: .13, tint: [.45, .22, 1.24], phase: 1.9 }
       ];
       for (const layer of layers) {
         const m = mul(base, compose(tr(0, 0, layer.z), rz(layer.rot), sc(layer.s, layer.s, layer.s)));
@@ -628,6 +631,7 @@ void main(){
         gl.uniform3fv(SU.tint, layer.tint);
         gl.drawElements(gl.TRIANGLES, shell.count, gl.UNSIGNED_INT, 0);
       }
+      gl.disable(gl.CULL_FACE);
     }
 
     function drawWire(t, base) {
