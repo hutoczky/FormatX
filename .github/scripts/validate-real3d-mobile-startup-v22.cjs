@@ -18,7 +18,7 @@ assert.match(bootstrap, /single-webgl2-reference-crystal-v53/);
 assert.equal((runtime.match(/getContext\('webgl2'/g) || []).length, 1, 'unified v53 path must create exactly one WebGL2 context');
 assert.match(runtime, /hero&&hero\.querySelector\('\.hero-space'\)/, 'mobile renderer must resolve hero-space');
 assert.match(runtime, /\(mobile\?host:document\.body\)\.prepend\(stage\)/, 'mobile must mount the stage inside hero-space');
-assert.match(runtime, /const budget=mobile\?1150000:2400000/, 'bounded mobile pixel budget missing');
+assert.match(runtime, /budget=mobile\?1150000:2400000/, 'bounded mobile pixel budget missing');
 assert.match(runtime, /powerPreference:mobile\?'default':'high-performance'/, 'mobile power policy missing');
 assert.match(runtime, /ResizeObserver/, 'mobile canvas must resize with hero host');
 assert.match(runtime, /IntersectionObserver/, 'renderer must pause outside hero');
