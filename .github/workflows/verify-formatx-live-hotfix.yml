@@ -1,5 +1,5 @@
 name: Verify FormatX live hotfix
-run-name: Verify live mobile hero + MAG v39 from ${{ github.sha }}
+run-name: Verify live mobile hero + MAG v40 from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -34,6 +34,7 @@ jobs:
               mag38_js="$(mktemp)"
               mag39_css="$(mktemp)"
               mag39_js="$(mktemp)"
+              mag40_css="$(mktemp)"
               core_js="$(mktemp)"
               home="$(mktemp)"
               if curl --fail --silent --show-error --location --max-time 30 \
@@ -53,6 +54,8 @@ jobs:
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-mag-reference-v39.js?v=${GITHUB_SHA}-${attempt}" > "$mag39_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/styles/formatx-mag-reference-v40.css?v=${GITHUB_SHA}-${attempt}" > "$mag40_css" \
+                && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_SHA}-${attempt}" > "$core_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/?v=${GITHUB_SHA}-${attempt}" > "$home" \
@@ -65,23 +68,23 @@ jobs:
                 && grep -Fq 'FormatX MAG reference v38' "$mag38_css" \
                 && grep -Fq 'fxMagReferenceV38' "$mag38_js" \
                 && grep -Fq 'FormatX MAG reference v39' "$mag39_css" \
-                && grep -Fq 'dynamic viewport clip' "$mag39_css" \
                 && grep -Fq 'fxMagReferenceV39' "$mag39_js" \
-                && grep -Fq 'dynamic-clip-not-canvas-hide' "$mag39_js" \
-                && grep -Fq 'reference-lock-v30-v39' "$core_js" \
-                && grep -Fq 'formatx-mag-reference-v39.css?v=20260810-mag-reference-v39-1' "$core_js" \
-                && grep -Fq 'formatx-mag-reference-v39.js?v=20260810-mag-reference-v39-1' "$core_js" \
+                && grep -Fq 'FormatX MAG reference v40' "$mag40_css" \
+                && grep -Fq 'clip-path:none!important' "$mag40_css" \
+                && grep -Fq 'background:#010711!important' "$mag40_css" \
+                && grep -Fq 'reference-lock-v30-v40' "$core_js" \
+                && grep -Fq 'formatx-mag-reference-v40.css?v=20260810-mag-reference-v40-1' "$core_js" \
                 && grep -Fq 'FormatX Suite Pro' "$home"
               then
                 success=true
-                rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag39_css" "$mag39_js" "$core_js" "$home"
+                rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag39_css" "$mag39_js" "$mag40_css" "$core_js" "$home"
                 break
               fi
-              rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag39_css" "$mag39_js" "$core_js" "$home"
+              rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag39_css" "$mag39_js" "$mag40_css" "$core_js" "$home"
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Live mobile hero / MAG v39 verification failed for $origin" >&2
+              echo "Live mobile hero / MAG v40 verification failed for $origin" >&2
               exit 1
             fi
           done
@@ -107,7 +110,7 @@ jobs:
               body: JSON.stringify({
                 state,
                 context: 'FormatX live mobile hero verification',
-                description: 'Both domains serve native MAG plus v39 dynamic mobile safe clipping',
+                description: 'Both domains serve native MAG plus v40 full-crystal mobile finish',
                 target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
               }),
             }
