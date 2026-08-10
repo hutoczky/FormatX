@@ -16,8 +16,10 @@ const homepage = read('docs/scifi-ui/index.html');
 assert.match(bootstrap, /reference-crystal-core-v51/, 'v51 production bootstrap missing');
 assert.match(bootstrap, /fxCoreReal3d = 'ready-v20'/, 'compatibility ownership marker missing');
 assert.match(bootstrap, /single-webgl2-reference-crystal-v51/, 'v51 renderer marker missing');
-assert.match(bootstrap, /formatx-core-mobile-compat-v52\.js\?v=20260811-mobile-safe-v52-4/, 'physical mobile r4 cache-busted renderer missing');
-assert.match(bootstrap, /formatx-core-mobile-compat-v52\.css\?v=20260811-mobile-safe-v52-4/, 'physical mobile r4 cache-busted style missing');
+assert.match(bootstrap, /formatx-core-mobile-compat-v52\.js\?v=20260811-mobile-safe-v52-5/, 'physical mobile r5 cache-busted renderer missing');
+assert.match(bootstrap, /formatx-core-mobile-compat-v52\.css\?v=20260811-mobile-safe-v52-5/, 'physical mobile r5 cache-busted style missing');
+assert.match(bootstrap, /addMobileSafeScript\(MOBILE_SAFE_SCRIPT, \(\) => addCoreScript\(SCRIPT\)\)/, 'mobile renderer and v51 validation script must start serially');
+assert.doesNotMatch(bootstrap, /addMobileSafeScript\(MOBILE_SAFE_SCRIPT\);\s*addCoreScript\(SCRIPT\);/, 'parallel mobile startup race must remain retired');
 
 assert.match(runtime, /powerPreference: mobile \? 'default' : 'high-performance'/, 'mobile power policy missing');
 assert.match(runtime, /webglcontextlost/, 'context loss reporting missing');
@@ -64,6 +66,7 @@ assert.doesNotMatch(mobileCompatStyle, /position:\s*fixed\s*!important/, 'physic
 
 assert.ok(homepage.includes('formatx-core-real3d-v20.js'), 'stable compatibility bootstrap missing from homepage');
 
+new Function(bootstrap);
 new Function(runtime);
 new Function(mobileCompat);
-console.log('PASS: v51 desktop and v52 physical-mobile startup use bounded native WebGL2 crystals; mobile is hero-local, filter-free, one-context, four-tip and compositor-safe.');
+console.log('PASS: v51 desktop and v52 physical-mobile startup use bounded native WebGL2 crystals; mobile is hero-local, serialized, filter-free, one-context, four-tip and compositor-safe.');
