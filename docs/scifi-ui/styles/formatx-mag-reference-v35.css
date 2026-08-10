@@ -1,0 +1,74 @@
+/* FormatX MAG reference v35 — sharper crystalline refinement.
+   The existing WebGL2 renderer remains the only 3D geometry source.
+   This layer removes the muddy v33/v34 haze and adds crisp optical facets,
+   compact reactor rings and cyan/violet energy accents without touching layout. */
+
+.fx-v33-core-glass,
+.fx-v33-reactor-halo,
+.fx-mag-v34-overlay{display:none!important}
+
+.fx-core-real3d-canvas{
+  transform:scale(1.03,.96)!important;
+  transform-origin:var(--fx-core-x) 49%!important;
+  filter:saturate(1.92) contrast(1.92) brightness(1.74)
+    drop-shadow(0 0 4px rgba(225,255,255,.62))
+    drop-shadow(0 0 13px rgba(60,233,255,.42))
+    drop-shadow(0 0 26px rgba(39,145,255,.24))
+    drop-shadow(0 0 39px rgba(157,66,255,.15))!important;
+}
+.fx-core-postfx-v31{filter:saturate(1.20) contrast(1.16) brightness(1.05)!important}
+.fx-v31-spectrum{opacity:.38!important}
+.fx-v31-ring-a{opacity:.64!important}.fx-v31-ring-b{opacity:.48!important}.fx-v31-ring-c{opacity:.34!important}
+.fx-v31-flare{width:10px!important;height:10px!important;margin:-5px 0 0 -5px!important;box-shadow:0 0 4px #fff,0 0 10px rgba(222,255,255,.98),0 0 24px rgba(73,236,255,.88),0 0 44px rgba(56,160,255,.42)!important}
+
+.fx-mag-v35-overlay{
+  --fx-v35-x:0px;--fx-v35-y:0px;--fx-v35-pulse:1;
+  position:absolute;z-index:3;inset:0;pointer-events:none;overflow:hidden;mix-blend-mode:screen;perspective:900px
+}
+.fx-mag-v35-overlay>*{position:absolute;left:var(--fx-core-x);top:49%;pointer-events:none;transform-origin:50% 50%}
+
+.fx-v35-facet{opacity:.72;filter:drop-shadow(0 0 3px rgba(178,251,255,.45)) drop-shadow(0 0 10px rgba(54,220,255,.18))}
+.fx-v35-facet::before{content:"";position:absolute;inset:7%;clip-path:inherit;background:inherit;opacity:.55;filter:brightness(1.18)}
+.fx-v35-n,.fx-v35-s{width:min(46vmin,520px);height:min(39vmin,440px);margin-left:min(-23vmin,-260px)}
+.fx-v35-n{margin-top:min(-39vmin,-440px);clip-path:polygon(50% 0,100% 100%,0 100%);background:linear-gradient(64deg,transparent 0 49.1%,rgba(132,247,255,.72) 49.5% 50.1%,transparent 50.5%),linear-gradient(-64deg,transparent 0 49.1%,rgba(74,219,255,.62) 49.5% 50.1%,transparent 50.5%),linear-gradient(180deg,rgba(108,241,255,.16),rgba(37,148,255,.06) 54%,transparent 88%)}
+.fx-v35-s{margin-top:0;clip-path:polygon(0 0,100% 0,50% 100%);background:linear-gradient(116deg,transparent 0 49.1%,rgba(100,239,255,.66) 49.5% 50.1%,transparent 50.5%),linear-gradient(-116deg,transparent 0 49.1%,rgba(168,87,255,.46) 49.5% 50.1%,transparent 50.5%),linear-gradient(0deg,rgba(75,229,255,.15),rgba(60,108,255,.05) 55%,transparent 88%)}
+.fx-v35-e,.fx-v35-w{width:min(39vmin,440px);height:min(46vmin,520px);margin-top:min(-23vmin,-260px)}
+.fx-v35-e{margin-left:0;clip-path:polygon(0 0,100% 50%,0 100%);background:linear-gradient(26deg,transparent 0 49.1%,rgba(122,244,255,.70) 49.5% 50.1%,transparent 50.5%),linear-gradient(-26deg,transparent 0 49.1%,rgba(169,82,255,.48) 49.5% 50.1%,transparent 50.5%),linear-gradient(90deg,rgba(74,229,255,.14),rgba(36,135,255,.05) 55%,transparent 88%)}
+.fx-v35-w{margin-left:min(-39vmin,-440px);clip-path:polygon(100% 0,100% 100%,0 50%);background:linear-gradient(154deg,transparent 0 49.1%,rgba(130,246,255,.70) 49.5% 50.1%,transparent 50.5%),linear-gradient(-154deg,transparent 0 49.1%,rgba(161,78,255,.45) 49.5% 50.1%,transparent 50.5%),linear-gradient(270deg,rgba(70,224,255,.14),rgba(41,126,255,.05) 55%,transparent 88%)}
+
+.fx-v35-frame{width:min(62vmin,700px);height:min(62vmin,700px);margin:min(-31vmin,-350px) 0 0 min(-31vmin,-350px);clip-path:polygon(50% 0,60% 30%,100% 50%,70% 60%,50% 100%,30% 60%,0 50%,40% 30%);background:conic-gradient(from 45deg,rgba(63,231,255,.06),rgba(116,246,255,.23) 10%,rgba(28,121,255,.04) 19%,rgba(170,78,255,.18) 28%,rgba(40,230,255,.05) 38%,rgba(122,248,255,.22) 50%,rgba(34,117,255,.04) 61%,rgba(167,72,255,.18) 72%,rgba(51,231,255,.05) 84%,rgba(63,231,255,.06));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;opacity:.86;filter:drop-shadow(0 0 4px rgba(104,241,255,.55))}
+
+.fx-v35-core{width:min(8.5vmin,96px);height:min(8.5vmin,96px);margin:min(-4.25vmin,-48px) 0 0 min(-4.25vmin,-48px);border-radius:50%;background:radial-gradient(circle,#fff 0 13%,#eaffff 14% 21%,rgba(104,249,255,.98) 22% 32%,rgba(43,209,255,.38) 34% 49%,rgba(42,126,255,.12) 52% 67%,transparent 72%);box-shadow:0 0 6px #fff,0 0 16px rgba(154,252,255,.98),0 0 32px rgba(55,224,255,.58),0 0 58px rgba(38,147,255,.28);transform:scale(var(--fx-v35-pulse))}
+.fx-v35-core::before{content:"";position:absolute;inset:-62%;border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 17%,rgba(118,239,255,.34) 17.8% 18.8%,transparent 19.8% 27%);opacity:.78}
+.fx-v35-core::after{content:"";position:absolute;inset:-115%;border-radius:50%;border:1px solid rgba(102,230,255,.23);box-shadow:inset 0 0 14px rgba(80,211,255,.08);opacity:.62}
+
+.fx-v35-ring{border-radius:50%;border:1px solid rgba(117,239,255,.42);box-shadow:0 0 5px rgba(79,222,255,.16),inset 0 0 7px rgba(73,211,255,.08)}
+.fx-v35-ring-a{width:15vmin;height:15vmin;margin:-7.5vmin 0 0 -7.5vmin;transform:rotateX(62deg) rotateZ(-14deg);opacity:.76}
+.fx-v35-ring-b{width:23vmin;height:23vmin;margin:-11.5vmin 0 0 -11.5vmin;border-color:rgba(118,219,255,.31);transform:rotateX(68deg) rotateZ(23deg);opacity:.59}
+.fx-v35-ring-c{width:31vmin;height:31vmin;margin:-15.5vmin 0 0 -15.5vmin;border-color:rgba(173,85,255,.25);transform:rotateX(64deg) rotateZ(-29deg);opacity:.47}
+
+.fx-v35-spectrum{width:min(68vmin,780px);height:min(68vmin,780px);margin:min(-34vmin,-390px) 0 0 min(-34vmin,-390px);border-radius:50%;background:conic-gradient(from 7deg,transparent 0 9%,rgba(60,228,255,.48) 11%,transparent 14% 27%,rgba(165,70,255,.42) 30%,transparent 33% 48%,rgba(54,230,255,.45) 51%,transparent 54% 68%,rgba(169,72,255,.37) 72%,transparent 75% 89%,rgba(58,232,255,.42) 92%,transparent 95%);-webkit-mask:radial-gradient(circle,transparent 0 70%,#000 71% 72.3%,transparent 74%);mask:radial-gradient(circle,transparent 0 70%,#000 71% 72.3%,transparent 74%);opacity:.68;filter:drop-shadow(0 0 4px rgba(79,226,255,.22))}
+
+.fx-v35-axis-x,.fx-v35-axis-y{opacity:.68}
+.fx-v35-axis-x{width:min(80vw,1040px);height:1px;margin:0 0 0 min(-40vw,-520px);background:linear-gradient(90deg,transparent,rgba(68,213,255,.10) 30%,rgba(198,253,255,.68) 49.6%,#fff 50%,rgba(198,253,255,.68) 50.4%,rgba(68,213,255,.10) 70%,transparent)}
+.fx-v35-axis-y{width:1px;height:min(61vh,760px);margin:min(-30.5vh,-380px) 0 0 0;background:linear-gradient(180deg,transparent,rgba(68,213,255,.07) 30%,rgba(198,253,255,.61) 49.6%,#fff 50%,rgba(198,253,255,.61) 50.4%,rgba(68,213,255,.07) 70%,transparent)}
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-canvas{transform:translate3d(0,-4dvh,0) scale(.96,.92)!important;transform-origin:50% 49%!important;filter:saturate(1.96) contrast(1.98) brightness(1.78) drop-shadow(0 0 4px rgba(225,255,255,.65)) drop-shadow(0 0 13px rgba(61,234,255,.43)) drop-shadow(0 0 25px rgba(40,147,255,.24)) drop-shadow(0 0 37px rgba(158,65,255,.14))!important}
+  .fx-core-postfx-v31{transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 4dvh),0) scale(.96,.92)!important;transform-origin:50% 49%!important}
+  .fx-mag-v35-overlay{transform:translate3d(var(--fx-v35-x),calc(var(--fx-v35-y) - 4dvh),0) scale(.96,.92)!important;transform-origin:50% 49%!important}
+  .fx-v35-n,.fx-v35-s{width:58vmin;height:48vmin;margin-left:-29vmin}.fx-v35-n{margin-top:-48vmin}.fx-v35-e,.fx-v35-w{width:48vmin;height:58vmin;margin-top:-29vmin}.fx-v35-w{margin-left:-48vmin}
+  .fx-v35-frame{width:78vmin;height:78vmin;margin:-39vmin 0 0 -39vmin}
+  .fx-v35-core{width:10vmin;height:10vmin;margin:-5vmin 0 0 -5vmin}
+  .fx-v35-ring-a{width:18vmin;height:18vmin;margin:-9vmin 0 0 -9vmin}.fx-v35-ring-b{width:28vmin;height:28vmin;margin:-14vmin 0 0 -14vmin}.fx-v35-ring-c{width:38vmin;height:38vmin;margin:-19vmin 0 0 -19vmin}
+  .fx-v35-spectrum{width:86vmin;height:86vmin;margin:-43vmin 0 0 -43vmin}
+  .fx-v35-axis-x{width:94vw;margin-left:-47vw}.fx-v35-axis-y{height:58vh;margin-top:-29vh}
+}
+
+@media(max-width:480px){
+  .fx-core-real3d-canvas{transform:translate3d(0,-3.5dvh,0) scale(.94,.90)!important}
+  .fx-core-postfx-v31{transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 3.5dvh),0) scale(.94,.90)!important}
+  .fx-mag-v35-overlay{transform:translate3d(var(--fx-v35-x),calc(var(--fx-v35-y) - 3.5dvh),0) scale(.94,.90)!important}
+}
+
+@media(prefers-reduced-motion:reduce){.fx-mag-v35-overlay{transform:none!important}.fx-v35-spectrum{filter:none!important}}
