@@ -31,6 +31,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: formatx-living-core-${{ github.ref }}
@@ -63,13 +64,18 @@ jobs:
           loader = Path('docs/scifi-ui/scripts/igloo-parity.js').read_text(encoding='utf-8')
           worker = Path('billing-worker/src/production-with-license.js').read_text(encoding='utf-8')
 
-          for token in ('living-core-canvas', 'data-node="0"', 'data-node="5"', 'lc-panel', 'lc-actionbar', 'ANDROID APK', 'GITHUB RELEASES'):
+          for token in (
+              'living-core-canvas', 'data-node="0"', 'data-node="5"', 'lc-panel', 'lc-actionbar',
+              'ANDROID TELJES VERZIÓ', 'GITHUB RELEASES', 'noindex,nofollow,noarchive', 'EXPERIMENTAL LAB'
+          ):
               assert token in html, token
           for token in ('ShaderMaterial', 'WebGLRenderer', 'gsap.to', 'AudioContext', 'createOscillator', 'SHA-256', 'requestAnimationFrame', 'setDrawRange'):
               assert token in engine, token
           for token in ('lc-node', 'lc-panel', 'clip-path', 'prefers-reduced-motion', 'lc-actionbar'):
               assert token in css, token
           assert 'living-core.html' in launcher
+          assert 'kísérleti kezelőfelület' in launcher
+          assert 'ORGANISM UI LAB' in launcher
           assert 'formatx-living-core-launcher.js' in loader
           assert 'LIVING_CORE_CONTENT_SECURITY_POLICY' in worker
           assert 'isLivingCorePath' in worker
@@ -132,3 +138,23 @@ jobs:
             living-core-mobile.png
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Publish Living Core laboratory status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Experimental noindex lab, WebGL, release routes and desktop/mobile controls passed'
+          else
+            state='failure'
+            description='FormatX Living Core laboratory validation failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX Living Core laboratory' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
