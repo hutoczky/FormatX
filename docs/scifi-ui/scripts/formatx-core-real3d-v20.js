@@ -5,16 +5,18 @@
   const BOOTSTRAP = 'reference-crystal-core-v51';
   const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=16';
   const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=16';
-  const MOBILE_SAFE_SCRIPT = './scripts/formatx-core-mobile-compat-v52.js?v=20260810-mobile-safe-v52-3';
-  const MOBILE_SAFE_STYLE = './styles/formatx-core-mobile-compat-v52.css?v=20260810-mobile-safe-v52-3';
+  const MOBILE_SAFE_SCRIPT = './scripts/formatx-core-mobile-compat-v52.js?v=20260811-mobile-safe-v52-4';
+  const MOBILE_SAFE_STYLE = './styles/formatx-core-mobile-compat-v52.css?v=20260811-mobile-safe-v52-4';
   const mobile = matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;
 
   /*
     Desktop authority remains the v51 native WebGL2 reference crystal.
     Physical mobile browsers boot the v52 mobile-safe WebGL2 renderer first.
-    The v51 script is still loaded afterwards for validation/cache parity, but
-    exits without creating a second context because v52 sets fxCoreV51=ready-v51.
-    No raster/image MAG path is used.
+    Mobile r4 hosts the canvas directly inside #hero .hero-space and avoids the
+    fixed filtered WebGL compositor path that can render as a blank field on
+    physical Android GPUs. The v51 script still loads afterwards for validation
+    and cache parity, but exits before creating a second context because the
+    mobile renderer sets fxCoreV51=ready-v51. No raster/image MAG path is used.
     formatx-core-v50.js
     formatx-reference-lock-v30.js
     formatx-mobile-mag-v33.js
