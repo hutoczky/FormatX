@@ -7,6 +7,7 @@
   const ACTIVITY_IDLE_MS = 170;
   const MOBILE_SETTLE_MS = 220;
   const MOBILE_FLOW_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
+  const HERO_START_HASHES = new Set(['', '#top', '#hero', '#experience', '#capabilities', '#pricing', '#system', '#resources']);
   let bridge = null;
   let sourceHero = null;
   let transferLockedUntil = 0;
@@ -19,6 +20,7 @@
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
   let layoutWidth = innerWidth;
+  let initialHeroGuardApplied = false;
 
   if (root.dataset.fxInfiniteController === VERSION) return;
 
@@ -32,6 +34,7 @@
   root.dataset.fxLoopBridge = 'initialising';
   root.dataset.fxScrollSnap = 'disabled';
   root.dataset.fxMobileScrollMode = 'native-momentum-loop';
+  root.dataset.fxInitialHeroGuard = 'pending';
   root.classList.add('fx-continuous-scroll-mode');
   root.classList.remove(
     'fx-infinite-loop-jump',
@@ -63,6 +66,57 @@
       if (element.matches('input,textarea')) return;
       element.textContent = element.dataset[language()];
     });
+  }
+
+  function navigationType() {
+    try {
+      return performance.getEntriesByType('navigation')[0]?.type || 'navigate';
+    } catch (_) {
+      return 'navigate';
+    }
+  }
+
+  function shouldGuaranteeHeroStart() {
+    if (!HERO_START_HASHES.has(location.hash)) return false;
+    return navigationType() !== 'back_forward';
+  }
+
+  function heroTop() {
+    sourceHero = document.querySelector('#main-content > #hero');
+    return sourceHero ? Math.max(0, sourceHero.offsetTop) : 0;
+  }
+
+  function forceHeroStart(source) {
+    sourceHero = document.querySelector('#main-content > #hero');
+    if (!sourceHero) return false;
+    const top = heroTop();
+    window.scrollTo({ top, left: 0, behavior: 'auto' });
+    root.dataset.fxInitialHeroGuard = source;
+    root.dataset.fxInitialHeroTop = String(Math.round(top));
+    return true;
+  }
+
+  function guaranteeInitialHero() {
+    if (initialHeroGuardApplied || !shouldGuaranteeHeroStart()) {
+      if (!initialHeroGuardApplied) root.dataset.fxInitialHeroGuard = 'preserve-navigation';
+      return;
+    }
+    initialHeroGuardApplied = true;
+    try { history.scrollRestoration = 'manual'; } catch (_) {}
+
+    if (['#experience', '#capabilities', '#pricing', '#system', '#resources', '#top'].includes(location.hash)) {
+      history.replaceState({}, '', location.pathname + location.search + '#hero');
+    }
+
+    forceHeroStart('initial');
+    requestAnimationFrame(() => {
+      forceHeroStart('frame-1');
+      requestAnimationFrame(() => forceHeroStart('frame-2'));
+    });
+
+    document.addEventListener('formatx:introcomplete', () => {
+      requestAnimationFrame(() => forceHeroStart('intro-complete'));
+    }, { once: true });
   }
 
   function repairFooterCopy(footer) {
@@ -404,6 +458,7 @@
 
   function initialise() {
     ensureStyle();
+    guaranteeInitialHero();
     repairReleasePanel();
     buildBridge();
     root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
@@ -416,6 +471,7 @@
       frameStableLanding: true,
       jumpFree: true,
       sectionSnapDisabled: true,
+      initialHeroGuaranteed: shouldGuaranteeHeroStart(),
       desktopTransfer: 'immediate-visual-match',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
