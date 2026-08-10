@@ -6,6 +6,7 @@ on:
       - 'docs/**'
       - 'billing-worker/src/**'
       - '.github/scripts/validate-public-site-integrity.cjs'
+      - '.github/scripts/validate-release-truth-runtime.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-real3d-core.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
@@ -15,6 +16,7 @@ on:
       - 'docs/**'
       - 'billing-worker/src/**'
       - '.github/scripts/validate-public-site-integrity.cjs'
+      - '.github/scripts/validate-release-truth-runtime.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-real3d-core.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
@@ -39,6 +41,8 @@ jobs:
           node-version: '22'
       - name: Validate full public surface
         run: node .github/scripts/validate-public-site-integrity.cjs
+      - name: Validate canonical release runtime truth
+        run: node .github/scripts/validate-release-truth-runtime.cjs
       - name: Validate native WebGL3D core
         run: node .github/scripts/validate-real3d-core.cjs
       - name: Validate feedback and moderation
@@ -74,7 +78,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Static, WebGL3D and desktop/mobile Chromium validation passed'
+            description='Release truth, static, WebGL3D and desktop/mobile Chromium validation passed'
           else
             state='failure'
             description='FormatX public-site integrity validation failed'
