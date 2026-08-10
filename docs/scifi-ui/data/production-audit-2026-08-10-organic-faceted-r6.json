@@ -1,8 +1,9 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "audit_date": "2026-08-10",
-  "scope": "organic faceted refinement of the uploaded-reference production MAG",
-  "production_renderer": "/scifi-ui/scripts/formatx-reference-lock-v30.js",
+  "scope": "final organic-faceted refinement of the uploaded-reference production MAG",
+  "production_renderer": "/scifi-ui/scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-6",
+  "production_style": "/scifi-ui/styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-6",
   "reference_target": "user-supplied four-tip luminous crystalline sci-fi core reference",
   "changes": {
     "regular_grid_replaced": true,
@@ -14,15 +15,21 @@
     "inner_ring_opacity_reduced": true,
     "white_core_halo_increased": true,
     "outer_orbit_opacity_reduced": true,
+    "surface_marker": "organic-faceted-glass-r6",
     "image_backed": false,
     "webgl2_context_count": 1,
-    "performance_target": "adaptive 60-plus FPS"
+    "performance_target": "adaptive 60-plus FPS",
+    "cache_revision": 6
   },
   "acceptance": {
     "production_validation": "required",
     "production_smoke": "required",
+    "public_site_integrity": "required",
+    "lighthouse": "required",
     "live_mobile_desktop_visual": "required",
     "live_reference_position": "required",
+    "live_award_readiness": "required",
     "direct_screenshot_reference_comparison": "required"
-  }
+  },
+  "acceptance_policy": "Do not claim exactness until the fresh live Chromium evidence has passed and has been directly compared against the uploaded reference."
 }
