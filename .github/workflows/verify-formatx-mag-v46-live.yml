@@ -1,4 +1,4 @@
-name: Verify FormatX MAG v46 live
+name: Verify FormatX MAG v48 live
 
 on:
   workflow_dispatch:
@@ -8,12 +8,16 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-mag-reference-v41.js'
       - 'docs/scifi-ui/scripts/formatx-mag-reference-v46.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-reference-v47.js'
+      - 'docs/scifi-ui/styles/formatx-mag-layering-v48.css'
       - '.github/workflows/verify-formatx-mag-v46-live.yml'
   pull_request:
     paths:
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-mag-reference-v41.js'
       - 'docs/scifi-ui/scripts/formatx-mag-reference-v46.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-reference-v47.js'
+      - 'docs/scifi-ui/styles/formatx-mag-layering-v48.css'
 
 permissions:
   contents: read
@@ -26,17 +30,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate v46 JavaScript and bootstrap wiring
+      - name: Validate v48 bootstrap and mobile layering
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-mag-reference-v46.js
+          node --check docs/scifi-ui/scripts/formatx-mag-reference-v47.js
           node --check docs/scifi-ui/scripts/formatx-mag-reference-v41.js
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          grep -Fq "reference-lock-v30-v46" docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          grep -Fq "formatx-mag-reference-v46.js?v=20260810-mag-reference-v46-1" docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          grep -Fq "v46-solid-reference-crystal" docs/scifi-ui/scripts/formatx-mag-reference-v46.js
-          grep -Fq "clip-before-copy-cta-or-next-section" docs/scifi-ui/scripts/formatx-mag-reference-v41.js
+          grep -Fq "reference-lock-v30-v48" docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          grep -Fq "formatx-mag-reference-v47.js?v=20260810-mag-reference-v47-1" docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          grep -Fq "formatx-mag-layering-v48.css?v=20260810-mag-layering-v48-1" docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          grep -Fq "v47" docs/scifi-ui/scripts/formatx-mag-reference-v47.js
+          grep -Fq ".fx-core-real3d-stage" docs/scifi-ui/styles/formatx-mag-layering-v48.css
+          grep -Fq "z-index: 0 !important" docs/scifi-ui/styles/formatx-mag-layering-v48.css
+          grep -Fq "#hero .hero-copy" docs/scifi-ui/styles/formatx-mag-layering-v48.css
 
       - name: Verify production deployment after master push
         if: github.event_name == 'push'
@@ -48,28 +56,28 @@ jobs:
             for attempt in $(seq 1 24); do
               core="$(mktemp)"
               mag="$(mktemp)"
-              guard="$(mktemp)"
+              layer="$(mktemp)"
               if curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_SHA}-${attempt}" > "$core" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-mag-reference-v46.js?v=${GITHUB_SHA}-${attempt}" > "$mag" \
-                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-mag-reference-v41.js?v=${GITHUB_SHA}-${attempt}" > "$guard" \
-                && grep -Fq 'reference-lock-v30-v46' "$core" \
-                && grep -Fq 'v46-solid-reference-crystal' "$mag" \
-                && grep -Fq 'clip-before-copy-cta-or-next-section' "$guard"
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/scripts/formatx-mag-reference-v47.js?v=${GITHUB_SHA}-${attempt}" > "$mag" \
+                && curl --fail --silent --show-error --location --max-time 30 "$origin/scifi-ui/styles/formatx-mag-layering-v48.css?v=${GITHUB_SHA}-${attempt}" > "$layer" \
+                && grep -Fq 'reference-lock-v30-v48' "$core" \
+                && grep -Fq 'v47' "$mag" \
+                && grep -Fq 'z-index: 0 !important' "$layer"
               then
                 success=true
-                rm -f "$core" "$mag" "$guard"
+                rm -f "$core" "$mag" "$layer"
                 break
               fi
-              rm -f "$core" "$mag" "$guard"
+              rm -f "$core" "$mag" "$layer"
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "MAG v46 production verification failed for $origin" >&2
+              echo "MAG v48 production verification failed for $origin" >&2
               exit 1
             fi
           done
 
-      - name: Publish v46 status
+      - name: Publish v48 status
         if: always() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -78,13 +86,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='MAG v46 solid WebGL crystal and mobile CTA-safe clipping are live'
+            description='MAG v48 transparent WebGL layer is behind mobile hero content'
           else
             state=failure
-            description='MAG v46 validation or live deployment verification failed'
+            description='MAG v48 layering validation or live deployment verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX MAG v46 live verification' \
+            -f context='FormatX MAG v48 live verification' \
             -f description="$description" \
             -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
