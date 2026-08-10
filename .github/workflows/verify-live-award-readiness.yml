@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live SEO, hierarchy, rounded v50 core, native Apex and scroll contract
+      - name: Verify live SEO, hierarchy, v51 reference crystal, native Apex and scroll contract
         shell: bash
         run: |
           set -euo pipefail
@@ -27,8 +27,8 @@ jobs:
           AWARD_CSS="$RUNNER_TEMP/formatx-award-readiness.css"
           REFERENCE_BOOTSTRAP="$RUNNER_TEMP/formatx-reference-core-v26.js"
           CORE_BOOTSTRAP="$RUNNER_TEMP/formatx-core-real3d-v20.js"
-          CORE_RUNTIME="$RUNNER_TEMP/formatx-core-v50.js"
-          CORE_CSS="$RUNNER_TEMP/formatx-core-v50.css"
+          CORE_RUNTIME="$RUNNER_TEMP/formatx-core-v51.js"
+          CORE_CSS="$RUNNER_TEMP/formatx-core-v51.css"
           PARITY_JS="$RUNNER_TEMP/igloo-parity.js"
           APEX_JS="$RUNNER_TEMP/formatx-apex-native.js"
           FALLBACK_JS="$RUNNER_TEMP/formatx-three-host-safe.js"
@@ -49,26 +49,28 @@ jobs:
             sleep 5
           done
 
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-award-readiness.css?v=award-live-v50' -o "$AWARD_CSS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-award-readiness.css?v=award-live-v51' -o "$AWARD_CSS"
           grep -Fq ':focus-visible' "$AWARD_CSS"
           grep -Fq 'min-block-size: 44px' "$AWARD_CSS"
           grep -Fq 'prefers-reduced-motion: reduce' "$AWARD_CSS"
 
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v50-authority' -o "$REFERENCE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v50-bootstrap' -o "$CORE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-v50.js?v=live-v50-runtime' -o "$CORE_RUNTIME"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-core-v50.css?v=live-v50-style' -o "$CORE_CSS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v51-authority' -o "$REFERENCE_BOOTSTRAP"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v51-bootstrap' -o "$CORE_BOOTSTRAP"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-v51.js?v=live-v51-runtime' -o "$CORE_RUNTIME"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-core-v51.css?v=live-v51-style' -o "$CORE_CSS"
 
           grep -Fq "const WEBGPU_PREVIEW = params.get('webgpu') === '1'" "$REFERENCE_BOOTSTRAP"
-          grep -Fq "root.dataset.fxReferenceCore = 'production-v50-rounded-living-core-authority'" "$REFERENCE_BOOTSTRAP"
-          grep -Fq "const BOOTSTRAP = 'rounded-living-core-v50'" "$CORE_BOOTSTRAP"
-          grep -Fq 'formatx-core-v50.js?v=20260810-rounded-living-core-v50-1' "$CORE_BOOTSTRAP"
-          grep -Fq "const VERSION = 'v50-rounded-living-core'" "$CORE_RUNTIME"
-          grep -Fq 'rounded-organic-glass-orb-v50' "$CORE_RUNTIME"
-          grep -Fq 'moving-internal-nucleus-spectral-orbits-v50' "$CORE_RUNTIME"
+          grep -Fq "root.dataset.fxReferenceCore = 'production-v51-reference-crystal-authority'" "$REFERENCE_BOOTSTRAP"
+          grep -Fq "const BOOTSTRAP = 'reference-crystal-core-v51'" "$CORE_BOOTSTRAP"
+          grep -Fq 'formatx-core-v51.js?v=20260810-reference-crystal-v51-1' "$CORE_BOOTSTRAP"
+          grep -Fq "const VERSION = 'v51-reference-crystal-core'" "$CORE_RUNTIME"
+          grep -Fq 'sharp-four-tip-concave-crystal-v51' "$CORE_RUNTIME"
+          grep -Fq 'layered-faceted-refractive-glass-v51' "$CORE_RUNTIME"
+          grep -Fq 'moving-white-nucleus-concentric-spectral-rings-v51' "$CORE_RUNTIME"
           grep -Fq 'single-context-adaptive-60-plus-fps' "$CORE_RUNTIME"
+          grep -Fq 'function crystal(' "$CORE_RUNTIME"
+          grep -Fq 'function starRadius(' "$CORE_RUNTIME"
           ! grep -Eq 'drawImage[[:space:]]*\(|new[[:space:]]+Image[[:space:]]*\(' "$CORE_RUNTIME"
-          ! grep -Fq 'function crystal(' "$CORE_RUNTIME"
           grep -Fq -- '--fx-core-x: 50%' "$CORE_CSS"
           ! grep -Fq 'clip-path: polygon' "$CORE_CSS"
 
@@ -90,5 +92,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live award-tier + rounded living core v50 + native Apex verified'; else state=failure; description='Live award-tier / v50 core / native Apex verification failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live award-tier + reference crystal v51 + native Apex verified'; else state=failure; description='Live award-tier / v51 core / native Apex verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="$TARGET_URL"
