@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const BOOTSTRAP='reference-lock-v30-v39';
+const BOOTSTRAP='reference-lock-v30-v40';
 const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-7';
 const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-7';
 const POLISH_STYLE='./styles/formatx-reference-polish-v31.css?v=20260810-reference-polish-1';
@@ -11,6 +11,7 @@ const V33_STYLE='./styles/formatx-mobile-mag-v33.css?v=20260810-mobile-mag-v33-2
 const V37_STYLE='./styles/formatx-mag-reference-v37.css?v=20260810-mag-reference-v37-1';
 const V38_STYLE='./styles/formatx-mag-reference-v38.css?v=20260810-mag-reference-v38-1';
 const V39_STYLE='./styles/formatx-mag-reference-v39.css?v=20260810-mag-reference-v39-1';
+const V40_STYLE='./styles/formatx-mag-reference-v40.css?v=20260810-mag-reference-v40-1';
 const POST_SCRIPT='./scripts/formatx-reference-postfx-v31.js?v=20260810-reference-postfx-1';
 const V33_SCRIPT='./scripts/formatx-mobile-mag-v33.js?v=20260810-mobile-mag-v33-2';
 const V37_SCRIPT='./scripts/formatx-mag-reference-v37.js?v=20260810-mag-reference-v37-1';
@@ -50,6 +51,7 @@ addStyle(V33_STYLE,'fx-mobile-mag-v33');
 addStyle(V37_STYLE,'fx-mag-reference-v37');
 addStyle(V38_STYLE,'fx-mag-reference-v38');
 addStyle(V39_STYLE,'fx-mag-reference-v39');
+addStyle(V40_STYLE,'fx-mag-reference-v40');
 addScript(V33_SCRIPT,'fx-mobile-mag-v33');
 if(document.querySelector('script[data-fx-reference-lock-v30]'))return;
 const script=document.createElement('script');
