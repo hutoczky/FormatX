@@ -6,7 +6,7 @@
     pointer-events: none !important;
   }
 
-  /* Promote the hero itself above the fixed MAG stacking context. */
+  /* Promote the hero stacking context above the fixed MAG without changing the MAG material. */
   body.living-architecture #hero {
     position: relative !important;
     z-index: 2 !important;
@@ -16,6 +16,7 @@
   body.living-architecture #hero .hero-grid {
     position: relative !important;
     z-index: 2 !important;
+    background: transparent !important;
   }
 
   /* The reserved visual area remains transparent so the MAG is still visible. */
@@ -39,7 +40,7 @@
     z-index: 20 !important;
   }
 
-  /* Copy owns an opaque reading plane. The transparent MAG can continue behind it. */
+  /* Copy owns a reading plane. The transparent MAG can continue behind it, never above it. */
   body.living-architecture #hero .hero-copy {
     isolation: isolate !important;
     background: linear-gradient(180deg, rgba(1,7,17,.96) 0%, rgba(1,7,17,.992) 52%, #010711 100%) !important;
@@ -49,14 +50,13 @@
     z-index: -1 !important;
   }
 
-  /* Header, floating controls and Live OS must always stay above both planes. */
+  /* Header, floating controls and Live OS stay above both planes without changing their positioning mode. */
   .topbar,
   .site-header,
   .fx-organism-dock,
   .fx-immersive-launch,
   .fx-live-os,
   [data-live-os] {
-    position: relative;
     z-index: 500 !important;
   }
 }
