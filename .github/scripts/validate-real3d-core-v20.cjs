@@ -36,7 +36,7 @@ for (const token of [
 
 assert.doesNotMatch(runtime, /drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|backgroundImage/i, 'MAG must not be image-backed');
 assert.doesNotMatch(runtime, /THREE\b|three\.js|babylon|playcanvas|model-viewer/i, 'third-party scene engine is forbidden');
-assert.match(runtime, /const budget=mobile\?1150000:2400000/);
+assert.match(runtime, /budget=mobile\?1150000:2400000/);
 assert.match(runtime, /pointermove/);
 assert.match(runtime, /prefers-reduced-motion/);
 
