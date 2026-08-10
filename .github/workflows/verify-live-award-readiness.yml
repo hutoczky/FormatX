@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live SEO, hierarchy, organic reference MAG, native Apex and scroll contract
+      - name: Verify live SEO, hierarchy, rounded v50 core, native Apex and scroll contract
         shell: bash
         run: |
           set -euo pipefail
@@ -27,12 +27,13 @@ jobs:
           AWARD_CSS="$RUNNER_TEMP/formatx-award-readiness.css"
           REFERENCE_BOOTSTRAP="$RUNNER_TEMP/formatx-reference-core-v26.js"
           CORE_BOOTSTRAP="$RUNNER_TEMP/formatx-core-real3d-v20.js"
-          REFERENCE_MAG="$RUNNER_TEMP/formatx-reference-lock-v30.js"
-          REFERENCE_CSS="$RUNNER_TEMP/formatx-reference-lock-v30.css"
+          CORE_RUNTIME="$RUNNER_TEMP/formatx-core-v50.js"
+          CORE_CSS="$RUNNER_TEMP/formatx-core-v50.css"
           PARITY_JS="$RUNNER_TEMP/igloo-parity.js"
           APEX_JS="$RUNNER_TEMP/formatx-apex-native.js"
           FALLBACK_JS="$RUNNER_TEMP/formatx-three-host-safe.js"
-          for attempt in $(seq 1 18); do
+
+          for attempt in $(seq 1 24); do
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/?award_audit=${GITHUB_RUN_ID}-${attempt}" -o "$HOME_HTML" \
               && grep -Fq 'data-fx-award-positioning="v2"' "$HOME_HTML" \
               && grep -Fq 'data-fx-hero-trustline' "$HOME_HTML" \
@@ -41,31 +42,36 @@ jobs:
               && grep -Fq 'Bazzite/Linux elsődleges' "$HOME_HTML" \
               && grep -Fq 'data-fx-award-proof' "$HOME_HTML" \
               && grep -Fq 'id="formatx-structured-data"' "$HOME_HTML" \
-              && grep -Fq 'formatx-core-real3d-v20.js' "$HOME_HTML"; then break; fi
-            if [ "$attempt" -eq 18 ]; then echo 'Live homepage did not expose the complete award/reference contract.' >&2; exit 1; fi
+              && grep -Fq 'formatx-core-real3d-v20.js' "$HOME_HTML"; then
+              break
+            fi
+            if [ "$attempt" -eq 24 ]; then echo 'Live homepage did not expose the complete award/core contract.' >&2; exit 1; fi
             sleep 5
           done
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-award-readiness.css?v=award-live' -o "$AWARD_CSS"
+
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-award-readiness.css?v=award-live-v50' -o "$AWARD_CSS"
           grep -Fq ':focus-visible' "$AWARD_CSS"
           grep -Fq 'min-block-size: 44px' "$AWARD_CSS"
           grep -Fq 'prefers-reduced-motion: reduce' "$AWARD_CSS"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v30-authority' -o "$REFERENCE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v30-bootstrap' -o "$CORE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-lock-v30.js?v=live-v30-mag-r6' -o "$REFERENCE_MAG"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-reference-lock-v30.css?v=live-v30-mag-r6' -o "$REFERENCE_CSS"
+
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v50-authority' -o "$REFERENCE_BOOTSTRAP"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v50-bootstrap' -o "$CORE_BOOTSTRAP"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-v50.js?v=live-v50-runtime' -o "$CORE_RUNTIME"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-core-v50.css?v=live-v50-style' -o "$CORE_CSS"
+
           grep -Fq "const WEBGPU_PREVIEW = params.get('webgpu') === '1'" "$REFERENCE_BOOTSTRAP"
-          grep -Fq "root.dataset.fxReferenceCore = 'production-v30-reference-lock-authority'" "$REFERENCE_BOOTSTRAP"
-          grep -Fq "BOOTSTRAP='reference-lock-v30'" "$CORE_BOOTSTRAP"
-          grep -Eq 'formatx-reference-lock-v30.js\?v=20260810-uploaded-reference-lock-[0-9]+' "$CORE_BOOTSTRAP"
-          grep -Fq "fxCoreReferenceRevision='uploaded-reference-20260810'" "$REFERENCE_MAG"
-          grep -Fq "fxCoreReferenceSurface='organic-faceted-glass-r6'" "$REFERENCE_MAG"
-          grep -Fq 'for(const k of[3,6,9,R])' "$REFERENCE_MAG"
-          grep -Fq 'Math.floor(A/8)' "$REFERENCE_MAG"
-          grep -Fq 'for(const k of[3,5,7,9])' "$REFERENCE_MAG"
-          grep -Fq 't=.009' "$REFERENCE_MAG"
-          ! grep -Eq 'drawImage[[:space:]]*\(|new[[:space:]]+Image[[:space:]]*\(' "$REFERENCE_MAG"
-          grep -Fq -- '--fx-core-x:50%' "$REFERENCE_CSS"
-          grep -Fq 'perspective(560px) rotateX(63deg)' "$REFERENCE_CSS"
+          grep -Fq "root.dataset.fxReferenceCore = 'production-v50-rounded-living-core-authority'" "$REFERENCE_BOOTSTRAP"
+          grep -Fq "const BOOTSTRAP = 'rounded-living-core-v50'" "$CORE_BOOTSTRAP"
+          grep -Fq 'formatx-core-v50.js?v=20260810-rounded-living-core-v50-1' "$CORE_BOOTSTRAP"
+          grep -Fq "const VERSION = 'v50-rounded-living-core'" "$CORE_RUNTIME"
+          grep -Fq 'rounded-organic-glass-orb-v50' "$CORE_RUNTIME"
+          grep -Fq 'moving-internal-nucleus-spectral-orbits-v50' "$CORE_RUNTIME"
+          grep -Fq 'single-context-adaptive-60-plus-fps' "$CORE_RUNTIME"
+          ! grep -Eq 'drawImage[[:space:]]*\(|new[[:space:]]+Image[[:space:]]*\(' "$CORE_RUNTIME"
+          ! grep -Fq 'function crystal(' "$CORE_RUNTIME"
+          grep -Fq -- '--fx-core-x: 50%' "$CORE_CSS"
+          ! grep -Fq 'clip-path: polygon' "$CORE_CSS"
+
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/igloo-parity.js?v=native-apex-live' -o "$PARITY_JS"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?v=native-apex-live' -o "$APEX_JS"
           curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-three-host-safe.js?v=native-apex-live' -o "$FALLBACK_JS"
@@ -74,6 +80,7 @@ jobs:
           grep -Fq "fxInputInterception='none'" "$APEX_JS"
           ! grep -Fq 'scrollTo(' "$APEX_JS"
           grep -Fq "root.dataset.fxNativeApex === 'ready'" "$FALLBACK_JS"
+
       - name: Publish live award-readiness status
         if: always()
         env:
@@ -83,5 +90,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live award-tier + organic faceted reference MAG r6 + native Apex verified'; else state=failure; description='Live award-tier / organic reference MAG / native Apex verification failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live award-tier + rounded living core v50 + native Apex verified'; else state=failure; description='Live award-tier / v50 core / native Apex verification failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="$TARGET_URL"
