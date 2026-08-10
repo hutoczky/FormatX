@@ -62,7 +62,7 @@ jobs:
                   spectral += 1;
                   minX = Math.min(minX, x); maxX = Math.max(maxX, x);
                   minY = Math.min(minY, y); maxY = Math.max(maxY, y);
-                  if ((spectral & 31) === 0) spectralPoints.push([x, y]);
+                  spectralPoints.push([x, y]);
                 }
               }
             }
