@@ -3,13 +3,14 @@
 
   const root = document.documentElement;
   const BOOTSTRAP = 'reference-crystal-core-v51';
-  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=6';
-  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=6';
+  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=7';
+  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=7';
 
   /*
-    Production authority is v51: one native WebGL2 context, sharp four-tip
-    concave faceted crystal, moving white nucleus and concentric cyan/violet rings.
-    The older rounded v50 and legacy multi-renderer MAG stacks are not loaded.
+    Production authority is v51: one native WebGL2 context, closed volumetric
+    four-tip concave faceted crystal, moving white nucleus and concentric
+    cyan/violet rings. The older rounded v50 and legacy multi-renderer MAG
+    stacks are not loaded.
     formatx-core-v50.js
     formatx-reference-lock-v30.js
     formatx-mobile-mag-v33.js
