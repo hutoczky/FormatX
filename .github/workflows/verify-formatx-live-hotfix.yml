@@ -1,5 +1,5 @@
 name: Verify FormatX live hotfix
-run-name: Verify live rounded core v50 from ${{ github.sha }}
+run-name: Verify live reference crystal v51 from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           for origin in https://formatxsuite.com https://www.formatxsuite.com; do
             success=false
-            for attempt in $(seq 1 30); do
+            for attempt in $(seq 1 36); do
               core_js="$(mktemp)"
               runtime_js="$(mktemp)"
               core_css="$(mktemp)"
@@ -33,15 +33,16 @@ jobs:
               if curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_SHA}-${attempt}" > "$core_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/scripts/formatx-core-v50.js?v=${GITHUB_SHA}-${attempt}" > "$runtime_js" \
+                   "$origin/scifi-ui/scripts/formatx-core-v51.js?v=${GITHUB_SHA}-${attempt}" > "$runtime_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-core-v50.css?v=${GITHUB_SHA}-${attempt}" > "$core_css" \
+                   "$origin/scifi-ui/styles/formatx-core-v51.css?v=${GITHUB_SHA}-${attempt}" > "$core_css" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/?v=${GITHUB_SHA}-${attempt}" > "$home" \
-                && grep -Fq 'rounded-living-core-v50' "$core_js" \
-                && grep -Fq "const VERSION = 'v50-rounded-living-core'" "$runtime_js" \
-                && grep -Fq 'rounded-organic-glass-orb-v50' "$runtime_js" \
-                && grep -Fq 'moving-internal-nucleus-spectral-orbits-v50' "$runtime_js" \
+                && grep -Fq 'reference-crystal-core-v51' "$core_js" \
+                && grep -Fq "const VERSION = 'v51-reference-crystal-core'" "$runtime_js" \
+                && grep -Fq 'sharp-four-tip-concave-crystal-v51' "$runtime_js" \
+                && grep -Fq 'layered-faceted-refractive-glass-v51' "$runtime_js" \
+                && grep -Fq 'moving-white-nucleus-concentric-spectral-rings-v51' "$runtime_js" \
                 && grep -Fq -- '--fx-core-x: 50%' "$core_css" \
                 && ! grep -Fq 'clip-path: polygon' "$core_css" \
                 && grep -Fq 'FormatX Suite Pro' "$home"
@@ -54,7 +55,7 @@ jobs:
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Live rounded core v50 verification failed for $origin" >&2
+              echo "Live reference crystal v51 verification failed for $origin" >&2
               exit 1
             fi
           done
@@ -68,5 +69,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live rounded core v50 verified on both production domains'; else state=failure; description='Live rounded core v50 verification failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live rounded core v50' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live reference crystal v51 verified on both production domains'; else state=failure; description='Live reference crystal v51 verification failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live reference crystal v51' -f description="$description" -f target_url="$TARGET_URL"
