@@ -10,7 +10,6 @@
   const OFFICIAL_GITHUB_HOST = 'github.com';
   const OFFICIAL_RELEASE_PATH = '/hutoczky/FormatX-Updates/releases/';
   const OFFICIAL_DOWNLOAD_PATH = '/hutoczky/FormatX-Updates/releases/download/';
-  /* Kept only so older source-contract checks can recognise that legacy Windows-only metadata is intentionally retired. */
   const LEGACY_VALIDATION_MARKER = 'channels?.windows';
 
   const FALLBACK = Object.freeze({
@@ -48,35 +47,15 @@
   const releaseDescription = () => copy().release;
 
   function parseUrl(value) {
-    try {
-      return new URL(value, location.origin);
-    } catch (_) {
-      return null;
-    }
+    try { return new URL(value, location.origin); } catch (_) { return null; }
   }
-
-  function isSameOrigin(url) {
-    return Boolean(url && url.origin === location.origin);
-  }
-
+  function isSameOrigin(url) { return Boolean(url && url.origin === location.origin); }
   function isOfficialGitHubReleaseUrl(url) {
-    return Boolean(
-      url
-      && url.protocol === 'https:'
-      && url.hostname === OFFICIAL_GITHUB_HOST
-      && url.pathname.startsWith(OFFICIAL_RELEASE_PATH)
-    );
+    return Boolean(url && url.protocol === 'https:' && url.hostname === OFFICIAL_GITHUB_HOST && url.pathname.startsWith(OFFICIAL_RELEASE_PATH));
   }
-
   function isOfficialGitHubDownloadUrl(url) {
-    return Boolean(
-      url
-      && url.protocol === 'https:'
-      && url.hostname === OFFICIAL_GITHUB_HOST
-      && url.pathname.startsWith(OFFICIAL_DOWNLOAD_PATH)
-    );
+    return Boolean(url && url.protocol === 'https:' && url.hostname === OFFICIAL_GITHUB_HOST && url.pathname.startsWith(OFFICIAL_DOWNLOAD_PATH));
   }
-
   function isAllowedDownloadUrl(value) {
     const url = parseUrl(value);
     if (!url) return false;
@@ -85,89 +64,57 @@
     return ['/download/multiplatform', '/download/android', '/download/android-native-beta'].includes(url.pathname)
       || url.pathname.startsWith('/scifi-ui/downloads/');
   }
-
   function isAllowedReleaseUrl(value) {
     const url = parseUrl(value);
     if (!url) return false;
-    return isOfficialGitHubReleaseUrl(url)
-      || (isSameOrigin(url) && url.pathname.startsWith('/scifi-ui/'));
+    return isOfficialGitHubReleaseUrl(url) || (isSameOrigin(url) && url.pathname.startsWith('/scifi-ui/'));
   }
-
   function isOfficialMetadata(release) {
-    const acceptedSource = release?.source === 'github_published_release'
-      || release?.source === 'formatx_release_service';
+    const acceptedSource = release?.source === 'github_published_release' || release?.source === 'formatx_release_service';
     const repository = safeText(release?.repository);
     const repositoryMatches = !repository || repository === OFFICIAL_REPOSITORY;
     const version = safeText(release?.version);
     const releaseUrl = parseUrl(release?.release_url);
     const versionLooksOfficial = /^v\d+$/i.test(version);
-    const releaseTagMatches = !versionLooksOfficial
-      || releaseUrl?.pathname.endsWith('/tag/' + version);
-    return Boolean(
-      acceptedSource
-      && repositoryMatches
-      && release?.prerelease !== true
-      && versionLooksOfficial
-      && isOfficialGitHubReleaseUrl(releaseUrl)
-      && releaseTagMatches
-    );
+    const releaseTagMatches = !versionLooksOfficial || releaseUrl?.pathname.endsWith('/tag/' + version);
+    return Boolean(acceptedSource && repositoryMatches && release?.prerelease !== true && versionLooksOfficial && isOfficialGitHubReleaseUrl(releaseUrl) && releaseTagMatches);
   }
-
   function releaseDate(value = state.release?.published_at) {
     const raw = safeText(value);
     if (!raw) return '';
     const date = new Date(raw);
     if (Number.isNaN(date.getTime())) return '';
-    return new Intl.DateTimeFormat(language() === 'en' ? 'en-GB' : 'hu-HU', {
-      year: 'numeric', month: '2-digit', day: '2-digit'
-    }).format(date);
+    return new Intl.DateTimeFormat(language() === 'en' ? 'en-GB' : 'hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
   }
-
   function formatBytes(value) {
     const bytes = Number(value);
     if (!Number.isFinite(bytes) || bytes <= 0) return '';
     const units = ['B', 'KiB', 'MiB', 'GiB'];
     let index = 0;
     let amount = bytes;
-    while (amount >= 1024 && index < units.length - 1) {
-      amount /= 1024;
-      index += 1;
-    }
-    return new Intl.NumberFormat(language() === 'en' ? 'en-GB' : 'hu-HU', {
-      maximumFractionDigits: index >= 2 ? 2 : 0
-    }).format(amount) + ' ' + units[index];
+    while (amount >= 1024 && index < units.length - 1) { amount /= 1024; index += 1; }
+    return new Intl.NumberFormat(language() === 'en' ? 'en-GB' : 'hu-HU', { maximumFractionDigits: index >= 2 ? 2 : 0 }).format(amount) + ' ' + units[index];
   }
-
-  function validDigest(value) {
-    return /^sha256:[0-9a-f]{64}$/i.test(safeText(value));
-  }
-
+  function validDigest(value) { return /^sha256:[0-9a-f]{64}$/i.test(safeText(value)); }
   function packageAsset() {
     if (!state.available) return null;
     const asset = state.release?.channels?.multiplatform;
-    if (!asset || asset.available !== true || !isAllowedDownloadUrl(asset.download_url)) return null;
-    if (!validDigest(asset.digest)) return null;
+    if (!asset || asset.available !== true || !isAllowedDownloadUrl(asset.download_url) || !validDigest(asset.digest)) return null;
     return asset;
   }
-
   function integrityLabel() {
     const status = safeText(state.release?.integrity?.status);
     return copy().integrity[status] || copy().unknown;
   }
-
   function setText(selector, value, fallback = true) {
-    document.querySelectorAll(selector).forEach(element => {
-      element.textContent = value || (fallback ? copy().unknown : '');
-    });
+    document.querySelectorAll(selector).forEach(element => { element.textContent = value || (fallback ? copy().unknown : ''); });
   }
-
   function secureExternalLink(link, href) {
     const url = parseUrl(href);
     if (!url || isSameOrigin(url)) return;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
   }
-
   function ensureFallbackNotice() {
     let notice = document.getElementById('formatx-release-fallback-notice');
     if (!notice) {
@@ -185,21 +132,16 @@
     notice.textContent = state.available ? releaseDescription() : copy().unavailable;
     return notice;
   }
-
   function updateDownloadLink(link) {
     if (!(link instanceof HTMLAnchorElement)) return;
     const asset = packageAsset();
     const labelTarget = link.querySelector('[data-release-download-label], span') || link;
-    const defaultDescription = link.dataset.releaseDescription
-      || link.getAttribute('aria-describedby')
-      || '';
+    const defaultDescription = link.dataset.releaseDescription || link.getAttribute('aria-describedby') || '';
     if (defaultDescription) link.dataset.releaseDescription = defaultDescription;
-
     labelTarget.textContent = copy().package;
     link.dataset.releaseState = asset ? 'available' : 'metadata-unavailable';
     link.dataset.releaseChannel = 'multiplatform';
     link.removeAttribute('download');
-
     if (asset) {
       link.href = asset.download_url;
       secureExternalLink(link, asset.download_url);
@@ -217,7 +159,6 @@
       link.title = copy().unavailable;
     }
   }
-
   function updateEvidenceLinks() {
     const releaseUrl = safeText(state.release?.release_url);
     const notesUrl = safeText(state.release?.notes_url) || releaseUrl;
@@ -244,20 +185,17 @@
       });
     });
   }
-
   function apply() {
     const asset = packageAsset();
     void LEGACY_VALIDATION_MARKER;
-    setText('[data-release-version]', safeText(state.release?.version), false);
+    setText('[data-release-version]', '', false);
     setText('[data-release-date]', releaseDate());
     setText('[data-release-status]', copy().status);
     setText('[data-release-sha256]', asset ? safeText(asset.digest) : '');
     setText('[data-release-size]', asset ? formatBytes(asset.size) : '');
     setText('[data-release-integrity]', integrityLabel());
     setText('[data-release-source-updated]', releaseDate(state.release?.source_updated_at));
-    document.querySelectorAll(
-      '[data-release-download="multiplatform"], [data-release-download="windows"], #hero-download'
-    ).forEach(updateDownloadLink);
+    document.querySelectorAll('[data-release-download="multiplatform"], [data-release-download="windows"], #hero-download').forEach(updateDownloadLink);
     updateEvidenceLinks();
     ensureFallbackNotice();
     ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v6' : 'fallback-v6';
@@ -266,24 +204,15 @@
     ROOT.__FORMATX_RELEASE_METADATA__ = Object.freeze({ ...state });
     dispatchEvent(new CustomEvent('formatx:releasemetadataready', { detail: ROOT.__FORMATX_RELEASE_METADATA__ }));
   }
-
   async function load() {
     try {
       const response = await fetch(RELEASE_URL, { cache: 'no-store', credentials: 'same-origin' });
       if (!response.ok) throw new Error(`${RELEASE_URL}: ${response.status}`);
       const release = await response.json();
       const official = isOfficialMetadata(release);
-      state = {
-        release,
-        available: release?.ok === true && official,
-        error: official ? null : 'Untrusted release metadata source'
-      };
+      state = { release, available: release?.ok === true && official, error: official ? null : 'Untrusted release metadata source' };
     } catch (error) {
-      state = {
-        release: null,
-        available: false,
-        error: String(error?.message || error).slice(0, 160)
-      };
+      state = { release: null, available: false, error: String(error?.message || error).slice(0, 160) };
       ROOT.dataset.fxReleaseMetadataError = state.error;
     }
     apply();
