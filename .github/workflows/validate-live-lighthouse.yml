@@ -1,0 +1,115 @@
+name: Validate live FormatX Lighthouse
+
+on:
+  workflow_run:
+    workflows:
+      - Prepare or deploy FormatX production
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-live-lighthouse
+  cancel-in-progress: true
+
+jobs:
+  live-lighthouse:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      AUDITED_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - name: Checkout audited revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.AUDITED_SHA }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+
+      - name: Confirm live production is reachable
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            code="$(curl -sS -L --max-time 25 -o "$RUNNER_TEMP/live-home.html" -w '%{http_code}' \
+              -H 'Cache-Control: no-cache' \
+              "https://www.formatxsuite.com/?live_lighthouse=${GITHUB_RUN_ID}-${attempt}" || true)"
+            if [[ "$code" == '200' ]] \
+              && grep -Fq 'FormatX Suite Pro' "$RUNNER_TEMP/live-home.html" \
+              && grep -Fq '5 napos próbalicenc' "$RUNNER_TEMP/live-home.html"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Live production did not become audit-ready.' >&2
+          exit 1
+
+      - name: Run live desktop Lighthouse
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf .lighthouseci
+          lhci autorun --rc=lighthouserc.live.json 2>&1 | tee lighthouse-live-desktop-output.txt
+          mkdir -p lighthouse-live-results/desktop
+          cp -a .lighthouseci/. lighthouse-live-results/desktop/
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Run live mobile Lighthouse
+        if: always()
+        shell: bash
+        run: |
+          set -o pipefail
+          rm -rf .lighthouseci
+          lhci autorun --rc=lighthouserc.live.mobile.json 2>&1 | tee lighthouse-live-mobile-output.txt
+          mkdir -p lighthouse-live-results/mobile
+          cp -a .lighthouseci/. lighthouse-live-results/mobile/
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload live Lighthouse evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: live-lighthouse-results-${{ env.AUDITED_SHA }}
+          path: |
+            lighthouse-live-results/
+            lighthouse-live-desktop-output.txt
+            lighthouse-live-mobile-output.txt
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish live Lighthouse status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Live Worker desktop/mobile Lighthouse gates passed'
+          else
+            state='failure'
+            description='Live Worker desktop or mobile Lighthouse gate failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
+            -f state="$state" \
+            -f context='FormatX live Lighthouse gate' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
