@@ -64,6 +64,11 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/styles/formatx-premium-finish.css',
   '/scifi-ui/scripts/formatx-premium-finish.js',
   '/scifi-ui/scripts/formatx-event-horizon.js',
+  '/scifi-ui/scripts/formatx-core-real3d-v20.js',
+  '/scifi-ui/scripts/formatx-core-v51.js',
+  '/scifi-ui/styles/formatx-core-v51.css',
+  '/scifi-ui/scripts/formatx-core-mobile-compat-v52.js',
+  '/scifi-ui/styles/formatx-core-mobile-compat-v52.css',
 ]);
 const REPLACEMENTS = [
   ['formatx-mobile-recovery.js?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
@@ -76,6 +81,7 @@ const REPLACEMENTS = [
   ['formatx-event-horizon.js?v=20260726-event-horizon-3', 'formatx-event-horizon.js?v=20260731-intro-restored-1'],
   ['formatx-event-horizon.js?v=20260729-event-horizon-5', 'formatx-event-horizon.js?v=20260731-intro-restored-1'],
   ['formatx-event-horizon.js?v=20260730-first-visit-1', 'formatx-event-horizon.js?v=20260731-intro-restored-1'],
+  ['formatx-core-real3d-v20.js?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11', 'formatx-core-real3d-v20.js?v=20260810-mobile-safe-v52-r13'],
 ];
 
 export default {
