@@ -3,8 +3,8 @@
 
   const root = document.documentElement;
   const BOOTSTRAP = 'reference-crystal-core-v51';
-  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=9';
-  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=9';
+  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=10';
+  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=10';
 
   /*
     Production authority is v51: one native WebGL2 context, closed volumetric
