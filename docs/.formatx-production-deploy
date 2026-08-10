@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-05T02:56:00+02:00
-source_master=e6ca5fb79ddbccc9588b8bf18f937025d8937fb2
-purpose=deploy current Bazzite-first multiplatform public site and latest official release metadata
-verification=production validation, Cloudflare deploy, both custom domains, release metadata, no public V92/V120 or Windows-only CTA
+requested_at=2026-08-10
+source_master=021321613400cdb95bfe3119b98e6b449e619a79
+purpose=publish complete Full release website truth audit with 5-day trial, canonical V130 GitHub release trust, official Android full release, separate Native beta channel, feedback, seamless-v7 and corrected public evidence
+verification=production validation, public-site integrity, desktop/mobile Chromium, Lighthouse desktop/mobile, Cloudflare custom domains, release metadata, download routes, Android route, feedback summary/submission smoke, transactional noindex, no generic Public beta or visible V92
