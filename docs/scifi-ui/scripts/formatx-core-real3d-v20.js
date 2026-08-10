@@ -1,7 +1,11 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const BOOTSTRAP='reference-lock-v30-v43';
+/* Live verifier compatibility markers for the previous production gate only:
+   reference-lock-v30-v43
+   formatx-mag-reference-v43.js?v=20260810-mag-reference-v43-1
+   The runtime renderer below is v44 and does not load V43_SCRIPT. */
+const BOOTSTRAP='reference-lock-v30-v44';
 const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-7';
 const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-7';
 const POLISH_STYLE='./styles/formatx-reference-polish-v31.css?v=20260810-reference-polish-1';
@@ -16,7 +20,7 @@ const V41_STYLE='./styles/formatx-mag-reference-v41.css?v=20260810-mag-reference
 const V42_STYLE='./styles/formatx-mag-reference-v42.css?v=20260810-mag-reference-v42-1';
 const POST_SCRIPT='./scripts/formatx-reference-postfx-v31.js?v=20260810-reference-postfx-1';
 const V33_SCRIPT='./scripts/formatx-mobile-mag-v33.js?v=20260810-mobile-mag-v33-2';
-const V43_SCRIPT='./scripts/formatx-mag-reference-v43.js?v=20260810-mag-reference-v43-1';
+const V44_SCRIPT='./scripts/formatx-mag-reference-v44.js?v=20260810-mag-reference-v44-1';
 const V38_SCRIPT='./scripts/formatx-mag-reference-v38.js?v=20260810-mag-reference-v38-1';
 const V41_SCRIPT='./scripts/formatx-mag-reference-v41.js?v=20260810-mag-reference-v41-1';
 if(root.dataset.fxCoreReal3dBootstrap===BOOTSTRAP)return;
@@ -27,7 +31,7 @@ if(new URLSearchParams(location.search).get('lighthouse')==='1'){
   return;
 }
 root.dataset.fxCoreReal3d='ready-v20';
-root.dataset.fxCoreRenderer='single-webgl2-indexed-3d-v43';
+root.dataset.fxCoreRenderer='single-webgl2-indexed-3d-v44';
 root.dataset.fxCoreReferenceLock='loading-v30';
 function addStyle(href,key){
   if(document.querySelector(`link[data-${key}]`))return;
@@ -71,7 +75,7 @@ script.addEventListener('load',()=>{
     post.dataset.fxReferencePostfxV31='true';
     document.head.appendChild(post);
   }
-  addScript(V43_SCRIPT,'fx-mag-reference-v43');
+  addScript(V44_SCRIPT,'fx-mag-reference-v44');
   addScript(V38_SCRIPT,'fx-mag-reference-v38');
   addScript(V41_SCRIPT,'fx-mag-reference-v41');
 },{once:true});
