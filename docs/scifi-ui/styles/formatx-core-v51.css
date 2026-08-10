@@ -1,5 +1,5 @@
 /* FormatX v51 volumetric reference crystal core.
-   Production revision: 2026-08-10-v51-volumetric-faceted-r9. */
+   Production revision: 2026-08-10-v51-volumetric-vivid-desktop-r10. */
 
 .fx-core-v51-stage {
   --fx-core-x: 68%;
@@ -37,6 +37,22 @@ html[data-fx-core-v51="ready-v51"] #hero .hero-space::after {
   will-change: contents;
 }
 
+/* Desktop reference treatment: keep the native WebGL2 mesh, but expose the
+   cyan/violet glass volume and emissive reactor instead of letting the dark
+   hero background swallow the shell. No raster/image layer is used here. */
+@media (min-width: 901px) and (pointer: fine) {
+  .fx-core-v51-canvas {
+    filter:
+      saturate(2.02)
+      contrast(1.20)
+      brightness(1.46)
+      drop-shadow(0 0 10px rgba(68, 235, 255, .42))
+      drop-shadow(0 0 24px rgba(85, 177, 255, .28))
+      drop-shadow(0 0 34px rgba(171, 79, 255, .22)) !important;
+    mix-blend-mode: screen !important;
+  }
+}
+
 html[data-fx-core-v51="ready-v51"] #hero .hero-copy {
   position: relative;
   z-index: 130 !important;
@@ -64,6 +80,7 @@ html[data-fx-core-v51="ready-v51"] .fx-transcend-shell[data-fx-native-apex="true
 
   .fx-core-v51-canvas {
     filter: saturate(1.28) contrast(1.10) brightness(1.06) !important;
+    mix-blend-mode: normal !important;
   }
 
   html[data-fx-core-v51="ready-v51"] body.living-architecture #hero {
