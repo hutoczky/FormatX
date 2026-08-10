@@ -1,4 +1,4 @@
-name: Validate real3D v22 mobile runtime recovery
+name: Validate rounded core v50 mobile runtime
 
 on:
   push:
@@ -6,9 +6,9 @@ on:
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
+      - 'docs/scifi-ui/scripts/formatx-core-v50.js'
+      - 'docs/scifi-ui/styles/formatx-core-v50.css'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
-      - 'docs/scifi-ui/scripts/igloo-parity.js'
-      - 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'
       - '.github/workflows/validate-real3d-mobile-runtime-v22.yml'
   workflow_dispatch:
 
@@ -17,35 +17,41 @@ permissions:
   statuses: write
 
 jobs:
-  mobile-runtime-recovery:
+  mobile-runtime:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install current Chromium runtime
+      - name: Validate source contracts
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node --check docs/scifi-ui/scripts/formatx-core-v50.js
+          node .github/scripts/validate-real3d-mobile-startup-v22.cjs
+
+      - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/real3d-mobile-v22"
-          cd "$RUNNER_TEMP/real3d-mobile-v22"
+          mkdir -p "$RUNNER_TEMP/core-v50-mobile"
+          cd "$RUNNER_TEMP/core-v50-mobile"
           npm init -y >/dev/null 2>&1
-          npm install --silent playwright@latest
+          npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Verify safe retry and total-failure fallback
+      - name: Verify mobile success and resilient WebGL failure
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/real3d-mobile-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v50-server.log" 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/real3d-mobile-v22"
+          cd "$RUNNER_TEMP/core-v50-mobile"
           node <<'NODE'
           const assert = require('node:assert/strict');
           const { chromium } = require('playwright');
 
-          async function openScenario(browser, mode, screenshot) {
+          async function scenario(browser, blockWebgl) {
             const context = await browser.newContext({
               viewport: { width: 384, height: 780 },
               deviceScaleFactor: 2,
@@ -54,30 +60,16 @@ jobs:
               locale: 'hu-HU'
             });
             const page = await context.newPage();
-            await page.addInitScript(failureMode => {
-              const original = HTMLCanvasElement.prototype.getContext;
-              let failed = false;
-              window.__fxWebgl2Requests = [];
-              HTMLCanvasElement.prototype.getContext = function (type, attributes) {
-                if (type === 'webgl2') {
-                  const isCore = this.classList.contains('fx-core-real3d-canvas');
-                  window.__fxWebgl2Requests.push({
-                    isCore,
-                    powerPreference: attributes?.powerPreference || 'unspecified',
-                    desynchronized: Object.prototype.hasOwnProperty.call(attributes || {}, 'desynchronized')
-                  });
-                  if (isCore && (failureMode === 'all' || (!failed && failureMode === 'first'))) {
-                    failed = true;
-                    return null;
-                  }
-                }
-                return original.call(this, type, attributes);
-              };
-            }, mode);
-            await page.goto('http://127.0.0.1:4173/scifi-ui/?immersive=1&lang=hu', {
-              waitUntil: 'domcontentloaded',
-              timeout: 45000
-            });
+            if (blockWebgl) {
+              await page.addInitScript(() => {
+                const original = HTMLCanvasElement.prototype.getContext;
+                HTMLCanvasElement.prototype.getContext = function(type, attributes) {
+                  if (type === 'webgl2') return null;
+                  return original.call(this, type, attributes);
+                };
+              });
+            }
+            await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu', { waitUntil: 'domcontentloaded', timeout: 45000 });
             await page.evaluate(() => {
               const root = document.documentElement;
               root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-managed');
@@ -87,104 +79,49 @@ jobs:
               scrollTo(0, 0);
             });
 
-            if (mode === 'first') {
-              await page.waitForFunction(() => document.documentElement.dataset.fxCoreReal3dStartup === 'ready-v22-mobile-safe', null, { timeout: 45000 });
+            if (!blockWebgl) {
+              await page.waitForFunction(() => document.documentElement.dataset.fxCoreV50 === 'ready', null, { timeout: 45000 });
+              const state = await page.evaluate(() => ({
+                renderer: document.documentElement.dataset.fxCoreRenderer,
+                responsive: document.documentElement.dataset.fxCoreResponsive,
+                performance: document.documentElement.dataset.fxCorePerformance,
+                canvasCount: document.querySelectorAll('.fx-core-v50-canvas').length,
+                stage: document.querySelector('.fx-core-v50-stage')?.dataset.active,
+                width: document.querySelector('.fx-core-v50-canvas')?.getBoundingClientRect().width || 0,
+                viewport: innerWidth,
+                fallback: document.querySelector('.fx-resilient-core')?.dataset.active || 'absent'
+              }));
+              assert.equal(state.renderer, 'single-webgl2-rounded-living-core-v50');
+              assert.equal(state.responsive, 'desktop-mobile-bounded-v50');
+              assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
+              assert.equal(state.canvasCount, 1);
+              assert.ok(state.width <= state.viewport + 1, `canvas overflow: ${state.width} > ${state.viewport}`);
+              assert.notEqual(state.fallback, 'true');
             } else {
-              await page.waitForFunction(() => document.documentElement.dataset.fxCoreReal3d === 'context-unavailable', null, { timeout: 45000 });
+              await page.waitForFunction(() => ['context-unavailable','webgl2-unavailable'].includes(document.documentElement.dataset.fxCoreV50), null, { timeout: 45000 });
               await page.waitForFunction(() => document.querySelector('.fx-resilient-core')?.dataset.active === 'true', null, { timeout: 45000 });
+              const state = await page.evaluate(() => ({
+                core: document.documentElement.dataset.fxCoreV50,
+                v50Canvases: document.querySelectorAll('.fx-core-v50-canvas').length,
+                fallback: document.querySelector('.fx-resilient-core')?.dataset.active || 'absent'
+              }));
+              assert.ok(['context-unavailable','webgl2-unavailable'].includes(state.core));
+              assert.equal(state.v50Canvases, 0);
+              assert.equal(state.fallback, 'true');
             }
-            await page.waitForFunction(() => document.documentElement.dataset.fxTranscendLoader === 'safe-ready-v28', null, { timeout: 45000 });
-            await page.waitForTimeout(350);
-
-            const state = await page.evaluate(() => {
-              const root = document.documentElement;
-              const fallback = document.querySelector('.fx-resilient-core');
-              const ring = document.querySelector('#hero .hero-ring');
-              return {
-                real3d: root.dataset.fxCoreReal3d,
-                startup: root.dataset.fxCoreReal3dStartup,
-                health: root.dataset.fxCoreReal3dHealth,
-                profile: root.dataset.fxCoreReal3dContextProfile,
-                attempts: root.dataset.fxCoreReal3dContextAttempts,
-                policy: root.dataset.fxCoreContextPolicy,
-                contexts: root.dataset.fxCoreContexts,
-                renderer: root.dataset.fxCoreRenderer,
-                visual: root.dataset.fxCoreVisualRevision,
-                bloom: root.dataset.fxCoreBloom,
-                postProcess: root.dataset.fxCorePostProcess,
-                material: root.dataset.fxCoreMeshMaterial,
-                filaments: root.dataset.fxCoreShapeFracture,
-                physicalGlass: root.dataset.fxCorePhysicalGlass,
-                nativeApex: root.dataset.fxNativeApex,
-                requests: window.__fxWebgl2Requests,
-                canvasCount: document.querySelectorAll('.fx-core-real3d-canvas').length,
-                fallbackActive: fallback?.dataset.active || 'absent',
-                legacyRingDisplay: ring ? getComputedStyle(ring).display : 'absent',
-                oldMeshStages: document.querySelectorAll('.fx-core-mesh3d-stage').length,
-                oldFractureStages: document.querySelectorAll('.fx-core-fracture3d-stage').length,
-                nativeStages: document.querySelectorAll('.fx-transcend-shell[data-fx-native-apex="true"]').length
-              };
-            });
-            await page.screenshot({ path: screenshot, fullPage: false });
             await context.close();
-            return state;
           }
 
           (async () => {
-            const browser = await chromium.launch({
-              headless: true,
-              args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist']
-            });
-            const retry = await openScenario(browser, 'first', 'mobile-safe-retry.png');
-            assert.equal(retry.real3d, 'ready-v20');
-            assert.equal(retry.startup, 'ready-v22-mobile-safe');
-            assert.equal(retry.health, 'ready');
-            assert.equal(retry.profile, 'safe-retry');
-            assert.equal(retry.attempts, '2');
-            assert.equal(retry.policy, 'mobile-default-no-probe');
-            assert.equal(retry.contexts, '1');
-            assert.equal(retry.renderer, 'single-webgl2-indexed-3d-v20');
-            assert.equal(retry.visual, 'v24-volumetric-crystal');
-            assert.equal(retry.bloom, 'quarter-resolution-separable-v23');
-            assert.equal(retry.postProcess, 'quarter-resolution-separable-bloom-v23');
-            assert.equal(retry.material, 'fresnel-chromatic-refraction-glass-v24');
-            assert.equal(retry.filaments, 'physical-tube-filaments-v24');
-            assert.equal(retry.physicalGlass, 'schlick-fresnel-chromatic-refraction-v24');
-            assert.equal(retry.canvasCount, 1);
-            assert.equal(retry.fallbackActive, 'false');
-            assert.equal(retry.legacyRingDisplay, 'none');
-            assert.equal(retry.oldMeshStages + retry.oldFractureStages + retry.nativeStages, 0);
-            assert.equal(retry.requests.length, 2, 'the skipped probe and first-failure retry must produce exactly two core WebGL2 requests');
-            assert.ok(retry.requests.every(request => request.isCore && request.powerPreference === 'default' && request.desynchronized === false));
-
-            const fallback = await openScenario(browser, 'all', 'mobile-total-failure-fallback.png');
-            assert.equal(fallback.real3d, 'context-unavailable');
-            assert.equal(fallback.health, 'context-unavailable');
-            assert.equal(fallback.attempts, '2');
-            assert.equal(fallback.canvasCount, 0);
-            assert.equal(fallback.fallbackActive, 'true');
-            assert.equal(fallback.legacyRingDisplay, 'none');
-            assert.equal(fallback.nativeApex, 'retired-for-dedicated-core-v22');
-            assert.equal(fallback.oldMeshStages + fallback.oldFractureStages + fallback.nativeStages, 0);
-            assert.equal(fallback.requests.length, 2);
-            assert.ok(fallback.requests.every(request => request.isCore && request.desynchronized === false));
-            console.log('MOBILE_RUNTIME_V22', JSON.stringify({ retry, fallback }));
+            const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
+            await scenario(browser, false);
+            await scenario(browser, true);
             await browser.close();
+            console.log('PASS: v50 mobile renderer stays bounded and resilient fallback activates when WebGL2 is unavailable.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
-      - name: Upload mobile runtime evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: real3d-v22-mobile-runtime-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/real3d-mobile-v22/mobile-safe-retry.png
-            ${{ runner.temp }}/real3d-mobile-v22/mobile-total-failure-fallback.png
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Publish runtime recovery status
+      - name: Publish mobile runtime status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -193,5 +130,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Real3D v22 safe retry and no-oval fallback passed in mobile Chromium'; else state=failure; description='Real3D v22 mobile runtime recovery failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX real3D v22 mobile runtime' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Rounded core v50 mobile runtime and fallback passed'; else state=failure; description='Rounded core v50 mobile runtime validation failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX v50 mobile runtime' -f description="$description" -f target_url="$TARGET_URL"
