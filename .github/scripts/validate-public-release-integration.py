@@ -38,6 +38,15 @@ def require_tokens(source: str, label: str, tokens: list[str]) -> None:
         require(token in source, f"{label} missing contract: {token}")
 
 
+def official_release(value: str) -> bool:
+    parsed = urlparse(value)
+    return (
+        parsed.scheme == "https"
+        and parsed.netloc == "github.com"
+        and parsed.path.startswith("/hutoczky/FormatX-Updates/releases/")
+    )
+
+
 def official_download(value: str) -> bool:
     parsed = urlparse(value)
     return (
@@ -48,8 +57,7 @@ def official_download(value: str) -> bool:
 
 
 def canonical_package(release: dict) -> dict:
-    channels = release.get("channels", {})
-    return channels.get("multiplatform") or channels.get("windows") or {}
+    return release.get("channels", {}).get("multiplatform") or {}
 
 
 def validate_known_issues() -> None:
@@ -71,10 +79,7 @@ def validate_known_issues() -> None:
     ids = [item.get("id") for item in data.get("items", [])]
     require(len(ids) == len(set(ids)), "Known-issues identifiers are not unique")
     for item in data.get("items", []):
-        require(
-            bool(re.fullmatch(r"FX-[A-Z0-9-]+", str(item.get("id", "")))),
-            f"Invalid issue identifier: {item.get('id')}",
-        )
+        require(bool(re.fullmatch(r"FX-[A-Z0-9-]+", str(item.get("id", "")))), f"Invalid issue identifier: {item.get('id')}")
 
 
 def validate_public_shell() -> None:
@@ -94,14 +99,10 @@ def validate_public_shell() -> None:
         "fxFullRelease = 'full-release'", "fxTrialDays = '5'",
         "TELJES VERZIÓ", "FULL RELEASE", "MutationObserver",
     ])
-    require(
-        "['NATÍV BÉTA'" not in guard and "['NATIVE BETA'" not in guard,
-        "Full release guard must preserve explicitly named beta channels",
-    )
-    require(
-        "fetch(" not in shell and "XMLHttpRequest" not in shell and "WebSocket" not in shell,
-        "Public shell must remain local",
-    )
+    require("['NATÍV BÉTA'" not in guard and "['NATIVE BETA'" not in guard,
+            "Full release guard must preserve explicitly named beta channels")
+    require("fetch(" not in shell and "XMLHttpRequest" not in shell and "WebSocket" not in shell,
+            "Public shell must remain local")
     require_tokens(css, "Public shell CSS", [
         ".fx-public-header", ".fx-public-header__inner", ".fx-public-tools",
         ".fx-public-footer", ".fx-issue-controls", ".fx-issue-overview",
@@ -110,10 +111,8 @@ def validate_public_shell() -> None:
         require_tokens(source, label, [
             "formatx-public-shell.js", "formatx-content-standard.css", "Cache-Control', 'no-store",
         ])
-    require(
-        '/scifi-ui/scripts/formatx-public-shell.js' in wrangler,
-        "Preview Worker does not route the public shell through run_worker_first",
-    )
+    require('/scifi-ui/scripts/formatx-public-shell.js' in wrangler,
+            "Preview Worker does not route the public shell through run_worker_first")
 
 
 def validate_release_sync() -> None:
@@ -138,8 +137,10 @@ def validate_release_sync() -> None:
         "channels?.android?.digest", "FormatX Android release integrity",
     ])
     require_tokens(release_script, "Release metadata controller", [
-        "ready-v5", "isAllowedReleaseUrl", "formatBytes", "integrityLabel",
-        "channels?.multiplatform", "channels?.windows", "data-release-integrity",
+        "ready-v6", "OFFICIAL_REPOSITORY = 'hutoczky/FormatX-Updates'",
+        "isOfficialGitHubReleaseUrl", "isOfficialGitHubDownloadUrl", "isOfficialMetadata",
+        "release?.source === 'github_published_release'", "validDigest(asset.digest)",
+        "formatBytes", "integrityLabel", "channels?.multiplatform", "data-release-integrity",
         "data-release-source-updated", "current-release.json",
         "setText('[data-release-version]', '', false)",
         "5-day trial licence", "Teljes multiplatform verzió letöltése",
@@ -149,38 +150,29 @@ def validate_release_sync() -> None:
     require(platform.get("product_release", {}).get("trial_days") == 5, "Product trial is not five days")
     require(release.get("schema_version") == 2, "Current release is not schema 2")
     require(release.get("source") == "github_published_release", "Current release source is not canonical")
+    require(release.get("repository") == "hutoczky/FormatX-Updates", "Current release repository is not canonical")
     require(release.get("prerelease") is not True, "Current official release must not be a prerelease")
-    release_url = urlparse(str(release.get("release_url") or ""))
-    require(
-        release_url.scheme == "https"
-        and release_url.netloc == "github.com"
-        and release_url.path.startswith("/hutoczky/FormatX-Updates/releases/"),
-        "Current release URL is not official",
-    )
+    require(bool(re.fullmatch(r"v\d+", str(release.get("version") or ""), re.I)), "Current release version is invalid")
+    require(official_release(str(release.get("release_url") or "")), "Current release URL is not official")
 
     package = canonical_package(release)
     require(package.get("available") is True, "Official package is unavailable")
     require(official_download(str(package.get("download_url") or "")), "Package URL is not official")
-    require(
-        bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(package.get("digest") or ""))),
-        "Package SHA-256 digest is missing or malformed",
-    )
+    require(bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(package.get("digest") or ""))),
+            "Package SHA-256 digest is missing or malformed")
+    require(package.get("supported_platforms") == ["linux-bazzite", "windows"],
+            "Canonical multiplatform native platform list is invalid")
 
     android = release.get("channels", {}).get("android") or {}
     require(android.get("available") is True, "Official Android package is unavailable")
     require(android.get("download_url") == "/download/android", "Android canonical worker download route is invalid")
     require(isinstance(android.get("size"), int) and android.get("size", 0) > 0, "Android package size is missing")
-    require(
-        bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(android.get("digest") or ""))),
-        "Android SHA-256 digest is missing or malformed",
-    )
+    require(bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(android.get("digest") or ""))),
+            "Android SHA-256 digest is missing or malformed")
 
-    require(
-        release.get("integrity", {}).get("status") in {
-            "package_only", "digest_published", "digest_and_signature_published"
-        },
-        "Schema 2 release integrity status is invalid",
-    )
+    require(release.get("integrity", {}).get("status") in {
+        "package_only", "digest_published", "digest_and_signature_published"
+    }, "Schema 2 release integrity status is invalid")
 
     public_copy = public_contract.get("public_copy", {})
     require(public_copy.get("primary_system") == "linux-bazzite", "Public primary platform is not Bazzite/Linux")
@@ -196,15 +188,11 @@ def validate_release_sync() -> None:
 def validate_worker_ownership() -> None:
     production_config = load_json("billing-worker/wrangler.jsonc")
     preview_config = load_json("wrangler.jsonc")
-    require(
-        production_config.get("main") == "src/production-content-entry.js",
-        "Production Worker does not use production-content-entry.js",
-    )
+    require(production_config.get("main") == "src/production-content-entry.js",
+            "Production Worker does not use production-content-entry.js")
     routes = [route.get("pattern") for route in production_config.get("routes", [])]
-    require(
-        routes == ["formatxsuite.com", "www.formatxsuite.com"],
-        f"Production custom-domain ownership is unexpected: {routes}",
-    )
+    require(routes == ["formatxsuite.com", "www.formatxsuite.com"],
+            f"Production custom-domain ownership is unexpected: {routes}")
     require(not preview_config.get("routes"), "Preview Worker must not own production custom domains")
     require(preview_config.get("main") == "content-preview-entry.js", "Preview entry is unexpected")
 
@@ -219,7 +207,7 @@ def main() -> int:
         for error in ERRORS:
             print(f" - {error}", file=sys.stderr)
         return 1
-    print("FormatX public pages, full release status, five-day trial, Android/multiplatform integrity, official release provenance and Worker ownership are valid.")
+    print("FormatX public pages, Full release status, five-day trial, V130-compatible GitHub provenance, Android/multiplatform integrity and Worker ownership are valid.")
     return 0
 
 
