@@ -48,7 +48,7 @@ function checkoutRequest(orderReference, overrides = {}) {
       payment_method: 'direct_bank_transfer_qr',
       business_buyer_confirmed: true,
       terms_accepted: true,
-      privacy_accepted: true,
+      privacy_notice_acknowledged: true,
       ...overrides,
     }),
   });
@@ -156,7 +156,7 @@ describe('V100 checkout security and pricing', () => {
     expect(metadata.buyer_type).toBe('business');
     expect(metadata.business_buyer_confirmed).toBe(true);
     expect(metadata.terms_accepted).toBe(true);
-    expect(metadata.privacy_accepted).toBe(true);
+    expect(metadata.privacy_notice_acknowledged).toBe(true);
     expect(metadata.terms_version).toBe('2026-08-07');
     expect(metadata.privacy_version).toBe('2026-08-10');
     expect(metadata.legal_acceptance_recorded_at).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -165,7 +165,7 @@ describe('V100 checkout security and pricing', () => {
   it.each([
     ['business_buyer_confirmed', false, /vállalkozási|szakmai/i],
     ['terms_accepted', false, /felhasználási feltételek/i],
-    ['privacy_accepted', false, /adatkezelési/i],
+    ['privacy_notice_acknowledged', false, /adatkezelési/i],
   ])('rejects checkout when %s is not confirmed', async (field, value, expected) => {
     const reference = 'FX-20260808-ABCDEF0123456789ABCDEF01';
     const response = await handleV100PricingRequest(checkoutRequest(reference, { [field]: value }), baseEnv);
