@@ -4,6 +4,9 @@ const root=document.documentElement;
 const BOOTSTRAP='reference-lock-v30';
 const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-7';
 const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-7';
+const POLISH_STYLE='./styles/formatx-reference-polish-v31.css?v=20260810-reference-polish-1';
+const POST_STYLE='./styles/formatx-reference-postfx-v31.css?v=20260810-reference-postfx-1';
+const POST_SCRIPT='./scripts/formatx-reference-postfx-v31.js?v=20260810-reference-postfx-1';
 if(root.dataset.fxCoreReal3dBootstrap===BOOTSTRAP)return;
 root.dataset.fxCoreReal3dBootstrap=BOOTSTRAP;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
@@ -14,19 +17,32 @@ if(new URLSearchParams(location.search).get('lighthouse')==='1'){
 root.dataset.fxCoreReal3d='ready-v20';
 root.dataset.fxCoreRenderer='single-webgl2-indexed-3d-v20';
 root.dataset.fxCoreReferenceLock='loading-v30';
-if(!document.querySelector('link[data-fx-reference-lock-v30]')){
+function addStyle(href,key){
+  if(document.querySelector(`link[data-${key}]`))return;
   const link=document.createElement('link');
   link.rel='stylesheet';
-  link.href=STYLE;
-  link.dataset.fxReferenceLockV30='true';
+  link.href=href;
+  link.setAttribute(`data-${key}`,'true');
   document.head.appendChild(link);
 }
+addStyle(STYLE,'fx-reference-lock-v30');
+addStyle(POLISH_STYLE,'fx-reference-polish-v31');
+addStyle(POST_STYLE,'fx-reference-postfx-v31');
 if(document.querySelector('script[data-fx-reference-lock-v30]'))return;
 const script=document.createElement('script');
 script.src=SCRIPT;
 script.async=false;
 script.dataset.fxReferenceLockV30='true';
-script.addEventListener('load',()=>{root.dataset.fxCoreReferenceLockLoad='ready';},{once:true});
+script.addEventListener('load',()=>{
+  root.dataset.fxCoreReferenceLockLoad='ready';
+  if(!document.querySelector('script[data-fx-reference-postfx-v31]')){
+    const post=document.createElement('script');
+    post.src=POST_SCRIPT;
+    post.async=false;
+    post.dataset.fxReferencePostfxV31='true';
+    document.head.appendChild(post);
+  }
+},{once:true});
 script.addEventListener('error',()=>{
   root.dataset.fxCoreReal3d='context-unavailable';
   root.dataset.fxCoreReferenceLock='load-failed';

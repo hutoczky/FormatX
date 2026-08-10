@@ -1,0 +1,38 @@
+/* Reference v31 post-processing. The WebGL mesh remains the source geometry; this layer is only lens/glow/orbit treatment. */
+.fx-core-postfx-v31{
+  --fx-v31-x:0px;--fx-v31-y:0px;--fx-v31-pulse:1;
+  position:absolute;z-index:2;inset:0;pointer-events:none;overflow:hidden;mix-blend-mode:screen;
+  transform:translate3d(var(--fx-v31-x),var(--fx-v31-y),0);
+  will-change:transform;
+}
+.fx-core-postfx-v31>*{position:absolute;left:var(--fx-core-x);top:49%;transform-origin:50% 50%;pointer-events:none}
+.fx-v31-flare{
+  width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0 24%,#dfffff 26% 42%,rgba(73,235,255,.92) 45% 57%,rgba(40,178,255,.24) 68%,transparent 76%);
+  box-shadow:0 0 5px #fff,0 0 12px rgba(196,255,255,.95),0 0 28px rgba(74,231,255,.92),0 0 54px rgba(50,157,255,.58),0 0 88px rgba(134,60,255,.20);
+  transform:scale(var(--fx-v31-pulse));
+}
+.fx-v31-axis{display:block;background:linear-gradient(90deg,transparent,rgba(78,217,255,.10) 24%,rgba(192,252,255,.66) 49.5%,rgba(255,255,255,.96) 50%,rgba(192,252,255,.66) 50.5%,rgba(78,217,255,.10) 76%,transparent);opacity:.82}
+.fx-v31-axis-x{width:min(78vw,980px);height:1px;margin:0 0 0 min(-39vw,-490px);transform:translateY(-.5px)}
+.fx-v31-axis-y{width:1px;height:min(67vh,820px);margin:min(-33.5vh,-410px) 0 0 0;background:linear-gradient(180deg,transparent,rgba(75,219,255,.08) 24%,rgba(188,252,255,.62) 49.5%,rgba(255,255,255,.94) 50%,rgba(188,252,255,.62) 50.5%,rgba(75,219,255,.08) 76%,transparent);transform:translateX(-.5px)}
+.fx-v31-ring{border-radius:50%;border:1px solid rgba(111,235,255,.46);box-shadow:0 0 8px rgba(73,215,255,.18),inset 0 0 10px rgba(75,213,255,.11);opacity:.66}
+.fx-v31-ring-a{width:19vmin;height:19vmin;margin:-9.5vmin 0 0 -9.5vmin;transform:rotateX(57deg) rotateZ(-7deg) scale(var(--fx-v31-pulse))}
+.fx-v31-ring-b{width:31vmin;height:31vmin;margin:-15.5vmin 0 0 -15.5vmin;border-color:rgba(94,205,255,.30);transform:rotateX(62deg) rotateZ(19deg) scale(var(--fx-v31-pulse));opacity:.48}
+.fx-v31-ring-c{width:44vmin;height:44vmin;margin:-22vmin 0 0 -22vmin;border-color:rgba(165,77,255,.24);box-shadow:0 0 12px rgba(151,64,255,.13),inset 0 0 12px rgba(78,202,255,.08);transform:rotateX(64deg) rotateZ(-23deg);opacity:.40}
+.fx-v31-spectrum{
+  width:min(74vmin,760px);height:min(74vmin,760px);margin:min(-37vmin,-380px) 0 0 min(-37vmin,-380px);border-radius:50%;
+  background:conic-gradient(from 18deg,transparent 0 8%,rgba(48,220,255,.40) 11%,transparent 18% 28%,rgba(166,61,255,.36) 32%,transparent 39% 51%,rgba(66,223,255,.34) 55%,transparent 62% 72%,rgba(170,66,255,.30) 76%,transparent 84% 100%);
+  -webkit-mask:radial-gradient(circle,transparent 0 61%,#000 63% 64.1%,transparent 66%);
+  mask:radial-gradient(circle,transparent 0 61%,#000 63% 64.1%,transparent 66%);
+  opacity:.62;filter:blur(.15px);transform:rotateZ(9deg) scale(var(--fx-v31-pulse));
+}
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-v31-flare{width:12px;height:12px;margin:-6px 0 0 -6px;box-shadow:0 0 5px #fff,0 0 11px rgba(196,255,255,.98),0 0 25px rgba(74,231,255,.88),0 0 46px rgba(50,157,255,.48),0 0 72px rgba(134,60,255,.18)}
+  .fx-v31-axis-x{width:94vw;margin-left:-47vw}
+  .fx-v31-axis-y{height:64vh;margin-top:-32vh}
+  .fx-v31-ring-a{width:22vmin;height:22vmin;margin:-11vmin 0 0 -11vmin}
+  .fx-v31-ring-b{width:35vmin;height:35vmin;margin:-17.5vmin 0 0 -17.5vmin}
+  .fx-v31-ring-c{width:49vmin;height:49vmin;margin:-24.5vmin 0 0 -24.5vmin}
+  .fx-v31-spectrum{width:84vmin;height:84vmin;margin:-42vmin 0 0 -42vmin;opacity:.58}
+}
+@media(prefers-reduced-motion:reduce){.fx-core-postfx-v31{will-change:auto}.fx-v31-flare,.fx-v31-ring,.fx-v31-spectrum{transform:none!important}}
