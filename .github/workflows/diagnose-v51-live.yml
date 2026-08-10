@@ -1,0 +1,63 @@
+name: Diagnose live v51 layer stack
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/diagnose-v51-live.yml'
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Install Playwright
+        run: |
+          mkdir -p "$RUNNER_TEMP/fxdiag"
+          cd "$RUNNER_TEMP/fxdiag"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+
+      - name: Dump center layer stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/fxdiag"
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await context.newPage();
+            await page.goto(`https://www.formatxsuite.com/?diag_v51=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.evaluate(()=>{
+              const root=document.documentElement;
+              root.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-managed');
+              root.classList.add('fx-intro-complete');
+              document.getElementById('formatx-event-horizon')?.setAttribute('hidden','');
+              document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+              scrollTo(0,0);
+            });
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreV51==='ready-v51',null,{timeout:60000});
+            await page.waitForTimeout(1800);
+            const dump=await page.evaluate(()=>{
+              const describe=(el)=>{
+                const cs=getComputedStyle(el),r=el.getBoundingClientRect();
+                const before=getComputedStyle(el,'::before'),after=getComputedStyle(el,'::after');
+                return {tag:el.tagName,id:el.id,cls:el.className,rect:{x:r.x,y:r.y,w:r.width,h:r.height},z:cs.zIndex,opacity:cs.opacity,display:cs.display,visibility:cs.visibility,borderRadius:cs.borderRadius,background:cs.backgroundImage,backgroundColor:cs.backgroundColor,filter:cs.filter,mixBlendMode:cs.mixBlendMode,before:{content:before.content,display:before.display,opacity:before.opacity,background:before.backgroundImage,borderRadius:before.borderRadius},after:{content:after.content,display:after.display,opacity:after.opacity,background:after.backgroundImage,borderRadius:after.borderRadius}};
+              };
+              const points=[[195,372],[195,320],[173,302],[195,240]];
+              const stacks=points.map(([x,y])=>({point:[x,y],elements:document.elementsFromPoint(x,y).slice(0,20).map(describe)}));
+              const suspicious=[...document.querySelectorAll('body *')].filter(el=>{
+                const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
+                const br=parseFloat(cs.borderRadius)||0;
+                return r.width>120&&r.height>120&&r.width<500&&r.height<500&&(br>50||cs.backgroundImage!=='none')&&cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)>0;
+              }).slice(0,80).map(describe);
+              return {dataset:{...document.documentElement.dataset},stacks,suspicious};
+            });
+            console.log('FX_V51_LAYER_DIAGNOSTIC',JSON.stringify(dump,null,2));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
