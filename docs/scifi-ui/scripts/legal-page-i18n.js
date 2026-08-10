@@ -128,11 +128,11 @@
       description: 'Privacy information for the FormatX Suite Pro website, support, feedback and bank-transfer licensing flows.',
       brand: 'Privacy',
       html: `
-      <p class="eyebrow">PRIVACY NOTICE · UPDATED 2026-07-31</p>
+      <p class="eyebrow">PRIVACY NOTICE · UPDATED 2026-08-10</p>
       <h1>Privacy</h1>
       <p class="legal-lead">FormatX does not request or store payment-card numbers, expiry data or CVC codes. Payment is made by HUF or EUR bank transfer. Personal data is processed only for defined purposes.</p>
 
-      <section><h2>1. Data controller</h2><p><strong>Controller:</strong> Hutóczky József</p><p><strong>Contact and data-subject requests:</strong> <a href="mailto:hutoczky@gmail.com">hutoczky@gmail.com</a></p><p><strong>Website:</strong> https://www.formatxsuite.com</p><p>Before full public consumer sales are activated, the controller’s complete postal/registered address and tax number must also be published.</p></section>
+      <section><h2>1. Data controller</h2><p><strong>Controller:</strong> Hutóczky József</p><p><strong>Contact and data-subject requests:</strong> <a href="mailto:hutoczky@gmail.com">hutoczky@gmail.com</a></p><p><strong>Website:</strong> https://www.formatxsuite.com</p><p>Before full public consumer sales are activated, the controller’s complete postal/registered address and, where legally required, tax and registration details must also be published.</p></section>
 
       <section><h2>2. Purposes, data and legal bases</h2><ul>
         <li><strong>Order and contract:</strong> company or personal name, contact person, email, billing address, tax number, plan, currency, amount and order reference. Legal basis: steps before entering into a contract and performance of the contract.</li>
@@ -144,9 +144,9 @@
         <li><strong>Local settings:</strong> language, theme, intro-viewed state, Organism ON/OFF state and up to 12 Thought Genome fingerprints in browser local storage. A fingerprint does not contain the raw text of the entered question and is not automatically sent to the server.</li>
       </ul></section>
 
-      <section><h2>3. Processors and recipients</h2><ul>
-        <li><strong>Cloudflare:</strong> web hosting, CDN, Worker execution, security logs and D1 database.</li>
-        <li><strong>Public source and release infrastructure:</strong> source code, release packages, public issue records and release metadata.</li>
+      <section><h2>3. Processors, hosting and recipients</h2><ul>
+        <li><strong>Cloudflare, Inc. — hosting, CDN and Worker infrastructure:</strong> 101 Townsend St., San Francisco, CA 94107, USA; contact: <a href="mailto:support@cloudflare.com">support@cloudflare.com</a>. The service may provide web hosting, CDN delivery, Worker execution, security logging and D1 database infrastructure.</li>
+        <li><strong>Public source and release infrastructure:</strong> source code, release packages, public issue records and release metadata. Do not submit personal, banking or licence data in a public issue report.</li>
         <li><strong>Google / Gmail:</strong> receiving support, complaint and licence messages.</li>
         <li><strong>QuickChart:</strong> generating QR images when an external service is used instead of the local fallback. The request may also involve technical connection data such as an IP address.</li>
         <li><strong>Banks and payment-service providers:</strong> execution and identification of bank transfers.</li>
