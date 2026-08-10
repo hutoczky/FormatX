@@ -9,14 +9,14 @@
     hu: {
       title: 'FormatX Suite Pro | Technikusi operációs réteg',
       description: 'A FormatX Suite Pro letölthető, többplatformos technikusi operációs réteg meghajtókezeléshez, diagnosztikához, telepítéshez és ellenőrizhető rendszerkarbantartáshoz.',
-      kicker: 'TECHNIKUSI OPERÁCIÓS RÉTEG',
-      lead: 'A FormatX Suite Pro egy letölthető, többplatformos technikusi rendszer meghajtók, adathordozók és operációs környezetek felméréséhez, előkészítéséhez, módosításához és visszaellenőrzéséhez. Nem látványos díszadatokat mutat: minden kritikus lépést valós állapot, célazonosítás és dokumentálható eredmény köt össze.',
-      enter: 'A működés megismerése',
-      nav: ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
+      kicker: 'ÉLŐ RENDSZERARCHITEKTÚRA',
+      lead: 'A FormatX nem egy eszközdoboz. Egy élő rendszerépület: érzékel, döntési útvonalat épít, kontrolláltan cselekszik, majd visszaellenőrzi saját állapotát.',
+      enter: 'Belépés az élő rendszerbe',
+      nav: ['Idegrendszer', 'Szervek', 'Kereskedelmi szív', 'Váz', 'Jeladó'],
       facts: [
-        ['06', 'ellenőrizhető modul'],
-        ['03', 'támogatott natív platform'],
-        ['05', 'nap teljes próba']
+        ['06', 'aktív szerv'],
+        ['03', 'platformréteg'],
+        ['05', 'napos kezdőlicenc']
       ],
       deckEyebrow: 'FORMATX / CATEGORY DEFINITION',
       deckTitle: 'Nem egy szebb segédprogram. Saját technikusi kategória.',
@@ -58,14 +58,14 @@
     en: {
       title: 'FormatX Suite Pro | Technician Operating Layer',
       description: 'FormatX Suite Pro is a downloadable cross-platform technician operating layer for drive management, diagnostics, deployment and verifiable system maintenance.',
-      kicker: 'TECHNICIAN OPERATING LAYER',
-      lead: 'FormatX Suite Pro is a downloadable cross-platform technician system for assessing, preparing, modifying and verifying drives, storage media and operating environments. It does not display decorative fake data: every critical step connects real state, explicit target identification and a documentable result.',
-      enter: 'See how it works',
-      nav: ['How it works', 'Modules', 'Licences', 'Proof', 'Download'],
+      kicker: 'LIVING SYSTEM ARCHITECTURE',
+      lead: 'FormatX is not a toolbox. It is a living system structure: it senses, builds a decision path, acts under control, then verifies its own state.',
+      enter: 'Enter the living system',
+      nav: ['Nervous system', 'Organs', 'Commerce core', 'Skeleton', 'Beacon'],
       facts: [
-        ['06', 'verifiable modules'],
-        ['03', 'supported native platforms'],
-        ['05', 'day full trial']
+        ['06', 'active organs'],
+        ['03', 'platform layers'],
+        ['05', 'day initial licence']
       ],
       deckEyebrow: 'FORMATX / CATEGORY DEFINITION',
       deckTitle: 'Not a prettier utility. A technician category of its own.',
