@@ -4,8 +4,8 @@ const root=document.documentElement;
 /* Live verifier compatibility markers for the previous production gate only:
    reference-lock-v30-v43
    formatx-mag-reference-v43.js?v=20260810-mag-reference-v43-1
-   The runtime renderer below is v44 + v46 and does not load V43_SCRIPT. */
-const BOOTSTRAP='reference-lock-v30-v46';
+   The runtime renderer below is v44 + v46 + v47 and does not load V43_SCRIPT. */
+const BOOTSTRAP='reference-lock-v30-v47';
 const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-7';
 const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-7';
 const POLISH_STYLE='./styles/formatx-reference-polish-v31.css?v=20260810-reference-polish-1';
@@ -22,8 +22,9 @@ const POST_SCRIPT='./scripts/formatx-reference-postfx-v31.js?v=20260810-referenc
 const V33_SCRIPT='./scripts/formatx-mobile-mag-v33.js?v=20260810-mobile-mag-v33-2';
 const V44_SCRIPT='./scripts/formatx-mag-reference-v44.js?v=20260810-mag-reference-v44-1';
 const V46_SCRIPT='./scripts/formatx-mag-reference-v46.js?v=20260810-mag-reference-v46-1';
+const V47_SCRIPT='./scripts/formatx-mag-reference-v47.js?v=20260810-mag-reference-v47-1';
 const V38_SCRIPT='./scripts/formatx-mag-reference-v38.js?v=20260810-mag-reference-v38-1';
-const V41_SCRIPT='./scripts/formatx-mag-reference-v41.js?v=20260810-mag-reference-v41-2';
+const V41_SCRIPT='./scripts/formatx-mag-reference-v41.js?v=20260810-mag-reference-v41-3';
 if(root.dataset.fxCoreReal3dBootstrap===BOOTSTRAP)return;
 root.dataset.fxCoreReal3dBootstrap=BOOTSTRAP;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
@@ -32,7 +33,7 @@ if(new URLSearchParams(location.search).get('lighthouse')==='1'){
   return;
 }
 root.dataset.fxCoreReal3d='ready-v20';
-root.dataset.fxCoreRenderer='single-webgl2-indexed-3d-v46';
+root.dataset.fxCoreRenderer='single-webgl2-indexed-3d-v47';
 root.dataset.fxCoreReferenceLock='loading-v30';
 function addStyle(href,key){
   if(document.querySelector(`link[data-${key}]`))return;
@@ -78,6 +79,7 @@ script.addEventListener('load',()=>{
   }
   addScript(V44_SCRIPT,'fx-mag-reference-v44');
   addScript(V46_SCRIPT,'fx-mag-reference-v46');
+  addScript(V47_SCRIPT,'fx-mag-reference-v47');
   addScript(V38_SCRIPT,'fx-mag-reference-v38');
   addScript(V41_SCRIPT,'fx-mag-reference-v41');
 },{once:true});
