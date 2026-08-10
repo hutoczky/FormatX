@@ -1,0 +1,183 @@
+/* FormatX MAG reference v48 — final visual reference lock.
+   WebGL remains the geometry source. This layer only tunes optics and stacking.
+   The MAG stays translucent and is rendered BEHIND readable/interactive content. */
+
+.fx-core-real3d-stage{
+  z-index:8!important;
+}
+
+.fx-core-real3d-canvas{
+  opacity:.92!important;
+  mix-blend-mode:screen;
+  filter:
+    saturate(1.72)
+    contrast(1.44)
+    brightness(1.52)
+    drop-shadow(0 0 4px rgba(245,255,255,.72))
+    drop-shadow(0 0 12px rgba(103,244,255,.58))
+    drop-shadow(0 0 28px rgba(43,186,255,.36))
+    drop-shadow(0 0 50px rgba(123,91,255,.22))
+    drop-shadow(0 0 74px rgba(29,107,255,.13))!important;
+}
+
+.fx-core-postfx-v31{
+  z-index:9!important;
+  opacity:.96!important;
+  mix-blend-mode:screen!important;
+}
+
+/* Reference-like luminous concentric reactor structure. */
+.fx-core-postfx-v31::before,
+.fx-core-postfx-v31::after{
+  content:"";
+  position:absolute;
+  left:var(--fx-core-x,71%);
+  top:49%;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+}
+
+.fx-core-postfx-v31::before{
+  width:min(48vmin,620px);
+  aspect-ratio:1;
+  background:
+    repeating-radial-gradient(circle,
+      transparent 0 5.8%,
+      rgba(129,239,255,.20) 6.1% 6.45%,
+      transparent 6.8% 11.9%),
+    radial-gradient(circle,
+      rgba(240,255,255,.24) 0 2%,
+      rgba(95,245,255,.18) 4% 8%,
+      rgba(42,175,255,.08) 15% 28%,
+      transparent 48%);
+  filter:drop-shadow(0 0 12px rgba(77,226,255,.32));
+  opacity:.78;
+}
+
+.fx-core-postfx-v31::after{
+  width:min(66vmin,820px);
+  aspect-ratio:1;
+  background:conic-gradient(
+    from 8deg,
+    transparent 0 7%,
+    rgba(66,229,255,.34) 9%,
+    transparent 14% 22%,
+    rgba(183,72,255,.26) 25%,
+    transparent 31% 46%,
+    rgba(83,232,255,.26) 49%,
+    transparent 56% 69%,
+    rgba(168,72,255,.22) 73%,
+    transparent 79% 91%,
+    rgba(75,226,255,.26) 94%,
+    transparent 100%);
+  -webkit-mask:radial-gradient(circle,transparent 0 51%,#000 53% 54.2%,transparent 56% 63%,#000 64% 64.8%,transparent 66%);
+  mask:radial-gradient(circle,transparent 0 51%,#000 53% 54.2%,transparent 56% 63%,#000 64% 64.8%,transparent 66%);
+  filter:drop-shadow(0 0 10px rgba(68,215,255,.24));
+  opacity:.72;
+}
+
+.fx-v31-flare{
+  width:15px!important;
+  height:15px!important;
+  margin:-7.5px 0 0 -7.5px!important;
+  background:radial-gradient(circle,#fff 0 22%,#eaffff 24% 40%,rgba(87,244,255,.98) 43% 56%,rgba(54,190,255,.30) 67%,transparent 78%)!important;
+  box-shadow:
+    0 0 5px #fff,
+    0 0 13px rgba(218,255,255,.98),
+    0 0 30px rgba(77,237,255,.94),
+    0 0 58px rgba(44,171,255,.60),
+    0 0 92px rgba(143,66,255,.26)!important;
+}
+
+.fx-v31-ring-a{opacity:.72!important;border-color:rgba(158,246,255,.70)!important}
+.fx-v31-ring-b{opacity:.58!important;border-color:rgba(91,218,255,.48)!important}
+.fx-v31-ring-c{opacity:.48!important;border-color:rgba(185,91,255,.36)!important}
+.fx-v31-spectrum{opacity:.78!important;filter:saturate(1.30) brightness(1.20)!important}
+.fx-v31-axis{opacity:.90!important}
+
+/* Content wins the stacking order everywhere in the hero. */
+body.living-architecture #hero,
+body.living-architecture #hero .hero-grid{
+  position:relative!important;
+}
+
+body.living-architecture #hero .hero-copy,
+body.living-architecture #hero .hero-copy *,
+body.living-architecture #hero .hero-actions,
+body.living-architecture #hero .hero-facts,
+body.living-architecture #hero .hero-label,
+body.living-architecture #hero .hero-cta,
+body.living-architecture #hero .hero-download,
+body.living-architecture #hero .download-card,
+body.living-architecture #hero .download-panel,
+body.living-architecture #hero a,
+body.living-architecture #hero button{
+  position:relative!important;
+  z-index:180!important;
+}
+
+body.living-architecture #hero .hero-copy{
+  isolation:isolate!important;
+  background:linear-gradient(180deg,rgba(1,7,17,.16),rgba(1,7,17,.52))!important;
+  box-shadow:none!important;
+}
+
+body.living-architecture #hero .hero-copy::before{
+  display:none!important;
+}
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-stage{
+    --fx-core-x:50%;
+    --fx-mag-clip-bottom:0px!important;
+    clip-path:none!important;
+    z-index:6!important;
+  }
+
+  .fx-core-real3d-canvas,
+  .fx-core-postfx-v31,
+  .fx-mag-v33-overlay{
+    clip-path:none!important;
+    -webkit-clip-path:none!important;
+  }
+
+  .fx-core-real3d-canvas{
+    transform:scaleX(1.09) scaleY(.96)!important;
+    transform-origin:50% 46%!important;
+    opacity:.88!important;
+    filter:
+      saturate(1.78)
+      contrast(1.46)
+      brightness(1.56)
+      drop-shadow(0 0 4px rgba(250,255,255,.72))
+      drop-shadow(0 0 13px rgba(93,244,255,.58))
+      drop-shadow(0 0 30px rgba(48,181,255,.35))
+      drop-shadow(0 0 54px rgba(152,72,255,.22))!important;
+  }
+
+  .fx-core-postfx-v31::before{width:58vmin;opacity:.82}
+  .fx-core-postfx-v31::after{width:78vmin;opacity:.76}
+
+  body.living-architecture #hero .hero-copy,
+  body.living-architecture #hero .hero-copy *,
+  body.living-architecture #hero .hero-actions,
+  body.living-architecture #hero .hero-facts,
+  body.living-architecture #hero .hero-label,
+  body.living-architecture #hero .hero-cta,
+  body.living-architecture #hero .hero-download,
+  body.living-architecture #hero .download-card,
+  body.living-architecture #hero .download-panel,
+  body.living-architecture #hero a,
+  body.living-architecture #hero button{
+    z-index:240!important;
+  }
+
+  body.living-architecture #hero .hero-copy{
+    background:linear-gradient(180deg,rgba(1,7,17,.20),rgba(1,7,17,.64))!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .fx-core-postfx-v31::after{transform:translate(-50%,-50%)!important}
+}
