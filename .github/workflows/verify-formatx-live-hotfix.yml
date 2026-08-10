@@ -1,5 +1,5 @@
 name: Verify FormatX live hotfix
-run-name: Verify live mobile hero + MAG v41 from ${{ github.sha }}
+run-name: Verify live mobile hero + MAG v42 from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -35,6 +35,7 @@ jobs:
               mag40_css="$(mktemp)"
               mag41_css="$(mktemp)"
               mag41_js="$(mktemp)"
+              mag42_css="$(mktemp)"
               core_js="$(mktemp)"
               home="$(mktemp)"
               if curl --fail --silent --show-error --location --max-time 30 \
@@ -56,6 +57,8 @@ jobs:
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-mag-reference-v41.js?v=${GITHUB_SHA}-${attempt}" > "$mag41_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/styles/formatx-mag-reference-v42.css?v=${GITHUB_SHA}-${attempt}" > "$mag42_css" \
+                && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_SHA}-${attempt}" > "$core_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/?v=${GITHUB_SHA}-${attempt}" > "$home" \
@@ -68,25 +71,23 @@ jobs:
                 && grep -Fq 'fxMagReferenceV38' "$mag38_js" \
                 && grep -Fq 'FormatX MAG reference v40' "$mag40_css" \
                 && grep -Fq 'FormatX MAG reference v41' "$mag41_css" \
-                && grep -Fq 'clip-path:inset(0 0 var(--fx-mag-clip-bottom,0px) 0)!important' "$mag41_css" \
-                && grep -Fq 'background:#010711!important' "$mag41_css" \
                 && grep -Fq 'fxMagReferenceV41' "$mag41_js" \
-                && grep -Fq 'clip-only-when-copy-enters-viewport' "$mag41_js" \
-                && grep -Fq 'reference-lock-v30-v41' "$core_js" \
-                && grep -Fq 'formatx-mag-reference-v41.css?v=20260810-mag-reference-v41-1' "$core_js" \
-                && grep -Fq 'formatx-mag-reference-v41.js?v=20260810-mag-reference-v41-1' "$core_js" \
-                && ! grep -Fq "addScript(V39_SCRIPT" "$core_js" \
+                && grep -Fq 'FormatX MAG reference v42' "$mag42_css" \
+                && grep -Fq 'clip-path:inset(0 0 0 48vw)!important' "$mag42_css" \
+                && grep -Fq 'scale(.74)!important' "$mag42_css" \
+                && grep -Fq 'reference-lock-v30-v42' "$core_js" \
+                && grep -Fq 'formatx-mag-reference-v42.css?v=20260810-mag-reference-v42-1' "$core_js" \
                 && grep -Fq 'FormatX Suite Pro' "$home"
               then
                 success=true
-                rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$core_js" "$home"
+                rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$mag42_css" "$core_js" "$home"
                 break
               fi
-              rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$core_js" "$home"
+              rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$mag42_css" "$core_js" "$home"
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Live mobile hero / MAG v41 verification failed for $origin" >&2
+              echo "Live MAG v42 verification failed for $origin" >&2
               exit 1
             fi
           done
@@ -112,7 +113,7 @@ jobs:
               body: JSON.stringify({
                 state,
                 context: 'FormatX live mobile hero verification',
-                description: 'Both domains serve native MAG plus v41 copy-safe clipping',
+                description: 'Both domains serve native MAG v42 desktop containment plus v41 mobile copy-safe clipping',
                 target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
               }),
             }
