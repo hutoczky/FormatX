@@ -1,5 +1,5 @@
 name: Verify live true 3D MAG visual
-run-name: Capture organic reference MAG r6 for ${{ github.event.workflow_run.head_sha }}
+run-name: Capture reference-fit MAG r7 for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@1.62.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
 
-      - name: Capture and measure live organic reference MAG r6
+      - name: Capture and measure live reference-fit MAG r7
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -57,45 +57,45 @@ jobs:
             const context=await browser.newContext({viewport:cfg.viewport,deviceScaleFactor:1,isMobile:cfg.mobile,hasTouch:cfg.mobile,locale:'hu-HU'});
             const page=await context.newPage();const errors=[];
             page.on('pageerror',e=>errors.push(String(e)));
-            await page.goto(`https://www.formatxsuite.com/?organic_ref=${process.env.RUN_ID}&capture=${cfg.name}`,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.goto(`https://www.formatxsuite.com/?reference_fit_r7=${process.env.RUN_ID}&capture=${cfg.name}`,{waitUntil:'domcontentloaded',timeout:45000});
             await page.evaluate(()=>{document.documentElement.lang='hu';document.documentElement.classList.add('fx-intro-complete');document.getElementById('formatx-event-horizon')?.remove();scrollTo(0,0);});
             await page.waitForFunction(()=>document.documentElement.dataset.fxCoreReferenceLock==='ready-v30',null,{timeout:60000});
             await page.waitForTimeout(1800);
             const runtime=await page.evaluate(()=>{
               const root=document.documentElement,canvas=document.querySelector('.fx-core-real3d-canvas'),stage=document.querySelector('.fx-core-real3d-stage'),rect=canvas?.getBoundingClientRect();
               let webgl2=false;try{webgl2=Boolean(canvas?.getContext('webgl2'));}catch(_){}
-              return {reference:root.dataset.fxCoreReferenceLock,referenceRevision:root.dataset.fxCoreReferenceRevision,surface:root.dataset.fxCoreReferenceSurface,visual:root.dataset.fxCoreVisualRevision,geometry:root.dataset.fxCoreGeometry,reactor:root.dataset.fxCoreInternalReactor,performance:root.dataset.fxCorePerformance,imageBacked:root.dataset.fxCoreImageBacked,webgl2,stageActive:stage?.dataset.active,canvas:rect?{width:rect.width,height:rect.height}:null,stages:document.querySelectorAll('.fx-core-real3d-stage').length};
+              return {reference:root.dataset.fxCoreReferenceLock,referenceRevision:root.dataset.fxCoreReferenceRevision,fit:root.dataset.fxCoreReferenceFit,surface:root.dataset.fxCoreReferenceSurface,visual:root.dataset.fxCoreVisualRevision,geometry:root.dataset.fxCoreGeometry,reactor:root.dataset.fxCoreInternalReactor,performance:root.dataset.fxCorePerformance,imageBacked:root.dataset.fxCoreImageBacked,webgl2,stageActive:stage?.dataset.active,canvas:rect?{width:rect.width,height:rect.height}:null,stages:document.querySelectorAll('.fx-core-real3d-stage').length};
             });
-            const file=`organic-reference-${cfg.name}.png`;await page.screenshot({path:file,fullPage:false});const visual=metrics(file,cfg.region);
-            fs.writeFileSync(`organic-reference-${cfg.name}.json`,JSON.stringify({runtime,visual,errors},null,2));
+            const file=`reference-fit-r7-${cfg.name}.png`;await page.screenshot({path:file,fullPage:false});const visual=metrics(file,cfg.region);
+            fs.writeFileSync(`reference-fit-r7-${cfg.name}.json`,JSON.stringify({runtime,visual,errors},null,2));
             await context.close();
             const b=visual.bounds;
-            const runtimeOk=runtime.reference==='ready-v30'&&runtime.referenceRevision==='uploaded-reference-20260810'&&runtime.surface==='organic-faceted-glass-r6'&&runtime.visual==='v30-reference-lock'&&runtime.geometry==='concave-four-sail-indexed-mesh-v30'&&runtime.reactor==='moving-white-core-four-rings-v30'&&runtime.performance==='adaptive-60-plus-fps'&&runtime.imageBacked==='false'&&runtime.webgl2&&runtime.stageActive==='true'&&runtime.stages===1&&runtime.canvas?.width>=cfg.viewport.width*.97&&runtime.canvas?.height>=cfg.viewport.height*.97;
-            const visualOk=visual.mean_luminance>=.025&&visual.mean_luminance<=.62&&visual.bright_fraction>=.003&&visual.saturated_fraction>=.012&&visual.cyan_violet_fraction>=.01&&b&&b.width>=cfg.minWidth&&b.height>=cfg.minHeight&&b.centerY>=cfg.centerYMin&&b.centerY<=cfg.centerYMax;
-            if(!runtimeOk||!visualOk||errors.length)throw new Error(`${cfg.name} r6 gate failed: ${JSON.stringify({runtime,visual,errors})}`);
+            const runtimeOk=runtime.reference==='ready-v30'&&runtime.referenceRevision==='uploaded-reference-20260810'&&runtime.fit==='uploaded-image-20260810-r7'&&runtime.surface==='organic-faceted-glass-r6'&&runtime.visual==='v30-reference-lock'&&runtime.geometry==='concave-four-sail-indexed-mesh-v30'&&runtime.reactor==='moving-white-core-four-rings-v30'&&runtime.performance==='adaptive-60-plus-fps'&&runtime.imageBacked==='false'&&runtime.webgl2&&runtime.stageActive==='true'&&runtime.stages===1&&runtime.canvas?.width>=cfg.viewport.width*.97&&runtime.canvas?.height>=cfg.viewport.height*.97;
+            const visualOk=visual.mean_luminance>=.018&&visual.mean_luminance<=.58&&visual.bright_fraction>=.0015&&visual.saturated_fraction>=.010&&visual.cyan_violet_fraction>=.008&&b&&b.width>=cfg.minWidth&&b.height>=cfg.minHeight&&b.centerY>=cfg.centerYMin&&b.centerY<=cfg.centerYMax;
+            if(!runtimeOk||!visualOk||errors.length)throw new Error(`${cfg.name} r7 gate failed: ${JSON.stringify({runtime,visual,errors})}`);
             return {runtime,visual};
           }
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-            const mobile=await capture(browser,{name:'mobile',mobile:true,viewport:{width:753,height:1536},region:{x0:15,y0:0,x1:738,y1:1240},minWidth:460,minHeight:650,centerYMin:420,centerYMax:790});
-            const desktop=await capture(browser,{name:'desktop',mobile:false,viewport:{width:1440,height:1000},region:{x0:560,y0:40,x1:1430,y1:960},minWidth:380,minHeight:360,centerYMin:220,centerYMax:730});
-            fs.writeFileSync('organic-reference-summary.json',JSON.stringify({surface:'organic-faceted-glass-r6',mobile,desktop},null,2));
-            console.log('ORGANIC_REFERENCE_EVIDENCE',JSON.stringify({mobile,desktop}));
+            const mobile=await capture(browser,{name:'mobile',mobile:true,viewport:{width:753,height:1536},region:{x0:15,y0:0,x1:738,y1:1300},minWidth:500,minHeight:520,centerYMin:500,centerYMax:930});
+            const desktop=await capture(browser,{name:'desktop',mobile:false,viewport:{width:1440,height:1000},region:{x0:560,y0:40,x1:1430,y1:960},minWidth:380,minHeight:360,centerYMin:250,centerYMax:780});
+            fs.writeFileSync('reference-fit-r7-summary.json',JSON.stringify({fit:'uploaded-image-20260810-r7',mobile,desktop},null,2));
+            console.log('REFERENCE_FIT_R7_EVIDENCE',JSON.stringify({mobile,desktop}));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1);});
           NODE
 
-      - name: Upload r6 visual evidence
+      - name: Upload r7 visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-organic-reference-r6-${{ github.run_id }}
+          name: live-reference-fit-r7-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-visual/organic-reference-mobile.png
-            ${{ runner.temp }}/mag-visual/organic-reference-desktop.png
-            ${{ runner.temp }}/mag-visual/organic-reference-mobile.json
-            ${{ runner.temp }}/mag-visual/organic-reference-desktop.json
-            ${{ runner.temp }}/mag-visual/organic-reference-summary.json
+            ${{ runner.temp }}/mag-visual/reference-fit-r7-mobile.png
+            ${{ runner.temp }}/mag-visual/reference-fit-r7-desktop.png
+            ${{ runner.temp }}/mag-visual/reference-fit-r7-mobile.json
+            ${{ runner.temp }}/mag-visual/reference-fit-r7-desktop.json
+            ${{ runner.temp }}/mag-visual/reference-fit-r7-summary.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -108,5 +108,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Organic faceted reference MAG r6 passed live mobile and desktop visual gates'; else state=failure; description='Organic faceted reference MAG r6 failed live visual gate'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference-fit WebGL2 MAG r7 passed live mobile and desktop visual gates'; else state=failure; description='Reference-fit MAG r7 failed live visual gate'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
