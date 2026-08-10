@@ -497,11 +497,16 @@ void main(){
     let orb;
     let ring;
     let wire;
+    let axis;
     try {
       shell = uploadIndexed(crystal());
       orb = uploadIndexed(sphere());
       ring = uploadIndexed(torus());
       wire = uploadLines(crystalLines());
+      axis = uploadLines([
+        -1.22, 0, .18, 1.22, 0, .18,
+        0, -1.31, .18, 0, 1.31, .18
+      ]);
     } catch (error) {
       stage.remove();
       fail('geometry-failed', error?.message || error);
@@ -733,26 +738,12 @@ void main(){
       gl.disable(gl.DEPTH_TEST);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-
-      const axis = new Float32Array([
-        -1.22, 0, .18, 1.22, 0, .18,
-        0, -1.31, .18, 0, 1.31, .18
-      ]);
-      const vao = gl.createVertexArray();
-      const b = gl.createBuffer();
-      gl.bindVertexArray(vao);
-      gl.bindBuffer(gl.ARRAY_BUFFER, b);
-      gl.bufferData(gl.ARRAY_BUFFER, axis, gl.STREAM_DRAW);
-      gl.enableVertexAttribArray(0);
-      gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+      gl.bindVertexArray(axis.vao);
 
       gl.uniformMatrix4fv(LU.M, false, base);
       gl.uniform3fv(LU.tint, [.36, .95, 1.00]);
       gl.uniform1f(LU.A, .42 + .08 * Math.sin(t * 1.1));
-      gl.drawArrays(gl.LINES, 0, 4);
-
-      gl.deleteBuffer(b);
-      gl.deleteVertexArray(vao);
+      gl.drawArrays(gl.LINES, 0, axis.count);
     }
 
     function render(now) {
