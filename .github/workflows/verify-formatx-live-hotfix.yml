@@ -1,5 +1,5 @@
 name: Verify FormatX live hotfix
-run-name: Verify live mobile hero + MAG v42 from ${{ github.sha }}
+run-name: Verify live MAG v43 from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -29,13 +29,13 @@ jobs:
               hero_css="$(mktemp)"
               recovery_css="$(mktemp)"
               mag37_css="$(mktemp)"
-              mag37_js="$(mktemp)"
               mag38_css="$(mktemp)"
               mag38_js="$(mktemp)"
               mag40_css="$(mktemp)"
               mag41_css="$(mktemp)"
               mag41_js="$(mktemp)"
               mag42_css="$(mktemp)"
+              mag43_js="$(mktemp)"
               core_js="$(mktemp)"
               home="$(mktemp)"
               if curl --fail --silent --show-error --location --max-time 30 \
@@ -44,8 +44,6 @@ jobs:
                    "$origin/scifi-ui/styles/formatx-mobile-recovery.css?v=${GITHUB_SHA}-${attempt}" > "$recovery_css" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/styles/formatx-mag-reference-v37.css?v=${GITHUB_SHA}-${attempt}" > "$mag37_css" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/scripts/formatx-mag-reference-v37.js?v=${GITHUB_SHA}-${attempt}" > "$mag37_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/styles/formatx-mag-reference-v38.css?v=${GITHUB_SHA}-${attempt}" > "$mag38_css" \
                 && curl --fail --silent --show-error --location --max-time 30 \
@@ -59,6 +57,8 @@ jobs:
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/styles/formatx-mag-reference-v42.css?v=${GITHUB_SHA}-${attempt}" > "$mag42_css" \
                 && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/scripts/formatx-mag-reference-v43.js?v=${GITHUB_SHA}-${attempt}" > "$mag43_js" \
+                && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_SHA}-${attempt}" > "$core_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/?v=${GITHUB_SHA}-${attempt}" > "$home" \
@@ -66,7 +66,6 @@ jobs:
                 && grep -Fq 'white-space: normal !important;' "$hero_css" \
                 && grep -Fq 'The Interaction Genome is a separate feature' "$recovery_css" \
                 && grep -Fq 'FormatX MAG reference v37' "$mag37_css" \
-                && grep -Fq 'v37-native-volumetric-reference' "$mag37_js" \
                 && grep -Fq 'FormatX MAG reference v38' "$mag38_css" \
                 && grep -Fq 'fxMagReferenceV38' "$mag38_js" \
                 && grep -Fq 'FormatX MAG reference v40' "$mag40_css" \
@@ -74,20 +73,24 @@ jobs:
                 && grep -Fq 'fxMagReferenceV41' "$mag41_js" \
                 && grep -Fq 'FormatX MAG reference v42' "$mag42_css" \
                 && grep -Fq 'clip-path:inset(0 0 0 48vw)!important' "$mag42_css" \
-                && grep -Fq 'scale(.74)!important' "$mag42_css" \
-                && grep -Fq 'reference-lock-v30-v42' "$core_js" \
-                && grep -Fq 'formatx-mag-reference-v42.css?v=20260810-mag-reference-v42-1' "$core_js" \
+                && grep -Fq 'fxMagReferenceV43' "$mag43_js" \
+                && grep -Fq 'v43-reference-crystal-native' "$mag43_js" \
+                && grep -Fq 'sharp-four-tip-crystal-v43' "$mag43_js" \
+                && grep -Fq 'faceted-fresnel-glass-v43' "$mag43_js" \
+                && grep -Fq 'reference-lock-v30-v43' "$core_js" \
+                && grep -Fq 'formatx-mag-reference-v43.js?v=20260810-mag-reference-v43-1' "$core_js" \
+                && ! grep -Fq "addScript(V37_SCRIPT" "$core_js" \
                 && grep -Fq 'FormatX Suite Pro' "$home"
               then
                 success=true
-                rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$mag42_css" "$core_js" "$home"
+                rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$mag42_css" "$mag43_js" "$core_js" "$home"
                 break
               fi
-              rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag37_js" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$mag42_css" "$core_js" "$home"
+              rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$mag42_css" "$mag43_js" "$core_js" "$home"
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Live MAG v42 verification failed for $origin" >&2
+              echo "Live MAG v43 verification failed for $origin" >&2
               exit 1
             fi
           done
@@ -113,7 +116,7 @@ jobs:
               body: JSON.stringify({
                 state,
                 context: 'FormatX live mobile hero verification',
-                description: 'Both domains serve native MAG v42 desktop containment plus v41 mobile copy-safe clipping',
+                description: 'Both domains serve native MAG v43 reference crystal plus v41 mobile copy-safe clipping',
                 target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
               }),
             }
