@@ -166,7 +166,8 @@ jobs:
         run: |
           set -o pipefail
           rm -rf .lighthouseci
-          lhci autorun --rc=lighthouserc.live.json 2>&1 | tee lighthouse-live-desktop-output.txt
+          lhci autorun --config=./lighthouserc.live.json 2>&1 | tee lighthouse-live-desktop-output.txt
+          grep -Fq 'Running Lighthouse 3 time(s) on URL: https://www.formatxsuite.com/?lighthouse=1&live=desktop' lighthouse-live-desktop-output.txt
           mkdir -p lighthouse-live-results/desktop
           cp -a .lighthouseci/. lighthouse-live-results/desktop/
         env:
@@ -178,7 +179,8 @@ jobs:
         run: |
           set -o pipefail
           rm -rf .lighthouseci
-          lhci autorun --rc=lighthouserc.live.mobile.json 2>&1 | tee lighthouse-live-mobile-output.txt
+          lhci autorun --config=./lighthouserc.live.mobile.json 2>&1 | tee lighthouse-live-mobile-output.txt
+          grep -Fq 'Running Lighthouse 3 time(s) on URL: https://www.formatxsuite.com/?lighthouse=1&live=mobile' lighthouse-live-mobile-output.txt
           mkdir -p lighthouse-live-results/mobile
           cp -a .lighthouseci/. lighthouse-live-results/mobile/
         env:
