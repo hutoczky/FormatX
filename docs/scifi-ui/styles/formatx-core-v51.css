@@ -1,5 +1,5 @@
 /* FormatX v51 reference crystal core — exact visual direction from the approved four-tip crystal reference.
-   Production revision: 2026-08-10-v51-reference-crystal-3. */
+   Production revision: 2026-08-10-v51-reference-crystal-4. */
 
 .fx-core-v51-stage {
   --fx-core-x: 68%;
@@ -17,6 +17,17 @@
   content: none !important;
   display: none !important;
   background: none !important;
+  opacity: 0 !important;
+}
+
+/* Legacy hero-space decoration was a bright circular orb exactly behind the MAG.
+   It masked the four-tip crystal silhouette on mobile and desktop. */
+html[data-fx-core-v51="ready-v51"] #hero .hero-space::before,
+html[data-fx-core-v51="ready-v51"] #hero .hero-space::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  box-shadow: none !important;
   opacity: 0 !important;
 }
 
