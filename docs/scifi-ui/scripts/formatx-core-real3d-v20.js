@@ -1,12 +1,13 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const BOOTSTRAP='reference-lock-v30';
-const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-7';
-const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-7';
-const POLISH_STYLE='./styles/formatx-reference-polish-v31.css?v=20260810-reference-polish-1';
-const POST_STYLE='./styles/formatx-reference-postfx-v31.css?v=20260810-reference-postfx-1';
-const POST_SCRIPT='./scripts/formatx-reference-postfx-v31.js?v=20260810-reference-postfx-1';
+const BOOTSTRAP='reference-lock-v32';
+const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-8';
+const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-8';
+const POLISH_STYLE='./styles/formatx-reference-polish-v31.css?v=20260810-reference-polish-2';
+const POST_STYLE='./styles/formatx-reference-postfx-v31.css?v=20260810-reference-postfx-2';
+const GUARD_STYLE='./styles/formatx-mobile-text-guard-v32.css?v=20260810-mobile-text-guard-1';
+const POST_SCRIPT='./scripts/formatx-reference-postfx-v31.js?v=20260810-reference-postfx-2';
 if(root.dataset.fxCoreReal3dBootstrap===BOOTSTRAP)return;
 root.dataset.fxCoreReal3dBootstrap=BOOTSTRAP;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
@@ -28,6 +29,7 @@ function addStyle(href,key){
 addStyle(STYLE,'fx-reference-lock-v30');
 addStyle(POLISH_STYLE,'fx-reference-polish-v31');
 addStyle(POST_STYLE,'fx-reference-postfx-v31');
+addStyle(GUARD_STYLE,'fx-mobile-text-guard-v32');
 if(document.querySelector('script[data-fx-reference-lock-v30]'))return;
 const script=document.createElement('script');
 script.src=SCRIPT;
