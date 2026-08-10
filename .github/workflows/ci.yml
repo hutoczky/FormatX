@@ -47,10 +47,14 @@ jobs:
         run: |
           set -o pipefail
           rm -rf .lighthouseci
+          set +e
           lhci autorun --config=./lighthouserc.json 2>&1 | tee lighthouse-desktop-output.txt
-          grep -Eq 'Running Lighthouse 3 time\(s\) on URL: http://localhost:[0-9]+/scifi-ui/index.html\?lighthouse=1$' lighthouse-desktop-output.txt
+          lhci_status=${PIPESTATUS[0]}
+          set -e
+          grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html\?lighthouse=1$' lighthouse-desktop-output.txt
           mkdir -p lighthouse-results/desktop
           cp -a .lighthouseci/. lighthouse-results/desktop/
+          exit "$lhci_status"
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
@@ -61,10 +65,14 @@ jobs:
         run: |
           set -o pipefail
           rm -rf .lighthouseci
+          set +e
           lhci autorun --config=./lighthouserc.mobile.json 2>&1 | tee lighthouse-mobile-output.txt
-          grep -Eq 'Running Lighthouse 3 time\(s\) on URL: http://localhost:[0-9]+/scifi-ui/index.html\?lighthouse=1&mobile=1$' lighthouse-mobile-output.txt
+          lhci_status=${PIPESTATUS[0]}
+          set -e
+          grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html\?lighthouse=1&mobile=1$' lighthouse-mobile-output.txt
           mkdir -p lighthouse-results/mobile
           cp -a .lighthouseci/. lighthouse-results/mobile/
+          exit "$lhci_status"
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
