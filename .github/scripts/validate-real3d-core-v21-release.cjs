@@ -28,7 +28,7 @@ for (const token of [
   'webglcontextlost'
 ]) assert.ok(src.includes(token), `missing release contract: ${token}`);
 
-assert.match(src, /const budget=mobile\?1150000:2400000/);
+assert.match(src, /budget=mobile\?1150000:2400000/);
 assert.match(src, /clamp\(w\*\.00156,\.55,\.70\)/);
 assert.doesNotMatch(src, /new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|backgroundImage/i);
 assert.doesNotMatch(src, /THREE\b|three\.js|babylon|playcanvas|model-viewer/i);
