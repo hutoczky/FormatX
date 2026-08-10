@@ -2,11 +2,17 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxReleaseMetadata === 'ready-v5') return;
-  ROOT.dataset.fxReleaseMetadata = 'loading-v5';
+  if (ROOT.dataset.fxReleaseMetadata === 'ready-v6') return;
+  ROOT.dataset.fxReleaseMetadata = 'loading-v6';
 
   const RELEASE_URL = '/scifi-ui/data/current-release.json';
+  const OFFICIAL_REPOSITORY = 'hutoczky/FormatX-Updates';
+  const OFFICIAL_GITHUB_HOST = 'github.com';
+  const OFFICIAL_RELEASE_PATH = '/hutoczky/FormatX-Updates/releases/';
+  const OFFICIAL_DOWNLOAD_PATH = '/hutoczky/FormatX-Updates/releases/download/';
+  /* Kept only so older source-contract checks can recognise that legacy Windows-only metadata is intentionally retired. */
   const LEGACY_VALIDATION_MARKER = 'channels?.windows';
+
   const FALLBACK = Object.freeze({
     hu: {
       package: 'Teljes multiplatform verzió letöltése',
@@ -16,7 +22,7 @@
       unknown: 'Nincs közzétett adat',
       integrity: {
         package_only: 'Csomag közzétéve; külön integritási bizonyíték nincs',
-        digest_published: 'SHA-256 vagy ellenőrzőösszeg közzétéve',
+        digest_published: 'SHA-256 digest közzétéve',
         digest_and_signature_published: 'Digest és aláírási bizonyíték közzétéve'
       }
     },
@@ -28,7 +34,7 @@
       unknown: 'No published data',
       integrity: {
         package_only: 'Package published; no separate integrity proof',
-        digest_published: 'SHA-256 or checksum evidence published',
+        digest_published: 'SHA-256 digest published',
         digest_and_signature_published: 'Digest and signature evidence published'
       }
     }
@@ -41,25 +47,70 @@
   const safeText = value => typeof value === 'string' ? value.trim() : '';
   const releaseDescription = () => copy().release;
 
-  function firstPartyUrl(value) {
+  function parseUrl(value) {
     try {
-      const url = new URL(value, location.origin);
-      return url.origin === location.origin ? url : null;
+      return new URL(value, location.origin);
     } catch (_) {
       return null;
     }
   }
 
+  function isSameOrigin(url) {
+    return Boolean(url && url.origin === location.origin);
+  }
+
+  function isOfficialGitHubReleaseUrl(url) {
+    return Boolean(
+      url
+      && url.protocol === 'https:'
+      && url.hostname === OFFICIAL_GITHUB_HOST
+      && url.pathname.startsWith(OFFICIAL_RELEASE_PATH)
+    );
+  }
+
+  function isOfficialGitHubDownloadUrl(url) {
+    return Boolean(
+      url
+      && url.protocol === 'https:'
+      && url.hostname === OFFICIAL_GITHUB_HOST
+      && url.pathname.startsWith(OFFICIAL_DOWNLOAD_PATH)
+    );
+  }
+
   function isAllowedDownloadUrl(value) {
-    const url = firstPartyUrl(value);
+    const url = parseUrl(value);
     if (!url) return false;
+    if (isOfficialGitHubDownloadUrl(url)) return true;
+    if (!isSameOrigin(url)) return false;
     return ['/download/multiplatform', '/download/android', '/download/android-native-beta'].includes(url.pathname)
       || url.pathname.startsWith('/scifi-ui/downloads/');
   }
 
   function isAllowedReleaseUrl(value) {
-    const url = firstPartyUrl(value);
-    return Boolean(url && url.pathname.startsWith('/scifi-ui/'));
+    const url = parseUrl(value);
+    if (!url) return false;
+    return isOfficialGitHubReleaseUrl(url)
+      || (isSameOrigin(url) && url.pathname.startsWith('/scifi-ui/'));
+  }
+
+  function isOfficialMetadata(release) {
+    const acceptedSource = release?.source === 'github_published_release'
+      || release?.source === 'formatx_release_service';
+    const repository = safeText(release?.repository);
+    const repositoryMatches = !repository || repository === OFFICIAL_REPOSITORY;
+    const version = safeText(release?.version);
+    const releaseUrl = parseUrl(release?.release_url);
+    const versionLooksOfficial = /^v\d+$/i.test(version);
+    const releaseTagMatches = !versionLooksOfficial
+      || releaseUrl?.pathname.endsWith('/tag/' + version);
+    return Boolean(
+      acceptedSource
+      && repositoryMatches
+      && release?.prerelease !== true
+      && versionLooksOfficial
+      && isOfficialGitHubReleaseUrl(releaseUrl)
+      && releaseTagMatches
+    );
   }
 
   function releaseDate(value = state.release?.published_at) {
@@ -87,10 +138,15 @@
     }).format(amount) + ' ' + units[index];
   }
 
+  function validDigest(value) {
+    return /^sha256:[0-9a-f]{64}$/i.test(safeText(value));
+  }
+
   function packageAsset() {
     if (!state.available) return null;
     const asset = state.release?.channels?.multiplatform;
     if (!asset || asset.available !== true || !isAllowedDownloadUrl(asset.download_url)) return null;
+    if (!validDigest(asset.digest)) return null;
     return asset;
   }
 
@@ -103,6 +159,13 @@
     document.querySelectorAll(selector).forEach(element => {
       element.textContent = value || (fallback ? copy().unknown : '');
     });
+  }
+
+  function secureExternalLink(link, href) {
+    const url = parseUrl(href);
+    if (!url || isSameOrigin(url)) return;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
   }
 
   function ensureFallbackNotice() {
@@ -139,6 +202,7 @@
 
     if (asset) {
       link.href = asset.download_url;
+      secureExternalLink(link, asset.download_url);
       link.removeAttribute('aria-disabled');
       link.classList.remove('is-disabled', 'is-metadata-fallback');
       if (link.dataset.releaseDescription) link.setAttribute('aria-describedby', link.dataset.releaseDescription);
@@ -146,6 +210,8 @@
       link.title = copy().package;
     } else {
       link.href = '/scifi-ui/downloads/';
+      link.removeAttribute('target');
+      link.removeAttribute('rel');
       link.setAttribute('aria-describedby', ensureFallbackNotice().id);
       link.classList.add('is-metadata-fallback');
       link.title = copy().unavailable;
@@ -167,9 +233,12 @@
         if (!(link instanceof HTMLAnchorElement)) return;
         if (href && validator(href)) {
           link.href = href;
+          secureExternalLink(link, href);
           link.removeAttribute('aria-disabled');
         } else {
           link.removeAttribute('href');
+          link.removeAttribute('target');
+          link.removeAttribute('rel');
           link.setAttribute('aria-disabled', 'true');
         }
       });
@@ -179,10 +248,10 @@
   function apply() {
     const asset = packageAsset();
     void LEGACY_VALIDATION_MARKER;
-    setText('[data-release-version]', '', false);
+    setText('[data-release-version]', safeText(state.release?.version), false);
     setText('[data-release-date]', releaseDate());
     setText('[data-release-status]', copy().status);
-    setText('[data-release-sha256]', asset && safeText(asset.digest) ? asset.digest : '');
+    setText('[data-release-sha256]', asset ? safeText(asset.digest) : '');
     setText('[data-release-size]', asset ? formatBytes(asset.size) : '');
     setText('[data-release-integrity]', integrityLabel());
     setText('[data-release-source-updated]', releaseDate(state.release?.source_updated_at));
@@ -191,8 +260,9 @@
     ).forEach(updateDownloadLink);
     updateEvidenceLinks();
     ensureFallbackNotice();
-    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v5' : 'fallback-v5';
+    ROOT.dataset.fxReleaseMetadata = state.available ? 'ready-v6' : 'fallback-v6';
     ROOT.dataset.fxReleaseSchema = String(state.release?.schema_version || 0);
+    ROOT.dataset.fxReleaseVersion = safeText(state.release?.version) || 'unknown';
     ROOT.__FORMATX_RELEASE_METADATA__ = Object.freeze({ ...state });
     dispatchEvent(new CustomEvent('formatx:releasemetadataready', { detail: ROOT.__FORMATX_RELEASE_METADATA__ }));
   }
@@ -202,9 +272,7 @@
       const response = await fetch(RELEASE_URL, { cache: 'no-store', credentials: 'same-origin' });
       if (!response.ok) throw new Error(`${RELEASE_URL}: ${response.status}`);
       const release = await response.json();
-      const official = release?.source === 'formatx_release_service'
-        && isAllowedReleaseUrl(release.release_url)
-        && release.prerelease !== true;
+      const official = isOfficialMetadata(release);
       state = {
         release,
         available: release?.ok === true && official,
