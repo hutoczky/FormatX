@@ -1,0 +1,159 @@
+/* FormatX mobile MAG v33 — hard visual/text separation plus closer reference framing. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  /* The WebGL renderer stays full-resolution, but its visible footprint is bounded. */
+  .fx-core-real3d-stage {
+    --fx-core-x:50%!important;
+    clip-path:inset(0 0 22dvh 0)!important;
+    transition:opacity 220ms ease,visibility 0s linear 220ms!important;
+  }
+
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="text"] {
+    opacity:0!important;
+    visibility:hidden!important;
+    transition:opacity 170ms ease,visibility 0s linear 170ms!important;
+  }
+
+  .fx-core-real3d-canvas {
+    transform:translate3d(0,-4dvh,0) scale(.82,1.08)!important;
+    transform-origin:50% 49%!important;
+    filter:saturate(1.72) contrast(1.44) brightness(2.68)
+      drop-shadow(0 0 7px rgba(109,244,255,.54))
+      drop-shadow(0 0 22px rgba(40,164,255,.28))
+      drop-shadow(0 0 38px rgba(154,65,255,.16))!important;
+  }
+
+  .fx-core-postfx-v31 {
+    transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 4dvh),0) scale(.82,1.08)!important;
+    transform-origin:50% 49%!important;
+  }
+
+  /* Make the reactor read as a luminous sci-fi core instead of a flat white dot. */
+  .fx-v31-flare {
+    width:16px!important;
+    height:16px!important;
+    margin:-8px 0 0 -8px!important;
+    box-shadow:
+      0 0 5px #fff,
+      0 0 13px rgba(220,255,255,1),
+      0 0 31px rgba(74,235,255,.98),
+      0 0 62px rgba(47,164,255,.64),
+      0 0 102px rgba(154,62,255,.24)!important;
+  }
+
+  .fx-v31-ring-a { opacity:.84!important; }
+  .fx-v31-ring-b { opacity:.66!important; }
+  .fx-v31-ring-c { opacity:.53!important; }
+  .fx-v31-spectrum { opacity:.72!important; }
+
+  body.living-architecture #hero {
+    min-height:auto!important;
+    height:auto!important;
+    padding-top:max(74px,calc(env(safe-area-inset-top) + 64px))!important;
+    padding-bottom:34px!important;
+    overflow:visible!important;
+  }
+
+  body.living-architecture #hero .hero-grid {
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    min-height:0!important;
+    height:auto!important;
+    gap:0!important;
+    padding-inline:0!important;
+    overflow:visible!important;
+  }
+
+  /* MAG has one dedicated slot. Text never uses negative overlap. */
+  body.living-architecture #hero .hero-space {
+    order:1!important;
+    position:relative!important;
+    inset:auto!important;
+    z-index:1!important;
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-height:clamp(390px,54svh,590px)!important;
+    max-height:590px!important;
+    margin:0!important;
+    overflow:hidden!important;
+    border-radius:0!important;
+    transform:none!important;
+    translate:none!important;
+  }
+
+  body.living-architecture #hero .hero-copy {
+    order:2!important;
+    position:relative!important;
+    inset:auto!important;
+    z-index:300!important;
+    flex:0 0 auto!important;
+    width:min(calc(100% - 18px),720px)!important;
+    max-width:720px!important;
+    min-width:0!important;
+    margin:0 auto!important;
+    padding:24px 16px 28px!important;
+    transform:none!important;
+    translate:none!important;
+    opacity:1!important;
+    visibility:visible!important;
+    overflow:visible!important;
+    border:0!important;
+    border-radius:0!important;
+    background:linear-gradient(180deg,#010711 0%,rgba(1,7,17,.995) 55%,#010711 100%)!important;
+    box-shadow:0 -28px 42px rgba(1,7,17,.98)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    isolation:isolate!important;
+  }
+
+  #hero .hero-copy>.kicker,
+  #hero #hero-title,
+  #hero .hero-title-main,
+  #hero .hero-title-sub,
+  #hero .hero-lead,
+  #hero .hero-actions,
+  #hero .hero-facts {
+    position:relative!important;
+    z-index:4!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+
+  #hero .hero-copy>.kicker {
+    display:block!important;
+    margin:0 0 10px!important;
+    color:rgba(229,249,255,.92)!important;
+  }
+
+  #hero #hero-title { margin:0 0 14px!important; }
+  #hero .hero-title-main { font-size:clamp(40px,11vw,56px)!important;line-height:.91!important; }
+  #hero .hero-title-sub { font-size:clamp(18px,5.3vw,27px)!important;margin-top:8px!important; }
+  #hero .hero-lead { color:rgba(237,247,253,.94)!important;line-height:1.5!important; }
+  #hero .hero-actions { margin-top:18px!important; }
+  #hero .hero-facts { margin-top:16px!important; }
+  #hero .scroll-cue { position:relative!important;z-index:305!important;margin-top:14px!important; }
+}
+
+@media (max-width:480px) {
+  body.living-architecture #hero .hero-space {
+    min-height:clamp(350px,50svh,500px)!important;
+    max-height:500px!important;
+  }
+
+  body.living-architecture #hero .hero-copy {
+    width:min(calc(100% - 14px),720px)!important;
+    padding:21px 14px 25px!important;
+  }
+
+  .fx-core-real3d-canvas {
+    transform:translate3d(0,-3.5dvh,0) scale(.80,1.07)!important;
+  }
+
+  .fx-core-postfx-v31 {
+    transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 3.5dvh),0) scale(.80,1.07)!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .fx-core-real3d-stage { transition-duration:90ms!important; }
+}
