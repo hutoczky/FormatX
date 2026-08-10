@@ -108,11 +108,15 @@
 
   const language = () => root.lang === 'en' ? 'en' : 'hu';
 
+  function setContent(element, value) {
+    if (element && element.textContent !== value) element.textContent = value;
+  }
+
   function setText(element, hu, en) {
     if (!element) return;
-    element.dataset.hu = hu;
-    element.dataset.en = en;
-    element.textContent = language() === 'en' ? en : hu;
+    if (element.dataset.hu !== hu) element.dataset.hu = hu;
+    if (element.dataset.en !== en) element.dataset.en = en;
+    setContent(element, language() === 'en' ? en : hu);
   }
 
   function buildDeck() {
@@ -140,10 +144,13 @@
   function renderDeck(copy) {
     const deck = document.querySelector('.fx-category-deck');
     if (!deck) return;
-    deck.querySelector('[data-fx-category-eyebrow]').textContent = copy.deckEyebrow;
-    deck.querySelector('[data-fx-category-title]').textContent = copy.deckTitle;
-    deck.querySelector('[data-fx-category-lead]').textContent = copy.deckLead;
+    setContent(deck.querySelector('[data-fx-category-eyebrow]'), copy.deckEyebrow);
+    setContent(deck.querySelector('[data-fx-category-title]'), copy.deckTitle);
+    setContent(deck.querySelector('[data-fx-category-lead]'), copy.deckLead);
     const grid = deck.querySelector('.fx-category-grid');
+    const signature = JSON.stringify(copy.deckCards);
+    if (grid.dataset.fxCopySignature === signature) return;
+    grid.dataset.fxCopySignature = signature;
     grid.replaceChildren(...copy.deckCards.map((item, index) => {
       const article = document.createElement('article');
       article.innerHTML = '<span>' + String(index + 1).padStart(2, '0') + '</span><h3></h3><p></p>';
@@ -156,11 +163,14 @@
   function renderProof(copy) {
     const proof = document.querySelector('.fx-origin-proof');
     if (!proof) return;
-    proof.querySelector('[data-fx-proof-eyebrow]').textContent = copy.proofEyebrow;
-    proof.querySelector('[data-fx-proof-title]').textContent = copy.proofTitle;
-    proof.querySelector('[data-fx-proof-story]').textContent = copy.proofStory;
-    proof.querySelector('[data-fx-proof-statement]').textContent = copy.proofStatement;
+    setContent(proof.querySelector('[data-fx-proof-eyebrow]'), copy.proofEyebrow);
+    setContent(proof.querySelector('[data-fx-proof-title]'), copy.proofTitle);
+    setContent(proof.querySelector('[data-fx-proof-story]'), copy.proofStory);
+    setContent(proof.querySelector('[data-fx-proof-statement]'), copy.proofStatement);
     const grid = proof.querySelector('.fx-proof-grid');
+    const signature = JSON.stringify(copy.proofCards);
+    if (grid.dataset.fxCopySignature === signature) return;
+    grid.dataset.fxCopySignature = signature;
     grid.replaceChildren(...copy.proofCards.map((item, index) => {
       const article = document.createElement('article');
       article.innerHTML = '<span>' + String(index + 1).padStart(2, '0') + '</span><div><h4></h4><p></p></div>';
@@ -174,9 +184,13 @@
     const card = document.querySelector('[data-plan-id="' + planId + '"]');
     if (!card) return;
     const paragraph = card.querySelector(':scope > p');
-    if (paragraph) paragraph.textContent = planCopy.description;
+    setContent(paragraph, planCopy.description);
     const list = card.querySelector('ul');
-    if (list) list.replaceChildren(...planCopy.bullets.map(text => {
+    if (!list) return;
+    const signature = JSON.stringify(planCopy.bullets);
+    if (list.dataset.fxCopySignature === signature) return;
+    list.dataset.fxCopySignature = signature;
+    list.replaceChildren(...planCopy.bullets.map(text => {
       const item = document.createElement('li');
       item.textContent = text;
       return item;
@@ -188,7 +202,10 @@
       try {
         const url = new URL(anchor.href, location.href);
         if (url.origin !== location.origin) return;
-        url.searchParams.set('lang', language());
+        const current = url.searchParams.get('lang');
+        const next = language();
+        if (current === next) return;
+        url.searchParams.set('lang', next);
         anchor.href = url.pathname + url.search + url.hash;
       } catch (_) {}
     });
@@ -197,13 +214,13 @@
   function render() {
     const lang = language();
     const copy = COPY[lang];
-    document.title = copy.title;
+    if (document.title !== copy.title) document.title = copy.title;
     const description = document.querySelector('meta[name="description"]');
-    if (description) description.content = copy.description;
+    if (description && description.content !== copy.description) description.content = copy.description;
     const ogTitle = document.querySelector('meta[property="og:title"]');
     const ogDescription = document.querySelector('meta[property="og:description"]');
-    if (ogTitle) ogTitle.content = copy.title;
-    if (ogDescription) ogDescription.content = copy.description;
+    if (ogTitle && ogTitle.content !== copy.title) ogTitle.content = copy.title;
+    if (ogDescription && ogDescription.content !== copy.description) ogDescription.content = copy.description;
 
     const kicker = document.querySelector('.hero-copy .kicker');
     const lead = document.querySelector('.hero-copy .hero-lead');
@@ -213,38 +230,31 @@
     setText(scroll, COPY.hu.enter, COPY.en.enter);
 
     document.querySelectorAll('.main-nav a').forEach((anchor, index) => {
-      if (copy.nav[index]) anchor.textContent = copy.nav[index];
+      if (copy.nav[index]) setContent(anchor, copy.nav[index]);
     });
 
     document.querySelectorAll('.hero-facts > span').forEach((fact, index) => {
       const data = copy.facts[index];
       if (!data) return;
-      const number = fact.querySelector('b');
-      const label = fact.querySelector('small');
-      if (number) number.textContent = data[0];
-      if (label) label.textContent = data[1];
+      setContent(fact.querySelector('b'), data[0]);
+      setContent(fact.querySelector('small'), data[1]);
     });
 
     const capabilitiesHeading = document.querySelector('#capabilities .section-heading h2');
     if (capabilitiesHeading) {
-      const span = capabilitiesHeading.querySelector('span');
-      const em = capabilitiesHeading.querySelector('em');
-      if (span) span.textContent = copy.capabilitiesTitle[0];
-      if (em) em.textContent = copy.capabilitiesTitle[1];
+      setContent(capabilitiesHeading.querySelector('span'), copy.capabilitiesTitle[0]);
+      setContent(capabilitiesHeading.querySelector('em'), copy.capabilitiesTitle[1]);
     }
     const pricingHeading = document.querySelector('#pricing .section-heading h2');
     if (pricingHeading) {
-      const span = pricingHeading.querySelector('span');
-      const em = pricingHeading.querySelector('em');
-      if (span) span.textContent = copy.pricingTitle[0];
-      if (em) em.textContent = copy.pricingTitle[1];
+      setContent(pricingHeading.querySelector('span'), copy.pricingTitle[0]);
+      setContent(pricingHeading.querySelector('em'), copy.pricingTitle[1]);
     }
 
     Object.entries(copy.plans).forEach(([planId, planCopy]) => updatePlan(planId, planCopy));
     renderDeck(copy);
     renderProof(copy);
-    const footer = document.querySelector('.site-footer .footer-brand p');
-    if (footer) footer.textContent = copy.footer;
+    setContent(document.querySelector('.site-footer .footer-brand p'), copy.footer);
     syncCheckoutLinks();
     root.dataset.fxCategoryLanguage = lang;
   }
