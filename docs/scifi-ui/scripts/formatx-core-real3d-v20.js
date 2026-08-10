@@ -3,8 +3,8 @@
 
   const root = document.documentElement;
   const BOOTSTRAP = 'reference-crystal-core-v51';
-  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=15';
-  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=15';
+  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=16';
+  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=16';
   const MOBILE_SAFE_SCRIPT = './scripts/formatx-core-mobile-compat-v52.js?v=20260810-mobile-safe-v52-3';
   const MOBILE_SAFE_STYLE = './styles/formatx-core-mobile-compat-v52.css?v=20260810-mobile-safe-v52-3';
   const mobile = matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;
