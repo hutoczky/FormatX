@@ -13,6 +13,12 @@ function mount(){
   const copy=hero?.querySelector('.hero-copy');
   if(!stage||!hero||!copy){if(tries++<360)requestAnimationFrame(mount);return;}
 
+  const blockers=()=>[
+    copy,
+    ...hero.querySelectorAll('.hero-actions,.hero-facts,.hero-cta,.hero-download,.download-card,.download-panel'),
+    hero.nextElementSibling
+  ].filter(Boolean);
+
   function sync(){
     raf=0;
     const vh=Math.max(1,visualViewport?.height||innerHeight);
@@ -28,18 +34,28 @@ function mount(){
       return;
     }
 
-    /* Full four-tip crystal while the copy is still below the viewport. */
-    if(cr.top>=vh-2){
+    const rects=blockers().map(node=>node.getBoundingClientRect());
+    const entering=rects.filter(r=>r.bottom>headerBottom+24&&r.top<vh-2);
+    const futureTop=Math.min(...rects.map(r=>r.top).filter(top=>top>=vh-2),Infinity);
+
+    /* Keep the complete crystal only while all readable/interactive content is below the viewport. */
+    if(!entering.length&&Number.isFinite(futureTop)){
       stage.style.setProperty('--fx-mag-clip-bottom','0px');
       root.dataset.fxMagSafeClip='0';
       return;
     }
 
-    /* Once copy enters, clip exactly above its readable card with a small fade gap. */
-    const safeY=Math.max(headerBottom+56,Math.min(vh,cr.top-22));
+    /* Prefer the first positive blocker boundary (copy/CTA/next section). */
+    const positiveTops=entering.map(r=>r.top).filter(top=>top>headerBottom+28);
+    let safeTop=positiveTops.length?Math.min(...positiveTops):headerBottom+74;
+    safeTop=Math.min(safeTop,cr.top>headerBottom+28?cr.top:safeTop);
+
+    /* Larger mobile safety gap prevents the crystal/glow from touching CTA cards. */
+    const safeY=Math.max(headerBottom+64,Math.min(vh,safeTop-42));
     const bottom=Math.max(0,Math.round(vh-safeY));
     stage.style.setProperty('--fx-mag-clip-bottom',bottom+'px');
     root.dataset.fxMagSafeClip=String(bottom);
+    root.dataset.fxMagSafeBoundary=Math.round(safeY)+'px';
   }
 
   function queue(){if(!raf)raf=requestAnimationFrame(sync);}
@@ -52,16 +68,16 @@ function mount(){
   mq.addEventListener?.('change',queue);
 
   if('ResizeObserver'in window){
-    const ro=new ResizeObserver(queue);ro.observe(copy);ro.observe(hero);
+    const ro=new ResizeObserver(queue);ro.observe(copy);ro.observe(hero);blockers().forEach(node=>ro.observe(node));
   }
   if('IntersectionObserver'in window){
     const io=new IntersectionObserver(queue,{threshold:[0,.01,.08,.25,.5,.8]});
-    io.observe(copy);io.observe(hero);
+    blockers().forEach(node=>io.observe(node));
   }
 
   root.dataset.fxMagReferenceV41='ready';
-  root.dataset.fxCoreVisualRevision='v41-mobile-copy-safe-clip';
-  root.dataset.fxCoreMobileProtection='clip-only-when-copy-enters-viewport';
+  root.dataset.fxCoreVisualRevision='v46-mobile-copy-and-cta-safe-clip';
+  root.dataset.fxCoreMobileProtection='clip-before-copy-cta-or-next-section';
 }
 
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',mount,{once:true});else mount();
