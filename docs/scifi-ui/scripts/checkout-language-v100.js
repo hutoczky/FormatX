@@ -15,7 +15,7 @@
   });
 
   const TRANSLATIONS = [
-    ['Banki átutalás | FormatX Suite Pro', 'Bank transfer | FormatX Suite Pro'],
+    ['Üzleti licencrendelés banki átutalással | FormatX Suite Pro', 'Business licence order by bank transfer | FormatX Suite Pro'],
     ['Ugrás a tartalomra', 'Skip to content'],
     ['FormatX Suite Pro főoldal', 'FormatX Suite Pro home'],
     ['HUF / EUR banki átutalás', 'HUF / EUR bank transfer'],
@@ -23,10 +23,10 @@
     ['Megjelenés', 'Appearance'],
     ['Sötét', 'Dark'],
     ['Világos', 'Light'],
-    ['RÖGZÍTETT ÖSSZEG HUF-BAN VAGY EURÓBAN', 'FIXED AMOUNT IN HUF OR EUR'],
+    ['ÜZLETI RENDELÉS · RÖGZÍTETT ÖSSZEG HUF-BAN VAGY EURÓBAN', 'BUSINESS ORDER · FIXED AMOUNT IN HUF OR EUR'],
     ['Közvetlen banki átutalás QR-kóddal', 'Direct bank transfer with QR'],
     ['HUF-fizetésnél az RFC 8905 szabvány szerinti', 'For HUF payments, an RFC 8905'],
-    ['QR-kód, EUR-fizetésnél pedig EPC SEPA átutalási QR-kód készül. A kiválasztott csomaghoz rögzített összeg és egyedi rendelési azonosító tartozik.', 'QR is generated; for EUR payments, an EPC SEPA transfer QR is generated. Every selected plan has a fixed amount and a unique order reference.'],
+    ['QR-kód, EUR-fizetésnél EPC SEPA átutalási QR-kód készül. A kiválasztott csomaghoz rögzített összeg és egyedi rendelési azonosító tartozik. A jelenlegi checkout kizárólag vállalkozási vagy szakmai célú megrendelésre használható.', 'QR is generated; for EUR payments, an EPC SEPA transfer QR is generated. Every selected plan has a fixed amount and a unique order reference. The current checkout is available only for business or professional-purpose orders.'],
     ['RENDELÉS', 'ORDER'],
     ['Összegzés', 'Summary'],
     ['Csomag', 'Plan'],
@@ -53,12 +53,13 @@
     ['1 év — egyszeri fizetés, 2 hónap díjmentes', '1 year — one-time payment, 2 months included'],
     ['Magyar forint (HUF)', 'Hungarian forint (HUF)'],
     ['Euró (EUR / SEPA)', 'Euro (EUR / SEPA)'],
+    ['Kijelentem, hogy a rendelést vállalkozás vagy szakmai tevékenységem körében adom le. Ez a checkout jelenleg nem fogyasztói értékesítésre szolgál.', 'I confirm that I am placing this order in the course of a business or professional activity. This checkout is not currently intended for consumer sales.'],
     ['Elfogadom a', 'I accept the'],
     ['felhasználási feltételeket', 'terms of use'],
     ['és az', 'and the'],
     ['adatkezelési tájékoztatót', 'privacy notice'],
     ['. Tudomásul veszem, hogy ez egyszeri banki átutalás, és a licenc csak a jóváírás kézi ellenőrzése után aktiválódik.', '. I understand that this is a one-time bank transfer and the licence is activated only after manual verification of the credit.'],
-    ['Bankszámla ellenőrzése…', 'Checking bank payment…'],
+    ['Rendelési rendszer ellenőrzése…', 'Checking order system…'],
     ['Fix összegű átutalási QR előkészítése', 'Prepare fixed-amount transfer QR'],
     ['A fizetés átmenetileg nem elérhető', 'Payment temporarily unavailable'],
     ['A fizetés nem elérhető', 'Payment unavailable'],
@@ -229,13 +230,15 @@
     applying = true;
     const target = next === 'en' ? 'en' : 'hu';
     if (root.lang !== target) root.lang = target;
-    root.dataset.fxCheckoutLanguage = 'authoritative-v4';
+    root.dataset.fxCheckoutLanguage = 'authoritative-v5';
     root.dataset.formatxPricing = 'v100-market-2026-07';
-    document.title = target === 'en' ? 'Bank transfer | FormatX Suite Pro' : 'Banki átutalás | FormatX Suite Pro';
+    document.title = target === 'en'
+      ? 'Business licence order by bank transfer | FormatX Suite Pro'
+      : 'Üzleti licencrendelés banki átutalással | FormatX Suite Pro';
     const description = document.querySelector('meta[name="description"]');
     if (description) description.content = target === 'en'
-      ? 'FormatX Suite Pro licence purchase by fixed-amount HUF or EUR bank transfer and QR.'
-      : 'FormatX Suite Pro licencvásárlás rögzített összegű, forint- vagy euróalapú banki átutalással és QR-kóddal.';
+      ? 'FormatX Suite Pro business licence order by fixed-amount HUF or EUR bank transfer and QR.'
+      : 'FormatX Suite Pro üzleti licencrendelés rögzített összegű, forint- vagy euróalapú banki átutalással és QR-kóddal.';
 
     translateTree(target);
     renderPricing(target);
@@ -254,7 +257,7 @@
     }
     applying = false;
     if (notify) dispatchEvent(new CustomEvent('formatx:languagechange', {
-      detail: { language: target, source: 'checkout-authoritative-v4' }
+      detail: { language: target, source: 'checkout-authoritative-v5' }
     }));
   }
 
@@ -262,7 +265,7 @@
   applyLanguage(initialLanguage(), false, false);
 
   addEventListener('formatx:languagechange', event => {
-    if (event.detail?.source === 'checkout-authoritative-v4') return;
+    if (event.detail?.source === 'checkout-authoritative-v5') return;
     queueMicrotask(() => applyLanguage(language(), false, false));
   });
   addEventListener('pageshow', () => applyLanguage(language(), false, false));
