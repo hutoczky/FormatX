@@ -3,14 +3,17 @@
 
   const root = document.documentElement;
   const BOOTSTRAP = 'reference-crystal-core-v51';
-  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=11';
-  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=11';
+  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=12';
+  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=12';
+  const MOBILE_HOST_SCRIPT = './scripts/formatx-core-mobile-host-v52.js?v=20260810-mobile-host-v52-1';
+  const MOBILE_HOST_STYLE = './styles/formatx-core-mobile-host-v52.css?v=20260810-mobile-host-v52-1';
 
   /*
     Production authority is v51: one native WebGL2 context, closed volumetric
     four-tip concave faceted crystal, moving white nucleus and concentric
-    cyan/violet rings. The older rounded v50 and legacy multi-renderer MAG
-    stacks are not loaded.
+    cyan/violet rings. v52 only corrects the physical-mobile DOM host and
+    framing so the same v51 WebGL renderer remains visible inside hero-space.
+    The older rounded v50 and legacy multi-renderer MAG stacks are not loaded.
     formatx-core-v50.js
     formatx-reference-lock-v30.js
     formatx-mobile-mag-v33.js
@@ -32,16 +35,16 @@
   root.dataset.fxCoreRenderer = 'single-webgl2-reference-crystal-v51';
   root.dataset.fxCoreReferenceLock = 'loading-v51';
 
-  function addStyle(href) {
-    if (document.querySelector('link[data-fx-core-v51-style]')) return;
+  function addStyle(href, marker) {
+    if (document.querySelector(`link[${marker}]`)) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = href;
-    link.dataset.fxCoreV51Style = 'true';
+    link.setAttribute(marker, 'true');
     document.head.appendChild(link);
   }
 
-  function addScript(src) {
+  function addCoreScript(src) {
     if (document.querySelector('script[data-fx-core-v51-script]')) return;
     const script = document.createElement('script');
     script.src = src;
@@ -61,6 +64,17 @@
     document.head.appendChild(script);
   }
 
-  addStyle(STYLE);
-  addScript(SCRIPT);
+  function addMobileHostScript(src) {
+    if (document.querySelector('script[data-fx-core-mobile-host-v52]')) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = false;
+    script.dataset.fxCoreMobileHostV52 = 'true';
+    document.head.appendChild(script);
+  }
+
+  addStyle(STYLE, 'data-fx-core-v51-style');
+  addStyle(MOBILE_HOST_STYLE, 'data-fx-core-mobile-host-v52-style');
+  addCoreScript(SCRIPT);
+  addMobileHostScript(MOBILE_HOST_SCRIPT);
 }());
