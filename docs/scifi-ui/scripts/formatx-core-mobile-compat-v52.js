@@ -6,7 +6,7 @@
   if (!mobile || root.dataset.fxCoreMobileCompat === 'ready-v52') return;
 
   const READY = 'ready-v51';
-  const VERSION = 'v52-mobile-safe-hero-local-volumetric-crystal-r4';
+  const VERSION = 'v52-mobile-safe-hero-local-volumetric-crystal-r5';
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -193,6 +193,11 @@
       return;
     }
 
+    /* Claim v51 ownership before any expensive WebGL work. This closes the
+       startup window in which another v51 instance could create a second stage. */
+    root.dataset.fxCoreV51=READY;
+    root.dataset.fxCoreMobileCompat='claiming-v52';
+
     document.querySelectorAll('.fx-core-real3d-stage').forEach(n=>n.remove());
 
     host.style.setProperty('position','relative','important');
@@ -241,6 +246,19 @@
     stage.append(canvas);
     host.prepend(stage);
 
+    function pruneDuplicateCoreNodes(){
+      document.querySelectorAll('.fx-core-v51-stage').forEach(node=>{
+        if(node!==stage) node.remove();
+      });
+      document.querySelectorAll('.fx-core-v51-canvas').forEach(node=>{
+        if(node!==canvas && !stage.contains(node)) node.remove();
+      });
+    }
+
+    pruneDuplicateCoreNodes();
+    const duplicateObserver=('MutationObserver' in window) ? new MutationObserver(()=>pruneDuplicateCoreNodes()) : null;
+    duplicateObserver?.observe(document.body,{childList:true,subtree:true});
+
     let gl;
     try{
       gl=canvas.getContext('webgl2',{
@@ -253,12 +271,14 @@
         powerPreference:'high-performance'
       });
     }catch(error){
+      duplicateObserver?.disconnect();
       stage.remove();
       fail('context-unavailable',error && error.message ? error.message : error);
       return;
     }
 
     if(!gl || gl.isContextLost()){
+      duplicateObserver?.disconnect();
       stage.remove();
       fail('context-unavailable');
       return;
@@ -389,6 +409,7 @@ void main(){
       lineProgram=makeProgram(LINE_VS,LINE_FS);
       pointProgram=makeProgram(POINT_VS,POINT_FS);
     }catch(error){
+      duplicateObserver?.disconnect();
       stage.remove();
       fail('shader-failed',error && error.message ? error.message : error);
       return;
@@ -648,6 +669,7 @@ void main(){
     canvas.addEventListener('webglcontextlost',event=>{
       event.preventDefault();
       running=false;
+      duplicateObserver?.disconnect();
       stage.dataset.active='false';
       fail('context-lost');
     },{passive:false});
@@ -658,7 +680,7 @@ void main(){
     root.dataset.fxCoreReal3d='ready-v20';
     root.dataset.fxCoreRenderer='single-webgl2-reference-crystal-v51';
     root.dataset.fxCoreReferenceLock='ready-v51';
-    root.dataset.fxCoreReferenceRevision='reference-image-20260811-mobile-hero-local-v52-r4';
+    root.dataset.fxCoreReferenceRevision='reference-image-20260811-mobile-hero-local-v52-r5';
     root.dataset.fxCoreReferenceGeometry='sharp-four-tip-concave-crystal-v51';
     root.dataset.fxCoreReferenceMaterial='layered-faceted-refractive-glass-v51';
     root.dataset.fxCoreInternalReactor='moving-white-nucleus-concentric-spectral-rings-v51';
@@ -668,7 +690,10 @@ void main(){
     root.dataset.fxCoreDepth='closed-volumetric-shell-with-sidewalls';
     root.dataset.fxCoreMobileCompat='ready-v52';
     root.dataset.fxCoreMobileHost='hero-space-local-webgl2';
+    root.dataset.fxCoreMobileOwner='exclusive-v52-r5';
     stage.dataset.active='true';
+
+    pruneDuplicateCoreNodes();
 
     dispatchEvent(new CustomEvent('formatx:core3dready',{
       detail:{
