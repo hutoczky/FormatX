@@ -1,5 +1,5 @@
 name: Verify live true 3D MAG visual
-run-name: Capture rounded living core v50 for ${{ github.event.workflow_run.head_sha }}
+run-name: Capture reference crystal v51 for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@1.62.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
 
-      - name: Capture and validate live rounded v50 MAG
+      - name: Capture and validate live v51 reference crystal
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -44,7 +44,9 @@ jobs:
 
           function visualPresence(file) {
             const png = PNG.sync.read(fs.readFileSync(file));
-            let total = 0, bright = 0, spectral = 0;
+            let bright = 0, spectral = 0;
+            let minX = png.width, minY = png.height, maxX = -1, maxY = -1;
+            const spectralPoints = [];
             for (let y = 0; y < png.height; y += 1) {
               for (let x = 0; x < png.width; x += 1) {
                 const o = (y * png.width + x) << 2;
@@ -53,18 +55,48 @@ jobs:
                 const b = png.data[o + 2] / 255;
                 const a = png.data[o + 3] / 255;
                 const l = .2126 * r + .7152 * g + .0722 * b;
-                total += 1;
-                if (a > .04 && l > .28) bright += 1;
-                const cyan = b > r * 1.08 && g > r * 1.02 && l > .055;
-                const violet = b > g * 1.04 && r > g * .62 && l > .055;
-                if (a > .035 && (cyan || violet)) spectral += 1;
+                if (a > .04 && l > .30) bright += 1;
+                const cyan = b > r * 1.06 && g > r * 1.01 && l > .055;
+                const violet = b > g * 1.035 && r > g * .60 && l > .055;
+                if (a > .035 && (cyan || violet)) {
+                  spectral += 1;
+                  minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+                  minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+                  if ((spectral & 31) === 0) spectralPoints.push([x, y]);
+                }
               }
+            }
+            const total = png.width * png.height;
+            const bounds = spectral > 40 ? {
+              x: minX, y: minY,
+              width: maxX - minX + 1,
+              height: maxY - minY + 1,
+              centerX: (minX + maxX) / 2,
+              centerY: (minY + maxY) / 2
+            } : null;
+            let tips = null;
+            if (bounds) {
+              const cx = bounds.centerX, cy = bounds.centerY;
+              const hw = bounds.width / 2, hh = bounds.height / 2;
+              const counts = { left: 0, right: 0, top: 0, bottom: 0, center: 0 };
+              for (const [x, y] of spectralPoints) {
+                const nx = (x - cx) / Math.max(1, hw);
+                const ny = (y - cy) / Math.max(1, hh);
+                if (nx < -.72 && Math.abs(ny) < .42) counts.left += 1;
+                if (nx > .72 && Math.abs(ny) < .42) counts.right += 1;
+                if (ny < -.72 && Math.abs(nx) < .42) counts.top += 1;
+                if (ny > .72 && Math.abs(nx) < .42) counts.bottom += 1;
+                if (Math.abs(nx) < .25 && Math.abs(ny) < .25) counts.center += 1;
+              }
+              tips = counts;
             }
             return {
               width: png.width,
               height: png.height,
               brightFraction: bright / Math.max(1, total),
-              spectralFraction: spectral / Math.max(1, total)
+              spectralFraction: spectral / Math.max(1, total),
+              bounds,
+              tips
             };
           }
 
@@ -80,7 +112,7 @@ jobs:
             const errors = [];
             page.on('pageerror', e => errors.push(String(e)));
 
-            await page.goto(`https://www.formatxsuite.com/?core_v50_visual=${process.env.RUN_ID}&capture=${cfg.name}`, {
+            await page.goto(`https://www.formatxsuite.com/?core_v51_visual=${process.env.RUN_ID}&capture=${cfg.name}`, {
               waitUntil: 'domcontentloaded', timeout: 60000
             });
             await page.evaluate(() => {
@@ -93,62 +125,74 @@ jobs:
               scrollTo(0, 0);
             });
 
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreV50 === 'ready', null, { timeout: 60000 });
-            await page.waitForTimeout(1600);
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreV51 === 'ready-v51', null, { timeout: 60000 });
+            await page.waitForTimeout(1800);
 
             const runtime = await page.evaluate(() => {
               const root = document.documentElement;
-              const stage = document.querySelector('.fx-core-v50-stage');
-              const canvas = document.querySelector('.fx-core-v50-canvas');
+              const stage = document.querySelector('.fx-core-v51-stage');
+              const canvas = document.querySelector('.fx-core-v51-canvas');
               const rect = canvas?.getBoundingClientRect();
               const style = stage ? getComputedStyle(stage) : null;
+              const loadedCoreScripts = [...document.scripts].map(s => s.src).filter(src => /formatx-core-v5[01]\.js/.test(src));
               const legacyScripts = [...document.scripts]
                 .map(s => s.src)
                 .filter(src => /reference-lock-v30|mobile-mag-v33|mag-reference-v4[1467]/.test(src));
               return {
-                core: root.dataset.fxCoreV50,
+                core: root.dataset.fxCoreV51,
                 renderer: root.dataset.fxCoreRenderer,
                 geometry: root.dataset.fxCoreReferenceGeometry,
                 material: root.dataset.fxCoreReferenceMaterial,
                 reactor: root.dataset.fxCoreInternalReactor,
                 responsive: root.dataset.fxCoreResponsive,
                 performance: root.dataset.fxCorePerformance,
+                imageBacked: root.dataset.fxCoreImageBacked,
                 stageActive: stage?.dataset.active || null,
-                stages: document.querySelectorAll('.fx-core-v50-stage').length,
-                canvases: document.querySelectorAll('.fx-core-v50-canvas').length,
+                stages: document.querySelectorAll('.fx-core-v51-stage').length,
+                canvases: document.querySelectorAll('.fx-core-v51-canvas').length,
                 canvas: rect ? { width: rect.width, height: rect.height } : null,
                 viewport: { width: innerWidth, height: innerHeight },
                 pointerEvents: style?.pointerEvents || null,
                 overflow: style?.overflow || null,
-                legacyScripts,
-                legacyDiamondOverlay: Boolean(document.querySelector('.fx-v33-core-glass'))
+                loadedCoreScripts,
+                legacyScripts
               };
             });
 
-            assert.equal(runtime.core, 'ready');
-            assert.equal(runtime.renderer, 'single-webgl2-rounded-living-core-v50');
-            assert.equal(runtime.geometry, 'rounded-organic-glass-orb-v50');
-            assert.equal(runtime.material, 'transparent-layered-living-glass-v50');
-            assert.equal(runtime.reactor, 'moving-internal-nucleus-spectral-orbits-v50');
-            assert.equal(runtime.responsive, 'desktop-mobile-bounded-v50');
+            assert.equal(runtime.core, 'ready-v51');
+            assert.equal(runtime.renderer, 'single-webgl2-reference-crystal-v51');
+            assert.equal(runtime.geometry, 'sharp-four-tip-concave-crystal-v51');
+            assert.equal(runtime.material, 'layered-faceted-refractive-glass-v51');
+            assert.equal(runtime.reactor, 'moving-white-nucleus-concentric-spectral-rings-v51');
+            assert.equal(runtime.responsive, 'desktop-mobile-reference-framing-v51');
             assert.equal(runtime.performance, 'single-context-adaptive-60-plus-fps');
+            assert.equal(runtime.imageBacked, 'false');
             assert.equal(runtime.stageActive, 'true');
             assert.equal(runtime.stages, 1);
             assert.equal(runtime.canvases, 1);
-            assert.deepEqual(runtime.legacyScripts, [], 'legacy four-tip MAG scripts must not load');
-            assert.equal(runtime.legacyDiamondOverlay, false, 'legacy diamond overlay must not exist');
+            assert.equal(runtime.loadedCoreScripts.filter(src => /formatx-core-v51\.js/.test(src)).length, 1);
+            assert.equal(runtime.loadedCoreScripts.filter(src => /formatx-core-v50\.js/.test(src)).length, 0, 'v50 rounded core must not load');
+            assert.deepEqual(runtime.legacyScripts, [], 'legacy multi-renderer MAG scripts must not load');
             assert.equal(runtime.pointerEvents, 'none', 'MAG must never capture pointer/touch input');
-            assert.equal(runtime.overflow, 'hidden', 'MAG stage must clip any accidental viewport overflow');
+            assert.equal(runtime.overflow, 'hidden', 'MAG stage must clip accidental viewport overflow');
             assert.ok(runtime.canvas.width <= runtime.viewport.width + 1, 'canvas must not overflow viewport width');
             assert.ok(runtime.canvas.height <= runtime.viewport.height + 1, 'canvas must not overflow viewport height');
 
-            const file = `core-v50-${cfg.name}.png`;
+            const file = `core-v51-${cfg.name}.png`;
             await page.screenshot({ path: file, fullPage: false });
             const visual = visualPresence(file);
-            assert.ok(visual.brightFraction > .0003, 'visible luminous content expected');
-            assert.ok(visual.spectralFraction > .0015, 'visible cyan/violet content expected');
+            assert.ok(visual.brightFraction > .00035, 'visible luminous nucleus/glass expected');
+            assert.ok(visual.spectralFraction > .0018, 'visible cyan/violet crystal detail expected');
+            assert.ok(visual.bounds, 'spectral crystal bounds expected');
+            assert.ok(visual.bounds.width < visual.width * .98, 'crystal must stay bounded horizontally');
+            assert.ok(visual.bounds.height < visual.height * .94, 'crystal must stay bounded vertically');
+            assert.ok(visual.tips && visual.tips.left > 0, 'left crystal tip must be visible');
+            assert.ok(visual.tips && visual.tips.right > 0, 'right crystal tip must be visible');
+            assert.ok(visual.tips && visual.tips.top > 0, 'top crystal tip must be visible');
+            assert.ok(visual.tips && visual.tips.bottom > 0, 'bottom crystal tip must be visible');
+            assert.ok(visual.tips && visual.tips.center > 0, 'luminous central reactor must be visible');
 
-            fs.writeFileSync(`core-v50-${cfg.name}.json`, JSON.stringify({ runtime, visual, errors }, null, 2));
+            fs.writeFileSync(`core-v51-${cfg.name}.json`, JSON.stringify({ runtime, visual, errors }, null, 2));
             if (errors.length) throw new Error(`${cfg.name} page errors: ${errors.join(' | ')}`);
             await context.close();
             return { runtime, visual };
@@ -161,23 +205,23 @@ jobs:
             });
             const mobile = await capture(browser, { name: 'mobile', mobile: true, viewport: { width: 390, height: 844 } });
             const desktop = await capture(browser, { name: 'desktop', mobile: false, viewport: { width: 1440, height: 1000 } });
-            fs.writeFileSync('core-v50-summary.json', JSON.stringify({ version: 'v50-rounded-living-core', mobile, desktop }, null, 2));
-            console.log('V50_LIVE_VISUAL_EVIDENCE', JSON.stringify({ mobile, desktop }));
+            fs.writeFileSync('core-v51-summary.json', JSON.stringify({ version: 'v51-reference-crystal-core', mobile, desktop }, null, 2));
+            console.log('V51_LIVE_VISUAL_EVIDENCE', JSON.stringify({ mobile, desktop }));
             await browser.close();
           })().catch(e => { console.error(e); process.exit(1); });
           NODE
 
-      - name: Upload v50 visual evidence
+      - name: Upload v51 visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-rounded-core-v50-${{ github.run_id }}
+          name: live-reference-crystal-v51-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-visual/core-v50-mobile.png
-            ${{ runner.temp }}/mag-visual/core-v50-desktop.png
-            ${{ runner.temp }}/mag-visual/core-v50-mobile.json
-            ${{ runner.temp }}/mag-visual/core-v50-desktop.json
-            ${{ runner.temp }}/mag-visual/core-v50-summary.json
+            ${{ runner.temp }}/mag-visual/core-v51-mobile.png
+            ${{ runner.temp }}/mag-visual/core-v51-desktop.png
+            ${{ runner.temp }}/mag-visual/core-v51-mobile.json
+            ${{ runner.temp }}/mag-visual/core-v51-desktop.json
+            ${{ runner.temp }}/mag-visual/core-v51-summary.json
           if-no-files-found: warn
           retention-days: 14
 
@@ -190,5 +234,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Rounded living WebGL2 MAG v50 passed live mobile and desktop visual gates'; else state=failure; description='Rounded living MAG v50 failed live visual gate'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference crystal WebGL2 MAG v51 passed live mobile and desktop four-tip visual gates'; else state=failure; description='Reference crystal MAG v51 failed live visual gate'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
