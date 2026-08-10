@@ -1,0 +1,62 @@
+/* FormatX MAG layering v48 — keep the transparent WebGL MAG behind readable mobile content. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  /* The MAG stays transparent and visible, but it belongs to the background plane. */
+  .fx-core-real3d-stage {
+    z-index: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Promote the hero itself above the fixed MAG stacking context. */
+  body.living-architecture #hero {
+    position: relative !important;
+    z-index: 2 !important;
+    background-color: transparent !important;
+  }
+
+  body.living-architecture #hero .hero-grid {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  /* The reserved visual area remains transparent so the MAG is still visible. */
+  body.living-architecture #hero .hero-space {
+    position: relative !important;
+    z-index: 0 !important;
+    background: transparent !important;
+    pointer-events: none !important;
+  }
+
+  /* Every readable / interactive hero element is on a foreground plane. */
+  body.living-architecture #hero .hero-copy,
+  body.living-architecture #hero .hero-actions,
+  body.living-architecture #hero .hero-facts,
+  body.living-architecture #hero .hero-cta,
+  body.living-architecture #hero .hero-download,
+  body.living-architecture #hero .download-card,
+  body.living-architecture #hero .download-panel,
+  body.living-architecture #hero .scroll-cue {
+    position: relative !important;
+    z-index: 20 !important;
+  }
+
+  /* Copy owns an opaque reading plane. The transparent MAG can continue behind it. */
+  body.living-architecture #hero .hero-copy {
+    isolation: isolate !important;
+    background: linear-gradient(180deg, rgba(1,7,17,.96) 0%, rgba(1,7,17,.992) 52%, #010711 100%) !important;
+  }
+
+  body.living-architecture #hero .hero-copy::before {
+    z-index: -1 !important;
+  }
+
+  /* Header, floating controls and Live OS must always stay above both planes. */
+  .topbar,
+  .site-header,
+  .fx-organism-dock,
+  .fx-immersive-launch,
+  .fx-live-os,
+  [data-live-os] {
+    position: relative;
+    z-index: 500 !important;
+  }
+}
