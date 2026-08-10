@@ -1,5 +1,5 @@
 name: Verify live true 3D MAG visual
-run-name: Capture reference-fit MAG r7 for ${{ github.event.workflow_run.head_sha }}
+run-name: Capture rounded living core v50 for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@1.62.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
 
-      - name: Capture and measure live reference-fit MAG r7
+      - name: Capture and validate live rounded v50 MAG
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -37,67 +37,165 @@ jobs:
           set -euo pipefail
           cd "$RUNNER_TEMP/mag-visual"
           node <<'NODE'
-          const {chromium}=require('playwright');
-          const {PNG}=require('pngjs');
-          const fs=require('node:fs');
-          function metrics(file,region){
-            const png=PNG.sync.read(fs.readFileSync(file));
-            const x0=Math.max(0,region.x0),y0=Math.max(0,region.y0),x1=Math.min(png.width,region.x1),y1=Math.min(png.height,region.y1);
-            let pixels=0,lum=0,bright=0,sat=0,spectral=0,minX=x1,minY=y1,maxX=x0,maxY=y0,sp=0;
-            for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){
-              const o=(y*png.width+x)<<2,r=png.data[o]/255,g=png.data[o+1]/255,b=png.data[o+2]/255,l=.2126*r+.7152*g+.0722*b,mx=Math.max(r,g,b),mn=Math.min(r,g,b),s=mx?(mx-mn)/mx:0;
-              const cv=(b>r*1.12&&g>r*1.01&&l>.05)||(b>g*1.05&&r>g*.62&&l>.05);
-              pixels++;lum+=l;if(l>.34)bright++;if(s>.40&&l>.05)sat++;if(cv)spectral++;
-              if(cv&&s>.34&&l>.07){sp++;minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}
+          const assert = require('node:assert/strict');
+          const { chromium } = require('playwright');
+          const { PNG } = require('pngjs');
+          const fs = require('node:fs');
+
+          function spectralMetrics(file) {
+            const png = PNG.sync.read(fs.readFileSync(file));
+            let total = 0, bright = 0, spectral = 0;
+            let minX = png.width, minY = png.height, maxX = -1, maxY = -1;
+            for (let y = 0; y < png.height; y += 1) {
+              for (let x = 0; x < png.width; x += 1) {
+                const o = (y * png.width + x) << 2;
+                const r = png.data[o] / 255;
+                const g = png.data[o + 1] / 255;
+                const b = png.data[o + 2] / 255;
+                const a = png.data[o + 3] / 255;
+                const l = .2126 * r + .7152 * g + .0722 * b;
+                total += 1;
+                if (a > .04 && l > .28) bright += 1;
+                const cyan = b > r * 1.08 && g > r * 1.02 && l > .055;
+                const violet = b > g * 1.04 && r > g * .62 && l > .055;
+                if (a > .035 && (cyan || violet)) {
+                  spectral += 1;
+                  minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+                  minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+                }
+              }
             }
-            const bounds=sp?{x:minX,y:minY,width:maxX-minX+1,height:maxY-minY+1,centerX:(minX+maxX)/2,centerY:(minY+maxY)/2}:null;
-            return {pixels,mean_luminance:lum/pixels,bright_fraction:bright/pixels,saturated_fraction:sat/pixels,cyan_violet_fraction:spectral/pixels,spectral_pixels:sp,bounds};
+            const bounds = spectral > 20 ? {
+              x: minX, y: minY,
+              width: maxX - minX + 1,
+              height: maxY - minY + 1,
+              centerX: (minX + maxX) / 2,
+              centerY: (minY + maxY) / 2
+            } : null;
+            return {
+              width: png.width,
+              height: png.height,
+              brightFraction: bright / Math.max(1, total),
+              spectralFraction: spectral / Math.max(1, total),
+              spectralPixels: spectral,
+              bounds
+            };
           }
-          async function capture(browser,cfg){
-            const context=await browser.newContext({viewport:cfg.viewport,deviceScaleFactor:1,isMobile:cfg.mobile,hasTouch:cfg.mobile,locale:'hu-HU'});
-            const page=await context.newPage();const errors=[];
-            page.on('pageerror',e=>errors.push(String(e)));
-            await page.goto(`https://www.formatxsuite.com/?reference_fit_r7=${process.env.RUN_ID}&capture=${cfg.name}`,{waitUntil:'domcontentloaded',timeout:45000});
-            await page.evaluate(()=>{document.documentElement.lang='hu';document.documentElement.classList.add('fx-intro-complete');document.getElementById('formatx-event-horizon')?.remove();scrollTo(0,0);});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreReferenceLock==='ready-v30',null,{timeout:60000});
-            await page.waitForTimeout(1800);
-            const runtime=await page.evaluate(()=>{
-              const root=document.documentElement,canvas=document.querySelector('.fx-core-real3d-canvas'),stage=document.querySelector('.fx-core-real3d-stage'),rect=canvas?.getBoundingClientRect();
-              let webgl2=false;try{webgl2=Boolean(canvas?.getContext('webgl2'));}catch(_){}
-              return {reference:root.dataset.fxCoreReferenceLock,referenceRevision:root.dataset.fxCoreReferenceRevision,fit:root.dataset.fxCoreReferenceFit,surface:root.dataset.fxCoreReferenceSurface,visual:root.dataset.fxCoreVisualRevision,geometry:root.dataset.fxCoreGeometry,reactor:root.dataset.fxCoreInternalReactor,performance:root.dataset.fxCorePerformance,imageBacked:root.dataset.fxCoreImageBacked,webgl2,stageActive:stage?.dataset.active,canvas:rect?{width:rect.width,height:rect.height}:null,stages:document.querySelectorAll('.fx-core-real3d-stage').length};
+
+          async function capture(browser, cfg) {
+            const context = await browser.newContext({
+              viewport: cfg.viewport,
+              deviceScaleFactor: 1,
+              isMobile: cfg.mobile,
+              hasTouch: cfg.mobile,
+              locale: 'hu-HU'
             });
-            const file=`reference-fit-r7-${cfg.name}.png`;await page.screenshot({path:file,fullPage:false});const visual=metrics(file,cfg.region);
-            fs.writeFileSync(`reference-fit-r7-${cfg.name}.json`,JSON.stringify({runtime,visual,errors},null,2));
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e)));
+
+            await page.goto(`https://www.formatxsuite.com/?core_v50_visual=${process.env.RUN_ID}&capture=${cfg.name}`, {
+              waitUntil: 'domcontentloaded', timeout: 60000
+            });
+            await page.evaluate(() => {
+              const root = document.documentElement;
+              root.lang = 'hu';
+              root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-managed');
+              root.classList.add('fx-intro-complete');
+              document.getElementById('formatx-event-horizon')?.setAttribute('hidden', '');
+              document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+              scrollTo(0, 0);
+            });
+
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreV50 === 'ready', null, { timeout: 60000 });
+            await page.waitForTimeout(1600);
+
+            const runtime = await page.evaluate(() => {
+              const root = document.documentElement;
+              const stage = document.querySelector('.fx-core-v50-stage');
+              const canvas = document.querySelector('.fx-core-v50-canvas');
+              const rect = canvas?.getBoundingClientRect();
+              const legacyScripts = [...document.scripts]
+                .map(s => s.src)
+                .filter(src => /reference-lock-v30|mobile-mag-v33|mag-reference-v4[1467]/.test(src));
+              return {
+                core: root.dataset.fxCoreV50,
+                renderer: root.dataset.fxCoreRenderer,
+                geometry: root.dataset.fxCoreReferenceGeometry,
+                material: root.dataset.fxCoreReferenceMaterial,
+                reactor: root.dataset.fxCoreInternalReactor,
+                responsive: root.dataset.fxCoreResponsive,
+                performance: root.dataset.fxCorePerformance,
+                stageActive: stage?.dataset.active || null,
+                stages: document.querySelectorAll('.fx-core-v50-stage').length,
+                canvases: document.querySelectorAll('.fx-core-v50-canvas').length,
+                canvas: rect ? { width: rect.width, height: rect.height } : null,
+                viewport: { width: innerWidth, height: innerHeight },
+                legacyScripts,
+                legacyDiamondOverlay: Boolean(document.querySelector('.fx-v33-core-glass'))
+              };
+            });
+
+            assert.equal(runtime.core, 'ready');
+            assert.equal(runtime.renderer, 'single-webgl2-rounded-living-core-v50');
+            assert.equal(runtime.geometry, 'rounded-organic-glass-orb-v50');
+            assert.equal(runtime.material, 'transparent-layered-living-glass-v50');
+            assert.equal(runtime.reactor, 'moving-internal-nucleus-spectral-orbits-v50');
+            assert.equal(runtime.responsive, 'desktop-mobile-bounded-v50');
+            assert.equal(runtime.performance, 'single-context-adaptive-60-plus-fps');
+            assert.equal(runtime.stages, 1);
+            assert.equal(runtime.canvases, 1);
+            assert.deepEqual(runtime.legacyScripts, [], 'legacy four-tip MAG scripts must not load');
+            assert.equal(runtime.legacyDiamondOverlay, false, 'legacy diamond overlay must not exist');
+            assert.ok(runtime.canvas.width <= runtime.viewport.width + 1, 'canvas must not overflow viewport width');
+            assert.ok(runtime.canvas.height <= runtime.viewport.height + 1, 'canvas must not overflow viewport height');
+
+            const file = `core-v50-${cfg.name}.png`;
+            await page.screenshot({ path: file, fullPage: false });
+            const visual = spectralMetrics(file);
+            assert.ok(visual.brightFraction > .0003, 'visible luminous nucleus/glass expected');
+            assert.ok(visual.spectralFraction > .0015, 'visible cyan/violet spectral detail expected');
+            assert.ok(visual.bounds, 'spectral core bounds expected');
+
+            /* The old mobile failure filled almost the full viewport with a four-tip sail.
+               v50 must keep the luminous spectral footprint bounded on both profiles. */
+            const maxWidthRatio = cfg.mobile ? .94 : .78;
+            const maxHeightRatio = cfg.mobile ? .80 : .92;
+            assert.ok(visual.bounds.width / visual.width <= maxWidthRatio, `spectral footprint too wide: ${visual.bounds.width}/${visual.width}`);
+            assert.ok(visual.bounds.height / visual.height <= maxHeightRatio, `spectral footprint too tall: ${visual.bounds.height}/${visual.height}`);
+
+            fs.writeFileSync(`core-v50-${cfg.name}.json`, JSON.stringify({ runtime, visual, errors }, null, 2));
+            if (errors.length) throw new Error(`${cfg.name} page errors: ${errors.join(' | ')}`);
             await context.close();
-            const b=visual.bounds;
-            const runtimeOk=runtime.reference==='ready-v30'&&runtime.referenceRevision==='uploaded-reference-20260810'&&runtime.fit==='uploaded-image-20260810-r7'&&runtime.surface==='organic-faceted-glass-r6'&&runtime.visual==='v30-reference-lock'&&runtime.geometry==='concave-four-sail-indexed-mesh-v30'&&runtime.reactor==='moving-white-core-four-rings-v30'&&runtime.performance==='adaptive-60-plus-fps'&&runtime.imageBacked==='false'&&runtime.webgl2&&runtime.stageActive==='true'&&runtime.stages===1&&runtime.canvas?.width>=cfg.viewport.width*.97&&runtime.canvas?.height>=cfg.viewport.height*.97;
-            const visualOk=visual.mean_luminance>=.018&&visual.mean_luminance<=.58&&visual.bright_fraction>=.0015&&visual.saturated_fraction>=.010&&visual.cyan_violet_fraction>=.008&&b&&b.width>=cfg.minWidth&&b.height>=cfg.minHeight&&b.centerY>=cfg.centerYMin&&b.centerY<=cfg.centerYMax;
-            if(!runtimeOk||!visualOk||errors.length)throw new Error(`${cfg.name} r7 gate failed: ${JSON.stringify({runtime,visual,errors})}`);
-            return {runtime,visual};
+            return { runtime, visual };
           }
-          (async()=>{
-            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-            const mobile=await capture(browser,{name:'mobile',mobile:true,viewport:{width:753,height:1536},region:{x0:15,y0:0,x1:738,y1:1300},minWidth:500,minHeight:520,centerYMin:500,centerYMax:930});
-            const desktop=await capture(browser,{name:'desktop',mobile:false,viewport:{width:1440,height:1000},region:{x0:560,y0:40,x1:1430,y1:960},minWidth:380,minHeight:360,centerYMin:250,centerYMax:780});
-            fs.writeFileSync('reference-fit-r7-summary.json',JSON.stringify({fit:'uploaded-image-20260810-r7',mobile,desktop},null,2));
-            console.log('REFERENCE_FIT_R7_EVIDENCE',JSON.stringify({mobile,desktop}));
+
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
+            });
+            const mobile = await capture(browser, { name: 'mobile', mobile: true, viewport: { width: 390, height: 844 } });
+            const desktop = await capture(browser, { name: 'desktop', mobile: false, viewport: { width: 1440, height: 1000 } });
+            fs.writeFileSync('core-v50-summary.json', JSON.stringify({ version: 'v50-rounded-living-core', mobile, desktop }, null, 2));
+            console.log('V50_LIVE_VISUAL_EVIDENCE', JSON.stringify({ mobile, desktop }));
             await browser.close();
-          })().catch(e=>{console.error(e);process.exit(1);});
+          })().catch(e => { console.error(e); process.exit(1); });
           NODE
 
-      - name: Upload r7 visual evidence
+      - name: Upload v50 visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-reference-fit-r7-${{ github.run_id }}
+          name: live-rounded-core-v50-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-visual/reference-fit-r7-mobile.png
-            ${{ runner.temp }}/mag-visual/reference-fit-r7-desktop.png
-            ${{ runner.temp }}/mag-visual/reference-fit-r7-mobile.json
-            ${{ runner.temp }}/mag-visual/reference-fit-r7-desktop.json
-            ${{ runner.temp }}/mag-visual/reference-fit-r7-summary.json
+            ${{ runner.temp }}/mag-visual/core-v50-mobile.png
+            ${{ runner.temp }}/mag-visual/core-v50-desktop.png
+            ${{ runner.temp }}/mag-visual/core-v50-mobile.json
+            ${{ runner.temp }}/mag-visual/core-v50-desktop.json
+            ${{ runner.temp }}/mag-visual/core-v50-summary.json
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 14
 
       - name: Publish visual status
         if: always()
@@ -108,5 +206,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference-fit WebGL2 MAG r7 passed live mobile and desktop visual gates'; else state=failure; description='Reference-fit MAG r7 failed live visual gate'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Rounded living WebGL2 MAG v50 passed live mobile and desktop visual gates'; else state=failure; description='Rounded living MAG v50 failed live visual gate'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
