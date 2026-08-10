@@ -132,12 +132,20 @@ jobs:
               const root = document.documentElement;
               const stage = document.querySelector('.fx-core-v51-stage');
               const canvas = document.querySelector('.fx-core-v51-canvas');
+              const heroSpace = document.querySelector('#hero .hero-space');
               const rect = canvas?.getBoundingClientRect();
+              const heroRect = heroSpace?.getBoundingClientRect();
               const style = stage ? getComputedStyle(stage) : null;
               const loadedCoreScripts = [...document.scripts].map(s => s.src).filter(src => /formatx-core-v5[01]\.js/.test(src));
               const legacyScripts = [...document.scripts]
                 .map(s => s.src)
                 .filter(src => /reference-lock-v30|mobile-mag-v33|mag-reference-v4[1467]/.test(src));
+              const clippedHero = heroRect ? {
+                x: Math.max(0, heroRect.left),
+                y: Math.max(0, heroRect.top),
+                width: Math.max(1, Math.min(innerWidth, heroRect.right) - Math.max(0, heroRect.left)),
+                height: Math.max(1, Math.min(innerHeight, heroRect.bottom) - Math.max(0, heroRect.top))
+              } : null;
               return {
                 core: root.dataset.fxCoreV51,
                 renderer: root.dataset.fxCoreRenderer,
@@ -147,10 +155,12 @@ jobs:
                 responsive: root.dataset.fxCoreResponsive,
                 performance: root.dataset.fxCorePerformance,
                 imageBacked: root.dataset.fxCoreImageBacked,
+                depth: root.dataset.fxCoreDepth || null,
                 stageActive: stage?.dataset.active || null,
                 stages: document.querySelectorAll('.fx-core-v51-stage').length,
                 canvases: document.querySelectorAll('.fx-core-v51-canvas').length,
                 canvas: rect ? { width: rect.width, height: rect.height } : null,
+                heroSpace: clippedHero,
                 viewport: { width: innerWidth, height: innerHeight },
                 pointerEvents: style?.pointerEvents || null,
                 overflow: style?.overflow || null,
@@ -167,6 +177,7 @@ jobs:
             assert.equal(runtime.responsive, 'desktop-mobile-reference-framing-v51');
             assert.equal(runtime.performance, 'single-context-adaptive-60-plus-fps');
             assert.equal(runtime.imageBacked, 'false');
+            assert.equal(runtime.depth, 'closed-volumetric-shell-with-sidewalls');
             assert.equal(runtime.stageActive, 'true');
             assert.equal(runtime.stages, 1);
             assert.equal(runtime.canvases, 1);
@@ -177,15 +188,16 @@ jobs:
             assert.equal(runtime.overflow, 'hidden', 'MAG stage must clip accidental viewport overflow');
             assert.ok(runtime.canvas.width <= runtime.viewport.width + 1, 'canvas must not overflow viewport width');
             assert.ok(runtime.canvas.height <= runtime.viewport.height + 1, 'canvas must not overflow viewport height');
+            assert.ok(runtime.heroSpace && runtime.heroSpace.width > 120 && runtime.heroSpace.height > 120, 'hero visual ROI must exist');
 
             const file = `core-v51-${cfg.name}.png`;
-            await page.screenshot({ path: file, fullPage: false });
+            await page.screenshot({ path: file, clip: runtime.heroSpace });
             const visual = visualPresence(file);
             assert.ok(visual.brightFraction > .00035, 'visible luminous nucleus/glass expected');
             assert.ok(visual.spectralFraction > .0018, 'visible cyan/violet crystal detail expected');
             assert.ok(visual.bounds, 'spectral crystal bounds expected');
-            assert.ok(visual.bounds.width < visual.width * .98, 'crystal must stay bounded horizontally');
-            assert.ok(visual.bounds.height < visual.height * .94, 'crystal must stay bounded vertically');
+            assert.ok(visual.bounds.width < visual.width * .98, 'crystal must stay bounded horizontally inside hero visual ROI');
+            assert.ok(visual.bounds.height < visual.height * .96, 'crystal must stay bounded vertically inside hero visual ROI');
             assert.ok(visual.tips && visual.tips.left > 0, 'left crystal tip must be visible');
             assert.ok(visual.tips && visual.tips.right > 0, 'right crystal tip must be visible');
             assert.ok(visual.tips && visual.tips.top > 0, 'top crystal tip must be visible');
@@ -234,5 +246,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference crystal WebGL2 MAG v51 passed live mobile and desktop four-tip visual gates'; else state=failure; description='Reference crystal MAG v51 failed live visual gate'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference crystal WebGL2 MAG v51 passed live mobile and desktop volumetric visual gates'; else state=failure; description='Reference crystal MAG v51 failed live visual gate'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
