@@ -1,0 +1,131 @@
+/* FormatX v53 reference MAG — sharp native WebGL2 crystal.
+   The visual is rendered by real geometry/shaders only: no raster MAG layer,
+   no CSS silhouette and no blur/filter chain on the WebGL canvas. */
+
+.fx-core-reference-v53-stage {
+  pointer-events: none !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 180ms linear, visibility 0s linear;
+}
+
+.fx-core-reference-v53-stage[data-active="false"] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.fx-core-reference-v53-stage::before,
+.fx-core-reference-v53-stage::after {
+  content: none !important;
+  display: none !important;
+}
+
+.fx-core-reference-v53-canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  background: transparent !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  image-rendering: auto !important;
+  transform: none !important;
+  backface-visibility: visible !important;
+  pointer-events: none !important;
+}
+
+@media (min-width: 901px) and (pointer: fine) {
+  .fx-core-reference-v53-stage {
+    position: fixed !important;
+    z-index: 122 !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    contain: strict;
+    isolation: isolate;
+  }
+}
+
+html[data-fx-core-reference-v53="ready-v53"] #hero .hero-copy {
+  position: relative !important;
+  z-index: 130 !important;
+}
+
+html[data-fx-core-reference-v53="ready-v53"] #hero .hero-ring,
+html[data-fx-core-reference-v53="ready-v53"] #hero .hero-label,
+html[data-fx-core-reference-v53="ready-v53"] .fx-resilient-core,
+html[data-fx-core-reference-v53="ready-v53"] .fx-premium-core-status,
+html[data-fx-core-reference-v53="ready-v53"] .fx-three-stage-shell,
+html[data-fx-core-reference-v53="ready-v53"] .fx-core-mesh3d-stage,
+html[data-fx-core-reference-v53="ready-v53"] .fx-core-fracture3d-stage,
+html[data-fx-core-reference-v53="ready-v53"] .fx-transcend-shell[data-fx-native-apex="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html[data-fx-core-reference-v53="ready-v53"] body.living-architecture #hero {
+    min-height: auto !important;
+    padding-top: max(82px, calc(env(safe-area-inset-top) + 72px)) !important;
+  }
+
+  html[data-fx-core-reference-v53="ready-v53"] body.living-architecture #hero .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    min-height: 0 !important;
+  }
+
+  html[data-fx-core-reference-v53="ready-v53"] body.living-architecture #hero .hero-space {
+    position: relative !important;
+    inset: auto !important;
+    order: -1 !important;
+    width: 100% !important;
+    min-height: clamp(500px, 58svh, 660px) !important;
+    z-index: 1 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    overflow: hidden !important;
+    isolation: auto !important;
+    contain: none !important;
+    background: transparent !important;
+  }
+
+  #hero .hero-space > .fx-core-reference-v53-stage {
+    position: absolute !important;
+    z-index: 2 !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    contain: none !important;
+    isolation: auto !important;
+  }
+
+  html[data-fx-core-reference-v53="ready-v53"] body.living-architecture #hero .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    z-index: 4 !important;
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 430px) {
+  html[data-fx-core-reference-v53="ready-v53"] body.living-architecture #hero .hero-space {
+    min-height: clamp(490px, 57svh, 620px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-core-reference-v53-stage {
+    transition-duration: 80ms;
+  }
+}
