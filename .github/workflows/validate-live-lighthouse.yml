@@ -58,6 +58,62 @@ jobs:
           echo 'Live production did not become audit-ready.' >&2
           exit 1
 
+      - name: Verify live checkout readiness invariant
+        shell: bash
+        run: |
+          set -euo pipefail
+          readiness_code="$(curl -sS --max-time 25 \
+            -H 'Accept: application/json' \
+            -H 'Cache-Control: no-cache' \
+            -o "$RUNNER_TEMP/checkout-readiness.json" \
+            -w '%{http_code}' \
+            "https://www.formatxsuite.com/api/checkout-readiness?audit=${GITHUB_RUN_ID}")"
+          test "$readiness_code" = '200'
+
+          checkout_code="$(curl -sS --max-time 25 \
+            -H 'Cache-Control: no-cache' \
+            -o "$RUNNER_TEMP/checkout.html" \
+            -w '%{http_code}' \
+            "https://www.formatxsuite.com/scifi-ui/checkout.html?audit=${GITHUB_RUN_ID}")"
+
+          python3 - "$RUNNER_TEMP/checkout-readiness.json" "$checkout_code" <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          payload = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          checkout_code = int(sys.argv[2])
+
+          assert payload.get('provider') == 'bank_transfer', payload
+          assert payload.get('business_checkout_only') is True, payload
+          assert payload.get('legal_acceptance_required') is True, payload
+          assert payload.get('manual_verification_required') is True, payload
+          currencies = set(payload.get('supported_currencies') or [])
+          assert {'HUF', 'EUR'} <= currencies, payload
+
+          sales_ready = payload.get('sales_ready') is True
+          order_tracking_ready = payload.get('order_tracking_ready') is True
+          live_ready = payload.get('live_ready') is True
+          ok = payload.get('ok') is True
+
+          if sales_ready:
+              assert order_tracking_ready, 'sales_ready must never be true without durable order tracking'
+              assert live_ready and ok, 'sales_ready requires a fully live checkout'
+              assert payload.get('mode') == 'live', payload
+              assert payload.get('configuration_errors') == 0, payload
+              assert checkout_code == 200, f'live business checkout returned HTTP {checkout_code}'
+          else:
+              assert not live_ready and not ok, 'disabled sales must not report a live checkout'
+              assert checkout_code == 503, f'legally gated checkout must return HTTP 503, got {checkout_code}'
+
+          print(json.dumps({
+              'sales_ready': sales_ready,
+              'order_tracking_ready': order_tracking_ready,
+              'live_ready': live_ready,
+              'checkout_http': checkout_code,
+          }))
+          PY
+
       - name: Run live desktop Lighthouse
         shell: bash
         run: |
@@ -103,10 +159,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live Worker desktop/mobile Lighthouse gates passed'
+            description='Live checkout invariant and desktop/mobile Lighthouse gates passed'
           else
             state='failure'
-            description='Live Worker desktop or mobile Lighthouse gate failed'
+            description='Live checkout invariant or Lighthouse gate failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
