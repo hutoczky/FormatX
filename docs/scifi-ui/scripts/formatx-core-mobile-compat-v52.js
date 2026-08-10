@@ -304,7 +304,7 @@ void main(){
 
     function model(t){
       const w=Math.max(320,innerWidth);
-      const s=clamp(w*.00172,.58,.72);
+      const s=clamp(w*.00112,.43,.47);
       return compose(
         tr(0,.16+Math.sin(t*.31)*.012,-3.05),
         rx(-.10+Math.sin(t*.23)*.025),
