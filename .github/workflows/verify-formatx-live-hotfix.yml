@@ -1,5 +1,5 @@
 name: Verify FormatX live hotfix
-run-name: Verify live mobile hero + MAG v33 from ${{ github.sha }}
+run-name: Verify live mobile hero + MAG v34 from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -28,8 +28,10 @@ jobs:
             for attempt in $(seq 1 24); do
               hero_css="$(mktemp)"
               recovery_css="$(mktemp)"
-              mag_css="$(mktemp)"
-              mag_js="$(mktemp)"
+              mag33_css="$(mktemp)"
+              mag33_js="$(mktemp)"
+              mag34_css="$(mktemp)"
+              mag34_js="$(mktemp)"
               core_js="$(mktemp)"
               home="$(mktemp)"
               if curl --fail --silent --show-error --location --max-time 30 \
@@ -37,9 +39,13 @@ jobs:
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/styles/formatx-mobile-recovery.css?v=${GITHUB_SHA}-${attempt}" > "$recovery_css" \
                 && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-mobile-mag-v33.css?v=${GITHUB_SHA}-${attempt}" > "$mag_css" \
+                   "$origin/scifi-ui/styles/formatx-mobile-mag-v33.css?v=${GITHUB_SHA}-${attempt}" > "$mag33_css" \
                 && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/scripts/formatx-mobile-mag-v33.js?v=${GITHUB_SHA}-${attempt}" > "$mag_js" \
+                   "$origin/scifi-ui/scripts/formatx-mobile-mag-v33.js?v=${GITHUB_SHA}-${attempt}" > "$mag33_js" \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/styles/formatx-mag-reference-v34.css?v=${GITHUB_SHA}-${attempt}" > "$mag34_css" \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/scripts/formatx-mag-reference-v34.js?v=${GITHUB_SHA}-${attempt}" > "$mag34_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_SHA}-${attempt}" > "$core_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
@@ -48,23 +54,25 @@ jobs:
                 && grep -Fq 'white-space: normal !important;' "$hero_css" \
                 && grep -Fq 'padding-bottom: max(104px' "$hero_css" \
                 && grep -Fq 'The Interaction Genome is a separate feature' "$recovery_css" \
-                && grep -Fq 'FormatX MAG v33' "$mag_css" \
-                && grep -Fq 'data-fx-mobile-text-guard="text"' "$mag_css" \
-                && grep -Fq 'fx-v33-core-glass' "$mag_css" \
-                && grep -Fq 'fxMobileMagTextGuard' "$mag_js" \
-                && grep -Fq 'formatx-mobile-mag-v33.css?v=20260810-mobile-mag-v33-2' "$core_js" \
-                && grep -Fq 'formatx-mobile-mag-v33.js?v=20260810-mobile-mag-v33-2' "$core_js" \
+                && grep -Fq 'FormatX MAG v33' "$mag33_css" \
+                && grep -Fq 'data-fx-mobile-text-guard="text"' "$mag33_css" \
+                && grep -Fq 'fxMobileMagTextGuard' "$mag33_js" \
+                && grep -Fq 'FormatX MAG reference v34' "$mag34_css" \
+                && grep -Fq 'fx-v34-reactor' "$mag34_css" \
+                && grep -Fq 'fxMagReferenceV34' "$mag34_js" \
+                && grep -Fq 'formatx-mag-reference-v34.css?v=20260810-mag-reference-v34-1' "$core_js" \
+                && grep -Fq 'formatx-mag-reference-v34.js?v=20260810-mag-reference-v34-1' "$core_js" \
                 && grep -Fq 'FormatX Suite Pro' "$home"
               then
                 success=true
-                rm -f "$hero_css" "$recovery_css" "$mag_css" "$mag_js" "$core_js" "$home"
+                rm -f "$hero_css" "$recovery_css" "$mag33_css" "$mag33_js" "$mag34_css" "$mag34_js" "$core_js" "$home"
                 break
               fi
-              rm -f "$hero_css" "$recovery_css" "$mag_css" "$mag_js" "$core_js" "$home"
+              rm -f "$hero_css" "$recovery_css" "$mag33_css" "$mag33_js" "$mag34_css" "$mag34_js" "$core_js" "$home"
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Live mobile hero / MAG v33 verification failed for $origin" >&2
+              echo "Live mobile hero / MAG v34 verification failed for $origin" >&2
               exit 1
             fi
           done
@@ -90,7 +98,7 @@ jobs:
               body: JSON.stringify({
                 state,
                 context: 'FormatX live mobile hero verification',
-                description: 'Both custom domains serve the mobile text guard and MAG v33 assets',
+                description: 'Both custom domains serve the mobile text guard and MAG v34 assets',
                 target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
               }),
             }
