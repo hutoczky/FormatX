@@ -26,6 +26,7 @@
 
   if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;
   root.dataset.fxCoreReal3dBootstrap = BOOTSTRAP;
+  root.dataset.fxCoreMobileStartup = mobile ? 'serialized-v52-r5' : 'desktop-v51';
 
   if (new URLSearchParams(location.search).get('lighthouse') === '1') {
     root.dataset.fxCoreReal3d = 'audit-skip';
