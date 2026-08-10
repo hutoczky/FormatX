@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const BOOTSTRAP='reference-lock-v34';
+const BOOTSTRAP='reference-lock-v30';
 const SCRIPT='./scripts/formatx-reference-lock-v30.js?v=20260810-uploaded-reference-lock-7';
 const STYLE='./styles/formatx-reference-lock-v30.css?v=20260810-uploaded-reference-lock-7';
 const POLISH_STYLE='./styles/formatx-reference-polish-v31.css?v=20260810-reference-polish-1';
