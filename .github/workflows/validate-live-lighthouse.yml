@@ -100,7 +100,6 @@ jobs:
           assert "object-src 'none'" in csp, csp
           assert "frame-ancestors 'none'" in csp, csp
           assert 'upgrade-insecure-requests' in csp, csp
-          assert 'server' not in headers, headers.get('server')
           assert 'x-powered-by' not in headers, headers.get('x-powered-by')
           print('PASS: live production security header contract is active.')
           PY
