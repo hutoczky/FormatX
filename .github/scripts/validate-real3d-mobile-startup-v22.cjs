@@ -20,6 +20,7 @@ assert.match(bootstrap, /formatx-core-mobile-compat-v52\.js\?v=20260811-mobile-s
 assert.match(bootstrap, /formatx-core-mobile-compat-v52\.css\?v=20260811-mobile-safe-v52-5/, 'physical mobile r5 cache-busted style missing');
 assert.match(bootstrap, /addMobileSafeScript\(MOBILE_SAFE_SCRIPT, \(\) => addCoreScript\(SCRIPT\)\)/, 'mobile renderer and v51 validation script must start serially');
 assert.doesNotMatch(bootstrap, /addMobileSafeScript\(MOBILE_SAFE_SCRIPT\);\s*addCoreScript\(SCRIPT\);/, 'parallel mobile startup race must remain retired');
+assert.match(bootstrap, /script\[src\*="formatx-core-v51\.js"\]/, 'bootstrap must reject duplicate v51 script injection');
 
 assert.match(runtime, /powerPreference: mobile \? 'default' : 'high-performance'/, 'mobile power policy missing');
 assert.match(runtime, /webglcontextlost/, 'context loss reporting missing');
@@ -36,7 +37,10 @@ assert.equal((runtime.match(/getContext\('webgl2'/g) || []).length, 1, 'v51 must
 assert.match(runtime, /document\.hidden/);
 assert.match(runtime, /IntersectionObserver/);
 
-assert.match(mobileCompat, /v52-mobile-safe-hero-local-volumetric-crystal-r4/, 'physical mobile hero-local renderer revision missing');
+assert.match(mobileCompat, /v52-mobile-safe-hero-local-volumetric-crystal-r5/, 'physical mobile hero-local renderer revision missing');
+assert.match(mobileCompat, /root\.dataset\.fxCoreV51=READY/, 'mobile renderer must claim v51 ownership before expensive GL startup');
+assert.match(mobileCompat, /function pruneDuplicateCoreNodes\(/, 'mobile renderer must expose duplicate-stage pruning');
+assert.match(mobileCompat, /MutationObserver/, 'mobile renderer must guard against late duplicate MAG stages');
 assert.match(mobileCompat, /hero\.querySelector\('\.hero-space'\)/, 'mobile renderer must resolve the hero visual host');
 assert.match(mobileCompat, /host\.prepend\(stage\)/, 'mobile renderer must be hosted inside the hero visual slot');
 assert.match(mobileCompat, /premultipliedAlpha:true/, 'mobile compositor-safe premultiplied WebGL path missing');
@@ -69,4 +73,4 @@ assert.ok(homepage.includes('formatx-core-real3d-v20.js'), 'stable compatibility
 new Function(bootstrap);
 new Function(runtime);
 new Function(mobileCompat);
-console.log('PASS: v51 desktop and v52 physical-mobile startup use bounded native WebGL2 crystals; mobile is hero-local, serialized, filter-free, one-context, four-tip and compositor-safe.');
+console.log('PASS: v51 desktop and v52 physical-mobile startup use bounded native WebGL2 crystals; mobile is hero-local, serialized, ownership-guarded, filter-free, one-context, four-tip and compositor-safe.');
