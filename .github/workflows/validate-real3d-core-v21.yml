@@ -4,19 +4,15 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
-      - 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'
-      - 'docs/scifi-ui/scripts/formatx-reference-lock-v30.js'
-      - 'docs/scifi-ui/styles/formatx-reference-lock-v30.css'
+      - 'docs/scifi-ui/scripts/formatx-core-v50.js'
+      - 'docs/scifi-ui/styles/formatx-core-v50.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
-      - 'docs/scifi-ui/styles/formatx-reference-core-v26.css'
-      - 'docs/scifi-ui/scripts/formatx-cinematic-core-v27.js'
-      - 'docs/scifi-ui/scripts/formatx-orbital-core-v28.js'
       - 'docs/scifi-ui/scripts/formatx-webgpu-core-v29.js'
-      - 'docs/scifi-ui/styles/formatx-orbital-core-v28.css'
-      - 'docs/scifi-ui/styles/formatx-real3d-mobile-v29.css'
+      - 'docs/scifi-ui/scripts/formatx-orbital-core-v28.js'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-core-v27.js'
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
-      - 'docs/scifi-ui/data/public-platform-contract.json'
+      - '.github/scripts/validate-real3d-core-v20.cjs'
       - '.github/scripts/validate-real3d-core-v21-release.cjs'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/scripts/validate-reference-core-v26.cjs'
@@ -31,20 +27,22 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: Validate uploaded-reference locked production MAG
+      - name: Validate rounded v50 production MAG
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
-      - name: Validate production mobile-safe startup
+      - name: Validate v50 mobile-safe startup contract
         run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-      - name: Validate compatibility preview renderers
+      - name: Validate production and preview renderer authority
         run: node .github/scripts/validate-reference-core-v26.cjs
+      - name: Validate core integration contract
+        run: node .github/scripts/validate-real3d-core-v20.cjs
       - name: Validate JavaScript syntax
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          node --check docs/scifi-ui/scripts/formatx-reference-lock-v30.js
+          node --check docs/scifi-ui/scripts/formatx-core-v50.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
-          node --check docs/scifi-ui/scripts/formatx-cinematic-core-v27.js
-          node --check docs/scifi-ui/scripts/formatx-orbital-core-v28.js
           node --check docs/scifi-ui/scripts/formatx-webgpu-core-v29.js
+          node --check docs/scifi-ui/scripts/formatx-orbital-core-v28.js
+          node --check docs/scifi-ui/scripts/formatx-cinematic-core-v27.js
           node --check billing-worker/src/production-entry.js
       - name: Publish real3D status
         if: always()
@@ -57,13 +55,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Uploaded-reference lock v30 MAG passed single-context real3D and mobile safety gates'
+            description='Rounded living core v50 passed single-context, mobile framing and syntax gates'
           else
             state=failure
-            description='Reference-lock v30 real3D validation failed'
+            description='Rounded living core v50 validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
-            -f context='FormatX real3D reference lock v30' \
+            -f context='FormatX rounded living core v50' \
             -f description="$description" \
             -f target_url="$TARGET_URL"
