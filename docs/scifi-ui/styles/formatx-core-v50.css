@@ -1,0 +1,66 @@
+/* FormatX v50 rounded living core — bounded on desktop and mobile. */
+.fx-core-v50-stage {
+  --fx-core-x: 68%;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  contain: strict;
+  isolation: isolate;
+}
+
+.fx-core-v50-stage::before {
+  background:
+    radial-gradient(circle at 18% 31%, rgba(92, 180, 255, .58) 0 1px, transparent 3px),
+    radial-gradient(circle at 28% 22%, rgba(151, 78, 255, .48) 0 1px, transparent 2.5px),
+    radial-gradient(circle at 83% 29%, rgba(87, 230, 255, .62) 0 1px, transparent 3px),
+    radial-gradient(circle at 75% 60%, rgba(174, 67, 255, .46) 0 1px, transparent 3px),
+    radial-gradient(circle at var(--fx-core-x) 47%, rgba(196, 250, 255, .10) 0 1.2%, rgba(38, 203, 255, .085) 5%, transparent 20%),
+    radial-gradient(ellipse at var(--fx-core-x) 48%, rgba(22, 162, 233, .105) 0, rgba(18, 82, 170, .045) 28%, transparent 58%),
+    linear-gradient(180deg, rgba(0, 4, 12, .01), rgba(0, 4, 13, .10));
+}
+
+.fx-core-v50-stage::after {
+  opacity: .34;
+}
+
+.fx-core-v50-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain;
+  filter: saturate(1.55) contrast(1.04) !important;
+  image-rendering: auto !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  .fx-core-v50-stage {
+    --fx-core-x: 50%;
+  }
+
+  .fx-core-v50-stage::before {
+    background:
+      radial-gradient(circle at 12% 30%, rgba(72, 164, 255, .52) 0 1px, transparent 3px),
+      radial-gradient(circle at 25% 21%, rgba(154, 73, 255, .43) 0 1px, transparent 2.5px),
+      radial-gradient(circle at 84% 28%, rgba(83, 226, 255, .56) 0 1px, transparent 3px),
+      radial-gradient(circle at 77% 58%, rgba(169, 61, 255, .40) 0 1px, transparent 3px),
+      radial-gradient(circle at 50% 42%, rgba(204, 252, 255, .10) 0 1.2%, rgba(41, 213, 255, .075) 5%, transparent 19%),
+      radial-gradient(ellipse at 50% 43%, rgba(32, 180, 244, .10) 0, rgba(20, 92, 180, .04) 28%, transparent 58%),
+      linear-gradient(180deg, rgba(1, 5, 11, .02), rgba(0, 2, 7, .14));
+  }
+
+  .fx-core-v50-stage::after {
+    top: 47%;
+    opacity: .28;
+  }
+
+  html[data-fx-core-v50="ready"] body.living-architecture #hero .hero-space {
+    min-height: clamp(460px, 55svh, 690px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-core-v50-stage {
+    transition-duration: 120ms;
+  }
+}
