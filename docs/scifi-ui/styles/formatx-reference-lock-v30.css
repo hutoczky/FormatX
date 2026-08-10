@@ -1,4 +1,4 @@
-/* FormatX reference lock v30 — uploaded four-tip crystalline frame. */
+/* FormatX reference lock v30 r7 — uploaded four-tip crystalline frame, reference-fit mobile composition. */
 .fx-core-real3d-stage{
   --fx-core-x:69%;position:fixed;z-index:121;inset:0;width:100vw;height:100dvh;overflow:hidden;contain:strict;isolation:isolate;pointer-events:none;opacity:0;visibility:hidden;background:#010711;transition:opacity 360ms ease,visibility 0s linear 360ms
 }
@@ -13,25 +13,27 @@
   radial-gradient(circle at 77% 21%,rgba(79,218,255,.72) 0 1px,transparent 2.8px),
   radial-gradient(circle at 88% 48%,rgba(158,76,255,.70) 0 1px,transparent 3px),
   radial-gradient(circle at 94% 61%,rgba(64,193,255,.68) 0 1px,transparent 2.6px),
-  radial-gradient(circle at var(--fx-core-x) 40.2%,rgba(243,255,255,.19) 0 .9%,rgba(77,232,255,.18) 4.8%,rgba(26,126,230,.075) 12%,transparent 22%),
-  radial-gradient(ellipse at var(--fx-core-x) 40.2%,rgba(23,190,255,.20) 0,rgba(12,82,186,.10) 32%,transparent 61%),
-  radial-gradient(ellipse at var(--fx-core-x) 41%,rgba(156,57,246,.13) 0,rgba(92,35,176,.05) 35%,transparent 59%),
-  linear-gradient(180deg,transparent 39.42%,rgba(52,188,255,.04) 39.82%,rgba(110,236,255,.20) 40.18%,rgba(36,132,222,.055) 40.48%,transparent 40.95%),
-  linear-gradient(180deg,#010712 0%,#020a17 38%,#020916 57%,#01050c 100%)
+  radial-gradient(circle at var(--fx-core-x) 49%,rgba(243,255,255,.18) 0 .9%,rgba(77,232,255,.17) 4.8%,rgba(26,126,230,.07) 12%,transparent 22%),
+  radial-gradient(ellipse at var(--fx-core-x) 49%,rgba(23,190,255,.18) 0,rgba(12,82,186,.09) 32%,transparent 61%),
+  radial-gradient(ellipse at var(--fx-core-x) 49.8%,rgba(156,57,246,.12) 0,rgba(92,35,176,.05) 35%,transparent 59%),
+  linear-gradient(180deg,transparent 48.35%,rgba(52,188,255,.04) 48.70%,rgba(110,236,255,.19) 49%,rgba(36,132,222,.055) 49.35%,transparent 49.85%),
+  linear-gradient(180deg,#010712 0%,#020a17 43%,#020916 61%,#01050c 100%)
 }
 .fx-core-real3d-stage::after{
-  content:"";position:absolute;z-index:0;left:-18vw;right:-18vw;top:47.5%;height:76%;pointer-events:none;transform:perspective(560px) rotateX(63deg) translateY(1.5%);transform-origin:50% 0;background:
-  radial-gradient(ellipse at var(--fx-core-x) 0%,rgba(101,234,255,.34),rgba(34,117,215,.10) 31%,transparent 64%),
-  repeating-radial-gradient(ellipse at var(--fx-core-x) 0%,rgba(91,221,255,.07) 0 1px,transparent 2px 17px),
-  repeating-radial-gradient(ellipse at var(--fx-core-x) 4%,rgba(150,65,255,.045) 0 1px,transparent 3px 31px),
-  radial-gradient(ellipse at 58% 8%,rgba(115,67,235,.065),transparent 42%),
-  linear-gradient(90deg,transparent 2%,rgba(37,111,214,.075) 28%,rgba(74,218,255,.15) 50%,rgba(137,53,229,.105) 72%,transparent 98%);
-  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.94),rgba(0,0,0,.54) 50%,transparent 91%);mask-image:linear-gradient(180deg,rgba(0,0,0,.94),rgba(0,0,0,.54) 50%,transparent 91%);opacity:.72
+  content:"";position:absolute;z-index:0;left:-18vw;right:-18vw;top:54%;height:70%;pointer-events:none;transform:perspective(560px) rotateX(63deg) translateY(1.5%);transform-origin:50% 0;background:
+  radial-gradient(ellipse at var(--fx-core-x) 0%,rgba(101,234,255,.31),rgba(34,117,215,.09) 31%,transparent 64%),
+  repeating-radial-gradient(ellipse at var(--fx-core-x) 0%,rgba(91,221,255,.065) 0 1px,transparent 2px 17px),
+  repeating-radial-gradient(ellipse at var(--fx-core-x) 4%,rgba(150,65,255,.043) 0 1px,transparent 3px 31px),
+  radial-gradient(ellipse at 58% 8%,rgba(115,67,235,.06),transparent 42%),
+  linear-gradient(90deg,transparent 2%,rgba(37,111,214,.07) 28%,rgba(74,218,255,.14) 50%,rgba(137,53,229,.10) 72%,transparent 98%);
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.94),rgba(0,0,0,.54) 50%,transparent 91%);mask-image:linear-gradient(180deg,rgba(0,0,0,.94),rgba(0,0,0,.54) 50%,transparent 91%);opacity:.68
 }
-.fx-core-real3d-canvas{position:absolute;z-index:1;inset:0;display:block;width:100%;height:100%;background:transparent;filter:saturate(1.25) contrast(1.16) brightness(2.60);image-rendering:auto;transform:translateZ(0);will-change:contents}
+.fx-core-real3d-canvas{position:absolute;z-index:1;inset:0;display:block;width:100%;height:100%;background:transparent;filter:saturate(1.35) contrast(1.14) brightness(1.85);image-rendering:auto;transform:translateZ(0);will-change:contents}
 .fx-core-real3d-stage[data-active="true"]{opacity:1;visibility:visible;transition:opacity 360ms ease,visibility 0s}
 html[data-fx-core-reference-lock="ready-v30"] .fx-core-real3d-stage{background:#010711}
 html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) #hero .hero-copy{position:relative;z-index:130}
+html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) .topbar{z-index:160}
+html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) #hero .scroll-cue{position:relative;z-index:130}
 html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) #hero .fx-organism-map,
 html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) #hero .fx-immersive-launch,
 html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) #hero .hero-ring,
@@ -45,10 +47,25 @@ html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavaila
 html.fx-organism-menu-open .fx-core-real3d-stage,body.fx-organism-panel-open .fx-core-real3d-stage{opacity:0!important;visibility:hidden!important}
 @media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   .fx-core-real3d-stage{--fx-core-x:50%}
-  .fx-core-real3d-stage::after{top:47.5%;opacity:.72;background:radial-gradient(ellipse at 50% 0%,rgba(101,234,255,.34),rgba(34,117,215,.10) 31%,transparent 64%),repeating-radial-gradient(ellipse at 50% 0%,rgba(91,221,255,.07) 0 1px,transparent 2px 17px),repeating-radial-gradient(ellipse at 50% 4%,rgba(150,65,255,.045) 0 1px,transparent 3px 31px),radial-gradient(ellipse at 58% 8%,rgba(115,67,235,.065),transparent 42%),linear-gradient(90deg,transparent 2%,rgba(37,111,214,.075) 28%,rgba(74,218,255,.15) 50%,rgba(137,53,229,.105) 72%,transparent 98%)}
+  .fx-core-real3d-stage::before{background:
+    radial-gradient(circle at 12% 31%,rgba(69,157,255,.70) 0 1px,transparent 3px),
+    radial-gradient(circle at 25% 22%,rgba(151,72,255,.64) 0 1px,transparent 2.5px),
+    radial-gradient(circle at 84% 29%,rgba(83,226,255,.74) 0 1px,transparent 3px),
+    radial-gradient(circle at 76% 57%,rgba(169,61,255,.58) 0 1px,transparent 3px),
+    radial-gradient(circle at 9% 54%,rgba(60,176,255,.50) 0 1px,transparent 2.5px),
+    radial-gradient(circle at 92% 49%,rgba(134,76,255,.60) 0 1px,transparent 3px),
+    radial-gradient(circle at 50% 49%,rgba(243,255,255,.18) 0 .9%,rgba(77,232,255,.17) 4.8%,rgba(26,126,230,.07) 12%,transparent 22%),
+    radial-gradient(ellipse at 50% 49%,rgba(23,190,255,.18) 0,rgba(12,82,186,.09) 32%,transparent 61%),
+    radial-gradient(ellipse at 50% 49.8%,rgba(156,57,246,.12) 0,rgba(92,35,176,.05) 35%,transparent 59%),
+    linear-gradient(180deg,transparent 48.35%,rgba(52,188,255,.04) 48.70%,rgba(110,236,255,.19) 49%,rgba(36,132,222,.055) 49.35%,transparent 49.85%),
+    linear-gradient(180deg,#010712 0%,#020a17 43%,#020916 61%,#01050c 100%)}
+  .fx-core-real3d-stage::after{top:54%;opacity:.68;background:radial-gradient(ellipse at 50% 0%,rgba(101,234,255,.31),rgba(34,117,215,.09) 31%,transparent 64%),repeating-radial-gradient(ellipse at 50% 0%,rgba(91,221,255,.065) 0 1px,transparent 2px 17px),repeating-radial-gradient(ellipse at 50% 4%,rgba(150,65,255,.043) 0 1px,transparent 3px 31px),radial-gradient(ellipse at 58% 8%,rgba(115,67,235,.06),transparent 42%),linear-gradient(90deg,transparent 2%,rgba(37,111,214,.07) 28%,rgba(74,218,255,.14) 50%,rgba(137,53,229,.10) 72%,transparent 98%)}
   html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero{min-height:auto!important;padding-top:max(82px,calc(env(safe-area-inset-top) + 72px))!important}
   html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-grid{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;min-height:0!important}
-  html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-space{position:relative!important;z-index:1!important;inset:auto!important;order:-1!important;width:100%!important;min-height:clamp(590px,68svh,920px)!important;opacity:1!important;transform:none!important}
+  html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-space{position:relative!important;z-index:1!important;inset:auto!important;order:-1!important;width:100%!important;min-height:clamp(500px,calc(100vw * 1.12 + 72px),860px)!important;opacity:1!important;transform:none!important}
   html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-copy{order:2!important;z-index:130!important;margin-top:0!important}
+}
+@media(max-width:480px){
+  html:is([data-fx-core-real3d="ready-v20"],[data-fx-core-real3d="context-unavailable"],[data-fx-core-real3d="webgl2-unavailable"],[data-fx-core-real3d="shader-failed"],[data-fx-core-real3d="context-lost"],[data-fx-core-real3d="geometry-failed"]) body.living-architecture #hero .hero-space{min-height:clamp(470px,calc(100vw * 1.10 + 72px),620px)!important}
 }
 @media(prefers-reduced-motion:reduce){.fx-core-real3d-stage{transition-duration:120ms}.fx-core-real3d-canvas{will-change:auto}}
