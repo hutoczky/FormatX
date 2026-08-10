@@ -195,7 +195,7 @@ async function handleCreateCheckoutSession(request, env) {
       buyer_type: 'business',
       business_buyer_confirmed: true,
       terms_accepted: true,
-      privacy_accepted: true,
+      privacy_notice_acknowledged: true,
       terms_version: TERMS_VERSION,
       privacy_version: PRIVACY_VERSION,
       legal_acceptance_recorded_at: now,
@@ -244,7 +244,7 @@ function validateCheckoutRequest(payload) {
   if (!isValidOrderReference(payload.order_reference)) return 'Érvénytelen rendelési azonosító.';
   if (payload.business_buyer_confirmed !== true) return 'A vállalkozási vagy szakmai célú vásárlói státusz megerősítése kötelező.';
   if (payload.terms_accepted !== true) return 'A felhasználási feltételek elfogadása kötelező.';
-  if (payload.privacy_accepted !== true) return 'Az adatkezelési tájékoztató elfogadása kötelező.';
+  if (payload.privacy_notice_acknowledged !== true) return 'Az adatkezelési tájékoztató elolvasásának és tudomásulvételének megerősítése kötelező.';
   return null;
 }
 
