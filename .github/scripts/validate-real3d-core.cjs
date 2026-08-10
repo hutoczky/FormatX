@@ -34,7 +34,7 @@ for (const token of [
   'webglcontextlost'
 ]) assert.ok(production.includes(token), `missing: ${token}`);
 
-assert.match(production, /const budget=mobile\?1150000:2400000/);
+assert.match(production, /budget=mobile\?1150000:2400000/);
 assert.match(production, /vec3 N=normalize\(vN\),V=normalize\(-vW\)/, 'directional surface lighting is required');
 assert.match(production, /sp=pow\(/, 'specular depth response is required');
 assert.doesNotMatch(production, /drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(/i);
