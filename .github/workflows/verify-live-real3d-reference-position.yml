@@ -1,5 +1,5 @@
-name: Verify live real3D reference position
-run-name: Measure uploaded-reference MAG r7 white-core position for ${{ github.event.workflow_run.head_sha }}
+name: Verify live rounded core v50 framing
+run-name: Measure rounded core v50 mobile framing for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -11,7 +11,7 @@ permissions:
   statuses: write
 
 jobs:
-  capture-reference-position:
+  capture-v50-framing:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
@@ -23,147 +23,94 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/real3d-ref"
-          cd "$RUNNER_TEMP/real3d-ref"
+          mkdir -p "$RUNNER_TEMP/core-v50-framing"
+          cd "$RUNNER_TEMP/core-v50-framing"
           npm init -y >/dev/null 2>&1
-          npm install --silent playwright@1.62.0 pngjs@7.0.0
+          npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Capture reference-lock v30 r7 at scroll zero
+      - name: Capture and validate v50 mobile framing
         shell: bash
-        env:
-          RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP/real3d-ref"
+          cd "$RUNNER_TEMP/core-v50-framing"
           node <<'NODE'
+          const assert = require('node:assert/strict');
           const { chromium } = require('playwright');
-          const { PNG } = require('pngjs');
-          const fs = require('node:fs');
-
-          function coreMetrics(file) {
-            const image = PNG.sync.read(fs.readFileSync(file));
-            const search = {
-              x0: Math.max(0, Math.round(image.width * 0.30)),
-              x1: Math.min(image.width, Math.round(image.width * 0.70)),
-              y0: Math.max(0, Math.round(image.height * 0.27)),
-              y1: Math.min(image.height, Math.round(image.height * 0.52)),
-            };
-            let peak = { luminance: -1, x: null, y: null };
-            for (let y = search.y0; y < search.y1; y += 1) {
-              for (let x = search.x0; x < search.x1; x += 1) {
-                const o = (image.width * y + x) << 2;
-                const r = image.data[o] / 255;
-                const g = image.data[o + 1] / 255;
-                const b = image.data[o + 2] / 255;
-                const luminance = .2126 * r + .7152 * g + .0722 * b;
-                const whiteCyan = Math.min(g, b) >= .42 && b >= r * .92;
-                if (whiteCyan && luminance > peak.luminance) peak = { luminance, x, y };
-              }
-            }
-            if (peak.x === null) return { search, peak, qualifying_pixels: 0, centroid_x: null, centroid_y: null };
-            const radius = Math.round(Math.min(image.width, image.height) * 0.075);
-            const threshold = Math.max(.48, peak.luminance * .64);
-            let pixels = 0, weight = 0, sumX = 0, sumY = 0;
-            for (let y = Math.max(search.y0, peak.y - radius); y <= Math.min(search.y1 - 1, peak.y + radius); y += 1) {
-              for (let x = Math.max(search.x0, peak.x - radius); x <= Math.min(search.x1 - 1, peak.x + radius); x += 1) {
-                const dx = x - peak.x, dy = y - peak.y;
-                if (dx * dx + dy * dy > radius * radius) continue;
-                const o = (image.width * y + x) << 2;
-                const r = image.data[o] / 255;
-                const g = image.data[o + 1] / 255;
-                const b = image.data[o + 2] / 255;
-                const luminance = .2126 * r + .7152 * g + .0722 * b;
-                if (luminance < threshold || Math.min(g, b) < .34 || b < r * .88) continue;
-                const w = Math.pow(Math.max(.001, luminance - threshold + .08), 2);
-                pixels += 1; weight += w; sumX += x * w; sumY += y * w;
-              }
-            }
-            return {search,peak,radius,threshold,qualifying_pixels:pixels,centroid_x:weight?sumX/weight:null,centroid_y:weight?sumY/weight:null};
-          }
-
-          async function waitForRenderer(page) {
-            await page.waitForFunction(() => {
-              const root=document.documentElement;
-              const ref=root.dataset.fxCoreReferenceLock||'';
-              const real=root.dataset.fxCoreReal3d||'';
-              return ref==='ready-v30' || ref.startsWith('fallback-') || ref==='load-failed' || ['shader-failed','context-unavailable','webgl2-unavailable','context-lost','geometry-failed'].includes(real);
-            }, null, {timeout:60000});
-            const diagnostic=await page.evaluate(()=>({
-              reference:document.documentElement.dataset.fxCoreReferenceLock||null,
-              referenceLoad:document.documentElement.dataset.fxCoreReferenceLockLoad||null,
-              real3d:document.documentElement.dataset.fxCoreReal3d||null,
-              error:document.documentElement.dataset.fxCoreReal3dError||null,
-              scripts:[...document.scripts].map(s=>s.src).filter(src=>src.includes('reference-lock-v30')),
-              styles:[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>l.href).filter(src=>src.includes('reference-lock-v30'))
-            }));
-            console.log('R7_POSITION_STARTUP_DIAGNOSTIC',JSON.stringify(diagnostic));
-            if(diagnostic.reference!=='ready-v30') throw new Error(`r7 renderer startup failed before position audit: ${JSON.stringify(diagnostic)}`);
-          }
 
           (async () => {
-            const browser = await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-            const context = await browser.newContext({viewport:{width:753,height:1536},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
+            const context = await browser.newContext({
+              viewport: { width: 390, height: 844 },
+              deviceScaleFactor: 2,
+              isMobile: true,
+              hasTouch: true,
+              locale: 'hu-HU'
+            });
             const page = await context.newPage();
-            await page.goto(`https://www.formatxsuite.com/?real3d_ref_r7=${process.env.RUN_ID}`, {waitUntil:'domcontentloaded',timeout:45000});
-            await page.evaluate(() => {const root=document.documentElement;root.lang='hu';root.classList.add('fx-intro-complete');document.getElementById('formatx-event-horizon')?.remove();scrollTo(0,0);});
-            await waitForRenderer(page);
-            await page.waitForTimeout(1800);
-            if (await page.evaluate(() => scrollY) !== 0) throw new Error('reference audit must remain at scrollY=0');
+            await page.goto(`https://www.formatxsuite.com/?v50_framing=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await page.evaluate(() => {
+              const root = document.documentElement;
+              root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-managed');
+              root.classList.add('fx-intro-complete');
+              document.getElementById('formatx-event-horizon')?.setAttribute('hidden', '');
+              document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+              scrollTo(0, 0);
+            });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreV50 === 'ready', null, { timeout: 60000 });
+            await page.waitForTimeout(1200);
 
-            await page.screenshot({ path: 'mag-reference-r7-scroll0.png', fullPage: false });
-            const visual = coreMetrics('mag-reference-r7-scroll0.png');
-            const state = await page.evaluate(() => ({
-              reference: document.documentElement.dataset.fxCoreReferenceLock,
-              referenceRevision: document.documentElement.dataset.fxCoreReferenceRevision,
-              fit: document.documentElement.dataset.fxCoreReferenceFit,
-              framing: document.documentElement.dataset.fxCoreReferenceFraming,
-              material: document.documentElement.dataset.fxCoreReferenceMaterial,
-              visual: document.documentElement.dataset.fxCoreVisualRevision,
-              geometry: document.documentElement.dataset.fxCoreGeometry,
-              scrollY,
-              stages: document.querySelectorAll('.fx-core-real3d-stage').length,
-              v26Stages: document.querySelectorAll('.fx-reference-core-v26-stage').length,
-              oldStages: document.querySelectorAll('.fx-core-mesh3d-stage,.fx-core-fracture3d-stage').length
-            }));
+            const state = await page.evaluate(() => {
+              const root = document.documentElement;
+              const stage = document.querySelector('.fx-core-v50-stage');
+              const canvas = document.querySelector('.fx-core-v50-canvas');
+              const canvasRect = canvas?.getBoundingClientRect();
+              const legacyScripts = [...document.scripts].map(s => s.src).filter(src => /reference-lock-v30|mobile-mag-v33|mag-reference-v4[1467]/.test(src));
+              const styleText = [...document.styleSheets].map(sheet => sheet.href || '').filter(Boolean);
+              return {
+                renderer: root.dataset.fxCoreRenderer,
+                responsive: root.dataset.fxCoreResponsive,
+                geometry: root.dataset.fxCoreReferenceGeometry,
+                nucleus: root.dataset.fxCoreInternalReactor,
+                performance: root.dataset.fxCorePerformance,
+                stageActive: stage?.dataset.active,
+                canvasCount: document.querySelectorAll('.fx-core-v50-canvas').length,
+                canvasWidth: canvasRect?.width || 0,
+                canvasHeight: canvasRect?.height || 0,
+                viewportWidth: innerWidth,
+                viewportHeight: innerHeight,
+                legacyScripts,
+                v50StyleLoaded: styleText.some(src => src.includes('formatx-core-v50.css'))
+              };
+            });
 
-            // Uploaded reference: white reactor centroid is ~48.2% of image height.
-            // At the 753x1536 mobile audit viewport that maps to about y=740.
-            const target = {white_core_centroid_x:[340,410],white_core_centroid_y:[700,790],peak_luminance_minimum:.68,minimum_qualifying_pixels:20};
-            fs.writeFileSync('reference-position-metrics.json', JSON.stringify({ target, measured: visual, state }, null, 2));
-            console.log('REFERENCE_POSITION_R7', JSON.stringify({ visual, state, target }));
+            console.log('V50_FRAMING', JSON.stringify(state));
+            assert.equal(state.renderer, 'single-webgl2-rounded-living-core-v50');
+            assert.equal(state.responsive, 'desktop-mobile-bounded-v50');
+            assert.equal(state.geometry, 'rounded-organic-glass-orb-v50');
+            assert.equal(state.nucleus, 'moving-internal-nucleus-spectral-orbits-v50');
+            assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
+            assert.equal(state.canvasCount, 1);
+            assert.ok(state.canvasWidth <= state.viewportWidth + 1, `canvas width overflow: ${state.canvasWidth}`);
+            assert.ok(state.canvasHeight <= state.viewportHeight + 1, `canvas height overflow: ${state.canvasHeight}`);
+            assert.deepEqual(state.legacyScripts, [], 'legacy diamond MAG scripts must not be loaded');
+            assert.equal(state.v50StyleLoaded, true);
 
-            const positionOk = visual.qualifying_pixels >= target.minimum_qualifying_pixels
-              && visual.peak.luminance >= target.peak_luminance_minimum
-              && visual.centroid_x >= target.white_core_centroid_x[0]
-              && visual.centroid_x <= target.white_core_centroid_x[1]
-              && visual.centroid_y >= target.white_core_centroid_y[0]
-              && visual.centroid_y <= target.white_core_centroid_y[1];
-            const runtimeOk = state.reference === 'ready-v30'
-              && state.referenceRevision === 'uploaded-reference-20260810'
-              && state.fit === 'uploaded-image-20260810-r7'
-              && state.framing === 'mobile-core-center-40pct-shell-height-75pct'
-              && state.material === 'dense-luminous-glass-filaments-v30'
-              && state.visual === 'v30-reference-lock'
-              && state.geometry === 'concave-four-sail-indexed-mesh-v30'
-              && state.scrollY === 0 && state.stages === 1 && state.v26Stages === 0 && state.oldStages === 0;
-            if (!runtimeOk || !positionOk) throw new Error(`r7 white-core position invalid: ${JSON.stringify({ visual, state, target })}`);
+            await page.screenshot({ path: 'formatx-v50-mobile.png', fullPage: false });
+            await context.close();
             await browser.close();
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
-      - name: Upload reference-position evidence
-        if: always()
+      - name: Upload v50 mobile capture
         uses: actions/upload-artifact@v4
         with:
-          name: live-reference-r7-position-${{ github.run_id }}
-          path: |
-            ${{ runner.temp }}/real3d-ref/mag-reference-r7-scroll0.png
-            ${{ runner.temp }}/real3d-ref/reference-position-metrics.json
-          if-no-files-found: warn
-          retention-days: 7
+          name: formatx-v50-mobile-framing-${{ github.event.workflow_run.head_sha }}
+          path: ${{ runner.temp }}/core-v50-framing/formatx-v50-mobile.png
+          if-no-files-found: error
+          retention-days: 14
 
-      - name: Publish reference-position status
+      - name: Publish v50 framing status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -172,5 +119,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Uploaded-reference MAG r7 white-core position passed at scrollY=0'; else state=failure; description='Uploaded-reference MAG r7 white-core position failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX real3D reference-position audit' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Rounded living core v50 mobile framing verified'; else state=failure; description='Rounded living core v50 mobile framing failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX v50 mobile framing' -f description="$description" -f target_url="$TARGET_URL"
