@@ -1,54 +1,9 @@
-/* FormatX mobile-safe volumetric MAG v52.
-   Phone path keeps one visible native WebGL2 canvas and prevents a blank hero
-   when coarse-pointer/mobile compositing differs from desktop Chromium. */
+/* FormatX mobile-safe volumetric MAG v52 r4.
+   Physical phone path: the WebGL2 MAG is hosted directly inside .hero-space.
+   No raster fallback, no fixed full-screen compositing layer, no CSS filter
+   chain on the WebGL canvas. */
 
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
-  .fx-core-mobile-safe-v52-stage,
-  html[data-fx-core-mobile-compat="ready-v52"] .fx-core-v51-stage {
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100vw !important;
-    height: 100dvh !important;
-    z-index: 124 !important;
-    overflow: hidden !important;
-    pointer-events: none !important;
-    background: transparent !important;
-    contain: strict !important;
-    isolation: isolate !important;
-  }
-
-  .fx-core-mobile-safe-v52-stage[data-fx-mobile-visible="true"],
-  html[data-fx-core-mobile-compat="ready-v52"] .fx-core-v51-stage[data-active="true"] {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  .fx-core-mobile-safe-v52-stage[data-fx-mobile-visible="false"] {
-    visibility: hidden !important;
-    opacity: 0 !important;
-  }
-
-  .fx-core-mobile-safe-v52-canvas,
-  html[data-fx-core-mobile-compat="ready-v52"] .fx-core-v51-canvas {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    filter:
-      saturate(1.86)
-      contrast(1.18)
-      brightness(1.48)
-      drop-shadow(0 0 8px rgba(67, 230, 255, .46))
-      drop-shadow(0 0 20px rgba(48, 160, 255, .30))
-      drop-shadow(0 0 30px rgba(161, 66, 255, .22)) !important;
-    mix-blend-mode: normal !important;
-    pointer-events: none !important;
-    transform: translateZ(0) !important;
-    backface-visibility: hidden !important;
-  }
-
   html[data-fx-core-mobile-compat="ready-v52"] body.living-architecture #hero {
     min-height: auto !important;
     padding-top: max(82px, calc(env(safe-area-inset-top) + 72px)) !important;
@@ -67,23 +22,92 @@
     inset: auto !important;
     order: -1 !important;
     width: 100% !important;
-    min-height: clamp(470px, 57svh, 640px) !important;
+    min-height: clamp(500px, 58svh, 660px) !important;
     z-index: 1 !important;
     opacity: 1 !important;
     visibility: visible !important;
     transform: none !important;
+    overflow: hidden !important;
+    isolation: auto !important;
+    contain: none !important;
+    background: transparent !important;
+  }
+
+  .fx-core-mobile-safe-v52-stage,
+  html[data-fx-core-mobile-compat="ready-v52"] #hero .hero-space > .fx-core-v51-stage {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 2 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    background: transparent !important;
+    contain: none !important;
+    isolation: auto !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .fx-core-mobile-safe-v52-stage[data-fx-mobile-visible="false"] {
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+
+  .fx-core-mobile-safe-v52-canvas,
+  html[data-fx-core-mobile-compat="ready-v52"] #hero .hero-space > .fx-core-v51-stage .fx-core-v51-canvas {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: transparent !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    transform: none !important;
+    backface-visibility: visible !important;
+    will-change: auto !important;
+    image-rendering: auto !important;
+    pointer-events: none !important;
   }
 
   html[data-fx-core-mobile-compat="ready-v52"] body.living-architecture #hero .hero-copy {
     order: 2 !important;
     position: relative !important;
-    z-index: 130 !important;
+    z-index: 4 !important;
     margin-top: 0 !important;
+  }
+
+  html[data-fx-core-mobile-compat="ready-v52"] #hero .hero-ring,
+  html[data-fx-core-mobile-compat="ready-v52"] #hero .hero-label,
+  html[data-fx-core-mobile-compat="ready-v52"] .fx-resilient-core,
+  html[data-fx-core-mobile-compat="ready-v52"] .fx-premium-core-status,
+  html[data-fx-core-mobile-compat="ready-v52"] .fx-three-stage-shell,
+  html[data-fx-core-mobile-compat="ready-v52"] .fx-core-mesh3d-stage,
+  html[data-fx-core-mobile-compat="ready-v52"] .fx-core-fracture3d-stage,
+  html[data-fx-core-mobile-compat="ready-v52"] .fx-transcend-shell[data-fx-native-apex="true"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 }
 
 @media (max-width: 430px) {
   html[data-fx-core-mobile-compat="ready-v52"] body.living-architecture #hero .hero-space {
-    min-height: clamp(455px, 56svh, 610px) !important;
+    min-height: clamp(490px, 57svh, 620px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-core-mobile-safe-v52-stage {
+    transition: none !important;
   }
 }
