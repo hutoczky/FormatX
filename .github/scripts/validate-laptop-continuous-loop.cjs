@@ -87,6 +87,7 @@ async function snapshot(page) {
       bridgeHeight: bridge?.offsetHeight || 0,
       sourceTop: source?.offsetTop || 0,
       sourceHeight: source?.offsetHeight || 0,
+      cloneHeight: clone?.offsetHeight || 0,
       sourceRectTop: sourceRect?.top ?? 999999,
       sourceRectBottom: sourceRect?.bottom ?? -999999,
       sourceTitle: source?.querySelector('.hero-title-main')?.textContent?.trim() || '',
