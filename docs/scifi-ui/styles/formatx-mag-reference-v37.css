@@ -1,0 +1,53 @@
+/* FormatX MAG reference v37 — native WebGL crystal takeover.
+   No image and no SVG/wireframe replacement. The existing WebGL2 canvas is reused,
+   while the old renderer is parked and a denser glass/crystal shader renders the MAG. */
+
+/* Retire all experimental 2D/DOM crystal overlays from v33-v36. */
+.fx-v33-core-glass,
+.fx-v33-reactor-halo,
+.fx-mag-v34-overlay,
+.fx-mag-v35-overlay,
+.fx-mag-v36-overlay{display:none!important}
+
+/* Keep legacy post-FX only as a very light optical halo. */
+.fx-core-postfx-v31{filter:saturate(1.04) contrast(1.04) brightness(.96)!important}
+.fx-v31-spectrum{opacity:.14!important}
+.fx-v31-ring-a{opacity:.22!important}
+.fx-v31-ring-b{opacity:.14!important}
+.fx-v31-ring-c{opacity:.08!important}
+.fx-v31-flare{
+  width:7px!important;height:7px!important;margin:-3.5px 0 0 -3.5px!important;
+  box-shadow:0 0 3px #fff,0 0 9px rgba(224,255,255,.94),0 0 20px rgba(69,235,255,.70),0 0 38px rgba(62,155,255,.26)!important
+}
+
+/* The shader now carries the material, so CSS filtering stays restrained. */
+.fx-core-real3d-canvas{
+  transform:none!important;
+  transform-origin:50% 50%!important;
+  filter:saturate(1.16) contrast(1.12) brightness(1.06)
+    drop-shadow(0 0 4px rgba(195,252,255,.28))
+    drop-shadow(0 0 16px rgba(55,216,255,.15))
+    drop-shadow(0 0 30px rgba(134,62,255,.08))!important;
+  opacity:1!important
+}
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-canvas{
+    transform:none!important;
+    filter:saturate(1.18) contrast(1.14) brightness(1.08)
+      drop-shadow(0 0 4px rgba(202,254,255,.30))
+      drop-shadow(0 0 15px rgba(57,221,255,.16))
+      drop-shadow(0 0 27px rgba(139,64,255,.08))!important
+  }
+  .fx-core-postfx-v31{transform:none!important}
+}
+
+/* Existing mobile text guard remains authoritative. */
+.fx-core-real3d-stage[data-fx-mobile-text-guard="text"] .fx-core-real3d-canvas{
+  opacity:0!important;
+  visibility:hidden!important
+}
+
+@media(prefers-reduced-motion:reduce){
+  .fx-core-real3d-canvas{filter:saturate(1.08) contrast(1.08) brightness(1.04)!important}
+}
