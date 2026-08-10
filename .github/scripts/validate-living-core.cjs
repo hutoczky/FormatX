@@ -46,6 +46,8 @@ async function readState(page) {
       renderedPoints: app?.renderer?.info?.render?.points || 0,
       overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
       sound: document.getElementById('lc-sound')?.getAttribute('aria-pressed'),
+      robots: document.querySelector('meta[name="robots"]')?.content || '',
+      title: document.title,
       fullDownload: document.getElementById('lc-full-download')?.href || '',
       androidDownload: document.querySelector('.lc-actionbar a:nth-child(2)')?.href || '',
       releasePage: document.querySelector('.lc-actionbar a:nth-child(3)')?.href || ''
@@ -58,6 +60,18 @@ async function waitReady(page) {
     const app = window.__FORMATX_LIVING_CORE__;
     return Boolean(app && app.renderer && app.corePoints && app.renderer.info.render.frame > 1);
   }, null, { timeout: 20000 });
+}
+
+function assertReleaseRoutes(state) {
+  assert(state.robots === 'noindex,nofollow,noarchive', `Living Core robots policy: ${state.robots}`);
+  assert(/Living Core Lab/i.test(state.title), `Living Core title: ${state.title}`);
+  const fullReleaseTrusted = state.fullDownload.includes('FormatX-Updates/releases')
+    || state.fullDownload.endsWith('/download/multiplatform');
+  assert(fullReleaseTrusted, `Full release link: ${state.fullDownload}`);
+  assert(state.androidDownload.endsWith('/download/android'), `Android full-release link: ${state.androidDownload}`);
+  const releaseCentreTrusted = state.releasePage.endsWith('/FormatX-Updates/releases')
+    || state.releasePage.endsWith('/scifi-ui/downloads/');
+  assert(releaseCentreTrusted, `Release centre link: ${state.releasePage}`);
 }
 
 async function desktop() {
@@ -82,9 +96,7 @@ async function desktop() {
     assert(state.canvas[0] >= 1200 && state.canvas[1] >= 800, `Living Core canvas: ${state.canvas}`);
     assert(state.drawCount >= 4000 && state.renderedPoints > 0, `Living Core particle field: ${JSON.stringify(state)}`);
     assert(state.overflow <= 1, `Living Core horizontal overflow: ${state.overflow}`);
-    assert(state.fullDownload.includes('FormatX-Updates/releases'), `Full release link: ${state.fullDownload}`);
-    assert(state.androidDownload.includes('FormatX-Native-Android.apk'), `Android link: ${state.androidDownload}`);
-    assert(state.releasePage.endsWith('/FormatX-Updates/releases'), `Release page: ${state.releasePage}`);
+    assertReleaseRoutes(state);
 
     await page.keyboard.press('4');
     await page.waitForFunction(() => document.getElementById('lc-panel')?.getAttribute('aria-hidden') === 'false');
@@ -135,6 +147,7 @@ async function mobile() {
     assert(state.canvas[2] >= 380 && state.canvas[3] >= 800, `Mobile canvas: ${state.canvas}`);
     assert(state.overflow <= 1, `Mobile horizontal overflow: ${state.overflow}`);
     assert(state.activeNodes === 1 && /ISO/i.test(state.panelTitle), `Mobile panel: ${JSON.stringify(state)}`);
+    assertReleaseRoutes(state);
     await page.screenshot({ path: 'living-core-mobile.png', fullPage: false });
     assert(errors.length === 0, `Living Core mobile diagnostics: ${errors.join(' | ')}`);
     console.log(JSON.stringify({ case: 'living-core-mobile', state }));
