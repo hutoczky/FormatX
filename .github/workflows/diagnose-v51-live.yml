@@ -30,6 +30,7 @@ jobs:
           set -euo pipefail
           cd "$RUNNER_TEMP/fxdiag"
           node <<'NODE'
+          const fs = require('node:fs');
           const { chromium } = require('playwright');
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
@@ -63,10 +64,23 @@ jobs:
               const styles=[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>l.href).filter(src=>/formatx-core|reference-lock|mag-reference|mobile-mag/.test(src));
               return {dataset:{...document.documentElement.dataset},scripts,styles,stacks,suspicious};
             });
-            console.log('FX_V51_LAYER_DIAGNOSTIC',JSON.stringify(dump,null,2));
+            fs.writeFileSync('v51-layer-diagnostic.json',JSON.stringify(dump,null,2));
+            await page.screenshot({path:'v51-diagnostic.png',fullPage:false});
+            console.log('FX_V51_LAYER_DIAGNOSTIC',JSON.stringify(dump));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
+
+      - name: Upload diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v51-layer-diagnostic-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/fxdiag/v51-layer-diagnostic.json
+            ${{ runner.temp }}/fxdiag/v51-diagnostic.png
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Publish diagnostic status
         if: always()
