@@ -115,6 +115,11 @@
     });
 
     document.addEventListener('formatx:introcomplete', () => {
+      const top = heroTop();
+      if (Math.abs(scrollY - top) > 96) {
+        root.dataset.fxInitialHeroGuard = 'user-scroll-preserved';
+        return;
+      }
       requestAnimationFrame(() => forceHeroStart('intro-complete'));
     }, { once: true });
   }
