@@ -1,5 +1,5 @@
 /* FormatX v51 reference crystal core — exact visual direction from the approved four-tip crystal reference.
-   Production revision: 2026-08-10-v51-reference-crystal-2. */
+   Production revision: 2026-08-10-v51-reference-crystal-3. */
 
 .fx-core-v51-stage {
   --fx-core-x: 68%;
@@ -7,46 +7,17 @@
   overflow: hidden !important;
   contain: strict;
   isolation: isolate;
-  background:
-    radial-gradient(circle at 18% 31%, rgba(91, 176, 255, .60) 0 1px, transparent 3px),
-    radial-gradient(circle at 27% 23%, rgba(155, 82, 255, .48) 0 1px, transparent 2.5px),
-    radial-gradient(circle at 83% 28%, rgba(79, 226, 255, .64) 0 1px, transparent 3px),
-    radial-gradient(circle at 74% 61%, rgba(173, 63, 255, .44) 0 1px, transparent 3px),
-    radial-gradient(circle at 9% 56%, rgba(60, 178, 255, .42) 0 1px, transparent 2.5px),
-    radial-gradient(circle at 91% 52%, rgba(134, 76, 255, .50) 0 1px, transparent 3px),
-    linear-gradient(180deg, rgba(0, 4, 12, .015), rgba(0, 3, 10, .08));
+  background: linear-gradient(180deg, rgba(0, 4, 12, .01), rgba(0, 3, 10, .06)) !important;
 }
 
-.fx-core-v51-stage::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 36% 17%, rgba(64, 194, 255, .36) 0 1px, transparent 2.5px),
-    radial-gradient(circle at 61% 23%, rgba(113, 87, 255, .32) 0 1px, transparent 2.5px),
-    radial-gradient(circle at 31% 61%, rgba(83, 229, 255, .34) 0 1px, transparent 2.5px),
-    radial-gradient(circle at 79% 67%, rgba(180, 67, 255, .30) 0 1px, transparent 2.5px),
-    radial-gradient(circle at 52% 37%, rgba(205, 251, 255, .045) 0 1%, transparent 8%);
-  opacity: .70;
-}
-
-.fx-core-v51-stage::after {
-  left: -12vw;
-  right: -12vw;
-  top: 54%;
-  height: 56%;
-  transform: perspective(560px) rotateX(63deg) translateY(2%);
-  transform-origin: 50% 0;
-  background:
-    radial-gradient(ellipse at var(--fx-core-x) 0%, rgba(86, 229, 255, .18), rgba(29, 106, 198, .050) 29%, transparent 56%),
-    repeating-radial-gradient(ellipse at var(--fx-core-x) 0%, rgba(97, 221, 255, .040) 0 1px, transparent 3px 18px),
-    repeating-linear-gradient(180deg, rgba(62, 190, 255, .060) 0 1px, transparent 2px 13px),
-    linear-gradient(90deg, transparent 4%, rgba(39, 119, 223, .045) 31%, rgba(85, 219, 255, .095) 50%, rgba(145, 58, 229, .060) 70%, transparent 96%);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .82), transparent 84%);
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, .82), transparent 84%);
-  opacity: .40;
+/* The old global real3D stylesheet contains large radial haze layers.
+   v51 intentionally suppresses them so only the actual WebGL crystal defines the silhouette. */
+.fx-core-real3d-stage.fx-core-v51-stage::before,
+.fx-core-real3d-stage.fx-core-v51-stage::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  opacity: 0 !important;
 }
 
 .fx-core-v51-canvas {
@@ -55,7 +26,7 @@
   max-width: none !important;
   max-height: none !important;
   object-fit: contain;
-  filter: saturate(2.05) contrast(1.12) brightness(1.34) !important;
+  filter: saturate(2.10) contrast(1.14) brightness(1.38) !important;
   mix-blend-mode: screen;
   image-rendering: auto !important;
   pointer-events: none !important;
@@ -83,37 +54,11 @@ html[data-fx-core-v51="ready-v51"] .fx-transcend-shell[data-fx-native-apex="true
 @media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
   .fx-core-v51-stage {
     --fx-core-x: 50%;
-    background:
-      radial-gradient(circle at 12% 30%, rgba(72, 164, 255, .50) 0 1px, transparent 3px),
-      radial-gradient(circle at 25% 21%, rgba(154, 73, 255, .40) 0 1px, transparent 2.5px),
-      radial-gradient(circle at 84% 28%, rgba(83, 226, 255, .54) 0 1px, transparent 3px),
-      radial-gradient(circle at 77% 58%, rgba(169, 61, 255, .38) 0 1px, transparent 3px),
-      linear-gradient(180deg, rgba(1, 5, 11, .015), rgba(0, 2, 7, .10));
-  }
-
-  .fx-core-v51-stage::before {
-    background:
-      radial-gradient(circle at 17% 37%, rgba(72, 164, 255, .34) 0 1px, transparent 2.5px),
-      radial-gradient(circle at 30% 22%, rgba(154, 73, 255, .30) 0 1px, transparent 2.5px),
-      radial-gradient(circle at 82% 31%, rgba(83, 226, 255, .36) 0 1px, transparent 2.5px),
-      radial-gradient(circle at 71% 58%, rgba(169, 61, 255, .28) 0 1px, transparent 2.5px),
-      radial-gradient(circle at 50% 42%, rgba(215, 252, 255, .040) 0 1%, transparent 8%);
-    opacity: .72;
-  }
-
-  .fx-core-v51-stage::after {
-    top: 49%;
-    height: 58%;
-    opacity: .34;
-    background:
-      radial-gradient(ellipse at 50% 0%, rgba(67, 214, 255, .18), rgba(28, 104, 190, .045) 30%, transparent 57%),
-      repeating-radial-gradient(ellipse at 50% 0%, rgba(93, 218, 255, .036) 0 1px, transparent 3px 17px),
-      repeating-linear-gradient(180deg, rgba(64, 195, 255, .054) 0 1px, transparent 2px 12px),
-      linear-gradient(90deg, transparent 2%, rgba(40, 117, 215, .040) 29%, rgba(83, 220, 255, .092) 50%, rgba(139, 61, 229, .052) 71%, transparent 98%);
+    background: linear-gradient(180deg, rgba(1, 5, 11, .01), rgba(0, 2, 7, .08)) !important;
   }
 
   .fx-core-v51-canvas {
-    filter: saturate(2.00) contrast(1.12) brightness(1.32) !important;
+    filter: saturate(2.06) contrast(1.14) brightness(1.36) !important;
   }
 
   html[data-fx-core-v51="ready-v51"] body.living-architecture #hero {
