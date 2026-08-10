@@ -1,5 +1,5 @@
-name: Verify live rounded core v50 framing
-run-name: Measure rounded core v50 mobile framing for ${{ github.event.workflow_run.head_sha }}
+name: Verify live reference crystal v51 framing
+run-name: Measure reference crystal v51 mobile framing for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -11,7 +11,7 @@ permissions:
   statuses: write
 
 jobs:
-  capture-v50-framing:
+  capture-v51-framing:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
@@ -23,23 +23,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/core-v50-framing"
-          cd "$RUNNER_TEMP/core-v50-framing"
+          mkdir -p "$RUNNER_TEMP/core-v51-framing"
+          cd "$RUNNER_TEMP/core-v51-framing"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Capture and validate v50 mobile framing
+      - name: Capture and validate v51 mobile framing
         shell: bash
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP/core-v50-framing"
+          cd "$RUNNER_TEMP/core-v51-framing"
           node <<'NODE'
           const assert = require('node:assert/strict');
           const { chromium } = require('playwright');
 
           (async () => {
-            const browser = await chromium.launch({ headless: true, args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
+            const browser = await chromium.launch({ headless: true, args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
             const context = await browser.newContext({
               viewport: { width: 390, height: 844 },
               deviceScaleFactor: 2,
@@ -48,7 +48,7 @@ jobs:
               locale: 'hu-HU'
             });
             const page = await context.newPage();
-            await page.goto(`https://www.formatxsuite.com/?v50_framing=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await page.goto(`https://www.formatxsuite.com/?v51_framing=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
             await page.evaluate(() => {
               const root = document.documentElement;
               root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-managed');
@@ -57,60 +57,64 @@ jobs:
               document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
               scrollTo(0, 0);
             });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreV50 === 'ready', null, { timeout: 60000 });
-            await page.waitForTimeout(1200);
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreV51 === 'ready-v51', null, { timeout: 60000 });
+            await page.waitForTimeout(1400);
 
             const state = await page.evaluate(() => {
               const root = document.documentElement;
-              const stage = document.querySelector('.fx-core-v50-stage');
-              const canvas = document.querySelector('.fx-core-v50-canvas');
+              const stage = document.querySelector('.fx-core-v51-stage');
+              const canvas = document.querySelector('.fx-core-v51-canvas');
               const canvasRect = canvas?.getBoundingClientRect();
-              const legacyScripts = [...document.scripts].map(s => s.src).filter(src => /reference-lock-v30|mobile-mag-v33|mag-reference-v4[1467]/.test(src));
+              const legacyScripts = [...document.scripts].map(s => s.src).filter(src => /reference-lock-v30|mobile-mag-v33|mag-reference-v4[1467]|formatx-core-v50\.js/.test(src));
               const styleText = [...document.styleSheets].map(sheet => sheet.href || '').filter(Boolean);
               return {
+                core: root.dataset.fxCoreV51,
                 renderer: root.dataset.fxCoreRenderer,
                 responsive: root.dataset.fxCoreResponsive,
                 geometry: root.dataset.fxCoreReferenceGeometry,
+                material: root.dataset.fxCoreReferenceMaterial,
                 nucleus: root.dataset.fxCoreInternalReactor,
                 performance: root.dataset.fxCorePerformance,
                 stageActive: stage?.dataset.active,
-                canvasCount: document.querySelectorAll('.fx-core-v50-canvas').length,
+                canvasCount: document.querySelectorAll('.fx-core-v51-canvas').length,
                 canvasWidth: canvasRect?.width || 0,
                 canvasHeight: canvasRect?.height || 0,
                 viewportWidth: innerWidth,
                 viewportHeight: innerHeight,
                 legacyScripts,
-                v50StyleLoaded: styleText.some(src => src.includes('formatx-core-v50.css'))
+                v51StyleLoaded: styleText.some(src => src.includes('formatx-core-v51.css'))
               };
             });
 
-            console.log('V50_FRAMING', JSON.stringify(state));
-            assert.equal(state.renderer, 'single-webgl2-rounded-living-core-v50');
-            assert.equal(state.responsive, 'desktop-mobile-bounded-v50');
-            assert.equal(state.geometry, 'rounded-organic-glass-orb-v50');
-            assert.equal(state.nucleus, 'moving-internal-nucleus-spectral-orbits-v50');
+            console.log('V51_FRAMING', JSON.stringify(state));
+            assert.equal(state.core, 'ready-v51');
+            assert.equal(state.renderer, 'single-webgl2-reference-crystal-v51');
+            assert.equal(state.responsive, 'desktop-mobile-reference-framing-v51');
+            assert.equal(state.geometry, 'sharp-four-tip-concave-crystal-v51');
+            assert.equal(state.material, 'layered-faceted-refractive-glass-v51');
+            assert.equal(state.nucleus, 'moving-white-nucleus-concentric-spectral-rings-v51');
             assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
             assert.equal(state.canvasCount, 1);
             assert.ok(state.canvasWidth <= state.viewportWidth + 1, `canvas width overflow: ${state.canvasWidth}`);
             assert.ok(state.canvasHeight <= state.viewportHeight + 1, `canvas height overflow: ${state.canvasHeight}`);
-            assert.deepEqual(state.legacyScripts, [], 'legacy diamond MAG scripts must not be loaded');
-            assert.equal(state.v50StyleLoaded, true);
+            assert.deepEqual(state.legacyScripts, [], 'old MAG/core scripts must not be loaded');
+            assert.equal(state.v51StyleLoaded, true);
 
-            await page.screenshot({ path: 'formatx-v50-mobile.png', fullPage: false });
+            await page.screenshot({ path: 'formatx-v51-mobile.png', fullPage: false });
             await context.close();
             await browser.close();
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
-      - name: Upload v50 mobile capture
+      - name: Upload v51 mobile capture
         uses: actions/upload-artifact@v4
         with:
-          name: formatx-v50-mobile-framing-${{ github.event.workflow_run.head_sha }}
-          path: ${{ runner.temp }}/core-v50-framing/formatx-v50-mobile.png
+          name: formatx-v51-mobile-framing-${{ github.event.workflow_run.head_sha }}
+          path: ${{ runner.temp }}/core-v51-framing/formatx-v51-mobile.png
           if-no-files-found: error
           retention-days: 14
 
-      - name: Publish v50 framing status
+      - name: Publish v51 framing status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
@@ -119,5 +123,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Rounded living core v50 mobile framing verified'; else state=failure; description='Rounded living core v50 mobile framing failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX v50 mobile framing' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference crystal v51 mobile framing verified'; else state=failure; description='Reference crystal v51 mobile framing failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX v51 mobile framing' -f description="$description" -f target_url="$TARGET_URL"
