@@ -1,4 +1,5 @@
 /* FormatX physical-mobile MAG v54. Keep the real WebGL2 canvas local to the hero visual slot. */
+/* Production mobile compositor path: v54-r1. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html[data-fx-core-mobile-v54="booting-v54"] #hero .hero-ring,
