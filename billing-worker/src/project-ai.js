@@ -27,31 +27,39 @@ Workflow
 4. Verification: check integrity, results and records.
 
 Platforms and access
-- The full-featured release is available for Linux/Bazzite, Windows and macOS. First activation includes a 5-day licence; continued operation follows the terms of a valid licence.
-- Linux, especially Bazzite-compatible environments, is the primary supported platform.
-- Windows and macOS are also supported by the full-featured release.
-- The web interface and Android client provide supplementary access in Hungarian and English.
+- FormatX is a full release. First use starts with a 5-day trial licence; a valid paid licence is required after the trial period.
+- Linux/Bazzite is the primary native platform.
+- Windows is a supported secondary native platform in the same full multiplatform package.
+- Android is a supported native platform with a separate official full-release APK served through /download/android.
+- The web surface is a technical preview and does not perform native drive-writing, formatting or erasure.
+- macOS and iOS/iPadOS are planned; they must not be presented as currently supported native releases.
+- A separate Android Native 1.1.0-beta development channel exists. It is not the official Android full-release channel and does not replace the canonical /download/android package.
 
 Security and integrity
 - Destructive operations require clear target identification and multi-step confirmation.
 - The project uses operation logging, release states, SHA-256 and Ed25519 integrity concepts.
-- The website uses strict security headers and same-origin assets.
+- The public release metadata currently publishes a SHA-256 digest for the official multiplatform package. Separate checksum/signature assets may still be absent and must not be invented.
+- The website uses strict security headers and same-origin assets where applicable.
 - The payment flow does not process bank-card data on the website; it uses a manually verified bank-transfer process.
 - Never expose secrets, environment variables, private prompts, internal credentials or payment account details.
 
 Releases, support and licensing
-- Stable packages and update information are distributed through GitHub Releases.
-- Support and issue reporting use GitHub-based workflows.
+- Official full releases and update information are distributed through GitHub Releases.
+- The independent evidence-gated Stable designation is a separate verification level and must not be used as a synonym for Full release.
+- Support and issue reporting use the public support page and GitHub issue workflows.
 - The project uses a custom non-redistributable licence.
 
 Public information pages
-- /project.html — complete project overview
-- /modules.html — detailed modules
-- /workflow.html — technician workflow
-- /security.html — safety and control principles
-- /benefits.html — benefits
-- /audiences.html — intended users
-- /support.html — support
+- /scifi-ui/downloads/ — downloads and platform status
+- /scifi-ui/method.html — FormatX method and workflow
+- /scifi-ui/verification.html — verification centre
+- /scifi-ui/test-matrix.html — public test matrix
+- /scifi-ui/known-issues.html — known issues and evidence gaps
+- /scifi-ui/security.html — security model
+- /scifi-ui/support.html — support and issue reporting
+- /scifi-ui/license.html — detailed licence
+- /scifi-ui/terms.html — terms of use
+- /scifi-ui/privacy.html — privacy notice
 
 Answering rules
 - Answer only from the verified knowledge above.
@@ -65,28 +73,28 @@ Answering rules
 
 const LOCAL_ANSWERS = {
   hu: {
-    overview: 'A FormatX Suite Pro egy moduláris, auditálható technikusi platform. A formázást, ISO–USB írást, partíciókezelést, diagnosztikát, biztonságos törlést, fájlműveleteket és ellenőrzött kiadáskezelést egyetlen munkafolyamatba szervezi. Részletesen: /project.html',
-    modules: 'A fő modulok: ISO–USB írás, gyors és mély formázás, partíciótervező, biztonságos törlés, SMART- és felszínvizsgálat, rendszerdiagnosztika, kétpaneles fájlkezelő, valamint AI- és támogatási modul. Részletesen: /modules.html',
-    workflow: 'A FormatX munkafolyamata négy lépésből áll: felderítés, tervezés, kontrollált végrehajtás és visszaellenőrzés. Részletesen: /workflow.html',
-    security: 'A biztonság alapja a célmeghajtó egyértelmű azonosítása, a többlépcsős megerősítés, a műveleti naplózás, valamint a SHA-256 és Ed25519 integritás-ellenőrzés. Az AI nem indíthat automatikusan veszélyes lemezműveletet. Részletesen: /security.html',
-    platforms: 'A FormatX teljes értékű kiadása Linux/Bazzite, Windows és macOS rendszeren is használható. Az első aktiváláskor 5 napos licencet kap, majd az érvényes licenc feltételei szerint működik tovább. A Linux, különösen a Bazzite-kompatibilis környezet, az elsődlegesen támogatott platform.',
-    android: 'A FormatX rendelkezik Android klienssel, amely a webes projektfelülethez ad mobil hozzáférést, magyar és angol nyelven.',
+    overview: 'A FormatX Suite Pro egy moduláris, auditálható technikusi platform. A formázást, ISO–USB írást, partíciókezelést, diagnosztikát, biztonságos törlést, fájlműveleteket és ellenőrzött kiadáskezelést egyetlen munkafolyamatba szervezi. Részletesen: /scifi-ui/method.html',
+    modules: 'A fő modulok: ISO–USB írás, gyors és mély formázás, partíciótervező, biztonságos törlés, SMART- és felszínvizsgálat, rendszerdiagnosztika, kétpaneles fájlkezelő, valamint AI- és támogatási modul. Letöltések és állapot: /scifi-ui/downloads/',
+    workflow: 'A FormatX munkafolyamata négy lépésből áll: felderítés, tervezés, kontrollált végrehajtás és visszaellenőrzés. Részletesen: /scifi-ui/method.html',
+    security: 'A biztonság alapja a célmeghajtó egyértelmű azonosítása, a többlépcsős megerősítés, a műveleti naplózás, valamint a SHA-256 és Ed25519 integritás-ellenőrzés. Az AI nem indíthat automatikusan veszélyes lemezműveletet. Részletesen: /scifi-ui/security.html',
+    platforms: 'A FormatX teljes verzió, 5 napos próbalicenccel. A Linux/Bazzite az elsődleges natív platform, a Windows támogatott másodlagos natív platform ugyanabban a teljes multiplatform csomagban, az Android pedig külön hivatalos teljes kiadásként érhető el. A web technikai előnézet; a macOS és az iOS/iPadOS tervezett.',
+    android: 'A hivatalos Android teljes verzió a /download/android végponton érhető el, 5 napos próbalicenccel. Ettől külön létezik egy FormatX Native 1.1.0-beta fejlesztési csatorna, amely nem azonos a hivatalos Android teljes kiadással.',
     ai: 'A projekt-AI magyarázó és döntéstámogató szerepet kap. Kizárólag a FormatX projektről válaszol, és nem hajt végre automatikusan formázást, törlést vagy más veszélyes meghajtóműveletet.',
-    support: 'A stabil kiadások GitHub Releases csatornán jelennek meg, a támogatás és hibajelentés GitHub-alapú folyamatokra épül. További információ: /support.html',
+    support: 'A hivatalos teljes kiadások GitHub Releases csatornán jelennek meg. A külön Stable minősítés bizonyítékokhoz kötött ellenőrzési szint. Támogatás és hibajelentés: /scifi-ui/support.html',
     privacy: 'A projekt-AI kérdéseit a felület nem menti adatbázisba. A böngésző nem kap AI API-kulcsot, a feldolgozás szerveroldali Cloudflare Workers AI bindingen keresztül történik.',
-    unknown: 'Ezt a nyilvános FormatX projektleírás nem erősíti meg, ezért nem adok rá találgatáson alapuló választ. A részletes projektoldal: /project.html',
+    unknown: 'Ezt a nyilvános FormatX projektleírás nem erősíti meg, ezért nem adok rá találgatáson alapuló választ. Ellenőrizhető adatok: /scifi-ui/verification.html',
   },
   en: {
-    overview: 'FormatX Suite Pro is a modular, auditable technician platform. It combines formatting, ISO-to-USB writing, partition management, diagnostics, secure erasure, file operations and verified release management in one workflow. Details: /project.html',
-    modules: 'Its main modules are ISO-to-USB writing, quick and deep formatting, partition planning, secure erasure, SMART and surface inspection, system diagnostics, a dual-pane file manager, and an AI/support module. Details: /modules.html',
-    workflow: 'The FormatX workflow has four stages: discovery, planning, controlled execution and verification. Details: /workflow.html',
-    security: 'Safety is based on explicit target-drive identification, multi-step confirmation, operation logs, and SHA-256/Ed25519 integrity checks. The AI cannot automatically start destructive disk operations. Details: /security.html',
-    platforms: 'The full-featured FormatX release is available for Linux/Bazzite, Windows and macOS. First activation includes a 5-day licence, after which operation continues under the terms of a valid licence. Linux, especially Bazzite-compatible environments, is the primary supported platform.',
-    android: 'FormatX includes an Android client that provides mobile access to the project web interface in Hungarian and English.',
+    overview: 'FormatX Suite Pro is a modular, auditable technician platform. It combines formatting, ISO-to-USB writing, partition management, diagnostics, secure erasure, file operations and verified release management in one workflow. Details: /scifi-ui/method.html',
+    modules: 'Its main modules are ISO-to-USB writing, quick and deep formatting, partition planning, secure erasure, SMART and surface inspection, system diagnostics, a dual-pane file manager, and an AI/support module. Downloads and status: /scifi-ui/downloads/',
+    workflow: 'The FormatX workflow has four stages: discovery, planning, controlled execution and verification. Details: /scifi-ui/method.html',
+    security: 'Safety is based on explicit target-drive identification, multi-step confirmation, operation logs, and SHA-256/Ed25519 integrity checks. The AI cannot automatically start destructive disk operations. Details: /scifi-ui/security.html',
+    platforms: 'FormatX is a full release with a 5-day trial licence. Linux/Bazzite is the primary native platform, Windows is a supported secondary native platform in the same full multiplatform package, and Android is available as a separate official full release. The web surface is a technical preview; macOS and iOS/iPadOS are planned.',
+    android: 'The official Android full release is available at /download/android with a 5-day trial licence. A separate FormatX Native 1.1.0-beta development channel also exists, but it is not the official Android full-release channel.',
     ai: 'The project AI provides explanations and decision support. It answers only about FormatX and cannot automatically run formatting, erasure or other destructive drive operations.',
-    support: 'Stable releases are published through GitHub Releases, while support and issue reporting use GitHub-based workflows. More information: /support.html',
+    support: 'Official full releases are published through GitHub Releases. The separate Stable designation is an evidence-gated verification level. Support and issue reporting: /scifi-ui/support.html',
     privacy: 'Project AI questions are not stored in a database by this interface. The browser never receives an AI API key; inference runs server-side through a Cloudflare Workers AI binding.',
-    unknown: 'The public FormatX project description does not confirm that, so I will not guess. See the detailed overview: /project.html',
+    unknown: 'The public FormatX project description does not confirm that, so I will not guess. Verifiable data: /scifi-ui/verification.html',
   },
 };
 
