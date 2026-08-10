@@ -1,5 +1,5 @@
 name: Verify FormatX live hotfix
-run-name: Verify live MAG v43 from ${{ github.sha }}
+run-name: Verify live rounded core v50 from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Verify both production domains
         id: live
@@ -25,72 +25,36 @@ jobs:
           set -euo pipefail
           for origin in https://formatxsuite.com https://www.formatxsuite.com; do
             success=false
-            for attempt in $(seq 1 24); do
-              hero_css="$(mktemp)"
-              recovery_css="$(mktemp)"
-              mag37_css="$(mktemp)"
-              mag38_css="$(mktemp)"
-              mag38_js="$(mktemp)"
-              mag40_css="$(mktemp)"
-              mag41_css="$(mktemp)"
-              mag41_js="$(mktemp)"
-              mag42_css="$(mktemp)"
-              mag43_js="$(mktemp)"
+            for attempt in $(seq 1 30); do
               core_js="$(mktemp)"
+              runtime_js="$(mktemp)"
+              core_css="$(mktemp)"
               home="$(mktemp)"
               if curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-mobile-hero-flow.css?v=${GITHUB_SHA}-${attempt}" > "$hero_css" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-mobile-recovery.css?v=${GITHUB_SHA}-${attempt}" > "$recovery_css" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-mag-reference-v37.css?v=${GITHUB_SHA}-${attempt}" > "$mag37_css" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-mag-reference-v38.css?v=${GITHUB_SHA}-${attempt}" > "$mag38_css" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/scripts/formatx-mag-reference-v38.js?v=${GITHUB_SHA}-${attempt}" > "$mag38_js" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-mag-reference-v40.css?v=${GITHUB_SHA}-${attempt}" > "$mag40_css" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-mag-reference-v41.css?v=${GITHUB_SHA}-${attempt}" > "$mag41_css" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/scripts/formatx-mag-reference-v41.js?v=${GITHUB_SHA}-${attempt}" > "$mag41_js" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/styles/formatx-mag-reference-v42.css?v=${GITHUB_SHA}-${attempt}" > "$mag42_css" \
-                && curl --fail --silent --show-error --location --max-time 30 \
-                   "$origin/scifi-ui/scripts/formatx-mag-reference-v43.js?v=${GITHUB_SHA}-${attempt}" > "$mag43_js" \
-                && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_SHA}-${attempt}" > "$core_js" \
                 && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/scripts/formatx-core-v50.js?v=${GITHUB_SHA}-${attempt}" > "$runtime_js" \
+                && curl --fail --silent --show-error --location --max-time 30 \
+                   "$origin/scifi-ui/styles/formatx-core-v50.css?v=${GITHUB_SHA}-${attempt}" > "$core_css" \
+                && curl --fail --silent --show-error --location --max-time 30 \
                    "$origin/scifi-ui/?v=${GITHUB_SHA}-${attempt}" > "$home" \
-                && grep -Fq 'mobile hero overflow fix' "$hero_css" \
-                && grep -Fq 'white-space: normal !important;' "$hero_css" \
-                && grep -Fq 'The Interaction Genome is a separate feature' "$recovery_css" \
-                && grep -Fq 'FormatX MAG reference v37' "$mag37_css" \
-                && grep -Fq 'FormatX MAG reference v38' "$mag38_css" \
-                && grep -Fq 'fxMagReferenceV38' "$mag38_js" \
-                && grep -Fq 'FormatX MAG reference v40' "$mag40_css" \
-                && grep -Fq 'FormatX MAG reference v41' "$mag41_css" \
-                && grep -Fq 'fxMagReferenceV41' "$mag41_js" \
-                && grep -Fq 'FormatX MAG reference v42' "$mag42_css" \
-                && grep -Fq 'clip-path:inset(0 0 0 48vw)!important' "$mag42_css" \
-                && grep -Fq 'fxMagReferenceV43' "$mag43_js" \
-                && grep -Fq 'v43-reference-crystal-native' "$mag43_js" \
-                && grep -Fq 'sharp-four-tip-crystal-v43' "$mag43_js" \
-                && grep -Fq 'faceted-fresnel-glass-v43' "$mag43_js" \
-                && grep -Fq 'reference-lock-v30-v43' "$core_js" \
-                && grep -Fq 'formatx-mag-reference-v43.js?v=20260810-mag-reference-v43-1' "$core_js" \
-                && ! grep -Fq "addScript(V37_SCRIPT" "$core_js" \
+                && grep -Fq 'rounded-living-core-v50' "$core_js" \
+                && grep -Fq "const VERSION = 'v50-rounded-living-core'" "$runtime_js" \
+                && grep -Fq 'rounded-organic-glass-orb-v50' "$runtime_js" \
+                && grep -Fq 'moving-internal-nucleus-spectral-orbits-v50' "$runtime_js" \
+                && grep -Fq -- '--fx-core-x: 50%' "$core_css" \
+                && ! grep -Fq 'clip-path: polygon' "$core_css" \
                 && grep -Fq 'FormatX Suite Pro' "$home"
               then
                 success=true
-                rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$mag42_css" "$mag43_js" "$core_js" "$home"
+                rm -f "$core_js" "$runtime_js" "$core_css" "$home"
                 break
               fi
-              rm -f "$hero_css" "$recovery_css" "$mag37_css" "$mag38_css" "$mag38_js" "$mag40_css" "$mag41_css" "$mag41_js" "$mag42_css" "$mag43_js" "$core_js" "$home"
+              rm -f "$core_js" "$runtime_js" "$core_css" "$home"
               sleep 10
             done
             if [[ "$success" != true ]]; then
-              echo "Live MAG v43 verification failed for $origin" >&2
+              echo "Live rounded core v50 verification failed for $origin" >&2
               exit 1
             fi
           done
@@ -98,28 +62,11 @@ jobs:
       - name: Publish live verification status
         if: always()
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
           JOB_STATUS: ${{ job.status }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
         run: |
-          node --input-type=module - <<'NODE'
-          const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
-          const response = await fetch(
-            `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`,
-            {
-              method: 'POST',
-              headers: {
-                Accept: 'application/vnd.github+json',
-                Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-                'X-GitHub-Api-Version': '2022-11-28',
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                state,
-                context: 'FormatX live mobile hero verification',
-                description: 'Both domains serve native MAG v43 reference crystal plus v41 mobile copy-safe clipping',
-                target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`,
-              }),
-            }
-          );
-          if (!response.ok) throw new Error(`Status publish failed: ${response.status} ${await response.text()}`);
-          NODE
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live rounded core v50 verified on both production domains'; else state=failure; description='Live rounded core v50 verification failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live rounded core v50' -f description="$description" -f target_url="$TARGET_URL"
