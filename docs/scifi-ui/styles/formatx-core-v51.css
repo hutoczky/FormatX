@@ -1,0 +1,158 @@
+/* FormatX v51 reference crystal core — exact visual direction from the approved four-tip crystal reference. */
+
+.fx-core-v51-stage {
+  --fx-core-x: 68%;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  contain: strict;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 18% 31%, rgba(91, 176, 255, .64) 0 1px, transparent 3px),
+    radial-gradient(circle at 27% 23%, rgba(155, 82, 255, .52) 0 1px, transparent 2.5px),
+    radial-gradient(circle at 83% 28%, rgba(79, 226, 255, .68) 0 1px, transparent 3px),
+    radial-gradient(circle at 74% 61%, rgba(173, 63, 255, .48) 0 1px, transparent 3px),
+    radial-gradient(circle at 9% 56%, rgba(60, 178, 255, .46) 0 1px, transparent 2.5px),
+    radial-gradient(circle at 91% 52%, rgba(134, 76, 255, .54) 0 1px, transparent 3px),
+    radial-gradient(ellipse at var(--fx-core-x) 48%, rgba(31, 175, 255, .12), rgba(7, 56, 122, .045) 31%, transparent 58%),
+    linear-gradient(180deg, rgba(0, 4, 12, .02), rgba(0, 3, 10, .10));
+}
+
+.fx-core-v51-stage::before {
+  background:
+    radial-gradient(circle at 18% 31%, rgba(92, 180, 255, .60) 0 1px, transparent 3px),
+    radial-gradient(circle at 28% 22%, rgba(151, 78, 255, .50) 0 1px, transparent 2.5px),
+    radial-gradient(circle at 83% 29%, rgba(87, 230, 255, .65) 0 1px, transparent 3px),
+    radial-gradient(circle at 75% 60%, rgba(174, 67, 255, .49) 0 1px, transparent 3px),
+    radial-gradient(circle at var(--fx-core-x) 47%, rgba(220, 252, 255, .12) 0 1.2%, rgba(48, 218, 255, .095) 5%, transparent 20%),
+    radial-gradient(ellipse at var(--fx-core-x) 48%, rgba(30, 177, 242, .11) 0, rgba(18, 82, 170, .05) 28%, transparent 58%),
+    linear-gradient(180deg, rgba(0, 4, 12, .01), rgba(0, 4, 13, .10));
+}
+
+.fx-core-v51-stage::after {
+  left: -12vw;
+  right: -12vw;
+  top: 54%;
+  height: 56%;
+  transform: perspective(560px) rotateX(63deg) translateY(2%);
+  transform-origin: 50% 0;
+  background:
+    radial-gradient(ellipse at var(--fx-core-x) 0%, rgba(86, 229, 255, .26), rgba(29, 106, 198, .075) 31%, transparent 62%),
+    repeating-radial-gradient(ellipse at var(--fx-core-x) 0%, rgba(97, 221, 255, .052) 0 1px, transparent 3px 18px),
+    repeating-linear-gradient(180deg, rgba(62, 190, 255, .075) 0 1px, transparent 2px 13px),
+    linear-gradient(90deg, transparent 4%, rgba(39, 119, 223, .06) 31%, rgba(85, 219, 255, .13) 50%, rgba(145, 58, 229, .08) 70%, transparent 96%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .88), transparent 84%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, .88), transparent 84%);
+  opacity: .52;
+}
+
+.fx-core-v51-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain;
+  filter: saturate(1.72) contrast(1.075) brightness(1.06) !important;
+  image-rendering: auto !important;
+  pointer-events: none !important;
+}
+
+html[data-fx-core-v51="ready-v51"] #hero .hero-copy {
+  position: relative;
+  z-index: 130 !important;
+}
+
+html[data-fx-core-v51="ready-v51"] #hero .hero-ring,
+html[data-fx-core-v51="ready-v51"] #hero .hero-label,
+html[data-fx-core-v51="ready-v51"] .fx-resilient-core,
+html[data-fx-core-v51="ready-v51"] .fx-premium-core-status,
+html[data-fx-core-v51="ready-v51"] .fx-three-stage-shell,
+html[data-fx-core-v51="ready-v51"] .fx-core-mesh3d-stage,
+html[data-fx-core-v51="ready-v51"] .fx-core-fracture3d-stage,
+html[data-fx-core-v51="ready-v51"] .fx-transcend-shell[data-fx-native-apex="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  .fx-core-v51-stage {
+    --fx-core-x: 50%;
+    background:
+      radial-gradient(circle at 12% 30%, rgba(72, 164, 255, .55) 0 1px, transparent 3px),
+      radial-gradient(circle at 25% 21%, rgba(154, 73, 255, .46) 0 1px, transparent 2.5px),
+      radial-gradient(circle at 84% 28%, rgba(83, 226, 255, .60) 0 1px, transparent 3px),
+      radial-gradient(circle at 77% 58%, rgba(169, 61, 255, .43) 0 1px, transparent 3px),
+      radial-gradient(circle at 50% 42%, rgba(207, 252, 255, .12) 0 1.2%, rgba(41, 213, 255, .085) 5%, transparent 19%),
+      radial-gradient(ellipse at 50% 43%, rgba(34, 184, 246, .11) 0, rgba(20, 92, 180, .045) 28%, transparent 58%),
+      linear-gradient(180deg, rgba(1, 5, 11, .02), rgba(0, 2, 7, .14));
+  }
+
+  .fx-core-v51-stage::before {
+    background:
+      radial-gradient(circle at 12% 30%, rgba(72, 164, 255, .54) 0 1px, transparent 3px),
+      radial-gradient(circle at 25% 21%, rgba(154, 73, 255, .44) 0 1px, transparent 2.5px),
+      radial-gradient(circle at 84% 28%, rgba(83, 226, 255, .58) 0 1px, transparent 3px),
+      radial-gradient(circle at 77% 58%, rgba(169, 61, 255, .42) 0 1px, transparent 3px),
+      radial-gradient(circle at 50% 42%, rgba(210, 252, 255, .11) 0 1.2%, rgba(41, 213, 255, .08) 5%, transparent 19%),
+      radial-gradient(ellipse at 50% 43%, rgba(32, 180, 244, .10) 0, rgba(20, 92, 180, .04) 28%, transparent 58%),
+      linear-gradient(180deg, rgba(1, 5, 11, .02), rgba(0, 2, 7, .14));
+  }
+
+  .fx-core-v51-stage::after {
+    top: 49%;
+    height: 58%;
+    opacity: .46;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(67, 214, 255, .27), rgba(28, 104, 190, .07) 32%, transparent 63%),
+      repeating-radial-gradient(ellipse at 50% 0%, rgba(93, 218, 255, .048) 0 1px, transparent 3px 17px),
+      repeating-linear-gradient(180deg, rgba(64, 195, 255, .076) 0 1px, transparent 2px 12px),
+      linear-gradient(90deg, transparent 2%, rgba(40, 117, 215, .06) 29%, rgba(83, 220, 255, .13) 50%, rgba(139, 61, 229, .075) 71%, transparent 98%);
+  }
+
+  .fx-core-v51-canvas {
+    filter: saturate(1.66) contrast(1.07) brightness(1.04) !important;
+  }
+
+  html[data-fx-core-v51="ready-v51"] body.living-architecture #hero {
+    min-height: auto !important;
+    padding-top: max(82px, calc(env(safe-area-inset-top) + 72px)) !important;
+  }
+
+  html[data-fx-core-v51="ready-v51"] body.living-architecture #hero .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    min-height: 0 !important;
+  }
+
+  html[data-fx-core-v51="ready-v51"] body.living-architecture #hero .hero-space {
+    position: relative !important;
+    z-index: 1 !important;
+    inset: auto !important;
+    order: -1 !important;
+    width: 100% !important;
+    min-height: clamp(540px, 61svh, 820px) !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  html[data-fx-core-v51="ready-v51"] body.living-architecture #hero .hero-copy {
+    order: 2 !important;
+    z-index: 130 !important;
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 430px) {
+  html[data-fx-core-v51="ready-v51"] body.living-architecture #hero .hero-space {
+    min-height: clamp(520px, 60svh, 760px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-core-v51-stage {
+    transition-duration: 120ms;
+  }
+}
