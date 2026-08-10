@@ -7,19 +7,19 @@
   const WEBGPU_PREVIEW = params.get('webgpu') === '1';
 
   if (AUDIT_MODE) {
-    root.dataset.fxReferenceCore = 'audit-skip-v50';
+    root.dataset.fxReferenceCore = 'audit-skip-v51';
     root.dataset.fxWebgpuCore = 'audit-skip';
     root.dataset.fxOrbitalCore = 'audit-skip';
     return;
   }
 
-  // v50 is the production authority: one native WebGL2 context, rounded living
-  // glass geometry, moving internal nucleus and bounded desktop/mobile framing.
+  // v51 is the production authority: one native WebGL2 context, sharp four-tip
+  // concave faceted crystal, moving white nucleus and bounded desktop/mobile framing.
   // WebGPU v29 remains an explicit opt-in preview only.
   if (!WEBGPU_PREVIEW) {
-    root.dataset.fxReferenceCore = 'production-v50-rounded-living-core-authority';
-    root.dataset.fxReal3dBootstrap = 'production-v50-rounded-living-core';
-    root.dataset.fxGpuPreference = 'webgl2-v50-rounded-living-production';
+    root.dataset.fxReferenceCore = 'production-v51-reference-crystal-authority';
+    root.dataset.fxReal3dBootstrap = 'production-v51-reference-crystal';
+    root.dataset.fxGpuPreference = 'webgl2-v51-reference-crystal-production';
     return;
   }
 
@@ -62,7 +62,7 @@
   script.addEventListener('load', () => { root.dataset.fxReal3dBootstrap = 'ready-v29'; }, { once: true });
   script.addEventListener('error', () => {
     root.dataset.fxReal3dBootstrap = 'failed-v29';
-    console.warn('FormatX WebGPU preview core failed to load. Production v50 rounded living core remains authoritative.');
+    console.warn('FormatX WebGPU preview core failed to load. Production v51 reference crystal remains authoritative.');
   }, { once: true });
   document.head.appendChild(script);
 }());
