@@ -189,30 +189,29 @@ void main(){
   vec3 V=normalize(-vW);
   vec3 N=normalize(vN);
   float nv=S(abs(dot(N,V)));
-  float fres=.012+.988*pow(1.-nv,2.25);
+  float fres=.008+.992*pow(1.-nv,2.10);
 
   float a=atan(vP.y,vP.x);
   float r=length(vP.xy);
-  float axis=pow(abs(cos(a*2.0)),2.1);
-  float facetA=pow(.5+.5*cos(a*12.0 + r*24.0 - uT*.18 + uPhase),20.0);
-  float facetB=pow(.5+.5*cos(a*20.0 - r*31.0 + uT*.13 + uPhase*.61),28.0);
-  float vein=pow(.5+.5*cos(a*8.0 + r*36.0 - uT*.52 + uPhase),30.0);
-  float rib=band(fract(r*7.8 + axis*.13),.50,.070);
-  float violet=pow(.5+.5*cos(a*6.0-r*9.0+uT*.16+uPhase),13.0);
-  float center=exp(-r*r*3.3);
+  float axis=pow(abs(cos(a*2.0)),2.0);
+  float facetA=pow(.5+.5*cos(a*12.0 + r*24.0 - uT*.18 + uPhase),22.0);
+  float facetB=pow(.5+.5*cos(a*20.0 - r*31.0 + uT*.13 + uPhase*.61),30.0);
+  float vein=pow(.5+.5*cos(a*8.0 + r*36.0 - uT*.52 + uPhase),32.0);
+  float rib=band(fract(r*7.8 + axis*.13),.50,.064);
+  float violet=pow(.5+.5*cos(a*6.0-r*9.0+uT*.16+uPhase),14.0);
 
-  vec3 cyan=vec3(.02,.94,1.48);
-  vec3 blue=vec3(.02,.31,1.10);
-  vec3 violetC=vec3(.83,.10,1.24);
-  vec3 ice=vec3(.86,1.28,1.46);
+  vec3 cyan=vec3(.02,.98,1.55);
+  vec3 blue=vec3(.02,.32,1.12);
+  vec3 violetC=vec3(.86,.10,1.28);
+  vec3 ice=vec3(.90,1.34,1.52);
 
-  vec3 col=uTint*(.018+.10*fres);
-  col+=cyan*(.035+.32*fres+.13*vein+.070*rib+.055*axis);
-  col+=blue*(.025+.060*facetB+.040*axis);
-  col+=violetC*(.020+.12*violet+.040*facetA);
-  col+=ice*(.13*pow(fres,1.35)+.090*facetA+.055*facetB+.030*center);
+  vec3 col=uTint*(.008+.075*fres);
+  col+=cyan*(.018+.43*fres+.18*vein+.090*rib+.070*axis);
+  col+=blue*(.014+.070*facetB+.035*axis);
+  col+=violetC*(.012+.14*violet+.055*facetA);
+  col+=ice*(.16*pow(fres,1.30)+.11*facetA+.065*facetB);
 
-  float alpha=uA*S(.012+.31*fres+.090*vein+.050*rib+.060*facetA+.035*facetB+.035*axis);
+  float alpha=uA*S(.0025+.145*fres+.048*vein+.022*rib+.032*facetA+.016*facetB+.010*axis);
   O=vec4(col,alpha);
 }`;
 
@@ -310,15 +309,15 @@ void main(){
       const px = -fy;
       const py = fx;
       const tip = starRadius(phi);
-      const radius = .055 + (tip - .055) * t;
+      const radius = .050 + (tip - .050) * t;
       const sinT = Math.sin(Math.PI * t);
-      const width = .090 * (1 - t) + .405 * Math.pow(Math.max(0, sinT), .82) * (1 - .10 * t);
-      const edgePull = 1 - .075 * Math.abs(s) * Math.sin(Math.PI * t);
-      const sweep = .020 * Math.sin(Math.PI * t) * Math.sin(s * Math.PI);
+      const width = .060 * (1 - t) + .335 * Math.pow(Math.max(0, sinT), .84) * (1 - .12 * t);
+      const edgePull = 1 - .095 * Math.abs(s) * Math.sin(Math.PI * t);
+      const sweep = .015 * Math.sin(Math.PI * t) * Math.sin(s * Math.PI);
       const x = fx * radius * edgePull + px * (s * width + sweep);
       const y = (fy * radius * edgePull + py * (s * width + sweep)) * 1.075;
-      const dome = .030 + .080 * (1 - t) + .145 * Math.pow(Math.max(0, sinT), .86) * (1 - .42 * s * s);
-      const fold = .018 * Math.sin(s * Math.PI * 2) * sinT;
+      const dome = .024 + .062 * (1 - t) + .135 * Math.pow(Math.max(0, sinT), .90) * (1 - .46 * s * s);
+      const fold = .016 * Math.sin(s * Math.PI * 2) * sinT;
       const z = side * (dome + fold);
       return [x, y, z];
     }
@@ -343,11 +342,11 @@ void main(){
               const fy = Math.sin(phi);
               const px = -fy;
               const py = fx;
-              const lateral = s * (.78 + .16 * Math.sin(Math.PI * t));
-              const forward = .18 + .28 * t;
+              const lateral = s * (.82 + .18 * Math.sin(Math.PI * t));
+              const forward = .20 + .32 * t;
               const nx = fx * forward + px * lateral;
               const ny = (fy * forward + py * lateral) / 1.075;
-              const nz = side * (1.00 + .24 * Math.cos((s + t) * Math.PI * 2));
+              const nz = side * (1.00 + .28 * Math.cos((s + t) * Math.PI * 2));
               const nl = Math.hypot(nx, ny, nz) || 1;
               N.push(nx / nl, ny / nl, nz / nl);
             }
@@ -442,7 +441,7 @@ void main(){
           }
         }
 
-        for (const t of [.19, .34, .50, .66, .81]) {
+        for (const t of [.20, .36, .52, .68, .82]) {
           const across = 8;
           for (let i = 0; i < across; i += 1) {
             const s0 = i / across * 2 - 1;
@@ -453,7 +452,7 @@ void main(){
           }
         }
 
-        for (const bias of [-.55, .55]) {
+        for (const bias of [-.58, .58]) {
           for (let i = 0; i < tSegments; i += 1) {
             const t0 = i / tSegments;
             const t1 = (i + 1) / tSegments;
@@ -617,11 +616,9 @@ void main(){
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
       const layers = [
-        { s: 1.000, z: 0, rot: 0, a: .58, tint: [.07, .65, 1.22], phase: .0 },
-        { s: .945, z: .012, rot: .010, a: .40, tint: [.08, .91, 1.38], phase: 1.2 },
-        { s: .865, z: .020, rot: -.014, a: .28, tint: [.42, .25, 1.20], phase: 2.5 }
+        { s: 1.000, z: 0, rot: 0, a: .42, tint: [.06, .70, 1.30], phase: .0 },
+        { s: .930, z: .014, rot: .010, a: .12, tint: [.45, .22, 1.24], phase: 1.9 }
       ];
-
       for (const layer of layers) {
         const m = mul(base, compose(tr(0, 0, layer.z), rz(layer.rot), sc(layer.s, layer.s, layer.s)));
         gl.uniformMatrix4fv(SU.M, false, m);
@@ -644,14 +641,14 @@ void main(){
       gl.lineWidth(1);
 
       gl.uniformMatrix4fv(LU.M, false, base);
-      gl.uniform3fv(LU.tint, [.18, .92, 1.00]);
-      gl.uniform1f(LU.A, .70 + .08 * Math.sin(t * .9));
+      gl.uniform3fv(LU.tint, [.22, .96, 1.00]);
+      gl.uniform1f(LU.A, .82 + .07 * Math.sin(t * .9));
       gl.drawArrays(gl.LINES, 0, wire.count);
 
-      const inner = mul(base, sc(.928, .928, .928));
+      const inner = mul(base, sc(.925, .925, .925));
       gl.uniformMatrix4fv(LU.M, false, inner);
-      gl.uniform3fv(LU.tint, [.61, .20, 1.00]);
-      gl.uniform1f(LU.A, .34 + .05 * Math.cos(t * .73));
+      gl.uniform3fv(LU.tint, [.66, .20, 1.00]);
+      gl.uniform1f(LU.A, .38 + .04 * Math.cos(t * .73));
       gl.drawArrays(gl.LINES, 0, wire.count);
     }
 
@@ -687,17 +684,11 @@ void main(){
       const nucleusY = Math.cos(t * .63) * .011 + Math.sin(t * .27) * .004;
       const pulse = 1 + Math.sin(t * 1.42) * .035;
 
-      const halo = mul(base, compose(
-        tr(nucleusX, nucleusY, .10),
-        sc(.135 * pulse, .135 * pulse, .135 * pulse)
-      ));
-      drawOrb(halo, [.10, .82, 1.30], .15, 1.25);
-
       const nucleus = mul(base, compose(
         tr(nucleusX, nucleusY, .145),
-        sc(.070 * pulse, .070 * pulse, .070 * pulse)
+        sc(.068 * pulse, .068 * pulse, .068 * pulse)
       ));
-      drawOrb(nucleus, [1.18, 1.26, 1.28], 1.0, 1.75);
+      drawOrb(nucleus, [1.20, 1.28, 1.30], 1.0, 1.80);
 
       const ringData = [
         [.170, .00, .00, .92, [.04, .96, 1.36]],
@@ -723,9 +714,9 @@ void main(){
       }
 
       const orbiters = [
-        [.29, .76, .012, [.12, .98, 1.28]],
-        [.40, -.57, .010, [.73, .18, 1.12]],
-        [.51, .43, .009, [.08, .78, 1.22]]
+        [.29, .76, .010, [.12, .98, 1.28]],
+        [.40, -.57, .009, [.73, .18, 1.12]],
+        [.51, .43, .008, [.08, .78, 1.22]]
       ];
       for (let i = 0; i < orbiters.length; i += 1) {
         const [radius, speed, size, tint] = orbiters[i];
@@ -745,8 +736,8 @@ void main(){
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
       gl.uniformMatrix4fv(LU.M, false, base);
-      gl.uniform3fv(LU.tint, [.42, .98, 1.00]);
-      gl.uniform1f(LU.A, .52 + .08 * Math.sin(t * 1.1));
+      gl.uniform3fv(LU.tint, [.46, 1.00, 1.00]);
+      gl.uniform1f(LU.A, .58 + .08 * Math.sin(t * 1.1));
       gl.drawArrays(gl.LINES, 0, axis.count);
     }
 
