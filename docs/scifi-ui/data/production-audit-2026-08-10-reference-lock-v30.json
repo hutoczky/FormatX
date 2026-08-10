@@ -1,8 +1,8 @@
 {
-  "schema_version": 8,
+  "schema_version": 9,
   "audit_date": "2026-08-10",
-  "deployment_iteration": 8,
-  "scope": "complete public-site audit plus uploaded-reference production MAG with one WebGL2 context, calibrated four-sail geometry, glass-dominant translucent cyan/violet surfaces, sparse light veins, calibrated reference luminance and horizon, organic floor, moving white reactor, desktop/mobile browser validation, Lighthouse gates and live screenshot evidence",
+  "deployment_iteration": 9,
+  "scope": "complete public-site deep audit: uploaded-reference production MAG, canonical full-release truth, desktop/mobile browser validation, strict static and post-deploy live Lighthouse gates, real HU/EN legal and support content, experimental-lab indexing boundaries, business-only fail-closed checkout, durable server-side order tracking, auditable legal acknowledgement and production checkout-readiness invariants",
   "audited_release": {
     "version": "v130",
     "product_status": "full_release",
@@ -35,14 +35,7 @@
       "fresnel_rim": 1
     },
     "veins": {
-      "transverse_levels": [
-        2,
-        4,
-        6,
-        8,
-        10,
-        12
-      ],
+      "transverse_levels": [2, 4, 6, 8, 10, 12],
       "longitudinal_count_approx": 12,
       "cyan_line_opacity": 0.22,
       "violet_line_opacity": 0.055
@@ -75,7 +68,25 @@
     "checkout_robots": "noindex,nofollow,noarchive",
     "payment_status_robots": "noindex,nofollow,noarchive",
     "transactional_surfaces_indexable": false,
+    "experimental_living_core_robots": "noindex,nofollow,noarchive",
+    "experimental_webgpu_stage_robots": "noindex,nofollow,noarchive",
+    "legal_support_real_bilingual_content": true,
     "canonical_sitemap_date": "2026-08-10"
+  },
+  "commerce_safety_contract": {
+    "checkout_audience": "business_or_professional_only",
+    "consumer_checkout_enabled": false,
+    "sales_legal_gate": "fail_closed",
+    "checkout_readiness_endpoint": "/api/checkout-readiness",
+    "payment_instructions_require_durable_order_tracking": true,
+    "production_static_payment_fallback": false,
+    "business_buyer_confirmation_required": true,
+    "terms_acceptance_required": true,
+    "privacy_notice_acknowledgement_required": true,
+    "server_side_legal_record_required": true,
+    "manual_bank_verification_required": true,
+    "automatic_renewal": false,
+    "live_invariant": "sales_ready may never be true without order_tracking_ready, live_ready and zero configuration errors"
   },
   "release_integrity": {
     "multiplatform_digest": "sha256:10036483a06794ba0e1985c9402324248052a18720b3f4a561b768945a2b9187",
@@ -87,7 +98,9 @@
     "production_validation": "required",
     "production_smoke": "required",
     "public_site_integrity": "required",
-    "lighthouse_desktop_mobile": "required",
+    "static_lighthouse_desktop_mobile": "required",
+    "live_worker_lighthouse_desktop_mobile": "required_after_deploy",
+    "live_checkout_readiness_invariant": "required_after_deploy",
     "live_mobile_desktop_visual_gate": "required",
     "live_visual_surface_marker": "glass-dominant-sparse-veins-r4",
     "live_white_core_position_gate": "required",
@@ -102,5 +115,12 @@
     "no independent professional review or verified customer case study is published",
     "60 or 120 FPS is a performance target, not a universal field guarantee"
   ],
-  "acceptance_policy": "Do not call the visual exact or the whole product universally verified merely because CI is green. The final live Chromium screenshot must pass the configured quantitative gates and be compared directly with the uploaded reference; external real-device and independent evidence gaps remain disclosed."
+  "external_legal_readiness_dependency": {
+    "consumer_sales_not_enabled_by_checkout_policy": true,
+    "full_operator_postal_or_registered_address_must_be_supplied_before_consumer_sales": true,
+    "tax_and_registration_details_must_be_supplied_where_legally_applicable": true,
+    "exact_invoice_provider_must_be_configured_before_sales_gate_can_be_approved": true,
+    "values_must_not_be_fabricated_by_software_or_ci": true
+  },
+  "acceptance_policy": "Do not call the visual exact or the whole product universally verified merely because CI is green. Production acceptance additionally requires the live Worker checkout invariant and live desktop/mobile Lighthouse gate after deployment. External real-device, independent evidence, signature and operator-supplied legal-data gaps remain explicitly disclosed."
 }
