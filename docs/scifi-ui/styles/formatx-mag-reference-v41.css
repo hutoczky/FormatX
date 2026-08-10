@@ -1,0 +1,101 @@
+/* FormatX MAG reference v41 — mobile copy-safe dynamic clipping.
+   The native WebGL2 crystal stays fully visible until hero copy actually enters the viewport.
+   Once copy enters, only the pixels below the copy-safe boundary are clipped. No image/SVG replacement. */
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-stage{
+    clip-path:none!important;
+    --fx-mag-clip-bottom:0px;
+    z-index:121!important;
+  }
+
+  .fx-core-real3d-stage[data-fx-v41-visible="true"],
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="text"],
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="visual"]{
+    opacity:1!important;
+    visibility:visible!important;
+  }
+
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="text"] .fx-core-real3d-canvas,
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="visual"] .fx-core-real3d-canvas,
+  .fx-core-real3d-canvas,
+  .fx-core-postfx-v31,
+  .fx-mag-v33-overlay{
+    opacity:1!important;
+    visibility:visible!important;
+    clip-path:inset(0 0 var(--fx-mag-clip-bottom,0px) 0)!important;
+  }
+
+  .fx-core-real3d-canvas{
+    transform:none!important;
+    filter:saturate(1.48) contrast(1.32) brightness(1.34)
+      drop-shadow(0 0 5px rgba(229,255,255,.44))
+      drop-shadow(0 0 18px rgba(67,235,255,.29))
+      drop-shadow(0 0 36px rgba(46,158,255,.18))
+      drop-shadow(0 0 56px rgba(162,66,255,.10))!important;
+  }
+
+  .fx-core-postfx-v31{
+    filter:saturate(1.16) contrast(1.10) brightness(1.08)!important;
+  }
+  .fx-v31-spectrum{opacity:.26!important}
+  .fx-v31-ring-a{opacity:.36!important}
+  .fx-v31-ring-b{opacity:.26!important}
+  .fx-v31-ring-c{opacity:.17!important}
+  .fx-v31-flare{
+    width:9px!important;
+    height:9px!important;
+    margin:-4.5px 0 0 -4.5px!important;
+    box-shadow:0 0 4px #fff,0 0 11px rgba(226,255,255,.98),0 0 24px rgba(72,240,255,.78),0 0 46px rgba(54,161,255,.30)!important;
+  }
+
+  body.living-architecture #hero .hero-copy{
+    position:relative!important;
+    z-index:420!important;
+    isolation:isolate!important;
+    background:#010711!important;
+    box-shadow:0 -30px 44px rgba(1,7,17,.98)!important;
+  }
+  body.living-architecture #hero .hero-copy::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:-30px;
+    height:30px;
+    z-index:-1;
+    pointer-events:none;
+    background:linear-gradient(180deg,rgba(1,7,17,0),rgba(1,7,17,.98));
+  }
+
+  #hero .hero-copy>.kicker,
+  #hero #hero-title,
+  #hero .hero-title-main,
+  #hero .hero-title-sub,
+  #hero .hero-lead,
+  #hero .hero-actions,
+  #hero .hero-facts{
+    position:relative!important;
+    z-index:2!important;
+  }
+}
+
+@media(min-width:901px) and (pointer:fine){
+  .fx-core-real3d-canvas{
+    filter:saturate(1.40) contrast(1.28) brightness(1.30)
+      drop-shadow(0 0 5px rgba(226,255,255,.40))
+      drop-shadow(0 0 18px rgba(64,232,255,.26))
+      drop-shadow(0 0 36px rgba(44,154,255,.16))
+      drop-shadow(0 0 54px rgba(160,64,255,.09))!important;
+  }
+}
+
+html.fx-organism-menu-open .fx-core-real3d-stage,
+body.fx-organism-panel-open .fx-core-real3d-stage{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .fx-core-real3d-canvas{filter:saturate(1.30) contrast(1.24) brightness(1.25)!important}
+}
