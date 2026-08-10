@@ -3,17 +3,18 @@
 
   const root = document.documentElement;
   const BOOTSTRAP = 'reference-crystal-core-v51';
-  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=12';
-  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=12';
-  const MOBILE_HOST_SCRIPT = './scripts/formatx-core-mobile-host-v52.js?v=20260810-mobile-host-v52-1';
-  const MOBILE_HOST_STYLE = './styles/formatx-core-mobile-host-v52.css?v=20260810-mobile-host-v52-1';
+  const SCRIPT = './scripts/formatx-core-v51.js?v=20260810-reference-crystal-v51-1&rev=13';
+  const STYLE = './styles/formatx-core-v51.css?v=20260810-reference-crystal-v51-1&rev=13';
+  const MOBILE_SAFE_SCRIPT = './scripts/formatx-core-mobile-compat-v52.js?v=20260810-mobile-safe-v52-1';
+  const MOBILE_SAFE_STYLE = './styles/formatx-core-mobile-compat-v52.css?v=20260810-mobile-safe-v52-1';
+  const mobile = matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;
 
   /*
-    Production authority is v51: one native WebGL2 context, closed volumetric
-    four-tip concave faceted crystal, moving white nucleus and concentric
-    cyan/violet rings. v52 only corrects the physical-mobile DOM host and
-    framing so the same v51 WebGL renderer remains visible inside hero-space.
-    The older rounded v50 and legacy multi-renderer MAG stacks are not loaded.
+    Desktop authority remains the v51 native WebGL2 reference crystal.
+    Physical mobile browsers boot the v52 mobile-safe WebGL2 renderer first.
+    The v51 script is still loaded afterwards for validation/cache parity, but
+    exits without creating a second context because v52 sets fxCoreV51=ready-v51.
+    No raster/image MAG path is used.
     formatx-core-v50.js
     formatx-reference-lock-v30.js
     formatx-mobile-mag-v33.js
@@ -64,17 +65,25 @@
     document.head.appendChild(script);
   }
 
-  function addMobileHostScript(src) {
-    if (document.querySelector('script[data-fx-core-mobile-host-v52]')) return;
+  function addMobileSafeScript(src) {
+    if (document.querySelector('script[data-fx-core-mobile-safe-v52]')) return;
     const script = document.createElement('script');
     script.src = src;
     script.async = false;
-    script.dataset.fxCoreMobileHostV52 = 'true';
+    script.dataset.fxCoreMobileSafeV52 = 'true';
+    script.addEventListener('error', () => {
+      root.dataset.fxCoreMobileCompat = 'load-failed-v52';
+    }, { once: true });
     document.head.appendChild(script);
   }
 
   addStyle(STYLE, 'data-fx-core-v51-style');
-  addStyle(MOBILE_HOST_STYLE, 'data-fx-core-mobile-host-v52-style');
-  addCoreScript(SCRIPT);
-  addMobileHostScript(MOBILE_HOST_SCRIPT);
+
+  if (mobile) {
+    addStyle(MOBILE_SAFE_STYLE, 'data-fx-core-mobile-safe-v52-style');
+    addMobileSafeScript(MOBILE_SAFE_SCRIPT);
+    addCoreScript(SCRIPT);
+  } else {
+    addCoreScript(SCRIPT);
+  }
 }());
