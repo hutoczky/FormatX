@@ -7,28 +7,30 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
 const selector = read('docs/scifi-ui/scripts/formatx-reference-core-v26.js');
 const productionBootstrap = read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
-const production = read('docs/scifi-ui/scripts/formatx-core-v51.js');
+const production = read('docs/scifi-ui/scripts/formatx-core-reference-v53.js');
+const productionStyle = read('docs/scifi-ui/styles/formatx-core-reference-v53.css');
 const webgpu = read('docs/scifi-ui/scripts/formatx-webgpu-core-v29.js');
 const webgl = read('docs/scifi-ui/scripts/formatx-orbital-core-v28.js');
-const cinematic = read('docs/scifi-ui/scripts/formatx-cinematic-core-v27.js');
 const entry = read('billing-worker/src/production-entry.js');
 
 assert.match(selector, /const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/);
-assert.match(selector, /production-v51-reference-crystal-authority/);
-assert.match(selector, /webgl2-v51-reference-crystal-production/);
-assert.match(productionBootstrap, /formatx-core-v51\.js\?v=20260810-reference-crystal-v51-1/);
-assert.match(productionBootstrap, /formatx-core-v51\.css\?v=20260810-reference-crystal-v51-1/);
-assert.match(production, /sharp-four-tip-concave-crystal-v51/);
-assert.match(production, /layered-faceted-refractive-glass-v51/);
-assert.match(production, /moving-white-nucleus-concentric-spectral-rings-v51/);
-assert.match(production, /const ringData = \[/);
-assert.match(production, /function crystal\(/);
-assert.doesNotMatch(selector, /if \(navigator\.gpu\)[\s\S]{0,500}webgpu-primary/);
+assert.match(productionBootstrap, /reference-crystal-core-v53/);
+assert.match(productionBootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r1/);
+assert.match(productionBootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r1/);
+assert.match(production, /sharp-four-tip-concave-crystal-v53/);
+assert.match(production, /clean-faceted-refractive-glass-v53/);
+assert.match(production, /moving-white-nucleus-concentric-spectral-rings-v53/);
+assert.match(production, /single-webgl2-reference-crystal-v53/);
+assert.equal((production.match(/getContext\('webgl2'/g) || []).length, 1);
+assert.match(productionStyle, /filter:\s*none\s*!important/);
+assert.doesNotMatch(production, /new\s+Image\s*\(|drawImage\s*\(|THREE\b|three\.js/i);
+
 assert.match(webgpu, /navigator\.gpu\.requestAdapter/);
 assert.match(webgpu, /pass\.drawIndexed/);
 assert.match(webgl, /canvas\.getContext\('webgl2'/);
 assert.match(webgl, /gl\.drawElements\(gl\.TRIANGLES/);
-assert.match(cinematic, /retired-by-orbital-v28/);
 assert.match(entry, /formatx-reference-core-v26\.js/);
-assert.doesNotMatch(production, /new\s+Image\s*\(|drawImage\s*\(|THREE\b|three\.js/i);
-console.log('PASS: v51 sharp four-tip faceted WebGL2 reference crystal is production authority; WebGPU v29 and WebGL2 v28 remain explicit preview paths.');
+
+new Function(productionBootstrap);
+new Function(production);
+console.log('PASS: v53 sharp four-tip animated WebGL2 reference crystal is production authority; WebGPU v29 and WebGL2 v28 remain explicit preview paths.');
