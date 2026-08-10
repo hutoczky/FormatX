@@ -1,0 +1,126 @@
+/* FormatX MAG reference v34 — visual-only refinement.
+   The WebGL2 mesh remains the real 3D source. This layer only improves framing,
+   crystal depth, reactor glow and cyan/violet energy readability. */
+
+.fx-core-real3d-canvas{
+  transform:scale(1.06,.86)!important;
+  transform-origin:var(--fx-core-x) 49%!important;
+  filter:saturate(1.92) contrast(1.70) brightness(2.12)
+    drop-shadow(0 0 5px rgba(210,255,255,.60))
+    drop-shadow(0 0 16px rgba(55,230,255,.38))
+    drop-shadow(0 0 34px rgba(39,143,255,.28))
+    drop-shadow(0 0 48px rgba(153,64,255,.18))!important;
+}
+
+/* Remove the flat polygon treatment from v33; keep the real WebGL object dominant. */
+.fx-v33-core-glass{opacity:.12!important;filter:blur(.2px)!important}
+.fx-v33-reactor-halo{opacity:.58!important}
+.fx-core-postfx-v31{filter:saturate(1.34) contrast(1.20) brightness(1.18)!important}
+.fx-v31-flare{
+  width:18px!important;height:18px!important;margin:-9px 0 0 -9px!important;
+  background:radial-gradient(circle,#fff 0 20%,#e9ffff 23% 36%,rgba(111,248,255,.98) 39% 52%,rgba(40,188,255,.30) 64%,transparent 76%)!important;
+  box-shadow:0 0 6px #fff,0 0 16px rgba(218,255,255,1),0 0 36px rgba(72,239,255,.98),0 0 74px rgba(46,167,255,.68),0 0 118px rgba(157,61,255,.26)!important;
+}
+.fx-v31-ring-a{opacity:.92!important}.fx-v31-ring-b{opacity:.74!important}.fx-v31-ring-c{opacity:.61!important}.fx-v31-spectrum{opacity:.79!important}
+
+.fx-mag-v34-overlay{
+  position:absolute;z-index:3;inset:0;pointer-events:none;overflow:hidden;mix-blend-mode:screen;
+}
+.fx-mag-v34-overlay>*{position:absolute;left:var(--fx-core-x);top:49%;pointer-events:none;transform-origin:50% 50%}
+
+/* Broad four-point luminous crystal silhouette. */
+.fx-v34-glass{
+  width:min(78vmin,920px);height:min(78vmin,920px);
+  margin:min(-39vmin,-460px) 0 0 min(-39vmin,-460px);
+  clip-path:polygon(50% 0%,60% 29%,100% 50%,69% 60%,50% 100%,31% 60%,0% 50%,40% 29%);
+  background:
+    radial-gradient(circle at 50% 50%,rgba(245,255,255,.27) 0 1.4%,rgba(97,243,255,.19) 3%,rgba(28,155,255,.075) 14%,transparent 31%),
+    conic-gradient(from 45deg,
+      rgba(37,219,255,.06) 0 10%,rgba(96,238,255,.20) 14%,rgba(24,113,255,.06) 24%,
+      rgba(155,61,255,.17) 31%,rgba(38,228,255,.07) 42%,rgba(115,245,255,.18) 50%,
+      rgba(39,130,255,.07) 62%,rgba(166,66,255,.16) 72%,rgba(41,228,255,.07) 84%,rgba(37,219,255,.06) 100%);
+  opacity:.48;
+  filter:drop-shadow(0 0 7px rgba(174,251,255,.38)) drop-shadow(0 0 24px rgba(56,220,255,.18));
+}
+.fx-v34-glass::before,
+.fx-v34-glass::after{
+  content:"";position:absolute;inset:7%;clip-path:inherit;
+  border:1px solid rgba(158,248,255,.30);
+  box-shadow:inset 0 0 26px rgba(62,222,255,.10);
+}
+.fx-v34-glass::after{
+  inset:17%;border-color:rgba(178,89,255,.27);transform:rotate(45deg) scale(.88);
+  box-shadow:inset 0 0 24px rgba(151,69,255,.08);
+}
+
+/* Concentric reactor with a luminous white core, not a flat white dot. */
+.fx-v34-reactor{
+  width:min(30vmin,360px);height:min(30vmin,360px);
+  margin:min(-15vmin,-180px) 0 0 min(-15vmin,-180px);
+  border-radius:50%;
+  background:
+    radial-gradient(circle,#fff 0 2.5%,#e9ffff 3.2% 5%,rgba(92,245,255,.95) 5.5% 8%,rgba(45,202,255,.27) 11%,rgba(48,105,255,.10) 24%,transparent 57%),
+    repeating-radial-gradient(circle,transparent 0 9%,rgba(124,240,255,.28) 9.7% 10.4%,transparent 11.2% 17%);
+  box-shadow:0 0 22px rgba(99,245,255,.30),0 0 52px rgba(45,184,255,.19),0 0 90px rgba(143,60,255,.12);
+  opacity:.98;
+}
+.fx-v34-reactor::before,
+.fx-v34-reactor::after{
+  content:"";position:absolute;border-radius:50%;border:1px solid rgba(143,243,255,.42);inset:16%;
+  transform:rotateX(63deg) rotateZ(-15deg);box-shadow:0 0 8px rgba(65,225,255,.23);
+}
+.fx-v34-reactor::after{inset:29%;border-color:rgba(183,83,255,.34);transform:rotateX(58deg) rotateZ(27deg)}
+
+/* Internal cinematic energy filaments around the core. */
+.fx-v34-filaments{
+  width:min(64vmin,760px);height:min(64vmin,760px);
+  margin:min(-32vmin,-380px) 0 0 min(-32vmin,-380px);
+  border-radius:50%;
+  background:conic-gradient(from 10deg,
+    transparent 0 6%,rgba(62,229,255,.53) 8%,transparent 12% 21%,rgba(161,68,255,.45) 24%,transparent 28% 39%,
+    rgba(60,235,255,.48) 42%,transparent 46% 58%,rgba(169,72,255,.40) 62%,transparent 66% 78%,rgba(58,231,255,.46) 82%,transparent 86% 100%);
+  -webkit-mask:radial-gradient(circle,transparent 0 31%,#000 36% 64%,transparent 72%);
+  mask:radial-gradient(circle,transparent 0 31%,#000 36% 64%,transparent 72%);
+  opacity:.77;filter:blur(.25px) drop-shadow(0 0 4px rgba(73,225,255,.28));
+}
+
+.fx-v34-orbits{
+  width:min(70vmin,840px);height:min(70vmin,840px);margin:min(-35vmin,-420px) 0 0 min(-35vmin,-420px);
+  border-radius:50%;
+  background:repeating-radial-gradient(circle,transparent 0 7.4%,rgba(89,228,255,.11) 7.7% 8.1%,transparent 8.5% 12.6%);
+  box-shadow:inset 0 0 42px rgba(77,217,255,.05);opacity:.66;
+}
+
+.fx-v34-axis-x,.fx-v34-axis-y{background:linear-gradient(90deg,transparent,rgba(70,211,255,.10) 25%,rgba(183,250,255,.72) 49.5%,#fff 50%,rgba(183,250,255,.72) 50.5%,rgba(70,211,255,.10) 75%,transparent)}
+.fx-v34-axis-x{width:min(86vw,1100px);height:1px;margin:0 0 0 min(-43vw,-550px);transform:translateY(-.5px);opacity:.86}
+.fx-v34-axis-y{width:1px;height:min(74vh,900px);margin:min(-37vh,-450px) 0 0 0;background:linear-gradient(180deg,transparent,rgba(70,211,255,.08) 25%,rgba(183,250,255,.68) 49.5%,#fff 50%,rgba(183,250,255,.68) 50.5%,rgba(70,211,255,.08) 75%,transparent);transform:translateX(-.5px);opacity:.78}
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-canvas{
+    transform:translate3d(0,-4.5dvh,0) scale(1.02,.82)!important;
+    transform-origin:50% 49%!important;
+    filter:saturate(1.96) contrast(1.74) brightness(2.16)
+      drop-shadow(0 0 5px rgba(215,255,255,.62))
+      drop-shadow(0 0 16px rgba(58,231,255,.40))
+      drop-shadow(0 0 31px rgba(41,148,255,.28))
+      drop-shadow(0 0 44px rgba(155,63,255,.17))!important;
+  }
+  .fx-core-postfx-v31{transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 4.5dvh),0) scale(1.02,.82)!important;transform-origin:50% 49%!important}
+  .fx-mag-v33-overlay{transform:translateY(-4.5dvh) scale(1.02,.82)!important;transform-origin:50% 49%!important}
+  .fx-mag-v34-overlay{transform:translateY(-4.5dvh) scale(1.02,.82)!important;transform-origin:50% 49%!important}
+  .fx-v34-glass{width:96vmin;height:96vmin;margin:-48vmin 0 0 -48vmin;opacity:.51}
+  .fx-v34-reactor{width:38vmin;height:38vmin;margin:-19vmin 0 0 -19vmin}
+  .fx-v34-filaments{width:82vmin;height:82vmin;margin:-41vmin 0 0 -41vmin;opacity:.72}
+  .fx-v34-orbits{width:88vmin;height:88vmin;margin:-44vmin 0 0 -44vmin;opacity:.58}
+  .fx-v34-axis-x{width:96vw;margin-left:-48vw}.fx-v34-axis-y{height:66vh;margin-top:-33vh}
+}
+
+@media(max-width:480px){
+  .fx-core-real3d-canvas{transform:translate3d(0,-4dvh,0) scale(1.00,.80)!important}
+  .fx-core-postfx-v31{transform:translate3d(var(--fx-v31-x),calc(var(--fx-v31-y) - 4dvh),0) scale(1.00,.80)!important}
+  .fx-mag-v33-overlay,.fx-mag-v34-overlay{transform:translateY(-4dvh) scale(1.00,.80)!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .fx-mag-v34-overlay{transform:none!important}.fx-v34-filaments{filter:none!important}
+}
