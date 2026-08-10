@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-10
-source_master=ccf86e09f7b924a8520f56132884cbe6c433b43c
-purpose=publish guaranteed homepage hero start on fresh navigation and reload, preserve user scrolling after startup, retain seamless-v7 continuous loop, Full release product truth, 5-day trial and canonical release/download channels
-verification=production validation, mobile/laptop/Full-HD hero-first viewport regression gate, seamless continuous scrolling, public-site integrity, live mobile hero, Cloudflare custom-domain smoke, release metadata, downloads, Android, support and feedback routes
+requested_at=2026-08-10T10:21:00+02:00
+source_master=b2607f7b710c32c034b9ace5f1ab1e78468657fe
+purpose=publish the current audited FormatX website to production with Full release product truth, 5-day trial, canonical multiplatform and Android download channels, corrected SEO/evidence/support surfaces, transactional noindex protection and preserved seamless-v7 homepage behaviour
+verification=production validation, public-site integrity, desktop/mobile Chromium, Lighthouse, Cloudflare custom-domain smoke, release metadata, downloads, Android, support, feedback and payment status routes
