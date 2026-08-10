@@ -58,6 +58,53 @@ jobs:
           echo 'Live production did not become audit-ready.' >&2
           exit 1
 
+      - name: Verify live production security headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sS --max-time 25 \
+            -H 'Cache-Control: no-cache' \
+            -D "$RUNNER_TEMP/live-headers.txt" \
+            -o /dev/null \
+            "https://www.formatxsuite.com/?header_audit=${GITHUB_RUN_ID}"
+
+          python3 - "$RUNNER_TEMP/live-headers.txt" <<'PY'
+          import pathlib
+          import sys
+
+          raw = pathlib.Path(sys.argv[1]).read_text(errors='replace')
+          blocks = [block for block in raw.replace('\r\n', '\n').split('\n\n') if block.strip()]
+          header_block = blocks[-1]
+          lines = header_block.splitlines()
+          assert lines and ' 200 ' in lines[0], lines[0] if lines else 'missing status line'
+
+          headers = {}
+          for line in lines[1:]:
+              if ':' not in line:
+                  continue
+              name, value = line.split(':', 1)
+              headers[name.strip().lower()] = value.strip()
+
+          hsts = headers.get('strict-transport-security', '').lower()
+          assert 'max-age=63072000' in hsts, hsts
+          assert 'includesubdomains' in hsts, hsts
+          assert 'preload' in hsts, hsts
+          assert headers.get('x-content-type-options', '').lower() == 'nosniff', headers
+          assert headers.get('referrer-policy', '').lower() == 'strict-origin-when-cross-origin', headers
+          assert headers.get('x-frame-options', '').upper() == 'DENY', headers
+          assert headers.get('cross-origin-opener-policy', '').lower() == 'same-origin', headers
+          assert headers.get('cross-origin-resource-policy', '').lower() == 'same-origin', headers
+          assert 'camera=()' in headers.get('permissions-policy', '').lower(), headers
+          csp = headers.get('content-security-policy', '').lower()
+          assert "default-src 'self'" in csp, csp
+          assert "object-src 'none'" in csp, csp
+          assert "frame-ancestors 'none'" in csp, csp
+          assert 'upgrade-insecure-requests' in csp, csp
+          assert 'server' not in headers, headers.get('server')
+          assert 'x-powered-by' not in headers, headers.get('x-powered-by')
+          print('PASS: live production security header contract is active.')
+          PY
+
       - name: Verify live checkout readiness invariant
         shell: bash
         run: |
@@ -159,10 +206,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Live checkout invariant and desktop/mobile Lighthouse gates passed'
+            description='Live headers, checkout invariant and desktop/mobile Lighthouse passed'
           else
             state='failure'
-            description='Live checkout invariant or Lighthouse gate failed'
+            description='Live headers, checkout invariant or Lighthouse gate failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$AUDITED_SHA" \
             -f state="$state" \
