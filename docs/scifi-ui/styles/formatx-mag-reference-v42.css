@@ -1,0 +1,59 @@
+/* FormatX MAG reference v42 — desktop framing containment.
+   Desktop only: keep the native WebGL2 crystal on the right half, reduce its visual
+   footprint, and prevent the axis/glow field from crossing the readable hero copy.
+   Mobile v41 behavior is intentionally untouched. */
+
+@media(min-width:901px) and (pointer:fine){
+  .fx-core-real3d-stage{
+    --fx-core-x:74%!important;
+    clip-path:inset(0 0 0 48vw)!important;
+    overflow:hidden!important;
+  }
+
+  .fx-core-real3d-canvas{
+    transform:translate3d(4vw,0,0) scale(.74)!important;
+    transform-origin:72% 50%!important;
+    opacity:1!important;
+    visibility:visible!important;
+    filter:saturate(1.38) contrast(1.27) brightness(1.28)
+      drop-shadow(0 0 4px rgba(226,255,255,.38))
+      drop-shadow(0 0 14px rgba(64,232,255,.23))
+      drop-shadow(0 0 28px rgba(44,154,255,.14))
+      drop-shadow(0 0 42px rgba(160,64,255,.08))!important;
+  }
+
+  .fx-core-postfx-v31{
+    transform:translate3d(calc(var(--fx-v31-x) + 4vw),var(--fx-v31-y),0) scale(.74)!important;
+    transform-origin:72% 49%!important;
+    filter:saturate(1.08) contrast(1.06) brightness(1.00)!important;
+  }
+
+  .fx-v31-axis-x{
+    width:min(48vw,760px)!important;
+    margin-left:max(-24vw,-380px)!important;
+    opacity:.52!important;
+  }
+  .fx-v31-axis-y{
+    height:min(56vh,620px)!important;
+    margin-top:max(-28vh,-310px)!important;
+    opacity:.52!important;
+  }
+
+  .fx-v31-ring-a{width:14vmin!important;height:14vmin!important;margin:-7vmin 0 0 -7vmin!important;opacity:.28!important}
+  .fx-v31-ring-b{width:22vmin!important;height:22vmin!important;margin:-11vmin 0 0 -11vmin!important;opacity:.18!important}
+  .fx-v31-ring-c{width:31vmin!important;height:31vmin!important;margin:-15.5vmin 0 0 -15.5vmin!important;opacity:.11!important}
+  .fx-v31-spectrum{width:min(46vmin,560px)!important;height:min(46vmin,560px)!important;margin:min(-23vmin,-280px) 0 0 min(-23vmin,-280px)!important;opacity:.13!important}
+
+  /* Hero copy is a protected desktop reading plane. */
+  body.living-architecture #hero .hero-copy{
+    position:relative!important;
+    z-index:430!important;
+    isolation:isolate!important;
+  }
+}
+
+@media(min-width:1400px) and (pointer:fine){
+  .fx-core-real3d-stage{--fx-core-x:75%!important;clip-path:inset(0 0 0 50vw)!important}
+  .fx-core-real3d-canvas{transform:translate3d(5vw,0,0) scale(.72)!important;transform-origin:73% 50%!important}
+  .fx-core-postfx-v31{transform:translate3d(calc(var(--fx-v31-x) + 5vw),var(--fx-v31-y),0) scale(.72)!important;transform-origin:73% 49%!important}
+}
