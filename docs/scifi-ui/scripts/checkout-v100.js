@@ -190,8 +190,8 @@
       setFeedback(
         feedback,
         t(
-          'A szerveres rendeléskövetés nem érhető el, ezért biztonsági okból az éles oldalon nem indítható fizetés. ' + (reason || ''),
-          'Server-side order tracking is unavailable, so payment is disabled on the production site for safety. ' + (reason || '')
+          'A tartós rendeléskövetés vagy a jogi/fizetési konfiguráció nem teljes, ezért az éles oldalon nem indítható fizetés. ' + (reason || ''),
+          'Durable order tracking or the legal/payment configuration is incomplete, so payment is disabled on the production site. ' + (reason || '')
         ),
         'error'
       );
@@ -205,8 +205,8 @@
     setFeedback(
       feedback,
       t(
-        'Fejlesztői statikus mód aktív. A fizetés és a licencellenőrzés kézi. ' + (reason || ''),
-        'Developer static mode is active. Payment and licence verification are manual. ' + (reason || '')
+        'Fejlesztői statikus mód aktív. Nincs tartós rendelésmentés; ez nem production fizetési mód. ' + (reason || ''),
+        'Developer static mode is active. There is no durable order storage; this is not a production payment mode. ' + (reason || '')
       ),
       'success'
     );
@@ -215,12 +215,12 @@
   async function verifyBackend() {
     liveReady = false;
     submitButton.disabled = true;
-    submitButton.textContent = t('Bankszámla ellenőrzése…', 'Checking bank payment…');
+    submitButton.textContent = t('Rendelési rendszer ellenőrzése…', 'Checking order system…');
 
     try {
       const controller = typeof AbortController === 'function' ? new AbortController() : null;
       const timer = controller ? window.setTimeout(function () { controller.abort(); }, 5000) : null;
-      const response = await fetch(apiUrl('/health'), {
+      const response = await fetch(apiUrl('/checkout-readiness'), {
         headers: { Accept: 'application/json' },
         cache: 'no-store',
         signal: controller ? controller.signal : undefined
@@ -229,13 +229,17 @@
       const result = await response.json().catch(function () { return {}; });
       const currencies = Array.isArray(result.supported_currencies) ? result.supported_currencies : [];
       if (!response.ok
+        || result.ok !== true
         || result.provider !== 'bank_transfer'
         || result.mode !== 'live'
         || result.live_ready !== true
-        || result.sales_ready === false
+        || result.sales_ready !== true
+        || result.order_tracking_ready !== true
+        || result.business_checkout_only !== true
+        || result.legal_acceptance_required !== true
         || !currencies.includes('HUF')
         || !currencies.includes('EUR')) {
-        throw new Error(t('A fizetési backend nincs teljesen konfigurálva.', 'The payment backend is not fully configured.'));
+        throw new Error(t('A fizetési és rendeléskövetési backend nincs teljesen konfigurálva.', 'The payment and order-tracking backend is not fully configured.'));
       }
 
       backendMode = 'api';
@@ -245,8 +249,8 @@
       setFeedback(
         feedback,
         t(
-          'A szerveroldali rendeléskövetés és a HUF/EUR QR-fizetés aktív.',
-          'Server-side order tracking and HUF/EUR QR payment are active.'
+          'A tartós rendeléskövetés, a jogi kapu és a HUF/EUR QR-fizetés aktív.',
+          'Durable order tracking, the legal gate and HUF/EUR QR payment are active.'
         ),
         'success'
       );
@@ -258,6 +262,8 @@
   function checkoutPayload() {
     const data = new FormData(form);
     const currency = selectedCurrency();
+    const businessConsent = document.getElementById('business-buyer-consent');
+    const legalConsent = document.getElementById('checkout-consent');
     return {
       plan_id: selectedPlanId(),
       billing_cycle: selectedCycle(),
@@ -269,7 +275,10 @@
       tax_number: String(data.get('tax_number') || '').trim(),
       purchase_order: String(data.get('purchase_order') || '').trim(),
       order_reference: orderReference,
-      payment_method: currency === 'EUR' ? 'sepa_credit_transfer_qr' : 'direct_bank_transfer_qr'
+      payment_method: currency === 'EUR' ? 'sepa_credit_transfer_qr' : 'direct_bank_transfer_qr',
+      business_buyer_confirmed: businessConsent instanceof HTMLInputElement && businessConsent.checked,
+      terms_accepted: legalConsent instanceof HTMLInputElement && legalConsent.checked,
+      privacy_accepted: legalConsent instanceof HTMLInputElement && legalConsent.checked
     };
   }
 
@@ -296,7 +305,7 @@
       session_id: orderReference,
       order_reference: orderReference,
       payment_provider: 'bank_transfer',
-      payment_mode: 'live',
+      payment_mode: 'development_static',
       pricing_version: 'v100-market-2026-07',
       amount: amount,
       currency: currency,
@@ -308,6 +317,7 @@
       qr_format: currency === 'EUR' ? 'epc069-12-v3.1' : 'payto-rfc8905',
       manual_verification_required: true,
       order_tracking_ready: false,
+      legal_acceptance_recorded: false,
       automatic_renewal: false
     };
   }
@@ -329,12 +339,14 @@
       || result.payment_mode !== 'live'
       || result.order_reference !== orderReference
       || result.pricing_version !== 'v100-market-2026-07'
+      || result.order_tracking_ready !== true
+      || result.legal_acceptance_recorded !== true
       || amount !== selectedAmount()
       || result.currency !== selectedCurrency()
       || !result.qr_payload
       || !result.payment_uri
       || !result.account) {
-      throw new Error(t('A szerver hibás vagy eltérő fizetési adatot adott vissza.', 'The server returned invalid or mismatched payment data.'));
+      throw new Error(t('A szerver nem igazolta a tartós rendelésmentést vagy hibás fizetési adatot adott vissza.', 'The server did not confirm durable order storage or returned invalid payment data.'));
     }
     result.amount = amount;
     return result;
@@ -489,7 +501,7 @@
     }
     if (!form.checkValidity()) {
       form.reportValidity();
-      setFeedback(feedback, t('Töltsd ki a kötelező rendelési adatokat.', 'Complete the required order details.'), 'error');
+      setFeedback(feedback, t('Töltsd ki és erősítsd meg az összes kötelező rendelési adatot.', 'Complete and confirm all required order details.'), 'error');
       return;
     }
 
@@ -500,10 +512,15 @@
       showPayment(result);
       setFeedback(
         feedback,
-        t(
-          'Az átutalási QR és a szerveroldalon rögzített rendelés elkészült.',
-          'The transfer QR and server-side order record are ready.'
-        ),
+        backendMode === 'api'
+          ? t(
+            'Az átutalási QR, a jogi elfogadás és a tartós szerveroldali rendelésrekord elkészült.',
+            'The transfer QR, legal acceptance record and durable server-side order record are ready.'
+          )
+          : t(
+            'Fejlesztői átutalási adatok elkészültek; nincs szerveroldali rendelésmentés.',
+            'Developer transfer details are ready; there is no server-side order storage.'
+          ),
         'success'
       );
       submitButton.textContent = t('Átutalási adatok elkészültek', 'Transfer details ready');
