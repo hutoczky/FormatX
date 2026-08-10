@@ -278,7 +278,7 @@
       payment_method: currency === 'EUR' ? 'sepa_credit_transfer_qr' : 'direct_bank_transfer_qr',
       business_buyer_confirmed: businessConsent instanceof HTMLInputElement && businessConsent.checked,
       terms_accepted: legalConsent instanceof HTMLInputElement && legalConsent.checked,
-      privacy_accepted: legalConsent instanceof HTMLInputElement && legalConsent.checked
+      privacy_notice_acknowledged: legalConsent instanceof HTMLInputElement && legalConsent.checked
     };
   }
 
