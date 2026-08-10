@@ -1,0 +1,88 @@
+/* FormatX MAG reference v40 — full four-tip crystal on mobile.
+   The native WebGL2 crystal remains the only MAG geometry. This layer removes the
+   premature v39 bottom clip and lets the opaque hero-copy card sit above the stage. */
+
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-core-real3d-stage{
+    clip-path:none!important;
+    --fx-mag-clip-bottom:0px!important;
+    z-index:121!important;
+  }
+
+  .fx-core-real3d-stage[data-fx-v38-visible="true"],
+  .fx-core-real3d-stage[data-fx-v39-visible="true"]{
+    opacity:1!important;
+    visibility:visible!important;
+  }
+
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="text"],
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="visual"]{
+    opacity:1!important;
+    visibility:visible!important;
+  }
+
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="text"] .fx-core-real3d-canvas,
+  .fx-core-real3d-stage[data-fx-mobile-text-guard="visual"] .fx-core-real3d-canvas,
+  .fx-core-real3d-canvas,
+  .fx-core-postfx-v31,
+  .fx-mag-v33-overlay{
+    clip-path:none!important;
+    visibility:visible!important;
+  }
+
+  .fx-core-real3d-canvas{
+    opacity:1!important;
+    transform:none!important;
+    filter:saturate(1.52) contrast(1.34) brightness(1.40)
+      drop-shadow(0 0 5px rgba(229,255,255,.46))
+      drop-shadow(0 0 18px rgba(67,235,255,.31))
+      drop-shadow(0 0 38px rgba(46,158,255,.20))
+      drop-shadow(0 0 58px rgba(162,66,255,.12))!important;
+  }
+
+  .fx-core-postfx-v31{
+    opacity:1!important;
+    filter:saturate(1.18) contrast(1.12) brightness(1.10)!important;
+  }
+  .fx-v31-spectrum{opacity:.30!important}
+  .fx-v31-ring-a{opacity:.40!important}
+  .fx-v31-ring-b{opacity:.29!important}
+  .fx-v31-ring-c{opacity:.19!important}
+  .fx-v31-flare{
+    width:9px!important;
+    height:9px!important;
+    margin:-4.5px 0 0 -4.5px!important;
+    box-shadow:0 0 4px #fff,0 0 11px rgba(226,255,255,.98),0 0 26px rgba(72,240,255,.82),0 0 52px rgba(54,161,255,.34)!important;
+  }
+
+  /* The text card itself is the occlusion plane. The MAG may continue behind it,
+     but can never cover readable copy because the copy owns a higher stacking layer. */
+  body.living-architecture #hero .hero-copy{
+    z-index:360!important;
+    isolation:isolate!important;
+    background:#010711!important;
+  }
+  body.living-architecture #hero .hero-copy::before{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    inset:-34px 0 auto 0;
+    height:36px;
+    pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(1,7,17,.96));
+  }
+}
+
+@media(min-width:901px) and (pointer:fine){
+  .fx-core-real3d-canvas{
+    filter:saturate(1.42) contrast(1.30) brightness(1.34)
+      drop-shadow(0 0 5px rgba(226,255,255,.42))
+      drop-shadow(0 0 18px rgba(64,232,255,.28))
+      drop-shadow(0 0 38px rgba(44,154,255,.18))
+      drop-shadow(0 0 56px rgba(160,64,255,.10))!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .fx-core-real3d-canvas{filter:saturate(1.30) contrast(1.24) brightness(1.25)!important}
+}
