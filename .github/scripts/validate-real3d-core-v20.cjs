@@ -1,44 +1,60 @@
 'use strict';
-const assert=require('node:assert/strict');
-const fs=require('node:fs');
-const path=require('node:path');
-const root=path.resolve(__dirname,'../..');
-const read=file=>fs.readFileSync(path.join(root,file),'utf8');
-const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
-const runtime=read('docs/scifi-ui/scripts/formatx-reference-lock-v30.js');
-const style=read('docs/scifi-ui/styles/formatx-reference-lock-v30.css');
-const homepage=read('docs/scifi-ui/index.html');
-const contract=JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
-assert.match(bootstrap,/reference-lock-v30/);
-assert.match(bootstrap,/formatx-reference-lock-v30\.js\?v=20260810-uploaded-reference-lock-7/);
-assert.match(bootstrap,/formatx-reference-lock-v30\.css\?v=20260810-uploaded-reference-lock-7/);
-assert.equal((bootstrap.match(/getContext\('webgl2'/g)||[]).length,0);
-assert.equal((runtime.match(/getContext\('webgl2'/g)||[]).length,1);
-for(const token of ['gl.enable(gl.DEPTH_TEST)','gl.drawElements(gl.TRIANGLES','gl.drawElements(gl.LINES','function persp(','function crystal(','function torus(','function sphere(','uploaded-reference-20260810','organic-faceted-glass-r6','uploaded-image-20260810-r7','adaptive-60-plus-fps','IntersectionObserver','webglcontextlost']) assert.ok(runtime.includes(token),`missing: ${token}`);
-assert.match(runtime,/p=\.78/);
-assert.match(runtime,/\*1\.07\*\(\.99\+\.06\*Math\.pow/);
-assert.doesNotMatch(runtime,/mobile\?1\.50:1/);
-assert.match(runtime,/mobile\?1\.45:1\.70/);
-assert.match(runtime,/mobile\?1750000:2500000/);
-assert.match(runtime,/portrait\?0:vw\*\.185,portrait\?\.04:\.01/);
-assert.match(runtime,/t=\.009/);
-assert.match(runtime,/for\(const k of\[3,6,9,R\]\)/);
-assert.match(runtime,/Math\.floor\(A\/8\)/);
-assert.match(runtime,/for\(const k of\[3,5,7,9\]\)/);
-assert.match(runtime,/branch=pow/);
-assert.match(runtime,/const rs=\[\.19,\.28,\.38,\.49\]/);
-assert.match(runtime,/ringAlpha=\[\.30,\.24,\.19,\.15\]/);
-assert.match(runtime,/fxCoreImageBacked='false'/);
-assert.doesNotMatch(runtime,/drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|backgroundImage/i);
-assert.doesNotMatch(runtime,/THREE\b|three\.js|babylon|playcanvas|model-viewer/i);
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.resolve(__dirname, '../..');
+const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+
+const bootstrap = read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
+const runtime = read('docs/scifi-ui/scripts/formatx-core-v50.js');
+const style = read('docs/scifi-ui/styles/formatx-core-v50.css');
+const homepage = read('docs/scifi-ui/index.html');
+const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
+
+assert.match(bootstrap, /rounded-living-core-v50/);
+assert.match(bootstrap, /formatx-core-v50\.js\?v=20260810-rounded-living-core-v50-1/);
+assert.match(bootstrap, /formatx-core-v50\.css\?v=20260810-rounded-living-core-v50-1/);
+assert.match(bootstrap, /single-webgl2-rounded-living-core-v50/);
+assert.equal((bootstrap.match(/getContext\('webgl2'/g) || []).length, 0, 'bootstrap must not create a WebGL context');
+assert.doesNotMatch(bootstrap, /addScript\(V(?:33|44|46|47|38|41)_SCRIPT/);
+
+assert.equal((runtime.match(/getContext\('webgl2'/g) || []).length, 1, 'v50 source must own one WebGL2 context creation site');
+for (const token of [
+  "const VERSION = 'v50-rounded-living-core'",
+  'gl.enable(gl.DEPTH_TEST)',
+  'gl.drawElements(gl.TRIANGLES',
+  'function sphere(',
+  'function torus(',
+  'const ribbonData = [',
+  'Math.sin(t * .71)',
+  'Math.cos(t * .63)',
+  'IntersectionObserver',
+  'webglcontextlost',
+  "root.dataset.fxCorePerformance = 'single-context-adaptive-60-plus-fps'"
+]) assert.ok(runtime.includes(token), `missing v50 contract: ${token}`);
+
+assert.doesNotMatch(runtime, /function\s+crystal\s*\(/, 'four-tip crystal geometry must remain retired');
+assert.doesNotMatch(runtime, /boundary\s*\(/, 'p-norm diamond boundary must remain retired');
+assert.doesNotMatch(runtime, /drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|backgroundImage/i, 'MAG must not be image-backed');
+assert.doesNotMatch(runtime, /THREE\b|three\.js|babylon|playcanvas|model-viewer/i, 'third-party scene engine is forbidden');
+assert.match(runtime, /const dprCap = mobile \? 1\.35 : 1\.75/);
+assert.match(runtime, /const budget = mobile \? 1450000 : 2600000/);
+assert.match(runtime, /clamp\(viewW \* \.34, \.36, \.66\)/, 'portrait core must be viewport-bounded');
+assert.match(runtime, /pointermove/);
+assert.match(runtime, /prefers-reduced-motion/);
+
+assert.match(style, /pointer-events:\s*none\s*!important/);
+assert.match(style, /--fx-core-x:\s*50%/);
+assert.match(style, /min-height:\s*clamp\(460px, 55svh, 690px\)/);
+assert.doesNotMatch(style, /clip-path:\s*polygon/i, 'diamond overlay must not return');
+assert.doesNotMatch(style, /scale\(\.78,\s*1\.04\)/, 'mobile aspect distortion must not return');
+
 assert.ok(homepage.includes('formatx-core-real3d-v20.js'));
-assert.match(style,/pointer-events:none/);
-assert.match(style,/100dvh/);
-assert.match(style,/--fx-core-x:50%/);
-assert.match(style,/49%/);
-assert.match(style,/top:54%/);
-assert.match(style,/saturate\(1\.35\) contrast\(1\.14\) brightness\(1\.85\)/);
-assert.match(style,/min-height:clamp\(500px,calc\(100vw \* 1\.12 \+ 72px\),860px\)/);
-const q=contract.quality_contract;
-assert.equal(q.mag_image_backed,false);assert.equal(q.mag_webgl_context_count,1);assert.equal(q.mag_paused_outside_hero,true);assert.equal(q.mag_reference_target,'four-tip-luminous-crystal-sci-fi-film-core');
-console.log('PASS: reference MAG r7 uses one indexed WebGL2 context, uploaded-reference proportions, centered mobile framing, adaptive render scale and luminous reactor filaments.');
+const q = contract.quality_contract;
+assert.equal(q.mag_image_backed, false);
+assert.equal(q.mag_webgl_context_count, 1);
+assert.equal(q.mag_paused_outside_hero, true);
+
+new Function(runtime);
+new Function(bootstrap);
+console.log('PASS: v50 uses one native WebGL2 rounded living core, moving internal nucleus, five spectral ribbons, bounded mobile framing and adaptive rendering.');
