@@ -1,6 +1,7 @@
-/* FormatX MAG reference v41 — mobile copy-safe dynamic clipping.
-   The native WebGL2 crystal stays fully visible until hero copy actually enters the viewport.
-   Once copy enters, only the pixels below the copy-safe boundary are clipped. No image/SVG replacement. */
+/* FormatX MAG reference v41 — mobile copy-safe dynamic clipping + v45 optical tuning.
+   The native WebGL2 crystal remains the source of truth. No image or SVG replacement.
+   Mobile keeps the copy-safe clip while the WebGL crystal is widened, brightened and given
+   stronger cyan/violet glass depth to match the visual reference more closely. */
 
 @media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   .fx-core-real3d-stage{
@@ -27,26 +28,35 @@
   }
 
   .fx-core-real3d-canvas{
-    transform:none!important;
-    filter:saturate(1.48) contrast(1.32) brightness(1.34)
-      drop-shadow(0 0 5px rgba(229,255,255,.44))
-      drop-shadow(0 0 18px rgba(67,235,255,.29))
-      drop-shadow(0 0 36px rgba(46,158,255,.18))
-      drop-shadow(0 0 56px rgba(162,66,255,.10))!important;
+    transform:scaleX(1.12) scaleY(.95)!important;
+    transform-origin:50% 46%!important;
+    filter:saturate(1.62) contrast(1.46) brightness(1.58)
+      drop-shadow(0 0 5px rgba(238,255,255,.68))
+      drop-shadow(0 0 15px rgba(82,244,255,.48))
+      drop-shadow(0 0 32px rgba(48,180,255,.30))
+      drop-shadow(0 0 54px rgba(176,72,255,.19))
+      drop-shadow(0 0 78px rgba(62,128,255,.12))!important;
   }
 
   .fx-core-postfx-v31{
-    filter:saturate(1.16) contrast(1.10) brightness(1.08)!important;
+    transform:scaleX(1.10) scaleY(.96)!important;
+    transform-origin:50% 46%!important;
+    filter:saturate(1.30) contrast(1.18) brightness(1.20)!important;
   }
-  .fx-v31-spectrum{opacity:.26!important}
-  .fx-v31-ring-a{opacity:.36!important}
-  .fx-v31-ring-b{opacity:.26!important}
-  .fx-v31-ring-c{opacity:.17!important}
+  .fx-v31-spectrum{opacity:.34!important}
+  .fx-v31-ring-a{opacity:.50!important}
+  .fx-v31-ring-b{opacity:.36!important}
+  .fx-v31-ring-c{opacity:.24!important}
   .fx-v31-flare{
-    width:9px!important;
-    height:9px!important;
-    margin:-4.5px 0 0 -4.5px!important;
-    box-shadow:0 0 4px #fff,0 0 11px rgba(226,255,255,.98),0 0 24px rgba(72,240,255,.78),0 0 46px rgba(54,161,255,.30)!important;
+    width:13px!important;
+    height:13px!important;
+    margin:-6.5px 0 0 -6.5px!important;
+    box-shadow:
+      0 0 4px #fff,
+      0 0 10px rgba(245,255,255,1),
+      0 0 22px rgba(95,247,255,.92),
+      0 0 42px rgba(54,190,255,.58),
+      0 0 68px rgba(137,72,255,.26)!important;
   }
 
   body.living-architecture #hero .hero-copy{
@@ -82,11 +92,11 @@
 
 @media(min-width:901px) and (pointer:fine){
   .fx-core-real3d-canvas{
-    filter:saturate(1.40) contrast(1.28) brightness(1.30)
-      drop-shadow(0 0 5px rgba(226,255,255,.40))
-      drop-shadow(0 0 18px rgba(64,232,255,.26))
-      drop-shadow(0 0 36px rgba(44,154,255,.16))
-      drop-shadow(0 0 54px rgba(160,64,255,.09))!important;
+    filter:saturate(1.45) contrast(1.32) brightness(1.34)
+      drop-shadow(0 0 5px rgba(226,255,255,.44))
+      drop-shadow(0 0 18px rgba(64,232,255,.30))
+      drop-shadow(0 0 38px rgba(44,154,255,.19))
+      drop-shadow(0 0 58px rgba(160,64,255,.11))!important;
   }
 }
 
@@ -97,5 +107,7 @@ body.fx-organism-panel-open .fx-core-real3d-stage{
 }
 
 @media(prefers-reduced-motion:reduce){
-  .fx-core-real3d-canvas{filter:saturate(1.30) contrast(1.24) brightness(1.25)!important}
+  .fx-core-real3d-canvas{
+    filter:saturate(1.38) contrast(1.30) brightness(1.34)!important;
+  }
 }
