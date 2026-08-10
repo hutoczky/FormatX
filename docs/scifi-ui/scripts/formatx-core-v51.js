@@ -166,7 +166,7 @@ uniform float uT;
 out vec3 vP, vW, vN;
 void main(){
   vec3 p=aP;
-  float breathe=1.0 + sin(uT*.46 + length(p.xy)*5.0)*.006;
+  float breathe=1.0 + sin(uT*.43 + length(p.xy)*6.0)*.0045;
   p.xy*=breathe;
   vec4 w=uM*vec4(p,1.0);
   vP=p;
@@ -189,30 +189,30 @@ void main(){
   vec3 V=normalize(-vW);
   vec3 N=normalize(vN);
   float nv=S(abs(dot(N,V)));
-  float fres=.018+.982*pow(1.-nv,2.55);
+  float fres=.012+.988*pow(1.-nv,2.25);
 
   float a=atan(vP.y,vP.x);
   float r=length(vP.xy);
-  float axis=pow(abs(cos(a*2.0)),11.0);
-  float facetA=pow(.5+.5*cos(a*16.0 + r*19.0 - uT*.14 + uPhase),18.0);
-  float facetB=pow(.5+.5*cos(a*24.0 - r*27.0 + uT*.11),26.0);
-  float rib=band(fract(r*6.4 + axis*.18),.50,.085);
-  float flow=pow(.5+.5*cos(a*8.0 + r*31.0 - uT*.55 + uPhase),22.0);
-  float inner=exp(-r*r*2.15);
-  float violet=pow(.5+.5*cos(a*6.0-r*8.0+uT*.17+uPhase),12.0);
+  float axis=pow(abs(cos(a*2.0)),2.1);
+  float facetA=pow(.5+.5*cos(a*12.0 + r*24.0 - uT*.18 + uPhase),20.0);
+  float facetB=pow(.5+.5*cos(a*20.0 - r*31.0 + uT*.13 + uPhase*.61),28.0);
+  float vein=pow(.5+.5*cos(a*8.0 + r*36.0 - uT*.52 + uPhase),30.0);
+  float rib=band(fract(r*7.8 + axis*.13),.50,.070);
+  float violet=pow(.5+.5*cos(a*6.0-r*9.0+uT*.16+uPhase),13.0);
+  float center=exp(-r*r*3.3);
 
-  vec3 cyan=vec3(.04,.92,1.42);
-  vec3 blue=vec3(.03,.26,1.05);
-  vec3 violetC=vec3(.78,.12,1.18);
-  vec3 ice=vec3(.82,1.22,1.42);
+  vec3 cyan=vec3(.02,.94,1.48);
+  vec3 blue=vec3(.02,.31,1.10);
+  vec3 violetC=vec3(.83,.10,1.24);
+  vec3 ice=vec3(.86,1.28,1.46);
 
-  vec3 col=uTint*(.045+.14*fres);
-  col+=cyan*(.085+.34*fres+.16*flow+.075*rib+.08*facetA);
-  col+=blue*(.055+.08*facetB+.055*axis);
-  col+=violetC*(.035+.13*violet+.035*facetA);
-  col+=ice*(.16*pow(fres,1.55)+.10*facetB+.05*inner);
+  vec3 col=uTint*(.018+.10*fres);
+  col+=cyan*(.035+.32*fres+.13*vein+.070*rib+.055*axis);
+  col+=blue*(.025+.060*facetB+.040*axis);
+  col+=violetC*(.020+.12*violet+.040*facetA);
+  col+=ice*(.13*pow(fres,1.35)+.090*facetA+.055*facetB+.030*center);
 
-  float alpha=uA*S(.055+.57*fres+.09*flow+.05*rib+.055*facetA+.03*facetB);
+  float alpha=uA*S(.012+.31*fres+.090*vein+.050*rib+.060*facetA+.035*facetB+.035*axis);
   O=vec4(col,alpha);
 }`;
 
@@ -238,8 +238,8 @@ out vec4 O;
 void main(){
   vec3 V=normalize(-vW);
   float fres=pow(1.-clamp(abs(dot(normalize(vN),V)),0.,1.),2.0);
-  vec3 col=uTint*(1.0+uGlow*.95)+vec3(1.0)*uGlow*.48;
-  O=vec4(col,uA*(.58+.42*fres));
+  vec3 col=uTint*(1.0+uGlow*.92)+vec3(1.0)*uGlow*.46;
+  O=vec4(col,uA*(.60+.40*fres));
 }`;
 
     const LINE_VS = `#version 300 es
@@ -299,53 +299,74 @@ void main(){
 
     function starRadius(theta) {
       const axis = Math.pow(Math.abs(Math.cos(theta * 2)), 9.5);
-      const shoulder = Math.pow(Math.abs(Math.cos(theta * 2)), 2.2);
-      return .52 + .26 * shoulder + .42 * axis;
+      const shoulder = Math.pow(Math.abs(Math.cos(theta * 2)), 2.0);
+      return .42 + .16 * shoulder + .48 * axis;
     }
 
-    function crystal(angleSegments = mobile ? 72 : 104, radialSegments = mobile ? 10 : 14) {
+    function sailPoint(arm, t, s, side) {
+      const phi = arm * Math.PI * .5;
+      const fx = Math.cos(phi);
+      const fy = Math.sin(phi);
+      const px = -fy;
+      const py = fx;
+      const tip = starRadius(phi);
+      const radius = .055 + (tip - .055) * t;
+      const sinT = Math.sin(Math.PI * t);
+      const width = .090 * (1 - t) + .405 * Math.pow(Math.max(0, sinT), .82) * (1 - .10 * t);
+      const edgePull = 1 - .075 * Math.abs(s) * Math.sin(Math.PI * t);
+      const sweep = .020 * Math.sin(Math.PI * t) * Math.sin(s * Math.PI);
+      const x = fx * radius * edgePull + px * (s * width + sweep);
+      const y = (fy * radius * edgePull + py * (s * width + sweep)) * 1.075;
+      const dome = .030 + .080 * (1 - t) + .145 * Math.pow(Math.max(0, sinT), .86) * (1 - .42 * s * s);
+      const fold = .018 * Math.sin(s * Math.PI * 2) * sinT;
+      const z = side * (dome + fold);
+      return [x, y, z];
+    }
+
+    function crystal(tSegments = mobile ? 20 : 30, sSegments = mobile ? 7 : 10) {
       const P = [];
       const N = [];
       const Ix = [];
 
-      for (const side of [-1, 1]) {
-        const sideOffset = P.length / 3;
-        for (let j = 0; j <= radialSegments; j += 1) {
-          const u = j / radialSegments;
-          for (let i = 0; i <= angleSegments; i += 1) {
-            const th = i / angleSegments * Math.PI * 2;
-            const baseR = starRadius(th);
-            const stepped = 1 + .022 * Math.sin(th * 12) * u + .012 * Math.sin(th * 20 + u * 9);
-            const r = baseR * u * stepped;
-            const x = r * Math.cos(th);
-            const y = r * Math.sin(th) * 1.075;
-            const dome = .095 * (1 - Math.pow(u, 1.65)) + .185 * Math.sin(Math.PI * u);
-            const facet = 1 + .10 * Math.sin(th * 8) * Math.sin(Math.PI * u) + .055 * Math.sin(th * 16);
-            const z = side * dome * facet;
-            P.push(x, y, z);
+      for (let arm = 0; arm < 4; arm += 1) {
+        for (const side of [-1, 1]) {
+          const offset = P.length / 3;
+          for (let ti = 0; ti <= tSegments; ti += 1) {
+            const t = ti / tSegments;
+            for (let si = 0; si <= sSegments; si += 1) {
+              const s = si / sSegments * 2 - 1;
+              const p = sailPoint(arm, t, s, side);
+              P.push(p[0], p[1], p[2]);
 
-            const nx = x * .30;
-            const ny = y * .30;
-            const nz = side * (1.0 + .22 * Math.cos(th * 8) * u);
-            const nl = Math.hypot(nx, ny, nz) || 1;
-            N.push(nx / nl, ny / nl, nz / nl);
+              const phi = arm * Math.PI * .5;
+              const fx = Math.cos(phi);
+              const fy = Math.sin(phi);
+              const px = -fy;
+              const py = fx;
+              const lateral = s * (.78 + .16 * Math.sin(Math.PI * t));
+              const forward = .18 + .28 * t;
+              const nx = fx * forward + px * lateral;
+              const ny = (fy * forward + py * lateral) / 1.075;
+              const nz = side * (1.00 + .24 * Math.cos((s + t) * Math.PI * 2));
+              const nl = Math.hypot(nx, ny, nz) || 1;
+              N.push(nx / nl, ny / nl, nz / nl);
+            }
           }
-        }
 
-        const row = angleSegments + 1;
-        for (let j = 0; j < radialSegments; j += 1) {
-          for (let i = 0; i < angleSegments; i += 1) {
-            const a = sideOffset + j * row + i;
-            const b = sideOffset + (j + 1) * row + i;
-            if (side > 0) {
-              Ix.push(a, b, a + 1, a + 1, b, b + 1);
-            } else {
-              Ix.push(a, a + 1, b, a + 1, b + 1, b);
+          const row = sSegments + 1;
+          for (let ti = 0; ti < tSegments; ti += 1) {
+            for (let si = 0; si < sSegments; si += 1) {
+              const a = offset + ti * row + si;
+              const b = offset + (ti + 1) * row + si;
+              if (side > 0) {
+                Ix.push(a, b, a + 1, a + 1, b, b + 1);
+              } else {
+                Ix.push(a, a + 1, b, a + 1, b + 1, b);
+              }
             }
           }
         }
       }
-
       return { P, N, Ix };
     }
 
@@ -406,54 +427,44 @@ void main(){
       return { P, N, Ix };
     }
 
-    function crystalLines(angleSegments = mobile ? 72 : 104) {
+    function crystalLines(tSegments = mobile ? 24 : 38) {
       const P = [];
+      const zLift = .014;
 
-      const zAt = (u, th) => {
-        const dome = .095 * (1 - Math.pow(u, 1.65)) + .185 * Math.sin(Math.PI * u);
-        const facet = 1 + .10 * Math.sin(th * 8) * Math.sin(Math.PI * u) + .055 * Math.sin(th * 16);
-        return dome * facet + .006;
-      };
+      for (let arm = 0; arm < 4; arm += 1) {
+        for (const s of [-1, 0, 1]) {
+          for (let i = 0; i < tSegments; i += 1) {
+            const t0 = i / tSegments;
+            const t1 = (i + 1) / tSegments;
+            const a = sailPoint(arm, t0, s, 1);
+            const b = sailPoint(arm, t1, s, 1);
+            P.push(a[0], a[1], a[2] + zLift, b[0], b[1], b[2] + zLift);
+          }
+        }
 
-      for (let spoke = 0; spoke < 16; spoke += 1) {
-        const th = spoke / 16 * Math.PI * 2;
-        const rr = starRadius(th);
-        for (let s = 0; s < 10; s += 1) {
-          const u0 = s / 10;
-          const u1 = (s + 1) / 10;
-          P.push(
-            rr * u0 * Math.cos(th), rr * u0 * Math.sin(th) * 1.075, zAt(u0, th),
-            rr * u1 * Math.cos(th), rr * u1 * Math.sin(th) * 1.075, zAt(u1, th)
-          );
+        for (const t of [.19, .34, .50, .66, .81]) {
+          const across = 8;
+          for (let i = 0; i < across; i += 1) {
+            const s0 = i / across * 2 - 1;
+            const s1 = (i + 1) / across * 2 - 1;
+            const a = sailPoint(arm, t, s0, 1);
+            const b = sailPoint(arm, t, s1, 1);
+            P.push(a[0], a[1], a[2] + zLift, b[0], b[1], b[2] + zLift);
+          }
+        }
+
+        for (const bias of [-.55, .55]) {
+          for (let i = 0; i < tSegments; i += 1) {
+            const t0 = i / tSegments;
+            const t1 = (i + 1) / tSegments;
+            const s0 = bias * Math.sin(Math.PI * t0);
+            const s1 = bias * Math.sin(Math.PI * t1);
+            const a = sailPoint(arm, t0, s0, 1);
+            const b = sailPoint(arm, t1, s1, 1);
+            P.push(a[0], a[1], a[2] + zLift * 1.2, b[0], b[1], b[2] + zLift * 1.2);
+          }
         }
       }
-
-      for (const u of [.27, .43, .59, .73, .86, 1.0]) {
-        for (let i = 0; i < angleSegments; i += 1) {
-          const t0 = i / angleSegments * Math.PI * 2;
-          const t1 = (i + 1) / angleSegments * Math.PI * 2;
-          const r0 = starRadius(t0) * u;
-          const r1 = starRadius(t1) * u;
-          P.push(
-            r0 * Math.cos(t0), r0 * Math.sin(t0) * 1.075, zAt(u, t0),
-            r1 * Math.cos(t1), r1 * Math.sin(t1) * 1.075, zAt(u, t1)
-          );
-        }
-      }
-
-      for (const th of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
-        const rr = starRadius(th);
-        for (const u of [.36, .58, .78]) {
-          const offset = .055 + u * .035;
-          const tangentX = -Math.sin(th) * offset;
-          const tangentY = Math.cos(th) * offset;
-          const x = rr * u * Math.cos(th);
-          const y = rr * u * Math.sin(th) * 1.075;
-          const z = zAt(u, th) + .010;
-          P.push(x - tangentX, y - tangentY, z, x + tangentX, y + tangentY, z);
-        }
-      }
-
       return P;
     }
 
@@ -476,7 +487,6 @@ void main(){
       const ib = gl.createBuffer();
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(g.Ix), gl.STATIC_DRAW);
-
       gl.bindVertexArray(null);
       return { vao, count: g.Ix.length };
     }
@@ -504,8 +514,8 @@ void main(){
       ring = uploadIndexed(torus());
       wire = uploadLines(crystalLines());
       axis = uploadLines([
-        -1.22, 0, .18, 1.22, 0, .18,
-        0, -1.31, .18, 0, 1.31, .18
+        -1.12, 0, .20, 1.12, 0, .20,
+        0, -1.18, .20, 0, 1.18, .20
       ]);
     } catch (error) {
       stage.remove();
@@ -583,16 +593,15 @@ void main(){
         ? clamp(w * .00134, .46, .60)
         : clamp(w * .00058, .68, .96);
       const x = portrait ? 0 : .78;
-      const y = portrait ? .16 : .02;
-      const z = portrait ? -3.45 : -3.70;
-
-      const driftX = Math.sin(t * .29) * .012;
-      const driftY = Math.cos(t * .23) * .012;
+      const y = portrait ? .14 : .015;
+      const z = portrait ? -3.36 : -3.62;
+      const driftX = Math.sin(t * .29) * .010;
+      const driftY = Math.cos(t * .23) * .010;
       return compose(
         tr(x + driftX, y + driftY, z),
-        rx(pointerY * .11),
-        ry(pointerX * .13),
-        rz(Math.sin(t * .19) * .009),
+        rx(pointerY * .090),
+        ry(pointerX * .105),
+        rz(Math.sin(t * .19) * .007),
         sc(scale, scale, scale)
       );
     }
@@ -601,21 +610,20 @@ void main(){
       gl.useProgram(shellProgram);
       gl.uniformMatrix4fv(SU.P, false, projection);
       gl.bindVertexArray(shell.vao);
-
-      const layers = [
-        { s: 1.000, z: 0, rzv: 0, a: .58, tint: [.08, .58, 1.16], phase: .0 },
-        { s: .934, z: .008, rzv: .010, a: .42, tint: [.08, .82, 1.30], phase: 1.1 },
-        { s: .838, z: .016, rzv: -.014, a: .32, tint: [.30, .28, 1.15], phase: 2.3 }
-      ];
-
       gl.enable(gl.DEPTH_TEST);
       gl.depthMask(false);
       gl.disable(gl.CULL_FACE);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
+      const layers = [
+        { s: 1.000, z: 0, rot: 0, a: .58, tint: [.07, .65, 1.22], phase: .0 },
+        { s: .945, z: .012, rot: .010, a: .40, tint: [.08, .91, 1.38], phase: 1.2 },
+        { s: .865, z: .020, rot: -.014, a: .28, tint: [.42, .25, 1.20], phase: 2.5 }
+      ];
+
       for (const layer of layers) {
-        const m = mul(base, compose(tr(0, 0, layer.z), rz(layer.rzv), sc(layer.s, layer.s, layer.s)));
+        const m = mul(base, compose(tr(0, 0, layer.z), rz(layer.rot), sc(layer.s, layer.s, layer.s)));
         gl.uniformMatrix4fv(SU.M, false, m);
         gl.uniform1f(SU.T, t);
         gl.uniform1f(SU.A, layer.a);
@@ -629,7 +637,6 @@ void main(){
       gl.useProgram(lineProgram);
       gl.uniformMatrix4fv(LU.P, false, projection);
       gl.bindVertexArray(wire.vao);
-
       gl.disable(gl.DEPTH_TEST);
       gl.depthMask(false);
       gl.enable(gl.BLEND);
@@ -637,14 +644,14 @@ void main(){
       gl.lineWidth(1);
 
       gl.uniformMatrix4fv(LU.M, false, base);
-      gl.uniform3fv(LU.tint, [.22, .86, 1.00]);
-      gl.uniform1f(LU.A, .28 + .08 * Math.sin(t * .9));
+      gl.uniform3fv(LU.tint, [.18, .92, 1.00]);
+      gl.uniform1f(LU.A, .70 + .08 * Math.sin(t * .9));
       gl.drawArrays(gl.LINES, 0, wire.count);
 
-      const secondary = mul(base, sc(.86, .86, .86));
-      gl.uniformMatrix4fv(LU.M, false, secondary);
-      gl.uniform3fv(LU.tint, [.62, .16, 1.00]);
-      gl.uniform1f(LU.A, .13 + .04 * Math.cos(t * .7));
+      const inner = mul(base, sc(.928, .928, .928));
+      gl.uniformMatrix4fv(LU.M, false, inner);
+      gl.uniform3fv(LU.tint, [.61, .20, 1.00]);
+      gl.uniform1f(LU.A, .34 + .05 * Math.cos(t * .73));
       gl.drawArrays(gl.LINES, 0, wire.count);
     }
 
@@ -676,73 +683,70 @@ void main(){
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
-      const nucleusX = Math.sin(t * .71) * .018 + Math.cos(t * .31) * .006;
-      const nucleusY = Math.cos(t * .63) * .015 + Math.sin(t * .27) * .005;
+      const nucleusX = Math.sin(t * .71) * .012 + Math.cos(t * .31) * .004;
+      const nucleusY = Math.cos(t * .63) * .011 + Math.sin(t * .27) * .004;
       const pulse = 1 + Math.sin(t * 1.42) * .035;
 
-      const nucleus = mul(base, compose(
-        tr(nucleusX, nucleusY, .13),
-        sc(.102 * pulse, .102 * pulse, .102 * pulse)
-      ));
-      drawOrb(nucleus, [1.12, 1.22, 1.24], .98, 1.65);
-
       const halo = mul(base, compose(
-        tr(nucleusX, nucleusY, .09),
-        sc(.176 * pulse, .176 * pulse, .176 * pulse)
+        tr(nucleusX, nucleusY, .10),
+        sc(.135 * pulse, .135 * pulse, .135 * pulse)
       ));
-      drawOrb(halo, [.18, .91, 1.26], .23, 1.35);
+      drawOrb(halo, [.10, .82, 1.30], .15, 1.25);
+
+      const nucleus = mul(base, compose(
+        tr(nucleusX, nucleusY, .145),
+        sc(.070 * pulse, .070 * pulse, .070 * pulse)
+      ));
+      drawOrb(nucleus, [1.18, 1.26, 1.28], 1.0, 1.75);
 
       const ringData = [
-        [.215, 0.0, 0.0, .82, [.06, .90, 1.30]],
-        [.292, .15, -.08, .62, [.08, .72, 1.28]],
-        [.372, -.19, .09, .48, [.48, .24, 1.22]],
-        [.460, .27, .14, .36, [.04, .80, 1.20]],
-        [.548, -.32, -.12, .28, [.64, .18, 1.16]],
-        [.646, .36, .18, .22, [.05, .58, 1.16]]
+        [.170, .00, .00, .92, [.04, .96, 1.36]],
+        [.235, .08, -.05, .76, [.06, .82, 1.32]],
+        [.305, -.12, .07, .61, [.10, .70, 1.28]],
+        [.380, .17, .10, .49, [.48, .25, 1.26]],
+        [.460, -.21, -.09, .37, [.06, .78, 1.22]],
+        [.545, .25, .12, .27, [.67, .18, 1.18]]
       ];
 
       for (let i = 0; i < ringData.length; i += 1) {
-        const [r, ax, ay, alpha, tint] = ringData[i];
-        const spin = t * (.18 + i * .031) * (i % 2 ? -1 : 1);
-        const wobble = Math.sin(t * (.37 + i * .05)) * .028;
+        const [radius, ax, ay, alpha, tint] = ringData[i];
+        const spin = t * (.17 + i * .026) * (i % 2 ? -1 : 1);
+        const wobble = Math.sin(t * (.36 + i * .045)) * .020;
         const m = mul(base, compose(
-          tr(0, 0, .105 - i * .007),
+          tr(0, 0, .105 - i * .006),
           rx(ax + wobble),
           ry(ay - wobble * .7),
           rz(spin),
-          sc(r, r, r)
+          sc(radius, radius, radius)
         ));
-        drawRing(m, tint, alpha, 1.10 + i * .06);
+        drawRing(m, tint, alpha, 1.08 + i * .055);
       }
 
       const orbiters = [
-        [.31, .82, .017, [.12, .98, 1.25]],
-        [.43, -.61, .014, [.72, .18, 1.10]],
-        [.56, .47, .012, [.08, .76, 1.18]]
+        [.29, .76, .012, [.12, .98, 1.28]],
+        [.40, -.57, .010, [.73, .18, 1.12]],
+        [.51, .43, .009, [.08, .78, 1.22]]
       ];
-
       for (let i = 0; i < orbiters.length; i += 1) {
         const [radius, speed, size, tint] = orbiters[i];
-        const a = t * speed + i * 2.12;
+        const a = t * speed + i * 2.15;
         const x = Math.cos(a) * radius;
-        const y = Math.sin(a) * radius * .93;
-        const z = .16 + Math.sin(a * 1.7) * .055;
-        const m = mul(base, compose(tr(x, y, z), sc(size, size, size)));
-        drawOrb(m, tint, .88, 1.45);
+        const y = Math.sin(a) * radius * .92;
+        const z = .17 + Math.sin(a * 1.65) * .045;
+        drawOrb(mul(base, compose(tr(x, y, z), sc(size, size, size))), tint, .92, 1.46);
       }
     }
 
     function drawAxisFlares(t, base) {
       gl.useProgram(lineProgram);
       gl.uniformMatrix4fv(LU.P, false, projection);
+      gl.bindVertexArray(axis.vao);
       gl.disable(gl.DEPTH_TEST);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-      gl.bindVertexArray(axis.vao);
-
       gl.uniformMatrix4fv(LU.M, false, base);
-      gl.uniform3fv(LU.tint, [.36, .95, 1.00]);
-      gl.uniform1f(LU.A, .42 + .08 * Math.sin(t * 1.1));
+      gl.uniform3fv(LU.tint, [.42, .98, 1.00]);
+      gl.uniform1f(LU.A, .52 + .08 * Math.sin(t * 1.1));
       gl.drawArrays(gl.LINES, 0, axis.count);
     }
 
@@ -772,7 +776,7 @@ void main(){
         return;
       }
 
-      const t = reduced.matches ? 0.8 : now * .001;
+      const t = reduced.matches ? .8 : now * .001;
       gl.clearColor(0, 0, 0, 0);
       gl.clearDepth(1);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
