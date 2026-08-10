@@ -80,7 +80,9 @@ jobs:
           assert 'LIVING_CORE_CONTENT_SECURITY_POLICY' in worker
           assert 'isLivingCorePath' in worker
           assert "script-src 'self' https://cdn.jsdelivr.net" in worker
-          assert 'https://api.github.com' in worker
+          assert "connect-src 'self' https://cdn.jsdelivr.net" in worker
+          assert "const PUBLIC_RELEASE_API_PATH = '/api/public-release';" in worker
+          assert 'concealUpstreamText' in worker
           assert html.count('class="lc-node"') == 6
           assert html.count('data-link=') == 6
 
