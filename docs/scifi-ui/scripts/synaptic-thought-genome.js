@@ -155,17 +155,44 @@
     document.head.appendChild(link);
   }
 
+  function resolveLayerStage() {
+    const legacyStage = document.querySelector('.fx-three-stage-shell');
+    if (legacyStage instanceof HTMLElement) {
+      ROOT.dataset.fxThoughtGenomeStage = 'legacy-three-shell';
+      return legacyStage;
+    }
+
+    const heroSpace = document.querySelector('#hero .hero-space');
+    if (heroSpace instanceof HTMLElement) {
+      ROOT.dataset.fxThoughtGenomeStage = 'hero-space';
+      return heroSpace;
+    }
+
+    const hero = document.querySelector('#hero');
+    if (hero instanceof HTMLElement) {
+      ROOT.dataset.fxThoughtGenomeStage = 'hero-fallback';
+      return hero;
+    }
+
+    ROOT.dataset.fxThoughtGenomeStage = 'missing';
+    return null;
+  }
+
   function ensureLayer() {
     if (layer?.isConnected) return true;
-    const stage = document.querySelector('.fx-three-stage-shell');
+    const stage = resolveLayerStage();
     if (!(stage instanceof HTMLElement)) return false;
+
+    if (getComputedStyle(stage).position === 'static') {
+      stage.classList.add('fx-thought-genome-stage-host');
+    }
 
     layer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     layer.classList.add('fx-thought-genome-layer');
     layer.setAttribute('viewBox', '0 0 1000 1000');
     layer.setAttribute('preserveAspectRatio', 'none');
     layer.setAttribute('aria-hidden', 'true');
-    layer.dataset.fxThoughtGenomeLayer = 'ready-v1';
+    layer.dataset.fxThoughtGenomeLayer = 'ready-v2';
 
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
