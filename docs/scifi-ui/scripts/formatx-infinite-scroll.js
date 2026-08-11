@@ -7,7 +7,7 @@
   const ACTIVITY_IDLE_MS = 170;
   const MOBILE_SETTLE_MS = 220;
   const MOBILE_FLOW_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const HERO_START_HASHES = new Set(['', '#top', '#hero', '#experience', '#capabilities', '#pricing', '#system', '#resources']);
+  const HERO_START_HASHES = new Set(['', '#top', '#hero']);
   let bridge = null;
   let sourceHero = null;
   let transferLockedUntil = 0;
@@ -19,8 +19,18 @@
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
+  let geometryFrame = 0;
+  let geometryObserver = null;
   let layoutWidth = innerWidth;
   let initialHeroGuardApplied = false;
+  let loopGeometry = Object.freeze({
+    ready: false,
+    bridgeTop: 0,
+    bridgeThreshold: 0,
+    sourceTop: 0,
+    sourceHeight: 0,
+    documentEnd: 0,
+  });
 
   if (root.dataset.fxInfiniteController === VERSION) return;
 
@@ -104,7 +114,7 @@
     initialHeroGuardApplied = true;
     try { history.scrollRestoration = 'manual'; } catch (_) {}
 
-    if (['#experience', '#capabilities', '#pricing', '#system', '#resources', '#top'].includes(location.hash)) {
+    if (location.hash === '#top') {
       history.replaceState({}, '', location.pathname + location.search + '#hero');
     }
 
@@ -264,12 +274,72 @@
     setBilingualText(clone);
   }
 
+  function resetGeometry() {
+    loopGeometry = Object.freeze({
+      ready: false,
+      bridgeTop: 0,
+      bridgeThreshold: 0,
+      sourceTop: 0,
+      sourceHeight: 0,
+      documentEnd: 0,
+    });
+  }
+
+  function refreshGeometry() {
+    sourceHero = document.querySelector('#main-content > #hero');
+    if (!bridge || !sourceHero || !bridge.isConnected || !sourceHero.isConnected) {
+      resetGeometry();
+      return false;
+    }
+
+    const viewportHeight = innerHeight;
+    const bridgeTop = bridge.offsetTop;
+    const sourceTop = sourceHero.offsetTop;
+    const sourceHeight = sourceHero.offsetHeight;
+    const documentEnd = Math.max(0, document.documentElement.scrollHeight - viewportHeight);
+
+    loopGeometry = Object.freeze({
+      ready: true,
+      bridgeTop,
+      bridgeThreshold: bridgeTop + Math.max(36, Math.min(viewportHeight * .18, 180)),
+      sourceTop,
+      sourceHeight,
+      documentEnd,
+    });
+    return true;
+  }
+
+  function scheduleGeometryRefresh() {
+    if (geometryFrame) return;
+    geometryFrame = requestAnimationFrame(() => {
+      geometryFrame = 0;
+      refreshGeometry();
+    });
+  }
+
+  function observeGeometry() {
+    geometryObserver?.disconnect();
+    geometryObserver = null;
+    if (!('ResizeObserver' in window) || !bridge || !sourceHero) return;
+
+    geometryObserver = new ResizeObserver(() => scheduleGeometryRefresh());
+    const main = document.getElementById('main-content');
+    const footer = document.querySelector('body > .site-footer');
+    if (main) geometryObserver.observe(main);
+    if (footer) geometryObserver.observe(footer);
+    geometryObserver.observe(sourceHero);
+    geometryObserver.observe(bridge);
+  }
+
   function removeBridge() {
+    geometryObserver?.disconnect();
+    geometryObserver = null;
     bridge?.remove();
     document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"]').forEach(element => {
       if (element !== bridge) element.remove();
     });
     bridge = null;
+    resetGeometry();
     root.dataset.fxLoopBridge = 'missing';
   }
 
@@ -290,19 +360,21 @@
     bridge.appendChild(clone);
     footer.insertAdjacentElement('afterend', bridge);
     root.dataset.fxLoopBridge = 'ready-v3';
+
+    // Geometry is deliberately sampled outside the scroll hot path. This avoids
+    // style writes followed by offset/scrollHeight reads on every animation frame.
+    refreshGeometry();
+    observeGeometry();
+    scheduleGeometryRefresh();
     return true;
   }
 
-  function documentEnd() {
-    return Math.max(0, document.documentElement.scrollHeight - innerHeight);
-  }
-
   function bridgeRelative() {
-    if (!bridge || !sourceHero) return null;
-    const bridgeTop = bridge.offsetTop;
-    const threshold = bridgeTop + Math.max(36, Math.min(innerHeight * .18, 180));
-    if (scrollY < threshold || scrollY > documentEnd() + 2) return null;
-    return Math.max(0, Math.min(scrollY - bridgeTop, Math.max(0, sourceHero.offsetHeight - 2)));
+    const geometry = loopGeometry;
+    if (!geometry.ready) return null;
+    const y = scrollY;
+    if (y < geometry.bridgeThreshold || y > geometry.documentEnd + 2) return null;
+    return Math.max(0, Math.min(y - geometry.bridgeTop, Math.max(0, geometry.sourceHeight - 2)));
   }
 
   function markIdle() {
@@ -314,10 +386,14 @@
   }
 
   function landingTarget(relative) {
-    sourceHero = document.querySelector('#main-content > #hero');
-    if (!sourceHero) return null;
-    const bounded = Math.max(0, Math.min(relative, Math.max(0, sourceHero.offsetHeight - 2)));
-    return sourceHero.offsetTop + bounded;
+    let geometry = loopGeometry;
+    if (!geometry.ready) {
+      refreshGeometry();
+      geometry = loopGeometry;
+    }
+    if (!geometry.ready) return null;
+    const bounded = Math.max(0, Math.min(relative, Math.max(0, geometry.sourceHeight - 2)));
+    return geometry.sourceTop + bounded;
   }
 
   function landAt(relative) {
@@ -385,12 +461,16 @@
 
   function transferIfNeeded() {
     scrollFrame = 0;
+
+    // Read the cached transfer position before mutating classes/data attributes.
+    // The scroll frame therefore contains no layout-dependent DOM reads.
+    const relative = bridgeRelative();
+
     root.dataset.fxScrollActivity = 'scrolling';
     root.classList.add('fx-page-scrolling');
     clearTimeout(activityTimer);
     activityTimer = window.setTimeout(markIdle, ACTIVITY_IDLE_MS);
 
-    const relative = bridgeRelative();
     if (relative == null) {
       if (isMobileFlow()) {
         pendingMobileRelative = null;
@@ -421,6 +501,7 @@
     repairTimer = window.setTimeout(() => {
       repairReleasePanel();
       if (rebuildBridge !== false && !document.body.classList.contains('fx-organism-panel-open')) buildBridge();
+      else scheduleGeometryRefresh();
     }, 60);
   }
 
@@ -459,6 +540,7 @@
       syncReleaseHub(panel);
       panel.scrollTop = 0;
     }
+    scheduleGeometryRefresh();
   }
 
   function initialise() {
@@ -476,6 +558,8 @@
       frameStableLanding: true,
       jumpFree: true,
       sectionSnapDisabled: true,
+      geometryCachedOutsideScroll: true,
+      deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
       desktopTransfer: 'immediate-visual-match',
       mobileTransfer: 'scrollend-or-idle',
@@ -486,11 +570,16 @@
     root.dataset.fxAutomaticLoop = 'enabled';
     root.dataset.fxMobileScrollMode = 'native-momentum-loop';
     onScroll();
+
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(scheduleGeometryRefresh).catch(() => {});
+    }
   }
 
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('scrollend', onScrollEnd, { passive: true });
   addEventListener('resize', onResize, { passive: true });
+  addEventListener('load', scheduleGeometryRefresh, { once: true, passive: true });
   addEventListener('pageshow', () => scheduleRepair(true), { passive: true });
   addEventListener('formatx:organisminterfaceready', () => scheduleRepair(true));
   addEventListener('formatx:organismpanelopen', onPanelOpen);
@@ -501,6 +590,7 @@
     if (footer) repairFooterCopy(footer);
     const panel = document.querySelector('[data-organism-panel="resources"]');
     if (panel) syncReleaseHub(panel);
+    scheduleGeometryRefresh();
   });
   document.addEventListener('touchstart', onTouchStart, { passive: true });
   document.addEventListener('touchend', onTouchEnd, { passive: true });
@@ -512,8 +602,10 @@
   addEventListener('pagehide', () => {
     cancelAnimationFrame(scrollFrame);
     cancelAnimationFrame(landingFrame);
+    cancelAnimationFrame(geometryFrame);
     clearTimeout(activityTimer);
     clearTimeout(mobileSettleTimer);
     clearTimeout(repairTimer);
+    geometryObserver?.disconnect();
   }, { once: true });
 }());
