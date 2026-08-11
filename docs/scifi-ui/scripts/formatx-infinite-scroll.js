@@ -9,6 +9,41 @@
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
 
+  function ensureMobileLoopBridgeOverride() {
+    if (document.querySelector('style[data-fx-mobile-loop-bridge-override]')) return;
+    const style = document.createElement('style');
+    style.dataset.fxMobileLoopBridgeOverride = 'true';
+    style.textContent = `
+@media (max-width: 900px), (pointer: coarse) {
+  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: calc(100svh + max(320px, 24svh)) !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding-bottom: max(320px, 24svh) !important;
+    overflow: clip !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    contain: layout paint style !important;
+  }
+
+  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
+  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] [data-fx-loop-clone='true'] {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100svh !important;
+    max-height: none !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+  }
+}
+`;
+    document.head.appendChild(style);
+  }
+
   function installSeamlessRuntime(platform) {
     const mobile = platform === 'mobile';
 
@@ -25,6 +60,7 @@
       root.dataset.fxMobileMomentumGuard = 'scrollend-or-idle-v1';
       root.classList.add('fx-mobile-seamless-loop');
       root.classList.remove('fx-mobile-native-scroll', 'fx-mobile-native-scroll-v2');
+      ensureMobileLoopBridgeOverride();
     }
 
     const existing = document.querySelector('script[data-fx-seamless-runtime]');
