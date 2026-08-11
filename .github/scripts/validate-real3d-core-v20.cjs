@@ -12,6 +12,10 @@ const homepage = read('docs/scifi-ui/index.html');
 const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
 
 assert.match(bootstrap, /reference-crystal-core-v53/);
+assert.match(bootstrap, /const SCRIPT = '\/scifi-ui\/scripts\/formatx-core-reference-v53\.js/,
+  'desktop runtime path must be root-safe on the canonical apex URL');
+assert.match(bootstrap, /const STYLE = '\/scifi-ui\/styles\/formatx-core-reference-v53\.css/,
+  'desktop style path must be root-safe on the canonical apex URL');
 assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r3/);
 assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r3/);
 assert.match(bootstrap, /single-webgl2-reference-crystal-v53/);

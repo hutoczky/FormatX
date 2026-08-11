@@ -12,6 +12,10 @@ const mobileStyle = read('docs/scifi-ui/styles/formatx-core-mobile-v55.css');
 const homepage = read('docs/scifi-ui/index.html');
 
 assert.match(bootstrap, /reference-crystal-core-v53/);
+assert.match(bootstrap, /const MOBILE_SCRIPT = '\/scifi-ui\/scripts\/formatx-core-mobile-v55\.js/,
+  'mobile runtime path must be root-safe on the canonical apex URL');
+assert.match(bootstrap, /const MOBILE_STYLE = '\/scifi-ui\/styles\/formatx-core-mobile-v55\.css/,
+  'mobile style path must be root-safe on the canonical apex URL');
 assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r3/);
 assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r3/);
 assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260811-cinematic-mobile-v55-r3/);
