@@ -77,28 +77,21 @@ export default {
       Single routing authority for every public GET/HEAD request.
 
       The historic inner stack contains older WWW/apex canonicalisers. Public
-      requests are therefore converted to an internal hostname before entering
-      that stack. Those lower layers can no longer emit an apex <-> WWW bounce,
-      while all existing content, licence, feedback and security behaviour stays
-      in place.
+      requests are converted to an internal hostname before entering that stack,
+      so lower layers cannot create an apex <-> WWW bounce. Only the visible WWW
+      homepage itself is redirected to the clean apex homepage. WWW assets/APIs
+      remain directly readable with HTTP 200 for compatibility and health checks.
     */
 
-    if (url.hostname === LEGACY_WWW_HOST) {
-      const target = new URL(url.pathname, CANONICAL_ORIGIN);
-      target.search = url.search;
-
-      if (HOMEPAGE_ALIASES.has(url.pathname)) {
-        target.pathname = '/';
-        target.search = '';
-      }
-
+    if (url.hostname === LEGACY_WWW_HOST && HOMEPAGE_ALIASES.has(url.pathname)) {
+      const target = new URL('/', CANONICAL_ORIGIN);
       // Temporary and explicitly non-cacheable. The unique recovery query also
-      // bypasses a historic cached 308 for the exact apex URL in Chromium.
+      // bypasses a historic cached 308 for the exact apex root in Chromium.
       target.searchParams.set(RECOVERY_PARAM, '1');
       return temporaryRedirect(target.toString());
     }
 
-    if (HOMEPAGE_ALIASES.has(url.pathname)) {
+    if (url.hostname === CANONICAL_HOST && HOMEPAGE_ALIASES.has(url.pathname)) {
       if (url.pathname !== '/') {
         const target = new URL('/', CANONICAL_ORIGIN);
         target.searchParams.set(RECOVERY_PARAM, '1');
