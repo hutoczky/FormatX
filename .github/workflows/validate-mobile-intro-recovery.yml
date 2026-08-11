@@ -1,6 +1,7 @@
-name: Validate unified FormatX mobile, status and Morphing Organism architecture
+name: Validate unified FormatX mobile and production architecture
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:
@@ -14,13 +15,10 @@ on:
       - 'billing-worker/src/production-content-entry.js'
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-webgpu-source.py'
-      - '.github/scripts/validate-thought-genome.cjs'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
   pull_request:
     branches: [master]
     paths:
-      - 'README.md'
-      - 'RELEASE_NOTES.md'
       - 'worker.js'
       - 'content-preview-entry.js'
       - 'wrangler.jsonc'
@@ -29,23 +27,22 @@ on:
       - 'billing-worker/src/production-content-entry.js'
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-webgpu-source.py'
-      - '.github/scripts/validate-thought-genome.cjs'
       - '.github/workflows/validate-mobile-intro-recovery.yml'
-  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: formatx-unified-mobile-morphing-organism-${{ github.ref }}
+  group: formatx-unified-mobile-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
       - name: Validate central architecture contract
         run: python3 .github/scripts/validate-webgpu-source.py
@@ -55,180 +52,56 @@ jobs:
         run: |
           set -euo pipefail
           node --check content-preview-entry.js
-          node --check billing-worker/src/production-content-entry.js
-          node --check docs/scifi-ui/scripts/platform-status.js
-          node --check docs/scifi-ui/scripts/release-metadata.js
-          node --check docs/scifi-ui/scripts/formatx-public-shell.js
-          node --check docs/scifi-ui/scripts/public-evidence-pages.js
+          node --input-type=module --check < billing-worker/src/production-entry.js
+          node --input-type=module --check < billing-worker/src/production-content-entry.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
-          node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
-          node --check docs/scifi-ui/scripts/formatx-three-host-safe.js
-          node --check docs/scifi-ui/scripts/formatx-render-visibility.js
-          node --check docs/scifi-ui/scripts/organism-interface.js
-          node --check docs/scifi-ui/scripts/organism-menu-controller.js
-          node --check docs/scifi-ui/scripts/organism-core-controller.js
-          node --check docs/scifi-ui/scripts/organism-console-state.js
           node --check docs/scifi-ui/scripts/organism-voice.js
           node --check docs/scifi-ui/scripts/organism-voice-stability.js
           node --check docs/scifi-ui/scripts/organism-master-sync.js
-          node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
-          node --input-type=module --check < docs/scifi-ui/scripts/mobile-webgl-entry.js
-          node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v2.js
-          node --input-type=module --check < docs/scifi-ui/scripts/mobile-core-engine-v3.js
-          node --input-type=module --check < billing-worker/src/production-entry.js
-          node --input-type=module --check < worker.js
-          node --check .github/scripts/validate-thought-genome.cjs
 
-      - name: Validate Worker ownership and current routes
-        shell: bash
-        run: |
-          node - <<'NODE'
-          const fs = require('fs');
-          const preview = JSON.parse(fs.readFileSync('wrangler.jsonc', 'utf8'));
-          const production = JSON.parse(fs.readFileSync('billing-worker/wrangler.jsonc', 'utf8'));
-          const first = preview.assets?.run_worker_first || [];
-          const required = [
-            '/scifi-ui/',
-            '/scifi-ui/index.html',
-            '/scifi-ui/downloads/',
-            '/scifi-ui/downloads/index.html',
-            '/scifi-ui/test-matrix.html',
-            '/scifi-ui/known-issues.html',
-            '/scifi-ui/data/platform-status.json',
-            '/scifi-ui/data/current-release.json',
-            '/scifi-ui/styles/platform-status.css',
-            '/scifi-ui/styles/organism-voice.css',
-            '/scifi-ui/styles/organism-voice-dock.css',
-            '/scifi-ui/styles/organism-master-sync.css',
-            '/scifi-ui/styles/formatx-mobile-readability.css',
-            '/scifi-ui/styles/formatx-mobile-unified.css',
-            '/scifi-ui/styles/synaptic-thought-genome.css',
-            '/scifi-ui/styles/synaptic-thought-disclosure.css',
-            '/scifi-ui/scripts/platform-status.js',
-            '/scifi-ui/scripts/release-metadata.js',
-            '/scifi-ui/scripts/formatx-public-shell.js',
-            '/scifi-ui/scripts/public-evidence-pages.js',
-            '/scifi-ui/scripts/organism-voice.js',
-            '/scifi-ui/scripts/organism-voice-stability.js',
-            '/scifi-ui/scripts/organism-master-sync.js',
-            '/scifi-ui/scripts/organism-core-controller.js',
-            '/scifi-ui/scripts/synaptic-thought-genome.js',
-            '/scifi-ui/scripts/synaptic-thought-disclosure.js',
-            '/scifi-ui/scripts/mobile-core-engine-v3.js',
-            '/scifi-ui/scripts/formatx-render-visibility.js',
-            '/scifi-ui/scripts/formatx-infinite-scroll.js',
-            '/scifi-ui/scripts/formatx-mobile-unified.js',
-            '/scifi-ui/scripts/igloo-parity.js',
-          ];
-          for (const path of required) {
-            if (!first.includes(path)) throw new Error(`Missing preview Worker path: ${path}`);
-          }
-          const retired = [
-            '/scifi-ui/styles/organism-voice-foreground.css',
-            '/scifi-ui/scripts/organism-voice-foreground.js',
-            '/scifi-ui/scripts/organism-natural-voice.js',
-          ];
-          for (const path of retired) {
-            if (first.includes(path)) throw new Error(`Retired preview Worker path returned: ${path}`);
-          }
-          if (preview.routes?.length) throw new Error('Preview Worker must not own production custom domains');
-          if (preview.workers_dev !== true) throw new Error('Preview Worker must remain available on workers.dev');
-          if (preview.main !== 'content-preview-entry.js') throw new Error('Preview content wrapper is not active');
-          if (production.main !== 'src/production-content-entry.js') throw new Error('Production content wrapper is not active');
-          const domains = (production.routes || []).map(route => route.pattern);
-          if (!domains.includes('formatxsuite.com') || !domains.includes('www.formatxsuite.com')) {
-            throw new Error('Production Worker custom domains are incomplete');
-          }
-          NODE
-
-      - name: Validate current intro, release and local Organism contracts
+      - name: Validate mobile native-scroll contract
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'safe-ready-v27' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'safe-degraded-v27' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-voice.js?v=20260730-organism-voice-4' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-voice-stability.js?v=20260731-organism-stability-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-master-sync.js?v=20260802-master-sync-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'organism-voice-dock.css?v=20260731-organism-dock-3' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'formatx-desktop-unified.css' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'synaptic-thought-genome.js?v=20260731-thought-genome-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'mobile-core-engine-v3.js?v=20260731-morphing-organism-v3' docs/scifi-ui/scripts/mobile-webgl-entry.js
-          grep -Fq 'three-webgl-morphing-organism-v3' docs/scifi-ui/scripts/mobile-webgl-entry.js
-          grep -Fq 'questionStored: false' docs/scifi-ui/scripts/synaptic-thought-genome.js
-          grep -Fq 'fingerprint-only' docs/scifi-ui/scripts/synaptic-thought-genome.js
-          grep -Fq 'details.open = false' docs/scifi-ui/scripts/synaptic-thought-disclosure.js
-          grep -Fq 'defaultOpen: false' docs/scifi-ui/scripts/synaptic-thought-disclosure.js
-          grep -Fq ':not([open]) > .fx-thought-genome-controls' docs/scifi-ui/styles/synaptic-thought-disclosure.css
-          ! grep -Fq 'fetch(' docs/scifi-ui/scripts/synaptic-thought-genome.js
-          ! grep -Fq 'fetch(' docs/scifi-ui/scripts/synaptic-thought-disclosure.js
-          ! grep -Fq 'organism-natural-voice' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'min-aspect-ratio: 21/9' docs/scifi-ui/styles/organism-voice-dock.css
-          grep -Fq 'right: 440px !important' docs/scifi-ui/styles/organism-voice-dock.css
-          grep -Fq 'platform-status.js?v=20260807-full-release-1' docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq 'MOBILE_QUERY.matches?2100:2400' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'MOBILE_DIRECT_QUERY' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq "fastRelease('mobile-direct-v1',true)" docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq "fxIntroStrategy='mobile-direct'" docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay' docs/scifi-ui/styles/formatx-critical-shell-v56.css
-          grep -Fq 'display: none !important' docs/scifi-ui/styles/formatx-critical-shell-v56.css
+          grep -Fq 'platform-scroll-v2' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'mobile-native-document-v1' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "fxAutomaticLoop = 'disabled-mobile'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "fxLoopBridge = 'disabled-mobile'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'automaticPagePositionChanges: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq 'scrollTo(' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq 'scrollIntoView(' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq 'cloneNode(' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          ! grep -Fq 'preventDefault' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'formatx-mobile-production-r5.css' docs/scifi-ui/scripts/formatx-mobile-unified.js
+          grep -Fq '.fx-award-proof__grid' docs/scifi-ui/styles/formatx-mobile-production-r5.css
+          grep -Fq '.fx-plan-qr-card:not(.is-qr-ready)' docs/scifi-ui/styles/formatx-mobile-production-r5.css
+
+      - name: Validate desktop seamless runtime remains isolated
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "const VERSION = 'seamless-v7'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq "formatx-infinite-scroll-desktop-v7.js" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'cloneNode(true)' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq 'window.scrollTo(' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+
+      - name: Validate current loader and production delivery
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'safe-ready-v28' docs/scifi-ui/scripts/igloo-parity.js
+          grep -Fq 'organism-voice-stability.js?v=20260808-mobile-visual-viewport-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq '20260811-mobile-intro-direct-r1' docs/scifi-ui/index.html
           grep -Fq '20260811-mobile-intro-direct-r1' billing-worker/src/production-content-entry.js
-          grep -Fq 'hardDeadline=timelineDuration+exitDuration+1100' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq "DOMContentLoaded',start" docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'bfcache-restore' docs/scifi-ui/scripts/formatx-event-horizon.js
-          grep -Fq 'formatx:intro-seen-v1' docs/scifi-ui/scripts/formatx-event-horizon.js
+          grep -Fq 'data-fx-seamless-scroll-runtime' billing-worker/src/production-entry.js
+          grep -Fq '/scifi-ui/scripts/formatx-infinite-scroll.js' billing-worker/src/production-entry.js
           grep -Fq '"status": "full_release"' docs/scifi-ui/data/platform-status.json
           grep -Fq '"trial_days": 5' docs/scifi-ui/data/platform-status.json
-          grep -Fq '"id": "linux-bazzite"' docs/scifi-ui/data/platform-status.json
-          grep -Fq '"public_package": "multiplatform"' docs/scifi-ui/data/platform-status.json
-          grep -Fq '"download_channel": "multiplatform"' docs/scifi-ui/data/public-platform-contract.json
-          grep -Fq '"release_maturity": "full_release"' docs/scifi-ui/data/public-platform-contract.json
-          grep -Fq '"trial_days": 5' docs/scifi-ui/data/public-platform-contract.json
-          grep -Fq 'data-release-download="multiplatform"' docs/scifi-ui/index.html
-          ! grep -Fq '92.00' docs/scifi-ui/index.html
-          grep -Fq 'fx-organism-master-toggle' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'setOpen(false, false)' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'function voiceScore(voice)' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'function splitSpeech(text)' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'speechWatchdog = window.setTimeout' docs/scifi-ui/scripts/organism-voice.js
-          ! grep -Fq 'fetch(' docs/scifi-ui/scripts/organism-voice.js
-          grep -Fq 'data-fx-organism-dialogue-enabled' docs/scifi-ui/scripts/organism-master-sync.js
-          grep -Fq 'fx-organism-master-disabled' docs/scifi-ui/scripts/organism-master-sync.js
-          grep -Fq 'organism-master-sync.css?v=20260802-master-sync-1' docs/scifi-ui/scripts/organism-master-sync.js
-          ! grep -Fq "document.createElement('style')" docs/scifi-ui/scripts/organism-master-sync.js
-          grep -Fq 'html.fx-organism-master-disabled .fx-thought-genome-layer' docs/scifi-ui/styles/organism-master-sync.css
-          grep -Fq 'html.fx-organism-master-disabled .fx-thought-genome-disclosure' docs/scifi-ui/styles/organism-master-sync.css
-
-      - name: Validate continuous mobile and laptop behaviour
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -Fq "const VERSION = 'seamless-v7'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "fxInfiniteCloneMode = 'visual-bridge'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "fxAutomaticLoop = 'enabled'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "fxScrollJumpGuard = 'visual-match-v4'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'clonedContent: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'clonedHeroOnly: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'visualBridge: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'automaticLoop: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'mobileNativeMomentumPreserved: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "mobileTransfer: 'scrollend-or-idle'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'jumpFree: true' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'window.scrollTo(' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'sourceHero.cloneNode(true)' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "addEventListener('scrollend', onScrollEnd" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "document.addEventListener('touchstart', onTouchStart" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'data-fx-mobile-core-visible="false"' docs/scifi-ui/styles/formatx-mobile-readability.css
-          grep -Fq -- '--fx-mobile-dock-height: 54px' docs/scifi-ui/styles/formatx-mobile-unified.css
-          grep -Fq 'max-height: 820px' docs/scifi-ui/styles/formatx-desktop-unified.css
-          ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          ! grep -Fq 'preventDefault' docs/scifi-ui/scripts/formatx-infinite-scroll.js

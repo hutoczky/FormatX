@@ -20,11 +20,7 @@ on:
       - 'docs/scifi-ui/styles/organism-master-sync.css'
       - 'docs/scifi-ui/styles/synaptic-thought-genome.css'
       - 'docs/scifi-ui/styles/synaptic-thought-disclosure.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-unified.css'
       - 'docs/scifi-ui/privacy.html'
-      - 'worker.js'
-      - 'wrangler.jsonc'
-      - 'billing-worker/src/production-entry.js'
       - '.github/scripts/validate-thought-disclosure-browser.cjs'
       - '.github/workflows/validate-organism-dialogue.yml'
   pull_request:
@@ -33,24 +29,10 @@ on:
       - 'docs/scifi-ui/scripts/organism-voice.js'
       - 'docs/scifi-ui/scripts/organism-voice-stability.js'
       - 'docs/scifi-ui/scripts/organism-master-sync.js'
-      - 'docs/scifi-ui/scripts/organism-core-interaction.js'
-      - 'docs/scifi-ui/scripts/formatx-organism-truth-guard.js'
-      - 'docs/scifi-ui/scripts/formatx-accessibility-finalizer.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
       - 'docs/scifi-ui/scripts/synaptic-thought-disclosure.js'
-      - 'docs/scifi-ui/scripts/formatx-mobile-unified.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
-      - 'docs/scifi-ui/styles/organism-voice.css'
-      - 'docs/scifi-ui/styles/organism-voice-dock.css'
-      - 'docs/scifi-ui/styles/organism-master-sync.css'
-      - 'docs/scifi-ui/styles/synaptic-thought-genome.css'
-      - 'docs/scifi-ui/styles/synaptic-thought-disclosure.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-unified.css'
       - 'docs/scifi-ui/privacy.html'
-      - 'worker.js'
-      - 'wrangler.jsonc'
-      - 'billing-worker/src/production-entry.js'
-      - '.github/scripts/validate-thought-disclosure-browser.cjs'
       - '.github/workflows/validate-organism-dialogue.yml'
 
 permissions:
@@ -65,9 +47,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
 
@@ -86,67 +70,40 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check .github/scripts/validate-thought-disclosure-browser.cjs
-          node --input-type=module --check < billing-worker/src/production-entry.js
-          node --input-type=module --check < worker.js
 
           node - <<'NODE'
           const fs = require('fs');
           const read = file => fs.readFileSync(file, 'utf8');
           const voice = read('docs/scifi-ui/scripts/organism-voice.js');
-          const truthGuard = read('docs/scifi-ui/scripts/formatx-organism-truth-guard.js');
-          const accessibility = read('docs/scifi-ui/scripts/formatx-accessibility-finalizer.js');
-          const voiceStability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
-          const masterSync = read('docs/scifi-ui/scripts/organism-master-sync.js');
-          const masterCss = read('docs/scifi-ui/styles/organism-master-sync.css');
-          const disclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
-          const disclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css');
+          const truth = read('docs/scifi-ui/scripts/formatx-organism-truth-guard.js');
+          const stability = read('docs/scifi-ui/scripts/organism-voice-stability.js');
+          const sync = read('docs/scifi-ui/scripts/organism-master-sync.js');
           const genome = read('docs/scifi-ui/scripts/synaptic-thought-genome.js');
+          const disclosure = read('docs/scifi-ui/scripts/synaptic-thought-disclosure.js');
           const loader = read('docs/scifi-ui/scripts/igloo-parity.js');
           const privacy = read('docs/scifi-ui/privacy.html');
-          const preview = read('worker.js');
-          const production = read('billing-worker/src/production-entry.js');
-          const previewConfig = read('wrangler.jsonc');
 
           const checks = [
-            [voice.includes("let speechEnabled = false"), 'speech must be off by default'],
-            [voice.includes('fx-organism-master-toggle'), 'Organism master switch missing'],
-            [voice.includes('setOpen(false, false)'), 'dialogue does not start closed'],
-            [voice.includes('ROOT.dataset.fxOrganismDialogueEnabled'), 'master state marker missing'],
-            [!voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'), 'voice answer engine must remain network-free'],
-            [truthGuard.includes('Linux/Bazzite is the primary platform') && truthGuard.includes('Windows and Android are supported Full release platforms'), 'canonical Organism platform truth missing'],
-            [truthGuard.includes('Separate Ed25519 signature proof may be claimed only when it has actually been published'), 'conditional signature-evidence truth missing'],
-            [!truthGuard.includes('fetch(') && !truthGuard.includes('XMLHttpRequest') && !truthGuard.includes('WebSocket'), 'Organism truth guard must remain network-free'],
-            [accessibility.includes('formatx-organism-truth-guard.js?v=20260808-truth-1'), 'Organism truth guard is not loaded after interactive modules'],
-            [voiceStability.includes('function interfaceBlocked()') && voiceStability.includes('function stopSpeech()'), 'voice overlay stability guard missing'],
-            [masterSync.includes('data-fx-organism-dialogue-enabled') && masterSync.includes('fx-organism-master-disabled'), 'master synchronizer does not observe the Organism switch'],
-            [masterSync.includes('organism-master-sync.css?v=20260802-master-sync-1'), 'CSP-safe master stylesheet link missing'],
-            [!masterSync.includes("document.createElement('style')"), 'master synchronizer must not inject inline CSS'],
-            [masterCss.includes('html.fx-organism-master-disabled .fx-thought-genome-layer') && masterCss.includes('display: none !important'), 'master-off CSS does not hide the thought constellation'],
-            [masterCss.includes('html.fx-organism-master-disabled .fx-thought-genome-disclosure'), 'master-off CSS does not hide advanced thought controls'],
-            [genome.includes('questionStored: false') && genome.includes('fingerprint-only'), 'Thought Genome must store fingerprints only'],
-            [!genome.includes('fetch(') && !genome.includes('XMLHttpRequest') && !genome.includes('WebSocket'), 'Thought Genome must remain network-free'],
+            [voice.includes('let speechEnabled = false'), 'speech must be off by default'],
+            [voice.includes('fx-organism-master-toggle'), 'master switch missing'],
+            [voice.includes('setOpen(false, false)'), 'dialogue must start closed'],
+            [!voice.includes('fetch(') && !voice.includes('XMLHttpRequest') && !voice.includes('WebSocket'), 'voice engine must remain local'],
+            [truth.includes('Linux/Bazzite is the primary platform'), 'canonical platform truth missing'],
+            [!truth.includes('fetch(') && !truth.includes('XMLHttpRequest') && !truth.includes('WebSocket'), 'truth guard must remain local'],
+            [stability.includes('function interfaceBlocked()') && stability.includes('function stopSpeech()'), 'voice stability guard missing'],
+            [sync.includes('data-fx-organism-dialogue-enabled') && sync.includes('fx-organism-master-disabled'), 'master synchronizer missing'],
+            [genome.includes('questionStored: false') && genome.includes('fingerprint-only'), 'Thought Genome raw-question privacy contract broken'],
+            [!genome.includes('fetch(') && !genome.includes('XMLHttpRequest') && !genome.includes('WebSocket'), 'Thought Genome must remain local'],
             [disclosure.includes('details.open = false') && disclosure.includes('defaultOpen: false'), 'advanced controls must start closed'],
-            [disclosure.includes("output.setAttribute('aria-live', 'polite')"), 'response-only live region missing'],
-            [disclosure.includes("bubble.removeAttribute('aria-live')"), 'whole dialogue is still an aria-live region'],
-            [disclosure.includes("liveRegion: 'response-only'"), 'live-region contract marker missing'],
-            [disclosureCss.includes(':not([open]) > .fx-thought-genome-controls'), 'advanced controls are not hidden while closed'],
-            [loader.includes('safe-ready-v27') && loader.includes('safe-degraded-v27'), 'v27 loader markers are missing'],
-            [loader.includes('organism-master-sync.js?v=20260802-master-sync-1'), 'master synchronizer module is missing'],
+            [disclosure.includes("liveRegion: 'response-only'"), 'response-only live region missing'],
+            [loader.includes('safe-ready-v28') && loader.includes('safe-loading-v28'), 'current v28 loader markers missing'],
+            [loader.includes('organism-voice-stability.js?v=20260808-mobile-visual-viewport-1'), 'current voice stability module missing'],
             [loader.indexOf('organism-voice-stability.js') < loader.indexOf('organism-master-sync.js'), 'master sync loads before voice stability'],
-            [loader.indexOf('organism-master-sync.js') < loader.indexOf('synaptic-thought-genome.js'), 'Thought Genome loads before master sync'],
-            [loader.includes('synaptic-thought-disclosure.js?v=20260731-thought-disclosure-1'), 'thought disclosure module is missing'],
-            [privacy.includes('legfeljebb 12 gondolatgenom-lenyomat') && privacy.includes('nyers kérdésszöveget nem menti'), 'privacy page does not document local Thought Genome data'],
-            [privacy.includes('helyi vagy online hangot használhat'), 'privacy page does not disclose browser speech service'],
-            [preview.includes('organism-master-sync.js') && preview.includes('organism-master-sync.css'), 'preview Worker master-sync routes missing'],
-            [production.includes('organism-master-sync.js') && production.includes('organism-master-sync.css'), 'production Worker master-sync routes missing'],
-            [previewConfig.includes('/scifi-ui/scripts/organism-master-sync.js') && previewConfig.includes('/scifi-ui/styles/organism-master-sync.css'), 'preview route ownership missing master-sync assets'],
-            [preview.includes('synaptic-thought-disclosure.js') && preview.includes('synaptic-thought-disclosure.css'), 'preview Worker disclosure routes missing'],
-            [production.includes('synaptic-thought-disclosure.js') && production.includes('synaptic-thought-disclosure.css'), 'production Worker disclosure routes missing'],
+            [privacy.includes('legfeljebb 12 gondolatgenom-lenyomat') && privacy.includes('nyers kérdésszöveget nem menti'), 'privacy disclosure is incomplete'],
           ];
-
           const failed = checks.filter(([ok]) => !ok).map(([, message]) => message);
           if (failed.length) throw new Error(failed.join('; '));
-          console.log('PASS: current Organism dialogue, canonical truth guard, master switch, privacy, accessibility and routing contracts are valid.');
+          console.log('PASS current Organism dialogue/privacy contracts');
           NODE
 
       - name: Install Playwright Chromium

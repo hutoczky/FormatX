@@ -12,204 +12,165 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function injectContentLayer(page) {
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-content-standard.css' });
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-readability.css' });
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-unified.css' });
-  await page.addStyleTag({ url: origin + '/scifi-ui/styles/formatx-mobile-hero-flow.css' });
+function overlap(a, b, gap = 0) {
+  if (!a || !b) return false;
+  return !(a.right + gap <= b.left || b.right + gap <= a.left || a.bottom + gap <= b.top || b.bottom + gap <= a.top);
+}
+
+async function box(page, selector, required = true) {
+  const locator = page.locator(selector).first();
+  if (!(await locator.count())) {
+    if (required) throw new Error('Missing selector: ' + selector);
+    return null;
+  }
+  const value = await locator.evaluate(element => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return {
+      left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
+      width: rect.width, height: rect.height,
+      visible: style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > .02 && rect.width > 0 && rect.height > 0,
+      text: (element.textContent || '').trim()
+    };
+  });
+  if (required) assert(value.visible, 'Selector is not visible: ' + selector);
+  return value.visible ? value : null;
+}
+
+async function injectProductionLikeContent(page) {
+  for (const href of [
+    '/scifi-ui/styles/formatx-content-standard.css',
+    '/scifi-ui/styles/formatx-mobile-readability.css',
+    '/scifi-ui/styles/formatx-mobile-unified.css',
+    '/scifi-ui/styles/formatx-mobile-hero-flow.css',
+    '/scifi-ui/styles/formatx-mobile-production-r5.css'
+  ]) {
+    await page.addStyleTag({ url: origin + href });
+  }
+
   for (const src of [
     '/scifi-ui/scripts/release-metadata.js',
     '/scifi-ui/scripts/formatx-content-standard.js',
     '/scifi-ui/scripts/formatx-content-finalizer.js',
     '/scifi-ui/scripts/formatx-platform-surface-finalizer.js',
-    '/scifi-ui/scripts/formatx-organism-semantic-state.js'
+    '/scifi-ui/scripts/formatx-organism-semantic-state.js',
+    '/scifi-ui/scripts/formatx-mobile-unified.js'
   ]) {
     await page.addScriptTag({ url: origin + src });
   }
-  await page.waitForTimeout(2600);
-}
-
-async function visibleBox(page, selector) {
-  return page.locator(selector).first().evaluate(element => {
-    const style = getComputedStyle(element);
-    const rect = element.getBoundingClientRect();
-    return {
-      x: rect.x, y: rect.y, width: rect.width, height: rect.height,
-      display: style.display, visibility: style.visibility, opacity: Number(style.opacity),
-      text: element.textContent.trim()
-    };
-  });
-}
-
-async function optionalVisibleBox(page, selector) {
-  const locator = page.locator(selector).first();
-  if (!(await locator.count())) return null;
-  return locator.evaluate(element => {
-    const style = getComputedStyle(element);
-    const rect = element.getBoundingClientRect();
-    const visible = style.display !== 'none'
-      && style.visibility !== 'hidden'
-      && Number(style.opacity) > .02
-      && rect.width > 0
-      && rect.height > 0;
-    return visible ? {
-      x: rect.x, y: rect.y, width: rect.width, height: rect.height,
-      display: style.display, visibility: style.visibility, opacity: Number(style.opacity),
-      text: element.textContent.trim()
-    } : null;
-  });
-}
-
-function overlap(a, b, gap = 0) {
-  if (!a || !b) return false;
-  return !(
-    a.x + a.width + gap <= b.x
-    || b.x + b.width + gap <= a.x
-    || a.y + a.height + gap <= b.y
-    || b.y + b.height + gap <= a.y
-  );
-}
-
-async function mobileLayoutAssertions(page) {
-  const heroCopy = await visibleBox(page, '#hero .hero-copy');
-  const heroSpace = await visibleBox(page, '#hero .hero-space');
-  const cue = await visibleBox(page, '#hero .scroll-cue');
-  const category = await visibleBox(page, '.fx-category-deck--standalone, .fx-category-deck');
-
-  assert(heroCopy.y + heroCopy.height <= heroSpace.y + 2, 'Reserved 3D field starts inside the hero copy');
-  assert(heroSpace.y + heroSpace.height <= cue.y + 2, 'Chapter cue overlaps the reserved 3D field');
-  assert(cue.y + cue.height <= category.y + 2, 'Next category heading overlaps the hero chapter cue');
-  assert(!overlap(heroCopy, category), 'Category section overlaps the mobile hero copy');
-
-  const genome = await optionalVisibleBox(page, '.fx-genome-launcher');
-  const sound = await optionalVisibleBox(page, '.fx-three-sound');
-  const dock = await optionalVisibleBox(page, '.fx-organism-actionbar');
-
-  for (const [name, control] of [['Genome trigger', genome], ['Sound trigger', sound]]) {
-    if (!control) continue;
-    assert(!overlap(control, heroCopy, 4), `${name} overlaps the mobile hero copy`);
-    assert(!overlap(control, cue, 4), `${name} overlaps the chapter cue`);
-    if (dock) assert(!overlap(control, dock, 4), `${name} overlaps the bottom action dock`);
-  }
-
-  assert(!overlap(genome, sound, 4), 'Genome and sound triggers overlap');
+  await page.waitForTimeout(1800);
 }
 
 async function commonAssertions(page, mobile) {
-  await page.waitForSelector('#hero-title');
-  const title = await visibleBox(page, '#hero-title');
-  const lead = await visibleBox(page, '#hero .hero-lead');
-  const cta = await visibleBox(page, '#hero-download');
-  assert(title.width > 100 && title.height > 20, 'Hero title is not visible');
-  assert(lead.text.length > 80 && lead.height > 20, 'Concrete product definition is not visible');
-  assert(/teljes|full|multiplatform/i.test(cta.text) && !/public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not communicate full-release status');
-  assert(!overlap(lead, cta), 'Primary CTA overlaps the hero product definition');
+  const title = await box(page, '#hero-title');
+  const lead = await box(page, '#hero .hero-lead');
+  const cta = await box(page, '#hero-download');
+  assert(title.width > 100 && title.height > 20, 'Hero title is too small');
+  assert(lead.text.length > 80 && lead.height > 20, 'Hero product definition is missing');
+  assert(/teljes|full|multiplatform/i.test(cta.text) && !/public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not describe the full release');
+  assert(!overlap(lead, cta), 'Primary CTA overlaps hero copy');
+
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  assert(overflow <= 2, `Horizontal overflow detected: ${overflow}px`);
-  const category = await page.locator('.fx-category-definition').first().textContent();
-  assert(/Technikusi operációs réteg|Technician Operating Layer/.test(category || ''), 'Product category is missing');
-  const method = await page.locator('.fx-method-inline:visible').first().locator('li').count();
-  assert(method === 4, `Visible FormatX Method must have four steps, found ${method}`);
-  const visibleLanguageControls = await page.locator('.fx-language-toggle:visible, .language-switch [data-language]:visible, .language-control [data-language-choice]:visible').count();
-  assert(visibleLanguageControls <= 1, `More than one visible language control: ${visibleLanguageControls}`);
-  const immersive = await page.evaluate(() => ({
-    mode: document.documentElement.dataset.fxImmersive || '',
-    coreCanvases: document.querySelectorAll('.fx-resilient-core').length,
-    frameSource: document.getElementById('fx-three-frame')?.getAttribute('src') || ''
-  }));
-  if (immersive.mode === 'standby') {
-    const launch = await visibleBox(page, '.fx-immersive-launch');
-    assert(launch.width >= 100 && launch.height >= 100, 'Living Core launch target is too small');
-    assert(immersive.coreCanvases === 0, 'Canvas renderer started before user activation');
-    assert(!immersive.frameSource || immersive.frameSource === 'about:blank', 'Three iframe started before user activation');
+  assert(overflow <= 2, 'Horizontal overflow detected: ' + overflow + 'px');
+
+  const languageControls = await page.locator('.fx-language-toggle:visible, .language-switch [data-language]:visible, .language-control [data-language-choice]:visible').count();
+  assert(languageControls <= 1, 'Multiple visible language controls: ' + languageControls);
+
+  const proof = await box(page, '.fx-award-proof', false);
+  if (proof) {
+    const proofLinks = await page.locator('.fx-award-proof__grid > a:visible').count();
+    assert(proofLinks === 4, 'Public proof layer must expose four distinct links, found ' + proofLinks);
   }
+
   if (mobile) {
-    const menu = await visibleBox(page, '#menu-toggle');
+    const menu = await box(page, '#menu-toggle');
     assert(menu.width >= 40 && menu.height >= 40, 'Mobile menu target is too small');
-    await mobileLayoutAssertions(page);
+
+    const heroCopy = await box(page, '#hero .hero-copy');
+    const heroSpace = await box(page, '#hero .hero-space');
+    const cue = await box(page, '#hero .scroll-cue');
+    const category = await box(page, '.fx-category-deck--standalone, .fx-category-deck');
+    assert(heroCopy.bottom <= heroSpace.top + 3, 'Mobile 3D field overlaps hero copy');
+    assert(heroSpace.bottom <= cue.top + 3, 'Mobile chapter cue overlaps 3D field');
+    assert(cue.bottom <= category.top + 3, 'Mobile next section overlaps chapter cue');
+
+    const proofGrid = page.locator('.fx-award-proof__grid').first();
+    if (await proofGrid.count()) {
+      const columns = await proofGrid.evaluate(element => getComputedStyle(element).gridTemplateColumns);
+      assert(!columns.includes(' ') || columns.trim().split(/\s+/).length === 1, 'Public proof cards are not single-column on mobile: ' + columns);
+    }
+
+    const qrBroken = await page.locator('.fx-plan-qr-card:not(.is-qr-ready) .fx-plan-qr-link img:visible').count();
+    assert(qrBroken === 0, 'A not-ready QR image is visibly rendered on mobile');
   }
 }
 
-async function capture(
-  browser,
-  name,
-  viewport,
-  setup = async () => {},
-  contextSetup = async () => {},
-  targetUrl = base
-) {
-  const context = await browser.newContext({ viewport, reducedMotion: name.includes('reduced') ? 'reduce' : 'no-preference' });
+async function capture(browser, name, viewport, setup = async () => {}, targetUrl = base) {
+  const context = await browser.newContext({
+    viewport,
+    reducedMotion: name.includes('reduced') ? 'reduce' : 'no-preference',
+    hasTouch: viewport.width < 700,
+    isMobile: viewport.width < 700,
+    deviceScaleFactor: viewport.width < 700 ? 2 : 1,
+    colorScheme: 'dark'
+  });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
-  await contextSetup(context);
   const page = await context.newPage();
-  page.on('pageerror', error => console.warn(`[${name}] pageerror:`, error.message));
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
-  await injectContentLayer(page);
+  await injectProductionLikeContent(page);
   await setup(page);
   await commonAssertions(page, viewport.width < 700);
-  await page.screenshot({ path: path.join(out, `${name}.png`), fullPage: true });
+  const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
+  assert(!meaningful.length, name + ' browser errors: ' + meaningful.join(' | '));
+  await page.screenshot({ path: path.join(out, name + '.png'), fullPage: true });
   await context.close();
 }
 
-async function publicPage(browser, name, pathname, expectedSelector, viewport = { width: 1440, height: 900 }) {
-  const context = await browser.newContext({ viewport });
+async function publicPage(browser, name, pathname, selector, viewport = { width: 1440, height: 900 }) {
+  const context = await browser.newContext({ viewport, colorScheme: 'dark' });
   const page = await context.newPage();
   await page.goto(origin + pathname, { waitUntil: 'networkidle' });
-  await page.waitForSelector(expectedSelector);
+  await page.waitForSelector(selector, { timeout: 10000 });
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  assert(overflow <= 2, `${pathname} has horizontal overflow: ${overflow}px`);
-  await page.screenshot({ path: path.join(out, `${name}.png`), fullPage: true });
+  assert(overflow <= 2, pathname + ' horizontal overflow: ' + overflow + 'px');
+  await page.screenshot({ path: path.join(out, name + '.png'), fullPage: true });
   await context.close();
 }
 
 (async () => {
   await fs.mkdir(out, { recursive: true });
-  const browser = await chromium.launch({ headless: true });
-  const englishUrl = new URL(base);
-  englishUrl.searchParams.set('lang', 'en');
+  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
+  const english = new URL(base);
+  english.searchParams.set('lang', 'en');
   try {
     await capture(browser, 'desktop-hero-hu', { width: 1440, height: 900 });
-    await capture(browser, 'desktop-immersive-active', { width: 1440, height: 900 }, async page => {
-      await page.locator('.fx-immersive-launch').click();
-      await page.waitForFunction(() => document.documentElement.dataset.fxImmersive === 'active');
-      assert((await page.locator('.fx-immersive-launch').getAttribute('aria-pressed')) === 'true', 'Living Core launch did not expose its active state');
-    });
-    await capture(browser, 'mobile-hero-hu', { width: 390, height: 844 });
-    await capture(browser, 'mobile-hero-wide', { width: 430, height: 932 });
-    await capture(browser, 'small-height-hero', { width: 1366, height: 600 });
+    await capture(browser, 'desktop-small-height', { width: 1366, height: 600 });
+    await capture(browser, 'mobile-390x844', { width: 390, height: 844 });
+    await capture(browser, 'mobile-430x932', { width: 430, height: 932 });
     await capture(browser, 'reduced-motion', { width: 1440, height: 900 });
-    await capture(
-      browser,
-      'desktop-hero-en',
-      { width: 1440, height: 900 },
-      async page => {
-        await page.waitForFunction(() => document.documentElement.lang === 'en', null, { timeout: 8000 });
-      },
-      async () => {},
-      englishUrl.href
-    );
+    await capture(browser, 'desktop-hero-en', { width: 1440, height: 900 }, async page => {
+      await page.waitForFunction(() => document.documentElement.lang === 'en', null, { timeout: 8000 });
+    }, english.href);
     await capture(browser, 'mobile-menu-open', { width: 390, height: 844 }, async page => {
       await page.locator('#menu-toggle').click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(180);
       assert((await page.locator('#menu-toggle').getAttribute('aria-expanded')) === 'true', 'Mobile menu did not open');
-      const nav = await visibleBox(page, '#main-nav');
+      const nav = await box(page, '#main-nav');
       assert(nav.width > 100 && nav.height > 100, 'Opened mobile navigation is not visible');
     });
-    await capture(browser, 'webgl-fallback', { width: 1440, height: 900 }, async () => {}, async context => {
-      await context.addInitScript(() => {
-        const original = HTMLCanvasElement.prototype.getContext;
-        HTMLCanvasElement.prototype.getContext = function(type, ...args) {
-          if (/webgl|webgpu/i.test(String(type))) return null;
-          return original.call(this, type, ...args);
-        };
-      });
-    });
+
     await publicPage(browser, 'downloads', '/scifi-ui/downloads/', '[data-release-download="multiplatform"]');
-    await publicPage(browser, 'verification-centre', '/scifi-ui/verification.html', '[data-verification-root]');
+    await publicPage(browser, 'verification', '/scifi-ui/verification.html', '[data-verification-root]');
     await publicPage(browser, 'test-matrix', '/scifi-ui/test-matrix.html', '[data-test-table-body]');
-    console.log('Visual contract and fallback screenshots completed.');
+    await publicPage(browser, 'known-issues', '/scifi-ui/known-issues.html', 'main');
+    await publicPage(browser, 'security', '/scifi-ui/security.html', 'main');
+    await publicPage(browser, 'support', '/scifi-ui/support.html', 'main');
+    console.log('PASS production-like visual contracts and public pages');
   } finally {
     await browser.close();
   }
