@@ -246,6 +246,339 @@ html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
     font-size: 7px !important;
     letter-spacing: .08em !important;
   }
+
+  /* Production mobile shell r6 ------------------------------------------------
+     These rules are intentionally independent of JavaScript-ready markers.
+     They are loaded in the normal document head, so the first paint is already
+     structurally correct on a phone. The dedicated MAG renderer is untouched. */
+
+  html,
+  body {
+    max-width: 100% !important;
+    overflow-x: clip !important;
+    scroll-padding-top: 88px !important;
+  }
+
+  /* A canvas without its later APEX stylesheet has a 300x150 intrinsic layout
+     box. Keep all atmosphere layers out of document flow from first paint. */
+  #fx-apex-canvas,
+  .fx-atmosphere,
+  .fx-atmosphere > span {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+  }
+
+  #fx-apex-canvas {
+    display: block !important;
+  }
+
+  /* Header / brand. The real first-party image is authoritative. The older
+     critical-shell pseudo-image is disabled to avoid a missing-logo state. */
+  .topbar {
+    position: fixed !important;
+    z-index: 1600 !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    min-height: 82px !important;
+    margin: 0 !important;
+    padding: max(10px, env(safe-area-inset-top)) 16px 10px !important;
+    align-items: center !important;
+    transform: none !important;
+    border-bottom: 1px solid rgba(139, 219, 255, .16) !important;
+    background: linear-gradient(180deg, rgba(4, 14, 24, .98), rgba(3, 10, 18, .94)) !important;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, .28) !important;
+    backdrop-filter: blur(18px) saturate(130%) !important;
+  }
+
+  .topbar .brand {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: auto !important;
+    max-width: calc(100vw - 94px) !important;
+    text-decoration: none !important;
+  }
+
+  .topbar .brand::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  .topbar .brand > img {
+    display: block !important;
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    height: 42px !important;
+    max-width: 42px !important;
+    object-fit: contain !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: drop-shadow(0 0 16px rgba(78, 220, 255, .22)) !important;
+  }
+
+  .topbar .brand > span {
+    display: grid !important;
+    gap: 5px !important;
+    line-height: 1 !important;
+  }
+
+  .topbar .brand strong {
+    display: block !important;
+    color: #f5fbff !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: .17em !important;
+    white-space: nowrap !important;
+  }
+
+  .topbar .brand small {
+    display: block !important;
+    margin: 0 !important;
+    color: rgba(191, 211, 223, .76) !important;
+    font-size: 9px !important;
+    line-height: 1.1 !important;
+    letter-spacing: .22em !important;
+    white-space: nowrap !important;
+  }
+
+  .topbar .menu-toggle {
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    padding: 0 !important;
+    border-radius: 19px !important;
+  }
+
+  /* Keep anchored content clear of the fixed mobile header. */
+  main > section,
+  .fx-award-proof,
+  .fx-static-live-os,
+  #user-feedback {
+    scroll-margin-top: 92px !important;
+  }
+
+  /* Proof metrics: values and labels must never collapse into one text run. */
+  #hero .hero-facts {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 24px !important;
+    padding: 0 !important;
+  }
+
+  #hero .hero-facts > span,
+  #hero .hero-facts > .fx-proof-metric {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    align-items: baseline !important;
+    gap: 11px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 12px 14px !important;
+    border: 1px solid rgba(139, 219, 255, .14) !important;
+    border-radius: 14px !important;
+    background: rgba(7, 19, 31, .68) !important;
+  }
+
+  #hero .hero-facts b {
+    display: block !important;
+    min-width: 2ch !important;
+    color: #f4fbff !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  #hero .hero-facts small {
+    display: block !important;
+    min-width: 0 !important;
+    color: rgba(209, 229, 239, .76) !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.35 !important;
+    letter-spacing: .02em !important;
+    text-transform: none !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* PUBLIC PROOF LAYER: mobile card layout is a hard fallback, not a JS
+     enhancement. This prevents title/description concatenation on first paint. */
+  body.living-architecture .fx-award-proof {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: calc(100% - 24px) !important;
+    max-width: 760px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 24px auto 42px !important;
+    padding: 22px 18px !important;
+    overflow: visible !important;
+    contain: none !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+    border: 1px solid rgba(139, 219, 255, .18) !important;
+    border-radius: 22px !important;
+    background: linear-gradient(145deg, rgba(8, 22, 37, .94), rgba(3, 9, 17, .98)) !important;
+  }
+
+  body.living-architecture .fx-award-proof__head {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+    margin: 0 0 22px !important;
+  }
+
+  body.living-architecture .fx-award-proof__head > div {
+    display: grid !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+  }
+
+  body.living-architecture .fx-award-proof__head .section-index {
+    margin: 0 !important;
+    color: rgba(174, 219, 239, .7) !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    letter-spacing: .12em !important;
+  }
+
+  body.living-architecture .fx-award-proof__head h2 {
+    display: block !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    color: #f4fbff !important;
+    font-size: clamp(32px, 9.6vw, 44px) !important;
+    line-height: 1.06 !important;
+    letter-spacing: -.04em !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  body.living-architecture .fx-award-proof__head > p {
+    max-width: 100% !important;
+    margin: 0 !important;
+    color: rgba(220, 236, 244, .78) !important;
+    font-size: 15px !important;
+    line-height: 1.62 !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  body.living-architecture .fx-award-proof__grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 11px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body.living-architecture .fx-award-proof__grid > a {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 76px !important;
+    margin: 0 !important;
+    padding: 16px 42px 16px 16px !important;
+    color: #f3fbff !important;
+    border: 1px solid rgba(139, 219, 255, .15) !important;
+    border-radius: 16px !important;
+    background: rgba(7, 19, 31, .82) !important;
+    text-decoration: none !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  body.living-architecture .fx-award-proof__grid > a::after {
+    content: '↗' !important;
+    position: absolute !important;
+    top: 15px !important;
+    right: 15px !important;
+    color: rgba(126, 226, 255, .78) !important;
+  }
+
+  body.living-architecture .fx-award-proof__grid > a > strong,
+  body.living-architecture .fx-award-proof__grid > a > span {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  body.living-architecture .fx-award-proof__grid > a > strong {
+    padding: 0 !important;
+    color: #f4fbff !important;
+    font-size: 17px !important;
+    line-height: 1.25 !important;
+  }
+
+  body.living-architecture .fx-award-proof__grid > a > span {
+    color: rgba(207, 228, 238, .72) !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Release centre: preserve hierarchy and stop adjacent labels from touching. */
+  .fx-release-download-hub,
+  #resources .release-layout {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .fx-release-download-head,
+  .fx-release-download-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .fx-release-download-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 58px !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .fx-release-download-note,
+  #resources .release-layout :where(p, span, strong, small, a) {
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* Footer/navigation remains readable even if a later enhancement fails. */
+  .site-footer nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px 16px !important;
+  }
+
+  .site-footer nav a {
+    display: inline-flex !important;
+    width: auto !important;
+    margin: 0 !important;
+  }
 }
 
 @media (max-width: 430px) {
@@ -255,5 +588,20 @@ html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
 
   #hero .hero-title-sub {
     font-size: clamp(21px, 7.4vw, 34px) !important;
+  }
+
+  .topbar .brand > img {
+    flex-basis: 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+    max-width: 38px !important;
+  }
+
+  .topbar .brand strong {
+    font-size: 15px !important;
+  }
+
+  .topbar .brand small {
+    font-size: 8.5px !important;
   }
 }
