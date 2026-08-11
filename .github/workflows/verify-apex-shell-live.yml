@@ -1,0 +1,116 @@
+name: Verify FormatX apex shell live
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'billing-worker/src/production-content-entry.js'
+      - 'docs/scifi-ui/styles/formatx-critical-shell-v56.css'
+      - 'docs/scifi-ui/index.html'
+      - '.github/workflows/verify-apex-shell-live.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Wait for and verify canonical mobile shell assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          APEX='https://formatxsuite.com'
+          WWW='https://www.formatxsuite.com'
+          ok=false
+
+          for attempt in $(seq 1 36); do
+            echo "FormatX shell probe $attempt/36"
+            tmp="$(mktemp -d)"
+
+            home_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/home.headers" -o "$tmp/home.html" -w '%{http_code}' "$APEX/" || true)"
+            www_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/www.headers" -o /dev/null -w '%{http_code}' "$WWW/" || true)"
+            css_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/design.headers" -o "$tmp/design.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-design-system.css?v=shell-live" || true)"
+            mobile_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/mobile.headers" -o "$tmp/mobile.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-mobile-recovery.css?v=shell-live" || true)"
+            critical_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/critical.headers" -o "$tmp/critical.css" -w '%{http_code}' "$APEX/scifi-ui/styles/formatx-critical-shell-v56.css?v=shell-live" || true)"
+            js_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/core.headers" -o "$tmp/core.js" -w '%{http_code}' "$APEX/scifi-ui/scripts/formatx-core-real3d-v20.js?v=shell-live" || true)"
+            icon_code="$(curl -sS --max-time 25 --max-redirs 0 -D "$tmp/icon.headers" -o "$tmp/icon.bin" -w '%{http_code}' "$APEX/scifi-ui/assets/images/formatx-icon.png?v=shell-live" || true)"
+
+            if [[ "$home_code" == 200 && "$www_code" == 302 && "$css_code" == 200 && "$mobile_code" == 200 && "$critical_code" == 200 && "$js_code" == 200 && "$icon_code" == 200 ]]; then
+              if python3 - "$tmp" <<'PY'
+          import pathlib, re, sys
+          root = pathlib.Path(sys.argv[1])
+
+          def header(name):
+              return (root / name).read_text(errors='replace').lower()
+
+          home = (root / 'home.html').read_text(errors='replace')
+          design = (root / 'design.css').read_text(errors='replace')
+          mobile = (root / 'mobile.css').read_text(errors='replace')
+          critical = (root / 'critical.css').read_text(errors='replace')
+          core = (root / 'core.js').read_text(errors='replace')
+
+          assert 'content-type: text/html' in header('home.headers')
+          assert re.search(r'content-type:\s*text/css', header('design.headers'))
+          assert re.search(r'content-type:\s*text/css', header('mobile.headers'))
+          assert re.search(r'content-type:\s*text/css', header('critical.headers'))
+          assert ('content-type: application/javascript' in header('core.headers') or
+                  'content-type: text/javascript' in header('core.headers'))
+          assert 'content-type: image/png' in header('icon.headers')
+
+          assert 'FormatX Design System 2.0' in design
+          assert 'FormatX living-core visibility and responsive layout recovery' in mobile
+          assert 'FormatX critical shell v56' in critical
+          assert 'formatx-core' in core.lower() or 'fxcore' in core.lower()
+
+          assert '<base href="/">' in home
+          assert 'href="/scifi-ui/styles/formatx-design-system.css' in home
+          assert 'href="/scifi-ui/styles/formatx-critical-shell-v56.css' in home
+          assert 'src="/scifi-ui/scripts/formatx-core-real3d-v20.js' in home
+          assert 'src="/scifi-ui/assets/images/formatx-icon.png' in home
+          assert 'href="./styles/' not in home
+          assert 'src="./scripts/' not in home
+          assert 'src="./assets/' not in home
+          assert 'location:' not in header('home.headers')
+
+          www_headers = header('www.headers')
+          assert 'location: https://formatxsuite.com/?_fx_redirect_recovery=1' in www_headers
+          assert 'cache-control: no-store' in www_headers
+          print('FormatX apex shell and first-party assets are live and typed correctly.')
+          PY
+              then
+                ok=true
+                rm -rf "$tmp"
+                break
+              fi
+            fi
+
+            echo "home=$home_code www=$www_code design=$css_code mobile=$mobile_code critical=$critical_code js=$js_code icon=$icon_code"
+            rm -rf "$tmp"
+            sleep 10
+          done
+
+          [[ "$ok" == true ]]
+
+      - name: Publish live shell status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [[ "$JOB_STATUS" == success ]]; then
+            state=success
+            description='Apex HTML, critical CSS, mobile CSS, WebGL bootstrap and logo are live with correct MIME types'
+          else
+            state=failure
+            description='Apex shell or first-party critical asset verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX apex shell integrity' \
+            -f description="$description" \
+            -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
