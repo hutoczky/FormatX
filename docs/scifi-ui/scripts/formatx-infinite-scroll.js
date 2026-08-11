@@ -5,43 +5,18 @@
   const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260812-mobile-seamless-v1';
+  const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
 
   function ensureMobileLoopBridgeOverride() {
-    if (document.querySelector('style[data-fx-mobile-loop-bridge-override]')) return;
-    const style = document.createElement('style');
-    style.dataset.fxMobileLoopBridgeOverride = 'true';
-    style.textContent = `
-@media (max-width: 900px), (pointer: coarse) {
-  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: calc(100svh + max(320px, 24svh)) !important;
-    max-height: none !important;
-    margin: 0 !important;
-    padding-bottom: max(320px, 24svh) !important;
-    overflow: clip !important;
-    visibility: visible !important;
-    pointer-events: none !important;
-    contain: layout paint style !important;
-  }
-
-  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
-  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] [data-fx-loop-clone='true'] {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: 100svh !important;
-    max-height: none !important;
-    visibility: visible !important;
-    pointer-events: none !important;
-  }
-}
-`;
-    document.head.appendChild(style);
+    if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = MOBILE_LOOP_STYLE;
+    link.dataset.fxMobileLoopBridgeOverride = 'true';
+    document.head.appendChild(link);
   }
 
   function installSeamlessRuntime(platform) {
