@@ -1,6 +1,9 @@
 import productionWorker from './production-with-license.js';
 
+const CANONICAL_ORIGIN = 'https://formatxsuite.com';
+const LEGACY_WWW_ORIGIN = 'https://www.formatxsuite.com';
 const SCIFI_ENTRY_PATHS = new Set(['/', '/scifi-ui/', '/scifi-ui/index.html']);
+const HOMEPAGE_ALIASES = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const LANGUAGE_PAGE_PATHS = new Set([
   '/',
   '/scifi-ui/',
@@ -130,10 +133,77 @@ const REPLACEMENTS = [
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const response = await productionWorker.fetch(request, env, ctx);
-    return applyStartupSafety(request, url, response);
+    const isRead = request.method === 'GET' || request.method === 'HEAD';
+
+    // The public product homepage has one canonical address only:
+    // https://formatxsuite.com/
+    if (isRead && url.hostname === 'www.formatxsuite.com') {
+      const target = new URL(url.pathname, CANONICAL_ORIGIN);
+      target.search = url.search;
+      if (HOMEPAGE_ALIASES.has(url.pathname)) {
+        target.pathname = '/';
+        target.search = '';
+      }
+      return Response.redirect(target.toString(), 308);
+    }
+
+    if (isRead && url.hostname === 'formatxsuite.com' && HOMEPAGE_ALIASES.has(url.pathname) && url.pathname !== '/') {
+      return Response.redirect(`${CANONICAL_ORIGIN}/`, 308);
+    }
+
+    // production-with-license still recognises its historic www homepage route.
+    // For the canonical apex root we proxy only the internal request URL to that
+    // route, then rewrite canonical metadata back to the apex domain. The user
+    // never sees the historic hostname or /scifi-ui alias.
+    let upstreamRequest = request;
+    if (isRead && url.hostname === 'formatxsuite.com' && url.pathname === '/') {
+      const upstreamUrl = new URL(request.url);
+      upstreamUrl.protocol = 'https:';
+      upstreamUrl.host = 'www.formatxsuite.com';
+      upstreamUrl.pathname = '/';
+      upstreamUrl.search = '';
+      upstreamRequest = new Request(upstreamUrl, request);
+    }
+
+    let response = await productionWorker.fetch(upstreamRequest, env, ctx);
+    response = await applyStartupSafety(request, url, response);
+    return canonicaliseApexResponse(request, url, response);
   },
 };
+
+async function canonicaliseApexResponse(request, url, response) {
+  const isRead = request.method === 'GET' || request.method === 'HEAD';
+  if (!isRead || url.hostname !== 'formatxsuite.com' || url.pathname !== '/') return response;
+
+  const headers = new Headers(response.headers);
+  headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
+  headers.set('Cache-Control', 'no-store, max-age=0');
+  headers.set('Pragma', 'no-cache');
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  headers.delete('ETag');
+
+  if (request.method === 'HEAD') {
+    return new Response(null, { status: response.status, statusText: response.statusText, headers });
+  }
+
+  const contentType = headers.get('Content-Type') || '';
+  if (!contentType.includes('text/html')) {
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  }
+
+  let html = await response.text();
+  html = html
+    .replaceAll(LEGACY_WWW_ORIGIN, CANONICAL_ORIGIN)
+    .replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?\s*>/i, `<link rel="canonical" href="${CANONICAL_ORIGIN}/">`)
+    .replace(/(<meta\s+property="og:url"\s+content=")[^"]*("\s*\/?\s*>)/i, `$1${CANONICAL_ORIGIN}/$2`);
+
+  return new Response(html, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
 
 async function applyStartupSafety(request, url, response) {
   const isRead = request.method === 'GET' || request.method === 'HEAD';
