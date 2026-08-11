@@ -11,7 +11,10 @@ const worker = read('billing-worker/src/production-feedback-entry.js');
 const seo = read('docs/scifi-ui/scripts/formatx-seo.js');
 const css = read('docs/scifi-ui/styles/formatx-award-readiness.css');
 const sitemap = read('docs/sitemap.xml');
-const contract = read('docs/scifi-ui/data/public-platform-contract.json');
+const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
+const scrollPolicy = JSON.parse(read('docs/scifi-ui/data/scroll-policy.json'));
+const scrollBootstrap = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
+const desktopScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
 
 assert.match(worker, /data-fx-award-readiness-style/, 'server-rendered award-readiness stylesheet missing');
 assert.match(worker, /award-readiness-2/, 'award-readiness v2 stylesheet is not server-rendered');
@@ -70,10 +73,24 @@ assert.ok(
   'technical-report sitemap lastmod is older than the current evidence report'
 );
 
-const publicContract = JSON.parse(contract);
-assert.equal(publicContract.layout_contract?.infinite_scroll_controller, 'seamless-v7', 'scroll regression detected while applying award polish');
-assert.equal(publicContract.layout_contract?.automatic_scroll_loop, true, 'infinite scrolling must remain enabled');
-assert.equal(publicContract.layout_contract?.mobile_native_momentum_preserved, true, 'mobile native momentum contract regressed');
-assert.equal(publicContract.public_delivery?.first_party_only, true, 'first-party public delivery contract regressed');
+assert.equal(contract.schema_version, 4, 'public platform contract schema is stale');
+assert.equal(contract.public_delivery?.first_party_only, true, 'first-party public delivery contract regressed');
+assert.equal(contract.layout_contract?.scroll_policy_source, '/scifi-ui/data/scroll-policy.json', 'public contract does not delegate scroll truth to the canonical policy');
+assert.equal(contract.layout_contract?.mobile?.controller, 'mobile-native-document-v1', 'public contract mobile controller is stale');
+assert.equal(contract.layout_contract?.mobile?.automatic_scroll_loop, false, 'public contract incorrectly claims a mobile loop');
+assert.equal(contract.layout_contract?.desktop?.controller, 'seamless-v7', 'public contract desktop controller regressed');
+assert.equal(contract.layout_contract?.desktop?.automatic_scroll_loop, true, 'desktop seamless loop must remain enabled');
 
-console.log('FormatX award-readiness v2 SEO, hierarchy, proof, accessibility, first-party, sitemap freshness and scroll-preservation validation passed.');
+assert.equal(scrollPolicy.mobile?.controller, 'mobile-native-document-v1', 'canonical mobile native-document controller regressed');
+assert.equal(scrollPolicy.mobile?.automatic_loop, false, 'mobile automatic loop must remain disabled');
+assert.equal(scrollPolicy.mobile?.visual_bridge, false, 'mobile visual bridge must remain disabled');
+assert.equal(scrollPolicy.mobile?.automatic_page_position_changes, false, 'mobile automatic page positioning must remain disabled');
+assert.equal(scrollPolicy.desktop?.controller, 'seamless-v7', 'desktop seamless-v7 controller regressed');
+assert.equal(scrollPolicy.desktop?.automatic_loop, true, 'desktop seamless scrolling must remain enabled');
+assert.equal(scrollPolicy.policy?.input_capture, false, 'wheel/touch capture must remain disabled');
+assert.equal(scrollPolicy.policy?.section_scroll_snap, false, 'section scroll snap must remain disabled');
+assert.match(scrollBootstrap, /platform-scroll-v2/, 'platform scroll bootstrap missing');
+assert.doesNotMatch(scrollBootstrap, /scrollTo\s*\(|scrollIntoView\s*\(|cloneNode\s*\(/, 'mobile-capable bootstrap must not move or clone the page');
+assert.match(desktopScroll, /const VERSION = 'seamless-v7'/, 'desktop seamless runtime missing');
+
+console.log('FormatX award-readiness SEO, hierarchy, proof, accessibility, first-party delivery, sitemap freshness and platform-specific scroll validation passed.');
