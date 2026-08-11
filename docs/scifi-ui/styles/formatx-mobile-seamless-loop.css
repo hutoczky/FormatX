@@ -1,0 +1,28 @@
+/* FormatX mobile seamless loop bridge. CSP-safe external override. */
+@media (max-width: 900px), (pointer: coarse) {
+  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: calc(100svh + max(320px, 24svh)) !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding-bottom: max(320px, 24svh) !important;
+    overflow: clip !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    contain: layout paint style !important;
+  }
+
+  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
+  html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] [data-fx-loop-clone='true'] {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100svh !important;
+    max-height: none !important;
+    margin: 0 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+  }
+}
