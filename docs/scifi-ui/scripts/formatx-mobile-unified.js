@@ -5,19 +5,32 @@
   if (root.dataset.fxMobileUnified === 'ready-v1') return;
   root.dataset.fxMobileUnified = 'loading-v1';
 
-  function ensureStyle() {
-    if (document.querySelector('link[data-fx-mobile-unified-style]')) return;
+  function appendStyle(marker, href, readyKey) {
+    if (document.querySelector('link[' + marker + ']')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/formatx-mobile-unified.css?v=20260731-mobile-unified-2';
-    link.dataset.fxMobileUnifiedStyle = 'true';
+    link.href = href;
+    link.setAttribute(marker, 'true');
     link.addEventListener('load', () => {
-      root.dataset.fxMobileUnifiedStyle = 'ready-v2';
+      if (readyKey) root.dataset[readyKey] = 'ready';
     }, { once: true });
     link.addEventListener('error', () => {
-      root.dataset.fxMobileUnifiedStyle = 'failed';
+      if (readyKey) root.dataset[readyKey] = 'failed';
     }, { once: true });
     document.head.appendChild(link);
+  }
+
+  function ensureStyle() {
+    appendStyle(
+      'data-fx-mobile-unified-style',
+      './styles/formatx-mobile-unified.css?v=20260811-production-stability-r4',
+      'fxMobileUnifiedStyle'
+    );
+    appendStyle(
+      'data-fx-mobile-production-r5',
+      './styles/formatx-mobile-production-r5.css?v=20260811-production-r5',
+      'fxMobileProductionR5'
+    );
   }
 
   function closeDialogueForScroll() {
@@ -37,6 +50,8 @@
 
   ensureStyle();
   syncViewportHeight();
+
+  root.dataset.fxMobileScrollPolicy = 'native-document-v1';
 
   addEventListener('formatx:pagestartscroll', closeDialogueForScroll);
   addEventListener('formatx:loop', closeDialogueForScroll);
