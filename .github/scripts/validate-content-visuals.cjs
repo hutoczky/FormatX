@@ -64,7 +64,21 @@ async function injectProductionLikeContent(page) {
   }
 
   await page.waitForFunction(() => document.documentElement.dataset.fxSingleLanguageToggle === 'ready', null, { timeout: 8000 });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(900);
+}
+
+async function primeScrollReveals(page) {
+  // Full-page screenshots do not necessarily move the viewport through every
+  // IntersectionObserver target. Visit the important production sections first
+  // so screenshot geometry represents what a real user sees while scrolling.
+  for (const selector of ['#experience', '#capabilities', '#pricing', '#system']) {
+    const target = page.locator(selector).first();
+    if (!(await target.count())) continue;
+    await target.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(140);
+  }
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
+  await page.waitForTimeout(180);
 }
 
 async function commonAssertions(page, mobile) {
@@ -96,9 +110,12 @@ async function commonAssertions(page, mobile) {
     const heroSpace = await box(page, '#hero .hero-space');
     const cue = await box(page, '#hero .scroll-cue');
     const category = await box(page, '.fx-category-deck--standalone, .fx-category-deck');
-    assert(heroCopy.bottom <= heroSpace.top + 3, 'Mobile 3D field overlaps hero copy');
-    assert(heroSpace.bottom <= cue.top + 3, 'Mobile chapter cue overlaps 3D field');
-    assert(cue.bottom <= category.top + 3, 'Mobile next section overlaps chapter cue');
+
+    // Mobile is allowed to place the 3D stage before or after the text in the
+    // visual order. What is forbidden is physical overlap between the blocks.
+    assert(!overlap(heroCopy, heroSpace), 'Mobile 3D field overlaps hero copy');
+    assert(!overlap(heroSpace, cue), 'Mobile chapter cue overlaps 3D field');
+    assert(!overlap(cue, category), 'Mobile next section overlaps chapter cue');
 
     const proofGrid = page.locator('.fx-award-proof__grid').first();
     if (await proofGrid.count()) {
@@ -140,6 +157,7 @@ async function capture(browser, name, viewport, setup = async () => {}, targetUr
   try {
     await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
     await injectProductionLikeContent(page);
+    await primeScrollReveals(page);
     await setup(page);
     await commonAssertions(page, viewport.width < 700);
     const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
