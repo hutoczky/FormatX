@@ -3,15 +3,25 @@
 
   try {
     const url = new URL(window.location.href);
-    if (url.protocol !== 'https:' || url.hostname !== 'formatxsuite.com' || url.pathname !== '/') return;
+    if (url.protocol !== 'https:' || url.hostname !== 'formatxsuite.com') return;
 
-    // The recovery query exists only to bypass a historic cached 308 redirect.
-    // Once the real apex homepage has loaded, remove every query/hash component
-    // without another navigation so the visible address is exactly the root URL.
-    if (url.search || url.hash) {
-      history.replaceState(history.state, document.title, '/');
+    const RECOVERY_PARAM = '_fx_redirect_recovery';
+
+    if (url.pathname === '/') {
+      // The public homepage must visibly remain exactly https://formatxsuite.com/
+      // after a cache-recovery request. Do not navigate: a navigation could hit
+      // a stale historic permanent redirect again.
+      if (url.search || url.hash) {
+        history.replaceState(history.state, document.title, '/');
+      }
+      return;
     }
+
+    if (!url.searchParams.has(RECOVERY_PARAM)) return;
+    url.searchParams.delete(RECOVERY_PARAM);
+    const clean = `${url.pathname}${url.search}${url.hash}`;
+    history.replaceState(history.state, document.title, clean || '/');
   } catch (_) {
-    // A failure here must never block or replace the already rendered homepage.
+    // Recovery cleanup must never block or replace an already-rendered page.
   }
 }());
