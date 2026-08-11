@@ -1,7 +1,7 @@
 /* FormatX native continuous scroll policy.
-   Production revision: 2026-08-12 mobile-native-r4.
-   Mobile uses one browser-owned document: no section snap, no visual loop,
-   no programmatic momentum handoff and no late content-realisation pauses. */
+   Production revision: 2026-08-12 mobile-seamless-r5.
+   Mobile keeps browser-owned momentum and uses the seamless visual bridge only
+   after touch/momentum ownership has ended. */
 
 html,
 body,
@@ -64,16 +64,16 @@ body {
     touch-action: pan-y pinch-zoom !important;
   }
 
-  /* Hard native momentum controller. Higher specificity intentionally wins
-     over older mobile/sticky layers that are appended later by enhancement JS. */
-  html[data-fx-infinite-controller='mobile-native-document-v1'],
-  html[data-fx-infinite-controller='mobile-native-document-v1'] body {
+  /* Hard native momentum policy. It applies both while the shared seamless
+     runtime is loading and after seamless-v7 takes ownership. */
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']),
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) body {
     overflow-anchor: none !important;
     scroll-behavior: auto !important;
     scroll-snap-type: none !important;
   }
 
-  html[data-fx-infinite-controller='mobile-native-document-v1'] .topbar {
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) .topbar {
     position: fixed !important;
     top: 0 !important;
     right: 0 !important;
@@ -83,8 +83,8 @@ body {
 
   /* Old Organism chapter CSS reserves 104svh per scene and 62svh per trigger.
      That desktop presentation is intentionally removed on touch devices. */
-  html[data-fx-infinite-controller='mobile-native-document-v1'] main > .scene:not(#hero),
-  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-organism-chapter {
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) main > .scene:not(#hero),
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) .fx-organism-chapter {
     min-height: 0 !important;
     height: auto !important;
     scroll-snap-align: none !important;
@@ -95,7 +95,7 @@ body {
     overflow-anchor: none !important;
   }
 
-  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-organism-chapter-trigger {
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) .fx-organism-chapter-trigger {
     min-height: 0 !important;
     height: auto !important;
     transform: none !important;
@@ -107,7 +107,7 @@ body {
   /* content-visibility:auto with a 900px synthetic intrinsic height can cause
      a visible hitch when a phone crosses a chapter boundary. Realise the mobile
      document normally so momentum never waits for a section activation. */
-  html[data-fx-infinite-controller='mobile-native-document-v1'] :is(
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) :is(
     .flow,
     .cards,
     .pricing,
@@ -129,22 +129,19 @@ body {
   }
 
   /* The 3D stage remains visually untouched, but it never owns a touch gesture. */
-  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-three-stage-shell,
-  html[data-fx-infinite-controller='mobile-native-document-v1'] #fx-three-frame {
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) .fx-three-stage-shell,
+  html:is(.fx-mobile-seamless-loop,[data-fx-infinite-controller='mobile-native-document-v1'],[data-fx-infinite-controller='seamless-v7']) #fx-three-frame {
     pointer-events: none !important;
     touch-action: pan-y pinch-zoom !important;
   }
 
-  /* Every legacy bridge variant is desktop-only. Remove them even before the
-     mobile-unified runtime marker exists, and also if a late script recreates one. */
+  /* Only the finite emergency fallback hides bridge nodes. The normal mobile
+     path is seamless-v7 and must keep the bridge visible so the document has
+     runway beyond the footer instead of stopping at the physical page end. */
   html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-loop-bridge,
   html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-loop-hero-clone,
   html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-transcend-loop-bridge,
-  html[data-fx-infinite-controller='mobile-native-document-v1'] [data-fx-loop-clone='true'],
-  html[data-fx-mobile-unified='ready-v1'] .fx-loop-bridge,
-  html[data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
-  html[data-fx-mobile-unified='ready-v1'] .fx-transcend-loop-bridge,
-  html[data-fx-mobile-unified='ready-v1'] [data-fx-loop-clone='true'] {
+  html[data-fx-infinite-controller='mobile-native-document-v1'] [data-fx-loop-clone='true'] {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
