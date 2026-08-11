@@ -1,8 +1,7 @@
 /* FormatX native continuous scroll policy.
-   Production revision: 2026-08-11 mobile-native-r3.
-   This stylesheet is intentionally small and loaded before optional/immersive
-   modules. It prevents any legacy chapter or scene stylesheet from turning
-   ordinary wheel/touch scrolling into section snapping. */
+   Production revision: 2026-08-12 mobile-native-r4.
+   Mobile uses one browser-owned document: no section snap, no visual loop,
+   no programmatic momentum handoff and no late content-realisation pauses. */
 
 html,
 body,
@@ -46,21 +45,105 @@ body {
     -webkit-overflow-scrolling: touch !important;
   }
 
+  body.fx-organism-panel-open {
+    overflow-y: hidden !important;
+    overscroll-behavior-y: none !important;
+  }
+
   #main-content,
   #hero,
   main > .scene,
   .fx-organism-chapter,
-  .fx-organism-chapter-trigger {
+  .fx-organism-chapter-trigger,
+  .fx-category-deck,
+  .fx-static-live-os,
+  .fx-award-proof,
+  #user-feedback {
     scroll-snap-align: none !important;
     scroll-snap-stop: normal !important;
     touch-action: pan-y pinch-zoom !important;
   }
 
-  /* The real production mobile shell deliberately uses one native document.
-     Scope this to the mobile-unified runtime marker so the desktop/seamless
-     controller can still be regression-tested independently. */
+  /* Hard native momentum controller. Higher specificity intentionally wins
+     over older mobile/sticky layers that are appended later by enhancement JS. */
+  html[data-fx-infinite-controller='mobile-native-document-v2'],
+  html[data-fx-infinite-controller='mobile-native-document-v2'] body {
+    overflow-anchor: none !important;
+    scroll-behavior: auto !important;
+    scroll-snap-type: none !important;
+  }
+
+  html[data-fx-infinite-controller='mobile-native-document-v2'] .topbar {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+  }
+
+  /* Old Organism chapter CSS reserves 104svh per scene and 62svh per trigger.
+     That desktop presentation is intentionally removed on touch devices. */
+  html[data-fx-infinite-controller='mobile-native-document-v2'] main > .scene:not(#hero),
+  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-organism-chapter {
+    min-height: 0 !important;
+    height: auto !important;
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    contain: none !important;
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+    overflow-anchor: none !important;
+  }
+
+  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-organism-chapter-trigger {
+    min-height: 0 !important;
+    height: auto !important;
+    transform: none !important;
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
+    overflow-anchor: none !important;
+  }
+
+  /* content-visibility:auto with a 900px synthetic intrinsic height can cause
+     a visible hitch when a phone crosses a chapter boundary. Realise the mobile
+     document normally so momentum never waits for a section activation. */
+  html[data-fx-infinite-controller='mobile-native-document-v2'] :is(
+    .flow,
+    .cards,
+    .pricing,
+    .payment,
+    .payment-console,
+    #formatx-plan-qr-dock,
+    .system-grid,
+    .release-layout,
+    .fx-category-deck,
+    .fx-static-live-os,
+    .fx-award-proof,
+    .fx-origin-proof,
+    #user-feedback
+  ) {
+    content-visibility: visible !important;
+    contain: none !important;
+    contain-intrinsic-size: none !important;
+    overflow-anchor: none !important;
+  }
+
+  /* The 3D stage remains visually untouched, but it never owns a touch gesture. */
+  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-three-stage-shell,
+  html[data-fx-infinite-controller='mobile-native-document-v2'] #fx-three-frame {
+    pointer-events: none !important;
+    touch-action: pan-y pinch-zoom !important;
+  }
+
+  /* Every legacy bridge variant is desktop-only. Remove them even before the
+     mobile-unified runtime marker exists, and also if a late script recreates one. */
+  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-loop-bridge,
+  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-loop-hero-clone,
+  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-transcend-loop-bridge,
+  html[data-fx-infinite-controller='mobile-native-document-v2'] [data-fx-loop-clone='true'],
   html[data-fx-mobile-unified='ready-v1'] .fx-loop-bridge,
   html[data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
+  html[data-fx-mobile-unified='ready-v1'] .fx-transcend-loop-bridge,
   html[data-fx-mobile-unified='ready-v1'] [data-fx-loop-clone='true'] {
     display: none !important;
     width: 0 !important;
@@ -75,17 +158,31 @@ body {
     contain: strict !important;
   }
 
-  /* The mobile shell already fades the fixed action surfaces while scrolling.
-     Do not keep costly backdrop blur/compositing alive while they are hidden. */
+  /* While the finger/momentum is moving, fixed glass surfaces stop asking the
+     compositor for blur and large shadows. They return immediately at scroll end. */
+  html.fx-mobile-scroll-active .topbar,
   html.fx-page-scrolling .topbar,
+  html.fx-mobile-scroll-active .fx-organism-actionbar,
   html.fx-page-scrolling .fx-organism-actionbar,
+  html.fx-mobile-scroll-active .fx-organism-dialogue,
   html.fx-page-scrolling .fx-organism-dialogue {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
+    box-shadow: none !important;
   }
 
-  html.fx-page-scrolling .fx-organism-actionbar,
-  html.fx-page-scrolling .fx-organism-dialogue {
-    box-shadow: none !important;
+  html.fx-mobile-scroll-active .fx-organism-actionbar,
+  html.fx-mobile-scroll-active .fx-organism-dialogue {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html.fx-mobile-scroll-active :is(
+    .fx-organism-chapter-trigger,
+    .fx-award-proof,
+    .fx-static-live-os,
+    .fx-category-deck
+  ) {
+    transition: none !important;
   }
 }
