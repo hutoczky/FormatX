@@ -1,0 +1,212 @@
+/* FormatX mobile production stability r5.
+   Scope: mobile document composition only. The dedicated 3D MAG renderer is not modified. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  html[data-fx-mobile-unified='ready-v1'] {
+    scroll-padding-top: 92px !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] body {
+    overflow-x: clip !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .topbar {
+    z-index: 1200 !important;
+    top: 0 !important;
+    transform: none !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] main > section,
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof,
+  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os,
+  html[data-fx-mobile-unified='ready-v1'] #user-feedback {
+    scroll-margin-top: 92px !important;
+  }
+
+  /* Public proof layer: never render link title and description as one inline run. */
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: clamp(54px, 10vw, 82px) clamp(18px, 5vw, 28px) !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+    width: 100% !important;
+    margin: 0 0 24px !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head > div {
+    display: grid !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head .section-index {
+    margin: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    letter-spacing: .11em !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head h2 {
+    margin: 0 !important;
+    max-width: 100% !important;
+    font-size: clamp(34px, 10.5vw, 52px) !important;
+    line-height: 1.04 !important;
+    letter-spacing: -.045em !important;
+    overflow-wrap: break-word !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__head > p {
+    margin: 0 !important;
+    max-width: 100% !important;
+    font-size: 16px !important;
+    line-height: 1.65 !important;
+    overflow-wrap: break-word !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 18px !important;
+    border: 1px solid rgba(139, 219, 255, .16) !important;
+    border-radius: 18px !important;
+    background: linear-gradient(145deg, rgba(8, 22, 37, .94), rgba(3, 9, 17, .98)) !important;
+    color: #f2f9fc !important;
+    text-decoration: none !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a > strong,
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a > span {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a > strong {
+    font-size: 18px !important;
+    line-height: 1.25 !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-award-proof__grid > a > span {
+    color: rgba(218, 235, 244, .72) !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+  }
+
+  /* Static operating-layer block injected by the production Worker. */
+  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__head,
+  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__grid,
+  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__head > *,
+  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__grid > *,
+  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__actions > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__actions .button,
+  html[data-fx-mobile-unified='ready-v1'] .fx-static-live-os__actions a {
+    width: 100% !important;
+    min-height: 54px !important;
+    white-space: normal !important;
+  }
+
+  /* Category deck keeps the same visual language instead of falling back to raw text. */
+  html[data-fx-mobile-unified='ready-v1'] .fx-category-deck > header {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-category-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-category-grid > article {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 18px !important;
+  }
+
+  /* QR images have no visible broken-image/alt fallback while JS is resolving API/local source. */
+  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-card:not(.is-qr-ready) .fx-plan-qr-link img,
+  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-link img:not([src]),
+  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-link img[src=''] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-card.is-qr-ready .fx-plan-qr-link img {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .fx-plan-qr-card:not(.is-qr-ready) .fx-qr-placeholder {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Mobile has a finite native document; the visual bridge and its cycle cue are desktop-only. */
+  html[data-fx-mobile-unified='ready-v1'] .fx-loop-bridge,
+  html[data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
+  html[data-fx-mobile-unified='ready-v1'] [data-fx-loop-clone='true'],
+  html[data-fx-mobile-unified='ready-v1'] #resources .loop-note,
+  html[data-fx-mobile-unified='ready-v1'] #resources .particle-footer {
+    display: none !important;
+  }
+
+  /* Avoid raw inline concatenation in footer navigation. */
+  html[data-fx-mobile-unified='ready-v1'] .site-footer nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px 16px !important;
+  }
+
+  html[data-fx-mobile-unified='ready-v1'] .site-footer nav a {
+    display: inline-flex !important;
+    width: auto !important;
+    margin: 0 !important;
+  }
+}
