@@ -18,6 +18,8 @@ on:
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-thought-disclosure-browser.cjs'
+      - '.github/scripts/validate-real3d-core-v20.cjs'
+      - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/scripts/production-preflight.cjs'
       - '.github/workflows/sync-current-release.yml'
       - '.github/workflows/validate-website.yml'
@@ -37,6 +39,8 @@ on:
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-thought-disclosure-browser.cjs'
+      - '.github/scripts/validate-real3d-core-v20.cjs'
+      - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/scripts/production-preflight.cjs'
       - '.github/workflows/sync-current-release.yml'
       - '.github/workflows/validate-website.yml'
@@ -99,6 +103,8 @@ jobs:
           node --check .github/scripts/validate-content-visuals.cjs
           node --check .github/scripts/validate-public-pages-browser.cjs
           node --check .github/scripts/validate-thought-disclosure-browser.cjs
+          node --check .github/scripts/validate-real3d-core-v20.cjs
+          node --check .github/scripts/validate-real3d-mobile-startup-v22.cjs
           node --check .github/scripts/production-preflight.cjs
 
       - name: Validate billing Worker and production bundle
@@ -148,14 +154,15 @@ jobs:
           FORMATX_PUBLIC_ORIGIN: http://127.0.0.1:4178
         run: node .github/scripts/validate-public-pages-browser.cjs
 
-      - name: Validate existing Morphing Organism and thought contracts
+      - name: Validate current production MAG and thought contracts
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-browser/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
         shell: bash
         run: |
           set -euo pipefail
-          node .github/scripts/validate-three-site-v4.cjs
+          node .github/scripts/validate-real3d-core-v20.cjs
+          node .github/scripts/validate-real3d-mobile-startup-v22.cjs
           node .github/scripts/validate-thought-genome.cjs
           node .github/scripts/validate-thought-disclosure-browser.cjs
 
