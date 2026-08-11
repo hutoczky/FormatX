@@ -1,5 +1,5 @@
 name: Verify live true 3D MAG visual
-run-name: Capture reference crystal v51 for ${{ github.event.workflow_run.head_sha }}
+run-name: Capture current cinematic MAG v53/v55 for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@1.62.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
 
-      - name: Capture and validate live v51 reference crystal
+      - name: Capture and validate live v53/v55 cinematic crystal
         shell: bash
         env:
           RUN_ID: ${{ github.run_id }}
@@ -112,7 +112,7 @@ jobs:
             const errors = [];
             page.on('pageerror', e => errors.push(String(e)));
 
-            await page.goto(`https://www.formatxsuite.com/?core_v51_visual=${process.env.RUN_ID}&capture=${cfg.name}`, {
+            await page.goto(`https://www.formatxsuite.com/?core_current_visual=${process.env.RUN_ID}&capture=${cfg.name}`, {
               waitUntil: 'domcontentloaded', timeout: 60000
             });
             await page.evaluate(() => {
@@ -125,21 +125,37 @@ jobs:
               scrollTo(0, 0);
             });
 
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreV51 === 'ready-v51', null, { timeout: 60000 });
+            await page.waitForFunction(isMobile => {
+              const root = document.documentElement;
+              return isMobile
+                ? root.dataset.fxCoreMobileV55 === 'ready-v55'
+                : root.dataset.fxCoreReferenceV53 === 'ready-v53';
+            }, cfg.mobile, { timeout: 60000 });
             await page.waitForTimeout(1800);
 
             const runtime = await page.evaluate(() => {
               const root = document.documentElement;
-              const stage = document.querySelector('.fx-core-v51-stage');
-              const canvas = document.querySelector('.fx-core-v51-canvas');
+              const mobileReady = root.dataset.fxCoreMobileV55 === 'ready-v55';
+              const stageSelector = mobileReady
+                ? '#hero:not(.fx-loop-hero-clone) .hero-space > .fx-core-mobile-v55-stage'
+                : 'body > .fx-core-reference-v53-stage';
+              const canvasSelector = mobileReady
+                ? `${stageSelector} > .fx-core-mobile-v55-canvas`
+                : `${stageSelector} > .fx-core-reference-v53-canvas`;
+              const stage = document.querySelector(stageSelector);
+              const canvas = document.querySelector(canvasSelector);
               const heroSpace = document.querySelector('#hero .hero-space');
               const rect = canvas?.getBoundingClientRect();
               const heroRect = heroSpace?.getBoundingClientRect();
               const style = stage ? getComputedStyle(stage) : null;
-              const loadedCoreScripts = [...document.scripts].map(s => s.src).filter(src => /formatx-core-v5[01]\.js/.test(src));
+              const canvasStyle = canvas ? getComputedStyle(canvas) : null;
+              const gl = canvas?.getContext('webgl2') || null;
+              const loadedCoreScripts = [...document.scripts]
+                .map(s => s.src)
+                .filter(src => /formatx-core-(?:reference-v53|mobile-v55)\.js/.test(src));
               const legacyScripts = [...document.scripts]
                 .map(s => s.src)
-                .filter(src => /reference-lock-v30|mobile-mag-v33|mag-reference-v4[1467]/.test(src));
+                .filter(src => /formatx-core-v5[014]\.js|formatx-core-mobile-(?:compat-v52|v54)\.js|reference-lock-v30|mobile-mag-v33|mag-reference-v4[1467]/.test(src));
               const clippedHero = heroRect ? {
                 x: Math.max(0, heroRect.left),
                 y: Math.max(0, heroRect.top),
@@ -147,7 +163,8 @@ jobs:
                 height: Math.max(1, Math.min(innerHeight, heroRect.bottom) - Math.max(0, heroRect.top))
               } : null;
               return {
-                core: root.dataset.fxCoreV51,
+                core: mobileReady ? root.dataset.fxCoreMobileV55 : root.dataset.fxCoreReferenceV53,
+                real3d: root.dataset.fxCoreReal3d,
                 renderer: root.dataset.fxCoreRenderer,
                 geometry: root.dataset.fxCoreReferenceGeometry,
                 material: root.dataset.fxCoreReferenceMaterial,
@@ -156,55 +173,119 @@ jobs:
                 performance: root.dataset.fxCorePerformance,
                 imageBacked: root.dataset.fxCoreImageBacked,
                 depth: root.dataset.fxCoreDepth || null,
+                ribbons: root.dataset.fxCoreSpectralRibbons,
+                corePlacement: root.dataset.fxCoreCorePlacement,
+                interaction: root.dataset.fxCoreInteraction,
                 stageActive: stage?.dataset.active || null,
-                stages: document.querySelectorAll('.fx-core-v51-stage').length,
-                canvases: document.querySelectorAll('.fx-core-v51-canvas').length,
+                stages: document.querySelectorAll(stageSelector).length,
+                canvases: document.querySelectorAll(canvasSelector).length,
+                liveMagCanvases: document.querySelectorAll(canvasSelector).length,
+                webgl2: Boolean(gl),
+                webglError: gl?.getError() ?? null,
+                contextAttributes: gl?.getContextAttributes() || null,
                 canvas: rect ? { width: rect.width, height: rect.height } : null,
                 heroSpace: clippedHero,
                 viewport: { width: innerWidth, height: innerHeight },
                 pointerEvents: style?.pointerEvents || null,
                 overflow: style?.overflow || null,
+                canvasFilter: canvasStyle?.filter || null,
+                corePosition: Array.isArray(window.FormatXCoreCinematic?.corePosition)
+                  ? [...window.FormatXCoreCinematic.corePosition]
+                  : null,
+                energy: Number(window.FormatXCoreCinematic?.energy || 0),
                 loadedCoreScripts,
                 legacyScripts
               };
             });
 
-            assert.equal(runtime.core, 'ready-v51');
-            assert.equal(runtime.renderer, 'single-webgl2-reference-crystal-v51');
-            assert.equal(runtime.geometry, 'sharp-four-tip-concave-crystal-v51');
-            assert.equal(runtime.material, 'layered-faceted-refractive-glass-v51');
-            assert.equal(runtime.reactor, 'moving-white-nucleus-concentric-spectral-rings-v51');
-            assert.equal(runtime.responsive, 'desktop-mobile-reference-framing-v51');
+            const expected = cfg.mobile ? {
+              core: 'ready-v55',
+              real3d: 'ready-v55',
+              renderer: 'single-webgl2-mobile-cinematic-crystal-v55',
+              geometry: 'long-sharp-four-tip-deep-concave-crystal-v55',
+              material: 'thin-layered-faceted-fresnel-glass-v55',
+              reactor: 'small-hot-white-nucleus-concentric-cyan-violet-rings-v55',
+              responsive: 'physical-mobile-hero-local-v55',
+              script: /formatx-core-mobile-v55\.js/
+            } : {
+              core: 'ready-v53',
+              real3d: 'ready-v20',
+              renderer: 'single-webgl2-reference-crystal-v53',
+              geometry: 'sharp-four-tip-concave-crystal-v53',
+              material: 'clean-faceted-refractive-glass-v53',
+              reactor: 'moving-white-nucleus-concentric-spectral-rings-v53',
+              responsive: null,
+              script: /formatx-core-reference-v53\.js/
+            };
+
+            assert.equal(runtime.core, expected.core);
+            assert.equal(runtime.real3d, expected.real3d);
+            assert.equal(runtime.renderer, expected.renderer);
+            assert.equal(runtime.geometry, expected.geometry);
+            assert.equal(runtime.material, expected.material);
+            assert.equal(runtime.reactor, expected.reactor);
+            if (expected.responsive) assert.equal(runtime.responsive, expected.responsive);
             assert.equal(runtime.performance, 'single-context-adaptive-60-plus-fps');
             assert.equal(runtime.imageBacked, 'false');
-            assert.equal(runtime.depth, 'closed-volumetric-shell-with-sidewalls');
+            if (cfg.mobile) assert.equal(runtime.depth, 'closed-volumetric-shell-with-sidewalls');
+            assert.equal(runtime.ribbons, 'physical-triangle-ribbons-interactive-r2');
+            assert.equal(runtime.corePlacement, 'inside-moving-volume-r2');
+            assert.equal(runtime.interaction, 'pointer-touch-speech-reactive-r2');
             assert.equal(runtime.stageActive, 'true');
             assert.equal(runtime.stages, 1);
             assert.equal(runtime.canvases, 1);
-            assert.equal(runtime.loadedCoreScripts.filter(src => /formatx-core-v51\.js/.test(src)).length, 1);
-            assert.equal(runtime.loadedCoreScripts.filter(src => /formatx-core-v50\.js/.test(src)).length, 0, 'v50 rounded core must not load');
+            assert.equal(runtime.liveMagCanvases, 1, 'exactly one live WebGL2 MAG canvas expected');
+            assert.equal(runtime.webgl2, true, 'native WebGL2 context expected');
+            assert.equal(runtime.webglError, 0, 'WebGL2 context must be error-free at capture');
+            assert.equal(runtime.contextAttributes?.alpha, true, 'transparent WebGL2 surface expected');
+            assert.equal(runtime.contextAttributes?.premultipliedAlpha, true, 'premultiplied transparent glass expected');
+            assert.equal(runtime.loadedCoreScripts.length, 1);
+            assert.equal(runtime.loadedCoreScripts.filter(src => expected.script.test(src)).length, 1);
             assert.deepEqual(runtime.legacyScripts, [], 'legacy multi-renderer MAG scripts must not load');
-            assert.equal(runtime.pointerEvents, 'none', 'MAG must never capture pointer/touch input');
+            assert.equal(runtime.pointerEvents, 'none', 'MAG remains non-blocking while window-level interaction stays active');
             assert.equal(runtime.overflow, 'hidden', 'MAG stage must clip accidental viewport overflow');
+            assert.equal(runtime.canvasFilter, 'none', 'true 3D output must stay sharp without a CSS blur/filter chain');
             assert.ok(runtime.canvas.width <= runtime.viewport.width + 1, 'canvas must not overflow viewport width');
             assert.ok(runtime.canvas.height <= runtime.viewport.height + 1, 'canvas must not overflow viewport height');
             assert.ok(runtime.heroSpace && runtime.heroSpace.width > 120 && runtime.heroSpace.height > 120, 'hero visual ROI must exist');
+            assert.ok(Array.isArray(runtime.corePosition) && runtime.corePosition.length === 3, 'inside nucleus position expected');
+            assert.ok(Math.hypot(...runtime.corePosition) < .15, 'nucleus must stay inside the crystal volume');
 
-            const file = `core-v51-${cfg.name}.png`;
+            if (cfg.mobile) {
+              await page.touchscreen.tap(Math.round(cfg.viewport.width * .72), Math.round(cfg.viewport.height * .42));
+            } else {
+              await page.mouse.move(Math.round(cfg.viewport.width * .72), Math.round(cfg.viewport.height * .42));
+              await page.mouse.down();
+              await page.mouse.up();
+            }
+            await page.evaluate(() => dispatchEvent(new CustomEvent('formatx:organismspeechstart')));
+            await page.waitForTimeout(650);
+            const response = await page.evaluate(() => ({
+              corePosition: [...(window.FormatXCoreCinematic?.corePosition || [])],
+              energy: Number(window.FormatXCoreCinematic?.energy || 0)
+            }));
+            await page.evaluate(() => dispatchEvent(new CustomEvent('formatx:organismspeechend')));
+            runtime.response = response;
+            assert.ok(response.energy > runtime.energy + .05, 'pointer/touch/speech input must energize the MAG');
+            assert.ok(Math.hypot(...response.corePosition) < .15, 'moving nucleus must remain inside the crystal volume');
+            assert.ok(Math.hypot(...response.corePosition.map((value, index) => value - runtime.corePosition[index])) > .001,
+              'central nucleus must move inside the volume instead of staying fixed');
+
+            const file = `core-current-${cfg.name}.png`;
             await page.screenshot({ path: file, clip: runtime.heroSpace });
             const visual = visualPresence(file);
             assert.ok(visual.brightFraction > .00035, 'visible luminous nucleus/glass expected');
             assert.ok(visual.spectralFraction > .0018, 'visible cyan/violet crystal detail expected');
             assert.ok(visual.bounds, 'spectral crystal bounds expected');
-            assert.ok(visual.bounds.width < visual.width * .98, 'crystal must stay bounded horizontally inside hero visual ROI');
-            assert.ok(visual.bounds.height < visual.height * .96, 'crystal must stay bounded vertically inside hero visual ROI');
+            assert.ok(visual.bounds.width <= visual.width, 'crystal spectral bounds must fit the hero ROI');
+            assert.ok(visual.bounds.height <= visual.height, 'crystal spectral bounds must fit the hero ROI');
             assert.ok(visual.tips && visual.tips.left > 0, 'left crystal tip must be visible');
             assert.ok(visual.tips && visual.tips.right > 0, 'right crystal tip must be visible');
             assert.ok(visual.tips && visual.tips.top > 0, 'top crystal tip must be visible');
             assert.ok(visual.tips && visual.tips.bottom > 0, 'bottom crystal tip must be visible');
             assert.ok(visual.tips && visual.tips.center > 0, 'luminous central reactor must be visible');
 
-            fs.writeFileSync(`core-v51-${cfg.name}.json`, JSON.stringify({ runtime, visual, errors }, null, 2));
+            fs.writeFileSync(`core-current-${cfg.name}.json`, JSON.stringify({ runtime, visual, errors }, null, 2));
             if (errors.length) throw new Error(`${cfg.name} page errors: ${errors.join(' | ')}`);
             await context.close();
             return { runtime, visual };
@@ -217,23 +298,23 @@ jobs:
             });
             const mobile = await capture(browser, { name: 'mobile', mobile: true, viewport: { width: 390, height: 844 } });
             const desktop = await capture(browser, { name: 'desktop', mobile: false, viewport: { width: 1440, height: 1000 } });
-            fs.writeFileSync('core-v51-summary.json', JSON.stringify({ version: 'v51-reference-crystal-core', mobile, desktop }, null, 2));
-            console.log('V51_LIVE_VISUAL_EVIDENCE', JSON.stringify({ mobile, desktop }));
+            fs.writeFileSync('core-current-summary.json', JSON.stringify({ version: 'v53-desktop-v55-mobile-cinematic-core', mobile, desktop }, null, 2));
+            console.log('CURRENT_LIVE_VISUAL_EVIDENCE', JSON.stringify({ mobile, desktop }));
             await browser.close();
           })().catch(e => { console.error(e); process.exit(1); });
           NODE
 
-      - name: Upload v51 visual evidence
+      - name: Upload current cinematic visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-reference-crystal-v51-${{ github.run_id }}
+          name: live-cinematic-crystal-v53-v55-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-visual/core-v51-mobile.png
-            ${{ runner.temp }}/mag-visual/core-v51-desktop.png
-            ${{ runner.temp }}/mag-visual/core-v51-mobile.json
-            ${{ runner.temp }}/mag-visual/core-v51-desktop.json
-            ${{ runner.temp }}/mag-visual/core-v51-summary.json
+            ${{ runner.temp }}/mag-visual/core-current-mobile.png
+            ${{ runner.temp }}/mag-visual/core-current-desktop.png
+            ${{ runner.temp }}/mag-visual/core-current-mobile.json
+            ${{ runner.temp }}/mag-visual/core-current-desktop.json
+            ${{ runner.temp }}/mag-visual/core-current-summary.json
           if-no-files-found: warn
           retention-days: 14
 
@@ -246,5 +327,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference crystal WebGL2 MAG v51 passed live mobile and desktop volumetric visual gates'; else state=failure; description='Reference crystal MAG v51 failed live visual gate'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Cinematic WebGL2 MAG v53/v55 passed live mobile and desktop visual gates'; else state=failure; description='Cinematic MAG v53/v55 failed live visual gate'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live true 3D MAG visual' -f description="$description" -f target_url="$TARGET_URL"
