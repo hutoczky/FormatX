@@ -3,10 +3,10 @@
 
   const root = document.documentElement;
   const BOOTSTRAP = 'reference-crystal-core-v53';
-  const SCRIPT = './scripts/formatx-core-reference-v53.js?v=20260811-reference-v53-r1';
-  const STYLE = './styles/formatx-core-reference-v53.css?v=20260811-reference-v53-r1';
-  const MOBILE_SCRIPT = './scripts/formatx-core-mobile-v55.js?v=20260811-cinematic-mobile-v55-r1';
-  const MOBILE_STYLE = './styles/formatx-core-mobile-v55.css?v=20260811-cinematic-mobile-v55-r1';
+  const SCRIPT = './scripts/formatx-core-reference-v53.js?v=20260811-reference-v53-r3';
+  const STYLE = './styles/formatx-core-reference-v53.css?v=20260811-reference-v53-r3';
+  const MOBILE_SCRIPT = './scripts/formatx-core-mobile-v55.js?v=20260811-cinematic-mobile-v55-r3';
+  const MOBILE_STYLE = './styles/formatx-core-mobile-v55.css?v=20260811-cinematic-mobile-v55-r3';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 
   /*
@@ -16,7 +16,7 @@
     a smaller hot white nucleus and denser cyan/violet reactor rings.
     The two renderers never boot together, so a phone gets exactly one WebGL2
     context and one MAG canvas. No raster/image or CSS fake silhouette is used.
-    Production mobile visual revision: cinematic-reference-v55-r1.
+    Production visual revision: interactive-cinematic-glass-r3.
   */
 
   if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;

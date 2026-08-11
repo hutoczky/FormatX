@@ -70,14 +70,18 @@
     return isOfficialGitHubReleaseUrl(url) || (isSameOrigin(url) && url.pathname.startsWith('/scifi-ui/'));
   }
   function isOfficialMetadata(release) {
-    const acceptedSource = release?.source === 'github_published_release' || release?.source === 'formatx_release_service';
+    const githubSource = release?.source === 'github_published_release';
+    const serviceSource = release?.source === 'formatx_release_service';
     const repository = safeText(release?.repository);
     const repositoryMatches = !repository || repository === OFFICIAL_REPOSITORY;
     const version = safeText(release?.version);
     const releaseUrl = parseUrl(release?.release_url);
     const versionLooksOfficial = /^v\d+$/i.test(version);
-    const releaseTagMatches = !versionLooksOfficial || releaseUrl?.pathname.endsWith('/tag/' + version);
-    return Boolean(acceptedSource && repositoryMatches && release?.prerelease !== true && versionLooksOfficial && isOfficialGitHubReleaseUrl(releaseUrl) && releaseTagMatches);
+    const releaseTagMatches = releaseUrl?.pathname.endsWith('/tag/' + version);
+    const trustedReleasePage = githubSource
+      ? isOfficialGitHubReleaseUrl(releaseUrl) && releaseTagMatches
+      : serviceSource && isSameOrigin(releaseUrl) && releaseUrl?.pathname.startsWith('/scifi-ui/');
+    return Boolean(repositoryMatches && release?.prerelease !== true && versionLooksOfficial && trustedReleasePage);
   }
   function releaseDate(value = state.release?.published_at) {
     const raw = safeText(value);
@@ -151,7 +155,7 @@
       else link.removeAttribute('aria-describedby');
       link.title = copy().package;
     } else {
-      link.href = '/scifi-ui/downloads/';
+      link.href = '/download/multiplatform';
       link.removeAttribute('target');
       link.removeAttribute('rel');
       link.setAttribute('aria-describedby', ensureFallbackNotice().id);

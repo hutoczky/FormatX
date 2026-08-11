@@ -12,10 +12,10 @@ const mobileStyle = read('docs/scifi-ui/styles/formatx-core-mobile-v55.css');
 const homepage = read('docs/scifi-ui/index.html');
 
 assert.match(bootstrap, /reference-crystal-core-v53/);
-assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r1/);
-assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r1/);
-assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260811-cinematic-mobile-v55-r1/);
-assert.match(bootstrap, /formatx-core-mobile-v55\.css\?v=20260811-cinematic-mobile-v55-r1/);
+assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r3/);
+assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r3/);
+assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260811-cinematic-mobile-v55-r3/);
+assert.match(bootstrap, /formatx-core-mobile-v55\.css\?v=20260811-cinematic-mobile-v55-r3/);
 assert.match(bootstrap, /single-webgl2-reference-crystal-v53/);
 assert.match(bootstrap, /single-webgl2-mobile-cinematic-crystal-v55/);
 assert.match(bootstrap, /if \(mobile\) \{[\s\S]*addMobileStyle\(\);[\s\S]*addMobileScript\(\);[\s\S]*\} else \{[\s\S]*addStyle\(\);[\s\S]*addScript\(\);/);
@@ -34,6 +34,8 @@ assert.match(mobileRuntime, /long-sharp-four-tip-deep-concave-crystal-v55/);
 assert.match(mobileRuntime, /thin-layered-faceted-fresnel-glass-v55/);
 assert.match(mobileRuntime, /small-hot-white-nucleus-concentric-cyan-violet-rings-v55/);
 assert.match(mobileRuntime, /single-context-adaptive-60-plus-fps/);
+assert.match(mobileRuntime, /physical-triangle-ribbons-interactive-r2/);
+assert.match(mobileRuntime, /inside-moving-volume-r2/);
 assert.match(mobileRuntime, /function starRadius\(/, 'sharp reference silhouette generator missing');
 assert.doesNotMatch(mobileRuntime, /new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(/i, 'mobile MAG must not be raster-backed');
 
@@ -41,7 +43,7 @@ assert.match(mobileStyle, /#hero \.hero-space > \.fx-core-mobile-v55-stage/);
 assert.match(mobileStyle, /position:\s*absolute\s*!important/);
 assert.match(mobileStyle, /filter:\s*none\s*!important/);
 assert.match(mobileStyle, /contain:\s*none\s*!important/);
-assert.match(mobileStyle, /height:\s*clamp\(445px,56svh,570px\)/);
+assert.match(mobileStyle, /height:\s*clamp\(590px,68svh,760px\)/);
 assert.doesNotMatch(mobileStyle, /clip-path:\s*polygon/i);
 
 assert.ok(homepage.includes('formatx-core-real3d-v20.js'));

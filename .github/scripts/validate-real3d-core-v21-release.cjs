@@ -10,8 +10,8 @@ const src = read('docs/scifi-ui/scripts/formatx-core-reference-v53.js');
 const css = read('docs/scifi-ui/styles/formatx-core-reference-v53.css');
 
 assert.match(bootstrap, /reference-crystal-core-v53/);
-assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r1/);
-assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r1/);
+assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r3/);
+assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r3/);
 assert.equal((src.match(/getContext\('webgl2'/g) || []).length, 1);
 for (const token of [
   'gl.enable(gl.DEPTH_TEST)',
@@ -25,6 +25,8 @@ for (const token of [
   'clean-faceted-refractive-glass-v53',
   'moving-white-nucleus-concentric-spectral-rings-v53',
   'single-context-adaptive-60-plus-fps',
+  'physical-triangle-ribbons-interactive-r2',
+  'inside-moving-volume-r2',
   'webglcontextlost'
 ]) assert.ok(src.includes(token), `missing release contract: ${token}`);
 

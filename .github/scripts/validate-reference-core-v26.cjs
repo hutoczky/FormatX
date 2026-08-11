@@ -15,12 +15,14 @@ const entry = read('billing-worker/src/production-entry.js');
 
 assert.match(selector, /const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/);
 assert.match(productionBootstrap, /reference-crystal-core-v53/);
-assert.match(productionBootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r1/);
-assert.match(productionBootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r1/);
+assert.match(productionBootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r3/);
+assert.match(productionBootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r3/);
 assert.match(production, /sharp-four-tip-concave-crystal-v53/);
 assert.match(production, /clean-faceted-refractive-glass-v53/);
 assert.match(production, /moving-white-nucleus-concentric-spectral-rings-v53/);
 assert.match(production, /single-webgl2-reference-crystal-v53/);
+assert.match(production, /physical-triangle-ribbons-interactive-r2/);
+assert.match(production, /inside-moving-volume-r2/);
 assert.equal((production.match(/getContext\('webgl2'/g) || []).length, 1);
 assert.match(productionStyle, /filter:\s*none\s*!important/);
 assert.doesNotMatch(production, /new\s+Image\s*\(|drawImage\s*\(|THREE\b|three\.js/i);

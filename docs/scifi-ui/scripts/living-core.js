@@ -64,8 +64,8 @@ const MOBILE_HUD_ANCHORS = Object.freeze([
   [0.26, 0.67], [0.74, 0.67]
 ]);
 
-const RELEASE_API = 'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest';
-const RELEASE_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
+const RELEASE_API = '/api/public-release';
+const RELEASE_DOWNLOAD = '/download/multiplatform';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -873,8 +873,8 @@ class LivingCoreExperience {
       const version = `V${match[1]}`;
       const expected = `FormatX-Suite-Pro-${version}.zip`;
       const asset = payload.assets.find(candidate => candidate && candidate.name === expected);
-      if (!asset || typeof asset.browser_download_url !== 'string' || !asset.browser_download_url.startsWith(RELEASE_PREFIX)) return;
-      this.releaseLink.href = asset.browser_download_url;
+      if (!asset || asset.browser_download_url !== RELEASE_DOWNLOAD) return;
+      this.releaseLink.href = RELEASE_DOWNLOAD;
       const versionNode = this.releaseLink.querySelector('strong');
       if (versionNode) versionNode.textContent = version;
       this.releaseLink.dataset.releaseVerified = 'true';

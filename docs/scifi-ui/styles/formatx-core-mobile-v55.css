@@ -45,9 +45,9 @@
     inset:auto !important;
     order:-1 !important;
     width:100% !important;
-    height:clamp(445px,56svh,570px) !important;
-    min-height:clamp(445px,56svh,570px) !important;
-    max-height:570px !important;
+    height:clamp(590px,68svh,760px) !important;
+    min-height:clamp(590px,68svh,760px) !important;
+    max-height:760px !important;
     z-index:1 !important;
     opacity:1 !important;
     visibility:visible !important;
@@ -55,7 +55,21 @@
     overflow:hidden !important;
     isolation:auto !important;
     contain:none !important;
-    background:transparent !important;
+    background:
+      radial-gradient(circle at 50% 47%, rgba(21, 188, 255, .085), transparent 35%),
+      radial-gradient(circle at 56% 49%, rgba(142, 55, 255, .045), transparent 48%) !important;
+  }
+
+  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-space::before,
+  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-space::after,
+  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-space::before,
+  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-space::after {
+    content:none !important;
+    display:none !important;
+    opacity:0 !important;
+    background:none !important;
+    box-shadow:none !important;
+    animation:none !important;
   }
 
   #hero .hero-space > .fx-core-mobile-v55-stage {

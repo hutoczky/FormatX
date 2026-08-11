@@ -115,22 +115,22 @@
   function starRadius(t) {
     const c = Math.abs(Math.cos(t));
     const s = Math.abs(Math.sin(t));
-    const axis = Math.pow(Math.max(c, s), 18);
+    const axis = Math.pow(Math.max(c, s), 56);
     const diagonal = Math.pow(Math.abs(Math.sin(t * 2)), 1.45);
-    const microFacet = 0.012 * Math.cos(t * 8);
-    return 0.425 + 0.79 * axis - 0.108 * diagonal + microFacet;
+    const microFacet = 0.010 * Math.cos(t * 8);
+    return 0.740 + 0.53 * axis - 0.045 * diagonal + microFacet;
   }
 
   function crystalPoint(t, u, side) {
     const outer = starRadius(t);
-    const ease = Math.pow(u, 1.7) * (2.7 - 1.7 * u);
-    const radius = 0.078 + (outer - 0.078) * ease;
+    const ease = u * u * (3 - 2 * u);
+    const radius = 0.008 + (outer - 0.008) * ease;
     const lens = Math.pow(Math.max(0, Math.sin(Math.PI * u)), 0.78);
     const diagonal = Math.pow(Math.abs(Math.sin(t * 2)), 1.55);
-    const facet = 1 + 0.115 * Math.cos(t * 8) * lens + 0.032 * Math.cos(t * 16 + u * 5.2);
-    const z = side * (0.032 + 0.195 * lens * facet + 0.018 * (1 - u));
-    const pinch = 1 - 0.070 * diagonal * Math.pow(Math.sin(Math.PI * u), 0.82);
-    return [radius * Math.cos(t) * pinch, radius * Math.sin(t) * 1.035 * pinch, z];
+    const facet = 1 + 0.090 * Math.cos(t * 8) * lens + 0.026 * Math.cos(t * 16 + u * 5.2);
+    const z = side * (0.032 + 0.235 * lens * facet + 0.018 * (1 - u));
+    const pinch = 1 - 0.025 * diagonal * Math.pow(Math.sin(Math.PI * u), 0.82);
+    return [radius * Math.cos(t) * pinch, radius * Math.sin(t) * 1.075 * pinch, z];
   }
 
   function crystalGeometry(angles = 72, radial = 9) {
@@ -168,17 +168,17 @@
       p[2] += 0.010;
       return p;
     };
-    for (let spoke = 0; spoke < 24; spoke += 1) {
-      const t = spoke / 24 * Math.PI * 2;
+    for (let spoke = 0; spoke < 12; spoke += 1) {
+      const t = spoke / 12 * Math.PI * 2;
       for (let j = 0; j < 9; j += 1) data.push(...front(t, j / 9), ...front(t, (j + 1) / 9));
     }
-    for (const u of [0.18, 0.29, 0.41, 0.54, 0.67, 0.80, 0.91, 1]) {
+    for (const u of [0.32, 0.58, 0.82, 1]) {
       for (let i = 0; i < angles; i += 1) data.push(...front(i / angles * Math.PI * 2, u), ...front((i + 1) / angles * Math.PI * 2, u));
     }
     return new Float32Array(data);
   }
 
-  function ringGeometry(radius, segments = 72, z = 0.245) {
+  function ringGeometry(radius, segments = 72, z = 0.120) {
     const data = [];
     for (let i = 0; i < segments; i += 1) {
       const a = i / segments * Math.PI * 2, b = (i + 1) / segments * Math.PI * 2;
@@ -196,11 +196,26 @@
     return new Float32Array(data);
   }
 
+  function ribbonArcGeometry(radius, width, start, length, segments = 54, z = 0.12) {
+    const data = [];
+    for (let i = 0; i < segments; i += 1) {
+      const a = start + length * i / segments, b = start + length * (i + 1) / segments;
+      const wobbleA = Math.sin(a * 3.0) * 0.018, wobbleB = Math.sin(b * 3.0) * 0.018;
+      const ai = radius - width, ao = radius + width;
+      const a0 = [Math.cos(a) * ai, Math.sin(a) * ai, z + wobbleA];
+      const a1 = [Math.cos(a) * ao, Math.sin(a) * ao, z + wobbleA];
+      const b0 = [Math.cos(b) * ai, Math.sin(b) * ai, z + wobbleB];
+      const b1 = [Math.cos(b) * ao, Math.sin(b) * ao, z + wobbleB];
+      data.push(...a0, ...a1, ...b1, ...a0, ...b1, ...b0);
+    }
+    return new Float32Array(data);
+  }
+
   const crossGeometry = new Float32Array([
-    -1.20, 0, 0.252, 1.20, 0, 0.252,
-    0, -1.24, 0.252, 0, 1.24, 0.252,
-    -0.54, -0.54, 0.248, 0.54, 0.54, 0.248,
-    -0.54, 0.54, 0.248, 0.54, -0.54, 0.248
+    -1.20, 0, 0.060, 1.20, 0, 0.060,
+    0, -1.22, 0.060, 0, 1.22, 0.060,
+    -0.54, -0.54, 0.072, 0.54, 0.54, 0.072,
+    -0.54, 0.54, 0.072, 0.54, -0.54, 0.072
   ]);
 
   function start(attempt = 0) {
@@ -249,7 +264,7 @@ uniform float uT,uAlpha,uPhase;
 uniform vec3 uTint;
 out vec4 O;
 float sat(float x){return clamp(x,0.0,1.0);}
-void main(){vec3 N=normalize(vN),V=normalize(-vW),L1=normalize(vec3(-.58,.72,.82)),L2=normalize(vec3(.76,-.24,.60));float d1=sat(dot(N,L1)),d2=sat(dot(N,L2)),fres=pow(1.0-sat(abs(dot(N,V))),2.05),spec=pow(sat(dot(N,normalize(L1+V))),92.0);float a=atan(vP.y,vP.x),r=length(vP.xy),facetA=pow(.5+.5*cos(a*16.0+r*31.0+vP.z*21.0-uT*.16+uPhase),26.0),facetB=pow(.5+.5*cos(a*24.0-r*27.0-vP.z*17.0+uT*.11+uPhase*.8),31.0),veins=pow(.5+.5*cos(a*8.0+r*42.0-vP.z*24.0-uT*.34+uPhase),36.0),violetBand=pow(.5+.5*cos(a*6.0-r*12.0+vP.z*10.0+uT*.14+uPhase),16.0);vec3 cyan=vec3(.00,.82,1.32),azure=vec3(.015,.23,.92),violet=vec3(.72,.08,1.18),ice=vec3(.92,1.06,1.16);vec3 color=uTint*.030+cyan*(.075+.28*d1+.34*fres+.12*veins)+azure*(.035+.10*d2+.07*facetB)+violet*(.018+.13*violetBand+.055*facetA)+ice*(.025+1.18*spec+.18*pow(fres,1.35));float alpha=uAlpha*sat(.055+.20*fres+.070*d1+.032*d2+.10*spec+.025*facetA+.021*veins);O=vec4(color*alpha,alpha);}`;
+void main(){vec3 N=normalize(vN),V=normalize(-vW),L1=normalize(vec3(-.58,.72,.82)),L2=normalize(vec3(.76,-.24,.60));float facing=sat(abs(dot(N,V))),d1=sat(dot(N,L1)),d2=sat(dot(N,L2)),fres=pow(1.0-facing,1.38),spec=pow(sat(dot(N,normalize(L1+V))),58.0);float a=atan(vP.y,vP.x),r=length(vP.xy),waveA=.5+.5*cos(a*5.0+r*15.0-vP.z*12.0-uT*.56+uPhase),waveB=.5+.5*cos(a*3.0-r*8.0+vP.z*8.0+uT*.38-uPhase),facetWave=.5+.5*cos(a*12.0+r*20.0-vP.z*12.0-uT*.14+uPhase*.7),veins=smoothstep(.985,1.0,waveA),violetBand=smoothstep(.986,1.0,waveB),facet=smoothstep(.987,1.0,facetWave),filament=smoothstep(.972,1.0,waveA*facetWave);vec3 cyan=vec3(.00,1.04,1.68),azure=vec3(.012,.25,.94),violet=vec3(.98,.045,1.58),ice=vec3(1.04,1.14,1.24);vec3 environment=mix(azure,cyan,.25+.75*fres);vec3 color=uTint*.035+environment*(.38+.24*d1+.72*fres)+cyan*(.070+.78*veins+.94*filament)+violet*(.034+.66*violetBand+.18*facet)+ice*(.046+.66*spec+.40*fres)+azure*(.036+.09*d2);float alpha=uAlpha*sat(.10+.35*fres+.075*d1+.028*d2+.058*spec+.042*facet+.065*veins+.056*violetBand+.052*filament);O=vec4(color*alpha,alpha);}`;
 
     const lineVertex = `#version 300 es
 precision highp float;
@@ -266,13 +281,13 @@ void main(){O=vec4(uColor*uAlpha,uAlpha);}`;
 precision highp float;
 uniform mat4 uP,uM;
 uniform float uSize;
-void main(){gl_Position=uP*uM*vec4(0.0,0.0,.268,1.0);gl_PointSize=uSize;}`;
+void main(){gl_Position=uP*uM*vec4(0.0,0.0,.060,1.0);gl_PointSize=uSize;}`;
     const pointFragment = `#version 300 es
 precision highp float;
 uniform vec3 uColor;
 uniform float uAlpha;
 out vec4 O;
-void main(){vec2 p=gl_PointCoord*2.0-1.0;float d=dot(p,p);if(d>1.0)discard;float core=pow(1.0-d,7.5),halo=pow(1.0-d,2.25),a=(core+.34*halo)*uAlpha;vec3 c=mix(uColor,vec3(1.0),core*.96);O=vec4(c*a,a);}`;
+void main(){vec2 p=gl_PointCoord*2.0-1.0;float d=dot(p,p);if(d>1.0)discard;float core=pow(1.0-d,7.5),halo=pow(1.0-d,2.25),a=min(1.0,(core+.34*halo)*uAlpha);vec3 c=mix(uColor,vec3(1.0),core*.96);O=vec4(c*a,a);}`;
 
     function shader(type, source) {
       const object = gl.createShader(type); gl.shaderSource(object, source); gl.compileShader(object);
@@ -304,29 +319,149 @@ void main(){vec2 p=gl_PointCoord*2.0-1.0;float d=dot(p,p);if(d>1.0)discard;float
     const shell = uploadShell(crystalGeometry()), wire = uploadLine(wireGeometry()), cross = uploadLine(crossGeometry);
     const rings = [0.105,0.145,0.19,0.24,0.30,0.37,0.45,0.54].map(r => uploadLine(ringGeometry(r)));
     const arcs = [uploadLine(arcGeometry(1.08,.18,2.72)),uploadLine(arcGeometry(1.18,2.34,2.18)),uploadLine(arcGeometry(1.30,4.08,1.82)),uploadLine(arcGeometry(.92,5.12,1.35))];
+    const ribbons = [
+      uploadLine(ribbonArcGeometry(.72,.010,.18,2.55,58,.16)),
+      uploadLine(ribbonArcGeometry(.88,.013,2.18,2.24,56,.10)),
+      uploadLine(ribbonArcGeometry(1.03,.010,4.10,1.92,52,.04)),
+      uploadLine(ribbonArcGeometry(1.18,.008,5.05,1.42,46,-.02))
+    ];
 
     const SU={P:gl.getUniformLocation(shellProgram,'uP'),M:gl.getUniformLocation(shellProgram,'uM'),T:gl.getUniformLocation(shellProgram,'uT'),A:gl.getUniformLocation(shellProgram,'uAlpha'),Q:gl.getUniformLocation(shellProgram,'uPhase'),C:gl.getUniformLocation(shellProgram,'uTint')};
     const LU={P:gl.getUniformLocation(lineProgram,'uP'),M:gl.getUniformLocation(lineProgram,'uM'),C:gl.getUniformLocation(lineProgram,'uColor'),A:gl.getUniformLocation(lineProgram,'uAlpha')};
     const PU={P:gl.getUniformLocation(pointProgram,'uP'),M:gl.getUniformLocation(pointProgram,'uM'),S:gl.getUniformLocation(pointProgram,'uSize'),C:gl.getUniformLocation(pointProgram,'uColor'),A:gl.getUniformLocation(pointProgram,'uAlpha')};
 
-    let projection=identity(),running=true,visible=true,last=performance.now(),frameAverage=16.7,frames=0,renderScale=1,dpr=1,pointerX=0,pointerY=0,targetX=0,targetY=0,raf=0,pointMax=64;
+    let projection=identity(),running=true,visible=true,last=performance.now(),frameAverage=16.7,frames=0,renderScale=1,dpr=1,pointerX=0,pointerY=0,targetX=0,targetY=0,raf=0,pointMax=64,activity=0,touchPulse=0,speech=0;
+    const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
+    cinematic.version='film-reactive-v2';cinematic.corePosition=[0,0,0];cinematic.energy=0;
     const pointRange=gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE); if(pointRange?.length>1)pointMax=pointRange[1];
 
     function view(){const rect=stage.getBoundingClientRect();return{width:Math.max(1,rect.width||host.clientWidth),height:Math.max(1,rect.height||host.clientHeight)}}
     function resize(){const{width,height}=view(),cap=1.32,budget=980000;dpr=Math.min(devicePixelRatio||1,cap)*renderScale;const pixels=width*height*dpr*dpr;if(pixels>budget)dpr*=Math.sqrt(budget/pixels);dpr=clamp(dpr,.76,cap);const tw=Math.max(1,Math.round(width*dpr)),th=Math.max(1,Math.round(height*dpr));if(canvas.width!==tw||canvas.height!==th){canvas.width=tw;canvas.height=th}gl.viewport(0,0,tw,th);projection=perspective(39*Math.PI/180,width/height,.1,30)}
-    function baseModel(t){const{width}=view(),s=clamp(width*.00112,.405,.485),idle=reduced.matches?.9:t;return compose(translate(0,-.015,-3.28),rotateX(-.075+pointerY*.080+Math.sin(idle*.18)*.012),rotateY(.10+pointerX*.10+Math.sin(idle*.21)*.024),rotateZ(Math.sin(idle*.17)*.009),scale(s,s,s))}
+    function baseModel(t){const{width,height}=view(),s=clamp(width/height*.82,.48,.84),idle=reduced.matches?.9:t,pulse=1+activity*.018;return compose(translate(0,-.012,-3.20),rotateX(-.075+pointerY*.115+Math.sin(idle*.18)*.014),rotateY(.10+pointerX*.14+Math.sin(idle*.21)*.030),rotateZ(Math.sin(idle*.17)*.011),scale(s*pulse,s*pulse,s*pulse))}
 
     function shellPass(time,model,tint,alpha,phase){gl.useProgram(shellProgram);gl.uniformMatrix4fv(SU.P,false,projection);gl.uniformMatrix4fv(SU.M,false,model);gl.uniform1f(SU.T,time);gl.uniform1f(SU.A,alpha);gl.uniform1f(SU.Q,phase);gl.uniform3fv(SU.C,tint);gl.bindVertexArray(shell.vao);gl.drawArrays(gl.TRIANGLES,0,shell.count)}
     function linePass(geometry,model,color,alpha){gl.useProgram(lineProgram);gl.uniformMatrix4fv(LU.P,false,projection);gl.uniformMatrix4fv(LU.M,false,model);gl.uniform3fv(LU.C,color);gl.uniform1f(LU.A,alpha);gl.bindVertexArray(geometry.vao);gl.drawArrays(gl.LINES,0,geometry.count)}
+    function ribbonPass(geometry,model,color,alpha){gl.useProgram(lineProgram);gl.uniformMatrix4fv(LU.P,false,projection);gl.uniformMatrix4fv(LU.M,false,model);gl.uniform3fv(LU.C,color);gl.uniform1f(LU.A,alpha);gl.bindVertexArray(geometry.vao);gl.drawArrays(gl.TRIANGLES,0,geometry.count)}
     function nucleusPass(model,size,color,alpha){gl.useProgram(pointProgram);gl.uniformMatrix4fv(PU.P,false,projection);gl.uniformMatrix4fv(PU.M,false,model);gl.uniform1f(PU.S,Math.min(pointMax,size*dpr));gl.uniform3fv(PU.C,color);gl.uniform1f(PU.A,alpha);gl.drawArrays(gl.POINTS,0,1)}
 
-    function render(now){if(!running)return;const delta=Math.min(60,now-last);last=now;frameAverage+=(delta-frameAverage)*.04;frames+=1;if(frames%90===0&&!reduced.matches){if(frameAverage>23&&renderScale>.82){renderScale=Math.max(.82,renderScale-.08);resize()}else if(frameAverage<17.5&&renderScale<1){renderScale=Math.min(1,renderScale+.04);resize()}}pointerX+=(targetX-pointerX)*.035;pointerY+=(targetY-pointerY)*.035;if(visible){const t=reduced.matches?.9:now*.001,model=baseModel(t);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.depthMask(false);gl.disable(gl.CULL_FACE);shellPass(t,model,[.02,.32,.64],1,0);shellPass(t,compose(model,scale(.965,.965,1.05)),[.10,.48,.92],.58,1.7);linePass(wire,model,[.00,.82,1.18],.46);linePass(cross,model,[.18,.86,1.22],.34);rings.forEach((ring,index)=>{const pulse=.72+.28*Math.sin(t*(.72+index*.035)+index*.82),ringModel=compose(model,rotateZ(t*(index%2?-.075:.064)+index*.10)),color=index%3===2?[.68,.12,1.08]:[.00,.92,1.30];linePass(ring,ringModel,color,.22+.19*pulse)});arcs.forEach((arc,index)=>{const orbit=compose(model,rotateZ(t*(index%2?-.055:.045)+index*1.23),rotateX(.18+index*.08));linePass(arc,orbit,index%2?[.72,.10,1.05]:[.00,.80,1.16],.16+.05*Math.sin(t+index))});const nucleusModel=compose(model,scale(.93,.93,.93)),pulse=.5+.5*Math.sin(t*1.8);nucleusPass(nucleusModel,26+pulse*3,[.04,.88,1.18],.54);nucleusPass(nucleusModel,17+pulse*2,[.82,.96,1.10],.94);nucleusPass(nucleusModel,9+pulse,[1,1,1],1);gl.bindVertexArray(null);gl.depthMask(true)}raf=requestAnimationFrame(render)}
+    function render(now) {
+      if (!running) return;
+      const delta = Math.min(60, now - last);
+      last = now;
+      frameAverage += (delta - frameAverage) * .04;
+      frames += 1;
+      if (frames % 60 === 0) {
+        root.dataset.fxCoreFrameMs = frameAverage.toFixed(1);
+        if (!reduced.matches) {
+          if (frameAverage > 18.5 && renderScale > .72) {
+            renderScale = Math.max(.72, renderScale - .10);
+            resize();
+          } else if (frameAverage < 16.4 && renderScale < 1) {
+            renderScale = Math.min(1, renderScale + .04);
+            resize();
+          }
+        }
+      }
+      touchPulse *= .972;
+      const wanted = Math.max(touchPulse, speech * .92);
+      activity += (wanted - activity) * .055;
+      pointerX += (targetX - pointerX) * .045;
+      pointerY += (targetY - pointerY) * .045;
 
-    function onPointer(event){if(event.pointerType==='touch')return;targetX=clamp(event.clientX/Math.max(1,innerWidth)*2-1,-1,1);targetY=clamp(-(event.clientY/Math.max(1,innerHeight)*2-1),-1,1)}
-    const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(host);const intersectionObserver=new IntersectionObserver(entries=>{visible=entries.some(entry=>entry.isIntersecting)},{rootMargin:'120px 0px 120px 0px'});intersectionObserver.observe(hero);addEventListener('resize',resize,{passive:true});visualViewport?.addEventListener('resize',resize,{passive:true});addEventListener('pointermove',onPointer,{passive:true});
+      if (visible) {
+        const t = reduced.matches ? .9 : now * .001;
+        const model = baseModel(t);
+        const coreX = Math.sin(t * .71) * .032 + Math.cos(t * .29) * .010 + pointerX * .018;
+        const coreY = Math.cos(t * .63) * .026 + Math.sin(t * .31) * .009 + pointerY * .014;
+        const coreZ = Math.sin(t * .51) * .036;
+        cinematic.corePosition = [coreX, coreY, coreZ];
+        cinematic.energy = activity;
+
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthFunc(gl.LEQUAL);
+        gl.depthMask(false);
+        gl.disable(gl.CULL_FACE);
+        shellPass(t, model, [.02, .40, .76], 1, 0);
+        gl.blendFunc(gl.ONE, gl.ONE);
+        shellPass(t, compose(model, scale(.966, .966, 1.07), rotateZ(-.012)), [.18, .08, .84], .30, 1.7);
+
+        gl.disable(gl.DEPTH_TEST);
+        linePass(wire, compose(model, scale(1.006, 1.006, 1.006)), [.00, .42, .92], .09);
+        linePass(wire, model, [.00, 1.02, 1.52], .19 + .025 * Math.sin(t * .8));
+        linePass(cross, model, [.24, 1.00, 1.42], .30 + .07 * activity);
+        const coreShift = translate(coreX * .42, coreY * .42, coreZ * .20);
+        rings.forEach((ring, index) => {
+          const ringPulse = .68 + .32 * Math.sin(t * (.76 + index * .035) + index * .82);
+          const ringModel = compose(
+            model,
+            coreShift,
+            rotateX((index % 2 ? -.08 : .07) + pointerY * .04),
+            rotateY((index % 3 - 1) * .05 + pointerX * .035),
+            rotateZ(t * (index % 2 ? -.105 : .088) * (1 + activity * .7) + index * .12)
+          );
+          const color = index % 3 === 2 ? [.82, .08, 1.28] : [.00, .98, 1.42];
+          linePass(ring, ringModel, color, .36 + .22 * ringPulse + .10 * activity);
+        });
+        ribbons.forEach((ribbon, index) => {
+          const orbit = compose(
+            model,
+            rotateX(.16 + index * .11 + pointerY * .06),
+            rotateY((index - 1.5) * .075 + pointerX * .07),
+            rotateZ(t * (index % 2 ? -.085 : .072) * (1 + activity * .55) + index * 1.31)
+          );
+          ribbonPass(
+            ribbon,
+            orbit,
+            index % 2 ? [.88, .055, 1.36] : [.00, 1.0, 1.42],
+            .18 + .052 * Math.sin(t * .83 + index) + .075 * activity
+          );
+        });
+        arcs.forEach((arc, index) => {
+          const orbit = compose(
+            model,
+            rotateZ(t * (index % 2 ? -.065 : .055) + index * 1.23),
+            rotateX(.20 + index * .09),
+            rotateY(pointerX * .045)
+          );
+          linePass(arc, orbit, index % 2 ? [.82, .07, 1.24] : [.00, .90, 1.28], .105 + .038 * Math.sin(t + index) + .05 * activity);
+        });
+
+        const nucleusModel = compose(model, translate(coreX, coreY, coreZ), scale(.93, .93, .93));
+        const pulse = .5 + .5 * Math.sin(t * 1.8);
+        nucleusPass(nucleusModel, 78 + pulse * 10 + activity * 10, [.00, .82, 1.24], .52 + .10 * activity);
+        nucleusPass(nucleusModel, 44 + pulse * 5 + activity * 4, [.42, 1.00, 1.18], .84);
+        nucleusPass(nucleusModel, 20 + pulse * 2, [1, 1, 1], 1);
+        const orbitPoints = [
+          [.62, .72, 0, [.00, .96, 1.28]],
+          [.82, -.54, 2.2, [.86, .10, 1.26]],
+          [1.02, .39, 4.1, [.08, .82, 1.18]]
+        ];
+        orbitPoints.forEach((entry, index) => {
+          const [radius, speed, phase, color] = entry;
+          const angle = t * speed * (1 + activity * .4) + phase;
+          nucleusPass(
+            compose(model, translate(Math.cos(angle) * radius, Math.sin(angle) * radius * .92, .04 + Math.sin(angle * 1.7) * .13)),
+            7 - index,
+            color,
+            .78
+          );
+        });
+        gl.bindVertexArray(null);
+        gl.depthMask(true);
+      }
+      raf = requestAnimationFrame(render);
+    }
+
+    function onPointer(event){const rect=stage.getBoundingClientRect();targetX=clamp((event.clientX-rect.left)/Math.max(1,rect.width)*2-1,-1,1);targetY=clamp(-((event.clientY-rect.top)/Math.max(1,rect.height)*2-1),-1,1);if(event.pointerType==='touch')touchPulse=Math.max(touchPulse,.72)}
+    function activate(amount=.9){touchPulse=Math.max(touchPulse,amount)}
+    const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(host);const intersectionObserver=new IntersectionObserver(entries=>{visible=entries.some(entry=>entry.isIntersecting)},{rootMargin:'120px 0px 120px 0px'});intersectionObserver.observe(hero);addEventListener('resize',resize,{passive:true});visualViewport?.addEventListener('resize',resize,{passive:true});addEventListener('pointermove',onPointer,{passive:true});addEventListener('pointerdown',event=>{onPointer(event);activate(1)},{passive:true});addEventListener('formatx:organismcoreactivate',()=>activate(1),{passive:true});addEventListener('formatx:organismresponse',()=>activate(.94),{passive:true});addEventListener('formatx:organismspeechstart',()=>{speech=1;activate(1)},{passive:true});addEventListener('formatx:organismspeechend',()=>{speech=0},{passive:true});
     canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();running=false;cancelAnimationFrame(raf);fail('context-lost-v55')},{passive:false});canvas.addEventListener('webglcontextrestored',()=>location.reload(),{once:true});addEventListener('pagehide',()=>{running=false;cancelAnimationFrame(raf);resizeObserver.disconnect();intersectionObserver.disconnect()},{once:true});
 
-    resize();root.dataset.fxCoreMobileV55=READY;root.dataset.fxCoreReal3d='ready-v55';root.dataset.fxCoreRenderer='single-webgl2-mobile-cinematic-crystal-v55';root.dataset.fxCoreReferenceGeometry='long-sharp-four-tip-deep-concave-crystal-v55';root.dataset.fxCoreReferenceMaterial='thin-layered-faceted-fresnel-glass-v55';root.dataset.fxCoreInternalReactor='small-hot-white-nucleus-concentric-cyan-violet-rings-v55';root.dataset.fxCoreResponsive='physical-mobile-hero-local-v55';root.dataset.fxCorePerformance='single-context-adaptive-60-plus-fps';root.dataset.fxCoreImageBacked='false';root.dataset.fxCoreDepth='closed-volumetric-shell-with-sidewalls';root.dataset.fxCoreReferenceLock='ready-v55';dispatchEvent(new CustomEvent('formatx:core3dready',{detail:{version:VERSION,mobile:true}}));raf=requestAnimationFrame(render);
+    resize();root.dataset.fxCoreMobileV55=READY;root.dataset.fxCoreReal3d='ready-v55';root.dataset.fxCoreRenderer='single-webgl2-mobile-cinematic-crystal-v55';root.dataset.fxCoreReferenceGeometry='long-sharp-four-tip-deep-concave-crystal-v55';root.dataset.fxCoreReferenceMaterial='thin-layered-faceted-fresnel-glass-v55';root.dataset.fxCoreInternalReactor='small-hot-white-nucleus-concentric-cyan-violet-rings-v55';root.dataset.fxCoreResponsive='physical-mobile-hero-local-v55';root.dataset.fxCorePerformance='single-context-adaptive-60-plus-fps';root.dataset.fxCoreImageBacked='false';root.dataset.fxCoreDepth='closed-volumetric-shell-with-sidewalls';root.dataset.fxCoreReferenceLock='ready-v55';root.dataset.fxCoreSpectralRibbons='physical-triangle-ribbons-interactive-r2';root.dataset.fxCoreCorePlacement='inside-moving-volume-r2';root.dataset.fxCoreInteraction='pointer-touch-speech-reactive-r2';dispatchEvent(new CustomEvent('formatx:core3dready',{detail:{version:VERSION,mobile:true}}));raf=requestAnimationFrame(render);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => start(), { once:true });

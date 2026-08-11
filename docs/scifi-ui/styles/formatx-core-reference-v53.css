@@ -39,7 +39,7 @@
   pointer-events: none !important;
 }
 
-@media (min-width: 901px) and (pointer: fine) {
+@media (min-width: 901px) {
   .fx-core-reference-v53-stage {
     position: fixed !important;
     z-index: 122 !important;

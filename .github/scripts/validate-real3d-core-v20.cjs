@@ -12,8 +12,8 @@ const homepage = read('docs/scifi-ui/index.html');
 const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
 
 assert.match(bootstrap, /reference-crystal-core-v53/);
-assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r1/);
-assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r1/);
+assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r3/);
+assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r3/);
 assert.match(bootstrap, /single-webgl2-reference-crystal-v53/);
 assert.equal((bootstrap.match(/getContext\('webgl2'/g) || []).length, 0, 'bootstrap must not create a WebGL context');
 
@@ -31,7 +31,9 @@ for (const token of [
   'clean-faceted-refractive-glass-v53',
   'moving-white-nucleus-concentric-spectral-rings-v53',
   'single-context-adaptive-60-plus-fps',
-  'single-webgl2-reference-crystal-v53'
+  'single-webgl2-reference-crystal-v53',
+  'physical-triangle-ribbons-interactive-r2',
+  'inside-moving-volume-r2'
 ]) assert.ok(runtime.includes(token), `missing v53 contract: ${token}`);
 
 assert.doesNotMatch(runtime, /drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|backgroundImage/i, 'MAG must not be image-backed');

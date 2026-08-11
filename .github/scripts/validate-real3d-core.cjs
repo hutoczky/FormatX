@@ -12,8 +12,8 @@ const previewWebgl = read('docs/scifi-ui/scripts/formatx-orbital-core-v28.js');
 const previewMobile = read('docs/scifi-ui/styles/formatx-real3d-mobile-v29.css');
 
 assert.match(productionBootstrap, /reference-crystal-core-v53/);
-assert.match(productionBootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r1/);
-assert.match(productionBootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r1/);
+assert.match(productionBootstrap, /formatx-core-reference-v53\.js\?v=20260811-reference-v53-r3/);
+assert.match(productionBootstrap, /formatx-core-reference-v53\.css\?v=20260811-reference-v53-r3/);
 assert.equal((productionBootstrap.match(/getContext\(['"]webgl2['"]/gi) || []).length, 0);
 assert.equal((production.match(/getContext\(['"]webgl2['"]/gi) || []).length, 1);
 
@@ -29,6 +29,8 @@ for (const token of [
   'moving-white-nucleus-concentric-spectral-rings-v53',
   'single-webgl2-reference-crystal-v53',
   'single-context-adaptive-60-plus-fps',
+  'physical-triangle-ribbons-interactive-r2',
+  'inside-moving-volume-r2',
   'Math.sin(t*.71)',
   'Math.cos(t*.63)',
   'webglcontextlost'

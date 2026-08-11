@@ -13,6 +13,9 @@ const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';
 const RELEASE_METADATA_PATH = '/scifi-ui/data/current-release.json';
 const PUBLIC_RELEASE_API_PATH = '/api/public-release';
 const MULTIPLATFORM_DOWNLOAD_PATH = '/download/multiplatform';
+const GITHUB_LATEST_RELEASE_API = 'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest';
+const GITHUB_LATEST_RELEASE_PAGE = 'https://github.com/hutoczky/FormatX-Updates/releases/latest';
+const LIVE_RELEASE_CACHE_SECONDS = 15;
 const ANDROID_APK_PATH = '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk';
 const ANDROID_APK_FILENAME = 'FormatX-Suite-Pro-Android-1.0.6.apk';
 const ANDROID_NATIVE_BETA_PATH = '/scifi-ui/downloads/FormatX-Native-Android.apk';
@@ -331,7 +334,7 @@ function serveAudioTestWav(request) {
   });
 }
 
-async function readRawReleaseMetadata(request, env) {
+async function readStaticReleaseMetadata(request, env) {
   if (!env.ASSETS || typeof env.ASSETS.fetch !== 'function') return null;
   const assetUrl = new URL(RELEASE_METADATA_PATH, request.url);
   assetUrl.searchParams.set('internal', '1');
@@ -345,6 +348,142 @@ async function readRawReleaseMetadata(request, env) {
   } catch (_) {
     return null;
   }
+}
+
+function isOfficialReleasePage(value, version) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:'
+      && url.hostname === 'github.com'
+      && url.pathname === `/hutoczky/FormatX-Updates/releases/tag/${version}`;
+  } catch (_) {
+    return false;
+  }
+}
+
+function releaseDigest(value) {
+  return /^sha256:[0-9a-f]{64}$/i.test(String(value || '')) ? String(value) : null;
+}
+
+function isReleaseAssetForVersion(value, version, filename) {
+  try {
+    const url = new URL(value);
+    return isTrustedReleaseAsset(url.href)
+      && url.pathname === `/hutoczky/FormatX-Updates/releases/download/${version}/${filename}`;
+  } catch (_) {
+    return false;
+  }
+}
+
+function releaseAssetRecord(asset) {
+  if (!asset || !isTrustedReleaseAsset(asset.browser_download_url)) return null;
+  return {
+    available: true,
+    asset_id: Number(asset.id) || null,
+    name: String(asset.name || ''),
+    download_url: asset.browser_download_url,
+    size: Number(asset.size) || null,
+    digest: releaseDigest(asset.digest),
+    content_type: asset.content_type || 'application/zip',
+    created_at: asset.created_at || null,
+    updated_at: asset.updated_at || null,
+    download_count: Number(asset.download_count) || null,
+    source: 'github_release_asset',
+  };
+}
+
+export function buildLiveReleaseMetadata(payload, fallback = null) {
+  if (!payload || payload.draft || payload.prerelease || !Array.isArray(payload.assets)) return null;
+  const version = String(payload.tag_name || '').trim();
+  const match = version.match(/^v(\d+)$/i);
+  if (!match || !isOfficialReleasePage(payload.html_url, version)) return null;
+
+  const expectedPackage = `FormatX-Suite-Pro-V${match[1]}.zip`;
+  const packageAsset = payload.assets.find((asset) => asset?.state === 'uploaded'
+    && asset.name === expectedPackage
+    && isReleaseAssetForVersion(asset.browser_download_url, version, expectedPackage));
+  const multiplatform = releaseAssetRecord(packageAsset);
+  if (!multiplatform) return null;
+
+  const checksumAsset = payload.assets.find((asset) => /(?:sha256|checksums?|checksum)/i.test(String(asset?.name || ''))
+    && isTrustedReleaseAsset(asset?.browser_download_url));
+  const signatureAsset = payload.assets.find((asset) => /\.(?:sig|minisig|asc)$/i.test(String(asset?.name || ''))
+    && isTrustedReleaseAsset(asset?.browser_download_url));
+  const fallbackAndroid = fallback?.channels?.android || null;
+
+  return {
+    schema_version: 2,
+    synced_at: payload.updated_at || payload.published_at || null,
+    ok: true,
+    source: 'github_published_release',
+    repository: 'hutoczky/FormatX-Updates',
+    source_release_id: Number(payload.id) || null,
+    source_updated_at: payload.updated_at || null,
+    target_commitish: payload.target_commitish || null,
+    version,
+    release_name: String(payload.name || version).trim() || version,
+    published_at: payload.published_at || null,
+    prerelease: false,
+    release_url: payload.html_url,
+    notes_url: payload.html_url,
+    channels: {
+      multiplatform: {
+        ...multiplatform,
+        primary_platform: 'linux-bazzite',
+        supported_platforms: ['linux-bazzite', 'windows'],
+      },
+      android: fallbackAndroid,
+    },
+    evidence: {
+      checksum_asset_url: checksumAsset?.browser_download_url || null,
+      checksum_asset_name: checksumAsset?.name || null,
+      signature_asset_url: signatureAsset?.browser_download_url || null,
+      signature_asset_name: signatureAsset?.name || null,
+      test_matrix_url: '/scifi-ui/test-matrix.html',
+      known_issues_url: '/scifi-ui/known-issues.html',
+      verification_url: '/scifi-ui/verification.html',
+    },
+    integrity: {
+      package_digest_available: Boolean(multiplatform.digest),
+      checksum_asset_available: Boolean(checksumAsset),
+      signature_asset_available: Boolean(signatureAsset),
+      status: signatureAsset && multiplatform.digest
+        ? 'digest_and_signature_published'
+        : multiplatform.digest || checksumAsset
+          ? 'digest_published'
+          : 'package_only',
+    },
+    error: null,
+  };
+}
+
+async function readLiveReleaseMetadata(env, fallback) {
+  if (String(env.FORMATX_RELEASE_API_DISABLED || '').toLowerCase() === 'true') return null;
+  const headers = new Headers({
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'FormatX-Latest-Release/1.0',
+    'X-GitHub-Api-Version': '2022-11-28',
+  });
+  const token = env.GITHUB_RELEASE_TOKEN || env.GITHUB_TOKEN;
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+
+  try {
+    const response = await fetch(GITHUB_LATEST_RELEASE_API, {
+      method: 'GET',
+      headers,
+      redirect: 'follow',
+      cf: { cacheEverything: true, cacheTtl: LIVE_RELEASE_CACHE_SECONDS },
+    });
+    if (!response.ok) return null;
+    return buildLiveReleaseMetadata(await response.json(), fallback);
+  } catch (_) {
+    return null;
+  }
+}
+
+async function readRawReleaseMetadata(request, env) {
+  const fallback = await readStaticReleaseMetadata(request, env);
+  return await readLiveReleaseMetadata(env, fallback) || fallback;
 }
 
 function publicReleaseMetadata(raw) {
@@ -477,12 +616,16 @@ function isTrustedReleaseAsset(value) {
 }
 
 async function serveMultiplatformPackage(request, env) {
-  const raw = await readRawReleaseMetadata(request, env);
+  const fallback = await readStaticReleaseMetadata(request, env);
+  const raw = await readLiveReleaseMetadata(env, fallback);
   const asset = raw?.channels?.multiplatform;
   if (!asset?.available || !isTrustedReleaseAsset(asset.download_url)) {
-    return new Response('A FormatX multiplatform csomag jelenleg nem tölthető le.', {
-      status: 503,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+    return new Response(null, {
+      status: 307,
+      headers: {
+        Location: GITHUB_LATEST_RELEASE_PAGE,
+        'Cache-Control': 'no-store, max-age=0',
+      },
     });
   }
 
@@ -515,8 +658,9 @@ async function serveMultiplatformPackage(request, env) {
   const headers = new Headers({
     'Content-Type': asset.content_type || upstream.headers.get('Content-Type') || 'application/zip',
     'Content-Disposition': `attachment; filename="${filename}"`,
-    'Cache-Control': 'public, max-age=300, s-maxage=3600',
+    'Cache-Control': 'no-store, max-age=0',
     'X-Content-Type-Options': 'nosniff',
+    'X-FormatX-Release': String(raw.version || 'latest'),
   });
   for (const name of ['Content-Length', 'Content-Range', 'Accept-Ranges', 'Last-Modified']) {
     const value = upstream.headers.get(name);

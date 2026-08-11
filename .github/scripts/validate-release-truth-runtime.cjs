@@ -8,6 +8,9 @@ const runtime = fs.readFileSync('docs/scifi-ui/scripts/release-metadata.js', 'ut
 const projectAi = fs.readFileSync('billing-worker/src/project-ai.js', 'utf8');
 const organism = fs.readFileSync('docs/scifi-ui/scripts/organism-voice.js', 'utf8');
 const livingCore = fs.readFileSync('docs/scifi-ui/living-core.html', 'utf8');
+const homepage = fs.readFileSync('docs/scifi-ui/index.html', 'utf8');
+const downloads = fs.readFileSync('docs/scifi-ui/downloads/index.html', 'utf8');
+const productionWorker = fs.readFileSync('billing-worker/src/production-with-license.js', 'utf8');
 
 assert.equal(release.ok, true, 'canonical release metadata is not available');
 assert.equal(release.prerelease, false, 'canonical product release must not be prerelease');
@@ -41,6 +44,15 @@ for (const source of [projectAi, organism]) {
 }
 
 assert.ok(livingCore.includes('TELJES MULTIPLATFORM VERZIÓ'), 'Living Core full-release download label missing');
+for (const [label, source] of [['homepage', homepage], ['downloads page', downloads], ['Living Core', livingCore]]) {
+  assert.ok(source.includes('href="/download/multiplatform"'), `${label} does not use the versionless latest-release route`);
+}
+for (const token of [
+  'FormatX-Updates/releases/latest',
+  'readLiveReleaseMetadata',
+  "'Cache-Control': 'no-store, max-age=0'",
+  "'X-FormatX-Release'",
+]) assert.ok(productionWorker.includes(token), `latest-release Worker contract missing: ${token}`);
 assert.ok(livingCore.includes('href="/download/android"'), 'Living Core official Android route missing');
 assert.ok(!livingCore.includes('FormatX-Native-Android.apk'), 'Living Core still exposes Native beta as the main Android download');
 assert.ok(!livingCore.includes('<strong>V92</strong>'), 'Living Core stale V92 label remains');
