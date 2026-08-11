@@ -1,4 +1,6 @@
-/* FormatX mobile seamless loop bridge. CSP-safe external override. */
+/* FormatX mobile seamless loop bridge.
+   Production revision: 2026-08-12 r2.
+   CSP-safe external override; keeps a real mobile runway beyond the footer. */
 @media (max-width: 900px), (pointer: coarse) {
   html[data-fx-infinite-controller='seamless-v7'][data-fx-mobile-unified='ready-v1'] .fx-loop-bridge {
     display: block !important;
