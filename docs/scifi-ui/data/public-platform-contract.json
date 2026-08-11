@@ -10,7 +10,7 @@
   },
   "public_delivery": {
     "first_party_only": true,
-    "public_origin": "https://www.formatxsuite.com",
+    "public_origin": "https://formatxsuite.com",
     "release_metadata_route": "/scifi-ui/data/current-release.json",
     "platform_status_route": "/scifi-ui/data/platform-status.json",
     "scroll_policy_route": "/scifi-ui/data/scroll-policy.json",
