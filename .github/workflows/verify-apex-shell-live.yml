@@ -64,6 +64,9 @@ jobs:
           assert 'FormatX Design System 2.0' in design
           assert 'FormatX living-core visibility and responsive layout recovery' in mobile
           assert 'FormatX critical shell v56' in critical
+          assert 'html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay' in critical
+          assert 'display: none !important' in critical
+          assert '20260811-mobile-intro-direct-r1' in home
           assert 'formatx-core' in core.lower() or 'fxcore' in core.lower()
 
           assert '<base href="/">' in home

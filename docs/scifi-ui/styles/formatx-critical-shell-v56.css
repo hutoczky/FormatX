@@ -55,6 +55,27 @@ html[data-fx-intro="complete"] .fx-intro-overlay {
   opacity: 0;
 }
 
+/* Phones enter the living interface directly.  This rule lives in the
+   critical shell so the unstyled intro can never become the first paint while
+   the full cinematic stylesheet is still travelling over a mobile network. */
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html.fx-intro-pending,
+  html.fx-intro-running,
+  html.fx-intro-managed {
+    overflow-y: auto !important;
+    overscroll-behavior: auto !important;
+  }
+
+  html.fx-intro-pending #formatx-event-horizon.fx-intro-overlay,
+  html.fx-intro-running #formatx-event-horizon.fx-intro-overlay,
+  html.fx-intro-managed #formatx-event-horizon.fx-intro-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
 .fx-intro-meta,
 .fx-intro-center,
 .fx-intro-progress-wrap {

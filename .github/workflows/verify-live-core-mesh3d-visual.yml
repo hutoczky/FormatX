@@ -126,15 +126,27 @@ jobs:
             await page.goto(`https://www.formatxsuite.com/?core_current_visual=${process.env.RUN_ID}&capture=${cfg.name}`, {
               waitUntil: 'domcontentloaded', timeout: 60000
             });
-            await page.evaluate(() => {
+            if (cfg.mobile) {
+              await page.waitForFunction(() => {
+                const root = document.documentElement;
+                const overlay = document.getElementById('formatx-event-horizon');
+                return root.dataset.fxIntro === 'mobile-direct-v1'
+                  && root.dataset.fxIntroStrategy === 'mobile-direct'
+                  && root.classList.contains('fx-intro-complete')
+                  && (!overlay || overlay.hidden || getComputedStyle(overlay).display === 'none');
+              }, null, { timeout: 10000 });
+            }
+            await page.evaluate(isMobile => {
               const root = document.documentElement;
               root.lang = 'hu';
-              root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-managed');
-              root.classList.add('fx-intro-complete');
-              document.getElementById('formatx-event-horizon')?.setAttribute('hidden', '');
-              document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+              if (!isMobile) {
+                root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-managed');
+                root.classList.add('fx-intro-complete');
+                document.getElementById('formatx-event-horizon')?.setAttribute('hidden', '');
+                document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
+              }
               scrollTo(0, 0);
-            });
+            }, cfg.mobile);
 
             try {
               await page.waitForFunction(isMobile => {
@@ -159,6 +171,12 @@ jobs:
                 lockLoad: root.dataset.fxCoreReferenceLockLoad,
                 error: root.dataset.fxCoreReal3dError || null,
                 bootstrap: root.dataset.fxCoreReal3dBootstrap,
+                intro: root.dataset.fxIntro,
+                introStrategy: root.dataset.fxIntroStrategy,
+                introOverlayHidden: (() => {
+                  const overlay = document.getElementById('formatx-event-horizon');
+                  return !overlay || overlay.hidden || getComputedStyle(overlay).display === 'none';
+                })(),
                 assets: [...document.scripts].map(script => script.src).filter(src => /formatx-core-(?:real3d-v20|reference-v53|mobile-v55)/.test(src)),
                 scriptCount: document.scripts.length
               };
