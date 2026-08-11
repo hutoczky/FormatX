@@ -1,5 +1,5 @@
 /* FormatX native continuous scroll policy.
-   Production revision: 2026-08-11 scroll-smooth-r1.
+   Production revision: 2026-08-11 mobile-native-r2.
    This stylesheet is intentionally small and loaded before optional/immersive
    modules. It prevents any legacy chapter or scene stylesheet from turning
    ordinary wheel/touch scrolling into section snapping. */
@@ -30,7 +30,15 @@ body {
 
 @media (pointer: coarse), (max-width: 900px) {
   html,
-  body {
+  body,
+  html.fx-organism-interface-ready,
+  html.fx-organism-interface-ready body,
+  html[data-fx-infinite-controller],
+  html[data-fx-infinite-controller] body,
+  html.fx-seamless-loop-transfer,
+  html.fx-seamless-loop-transfer body {
+    scroll-behavior: auto !important;
+    scroll-snap-type: none !important;
     overflow-y: auto !important;
     overscroll-behavior-x: none !important;
     overscroll-behavior-y: auto !important;
@@ -43,7 +51,27 @@ body {
   main > .scene,
   .fx-organism-chapter,
   .fx-organism-chapter-trigger {
+    scroll-snap-align: none !important;
+    scroll-snap-stop: normal !important;
     touch-action: pan-y pinch-zoom !important;
+  }
+
+  /* Phones use one real document only. The desktop visual loop bridge caused
+     duplicate hero/header states, black runway gaps and post-momentum jumps. */
+  .fx-loop-bridge,
+  .fx-loop-hero-clone,
+  [data-fx-loop-clone='true'] {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    contain: strict !important;
   }
 
   /* The mobile shell already fades the fixed action surfaces while scrolling.
