@@ -1,0 +1,120 @@
+/* FormatX physical-mobile MAG v55 — cinematic sharp reference crystal. */
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-ring,
+  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-ring,
+  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-label,
+  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-label,
+  html[data-fx-core-mobile-v55="booting-v55"] .fx-resilient-core,
+  html[data-fx-core-mobile-v55="ready-v55"] .fx-resilient-core,
+  html[data-fx-core-mobile-v55="booting-v55"] .fx-premium-core-status,
+  html[data-fx-core-mobile-v55="ready-v55"] .fx-premium-core-status,
+  html[data-fx-core-mobile-v55="booting-v55"] .fx-three-stage-shell,
+  html[data-fx-core-mobile-v55="ready-v55"] .fx-three-stage-shell,
+  html[data-fx-core-mobile-v55="booting-v55"] .fx-core-mesh3d-stage,
+  html[data-fx-core-mobile-v55="ready-v55"] .fx-core-mesh3d-stage,
+  html[data-fx-core-mobile-v55="booting-v55"] .fx-core-fracture3d-stage,
+  html[data-fx-core-mobile-v55="ready-v55"] .fx-core-fracture3d-stage,
+  html[data-fx-core-mobile-v55="booting-v55"] .fx-core-mobile-v54-stage,
+  html[data-fx-core-mobile-v55="ready-v55"] .fx-core-mobile-v54-stage,
+  html[data-fx-core-mobile-v55="booting-v55"] .fx-core-reference-v53-stage,
+  html[data-fx-core-mobile-v55="ready-v55"] .fx-core-reference-v53-stage,
+  html[data-fx-core-mobile-v55="booting-v55"] .fx-transcend-shell[data-fx-native-apex="true"],
+  html[data-fx-core-mobile-v55="ready-v55"] .fx-transcend-shell[data-fx-native-apex="true"] {
+    display:none !important;
+    visibility:hidden !important;
+    opacity:0 !important;
+    pointer-events:none !important;
+  }
+
+  body.living-architecture #hero {
+    min-height:auto !important;
+    padding-top:max(82px, calc(env(safe-area-inset-top) + 72px)) !important;
+  }
+
+  body.living-architecture #hero .hero-grid {
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:0 !important;
+    min-height:0 !important;
+  }
+
+  body.living-architecture #hero .hero-space {
+    position:relative !important;
+    inset:auto !important;
+    order:-1 !important;
+    width:100% !important;
+    height:clamp(445px,56svh,570px) !important;
+    min-height:clamp(445px,56svh,570px) !important;
+    max-height:570px !important;
+    z-index:1 !important;
+    opacity:1 !important;
+    visibility:visible !important;
+    transform:none !important;
+    overflow:hidden !important;
+    isolation:auto !important;
+    contain:none !important;
+    background:transparent !important;
+  }
+
+  #hero .hero-space > .fx-core-mobile-v55-stage {
+    position:absolute !important;
+    inset:0 !important;
+    width:100% !important;
+    height:100% !important;
+    z-index:3 !important;
+    display:block !important;
+    overflow:hidden !important;
+    contain:none !important;
+    isolation:auto !important;
+    background:transparent !important;
+    opacity:1 !important;
+    visibility:visible !important;
+    pointer-events:none !important;
+  }
+
+  .fx-core-mobile-v55-stage::before,
+  .fx-core-mobile-v55-stage::after {
+    content:none !important;
+    display:none !important;
+  }
+
+  .fx-core-mobile-v55-canvas {
+    position:absolute !important;
+    inset:0 !important;
+    display:block !important;
+    width:100% !important;
+    height:100% !important;
+    max-width:none !important;
+    max-height:none !important;
+    background:transparent !important;
+    filter:none !important;
+    mix-blend-mode:normal !important;
+    image-rendering:auto !important;
+    transform:none !important;
+    backface-visibility:visible !important;
+    opacity:1 !important;
+    visibility:visible !important;
+    pointer-events:none !important;
+  }
+
+  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-copy {
+    order:2 !important;
+    position:relative !important;
+    z-index:5 !important;
+    margin-top:0 !important;
+  }
+}
+
+@media (max-width:430px) {
+  body.living-architecture #hero .hero-space {
+    height:clamp(425px,54svh,535px) !important;
+    min-height:clamp(425px,54svh,535px) !important;
+    max-height:535px !important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .fx-core-mobile-v55-stage { transition:none !important; }
+}
