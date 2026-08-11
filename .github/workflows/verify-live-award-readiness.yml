@@ -137,7 +137,7 @@ jobs:
           absent 'desktop CSS fake polygon crystal' 'clip-path: polygon' "$DESKTOP_CORE_CSS"
 
           count_exact 'mobile WebGL2 context creation sites' "getContext('webgl2'" 1 "$MOBILE_CORE"
-          contains 'mobile hero-local host resolution' "hero&&hero.querySelector('.hero-space')" "$MOBILE_CORE"
+          contains 'mobile hero-local host resolution' "hero.querySelector('.hero-space')" "$MOBILE_CORE"
           contains 'mobile stage mounted in hero host' 'host.prepend(stage)' "$MOBILE_CORE"
           contains 'mobile compositor-safe premultiplied alpha' 'premultipliedAlpha:true' "$MOBILE_CORE"
           contains 'mobile bounded pixel budget' 'budget=980000' "$MOBILE_CORE"
