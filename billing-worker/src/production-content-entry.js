@@ -4,6 +4,8 @@ const CANONICAL_ORIGIN = 'https://formatxsuite.com';
 const CANONICAL_HOST = 'formatxsuite.com';
 const LEGACY_WWW_HOST = 'www.formatxsuite.com';
 const INTERNAL_ASSET_HOST = 'formatx-homepage.internal';
+const RECOVERY_PARAM = '_fx_canonical_recovery';
+const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-1"></script>';
 const HOMEPAGE_ALIASES = new Set([
   '/',
   '/index.html',
@@ -43,35 +45,44 @@ export default {
     const publicHost = url.hostname === CANONICAL_HOST || url.hostname === LEGACY_WWW_HOST;
 
     if (safeMethod && homepage) {
-      // There is exactly one browser-visible homepage URL. Old aliases, WWW and
-      // cache-busting query strings collapse to the clean apex root.
-      if (
-        url.hostname === LEGACY_WWW_HOST
-        || url.pathname !== '/'
-        || url.search
-      ) {
-        return Response.redirect(`${CANONICAL_ORIGIN}/`, 308);
+      /*
+        Historic production revisions emitted a permanent 308 from the apex
+        hostname to WWW. Mobile Chrome can retain that redirect even after the
+        server is fixed. Redirecting WWW straight back to the apex root would
+        therefore create a client-side apex <-> WWW loop.
+
+        WWW now uses a temporary, non-cacheable redirect to an apex recovery URL.
+        That URL is not covered by the old cached root redirect, so the apex
+        Worker can return a real 200 response, clear the origin HTTP cache and
+        remove the recovery query from the address bar with history.replaceState.
+      */
+      if (url.hostname === LEGACY_WWW_HOST) {
+        const target = new URL('/', CANONICAL_ORIGIN);
+        target.searchParams.set(RECOVERY_PARAM, '1');
+        return temporaryRedirect(target.toString());
       }
 
-      if (url.hostname === CANONICAL_HOST && url.pathname === '/') {
-        /*
-          Never route the internal homepage request through either public host.
-          Lower legacy layers contain historical canonical rules in opposite
-          directions. The internal-only hostname bypasses those rules, and the
-          real static homepage is requested directly at /scifi-ui/.
-        */
+      if (url.hostname === CANONICAL_HOST) {
+        if (url.pathname !== '/') {
+          return temporaryRedirect(`${CANONICAL_ORIGIN}/`);
+        }
+
+        const hasPublicQuery = Boolean(url.search);
+        const isRecovery = url.searchParams.has(RECOVERY_PARAM);
         const internalRequest = createInternalPipelineRequest(request, '/scifi-ui/', '');
         const response = await contentPipeline.fetch(internalRequest, env, ctx);
-        return canonicaliseHomepageResponse(response, request.method);
+        return canonicaliseHomepageResponse(response, request.method, {
+          cleanAddressBar: hasPublicQuery,
+          clearCachedRedirect: isRecovery,
+        });
       }
     }
 
     if (safeMethod && publicHost) {
       /*
-        Shield every public GET/HEAD asset, API read and secondary page from the
-        old hostname canonicalisers as well. This is critical for the apex root:
-        its CSS/JS requests must remain first-party and must not bounce through
-        WWW, otherwise strict self-only CSP can leave the page as raw HTML.
+        Shield every public GET/HEAD asset, API read and secondary page from old
+        hostname canonicalisers. CSS/JS requests stay first-party on the visible
+        hostname and never bounce through WWW.
       */
       const internalRequest = createInternalPipelineRequest(request, url.pathname, url.search);
       return contentPipeline.fetch(internalRequest, env, ctx);
@@ -80,6 +91,17 @@ export default {
     return contentPipeline.fetch(request, env, ctx);
   },
 };
+
+function temporaryRedirect(location) {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: location,
+      'Cache-Control': 'no-store, max-age=0',
+      Pragma: 'no-cache',
+    },
+  });
+}
 
 function createInternalPipelineRequest(request, pathname, search) {
   const internalUrl = new URL(request.url);
@@ -91,14 +113,19 @@ function createInternalPipelineRequest(request, pathname, search) {
   return new Request(internalUrl, request);
 }
 
-async function canonicaliseHomepageResponse(response, method) {
+async function canonicaliseHomepageResponse(response, method, options = {}) {
+  const { cleanAddressBar = false, clearCachedRedirect = false } = options;
   const headers = new Headers(response.headers);
   headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
-  headers.set('Cache-Control', 'no-cache, max-age=0, must-revalidate');
+  headers.set('Cache-Control', 'no-store, max-age=0');
+  headers.set('Pragma', 'no-cache');
+
+  if (clearCachedRedirect) {
+    // Chrome/Chromium use this to evict the stale permanent apex -> WWW redirect.
+    headers.set('Clear-Site-Data', '"cache"');
+  }
 
   // No lower-layer redirect is allowed to escape from the canonical homepage.
-  // If a future regression reaches this boundary, return an explicit failure
-  // rather than trapping the browser in another redirect loop.
   if (response.status >= 300 && response.status < 400) {
     headers.delete('Location');
     headers.delete('Content-Length');
@@ -134,6 +161,10 @@ async function canonicaliseHomepageResponse(response, method) {
     .replaceAll('https://www.formatxsuite.com', 'https://formatxsuite.com')
     .replaceAll(`https://${INTERNAL_ASSET_HOST}/`, 'https://formatxsuite.com/')
     .replaceAll(`https://${INTERNAL_ASSET_HOST}`, 'https://formatxsuite.com');
+
+  if (cleanAddressBar && !html.includes('data-fx-canonical-recovery')) {
+    html = html.replace('</head>', `  ${RECOVERY_SCRIPT}\n</head>`);
+  }
 
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
