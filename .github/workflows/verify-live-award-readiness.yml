@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Verify live SEO, hierarchy, v51 reference crystal, native Apex and scroll contract
+      - name: Verify live SEO, hierarchy, v51 reference crystal, native Apex and platform scroll policy
         shell: bash
         run: |
           set -euo pipefail
@@ -32,9 +32,12 @@ jobs:
           PARITY_JS="$RUNNER_TEMP/igloo-parity.js"
           APEX_JS="$RUNNER_TEMP/formatx-apex-native.js"
           FALLBACK_JS="$RUNNER_TEMP/formatx-three-host-safe.js"
+          SCROLL_BOOTSTRAP="$RUNNER_TEMP/formatx-scroll-bootstrap.js"
+          DESKTOP_SCROLL="$RUNNER_TEMP/formatx-desktop-scroll-v7.js"
+          SCROLL_POLICY="$RUNNER_TEMP/formatx-scroll-policy.json"
 
           for attempt in $(seq 1 24); do
-            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://www.formatxsuite.com/?award_audit=${GITHUB_RUN_ID}-${attempt}" -o "$HOME_HTML" \
+            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://formatxsuite.com/?award_audit=${GITHUB_RUN_ID}-${attempt}" -o "$HOME_HTML" \
               && grep -Fq 'data-fx-award-positioning="v2"' "$HOME_HTML" \
               && grep -Fq 'data-fx-hero-trustline' "$HOME_HTML" \
               && grep -Fq 'FormatX Suite Pro | Technikusi operációs réteg' "$HOME_HTML" \
@@ -49,15 +52,15 @@ jobs:
             sleep 5
           done
 
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-award-readiness.css?v=award-live-v51' -o "$AWARD_CSS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/styles/formatx-award-readiness.css?v=award-live-v51' -o "$AWARD_CSS"
           grep -Fq ':focus-visible' "$AWARD_CSS"
           grep -Fq 'min-block-size: 44px' "$AWARD_CSS"
           grep -Fq 'prefers-reduced-motion: reduce' "$AWARD_CSS"
 
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v51-authority' -o "$REFERENCE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v51-bootstrap' -o "$CORE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-core-v51.js?v=live-v51-runtime' -o "$CORE_RUNTIME"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/styles/formatx-core-v51.css?v=live-v51-style' -o "$CORE_CSS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v51-authority' -o "$REFERENCE_BOOTSTRAP"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v51-bootstrap' -o "$CORE_BOOTSTRAP"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-core-v51.js?v=live-v51-runtime' -o "$CORE_RUNTIME"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/styles/formatx-core-v51.css?v=live-v51-style' -o "$CORE_CSS"
 
           grep -Fq "const WEBGPU_PREVIEW = params.get('webgpu') === '1'" "$REFERENCE_BOOTSTRAP"
           grep -Fq "root.dataset.fxReferenceCore = 'production-v51-reference-crystal-authority'" "$REFERENCE_BOOTSTRAP"
@@ -74,14 +77,49 @@ jobs:
           grep -Fq -- '--fx-core-x: 50%' "$CORE_CSS"
           ! grep -Fq 'clip-path: polygon' "$CORE_CSS"
 
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/igloo-parity.js?v=native-apex-live' -o "$PARITY_JS"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?v=native-apex-live' -o "$APEX_JS"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://www.formatxsuite.com/scifi-ui/scripts/formatx-three-host-safe.js?v=native-apex-live' -o "$FALLBACK_JS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/igloo-parity.js?v=native-apex-live' -o "$PARITY_JS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?v=native-apex-live' -o "$APEX_JS"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-three-host-safe.js?v=native-apex-live' -o "$FALLBACK_JS"
           grep -Fq 'safe-ready-v28' "$PARITY_JS"
-          grep -Fq "fxScrollOwnership='seamless-v7'" "$APEX_JS"
           grep -Fq "fxInputInterception='none'" "$APEX_JS"
           ! grep -Fq 'scrollTo(' "$APEX_JS"
+          ! grep -Fq "addEventListener('wheel'" "$APEX_JS"
+          ! grep -Fq "addEventListener('touchmove'" "$APEX_JS"
           grep -Fq "root.dataset.fxNativeApex === 'ready'" "$FALLBACK_JS"
+
+          # Scroll ownership is platform-specific. Mobile is a finite native
+          # document; desktop retains the seamless-v7 visual boundary bridge.
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-infinite-scroll.js?v=award-platform-scroll' -o "$SCROLL_BOOTSTRAP"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=award-platform-scroll' -o "$DESKTOP_SCROLL"
+          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/data/scroll-policy.json?v=award-platform-scroll' -o "$SCROLL_POLICY"
+
+          grep -Fq 'platform-scroll-v2' "$SCROLL_BOOTSTRAP"
+          grep -Fq 'mobile-native-document-v1' "$SCROLL_BOOTSTRAP"
+          grep -Fq "fxAutomaticLoop = 'disabled-mobile'" "$SCROLL_BOOTSTRAP"
+          grep -Fq "fxLoopBridge = 'disabled-mobile'" "$SCROLL_BOOTSTRAP"
+          ! grep -Fq 'scrollTo(' "$SCROLL_BOOTSTRAP"
+          ! grep -Fq 'scrollIntoView(' "$SCROLL_BOOTSTRAP"
+          ! grep -Fq 'cloneNode(' "$SCROLL_BOOTSTRAP"
+          ! grep -Fq 'preventDefault' "$SCROLL_BOOTSTRAP"
+
+          grep -Fq "const VERSION = 'seamless-v7'" "$DESKTOP_SCROLL"
+          grep -Fq 'sourceHero.cloneNode(true)' "$DESKTOP_SCROLL"
+          grep -Fq 'window.scrollTo(' "$DESKTOP_SCROLL"
+          ! grep -Fq "addEventListener('wheel'" "$DESKTOP_SCROLL"
+          ! grep -Fq "addEventListener('touchmove'" "$DESKTOP_SCROLL"
+
+          jq -e '
+            .schema_version == 1 and
+            .policy.input_capture == false and
+            .policy.section_scroll_snap == false and
+            .mobile.controller == "mobile-native-document-v1" and
+            .mobile.automatic_loop == false and
+            .mobile.visual_bridge == false and
+            .mobile.automatic_page_position_changes == false and
+            .desktop.controller == "seamless-v7" and
+            .desktop.automatic_loop == true and
+            .desktop.visual_bridge == true
+          ' "$SCROLL_POLICY" >/dev/null
 
       - name: Publish live award-readiness status
         if: always()
@@ -92,5 +130,15 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live award-tier + reference crystal v51 + native Apex verified'; else state=failure; description='Live award-tier / v51 core / native Apex verification failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Live award tier, v51 core, native Apex and platform scroll verified'
+          else
+            state=failure
+            description='Live award/core/Apex/platform-scroll verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX live award readiness' \
+            -f description="$description" \
+            -f target_url="$TARGET_URL"

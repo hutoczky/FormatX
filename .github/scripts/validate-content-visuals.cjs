@@ -48,7 +48,11 @@ async function injectProductionLikeContent(page) {
     await page.addStyleTag({ url: origin + href });
   }
 
+  // Keep the browser test aligned with the production worker. The static HTML
+  // contains the legacy HU/EN pair, while production loads this module and
+  // exposes exactly one accessible language toggle.
   for (const src of [
+    '/scifi-ui/scripts/single-language-toggle.js',
     '/scifi-ui/scripts/release-metadata.js',
     '/scifi-ui/scripts/formatx-content-standard.js',
     '/scifi-ui/scripts/formatx-content-finalizer.js',
@@ -58,7 +62,9 @@ async function injectProductionLikeContent(page) {
   ]) {
     await page.addScriptTag({ url: origin + src });
   }
-  await page.waitForTimeout(1800);
+
+  await page.waitForFunction(() => document.documentElement.dataset.fxSingleLanguageToggle === 'ready', null, { timeout: 8000 });
+  await page.waitForTimeout(1200);
 }
 
 async function commonAssertions(page, mobile) {
@@ -74,7 +80,7 @@ async function commonAssertions(page, mobile) {
   assert(overflow <= 2, 'Horizontal overflow detected: ' + overflow + 'px');
 
   const languageControls = await page.locator('.fx-language-toggle:visible, .language-switch [data-language]:visible, .language-control [data-language-choice]:visible').count();
-  assert(languageControls <= 1, 'Multiple visible language controls: ' + languageControls);
+  assert(languageControls === 1, 'Production must expose exactly one visible language control: ' + languageControls);
 
   const proof = await box(page, '.fx-award-proof', false);
   if (proof) {
@@ -97,11 +103,19 @@ async function commonAssertions(page, mobile) {
     const proofGrid = page.locator('.fx-award-proof__grid').first();
     if (await proofGrid.count()) {
       const columns = await proofGrid.evaluate(element => getComputedStyle(element).gridTemplateColumns);
-      assert(!columns.includes(' ') || columns.trim().split(/\s+/).length === 1, 'Public proof cards are not single-column on mobile: ' + columns);
+      assert(columns.trim().split(/\s+/).length === 1, 'Public proof cards are not single-column on mobile: ' + columns);
     }
 
     const qrBroken = await page.locator('.fx-plan-qr-card:not(.is-qr-ready) .fx-plan-qr-link img:visible').count();
     assert(qrBroken === 0, 'A not-ready QR image is visibly rendered on mobile');
+
+    const scrollState = await page.evaluate(() => ({
+      policy: document.documentElement.dataset.fxMobileScrollPolicy || '',
+      mode: document.documentElement.dataset.fxMobileScrollMode || '',
+      bridgeCount: document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"]').length
+    }));
+    assert(scrollState.policy === 'native-document-v1', 'Mobile native-document policy marker missing: ' + JSON.stringify(scrollState));
+    assert(scrollState.bridgeCount === 0, 'Mobile visual loop bridge leaked into document: ' + JSON.stringify(scrollState));
   }
 }
 
@@ -121,25 +135,40 @@ async function capture(browser, name, viewport, setup = async () => {}, targetUr
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-  await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
-  await injectProductionLikeContent(page);
-  await setup(page);
-  await commonAssertions(page, viewport.width < 700);
-  const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
-  assert(!meaningful.length, name + ' browser errors: ' + meaningful.join(' | '));
-  await page.screenshot({ path: path.join(out, name + '.png'), fullPage: true });
-  await context.close();
+
+  let failure;
+  try {
+    await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
+    await injectProductionLikeContent(page);
+    await setup(page);
+    await commonAssertions(page, viewport.width < 700);
+    const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
+    assert(!meaningful.length, name + ' browser errors: ' + meaningful.join(' | '));
+  } catch (error) {
+    failure = error;
+  } finally {
+    await page.screenshot({ path: path.join(out, name + '.png'), fullPage: true }).catch(() => {});
+    await context.close();
+  }
+  if (failure) throw failure;
 }
 
 async function publicPage(browser, name, pathname, selector, viewport = { width: 1440, height: 900 }) {
   const context = await browser.newContext({ viewport, colorScheme: 'dark' });
   const page = await context.newPage();
-  await page.goto(origin + pathname, { waitUntil: 'networkidle' });
-  await page.waitForSelector(selector, { timeout: 10000 });
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  assert(overflow <= 2, pathname + ' horizontal overflow: ' + overflow + 'px');
-  await page.screenshot({ path: path.join(out, name + '.png'), fullPage: true });
-  await context.close();
+  let failure;
+  try {
+    await page.goto(origin + pathname, { waitUntil: 'networkidle' });
+    await page.waitForSelector(selector, { timeout: 10000 });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    assert(overflow <= 2, pathname + ' horizontal overflow: ' + overflow + 'px');
+  } catch (error) {
+    failure = error;
+  } finally {
+    await page.screenshot({ path: path.join(out, name + '.png'), fullPage: true }).catch(() => {});
+    await context.close();
+  }
+  if (failure) throw failure;
 }
 
 (async () => {
