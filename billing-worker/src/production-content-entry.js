@@ -40,10 +40,11 @@ export default {
     const url = new URL(request.url);
     const safeMethod = request.method === 'GET' || request.method === 'HEAD';
     const homepage = HOMEPAGE_ALIASES.has(url.pathname);
+    const publicHost = url.hostname === CANONICAL_HOST || url.hostname === LEGACY_WWW_HOST;
 
     if (safeMethod && homepage) {
-      // Every visible homepage variant collapses to one clean browser URL.
-      // Query-string cache busters are intentionally removed from the public URL.
+      // There is exactly one browser-visible homepage URL. Old aliases, WWW and
+      // cache-busting query strings collapse to the clean apex root.
       if (
         url.hostname === LEGACY_WWW_HOST
         || url.pathname !== '/'
@@ -54,42 +55,50 @@ export default {
 
       if (url.hostname === CANONICAL_HOST && url.pathname === '/') {
         /*
-          IMPORTANT: never route the internal homepage request through either
-          public hostname. Lower legacy layers still contain opposite historical
-          canonical rules (apex -> www and www -> apex). Sending the internal
-          request to either public host can therefore surface a 308 response and
-          create a browser-visible redirect loop.
-
-          The content pipeline only needs the static asset pathname here. An
-          internal-only hostname plus /scifi-ui/ bypasses all public canonical
-          redirects while preserving the complete production content pipeline.
-          The response is canonicalised back to https://formatxsuite.com/ below.
+          Never route the internal homepage request through either public host.
+          Lower legacy layers contain historical canonical rules in opposite
+          directions. The internal-only hostname bypasses those rules, and the
+          real static homepage is requested directly at /scifi-ui/.
         */
-        const internalUrl = new URL(request.url);
-        internalUrl.protocol = 'https:';
-        internalUrl.hostname = INTERNAL_ASSET_HOST;
-        internalUrl.pathname = '/scifi-ui/';
-        internalUrl.search = '';
-        internalUrl.hash = '';
-
-        const internalRequest = new Request(internalUrl, request);
+        const internalRequest = createInternalPipelineRequest(request, '/scifi-ui/', '');
         const response = await contentPipeline.fetch(internalRequest, env, ctx);
         return canonicaliseHomepageResponse(response, request.method);
       }
+    }
+
+    if (safeMethod && publicHost) {
+      /*
+        Shield every public GET/HEAD asset, API read and secondary page from the
+        old hostname canonicalisers as well. This is critical for the apex root:
+        its CSS/JS requests must remain first-party and must not bounce through
+        WWW, otherwise strict self-only CSP can leave the page as raw HTML.
+      */
+      const internalRequest = createInternalPipelineRequest(request, url.pathname, url.search);
+      return contentPipeline.fetch(internalRequest, env, ctx);
     }
 
     return contentPipeline.fetch(request, env, ctx);
   },
 };
 
+function createInternalPipelineRequest(request, pathname, search) {
+  const internalUrl = new URL(request.url);
+  internalUrl.protocol = 'https:';
+  internalUrl.hostname = INTERNAL_ASSET_HOST;
+  internalUrl.pathname = pathname;
+  internalUrl.search = search || '';
+  internalUrl.hash = '';
+  return new Request(internalUrl, request);
+}
+
 async function canonicaliseHomepageResponse(response, method) {
   const headers = new Headers(response.headers);
   headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
   headers.set('Cache-Control', 'no-cache, max-age=0, must-revalidate');
 
-  // A canonical homepage response must never expose a redirect from an inner
-  // legacy layer. If one somehow reaches this boundary, fail closed instead of
-  // sending the browser back into a domain loop.
+  // No lower-layer redirect is allowed to escape from the canonical homepage.
+  // If a future regression reaches this boundary, return an explicit failure
+  // rather than trapping the browser in another redirect loop.
   if (response.status >= 300 && response.status < 400) {
     headers.delete('Location');
     headers.delete('Content-Length');
