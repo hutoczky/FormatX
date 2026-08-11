@@ -1,5 +1,5 @@
 /* FormatX native continuous scroll policy.
-   Production revision: 2026-08-08 wheel-v1.
+   Production revision: 2026-08-11 scroll-smooth-r1.
    This stylesheet is intentionally small and loaded before optional/immersive
    modules. It prevents any legacy chapter or scene stylesheet from turning
    ordinary wheel/touch scrolling into section snapping. */
@@ -32,6 +32,7 @@ body {
   html,
   body {
     overflow-y: auto !important;
+    overscroll-behavior-x: none !important;
     overscroll-behavior-y: auto !important;
     touch-action: pan-y pinch-zoom !important;
     -webkit-overflow-scrolling: touch !important;
@@ -43,5 +44,19 @@ body {
   .fx-organism-chapter,
   .fx-organism-chapter-trigger {
     touch-action: pan-y pinch-zoom !important;
+  }
+
+  /* The mobile shell already fades the fixed action surfaces while scrolling.
+     Do not keep costly backdrop blur/compositing alive while they are hidden. */
+  html.fx-page-scrolling .topbar,
+  html.fx-page-scrolling .fx-organism-actionbar,
+  html.fx-page-scrolling .fx-organism-dialogue {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  html.fx-page-scrolling .fx-organism-actionbar,
+  html.fx-page-scrolling .fx-organism-dialogue {
+    box-shadow: none !important;
   }
 }
