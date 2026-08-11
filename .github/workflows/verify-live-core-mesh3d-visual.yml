@@ -110,7 +110,18 @@ jobs:
             });
             const page = await context.newPage();
             const errors = [];
+            const diagnostics = [];
             page.on('pageerror', e => errors.push(String(e)));
+            page.on('requestfailed', request => {
+              if (/formatx-core-(?:real3d-v20|reference-v53|mobile-v55)/.test(request.url())) {
+                diagnostics.push(`request failed: ${request.url()} :: ${request.failure()?.errorText || 'unknown'}`);
+              }
+            });
+            page.on('response', response => {
+              if (response.status() >= 400 && /formatx-core-(?:real3d-v20|reference-v53|mobile-v55)/.test(response.url())) {
+                diagnostics.push(`HTTP ${response.status()}: ${response.url()}`);
+              }
+            });
 
             await page.goto(`https://www.formatxsuite.com/?core_current_visual=${process.env.RUN_ID}&capture=${cfg.name}`, {
               waitUntil: 'domcontentloaded', timeout: 60000
@@ -127,10 +138,25 @@ jobs:
 
             await page.waitForFunction(isMobile => {
               const root = document.documentElement;
-              return isMobile
-                ? root.dataset.fxCoreMobileV55 === 'ready-v55'
-                : root.dataset.fxCoreReferenceV53 === 'ready-v53';
+              const state = isMobile ? root.dataset.fxCoreMobileV55 : root.dataset.fxCoreReferenceV53;
+              const expected = isMobile ? 'ready-v55' : 'ready-v53';
+              return state === expected || Boolean(state && !/^booting-/.test(state));
             }, cfg.mobile, { timeout: 60000 });
+            const startup = await page.evaluate(isMobile => {
+              const root = document.documentElement;
+              return {
+                engine: isMobile ? root.dataset.fxCoreMobileV55 : root.dataset.fxCoreReferenceV53,
+                real3d: root.dataset.fxCoreReal3d,
+                lock: root.dataset.fxCoreReferenceLock,
+                lockLoad: root.dataset.fxCoreReferenceLockLoad,
+                error: root.dataset.fxCoreReal3dError || null,
+                bootstrap: root.dataset.fxCoreReal3dBootstrap,
+                assets: [...document.scripts].map(script => script.src).filter(src => /formatx-core-(?:real3d-v20|reference-v53|mobile-v55)/.test(src))
+              };
+            }, cfg.mobile);
+            console.log('MAG_STARTUP', cfg.name, JSON.stringify({ startup, diagnostics }));
+            assert.equal(startup.engine, cfg.mobile ? 'ready-v55' : 'ready-v53',
+              `${cfg.name} cinematic engine failed to start: ${JSON.stringify({ startup, diagnostics })}`);
             await page.waitForTimeout(1800);
 
             const runtime = await page.evaluate(() => {
@@ -285,7 +311,7 @@ jobs:
             assert.ok(visual.tips && visual.tips.bottom > 0, 'bottom crystal tip must be visible');
             assert.ok(visual.tips && visual.tips.center > 0, 'luminous central reactor must be visible');
 
-            fs.writeFileSync(`core-current-${cfg.name}.json`, JSON.stringify({ runtime, visual, errors }, null, 2));
+            fs.writeFileSync(`core-current-${cfg.name}.json`, JSON.stringify({ startup, runtime, visual, errors, diagnostics }, null, 2));
             if (errors.length) throw new Error(`${cfg.name} page errors: ${errors.join(' | ')}`);
             await context.close();
             return { runtime, visual };
@@ -294,7 +320,7 @@ jobs:
           (async () => {
             const browser = await chromium.launch({
               headless: true,
-              args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
+              args: ['--use-gl=angle', '--use-angle=swiftshader-webgl', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
             });
             const mobile = await capture(browser, { name: 'mobile', mobile: true, viewport: { width: 390, height: 844 } });
             const desktop = await capture(browser, { name: 'desktop', mobile: false, viewport: { width: 1440, height: 1000 } });
