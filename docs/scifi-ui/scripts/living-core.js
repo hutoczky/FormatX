@@ -64,7 +64,7 @@ const MOBILE_HUD_ANCHORS = Object.freeze([
   [0.26, 0.67], [0.74, 0.67]
 ]);
 
-const RELEASE_API = '/api/public-release';
+const RELEASE_API = './data/current-release.json';
 const RELEASE_DOWNLOAD = '/download/multiplatform';
 
 function clamp(value, min, max) {
@@ -862,24 +862,24 @@ class LivingCoreExperience {
     if (!(this.releaseLink instanceof HTMLAnchorElement)) return;
     try {
       const response = await fetch(RELEASE_API, {
-        headers: { Accept: 'application/vnd.github+json' },
+        headers: { Accept: 'application/json' },
         cache: 'no-store'
       });
       if (!response.ok) return;
       const payload = await response.json();
-      if (!payload || payload.draft || payload.prerelease || !Array.isArray(payload.assets)) return;
-      const match = String(payload.tag_name || '').match(/^v?(\d+)$/i);
+      if (!payload?.ok || payload.prerelease) return;
+      const match = String(payload.version || '').match(/^v?(\d+)$/i);
       if (!match) return;
       const version = `V${match[1]}`;
       const expected = `FormatX-Suite-Pro-${version}.zip`;
-      const asset = payload.assets.find(candidate => candidate && candidate.name === expected);
-      if (!asset || asset.browser_download_url !== RELEASE_DOWNLOAD) return;
+      const asset = payload.channels?.multiplatform;
+      if (!asset?.available || asset.name !== expected || asset.download_url !== RELEASE_DOWNLOAD) return;
       this.releaseLink.href = RELEASE_DOWNLOAD;
       const versionNode = this.releaseLink.querySelector('strong');
       if (versionNode) versionNode.textContent = version;
       this.releaseLink.dataset.releaseVerified = 'true';
     } catch (_) {
-      // The verified release-page fallback remains usable without the API.
+      // The versionless latest-release route remains usable without metadata.
     }
   }
 
