@@ -92,7 +92,7 @@
     root.dataset.fxScrollJumpGuard = 'native-document-v2';
     root.dataset.fxLoopBridge = 'disabled-mobile';
     root.dataset.fxScrollSnap = 'disabled';
-    root.dataset.fxMobileScrollMode = 'native-momentum-v2';
+    root.dataset.fxMobileScrollMode = 'native-document-v1';
     root.dataset.fxMobileScrollPolicy = 'native-momentum-v2';
     root.dataset.fxScrollBootstrapState = 'mobile-ready';
 
