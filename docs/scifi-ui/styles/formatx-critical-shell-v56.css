@@ -272,6 +272,44 @@ main { position: relative; z-index: 2; }
   }
 }
 
+/* Visual-only repair r2.
+   Keep the existing asset and runtime contracts untouched: the brand icon is
+   drawn from the same first-party PNG using an origin-absolute URL, while
+   mobile-only decorative diagnostics that can surface as raw text are hidden.
+   The 3D MAG canvas, launch control, hero content and desktop organism UI are
+   deliberately not changed here. */
+.brand {
+  position: relative;
+}
+
+.brand > img {
+  display: none !important;
+}
+
+.brand::before {
+  content: "";
+  display: block;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  background: url('/scifi-ui/assets/images/formatx-icon.png') center / contain no-repeat;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  .brand::before {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+  }
+
+  #hero .fx-organism-map,
+  #hero .hero-label,
+  #hero .hero-ring,
+  .fx-organism-status {
+    display: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
