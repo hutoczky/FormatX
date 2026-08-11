@@ -1,19 +1,22 @@
 {
   "schema_version": 1,
-  "revision": "2026-08-11-platform-scroll-v2",
+  "revision": "2026-08-12-mobile-seamless-v1",
   "policy": {
     "input_capture": false,
     "section_scroll_snap": false,
     "native_wheel_touch": true
   },
   "mobile": {
-    "controller": "mobile-native-document-v1",
-    "automatic_loop": false,
-    "visual_bridge": false,
+    "controller": "seamless-v7",
+    "automatic_loop": true,
+    "visual_bridge": true,
     "cloned_content": false,
-    "automatic_page_position_changes": false,
+    "cloned_hero_only": true,
+    "automatic_page_position_changes": true,
+    "boundary_handoff_only": true,
+    "transfer_mode": "scrollend-or-idle",
     "native_momentum_preserved": true,
-    "finite_document": true
+    "finite_document": false
   },
   "desktop": {
     "controller": "seamless-v7",
