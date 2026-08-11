@@ -19,17 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - name: Verify live SEO, hierarchy, v51 reference crystal, native Apex and platform scroll policy
+      - name: Verify live SEO, hierarchy, current MAG, native Apex and platform scroll policy
         shell: bash
         run: |
           set -euo pipefail
-          ORIGIN='https://www.formatxsuite.com'
+          ORIGIN='https://formatxsuite.com'
           HOME_HTML="$RUNNER_TEMP/formatx-home.html"
           AWARD_CSS="$RUNNER_TEMP/formatx-award-readiness.css"
-          REFERENCE_BOOTSTRAP="$RUNNER_TEMP/formatx-reference-core-v26.js"
           CORE_BOOTSTRAP="$RUNNER_TEMP/formatx-core-real3d-v20.js"
-          CORE_RUNTIME="$RUNNER_TEMP/formatx-core-v51.js"
-          CORE_CSS="$RUNNER_TEMP/formatx-core-v51.css"
+          DESKTOP_CORE="$RUNNER_TEMP/formatx-core-reference-v53.js"
+          DESKTOP_CORE_CSS="$RUNNER_TEMP/formatx-core-reference-v53.css"
+          MOBILE_CORE="$RUNNER_TEMP/formatx-core-mobile-v55.js"
+          MOBILE_CORE_CSS="$RUNNER_TEMP/formatx-core-mobile-v55.css"
           PARITY_JS="$RUNNER_TEMP/igloo-parity.js"
           APEX_JS="$RUNNER_TEMP/formatx-apex-native.js"
           FALLBACK_JS="$RUNNER_TEMP/formatx-three-host-safe.js"
@@ -66,6 +67,18 @@ jobs:
             fi
           }
 
+          count_exact() {
+            local label="$1" needle="$2" expected="$3" file="$4"
+            local actual
+            actual="$(grep -Fo -- "$needle" "$file" | wc -l | tr -d ' ')"
+            if [ "$actual" = "$expected" ]; then
+              echo "PASS count: $label = $actual"
+            else
+              echo "FAIL count: $label expected $expected, got $actual" >&2
+              exit 1
+            fi
+          }
+
           for attempt in $(seq 1 24); do
             if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$ORIGIN/?award_audit=${GITHUB_RUN_ID}-${attempt}" -o "$HOME_HTML" \
               && grep -Fq 'data-fx-award-positioning="v2"' "$HOME_HTML" \
@@ -83,36 +96,72 @@ jobs:
             sleep 5
           done
 
-          get_live 'award readiness CSS' "$ORIGIN/scifi-ui/styles/formatx-award-readiness.css?v=award-live-v51" "$AWARD_CSS"
+          get_live 'award readiness CSS' "$ORIGIN/scifi-ui/styles/formatx-award-readiness.css?v=award-live-current" "$AWARD_CSS"
           contains 'keyboard focus styling' ':focus-visible' "$AWARD_CSS"
           contains '44px target floor' 'min-block-size: 44px' "$AWARD_CSS"
           contains 'reduced-motion support' 'prefers-reduced-motion: reduce' "$AWARD_CSS"
 
-          get_live 'reference core authority' "$ORIGIN/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v51-authority" "$REFERENCE_BOOTSTRAP"
-          get_live 'core bootstrap' "$ORIGIN/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v51-bootstrap" "$CORE_BOOTSTRAP"
-          get_live 'v51 core runtime' "$ORIGIN/scifi-ui/scripts/formatx-core-v51.js?v=live-v51-runtime" "$CORE_RUNTIME"
-          get_live 'v51 core CSS' "$ORIGIN/scifi-ui/styles/formatx-core-v51.css?v=live-v51-style" "$CORE_CSS"
+          # Current production MAG authority: desktop v53 and physical-mobile v55.
+          # The bootstrap chooses exactly one renderer and does not create a GL context itself.
+          get_live 'current MAG bootstrap' "$ORIGIN/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-current-mag" "$CORE_BOOTSTRAP"
+          get_live 'desktop v53 MAG runtime' "$ORIGIN/scifi-ui/scripts/formatx-core-reference-v53.js?v=live-current-mag" "$DESKTOP_CORE"
+          get_live 'desktop v53 MAG CSS' "$ORIGIN/scifi-ui/styles/formatx-core-reference-v53.css?v=live-current-mag" "$DESKTOP_CORE_CSS"
+          get_live 'mobile v55 MAG runtime' "$ORIGIN/scifi-ui/scripts/formatx-core-mobile-v55.js?v=live-current-mag" "$MOBILE_CORE"
+          get_live 'mobile v55 MAG CSS' "$ORIGIN/scifi-ui/styles/formatx-core-mobile-v55.css?v=live-current-mag" "$MOBILE_CORE_CSS"
 
-          contains 'WebGPU preview opt-in' "const WEBGPU_PREVIEW = params.get('webgpu') === '1'" "$REFERENCE_BOOTSTRAP"
-          contains 'v51 production authority' "root.dataset.fxReferenceCore = 'production-v51-reference-crystal-authority'" "$REFERENCE_BOOTSTRAP"
-          contains 'v51 bootstrap marker' "const BOOTSTRAP = 'reference-crystal-core-v51'" "$CORE_BOOTSTRAP"
-          contains 'v51 runtime asset' 'formatx-core-v51.js?v=20260810-reference-crystal-v51-1' "$CORE_BOOTSTRAP"
-          contains 'v51 runtime version' "const VERSION = 'v51-reference-crystal-core'" "$CORE_RUNTIME"
-          contains 'sharp four-tip crystal' 'sharp-four-tip-concave-crystal-v51' "$CORE_RUNTIME"
-          contains 'refractive glass material' 'layered-faceted-refractive-glass-v51' "$CORE_RUNTIME"
-          contains 'moving nucleus rings' 'moving-white-nucleus-concentric-spectral-rings-v51' "$CORE_RUNTIME"
-          contains 'adaptive 60+ FPS contract' 'single-context-adaptive-60-plus-fps' "$CORE_RUNTIME"
-          contains 'procedural crystal function' 'function crystal(' "$CORE_RUNTIME"
-          contains 'procedural star radius' 'function starRadius(' "$CORE_RUNTIME"
-          absent 'image-backed core drawImage' 'drawImage(' "$CORE_RUNTIME"
-          absent 'image-backed core Image constructor' 'new Image(' "$CORE_RUNTIME"
-          contains 'reference horizontal center' '--fx-core-x: 50%' "$CORE_CSS"
-          absent 'legacy polygon clipping' 'clip-path: polygon' "$CORE_CSS"
+          contains 'current v53 bootstrap marker' "const BOOTSTRAP = 'reference-crystal-core-v53'" "$CORE_BOOTSTRAP"
+          contains 'root-safe desktop v53 runtime route' "/scifi-ui/scripts/formatx-core-reference-v53.js?v=20260811-reference-v53-r3" "$CORE_BOOTSTRAP"
+          contains 'root-safe desktop v53 style route' "/scifi-ui/styles/formatx-core-reference-v53.css?v=20260811-reference-v53-r3" "$CORE_BOOTSTRAP"
+          contains 'root-safe mobile v55 runtime route' "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260811-cinematic-mobile-v55-r3" "$CORE_BOOTSTRAP"
+          contains 'root-safe mobile v55 style route' "/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260811-cinematic-mobile-v55-r3" "$CORE_BOOTSTRAP"
+          contains 'desktop v53 renderer marker' 'single-webgl2-reference-crystal-v53' "$CORE_BOOTSTRAP"
+          contains 'mobile v55 renderer marker' 'single-webgl2-mobile-cinematic-crystal-v55' "$CORE_BOOTSTRAP"
+          absent 'bootstrap WebGL context creation' "getContext('webgl2'" "$CORE_BOOTSTRAP"
+
+          count_exact 'desktop WebGL2 context creation sites' "getContext('webgl2'" 1 "$DESKTOP_CORE"
+          contains 'desktop sharp four-tip crystal' 'sharp-four-tip-concave-crystal-v53' "$DESKTOP_CORE"
+          contains 'desktop refractive glass material' 'clean-faceted-refractive-glass-v53' "$DESKTOP_CORE"
+          contains 'desktop moving nucleus rings' 'moving-white-nucleus-concentric-spectral-rings-v53' "$DESKTOP_CORE"
+          contains 'desktop adaptive 60+ FPS contract' 'single-context-adaptive-60-plus-fps' "$DESKTOP_CORE"
+          contains 'desktop physical triangle ribbons' 'physical-triangle-ribbons-interactive-r2' "$DESKTOP_CORE"
+          contains 'desktop moving internal volume' 'inside-moving-volume-r2' "$DESKTOP_CORE"
+          contains 'desktop procedural crystal function' 'function crystal(' "$DESKTOP_CORE"
+          contains 'desktop procedural radius function' 'function radius(' "$DESKTOP_CORE"
+          contains 'desktop visibility pause' 'IntersectionObserver' "$DESKTOP_CORE"
+          contains 'desktop responsive resize' 'ResizeObserver' "$DESKTOP_CORE"
+          absent 'desktop image-backed drawImage' 'drawImage(' "$DESKTOP_CORE"
+          absent 'desktop image-backed Image constructor' 'new Image(' "$DESKTOP_CORE"
+          absent 'desktop third-party Three.js engine' 'THREE' "$DESKTOP_CORE"
+          contains 'desktop non-interactive core stage' 'pointer-events: none !important' "$DESKTOP_CORE_CSS"
+          contains 'desktop unfiltered native render' 'filter: none !important' "$DESKTOP_CORE_CSS"
+          absent 'desktop CSS fake polygon crystal' 'clip-path: polygon' "$DESKTOP_CORE_CSS"
+
+          count_exact 'mobile WebGL2 context creation sites' "getContext('webgl2'" 1 "$MOBILE_CORE"
+          contains 'mobile hero-local host resolution' "hero&&hero.querySelector('.hero-space')" "$MOBILE_CORE"
+          contains 'mobile stage mounted in hero host' 'host.prepend(stage)' "$MOBILE_CORE"
+          contains 'mobile compositor-safe premultiplied alpha' 'premultipliedAlpha:true' "$MOBILE_CORE"
+          contains 'mobile bounded pixel budget' 'budget=980000' "$MOBILE_CORE"
+          contains 'mobile default power preference' "powerPreference:'default'" "$MOBILE_CORE"
+          contains 'mobile sharp long-tip crystal' 'long-sharp-four-tip-deep-concave-crystal-v55' "$MOBILE_CORE"
+          contains 'mobile thin faceted Fresnel glass' 'thin-layered-faceted-fresnel-glass-v55' "$MOBILE_CORE"
+          contains 'mobile compact nucleus and spectral rings' 'small-hot-white-nucleus-concentric-cyan-violet-rings-v55' "$MOBILE_CORE"
+          contains 'mobile adaptive 60+ FPS contract' 'single-context-adaptive-60-plus-fps' "$MOBILE_CORE"
+          contains 'mobile procedural star radius' 'function starRadius(' "$MOBILE_CORE"
+          contains 'mobile visibility pause' 'IntersectionObserver' "$MOBILE_CORE"
+          contains 'mobile responsive resize' 'ResizeObserver' "$MOBILE_CORE"
+          absent 'mobile image-backed drawImage' 'drawImage(' "$MOBILE_CORE"
+          absent 'mobile image-backed Image constructor' 'new Image(' "$MOBILE_CORE"
+          absent 'mobile third-party Three.js engine' 'THREE' "$MOBILE_CORE"
+          contains 'mobile hero-local stage selector' '#hero .hero-space > .fx-core-mobile-v55-stage' "$MOBILE_CORE_CSS"
+          contains 'mobile absolute stage positioning' 'position: absolute !important' "$MOBILE_CORE_CSS"
+          contains 'mobile unfiltered native render' 'filter: none !important' "$MOBILE_CORE_CSS"
+          absent 'mobile CSS fake polygon crystal' 'clip-path: polygon' "$MOBILE_CORE_CSS"
 
           get_live 'immersive parity loader' "$ORIGIN/scifi-ui/scripts/igloo-parity.js?v=native-apex-live" "$PARITY_JS"
           get_live 'native Apex renderer' "$ORIGIN/scifi-ui/scripts/formatx-apex-native.js?v=native-apex-live" "$APEX_JS"
           get_live 'safe Apex fallback' "$ORIGIN/scifi-ui/scripts/formatx-three-host-safe.js?v=native-apex-live" "$FALLBACK_JS"
           contains 'current v28 loader' 'safe-ready-v28' "$PARITY_JS"
+          contains 'current Thought Genome host compatibility' 'synaptic-thought-genome.js?v=20260811-current-host-v2' "$PARITY_JS"
           contains 'Apex no input interception marker' "fxInputInterception='none'" "$APEX_JS"
           absent 'Apex forced scroll' 'scrollTo(' "$APEX_JS"
           absent 'Apex wheel ownership' "addEventListener('wheel'" "$APEX_JS"
@@ -172,10 +221,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Live award tier, v51 core, native Apex and platform scroll verified'
+            description='Live award tier, v53/v55 MAG, native Apex and platform scroll verified'
           else
             state=failure
-            description='Live award/core/Apex/platform-scroll verification failed'
+            description='Live award/MAG/Apex/platform-scroll verification failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
