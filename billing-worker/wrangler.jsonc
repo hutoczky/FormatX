@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "formatx",
-  "main": "src/canonical-entry.js",
+  "main": "src/production-content-entry.js",
   "compatibility_date": "2026-07-18",
   "workers_dev": false,
   "minify": true,
