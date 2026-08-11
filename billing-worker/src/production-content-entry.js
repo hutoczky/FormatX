@@ -6,6 +6,7 @@ const LEGACY_WWW_HOST = 'www.formatxsuite.com';
 const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
 const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
+const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260811-critical-shell-1">';
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -220,6 +221,7 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
 
   if (homepage) {
     headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
+    headers.set('X-FormatX-Shell', 'v56');
   } else {
     const link = headers.get('Link');
     if (link) {
@@ -283,6 +285,10 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
     .replaceAll(`https://${INTERNAL_HOST}/`, `${CANONICAL_ORIGIN}/`)
     .replaceAll(`https://${INTERNAL_HOST}`, CANONICAL_ORIGIN);
 
+  if (homepage) {
+    html = normaliseHomepageDocumentPaths(html);
+  }
+
   if (cleanAddressBar && !html.includes('data-fx-canonical-recovery')) {
     html = html.replace('</head>', `  ${RECOVERY_SCRIPT}\n</head>`);
   }
@@ -296,6 +302,34 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
     statusText: response.statusText,
     headers,
   });
+}
+
+function normaliseHomepageDocumentPaths(html) {
+  let output = String(html || '')
+    .replace(/<base\s+href=["']\/scifi-ui\/["']\s*\/?\s*>/i, '<base href="/">')
+    .replaceAll('href="./', 'href="/scifi-ui/')
+    .replaceAll("href='./", "href='/scifi-ui/")
+    .replaceAll('src="./', 'src="/scifi-ui/')
+    .replaceAll("src='./", "src='/scifi-ui/")
+    .replaceAll('action="./', 'action="/scifi-ui/')
+    .replaceAll("action='./", "action='/scifi-ui/")
+    .replaceAll('poster="./', 'poster="/scifi-ui/')
+    .replaceAll("poster='./", "poster='/scifi-ui/");
+
+  if (!/<base\s+href=["']\/["']/i.test(output)) {
+    output = output.replace('</title>', '</title>\n  <base href="/">');
+  }
+
+  if (!output.includes('data-fx-critical-shell="v56"')) {
+    const baseTag = '<base href="/">';
+    if (output.includes(baseTag)) {
+      output = output.replace(baseTag, `${baseTag}\n  ${CRITICAL_SHELL_LINK}`);
+    } else {
+      output = output.replace('<head>', `<head>\n  ${CRITICAL_SHELL_LINK}`);
+    }
+  }
+
+  return output;
 }
 
 function mergeVary(existing, value) {
