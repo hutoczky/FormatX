@@ -1,0 +1,10 @@
+FormatX production domain routing revision
+2026-08-11
+
+Canonical public homepage: https://formatxsuite.com/
+Public safe requests are isolated from legacy inner hostname canonicalisers.
+WWW recovery redirects are temporary/no-store and use a cache-busting recovery parameter.
+The apex recovery response clears stale browser HTTP cache and removes the recovery parameter without navigation.
+Known public aliases are resolved internally.
+A bounded internal redirect follower blocks routing cycles before they can reach the browser.
+Regression tests cover apex root, WWW recovery, recovery cleanup, CSS delivery and public aliases.
