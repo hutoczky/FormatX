@@ -17,6 +17,7 @@ on:
       - '.github/scripts/validate-public-release-integration.py'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-thought-genome.cjs'
       - '.github/scripts/validate-thought-disclosure-browser.cjs'
       - '.github/scripts/validate-real3d-core-v20.cjs'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
@@ -38,6 +39,7 @@ on:
       - '.github/scripts/validate-public-release-integration.py'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
+      - '.github/scripts/validate-thought-genome.cjs'
       - '.github/scripts/validate-thought-disclosure-browser.cjs'
       - '.github/scripts/validate-real3d-core-v20.cjs'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
@@ -102,6 +104,7 @@ jobs:
           node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
           node --check .github/scripts/validate-content-visuals.cjs
           node --check .github/scripts/validate-public-pages-browser.cjs
+          node --check .github/scripts/validate-thought-genome.cjs
           node --check .github/scripts/validate-thought-disclosure-browser.cjs
           node --check .github/scripts/validate-real3d-core-v20.cjs
           node --check .github/scripts/validate-real3d-mobile-startup-v22.cjs
