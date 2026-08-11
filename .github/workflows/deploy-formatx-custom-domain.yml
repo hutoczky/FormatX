@@ -176,7 +176,7 @@ jobs:
             npx wrangler deploy
           fi
 
-      - name: Smoke-test canonical production and platform-specific scrolling
+      - name: Smoke-test canonical production and shared seamless scrolling
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -189,9 +189,10 @@ jobs:
             home_code="$(curl -sS -L --max-time 30 -D "$tmp/home.headers" -o "$tmp/home.html" -w '%{http_code}' "$ORIGIN/" || true)"
             www_code="$(curl -sS -L --max-time 30 -o "$tmp/www.html" -w '%{http_code}' "$WWW/" || true)"
             bootstrap_code="$(curl -sS --max-time 30 -o "$tmp/bootstrap.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll.js?v=production-smoke" || true)"
-            desktop_code="$(curl -sS --max-time 30 -o "$tmp/desktop.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=production-smoke" || true)"
+            seamless_code="$(curl -sS --max-time 30 -o "$tmp/seamless.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=production-smoke" || true)"
             continuous_code="$(curl -sS --max-time 30 -o "$tmp/continuous.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-continuous-scroll.css?v=production-smoke" || true)"
             mobile_code="$(curl -sS --max-time 30 -o "$tmp/mobile.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-production-r5.css?v=production-smoke" || true)"
+            mobile_loop_code="$(curl -sS --max-time 30 -o "$tmp/mobile-loop.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=production-smoke" || true)"
             policy_code="$(curl -sS --max-time 30 -o "$tmp/scroll-policy.json" -w '%{http_code}' "$ORIGIN/scifi-ui/data/scroll-policy.json?v=production-smoke" || true)"
             release_code="$(curl -sS --max-time 30 -o "$tmp/release.json" -w '%{http_code}' "$ORIGIN/scifi-ui/data/current-release.json" || true)"
             summary_code="$(curl -sS --max-time 30 -o "$tmp/summary.json" -w '%{http_code}' "$ORIGIN/api/feedback/summary" || true)"
@@ -199,9 +200,9 @@ jobs:
             verification_code="$(curl -sS -L --max-time 30 -o "$tmp/verification.html" -w '%{http_code}' "$ORIGIN/verification" || true)"
             package_code="$(curl -sS --max-time 45 --range 0-0 -o "$tmp/package.bin" -w '%{http_code}' "$ORIGIN/download/multiplatform" || true)"
 
-            if [[ "$home_code" == 200 && "$www_code" == 200 && "$bootstrap_code" == 200 && "$desktop_code" == 200 \
-              && "$continuous_code" == 200 && "$mobile_code" == 200 && "$policy_code" == 200 && "$release_code" == 200 \
-              && "$summary_code" == 200 && "$downloads_code" == 200 && "$verification_code" == 200 \
+            if [[ "$home_code" == 200 && "$www_code" == 200 && "$bootstrap_code" == 200 && "$seamless_code" == 200 \
+              && "$continuous_code" == 200 && "$mobile_code" == 200 && "$mobile_loop_code" == 200 && "$policy_code" == 200 \
+              && "$release_code" == 200 && "$summary_code" == 200 && "$downloads_code" == 200 && "$verification_code" == 200 \
               && ( "$package_code" == 200 || "$package_code" == 206 ) ]]; then
               if python3 - "$tmp" <<'PY'
           import json
@@ -213,9 +214,10 @@ jobs:
           home = (root / 'home.html').read_text()
           headers = (root / 'home.headers').read_text().lower()
           bootstrap = (root / 'bootstrap.js').read_text()
-          desktop = (root / 'desktop.js').read_text()
+          seamless = (root / 'seamless.js').read_text()
           continuous = (root / 'continuous.css').read_text()
           mobile = (root / 'mobile.css').read_text()
+          mobile_loop = (root / 'mobile-loop.css').read_text()
           downloads = (root / 'downloads.html').read_text()
           verification = (root / 'verification.html').read_text()
           policy = json.loads((root / 'scroll-policy.json').read_text())
@@ -223,22 +225,32 @@ jobs:
           summary = json.loads((root / 'summary.json').read_text())
 
           assert 'platform-scroll-v2' in bootstrap, 'platform scroll bootstrap not deployed yet'
-          assert 'mobile-native-document-v1' in bootstrap, 'mobile native-document policy missing'
-          assert "fxAutomaticLoop = 'disabled-mobile'" in bootstrap, 'mobile automatic loop not disabled'
-          assert "fxLoopBridge = 'disabled-mobile'" in bootstrap, 'mobile visual bridge not disabled'
+          assert "installSeamlessRuntime('mobile')" in bootstrap, 'mobile shared seamless runtime not deployed yet'
+          assert 'native-momentum-loop-v1' in bootstrap, 'mobile native-momentum loop marker missing'
+          assert "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'" in bootstrap, 'mobile seamless loop bootstrap marker missing'
+          assert 'formatx-mobile-seamless-loop.css' in bootstrap, 'CSP-safe mobile bridge stylesheet loader missing'
+          assert "createElement('style')" not in bootstrap, 'inline mobile bridge style violates CSP-safe contract'
           assert 'scrollTo(' not in bootstrap and 'scrollIntoView(' not in bootstrap and 'cloneNode(' not in bootstrap, 'mobile-capable bootstrap still moves/clones page'
-          assert "const VERSION = 'seamless-v7'" in desktop, 'desktop seamless-v7 runtime missing'
-          assert 'sourceHero.cloneNode(true)' in desktop and 'window.scrollTo(' in desktop, 'desktop visual bridge implementation missing'
-          assert "addEventListener('wheel'" not in desktop and "addEventListener('touchmove'" not in desktop, 'desktop runtime captures input'
+          assert "const VERSION = 'seamless-v7'" in seamless, 'shared seamless-v7 runtime missing'
+          assert 'sourceHero.cloneNode(true)' in seamless and 'window.scrollTo(' in seamless, 'shared visual bridge implementation missing'
+          assert "mobileTransfer: 'scrollend-or-idle'" in seamless, 'mobile handoff is not deferred until scrollend/idle'
+          assert "addEventListener('wheel'" not in seamless and "addEventListener('touchmove'" not in seamless, 'shared runtime captures native input'
           assert 'scroll-snap-type: none !important' in continuous and 'scroll-snap-align: none !important' in continuous, 'scroll snap suppression missing'
           assert '.fx-award-proof__grid' in mobile and '.fx-plan-qr-card:not(.is-qr-ready)' in mobile, 'mobile production safeguards missing'
+          assert 'display: block !important' in mobile_loop and 'min-height: calc(100svh + max(320px, 24svh))' in mobile_loop, 'mobile seamless bridge runway missing'
 
-          assert policy['mobile']['controller'] == 'mobile-native-document-v1'
-          assert policy['mobile']['automatic_loop'] is False
-          assert policy['mobile']['visual_bridge'] is False
-          assert policy['mobile']['automatic_page_position_changes'] is False
+          assert policy['mobile']['controller'] == 'seamless-v7'
+          assert policy['mobile']['automatic_loop'] is True
+          assert policy['mobile']['visual_bridge'] is True
+          assert policy['mobile']['automatic_page_position_changes'] is True
+          assert policy['mobile']['boundary_handoff_only'] is True
+          assert policy['mobile']['transfer_mode'] == 'scrollend-or-idle'
+          assert policy['mobile']['native_momentum_preserved'] is True
+          assert policy['mobile']['finite_document'] is False
           assert policy['desktop']['controller'] == 'seamless-v7'
           assert policy['desktop']['automatic_loop'] is True
+          assert policy['policy']['input_capture'] is False
+          assert policy['policy']['section_scroll_snap'] is False
 
           multi = release.get('channels', {}).get('multiplatform') or release.get('channels', {}).get('windows') or {}
           assert release.get('ok') is True and multi.get('available') is True, release
