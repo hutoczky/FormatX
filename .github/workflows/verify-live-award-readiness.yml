@@ -17,12 +17,13 @@ jobs:
       github.event.workflow_run.event == 'push' &&
       contains(github.event.workflow_run.head_commit.message, '[deploy-production]')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Verify live SEO, hierarchy, v51 reference crystal, native Apex and platform scroll policy
         shell: bash
         run: |
           set -euo pipefail
+          ORIGIN='https://www.formatxsuite.com'
           HOME_HTML="$RUNNER_TEMP/formatx-home.html"
           AWARD_CSS="$RUNNER_TEMP/formatx-award-readiness.css"
           REFERENCE_BOOTSTRAP="$RUNNER_TEMP/formatx-reference-core-v26.js"
@@ -36,8 +37,37 @@ jobs:
           DESKTOP_SCROLL="$RUNNER_TEMP/formatx-desktop-scroll-v7.js"
           SCROLL_POLICY="$RUNNER_TEMP/formatx-scroll-policy.json"
 
+          get_live() {
+            local label="$1" url="$2" file="$3"
+            echo "CHECK download: $label"
+            curl --fail --silent --show-error --location --retry 3 --retry-delay 1 --max-time 30 \
+              -H 'Cache-Control: no-cache' "$url" -o "$file"
+            test -s "$file" || { echo "FAIL empty live asset: $label" >&2; exit 1; }
+            echo "PASS download: $label"
+          }
+
+          contains() {
+            local label="$1" needle="$2" file="$3"
+            if grep -Fq -- "$needle" "$file"; then
+              echo "PASS contains: $label"
+            else
+              echo "FAIL contains: $label :: $needle" >&2
+              exit 1
+            fi
+          }
+
+          absent() {
+            local label="$1" needle="$2" file="$3"
+            if grep -Fq -- "$needle" "$file"; then
+              echo "FAIL absent: $label :: unexpected $needle" >&2
+              exit 1
+            else
+              echo "PASS absent: $label"
+            fi
+          }
+
           for attempt in $(seq 1 24); do
-            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "https://formatxsuite.com/?award_audit=${GITHUB_RUN_ID}-${attempt}" -o "$HOME_HTML" \
+            if curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' "$ORIGIN/?award_audit=${GITHUB_RUN_ID}-${attempt}" -o "$HOME_HTML" \
               && grep -Fq 'data-fx-award-positioning="v2"' "$HOME_HTML" \
               && grep -Fq 'data-fx-hero-trustline' "$HOME_HTML" \
               && grep -Fq 'FormatX Suite Pro | Technikusi operációs réteg' "$HOME_HTML" \
@@ -46,80 +76,90 @@ jobs:
               && grep -Fq 'data-fx-award-proof' "$HOME_HTML" \
               && grep -Fq 'id="formatx-structured-data"' "$HOME_HTML" \
               && grep -Fq 'formatx-core-real3d-v20.js' "$HOME_HTML"; then
+              echo 'PASS live homepage contract'
               break
             fi
-            if [ "$attempt" -eq 24 ]; then echo 'Live homepage did not expose the complete award/core contract.' >&2; exit 1; fi
+            if [ "$attempt" -eq 24 ]; then echo 'FAIL live homepage did not expose the complete award/core contract.' >&2; exit 1; fi
             sleep 5
           done
 
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/styles/formatx-award-readiness.css?v=award-live-v51' -o "$AWARD_CSS"
-          grep -Fq ':focus-visible' "$AWARD_CSS"
-          grep -Fq 'min-block-size: 44px' "$AWARD_CSS"
-          grep -Fq 'prefers-reduced-motion: reduce' "$AWARD_CSS"
+          get_live 'award readiness CSS' "$ORIGIN/scifi-ui/styles/formatx-award-readiness.css?v=award-live-v51" "$AWARD_CSS"
+          contains 'keyboard focus styling' ':focus-visible' "$AWARD_CSS"
+          contains '44px target floor' 'min-block-size: 44px' "$AWARD_CSS"
+          contains 'reduced-motion support' 'prefers-reduced-motion: reduce' "$AWARD_CSS"
 
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v51-authority' -o "$REFERENCE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v51-bootstrap' -o "$CORE_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-core-v51.js?v=live-v51-runtime' -o "$CORE_RUNTIME"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/styles/formatx-core-v51.css?v=live-v51-style' -o "$CORE_CSS"
+          get_live 'reference core authority' "$ORIGIN/scifi-ui/scripts/formatx-reference-core-v26.js?v=live-v51-authority" "$REFERENCE_BOOTSTRAP"
+          get_live 'core bootstrap' "$ORIGIN/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-v51-bootstrap" "$CORE_BOOTSTRAP"
+          get_live 'v51 core runtime' "$ORIGIN/scifi-ui/scripts/formatx-core-v51.js?v=live-v51-runtime" "$CORE_RUNTIME"
+          get_live 'v51 core CSS' "$ORIGIN/scifi-ui/styles/formatx-core-v51.css?v=live-v51-style" "$CORE_CSS"
 
-          grep -Fq "const WEBGPU_PREVIEW = params.get('webgpu') === '1'" "$REFERENCE_BOOTSTRAP"
-          grep -Fq "root.dataset.fxReferenceCore = 'production-v51-reference-crystal-authority'" "$REFERENCE_BOOTSTRAP"
-          grep -Fq "const BOOTSTRAP = 'reference-crystal-core-v51'" "$CORE_BOOTSTRAP"
-          grep -Fq 'formatx-core-v51.js?v=20260810-reference-crystal-v51-1' "$CORE_BOOTSTRAP"
-          grep -Fq "const VERSION = 'v51-reference-crystal-core'" "$CORE_RUNTIME"
-          grep -Fq 'sharp-four-tip-concave-crystal-v51' "$CORE_RUNTIME"
-          grep -Fq 'layered-faceted-refractive-glass-v51' "$CORE_RUNTIME"
-          grep -Fq 'moving-white-nucleus-concentric-spectral-rings-v51' "$CORE_RUNTIME"
-          grep -Fq 'single-context-adaptive-60-plus-fps' "$CORE_RUNTIME"
-          grep -Fq 'function crystal(' "$CORE_RUNTIME"
-          grep -Fq 'function starRadius(' "$CORE_RUNTIME"
-          ! grep -Eq 'drawImage[[:space:]]*\(|new[[:space:]]+Image[[:space:]]*\(' "$CORE_RUNTIME"
-          grep -Fq -- '--fx-core-x: 50%' "$CORE_CSS"
-          ! grep -Fq 'clip-path: polygon' "$CORE_CSS"
+          contains 'WebGPU preview opt-in' "const WEBGPU_PREVIEW = params.get('webgpu') === '1'" "$REFERENCE_BOOTSTRAP"
+          contains 'v51 production authority' "root.dataset.fxReferenceCore = 'production-v51-reference-crystal-authority'" "$REFERENCE_BOOTSTRAP"
+          contains 'v51 bootstrap marker' "const BOOTSTRAP = 'reference-crystal-core-v51'" "$CORE_BOOTSTRAP"
+          contains 'v51 runtime asset' 'formatx-core-v51.js?v=20260810-reference-crystal-v51-1' "$CORE_BOOTSTRAP"
+          contains 'v51 runtime version' "const VERSION = 'v51-reference-crystal-core'" "$CORE_RUNTIME"
+          contains 'sharp four-tip crystal' 'sharp-four-tip-concave-crystal-v51' "$CORE_RUNTIME"
+          contains 'refractive glass material' 'layered-faceted-refractive-glass-v51' "$CORE_RUNTIME"
+          contains 'moving nucleus rings' 'moving-white-nucleus-concentric-spectral-rings-v51' "$CORE_RUNTIME"
+          contains 'adaptive 60+ FPS contract' 'single-context-adaptive-60-plus-fps' "$CORE_RUNTIME"
+          contains 'procedural crystal function' 'function crystal(' "$CORE_RUNTIME"
+          contains 'procedural star radius' 'function starRadius(' "$CORE_RUNTIME"
+          absent 'image-backed core drawImage' 'drawImage(' "$CORE_RUNTIME"
+          absent 'image-backed core Image constructor' 'new Image(' "$CORE_RUNTIME"
+          contains 'reference horizontal center' '--fx-core-x: 50%' "$CORE_CSS"
+          absent 'legacy polygon clipping' 'clip-path: polygon' "$CORE_CSS"
 
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/igloo-parity.js?v=native-apex-live' -o "$PARITY_JS"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-apex-native.js?v=native-apex-live' -o "$APEX_JS"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-three-host-safe.js?v=native-apex-live' -o "$FALLBACK_JS"
-          grep -Fq 'safe-ready-v28' "$PARITY_JS"
-          grep -Fq "fxInputInterception='none'" "$APEX_JS"
-          ! grep -Fq 'scrollTo(' "$APEX_JS"
-          ! grep -Fq "addEventListener('wheel'" "$APEX_JS"
-          ! grep -Fq "addEventListener('touchmove'" "$APEX_JS"
-          grep -Fq "root.dataset.fxNativeApex === 'ready'" "$FALLBACK_JS"
+          get_live 'immersive parity loader' "$ORIGIN/scifi-ui/scripts/igloo-parity.js?v=native-apex-live" "$PARITY_JS"
+          get_live 'native Apex renderer' "$ORIGIN/scifi-ui/scripts/formatx-apex-native.js?v=native-apex-live" "$APEX_JS"
+          get_live 'safe Apex fallback' "$ORIGIN/scifi-ui/scripts/formatx-three-host-safe.js?v=native-apex-live" "$FALLBACK_JS"
+          contains 'current v28 loader' 'safe-ready-v28' "$PARITY_JS"
+          contains 'Apex no input interception marker' "fxInputInterception='none'" "$APEX_JS"
+          absent 'Apex forced scroll' 'scrollTo(' "$APEX_JS"
+          absent 'Apex wheel ownership' "addEventListener('wheel'" "$APEX_JS"
+          absent 'Apex touchmove ownership' "addEventListener('touchmove'" "$APEX_JS"
+          contains 'fallback honours native Apex' "root.dataset.fxNativeApex === 'ready'" "$FALLBACK_JS"
 
           # Scroll ownership is platform-specific. Mobile is a finite native
           # document; desktop retains the seamless-v7 visual boundary bridge.
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-infinite-scroll.js?v=award-platform-scroll' -o "$SCROLL_BOOTSTRAP"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=award-platform-scroll' -o "$DESKTOP_SCROLL"
-          curl -fsSL --max-time 25 -H 'Cache-Control: no-cache' 'https://formatxsuite.com/scifi-ui/data/scroll-policy.json?v=award-platform-scroll' -o "$SCROLL_POLICY"
+          get_live 'platform scroll bootstrap' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll.js?v=award-platform-scroll" "$SCROLL_BOOTSTRAP"
+          get_live 'desktop seamless runtime' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=award-platform-scroll" "$DESKTOP_SCROLL"
+          get_live 'public scroll policy' "$ORIGIN/scifi-ui/data/scroll-policy.json?v=award-platform-scroll" "$SCROLL_POLICY"
 
-          grep -Fq 'platform-scroll-v2' "$SCROLL_BOOTSTRAP"
-          grep -Fq 'mobile-native-document-v1' "$SCROLL_BOOTSTRAP"
-          grep -Fq "fxAutomaticLoop = 'disabled-mobile'" "$SCROLL_BOOTSTRAP"
-          grep -Fq "fxLoopBridge = 'disabled-mobile'" "$SCROLL_BOOTSTRAP"
-          ! grep -Fq 'scrollTo(' "$SCROLL_BOOTSTRAP"
-          ! grep -Fq 'scrollIntoView(' "$SCROLL_BOOTSTRAP"
-          ! grep -Fq 'cloneNode(' "$SCROLL_BOOTSTRAP"
-          ! grep -Fq 'preventDefault' "$SCROLL_BOOTSTRAP"
+          contains 'platform-scroll-v2 bootstrap' 'platform-scroll-v2' "$SCROLL_BOOTSTRAP"
+          contains 'mobile native document controller' 'mobile-native-document-v1' "$SCROLL_BOOTSTRAP"
+          contains 'mobile automatic loop disabled' "fxAutomaticLoop = 'disabled-mobile'" "$SCROLL_BOOTSTRAP"
+          contains 'mobile visual bridge disabled' "fxLoopBridge = 'disabled-mobile'" "$SCROLL_BOOTSTRAP"
+          absent 'mobile bootstrap scrollTo' 'scrollTo(' "$SCROLL_BOOTSTRAP"
+          absent 'mobile bootstrap scrollIntoView' 'scrollIntoView(' "$SCROLL_BOOTSTRAP"
+          absent 'mobile bootstrap cloneNode' 'cloneNode(' "$SCROLL_BOOTSTRAP"
+          absent 'mobile bootstrap input capture' 'preventDefault' "$SCROLL_BOOTSTRAP"
 
-          grep -Fq "const VERSION = 'seamless-v7'" "$DESKTOP_SCROLL"
-          grep -Fq 'sourceHero.cloneNode(true)' "$DESKTOP_SCROLL"
-          grep -Fq 'window.scrollTo(' "$DESKTOP_SCROLL"
-          ! grep -Fq "addEventListener('wheel'" "$DESKTOP_SCROLL"
-          ! grep -Fq "addEventListener('touchmove'" "$DESKTOP_SCROLL"
+          contains 'desktop seamless-v7 version' "const VERSION = 'seamless-v7'" "$DESKTOP_SCROLL"
+          contains 'desktop visual hero clone' 'sourceHero.cloneNode(true)' "$DESKTOP_SCROLL"
+          contains 'desktop boundary handoff scroll' 'window.scrollTo(' "$DESKTOP_SCROLL"
+          absent 'desktop wheel listener capture' "addEventListener('wheel'" "$DESKTOP_SCROLL"
+          absent 'desktop touchmove listener capture' "addEventListener('touchmove'" "$DESKTOP_SCROLL"
 
-          jq -e '
-            .schema_version == 1 and
-            .policy.input_capture == false and
-            .policy.section_scroll_snap == false and
-            .mobile.controller == "mobile-native-document-v1" and
-            .mobile.automatic_loop == false and
-            .mobile.visual_bridge == false and
-            .mobile.automatic_page_position_changes == false and
-            .desktop.controller == "seamless-v7" and
-            .desktop.automatic_loop == true and
-            .desktop.visual_bridge == true
-          ' "$SCROLL_POLICY" >/dev/null
+          python3 - "$SCROLL_POLICY" <<'PY'
+          import json, sys
+          p = json.load(open(sys.argv[1], encoding='utf-8'))
+          checks = {
+              'schema_version': p.get('schema_version') == 1,
+              'input_capture': p.get('policy', {}).get('input_capture') is False,
+              'section_scroll_snap': p.get('policy', {}).get('section_scroll_snap') is False,
+              'mobile_controller': p.get('mobile', {}).get('controller') == 'mobile-native-document-v1',
+              'mobile_automatic_loop': p.get('mobile', {}).get('automatic_loop') is False,
+              'mobile_visual_bridge': p.get('mobile', {}).get('visual_bridge') is False,
+              'mobile_position_changes': p.get('mobile', {}).get('automatic_page_position_changes') is False,
+              'desktop_controller': p.get('desktop', {}).get('controller') == 'seamless-v7',
+              'desktop_automatic_loop': p.get('desktop', {}).get('automatic_loop') is True,
+              'desktop_visual_bridge': p.get('desktop', {}).get('visual_bridge') is True,
+          }
+          failed = [name for name, ok in checks.items() if not ok]
+          if failed:
+              raise SystemExit('FAIL public scroll policy: ' + ', '.join(failed))
+          print('PASS public scroll policy JSON contract')
+          PY
 
       - name: Publish live award-readiness status
         if: always()
