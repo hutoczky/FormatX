@@ -49,10 +49,10 @@
     "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
     "language_switch_preserves_scene_hash": true,
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
-    "deployment_revision": "2026-08-11-platform-scroll-v2"
+    "deployment_revision": "2026-08-11-platform-scroll-v2-live-audit-v53-v55"
   },
   "quality_contract": {
-    "award_readiness_revision": "2026-08-11-production-audit",
+    "award_readiness_revision": "2026-08-11-production-audit-v53-v55",
     "market_ambition": {
       "hungary": "top-1-target-not-claimed-without-external-ranking",
       "global": "top-1-to-3-percent-target-not-claimed-without-external-ranking"
@@ -77,7 +77,7 @@
     "mag_webgl_context_count": 1,
     "mag_paused_outside_hero": true,
     "mag_reduced_motion_respected": true,
-    "mag_reference_validation": "live-browser-plus-source-gates",
+    "mag_reference_validation": "live-browser-plus-source-gates-v53-v55",
     "first_response_product_positioning": true,
     "hero_factual_trustline": true,
     "server_rendered_software_application_schema": true,
