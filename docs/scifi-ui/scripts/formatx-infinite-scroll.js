@@ -2,9 +2,9 @@
   'use strict';
 
   const root = document.documentElement;
-  const BOOTSTRAP = 'platform-scroll-v3';
+  const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const MOBILE_CONTROLLER = 'mobile-native-document-v2';
+  const MOBILE_CONTROLLER = 'mobile-native-document-v1';
   const MOBILE_ACTIVE_CLASS = 'fx-mobile-scroll-active';
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
