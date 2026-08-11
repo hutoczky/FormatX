@@ -118,7 +118,7 @@ jobs:
               }
             });
             page.on('response', response => {
-              if (response.status() >= 400 && /formatx-core-(?:real3d-v20|reference-v53|mobile-v55)/.test(response.url())) {
+              if (/formatx-core-(?:real3d-v20|reference-v53|mobile-v55)/.test(response.url())) {
                 diagnostics.push(`HTTP ${response.status()}: ${response.url()}`);
               }
             });
@@ -136,22 +136,31 @@ jobs:
               scrollTo(0, 0);
             });
 
-            await page.waitForFunction(isMobile => {
-              const root = document.documentElement;
-              const state = isMobile ? root.dataset.fxCoreMobileV55 : root.dataset.fxCoreReferenceV53;
-              const expected = isMobile ? 'ready-v55' : 'ready-v53';
-              return state === expected || Boolean(state && !/^booting-/.test(state));
-            }, cfg.mobile, { timeout: 60000 });
+            try {
+              await page.waitForFunction(isMobile => {
+                const root = document.documentElement;
+                const state = isMobile ? root.dataset.fxCoreMobileV55 : root.dataset.fxCoreReferenceV53;
+                const expected = isMobile ? 'ready-v55' : 'ready-v53';
+                return state === expected || Boolean(state && !/^booting-/.test(state));
+              }, cfg.mobile, { timeout: 20000 });
+            } catch (error) {
+              diagnostics.push(`startup wait: ${error.name}: ${error.message}`);
+            }
             const startup = await page.evaluate(isMobile => {
               const root = document.documentElement;
               return {
+                pageUrl: location.href,
+                title: document.title,
+                readyState: document.readyState,
+                hasHero: Boolean(document.querySelector('#hero')),
                 engine: isMobile ? root.dataset.fxCoreMobileV55 : root.dataset.fxCoreReferenceV53,
                 real3d: root.dataset.fxCoreReal3d,
                 lock: root.dataset.fxCoreReferenceLock,
                 lockLoad: root.dataset.fxCoreReferenceLockLoad,
                 error: root.dataset.fxCoreReal3dError || null,
                 bootstrap: root.dataset.fxCoreReal3dBootstrap,
-                assets: [...document.scripts].map(script => script.src).filter(src => /formatx-core-(?:real3d-v20|reference-v53|mobile-v55)/.test(src))
+                assets: [...document.scripts].map(script => script.src).filter(src => /formatx-core-(?:real3d-v20|reference-v53|mobile-v55)/.test(src)),
+                scriptCount: document.scripts.length
               };
             }, cfg.mobile);
             console.log('MAG_STARTUP', cfg.name, JSON.stringify({ startup, diagnostics }));
