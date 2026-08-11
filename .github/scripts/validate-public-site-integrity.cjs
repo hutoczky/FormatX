@@ -84,8 +84,9 @@ const productionEntry = read('billing-worker/src/production-entry.js');
 const feedbackEntry = read('billing-worker/src/production-feedback-entry.js');
 const feedbackApi = read('billing-worker/src/feedback-api.js');
 const scrollBootstrap = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
-const desktopScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
+const seamlessScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
 const mobileCss = read('docs/scifi-ui/styles/formatx-mobile-production-r5.css');
+const mobileLoopCss = read('docs/scifi-ui/styles/formatx-mobile-seamless-loop.css');
 const platformStatus = json('docs/scifi-ui/data/platform-status.json');
 const currentRelease = json('docs/scifi-ui/data/current-release.json');
 const scrollPolicy = json('docs/scifi-ui/data/scroll-policy.json');
@@ -114,19 +115,24 @@ if (!currentRelease.ok || !multi?.available) report('current release: public pac
 if (!/^sha256:[0-9a-f]{64}$/i.test(multi?.digest || '')) report('current release: SHA-256 digest missing');
 
 if (scrollPolicy.schema_version !== 1) report('scroll policy: schema version mismatch');
-if (scrollPolicy.mobile?.controller !== 'mobile-native-document-v1') report('scroll policy: mobile controller must be native document');
-if (scrollPolicy.mobile?.automatic_loop !== false || scrollPolicy.mobile?.visual_bridge !== false) report('scroll policy: mobile loop/bridge must be disabled');
-if (scrollPolicy.mobile?.automatic_page_position_changes !== false) report('scroll policy: mobile automatic position changes must be disabled');
+if (scrollPolicy.mobile?.controller !== 'seamless-v7') report('scroll policy: mobile seamless-v7 controller missing');
+if (scrollPolicy.mobile?.automatic_loop !== true || scrollPolicy.mobile?.visual_bridge !== true) report('scroll policy: mobile loop/bridge must be enabled');
+if (scrollPolicy.mobile?.automatic_page_position_changes !== true || scrollPolicy.mobile?.boundary_handoff_only !== true) report('scroll policy: mobile boundary-only handoff contract missing');
+if (scrollPolicy.mobile?.transfer_mode !== 'scrollend-or-idle' || scrollPolicy.mobile?.native_momentum_preserved !== true) report('scroll policy: mobile native momentum handoff contract missing');
+if (scrollPolicy.mobile?.finite_document !== false) report('scroll policy: mobile document must not terminate at the footer');
 if (scrollPolicy.desktop?.controller !== 'seamless-v7' || scrollPolicy.desktop?.automatic_loop !== true) report('scroll policy: desktop seamless-v7 must remain enabled');
 if (scrollPolicy.policy?.input_capture !== false || scrollPolicy.policy?.section_scroll_snap !== false) report('scroll policy: input capture/snap contract regressed');
 
-if (!scrollBootstrap.includes('platform-scroll-v2') || !scrollBootstrap.includes('mobile-native-document-v1')) report('scroll bootstrap: platform split missing');
-if (!scrollBootstrap.includes("fxAutomaticLoop = 'disabled-mobile'") || !scrollBootstrap.includes("fxLoopBridge = 'disabled-mobile'")) report('scroll bootstrap: mobile loop is not disabled');
+if (!scrollBootstrap.includes('platform-scroll-v2') || !scrollBootstrap.includes("installSeamlessRuntime('mobile')")) report('scroll bootstrap: shared mobile seamless runtime missing');
+if (!scrollBootstrap.includes("fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'") || !scrollBootstrap.includes('native-momentum-loop-v1')) report('scroll bootstrap: mobile seamless loop policy missing');
+if (!scrollBootstrap.includes('formatx-mobile-seamless-loop.css') || scrollBootstrap.includes("createElement('style')")) report('scroll bootstrap: CSP-safe external mobile bridge layer missing');
 if (scrollBootstrap.includes('scrollTo(') || scrollBootstrap.includes('scrollIntoView(') || scrollBootstrap.includes('cloneNode(')) report('scroll bootstrap: mobile-capable bootstrap must not move or clone the document');
-if (!scrollBootstrap.includes('formatx-infinite-scroll-desktop-v7.js')) report('scroll bootstrap: desktop runtime loader missing');
-if (!desktopScroll.includes("const VERSION = 'seamless-v7'")) report('desktop scroll: seamless-v7 runtime missing');
-if (!desktopScroll.includes('sourceHero.cloneNode(true)') || !desktopScroll.includes('window.scrollTo(')) report('desktop scroll: visual bridge handoff implementation missing');
-if (/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(desktopScroll)) report('desktop scroll: wheel/touch input capture returned');
+if (!scrollBootstrap.includes('formatx-infinite-scroll-desktop-v7.js')) report('scroll bootstrap: shared seamless runtime loader missing');
+if (!seamlessScroll.includes("const VERSION = 'seamless-v7'")) report('seamless scroll: seamless-v7 runtime missing');
+if (!seamlessScroll.includes('sourceHero.cloneNode(true)') || !seamlessScroll.includes('window.scrollTo(')) report('seamless scroll: visual bridge handoff implementation missing');
+if (!seamlessScroll.includes("mobileTransfer: 'scrollend-or-idle'")) report('seamless scroll: mobile transfer must wait for scrollend/idle');
+if (/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(seamlessScroll)) report('seamless scroll: wheel/touch input capture returned');
+if (!mobileLoopCss.includes('min-height: calc(100svh + max(320px, 24svh))') || !mobileLoopCss.includes('display: block !important')) report('mobile seamless bridge: footer runway override missing');
 if (!mobileCss.includes('.fx-award-proof__grid') || !mobileCss.includes('grid-template-columns: 1fr !important')) report('mobile CSS: public proof single-column safeguard missing');
 if (!mobileCss.includes('.fx-plan-qr-card:not(.is-qr-ready)')) report('mobile CSS: QR broken-image safeguard missing');
 
@@ -147,4 +153,4 @@ if (failures.length) {
   console.error('FormatX public-site integrity failures:\n- ' + failures.join('\n- '));
   process.exit(1);
 }
-console.log(`PASS public-site integrity: ${htmlFiles.length} HTML pages, release/platform/security/routing and platform-specific scroll contracts validated.`);
+console.log(`PASS public-site integrity: ${htmlFiles.length} HTML pages, release/platform/security/routing and shared seamless scroll contracts validated.`);
