@@ -1,5 +1,9 @@
 /* FormatX Synaptic Thought Genome — visual layer behind content, controls inside dialogue. */
 
+.fx-thought-genome-stage-host {
+  position: relative !important;
+}
+
 .fx-thought-genome-layer {
   position: absolute;
   inset: 0;
