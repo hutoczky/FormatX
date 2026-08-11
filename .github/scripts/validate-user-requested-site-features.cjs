@@ -14,10 +14,11 @@ const menu = read('docs/scifi-ui/scripts/organism-menu-controller.js');
 const consoleState = read('docs/scifi-ui/scripts/organism-console-state.js');
 const language = read('docs/scifi-ui/scripts/single-language-toggle.js');
 const scrollBootstrap = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
-const desktopScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
+const seamlessScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
 const loopStyle = read('docs/scifi-ui/styles/formatx-seamless-loop.css');
 const continuousStyle = read('docs/scifi-ui/styles/formatx-continuous-scroll.css');
 const mobileStyle = read('docs/scifi-ui/styles/formatx-mobile-production-r5.css');
+const mobileLoopStyle = read('docs/scifi-ui/styles/formatx-mobile-seamless-loop.css');
 const downloads = read('docs/scifi-ui/downloads/index.html');
 const downloadStyle = read('docs/scifi-ui/styles/downloads-page.css');
 const feedbackApi = read('billing-worker/src/feedback-api.js');
@@ -44,25 +45,30 @@ assert.ok(includesAll(menu, ['function setOpen(toggle, nav, open)', 'aria-expand
 assert.ok(includesAll(consoleState, ['forceClosed', 'is-authorised-open', 'shell.hidden = true']), 'panel closed-state contract missing');
 assert.ok(includesAll(language, ["toggle.className = 'fx-language-toggle'", 'localStorage.setItem', 'localStorage.getItem']), 'single language toggle contract missing');
 
-assert.equal(scrollPolicy.mobile.controller, 'mobile-native-document-v1', 'mobile native-document policy missing');
-assert.equal(scrollPolicy.mobile.automatic_loop, false, 'mobile automatic loop must stay disabled');
-assert.equal(scrollPolicy.mobile.visual_bridge, false, 'mobile visual bridge must stay disabled');
-assert.equal(scrollPolicy.mobile.automatic_page_position_changes, false, 'mobile automatic page positioning must stay disabled');
+assert.equal(scrollPolicy.mobile.controller, 'seamless-v7', 'mobile seamless-v7 policy missing');
+assert.equal(scrollPolicy.mobile.automatic_loop, true, 'mobile automatic loop must stay enabled');
+assert.equal(scrollPolicy.mobile.visual_bridge, true, 'mobile visual bridge must stay enabled');
+assert.equal(scrollPolicy.mobile.automatic_page_position_changes, true, 'mobile boundary handoff positioning must stay enabled');
+assert.equal(scrollPolicy.mobile.boundary_handoff_only, true, 'mobile positioning must remain boundary-only');
+assert.equal(scrollPolicy.mobile.transfer_mode, 'scrollend-or-idle', 'mobile loop must wait for scrollend/idle');
+assert.equal(scrollPolicy.mobile.native_momentum_preserved, true, 'mobile native momentum must stay preserved');
+assert.equal(scrollPolicy.mobile.finite_document, false, 'mobile document must not stop at the footer');
 assert.equal(scrollPolicy.desktop.controller, 'seamless-v7', 'desktop seamless-v7 policy missing');
 assert.equal(scrollPolicy.desktop.automatic_loop, true, 'desktop seamless loop must stay enabled');
 assert.equal(scrollPolicy.policy.input_capture, false, 'wheel/touch capture must stay disabled');
 
 assert.ok(includesAll(scrollBootstrap, [
   'platform-scroll-v2',
-  'mobile-native-document-v1',
-  "fxAutomaticLoop = 'disabled-mobile'",
-  "fxLoopBridge = 'disabled-mobile'",
-  'automaticPagePositionChanges: false',
+  "installSeamlessRuntime('mobile')",
+  'native-momentum-loop-v1',
+  "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'",
+  'formatx-mobile-seamless-loop.css',
   'formatx-infinite-scroll-desktop-v7.js'
-]), 'platform scroll bootstrap contract missing');
+]), 'shared mobile/desktop seamless bootstrap contract missing');
+assert.ok(!scrollBootstrap.includes("createElement('style')"), 'mobile seamless bridge override must remain CSP-safe external CSS');
 assert.ok(!scrollBootstrap.includes('scrollTo(') && !scrollBootstrap.includes('scrollIntoView(') && !scrollBootstrap.includes('cloneNode('), 'mobile-capable bootstrap must not move/clone the page');
 assert.ok(!scrollBootstrap.includes('preventDefault'), 'scroll bootstrap must not capture input');
-assert.ok(includesAll(desktopScroll, [
+assert.ok(includesAll(seamlessScroll, [
   "const VERSION = 'seamless-v7'",
   "root.dataset.fxInfiniteInput = 'native'",
   "root.dataset.fxInfiniteCloneMode = 'visual-bridge'",
@@ -71,12 +77,14 @@ assert.ok(includesAll(desktopScroll, [
   'visualBridge: true',
   'clonedHeroOnly: true',
   'clonedContent: false',
+  "mobileTransfer: 'scrollend-or-idle'",
   'sourceHero.cloneNode(true)',
   'window.scrollTo('
-]), 'desktop seamless-v7 implementation missing');
-assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(desktopScroll), 'desktop runtime must not capture wheel/touchmove');
-assert.ok(includesAll(loopStyle, ['scroll-snap-type: none !important', 'scroll-snap-align: none !important']), 'desktop loop snap suppression missing');
-assert.ok(includesAll(continuousStyle, ['scroll-snap-type: none !important', 'scroll-snap-align: none !important']), 'global snap suppression missing');
+]), 'shared seamless-v7 implementation missing');
+assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(seamlessScroll), 'shared seamless runtime must not capture wheel/touchmove');
+assert.ok(includesAll(loopStyle, ['scroll-snap-type: none !important', 'scroll-snap-align: none !important']), 'seamless loop snap suppression missing');
+assert.ok(includesAll(continuousStyle, ['scroll-snap-type: none !important', 'scroll-snap-align: none !important', 'mobile-seamless-r5']), 'global/mobile snap suppression missing');
+assert.ok(includesAll(mobileLoopStyle, ['display: block !important', 'min-height: calc(100svh + max(320px, 24svh))']), 'mobile seamless bridge runway missing');
 assert.ok(includesAll(mobileStyle, ['.fx-award-proof__grid', '.fx-plan-qr-card:not(.is-qr-ready)', '.site-footer nav']), 'mobile production stability layer incomplete');
 
 assert.ok(includesAll(downloads, [
@@ -115,4 +123,4 @@ assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 
 require('./validate-igloo-floor.cjs');
-console.log('PASS: requested site features validated with mobile native-document scrolling, desktop seamless-v7, responsive UI, feedback, downloads, deferred rendering and production gates.');
+console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
