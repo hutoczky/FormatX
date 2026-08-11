@@ -11,15 +11,17 @@ function assert(value, message) {
 
 async function activateRuntime(page) {
   // The current production architecture deliberately defers Organism/Thought
-  // Genome modules until explicit user activation. The legacy test used
-  // ?immersive=1 and waited for retired Three.js renderer telemetry, which no
-  // longer represents the production contract.
+  // Genome modules until explicit activation. Some current surfaces keep the
+  // legacy launch control in the DOM but visually retire it because the native
+  // core already owns the hero. Only click a genuinely visible control;
+  // otherwise dispatch the same activation event used by the runtime contract.
   const launch = page.locator('.fx-immersive-launch').first();
-  if (await launch.count()) {
+  if (await launch.count() && await launch.isVisible()) {
     await launch.click();
   } else {
     await page.evaluate(() => {
       document.documentElement.dataset.fxImmersive = 'active';
+      document.documentElement.dataset.fxImmersiveSource = 'browser-validation';
       dispatchEvent(new CustomEvent('formatx:immersiveactivate', { detail: { source: 'browser-validation' } }));
     });
   }
