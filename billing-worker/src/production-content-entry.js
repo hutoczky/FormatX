@@ -27,6 +27,11 @@ const HOMEPAGE_ALIASES = new Set([
   single-language-toggle.js
   cleanLegacyReleaseCopy
   Cache-Control', 'no-store
+
+  Delegated homepage contracts preserved by production-content-base.js:
+  USER_FEEDBACK_SECTION
+  id="user-feedback"
+  itemprop="operatingSystem" content="Linux, Bazzite, Windows, Android"
 */
 
 export default {
