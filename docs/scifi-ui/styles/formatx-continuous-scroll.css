@@ -66,14 +66,14 @@ body {
 
   /* Hard native momentum controller. Higher specificity intentionally wins
      over older mobile/sticky layers that are appended later by enhancement JS. */
-  html[data-fx-infinite-controller='mobile-native-document-v2'],
-  html[data-fx-infinite-controller='mobile-native-document-v2'] body {
+  html[data-fx-infinite-controller='mobile-native-document-v1'],
+  html[data-fx-infinite-controller='mobile-native-document-v1'] body {
     overflow-anchor: none !important;
     scroll-behavior: auto !important;
     scroll-snap-type: none !important;
   }
 
-  html[data-fx-infinite-controller='mobile-native-document-v2'] .topbar {
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .topbar {
     position: fixed !important;
     top: 0 !important;
     right: 0 !important;
@@ -83,8 +83,8 @@ body {
 
   /* Old Organism chapter CSS reserves 104svh per scene and 62svh per trigger.
      That desktop presentation is intentionally removed on touch devices. */
-  html[data-fx-infinite-controller='mobile-native-document-v2'] main > .scene:not(#hero),
-  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-organism-chapter {
+  html[data-fx-infinite-controller='mobile-native-document-v1'] main > .scene:not(#hero),
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-organism-chapter {
     min-height: 0 !important;
     height: auto !important;
     scroll-snap-align: none !important;
@@ -95,7 +95,7 @@ body {
     overflow-anchor: none !important;
   }
 
-  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-organism-chapter-trigger {
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-organism-chapter-trigger {
     min-height: 0 !important;
     height: auto !important;
     transform: none !important;
@@ -107,7 +107,7 @@ body {
   /* content-visibility:auto with a 900px synthetic intrinsic height can cause
      a visible hitch when a phone crosses a chapter boundary. Realise the mobile
      document normally so momentum never waits for a section activation. */
-  html[data-fx-infinite-controller='mobile-native-document-v2'] :is(
+  html[data-fx-infinite-controller='mobile-native-document-v1'] :is(
     .flow,
     .cards,
     .pricing,
@@ -129,18 +129,18 @@ body {
   }
 
   /* The 3D stage remains visually untouched, but it never owns a touch gesture. */
-  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-three-stage-shell,
-  html[data-fx-infinite-controller='mobile-native-document-v2'] #fx-three-frame {
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-three-stage-shell,
+  html[data-fx-infinite-controller='mobile-native-document-v1'] #fx-three-frame {
     pointer-events: none !important;
     touch-action: pan-y pinch-zoom !important;
   }
 
   /* Every legacy bridge variant is desktop-only. Remove them even before the
      mobile-unified runtime marker exists, and also if a late script recreates one. */
-  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-loop-bridge,
-  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-loop-hero-clone,
-  html[data-fx-infinite-controller='mobile-native-document-v2'] .fx-transcend-loop-bridge,
-  html[data-fx-infinite-controller='mobile-native-document-v2'] [data-fx-loop-clone='true'],
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-loop-bridge,
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-loop-hero-clone,
+  html[data-fx-infinite-controller='mobile-native-document-v1'] .fx-transcend-loop-bridge,
+  html[data-fx-infinite-controller='mobile-native-document-v1'] [data-fx-loop-clone='true'],
   html[data-fx-mobile-unified='ready-v1'] .fx-loop-bridge,
   html[data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
   html[data-fx-mobile-unified='ready-v1'] .fx-transcend-loop-bridge,
