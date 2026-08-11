@@ -1,5 +1,5 @@
 /* FormatX native continuous scroll policy.
-   Production revision: 2026-08-11 mobile-native-r2.
+   Production revision: 2026-08-11 mobile-native-r3.
    This stylesheet is intentionally small and loaded before optional/immersive
    modules. It prevents any legacy chapter or scene stylesheet from turning
    ordinary wheel/touch scrolling into section snapping. */
@@ -56,11 +56,12 @@ body {
     touch-action: pan-y pinch-zoom !important;
   }
 
-  /* Phones use one real document only. The desktop visual loop bridge caused
-     duplicate hero/header states, black runway gaps and post-momentum jumps. */
-  .fx-loop-bridge,
-  .fx-loop-hero-clone,
-  [data-fx-loop-clone='true'] {
+  /* The real production mobile shell deliberately uses one native document.
+     Scope this to the mobile-unified runtime marker so the desktop/seamless
+     controller can still be regression-tested independently. */
+  html[data-fx-mobile-unified='ready-v1'] .fx-loop-bridge,
+  html[data-fx-mobile-unified='ready-v1'] .fx-loop-hero-clone,
+  html[data-fx-mobile-unified='ready-v1'] [data-fx-loop-clone='true'] {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
