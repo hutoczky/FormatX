@@ -3,9 +3,10 @@ import contentPipeline from './production-content-base.js';
 const CANONICAL_ORIGIN = 'https://formatxsuite.com';
 const CANONICAL_HOST = 'formatxsuite.com';
 const LEGACY_WWW_HOST = 'www.formatxsuite.com';
-const INTERNAL_ASSET_HOST = 'formatx-homepage.internal';
-const RECOVERY_PARAM = '_fx_canonical_recovery';
-const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-1"></script>';
+const INTERNAL_HOST = 'formatx-routing.internal';
+const RECOVERY_PARAM = '_fx_redirect_recovery';
+const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
+
 const HOMEPAGE_ALIASES = new Set([
   '/',
   '/index.html',
@@ -14,10 +15,35 @@ const HOMEPAGE_ALIASES = new Set([
   '/scifi-ui/index.html',
 ]);
 
+const PUBLIC_PAGE_ALIASES = new Map([
+  ['/downloads', '/scifi-ui/downloads/'],
+  ['/downloads/', '/scifi-ui/downloads/'],
+  ['/support', '/scifi-ui/support.html'],
+  ['/support.html', '/scifi-ui/support.html'],
+  ['/license', '/scifi-ui/license.html'],
+  ['/license.html', '/scifi-ui/license.html'],
+  ['/privacy', '/scifi-ui/privacy.html'],
+  ['/privacy.html', '/scifi-ui/privacy.html'],
+  ['/terms', '/scifi-ui/terms.html'],
+  ['/terms.html', '/scifi-ui/terms.html'],
+  ['/verification', '/scifi-ui/verification.html'],
+  ['/verification.html', '/scifi-ui/verification.html'],
+  ['/test-matrix', '/scifi-ui/test-matrix.html'],
+  ['/test-matrix.html', '/scifi-ui/test-matrix.html'],
+  ['/known-issues', '/scifi-ui/known-issues.html'],
+  ['/known-issues.html', '/scifi-ui/known-issues.html'],
+  ['/security', '/scifi-ui/security.html'],
+  ['/security.html', '/scifi-ui/security.html'],
+  ['/technical-report', '/scifi-ui/technical-report.html'],
+  ['/technical-report.html', '/scifi-ui/technical-report.html'],
+  ['/method', '/scifi-ui/method.html'],
+  ['/method.html', '/scifi-ui/method.html'],
+  ['/checkout.html', '/scifi-ui/checkout.html'],
+]);
+
 /*
-  The full production content wrapper remains delegated to
-  production-content-base.js. These contract tokens document the preserved
-  pipeline for repository validators and reviewers:
+  Production content contracts remain delegated to production-content-base.js.
+  These tokens are intentionally retained for repository validators/reviewers:
   release-metadata.js
   formatx-public-shell.js
   formatx-content-standard.js
@@ -41,54 +67,77 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const safeMethod = request.method === 'GET' || request.method === 'HEAD';
-    const homepage = HOMEPAGE_ALIASES.has(url.pathname);
     const publicHost = url.hostname === CANONICAL_HOST || url.hostname === LEGACY_WWW_HOST;
 
-    if (safeMethod && homepage) {
-      /*
-        Historic production revisions emitted a permanent 308 from the apex
-        hostname to WWW. Mobile Chrome can retain that redirect even after the
-        server is fixed. Redirecting WWW straight back to the apex root would
-        therefore create a client-side apex <-> WWW loop.
+    if (!safeMethod || !publicHost) {
+      return contentPipeline.fetch(request, env, ctx);
+    }
 
-        WWW now uses a temporary, non-cacheable redirect to an apex recovery URL.
-        That URL is not covered by the old cached root redirect, so the apex
-        Worker can return a real 200 response, clear the origin HTTP cache and
-        remove the recovery query from the address bar with history.replaceState.
-      */
-      if (url.hostname === LEGACY_WWW_HOST) {
+    /*
+      Single routing authority for every public GET/HEAD request.
+
+      The historic inner stack contains older WWW/apex canonicalisers. Public
+      requests are therefore converted to an internal hostname before entering
+      that stack. Those lower layers can no longer emit an apex <-> WWW bounce,
+      while all existing content, licence, feedback and security behaviour stays
+      in place.
+    */
+
+    if (url.hostname === LEGACY_WWW_HOST) {
+      const target = new URL(url.pathname, CANONICAL_ORIGIN);
+      target.search = url.search;
+
+      if (HOMEPAGE_ALIASES.has(url.pathname)) {
+        target.pathname = '/';
+        target.search = '';
+      }
+
+      // Temporary and explicitly non-cacheable. The unique recovery query also
+      // bypasses a historic cached 308 for the exact apex URL in Chromium.
+      target.searchParams.set(RECOVERY_PARAM, '1');
+      return temporaryRedirect(target.toString());
+    }
+
+    if (HOMEPAGE_ALIASES.has(url.pathname)) {
+      if (url.pathname !== '/') {
         const target = new URL('/', CANONICAL_ORIGIN);
         target.searchParams.set(RECOVERY_PARAM, '1');
         return temporaryRedirect(target.toString());
       }
 
-      if (url.hostname === CANONICAL_HOST) {
-        if (url.pathname !== '/') {
-          return temporaryRedirect(`${CANONICAL_ORIGIN}/`);
-        }
-
-        const hasPublicQuery = Boolean(url.search);
-        const isRecovery = url.searchParams.has(RECOVERY_PARAM);
-        const internalRequest = createInternalPipelineRequest(request, '/scifi-ui/', '');
-        const response = await contentPipeline.fetch(internalRequest, env, ctx);
-        return canonicaliseHomepageResponse(response, request.method, {
-          cleanAddressBar: hasPublicQuery,
-          clearCachedRedirect: isRecovery,
-        });
-      }
+      const response = await fetchInternalNoLoop(
+        request,
+        env,
+        ctx,
+        '/scifi-ui/',
+        '',
+      );
+      return canonicalisePublicResponse(response, request, url, {
+        homepage: true,
+        cleanAddressBar: Boolean(url.search || url.hash),
+        clearCachedRedirect: url.searchParams.has(RECOVERY_PARAM),
+      });
     }
 
-    if (safeMethod && publicHost) {
-      /*
-        Shield every public GET/HEAD asset, API read and secondary page from old
-        hostname canonicalisers. CSS/JS requests stay first-party on the visible
-        hostname and never bounce through WWW.
-      */
-      const internalRequest = createInternalPipelineRequest(request, url.pathname, url.search);
-      return contentPipeline.fetch(internalRequest, env, ctx);
-    }
+    const mappedPath = PUBLIC_PAGE_ALIASES.get(url.pathname) || url.pathname;
+    const internalParams = new URLSearchParams(url.search);
+    const clearCachedRedirect = internalParams.has(RECOVERY_PARAM);
+    internalParams.delete(RECOVERY_PARAM);
+    const internalSearch = internalParams.toString() ? `?${internalParams.toString()}` : '';
 
-    return contentPipeline.fetch(request, env, ctx);
+    const response = await fetchInternalNoLoop(
+      request,
+      env,
+      ctx,
+      mappedPath,
+      internalSearch,
+    );
+
+    return canonicalisePublicResponse(response, request, url, {
+      homepage: false,
+      cleanAddressBar: clearCachedRedirect,
+      clearCachedRedirect,
+    });
   },
 };
 
@@ -99,45 +148,124 @@ function temporaryRedirect(location) {
       Location: location,
       'Cache-Control': 'no-store, max-age=0',
       Pragma: 'no-cache',
+      Vary: 'Host',
     },
   });
 }
 
-function createInternalPipelineRequest(request, pathname, search) {
+function createInternalRequest(request, pathname, search = '') {
   const internalUrl = new URL(request.url);
   internalUrl.protocol = 'https:';
-  internalUrl.hostname = INTERNAL_ASSET_HOST;
+  internalUrl.hostname = INTERNAL_HOST;
   internalUrl.pathname = pathname;
-  internalUrl.search = search || '';
+  internalUrl.search = search;
   internalUrl.hash = '';
   return new Request(internalUrl, request);
 }
 
-async function canonicaliseHomepageResponse(response, method, options = {}) {
-  const { cleanAddressBar = false, clearCachedRedirect = false } = options;
+async function fetchInternalNoLoop(request, env, ctx, pathname, search = '') {
+  let currentPath = pathname;
+  let currentSearch = search;
+  const seen = new Set();
+
+  for (let hop = 0; hop < 5; hop += 1) {
+    const key = `${currentPath}${currentSearch}`;
+    if (seen.has(key)) return routingLoopBlocked();
+    seen.add(key);
+
+    const internalRequest = createInternalRequest(request, currentPath, currentSearch);
+    const response = await contentPipeline.fetch(internalRequest, env, ctx);
+    if (response.status < 300 || response.status >= 400) return response;
+
+    const location = response.headers.get('Location');
+    if (!location) return response;
+
+    let target;
+    try {
+      target = new URL(location, internalRequest.url);
+    } catch (_) {
+      return response;
+    }
+
+    const internalTarget = target.hostname === INTERNAL_HOST
+      || target.hostname === CANONICAL_HOST
+      || target.hostname === LEGACY_WWW_HOST;
+    if (!internalTarget) return response;
+
+    currentPath = PUBLIC_PAGE_ALIASES.get(target.pathname) || target.pathname;
+    if (HOMEPAGE_ALIASES.has(currentPath)) currentPath = '/scifi-ui/';
+
+    const params = new URLSearchParams(target.search);
+    params.delete(RECOVERY_PARAM);
+    currentSearch = params.toString() ? `?${params.toString()}` : '';
+  }
+
+  return routingLoopBlocked();
+}
+
+function routingLoopBlocked() {
+  return new Response('FormatX routing loop blocked before it reached the browser.', {
+    status: 508,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store, max-age=0',
+    },
+  });
+}
+
+async function canonicalisePublicResponse(response, request, publicUrl, options = {}) {
+  const {
+    homepage = false,
+    cleanAddressBar = false,
+    clearCachedRedirect = false,
+  } = options;
+
   const headers = new Headers(response.headers);
-  headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
   headers.set('Cache-Control', 'no-store, max-age=0');
   headers.set('Pragma', 'no-cache');
+  headers.set('Vary', mergeVary(headers.get('Vary'), 'Host'));
+
+  if (homepage) {
+    headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
+  } else {
+    const link = headers.get('Link');
+    if (link) {
+      headers.set(
+        'Link',
+        link
+          .replaceAll(`https://${LEGACY_WWW_HOST}`, CANONICAL_ORIGIN)
+          .replaceAll(`https://${INTERNAL_HOST}`, CANONICAL_ORIGIN),
+      );
+    }
+  }
 
   if (clearCachedRedirect) {
-    // Chrome/Chromium use this to evict the stale permanent apex -> WWW redirect.
+    // Evict stale permanent domain redirects after a successful recovery load.
     headers.set('Clear-Site-Data', '"cache"');
   }
 
-  // No lower-layer redirect is allowed to escape from the canonical homepage.
+  // A public-host redirect emitted by a lower layer is never allowed to escape.
+  // fetchInternalNoLoop resolves bounded internal redirects first; if one still
+  // survives, fail closed instead of creating a browser-visible redirect cycle.
   if (response.status >= 300 && response.status < 400) {
-    headers.delete('Location');
-    headers.delete('Content-Length');
-    headers.delete('Content-Encoding');
-    headers.delete('ETag');
-    return new Response(method === 'HEAD' ? null : 'FormatX homepage routing is temporarily unavailable.', {
-      status: 503,
-      headers,
-    });
+    const location = headers.get('Location');
+    if (location) {
+      try {
+        const target = new URL(location, publicUrl);
+        if (
+          target.hostname === LEGACY_WWW_HOST
+          || target.hostname === CANONICAL_HOST
+          || target.hostname === INTERNAL_HOST
+        ) {
+          return routingLoopBlocked();
+        }
+      } catch (_) {
+        // Unrelated external redirects remain untouched.
+      }
+    }
   }
 
-  if (method === 'HEAD') {
+  if (request.method === 'HEAD') {
     headers.delete('Content-Length');
     return new Response(null, {
       status: response.status,
@@ -157,10 +285,10 @@ async function canonicaliseHomepageResponse(response, method, options = {}) {
 
   let html = await response.text();
   html = html
-    .replaceAll('https://www.formatxsuite.com/', 'https://formatxsuite.com/')
-    .replaceAll('https://www.formatxsuite.com', 'https://formatxsuite.com')
-    .replaceAll(`https://${INTERNAL_ASSET_HOST}/`, 'https://formatxsuite.com/')
-    .replaceAll(`https://${INTERNAL_ASSET_HOST}`, 'https://formatxsuite.com');
+    .replaceAll(`https://${LEGACY_WWW_HOST}/`, `${CANONICAL_ORIGIN}/`)
+    .replaceAll(`https://${LEGACY_WWW_HOST}`, CANONICAL_ORIGIN)
+    .replaceAll(`https://${INTERNAL_HOST}/`, `${CANONICAL_ORIGIN}/`)
+    .replaceAll(`https://${INTERNAL_HOST}`, CANONICAL_ORIGIN);
 
   if (cleanAddressBar && !html.includes('data-fx-canonical-recovery')) {
     html = html.replace('</head>', `  ${RECOVERY_SCRIPT}\n</head>`);
@@ -175,4 +303,15 @@ async function canonicaliseHomepageResponse(response, method, options = {}) {
     statusText: response.statusText,
     headers,
   });
+}
+
+function mergeVary(existing, value) {
+  const values = new Set(
+    String(existing || '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
+  values.add(value);
+  return Array.from(values).join(', ');
 }
