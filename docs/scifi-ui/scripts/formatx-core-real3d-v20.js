@@ -16,6 +16,7 @@
     a smaller hot white nucleus and denser cyan/violet reactor rings.
     The two renderers never boot together, so a phone gets exactly one WebGL2
     context and one MAG canvas. No raster/image or CSS fake silhouette is used.
+    Production mobile visual revision: cinematic-reference-v55-r1.
   */
 
   if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;
