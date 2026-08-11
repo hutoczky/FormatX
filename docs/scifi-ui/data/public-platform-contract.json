@@ -22,20 +22,23 @@
   "layout_contract": {
     "desktop_composition_preloaded": true,
     "mobile_layout_unchanged": false,
-    "scroll_controller": "platform-specific",
+    "scroll_controller": "shared-seamless-v7-platform-input-policy",
     "scroll_runtime_load": "critical-startup",
     "scroll_runtime_independent_of_immersive": true,
     "scroll_policy_source": "/scifi-ui/data/scroll-policy.json",
     "section_scroll_snap": false,
     "wheel_or_touch_scroll_capture": false,
     "mobile": {
-      "controller": "mobile-native-document-v1",
-      "automatic_scroll_loop": false,
-      "visual_bridge": false,
-      "clone_based_loop": false,
-      "automatic_page_position_changes": false,
+      "controller": "seamless-v7",
+      "automatic_scroll_loop": true,
+      "visual_bridge": true,
+      "clone_based_loop": true,
+      "cloned_hero_only": true,
+      "automatic_page_position_changes": true,
+      "boundary_handoff_only": true,
+      "transfer_mode": "scrollend-or-idle",
       "native_momentum_preserved": true,
-      "finite_document": true
+      "finite_document": false
     },
     "desktop": {
       "controller": "seamless-v7",
@@ -49,7 +52,7 @@
     "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
     "language_switch_preserves_scene_hash": true,
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
-    "deployment_revision": "2026-08-11-platform-scroll-v2-live-audit-v53-v55-r3"
+    "deployment_revision": "2026-08-12-mobile-seamless-v1"
   },
   "quality_contract": {
     "award_readiness_revision": "2026-08-11-production-audit-v53-v55-r3",
@@ -67,7 +70,7 @@
       "generative_audio": "explicit-user-opt-in",
       "particle_typography_footer": true,
       "third_party_scene_framework_required": false,
-      "scroll_ownership": "platform-split-mobile-native-desktop-seamless-v7",
+      "scroll_ownership": "shared-seamless-v7-native-input-mobile-scrollend-handoff",
       "section_scroll_snap": false,
       "wheel_or_touch_scroll_capture": false
     },
