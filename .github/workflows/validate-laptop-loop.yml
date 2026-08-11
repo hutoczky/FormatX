@@ -53,8 +53,8 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           grep -Fq "platform-scroll-v2" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "mobile-native-document-v1" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "fxAutomaticLoop = 'disabled-mobile'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "native-momentum-loop-v1" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "formatx-infinite-scroll-desktop-v7.js" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "scrollTo(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "scrollIntoView(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
@@ -63,9 +63,11 @@ jobs:
           grep -Fq "const VERSION = 'seamless-v7'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "cloneNode(true)" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "window.scrollTo(" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq "mobileTransfer: 'scrollend-or-idle'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "scroll-snap-type: none !important" docs/scifi-ui/styles/formatx-continuous-scroll.css
+          grep -Fq "mobile-seamless-r5" docs/scifi-ui/styles/formatx-continuous-scroll.css
 
       - name: Install Chromium
         shell: bash
@@ -86,7 +88,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-platform-scroll-http.log"
           exit 1
 
-      - name: Verify mobile native and desktop seamless scrolling
+      - name: Verify mobile and desktop seamless scrolling
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-platform-scroll/node_modules
         shell: bash
@@ -112,7 +114,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Mobile native + desktop seamless scroll passed'
+            description='Mobile + desktop seamless scroll passed'
           else
             state='failure'
             description='Platform scroll validation failed'
