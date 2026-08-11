@@ -2,14 +2,25 @@
   'use strict';
 
   const root = document.documentElement;
-  const BOOTSTRAP = 'platform-scroll-v2';
+  const BOOTSTRAP = 'platform-scroll-v3';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
+  const MOBILE_CONTROLLER = 'mobile-native-document-v2';
+  const MOBILE_ACTIVE_CLASS = 'fx-mobile-scroll-active';
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
 
+  function removeLegacyMobileLoopNodes() {
+    document.querySelectorAll([
+      '.fx-loop-bridge',
+      '.fx-loop-hero-clone',
+      '.fx-transcend-loop-bridge',
+      '[data-fx-loop-clone="true"]'
+    ].join(',')).forEach(node => node.remove());
+  }
+
   function stabiliseMobileDocument(source) {
-    document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"]').forEach(node => node.remove());
+    removeLegacyMobileLoopNodes();
 
     const main = document.getElementById('main-content');
     const footer = document.querySelector('.site-footer');
@@ -21,21 +32,71 @@
     root.dataset.fxMobileDocumentStability = source;
   }
 
+  function installMobileMomentumState() {
+    let idleTimer = 0;
+    let active = false;
+
+    const finish = () => {
+      clearTimeout(idleTimer);
+      idleTimer = 0;
+      if (!active) return;
+      active = false;
+      root.classList.remove(MOBILE_ACTIVE_CLASS, 'fx-page-scrolling');
+      root.dataset.fxScrollActivity = 'idle';
+      dispatchEvent(new CustomEvent('formatx:pageendscroll', {
+        detail: { controller: MOBILE_CONTROLLER, nativeMomentum: true }
+      }));
+    };
+
+    const mark = event => {
+      if (!MOBILE_QUERY.matches) return;
+      if (!active) {
+        active = true;
+        root.classList.add(MOBILE_ACTIVE_CLASS, 'fx-page-scrolling');
+        root.dataset.fxScrollActivity = 'scrolling';
+        dispatchEvent(new CustomEvent('formatx:pagestartscroll', {
+          detail: {
+            controller: MOBILE_CONTROLLER,
+            nativeMomentum: true,
+            source: event?.type || 'scroll'
+          }
+        }));
+      }
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(finish, 150);
+    };
+
+    addEventListener('scroll', mark, { passive: true });
+    document.addEventListener('touchmove', mark, { passive: true, capture: true });
+    if ('onscrollend' in window) addEventListener('scrollend', finish, { passive: true });
+    addEventListener('pagehide', finish, { once: true });
+
+    root.dataset.fxMobileMomentumGuard = 'native-v2';
+  }
+
+  function scheduleMobileCleanup() {
+    const clean = () => stabiliseMobileDocument('late-cleanup');
+    setTimeout(clean, 0);
+    setTimeout(clean, 350);
+    setTimeout(clean, 1400);
+    setTimeout(clean, 4000);
+  }
+
   function enableMobileNativeDocument() {
-    root.dataset.fxInfiniteScroll = 'mobile-native-document-v1';
-    root.dataset.fxInfiniteController = 'mobile-native-document-v1';
+    root.dataset.fxInfiniteScroll = MOBILE_CONTROLLER;
+    root.dataset.fxInfiniteController = MOBILE_CONTROLLER;
     root.dataset.fxInfiniteCloneMode = 'disabled-mobile';
     root.dataset.fxInfiniteInput = 'native';
     root.dataset.fxScrollActivity = 'idle';
     root.dataset.fxAutomaticLoop = 'disabled-mobile';
-    root.dataset.fxScrollJumpGuard = 'native-document-v1';
+    root.dataset.fxScrollJumpGuard = 'native-document-v2';
     root.dataset.fxLoopBridge = 'disabled-mobile';
     root.dataset.fxScrollSnap = 'disabled';
-    root.dataset.fxMobileScrollMode = 'native-document-v1';
-    root.dataset.fxMobileScrollPolicy = 'native-document-v1';
+    root.dataset.fxMobileScrollMode = 'native-momentum-v2';
+    root.dataset.fxMobileScrollPolicy = 'native-momentum-v2';
     root.dataset.fxScrollBootstrapState = 'mobile-ready';
 
-    root.classList.add('fx-mobile-native-scroll');
+    root.classList.add('fx-mobile-native-scroll', 'fx-mobile-native-scroll-v2');
     root.classList.remove(
       'fx-continuous-scroll-mode',
       'fx-infinite-loop-jump',
@@ -46,7 +107,7 @@
 
     root.__FORMATX_INFINITE_SCROLL__ = Object.freeze({
       version: BOOTSTRAP,
-      controller: 'mobile-native-document-v1',
+      controller: MOBILE_CONTROLLER,
       automaticLoop: false,
       visualBridge: false,
       clonedContent: false,
@@ -55,8 +116,14 @@
       mobileNativeDocument: true,
       mobileNativeMomentumPreserved: true,
       automaticPagePositionChanges: false,
-      inputCapture: false
+      inputCapture: false,
+      scrollAnchoringGuard: true,
+      lateLoopCleanup: true
     });
+
+    try {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'auto';
+    } catch (_) {}
 
     const stabilise = event => stabiliseMobileDocument(event?.type || 'startup');
     if (document.readyState === 'loading') {
@@ -64,9 +131,14 @@
     } else {
       stabiliseMobileDocument('ready');
     }
+
     addEventListener('pageshow', stabilise, { passive: true });
     addEventListener('formatx:livingready', stabilise);
     addEventListener('formatx:organismready', stabilise);
+    addEventListener('formatx:interface-ready', stabilise);
+
+    installMobileMomentumState();
+    scheduleMobileCleanup();
   }
 
   function enableDesktopSeamlessRuntime() {
