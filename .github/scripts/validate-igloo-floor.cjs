@@ -16,14 +16,14 @@ const productionEntry = read('billing-worker/src/production-entry.js');
 const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
 const scrollPolicy = JSON.parse(read('docs/scifi-ui/data/scroll-policy.json'));
 const scrollBootstrap = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
-const desktopScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
+const seamlessScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
 
 for (const [filename, source] of [
   ['formatx-apex-native.js', apex],
   ['igloo-parity.js', loader],
   ['formatx-three-host-safe.js', fallback],
   ['formatx-infinite-scroll.js', scrollBootstrap],
-  ['formatx-infinite-scroll-desktop-v7.js', desktopScroll],
+  ['formatx-infinite-scroll-desktop-v7.js', seamlessScroll],
 ]) {
   assert.doesNotThrow(() => new vm.Script(source, { filename }), `${filename} contains invalid JavaScript`);
 }
@@ -72,19 +72,29 @@ assert.match(productionEntry, /'\/scifi-ui\/scripts\/formatx-three-host-safe\.js
 assert.match(productionEntry, /'\/scifi-ui\/styles\/formatx-transcend\.css'/, 'native Apex cinematic CSS is not protected as a no-store production asset');
 
 assert.equal(scrollPolicy.schema_version, 1, 'platform scroll policy schema missing');
-assert.equal(scrollPolicy.mobile?.controller, 'mobile-native-document-v1', 'mobile native-document controller regressed');
-assert.equal(scrollPolicy.mobile?.automatic_loop, false, 'mobile automatic loop regressed');
-assert.equal(scrollPolicy.mobile?.visual_bridge, false, 'mobile visual bridge regressed');
-assert.equal(scrollPolicy.mobile?.automatic_page_position_changes, false, 'mobile automatic positioning regressed');
+assert.equal(scrollPolicy.mobile?.controller, 'seamless-v7', 'mobile seamless-v7 controller regressed');
+assert.equal(scrollPolicy.mobile?.automatic_loop, true, 'mobile automatic loop regressed');
+assert.equal(scrollPolicy.mobile?.visual_bridge, true, 'mobile visual bridge regressed');
+assert.equal(scrollPolicy.mobile?.automatic_page_position_changes, true, 'mobile boundary handoff positioning regressed');
+assert.equal(scrollPolicy.mobile?.boundary_handoff_only, true, 'mobile positioning must remain boundary-only');
+assert.equal(scrollPolicy.mobile?.transfer_mode, 'scrollend-or-idle', 'mobile handoff must wait for scrollend/idle');
+assert.equal(scrollPolicy.mobile?.native_momentum_preserved, true, 'mobile native momentum regressed');
+assert.equal(scrollPolicy.mobile?.finite_document, false, 'mobile document must not terminate at the footer');
 assert.equal(scrollPolicy.desktop?.controller, 'seamless-v7', 'desktop seamless-v7 controller regressed');
 assert.equal(scrollPolicy.desktop?.automatic_loop, true, 'desktop seamless loop regressed');
 assert.equal(scrollPolicy.policy?.input_capture, false, 'scroll input capture regressed');
 assert.equal(scrollPolicy.policy?.section_scroll_snap, false, 'section scroll snap regressed');
 assert.match(scrollBootstrap, /platform-scroll-v2/, 'platform scroll bootstrap missing');
+assert.match(scrollBootstrap, /installSeamlessRuntime\('mobile'\)/, 'mobile shared seamless runtime bootstrap missing');
+assert.match(scrollBootstrap, /native-momentum-loop-v1/, 'mobile native momentum loop marker missing');
 assert.doesNotMatch(scrollBootstrap, /scrollTo\s*\(/, 'mobile-capable bootstrap must not force page position');
-assert.match(desktopScroll, /const VERSION = 'seamless-v7'/, 'desktop seamless runtime missing');
+assert.match(seamlessScroll, /const VERSION = 'seamless-v7'/, 'shared seamless runtime missing');
+assert.match(seamlessScroll, /mobileTransfer: 'scrollend-or-idle'/, 'mobile seamless handoff guard missing');
+assert.doesNotMatch(seamlessScroll, /addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/, 'shared seamless runtime must not capture wheel/touch input');
 
 assert.equal(contract.public_delivery?.first_party_only, true, 'first-party delivery contract regressed');
+assert.equal(contract.layout_contract?.mobile?.controller, 'seamless-v7', 'public mobile seamless controller contract regressed');
+assert.equal(contract.layout_contract?.mobile?.finite_document, false, 'public mobile infinite-scroll contract regressed');
 assert.equal(contract.quality_contract?.benchmark_floor?.policy, 'igloo-inc-is-mandatory-minimum-reference', 'Igloo minimum benchmark policy missing');
 assert.equal(contract.quality_contract?.benchmark_floor?.native_first_party_procedural_gpu, true, 'native procedural GPU benchmark requirement missing');
 assert.equal(contract.quality_contract?.benchmark_floor?.functional_six_scene_morphing, true, 'six-scene functional morph benchmark requirement missing');
@@ -92,4 +102,4 @@ assert.equal(contract.quality_contract?.benchmark_floor?.adaptive_gpu_quality_fr
 assert.equal(contract.quality_contract?.benchmark_floor?.third_party_scene_framework_required, false, 'native renderer unexpectedly requires a third-party scene framework');
 assert.equal(contract.quality_contract?.benchmark_floor?.external_superiority_claim, false, 'external superiority must not be claimed without independent validation');
 
-console.log('PASS FormatX Igloo-floor native GPU, first-party delivery, fallback and platform-specific scroll policy.');
+console.log('PASS FormatX Igloo-floor native GPU, first-party delivery, fallback and shared seamless-v7 mobile/desktop scroll policy.');
