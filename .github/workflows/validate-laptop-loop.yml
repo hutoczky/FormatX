@@ -11,6 +11,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-seamless-loop.css'
       - 'docs/scifi-ui/styles/formatx-continuous-scroll.css'
       - 'docs/scifi-ui/styles/formatx-mobile-production-r5.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-seamless-loop.css'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
   pull_request:
@@ -21,6 +22,7 @@ on:
       - 'docs/scifi-ui/styles/formatx-seamless-loop.css'
       - 'docs/scifi-ui/styles/formatx-continuous-scroll.css'
       - 'docs/scifi-ui/styles/formatx-mobile-production-r5.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-seamless-loop.css'
       - '.github/scripts/validate-laptop-continuous-loop.cjs'
       - '.github/workflows/validate-laptop-loop.yml'
 
@@ -56,6 +58,7 @@ jobs:
           grep -Fq "native-momentum-loop-v1" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "formatx-infinite-scroll-desktop-v7.js" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "formatx-mobile-seamless-loop.css" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "scrollTo(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "scrollIntoView(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "cloneNode(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
@@ -68,6 +71,7 @@ jobs:
           ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "scroll-snap-type: none !important" docs/scifi-ui/styles/formatx-continuous-scroll.css
           grep -Fq "mobile-seamless-r5" docs/scifi-ui/styles/formatx-continuous-scroll.css
+          grep -Fq "min-height: calc(100svh + max(320px, 24svh))" docs/scifi-ui/styles/formatx-mobile-seamless-loop.css
 
       - name: Install Chromium
         shell: bash
