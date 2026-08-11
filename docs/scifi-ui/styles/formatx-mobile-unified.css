@@ -226,6 +226,421 @@
   .site-footer {
     padding-bottom: calc(var(--fx-mobile-dock-height) + var(--fx-mobile-safe-bottom) + 26px) !important;
   }
+
+  /* Production mobile stability r4 — the public page must remain a complete,
+     readable document even if optional cinematic/enhancement CSS arrives late. */
+  .topbar {
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  #main-content {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  #main-content > .scene:not(#hero),
+  #main-content > .fx-category-deck,
+  .fx-static-live-os,
+  .fx-origin-proof,
+  #user-feedback {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: clamp(54px, 10vw, 82px) clamp(18px, 5vw, 28px) !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  #main-content > .scene:not(#hero) *,
+  .fx-static-live-os *,
+  .fx-origin-proof *,
+  #user-feedback * {
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  #main-content > .scene:not(#hero) :where(h1,h2,h3,h4,p,span,strong,small,b,em,a,li),
+  .fx-static-live-os :where(h1,h2,h3,h4,p,span,strong,small,b,em,a,li),
+  .fx-origin-proof :where(h1,h2,h3,h4,p,span,strong,small,b,em,a,li),
+  #user-feedback :where(h1,h2,h3,h4,p,span,strong,small,b,em,a,li) {
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+  }
+
+  .section-heading {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    width: 100% !important;
+    margin: 0 0 34px !important;
+  }
+
+  .section-heading .section-index {
+    margin: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    letter-spacing: .11em !important;
+  }
+
+  .section-heading h2,
+  #resources .release-layout h2,
+  .fx-static-live-os h2,
+  .fx-origin-proof h2,
+  #user-feedback h2 {
+    display: grid !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    font-size: clamp(34px, 10.5vw, 52px) !important;
+    line-height: 1.04 !important;
+    letter-spacing: -.045em !important;
+  }
+
+  .section-heading h2 > span,
+  .section-heading h2 > em {
+    display: block !important;
+    margin: 0 !important;
+  }
+
+  /* Nervous system: keep the information, remove the redundant desktop stage
+     that was colliding with the chapter cards on phones. */
+  #experience .flow {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  #experience .flow-stage {
+    display: none !important;
+  }
+
+  #experience .flow-chapters {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  #experience .flow-chapters article,
+  #capabilities .card,
+  #system .system-grid article,
+  #pricing .price-card {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 22px 20px !important;
+    border: 1px solid rgba(139, 219, 255, .16) !important;
+    border-radius: 22px !important;
+    background: linear-gradient(145deg, rgba(8, 22, 37, .94), rgba(3, 9, 17, .98)) !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .2) !important;
+    overflow: hidden !important;
+    transform: none !important;
+  }
+
+  #experience .flow-chapters article > span,
+  #capabilities .card > span,
+  #system .system-grid article > span {
+    display: block !important;
+    margin: 0 0 12px !important;
+    color: rgba(155, 224, 255, .76) !important;
+    font-size: 12px !important;
+    letter-spacing: .12em !important;
+  }
+
+  #experience .flow-chapters article > div {
+    display: block !important;
+  }
+
+  #experience .flow-chapters article small,
+  #capabilities .card b {
+    display: block !important;
+    margin: 0 0 9px !important;
+    color: rgba(167, 221, 244, .7) !important;
+    font-size: 11px !important;
+    letter-spacing: .08em !important;
+  }
+
+  #experience .flow-chapters article h3,
+  #capabilities .card h3,
+  #system .system-grid article h3,
+  #pricing .price-card h3 {
+    margin: 0 0 12px !important;
+    font-size: clamp(24px, 7.2vw, 34px) !important;
+    line-height: 1.12 !important;
+  }
+
+  #experience .flow-chapters article p,
+  #capabilities .card p,
+  #system .system-grid article p,
+  #pricing .price-card p {
+    margin: 0 !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+  }
+
+  #capabilities .cards,
+  #capabilities .card-grid,
+  #capabilities .capability-grid,
+  #system .system-grid,
+  #pricing .pricing {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  #capabilities .card > i {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+  }
+
+  /* Pricing must never concatenate plan metadata, price and currency. */
+  #pricing .price-card header {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px 12px !important;
+    margin: 0 0 22px !important;
+  }
+
+  #pricing .price-card header > span,
+  #pricing .price-card header > b {
+    display: inline-flex !important;
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  #pricing .price-card .price {
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    align-items: baseline !important;
+    gap: 4px 8px !important;
+    margin: 20px 0 !important;
+  }
+
+  #pricing .price-card .price strong {
+    display: block !important;
+    font-size: clamp(28px, 8vw, 38px) !important;
+    line-height: 1 !important;
+  }
+
+  #pricing .price-card .price span {
+    display: block !important;
+  }
+
+  #pricing .price-card .price small {
+    display: block !important;
+    grid-column: 1 / -1 !important;
+    margin-top: 5px !important;
+  }
+
+  #pricing .price-card ul {
+    margin: 0 0 22px !important;
+    padding-left: 22px !important;
+  }
+
+  #pricing .price-card li {
+    margin: 7px 0 !important;
+    line-height: 1.45 !important;
+  }
+
+  #pricing .price-card .button {
+    width: 100% !important;
+    min-height: 54px !important;
+    padding: 12px 16px !important;
+  }
+
+  #pricing .payment {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+    width: 100% !important;
+    margin: 24px 0 0 !important;
+    padding: 22px 20px !important;
+    border: 1px solid rgba(139, 219, 255, .16) !important;
+    border-radius: 22px !important;
+    background: rgba(5, 15, 26, .92) !important;
+  }
+
+  #pricing .payment-console {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  #pricing .payment-console .button {
+    width: 100% !important;
+  }
+
+  #formatx-plan-qr-dock {
+    width: 100% !important;
+    margin: 22px 0 0 !important;
+    padding: 20px !important;
+    border-radius: 22px !important;
+  }
+
+  #formatx-plan-qr-dock .fx-plan-qr-head,
+  #formatx-plan-qr-dock .fx-plan-qr-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  #formatx-plan-qr-dock .fx-plan-qr-card {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 14px !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 18px !important;
+  }
+
+  #formatx-plan-qr-dock .fx-plan-qr-copy > * {
+    display: block !important;
+  }
+
+  #formatx-plan-qr-dock .fx-plan-qr-copy > strong {
+    margin-top: 10px !important;
+  }
+
+  #formatx-plan-qr-dock .fx-plan-qr-link {
+    width: 92px !important;
+    height: 92px !important;
+    align-self: center !important;
+  }
+
+  #formatx-plan-qr-dock .fx-plan-qr-link img {
+    inset: 5px !important;
+    width: 82px !important;
+    height: 82px !important;
+  }
+
+  #system .marquee {
+    width: 100% !important;
+    margin-top: 24px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+  }
+
+  #system .marquee span {
+    display: block !important;
+    width: max-content !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+  }
+
+  /* Release beacon and footer are explicit stacks instead of inline text runs. */
+  #resources .release-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 22px !important;
+    width: 100% !important;
+  }
+
+  #resources .release-layout > div:first-child {
+    display: grid !important;
+    gap: 16px !important;
+  }
+
+  #resources .release-card {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    padding: 20px !important;
+    border: 1px solid rgba(139, 219, 255, .16) !important;
+    border-radius: 20px !important;
+    background: rgba(5, 15, 26, .92) !important;
+  }
+
+  #resources .release-card > span,
+  #resources .release-card > strong,
+  #resources .release-card > small,
+  #resources .release-card > a {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  #resources .particle-footer,
+  #resources .loop-note {
+    display: none !important;
+  }
+
+  .site-footer {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 22px !important;
+    width: 100% !important;
+    padding: 38px 20px calc(var(--fx-mobile-dock-height) + var(--fx-mobile-safe-bottom) + 30px) !important;
+  }
+
+  .site-footer .footer-brand,
+  .site-footer nav,
+  .site-footer .footer-bottom {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    gap: 10px 16px !important;
+    width: 100% !important;
+  }
+
+  .site-footer .footer-brand {
+    flex-direction: column !important;
+  }
+
+  .site-footer nav a,
+  .site-footer .footer-bottom a,
+  .site-footer .footer-bottom span {
+    display: inline-flex !important;
+    width: auto !important;
+    margin: 0 !important;
+    white-space: normal !important;
+  }
+
+  .fx-static-live-os,
+  .fx-origin-proof,
+  #user-feedback {
+    margin-inline: 0 !important;
+  }
+
+  .fx-static-live-os__head,
+  .fx-static-live-os__grid,
+  .fx-static-live-os__actions,
+  .fx-proof-grid,
+  .fx-feedback-head,
+  .fx-feedback-ratings {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .fx-static-live-os__actions .button,
+  .fx-static-live-os__actions a {
+    width: 100% !important;
+    min-height: 54px !important;
+  }
 }
 
 @media (max-width: 430px) {
@@ -260,6 +675,14 @@
   .fx-organism-actionbar {
     left: 8px !important;
     right: 8px !important;
+  }
+
+  #formatx-plan-qr-dock .fx-plan-qr-card {
+    grid-template-columns: 1fr !important;
+  }
+
+  #formatx-plan-qr-dock .fx-plan-qr-link {
+    justify-self: start !important;
   }
 }
 
