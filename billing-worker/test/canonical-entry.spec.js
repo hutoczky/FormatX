@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import canonicalWorker from '../src/canonical-entry.js';
+import canonicalWorker from '../src/production-content-entry.js';
 
 function testEnv(onAsset) {
   return {
@@ -28,7 +28,7 @@ function testEnv(onAsset) {
   };
 }
 
-describe('canonical production gateway', () => {
+describe('active production canonical gateway', () => {
   it('serves the canonical apex root as a 200 without any Location header', async () => {
     let assetPath = '';
     const response = await canonicalWorker.fetch(
