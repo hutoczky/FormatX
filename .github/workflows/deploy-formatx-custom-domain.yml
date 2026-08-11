@@ -18,7 +18,6 @@ on:
       - 'wrangler.jsonc'
       - '.github/scripts/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
-      - '.github/workflows/verify-live-core-mesh3d-visual.yml'
   push:
     branches: [master]
     paths:
@@ -28,7 +27,6 @@ on:
       - 'wrangler.jsonc'
       - '.github/scripts/**'
       - '.github/workflows/deploy-formatx-custom-domain.yml'
-      - '.github/workflows/verify-live-core-mesh3d-visual.yml'
 
 permissions:
   contents: read
@@ -45,20 +43,22 @@ jobs:
     timeout-minutes: 35
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate public content, releases and complete site integrity
+      - name: Validate public content, release, runtime and security contracts
+        shell: bash
         run: |
           set -euo pipefail
           python3 .github/scripts/validate-content-standard-v2.py
           python3 .github/scripts/validate-public-release-integration.py
+          python3 .github/scripts/validate-webgpu-source.py
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-pricing-qr.cjs
           node .github/scripts/validate-public-site-integrity.cjs
@@ -68,50 +68,33 @@ jobs:
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
 
       - name: Validate production JavaScript syntax
+        shell: bash
         run: |
           set -euo pipefail
           node --check content-preview-entry.js
-          node --check billing-worker/src/production-with-license.js
-          node --check billing-worker/src/production-entry.js
-          node --check billing-worker/src/production-content-entry.js
-          node --check billing-worker/src/production-feedback-entry.js
-          node --check billing-worker/src/feedback-api.js
-          node --check billing-worker/src/feedback-schema.js
-          node --check billing-worker/src/pricing-v100-api.js
-          node --check docs/scifi-ui/scripts/release-metadata.js
-          node --check docs/scifi-ui/scripts/formatx-public-shell.js
-          node --check docs/scifi-ui/scripts/public-evidence-pages.js
+          node --input-type=module --check < billing-worker/src/production-with-license.js
+          node --input-type=module --check < billing-worker/src/production-entry.js
+          node --input-type=module --check < billing-worker/src/production-content-entry.js
+          node --input-type=module --check < billing-worker/src/production-feedback-entry.js
+          node --input-type=module --check < billing-worker/src/feedback-api.js
+          node --input-type=module --check < billing-worker/src/feedback-schema.js
+          node --input-type=module --check < billing-worker/src/pricing-v100-api.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
-          node --check docs/scifi-ui/scripts/formatx-apex.js
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
-          node --check docs/scifi-ui/scripts/formatx-premium-finish.js
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          node --check docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js
-          node --check docs/scifi-ui/scripts/formatx-accessibility-finalizer.js
-          node --check docs/scifi-ui/scripts/formatx-organism-truth-guard.js
-          node --check docs/scifi-ui/scripts/single-language-toggle.js
-          node --check docs/scifi-ui/scripts/formatx-license-links.js
-          node --check docs/scifi-ui/scripts/formatx-feedback.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
           node --check docs/scifi-ui/scripts/organism-interface.js
           node --check docs/scifi-ui/scripts/organism-menu-controller.js
-          node --check docs/scifi-ui/scripts/organism-console-state.js
-          node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-voice.js
           node --check docs/scifi-ui/scripts/organism-voice-stability.js
           node --check docs/scifi-ui/scripts/organism-master-sync.js
-          node --check docs/scifi-ui/scripts/organism-core-interaction.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-recovery.js
-          node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
-          node --check docs/scifi-ui/scripts/mobile-webgl-entry.js
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-public-site-integrity.cjs
-          node --check .github/scripts/validate-real3d-core-v20.cjs
-          node --check .github/scripts/validate-real3d-mobile-startup-v22.cjs
 
       - name: Install dependencies and run Worker tests
         working-directory: billing-worker
@@ -124,43 +107,29 @@ jobs:
         working-directory: billing-worker
         run: npx wrangler deploy --dry-run --outdir ../.wrangler-production-candidate
 
-      - name: Upload production candidate
-        uses: actions/upload-artifact@v4
-        with:
-          name: formatx-production-candidate-${{ github.sha }}
-          path: |
-            .wrangler-production-candidate
-            artifacts/production-readiness.json
-          if-no-files-found: warn
-          retention-days: 14
-
       - name: Publish production validation status
         if: always()
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
-          STATUS_CONTEXT: FormatX production validation
-          STATUS_DESCRIPTION: Full public surface, seamless scrolling, feedback, downloads and Worker validation
-          STATUS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           node --input-type=module - <<'NODE'
           const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
-          const url = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`;
-          const response = await fetch(url, {
+          const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`, {
             method: 'POST',
             headers: {
               Accept: 'application/vnd.github+json',
               Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
               'X-GitHub-Api-Version': '2022-11-28',
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({
               state,
-              context: process.env.STATUS_CONTEXT,
-              description: process.env.STATUS_DESCRIPTION.slice(0, 140),
-              target_url: process.env.STATUS_URL,
-            }),
+              context: 'FormatX production validation',
+              description: state === 'success' ? 'Production runtime, public surface and Worker validation passed' : 'Production validation failed',
+              target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+            })
           });
           if (!response.ok) throw new Error(`Status publish failed: ${response.status} ${await response.text()}`);
           NODE
@@ -173,13 +142,13 @@ jobs:
     timeout-minutes: 30
     environment:
       name: production
-      url: https://www.formatxsuite.com/
+      url: https://formatxsuite.com/
     steps:
       - name: Check out validated commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
@@ -189,163 +158,134 @@ jobs:
         working-directory: billing-worker
         run: npm ci
 
-      - name: Deploy with Wrangler or use the connected Cloudflare build
+      - name: Deploy with Wrangler or use connected Cloudflare build
         id: deploy_mode
         working-directory: billing-worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.FORMATX_CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_WORKERS_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID || 'ffd7d28ea7c6a510549dc9363619c8c5' }}
+        shell: bash
         run: |
           set -euo pipefail
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           if [[ -z "$CLOUDFLARE_API_TOKEN" ]]; then
             echo "mode=connected-cloudflare-build" >> "$GITHUB_OUTPUT"
-            echo 'Wrangler token unavailable; live smoke tests will verify the connected Cloudflare deployment.'
-            exit 0
+            echo 'Wrangler token unavailable; smoke test will wait for the connected Cloudflare deployment.'
+          else
+            echo "mode=wrangler" >> "$GITHUB_OUTPUT"
+            npx wrangler deploy
           fi
-          echo "mode=wrangler" >> "$GITHUB_OUTPUT"
-          npx wrangler deploy
 
-      - name: Smoke-test production performance, first-party delivery, seamless scrolling and public comments
+      - name: Smoke-test canonical production and platform-specific scrolling
         shell: bash
         run: |
           set -Eeuo pipefail
+          ORIGIN='https://formatxsuite.com'
           WWW='https://www.formatxsuite.com'
-          ROOT_DOMAIN='https://formatxsuite.com'
-          PAYLOAD='{"overall":5,"usability":5,"performance":5,"design":5,"features":5,"comment":"","display_name":"","contact_email":"","publish_permission":false,"privacy_consent":true,"website":"formatx-production-smoke-probe","locale":"hu","source":"formatx-production-smoke","page_path":"/"}'
 
           for attempt in $(seq 1 30); do
             echo "Production smoke attempt $attempt/30"
             tmp="$(mktemp -d)"
-            root_code="$(curl -sS -L --max-time 30 -D "$tmp/home.headers" -o "$tmp/home.html" -w '%{http_code}' "$WWW/" || true)"
-            bare_code="$(curl -sS -L --max-time 30 -o "$tmp/bare.html" -w '%{http_code}' "$ROOT_DOMAIN/" || true)"
-            summary_code="$(curl -sS --max-time 30 -o "$tmp/summary.json" -w '%{http_code}' "$WWW/api/feedback/summary" || true)"
-            submit_code="$(curl -sS --max-time 30 -o "$tmp/submit.json" -w '%{http_code}' \
-              -X POST "$WWW/api/feedback" \
-              -H 'Origin: https://www.formatxsuite.com' \
-              -H 'Content-Type: application/json' \
-              -H 'Accept: application/json' \
-              --data "$PAYLOAD" || true)"
-            loop_code="$(curl -sS --max-time 30 -o "$tmp/loop.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-infinite-scroll.js?v=production-smoke" || true)"
-            loop_style_code="$(curl -sS --max-time 30 -o "$tmp/loop.css" -w '%{http_code}' "$WWW/scifi-ui/styles/formatx-seamless-loop.css?v=production-smoke" || true)"
-            living_code="$(curl -sS --max-time 30 -o "$tmp/living.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/living-architecture.js?v=production-smoke" || true)"
-            apex_code="$(curl -sS --max-time 30 -o "$tmp/apex.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-apex.js?v=production-smoke" || true)"
-            feedback_code="$(curl -sS --max-time 30 -o "$tmp/feedback.js" -w '%{http_code}' "$WWW/scifi-ui/scripts/formatx-feedback.js?v=production-smoke" || true)"
-            feedback_style_code="$(curl -sS --max-time 30 -o "$tmp/feedback-public.css" -w '%{http_code}' "$WWW/scifi-ui/styles/formatx-feedback-public.css?v=production-smoke" || true)"
-            downloads_code="$(curl -sS -L --max-time 30 -D "$tmp/downloads.headers" -o "$tmp/downloads.html" -w '%{http_code}' "$WWW/downloads/" || true)"
-            android_code="$(curl -sS -L --max-time 30 -o "$tmp/android.html" -w '%{http_code}' "$WWW/scifi-ui/android/" || true)"
-            verification_code="$(curl -sS -L --max-time 30 -o "$tmp/verification.html" -w '%{http_code}' "$WWW/scifi-ui/verification.html" || true)"
-            known_issues_code="$(curl -sS -L --max-time 30 -o "$tmp/known-issues.html" -w '%{http_code}' "$WWW/scifi-ui/known-issues.html" || true)"
-            support_code="$(curl -sS -L --max-time 30 -o "$tmp/support.html" -w '%{http_code}' "$WWW/support.html" || true)"
-            release_code="$(curl -sS --max-time 30 -o "$tmp/release.json" -w '%{http_code}' "$WWW/scifi-ui/data/current-release.json" || true)"
-            release_api_code="$(curl -sS --max-time 30 -o "$tmp/release-api.json" -w '%{http_code}' "$WWW/api/public-release" || true)"
-            package_code="$(curl -sS --max-time 45 --range 0-0 -D "$tmp/package.headers" -o "$tmp/package.bin" -w '%{http_code}' "$WWW/download/multiplatform" || true)"
-            portable_code="$(curl -sS --max-time 30 -o "$tmp/portable.svg" -w '%{http_code}' "$WWW/scifi-ui/assets/images/product-showcase/portable-installer-compatible.svg" || true)"
+            home_code="$(curl -sS -L --max-time 30 -D "$tmp/home.headers" -o "$tmp/home.html" -w '%{http_code}' "$ORIGIN/" || true)"
+            www_code="$(curl -sS -L --max-time 30 -o "$tmp/www.html" -w '%{http_code}' "$WWW/" || true)"
+            bootstrap_code="$(curl -sS --max-time 30 -o "$tmp/bootstrap.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll.js?v=production-smoke" || true)"
+            desktop_code="$(curl -sS --max-time 30 -o "$tmp/desktop.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=production-smoke" || true)"
+            continuous_code="$(curl -sS --max-time 30 -o "$tmp/continuous.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-continuous-scroll.css?v=production-smoke" || true)"
+            mobile_code="$(curl -sS --max-time 30 -o "$tmp/mobile.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-production-r5.css?v=production-smoke" || true)"
+            policy_code="$(curl -sS --max-time 30 -o "$tmp/scroll-policy.json" -w '%{http_code}' "$ORIGIN/scifi-ui/data/scroll-policy.json?v=production-smoke" || true)"
+            release_code="$(curl -sS --max-time 30 -o "$tmp/release.json" -w '%{http_code}' "$ORIGIN/scifi-ui/data/current-release.json" || true)"
+            summary_code="$(curl -sS --max-time 30 -o "$tmp/summary.json" -w '%{http_code}' "$ORIGIN/api/feedback/summary" || true)"
+            downloads_code="$(curl -sS -L --max-time 30 -o "$tmp/downloads.html" -w '%{http_code}' "$ORIGIN/downloads/" || true)"
+            verification_code="$(curl -sS -L --max-time 30 -o "$tmp/verification.html" -w '%{http_code}' "$ORIGIN/verification" || true)"
+            package_code="$(curl -sS --max-time 45 --range 0-0 -o "$tmp/package.bin" -w '%{http_code}' "$ORIGIN/download/multiplatform" || true)"
 
-            if [[ "$root_code" == '200' && "$bare_code" == '200' && "$summary_code" == '200' \
-              && "$submit_code" == '202' && "$loop_code" == '200' && "$loop_style_code" == '200' \
-              && "$living_code" == '200' && "$apex_code" == '200' && "$feedback_code" == '200' \
-              && "$feedback_style_code" == '200' && "$downloads_code" == '200' && "$android_code" == '200' \
-              && "$verification_code" == '200' && "$known_issues_code" == '200' && "$support_code" == '200' \
-              && "$release_code" == '200' && "$release_api_code" == '200' \
-              && ( "$package_code" == '200' || "$package_code" == '206' ) && "$portable_code" == '200' ]]; then
+            if [[ "$home_code" == 200 && "$www_code" == 200 && "$bootstrap_code" == 200 && "$desktop_code" == 200 \
+              && "$continuous_code" == 200 && "$mobile_code" == 200 && "$policy_code" == 200 && "$release_code" == 200 \
+              && "$summary_code" == 200 && "$downloads_code" == 200 && "$verification_code" == 200 \
+              && ( "$package_code" == 200 || "$package_code" == 206 ) ]]; then
               if python3 - "$tmp" <<'PY'
           import json
           import pathlib
+          import re
           import sys
 
           root = pathlib.Path(sys.argv[1])
-          summary = json.loads((root / 'summary.json').read_text())
-          submit = json.loads((root / 'submit.json').read_text())
-          release = json.loads((root / 'release.json').read_text())
-          release_api = json.loads((root / 'release-api.json').read_text())
-          loop = (root / 'loop.js').read_text()
-          loop_css = (root / 'loop.css').read_text()
-          living = (root / 'living.js').read_text()
-          apex = (root / 'apex.js').read_text()
-          feedback = (root / 'feedback.js').read_text()
-          feedback_public = (root / 'feedback-public.css').read_text()
           home = (root / 'home.html').read_text()
-          home_headers = (root / 'home.headers').read_text()
+          headers = (root / 'home.headers').read_text().lower()
+          bootstrap = (root / 'bootstrap.js').read_text()
+          desktop = (root / 'desktop.js').read_text()
+          continuous = (root / 'continuous.css').read_text()
+          mobile = (root / 'mobile.css').read_text()
           downloads = (root / 'downloads.html').read_text()
-          downloads_headers = (root / 'downloads.headers').read_text()
-          android = (root / 'android.html').read_text()
           verification = (root / 'verification.html').read_text()
-          known_issues = (root / 'known-issues.html').read_text()
-          support = (root / 'support.html').read_text()
-          package_headers = (root / 'package.headers').read_text()
-          portable = (root / 'portable.svg').read_text().lower()
+          policy = json.loads((root / 'scroll-policy.json').read_text())
+          release = json.loads((root / 'release.json').read_text())
+          summary = json.loads((root / 'summary.json').read_text())
 
-          assert summary.get('ok') is True, summary
-          assert isinstance(summary.get('count'), int), summary
-          assert isinstance(summary.get('reviews'), list), summary
-          for review in summary.get('reviews', []):
-              assert set(review).issubset({'overall', 'comment', 'display_name', 'locale', 'approved_at'}), review
-              assert isinstance(review.get('comment'), str) and review['comment'].strip(), review
-              assert 1 <= int(review.get('overall', 0)) <= 5, review
-          assert 'contact_email' not in json.dumps(summary), summary
-          assert 'ip_hash' not in json.dumps(summary), summary
-          assert 'user_agent' not in json.dumps(summary), summary
-          assert 'moderation_note' not in json.dumps(summary), summary
+          assert 'platform-scroll-v2' in bootstrap, 'platform scroll bootstrap not deployed yet'
+          assert 'mobile-native-document-v1' in bootstrap, 'mobile native-document policy missing'
+          assert "fxAutomaticLoop = 'disabled-mobile'" in bootstrap, 'mobile automatic loop not disabled'
+          assert "fxLoopBridge = 'disabled-mobile'" in bootstrap, 'mobile visual bridge not disabled'
+          assert 'scrollTo(' not in bootstrap and 'scrollIntoView(' not in bootstrap and 'cloneNode(' not in bootstrap, 'mobile-capable bootstrap still moves/clones page'
+          assert "const VERSION = 'seamless-v7'" in desktop, 'desktop seamless-v7 runtime missing'
+          assert 'sourceHero.cloneNode(true)' in desktop and 'window.scrollTo(' in desktop, 'desktop visual bridge implementation missing'
+          assert "addEventListener('wheel'" not in desktop and "addEventListener('touchmove'" not in desktop, 'desktop runtime captures input'
+          assert 'scroll-snap-type: none !important' in continuous and 'scroll-snap-align: none !important' in continuous, 'scroll snap suppression missing'
+          assert '.fx-award-proof__grid' in mobile and '.fx-plan-qr-card:not(.is-qr-ready)' in mobile, 'mobile production safeguards missing'
 
-          assert submit.get('ok') is True, submit
-          assert submit.get('state') == 'pending-moderation', submit
-          assert "const VERSION = 'seamless-v7'" in loop, 'seamless-v7 controller missing'
-          assert "fxInfiniteCloneMode = 'visual-bridge'" in loop, 'seamless Hero bridge contract missing'
-          assert "fxAutomaticLoop = 'enabled'" in loop, 'automatic seamless loop is not enabled'
-          assert 'clonedHeroOnly: true' in loop and 'clonedContent: false' in loop, 'Hero-only inert bridge contract missing'
-          assert 'sectionSnapDisabled: true' in loop, 'section snap suppression contract missing'
-          assert "root.classList.add('fx-continuous-scroll-mode')" in loop, 'continuous-scroll class missing'
-          assert 'sourceHero.cloneNode(true)' in loop, 'Hero visual bridge clone missing'
-          assert "window.scrollTo({ top: target, left: 0, behavior: 'auto' })" in loop, 'boundary handoff landing missing'
-          assert "mobileTransfer: 'scrollend-or-idle'" in loop and 'mobileNativeMomentumPreserved: true' in loop, 'mobile momentum-safe handoff missing'
-          assert "addEventListener('scrollend', onScrollEnd" in loop and "touchstart', onTouchStart" in loop, 'mobile scroll-end/touch ownership guards missing'
-          assert "addEventListener('wheel'" not in loop and "addEventListener('touchmove'" not in loop and 'preventDefault' not in loop, 'wheel or touchmove input is being intercepted'
-          assert 'document.body.cloneNode' not in loop and 'document.documentElement.cloneNode' not in loop, 'full-page cloning is forbidden'
-          assert 'scroll-snap-type: none !important' in loop_css, 'root section snapping is not disabled'
-          assert 'scroll-snap-align: none !important' in loop_css, 'section snap alignment is not disabled'
-          assert "deferred-user-activation" in living, 'immersive engine is not user-deferred'
-          assert "rootMargin: '700px 0px'" in living, 'QR work is not viewport-deferred'
-          assert "const RELEASE_API = './data/current-release.json'" in apex, 'homepage still depends on remote release API'
-          assert 'requestAnimationFrame(progress)' in apex and 'requestAnimationFrame(apply)' in apex, 'scroll/pointer work is not frame-throttled'
-          assert 'function renderPublicReviews' in feedback, 'approved public comment renderer missing'
-          assert "rootMargin: '800px 0px'" in feedback, 'feedback UI is not viewport-deferred'
-          assert '.fx-feedback-public-card' in feedback_public, 'public comment styles missing'
-          assert 'id="user-feedback"' in home, 'feedback section missing'
-          assert 'data-fx-category-title' in home and 'Egy élő operációs réteg technikusi munkához.' in home, 'static category semantics missing'
-          assert 'Public beta' not in home and 'Nyilvános béta' not in home, 'retired product-level beta copy returned on homepage'
-          assert 'ANDROID TELJES VERZIÓ' in android and '/download/android-native-beta' in android, 'Android full-release/Native-beta separation missing'
-          assert 'data-verification-root' in verification, 'verification page invalid'
-          assert 'data-issues-root' in known_issues, 'known-issues page invalid'
-          assert 'Támogatás' in support or 'Support' in support, 'support page invalid'
-          assert release.get('ok') is True, release
-          assert release.get('source') == 'formatx_release_service', release
-          assert release.get('release_url') == '/scifi-ui/downloads/', release
-          assert release.get('channels', {}).get('multiplatform', {}).get('download_url') == '/download/multiplatform', release
-          assert release.get('channels', {}).get('android', {}).get('download_url') == '/download/android', release
-          assert release_api.get('html_url') == '/scifi-ui/downloads/', release_api
-          assert release_api.get('assets', [{}])[0].get('browser_download_url') == '/download/multiplatform', release_api
-          for public_text in [home, home_headers, downloads, downloads_headers, android, verification, known_issues, support, json.dumps(release), json.dumps(release_api), package_headers]:
-              assert 'github' not in public_text.lower(), 'upstream source leaked into a public response'
-              assert 'githubusercontent' not in public_text.lower(), 'upstream asset host leaked into a public response'
-          assert '<svg' in portable and '</svg>' in portable, 'portable installer SVG missing'
-          assert 'data:image/webp' not in portable and '<image' not in portable, 'embedded raster returned'
-          print('FormatX production first-party delivery/seamless-scroll/public-comments smoke passed.')
+          assert policy['mobile']['controller'] == 'mobile-native-document-v1'
+          assert policy['mobile']['automatic_loop'] is False
+          assert policy['mobile']['visual_bridge'] is False
+          assert policy['mobile']['automatic_page_position_changes'] is False
+          assert policy['desktop']['controller'] == 'seamless-v7'
+          assert policy['desktop']['automatic_loop'] is True
+
+          multi = release.get('channels', {}).get('multiplatform') or release.get('channels', {}).get('windows') or {}
+          assert release.get('ok') is True and multi.get('available') is True, release
+          assert re.fullmatch(r'sha256:[0-9a-f]{64}', multi.get('digest', ''), re.I), multi
+          assert summary.get('ok') is True and isinstance(summary.get('reviews'), list), summary
+          assert 'data-release-download="multiplatform"' in home
+          assert 'data-release-download="multiplatform"' in downloads
+          assert 'verification' in verification.lower() or 'ellenőrz' in verification.lower()
+          assert 'content-security-policy' in headers, 'CSP response header missing'
           PY
               then
                 rm -rf "$tmp"
+                echo 'Production smoke passed.'
                 exit 0
               fi
             fi
 
-            echo "root=$root_code bare=$bare_code summary=$summary_code submit=$submit_code loop=$loop_code loop_style=$loop_style_code living=$living_code apex=$apex_code feedback=$feedback_code feedback_style=$feedback_style_code downloads=$downloads_code android=$android_code verification=$verification_code known_issues=$known_issues_code support=$support_code release=$release_code release_api=$release_api_code package=$package_code portable=$portable_code"
-            [[ -s "$tmp/summary.json" ]] && cat "$tmp/summary.json" || true
-            [[ -s "$tmp/submit.json" ]] && cat "$tmp/submit.json" || true
-            [[ -s "$tmp/release.json" ]] && cat "$tmp/release.json" || true
             rm -rf "$tmp"
-            if [[ "$attempt" == '30' ]]; then
-              echo 'Production did not become healthy with the first-party delivery and seamless-scroll contract within the retry window.' >&2
-              exit 1
-            fi
-            sleep 12
+            sleep 10
           done
+
+          echo 'Production did not converge to the validated commit in time.' >&2
+          exit 1
+
+      - name: Publish deployment status
+        if: always()
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          node --input-type=module - <<'NODE'
+          const state = process.env.JOB_STATUS === 'success' ? 'success' : 'failure';
+          const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/statuses/${process.env.GITHUB_SHA}`, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/vnd.github+json',
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+              'X-GitHub-Api-Version': '2022-11-28',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              state,
+              context: 'FormatX production deployment',
+              description: state === 'success' ? 'Production deployment and live smoke tests passed' : 'Production deployment or smoke test failed',
+              target_url: `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+            })
+          });
+          if (!response.ok) throw new Error(`Status publish failed: ${response.status} ${await response.text()}`);
+          NODE

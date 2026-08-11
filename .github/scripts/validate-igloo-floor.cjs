@@ -14,11 +14,16 @@ const fallback = read('docs/scifi-ui/scripts/formatx-three-host-safe.js');
 const transcendCss = read('docs/scifi-ui/styles/formatx-transcend.css');
 const productionEntry = read('billing-worker/src/production-entry.js');
 const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
+const scrollPolicy = JSON.parse(read('docs/scifi-ui/data/scroll-policy.json'));
+const scrollBootstrap = read('docs/scifi-ui/scripts/formatx-infinite-scroll.js');
+const desktopScroll = read('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
 
 for (const [filename, source] of [
   ['formatx-apex-native.js', apex],
   ['igloo-parity.js', loader],
   ['formatx-three-host-safe.js', fallback],
+  ['formatx-infinite-scroll.js', scrollBootstrap],
+  ['formatx-infinite-scroll-desktop-v7.js', desktopScroll],
 ]) {
   assert.doesNotThrow(() => new vm.Script(source, { filename }), `${filename} contains invalid JavaScript`);
 }
@@ -39,7 +44,6 @@ assert.match(apex, /createFallback/, 'Canvas2D fallback missing');
 assert.match(apex, /createFooterField/, 'particle typography footer missing');
 assert.match(apex, /createSoundscape/, 'generative soundscape missing');
 assert.match(apex, /button\.addEventListener\('click'/, 'soundscape must remain explicit opt-in');
-assert.match(apex, /fxScrollOwnership='seamless-v7'/, 'seamless-v7 must remain sole scroll owner');
 assert.match(apex, /fxSectionSnap='disabled'/, 'section snap must stay disabled');
 assert.match(apex, /fxInputInterception='none'/, 'native Apex input ownership marker missing');
 assert.doesNotMatch(apex, /scrollTo\s*\(/, 'native Apex must not programmatically move the page');
@@ -60,7 +64,6 @@ assert.match(loader, /safe-ready-v28/, 'immersive loader revision did not advanc
 assert.match(fallback, /root\.dataset\.fxNativeApex === 'ready'/, 'safe Three host does not honour native Apex readiness');
 assert.match(fallback, /root\.dataset\.fxThreeHost = 'native-apex'/, 'native Apex host bypass marker missing');
 assert.match(fallback, /fxThreeFallback/, 'safe renderer fallback state missing');
-
 assert.match(transcendCss, /\.fx-transcend-canvas/, 'cinematic native Apex surface styling missing');
 assert.match(transcendCss, /\.fx-transcend-footer/, 'particle footer styling missing');
 
@@ -68,16 +71,25 @@ assert.match(productionEntry, /'\/scifi-ui\/scripts\/formatx-apex-native\.js'/, 
 assert.match(productionEntry, /'\/scifi-ui\/scripts\/formatx-three-host-safe\.js'/, 'safe fallback host is not protected as a no-store production asset');
 assert.match(productionEntry, /'\/scifi-ui\/styles\/formatx-transcend\.css'/, 'native Apex cinematic CSS is not protected as a no-store production asset');
 
-assert.equal(contract.layout_contract?.infinite_scroll_controller, 'seamless-v7', 'infinite-scroll controller regressed');
-assert.equal(contract.layout_contract?.section_scroll_snap, false, 'section scroll snap regressed');
-assert.equal(contract.layout_contract?.mobile_native_momentum_preserved, true, 'mobile momentum contract regressed');
+assert.equal(scrollPolicy.schema_version, 1, 'platform scroll policy schema missing');
+assert.equal(scrollPolicy.mobile?.controller, 'mobile-native-document-v1', 'mobile native-document controller regressed');
+assert.equal(scrollPolicy.mobile?.automatic_loop, false, 'mobile automatic loop regressed');
+assert.equal(scrollPolicy.mobile?.visual_bridge, false, 'mobile visual bridge regressed');
+assert.equal(scrollPolicy.mobile?.automatic_page_position_changes, false, 'mobile automatic positioning regressed');
+assert.equal(scrollPolicy.desktop?.controller, 'seamless-v7', 'desktop seamless-v7 controller regressed');
+assert.equal(scrollPolicy.desktop?.automatic_loop, true, 'desktop seamless loop regressed');
+assert.equal(scrollPolicy.policy?.input_capture, false, 'scroll input capture regressed');
+assert.equal(scrollPolicy.policy?.section_scroll_snap, false, 'section scroll snap regressed');
+assert.match(scrollBootstrap, /platform-scroll-v2/, 'platform scroll bootstrap missing');
+assert.doesNotMatch(scrollBootstrap, /scrollTo\s*\(/, 'mobile-capable bootstrap must not force page position');
+assert.match(desktopScroll, /const VERSION = 'seamless-v7'/, 'desktop seamless runtime missing');
+
 assert.equal(contract.public_delivery?.first_party_only, true, 'first-party delivery contract regressed');
 assert.equal(contract.quality_contract?.benchmark_floor?.policy, 'igloo-inc-is-mandatory-minimum-reference', 'Igloo minimum benchmark policy missing');
 assert.equal(contract.quality_contract?.benchmark_floor?.native_first_party_procedural_gpu, true, 'native procedural GPU benchmark requirement missing');
 assert.equal(contract.quality_contract?.benchmark_floor?.functional_six_scene_morphing, true, 'six-scene functional morph benchmark requirement missing');
 assert.equal(contract.quality_contract?.benchmark_floor?.adaptive_gpu_quality_from_measured_fps, true, 'adaptive measured-FPS quality benchmark missing');
 assert.equal(contract.quality_contract?.benchmark_floor?.third_party_scene_framework_required, false, 'native renderer unexpectedly requires a third-party scene framework');
-assert.equal(contract.quality_contract?.benchmark_floor?.scroll_ownership, 'seamless-v7-only', 'Igloo-floor contract does not preserve seamless-v7 scroll ownership');
 assert.equal(contract.quality_contract?.benchmark_floor?.external_superiority_claim, false, 'external superiority must not be claimed without independent validation');
 
-console.log('FormatX Igloo-floor native procedural GPU, production delivery, fallback and seamless-scroll gate passed.');
+console.log('PASS FormatX Igloo-floor native GPU, first-party delivery, fallback and platform-specific scroll policy.');
