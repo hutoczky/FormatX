@@ -77,23 +77,25 @@ require("public release version remains hidden", public_copy.get("public_release
 require("downloads expose multiplatform release", 'data-release-download="multiplatform"' in downloads)
 require("home CTA exposes multiplatform release", 'data-release-download="multiplatform"' in home)
 
-# Loader/runtime contract: v28 is the current loader. Mobile never starts the
-# seamless transfer engine; desktop keeps the existing v7 implementation.
+# Loader/runtime contract: mobile and desktop both use seamless-v7. Mobile keeps
+# native browser momentum and defers the visual bridge handoff until scrollend/idle.
 require("loader uses current v28 marker", "safe-ready-v28" in loader and "safe-loading-v28" in loader)
 require("loader includes current voice stability", "organism-voice-stability.js?v=20260808-mobile-visual-viewport-1" in loader)
 require("loader includes unified mobile controller", "formatx-mobile-unified.js" in loader)
 require("scroll bootstrap is platform split v2", "platform-scroll-v2" in scroll_bootstrap)
-require("mobile controller is native document", "mobile-native-document-v1" in scroll_bootstrap)
-require("mobile automatic loop is disabled", "fxAutomaticLoop = 'disabled-mobile'" in scroll_bootstrap)
-require("mobile bridge is disabled", "fxLoopBridge = 'disabled-mobile'" in scroll_bootstrap)
+require("mobile requests seamless runtime", "installSeamlessRuntime('mobile')" in scroll_bootstrap)
+require("mobile automatic loop is pending then enabled by shared runtime", "fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'" in scroll_bootstrap)
+require("mobile loop policy preserves native momentum", "native-momentum-loop-v1" in scroll_bootstrap and "scrollend-or-idle-v1" in scroll_bootstrap)
+require("mobile bridge is explicitly exposed in seamless mode", "data-fx-mobile-loop-bridge-override" in scroll_bootstrap and "min-height: calc(100svh + max(320px, 24svh))" in scroll_bootstrap)
 require("mobile bootstrap performs no forced scrolling", "scrollTo(" not in scroll_bootstrap and "scrollIntoView(" not in scroll_bootstrap)
 require("mobile bootstrap performs no cloning", "cloneNode(" not in scroll_bootstrap)
-require("bootstrap loads desktop-only seamless runtime", "formatx-infinite-scroll-desktop-v7.js" in scroll_bootstrap)
-require("desktop runtime remains seamless-v7", "const VERSION = 'seamless-v7'" in desktop_scroll)
-require("desktop runtime retains visual bridge", "cloneNode(true)" in desktop_scroll and "window.scrollTo(" in desktop_scroll)
-require("desktop runtime never captures wheel/touchmove", "addEventListener('wheel'" not in desktop_scroll and "addEventListener('touchmove'" not in desktop_scroll and "preventDefault" not in desktop_scroll)
+require("bootstrap loads shared seamless runtime", "formatx-infinite-scroll-desktop-v7.js" in scroll_bootstrap)
+require("shared runtime remains seamless-v7", "const VERSION = 'seamless-v7'" in desktop_scroll)
+require("shared runtime retains visual bridge", "cloneNode(true)" in desktop_scroll and "window.scrollTo(" in desktop_scroll)
+require("shared runtime defers mobile transfer", "mobileTransfer: 'scrollend-or-idle'" in desktop_scroll and "scheduleMobileTransfer" in desktop_scroll)
+require("shared runtime never captures wheel/touchmove", "addEventListener('wheel'" not in desktop_scroll and "addEventListener('touchmove'" not in desktop_scroll and "preventDefault" not in desktop_scroll)
 require("mobile production layer is loaded", "formatx-mobile-production-r5.css" in mobile_unified)
-require("mobile production layer hides legacy bridge", ".fx-loop-bridge" in mobile_css and "display: none !important" in mobile_css)
+require("legacy mobile bridge hide remains scoped for compatibility", ".fx-loop-bridge" in mobile_css and "display: none !important" in mobile_css)
 require("mobile proof layout is single-column", ".fx-award-proof__grid" in mobile_css and "grid-template-columns: 1fr !important" in mobile_css)
 
 require("intro remains fail-open", "runtime-error" in intro and "promise-error" in intro)
