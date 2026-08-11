@@ -57,6 +57,16 @@ jobs:
             fi
           }
 
+          matches() {
+            local label="$1" pattern="$2" file="$3"
+            if grep -Eq -- "$pattern" "$file"; then
+              echo "PASS matches: $label"
+            else
+              echo "FAIL matches: $label :: $pattern" >&2
+              exit 1
+            fi
+          }
+
           absent() {
             local label="$1" needle="$2" file="$3"
             if grep -Fq -- "$needle" "$file"; then
@@ -98,11 +108,9 @@ jobs:
 
           get_live 'award readiness CSS' "$ORIGIN/scifi-ui/styles/formatx-award-readiness.css?v=award-live-current" "$AWARD_CSS"
           contains 'keyboard focus styling' ':focus-visible' "$AWARD_CSS"
-          contains '44px target floor' 'min-block-size: 44px' "$AWARD_CSS"
+          matches '44px target floor' 'min-block-size:[[:space:]]*44px' "$AWARD_CSS"
           contains 'reduced-motion support' 'prefers-reduced-motion: reduce' "$AWARD_CSS"
 
-          # Current production MAG authority: desktop v53 and physical-mobile v55.
-          # The bootstrap chooses exactly one renderer and does not create a GL context itself.
           get_live 'current MAG bootstrap' "$ORIGIN/scifi-ui/scripts/formatx-core-real3d-v20.js?v=live-current-mag" "$CORE_BOOTSTRAP"
           get_live 'desktop v53 MAG runtime' "$ORIGIN/scifi-ui/scripts/formatx-core-reference-v53.js?v=live-current-mag" "$DESKTOP_CORE"
           get_live 'desktop v53 MAG CSS' "$ORIGIN/scifi-ui/styles/formatx-core-reference-v53.css?v=live-current-mag" "$DESKTOP_CORE_CSS"
@@ -132,8 +140,8 @@ jobs:
           absent 'desktop image-backed drawImage' 'drawImage(' "$DESKTOP_CORE"
           absent 'desktop image-backed Image constructor' 'new Image(' "$DESKTOP_CORE"
           absent 'desktop third-party Three.js engine' 'THREE' "$DESKTOP_CORE"
-          contains 'desktop non-interactive core stage' 'pointer-events: none !important' "$DESKTOP_CORE_CSS"
-          contains 'desktop unfiltered native render' 'filter: none !important' "$DESKTOP_CORE_CSS"
+          matches 'desktop non-interactive core stage' 'pointer-events:[[:space:]]*none[[:space:]]*!important' "$DESKTOP_CORE_CSS"
+          matches 'desktop unfiltered native render' 'filter:[[:space:]]*none[[:space:]]*!important' "$DESKTOP_CORE_CSS"
           absent 'desktop CSS fake polygon crystal' 'clip-path: polygon' "$DESKTOP_CORE_CSS"
 
           count_exact 'mobile WebGL2 context creation sites' "getContext('webgl2'" 1 "$MOBILE_CORE"
@@ -153,8 +161,8 @@ jobs:
           absent 'mobile image-backed Image constructor' 'new Image(' "$MOBILE_CORE"
           absent 'mobile third-party Three.js engine' 'THREE' "$MOBILE_CORE"
           contains 'mobile hero-local stage selector' '#hero .hero-space > .fx-core-mobile-v55-stage' "$MOBILE_CORE_CSS"
-          contains 'mobile absolute stage positioning' 'position: absolute !important' "$MOBILE_CORE_CSS"
-          contains 'mobile unfiltered native render' 'filter: none !important' "$MOBILE_CORE_CSS"
+          matches 'mobile absolute stage positioning' 'position:[[:space:]]*absolute[[:space:]]*!important' "$MOBILE_CORE_CSS"
+          matches 'mobile unfiltered native render' 'filter:[[:space:]]*none[[:space:]]*!important' "$MOBILE_CORE_CSS"
           absent 'mobile CSS fake polygon crystal' 'clip-path: polygon' "$MOBILE_CORE_CSS"
 
           get_live 'immersive parity loader' "$ORIGIN/scifi-ui/scripts/igloo-parity.js?v=native-apex-live" "$PARITY_JS"
@@ -168,8 +176,6 @@ jobs:
           absent 'Apex touchmove ownership' "addEventListener('touchmove'" "$APEX_JS"
           contains 'fallback honours native Apex' "root.dataset.fxNativeApex === 'ready'" "$FALLBACK_JS"
 
-          # Scroll ownership is platform-specific. Mobile is a finite native
-          # document; desktop retains the seamless-v7 visual boundary bridge.
           get_live 'platform scroll bootstrap' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll.js?v=award-platform-scroll" "$SCROLL_BOOTSTRAP"
           get_live 'desktop seamless runtime' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=award-platform-scroll" "$DESKTOP_SCROLL"
           get_live 'public scroll policy' "$ORIGIN/scifi-ui/data/scroll-policy.json?v=award-platform-scroll" "$SCROLL_POLICY"
