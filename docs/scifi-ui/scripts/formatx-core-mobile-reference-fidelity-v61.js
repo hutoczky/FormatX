@@ -36,9 +36,9 @@ function start(attempt=0){
     <rect x="40" y="50" width="920" height="1100" rx="50" fill="#010711" fill-opacity=".22"/>
     <circle cx="500" cy="600" r="430" fill="url(#fx61-halo)"/>
     <g class="fx61-floor" opacity=".8">
-      <ellipse cx="500" cy="1045" rx="430" ry="108" fill="url(#fx61-floor)"/>
-      <path d="M80 1015H920 M120 1040H880 M155 1065H845 M190 1090H810 M225 1115H775 M270 1140H730 M315 1165H685" stroke="#22bfff" stroke-width="1.4" stroke-opacity=".15"/>
-      <path d="M500 985L160 1190 M500 985L840 1190 M500 985L320 1190 M500 985L680 1190" stroke="#4b8fff" stroke-width="1" stroke-opacity=".08"/>
+      <ellipse cx="500" cy="1100" rx="430" ry="92" fill="url(#fx61-floor)"/>
+      <path d="M80 1065H920 M120 1090H880 M155 1115H845 M190 1140H810 M225 1165H775 M270 1185H730" stroke="#22bfff" stroke-width="1.4" stroke-opacity=".15"/>
+      <path d="M500 1050L190 1190 M500 1050L810 1190 M500 1050L340 1190 M500 1050L660 1190" stroke="#4b8fff" stroke-width="1" stroke-opacity=".08"/>
     </g>
     <g class="fx61-halo-rings" fill="none" transform-origin="500px 600px">
       <circle cx="500" cy="600" r="348" stroke="#168cff" stroke-width="2" stroke-opacity=".12"/>
@@ -46,16 +46,16 @@ function start(attempt=0){
       <circle cx="500" cy="600" r="438" stroke="#22dfff" stroke-width="1.2" stroke-opacity=".07" stroke-dasharray="70 42"/>
     </g>
     <g class="fx61-crystal" fill="none" stroke-linejoin="round" stroke-linecap="round">
-      <path d="M500 155 C540 300 653 440 902 600 C657 690 560 805 500 1000 C440 805 343 690 98 600 C347 440 460 300 500 155Z" stroke="#0d8fff" stroke-width="28" stroke-opacity=".13" filter="url(#fx61-glow)"/>
-      <path d="M500 155 C540 300 653 440 902 600 C657 690 560 805 500 1000 C440 805 343 690 98 600 C347 440 460 300 500 155Z" stroke="url(#fx61-edge)" stroke-width="9" stroke-opacity=".72" filter="url(#fx61-glow-small)"/>
-      <path d="M500 155 C540 300 653 440 902 600 C657 690 560 805 500 1000 C440 805 343 690 98 600 C347 440 460 300 500 155Z" stroke="#efffff" stroke-width="2.4" stroke-opacity=".82"/>
-      <path d="M500 178 C518 322 590 456 842 600 C600 706 535 795 500 976 C465 795 400 706 158 600 C410 456 482 322 500 178Z" stroke="#17dfff" stroke-width="3.2" stroke-opacity=".34"/>
-      <path d="M500 208 C531 342 626 475 782 600 C626 716 548 800 500 946 C452 800 374 716 218 600 C374 475 469 342 500 208Z" stroke="#a94fff" stroke-width="2.4" stroke-opacity=".25" stroke-dasharray="58 19 23 14"/>
+      <path d="M500 155 C540 300 653 440 902 600 C657 700 560 835 500 1075 C440 835 343 700 98 600 C347 440 460 300 500 155Z" stroke="#0d8fff" stroke-width="28" stroke-opacity=".13" filter="url(#fx61-glow)"/>
+      <path d="M500 155 C540 300 653 440 902 600 C657 700 560 835 500 1075 C440 835 343 700 98 600 C347 440 460 300 500 155Z" stroke="url(#fx61-edge)" stroke-width="9" stroke-opacity=".72" filter="url(#fx61-glow-small)"/>
+      <path d="M500 155 C540 300 653 440 902 600 C657 700 560 835 500 1075 C440 835 343 700 98 600 C347 440 460 300 500 155Z" stroke="#efffff" stroke-width="2.4" stroke-opacity=".82"/>
+      <path d="M500 178 C518 322 590 456 842 600 C600 716 535 825 500 1040 C465 825 400 716 158 600 C410 456 482 322 500 178Z" stroke="#17dfff" stroke-width="3.2" stroke-opacity=".34"/>
+      <path d="M500 208 C531 342 626 475 782 600 C626 726 548 820 500 1005 C452 820 374 726 218 600 C374 475 469 342 500 208Z" stroke="#a94fff" stroke-width="2.4" stroke-opacity=".25" stroke-dasharray="58 19 23 14"/>
     </g>
     <g class="fx61-axes" filter="url(#fx61-glow-small)">
       <path d="M98 600H902" stroke="url(#fx61-axis)" stroke-width="6.5" stroke-opacity=".78"/>
-      <path d="M500 155V1000" stroke="#34e9ff" stroke-width="6" stroke-opacity=".70"/>
-      <path d="M500 155V1000" stroke="#fff" stroke-width="1.5" stroke-opacity=".76"/>
+      <path d="M500 155V1075" stroke="#34e9ff" stroke-width="6" stroke-opacity=".70"/>
+      <path d="M500 155V1075" stroke="#fff" stroke-width="1.5" stroke-opacity=".76"/>
       <path d="M98 600H902" stroke="#fff" stroke-width="1.4" stroke-opacity=".62"/>
     </g>
     <g class="fx61-filaments" fill="none" stroke-linecap="round">
@@ -63,12 +63,12 @@ function start(attempt=0){
       <path d="M500 600 C570 520 602 404 500 178" stroke="#36cfff" stroke-width="2.8" stroke-opacity=".47"/>
       <path d="M500 600 C405 545 292 522 116 600" stroke="#5eeaff" stroke-width="3.2" stroke-opacity=".48"/>
       <path d="M500 600 C595 545 708 522 884 600" stroke="#d15aff" stroke-width="3.2" stroke-opacity=".48"/>
-      <path d="M500 600 C416 668 428 780 500 975" stroke="#37dfff" stroke-width="3.1" stroke-opacity=".50"/>
-      <path d="M500 600 C584 668 572 780 500 975" stroke="#a94aff" stroke-width="2.8" stroke-opacity=".38"/>
+      <path d="M500 600 C416 680 424 835 500 1055" stroke="#37dfff" stroke-width="3.1" stroke-opacity=".50"/>
+      <path d="M500 600 C584 680 576 835 500 1055" stroke="#a94aff" stroke-width="2.8" stroke-opacity=".38"/>
       <path d="M500 600 C382 486 330 470 258 438" stroke="#b655ff" stroke-width="2.2" stroke-opacity=".34"/>
       <path d="M500 600 C618 486 670 470 742 438" stroke="#42eaff" stroke-width="2.4" stroke-opacity=".40"/>
-      <path d="M500 600 C372 698 338 720 278 758" stroke="#42dfff" stroke-width="2.4" stroke-opacity=".38"/>
-      <path d="M500 600 C628 698 662 720 722 758" stroke="#cf55ff" stroke-width="2.2" stroke-opacity=".34"/>
+      <path d="M500 600 C372 716 334 752 272 798" stroke="#42dfff" stroke-width="2.4" stroke-opacity=".38"/>
+      <path d="M500 600 C628 716 666 752 728 798" stroke="#cf55ff" stroke-width="2.2" stroke-opacity=".34"/>
     </g>
     <g class="fx61-reactor-rings" fill="none" transform-origin="500px 600px" filter="url(#fx61-glow-small)">
       <circle cx="500" cy="600" r="70" stroke="#efffff" stroke-width="3.2" stroke-opacity=".60"/>
@@ -82,9 +82,9 @@ function start(attempt=0){
     <circle cx="500" cy="600" r="25" fill="#bcfbff" fill-opacity=".95" filter="url(#fx61-glow-small)"/>
     <circle cx="500" cy="600" r="13" fill="#fff"/>
     <g class="fx61-stars" fill="#ecffff" filter="url(#fx61-glow-small)">
-      <circle cx="500" cy="155" r="6"/><circle cx="902" cy="600" r="6"/><circle cx="500" cy="1000" r="6"/><circle cx="98" cy="600" r="6"/>
-      <circle cx="330" cy="478" r="5"/><circle cx="694" cy="506" r="5"/><circle cx="616" cy="422" r="4"/><circle cx="390" cy="748" r="4"/><circle cx="688" cy="748" r="5"/>
-      <circle cx="305" cy="612" r="4"/><circle cx="745" cy="603" r="4"/><circle cx="505" cy="360" r="5"/><circle cx="501" cy="842" r="5"/>
+      <circle cx="500" cy="155" r="6"/><circle cx="902" cy="600" r="6"/><circle cx="500" cy="1075" r="6"/><circle cx="98" cy="600" r="6"/>
+      <circle cx="330" cy="478" r="5"/><circle cx="694" cy="506" r="5"/><circle cx="616" cy="422" r="4"/><circle cx="390" cy="775" r="4"/><circle cx="688" cy="775" r="5"/>
+      <circle cx="305" cy="612" r="4"/><circle cx="745" cy="603" r="4"/><circle cx="505" cy="360" r="5"/><circle cx="501" cy="900" r="5"/>
     </g>
   `;
   const style=document.createElement('style');style.textContent=`
