@@ -38,7 +38,6 @@ function start(attempt=0){
       </linearGradient>
       <filter id="fx61-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       <filter id="fx61-glow-small" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <filter id="fx61-glass-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.15"/></filter>
     </defs>
 
     <circle cx="500" cy="600" r="452" fill="url(#fx61-halo)"/>
@@ -135,7 +134,8 @@ function start(attempt=0){
     @media (prefers-reduced-motion:reduce){.fx61-reactor-rings,.fx61-halo-rings,.fx61-stars,.fx61-filaments,.fx61-facets{animation:none!important}}
   `;stage.append(svg,style);
   root.dataset.fxCoreFidelityV61='ready-v61';
-  root.dataset.fxCoreReferenceFidelity='volumetric-glass-over-real-webgl2-v61-r9';
+  root.dataset.fxCoreReferenceFidelity='emissive-vector-over-real-webgl2-v61';
+  root.dataset.fxCoreReferenceFidelityRevision='volumetric-glass-r9';
 }
 start();
 }());
