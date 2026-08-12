@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'return-state-v1';
+  const VERSION = 'return-state-v2';
   const LOOP_RUNTIME = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260812-mobile-seamless-v1';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
 
@@ -51,8 +51,8 @@
       overlay.hidden = true;
       overlay.setAttribute('aria-hidden', 'true');
       overlay.classList.remove('is-exiting');
-      overlay.style.display = 'none';
-      overlay.style.opacity = '0';
+      overlay.style.removeProperty('display');
+      overlay.style.removeProperty('opacity');
     }
 
     root.classList.remove(
