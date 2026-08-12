@@ -18,7 +18,7 @@ const contract = JSON.parse(read('docs/scifi-ui/data/public-platform-contract.js
 
 assert.match(bootstrap, /reference-crystal-core-v53/);
 assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260812-four-point-reference-r1/);
-assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260812-reference-fidelity-v61-r1/);
+assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260812-reference-fidelity-v61-r9c/);
 assert.match(bootstrap, /single-webgl2-reference-crystal-v53/);
 assert.match(bootstrap, /single-webgl2-mobile-cinematic-reference-v60/);
 assert.equal((bootstrap.match(/getContext\(['"]webgl2['"]/g) || []).length, 0, 'bootstrap must not create WebGL');
