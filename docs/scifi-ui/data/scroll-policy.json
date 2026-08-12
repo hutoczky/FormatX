@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "2026-08-12-production-hardening-v6",
+  "revision": "2026-08-12-production-hardening-v7",
   "policy": {
     "input_capture": false,
     "section_scroll_snap": false,
