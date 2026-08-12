@@ -110,7 +110,7 @@ jobs:
           grep -Fq 'safe-ready-v28' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-voice-stability.js?v=20260808-mobile-visual-viewport-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq '20260811-mobile-intro-direct-r1' docs/scifi-ui/index.html
-          grep -Fq '20260811-mobile-intro-direct-r1' billing-worker/src/production-content-entry.js
+          grep -Fq '20260812-first-paint-r4' billing-worker/src/production-content-entry.js
           grep -Fq 'data-fx-seamless-scroll-runtime' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/scripts/formatx-infinite-scroll.js' billing-worker/src/production-entry.js
           grep -Fq '"status": "full_release"' docs/scifi-ui/data/platform-status.json
