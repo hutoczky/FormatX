@@ -1,10 +1,10 @@
-name: Preview mobile pixel-reference v58
+name: Preview mobile luminous-reference v59
 on:
   push:
     branches: [work/reference-lock-v57]
     paths:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v58.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v59.js'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - '.github/workflows/reference-lock-v57-preview.yml'
   workflow_dispatch:
@@ -19,24 +19,24 @@ jobs:
       - name: Validate syntax
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v58.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v59.js
       - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/v58-preview"
-          cd "$RUNNER_TEMP/v58-preview"
+          mkdir -p "$RUNNER_TEMP/v59-preview"
+          cd "$RUNNER_TEMP/v59-preview"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Capture real mobile WebGL2 pixel-reference render
+      - name: Capture real mobile WebGL2 luminous-reference render
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/v58-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/v59-server.log" 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/v58-preview"
+          cd "$RUNNER_TEMP/v59-preview"
           node <<'NODE'
           const assert = require('node:assert/strict');
           const { chromium } = require('playwright');
@@ -44,22 +44,22 @@ jobs:
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
             const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
             const page=await context.newPage();
-            await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&reference_lock=v58',{waitUntil:'domcontentloaded',timeout:60000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV58==='ready-v58',null,{timeout:60000});
+            await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&reference_lock=v59',{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV59==='ready-v59',null,{timeout:60000});
             await page.waitForTimeout(1400);
-            const state=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),b=c?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,v55:r.dataset.fxCoreMobileV55,v58:r.dataset.fxCoreMobileV58,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,gl:Boolean(c?.getContext('webgl2')),width:b?.width||0,height:b?.height||0,vw:innerWidth,vh:innerHeight};});
-            assert.equal(state.renderer,'single-webgl2-mobile-pixel-reference-v58');
-            assert.equal(state.geometry,'asymmetric-concave-four-point-reference-v58');
-            assert.equal(state.material,'bright-layered-faceted-glass-v58');
-            assert.equal(state.reactor,'white-hot-cyan-violet-reactor-v58');
-            assert.equal(state.v55,'ready-v55');assert.equal(state.v58,'ready-v58');assert.equal(state.canvases,1);assert.equal(state.gl,true);assert.ok(state.width<=state.vw+1&&state.height<=state.vh+1,JSON.stringify(state));
-            await page.screenshot({path:'mobile-reference-v58.png',fullPage:false});
+            const state=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),b=c?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,v55:r.dataset.fxCoreMobileV55,v59:r.dataset.fxCoreMobileV59,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,gl:Boolean(c?.getContext('webgl2')),width:b?.width||0,height:b?.height||0,vw:innerWidth,vh:innerHeight};});
+            assert.equal(state.renderer,'single-webgl2-mobile-luminous-reference-v59');
+            assert.equal(state.geometry,'asymmetric-concave-four-point-reference-v59');
+            assert.equal(state.material,'luminous-threaded-faceted-glass-v59');
+            assert.equal(state.reactor,'white-hot-cyan-violet-reactor-v59');
+            assert.equal(state.v55,'ready-v55');assert.equal(state.v59,'ready-v59');assert.equal(state.canvases,1);assert.equal(state.gl,true);assert.ok(state.width<=state.vw+1&&state.height<=state.vh+1,JSON.stringify(state));
+            await page.screenshot({path:'mobile-reference-v59.png',fullPage:false});
             await context.close();await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
-      - name: Upload v58 preview
+      - name: Upload v59 preview
         uses: actions/upload-artifact@v4
         with:
-          name: mobile-pixel-reference-v58-${{ github.sha }}
-          path: ${{ runner.temp }}/v58-preview/mobile-reference-v58.png
+          name: mobile-luminous-reference-v59-${{ github.sha }}
+          path: ${{ runner.temp }}/v59-preview/mobile-reference-v59.png
           retention-days: 3
