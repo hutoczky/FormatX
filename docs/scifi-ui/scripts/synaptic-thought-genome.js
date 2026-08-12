@@ -150,7 +150,7 @@
     if (document.querySelector('link[data-fx-thought-genome-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/synaptic-thought-genome.css?v=20260731-thought-genome-1';
+    link.href = './styles/synaptic-thought-genome.css?v=20260812-csp-safe-r2';
     link.dataset.fxThoughtGenomeStyle = 'true';
     document.head.appendChild(link);
   }
@@ -253,14 +253,12 @@
     path.setAttribute('d', pathPoints.length > 1
       ? pathPoints.map((point, index) => `${index ? 'L' : 'M'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(' ')
       : '');
-    path.style.setProperty('--fx-genome-path-length', String(Math.max(1, pathPoints.length * 150)));
 
     points.forEach((point, index) => {
       const entry = history[index];
       const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       group.classList.add('fx-thought-genome-node');
       if (entry.fingerprint === activeFingerprint) group.classList.add('is-new');
-      group.style.setProperty('--fx-genome-hue', String(point.hue));
       group.dataset.scene = String(entry.scene);
       group.dataset.fingerprint = String(entry.fingerprint);
 
@@ -269,12 +267,14 @@
       orbit.setAttribute('cy', point.y);
       orbit.setAttribute('r', String(point.r * 2.6));
       orbit.classList.add('fx-thought-genome-orbit');
+      orbit.setAttribute('stroke', `hsl(${point.hue} 84% 67% / .34)`);
 
       const star = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       star.setAttribute('cx', point.x);
       star.setAttribute('cy', point.y);
       star.setAttribute('r', String(point.r));
       star.classList.add('fx-thought-genome-star');
+      star.setAttribute('fill', `hsl(${point.hue} 88% 72%)`);
 
       group.append(orbit, star);
       nodes.appendChild(group);

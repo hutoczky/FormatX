@@ -42,7 +42,7 @@ const LANGUAGE_ASSETS = [
   '<script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260731-language-unified-1"></script>'
 ].join('\n');
 const CONTENT_ASSETS = [
-  '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-2">',
+  '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260812-quality-r1">',
   '<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260807-full-release-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>',

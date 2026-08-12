@@ -38,14 +38,12 @@
 }
 
 .fx-thought-genome-star {
-  fill: hsl(var(--fx-genome-hue) 88% 72%);
   filter: url(#fx-thought-genome-glow);
   opacity: .92;
 }
 
 .fx-thought-genome-orbit {
   fill: none;
-  stroke: hsl(var(--fx-genome-hue) 84% 67% / .34);
   stroke-width: 1.2;
   vector-effect: non-scaling-stroke;
   opacity: .58;

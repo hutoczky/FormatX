@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "url": [
-        "https://www.formatxsuite.com/?lighthouse=1&live=mobile"
+        "https://formatxsuite.com/?lighthouse=1&live=mobile"
       ],
       "numberOfRuns": 3,
       "settings": {

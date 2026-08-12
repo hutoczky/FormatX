@@ -1,5 +1,578 @@
-@import url('./formatx-desktop-unified.css');
-@import url('./formatx-mobile-hero-flow.css');
+/* Inlined critical composition: no nested CSS request on first paint. */
+/* FormatX desktop composition contract.
+   Keeps the visual system intact while preventing oversized empty hero space. */
+
+/* Desktop and laptop input remains continuous. Mobile keeps its guided snap flow. */
+@media (min-width: 901px) {
+  html body.living-architecture {
+    scroll-snap-type: none !important;
+  }
+}
+
+@media (min-width: 1100px) and (pointer: fine) {
+  html body.living-architecture #hero {
+    display: grid;
+    box-sizing: border-box;
+    height: min(860px, calc(100svh - 69px));
+    max-height: min(860px, calc(100svh - 69px));
+    min-height: 680px;
+    padding: clamp(82px, 8.2vh, 108px) 0 clamp(48px, 5.8vh, 72px);
+    align-items: center;
+    overflow: clip;
+  }
+
+  html body.living-architecture #hero .hero-grid {
+    position: relative;
+    display: grid;
+    box-sizing: border-box;
+    grid-template-columns: minmax(500px, .92fr) minmax(520px, 1.08fr);
+    width: min(1680px, calc(100% - clamp(72px, 8vw, 150px)));
+    height: 100%;
+    min-height: 0;
+    margin-inline: auto;
+    padding: 0;
+    gap: clamp(34px, 5vw, 96px);
+    align-items: center;
+  }
+
+  html body.living-architecture #hero .hero-copy {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    display: grid;
+    grid-template-rows: repeat(7, auto);
+    row-gap: clamp(7px, 1.05vh, 14px);
+    align-content: center;
+    align-self: center;
+    width: min(700px, 100%);
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    transform: none;
+    overflow: visible;
+  }
+
+  html body.living-architecture #hero .hero-copy > .kicker {
+    grid-row: 1;
+    margin-bottom: 0;
+  }
+
+  html body.living-architecture #hero .hero-copy > .fx-category-definition {
+    grid-row: 2;
+    align-self: start;
+    width: min(620px, 100%);
+    max-width: 620px;
+    margin: 0;
+    overflow: visible;
+  }
+
+  html body.living-architecture #hero .hero-copy > #hero-title {
+    grid-row: 3;
+    margin-block: clamp(2px, .5vh, 8px);
+  }
+
+  html body.living-architecture #hero .hero-copy > .hero-lead {
+    grid-row: 4;
+  }
+
+  html body.living-architecture #hero .hero-copy > .fx-method-inline {
+    grid-row: 5;
+    align-self: start;
+    margin-block: clamp(4px, .7vh, 10px);
+    overflow: visible;
+  }
+
+  html body.living-architecture #hero .hero-copy > .hero-actions {
+    grid-row: 6;
+  }
+
+  html body.living-architecture #hero .hero-copy > .hero-facts {
+    grid-row: 7;
+  }
+
+  html body.living-architecture #hero .hero-title-main {
+    font-size: clamp(66px, 7.1vw, 124px);
+    line-height: .84;
+  }
+
+  html body.living-architecture #hero .hero-title-sub {
+    font-size: clamp(27px, 2.9vw, 48px);
+  }
+
+  html body.living-architecture #hero .hero-lead {
+    max-width: 620px;
+    margin-top: clamp(8px, 1.2vh, 16px);
+    font-size: clamp(15px, 1.05vw, 18px);
+    line-height: 1.58;
+  }
+
+  html body.living-architecture #hero .hero-actions {
+    display: flex !important;
+    width: min(620px, 100%);
+    margin-top: clamp(10px, 1.5vh, 20px);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  html body.living-architecture #hero .hero-actions .button {
+    min-height: 48px;
+  }
+
+  html body.living-architecture #hero .hero-facts {
+    display: flex !important;
+    width: min(620px, 100%);
+    margin-top: clamp(8px, 1.2vh, 16px);
+    flex-wrap: wrap;
+  }
+
+  html body.living-architecture #hero .hero-space {
+    position: relative;
+    inset: auto;
+    align-self: center;
+    width: 100%;
+    height: min(100%, 650px);
+    min-height: 480px;
+    pointer-events: none;
+  }
+
+  html body.living-architecture #hero .hero-space::before {
+    content: '';
+    position: absolute;
+    inset: 8% 3% 7%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--accent, 56 222 255), .055), transparent 66%);
+    filter: blur(28px);
+    pointer-events: none;
+  }
+
+  html body.living-architecture #hero .scroll-cue {
+    position: absolute;
+    left: 50%;
+    right: auto;
+    bottom: clamp(16px, 2.2vh, 28px);
+    margin: 0;
+    transform: translateX(-50%);
+  }
+
+  /* The hero already exposes download and navigation actions. The duplicate
+     fixed dock must not cover the composition while the core is active. */
+  html.fx-organism-core-active .fx-organism-actionbar {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(16px) !important;
+  }
+
+  html body.living-architecture main > .scene:not(#hero) {
+    min-height: clamp(760px, 94svh, 980px);
+    padding-block: clamp(96px, 12vh, 150px);
+  }
+}
+
+@media (min-width: 1100px) and (max-height: 820px) and (pointer: fine) {
+  html body.living-architecture #hero {
+    height: calc(100svh - 69px);
+    min-height: 640px;
+    padding-top: 72px;
+    padding-bottom: 44px;
+  }
+
+  html body.living-architecture #hero .hero-copy {
+    grid-template-rows: repeat(7, auto);
+    row-gap: 6px;
+    transform: none;
+  }
+
+  html body.living-architecture #hero .fx-category-definition {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  html body.living-architecture #hero .fx-category-definition strong {
+    margin-bottom: 4px;
+  }
+
+  html body.living-architecture #hero .fx-method-inline {
+    margin-block: 2px;
+  }
+
+  html body.living-architecture #hero .hero-space {
+    height: min(100%, 520px);
+    min-height: 460px;
+  }
+
+  html body.living-architecture #hero .hero-title-main {
+    font-size: clamp(60px, 6.5vw, 106px);
+  }
+
+  html body.living-architecture #hero .hero-lead {
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+
+  html body.living-architecture #hero .hero-actions {
+    margin-top: 6px;
+  }
+
+  html body.living-architecture #hero .hero-facts {
+    margin-top: 4px;
+  }
+}
+
+@media (min-width: 1600px) and (min-height: 900px) and (pointer: fine) {
+  html body.living-architecture #hero .hero-grid {
+    grid-template-columns: minmax(600px, .95fr) minmax(650px, 1.05fr);
+  }
+
+  html body.living-architecture #hero .hero-space {
+    height: min(100%, 700px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.living-architecture #hero .hero-copy {
+    transform: none;
+  }
+}
+
+/* Real-device hero geometry: compact desktop composition and full-width mobile reading flow. */
+
+@media (min-width: 901px) and (pointer: fine) {
+  #hero {
+    box-sizing: border-box !important;
+    min-height: min(900px, calc(100svh - 72px)) !important;
+    max-height: 900px !important;
+    padding-top: clamp(92px, 9vh, 118px) !important;
+    padding-bottom: clamp(64px, 7vh, 94px) !important;
+    scroll-margin-top: 76px !important;
+    overflow: clip !important;
+  }
+
+  #hero .hero-grid {
+    width: min(100%, 1680px) !important;
+    min-height: 0 !important;
+    margin-inline: auto !important;
+    grid-template-columns: minmax(430px, .92fr) minmax(560px, 1.08fr) !important;
+    align-items: center !important;
+    gap: clamp(30px, 4vw, 72px) !important;
+  }
+
+  #hero .hero-copy {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 690px !important;
+    margin: 0 !important;
+    padding-top: 108px !important;
+    padding-bottom: 42px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* These two blocks are injected after first paint. Their positions are
+     reserved up front so they cannot push the hero and create CLS. */
+  #hero .fx-category-definition {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-width: 650px !important;
+    margin: 0 !important;
+  }
+
+  #hero .fx-method-inline {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+  }
+
+  #hero .hero-space {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    min-height: clamp(500px, 64vh, 720px) !important;
+    max-height: 720px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  #hero .hero-title-main {
+    font-size: clamp(74px, 7vw, 128px) !important;
+    line-height: .84 !important;
+  }
+
+  #hero .hero-title-sub {
+    font-size: clamp(32px, 3.4vw, 64px) !important;
+  }
+
+  #hero::after,
+  #hero .hero-copy,
+  #hero .hero-space {
+    animation: none !important;
+    transition-property: opacity, color, background-color, border-color !important;
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  body {
+    padding-bottom: max(104px, calc(92px + env(safe-area-inset-bottom, 0px))) !important;
+  }
+
+  #hero {
+    box-sizing: border-box !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 28px 0 max(104px, calc(92px + env(safe-area-inset-bottom, 0px))) !important;
+    overflow: visible !important;
+  }
+
+  #hero::after {
+    display: none !important;
+  }
+
+  #hero .hero-grid {
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding-inline: 12px !important;
+    gap: 18px !important;
+    overflow: visible !important;
+  }
+
+  #hero .hero-copy {
+    box-sizing: border-box !important;
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    translate: none !important;
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 24px clamp(18px, 5.2vw, 26px) 28px !important;
+    overflow: hidden !important;
+    border-radius: 24px !important;
+  }
+
+  #hero .hero-copy > .kicker {
+    display: none !important;
+  }
+
+  #hero .fx-category-definition {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 clamp(22px, 5vw, 32px) !important;
+    font-size: clamp(15px, 4.1vw, 18px) !important;
+    line-height: 1.5 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #hero .fx-category-definition strong {
+    display: block !important;
+    margin-bottom: 10px !important;
+    font-size: clamp(13px, 3.7vw, 16px) !important;
+    line-height: 1.3 !important;
+  }
+
+  #hero-title {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 20px !important;
+    overflow: visible !important;
+  }
+
+  #hero .hero-title-main {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    font-size: clamp(38px, 11.6vw, 56px) !important;
+    line-height: .94 !important;
+    letter-spacing: -.045em !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    hyphens: auto !important;
+    text-wrap: balance !important;
+    transform: none !important;
+  }
+
+  #hero .hero-title-sub {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-top: 10px !important;
+    font-size: clamp(18px, 5.8vw, 27px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: .09em !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-wrap: balance !important;
+    transform: none !important;
+  }
+
+  #hero .hero-lead {
+    max-width: 100% !important;
+    margin: 0 !important;
+    font-size: clamp(15px, 4.1vw, 18px) !important;
+    line-height: 1.56 !important;
+    overflow-wrap: anywhere !important;
+    text-wrap: pretty !important;
+  }
+
+  #hero .hero-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 22px !important;
+  }
+
+  #hero .hero-actions .button {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    justify-content: center !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+
+  #hero .hero-facts {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 20px !important;
+    padding-bottom: 0 !important;
+  }
+
+  #hero .hero-space {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    translate: none !important;
+    flex: 0 0 auto !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin: 0 !important;
+    min-height: clamp(300px, 45svh, 470px) !important;
+    max-height: 490px !important;
+    overflow: hidden !important;
+    border-radius: 24px !important;
+  }
+
+  #hero .scroll-cue {
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    transform: none !important;
+    translate: none !important;
+    margin: 0 0 20px !important;
+  }
+
+  .fx-single-language-switch,
+  .fx-language-toggle {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .fx-language-toggle {
+    display: inline-flex !important;
+  }
+
+  .fx-genome-launcher,
+  .fx-three-sound {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .fx-organism-dialogue:not(.is-open) {
+    position: fixed !important;
+    top: max(82px, calc(70px + env(safe-area-inset-top, 0px))) !important;
+    right: 12px !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 54px !important;
+    max-width: 54px !important;
+    justify-items: center !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 10030 !important;
+  }
+
+  .fx-organism-dialogue:not(.is-open) .fx-organism-thought-trigger {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    translate: none !important;
+    z-index: 10030 !important;
+  }
+
+  html.fx-organism-core-active .fx-organism-actionbar,
+  html[data-fx-mobile-core-visible="true"] .fx-organism-actionbar {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(16px) !important;
+  }
+
+  .fx-organism-console-shell {
+    box-sizing: border-box !important;
+    position: fixed !important;
+    top: max(8px, env(safe-area-inset-top, 0px)) !important;
+    right: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    left: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 16px) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100svh - 16px) !important;
+    margin: 0 !important;
+    transform: none !important;
+    translate: none !important;
+    animation: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #hero .hero-grid {
+    padding-inline: 8px !important;
+  }
+
+  #hero .hero-copy {
+    padding-inline: 16px !important;
+  }
+
+  #hero .hero-title-main {
+    font-size: clamp(36px, 11.2vw, 48px) !important;
+    letter-spacing: -.035em !important;
+  }
+
+  #hero .hero-title-sub {
+    font-size: clamp(17px, 5.4vw, 24px) !important;
+    letter-spacing: .07em !important;
+  }
+}
+
+/* Deployment trigger marker: 2026-08-03 mobile hero overflow fix. */
 
 /* Production marker: duplicate floating-control hotfix validated on mobile and desktop. */
 /* FormatX living-core visibility and responsive layout recovery. */
@@ -603,5 +1176,34 @@ html[data-fx-safe-three-gate="ready-v2"] #hero .hero-facts {
 
   .topbar .brand small {
     font-size: 8.5px !important;
+  }
+}
+
+
+/* FormatX mobile quality hardening r7 */
+@media (max-width: 900px), (pointer: coarse) {
+  .site-footer nav { gap: 8px 10px !important; }
+  .site-footer nav a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    padding: 10px 9px !important;
+    box-sizing: border-box !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-intro-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
   }
 }
