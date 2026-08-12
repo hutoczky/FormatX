@@ -6,7 +6,9 @@ on:
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
+      - 'docs/scifi-ui/scripts/formatx-core-reference-v53.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
@@ -28,6 +30,7 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          node --check docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
 
       - name: Install Chromium runtime
@@ -79,6 +82,7 @@ jobs:
                   responsive:r.dataset.fxCoreResponsive,
                   performance:r.dataset.fxCorePerformance,
                   interaction:r.dataset.fxCoreInteraction,
+                  cinematic:r.dataset.fxReferenceCoreCinematic,
                   canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
                   width:box?.width||0,
                   height:box?.height||0,
@@ -94,6 +98,7 @@ jobs:
               assert.equal(s.responsive, 'physical-mobile-hero-local-v55');
               assert.equal(s.performance, 'single-context-adaptive-60-plus-fps');
               assert.equal(s.interaction, 'direct-pointer-touch-drag-r4-living-system');
+              assert.equal(s.cinematic, 'reference-core-cinematic-v1');
               assert.equal(s.canvases, 1);
               assert.equal(s.gl, true);
               assert.ok(s.width <= s.vw + 1 && s.height <= s.vh + 1, JSON.stringify(s));
@@ -116,7 +121,7 @@ jobs:
             await scenario(browser, false);
             await scenario(browser, true);
             await browser.close();
-            console.log('PASS: current v55 mobile MAG runtime is bounded and fails open without WebGL2.');
+            console.log('PASS: shared four-point v55 mobile MAG runtime is bounded, interactive and fails open without WebGL2.');
           })().catch(e => { console.error(e); process.exit(1); });
           NODE
 
@@ -127,5 +132,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Cinematic v55 mobile MAG runtime passed'; else state=failure; description='Cinematic v55 mobile MAG runtime failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Four-point cinematic v55 mobile MAG runtime passed'; else state=failure; description='Four-point cinematic v55 mobile MAG runtime failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v55 mobile runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
