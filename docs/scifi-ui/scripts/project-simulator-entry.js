@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxSimulatorEntryController === 'v1') return;
-  root.dataset.fxSimulatorEntryController = 'v1';
+  if (root.dataset.fxSimulatorEntryController === 'v2') return;
+  root.dataset.fxSimulatorEntryController = 'v2';
 
   const COPY = {
     hu: {
@@ -28,7 +28,7 @@
   }
 
   function href() {
-    return './project-simulator.html?lang=' + language();
+    return '/scifi-ui/project-simulator.html?lang=' + encodeURIComponent(language());
   }
 
   function ensureHeroEntry() {
@@ -90,7 +90,7 @@
         link.textContent = copy.footer;
       }
     });
-    root.dataset.fxSimulatorEntryState = 'ready';
+    root.dataset.fxSimulatorEntryState = 'ready-v2';
   }
 
   function ensure() {
@@ -109,7 +109,7 @@
         if (ready || attempts >= 80) {
           clearInterval(retryTimer);
           retryTimer = 0;
-          if (!ready) root.dataset.fxSimulatorEntryState = 'partial';
+          if (!ready) root.dataset.fxSimulatorEntryState = 'partial-v2';
         }
       }, 250);
     }
