@@ -8,7 +8,7 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v61';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-v61-r8';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-v61-r9';
 
   function registerFidelity() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
@@ -16,18 +16,18 @@
     const overlay = stage?.querySelector('.fx-core-fidelity-v61');
     if (host) {
       const compactPhone = matchMedia('(max-width:430px)').matches;
-      const referenceHeight = compactPhone ? 'clamp(420px,52svh,470px)' : 'clamp(470px,58svh,520px)';
+      const referenceHeight = compactPhone ? 'clamp(455px,57svh,510px)' : 'clamp(490px,60svh,545px)';
       host.style.setProperty('height', referenceHeight, 'important');
       host.style.setProperty('min-height', referenceHeight, 'important');
-      host.style.setProperty('max-height', compactPhone ? '470px' : '520px', 'important');
+      host.style.setProperty('max-height', compactPhone ? '510px' : '545px', 'important');
     }
     if (stage) {
-      stage.style.setProperty('background', 'radial-gradient(circle at 50% 48%, rgba(18,148,255,.14), transparent 38%), radial-gradient(circle at 55% 50%, rgba(133,56,255,.07), transparent 51%), linear-gradient(180deg,#010611 0%,#010915 64%,#021629 100%)', 'important');
-      stage.style.setProperty('transform', 'translateY(3%) scale(.94)', 'important');
+      stage.style.setProperty('background', 'radial-gradient(circle at 50% 48%, rgba(18,148,255,.13), transparent 40%), radial-gradient(circle at 55% 50%, rgba(133,56,255,.065), transparent 53%), linear-gradient(180deg,#010611 0%,#010915 65%,#021426 100%)', 'important');
+      stage.style.setProperty('transform', 'translateY(-1.5%) scale(.975)', 'important');
       stage.style.setProperty('transform-origin', '50% 50%', 'important');
     }
     if (overlay) {
-      overlay.style.setProperty('transform', 'translateY(0%) scale(1.09,1.08)', 'important');
+      overlay.style.setProperty('transform', 'translateY(-.5%) scale(1.105,1.06)', 'important');
       overlay.style.setProperty('transform-origin', '50% 50%', 'important');
       overlay.style.setProperty('overflow', 'visible', 'important');
     }
@@ -40,7 +40,7 @@
   renderer.addEventListener('load', () => {
     root.dataset.fxCoreReferenceLockLoad = 'ready-v60';
     const fidelity = document.createElement('script');
-    fidelity.src = '/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js?v=20260812-reference-fidelity-r8';
+    fidelity.src = '/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js?v=20260812-reference-fidelity-r9';
     fidelity.async = false;
     fidelity.dataset.fxCoreMobileReferenceFidelityV61 = 'true';
     fidelity.addEventListener('load', () => {
