@@ -8,6 +8,7 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-award-v56';
   root.dataset.fxCoreRendererMode = 'mobile';
+  root.dataset.fxCoreMobileAwardRevision = 'award-crystal-r1';
   const script = document.createElement('script');
   script.src = '/scifi-ui/scripts/formatx-core-mobile-award-v56.js?v=20260812-award-crystal-r1';
   script.async = false;
