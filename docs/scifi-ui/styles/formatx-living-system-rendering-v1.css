@@ -1,0 +1,227 @@
+/* FormatX Living System Rendering v1
+   Additive cinematic layer. It never owns scrolling and never substitutes the WebGL core. */
+:root {
+  --fx-system-energy: .28;
+  --fx-system-stability: 1;
+  --fx-system-pressure: 0;
+  --fx-system-latency: .2;
+  --fx-system-complexity: .72;
+  --fx-system-pointer-x: 0;
+  --fx-system-pointer-y: 0;
+  --fx-living-transition-ms: 720ms;
+}
+
+.fx-living-system-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+  opacity: 1;
+}
+
+.fx-living-system-layer::before,
+.fx-living-system-layer::after {
+  content: "";
+  position: absolute;
+  inset: -18vmax;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+.fx-living-system-layer::before {
+  background:
+    radial-gradient(circle at calc(50% + var(--fx-system-pointer-x) * 9%), calc(34% + var(--fx-system-pointer-y) * 7%), rgba(74, 238, 255, calc(.035 + var(--fx-system-energy) * .055)), transparent 24%),
+    radial-gradient(circle at 65% 38%, rgba(137, 61, 255, calc(.018 + var(--fx-system-energy) * .032)), transparent 31%);
+  filter: blur(calc(12px + var(--fx-system-pressure) * 8px));
+  transform: scale(calc(1 + var(--fx-system-energy) * .012));
+  transition: opacity 240ms ease, transform 520ms cubic-bezier(.2,.8,.2,1);
+}
+
+.fx-living-system-layer::after {
+  inset: 0;
+  background:
+    linear-gradient(105deg, transparent 20%, rgba(99, 236, 255, .025) 49.5%, transparent 50.5%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.012) 0 1px, transparent 1px 11vw);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 82%, transparent 100%);
+  opacity: calc(.22 + var(--fx-system-energy) * .22);
+}
+
+.fx-living-transition {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 15%, rgba(1, 8, 19, .32) 63%, rgba(0, 2, 9, .74) 100%),
+    linear-gradient(115deg, transparent 32%, rgba(81, 224, 255, .075) 48%, rgba(159, 62, 255, .055) 52%, transparent 68%);
+  transform: scale(1.035);
+  transition: opacity 180ms ease, transform var(--fx-living-transition-ms) cubic-bezier(.16,.8,.2,1);
+}
+
+html[data-fx-living-transition="active"] .fx-living-transition {
+  opacity: .78;
+  transform: scale(1);
+}
+
+.fx-living-neural-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fx-living-neural-pulse {
+  position: absolute;
+  left: var(--fx-neural-x);
+  top: var(--fx-neural-y);
+  width: 7px;
+  height: 7px;
+  border: 1px solid rgba(184, 250, 255, .78);
+  border-radius: 50%;
+  box-shadow: 0 0 16px rgba(64, 230, 255, .74), 0 0 34px rgba(131, 66, 255, .34);
+  transform: translate(-50%, -50%) scale(.3);
+  opacity: 0;
+  animation: fx-neural-pulse 780ms cubic-bezier(.15,.75,.2,1) forwards;
+}
+
+.fx-living-neural-pulse::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(48px, 7vw, 120px);
+  height: 1px;
+  transform-origin: 0 50%;
+  transform: rotate(var(--fx-neural-angle));
+  background: linear-gradient(90deg, rgba(95, 239, 255, .72), transparent);
+  filter: drop-shadow(0 0 4px rgba(61, 220, 255, .5));
+}
+
+@keyframes fx-neural-pulse {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.25); }
+  22% { opacity: .9; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); }
+}
+
+/* One coherent biomechanical visual language. The DOM stays semantic/accessible;
+   these accents only expose the active organ and real runtime state. */
+html[data-fx-living-phase="discover"] { --fx-living-accent-rgb: 75 237 255; }
+html[data-fx-living-phase="plan"] { --fx-living-accent-rgb: 96 207 255; }
+html[data-fx-living-phase="execute"] { --fx-living-accent-rgb: 175 77 255; }
+html[data-fx-living-phase="verify"] { --fx-living-accent-rgb: 116 255 212; }
+
+html[data-fx-living-phase] .scene::after,
+html[data-fx-living-phase] [data-organism-panel]::after {
+  border-color: rgb(var(--fx-living-accent-rgb) / .08);
+}
+
+html[data-fx-living-phase="discover"] .hero-ring {
+  filter: drop-shadow(0 0 calc(8px + var(--fx-system-energy) * 12px) rgba(66, 225, 255, .22));
+}
+
+html[data-fx-living-phase="plan"] .hero-ring {
+  filter: drop-shadow(0 0 calc(10px + var(--fx-system-energy) * 14px) rgba(82, 197, 255, .24));
+}
+
+html[data-fx-living-phase="execute"] .hero-ring {
+  filter: drop-shadow(0 0 calc(12px + var(--fx-system-energy) * 18px) rgba(165, 68, 255, .27));
+}
+
+html[data-fx-living-phase="verify"] .hero-ring {
+  filter: drop-shadow(0 0 calc(8px + var(--fx-system-energy) * 10px) rgba(104, 255, 207, .22));
+}
+
+/* CORE AWAKENING: visual signature around the real WebGL core. It does not cover,
+   transform or replace the core canvas and never captures input. */
+html[data-fx-core-awakening="running"] #hero .hero-space::before,
+html[data-fx-core-awakening="running"] #hero .hero-space::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+html[data-fx-core-awakening="running"] #hero .hero-space::before {
+  width: min(52vmin, 520px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(111, 241, 255, .38);
+  box-shadow: inset 0 0 38px rgba(69, 225, 255, .07), 0 0 48px rgba(78, 220, 255, .08);
+  animation: fx-core-awaken-ring 1500ms cubic-bezier(.15,.72,.22,1) both;
+}
+
+html[data-fx-core-awakening="running"] #hero .hero-space::after {
+  width: 8px;
+  height: 8px;
+  background: rgba(238, 255, 255, .98);
+  box-shadow: 0 0 8px #fff, 0 0 24px rgba(73, 233, 255, .92), 0 0 52px rgba(149, 77, 255, .55);
+  animation: fx-core-awaken-nucleus 1500ms cubic-bezier(.16,.8,.2,1) both;
+}
+
+@keyframes fx-core-awaken-ring {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.22) rotate(-18deg); }
+  28% { opacity: .95; }
+  70% { opacity: .55; transform: translate(-50%, -50%) scale(1.08) rotate(10deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.22) rotate(18deg); }
+}
+
+@keyframes fx-core-awaken-nucleus {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1.4); }
+  58% { opacity: .92; transform: translate(-50%, -50%) scale(.82); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.35); }
+}
+
+html[data-fx-system-stability="unstable"] .fx-living-system-layer::before {
+  opacity: .72;
+  transform: translate3d(1px, -1px, 0) scale(1.012);
+}
+
+/* Mobile is a dedicated portrait composition, not desktop squeezed smaller. */
+@media (max-width: 900px), (pointer: coarse) {
+  :root {
+    --fx-living-transition-ms: 520ms;
+  }
+
+  .fx-living-system-layer::before {
+    inset: -8vmax;
+    background:
+      radial-gradient(circle at calc(50% + var(--fx-system-pointer-x) * 5%), calc(26% + var(--fx-system-pointer-y) * 4%), rgba(71, 236, 255, calc(.028 + var(--fx-system-energy) * .045)), transparent 29%),
+      radial-gradient(circle at 50% 39%, rgba(145, 73, 255, calc(.014 + var(--fx-system-energy) * .022)), transparent 38%);
+    filter: blur(10px);
+  }
+
+  .fx-living-system-layer::after {
+    opacity: calc(.12 + var(--fx-system-energy) * .12);
+    background: linear-gradient(180deg, transparent 8%, rgba(86, 231, 255, .025) 42%, transparent 72%);
+  }
+
+  .fx-living-transition {
+    background: radial-gradient(ellipse at 50% 34%, transparent 20%, rgba(1, 6, 16, .26) 70%, rgba(0, 2, 9, .58));
+  }
+
+  .fx-living-neural-pulse::after {
+    width: 58px;
+  }
+
+  html[data-fx-core-awakening="running"] #hero .hero-space::before {
+    width: min(72vw, 390px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-living-system-layer::before,
+  .fx-living-transition {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .fx-living-neural-pulse,
+  html[data-fx-core-awakening="running"] #hero .hero-space::before,
+  html[data-fx-core-awakening="running"] #hero .hero-space::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
