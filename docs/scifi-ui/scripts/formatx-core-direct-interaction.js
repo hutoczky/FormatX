@@ -4,6 +4,7 @@
   const root = document.documentElement;
   const VERSION = 'direct-core-interaction-v3';
   const LIVING_SCRIPT = '/scifi-ui/scripts/formatx-living-system-rendering-v1.js?v=20260812-award-r1';
+  const TELEMETRY_BRIDGE = '/scifi-ui/scripts/formatx-living-telemetry-visual-bridge-v1.js?v=20260812-award-r2';
   const desktop = matchMedia('(min-width:901px) and (pointer:fine)').matches;
   const MOVE_THROTTLE_MS = desktop ? 28 : 72;
   const DESKTOP_X_GAIN = 1.85;
@@ -22,14 +23,30 @@
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
+  function bootTelemetryBridge() {
+    if (root.dataset.fxLivingTelemetryBridge === 'living-telemetry-visual-bridge-v1') return;
+    if (document.querySelector('script[data-fx-living-telemetry-bridge],script[src*="formatx-living-telemetry-visual-bridge-v1.js"]')) return;
+    const script = document.createElement('script');
+    script.src = TELEMETRY_BRIDGE;
+    script.async = false;
+    script.dataset.fxLivingTelemetryBridge = 'v1';
+    script.addEventListener('load', () => { root.dataset.fxLivingTelemetryController = 'ready-v1'; }, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxLivingTelemetryController = 'failed-v1'; }, { once: true });
+    document.head.appendChild(script);
+  }
+
   function bootLivingSystem() {
+    bootTelemetryBridge();
     if (root.dataset.fxLivingSystemRendering === 'living-system-rendering-v1') return;
     if (document.querySelector('script[data-fx-living-system-rendering],script[src*="formatx-living-system-rendering-v1.js"]')) return;
     const script = document.createElement('script');
     script.src = LIVING_SCRIPT;
     script.async = false;
     script.dataset.fxLivingSystemRendering = 'v1';
-    script.addEventListener('load', () => { root.dataset.fxLivingSystemController = 'ready-v1'; }, { once: true });
+    script.addEventListener('load', () => {
+      root.dataset.fxLivingSystemController = 'ready-v1';
+      bootTelemetryBridge();
+    }, { once: true });
     script.addEventListener('error', () => { root.dataset.fxLivingSystemController = 'failed-v1'; }, { once: true });
     root.dataset.fxLivingSystemController = 'loading-v1';
     document.head.appendChild(script);
@@ -72,7 +89,6 @@
 
     const x = (event.clientX - rect.left) / rect.width;
     const y = (event.clientY - rect.top) / rect.height;
-
     const radiusX = desktop ? 0.52 : 0.47;
     const radiusY = desktop ? 0.51 : 0.46;
     const dx = (x - 0.5) / radiusX;
@@ -87,7 +103,6 @@
 
   function amplifyDesktopPointer(event, point) {
     if (!desktop || !event.isTrusted || !point || event.pointerType === 'touch') return;
-
     const gain = activePointer === event.pointerId ? 1.12 : 1;
     const nx = clamp(point.x * DESKTOP_X_GAIN * gain, -1, 1);
     const ny = clamp(point.y * DESKTOP_Y_GAIN * gain, -1, 1);
@@ -157,7 +172,6 @@
     if (!event.isTrusted) return;
     const point = pointInCore(event);
     if (!point) return;
-
     amplifyDesktopPointer(event, point);
 
     const now = performance.now();
@@ -193,9 +207,7 @@
     delays.forEach(delay => window.setTimeout(() => pulse(event, 'burst', point), delay));
   }
 
-  // No preventDefault and no pointer capture: phone pan-y/pinch/momentum remain
-  // native. The desktop amplifier only emits synthetic pointermove coordinates
-  // into the existing WebGL renderer; the crystal remains real WebGL geometry.
+  // No preventDefault and no pointer capture: phone pan-y/pinch/momentum remain native.
   addEventListener('pointerdown', onPointerDown, { passive: true });
   addEventListener('pointermove', onPointerMove, { passive: true });
   addEventListener('pointerup', event => finishPointer(event, 'release'), { passive: true });
