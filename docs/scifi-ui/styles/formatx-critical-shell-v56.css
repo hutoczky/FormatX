@@ -318,3 +318,65 @@ main { position: relative; z-index: 2; }
     transition-duration: .001ms !important;
   }
 }
+
+/* First-paint geometry lock r4 -----------------------------------------------
+   Mirrors the final mobile recovery + hero-flow composition from the very
+   first CSS response. This prevents header mode, source order and hero height
+   from changing after first paint. */
+@media (max-width: 900px), (pointer: coarse) {
+  .topbar {
+    position: fixed;
+    z-index: 1600;
+    top: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    min-height: 82px;
+    margin: 0;
+    padding: max(10px, env(safe-area-inset-top)) 16px 10px;
+    align-items: center;
+  }
+
+  .menu-toggle {
+    width: 58px;
+    min-width: 58px;
+    height: 58px;
+    min-height: 58px;
+    padding: 0;
+    border-radius: 19px;
+  }
+
+  #hero {
+    min-height: 0;
+    height: auto;
+    padding: 84px 0 max(104px, calc(92px + env(safe-area-inset-bottom, 0px)));
+  }
+
+  #hero .hero-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding-inline: 12px;
+    gap: 18px;
+  }
+
+  #hero .hero-copy {
+    order: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 24px clamp(18px, 5.2vw, 26px) 28px;
+  }
+
+  #hero .hero-space {
+    order: 0;
+    width: 100%;
+    margin: 0;
+    min-height: clamp(300px, 45svh, 470px);
+    max-height: 490px;
+  }
+}
