@@ -2,7 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  const VERSION = 'direct-core-interaction-v2';
+  const VERSION = 'direct-core-interaction-v3';
+  const LIVING_SCRIPT = '/scifi-ui/scripts/formatx-living-system-rendering-v1.js?v=20260812-award-r1';
   const desktop = matchMedia('(min-width:901px) and (pointer:fine)').matches;
   const MOVE_THROTTLE_MS = desktop ? 28 : 72;
   const DESKTOP_X_GAIN = 1.85;
@@ -20,6 +21,19 @@
   let rectRaf = 0;
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+  function bootLivingSystem() {
+    if (root.dataset.fxLivingSystemRendering === 'living-system-rendering-v1') return;
+    if (document.querySelector('script[data-fx-living-system-rendering],script[src*="formatx-living-system-rendering-v1.js"]')) return;
+    const script = document.createElement('script');
+    script.src = LIVING_SCRIPT;
+    script.async = false;
+    script.dataset.fxLivingSystemRendering = 'v1';
+    script.addEventListener('load', () => { root.dataset.fxLivingSystemController = 'ready-v1'; }, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxLivingSystemController = 'failed-v1'; }, { once: true });
+    root.dataset.fxLivingSystemController = 'loading-v1';
+    document.head.appendChild(script);
+  }
 
   function coreReady() {
     return root.dataset.fxCoreReferenceV53 === 'ready-v53'
@@ -39,11 +53,12 @@
 
   function findHost() {
     host = document.querySelector('#hero .hero-space');
+    bootLivingSystem();
     if (host && coreReady()) {
       hostRect = host.getBoundingClientRect();
       root.dataset.fxCoreInteraction = desktop
-        ? 'direct-desktop-pointer-energy-r4'
-        : 'direct-pointer-touch-drag-r3';
+        ? 'direct-desktop-pointer-energy-r5-living-system'
+        : 'direct-pointer-touch-drag-r4-living-system';
       root.dataset.fxCoreInteractionState = 'ready';
       return true;
     }
@@ -58,9 +73,6 @@
     const x = (event.clientX - rect.left) / rect.width;
     const y = (event.clientY - rect.top) / rect.height;
 
-    // Keep the interaction field around the visible MAG instead of consuming
-    // the entire hero. Desktop gets a slightly wider field so the core starts
-    // reacting before the cursor reaches the glass surface.
     const radiusX = desktop ? 0.52 : 0.47;
     const radiusY = desktop ? 0.51 : 0.46;
     const dx = (x - 0.5) / radiusX;
@@ -76,10 +88,6 @@
   function amplifyDesktopPointer(event, point) {
     if (!desktop || !event.isTrusted || !point || event.pointerType === 'touch') return;
 
-    // The WebGL renderer consumes viewport-normalized pointer coordinates.
-    // Feed it a magnified coordinate derived from the MAG-local position so
-    // the existing native 3D model matrix rotates farther without adding a
-    // CSS/fake-3D transform or changing the crystal geometry/material.
     const gain = activePointer === event.pointerId ? 1.12 : 1;
     const nx = clamp(point.x * DESKTOP_X_GAIN * gain, -1, 1);
     const ny = clamp(point.y * DESKTOP_Y_GAIN * gain, -1, 1);
@@ -197,13 +205,18 @@
   addEventListener('scroll', scheduleRectRefresh, { passive: true });
   visualViewport?.addEventListener('resize', scheduleRectRefresh, { passive: true });
 
-  addEventListener('formatx:core3dready', () => findHost(), { passive: true });
+  addEventListener('formatx:core3dready', () => {
+    findHost();
+    bootLivingSystem();
+  }, { passive: true });
   addEventListener('pageshow', () => {
     activePointer = null;
     lastMovePulse = 0;
     findHost();
+    bootLivingSystem();
   }, { passive: true });
 
+  bootLivingSystem();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', findHost, { once: true });
   } else {
