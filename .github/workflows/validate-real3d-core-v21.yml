@@ -7,7 +7,8 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-reference-v53.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-award-v56.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v60.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js'
       - 'docs/scifi-ui/styles/formatx-core-reference-v53.css'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
@@ -32,9 +33,9 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: Validate desktop reference and mobile award crystal production MAG
+      - name: Validate desktop reference and mobile v60 v61 production MAG
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
-      - name: Validate v53 desktop and v56 mobile startup contract
+      - name: Validate v53 desktop and v60 v61 mobile startup contract
         run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Validate production and preview renderer authority
         run: node .github/scripts/validate-reference-core-v26.cjs
@@ -46,7 +47,8 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-reference-v53.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-award-v56.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v60.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
           node --check docs/scifi-ui/scripts/formatx-webgpu-core-v29.js
           node --check docs/scifi-ui/scripts/formatx-orbital-core-v28.js
@@ -63,7 +65,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Desktop v53 and mobile v56 crystals passed geometry, single-context and syntax gates'
+            description='Desktop v53 and mobile v60+v61 passed geometry, one-context and syntax gates'
           else
             state=failure
             description='FormatX production crystal validation failed'

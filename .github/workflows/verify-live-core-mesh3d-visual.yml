@@ -1,5 +1,5 @@
 name: Verify live true 3D MAG visual
-run-name: Capture current desktop v53 and mobile v56 MAG for ${{ github.event.workflow_run.head_sha }}
+run-name: Capture current desktop v53 and mobile v61 MAG for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Validate current desktop v53 and mobile award v56 live MAG
+      - name: Validate current desktop v53 and mobile v60 v61 live MAG
         shell: bash
         run: |
           set -euo pipefail
@@ -47,30 +47,11 @@ jobs:
             await page.waitForFunction(() => document.documentElement.dataset.fxCoreReferenceV53 === 'ready-v53', null, { timeout:60000 });
             await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteraction === 'direct-desktop-pointer-energy-r5-living-system', null, { timeout:30000 });
             const before = await page.evaluate(() => Number(window.FormatXCoreCinematic?.energy || 0));
-            await page.mouse.move(720, 430);
-            await page.mouse.move(900, 360, { steps:8 });
-            await page.mouse.down();
-            await page.mouse.move(1040, 500, { steps:8 });
-            await page.mouse.up();
-            await page.mouse.click(820, 420);
-            await page.waitForTimeout(100);
+            await page.mouse.move(720, 430); await page.mouse.move(900, 360, { steps:8 }); await page.mouse.down();
+            await page.mouse.move(1040, 500, { steps:8 }); await page.mouse.up(); await page.mouse.click(820, 420); await page.waitForTimeout(100);
             const state = await page.evaluate(() => {
-              const r = document.documentElement;
-              const c = document.querySelector('.fx-core-reference-v53-canvas');
-              const b = c?.getBoundingClientRect();
-              return {
-                renderer:r.dataset.fxCoreRenderer,
-                geometry:r.dataset.fxCoreReferenceGeometry,
-                material:r.dataset.fxCoreReferenceMaterial,
-                reactor:r.dataset.fxCoreInternalReactor,
-                interaction:r.dataset.fxCoreInteraction,
-                performance:r.dataset.fxCorePerformance,
-                canvases:document.querySelectorAll('.fx-core-reference-v53-canvas').length,
-                gl:Boolean(c?.getContext('webgl2')),
-                width:b?.width||0,
-                height:b?.height||0,
-                energy:Number(window.FormatXCoreCinematic?.energy || 0)
-              };
+              const r = document.documentElement, c = document.querySelector('.fx-core-reference-v53-canvas'), b = c?.getBoundingClientRect();
+              return {renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,interaction:r.dataset.fxCoreInteraction,performance:r.dataset.fxCorePerformance,canvases:document.querySelectorAll('.fx-core-reference-v53-canvas').length,gl:Boolean(c?.getContext('webgl2')),width:b?.width||0,height:b?.height||0,energy:Number(window.FormatXCoreCinematic?.energy || 0)};
             });
             assert.equal(state.renderer, 'single-webgl2-reference-crystal-v53');
             assert.equal(state.geometry, 'sharp-four-tip-concave-crystal-v53');
@@ -78,65 +59,42 @@ jobs:
             assert.equal(state.reactor, 'moving-white-nucleus-concentric-spectral-rings-v53');
             assert.equal(state.interaction, 'direct-desktop-pointer-energy-r5-living-system');
             assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
-            assert.equal(state.canvases, 1);
-            assert.equal(state.gl, true);
-            assert.ok(state.width > 100 && state.height > 100, JSON.stringify(state));
-            assert.ok(state.energy >= before, JSON.stringify({before, after:state.energy}));
-            await page.screenshot({ path:'desktop-v53.png', fullPage:false });
-            await context.close();
+            assert.equal(state.canvases, 1); assert.equal(state.gl, true); assert.ok(state.width > 100 && state.height > 100, JSON.stringify(state)); assert.ok(state.energy >= before, JSON.stringify({before, after:state.energy}));
+            await page.screenshot({ path:'desktop-v53.png', fullPage:false }); await context.close();
           }
 
           async function validateMobile(browser) {
             const context = await browser.newContext({ viewport:{width:390,height:844}, deviceScaleFactor:2, isMobile:true, hasTouch:true, locale:'hu-HU' });
             const page = await context.newPage();
             await page.goto(`${origin}/?mag_visual=mobile-${Date.now()}`, { waitUntil:'domcontentloaded', timeout:60000 });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV56 === 'ready-v56', null, { timeout:60000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV60 === 'ready-v60' && document.documentElement.dataset.fxCoreFidelityV61 === 'ready-v61', null, { timeout:60000 });
             await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteraction === 'direct-pointer-touch-drag-r4-living-system', null, { timeout:30000 });
-            await page.touchscreen.tap(196, 390);
-            await page.waitForTimeout(100);
+            await page.touchscreen.tap(196, 390); await page.waitForTimeout(100);
             const state = await page.evaluate(() => {
               const r = document.documentElement;
               const c = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas');
+              const overlay = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-fidelity-v61');
               const b = c?.getBoundingClientRect();
-              return {
-                renderer:r.dataset.fxCoreRenderer,
-                geometry:r.dataset.fxCoreAwardGeometry,
-                material:r.dataset.fxCoreAwardMaterial,
-                reactor:r.dataset.fxCoreAwardReactor,
-                performance:r.dataset.fxCoreAwardPerf,
-                interaction:r.dataset.fxCoreInteraction,
-                v55:r.dataset.fxCoreMobileV55,
-                v56:r.dataset.fxCoreMobileV56,
-                canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
-                gl:Boolean(c?.getContext('webgl2')),
-                width:b?.width||0,
-                height:b?.height||0,
-                vw:innerWidth,
-                vh:innerHeight
-              };
+              return {renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,fidelity:r.dataset.fxCoreReferenceFidelity,performance:r.dataset.fxCorePerformance,interaction:r.dataset.fxCoreInteraction,v55:r.dataset.fxCoreMobileV55,v60:r.dataset.fxCoreMobileV60,v61:r.dataset.fxCoreFidelityV61,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,overlays:document.querySelectorAll('.fx-core-fidelity-v61').length,gl:Boolean(c?.getContext('webgl2')),svg:Boolean(overlay),width:b?.width||0,height:b?.height||0,vw:innerWidth,vh:innerHeight};
             });
-            assert.equal(state.renderer, 'single-webgl2-mobile-award-crystal-v56');
-            assert.equal(state.geometry, 'quadratic-bezier-cusped-outline-v56');
-            assert.equal(state.material, 'bright-faceted-fresnel-glass-v56');
-            assert.equal(state.reactor, 'white-reactor-nucleus-concentric-cyan-violet-rings-v56');
+            assert.equal(state.renderer, 'single-webgl2-mobile-cinematic-reference-v60');
+            assert.equal(state.geometry, 'asymmetric-deep-concave-four-point-reference-v60');
+            assert.equal(state.material, 'refractive-band-threaded-glass-v60');
+            assert.equal(state.reactor, 'layered-white-cyan-violet-reactor-v60');
+            assert.equal(state.fidelity, 'emissive-vector-over-real-webgl2-v61');
             assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
             assert.equal(state.interaction, 'direct-pointer-touch-drag-r4-living-system');
-            assert.equal(state.v55, 'ready-v55');
-            assert.equal(state.v56, 'ready-v56');
-            assert.equal(state.canvases, 1);
-            assert.equal(state.gl, true);
+            assert.equal(state.v55, 'ready-v55'); assert.equal(state.v60, 'ready-v60'); assert.equal(state.v61, 'ready-v61');
+            assert.equal(state.canvases, 1); assert.equal(state.overlays, 1); assert.equal(state.gl, true); assert.equal(state.svg, true);
             assert.ok(state.width <= state.vw + 1 && state.height <= state.vh + 1, JSON.stringify(state));
-            await page.screenshot({ path:'mobile-v56.png', fullPage:false });
-            await context.close();
+            await page.screenshot({ path:'mobile-v61.png', fullPage:false }); await context.close();
           }
 
           (async () => {
             const browser = await chromium.launch({ headless:true, args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader'] });
-            await validateDesktop(browser);
-            await validateMobile(browser);
-            await browser.close();
-            for (const file of ['desktop-v53.png','mobile-v56.png']) assert.ok(fs.statSync(file).size > 10000, file);
-            console.log('PASS: live desktop v53 and mobile award v56 MAG are current, WebGL2-backed and interactive.');
+            await validateDesktop(browser); await validateMobile(browser); await browser.close();
+            for (const file of ['desktop-v53.png','mobile-v61.png']) assert.ok(fs.statSync(file).size > 10000, file);
+            console.log('PASS: live desktop v53 and mobile v60 WebGL2 + v61 fidelity MAG are current and interactive.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
@@ -144,10 +102,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-mag-v53-v56-${{ github.event.workflow_run.head_sha }}
+          name: live-mag-v53-v61-${{ github.event.workflow_run.head_sha }}
           path: |
             ${{ runner.temp }}/mag-live/desktop-v53.png
-            ${{ runner.temp }}/mag-live/mobile-v56.png
+            ${{ runner.temp }}/mag-live/mobile-v61.png
           if-no-files-found: warn
           retention-days: 14
 
@@ -159,5 +117,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live desktop v53 + mobile v56 WebGL2 MAG visual passed'; else state=failure; description='Live production MAG visual or interaction failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG v53-v56' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live desktop v53 + mobile v60/v61 MAG visual passed'; else state=failure; description='Live production MAG visual or interaction failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG v53-v61' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
