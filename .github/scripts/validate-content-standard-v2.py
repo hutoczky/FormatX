@@ -155,8 +155,8 @@ def validate_public_pages_v2() -> None:
                 module.fail(f"{name} public-page wrapper missing {token}")
 
     sitemap = module.read("docs/sitemap.xml")
-    if "<loc>https://www.formatxsuite.com/</loc>" not in sitemap:
-        module.fail("Sitemap missing canonical root homepage")
+    if "<loc>https://formatxsuite.com/</loc>" not in sitemap:
+        module.fail("Sitemap missing canonical apex root homepage")
     for url in [
         "/scifi-ui/downloads/", "/scifi-ui/android/", "/scifi-ui/method.html",
         "/scifi-ui/verification.html", "/scifi-ui/test-matrix.html",
@@ -166,8 +166,8 @@ def validate_public_pages_v2() -> None:
     ]:
         if url not in sitemap:
             module.fail(f"Sitemap missing {url}")
-    if "Sitemap: https://www.formatxsuite.com/sitemap.xml" not in module.read("docs/robots.txt"):
-        module.fail("robots.txt does not point to the canonical sitemap")
+    if "Sitemap: https://formatxsuite.com/sitemap.xml" not in module.read("docs/robots.txt"):
+        module.fail("robots.txt does not point to the canonical apex sitemap")
 
 
 module.validate_release_metadata = validate_release_metadata_v2
