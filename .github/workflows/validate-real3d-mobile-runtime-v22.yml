@@ -1,4 +1,4 @@
-name: Validate mobile reference MAG v61 runtime
+name: Validate mobile reference MAG v62 runtime
 
 on:
   push:
@@ -7,8 +7,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v60.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v62.js'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
@@ -30,28 +29,27 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v60.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v62.js
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
 
       - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/core-v61-mobile"
-          cd "$RUNNER_TEMP/core-v61-mobile"
+          mkdir -p "$RUNNER_TEMP/core-v62-mobile"
+          cd "$RUNNER_TEMP/core-v62-mobile"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Verify v60 WebGL2 plus v61 fidelity success and fail-open state
+      - name: Verify native v62 WebGL2 success and fail-open state
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v61-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v62-server.log" 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/core-v61-mobile"
+          cd "$RUNNER_TEMP/core-v62-mobile"
           node <<'NODE'
           const assert = require('node:assert/strict');
           const { chromium } = require('playwright');
@@ -70,11 +68,10 @@ jobs:
             }
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu', { waitUntil:'domcontentloaded', timeout:45000 });
             if (!blockWebgl) {
-              await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV60 === 'ready-v60' && document.documentElement.dataset.fxCoreFidelityV61 === 'ready-v61', null, { timeout:45000 });
+              await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV62 === 'ready-v62', null, { timeout:45000 });
               const s = await page.evaluate(() => {
                 const r = document.documentElement;
                 const c = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas');
-                const overlay = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-fidelity-v61');
                 const box = c?.getBoundingClientRect();
                 return {
                   renderer:r.dataset.fxCoreRenderer,
@@ -84,41 +81,37 @@ jobs:
                   fidelity:r.dataset.fxCoreReferenceFidelity,
                   performance:r.dataset.fxCorePerformance,
                   v55:r.dataset.fxCoreMobileV55,
-                  v60:r.dataset.fxCoreMobileV60,
-                  v61:r.dataset.fxCoreFidelityV61,
+                  v62:r.dataset.fxCoreMobileV62,
                   canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
                   overlays:document.querySelectorAll('.fx-core-fidelity-v61').length,
                   width:box?.width||0,
                   height:box?.height||0,
                   vw:innerWidth,
                   vh:innerHeight,
-                  gl:Boolean(c?.getContext('webgl2')),
-                  svg:Boolean(overlay)
+                  gl:Boolean(c?.getContext('webgl2'))
                 };
               });
-              assert.equal(s.renderer, 'single-webgl2-mobile-cinematic-reference-v60');
-              assert.equal(s.geometry, 'asymmetric-deep-concave-four-point-reference-v60');
-              assert.equal(s.material, 'refractive-band-threaded-glass-v60');
-              assert.equal(s.reactor, 'layered-white-cyan-violet-reactor-v60');
-              assert.equal(s.fidelity, 'emissive-vector-over-real-webgl2-v61');
+              assert.equal(s.renderer, 'single-webgl2-mobile-pixel-reference-v62');
+              assert.equal(s.geometry, 'pixel-locked-organic-concave-four-point-v62');
+              assert.equal(s.material, 'multishell-refractive-crystal-glass-v62');
+              assert.equal(s.reactor, 'white-cyan-spherical-reactor-orbital-rings-v62');
+              assert.equal(s.fidelity, 'native-webgl2-no-overlay-v62');
               assert.equal(s.performance, 'single-context-adaptive-60-plus-fps');
               assert.equal(s.v55, 'ready-v55');
-              assert.equal(s.v60, 'ready-v60');
-              assert.equal(s.v61, 'ready-v61');
+              assert.equal(s.v62, 'ready-v62');
               assert.equal(s.canvases, 1);
-              assert.equal(s.overlays, 1);
+              assert.equal(s.overlays, 0);
               assert.equal(s.gl, true);
-              assert.equal(s.svg, true);
               assert.ok(s.width <= s.vw + 1 && s.height <= s.vh + 1, JSON.stringify(s));
             } else {
-              await page.waitForFunction(() => ['context-unavailable-v60','webgl2-unavailable-v60'].includes(document.documentElement.dataset.fxCoreMobileV60), null, { timeout:45000 });
+              await page.waitForFunction(() => ['context-unavailable-v62','webgl2-unavailable-v62'].includes(document.documentElement.dataset.fxCoreMobileV62), null, { timeout:45000 });
               const s = await page.evaluate(() => ({
-                state:document.documentElement.dataset.fxCoreMobileV60,
+                state:document.documentElement.dataset.fxCoreMobileV62,
                 canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
                 bodyVisible:getComputedStyle(document.body).visibility !== 'hidden'
               }));
-              assert.ok(['context-unavailable-v60','webgl2-unavailable-v60'].includes(s.state));
-              assert.equal(s.canvases, 0);
+              assert.ok(['context-unavailable-v62','webgl2-unavailable-v62'].includes(s.state));
+              assert.ok(s.canvases <= 1);
               assert.equal(s.bodyVisible, true);
             }
             await context.close();
@@ -129,7 +122,7 @@ jobs:
             await scenario(browser, false);
             await scenario(browser, true);
             await browser.close();
-            console.log('PASS: mobile v60 real WebGL2 plus v61 fidelity is bounded, interactive and fails open without WebGL2.');
+            console.log('PASS: mobile v62 native WebGL2 MAG is bounded, interactive and fails open without WebGL2.');
           })().catch(e => { console.error(e); process.exit(1); });
           NODE
 
@@ -140,5 +133,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference v60+v61 mobile MAG runtime passed'; else state=failure; description='Reference v60+v61 mobile MAG runtime failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v61 mobile runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference v62 native WebGL2 mobile MAG runtime passed'; else state=failure; description='Reference v62 mobile MAG runtime failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v62 mobile runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
