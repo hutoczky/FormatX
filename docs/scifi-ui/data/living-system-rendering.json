@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "release": "2026-08-12",
+  "name": "FormatX Living System Rendering v1",
+  "production_renderer": {
+    "desktop": "single-webgl2-reference-crystal-v53",
+    "mobile": "single-webgl2-mobile-cinematic-crystal-v55",
+    "single_context_per_device": true,
+    "webgpu_production_authority": false,
+    "webgpu_status": "preview-capability-retained"
+  },
+  "operational_core": {
+    "phases": ["discover", "plan", "execute", "verify"],
+    "core_awakening": {
+      "trigger": "first-direct-core-interaction-per-session",
+      "duration_ms": 1540,
+      "mandatory": false,
+      "reduced_motion_safe": true,
+      "captures_scroll": false
+    }
+  },
+  "real_runtime_inputs": {
+    "fps": true,
+    "frame_time": true,
+    "render_pressure": true,
+    "network_rtt_when_available": true,
+    "network_downlink_when_available": true,
+    "effective_connection_type_when_available": true,
+    "hardware_concurrency_when_available": true,
+    "device_memory_when_available": true,
+    "pointer_and_touch": true,
+    "device_orientation_when_browser_allows": true,
+    "runtime_errors": true,
+    "system_cpu_load": false,
+    "system_cpu_load_reason": "standard browser APIs do not expose trustworthy OS CPU load"
+  },
+  "scroll_contract": {
+    "controller": "seamless-v7",
+    "scroll_jacking": false,
+    "input_capture": false,
+    "section_snap": false,
+    "living_system_layer_owns_scroll": false
+  },
+  "accessibility_and_performance": {
+    "semantic_html_remains_authority": true,
+    "visual_layers_are_aria_hidden": true,
+    "pointer_events_on_visual_layer": false,
+    "prefers_reduced_motion_supported": true,
+    "adaptive_existing_webgl_renderer_preserved": true
+  }
+}
