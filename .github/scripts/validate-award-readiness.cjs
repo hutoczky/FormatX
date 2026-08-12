@@ -66,11 +66,11 @@ function sitemapLastmod(url) {
 }
 
 assert.ok(
-  sitemapLastmod('https://www.formatxsuite.com/') >= '2026-08-08',
+  sitemapLastmod('https://formatxsuite.com/') >= '2026-08-08',
   'homepage sitemap lastmod is older than the audited award-readiness baseline'
 );
 assert.ok(
-  sitemapLastmod('https://www.formatxsuite.com/scifi-ui/technical-report.html') >= '2026-08-10',
+  sitemapLastmod('https://formatxsuite.com/scifi-ui/technical-report.html') >= '2026-08-10',
   'technical-report sitemap lastmod is older than the current evidence report'
 );
 
