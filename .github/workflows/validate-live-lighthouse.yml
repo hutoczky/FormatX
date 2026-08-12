@@ -94,27 +94,91 @@ jobs:
       - name: Run live desktop Lighthouse
         shell: bash
         run: |
-          set -o pipefail
+          set +e
           rm -rf .lighthouseci
-          lhci autorun --config=./lighthouserc.live.json 2>&1 | tee lighthouse-live-desktop-output.txt
-          grep -Fq 'https://formatxsuite.com/?lighthouse=1&live=desktop' lighthouse-live-desktop-output.txt
+          lhci collect --config=./lighthouserc.live.json 2>&1 | tee lighthouse-live-desktop-output.txt
+          collect_rc=${PIPESTATUS[0]}
+          if [ "$collect_rc" -ne 0 ]; then exit "$collect_rc"; fi
+          node <<'NODE' | tee -a lighthouse-live-desktop-output.txt
+          const fs=require('node:fs');
+          const files=fs.readdirSync('.lighthouseci').filter(f=>/^lhr-.*\.json$/.test(f)).sort();
+          for (const file of files) {
+            const lhr=JSON.parse(fs.readFileSync(`.lighthouseci/${file}`,'utf8'));
+            console.log(`\n=== ${file} ${lhr.finalDisplayedUrl || lhr.finalUrl} ===`);
+            for (const id of ['best-practices','seo','performance']) {
+              const cat=lhr.categories?.[id];
+              if (!cat) continue;
+              console.log(`CATEGORY ${id}: ${cat.score}`);
+              for (const ref of cat.auditRefs || []) {
+                if (!(ref.weight > 0)) continue;
+                const a=lhr.audits?.[ref.id];
+                if (a && a.score !== null && a.score < 1) {
+                  console.log(`FAIL-AUDIT ${ref.id} score=${a.score} title=${a.title}`);
+                  if (a.displayValue) console.log(`  display=${a.displayValue}`);
+                  const items=a.details?.items;
+                  if (Array.isArray(items) && items.length) console.log(`  items=${JSON.stringify(items.slice(0,5)).slice(0,6000)}`);
+                }
+              }
+            }
+            for (const id of ['largest-contentful-paint','largest-contentful-paint-element','lcp-breakdown-insight','render-blocking-insight','network-dependency-tree-insight','unused-javascript','unused-css-rules','bootup-time','mainthread-work-breakdown']) {
+              const a=lhr.audits?.[id];
+              if (!a) continue;
+              console.log(`DIAG ${id} score=${a.score} numeric=${a.numericValue ?? ''} display=${a.displayValue ?? ''}`);
+              const items=a.details?.items;
+              if (Array.isArray(items) && items.length) console.log(`  items=${JSON.stringify(items.slice(0,8)).slice(0,9000)}`);
+            }
+          }
+          NODE
           mkdir -p lighthouse-live-results/desktop
           cp -a .lighthouseci/. lighthouse-live-results/desktop/
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          lhci assert --config=./lighthouserc.live.json 2>&1 | tee -a lighthouse-live-desktop-output.txt
+          assert_rc=${PIPESTATUS[0]}
+          exit "$assert_rc"
 
       - name: Run live mobile Lighthouse
         if: always()
         shell: bash
         run: |
-          set -o pipefail
+          set +e
           rm -rf .lighthouseci
-          lhci autorun --config=./lighthouserc.live.mobile.json 2>&1 | tee lighthouse-live-mobile-output.txt
-          grep -Fq 'https://formatxsuite.com/?lighthouse=1&live=mobile' lighthouse-live-mobile-output.txt
+          lhci collect --config=./lighthouserc.live.mobile.json 2>&1 | tee lighthouse-live-mobile-output.txt
+          collect_rc=${PIPESTATUS[0]}
+          if [ "$collect_rc" -ne 0 ]; then exit "$collect_rc"; fi
+          node <<'NODE' | tee -a lighthouse-live-mobile-output.txt
+          const fs=require('node:fs');
+          const files=fs.readdirSync('.lighthouseci').filter(f=>/^lhr-.*\.json$/.test(f)).sort();
+          for (const file of files) {
+            const lhr=JSON.parse(fs.readFileSync(`.lighthouseci/${file}`,'utf8'));
+            console.log(`\n=== ${file} ${lhr.finalDisplayedUrl || lhr.finalUrl} ===`);
+            for (const id of ['best-practices','seo','performance']) {
+              const cat=lhr.categories?.[id];
+              if (!cat) continue;
+              console.log(`CATEGORY ${id}: ${cat.score}`);
+              for (const ref of cat.auditRefs || []) {
+                if (!(ref.weight > 0)) continue;
+                const a=lhr.audits?.[ref.id];
+                if (a && a.score !== null && a.score < 1) {
+                  console.log(`FAIL-AUDIT ${ref.id} score=${a.score} title=${a.title}`);
+                  if (a.displayValue) console.log(`  display=${a.displayValue}`);
+                  const items=a.details?.items;
+                  if (Array.isArray(items) && items.length) console.log(`  items=${JSON.stringify(items.slice(0,5)).slice(0,6000)}`);
+                }
+              }
+            }
+            for (const id of ['largest-contentful-paint','largest-contentful-paint-element','lcp-breakdown-insight','render-blocking-insight','network-dependency-tree-insight','unused-javascript','unused-css-rules','bootup-time','mainthread-work-breakdown']) {
+              const a=lhr.audits?.[id];
+              if (!a) continue;
+              console.log(`DIAG ${id} score=${a.score} numeric=${a.numericValue ?? ''} display=${a.displayValue ?? ''}`);
+              const items=a.details?.items;
+              if (Array.isArray(items) && items.length) console.log(`  items=${JSON.stringify(items.slice(0,8)).slice(0,9000)}`);
+            }
+          }
+          NODE
           mkdir -p lighthouse-live-results/mobile
           cp -a .lighthouseci/. lighthouse-live-results/mobile/
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          lhci assert --config=./lighthouserc.live.mobile.json 2>&1 | tee -a lighthouse-live-mobile-output.txt
+          assert_rc=${PIPESTATUS[0]}
+          exit "$assert_rc"
 
       - name: Upload live Lighthouse evidence
         if: always()
