@@ -8,7 +8,7 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v61';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-v61-r9-verified';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-v61-r9-final';
 
   function registerFidelity() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
