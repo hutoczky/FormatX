@@ -7,6 +7,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-reference-v53.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-award-v56.js'
       - 'docs/scifi-ui/styles/formatx-core-reference-v53.css'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
@@ -31,9 +32,9 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: Validate four-point reference crystal production MAG
+      - name: Validate desktop reference and mobile award crystal production MAG
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
-      - name: Validate v53/v55 shared mobile startup contract
+      - name: Validate v53 desktop and v56 mobile startup contract
         run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Validate production and preview renderer authority
         run: node .github/scripts/validate-reference-core-v26.cjs
@@ -45,6 +46,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-reference-v53.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-award-v56.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
           node --check docs/scifi-ui/scripts/formatx-webgpu-core-v29.js
           node --check docs/scifi-ui/scripts/formatx-orbital-core-v28.js
@@ -61,13 +63,13 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = success ]; then
             state=success
-            description='Four-point crystal passed single-context, mobile framing and syntax gates'
+            description='Desktop v53 and mobile v56 crystals passed geometry, single-context and syntax gates'
           else
             state=failure
-            description='Four-point reference crystal validation failed'
+            description='FormatX production crystal validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
             -f state="$state" \
-            -f context='FormatX reference crystal v53' \
+            -f context='FormatX production crystal' \
             -f description="$description" \
             -f target_url="$TARGET_URL"
