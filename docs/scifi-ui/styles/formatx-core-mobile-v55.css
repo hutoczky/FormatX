@@ -119,13 +119,81 @@
     z-index:5 !important;
     margin-top:0 !important;
   }
+
+  /* Award composition r2: keep the MAG genuinely WebGL2, but frame it like
+     the approved mobile reference — a little smaller, sharper and with a
+     restrained cyan/violet horizon + reflective floor behind the real 3D core. */
+  html[data-fx-core-mobile-v55="booting-v55"] body.living-architecture #hero .hero-space,
+  html[data-fx-core-mobile-v55="ready-v55"] body.living-architecture #hero .hero-space {
+    background:
+      radial-gradient(circle at 50% 46%, rgba(61, 218, 255, .16) 0, rgba(24, 129, 214, .075) 22%, transparent 43%),
+      radial-gradient(circle at 55% 49%, rgba(157, 76, 255, .095) 0, transparent 42%),
+      linear-gradient(180deg, rgba(1, 7, 17, .02) 0%, rgba(1, 8, 20, .08) 58%, rgba(2, 16, 34, .34) 100%) !important;
+    box-shadow:
+      inset 0 -52px 74px rgba(0, 7, 18, .72),
+      inset 0 1px 0 rgba(67, 211, 255, .035) !important;
+  }
+
+  html[data-fx-core-mobile-v55="booting-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::before,
+  html[data-fx-core-mobile-v55="ready-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::before {
+    content:"" !important;
+    display:block !important;
+    position:absolute !important;
+    inset:0 !important;
+    z-index:1 !important;
+    opacity:1 !important;
+    pointer-events:none !important;
+    animation:none !important;
+    box-shadow:none !important;
+    background:
+      radial-gradient(circle at 22% 31%, rgba(90, 205, 255, .46) 0 1px, transparent 1.7px),
+      radial-gradient(circle at 76% 24%, rgba(135, 91, 255, .40) 0 1px, transparent 1.8px),
+      radial-gradient(circle at 83% 53%, rgba(74, 214, 255, .38) 0 1px, transparent 1.6px),
+      radial-gradient(circle at 13% 58%, rgba(86, 184, 255, .34) 0 1px, transparent 1.6px),
+      radial-gradient(circle at 67% 65%, rgba(175, 88, 255, .30) 0 1px, transparent 1.7px),
+      linear-gradient(180deg, transparent 0 67%, rgba(38, 182, 255, .085) 68%, rgba(14, 87, 153, .055) 69%, transparent 72%) !important;
+  }
+
+  html[data-fx-core-mobile-v55="booting-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::after,
+  html[data-fx-core-mobile-v55="ready-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::after {
+    content:"" !important;
+    display:block !important;
+    position:absolute !important;
+    left:4% !important;
+    right:4% !important;
+    bottom:-7% !important;
+    height:38% !important;
+    z-index:2 !important;
+    opacity:.54 !important;
+    pointer-events:none !important;
+    animation:none !important;
+    box-shadow:none !important;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(42, 208, 255, .22) 0, rgba(74, 94, 255, .09) 27%, rgba(148, 61, 255, .045) 43%, transparent 68%),
+      repeating-linear-gradient(0deg, rgba(52, 190, 255, .075) 0 1px, transparent 1px 8px),
+      linear-gradient(90deg, transparent 0 9%, rgba(53, 180, 255, .06) 22%, rgba(91, 210, 255, .12) 50%, rgba(128, 77, 255, .055) 77%, transparent 92%) !important;
+    transform:perspective(420px) rotateX(63deg) scaleX(1.12) scaleY(.96) !important;
+    transform-origin:50% 0 !important;
+  }
+
+  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-space > .fx-core-mobile-v55-stage,
+  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-space > .fx-core-mobile-v55-stage {
+    transform:translateY(-1.2%) scale(.94) !important;
+    transform-origin:50% 50% !important;
+    will-change:transform !important;
+  }
 }
 
 @media (max-width:430px) {
   body.living-architecture #hero .hero-space {
-    height:clamp(425px,54svh,535px) !important;
-    min-height:clamp(425px,54svh,535px) !important;
-    max-height:535px !important;
+    height:clamp(455px,56svh,555px) !important;
+    min-height:clamp(455px,56svh,555px) !important;
+    max-height:555px !important;
+  }
+
+  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-space > .fx-core-mobile-v55-stage,
+  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-space > .fx-core-mobile-v55-stage {
+    transform:translateY(-1.4%) scale(.935) !important;
   }
 }
 
