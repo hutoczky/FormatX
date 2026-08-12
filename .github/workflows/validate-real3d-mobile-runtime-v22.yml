@@ -1,4 +1,4 @@
-name: Validate reference crystal v51 mobile runtime
+name: Validate cinematic mobile MAG v55 runtime
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
-      - 'docs/scifi-ui/scripts/formatx-core-v51.js'
-      - 'docs/scifi-ui/styles/formatx-core-v51.css'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/workflows/validate-real3d-mobile-runtime-v22.yml'
@@ -24,42 +24,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate source contracts
+      - name: Validate current source contracts
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          node --check docs/scifi-ui/scripts/formatx-core-v51.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
 
       - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/core-v51-mobile"
-          cd "$RUNNER_TEMP/core-v51-mobile"
+          mkdir -p "$RUNNER_TEMP/core-v55-mobile"
+          cd "$RUNNER_TEMP/core-v55-mobile"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Verify mobile success and resilient WebGL failure
+      - name: Verify v55 mobile WebGL2 success and fail-open state
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v51-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v55-server.log" 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/core-v51-mobile"
+          cd "$RUNNER_TEMP/core-v55-mobile"
           node <<'NODE'
           const assert = require('node:assert/strict');
           const { chromium } = require('playwright');
 
           async function scenario(browser, blockWebgl) {
-            const context = await browser.newContext({
-              viewport: { width: 384, height: 780 },
-              deviceScaleFactor: 2,
-              isMobile: true,
-              hasTouch: true,
-              locale: 'hu-HU'
-            });
+            const context = await browser.newContext({ viewport:{width:390,height:844}, deviceScaleFactor:2, isMobile:true, hasTouch:true, locale:'hu-HU' });
             const page = await context.newPage();
             if (blockWebgl) {
               await page.addInitScript(() => {
@@ -70,72 +64,68 @@ jobs:
                 };
               });
             }
-            await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu', { waitUntil: 'domcontentloaded', timeout: 45000 });
-            await page.evaluate(() => {
-              const root = document.documentElement;
-              root.classList.remove('fx-intro-pending', 'fx-intro-running', 'fx-intro-managed');
-              root.classList.add('fx-intro-complete');
-              document.getElementById('formatx-event-horizon')?.setAttribute('hidden', '');
-              document.dispatchEvent(new CustomEvent('formatx:introcomplete'));
-              scrollTo(0, 0);
-            });
-
+            await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu', { waitUntil:'domcontentloaded', timeout:45000 });
             if (!blockWebgl) {
-              await page.waitForFunction(() => document.documentElement.dataset.fxCoreV51 === 'ready-v51', null, { timeout: 45000 });
-              const state = await page.evaluate(() => ({
-                renderer: document.documentElement.dataset.fxCoreRenderer,
-                geometry: document.documentElement.dataset.fxCoreReferenceGeometry,
-                material: document.documentElement.dataset.fxCoreReferenceMaterial,
-                reactor: document.documentElement.dataset.fxCoreInternalReactor,
-                responsive: document.documentElement.dataset.fxCoreResponsive,
-                performance: document.documentElement.dataset.fxCorePerformance,
-                canvasCount: document.querySelectorAll('.fx-core-v51-canvas').length,
-                stage: document.querySelector('.fx-core-v51-stage')?.dataset.active,
-                width: document.querySelector('.fx-core-v51-canvas')?.getBoundingClientRect().width || 0,
-                viewport: innerWidth,
-                fallback: document.querySelector('.fx-resilient-core')?.dataset.active || 'absent'
-              }));
-              assert.equal(state.renderer, 'single-webgl2-reference-crystal-v51');
-              assert.equal(state.geometry, 'sharp-four-tip-concave-crystal-v51');
-              assert.equal(state.material, 'layered-faceted-refractive-glass-v51');
-              assert.equal(state.reactor, 'moving-white-nucleus-concentric-spectral-rings-v51');
-              assert.equal(state.responsive, 'desktop-mobile-reference-framing-v51');
-              assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
-              assert.equal(state.canvasCount, 1);
-              assert.ok(state.width <= state.viewport + 1, `canvas overflow: ${state.width} > ${state.viewport}`);
-              assert.notEqual(state.fallback, 'true');
+              await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV55 === 'ready-v55', null, { timeout:45000 });
+              const s = await page.evaluate(() => {
+                const r = document.documentElement;
+                const c = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas');
+                const box = c?.getBoundingClientRect();
+                return {
+                  renderer:r.dataset.fxCoreRenderer,
+                  geometry:r.dataset.fxCoreReferenceGeometry,
+                  material:r.dataset.fxCoreReferenceMaterial,
+                  reactor:r.dataset.fxCoreInternalReactor,
+                  responsive:r.dataset.fxCoreResponsive,
+                  performance:r.dataset.fxCorePerformance,
+                  interaction:r.dataset.fxCoreInteraction,
+                  canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
+                  width:box?.width||0,
+                  height:box?.height||0,
+                  vw:innerWidth,
+                  vh:innerHeight,
+                  gl:Boolean(c?.getContext('webgl2'))
+                };
+              });
+              assert.equal(s.renderer, 'single-webgl2-mobile-cinematic-crystal-v55');
+              assert.equal(s.geometry, 'long-sharp-four-tip-deep-concave-crystal-v55');
+              assert.equal(s.material, 'thin-layered-faceted-fresnel-glass-v55');
+              assert.equal(s.reactor, 'small-hot-white-nucleus-concentric-cyan-violet-rings-v55');
+              assert.equal(s.responsive, 'physical-mobile-hero-local-v55');
+              assert.equal(s.performance, 'single-context-adaptive-60-plus-fps');
+              assert.equal(s.interaction, 'direct-pointer-touch-drag-r4-living-system');
+              assert.equal(s.canvases, 1);
+              assert.equal(s.gl, true);
+              assert.ok(s.width <= s.vw + 1 && s.height <= s.vh + 1, JSON.stringify(s));
             } else {
-              await page.waitForFunction(() => ['context-unavailable','webgl2-unavailable'].includes(document.documentElement.dataset.fxCoreV51), null, { timeout: 45000 });
-              await page.waitForFunction(() => document.querySelector('.fx-resilient-core')?.dataset.active === 'true', null, { timeout: 45000 });
-              const state = await page.evaluate(() => ({
-                core: document.documentElement.dataset.fxCoreV51,
-                v51Canvases: document.querySelectorAll('.fx-core-v51-canvas').length,
-                fallback: document.querySelector('.fx-resilient-core')?.dataset.active || 'absent'
+              await page.waitForFunction(() => ['context-unavailable-v55','webgl2-unavailable-v55'].includes(document.documentElement.dataset.fxCoreMobileV55), null, { timeout:45000 });
+              const s = await page.evaluate(() => ({
+                state:document.documentElement.dataset.fxCoreMobileV55,
+                canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
+                bodyVisible:getComputedStyle(document.body).visibility !== 'hidden'
               }));
-              assert.ok(['context-unavailable','webgl2-unavailable'].includes(state.core));
-              assert.equal(state.v51Canvases, 0);
-              assert.equal(state.fallback, 'true');
+              assert.ok(['context-unavailable-v55','webgl2-unavailable-v55'].includes(s.state));
+              assert.equal(s.canvases, 0);
+              assert.equal(s.bodyVisible, true);
             }
             await context.close();
           }
 
           (async () => {
-            const browser = await chromium.launch({ headless: true, args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
+            const browser = await chromium.launch({ headless:true, args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader'] });
             await scenario(browser, false);
             await scenario(browser, true);
             await browser.close();
-            console.log('PASS: v51 mobile reference crystal stays bounded and resilient fallback activates when WebGL2 is unavailable.');
-          })().catch(error => { console.error(error); process.exit(1); });
+            console.log('PASS: current v55 mobile MAG runtime is bounded and fails open without WebGL2.');
+          })().catch(e => { console.error(e); process.exit(1); });
           NODE
 
       - name: Publish mobile runtime status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ github.sha }}
           JOB_STATUS: ${{ job.status }}
-          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference crystal v51 mobile runtime and fallback passed'; else state=failure; description='Reference crystal v51 mobile runtime validation failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX v51 mobile runtime' -f description="$description" -f target_url="$TARGET_URL"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Cinematic v55 mobile MAG runtime passed'; else state=failure; description='Cinematic v55 mobile MAG runtime failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v55 mobile runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
