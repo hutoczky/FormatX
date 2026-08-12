@@ -1,5 +1,5 @@
 FormatX production domain routing revision
-2026-08-11
+2026-08-12
 
 Canonical public homepage: https://formatxsuite.com/
 Public safe requests are isolated from legacy inner hostname canonicalisers.
@@ -8,3 +8,4 @@ The apex recovery response clears stale browser HTTP cache and removes the recov
 Known public aliases are resolved internally.
 A bounded internal redirect follower blocks routing cycles before they can reach the browser.
 Regression tests cover apex root, WWW recovery, recovery cleanup, CSS delivery and public aliases.
+Final public polish: crawler-visible section headings have explicit text separation, duplicated release-channel wording is removed, and the SEO runtime uses the canonical apex origin with a fresh asset revision.
