@@ -275,7 +275,7 @@ check(
 
 check(
   'sitemap-root',
-  sitemap.includes('<loc>https://www.formatxsuite.com/</loc>'),
+  sitemap.includes('<loc>https://formatxsuite.com/</loc>'),
   'Sitemap missing canonical root homepage'
 );
 for (const route of [
@@ -290,7 +290,7 @@ for (const route of [
 }
 check(
   'robots-sitemap',
-  robots.includes('Sitemap: https://www.formatxsuite.com/sitemap.xml'),
+  robots.includes('Sitemap: https://formatxsuite.com/sitemap.xml'),
   'robots.txt does not declare the canonical sitemap'
 );
 
