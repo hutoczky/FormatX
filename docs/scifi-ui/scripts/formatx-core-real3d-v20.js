@@ -7,7 +7,7 @@
   const STYLE = '/scifi-ui/styles/formatx-core-reference-v53.css?v=20260812-four-point-reference-r1';
   const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260812-reference-fidelity-v61-r9c';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260812-award-composition-r2';
-  const MOBILE_LIVING_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-living-interaction-v1.js?v=20260812-living-motion-r1';
+  const MOBILE_LIVING_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-living-interaction-v1.js?v=20260812-living-motion-r1a';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260812-direct-interaction-r3-living-system';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 
