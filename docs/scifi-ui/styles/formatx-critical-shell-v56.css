@@ -349,7 +349,7 @@ main { position: relative; z-index: 2; }
   #hero {
     min-height: 0;
     height: auto;
-    padding: 84px 0 max(104px, calc(92px + env(safe-area-inset-bottom, 0px)));
+    padding: 28px 0 max(104px, calc(92px + env(safe-area-inset-bottom, 0px)));
   }
 
   #hero .hero-grid {
