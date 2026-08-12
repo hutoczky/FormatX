@@ -45,6 +45,7 @@ jobs:
             const page = await context.newPage();
             await page.goto(`${origin}/?mag_visual=desktop-${Date.now()}`, { waitUntil:'domcontentloaded', timeout:60000 });
             await page.waitForFunction(() => document.documentElement.dataset.fxCoreReferenceV53 === 'ready-v53', null, { timeout:60000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteraction === 'direct-desktop-pointer-energy-r5-living-system', null, { timeout:30000 });
             const before = await page.evaluate(() => Number(window.FormatXCoreCinematic?.energy || 0));
             await page.mouse.move(720, 430);
             await page.mouse.move(900, 360, { steps:8 });
@@ -75,7 +76,7 @@ jobs:
             assert.equal(state.geometry, 'sharp-four-tip-concave-crystal-v53');
             assert.equal(state.material, 'clean-faceted-refractive-glass-v53');
             assert.equal(state.reactor, 'moving-white-nucleus-concentric-spectral-rings-v53');
-            assert.equal(state.interaction, 'direct-pointer-touch-drag-r4-living-system');
+            assert.equal(state.interaction, 'direct-desktop-pointer-energy-r5-living-system');
             assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
             assert.equal(state.canvases, 1);
             assert.equal(state.gl, true);
@@ -90,6 +91,7 @@ jobs:
             const page = await context.newPage();
             await page.goto(`${origin}/?mag_visual=mobile-${Date.now()}`, { waitUntil:'domcontentloaded', timeout:60000 });
             await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV55 === 'ready-v55', null, { timeout:60000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteraction === 'direct-pointer-touch-drag-r4-living-system', null, { timeout:30000 });
             await page.touchscreen.tap(196, 390);
             await page.waitForTimeout(100);
             const state = await page.evaluate(() => {
@@ -132,7 +134,7 @@ jobs:
             await validateMobile(browser);
             await browser.close();
             for (const file of ['desktop-v53.png','mobile-v55.png']) assert.ok(fs.statSync(file).size > 10000, file);
-            console.log('PASS: live desktop v53 and mobile v55 MAG are current, WebGL2-backed and interactive.');
+            console.log('PASS: live desktop v53/r5 and mobile v55/r4 MAG are current, WebGL2-backed and interactive.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
