@@ -3,6 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'living-telemetry-visual-bridge-v1';
+  const STYLE_URL = '/scifi-ui/styles/formatx-living-system-rendering-v1.css?v=20260812-award-r2';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value) || 0));
   let pointerX = 0;
@@ -10,6 +11,17 @@
 
   if (root.dataset.fxLivingTelemetryBridge === VERSION) return;
   root.dataset.fxLivingTelemetryBridge = VERSION;
+
+  function ensureStyle() {
+    if (document.querySelector('link[data-fx-living-system-style]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = STYLE_URL;
+    link.dataset.fxLivingSystemStyle = VERSION;
+    link.addEventListener('load', () => { root.dataset.fxLivingSystemStyle = 'ready'; }, { once: true });
+    link.addEventListener('error', () => { root.dataset.fxLivingSystemStyle = 'failed'; }, { once: true });
+    document.head.appendChild(link);
+  }
 
   function applyPointer() {
     root.style.setProperty('--fx-system-pointer-x-shift', (pointerX * (mobile ? 5 : 9)).toFixed(2) + '%');
@@ -43,6 +55,7 @@
     } catch (_) {}
   }
 
+  ensureStyle();
   addEventListener('pointermove', event => {
     if (!event.isTrusted) return;
     pointerX = clamp(event.clientX / Math.max(1, innerWidth) * 2 - 1, -1, 1);
@@ -52,7 +65,7 @@
   addEventListener('formatx:systemstate', event => apply(event.detail?.state), { passive: true });
   addEventListener('formatx:coreinteraction', sync, { passive: true });
   addEventListener('formatx:organismstatechange', () => queueMicrotask(sync), { passive: true });
-  addEventListener('pageshow', sync, { passive: true });
+  addEventListener('pageshow', () => { ensureStyle(); sync(); }, { passive: true });
 
   let attempts = 0;
   const timer = window.setInterval(() => {
