@@ -5,19 +5,17 @@
   const BOOTSTRAP = 'reference-crystal-core-v53';
   const SCRIPT = '/scifi-ui/scripts/formatx-core-reference-v53.js?v=20260812-four-point-reference-r1';
   const STYLE = '/scifi-ui/styles/formatx-core-reference-v53.css?v=20260812-four-point-reference-r1';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260812-reference-fidelity-v61-r9c';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260813-pixel-reference-native-v62-r1';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260812-award-composition-r2';
-  const MOBILE_LIVING_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-living-interaction-v1.js?v=20260812-living-motion-r1a';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260812-direct-interaction-r3-living-system';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 
   /*
-    Desktop keeps the production v53 crystal. Mobile v55 is the compatibility
-    wrapper for the reference-locked composition: v60 owns the single native
-    WebGL2 four-point crystal and v61 adds an emissive vector fidelity layer over
-    that real geometry. The mobile living interaction layer adds continuous
-    low-cost motion, touch/drag parallax and energy response without a second
-    WebGL context. Production mobile visual revision: reference-fidelity-v61-r9.
+    Desktop keeps the production v53 crystal. Mobile v55 now routes to v62,
+    which owns the complete mobile MAG in one native WebGL2 context: organic
+    four-point shell, real depth, crystal rails, internal ribs, 3D reactor,
+    orbital rings, particles, continuous motion and touch-driven parallax.
+    No raster MAG image and no SVG fidelity overlay are used by the mobile MAG.
   */
 
   if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;
@@ -30,8 +28,8 @@
   }
 
   root.dataset.fxCoreReal3d = 'ready-v20';
-  root.dataset.fxCoreRenderer = mobile ? 'single-webgl2-mobile-cinematic-reference-v60' : 'single-webgl2-reference-crystal-v53';
-  root.dataset.fxCoreReferenceLock = mobile ? 'loading-v61' : 'loading-v53';
+  root.dataset.fxCoreRenderer = mobile ? 'single-webgl2-mobile-pixel-reference-v62' : 'single-webgl2-reference-crystal-v53';
+  root.dataset.fxCoreReferenceLock = mobile ? 'loading-v62' : 'loading-v53';
 
   function addStyle() {
     if (document.querySelector('link[data-fx-core-reference-v53-style]')) return;
@@ -71,17 +69,6 @@
     document.head.appendChild(link);
   }
 
-  function addMobileLivingScript() {
-    if (document.querySelector('script[data-fx-core-mobile-living-interaction], script[src*="formatx-core-mobile-living-interaction-v1.js"]')) return;
-    const script = document.createElement('script');
-    script.src = MOBILE_LIVING_SCRIPT;
-    script.async = false;
-    script.dataset.fxCoreMobileLivingInteraction = 'v1';
-    script.addEventListener('load', () => { root.dataset.fxCoreMobileLivingController = 'ready-v1'; }, { once: true });
-    script.addEventListener('error', () => { root.dataset.fxCoreMobileLivingController = 'failed-v1'; }, { once: true });
-    document.head.appendChild(script);
-  }
-
   function addMobileScript() {
     if (document.querySelector('script[data-fx-core-mobile-v55-script], script[src*="formatx-core-mobile-v55.js"]')) return;
     const script = document.createElement('script');
@@ -89,14 +76,13 @@
     script.async = false;
     script.dataset.fxCoreMobileV55Script = 'true';
     script.addEventListener('load', () => {
-      root.dataset.fxCoreReferenceLockLoad = 'ready-v61';
-      addMobileLivingScript();
+      root.dataset.fxCoreReferenceLockLoad = 'ready-v62';
     }, { once: true });
     script.addEventListener('error', () => {
-      root.dataset.fxCoreReal3d = 'context-unavailable-v61';
-      root.dataset.fxCoreReferenceLock = 'load-failed-v61';
-      root.dataset.fxCoreReferenceLockLoad = 'failed-v61';
-      dispatchEvent(new CustomEvent('formatx:core3dfallback', { detail: { reason: 'mobile-reference-fidelity-load-failed', reference: 'v61' } }));
+      root.dataset.fxCoreReal3d = 'context-unavailable-v62';
+      root.dataset.fxCoreReferenceLock = 'load-failed-v62';
+      root.dataset.fxCoreReferenceLockLoad = 'failed-v62';
+      dispatchEvent(new CustomEvent('formatx:core3dfallback', { detail: { reason: 'mobile-pixel-reference-load-failed', reference: 'v62' } }));
     }, { once: true });
     document.head.appendChild(script);
   }
