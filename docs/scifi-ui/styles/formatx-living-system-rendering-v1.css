@@ -8,6 +8,17 @@
   --fx-system-complexity: .72;
   --fx-system-pointer-x: 0;
   --fx-system-pointer-y: 0;
+  --fx-system-pointer-x-shift: 0%;
+  --fx-system-pointer-y-shift: 0%;
+  --fx-system-cyan-alpha: .050;
+  --fx-system-violet-alpha: .026;
+  --fx-system-mobile-cyan-alpha: .040;
+  --fx-system-mobile-violet-alpha: .020;
+  --fx-system-blur: 12px;
+  --fx-system-scale: 1.004;
+  --fx-system-layer-opacity: .28;
+  --fx-system-mobile-layer-opacity: .16;
+  --fx-system-ring-glow: 12px;
   --fx-living-transition-ms: 720ms;
 }
 
@@ -32,10 +43,10 @@
 
 .fx-living-system-layer::before {
   background:
-    radial-gradient(circle at calc(50% + var(--fx-system-pointer-x) * 9%), calc(34% + var(--fx-system-pointer-y) * 7%), rgba(74, 238, 255, calc(.035 + var(--fx-system-energy) * .055)), transparent 24%),
-    radial-gradient(circle at 65% 38%, rgba(137, 61, 255, calc(.018 + var(--fx-system-energy) * .032)), transparent 31%);
-  filter: blur(calc(12px + var(--fx-system-pressure) * 8px));
-  transform: scale(calc(1 + var(--fx-system-energy) * .012));
+    radial-gradient(circle at calc(50% + var(--fx-system-pointer-x-shift)), calc(34% + var(--fx-system-pointer-y-shift)), rgba(74, 238, 255, var(--fx-system-cyan-alpha)), transparent 24%),
+    radial-gradient(circle at 65% 38%, rgba(137, 61, 255, var(--fx-system-violet-alpha)), transparent 31%);
+  filter: blur(var(--fx-system-blur));
+  transform: scale(var(--fx-system-scale));
   transition: opacity 240ms ease, transform 520ms cubic-bezier(.2,.8,.2,1);
 }
 
@@ -45,7 +56,7 @@
     linear-gradient(105deg, transparent 20%, rgba(99, 236, 255, .025) 49.5%, transparent 50.5%),
     repeating-linear-gradient(90deg, rgba(255,255,255,.012) 0 1px, transparent 1px 11vw);
   mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 82%, transparent 100%);
-  opacity: calc(.22 + var(--fx-system-energy) * .22);
+  opacity: var(--fx-system-layer-opacity);
 }
 
 .fx-living-transition {
@@ -116,19 +127,19 @@ html[data-fx-living-phase] [data-organism-panel]::after {
 }
 
 html[data-fx-living-phase="discover"] .hero-ring {
-  filter: drop-shadow(0 0 calc(8px + var(--fx-system-energy) * 12px) rgba(66, 225, 255, .22));
+  filter: drop-shadow(0 0 var(--fx-system-ring-glow) rgba(66, 225, 255, .22));
 }
 
 html[data-fx-living-phase="plan"] .hero-ring {
-  filter: drop-shadow(0 0 calc(10px + var(--fx-system-energy) * 14px) rgba(82, 197, 255, .24));
+  filter: drop-shadow(0 0 var(--fx-system-ring-glow) rgba(82, 197, 255, .24));
 }
 
 html[data-fx-living-phase="execute"] .hero-ring {
-  filter: drop-shadow(0 0 calc(12px + var(--fx-system-energy) * 18px) rgba(165, 68, 255, .27));
+  filter: drop-shadow(0 0 var(--fx-system-ring-glow) rgba(165, 68, 255, .27));
 }
 
 html[data-fx-living-phase="verify"] .hero-ring {
-  filter: drop-shadow(0 0 calc(8px + var(--fx-system-energy) * 10px) rgba(104, 255, 207, .22));
+  filter: drop-shadow(0 0 var(--fx-system-ring-glow) rgba(104, 255, 207, .22));
 }
 
 /* CORE AWAKENING: visual signature around the real WebGL core. It does not cover,
@@ -188,13 +199,13 @@ html[data-fx-system-stability="unstable"] .fx-living-system-layer::before {
   .fx-living-system-layer::before {
     inset: -8vmax;
     background:
-      radial-gradient(circle at calc(50% + var(--fx-system-pointer-x) * 5%), calc(26% + var(--fx-system-pointer-y) * 4%), rgba(71, 236, 255, calc(.028 + var(--fx-system-energy) * .045)), transparent 29%),
-      radial-gradient(circle at 50% 39%, rgba(145, 73, 255, calc(.014 + var(--fx-system-energy) * .022)), transparent 38%);
+      radial-gradient(circle at calc(50% + var(--fx-system-pointer-x-shift)), calc(26% + var(--fx-system-pointer-y-shift)), rgba(71, 236, 255, var(--fx-system-mobile-cyan-alpha)), transparent 29%),
+      radial-gradient(circle at 50% 39%, rgba(145, 73, 255, var(--fx-system-mobile-violet-alpha)), transparent 38%);
     filter: blur(10px);
   }
 
   .fx-living-system-layer::after {
-    opacity: calc(.12 + var(--fx-system-energy) * .12);
+    opacity: var(--fx-system-mobile-layer-opacity);
     background: linear-gradient(180deg, transparent 8%, rgba(86, 231, 255, .025) 42%, transparent 72%);
   }
 
