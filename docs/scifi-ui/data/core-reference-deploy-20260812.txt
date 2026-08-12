@@ -1,0 +1,4 @@
+FormatX four-point cinematic reference MAG
+revision=reference-image-20260812-four-point-cinematic-r1
+renderer=reference-four-point-crystal-v1
+production_verification=2026-08-12T17:36+02:00
