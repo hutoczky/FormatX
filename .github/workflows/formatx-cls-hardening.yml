@@ -28,8 +28,13 @@ jobs:
           css_path=Path('docs/scifi-ui/styles/formatx-critical-shell-v56.css')
           s=css_path.read_text(encoding='utf-8')
 
-          replacements=[
-          ('''  .topbar {
+          def swap(old,new,label):
+              global s
+              if old not in s:
+                  raise SystemExit(f'expected {label} block not found')
+              s=s.replace(old,new,1)
+
+          swap('''  .topbar {
             min-height: 74px;
             grid-template-columns: minmax(0, 1fr) auto;
             gap: 10px;
@@ -47,20 +52,19 @@ jobs:
             gap: 10px;
             padding: max(10px, env(safe-area-inset-top)) 16px 10px;
           }
-          '''),
-          ('''  .menu-toggle {
-            justify-self: end;
-            width: 54px;
+          ''','mobile topbar')
+
+          swap('''    width: 54px;
             height: 54px;
-          ''','''  .menu-toggle {
-            justify-self: end;
-            width: 58px;
+            display: grid;
+          ''','''    width: 58px;
             min-width: 58px;
             height: 58px;
             min-height: 58px;
-          }
-          '''),
-          ('''  #hero {
+            display: grid;
+          ''','menu dimensions')
+
+          swap('''  #hero {
             min-height: auto;
             padding: 24px 16px 72px;
           }
@@ -113,16 +117,10 @@ jobs:
             min-height: clamp(300px, 45svh, 470px);
             max-height: 490px;
           }
-          ''')]
+          ''','mobile hero geometry')
 
-          for old,new in replacements:
-              if old not in s:
-                  raise SystemExit('expected critical geometry block not found')
-              s=s.replace(old,new,1)
-
-          s += '''\n\n/* First-paint geometry lock r3: these values intentionally mirror the final
-             mobile recovery + hero-flow composition to prevent any source-order,
-             header-mode or hero-height change after first paint. */\n'''
+          s += '''\n\n/* First-paint geometry lock r3: mirrors the final mobile recovery + hero-flow
+             composition, preventing source-order, header-mode and hero-height changes. */\n'''
           css_path.write_text(s, encoding='utf-8')
 
           entry=Path('billing-worker/src/production-content-entry.js')
@@ -138,6 +136,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          grep -Fq 'position: fixed;' docs/scifi-ui/styles/formatx-critical-shell-v56.css
           grep -Fq 'padding: 84px 0 max(104px' docs/scifi-ui/styles/formatx-critical-shell-v56.css
           grep -Fq 'min-height: clamp(300px, 45svh, 470px)' docs/scifi-ui/styles/formatx-critical-shell-v56.css
           ! grep -Fq 'order: -1' docs/scifi-ui/styles/formatx-critical-shell-v56.css
