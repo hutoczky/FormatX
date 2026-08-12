@@ -774,6 +774,8 @@ export function concealUpstreamText(value) {
     .replace(/https:\/\/api\.github\.com(?:\/[^"'\s<>()]*)?/gi, PUBLIC_RELEASE_API_PATH)
     .replace(/https:\/\/raw\.githubusercontent\.com\/[^"'\s<>()]+/gi, '/')
     .replace(/https:\/\/github\.com\/[^"'\s<>()]+/gi, '/')
+    .replace(/\bGitHub Releases csatornáján\b/gi, 'hivatalos kiadási csatornán')
+    .replace(/\bGitHub Releases csatornája\b/gi, 'hivatalos kiadási csatorna')
     .replace(/\bGitHub Releases\b/gi, 'hivatalos kiadási csatorna')
     .replace(/\bGitHub release(?:s)?\b/gi, 'hivatalos kiadás')
     .replace(/\bGitHub hibajegy\b/gi, 'nyilvános hibajegy')
