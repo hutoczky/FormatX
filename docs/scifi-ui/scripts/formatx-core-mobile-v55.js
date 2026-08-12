@@ -8,11 +8,19 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v61';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-v61-r6';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-v61-r7';
 
   function registerFidelity() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
+    const host = stage?.parentElement;
     const overlay = stage?.querySelector('.fx-core-fidelity-v61');
+    if (host) {
+      const compactPhone = matchMedia('(max-width:430px)').matches;
+      const referenceHeight = compactPhone ? 'clamp(420px,52svh,470px)' : 'clamp(470px,58svh,520px)';
+      host.style.setProperty('height', referenceHeight, 'important');
+      host.style.setProperty('min-height', referenceHeight, 'important');
+      host.style.setProperty('max-height', compactPhone ? '470px' : '520px', 'important');
+    }
     if (stage) {
       stage.style.setProperty('background', 'radial-gradient(circle at 50% 48%, rgba(18,148,255,.14), transparent 38%), radial-gradient(circle at 55% 50%, rgba(133,56,255,.07), transparent 51%), linear-gradient(180deg,#010611 0%,#010915 64%,#021629 100%)', 'important');
     }
