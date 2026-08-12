@@ -32,9 +32,10 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-reference-v53.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-award-v56.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
 
-      - name: Verify live current MAG, interaction and seamless-v7 scroll policy
+      - name: Verify live desktop reference, mobile award MAG and seamless-v7 scroll policy
         shell: bash
         run: |
           set -euo pipefail
@@ -57,7 +58,8 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/core-bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-reference-v53.js?v=${GITHUB_RUN_ID}" "$TMP/core-v53.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/core-v55.js"
-          fetch "/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js?v=${GITHUB_RUN_ID}" "$TMP/core-shared.js"
+          fetch "/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js?v=${GITHUB_RUN_ID}" "$TMP/core-desktop.js"
+          fetch "/scifi-ui/scripts/formatx-core-mobile-award-v56.js?v=${GITHUB_RUN_ID}" "$TMP/core-mobile-v56.js"
           fetch "/scifi-ui/scripts/formatx-core-direct-interaction.js?v=${GITHUB_RUN_ID}" "$TMP/direct-interaction.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
@@ -66,18 +68,22 @@ jobs:
           contains 'homepage' 'FormatX Suite Pro' "$TMP/home.html"
           contains 'MAG bootstrap reference' 'formatx-core-real3d-v20.js' "$TMP/home.html"
           contains 'v53 bootstrap' 'reference-crystal-core-v53' "$TMP/core-bootstrap.js"
+          contains 'mobile award bootstrap marker' 'single-webgl2-mobile-award-crystal-v56' "$TMP/core-bootstrap.js"
           contains 'desktop wrapper mode' "fxCoreRendererMode = 'desktop'" "$TMP/core-v53.js"
           contains 'mobile wrapper mode' "fxCoreRendererMode = 'mobile'" "$TMP/core-v55.js"
-          contains 'shared four-point renderer' 'reference-four-point-crystal-v1' "$TMP/core-shared.js"
-          contains 'desktop v53 renderer marker' 'single-webgl2-reference-crystal-v53' "$TMP/core-shared.js"
-          contains 'mobile v55 renderer marker' 'single-webgl2-mobile-cinematic-crystal-v55' "$TMP/core-shared.js"
-          contains 'four-tip desktop geometry' 'sharp-four-tip-concave-crystal-v53' "$TMP/core-shared.js"
-          contains 'four-tip mobile geometry' 'long-sharp-four-tip-deep-concave-crystal-v55' "$TMP/core-shared.js"
-          contains 'white reactor rings' 'small-hot-white-nucleus-concentric-cyan-violet-rings-v55' "$TMP/core-shared.js"
-          contains 'single-context performance contract' 'single-context-adaptive-60-plus-fps' "$TMP/core-shared.js"
-          contains 'direct core interaction event' 'formatx:coreinteraction' "$TMP/core-shared.js"
-          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-shared.js" | wc -l)" -eq 1
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-shared.js"
+          contains 'mobile wrapper v56 path' 'formatx-core-mobile-award-v56.js' "$TMP/core-v55.js"
+          contains 'desktop four-point renderer' 'reference-four-point-crystal-v1' "$TMP/core-desktop.js"
+          contains 'desktop geometry' 'sharp-four-tip-concave-crystal-v53' "$TMP/core-desktop.js"
+          contains 'mobile award renderer' 'award-four-point-concave-crystal-v56' "$TMP/core-mobile-v56.js"
+          contains 'mobile sharp concave geometry' 'quadratic-bezier-cusped-outline-v56' "$TMP/core-mobile-v56.js"
+          contains 'mobile bright glass material' 'bright-faceted-fresnel-glass-v56' "$TMP/core-mobile-v56.js"
+          contains 'mobile white reactor rings' 'white-reactor-nucleus-concentric-cyan-violet-rings-v56' "$TMP/core-mobile-v56.js"
+          contains 'single-context performance contract' 'single-context-adaptive-60-plus-fps' "$TMP/core-mobile-v56.js"
+          contains 'direct core interaction event' 'formatx:coreinteraction' "$TMP/core-mobile-v56.js"
+          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-desktop.js" | wc -l)" -eq 1
+          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-mobile-v56.js" | wc -l)" -eq 1
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-desktop.js"
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-mobile-v56.js"
           contains 'desktop direct interaction r5' 'direct-desktop-pointer-energy-r5-living-system' "$TMP/direct-interaction.js"
           contains 'mobile direct interaction r4' 'direct-pointer-touch-drag-r4-living-system' "$TMP/direct-interaction.js"
           contains 'mobile seamless bootstrap' 'mobile-seamless-loading-v1' "$TMP/scroll.js"
@@ -122,5 +128,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source, shared v53-v55 MAG interaction and seamless-v7 policy passed'; else state=failure; description='Award, shared MAG interaction or seamless-v7 policy failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source, desktop v53 + mobile v56 MAG and seamless-v7 policy passed'; else state=failure; description='Award, production MAG or seamless-v7 policy failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
