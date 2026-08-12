@@ -27,106 +27,80 @@ jobs:
 
           css_path=Path('docs/scifi-ui/styles/formatx-critical-shell-v56.css')
           s=css_path.read_text(encoding='utf-8')
+          marker='First-paint geometry lock r4'
+          if marker in s:
+              raise SystemExit('first-paint geometry lock already present')
 
-          def swap(old,new,label):
-              global s
-              if old not in s:
-                  raise SystemExit(f'expected {label} block not found')
-              s=s.replace(old,new,1)
+          s += r'''
 
-          swap('''  .topbar {
-            min-height: 74px;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 10px;
-            padding-inline: 16px;
-          }
-          ''','''  .topbar {
-            position: fixed;
-            z-index: 1600;
-            top: 0;
-            right: 0;
-            left: 0;
-            width: 100%;
-            min-height: 82px;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 10px;
-            padding: max(10px, env(safe-area-inset-top)) 16px 10px;
-          }
-          ''','mobile topbar')
+/* First-paint geometry lock r4 -----------------------------------------------
+   Mirrors the final mobile recovery + hero-flow composition from the very
+   first CSS response. This prevents header mode, source order and hero height
+   from changing after first paint. */
+@media (max-width: 900px), (pointer: coarse) {
+  .topbar {
+    position: fixed;
+    z-index: 1600;
+    top: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    min-height: 82px;
+    margin: 0;
+    padding: max(10px, env(safe-area-inset-top)) 16px 10px;
+    align-items: center;
+  }
 
-          swap('''    width: 54px;
-            height: 54px;
-            display: grid;
-          ''','''    width: 58px;
-            min-width: 58px;
-            height: 58px;
-            min-height: 58px;
-            display: grid;
-          ''','menu dimensions')
+  .menu-toggle {
+    width: 58px;
+    min-width: 58px;
+    height: 58px;
+    min-height: 58px;
+    padding: 0;
+    border-radius: 19px;
+  }
 
-          swap('''  #hero {
-            min-height: auto;
-            padding: 24px 16px 72px;
-          }
+  #hero {
+    min-height: 0;
+    height: auto;
+    padding: 84px 0 max(104px, calc(92px + env(safe-area-inset-bottom, 0px)));
+  }
 
-          .hero-grid {
-            grid-template-columns: minmax(0, 1fr);
-            gap: 18px;
-          }
+  #hero .hero-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding-inline: 12px;
+    gap: 18px;
+  }
 
-          .hero-space {
-            order: -1;
-            width: 100%;
-            min-height: clamp(360px, 56svh, 560px);
-          }
+  #hero .hero-copy {
+    order: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 24px clamp(18px, 5.2vw, 26px) 28px;
+  }
 
-          .hero-copy {
-            width: min(100%, 680px);
-            margin-inline: auto;
-          }
-          ''','''  #hero {
-            min-height: 0;
-            height: auto;
-            padding: 84px 0 max(104px, calc(92px + env(safe-area-inset-bottom, 0px)));
-          }
-
-          .hero-grid {
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            width: 100%;
-            max-width: 100%;
-            min-height: 0;
-            margin: 0;
-            padding-inline: 12px;
-            gap: 18px;
-          }
-
-          .hero-copy {
-            order: 0;
-            width: 100%;
-            max-width: 100%;
-            margin: 0;
-            padding: 24px clamp(18px, 5.2vw, 26px) 28px;
-          }
-
-          .hero-space {
-            order: 0;
-            width: 100%;
-            margin: 0;
-            min-height: clamp(300px, 45svh, 470px);
-            max-height: 490px;
-          }
-          ''','mobile hero geometry')
-
-          s += '''\n\n/* First-paint geometry lock r3: mirrors the final mobile recovery + hero-flow
-             composition, preventing source-order, header-mode and hero-height changes. */\n'''
+  #hero .hero-space {
+    order: 0;
+    width: 100%;
+    margin: 0;
+    min-height: clamp(300px, 45svh, 470px);
+    max-height: 490px;
+  }
+}
+'''
           css_path.write_text(s, encoding='utf-8')
 
           entry=Path('billing-worker/src/production-content-entry.js')
           e=entry.read_text(encoding='utf-8')
           old='formatx-critical-shell-v56.css?v=20260811-mobile-intro-direct-r1'
-          new='formatx-critical-shell-v56.css?v=20260812-first-paint-r3'
+          new='formatx-critical-shell-v56.css?v=20260812-first-paint-r4'
           if old not in e:
               raise SystemExit('critical shell production version token changed unexpectedly')
           entry.write_text(e.replace(old,new,1), encoding='utf-8')
@@ -136,11 +110,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq 'position: fixed;' docs/scifi-ui/styles/formatx-critical-shell-v56.css
+          grep -Fq 'First-paint geometry lock r4' docs/scifi-ui/styles/formatx-critical-shell-v56.css
           grep -Fq 'padding: 84px 0 max(104px' docs/scifi-ui/styles/formatx-critical-shell-v56.css
           grep -Fq 'min-height: clamp(300px, 45svh, 470px)' docs/scifi-ui/styles/formatx-critical-shell-v56.css
-          ! grep -Fq 'order: -1' docs/scifi-ui/styles/formatx-critical-shell-v56.css
-          grep -Fq 'formatx-critical-shell-v56.css?v=20260812-first-paint-r3' billing-worker/src/production-content-entry.js
+          grep -Fq '#hero .hero-copy' docs/scifi-ui/styles/formatx-critical-shell-v56.css
+          grep -Fq 'order: 0;' docs/scifi-ui/styles/formatx-critical-shell-v56.css
+          grep -Fq 'formatx-critical-shell-v56.css?v=20260812-first-paint-r4' billing-worker/src/production-content-entry.js
 
       - name: Commit and deploy repaired first paint
         shell: bash
