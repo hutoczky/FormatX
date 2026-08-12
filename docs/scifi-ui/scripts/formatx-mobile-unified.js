@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxMobileUnified === 'ready-v1') return;
-  root.dataset.fxMobileUnified = 'loading-v1';
+  if (root.dataset.fxMobileUnified === 'ready-v2') return;
+  root.dataset.fxMobileUnified = 'loading-v2';
 
   function appendStyle(marker, href, readyKey) {
     if (document.querySelector('link[' + marker + ']')) return;
@@ -33,6 +33,21 @@
     );
   }
 
+  function ensureReturnStateRecovery() {
+    if (document.querySelector('script[data-fx-return-state-recovery]')) return;
+    const script = document.createElement('script');
+    script.src = './scripts/formatx-return-state-recovery.js?v=20260812-return-state-v1';
+    script.async = false;
+    script.dataset.fxReturnStateRecovery = 'true';
+    script.addEventListener('load', () => {
+      root.dataset.fxReturnStateRecoveryLoad = 'ready';
+    }, { once: true });
+    script.addEventListener('error', () => {
+      root.dataset.fxReturnStateRecoveryLoad = 'failed';
+    }, { once: true });
+    document.head.appendChild(script);
+  }
+
   function closeDialogueForScroll() {
     const dialogue = document.querySelector('.fx-organism-dialogue.is-open');
     if (!dialogue) return;
@@ -48,16 +63,37 @@
     root.style.setProperty('--fx-visual-viewport-height', Math.round(height) + 'px');
   }
 
-  ensureStyle();
-  syncViewportHeight();
+  function syncScrollPolicyMarker() {
+    const seamless = root.dataset.fxInfiniteController === 'seamless-v7'
+      || root.dataset.fxMobileScrollMode === 'native-momentum-loop'
+      || root.classList.contains('fx-mobile-seamless-loop');
 
-  root.dataset.fxMobileScrollPolicy = 'native-document-v1';
+    if (seamless) {
+      root.dataset.fxMobileScrollPolicy = 'native-momentum-loop-v1';
+      root.dataset.fxMobileScrollMode = 'native-momentum-loop';
+      return;
+    }
+
+    if (!root.dataset.fxScrollBootstrap) {
+      root.dataset.fxMobileScrollPolicy = 'native-document-v1';
+    }
+  }
+
+  ensureStyle();
+  ensureReturnStateRecovery();
+  syncViewportHeight();
+  syncScrollPolicyMarker();
 
   addEventListener('formatx:pagestartscroll', closeDialogueForScroll);
   addEventListener('formatx:loop', closeDialogueForScroll);
   addEventListener('resize', syncViewportHeight, { passive: true });
   window.visualViewport?.addEventListener('resize', syncViewportHeight, { passive: true });
-  addEventListener('pageshow', syncViewportHeight, { passive: true });
+  addEventListener('pageshow', () => {
+    syncViewportHeight();
+    ensureReturnStateRecovery();
+    requestAnimationFrame(syncScrollPolicyMarker);
+  }, { passive: true });
+  document.addEventListener('formatx:returnrestore', syncScrollPolicyMarker);
 
-  root.dataset.fxMobileUnified = 'ready-v1';
+  root.dataset.fxMobileUnified = 'ready-v2';
 }());
