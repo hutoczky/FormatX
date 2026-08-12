@@ -1,0 +1,118 @@
+name: One-shot final public polish
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/final-public-polish-20260812.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Apply final crawler-visible text and cache fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+
+          index = root / 'docs/scifi-ui/index.html'
+          text = index.read_text(encoding='utf-8')
+          # Keep visible headings as two typographic elements, but make their
+          # plain-text/crawler representation grammatical as well.
+          text = text.replace('</span><em', '</span> <em')
+          text = text.replace('hivatalos kiadási csatorna csatornáján', 'hivatalos kiadási csatornán')
+          text = text.replace('hivatalos kiadási csatorna csatornája', 'hivatalos kiadási csatornája')
+          index.write_text(text, encoding='utf-8')
+
+          # Remove the duplicated release-channel wording anywhere a late
+          # runtime layer could otherwise reintroduce it.
+          for path in (root / 'docs/scifi-ui').rglob('*'):
+              if not path.is_file() or path.suffix.lower() not in {'.html', '.js', '.json', '.md', '.txt'}:
+                  continue
+              try:
+                  value = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              fixed = value.replace('hivatalos kiadási csatorna csatornáján', 'hivatalos kiadási csatornán')
+              fixed = fixed.replace('hivatalos kiadási csatorna csatornája', 'hivatalos kiadási csatornája')
+              if fixed != value:
+                  path.write_text(fixed, encoding='utf-8')
+
+          seo = root / 'docs/scifi-ui/scripts/formatx-seo.js'
+          value = seo.read_text(encoding='utf-8')
+          value = value.replace("const O='https://www.formatxsuite.com';", "const O='https://formatxsuite.com';")
+          seo.write_text(value, encoding='utf-8')
+
+          # Absolute first-party URL: no document/base-path ambiguity and no
+          # empty-MIME stylesheet request on the canonical root.
+          for rel in [
+              'docs/scifi-ui/scripts/igloo-parity.js',
+              'docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js',
+          ]:
+              path = root / rel
+              value = path.read_text(encoding='utf-8')
+              value = value.replace("'./styles/formatx-readability-floor.css", "'/scifi-ui/styles/formatx-readability-floor.css")
+              path.write_text(value, encoding='utf-8')
+
+          # Force the canonical production shell to request the corrected SEO
+          # runtime under a fresh URL even in clients with a stale asset cache.
+          base = root / 'billing-worker/src/production-content-base.js'
+          value = base.read_text(encoding='utf-8')
+          value = re.sub(r'formatx-seo\.js\?v=[^\"\']+', 'formatx-seo.js?v=20260812-final-polish-r1', value)
+          base.write_text(value, encoding='utf-8')
+
+          # Cache-bust the living-system runtime wherever it is referenced.
+          for path in [root / 'billing-worker/src/production-content-base.js', root / 'docs/scifi-ui/index.html']:
+              value = path.read_text(encoding='utf-8')
+              value = re.sub(r'formatx-living-system-rendering-v1\.js\?v=[^\"\']+', 'formatx-living-system-rendering-v1.js?v=20260812-copy-polish-r1', value)
+              path.write_text(value, encoding='utf-8')
+
+          # Fail the one-shot job if the reported public defects survive.
+          corpus = '\n'.join(
+              p.read_text(encoding='utf-8', errors='ignore')
+              for p in [
+                  root / 'docs/scifi-ui/index.html',
+                  root / 'docs/scifi-ui/scripts/formatx-living-system-rendering-v1.js',
+                  root / 'docs/scifi-ui/scripts/formatx-seo.js',
+              ]
+          )
+          assert 'A mag érzékel.</span><em' not in corpus
+          assert 'Hat specializált szerv.</span><em' not in corpus
+          assert 'A látvány a bőr.</span><em' not in corpus
+          assert 'hivatalos kiadási csatorna csatornáján' not in corpus
+          assert "const O='https://www.formatxsuite.com';" not in corpus
+          PY
+
+      - name: Commit production polish and remove previous backup branch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html \
+                  docs/scifi-ui/scripts/formatx-seo.js \
+                  docs/scifi-ui/scripts/igloo-parity.js \
+                  docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js \
+                  docs/scifi-ui/scripts/formatx-living-system-rendering-v1.js \
+                  billing-worker/src/production-content-base.js
+          if ! git diff --cached --quiet; then
+            git commit -m '[deploy-production] fix(public): final crawler copy and cache polish'
+            git push origin HEAD:master
+          fi
+          # The new 14:14 backup already exists; retire the older saved snapshot.
+          git push origin --delete 'backup/production-before-award-upgrade-20260812-1025' || true
