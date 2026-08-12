@@ -57,6 +57,8 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll.js
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           node --check docs/scifi-ui/scripts/formatx-mobile-unified.js
+          node --check docs/scifi-ui/scripts/formatx-return-state-recovery.js
+          node --check docs/scifi-ui/scripts/formatx-intro-skip-guard.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/organism-voice.js
@@ -65,24 +67,30 @@ jobs:
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
 
-      - name: Validate mobile native-scroll contract
+      - name: Validate mobile seamless-scroll contract
         shell: bash
         run: |
           set -euo pipefail
           grep -Fq 'platform-scroll-v2' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'mobile-native-document-v1' docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "fxAutomaticLoop = 'disabled-mobile'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq "fxLoopBridge = 'disabled-mobile'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'automaticPagePositionChanges: false' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'mobile-seamless-loading-v1' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq "fxAutomaticLoop = mobile ? 'pending-mobile'" docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'native-momentum-loop-v1' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'scrollend-or-idle-v1' docs/scifi-ui/scripts/formatx-infinite-scroll.js
+          grep -Fq 'formatx-mobile-seamless-loop.css' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq 'scrollTo(' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq 'scrollIntoView(' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq 'cloneNode(' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq 'preventDefault' docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'formatx-mobile-production-r5.css' docs/scifi-ui/scripts/formatx-mobile-unified.js
+          grep -Fq 'formatx-return-state-recovery.js?v=20260812-return-state-v2' docs/scifi-ui/scripts/formatx-mobile-unified.js
+          grep -Fq "const VERSION = 'return-state-v2'" docs/scifi-ui/scripts/formatx-return-state-recovery.js
+          grep -Fq 'bfcache-return-recovered' docs/scifi-ui/scripts/formatx-return-state-recovery.js
+          grep -Fq 'history-return-recovered' docs/scifi-ui/scripts/formatx-return-state-recovery.js
+          grep -Fq 'native-momentum-loop-v1' docs/scifi-ui/scripts/formatx-return-state-recovery.js
           grep -Fq '.fx-award-proof__grid' docs/scifi-ui/styles/formatx-mobile-production-r5.css
           grep -Fq '.fx-plan-qr-card:not(.is-qr-ready)' docs/scifi-ui/styles/formatx-mobile-production-r5.css
 
-      - name: Validate desktop seamless runtime remains isolated
+      - name: Validate shared seamless runtime and return handoff
         shell: bash
         run: |
           set -euo pipefail
@@ -90,6 +98,8 @@ jobs:
           grep -Fq "formatx-infinite-scroll-desktop-v7.js" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq 'cloneNode(true)' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq 'window.scrollTo(' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq 'scheduleMobileTransfer' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq "addEventListener('scrollend'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           ! grep -Fq "addEventListener('touchmove'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
 
