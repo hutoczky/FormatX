@@ -62,7 +62,7 @@
   function ensureReadabilityFloorStyle() {
     ensureStyle(
       'data-fx-readability-floor',
-      './styles/formatx-readability-floor.css?v=20260808-a11y-floor-1',
+      '/scifi-ui/styles/formatx-readability-floor.css?v=20260808-a11y-floor-1',
       'fxReadabilityFloor',
       'FormatX readability floor stylesheet failed to load.'
     );

@@ -27,7 +27,7 @@
     if (document.querySelector('link[data-fx-early-readability-floor]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = './styles/formatx-readability-floor.css?v=20260808-a11y-floor-2';
+    link.href = '/scifi-ui/styles/formatx-readability-floor.css?v=20260808-a11y-floor-2';
     link.dataset.fxEarlyReadabilityFloor = 'true';
     document.head.appendChild(link);
   }

@@ -2,7 +2,7 @@
 'use strict';
 
 const R=document.documentElement;
-const O='https://www.formatxsuite.com';
+const O='https://formatxsuite.com';
 const IMAGE=O+'/scifi-ui/assets/images/formatx-technician-console.png';
 const AWARD_STYLE='/scifi-ui/styles/formatx-award-readiness.css?v=20260808-award-readiness-2';
 const P={

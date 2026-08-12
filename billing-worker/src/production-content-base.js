@@ -46,7 +46,7 @@ const CONTENT_ASSETS = [
   '<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260807-full-release-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>',
-  '<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260807-full-release-seo-3"></script>',
+  '<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260812-final-polish-r1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-finalizer.js?v=20260731-content-final-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-platform-surface-finalizer.js?v=20260731-platform-final-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-organism-trust.js?v=20260731-organism-trust-1"></script>',

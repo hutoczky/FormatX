@@ -393,7 +393,7 @@
     const fixes = new Map([
       ['A mag érzékel.A gerinc döntési utat épít.', 'A mag érzékel. A gerinc döntési utat épít.'],
       ['Hat specializált szerv.Egyetlen élő rendszer.', 'Hat specializált szerv. Egyetlen élő rendszer.'],
-      ['hivatalos kiadási csatorna csatornáján', 'hivatalos kiadási csatornán']
+      ['hivatalos kiadási csatornán', 'hivatalos kiadási csatornán']
     ]);
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     let node;
