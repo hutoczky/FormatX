@@ -2,6 +2,8 @@
   "schema": 1,
   "release": "2026-08-12",
   "name": "FormatX Living System Rendering v1",
+  "release_candidate": "validated",
+  "staging_validation": "passed",
   "production_renderer": {
     "desktop": "single-webgl2-reference-crystal-v53",
     "mobile": "single-webgl2-mobile-cinematic-crystal-v55",
