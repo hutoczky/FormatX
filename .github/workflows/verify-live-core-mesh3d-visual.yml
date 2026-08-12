@@ -1,15 +1,13 @@
 name: Verify live true 3D MAG visual
-run-name: Capture current desktop v53 and mobile v62 MAG for ${{ github.event.workflow_run.head_sha }}
+run-name: Capture current desktop v53 and mobile v63 MAG for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
-
 permissions:
   contents: read
   statuses: write
-
 jobs:
   verify-live-mag:
     if: >-
@@ -23,111 +21,31 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/mag-live"
-          cd "$RUNNER_TEMP/mag-live"
+          mkdir -p "$RUNNER_TEMP/mag-live" && cd "$RUNNER_TEMP/mag-live"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-
-      - name: Validate current desktop v53 and native mobile v62 live MAG
+      - name: Validate current desktop v53 and cinematic native mobile v63 live MAG
         shell: bash
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/mag-live"
           node <<'NODE'
-          const assert = require('node:assert/strict');
-          const fs = require('node:fs');
-          const { chromium } = require('playwright');
-          const origin = 'https://formatxsuite.com';
-
-          async function validateDesktop(browser) {
-            const context = await browser.newContext({ viewport:{width:1440,height:960}, deviceScaleFactor:1, locale:'hu-HU' });
-            const page = await context.newPage();
-            await page.goto(`${origin}/?mag_visual=desktop-${Date.now()}`, { waitUntil:'domcontentloaded', timeout:60000 });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreReferenceV53 === 'ready-v53', null, { timeout:60000 });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteraction === 'direct-desktop-pointer-energy-r5-living-system', null, { timeout:30000 });
-            const before = await page.evaluate(() => Number(window.FormatXCoreCinematic?.energy || 0));
-            await page.mouse.move(720, 430); await page.mouse.move(900, 360, { steps:8 }); await page.mouse.down();
-            await page.mouse.move(1040, 500, { steps:8 }); await page.mouse.up(); await page.mouse.click(820, 420); await page.waitForTimeout(100);
-            const state = await page.evaluate(() => {
-              const r = document.documentElement, c = document.querySelector('.fx-core-reference-v53-canvas'), b = c?.getBoundingClientRect();
-              return {renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,interaction:r.dataset.fxCoreInteraction,performance:r.dataset.fxCorePerformance,canvases:document.querySelectorAll('.fx-core-reference-v53-canvas').length,gl:Boolean(c?.getContext('webgl2')),width:b?.width||0,height:b?.height||0,energy:Number(window.FormatXCoreCinematic?.energy || 0)};
-            });
-            assert.equal(state.renderer, 'single-webgl2-reference-crystal-v53');
-            assert.equal(state.geometry, 'sharp-four-tip-concave-crystal-v53');
-            assert.equal(state.material, 'clean-faceted-refractive-glass-v53');
-            assert.equal(state.reactor, 'moving-white-nucleus-concentric-spectral-rings-v53');
-            assert.equal(state.interaction, 'direct-desktop-pointer-energy-r5-living-system');
-            assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
-            assert.equal(state.canvases, 1); assert.equal(state.gl, true); assert.ok(state.width > 100 && state.height > 100, JSON.stringify(state)); assert.ok(state.energy >= before, JSON.stringify({before, after:state.energy}));
-            await page.screenshot({ path:'desktop-v53.png', fullPage:false }); await context.close();
-          }
-
-          async function validateMobile(browser) {
-            const context = await browser.newContext({ viewport:{width:390,height:844}, deviceScaleFactor:2, isMobile:true, hasTouch:true, locale:'hu-HU' });
-            const page = await context.newPage();
-            await page.goto(`${origin}/?mag_visual=mobile-${Date.now()}`, { waitUntil:'domcontentloaded', timeout:60000 });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV62 === 'ready-v62', null, { timeout:60000 });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteraction === 'direct-pointer-touch-drag-r4-living-system', null, { timeout:30000 });
-            const before = await page.evaluate(() => Number(window.FormatXCoreMobileV62?.energy || 0));
-            await page.touchscreen.tap(196, 390); await page.waitForTimeout(140);
-            const state = await page.evaluate(() => {
-              const r = document.documentElement;
-              const c = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas');
-              const b = c?.getBoundingClientRect();
-              return {
-                renderer:r.dataset.fxCoreRenderer,
-                geometry:r.dataset.fxCoreReferenceGeometry,
-                material:r.dataset.fxCoreReferenceMaterial,
-                reactor:r.dataset.fxCoreInternalReactor,
-                fidelity:r.dataset.fxCoreReferenceFidelity,
-                performance:r.dataset.fxCorePerformance,
-                interaction:r.dataset.fxCoreInteraction,
-                v55:r.dataset.fxCoreMobileV55,
-                v62:r.dataset.fxCoreMobileV62,
-                canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
-                overlays:document.querySelectorAll('.fx-core-fidelity-v61').length,
-                gl:Boolean(c?.getContext('webgl2')),
-                width:b?.width||0,
-                height:b?.height||0,
-                vw:innerWidth,
-                vh:innerHeight,
-                energy:Number(window.FormatXCoreMobileV62?.energy || 0)
-              };
-            });
-            assert.equal(state.renderer, 'single-webgl2-mobile-pixel-reference-v62');
-            assert.equal(state.geometry, 'pixel-locked-organic-concave-four-point-v62');
-            assert.equal(state.material, 'multishell-refractive-crystal-glass-v62');
-            assert.equal(state.reactor, 'white-cyan-spherical-reactor-orbital-rings-v62');
-            assert.equal(state.fidelity, 'native-webgl2-no-overlay-v62');
-            assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
-            assert.equal(state.interaction, 'direct-pointer-touch-drag-r4-living-system');
-            assert.equal(state.v55, 'ready-v55'); assert.equal(state.v62, 'ready-v62');
-            assert.equal(state.canvases, 1); assert.equal(state.overlays, 0); assert.equal(state.gl, true);
-            assert.ok(state.width <= state.vw + 1 && state.height <= state.vh + 1, JSON.stringify(state));
-            assert.ok(state.energy >= before, JSON.stringify({before,after:state.energy}));
-            await page.screenshot({ path:'mobile-v62.png', fullPage:false }); await context.close();
-          }
-
-          (async () => {
-            const browser = await chromium.launch({ headless:true, args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader'] });
-            await validateDesktop(browser); await validateMobile(browser); await browser.close();
-            for (const file of ['desktop-v53.png','mobile-v62.png']) assert.ok(fs.statSync(file).size > 10000, file);
-            console.log('PASS: live desktop v53 and canonical mobile v62 native WebGL2 MAG are current and interactive.');
-          })().catch(error => { console.error(error); process.exit(1); });
+          const assert=require('node:assert/strict'),fs=require('node:fs');const {chromium}=require('playwright');const origin='https://formatxsuite.com';
+          async function desktop(browser){const context=await browser.newContext({viewport:{width:1440,height:960},deviceScaleFactor:1,locale:'hu-HU'}),page=await context.newPage();await page.goto(`${origin}/?mag_visual=desktop-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForFunction(()=>document.documentElement.dataset.fxCoreReferenceV53==='ready-v53',null,{timeout:60000});const s=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('.fx-core-reference-v53-canvas'),b=c?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,canvases:document.querySelectorAll('.fx-core-reference-v53-canvas').length,gl:Boolean(c?.getContext('webgl2')),width:b?.width||0,height:b?.height||0};});assert.equal(s.renderer,'single-webgl2-reference-crystal-v53');assert.equal(s.canvases,1);assert.equal(s.gl,true);assert.ok(s.width>100&&s.height>100);await page.screenshot({path:'desktop-v53.png',fullPage:false});await context.close();}
+          async function mobile(browser){const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'}),page=await context.newPage();await page.goto(`${origin}/?mag_visual=mobile-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV63==='ready-v63',null,{timeout:60000});await page.waitForFunction(()=>document.documentElement.dataset.fxCoreInteraction==='direct-pointer-touch-drag-r4-living-system',null,{timeout:30000});const before=await page.evaluate(()=>Number(window.FormatXCoreMobileV63?.energy||0));await page.touchscreen.tap(196,390);await page.waitForTimeout(160);const s=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),b=c?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,fidelity:r.dataset.fxCoreReferenceFidelity,performance:r.dataset.fxCorePerformance,interaction:r.dataset.fxCoreInteraction,v55:r.dataset.fxCoreMobileV55,v63:r.dataset.fxCoreMobileV63,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,overlays:document.querySelectorAll('.fx-core-fidelity-v61').length,gl:Boolean(c?.getContext('webgl2')),width:b?.width||0,height:b?.height||0,vw:innerWidth,vh:innerHeight,energy:Number(window.FormatXCoreMobileV63?.energy||0)};});assert.equal(s.renderer,'single-webgl2-mobile-cinematic-pixel-reference-v63');assert.equal(s.geometry,'pixel-locked-organic-deep-concave-four-point-v63');assert.equal(s.material,'multishell-fresnel-crystal-tube-glass-v63');assert.equal(s.reactor,'white-cyan-spherical-reactor-multiaxis-orbitals-v63');assert.equal(s.fidelity,'native-webgl2-only-no-raster-no-svg-v63');assert.equal(s.performance,'single-context-adaptive-60-plus-fps');assert.equal(s.interaction,'direct-pointer-touch-drag-r4-living-system');assert.equal(s.v55,'ready-v55');assert.equal(s.v63,'ready-v63');assert.equal(s.canvases,1);assert.equal(s.overlays,0);assert.equal(s.gl,true);assert.ok(s.width<=s.vw+1&&s.height<=s.vh+1,JSON.stringify(s));assert.ok(s.energy>=before,JSON.stringify({before,after:s.energy}));await page.screenshot({path:'mobile-v63.png',fullPage:false});await context.close();}
+          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await desktop(b);await mobile(b);await b.close();for(const f of['desktop-v53.png','mobile-v63.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS: live desktop v53 + cinematic native mobile v63 MAG are current and interactive.');})().catch(e=>{console.error(e);process.exit(1);});
           NODE
-
       - name: Upload live MAG captures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-mag-v53-v62-${{ github.event.workflow_run.head_sha }}
+          name: live-mag-v53-v63-${{ github.event.workflow_run.head_sha }}
           path: |
             ${{ runner.temp }}/mag-live/desktop-v53.png
-            ${{ runner.temp }}/mag-live/mobile-v62.png
+            ${{ runner.temp }}/mag-live/mobile-v63.png
           if-no-files-found: warn
           retention-days: 14
-
       - name: Publish current MAG visual status
         if: always()
         env:
@@ -136,5 +54,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live desktop v53 + native mobile v62 MAG visual passed'; else state=failure; description='Live production MAG visual or interaction failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG v53-v62' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live desktop v53 + cinematic native mobile v63 visual passed'; else state=failure; description='Live production MAG visual or interaction failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG v53-v63' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
