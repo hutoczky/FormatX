@@ -1,5 +1,5 @@
 name: Verify live true 3D MAG visual
-run-name: Capture current cinematic MAG v53/v55 for ${{ github.event.workflow_run.head_sha }}
+run-name: Capture current desktop v53 and mobile v56 MAG for ${{ github.event.workflow_run.head_sha }}
 
 on:
   workflow_run:
@@ -29,7 +29,7 @@ jobs:
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
 
-      - name: Validate current desktop v53 and mobile v55 live MAG
+      - name: Validate current desktop v53 and mobile award v56 live MAG
         shell: bash
         run: |
           set -euo pipefail
@@ -90,7 +90,7 @@ jobs:
             const context = await browser.newContext({ viewport:{width:390,height:844}, deviceScaleFactor:2, isMobile:true, hasTouch:true, locale:'hu-HU' });
             const page = await context.newPage();
             await page.goto(`${origin}/?mag_visual=mobile-${Date.now()}`, { waitUntil:'domcontentloaded', timeout:60000 });
-            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV55 === 'ready-v55', null, { timeout:60000 });
+            await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV56 === 'ready-v56', null, { timeout:60000 });
             await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteraction === 'direct-pointer-touch-drag-r4-living-system', null, { timeout:30000 });
             await page.touchscreen.tap(196, 390);
             await page.waitForTimeout(100);
@@ -100,12 +100,13 @@ jobs:
               const b = c?.getBoundingClientRect();
               return {
                 renderer:r.dataset.fxCoreRenderer,
-                geometry:r.dataset.fxCoreReferenceGeometry,
-                material:r.dataset.fxCoreReferenceMaterial,
-                reactor:r.dataset.fxCoreInternalReactor,
-                responsive:r.dataset.fxCoreResponsive,
+                geometry:r.dataset.fxCoreAwardGeometry,
+                material:r.dataset.fxCoreAwardMaterial,
+                reactor:r.dataset.fxCoreAwardReactor,
+                performance:r.dataset.fxCoreAwardPerf,
                 interaction:r.dataset.fxCoreInteraction,
-                performance:r.dataset.fxCorePerformance,
+                v55:r.dataset.fxCoreMobileV55,
+                v56:r.dataset.fxCoreMobileV56,
                 canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
                 gl:Boolean(c?.getContext('webgl2')),
                 width:b?.width||0,
@@ -114,17 +115,18 @@ jobs:
                 vh:innerHeight
               };
             });
-            assert.equal(state.renderer, 'single-webgl2-mobile-cinematic-crystal-v55');
-            assert.equal(state.geometry, 'long-sharp-four-tip-deep-concave-crystal-v55');
-            assert.equal(state.material, 'thin-layered-faceted-fresnel-glass-v55');
-            assert.equal(state.reactor, 'small-hot-white-nucleus-concentric-cyan-violet-rings-v55');
-            assert.equal(state.responsive, 'physical-mobile-hero-local-v55');
-            assert.equal(state.interaction, 'direct-pointer-touch-drag-r4-living-system');
+            assert.equal(state.renderer, 'single-webgl2-mobile-award-crystal-v56');
+            assert.equal(state.geometry, 'quadratic-bezier-cusped-outline-v56');
+            assert.equal(state.material, 'bright-faceted-fresnel-glass-v56');
+            assert.equal(state.reactor, 'white-reactor-nucleus-concentric-cyan-violet-rings-v56');
             assert.equal(state.performance, 'single-context-adaptive-60-plus-fps');
+            assert.equal(state.interaction, 'direct-pointer-touch-drag-r4-living-system');
+            assert.equal(state.v55, 'ready-v55');
+            assert.equal(state.v56, 'ready-v56');
             assert.equal(state.canvases, 1);
             assert.equal(state.gl, true);
             assert.ok(state.width <= state.vw + 1 && state.height <= state.vh + 1, JSON.stringify(state));
-            await page.screenshot({ path:'mobile-v55.png', fullPage:false });
+            await page.screenshot({ path:'mobile-v56.png', fullPage:false });
             await context.close();
           }
 
@@ -133,8 +135,8 @@ jobs:
             await validateDesktop(browser);
             await validateMobile(browser);
             await browser.close();
-            for (const file of ['desktop-v53.png','mobile-v55.png']) assert.ok(fs.statSync(file).size > 10000, file);
-            console.log('PASS: live desktop v53/r5 and mobile v55/r4 MAG are current, WebGL2-backed and interactive.');
+            for (const file of ['desktop-v53.png','mobile-v56.png']) assert.ok(fs.statSync(file).size > 10000, file);
+            console.log('PASS: live desktop v53 and mobile award v56 MAG are current, WebGL2-backed and interactive.');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
@@ -142,10 +144,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-mag-v53-v55-${{ github.event.workflow_run.head_sha }}
+          name: live-mag-v53-v56-${{ github.event.workflow_run.head_sha }}
           path: |
             ${{ runner.temp }}/mag-live/desktop-v53.png
-            ${{ runner.temp }}/mag-live/mobile-v55.png
+            ${{ runner.temp }}/mag-live/mobile-v56.png
           if-no-files-found: warn
           retention-days: 14
 
@@ -157,5 +159,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live v53/v55 WebGL2 MAG visual and interaction passed'; else state=failure; description='Live v53/v55 MAG visual or interaction failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG v53-v55' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live desktop v53 + mobile v56 WebGL2 MAG visual passed'; else state=failure; description='Live production MAG visual or interaction failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG v53-v56' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
