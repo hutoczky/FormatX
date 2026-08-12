@@ -31,31 +31,45 @@ jobs:
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
           node --check docs/scifi-ui/scripts/formatx-core-reference-v53.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
 
-      - name: Verify live current MAG and seamless-v7 scroll policy
+      - name: Verify live current MAG, interaction and seamless-v7 scroll policy
         shell: bash
         run: |
           set -euo pipefail
           ORIGIN='https://formatxsuite.com'
           TMP="$RUNNER_TEMP/formatx-award-current"
           mkdir -p "$TMP"
-          curl -fsSL -H 'Cache-Control: no-cache' "$ORIGIN/?award_current=${GITHUB_RUN_ID}" -o "$TMP/home.html"
-          curl -fsSL -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" -o "$TMP/core-bootstrap.js"
-          curl -fsSL -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-core-reference-v53.js?v=${GITHUB_RUN_ID}" -o "$TMP/core-v53.js"
-          curl -fsSL -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" -o "$TMP/core-v55.js"
-          curl -fsSL -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" -o "$TMP/scroll.js"
-          curl -fsSL -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" -o "$TMP/scroll-v7.js"
-          curl -fsSL -H 'Cache-Control: no-cache' "$ORIGIN/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" -o "$TMP/scroll-policy.json"
 
-          grep -Fq 'FormatX Suite Pro' "$TMP/home.html"
-          grep -Fq 'formatx-core-real3d-v20.js' "$TMP/home.html"
-          grep -Fq "reference-crystal-core-v53" "$TMP/core-bootstrap.js"
-          grep -Fq 'single-webgl2-reference-crystal-v53' "$TMP/core-v53.js"
-          grep -Fq 'single-webgl2-mobile-cinematic-crystal-v55' "$TMP/core-v55.js"
-          grep -Fq 'direct-pointer-touch-drag-r4-living-system' "$TMP/core-v53.js"
-          grep -Fq 'direct-pointer-touch-drag-r4-living-system' "$TMP/core-v55.js"
-          grep -Fq 'mobile-seamless-loading-v1' "$TMP/scroll.js"
-          grep -Fq "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
+          fetch() {
+            local path="$1" out="$2"
+            echo "FETCH $path"
+            curl -fsSL --retry 3 --retry-delay 1 -H 'Cache-Control: no-cache' "$ORIGIN$path" -o "$out"
+          }
+          contains() {
+            local label="$1" needle="$2" file="$3"
+            echo "CHECK $label"
+            grep -Fq "$needle" "$file" || { echo "FAIL $label: missing $needle"; exit 1; }
+          }
+
+          fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
+          fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/core-bootstrap.js"
+          fetch "/scifi-ui/scripts/formatx-core-reference-v53.js?v=${GITHUB_RUN_ID}" "$TMP/core-v53.js"
+          fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/core-v55.js"
+          fetch "/scifi-ui/scripts/formatx-core-direct-interaction.js?v=${GITHUB_RUN_ID}" "$TMP/direct-interaction.js"
+          fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
+          fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
+          fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/scroll-policy.json"
+
+          contains 'homepage' 'FormatX Suite Pro' "$TMP/home.html"
+          contains 'MAG bootstrap reference' 'formatx-core-real3d-v20.js' "$TMP/home.html"
+          contains 'v53 bootstrap' 'reference-crystal-core-v53' "$TMP/core-bootstrap.js"
+          contains 'desktop v53 renderer' 'single-webgl2-reference-crystal-v53' "$TMP/core-v53.js"
+          contains 'mobile v55 renderer' 'single-webgl2-mobile-cinematic-crystal-v55' "$TMP/core-v55.js"
+          contains 'desktop direct interaction r5' 'direct-desktop-pointer-energy-r5-living-system' "$TMP/direct-interaction.js"
+          contains 'mobile direct interaction r4' 'direct-pointer-touch-drag-r4-living-system' "$TMP/direct-interaction.js"
+          contains 'mobile seamless bootstrap' 'mobile-seamless-loading-v1' "$TMP/scroll.js"
+          contains 'seamless runtime v7' "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
           ! grep -Fq 'preventDefault' "$TMP/scroll.js"
           ! grep -Fq 'scrollTo(' "$TMP/scroll.js"
           ! grep -Fq 'scrollIntoView(' "$TMP/scroll.js"
@@ -96,5 +110,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source, v53-v55 MAG and seamless-v7 policy passed'; else state=failure; description='Award, MAG or seamless-v7 policy failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source, v53-v55 MAG interaction and seamless-v7 policy passed'; else state=failure; description='Award, MAG interaction or seamless-v7 policy failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
