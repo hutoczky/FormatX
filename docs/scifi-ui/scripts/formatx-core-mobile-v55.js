@@ -8,41 +8,41 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v60';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-r2';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-r3';
 
-  if (!document.getElementById('fx-mobile-reference-lock-v60')) {
-    const style = document.createElement('style');
-    style.id = 'fx-mobile-reference-lock-v60';
-    style.textContent = `
-      @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-        html[data-fx-core-mobile-v60="ready-v60"] #hero .hero-space > :not(.fx-core-mobile-v55-stage) {
-          display:none !important;
-          visibility:hidden !important;
-          opacity:0 !important;
-          pointer-events:none !important;
-        }
-        html[data-fx-core-mobile-v60="ready-v60"] #hero .fx-core-mobile-v55-stage,
-        html[data-fx-core-mobile-v60="ready-v60"] #hero .fx-core-mobile-v55-canvas {
-          display:block !important;
-          visibility:visible !important;
-          opacity:1 !important;
-        }
-        html[data-fx-core-mobile-v60="ready-v60"] #hero .fx-core-mobile-v55-canvas {
-          filter:brightness(1.55) saturate(1.34) contrast(1.10)
-            drop-shadow(0 0 5px rgba(65,225,255,.28))
-            drop-shadow(0 0 12px rgba(80,110,255,.16)) !important;
-        }
-      }
-    `;
-    document.head.appendChild(style);
+  function enforceReferencePresentation() {
+    document.querySelectorAll('#hero .hero-ring,#hero .fx-organism-map,#hero .fx-resilient-core,#hero .fx-three-stage-shell,#hero .fx-three-telemetry,#hero .fx-three-guide').forEach(node => {
+      node.style.setProperty('display', 'none', 'important');
+      node.style.setProperty('visibility', 'hidden', 'important');
+      node.style.setProperty('opacity', '0', 'important');
+    });
+    const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
+    const canvas = stage?.querySelector('.fx-core-mobile-v55-canvas');
+    if (stage) {
+      stage.style.setProperty('display', 'block', 'important');
+      stage.style.setProperty('visibility', 'visible', 'important');
+      stage.style.setProperty('opacity', '1', 'important');
+    }
+    if (canvas) {
+      canvas.style.setProperty('display', 'block', 'important');
+      canvas.style.setProperty('visibility', 'visible', 'important');
+      canvas.style.setProperty('opacity', '1', 'important');
+      canvas.style.setProperty('filter', 'brightness(1.58) saturate(1.38) contrast(1.11) drop-shadow(0 0 5px rgba(65,225,255,.30)) drop-shadow(0 0 13px rgba(80,110,255,.18))', 'important');
+    }
   }
 
   const script = document.createElement('script');
-  script.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v60.js?v=20260812-cinematic-reference-r2';
+  script.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v60.js?v=20260812-cinematic-reference-r3';
   script.async = false;
   script.dataset.fxCoreMobileReferenceV60 = 'true';
   script.addEventListener('load', () => {
     root.dataset.fxCoreReferenceLockLoad = 'ready-v60';
+    requestAnimationFrame(() => {
+      enforceReferencePresentation();
+      requestAnimationFrame(enforceReferencePresentation);
+    });
+    setTimeout(enforceReferencePresentation, 250);
+    setTimeout(enforceReferencePresentation, 1000);
   }, { once: true });
   script.addEventListener('error', () => {
     root.dataset.fxCoreMobileV55 = 'load-failed-v55';
