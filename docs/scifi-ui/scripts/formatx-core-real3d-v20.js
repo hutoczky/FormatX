@@ -5,17 +5,17 @@
   const BOOTSTRAP = 'reference-crystal-core-v53';
   const SCRIPT = '/scifi-ui/scripts/formatx-core-reference-v53.js?v=20260812-four-point-reference-r1';
   const STYLE = '/scifi-ui/styles/formatx-core-reference-v53.css?v=20260812-four-point-reference-r1';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260812-reference-fidelity-v61-r1';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260812-reference-fidelity-v61-r9b';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260812-award-composition-r2';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260812-direct-interaction-r3-living-system';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 
   /*
-    Desktop keeps the production v53 crystal. Mobile v55 is now the compatibility
+    Desktop keeps the production v53 crystal. Mobile v55 is the compatibility
     wrapper for the reference-locked composition: v60 owns the single native
     WebGL2 four-point crystal and v61 adds an emissive vector fidelity layer over
     that real geometry. No raster image, second WebGL context or scene engine is
-    used. Production mobile visual revision: reference-fidelity-v61-r1.
+    used. Production mobile visual revision: reference-fidelity-v61-r9.
   */
 
   if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;
