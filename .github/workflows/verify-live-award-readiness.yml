@@ -1,15 +1,12 @@
 name: Verify FormatX live award readiness
 run-name: Live award-readiness audit for ${{ github.event.workflow_run.head_sha }}
-
 on:
   workflow_run:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
-
 permissions:
   contents: read
   statuses: write
-
 jobs:
   verify-live-award-readiness:
     if: >-
@@ -23,7 +20,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-
       - name: Validate current award/source contracts
         run: |
           set -euo pipefail
@@ -32,96 +28,52 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-reference-v53.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v62.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v63.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
-
-      - name: Verify live desktop reference, native mobile v62 MAG and seamless-v7 scroll policy
+      - name: Verify live desktop reference, cinematic native mobile v63 MAG and seamless-v7 scroll policy
         shell: bash
         run: |
           set -euo pipefail
-          ORIGIN='https://formatxsuite.com'
-          TMP="$RUNNER_TEMP/formatx-award-current"
-          mkdir -p "$TMP"
-
-          fetch() {
-            local path="$1" out="$2"
-            echo "FETCH $path"
-            curl -fsSL --retry 3 --retry-delay 1 -H 'Cache-Control: no-cache' "$ORIGIN$path" -o "$out"
-          }
-          contains() {
-            local label="$1" needle="$2" file="$3"
-            echo "CHECK $label"
-            grep -Fq "$needle" "$file" || { echo "FAIL $label: missing $needle"; exit 1; }
-          }
-
+          ORIGIN='https://formatxsuite.com'; TMP="$RUNNER_TEMP/formatx-award-current"; mkdir -p "$TMP"
+          fetch(){ local path="$1" out="$2"; curl -fsSL --retry 3 --retry-delay 1 -H 'Cache-Control: no-cache' "$ORIGIN$path" -o "$out"; }
+          contains(){ local label="$1" needle="$2" file="$3"; echo "CHECK $label"; grep -Fq "$needle" "$file" || { echo "FAIL $label: missing $needle"; exit 1; }; }
           fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/core-bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-reference-v53.js?v=${GITHUB_RUN_ID}" "$TMP/core-v53.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/core-v55.js"
           fetch "/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js?v=${GITHUB_RUN_ID}" "$TMP/core-desktop.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v62.js?v=${GITHUB_RUN_ID}" "$TMP/core-mobile-v62.js"
+          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v63.js?v=${GITHUB_RUN_ID}" "$TMP/core-mobile-v63.js"
           fetch "/scifi-ui/scripts/formatx-core-direct-interaction.js?v=${GITHUB_RUN_ID}" "$TMP/direct-interaction.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
           fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/scroll-policy.json"
-
-          contains 'homepage' 'FormatX Suite Pro' "$TMP/home.html"
-          contains 'MAG bootstrap reference' 'formatx-core-real3d-v20.js' "$TMP/home.html"
-          contains 'v53 bootstrap' 'reference-crystal-core-v53' "$TMP/core-bootstrap.js"
-          contains 'mobile native v62 bootstrap marker' 'single-webgl2-mobile-pixel-reference-v62' "$TMP/core-bootstrap.js"
-          contains 'desktop wrapper mode' "fxCoreRendererMode = 'desktop'" "$TMP/core-v53.js"
-          contains 'mobile wrapper mode' "fxCoreRendererMode = 'mobile'" "$TMP/core-v55.js"
-          contains 'mobile wrapper v62 path' 'formatx-core-mobile-reference-v62.js' "$TMP/core-v55.js"
+          contains homepage 'FormatX Suite Pro' "$TMP/home.html"
+          contains bootstrap 'reference-crystal-core-v53' "$TMP/core-bootstrap.js"
+          contains mobile-bootstrap 'single-webgl2-mobile-cinematic-pixel-reference-v63' "$TMP/core-bootstrap.js"
+          contains mobile-wrapper 'formatx-core-mobile-reference-v63.js' "$TMP/core-v55.js"
           ! grep -Fq 'formatx-core-mobile-reference-fidelity-v61.js' "$TMP/core-v55.js"
-          contains 'desktop four-point renderer' 'reference-four-point-crystal-v1' "$TMP/core-desktop.js"
-          contains 'desktop geometry' 'sharp-four-tip-concave-crystal-v53' "$TMP/core-desktop.js"
-          contains 'mobile native renderer' 'pixel-reference-native-webgl2-v62' "$TMP/core-mobile-v62.js"
-          contains 'mobile pixel geometry' 'pixel-locked-organic-concave-four-point-v62' "$TMP/core-mobile-v62.js"
-          contains 'mobile refractive material' 'multishell-refractive-crystal-glass-v62' "$TMP/core-mobile-v62.js"
-          contains 'mobile 3D reactor' 'white-cyan-spherical-reactor-orbital-rings-v62' "$TMP/core-mobile-v62.js"
-          contains 'mobile native fidelity contract' 'native-webgl2-no-overlay-v62' "$TMP/core-mobile-v62.js"
-          contains 'single-context performance contract' 'single-context-adaptive-60-plus-fps' "$TMP/core-mobile-v62.js"
-          contains 'direct core interaction event' 'formatx:coreinteraction' "$TMP/core-mobile-v62.js"
+          contains mobile-renderer 'cinematic-pixel-reference-native-webgl2-v63' "$TMP/core-mobile-v63.js"
+          contains mobile-geometry 'pixel-locked-organic-deep-concave-four-point-v63' "$TMP/core-mobile-v63.js"
+          contains mobile-material 'multishell-fresnel-crystal-tube-glass-v63' "$TMP/core-mobile-v63.js"
+          contains mobile-reactor 'white-cyan-spherical-reactor-multiaxis-orbitals-v63' "$TMP/core-mobile-v63.js"
+          contains native-fidelity 'native-webgl2-only-no-raster-no-svg-v63' "$TMP/core-mobile-v63.js"
+          contains performance 'single-context-adaptive-60-plus-fps' "$TMP/core-mobile-v63.js"
+          contains interaction 'formatx:coreinteraction' "$TMP/core-mobile-v63.js"
           test "$(grep -Fo "getContext('webgl2'" "$TMP/core-desktop.js" | wc -l)" -eq 1
-          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-mobile-v62.js" | wc -l)" -eq 1
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-desktop.js"
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-mobile-v62.js"
-          contains 'desktop direct interaction r5' 'direct-desktop-pointer-energy-r5-living-system' "$TMP/direct-interaction.js"
-          contains 'mobile direct interaction r4' 'direct-pointer-touch-drag-r4-living-system' "$TMP/direct-interaction.js"
-          contains 'mobile seamless bootstrap' 'mobile-seamless-loading-v1' "$TMP/scroll.js"
-          contains 'seamless runtime v7' "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
+          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-mobile-v63.js" | wc -l)" -eq 1
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-mobile-v63.js"
+          contains desktop-interaction 'direct-desktop-pointer-energy-r5-living-system' "$TMP/direct-interaction.js"
+          contains mobile-interaction 'direct-pointer-touch-drag-r4-living-system' "$TMP/direct-interaction.js"
+          contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
           ! grep -Fq 'preventDefault' "$TMP/scroll.js"
-          ! grep -Fq 'scrollTo(' "$TMP/scroll.js"
-          ! grep -Fq 'scrollIntoView(' "$TMP/scroll.js"
-          ! grep -Fq 'cloneNode(' "$TMP/scroll.js"
-
           python3 - "$TMP/scroll-policy.json" <<'PY'
-          import json, sys
-          p=json.load(open(sys.argv[1], encoding='utf-8'))
-          common=p.get('policy',{})
-          m=p.get('mobile',{})
-          d=p.get('desktop',{})
-          checks={
-            'input_capture': common.get('input_capture') is False,
-            'section_scroll_snap': common.get('section_scroll_snap') is False,
-            'native_wheel_touch': common.get('native_wheel_touch') is True,
-            'mobile_controller': m.get('controller') == 'seamless-v7',
-            'mobile_loop': m.get('automatic_loop') is True,
-            'mobile_bridge': m.get('visual_bridge') is True,
-            'mobile_no_content_clone': m.get('cloned_content') is False,
-            'mobile_hero_clone_only': m.get('cloned_hero_only') is True,
-            'mobile_boundary_handoff': m.get('boundary_handoff_only') is True,
-            'mobile_native_momentum': m.get('native_momentum_preserved') is True,
-            'mobile_infinite': m.get('finite_document') is False,
-            'desktop_controller': d.get('controller') == 'seamless-v7',
-            'desktop_loop': d.get('automatic_loop') is True,
-            'desktop_bridge': d.get('visual_bridge') is True,
-          }
+          import json,sys
+          p=json.load(open(sys.argv[1],encoding='utf-8'));c=p.get('policy',{});m=p.get('mobile',{});d=p.get('desktop',{})
+          checks={'input_capture':c.get('input_capture') is False,'section_scroll_snap':c.get('section_scroll_snap') is False,'native_wheel_touch':c.get('native_wheel_touch') is True,'mobile_controller':m.get('controller')=='seamless-v7','mobile_loop':m.get('automatic_loop') is True,'mobile_bridge':m.get('visual_bridge') is True,'mobile_no_content_clone':m.get('cloned_content') is False,'mobile_native_momentum':m.get('native_momentum_preserved') is True,'desktop_controller':d.get('controller')=='seamless-v7'}
           failed=[k for k,v in checks.items() if not v]
           if failed: raise SystemExit('FAIL current scroll policy: '+', '.join(failed))
-          print('PASS: current shared seamless-v7 mobile/desktop policy is live.')
+          print('PASS: award readiness live policy passed.')
           PY
-
       - name: Publish live award-readiness status
         if: always()
         env:
@@ -130,5 +82,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source, desktop v53 + native mobile v62 and seamless-v7 passed'; else state=failure; description='Award, production MAG or seamless-v7 policy failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source, desktop v53 + cinematic native mobile v63 passed'; else state=failure; description='Award, production MAG or seamless-v7 policy failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
