@@ -12,13 +12,13 @@ permissions:
 jobs:
   harden:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Apply current production hardening
+      - name: Apply product hardening
         shell: bash
         run: |
           set -euo pipefail
@@ -27,21 +27,15 @@ jobs:
 
           def read(path):
               return Path(path).read_text(encoding='utf-8')
-
           def write(path, text):
               Path(path).write_text(text, encoding='utf-8')
-
-          def replace(path, old, new, required=True):
+          def replace(path, old, new):
               text = read(path)
               if old not in text:
-                  if required:
-                      raise SystemExit(f'missing expected text in {path}: {old[:100]!r}')
-                  return
+                  raise SystemExit(f'missing expected text in {path}: {old!r}')
               write(path, text.replace(old, new))
 
-          # 1) Remove nested CSS @imports from the critical mobile stylesheet.
-          #    This makes the mobile geometry available in the first stylesheet response,
-          #    instead of arriving one/two network turns later and moving the hero.
+          # Eliminate the two nested CSS requests that caused late mobile hero geometry.
           recovery_path = 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
           recovery = read(recovery_path)
           imports = "@import url('./formatx-desktop-unified.css');\n@import url('./formatx-mobile-hero-flow.css');\n\n"
@@ -50,13 +44,9 @@ jobs:
           desktop = read('docs/scifi-ui/styles/formatx-desktop-unified.css').rstrip()
           mobile_flow = read('docs/scifi-ui/styles/formatx-mobile-hero-flow.css').rstrip()
           recovery = recovery.replace(imports, '/* Inlined critical composition: no nested CSS request on first paint. */\n' + desktop + '\n\n' + mobile_flow + '\n\n', 1)
-          marker = '/* FormatX mobile quality hardening r7 */'
-          if marker not in recovery:
-              recovery += '''\n\n/* FormatX mobile quality hardening r7 */
+          recovery += '''\n\n/* FormatX mobile quality hardening r7 */
           @media (max-width: 900px), (pointer: coarse) {
-            .site-footer nav {
-              gap: 8px 10px !important;
-            }
+            .site-footer nav { gap: 8px 10px !important; }
             .site-footer nav a {
               display: inline-flex !important;
               align-items: center !important;
@@ -83,20 +73,14 @@ jobs:
           }
           '''
           write(recovery_path, recovery)
-
-          # Cache-bust the now critical first-paint mobile stylesheet for returning visitors.
           replace('docs/scifi-ui/index.html',
                   './styles/formatx-mobile-recovery.css?v=20260729-mobile-recovery-1',
                   './styles/formatx-mobile-recovery.css?v=20260812-mobile-stability-r7')
 
-          # 2) Thought Genome: keep strict style-src 'self' by removing inline style writes.
+          # Preserve strict CSP: no inline style attributes from Thought Genome.
           genome = 'docs/scifi-ui/scripts/synaptic-thought-genome.js'
-          replace(genome,
-                  "    path.style.setProperty('--fx-genome-path-length', String(Math.max(1, pathPoints.length * 150)));\n",
-                  '')
-          replace(genome,
-                  "      group.style.setProperty('--fx-genome-hue', String(point.hue));\n",
-                  '')
+          replace(genome, "    path.style.setProperty('--fx-genome-path-length', String(Math.max(1, pathPoints.length * 150)));\n", '')
+          replace(genome, "      group.style.setProperty('--fx-genome-hue', String(point.hue));\n", '')
           replace(genome,
                   "      orbit.classList.add('fx-thought-genome-orbit');\n",
                   "      orbit.classList.add('fx-thought-genome-orbit');\n      orbit.setAttribute('stroke', `hsl(${point.hue} 84% 67% / .34)`);\n")
@@ -106,211 +90,37 @@ jobs:
           replace(genome,
                   './styles/synaptic-thought-genome.css?v=20260731-thought-genome-1',
                   './styles/synaptic-thought-genome.css?v=20260812-csp-safe-r2')
-
           genome_css = 'docs/scifi-ui/styles/synaptic-thought-genome.css'
           replace(genome_css, '  fill: hsl(var(--fx-genome-hue) 88% 72%);\n', '')
           replace(genome_css, '  stroke: hsl(var(--fx-genome-hue) 84% 67% / .34);\n', '')
 
-          # 3) Live Lighthouse must test the canonical apex, not the intentional www -> apex redirect.
+          # Canonical live Lighthouse targets.
           for cfg in ('lighthouserc.live.json', 'lighthouserc.live.mobile.json'):
-              text = read(cfg).replace('https://www.formatxsuite.com/', 'https://formatxsuite.com/')
-              write(cfg, text)
-          live_wf = '.github/workflows/validate-live-lighthouse.yml'
-          write(live_wf, read(live_wf).replace('https://www.formatxsuite.com/', 'https://formatxsuite.com/'))
+              write(cfg, read(cfg).replace('https://www.formatxsuite.com/', 'https://formatxsuite.com/'))
 
-          # 4) Current live MAG visual contract: interaction was intentionally upgraded to r4.
-          visual_wf = '.github/workflows/verify-live-core-mesh3d-visual.yml'
-          replace(visual_wf,
-                  "pointer-touch-speech-reactive-r2",
-                  "direct-pointer-touch-drag-r4-living-system")
-
-          # 5) Award-readiness scroll checks must describe the current shared seamless-v7 runtime.
-          award = '.github/workflows/verify-live-award-readiness.yml'
-          text = read(award)
-          text = text.replace("contains 'mobile native document controller' 'mobile-native-document-v1' \"$SCROLL_BOOTSTRAP\"",
-                              "contains 'mobile seamless loading controller' 'mobile-seamless-loading-v1' \"$SCROLL_BOOTSTRAP\"")
-          text = text.replace("contains 'mobile automatic loop disabled' \"fxAutomaticLoop = 'disabled-mobile'\" \"$SCROLL_BOOTSTRAP\"",
-                              "contains 'mobile automatic loop handoff' \"root.dataset.fxAutomaticLoop = mobile ? 'pending-mobile' : 'desktop-only'\" \"$SCROLL_BOOTSTRAP\"")
-          text = text.replace("contains 'mobile visual bridge disabled' \"fxLoopBridge = 'disabled-mobile'\" \"$SCROLL_BOOTSTRAP\"",
-                              "contains 'mobile visual bridge initialisation' \"root.dataset.fxLoopBridge = 'initialising'\" \"$SCROLL_BOOTSTRAP\"")
-          text = text.replace("'mobile_controller': p.get('mobile', {}).get('controller') == 'mobile-native-document-v1',",
-                              "'mobile_controller': p.get('mobile', {}).get('controller') == 'seamless-v7',")
-          text = text.replace("'mobile_automatic_loop': p.get('mobile', {}).get('automatic_loop') is False,",
-                              "'mobile_automatic_loop': p.get('mobile', {}).get('automatic_loop') is True,")
-          text = text.replace("'mobile_visual_bridge': p.get('mobile', {}).get('visual_bridge') is False,",
-                              "'mobile_visual_bridge': p.get('mobile', {}).get('visual_bridge') is True,")
-          text = text.replace("'mobile_position_changes': p.get('mobile', {}).get('automatic_page_position_changes') is False,",
-                              "'mobile_position_changes': p.get('mobile', {}).get('automatic_page_position_changes') is True,\n              'mobile_no_content_clone': p.get('mobile', {}).get('cloned_content') is False,\n              'mobile_hero_bridge_only': p.get('mobile', {}).get('cloned_hero_only') is True,\n              'mobile_boundary_handoff': p.get('mobile', {}).get('boundary_handoff_only') is True,\n              'mobile_native_momentum': p.get('mobile', {}).get('native_momentum_preserved') is True,\n              'mobile_infinite_document': p.get('mobile', {}).get('finite_document') is False,")
-          write(award, text)
-
-          # 6) Replace the obsolete v51 mobile-runtime browser contract with the current v55 runtime.
-          mobile_runtime = r'''name: Validate cinematic mobile MAG v55 runtime
-
-          on:
-            push:
-              branches: [master]
-              paths:
-                - 'docs/scifi-ui/index.html'
-                - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
-                - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-                - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
-                - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
-                - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
-                - '.github/workflows/validate-real3d-mobile-runtime-v22.yml'
-            workflow_dispatch:
-
-          permissions:
-            contents: read
-            statuses: write
-
-          jobs:
-            mobile-runtime:
-              runs-on: ubuntu-latest
-              timeout-minutes: 15
-              steps:
-                - uses: actions/checkout@v4
-
-                - name: Validate current source contracts
-                  run: |
-                    node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-                    node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-                    node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-
-                - name: Install Chromium runtime
-                  shell: bash
-                  run: |
-                    set -euo pipefail
-                    mkdir -p "$RUNNER_TEMP/core-v55-mobile"
-                    cd "$RUNNER_TEMP/core-v55-mobile"
-                    npm init -y >/dev/null 2>&1
-                    npm install --silent playwright@1.62.0
-                    npx playwright install --with-deps chromium
-
-                - name: Verify v55 mobile WebGL2 success and fail-open state
-                  shell: bash
-                  run: |
-                    set -euo pipefail
-                    python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v55-server.log" 2>&1 &
-                    server_pid=$!
-                    trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-                    cd "$RUNNER_TEMP/core-v55-mobile"
-                    node <<'NODE'
-                    const assert = require('node:assert/strict');
-                    const { chromium } = require('playwright');
-
-                    async function scenario(browser, blockWebgl) {
-                      const context = await browser.newContext({ viewport:{width:390,height:844}, deviceScaleFactor:2, isMobile:true, hasTouch:true, locale:'hu-HU' });
-                      const page = await context.newPage();
-                      if (blockWebgl) {
-                        await page.addInitScript(() => {
-                          const original = HTMLCanvasElement.prototype.getContext;
-                          HTMLCanvasElement.prototype.getContext = function(type, attributes) {
-                            if (type === 'webgl2') return null;
-                            return original.call(this, type, attributes);
-                          };
-                        });
-                      }
-                      await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu', { waitUntil:'domcontentloaded', timeout:45000 });
-                      if (!blockWebgl) {
-                        await page.waitForFunction(() => document.documentElement.dataset.fxCoreMobileV55 === 'ready-v55', null, { timeout:45000 });
-                        const s = await page.evaluate(() => {
-                          const r = document.documentElement;
-                          const c = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas');
-                          const box = c?.getBoundingClientRect();
-                          return {
-                            renderer:r.dataset.fxCoreRenderer, geometry:r.dataset.fxCoreReferenceGeometry,
-                            material:r.dataset.fxCoreReferenceMaterial, reactor:r.dataset.fxCoreInternalReactor,
-                            responsive:r.dataset.fxCoreResponsive, performance:r.dataset.fxCorePerformance,
-                            interaction:r.dataset.fxCoreInteraction,
-                            canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
-                            width:box?.width||0, height:box?.height||0, vw:innerWidth, vh:innerHeight,
-                            gl:Boolean(c?.getContext('webgl2'))
-                          };
-                        });
-                        assert.equal(s.renderer, 'single-webgl2-mobile-cinematic-crystal-v55');
-                        assert.equal(s.geometry, 'long-sharp-four-tip-deep-concave-crystal-v55');
-                        assert.equal(s.material, 'thin-layered-faceted-fresnel-glass-v55');
-                        assert.equal(s.reactor, 'small-hot-white-nucleus-concentric-cyan-violet-rings-v55');
-                        assert.equal(s.responsive, 'physical-mobile-hero-local-v55');
-                        assert.equal(s.performance, 'single-context-adaptive-60-plus-fps');
-                        assert.equal(s.interaction, 'direct-pointer-touch-drag-r4-living-system');
-                        assert.equal(s.canvases, 1);
-                        assert.equal(s.gl, true);
-                        assert.ok(s.width <= s.vw + 1 && s.height <= s.vh + 1, JSON.stringify(s));
-                      } else {
-                        await page.waitForFunction(() => ['context-unavailable-v55','webgl2-unavailable-v55'].includes(document.documentElement.dataset.fxCoreMobileV55), null, { timeout:45000 });
-                        const s = await page.evaluate(() => ({
-                          state:document.documentElement.dataset.fxCoreMobileV55,
-                          canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
-                          bodyVisible:getComputedStyle(document.body).visibility !== 'hidden'
-                        }));
-                        assert.ok(['context-unavailable-v55','webgl2-unavailable-v55'].includes(s.state));
-                        assert.equal(s.canvases, 0);
-                        assert.equal(s.bodyVisible, true);
-                      }
-                      await context.close();
-                    }
-
-                    (async () => {
-                      const browser = await chromium.launch({ headless:true, args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader'] });
-                      await scenario(browser, false);
-                      await scenario(browser, true);
-                      await browser.close();
-                      console.log('PASS: current v55 mobile MAG runtime is bounded and fails open without WebGL2.');
-                    })().catch(e => { console.error(e); process.exit(1); });
-                    NODE
-
-                - name: Publish mobile runtime status
-                  if: always()
-                  env:
-                    GH_TOKEN: ${{ github.token }}
-                    JOB_STATUS: ${{ job.status }}
-                  shell: bash
-                  run: |
-                    if [ "$JOB_STATUS" = success ]; then state=success; description='Cinematic v55 mobile MAG runtime passed'; else state=failure; description='Cinematic v55 mobile MAG runtime failed'; fi
-                    gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v55 mobile runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          '''
-          # Strip the indentation intentionally present in the Python source.
-          import textwrap
-          write('.github/workflows/validate-real3d-mobile-runtime-v22.yml', textwrap.dedent(mobile_runtime))
-
-          # 7) Retire redundant v51-only workflows. Current v53/v55 source/runtime/live
-          #    gates remain and are stricter than these historical contracts.
-          for obsolete in (
-              '.github/workflows/verify-live-real3d-reference-position.yml',
-              '.github/workflows/verify-formatx-live-hotfix.yml',
-              '.github/workflows/verify-formatx-mag-v46-live.yml',
-          ):
-              Path(obsolete).unlink(missing_ok=True)
-
-          # 8) Cache-bust the Worker-injected content CSS after CSP/layout fixes.
+          # Cache-bust Worker-injected public content CSS.
           base = 'billing-worker/src/production-content-base.js'
           replace(base,
                   '/scifi-ui/styles/formatx-content-standard.css?v=20260731-content-2',
                   '/scifi-ui/styles/formatx-content-standard.css?v=20260812-quality-r1')
-
-          print('Hardening changes applied.')
           PY
 
-      - name: Validate patched source before commit
+      - name: Validate product hardening
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
           node .github/scripts/validate-award-readiness.cjs
-          grep -q 'direct-pointer-touch-drag-r4-living-system' .github/workflows/verify-live-core-mesh3d-visual.yml
           ! grep -q "@import url('./formatx-mobile-hero-flow.css')" docs/scifi-ui/styles/formatx-mobile-recovery.css
           ! grep -q "style.setProperty('--fx-genome" docs/scifi-ui/scripts/synaptic-thought-genome.js
 
-      - name: Commit hardening and remove one-shot workflow
+      - name: Commit product hardening
         shell: bash
         run: |
           set -euo pipefail
-          rm -f .github/workflows/formatx-100-hardening.yml
           git config user.name 'FormatX CI hardening'
           git config user.email 'actions@users.noreply.github.com'
-          git add -A
-          git commit -m 'fix: align production quality gates with v53-v55 runtime'
+          git add docs/scifi-ui/styles/formatx-mobile-recovery.css docs/scifi-ui/index.html docs/scifi-ui/scripts/synaptic-thought-genome.js docs/scifi-ui/styles/synaptic-thought-genome.css lighthouserc.live.json lighthouserc.live.mobile.json billing-worker/src/production-content-base.js
+          git commit -m 'fix: harden mobile first paint and CSP'
           git push origin HEAD:master
