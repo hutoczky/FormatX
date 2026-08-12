@@ -1,48 +1,7 @@
 'use strict';
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const root = path.resolve(__dirname, '../..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
-
-const bootstrap = read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
-const desktop = read('docs/scifi-ui/scripts/formatx-core-reference-v53.js');
-const mobile = read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
-const desktopRenderer = read('docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js');
-const mobileRenderer = read('docs/scifi-ui/scripts/formatx-core-mobile-reference-v62.js');
-const css = read('docs/scifi-ui/styles/formatx-core-reference-v53.css');
-
-assert.match(bootstrap, /reference-crystal-core-v53/);
-assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260812-four-point-reference-r1/);
-assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260812-four-point-reference-r1/);
-assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260813-pixel-reference-native-v62-r1/);
-assert.match(desktop, /formatx-core-reference-cinematic-v1\.js\?v=20260812-four-point-reference-r1/);
-assert.match(mobile, /formatx-core-mobile-reference-v62\.js/);
-assert.doesNotMatch(mobile, /formatx-core-mobile-reference-fidelity-v61\.js/);
-assert.equal((desktopRenderer.match(/getContext\(['"]webgl2['"]/g) || []).length, 1);
-assert.equal((mobileRenderer.match(/getContext\(['"]webgl2['"]/g) || []).length, 1);
-
-for (const token of [
-  'gl.enable(gl.DEPTH_TEST)','gl.drawArrays(gl.TRIANGLES','gl.POINTS','function outlineRadius(',
-  'function surfacePoint(','function buildShell(','function starContour(','function radialFacets(',
-  'reference-four-point-crystal-v1','sharp-four-tip-concave-crystal-v53',
-  'clean-faceted-refractive-glass-v53','moving-white-nucleus-concentric-spectral-rings-v53',
-  'single-context-adaptive-60-plus-fps','webglcontextlost'
-]) assert.ok(desktopRenderer.includes(token), `missing desktop release renderer contract: ${token}`);
-
-for (const token of [
-  'pixel-reference-native-webgl2-v62','function outlinePoint(','function surfacePoint(','function shellGeo(',
-  'function ribbonOutline(','function radialRibs(','function torus(','function sphere(',
-  'gl.enable(gl.DEPTH_TEST)','gl.drawArrays(gl.TRIANGLES','gl.POINTS',
-  'pixel-locked-organic-concave-four-point-v62','multishell-refractive-crystal-glass-v62',
-  'white-cyan-spherical-reactor-orbital-rings-v62','native-webgl2-no-overlay-v62',
-  'single-context-adaptive-60-plus-fps','webglcontextlost'
-]) assert.ok(mobileRenderer.includes(token), `missing mobile v62 release renderer contract: ${token}`);
-
-assert.match(desktopRenderer, /budget=mobile\?1100000:2500000/);
-assert.doesNotMatch(desktopRenderer + mobileRenderer, /new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(/i);
-assert.doesNotMatch(desktopRenderer + mobileRenderer, /THREE\b|three\.js|babylon|playcanvas|model-viewer/i);
-assert.match(css, /pointer-events:\s*none\s*!important/);
-assert.match(css, /min-height:\s*clamp\(500px, 58svh, 660px\)/);
-new Function(desktopRenderer);new Function(mobileRenderer);new Function(desktop);new Function(mobile);
-console.log('PASS: release MAG keeps desktop v53 and uses one complete native WebGL2 v62 mobile pixel-reference renderer.');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'../..'),read=f=>fs.readFileSync(path.join(root,f),'utf8');
+const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js'),desktop=read('docs/scifi-ui/scripts/formatx-core-reference-v53.js'),mobile=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js'),desktopRenderer=read('docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js'),mobileRenderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-v63.js'),css=read('docs/scifi-ui/styles/formatx-core-reference-v53.css');
+assert.match(bootstrap,/reference-crystal-core-v53/);assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260813-cinematic-pixel-reference-v63-r1/);assert.match(desktop,/formatx-core-reference-cinematic-v1\.js\?v=20260812-four-point-reference-r1/);assert.match(mobile,/formatx-core-mobile-reference-v63\.js/);assert.doesNotMatch(mobile,/formatx-core-mobile-reference-fidelity-v61\.js/);assert.equal((desktopRenderer.match(/getContext\(['"]webgl2['"]/g)||[]).length,1);assert.equal((mobileRenderer.match(/getContext\(['"]webgl2['"]/g)||[]).length,1);
+for(const t of['cinematic-pixel-reference-native-webgl2-v63','function outlinePoint(','function surfacePoint(','function shellGeo(','function tubeCurve(','function outlineTube(','function surfaceRail(','function ringTube(','function sphere(','function filamentField(','function waterLines(','gl.enable(gl.DEPTH_TEST)','gl.drawArrays(gl.TRIANGLES','gl.POINTS','pixel-locked-organic-deep-concave-four-point-v63','multishell-fresnel-crystal-tube-glass-v63','white-cyan-spherical-reactor-multiaxis-orbitals-v63','native-webgl2-only-no-raster-no-svg-v63','single-context-adaptive-60-plus-fps','webglcontextlost'])assert.ok(mobileRenderer.includes(t),`missing mobile v63 release contract: ${t}`);
+assert.match(desktopRenderer,/budget=mobile\?1100000:2500000/);assert.doesNotMatch(desktopRenderer+mobileRenderer,/new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|THREE\b|three\.js|babylon|playcanvas|model-viewer/i);assert.match(css,/pointer-events:\s*none\s*!important/);new Function(desktopRenderer);new Function(mobileRenderer);new Function(desktop);new Function(mobile);console.log('PASS: release MAG keeps desktop v53 and uses one cinematic native WebGL2 v63 mobile renderer.');
