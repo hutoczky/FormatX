@@ -16,7 +16,7 @@ const css = read('docs/scifi-ui/styles/formatx-core-reference-v53.css');
 assert.match(bootstrap, /reference-crystal-core-v53/);
 assert.match(bootstrap, /formatx-core-reference-v53\.js\?v=20260812-four-point-reference-r1/);
 assert.match(bootstrap, /formatx-core-reference-v53\.css\?v=20260812-four-point-reference-r1/);
-assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260812-reference-fidelity-v61-r1/);
+assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260812-reference-fidelity-v61-r9c/);
 assert.match(desktop, /formatx-core-reference-cinematic-v1\.js\?v=20260812-four-point-reference-r1/);
 assert.match(mobile, /formatx-core-mobile-reference-v60\.js/);
 assert.match(mobile, /formatx-core-mobile-reference-fidelity-v61\.js/);
