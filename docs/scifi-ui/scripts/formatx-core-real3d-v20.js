@@ -8,18 +8,17 @@
   // resolve to non-existent root folders when location.pathname is "/".
   const SCRIPT = '/scifi-ui/scripts/formatx-core-reference-v53.js?v=20260812-four-point-reference-r1';
   const STYLE = '/scifi-ui/styles/formatx-core-reference-v53.css?v=20260812-four-point-reference-r1';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260812-four-point-reference-r1';
-  const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260812-four-point-reference-r1';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260812-award-crystal-r1';
+  const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260812-award-composition-r2';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260812-direct-interaction-r3-living-system';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 
   /*
-    The public v53/v55 compatibility contract remains stable, while both paths
-    now hand off to the same reference-four-point WebGL2 crystal renderer.
-    The renderer uses real 3D shell geometry, faceted glass shading, a white
-    reactor nucleus, cyan/violet orbital rings and direct pointer/touch energy.
-    No raster MAG layer or CSS silhouette is used.
-    Production visual revision: four-point-reference-r1.
+    Desktop keeps the shared reference v53 renderer. Mobile v55 is a compatibility
+    wrapper for the dedicated v56 award crystal: a true WebGL2 four-point shell
+    with sharp cardinal tips, deep concave sides, bright faceted glass, white
+    reactor nucleus and cyan/violet orbital detail. No image-backed MAG layer is
+    used. Production mobile visual revision: award-crystal-r1.
   */
 
   if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;
@@ -32,8 +31,8 @@
   }
 
   root.dataset.fxCoreReal3d = 'ready-v20';
-  root.dataset.fxCoreRenderer = mobile ? 'single-webgl2-mobile-cinematic-crystal-v55' : 'single-webgl2-reference-crystal-v53';
-  root.dataset.fxCoreReferenceLock = mobile ? 'loading-v55' : 'loading-v53';
+  root.dataset.fxCoreRenderer = mobile ? 'single-webgl2-mobile-award-crystal-v56' : 'single-webgl2-reference-crystal-v53';
+  root.dataset.fxCoreReferenceLock = mobile ? 'loading-v56' : 'loading-v53';
 
   function addStyle() {
     if (document.querySelector('link[data-fx-core-reference-v53-style]')) return;
@@ -92,14 +91,14 @@
     script.async = false;
     script.dataset.fxCoreMobileV55Script = 'true';
     script.addEventListener('load', () => {
-      root.dataset.fxCoreReferenceLockLoad = 'ready-v55';
+      root.dataset.fxCoreReferenceLockLoad = 'ready-v56';
     }, { once: true });
     script.addEventListener('error', () => {
-      root.dataset.fxCoreReal3d = 'context-unavailable-v55';
-      root.dataset.fxCoreReferenceLock = 'load-failed-v55';
-      root.dataset.fxCoreReferenceLockLoad = 'failed-v55';
+      root.dataset.fxCoreReal3d = 'context-unavailable-v56';
+      root.dataset.fxCoreReferenceLock = 'load-failed-v56';
+      root.dataset.fxCoreReferenceLockLoad = 'failed-v56';
       dispatchEvent(new CustomEvent('formatx:core3dfallback', {
-        detail: { reason: 'mobile-crystal-load-failed', reference: 'v55' }
+        detail: { reason: 'mobile-award-crystal-load-failed', reference: 'v56' }
       }));
     }, { once: true });
     document.head.appendChild(script);
