@@ -20,7 +20,7 @@ const entry = read('billing-worker/src/production-entry.js');
 assert.match(selector, /const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/);
 assert.match(productionBootstrap, /reference-crystal-core-v53/);
 assert.match(productionBootstrap, /formatx-core-reference-v53\.js\?v=20260812-four-point-reference-r1/);
-assert.match(productionBootstrap, /formatx-core-mobile-v55\.js\?v=20260812-reference-fidelity-v61-r1/);
+assert.match(productionBootstrap, /formatx-core-mobile-v55\.js\?v=20260812-reference-fidelity-v61-r9c/);
 assert.match(desktopWrapper, /formatx-core-reference-cinematic-v1\.js\?v=20260812-four-point-reference-r1/);
 assert.match(mobileWrapper, /formatx-core-mobile-reference-v60\.js/);
 assert.match(mobileWrapper, /formatx-core-mobile-reference-fidelity-v61\.js/);
