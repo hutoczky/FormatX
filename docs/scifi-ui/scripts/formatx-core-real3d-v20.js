@@ -10,7 +10,7 @@
   const STYLE = '/scifi-ui/styles/formatx-core-reference-v53.css?v=20260811-reference-v53-r3';
   const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260811-cinematic-mobile-v55-r3';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260811-cinematic-mobile-v55-r3';
-  const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260812-direct-interaction-r2';
+  const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260812-direct-interaction-r3-living-system';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 
   /*
@@ -108,16 +108,16 @@
 
   function addInteractionScript() {
     if (document.querySelector('script[data-fx-core-direct-interaction], script[src*="formatx-core-direct-interaction.js"]')) return;
-    root.dataset.fxCoreInteractionController = 'loading-v2';
+    root.dataset.fxCoreInteractionController = 'loading-v3';
     const script = document.createElement('script');
     script.src = INTERACTION_SCRIPT;
     script.async = false;
     script.dataset.fxCoreDirectInteraction = 'true';
     script.addEventListener('load', () => {
-      root.dataset.fxCoreInteractionController = 'ready-v2';
+      root.dataset.fxCoreInteractionController = 'ready-v3';
     }, { once: true });
     script.addEventListener('error', () => {
-      root.dataset.fxCoreInteractionController = 'failed-v2';
+      root.dataset.fxCoreInteractionController = 'failed-v3';
     }, { once: true });
     document.head.appendChild(script);
   }
