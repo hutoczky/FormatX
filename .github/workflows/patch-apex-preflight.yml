@@ -1,0 +1,48 @@
+name: Align production preflight with apex canonical
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/patch-apex-preflight.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch canonical preflight checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('.github/scripts/production-preflight.cjs')
+          s=p.read_text(encoding='utf-8')
+          old_root="sitemap.includes('<loc>https://www.formatxsuite.com/</loc>')"
+          new_root="sitemap.includes('<loc>https://formatxsuite.com/</loc>')"
+          old_robots="robots.includes('Sitemap: https://www.formatxsuite.com/sitemap.xml')"
+          new_robots="robots.includes('Sitemap: https://formatxsuite.com/sitemap.xml')"
+          if old_root not in s or old_robots not in s:
+              raise SystemExit('stale canonical checks not found exactly once')
+          s=s.replace(old_root,new_root,1).replace(old_robots,new_robots,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          node --check .github/scripts/production-preflight.cjs
+          node .github/scripts/production-preflight.cjs >/tmp/preflight.json
+          grep -Fq '"ready": true' /tmp/preflight.json
+      - name: Commit preflight alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'FormatX CI hardening'
+          git config user.email 'actions@users.noreply.github.com'
+          git add .github/scripts/production-preflight.cjs
+          git commit -m 'ci: align production preflight with apex canonical'
+          git push origin HEAD:master
