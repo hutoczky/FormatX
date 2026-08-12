@@ -8,7 +8,7 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v61';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-v61-r9-final';
+  root.dataset.fxCoreMobileAwardRevision = 'organic-glass-reference-v61-r10';
 
   function registerFidelity() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
@@ -40,7 +40,7 @@
   renderer.addEventListener('load', () => {
     root.dataset.fxCoreReferenceLockLoad = 'ready-v60';
     const fidelity = document.createElement('script');
-    fidelity.src = '/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js?v=20260812-reference-fidelity-r9b';
+    fidelity.src = '/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js?v=20260813-organic-glass-r10';
     fidelity.async = false;
     fidelity.dataset.fxCoreMobileReferenceFidelityV61 = 'true';
     fidelity.addEventListener('load', () => {
