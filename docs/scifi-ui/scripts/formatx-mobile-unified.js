@@ -36,11 +36,11 @@
   function ensureReturnStateRecovery() {
     if (document.querySelector('script[data-fx-return-state-recovery]')) return;
     const script = document.createElement('script');
-    script.src = './scripts/formatx-return-state-recovery.js?v=20260812-return-state-v1';
+    script.src = './scripts/formatx-return-state-recovery.js?v=20260812-return-state-v2';
     script.async = false;
     script.dataset.fxReturnStateRecovery = 'true';
     script.addEventListener('load', () => {
-      root.dataset.fxReturnStateRecoveryLoad = 'ready';
+      root.dataset.fxReturnStateRecoveryLoad = 'ready-v2';
     }, { once: true });
     script.addEventListener('error', () => {
       root.dataset.fxReturnStateRecoveryLoad = 'failed';
