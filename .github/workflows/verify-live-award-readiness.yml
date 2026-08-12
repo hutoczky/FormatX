@@ -32,11 +32,10 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-reference-v53.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v60.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v62.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
 
-      - name: Verify live desktop reference, mobile v60 v61 MAG and seamless-v7 scroll policy
+      - name: Verify live desktop reference, native mobile v62 MAG and seamless-v7 scroll policy
         shell: bash
         run: |
           set -euo pipefail
@@ -60,8 +59,7 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-core-reference-v53.js?v=${GITHUB_RUN_ID}" "$TMP/core-v53.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/core-v55.js"
           fetch "/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js?v=${GITHUB_RUN_ID}" "$TMP/core-desktop.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v60.js?v=${GITHUB_RUN_ID}" "$TMP/core-mobile-v60.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-fidelity-v61.js?v=${GITHUB_RUN_ID}" "$TMP/core-mobile-v61.js"
+          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v62.js?v=${GITHUB_RUN_ID}" "$TMP/core-mobile-v62.js"
           fetch "/scifi-ui/scripts/formatx-core-direct-interaction.js?v=${GITHUB_RUN_ID}" "$TMP/direct-interaction.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
@@ -70,27 +68,24 @@ jobs:
           contains 'homepage' 'FormatX Suite Pro' "$TMP/home.html"
           contains 'MAG bootstrap reference' 'formatx-core-real3d-v20.js' "$TMP/home.html"
           contains 'v53 bootstrap' 'reference-crystal-core-v53' "$TMP/core-bootstrap.js"
-          contains 'mobile reference bootstrap marker' 'single-webgl2-mobile-cinematic-reference-v60' "$TMP/core-bootstrap.js"
+          contains 'mobile native v62 bootstrap marker' 'single-webgl2-mobile-pixel-reference-v62' "$TMP/core-bootstrap.js"
           contains 'desktop wrapper mode' "fxCoreRendererMode = 'desktop'" "$TMP/core-v53.js"
           contains 'mobile wrapper mode' "fxCoreRendererMode = 'mobile'" "$TMP/core-v55.js"
-          contains 'mobile wrapper v60 path' 'formatx-core-mobile-reference-v60.js' "$TMP/core-v55.js"
-          contains 'mobile wrapper v61 path' 'formatx-core-mobile-reference-fidelity-v61.js' "$TMP/core-v55.js"
+          contains 'mobile wrapper v62 path' 'formatx-core-mobile-reference-v62.js' "$TMP/core-v55.js"
+          ! grep -Fq 'formatx-core-mobile-reference-fidelity-v61.js' "$TMP/core-v55.js"
           contains 'desktop four-point renderer' 'reference-four-point-crystal-v1' "$TMP/core-desktop.js"
           contains 'desktop geometry' 'sharp-four-tip-concave-crystal-v53' "$TMP/core-desktop.js"
-          contains 'mobile real renderer' 'cinematic-glass-reference-v60' "$TMP/core-mobile-v60.js"
-          contains 'mobile deep concave geometry' 'asymmetric-deep-concave-four-point-reference-v60' "$TMP/core-mobile-v60.js"
-          contains 'mobile refractive material' 'refractive-band-threaded-glass-v60' "$TMP/core-mobile-v60.js"
-          contains 'mobile reactor' 'layered-white-cyan-violet-reactor-v60' "$TMP/core-mobile-v60.js"
-          contains 'mobile fidelity layer' 'emissive-vector-over-real-webgl2-v61' "$TMP/core-mobile-v61.js"
-          contains 'mobile fidelity svg' 'fx-core-fidelity-v61' "$TMP/core-mobile-v61.js"
-          contains 'single-context performance contract' 'single-context-adaptive-60-plus-fps' "$TMP/core-mobile-v60.js"
-          contains 'direct core interaction event' 'formatx:coreinteraction' "$TMP/core-mobile-v60.js"
+          contains 'mobile native renderer' 'pixel-reference-native-webgl2-v62' "$TMP/core-mobile-v62.js"
+          contains 'mobile pixel geometry' 'pixel-locked-organic-concave-four-point-v62' "$TMP/core-mobile-v62.js"
+          contains 'mobile refractive material' 'multishell-refractive-crystal-glass-v62' "$TMP/core-mobile-v62.js"
+          contains 'mobile 3D reactor' 'white-cyan-spherical-reactor-orbital-rings-v62' "$TMP/core-mobile-v62.js"
+          contains 'mobile native fidelity contract' 'native-webgl2-no-overlay-v62' "$TMP/core-mobile-v62.js"
+          contains 'single-context performance contract' 'single-context-adaptive-60-plus-fps' "$TMP/core-mobile-v62.js"
+          contains 'direct core interaction event' 'formatx:coreinteraction' "$TMP/core-mobile-v62.js"
           test "$(grep -Fo "getContext('webgl2'" "$TMP/core-desktop.js" | wc -l)" -eq 1
-          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-mobile-v60.js" | wc -l)" -eq 1
-          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-mobile-v61.js" | wc -l)" -eq 0
+          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-mobile-v62.js" | wc -l)" -eq 1
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-desktop.js"
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-mobile-v60.js"
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-mobile-v61.js"
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-mobile-v62.js"
           contains 'desktop direct interaction r5' 'direct-desktop-pointer-energy-r5-living-system' "$TMP/direct-interaction.js"
           contains 'mobile direct interaction r4' 'direct-pointer-touch-drag-r4-living-system' "$TMP/direct-interaction.js"
           contains 'mobile seamless bootstrap' 'mobile-seamless-loading-v1' "$TMP/scroll.js"
@@ -135,5 +130,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source, desktop v53 + mobile v60/v61 and seamless-v7 passed'; else state=failure; description='Award, production MAG or seamless-v7 policy failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source, desktop v53 + native mobile v62 and seamless-v7 passed'; else state=failure; description='Award, production MAG or seamless-v7 policy failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
