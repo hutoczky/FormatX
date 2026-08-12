@@ -1,4 +1,4 @@
-name: Patch final live release wording
+name: Verify final live crawler copy
 
 on:
   push:
@@ -7,57 +7,34 @@ on:
       - '.github/workflows/verify-live-copy-polish-20260812.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: master
-          fetch-depth: 0
-
-      - name: Remove final release-channel duplication at source and Worker transform
+      - name: Verify canonical live HTML bypassing cache
         shell: bash
         run: |
           set -euo pipefail
+          url="https://formatxsuite.com/?copy_audit=${GITHUB_RUN_ID}"
+          curl -fsS --max-time 30 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$url" -o live.html
           python3 - <<'PY'
           from pathlib import Path
-
-          index = Path('docs/scifi-ui/index.html')
-          text = index.read_text(encoding='utf-8')
-          text = text.replace(
-              'A hivatalos teljes kiadások és kiadási információk a FormatX GitHub Releases csatornáján jelennek meg.',
-              'A hivatalos teljes kiadások és kiadási információk a FormatX hivatalos kiadási felületén jelennek meg.'
-          )
-          text = text.replace(
-              'Official full releases and release information are published through FormatX GitHub Releases.',
-              'Official full releases and release information are published on the FormatX release page.'
-          )
-          index.write_text(text, encoding='utf-8')
-
-          worker = Path('billing-worker/src/production-with-license.js')
-          value = worker.read_text(encoding='utf-8')
-          marker = ".replace(/\\bGitHub Releases\\b/gi, 'hivatalos kiadási csatorna')"
-          guarded = ".replace(/\\bGitHub Releases csatornáján\\b/gi, 'hivatalos kiadási csatornán')\n    .replace(/\\bGitHub Releases csatornája\\b/gi, 'hivatalos kiadási csatorna')\n    " + marker
-          if guarded not in value:
-              assert marker in value
-              value = value.replace(marker, guarded)
-          worker.write_text(value, encoding='utf-8')
-
-          assert 'GitHub Releases csatornáján' not in index.read_text(encoding='utf-8')
-          assert "GitHub Releases csatornáján\\b/gi, 'hivatalos kiadási csatornán'" in worker.read_text(encoding='utf-8')
+          import re, html
+          raw = Path('live.html').read_text(encoding='utf-8', errors='replace')
+          assert 'A mag érzékel.</span> <em' in raw
+          assert 'Hat specializált szerv.</span> <em' in raw
+          assert 'A látvány a bőr.</span> <em' in raw
+          assert 'hivatalos kiadási csatorna csatornáján' not in raw
+          assert 'hivatalos kiadási csatorna csatornája' not in raw
+          assert 'FormatX hivatalos kiadási felületén jelennek meg.' in raw
+          assert 'formatx-seo.js?v=20260812-final-polish-r1' in raw
+          plain = re.sub(r'<[^>]+>', '', raw)
+          plain = html.unescape(plain)
+          plain = re.sub(r'\s+', ' ', plain)
+          assert 'A mag érzékel. A gerinc döntési utat épít.' in plain
+          assert 'Hat specializált szerv. Egyetlen élő rendszer.' in plain
+          assert 'A látvány a bőr. Az ellenőrizhetőség a váz.' in plain
+          print('PASS: live canonical HTML serves all requested corrected crawler-visible copy.')
           PY
-
-      - name: Commit source correction
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html billing-worker/src/production-with-license.js
-          if ! git diff --cached --quiet; then
-            git commit -m 'fix(public): remove duplicated release-channel wording at source'
-            git push origin HEAD:master
-          fi
