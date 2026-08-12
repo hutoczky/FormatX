@@ -6,21 +6,20 @@
   // The Worker serves /scifi-ui/index.html at the canonical domain root. These
   // must therefore be origin-absolute; document-relative ./scripts and ./styles
   // resolve to non-existent root folders when location.pathname is "/".
-  const SCRIPT = '/scifi-ui/scripts/formatx-core-reference-v53.js?v=20260811-reference-v53-r3';
-  const STYLE = '/scifi-ui/styles/formatx-core-reference-v53.css?v=20260811-reference-v53-r3';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260811-cinematic-mobile-v55-r3';
-  const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260811-cinematic-mobile-v55-r3';
+  const SCRIPT = '/scifi-ui/scripts/formatx-core-reference-v53.js?v=20260812-four-point-reference-r1';
+  const STYLE = '/scifi-ui/styles/formatx-core-reference-v53.css?v=20260812-four-point-reference-r1';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260812-four-point-reference-r1';
+  const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260812-four-point-reference-r1';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260812-direct-interaction-r3-living-system';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 
   /*
-    Desktop authority remains the v53 native WebGL2 reference crystal.
-    Physical mobile uses the v55 hero-local cinematic WebGL2 renderer with
-    longer four-axis tips, deeper concave sides, thinner faceted Fresnel glass,
-    a smaller hot white nucleus and denser cyan/violet reactor rings.
-    The two renderers never boot together, so a phone gets exactly one WebGL2
-    context and one MAG canvas. No raster/image or CSS fake silhouette is used.
-    Production visual revision: interactive-cinematic-glass-r4-root-safe.
+    The public v53/v55 compatibility contract remains stable, while both paths
+    now hand off to the same reference-four-point WebGL2 crystal renderer.
+    The renderer uses real 3D shell geometry, faceted glass shading, a white
+    reactor nucleus, cyan/violet orbital rings and direct pointer/touch energy.
+    No raster MAG layer or CSS silhouette is used.
+    Production visual revision: four-point-reference-r1.
   */
 
   if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;
