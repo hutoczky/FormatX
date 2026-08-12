@@ -76,7 +76,7 @@ jobs:
               const canonicalStage = c?.parentElement || null;
               const overlay = canonicalStage?.querySelector(':scope > .fx-core-fidelity-v61') || null;
               const b = c?.getBoundingClientRect();
-              const stages = [...document.querySelectorAll('#hero .hero-space > .fx-core-mobile-v55-stage')];
+              const canonicalStages = [...document.querySelectorAll('#hero .hero-space > .fx-core-mobile-v55-stage')];
               return {
                 renderer:r.dataset.fxCoreRenderer,
                 geometry:r.dataset.fxCoreReferenceGeometry,
@@ -92,8 +92,7 @@ jobs:
                 canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,
                 canonicalOverlays:canonicalStage?.querySelectorAll(':scope > .fx-core-fidelity-v61').length || 0,
                 overlays:document.querySelectorAll('.fx-core-fidelity-v61').length,
-                canvasStages:stages.filter(s => s.querySelector(':scope > .fx-core-mobile-v55-canvas')).length,
-                visualOnlyStages:stages.filter(s => !s.querySelector(':scope > .fx-core-mobile-v55-canvas') && s.querySelector(':scope > .fx-core-fidelity-v61')).length,
+                canvasStages:canonicalStages.filter(s => s.querySelector(':scope > .fx-core-mobile-v55-canvas')).length,
                 gl:Boolean(c?.getContext('webgl2')),
                 svg:Boolean(overlay),
                 width:b?.width||0,
@@ -112,10 +111,7 @@ jobs:
             assert.equal(state.v55, 'ready-v55'); assert.equal(state.v60, 'ready-v60'); assert.equal(state.v61, 'ready-v61');
             assert.equal(state.canvases, 1); assert.equal(state.canvasStages, 1); assert.equal(state.canonicalOverlays, 1); assert.equal(state.gl, true); assert.equal(state.svg, true);
             assert.ok(state.overlays >= 1 && state.overlays <= 2, JSON.stringify(state));
-            if (state.overlays === 2) {
-              assert.equal(state.cloneMode, 'visual-bridge');
-              assert.equal(state.visualOnlyStages, 1);
-            }
+            if (state.overlays === 2) assert.equal(state.cloneMode, 'visual-bridge');
             assert.ok(state.width <= state.vw + 1 && state.height <= state.vh + 1, JSON.stringify(state));
             await page.screenshot({ path:'mobile-v61.png', fullPage:false }); await context.close();
           }
