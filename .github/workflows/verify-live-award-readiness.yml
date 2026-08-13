@@ -10,9 +10,7 @@ permissions:
 jobs:
   verify-live-award-readiness:
     if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      contains(github.event.workflow_run.head_commit.message, '[deploy-production]')
+      github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]')
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -25,54 +23,45 @@ jobs:
           set -euo pipefail
           node .github/scripts/validate-award-readiness.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-          node --check docs/scifi-ui/scripts/formatx-core-reference-v53.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v63.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v64.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
-      - name: Verify live desktop reference, cinematic native mobile v63 MAG and seamless-v7 scroll policy
+      - name: Verify live cinematic bloom v64 MAG and scrolling
         shell: bash
         run: |
           set -euo pipefail
           ORIGIN='https://formatxsuite.com'; TMP="$RUNNER_TEMP/formatx-award-current"; mkdir -p "$TMP"
-          fetch(){ local path="$1" out="$2"; curl -fsSL --retry 3 --retry-delay 1 -H 'Cache-Control: no-cache' "$ORIGIN$path" -o "$out"; }
-          contains(){ local label="$1" needle="$2" file="$3"; echo "CHECK $label"; grep -Fq "$needle" "$file" || { echo "FAIL $label: missing $needle"; exit 1; }; }
+          fetch(){ curl -fsSL --retry 3 --retry-delay 1 -H 'Cache-Control: no-cache' "$ORIGIN$1" -o "$2"; }
+          contains(){ grep -Fq "$2" "$3" || { echo "FAIL $1: missing $2"; exit 1; }; }
           fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
-          fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/core-bootstrap.js"
-          fetch "/scifi-ui/scripts/formatx-core-reference-v53.js?v=${GITHUB_RUN_ID}" "$TMP/core-v53.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/core-v55.js"
-          fetch "/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js?v=${GITHUB_RUN_ID}" "$TMP/core-desktop.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v63.js?v=${GITHUB_RUN_ID}" "$TMP/core-mobile-v63.js"
-          fetch "/scifi-ui/scripts/formatx-core-direct-interaction.js?v=${GITHUB_RUN_ID}" "$TMP/direct-interaction.js"
+          fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
+          fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
+          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v64.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-v64.js"
+          fetch "/scifi-ui/scripts/formatx-core-direct-interaction.js?v=${GITHUB_RUN_ID}" "$TMP/interaction.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
-          fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/scroll-policy.json"
+          fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
-          contains bootstrap 'reference-crystal-core-v53' "$TMP/core-bootstrap.js"
-          contains mobile-bootstrap 'single-webgl2-mobile-cinematic-pixel-reference-v63' "$TMP/core-bootstrap.js"
-          contains mobile-wrapper 'formatx-core-mobile-reference-v63.js' "$TMP/core-v55.js"
-          ! grep -Fq 'formatx-core-mobile-reference-fidelity-v61.js' "$TMP/core-v55.js"
-          contains mobile-renderer 'cinematic-pixel-reference-native-webgl2-v63' "$TMP/core-mobile-v63.js"
-          contains mobile-geometry 'pixel-locked-organic-deep-concave-four-point-v63' "$TMP/core-mobile-v63.js"
-          contains mobile-material 'multishell-fresnel-crystal-tube-glass-v63' "$TMP/core-mobile-v63.js"
-          contains mobile-reactor 'white-cyan-spherical-reactor-multiaxis-orbitals-v63' "$TMP/core-mobile-v63.js"
-          contains native-fidelity 'native-webgl2-only-no-raster-no-svg-v63' "$TMP/core-mobile-v63.js"
-          contains performance 'single-context-adaptive-60-plus-fps' "$TMP/core-mobile-v63.js"
-          contains interaction 'formatx:coreinteraction' "$TMP/core-mobile-v63.js"
-          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-desktop.js" | wc -l)" -eq 1
-          test "$(grep -Fo "getContext('webgl2'" "$TMP/core-mobile-v63.js" | wc -l)" -eq 1
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/core-mobile-v63.js"
-          contains desktop-interaction 'direct-desktop-pointer-energy-r5-living-system' "$TMP/direct-interaction.js"
-          contains mobile-interaction 'direct-pointer-touch-drag-r4-living-system' "$TMP/direct-interaction.js"
+          contains bootstrap 'single-webgl2-mobile-cinematic-bloom-reference-v64' "$TMP/bootstrap.js"
+          contains wrapper 'formatx-core-mobile-reference-v64.js' "$TMP/mobile-wrapper.js"
+          contains renderer 'cinematic-bloom-native-webgl2-v64' "$TMP/mobile-v64.js"
+          contains geometry 'target-proportioned-organic-deep-concave-four-point-v64' "$TMP/mobile-v64.js"
+          contains material 'fresnel-multishell-crystal-bloom-v64' "$TMP/mobile-v64.js"
+          contains reactor 'white-cyan-spherical-reactor-multiaxis-bloom-orbitals-v64' "$TMP/mobile-v64.js"
+          contains fidelity 'native-webgl2-one-context-postprocess-bloom-v64' "$TMP/mobile-v64.js"
+          contains performance 'single-context-adaptive-60-plus-fps' "$TMP/mobile-v64.js"
+          contains interaction 'formatx:coreinteraction' "$TMP/mobile-v64.js"
+          contains bloom 'uBloom' "$TMP/mobile-v64.js"
+          test "$(grep -Fo "getContext('webgl2'" "$TMP/mobile-v64.js" | wc -l)" -eq 1
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/mobile-v64.js"
+          contains mobile-interaction 'direct-pointer-touch-drag-r4-living-system' "$TMP/interaction.js"
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
           ! grep -Fq 'preventDefault' "$TMP/scroll.js"
-          python3 - "$TMP/scroll-policy.json" <<'PY'
+          python3 - "$TMP/policy.json" <<'PY'
           import json,sys
           p=json.load(open(sys.argv[1],encoding='utf-8'));c=p.get('policy',{});m=p.get('mobile',{});d=p.get('desktop',{})
           checks={'input_capture':c.get('input_capture') is False,'section_scroll_snap':c.get('section_scroll_snap') is False,'native_wheel_touch':c.get('native_wheel_touch') is True,'mobile_controller':m.get('controller')=='seamless-v7','mobile_loop':m.get('automatic_loop') is True,'mobile_bridge':m.get('visual_bridge') is True,'mobile_no_content_clone':m.get('cloned_content') is False,'mobile_native_momentum':m.get('native_momentum_preserved') is True,'desktop_controller':d.get('controller')=='seamless-v7'}
           failed=[k for k,v in checks.items() if not v]
           if failed: raise SystemExit('FAIL current scroll policy: '+', '.join(failed))
-          print('PASS: award readiness live policy passed.')
           PY
       - name: Publish live award-readiness status
         if: always()
@@ -82,5 +71,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source, desktop v53 + cinematic native mobile v63 passed'; else state=failure; description='Award, production MAG or seamless-v7 policy failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + cinematic bloom native mobile v64 passed'; else state=failure; description='Award, production MAG or scrolling failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
