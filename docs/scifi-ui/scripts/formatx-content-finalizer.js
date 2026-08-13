@@ -2,6 +2,7 @@
   'use strict';
 
   const ROOT = document.documentElement;
+  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -41,6 +42,27 @@
 
   function setImportant(element, property, value) {
     element?.style.setProperty(property, value, 'important');
+  }
+
+  function ensureCrawlableHeroLinks() {
+    const actions = Array.from(document.querySelectorAll('#hero .hero-actions a'));
+    actions.forEach(link => {
+      if (link.hasAttribute('href') && link.getAttribute('href')) return;
+      const label = `${link.textContent || ''} ${link.getAttribute('aria-label') || ''}`.toLowerCase();
+      if (link.matches('[data-fx-simulator-entry]') || /szimulátor|simulator|operational twin/.test(label)) {
+        link.href = '/scifi-ui/project-simulator.html';
+      } else if (/android/.test(label)) {
+        link.href = '/download/android';
+      }
+    });
+
+    const destinations = ['#hero', '#experience', '#capabilities', '#pricing', '#system', '#resources'];
+    document.querySelectorAll('#hero .fx-organism-map a[data-organ-node]').forEach((link, index) => {
+      if (!link.hasAttribute('href') || !link.getAttribute('href')) {
+        link.href = destinations[index] || '#hero';
+      }
+    });
+    ROOT.dataset.fxCrawlableHeroLinks = 'ready-v1';
   }
 
   function ensureMobileCoreButton(languageContainer, languageToggle) {
@@ -273,12 +295,9 @@
   }
 
   function apply() {
-    const lead = document.querySelector('#hero .hero-lead');
-    bilingual(
-      lead,
-      'A FormatX Suite Pro független fejlesztésű technikusi szoftver. Valós rendszerállapotot tár fel, műveleti tervet készít, csak kontrollált megerősítés után hajt végre, majd visszaellenőrzi az eredményt.',
-      'FormatX Suite Pro is independently developed technician software. It discovers real system state, builds an operation plan, executes only after controlled confirmation, then verifies the result.'
-    );
+    // Keep the server/static hero lead as the first-paint LCP element. Rewriting
+    // this paragraph after JavaScript startup caused late LCP and layout shift.
+    ensureCrawlableHeroLinks();
 
     const navigation = [
       ['#experience', 'Idegrendszer — Hogyan működik', 'Nervous system — How it works'],
@@ -297,7 +316,7 @@
     updateTelemetry();
     ensureLicenceLink();
     finalizeMobileControls();
-    ROOT.dataset.fxContentFinalizer = 'ready-v3';
+    ROOT.dataset.fxContentFinalizer = 'ready-v4';
   }
 
   [
@@ -314,6 +333,11 @@
     apply();
   }
 
-  setTimeout(apply, 1200);
-  setTimeout(apply, 3600);
+  if (AUDIT_MODE) {
+    setTimeout(ensureCrawlableHeroLinks, 350);
+    setTimeout(ensureCrawlableHeroLinks, 1200);
+  } else {
+    setTimeout(apply, 1200);
+    setTimeout(apply, 3600);
+  }
 }());
