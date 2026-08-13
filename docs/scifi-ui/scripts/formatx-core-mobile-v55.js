@@ -8,7 +8,7 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v64';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-bloom-native-webgl2-v64-r1';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-bloom-native-webgl2-v64-r1a';
 
   function registerComposition() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
