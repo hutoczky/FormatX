@@ -1,4 +1,4 @@
-name: Validate mobile reference-locked MAG v67 runtime
+name: Validate mobile reference-grade MAG v68 runtime
 on:
   push:
     branches: [master]
@@ -6,8 +6,9 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v67.js'
-      - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v68.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
+      - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/workflows/validate-real3d-mobile-runtime-v22.yml'
   workflow_dispatch:
@@ -20,29 +21,30 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Validate v67 source contracts
+      - name: Validate v68 source contracts
         run: |
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v67.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v68.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/core-v67-mobile" && cd "$RUNNER_TEMP/core-v67-mobile"
+          mkdir -p "$RUNNER_TEMP/core-v68-mobile" && cd "$RUNNER_TEMP/core-v68-mobile"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify native v67 WebGL2 animation interaction and fail-open state
+      - name: Verify native v68 WebGL2 animation interaction layout and fail-open state
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v67-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v68-server.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/core-v67-mobile"
+          cd "$RUNNER_TEMP/core-v68-mobile"
           node <<'NODE'
           const assert=require('node:assert/strict');const {chromium}=require('playwright');
-          async function scenario(browser,block){const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'}),page=await ctx.newPage();if(block)await page.addInitScript(()=>{const o=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(t,a){if(t==='webgl2')return null;return o.call(this,t,a);};});await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu',{waitUntil:'domcontentloaded',timeout:45000});if(!block){await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV67==='ready-v67',null,{timeout:45000});const before=await page.evaluate(()=>Number(window.FormatXCoreMobileV67?.energy||0));await page.touchscreen.tap(195,390);await page.waitForTimeout(180);const s=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),b=c?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,fidelity:r.dataset.fxCoreReferenceFidelity,performance:r.dataset.fxCorePerformance,animation:r.dataset.fxCoreAnimation,interaction:r.dataset.fxCoreInteractionVisual,v55:r.dataset.fxCoreMobileV55,v67:r.dataset.fxCoreMobileV67,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,overlays:document.querySelectorAll('.fx-core-fidelity-v61').length,width:b?.width||0,height:b?.height||0,vw:innerWidth,vh:innerHeight,gl:Boolean(c?.getContext('webgl2')),energy:Number(window.FormatXCoreMobileV67?.energy||0)};});assert.equal(s.renderer,'single-webgl2-mobile-reference-locked-v67');assert.equal(s.geometry,'reference-locked-organic-deep-concave-four-point-v67');assert.equal(s.material,'multishell-translucent-fresnel-crystal-glass-v67');assert.equal(s.reactor,'small-white-cyan-reactor-six-orbitals-v67');assert.equal(s.fidelity,'native-webgl2-only-no-raster-no-svg-v67');assert.equal(s.performance,'single-context-adaptive-60-plus-fps');assert.equal(s.animation,'continuous-native-webgl2-living-motion-v67');assert.equal(s.interaction,'direct-touch-drag-burst-parallax-v67');assert.equal(s.v55,'ready-v55');assert.equal(s.v67,'ready-v67');assert.equal(s.canvases,1);assert.equal(s.overlays,0);assert.equal(s.gl,true);assert.ok(s.width<=s.vw+1&&s.height<=s.vh+1,JSON.stringify(s));assert.ok(s.energy>=before,JSON.stringify({before,after:s.energy}));}else{await page.waitForFunction(()=>['context-unavailable-v67','webgl2-unavailable-v67'].includes(document.documentElement.dataset.fxCoreMobileV67),null,{timeout:45000});const s=await page.evaluate(()=>({state:document.documentElement.dataset.fxCoreMobileV67,bodyVisible:getComputedStyle(document.body).visibility!=='hidden'}));assert.ok(['context-unavailable-v67','webgl2-unavailable-v67'].includes(s.state));assert.equal(s.bodyVisible,true);}await ctx.close();}
-          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(b,false);await scenario(b,true);await b.close();console.log('PASS: mobile reference-locked v67 runtime, animation and interaction passed.');})().catch(e=>{console.error(e);process.exit(1);});
+          async function scenario(browser,block){const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'}),page=await ctx.newPage();if(block)await page.addInitScript(()=>{const o=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(t,a){if(t==='webgl2')return null;return o.call(this,t,a);};});await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu',{waitUntil:'domcontentloaded',timeout:45000});if(!block){await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV68==='ready-v68',null,{timeout:45000});await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:15000});const before=await page.evaluate(()=>Number(window.FormatXCoreMobileV68?.energy||0));await page.touchscreen.tap(195,390);await page.waitForTimeout(220);const s=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),b=c?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,fidelity:r.dataset.fxCoreReferenceFidelity,performance:r.dataset.fxCorePerformance,animation:r.dataset.fxCoreAnimation,interaction:r.dataset.fxCoreInteractionVisual,v55:r.dataset.fxCoreMobileV55,v68:r.dataset.fxCoreMobileV68,layout:r.dataset.fxMobileReferenceLayout,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,width:b?.width||0,height:b?.height||0,vw:innerWidth,vh:innerHeight,gl:Boolean(c?.getContext('webgl2')),energy:Number(window.FormatXCoreMobileV68?.energy||0),heading:Boolean(document.querySelector('.fx-reference-heading')),proof:Boolean(document.querySelector('.fx-reference-proof')),rail:Boolean(document.querySelector('.fx-reference-rail'))};});assert.equal(s.renderer,'single-webgl2-mobile-reference-grade-v68');assert.equal(s.geometry,'reference-grade-organic-deep-concave-four-point-v68');assert.equal(s.material,'four-layer-translucent-fresnel-crystal-glass-v68');assert.equal(s.reactor,'small-white-cyan-reactor-six-orbitals-v68');assert.equal(s.fidelity,'native-webgl2-only-no-raster-no-svg-v68');assert.equal(s.performance,'single-context-adaptive-60-plus-fps');assert.equal(s.animation,'continuous-native-webgl2-living-motion-v68');assert.equal(s.interaction,'direct-touch-drag-burst-parallax-v68');assert.equal(s.v55,'ready-v55');assert.equal(s.v68,'ready-v68');assert.equal(s.layout,'ready-v1');assert.equal(s.canvases,1);assert.equal(s.gl,true);assert.equal(s.heading,true);assert.equal(s.proof,true);assert.equal(s.rail,true);assert.ok(s.width<=s.vw+1&&s.height<=s.vh+1,JSON.stringify(s));assert.ok(s.energy>=before,JSON.stringify({before,after:s.energy}));}else{await page.waitForFunction(()=>['context-unavailable-v68','webgl2-unavailable-v68'].includes(document.documentElement.dataset.fxCoreMobileV68),null,{timeout:45000});}await ctx.close();}
+          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(b,false);await scenario(b,true);await b.close();console.log('PASS: mobile reference-grade v68 runtime, layout, animation and interaction passed.');})().catch(e=>{console.error(e);process.exit(1);});
           NODE
       - name: Publish mobile runtime status
         if: always()
@@ -51,5 +53,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference-locked v67 mobile WebGL2 animation and interaction passed'; else state=failure; description='Reference-locked v67 mobile runtime failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v67 mobile runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Reference-grade v68 mobile WebGL2 layout/animation/interaction passed'; else state=failure; description='Reference-grade v68 mobile runtime failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v68 mobile runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
