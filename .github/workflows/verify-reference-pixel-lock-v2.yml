@@ -1,5 +1,9 @@
 name: Verify post-deploy reference composition
 on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/verify-reference-pixel-lock-v2.yml'
   workflow_run:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
@@ -9,7 +13,7 @@ permissions:
 jobs:
   post-deploy-capture:
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'workflow_dispatch' || github.event_name == 'push' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
