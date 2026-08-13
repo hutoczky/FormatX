@@ -1,14 +1,14 @@
 (function () {
   'use strict';
   const root = document.documentElement;
-  if (root.dataset.fxCoreMobileV55 === 'ready-v55' || root.dataset.fxCoreMobileV55 === 'booting-reference-v63') return;
+  if (root.dataset.fxCoreMobileV55 === 'ready-v55' || root.dataset.fxCoreMobileV55 === 'booting-reference-v64') return;
   if (new URLSearchParams(location.search).get('lighthouse') === '1') {
     root.dataset.fxCoreMobileV55 = 'audit-skip';
     return;
   }
-  root.dataset.fxCoreMobileV55 = 'booting-reference-v63';
+  root.dataset.fxCoreMobileV55 = 'booting-reference-v64';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-pixel-reference-native-webgl2-v63-r1a';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-bloom-native-webgl2-v64-r1';
 
   function registerComposition() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
@@ -21,18 +21,18 @@
       host.style.setProperty('max-height', compactPhone ? '510px' : '545px', 'important');
     }
     if (stage) {
-      stage.style.setProperty('background', 'radial-gradient(circle at 50% 47%, rgba(22,151,255,.15), transparent 38%), radial-gradient(circle at 55% 49%, rgba(137,56,255,.075), transparent 51%), linear-gradient(180deg,#01050e 0%,#010914 67%,#03172b 100%)', 'important');
+      stage.style.setProperty('background', 'radial-gradient(circle at 50% 47%, rgba(16,124,255,.17), transparent 38%), radial-gradient(circle at 54% 50%, rgba(123,45,255,.085), transparent 52%), linear-gradient(180deg,#01040b 0%,#010914 64%,#031a30 100%)', 'important');
       stage.style.setProperty('transform', 'translateY(-1.5%) scale(.975)', 'important');
       stage.style.setProperty('transform-origin', '50% 50%', 'important');
     }
   }
 
   const renderer = document.createElement('script');
-  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v63.js?v=20260813-cinematic-pixel-reference-r1a';
+  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v64.js?v=20260813-cinematic-bloom-r1';
   renderer.async = false;
-  renderer.dataset.fxCoreMobileReferenceV63 = 'true';
+  renderer.dataset.fxCoreMobileReferenceV64 = 'true';
   renderer.addEventListener('load', () => {
-    root.dataset.fxCoreReferenceLockLoad = 'ready-v63';
+    root.dataset.fxCoreReferenceLockLoad = 'ready-v64';
     requestAnimationFrame(() => {
       registerComposition();
       requestAnimationFrame(registerComposition);
@@ -42,9 +42,9 @@
   }, { once: true });
   renderer.addEventListener('error', () => {
     root.dataset.fxCoreMobileV55 = 'load-failed-v55';
-    root.dataset.fxCoreMobileV63 = 'load-failed-v63';
-    root.dataset.fxCoreReferenceLock = 'load-failed-v63';
-    root.dataset.fxCoreReal3d = 'context-unavailable-v63';
+    root.dataset.fxCoreMobileV64 = 'load-failed-v64';
+    root.dataset.fxCoreReferenceLock = 'load-failed-v64';
+    root.dataset.fxCoreReal3d = 'context-unavailable-v64';
   }, { once: true });
   document.head.appendChild(renderer);
 }());
