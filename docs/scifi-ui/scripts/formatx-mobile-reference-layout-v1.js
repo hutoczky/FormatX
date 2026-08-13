@@ -1,57 +1,194 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const mobileViewport=matchMedia('(max-width:900px)');
 let legacyMenu=null;
 let paused=root.dataset.fxReferenceMotionPaused==='true';
+if(root.dataset.fxMobileReferenceLayout==='booting-r74'||root.dataset.fxMobileReferenceLayout==='ready-v1')return;
+root.dataset.fxMobileReferenceLayout='booting-r74';
 
-function restoreDesktop(){
-  document.querySelectorAll('#hero .fx-reference-heading,#hero .fx-reference-proof,#hero .fx-reference-rail,.fx-reference-mag-button,.fx-reference-menu-button').forEach(node=>node.remove());
-  const legacy=document.getElementById('fx-reference-legacy-menu');
-  if(legacy instanceof HTMLButtonElement){
-    legacy.id='menu-toggle';
-    legacy.hidden=false;
-    legacy.removeAttribute('hidden');
-    legacy.removeAttribute('aria-hidden');
-    legacy.removeAttribute('tabindex');
-    legacyMenu=legacy;
+function loadStyles(){
+  if(!document.querySelector('link[data-fx-mobile-reference-layout-style]')){
+    const l=document.createElement('link');
+    l.rel='stylesheet';
+    l.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260813-mobile-only-r73';
+    l.dataset.fxMobileReferenceLayoutStyle='true';
+    document.head.appendChild(l);
   }
-  root.dataset.fxMobileReferenceLayout='desktop-skip';
+  if(!document.querySelector('link[data-fx-flow-first-r74]')){
+    const f=document.createElement('link');
+    f.rel='stylesheet';
+    f.href='/scifi-ui/styles/formatx-flow-first-r74.css?v=20260814-mag-first-flow-r74';
+    f.dataset.fxFlowFirstR74='true';
+    document.head.appendChild(f);
+  }
+  if(!document.querySelector('link[data-fx-responsive-text-guard]')){
+    const g=document.createElement('link');
+    g.rel='stylesheet';
+    g.href='/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260813-responsive-text-wrap-r72';
+    g.dataset.fxResponsiveTextGuard='true';
+    document.head.appendChild(g);
+  }
 }
 
-if(!mobileViewport.matches){
-  restoreDesktop();
-  addEventListener('resize',()=>{if(!mobileViewport.matches)restoreDesktop()},{passive:true});
-  return;
-}
-if(root.dataset.fxMobileReferenceLayout==='ready-v1')return;
-root.dataset.fxMobileReferenceLayout='booting-v1';
-
-function loadStyle(){
- if(!document.querySelector('link[data-fx-mobile-reference-layout-style]')){const l=document.createElement('link');l.rel='stylesheet';l.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260813-mobile-only-r73';l.dataset.fxMobileReferenceLayoutStyle='true';document.head.appendChild(l)}
- if(!document.querySelector('link[data-fx-responsive-text-guard]')){const g=document.createElement('link');g.rel='stylesheet';g.href='/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260813-responsive-text-wrap-r72';g.dataset.fxResponsiveTextGuard='true';document.head.appendChild(g)}
-}
 function pulse(){window.FormatXCoreMobileV69?.pulse?.()}
-function mountHeaderControls(){const bar=document.querySelector('.topbar'),mag=document.querySelector('.fx-reference-mag-button'),language=document.querySelector('.fx-language-toggle'),menu=document.querySelector('.fx-reference-menu-button');if(!(bar instanceof HTMLElement)||!(mag instanceof HTMLButtonElement)||!(menu instanceof HTMLButtonElement))return false;if(!(language instanceof HTMLButtonElement)){bar.append(mag,menu);return false}bar.append(mag,language,menu);return true}
-function syncMenuState(){const reference=document.querySelector('.fx-reference-menu-button'),nav=document.getElementById('main-nav');if(!(reference instanceof HTMLButtonElement)||!(nav instanceof HTMLElement))return;const open=nav.classList.contains('open');reference.setAttribute('aria-expanded',String(open));reference.classList.toggle('open',open)}
-function adoptLegacyMenu(){const original=document.querySelector('#menu-toggle.fx-organism-system-toggle');if(!(original instanceof HTMLButtonElement)||original.classList.contains('fx-reference-menu-button'))return false;legacyMenu=original;original.id='fx-reference-legacy-menu';original.hidden=true;original.setAttribute('aria-hidden','true');original.setAttribute('tabindex','-1');const reference=document.querySelector('.fx-reference-menu-button');if(reference instanceof HTMLButtonElement){reference.id='menu-toggle';reference.setAttribute('aria-controls','main-nav');syncMenuState()}return true}
-function setPaused(next){paused=Boolean(next);root.dataset.fxReferenceMotionPaused=String(paused);document.querySelectorAll('.fx-reference-pause').forEach(button=>{button.dataset.paused=String(paused);button.setAttribute('aria-pressed',String(paused));button.textContent=paused?'▶':'Ⅱ';button.setAttribute('aria-label',root.lang==='en'?(paused?'Resume animation':'Pause animation'):(paused?'Animáció folytatása':'Animáció szüneteltetése'))});dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused}}));if(!paused)pulse()}
-function create(){
- if(!mobileViewport.matches){restoreDesktop();return true}
- const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!hero||!grid||!space)return false;
- if(!document.querySelector('.fx-reference-mag-button')){const mag=document.createElement('button');mag.className='fx-reference-mag-button';mag.type='button';mag.textContent=root.lang==='en'?'CORE':'MAG';mag.setAttribute('aria-label',root.lang==='en'?'Focus the living core':'Az élő mag fókuszálása');mag.addEventListener('click',()=>{hero.scrollIntoView({block:'start'});pulse()});document.body.appendChild(mag)}
- if(!document.querySelector('.fx-reference-menu-button')){const menu=document.createElement('button');menu.className='fx-reference-menu-button';menu.type='button';menu.innerHTML='<span></span><span></span>';menu.setAttribute('aria-label',root.lang==='en'?'Menu':'Menü');menu.setAttribute('aria-expanded','false');menu.addEventListener('click',()=>{adoptLegacyMenu();if(legacyMenu instanceof HTMLButtonElement)legacyMenu.click();queueMicrotask(syncMenuState);setTimeout(syncMenuState,0)});document.body.appendChild(menu);adoptLegacyMenu()}
- mountHeaderControls();
- if(!hero.querySelector('.fx-reference-heading')){const h=document.createElement('div');h.className='fx-reference-heading';h.textContent=root.lang==='en'?'DISCOVER HOW IT WORKS':'A MŰKÖDÉS MEGISMERÉSE';space.after(h)}
- if(!hero.querySelector('.fx-reference-proof')){const card=document.createElement('article');card.className='fx-reference-proof';card.innerHTML=`<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2>${root.lang==='en'?'Proof behind the visual.':'Bizonyíték a látvány mögött.'}</h2><p>${root.lang==='en'?'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.':'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.'}</p><a class="fx-reference-liveos" href="#experience" aria-label="Live OS megnyitása">Live OS</a>`;hero.querySelector('.fx-reference-heading').after(card);card.querySelector('.fx-reference-liveos').addEventListener('click',event=>{event.preventDefault();pulse();const launcher=document.querySelector('[data-fx-live-os-launcher]');if(launcher instanceof HTMLButtonElement)launcher.click();else dispatchEvent(new CustomEvent('formatx:open-live-os'))})}
- if(!hero.querySelector('.fx-reference-rail')){const rail=document.createElement('div');rail.className='fx-reference-rail';rail.innerHTML='<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i></i><span>KÉRDEZZ</span></button><button class="fx-reference-pause" type="button" aria-label="Animáció szüneteltetése" data-paused="false">Ⅱ</button>';hero.appendChild(rail);rail.querySelector('.fx-reference-ask').addEventListener('click',()=>{if(window.FormatXOrganismVoice?.open)window.FormatXOrganismVoice.open();else document.querySelector('.fx-organism-thought-trigger')?.click();pulse()});setPaused(paused)}
- root.dataset.fxMobileReferenceLayout='ready-v1';return true;
+function syncMenuState(){
+  const reference=document.querySelector('.fx-reference-menu-button');
+  const nav=document.getElementById('main-nav');
+  if(!(reference instanceof HTMLButtonElement)||!(nav instanceof HTMLElement))return;
+  const open=nav.classList.contains('open');
+  reference.setAttribute('aria-expanded',String(open));
+  reference.classList.toggle('open',open);
 }
-loadStyle();
-if(!create()){const mo=new MutationObserver(()=>{if(create())mo.disconnect()});mo.observe(document.documentElement,{subtree:true,childList:true})}
-const menuObserver=new MutationObserver(()=>{if(!mobileViewport.matches){menuObserver.disconnect();restoreDesktop();return}if(adoptLegacyMenu())menuObserver.disconnect()});menuObserver.observe(document.documentElement,{subtree:true,childList:true});adoptLegacyMenu();
-const headerObserver=new MutationObserver(()=>{if(!mobileViewport.matches){headerObserver.disconnect();restoreDesktop();return}if(mountHeaderControls())headerObserver.disconnect()});headerObserver.observe(document.documentElement,{subtree:true,childList:true});if(mountHeaderControls())headerObserver.disconnect();
-const nav=document.getElementById('main-nav');if(nav)new MutationObserver(syncMenuState).observe(nav,{attributes:true,attributeFilter:['class']});addEventListener('keydown',event=>{if(event.key==='Escape')queueMicrotask(syncMenuState)});let lastPausePointerUp=-Infinity;function handlePauseActivation(event){const button=event.target instanceof Element?event.target.closest('.fx-reference-pause'):null;if(!(button instanceof HTMLButtonElement))return;if(event.type==='click'&&performance.now()-lastPausePointerUp<700){event.preventDefault();return}if(event.type==='pointerup'){if(event.button!==0)return;lastPausePointerUp=performance.now()}event.preventDefault();setPaused(!paused)}document.addEventListener('pointerup',handlePauseActivation,true);document.addEventListener('click',handlePauseActivation,true);
-addEventListener('resize',()=>{if(!mobileViewport.matches)restoreDesktop()},{passive:true});
-addEventListener('formatx:languagechange',()=>{if(!mobileViewport.matches)return;const h=document.querySelector('.fx-reference-heading'),c=document.querySelector('.fx-reference-proof'),ask=document.querySelector('.fx-reference-ask span'),mag=document.querySelector('.fx-reference-mag-button');if(h)h.textContent=root.lang==='en'?'DISCOVER HOW IT WORKS':'A MŰKÖDÉS MEGISMERÉSE';if(c){c.querySelector('h2').textContent=root.lang==='en'?'Proof behind the visual.':'Bizonyíték a látvány mögött.';c.querySelector('p').textContent=root.lang==='en'?'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.':'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.'}if(ask)ask.textContent=root.lang==='en'?'ASK':'KÉRDEZZ';if(mag)mag.textContent=root.lang==='en'?'CORE':'MAG'});
+function adoptLegacyMenu(){
+  const original=document.querySelector('#menu-toggle.fx-organism-system-toggle, #menu-toggle.menu-toggle');
+  if(!(original instanceof HTMLButtonElement)||original.classList.contains('fx-reference-menu-button'))return false;
+  legacyMenu=original;
+  original.id='fx-reference-legacy-menu';
+  original.hidden=true;
+  original.setAttribute('aria-hidden','true');
+  original.setAttribute('tabindex','-1');
+  const reference=document.querySelector('.fx-reference-menu-button');
+  if(reference instanceof HTMLButtonElement){
+    reference.id='menu-toggle';
+    reference.setAttribute('aria-controls','main-nav');
+    syncMenuState();
+  }
+  return true;
+}
+function mountHeaderControls(){
+  const bar=document.querySelector('.topbar');
+  const mag=document.querySelector('.fx-reference-mag-button');
+  const language=document.querySelector('.fx-language-toggle');
+  const menu=document.querySelector('.fx-reference-menu-button');
+  if(!(bar instanceof HTMLElement)||!(mag instanceof HTMLButtonElement)||!(menu instanceof HTMLButtonElement))return false;
+  bar.appendChild(mag);
+  if(language instanceof HTMLButtonElement)bar.appendChild(language);
+  bar.appendChild(menu);
+  return language instanceof HTMLButtonElement;
+}
+function setPaused(next){
+  paused=Boolean(next);
+  root.dataset.fxReferenceMotionPaused=String(paused);
+  document.querySelectorAll('.fx-reference-pause').forEach(button=>{
+    button.dataset.paused=String(paused);
+    button.setAttribute('aria-pressed',String(paused));
+    button.textContent=paused?'▶':'Ⅱ';
+    button.setAttribute('aria-label',root.lang==='en'?(paused?'Resume animation':'Pause animation'):(paused?'Animáció folytatása':'Animáció szüneteltetése'));
+  });
+  dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused}}));
+  if(!paused)pulse();
+}
+function ensureHeader(hero){
+  if(!document.querySelector('.fx-reference-mag-button')){
+    const mag=document.createElement('button');
+    mag.className='fx-reference-mag-button';
+    mag.type='button';
+    mag.textContent=root.lang==='en'?'CORE':'MAG';
+    mag.setAttribute('aria-label',root.lang==='en'?'Focus the living core':'Az élő mag fókuszálása');
+    mag.addEventListener('click',()=>{hero.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});pulse()});
+    document.body.appendChild(mag);
+  }
+  if(!document.querySelector('.fx-reference-menu-button')){
+    const menu=document.createElement('button');
+    menu.className='fx-reference-menu-button';
+    menu.type='button';
+    menu.innerHTML='<span></span><span></span>';
+    menu.setAttribute('aria-label',root.lang==='en'?'Menu':'Menü');
+    menu.setAttribute('aria-expanded','false');
+    menu.addEventListener('click',()=>{
+      adoptLegacyMenu();
+      if(legacyMenu instanceof HTMLButtonElement)legacyMenu.click();
+      queueMicrotask(syncMenuState);
+      setTimeout(syncMenuState,0);
+    });
+    document.body.appendChild(menu);
+  }
+  adoptLegacyMenu();
+  mountHeaderControls();
+}
+function ensureFlowContent(hero,grid,space){
+  let heading=hero.querySelector('.fx-reference-heading');
+  if(!heading){
+    heading=document.createElement('div');
+    heading.className='fx-reference-heading';
+    heading.textContent=root.lang==='en'?'DISCOVER HOW IT WORKS':'A MŰKÖDÉS MEGISMERÉSE';
+    grid.appendChild(heading);
+  }
+  let card=hero.querySelector('.fx-reference-proof');
+  if(!card){
+    card=document.createElement('article');
+    card.className='fx-reference-proof';
+    card.innerHTML=`<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2>${root.lang==='en'?'Proof behind the visual.':'Bizonyíték a látvány mögött.'}</h2><p>${root.lang==='en'?'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.':'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.'}</p><a class="fx-reference-liveos" href="#experience" aria-label="Live OS megnyitása">Live OS</a>`;
+    grid.appendChild(card);
+    card.querySelector('.fx-reference-liveos').addEventListener('click',event=>{
+      event.preventDefault();
+      pulse();
+      const launcher=document.querySelector('[data-fx-live-os-launcher]');
+      if(launcher instanceof HTMLButtonElement)launcher.click();
+      else dispatchEvent(new CustomEvent('formatx:open-live-os'));
+    });
+  }
+  let rail=hero.querySelector('.fx-reference-rail');
+  if(!rail){
+    rail=document.createElement('div');
+    rail.className='fx-reference-rail';
+    rail.innerHTML='<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i></i><span>KÉRDEZZ</span></button><button class="fx-reference-pause" type="button" aria-label="Animáció szüneteltetése" data-paused="false">Ⅱ</button>';
+    rail.querySelector('.fx-reference-ask').addEventListener('click',()=>{
+      if(window.FormatXOrganismVoice?.open)window.FormatXOrganismVoice.open();
+      else document.querySelector('.fx-organism-thought-trigger')?.click();
+      pulse();
+    });
+  }
+  if(rail.parentElement!==grid)space.after(rail);
+  setPaused(paused);
+}
+function create(){
+  const hero=document.getElementById('hero');
+  const grid=hero?.querySelector('.hero-grid');
+  const space=hero?.querySelector('.hero-space');
+  if(!hero||!grid||!space)return false;
+  ensureHeader(hero);
+  ensureFlowContent(hero,grid,space);
+  root.dataset.fxMobileReferenceLayout='ready-v1';
+  root.dataset.fxReferenceComposition='mag-first-normal-flow-r74';
+  return true;
+}
+
+loadStyles();
+if(!create()){
+  const mo=new MutationObserver(()=>{if(create())mo.disconnect()});
+  mo.observe(document.documentElement,{subtree:true,childList:true});
+}
+const headerObserver=new MutationObserver(()=>mountHeaderControls());
+headerObserver.observe(document.documentElement,{subtree:true,childList:true});
+const nav=document.getElementById('main-nav');
+if(nav)new MutationObserver(syncMenuState).observe(nav,{attributes:true,attributeFilter:['class']});
+addEventListener('keydown',event=>{if(event.key==='Escape')queueMicrotask(syncMenuState)});
+let lastPausePointerUp=-Infinity;
+function handlePauseActivation(event){
+  const button=event.target instanceof Element?event.target.closest('.fx-reference-pause'):null;
+  if(!(button instanceof HTMLButtonElement))return;
+  if(event.type==='click'&&performance.now()-lastPausePointerUp<700){event.preventDefault();return;}
+  if(event.type==='pointerup'){if(event.button!==0)return;lastPausePointerUp=performance.now();}
+  event.preventDefault();
+  setPaused(!paused);
+}
+document.addEventListener('pointerup',handlePauseActivation,true);
+document.addEventListener('click',handlePauseActivation,true);
+addEventListener('resize',()=>requestAnimationFrame(()=>{mountHeaderControls();create()}),{passive:true});
+addEventListener('formatx:languagechange',()=>{
+  const h=document.querySelector('.fx-reference-heading');
+  const c=document.querySelector('.fx-reference-proof');
+  const ask=document.querySelector('.fx-reference-ask span');
+  const mag=document.querySelector('.fx-reference-mag-button');
+  const menu=document.querySelector('.fx-reference-menu-button');
+  if(h)h.textContent=root.lang==='en'?'DISCOVER HOW IT WORKS':'A MŰKÖDÉS MEGISMERÉSE';
+  if(c){
+    c.querySelector('h2').textContent=root.lang==='en'?'Proof behind the visual.':'Bizonyíték a látvány mögött.';
+    c.querySelector('p').textContent=root.lang==='en'?'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.':'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.';
+  }
+  if(ask)ask.textContent=root.lang==='en'?'ASK':'KÉRDEZZ';
+  if(mag)mag.textContent=root.lang==='en'?'CORE':'MAG';
+  if(menu)menu.setAttribute('aria-label',root.lang==='en'?'Menu':'Menü');
+});
 }());
