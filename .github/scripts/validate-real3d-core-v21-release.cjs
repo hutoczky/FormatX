@@ -4,10 +4,12 @@ const root=path.resolve(__dirname,'../..'),read=file=>fs.readFileSync(path.join(
 const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
 const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js');
+const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const layoutCss=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
-assert.match(bootstrap,/responsive-cinematic-reference-v69-r73/);
+const flowCss=read('docs/scifi-ui/styles/formatx-flow-first-r74.css');
+assert.match(bootstrap,/responsive-cinematic-reference-v69-r74-flow-first/);
 assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69/);
-assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260813-mobile-only-r73/);
+assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260814-mag-first-flow-r74/);
 assert.match(wrapper,/formatx-core-mobile-reference-v69\.js/);
 assert.equal((renderer.match(/candidate\.getContext\(profile\.kind/g)||[]).length,1);
 for(const token of [
@@ -22,7 +24,17 @@ for(const token of [
 ]) assert.ok(renderer.includes(token),`missing v69 release contract: ${token}`);
 assert.doesNotMatch(renderer,/new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|three\.js|babylon|playcanvas|model-viewer/i);
 assert.doesNotMatch(renderer,/\bTHREE\./);
+assert.match(layout,/mag-first-normal-flow-r74/);
+assert.match(layout,/formatx-flow-first-r74\.css\?v=20260814-mag-first-flow-r74/);
+assert.match(layout,/space\.after\(rail\)/);
+assert.doesNotMatch(layout,/desktop-skip/);
 assert.match(layoutCss,/PUBLIC PROOF|fx-reference-proof/);
-assert.match(layoutCss,/@media \(min-width:901px\)/);
-new Function(bootstrap);new Function(wrapper);new Function(renderer);
-console.log('PASS: release validates unified responsive cinematic native WebGL2 v69 r73.');
+assert.match(flowCss,/#hero \.hero-space/);
+assert.match(flowCss,/#hero \.hero-copy/);
+assert.match(flowCss,/order:0!important/);
+assert.match(flowCss,/order:2!important/);
+assert.match(flowCss,/position:sticky!important/);
+assert.match(flowCss,/position:relative!important/);
+assert.match(flowCss,/@media \(max-width:900px\)/);
+new Function(bootstrap);new Function(wrapper);new Function(renderer);new Function(layout);
+console.log('PASS: release validates responsive cinematic native WebGL2 v69 r74 MAG-first normal-flow composition.');
