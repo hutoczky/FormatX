@@ -23,9 +23,9 @@ jobs:
           set -euo pipefail
           node .github/scripts/validate-award-readiness.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v64.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v65.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
-      - name: Verify live cinematic bloom v64 MAG and scrolling
+      - name: Verify live native cinematic v65 MAG and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -35,24 +35,23 @@ jobs:
           fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v64.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-v64.js"
+          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v65.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-v65.js"
           fetch "/scifi-ui/scripts/formatx-core-direct-interaction.js?v=${GITHUB_RUN_ID}" "$TMP/interaction.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
           fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
-          contains bootstrap 'single-webgl2-mobile-cinematic-bloom-reference-v64' "$TMP/bootstrap.js"
-          contains wrapper 'formatx-core-mobile-reference-v64.js' "$TMP/mobile-wrapper.js"
-          contains renderer 'cinematic-bloom-native-webgl2-v64' "$TMP/mobile-v64.js"
-          contains geometry 'target-proportioned-organic-deep-concave-four-point-v64' "$TMP/mobile-v64.js"
-          contains material 'fresnel-multishell-crystal-bloom-v64' "$TMP/mobile-v64.js"
-          contains reactor 'white-cyan-spherical-reactor-multiaxis-bloom-orbitals-v64' "$TMP/mobile-v64.js"
-          contains fidelity 'native-webgl2-one-context-postprocess-bloom-v64' "$TMP/mobile-v64.js"
-          contains performance 'single-context-adaptive-60-plus-fps' "$TMP/mobile-v64.js"
-          contains interaction 'formatx:coreinteraction' "$TMP/mobile-v64.js"
-          contains bloom 'uBloom' "$TMP/mobile-v64.js"
-          test "$(grep -Fo "getContext('webgl2'" "$TMP/mobile-v64.js" | wc -l)" -eq 1
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/mobile-v64.js"
+          contains bootstrap 'single-webgl2-mobile-cinematic-crystal-volume-v65' "$TMP/bootstrap.js"
+          contains wrapper 'formatx-core-mobile-reference-v65.js' "$TMP/mobile-wrapper.js"
+          contains renderer 'cinematic-crystal-volume-native-webgl2-v65' "$TMP/mobile-v65.js"
+          contains geometry 'target-proportioned-organic-deep-concave-four-point-v65' "$TMP/mobile-v65.js"
+          contains material 'layered-fresnel-crystal-volume-v65' "$TMP/mobile-v65.js"
+          contains reactor 'white-cyan-spherical-reactor-multiaxis-orbitals-v65' "$TMP/mobile-v65.js"
+          contains fidelity 'native-webgl2-only-no-raster-no-svg-v65' "$TMP/mobile-v65.js"
+          contains performance 'single-context-adaptive-60-plus-fps' "$TMP/mobile-v65.js"
+          contains interaction 'formatx:coreinteraction' "$TMP/mobile-v65.js"
+          test "$(grep -Fo "getContext('webgl2'" "$TMP/mobile-v65.js" | wc -l)" -eq 1
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/mobile-v65.js"
           contains mobile-interaction 'direct-pointer-touch-drag-r4-living-system' "$TMP/interaction.js"
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
           ! grep -Fq 'preventDefault' "$TMP/scroll.js"
@@ -71,5 +70,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + cinematic bloom native mobile v64 passed'; else state=failure; description='Award, production MAG or scrolling failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + native cinematic mobile v65 passed'; else state=failure; description='Award, production MAG or scrolling failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
