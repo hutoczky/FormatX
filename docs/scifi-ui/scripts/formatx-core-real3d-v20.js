@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const root = document.documentElement;
-  const BOOTSTRAP = 'responsive-cinematic-reference-v69-r73';
+  const BOOTSTRAP = 'responsive-cinematic-reference-v69-r73a';
   const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260813-desktop-safe-r73';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260813-android-webgl-recovery-r71';
   const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260813-mobile-only-r73';
