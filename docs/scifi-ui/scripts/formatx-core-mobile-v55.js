@@ -8,7 +8,7 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v64';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-bloom-native-webgl2-v64-r1a';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-bloom-native-webgl2-v64-r2';
 
   function registerComposition() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
@@ -28,7 +28,7 @@
   }
 
   const renderer = document.createElement('script');
-  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v64.js?v=20260813-cinematic-bloom-r1';
+  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v64.js?v=20260813-cinematic-bloom-r2';
   renderer.async = false;
   renderer.dataset.fxCoreMobileReferenceV64 = 'true';
   renderer.addEventListener('load', () => {
