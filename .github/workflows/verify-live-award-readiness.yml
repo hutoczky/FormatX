@@ -42,6 +42,7 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
           fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
+          contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
           contains bootstrap 'single-webgl2-mobile-cinematic-reference-glass-v69' "$TMP/bootstrap.js"
           contains wrapper 'formatx-core-mobile-reference-v69.js' "$TMP/mobile-wrapper.js"
           contains renderer 'single-webgl2-mobile-cinematic-reference-glass-v69' "$TMP/mobile-v69.js"

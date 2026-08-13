@@ -47,6 +47,11 @@
     if (!(languageContainer instanceof HTMLElement)) return;
 
     let coreButton = languageContainer.querySelector('[data-fx-mobile-core-button]');
+    if (ROOT.dataset.fxMobileReferenceLayout === 'ready-v1'
+      || document.querySelector('.fx-reference-mag-button')) {
+      coreButton?.remove();
+      return;
+    }
     if (!(coreButton instanceof HTMLAnchorElement)) {
       coreButton = document.createElement('a');
       coreButton.href = '#hero';

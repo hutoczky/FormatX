@@ -10,6 +10,8 @@ const wrapper = read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
 const renderer = read('docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js');
 const layout = read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const layoutStyle = read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
+const contentFinalizer = read('docs/scifi-ui/scripts/formatx-content-finalizer.js');
+const livingRendering = read('docs/scifi-ui/scripts/formatx-living-system-rendering-v1.js');
 const previewWebgl = read('docs/scifi-ui/scripts/formatx-orbital-core-v28.js');
 const previewMobile = read('docs/scifi-ui/styles/formatx-real3d-mobile-v29.css');
 
@@ -55,11 +57,15 @@ assert.match(layoutStyle, /\.fx-reference-proof/);
 assert.match(layoutStyle, /:focus-visible/);
 assert.match(layoutStyle, /@media \(min-width:901px\)/);
 assert.doesNotMatch(layoutStyle, /clip-path:\s*polygon/i);
+assert.match(contentFinalizer, /fxMobileReferenceLayout === 'ready-v1'/);
+assert.match(contentFinalizer, /querySelector\('\.fx-reference-mag-button'\)/);
+assert.match(livingRendering, /document\.permissionsPolicy \|\| document\.featurePolicy/);
+assert.match(livingRendering, /fxOrientationInput = 'policy-disabled'/);
 
 assert.match(previewWebgl, /getContext\(['"]webgl2['"]/i);
 assert.match(previewWebgl, /gl\.drawElements\(gl\.TRIANGLES/);
 assert.doesNotMatch(previewWebgl, /drawImage\s*\(|new\s+Image\s*\(/i);
 assert.match(previewMobile, /data-fx-orbital-core="ready-v28"/);
 
-for (const source of [bootstrap, wrapper, renderer, layout]) new Function(source);
+for (const source of [bootstrap, wrapper, renderer, layout, contentFinalizer, livingRendering]) new Function(source);
 console.log('PASS: production MAG uses one adaptive native WebGL2 v69 renderer with layered crystalline glass, moving reactor, accessible controls and responsive mobile/desktop framing.');

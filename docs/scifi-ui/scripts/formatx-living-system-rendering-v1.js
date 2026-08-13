@@ -454,7 +454,12 @@
     addEventListener('formatx:languagechange', () => notify('language-change'), { passive: true });
     addEventListener('error', () => reportInstability('runtime-error'));
     addEventListener('unhandledrejection', () => reportInstability('promise-rejection'));
-    addEventListener('deviceorientation', onOrientation, { passive: true });
+    const sensorPolicy = document.permissionsPolicy || document.featurePolicy;
+    if (!sensorPolicy?.allowsFeature || sensorPolicy.allowsFeature('accelerometer')) {
+      addEventListener('deviceorientation', onOrientation, { passive: true });
+    } else {
+      root.dataset.fxOrientationInput = 'policy-disabled';
+    }
 
     addEventListener('pointermove', event => {
       if (!event.isTrusted) return;
