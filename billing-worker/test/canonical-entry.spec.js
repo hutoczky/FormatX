@@ -43,6 +43,29 @@ describe('active production canonical gateway', () => {
     expect(assetPath).toBe('/scifi-ui/');
   });
 
+  it('keeps dynamic homepage assets rooted in /scifi-ui without moving hash navigation', async () => {
+    const response = await canonicalWorker.fetch(
+      new Request('https://formatxsuite.com/'),
+      {
+        ASSETS: {
+          async fetch() {
+            return new Response('<!doctype html><html><head><title>FORMATX</title><base href="/scifi-ui/"></head><body><a href="#hero">Core</a></body></html>', {
+              headers: { 'Content-Type': 'text/html; charset=utf-8' },
+            });
+          },
+        },
+      },
+      {},
+    );
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(html).toContain('<base href="/scifi-ui/">');
+    expect(html).toContain('href="/#hero"');
+    expect(html).toContain('data-fx-critical-shell="v56"');
+    expect(html).not.toContain('<base href="/">');
+  });
+
   it('never emits a permanent WWW-to-apex redirect for the homepage recovery hop', async () => {
     const response = await canonicalWorker.fetch(
       new Request('https://www.formatxsuite.com/'),

@@ -306,7 +306,9 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
 
 function normaliseHomepageDocumentPaths(html) {
   let output = String(html || '')
-    .replace(/<base\s+href=["']\/scifi-ui\/["']\s*\/?\s*>/i, '<base href="/">')
+    .replace(/<base\s+href=["'](?:\/|\/scifi-ui\/)["']\s*\/?\s*>/i, '<base href="/scifi-ui/">')
+    .replaceAll('href="#', 'href="/#')
+    .replaceAll("href='#", "href='/#")
     .replaceAll('href="./', 'href="/scifi-ui/')
     .replaceAll("href='./", "href='/scifi-ui/")
     .replaceAll('src="./', 'src="/scifi-ui/')
@@ -316,12 +318,12 @@ function normaliseHomepageDocumentPaths(html) {
     .replaceAll('poster="./', 'poster="/scifi-ui/')
     .replaceAll("poster='./", "poster='/scifi-ui/");
 
-  if (!/<base\s+href=["']\/["']/i.test(output)) {
-    output = output.replace('</title>', '</title>\n  <base href="/">');
+  if (!/<base\s+href=["']\/scifi-ui\/["']/i.test(output)) {
+    output = output.replace('</title>', '</title>\n  <base href="/scifi-ui/">');
   }
 
   if (!output.includes('data-fx-critical-shell="v56"')) {
-    const baseTag = '<base href="/">';
+    const baseTag = '<base href="/scifi-ui/">';
     if (output.includes(baseTag)) {
       output = output.replace(baseTag, `${baseTag}\n  ${CRITICAL_SHELL_LINK}`);
     } else {

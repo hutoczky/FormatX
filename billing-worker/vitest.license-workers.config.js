@@ -40,6 +40,7 @@ export default defineConfig({
       'test/license-center.spec.js',
       'test/license-center-e2e.spec.js',
       'test/production-routing.spec.js',
+      'test/canonical-entry.spec.js',
     ],
     setupFiles: ['./test/license-center.setup.js'],
   },
