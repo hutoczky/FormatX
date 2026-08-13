@@ -8,13 +8,13 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v68';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'reference-grade-native-webgl2-v68-r2';
+  root.dataset.fxCoreMobileAwardRevision = 'reference-grade-native-webgl2-v68-r4';
 
   function loadReferenceLayout() {
     if (!document.querySelector('link[data-fx-mobile-reference-layout-style]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260813-reference-layout-r3';
+      link.href = '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260813-reference-layout-r4';
       link.dataset.fxMobileReferenceLayoutStyle = 'true';
       document.head.appendChild(link);
     }
