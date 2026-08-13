@@ -1,4 +1,4 @@
-name: Validate mobile cinematic bloom MAG v64 runtime
+name: Validate mobile cinematic crystal MAG v65 runtime
 on:
   push:
     branches: [master]
@@ -6,7 +6,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v64.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v65.js'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/workflows/validate-real3d-mobile-runtime-v22.yml'
@@ -20,31 +20,29 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Validate current source contracts
+      - name: Validate v65 source contracts
         run: |
-          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v64.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v65.js
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/core-v64-mobile" && cd "$RUNNER_TEMP/core-v64-mobile"
+          mkdir -p "$RUNNER_TEMP/core-v65-mobile" && cd "$RUNNER_TEMP/core-v65-mobile"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify native v64 WebGL2 bloom success and fail-open state
+      - name: Verify native v65 WebGL2 success and fail-open state
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v64-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v65-server.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/core-v64-mobile"
+          cd "$RUNNER_TEMP/core-v65-mobile"
           node <<'NODE'
           const assert=require('node:assert/strict');const {chromium}=require('playwright');
-          async function scenario(browser,block){const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'}),page=await ctx.newPage();if(block)await page.addInitScript(()=>{const o=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(t,a){if(t==='webgl2')return null;return o.call(this,t,a);};});await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu',{waitUntil:'domcontentloaded',timeout:45000});if(!block){await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV64==='ready-v64',null,{timeout:45000});const s=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),b=c?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,fidelity:r.dataset.fxCoreReferenceFidelity,performance:r.dataset.fxCorePerformance,v55:r.dataset.fxCoreMobileV55,v64:r.dataset.fxCoreMobileV64,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,overlays:document.querySelectorAll('.fx-core-fidelity-v61').length,width:b?.width||0,height:b?.height||0,vw:innerWidth,vh:innerHeight,gl:Boolean(c?.getContext('webgl2'))};});assert.equal(s.renderer,'single-webgl2-mobile-cinematic-bloom-reference-v64');assert.equal(s.geometry,'target-proportioned-organic-deep-concave-four-point-v64');assert.equal(s.material,'fresnel-multishell-crystal-bloom-v64');assert.equal(s.reactor,'white-cyan-spherical-reactor-multiaxis-bloom-orbitals-v64');assert.equal(s.fidelity,'native-webgl2-one-context-postprocess-bloom-v64');assert.equal(s.performance,'single-context-adaptive-60-plus-fps');assert.equal(s.v55,'ready-v55');assert.equal(s.v64,'ready-v64');assert.equal(s.canvases,1);assert.equal(s.overlays,0);assert.equal(s.gl,true);assert.ok(s.width<=s.vw+1&&s.height<=s.vh+1,JSON.stringify(s));}else{await page.waitForFunction(()=>['context-unavailable-v64','webgl2-unavailable-v64'].includes(document.documentElement.dataset.fxCoreMobileV64),null,{timeout:45000});const s=await page.evaluate(()=>({state:document.documentElement.dataset.fxCoreMobileV64,bodyVisible:getComputedStyle(document.body).visibility!=='hidden'}));assert.ok(['context-unavailable-v64','webgl2-unavailable-v64'].includes(s.state));assert.equal(s.bodyVisible,true);}await ctx.close();}
-          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(b,false);await scenario(b,true);await b.close();console.log('PASS: mobile cinematic bloom v64 runtime passed.');})().catch(e=>{console.error(e);process.exit(1);});
+          async function scenario(browser,block){const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'}),page=await ctx.newPage();if(block)await page.addInitScript(()=>{const o=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(t,a){if(t==='webgl2')return null;return o.call(this,t,a);};});await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu',{waitUntil:'domcontentloaded',timeout:45000});if(!block){await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV65==='ready-v65',null,{timeout:45000});const s=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),b=c?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,fidelity:r.dataset.fxCoreReferenceFidelity,performance:r.dataset.fxCorePerformance,v55:r.dataset.fxCoreMobileV55,v65:r.dataset.fxCoreMobileV65,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,overlays:document.querySelectorAll('.fx-core-fidelity-v61').length,width:b?.width||0,height:b?.height||0,vw:innerWidth,vh:innerHeight,gl:Boolean(c?.getContext('webgl2'))};});assert.equal(s.renderer,'single-webgl2-mobile-cinematic-crystal-volume-v65');assert.equal(s.geometry,'target-proportioned-organic-deep-concave-four-point-v65');assert.equal(s.material,'layered-fresnel-crystal-volume-v65');assert.equal(s.reactor,'white-cyan-spherical-reactor-multiaxis-orbitals-v65');assert.equal(s.fidelity,'native-webgl2-only-no-raster-no-svg-v65');assert.equal(s.performance,'single-context-adaptive-60-plus-fps');assert.equal(s.v55,'ready-v55');assert.equal(s.v65,'ready-v65');assert.equal(s.canvases,1);assert.equal(s.overlays,0);assert.equal(s.gl,true);assert.ok(s.width<=s.vw+1&&s.height<=s.vh+1,JSON.stringify(s));}else{await page.waitForFunction(()=>['context-unavailable-v65','webgl2-unavailable-v65'].includes(document.documentElement.dataset.fxCoreMobileV65),null,{timeout:45000});const s=await page.evaluate(()=>({state:document.documentElement.dataset.fxCoreMobileV65,bodyVisible:getComputedStyle(document.body).visibility!=='hidden'}));assert.ok(['context-unavailable-v65','webgl2-unavailable-v65'].includes(s.state));assert.equal(s.bodyVisible,true);}await ctx.close();}
+          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(b,false);await scenario(b,true);await b.close();console.log('PASS: mobile cinematic crystal-volume v65 runtime passed.');})().catch(e=>{console.error(e);process.exit(1);});
           NODE
       - name: Publish mobile runtime status
         if: always()
@@ -53,5 +51,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Cinematic bloom v64 mobile WebGL2 runtime passed'; else state=failure; description='Cinematic bloom v64 mobile runtime failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v64 mobile runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Cinematic crystal-volume v65 mobile WebGL2 runtime passed'; else state=failure; description='Cinematic crystal-volume v65 mobile runtime failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v65 mobile runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
