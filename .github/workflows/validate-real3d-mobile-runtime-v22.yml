@@ -12,6 +12,7 @@ on:
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
+      - 'docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
       - '.github/workflows/validate-real3d-mobile-runtime-v22.yml'
   workflow_dispatch:

@@ -12,6 +12,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
+      - 'docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'
   workflow_dispatch:
 permissions:
   contents: read

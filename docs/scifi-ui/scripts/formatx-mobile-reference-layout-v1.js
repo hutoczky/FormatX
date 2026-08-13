@@ -7,8 +7,8 @@ if(root.dataset.fxMobileReferenceLayout==='ready-v1')return;
 root.dataset.fxMobileReferenceLayout='booting-v1';
 
 function loadStyle(){
- if(document.querySelector('link[data-fx-mobile-reference-layout-style]'))return;
- const l=document.createElement('link');l.rel='stylesheet';l.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260813-android-webgl-recovery-r71';l.dataset.fxMobileReferenceLayoutStyle='true';document.head.appendChild(l);
+ if(!document.querySelector('link[data-fx-mobile-reference-layout-style]')){const l=document.createElement('link');l.rel='stylesheet';l.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260813-android-webgl-recovery-r71';l.dataset.fxMobileReferenceLayoutStyle='true';document.head.appendChild(l)}
+ if(!document.querySelector('link[data-fx-responsive-text-guard]')){const g=document.createElement('link');g.rel='stylesheet';g.href='/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260813-responsive-text-wrap-r72';g.dataset.fxResponsiveTextGuard='true';document.head.appendChild(g)}
 }
 function pulse(){window.FormatXCoreMobileV69?.pulse?.()}
 function mountHeaderControls(){const bar=document.querySelector('.topbar'),mag=document.querySelector('.fx-reference-mag-button'),language=document.querySelector('.fx-language-toggle'),menu=document.querySelector('.fx-reference-menu-button');if(!(bar instanceof HTMLElement)||!(mag instanceof HTMLButtonElement)||!(menu instanceof HTMLButtonElement))return false;if(!(language instanceof HTMLButtonElement)){bar.append(mag,menu);return false}bar.append(mag,language,menu);return true}

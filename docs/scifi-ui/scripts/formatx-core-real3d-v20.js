@@ -2,7 +2,7 @@
   'use strict';
   const root = document.documentElement;
   const BOOTSTRAP = 'responsive-cinematic-reference-v69-r71';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260813-android-webgl-recovery-r71';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260813-responsive-text-wrap-r72';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260813-android-webgl-recovery-r71';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260813-direct-interaction-r4-root-integrity';
 

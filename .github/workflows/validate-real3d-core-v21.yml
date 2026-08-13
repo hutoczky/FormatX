@@ -8,6 +8,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
+      - 'docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
       - 'billing-worker/src/production-entry.js'

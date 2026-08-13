@@ -18,9 +18,16 @@
       link.dataset.fxMobileReferenceLayoutStyle = 'true';
       document.head.appendChild(link);
     }
+    if (!document.querySelector('link[data-fx-responsive-text-guard]')) {
+      const guard = document.createElement('link');
+      guard.rel = 'stylesheet';
+      guard.href = '/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260813-responsive-text-wrap-r72';
+      guard.dataset.fxResponsiveTextGuard = 'true';
+      document.head.appendChild(guard);
+    }
     if (document.querySelector('script[data-fx-mobile-reference-layout]')) return;
     const script = document.createElement('script');
-    script.src = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260813-android-webgl-recovery-r71';
+    script.src = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260813-responsive-text-wrap-r72';
     script.async = false;
     script.dataset.fxMobileReferenceLayout = 'true';
     document.head.appendChild(script);

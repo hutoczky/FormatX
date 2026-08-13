@@ -38,6 +38,7 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v69.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-v69.js"
           fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
           fetch "/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=${GITHUB_RUN_ID}" "$TMP/layout.css"
+          fetch "/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=${GITHUB_RUN_ID}" "$TMP/text-guard.css"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
           fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
@@ -56,6 +57,9 @@ jobs:
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
           contains proof-style '.fx-reference-proof' "$TMP/layout.css"
+          contains hero-wrap 'max-width: 620px !important' "$TMP/text-guard.css"
+          contains normal-wrap 'white-space: normal !important' "$TMP/text-guard.css"
+          contains proof-reserve 'padding-right: clamp(88px, 24vw, 104px) !important' "$TMP/text-guard.css"
           test "$(grep -Fo "candidate.getContext(profile.kind" "$TMP/mobile-v69.js" | wc -l)" -eq 1
           contains webgl2-primary "kind:'webgl2'" "$TMP/mobile-v69.js"
           contains webgl1-recovery "kind:'webgl'" "$TMP/mobile-v69.js"
