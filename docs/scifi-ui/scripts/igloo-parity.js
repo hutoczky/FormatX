@@ -218,7 +218,7 @@
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
     './scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
     './scripts/release-metadata.js?v=20260807-full-release-1',
-    './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2',
+    './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2-reference-r70',
     './scripts/platform-status.js?v=20260807-full-release-1',
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
@@ -251,12 +251,13 @@
     }
 
     const source = queue[index];
-    const dedicatedCoreSettled = root.dataset.fxCoreReal3d === 'ready-v20'
+    const dedicatedCoreReady = /^(?:ready-v20|ready-v69)$/.test(root.dataset.fxCoreReal3d || '');
+    const dedicatedCoreSettled = dedicatedCoreReady
       || ['context-unavailable', 'webgl2-unavailable', 'shader-failed', 'context-lost'].includes(root.dataset.fxCoreReal3d);
     if (dedicatedCoreSettled
       && (source.includes('formatx-apex-native.js') || source.includes('formatx-three-host-safe.js'))) {
-      root.dataset.fxNativeApex = 'retired-for-dedicated-core-v22';
-      root.dataset.fxThreeHost = root.dataset.fxCoreReal3d === 'ready-v20' ? 'single-real3d-v22' : 'canvas2d-safety-fallback-v22';
+      root.dataset.fxNativeApex = 'retired-for-dedicated-core-v69';
+      root.dataset.fxThreeHost = dedicatedCoreReady ? 'single-real3d-v69' : 'canvas2d-safety-fallback-v22';
       root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
       load(index + 1);
       return;

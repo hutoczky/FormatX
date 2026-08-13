@@ -23,9 +23,9 @@ jobs:
           set -euo pipefail
           node .github/scripts/validate-award-readiness.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v68.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
-      - name: Verify live reference-grade v68 MAG, layout and scrolling
+      - name: Verify live responsive cinematic v69 MAG, layout and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -35,27 +35,28 @@ jobs:
           fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v68.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-v68.js"
+          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v69.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-v69.js"
           fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
           fetch "/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=${GITHUB_RUN_ID}" "$TMP/layout.css"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
           fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
-          contains bootstrap 'single-webgl2-mobile-reference-grade-v68' "$TMP/bootstrap.js"
-          contains wrapper 'formatx-core-mobile-reference-v68.js' "$TMP/mobile-wrapper.js"
-          contains renderer 'single-webgl2-mobile-reference-grade-v68' "$TMP/mobile-v68.js"
-          contains geometry 'reference-grade-organic-deep-concave-four-point-v68' "$TMP/mobile-v68.js"
-          contains material 'four-layer-translucent-fresnel-crystal-glass-v68' "$TMP/mobile-v68.js"
-          contains reactor 'small-white-cyan-reactor-six-orbitals-v68' "$TMP/mobile-v68.js"
-          contains fidelity 'native-webgl2-only-no-raster-no-svg-v68' "$TMP/mobile-v68.js"
-          contains animation 'continuous-native-webgl2-living-motion-v68' "$TMP/mobile-v68.js"
-          contains interaction 'direct-touch-drag-burst-parallax-v68' "$TMP/mobile-v68.js"
+          contains bootstrap 'single-webgl2-mobile-cinematic-reference-glass-v69' "$TMP/bootstrap.js"
+          contains wrapper 'formatx-core-mobile-reference-v69.js' "$TMP/mobile-wrapper.js"
+          contains renderer 'single-webgl2-mobile-cinematic-reference-glass-v69' "$TMP/mobile-v69.js"
+          contains geometry 'reference-target-organic-deep-concave-four-point-v69' "$TMP/mobile-v69.js"
+          contains material 'four-layer-luminous-fresnel-faceted-glass-v69' "$TMP/mobile-v69.js"
+          contains reactor 'white-cyan-reactor-six-orbitals-crossflare-v69' "$TMP/mobile-v69.js"
+          contains fidelity 'native-webgl2-only-no-raster-no-svg-v69' "$TMP/mobile-v69.js"
+          contains performance 'single-context-adaptive-60-plus-fps' "$TMP/mobile-v69.js"
+          contains animation 'continuous-native-webgl2-living-motion-v69' "$TMP/mobile-v69.js"
+          contains interaction 'direct-touch-drag-energy-burst-parallax-v69' "$TMP/mobile-v69.js"
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
           contains proof-style '.fx-reference-proof' "$TMP/layout.css"
-          test "$(grep -Fo "getContext('webgl2'" "$TMP/mobile-v68.js" | wc -l)" -eq 1
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\b|three\\.js' "$TMP/mobile-v68.js"
+          test "$(grep -Fo "getContext('webgl2'" "$TMP/mobile-v69.js" | wc -l)" -eq 1
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\.|three\\.js' "$TMP/mobile-v69.js"
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
           ! grep -Fq 'preventDefault' "$TMP/scroll.js"
           python3 - "$TMP/policy.json" <<'PY'
@@ -73,5 +74,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + reference-grade native mobile v68 passed'; else state=failure; description='Award, production MAG or scrolling failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + responsive cinematic native v69 passed'; else state=failure; description='Award, production MAG or scrolling failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

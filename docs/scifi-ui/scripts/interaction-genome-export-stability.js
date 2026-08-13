@@ -48,6 +48,17 @@
   function stabilizeMobileGeometry() {
     if (!matchMedia('(max-width: 900px), (pointer: coarse)').matches) return;
 
+    if (['booting-v1', 'ready-v1'].includes(root.dataset.fxMobileReferenceLayout)
+      || ['booting-v69', 'ready-v69'].includes(root.dataset.fxCoreMobileV69)) {
+      const sound = document.querySelector('.fx-three-sound');
+      setImportant(sound, 'display', 'none');
+      setImportant(sound, 'visibility', 'hidden');
+      setImportant(sound, 'opacity', '0');
+      setImportant(sound, 'pointer-events', 'none');
+      setImportant(sound, 'z-index', '-1');
+      return;
+    }
+
     const heroCopy = document.querySelector('#hero .hero-copy');
     setImportant(heroCopy, 'box-sizing', 'border-box');
     setImportant(heroCopy, 'position', 'relative');

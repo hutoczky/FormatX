@@ -4,13 +4,10 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
-      - 'docs/scifi-ui/scripts/formatx-core-reference-v53.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-      - 'docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v68.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
-      - 'docs/scifi-ui/styles/formatx-core-reference-v53.css'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
       - 'billing-worker/src/production-entry.js'
@@ -29,9 +26,9 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: Validate desktop v53 and reference-grade mobile v68 source
+      - name: Validate responsive cinematic v69 source
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
-      - name: Validate v53 desktop and v68 mobile startup/layout contract
+      - name: Validate v69 desktop/mobile startup and layout contract
         run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Validate production and preview renderer authority
         run: node .github/scripts/validate-reference-core-v26.cjs
@@ -40,10 +37,8 @@ jobs:
       - name: Validate JavaScript syntax
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
-          node --check docs/scifi-ui/scripts/formatx-core-reference-v53.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          node --check docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v68.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
           node --check billing-worker/src/production-entry.js
@@ -56,5 +51,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Desktop v53 + reference-grade mobile v68 source/layout/animation/interaction gates passed'; else state=failure; description='FormatX production crystal validation failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Responsive cinematic v69 source/layout/animation/interaction gates passed'; else state=failure; description='FormatX production crystal validation failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX production crystal' -f description="$description" -f target_url="$TARGET_URL"

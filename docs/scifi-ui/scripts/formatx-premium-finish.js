@@ -344,7 +344,7 @@
       return;
     }
 
-    if (root.dataset.fxCoreReal3d === 'ready-v20') {
+    if (/^(?:ready-v20|ready-v69)$/.test(root.dataset.fxCoreReal3d || '')) {
       root.dataset.fxPremiumCore = 'single-webgl2-real3d';
       resilientCore?.setActive(false);
       return;
@@ -497,6 +497,7 @@
     if (root.dataset.fxImmersive === 'active') ensureFallbackStatus();
   });
   addEventListener('formatx:premiumfallback', syncRendererState);
+  addEventListener('formatx:real3dready', syncRendererState);
   addEventListener('formatx:core3dfallback', handleCoreFallback);
   addEventListener('formatx:coremesh3dready', syncRendererState);
   const initialise = () => {

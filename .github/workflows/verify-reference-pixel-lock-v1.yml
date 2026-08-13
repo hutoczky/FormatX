@@ -1,22 +1,26 @@
-name: Verify mobile reference pixel lock
-run-name: Capture 432x713 CSS / DPR2 reference viewport
+name: Verify responsive reference composition
+run-name: Validate local v69 composition at award review viewports
 on:
   push:
     branches: [master]
     paths:
       - '.github/workflows/verify-reference-pixel-lock-v1.yml'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v68.js'
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
+      - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  reference-pixel-lock:
+  reference-composition:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - uses: actions/checkout@v4
       - name: Install Chromium
         shell: bash
         run: |
@@ -25,42 +29,25 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Capture exact target content viewport
+      - name: Validate exact mobile geometry and desktop composition
         shell: bash
         run: |
           set -euo pipefail
+          python3 -m http.server 4174 --directory docs >"$RUNNER_TEMP/ref-lock-server.log" 2>&1 &
+          server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           cd "$RUNNER_TEMP/ref-lock"
           node <<'NODE'
-          const assert=require('node:assert/strict');
-          const fs=require('node:fs');
-          const {chromium}=require('playwright');
-          (async()=>{
-            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-            const context=await browser.newContext({viewport:{width:432,height:713},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
-            const page=await context.newPage();
-            page.on('pageerror',e=>console.log('[PAGEERROR]',e.message));
-            await page.goto(`https://formatxsuite.com/?reference_pixel_lock=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV68==='ready-v68',null,{timeout:45000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:15000});
-            await page.waitForTimeout(450);
-            const state=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('.fx-core-mobile-v55-canvas'),b=c?.getBoundingClientRect(),hero=document.querySelector('#hero'),h=hero?.getBoundingClientRect(),heading=document.querySelector('.fx-reference-heading')?.getBoundingClientRect(),proof=document.querySelector('.fx-reference-proof')?.getBoundingClientRect(),rail=document.querySelector('.fx-reference-rail')?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,v68:r.dataset.fxCoreMobileV68,layout:r.dataset.fxMobileReferenceLayout,canvas:b?{x:b.x,y:b.y,w:b.width,h:b.height}:null,hero:h?{x:h.x,y:h.y,w:h.width,h:h.height}:null,heading:heading?{x:heading.x,y:heading.y,w:heading.width,h:heading.height}:null,proof:proof?{x:proof.x,y:proof.y,w:proof.width,h:proof.height}:null,rail:rail?{x:rail.x,y:rail.y,w:rail.width,h:rail.height}:null};});
-            console.log('REFERENCE LOCK STATE',JSON.stringify(state));
-            assert.equal(state.renderer,'single-webgl2-mobile-reference-grade-v68');
-            assert.equal(state.v68,'ready-v68');
-            assert.equal(state.layout,'ready-v1');
-            await page.screenshot({path:'reference-content-432x713-dpr2.png',fullPage:false});
-            await page.touchscreen.tap(216,330);
-            await page.waitForTimeout(220);
-            await page.screenshot({path:'reference-content-interactive-432x713-dpr2.png',fullPage:false});
-            await context.close();await browser.close();
-            for(const f of ['reference-content-432x713-dpr2.png','reference-content-interactive-432x713-dpr2.png'])assert.ok(fs.statSync(f).size>10000,f);
-          })().catch(e=>{console.error(e);process.exit(1)});
+          const assert=require('node:assert/strict'),fs=require('node:fs');const {chromium}=require('playwright');
+          const origin='http://127.0.0.1:4174/scifi-ui/';
+          async function capture(browser,name,viewport,mobile=false,dpr=1){const context=await browser.newContext({viewport,deviceScaleFactor:dpr,isMobile:mobile,hasTouch:mobile,locale:'hu-HU'}),page=await context.newPage();page.on('pageerror',error=>console.log(`[${name} PAGEERROR]`,error.message));await page.goto(`${origin}?reference_composition=${name}`,{waitUntil:'domcontentloaded',timeout:45000});await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:45000});await page.waitForTimeout(900);const state=await page.evaluate(()=>{const root=document.documentElement,q=s=>{const box=document.querySelector(s)?.getBoundingClientRect();return box?{x:+box.x.toFixed(1),y:+box.y.toFixed(1),w:+box.width.toFixed(1),h:+box.height.toFixed(1)}:null;},canvas=document.querySelector('.fx-core-mobile-v55-canvas'),genome=document.querySelector('.fx-genome-launcher');return{renderer:root.dataset.fxCoreRenderer,v69:root.dataset.fxCoreMobileV69,layout:root.dataset.fxMobileReferenceLayout,canvas:q('.fx-core-mobile-v55-canvas'),heading:q('.fx-reference-heading'),proof:q('.fx-reference-proof'),brand:q('.topbar .brand'),mag:q('.fx-reference-mag-button'),language:q('.fx-language-toggle'),menu:q('.fx-reference-menu-button'),rail:q('.fx-reference-rail'),liveOs:q('.fx-reference-liveos'),gl:Boolean(canvas?.getContext('webgl2')),glError:canvas?.getContext('webgl2')?.getError(),renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),legacyStages:document.querySelectorAll('.fx-core-mesh3d-stage,.fx-core-fracture3d-stage,.fx-transcend-shell[data-fx-native-apex="true"]').length,genome:genome?getComputedStyle(genome).display:'absent'};});console.log(name.toUpperCase(),JSON.stringify(state));assert.equal(state.renderer,'single-webgl2-mobile-cinematic-reference-glass-v69');assert.equal(state.v69,'ready-v69');assert.equal(state.layout,'ready-v1');assert.equal(state.gl,true);assert.equal(state.glError,0);assert.equal(state.legacyStages,0);assert.ok(state.renderMs<16.67,JSON.stringify(state));assert.ok(['none','absent'].includes(state.genome));if(name==='mobile-412x680'){assert.ok(Math.abs(state.brand.x-18)<=.2&&Math.abs(state.brand.y-19)<=.2&&Math.abs(state.brand.h-34)<=.2,JSON.stringify(state));assert.deepEqual(state.mag,{x:228,y:16,w:48,h:36});assert.deepEqual(state.language,{x:284,y:14,w:40,h:40});assert.deepEqual(state.menu,{x:337,y:8,w:48,h:52});assert.ok(Math.abs(state.heading.y-438)<=1,JSON.stringify(state));assert.ok(Math.abs(state.proof.x-24.7)<=1&&Math.abs(state.proof.y-478)<=1&&Math.abs(state.proof.w-358.5)<=1,JSON.stringify(state));assert.ok(Math.abs(state.liveOs.x-302.3)<=1&&Math.abs(state.liveOs.y-621)<=2,JSON.stringify(state));}await page.screenshot({path:`${name}.png`,fullPage:false});await context.close();}
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await capture(browser,'mobile-412x680',{width:412,height:680},true,2);await capture(browser,'mobile-390x844',{width:390,height:844},true,2);await capture(browser,'desktop-1440x960',{width:1440,height:960},false,1);}finally{await browser.close()}for(const file of ['mobile-412x680.png','mobile-390x844.png','desktop-1440x960.png'])assert.ok(fs.statSync(file).size>10000,file);console.log('PASS: v69 responsive reference composition matches the locked geometry.');})().catch(error=>{console.error(error);process.exit(1)});
           NODE
-      - name: Upload exact reference captures
+      - name: Upload review captures
         uses: actions/upload-artifact@v4
         with:
-          name: reference-pixel-lock-${{ github.run_id }}
+          name: responsive-reference-v69-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/ref-lock/reference-content-432x713-dpr2.png
-            ${{ runner.temp }}/ref-lock/reference-content-interactive-432x713-dpr2.png
+            ${{ runner.temp }}/ref-lock/mobile-412x680.png
+            ${{ runner.temp }}/ref-lock/mobile-390x844.png
+            ${{ runner.temp }}/ref-lock/desktop-1440x960.png
           retention-days: 14

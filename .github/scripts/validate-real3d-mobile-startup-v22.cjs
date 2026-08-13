@@ -1,6 +1,53 @@
 'use strict';
-const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'../..'),read=f=>fs.readFileSync(path.join(root,f),'utf8');
-const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js'),desktop=read('docs/scifi-ui/scripts/formatx-core-reference-v53.js'),mobile=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js'),dr=read('docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js'),mr=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-v68.js'),layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'),css=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'),home=read('docs/scifi-ui/index.html');
-assert.match(bootstrap,/reference-crystal-core-v53/);assert.match(bootstrap,/reference-grade-v68/);assert.match(bootstrap,/loading-v68/);assert.match(bootstrap,/ready-v68/);assert.match(desktop,/fxCoreRendererMode = 'desktop'/);assert.match(mobile,/fxCoreRendererMode = 'mobile'/);assert.match(mobile,/formatx-core-mobile-reference-v68\.js/);assert.equal((desktop.match(/getContext\(['"]webgl2['"]/g)||[]).length,0);assert.equal((mobile.match(/getContext\(['"]webgl2['"]/g)||[]).length,0);assert.equal((dr.match(/getContext\(['"]webgl2['"]/g)||[]).length,1);assert.equal((mr.match(/getContext\(['"]webgl2['"]/g)||[]).length,1);
-for(const t of['single-webgl2-mobile-reference-grade-v68','reference-grade-organic-deep-concave-four-point-v68','four-layer-translucent-fresnel-crystal-glass-v68','small-white-cyan-reactor-six-orbitals-v68','native-webgl2-only-no-raster-no-svg-v68','single-context-adaptive-60-plus-fps','continuous-native-webgl2-living-motion-v68','direct-touch-drag-burst-parallax-v68','formatx:coreinteraction','formatx:referencepause','ResizeObserver','IntersectionObserver','webglcontextlost'])assert.ok(mr.includes(t),`missing v68 startup contract: ${t}`);
-assert.doesNotMatch(mr,/new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|THREE\b|three\.js|babylon|playcanvas|model-viewer/i);assert.match(layout,/formatx-mobile-reference-layout-v1\.css/);assert.match(css,/\.fx-reference-heading/);assert.match(css,/\.fx-reference-proof/);assert.ok(home.includes('formatx-core-real3d-v20.js'));new Function(desktop);new Function(mobile);new Function(dr);new Function(mr);new Function(layout);new Function(bootstrap);console.log('PASS: reference-grade native mobile v68 startup/layout contract passed.');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'../..'),read=file=>fs.readFileSync(path.join(root,file),'utf8');
+const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
+const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
+const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js');
+const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
+const css=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
+const premium=read('docs/scifi-ui/scripts/formatx-premium-finish.js');
+const loader=read('docs/scifi-ui/scripts/igloo-parity.js');
+const stability=read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
+const interactionStability=read('docs/scifi-ui/scripts/interaction-genome-export-stability.js');
+const home=read('docs/scifi-ui/index.html');
+
+assert.match(bootstrap,/responsive-cinematic-reference-v69-r70/);
+assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69/);
+assert.match(bootstrap,/loading-v69/);
+assert.match(bootstrap,/ready-v69/);
+assert.match(wrapper,/formatx-core-mobile-reference-v69\.js/);
+assert.equal((bootstrap.match(/getContext\(['"]webgl2['"]/g)||[]).length,0);
+assert.equal((wrapper.match(/getContext\(['"]webgl2['"]/g)||[]).length,0);
+assert.equal((renderer.match(/getContext\(['"]webgl2['"]/g)||[]).length,1);
+for(const token of [
+  'single-webgl2-mobile-cinematic-reference-glass-v69',
+  'reference-target-organic-deep-concave-four-point-v69',
+  'four-layer-luminous-fresnel-faceted-glass-v69',
+  'white-cyan-reactor-six-orbitals-crossflare-v69',
+  'native-webgl2-only-no-raster-no-svg-v69',
+  'single-context-adaptive-60-plus-fps',
+  'continuous-native-webgl2-living-motion-v69',
+  'direct-touch-drag-energy-burst-parallax-v69',
+  'formatx:coreinteraction','formatx:referencepause','formatx:real3dready',
+  'ResizeObserver','IntersectionObserver','webglcontextlost','fxCoreRenderMs'
+]) assert.ok(renderer.includes(token),`missing v69 startup contract: ${token}`);
+assert.doesNotMatch(renderer,/new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|three\.js|babylon|playcanvas|model-viewer/i);
+assert.doesNotMatch(renderer,/\bTHREE\./);
+assert.match(layout,/formatx-mobile-reference-layout-v1\.css/);
+assert.match(layout,/setPaused/);
+assert.match(layout,/syncMenuState/);
+assert.match(layout,/aria-pressed/);
+assert.match(layout,/pointerup/);
+assert.match(css,/\.fx-reference-heading/);
+assert.match(css,/\.fx-reference-proof/);
+assert.match(css,/\.fx-genome-launcher/);
+assert.match(css,/@media \(min-width:901px\)/);
+assert.match(premium,/ready-v20\|ready-v69/);
+assert.match(loader,/ready-v20\|ready-v69/);
+assert.match(stability,/ready-v20\|ready-v69/);
+assert.match(interactionStability,/booting-v69/);
+assert.match(interactionStability,/setImportant\(sound, 'display', 'none'\)/);
+assert.ok(home.includes('formatx-core-real3d-v20.js'));
+for(const source of [bootstrap,wrapper,renderer,layout,premium,loader,stability,interactionStability]) new Function(source);
+console.log('PASS: responsive cinematic native WebGL2 v69 startup/layout/performance contract passed.');

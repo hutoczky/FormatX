@@ -1,24 +1,17 @@
-name: Verify live true 3D MAG visual
-run-name: Diagnose live desktop v53 and mobile v68 MAG
+name: Verify live responsive true 3D MAG
+run-name: Validate production v69 WebGL2 MAG on desktop and mobile
 on:
-  push:
-    branches: [master]
-    paths:
-      - '.github/workflows/verify-live-core-mesh3d-visual.yml'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v68.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-      - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
-      - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
   workflow_run:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
+  workflow_dispatch:
 permissions:
   contents: read
   statuses: write
 jobs:
   verify-live-mag:
     if: >-
-      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -31,36 +24,34 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Diagnose and validate live v68 MAG
+      - name: Validate live v69 MAG visuals animation interaction and performance
         shell: bash
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/mag-live"
           node <<'NODE'
           const assert=require('node:assert/strict'),fs=require('node:fs');const {chromium}=require('playwright');const origin='https://formatxsuite.com';
-          function diagnostics(page,label){page.on('pageerror',e=>console.log(`[${label} PAGEERROR]`,e.message));page.on('console',m=>{if(['error','warning'].includes(m.type()))console.log(`[${label} ${m.type().toUpperCase()}]`,m.text())});page.on('requestfailed',r=>console.log(`[${label} REQUESTFAILED]`,r.url(),r.failure()?.errorText||''));}
-          async function desktop(b){const c=await b.newContext({viewport:{width:1440,height:960},deviceScaleFactor:1,locale:'hu-HU'}),p=await c.newPage();diagnostics(p,'DESKTOP');await p.goto(`${origin}/?mag_visual=desktop-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await p.waitForFunction(()=>document.documentElement.dataset.fxCoreReferenceV53==='ready-v53',null,{timeout:30000});await p.screenshot({path:'desktop-v53.png',fullPage:false});await c.close();}
-          async function mobile(b){const c=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'}),p=await c.newPage();diagnostics(p,'MOBILE');await p.goto(`${origin}/?mag_visual=mobile-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});let ready=false;try{await p.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV68==='ready-v68',null,{timeout:20000});ready=true}catch(e){console.log('MOBILE READY TIMEOUT',e.message)}const pre=await p.evaluate(()=>{const r=document.documentElement;return{v55:r.dataset.fxCoreMobileV55,v68:r.dataset.fxCoreMobileV68,renderer:r.dataset.fxCoreRenderer,lock:r.dataset.fxCoreReferenceLock,lockLoad:r.dataset.fxCoreReferenceLockLoad,real3d:r.dataset.fxCoreReal3d,layout:r.dataset.fxMobileReferenceLayout,scripts:[...document.scripts].map(s=>s.src).filter(Boolean).filter(s=>s.includes('formatx-core')||s.includes('reference-layout')),styles:[...document.styleSheets].map(s=>s.href).filter(Boolean).filter(s=>s.includes('reference-layout'))};});console.log('MOBILE PRESTATE',JSON.stringify(pre));await p.screenshot({path:'mobile-v68-debug.png',fullPage:false});if(!ready)throw new Error(`v68 not ready: ${JSON.stringify(pre)}`);await p.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:10000});const before=await p.evaluate(()=>Number(window.FormatXCoreMobileV68?.energy||0));await p.touchscreen.tap(196,390);await p.waitForTimeout(260);const s=await p.evaluate(()=>{const r=document.documentElement,x=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),b=x?.getBoundingClientRect(),proof=document.querySelector('.fx-reference-proof'),heading=document.querySelector('.fx-reference-heading'),rail=document.querySelector('.fx-reference-rail');return{renderer:r.dataset.fxCoreRenderer,geometry:r.dataset.fxCoreReferenceGeometry,material:r.dataset.fxCoreReferenceMaterial,reactor:r.dataset.fxCoreInternalReactor,fidelity:r.dataset.fxCoreReferenceFidelity,animation:r.dataset.fxCoreAnimation,interaction:r.dataset.fxCoreInteractionVisual,v68:r.dataset.fxCoreMobileV68,layout:r.dataset.fxMobileReferenceLayout,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,gl:Boolean(x?.getContext('webgl2')),width:b?.width||0,height:b?.height||0,vw:innerWidth,vh:innerHeight,energy:Number(window.FormatXCoreMobileV68?.energy||0),heading:Boolean(heading),proof:Boolean(proof),rail:Boolean(rail),headingDisplay:heading?getComputedStyle(heading).display:null,proofBg:proof?getComputedStyle(proof).backgroundImage:null,railDisplay:rail?getComputedStyle(rail).display:null};});console.log('MOBILE STATE',JSON.stringify(s));assert.equal(s.renderer,'single-webgl2-mobile-reference-grade-v68');assert.equal(s.geometry,'reference-grade-organic-deep-concave-four-point-v68');assert.equal(s.material,'four-layer-translucent-fresnel-crystal-glass-v68');assert.equal(s.reactor,'small-white-cyan-reactor-six-orbitals-v68');assert.equal(s.fidelity,'native-webgl2-only-no-raster-no-svg-v68');assert.equal(s.animation,'continuous-native-webgl2-living-motion-v68');assert.equal(s.interaction,'direct-touch-drag-burst-parallax-v68');assert.equal(s.v68,'ready-v68');assert.equal(s.layout,'ready-v1');assert.equal(s.canvases,1);assert.equal(s.gl,true);assert.equal(s.heading,true);assert.equal(s.proof,true);assert.equal(s.rail,true);assert.notEqual(s.headingDisplay,'inline');assert.ok(s.proofBg&&s.proofBg!=='none');assert.equal(s.railDisplay,'flex');assert.ok(s.energy>=before,JSON.stringify({before,after:s.energy}));await p.screenshot({path:'mobile-v68.png',fullPage:false});await c.close();}
-          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await desktop(b);await mobile(b)}finally{await b.close()}for(const f of ['desktop-v53.png','mobile-v68-debug.png'])assert.ok(fs.existsSync(f)&&fs.statSync(f).size>10000,f);console.log('PASS: live reference-grade v68 visual/layout/animation/interaction completed.');})().catch(e=>{console.error(e);process.exit(1)});
+          function diagnostics(page,label){page.on('pageerror',error=>console.log(`[${label} PAGEERROR]`,error.message));page.on('requestfailed',request=>console.log(`[${label} REQUESTFAILED]`,request.url(),request.failure()?.errorText||''));}
+          async function verify(browser,name,viewport,mobile,dpr){const context=await browser.newContext({viewport,deviceScaleFactor:dpr,isMobile:mobile,hasTouch:mobile,locale:'hu-HU'}),page=await context.newPage();diagnostics(page,name);await page.goto(`${origin}/?live_mag=${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:45000});await page.waitForTimeout(1100);const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])]}));if(mobile)await page.touchscreen.tap(viewport.width/2,Math.min(340,viewport.height/2));else await page.mouse.click(viewport.width/2,Math.min(420,viewport.height/2));await page.waitForTimeout(360);const state=await page.evaluate(()=>{const root=document.documentElement,canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas'),box=canvas?.getBoundingClientRect();return{renderer:root.dataset.fxCoreRenderer,geometry:root.dataset.fxCoreReferenceGeometry,material:root.dataset.fxCoreReferenceMaterial,reactor:root.dataset.fxCoreInternalReactor,fidelity:root.dataset.fxCoreReferenceFidelity,performance:root.dataset.fxCorePerformance,animation:root.dataset.fxCoreAnimation,interaction:root.dataset.fxCoreInteractionVisual,v69:root.dataset.fxCoreMobileV69,layout:root.dataset.fxMobileReferenceLayout,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,legacyStages:document.querySelectorAll('.fx-core-mesh3d-stage,.fx-core-fracture3d-stage,.fx-transcend-shell[data-fx-native-apex="true"]').length,gl:Boolean(canvas?.getContext('webgl2')),glError:canvas?.getContext('webgl2')?.getError(),width:box?.width||0,height:box?.height||0,energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])],renderMs:Number(root.dataset.fxCoreRenderMs||Infinity)};});console.log(name.toUpperCase(),JSON.stringify(state));assert.equal(state.renderer,'single-webgl2-mobile-cinematic-reference-glass-v69');assert.equal(state.geometry,'reference-target-organic-deep-concave-four-point-v69');assert.equal(state.material,'four-layer-luminous-fresnel-faceted-glass-v69');assert.equal(state.reactor,'white-cyan-reactor-six-orbitals-crossflare-v69');assert.equal(state.fidelity,'native-webgl2-only-no-raster-no-svg-v69');assert.equal(state.performance,'single-context-adaptive-60-plus-fps');assert.equal(state.animation,'continuous-native-webgl2-living-motion-v69');assert.equal(state.interaction,'direct-touch-drag-energy-burst-parallax-v69');assert.equal(state.v69,'ready-v69');assert.equal(state.layout,'ready-v1');assert.equal(state.canvases,1);assert.equal(state.legacyStages,0);assert.equal(state.gl,true);assert.equal(state.glError,0);assert.ok(state.width<=viewport.width+1&&state.renderMs<16.67,JSON.stringify(state));assert.ok(state.energy>=before.energy,JSON.stringify({before,state}));assert.notDeepEqual(state.position,before.position);await page.screenshot({path:`${name}-v69.png`,fullPage:false});await context.close();}
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await verify(browser,'desktop',{width:1440,height:960},false,1);await verify(browser,'mobile',{width:390,height:844},true,2);}finally{await browser.close()}for(const file of ['desktop-v69.png','mobile-v69.png'])assert.ok(fs.statSync(file).size>10000,file);console.log('PASS: live responsive v69 WebGL2 MAG verified.');})().catch(error=>{console.error(error);process.exit(1)});
           NODE
       - name: Upload live MAG captures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: live-mag-v68-${{ github.run_id }}
+          name: live-mag-v69-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/mag-live/desktop-v53.png
-            ${{ runner.temp }}/mag-live/mobile-v68-debug.png
-            ${{ runner.temp }}/mag-live/mobile-v68.png
+            ${{ runner.temp }}/mag-live/desktop-v69.png
+            ${{ runner.temp }}/mag-live/mobile-v69.png
           if-no-files-found: warn
           retention-days: 14
       - name: Publish live MAG status
-        if: always()
+        if: always() && github.event_name == 'workflow_run'
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ github.event_name == 'push' && github.sha || github.event.workflow_run.head_sha }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Live reference-grade v68 visual/layout/animation/interaction passed'; else state=failure; description='Live v68 diagnostic failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG v68' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live responsive v69 WebGL2 visual and performance passed'; else state=failure; description='Live responsive v69 diagnostic failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live MAG v69' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

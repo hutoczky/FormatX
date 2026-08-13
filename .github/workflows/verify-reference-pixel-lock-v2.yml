@@ -1,35 +1,39 @@
-name: Verify post-deploy reference pixel lock
+name: Verify post-deploy reference composition
 on:
-  push:
-    branches: [master]
-    paths:
-      - '.github/workflows/verify-reference-pixel-lock-v2.yml'
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  capture:
+  post-deploy-capture:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Install Chromium
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p "$RUNNER_TEMP/ref2" && cd "$RUNNER_TEMP/ref2"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Capture current production at exact reference viewport
+      - name: Capture and verify production at the locked viewport
         shell: bash
         run: |
           set -euo pipefail
           cd "$RUNNER_TEMP/ref2"
           node <<'NODE'
           const assert=require('node:assert/strict'),fs=require('node:fs');const {chromium}=require('playwright');
-          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});const c=await b.newContext({viewport:{width:432,height:713},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});const p=await c.newPage();p.on('pageerror',e=>console.log('[PAGEERROR]',e.message));await p.goto(`https://formatxsuite.com/?pixel_lock_post=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await p.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:20000});await p.waitForTimeout(600);const state=await p.evaluate(()=>{const r=document.documentElement,q=s=>document.querySelector(s)?.getBoundingClientRect(),c=document.querySelector('.fx-core-mobile-v55-canvas');const header=[...document.querySelectorAll('.topbar *')].map(el=>{const b=el.getBoundingClientRect(),t=(el.textContent||'').trim().replace(/\s+/g,' ').slice(0,50);return{tag:el.tagName.toLowerCase(),class:el.className||'',text:t,x:+b.x.toFixed(2),y:+b.y.toFixed(2),w:+b.width.toFixed(2),h:+b.height.toFixed(2),display:getComputedStyle(el).display,vis:getComputedStyle(el).visibility};}).filter(x=>x.w>0&&x.h>0);return{renderer:r.dataset.fxCoreRenderer,v68:r.dataset.fxCoreMobileV68,layout:r.dataset.fxMobileReferenceLayout,canvas:q('.fx-core-mobile-v55-canvas'),heading:q('.fx-reference-heading'),proof:q('.fx-reference-proof'),rail:q('.fx-reference-rail'),brand:q('.topbar .brand'),logo:q('.topbar .brand>img'),menu:q('.topbar .menu-toggle'),energy:Number(window.FormatXCoreMobileV68?.energy||0),gl:Boolean(c?.getContext('webgl2')),header};});console.log('POST DEPLOY STATE',JSON.stringify(state));console.log('HEADER ELEMENTS',JSON.stringify(state.header));await p.screenshot({path:'reference-post-deploy.png',fullPage:false});await c.close();await b.close();assert.ok(fs.statSync('reference-post-deploy.png').size>10000);})().catch(e=>{console.error(e);process.exit(1)});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']}),context=await browser.newContext({viewport:{width:412,height:680},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'}),page=await context.newPage();page.on('pageerror',error=>console.log('[PAGEERROR]',error.message));await page.goto(`https://formatxsuite.com/?post_deploy_reference=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:45000});await page.waitForTimeout(1000);const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])]}));await page.touchscreen.tap(206,330);await page.waitForTimeout(360);const state=await page.evaluate(()=>{const root=document.documentElement,q=s=>{const b=document.querySelector(s)?.getBoundingClientRect();return b?{x:+b.x.toFixed(1),y:+b.y.toFixed(1),w:+b.width.toFixed(1),h:+b.height.toFixed(1)}:null;},canvas=document.querySelector('.fx-core-mobile-v55-canvas');return{renderer:root.dataset.fxCoreRenderer,v69:root.dataset.fxCoreMobileV69,geometry:root.dataset.fxCoreReferenceGeometry,material:root.dataset.fxCoreReferenceMaterial,interaction:root.dataset.fxCoreInteractionVisual,heading:q('.fx-reference-heading'),proof:q('.fx-reference-proof'),energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])],glError:canvas?.getContext('webgl2')?.getError(),renderMs:Number(root.dataset.fxCoreRenderMs||Infinity)};});console.log('POST DEPLOY',JSON.stringify(state));assert.equal(state.renderer,'single-webgl2-mobile-cinematic-reference-glass-v69');assert.equal(state.v69,'ready-v69');assert.equal(state.geometry,'reference-target-organic-deep-concave-four-point-v69');assert.equal(state.material,'four-layer-luminous-fresnel-faceted-glass-v69');assert.equal(state.interaction,'direct-touch-drag-energy-burst-parallax-v69');assert.equal(state.glError,0);assert.ok(state.renderMs<16.67,JSON.stringify(state));assert.ok(Math.abs(state.heading.y-438)<=1,JSON.stringify(state));assert.ok(Math.abs(state.proof.y-478)<=1,JSON.stringify(state));assert.ok(state.energy>=before.energy,JSON.stringify({before,state}));assert.notDeepEqual(state.position,before.position);await page.screenshot({path:'reference-post-deploy-v69.png',fullPage:false});await context.close();await browser.close();assert.ok(fs.statSync('reference-post-deploy-v69.png').size>10000);console.log('PASS: production v69 reference composition and interaction verified.');})().catch(error=>{console.error(error);process.exit(1)});
           NODE
-      - name: Upload
+      - name: Upload production capture
         uses: actions/upload-artifact@v4
         with:
-          name: reference-post-deploy-${{ github.run_id }}
-          path: ${{ runner.temp }}/ref2/reference-post-deploy.png
+          name: reference-post-deploy-v69-${{ github.run_id }}
+          path: ${{ runner.temp }}/ref2/reference-post-deploy-v69.png
           retention-days: 14
