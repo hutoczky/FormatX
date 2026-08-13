@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-10T10:21:00+02:00
-source_master=b2607f7b710c32c034b9ace5f1ab1e78468657fe
-purpose=publish the current audited FormatX website to production with Full release product truth, 5-day trial, canonical multiplatform and Android download channels, corrected SEO/evidence/support surfaces, transactional noindex protection and preserved seamless-v7 homepage behaviour
-verification=production validation, public-site integrity, desktop/mobile Chromium, Lighthouse, Cloudflare custom-domain smoke, release metadata, downloads, Android, support, feedback and payment status routes
+requested_at=2026-08-14T00:20:00+02:00
+source_master=b9adf0d93f0305181abc573f733cda38cc8d15e2
+purpose=publish verified MAG-first normal-flow composition r75 on phone and desktop: MAG first, all hero information below it in document flow, no floating header/interaction controls covering page information, native WebGL2 animation and interaction preserved
+verification=local Chromium geometry and visibility gate at 390x844 DPR2, 412x680 DPR2 and 1440x960; production validation; custom-domain smoke; follow-up live no-overlap verification
