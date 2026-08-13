@@ -13,8 +13,9 @@ const stability=read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
 const interactionStability=read('docs/scifi-ui/scripts/interaction-genome-export-stability.js');
 const home=read('docs/scifi-ui/index.html');
 
-assert.match(bootstrap,/responsive-cinematic-reference-v69-r71/);
+assert.match(bootstrap,/responsive-cinematic-reference-v69-r73/);
 assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69/);
+assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260813-mobile-only-r73/);
 assert.match(bootstrap,/loading-v69/);
 assert.match(bootstrap,/ready-v69/);
 assert.match(wrapper,/formatx-core-mobile-reference-v69\.js/);
@@ -35,6 +36,8 @@ for(const token of [
 ]) assert.ok(renderer.includes(token),`missing v69 startup contract: ${token}`);
 assert.doesNotMatch(renderer,/new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|three\.js|babylon|playcanvas|model-viewer/i);
 assert.doesNotMatch(renderer,/\bTHREE\./);
+assert.match(layout,/const mobileViewport=matchMedia\('\(max-width:900px\)'\)/);
+assert.match(layout,/desktop-skip/);
 assert.match(layout,/formatx-mobile-reference-layout-v1\.css/);
 assert.match(layout,/formatx-responsive-text-guard-r72\.css\?v=20260813-responsive-text-wrap-r72/);
 assert.match(layout,/setPaused/);
@@ -56,4 +59,4 @@ assert.match(interactionStability,/booting-v69/);
 assert.match(interactionStability,/setImportant\(sound, 'display', 'none'\)/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 for(const source of [bootstrap,wrapper,renderer,layout,premium,loader,stability,interactionStability]) new Function(source);
-console.log('PASS: responsive cinematic native WebGL2 v69 startup/layout/performance contract passed.');
+console.log('PASS: responsive cinematic native WebGL2 v69 r73 startup/layout/performance contract passed.');
