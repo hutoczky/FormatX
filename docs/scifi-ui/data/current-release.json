@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "synced_at": "2026-08-12T18:35:36Z",
+  "synced_at": "2026-08-13T06:48:09Z",
   "ok": true,
   "source": "github_published_release",
   "repository": "hutoczky/FormatX-Updates",
@@ -24,7 +24,7 @@
       "content_type": "application/zip",
       "created_at": "2026-08-11T19:16:25Z",
       "updated_at": "2026-08-11T19:16:47Z",
-      "download_count": 41,
+      "download_count": 62,
       "source": "github_release_asset",
       "primary_platform": "linux-bazzite",
       "supported_platforms": [
@@ -41,7 +41,7 @@
       "digest": "sha256:ac8add4fa5d1532c35f6994fe22a97ca8400781ce272f8577d313628e509b69f",
       "content_type": "application/vnd.android.package-archive",
       "created_at": null,
-      "updated_at": "2026-08-12T18:35:36Z",
+      "updated_at": "2026-08-13T06:48:09Z",
       "download_count": null,
       "source": "local_worker_asset"
     }
