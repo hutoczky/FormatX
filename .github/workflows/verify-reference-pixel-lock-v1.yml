@@ -1,0 +1,66 @@
+name: Verify mobile reference pixel lock
+run-name: Capture 432x713 CSS / DPR2 reference viewport
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/verify-reference-pixel-lock-v1.yml'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v68.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
+      - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reference-pixel-lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ref-lock" && cd "$RUNNER_TEMP/ref-lock"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Capture exact target content viewport
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/ref-lock"
+          node <<'NODE'
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs');
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:432,height:713},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await context.newPage();
+            page.on('pageerror',e=>console.log('[PAGEERROR]',e.message));
+            await page.goto(`https://formatxsuite.com/?reference_pixel_lock=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV68==='ready-v68',null,{timeout:45000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:15000});
+            await page.waitForTimeout(450);
+            const state=await page.evaluate(()=>{const r=document.documentElement,c=document.querySelector('.fx-core-mobile-v55-canvas'),b=c?.getBoundingClientRect(),hero=document.querySelector('#hero'),h=hero?.getBoundingClientRect(),heading=document.querySelector('.fx-reference-heading')?.getBoundingClientRect(),proof=document.querySelector('.fx-reference-proof')?.getBoundingClientRect(),rail=document.querySelector('.fx-reference-rail')?.getBoundingClientRect();return{renderer:r.dataset.fxCoreRenderer,v68:r.dataset.fxCoreMobileV68,layout:r.dataset.fxMobileReferenceLayout,canvas:b?{x:b.x,y:b.y,w:b.width,h:b.height}:null,hero:h?{x:h.x,y:h.y,w:h.width,h:h.height}:null,heading:heading?{x:heading.x,y:heading.y,w:heading.width,h:heading.height}:null,proof:proof?{x:proof.x,y:proof.y,w:proof.width,h:proof.height}:null,rail:rail?{x:rail.x,y:rail.y,w:rail.width,h:rail.height}:null};});
+            console.log('REFERENCE LOCK STATE',JSON.stringify(state));
+            assert.equal(state.renderer,'single-webgl2-mobile-reference-grade-v68');
+            assert.equal(state.v68,'ready-v68');
+            assert.equal(state.layout,'ready-v1');
+            await page.screenshot({path:'reference-content-432x713-dpr2.png',fullPage:false});
+            await page.touchscreen.tap(216,330);
+            await page.waitForTimeout(220);
+            await page.screenshot({path:'reference-content-interactive-432x713-dpr2.png',fullPage:false});
+            await context.close();await browser.close();
+            for(const f of ['reference-content-432x713-dpr2.png','reference-content-interactive-432x713-dpr2.png'])assert.ok(fs.statSync(f).size>10000,f);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Upload exact reference captures
+        uses: actions/upload-artifact@v4
+        with:
+          name: reference-pixel-lock-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/ref-lock/reference-content-432x713-dpr2.png
+            ${{ runner.temp }}/ref-lock/reference-content-interactive-432x713-dpr2.png
+          retention-days: 14
