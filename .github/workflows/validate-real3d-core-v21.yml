@@ -7,7 +7,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-reference-v53.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v64.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v65.js'
       - 'docs/scifi-ui/styles/formatx-core-reference-v53.css'
       - 'docs/scifi-ui/styles/formatx-core-mobile-v55.css'
       - 'docs/scifi-ui/scripts/formatx-reference-core-v26.js'
@@ -27,13 +27,13 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: Validate desktop v53 and cinematic bloom mobile v64 production MAG
+      - name: Validate desktop v53 and native cinematic mobile v65 source
         run: node .github/scripts/validate-real3d-core-v21-release.cjs
-      - name: Validate v53 desktop and cinematic bloom v64 mobile startup contract
+      - name: Validate v53 desktop and v65 mobile startup source contract
         run: node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-      - name: Validate production and preview renderer authority
+      - name: Validate production and preview renderer authority source
         run: node .github/scripts/validate-reference-core-v26.cjs
-      - name: Validate core integration contract
+      - name: Validate core integration source contract
         run: node .github/scripts/validate-real3d-core-v20.cjs
       - name: Validate JavaScript syntax
         run: |
@@ -41,7 +41,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-reference-v53.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-core-reference-cinematic-v1.js
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v64.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v65.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
           node --check billing-worker/src/production-entry.js
       - name: Publish real3D status
@@ -53,5 +53,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Desktop v53 + cinematic bloom mobile v64 passed geometry, bloom, one-context and syntax gates'; else state=failure; description='FormatX production crystal validation failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Desktop v53 + native cinematic mobile v65 source, one-context and syntax gates passed'; else state=failure; description='FormatX production crystal validation failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX production crystal' -f description="$description" -f target_url="$TARGET_URL"
