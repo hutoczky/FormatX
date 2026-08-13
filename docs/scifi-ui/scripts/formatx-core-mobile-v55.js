@@ -8,7 +8,7 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v63';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-pixel-reference-native-webgl2-v63-r1';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-pixel-reference-native-webgl2-v63-r1a';
 
   function registerComposition() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
@@ -28,7 +28,7 @@
   }
 
   const renderer = document.createElement('script');
-  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v63.js?v=20260813-cinematic-pixel-reference-r1';
+  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v63.js?v=20260813-cinematic-pixel-reference-r1a';
   renderer.async = false;
   renderer.dataset.fxCoreMobileReferenceV63 = 'true';
   renderer.addEventListener('load', () => {
