@@ -4,7 +4,7 @@
   const BOOTSTRAP = 'responsive-cinematic-reference-v69-r70';
   const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260813-cinematic-reference-v69-r70';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260813-reference-pixel-lock-r70';
-  const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260812-direct-interaction-r3-living-system';
+  const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260813-direct-interaction-r4-root-integrity';
 
   if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;
   root.dataset.fxCoreReal3dBootstrap = BOOTSTRAP;

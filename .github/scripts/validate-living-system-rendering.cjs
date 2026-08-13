@@ -49,7 +49,7 @@ for (const forbidden of [
 
 requireToken(interaction, 'formatx-living-system-rendering-v1.js', 'Core interaction does not boot Living System Rendering');
 requireToken(interaction, 'formatx-living-telemetry-visual-bridge-v1.js', 'Core interaction does not boot telemetry visual bridge');
-requireToken(bootstrap, 'direct-interaction-r3-living-system', 'Core bootstrap cache revision is stale');
+requireToken(bootstrap, 'direct-interaction-r4-root-integrity', 'Core bootstrap cache revision is stale');
 
 for (const token of [
   '.fx-living-system-layer',

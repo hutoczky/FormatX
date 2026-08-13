@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'direct-core-interaction-v3';
-  const LIVING_SCRIPT = '/scifi-ui/scripts/formatx-living-system-rendering-v1.js?v=20260812-award-r1';
+  const LIVING_SCRIPT = '/scifi-ui/scripts/formatx-living-system-rendering-v1.js?v=20260813-policy-clean-r70';
   const TELEMETRY_BRIDGE = '/scifi-ui/scripts/formatx-living-telemetry-visual-bridge-v1.js?v=20260812-award-r2';
   const desktop = matchMedia('(min-width:901px) and (pointer:fine)').matches;
   const MOVE_THROTTLE_MS = desktop ? 28 : 72;
