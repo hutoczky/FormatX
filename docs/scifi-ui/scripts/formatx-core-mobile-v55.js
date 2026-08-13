@@ -8,7 +8,7 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v67';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'reference-locked-native-webgl2-v67-r1';
+  root.dataset.fxCoreMobileAwardRevision = 'reference-locked-native-webgl2-v67-r2';
 
   function registerComposition() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
@@ -28,12 +28,22 @@
     }
   }
 
+  function loadReferenceLayout() {
+    if (document.querySelector('script[data-fx-mobile-reference-layout]')) return;
+    const script = document.createElement('script');
+    script.src = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260813-reference-layout-r1';
+    script.async = false;
+    script.dataset.fxMobileReferenceLayout = 'true';
+    document.head.appendChild(script);
+  }
+
   const renderer = document.createElement('script');
   renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v67.js?v=20260813-reference-lock-r1';
   renderer.async = false;
   renderer.dataset.fxCoreMobileReferenceV67 = 'true';
   renderer.addEventListener('load', () => {
     root.dataset.fxCoreReferenceLockLoad = 'ready-v67';
+    loadReferenceLayout();
     requestAnimationFrame(() => {
       registerComposition();
       requestAnimationFrame(registerComposition);
