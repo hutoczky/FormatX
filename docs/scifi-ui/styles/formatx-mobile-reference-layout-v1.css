@@ -109,3 +109,8 @@
   #hero .fx-reference-pause{font:800 15px/1 ui-monospace,SFMono-Regular,Consolas,monospace;color:#62dcff}
   html[data-fx-mobile-reference-layout="ready-v1"] .fx-rail,html[data-fx-mobile-reference-layout="ready-v1"] .fx-organism-status,html[data-fx-mobile-reference-layout="ready-v1"] .fx-organism-actionbar,html[data-fx-mobile-reference-layout="ready-v1"] .fx-three-sound,html[data-fx-mobile-reference-layout="ready-v1"] [data-fx-live-os-launcher],html[data-fx-mobile-reference-layout="ready-v1"] .fx-organism-dialogue .fx-organism-thought-trigger,html[data-fx-mobile-reference-layout="ready-v1"] .fx-living-core-launcher,html[data-fx-mobile-reference-layout="ready-v1"] .fx-genome-launcher{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 }
+html[data-fx-mobile-reference-layout="ready-v1"] .fx-premium-core-status{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+}

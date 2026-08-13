@@ -15,13 +15,15 @@ const livingRendering = read('docs/scifi-ui/scripts/formatx-living-system-render
 const previewWebgl = read('docs/scifi-ui/scripts/formatx-orbital-core-v28.js');
 const previewMobile = read('docs/scifi-ui/styles/formatx-real3d-mobile-v29.css');
 
-assert.match(bootstrap, /responsive-cinematic-reference-v69-r70/);
+assert.match(bootstrap, /responsive-cinematic-reference-v69-r71/);
 assert.match(bootstrap, /single-webgl2-responsive-cinematic-reference-glass-v69/);
-assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260813-cinematic-reference-v69-r70/);
+assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260813-android-webgl-recovery-r71/);
 assert.match(wrapper, /formatx-core-mobile-reference-v69\.js/);
 assert.equal((bootstrap.match(/getContext\(['"]webgl2['"]/gi) || []).length, 0);
 assert.equal((wrapper.match(/getContext\(['"]webgl2['"]/gi) || []).length, 0);
-assert.equal((renderer.match(/getContext\(['"]webgl2['"]/gi) || []).length, 1);
+assert.equal((renderer.match(/candidate\.getContext\(profile\.kind/g) || []).length, 1);
+assert.match(renderer, /kind:'webgl2'/);
+assert.match(renderer, /kind:'webgl'/);
 
 for (const token of [
   'gl.enable(gl.DEPTH_TEST)',
@@ -42,6 +44,9 @@ for (const token of [
   'ResizeObserver',
   'IntersectionObserver',
   'webglcontextlost',
+  'webglcontextrestored',
+  'visible-native-3d-v71',
+  'webgl2-primary-webgl1-native-3d-self-healing-v71',
   'fxCoreRenderMs',
   'corePosition'
 ]) assert.ok(renderer.includes(token), `missing v69 production contract: ${token}`);

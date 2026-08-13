@@ -12,14 +12,14 @@ const stability=read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
 const interactionStability=read('docs/scifi-ui/scripts/interaction-genome-export-stability.js');
 const home=read('docs/scifi-ui/index.html');
 
-assert.match(bootstrap,/responsive-cinematic-reference-v69-r70/);
+assert.match(bootstrap,/responsive-cinematic-reference-v69-r71/);
 assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69/);
 assert.match(bootstrap,/loading-v69/);
 assert.match(bootstrap,/ready-v69/);
 assert.match(wrapper,/formatx-core-mobile-reference-v69\.js/);
 assert.equal((bootstrap.match(/getContext\(['"]webgl2['"]/g)||[]).length,0);
 assert.equal((wrapper.match(/getContext\(['"]webgl2['"]/g)||[]).length,0);
-assert.equal((renderer.match(/getContext\(['"]webgl2['"]/g)||[]).length,1);
+assert.equal((renderer.match(/candidate\.getContext\(profile\.kind/g)||[]).length,1);
 for(const token of [
   'single-webgl2-mobile-cinematic-reference-glass-v69',
   'reference-target-organic-deep-concave-four-point-v69',
@@ -30,7 +30,7 @@ for(const token of [
   'continuous-native-webgl2-living-motion-v69',
   'direct-touch-drag-energy-burst-parallax-v69',
   'formatx:coreinteraction','formatx:referencepause','formatx:real3dready',
-  'ResizeObserver','IntersectionObserver','webglcontextlost','fxCoreRenderMs'
+  'ResizeObserver','IntersectionObserver','webglcontextlost','webglcontextrestored','visible-native-3d-v71','fxCoreRenderMs'
 ]) assert.ok(renderer.includes(token),`missing v69 startup contract: ${token}`);
 assert.doesNotMatch(renderer,/new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|three\.js|babylon|playcanvas|model-viewer/i);
 assert.doesNotMatch(renderer,/\bTHREE\./);

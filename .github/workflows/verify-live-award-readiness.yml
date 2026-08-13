@@ -56,7 +56,11 @@ jobs:
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
           contains proof-style '.fx-reference-proof' "$TMP/layout.css"
-          test "$(grep -Fo "getContext('webgl2'" "$TMP/mobile-v69.js" | wc -l)" -eq 1
+          test "$(grep -Fo "candidate.getContext(profile.kind" "$TMP/mobile-v69.js" | wc -l)" -eq 1
+          contains webgl2-primary "kind:'webgl2'" "$TMP/mobile-v69.js"
+          contains webgl1-recovery "kind:'webgl'" "$TMP/mobile-v69.js"
+          contains context-restoration 'webglcontextrestored' "$TMP/mobile-v69.js"
+          contains visible-frame-gate 'visible-native-3d-v71' "$TMP/mobile-v69.js"
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\.|three\\.js' "$TMP/mobile-v69.js"
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
           ! grep -Fq 'preventDefault' "$TMP/scroll.js"
