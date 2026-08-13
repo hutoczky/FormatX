@@ -5,8 +5,9 @@ const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
 const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js');
 const layoutCss=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
-assert.match(bootstrap,/responsive-cinematic-reference-v69-r71/);
+assert.match(bootstrap,/responsive-cinematic-reference-v69-r73/);
 assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69/);
+assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260813-mobile-only-r73/);
 assert.match(wrapper,/formatx-core-mobile-reference-v69\.js/);
 assert.equal((renderer.match(/candidate\.getContext\(profile\.kind/g)||[]).length,1);
 for(const token of [
@@ -24,4 +25,4 @@ assert.doesNotMatch(renderer,/\bTHREE\./);
 assert.match(layoutCss,/PUBLIC PROOF|fx-reference-proof/);
 assert.match(layoutCss,/@media \(min-width:901px\)/);
 new Function(bootstrap);new Function(wrapper);new Function(renderer);
-console.log('PASS: release validates unified responsive cinematic native WebGL2 v69.');
+console.log('PASS: release validates unified responsive cinematic native WebGL2 v69 r73.');
