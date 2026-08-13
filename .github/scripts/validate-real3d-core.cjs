@@ -16,9 +16,10 @@ const livingRendering = read('docs/scifi-ui/scripts/formatx-living-system-render
 const previewWebgl = read('docs/scifi-ui/scripts/formatx-orbital-core-v28.js');
 const previewMobile = read('docs/scifi-ui/styles/formatx-real3d-mobile-v29.css');
 
-assert.match(bootstrap, /responsive-cinematic-reference-v69-r71/);
+assert.match(bootstrap, /responsive-cinematic-reference-v69-r73/);
 assert.match(bootstrap, /single-webgl2-responsive-cinematic-reference-glass-v69/);
-assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260813-responsive-text-wrap-r72/);
+assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260813-desktop-safe-r73/);
+assert.match(bootstrap, /formatx-mobile-reference-layout-v1\.js\?v=20260813-mobile-only-r73/);
 assert.match(wrapper, /formatx-core-mobile-reference-v69\.js/);
 assert.equal((bootstrap.match(/getContext\(['"]webgl2['"]/gi) || []).length, 0);
 assert.equal((wrapper.match(/getContext\(['"]webgl2['"]/gi) || []).length, 0);
@@ -57,6 +58,8 @@ assert.match(renderer, /float fres=pow\(/);
 assert.match(renderer, /gl\.blendFunc\(gl\.SRC_ALPHA,gl\.ONE\)/);
 assert.doesNotMatch(renderer, /drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(/i);
 assert.doesNotMatch(renderer, /\bTHREE\.|three\.js|babylon|playcanvas|model-viewer/i);
+assert.match(layout, /const mobileViewport=matchMedia\('\(max-width:900px\)'\)/);
+assert.match(layout, /desktop-skip/);
 assert.match(layout, /formatx:referencepause/);
 assert.match(layout, /formatx-responsive-text-guard-r72\.css\?v=20260813-responsive-text-wrap-r72/);
 assert.match(layout, /aria-pressed/);
@@ -79,4 +82,4 @@ assert.doesNotMatch(previewWebgl, /drawImage\s*\(|new\s+Image\s*\(/i);
 assert.match(previewMobile, /data-fx-orbital-core="ready-v28"/);
 
 for (const source of [bootstrap, wrapper, renderer, layout, contentFinalizer, livingRendering]) new Function(source);
-console.log('PASS: production MAG uses one adaptive native WebGL2 v69 renderer with layered crystalline glass, moving reactor, accessible controls and responsive mobile/desktop framing.');
+console.log('PASS: production MAG uses one adaptive native WebGL2 v69 r73 renderer with layered crystalline glass, moving reactor, accessible controls and mobile-only reference chrome.');
