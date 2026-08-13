@@ -8,7 +8,13 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v65';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-crystal-volume-native-webgl2-v65-r1';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-crystal-volume-native-webgl2-v65-r2';
+
+  // v65's render loop intentionally reuses these scalar bindings every frame.
+  // Define them on the global object before the strict renderer evaluates so
+  // assignment remains allocation-free on mobile Chromium.
+  if (!Object.prototype.hasOwnProperty.call(window, 'lerp')) window.lerp = 0;
+  if (!Object.prototype.hasOwnProperty.call(window, 'slow')) window.slow = 0;
 
   function registerComposition() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
@@ -28,7 +34,7 @@
   }
 
   const renderer = document.createElement('script');
-  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v65.js?v=20260813-cinematic-crystal-volume-r1';
+  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v65.js?v=20260813-cinematic-crystal-volume-r2';
   renderer.async = false;
   renderer.dataset.fxCoreMobileReferenceV65 = 'true';
   renderer.addEventListener('load', () => {
