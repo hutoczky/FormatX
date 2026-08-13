@@ -1,14 +1,14 @@
 (function () {
   'use strict';
   const root = document.documentElement;
-  if (root.dataset.fxCoreMobileV55 === 'ready-v55' || root.dataset.fxCoreMobileV55 === 'booting-reference-v64') return;
+  if (root.dataset.fxCoreMobileV55 === 'ready-v55' || root.dataset.fxCoreMobileV55 === 'booting-reference-v65') return;
   if (new URLSearchParams(location.search).get('lighthouse') === '1') {
     root.dataset.fxCoreMobileV55 = 'audit-skip';
     return;
   }
-  root.dataset.fxCoreMobileV55 = 'booting-reference-v64';
+  root.dataset.fxCoreMobileV55 = 'booting-reference-v65';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-bloom-native-webgl2-v64-r2';
+  root.dataset.fxCoreMobileAwardRevision = 'cinematic-crystal-volume-native-webgl2-v65-r1';
 
   function registerComposition() {
     const stage = document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage');
@@ -21,18 +21,18 @@
       host.style.setProperty('max-height', compactPhone ? '510px' : '545px', 'important');
     }
     if (stage) {
-      stage.style.setProperty('background', 'radial-gradient(circle at 50% 47%, rgba(16,124,255,.17), transparent 38%), radial-gradient(circle at 54% 50%, rgba(123,45,255,.085), transparent 52%), linear-gradient(180deg,#01040b 0%,#010914 64%,#031a30 100%)', 'important');
+      stage.style.setProperty('background', 'radial-gradient(circle at 50% 46%, rgba(18,136,255,.19), transparent 38%), radial-gradient(circle at 54% 49%, rgba(128,48,255,.10), transparent 53%), linear-gradient(180deg,#01040c 0%,#010914 62%,#031a30 100%)', 'important');
       stage.style.setProperty('transform', 'translateY(-1.5%) scale(.975)', 'important');
       stage.style.setProperty('transform-origin', '50% 50%', 'important');
     }
   }
 
   const renderer = document.createElement('script');
-  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v64.js?v=20260813-cinematic-bloom-r2';
+  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v65.js?v=20260813-cinematic-crystal-volume-r1';
   renderer.async = false;
-  renderer.dataset.fxCoreMobileReferenceV64 = 'true';
+  renderer.dataset.fxCoreMobileReferenceV65 = 'true';
   renderer.addEventListener('load', () => {
-    root.dataset.fxCoreReferenceLockLoad = 'ready-v64';
+    root.dataset.fxCoreReferenceLockLoad = 'ready-v65';
     requestAnimationFrame(() => {
       registerComposition();
       requestAnimationFrame(registerComposition);
@@ -42,9 +42,9 @@
   }, { once: true });
   renderer.addEventListener('error', () => {
     root.dataset.fxCoreMobileV55 = 'load-failed-v55';
-    root.dataset.fxCoreMobileV64 = 'load-failed-v64';
-    root.dataset.fxCoreReferenceLock = 'load-failed-v64';
-    root.dataset.fxCoreReal3d = 'context-unavailable-v64';
+    root.dataset.fxCoreMobileV65 = 'load-failed-v65';
+    root.dataset.fxCoreReferenceLock = 'load-failed-v65';
+    root.dataset.fxCoreReal3d = 'context-unavailable-v65';
   }, { once: true });
   document.head.appendChild(renderer);
 }());
