@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  // r94 luminous crystalline shipment; preserve r87 size and strengthen reference-like ice lattice depth.
+  // r94 native renderer with r95 optical match pass; preserve r87 size and layout.
   const root = document.documentElement;
   const BOOTSTRAP = 'responsive-cinematic-reference-v69-r94-rayglass';
   const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260814-rayglass-r94';
@@ -10,7 +10,7 @@
   const MATERIAL_STYLE = '/scifi-ui/styles/formatx-award-material-r88.css?v=20260814-material-reactor-r88';
   const FACET_STYLE = '/scifi-ui/styles/formatx-award-material-r89.css?v=20260814-faceted-crystal-r89';
   const CLARITY_STYLE = '/scifi-ui/styles/formatx-award-material-r90.css?v=20260814-reference-clarity-r90';
-  const RAYGLASS_STYLE = '/scifi-ui/styles/formatx-award-material-r91.css?v=20260814-rayglass-r94';
+  const RAYGLASS_STYLE = '/scifi-ui/styles/formatx-award-material-r91.css?v=20260814-rayglass-r95';
   const PROOF_STYLE = '/scifi-ui/styles/formatx-award-proof-r85.css?v=20260814-proof-geometry-r86';
   const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260814-desktop-safe-r84';
   const FLOW_SCRIPT = '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260814-award-overlay-r82-desktop-scope';
