@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T22:36:00+02:00
-source_master=2613c7bb392c04bf6000bd1987fac94c5cc2d506
-purpose=activate r102 shared desktop/mobile deep refractive crystal while preserving accepted r87 size/layout: dark transparent cyan/navy glass body, thin ice-white fractures and shells, stronger violet refraction, compact white reactor, orbital light arcs and cinematic reflection
+requested_at=2026-08-14T22:42:00+02:00
+source_master=f8e7f800e26ff7d36ef64dae2c82465decff2b6d
+purpose=activate r103 shared desktop/mobile volumetric glass-fold pass while preserving accepted r87 size/layout: suppress wireframe dominance, add broad translucent cyan/blue crystal planes, violet refraction, compact white reactor, layered glass folds and cinematic reflective floor
 interaction=continuous breathing; pointer/touch parallax; native touch energy surge; moving spectral caustics; reactor pulse; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; native r102/r99 identity WebGL contract; 540000 mobile pixel budget; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG visual capture; post-deploy reference capture; award-readiness
+verification=production candidate validation; JavaScript syntax; native r102/r99 identity WebGL contract; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG visual capture; post-deploy reference capture; award-readiness
