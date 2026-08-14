@@ -7,6 +7,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-r98.js'
+      - 'docs/scifi-ui/scripts/formatx-core-touch-pulse-r98.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
       - 'docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'
@@ -42,6 +43,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r98.js
+          node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r98.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           node --check docs/scifi-ui/scripts/formatx-reference-core-v26.js
           node --check billing-worker/src/production-entry.js
@@ -54,5 +56,5 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Responsive cinematic r98 source/layout/animation/touch gates passed'; else state=failure; description='FormatX production crystal validation failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Responsive cinematic r98 source/layout/animation/native-touch gates passed'; else state=failure; description='FormatX production crystal validation failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX production crystal' -f description="$description" -f target_url="$TARGET_URL"
