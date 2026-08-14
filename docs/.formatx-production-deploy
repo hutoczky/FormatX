@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-14T17:56:00+02:00
-source_master=cc312c857bb277645f1f5fb3a0c56db9e285cbd7
-purpose=ship the r95 optical crystal-match pass on top of the r94 native WebGL renderer; preserve the locked r87 mobile size/layout while lifting brightness, spectral cyan-violet separation, orbital rings, radial crystal rays, compact reactor glow and reflective atmosphere toward the approved mobile reference
-verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; locked r94 renderer mobile screenshot after r95 CSS cache-bust; frame-budget, geometry, text-overlap and touch interaction checks; visual comparison against approved mobile reference
+requested_at=2026-08-14T18:01:00+02:00
+source_master=ea96f0d82d22349814fea2d47edd194fa986e0de
+purpose=ship and revalidate the r95 optical crystal-match pass on the r94 native WebGL renderer; preserve locked r87 mobile geometry while keeping the brighter crystalline lattice, cyan-violet refraction, compact reactor and refractive depth
+verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; updated live r94 desktop/mobile renderer contract; post-deploy locked mobile screenshot; frame-budget, geometry, text-overlap and off-center touch interaction checks
