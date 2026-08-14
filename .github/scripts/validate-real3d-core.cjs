@@ -21,7 +21,7 @@ assert.match(bootstrap, /responsive-cinematic-reference-v69-r81-pixel-aspect-awa
 assert.match(bootstrap, /single-webgl2-responsive-cinematic-reference-glass-v69-r81/);
 assert.match(bootstrap, /formatx-core-mobile-v55\.js\?v=20260813-desktop-safe-r73b/);
 assert.match(bootstrap, /formatx-mobile-reference-layout-v1\.js\?v=20260814-mag-first-flow-r74/);
-assert.match(bootstrap, /formatx-flow-first-r75\.js\?v=20260814-award-overlay-r81/);
+assert.match(bootstrap, /formatx-flow-first-r75\.js\?v=20260814-award-overlay-r82-desktop-scope/);
 assert.match(wrapper, /formatx-core-mobile-reference-v69\.js/);
 assert.equal((bootstrap.match(/getContext\(['"]webgl2['"]/gi) || []).length, 0);
 assert.equal((wrapper.match(/getContext\(['"]webgl2['"]/gi) || []).length, 0);
