@@ -1,0 +1,28 @@
+/* r105 — user-approved mobile size lock. Loaded after r87/r104 presentation CSS. */
+@media (max-width:430px){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
+    height:clamp(430px,112vw,490px)!important;
+    min-height:clamp(430px,112vw,490px)!important;
+    max-height:490px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
+    transform:translateY(-.5%) scaleX(1.16) scaleY(1)!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{
+    top:20px!important;
+    right:5.8%!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
+    margin:-34px 6% 24px!important;
+  }
+}
+@media (min-width:431px) and (max-width:900px){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
+    height:clamp(470px,108vw,690px)!important;
+    min-height:clamp(470px,108vw,690px)!important;
+    max-height:none!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
+    transform:translateY(-.5%) scaleX(1.13) scaleY(1)!important;
+  }
+}
