@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T18:53:00+02:00
-source_master=cf6931623bd505626fcec1ed321e353df12a124c
-purpose=verify deployed r97 faceted interactive crystal MAG against the approved mobile reference without changing accepted r87 size/layout; trigger full production/live reference audits after the successful r97 candidate deploy
+requested_at=2026-08-14T18:56:00+02:00
+source_master=a33afb63271f4a2d7891cd26a3ff5501a4c8cafb
+purpose=verify deployed r97 faceted interactive crystal MAG after updating live award-readiness from stale r94 authority to r97; preserve accepted r87 size/layout
 interaction=continuous breathing; animated small reactor pulse; moving spectral caustics; pointer/touch parallax; touch energy surge; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; r97 JavaScript syntax; native real3D crystal contract; Worker tests; production build; custom-domain smoke; public-site integrity; live award-readiness; mobile interaction; post-deploy composition; Lighthouse
+verification=production candidate validation; r97 JavaScript syntax; native real3D crystal contract; Worker tests; production build; custom-domain smoke; public-site integrity; live award-readiness r97; mobile interaction; post-deploy composition; Lighthouse
