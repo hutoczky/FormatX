@@ -23,9 +23,11 @@ jobs:
           set -euo pipefail
           node .github/scripts/validate-award-readiness.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js
+          node .github/scripts/validate-real3d-core.cjs
+          node .github/scripts/validate-reference-core-v26.cjs
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v91.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
-      - name: Verify live responsive cinematic v69 MAG, layout and scrolling
+      - name: Verify live r94 crystalline MAG, layout and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -35,37 +37,38 @@ jobs:
           fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
-          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v69.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-v69.js"
+          fetch "/scifi-ui/scripts/formatx-core-mobile-reference-v91.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-r94.js"
           fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
           fetch "/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=${GITHUB_RUN_ID}" "$TMP/layout.css"
+          fetch "/scifi-ui/styles/formatx-award-material-r91.css?v=${GITHUB_RUN_ID}" "$TMP/material.css"
           fetch "/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=${GITHUB_RUN_ID}" "$TMP/text-guard.css"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
           fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
           contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
-          contains bootstrap 'single-webgl2-responsive-cinematic-reference-glass-v69' "$TMP/bootstrap.js"
-          contains wrapper 'formatx-core-mobile-reference-v69.js' "$TMP/mobile-wrapper.js"
-          contains renderer 'single-webgl2-mobile-cinematic-reference-glass-v69' "$TMP/mobile-v69.js"
-          contains geometry 'reference-target-organic-deep-concave-four-point-v69' "$TMP/mobile-v69.js"
-          contains material 'four-layer-luminous-fresnel-faceted-glass-v69' "$TMP/mobile-v69.js"
-          contains reactor 'white-cyan-reactor-six-orbitals-crossflare-v69' "$TMP/mobile-v69.js"
-          contains fidelity 'native-webgl2-only-no-raster-no-svg-v69' "$TMP/mobile-v69.js"
-          contains performance 'single-context-adaptive-60-plus-fps' "$TMP/mobile-v69.js"
-          contains animation 'continuous-native-webgl2-living-motion-v69' "$TMP/mobile-v69.js"
-          contains interaction 'direct-touch-drag-energy-burst-parallax-v69' "$TMP/mobile-v69.js"
+          contains bootstrap 'responsive-cinematic-reference-v69-r94-rayglass' "$TMP/bootstrap.js"
+          contains bootstrap-renderer 'single-webgl-refractive-rayglass-r94' "$TMP/bootstrap.js"
+          contains wrapper 'formatx-core-mobile-reference-v91.js?v=20260814-reference-rayglass-r94' "$TMP/mobile-wrapper.js"
+          contains renderer-version 'reference-rayglass-webgl-r94' "$TMP/mobile-r94.js"
+          contains renderer 'single-webgl-refractive-rayglass-r94' "$TMP/mobile-r94.js"
+          contains geometry 'reference-rayglass-deep-concave-four-point-r94' "$TMP/mobile-r94.js"
+          contains material 'luminous-ice-lattice-fresnel-caustic-r94' "$TMP/mobile-r94.js"
+          contains interaction 'direct-touch-refractive-parallax-energy-r94' "$TMP/mobile-r94.js"
+          contains webgl2 "getContext('webgl2'" "$TMP/mobile-r94.js"
+          contains webgl-fallback "getContext('webgl'" "$TMP/mobile-r94.js"
+          contains draw 'TRIANGLE_STRIP' "$TMP/mobile-r94.js"
+          contains visible-frame-gate 'visible-native-3d-r94' "$TMP/mobile-r94.js"
+          contains pixel-budget '610000' "$TMP/mobile-r94.js"
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\.|three\\.js|babylon|playcanvas|model-viewer' "$TMP/mobile-r94.js"
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
+          contains mobile-unpaused 'let paused=mobileViewport()?false:' "$TMP/layout.js"
           contains proof-style '.fx-reference-proof' "$TMP/layout.css"
+          contains crystal-style 'fx-core-rayglass-r91-stage' "$TMP/material.css"
           contains hero-wrap 'max-width: 620px !important' "$TMP/text-guard.css"
           contains normal-wrap 'white-space: normal !important' "$TMP/text-guard.css"
           contains proof-reserve 'padding-right: clamp(88px, 24vw, 104px) !important' "$TMP/text-guard.css"
-          test "$(grep -Fo "candidate.getContext(profile.kind" "$TMP/mobile-v69.js" | wc -l)" -eq 1
-          contains webgl2-primary "kind:'webgl2'" "$TMP/mobile-v69.js"
-          contains webgl1-recovery "kind:'webgl'" "$TMP/mobile-v69.js"
-          contains context-restoration 'webglcontextrestored' "$TMP/mobile-v69.js"
-          contains visible-frame-gate 'visible-native-3d-v71' "$TMP/mobile-v69.js"
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\.|three\\.js' "$TMP/mobile-v69.js"
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
           ! grep -Fq 'preventDefault' "$TMP/scroll.js"
           python3 - "$TMP/policy.json" <<'PY'
@@ -83,5 +86,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + responsive cinematic native v69 passed'; else state=failure; description='Award, production MAG or scrolling failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + live r94 crystal MAG passed'; else state=failure; description='Award, production r94 MAG or scrolling failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
