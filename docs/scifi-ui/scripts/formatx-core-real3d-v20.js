@@ -1,5 +1,6 @@
 (function () {
   'use strict';
+  // r81 live-gate revalidation marker; runtime behavior intentionally unchanged.
   const root = document.documentElement;
   const BOOTSTRAP = 'responsive-cinematic-reference-v69-r81-pixel-aspect-award-lock';
   const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260813-desktop-safe-r73b';
