@@ -2,8 +2,11 @@
 'use strict';
 const root=document.documentElement;
 let legacyMenu=null;
-let paused=root.dataset.fxReferenceMotionPaused==='true';
 const mobileViewport=()=>matchMedia('(max-width:900px)').matches;
+// The mobile reference MAG is the visible interactive surface. Do not inherit a
+// stale desktop/offscreen pause marker during bootstrap; the dedicated pause
+// control remains authoritative after the mobile layout has mounted.
+let paused=mobileViewport()?false:root.dataset.fxReferenceMotionPaused==='true';
 if(root.dataset.fxMobileReferenceLayout==='booting-r74'||root.dataset.fxMobileReferenceLayout==='ready-v1')return;
 root.dataset.fxMobileReferenceLayout='booting-r74';
 function loadStyles(){
