@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T23:50:00+02:00
-source_master=7a490f85be379351c20be15b9f73b4a56ff95539
-purpose=republish the unchanged r111 MAG after award-readiness validator maintenance; no visual, geometry, interaction or layout change
+requested_at=2026-08-14T23:55:00+02:00
+source_master=b1d4fdf7800122897d1a33103a3b4485ae79de4d
+purpose=republish unchanged r111 MAG after award-readiness optical contract maintenance; no visual, geometry, interaction or layout change
 interaction=unchanged r111 native procedural WebGL interaction contract
-verification=re-run production candidate validation, custom-domain smoke, live award-readiness audit and post-deploy mobile/desktop screenshot capture with the corrected current fracture shader token
+verification=re-run production candidate validation, custom-domain smoke, live award-readiness audit and post-deploy mobile/desktop screenshot capture against current shader/CSS contracts
