@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T22:42:00+02:00
-source_master=f8e7f800e26ff7d36ef64dae2c82465decff2b6d
-purpose=activate r103 shared desktop/mobile volumetric glass-fold pass while preserving accepted r87 size/layout: suppress wireframe dominance, add broad translucent cyan/blue crystal planes, violet refraction, compact white reactor, layered glass folds and cinematic reflective floor
+requested_at=2026-08-14T22:47:00+02:00
+source_master=f8ba0d4a8152a0070c45212af02ec73c3d66fb54
+purpose=activate r105 shared desktop/mobile volumetric glass while restoring the previously accepted mobile r87 size after the parallel r104 geometry change: broad translucent cyan/navy crystal planes, violet refraction, compact white reactor, reduced wireframe dominance and cinematic reflection
 interaction=continuous breathing; pointer/touch parallax; native touch energy surge; moving spectral caustics; reactor pulse; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; native r102/r99 identity WebGL contract; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG visual capture; post-deploy reference capture; award-readiness
+verification=production candidate validation; JavaScript syntax; native r102/r99 identity WebGL contract; accepted-size r105 CSS lock; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG capture; post-deploy reference capture; award-readiness
