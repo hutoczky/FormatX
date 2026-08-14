@@ -13,8 +13,10 @@ const loader=read('docs/scifi-ui/scripts/igloo-parity.js');
 const stability=read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
 const interactionStability=read('docs/scifi-ui/scripts/interaction-genome-export-stability.js');
 const home=read('docs/scifi-ui/index.html');
-assert.match(bootstrap,/responsive-cinematic-reference-v69-r74-flow-first/);
-assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69/);
+assert.match(bootstrap,/responsive-cinematic-reference-v69-r81-pixel-aspect-award-lock/);
+assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69-r81/);
+assert.match(bootstrap,/formatx-award-reference-r80\.css\?v=20260814-pixel-aspect-r80/);
+assert.match(bootstrap,/formatx-flow-first-r75\.js\?v=20260814-award-overlay-r81/);
 assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260814-mag-first-flow-r74/);
 assert.match(bootstrap,/loading-v69/);assert.match(bootstrap,/ready-v69/);
 assert.match(wrapper,/formatx-core-mobile-reference-v69\.js/);
@@ -29,4 +31,4 @@ assert.match(flowCss,/\.topbar\{/);assert.match(flowCss,/position:relative!impor
 assert.match(textGuard,/#hero \.hero-copy > \.hero-lead/);assert.match(textGuard,/white-space:\s*normal\s*!important/);
 assert.match(premium,/ready-v20\|ready-v69/);assert.match(loader,/ready-v20\|ready-v69/);assert.match(stability,/ready-v20\|ready-v69/);assert.match(interactionStability,/booting-v69/);assert.match(interactionStability,/setImportant\(sound, 'display', 'none'\)/);assert.ok(home.includes('formatx-core-real3d-v20.js'));
 for(const source of [bootstrap,wrapper,renderer,layout,premium,loader,stability,interactionStability])new Function(source);
-console.log('PASS: responsive native WebGL2 v69 r74 MAG-first no-overlay startup contract passed.');
+console.log('PASS: responsive native WebGL2 v69 r81 award-reference startup contract passed.');
