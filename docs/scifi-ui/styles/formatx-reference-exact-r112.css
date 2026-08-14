@@ -1,7 +1,7 @@
-/* r113 — screenshot-locked mobile composition + vivid true WebGL 3D crystal presentation.
-   Reference viewport: 412x680 CSS px, normalized from the supplied mobile reference.
-   Layout remains locked; this revision increases optical scale, glass density,
-   cyan/violet refraction, reactor rings and the reflective floor without images. */
+/* r115 — screenshot-locked mobile composition for the supplied reference.
+   The layout stays fixed at the measured 412x680 geometry. Optical treatment is
+   deliberately dark-glass: bright cyan/ice edges, violet refraction, large reactor
+   rings and a restrained reflective floor. No image asset is used. */
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero{padding-top:68px!important}
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar{height:68px!important;min-height:68px!important;padding:4px 18px!important}
@@ -13,51 +13,51 @@
 
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
     width:100%!important;height:clamp(376px,95.6vw,430px)!important;min-height:clamp(376px,95.6vw,430px)!important;max-height:430px!important;
-    overflow:visible!important;background:#01050e!important;
+    overflow:visible!important;background:#01040d!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage{
     position:absolute!important;inset:0!important;overflow:visible!important;
     background:
-      radial-gradient(circle at 9% 27%,rgba(112,232,255,.78) 0 1px,transparent 1.9px),
-      radial-gradient(circle at 17% 48%,rgba(76,191,255,.54) 0 1px,transparent 1.8px),
-      radial-gradient(circle at 26% 21%,rgba(176,102,255,.67) 0 1px,transparent 1.9px),
-      radial-gradient(circle at 78% 24%,rgba(219,122,255,.70) 0 1px,transparent 2px),
-      radial-gradient(circle at 89% 50%,rgba(100,236,255,.66) 0 1px,transparent 1.9px),
-      radial-gradient(circle at 74% 68%,rgba(186,96,255,.52) 0 1px,transparent 1.9px),
-      radial-gradient(circle at 33% 70%,rgba(99,230,255,.52) 0 1px,transparent 1.9px),
-      radial-gradient(ellipse at 50% 49%,rgba(31,219,255,.31) 0%,rgba(22,118,218,.12) 28%,transparent 52%),
-      radial-gradient(ellipse at 57% 50%,rgba(181,64,255,.27) 0%,rgba(108,42,205,.09) 31%,transparent 54%),
-      linear-gradient(180deg,#000208 0%,#010713 38%,#02152c 69%,#04203a 100%)!important;
-    filter:none!important;box-shadow:inset 0 -1px 0 rgba(78,200,244,.10)!important;
+      radial-gradient(circle at 9% 27%,rgba(115,233,255,.64) 0 1px,transparent 1.9px),
+      radial-gradient(circle at 17% 48%,rgba(71,187,255,.40) 0 1px,transparent 1.8px),
+      radial-gradient(circle at 26% 21%,rgba(182,96,255,.55) 0 1px,transparent 1.9px),
+      radial-gradient(circle at 78% 24%,rgba(224,116,255,.57) 0 1px,transparent 2px),
+      radial-gradient(circle at 89% 50%,rgba(100,236,255,.52) 0 1px,transparent 1.9px),
+      radial-gradient(circle at 74% 68%,rgba(190,91,255,.42) 0 1px,transparent 1.9px),
+      radial-gradient(circle at 33% 70%,rgba(93,227,255,.41) 0 1px,transparent 1.9px),
+      radial-gradient(ellipse at 50% 49%,rgba(26,199,255,.20) 0%,rgba(18,92,190,.075) 29%,transparent 53%),
+      radial-gradient(ellipse at 57% 50%,rgba(174,54,255,.20) 0%,rgba(99,36,197,.065) 31%,transparent 55%),
+      linear-gradient(180deg,#000208 0%,#010612 39%,#021126 70%,#031a30 100%)!important;
+    filter:none!important;box-shadow:inset 0 -1px 0 rgba(78,200,244,.08)!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
     position:absolute!important;inset:0!important;width:100%!important;height:100%!important;transform-origin:50% 50%!important;
     transform:translateY(.5%) scaleX(1.07) scaleY(1.27)!important;
-    filter:brightness(1.22) contrast(1.27) saturate(1.58)
-      drop-shadow(0 0 3px rgba(244,255,255,.78))
-      drop-shadow(0 0 10px rgba(49,235,255,.50))
-      drop-shadow(0 0 23px rgba(42,155,255,.31))
-      drop-shadow(0 0 39px rgba(162,64,255,.24))!important;
+    filter:brightness(.92) contrast(1.50) saturate(2.15)
+      drop-shadow(0 0 2px rgba(246,255,255,.72))
+      drop-shadow(0 0 9px rgba(43,235,255,.52))
+      drop-shadow(0 0 23px rgba(39,153,255,.29))
+      drop-shadow(0 0 40px rgba(166,58,255,.27))!important;
   }
   html[data-fx-core-r112="true-3d-mesh-glass-reactor"] #hero .hero-space>.fx-core-r112-stage:before{
     content:""!important;display:block!important;position:absolute!important;inset:0!important;z-index:3!important;pointer-events:none!important;
     background:
-      radial-gradient(circle at 50% 50%,#fff 0 .28%,rgba(245,255,255,1) .38% .82%,rgba(87,246,255,.86) 1.0% 1.9%,rgba(33,181,255,.31) 2.5% 4.9%,transparent 7.7%),
-      radial-gradient(circle at 50% 50%,transparent 0 7.0%,rgba(239,255,255,.55) 7.35% 7.78%,transparent 8.2% 11.1%,rgba(99,241,255,.42) 11.45% 11.87%,transparent 12.25% 15.0%,rgba(229,255,255,.33) 15.35% 15.72%,transparent 16.12% 19.1%,rgba(194,91,255,.31) 19.45% 19.84%,transparent 20.25% 23.5%,rgba(82,220,255,.23) 23.85% 24.22%,transparent 24.7% 28.3%,rgba(224,255,255,.14) 28.65% 28.95%,transparent 29.4%),
-      linear-gradient(90deg,transparent 2%,rgba(62,220,255,.025) 18%,rgba(190,249,255,.13) 41%,rgba(224,255,255,.29) 49.7%,rgba(255,255,255,.66) 50%,rgba(224,255,255,.29) 50.3%,rgba(190,249,255,.13) 59%,rgba(62,220,255,.025) 82%,transparent 98%),
-      linear-gradient(180deg,transparent 2%,rgba(59,214,255,.025) 20%,rgba(203,251,255,.15) 42%,rgba(232,255,255,.31) 49.7%,rgba(255,255,255,.57) 50%,rgba(232,255,255,.31) 50.3%,rgba(203,251,255,.15) 58%,rgba(59,214,255,.025) 80%,transparent 98%),
-      conic-gradient(from 10deg at 50% 50%,transparent 0 7%,rgba(99,233,255,.085) 10%,transparent 14% 31%,rgba(197,86,255,.09) 35%,transparent 39% 56%,rgba(111,235,255,.075) 60%,transparent 64% 81%,rgba(183,79,255,.075) 85%,transparent 89% 100%)!important;
+      radial-gradient(circle at 50% 50%,#fff 0 .34%,rgba(247,255,255,1) .43% .90%,rgba(89,247,255,.90) 1.08% 2.0%,rgba(29,175,255,.27) 2.6% 5.2%,transparent 8.0%),
+      radial-gradient(circle at 50% 50%,transparent 0 7.1%,rgba(242,255,255,.58) 7.42% 7.90%,transparent 8.28% 11.3%,rgba(87,244,255,.52) 11.66% 12.12%,transparent 12.52% 15.8%,rgba(229,255,255,.39) 16.12% 16.52%,transparent 16.92% 20.3%,rgba(205,82,255,.40) 20.62% 21.04%,transparent 21.48% 25.0%,rgba(71,222,255,.32) 25.35% 25.76%,transparent 26.2% 30.0%,rgba(231,255,255,.20) 30.34% 30.72%,transparent 31.15% 35.0%,rgba(169,67,255,.18) 35.34% 35.70%,transparent 36.1%),
+      linear-gradient(90deg,transparent 1%,rgba(61,218,255,.018) 16%,rgba(175,247,255,.10) 38%,rgba(220,254,255,.24) 49.7%,rgba(255,255,255,.60) 50%,rgba(220,254,255,.24) 50.3%,rgba(175,247,255,.10) 62%,rgba(61,218,255,.018) 84%,transparent 99%),
+      linear-gradient(180deg,transparent 1%,rgba(60,215,255,.018) 17%,rgba(185,249,255,.11) 40%,rgba(227,255,255,.26) 49.7%,rgba(255,255,255,.54) 50%,rgba(227,255,255,.26) 50.3%,rgba(185,249,255,.11) 60%,rgba(60,215,255,.018) 83%,transparent 99%),
+      conic-gradient(from 8deg at 50% 50%,transparent 0 5%,rgba(97,236,255,.11) 9%,transparent 14% 29%,rgba(211,70,255,.18) 34%,transparent 40% 54%,rgba(101,235,255,.11) 59%,transparent 64% 79%,rgba(194,69,255,.16) 84%,transparent 90% 100%)!important;
     mix-blend-mode:screen!important;opacity:1!important;filter:none!important;
   }
   html[data-fx-core-r112="true-3d-mesh-glass-reactor"] #hero .hero-space>.fx-core-r112-stage:after{
     content:""!important;display:block!important;position:absolute!important;left:-9%!important;right:-9%!important;top:51.5%!important;height:76%!important;z-index:1!important;pointer-events:none!important;
     background:
-      radial-gradient(ellipse at 50% 0%,rgba(122,249,255,.44),rgba(35,151,244,.18) 29%,rgba(173,73,245,.12) 48%,transparent 73%),
-      repeating-radial-gradient(ellipse at 50% 0%,rgba(102,226,255,.085) 0 1px,transparent 3px 13px),
-      repeating-linear-gradient(180deg,rgba(79,208,255,.09) 0 1px,transparent 2px 9px),
-      linear-gradient(90deg,transparent 2%,rgba(56,182,241,.08) 27%,rgba(161,242,255,.20) 50%,rgba(144,76,232,.10) 72%,transparent 98%)!important;
-    transform:perspective(500px) rotateX(64deg) scaleX(1.13)!important;transform-origin:50% 0!important;opacity:.82!important;
-    -webkit-mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.86) 48%,transparent 91%);mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.86) 48%,transparent 91%);
+      radial-gradient(ellipse at 50% 0%,rgba(105,244,255,.32),rgba(31,137,236,.12) 29%,rgba(165,66,241,.10) 48%,transparent 74%),
+      repeating-radial-gradient(ellipse at 50% 0%,rgba(96,222,255,.055) 0 1px,transparent 3px 13px),
+      repeating-linear-gradient(180deg,rgba(74,201,255,.06) 0 1px,transparent 2px 9px),
+      linear-gradient(90deg,transparent 2%,rgba(52,170,236,.05) 27%,rgba(143,235,255,.14) 50%,rgba(137,67,229,.08) 72%,transparent 98%)!important;
+    transform:perspective(500px) rotateX(64deg) scaleX(1.13)!important;transform-origin:50% 0!important;opacity:.65!important;
+    -webkit-mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.83) 48%,transparent 91%);mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.83) 48%,transparent 91%);
   }
 
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{top:14px!important;right:6.55%!important;gap:12px!important;z-index:24!important}
@@ -68,12 +68,6 @@
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading:after{width:31px!important}
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{margin-left:6%!important;margin-right:7%!important;border-radius:22px!important;z-index:20!important}
 }
-
-@media (max-width:430px){
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{height:clamp(376px,95.6vw,411px)!important;min-height:clamp(376px,95.6vw,411px)!important;max-height:411px!important}
-}
-@media (max-width:380px){
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{height:clamp(350px,96vw,376px)!important;min-height:clamp(350px,96vw,376px)!important}
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{transform:translateY(.5%) scaleX(1.05) scaleY(1.23)!important}
-}
+@media (max-width:430px){html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{height:clamp(376px,95.6vw,411px)!important;min-height:clamp(376px,95.6vw,411px)!important;max-height:411px!important}}
+@media (max-width:380px){html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{height:clamp(350px,96vw,376px)!important;min-height:clamp(350px,96vw,376px)!important}html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{transform:translateY(.5%) scaleX(1.05) scaleY(1.23)!important}}
 @media (prefers-reduced-motion:reduce){html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{transition:none!important}}
