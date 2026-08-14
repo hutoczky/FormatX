@@ -56,7 +56,9 @@
     return root.dataset.fxCoreReferenceV53 === 'ready-v53'
       || root.dataset.fxCoreMobileV55 === 'ready-v55'
       || root.dataset.fxCoreReferenceLock === 'ready-v53'
-      || root.dataset.fxCoreReferenceLock === 'ready-v55';
+      || root.dataset.fxCoreReferenceLock === 'ready-v55'
+      || root.dataset.fxCoreReferenceLock === 'ready-v69'
+      || root.dataset.fxCoreMobileV69 === 'ready-v69';
   }
 
   function refreshHostRect() {
@@ -131,6 +133,15 @@
     }, desktop ? 520 : 360);
   }
 
+  function wakeRenderer() {
+    const pauseButton = document.querySelector('.fx-reference-pause');
+    if (pauseButton instanceof HTMLButtonElement && pauseButton.dataset.paused === 'true') return;
+    if (root.dataset.fxReferenceMotionPaused === 'true') root.dataset.fxReferenceMotionPaused = 'false';
+    dispatchEvent(new CustomEvent('formatx:referencepause', {
+      detail: { paused: false, source: VERSION, reason: 'direct-core-interaction' }
+    }));
+  }
+
   function pulse(event, phase, point = null) {
     point = point || pointInCore(event);
     if (!point) return false;
@@ -147,6 +158,7 @@
     root.dataset.fxCoreInteractionState = phase;
     dispatchEvent(new CustomEvent('formatx:organismcoreactivate', { detail }));
     dispatchEvent(new CustomEvent('formatx:coreinteraction', { detail }));
+    window.FormatXCoreMobileV69?.pulse?.();
     scheduleIdle();
     return true;
   }
@@ -156,6 +168,7 @@
     const point = pointInCore(event);
     if (!point) return;
     activePointer = event.pointerId;
+    wakeRenderer();
     amplifyDesktopPointer(event, point);
     pulse(event, 'press', point);
     if (desktop) {
@@ -201,23 +214,30 @@
     if (!event.isTrusted) return;
     const point = pointInCore(event);
     if (!point) return;
+    wakeRenderer();
     amplifyDesktopPointer(event, point);
     pulse(event, 'burst', point);
     const delays = desktop ? [55, 110, 175, 250, 340] : [90, 180];
     delays.forEach(delay => window.setTimeout(() => pulse(event, 'burst', point), delay));
   }
 
-  // No preventDefault and no pointer capture: phone pan-y/pinch/momentum remain native.
-  addEventListener('pointerdown', onPointerDown, { passive: true });
-  addEventListener('pointermove', onPointerMove, { passive: true });
-  addEventListener('pointerup', event => finishPointer(event, 'release'), { passive: true });
-  addEventListener('pointercancel', event => finishPointer(event, 'cancel'), { passive: true });
-  addEventListener('dblclick', onDoubleClick, { passive: true });
+  // Capture-phase listeners make touch interaction robust even when a visual
+  // overlay handles its own pointer event. No preventDefault/pointer capture is
+  // used, so phone pan-y, pinch and momentum remain native.
+  addEventListener('pointerdown', onPointerDown, { passive: true, capture: true });
+  addEventListener('pointermove', onPointerMove, { passive: true, capture: true });
+  addEventListener('pointerup', event => finishPointer(event, 'release'), { passive: true, capture: true });
+  addEventListener('pointercancel', event => finishPointer(event, 'cancel'), { passive: true, capture: true });
+  addEventListener('dblclick', onDoubleClick, { passive: true, capture: true });
   addEventListener('resize', scheduleRectRefresh, { passive: true });
   addEventListener('scroll', scheduleRectRefresh, { passive: true });
   visualViewport?.addEventListener('resize', scheduleRectRefresh, { passive: true });
 
   addEventListener('formatx:core3dready', () => {
+    findHost();
+    bootLivingSystem();
+  }, { passive: true });
+  addEventListener('formatx:real3dready', () => {
     findHost();
     bootLivingSystem();
   }, { passive: true });
