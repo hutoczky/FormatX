@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-14T17:36:00+02:00
-source_master=3e3c5981530c0a738e7f82aed00a606a6e430de3
-purpose=ship r92 faceted refractive ray-glass native WebGL MAG while preserving the approved r87 mobile size and reference flow; increase icy Fresnel edges, chromatic cyan-violet splitting, internal polygonal facet web, concentric reactor rings and sharpen the white center without restoring broad flare wash
-verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain deploy; r92 post-deploy screenshot gate with frame-budget, geometry, text-overlap and interaction telemetry
+requested_at=2026-08-14T17:44:00+02:00
+source_master=daa5c4fd636e44af2d0e52b08874f43854c9b541
+purpose=ship r93 crystalline shard native WebGL MAG while preserving the user-approved r87 mobile size; replace the remaining smooth dark ray-glass look with brighter icy Fresnel edges, circular reactor rings, angular internal shard planes, cyan-violet chromatic separation and a sharper luminous center
+verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; r93 locked mobile screenshot with frame-budget, geometry, text-overlap and off-center touch interaction telemetry
