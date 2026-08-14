@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T18:39:00+02:00
-source_master=075a7c9571a003f098742df432397d31fda760ba
-purpose=ship r96 interactive MAG motion on the locked r94/r95 reference geometry and optical material without changing the accepted MAG size
+requested_at=2026-08-14T18:42:00+02:00
+source_master=4d30ca48cb34fc31dfd9abb903c90553b09b0519
+purpose=retry r96 interactive MAG motion after aligning production validators with the r96 bootstrap and renderer contracts; preserve locked r94/r95 geometry, optical material and accepted MAG size
 interaction=continuous breathing; animated reactor pulse; moving spectral caustics; pointer/touch parallax; touch energy surge; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; public-site integrity; live award-readiness; live r94/r96 desktop identity and mobile interaction; post-deploy locked mobile composition; Lighthouse
+verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; public-site integrity; live award-readiness; live r96 desktop identity and mobile interaction; post-deploy locked mobile composition; Lighthouse
