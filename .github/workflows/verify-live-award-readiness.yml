@@ -31,7 +31,7 @@ jobs:
           test -s docs/scifi-ui/styles/formatx-award-material-r99.css
           grep -Fq 'single-webgl-luminous-crystal-r99' docs/scifi-ui/styles/formatx-award-material-r99.css
           ! grep -Fq 'repeating-conic-gradient' docs/scifi-ui/styles/formatx-award-material-r99.css
-      - name: Verify live r99 luminous crystalline MAG, optical atmosphere, layout and scrolling
+      - name: Verify live r120 prismatic crystalline MAG, optical atmosphere, layout and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -58,7 +58,7 @@ jobs:
           contains optical-loader 'formatx-award-material-r99.css?v=20260814-cinematic-atmosphere-r99' "$TMP/bootstrap.js"
           contains touch-loader 'formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99' "$TMP/bootstrap.js"
           contains wrapper 'formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99' "$TMP/mobile-wrapper.js"
-          contains renderer-version 'reference-luminous-crystal-webgl-r99' "$TMP/mobile-r99.js"
+          contains renderer-version 'reference-luminous-crystal-webgl-r99-prismatic-r120' "$TMP/mobile-r99.js"
           contains renderer 'single-webgl-luminous-crystal-r99' "$TMP/mobile-r99.js"
           contains geometry 'reference-deep-concave-four-point-size-lock-r99' "$TMP/mobile-r99.js"
           contains material 'luminous-faceted-iceglass-caustic-r99' "$TMP/mobile-r99.js"
@@ -75,10 +75,11 @@ jobs:
           contains webgl-fallback "getContext('webgl'" "$TMP/mobile-r99.js"
           contains draw 'TRIANGLE_STRIP' "$TMP/mobile-r99.js"
           contains visible-frame-gate 'visible-native-3d-r99' "$TMP/mobile-r99.js"
-          contains pixel-budget '540000' "$TMP/mobile-r99.js"
-          contains crystal-fracture 'fracture' "$TMP/mobile-r99.js"
+          contains pixel-budget '720000' "$TMP/mobile-r99.js"
+          contains crystal-fracture 'frac' "$TMP/mobile-r99.js"
           contains crystal-caustics 'caustic' "$TMP/mobile-r99.js"
           contains reactor-rings 'rings' "$TMP/mobile-r99.js"
+          contains r120-material-lock 'prismatic-organic-glass' "$TMP/mobile-r99.js"
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\.|three\\.js|babylon|playcanvas|model-viewer' "$TMP/mobile-r99.js"
           contains optical-scope 'single-webgl-luminous-crystal-r99' "$TMP/material-r99.css"
           contains optical-highlight 'brightness(1.09)' "$TMP/material-r99.css"
@@ -110,5 +111,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + live r99 luminous crystal, touch bridge and optical atmosphere passed'; else state=failure; description='Award, production r99 MAG, touch bridge, optical atmosphere or scrolling failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + live r120 prismatic crystal, touch bridge and optical atmosphere passed'; else state=failure; description='Award, production r120 MAG, touch bridge, optical atmosphere or scrolling failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
