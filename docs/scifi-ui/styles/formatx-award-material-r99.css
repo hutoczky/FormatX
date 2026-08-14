@@ -1,29 +1,32 @@
-/* r99 — optical atmosphere for the luminous native WebGL crystal.
-   Keep the accepted r87 geometry and size untouched. Remove the old HUD-like
-   repeating conic rays and replace them with restrained cinematic glass light. */
+/* r99 — cinematic optical atmosphere for the luminous native WebGL crystal.
+   The accepted r87 geometry/size stays locked. This pass restores the reference
+   contrast: dark transparent glass, ice-white/cyan edges, violet refraction,
+   a compact reactor and restrained water-like reflection. */
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage{
     background:
-      radial-gradient(ellipse at 50% 48%,rgba(76,228,255,.20) 0%,rgba(30,146,235,.095) 27%,transparent 48%),
-      radial-gradient(ellipse at 57% 49%,rgba(171,72,255,.14) 0%,transparent 48%),
-      radial-gradient(circle at 18% 30%,rgba(131,233,255,.58) 0 1px,transparent 1.7px),
-      radial-gradient(circle at 82% 29%,rgba(205,119,255,.52) 0 1px,transparent 1.8px),
-      radial-gradient(circle at 88% 58%,rgba(103,234,255,.46) 0 1px,transparent 1.8px),
-      radial-gradient(circle at 27% 71%,rgba(161,99,255,.30) 0 1px,transparent 1.6px),
-      linear-gradient(180deg,#01040b 0%,#010816 43%,#03152b 72%,#041c32 100%)!important;
+      radial-gradient(ellipse at 50% 48%,rgba(22,184,255,.18) 0%,rgba(18,104,205,.080) 29%,transparent 52%),
+      radial-gradient(ellipse at 58% 48%,rgba(159,52,255,.17) 0%,rgba(114,43,216,.055) 31%,transparent 52%),
+      radial-gradient(circle at 15% 27%,rgba(132,238,255,.70) 0 1px,transparent 1.7px),
+      radial-gradient(circle at 78% 24%,rgba(215,126,255,.62) 0 1px,transparent 1.8px),
+      radial-gradient(circle at 88% 55%,rgba(98,235,255,.54) 0 1px,transparent 1.8px),
+      radial-gradient(circle at 27% 69%,rgba(184,95,255,.38) 0 1px,transparent 1.7px),
+      radial-gradient(circle at 65% 72%,rgba(102,225,255,.34) 0 1px,transparent 1.7px),
+      linear-gradient(180deg,#00030a 0%,#010713 40%,#021226 70%,#03182c 100%)!important;
     filter:none!important;
     overflow:visible!important;
   }
 
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage>.fx-core-rayglass-r91-canvas{
-    opacity:1!important;
+    opacity:.96!important;
     filter:
-      brightness(1.48)
-      contrast(1.30)
-      saturate(1.45)
-      drop-shadow(0 0 4px rgba(236,255,255,.72))
-      drop-shadow(0 0 14px rgba(72,229,255,.48))
-      drop-shadow(0 0 32px rgba(137,77,255,.23))!important;
+      brightness(1.16)
+      contrast(1.58)
+      saturate(1.92)
+      drop-shadow(0 0 3px rgba(239,255,255,.86))
+      drop-shadow(0 0 10px rgba(39,229,255,.62))
+      drop-shadow(0 0 24px rgba(50,151,255,.32))
+      drop-shadow(0 0 38px rgba(159,62,255,.25))!important;
     transform-origin:50% 50%!important;
   }
 
@@ -34,22 +37,26 @@
     z-index:3!important;
     pointer-events:none!important;
     background:
-      radial-gradient(circle at 50% 50%,rgba(255,255,255,.92) 0 .13%,rgba(218,255,255,.42) .24% .52%,rgba(67,232,255,.13) .74%,transparent 1.35%),
-      radial-gradient(circle at 50% 50%,transparent 0 7.1%,rgba(185,252,255,.13) 7.35% 7.58%,transparent 7.9% 11.8%,rgba(123,225,255,.095) 12.05% 12.28%,transparent 12.62% 16.4%,rgba(190,103,255,.075) 16.7% 16.94%,transparent 17.3%),
-      radial-gradient(ellipse at 44% 48%,transparent 0 23%,rgba(75,225,255,.055) 23.35% 23.65%,transparent 24.1%),
-      radial-gradient(ellipse at 57% 51%,transparent 0 29%,rgba(178,87,255,.055) 29.35% 29.62%,transparent 30.1%),
-      conic-gradient(from 22deg at 50% 50%,transparent 0 13%,rgba(106,235,255,.035) 15%,transparent 18% 42%,rgba(174,79,255,.035) 45%,transparent 48% 72%,rgba(109,229,255,.03) 75%,transparent 78% 100%)!important;
+      radial-gradient(circle at 50% 50%,rgba(255,255,255,1) 0 .22%,rgba(232,255,255,.98) .28% .48%,rgba(87,241,255,.70) .62% 1.15%,rgba(31,178,255,.22) 1.6% 3.2%,transparent 5.4%),
+      radial-gradient(circle at 50% 50%,transparent 0 7.0%,rgba(223,255,255,.34) 7.25% 7.55%,rgba(52,225,255,.19) 7.72%,transparent 8.15% 11.2%,rgba(98,234,255,.25) 11.45% 11.75%,transparent 12.15% 15.4%,rgba(188,89,255,.20) 15.72% 16.02%,transparent 16.38% 20.1%,rgba(72,207,255,.14) 20.40% 20.66%,transparent 21.05%),
+      linear-gradient(90deg,transparent 5%,rgba(42,213,255,.015) 25%,rgba(194,252,255,.19) 49.7%,rgba(255,255,255,.54) 50%,rgba(194,252,255,.19) 50.3%,rgba(42,213,255,.015) 75%,transparent 95%),
+      linear-gradient(180deg,transparent 3%,rgba(45,201,255,.018) 29%,rgba(220,255,255,.22) 49.7%,rgba(255,255,255,.40) 50%,rgba(220,255,255,.22) 50.3%,rgba(45,201,255,.018) 71%,transparent 97%),
+      radial-gradient(ellipse at 43% 47%,transparent 0 23%,rgba(63,225,255,.11) 23.30% 23.65%,transparent 24.1%),
+      radial-gradient(ellipse at 58% 52%,transparent 0 29%,rgba(191,73,255,.11) 29.30% 29.65%,transparent 30.1%),
+      conic-gradient(from 20deg at 50% 50%,transparent 0 10%,rgba(79,225,255,.050) 13%,transparent 17% 38%,rgba(184,65,255,.055) 43%,transparent 47% 68%,rgba(98,226,255,.045) 73%,transparent 78% 100%)!important;
     mix-blend-mode:screen!important;
-    opacity:.82!important;
+    opacity:.94!important;
     filter:none!important;
   }
 
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage:after{
-    bottom:-10%!important;
-    height:42%!important;
-    opacity:.48!important;
+    bottom:-11%!important;
+    height:45%!important;
+    opacity:.58!important;
     background:
-      radial-gradient(ellipse at 50% 0%,rgba(120,241,255,.24),rgba(48,130,226,.075) 35%,rgba(151,69,232,.055) 54%,transparent 76%),
-      repeating-linear-gradient(0deg,rgba(81,206,255,.022) 0 1px,transparent 1px 11px)!important;
+      radial-gradient(ellipse at 50% 0%,rgba(112,244,255,.32),rgba(30,132,231,.095) 30%,rgba(156,64,235,.075) 50%,transparent 75%),
+      linear-gradient(90deg,transparent 4%,rgba(54,203,255,.04) 33%,rgba(175,246,255,.12) 50%,rgba(98,70,222,.05) 67%,transparent 96%),
+      repeating-linear-gradient(0deg,rgba(88,211,255,.030) 0 1px,transparent 1px 10px)!important;
+    filter:blur(.1px)!important;
   }
 }
