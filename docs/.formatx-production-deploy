@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T23:33:00+02:00
-source_master=cbea4a1848492640d210177bbe7bba85729efe6a
-purpose=publish the supplied-reference MAG material pass with the approved mobile size: replace the flat pale lattice with a dark translucent four-point crystal using organic cyan/violet caustics, layered refractive shells, compact cyan-white reactor rings, sharp central light spine, orbit arcs and reflective floor; no bitmap/image-backed MAG
-interaction=continuous native WebGL animation; pointer/touch parallax; immediate energy surge for custom interaction events; touch drag response; reactor pulse; smooth return to idle; capture-phase interaction bridge; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax and native WebGL contract; single-canvas rendering; approved size lock; interaction gate; Worker tests; production build; custom-domain smoke; live desktop/mobile screenshots; post-deploy visual comparison
+requested_at=2026-08-14T23:42:00+02:00
+source_master=84f267d6a8556198aec84fe595e69d9bc266570a
+purpose=publish the r111 supplied-reference MAG pass with the approved mobile size: native procedural WebGL four-point crystal rebuilt around converging structural glass fans, nested facet diamonds, layered refractive shells, sharper cyan-white reactor optics, cyan/violet internal refraction, central light spine, sparse spark points, orbit arcs and reflective floor; no bitmap or image-backed MAG
+interaction=continuous native WebGL animation; pointer/touch parallax; immediate energy surge; touch drag response; moving spectral refraction; reactor pulse; smooth return to idle; capture-phase interaction bridge; prefers-reduced-motion respected
+verification=production candidate validation; JavaScript syntax and native WebGL contract; single-canvas rendering; approved size lock; interaction gate; Worker tests; production build; custom-domain smoke; live desktop/mobile screenshots; post-deploy visual comparison against supplied reference
