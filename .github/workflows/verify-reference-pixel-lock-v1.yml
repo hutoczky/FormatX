@@ -11,9 +11,11 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/scripts/formatx-flow-first-r75.js'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
       - 'docs/scifi-ui/styles/formatx-award-reference-r80.css'
       - 'docs/scifi-ui/styles/formatx-award-proof-r85.css'
+      - 'docs/scifi-ui/styles/single-language-toggle.css'
       - 'docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'
   workflow_dispatch:
 permissions:
@@ -49,13 +51,17 @@ jobs:
             const page=await context.newPage();
             page.on('pageerror',e=>console.log(`[${name} PAGEERROR]`,e.message));
             await page.goto(`${origin}?reference_composition=${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+            if(mobile){
+              await page.addScriptTag({url:`${origin}scripts/single-language-toggle.js?v=visual-qa-r86`});
+            }
             await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxFlowFirstR75==='ready-r81',null,{timeout:45000});
+            if(mobile)await page.waitForFunction(()=>document.querySelector('.topbar>.fx-language-toggle'),null,{timeout:10000});
             await page.waitForTimeout(1900);
             const state=await page.evaluate(()=>{
               const root=document.documentElement;
               const q=s=>{const el=document.querySelector(s),r=el?.getBoundingClientRect(),cs=el?getComputedStyle(el):null;return r?{x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),display:cs.display,visibility:cs.visibility,opacity:+(cs.opacity||1),position:cs.position}:null};
               const canvas=document.querySelector('.fx-core-mobile-v55-canvas');
-              return {renderer:root.dataset.fxCoreRenderer,v69:root.dataset.fxCoreMobileV69,layout:root.dataset.fxMobileReferenceLayout,flow:root.dataset.fxFlowFirstR75,composition:root.dataset.fxReferenceComposition,renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),gl:Boolean(canvas?.getContext('webgl2')),glError:canvas?.getContext('webgl2')?.getError(),canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,topbar:q('.topbar'),space:q('#hero .hero-space'),rail:q('#hero .fx-reference-rail'),copy:q('#hero .hero-copy'),heading:q('#hero .fx-reference-heading'),proof:q('#hero .fx-reference-proof'),proofText:q('#hero .fx-reference-proof p'),liveOs:q('#hero .fx-reference-liveos'),brand:q('.topbar .brand'),mag:q('.topbar>.fx-reference-mag-button'),language:q('.fx-language-toggle'),menu:q('.topbar>.fx-reference-menu-button'),legacyMenu:q('#menu-toggle.fx-organism-system-toggle')};
+              return {renderer:root.dataset.fxCoreRenderer,v69:root.dataset.fxCoreMobileV69,layout:root.dataset.fxMobileReferenceLayout,flow:root.dataset.fxFlowFirstR75,composition:root.dataset.fxReferenceComposition,renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),gl:Boolean(canvas?.getContext('webgl2')),glError:canvas?.getContext('webgl2')?.getError(),canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,topbar:q('.topbar'),space:q('#hero .hero-space'),rail:q('#hero .fx-reference-rail'),copy:q('#hero .hero-copy'),heading:q('#hero .fx-reference-heading'),proof:q('#hero .fx-reference-proof'),proofText:q('#hero .fx-reference-proof p'),liveOs:q('#hero .fx-reference-liveos'),brand:q('.topbar .brand'),mag:q('.topbar>.fx-reference-mag-button'),language:q('.topbar>.fx-language-toggle'),menu:q('.topbar>.fx-reference-menu-button'),legacyMenu:q('#menu-toggle.fx-organism-system-toggle')};
             });
             console.log(name.toUpperCase(),JSON.stringify(state));
             await page.screenshot({path:`${name}.png`,fullPage:false});
@@ -88,7 +94,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: responsive-reference-v69-r85-${{ github.run_id }}
+          name: responsive-reference-v69-r86-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/ref-lock/mobile-412x680.png
             ${{ runner.temp }}/ref-lock/mobile-390x844.png
