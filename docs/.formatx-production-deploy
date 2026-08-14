@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T18:49:00+02:00
-source_master=7159b6101b039fdcbd1d609ce3a4ea807888220e
-purpose=ship r97 faceted interactive crystal MAG; preserve accepted r87 size/layout while replacing the flat HUD-like interior with refractive crystal depth, irregular facets and organic caustics
+requested_at=2026-08-14T18:52:00+02:00
+source_master=cf6931623bd505626fcec1ed321e353df12a124c
+purpose=ship validated r97 faceted interactive crystal MAG; preserve accepted r87 size/layout while replacing the flat HUD-like interior with refractive crystal depth, irregular facets and organic caustics
 interaction=continuous breathing; animated small reactor pulse; moving spectral caustics; pointer/touch parallax; touch energy surge; smooth return to idle; prefers-reduced-motion respected
 verification=production candidate validation; r97 JavaScript syntax; native real3D crystal contract; Worker tests; production build; custom-domain smoke; public-site integrity; live award-readiness; mobile interaction; post-deploy composition; Lighthouse
