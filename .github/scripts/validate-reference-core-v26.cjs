@@ -1,4 +1,5 @@
 'use strict';
+// r81 production propagation marker: validators are aligned with the current award-reference authority.
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'../..'),read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const selector=read('docs/scifi-ui/scripts/formatx-reference-core-v26.js');
