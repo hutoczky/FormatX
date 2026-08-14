@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T22:55:00+02:00
-source_master=9ee19d48a64deff4c661430c3ba23d77c575e496
-purpose=activate r106 shared desktop/mobile native WebGL crystal while preserving the accepted r87/r105 size: replace dense wire lattice with six layered glass shells, four curved internal crystal ribs, broad translucent cyan/navy faces, violet refraction, compact white reactor, subtle orbital arcs and cinematic reflection
+requested_at=2026-08-14T23:06:00+02:00
+source_master=79fb4f32825b593f2c907d98bb09346c4ed9f567
+purpose=activate the current r107 desktop/mobile reference-volumetric native WebGL crystal for direct live comparison before any further shader refinement
 interaction=continuous breathing; pointer/touch parallax; native touch energy surge; moving spectral caustics; reactor pulse; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; native r106/r99 identity WebGL contract; accepted-size r105 CSS lock; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG capture; post-deploy reference capture; award-readiness
+verification=production candidate validation; JavaScript syntax; native WebGL contract; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG capture; post-deploy reference capture; award-readiness
