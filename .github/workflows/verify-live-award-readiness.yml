@@ -27,7 +27,10 @@ jobs:
           node .github/scripts/validate-reference-core-v26.cjs
           node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
-      - name: Verify live r99 luminous crystalline MAG, layout and scrolling
+          test -s docs/scifi-ui/styles/formatx-award-material-r99.css
+          grep -Fq 'single-webgl-luminous-crystal-r99' docs/scifi-ui/styles/formatx-award-material-r99.css
+          ! grep -Fq 'repeating-conic-gradient' docs/scifi-ui/styles/formatx-award-material-r99.css
+      - name: Verify live r99 luminous crystalline MAG, optical atmosphere, layout and scrolling
         shell: bash
         run: |
           set -euo pipefail
@@ -38,6 +41,7 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-r99.js"
+          fetch "/scifi-ui/styles/formatx-award-material-r99.css?v=${GITHUB_RUN_ID}" "$TMP/material-r99.css"
           fetch "/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=${GITHUB_RUN_ID}" "$TMP/layout.js"
           fetch "/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=${GITHUB_RUN_ID}" "$TMP/layout.css"
           fetch "/scifi-ui/styles/formatx-award-material-r91.css?v=${GITHUB_RUN_ID}" "$TMP/material.css"
@@ -49,6 +53,7 @@ jobs:
           contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
           contains bootstrap 'responsive-cinematic-reference-v69-r99-luminous-interactive' "$TMP/bootstrap.js"
           contains bootstrap-renderer 'single-webgl-luminous-crystal-r99' "$TMP/bootstrap.js"
+          contains optical-loader 'formatx-award-material-r99.css?v=20260814-cinematic-atmosphere-r99' "$TMP/bootstrap.js"
           contains wrapper 'formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99' "$TMP/mobile-wrapper.js"
           contains renderer-version 'reference-luminous-crystal-webgl-r99' "$TMP/mobile-r99.js"
           contains renderer 'single-webgl-luminous-crystal-r99' "$TMP/mobile-r99.js"
@@ -70,6 +75,10 @@ jobs:
           contains crystal-caustics 'caustic' "$TMP/mobile-r99.js"
           contains reactor-rings 'rings' "$TMP/mobile-r99.js"
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\.|three\\.js|babylon|playcanvas|model-viewer' "$TMP/mobile-r99.js"
+          contains optical-scope 'single-webgl-luminous-crystal-r99' "$TMP/material-r99.css"
+          contains optical-highlight 'brightness(1.48)' "$TMP/material-r99.css"
+          contains optical-violet 'drop-shadow(0 0 32px rgba(137,77,255,.23))' "$TMP/material-r99.css"
+          ! grep -Fq 'repeating-conic-gradient' "$TMP/material-r99.css"
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
           contains mobile-unpaused 'let paused=mobileViewport()?false:' "$TMP/layout.js"
@@ -95,5 +104,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + live r99 luminous crystal touch MAG passed'; else state=failure; description='Award, production r99 MAG or scrolling failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + live r99 luminous crystal touch MAG and optical atmosphere passed'; else state=failure; description='Award, production r99 MAG, optical atmosphere or scrolling failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
