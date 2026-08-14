@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Bump production r105 bootstrap cache key
+      - name: Bump production r106 bootstrap cache key
         shell: bash
         run: |
           set -euo pipefail
@@ -20,12 +20,12 @@ jobs:
           from pathlib import Path
           p = Path('docs/scifi-ui/index.html')
           s = p.read_text()
-          old = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-volumetric-folds-r103'
-          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-accepted-size-volumetric-r105'
+          old = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-accepted-size-volumetric-r105'
+          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-native-volumetric-r106'
           if new in s:
               raise SystemExit(0)
           if old not in s:
-              raise SystemExit('expected r103 bootstrap cache key not found')
+              raise SystemExit('expected r105 bootstrap cache key not found')
           p.write_text(s.replace(old, new, 1))
           PY
           git config user.name 'github-actions[bot]'
@@ -35,5 +35,5 @@ jobs:
             echo 'cache key already current'
             exit 0
           fi
-          git commit -m '[deploy-production] fix(mag): publish r105 accepted-size volumetric glass'
+          git commit -m '[deploy-production] fix(mag): publish r106 native volumetric crystal'
           git push origin HEAD:master
