@@ -1,6 +1,6 @@
-/* r120 — 412x680 reference lock for the supplied mobile composition.
-   Visual material is rendered by the native XYZ WebGL mesh. This layer only fixes
-   presentation, atmosphere, the central flare and reflective floor. No image asset. */
+/* r121 — exact mobile composition + prismatic facet overlay.
+   The actual object remains a native XYZ WebGL mesh. This CSS adds only optical
+   caustics/veins comparable to the supplied cinematic reference; no image texture. */
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero{padding-top:68px!important}
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar{height:68px!important;min-height:68px!important;padding:4px 18px!important}
@@ -9,60 +9,13 @@
   html[data-fx-mobile-reference-layout="ready-v1"] .fx-reference-menu-button{top:8px!important;right:clamp(16px,6.55vw,57px)!important;width:48px!important;height:52px!important}
   html[data-fx-mobile-reference-layout="ready-v1"] .fx-language-toggle{top:14px!important;right:calc(clamp(16px,6.55vw,57px) + 61px)!important;width:40px!important;height:40px!important}
   html[data-fx-mobile-reference-layout="ready-v1"] .fx-reference-mag-button{top:16px!important;right:calc(clamp(16px,6.55vw,57px) + 109px)!important;width:48px!important;height:36px!important}
-
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
-    width:100%!important;height:clamp(376px,95.6vw,430px)!important;min-height:clamp(376px,95.6vw,430px)!important;max-height:430px!important;
-    overflow:visible!important;background:#01040d!important;
-  }
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage{
-    position:absolute!important;inset:0!important;overflow:visible!important;
-    background:
-      radial-gradient(circle at 9% 27%,rgba(115,233,255,.62) 0 1px,transparent 1.8px),
-      radial-gradient(circle at 17% 48%,rgba(71,187,255,.38) 0 1px,transparent 1.8px),
-      radial-gradient(circle at 25% 21%,rgba(182,96,255,.54) 0 1px,transparent 1.9px),
-      radial-gradient(circle at 78% 24%,rgba(224,116,255,.58) 0 1px,transparent 2px),
-      radial-gradient(circle at 89% 50%,rgba(100,236,255,.52) 0 1px,transparent 1.9px),
-      radial-gradient(circle at 74% 68%,rgba(190,91,255,.42) 0 1px,transparent 1.9px),
-      radial-gradient(circle at 33% 70%,rgba(93,227,255,.40) 0 1px,transparent 1.9px),
-      radial-gradient(circle at 56% 18%,rgba(111,205,255,.30) 0 1px,transparent 1.8px),
-      radial-gradient(circle at 41% 35%,rgba(181,91,255,.24) 0 1px,transparent 1.8px),
-      radial-gradient(ellipse at 50% 49%,rgba(23,186,255,.18) 0%,rgba(18,84,181,.065) 29%,transparent 53%),
-      radial-gradient(ellipse at 57% 50%,rgba(164,52,255,.18) 0%,rgba(94,34,188,.055) 31%,transparent 55%),
-      linear-gradient(180deg,#000208 0%,#010612 39%,#021126 70%,#031a30 100%)!important;
-    filter:none!important;box-shadow:inset 0 -1px 0 rgba(78,200,244,.08)!important;
-  }
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
-    position:absolute!important;inset:0!important;width:100%!important;height:100%!important;transform-origin:50% 50%!important;
-    transform:translateY(-.15%) scaleX(1.005) scaleY(1.27)!important;
-    filter:brightness(1.03) contrast(1.28) saturate(1.72)
-      drop-shadow(0 0 2px rgba(240,255,255,.60))
-      drop-shadow(0 0 10px rgba(42,229,255,.42))
-      drop-shadow(0 0 24px rgba(43,147,255,.24))
-      drop-shadow(0 0 41px rgba(157,58,255,.22))!important;
-  }
-  html[data-fx-core-r112="true-3d-mesh-glass-reactor"] #hero .hero-space>.fx-core-r112-stage:before{
-    content:""!important;display:block!important;position:absolute!important;inset:0!important;z-index:3!important;pointer-events:none!important;
-    background:
-      radial-gradient(circle at 50% 50%,#fff 0 .30%,rgba(244,255,255,1) .40% .82%,rgba(86,245,255,.88) 1.0% 1.85%,rgba(30,172,255,.25) 2.5% 4.9%,transparent 7.5%),
-      linear-gradient(90deg,transparent 1%,rgba(65,220,255,.014) 17%,rgba(185,249,255,.075) 41%,rgba(224,255,255,.22) 49.72%,rgba(255,255,255,.48) 50%,rgba(224,255,255,.22) 50.28%,rgba(185,249,255,.075) 59%,rgba(65,220,255,.014) 83%,transparent 99%),
-      linear-gradient(180deg,transparent 1%,rgba(61,214,255,.014) 18%,rgba(190,249,255,.08) 41%,rgba(230,255,255,.22) 49.72%,rgba(255,255,255,.44) 50%,rgba(230,255,255,.22) 50.28%,rgba(190,249,255,.08) 59%,rgba(61,214,255,.014) 82%,transparent 99%),
-      conic-gradient(from 8deg at 50% 50%,transparent 0 8%,rgba(90,232,255,.05) 11%,transparent 15% 32%,rgba(200,67,255,.07) 36%,transparent 40% 57%,rgba(94,232,255,.05) 61%,transparent 65% 82%,rgba(188,66,255,.06) 86%,transparent 90% 100%)!important;
-    mix-blend-mode:screen!important;opacity:.92!important;filter:none!important;
-  }
-  html[data-fx-core-r112="true-3d-mesh-glass-reactor"] #hero .hero-space>.fx-core-r112-stage:after{
-    content:""!important;display:block!important;position:absolute!important;left:-8%!important;right:-8%!important;top:51.8%!important;height:72%!important;z-index:1!important;pointer-events:none!important;
-    background:
-      radial-gradient(ellipse at 50% 0%,rgba(104,240,255,.28),rgba(31,132,229,.105) 29%,rgba(160,63,236,.085) 48%,transparent 74%),
-      repeating-radial-gradient(ellipse at 50% 0%,rgba(92,217,255,.045) 0 1px,transparent 3px 14px),
-      repeating-linear-gradient(180deg,rgba(68,193,255,.048) 0 1px,transparent 2px 10px),
-      linear-gradient(90deg,transparent 2%,rgba(50,161,226,.045) 27%,rgba(136,228,255,.12) 50%,rgba(130,63,220,.07) 72%,transparent 98%)!important;
-    transform:perspective(500px) rotateX(64deg) scaleX(1.12)!important;transform-origin:50% 0!important;opacity:.62!important;
-    -webkit-mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.82) 48%,transparent 91%);mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.82) 48%,transparent 91%);
-  }
-
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{width:100%!important;height:clamp(376px,95.6vw,430px)!important;min-height:clamp(376px,95.6vw,430px)!important;max-height:430px!important;overflow:visible!important;background:#01040d!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage{position:absolute!important;inset:0!important;overflow:visible!important;background:radial-gradient(circle at 9% 27%,rgba(115,233,255,.68) 0 1px,transparent 1.8px),radial-gradient(circle at 17% 48%,rgba(71,187,255,.43) 0 1px,transparent 1.8px),radial-gradient(circle at 25% 21%,rgba(190,93,255,.60) 0 1px,transparent 1.9px),radial-gradient(circle at 78% 24%,rgba(228,112,255,.63) 0 1px,transparent 2px),radial-gradient(circle at 89% 50%,rgba(100,239,255,.59) 0 1px,transparent 1.9px),radial-gradient(circle at 74% 68%,rgba(196,88,255,.48) 0 1px,transparent 1.9px),radial-gradient(circle at 33% 70%,rgba(93,231,255,.47) 0 1px,transparent 1.9px),radial-gradient(circle at 56% 18%,rgba(111,209,255,.35) 0 1px,transparent 1.8px),radial-gradient(circle at 41% 35%,rgba(185,88,255,.29) 0 1px,transparent 1.8px),radial-gradient(ellipse at 50% 49%,rgba(23,194,255,.20) 0%,rgba(18,86,187,.07) 29%,transparent 53%),radial-gradient(ellipse at 57% 50%,rgba(170,48,255,.20) 0%,rgba(98,32,194,.06) 31%,transparent 55%),linear-gradient(180deg,#000208 0%,#010612 39%,#021126 70%,#031a30 100%)!important;filter:none!important;box-shadow:inset 0 -1px 0 rgba(78,200,244,.08)!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;transform-origin:50% 50%!important;transform:translateY(-.15%) scaleX(1.005) scaleY(1.27)!important;filter:brightness(1.07) contrast(1.33) saturate(2.05) drop-shadow(0 0 2px rgba(240,255,255,.62)) drop-shadow(0 0 10px rgba(42,232,255,.48)) drop-shadow(0 0 25px rgba(43,147,255,.28)) drop-shadow(0 0 42px rgba(160,55,255,.25))!important}
+  html[data-fx-core-r112="true-3d-mesh-glass-reactor"] #hero .hero-space>.fx-core-r112-stage:before{content:""!important;display:block!important;position:absolute!important;inset:0!important;z-index:3!important;pointer-events:none!important;clip-path:polygon(50% 0%,61% 30%,94% 50%,62% 69%,50% 94%,38% 69%,6% 50%,39% 30%);background:radial-gradient(circle at 50% 50%,#fff 0 .30%,rgba(245,255,255,1) .42% .85%,rgba(83,247,255,.95) 1.05% 1.95%,rgba(31,178,255,.30) 2.55% 5%,transparent 7.6%),radial-gradient(circle at 50% 50%,transparent 0 6.8%,rgba(172,253,255,.34) 7.1% 7.45%,transparent 7.8% 10.4%,rgba(77,239,255,.30) 10.75% 11.08%,transparent 11.4% 14.5%,rgba(205,93,255,.25) 14.85% 15.2%,transparent 15.55% 19.2%,rgba(86,224,255,.20) 19.55% 19.86%,transparent 20.2% 24.2%,rgba(196,245,255,.13) 24.55% 24.85%,transparent 25.2%),repeating-conic-gradient(from 7deg at 50% 50%,transparent 0 5.5deg,rgba(84,235,255,.095) 5.75deg 6.05deg,transparent 6.3deg 13.5deg,rgba(188,73,255,.075) 13.8deg 14.1deg,transparent 14.4deg 22.5deg),repeating-conic-gradient(from 3deg at 47% 51%,transparent 0 9deg,rgba(214,253,255,.055) 9.25deg 9.5deg,transparent 9.8deg 19deg),linear-gradient(27deg,transparent 0 23%,rgba(75,229,255,.09) 23.25% 23.55%,transparent 23.9% 72%,rgba(195,72,255,.08) 72.2% 72.5%,transparent 72.85%),linear-gradient(-31deg,transparent 0 19%,rgba(212,252,255,.075) 19.2% 19.48%,transparent 19.8% 66%,rgba(80,230,255,.095) 66.2% 66.52%,transparent 66.9%),linear-gradient(63deg,transparent 0 31%,rgba(200,77,255,.09) 31.15% 31.42%,transparent 31.8% 58%,rgba(92,236,255,.075) 58.2% 58.48%,transparent 58.9%),linear-gradient(-68deg,transparent 0 28%,rgba(77,227,255,.08) 28.2% 28.48%,transparent 28.8% 61%,rgba(203,75,255,.085) 61.2% 61.5%,transparent 61.8%),radial-gradient(ellipse at 35% 42%,rgba(78,231,255,.12),transparent 15%),radial-gradient(ellipse at 68% 58%,rgba(190,72,255,.10),transparent 18%),conic-gradient(from 18deg at 50% 50%,rgba(72,216,255,.04),transparent 9%,rgba(195,66,255,.06) 15%,transparent 23%,rgba(83,232,255,.045) 31%,transparent 42%,rgba(185,65,255,.055) 50%,transparent 61%,rgba(76,224,255,.045) 71%,transparent 84%,rgba(192,72,255,.05) 91%,transparent 100%),linear-gradient(90deg,transparent 1%,rgba(65,220,255,.014) 17%,rgba(185,249,255,.08) 41%,rgba(224,255,255,.23) 49.72%,rgba(255,255,255,.50) 50%,rgba(224,255,255,.23) 50.28%,rgba(185,249,255,.08) 59%,rgba(65,220,255,.014) 83%,transparent 99%),linear-gradient(180deg,transparent 1%,rgba(61,214,255,.014) 18%,rgba(190,249,255,.08) 41%,rgba(230,255,255,.23) 49.72%,rgba(255,255,255,.46) 50%,rgba(230,255,255,.23) 50.28%,rgba(190,249,255,.08) 59%,rgba(61,214,255,.014) 82%,transparent 99%)!important;mix-blend-mode:screen!important;opacity:.98!important;filter:saturate(1.22) contrast(1.05)!important}
+  html[data-fx-core-r112="true-3d-mesh-glass-reactor"] #hero .hero-space>.fx-core-r112-stage:after{content:""!important;display:block!important;position:absolute!important;left:-8%!important;right:-8%!important;top:51.8%!important;height:72%!important;z-index:1!important;pointer-events:none!important;background:radial-gradient(ellipse at 50% 0%,rgba(108,244,255,.32),rgba(31,136,233,.115) 29%,rgba(164,63,242,.095) 48%,transparent 74%),repeating-radial-gradient(ellipse at 50% 0%,rgba(96,221,255,.05) 0 1px,transparent 3px 14px),repeating-linear-gradient(180deg,rgba(71,199,255,.055) 0 1px,transparent 2px 10px),linear-gradient(90deg,transparent 2%,rgba(52,165,230,.05) 27%,rgba(143,235,255,.13) 50%,rgba(136,66,226,.075) 72%,transparent 98%)!important;transform:perspective(500px) rotateX(64deg) scaleX(1.12)!important;transform-origin:50% 0!important;opacity:.65!important;-webkit-mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.82) 48%,transparent 91%);mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.82) 48%,transparent 91%)}
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{top:14px!important;right:6.55%!important;gap:12px!important;z-index:24!important}
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask,
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-pause{width:56px!important;height:56px!important;min-width:56px!important;min-height:56px!important;background:rgba(2,13,23,.79)!important;border-color:rgba(145,203,229,.27)!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask,html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-pause{width:56px!important;height:56px!important;min-width:56px!important;min-height:56px!important;background:rgba(2,13,23,.79)!important;border-color:rgba(145,203,229,.27)!important}
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask span{top:61px!important;font-size:10px!important}
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{margin:-23px 6% 24px!important;font-size:15px!important;line-height:1.08!important;letter-spacing:.145em!important;z-index:25!important}
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading:after{width:31px!important}
