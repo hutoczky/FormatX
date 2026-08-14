@@ -1,6 +1,7 @@
 /* Award reference r80 — measured silhouette/aspect correction from supplied reference screenshot.
    The approved reference MAG occupies ~88.7% of viewport width and ~80.9% of viewport width in height.
-   Keep native WebGL interaction; constrain only framing, optical scale and award-overlay placement. */
+   Keep native WebGL interaction; constrain only framing, optical scale and award-overlay placement.
+   Production propagation marker: r81 trigger repair. */
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
     width:100%!important;
