@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T23:29:00+02:00
-source_master=47434bce295f89d878eeb9041c47388ff01747af
-purpose=activate r109 on desktop and mobile while preserving the approved r105 size: r108 native volumetric glass plus darker cinematic contrast polish, sharper ice-white/cyan edges, stronger violet refraction, tighter reactor and water-like reflection
-interaction=continuous breathing; pointer/touch parallax; native touch energy surge; capture-phase custom interaction bridge; reactor pulse; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; native r99 WebGL contract; approved-size r105 lock; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG interaction gate; post-deploy screenshots; award-readiness
+requested_at=2026-08-14T23:31:00+02:00
+source_master=c4a964eb80d9518a50fb3b95fd70afe92568626c
+purpose=deploy the supplied-reference MAG pass: replace the flat pale lattice with a dark translucent four-point crystal using irregular organic caustics, layered glass shells, compact cyan-white reactor rings, cyan/violet refraction, sharp light spine, orbit arcs and reflective floor; retune the mobile envelope to remove the over-tall and over-wide stretch; no bitmap/image-backed MAG
+interaction=continuous native WebGL animation; pointer/touch parallax; immediate energy surge for interaction events; touch drag response; reactor pulse; smooth return to idle; prefers-reduced-motion respected
+verification=production candidate validation; JavaScript syntax and WebGL contract; single-canvas rendering; mobile framing; interaction gate; Worker tests; production build; custom-domain smoke; live desktop/mobile screenshots; post-deploy visual comparison
