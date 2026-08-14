@@ -1,0 +1,9 @@
+/* Award reference r76 — mobile composition lock. Keeps the native WebGL MAG interactive while matching the approved tall cinematic framing. */
+@media (max-width:900px),(pointer:coarse){
+html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{height:clamp(560px,149vw,820px)!important;min-height:clamp(560px,149vw,820px)!important;max-height:820px!important;background:linear-gradient(180deg,#010713 0%,#020916 53%,#03182a 78%,#06192a 100%)!important;overflow:visible!important}
+html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage{background:radial-gradient(circle at 50% 48%,rgba(37,210,255,.28),transparent 29%),radial-gradient(circle at 55% 49%,rgba(151,56,255,.18),transparent 46%),radial-gradient(circle at 19% 23%,rgba(96,203,255,.45) 0 1px,transparent 1.6px),radial-gradient(circle at 78% 31%,rgba(171,91,255,.42) 0 1px,transparent 1.7px),radial-gradient(circle at 87% 57%,rgba(75,215,255,.38) 0 1px,transparent 1.6px),linear-gradient(180deg,#01040c 0%,#010b19 48%,#04213b 77%,#031b31 100%)!important;filter:saturate(1.22) contrast(1.08)!important}
+html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{transform-origin:50% 50%!important;transform:translateY(-1.5%) scaleX(1.08) scaleY(1.05)!important;filter:saturate(1.28) contrast(1.09) brightness(1.08)!important}
+html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{top:38px!important;right:6.7%!important;z-index:14!important}
+html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{margin:-45px 6% 24px!important}
+}
+@media (max-width:430px){html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{height:clamp(545px,149vw,680px)!important;min-height:clamp(545px,149vw,680px)!important;max-height:680px!important}}
