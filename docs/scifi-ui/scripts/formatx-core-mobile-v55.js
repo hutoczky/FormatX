@@ -8,7 +8,7 @@
   }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v69';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'cinematic-reference-glass-native-webgl-self-healing-v69-r71';
+  root.dataset.fxCoreMobileAwardRevision = 'reference-rayglass-native-webgl-v69-r91';
 
   function loadReferenceLayout() {
     if (!document.querySelector('link[data-fx-mobile-reference-layout-style]')) {
@@ -35,18 +35,20 @@
 
   loadReferenceLayout();
   const renderer = document.createElement('script');
-  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v69.js?v=20260813-android-webgl-recovery-r71';
+  renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-v91.js?v=20260814-reference-rayglass-r91';
   renderer.async = false;
   renderer.dataset.fxCoreMobileReferenceV69 = 'true';
+  renderer.dataset.fxCoreMobileReferenceV91 = 'true';
   renderer.addEventListener('load', () => {
-    root.dataset.fxCoreReferenceLockLoad = 'ready-v69';
+    root.dataset.fxCoreReferenceLockLoad = 'ready-v69-r91';
   }, { once: true });
   renderer.addEventListener('error', () => {
     root.dataset.fxCoreMobileV55 = 'load-failed-v55';
     root.dataset.fxCoreMobileV69 = 'load-failed-v69';
+    root.dataset.fxCoreMobileV91 = 'load-failed-r91';
     root.dataset.fxCoreReferenceLock = 'load-failed-v69';
     root.dataset.fxCoreReal3d = 'context-unavailable';
-    dispatchEvent(new CustomEvent('formatx:core3dfallback', { detail: { reason: 'native-webgl-renderer-load-failed', reference: 'v69-r71' } }));
+    dispatchEvent(new CustomEvent('formatx:core3dfallback', { detail: { reason: 'native-webgl-renderer-load-failed', reference: 'v69-r91' } }));
   }, { once: true });
   document.head.appendChild(renderer);
 }());
