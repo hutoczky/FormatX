@@ -19,9 +19,10 @@
 
   function setBilingual(element, hu, en) {
     if (!element) return;
-    element.dataset.hu = hu;
-    element.dataset.en = en;
-    element.textContent = language() === 'en' ? en : hu;
+    if (element.dataset.hu !== hu) element.dataset.hu = hu;
+    if (element.dataset.en !== en) element.dataset.en = en;
+    const next = language() === 'en' ? en : hu;
+    if (element.textContent !== next) element.textContent = next;
   }
 
   function ensureCategoryDefinition() {
@@ -37,9 +38,10 @@
       else heroCopy.prepend(block);
     }
 
-    block.innerHTML = language() === 'en'
+    const definition = language() === 'en'
       ? '<strong>Technician Operating Layer</strong>One shared, verifiable workflow for drive management, system diagnostics, installation and safe maintenance.'
       : '<strong>Technikusi operációs réteg</strong>Egy közös, ellenőrizhető munkafolyamat meghajtókezeléshez, rendszerdiagnosztikához, telepítéshez és biztonságos karbantartáshoz.';
+    if (block.innerHTML !== definition) block.innerHTML = definition;
 
     const lead = heroCopy.querySelector('.hero-lead');
     setBilingual(
@@ -59,9 +61,12 @@
     const steps = language() === 'en'
       ? ['Discover', 'Plan', 'Controlled execution', 'Verify']
       : ['Felderítés', 'Terv', 'Kontrollált végrehajtás', 'Visszaellenőrzés'];
-    method.replaceChildren(...steps.map(step => Object.assign(document.createElement('li'), {
-      textContent: step
-    })));
+    const currentSteps = Array.from(method.children, item => item.textContent || '');
+    if (currentSteps.length !== steps.length || currentSteps.some((value, index) => value !== steps[index])) {
+      method.replaceChildren(...steps.map(step => Object.assign(document.createElement('li'), {
+        textContent: step
+      })));
+    }
   }
 
   function updateNavigation() {
@@ -137,33 +142,38 @@
       if (!values[index]) return;
       const value = fact.querySelector('b');
       const label = fact.querySelector('small');
-      if (value) value.textContent = values[index][0];
-      if (label) label.textContent = values[index][1];
+      if (value && value.textContent !== values[index][0]) value.textContent = values[index][0];
+      if (label && label.textContent !== values[index][1]) label.textContent = values[index][1];
       fact.classList.add('fx-proof-metric');
       fact.dataset.state = values[index][0] === '—' ? 'unavailable' : 'available';
     });
 
     const labels = document.querySelectorAll('#hero .hero-label');
     if (labels[0]) {
-      labels[0].querySelector('span').textContent = '01/04';
-      labels[0].querySelector('b').textContent = 'METHOD STEP';
+      const span = labels[0].querySelector('span');
+      const bold = labels[0].querySelector('b');
+      if (span && span.textContent !== '01/04') span.textContent = '01/04';
+      if (bold && bold.textContent !== 'METHOD STEP') bold.textContent = 'METHOD STEP';
     }
     if (labels[1]) {
-      labels[1].querySelector('span').textContent = 'FULL';
-      labels[1].querySelector('b').textContent = 'PUBLIC RELEASE';
+      const span = labels[1].querySelector('span');
+      const bold = labels[1].querySelector('b');
+      if (span && span.textContent !== 'FULL') span.textContent = 'FULL';
+      if (bold && bold.textContent !== 'PUBLIC RELEASE') bold.textContent = 'PUBLIC RELEASE';
       labels[1].dataset.releaseTelemetry = 'true';
     }
     if (labels[2]) {
-      labels[2].querySelector('span').textContent = issueCount == null
-        ? '—'
-        : String(issueCount).padStart(2, '0');
-      labels[2].querySelector('b').textContent = 'KNOWN LIMITS';
+      const issueText = issueCount == null ? '—' : String(issueCount).padStart(2, '0');
+      const span = labels[2].querySelector('span');
+      const bold = labels[2].querySelector('b');
+      if (span && span.textContent !== issueText) span.textContent = issueText;
+      if (bold && bold.textContent !== 'KNOWN LIMITS') bold.textContent = 'KNOWN LIMITS';
     }
   }
 
   function updateReleaseTelemetry() {
     const target = document.querySelector('#hero .hero-label[data-release-telemetry] span');
-    if (target) target.textContent = 'FULL';
+    if (target && target.textContent !== 'FULL') target.textContent = 'FULL';
   }
 
   function ensureTrustStrip() {
@@ -234,8 +244,10 @@
     };
 
     Object.entries(copy).forEach(([key, values]) => {
-      section.querySelector(`[data-card="${key}"]`).textContent = values[0];
-      section.querySelector(`[data-card-copy="${key}"]`).textContent = values[1];
+      const title = section.querySelector(`[data-card="${key}"]`);
+      const body = section.querySelector(`[data-card-copy="${key}"]`);
+      if (title && title.textContent !== values[0]) title.textContent = values[0];
+      if (body && body.textContent !== values[1]) body.textContent = values[1];
     });
   }
 
@@ -250,9 +262,10 @@
       host.appendChild(paragraph);
     }
 
-    paragraph.textContent = language() === 'en'
+    const next = language() === 'en'
       ? 'FormatX Suite Pro is an independent, one-person technology project. Hutóczky József is responsible for system design, development and product direction.'
       : 'A FormatX Suite Pro független, egyszemélyes technológiai projekt. A rendszer tervezését, fejlesztését és termékirányát Hutóczky József végzi.';
+    if (paragraph.textContent !== next) paragraph.textContent = next;
   }
 
   async function fetchJson(url) {
@@ -271,13 +284,13 @@
     data.tests = settled[1].status === 'fulfilled' ? settled[1].value : null;
     data.issues = settled[2].status === 'fulfilled' ? settled[2].value : null;
     ROOT.__FORMATX_CONTENT_DATA__ = data;
+    ROOT.dataset.fxContentData = 'ready-v2';
   }
 
-  function apply() {
+  function applyStatic() {
     ensureCategoryDefinition();
     updateNavigation();
     updateDownloadSemantics();
-    updateHeroTelemetry();
     ensureTrustStrip();
     const strip = document.querySelector('.fx-trust-strip');
     if (strip) translateTrustStrip(strip);
@@ -285,16 +298,22 @@
     ROOT.dataset.fxContentStandard = 'ready-v2';
   }
 
-  async function init() {
-    await loadData();
-    apply();
+  function apply() {
+    applyStatic();
+    updateHeroTelemetry();
   }
+
+  async function hydrateData() {
+    await loadData();
+    updateHeroTelemetry();
+  }
+
+  // This script is deferred. The hero already exists when it executes, so apply
+  // all LCP-visible copy synchronously instead of waiting for three JSON fetches.
+  // Only telemetry depends on those responses and hydrates after first paint.
+  applyStatic();
+  hydrateData();
 
   addEventListener('formatx:languagechange', apply);
   addEventListener('formatx:releasemetadataready', updateReleaseTelemetry);
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init, { once: true });
-  } else {
-    init();
-  }
 }());
