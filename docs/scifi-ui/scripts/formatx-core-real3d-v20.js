@@ -1,13 +1,13 @@
 (function () {
   'use strict';
-  // r110 bootstrap: dark refractive r109 WebGL + supplied-reference framing + cinematic polish + interaction bridge.
+  // r110 bootstrap: dark refractive r109 WebGL + user-approved size + cinematic polish + interaction bridge.
   const root = document.documentElement;
   const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive';
   const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260814-luminous-cinematic-r99&rev=20260814-dark-refractive-r109';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260813-android-webgl-recovery-r71';
   const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260814-pixel-aspect-r80';
   const R87_STYLE = '/scifi-ui/styles/formatx-award-reference-r87.css?v=20260814-size-lock-r87&rev=20260814-supplied-reference-r108';
-  const SIZE_LOCK_STYLE = '/scifi-ui/styles/formatx-size-lock-r105.css?v=20260814-supplied-reference-r109';
+  const SIZE_LOCK_STYLE = '/scifi-ui/styles/formatx-size-lock-r105.css?v=20260814-user-approved-size-r110';
   const MATERIAL_STYLE = '/scifi-ui/styles/formatx-award-material-r88.css?v=20260814-material-reactor-r88';
   const FACET_STYLE = '/scifi-ui/styles/formatx-award-material-r89.css?v=20260814-faceted-crystal-r89';
   const CLARITY_STYLE = '/scifi-ui/styles/formatx-award-material-r90.css?v=20260814-reference-clarity-r90';
