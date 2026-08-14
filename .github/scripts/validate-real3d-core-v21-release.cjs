@@ -10,13 +10,13 @@ assert.match(bootstrap,/responsive-cinematic-reference-v69-r83-desktop-safe-head
 assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69-r83/);
 assert.match(bootstrap,/formatx-award-reference-r80\.css\?v=20260814-pixel-aspect-r80/);
 assert.match(bootstrap,/formatx-flow-first-r75\.js\?v=20260814-award-overlay-r82-desktop-scope/);
-assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260814-desktop-safe-r83/);
+assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260814-desktop-safe-r84/);
 assert.match(wrapper,/formatx-core-mobile-reference-v69\.js/);
 assert.equal((renderer.match(/candidate\.getContext\(profile\.kind/g)||[]).length,1);
 for(const token of ['single-webgl2-mobile-cinematic-reference-glass-v69','reference-target-organic-deep-concave-four-point-v69','four-layer-luminous-fresnel-faceted-glass-v69','white-cyan-reactor-six-orbitals-crossflare-v69','native-webgl2-only-no-raster-no-svg-v69','single-context-adaptive-60-plus-fps','continuous-native-webgl2-living-motion-v69','direct-touch-drag-energy-burst-parallax-v69','formatx:referencepause','webglcontextrestored','visible-native-3d-v71'])assert.ok(renderer.includes(token),`missing v69 release contract: ${token}`);
 assert.doesNotMatch(renderer,/new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
-assert.match(layout,/mag-first-normal-flow-r74/);assert.match(layout,/space\.after\(rail\)/);assert.doesNotMatch(layout,/desktop-skip/);assert.match(layout,/mobileViewport=.*max-width:900px/);assert.match(layout,/restoreDesktopMenu/);
+assert.match(layout,/mag-first-normal-flow-r74/);assert.match(layout,/space\.after\(rail\)/);assert.doesNotMatch(layout,/desktop-skip/);assert.match(layout,/mobileViewport=.*max-width:900px/);assert.match(layout,/restoreDesktopMenu/);assert.match(layout,/fx-organism-system-toggle/);
 for(const token of ['position:relative!important','flex-direction:column!important','order:0!important','order:1!important','order:2!important','order:3!important','order:4!important','#fx-reference-legacy-menu','display:grid!important'])assert.ok(flowCss.includes(token),`missing r74 flow contract: ${token}`);
 assert.doesNotMatch(flowCss,/position:sticky!important/);
 new Function(bootstrap);new Function(wrapper);new Function(renderer);new Function(layout);
-console.log('PASS: release validates native WebGL2 v69 r83 desktop-safe header with preserved mobile award-reference flow.');
+console.log('PASS: release validates native WebGL2 v69 r84 desktop-menu hardening with preserved mobile award-reference flow.');
