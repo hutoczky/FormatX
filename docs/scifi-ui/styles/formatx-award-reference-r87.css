@@ -1,16 +1,20 @@
-/* r87 — visual correction measured from the latest live mobile capture against the approved award reference.
-   The r80 <=430px clamp compressed the cinematic MAG to ~86vw high; the approved reference is materially taller,
-   wider, brighter and more refractive. Keep the native WebGL renderer and correct only its presentation envelope. */
+/* r104 — screenshot-locked mobile MAG geometry from the supplied reference.
+   Keep the native WebGL animation/interactions and r103 volumetric glass material.
+   This layer corrects the measured presentation envelope only: stage height, optical
+   width, controls and normal-flow heading/card placement. No image-backed MAG. */
 @media (max-width:430px){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
-    height:clamp(430px,112vw,490px)!important;
-    min-height:clamp(430px,112vw,490px)!important;
-    max-height:490px!important;
+    width:100%!important;
+    height:clamp(390px,97vw,414px)!important;
+    min-height:clamp(390px,97vw,414px)!important;
+    max-height:414px!important;
+    overflow:visible!important;
     background:
       radial-gradient(ellipse at 50% 49%,rgba(62,226,255,.30),transparent 31%),
       radial-gradient(ellipse at 55% 51%,rgba(169,72,255,.22),transparent 49%),
       linear-gradient(180deg,#01050e 0%,#010916 46%,#031a30 74%,#061a2c 100%)!important;
   }
+
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage{
     filter:saturate(1.58) contrast(1.20) brightness(1.12)!important;
     background:
@@ -21,38 +25,82 @@
       radial-gradient(circle at 90% 59%,rgba(96,238,255,.51) 0 1px,transparent 1.8px),
       linear-gradient(180deg,#01040c 0%,#010b19 46%,#04243f 75%,#031d35 100%)!important;
   }
+
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
     transform-origin:50% 50%!important;
-    transform:translateY(-.5%) scaleX(1.16) scaleY(1.00)!important;
+    transform:translateY(0) scaleX(1.36) scaleY(1.00)!important;
     filter:saturate(1.82) contrast(1.30) brightness(1.34) drop-shadow(0 0 20px rgba(54,226,255,.42)) drop-shadow(0 0 34px rgba(111,83,255,.16))!important;
   }
+
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:before{
     background:
       linear-gradient(90deg,transparent 0 2%,rgba(70,203,255,.05) 18%,rgba(132,245,255,.24) 49.8%,rgba(197,88,255,.13) 72%,transparent 98%),
       radial-gradient(ellipse at 50% 65%,rgba(72,220,255,.20),transparent 50%)!important;
   }
+
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:after{
-    bottom:-12%!important;height:47%!important;opacity:.82!important;
+    bottom:-12%!important;
+    height:47%!important;
+    opacity:.82!important;
     background:
       radial-gradient(ellipse at 50% 0%,rgba(76,235,255,.34),rgba(94,116,255,.14) 29%,rgba(164,72,255,.09) 47%,transparent 72%),
       repeating-linear-gradient(0deg,rgba(67,214,255,.10) 0 1px,transparent 1px 8px)!important;
   }
+
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{
-    top:20px!important;right:5.8%!important;
+    top:13px!important;
+    right:6.2%!important;
+    gap:10px!important;
   }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask,
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-pause{
+    width:48px!important;
+    height:48px!important;
+    min-width:48px!important;
+    min-height:48px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask span{
+    top:53px!important;
+    font-size:9px!important;
+    letter-spacing:.045em!important;
+  }
+
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
-    margin:-34px 6% 24px!important;
+    margin:-40px 6% 24px!important;
     font-size:15px!important;
+    line-height:1.08!important;
     letter-spacing:.15em!important;
   }
 }
+
 @media (min-width:431px) and (max-width:900px){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
-    height:clamp(470px,108vw,690px)!important;
-    min-height:clamp(470px,108vw,690px)!important;
+    height:clamp(414px,99vw,650px)!important;
+    min-height:clamp(414px,99vw,650px)!important;
+    max-height:650px!important;
   }
+
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
-    transform:translateY(-.5%) scaleX(1.13) scaleY(1.00)!important;
-    filter:saturate(1.78) contrast(1.28) brightness(1.30) drop-shadow(0 0 20px rgba(54,226,255,.40))!important;
+    transform:translateY(0) scaleX(1.31) scaleY(1.00)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{
+    top:14px!important;
+    right:6.2%!important;
+    gap:10px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask,
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-pause{
+    width:50px!important;
+    height:50px!important;
+    min-width:50px!important;
+    min-height:50px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
+    margin:-42px 6% 24px!important;
   }
 }
