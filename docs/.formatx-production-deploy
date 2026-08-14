@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-14T17:31:00+02:00
-source_master=079432b4825f9e7a24f9c0574feba1e73754b35f
-purpose=ship r91 refractive ray-glass native WebGL MAG while preserving the approved r87 mobile size and reference flow; replace the flat cyan membrane look with layered glass depth, Fresnel edges, internal facet web, restrained cyan/violet caustics and a smaller white reactor
-verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain deploy; follow-up live MAG and award-readiness gates
+requested_at=2026-08-14T17:36:00+02:00
+source_master=3e3c5981530c0a738e7f82aed00a606a6e430de3
+purpose=ship r92 faceted refractive ray-glass native WebGL MAG while preserving the approved r87 mobile size and reference flow; increase icy Fresnel edges, chromatic cyan-violet splitting, internal polygonal facet web, concentric reactor rings and sharpen the white center without restoring broad flare wash
+verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain deploy; r92 post-deploy screenshot gate with frame-budget, geometry, text-overlap and interaction telemetry
