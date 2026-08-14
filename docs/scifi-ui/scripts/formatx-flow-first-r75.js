@@ -16,18 +16,18 @@ function apply(){
  document.querySelectorAll('#fx-reference-legacy-menu,body>.menu-toggle.fx-organism-system-toggle:not(.fx-reference-menu-button)').forEach(el=>{imp(el,'display','none');imp(el,'visibility','hidden');imp(el,'opacity','0');imp(el,'pointer-events','none');});
  const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space'),rail=hero?.querySelector('.fx-reference-rail'),copy=hero?.querySelector('.hero-copy'),heading=hero?.querySelector('.fx-reference-heading'),proof=hero?.querySelector('.fx-reference-proof');
  if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement)||!(copy instanceof HTMLElement))return false;
- imp(hero,'display','block');imp(hero,'height','auto');imp(hero,'min-height','0');imp(hero,'max-height','none');imp(hero,'padding-top',mobile?'8px':'12px');imp(hero,'overflow','visible');
+ imp(hero,'display','block');imp(hero,'height','auto');imp(hero,'min-height','0');imp(hero,'max-height','none');imp(hero,'padding-top',mobile?'0':'12px');imp(hero,'overflow','visible');
  imp(grid,'position','relative');imp(grid,'display','flex');imp(grid,'flex-direction','column');imp(grid,'grid-template-columns','none');imp(grid,'grid-template-rows','none');imp(grid,'align-items','stretch');imp(grid,'width','100%');imp(grid,'max-width','none');imp(grid,'height','auto');imp(grid,'min-height','0');imp(grid,'gap','0');imp(grid,'margin','0');imp(grid,'padding','0');imp(grid,'overflow','visible');
  normal(space);imp(space,'order','0');imp(space,'align-self','center');imp(space,'margin','0 auto');
 
  if(mobile){
   if(rail instanceof HTMLElement){
-   imp(rail,'position','absolute');imp(rail,'inset','auto');imp(rail,'top','38px');imp(rail,'right','6%');imp(rail,'left','auto');imp(rail,'bottom','auto');imp(rail,'z-index','14');imp(rail,'display','flex');imp(rail,'flex-direction','column');imp(rail,'align-items','center');imp(rail,'justify-content','flex-start');imp(rail,'gap','13px');imp(rail,'width','auto');imp(rail,'height','auto');imp(rail,'margin','0');imp(rail,'transform','none');
+   imp(rail,'position','absolute');imp(rail,'inset','auto');imp(rail,'top','18px');imp(rail,'right','6.2%');imp(rail,'left','auto');imp(rail,'bottom','auto');imp(rail,'z-index','20');imp(rail,'display','flex');imp(rail,'flex-direction','column');imp(rail,'align-items','center');imp(rail,'justify-content','flex-start');imp(rail,'gap','13px');imp(rail,'width','auto');imp(rail,'height','auto');imp(rail,'margin','0');imp(rail,'transform','none');
   }
   imp(copy,'position','absolute');imp(copy,'width','1px');imp(copy,'height','1px');imp(copy,'padding','0');imp(copy,'margin','-1px');imp(copy,'overflow','hidden');imp(copy,'clip','rect(0,0,0,0)');imp(copy,'clip-path','inset(50%)');imp(copy,'white-space','nowrap');imp(copy,'border','0');imp(copy,'opacity','1');imp(copy,'visibility','visible');
-  if(heading instanceof HTMLElement){normal(heading);imp(heading,'order','2');imp(heading,'align-self','stretch');imp(heading,'margin','-50px 6% 24px');imp(heading,'z-index','15');}
+  if(heading instanceof HTMLElement){normal(heading);imp(heading,'order','2');imp(heading,'align-self','stretch');imp(heading,'margin','-24px 6% 24px');imp(heading,'z-index','21');}
   if(proof instanceof HTMLElement){normal(proof);imp(proof,'order','3');imp(proof,'align-self','stretch');imp(proof,'height','auto');imp(proof,'min-height','222px');imp(proof,'margin','0 7% 30px 6%');imp(proof,'overflow','hidden');const live=proof.querySelector('.fx-reference-liveos');if(live instanceof HTMLElement){imp(live,'position','absolute');imp(live,'right','6px');imp(live,'top','143px');imp(live,'left','auto');imp(live,'bottom','auto');imp(live,'display','grid');imp(live,'margin','0');}}
-  root.dataset.fxReferenceComposition='award-reference-overlay-r78';root.dataset.fxFlowFirstR75='ready-r78';return true;
+  root.dataset.fxReferenceComposition='award-reference-overlay-r81';root.dataset.fxFlowFirstR75='ready-r81';return true;
  }
 
  if(rail instanceof HTMLElement){normal(rail);imp(rail,'order','1');imp(rail,'align-self','center');imp(rail,'display','flex');imp(rail,'flex-direction','row');imp(rail,'align-items','center');imp(rail,'justify-content','center');imp(rail,'gap','12px');imp(rail,'width','auto');imp(rail,'height','auto');imp(rail,'margin','12px auto 32px');}
