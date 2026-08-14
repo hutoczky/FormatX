@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-14T00:20:00+02:00
-source_master=b9adf0d93f0305181abc573f733cda38cc8d15e2
-purpose=publish verified MAG-first normal-flow composition r75 on phone and desktop: MAG first, all hero information below it in document flow, no floating header/interaction controls covering page information, native WebGL2 animation and interaction preserved
-verification=local Chromium geometry and visibility gate at 390x844 DPR2, 412x680 DPR2 and 1440x960; production validation; custom-domain smoke; follow-up live no-overlap verification
+requested_at=2026-08-14T17:31:00+02:00
+source_master=079432b4825f9e7a24f9c0574feba1e73754b35f
+purpose=ship r91 refractive ray-glass native WebGL MAG while preserving the approved r87 mobile size and reference flow; replace the flat cyan membrane look with layered glass depth, Fresnel edges, internal facet web, restrained cyan/violet caustics and a smaller white reactor
+verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain deploy; follow-up live MAG and award-readiness gates
