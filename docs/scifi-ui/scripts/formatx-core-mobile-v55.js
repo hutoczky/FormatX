@@ -5,7 +5,7 @@
   if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreMobileV55 = 'audit-skip'; return; }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v69';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'reference-faceted-crystal-native-webgl-v69-r97-interactive';
+  root.dataset.fxCoreMobileAwardRevision = 'reference-deep-crystal-native-webgl-v69-r98-interactive-touch';
   function loadReferenceLayout() {
     if (!document.querySelector('link[data-fx-mobile-reference-layout-style]')) { const link=document.createElement('link');link.rel='stylesheet';link.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260813-android-webgl-recovery-r71';link.dataset.fxMobileReferenceLayoutStyle='true';document.head.appendChild(link); }
     if (!document.querySelector('link[data-fx-responsive-text-guard]')) { const guard=document.createElement('link');guard.rel='stylesheet';guard.href='/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260813-responsive-text-wrap-r72';guard.dataset.fxResponsiveTextGuard='true';document.head.appendChild(guard); }
@@ -13,8 +13,8 @@
     const script=document.createElement('script');script.src='/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260813-responsive-text-wrap-r72';script.async=false;script.dataset.fxMobileReferenceLayout='true';document.head.appendChild(script);
   }
   loadReferenceLayout();
-  const renderer=document.createElement('script');renderer.src='/scifi-ui/scripts/formatx-core-mobile-reference-r97.js?v=20260814-faceted-crystal-depth-r97';renderer.async=false;renderer.dataset.fxCoreMobileReferenceV69='true';renderer.dataset.fxCoreMobileReferenceR97='true';
-  renderer.addEventListener('load',()=>{root.dataset.fxCoreReferenceLockLoad='ready-v69-r97';},{once:true});
-  renderer.addEventListener('error',()=>{root.dataset.fxCoreMobileV55='load-failed-v55';root.dataset.fxCoreMobileV69='load-failed-v69';root.dataset.fxCoreMobileR97='load-failed-r97';root.dataset.fxCoreReferenceLock='load-failed-v69';root.dataset.fxCoreReal3d='context-unavailable';dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'native-webgl-renderer-load-failed',reference:'v69-r97'}}));},{once:true});
+  const renderer=document.createElement('script');renderer.src='/scifi-ui/scripts/formatx-core-mobile-reference-r98.js?v=20260814-deep-crystal-touch-r98';renderer.async=false;renderer.dataset.fxCoreMobileReferenceV69='true';renderer.dataset.fxCoreMobileReferenceR98='true';
+  renderer.addEventListener('load',()=>{root.dataset.fxCoreReferenceLockLoad='ready-v69-r98';},{once:true});
+  renderer.addEventListener('error',()=>{root.dataset.fxCoreMobileV55='load-failed-v55';root.dataset.fxCoreMobileV69='load-failed-v69';root.dataset.fxCoreMobileR98='load-failed-r98';root.dataset.fxCoreReferenceLock='load-failed-v69';root.dataset.fxCoreReal3d='context-unavailable';dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'native-webgl-renderer-load-failed',reference:'v69-r98'}}));},{once:true});
   document.head.appendChild(renderer);
 }());
