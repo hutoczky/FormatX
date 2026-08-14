@@ -76,7 +76,7 @@ jobs:
           contains draw 'TRIANGLE_STRIP' "$TMP/mobile-r99.js"
           contains visible-frame-gate 'visible-native-3d-r99' "$TMP/mobile-r99.js"
           contains pixel-budget '540000' "$TMP/mobile-r99.js"
-          contains crystal-fractures 'fractures' "$TMP/mobile-r99.js"
+          contains crystal-fracture 'fracture' "$TMP/mobile-r99.js"
           contains crystal-caustics 'caustic' "$TMP/mobile-r99.js"
           contains reactor-rings 'rings' "$TMP/mobile-r99.js"
           ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\.|three\\.js|babylon|playcanvas|model-viewer' "$TMP/mobile-r99.js"
