@@ -1,5 +1,5 @@
 'use strict';
-// r83 desktop-safe header marker; mobile award-reference geometry remains the production authority.
+// r84 desktop-menu hardening marker; mobile award-reference geometry remains the production authority.
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'../..'),read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const selector=read('docs/scifi-ui/scripts/formatx-reference-core-v26.js');
@@ -15,7 +15,7 @@ assert.match(selector,/const WEBGPU_PREVIEW = params\.get\('webgpu'\) === '1'/);
 assert.match(bootstrap,/responsive-cinematic-reference-v69-r83-desktop-safe-header/);
 assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69-r83/);
 assert.match(bootstrap,/formatx-award-reference-r80\.css\?v=20260814-pixel-aspect-r80/);
-assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260814-desktop-safe-r83/);
+assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260814-desktop-safe-r84/);
 assert.match(bootstrap,/formatx-flow-first-r75\.js\?v=20260814-award-overlay-r82-desktop-scope/);
 assert.match(wrapper,/formatx-core-mobile-reference-v69\.js/);
 assert.match(renderer,/single-webgl2-mobile-cinematic-reference-glass-v69/);
@@ -31,8 +31,9 @@ assert.doesNotMatch(renderer,/\bTHREE\./);
 assert.match(flow,/award-reference-overlay-r81/);
 assert.match(flow,/desktop-native-content-r81/);
 assert.match(flow,/restoreDesktopMenu/);
-assert.match(layout,/const mobile=innerWidth<=900/);
+assert.match(layout,/mobileViewport=.*max-width:900px/);
 assert.match(layout,/restoreDesktopMenu/);
+assert.match(layout,/fx-organism-system-toggle/);
 assert.match(flow,/min-height','260px/);
 assert.match(flow,/font-size','17px/);
 assert.match(webgpu,/navigator\.gpu\.requestAdapter/);
@@ -41,4 +42,4 @@ assert.match(webgl,/canvas\.getContext\('webgl2'/);
 assert.match(webgl,/gl\.drawElements\(gl\.TRIANGLES/);
 assert.match(entry,/formatx-reference-core-v26\.js/);
 for(const source of [selector,bootstrap,wrapper,renderer,flow,layout]) new Function(source);
-console.log('PASS: responsive cinematic native WebGL2 v69 r83 desktop-safe header keeps the measured mobile award-reference flow as production authority.');
+console.log('PASS: responsive cinematic native WebGL2 v69 r84 desktop-menu hardening keeps the measured mobile award-reference flow as production authority.');
