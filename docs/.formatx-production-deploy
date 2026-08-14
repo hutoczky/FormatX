@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-14T18:06:00+02:00
-source_master=eb4f21be70bde5066247f7b1ac6d0529a5057725
-purpose=revalidate the r95 optical crystal-match pass on the r94 native WebGL renderer after updating the live interaction gate to exercise the renderer's formatx:coreinteraction event contract
-verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; live r94 desktop/mobile renderer identity; post-deploy locked mobile screenshot; frame-budget, geometry, text-overlap and event-driven interaction response
+requested_at=2026-08-14T18:10:00+02:00
+source_master=0d6a993b827617406a4313fa27423e073e7f2ed9
+purpose=finalize r95 optical crystal-match validation on the r94 native WebGL renderer after aligning all production/reference validators and making the live interaction probe explicitly resume the renderer frame loop
+verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; public-site integrity; canonical reference authority; live r94 desktop/mobile renderer identity; post-deploy locked mobile screenshot; frame-budget, geometry, text-overlap and event-driven interaction response
