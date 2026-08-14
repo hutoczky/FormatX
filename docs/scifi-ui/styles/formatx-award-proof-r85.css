@@ -1,0 +1,15 @@
+/* r85 award proof integrity: reserve the Live OS action lane on narrow mobile cards. */
+@media (max-width:430px),(pointer:coarse) and (max-width:430px){
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof p{
+    box-sizing:border-box!important;
+    padding-right:84px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-liveos{
+    right:6px!important;
+    top:143px!important;
+  }
+}
+@media (max-width:380px){
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof p{padding-right:78px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-liveos{top:auto!important;bottom:12px!important}
+}
