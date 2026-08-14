@@ -1,12 +1,12 @@
-/* r104 — screenshot-locked mobile MAG geometry from the supplied reference.
-   Keep the native WebGL animation/interactions and r103 volumetric glass material.
-   This layer corrects the measured presentation envelope only: stage height, optical
-   width, controls and normal-flow heading/card placement. No image-backed MAG. */
+/* r107 — measured mobile MAG framing from the supplied reference.
+   Native WebGL animation/interactions remain active. This layer locks the visual
+   envelope only: stage height, optical width, controls and proof-flow placement.
+   No bitmap/image-backed MAG is used. */
 @media (max-width:430px){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
     width:100%!important;
-    height:clamp(390px,97vw,414px)!important;
-    min-height:clamp(390px,97vw,414px)!important;
+    height:clamp(390px,100vw,414px)!important;
+    min-height:clamp(390px,100vw,414px)!important;
     max-height:414px!important;
     overflow:visible!important;
     background:
@@ -28,7 +28,7 @@
 
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
     transform-origin:50% 50%!important;
-    transform:translateY(0) scaleX(1.36) scaleY(1.00)!important;
+    transform:translateY(0) scaleX(1.04) scaleY(1.00)!important;
     filter:saturate(1.82) contrast(1.30) brightness(1.34) drop-shadow(0 0 20px rgba(54,226,255,.42)) drop-shadow(0 0 34px rgba(111,83,255,.16))!important;
   }
 
@@ -77,13 +77,13 @@
 
 @media (min-width:431px) and (max-width:900px){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
-    height:clamp(414px,99vw,650px)!important;
-    min-height:clamp(414px,99vw,650px)!important;
+    height:clamp(431px,100vw,650px)!important;
+    min-height:clamp(431px,100vw,650px)!important;
     max-height:650px!important;
   }
 
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
-    transform:translateY(0) scaleX(1.31) scaleY(1.00)!important;
+    transform:translateY(0) scaleX(1.03) scaleY(1.00)!important;
   }
 
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{
