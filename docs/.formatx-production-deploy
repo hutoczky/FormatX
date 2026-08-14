@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T18:56:00+02:00
-source_master=a33afb63271f4a2d7891cd26a3ff5501a4c8cafb
-purpose=verify deployed r97 faceted interactive crystal MAG after updating live award-readiness from stale r94 authority to r97; preserve accepted r87 size/layout
-interaction=continuous breathing; animated small reactor pulse; moving spectral caustics; pointer/touch parallax; touch energy surge; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; r97 JavaScript syntax; native real3D crystal contract; Worker tests; production build; custom-domain smoke; public-site integrity; live award-readiness r97; mobile interaction; post-deploy composition; Lighthouse
+requested_at=2026-08-14T19:12:00+02:00
+source_master=f0111e7252222b4de5690fd876fe0bf1ed722c1c
+purpose=ship r98 deep faceted ice-glass MAG while preserving accepted r87 size/layout; replace remaining HUD-like regular interior with irregular refractive veins, facets, caustics and a smaller sharp reactor; fix real mobile tap response
+interaction=continuous subtle breathing; moving spectral caustics; pointer parallax; native touchstart/touchmove energy surge; touch-end pulse hold bridge; smooth return to idle; prefers-reduced-motion respected
+verification=production candidate validation; r98 JavaScript syntax; native real3D crystal contract; Worker tests; production build; custom-domain smoke; public-site integrity; live award-readiness r98; native mobile touchscreen tap interaction; post-deploy locked composition and screenshot; Lighthouse
