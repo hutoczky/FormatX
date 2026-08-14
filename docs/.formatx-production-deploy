@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-14T17:44:00+02:00
-source_master=daa5c4fd636e44af2d0e52b08874f43854c9b541
-purpose=ship r93 crystalline shard native WebGL MAG while preserving the user-approved r87 mobile size; replace the remaining smooth dark ray-glass look with brighter icy Fresnel edges, circular reactor rings, angular internal shard planes, cyan-violet chromatic separation and a sharper luminous center
-verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; r93 locked mobile screenshot with frame-budget, geometry, text-overlap and off-center touch interaction telemetry
+requested_at=2026-08-14T17:49:00+02:00
+source_master=2dd97d8b3a521b6d9a6b0115d534cdc49972c4aa
+purpose=ship r94 luminous crystalline native WebGL MAG against the approved mobile crystal reference while preserving the locked r87 size and layout; increase icy transparency, internal lattice density, reactor rings, radial crystalline rays, cyan-violet chromatic refraction and the compact white center without replacing the native interactive renderer
+verification=production candidate validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; r94 locked mobile screenshot with frame-budget, geometry, text-overlap and off-center touch interaction telemetry; visual comparison against approved mobile reference
