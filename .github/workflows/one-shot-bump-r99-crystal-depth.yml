@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Bump production r99 bootstrap cache key
+      - name: Bump production r101 bootstrap cache key
         shell: bash
         run: |
           set -euo pipefail
@@ -20,12 +20,12 @@ jobs:
           from pathlib import Path
           p = Path('docs/scifi-ui/index.html')
           s = p.read_text()
-          old = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2'
-          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-crystal-depth-r100'
+          old = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-crystal-depth-r100'
+          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-deep-spectral-glass-r101'
           if new in s:
               raise SystemExit(0)
           if old not in s:
-              raise SystemExit('expected r99 bootstrap cache key not found')
+              raise SystemExit('expected r100 bootstrap cache key not found')
           p.write_text(s.replace(old, new, 1))
           PY
           git config user.name 'github-actions[bot]'
@@ -35,5 +35,5 @@ jobs:
             echo 'cache key already current'
             exit 0
           fi
-          git commit -m '[deploy-production] fix(mag): publish shared r99 crystal depth'
+          git commit -m '[deploy-production] fix(mag): publish r101 deep spectral glass'
           git push origin HEAD:master
