@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAccessibilityFinalizer === 'ready-v1') return;
-  root.dataset.fxAccessibilityFinalizer = 'ready-v1';
+  if (root.dataset.fxAccessibilityFinalizer === 'ready-v2') return;
+  root.dataset.fxAccessibilityFinalizer = 'ready-v2';
 
   let scheduled = 0;
   let applying = false;
@@ -24,6 +24,25 @@
     script.defer = true;
     script.dataset.fxOrganismTruthGuard = 'true';
     document.head.appendChild(script);
+  }
+
+  function repairCrawlableAnchors() {
+    const simulatorHref = '/scifi-ui/project-simulator.html?lang=' + encodeURIComponent(language());
+    document.querySelectorAll('a[data-fx-simulator-entry]').forEach(link => {
+      setAttributeIfChanged(link, 'href', simulatorHref);
+    });
+
+    document.querySelectorAll('#hero .hero-actions a:not([href])').forEach(link => {
+      const label = (link.textContent || '') + ' ' + (link.getAttribute('aria-label') || '');
+      if (/android/i.test(label)) setAttributeIfChanged(link, 'href', '/download/android');
+    });
+
+    const organTargets = ['#hero', '#experience', '#capabilities', '#system'];
+    document.querySelectorAll('a[data-organ-node]').forEach(link => {
+      const index = Number.parseInt(link.dataset.organNode || '0', 10);
+      const target = organTargets[Number.isFinite(index) ? index : 0] || '#system';
+      setAttributeIfChanged(link, 'href', target);
+    });
   }
 
   function apply() {
@@ -63,6 +82,8 @@
         setAttributeIfChanged(launcher, 'aria-label', label);
         if (launcher.title !== label + ' · Ctrl/⌘ K') launcher.title = label + ' · Ctrl/⌘ K';
       }
+
+      repairCrawlableAnchors();
     } finally {
       applying = false;
     }
@@ -78,6 +99,7 @@
     if (entries.some(entry =>
       entry.type === 'childList'
       || entry.attributeName === 'aria-label'
+      || entry.attributeName === 'href'
       || entry.attributeName === 'lang'
     )) schedule();
   });
@@ -86,7 +108,7 @@
     subtree: true,
     childList: true,
     attributes: true,
-    attributeFilter: ['aria-label', 'lang']
+    attributeFilter: ['aria-label', 'href', 'lang']
   });
 
   addEventListener('formatx:languagechange', schedule);
