@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T22:20:00+02:00
-source_master=cc4676590e249e8d731ab47705d2e907d3c738ae
-purpose=activate the cache-busted shared desktop/mobile r99 crystal-depth pass while preserving the accepted r87 size/layout: denser transparent ice glass, larger crystalline facets, brighter cyan/violet refraction, hot white reactor, orbital light arcs and cinematic reflective floor
+requested_at=2026-08-14T22:27:00+02:00
+source_master=5241a23dd2097ccf3059d9a029eb0e67a53250e3
+purpose=activate r101 deep spectral glass on desktop and mobile while preserving accepted r87 size/layout: remove milk-white body haze, restore deep transparent cyan/blue glass, keep ice-white reactor and facet edges, strengthen violet spectral refraction and dark cinematic reflection
 interaction=continuous breathing; pointer/touch parallax; native touch energy surge; moving spectral caustics; reactor pulse; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; native r99 WebGL contract; Worker tests; production build; custom-domain smoke; live r99 desktop/mobile MAG visual gate; post-deploy reference capture; award-readiness; Lighthouse
+verification=production candidate validation; JavaScript syntax; native r99 WebGL contract; Worker tests; production build; custom-domain smoke; live r99 desktop/mobile MAG visual capture; post-deploy reference capture; award-readiness
