@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T23:06:00+02:00
-source_master=79fb4f32825b593f2c907d98bb09346c4ed9f567
-purpose=activate the current r107 desktop/mobile reference-volumetric native WebGL crystal for direct live comparison before any further shader refinement
+requested_at=2026-08-14T23:11:00+02:00
+source_master=bc3120da81e017c822cda72442d99f184f9440ac
+purpose=activate the clean analytic r107 shared desktop/mobile WebGL crystal after replacing the corrupted renderer and restoring the user-approved mobile size lock: analytic pseudo-3D surface normals, Fresnel/specular glass depth, deep cyan/navy body, violet refraction, compact white reactor and restrained cinematic reflection
 interaction=continuous breathing; pointer/touch parallax; native touch energy surge; moving spectral caustics; reactor pulse; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; native WebGL contract; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG capture; post-deploy reference capture; award-readiness
+verification=production candidate validation; JavaScript syntax; native r99 identity/WebGL TRIANGLE_STRIP contract; accepted r105 mobile size lock; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG capture; post-deploy reference capture; award-readiness
