@@ -48,9 +48,6 @@ async function injectProductionLikeContent(page) {
     await page.addStyleTag({ url: origin + href });
   }
 
-  // Keep the browser test aligned with the production worker. The static HTML
-  // contains the legacy HU/EN pair, while production loads this module and
-  // exposes exactly one accessible language toggle.
   for (const src of [
     '/scifi-ui/scripts/single-language-toggle.js',
     '/scifi-ui/scripts/release-metadata.js',
@@ -68,9 +65,6 @@ async function injectProductionLikeContent(page) {
 }
 
 async function primeScrollReveals(page) {
-  // Full-page screenshots do not necessarily move the viewport through every
-  // IntersectionObserver target. Visit the important production sections first
-  // so screenshot geometry represents what a real user sees while scrolling.
   for (const selector of ['#experience', '#capabilities', '#pricing', '#system']) {
     const target = page.locator(selector).first();
     if (!(await target.count())) continue;
@@ -93,8 +87,19 @@ async function commonAssertions(page, mobile) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 2, 'Horizontal overflow detected: ' + overflow + 'px');
 
-  const languageControls = await page.locator('.fx-language-toggle:visible, .language-switch:visible, .language-control:visible').count();
-  assert(languageControls === 1, 'Production must expose exactly one visible language control: ' + languageControls);
+  const languageState = await page.evaluate(() => {
+    const visible = element => {
+      const style = getComputedStyle(element), rect = element.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
+    };
+    const primary = [...document.querySelectorAll('[data-fx-single-language-toggle="ready-v2"]')];
+    const toggles = [...document.querySelectorAll('.fx-language-toggle')];
+    return { primary: primary.length, toggles: toggles.length, visibleToggles: toggles.filter(visible).length };
+  });
+  assert(languageState.primary === 1, 'Production must install exactly one semantic language switch: ' + JSON.stringify(languageState));
+  assert(languageState.toggles === 1, 'Production must expose exactly one language-toggle button: ' + JSON.stringify(languageState));
+  assert(languageState.visibleToggles <= 1, 'Duplicate visible language toggles detected: ' + JSON.stringify(languageState));
+  if (mobile) assert(languageState.visibleToggles === 1, 'Mobile language toggle must be visible: ' + JSON.stringify(languageState));
 
   const proof = await box(page, '.fx-award-proof', false);
   if (proof) {
@@ -111,8 +116,6 @@ async function commonAssertions(page, mobile) {
     const cue = await box(page, '#hero .scroll-cue');
     const category = await box(page, '.fx-category-deck--standalone, .fx-category-deck');
 
-    // Mobile is allowed to place the 3D stage before or after the text in the
-    // visual order. What is forbidden is physical overlap between the blocks.
     assert(!overlap(heroCopy, heroSpace), 'Mobile 3D field overlaps hero copy');
     assert(!overlap(heroSpace, cue), 'Mobile chapter cue overlaps 3D field');
     assert(!overlap(cue, category), 'Mobile next section overlaps chapter cue');
