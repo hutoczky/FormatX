@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T19:22:00+02:00
-source_master=65ad70e597e61bb2e70381e7138863f201d6b396
-purpose=ship r99 luminous cinematic ice-glass MAG while preserving the accepted r87 size/layout; replace the dark flat r98 appearance with bright crystalline facets, white/cyan caustics, violet refraction, layered shells and a sharper reactor
-interaction=continuous subtle breathing; moving spectral caustics; pointer/touch parallax; native touch energy surge; reactor pulse; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; r99 JavaScript syntax; native real3D luminous crystal contract; Worker tests; production build; custom-domain smoke; public-site integrity; live award-readiness r99; native mobile touchscreen interaction; post-deploy locked composition and screenshot; Lighthouse
+requested_at=2026-08-14T19:30:00+02:00
+source_master=f3a7d59dcdc4cb46e0c634cf071caa82d1ecb283
+purpose=ship the r99 reference refinement while preserving accepted r87 size/layout: deeper transparent cyan/blue glass, stronger violet refraction, compact white reactor, cinematic water reflection and wake-safe native touch feedback
+interaction=continuous breathing; moving spectral caustics; pointer/touch parallax; capture-phase wake bridge; native touch energy surge; reactor pulse; smooth return to idle; prefers-reduced-motion respected
+verification=production candidate validation; r99 JavaScript syntax; native real3D luminous crystal contract; Worker tests; production build; custom-domain smoke; public-site integrity; live award-readiness; post-deploy locked composition; real touchscreen energy/position response; Lighthouse
