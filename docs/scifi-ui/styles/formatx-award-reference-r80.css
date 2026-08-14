@@ -1,0 +1,85 @@
+/* Award reference r80 — measured silhouette/aspect correction from supplied reference screenshot.
+   The approved reference MAG occupies ~88.7% of viewport width and ~80.9% of viewport width in height.
+   Keep native WebGL interaction; constrain only framing, optical scale and award-overlay placement. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
+    width:100%!important;
+    height:clamp(350px,84vw,520px)!important;
+    min-height:clamp(350px,84vw,520px)!important;
+    max-height:520px!important;
+    overflow:visible!important;
+    background:
+      radial-gradient(circle at 50% 51%,rgba(49,218,255,.20),transparent 28%),
+      radial-gradient(circle at 54% 52%,rgba(179,76,255,.14),transparent 44%),
+      linear-gradient(180deg,#010611 0%,#010a18 48%,#031d34 76%,#061a2c 100%)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage{
+    inset:0!important;
+    overflow:visible!important;
+    background:
+      radial-gradient(circle at 50% 51%,rgba(72,239,255,.39),transparent 25%),
+      radial-gradient(circle at 54% 51%,rgba(189,78,255,.26),transparent 42%),
+      radial-gradient(circle at 16% 28%,rgba(113,221,255,.53) 0 1px,transparent 1.8px),
+      radial-gradient(circle at 82% 31%,rgba(190,104,255,.51) 0 1px,transparent 1.9px),
+      radial-gradient(circle at 90% 59%,rgba(89,233,255,.46) 0 1px,transparent 1.8px),
+      linear-gradient(180deg,#01040c 0%,#010b19 48%,#04243f 76%,#031d35 100%)!important;
+    filter:saturate(1.38) contrast(1.14) brightness(1.06)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
+    position:relative!important;
+    z-index:3!important;
+    transform-origin:50% 50%!important;
+    transform:translateY(-.2%) scaleX(1.075) scaleY(.92)!important;
+    filter:saturate(1.60) contrast(1.20) brightness(1.20) drop-shadow(0 0 16px rgba(40,220,255,.31))!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:before{
+    content:""!important;display:block!important;position:absolute!important;inset:0!important;z-index:2!important;pointer-events:none!important;
+    background:
+      linear-gradient(90deg,transparent 0 2%,rgba(70,203,255,.04) 18%,rgba(109,240,255,.18) 49.8%,rgba(188,78,255,.09) 72%,transparent 98%),
+      radial-gradient(ellipse at 50% 67%,rgba(66,207,255,.14),transparent 48%)!important;
+    mix-blend-mode:screen!important;opacity:1!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage:after{
+    content:""!important;display:block!important;position:absolute!important;left:-8%!important;right:-8%!important;bottom:-14%!important;height:44%!important;z-index:1!important;pointer-events:none!important;
+    background:
+      radial-gradient(ellipse at 50% 0%,rgba(67,226,255,.27),rgba(90,108,255,.11) 29%,rgba(157,67,255,.065) 46%,transparent 71%),
+      repeating-linear-gradient(0deg,rgba(59,203,255,.08) 0 1px,transparent 1px 8px)!important;
+    transform:perspective(430px) rotateX(63deg) scaleX(1.17)!important;
+    transform-origin:50% 0!important;opacity:.69!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{
+    position:absolute!important;top:18px!important;right:6.2%!important;left:auto!important;bottom:auto!important;
+    z-index:20!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:13px!important;margin:0!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask,
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-pause{
+    width:56px!important;height:56px!important;min-width:56px!important;min-height:56px!important;
+    border-color:rgba(155,210,235,.31)!important;background:rgba(3,14,24,.73)!important;
+    box-shadow:inset 0 0 30px rgba(55,180,255,.06),0 0 22px rgba(0,0,0,.16)!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask span{top:61px!important;font-size:10px!important;letter-spacing:.045em!important}
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
+    position:relative!important;z-index:21!important;
+    margin:-24px 6% 24px!important;
+    font-size:16px!important;line-height:1.08!important;letter-spacing:.15em!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading:after{width:40px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{position:relative!important;z-index:16!important}
+}
+
+@media (max-width:430px){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
+    height:clamp(345px,86vw,370px)!important;
+    min-height:clamp(345px,86vw,370px)!important;
+    max-height:370px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
+    transform:translateY(0) scaleX(1.07) scaleY(.92)!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{margin:-20px 6% 22px!important;font-size:15px!important}
+}
