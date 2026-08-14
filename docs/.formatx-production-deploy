@@ -1,5 +1,5 @@
 FormatX production deployment marker
-requested_at=2026-08-14T18:46:00+02:00
+requested_at=2026-08-14T18:47:00+02:00
 source_master=b332bae99b0c6430599a2de721e7a4ad525ca8d1
 purpose=deploy r96 interactive MAG motion after final cache-contract alignment; preserve locked r94/r95 geometry, optical material and accepted MAG size
 interaction=continuous breathing; animated reactor pulse; moving spectral caustics; pointer/touch parallax; touch energy surge; smooth return to idle; prefers-reduced-motion respected
