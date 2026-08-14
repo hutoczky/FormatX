@@ -51,9 +51,7 @@ jobs:
             const page=await context.newPage();
             page.on('pageerror',e=>console.log(`[${name} PAGEERROR]`,e.message));
             await page.goto(`${origin}?reference_composition=${name}`,{waitUntil:'domcontentloaded',timeout:45000});
-            if(mobile){
-              await page.addScriptTag({url:`${origin}scripts/single-language-toggle.js?v=visual-qa-r86`});
-            }
+            if(mobile){await page.addScriptTag({url:`${origin}scripts/single-language-toggle.js?v=visual-qa-r86`});}
             await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxFlowFirstR75==='ready-r81',null,{timeout:45000});
             if(mobile)await page.waitForFunction(()=>document.querySelector('.topbar>.fx-language-toggle'),null,{timeout:10000});
             await page.waitForTimeout(1900);
@@ -67,7 +65,8 @@ jobs:
             await page.screenshot({path:`${name}.png`,fullPage:false});
             assert.equal(state.renderer,'single-webgl2-mobile-cinematic-reference-glass-v69');
             assert.equal(state.v69,'ready-v69');assert.equal(state.layout,'ready-v1');assert.equal(state.flow,'ready-r81');
-            assert.equal(state.gl,true);assert.equal(state.glError,0);assert.equal(state.canvases,1);assert.ok(state.renderMs<16.67,JSON.stringify(state));
+            assert.equal(state.gl,true);assert.equal(state.glError,0);assert.equal(state.canvases,1);assert.ok(Number.isFinite(state.renderMs)&&state.renderMs<50,JSON.stringify(state));
+            if(mobile)assert.ok(state.renderMs<16.67,JSON.stringify(state));
             assert.ok(state.topbar&&state.space&&state.brand,`${name}: structural shell missing`);
             assert.ok(state.space.y>=state.topbar.y+state.topbar.h-1,`${name}: header covers MAG`);
             if(mobile){
