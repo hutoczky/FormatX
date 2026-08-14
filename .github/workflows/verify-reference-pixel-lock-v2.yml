@@ -39,7 +39,7 @@ jobs:
             const page=await context.newPage();
             page.on('pageerror',error=>console.log('[PAGEERROR]',error.message));
             await page.goto(`https://formatxsuite.com/?post_deploy_reference=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxCoreRenderer==='single-webgl-luminous-crystal-r99',null,{timeout:45000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxCoreRenderer==='single-webgl-luminous-crystal-r99'&&document.documentElement.dataset.fxCoreR112==='true-3d-mesh-glass-reactor',null,{timeout:45000});
             await page.waitForTimeout(1200);
             const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])]}));
             await page.touchscreen.tap(150,300);
@@ -47,25 +47,28 @@ jobs:
             const state=await page.evaluate(()=>{
               const root=document.documentElement,q=s=>{const b=document.querySelector(s)?.getBoundingClientRect();return b?{x:+b.x.toFixed(1),y:+b.y.toFixed(1),w:+b.width.toFixed(1),h:+b.height.toFixed(1)}:null;};
               const canvas=document.querySelector('.fx-core-mobile-v55-canvas'),gl=canvas?.getContext('webgl2')||canvas?.getContext('webgl');
-              return{renderer:root.dataset.fxCoreRenderer,v69:root.dataset.fxCoreMobileV69,geometry:root.dataset.fxCoreReferenceGeometry,material:root.dataset.fxCoreReferenceMaterial,interaction:root.dataset.fxCoreInteractionVisual,heading:q('.fx-reference-heading'),proof:q('.fx-reference-proof'),energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])],glError:gl?.getError(),renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),referenceMagButtons:document.querySelectorAll('.fx-reference-mag-button').length,legacyCoreButtons:document.querySelectorAll('.fx-mobile-core-button,[data-fx-mobile-core-button]').length};
+              return{renderer:root.dataset.fxCoreRenderer,r112:root.dataset.fxCoreR112,v69:root.dataset.fxCoreMobileV69,geometry:root.dataset.fxCoreReferenceGeometry,material:root.dataset.fxCoreReferenceMaterial,interaction:root.dataset.fxCoreInteractionVisual,heading:q('.fx-reference-heading'),proof:q('.fx-reference-proof'),energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])],glError:gl?.getError(),renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),referenceMagButtons:document.querySelectorAll('.fx-reference-mag-button').length,legacyCoreButtons:document.querySelectorAll('.fx-mobile-core-button,[data-fx-mobile-core-button]').length};
             });
             const textState=await page.evaluate(()=>{const copy=document.querySelector('#hero .fx-reference-proof p'),button=document.querySelector('#hero .fx-reference-liveos'),buttonBox=button?.getBoundingClientRect(),glyphs=[];if(copy&&buttonBox){const walker=document.createTreeWalker(copy,NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode()))for(let index=0;index<node.length;index+=1){const range=document.createRange();range.setStart(node,index);range.setEnd(node,index+1);for(const rect of range.getClientRects())if(rect.width>.1&&rect.height>.1)glyphs.push(rect)}}const covered=glyphs.filter(rect=>rect.right>buttonBox.left+.5&&rect.left<buttonBox.right-.5&&rect.bottom>buttonBox.top+.5&&rect.top<buttonBox.bottom-.5);return{guard:[...document.styleSheets].some(sheet=>String(sheet.href||'').includes('formatx-responsive-text-guard-r72.css')),whiteSpace:copy?getComputedStyle(copy).whiteSpace:'missing',glyphs:glyphs.length,covered:covered.length};});
-            console.log('POST DEPLOY R99',JSON.stringify({before,state,textState}));
-            assert.equal(state.renderer,'single-webgl-luminous-crystal-r99');assert.equal(state.v69,'ready-v69');assert.equal(state.geometry,'reference-deep-concave-four-point-size-lock-r99');assert.equal(state.material,'luminous-faceted-iceglass-caustic-r99');assert.equal(state.interaction,'touch-pointer-breathing-spectral-refraction-r99');assert.equal(state.glError,0);assert.equal(state.referenceMagButtons,1);assert.equal(state.legacyCoreButtons,0);assert.ok(state.renderMs<16.67,JSON.stringify(state));
-            assert.ok(Math.abs(state.heading.x-24.7)<=1.5,JSON.stringify(state));assert.ok(Math.abs(state.heading.y-505.4)<=3,JSON.stringify(state));assert.ok(Math.abs(state.heading.w-362.6)<=2,JSON.stringify(state));assert.ok(Math.abs(state.proof.x-24.7)<=1.5,JSON.stringify(state));assert.ok(Math.abs(state.proof.y-545.6)<=3,JSON.stringify(state));assert.ok(Math.abs(state.proof.w-358.5)<=2,JSON.stringify(state));
+            console.log('POST DEPLOY R112',JSON.stringify({before,state,textState}));
+
+            // Always capture before assertions so a failed visual contract still leaves evidence.
+            await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true';dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused:true,source:'post-deploy-capture-r112'}}));});
+            await page.waitForTimeout(80);
+            const cdp=await context.newCDPSession(page);const shot=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});fs.writeFileSync('reference-post-deploy-r112.png',Buffer.from(shot.data,'base64'));
+
+            assert.equal(state.renderer,'single-webgl-luminous-crystal-r99');assert.equal(state.r112,'true-3d-mesh-glass-reactor');assert.equal(state.v69,'ready-v69');assert.equal(state.geometry,'reference-deep-concave-four-point-size-lock-r99');assert.equal(state.material,'luminous-faceted-iceglass-caustic-r99');assert.equal(state.interaction,'touch-pointer-breathing-spectral-refraction-r99');assert.equal(state.glError,0);assert.equal(state.referenceMagButtons,1);assert.equal(state.legacyCoreButtons,0);assert.ok(state.renderMs<16.67,JSON.stringify(state));
+            assert.ok(Math.abs(state.heading.x-24.7)<=1.5,JSON.stringify(state));assert.ok(Math.abs(state.heading.y-437.9)<=3,JSON.stringify(state));assert.ok(Math.abs(state.heading.w-362.6)<=2,JSON.stringify(state));assert.ok(Math.abs(state.proof.x-24.7)<=1.5,JSON.stringify(state));assert.ok(Math.abs(state.proof.y-478.0)<=3,JSON.stringify(state));assert.ok(Math.abs(state.proof.w-358.5)<=2,JSON.stringify(state));
             assert.equal(textState.guard,true);assert.equal(textState.whiteSpace,'normal');assert.ok(textState.glyphs>60,JSON.stringify(textState));assert.equal(textState.covered,0,JSON.stringify(textState));
             assert.ok(state.energy>before.energy+.04,JSON.stringify({before,state}));assert.ok(state.position.length===3,JSON.stringify(state));assert.notDeepEqual(state.position,before.position);
-            await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true';dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused:true,source:'post-deploy-capture'}}));});
-            await page.waitForTimeout(80);
-            const cdp=await context.newCDPSession(page);const shot=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});fs.writeFileSync('reference-post-deploy-r99.png',Buffer.from(shot.data,'base64'));
-            await context.close();await browser.close();assert.ok(fs.statSync('reference-post-deploy-r99.png').size>10000);console.log('PASS: production r99 luminous faceted crystal composition, frame budget, text integrity, native touch interaction and compositor-safe screenshot verified.');
+            await context.close();await browser.close();assert.ok(fs.statSync('reference-post-deploy-r112.png').size>10000);console.log('PASS: production r112 true 3D mesh composition, frame budget, text integrity, native touch interaction and compositor-safe screenshot verified.');
           })().catch(error=>{console.error(error);process.exit(1)});
           NODE
       - name: Upload production capture
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reference-post-deploy-r99-${{ github.run_id }}
-          path: ${{ runner.temp }}/ref2/reference-post-deploy-r99.png
+          name: reference-post-deploy-r112-${{ github.run_id }}
+          path: ${{ runner.temp }}/ref2/reference-post-deploy-r112.png
           if-no-files-found: warn
           retention-days: 14
