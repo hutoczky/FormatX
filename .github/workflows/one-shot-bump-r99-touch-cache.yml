@@ -1,0 +1,37 @@
+name: One-shot bump r99 touch cache
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-bump-r99-touch-cache.yml']
+permissions:
+  contents: write
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Bump production r99 bootstrap cache key
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('docs/scifi-ui/index.html')
+          s = p.read_text()
+          old = './scripts/formatx-core-real3d-v20.js?v=20260813-responsive-text-wrap-r72'
+          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2'
+          if new in s:
+              print('r99 cache key already active')
+          elif old in s:
+              p.write_text(s.replace(old, new, 1))
+          else:
+              raise SystemExit('expected current production core loader cache key not found')
+          PY
+          if git diff --quiet -- docs/scifi-ui/index.html; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html
+          git commit -m '[deploy-production] fix(mag): publish r99 touch and contrast cache bust'
+          git push origin HEAD:master
