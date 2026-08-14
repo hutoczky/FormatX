@@ -12,9 +12,13 @@
     if (document.querySelector('script[data-fx-mobile-reference-layout]')) return;
     const script=document.createElement('script');script.src='/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260813-responsive-text-wrap-r72';script.async=false;script.dataset.fxMobileReferenceLayout='true';document.head.appendChild(script);
   }
+  function loadTouchPulseBridge(){
+    if(document.querySelector('script[data-fx-core-touch-pulse-r98]'))return;
+    const bridge=document.createElement('script');bridge.src='/scifi-ui/scripts/formatx-core-touch-pulse-r98.js?v=20260814-touch-hold-r98';bridge.async=false;bridge.dataset.fxCoreTouchPulseR98='true';document.head.appendChild(bridge);
+  }
   loadReferenceLayout();
   const renderer=document.createElement('script');renderer.src='/scifi-ui/scripts/formatx-core-mobile-reference-r98.js?v=20260814-deep-crystal-touch-r98';renderer.async=false;renderer.dataset.fxCoreMobileReferenceV69='true';renderer.dataset.fxCoreMobileReferenceR98='true';
-  renderer.addEventListener('load',()=>{root.dataset.fxCoreReferenceLockLoad='ready-v69-r98';},{once:true});
+  renderer.addEventListener('load',()=>{root.dataset.fxCoreReferenceLockLoad='ready-v69-r98';loadTouchPulseBridge();},{once:true});
   renderer.addEventListener('error',()=>{root.dataset.fxCoreMobileV55='load-failed-v55';root.dataset.fxCoreMobileV69='load-failed-v69';root.dataset.fxCoreMobileR98='load-failed-r98';root.dataset.fxCoreReferenceLock='load-failed-v69';root.dataset.fxCoreReal3d='context-unavailable';dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'native-webgl-renderer-load-failed',reference:'v69-r98'}}));},{once:true});
   document.head.appendChild(renderer);
 }());
