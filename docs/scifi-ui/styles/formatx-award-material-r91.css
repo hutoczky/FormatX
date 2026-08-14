@@ -1,37 +1,34 @@
-/* r92 — optical presentation for the refractive ray-glass renderer.
-   Geometry/size stays locked to r87. Increase icy facet readability, cyan/violet refraction
-   and depth while keeping the center flare narrow and avoiding the old flat membrane wash. */
+/* r93 — optical presentation for the crystalline shard ray-glass renderer.
+   Geometry/size remains locked to r87. The shader owns the facets; CSS only lifts
+   the icy highlights and restrained reflection without reintroducing broad flare wash. */
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage{
     background:
-      radial-gradient(ellipse at 50% 48%,rgba(38,169,235,.17),transparent 28%),
-      radial-gradient(ellipse at 56% 50%,rgba(126,58,205,.13),transparent 43%),
-      radial-gradient(ellipse at 50% 78%,rgba(27,111,196,.12),transparent 38%),
-      linear-gradient(180deg,#01040b 0%,#010713 44%,#021127 72%,#03192d 100%)!important;
-    filter:none!important;
-    overflow:visible!important;
+      radial-gradient(ellipse at 50% 48%,rgba(42,176,241,.18),transparent 28%),
+      radial-gradient(ellipse at 56% 50%,rgba(134,63,214,.14),transparent 43%),
+      radial-gradient(ellipse at 50% 79%,rgba(31,123,211,.13),transparent 39%),
+      linear-gradient(180deg,#01040b 0%,#010713 43%,#021229 72%,#031a30 100%)!important;
+    filter:none!important;overflow:visible!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage>.fx-core-rayglass-r91-canvas{
     opacity:1!important;
-    filter:brightness(1.10) contrast(1.10) saturate(1.08)
-      drop-shadow(0 0 6px rgba(185,250,255,.38))
-      drop-shadow(0 0 15px rgba(56,205,255,.26))
-      drop-shadow(0 0 28px rgba(106,72,255,.12))!important;
+    filter:brightness(1.16) contrast(1.15) saturate(1.12)
+      drop-shadow(0 0 5px rgba(220,254,255,.43))
+      drop-shadow(0 0 14px rgba(58,214,255,.30))
+      drop-shadow(0 0 30px rgba(116,75,255,.14))!important;
     transform-origin:50% 50%!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage:before{
     content:""!important;position:absolute!important;inset:0!important;z-index:3!important;pointer-events:none!important;
     background:
-      radial-gradient(circle at 50% 50%,rgba(255,255,255,.62) 0 .18%,rgba(188,251,255,.22) .28% .60%,transparent 1.10%),
-      radial-gradient(circle at 50% 50%,transparent 0 10.6%,rgba(114,235,255,.09) 10.88% 11.14%,transparent 11.45% 15.75%,rgba(169,97,255,.075) 16.00% 16.28%,transparent 16.62%),
-      linear-gradient(90deg,transparent 0 46.5%,rgba(211,253,255,.025) 49.75%,rgba(255,255,255,.11) 49.94%,rgba(255,255,255,.18) 50%,rgba(255,255,255,.11) 50.06%,rgba(211,253,255,.025) 50.25%,transparent 53.5% 100%),
-      linear-gradient(180deg,transparent 0 46.5%,rgba(211,253,255,.02) 49.78%,rgba(255,255,255,.085) 49.95%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.085) 50.05%,rgba(211,253,255,.02) 50.22%,transparent 53.5% 100%)!important;
-    mix-blend-mode:screen!important;opacity:.56!important;filter:none!important;
+      radial-gradient(circle at 50% 50%,rgba(255,255,255,.48) 0 .15%,rgba(192,252,255,.16) .25% .52%,transparent .98%),
+      radial-gradient(circle at 50% 50%,transparent 0 10.7%,rgba(122,239,255,.075) 10.95% 11.16%,transparent 11.42% 15.8%,rgba(173,100,255,.06) 16.02% 16.25%,transparent 16.55%)!important;
+    mix-blend-mode:screen!important;opacity:.48!important;filter:none!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage:after{
-    bottom:-10%!important;height:39%!important;opacity:.41!important;
+    bottom:-10%!important;height:40%!important;opacity:.45!important;
     background:
-      radial-gradient(ellipse at 50% 0%,rgba(103,231,255,.21),rgba(48,113,204,.075) 34%,rgba(132,62,205,.045) 51%,transparent 72%),
-      repeating-linear-gradient(0deg,rgba(76,190,255,.022) 0 1px,transparent 1px 10px)!important;
+      radial-gradient(ellipse at 50% 0%,rgba(113,237,255,.23),rgba(50,119,214,.08) 34%,rgba(140,66,215,.05) 51%,transparent 72%),
+      repeating-linear-gradient(0deg,rgba(80,199,255,.024) 0 1px,transparent 1px 10px)!important;
   }
 }
