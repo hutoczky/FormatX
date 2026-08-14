@@ -3,7 +3,7 @@
   // r120 bootstrap: native XYZ WebGL mesh, prismatic organic glass, screenshot-locked mobile framing.
   const root = document.documentElement;
   const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r120';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260815-prismatic-organic-r120';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260814-luminous-cinematic-r99&rev=20260815-prismatic-organic-r120';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260813-android-webgl-recovery-r71';
   const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260814-pixel-aspect-r80';
   const R87_STYLE = '/scifi-ui/styles/formatx-award-reference-r87.css?v=20260814-size-lock-r87&rev=20260814-supplied-reference-r108';
