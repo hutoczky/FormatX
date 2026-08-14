@@ -1,57 +1,70 @@
-const { chromium } = require(process.env.NODE_PATH ? `${process.env.NODE_PATH}/playwright` : 'playwright');
-const fs = require('node:fs');
+'use strict';
+
+const { chromium } = require('playwright');
+const fs = require('node:fs/promises');
 const path = require('node:path');
 
-const target = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
-const outputDir = process.env.FORMATX_VISUAL_DIR || 'artifacts/content-visuals';
-fs.mkdirSync(outputDir, { recursive: true });
+const base = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
+const origin = new URL(base).origin;
+const out = process.env.FORMATX_VISUAL_DIR || 'artifacts/content-visuals';
 
-function assert(value, message) {
-  if (!value) throw new Error(message);
+function assert(condition, message) {
+  if (!condition) throw new Error(message);
 }
 
-function overlap(a, b, tolerance = 2) {
-  return !(
-    a.right <= b.left + tolerance ||
-    b.right <= a.left + tolerance ||
-    a.bottom <= b.top + tolerance ||
-    b.bottom <= a.top + tolerance
-  );
+function overlap(a, b, gap = 0) {
+  if (!a || !b) return false;
+  return !(a.right + gap <= b.left || b.right + gap <= a.left || a.bottom + gap <= b.top || b.bottom + gap <= a.top);
 }
 
 async function box(page, selector, required = true) {
   const locator = page.locator(selector).first();
   if (!(await locator.count())) {
-    if (required) throw new Error(`Missing required selector: ${selector}`);
+    if (required) throw new Error('Missing selector: ' + selector);
     return null;
   }
-  const result = await locator.evaluate((node) => {
-    const rect = node.getBoundingClientRect();
-    const style = getComputedStyle(node);
+  const value = await locator.evaluate(element => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
     return {
-      left: rect.left,
-      top: rect.top,
-      right: rect.right,
-      bottom: rect.bottom,
-      width: rect.width,
-      height: rect.height,
-      display: style.display,
-      visibility: style.visibility,
-      opacity: Number(style.opacity || 1),
-      text: (node.textContent || '').replace(/\s+/g, ' ').trim(),
+      left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
+      width: rect.width, height: rect.height,
+      visible: style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > .02 && rect.width > 0 && rect.height > 0,
+      text: (element.textContent || '').trim()
     };
   });
-  if (required) {
-    assert(result.width > 0 && result.height > 0, `${selector} has no layout box`);
-    assert(result.display !== 'none' && result.visibility !== 'hidden' && result.opacity > 0, `${selector} is hidden`);
-  }
-  return result;
+  if (required) assert(value.visible, 'Selector is not visible: ' + selector);
+  return value.visible ? value : null;
 }
 
-async function waitForStablePage(page) {
-  await page.waitForLoadState('domcontentloaded');
-  await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete') || !document.documentElement.classList.contains('fx-intro-pending'), null, { timeout: 15000 }).catch(() => {});
-  await page.waitForTimeout(850);
+async function injectProductionLikeContent(page) {
+  for (const href of [
+    '/scifi-ui/styles/formatx-content-standard.css',
+    '/scifi-ui/styles/formatx-mobile-readability.css',
+    '/scifi-ui/styles/formatx-mobile-unified.css',
+    '/scifi-ui/styles/formatx-mobile-hero-flow.css',
+    '/scifi-ui/styles/formatx-mobile-production-r5.css'
+  ]) {
+    await page.addStyleTag({ url: origin + href });
+  }
+
+  // Keep the browser test aligned with the production worker. The static HTML
+  // contains the legacy HU/EN pair, while production loads this module and
+  // exposes exactly one accessible language toggle.
+  for (const src of [
+    '/scifi-ui/scripts/single-language-toggle.js',
+    '/scifi-ui/scripts/release-metadata.js',
+    '/scifi-ui/scripts/formatx-content-standard.js',
+    '/scifi-ui/scripts/formatx-content-finalizer.js',
+    '/scifi-ui/scripts/formatx-platform-surface-finalizer.js',
+    '/scifi-ui/scripts/formatx-organism-semantic-state.js',
+    '/scifi-ui/scripts/formatx-mobile-unified.js'
+  ]) {
+    await page.addScriptTag({ url: origin + src });
+  }
+
+  await page.waitForFunction(() => document.documentElement.dataset.fxSingleLanguageToggle === 'ready', null, { timeout: 8000 });
+  await page.waitForTimeout(900);
 }
 
 async function primeScrollReveals(page) {
@@ -80,8 +93,6 @@ async function commonAssertions(page, mobile) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 2, 'Horizontal overflow detected: ' + overflow + 'px');
 
-  // A two-button HU/EN switch is one language control. Count the visible
-  // control container, not its individual choice buttons.
   const languageControls = await page.locator('.fx-language-toggle:visible, .language-switch:visible, .language-control:visible').count();
   assert(languageControls === 1, 'Production must expose exactly one visible language control: ' + languageControls);
 
@@ -102,36 +113,115 @@ async function commonAssertions(page, mobile) {
 
     // Mobile is allowed to place the 3D stage before or after the text in the
     // visual order. What is forbidden is physical overlap between the blocks.
-    assert(!overlap(heroCopy, heroSpace), 'Mobile hero copy overlaps the MAG stage');
-    assert(!overlap(cue, heroSpace), 'Mobile scroll cue overlaps the MAG stage');
-    assert(!overlap(category, heroSpace), 'Mobile category deck overlaps the MAG stage');
+    assert(!overlap(heroCopy, heroSpace), 'Mobile 3D field overlaps hero copy');
+    assert(!overlap(heroSpace, cue), 'Mobile chapter cue overlaps 3D field');
+    assert(!overlap(cue, category), 'Mobile next section overlaps chapter cue');
+
+    const proofGrid = page.locator('.fx-award-proof__grid').first();
+    if (await proofGrid.count()) {
+      const columns = await proofGrid.evaluate(element => getComputedStyle(element).gridTemplateColumns);
+      assert(columns.trim().split(/\s+/).length === 1, 'Public proof cards are not single-column on mobile: ' + columns);
+    }
+
+    const qrBroken = await page.locator('.fx-plan-qr-card:not(.is-qr-ready) .fx-plan-qr-link img:visible').count();
+    assert(qrBroken === 0, 'A not-ready QR image is visibly rendered on mobile');
+
+    const scrollState = await page.evaluate(() => ({
+      policy: document.documentElement.dataset.fxMobileScrollPolicy || '',
+      mode: document.documentElement.dataset.fxMobileScrollMode || '',
+      bridgeCount: document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"]').length
+    }));
+    assert(scrollState.policy === 'native-document-v1', 'Mobile native-document policy marker missing: ' + JSON.stringify(scrollState));
+    assert(scrollState.bridgeCount === 0, 'Mobile visual loop bridge leaked into document: ' + JSON.stringify(scrollState));
   }
 }
 
-async function capture(page, name, viewport, mobile) {
-  await page.setViewportSize(viewport);
-  await page.goto(target, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await waitForStablePage(page);
-  await primeScrollReveals(page);
-  await commonAssertions(page, mobile);
-  await page.screenshot({ path: path.join(outputDir, `${name}.png`), fullPage: true });
+async function capture(browser, name, viewport, setup = async () => {}, targetUrl = base) {
+  const context = await browser.newContext({
+    viewport,
+    reducedMotion: name.includes('reduced') ? 'reduce' : 'no-preference',
+    hasTouch: viewport.width < 700,
+    isMobile: viewport.width < 700,
+    deviceScaleFactor: viewport.width < 700 ? 2 : 1,
+    colorScheme: 'dark'
+  });
+  await context.addInitScript(() => {
+    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+  });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+
+  let failure;
+  try {
+    await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
+    await injectProductionLikeContent(page);
+    await primeScrollReveals(page);
+    await setup(page);
+    await commonAssertions(page, viewport.width < 700);
+    const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
+    assert(!meaningful.length, name + ' browser errors: ' + meaningful.join(' | '));
+  } catch (error) {
+    failure = error;
+  } finally {
+    await page.screenshot({ path: path.join(out, name + '.png'), fullPage: true }).catch(() => {});
+    await context.close();
+  }
+  if (failure) throw failure;
+}
+
+async function publicPage(browser, name, pathname, selector, viewport = { width: 1440, height: 900 }) {
+  const context = await browser.newContext({ viewport, colorScheme: 'dark' });
+  const page = await context.newPage();
+  let failure;
+  try {
+    await page.goto(origin + pathname, { waitUntil: 'networkidle' });
+    await page.waitForSelector(selector, { timeout: 10000 });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    assert(overflow <= 2, pathname + ' horizontal overflow: ' + overflow + 'px');
+  } catch (error) {
+    failure = error;
+  } finally {
+    await page.screenshot({ path: path.join(out, name + '.png'), fullPage: true }).catch(() => {});
+    await context.close();
+  }
+  if (failure) throw failure;
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  await fs.mkdir(out, { recursive: true });
+  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
+  const english = new URL(base);
+  english.searchParams.set('lang', 'en');
   try {
-    const desktop = await browser.newPage();
-    await capture(desktop, 'desktop', { width: 1440, height: 960 }, false);
-    await desktop.close();
+    await capture(browser, 'desktop-hero-hu', { width: 1440, height: 900 });
+    await capture(browser, 'desktop-small-height', { width: 1366, height: 600 });
+    await capture(browser, 'mobile-390x844', { width: 390, height: 844 });
+    await capture(browser, 'mobile-430x932', { width: 430, height: 932 });
+    await capture(browser, 'reduced-motion', { width: 1440, height: 900 });
+    await capture(browser, 'desktop-hero-en', { width: 1440, height: 900 }, async page => {
+      await page.waitForFunction(() => document.documentElement.lang === 'en', null, { timeout: 8000 });
+    }, english.href);
+    await capture(browser, 'mobile-menu-open', { width: 390, height: 844 }, async page => {
+      await page.locator('#menu-toggle').click();
+      await page.waitForTimeout(180);
+      assert((await page.locator('#menu-toggle').getAttribute('aria-expanded')) === 'true', 'Mobile menu did not open');
+      const nav = await box(page, '#main-nav');
+      assert(nav.width > 100 && nav.height > 100, 'Opened mobile navigation is not visible');
+    });
 
-    const mobile = await browser.newPage();
-    await capture(mobile, 'mobile', { width: 390, height: 844 }, true);
-    await mobile.close();
+    await publicPage(browser, 'downloads', '/scifi-ui/downloads/', '[data-release-download="multiplatform"]');
+    await publicPage(browser, 'verification', '/scifi-ui/verification.html', '[data-verification-root]');
+    await publicPage(browser, 'test-matrix', '/scifi-ui/test-matrix.html', '[data-test-table-body]');
+    await publicPage(browser, 'known-issues', '/scifi-ui/known-issues.html', 'main');
+    await publicPage(browser, 'security', '/scifi-ui/security.html', 'main');
+    await publicPage(browser, 'support', '/scifi-ui/support.html', 'main');
+    console.log('PASS production-like visual contracts and public pages');
   } finally {
     await browser.close();
   }
-  console.log('PASS: content visual contracts captured and validated.');
-})().catch((error) => {
-  console.error(error);
+})().catch(error => {
+  console.error(error.stack || error);
   process.exit(1);
 });
