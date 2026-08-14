@@ -1,32 +1,33 @@
-/* r99 — shared cinematic optical atmosphere for the luminous native WebGL crystal.
-   The accepted r87 geometry/size stays locked. This layer now treats desktop and
-   mobile as the same visual material: dark transparent glass, ice-white/cyan edges,
-   violet refraction, a compact white reactor and a restrained reflective floor. */
+/* r101 — deep spectral glass correction after live desktop/mobile capture.
+   Keep the accepted r87 geometry and size untouched. The crystal body must read as
+   transparent deep cyan/blue glass, not milk-white; reserve ice-white for the reactor,
+   facet edges and caustics, with violet refraction and a dark cinematic floor. */
 
 html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] #hero .hero-space>.fx-core-rayglass-r91-stage{
   background:
-    radial-gradient(ellipse at 50% 48%,rgba(25,193,255,.22) 0%,rgba(18,104,205,.095) 29%,transparent 54%),
-    radial-gradient(ellipse at 58% 48%,rgba(167,57,255,.20) 0%,rgba(114,43,216,.065) 31%,transparent 54%),
-    radial-gradient(circle at 15% 27%,rgba(150,244,255,.76) 0 1px,transparent 1.7px),
-    radial-gradient(circle at 78% 24%,rgba(220,132,255,.68) 0 1px,transparent 1.8px),
-    radial-gradient(circle at 88% 55%,rgba(104,239,255,.62) 0 1px,transparent 1.8px),
-    radial-gradient(circle at 27% 69%,rgba(190,104,255,.45) 0 1px,transparent 1.7px),
-    radial-gradient(circle at 65% 72%,rgba(112,232,255,.42) 0 1px,transparent 1.7px),
-    linear-gradient(180deg,#000208 0%,#010713 39%,#021329 70%,#031a31 100%)!important;
+    radial-gradient(ellipse at 50% 48%,rgba(17,151,235,.145) 0%,rgba(10,75,160,.065) 29%,transparent 52%),
+    radial-gradient(ellipse at 58% 48%,rgba(139,42,232,.145) 0%,rgba(91,31,184,.045) 31%,transparent 53%),
+    radial-gradient(circle at 15% 27%,rgba(128,235,255,.62) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 78% 24%,rgba(207,111,255,.56) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 88% 55%,rgba(87,226,255,.50) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 27% 69%,rgba(176,86,255,.36) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 65% 72%,rgba(92,219,255,.33) 0 1px,transparent 1.7px),
+    linear-gradient(180deg,#000208 0%,#00050e 39%,#010c1d 70%,#021326 100%)!important;
+  box-shadow:inset 0 0 120px rgba(0,0,0,.34)!important;
   filter:none!important;
   overflow:visible!important;
 }
 
 html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] #hero .hero-space>.fx-core-rayglass-r91-stage>.fx-core-rayglass-r91-canvas{
-  opacity:1!important;
+  opacity:.90!important;
   filter:
-    brightness(1.20)
-    contrast(1.52)
-    saturate(1.72)
-    drop-shadow(0 0 3px rgba(242,255,255,.92))
-    drop-shadow(0 0 11px rgba(45,231,255,.66))
-    drop-shadow(0 0 26px rgba(49,153,255,.34))
-    drop-shadow(0 0 42px rgba(165,67,255,.27))!important;
+    brightness(.82)
+    contrast(1.72)
+    saturate(2.28)
+    drop-shadow(0 0 2px rgba(240,255,255,.72))
+    drop-shadow(0 0 9px rgba(39,224,255,.58))
+    drop-shadow(0 0 23px rgba(42,139,255,.30))
+    drop-shadow(0 0 36px rgba(154,54,255,.22))!important;
   transform-origin:50% 50%!important;
 }
 
@@ -38,13 +39,13 @@ html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] #hero .hero-spac
   z-index:3!important;
   pointer-events:none!important;
   background:
-    radial-gradient(circle at 50% 50%,rgba(255,255,255,1) 0 .20%,rgba(238,255,255,.98) .26% .46%,rgba(92,244,255,.72) .60% 1.08%,rgba(31,178,255,.22) 1.55% 3.0%,transparent 5.2%),
-    radial-gradient(circle at 50% 50%,transparent 0 7.0%,rgba(227,255,255,.30) 7.28% 7.52%,transparent 7.92% 11.0%,rgba(91,235,255,.22) 11.3% 11.58%,transparent 11.94% 15.2%,rgba(194,94,255,.18) 15.5% 15.78%,transparent 16.15% 20.0%,rgba(73,210,255,.13) 20.3% 20.58%,transparent 20.95%),
-    linear-gradient(90deg,transparent 7%,rgba(45,215,255,.012) 27%,rgba(196,252,255,.13) 49.78%,rgba(255,255,255,.37) 50%,rgba(196,252,255,.13) 50.22%,rgba(45,215,255,.012) 73%,transparent 93%),
-    linear-gradient(180deg,transparent 5%,rgba(48,205,255,.014) 31%,rgba(221,255,255,.15) 49.78%,rgba(255,255,255,.31) 50%,rgba(221,255,255,.15) 50.22%,rgba(48,205,255,.014) 69%,transparent 95%),
-    conic-gradient(from 18deg at 50% 50%,transparent 0 10%,rgba(82,229,255,.045) 13%,transparent 17% 38%,rgba(190,70,255,.050) 43%,transparent 47% 68%,rgba(102,231,255,.040) 73%,transparent 78% 100%)!important;
+    radial-gradient(circle at 50% 50%,rgba(255,255,255,1) 0 .19%,rgba(241,255,255,.98) .25% .43%,rgba(83,240,255,.68) .57% 1.02%,rgba(25,168,255,.18) 1.48% 2.8%,transparent 4.9%),
+    radial-gradient(circle at 50% 50%,transparent 0 7.0%,rgba(225,255,255,.23) 7.27% 7.50%,transparent 7.90% 11.0%,rgba(83,230,255,.19) 11.30% 11.56%,transparent 11.94% 15.2%,rgba(188,84,255,.15) 15.50% 15.77%,transparent 16.15% 20.0%,rgba(64,201,255,.10) 20.30% 20.56%,transparent 20.94%),
+    linear-gradient(90deg,transparent 8%,rgba(41,209,255,.010) 28%,rgba(186,249,255,.095) 49.80%,rgba(255,255,255,.28) 50%,rgba(186,249,255,.095) 50.20%,rgba(41,209,255,.010) 72%,transparent 92%),
+    linear-gradient(180deg,transparent 6%,rgba(43,199,255,.011) 32%,rgba(214,252,255,.105) 49.80%,rgba(255,255,255,.24) 50%,rgba(214,252,255,.105) 50.20%,rgba(43,199,255,.011) 68%,transparent 94%),
+    conic-gradient(from 18deg at 50% 50%,transparent 0 10%,rgba(74,220,255,.038) 13%,transparent 17% 38%,rgba(181,61,255,.042) 43%,transparent 47% 68%,rgba(91,221,255,.034) 73%,transparent 78% 100%)!important;
   mix-blend-mode:screen!important;
-  opacity:.88!important;
+  opacity:.64!important;
   filter:none!important;
 }
 
@@ -52,18 +53,18 @@ html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] #hero .hero-spac
   content:""!important;
   display:block!important;
   position:absolute!important;
-  left:2%!important;
-  right:2%!important;
-  bottom:-11%!important;
-  height:45%!important;
+  left:4%!important;
+  right:4%!important;
+  bottom:-9%!important;
+  height:39%!important;
   z-index:2!important;
   pointer-events:none!important;
-  opacity:.62!important;
+  opacity:.48!important;
   background:
-    radial-gradient(ellipse at 50% 0%,rgba(118,248,255,.34),rgba(31,137,236,.11) 30%,rgba(162,69,242,.08) 50%,transparent 75%),
-    linear-gradient(90deg,transparent 4%,rgba(58,208,255,.04) 33%,rgba(182,248,255,.13) 50%,rgba(103,74,228,.055) 67%,transparent 96%),
-    repeating-linear-gradient(0deg,rgba(91,216,255,.033) 0 1px,transparent 1px 10px)!important;
-  transform:perspective(520px) rotateX(65deg) scaleX(1.08)!important;
+    radial-gradient(ellipse at 50% 0%,rgba(91,231,255,.25),rgba(23,111,208,.075) 30%,rgba(141,53,224,.055) 50%,transparent 74%),
+    linear-gradient(90deg,transparent 5%,rgba(47,194,255,.03) 33%,rgba(154,237,255,.085) 50%,rgba(89,59,210,.04) 67%,transparent 95%),
+    repeating-linear-gradient(0deg,rgba(74,201,255,.025) 0 1px,transparent 1px 10px)!important;
+  transform:perspective(520px) rotateX(65deg) scaleX(1.07)!important;
   transform-origin:50% 0!important;
   filter:blur(.1px)!important;
 }
@@ -71,38 +72,39 @@ html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] #hero .hero-spac
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage{
     background:
-      radial-gradient(ellipse at 50% 48%,rgba(28,203,255,.24) 0%,rgba(18,104,205,.10) 29%,transparent 52%),
-      radial-gradient(ellipse at 58% 48%,rgba(174,60,255,.21) 0%,rgba(114,43,216,.07) 31%,transparent 52%),
-      radial-gradient(circle at 15% 27%,rgba(150,244,255,.78) 0 1px,transparent 1.7px),
-      radial-gradient(circle at 78% 24%,rgba(222,134,255,.70) 0 1px,transparent 1.8px),
-      radial-gradient(circle at 88% 55%,rgba(108,242,255,.64) 0 1px,transparent 1.8px),
-      radial-gradient(circle at 27% 69%,rgba(194,106,255,.47) 0 1px,transparent 1.7px),
-      radial-gradient(circle at 65% 72%,rgba(116,235,255,.44) 0 1px,transparent 1.7px),
-      linear-gradient(180deg,#000208 0%,#010713 40%,#021329 70%,#031a31 100%)!important;
+      radial-gradient(ellipse at 50% 48%,rgba(20,164,241,.155) 0%,rgba(10,78,164,.070) 29%,transparent 51%),
+      radial-gradient(ellipse at 58% 48%,rgba(146,45,239,.150) 0%,rgba(91,31,184,.050) 31%,transparent 52%),
+      radial-gradient(circle at 15% 27%,rgba(132,239,255,.64) 0 1px,transparent 1.7px),
+      radial-gradient(circle at 78% 24%,rgba(211,115,255,.58) 0 1px,transparent 1.8px),
+      radial-gradient(circle at 88% 55%,rgba(91,230,255,.52) 0 1px,transparent 1.8px),
+      radial-gradient(circle at 27% 69%,rgba(180,90,255,.38) 0 1px,transparent 1.7px),
+      radial-gradient(circle at 65% 72%,rgba(96,223,255,.35) 0 1px,transparent 1.7px),
+      linear-gradient(180deg,#000208 0%,#00050f 40%,#010d1f 70%,#021428 100%)!important;
+    box-shadow:inset 0 0 95px rgba(0,0,0,.28)!important;
     filter:none!important;
     overflow:visible!important;
   }
 
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage>.fx-core-rayglass-r91-canvas{
-    opacity:1!important;
+    opacity:.88!important;
     filter:
-      brightness(1.22)
-      contrast(1.56)
-      saturate(1.78)
-      drop-shadow(0 0 3px rgba(244,255,255,.94))
-      drop-shadow(0 0 11px rgba(45,233,255,.68))
-      drop-shadow(0 0 27px rgba(50,157,255,.35))
-      drop-shadow(0 0 43px rgba(168,68,255,.28))!important;
+      brightness(.78)
+      contrast(1.78)
+      saturate(2.38)
+      drop-shadow(0 0 2px rgba(242,255,255,.74))
+      drop-shadow(0 0 9px rgba(40,226,255,.60))
+      drop-shadow(0 0 23px rgba(44,143,255,.31))
+      drop-shadow(0 0 37px rgba(157,56,255,.23))!important;
     transform-origin:50% 50%!important;
   }
 
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage:before{
-    opacity:.92!important;
+    opacity:.67!important;
   }
 
   html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage:after{
-    bottom:-11%!important;
-    height:45%!important;
-    opacity:.64!important;
+    bottom:-9%!important;
+    height:39%!important;
+    opacity:.50!important;
   }
 }
