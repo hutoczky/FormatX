@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T23:20:00+02:00
-source_master=67aca7889ed08dfcf1b6c53604924274a6fc4df3
-purpose=replace the flat analytic r107 MAG with a darker translucent four-point crystalline volume matched to the supplied mobile reference: broad refractive glass folds, cyan/violet internal caustics, sparse fractures, layered shells, concentric reactor optics, white core, light spine, orbit arcs and reflective floor treatment; use supplied-reference mobile stage geometry and do not use an image-backed MAG
+requested_at=2026-08-14T23:22:00+02:00
+source_master=96c16cc8c8ef0a01e166f6a08de5b06dd97a54be
+purpose=activate the supplied-reference r108 volumetric desktop/mobile WebGL crystal together with the user-approved mobile size lock: darker translucent four-point glass volume, broad refractive folds, cyan/violet caustics, sparse fractures, layered shells, compact white reactor, orbital arcs and water-like reflective floor; no image-backed MAG
 interaction=continuous breathing; pointer/touch parallax; native touch energy surge; moving spectral folds and caustics; reactor pulse; smooth return to idle; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; native r99 WebGL TRIANGLE_STRIP contract; supplied-reference mobile framing; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG capture; post-deploy reference capture; award-readiness
+verification=production candidate validation; JavaScript syntax; native r99 WebGL TRIANGLE_STRIP contract; user-approved r105 mobile size lock; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG capture; post-deploy reference capture; award-readiness
