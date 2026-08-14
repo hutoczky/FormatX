@@ -1,0 +1,32 @@
+/* r122 — procedural detail pass above the true WebGL mesh. No raster reference asset. */
+.fx-core-detail-r122{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  width:100%;
+  height:100%;
+  display:block;
+  pointer-events:none;
+  mix-blend-mode:screen;
+  opacity:.98;
+  transform:translateZ(0);
+}
+html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage:before{
+  clip-path:none!important;
+  background:
+    radial-gradient(circle at 50% 50%,#fff 0 .25%,rgba(247,255,255,.98) .35% .70%,rgba(84,246,255,.80) .88% 1.55%,rgba(31,177,255,.23) 2.1% 4.4%,transparent 6.9%),
+    linear-gradient(90deg,transparent 3%,rgba(89,232,255,.02) 22%,rgba(213,253,255,.14) 49.72%,rgba(255,255,255,.39) 50%,rgba(213,253,255,.14) 50.28%,rgba(89,232,255,.02) 78%,transparent 97%),
+    linear-gradient(180deg,transparent 3%,rgba(89,232,255,.02) 22%,rgba(213,253,255,.13) 49.72%,rgba(255,255,255,.34) 50%,rgba(213,253,255,.13) 50.28%,rgba(89,232,255,.02) 78%,transparent 97%)!important;
+  opacity:.9!important;
+  filter:none!important;
+}
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
+    filter:brightness(1.06) contrast(1.30) saturate(1.92)
+      drop-shadow(0 0 2px rgba(239,255,255,.62))
+      drop-shadow(0 0 10px rgba(42,231,255,.46))
+      drop-shadow(0 0 25px rgba(42,149,255,.27))
+      drop-shadow(0 0 42px rgba(159,56,255,.24))!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){.fx-core-detail-r122{opacity:.92}}
