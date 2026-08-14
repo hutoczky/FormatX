@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Bump production dark refractive r110 bootstrap cache key
+      - name: Bump production faceted crystal r111 bootstrap cache key
         shell: bash
         run: |
           set -euo pipefail
@@ -20,12 +20,12 @@ jobs:
           from pathlib import Path
           p = Path('docs/scifi-ui/index.html')
           s = p.read_text()
-          old = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-cinematic-polish-r109'
-          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-dark-refractive-r110'
+          old = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-dark-refractive-r110'
+          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-faceted-crystal-r111'
           if new in s:
               raise SystemExit(0)
           if old not in s:
-              raise SystemExit('expected r109 cinematic bootstrap cache key not found')
+              raise SystemExit('expected r110 dark refractive bootstrap cache key not found')
           p.write_text(s.replace(old, new, 1))
           PY
           git config user.name 'github-actions[bot]'
@@ -35,5 +35,5 @@ jobs:
             echo 'cache key already current'
             exit 0
           fi
-          git commit -m '[deploy-production] fix(mag): publish dark refractive r110 bootstrap'
+          git commit -m '[deploy-production] fix(mag): publish faceted crystal r111 bootstrap'
           git push origin HEAD:master
