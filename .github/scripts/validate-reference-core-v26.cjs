@@ -15,7 +15,7 @@ assert.match(bootstrap,/responsive-cinematic-reference-v69-r81-pixel-aspect-awar
 assert.match(bootstrap,/single-webgl2-responsive-cinematic-reference-glass-v69-r81/);
 assert.match(bootstrap,/formatx-award-reference-r80\.css\?v=20260814-pixel-aspect-r80/);
 assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260814-mag-first-flow-r74/);
-assert.match(bootstrap,/formatx-flow-first-r75\.js\?v=20260814-award-overlay-r81/);
+assert.match(bootstrap,/formatx-flow-first-r75\.js\?v=20260814-award-overlay-r82-desktop-scope/);
 assert.match(wrapper,/formatx-core-mobile-reference-v69\.js/);
 assert.match(renderer,/single-webgl2-mobile-cinematic-reference-glass-v69/);
 assert.match(renderer,/reference-target-organic-deep-concave-four-point-v69/);
@@ -28,6 +28,8 @@ assert.equal((wrapper.match(/getContext\(['"]webgl2['"]/g)||[]).length,0);
 assert.doesNotMatch(renderer,/new\s+Image\s*\(|drawImage\s*\(|three\.js/i);
 assert.doesNotMatch(renderer,/\bTHREE\./);
 assert.match(flow,/award-reference-overlay-r81/);
+assert.match(flow,/desktop-native-content-r81/);
+assert.match(flow,/restoreDesktopMenu/);
 assert.match(flow,/min-height','260px/);
 assert.match(flow,/font-size','17px/);
 assert.match(webgpu,/navigator\.gpu\.requestAdapter/);
