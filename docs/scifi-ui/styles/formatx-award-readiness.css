@@ -296,3 +296,29 @@ html[data-fx-award-positioning='v2'] .price-card.featured {
     transform: none !important;
   }
 }
+
+/* Keep the above-the-fold copy paintable immediately. The MAG remains untouched. */
+#hero .hero-lead {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
+  content-visibility: visible !important;
+}
+
+#hero .hero-copy {
+  contain: layout style;
+}
+
+@media (max-width: 700px) {
+  #hero .hero-lead {
+    min-block-size: 7.5em;
+  }
+}
+
+@media (min-width: 701px) {
+  #hero .hero-lead {
+    min-block-size: 4.5em;
+  }
+}
