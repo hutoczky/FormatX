@@ -13,7 +13,7 @@
     const script=document.createElement('script');script.src='/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260813-responsive-text-wrap-r72';script.async=false;script.dataset.fxMobileReferenceLayout='true';document.head.appendChild(script);
   }
   loadReferenceLayout();
-  const renderer=document.createElement('script');renderer.src='/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99&rev=20260814-crystal-depth-r100';renderer.async=false;renderer.dataset.fxCoreMobileReferenceV69='true';renderer.dataset.fxCoreMobileReferenceR99='true';
+  const renderer=document.createElement('script');renderer.src='/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99&rev=20260814-deep-refractive-r102';renderer.async=false;renderer.dataset.fxCoreMobileReferenceV69='true';renderer.dataset.fxCoreMobileReferenceR99='true';
   renderer.addEventListener('load',()=>{root.dataset.fxCoreReferenceLockLoad='ready-v69-r99';},{once:true});
   renderer.addEventListener('error',()=>{root.dataset.fxCoreMobileV55='load-failed-v55';root.dataset.fxCoreMobileV69='load-failed-v69';root.dataset.fxCoreMobileR99='load-failed-r99';root.dataset.fxCoreReferenceLock='load-failed-v69';root.dataset.fxCoreReal3d='context-unavailable';dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'native-webgl-renderer-load-failed',reference:'v69-r99'}}));},{once:true});
   document.head.appendChild(renderer);
