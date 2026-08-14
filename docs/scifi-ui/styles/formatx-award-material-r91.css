@@ -1,28 +1,37 @@
-/* r91 — presentation lock for the refractive ray-glass renderer.
-   Keep r87 geometry/size. Remove legacy flare layers that flattened the new WebGL material. */
+/* r92 — optical presentation for the refractive ray-glass renderer.
+   Geometry/size stays locked to r87. Increase icy facet readability, cyan/violet refraction
+   and depth while keeping the center flare narrow and avoiding the old flat membrane wash. */
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage{
     background:
-      radial-gradient(ellipse at 50% 48%,rgba(27,151,224,.12),transparent 29%),
-      radial-gradient(ellipse at 56% 50%,rgba(103,48,184,.10),transparent 44%),
-      linear-gradient(180deg,#01040b 0%,#010713 48%,#021124 74%,#03182b 100%)!important;
+      radial-gradient(ellipse at 50% 48%,rgba(38,169,235,.17),transparent 28%),
+      radial-gradient(ellipse at 56% 50%,rgba(126,58,205,.13),transparent 43%),
+      radial-gradient(ellipse at 50% 78%,rgba(27,111,196,.12),transparent 38%),
+      linear-gradient(180deg,#01040b 0%,#010713 44%,#021127 72%,#03192d 100%)!important;
     filter:none!important;
     overflow:visible!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage>.fx-core-rayglass-r91-canvas{
     opacity:1!important;
-    filter:drop-shadow(0 0 7px rgba(93,225,255,.34)) drop-shadow(0 0 22px rgba(70,143,255,.14))!important;
+    filter:brightness(1.10) contrast(1.10) saturate(1.08)
+      drop-shadow(0 0 6px rgba(185,250,255,.38))
+      drop-shadow(0 0 15px rgba(56,205,255,.26))
+      drop-shadow(0 0 28px rgba(106,72,255,.12))!important;
     transform-origin:50% 50%!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage:before{
     content:""!important;position:absolute!important;inset:0!important;z-index:3!important;pointer-events:none!important;
     background:
-      radial-gradient(circle at 50% 50%,rgba(255,255,255,.72) 0 .22%,rgba(168,247,255,.28) .35% .70%,transparent 1.25%),
-      radial-gradient(circle at 50% 50%,transparent 0 10.7%,rgba(95,226,255,.10) 11.0% 11.25%,transparent 11.55% 15.8%,rgba(155,89,255,.08) 16.05% 16.3%,transparent 16.65%)!important;
-    mix-blend-mode:screen!important;opacity:.62!important;filter:none!important;
+      radial-gradient(circle at 50% 50%,rgba(255,255,255,.62) 0 .18%,rgba(188,251,255,.22) .28% .60%,transparent 1.10%),
+      radial-gradient(circle at 50% 50%,transparent 0 10.6%,rgba(114,235,255,.09) 10.88% 11.14%,transparent 11.45% 15.75%,rgba(169,97,255,.075) 16.00% 16.28%,transparent 16.62%),
+      linear-gradient(90deg,transparent 0 46.5%,rgba(211,253,255,.025) 49.75%,rgba(255,255,255,.11) 49.94%,rgba(255,255,255,.18) 50%,rgba(255,255,255,.11) 50.06%,rgba(211,253,255,.025) 50.25%,transparent 53.5% 100%),
+      linear-gradient(180deg,transparent 0 46.5%,rgba(211,253,255,.02) 49.78%,rgba(255,255,255,.085) 49.95%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.085) 50.05%,rgba(211,253,255,.02) 50.22%,transparent 53.5% 100%)!important;
+    mix-blend-mode:screen!important;opacity:.56!important;filter:none!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage:after{
-    bottom:-10%!important;height:38%!important;opacity:.34!important;
-    background:radial-gradient(ellipse at 50% 0%,rgba(73,213,255,.17),rgba(47,99,184,.05) 34%,rgba(120,54,191,.035) 51%,transparent 72%)!important;
+    bottom:-10%!important;height:39%!important;opacity:.41!important;
+    background:
+      radial-gradient(ellipse at 50% 0%,rgba(103,231,255,.21),rgba(48,113,204,.075) 34%,rgba(132,62,205,.045) 51%,transparent 72%),
+      repeating-linear-gradient(0deg,rgba(76,190,255,.022) 0 1px,transparent 1px 10px)!important;
   }
 }
