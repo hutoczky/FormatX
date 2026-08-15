@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-15T19:18:00+02:00
-source_master=3aa886247abf7df8fd420e49985ebbd21ca55ca6
-purpose=activate r161 continuous page carrier: keep the r160 cross-device reference alpha key and approved crystal geometry/size, while removing residual rounded/card-like hero-space and stage carrier edges so the MAG flows directly into the page atmosphere on desktop and mobile; keep Public Proof card styling intentionally separate
+requested_at=2026-08-15T19:25:00+02:00
+source_master=2161af5951bfc6c97f66f9824191d1f9146e1f55
+purpose=activate r162 mobile reference edge fade: retain r160/r161 seamless integration, approved crystal geometry and size, while reducing residual dark source-bitmap opacity progressively toward the mobile image edges so no hard horizontal media boundary remains between the MAG and the page atmosphere
 interaction=preserve organic double lub-dub heartbeat plus slow breathing on PC and phone; pointer/mouse response on desktop; touch interaction and r144 gyroscope response on mobile; interaction increases reactor energy/glow without moving or resizing the approved silhouette; pause and prefers-reduced-motion remain respected
-verification=production candidate source/runtime/security validation; JavaScript syntax; r160 reference key plus r161 carrier runtime lock; Worker tests; production build; custom-domain smoke; stage background none; hero/hero-space/stage card edges removed; full-cycle heartbeat amplitude; pointer/touch/gyro interaction; WebGL glError=0 and render budget; glyph overlap zero; fresh desktop/mobile production captures and visual review
+verification=production candidate source/runtime/security validation; JavaScript syntax; r162 detail cache and alpha-edge fade; r161 carrier lock; Worker tests; production build; custom-domain smoke; stage background none; full-cycle heartbeat amplitude; pointer/touch/gyro interaction; WebGL glError=0 and render budget; glyph overlap zero; fresh desktop/mobile production captures and visual review
