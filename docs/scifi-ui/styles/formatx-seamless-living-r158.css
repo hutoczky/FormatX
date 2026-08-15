@@ -205,3 +205,23 @@ html body.living-architecture #hero .fx-reference-heading::before{
     filter:none!important;
   }
 }
+
+
+@media (max-width:900px),(pointer:coarse){
+  /* r165: continue the MAG atmosphere below hero-space; no hard carrier edge. */
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space::after{
+    content:""!important;
+    display:block!important;
+    position:absolute!important;
+    left:0!important;
+    right:0!important;
+    top:100%!important;
+    height:72px!important;
+    z-index:0!important;
+    pointer-events:none!important;
+    background:linear-gradient(180deg,#010610 0%,#010817 20%,#020a1b 44%,#030c1d 70%,#040d1e 100%)!important;
+    border:0!important;
+    box-shadow:none!important;
+    opacity:1!important;
+  }
+}
