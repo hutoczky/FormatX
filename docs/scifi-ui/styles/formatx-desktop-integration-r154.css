@@ -1,0 +1,93 @@
+/* r154 — desktop aspect + seamless hero integration.
+   The supplied reference material is a 412x410 WebP. On a wide desktop stage it
+   must not be stretched to the stage aspect ratio. Keep the visible reference
+   compositor at its native near-square ratio, center it, and let its dark pixels
+   screen-blend into the page so the MAG no longer reads as a separate rectangle.
+   Mobile geometry is intentionally untouched. */
+
+@media (min-width:901px) and (pointer:fine){
+  html[data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space{
+    position:relative!important;
+    isolation:isolate!important;
+    overflow:hidden!important;
+    background:transparent!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+
+  html[data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space::before{
+    content:""!important;
+    position:absolute!important;
+    inset:-16% -18%!important;
+    border-radius:50%!important;
+    background:
+      radial-gradient(ellipse at 50% 48%,rgba(18,91,137,.24) 0%,rgba(8,56,92,.17) 31%,rgba(4,31,56,.09) 51%,rgba(1,12,24,.035) 66%,transparent 79%)!important;
+    filter:blur(24px)!important;
+    opacity:.92!important;
+    pointer-events:none!important;
+  }
+
+  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-mobile-v55-stage,
+  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-r112-stage{
+    background:transparent!important;
+    border:0!important;
+    outline:0!important;
+    box-shadow:none!important;
+    filter:none!important;
+  }
+
+  /* The reference source is 412x410. The detail compositor internally keeps the
+     stage-sized backing buffer for crisp rendering and interaction, while CSS
+     presents that buffer at the source aspect. This cancels desktop stretch
+     without touching mobile or the renderer's interaction coordinate system. */
+  html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
+    inset:auto!important;
+    left:50%!important;
+    right:auto!important;
+    top:50%!important;
+    bottom:auto!important;
+    height:min(100%,720px)!important;
+    width:auto!important;
+    max-width:none!important;
+    aspect-ratio:412 / 410!important;
+    transform:translate(-50%,-50%)!important;
+    transform-origin:50% 50%!important;
+    mix-blend-mode:screen!important;
+    opacity:.985!important;
+    filter:
+      brightness(1.025)
+      contrast(1.075)
+      saturate(1.08)
+      drop-shadow(0 0 14px rgba(76,225,255,.18))
+      drop-shadow(0 0 34px rgba(137,73,255,.10))!important;
+  }
+
+  /* The native WebGL renderer remains alive and interactive underneath, but its
+     wide-stage visual must not ghost a second horizontally stretched crystal. */
+  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas,
+  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
+    opacity:.018!important;
+    filter:brightness(.92) contrast(1.06) saturate(1.18)!important;
+  }
+
+  /* r147/r153 live optics is geometry-synchronised to the detail canvas by JS.
+     Screen blending removes any box edge while preserving pulse/orbit/reactor light. */
+  html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-live-r147-layer{
+    background:transparent!important;
+    border:0!important;
+    box-shadow:none!important;
+    mix-blend-mode:screen!important;
+  }
+}
+
+@media (min-width:901px) and (pointer:fine) and (max-height:760px){
+  html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
+    height:min(96%,620px)!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
+    transition:none!important;
+  }
+}
