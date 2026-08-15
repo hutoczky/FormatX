@@ -42,6 +42,7 @@ jobs:
           validator=Path('.github/scripts/validate-real3d-core.cjs')
           v=validator.read_text()
           v=v.replace('formatx-core-detail-overlay-r122.js?v=20260815-r166-heartbeat-shape-pulse','formatx-core-detail-overlay-r122.js?v=20260815-r166b-direct-clock-shape-pulse',1)
+          v=v.replace("'heartbeatShape','fxLivingHeartbeatBeatR158','fxLivingShapePulseR166'","'heartbeatShape','fxLivingShapeClockR166','fxLivingShapePulseR166'",1)
           marker="for(const source of [bootstrap,heartbeat,detail,mobileStability,wrapper,renderer,layout,flow,contentFinalizer,livingRendering,tailFinalizer,gyro])new Function(source);"
           direct_assert="assert.ok(detail.includes('direct-render-clock-r166b'),'missing r166b direct render-clock shape pulse');\n"
           if direct_assert not in v:
