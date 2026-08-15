@@ -1,0 +1,4 @@
+FormatX r151 mobile hero stability deployment marker.
+Commit under test: 4af45f07e4e21408ad1b28816141db31b53bb818
+Purpose: remove invalid/broken hero visual nodes, preserve the approved canvas/WebGL MAG, and restore a dedicated mobile download section before the public proof card.
+Date: 2026-08-15
