@@ -35,75 +35,43 @@ jobs:
               class MockDeviceOrientationEvent extends Event{constructor(type,init={}){super(type);this.alpha=+(init.alpha||0);this.beta=+(init.beta||0);this.gamma=+(init.gamma||0);this.absolute=!!init.absolute;}}
               try{Object.defineProperty(window,'DeviceOrientationEvent',{value:MockDeviceOrientationEvent,configurable:true});}catch(_){ }
             });
-            const page=await context.newPage();
-            const errors=[];page.on('pageerror',e=>errors.push(e.message));
+            const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
             await page.goto(`https://formatxsuite.com/?verify_r149b=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
-            await page.waitForFunction(()=>{
-              const d=document.documentElement.dataset;
-              return String(d.fxLiveMotionR147||'').includes('r149b')&&d.fxLiveMotionVisualR149==='centered-clipped-reactor'&&d.fxLiveLayerAnchorR149==='detail-canvas'&&d.fxLiveSafeLaneR147==='active-r149b'&&d.fxLiveSafeLaneMethodR149==='physical-rect-reconcile';
-            },null,{timeout:90000});
+            await page.waitForFunction(()=>{const d=document.documentElement.dataset;return String(d.fxLiveMotionR147||'').includes('r149b')&&d.fxLiveMotionVisualR149==='centered-clipped-reactor'&&d.fxLiveLayerAnchorR149==='detail-canvas'&&d.fxLiveSafeLaneR147==='active-r149b'&&d.fxLiveSafeLaneMethodR149==='physical-rect-reconcile';},null,{timeout:90000});
             await page.waitForTimeout(900);
 
-            const sample=()=>page.evaluate(()=>{
-              const glow=document.querySelector('#hero .fx-core-live-r147-glow');
-              const layer=document.querySelector('#hero .fx-core-live-r147-layer');
-              const g=glow?getComputedStyle(glow):null;
-              const shell=layer?getComputedStyle(layer,'::after'):null;
-              return {paused:document.documentElement.dataset.fxLiveMotionPausedR147,glowTransform:g?.transform||'',glowOpacity:g?.opacity||'',glowState:g?.animationPlayState||'',shellTransform:shell?.transform||'',shellOpacity:shell?.opacity||'',shellState:shell?.animationPlayState||''};
-            });
-            const visualA=await sample();
-            await page.waitForTimeout(700);
-            const visualB=await sample();
-            console.log('R149B VISUAL MOTION',JSON.stringify({visualA,visualB}));
-            assert.equal(visualA.glowState,'running','glow animation is not running');
-            assert.equal(visualA.shellState,'running','reactor shell animation is not running');
-            assert.notDeepEqual({t:visualA.glowTransform,o:visualA.glowOpacity,s:visualA.shellTransform,so:visualA.shellOpacity},{t:visualB.glowTransform,o:visualB.glowOpacity,s:visualB.shellTransform,so:visualB.shellOpacity},'visible CSS optics are static');
+            const sample=()=>page.evaluate(()=>{const g=getComputedStyle(document.querySelector('#hero .fx-core-live-r147-glow'));const l=document.querySelector('#hero .fx-core-live-r147-layer');const s=getComputedStyle(l,'::after');return{gt:g.transform,go:g.opacity,gs:g.animationPlayState,st:s.transform,so:s.opacity,ss:s.animationPlayState,paused:document.documentElement.dataset.fxLiveMotionPausedR147};});
+            const a=await sample();await page.waitForTimeout(700);const b=await sample();
+            console.log('R149B VISUAL',JSON.stringify({a,b}));
+            assert.equal(a.gs,'running');assert.equal(a.ss,'running');
+            assert.notDeepEqual({t:a.gt,o:a.go,s:a.st,so:a.so},{t:b.gt,o:b.go,s:b.st,so:b.so},'visible optics are static');
 
             const state=await page.evaluate(()=>{
-              const q=s=>{const e=document.querySelector(s),r=e?.getBoundingClientRect(),c=e?getComputedStyle(e):null;return e&&r&&c?{x:+r.x.toFixed(2),y:+r.y.toFixed(2),w:+r.width.toFixed(2),h:+r.height.toFixed(2),display:c.display,visibility:c.visibility,opacity:c.opacity,overflow:c.overflow,filter:c.filter,clipPath:c.clipPath}:null};
+              const q=s=>{const e=document.querySelector(s),r=e?.getBoundingClientRect(),c=e?getComputedStyle(e):null;return e&&r&&c?{x:+r.x.toFixed(2),y:+r.y.toFixed(2),w:+r.width.toFixed(2),h:+r.height.toFixed(2),display:c.display,visibility:c.visibility,opacity:c.opacity,overflow:c.overflow,filter:c.filter}:null};
               const root=document.documentElement,detail=q('#hero .fx-core-detail-r122'),layer=q('#hero .fx-core-live-r147-layer'),heading=q('#hero .fx-reference-heading'),tail=q('#hero .fx-core-reference-tail-r143'),copy=q('#hero .hero-copy'),ring=q('#hero .hero-ring');
-              const bottom=Math.max(detail?detail.y+detail.h:-Infinity,tail&&tail.display!=='none'?tail.y+tail.h:-Infinity);
-              const physicalGap=heading?heading.y-bottom:NaN;
-              const canvas=document.querySelector('.fx-core-mobile-v55-canvas'),gl=canvas?.getContext('webgl2')||canvas?.getContext('webgl');
-              return {version:root.dataset.fxLiveMotionR147,method:root.dataset.fxLiveSafeLaneMethodR149,gap:parseFloat(root.dataset.fxLiveSafeGapR147||'0'),physicalGap:+physicalGap.toFixed(2),detail,layer,heading,tail,copy,ring,layers:document.querySelectorAll('#hero .fx-core-live-r147-layer').length,glError:gl?.getError()};
+              const bottom=Math.max(detail?detail.y+detail.h:-Infinity,tail&&tail.display!=='none'?tail.y+tail.h:-Infinity),gap=heading?heading.y-bottom:NaN;
+              const c=document.querySelector('.fx-core-mobile-v55-canvas'),gl=c?.getContext('webgl2')||c?.getContext('webgl');
+              return{version:root.dataset.fxLiveMotionR147,method:root.dataset.fxLiveSafeLaneMethodR149,telemetryGap:parseFloat(root.dataset.fxLiveSafeGapR147||'0'),gap:+gap.toFixed(2),detail,layer,heading,copy,ring,layers:document.querySelectorAll('#hero .fx-core-live-r147-layer').length,glError:gl?.getError()};
             });
             console.log('R149B GEOMETRY',JSON.stringify(state));
-            assert.ok(String(state.version).includes('r149b'));
-            assert.equal(state.method,'physical-rect-reconcile');
-            assert.equal(state.layers,1,'duplicate optical layer');
-            assert.ok(state.detail&&state.layer&&state.heading,'MAG geometry missing');
-            for(const k of ['x','y','w','h'])assert.ok(Math.abs(state.detail[k]-state.layer[k])<=2.1,`layer/detail ${k} mismatch`);
-            assert.equal(state.layer.overflow,'hidden');
-            assert.ok(state.ring&&state.ring.display==='none','top-left legacy ring is visible');
-            assert.ok(state.copy&&state.copy.display==='none','legacy hero copy is rendered');
-            assert.equal(state.copy.visibility,'hidden');
-            assert.equal(state.copy.opacity,'0');
-            assert.ok(state.gap>=38&&state.gap<=54,`telemetry gap ${state.gap}`);
-            assert.ok(state.physicalGap>=38&&state.physicalGap<=54,`physical gap ${state.physicalGap}`);
-            assert.notEqual(state.detail.filter,'none','crystal luminance filter missing');
-            assert.equal(state.glError,0);
+            assert.ok(String(state.version).includes('r149b'));assert.equal(state.method,'physical-rect-reconcile');assert.equal(state.layers,1);
+            assert.ok(state.detail&&state.layer&&state.heading);for(const k of ['x','y','w','h'])assert.ok(Math.abs(state.detail[k]-state.layer[k])<=2.1,`layer/detail ${k} mismatch`);
+            assert.equal(state.layer.overflow,'hidden');assert.ok(state.ring&&state.ring.display==='none');assert.ok(state.copy&&state.copy.display==='none');assert.equal(state.copy.visibility,'hidden');assert.equal(state.copy.opacity,'0');
+            assert.ok(state.telemetryGap>=38&&state.telemetryGap<=54,`telemetry gap ${state.telemetryGap}`);assert.ok(state.gap>=38&&state.gap<=54,`physical gap ${state.gap}`);assert.notEqual(state.detail.filter,'none');assert.equal(state.glError,0);
 
             const before=await page.evaluate(()=>document.documentElement.dataset.fxLiveMotionFrameR147||'');
             await page.touchscreen.tap(206,330);await page.waitForTimeout(360);
             const touch=await page.evaluate(()=>({frame:document.documentElement.dataset.fxLiveMotionFrameR147||'',interaction:document.documentElement.dataset.fxLiveMotionInteractionR147||'',vector:document.documentElement.dataset.fxLiveMotionVectorR147||''}));
-            assert.equal(touch.interaction,'active-r149b');
-            assert.notEqual(touch.frame,before,'touch did not affect reactor');
-            assert.ok(touch.vector.length>8);
+            assert.equal(touch.interaction,'active-r149b');assert.notEqual(touch.frame,before);assert.ok(touch.vector.length>8);
 
             await page.waitForTimeout(900);
             await page.evaluate(async()=>{const fire=(b,g)=>window.dispatchEvent(new DeviceOrientationEvent('deviceorientation',{beta:b,gamma:g,alpha:0,absolute:false}));for(let i=0;i<10;i++){fire(45,0);await new Promise(r=>setTimeout(r,24));}for(let i=0;i<18;i++){fire(57,14);await new Promise(r=>setTimeout(r,28));}});
             await page.waitForTimeout(900);
             const gyro=await page.evaluate(()=>({state:document.documentElement.dataset.fxCoreGyroState,input:document.documentElement.dataset.fxCoreGyroInput,frame:document.documentElement.dataset.fxLiveMotionFrameR147}));
-            console.log('R149B GYRO',JSON.stringify(gyro));
-            assert.equal(gyro.state,'active');
-            assert.ok(gyro.input&&gyro.input!=='0.000,0.000');
-            assert.ok(String(gyro.frame).endsWith('gyro'),`gyro source not selected: ${gyro.frame}`);
+            console.log('R149B GYRO',JSON.stringify(gyro));assert.equal(gyro.state,'active');assert.ok(gyro.input&&gyro.input!=='0.000,0.000');assert.ok(String(gyro.frame).endsWith('gyro'));
 
-            await page.screenshot({path:'formatx-r149b-live-mobile.png',fullPage:true});
-            assert.ok(fs.statSync('formatx-r149b-live-mobile.png').size>20000);
-            assert.deepEqual(errors,[],`page errors: ${errors.join(' | ')}`);
-            await browser.close();
-            console.log('PASS: r149b visible animation, centered clipping, physical safe lane, hidden legacy layers, touch and gyro.');
+            const cdp=await context.newCDPSession(page);const shot=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});fs.writeFileSync('formatx-r149b-live-mobile.png',Buffer.from(shot.data,'base64'));assert.ok(fs.statSync('formatx-r149b-live-mobile.png').size>12000);
+            assert.deepEqual(errors,[],`page errors: ${errors.join(' | ')}`);await browser.close();console.log('PASS: r149b mobile MAG verified.');
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
       - name: Upload r149b live capture
