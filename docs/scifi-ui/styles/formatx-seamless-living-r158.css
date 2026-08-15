@@ -1,4 +1,4 @@
-/* r158b — seamless living MAG integration.
+/* r158c — seamless living MAG integration.
    Keep the approved crystal geometry and size. The hero, reference material and
    live optics share one atmosphere so the MAG reads as part of the page,
    never as a separate rectangular media panel. */
@@ -122,8 +122,6 @@ html body.living-architecture #hero .fx-reference-heading::before{
       linear-gradient(180deg,#01040c 0%,#020917 31%,#031a31 64%,#031324 80%,#010711 100%)!important;
   }
 
-  /* Stronger than the legacy ready-v1 stage rule. This is deliberately tied to
-     the mobile reference layout because that older rule also uses !important. */
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-grid,
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
     background:none!important;
@@ -171,6 +169,21 @@ html body.living-architecture #hero .fx-reference-heading::before{
 
 @media (min-width:901px) and (pointer:fine){
   html body.living-architecture #hero .hero-space{overflow:hidden!important;}
+
+  /* r158c: the old r154 mask used 75% radii, placing its transparent edge
+     outside the canvas. These 53% radii put the feather at the real canvas
+     boundary. The bright four crystal tips remain visible while low-energy
+     square-edge residue dissolves into the hero atmosphere. */
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-core-detail-r122,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-core-live-r147-layer{
+    -webkit-mask-image:radial-gradient(ellipse 53% 53% at 50% 50%,#000 0 78%,rgba(0,0,0,.98) 84%,rgba(0,0,0,.72) 91%,rgba(0,0,0,.28) 97%,transparent 100%)!important;
+    mask-image:radial-gradient(ellipse 53% 53% at 50% 50%,#000 0 78%,rgba(0,0,0,.98) 84%,rgba(0,0,0,.72) 91%,rgba(0,0,0,.28) 97%,transparent 100%)!important;
+    -webkit-mask-size:100% 100%!important;
+    mask-size:100% 100%!important;
+    -webkit-mask-repeat:no-repeat!important;
+    mask-repeat:no-repeat!important;
+  }
+
   html body.living-architecture #hero .fx-core-detail-r122{mix-blend-mode:screen!important;}
 }
 
