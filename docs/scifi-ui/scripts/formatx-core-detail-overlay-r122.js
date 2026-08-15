@@ -7,7 +7,7 @@ root.dataset.fxCoreDetailR122='booting';
 root.dataset.fxCoreReferenceTextureR130='loading';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const PARTS=Array.from({length:6},(_,i)=>`/scifi-ui/assets/reference-r130/part${i}.b64?v=20260815-reference-material-r131`);
+const PARTS=Array.from({length:6},(_,i)=>`/scifi-ui/assets/reference-r130/part${i}.b64?v=20260815-reference-material-r136`);
 
 async function loadReferenceBitmap(){
   const chunks=await Promise.all(PARTS.map(async url=>{
@@ -16,9 +16,8 @@ async function loadReferenceBitmap(){
     return (await r.text()).trim();
   }));
 
-  /* r131: two one-character transport defects were isolated by block hashes on the
-     live Worker asset path. Repair them before decoding so the reconstructed bytes
-     are exactly the original 49,204-byte WebP reference material. */
+  /* r131 repair retained: two one-character transport defects were isolated by
+     block hashes on the live Worker asset path. Repair before decoding. */
   chunks[0]=chunks[0].slice(0,754)+'n'+chunks[0].slice(754);
   chunks[4]=chunks[4].slice(0,10770)+chunks[4].slice(10771);
   const expected=[11000,11000,11000,11000,11000,10608];
@@ -54,12 +53,12 @@ function boot(attempt=0){
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;canvas.style.width=cssW+'px';canvas.style.height=cssH+'px';}
   }
 
-  function clearReferenceTitleBand(){
-    /* The supplied reference contains the same live section title near the bottom.
-       Remove only that baked text band so the real DOM title remains the single copy. */
-    ctx.save();ctx.globalCompositeOperation='destination-out';ctx.globalAlpha=1;
-    ctx.fillStyle='#000';ctx.fillRect(0,cssH*.888,cssW*.735,cssH*.078);
-    ctx.restore();
+  /* r136: do not erase the supplied title band. The previous broad destination-out
+     rectangle also erased the crystal's lower center tail. The bitmap heading is
+     now the visual heading; the semantic DOM heading stays in-flow but is visually
+     transparent in the final mobile lock. This preserves the supplied pixels. */
+  function preserveReferenceTitleBand(){
+    root.dataset.fxCoreReferenceHeadingR136='bitmap-source';
   }
 
   function drawReference(tx,ty,energy){
@@ -75,16 +74,16 @@ function boot(attempt=0){
     ctx.globalCompositeOperation='source-over';
     ctx.drawImage(bitmap,-cssW*.5,-cssH*.5,cssW,cssH);
     ctx.restore();
-    clearReferenceTitleBand();
+    preserveReferenceTitleBand();
 
     /* A very small counter-shifted copy gives pointer-driven glass refraction while
-       keeping the idle frame locked to the reference. */
+       keeping the idle frame locked to the supplied reference. */
     if(!reduced.matches&&(Math.abs(tx)+Math.abs(ty)>.006||energy>.42)){
       ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=clamp(.025+(energy-.30)*.035,.025,.075);
       ctx.translate(-tx*cssW*.018,ty*cssH*.014);
       ctx.drawImage(bitmap,0,0,cssW,cssH);
       ctx.restore();
-      clearReferenceTitleBand();
+      preserveReferenceTitleBand();
     }
   }
 
@@ -115,17 +114,17 @@ function boot(attempt=0){
     ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,cssW,cssH);
     if(bitmap){drawReference(lastTx,lastTy,lastEnergy);drawLiveOptics(lastTx,lastTy,lastEnergy);}
     root.dataset.fxCoreDetailEnergy=lastEnergy.toFixed(2);
-    root.dataset.fxCoreDetailFrame=bitmap?'reference-material-r131':failed?'reference-fallback-r131':'reference-loading-r131';
+    root.dataset.fxCoreDetailFrame=bitmap?'reference-material-r136':failed?'reference-fallback-r136':'reference-loading-r136';
     if(!raf)raf=requestAnimationFrame(render);
   }
 
   loadReferenceBitmap().then(b=>{
-    bitmap=b;root.dataset.fxCoreReferenceTextureR130='ready';root.dataset.fxCoreFacetMode='reference-material-r131';
-    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r131',mode:'reference-material-interactive'}}));
+    bitmap=b;root.dataset.fxCoreReferenceTextureR130='ready';root.dataset.fxCoreFacetMode='reference-material-r136';root.dataset.fxCoreReferenceHeadingR136='bitmap-source';
+    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r136',mode:'reference-material-interactive'}}));
     if(!raf&&visible){last=performance.now();raf=requestAnimationFrame(render);}
   }).catch(err=>{
-    failed=true;root.dataset.fxCoreReferenceTextureR130='failed';root.dataset.fxCoreFacetMode='native-webgl-fallback-r131';
-    console.warn('FormatX reference material r131 fallback',err);
+    failed=true;root.dataset.fxCoreReferenceTextureR130='failed';root.dataset.fxCoreFacetMode='native-webgl-fallback-r136';
+    console.warn('FormatX reference material r136 fallback',err);
   });
 
   const ro=new ResizeObserver(resize);ro.observe(stage);
