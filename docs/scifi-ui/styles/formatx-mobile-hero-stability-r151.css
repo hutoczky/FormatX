@@ -1,0 +1,179 @@
+/* r151 — mobile hero stability layer.
+   The approved MAG renderer is canvas/WebGL-based. No image/picture/embed belongs
+   inside .hero-space, so accidental/broken visual nodes are suppressed before
+   they can paint a white fallback surface. The crystal geometry is untouched. */
+.fx-mobile-download-r151{display:none}
+
+@media (max-width:900px),(pointer:coarse){
+  body.living-architecture #hero .hero-space{
+    background-color:#010610!important;
+  }
+
+  /* Defensive containment for stale/failed image fallbacks. The production MAG
+     is rendered by .fx-core-mobile-v55-canvas + .fx-core-detail-r122 canvases. */
+  #hero .hero-space img,
+  #hero .hero-space picture,
+  #hero .hero-space iframe,
+  #hero .hero-space object,
+  #hero .hero-space embed{
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    width:0!important;
+    height:0!important;
+    min-width:0!important;
+    min-height:0!important;
+    max-width:0!important;
+    max-height:0!important;
+    position:absolute!important;
+    inset:auto!important;
+    pointer-events:none!important;
+    background:transparent!important;
+  }
+
+  /* Keep every legitimate optical surface transparent so the dark cinematic
+     hero can never turn white if a late legacy rule arrives. */
+  #hero .fx-core-mobile-v55-stage,
+  #hero .fx-core-r112-stage,
+  #hero .fx-core-mobile-v55-canvas,
+  #hero .fx-core-r112-canvas,
+  #hero .fx-core-detail-r122,
+  #hero .fx-core-reference-tail-r143,
+  #hero .fx-core-live-r147-layer{
+    background-color:transparent!important;
+  }
+
+  #hero .fx-mobile-download-r150{display:none!important}
+
+  #hero .fx-mobile-download-r151{
+    display:block!important;
+    box-sizing:border-box!important;
+    position:relative!important;
+    z-index:32!important;
+    width:min(88%,680px)!important;
+    margin:0 auto 28px!important;
+    padding:18px!important;
+    border:1px solid rgba(101,225,255,.30)!important;
+    border-radius:22px!important;
+    background:
+      radial-gradient(circle at 12% 0%,rgba(59,216,255,.13),transparent 42%),
+      radial-gradient(circle at 92% 100%,rgba(129,72,255,.08),transparent 42%),
+      linear-gradient(145deg,rgba(5,22,34,.97),rgba(2,9,19,.99))!important;
+    box-shadow:
+      0 18px 52px rgba(0,0,0,.38),
+      inset 0 1px rgba(255,255,255,.045),
+      0 0 28px rgba(34,188,255,.07)!important;
+    overflow:hidden!important;
+    isolation:isolate!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+
+  #hero .fx-mobile-download-r151::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:-1;
+    pointer-events:none;
+    background:linear-gradient(108deg,transparent 0 58%,rgba(105,231,255,.09) 70%,transparent 84%);
+    transform:translateX(-54%);
+    animation:fx-r151-download-scan 6.4s ease-in-out infinite;
+  }
+
+  #hero .fx-mobile-download-head-r151{
+    display:grid!important;
+    gap:5px!important;
+    margin:0 0 15px!important;
+  }
+
+  #hero .fx-mobile-download-head-r151>span{
+    font-size:11px!important;
+    font-weight:800!important;
+    letter-spacing:.22em!important;
+    color:rgba(173,222,238,.78)!important;
+  }
+
+  #hero .fx-mobile-download-head-r151 h2{
+    margin:0!important;
+    color:#f3fbff!important;
+    font-size:clamp(22px,6.3vw,30px)!important;
+    line-height:1.04!important;
+    letter-spacing:-.035em!important;
+  }
+
+  #hero .fx-mobile-download-head-r151 p{
+    margin:3px 0 0!important;
+    max-width:42rem!important;
+    color:rgba(195,213,224,.78)!important;
+    font-size:13px!important;
+    line-height:1.48!important;
+  }
+
+  #hero .fx-mobile-download-actions-r151{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+  }
+
+  #hero .fx-mobile-download-r151 .button{
+    box-sizing:border-box!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    width:100%!important;
+    min-height:56px!important;
+    margin:0!important;
+    padding:14px 17px!important;
+    border-radius:15px!important;
+    font-size:14px!important;
+    font-weight:700!important;
+    line-height:1.25!important;
+    text-align:left!important;
+    white-space:normal!important;
+    text-decoration:none!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+  }
+
+  #hero .fx-mobile-download-r151 .button-solid{
+    border:1px solid rgba(104,235,255,.58)!important;
+    background:linear-gradient(115deg,rgba(20,181,224,.96),rgba(72,85,218,.94))!important;
+    box-shadow:0 10px 28px rgba(30,151,220,.25),inset 0 1px rgba(255,255,255,.19)!important;
+    color:#fff!important;
+  }
+
+  #hero .fx-mobile-download-r151 .button-line{
+    border:1px solid rgba(126,203,231,.32)!important;
+    background:rgba(8,25,38,.80)!important;
+    color:#e1f9ff!important;
+  }
+
+  #hero .fx-mobile-download-r151 .button i{
+    flex:0 0 auto!important;
+    margin-left:12px!important;
+    font-style:normal!important;
+  }
+
+  /* Explicit flow contract: heading -> download -> proof. */
+  #hero .fx-reference-heading{
+    margin-bottom:24px!important;
+  }
+  #hero .fx-mobile-download-r151 + .fx-reference-proof{
+    margin-top:0!important;
+  }
+}
+
+@keyframes fx-r151-download-scan{
+  0%,22%{transform:translateX(-64%);opacity:.14}
+  50%{opacity:.52}
+  78%,100%{transform:translateX(64%);opacity:.12}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #hero .fx-mobile-download-r151::before{animation:none!important}
+}
