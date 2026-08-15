@@ -27,8 +27,8 @@ jobs:
             const failed=[];
             page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));
             page.on('response',r=>{ if(r.status()>=400) failed.push({url:r.url(),status:r.status()}); });
-            await page.goto('https://formatxsuite.com/?r151diag='+Date.now(),{waitUntil:'networkidle',timeout:120000});
-            await page.waitForTimeout(4500);
+            await page.goto('https://formatxsuite.com/?r151diag='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
+            await page.waitForTimeout(8000);
             const data=await page.evaluate(()=>{
               const rect=e=>{const r=e.getBoundingClientRect();return {x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),bottom:+r.bottom.toFixed(1)};};
               const style=e=>{const s=getComputedStyle(e);return {display:s.display,visibility:s.visibility,opacity:s.opacity,position:s.position,zIndex:s.zIndex,background:s.background,backgroundColor:s.backgroundColor,overflow:s.overflow,filter:s.filter};};
