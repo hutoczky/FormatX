@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-15T19:35:00+02:00
-source_master=e72b7b8027df7ca50f6373adeb7375ed03269692
-purpose=activate r163 seamless heading bridge: preserve the approved crystal geometry, r160/r162 reference alpha integration and r161 continuous carrier while replacing the old near-black mobile heading guard with a gradient that resolves into the real page background tone, removing the last hard horizontal seam between the MAG and following content
+requested_at=2026-08-15T19:42:00+02:00
+source_master=917208a8f96c97e53caa61f42a18ad6d38688514
+purpose=activate r164 removal of the obsolete mobile reference-heading guard: preserve the approved crystal geometry/size, r160/r162 reference alpha integration, r161 continuous carrier and r158 heartbeat while eliminating the last legacy pseudo-element that created a hard dark strip between the MAG heading and the following page atmosphere
 interaction=preserve organic double lub-dub heartbeat plus slow breathing on PC and phone; pointer/mouse response on desktop; touch interaction and r144 gyroscope response on mobile; interaction increases reactor energy/glow without changing the approved silhouette; pause and prefers-reduced-motion remain respected
-verification=production candidate source/runtime/security validation; JavaScript syntax; r163 heartbeat seamless CSS cache; Worker tests; production build; custom-domain smoke; desktop/mobile continuous background; full-cycle heartbeat amplitude; pointer/touch/gyro interaction; WebGL glError=0 and render budget; glyph overlap zero; fresh mobile screenshot visual seam review
+verification=production candidate source/runtime/security validation; JavaScript syntax; r164 seamless CSS cache; Worker tests; production build; custom-domain smoke; desktop/mobile continuous background; full-cycle heartbeat amplitude; pointer/touch/gyro interaction; WebGL glError=0 and render budget; glyph overlap zero; fresh mobile screenshot and pixel-row seam review
