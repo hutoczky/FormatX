@@ -1,4 +1,4 @@
-name: One-shot publish r168 v2 multimodal living MAG
+name: One-shot publish r169 optics-led living MAG
 on:
   push:
     branches: [master]
@@ -12,34 +12,46 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Publish r168 v2 multimodal interaction cache
+      - name: Reduce crystal zoom and publish optics-led heartbeat cache
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import re
+
+          hb=Path('docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js')
+          s=hb.read_text()
+          oldx="const targetX=still?1:clamp(.995+(breath-.5)*.006+shapeBeat*.019+activity*.002,.991,1.025);"
+          oldy="const targetY=still?1:clamp(.993+(breath-.5)*.009+shapeBeat*.031+activity*.003,.987,1.039);"
+          newx="const targetX=still?1:clamp(1+(breath-.5)*.0012+shapeBeat*.0018+activity*.0004,.9988,1.0032);"
+          newy="const targetY=still?1:clamp(1+(breath-.5)*.0016+shapeBeat*.0024+activity*.0005,.9985,1.0040);"
+          if oldx in s:s=s.replace(oldx,newx,1)
+          elif newx not in s:raise SystemExit('heartbeat targetX token not found')
+          if oldy in s:s=s.replace(oldy,newy,1)
+          elif newy not in s:raise SystemExit('heartbeat targetY token not found')
+          s=s.replace("root.dataset.fxLivingShapePulseStateR167=still?'reduced-motion-static':'visible-four-tip-lub-dub';","root.dataset.fxLivingShapePulseStateR167=still?'reduced-motion-static':'micro-breath-optics-led';",1)
+          hb.write_text(s)
+
           index=Path('docs/scifi-ui/index.html')
           html=index.read_text()
-          css='./styles/formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics'
-          js='./scripts/formatx-living-energy-r168.js?v=20260815-r168-v2-multimodal&rev=20260815-visible-interaction'
-          html,n1=re.subn(r'\.\/styles\/formatx-living-energy-r168\.css\?[^"\']+',css,html,count=1)
-          html,n2=re.subn(r'\.\/scripts\/formatx-living-energy-r168\.js\?[^"\']+',js,html,count=1)
-          if n1!=1 or n2!=1: raise SystemExit(f'r168 asset URLs not found exactly once: css={n1} js={n2}')
+          old='formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless&rev=20260815-r168-living-energy'
+          new='formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless&rev=20260815-r169-optics-led-micro-scale'
+          if old in html:html=html.replace(old,new,1)
+          elif new not in html:raise SystemExit('heartbeat index cache token not found')
           index.write_text(html)
 
           validator=Path('.github/scripts/validate-real3d-core.cjs')
           v=validator.read_text()
-          v=re.sub(r'formatx-living-energy-r168\.css\?[^\'"\)]+','formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics',v)
-          v=re.sub(r'formatx-living-energy-r168\.js\?[^\'"\)]+','formatx-living-energy-r168.js?v=20260815-r168-v2-multimodal&rev=20260815-visible-interaction',v)
+          v=v.replace(old,new)
+          v=v.replace("'visible-four-tip-lub-dub'","'micro-breath-optics-led'")
           validator.write_text(v)
           PY
-          node --check docs/scifi-ui/scripts/formatx-living-energy-r168.js
           node --check docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js
+          node --check docs/scifi-ui/scripts/formatx-living-energy-r168.js
           node .github/scripts/validate-real3d-core.cjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
-          if git diff --cached --quiet; then echo 'r168 v2 cache already current'; exit 0; fi
-          git commit -m '[deploy-production] feat(mag): publish r168 v2 multimodal living interaction'
+          git add docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
+          if git diff --cached --quiet; then echo 'r169 optics-led cache already current'; exit 0; fi
+          git commit -m '[deploy-production] feat(mag): make heartbeat optics-led with micro scale'
           git push origin HEAD:master
