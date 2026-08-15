@@ -1,69 +1,145 @@
-/* r147 — preserve the approved r145 MAG appearance while adding live optical motion.
-   Geometry is intentionally untouched: animation/interactivity live in a screen-light layer.
-   The content below the MAG is given a larger safe lane so the crystal/tail never covers copy. */
+/* r147b — preserve the approved r145 MAG silhouette, but make the living motion clearly visible.
+   The crystal itself is not translated/rotated. Motion is an optical layer + controlled luminance pulse.
+   Mobile flow gets a real safe gap below the extended crystal tail before any text starts. */
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero{
-    padding-bottom:64px!important;
+    padding-bottom:76px!important;
     overflow:visible!important;
   }
 
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space{
     isolation:isolate!important;
+    overflow:visible!important;
   }
 
+  /* CSS fallback. JS measures the actual tail protrusion and overrides this margin
+     with an even safer value when the tail bridge is present. */
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
     top:0!important;
-    margin:16px 6% 26px!important;
-    z-index:21!important;
+    margin:64px 6% 26px!important;
+    z-index:24!important;
   }
 
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{
-    z-index:21!important;
-    margin:0 7% 42px 6%!important;
+    z-index:24!important;
+    margin:0 7% 46px 6%!important;
   }
 
-  /* Interactive light field only. It does not translate, rotate or scale the
-     approved crystal bitmap/canvas, so the r145 silhouette stays unchanged. */
-  html[data-fx-live-motion-r147="ready"] #hero .hero-space::after{
-    content:"";
+  /* Real DOM optical animation layer, injected by formatx-core-live-motion-r147.js. */
+  #hero .fx-core-live-r147-layer{
     position:absolute;
     inset:0;
-    z-index:9;
+    z-index:10;
+    overflow:visible;
     pointer-events:none;
-    background:
-      radial-gradient(circle at var(--fx-r147-light-x,50%) var(--fx-r147-light-y,48%),
-        rgba(255,255,255,.18) 0,
-        rgba(112,244,255,.105) 3.8%,
-        rgba(82,220,255,.060) 9%,
-        rgba(183,78,255,.038) 17%,
-        rgba(0,0,0,0) 34%),
-      radial-gradient(ellipse at 50% 52%,rgba(58,224,255,.030),transparent 48%);
     mix-blend-mode:screen;
-    opacity:var(--fx-r147-light-opacity,.34);
-    filter:blur(.2px);
-    will-change:opacity,background;
-    animation:fx-r147-breathe 4.8s ease-in-out infinite;
+    contain:layout style;
   }
 
+  #hero .fx-core-live-r147-glow,
+  #hero .fx-core-live-r147-orbit,
+  #hero .fx-core-live-r147-orbit-b,
+  #hero .fx-core-live-r147-flare{
+    position:absolute;
+    left:var(--fx-r147-light-x,50%);
+    top:var(--fx-r147-light-y,48%);
+    pointer-events:none;
+    transform-origin:50% 50%;
+    will-change:transform,opacity,filter,left,top;
+  }
+
+  #hero .fx-core-live-r147-glow{
+    width:clamp(170px,46vw,235px);
+    height:clamp(170px,46vw,235px);
+    border-radius:50%;
+    transform:translate(-50%,-50%) scale(var(--fx-r147-pulse-scale,1));
+    background:
+      radial-gradient(circle,
+        rgba(255,255,255,.34) 0 2%,
+        rgba(123,248,255,.24) 5%,
+        rgba(53,219,255,.14) 13%,
+        rgba(171,78,255,.085) 24%,
+        rgba(0,0,0,0) 55%);
+    filter:blur(1.1px);
+    opacity:var(--fx-r147-light-opacity,.56);
+    animation:fx-r147-core-pulse 2.35s ease-in-out infinite;
+  }
+
+  #hero .fx-core-live-r147-flare{
+    width:78%;
+    height:2px;
+    transform:translate(-50%,-50%) scaleX(var(--fx-r147-flare-scale,1));
+    background:linear-gradient(90deg,transparent,rgba(75,219,255,.10) 18%,rgba(210,252,255,.70) 49%,rgba(173,90,255,.22) 61%,transparent);
+    box-shadow:0 0 9px rgba(92,231,255,.46),0 0 22px rgba(73,193,255,.19);
+    opacity:var(--fx-r147-flare-opacity,.52);
+    animation:fx-r147-flare-breathe 2.35s ease-in-out infinite;
+  }
+
+  #hero .fx-core-live-r147-orbit,
+  #hero .fx-core-live-r147-orbit-b{
+    width:clamp(118px,32vw,164px);
+    height:clamp(118px,32vw,164px);
+    border-radius:50%;
+    border:1px solid rgba(86,231,255,.30);
+    border-left-color:rgba(228,249,255,.64);
+    border-right-color:rgba(174,79,255,.36);
+    box-shadow:0 0 12px rgba(77,222,255,.13),inset 0 0 14px rgba(109,230,255,.055);
+    opacity:var(--fx-r147-orbit-opacity,.48);
+  }
+
+  #hero .fx-core-live-r147-orbit{
+    transform:translate(-50%,-50%) rotate(0deg) scaleX(1.08) scaleY(.82);
+    animation:fx-r147-orbit-a 7.5s linear infinite;
+  }
+
+  #hero .fx-core-live-r147-orbit-b{
+    width:clamp(92px,25vw,130px);
+    height:clamp(92px,25vw,130px);
+    border-color:rgba(176,91,255,.26);
+    border-top-color:rgba(101,239,255,.48);
+    transform:translate(-50%,-50%) rotate(0deg) scaleX(.82) scaleY(1.10);
+    animation:fx-r147-orbit-b 10.5s linear infinite reverse;
+  }
+
+  /* The approved reference material stays geometrically fixed, but its emitted
+     light visibly breathes. Values are driven by JS and react to pointer/gyro. */
   html[data-fx-live-motion-r147="ready"] #hero .fx-core-detail-r122{
     will-change:filter;
-    filter:brightness(var(--fx-r147-brightness,1)) saturate(var(--fx-r147-saturation,1))!important;
+    filter:
+      brightness(var(--fx-r147-brightness,1.06))
+      saturate(var(--fx-r147-saturation,1.08))
+      drop-shadow(0 0 var(--fx-r147-shadow-blur,8px) rgba(69,224,255,var(--fx-r147-shadow-alpha,.18)))!important;
   }
 
-  html[data-fx-live-motion-paused-r147="true"] #hero .hero-space::after{
+  html[data-fx-live-motion-paused-r147="true"] #hero .fx-core-live-r147-glow,
+  html[data-fx-live-motion-paused-r147="true"] #hero .fx-core-live-r147-orbit,
+  html[data-fx-live-motion-paused-r147="true"] #hero .fx-core-live-r147-orbit-b,
+  html[data-fx-live-motion-paused-r147="true"] #hero .fx-core-live-r147-flare{
     animation-play-state:paused!important;
-    opacity:.18!important;
+    opacity:.16!important;
   }
 
-  @keyframes fx-r147-breathe{
-    0%,100%{opacity:.25}
-    50%{opacity:var(--fx-r147-light-opacity,.34)}
+  @keyframes fx-r147-core-pulse{
+    0%,100%{transform:translate(-50%,-50%) scale(calc(var(--fx-r147-pulse-scale,1) * .94));opacity:.34}
+    50%{transform:translate(-50%,-50%) scale(calc(var(--fx-r147-pulse-scale,1) * 1.07));opacity:var(--fx-r147-light-opacity,.66)}
+  }
+  @keyframes fx-r147-flare-breathe{
+    0%,100%{opacity:.28;filter:blur(.2px)}
+    50%{opacity:var(--fx-r147-flare-opacity,.62);filter:blur(.55px)}
+  }
+  @keyframes fx-r147-orbit-a{
+    from{transform:translate(-50%,-50%) rotate(0deg) scaleX(1.08) scaleY(.82)}
+    to{transform:translate(-50%,-50%) rotate(360deg) scaleX(1.08) scaleY(.82)}
+  }
+  @keyframes fx-r147-orbit-b{
+    from{transform:translate(-50%,-50%) rotate(0deg) scaleX(.82) scaleY(1.10)}
+    to{transform:translate(-50%,-50%) rotate(360deg) scaleX(.82) scaleY(1.10)}
   }
 }
 
 @media (max-width:430px){
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
-    margin-top:18px!important;
+    margin-top:68px!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{
     min-height:252px!important;
@@ -76,15 +152,18 @@
 
 @media (max-width:380px){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero{
-    padding-bottom:72px!important;
+    padding-bottom:84px!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{
-    margin-bottom:46px!important;
+    margin-bottom:50px!important;
   }
 }
 
 @media (prefers-reduced-motion:reduce){
-  html[data-fx-live-motion-r147="ready"] #hero .hero-space::after{
+  #hero .fx-core-live-r147-glow,
+  #hero .fx-core-live-r147-orbit,
+  #hero .fx-core-live-r147-orbit-b,
+  #hero .fx-core-live-r147-flare{
     animation:none!important;
     opacity:.18!important;
   }
