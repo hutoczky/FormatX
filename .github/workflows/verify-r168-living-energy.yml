@@ -62,7 +62,8 @@ jobs:
               }
               await route.continue();
             });
-            await page.goto(`${origin}/?verify=${encodeURIComponent(label)}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
+            await page.goto(`${origin}/?verify=${encodeURIComponent(label)}-${Date.now()}`,{waitUntil:'commit',timeout:15000});
+            await page.waitForSelector('#hero',{state:'attached',timeout:15000});
             await page.evaluate(label=>document.documentElement.dataset.fxVerifierLabel=label,label);
             return page;
           }
