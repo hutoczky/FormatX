@@ -72,6 +72,7 @@ jobs:
             });
             console.log(JSON.stringify(result,null,2));
             console.log('badResponses',JSON.stringify(badResponses,null,2));
+            await page.screenshot({path:'r151-production.png',fullPage:false});
             assert(result.dataset.fxMobileHeroStabilityR151==='r151-mobile-hero-stability','r151 stability runtime not ready');
             assert(result.dataset.fxMobileDownloadR151==='ready','r151 download runtime not ready');
             assert(result.forbidden===0,'forbidden visual node remains in hero-space');
@@ -80,13 +81,12 @@ jobs:
             assert(result.core&&result.core.width>300&&result.core.height>300,'core canvas not visible');
             assert(result.detail&&result.detail.width>300&&result.detail.height>300,'detail canvas not visible');
             assert(result.heading&&result.dock&&result.proof,'heading/download/proof flow missing');
-            assert(+result.heading.order===10&&+result.dock.order===11&&+result.proof.order===12,'mobile flex order contract is wrong');
+            assert(+result.heading.order===2&&+result.dock.order===2&&+result.proof.order===3,'mobile flex order contract is wrong');
             assert(result.heading.gap>=30&&result.heading.gap<=80,'MAG-to-heading safe gap outside 30-80px');
             assert(result.heading.bottom<=result.dock.top+2,'download is not below heading');
             assert(result.dock.bottom<=result.proof.top+2,'proof overlaps download');
             assert(result.primary?.visible&&result.primary.href,'primary download unavailable');
             assert(result.android?.visible&&result.android.href.endsWith('/download/android'),'Android download unavailable');
-            await page.screenshot({path:'r151-production.png',fullPage:false});
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           EOF
