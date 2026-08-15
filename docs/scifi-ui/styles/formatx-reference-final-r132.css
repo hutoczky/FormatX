@@ -1,4 +1,4 @@
-/* r137 — final mobile reference geometry/typography lock.
+/* r138 — final mobile reference geometry/typography lock.
    Loaded after legacy award layers so the supplied reference framing wins.
    Native WebGL and touch interaction remain live underneath. */
 @media (max-width:900px),(pointer:coarse){
@@ -98,11 +98,22 @@
     box-shadow:0 0 5px rgba(210,171,255,.55)!important;
   }
 
-  /* The semantic heading keeps its exact box for flow/accessibility, while the
-     reference bitmap supplies the visible title and uninterrupted crystal tail. */
-  html[data-fx-core-reference-heading-r136="bitmap-source"] #hero .fx-reference-heading{
-    opacity:0!important;
+  /* r138 reconstructs only the baked SMER fragment. The real DOM heading is
+     therefore visible again, at the supplied reference box, without cutting the
+     cyan tail underneath it. */
+  html[data-fx-core-reference-heading-r138="dom-visible-clean-reference"] #hero .fx-reference-heading{
+    opacity:1!important;
+    visibility:visible!important;
     pointer-events:none!important;
+  }
+
+  /* Remove the old host-bottom seam at ~462px. The reference compositor already
+     owns the continuous water field through the proof-card overlap. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage{
+    box-shadow:none!important;
+    border:0!important;
+    outline:0!important;
   }
 
   /* Target Android screenshot uses Roboto metrics. The explicit line breaks are
