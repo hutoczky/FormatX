@@ -1,0 +1,36 @@
+name: Debug r130 reference chunks
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/debug-r130-chunks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  locate-corruption:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Compare production chunks to source block hashes
+        shell: bash
+        run: |
+          node <<'NODE'
+          const crypto=require('node:crypto');
+          const expected={
+            0:["547b1080ce7adc05","df6219e9b7fb9b9f","eae5b72ff7b87656","dcbe922942033c00","1cfdac59930de30f","23d88c4c76efbb26","22f4c78b0fb07b52","bc63fa325ebe1998","8391a4c17d7eaf46","566098955989ce70","fe326c61fd9ee296","a9762e8c9e6e99ca","4494e49ba89fc464","dbecf6a62612ffe5","409464b77d03e57c","2e9d100601d96235","9145e28408f4f262","757c6c137f9dc5b0","75cfe5c499e549a4","b843753a1ae15113","3eda419378d77c57","8d65ec0408a4a664","86ec2367efffbca5","506d040710dce911","a54d463c1fd0121e","06e33d99f3ca41b9","6ba22c69c02370d5","cbd654b7016cfa98","ec7b4f77bfe7ca49","e8061c3d3df7d4b6","ce8da11d30d18b06","0ff33a095e4d942f","0c9b1273d4cfd4c8","597d156dc41550e6","3c0a4852f3b105f0","e3e71a72d2ffa289","0d05a8e3d8ed1967","a8d9a5113c124ab4","1430cc9fb47d5c6e","ecb51517cbc75426","de1471c3a6fd6178","274923b6e080a20d","4944f9588bc1c033","6e6fac9f0673f3b0","8382998fad3cd753","783acbd39361e1fe","78e6019c79b50927","17e13ad3fa74082f","2d39231c3967d1a2","74aa9282090a3e6c","4f02d62c20d0f8af","50d28f7413a14b61","4dfad82f8988e068","c0e0e4f68c07218e","28fee61d32b4ae7f","23491ae247c7d5a1","061cf01c70f72c3a","4e0d0b23b1b03bdb","239be548eec0e054","5596d9055e530257","62ce12b4bd4effa4","fa755c46b6b53756","830e0552c817b398","f632ec4fa4dbacaf","bceb44e6ffaf0469","f1499f4d68cf0d15","8ed8516ff2f4fdc1","fbb86f0bf11498bd","0be149b8e6a86649","df057272336461ca","4d08d16c7d945793","eebfeadd91b6eb4d","1c6ee615b8b34cd4","85035b0ded29fb5f","17bed4d73a5f1310","5f6d1514322a7d63","b05a4f807d85c9d3","2668f7643f9a5ad6","2723c2fbf281c321","b293bed2302c8a04","d5a057cec231e650","f90dffea0256628f","39bfeb9a07feafa9","72d20676f86dd468","086d06b76e631fb6","4d83df6af63d8377"],
+            4:["ef85cdb98fd3a985","6b2aabc859f0d53d","3933598b61e332bd","6699e4f00883a848","0d51ca395261953f","ea0b2a2163825a16","407e886ade5df9e3","651a446ee1a154ec","88bf4547a5635807","d0c8e1fe82d90636","21b62a116a512205","d8c5f970d7432eb1","6f39414e9e61f505","0b10af9b11550bda","977e04b596b25ced","6182f167ec855c40","6a1173c38ec0d893","c077b88359773b26","4953a9f6b35560cf","0f1e320ba78f13f9","35833bc2ec0fd343","150fe674c7eecf7d","31afda13dddca63e","b8adcb4cceb165d4","32ee61250291feb6","6c7fa3ea4c54b3e3","e3cd200e103a504a","d6642c8e1dd06812","38334da151e0d2f7","b3f87dbb91cf9031","8f58893a462c1a57","b6f2c7e418bdf7e0","e078e681ecef21ed","999f68aa3047a042","0578db0349be8416","02820b875eec2542","520cadd7adff42d3","94533a885509df2b","5d0f863dbc99d9ae","0419520428a7bffa","7ea6f0b56e4d5448","82307b7bbb5949f1","920504219813be12","a27ea36b32b42263","0eb350c9b49680df","8fa7b7b302ecd39a","0d88fec0e9598940","28c938bce777aa63","9453ff6344751eef","2b661285f0761aea","2e79d47ba986c647","74d19b455756ccff","e684be60e6dfc5ca","ecf57195d61bd4f9","3fcf4b0c511d5394","56ad54c090ba28f0","5a9f859a22847ede","7b82fdef7f679945","90c3fb7e0e1f05f5","dd0a45b93f4f5b20","04200bdce46660ac","6605c82e7a5b3c44","900a7d0fc1a17fac","8fce1dc5ac3ece59","1854816b2e9e4f3f","7bcaa1b6b06ee2c8","acb9d3100a70a41c","5eea2af3d07e77ea","d1e7518dea7f66ed","ca7ec16ffdccdbf6","1a6c6ecad4061833","69372d9cd49a86d4","7900f93e9b7e93f4","dce67f673da7208e","6775f65c9610c602","72ec3b70a28a9834","8b5cfe4136fe6aef","9f85f257d32d81d9","bd325250ae459432","bf997092713a2cdd","a1655e3023f85f76","4cf102a22e99b0dc","f5dbc107a9c13757","ecf74d71e60f5ffe","d129978883a83279","4104212929e60699"]
+          };
+          const hash=s=>crypto.createHash('sha256').update(s).digest('hex').slice(0,16);
+          (async()=>{
+            for(const idx of [0,4]){
+              const url=`https://formatxsuite.com/scifi-ui/assets/reference-r130/part${idx}.b64?diag=${Date.now()}`;
+              const r=await fetch(url,{cache:'no-store'}),s=(await r.text()).trim();
+              const actual=[];for(let i=0;i<s.length;i+=128)actual.push(hash(s.slice(i,i+128)));
+              const bad=[];for(let i=0;i<Math.max(actual.length,expected[idx].length);i++)if(actual[i]!==expected[idx][i])bad.push(i);
+              const first=bad[0]??-1,last=bad.at(-1)??-1;
+              console.log(JSON.stringify({idx,status:r.status,len:s.length,first,last,badCount:bad.length,actualBlocks:actual.length,expectedBlocks:expected[idx].length}));
+              if(first>=0){const start=Math.max(0,first*128-160),end=Math.min(s.length,(first+2)*128+160);console.log(`SERVER_WINDOW_${idx} ${start}:${end} ${s.slice(start,end)}`);}
+            }
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
