@@ -1,4 +1,4 @@
-/* r132 — final mobile reference geometry lock.
+/* r136 — final mobile reference geometry lock.
    Loaded after all legacy award layers so the supplied reference framing wins.
    The native WebGL mesh and touch interaction remain live underneath. */
 @media (max-width:900px),(pointer:coarse){
@@ -98,9 +98,14 @@
     box-shadow:0 0 5px rgba(210,171,255,.55)!important;
   }
 
-  /* Match the supplied proof-card line breaks. The Linux CI system font is a
-     little wider than Android's reference font, so compensate by 0.5px while
-     preserving the same visual line pitch. */
+  /* r136 keeps the semantic DOM heading in flow, but the supplied bitmap owns
+     the visible heading. This restores the crystal tail pixels that used to be
+     erased by the old title-band mask. */
+  html[data-fx-core-reference-heading-r136="bitmap-source"] #hero .fx-reference-heading{
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof h2{
     margin-bottom:26px!important;
   }
@@ -109,8 +114,8 @@
     width:100%!important;
     max-width:100%!important;
     padding-right:0!important;
-    font-size:14.5px!important;
-    line-height:1.88!important;
+    font-size:14px!important;
+    line-height:2!important;
     letter-spacing:-.005em!important;
   }
 
@@ -127,6 +132,7 @@
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof p{
     padding-right:70px!important;
     font-size:14px!important;
+    line-height:1.9!important;
   }
   html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
     transform:scaleY(1.042)!important;
