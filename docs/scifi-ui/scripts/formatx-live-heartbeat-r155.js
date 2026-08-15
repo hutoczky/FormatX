@@ -5,7 +5,7 @@ const root=document.documentElement;
    behavior to a double-beat living reactor and loads the seamless page integration. */
 const VERSION='js-reactive-heartbeat-r155';
 const MODE='r158-lub-dub-seamless-living';
-const SEAMLESS='/scifi-ui/styles/formatx-seamless-living-r158.css?v=20260815-r158b-mobile-transparent-stage';
+const SEAMLESS='/scifi-ui/styles/formatx-seamless-living-r158.css?v=20260815-r158c-desktop-edge-feather';
 if(root.dataset.fxLiveHeartbeatR155===VERSION&&root.dataset.fxLivingHeartbeatModeR158===MODE)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxLiveHeartbeatR155='audit-skip';root.dataset.fxLivingHeartbeatModeR158='audit-skip';return;}
 root.dataset.fxLiveHeartbeatR155='booting';
