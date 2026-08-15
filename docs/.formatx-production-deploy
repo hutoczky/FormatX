@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-15T18:06:00+02:00
-source_master=6fb9d81b4a700e3d705e527262bde7062b496e3b
-purpose=activate r158 cross-device living MAG integration: preserve the approved crystal geometry and size while removing the separate-panel feeling on desktop and mobile; blend the reference material and live optics into one continuous hero/page atmosphere with transparent legacy stages and screen-blended crystal material
+requested_at=2026-08-15T18:09:00+02:00
+source_master=86fc00240d2bba19cec233404018e5566fea4da8
+purpose=reverify the same r158 cross-device living MAG integration after making the heartbeat live gate phase-window safe; preserve the approved crystal geometry and size and keep the MAG blended into one continuous hero/page atmosphere on desktop and mobile
 interaction=organic double lub-dub heartbeat plus slow breathing on PC and phone; pointer/mouse interaction on desktop; touch interaction and existing r144 gyroscope response on mobile; interaction increases reactor energy/glow without changing the approved silhouette; pause and prefers-reduced-motion remain respected
-verification=production candidate source/runtime/security validation; JavaScript syntax; r158 seamless style and heartbeat contract; Worker tests; production build; custom-domain smoke; desktop 1600x1000 seamless blend/heartbeat/pointer live check; mobile 390x844 seamless blend/heartbeat/touch/gyro/proof flow check; WebGL render budget and screenshot capture
+verification=production candidate source/runtime/security validation; JavaScript syntax; r158 seamless style and heartbeat contract; Worker tests; production build; custom-domain smoke; desktop 1600x1000 seamless blend/heartbeat/pointer live check; mobile 390x844 seamless blend/heartbeat/touch/gyro/proof flow check; WebGL render budget and screenshot capture using phase-window-safe heartbeat assertions
