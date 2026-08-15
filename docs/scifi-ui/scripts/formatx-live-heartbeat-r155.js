@@ -2,19 +2,23 @@
 'use strict';
 const root=document.documentElement;
 /* Keep the public r155 identity for existing runtime contracts; r158 upgrades the
-   behavior to a double-beat living reactor and loads the seamless page integration. */
+   behavior to a double-beat living reactor and r167 applies that beat directly
+   to the visible crystal body's individual CSS scale on desktop and mobile. */
 const VERSION='js-reactive-heartbeat-r155';
 const MODE='r158-lub-dub-seamless-living';
+const SHAPE_MODE='r167-heartbeat-css-scale-four-tip';
 const SEAMLESS='/scifi-ui/styles/formatx-seamless-living-r158.css?v=20260815-r165-space-atmosphere-bridge';
-if(root.dataset.fxLiveHeartbeatR155===VERSION&&root.dataset.fxLivingHeartbeatModeR158===MODE)return;
-if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxLiveHeartbeatR155='audit-skip';root.dataset.fxLivingHeartbeatModeR158='audit-skip';return;}
+if(root.dataset.fxLiveHeartbeatR155===VERSION&&root.dataset.fxLivingHeartbeatModeR158===MODE&&root.dataset.fxLivingShapeModeR167===SHAPE_MODE)return;
+if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxLiveHeartbeatR155='audit-skip';root.dataset.fxLivingHeartbeatModeR158='audit-skip';root.dataset.fxLivingShapeModeR167='audit-skip';return;}
 root.dataset.fxLiveHeartbeatR155='booting';
 root.dataset.fxLivingHeartbeatModeR158='booting';
+root.dataset.fxLivingShapeModeR167='booting';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const gauss=(x,c,w)=>Math.exp(-Math.pow((x-c)/w,2));
-let host=null,layer=null,core=null,ring=null,wave=null,timer=0,seq=0,boost=0,lastInput=0;
+let host=null,layer=null,detail=null,core=null,ring=null,wave=null,timer=0,seq=0,boost=0,lastInput=0;
+let shapeX=1,shapeY=1;
 
 function ensureSeamless(){
   let link=document.querySelector('link[data-fx-seamless-living-r158]');
@@ -65,6 +69,7 @@ function ensure(){
   ensureSeamless();
   host=document.querySelector('#hero .hero-space');
   layer=document.querySelector('#hero .fx-core-live-r147-layer');
+  detail=document.querySelector('#hero .fx-core-detail-r122');
   if(!(host instanceof HTMLElement)||!(layer instanceof HTMLElement))return false;
   ensureStyle();
   core=layer.querySelector('.fx-r155-heartbeat-core');
@@ -83,6 +88,7 @@ function ensure(){
   }
   root.dataset.fxLiveHeartbeatR155=VERSION;
   root.dataset.fxLivingHeartbeatModeR158=MODE;
+  root.dataset.fxLivingShapeModeR167=SHAPE_MODE;
   return true;
 }
 
@@ -93,6 +99,30 @@ function pct(name,fallback){
 }
 function set(el,prop,value){if(el instanceof HTMLElement)el.style.setProperty(prop,value,'important');}
 
+function applyCrystalShapePulse(cycle,breath,activity,still){
+  if(!(detail instanceof HTMLElement))detail=document.querySelector('#hero .fx-core-detail-r122');
+  const shapeLub=still?0:gauss(cycle,.105,.082);
+  const shapeDub=still?0:gauss(cycle,.255,.098)*.72;
+  const shapeBeat=clamp(shapeLub+shapeDub*.86,0,1.16);
+  const targetX=still?1:clamp(.995+(breath-.5)*.006+shapeBeat*.019+activity*.002,.991,1.025);
+  const targetY=still?1:clamp(.993+(breath-.5)*.009+shapeBeat*.031+activity*.003,.987,1.039);
+  const kx=targetX>shapeX?.58:.16;
+  const ky=targetY>shapeY?.62:.145;
+  shapeX+=(targetX-shapeX)*kx;
+  shapeY+=(targetY-shapeY)*ky;
+  if(still){shapeX=1;shapeY=1;}
+  if(detail instanceof HTMLElement){
+    set(detail,'transform-origin','50% 50%');
+    set(detail,'scale',`${shapeX.toFixed(4)} ${shapeY.toFixed(4)}`);
+    detail.style.setProperty('--fx-r167-shape-x',shapeX.toFixed(4));
+    detail.style.setProperty('--fx-r167-shape-y',shapeY.toFixed(4));
+  }
+  root.dataset.fxLivingShapeScaleR167=`${shapeX.toFixed(4)},${shapeY.toFixed(4)}`;
+  root.dataset.fxLivingShapeEnvelopeR167=`${shapeLub.toFixed(3)},${shapeDub.toFixed(3)},${shapeBeat.toFixed(3)}`;
+  root.dataset.fxLivingShapePulseStateR167=still?'reduced-motion-static':'visible-four-tip-lub-dub';
+  root.dataset.fxLivingShapeScaleSupportR167=globalThis.CSS?.supports?.('scale','1 1')?'native-individual-scale':'canvas-fallback-r166c';
+}
+
 function tick(){
   if(!ensure())return;
   const now=performance.now(),paused=root.dataset.fxReferenceMotionPaused==='true',still=paused||reduced.matches;
@@ -100,7 +130,7 @@ function tick(){
   if(now-lastInput>110)boost*=.82;if(boost<.002)boost=0;
 
   /* Organic heartbeat: strong first contraction, softer second contraction,
-     plus a slow respiratory wave. The crystal silhouette itself remains fixed. */
+     plus a slow respiratory wave. r167 also drives the visible crystal body. */
   const cycle=still?0:(now%1380)/1380;
   const lub=still?.18:gauss(cycle,.105,.040);
   const dub=still?.10:gauss(cycle,.235,.052)*.64;
@@ -109,6 +139,8 @@ function tick(){
   const shimmer=still?.28:(.5+.5*Math.sin(now*.0067+1.45));
   const activity=clamp(energy*.46+boost*.58,0,1.35);
   const x=pct('--fx-r147-light-x',50),y=pct('--fx-r147-light-y',49);
+
+  applyCrystalShapePulse(cycle,breath,activity,still);
 
   const coreScale=.955+breath*.014+beat*.105+activity*.028;
   const ringScale=.925+breath*.020+lub*.205+dub*.135+activity*.038;
@@ -169,8 +201,8 @@ function tick(){
   root.dataset.fxLivingHeartbeatInteractionR158=boost>.04?'energized':'idle-living';
 }
 
-function start(){ensure();if(timer)return;tick();timer=setInterval(tick,50);root.dataset.fxLiveHeartbeatClockR155='50ms-interval';root.dataset.fxLivingHeartbeatModeR158=MODE;}
+function start(){ensure();if(timer)return;tick();timer=setInterval(tick,50);root.dataset.fxLiveHeartbeatClockR155='50ms-interval';root.dataset.fxLivingHeartbeatModeR158=MODE;root.dataset.fxLivingShapeModeR167=SHAPE_MODE;}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-const mo=new MutationObserver(()=>{if(!layer?.isConnected)ensure();});mo.observe(document.documentElement,{childList:true,subtree:true});
+const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected)ensure();});mo.observe(document.documentElement,{childList:true,subtree:true});
 addEventListener('pageshow',start,{passive:true});
 }());
