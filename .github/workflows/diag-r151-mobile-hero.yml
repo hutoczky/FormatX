@@ -18,7 +18,7 @@ jobs:
           npx playwright install --with-deps chromium >/dev/null 2>&1
       - name: Inspect production mobile hero
         run: |
-          cat > /tmp/diag.cjs <<'EOF'
+          cat > diag-r151.cjs <<'EOF'
           const { chromium } = require('playwright');
           (async()=>{
             const browser=await chromium.launch({headless:true});
@@ -43,14 +43,14 @@ jobs:
             console.log(JSON.stringify(data,null,2));
             console.log('=== FAILED REQUESTS ===');
             console.log(JSON.stringify(failed,null,2));
-            await page.screenshot({path:'/tmp/r151-live.png',fullPage:false});
+            await page.screenshot({path:'r151-live.png',fullPage:false});
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           EOF
-          node /tmp/diag.cjs
+          node diag-r151.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: r151-mobile-hero-diag
-          path: /tmp/r151-live.png
+          path: r151-live.png
           retention-days: 2
