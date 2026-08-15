@@ -1,0 +1,67 @@
+name: Verify r152 MAG click stability
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-r152-mag-click-stability.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile-click:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Verify live MAG stays centered after touch
+        run: |
+          cat > verify-r152.cjs <<'EOF'
+          const { chromium } = require('playwright');
+          const assert=(v,m)=>{if(!v)throw new Error(m)};
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:1,isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36'});
+            const page=await context.newPage();
+            await page.goto('https://formatxsuite.com/?verify_r152='+Date.now(),{waitUntil:'commit',timeout:30000});
+            await page.waitForSelector('#hero .fx-core-detail-r122',{timeout:20000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxClickStabilityStyleR152==='ready',{timeout:20000});
+            await page.waitForTimeout(2500);
+            const before=await page.evaluate(()=>{
+              const host=document.querySelector('#hero .hero-space');
+              const detail=document.querySelector('#hero .fx-core-detail-r122');
+              const orbit=document.querySelector('#hero .fx-core-live-r147-orbit');
+              const rr=e=>{const r=e.getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height,cx:r.left+r.width/2,cy:r.top+r.height/2}};
+              const cs=getComputedStyle(host);
+              return {scrollY,host:rr(host),detail:rr(detail),orbit:rr(orbit),x:cs.getPropertyValue('--fx-r147-light-x').trim(),y:cs.getPropertyValue('--fx-r147-light-y').trim()};
+            });
+            await page.touchscreen.tap(before.detail.left+35,before.detail.top+40);
+            await page.waitForTimeout(180);
+            const after=await page.evaluate(()=>{
+              const host=document.querySelector('#hero .hero-space');
+              const detail=document.querySelector('#hero .fx-core-detail-r122');
+              const orbit=document.querySelector('#hero .fx-core-live-r147-orbit');
+              const rr=e=>{const r=e.getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height,cx:r.left+r.width/2,cy:r.top+r.height/2}};
+              const cs=getComputedStyle(host);
+              return {scrollY,detail:rr(detail),orbit:rr(orbit),x:cs.getPropertyValue('--fx-r147-light-x').trim(),y:cs.getPropertyValue('--fx-r147-light-y').trim(),interaction:document.documentElement.dataset.fxLiveMotionInteractionR147||'',style:document.documentElement.dataset.fxClickStabilityStyleR152||''};
+            });
+            console.log(JSON.stringify({before,after},null,2));
+            assert(after.style==='ready','r152 CSS not ready');
+            assert(after.x==='50%'&&after.y==='49%','reactor CSS center moved after touch');
+            assert(Math.abs(after.orbit.cx-(after.detail.left+after.detail.width*.5))<4,'orbit jumped horizontally');
+            assert(Math.abs(after.orbit.cy-(after.detail.top+after.detail.height*.49))<4,'orbit jumped vertically');
+            assert(Math.abs(after.scrollY-before.scrollY)<2,'page jumped vertically on MAG touch');
+            assert(after.interaction.includes('active'),'touch interaction no longer activates MAG');
+            await page.screenshot({path:'r152-click-stable.png',fullPage:false});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          EOF
+          timeout 75s node verify-r152.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r152-click-stable-mobile
+          path: r152-click-stable.png
+          retention-days: 3
