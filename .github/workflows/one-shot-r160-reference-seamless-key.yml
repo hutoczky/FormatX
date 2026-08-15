@@ -1,0 +1,108 @@
+name: One-shot publish r160 seamless reference key
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r160-reference-seamless-key.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Apply cross-device reference alpha key and cache bust
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          detail=Path('docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js')
+          s=detail.read_text()
+          pattern=r'''  /\* r157 desktop-only luminance key\..*?  }else\{\n    root\.dataset\.fxCoreDesktopLumaKeyR157='mobile-bypass';\n  }\n'''
+          replacement=r'''  /* r160 cross-device seamless reference key.
+     The supplied reference carries a dark navy image field. Keep the bright
+     crystal, violet/cyan facets and water highlights, but progressively key
+     low-luminance pixels to alpha. Mobile uses a gentler curve; both devices
+     get additional edge attenuation so the source bitmap cannot read as a
+     rectangular media panel inside the living page. */
+  const desktopKey=matchMedia('(min-width:901px) and (pointer:fine)').matches;
+  let keyed=0,kept=0;
+  for(let i=0;i<d.length;i+=4){
+    const r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];
+    if(a===0)continue;
+    const peak=Math.max(r,g,b);
+    const lum=.2126*r+.7152*g+.0722*b;
+    const signal=Math.max(peak*.72+lum*.28,lum);
+    let f=1;
+    if(desktopKey){
+      if(signal<=24)f=0;
+      else if(signal<52)f=(signal-24)/28*.08;
+      else if(signal<80)f=.08+(signal-52)/28*.18;
+      else if(signal<112)f=.26+(signal-80)/32*.36;
+      else if(signal<150)f=.62+(signal-112)/38*.38;
+    }else{
+      if(signal<=16)f=0;
+      else if(signal<38)f=(signal-16)/22*.12;
+      else if(signal<62)f=.12+(signal-38)/24*.24;
+      else if(signal<92)f=.36+(signal-62)/30*.36;
+      else if(signal<126)f=.72+(signal-92)/34*.28;
+    }
+    const p=i>>2,px=p%w,py=(p/w)|0;
+    const nx=Math.abs(px/Math.max(1,w-1)-.5)*2;
+    const ny=Math.abs(py/Math.max(1,h-1)-.5)*2;
+    const edge=Math.pow(Math.max(nx,ny),2.2);
+    if(signal<155){
+      const edgeFloor=desktopKey?.16:.27;
+      const edgeStrength=desktopKey?.78:.68;
+      f*=clamp(1-edge*edgeStrength,edgeFloor,1);
+    }
+    if(f<.995)keyed++;else kept++;
+    d[i+3]=Math.round(a*clamp(f,0,1));
+  }
+  root.dataset.fxCoreDesktopLumaKeyR157=desktopKey?'applied':'mobile-applied-r160';
+  root.dataset.fxCoreDesktopLumaKeyStatsR157=`${keyed},${kept}`;
+  root.dataset.fxCoreReferenceKeyR160=desktopKey?'desktop-edge-alpha':'mobile-gentle-edge-alpha';
+'''
+          s2,n=re.subn(pattern,replacement,s,count=1,flags=re.S)
+          if n!=1:
+              raise SystemExit('r157 luminance key block not found exactly once')
+          s2=s2.replace("version:'r157',mode:'reference-material-interactive-desktop-key'","version:'r160',mode:'reference-material-interactive-seamless-key'")
+          s2=s2.replace("FormatX reference material r157 fallback","FormatX reference material r160 fallback")
+          detail.write_text(s2)
+
+          boot=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          b=boot.read_text()
+          old='formatx-core-detail-overlay-r122.js?v=20260815-r157-desktop-luma-key'
+          new='formatx-core-detail-overlay-r122.js?v=20260815-r160-cross-device-alpha-key'
+          if old in b:b=b.replace(old,new)
+          elif new not in b:raise SystemExit('detail cache token not found')
+          boot.write_text(b)
+
+          index=Path('docs/scifi-ui/index.html')
+          h=index.read_text()
+          h=re.sub(r'(formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=)[^"\']+',r'\g<1>20260815-r160-seamless-reference-key',h,count=1)
+          index.write_text(h)
+
+          validator=Path('.github/scripts/validate-real3d-core.cjs')
+          v=validator.read_text()
+          v=v.replace('formatx-core-detail-overlay-r122.js?v=20260815-r157-desktop-luma-key','formatx-core-detail-overlay-r122.js?v=20260815-r160-cross-device-alpha-key')
+          old_tokens="['fxCoreDesktopLumaKeyR157','desktopKey=matchMedia','signal<=20','signal<38','signal<58','signal<82','mobile-bypass','reference-material-interactive-desktop-key']"
+          new_tokens="['fxCoreDesktopLumaKeyR157','fxCoreReferenceKeyR160','desktopKey=matchMedia','signal<=24','signal<52','signal<80','signal<112','mobile-applied-r160','reference-material-interactive-seamless-key']"
+          if old_tokens in v:v=v.replace(old_tokens,new_tokens)
+          elif new_tokens not in v:raise SystemExit('validator detail token list not found')
+          v=v.replace('r158 seamless living heartbeat integrates the r157 MAG','r160 cross-device alpha key and r158 living heartbeat integrate the MAG')
+          validator.write_text(v)
+          PY
+          node --check docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node .github/scripts/validate-real3d-core.cjs
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
+          if git diff --cached --quiet; then echo 'r160 already current'; exit 0; fi
+          git commit -m '[deploy-production] feat(mag): publish r160 seamless reference alpha key'
+          git push origin HEAD:master
