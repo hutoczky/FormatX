@@ -1,4 +1,4 @@
-name: One-shot bump r144 interactive reference bootstrap cache
+name: One-shot bump r145 narrow-proof bootstrap cache
 on:
   push:
     branches: [master]
@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Bump production r144 interactive reference bootstrap cache key
+      - name: Bump production r145 narrow-proof bootstrap cache key
         shell: bash
         run: |
           set -euo pipefail
@@ -21,7 +21,7 @@ jobs:
           import re
           p = Path('docs/scifi-ui/index.html')
           s = p.read_text()
-          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-interactive-tail-r144'
+          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-narrow-proof-r145'
           if new in s:
               raise SystemExit(0)
           pat = r'\.\/scripts\/formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=[^"\']+'
@@ -37,5 +37,5 @@ jobs:
             echo 'cache key already current'
             exit 0
           fi
-          git commit -m '[deploy-production] feat(mag): publish r144 interactive tail bootstrap'
+          git commit -m '[deploy-production] fix(mobile): publish r145 narrow-proof bootstrap'
           git push origin HEAD:master
