@@ -1,8 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-15T22:39:00+02:00
-source_master=978802c66db16860ee635c75fbca2cf8a4009a62
-purpose=activate r172 on the accepted four-point crystal geometry and size: retain r171 continuous optical breathing, lub-dub light peaks and stronger interaction while publishing the fresh high-priority seamless runtime cache
-optical_life=stable 32ms monotonic reactor clock drives dual caustics, cyan-violet spectrum/refraction, two orbit rings, cross-flare, shockwave, six moving sparks and a direct expanding interaction burst; slow breathing continuously modulates flare, spectrum, refraction, brightness, saturation and cyan/violet glow without relying on visible crystal zoom
-interaction=desktop pointer/mouse and mobile touch plus existing r144 gyroscope remain active; pointer/touch shifts the optical source more strongly and click/touch injects a high-visibility expanding energy burst
-integration=mobile hero/stage carriers stay transparent; high-specificity runtime dissolve now starts at 58% of the hero-space and continues 72% deep, so the MAG atmosphere blends inside the lower crystal field into the operation heading/Public Proof rather than starting at the edge of a rectangular panel
-verification=production candidate source/runtime/security validation; JavaScript syntax; Worker/build/smoke; r169 optics-led compatibility gate; r168 desktop/mobile 390x844 and 412x915 live gate requiring advancing optical frames/orbits/dual-caustics, visible pointer/touch response, transparent carrier and mobile seam beginning before 80% with height above 40%
+requested_at=2026-08-16T00:43:00+02:00
+source_master=8012db4bcd795c1d738d586cb2f57f5b6969c67a
+purpose=activate r173 lifecycle recovery for the existing r172/r168 optical MAG without changing approved crystal geometry, size, material tuning or layout
+runtime_fix=if the r168 deferred script starts before the live optical layer exists, the MutationObserver now calls start() when the layer/detail appears or the timer is absent, so the 32ms optical reactor clock cannot remain stuck after a late mount
+cache=publish fresh r168 asset revision 20260816-r173-late-layer-start so production browsers do not retain the pre-fix lifecycle script
+interaction=preserve desktop pointer/mouse, mobile touch, existing r144 gyroscope, lub-dub heartbeat, dual caustics, spectrum/refraction, orbit rings, sparks, interaction burst and reduced-motion behavior
+integration=preserve r172 priority mobile seam and transparent carrier; no geometry/CSS optical tuning changed in this deploy
+verification=production candidate source/runtime/security validation; JavaScript syntax; Worker/build/smoke; then r168/r172 desktop and mobile live verification requiring advancing optical frame/heartbeat state, pointer/touch response, mobile seam and screenshot capture
