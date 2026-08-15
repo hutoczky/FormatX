@@ -1,4 +1,4 @@
-name: One-shot bump r99 crystal depth cache
+name: One-shot bump r143 reference bootstrap cache
 on:
   push:
     branches: [master]
@@ -12,21 +12,23 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Bump production faceted crystal r111 bootstrap cache key
+      - name: Bump production r143 reference bootstrap cache key
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p = Path('docs/scifi-ui/index.html')
           s = p.read_text()
-          old = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-dark-refractive-r110'
-          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260814-faceted-crystal-r111'
+          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-unclipped-tail-r143'
           if new in s:
               raise SystemExit(0)
-          if old not in s:
-              raise SystemExit('expected r110 dark refractive bootstrap cache key not found')
-          p.write_text(s.replace(old, new, 1))
+          pat = r'\.\/scripts\/formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=[^"\']+'
+          out, n = re.subn(pat, new, s, count=1)
+          if n != 1:
+              raise SystemExit('expected FormatX real3d bootstrap URL not found exactly once')
+          p.write_text(out)
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -35,5 +37,5 @@ jobs:
             echo 'cache key already current'
             exit 0
           fi
-          git commit -m '[deploy-production] fix(mag): publish faceted crystal r111 bootstrap'
+          git commit -m '[deploy-production] fix(mag): publish r143 unclipped reference bootstrap'
           git push origin HEAD:master
