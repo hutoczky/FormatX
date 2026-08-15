@@ -1,0 +1,67 @@
+name: One-shot r148b optical polish
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r148b-optical-polish.yml'
+permissions:
+  contents: write
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply r148b visual polish and cache bust
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          cssp=Path('docs/scifi-ui/styles/formatx-live-motion-r147.css')
+          css=cssp.read_text(encoding='utf-8')
+          css=css.replace('html[data-fx-live-motion-r147="ready"]', 'html[data-fx-live-motion-r147*="r148"]')
+          needle='    pointer-events:none!important;\n    z-index:-1!important;\n'
+          repl='    pointer-events:none!important;\n    opacity:0!important;\n    z-index:-1!important;\n'
+          if needle in css and 'opacity:0!important;\n    z-index:-1!important;' not in css:
+              css=css.replace(needle,repl,1)
+          cssp.write_text(css,encoding='utf-8')
+
+          jsp=Path('docs/scifi-ui/scripts/formatx-core-live-motion-r147.js')
+          js=jsp.read_text(encoding='utf-8')
+          old="""function ensureLayer(){
+  if(!(host instanceof HTMLElement))return null;
+  layer=host.querySelector('.fx-core-live-r147-layer');
+  if(layer instanceof HTMLElement&&layer.dataset.fxR148==='true')return layer;
+  if(layer instanceof HTMLElement)layer.remove();
+  layer=document.createElement('div');
+"""
+          new="""function ensureLayer(){
+  if(!(host instanceof HTMLElement))return null;
+  const all=[...document.querySelectorAll('#hero .fx-core-live-r147-layer')];
+  const keep=all.find(el=>el instanceof HTMLElement&&el.parentElement===host&&el.dataset.fxR148==='true')||null;
+  for(const el of all)if(el!==keep)el.remove();
+  if(keep instanceof HTMLElement){layer=keep;return layer;}
+  layer=document.createElement('div');
+"""
+          if old not in js and new not in js:
+              raise SystemExit('ensureLayer contract not found')
+          js=js.replace(old,new)
+          jsp.write_text(js,encoding='utf-8')
+
+          bootp=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          boot=bootp.read_text(encoding='utf-8').replace('20260815-spectacular-reactor-safe-lane-r148','20260815-spectacular-reactor-safe-lane-r148b')
+          bootp.write_text(boot,encoding='utf-8')
+
+          indexp=Path('docs/scifi-ui/index.html')
+          index=indexp.read_text(encoding='utf-8').replace('rev=20260815-spectacular-reactor-safe-lane-r148','rev=20260815-spectacular-reactor-safe-lane-r148b')
+          indexp.write_text(index,encoding='utf-8')
+          PY
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/styles/formatx-live-motion-r147.css docs/scifi-ui/scripts/formatx-core-live-motion-r147.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html
+          git commit -m '[deploy-production] fix(mag): r148b apply crystal luminance, dedupe optics and fully hide legacy copy'
+          git push origin HEAD:master
