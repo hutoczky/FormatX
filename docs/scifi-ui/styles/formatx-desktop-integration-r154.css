@@ -1,7 +1,8 @@
-/* r154d — desktop aspect + seamless hero integration.
+/* r154e — desktop aspect + seamless hero integration.
    Desktop keeps the supplied 412x410 crystal aspect. r157 removes the dark
-   source-background pixels at canvas level; this layer finishes the integration
-   with source-edge feathering and a modest contrast key. Mobile is untouched. */
+   reference-bitmap background at canvas level. r154e also disables the legacy
+   stage pseudo-elements that painted a separate perspective grid rectangle.
+   Mobile is intentionally untouched. */
 
 @media (min-width:901px) and (pointer:fine){
   html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space{
@@ -11,14 +12,28 @@
 
   html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space::before{
     content:""!important;position:absolute!important;inset:-16% -18%!important;border-radius:50%!important;
-    background:radial-gradient(ellipse at 50% 48%,rgba(18,91,137,.18) 0%,rgba(8,56,92,.12) 31%,rgba(4,31,56,.055) 51%,rgba(1,12,24,.018) 66%,transparent 79%)!important;
-    filter:blur(28px)!important;opacity:.82!important;pointer-events:none!important;
+    background:radial-gradient(ellipse at 50% 48%,rgba(18,91,137,.15) 0%,rgba(8,56,92,.09) 31%,rgba(4,31,56,.035) 51%,rgba(1,12,24,.012) 66%,transparent 79%)!important;
+    filter:blur(30px)!important;opacity:.74!important;pointer-events:none!important;
   }
 
   html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-stage,
-  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage{
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-rayglass-r91-stage{
     background:transparent!important;background-image:none!important;background-color:transparent!important;
     border:0!important;outline:0!important;box-shadow:none!important;filter:none!important;
+  }
+
+  /* Remove legacy r91/r109 floor grid + duplicate reactor crosshair on desktop.
+     r153/r155 now own the live reactor/orbits, so these old pseudo-elements only
+     create a rectangular panel and duplicate light. */
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-rayglass-r91-stage::before,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-rayglass-r91-stage::after,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-stage::before,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-stage::after,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage::before,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage::after{
+    content:none!important;display:none!important;background:none!important;background-image:none!important;
+    opacity:0!important;box-shadow:none!important;filter:none!important;transform:none!important;
   }
 
   html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-detail-r122{
