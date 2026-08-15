@@ -19,7 +19,7 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Install Playwright Chromium
         run: |
@@ -38,16 +38,16 @@ jobs:
 
           async function navigate(page,url){
             let last;
-            for(let i=1;i<=4;i++){
+            for(let i=1;i<=2;i++){
               try{
-                await page.goto(url,{waitUntil:'commit',timeout:35000});
-                await page.waitForFunction(()=>document.readyState!=='loading'&&!!document.querySelector('#hero'),null,{timeout:45000});
+                await page.goto(url,{waitUntil:'commit',timeout:30000});
+                await page.waitForFunction(()=>document.readyState!=='loading'&&!!document.querySelector('#hero'),null,{timeout:30000});
                 return;
               }catch(e){
                 last=e;
                 console.warn(`navigation attempt ${i} failed: ${e.message}`);
                 try{await page.goto('about:blank',{waitUntil:'commit',timeout:5000})}catch(_){ }
-                await page.waitForTimeout(1200*i);
+                await page.waitForTimeout(1000*i);
               }
             }
             throw last;
