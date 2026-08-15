@@ -28,6 +28,8 @@
     clip-path:inset(50%)!important;
     white-space:nowrap!important;
     border:0!important;
+    display:none!important;
+    visibility:hidden!important;
     pointer-events:none!important;
     opacity:0!important;
     z-index:-1!important;

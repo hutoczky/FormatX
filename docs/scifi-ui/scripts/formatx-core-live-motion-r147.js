@@ -1,14 +1,14 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r145-centered-optical-reactor-r149';
+const VERSION='r145-centered-optical-reactor-r149b';
 if(root.dataset.fxLiveMotionR147===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxLiveMotionR147='audit-skip';return;}
 root.dataset.fxLiveMotionR147='booting';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const imp=(el,prop,value)=>{if(el instanceof HTMLElement&&el.style.getPropertyValue(prop)!==value)el.style.setProperty(prop,value,'important');};
+const imp=(el,prop,value)=>{if(!(el instanceof HTMLElement))return;const current=el.style.getPropertyValue(prop),priority=el.style.getPropertyPriority(prop);if(current!==value||priority!=='important')el.style.setProperty(prop,value,'important');};
 let host=null,detail=null,layer=null,raf=0,last=performance.now(),visible=true;
 let sx=0,sy=0,se=.34,manualX=0,manualY=0,manualUntil=0;
 let lastLayoutAt=0;
@@ -61,6 +61,7 @@ function hideLegacyHeroVisuals(){
     imp(copy,'margin','-1px');imp(copy,'padding','0px');
     imp(copy,'overflow','hidden');imp(copy,'clip','rect(0px, 0px, 0px, 0px)');
     imp(copy,'clip-path','inset(50%)');imp(copy,'white-space','nowrap');
+    imp(copy,'display','none');imp(copy,'visibility','hidden');
     imp(copy,'pointer-events','none');imp(copy,'opacity','0');imp(copy,'z-index','-1');
   }
   hero.querySelectorAll('.scroll-cue,.hero-label,.hero-ring,.fx-immersive-launch,.fx-organism-map').forEach(el=>{
@@ -100,6 +101,7 @@ function applyLayout(force=false){
   syncLayerGeometry();
   const hero=document.getElementById('hero');
   const space=hero?.querySelector('.hero-space');
+  const core=hero?.querySelector('.fx-core-detail-r122');
   const tail=hero?.querySelector('.fx-core-reference-tail-r143');
   const heading=hero?.querySelector('.fx-reference-heading');
   const proof=hero?.querySelector('.fx-reference-proof');
@@ -107,20 +109,38 @@ function applyLayout(force=false){
   if(!(hero instanceof HTMLElement)||!(space instanceof HTMLElement))return;
 
   if(innerWidth<=900){
-    const sr=space.getBoundingClientRect();
-    const tr=tail instanceof HTMLElement?tail.getBoundingClientRect():null;
-    const protrusion=Math.max(0,(tr?.bottom||sr.bottom)-sr.bottom);
     const clearGap=innerWidth<=380?50:innerWidth<=430?44:40;
-    const marginTop=Math.ceil(protrusion+clearGap);
-
     imp(hero,'padding-bottom',innerWidth<=380?'56px':innerWidth<=430?'52px':'48px');
     imp(hero,'overflow','visible');
+
+    let finalGap=clearGap;
+    let visualBottom=space.getBoundingClientRect().bottom;
+    if(core instanceof HTMLElement)visualBottom=Math.max(visualBottom,core.getBoundingClientRect().bottom);
+    if(tail instanceof HTMLElement&&getComputedStyle(tail).display!=='none')visualBottom=Math.max(visualBottom,tail.getBoundingClientRect().bottom);
+
     if(heading instanceof HTMLElement){
       imp(heading,'top','0px');
-      imp(heading,'margin',`${marginTop}px 6% 24px`);
       imp(heading,'z-index','28');
       imp(heading,'position','relative');
+
+      let hr=heading.getBoundingClientRect();
+      let physicalGap=hr.top-visualBottom;
+      const currentMargin=parseFloat(getComputedStyle(heading).marginTop)||0;
+      const correctedMargin=clamp(currentMargin+(clearGap-physicalGap),0,340);
+      imp(heading,'margin',`${Math.ceil(correctedMargin)}px 6% 24px`);
+      hr=heading.getBoundingClientRect();
+      physicalGap=hr.top-visualBottom;
+
+      if(Math.abs(physicalGap-clearGap)>1.5){
+        const secondMargin=parseFloat(getComputedStyle(heading).marginTop)||correctedMargin;
+        const second=clamp(secondMargin+(clearGap-physicalGap),0,340);
+        imp(heading,'margin',`${Math.ceil(second)}px 6% 24px`);
+        hr=heading.getBoundingClientRect();
+        physicalGap=hr.top-visualBottom;
+      }
+      finalGap=physicalGap;
     }
+
     if(proof instanceof HTMLElement){
       imp(proof,'margin',innerWidth<=380?'0 7% 38px 6%':'0 7% 34px 6%');
       imp(proof,'z-index','28');
@@ -128,12 +148,10 @@ function applyLayout(force=false){
     }
     if(live instanceof HTMLElement&&innerWidth<=430){imp(live,'top','auto');imp(live,'bottom','18px');}
 
-    const hr=heading instanceof HTMLElement?heading.getBoundingClientRect():null;
-    const tailBottom=tr?.bottom||sr.bottom;
-    const actualGap=hr?hr.top-tailBottom:marginTop-protrusion;
-    root.dataset.fxLiveSafeLaneR147='active-r149';
-    root.dataset.fxLiveSafeGapR147=actualGap.toFixed(1)+'px';
-    root.dataset.fxLiveTailProtrusionR147=protrusion.toFixed(1)+'px';
+    root.dataset.fxLiveSafeLaneR147='active-r149b';
+    root.dataset.fxLiveSafeGapR147=finalGap.toFixed(1)+'px';
+    root.dataset.fxLiveVisualBottomR149=visualBottom.toFixed(1)+'px';
+    root.dataset.fxLiveSafeLaneMethodR149='physical-rect-reconcile';
   }else if(String(root.dataset.fxLiveSafeLaneR147||'').startsWith('active')){
     hero.style.removeProperty('padding-bottom');hero.style.removeProperty('overflow');
     for(const el of [heading,proof,live])if(el instanceof HTMLElement){for(const prop of ['top','bottom','margin','z-index','min-height','position'])el.style.removeProperty(prop);}
@@ -159,14 +177,14 @@ function activate(event){
   pointerTarget(event);
   pulse();
   se=Math.max(se,1.20);
-  root.dataset.fxLiveMotionInteractionR147='active-r149';
+  root.dataset.fxLiveMotionInteractionR147='active-r149b';
 }
 
 function bind(){
   if(!find())return false;
   ensureLayer();syncLayerGeometry();
-  if(host.dataset.fxLiveMotionBoundR147==='r149')return true;
-  host.dataset.fxLiveMotionBoundR147='r149';
+  if(host.dataset.fxLiveMotionBoundR147==='r149b')return true;
+  host.dataset.fxLiveMotionBoundR147='r149b';
   host.addEventListener('pointerdown',activate,{passive:true});
   host.addEventListener('pointermove',pointerTarget,{passive:true});
   host.addEventListener('touchstart',activate,{passive:true});
