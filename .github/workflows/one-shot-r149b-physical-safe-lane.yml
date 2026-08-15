@@ -4,6 +4,7 @@ on:
     branches: [master]
     paths:
       - '.github/workflows/one-shot-r149b-physical-safe-lane.yml'
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -14,148 +15,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Reconcile physical MAG clearance and hard-hide legacy mobile copy
+      - name: Apply r149b patch
+        run: python3 .github/scripts/patch-r149b.py
+      - name: Publish patch
         shell: bash
         run: |
           set -euo pipefail
-          python3 <<'PY'
-          from pathlib import Path
-
-          jsp = Path('docs/scifi-ui/scripts/formatx-core-live-motion-r147.js')
-          js = jsp.read_text(encoding='utf-8')
-          js = js.replace("const VERSION='r145-centered-optical-reactor-r149';", "const VERSION='r145-centered-optical-reactor-r149b';")
-          js = js.replace(
-              "const imp=(el,prop,value)=>{if(el instanceof HTMLElement&&el.style.getPropertyValue(prop)!==value)el.style.setProperty(prop,value,'important');};",
-              "const imp=(el,prop,value)=>{if(!(el instanceof HTMLElement))return;const current=el.style.getPropertyValue(prop),priority=el.style.getPropertyPriority(prop);if(current!==value||priority!=='important')el.style.setProperty(prop,value,'important');};"
-          )
-          old_hide = """    imp(copy,'pointer-events','none');imp(copy,'opacity','0');imp(copy,'z-index','-1');
-  }
-"""
-          new_hide = """    imp(copy,'display','none');imp(copy,'visibility','hidden');
-    imp(copy,'pointer-events','none');imp(copy,'opacity','0');imp(copy,'z-index','-1');
-  }
-"""
-          if old_hide not in js and new_hide not in js:
-              raise SystemExit('legacy copy hide contract not found')
-          js = js.replace(old_hide, new_hide)
-
-          start = js.index('function applyLayout(force=false){')
-          end = js.index('\nfunction pulse(){', start)
-          replacement = r'''function applyLayout(force=false){
-  const now=performance.now();
-  if(!force&&now-lastLayoutAt<180)return;
-  lastLayoutAt=now;
-  hideLegacyHeroVisuals();
-  syncLayerGeometry();
-  const hero=document.getElementById('hero');
-  const space=hero?.querySelector('.hero-space');
-  const core=hero?.querySelector('.fx-core-detail-r122');
-  const tail=hero?.querySelector('.fx-core-reference-tail-r143');
-  const heading=hero?.querySelector('.fx-reference-heading');
-  const proof=hero?.querySelector('.fx-reference-proof');
-  const live=proof?.querySelector('.fx-reference-liveos');
-  if(!(hero instanceof HTMLElement)||!(space instanceof HTMLElement))return;
-
-  if(innerWidth<=900){
-    const clearGap=innerWidth<=380?50:innerWidth<=430?44:40;
-    imp(hero,'padding-bottom',innerWidth<=380?'56px':innerWidth<=430?'52px':'48px');
-    imp(hero,'overflow','visible');
-
-    let finalGap=clearGap;
-    let visualBottom=space.getBoundingClientRect().bottom;
-    if(core instanceof HTMLElement)visualBottom=Math.max(visualBottom,core.getBoundingClientRect().bottom);
-    if(tail instanceof HTMLElement&&getComputedStyle(tail).display!=='none')visualBottom=Math.max(visualBottom,tail.getBoundingClientRect().bottom);
-
-    if(heading instanceof HTMLElement){
-      imp(heading,'top','0px');
-      imp(heading,'z-index','28');
-      imp(heading,'position','relative');
-
-      /* Grid rows and the absolute tail do not share a normal-flow baseline.
-         Reconcile the ACTUAL rendered gap instead of guessing from protrusion. */
-      let hr=heading.getBoundingClientRect();
-      let physicalGap=hr.top-visualBottom;
-      const currentMargin=parseFloat(getComputedStyle(heading).marginTop)||0;
-      const correctedMargin=clamp(currentMargin+(clearGap-physicalGap),0,340);
-      imp(heading,'margin',`${Math.ceil(correctedMargin)}px 6% 24px`);
-      hr=heading.getBoundingClientRect();
-      physicalGap=hr.top-visualBottom;
-
-      if(Math.abs(physicalGap-clearGap)>1.5){
-        const secondMargin=parseFloat(getComputedStyle(heading).marginTop)||correctedMargin;
-        const second=clamp(secondMargin+(clearGap-physicalGap),0,340);
-        imp(heading,'margin',`${Math.ceil(second)}px 6% 24px`);
-        hr=heading.getBoundingClientRect();
-        physicalGap=hr.top-visualBottom;
-      }
-      finalGap=physicalGap;
-    }
-
-    if(proof instanceof HTMLElement){
-      imp(proof,'margin',innerWidth<=380?'0 7% 38px 6%':'0 7% 34px 6%');
-      imp(proof,'z-index','28');
-      if(innerWidth<=430)imp(proof,'min-height','252px');
-    }
-    if(live instanceof HTMLElement&&innerWidth<=430){imp(live,'top','auto');imp(live,'bottom','18px');}
-
-    root.dataset.fxLiveSafeLaneR147='active-r149b';
-    root.dataset.fxLiveSafeGapR147=finalGap.toFixed(1)+'px';
-    root.dataset.fxLiveVisualBottomR149=visualBottom.toFixed(1)+'px';
-    root.dataset.fxLiveSafeLaneMethodR149='physical-rect-reconcile';
-  }else if(String(root.dataset.fxLiveSafeLaneR147||'').startsWith('active')){
-    hero.style.removeProperty('padding-bottom');hero.style.removeProperty('overflow');
-    for(const el of [heading,proof,live])if(el instanceof HTMLElement){for(const prop of ['top','bottom','margin','z-index','min-height','position'])el.style.removeProperty(prop);}
-    root.dataset.fxLiveSafeLaneR147='desktop';
-  }
-}
-'''
-          js = js[:start] + replacement + js[end:]
-          js = js.replace("root.dataset.fxLiveMotionInteractionR147='active-r149';", "root.dataset.fxLiveMotionInteractionR147='active-r149b';")
-          js = js.replace("if(host.dataset.fxLiveMotionBoundR147==='r149')return true;", "if(host.dataset.fxLiveMotionBoundR147==='r149b')return true;")
-          js = js.replace("host.dataset.fxLiveMotionBoundR147='r149';", "host.dataset.fxLiveMotionBoundR147='r149b';")
-          jsp.write_text(js, encoding='utf-8')
-
-          cssp = Path('docs/scifi-ui/styles/formatx-live-motion-r147.css')
-          css = cssp.read_text(encoding='utf-8')
-          needle = """    border:0!important;
-    pointer-events:none!important;
-    opacity:0!important;
-"""
-          repl = """    border:0!important;
-    display:none!important;
-    visibility:hidden!important;
-    pointer-events:none!important;
-    opacity:0!important;
-"""
-          if needle not in css and repl not in css:
-              raise SystemExit('mobile copy CSS contract not found')
-          css = css.replace(needle, repl, 1)
-          cssp.write_text(css, encoding='utf-8')
-
-          bootp = Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
-          boot = bootp.read_text(encoding='utf-8')
-          boot = boot.replace('luminous-interactive-r149', 'luminous-interactive-r149b')
-          boot = boot.replace('centered-optics-safe-lane-r149', 'centered-optics-safe-lane-r149b')
-          boot = boot.replace("ready-r149';", "ready-r149b';")
-          boot = boot.replace("failed-r149';", "failed-r149b';")
-          bootp.write_text(boot, encoding='utf-8')
-
-          indexp = Path('docs/scifi-ui/index.html')
-          index = indexp.read_text(encoding='utf-8').replace('rev=20260815-centered-optics-safe-lane-r149','rev=20260815-centered-optics-safe-lane-r149b')
-          indexp.write_text(index, encoding='utf-8')
-
-          checks = {
-              'js': (js, ['r149b', 'physical-rect-reconcile', "getPropertyPriority(prop)", "display','none"]),
-              'css': (css, ['display:none!important', 'visibility:hidden!important']),
-              'boot': (boot, ['centered-optics-safe-lane-r149b', 'luminous-interactive-r149b']),
-              'index': (index, ['centered-optics-safe-lane-r149b'])
-          }
-          for name,(text,needles) in checks.items():
-              missing=[n for n in needles if n not in text]
-              if missing: raise SystemExit(f'{name} missing: {missing}')
-          PY
           git config user.name 'Games Tech'
           git config user.email 'hutoczky@users.noreply.github.com'
           git add docs/scifi-ui/scripts/formatx-core-live-motion-r147.js docs/scifi-ui/styles/formatx-live-motion-r147.css docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html
-          git commit -m '[deploy-production] fix(mag): r149b reconcile physical clearance and hard-hide legacy copy'
+          if git diff --cached --quiet; then
+            echo 'r149b patch already applied.'
+            exit 0
+          fi
+          git commit -m '[deploy-production] fix(mag): r149b physical clearance and hidden legacy copy'
           git push origin HEAD:master
