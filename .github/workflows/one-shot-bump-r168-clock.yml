@@ -18,7 +18,6 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-
           index=Path('docs/scifi-ui/index.html')
           html=index.read_text()
           old='formatx-living-energy-r168.js?v=20260815-r168-v2-multimodal&rev=20260815-visible-interaction'
@@ -28,23 +27,15 @@ jobs:
           elif new not in html:
               raise SystemExit('r168 index cache token not found')
           index.write_text(html)
-
           validator=Path('.github/scripts/validate-real3d-core.cjs')
-          v=validator.read_text()
-          v=v.replace(old,new)
+          v=validator.read_text().replace(old,new)
           validator.write_text(v)
-
-          verifier=Path('.github/workflows/verify-r168-living-energy.yml')
-          q=verifier.read_text()
-          q=q.replace("r.fxLivingEnergyClockR168==='requestAnimationFrame-v2'","r.fxLivingEnergyClockR168==='32ms-optical-reactor-v3'")
-          q=q.replace("assert.equal(a.clock,'requestAnimationFrame-v2')","assert.equal(a.clock,'32ms-optical-reactor-v3')")
-          verifier.write_text(q)
           PY
           node --check docs/scifi-ui/scripts/formatx-living-energy-r168.js
           node .github/scripts/validate-real3d-core.cjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs .github/workflows/verify-r168-living-energy.yml
+          git add docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
           if git diff --cached --quiet; then echo 'r168 monotonic cache already current'; exit 0; fi
           git commit -m '[deploy-production] fix(mag): publish monotonic r168 optical clock'
           git push origin HEAD:master
