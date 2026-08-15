@@ -1,4 +1,6 @@
-/* r122 — procedural detail pass above the true WebGL mesh. No raster reference asset. */
+/* r123 — measured silhouette correction for the procedural detail pass.
+   The 412x680 live capture was ~4% too narrow and ~10% too short vertically versus
+   the supplied reference. Scale only the visual layers; flow geometry stays locked. */
 .fx-core-detail-r122{
   position:absolute;
   inset:0;
@@ -9,7 +11,8 @@
   pointer-events:none;
   mix-blend-mode:screen;
   opacity:.98;
-  transform:translateZ(0);
+  transform-origin:50% 50%;
+  transform:translateY(1.8%) scaleX(1.045) scaleY(1.105) translateZ(0);
 }
 html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage:before{
   clip-path:none!important;
@@ -22,11 +25,17 @@ html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage:bef
 }
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
-    filter:brightness(1.06) contrast(1.30) saturate(1.92)
-      drop-shadow(0 0 2px rgba(239,255,255,.62))
-      drop-shadow(0 0 10px rgba(42,231,255,.46))
-      drop-shadow(0 0 25px rgba(42,149,255,.27))
-      drop-shadow(0 0 42px rgba(159,56,255,.24))!important;
+    transform-origin:50% 50%!important;
+    transform:translateY(1.8%) scaleX(1.047) scaleY(1.40)!important;
+    filter:brightness(1.07) contrast(1.31) saturate(1.96)
+      drop-shadow(0 0 2px rgba(239,255,255,.64))
+      drop-shadow(0 0 10px rgba(42,231,255,.48))
+      drop-shadow(0 0 25px rgba(42,149,255,.29))
+      drop-shadow(0 0 42px rgba(159,56,255,.25))!important;
   }
+}
+@media (max-width:380px){
+  .fx-core-detail-r122{transform:translateY(1.5%) scaleX(1.035) scaleY(1.085) translateZ(0)}
+  html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{transform:translateY(1.5%) scaleX(1.035) scaleY(1.36)!important}
 }
 @media (prefers-reduced-motion:reduce){.fx-core-detail-r122{opacity:.92}}
