@@ -1,7 +1,8 @@
 FormatX production deployment marker
-requested_at=2026-08-15T22:26:00+02:00
-source_master=294d19d7ff0eb9b40f6d799088c40bfceb6fe865
-purpose=activate the final optics-led living MAG state: preserve accepted four-point geometry and size, keep r169 crystal-body movement at micro-breathing amplitude, and drive visible life through r168 v2 dual caustics, cyan-violet spectrum/refraction, two orbit rings, cross-flare, reactor shockwave, six moving sparks and direct expanding interaction burst
-interaction=use the new monotonic 32ms optical reactor clock so orbit/caustic phases visibly advance even when requestAnimationFrame is throttled; desktop pointer/mouse and mobile touch plus existing r144 gyroscope remain active; pointer/touch moves the optical source and click/touch injects an immediate energy burst
-mobile_integration=hero and stage carriers remain transparent; the lower atmosphere overlaps the lower MAG region and continues into the operation heading and Public Proof so the object reads as part of the page instead of a separate panel
-verification=production candidate source/runtime/security validation; JavaScript syntax; r168/r169 cache contract; Worker tests; production build; custom-domain smoke; dedicated desktop 1600x1000 plus mobile 390x844 and 412x915 live verifier requiring monotonic optical frame advance, orbit/dual-caustic motion, spectrum changes, pointer/touch burst, gyro continuity, transparent stage and seamless lower gradient
+requested_at=2026-08-15T22:28:00+02:00
+source_master=5e9bf5f07b57303ceabd7d98075863e07fda8c75
+purpose=activate the current r170 optics-led living MAG including the fresh monotonic r168 v3 browser cache; preserve accepted four-point crystal geometry and size and keep r169 body movement at micro-breathing amplitude
+optical_life=run dual caustics, cyan-violet spectrum/refraction, two orbit rings, cross-flare, shockwave, six moving sparks and direct expanding interaction burst from the stable 32ms optical reactor clock; idle lub-dub heartbeat changes light, color, refraction and waves rather than obvious zoom
+interaction=desktop pointer/mouse and mobile touch plus existing r144 gyroscope remain active; pointer/touch shifts the optical source and click/touch injects a high-visibility energy burst
+integration=hero and stage carriers remain transparent and the atmospheric bridge continues into the operation heading/Public Proof so the MAG reads as part of the page rather than a separate panel
+verification=production candidate, JavaScript syntax, Worker/build/smoke; dedicated r168 live gate must show advancing optical frame plus rotating orbit/dual-caustic values and pointer/touch burst on desktop 1600x1000 and mobile 390x844 + 412x915; r169 compatibility gate must confirm micro-scale crystal movement and changing optics
