@@ -1,4 +1,4 @@
-name: Verify r158 seamless living MAG
+name: Verify r158b living seamless MAG
 
 on:
   push:
@@ -26,24 +26,214 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Verify live r158 desktop and mobile MAG
+
+      - name: Verify full-cycle heartbeat seamless blend and interaction
         run: |
-          cat > check-r158.cjs <<'JS'
-          const {chromium}=require('playwright');const fs=require('node:fs'),assert=require('node:assert/strict');const origin='https://formatxsuite.com';
-          async function beat(page){return page.evaluate(()=>{const r=document.documentElement.dataset,c=document.querySelector('#hero .fx-r155-heartbeat-core'),g=c?getComputedStyle(c):null;return{ready:r.fxLiveHeartbeatR155||'',mode:r.fxLivingHeartbeatModeR158||'',seamless:r.fxSeamlessLivingR158||'',tick:Number(r.fxLiveHeartbeatTickR155||0),phase:Number(r.fxLiveHeartbeatPhaseR155||0),position:r.fxLiveHeartbeatPositionR155||'',energy:Number(r.fxLiveHeartbeatEnergyR155||0),paused:r.fxLiveHeartbeatPausedR155||'',beat:r.fxLivingHeartbeatBeatR158||'',transform:c?.style.transform||'',opacity:Number(c?.style.opacity||g?.opacity||0)}})}
-          async function glyphOverlap(page){return page.evaluate(()=>{const p=document.querySelector('#hero .fx-reference-proof p'),b=document.querySelector('#hero .fx-reference-liveos');if(!p||!b)return -1;const bb=b.getBoundingClientRect(),w=document.createTreeWalker(p,NodeFilter.SHOW_TEXT);let n,count=0;while((n=w.nextNode()))for(let i=0;i<n.length;i++){const r=document.createRange();r.setStart(n,i);r.setEnd(n,i+1);for(const x of r.getClientRects())if(x.width>.1&&x.height>.1&&x.right>bb.left+.5&&x.left<bb.right-.5&&x.bottom>bb.top+.5&&x.top<bb.bottom-.5)count++;}return count})}
-          async function stableShot(page,path){await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true';dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused:true,source:'r158-ci-capture'}}));});await page.waitForTimeout(90);await page.screenshot({path,fullPage:false,animations:'disabled',caret:'hide',timeout:120000});}
-          async function desktop(browser){const context=await browser.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'}),page=await context.newPage();await page.goto(`${origin}/?verify=r158-desktop-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});await page.waitForFunction(()=>String(document.documentElement.dataset.fxCoreReal3dBootstrap||'').includes('r157-cross-device-final')&&document.documentElement.dataset.fxLiveHeartbeatR155==='js-reactive-heartbeat-r155'&&document.documentElement.dataset.fxLivingHeartbeatModeR158==='r158-lub-dub-seamless-living'&&document.documentElement.dataset.fxSeamlessLivingR158==='ready'&&document.documentElement.dataset.fxDesktopIntegrationStyleR154==='ready'&&document.documentElement.dataset.fxCoreDesktopLumaKeyR157==='applied',null,{timeout:60000});await page.waitForTimeout(350);const state=await page.evaluate(()=>{const root=document.documentElement,stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage'),detail=document.querySelector('#hero .fx-core-detail-r122'),native=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r112-canvas'),layer=document.querySelector('#hero .fx-core-live-r147-layer');if(!stage||!detail||!native||!layer)throw new Error('desktop MAG nodes missing');const d=detail.getBoundingClientRect(),l=layer.getBoundingClientRect(),ds=getComputedStyle(detail),ss=getComputedStyle(stage),ns=getComputedStyle(native),before=getComputedStyle(stage,'::before'),after=getComputedStyle(stage,'::after');return{bootstrap:root.dataset.fxCoreReal3dBootstrap,seamless:root.dataset.fxSeamlessLivingR158,luma:root.dataset.fxCoreDesktopLumaKeyR157,lumaStats:root.dataset.fxCoreDesktopLumaKeyStatsR157||'',detail:[d.x,d.y,d.width,d.height],layer:[l.x,l.y,l.width,l.height],ratio:d.width/d.height,mix:ds.mixBlendMode,filter:ds.filter,stageBackground:ss.backgroundImage,nativeOpacity:Number(ns.opacity),pseudoBefore:{display:before.display,content:before.content,opacity:before.opacity,background:before.backgroundImage},pseudoAfter:{display:after.display,content:after.content,opacity:after.opacity,background:after.backgroundImage},renderMs:Number(root.dataset.fxCoreRenderMs||Infinity)}});const b1=await beat(page);await page.waitForTimeout(360);const b2=await beat(page);const box=await page.locator('#hero .hero-space').boundingBox();if(box){await page.mouse.move(box.x+box.width*.72,box.y+box.height*.38);await page.mouse.down();await page.waitForTimeout(100);await page.mouse.up();await page.waitForTimeout(180)}const b3=await beat(page);console.log('DESKTOP R158',JSON.stringify({state,b1,b2,b3},null,2));assert.equal(state.seamless,'ready');assert.equal(state.luma,'applied');assert.ok(state.lumaStats.includes(','));assert.ok(Math.abs(state.ratio-(412/410))<.035);assert.ok(state.detail[2]>=420&&state.detail[2]<=760);assert.ok(Math.abs(state.layer[2]-state.detail[2])<3&&Math.abs(state.layer[3]-state.detail[3])<3);assert.equal(state.mix,'screen');assert.ok(state.filter.includes('brightness('));assert.equal(state.stageBackground,'none');assert.ok(state.nativeOpacity<=.02);for(const p of [state.pseudoBefore,state.pseudoAfter])assert.ok(p.display==='none'||p.content==='none'||Number(p.opacity)===0,`legacy stage pseudo still visible ${JSON.stringify(p)}`);assert.ok(state.renderMs<16.67);assert.equal(b1.ready,'js-reactive-heartbeat-r155');assert.equal(b1.mode,'r158-lub-dub-seamless-living');assert.equal(b1.seamless,'ready');assert.ok(b2.tick>=b1.tick+4);assert.ok(b1.beat!==b2.beat||b1.transform!==b2.transform);assert.notEqual(b1.transform,b2.transform);assert.equal(b1.paused,'false');assert.ok(b3.tick>b2.tick);assert.ok(b3.position!==b1.position||b3.energy>b1.energy);await stableShot(page,'/tmp/r158-desktop.png');await context.close();}
-          async function mobile(browser){const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'}),page=await context.newPage();await page.goto(`${origin}/?verify=r158-mobile-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&String(document.documentElement.dataset.fxCoreReal3dBootstrap||'').includes('r157-cross-device-final')&&document.documentElement.dataset.fxLiveHeartbeatR155==='js-reactive-heartbeat-r155'&&document.documentElement.dataset.fxLivingHeartbeatModeR158==='r158-lub-dub-seamless-living'&&document.documentElement.dataset.fxSeamlessLivingR158==='ready'&&document.documentElement.dataset.fxMobileHeroStabilityR151==='r156-mobile-proof-first-stability'&&document.documentElement.dataset.fxCoreReferenceTextureR130==='ready',null,{timeout:60000});await page.waitForTimeout(250);const initial=await page.evaluate(()=>{const root=document.documentElement,detail=document.querySelector('#hero .fx-core-detail-r122'),stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage'),heading=document.querySelector('#hero .fx-reference-heading'),proof=document.querySelector('#hero .fx-reference-proof'),dock=document.querySelector('#hero .fx-mobile-download-r151'),d=detail?.getBoundingClientRect(),ds=detail?getComputedStyle(detail):null,ss=stage?getComputedStyle(stage):null,box=e=>{const r=e?.getBoundingClientRect();return r?{top:r.top,bottom:r.bottom,order:Number(getComputedStyle(e).order)}:null};return{layout:root.dataset.fxMobileReferenceLayout,seamless:root.dataset.fxSeamlessLivingR158,luma:root.dataset.fxCoreDesktopLumaKeyR157,placement:root.dataset.fxMobileDownloadPlacementR151,detail:[d?.width||0,d?.height||0],mix:ds?.mixBlendMode||'',stageBackground:ss?.backgroundImage||'',heading:box(heading),proof:box(proof),dock:box(dock),paused:root.dataset.fxReferenceMotionPaused,motion:root.dataset.fxCoreMotionR144||'',gyro:root.dataset.fxCoreGyroLoadR144||'',renderMs:Number(root.dataset.fxCoreRenderMs||Infinity)}});const b1=await beat(page);await page.waitForTimeout(310);const b2=await beat(page);await page.touchscreen.tap(300,300);await page.waitForTimeout(180);const b3=await beat(page);const covered=await glyphOverlap(page);console.log('MOBILE R158',JSON.stringify({initial,b1,b2,b3,covered},null,2));assert.equal(initial.layout,'ready-v1');assert.equal(initial.seamless,'ready');assert.notEqual(initial.luma,'applied','desktop luminance key leaked into mobile');assert.equal(initial.placement,'heading-proof-download');assert.equal(initial.mix,'screen');assert.equal(initial.stageBackground,'none');assert.ok(initial.detail[0]>=360);assert.ok(initial.heading&&initial.proof&&initial.dock);assert.equal(initial.heading.order,2);assert.equal(initial.proof.order,3);assert.equal(initial.dock.order,4);assert.ok(initial.heading.bottom<=initial.proof.top+3);assert.ok(initial.proof.bottom<=initial.dock.top+3);assert.equal(initial.paused,'false');assert.ok(initial.motion.includes('breathing-pointer-touch-gyro'));assert.equal(initial.gyro,'ready');assert.ok(initial.renderMs<16.67);assert.equal(covered,0);assert.equal(b1.ready,'js-reactive-heartbeat-r155');assert.equal(b1.mode,'r158-lub-dub-seamless-living');assert.ok(b2.tick>=b1.tick+3);assert.ok(b1.beat!==b2.beat||b1.transform!==b2.transform);assert.notEqual(b1.transform,b2.transform);assert.ok(b3.tick>b2.tick);assert.ok(b3.energy>=b2.energy);await stableShot(page,'/tmp/r158-mobile.png');await context.close();}
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await desktop(browser);await mobile(browser)}finally{await browser.close()}for(const f of ['/tmp/r158-desktop.png','/tmp/r158-mobile.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS: r158 seamless living MAG is integrated with the page and heartbeat/interactions work on desktop and mobile.')})().catch(e=>{console.error(e);process.exit(1)});
+          cat > check-r158b.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const origin='https://formatxsuite.com';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+          function scaleOf(t=''){
+            const m=String(t).match(/scale\(([-\d.]+)\)/);
+            return m?Number(m[1]):NaN;
+          }
+
+          async function heartbeat(page){
+            return page.evaluate(()=>{
+              const r=document.documentElement.dataset;
+              const c=document.querySelector('#hero .fx-r155-heartbeat-core');
+              return {
+                tick:Number(r.fxLiveHeartbeatTickR155||0),
+                phase:Number(r.fxLiveHeartbeatPhaseR155||0),
+                beat:r.fxLivingHeartbeatBeatR158||'',
+                position:r.fxLiveHeartbeatPositionR155||'',
+                energy:Number(r.fxLiveHeartbeatEnergyR155||0),
+                transform:c?.style.transform||'',
+                opacity:Number(c?.style.opacity||0),
+                paused:r.fxLiveHeartbeatPausedR155||'',
+                mode:r.fxLivingHeartbeatModeR158||'',
+                seamless:r.fxSeamlessLivingR158||''
+              };
+            });
+          }
+
+          async function sampleCycle(page){
+            const out=[];
+            for(let i=0;i<20;i++){
+              out.push(await heartbeat(page));
+              await page.waitForTimeout(90);
+            }
+            const scales=out.map(v=>scaleOf(v.transform)).filter(Number.isFinite);
+            const op=out.map(v=>v.opacity).filter(Number.isFinite);
+            const phases=out.map(v=>v.phase).filter(Number.isFinite);
+            return {
+              samples:out,
+              scaleMin:Math.min(...scales),scaleMax:Math.max(...scales),
+              opacityMin:Math.min(...op),opacityMax:Math.max(...op),
+              phaseMax:Math.max(...phases),
+              tickDelta:out.at(-1).tick-out[0].tick
+            };
+          }
+
+          async function glyphOverlap(page){
+            return page.evaluate(()=>{
+              const p=document.querySelector('#hero .fx-reference-proof p');
+              const b=document.querySelector('#hero .fx-reference-liveos');
+              if(!p||!b)return -1;
+              const bb=b.getBoundingClientRect(),w=document.createTreeWalker(p,NodeFilter.SHOW_TEXT);
+              let n,count=0;
+              while((n=w.nextNode()))for(let i=0;i<n.length;i++){
+                const r=document.createRange();r.setStart(n,i);r.setEnd(n,i+1);
+                for(const x of r.getClientRects())if(x.width>.1&&x.height>.1&&x.right>bb.left+.5&&x.left<bb.right-.5&&x.bottom>bb.top+.5&&x.top<bb.bottom-.5)count++;
+              }
+              return count;
+            });
+          }
+
+          async function capture(context,page,path){
+            await page.evaluate(()=>{
+              document.documentElement.dataset.fxReferenceMotionPaused='true';
+              dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused:true,source:'r158b-ci-capture'}}));
+            });
+            await page.waitForTimeout(100);
+            const cdp=await context.newCDPSession(page);
+            const shot=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});
+            fs.writeFileSync(path,Buffer.from(shot.data,'base64'));
+            assert.ok(fs.statSync(path).size>10000,path);
+          }
+
+          async function commonState(page){
+            return page.evaluate(()=>{
+              const root=document.documentElement;
+              const stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage');
+              const detail=document.querySelector('#hero .fx-core-detail-r122');
+              const canvas=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r112-canvas');
+              const layer=document.querySelector('#hero .fx-core-live-r147-layer');
+              const gl=canvas?.getContext('webgl2')||canvas?.getContext('webgl');
+              const d=detail?.getBoundingClientRect(),l=layer?.getBoundingClientRect();
+              return {
+                bootstrap:root.dataset.fxCoreReal3dBootstrap||'',
+                mode:root.dataset.fxLivingHeartbeatModeR158||'',
+                seamless:root.dataset.fxSeamlessLivingR158||'',
+                stageBackground:stage?getComputedStyle(stage).backgroundImage:'missing',
+                detailMix:detail?getComputedStyle(detail).mixBlendMode:'',
+                detail:d?[d.x,d.y,d.width,d.height]:null,
+                layer:l?[l.x,l.y,l.width,l.height]:null,
+                glError:gl?.getError(),
+                renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),
+                paused:root.dataset.fxReferenceMotionPaused||'',
+                motion:root.dataset.fxCoreMotionR144||'',
+                gyro:root.dataset.fxCoreGyroLoadR144||'',
+                luma:root.dataset.fxCoreDesktopLumaKeyR157||''
+              };
+            });
+          }
+
+          function assertHeartbeat(cycle,label){
+            console.log(label+' HEARTBEAT',JSON.stringify({
+              scaleMin:cycle.scaleMin,scaleMax:cycle.scaleMax,
+              opacityMin:cycle.opacityMin,opacityMax:cycle.opacityMax,
+              phaseMax:cycle.phaseMax,tickDelta:cycle.tickDelta
+            }));
+            assert.ok(cycle.tickDelta>=25,`${label}: heartbeat clock did not advance`);
+            assert.ok(cycle.phaseMax>.16,`${label}: no lub-dub pulse peak captured`);
+            assert.ok(cycle.scaleMax-cycle.scaleMin>.035,`${label}: visible pulse scale amplitude too small`);
+            assert.ok(cycle.opacityMax-cycle.opacityMin>.10,`${label}: visible pulse opacity amplitude too small`);
+          }
+
+          async function desktop(browser){
+            const context=await browser.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'});
+            const page=await context.newPage();
+            await page.goto(`${origin}/?verify=r158b-desktop-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>{
+              const r=document.documentElement.dataset;
+              return String(r.fxCoreReal3dBootstrap||'').includes('r157-cross-device-final')&&
+                r.fxLiveHeartbeatR155==='js-reactive-heartbeat-r155'&&
+                r.fxLivingHeartbeatModeR158==='r158-lub-dub-seamless-living'&&
+                r.fxSeamlessLivingR158==='ready'&&r.fxCoreDesktopLumaKeyR157==='applied';
+            },null,{timeout:60000});
+            await page.waitForTimeout(250);
+            const state=await commonState(page);
+            const cycle=await sampleCycle(page);
+            assert.equal(state.seamless,'ready');
+            assert.equal(state.stageBackground,'none');
+            assert.equal(state.detailMix,'screen');
+            assert.equal(state.luma,'applied');
+            assert.equal(state.glError,0);
+            assert.ok(state.renderMs<16.67,JSON.stringify(state));
+            assert.ok(state.detail&&state.layer&&Math.abs(state.detail[2]-state.layer[2])<3&&Math.abs(state.detail[3]-state.layer[3])<3);
+            assertHeartbeat(cycle,'DESKTOP');
+            const before=await heartbeat(page);
+            const box=await page.locator('#hero .hero-space').boundingBox();
+            if(box){
+              await page.mouse.move(box.x+box.width*.76,box.y+box.height*.34);
+              await page.mouse.down();await page.waitForTimeout(100);await page.mouse.up();
+            }
+            await page.waitForTimeout(220);
+            const after=await heartbeat(page);
+            assert.ok(after.position!==before.position||after.energy>before.energy+.02,JSON.stringify({before,after}));
+            await capture(context,page,'/tmp/r158b-desktop.png');
+            await context.close();
+          }
+
+          async function mobile(browser){
+            const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
+            const page=await context.newPage();
+            await page.goto(`${origin}/?verify=r158b-mobile-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>{
+              const r=document.documentElement.dataset;
+              return r.fxMobileReferenceLayout==='ready-v1'&&
+                String(r.fxCoreReal3dBootstrap||'').includes('r157-cross-device-final')&&
+                r.fxLiveHeartbeatR155==='js-reactive-heartbeat-r155'&&
+                r.fxLivingHeartbeatModeR158==='r158-lub-dub-seamless-living'&&
+                r.fxSeamlessLivingR158==='ready'&&
+                r.fxMobileHeroStabilityR151==='r156-mobile-proof-first-stability';
+            },null,{timeout:60000});
+            await page.waitForTimeout(250);
+            const state=await commonState(page);
+            const order=await page.evaluate(()=>{
+              const q=s=>document.querySelector(s),o=e=>e?Number(getComputedStyle(e).order):null,b=e=>{const r=e?.getBoundingClientRect();return r?{top:r.top,bottom:r.bottom}:null};
+              const h=q('#hero .fx-reference-heading'),p=q('#hero .fx-reference-proof'),d=q('#hero .fx-mobile-download-r151');
+              return {orders:[o(h),o(p),o(d)],heading:b(h),proof:b(p),dock:b(d)};
+            });
+            const cycle=await sampleCycle(page);
+            assert.equal(state.seamless,'ready');
+            assert.equal(state.stageBackground,'none','legacy mobile stage panel is still visible');
+            assert.equal(state.detailMix,'screen');
+            assert.notEqual(state.luma,'applied');
+            assert.equal(state.glError,0);
+            assert.ok(state.renderMs<16.67,JSON.stringify(state));
+            assert.ok(state.motion.includes('breathing-pointer-touch-gyro'));
+            assert.equal(state.gyro,'ready');
+            assert.deepEqual(order.orders,[2,3,4]);
+            assert.ok(order.heading.bottom<=order.proof.top+3&&order.proof.bottom<=order.dock.top+3,JSON.stringify(order));
+            assert.equal(await glyphOverlap(page),0);
+            assertHeartbeat(cycle,'MOBILE');
+            const before=await heartbeat(page);
+            await page.touchscreen.tap(300,300);await page.waitForTimeout(220);
+            const after=await heartbeat(page);
+            assert.ok(after.energy>before.energy+.02||after.position!==before.position,JSON.stringify({before,after}));
+            await capture(context,page,'/tmp/r158b-mobile.png');
+            await context.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            try{await desktop(browser);await mobile(browser)}finally{await browser.close()}
+            console.log('PASS: r158b living MAG has visible full-cycle lub-dub heartbeat, seamless page integration and interaction on desktop and mobile.');
+          })().catch(e=>{console.error(e);process.exit(1)});
           JS
-          node check-r158.cjs
-      - uses: actions/upload-artifact@v4
+          node check-r158b.cjs
+
+      - name: Upload r158b production captures
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: r158-seamless-living-${{ github.run_id }}
+          name: r158b-living-seamless-${{ github.run_id }}
           path: |
-            /tmp/r158-desktop.png
-            /tmp/r158-mobile.png
+            /tmp/r158b-desktop.png
+            /tmp/r158b-mobile.png
           if-no-files-found: warn
           retention-days: 14
