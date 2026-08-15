@@ -33,6 +33,7 @@ jobs:
             const result=await page.evaluate(()=>{
               const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&+s.opacity>.05&&r.width>2&&r.height>2;};
               const rect=e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height};};
+              const styleOrder=e=>e?getComputedStyle(e).order:null;
               const space=document.querySelector('#hero .hero-space');
               const heading=document.querySelector('#hero .fx-reference-heading');
               const dock=document.querySelector('#hero .fx-mobile-download-r151');
@@ -41,26 +42,32 @@ jobs:
               const android=dock?.querySelector('a[href="/download/android"]');
               const forbidden=[...document.querySelectorAll('#hero .hero-space img,#hero .hero-space picture,#hero .hero-space iframe,#hero .hero-space object,#hero .hero-space embed')];
               const broken=[...document.images].filter(i=>i.closest('#hero .hero-space')&&i.complete&&i.naturalWidth===0);
-              const whiteish=[...space.querySelectorAll('*')].filter(e=>{
+              const whiteSurfaces=[...space.querySelectorAll('*')].filter(e=>{
                 if(!visible(e))return false;
+                const r=e.getBoundingClientRect();
+                if(r.width*r.height<1600)return false;
                 const c=getComputedStyle(e).backgroundColor.match(/[\d.]+/g)?.map(Number)||[];
                 return c.length>=3&&c[0]>225&&c[1]>225&&c[2]>225&&(c[3]??1)>.25;
-              }).map(e=>({tag:e.tagName,cls:e.className,color:getComputedStyle(e).backgroundColor}));
+              }).map(e=>({tag:e.tagName,cls:e.className,color:getComputedStyle(e).backgroundColor,rect:rect(e)}));
               const core=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r112-canvas');
               const detail=document.querySelector('#hero .fx-core-detail-r122');
+              const coreRect=core&&visible(core)?rect(core):null;
+              const detailRect=detail&&visible(detail)?rect(detail):null;
+              const headingRect=heading&&visible(heading)?rect(heading):null;
+              const visualBottom=Math.max(space?.getBoundingClientRect().bottom||0,core?.getBoundingClientRect().bottom||0,detail?.getBoundingClientRect().bottom||0);
               return {
                 dataset:{...document.documentElement.dataset},
                 forbidden:forbidden.length,
                 broken:broken.length,
-                whiteish,
-                space:space?{rect:rect(space),bg:getComputedStyle(space).backgroundColor}:null,
-                heading:heading&&visible(heading)?rect(heading):null,
-                dock:dock&&visible(dock)?rect(dock):null,
-                proof:proof&&visible(proof)?rect(proof):null,
+                whiteSurfaces,
+                space:space?{rect:rect(space),bg:getComputedStyle(space).backgroundColor,order:styleOrder(space)}:null,
+                heading:headingRect?{...headingRect,order:styleOrder(heading),gap:headingRect.top-visualBottom}:null,
+                dock:dock&&visible(dock)?{...rect(dock),order:styleOrder(dock)}:null,
+                proof:proof&&visible(proof)?{...rect(proof),order:styleOrder(proof)}:null,
                 primary:primary instanceof HTMLAnchorElement?{href:primary.href,visible:visible(primary)}:null,
                 android:android instanceof HTMLAnchorElement?{href:android.href,visible:visible(android)}:null,
-                core:core&&visible(core)?rect(core):null,
-                detail:detail&&visible(detail)?rect(detail):null
+                core:coreRect,
+                detail:detailRect
               };
             });
             console.log(JSON.stringify(result,null,2));
@@ -69,12 +76,14 @@ jobs:
             assert(result.dataset.fxMobileDownloadR151==='ready','r151 download runtime not ready');
             assert(result.forbidden===0,'forbidden visual node remains in hero-space');
             assert(result.broken===0,'broken image remains in hero-space');
-            assert(result.whiteish.length===0,'white visual surface remains inside hero-space');
+            assert(result.whiteSurfaces.length===0,'large white visual surface remains inside hero-space');
             assert(result.core&&result.core.width>300&&result.core.height>300,'core canvas not visible');
             assert(result.detail&&result.detail.width>300&&result.detail.height>300,'detail canvas not visible');
             assert(result.heading&&result.dock&&result.proof,'heading/download/proof flow missing');
-            assert(result.heading.bottom<=result.dock.top+2,'download overlaps heading');
-            assert(result.dock.bottom<=result.proof.top+2,'download overlaps proof');
+            assert(+result.heading.order===10&&+result.dock.order===11&&+result.proof.order===12,'mobile flex order contract is wrong');
+            assert(result.heading.gap>=30&&result.heading.gap<=80,'MAG-to-heading safe gap outside 30-80px');
+            assert(result.heading.bottom<=result.dock.top+2,'download is not below heading');
+            assert(result.dock.bottom<=result.proof.top+2,'proof overlaps download');
             assert(result.primary?.visible&&result.primary.href,'primary download unavailable');
             assert(result.android?.visible&&result.android.href.endsWith('/download/android'),'Android download unavailable');
             await page.screenshot({path:'r151-production.png',fullPage:false});
