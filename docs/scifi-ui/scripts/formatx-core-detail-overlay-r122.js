@@ -122,7 +122,7 @@ function boot(attempt=0){
   if(!ctx){canvas.remove();root.dataset.fxCoreDetailR122='context-unavailable';root.dataset.fxCoreReferenceTextureR130='failed';return;}
 
   let cssW=0,cssH=0,dpr=1,raf=0,visible=true,last=performance.now(),phase=0,bitmap=null,failed=false;
-  let lastTx=0,lastTy=0,lastEnergy=.30;
+  let lastTx=0,lastTy=0,lastEnergy=.30,lastShapeX=1,lastShapeY=1;
 
   function resize(){
     const r=stage.getBoundingClientRect();if(r.width<2||r.height<2)return;
@@ -131,19 +131,37 @@ function boot(attempt=0){
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;canvas.style.width=cssW+'px';canvas.style.height=cssH+'px';}
   }
 
+  function heartbeatShape(energy){
+    if(reduced.matches)return{x:1,y:1,beat:0,breath:.5};
+    const parts=String(root.dataset.fxLivingHeartbeatBeatR158||'0,0,.5').split(',').map(Number);
+    const lub=clamp(Number.isFinite(parts[0])?parts[0]:0,0,1.2);
+    const dub=clamp(Number.isFinite(parts[1])?parts[1]:0,0,1.2);
+    const breath=clamp(Number.isFinite(parts[2])?parts[2]:.5,0,1);
+    const beat=clamp(lub+dub*.78,0,1.18);
+    const activity=clamp((energy-.30)/1.10,0,1);
+    const targetX=clamp(.998+(breath-.5)*.004+beat*.017+activity*.002,.994,1.023);
+    const targetY=clamp(.997+(breath-.5)*.006+beat*.026+activity*.003,.992,1.035);
+    lastShapeX+=(targetX-lastShapeX)*.24;
+    lastShapeY+=(targetY-lastShapeY)*.24;
+    return{x:lastShapeX,y:lastShapeY,beat,breath};
+  }
+
   function drawReference(tx,ty,energy){
     if(!bitmap)return;
     const moveX=tx*cssW*.13,moveY=-ty*cssH*.11;
-    const pulse=reduced.matches?1:1+Math.sin(phase*.62)*.0027+(energy-.30)*.0045;
+    const shape=heartbeatShape(energy);
+    const pulse=reduced.matches?1:1+Math.sin(phase*.62)*.0012+(energy-.30)*.0018;
     const angle=reduced.matches?0:tx*.055;
     ctx.save();
     ctx.translate(cssW*.5+moveX,cssH*.5+moveY);
     ctx.rotate(angle);
-    ctx.scale(pulse,pulse*(1+ty*.018));
+    ctx.scale(pulse*shape.x,pulse*shape.y*(1+ty*.018));
     ctx.globalAlpha=.985;
     ctx.globalCompositeOperation='source-over';
     ctx.drawImage(bitmap,-cssW*.5,-cssH*.5,cssW,cssH);
     ctx.restore();
+    root.dataset.fxLivingShapePulseR166=`${shape.x.toFixed(4)},${shape.y.toFixed(4)}`;
+    root.dataset.fxLivingShapeBeatR166=`${shape.beat.toFixed(4)},${shape.breath.toFixed(4)}`;
 
     if(!reduced.matches&&(Math.abs(tx)+Math.abs(ty)>.006||energy>.42)){
       ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=clamp(.025+(energy-.30)*.035,.025,.075);
@@ -181,16 +199,17 @@ function boot(attempt=0){
     if(bitmap){drawReference(lastTx,lastTy,lastEnergy);drawLiveOptics(lastTx,lastTy,lastEnergy);}
     root.dataset.fxCoreDetailEnergy=lastEnergy.toFixed(2);
     root.dataset.fxCoreDetailFrame=bitmap?'reference-material-r138':failed?'reference-fallback-r138':'reference-loading-r138';
+    root.dataset.fxLivingShapePulseStateR166=reduced.matches?'reduced-motion-static':'heartbeat-driven-four-tip-breathing';
     if(!raf)raf=requestAnimationFrame(render);
   }
 
   loadReferenceBitmap().then(b=>{
     bitmap=b;root.dataset.fxCoreReferenceTextureR130='ready';root.dataset.fxCoreFacetMode='reference-material-r138';root.dataset.fxCoreReferenceHeadingR138='dom-visible-clean-reference';
-    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r160',mode:'reference-material-interactive-seamless-key'}}));
+    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r166',mode:'reference-material-interactive-seamless-shape-pulse'}}));
     if(!raf&&visible){last=performance.now();raf=requestAnimationFrame(render);}
   }).catch(err=>{
     failed=true;root.dataset.fxCoreReferenceTextureR130='failed';root.dataset.fxCoreFacetMode='native-webgl-fallback-r138';
-    console.warn('FormatX reference material r160 fallback',err);
+    console.warn('FormatX reference material r166 fallback',err);
   });
 
   const ro=new ResizeObserver(resize);ro.observe(stage);
