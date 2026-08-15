@@ -37,6 +37,37 @@ async function reconstructHeadingArtifactR138(source){
       d[i+3]=Math.round(d[a+3]+(d[b+3]-d[a+3])*t);
     }
   }
+
+  /* r157 desktop-only luminance key.
+     The supplied 412x410 reference contains a dark navy image background. On a
+     near-square mobile hero that background is part of the approved reference,
+     but on a wide desktop page its rectangular extent reads as a separate panel.
+     Key only the dark pixels to alpha on fine-pointer desktop. Bright cyan/white/
+     violet crystal facets, star tips and water highlights stay opaque. */
+  const desktopKey=matchMedia('(min-width:901px) and (pointer:fine)').matches;
+  if(desktopKey){
+    let keyed=0,kept=0;
+    for(let i=0;i<d.length;i+=4){
+      const r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];
+      if(a===0)continue;
+      const peak=Math.max(r,g,b);
+      const lum=.2126*r+.7152*g+.0722*b;
+      const signal=Math.max(peak*.72+lum*.28,lum);
+      let f=1;
+      if(signal<=20)f=0;
+      else if(signal<38)f=(signal-20)/18*.16;
+      else if(signal<58)f=.16+(signal-38)/20*.28;
+      else if(signal<82)f=.44+(signal-58)/24*.38;
+      else if(signal<108)f=.82+(signal-82)/26*.18;
+      if(f<.995)keyed++;else kept++;
+      d[i+3]=Math.round(a*clamp(f,0,1));
+    }
+    root.dataset.fxCoreDesktopLumaKeyR157='applied';
+    root.dataset.fxCoreDesktopLumaKeyStatsR157=`${keyed},${kept}`;
+  }else{
+    root.dataset.fxCoreDesktopLumaKeyR157='mobile-bypass';
+  }
+
   c.putImageData(image,0,0);
   source.close?.();
   root.dataset.fxCoreReferenceArtifactRepairR138='applied';
@@ -143,11 +174,11 @@ function boot(attempt=0){
 
   loadReferenceBitmap().then(b=>{
     bitmap=b;root.dataset.fxCoreReferenceTextureR130='ready';root.dataset.fxCoreFacetMode='reference-material-r138';root.dataset.fxCoreReferenceHeadingR138='dom-visible-clean-reference';
-    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r138',mode:'reference-material-interactive'}}));
+    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r157',mode:'reference-material-interactive-desktop-key'}}));
     if(!raf&&visible){last=performance.now();raf=requestAnimationFrame(render);}
   }).catch(err=>{
     failed=true;root.dataset.fxCoreReferenceTextureR130='failed';root.dataset.fxCoreFacetMode='native-webgl-fallback-r138';
-    console.warn('FormatX reference material r138 fallback',err);
+    console.warn('FormatX reference material r157 fallback',err);
   });
 
   const ro=new ResizeObserver(resize);ro.observe(stage);
