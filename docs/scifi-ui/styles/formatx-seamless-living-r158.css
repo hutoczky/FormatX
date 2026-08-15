@@ -1,0 +1,145 @@
+/* r158 — seamless living MAG integration.
+   Keep the approved crystal geometry and size. The hero, reference material and
+   live optics now share one atmosphere so the MAG reads as part of the page,
+   not as a separate rectangular media panel. */
+
+html body.living-architecture #hero{
+  position:relative!important;
+  isolation:isolate!important;
+  background:
+    radial-gradient(ellipse 70% 62% at var(--fx-r158-heart-x,50%) 36%,rgba(28,171,225,.105),rgba(31,88,160,.045) 38%,transparent 72%),
+    radial-gradient(ellipse 54% 48% at 58% 44%,rgba(140,66,255,.052),transparent 72%),
+    linear-gradient(180deg,#01040c 0%,#020816 31%,#031427 62%,#02101d 82%,#010711 100%)!important;
+  box-shadow:none!important;
+  border:0!important;
+}
+
+html body.living-architecture #hero::before{
+  content:""!important;
+  position:absolute!important;
+  z-index:0!important;
+  left:-12vw!important;
+  right:-12vw!important;
+  top:5%!important;
+  height:78%!important;
+  pointer-events:none!important;
+  background:
+    radial-gradient(circle at var(--fx-r158-heart-x,50%) var(--fx-r158-heart-y,49%),rgba(224,254,255,.12) 0 1.2%,rgba(67,229,255,.075) 7%,rgba(138,67,255,.045) 20%,transparent 44%),
+    radial-gradient(ellipse at 50% 64%,rgba(26,143,205,.055),transparent 64%)!important;
+  opacity:var(--fx-r158-field-opacity,.72)!important;
+  filter:blur(var(--fx-r158-field-blur,18px))!important;
+  transform:translateZ(0)!important;
+}
+
+html body.living-architecture #hero::after{
+  content:""!important;
+  position:absolute!important;
+  z-index:1!important;
+  left:0!important;
+  right:0!important;
+  bottom:-2px!important;
+  height:clamp(80px,12vw,170px)!important;
+  pointer-events:none!important;
+  background:linear-gradient(180deg,rgba(1,7,17,0) 0%,rgba(1,7,17,.44) 42%,rgba(1,7,17,.86) 76%,#010711 100%)!important;
+}
+
+html body.living-architecture #hero .hero-grid,
+html body.living-architecture #hero .hero-space{
+  position:relative!important;
+  z-index:2!important;
+  background:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+
+html body.living-architecture #hero .fx-core-mobile-v55-stage,
+html body.living-architecture #hero .fx-core-r112-stage,
+html body.living-architecture #hero .fx-core-rayglass-r91-stage{
+  background:transparent!important;
+  background-image:none!important;
+  background-color:transparent!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+
+html body.living-architecture #hero .fx-core-mobile-v55-stage::before,
+html body.living-architecture #hero .fx-core-mobile-v55-stage::after,
+html body.living-architecture #hero .fx-core-r112-stage::before,
+html body.living-architecture #hero .fx-core-r112-stage::after,
+html body.living-architecture #hero .fx-core-rayglass-r91-stage::before,
+html body.living-architecture #hero .fx-core-rayglass-r91-stage::after{
+  content:none!important;
+  display:none!important;
+  opacity:0!important;
+  background:none!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+
+html body.living-architecture #hero .fx-core-detail-r122{
+  mix-blend-mode:screen!important;
+  opacity:.995!important;
+  background:transparent!important;
+  filter:
+    brightness(var(--fx-r158-detail-brightness,1.08))
+    contrast(var(--fx-r158-detail-contrast,1.16))
+    saturate(var(--fx-r158-detail-saturation,1.12))
+    drop-shadow(0 0 var(--fx-r158-cyan-blur,17px) rgba(72,226,255,var(--fx-r158-cyan-alpha,.23)))
+    drop-shadow(0 0 var(--fx-r158-violet-blur,30px) rgba(151,72,255,var(--fx-r158-violet-alpha,.12)))!important;
+  transition:none!important;
+  will-change:filter,opacity!important;
+}
+
+html body.living-architecture #hero .fx-core-live-r147-layer{
+  background:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  mix-blend-mode:screen!important;
+}
+
+html body.living-architecture #hero .fx-reference-heading,
+html body.living-architecture #hero .fx-reference-proof{
+  position:relative!important;
+  z-index:6!important;
+}
+
+/* Keep the transition from the crystal into the content continuous. */
+html body.living-architecture #hero .fx-reference-heading::before{
+  background:linear-gradient(180deg,rgba(1,7,17,0),rgba(1,7,17,.50) 48%,rgba(1,7,17,.92) 86%,#010711 100%)!important;
+}
+
+@media (max-width:900px),(pointer:coarse){
+  html body.living-architecture #hero{
+    background:
+      radial-gradient(ellipse 86% 58% at var(--fx-r158-heart-x,50%) 37%,rgba(27,181,232,.115),rgba(29,83,158,.05) 42%,transparent 73%),
+      radial-gradient(ellipse 70% 48% at 59% 45%,rgba(142,67,255,.058),transparent 72%),
+      linear-gradient(180deg,#01040c 0%,#020917 31%,#031a31 64%,#031324 80%,#010711 100%)!important;
+  }
+  html body.living-architecture #hero .fx-core-detail-r122{
+    mix-blend-mode:screen!important;
+    opacity:.998!important;
+  }
+  html body.living-architecture #hero::after{
+    height:118px!important;
+  }
+}
+
+@media (min-width:901px) and (pointer:fine){
+  html body.living-architecture #hero .hero-space{
+    overflow:hidden!important;
+  }
+  html body.living-architecture #hero .fx-core-detail-r122{
+    mix-blend-mode:screen!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html body.living-architecture #hero::before{filter:blur(18px)!important;opacity:.58!important}
+  html body.living-architecture #hero .fx-core-detail-r122{filter:brightness(1.06) contrast(1.15) saturate(1.10)!important}
+}
