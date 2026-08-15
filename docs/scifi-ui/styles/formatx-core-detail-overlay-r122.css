@@ -1,7 +1,6 @@
-/* r125 — reference material correction.
-   Geometry is already locked. This pass narrows the visual ~5% and replaces the
-   previous wireframe emphasis with dense filled glass, stronger spectral depth and
-   a compact reactor while preserving the native WebGL mesh underneath. */
+/* r126 — target-material weighting.
+   Keep the native WebGL mesh as the real 3D motion/depth source, but lower its old
+   line-heavy optical pass. The filled crystal overlay becomes the visible surface. */
 .fx-core-detail-r122{
   position:absolute;
   inset:0;
@@ -11,32 +10,33 @@
   display:block;
   pointer-events:none;
   mix-blend-mode:screen;
-  opacity:.94;
+  opacity:.985;
   transform-origin:50% 50%;
   transform:translateY(1.8%) scaleX(.99) scaleY(1.105) translateZ(0);
 }
 html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage:before{
   clip-path:none!important;
   background:
-    radial-gradient(circle at 50% 50%,#fff 0 .24%,rgba(247,255,255,.99) .34% .72%,rgba(84,246,255,.78) .90% 1.65%,rgba(31,177,255,.19) 2.2% 4.7%,transparent 7.4%),
-    linear-gradient(90deg,transparent 5%,rgba(89,232,255,.01) 25%,rgba(213,253,255,.09) 49.78%,rgba(255,255,255,.28) 50%,rgba(213,253,255,.09) 50.22%,rgba(89,232,255,.01) 75%,transparent 95%),
-    linear-gradient(180deg,transparent 5%,rgba(89,232,255,.01) 25%,rgba(213,253,255,.08) 49.78%,rgba(255,255,255,.24) 50%,rgba(213,253,255,.08) 50.22%,rgba(89,232,255,.01) 75%,transparent 95%)!important;
-  opacity:.78!important;
+    radial-gradient(circle at 50% 50%,#fff 0 .24%,rgba(247,255,255,.99) .34% .74%,rgba(84,246,255,.82) .92% 1.70%,rgba(31,177,255,.22) 2.25% 4.9%,transparent 7.6%),
+    linear-gradient(90deg,transparent 6%,rgba(89,232,255,.012) 27%,rgba(213,253,255,.075) 49.82%,rgba(255,255,255,.22) 50%,rgba(213,253,255,.075) 50.18%,rgba(89,232,255,.012) 73%,transparent 94%),
+    linear-gradient(180deg,transparent 6%,rgba(89,232,255,.012) 27%,rgba(213,253,255,.068) 49.82%,rgba(255,255,255,.19) 50%,rgba(213,253,255,.068) 50.18%,rgba(89,232,255,.012) 73%,transparent 94%)!important;
+  opacity:.70!important;
   filter:none!important;
 }
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
     transform-origin:50% 50%!important;
     transform:translateY(1.8%) scaleX(.992) scaleY(1.40)!important;
-    filter:brightness(1.13) contrast(1.34) saturate(2.12)
-      drop-shadow(0 0 2px rgba(239,255,255,.68))
-      drop-shadow(0 0 10px rgba(42,231,255,.52))
-      drop-shadow(0 0 26px rgba(42,149,255,.31))
-      drop-shadow(0 0 46px rgba(159,56,255,.27))!important;
+    opacity:.66!important;
+    filter:brightness(1.08) contrast(1.28) saturate(1.82)
+      drop-shadow(0 0 2px rgba(239,255,255,.54))
+      drop-shadow(0 0 10px rgba(42,231,255,.38))
+      drop-shadow(0 0 25px rgba(42,149,255,.23))
+      drop-shadow(0 0 44px rgba(159,56,255,.22))!important;
   }
 }
 @media (max-width:380px){
   .fx-core-detail-r122{transform:translateY(1.5%) scaleX(.985) scaleY(1.085) translateZ(0)}
-  html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{transform:translateY(1.5%) scaleX(.987) scaleY(1.36)!important}
+  html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{transform:translateY(1.5%) scaleX(.987) scaleY(1.36)!important;opacity:.68!important}
 }
-@media (prefers-reduced-motion:reduce){.fx-core-detail-r122{opacity:.91}}
+@media (prefers-reduced-motion:reduce){.fx-core-detail-r122{opacity:.95}}
