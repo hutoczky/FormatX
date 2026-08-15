@@ -67,10 +67,10 @@ async function reconstructHeadingArtifactR138(source){
     const p=i>>2,px=p%w,py=(p/w)|0;
     const nx=Math.abs(px/Math.max(1,w-1)-.5)*2;
     const ny=Math.abs(py/Math.max(1,h-1)-.5)*2;
-    const edge=Math.pow(Math.max(nx,ny),2.2);
+    const edge=Math.pow(Math.max(nx,ny),desktopKey?2.2:1.62);
     if(signal<155){
-      const edgeFloor=desktopKey ? .16 : .27;
-      const edgeStrength=desktopKey ? .78 : .68;
+      const edgeFloor=desktopKey ? .16 : .02;
+      const edgeStrength=desktopKey ? .78 : .96;
       f*=clamp(1-edge*edgeStrength,edgeFloor,1);
     }
     if(f<.995)keyed++;else kept++;
@@ -78,7 +78,7 @@ async function reconstructHeadingArtifactR138(source){
   }
   root.dataset.fxCoreDesktopLumaKeyR157=desktopKey?'applied':'mobile-applied-r160';
   root.dataset.fxCoreDesktopLumaKeyStatsR157=`${keyed},${kept}`;
-  root.dataset.fxCoreReferenceKeyR160=desktopKey?'desktop-edge-alpha':'mobile-gentle-edge-alpha';
+  root.dataset.fxCoreReferenceKeyR160=desktopKey?'desktop-edge-alpha':'mobile-soft-edge-alpha-r162';
 
   c.putImageData(image,0,0);
   source.close?.();
