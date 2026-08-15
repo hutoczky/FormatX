@@ -19,90 +19,100 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 12
     steps:
+      - name: Fetch canonical production document
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            if curl -fsSL --retry 2 --retry-all-errors --connect-timeout 10 --max-time 35 -o /tmp/r172-home.html 'https://formatxsuite.com/'; then
+              test "$(wc -c </tmp/r172-home.html)" -gt 10000
+              echo "Production HTML captured on attempt $attempt"
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo 'Could not fetch canonical production HTML' >&2
+          exit 1
+
       - name: Install Playwright Chromium
         run: |
           npm init -y >/dev/null 2>&1
           npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
 
-      - name: Verify r168 living energy on desktop and mobile
+      - name: Verify r172 optics, interaction and seamless mobile carrier
         run: |
-          cat > check-r168.cjs <<'JS'
+          cat > check-r172.cjs <<'JS'
           const {chromium}=require('playwright');
           const fs=require('node:fs'),assert=require('node:assert/strict');
           const origin='https://formatxsuite.com';
+          const home=fs.readFileSync('/tmp/r172-home.html','utf8');
           const MODE='orbit-caustic-spectrum-shock-refraction';
           const CLOCK='32ms-optical-reactor-v3';
 
-          async function navigate(page,url){
-            let last;
-            for(let i=1;i<=2;i++){
-              try{
-                await page.goto(url,{waitUntil:'commit',timeout:30000});
-                await page.waitForFunction(()=>document.readyState!=='loading'&&!!document.querySelector('#hero'),null,{timeout:30000});
-                return;
-              }catch(e){
-                last=e;
-                console.warn(`navigation attempt ${i} failed: ${e.message}`);
-                try{await page.goto('about:blank',{waitUntil:'commit',timeout:5000})}catch(_){ }
-                await page.waitForTimeout(1000*i);
-              }
-            }
-            throw last;
+          async function openProduction(context,label){
+            const page=await context.newPage();
+            let fulfilled=false;
+            await page.route(`${origin}/**`,async route=>{
+              const req=route.request();
+              if(!fulfilled&&req.isNavigationRequest()&&req.frame()===page.mainFrame()){
+                fulfilled=true;
+                await route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:home,headers:{'cache-control':'no-store'}});
+              }else await route.continue();
+            });
+            await page.goto(`${origin}/?verify=${label}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
+            return page;
           }
 
           async function ready(page,mobile=false){
             await page.waitForFunction(({mobile,mode,clock})=>{
               const r=document.documentElement.dataset;
-              return (!mobile||(
-                  r.fxMobileReferenceLayout==='ready-v1' &&
-                  r.fxMobileSeamR170==='ready-58-72-priority'
-                )) &&
+              return (!mobile||(r.fxMobileReferenceLayout==='ready-v1'&&r.fxMobileSeamR170==='ready-58-72-priority')) &&
                 String(r.fxLivingEnergyR168||'').includes('r168-living-energy-orbit-caustic-v2') &&
                 r.fxLivingEnergyEffectModeR168===mode && r.fxLivingEnergyClockR168===clock &&
-                Number(r.fxLivingEnergyFrameR168||0)>2 && Number(r.fxLiveHeartbeatTickR155||0)>2 &&
+                Number(r.fxLivingEnergyFrameR168||0)>3 && Number(r.fxLiveHeartbeatTickR155||0)>3 &&
                 document.querySelectorAll('#hero .fx-r168-orbit').length===2 &&
                 document.querySelectorAll('#hero .fx-r168-caustic').length===2 &&
                 document.querySelectorAll('#hero .fx-r168-spectrum').length===1 &&
                 document.querySelectorAll('#hero .fx-r168-interaction-wave').length===1 &&
                 document.querySelectorAll('#hero .fx-r168-spark').length===6;
-            },{mobile,mode:MODE,clock:CLOCK},{timeout:90000});
+            },{mobile,mode:MODE,clock:CLOCK},{timeout:45000});
           }
 
           async function state(page){return page.evaluate(()=>{
             const r=document.documentElement.dataset,h=document.querySelector('#hero .hero-space'),s=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage');
-            const hs=h?getComputedStyle(h):null,ss=s?getComputedStyle(s):null,after=h?getComputedStyle(h,'::after'):null,box=h?.getBoundingClientRect();
+            const hs=h?getComputedStyle(h):null,ss=s?getComputedStyle(s):null,after=h?getComputedStyle(h,'::after'):null,before=h?getComputedStyle(h,'::before'):null,box=h?.getBoundingClientRect();
             const css=n=>h?.style.getPropertyValue(n)||getComputedStyle(h).getPropertyValue(n)||'';
-            return {version:r.fxLivingEnergyR168||'',mode:r.fxLivingEnergyEffectModeR168||'',clock:r.fxLivingEnergyClockR168||'',frame:Number(r.fxLivingEnergyFrameR168||0),tick:Number(r.fxLiveHeartbeatTickR155||0),interaction:r.fxLivingEnergyInteractionR168||'',position:r.fxLivingEnergyPositionR168||'',activity:Number(r.fxLivingEnergyActivityR168||0),optics:r.fxLivingEnergyOpticsR168||'',beat:r.fxLivingEnergyBeatR168||'',gyro:r.fxCoreGyroLoadR144||'',seamState:r.fxMobileSeamR170||'',renderMs:Number(r.fxCoreRenderMs||Infinity),orbitA:css('--fx-r168-orbit-a'),orbitB:css('--fx-r168-orbit-b'),causticA:css('--fx-r168-caustic-a'),causticB:css('--fx-r168-caustic-b'),spectrum:css('--fx-r168-spectrum'),burst:Number(css('--fx-r168-burst-opacity')||0),stageBg:ss?.backgroundImage||'',stageColor:ss?.backgroundColor||'',seamTop:after?.top||'',seamHeight:after?.height||'',seamBg:after?.backgroundImage||'',hostHeight:box?.height||0,hostBg:hs?.backgroundImage||''};
+            return {version:r.fxLivingEnergyR168||'',mode:r.fxLivingEnergyEffectModeR168||'',clock:r.fxLivingEnergyClockR168||'',frame:Number(r.fxLivingEnergyFrameR168||0),tick:Number(r.fxLiveHeartbeatTickR155||0),interaction:r.fxLivingEnergyInteractionR168||'',position:r.fxLivingEnergyPositionR168||'',activity:Number(r.fxLivingEnergyActivityR168||0),optics:r.fxLivingEnergyOpticsR168||'',beat:r.fxLivingEnergyBeatR168||'',gyro:r.fxCoreGyroLoadR144||'',seamState:r.fxMobileSeamR170||'',renderMs:Number(r.fxCoreRenderMs||Infinity),orbitA:css('--fx-r168-orbit-a'),orbitB:css('--fx-r168-orbit-b'),causticA:css('--fx-r168-caustic-a'),causticB:css('--fx-r168-caustic-b'),spectrum:css('--fx-r168-spectrum'),burst:Number(css('--fx-r168-burst-opacity')||0),stageBg:ss?.backgroundImage||'',stageColor:ss?.backgroundColor||'',hostBg:hs?.backgroundImage||'',seamTop:after?.top||'',seamHeight:after?.height||'',seamBg:after?.backgroundImage||'',atmosTop:before?.top||'',atmosBottom:before?.bottom||'',hostHeight:box?.height||0};
           })}
 
           function base(a){assert.ok(a.version.includes('v2'));assert.equal(a.mode,MODE);assert.equal(a.clock,CLOCK);assert.ok(a.renderMs<16.67,`render ${a.renderMs}`)}
-          function motion(a,b){assert.ok(b.frame>a.frame,'r168 clock stalled');assert.ok(b.tick>a.tick,'heartbeat stalled');assert.notEqual(a.orbitA,b.orbitA,'orbit A stalled');assert.notEqual(a.orbitB,b.orbitB,'orbit B stalled');assert.notEqual(a.causticA,b.causticA,'caustic A stalled');assert.notEqual(a.causticB,b.causticB,'caustic B stalled');assert.ok(a.optics!==b.optics||a.beat!==b.beat||a.spectrum!==b.spectrum,'optics static')}
+          function motion(a,b){assert.ok(b.frame>a.frame,'r168 optical clock stalled');assert.ok(b.tick>a.tick,'heartbeat stalled');assert.notEqual(a.orbitA,b.orbitA,'orbit A stalled');assert.notEqual(a.orbitB,b.orbitB,'orbit B stalled');assert.notEqual(a.causticA,b.causticA,'caustic A stalled');assert.notEqual(a.causticB,b.causticB,'caustic B stalled');assert.ok(a.optics!==b.optics||a.beat!==b.beat||a.spectrum!==b.spectrum,'optical state static')}
 
           async function desktop(browser){
-            const c=await browser.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'}),p=await c.newPage();
-            await navigate(p,`${origin}/?verify=r172d-${Date.now()}`);await ready(p,false);await p.waitForTimeout(160);
+            const c=await browser.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'});
+            const p=await openProduction(c,'r172-desktop');await ready(p,false);await p.waitForTimeout(160);
             const a=await state(p);await p.waitForTimeout(420);const b=await state(p);base(a);motion(a,b);
-            const box=await p.locator('#hero .hero-space').boundingBox();if(box){await p.mouse.move(box.x+box.width*.76,box.y+box.height*.33);await p.mouse.down();await p.waitForTimeout(90);await p.mouse.up();}
-            await p.waitForTimeout(80);const d=await state(p);assert.ok(d.position!==a.position||d.activity>a.activity,'desktop interaction missing');assert.ok(d.burst>0||d.interaction==='energy-burst'||d.activity>b.activity,'desktop burst missing');
-            await p.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await p.waitForTimeout(80);await p.screenshot({path:'/tmp/r172-desktop.png',animations:'disabled',timeout:120000});console.log('DESKTOP',JSON.stringify({a,b,d},null,2));await c.close();
+            const box=await p.locator('#hero .hero-space').boundingBox();if(box){await p.mouse.move(box.x+box.width*.77,box.y+box.height*.34);await p.mouse.down();await p.waitForTimeout(90);await p.mouse.up();}
+            await p.waitForTimeout(75);const d=await state(p);assert.ok(d.position!==a.position||d.activity>a.activity,'desktop pointer did not affect optics');assert.ok(d.burst>0||d.interaction==='energy-burst'||d.activity>b.activity,'desktop burst missing');
+            await p.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await p.waitForTimeout(90);await p.locator('#hero').screenshot({path:'/tmp/r172-desktop.png',animations:'disabled',timeout:45000});console.log('DESKTOP R172',JSON.stringify({a,b,d},null,2));await c.close();
           }
 
           async function mobile(browser,w,h,label){
-            const c=await browser.newContext({viewport:{width:w,height:h},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'}),p=await c.newPage();
-            await navigate(p,`${origin}/?verify=r172-${label}-${Date.now()}`);await ready(p,true);await p.waitForTimeout(160);
+            const c=await browser.newContext({viewport:{width:w,height:h},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
+            const p=await openProduction(c,`r172-${label}`);await ready(p,true);await p.waitForTimeout(160);
             const a=await state(p);await p.waitForTimeout(380);const b=await state(p);base(a);motion(a,b);
-            await p.touchscreen.tap(Math.round(w*.69),Math.round(h*.37));await p.waitForTimeout(80);const d=await state(p);assert.ok(d.activity>=b.activity||d.interaction==='energy-burst','touch energy missing');assert.ok(d.burst>0||d.interaction==='energy-burst','touch burst missing');
-            assert.equal(a.seamState,'ready-58-72-priority');assert.ok(['ready','permission-required','unsupported'].includes(a.gyro),`gyro ${a.gyro}`);assert.equal(a.stageBg,'none');assert.ok(a.stageColor==='rgba(0, 0, 0, 0)'||a.stageColor==='transparent',`stage ${a.stageColor}`);
-            const top=parseFloat(a.seamTop),height=parseFloat(a.seamHeight);assert.ok(Number.isFinite(top)&&top<a.hostHeight*.80,`seam top ${a.seamTop}/${a.hostHeight}`);assert.ok(Number.isFinite(height)&&height>a.hostHeight*.40,`seam height ${a.seamHeight}/${a.hostHeight}`);assert.ok(a.seamBg.includes('linear-gradient'),'seam gradient missing');
-            await p.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await p.waitForTimeout(80);await p.screenshot({path:`/tmp/r172-${label}.png`,animations:'disabled',timeout:120000});console.log(label.toUpperCase(),JSON.stringify({a,b,d},null,2));await c.close();
+            await p.touchscreen.tap(Math.round(w*.68),Math.round(h*.37));await p.waitForTimeout(75);const d=await state(p);assert.ok(d.activity>=b.activity||d.interaction==='energy-burst','mobile touch did not energize optics');assert.ok(d.burst>0||d.interaction==='energy-burst','mobile interaction burst missing');
+            assert.equal(a.seamState,'ready-58-72-priority');assert.ok(['ready','permission-required','unsupported'].includes(a.gyro),`gyro ${a.gyro}`);assert.equal(a.stageBg,'none','mobile stage background panel remains');assert.ok(a.stageColor==='rgba(0, 0, 0, 0)'||a.stageColor==='transparent',`mobile stage color ${a.stageColor}`);
+            const top=parseFloat(a.seamTop),height=parseFloat(a.seamHeight);assert.ok(Number.isFinite(top)&&top<a.hostHeight*.70,`seam starts too late ${a.seamTop}/${a.hostHeight}`);assert.ok(Number.isFinite(height)&&height>a.hostHeight*.60,`seam bridge too short ${a.seamHeight}/${a.hostHeight}`);assert.ok(a.seamBg.includes('linear-gradient'),'mobile seam gradient missing');
+            await p.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await p.waitForTimeout(90);await p.locator('#hero').screenshot({path:`/tmp/r172-${label}.png`,animations:'disabled',timeout:45000});console.log(label.toUpperCase(),JSON.stringify({a,b,d},null,2));await c.close();
           }
 
-          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await desktop(b);await mobile(b,390,844,'mobile390');await mobile(b,412,915,'mobile412')}finally{await b.close()}for(const f of ['/tmp/r172-desktop.png','/tmp/r172-mobile390.png','/tmp/r172-mobile412.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS r172 optics + interaction + priority seamless mobile');})().catch(e=>{console.error(e);process.exit(1)});
+          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await desktop(b);await mobile(b,390,844,'mobile390');await mobile(b,412,915,'mobile412')}finally{await b.close()}for(const f of ['/tmp/r172-desktop.png','/tmp/r172-mobile390.png','/tmp/r172-mobile412.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS: r172 optics-led MAG is animated/interactable on PC and phone and the mobile carrier dissolves inside the crystal field.');})().catch(e=>{console.error(e);process.exit(1)});
           JS
-          node check-r168.cjs
+          node check-r172.cjs
 
       - uses: actions/upload-artifact@v4
         if: always()
