@@ -19,7 +19,6 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-
           detail=Path('docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js')
           s=detail.read_text()
           start=s.find('  /* r157 desktop-only luminance key.')
@@ -28,66 +27,64 @@ jobs:
               if 'r160 cross-device seamless reference key' not in s:
                   raise SystemExit('luminance-key block not found')
           else:
-              replacement='''  /* r160 cross-device seamless reference key.
-     Preserve bright cyan/white/violet crystal facets and water highlights while
-     making the dark source-image field transparent. Mobile uses a gentler curve;
-     both devices get extra edge attenuation so the bitmap cannot read as a panel. */
-  const desktopKey=matchMedia('(min-width:901px) and (pointer:fine)').matches;
-  let keyed=0,kept=0;
-  for(let i=0;i<d.length;i+=4){
-    const r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];
-    if(a===0)continue;
-    const peak=Math.max(r,g,b);
-    const lum=.2126*r+.7152*g+.0722*b;
-    const signal=Math.max(peak*.72+lum*.28,lum);
-    let f=1;
-    if(desktopKey){
-      if(signal<=24)f=0;
-      else if(signal<52)f=(signal-24)/28*.08;
-      else if(signal<80)f=.08+(signal-52)/28*.18;
-      else if(signal<112)f=.26+(signal-80)/32*.36;
-      else if(signal<150)f=.62+(signal-112)/38*.38;
-    }else{
-      if(signal<=16)f=0;
-      else if(signal<38)f=(signal-16)/22*.12;
-      else if(signal<62)f=.12+(signal-38)/24*.24;
-      else if(signal<92)f=.36+(signal-62)/30*.36;
-      else if(signal<126)f=.72+(signal-92)/34*.28;
-    }
-    const p=i>>2,px=p%w,py=(p/w)|0;
-    const nx=Math.abs(px/Math.max(1,w-1)-.5)*2;
-    const ny=Math.abs(py/Math.max(1,h-1)-.5)*2;
-    const edge=Math.pow(Math.max(nx,ny),2.2);
-    if(signal<155){
-      const edgeFloor=desktopKey ? .16 : .27;
-      const edgeStrength=desktopKey ? .78 : .68;
-      f*=clamp(1-edge*edgeStrength,edgeFloor,1);
-    }
-    if(f<.995)keyed++;else kept++;
-    d[i+3]=Math.round(a*clamp(f,0,1));
-  }
-  root.dataset.fxCoreDesktopLumaKeyR157=desktopKey?'applied':'mobile-applied-r160';
-  root.dataset.fxCoreDesktopLumaKeyStatsR157=`${keyed},${kept}`;
-  root.dataset.fxCoreReferenceKeyR160=desktopKey?'desktop-edge-alpha':'mobile-gentle-edge-alpha';'''
+              lines=[
+                  '  /* r160 cross-device seamless reference key.',
+                  '     Preserve bright cyan/white/violet crystal facets and water highlights while',
+                  '     making the dark source-image field transparent. Mobile uses a gentler curve;',
+                  '     both devices get extra edge attenuation so the bitmap cannot read as a panel. */',
+                  "  const desktopKey=matchMedia('(min-width:901px) and (pointer:fine)').matches;",
+                  '  let keyed=0,kept=0;',
+                  '  for(let i=0;i<d.length;i+=4){',
+                  '    const r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];',
+                  '    if(a===0)continue;',
+                  '    const peak=Math.max(r,g,b);',
+                  '    const lum=.2126*r+.7152*g+.0722*b;',
+                  '    const signal=Math.max(peak*.72+lum*.28,lum);',
+                  '    let f=1;',
+                  '    if(desktopKey){',
+                  '      if(signal<=24)f=0;',
+                  '      else if(signal<52)f=(signal-24)/28*.08;',
+                  '      else if(signal<80)f=.08+(signal-52)/28*.18;',
+                  '      else if(signal<112)f=.26+(signal-80)/32*.36;',
+                  '      else if(signal<150)f=.62+(signal-112)/38*.38;',
+                  '    }else{',
+                  '      if(signal<=16)f=0;',
+                  '      else if(signal<38)f=(signal-16)/22*.12;',
+                  '      else if(signal<62)f=.12+(signal-38)/24*.24;',
+                  '      else if(signal<92)f=.36+(signal-62)/30*.36;',
+                  '      else if(signal<126)f=.72+(signal-92)/34*.28;',
+                  '    }',
+                  '    const p=i>>2,px=p%w,py=(p/w)|0;',
+                  '    const nx=Math.abs(px/Math.max(1,w-1)-.5)*2;',
+                  '    const ny=Math.abs(py/Math.max(1,h-1)-.5)*2;',
+                  '    const edge=Math.pow(Math.max(nx,ny),2.2);',
+                  '    if(signal<155){',
+                  '      const edgeFloor=desktopKey ? .16 : .27;',
+                  '      const edgeStrength=desktopKey ? .78 : .68;',
+                  '      f*=clamp(1-edge*edgeStrength,edgeFloor,1);',
+                  '    }',
+                  '    if(f<.995)keyed++;else kept++;',
+                  '    d[i+3]=Math.round(a*clamp(f,0,1));',
+                  '  }',
+                  "  root.dataset.fxCoreDesktopLumaKeyR157=desktopKey?'applied':'mobile-applied-r160';",
+                  '  root.dataset.fxCoreDesktopLumaKeyStatsR157=`${keyed},${kept}`;',
+                  "  root.dataset.fxCoreReferenceKeyR160=desktopKey?'desktop-edge-alpha':'mobile-gentle-edge-alpha';",
+              ]
+              replacement='\n'.join(lines)
               s=s[:start]+replacement+s[end:]
           s=s.replace("version:'r157',mode:'reference-material-interactive-desktop-key'","version:'r160',mode:'reference-material-interactive-seamless-key'")
           s=s.replace('FormatX reference material r157 fallback','FormatX reference material r160 fallback')
           detail.write_text(s)
-
           boot=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
-          b=boot.read_text()
-          b=b.replace('formatx-core-detail-overlay-r122.js?v=20260815-r157-desktop-luma-key','formatx-core-detail-overlay-r122.js?v=20260815-r160-cross-device-alpha-key')
+          b=boot.read_text().replace('formatx-core-detail-overlay-r122.js?v=20260815-r157-desktop-luma-key','formatx-core-detail-overlay-r122.js?v=20260815-r160-cross-device-alpha-key')
           boot.write_text(b)
-
           index=Path('docs/scifi-ui/index.html')
           h=index.read_text()
           h,n=re.subn(r'(formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=)[^"\']+',r'\g<1>20260815-r160-seamless-reference-key',h,count=1)
           if n!=1:raise SystemExit('bootstrap cache URL not found')
           index.write_text(h)
-
           validator=Path('.github/scripts/validate-real3d-core.cjs')
-          v=validator.read_text()
-          v=v.replace('formatx-core-detail-overlay-r122.js?v=20260815-r157-desktop-luma-key','formatx-core-detail-overlay-r122.js?v=20260815-r160-cross-device-alpha-key')
+          v=validator.read_text().replace('formatx-core-detail-overlay-r122.js?v=20260815-r157-desktop-luma-key','formatx-core-detail-overlay-r122.js?v=20260815-r160-cross-device-alpha-key')
           old="['fxCoreDesktopLumaKeyR157','desktopKey=matchMedia','signal<=20','signal<38','signal<58','signal<82','mobile-bypass','reference-material-interactive-desktop-key']"
           new="['fxCoreDesktopLumaKeyR157','fxCoreReferenceKeyR160','desktopKey=matchMedia','signal<=24','signal<52','signal<80','signal<112','mobile-applied-r160','reference-material-interactive-seamless-key']"
           if old in v:v=v.replace(old,new)
