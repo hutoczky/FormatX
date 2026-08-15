@@ -133,23 +133,24 @@ function boot(attempt=0){
 
   function heartbeatShape(energy){
     if(reduced.matches)return{x:1,y:1,beat:0,breath:.5};
-    /* r166b: derive the crystal deformation from the render clock itself.
-       This uses the exact same 1380ms lub-dub timing and respiratory wave as
-       the reactor heartbeat, so a 50ms heartbeat sample can never miss the
-       short contraction peaks that physically move the four crystal tips. */
+    /* r166c: wide render-clock heartbeat envelope with fast contraction and
+       slower release so the four-point silhouette visibly breathes on every
+       desktop/mobile frame instead of flashing between sampled instants. */
     const now=performance.now();
     const cycle=(now%1380)/1380;
     const g=(c,w)=>Math.exp(-Math.pow((cycle-c)/w,2));
-    const lub=g(.105,.040);
-    const dub=g(.235,.052)*.64;
-    const beat=clamp(lub+dub*.78,0,1.18);
+    const lub=g(.105,.066);
+    const dub=g(.245,.078)*.70;
+    const beat=clamp(lub+dub*.82,0,1.20);
     const breath=.5+.5*Math.sin(now*.00118-1.05);
     const activity=clamp((energy-.30)/1.10,0,1);
-    const targetX=clamp(.997+(breath-.5)*.005+beat*.022+activity*.003,.992,1.028);
-    const targetY=clamp(.996+(breath-.5)*.008+beat*.034+activity*.004,.989,1.043);
-    lastShapeX+=(targetX-lastShapeX)*.34;
-    lastShapeY+=(targetY-lastShapeY)*.34;
-    root.dataset.fxLivingShapeClockR166='direct-render-clock-r166b';
+    const targetX=clamp(.996+(breath-.5)*.006+beat*.021+activity*.003,.991,1.029);
+    const targetY=clamp(.995+(breath-.5)*.010+beat*.034+activity*.004,.987,1.045);
+    const kx=targetX>lastShapeX?.38:.075;
+    const ky=targetY>lastShapeY?.42:.070;
+    lastShapeX+=(targetX-lastShapeX)*kx;
+    lastShapeY+=(targetY-lastShapeY)*ky;
+    root.dataset.fxLivingShapeClockR166='direct-render-clock-r166c-held-pulse';
     return{x:lastShapeX,y:lastShapeY,beat,breath};
   }
 
