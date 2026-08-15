@@ -1,4 +1,4 @@
-name: One-shot publish r172 physical mobile seam bridge
+name: One-shot publish r172 seam-priority cache
 on:
   push:
     branches: [master]
@@ -12,27 +12,39 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Publish r172 mobile seamless bridge
+      - name: Publish r172 seam-priority cache
         shell: bash
         run: |
           set -euo pipefail
+          git fetch origin master
+          git reset --hard origin/master
           python3 - <<'PY'
           from pathlib import Path
           index=Path('docs/scifi-ui/index.html')
           html=index.read_text()
-          tag='  <script defer data-fx-mobile-seam-bridge-r172="true" src="./scripts/formatx-mobile-seam-bridge-r172.js?v=20260815-r172-physical-seam-bridge"></script>\n'
-          if 'data-fx-mobile-seam-bridge-r172="true"' not in html:
-              anchor='</head>'
-              if anchor not in html: raise SystemExit('head terminator missing')
-              html=html.replace(anchor,tag+anchor,1)
+          old='formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260815-r171-breathing-optics'
+          new='formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260815-r172-seam-priority'
+          if old in html:
+              html=html.replace(old,new,1)
+          elif new not in html:
+              raise SystemExit('current r171/r172 energy cache token missing')
           index.write_text(html)
+          validator=Path('.github/scripts/validate-real3d-core.cjs')
+          v=validator.read_text().replace(old,new)
+          validator.write_text(v)
           PY
           node --check docs/scifi-ui/scripts/formatx-living-energy-r168.js
-          node --check docs/scifi-ui/scripts/formatx-mobile-seam-bridge-r172.js
           node .github/scripts/validate-real3d-core.cjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html
-          if git diff --cached --quiet; then echo 'r172 bridge already published'; exit 0; fi
-          git commit -m '[deploy-production] fix(mag): publish r172 physical mobile seam bridge'
-          git push origin HEAD:master
+          git add docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
+          if git diff --cached --quiet; then echo 'r172 seam-priority cache already current'; exit 0; fi
+          git commit -m '[deploy-production] fix(mag): publish r172 seam-priority cache'
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:master; then exit 0; fi
+            echo "master moved during push; rebasing attempt $attempt"
+            git fetch origin master
+            git rebase origin/master
+            sleep 1
+          done
+          exit 1
