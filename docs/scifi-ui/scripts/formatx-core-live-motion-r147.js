@@ -8,6 +8,7 @@ root.dataset.fxLiveMotionR147='booting';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const imp=(el,prop,value)=>{if(el instanceof HTMLElement&&el.style.getPropertyValue(prop)!==value)el.style.setProperty(prop,value,'important');};
 let host=null,detail=null,raf=0,last=performance.now(),visible=true;
 let sx=0,sy=0,se=.22;
 
@@ -15,6 +16,26 @@ function find(){
   host=document.querySelector('#hero .hero-space');
   detail=document.querySelector('#hero .fx-core-detail-r122');
   return host instanceof HTMLElement&&detail instanceof HTMLCanvasElement;
+}
+
+function applySafeLane(){
+  const hero=document.getElementById('hero');
+  const heading=hero?.querySelector('.fx-reference-heading');
+  const proof=hero?.querySelector('.fx-reference-proof');
+  const live=proof?.querySelector('.fx-reference-liveos');
+  if(!(hero instanceof HTMLElement))return;
+  if(innerWidth<=900){
+    imp(hero,'padding-bottom',innerWidth<=380?'72px':'64px');
+    imp(hero,'overflow','visible');
+    if(heading instanceof HTMLElement){imp(heading,'top','0px');imp(heading,'margin',innerWidth<=430?'18px 6% 26px':'16px 6% 26px');imp(heading,'z-index','21');}
+    if(proof instanceof HTMLElement){imp(proof,'margin',innerWidth<=380?'0 7% 46px 6%':'0 7% 42px 6%');imp(proof,'z-index','21');if(innerWidth<=430)imp(proof,'min-height','252px');}
+    if(live instanceof HTMLElement&&innerWidth<=430){imp(live,'top','auto');imp(live,'bottom','18px');}
+    root.dataset.fxLiveSafeLaneR147='active';
+  }else if(root.dataset.fxLiveSafeLaneR147==='active'){
+    hero.style.removeProperty('padding-bottom');hero.style.removeProperty('overflow');
+    for(const el of [heading,proof,live])if(el instanceof HTMLElement){for(const prop of ['top','bottom','margin','z-index','min-height'])el.style.removeProperty(prop);}
+    root.dataset.fxLiveSafeLaneR147='desktop';
+  }
 }
 
 function pulse(){
@@ -39,6 +60,7 @@ function bind(){
 
 function frame(now){
   raf=0;
+  applySafeLane();
   if(!visible){raf=requestAnimationFrame(frame);return;}
   if(!host?.isConnected||!detail?.isConnected){if(!bind()){raf=requestAnimationFrame(frame);return;}}
 
@@ -74,6 +96,7 @@ function frame(now){
 
 function start(){if(!raf)raf=requestAnimationFrame(frame);}
 function boot(attempt=0){
+  applySafeLane();
   if(!bind()){
     if(attempt<360)return requestAnimationFrame(()=>boot(attempt+1));
     root.dataset.fxLiveMotionR147='host-unavailable';return;
@@ -83,7 +106,8 @@ function boot(attempt=0){
   start();
 }
 
-['formatx:real3dready','formatx:coredetailready','formatx:referencepause'].forEach(name=>addEventListener(name,start,{passive:true}));
+['formatx:real3dready','formatx:coredetailready','formatx:referencepause','formatx:languagechange'].forEach(name=>addEventListener(name,()=>{applySafeLane();start();},{passive:true}));
+addEventListener('resize',applySafeLane,{passive:true});
 addEventListener('pageshow',start,{passive:true});
 boot();
 }());
