@@ -1,8 +1,8 @@
 FormatX production deployment marker
-requested_at=2026-08-15T22:32:00+02:00
+requested_at=2026-08-15T22:33:00+02:00
 source_master=20796971aeebf5796f9679ebb748b4716f8d1b37
 purpose=activate r171 optics-led living MAG on the accepted four-point crystal geometry and size; keep crystal-body scale at micro-breathing amplitude and make visible life come from continuous optical breathing plus lub-dub energy peaks
-optical_life=stable 32ms monotonic reactor clock drives dual caustics, cyan-violet spectrum/refraction, two orbit rings, cross-flare, shockwave, six moving sparks and direct expanding burst; slow breath now continuously modulates flare, spectrum, refraction, brightness, saturation and cyan/violet glow between heartbeat peaks
+optical_life=stable 32ms monotonic reactor clock drives dual caustics, cyan-violet spectrum/refraction, two orbit rings, cross-flare, shockwave, six moving sparks and direct expanding burst; slow breath continuously modulates flare, spectrum, refraction, brightness, saturation and cyan/violet glow between heartbeat peaks
 interaction=desktop pointer/mouse and mobile touch plus existing r144 gyroscope remain active; pointer tracking has larger optical travel, pointer/touch energy gain is stronger, click/touch launches a larger high-visibility burst without resizing the crystal geometry
-integration=preserve b6d5a753 mobile carrier seam dissolution plus transparent hero/stage carriers so the MAG atmosphere blends into operation heading/Public Proof instead of reading as a separate panel
-verification=production candidate source/runtime/security validation; JS syntax; Worker/build/smoke; dedicated r168 desktop/mobile verifier must show advancing optical frame/orbits/dual-caustics and pointer/touch burst; r169 compatibility verifier must confirm micro-scale body movement and continuously changing optical state
+integration=preserve b6d5a753 mobile carrier seam dissolution with a late runtime seam override at 64%/58% plus transparent hero/stage carriers so the MAG atmosphere blends through the lower crystal field into the operation heading/Public Proof instead of reading as a separate panel
+verification=production candidate source/runtime/security validation; JS syntax; Worker/build/smoke; dedicated r168 desktop/mobile verifier must show advancing optical frame/orbits/dual-caustics, pointer/touch burst, transparent mobile stage and seam starting inside the lower crystal field; r169 compatibility verifier must confirm micro-scale body movement and continuously changing optical state
