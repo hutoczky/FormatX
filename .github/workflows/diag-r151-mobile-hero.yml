@@ -1,0 +1,56 @@
+name: Diagnose r151 mobile hero
+on:
+  push:
+    paths:
+      - '.github/workflows/diag-r151-mobile-hero.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Inspect production mobile hero
+        run: |
+          cat > /tmp/diag.cjs <<'EOF'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:1,isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36'});
+            const page=await context.newPage();
+            const failed=[];
+            page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));
+            page.on('response',r=>{ if(r.status()>=400) failed.push({url:r.url(),status:r.status()}); });
+            await page.goto('https://formatxsuite.com/?r151diag='+Date.now(),{waitUntil:'networkidle',timeout:120000});
+            await page.waitForTimeout(4500);
+            const data=await page.evaluate(()=>{
+              const rect=e=>{const r=e.getBoundingClientRect();return {x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),bottom:+r.bottom.toFixed(1)};};
+              const style=e=>{const s=getComputedStyle(e);return {display:s.display,visibility:s.visibility,opacity:s.opacity,position:s.position,zIndex:s.zIndex,background:s.background,backgroundColor:s.backgroundColor,overflow:s.overflow,filter:s.filter};};
+              const images=[...document.querySelectorAll('#hero img')].map(e=>({tag:e.tagName,id:e.id,cls:e.className,src:e.getAttribute('src'),currentSrc:e.currentSrc,natural:[e.naturalWidth,e.naturalHeight],complete:e.complete,rect:rect(e),style:style(e),parent:e.parentElement?.className||''}));
+              const allBroken=[...document.images].filter(e=>e.complete&&e.naturalWidth===0).map(e=>({id:e.id,cls:e.className,src:e.getAttribute('src'),rect:rect(e),style:style(e),parent:e.parentElement?.className||''}));
+              const canvases=[...document.querySelectorAll('#hero canvas')].map(e=>({id:e.id,cls:e.className,wh:[e.width,e.height],rect:rect(e),style:style(e),parent:e.parentElement?.className||''}));
+              const hero=document.querySelector('#hero');
+              const direct=hero?[...hero.querySelectorAll('.hero-space > *, .fx-reference-heading, .fx-mobile-download-r150, .fx-reference-proof')].map(e=>({tag:e.tagName,id:e.id,cls:e.className,rect:rect(e),style:style(e)})):[];
+              return {root:{...document.documentElement.dataset},images,allBroken,canvases,direct,hero:hero?{rect:rect(hero),style:style(hero)}:null};
+            });
+            console.log('=== HERO DIAGNOSTIC ===');
+            console.log(JSON.stringify(data,null,2));
+            console.log('=== FAILED REQUESTS ===');
+            console.log(JSON.stringify(failed,null,2));
+            await page.screenshot({path:'/tmp/r151-live.png',fullPage:false});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          EOF
+          node /tmp/diag.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r151-mobile-hero-diag
+          path: /tmp/r151-live.png
+          retention-days: 2
