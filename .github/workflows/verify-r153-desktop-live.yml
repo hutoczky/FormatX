@@ -1,96 +1,117 @@
-name: Verify r153 desktop live MAG
+name: Verify r154 desktop and mobile MAG
 
 on:
-  push:
-    paths:
-      - '.github/workflows/verify-r153-desktop-live.yml'
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  desktop-live:
+  cross-device-live:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Install Playwright Chromium
         run: |
           npm init -y >/dev/null 2>&1
-          npm install playwright@1.55.0 >/dev/null 2>&1
+          npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
 
-      - name: Verify live desktop MAG motion
+      - name: Verify live desktop and mobile MAG
         run: |
-          cat > check-r153.cjs <<'JS'
+          cat > check-r154.cjs <<'JS'
           const { chromium } = require('playwright');
-          (async()=>{
-            const browser = await chromium.launch({headless:true});
-            const page = await browser.newPage({viewport:{width:1600,height:1000}, deviceScaleFactor:1});
-            await page.goto('https://formatxsuite.com/?verify=r153-desktop-live', {waitUntil:'networkidle', timeout:120000});
-            await page.waitForSelector('#hero .fx-core-detail-r122', {timeout:30000});
-            await page.waitForSelector('#hero .fx-core-live-r147-layer', {timeout:30000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxDesktopLiveStyleR153==='ready', null, {timeout:30000});
-            await page.waitForTimeout(700);
+          const fs = require('node:fs');
+          const assert = require('node:assert/strict');
+          const origin = 'https://formatxsuite.com';
 
-            const first = await page.evaluate(()=>{
-              const root=document.documentElement;
-              const host=document.querySelector('#hero .hero-space');
-              const layer=document.querySelector('#hero .fx-core-live-r147-layer');
-              const glow=document.querySelector('#hero .fx-core-live-r147-glow');
-              const orbit=document.querySelector('#hero .fx-core-live-r147-orbit');
-              const detail=document.querySelector('#hero .fx-core-detail-r122');
-              if(!host||!layer||!glow||!orbit||!detail) throw new Error('desktop live MAG nodes missing');
-              const lr=layer.getBoundingClientRect();
-              const gr=getComputedStyle(glow);
-              const or=getComputedStyle(orbit);
-              return {
-                bootstrap:root.dataset.fxCoreReal3dBootstrap||'',
-                live:root.dataset.fxLiveMotionR147||'',
-                style:root.dataset.fxDesktopLiveStyleR153||'',
-                layer:[lr.width,lr.height],
-                glowAnimation:gr.animationName,
-                orbitAnimation:or.animationName,
-                glowOpacity:Number(gr.opacity),
-                brightness:host.style.getPropertyValue('--fx-r147-brightness'),
-                filter:getComputedStyle(detail).filter
-              };
+          async function desktop(browser){
+            const context=await browser.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU'});
+            const page=await context.newPage();
+            await page.goto(`${origin}/?verify=r154-desktop-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForSelector('#hero .fx-core-detail-r122',{timeout:45000});
+            await page.waitForSelector('#hero .fx-core-live-r147-layer',{timeout:45000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxDesktopIntegrationStyleR154==='ready'&&String(document.documentElement.dataset.fxCoreReal3dBootstrap||'').includes('r154-desktop-integrated'),null,{timeout:45000});
+            await page.waitForTimeout(900);
+
+            const first=await page.evaluate(()=>{
+              const root=document.documentElement,host=document.querySelector('#hero .hero-space'),stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage'),detail=document.querySelector('#hero .fx-core-detail-r122'),native=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r112-canvas'),layer=document.querySelector('#hero .fx-core-live-r147-layer'),glow=document.querySelector('#hero .fx-core-live-r147-glow'),orbit=document.querySelector('#hero .fx-core-live-r147-orbit');
+              if(!host||!stage||!detail||!native||!layer||!glow||!orbit)throw new Error('desktop MAG nodes missing');
+              const h=host.getBoundingClientRect(),d=detail.getBoundingClientRect(),l=layer.getBoundingClientRect(),ds=getComputedStyle(detail),ss=getComputedStyle(stage),ns=getComputedStyle(native),gs=getComputedStyle(glow),os=getComputedStyle(orbit);
+              return{bootstrap:root.dataset.fxCoreReal3dBootstrap||'',integration:root.dataset.fxDesktopIntegrationStyleR154||'',host:[h.width,h.height],detail:[d.x,d.y,d.width,d.height],layer:[l.x,l.y,l.width,l.height],detailRatio:d.width/d.height,mix:ds.mixBlendMode,stageBackground:ss.backgroundImage,stageColor:ss.backgroundColor,nativeOpacity:Number(ns.opacity),glowAnimation:gs.animationName,orbitAnimation:os.animationName,glowOpacity:Number(gs.opacity),brightness:host.style.getPropertyValue('--fx-r147-brightness'),renderMs:Number(root.dataset.fxCoreRenderMs||Infinity)};
             });
-
-            await page.waitForTimeout(700);
-            const second = await page.evaluate(()=>{
-              const host=document.querySelector('#hero .hero-space');
-              const glow=document.querySelector('#hero .fx-core-live-r147-glow');
-              return {
-                glowOpacity:Number(getComputedStyle(glow).opacity),
-                brightness:host.style.getPropertyValue('--fx-r147-brightness')
-              };
-            });
-
+            await page.waitForTimeout(760);
+            const second=await page.evaluate(()=>({glowOpacity:Number(getComputedStyle(document.querySelector('#hero .fx-core-live-r147-glow')).opacity),brightness:document.querySelector('#hero .hero-space').style.getPropertyValue('--fx-r147-brightness')}));
             const box=await page.locator('#hero .hero-space').boundingBox();
-            if(box){
-              await page.mouse.move(box.x+box.width*.72, box.y+box.height*.46);
-              await page.waitForTimeout(350);
-            }
-            const interaction = await page.evaluate(()=>({
-              state:document.documentElement.dataset.fxCoreInteractionState||'',
-              x:document.querySelector('#hero .hero-space')?.style.getPropertyValue('--fx-r147-light-x')||'',
-              y:document.querySelector('#hero .hero-space')?.style.getPropertyValue('--fx-r147-light-y')||''
-            }));
+            if(box){await page.mouse.move(box.x+box.width*.70,box.y+box.height*.43);await page.mouse.down();await page.waitForTimeout(120);await page.mouse.up();await page.waitForTimeout(320);}
+            const interaction=await page.evaluate(()=>({state:document.documentElement.dataset.fxCoreInteractionState||'',lightX:document.querySelector('#hero .hero-space')?.style.getPropertyValue('--fx-r147-light-x')||'',lightY:document.querySelector('#hero .hero-space')?.style.getPropertyValue('--fx-r147-light-y')||''}));
+            console.log('DESKTOP R154',JSON.stringify({first,second,interaction},null,2));
+            assert.ok(first.bootstrap.includes('r154-desktop-integrated'));
+            assert.equal(first.integration,'ready');
+            assert.ok(Math.abs(first.detailRatio-(412/410))<0.035,`desktop reference aspect wrong: ${first.detailRatio}`);
+            assert.ok(first.detail[2]>=420&&first.detail[2]<=760,`desktop reference width unexpected: ${first.detail[2]}`);
+            assert.ok(Math.abs(first.layer[2]-first.detail[2])<3&&Math.abs(first.layer[3]-first.detail[3])<3,'live optics not locked to reference canvas');
+            assert.equal(first.mix,'screen');
+            assert.equal(first.stageBackground,'none');
+            assert.ok(first.nativeOpacity<=0.03,`wide native ghost still visible: ${first.nativeOpacity}`);
+            assert.ok(first.glowAnimation.includes('fx-r153-core-pulse'));
+            assert.ok(first.orbitAnimation.includes('fx-r153-orbit-a'));
+            assert.ok(first.glowOpacity!==second.glowOpacity||first.brightness!==second.brightness,'desktop idle pulse is not changing');
+            assert.ok(interaction.state||interaction.lightX!=='50.00%','desktop pointer interaction inactive');
+            assert.ok(first.renderMs<16.67,`desktop WebGL render budget exceeded: ${first.renderMs}`);
+            await page.screenshot({path:'/tmp/r154-desktop.png',fullPage:false,animations:'allow'});
+            await context.close();
+          }
 
-            console.log(JSON.stringify({first,second,interaction},null,2));
-            if(!first.bootstrap.includes('r153-desktop-live')) throw new Error('r153 bootstrap is not live');
-            if(first.style!=='ready') throw new Error('r153 desktop stylesheet not ready');
-            if(first.layer[0]<200 || first.layer[1]<200) throw new Error('desktop live layer has invalid geometry');
-            if(!first.glowAnimation.includes('fx-r153-core-pulse')) throw new Error('core pulse animation missing');
-            if(!first.orbitAnimation.includes('fx-r153-orbit-a')) throw new Error('orbit animation missing');
-            if(first.glowOpacity===second.glowOpacity && first.brightness===second.brightness) throw new Error('no measurable idle animation change');
-            if(!interaction.state) throw new Error('desktop interaction controller is not active');
-            await page.screenshot({path:'/tmp/r153-desktop-live.png', fullPage:false});
-            await browser.close();
+          async function mobile(browser){
+            const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await context.newPage();
+            await page.goto(`${origin}/?verify=r154-mobile-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForSelector('#hero .fx-core-detail-r122',{timeout:45000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&String(document.documentElement.dataset.fxCoreReal3dBootstrap||'').includes('r154-desktop-integrated'),null,{timeout:45000});
+            await page.waitForTimeout(900);
+            const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])]}));
+            await page.touchscreen.tap(195,310);await page.waitForTimeout(320);
+            const state=await page.evaluate(()=>{
+              const root=document.documentElement,detail=document.querySelector('#hero .fx-core-detail-r122'),stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage'),live=document.querySelector('#hero .fx-reference-liveos'),proof=document.querySelector('#hero .fx-reference-proof p'),d=detail?.getBoundingClientRect(),s=stage?getComputedStyle(stage):null,ds=detail?getComputedStyle(detail):null;
+              const covered=(()=>{if(!proof||!live)return -1;const bb=live.getBoundingClientRect(),walker=document.createTreeWalker(proof,NodeFilter.SHOW_TEXT);let n,count=0;while((n=walker.nextNode()))for(let i=0;i<n.length;i++){const r=document.createRange();r.setStart(n,i);r.setEnd(n,i+1);for(const x of r.getClientRects())if(x.width>.1&&x.height>.1&&x.right>bb.left+.5&&x.left<bb.right-.5&&x.bottom>bb.top+.5&&x.top<bb.bottom-.5)count++;}return count;})();
+              return{bootstrap:root.dataset.fxCoreReal3dBootstrap||'',layout:root.dataset.fxMobileReferenceLayout||'',detail:[d?.width||0,d?.height||0],mix:ds?.mixBlendMode||'',stageBackground:s?.backgroundImage||'',energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])],paused:root.dataset.fxReferenceMotionPaused,covered,renderMs:Number(root.dataset.fxCoreRenderMs||Infinity)};
+            });
+            console.log('MOBILE R154',JSON.stringify({before,state},null,2));
+            assert.ok(state.bootstrap.includes('r154-desktop-integrated'));
+            assert.equal(state.layout,'ready-v1');
+            assert.notEqual(state.mix,'screen','desktop blend leaked into mobile');
+            assert.ok(state.stageBackground!=='none','mobile reference atmosphere was removed');
+            assert.ok(state.detail[0]>=360,'approved mobile MAG width regressed');
+            assert.equal(state.covered,0,'Live OS overlaps proof text on mobile');
+            assert.equal(state.paused,'false');
+            assert.ok(state.energy>=before.energy-.01,'mobile interaction energy regressed');
+            assert.ok(state.renderMs<16.67,`mobile WebGL render budget exceeded: ${state.renderMs}`);
+            await page.screenshot({path:'/tmp/r154-mobile.png',fullPage:false,animations:'allow'});
+            await context.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            try{await desktop(browser);await mobile(browser);}finally{await browser.close();}
+            for(const f of ['/tmp/r154-desktop.png','/tmp/r154-mobile.png'])assert.ok(fs.statSync(f).size>10000,f);
+            console.log('PASS: r154 desktop aspect/blend and mobile regression checks passed.');
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
-          node check-r153.cjs
+          node check-r154.cjs
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: r153-desktop-live
-          path: /tmp/r153-desktop-live.png
+          name: r154-cross-device-${{ github.run_id }}
+          path: |
+            /tmp/r154-desktop.png
+            /tmp/r154-mobile.png
+          if-no-files-found: warn
+          retention-days: 14
