@@ -2,14 +2,16 @@
 'use strict';
 const root=document.documentElement;
 const VERSION='r168-living-energy-orbit-caustic-v2';
-if(root.dataset.fxLivingEnergyR168===VERSION)return;
-if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxLivingEnergyR168='audit-skip';return;}
+const CLOCK='32ms-optical-reactor-v3';
+if(root.dataset.fxLivingEnergyR168===VERSION&&root.dataset.fxLivingEnergyClockR168===CLOCK)return;
+if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxLivingEnergyR168='audit-skip';root.dataset.fxLivingEnergyClockR168='audit-skip';return;}
 root.dataset.fxLivingEnergyR168='booting';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const gauss=(x,c,w)=>Math.exp(-Math.pow((x-c)/w,2));
-let host=null,layer=null,detail=null,boost=0,lastInput=0,raf=0,last=0;
-let pointerX=0,pointerY=0,burstAt=0,burstStrength=0;
+let host=null,layer=null,detail=null,boost=0,lastInput=0,timer=0,last=performance.now();
+let pointerX=0,pointerY=0,burstAt=0,burstStrength=0,frameSeq=0;
+let orbitPhaseA=0,orbitPhaseB=0,causticPhaseA=0,causticPhaseB=0;
 
 function make(cls){const e=document.createElement('span');e.className=cls;e.setAttribute('aria-hidden','true');return e;}
 function ensure(){
@@ -27,23 +29,23 @@ function ensure(){
     'fx-r168-spark fx-r168-spark-e','fx-r168-spark fx-r168-spark-f'
   ];
   for(const cls of wanted){const parts=cls.split(' '),sel='.'+parts.join('.');if(!layer.querySelector(sel))layer.appendChild(make(cls));}
-  if(host.dataset.fxLivingEnergyBoundR168!=='v2'){
+  if(host.dataset.fxLivingEnergyBoundR168!=='v3'){
     const pos=(x,y)=>{const r=host.getBoundingClientRect();if(!r.width||!r.height)return;pointerX=clamp((x-r.left)/r.width*2-1,-1,1);pointerY=clamp((y-r.top)/r.height*2-1,-1,1);};
     const hit=(strength=1)=>{const now=performance.now();boost=Math.max(boost,strength);burstStrength=Math.max(burstStrength,strength);burstAt=now;lastInput=now;root.dataset.fxLivingEnergyInteractionR168='energy-burst';try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}};
     host.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'){pos(e.clientX,e.clientY);boost=Math.max(boost,.48);lastInput=performance.now();root.dataset.fxLivingEnergyInteractionR168='pointer-reactive';}},{passive:true});
     host.addEventListener('pointerdown',e=>{pos(e.clientX,e.clientY);hit(1.48);},{passive:true});
     host.addEventListener('touchstart',e=>{const t=e.touches?.[0];if(t)pos(t.clientX,t.clientY);hit(1.58);},{passive:true});
     host.addEventListener('touchmove',e=>{const t=e.touches?.[0];if(t)pos(t.clientX,t.clientY);boost=Math.max(boost,1.0);lastInput=performance.now();root.dataset.fxLivingEnergyInteractionR168='touch-reactive';},{passive:true});
-    host.dataset.fxLivingEnergyBoundR168='v2';
+    host.dataset.fxLivingEnergyBoundR168='v3';
   }
   root.dataset.fxLivingEnergyR168=VERSION;
   return true;
 }
-function tick(now){
-  raf=requestAnimationFrame(tick);
+
+function tick(){
   if(!ensure())return;
-  if(now-last<20)return;
-  const dt=Math.min(80,Math.max(0,now-last));last=now;
+  const now=performance.now();
+  const dt=clamp(now-last||32,16,120);last=now;
   const still=reduced.matches||root.dataset.fxReferenceMotionPaused==='true';
   const energy=clamp(Number(window.FormatXCoreMobileV69?.energy||window.FormatXCoreCinematic?.energy||.45),0,1.5);
   const cp=window.FormatXCoreCinematic?.corePosition||[0,0,0];
@@ -58,8 +60,17 @@ function tick(now){
   const breath=still?.5:.5+.5*Math.sin(now*.00118-1.05);
   const activity=still?.12:clamp(energy*.40+boost*.78+burstStrength*.48,0,1.65);
   const x=clamp(pointerX*.58+gx*.42,-1,1),y=clamp(pointerY*.58-gy*.42,-1,1);
-  const orbitA=(now*(.017+activity*.004)+x*16)%360,orbitB=(-now*(.011+activity*.003)+y*18)%360;
-  const causticA=(now*.020+x*22-y*11)%360,causticB=(-now*.013+x*10+y*18)%360;
+
+  /* Monotonic optical phases: unlike raw rAF timestamps, these advance on every
+     reactor tick, so orbit/caustic motion stays visibly alive under throttling. */
+  if(!still){
+    orbitPhaseA=(orbitPhaseA+dt*(.017+activity*.004))%360;
+    orbitPhaseB=(orbitPhaseB-dt*(.011+activity*.003)+360)%360;
+    causticPhaseA=(causticPhaseA+dt*(.020+activity*.0035))%360;
+    causticPhaseB=(causticPhaseB-dt*(.013+activity*.0025)+360)%360;
+  }
+  const orbitA=(orbitPhaseA+x*16+360)%360,orbitB=(orbitPhaseB+y*18+360)%360;
+  const causticA=(causticPhaseA+x*22-y*11+360)%360,causticB=(causticPhaseB+x*10+y*18+360)%360;
   const pulse=clamp(beat*.98+activity*.48,0,1.5);
   const shock=clamp(.72+beat*.48+activity*.12,.70,1.42);
   const flare=clamp(.12+beat*.58+activity*.27,.10,.92);
@@ -98,15 +109,17 @@ function tick(now){
     detail.style.setProperty('--fx-r168-live-opacity',clamp(.982+beat*.012+activity*.004,.982,1).toFixed(3));
     detail.style.setProperty('filter',`brightness(${brightness.toFixed(3)}) saturate(${saturation.toFixed(3)}) contrast(${contrast.toFixed(3)}) drop-shadow(0 0 ${cyanBlur.toFixed(1)}px rgba(70,225,255,${cyanAlpha.toFixed(3)})) drop-shadow(0 0 ${violetBlur.toFixed(1)}px rgba(155,72,255,${violetAlpha.toFixed(3)}))`,'important');
   }
+  frameSeq++;
   root.dataset.fxLivingEnergyBeatR168=`${lub.toFixed(3)},${dub.toFixed(3)},${breath.toFixed(3)}`;
   root.dataset.fxLivingEnergyPositionR168=`${x.toFixed(3)},${y.toFixed(3)}`;
   root.dataset.fxLivingEnergyActivityR168=activity.toFixed(3);
   root.dataset.fxLivingEnergyOpticsR168=`${flare.toFixed(3)},${spectrum.toFixed(3)},${refract.toFixed(3)},${burstO.toFixed(3)}`;
-  root.dataset.fxLivingEnergyClockR168='requestAnimationFrame-v2';
+  root.dataset.fxLivingEnergyClockR168=CLOCK;
+  root.dataset.fxLivingEnergyFrameR168=String(frameSeq);
   root.dataset.fxLivingEnergyEffectModeR168='orbit-caustic-spectrum-shock-refraction';
   if(!burstAt&&boost<.04)root.dataset.fxLivingEnergyInteractionR168='idle-living';
 }
-function start(){if(!ensure())return;if(!raf)raf=requestAnimationFrame(tick);}
+function start(){if(!ensure())return;if(timer)return;last=performance.now();tick();timer=setInterval(tick,32);root.dataset.fxLivingEnergyClockR168=CLOCK;}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected)ensure();});mo.observe(document.documentElement,{childList:true,subtree:true});
 addEventListener('pageshow',start,{passive:true});
