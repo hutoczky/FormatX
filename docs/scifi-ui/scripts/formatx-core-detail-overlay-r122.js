@@ -7,7 +7,7 @@ root.dataset.fxCoreDetailR122='booting';
 root.dataset.fxCoreReferenceTextureR130='loading';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const PARTS=Array.from({length:6},(_,i)=>`/scifi-ui/assets/reference-r130/part${i}.b64?v=20260815-reference-material-r130`);
+const PARTS=Array.from({length:6},(_,i)=>`/scifi-ui/assets/reference-r130/part${i}.b64?v=20260815-reference-material-r131`);
 
 async function loadReferenceBitmap(){
   const chunks=await Promise.all(PARTS.map(async url=>{
@@ -15,9 +15,23 @@ async function loadReferenceBitmap(){
     if(!r.ok)throw new Error(`reference chunk ${r.status}`);
     return (await r.text()).trim();
   }));
-  const bin=atob(chunks.join(''));
+
+  /* r131: two one-character transport defects were isolated by block hashes on the
+     live Worker asset path. Repair them before decoding so the reconstructed bytes
+     are exactly the original 49,204-byte WebP reference material. */
+  chunks[0]=chunks[0].slice(0,754)+'n'+chunks[0].slice(754);
+  chunks[4]=chunks[4].slice(0,10770)+chunks[4].slice(10771);
+  const expected=[11000,11000,11000,11000,11000,10608];
+  if(chunks.some((chunk,i)=>chunk.length!==expected[i]))throw new Error(`reference repair length mismatch ${chunks.map(v=>v.length).join(',')}`);
+  root.dataset.fxCoreReferenceRepairR131='applied';
+
+  const joined=chunks.join('');
+  if(joined.length!==65608)throw new Error(`reference base64 length ${joined.length}`);
+  const bin=atob(joined);
+  if(bin.length!==49204)throw new Error(`reference byte length ${bin.length}`);
   const bytes=new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  if(bytes[0]!==82||bytes[1]!==73||bytes[2]!==70||bytes[3]!==70||bytes[8]!==87||bytes[9]!==69||bytes[10]!==66||bytes[11]!==80)throw new Error('reference RIFF/WEBP signature mismatch');
   const blob=new Blob([bytes],{type:'image/webp'});
   return createImageBitmap(blob);
 }
@@ -101,17 +115,17 @@ function boot(attempt=0){
     ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,cssW,cssH);
     if(bitmap){drawReference(lastTx,lastTy,lastEnergy);drawLiveOptics(lastTx,lastTy,lastEnergy);}
     root.dataset.fxCoreDetailEnergy=lastEnergy.toFixed(2);
-    root.dataset.fxCoreDetailFrame=bitmap?'reference-material-r130':failed?'reference-fallback-r130':'reference-loading-r130';
+    root.dataset.fxCoreDetailFrame=bitmap?'reference-material-r131':failed?'reference-fallback-r131':'reference-loading-r131';
     if(!raf)raf=requestAnimationFrame(render);
   }
 
   loadReferenceBitmap().then(b=>{
-    bitmap=b;root.dataset.fxCoreReferenceTextureR130='ready';root.dataset.fxCoreFacetMode='reference-material-r130';
-    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r130',mode:'reference-material-interactive'}}));
+    bitmap=b;root.dataset.fxCoreReferenceTextureR130='ready';root.dataset.fxCoreFacetMode='reference-material-r131';
+    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r131',mode:'reference-material-interactive'}}));
     if(!raf&&visible){last=performance.now();raf=requestAnimationFrame(render);}
   }).catch(err=>{
-    failed=true;root.dataset.fxCoreReferenceTextureR130='failed';root.dataset.fxCoreFacetMode='native-webgl-fallback-r130';
-    console.warn('FormatX reference material r130 fallback',err);
+    failed=true;root.dataset.fxCoreReferenceTextureR130='failed';root.dataset.fxCoreFacetMode='native-webgl-fallback-r131';
+    console.warn('FormatX reference material r131 fallback',err);
   });
 
   const ro=new ResizeObserver(resize);ro.observe(stage);
