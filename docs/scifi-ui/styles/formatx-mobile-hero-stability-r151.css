@@ -50,6 +50,8 @@
     box-sizing:border-box!important;
     position:relative!important;
     z-index:32!important;
+    order:11!important;
+    flex:0 0 auto!important;
     width:min(88%,680px)!important;
     margin:0 auto 28px!important;
     padding:18px!important;
@@ -159,9 +161,20 @@
     font-style:normal!important;
   }
 
-  /* Explicit flow contract: heading -> download -> proof. */
+  /* Explicit flex-flow contract. Legacy reference layers assign their own
+     margins/positions; fixed order prevents a newly inserted download dock from
+     entering the physical MAG-to-heading safe lane. */
+  #hero .hero-space{
+    order:-1!important;
+  }
   #hero .fx-reference-heading{
+    order:10!important;
+    flex:0 0 auto!important;
     margin-bottom:24px!important;
+  }
+  #hero .fx-reference-proof{
+    order:12!important;
+    flex:0 0 auto!important;
   }
   #hero .fx-mobile-download-r151 + .fx-reference-proof{
     margin-top:0!important;
