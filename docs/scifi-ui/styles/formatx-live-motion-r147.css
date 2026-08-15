@@ -29,6 +29,7 @@
     white-space:nowrap!important;
     border:0!important;
     pointer-events:none!important;
+    opacity:0!important;
     z-index:-1!important;
   }
 
@@ -218,7 +219,7 @@
   #hero .fx-core-live-r147-spark.s6{transform:translate(61px,93px);animation:fx-r147-spark 3.1s 1.05s ease-in-out infinite}
 
   /* Approved reference material remains geometrically fixed. Only emitted light changes. */
-  html[data-fx-live-motion-r147="ready"] #hero .fx-core-detail-r122{
+  html[data-fx-live-motion-r147*="r148"] #hero .fx-core-detail-r122{
     will-change:filter;
     filter:
       brightness(var(--fx-r147-brightness,1.12))
@@ -305,5 +306,5 @@
   #hero .fx-core-live-r147-prism,
   #hero .fx-core-live-r147-shock,
   #hero .fx-core-live-r147-spark{animation:none!important;opacity:.16!important}
-  html[data-fx-live-motion-r147="ready"] #hero .fx-core-detail-r122{filter:none!important}
+  html[data-fx-live-motion-r147*="r148"] #hero .fx-core-detail-r122{filter:none!important}
 }

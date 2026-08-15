@@ -21,9 +21,10 @@ function find(){
 
 function ensureLayer(){
   if(!(host instanceof HTMLElement))return null;
-  layer=host.querySelector('.fx-core-live-r147-layer');
-  if(layer instanceof HTMLElement&&layer.dataset.fxR148==='true')return layer;
-  if(layer instanceof HTMLElement)layer.remove();
+  const all=[...document.querySelectorAll('#hero .fx-core-live-r147-layer')];
+  const keep=all.find(el=>el instanceof HTMLElement&&el.parentElement===host&&el.dataset.fxR148==='true')||null;
+  for(const el of all)if(el!==keep)el.remove();
+  if(keep instanceof HTMLElement){layer=keep;return layer;}
   layer=document.createElement('div');
   layer.className='fx-core-live-r147-layer';
   layer.dataset.fxR148='true';
