@@ -1,0 +1,60 @@
+name: Verify final r151 production
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-r151-final-live.yml'
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Verify final live mobile runtime
+        run: |
+          cat > verify-final.cjs <<'EOF'
+          const { chromium } = require('playwright');
+          const assert=(v,m)=>{if(!v)throw new Error(m)};
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({viewport:{width:412,height:915},isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36'});
+            const page=await context.newPage();
+            const bad=[];page.on('response',r=>{if(r.status()>=400&&r.url().includes('formatxsuite.com'))bad.push([r.status(),r.url()])});
+            await page.goto('https://formatxsuite.com/?r151_final='+Date.now(),{waitUntil:'commit',timeout:30000});
+            await page.waitForSelector('#hero',{timeout:20000});
+            await page.waitForTimeout(9000);
+            const r=await page.evaluate(()=>{
+              const vis=e=>{if(!e)return false;const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&+s.opacity>.05&&r.width>2&&r.height>2};
+              const rr=e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+              const space=document.querySelector('#hero .hero-space'),core=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r112-canvas'),detail=document.querySelector('#hero .fx-core-detail-r122'),heading=document.querySelector('#hero .fx-reference-heading'),dock=document.querySelector('#hero .fx-mobile-download-r151'),proof=document.querySelector('#hero .fx-reference-proof');
+              const primary=dock?.querySelector('[data-release-download="multiplatform"]'),android=dock?.querySelector('a[href="/download/android"]');
+              const forbidden=document.querySelectorAll('#hero .hero-space img,#hero .hero-space picture,#hero .hero-space iframe,#hero .hero-space object,#hero .hero-space embed').length;
+              const white=[...space.querySelectorAll('*')].filter(e=>{if(!vis(e))return false;const x=e.getBoundingClientRect();if(x.width*x.height<1600)return false;const c=getComputedStyle(e).backgroundColor.match(/[\d.]+/g)?.map(Number)||[];return c.length>=3&&c[0]>225&&c[1]>225&&c[2]>225&&(c[3]??1)>.25}).length;
+              const cb=core?.getBoundingClientRect(),db=detail?.getBoundingClientRect(),hb=heading?.getBoundingClientRect();const visualBottom=Math.max(space?.getBoundingClientRect().bottom||0,cb?.bottom||0,db?.bottom||0);
+              return {dataset:{...document.documentElement.dataset},space:space?{...rr(space),bg:getComputedStyle(space).backgroundColor}:null,core:vis(core)?rr(core):null,detail:vis(detail)?rr(detail):null,heading:vis(heading)?{...rr(heading),gap:hb.top-visualBottom,order:getComputedStyle(heading).order}:null,dock:vis(dock)?{...rr(dock),order:getComputedStyle(dock).order}:null,proof:vis(proof)?{...rr(proof),order:getComputedStyle(proof).order}:null,primary:primary instanceof HTMLAnchorElement&&vis(primary)?primary.href:null,android:android instanceof HTMLAnchorElement&&vis(android)?android.href:null,forbidden,white};
+            });
+            console.log(JSON.stringify(r,null,2));console.log('badResponses',JSON.stringify(bad));
+            await page.screenshot({path:'r151-final-production.png',fullPage:false});
+            assert(r.dataset.fxCoreReal3dBootstrap?.includes('r151-final'),'final cache-busted bootstrap not active');
+            assert(r.dataset.fxMobileHeroStabilityR151==='r151-mobile-hero-stability','stability runtime not ready');
+            assert(r.forbidden===0&&r.white===0,'broken/white hero visual remains');
+            assert(r.core?.width>300&&r.detail?.width>300,'MAG canvases unavailable');
+            assert(r.heading?.gap>=30&&r.heading?.gap<=80,'MAG safe gap wrong');
+            assert(r.heading.bottom<=r.dock.top+2&&r.dock.bottom<=r.proof.top+2,'heading/download/proof flow wrong');
+            assert(r.primary&&r.android?.endsWith('/download/android'),'downloads unavailable');
+            assert(bad.length===0,'production returned failing resources');
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          EOF
+          timeout 75s node verify-final.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r151-final-production
+          path: r151-final-production.png
+          retention-days: 3
