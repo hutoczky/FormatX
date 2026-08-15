@@ -1,0 +1,89 @@
+/* r132 — final mobile reference geometry lock.
+   Loaded after all legacy award layers so the supplied reference framing wins.
+   It changes framing only; the WebGL mesh and touch interaction remain native. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar{
+    height:68px!important;
+    min-height:68px!important;
+    padding:4px 18px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] .topbar .brand{
+    position:fixed!important;
+    left:18px!important;
+    right:auto!important;
+    top:19px!important;
+    bottom:auto!important;
+    width:auto!important;
+    height:34px!important;
+    margin:0!important;
+    gap:10px!important;
+    transform:none!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] .topbar .brand>img{
+    width:34px!important;
+    height:34px!important;
+    max-width:34px!important;
+    flex:0 0 34px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] .fx-reference-mag-button{
+    position:fixed!important;
+    left:auto!important;
+    right:calc(clamp(16px,6.55vw,57px) + 109px)!important;
+    top:16px!important;
+    bottom:auto!important;
+    width:48px!important;
+    height:36px!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] .fx-language-toggle{
+    position:fixed!important;
+    left:auto!important;
+    right:calc(clamp(16px,6.55vw,57px) + 61px)!important;
+    top:14px!important;
+    bottom:auto!important;
+    width:40px!important;
+    min-width:40px!important;
+    height:40px!important;
+    min-height:40px!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] .fx-reference-menu-button{
+    position:fixed!important;
+    left:auto!important;
+    right:clamp(16px,6.55vw,57px)!important;
+    top:8px!important;
+    bottom:auto!important;
+    width:48px!important;
+    height:52px!important;
+    margin:0!important;
+    transform:none!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-rail{
+    position:absolute!important;
+    left:auto!important;
+    right:6.55%!important;
+    top:14px!important;
+    bottom:auto!important;
+    margin:0!important;
+  }
+
+  /* The reference material is a square 412px composition. The live hero host is
+     95.6vw (393.86px at the locked 412px viewport), so compensate only the
+     compositor vertically. This removes the previous compressed/crushed look. */
+  html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
+    transform:scaleY(1.046)!important;
+    transform-origin:50% 0!important;
+  }
+}
+
+@media (max-width:380px){
+  html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
+    transform:scaleY(1.042)!important;
+    transform-origin:50% 0!important;
+  }
+}
