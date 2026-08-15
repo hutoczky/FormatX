@@ -1,4 +1,4 @@
-name: One-shot publish r166c living crystal shape pulse
+name: One-shot publish r167 visible crystal body heartbeat
 on:
   push:
     branches: [master]
@@ -12,45 +12,40 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Publish r166c held crystal heartbeat
+      - name: Publish r167 heartbeat script cache and contract
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import re, base64
-          detail=Path('docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js')
-          d=detail.read_text()
-          encoded='ZnVuY3Rpb24gaGVhcnRiZWF0U2hhcGUoZW5lcmd5KXsKICAgIGlmKHJlZHVjZWQubWF0Y2hlcylyZXR1cm57eDoxLHk6MSxiZWF0OjAsYnJlYXRoOi41fTsKICAgIC8qIHIxNjZjOiB3aWRlIHJlbmRlci1jbG9jayBoZWFydGJlYXQgZW52ZWxvcGUgd2l0aCBmYXN0IGNvbnRyYWN0aW9uIGFuZAogICAgICAgc2xvd2VyIHJlbGVhc2Ugc28gdGhlIGZvdXItcG9pbnQgc2lsaG91ZXR0ZSB2aXNpYmx5IGJyZWF0aGVzIG9uIGV2ZXJ5CiAgICAgICBkZXNrdG9wL21vYmlsZSBmcmFtZSBpbnN0ZWFkIG9mIGZsYXNoaW5nIGJldHdlZW4gc2FtcGxlZCBpbnN0YW50cy4gKi8KICAgIGNvbnN0IG5vdz1wZXJmb3JtYW5jZS5ub3coKTsKICAgIGNvbnN0IGN5Y2xlPShub3clMTM4MCkvMTM4MDsKICAgIGNvbnN0IGc9KGMsdyk9Pk1hdGguZXhwKC1NYXRoLnBvdygoY3ljbGUtYykvdywyKSk7CiAgICBjb25zdCBsdWI9ZyguMTA1LC4wNjYpOwogICAgY29uc3QgZHViPWcoLjI0NSwuMDc4KSouNzA7CiAgICBjb25zdCBiZWF0PWNsYW1wKGx1YitkdWIqLjgyLDAsMS4yMCk7CiAgICBjb25zdCBicmVhdGg9LjUrLjUqTWF0aC5zaW4obm93Ki4wMDExOC0xLjA1KTsKICAgIGNvbnN0IGFjdGl2aXR5PWNsYW1wKChlbmVyZ3ktLjMwKS8xLjEwLDAsMSk7CiAgICBjb25zdCB0YXJnZXRYPWNsYW1wKC45OTYrKGJyZWF0aC0uNSkqLjAwNitiZWF0Ki4wMjErYWN0aXZpdHkqLjAwMywuOTkxLDEuMDI5KTsKICAgIGNvbnN0IHRhcmdldFk9Y2xhbXAoLjk5NSsoYnJlYXRoLS41KSouMDEwK2JlYXQqLjAzNCthY3Rpdml0eSouMDA0LC45ODcsMS4wNDUpOwogICAgY29uc3Qga3g9dGFyZ2V0WD5sYXN0U2hhcGVYPy4zODouMDc1OwogICAgY29uc3Qga3k9dGFyZ2V0WT5sYXN0U2hhcGVZPy40MjouMDcwOwogICAgbGFzdFNoYXBlWCs9KHRhcmdldFgtbGFzdFNoYXBlWCkqa3g7CiAgICBsYXN0U2hhcGVZKz0odGFyZ2V0WS1sYXN0U2hhcGVZKSpreTsKICAgIHJvb3QuZGF0YXNldC5meExpdmluZ1NoYXBlQ2xvY2tSMTY2PSdkaXJlY3QtcmVuZGVyLWNsb2NrLXIxNjZjLWhlbGQtcHVsc2UnOwogICAgcmV0dXJue3g6bGFzdFNoYXBlWCx5Omxhc3RTaGFwZVksYmVhdCxicmVhdGh9OwogIH0='
-          new_func=base64.b64decode(encoded).decode()
-          d,n=re.subn(r'function heartbeatShape\(energy\)\{.*?\n  \}\n\n  function drawReference',new_func+'\n\n  function drawReference',d,count=1,flags=re.S)
-          if n!=1: raise SystemExit('heartbeatShape block not found exactly once')
-          detail.write_text(d)
-          boot=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
-          s=boot.read_text()
-          old='formatx-core-detail-overlay-r122.js?v=20260815-r166b-direct-clock-shape-pulse'
-          new='formatx-core-detail-overlay-r122.js?v=20260815-r166c-held-shape-pulse'
-          if old in s:s=s.replace(old,new,1)
-          elif new not in s:raise SystemExit('r166b detail cache token not found')
-          boot.write_text(s)
+          import re
+
           index=Path('docs/scifi-ui/index.html')
           html=index.read_text()
-          target='./scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-r166c-held-shape-pulse'
-          html,n=re.subn(r'\.\/scripts\/formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=[^"\']+',target,html,count=1)
-          if n!=1: raise SystemExit('FormatX real3d bootstrap URL not found exactly once')
+          target='./scripts/formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless&rev=20260815-r167-crystal-body-pulse'
+          html,n=re.subn(r'\.\/scripts\/formatx-live-heartbeat-r155\.js\?v=20260815-r158-lubdub-seamless&rev=[^"\']+',target,html,count=1)
+          if n!=1: raise SystemExit('heartbeat script URL not found exactly once')
           index.write_text(html)
+
           validator=Path('.github/scripts/validate-real3d-core.cjs')
           v=validator.read_text()
-          v=v.replace('formatx-core-detail-overlay-r122.js?v=20260815-r166b-direct-clock-shape-pulse','formatx-core-detail-overlay-r122.js?v=20260815-r166c-held-shape-pulse',1)
-          v=v.replace('direct-render-clock-r166b','direct-render-clock-r166c-held-pulse')
+          old="assert.ok(index.includes('formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless'));"
+          new="assert.ok(index.includes('formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless&rev=20260815-r167-crystal-body-pulse'));"
+          if old in v:v=v.replace(old,new,1)
+          elif new not in v:raise SystemExit('heartbeat index validator token not found')
+          marker="for(const token of ['js-reactive-heartbeat-r155','r158-lub-dub-seamless-living'"
+          if marker not in v:raise SystemExit('heartbeat validator marker missing')
+          needle="'formatx-seamless-living-r158.css'])assert.ok(heartbeat.includes(token),`missing r158 heartbeat token: ${token}`);"
+          replacement="'formatx-seamless-living-r158.css','r167-heartbeat-css-scale-four-tip','applyCrystalShapePulse','fxLivingShapeScaleR167','fxLivingShapeEnvelopeR167','visible-four-tip-lub-dub',\"set(detail,'scale'\"])assert.ok(heartbeat.includes(token),`missing r167 heartbeat token: ${token}`);"
+          if needle in v:v=v.replace(needle,replacement,1)
+          elif 'fxLivingShapeScaleR167' not in v:raise SystemExit('heartbeat token list terminator not found')
           validator.write_text(v)
           PY
-          node --check docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js
-          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node --check docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js
           node .github/scripts/validate-real3d-core.cjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
-          if git diff --cached --quiet; then echo 'r166c held shape pulse already current'; exit 0; fi
-          git commit -m '[deploy-production] fix(mag): widen and hold crystal silhouette heartbeat'
+          git add docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
+          if git diff --cached --quiet; then echo 'r167 heartbeat cache already current'; exit 0; fi
+          git commit -m '[deploy-production] feat(mag): publish r167 visible crystal-body heartbeat'
           git push origin HEAD:master
