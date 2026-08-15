@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-15T11:55:47+02:00
-source_master=458a8419c831b64041ebb47dd3ed22339e9d127c
-purpose=activate the current mobile/desktop reference chain: r142 unclipped compositor, r143 tail-pixel bridge, r144 animated pointer/touch/gyroscope interaction, native prismatic WebGL core and current reference typography/layout; preserve the approved MAG geometry and size
-interaction=continuous breathing and reactor animation; pointer/touch parallax and energy response; mobile gyroscope parallax where supported and permitted; manual touch remains authoritative; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; r144 gyro + r143 tail bridge contract; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG capture; animation/interactivity verification; award-readiness and post-deploy reference checks
+requested_at=2026-08-15T12:05:20+02:00
+source_master=70b888dcf6622c8389a5c70ef357a5cac67cb997
+purpose=activate r145 narrow-mobile proof safety while preserving the approved MAG visual: r142 unclipped compositor, r143 tail bridge, r144 pointer/touch/gyroscope interaction and native prismatic WebGL remain unchanged; only <=400px proof text/control separation is tightened
+interaction=unchanged r144 continuous breathing and reactor animation; pointer/touch parallax and energy response; mobile gyroscope where supported and permitted; manual touch remains authoritative; prefers-reduced-motion respected
+verification=production candidate validation; JavaScript syntax; r145 narrow-proof contract; r144 gyro + r143 tail bridge contract; Worker tests; production build; custom-domain smoke; 390px live text-glyph overlap check; desktop/mobile MAG capture; post-deploy reference and award-readiness checks
