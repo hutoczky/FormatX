@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-15T16:50:00+02:00
-source_master=66da9a145423c430c297c52cfa1d28444f4e3195
-purpose=activate r154b desktop integration: preserve the supplied 412x410 reference aspect; remove the legacy desktop stage gradient rectangle with higher-specificity overrides; suppress the horizontally stretched native WebGL ghost while keeping its renderer and interaction engine alive; screen-blend the visible reference compositor and live optics into the hero; preserve the approved mobile geometry, size, proof layout and atmosphere
-interaction=preserve r153 desktop breathing/reactor/orbit animation and pointer response; preserve r152 centered click stability; preserve r144 mobile pointer/touch/gyroscope interaction and continuous breathing/reactor motion; prefers-reduced-motion remains respected
-verification=production candidate validation; JavaScript syntax; r154b aspect/blend/stage override contract; Worker tests; production build; custom-domain smoke; desktop 1600x1000 and mobile 390x844 live regression; real animation timeline; pointer/touch interaction; WebGL render budget; screenshot visual inspection
+requested_at=2026-08-15T17:00:00+02:00
+source_master=661173173b34fef0e3e06c5d31d7b6cedb7ace99
+purpose=activate r155 cross-device live heartbeat plus r154c desktop integration: keep the supplied 412x410 crystal aspect; remove the desktop stage rectangle and stretched WebGL ghost; feather the remaining reference-bitmap corners into the hero with a soft alpha mask; keep the reference compositor and live optics screen-blended into the site; preserve approved mobile geometry, size, atmosphere and proof layout
+interaction=r155 50ms JavaScript heartbeat drives a visible reactor core, ring and wave on desktop and mobile; it follows the existing r147 light position so desktop pointer, mobile touch and r144 gyroscope input remain authoritative; r153 optical effects and r152 click stability stay active; prefers-reduced-motion and pause state are respected
+verification=production candidate validation; JS syntax including heartbeat; r154c aspect/blend/mask contract; Worker tests; production build; custom-domain smoke; desktop 1600x1000 and mobile 390x844 live regression; heartbeat tick/phase progression; pointer/touch interaction; WebGL render budget; real screenshot visual inspection
