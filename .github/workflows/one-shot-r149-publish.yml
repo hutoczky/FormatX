@@ -1,0 +1,54 @@
+name: One-shot publish centered MAG r149
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r149-publish.yml'
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Publish r149 cache token and production marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          js = Path('docs/scifi-ui/scripts/formatx-core-live-motion-r147.js').read_text(encoding='utf-8')
+          css = Path('docs/scifi-ui/styles/formatx-live-motion-r147.css').read_text(encoding='utf-8')
+          boot = Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js').read_text(encoding='utf-8')
+          required = {
+              'js': ['centered-optical-reactor-r149', 'fxLiveLayerAnchorR149', 'active-r149'],
+              'css': ['r149', 'contain:layout paint style', 'margin:44px 6% 24px'],
+              'boot': ['centered-optics-safe-lane-r149', 'luminous-interactive-r149']
+          }
+          for name, needles in required.items():
+              text = {'js': js, 'css': css, 'boot': boot}[name]
+              missing = [n for n in needles if n not in text]
+              if missing:
+                  raise SystemExit(f'{name} missing r149 contract: {missing}')
+
+          p = Path('docs/scifi-ui/index.html')
+          s = p.read_text(encoding='utf-8')
+          old = 'rev=20260815-spectacular-reactor-safe-lane-r148c'
+          new = 'rev=20260815-centered-optics-safe-lane-r149'
+          if old not in s and new not in s:
+              raise SystemExit('FormatX bootstrap cache token not found')
+          p.write_text(s.replace(old, new), encoding='utf-8')
+          PY
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/index.html
+          if git diff --cached --quiet; then
+            echo 'r149 cache token already published.'
+            exit 0
+          fi
+          git commit -m '[deploy-production] fix(mag): publish centered r149 optics and compact safe lane'
+          git push origin HEAD:master
