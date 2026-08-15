@@ -1,0 +1,58 @@
+/* r112 — final supplied-reference optical polish.
+   Geometry, framing, size and interaction intentionally unchanged. */
+html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] #hero .hero-space>.fx-core-rayglass-r91-stage{
+  background:
+    radial-gradient(ellipse at 50% 48%,rgba(8,94,183,.090) 0%,rgba(3,39,103,.030) 30%,transparent 55%),
+    radial-gradient(ellipse at 58% 49%,rgba(116,32,214,.090) 0%,rgba(64,18,145,.026) 34%,transparent 58%),
+    radial-gradient(circle at 15% 27%,rgba(144,239,255,.48) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 78% 24%,rgba(212,113,255,.46) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 88% 55%,rgba(94,229,255,.40) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 27% 69%,rgba(179,87,255,.28) 0 1px,transparent 1.7px),
+    linear-gradient(180deg,#000105 0%,#000209 36%,#000713 68%,#010d1b 100%)!important;
+  box-shadow:inset 0 0 165px rgba(0,0,0,.56)!important;
+}
+
+html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] #hero .hero-space>.fx-core-rayglass-r91-stage>.fx-core-rayglass-r91-canvas{
+  opacity:.97!important;
+  filter:
+    brightness(.87)
+    contrast(2.06)
+    saturate(1.98)
+    drop-shadow(0 0 1px rgba(255,255,255,.96))
+    drop-shadow(0 0 4px rgba(223,252,255,.78))
+    drop-shadow(0 0 10px rgba(46,224,255,.60))
+    drop-shadow(0 0 20px rgba(45,128,255,.31))
+    drop-shadow(0 0 29px rgba(177,54,255,.24))!important;
+}
+
+/* Keep the reactor compact: the shader carries the detail, this overlay only adds a tiny white-hot optical core. */
+html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] #hero .hero-space>.fx-core-rayglass-r91-stage:before{
+  background:
+    radial-gradient(circle at 50% 50%,rgba(255,255,255,1) 0 .10%,rgba(248,255,255,.98) .15% .27%,rgba(98,240,255,.67) .38% .61%,rgba(26,156,255,.13) .83% 1.25%,transparent 2.25%),
+    radial-gradient(circle at 50% 50%,transparent 0 5.7%,rgba(229,255,255,.10) 5.86% 6.02%,transparent 6.28% 8.8%,rgba(75,222,255,.075) 8.96% 9.10%,transparent 9.36% 11.8%,rgba(196,82,255,.068) 11.96% 12.10%,transparent 12.40% 15.4%,rgba(62,194,255,.038) 15.56% 15.70%,transparent 16.0%),
+    linear-gradient(90deg,transparent 7%,rgba(36,205,255,.004) 39%,rgba(229,255,255,.055) 49.91%,rgba(255,255,255,.19) 50%,rgba(229,255,255,.055) 50.09%,rgba(36,205,255,.004) 61%,transparent 93%),
+    linear-gradient(180deg,transparent 7%,rgba(35,199,255,.004) 39%,rgba(226,255,255,.050) 49.91%,rgba(255,255,255,.17) 50%,rgba(226,255,255,.050) 50.09%,rgba(35,199,255,.004) 61%,transparent 93%)!important;
+  opacity:.31!important;
+  mix-blend-mode:screen!important;
+}
+
+/* Reference-like water reflection: visible, but never a second bright copy of the MAG. */
+html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"] #hero .hero-space>.fx-core-rayglass-r91-stage:after{
+  bottom:-8%!important;
+  height:40%!important;
+  opacity:.53!important;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(106,237,255,.23),rgba(22,105,205,.065) 29%,rgba(156,53,235,.050) 48%,transparent 72%),
+    repeating-radial-gradient(ellipse at 50% 0%,rgba(100,223,255,.056) 0 1px,transparent 1.5px 11px),
+    linear-gradient(90deg,transparent 3%,rgba(44,188,255,.020) 29%,rgba(187,245,255,.072) 50%,rgba(104,58,218,.035) 71%,transparent 97%)!important;
+  transform:perspective(520px) rotateX(66deg) scaleX(1.08)!important;
+}
+
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage>.fx-core-rayglass-r91-canvas{
+    opacity:.98!important;
+    filter:brightness(.89) contrast(2.08) saturate(2.00) drop-shadow(0 0 1px rgba(255,255,255,.97)) drop-shadow(0 0 4px rgba(226,253,255,.80)) drop-shadow(0 0 10px rgba(48,226,255,.62)) drop-shadow(0 0 20px rgba(47,132,255,.32)) drop-shadow(0 0 29px rgba(180,57,255,.25))!important;
+  }
+  html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage:before{opacity:.33!important;}
+  html[data-fx-core-renderer="single-webgl-luminous-crystal-r99"][data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-rayglass-r91-stage:after{opacity:.55!important;}
+}
