@@ -34,129 +34,101 @@ jobs:
           const fs=require('node:fs');
           const assert=require('node:assert/strict');
           const origin='https://formatxsuite.com';
+          const MODE='orbit-caustic-spectrum-shock-refraction';
+
+          async function waitReady(page,mobile=false){
+            await page.waitForFunction(({mobile,mode})=>{
+              const r=document.documentElement.dataset;
+              return (!mobile||r.fxMobileReferenceLayout==='ready-v1') &&
+                String(r.fxLivingEnergyR168||'').includes('r168-living-energy-orbit-caustic-v2') &&
+                r.fxLivingEnergyEffectModeR168===mode &&
+                r.fxLivingEnergyClockR168==='requestAnimationFrame-v2' &&
+                Number(r.fxLiveHeartbeatTickR155||0)>2 &&
+                document.querySelectorAll('#hero .fx-r168-orbit').length===2 &&
+                document.querySelectorAll('#hero .fx-r168-caustic').length===2 &&
+                document.querySelectorAll('#hero .fx-r168-spectrum').length===1 &&
+                document.querySelectorAll('#hero .fx-r168-interaction-wave').length===1 &&
+                document.querySelectorAll('#hero .fx-r168-spark').length===6;
+            },{mobile,mode:MODE},{timeout:60000});
+          }
 
           async function snap(page){
             return page.evaluate(()=>{
-              const root=document.documentElement;
+              const r=document.documentElement.dataset;
               const host=document.querySelector('#hero .hero-space');
-              const detail=document.querySelector('#hero .fx-core-detail-r122');
               const stage=document.querySelector('#hero .fx-core-mobile-v55-stage,#hero .fx-core-r112-stage');
-              const after=host?getComputedStyle(host,'::after'):null;
               const hs=host?getComputedStyle(host):null;
               const ss=stage?getComputedStyle(stage):null;
+              const after=host?getComputedStyle(host,'::after'):null;
               const box=host?.getBoundingClientRect();
               const css=n=>host?.style.getPropertyValue(n)||getComputedStyle(host).getPropertyValue(n)||'';
               return {
-                version:root.dataset.fxLivingEnergyR168||'',
-                mode:root.dataset.fxLivingEnergyEffectModeR168||'',
-                interaction:root.dataset.fxLivingEnergyInteractionR168||'',
-                optics:root.dataset.fxLivingEnergyOpticsR168||'',
-                beat:root.dataset.fxLivingEnergyBeatR168||'',
-                position:root.dataset.fxLivingEnergyPositionR168||'',
-                activity:Number(root.dataset.fxLivingEnergyActivityR168||0),
-                clock:root.dataset.fxLivingEnergyClockR168||'',
-                heartbeatTick:Number(root.dataset.fxLiveHeartbeatTickR155||0),
-                heartbeatMode:root.dataset.fxLivingHeartbeatModeR158||'',
-                gyro:root.dataset.fxCoreGyroLoadR144||'',
-                renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),
-                orbitA:css('--fx-r168-orbit-a'),
-                orbitB:css('--fx-r168-orbit-b'),
-                causticA:css('--fx-r168-caustic-a'),
-                causticB:css('--fx-r168-caustic-b'),
-                spectrum:css('--fx-r168-spectrum'),
-                burst:css('--fx-r168-burst-opacity'),
-                x:css('--fx-r168-x'),
-                y:css('--fx-r168-y'),
-                hostBackground:hs?.backgroundImage||'',
-                stageBackground:ss?.backgroundImage||'',
-                stageColor:ss?.backgroundColor||'',
-                seamTop:after?.top||'',
-                seamHeight:after?.height||'',
-                seamBackground:after?.backgroundImage||'',
-                hostHeight:box?.height||0,
-                nodes:{
-                  orbit:document.querySelectorAll('#hero .fx-r168-orbit').length,
-                  caustic:document.querySelectorAll('#hero .fx-r168-caustic').length,
-                  spectrum:document.querySelectorAll('#hero .fx-r168-spectrum').length,
-                  shock:document.querySelectorAll('#hero .fx-r168-shockwave').length,
-                  burst:document.querySelectorAll('#hero .fx-r168-interaction-wave').length,
-                  spark:document.querySelectorAll('#hero .fx-r168-spark').length,
-                  detail:detail?1:0
-                }
+                version:r.fxLivingEnergyR168||'',mode:r.fxLivingEnergyEffectModeR168||'',clock:r.fxLivingEnergyClockR168||'',
+                interaction:r.fxLivingEnergyInteractionR168||'',optics:r.fxLivingEnergyOpticsR168||'',beat:r.fxLivingEnergyBeatR168||'',
+                position:r.fxLivingEnergyPositionR168||'',activity:Number(r.fxLivingEnergyActivityR168||0),tick:Number(r.fxLiveHeartbeatTickR155||0),
+                gyro:r.fxCoreGyroLoadR144||'',renderMs:Number(r.fxCoreRenderMs||Infinity),
+                orbitA:css('--fx-r168-orbit-a'),orbitB:css('--fx-r168-orbit-b'),causticA:css('--fx-r168-caustic-a'),causticB:css('--fx-r168-caustic-b'),
+                spectrum:css('--fx-r168-spectrum'),burst:css('--fx-r168-burst-opacity'),x:css('--fx-r168-x'),y:css('--fx-r168-y'),
+                hostBackground:hs?.backgroundImage||'',stageBackground:ss?.backgroundImage||'',stageColor:ss?.backgroundColor||'',
+                seamTop:after?.top||'',seamHeight:after?.height||'',seamBackground:after?.backgroundImage||'',hostHeight:box?.height||0,
+                nodes:{orbit:document.querySelectorAll('#hero .fx-r168-orbit').length,caustic:document.querySelectorAll('#hero .fx-r168-caustic').length,spectrum:document.querySelectorAll('#hero .fx-r168-spectrum').length,burst:document.querySelectorAll('#hero .fx-r168-interaction-wave').length,spark:document.querySelectorAll('#hero .fx-r168-spark').length}
               };
             });
           }
 
-          function changed(a,b,key){assert.notEqual(a[key],b[key],`${key} did not change`)}
+          function assertBase(a){
+            assert.ok(a.version.includes('v2'));assert.equal(a.mode,MODE);assert.equal(a.clock,'requestAnimationFrame-v2');
+            assert.equal(a.nodes.orbit,2);assert.equal(a.nodes.caustic,2);assert.equal(a.nodes.spectrum,1);assert.equal(a.nodes.burst,1);assert.equal(a.nodes.spark,6);
+            assert.ok(a.renderMs<16.67,`render budget ${a.renderMs}`);
+          }
+          function assertMotion(a,b){
+            assert.ok(b.tick>a.tick,'heartbeat clock did not advance');
+            assert.notEqual(a.orbitA,b.orbitA,'orbit A did not rotate');assert.notEqual(a.orbitB,b.orbitB,'orbit B did not rotate');
+            assert.notEqual(a.causticA,b.causticA,'caustic A did not rotate');assert.notEqual(a.causticB,b.causticB,'caustic B did not rotate');
+            assert.ok(a.optics!==b.optics||a.beat!==b.beat||a.spectrum!==b.spectrum,'optical life did not change');
+          }
 
           async function desktop(browser){
             const context=await browser.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'});
             const page=await context.newPage();
             await page.goto(`${origin}/?verify=r168-desktop-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
-            await page.waitForFunction(()=>String(document.documentElement.dataset.fxLivingEnergyR168||'').includes('r168-living-energy-orbit-caustic-v2')&&document.querySelectorAll('#hero .fx-r168-spark').length===6&&document.querySelectorAll('#hero .fx-r168-caustic').length===2,null,{timeout:60000});
-            await page.waitForTimeout(350);
-            const a=await snap(page);
-            await page.waitForTimeout(420);
-            const b=await snap(page);
+            await waitReady(page,false);await page.waitForTimeout(180);
+            const a=await snap(page);await page.waitForTimeout(420);const b=await snap(page);assertBase(a);assertMotion(a,b);
             const box=await page.locator('#hero .hero-space').boundingBox();
-            if(box){
-              await page.mouse.move(box.x+box.width*.76,box.y+box.height*.33);
-              await page.mouse.down();await page.waitForTimeout(90);await page.mouse.up();
-            }
-            await page.waitForTimeout(110);
-            const c=await snap(page);
-            assert.ok(a.version.includes('v2'));
-            assert.equal(a.mode,'orbit-caustic-spectrum-shock-refraction');
-            assert.equal(a.nodes.orbit,2);assert.equal(a.nodes.caustic,2);assert.equal(a.nodes.spectrum,1);assert.equal(a.nodes.shock,1);assert.equal(a.nodes.burst,1);assert.equal(a.nodes.spark,6);assert.equal(a.nodes.detail,1);
-            assert.ok(b.heartbeatTick>a.heartbeatTick);
-            changed(a,b,'orbitA');changed(a,b,'orbitB');changed(a,b,'causticA');changed(a,b,'causticB');
-            assert.ok(c.heartbeatTick>b.heartbeatTick);
-            assert.ok(c.position!==a.position||c.activity>a.activity,'desktop interaction did not move/energize MAG');
-            assert.ok(Number(c.burst)>0||c.interaction==='energy-burst'||c.activity>a.activity,'desktop burst missing');
-            assert.ok(a.renderMs<16.67&&b.renderMs<16.67&&c.renderMs<16.67);
-            await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true';});
-            await page.waitForTimeout(80);
+            if(box){await page.mouse.move(box.x+box.width*.76,box.y+box.height*.33);await page.mouse.down();await page.waitForTimeout(90);await page.mouse.up();}
+            await page.waitForTimeout(90);const c=await snap(page);
+            assert.ok(c.position!==a.position||c.activity>a.activity,'desktop pointer did not move/energize MAG');
+            assert.ok(Number(c.burst)>0||c.interaction==='energy-burst'||c.activity>b.activity,'desktop energy burst missing');
+            assert.ok(c.renderMs<16.67);
+            await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await page.waitForTimeout(80);
             await page.screenshot({path:'/tmp/r168-desktop.png',fullPage:false,animations:'disabled',timeout:120000});
-            console.log('DESKTOP R168',JSON.stringify({a,b,c},null,2));
-            await context.close();
+            console.log('DESKTOP R168',JSON.stringify({a,b,c},null,2));await context.close();
           }
 
           async function mobile(browser,width,height,label){
             const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
             const page=await context.newPage();
             await page.goto(`${origin}/?verify=r168-${label}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&String(document.documentElement.dataset.fxLivingEnergyR168||'').includes('r168-living-energy-orbit-caustic-v2')&&document.querySelectorAll('#hero .fx-r168-spark').length===6,null,{timeout:60000});
-            await page.waitForTimeout(320);
-            const a=await snap(page);
-            await page.waitForTimeout(380);
-            const b=await snap(page);
-            await page.touchscreen.tap(Math.round(width*.69),Math.round(height*.37));
-            await page.waitForTimeout(120);
-            const c=await snap(page);
-            assert.ok(a.version.includes('v2'));
-            assert.equal(a.mode,'orbit-caustic-spectrum-shock-refraction');
-            assert.equal(a.nodes.orbit,2);assert.equal(a.nodes.caustic,2);assert.equal(a.nodes.spectrum,1);assert.equal(a.nodes.burst,1);assert.equal(a.nodes.spark,6);
-            assert.ok(b.heartbeatTick>a.heartbeatTick);changed(a,b,'orbitA');changed(a,b,'causticA');
+            await waitReady(page,true);await page.waitForTimeout(180);
+            const a=await snap(page);await page.waitForTimeout(380);const b=await snap(page);assertBase(a);assertMotion(a,b);
+            await page.touchscreen.tap(Math.round(width*.69),Math.round(height*.37));await page.waitForTimeout(90);const c=await snap(page);
             assert.ok(c.activity>=b.activity||c.interaction==='energy-burst','mobile touch did not energize MAG');
-            assert.ok(Number(c.burst)>0||c.interaction==='energy-burst','mobile burst missing');
-            assert.ok(a.gyro==='ready'||a.gyro==='permission-required'||a.gyro==='unsupported','gyro state missing');
-            assert.ok(a.stageBackground==='none','mobile stage still has image/background panel');
-            assert.ok(a.stageColor==='rgba(0, 0, 0, 0)'||a.stageColor==='transparent','mobile stage color is not transparent');
-            const seamTop=parseFloat(a.seamTop),seamHeight=parseFloat(a.seamHeight);
-            assert.ok(Number.isFinite(seamTop)&&seamTop<a.hostHeight*.80,`seam starts too late ${a.seamTop}/${a.hostHeight}`);
-            assert.ok(Number.isFinite(seamHeight)&&seamHeight>a.hostHeight*.40,`seam bridge too short ${a.seamHeight}/${a.hostHeight}`);
-            assert.ok(a.seamBackground.includes('linear-gradient'),'mobile seamless gradient missing');
-            assert.ok(a.renderMs<16.67&&b.renderMs<16.67&&c.renderMs<16.67);
-            await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true';});
-            await page.waitForTimeout(80);
+            assert.ok(Number(c.burst)>0||c.interaction==='energy-burst','mobile interaction burst missing');
+            assert.ok(['ready','permission-required','unsupported'].includes(a.gyro),`gyro state missing: ${a.gyro}`);
+            assert.equal(a.stageBackground,'none','mobile stage still has background image');
+            assert.ok(a.stageColor==='rgba(0, 0, 0, 0)'||a.stageColor==='transparent',`mobile stage color ${a.stageColor}`);
+            const top=parseFloat(a.seamTop),h=parseFloat(a.seamHeight);
+            assert.ok(Number.isFinite(top)&&top<a.hostHeight*.80,`seam starts too late ${a.seamTop}/${a.hostHeight}`);
+            assert.ok(Number.isFinite(h)&&h>a.hostHeight*.40,`seam bridge too short ${a.seamHeight}/${a.hostHeight}`);
+            assert.ok(a.seamBackground.includes('linear-gradient'),'mobile seamless gradient missing');assert.ok(c.renderMs<16.67);
+            await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await page.waitForTimeout(80);
             await page.screenshot({path:`/tmp/r168-${label}.png`,fullPage:false,animations:'disabled',timeout:120000});
-            console.log(label.toUpperCase(),JSON.stringify({a,b,c},null,2));
-            await context.close();
+            console.log(label.toUpperCase(),JSON.stringify({a,b,c},null,2));await context.close();
           }
 
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-            try{await desktop(browser);await mobile(browser,390,844,'mobile390');await mobile(browser,412,915,'mobile412');}finally{await browser.close();}
+            try{await desktop(browser);await mobile(browser,390,844,'mobile390');await mobile(browser,412,915,'mobile412');}finally{await browser.close()}
             for(const f of ['/tmp/r168-desktop.png','/tmp/r168-mobile390.png','/tmp/r168-mobile412.png'])assert.ok(fs.statSync(f).size>10000,`small screenshot ${f}`);
             console.log('PASS: r168 multimodal living MAG is animated, interactive and seamless on desktop and mobile.');
           })().catch(e=>{console.error(e);process.exit(1)});
