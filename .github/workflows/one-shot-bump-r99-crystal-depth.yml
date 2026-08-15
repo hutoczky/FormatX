@@ -16,6 +16,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          git fetch origin master
+          git reset --hard origin/master
           python3 - <<'PY'
           from pathlib import Path
           import re
@@ -42,4 +44,10 @@ jobs:
           git add docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
           if git diff --cached --quiet; then echo 'r170 optical cache already current'; exit 0; fi
           git commit -m '[deploy-production] fix(mag): publish r170 monotonic optical clock'
-          git push origin HEAD:master
+          for attempt in 1 2 3; do
+            if git push origin HEAD:master; then exit 0; fi
+            echo "master advanced during publish; rebasing attempt $attempt"
+            git pull --rebase origin master
+          done
+          echo 'failed to publish r170 after three rebase attempts' >&2
+          exit 1
