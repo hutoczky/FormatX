@@ -49,7 +49,7 @@ function frame(now){
   const rawEnergy=Number(window.FormatXCoreMobileV69?.energy||window.FormatXCoreCinematic?.energy||.30);
   const tx=(paused||reduced.matches)?0:clamp(Number(cp[0]||0)/.075,-1,1);
   const ty=(paused||reduced.matches)?0:clamp(Number(cp[1]||0)/.075,-1,1);
-  const te=(paused||reduced.matches)?.18:clamp((rawEnergy-.30)/1.25,.18,1);
+  const te=(paused||reduced.matches) ? 0.18 : clamp((rawEnergy-.30)/1.25,.18,1);
   const dt=Math.min(50,Math.max(0,now-last));last=now;
   const k=1-Math.pow(.002,dt/1000*6.5);
   sx+=(tx-sx)*k;sy+=(ty-sy)*k;se+=(te-se)*Math.min(1,k*.82);
