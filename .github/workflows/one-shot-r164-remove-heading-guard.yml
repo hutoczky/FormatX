@@ -1,0 +1,64 @@
+name: One-shot publish r164 remove mobile heading guard
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r164-remove-heading-guard.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Remove obsolete mobile heading guard and refresh seamless cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          css=Path('docs/scifi-ui/styles/formatx-seamless-living-r158.css')
+          s=css.read_text()
+          marker='/* r164: obsolete mobile heading guard removed; the crystal tail and flow are independently locked. */'
+          rule='''\n\n@media (max-width:900px),(pointer:coarse){\n  /* r164: obsolete mobile heading guard removed; the crystal tail and flow are independently locked. */\n  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-heading::before{\n    content:none!important;\n    display:none!important;\n    background:none!important;\n    background-image:none!important;\n    opacity:0!important;\n    box-shadow:none!important;\n    filter:none!important;\n  }\n}\n'''
+          if marker not in s:
+              s+=rule
+          css.write_text(s)
+
+          heartbeat=Path('docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js')
+          h=heartbeat.read_text()
+          h,n=re.subn(
+              r"const SEAMLESS='/scifi-ui/styles/formatx-seamless-living-r158\.css\?v=[^']+';",
+              "const SEAMLESS='/scifi-ui/styles/formatx-seamless-living-r158.css?v=20260815-r164-no-heading-guard';",
+              h,count=1
+          )
+          if n!=1 and '20260815-r164-no-heading-guard' not in h:
+              raise SystemExit('heartbeat seamless loader token not found')
+          heartbeat.write_text(h)
+
+          index=Path('docs/scifi-ui/index.html')
+          i=index.read_text()
+          i,n=re.subn(
+              r'(formatx-live-heartbeat-r155\.js\?v=20260815-r158-lubdub-seamless&rev=)[^"\']+',
+              r'\g<1>20260815-r164-no-heading-guard',i,count=1
+          )
+          if n!=1:
+              raise SystemExit('heartbeat script cache URL not found')
+          index.write_text(i)
+          PY
+
+          node --check docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js
+          node .github/scripts/validate-real3d-core.cjs
+          grep -F 'r164: obsolete mobile heading guard removed' docs/scifi-ui/styles/formatx-seamless-living-r158.css >/dev/null
+          grep -F 'formatx-seamless-living-r158.css?v=20260815-r164-no-heading-guard' docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js >/dev/null
+          grep -F 'rev=20260815-r164-no-heading-guard' docs/scifi-ui/index.html >/dev/null
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/styles/formatx-seamless-living-r158.css docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js docs/scifi-ui/index.html
+          if git diff --cached --quiet; then echo 'r164 already current'; exit 0; fi
+          git commit -m '[deploy-production] fix(mag): remove obsolete mobile heading guard r164'
+          git push origin HEAD:master
