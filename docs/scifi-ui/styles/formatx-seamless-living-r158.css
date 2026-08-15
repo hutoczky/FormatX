@@ -1,7 +1,7 @@
-/* r158 — seamless living MAG integration.
+/* r158b — seamless living MAG integration.
    Keep the approved crystal geometry and size. The hero, reference material and
-   live optics now share one atmosphere so the MAG reads as part of the page,
-   not as a separate rectangular media panel. */
+   live optics share one atmosphere so the MAG reads as part of the page,
+   never as a separate rectangular media panel. */
 
 html body.living-architecture #hero{
   position:relative!important;
@@ -47,8 +47,9 @@ html body.living-architecture #hero .hero-grid,
 html body.living-architecture #hero .hero-space{
   position:relative!important;
   z-index:2!important;
-  background:transparent!important;
+  background:none!important;
   background-image:none!important;
+  background-color:transparent!important;
   border:0!important;
   outline:0!important;
   box-shadow:none!important;
@@ -57,7 +58,7 @@ html body.living-architecture #hero .hero-space{
 html body.living-architecture #hero .fx-core-mobile-v55-stage,
 html body.living-architecture #hero .fx-core-r112-stage,
 html body.living-architecture #hero .fx-core-rayglass-r91-stage{
-  background:transparent!important;
+  background:none!important;
   background-image:none!important;
   background-color:transparent!important;
   border:0!important;
@@ -95,7 +96,7 @@ html body.living-architecture #hero .fx-core-detail-r122{
 }
 
 html body.living-architecture #hero .fx-core-live-r147-layer{
-  background:transparent!important;
+  background:none!important;
   background-image:none!important;
   border:0!important;
   outline:0!important;
@@ -109,7 +110,6 @@ html body.living-architecture #hero .fx-reference-proof{
   z-index:6!important;
 }
 
-/* Keep the transition from the crystal into the content continuous. */
 html body.living-architecture #hero .fx-reference-heading::before{
   background:linear-gradient(180deg,rgba(1,7,17,0),rgba(1,7,17,.50) 48%,rgba(1,7,17,.92) 86%,#010711 100%)!important;
 }
@@ -121,22 +121,57 @@ html body.living-architecture #hero .fx-reference-heading::before{
       radial-gradient(ellipse 70% 48% at 59% 45%,rgba(142,67,255,.058),transparent 72%),
       linear-gradient(180deg,#01040c 0%,#020917 31%,#031a31 64%,#031324 80%,#010711 100%)!important;
   }
-  html body.living-architecture #hero .fx-core-detail-r122{
+
+  /* Stronger than the legacy ready-v1 stage rule. This is deliberately tied to
+     the mobile reference layout because that older rule also uses !important. */
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-grid,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
+    background:none!important;
+    background-image:none!important;
+    background-color:transparent!important;
+    box-shadow:none!important;
+    border-color:transparent!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space>.fx-core-mobile-v55-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space>.fx-core-r112-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space>.fx-core-rayglass-r91-stage{
+    background:none!important;
+    background-image:none!important;
+    background-color:transparent!important;
+    box-shadow:none!important;
+    border:0!important;
+    outline:0!important;
+    filter:none!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space>.fx-core-mobile-v55-stage::before,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space>.fx-core-mobile-v55-stage::after,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space>.fx-core-r112-stage::before,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space>.fx-core-r112-stage::after,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space>.fx-core-rayglass-r91-stage::before,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space>.fx-core-rayglass-r91-stage::after{
+    content:none!important;
+    display:none!important;
+    opacity:0!important;
+    background:none!important;
+    background-image:none!important;
+    box-shadow:none!important;
+    filter:none!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-core-detail-r122{
     mix-blend-mode:screen!important;
     opacity:.998!important;
+    background:transparent!important;
   }
-  html body.living-architecture #hero::after{
-    height:118px!important;
-  }
+
+  html body.living-architecture #hero::after{height:118px!important;}
 }
 
 @media (min-width:901px) and (pointer:fine){
-  html body.living-architecture #hero .hero-space{
-    overflow:hidden!important;
-  }
-  html body.living-architecture #hero .fx-core-detail-r122{
-    mix-blend-mode:screen!important;
-  }
+  html body.living-architecture #hero .hero-space{overflow:hidden!important;}
+  html body.living-architecture #hero .fx-core-detail-r122{mix-blend-mode:screen!important;}
 }
 
 @media (prefers-reduced-motion:reduce){
