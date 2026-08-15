@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-15T18:20:00+02:00
-source_master=3eb9310c4b1e701606606ac700f58500a5c074a8
-purpose=activate r158b cross-device living MAG integration: preserve the approved crystal geometry and size, keep organic lub-dub heartbeat and interaction, and remove the remaining legacy mobile stage gradient so the MAG is visually part of the page instead of a separate rectangular panel
+requested_at=2026-08-15T18:31:00+02:00
+source_master=842626d77b9c87c8f9b48e20c6535cd1e4d60aa6
+purpose=activate r158c living seamless MAG integration: preserve the approved crystal geometry and size, retain the r158 lub-dub heartbeat and cross-device interaction, keep the transparent mobile stage, and feather the desktop reference/live optical canvas edges into the hero atmosphere so no rectangular panel remains
 interaction=organic double lub-dub heartbeat plus slow breathing on PC and phone; pointer/mouse interaction on desktop; touch interaction and existing r144 gyroscope response on mobile; interaction increases reactor energy/glow without changing the approved silhouette; pause and prefers-reduced-motion remain respected
-verification=production candidate source/runtime/security validation; JavaScript syntax; r158b high-specificity seamless mobile stage override; Worker tests; production build; custom-domain smoke; desktop 1600x1000 seamless blend/heartbeat/pointer live check; mobile 390x844 transparent stage/seamless blend/heartbeat/touch/gyro/proof flow check; WebGL render budget and stable screenshots
+verification=production candidate source/runtime/security validation; JavaScript syntax; r158c seamless CSS cache; Worker tests; production build; custom-domain smoke; full-cycle visible heartbeat amplitude on desktop and mobile; desktop pointer and mobile touch/gyro; stage background none on both; WebGL render budget; glyph overlap zero; stable CDP screenshots and visual edge-integration review
