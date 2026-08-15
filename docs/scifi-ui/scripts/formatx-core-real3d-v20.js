@@ -2,7 +2,7 @@
   'use strict';
   // r145 crystal preserved; r149 centers every live optical effect on the crystal canvas and tightens the safe lane.
   const root = document.documentElement;
-  const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r151-final';
+  const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r152-click-stable';
   const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260814-luminous-cinematic-r99&rev=20260815-prismatic-organic-r120';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260813-android-webgl-recovery-r71';
   const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260814-pixel-aspect-r80';
@@ -19,6 +19,7 @@
   const FINAL_STYLE = '/scifi-ui/styles/formatx-reference-final-r132.css?v=20260815-pixel-lock-r139';
   const NARROW_PROOF_STYLE = '/scifi-ui/styles/formatx-reference-narrow-proof-r145.css?v=20260815-narrow-proof-r145';
   const LIVE_MOTION_STYLE = '/scifi-ui/styles/formatx-live-motion-r147.css?v=20260815-centered-optics-safe-lane-r149b';
+  const CLICK_STABILITY_STYLE = '/scifi-ui/styles/formatx-click-stability-r152.css?v=20260815-r152-center-lock';
   const MOBILE_HERO_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260815-r151-final';
   const DETAIL_SCRIPT = '/scifi-ui/scripts/formatx-core-detail-overlay-r122.js?v=20260815-reference-material-r138';
   const COPY_SCRIPT = '/scifi-ui/scripts/formatx-reference-copy-r137.js?v=20260815-reference-copy-r137';
@@ -38,7 +39,7 @@
   if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreReal3d='audit-skip';root.dataset.fxCoreReferenceLock='audit-skip';return; }
   root.dataset.fxCoreReal3d='loading-v69';root.dataset.fxCoreRenderer='single-webgl-luminous-crystal-r99';root.dataset.fxCoreReferenceLock='loading-v69';
   function addStyle(href,attr,ready){if(document.querySelector('link['+attr+']'))return;const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.setAttribute(attr,'true');if(ready)l.addEventListener('load',()=>{root.dataset[ready]='ready';},{once:true});document.head.appendChild(l);}
-  function addExactStyle(){addStyle(EXACT_STYLE,'data-fx-reference-exact-r112','fxCoreExactR112');addStyle(DETAIL_STYLE,'data-fx-core-detail-r122-style','fxCoreDetailStyleR122');addStyle(FINAL_STYLE,'data-fx-reference-final-r132','fxReferenceFinalR132');addStyle(NARROW_PROOF_STYLE,'data-fx-reference-narrow-proof-r145','fxReferenceNarrowProofR145');addStyle(LIVE_MOTION_STYLE,'data-fx-live-motion-r147-style','fxLiveMotionStyleR147');}
+  function addExactStyle(){addStyle(EXACT_STYLE,'data-fx-reference-exact-r112','fxCoreExactR112');addStyle(DETAIL_STYLE,'data-fx-core-detail-r122-style','fxCoreDetailStyleR122');addStyle(FINAL_STYLE,'data-fx-reference-final-r132','fxReferenceFinalR132');addStyle(NARROW_PROOF_STYLE,'data-fx-reference-narrow-proof-r145','fxReferenceNarrowProofR145');addStyle(LIVE_MOTION_STYLE,'data-fx-live-motion-r147-style','fxLiveMotionStyleR147');addStyle(CLICK_STABILITY_STYLE,'data-fx-click-stability-r152-style','fxClickStabilityStyleR152');}
   function addMobileStyle(){addStyle(MOBILE_STYLE,'data-fx-core-mobile-v55-style');addStyle(AWARD_STYLE,'data-fx-award-reference-r80');addStyle(R87_STYLE,'data-fx-award-reference-r87');addStyle(SIZE_LOCK_STYLE,'data-fx-size-lock-r105');addStyle(MATERIAL_STYLE,'data-fx-award-material-r88');addStyle(FACET_STYLE,'data-fx-award-material-r89');addStyle(CLARITY_STYLE,'data-fx-award-material-r90');addStyle(RAYGLASS_STYLE,'data-fx-award-material-r91','fxCoreMaterialR94');addStyle(R99_OPTICAL_STYLE,'data-fx-award-material-r99','fxCoreMaterialR99');addStyle(POLISH_STYLE,'data-fx-reference-polish-r109','fxCorePolishR109');addStyle(PROOF_STYLE,'data-fx-award-proof-r85');}
   function addReferenceCopy(){if(document.querySelector('script[data-fx-reference-copy-r137], script[src*="formatx-reference-copy-r137.js"]'))return;const s=document.createElement('script');s.src=COPY_SCRIPT;s.async=false;s.dataset.fxReferenceCopyR137='true';s.addEventListener('load',()=>{root.dataset.fxReferenceCopyLoadR137='ready';},{once:true});s.addEventListener('error',()=>{root.dataset.fxReferenceCopyLoadR137='failed';},{once:true});document.head.appendChild(s);}
   function addMobileHeroStability(){addStyle(MOBILE_HERO_STABILITY_STYLE,'data-fx-mobile-hero-stability-r151-style','fxMobileHeroStabilityStyleR151');if(document.querySelector('script[data-fx-mobile-hero-stability-r151], script[src*="formatx-mobile-hero-stability-r151.js"]'))return;const s=document.createElement('script');s.src=MOBILE_HERO_STABILITY_SCRIPT;s.async=false;s.dataset.fxMobileHeroStabilityR151='true';s.addEventListener('load',()=>{root.dataset.fxMobileHeroStabilityLoadR151='ready';},{once:true});s.addEventListener('error',()=>{root.dataset.fxMobileHeroStabilityLoadR151='failed';},{once:true});document.head.appendChild(s);}
