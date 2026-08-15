@@ -25,7 +25,7 @@
   const DESKTOP_LIVE_STYLE = '/scifi-ui/styles/formatx-desktop-live-r153.css?v=20260815-r153-desktop-live';
   const DESKTOP_INTEGRATION_STYLE = '/scifi-ui/styles/formatx-desktop-integration-r154.css?v=20260815-r154e-no-legacy-grid';
   const MOBILE_HERO_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260815-r156-proof-first';
-  const DETAIL_SCRIPT = '/scifi-ui/scripts/formatx-core-detail-overlay-r122.js?v=20260815-r166-heartbeat-shape-pulse';
+  const DETAIL_SCRIPT = '/scifi-ui/scripts/formatx-core-detail-overlay-r122.js?v=20260815-r166b-direct-clock-shape-pulse';
   const COPY_SCRIPT = '/scifi-ui/scripts/formatx-reference-copy-r137.js?v=20260815-reference-copy-r137';
   const FINALIZER_SCRIPT = '/scifi-ui/scripts/formatx-reference-finalizer-r142.js?v=20260815-unclipped-chain-r142';
   const TAIL_FINALIZER_SCRIPT = '/scifi-ui/scripts/formatx-reference-finalizer-r143.js?v=20260815-tail-bridge-r143';
