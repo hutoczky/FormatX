@@ -1,7 +1,6 @@
-/* r128 — target-first optical weighting.
-   Native WebGL remains active and drives 3D position/interaction, but its legacy
-   wire-heavy fragment pass is visually suppressed. The procedural shard renderer
-   carries the visible crystal material. */
+/* r130 — reference-material compositor.
+   The visible crystal material comes from the supplied reference, while the native
+   WebGL mesh remains alive underneath for real pointer/touch depth and motion. */
 .fx-core-detail-r122{
   position:absolute;
   inset:0;
@@ -12,30 +11,41 @@
   pointer-events:none;
   mix-blend-mode:normal;
   opacity:1;
+  transform:none!important;
   transform-origin:50% 50%;
-  transform:translateY(1.8%) scaleX(.99) scaleY(1.105) translateZ(0);
 }
-html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage:before{
-  clip-path:none!important;
-  background:
-    radial-gradient(circle at 50% 50%,#fff 0 .24%,rgba(247,255,255,.99) .34% .76%,rgba(84,246,255,.78) .94% 1.75%,rgba(31,177,255,.16) 2.3% 4.9%,transparent 7.8%),
-    linear-gradient(90deg,transparent 10%,rgba(213,253,255,.035) 49.86%,rgba(255,255,255,.12) 50%,rgba(213,253,255,.035) 50.14%,transparent 90%),
-    linear-gradient(180deg,transparent 10%,rgba(213,253,255,.032) 49.86%,rgba(255,255,255,.11) 50%,rgba(213,253,255,.032) 50.14%,transparent 90%)!important;
-  opacity:.42!important;
+html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-r112-stage:before{
+  opacity:.10!important;
   filter:none!important;
 }
+html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
+  opacity:.10!important;
+  filter:brightness(1.05) contrast(1.18) saturate(1.55)
+    drop-shadow(0 0 8px rgba(48,225,255,.18))
+    drop-shadow(0 0 30px rgba(150,58,255,.12))!important;
+}
+html[data-fx-core-reference-texture-r130="loading"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas,
+html[data-fx-core-reference-texture-r130="failed"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
+  opacity:.78!important;
+}
 @media (max-width:900px),(pointer:coarse){
-  html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
+  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
     transform-origin:50% 50%!important;
     transform:translateY(1.8%) scaleX(.992) scaleY(1.40)!important;
-    opacity:.065!important;
-    filter:brightness(1.02) contrast(1.16) saturate(1.45)
-      drop-shadow(0 0 8px rgba(42,231,255,.18))
-      drop-shadow(0 0 36px rgba(159,56,255,.13))!important;
+    opacity:.075!important;
+  }
+  html[data-fx-core-reference-texture-r130="loading"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas,
+  html[data-fx-core-reference-texture-r130="failed"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
+    transform-origin:50% 50%!important;
+    transform:translateY(1.8%) scaleX(.992) scaleY(1.40)!important;
+    opacity:.78!important;
   }
 }
 @media (max-width:380px){
-  .fx-core-detail-r122{transform:translateY(1.5%) scaleX(.985) scaleY(1.085) translateZ(0)}
-  html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{transform:translateY(1.5%) scaleX(.987) scaleY(1.36)!important;opacity:.075!important}
+  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas,
+  html[data-fx-core-reference-texture-r130="loading"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas,
+  html[data-fx-core-reference-texture-r130="failed"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
+    transform:translateY(1.5%) scaleX(.987) scaleY(1.36)!important;
+  }
 }
 @media (prefers-reduced-motion:reduce){.fx-core-detail-r122{opacity:1}}
