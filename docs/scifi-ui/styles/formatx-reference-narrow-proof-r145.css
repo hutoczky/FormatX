@@ -1,0 +1,16 @@
+/* r145 — narrow mobile proof safety.
+   Does not change MAG geometry, scale, rendering or interaction.
+   At <=400px it reserves the right side of the proof copy for the Live OS control. */
+@media (max-width:400px){
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{
+    min-height:250px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof p{
+    box-sizing:border-box!important;
+    padding-right:72px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-liveos{
+    top:auto!important;
+    bottom:14px!important;
+  }
+}
