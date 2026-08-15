@@ -23,7 +23,7 @@
   const LIVE_MOTION_STYLE = '/scifi-ui/styles/formatx-live-motion-r147.css?v=20260815-centered-optics-safe-lane-r149b';
   const CLICK_STABILITY_STYLE = '/scifi-ui/styles/formatx-click-stability-r152.css?v=20260815-r152-center-lock';
   const DESKTOP_LIVE_STYLE = '/scifi-ui/styles/formatx-desktop-live-r153.css?v=20260815-r153-desktop-live';
-  const DESKTOP_INTEGRATION_STYLE = '/scifi-ui/styles/formatx-desktop-integration-r154.css?v=20260815-r154d-luma-blend';
+  const DESKTOP_INTEGRATION_STYLE = '/scifi-ui/styles/formatx-desktop-integration-r154.css?v=20260815-r154e-no-legacy-grid';
   const MOBILE_HERO_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260815-r156-proof-first';
   const DETAIL_SCRIPT = '/scifi-ui/scripts/formatx-core-detail-overlay-r122.js?v=20260815-r157-desktop-luma-key';
   const COPY_SCRIPT = '/scifi-ui/scripts/formatx-reference-copy-r137.js?v=20260815-reference-copy-r137';
