@@ -1,6 +1,7 @@
-/* r126 — target-material weighting.
-   Keep the native WebGL mesh as the real 3D motion/depth source, but lower its old
-   line-heavy optical pass. The filled crystal overlay becomes the visible surface. */
+/* r127 — volumetric crystal compositing.
+   The detail canvas now composites normally so dark/translucent crystal faces can
+   mask the old line-heavy shader. Native WebGL remains underneath for real depth,
+   movement and pointer/touch response. */
 .fx-core-detail-r122{
   position:absolute;
   inset:0;
@@ -9,34 +10,34 @@
   height:100%;
   display:block;
   pointer-events:none;
-  mix-blend-mode:screen;
-  opacity:.985;
+  mix-blend-mode:normal;
+  opacity:1;
   transform-origin:50% 50%;
   transform:translateY(1.8%) scaleX(.99) scaleY(1.105) translateZ(0);
 }
 html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage:before{
   clip-path:none!important;
   background:
-    radial-gradient(circle at 50% 50%,#fff 0 .24%,rgba(247,255,255,.99) .34% .74%,rgba(84,246,255,.82) .92% 1.70%,rgba(31,177,255,.22) 2.25% 4.9%,transparent 7.6%),
-    linear-gradient(90deg,transparent 6%,rgba(89,232,255,.012) 27%,rgba(213,253,255,.075) 49.82%,rgba(255,255,255,.22) 50%,rgba(213,253,255,.075) 50.18%,rgba(89,232,255,.012) 73%,transparent 94%),
-    linear-gradient(180deg,transparent 6%,rgba(89,232,255,.012) 27%,rgba(213,253,255,.068) 49.82%,rgba(255,255,255,.19) 50%,rgba(213,253,255,.068) 50.18%,rgba(89,232,255,.012) 73%,transparent 94%)!important;
-  opacity:.70!important;
+    radial-gradient(circle at 50% 50%,#fff 0 .24%,rgba(247,255,255,.99) .34% .74%,rgba(84,246,255,.82) .92% 1.70%,rgba(31,177,255,.20) 2.25% 4.9%,transparent 7.6%),
+    linear-gradient(90deg,transparent 7%,rgba(89,232,255,.01) 28%,rgba(213,253,255,.06) 49.84%,rgba(255,255,255,.18) 50%,rgba(213,253,255,.06) 50.16%,rgba(89,232,255,.01) 72%,transparent 93%),
+    linear-gradient(180deg,transparent 7%,rgba(89,232,255,.01) 28%,rgba(213,253,255,.055) 49.84%,rgba(255,255,255,.16) 50%,rgba(213,253,255,.055) 50.16%,rgba(89,232,255,.01) 72%,transparent 93%)!important;
+  opacity:.60!important;
   filter:none!important;
 }
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
     transform-origin:50% 50%!important;
     transform:translateY(1.8%) scaleX(.992) scaleY(1.40)!important;
-    opacity:.66!important;
-    filter:brightness(1.08) contrast(1.28) saturate(1.82)
-      drop-shadow(0 0 2px rgba(239,255,255,.54))
-      drop-shadow(0 0 10px rgba(42,231,255,.38))
-      drop-shadow(0 0 25px rgba(42,149,255,.23))
-      drop-shadow(0 0 44px rgba(159,56,255,.22))!important;
+    opacity:.28!important;
+    filter:brightness(1.04) contrast(1.22) saturate(1.62)
+      drop-shadow(0 0 2px rgba(239,255,255,.40))
+      drop-shadow(0 0 10px rgba(42,231,255,.30))
+      drop-shadow(0 0 24px rgba(42,149,255,.20))
+      drop-shadow(0 0 42px rgba(159,56,255,.18))!important;
   }
 }
 @media (max-width:380px){
   .fx-core-detail-r122{transform:translateY(1.5%) scaleX(.985) scaleY(1.085) translateZ(0)}
-  html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{transform:translateY(1.5%) scaleX(.987) scaleY(1.36)!important;opacity:.68!important}
+  html[data-fx-core-detail-r122="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{transform:translateY(1.5%) scaleX(.987) scaleY(1.36)!important;opacity:.30!important}
 }
-@media (prefers-reduced-motion:reduce){.fx-core-detail-r122{opacity:.95}}
+@media (prefers-reduced-motion:reduce){.fx-core-detail-r122{opacity:1}}
