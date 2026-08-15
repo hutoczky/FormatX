@@ -1,4 +1,4 @@
-/* r138 — final mobile reference geometry/typography lock.
+/* r139 — final mobile reference geometry/typography lock.
    Loaded after legacy award layers so the supplied reference framing wins.
    Native WebGL and touch interaction remain live underneath. */
 @media (max-width:900px),(pointer:coarse){
@@ -98,27 +98,26 @@
     box-shadow:0 0 5px rgba(210,171,255,.55)!important;
   }
 
-  /* r138 reconstructs only the baked SMER fragment. The real DOM heading is
-     therefore visible again, at the supplied reference box, without cutting the
-     cyan tail underneath it. */
+  /* r138 reconstructs only the baked SMER fragment. The real DOM heading stays
+     visible, but r139 tightens its tracking to the supplied 412px reference. */
   html[data-fx-core-reference-heading-r138="dom-visible-clean-reference"] #hero .fx-reference-heading{
     opacity:1!important;
     visibility:visible!important;
     pointer-events:none!important;
+    font-size:15px!important;
+    line-height:1.08!important;
+    letter-spacing:.13em!important;
   }
 
-  /* Remove the old host-bottom seam at ~462px. The reference compositor already
-     owns the continuous water field through the proof-card overlap. */
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage,
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-r112-stage{
+  /* Remove the original stage's inset bottom rule regardless of the runtime
+     wrapper nesting. It was the dark seam crossing the crystal tail at ~462px. */
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-core-mobile-v55-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-core-r112-stage{
     box-shadow:none!important;
     border:0!important;
     outline:0!important;
   }
 
-  /* Target Android screenshot uses Roboto metrics. The explicit line breaks are
-     supplied by formatx-reference-copy-r137.js; these values match its vertical
-     rhythm and clear the Live OS pill on lines two and three. */
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof h2{
     margin-bottom:17px!important;
     line-height:1.16!important;
@@ -135,8 +134,6 @@
     letter-spacing:0!important;
   }
 
-  /* The supplied material is a square 412px composition. The live hero host is
-     393.86px high at the locked viewport, so compensate only the compositor. */
   html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
     transform:scaleY(1.046)!important;
     transform-origin:50% 0!important;
