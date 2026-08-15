@@ -1,0 +1,40 @@
+name: One-shot wire r159 seamless enforcer
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r159-seamless-enforcer.yml']
+permissions:
+  contents: write
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Wire r159 seamless enforcer after heartbeat
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/index.html')
+          s=p.read_text()
+          enforcer='  <script defer data-fx-seamless-enforcer-r159="true" src="./scripts/formatx-seamless-enforcer-r159.js?v=20260815-r159-cross-device-lock"></script>\n'
+          if 'data-fx-seamless-enforcer-r159="true"' not in s:
+              needle='  <script defer data-fx-live-heartbeat-r155="true" src="./scripts/formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless&rev=20260815-r158c-desktop-edge-feather"></script>\n'
+              if needle not in s:
+                  raise SystemExit('heartbeat script tag not found')
+              s=s.replace(needle,needle+enforcer,1)
+          else:
+              import re
+              s=re.sub(r'<script defer data-fx-seamless-enforcer-r159="true" src="[^"]+"></script>',
+                       '<script defer data-fx-seamless-enforcer-r159="true" src="./scripts/formatx-seamless-enforcer-r159.js?v=20260815-r159-cross-device-lock"></script>',s,count=1)
+          p.write_text(s)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html
+          if git diff --cached --quiet; then echo 'r159 already wired'; exit 0; fi
+          git commit -m '[deploy-production] feat(mag): wire r159 cross-device seamless stage lock'
+          git push origin HEAD:master
