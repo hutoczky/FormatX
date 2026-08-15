@@ -1,0 +1,94 @@
+/* r147 — preserve the approved r145 MAG appearance while adding live optical motion.
+   Geometry is intentionally untouched: animation/interactivity live in a screen-light layer.
+   The content below the MAG is given a larger safe lane so the crystal/tail never covers copy. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero{
+    padding-bottom:64px!important;
+    overflow:visible!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space{
+    isolation:isolate!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
+    top:0!important;
+    margin:16px 6% 26px!important;
+    z-index:21!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{
+    z-index:21!important;
+    margin:0 7% 42px 6%!important;
+  }
+
+  /* Interactive light field only. It does not translate, rotate or scale the
+     approved crystal bitmap/canvas, so the r145 silhouette stays unchanged. */
+  html[data-fx-live-motion-r147="ready"] #hero .hero-space::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:9;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at var(--fx-r147-light-x,50%) var(--fx-r147-light-y,48%),
+        rgba(255,255,255,.18) 0,
+        rgba(112,244,255,.105) 3.8%,
+        rgba(82,220,255,.060) 9%,
+        rgba(183,78,255,.038) 17%,
+        rgba(0,0,0,0) 34%),
+      radial-gradient(ellipse at 50% 52%,rgba(58,224,255,.030),transparent 48%);
+    mix-blend-mode:screen;
+    opacity:var(--fx-r147-light-opacity,.34);
+    filter:blur(.2px);
+    will-change:opacity,background;
+    animation:fx-r147-breathe 4.8s ease-in-out infinite;
+  }
+
+  html[data-fx-live-motion-r147="ready"] #hero .fx-core-detail-r122{
+    will-change:filter;
+    filter:brightness(var(--fx-r147-brightness,1)) saturate(var(--fx-r147-saturation,1))!important;
+  }
+
+  html[data-fx-live-motion-paused-r147="true"] #hero .hero-space::after{
+    animation-play-state:paused!important;
+    opacity:.18!important;
+  }
+
+  @keyframes fx-r147-breathe{
+    0%,100%{opacity:calc(var(--fx-r147-light-opacity,.34) * .72)}
+    50%{opacity:var(--fx-r147-light-opacity,.34)}
+  }
+}
+
+@media (max-width:430px){
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
+    margin-top:18px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{
+    min-height:252px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-liveos{
+    top:auto!important;
+    bottom:18px!important;
+  }
+}
+
+@media (max-width:380px){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero{
+    padding-bottom:72px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{
+    margin-bottom:46px!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-live-motion-r147="ready"] #hero .hero-space::after{
+    animation:none!important;
+    opacity:.18!important;
+  }
+  html[data-fx-live-motion-r147="ready"] #hero .fx-core-detail-r122{
+    filter:none!important;
+  }
+}
