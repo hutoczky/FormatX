@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-14T23:55:00+02:00
-source_master=b1d4fdf7800122897d1a33103a3b4485ae79de4d
-purpose=republish unchanged r111 MAG after award-readiness optical contract maintenance; no visual, geometry, interaction or layout change
-interaction=unchanged r111 native procedural WebGL interaction contract
-verification=re-run production candidate validation, custom-domain smoke, live award-readiness audit and post-deploy mobile/desktop screenshot capture against current shader/CSS contracts
+requested_at=2026-08-15T11:55:47+02:00
+source_master=458a8419c831b64041ebb47dd3ed22339e9d127c
+purpose=activate the current mobile/desktop reference chain: r142 unclipped compositor, r143 tail-pixel bridge, r144 animated pointer/touch/gyroscope interaction, native prismatic WebGL core and current reference typography/layout; preserve the approved MAG geometry and size
+interaction=continuous breathing and reactor animation; pointer/touch parallax and energy response; mobile gyroscope parallax where supported and permitted; manual touch remains authoritative; prefers-reduced-motion respected
+verification=production candidate validation; JavaScript syntax; r144 gyro + r143 tail bridge contract; Worker tests; production build; custom-domain smoke; live desktop/mobile MAG capture; animation/interactivity verification; award-readiness and post-deploy reference checks
