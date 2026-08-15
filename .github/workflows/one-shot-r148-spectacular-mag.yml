@@ -1,0 +1,50 @@
+name: One-shot publish spectacular MAG r148
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r148-spectacular-mag.yml'
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Bust runtime cache and publish r148
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path('docs/scifi-ui/index.html')
+          s = p.read_text(encoding='utf-8')
+          old = 'rev=20260815-visible-motion-safe-lane-r147b'
+          new = 'rev=20260815-spectacular-reactor-safe-lane-r148'
+          if old not in s and new not in s:
+              raise SystemExit('Expected FormatX core cache token not found in index.html')
+          s = s.replace(old, new)
+          p.write_text(s, encoding='utf-8')
+
+          boot = Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js').read_text(encoding='utf-8')
+          required = [
+              'spectacular-reactor-safe-lane-r148',
+              'formatx-live-motion-r147.css',
+              'formatx-core-live-motion-r147.js'
+          ]
+          missing = [x for x in required if x not in boot]
+          if missing:
+              raise SystemExit(f'r148 bootstrap contract missing: {missing}')
+          PY
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add docs/scifi-ui/index.html
+          if git diff --cached --quiet; then
+            echo 'r148 cache token already published.'
+            exit 0
+          fi
+          git commit -m '[deploy-production] feat(mag): publish spectacular r148 live reactor and hide legacy copy'
+          git push origin HEAD:master
