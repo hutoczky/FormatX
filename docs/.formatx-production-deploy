@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-15T12:05:20+02:00
-source_master=70b888dcf6622c8389a5c70ef357a5cac67cb997
-purpose=activate r145 narrow-mobile proof safety while preserving the approved MAG visual: r142 unclipped compositor, r143 tail bridge, r144 pointer/touch/gyroscope interaction and native prismatic WebGL remain unchanged; only <=400px proof text/control separation is tightened
-interaction=unchanged r144 continuous breathing and reactor animation; pointer/touch parallax and energy response; mobile gyroscope where supported and permitted; manual touch remains authoritative; prefers-reduced-motion respected
-verification=production candidate validation; JavaScript syntax; r145 narrow-proof contract; r144 gyro + r143 tail bridge contract; Worker tests; production build; custom-domain smoke; 390px live text-glyph overlap check; desktop/mobile MAG capture; post-deploy reference and award-readiness checks
+requested_at=2026-08-15T16:40:00+02:00
+source_master=244179056d2f688525d65374eb388425c9dd6620
+purpose=activate r154 desktop integration: preserve the supplied 412x410 reference aspect instead of stretching it across the wide desktop stage; remove the desktop stage rectangle; screen-blend the reference material into the hero; suppress the wide native WebGL ghost while keeping its interaction engine alive; preserve the approved mobile geometry and size
+interaction=preserve r153 desktop breathing/reactor/orbit animation, r152 centered click stability, r144 pointer/touch/gyroscope interaction, continuous mobile breathing and reactor motion, and prefers-reduced-motion behavior
+verification=production candidate validation; JavaScript syntax; r154 aspect/blend contract; Worker tests; production build; custom-domain smoke; desktop and mobile live screenshot comparison; WebGL/interactivity; mobile geometry and proof safety regression
