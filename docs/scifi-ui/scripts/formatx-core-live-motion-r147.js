@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r145-spectacular-reactor-safe-lane-r148';
+const VERSION='r145-spectacular-reactor-safe-lane-r148c';
 if(root.dataset.fxLiveMotionR147===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxLiveMotionR147='audit-skip';return;}
 root.dataset.fxLiveMotionR147='booting';
@@ -61,7 +61,7 @@ function hideLegacyHeroVisuals(){
     imp(copy,'margin','-1px');imp(copy,'padding','0px');
     imp(copy,'overflow','hidden');imp(copy,'clip','rect(0px, 0px, 0px, 0px)');
     imp(copy,'clip-path','inset(50%)');imp(copy,'white-space','nowrap');
-    imp(copy,'pointer-events','none');imp(copy,'z-index','-1');
+    imp(copy,'pointer-events','none');imp(copy,'opacity','0');imp(copy,'z-index','-1');
   }
   hero.querySelectorAll('.scroll-cue,.hero-label,.hero-ring,.fx-immersive-launch,.fx-organism-map').forEach(el=>{
     if(el instanceof HTMLElement){imp(el,'display','none');imp(el,'visibility','hidden');imp(el,'pointer-events','none');}
