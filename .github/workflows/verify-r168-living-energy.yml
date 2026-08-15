@@ -48,14 +48,21 @@ jobs:
           const {chromium}=require('playwright');
           const fs=require('node:fs'),assert=require('node:assert/strict');
           const origin='https://formatxsuite.com';
-          const rawHome=fs.readFileSync('/tmp/r172-home.html','utf8');
-          const home=rawHome.replace('<base href="/scifi-ui/">','<base href="https://formatxsuite.com/scifi-ui/">');
+          const home=fs.readFileSync('/tmp/r172-home.html','utf8');
           const MODE='orbit-caustic-spectrum-shock-refraction';
           const CLOCK='32ms-optical-reactor-v3';
 
           async function openProduction(context,label){
             const page=await context.newPage();
-            await page.setContent(home,{waitUntil:'domcontentloaded',timeout:30000});
+            await page.route(`${origin}/**`,async route=>{
+              const req=route.request(),url=new URL(req.url());
+              if(req.resourceType()==='document'&&url.origin===origin&&url.pathname==='/'){
+                await route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:home,headers:{'cache-control':'no-store'}});
+                return;
+              }
+              await route.continue();
+            });
+            await page.goto(`${origin}/?verify=${encodeURIComponent(label)}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
             await page.evaluate(label=>document.documentElement.dataset.fxVerifierLabel=label,label);
             return page;
           }
