@@ -1,0 +1,38 @@
+name: One-shot r150 mobile download restore
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r150-mobile-download.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply r150 mobile download restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/patch-r150-mobile-download.py
+          node --check docs/scifi-ui/scripts/formatx-mobile-download-r150.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+      - name: Publish r150 patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add \
+            docs/scifi-ui/scripts/formatx-core-real3d-v20.js \
+            docs/scifi-ui/index.html
+          if git diff --cached --quiet; then
+            echo 'r150 patch already applied'
+            exit 0
+          fi
+          git commit -m '[deploy-production] fix(download): restore mobile download section r150'
+          git push origin HEAD:master
