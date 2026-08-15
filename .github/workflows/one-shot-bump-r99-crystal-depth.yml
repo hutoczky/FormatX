@@ -1,4 +1,4 @@
-name: One-shot publish r170 monotonic living optics
+name: One-shot publish r171 breathing living optics
 on:
   push:
     branches: [master]
@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Publish monotonic r168 v3 optical clock cache
+      - name: Publish r171 continuous optical breathing and stronger interaction
         shell: bash
         run: |
           set -euo pipefail
@@ -21,33 +21,58 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
+          js=Path('docs/scifi-ui/scripts/formatx-living-energy-r168.js')
+          s=js.read_text()
+          replacements={
+            "boost=Math.max(boost,.48);":"boost=Math.max(boost,.64);",
+            "hit(1.48);":"hit(1.68);",
+            "hit(1.58);":"hit(1.84);",
+            "boost=Math.max(boost,1.0);":"boost=Math.max(boost,1.16);",
+            "clamp(energy*.40+boost*.78+burstStrength*.48,0,1.65)":"clamp(energy*.40+boost*.88+burstStrength*.56,0,1.78)",
+            "const flare=clamp(.12+beat*.58+activity*.27,.10,.92);":"const flare=clamp(.08+beat*.54+breath*.11+activity*.27,.08,.94);",
+            "const spectrum=clamp(.08+beat*.44+activity*.31,.07,.88);":"const spectrum=clamp(.06+beat*.40+breath*.09+activity*.31,.06,.90);",
+            "const refract=clamp(.10+beat*.26+activity*.30,.08,.72);":"const refract=clamp(.07+beat*.23+breath*.10+activity*.30,.07,.74);",
+            "(50+x*7.2).toFixed(2)":"(50+x*9.2).toFixed(2)",
+            "(49+y*5.8).toFixed(2)":"(49+y*7.4).toFixed(2)",
+            "(x*13).toFixed(2)":"(x*18).toFixed(2)",
+            "(y*10).toFixed(2)":"(y*14).toFixed(2)",
+            "(.54+burstP*1.62).toFixed(4)":"(.50+burstP*1.78).toFixed(4)",
+            "const brightness=clamp(1.04+beat*.14+activity*.11,1.04,1.38);":"const brightness=clamp(1.01+breath*.055+beat*.14+activity*.11,1.03,1.40);",
+            "const saturation=clamp(1.08+beat*.10+activity*.16,1.08,1.48);":"const saturation=clamp(1.04+breath*.070+beat*.10+activity*.16,1.07,1.50);",
+            "const contrast=clamp(1.19+beat*.05+activity*.04,1.19,1.31);":"const contrast=clamp(1.17+breath*.032+beat*.05+activity*.04,1.18,1.32);",
+            "const cyanBlur=14+beat*15+activity*10,cyanAlpha=clamp(.17+beat*.18+activity*.14,.16,.52);":"const cyanBlur=12+breath*5+beat*15+activity*10,cyanAlpha=clamp(.13+breath*.075+beat*.18+activity*.14,.15,.54);",
+            "const violetBlur=25+dub*18+activity*10,violetAlpha=clamp(.09+dub*.16+activity*.11,.08,.36);":"const violetBlur=22+breath*6+dub*18+activity*10,violetAlpha=clamp(.065+breath*.060+dub*.16+activity*.11,.08,.38);"
+          }
+          for old,new in replacements.items():
+            if old in s:s=s.replace(old,new,1)
+            elif new not in s:raise SystemExit(f'missing r171 patch token: {old}')
+          js.write_text(s)
+
           index=Path('docs/scifi-ui/index.html')
           html=index.read_text()
-          new='./scripts/formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260815-r170-stable-optical-clock'
-          pat=r'\.\/scripts\/formatx-living-energy-r168\.js\?[^"\']+'
-          html,n=re.subn(pat,new,html,count=1)
+          new_url='./scripts/formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260815-r171-breathing-optics'
+          html,n=re.subn(r'\.\/scripts\/formatx-living-energy-r168\.js\?[^"\']+',new_url,html,count=1)
           if n!=1:raise SystemExit(f'r168 JS URL not found exactly once: {n}')
           index.write_text(html)
 
           validator=Path('.github/scripts/validate-real3d-core.cjs')
           v=validator.read_text()
-          v=re.sub(r'formatx-living-energy-r168\.js\?[^\'"\)]+','formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260815-r170-stable-optical-clock',v)
+          v=re.sub(r'formatx-living-energy-r168\.js\?[^\'"\)]+','formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260815-r171-breathing-optics',v)
           validator.write_text(v)
           PY
           node --check docs/scifi-ui/scripts/formatx-living-energy-r168.js
           node --check docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js
           node .github/scripts/validate-real3d-core.cjs
+          grep -q "breath\*\.11" docs/scifi-ui/scripts/formatx-living-energy-r168.js
           grep -q "32ms-optical-reactor-v3" docs/scifi-ui/scripts/formatx-living-energy-r168.js
-          grep -q "fxLivingEnergyFrameR168" docs/scifi-ui/scripts/formatx-living-energy-r168.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
-          if git diff --cached --quiet; then echo 'r170 optical cache already current'; exit 0; fi
-          git commit -m '[deploy-production] fix(mag): publish r170 monotonic optical clock'
+          git add docs/scifi-ui/scripts/formatx-living-energy-r168.js docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
+          if git diff --cached --quiet; then echo 'r171 already current'; exit 0; fi
+          git commit -m '[deploy-production] feat(mag): publish r171 breathing optics and stronger interaction'
           for attempt in 1 2 3; do
             if git push origin HEAD:master; then exit 0; fi
             echo "master advanced during publish; rebasing attempt $attempt"
             git pull --rebase origin master
           done
-          echo 'failed to publish r170 after three rebase attempts' >&2
           exit 1
