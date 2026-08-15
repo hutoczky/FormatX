@@ -1,4 +1,4 @@
-name: One-shot publish r166 living crystal shape pulse
+name: One-shot publish r166b living crystal shape pulse
 on:
   push:
     branches: [master]
@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Publish r166 heartbeat-driven silhouette cache keys
+      - name: Publish r166b direct-clock crystal breathing
         shell: bash
         run: |
           set -euo pipefail
@@ -20,32 +20,56 @@ jobs:
           from pathlib import Path
           import re
 
+          detail=Path('docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js')
+          d=detail.read_text()
+          new_func=r'''function heartbeatShape(energy){
+    if(reduced.matches)return{x:1,y:1,beat:0,breath:.5};
+    /* r166b: derive the crystal deformation from the render clock itself.
+       This uses the exact same 1380ms lub-dub timing and respiratory wave as
+       the reactor heartbeat, so a 50ms heartbeat sample can never miss the
+       short contraction peaks that physically move the four crystal tips. */
+    const now=performance.now();
+    const cycle=(now%1380)/1380;
+    const g=(c,w)=>Math.exp(-Math.pow((cycle-c)/w,2));
+    const lub=g(.105,.040);
+    const dub=g(.235,.052)*.64;
+    const beat=clamp(lub+dub*.78,0,1.18);
+    const breath=.5+.5*Math.sin(now*.00118-1.05);
+    const activity=clamp((energy-.30)/1.10,0,1);
+    const targetX=clamp(.997+(breath-.5)*.005+beat*.022+activity*.003,.992,1.028);
+    const targetY=clamp(.996+(breath-.5)*.008+beat*.034+activity*.004,.989,1.043);
+    lastShapeX+=(targetX-lastShapeX)*.34;
+    lastShapeY+=(targetY-lastShapeY)*.34;
+    root.dataset.fxLivingShapeClockR166='direct-render-clock-r166b';
+    return{x:lastShapeX,y:lastShapeY,beat,breath};
+  }'''
+          d,n=re.subn(r'function heartbeatShape\(energy\)\{.*?\n  \}\n\n  function drawReference',new_func+'\n\n  function drawReference',d,count=1,flags=re.S)
+          if n!=1: raise SystemExit('heartbeatShape block not found exactly once')
+          detail.write_text(d)
+
           boot=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
           s=boot.read_text()
-          old='formatx-core-detail-overlay-r122.js?v=20260815-r162-mobile-edge-fade'
-          new='formatx-core-detail-overlay-r122.js?v=20260815-r166-heartbeat-shape-pulse'
-          if old in s:
-              s=s.replace(old,new,1)
-          elif new not in s:
-              raise SystemExit('detail overlay cache token not found')
+          old='formatx-core-detail-overlay-r122.js?v=20260815-r166-heartbeat-shape-pulse'
+          new='formatx-core-detail-overlay-r122.js?v=20260815-r166b-direct-clock-shape-pulse'
+          if old in s:s=s.replace(old,new,1)
+          elif new not in s:raise SystemExit('r166 detail cache token not found')
           boot.write_text(s)
 
           index=Path('docs/scifi-ui/index.html')
           html=index.read_text()
-          target='./scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-r166-heartbeat-shape-pulse'
+          target='./scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-r166b-direct-clock-shape-pulse'
           html,n=re.subn(r'\.\/scripts\/formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=[^"\']+',target,html,count=1)
           if n!=1: raise SystemExit('FormatX real3d bootstrap URL not found exactly once')
           index.write_text(html)
 
           validator=Path('.github/scripts/validate-real3d-core.cjs')
           v=validator.read_text()
-          v=v.replace('formatx-core-detail-overlay-r122.js?v=20260815-r162-mobile-edge-fade','formatx-core-detail-overlay-r122.js?v=20260815-r166-heartbeat-shape-pulse',1)
-          v=v.replace('reference-material-interactive-seamless-key','reference-material-interactive-seamless-shape-pulse',1)
+          v=v.replace('formatx-core-detail-overlay-r122.js?v=20260815-r166-heartbeat-shape-pulse','formatx-core-detail-overlay-r122.js?v=20260815-r166b-direct-clock-shape-pulse',1)
           marker="for(const source of [bootstrap,heartbeat,detail,mobileStability,wrapper,renderer,layout,flow,contentFinalizer,livingRendering,tailFinalizer,gyro])new Function(source);"
-          shape_assert="for(const token of ['heartbeatShape','fxLivingHeartbeatBeatR158','fxLivingShapePulseR166','fxLivingShapeBeatR166','heartbeat-driven-four-tip-breathing','reference-material-interactive-seamless-shape-pulse'])assert.ok(detail.includes(token),`missing r166 shape-pulse token: ${token}`);\n"
-          if shape_assert not in v:
+          direct_assert="assert.ok(detail.includes('direct-render-clock-r166b'),'missing r166b direct render-clock shape pulse');\n"
+          if direct_assert not in v:
               if marker not in v: raise SystemExit('validator insertion marker not found')
-              v=v.replace(marker,shape_assert+marker,1)
+              v=v.replace(marker,direct_assert+marker,1)
           validator.write_text(v)
           PY
           node --check docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js
@@ -53,7 +77,7 @@ jobs:
           node .github/scripts/validate-real3d-core.cjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
-          if git diff --cached --quiet; then echo 'r166 shape pulse cache already current'; exit 0; fi
-          git commit -m '[deploy-production] feat(mag): publish r166 heartbeat-driven silhouette pulse'
+          git add docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
+          if git diff --cached --quiet; then echo 'r166b direct-clock shape pulse already current'; exit 0; fi
+          git commit -m '[deploy-production] fix(mag): make crystal silhouette visibly pulse on render clock'
           git push origin HEAD:master
