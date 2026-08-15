@@ -1,0 +1,55 @@
+name: One-shot r173 r168 lifecycle recovery
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r173-r168-start.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Patch r168 late-layer lifecycle and publish fresh cache key
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          js=Path('docs/scifi-ui/scripts/formatx-living-energy-r168.js')
+          s=js.read_text()
+          old="const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected)ensure();});mo.observe(document.documentElement,{childList:true,subtree:true});"
+          new="const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!timer)start();});mo.observe(document.documentElement,{childList:true,subtree:true});"
+          if old in s:
+              s=s.replace(old,new,1)
+          elif new not in s:
+              raise SystemExit('r168 lifecycle target not found')
+          js.write_text(s)
+
+          index=Path('docs/scifi-ui/index.html')
+          html=index.read_text()
+          old_rev='formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260815-r172-priority-seamless'
+          new_rev='formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260816-r173-late-layer-start'
+          if old_rev in html:
+              html=html.replace(old_rev,new_rev,1)
+          elif new_rev not in html:
+              raise SystemExit('r168 cache token not found')
+          index.write_text(html)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-living-energy-r168.js docs/scifi-ui/index.html
+          if git diff --cached --quiet; then
+            echo 'r173 lifecycle patch already current'
+            exit 0
+          fi
+          git commit -m '[deploy-production] fix(mag): recover r168 clock after late live-layer mount r173'
+          git push origin HEAD:master
