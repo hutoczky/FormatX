@@ -7,7 +7,42 @@ root.dataset.fxCoreDetailR122='booting';
 root.dataset.fxCoreReferenceTextureR130='loading';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const PARTS=Array.from({length:6},(_,i)=>`/scifi-ui/assets/reference-r130/part${i}.b64?v=20260815-reference-material-r136`);
+const PARTS=Array.from({length:6},(_,i)=>`/scifi-ui/assets/reference-r130/part${i}.b64?v=20260815-reference-material-r138`);
+
+async function reconstructHeadingArtifactR138(source){
+  const w=source.width,h=source.height;
+  const off=typeof OffscreenCanvas==='function'?new OffscreenCanvas(w,h):document.createElement('canvas');
+  off.width=w;off.height=h;
+  const c=off.getContext('2d',{alpha:true,willReadFrequently:true});
+  if(!c){root.dataset.fxCoreReferenceArtifactRepairR138='context-unavailable';return source;}
+  c.drawImage(source,0,0,w,h);
+  const image=c.getImageData(0,0,w,h),d=image.data;
+
+  /* The source reference contains one residual neutral-blue "SMER" fragment at
+     the lower crystal tail. The old implementation erased a wide title band,
+     which also cut the cyan tail. Reconstruct only this 60x20 source-pixel area
+     by vertical interpolation from clean rows immediately above/below it. This
+     removes the baked fragment while preserving the continuous tail/water field. */
+  const x0=Math.max(0,Math.round(w*.437)),x1=Math.min(w-1,Math.round(w*.588));
+  const y0=Math.max(1,Math.round(h*.895)),y1=Math.min(h-2,Math.round(h*.939));
+  const top=Math.max(0,y0-4),bottom=Math.min(h-1,y1+4);
+  const row=(x,y)=>(y*w+x)*4;
+  for(let y=y0;y<=y1;y++){
+    const t=(y-y0+1)/(y1-y0+2);
+    for(let x=x0;x<=x1;x++){
+      const i=row(x,y),a=row(x,top),b=row(x,bottom);
+      d[i]=Math.round(d[a]+(d[b]-d[a])*t);
+      d[i+1]=Math.round(d[a+1]+(d[b+1]-d[a+1])*t);
+      d[i+2]=Math.round(d[a+2]+(d[b+2]-d[a+2])*t);
+      d[i+3]=Math.round(d[a+3]+(d[b+3]-d[a+3])*t);
+    }
+  }
+  c.putImageData(image,0,0);
+  source.close?.();
+  root.dataset.fxCoreReferenceArtifactRepairR138='applied';
+  root.dataset.fxCoreReferenceHeadingR138='dom-visible-clean-reference';
+  return createImageBitmap(off);
+}
 
 async function loadReferenceBitmap(){
   const chunks=await Promise.all(PARTS.map(async url=>{
@@ -31,8 +66,8 @@ async function loadReferenceBitmap(){
   const bytes=new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
   if(bytes[0]!==82||bytes[1]!==73||bytes[2]!==70||bytes[3]!==70||bytes[8]!==87||bytes[9]!==69||bytes[10]!==66||bytes[11]!==80)throw new Error('reference RIFF/WEBP signature mismatch');
-  const blob=new Blob([bytes],{type:'image/webp'});
-  return createImageBitmap(blob);
+  const raw=await createImageBitmap(new Blob([bytes],{type:'image/webp'}));
+  return reconstructHeadingArtifactR138(raw);
 }
 
 function boot(attempt=0){
@@ -53,14 +88,6 @@ function boot(attempt=0){
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;canvas.style.width=cssW+'px';canvas.style.height=cssH+'px';}
   }
 
-  /* r136: do not erase the supplied title band. The previous broad destination-out
-     rectangle also erased the crystal's lower center tail. The bitmap heading is
-     now the visual heading; the semantic DOM heading stays in-flow but is visually
-     transparent in the final mobile lock. This preserves the supplied pixels. */
-  function preserveReferenceTitleBand(){
-    root.dataset.fxCoreReferenceHeadingR136='bitmap-source';
-  }
-
   function drawReference(tx,ty,energy){
     if(!bitmap)return;
     const moveX=tx*cssW*.13,moveY=-ty*cssH*.11;
@@ -74,16 +101,12 @@ function boot(attempt=0){
     ctx.globalCompositeOperation='source-over';
     ctx.drawImage(bitmap,-cssW*.5,-cssH*.5,cssW,cssH);
     ctx.restore();
-    preserveReferenceTitleBand();
 
-    /* A very small counter-shifted copy gives pointer-driven glass refraction while
-       keeping the idle frame locked to the supplied reference. */
     if(!reduced.matches&&(Math.abs(tx)+Math.abs(ty)>.006||energy>.42)){
       ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=clamp(.025+(energy-.30)*.035,.025,.075);
       ctx.translate(-tx*cssW*.018,ty*cssH*.014);
       ctx.drawImage(bitmap,0,0,cssW,cssH);
       ctx.restore();
-      preserveReferenceTitleBand();
     }
   }
 
@@ -114,17 +137,17 @@ function boot(attempt=0){
     ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,cssW,cssH);
     if(bitmap){drawReference(lastTx,lastTy,lastEnergy);drawLiveOptics(lastTx,lastTy,lastEnergy);}
     root.dataset.fxCoreDetailEnergy=lastEnergy.toFixed(2);
-    root.dataset.fxCoreDetailFrame=bitmap?'reference-material-r136':failed?'reference-fallback-r136':'reference-loading-r136';
+    root.dataset.fxCoreDetailFrame=bitmap?'reference-material-r138':failed?'reference-fallback-r138':'reference-loading-r138';
     if(!raf)raf=requestAnimationFrame(render);
   }
 
   loadReferenceBitmap().then(b=>{
-    bitmap=b;root.dataset.fxCoreReferenceTextureR130='ready';root.dataset.fxCoreFacetMode='reference-material-r136';root.dataset.fxCoreReferenceHeadingR136='bitmap-source';
-    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r136',mode:'reference-material-interactive'}}));
+    bitmap=b;root.dataset.fxCoreReferenceTextureR130='ready';root.dataset.fxCoreFacetMode='reference-material-r138';root.dataset.fxCoreReferenceHeadingR138='dom-visible-clean-reference';
+    dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r138',mode:'reference-material-interactive'}}));
     if(!raf&&visible){last=performance.now();raf=requestAnimationFrame(render);}
   }).catch(err=>{
-    failed=true;root.dataset.fxCoreReferenceTextureR130='failed';root.dataset.fxCoreFacetMode='native-webgl-fallback-r136';
-    console.warn('FormatX reference material r136 fallback',err);
+    failed=true;root.dataset.fxCoreReferenceTextureR130='failed';root.dataset.fxCoreFacetMode='native-webgl-fallback-r138';
+    console.warn('FormatX reference material r138 fallback',err);
   });
 
   const ro=new ResizeObserver(resize);ro.observe(stage);
