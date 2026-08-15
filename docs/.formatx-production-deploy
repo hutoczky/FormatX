@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-15T17:31:00+02:00
-source_master=acef4b1e7076847d8c329be90dfa080ffe8228de
-purpose=activate the current cross-device final with r154e desktop cleanup: preserve the supplied 412x410 crystal aspect, keep r157 desktop luminance alpha key, remove the legacy rayglass/stage ::before and ::after reactor/grid pseudo-elements that created a separate rectangular floor panel, keep the stage transparent and the visible crystal screen-blended into the site; preserve the approved mobile MAG size/form and r156 flow MAG -> operation heading -> Public Proof -> Download
-interaction=preserve r155 50ms JavaScript heartbeat on PC and phone, r153 reactor/orbit optics, r152 centered click stability, desktop pointer response, mobile touch and r144 gyroscope input, pause control and prefers-reduced-motion behavior
-verification=production candidate source/runtime/security validation; JavaScript syntax; r154e pseudo-grid removal contract; Worker tests; production build; custom-domain smoke; desktop 1600x1000 luma-key/aspect/blend/pseudo-element/heartbeat/pointer live check; mobile 390x844 and 412x915 proof-first/heartbeat/touch/gyro regression; WebGL render budget; real screenshot visual inspection
+requested_at=2026-08-15T18:06:00+02:00
+source_master=6fb9d81b4a700e3d705e527262bde7062b496e3b
+purpose=activate r158 cross-device living MAG integration: preserve the approved crystal geometry and size while removing the separate-panel feeling on desktop and mobile; blend the reference material and live optics into one continuous hero/page atmosphere with transparent legacy stages and screen-blended crystal material
+interaction=organic double lub-dub heartbeat plus slow breathing on PC and phone; pointer/mouse interaction on desktop; touch interaction and existing r144 gyroscope response on mobile; interaction increases reactor energy/glow without changing the approved silhouette; pause and prefers-reduced-motion remain respected
+verification=production candidate source/runtime/security validation; JavaScript syntax; r158 seamless style and heartbeat contract; Worker tests; production build; custom-domain smoke; desktop 1600x1000 seamless blend/heartbeat/pointer live check; mobile 390x844 seamless blend/heartbeat/touch/gyro/proof flow check; WebGL render budget and screenshot capture
