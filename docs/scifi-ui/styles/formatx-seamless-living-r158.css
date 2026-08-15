@@ -111,7 +111,7 @@ html body.living-architecture #hero .fx-reference-proof{
 }
 
 html body.living-architecture #hero .fx-reference-heading::before{
-  background:linear-gradient(180deg,rgba(1,7,17,0),rgba(1,7,17,.50) 48%,rgba(1,7,17,.92) 86%,#010711 100%)!important;
+  background:linear-gradient(180deg,rgba(4,13,30,0) 0%,rgba(4,13,30,.18) 42%,rgba(4,13,30,.62) 78%,#040d1e 100%)!important;
 }
 
 @media (max-width:900px),(pointer:coarse){
