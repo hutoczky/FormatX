@@ -1,21 +1,21 @@
-/* r148 — preserve the approved r145 crystal silhouette, but make the living core unmistakably alive.
-   Geometry stays fixed. Motion is rendered as optical energy, reactor pulse, rotating prismatic fields,
-   shockwaves and interaction-driven light. Legacy hero copy is visually removed from behind the MAG. */
+/* r149 — centered optical reactor for the approved r145 crystal.
+   The visible crystal geometry stays fixed. Animation is clipped to the actual
+   crystal canvas so orbit/prism effects cannot escape into the hero corners. */
 @media (max-width:900px),(pointer:coarse){
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero{
-    padding-bottom:92px!important;
+  body.living-architecture #hero{
+    padding-bottom:48px!important;
     overflow:visible!important;
   }
 
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-grid,
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space{
+  #hero .hero-grid,
+  #hero .hero-space{
     isolation:isolate!important;
     overflow:visible!important;
   }
 
-  /* The original desktop hero copy was still physically behind the mobile MAG.
-     Keep it available to assistive technology, but remove it from the visual/layout plane. */
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-copy{
+  /* Mobile reference owns the visual hero. Remove every legacy overlay even
+     before the reference-layout data attribute has finished booting. */
+  #hero .hero-copy{
     position:absolute!important;
     width:1px!important;
     height:1px!important;
@@ -33,55 +33,87 @@
     z-index:-1!important;
   }
 
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .scroll-cue,
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-label,
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-ring,
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-immersive-launch,
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-organism-map{
+  #hero .scroll-cue,
+  #hero .hero-label,
+  #hero .hero-ring,
+  #hero .fx-immersive-launch,
+  #hero .fx-organism-map{
     display:none!important;
     visibility:hidden!important;
+    opacity:0!important;
     pointer-events:none!important;
   }
 
-  /* JS measures the extended tail and overrides this with the exact safe lane. */
+  /* JS measures the tail protrusion and replaces margin-top with an exact value. */
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
     top:0!important;
-    margin:92px 6% 26px!important;
+    margin:44px 6% 24px!important;
     z-index:28!important;
     position:relative!important;
   }
 
-  /* Opaque transition below the core so no legacy/animated content can read through the heading. */
+  /* Short transition only. The previous 112px guard amplified the black dead zone. */
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading::before{
     content:"";
     position:absolute;
     left:-8vw;
     right:-8vw;
-    top:-88px;
-    height:112px;
+    top:-48px;
+    height:62px;
     pointer-events:none;
     z-index:-1;
-    background:linear-gradient(180deg,rgba(1,6,16,0),rgba(1,6,16,.76) 46%,rgba(1,6,16,.98) 82%,#010610 100%);
+    background:linear-gradient(180deg,rgba(1,6,16,0),rgba(1,6,16,.72) 48%,rgba(1,6,16,.98) 88%,#010610 100%);
   }
 
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{
     z-index:28!important;
-    margin:0 7% 46px 6%!important;
+    margin:0 7% 34px 6%!important;
   }
 
-  /* Real DOM optical animation layer, injected by formatx-core-live-motion-r147.js. */
+  /* The runtime sets left/top/width/height to the exact .fx-core-detail-r122
+     client rect. Paint containment is deliberate: no ring may leak to top-left. */
   #hero .fx-core-live-r147-layer{
     position:absolute;
-    inset:0;
+    left:0;
+    top:0;
     width:100%;
-    height:clamp(390px,100vw,520px);
-    min-height:410px;
-    z-index:14;
-    overflow:visible;
+    height:100%;
+    min-height:0;
+    z-index:15;
+    overflow:hidden;
+    clip-path:inset(0);
     pointer-events:none;
     mix-blend-mode:screen;
-    contain:layout style;
+    contain:layout paint style;
     transform:translateZ(0);
+  }
+
+  #hero .fx-core-live-r147-layer::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at var(--fx-r147-light-x,50%) var(--fx-r147-light-y,48%),rgba(231,255,255,.22) 0 1.2%,rgba(74,235,255,.14) 4%,rgba(171,84,255,.08) 13%,transparent 31%),
+      radial-gradient(ellipse at 50% 52%,rgba(44,213,255,.08),rgba(96,65,255,.035) 36%,transparent 66%);
+    opacity:var(--fx-r147-light-opacity,.78);
+    animation:fx-r149-field-breathe 2.6s ease-in-out infinite;
+  }
+
+  #hero .fx-core-live-r147-layer::after{
+    content:"";
+    position:absolute;
+    left:var(--fx-r147-light-x,50%);
+    top:var(--fx-r147-light-y,48%);
+    width:clamp(62px,17vw,88px);
+    height:clamp(62px,17vw,88px);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    border:1px solid rgba(203,253,255,.56);
+    box-shadow:0 0 13px rgba(96,239,255,.38),0 0 28px rgba(147,80,255,.18),inset 0 0 20px rgba(174,249,255,.20);
+    opacity:.64;
+    pointer-events:none;
+    animation:fx-r149-reactor-shell 1.9s ease-in-out infinite;
   }
 
   #hero .fx-core-live-r147-glow,
@@ -102,104 +134,101 @@
   }
 
   #hero .fx-core-live-r147-glow{
-    width:clamp(220px,58vw,310px);
-    height:clamp(220px,58vw,310px);
+    width:clamp(180px,49vw,252px);
+    height:clamp(180px,49vw,252px);
     border-radius:50%;
     transform:translate(-50%,-50%) scale(var(--fx-r147-pulse-scale,1));
-    background:
-      radial-gradient(circle,
-        rgba(255,255,255,.78) 0 1.2%,
-        rgba(198,253,255,.48) 2.5%,
-        rgba(92,240,255,.32) 6%,
-        rgba(31,214,255,.22) 13%,
-        rgba(171,72,255,.16) 24%,
-        rgba(69,86,255,.075) 37%,
-        rgba(0,0,0,0) 62%);
-    filter:blur(1.1px);
-    opacity:var(--fx-r147-light-opacity,.76);
-    animation:fx-r147-core-pulse 1.85s cubic-bezier(.4,0,.2,1) infinite;
+    background:radial-gradient(circle,
+      rgba(255,255,255,.88) 0 1.2%,
+      rgba(205,254,255,.58) 2.8%,
+      rgba(84,241,255,.38) 7%,
+      rgba(28,211,255,.22) 15%,
+      rgba(169,73,255,.15) 27%,
+      rgba(65,81,255,.07) 40%,
+      transparent 64%);
+    filter:blur(.8px);
+    opacity:var(--fx-r147-light-opacity,.82);
+    animation:fx-r147-core-pulse 1.72s cubic-bezier(.4,0,.2,1) infinite;
   }
 
   #hero .fx-core-live-r147-flare{
-    width:92%;
+    width:86%;
     height:2px;
     transform:translate(-50%,-50%) scaleX(var(--fx-r147-flare-scale,1));
-    background:linear-gradient(90deg,transparent 0%,rgba(48,196,255,.12) 14%,rgba(74,232,255,.35) 32%,rgba(230,255,255,.96) 49.5%,rgba(212,129,255,.46) 62%,rgba(103,75,255,.16) 78%,transparent 100%);
-    box-shadow:0 0 8px rgba(213,252,255,.82),0 0 19px rgba(66,222,255,.56),0 0 42px rgba(105,104,255,.24);
-    opacity:var(--fx-r147-flare-opacity,.72);
-    animation:fx-r147-flare-breathe 1.85s ease-in-out infinite;
+    background:linear-gradient(90deg,transparent 0%,rgba(48,196,255,.10) 12%,rgba(74,232,255,.36) 32%,rgba(241,255,255,.98) 49.5%,rgba(214,130,255,.48) 62%,rgba(103,75,255,.14) 80%,transparent 100%);
+    box-shadow:0 0 8px rgba(220,254,255,.86),0 0 20px rgba(66,222,255,.58),0 0 38px rgba(105,104,255,.22);
+    opacity:var(--fx-r147-flare-opacity,.78);
+    animation:fx-r147-flare-breathe 1.72s ease-in-out infinite;
   }
 
   #hero .fx-core-live-r147-beam{
     width:2px;
-    height:76%;
+    height:70%;
     transform:translate(-50%,-50%) scaleY(var(--fx-r147-beam-scale,1));
-    background:linear-gradient(180deg,transparent 0%,rgba(91,221,255,.18) 18%,rgba(214,252,255,.78) 48%,rgba(168,94,255,.28) 70%,transparent 100%);
-    box-shadow:0 0 9px rgba(116,235,255,.66),0 0 25px rgba(65,190,255,.34);
-    opacity:var(--fx-r147-beam-opacity,.52);
-    animation:fx-r147-beam-breathe 2.45s ease-in-out infinite;
+    background:linear-gradient(180deg,transparent 0%,rgba(91,221,255,.15) 15%,rgba(226,254,255,.82) 48%,rgba(168,94,255,.25) 72%,transparent 100%);
+    box-shadow:0 0 9px rgba(116,235,255,.70),0 0 23px rgba(65,190,255,.34);
+    opacity:var(--fx-r147-beam-opacity,.58);
+    animation:fx-r147-beam-breathe 2.25s ease-in-out infinite;
   }
 
   #hero .fx-core-live-r147-prism{
-    width:clamp(180px,49vw,255px);
-    height:clamp(180px,49vw,255px);
+    width:clamp(148px,40vw,206px);
+    height:clamp(148px,40vw,206px);
     border-radius:50%;
     transform:translate(-50%,-50%) rotate(var(--fx-r147-prism-angle,0deg));
-    background:conic-gradient(from 0deg,
-      transparent 0 7%,rgba(50,225,255,.12) 10%,transparent 15% 27%,rgba(177,78,255,.12) 31%,transparent 36% 51%,rgba(117,244,255,.10) 55%,transparent 61% 76%,rgba(82,113,255,.11) 80%,transparent 86% 100%);
-    -webkit-mask:radial-gradient(circle,transparent 0 39%,#000 43% 47%,transparent 52%);
-    mask:radial-gradient(circle,transparent 0 39%,#000 43% 47%,transparent 52%);
-    filter:blur(.7px);
-    opacity:var(--fx-r147-prism-opacity,.62);
-    animation:fx-r147-prism-spin 13s linear infinite;
+    background:conic-gradient(from 0deg,transparent 0 8%,rgba(50,225,255,.15) 11%,transparent 16% 28%,rgba(177,78,255,.14) 32%,transparent 37% 51%,rgba(117,244,255,.13) 55%,transparent 62% 77%,rgba(82,113,255,.13) 81%,transparent 87% 100%);
+    -webkit-mask:radial-gradient(circle,transparent 0 38%,#000 42% 47%,transparent 52%);
+    mask:radial-gradient(circle,transparent 0 38%,#000 42% 47%,transparent 52%);
+    filter:blur(.55px);
+    opacity:var(--fx-r147-prism-opacity,.66);
+    animation:fx-r147-prism-spin 10.5s linear infinite;
   }
 
   #hero .fx-core-live-r147-orbit,
   #hero .fx-core-live-r147-orbit-b,
   #hero .fx-core-live-r147-orbit-c{
     border-radius:50%;
-    border:1px solid rgba(86,231,255,.48);
-    border-left-color:rgba(238,253,255,.90);
-    border-right-color:rgba(177,75,255,.56);
-    box-shadow:0 0 14px rgba(77,222,255,.25),inset 0 0 18px rgba(109,230,255,.10);
-    opacity:var(--fx-r147-orbit-opacity,.66);
+    border:1px solid rgba(86,231,255,.46);
+    border-left-color:rgba(238,253,255,.86);
+    border-right-color:rgba(177,75,255,.54);
+    box-shadow:0 0 12px rgba(77,222,255,.23),inset 0 0 16px rgba(109,230,255,.09);
+    opacity:var(--fx-r147-orbit-opacity,.64);
   }
 
   #hero .fx-core-live-r147-orbit{
-    width:clamp(138px,37vw,190px);
-    height:clamp(138px,37vw,190px);
-    transform:translate(-50%,-50%) rotate(0deg) scaleX(1.12) scaleY(.78);
-    animation:fx-r147-orbit-a 5.4s linear infinite;
+    width:clamp(118px,31vw,160px);
+    height:clamp(118px,31vw,160px);
+    transform:translate(-50%,-50%) rotate(0deg) scaleX(1.10) scaleY(.80);
+    animation:fx-r147-orbit-a 4.8s linear infinite;
   }
 
   #hero .fx-core-live-r147-orbit-b{
-    width:clamp(108px,29vw,150px);
-    height:clamp(108px,29vw,150px);
-    border-color:rgba(176,91,255,.42);
-    border-top-color:rgba(118,244,255,.72);
-    transform:translate(-50%,-50%) rotate(0deg) scaleX(.80) scaleY(1.13);
-    animation:fx-r147-orbit-b 7.8s linear infinite reverse;
+    width:clamp(94px,25vw,128px);
+    height:clamp(94px,25vw,128px);
+    border-color:rgba(176,91,255,.40);
+    border-top-color:rgba(118,244,255,.70);
+    transform:translate(-50%,-50%) rotate(0deg) scaleX(.82) scaleY(1.10);
+    animation:fx-r147-orbit-b 6.6s linear infinite reverse;
   }
 
   #hero .fx-core-live-r147-orbit-c{
-    width:clamp(74px,20vw,104px);
-    height:clamp(74px,20vw,104px);
-    border-width:1px;
-    border-color:rgba(222,250,255,.42);
-    border-bottom-color:rgba(179,70,255,.70);
-    transform:translate(-50%,-50%) rotate(0deg) scaleX(1.18) scaleY(.70);
-    animation:fx-r147-orbit-c 3.9s linear infinite;
+    width:clamp(66px,18vw,90px);
+    height:clamp(66px,18vw,90px);
+    border-color:rgba(222,250,255,.40);
+    border-bottom-color:rgba(179,70,255,.68);
+    transform:translate(-50%,-50%) rotate(0deg) scaleX(1.16) scaleY(.72);
+    animation:fx-r147-orbit-c 3.5s linear infinite;
   }
 
   #hero .fx-core-live-r147-shock{
-    width:clamp(126px,34vw,174px);
-    height:clamp(126px,34vw,174px);
+    width:clamp(108px,29vw,148px);
+    height:clamp(108px,29vw,148px);
     border-radius:50%;
-    border:1px solid rgba(170,248,255,.62);
-    box-shadow:0 0 18px rgba(80,224,255,.30),0 0 44px rgba(151,74,255,.13);
+    border:1px solid rgba(170,248,255,.58);
+    box-shadow:0 0 17px rgba(80,224,255,.28),0 0 38px rgba(151,74,255,.12);
     opacity:0;
     transform:translate(-50%,-50%) scale(.62);
-    animation:fx-r147-shockwave 3.25s ease-out infinite;
+    animation:fx-r147-shockwave 2.9s ease-out infinite;
   }
 
   #hero .fx-core-live-r147-spark{
@@ -207,26 +236,25 @@
     height:3px;
     margin:-1.5px 0 0 -1.5px;
     border-radius:50%;
-    background:#eaffff;
-    box-shadow:0 0 5px #d9ffff,0 0 12px #5ce8ff,0 0 20px rgba(160,90,255,.70);
+    background:#efffff;
+    box-shadow:0 0 5px #ddffff,0 0 11px #5ce8ff,0 0 18px rgba(160,90,255,.66);
     opacity:.25;
   }
-  #hero .fx-core-live-r147-spark.s1{transform:translate(-98px,-74px);animation:fx-r147-spark 2.7s .1s ease-in-out infinite}
-  #hero .fx-core-live-r147-spark.s2{transform:translate(88px,-52px);animation:fx-r147-spark 3.2s .8s ease-in-out infinite}
-  #hero .fx-core-live-r147-spark.s3{transform:translate(-116px,26px);animation:fx-r147-spark 2.9s 1.4s ease-in-out infinite}
-  #hero .fx-core-live-r147-spark.s4{transform:translate(108px,41px);animation:fx-r147-spark 3.5s .35s ease-in-out infinite}
-  #hero .fx-core-live-r147-spark.s5{transform:translate(-55px,102px);animation:fx-r147-spark 2.6s 1.8s ease-in-out infinite}
-  #hero .fx-core-live-r147-spark.s6{transform:translate(61px,93px);animation:fx-r147-spark 3.1s 1.05s ease-in-out infinite}
+  #hero .fx-core-live-r147-spark.s1{transform:translate(-82px,-62px);animation:fx-r147-spark 2.5s .1s ease-in-out infinite}
+  #hero .fx-core-live-r147-spark.s2{transform:translate(76px,-48px);animation:fx-r147-spark 2.9s .8s ease-in-out infinite}
+  #hero .fx-core-live-r147-spark.s3{transform:translate(-92px,22px);animation:fx-r147-spark 2.7s 1.4s ease-in-out infinite}
+  #hero .fx-core-live-r147-spark.s4{transform:translate(88px,36px);animation:fx-r147-spark 3.1s .35s ease-in-out infinite}
+  #hero .fx-core-live-r147-spark.s5{transform:translate(-48px,82px);animation:fx-r147-spark 2.4s 1.8s ease-in-out infinite}
+  #hero .fx-core-live-r147-spark.s6{transform:translate(52px,76px);animation:fx-r147-spark 2.8s 1.05s ease-in-out infinite}
 
-  /* Approved reference material remains geometrically fixed. Only emitted light changes. */
-  html[data-fx-live-motion-r147*="r148"] #hero .fx-core-detail-r122{
+  html[data-fx-live-motion-r147*="r149"] #hero .fx-core-detail-r122{
     will-change:filter;
     filter:
-      brightness(var(--fx-r147-brightness,1.12))
-      saturate(var(--fx-r147-saturation,1.16))
-      contrast(var(--fx-r147-contrast,1.04))
-      drop-shadow(0 0 var(--fx-r147-shadow-blur,13px) rgba(69,224,255,var(--fx-r147-shadow-alpha,.28)))
-      drop-shadow(0 0 var(--fx-r147-violet-blur,22px) rgba(151,71,255,var(--fx-r147-violet-alpha,.15)))!important;
+      brightness(var(--fx-r147-brightness,1.15))
+      saturate(var(--fx-r147-saturation,1.19))
+      contrast(var(--fx-r147-contrast,1.05))
+      drop-shadow(0 0 var(--fx-r147-shadow-blur,14px) rgba(69,224,255,var(--fx-r147-shadow-alpha,.31)))
+      drop-shadow(0 0 var(--fx-r147-violet-blur,23px) rgba(151,71,255,var(--fx-r147-violet-alpha,.16)))!important;
   }
 
   html[data-fx-live-motion-paused-r147="true"] #hero .fx-core-live-r147-glow,
@@ -242,61 +270,71 @@
     opacity:.12!important;
   }
 
+  @keyframes fx-r149-field-breathe{
+    0%,100%{opacity:.58;filter:brightness(.92)}
+    50%{opacity:.96;filter:brightness(1.22)}
+  }
+  @keyframes fx-r149-reactor-shell{
+    0%,100%{transform:translate(-50%,-50%) scale(.90);opacity:.42}
+    50%{transform:translate(-50%,-50%) scale(1.08);opacity:.82}
+  }
   @keyframes fx-r147-core-pulse{
-    0%,100%{transform:translate(-50%,-50%) scale(calc(var(--fx-r147-pulse-scale,1) * .90));opacity:.48;filter:blur(1.2px)}
-    50%{transform:translate(-50%,-50%) scale(calc(var(--fx-r147-pulse-scale,1) * 1.12));opacity:var(--fx-r147-light-opacity,.88);filter:blur(.35px)}
+    0%,100%{transform:translate(-50%,-50%) scale(calc(var(--fx-r147-pulse-scale,1) * .90));opacity:.50;filter:blur(1px)}
+    50%{transform:translate(-50%,-50%) scale(calc(var(--fx-r147-pulse-scale,1) * 1.12));opacity:var(--fx-r147-light-opacity,.90);filter:blur(.25px)}
   }
   @keyframes fx-r147-flare-breathe{
-    0%,100%{opacity:.34;filter:blur(.25px)}
-    50%{opacity:var(--fx-r147-flare-opacity,.86);filter:blur(.7px)}
+    0%,100%{opacity:.34;filter:blur(.2px)}
+    50%{opacity:var(--fx-r147-flare-opacity,.88);filter:blur(.65px)}
   }
   @keyframes fx-r147-beam-breathe{
-    0%,100%{opacity:.22;transform:translate(-50%,-50%) scaleY(.88)}
-    50%{opacity:var(--fx-r147-beam-opacity,.62);transform:translate(-50%,-50%) scaleY(var(--fx-r147-beam-scale,1.08))}
+    0%,100%{opacity:.22;transform:translate(-50%,-50%) scaleY(.90)}
+    50%{opacity:var(--fx-r147-beam-opacity,.66);transform:translate(-50%,-50%) scaleY(var(--fx-r147-beam-scale,1.08))}
   }
   @keyframes fx-r147-prism-spin{
     from{transform:translate(-50%,-50%) rotate(var(--fx-r147-prism-angle,0deg))}
     to{transform:translate(-50%,-50%) rotate(calc(var(--fx-r147-prism-angle,0deg) + 360deg))}
   }
   @keyframes fx-r147-orbit-a{
-    from{transform:translate(-50%,-50%) rotate(0deg) scaleX(1.12) scaleY(.78)}
-    to{transform:translate(-50%,-50%) rotate(360deg) scaleX(1.12) scaleY(.78)}
+    from{transform:translate(-50%,-50%) rotate(0deg) scaleX(1.10) scaleY(.80)}
+    to{transform:translate(-50%,-50%) rotate(360deg) scaleX(1.10) scaleY(.80)}
   }
   @keyframes fx-r147-orbit-b{
-    from{transform:translate(-50%,-50%) rotate(0deg) scaleX(.80) scaleY(1.13)}
-    to{transform:translate(-50%,-50%) rotate(360deg) scaleX(.80) scaleY(1.13)}
+    from{transform:translate(-50%,-50%) rotate(0deg) scaleX(.82) scaleY(1.10)}
+    to{transform:translate(-50%,-50%) rotate(360deg) scaleX(.82) scaleY(1.10)}
   }
   @keyframes fx-r147-orbit-c{
-    from{transform:translate(-50%,-50%) rotate(0deg) scaleX(1.18) scaleY(.70)}
-    to{transform:translate(-50%,-50%) rotate(360deg) scaleX(1.18) scaleY(.70)}
+    from{transform:translate(-50%,-50%) rotate(0deg) scaleX(1.16) scaleY(.72)}
+    to{transform:translate(-50%,-50%) rotate(360deg) scaleX(1.16) scaleY(.72)}
   }
   @keyframes fx-r147-shockwave{
     0%{opacity:0;transform:translate(-50%,-50%) scale(.58)}
-    14%{opacity:var(--fx-r147-shock-opacity,.62)}
-    72%{opacity:.09}
-    100%{opacity:0;transform:translate(-50%,-50%) scale(var(--fx-r147-shock-scale,1.72))}
+    14%{opacity:var(--fx-r147-shock-opacity,.64)}
+    72%{opacity:.08}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(var(--fx-r147-shock-scale,1.64))}
   }
   @keyframes fx-r147-spark{
-    0%,100%{opacity:.12;filter:brightness(.8);scale:.7}
-    45%{opacity:.92;filter:brightness(1.6);scale:1.45}
-    63%{opacity:.34;scale:.92}
+    0%,100%{opacity:.10;filter:brightness(.8);scale:.7}
+    45%{opacity:.92;filter:brightness(1.65);scale:1.42}
+    63%{opacity:.32;scale:.92}
   }
 }
 
 @media (max-width:430px){
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero{padding-bottom:100px!important}
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{margin-top:98px!important}
+  body.living-architecture #hero{padding-bottom:52px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{margin-top:46px!important}
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{min-height:252px!important}
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-liveos{top:auto!important;bottom:18px!important}
 }
 
 @media (max-width:380px){
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero{padding-bottom:108px!important}
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{margin-top:104px!important}
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{margin-bottom:50px!important}
+  body.living-architecture #hero{padding-bottom:56px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{margin-top:50px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof{margin-bottom:38px!important}
 }
 
 @media (prefers-reduced-motion:reduce){
+  #hero .fx-core-live-r147-layer::before,
+  #hero .fx-core-live-r147-layer::after,
   #hero .fx-core-live-r147-glow,
   #hero .fx-core-live-r147-flare,
   #hero .fx-core-live-r147-beam,
@@ -306,5 +344,5 @@
   #hero .fx-core-live-r147-prism,
   #hero .fx-core-live-r147-shock,
   #hero .fx-core-live-r147-spark{animation:none!important;opacity:.16!important}
-  html[data-fx-live-motion-r147*="r148"] #hero .fx-core-detail-r122{filter:none!important}
+  html[data-fx-live-motion-r147*="r149"] #hero .fx-core-detail-r122{filter:none!important}
 }
