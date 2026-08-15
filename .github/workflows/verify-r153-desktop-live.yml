@@ -1,0 +1,96 @@
+name: Verify r153 desktop live MAG
+
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-r153-desktop-live.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  desktop-live:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify live desktop MAG motion
+        run: |
+          cat > /tmp/check-r153.cjs <<'JS'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser = await chromium.launch({headless:true});
+            const page = await browser.newPage({viewport:{width:1600,height:1000}, deviceScaleFactor:1});
+            await page.goto('https://formatxsuite.com/?verify=r153-desktop-live', {waitUntil:'networkidle', timeout:120000});
+            await page.waitForSelector('#hero .fx-core-detail-r122', {timeout:30000});
+            await page.waitForSelector('#hero .fx-core-live-r147-layer', {timeout:30000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxDesktopLiveStyleR153==='ready', null, {timeout:30000});
+            await page.waitForTimeout(700);
+
+            const first = await page.evaluate(()=>{
+              const root=document.documentElement;
+              const host=document.querySelector('#hero .hero-space');
+              const layer=document.querySelector('#hero .fx-core-live-r147-layer');
+              const glow=document.querySelector('#hero .fx-core-live-r147-glow');
+              const orbit=document.querySelector('#hero .fx-core-live-r147-orbit');
+              const detail=document.querySelector('#hero .fx-core-detail-r122');
+              if(!host||!layer||!glow||!orbit||!detail) throw new Error('desktop live MAG nodes missing');
+              const lr=layer.getBoundingClientRect();
+              const gr=getComputedStyle(glow);
+              const or=getComputedStyle(orbit);
+              return {
+                bootstrap:root.dataset.fxCoreReal3dBootstrap||'',
+                live:root.dataset.fxLiveMotionR147||'',
+                style:root.dataset.fxDesktopLiveStyleR153||'',
+                layer:[lr.width,lr.height],
+                glowAnimation:gr.animationName,
+                orbitAnimation:or.animationName,
+                glowOpacity:Number(gr.opacity),
+                brightness:host.style.getPropertyValue('--fx-r147-brightness'),
+                filter:getComputedStyle(detail).filter
+              };
+            });
+
+            await page.waitForTimeout(700);
+            const second = await page.evaluate(()=>{
+              const host=document.querySelector('#hero .hero-space');
+              const glow=document.querySelector('#hero .fx-core-live-r147-glow');
+              return {
+                glowOpacity:Number(getComputedStyle(glow).opacity),
+                brightness:host.style.getPropertyValue('--fx-r147-brightness')
+              };
+            });
+
+            const box=await page.locator('#hero .hero-space').boundingBox();
+            if(box){
+              await page.mouse.move(box.x+box.width*.72, box.y+box.height*.46);
+              await page.waitForTimeout(350);
+            }
+            const interaction = await page.evaluate(()=>({
+              state:document.documentElement.dataset.fxCoreInteractionState||'',
+              x:document.querySelector('#hero .hero-space')?.style.getPropertyValue('--fx-r147-light-x')||'',
+              y:document.querySelector('#hero .hero-space')?.style.getPropertyValue('--fx-r147-light-y')||''
+            }));
+
+            console.log(JSON.stringify({first,second,interaction},null,2));
+            if(!first.bootstrap.includes('r153-desktop-live')) throw new Error('r153 bootstrap is not live');
+            if(first.style!=='ready') throw new Error('r153 desktop stylesheet not ready');
+            if(first.layer[0]<200 || first.layer[1]<200) throw new Error('desktop live layer has invalid geometry');
+            if(!first.glowAnimation.includes('fx-r153-core-pulse')) throw new Error('core pulse animation missing');
+            if(!first.orbitAnimation.includes('fx-r153-orbit-a')) throw new Error('orbit animation missing');
+            if(first.glowOpacity===second.glowOpacity && first.brightness===second.brightness) throw new Error('no measurable idle animation change');
+            if(!interaction.state) throw new Error('desktop interaction controller is not active');
+            await page.screenshot({path:'/tmp/r153-desktop-live.png', fullPage:false});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node /tmp/check-r153.cjs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r153-desktop-live
+          path: /tmp/r153-desktop-live.png
