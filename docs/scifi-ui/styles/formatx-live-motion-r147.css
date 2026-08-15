@@ -56,7 +56,7 @@
   }
 
   @keyframes fx-r147-breathe{
-    0%,100%{opacity:calc(var(--fx-r147-light-opacity,.34) * .72)}
+    0%,100%{opacity:.25}
     50%{opacity:var(--fx-r147-light-opacity,.34)}
   }
 }
