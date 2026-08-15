@@ -1,4 +1,4 @@
-name: One-shot bump r157 cross-device bootstrap cache
+name: One-shot publish r154e seamless-stage cache
 on:
   push:
     branches: [master]
@@ -12,29 +12,31 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Publish r157 cross-device bootstrap cache key
+      - name: Publish r154e legacy-grid removal with fresh bootstrap cache
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import re
+          boot=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          s=boot.read_text()
+          old='formatx-desktop-integration-r154.css?v=20260815-r154d-luma-blend'
+          new_style='formatx-desktop-integration-r154.css?v=20260815-r154e-no-legacy-grid'
+          if old in s:s=s.replace(old,new_style)
+          elif new_style not in s:raise SystemExit('desktop integration cache token not found')
+          boot.write_text(s)
           p=Path('docs/scifi-ui/index.html')
           html=p.read_text()
-          new='./scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-r157-cross-device-final'
+          new='./scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-r158-seamless-stage'
           pat=r'\.\/scripts\/formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=[^"\']+'
           html,n=re.subn(pat,new,html,count=1)
-          if n!=1: raise SystemExit('expected FormatX real3d bootstrap URL not found exactly once')
-          heartbeat='  <script defer data-fx-live-heartbeat-r155="true" src="./scripts/formatx-live-heartbeat-r155.js?v=20260815-r155-js-heartbeat"></script>'
-          if 'data-fx-live-heartbeat-r155=' not in html:
-              anchor=re.search(r'(^\s*<script defer data-fx-core-real3d="true"[^\n]+</script>\s*$)',html,re.M)
-              if not anchor: raise SystemExit('core real3d script anchor not found')
-              html=html[:anchor.end()]+'\n'+heartbeat+html[anchor.end():]
+          if n!=1:raise SystemExit('expected FormatX real3d bootstrap URL not found exactly once')
           p.write_text(html)
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html
-          if git diff --cached --quiet; then echo 'r157 cache already current'; exit 0; fi
-          git commit -m '[deploy-production] fix(mag): publish r157 cross-device final cache'
+          git add docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html
+          if git diff --cached --quiet; then echo 'r154e cache already current'; exit 0; fi
+          git commit -m '[deploy-production] fix(desktop): publish r154e seamless-stage integration'
           git push origin HEAD:master
