@@ -20,7 +20,7 @@ jobs:
 
       - name: Verify live desktop MAG motion
         run: |
-          cat > /tmp/check-r153.cjs <<'JS'
+          cat > check-r153.cjs <<'JS'
           const { chromium } = require('playwright');
           (async()=>{
             const browser = await chromium.launch({headless:true});
@@ -88,7 +88,7 @@ jobs:
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
-          node /tmp/check-r153.cjs
+          node check-r153.cjs
 
       - uses: actions/upload-artifact@v4
         with:
