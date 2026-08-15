@@ -1,4 +1,4 @@
-/* r154 — desktop aspect + seamless hero integration.
+/* r154b — desktop aspect + seamless hero integration.
    The supplied reference material is a 412x410 WebP. On a wide desktop stage it
    must not be stretched to the stage aspect ratio. Keep the visible reference
    compositor at its native near-square ratio, center it, and let its dark pixels
@@ -6,7 +6,7 @@
    Mobile geometry is intentionally untouched. */
 
 @media (min-width:901px) and (pointer:fine){
-  html[data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space{
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space{
     position:relative!important;
     isolation:isolate!important;
     overflow:hidden!important;
@@ -15,7 +15,7 @@
     box-shadow:none!important;
   }
 
-  html[data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space::before{
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space::before{
     content:""!important;
     position:absolute!important;
     inset:-16% -18%!important;
@@ -27,9 +27,14 @@
     pointer-events:none!important;
   }
 
-  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-mobile-v55-stage,
-  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-r112-stage{
+  /* Desktop stage may be wrapped by legacy hosts, so do not require a direct-child
+     relationship here. The extra root/body qualifiers intentionally outrank old
+     reference-layout !important rules. */
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage{
     background:transparent!important;
+    background-image:none!important;
+    background-color:transparent!important;
     border:0!important;
     outline:0!important;
     box-shadow:none!important;
@@ -40,7 +45,7 @@
      stage-sized backing buffer for crisp rendering and interaction, while CSS
      presents that buffer at the source aspect. This cancels desktop stretch
      without touching mobile or the renderer's interaction coordinate system. */
-  html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-detail-r122{
     inset:auto!important;
     left:50%!important;
     right:auto!important;
@@ -64,16 +69,19 @@
 
   /* The native WebGL renderer remains alive and interactive underneath, but its
      wide-stage visual must not ghost a second horizontally stretched crystal. */
-  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas,
-  html[data-fx-core-reference-texture-r130="ready"] #hero .hero-space>.fx-core-r112-stage>.fx-core-r112-canvas{
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-stage .fx-core-mobile-v55-canvas,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-stage .fx-core-r112-canvas,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-mobile-v55-canvas,
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-r112-canvas{
     opacity:.018!important;
     filter:brightness(.92) contrast(1.06) saturate(1.18)!important;
   }
 
   /* r147/r153 live optics is geometry-synchronised to the detail canvas by JS.
      Screen blending removes any box edge while preserving pulse/orbit/reactor light. */
-  html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-live-r147-layer{
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-live-r147-layer{
     background:transparent!important;
+    background-image:none!important;
     border:0!important;
     box-shadow:none!important;
     mix-blend-mode:screen!important;
@@ -81,7 +89,7 @@
 }
 
 @media (min-width:901px) and (pointer:fine) and (max-height:760px){
-  html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .fx-core-detail-r122{
     height:min(96%,620px)!important;
   }
 }
