@@ -57,10 +57,10 @@ function ensure(){
   if(host.dataset.fxLivingEnergyBoundR168!=='v3'){
     const pos=(x,y)=>{const r=host.getBoundingClientRect();if(!r.width||!r.height)return;pointerX=clamp((x-r.left)/r.width*2-1,-1,1);pointerY=clamp((y-r.top)/r.height*2-1,-1,1);};
     const hit=(strength=1)=>{const now=performance.now();boost=Math.max(boost,strength);burstStrength=Math.max(burstStrength,strength);burstAt=now;lastInput=now;root.dataset.fxLivingEnergyInteractionR168='energy-burst';try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}};
-    host.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'){pos(e.clientX,e.clientY);boost=Math.max(boost,.48);lastInput=performance.now();root.dataset.fxLivingEnergyInteractionR168='pointer-reactive';}},{passive:true});
-    host.addEventListener('pointerdown',e=>{pos(e.clientX,e.clientY);hit(1.48);},{passive:true});
-    host.addEventListener('touchstart',e=>{const t=e.touches?.[0];if(t)pos(t.clientX,t.clientY);hit(1.58);},{passive:true});
-    host.addEventListener('touchmove',e=>{const t=e.touches?.[0];if(t)pos(t.clientX,t.clientY);boost=Math.max(boost,1.0);lastInput=performance.now();root.dataset.fxLivingEnergyInteractionR168='touch-reactive';},{passive:true});
+    host.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'){pos(e.clientX,e.clientY);boost=Math.max(boost,.64);lastInput=performance.now();root.dataset.fxLivingEnergyInteractionR168='pointer-reactive';}},{passive:true});
+    host.addEventListener('pointerdown',e=>{pos(e.clientX,e.clientY);hit(1.68);},{passive:true});
+    host.addEventListener('touchstart',e=>{const t=e.touches?.[0];if(t)pos(t.clientX,t.clientY);hit(1.84);},{passive:true});
+    host.addEventListener('touchmove',e=>{const t=e.touches?.[0];if(t)pos(t.clientX,t.clientY);boost=Math.max(boost,1.16);lastInput=performance.now();root.dataset.fxLivingEnergyInteractionR168='touch-reactive';},{passive:true});
     host.dataset.fxLivingEnergyBoundR168='v3';
   }
   root.dataset.fxLivingEnergyR168=VERSION;
@@ -83,7 +83,7 @@ function tick(){
   const dub=still?0:gauss(cycle,.235,.055)*.66;
   const beat=clamp(lub+dub,0,1.08);
   const breath=still?.5:.5+.5*Math.sin(now*.00118-1.05);
-  const activity=still?.12:clamp(energy*.40+boost*.78+burstStrength*.48,0,1.65);
+  const activity=still?.12:clamp(energy*.40+boost*.88+burstStrength*.56,0,1.78);
   const x=clamp(pointerX*.58+gx*.42,-1,1),y=clamp(pointerY*.58-gy*.42,-1,1);
 
   if(!still){
@@ -96,15 +96,15 @@ function tick(){
   const causticA=(causticPhaseA+x*22-y*11+360)%360,causticB=(causticPhaseB+x*10+y*18+360)%360;
   const pulse=clamp(beat*.98+activity*.48,0,1.5);
   const shock=clamp(.72+beat*.48+activity*.12,.70,1.42);
-  const flare=clamp(.12+beat*.58+activity*.27,.10,.92);
-  const spectrum=clamp(.08+beat*.44+activity*.31,.07,.88);
-  const refract=clamp(.10+beat*.26+activity*.30,.08,.72);
+  const flare=clamp(.08+beat*.54+breath*.11+activity*.27,.08,.94);
+  const spectrum=clamp(.06+beat*.40+breath*.09+activity*.31,.06,.90);
+  const refract=clamp(.07+beat*.23+breath*.10+activity*.30,.07,.74);
 
   let burstP=1,burstO=0;
   if(burstAt){const age=(now-burstAt)/780;if(age<1){burstP=age;burstO=(1-age)*clamp(.78+burstStrength*.18,.78,1);}else burstAt=0;}
 
-  host.style.setProperty('--fx-r168-x',`${(50+x*7.2).toFixed(2)}%`);
-  host.style.setProperty('--fx-r168-y',`${(49+y*5.8).toFixed(2)}%`);
+  host.style.setProperty('--fx-r168-x',`${(50+x*9.2).toFixed(2)}%`);
+  host.style.setProperty('--fx-r168-y',`${(49+y*7.4).toFixed(2)}%`);
   host.style.setProperty('--fx-r168-orbit-a',`${orbitA.toFixed(2)}deg`);
   host.style.setProperty('--fx-r168-orbit-b',`${orbitB.toFixed(2)}deg`);
   host.style.setProperty('--fx-r168-caustic-a',`${causticA.toFixed(2)}deg`);
@@ -116,17 +116,17 @@ function tick(){
   host.style.setProperty('--fx-r168-refract-strength',refract.toFixed(4));
   host.style.setProperty('--fx-r168-breath',breath.toFixed(4));
   host.style.setProperty('--fx-r168-activity',activity.toFixed(4));
-  host.style.setProperty('--fx-r168-parallax-x',`${(x*13).toFixed(2)}px`);
-  host.style.setProperty('--fx-r168-parallax-y',`${(y*10).toFixed(2)}px`);
-  host.style.setProperty('--fx-r168-burst-scale',(.54+burstP*1.62).toFixed(4));
+  host.style.setProperty('--fx-r168-parallax-x',`${(x*18).toFixed(2)}px`);
+  host.style.setProperty('--fx-r168-parallax-y',`${(y*14).toFixed(2)}px`);
+  host.style.setProperty('--fx-r168-burst-scale',(.50+burstP*1.78).toFixed(4));
   host.style.setProperty('--fx-r168-burst-opacity',burstO.toFixed(4));
   host.style.setProperty('--fx-r168-hue',`${(Math.sin(now*.00135)*5+x*9-y*5).toFixed(2)}deg`);
 
-  const brightness=clamp(1.04+beat*.14+activity*.11,1.04,1.38);
-  const saturation=clamp(1.08+beat*.10+activity*.16,1.08,1.48);
-  const contrast=clamp(1.19+beat*.05+activity*.04,1.19,1.31);
-  const cyanBlur=14+beat*15+activity*10,cyanAlpha=clamp(.17+beat*.18+activity*.14,.16,.52);
-  const violetBlur=25+dub*18+activity*10,violetAlpha=clamp(.09+dub*.16+activity*.11,.08,.36);
+  const brightness=clamp(1.01+breath*.055+beat*.14+activity*.11,1.03,1.40);
+  const saturation=clamp(1.04+breath*.070+beat*.10+activity*.16,1.07,1.50);
+  const contrast=clamp(1.17+breath*.032+beat*.05+activity*.04,1.18,1.32);
+  const cyanBlur=12+breath*5+beat*15+activity*10,cyanAlpha=clamp(.13+breath*.075+beat*.18+activity*.14,.15,.54);
+  const violetBlur=22+breath*6+dub*18+activity*10,violetAlpha=clamp(.065+breath*.060+dub*.16+activity*.11,.08,.38);
   if(detail instanceof HTMLElement){
     detail.style.setProperty('--fx-r168-refract',`${(x*2.4+y*1.2).toFixed(2)}deg`);
     detail.style.setProperty('--fx-r168-live-opacity',clamp(.982+beat*.012+activity*.004,.982,1).toFixed(3));
