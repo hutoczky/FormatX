@@ -50,7 +50,10 @@
     box-sizing:border-box!important;
     position:relative!important;
     z-index:32!important;
-    order:11!important;
+    /* Reference runtime gives the heading order 2 and proof order 3 via inline
+       important styles. Matching heading order keeps DOM order heading -> dock,
+       then proof remains next at order 3. */
+    order:2!important;
     flex:0 0 auto!important;
     width:min(88%,680px)!important;
     margin:0 auto 28px!important;
@@ -161,19 +164,16 @@
     font-style:normal!important;
   }
 
-  /* Explicit flex-flow contract. Legacy reference layers assign their own
-     margins/positions; fixed order prevents a newly inserted download dock from
-     entering the physical MAG-to-heading safe lane. */
-  #hero .hero-space{
-    order:-1!important;
-  }
+  /* Explicit flow contract: the reference runtime's inline order values are 2
+     for heading and 3 for proof. Dock shares 2 and follows heading in DOM. */
+  #hero .hero-space{order:-1!important}
   #hero .fx-reference-heading{
-    order:10!important;
+    order:2!important;
     flex:0 0 auto!important;
     margin-bottom:24px!important;
   }
   #hero .fx-reference-proof{
-    order:12!important;
+    order:3!important;
     flex:0 0 auto!important;
   }
   #hero .fx-mobile-download-r151 + .fx-reference-proof{
