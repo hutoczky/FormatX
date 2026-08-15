@@ -2,7 +2,7 @@
   'use strict';
   // r145 crystal preserved; r149 centers every live optical effect on the crystal canvas and tightens the safe lane.
   const root = document.documentElement;
-  const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r151-hero-stability';
+  const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r151-final';
   const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260814-luminous-cinematic-r99&rev=20260815-prismatic-organic-r120';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260813-android-webgl-recovery-r71';
   const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260814-pixel-aspect-r80';
@@ -19,14 +19,14 @@
   const FINAL_STYLE = '/scifi-ui/styles/formatx-reference-final-r132.css?v=20260815-pixel-lock-r139';
   const NARROW_PROOF_STYLE = '/scifi-ui/styles/formatx-reference-narrow-proof-r145.css?v=20260815-narrow-proof-r145';
   const LIVE_MOTION_STYLE = '/scifi-ui/styles/formatx-live-motion-r147.css?v=20260815-centered-optics-safe-lane-r149b';
-  const MOBILE_HERO_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260815-r151-mobile-hero-stability';
+  const MOBILE_HERO_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260815-r151-final';
   const DETAIL_SCRIPT = '/scifi-ui/scripts/formatx-core-detail-overlay-r122.js?v=20260815-reference-material-r138';
   const COPY_SCRIPT = '/scifi-ui/scripts/formatx-reference-copy-r137.js?v=20260815-reference-copy-r137';
   const FINALIZER_SCRIPT = '/scifi-ui/scripts/formatx-reference-finalizer-r142.js?v=20260815-unclipped-chain-r142';
   const TAIL_FINALIZER_SCRIPT = '/scifi-ui/scripts/formatx-reference-finalizer-r143.js?v=20260815-tail-bridge-r143';
   const GYRO_SCRIPT = '/scifi-ui/scripts/formatx-core-gyro-r144.js?v=20260815-mobile-gyro-r144';
   const LIVE_MOTION_SCRIPT = '/scifi-ui/scripts/formatx-core-live-motion-r147.js?v=20260815-centered-optics-safe-lane-r149b';
-  const MOBILE_HERO_STABILITY_SCRIPT = '/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js?v=20260815-r151-mobile-hero-stability';
+  const MOBILE_HERO_STABILITY_SCRIPT = '/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js?v=20260815-r151-final';
   const PROOF_STYLE = '/scifi-ui/styles/formatx-award-proof-r85.css?v=20260814-proof-geometry-r86';
   const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260814-desktop-safe-r84';
   const FLOW_SCRIPT = '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260815-reference-geometry-r139';
