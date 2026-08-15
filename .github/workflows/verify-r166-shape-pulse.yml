@@ -1,0 +1,106 @@
+name: Verify r166 living crystal silhouette pulse
+
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/verify-r166-shape-pulse.yml']
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shape-pulse-live:
+    if: >-
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.62.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify heartbeat changes the crystal silhouette itself
+        run: |
+          cat > verify-r166.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const assert=require('node:assert/strict');
+          const origin='https://formatxsuite.com';
+
+          async function sample(page,count=28,wait=70){
+            const out=[];
+            for(let i=0;i<count;i++){
+              out.push(await page.evaluate(()=>{
+                const r=document.documentElement.dataset;
+                const p=String(r.fxLivingShapePulseR166||'').split(',').map(Number);
+                const b=String(r.fxLivingShapeBeatR166||'').split(',').map(Number);
+                return {
+                  x:p[0],y:p[1],beat:b[0],breath:b[1],
+                  state:r.fxLivingShapePulseStateR166||'',
+                  heartbeat:r.fxLivingHeartbeatModeR158||'',
+                  tick:Number(r.fxLiveHeartbeatTickR155||0),
+                  energy:Number(r.fxLiveHeartbeatEnergyR155||0),
+                  renderMs:Number(r.fxCoreRenderMs||Infinity)
+                };
+              }));
+              await page.waitForTimeout(wait);
+            }
+            return out;
+          }
+
+          function range(values){const v=values.filter(Number.isFinite);return[Math.min(...v),Math.max(...v)];}
+          function validate(samples,label){
+            const [xmin,xmax]=range(samples.map(v=>v.x));
+            const [ymin,ymax]=range(samples.map(v=>v.y));
+            const [bmin,bmax]=range(samples.map(v=>v.beat));
+            const tickDelta=samples.at(-1).tick-samples[0].tick;
+            console.log(label,JSON.stringify({xmin,xmax,ymin,ymax,xAmp:xmax-xmin,yAmp:ymax-ymin,bmin,bmax,tickDelta,renderMax:Math.max(...samples.map(v=>v.renderMs))},null,2));
+            assert.ok(samples.every(v=>v.state==='heartbeat-driven-four-tip-breathing'),`${label}: r166 shape state missing`);
+            assert.ok(samples.every(v=>v.heartbeat==='r158-lub-dub-seamless-living'),`${label}: heartbeat mode missing`);
+            assert.ok(tickDelta>=20,`${label}: heartbeat clock stalled`);
+            assert.ok(bmax-bmin>.10,`${label}: no heartbeat peak captured`);
+            assert.ok(xmax-xmin>.006,`${label}: horizontal crystal silhouette does not visibly pulse`);
+            assert.ok(ymax-ymin>.010,`${label}: vertical crystal tips do not visibly pulse`);
+            assert.ok((ymax-ymin)>(xmax-xmin),`${label}: four-tip breathing should be stronger vertically`);
+            assert.ok(samples.every(v=>v.renderMs<16.67),`${label}: render budget regression`);
+          }
+
+          async function runDevice(browser,label,opts){
+            const context=await browser.newContext(opts);
+            const page=await context.newPage();
+            await page.goto(`${origin}/?verify=r166-${label.toLowerCase()}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>{
+              const r=document.documentElement.dataset;
+              return r.fxCoreReferenceTextureR130==='ready'&&
+                r.fxLivingHeartbeatModeR158==='r158-lub-dub-seamless-living'&&
+                r.fxLivingShapePulseStateR166==='heartbeat-driven-four-tip-breathing'&&
+                String(r.fxLivingShapePulseR166||'').includes(',');
+            },null,{timeout:60000});
+            await page.waitForTimeout(180);
+            const before=await page.evaluate(()=>Number(document.documentElement.dataset.fxLiveHeartbeatEnergyR155||0));
+            const samples=await sample(page);
+            validate(samples,label);
+            if(opts.hasTouch){await page.touchscreen.tap(Math.round(opts.viewport.width*.72),Math.round(opts.viewport.height*.35));}
+            else {const box=await page.locator('#hero .hero-space').boundingBox();if(box){await page.mouse.move(box.x+box.width*.72,box.y+box.height*.35);await page.mouse.down();await page.waitForTimeout(80);await page.mouse.up();}}
+            await page.waitForTimeout(160);
+            const after=await page.evaluate(()=>Number(document.documentElement.dataset.fxLiveHeartbeatEnergyR155||0));
+            assert.ok(after>=before,`${label}: interaction reduced living-core energy unexpectedly`);
+            await context.close();
+          }
+
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            try{
+              await runDevice(browser,'DESKTOP',{viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'});
+              await runDevice(browser,'MOBILE',{viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
+            }finally{await browser.close();}
+            console.log('PASS: r166 crystal silhouette itself pulses with the living heartbeat on desktop and mobile.');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node verify-r166.cjs
