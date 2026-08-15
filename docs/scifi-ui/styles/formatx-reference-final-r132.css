@@ -74,11 +74,14 @@
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask,
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-pause{
-    width:46px!important;
-    min-width:46px!important;
-    height:46px!important;
-    min-height:46px!important;
-    flex:0 0 46px!important;
+    width:48px!important;
+    min-width:48px!important;
+    height:48px!important;
+    min-height:48px!important;
+    flex:0 0 48px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask span{
+    top:50px!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-ask i{
     position:relative!important;
@@ -95,16 +98,20 @@
     box-shadow:0 0 5px rgba(210,171,255,.55)!important;
   }
 
-  /* Match the supplied proof-card typography. Reserve no permanent empty lane:
-     the Hungarian reference naturally wraps before the Live OS control. */
+  /* Match the supplied proof-card line breaks. The Linux CI system font is a
+     little wider than Android's reference font, so compensate by 0.5px while
+     preserving the same visual line pitch. */
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof h2{
-    margin-bottom:22px!important;
+    margin-bottom:26px!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof p{
     box-sizing:border-box!important;
     width:100%!important;
     max-width:100%!important;
     padding-right:0!important;
+    font-size:14.5px!important;
+    line-height:1.88!important;
+    letter-spacing:-.005em!important;
   }
 
   /* The supplied reference material is a square 412px composition. The live
@@ -119,6 +126,7 @@
 @media (max-width:380px){
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof p{
     padding-right:70px!important;
+    font-size:14px!important;
   }
   html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
     transform:scaleY(1.042)!important;
