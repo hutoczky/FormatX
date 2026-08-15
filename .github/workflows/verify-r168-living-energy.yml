@@ -54,7 +54,6 @@ jobs:
           async function openProduction(context,label){
             const page=await context.newPage();
             await page.goto(`${origin}/?verify=${encodeURIComponent(label)}-${Date.now()}`,{waitUntil:'commit',timeout:15000});
-            await page.waitForSelector('#hero',{state:'attached',timeout:15000});
             await page.evaluate(label=>document.documentElement.dataset.fxVerifierLabel=label,label);
             return page;
           }
@@ -62,7 +61,8 @@ jobs:
           async function ready(page,mobile=false){
             await page.waitForFunction(({mobile,mode,clock})=>{
               const r=document.documentElement.dataset;
-              return (!mobile||(r.fxMobileReferenceLayout==='ready-v1'&&r.fxMobileSeamR170==='ready-58-72-priority')) &&
+              return document.querySelector('#hero') &&
+                (!mobile||(r.fxMobileReferenceLayout==='ready-v1'&&r.fxMobileSeamR170==='ready-58-72-priority')) &&
                 String(r.fxLivingEnergyR168||'').includes('r168-living-energy-orbit-caustic-v2') &&
                 r.fxLivingEnergyEffectModeR168===mode && r.fxLivingEnergyClockR168===clock &&
                 Number(r.fxLivingEnergyFrameR168||0)>3 && Number(r.fxLiveHeartbeatTickR155||0)>3 &&
