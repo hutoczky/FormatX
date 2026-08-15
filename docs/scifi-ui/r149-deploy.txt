@@ -1,0 +1,2 @@
+FormatX MAG r149 deployment synchronization marker.
+The production checkout must include the r149 index cache token and centered optical reactor assets.
