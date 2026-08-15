@@ -1,0 +1,64 @@
+name: Verify r150 mobile download
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/verify-r150-mobile-download.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Install Playwright Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/r150" && cd "$RUNNER_TEMP/r150"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Verify live mobile download section
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/r150"
+          node <<'NODE'
+          const assert=require('node:assert/strict');
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:412,height:840},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await context.newPage();
+            const errors=[];page.on('pageerror',e=>errors.push(e.message));
+            await page.goto(`https://formatxsuite.com/?verify_r150_download=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileDownloadR150==='r150-mobile-download-restored',{timeout:90000});
+            await page.waitForTimeout(900);
+            const state=await page.evaluate(()=>{
+              const box=s=>{const e=document.querySelector(s),r=e?.getBoundingClientRect(),c=e?getComputedStyle(e):null;return e&&r&&c?{x:r.x,y:r.y,w:r.width,h:r.height,display:c.display,visibility:c.visibility,opacity:c.opacity}:null};
+              const dock=box('#hero .fx-mobile-download-r150');
+              const heading=box('#hero .fx-reference-heading');
+              const proof=box('#hero .fx-reference-proof');
+              const copy=box('#hero .hero-copy');
+              const links=[...document.querySelectorAll('#hero .fx-mobile-download-r150 a')].map(a=>({href:a.href,text:a.textContent.trim(),state:a.dataset.releaseState||''}));
+              return {version:document.documentElement.dataset.fxMobileDownloadR150,placement:document.documentElement.dataset.fxMobileDownloadPlacementR150,dock,heading,proof,copy,links};
+            });
+            console.log('R150 DOWNLOAD STATE',JSON.stringify(state));
+            assert.equal(state.version,'r150-mobile-download-restored');
+            assert.equal(state.placement,'before-proof');
+            assert.ok(state.dock&&state.dock.display!=='none'&&state.dock.visibility!=='hidden'&&Number(state.dock.opacity)!==0,'download dock is not visible');
+            assert.ok(state.dock.w>300&&state.dock.h>120,'download dock is too small');
+            assert.ok(state.heading&&state.proof,'reference heading/proof missing');
+            assert.ok(state.dock.y>=state.heading.y+state.heading.h-2,'download dock is not below the reference heading');
+            assert.ok(state.proof.y>=state.dock.y+state.dock.h-2,'proof card overlaps the download dock');
+            assert.ok(state.copy&&state.copy.display==='none','legacy hero copy was re-enabled');
+            assert.equal(state.links.length,2,'expected multiplatform and Android download links');
+            assert.ok(state.links[0].href.includes('/download/multiplatform')||state.links[0].href.includes('github.com/hutoczky/FormatX-Updates/releases/download/'),'multiplatform download target invalid');
+            assert.ok(state.links[1].href.includes('/download/android'),'Android download target invalid');
+            assert.deepEqual(errors,[],`page errors: ${errors.join(' | ')}`);
+            await browser.close();
+            console.log('PASS: r150 mobile download section is visible, correctly ordered, linked, and legacy hero copy remains hidden.');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
