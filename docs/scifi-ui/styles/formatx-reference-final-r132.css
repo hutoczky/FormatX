@@ -1,6 +1,6 @@
-/* r136 — final mobile reference geometry lock.
-   Loaded after all legacy award layers so the supplied reference framing wins.
-   The native WebGL mesh and touch interaction remain live underneath. */
+/* r137 — final mobile reference geometry/typography lock.
+   Loaded after legacy award layers so the supplied reference framing wins.
+   Native WebGL and touch interaction remain live underneath. */
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar{
     height:68px!important;
@@ -98,30 +98,34 @@
     box-shadow:0 0 5px rgba(210,171,255,.55)!important;
   }
 
-  /* r136 keeps the semantic DOM heading in flow, but the supplied bitmap owns
-     the visible heading. This restores the crystal tail pixels that used to be
-     erased by the old title-band mask. */
+  /* The semantic heading keeps its exact box for flow/accessibility, while the
+     reference bitmap supplies the visible title and uninterrupted crystal tail. */
   html[data-fx-core-reference-heading-r136="bitmap-source"] #hero .fx-reference-heading{
     opacity:0!important;
     pointer-events:none!important;
   }
 
+  /* Target Android screenshot uses Roboto metrics. The explicit line breaks are
+     supplied by formatx-reference-copy-r137.js; these values match its vertical
+     rhythm and clear the Live OS pill on lines two and three. */
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof h2{
-    margin-bottom:26px!important;
+    margin-bottom:17px!important;
+    line-height:1.16!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-proof p{
     box-sizing:border-box!important;
     width:100%!important;
     max-width:100%!important;
     padding-right:0!important;
-    font-size:14px!important;
-    line-height:2!important;
-    letter-spacing:-.005em!important;
+    font-family:Roboto,system-ui,-apple-system,"Segoe UI",sans-serif!important;
+    font-size:14.5px!important;
+    font-weight:400!important;
+    line-height:1.88!important;
+    letter-spacing:0!important;
   }
 
-  /* The supplied reference material is a square 412px composition. The live
-     hero host is 393.86px high at the locked viewport, so compensate only the
-     compositor vertically. */
+  /* The supplied material is a square 412px composition. The live hero host is
+     393.86px high at the locked viewport, so compensate only the compositor. */
   html[data-fx-core-reference-texture-r130="ready"] #hero .fx-core-detail-r122{
     transform:scaleY(1.046)!important;
     transform-origin:50% 0!important;
