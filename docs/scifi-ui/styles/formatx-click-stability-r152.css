@@ -1,0 +1,39 @@
+/* r152 — mobile interaction stability.
+   Keep every optical reactor effect anchored to the approved MAG centre.
+   Pointer/touch still increases energy, pulse, brightness and shockwave intensity,
+   while WebGL/gyro interaction remains active underneath. */
+@media (max-width:900px),(pointer:coarse){
+  html body.living-architecture #hero .hero-space{
+    --fx-r147-light-x:50% !important;
+    --fx-r147-light-y:49% !important;
+  }
+
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-layer,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-layer::before,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-layer::after{
+    transform-origin:50% 49% !important;
+  }
+
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-layer::after,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-glow,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-flare,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-beam,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-orbit,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-orbit-b,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-orbit-c,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-prism,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-shock,
+  html body.living-architecture #hero .hero-space .fx-core-live-r147-spark{
+    left:50% !important;
+    top:49% !important;
+  }
+
+  /* Do not let focus/activation introduce a transform or layout shift on the
+     stage/canvas. The interaction is optical/energy based, not positional. */
+  html body.living-architecture #hero .hero-space:active,
+  html body.living-architecture #hero .hero-space:focus,
+  html body.living-architecture #hero .hero-space:focus-within,
+  html body.living-architecture #hero .fx-core-live-r147-layer:active{
+    translate:none !important;
+  }
+}
