@@ -1,4 +1,4 @@
-name: One-shot bump r154b seamless-stage bootstrap cache
+name: One-shot publish r155 heartbeat and r154c feathered desktop
 on:
   push:
     branches: [master]
@@ -12,30 +12,42 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Bump production r154b seamless-stage bootstrap cache key
+      - name: Wire r154c feather mask and r155 heartbeat with fresh cache keys
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import re
+
+          boot = Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          s = boot.read_text()
+          s = s.replace('responsive-cinematic-reference-v69-r99-luminous-interactive-r154b-desktop-integrated','responsive-cinematic-reference-v69-r99-luminous-interactive-r154c-desktop-integrated')
+          s = s.replace('formatx-desktop-integration-r154.css?v=20260815-r154b-aspect-blend-stage','formatx-desktop-integration-r154.css?v=20260815-r154c-feather-mask')
+          s = s.replace('ready-v69-r154b','ready-v69-r154c').replace("reference:'v69-r154b'","reference:'v69-r154c'")
+          boot.write_text(s)
+
           p = Path('docs/scifi-ui/index.html')
-          s = p.read_text()
-          new = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-r154b-desktop-integrated'
-          if new in s:
-              raise SystemExit(0)
+          html = p.read_text()
+          new_core = './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-r155-seamless-heartbeat'
           pat = r'\.\/scripts\/formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=[^"\']+'
-          out, n = re.subn(pat, new, s, count=1)
+          html, n = re.subn(pat, new_core, html, count=1)
           if n != 1:
               raise SystemExit('expected FormatX real3d bootstrap URL not found exactly once')
-          p.write_text(out)
+          heartbeat = '  <script defer data-fx-live-heartbeat-r155="true" src="./scripts/formatx-live-heartbeat-r155.js?v=20260815-r155-js-heartbeat"></script>\n'
+          if 'data-fx-live-heartbeat-r155=' not in html:
+              anchor = re.search(r'(^\s*<script defer data-fx-core-real3d="true"[^\n]+</script>\s*$)', html, re.M)
+              if not anchor:
+                  raise SystemExit('core real3d script anchor not found')
+              html = html[:anchor.end()] + '\n' + heartbeat.rstrip('\n') + html[anchor.end():]
+          p.write_text(html)
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/formatx-core-real3d-v20.js
           if git diff --cached --quiet; then
-            echo 'cache key already current'
+            echo 'r155 production chain already current'
             exit 0
           fi
-          git commit -m '[deploy-production] fix(desktop): publish r154b seamless-stage MAG'
+          git commit -m '[deploy-production] feat(mag): publish r155 live heartbeat and seamless r154c desktop'
           git push origin HEAD:master
