@@ -104,8 +104,8 @@ function applyCrystalShapePulse(cycle,breath,activity,still){
   const shapeLub=still?0:gauss(cycle,.105,.082);
   const shapeDub=still?0:gauss(cycle,.255,.098)*.72;
   const shapeBeat=clamp(shapeLub+shapeDub*.86,0,1.16);
-  const targetX=still?1:clamp(.995+(breath-.5)*.006+shapeBeat*.019+activity*.002,.991,1.025);
-  const targetY=still?1:clamp(.993+(breath-.5)*.009+shapeBeat*.031+activity*.003,.987,1.039);
+  const targetX=still?1:clamp(1+(breath-.5)*.0012+shapeBeat*.0018+activity*.0004,.9988,1.0032);
+  const targetY=still?1:clamp(1+(breath-.5)*.0016+shapeBeat*.0024+activity*.0005,.9985,1.0040);
   const kx=targetX>shapeX?.58:.16;
   const ky=targetY>shapeY?.62:.145;
   shapeX+=(targetX-shapeX)*kx;
@@ -119,7 +119,7 @@ function applyCrystalShapePulse(cycle,breath,activity,still){
   }
   root.dataset.fxLivingShapeScaleR167=`${shapeX.toFixed(4)},${shapeY.toFixed(4)}`;
   root.dataset.fxLivingShapeEnvelopeR167=`${shapeLub.toFixed(3)},${shapeDub.toFixed(3)},${shapeBeat.toFixed(3)}`;
-  root.dataset.fxLivingShapePulseStateR167=still?'reduced-motion-static':'visible-four-tip-lub-dub';
+  root.dataset.fxLivingShapePulseStateR167=still?'reduced-motion-static':'micro-breath-optics-led';
   root.dataset.fxLivingShapeScaleSupportR167=globalThis.CSS?.supports?.('scale','1 1')?'native-individual-scale':'canvas-fallback-r166c';
 }
 
