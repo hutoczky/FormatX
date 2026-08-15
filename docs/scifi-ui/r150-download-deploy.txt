@@ -1,0 +1,3 @@
+FormatX r150 mobile download restore deployment marker
+2026-08-15
+Restores the public multiplatform and Android download controls on the mobile MAG composition without re-enabling the legacy hero copy.
