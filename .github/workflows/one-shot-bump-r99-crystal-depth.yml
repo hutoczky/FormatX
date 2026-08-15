@@ -40,6 +40,7 @@ jobs:
           validator=Path('.github/scripts/validate-real3d-core.cjs')
           v=validator.read_text()
           v=v.replace('formatx-core-detail-overlay-r122.js?v=20260815-r162-mobile-edge-fade','formatx-core-detail-overlay-r122.js?v=20260815-r166-heartbeat-shape-pulse',1)
+          v=v.replace('reference-material-interactive-seamless-key','reference-material-interactive-seamless-shape-pulse',1)
           marker="for(const source of [bootstrap,heartbeat,detail,mobileStability,wrapper,renderer,layout,flow,contentFinalizer,livingRendering,tailFinalizer,gyro])new Function(source);"
           shape_assert="for(const token of ['heartbeatShape','fxLivingHeartbeatBeatR158','fxLivingShapePulseR166','fxLivingShapeBeatR166','heartbeat-driven-four-tip-breathing','reference-material-interactive-seamless-shape-pulse'])assert.ok(detail.includes(token),`missing r166 shape-pulse token: ${token}`);\n"
           if shape_assert not in v:
