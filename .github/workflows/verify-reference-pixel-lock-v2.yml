@@ -40,7 +40,7 @@ jobs:
             page.on('pageerror',error=>console.log('[PAGEERROR]',error.message));
             await page.goto(`https://formatxsuite.com/?post_deploy_reference=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:60000});
             await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxCoreRenderer==='single-webgl-luminous-crystal-r99'&&document.documentElement.dataset.fxCoreR112==='true-3d-mesh-glass-reactor',null,{timeout:45000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreReferenceTextureR130==='ready'&&document.documentElement.dataset.fxCoreReferenceRepairR131==='applied',null,{timeout:12000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreReferenceTextureR130==='ready'&&document.documentElement.dataset.fxCoreReferenceRepairR131==='applied'&&document.documentElement.dataset.fxReferenceFinalR132==='ready',null,{timeout:15000});
             await page.waitForTimeout(350);
 
             const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])]}));
@@ -53,35 +53,42 @@ jobs:
               return{
                 renderer:root.dataset.fxCoreRenderer,r112:root.dataset.fxCoreR112,v69:root.dataset.fxCoreMobileV69,
                 geometry:root.dataset.fxCoreReferenceGeometry,material:root.dataset.fxCoreReferenceMaterial,interaction:root.dataset.fxCoreInteractionVisual,
-                referenceTexture:root.dataset.fxCoreReferenceTextureR130,referenceRepair:root.dataset.fxCoreReferenceRepairR131,
+                referenceTexture:root.dataset.fxCoreReferenceTextureR130,referenceRepair:root.dataset.fxCoreReferenceRepairR131,finalR132:root.dataset.fxReferenceFinalR132,
                 facetMode:root.dataset.fxCoreFacetMode,detailFrame:root.dataset.fxCoreDetailFrame,detailLoad:root.dataset.fxCoreDetailLoadR122,
-                detailCanvas:Boolean(detail),detailOpacity:detail?getComputedStyle(detail).opacity:null,detailBlend:detail?getComputedStyle(detail).mixBlendMode:null,
+                detailCanvas:Boolean(detail),detailOpacity:detail?getComputedStyle(detail).opacity:null,detailBlend:detail?getComputedStyle(detail).mixBlendMode:null,detailTransform:detail?getComputedStyle(detail).transform:null,
+                brand:q('.topbar .brand'),logo:q('.topbar .brand>img'),mag:q('.fx-reference-mag-button'),lang:q('.fx-language-toggle'),menu:q('.fx-reference-menu-button'),rail:q('#hero .fx-reference-rail'),
                 heading:q('.fx-reference-heading'),proof:q('.fx-reference-proof'),energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])],
                 glError:gl?.getError(),renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),referenceMagButtons:document.querySelectorAll('.fx-reference-mag-button').length,legacyCoreButtons:document.querySelectorAll('.fx-mobile-core-button,[data-fx-mobile-core-button]').length
               };
             });
             const textState=await page.evaluate(()=>{const copy=document.querySelector('#hero .fx-reference-proof p'),button=document.querySelector('#hero .fx-reference-liveos'),buttonBox=button?.getBoundingClientRect(),glyphs=[];if(copy&&buttonBox){const walker=document.createTreeWalker(copy,NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode()))for(let index=0;index<node.length;index+=1){const range=document.createRange();range.setStart(node,index);range.setEnd(node,index+1);for(const rect of range.getClientRects())if(rect.width>.1&&rect.height>.1)glyphs.push(rect)}}const covered=glyphs.filter(rect=>rect.right>buttonBox.left+.5&&rect.left<buttonBox.right-.5&&rect.bottom>buttonBox.top+.5&&rect.top<buttonBox.bottom-.5);return{guard:[...document.styleSheets].some(sheet=>String(sheet.href||'').includes('formatx-responsive-text-guard-r72.css')),whiteSpace:copy?getComputedStyle(copy).whiteSpace:'missing',glyphs:glyphs.length,covered:covered.length};});
-            console.log('POST DEPLOY R131',JSON.stringify({before,state,textState}));
+            console.log('POST DEPLOY R132',JSON.stringify({before,state,textState}));
 
-            await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true';dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused:true,source:'post-deploy-capture-r131'}}));});
+            await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true';dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused:true,source:'post-deploy-capture-r132'}}));});
             await page.waitForTimeout(80);
-            const cdp=await context.newCDPSession(page);const shot=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});fs.writeFileSync('reference-post-deploy-r112.png',Buffer.from(shot.data,'base64'));
+            const cdp=await context.newCDPSession(page);const shot=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});fs.writeFileSync('reference-post-deploy-r132.png',Buffer.from(shot.data,'base64'));
 
             assert.equal(state.renderer,'single-webgl-luminous-crystal-r99');assert.equal(state.r112,'true-3d-mesh-glass-reactor');assert.equal(state.v69,'ready-v69');assert.equal(state.geometry,'reference-deep-concave-four-point-size-lock-r99');assert.equal(state.material,'luminous-faceted-iceglass-caustic-r99');assert.equal(state.interaction,'touch-pointer-breathing-spectral-refraction-r99');
-            assert.equal(state.referenceTexture,'ready');assert.equal(state.referenceRepair,'applied');assert.equal(state.facetMode,'reference-material-r131');assert.equal(state.detailFrame,'reference-material-r131');assert.equal(state.detailLoad,'ready-r131');assert.equal(state.detailCanvas,true);assert.equal(state.detailOpacity,'1');assert.equal(state.detailBlend,'normal');
+            assert.equal(state.referenceTexture,'ready');assert.equal(state.referenceRepair,'applied');assert.equal(state.finalR132,'ready');assert.equal(state.facetMode,'reference-material-r131');assert.equal(state.detailFrame,'reference-material-r131');assert.equal(state.detailLoad,'ready-r132');assert.equal(state.detailCanvas,true);assert.equal(state.detailOpacity,'1');assert.equal(state.detailBlend,'normal');
+            assert.ok(state.detail.h>=410&&state.detail.h<=414,JSON.stringify(state));
+            assert.ok(Math.abs(state.brand.x-18)<=1,JSON.stringify(state));assert.ok(Math.abs(state.brand.y-19)<=1,JSON.stringify(state));assert.ok(Math.abs(state.logo.w-34)<=1,JSON.stringify(state));
+            assert.ok(Math.abs(state.mag.x-228)<=1.5,JSON.stringify(state));assert.ok(Math.abs(state.mag.y-16)<=1,JSON.stringify(state));
+            assert.ok(Math.abs(state.lang.x-284)<=1.5,JSON.stringify(state));assert.ok(Math.abs(state.lang.y-14)<=1,JSON.stringify(state));
+            assert.ok(Math.abs(state.menu.x-337)<=1.5,JSON.stringify(state));assert.ok(Math.abs(state.menu.y-8)<=1,JSON.stringify(state));
+            assert.ok(Math.abs(state.rail.y-82)<=2,JSON.stringify(state));
             assert.equal(state.glError,0);assert.equal(state.referenceMagButtons,1);assert.equal(state.legacyCoreButtons,0);assert.ok(state.renderMs<16.67,JSON.stringify(state));
             assert.ok(Math.abs(state.heading.x-24.7)<=1.5,JSON.stringify(state));assert.ok(Math.abs(state.heading.y-437.9)<=3,JSON.stringify(state));assert.ok(Math.abs(state.heading.w-362.6)<=2,JSON.stringify(state));assert.ok(Math.abs(state.proof.x-24.7)<=1.5,JSON.stringify(state));assert.ok(Math.abs(state.proof.y-478.0)<=3,JSON.stringify(state));assert.ok(Math.abs(state.proof.w-358.5)<=2,JSON.stringify(state));
             assert.equal(textState.guard,true);assert.equal(textState.whiteSpace,'normal');assert.ok(textState.glyphs>60,JSON.stringify(textState));assert.equal(textState.covered,0,JSON.stringify(textState));
             assert.ok(state.energy>before.energy+.04,JSON.stringify({before,state}));assert.ok(state.position.length===3,JSON.stringify(state));assert.notDeepEqual(state.position,before.position);
-            await context.close();await browser.close();assert.ok(fs.statSync('reference-post-deploy-r112.png').size>10000);
-            console.log('PASS: production r131 reference material, native WebGL depth, frame budget, text integrity, touch interaction and screenshot verified.');
+            await context.close();await browser.close();assert.ok(fs.statSync('reference-post-deploy-r132.png').size>10000);
+            console.log('PASS: production r132 reference framing, repaired crystal material, native WebGL depth, frame budget, text integrity, touch interaction and screenshot verified.');
           })().catch(error=>{console.error(error);process.exit(1)});
           NODE
       - name: Upload production capture
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reference-post-deploy-r112-${{ github.run_id }}
-          path: ${{ runner.temp }}/ref2/reference-post-deploy-r112.png
+          name: reference-post-deploy-r132-${{ github.run_id }}
+          path: ${{ runner.temp }}/ref2/reference-post-deploy-r132.png
           if-no-files-found: warn
           retention-days: 14
