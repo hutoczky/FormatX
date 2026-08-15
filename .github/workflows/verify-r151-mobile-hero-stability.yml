@@ -1,0 +1,90 @@
+name: Verify r151 mobile hero stability
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-r151-mobile-hero-stability.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Verify production r151
+        run: |
+          cat > verify-r151.cjs <<'EOF'
+          const { chromium } = require('playwright');
+          const assert = (v,m) => { if(!v) throw new Error(m); };
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:1,isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36'});
+            const page=await context.newPage();
+            const badResponses=[];
+            page.on('response',r=>{ if(r.status()>=400 && r.url().includes('formatxsuite.com')) badResponses.push([r.status(),r.url()]); });
+            await page.goto('https://formatxsuite.com/?verify_r151='+Date.now(),{waitUntil:'commit',timeout:30000});
+            await page.waitForSelector('#hero',{timeout:20000});
+            await page.waitForTimeout(9000);
+            const result=await page.evaluate(()=>{
+              const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&+s.opacity>.05&&r.width>2&&r.height>2;};
+              const rect=e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height};};
+              const space=document.querySelector('#hero .hero-space');
+              const heading=document.querySelector('#hero .fx-reference-heading');
+              const dock=document.querySelector('#hero .fx-mobile-download-r151');
+              const proof=document.querySelector('#hero .fx-reference-proof');
+              const primary=dock?.querySelector('[data-release-download="multiplatform"]');
+              const android=dock?.querySelector('a[href="/download/android"]');
+              const forbidden=[...document.querySelectorAll('#hero .hero-space img,#hero .hero-space picture,#hero .hero-space iframe,#hero .hero-space object,#hero .hero-space embed')];
+              const broken=[...document.images].filter(i=>i.closest('#hero .hero-space')&&i.complete&&i.naturalWidth===0);
+              const whiteish=[...space.querySelectorAll('*')].filter(e=>{
+                if(!visible(e))return false;
+                const c=getComputedStyle(e).backgroundColor.match(/[\d.]+/g)?.map(Number)||[];
+                return c.length>=3&&c[0]>225&&c[1]>225&&c[2]>225&&(c[3]??1)>.25;
+              }).map(e=>({tag:e.tagName,cls:e.className,color:getComputedStyle(e).backgroundColor}));
+              const core=document.querySelector('#hero .fx-core-mobile-v55-canvas,#hero .fx-core-r112-canvas');
+              const detail=document.querySelector('#hero .fx-core-detail-r122');
+              return {
+                dataset:{...document.documentElement.dataset},
+                forbidden:forbidden.length,
+                broken:broken.length,
+                whiteish,
+                space:space?{rect:rect(space),bg:getComputedStyle(space).backgroundColor}:null,
+                heading:heading&&visible(heading)?rect(heading):null,
+                dock:dock&&visible(dock)?rect(dock):null,
+                proof:proof&&visible(proof)?rect(proof):null,
+                primary:primary instanceof HTMLAnchorElement?{href:primary.href,visible:visible(primary)}:null,
+                android:android instanceof HTMLAnchorElement?{href:android.href,visible:visible(android)}:null,
+                core:core&&visible(core)?rect(core):null,
+                detail:detail&&visible(detail)?rect(detail):null
+              };
+            });
+            console.log(JSON.stringify(result,null,2));
+            console.log('badResponses',JSON.stringify(badResponses,null,2));
+            assert(result.dataset.fxMobileHeroStabilityR151==='r151-mobile-hero-stability','r151 stability runtime not ready');
+            assert(result.dataset.fxMobileDownloadR151==='ready','r151 download runtime not ready');
+            assert(result.forbidden===0,'forbidden visual node remains in hero-space');
+            assert(result.broken===0,'broken image remains in hero-space');
+            assert(result.whiteish.length===0,'white visual surface remains inside hero-space');
+            assert(result.core&&result.core.width>300&&result.core.height>300,'core canvas not visible');
+            assert(result.detail&&result.detail.width>300&&result.detail.height>300,'detail canvas not visible');
+            assert(result.heading&&result.dock&&result.proof,'heading/download/proof flow missing');
+            assert(result.heading.bottom<=result.dock.top+2,'download overlaps heading');
+            assert(result.dock.bottom<=result.proof.top+2,'download overlaps proof');
+            assert(result.primary?.visible&&result.primary.href,'primary download unavailable');
+            assert(result.android?.visible&&result.android.href.endsWith('/download/android'),'Android download unavailable');
+            await page.screenshot({path:'r151-production.png',fullPage:false});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          EOF
+          timeout 75s node verify-r151.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r151-production-mobile
+          path: r151-production.png
+          retention-days: 3
