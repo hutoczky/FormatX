@@ -1,0 +1,159 @@
+/* r168 — living energy + seamless mobile carrier.
+   Adds motion beyond simple scaling while preserving approved crystal geometry/size. */
+#hero .fx-r168-orbit,
+#hero .fx-r168-caustic,
+#hero .fx-r168-flare,
+#hero .fx-r168-shockwave,
+#hero .fx-r168-spark{
+  position:absolute!important;
+  left:var(--fx-r168-x,50%)!important;
+  top:var(--fx-r168-y,49%)!important;
+  pointer-events:none!important;
+  transform-origin:50% 50%!important;
+  mix-blend-mode:screen!important;
+  will-change:transform,opacity,filter!important;
+}
+#hero .fx-r168-orbit{
+  z-index:34!important;
+  width:clamp(154px,23vw,330px)!important;
+  aspect-ratio:1.34/1!important;
+  border-radius:50%!important;
+  border:1px solid transparent!important;
+  border-top-color:rgba(176,249,255,.50)!important;
+  border-right-color:rgba(87,224,255,.26)!important;
+  border-bottom-color:rgba(158,83,255,.20)!important;
+  box-shadow:0 0 18px rgba(77,224,255,.12),inset 0 0 16px rgba(165,73,255,.055)!important;
+  opacity:calc(.12 + var(--fx-r168-pulse,.2) * .25)!important;
+}
+#hero .fx-r168-orbit-a{
+  transform:translate(-50%,-50%) rotate(var(--fx-r168-orbit-a,0deg)) scale(calc(.94 + var(--fx-r168-breath,.5) * .06))!important;
+}
+#hero .fx-r168-orbit-b{
+  width:clamp(132px,19vw,278px)!important;
+  aspect-ratio:1/1.28!important;
+  border-top-color:rgba(164,89,255,.34)!important;
+  border-right-color:rgba(104,237,255,.32)!important;
+  transform:translate(-50%,-50%) rotate(var(--fx-r168-orbit-b,0deg)) scale(calc(.91 + var(--fx-r168-breath,.5) * .075))!important;
+  opacity:calc(.09 + var(--fx-r168-pulse,.2) * .21)!important;
+}
+#hero .fx-r168-caustic{
+  z-index:33!important;
+  width:clamp(190px,30vw,430px)!important;
+  aspect-ratio:1!important;
+  border-radius:50%!important;
+  background:conic-gradient(from 0deg,transparent 0 8%,rgba(93,234,255,.12) 10%,transparent 13% 31%,rgba(172,83,255,.10) 34%,transparent 38% 55%,rgba(215,253,255,.11) 58%,transparent 62% 81%,rgba(76,219,255,.10) 84%,transparent 88%)!important;
+  -webkit-mask-image:radial-gradient(circle,transparent 0 31%,#000 40% 62%,transparent 74%)!important;
+  mask-image:radial-gradient(circle,transparent 0 31%,#000 40% 62%,transparent 74%)!important;
+  filter:blur(.35px) drop-shadow(0 0 14px rgba(81,228,255,.14))!important;
+  opacity:calc(.12 + var(--fx-r168-activity,.2) * .18)!important;
+  transform:translate(-50%,-50%) rotate(var(--fx-r168-caustic,0deg)) scale(calc(.94 + var(--fx-r168-pulse,.2) * .05))!important;
+}
+#hero .fx-r168-flare{
+  z-index:35!important;
+  opacity:var(--fx-r168-flare,.18)!important;
+  filter:blur(.4px)!important;
+}
+#hero .fx-r168-flare-x{
+  width:clamp(220px,54vw,710px)!important;
+  height:2px!important;
+  background:linear-gradient(90deg,transparent,rgba(75,215,255,.10) 22%,rgba(223,255,255,.72) 49%,rgba(170,87,255,.22) 62%,transparent)!important;
+  transform:translate(-50%,-50%) translate(var(--fx-r168-parallax-x,0px),0)!important;
+  box-shadow:0 0 12px rgba(89,231,255,.18)!important;
+}
+#hero .fx-r168-flare-y{
+  width:2px!important;
+  height:clamp(210px,44vw,620px)!important;
+  background:linear-gradient(180deg,transparent,rgba(91,231,255,.09) 25%,rgba(225,255,255,.55) 50%,rgba(143,73,255,.15) 68%,transparent)!important;
+  transform:translate(-50%,-50%) translate(0,var(--fx-r168-parallax-y,0px))!important;
+  box-shadow:0 0 10px rgba(83,226,255,.14)!important;
+}
+#hero .fx-r168-shockwave{
+  z-index:32!important;
+  width:clamp(118px,17vw,236px)!important;
+  aspect-ratio:1!important;
+  border-radius:50%!important;
+  border:1px solid rgba(145,244,255,.42)!important;
+  box-shadow:0 0 19px rgba(75,225,255,.16),0 0 38px rgba(152,76,255,.07),inset 0 0 17px rgba(205,253,255,.07)!important;
+  opacity:calc(.07 + var(--fx-r168-pulse,.15) * .30)!important;
+  transform:translate(-50%,-50%) scale(var(--fx-r168-shock,.82))!important;
+}
+#hero .fx-r168-spark{
+  z-index:36!important;
+  width:3px!important;height:3px!important;border-radius:50%!important;
+  background:#ecffff!important;
+  box-shadow:0 0 7px #8cecff,0 0 13px rgba(137,80,255,.34)!important;
+  opacity:calc(.16 + var(--fx-r168-activity,.2) * .28)!important;
+}
+#hero .fx-r168-spark-a{transform:translate(-50%,-50%) rotate(var(--fx-r168-orbit-a,0deg)) translateX(clamp(76px,15vw,205px))!important}
+#hero .fx-r168-spark-b{transform:translate(-50%,-50%) rotate(calc(var(--fx-r168-orbit-a,0deg) + 128deg)) translateX(clamp(82px,17vw,230px))!important}
+#hero .fx-r168-spark-c{transform:translate(-50%,-50%) rotate(var(--fx-r168-orbit-b,0deg)) translateX(clamp(66px,13vw,178px))!important;background:#d9b9ff!important}
+#hero .fx-r168-spark-d{transform:translate(-50%,-50%) rotate(calc(var(--fx-r168-orbit-b,0deg) + 196deg)) translateX(clamp(72px,14vw,194px))!important}
+
+/* Keep the crystal itself visually alive without changing its approved box. */
+#hero .fx-core-detail-r122{
+  opacity:var(--fx-r168-live-opacity,.995)!important;
+}
+
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-grid,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-core-mobile-v55-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-core-r112-stage{
+    background-color:transparent!important;
+    background-image:none!important;
+    box-shadow:none!important;
+    border:0!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
+    isolation:isolate!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space::before{
+    content:""!important;
+    position:absolute!important;
+    z-index:0!important;
+    inset:50% -12vw -122px -12vw!important;
+    pointer-events:none!important;
+    background:
+      radial-gradient(ellipse 72% 48% at 50% 20%,rgba(41,185,235,.105),transparent 64%),
+      radial-gradient(ellipse 55% 38% at 58% 38%,rgba(137,67,255,.055),transparent 70%),
+      linear-gradient(180deg,rgba(1,5,14,0) 0%,rgba(2,10,24,.16) 24%,rgba(3,15,31,.48) 58%,rgba(4,13,30,.86) 82%,#040d1e 100%)!important;
+    filter:blur(.2px)!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space::after{
+    content:""!important;
+    position:absolute!important;
+    z-index:1!important;
+    left:-8vw!important;right:-8vw!important;
+    top:72%!important;height:46%!important;
+    pointer-events:none!important;
+    background:linear-gradient(180deg,rgba(1,6,16,0) 0%,rgba(1,8,20,.10) 22%,rgba(2,11,27,.34) 47%,rgba(3,14,30,.70) 76%,#040d1e 100%)!important;
+    border:0!important;box-shadow:none!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-core-mobile-v55-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-core-r112-stage,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-core-live-r147-layer,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-core-detail-r122{
+    position:absolute!important;
+    z-index:3!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-heading{
+    z-index:8!important;
+    background:transparent!important;
+  }
+  #hero .fx-r168-orbit{width:clamp(146px,47vw,206px)!important}
+  #hero .fx-r168-orbit-b{width:clamp(128px,40vw,178px)!important}
+  #hero .fx-r168-caustic{width:clamp(174px,58vw,250px)!important}
+  #hero .fx-r168-flare-x{width:92vw!important}
+  #hero .fx-r168-flare-y{height:70vw!important}
+  #hero .fx-r168-spark-a{transform:translate(-50%,-50%) rotate(var(--fx-r168-orbit-a,0deg)) translateX(clamp(72px,25vw,112px))!important}
+  #hero .fx-r168-spark-b{transform:translate(-50%,-50%) rotate(calc(var(--fx-r168-orbit-a,0deg) + 128deg)) translateX(clamp(78px,28vw,124px))!important}
+  #hero .fx-r168-spark-c{transform:translate(-50%,-50%) rotate(var(--fx-r168-orbit-b,0deg)) translateX(clamp(62px,21vw,96px))!important}
+  #hero .fx-r168-spark-d{transform:translate(-50%,-50%) rotate(calc(var(--fx-r168-orbit-b,0deg) + 196deg)) translateX(clamp(68px,23vw,104px))!important}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #hero .fx-r168-orbit,#hero .fx-r168-caustic,#hero .fx-r168-flare,#hero .fx-r168-shockwave,#hero .fx-r168-spark{will-change:auto!important}
+  #hero .fx-r168-flare{opacity:.12!important}
+  #hero .fx-r168-caustic{opacity:.10!important}
+}
