@@ -1,6 +1,6 @@
 FormatX production deployment marker
-requested_at=2026-08-15T16:40:00+02:00
-source_master=244179056d2f688525d65374eb388425c9dd6620
-purpose=activate r154 desktop integration: preserve the supplied 412x410 reference aspect instead of stretching it across the wide desktop stage; remove the desktop stage rectangle; screen-blend the reference material into the hero; suppress the wide native WebGL ghost while keeping its interaction engine alive; preserve the approved mobile geometry and size
-interaction=preserve r153 desktop breathing/reactor/orbit animation, r152 centered click stability, r144 pointer/touch/gyroscope interaction, continuous mobile breathing and reactor motion, and prefers-reduced-motion behavior
-verification=production candidate validation; JavaScript syntax; r154 aspect/blend contract; Worker tests; production build; custom-domain smoke; desktop and mobile live screenshot comparison; WebGL/interactivity; mobile geometry and proof safety regression
+requested_at=2026-08-15T16:50:00+02:00
+source_master=66da9a145423c430c297c52cfa1d28444f4e3195
+purpose=activate r154b desktop integration: preserve the supplied 412x410 reference aspect; remove the legacy desktop stage gradient rectangle with higher-specificity overrides; suppress the horizontally stretched native WebGL ghost while keeping its renderer and interaction engine alive; screen-blend the visible reference compositor and live optics into the hero; preserve the approved mobile geometry, size, proof layout and atmosphere
+interaction=preserve r153 desktop breathing/reactor/orbit animation and pointer response; preserve r152 centered click stability; preserve r144 mobile pointer/touch/gyroscope interaction and continuous breathing/reactor motion; prefers-reduced-motion remains respected
+verification=production candidate validation; JavaScript syntax; r154b aspect/blend/stage override contract; Worker tests; production build; custom-domain smoke; desktop 1600x1000 and mobile 390x844 live regression; real animation timeline; pointer/touch interaction; WebGL render budget; screenshot visual inspection
