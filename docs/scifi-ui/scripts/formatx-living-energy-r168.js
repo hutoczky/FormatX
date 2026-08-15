@@ -14,7 +14,32 @@ let pointerX=0,pointerY=0,burstAt=0,burstStrength=0,frameSeq=0;
 let orbitPhaseA=0,orbitPhaseB=0,causticPhaseA=0,causticPhaseB=0;
 
 function make(cls){const e=document.createElement('span');e.className=cls;e.setAttribute('aria-hidden','true');return e;}
+function ensureMobileSeam(){
+  if(document.getElementById('fx-r170-mobile-seam-override'))return;
+  const style=document.createElement('style');
+  style.id='fx-r170-mobile-seam-override';
+  style.textContent=`
+  @media (max-width:900px),(pointer:coarse){
+    html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space::before{
+      content:""!important;display:block!important;position:absolute!important;
+      left:-14vw!important;right:-14vw!important;top:43%!important;bottom:-146px!important;
+      height:auto!important;z-index:0!important;pointer-events:none!important;
+      background:radial-gradient(ellipse 76% 50% at 50% 22%,rgba(45,188,239,.12),transparent 64%),radial-gradient(ellipse 58% 40% at 59% 39%,rgba(140,69,255,.065),transparent 70%),linear-gradient(180deg,rgba(1,5,14,0) 0%,rgba(2,10,24,.13) 20%,rgba(3,15,31,.43) 54%,rgba(4,13,30,.82) 82%,#040d1e 100%)!important;
+      border:0!important;box-shadow:none!important;opacity:1!important;
+    }
+    html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space::after{
+      content:""!important;display:block!important;position:absolute!important;
+      left:-10vw!important;right:-10vw!important;top:64%!important;bottom:auto!important;height:58%!important;
+      z-index:1!important;pointer-events:none!important;
+      background:linear-gradient(180deg,rgba(1,6,16,0) 0%,rgba(1,8,20,.07) 18%,rgba(2,11,27,.27) 42%,rgba(3,14,30,.64) 72%,#040d1e 100%)!important;
+      border:0!important;box-shadow:none!important;opacity:1!important;
+    }
+  }`;
+  document.head.appendChild(style);
+  root.dataset.fxMobileSeamR170='ready-64-58';
+}
 function ensure(){
+  ensureMobileSeam();
   host=document.querySelector('#hero .hero-space');
   layer=document.querySelector('#hero .fx-core-live-r147-layer');
   detail=document.querySelector('#hero .fx-core-detail-r122');
@@ -61,8 +86,6 @@ function tick(){
   const activity=still?.12:clamp(energy*.40+boost*.78+burstStrength*.48,0,1.65);
   const x=clamp(pointerX*.58+gx*.42,-1,1),y=clamp(pointerY*.58-gy*.42,-1,1);
 
-  /* Monotonic optical phases: unlike raw rAF timestamps, these advance on every
-     reactor tick, so orbit/caustic motion stays visibly alive under throttling. */
   if(!still){
     orbitPhaseA=(orbitPhaseA+dt*(.017+activity*.004))%360;
     orbitPhaseB=(orbitPhaseB-dt*(.011+activity*.003)+360)%360;
