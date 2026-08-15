@@ -143,6 +143,6 @@ function tick(){
 }
 function start(){if(!ensure())return;if(timer)return;last=performance.now();tick();timer=setInterval(tick,32);root.dataset.fxLivingEnergyClockR168=CLOCK;}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected)ensure();});mo.observe(document.documentElement,{childList:true,subtree:true});
+const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!timer)start();});mo.observe(document.documentElement,{childList:true,subtree:true});
 addEventListener('pageshow',start,{passive:true});
 }());
