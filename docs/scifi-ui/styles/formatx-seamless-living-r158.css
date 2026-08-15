@@ -191,3 +191,17 @@ html body.living-architecture #hero .fx-reference-heading::before{
   html body.living-architecture #hero::before{filter:blur(18px)!important;opacity:.58!important}
   html body.living-architecture #hero .fx-core-detail-r122{filter:brightness(1.06) contrast(1.15) saturate(1.10)!important}
 }
+
+
+@media (max-width:900px),(pointer:coarse){
+  /* r164: obsolete mobile heading guard removed; the crystal tail and flow are independently locked. */
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-heading::before{
+    content:none!important;
+    display:none!important;
+    background:none!important;
+    background-image:none!important;
+    opacity:0!important;
+    box-shadow:none!important;
+    filter:none!important;
+  }
+}
