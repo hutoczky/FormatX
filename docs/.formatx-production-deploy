@@ -1,10 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-16T14:36:00+02:00
-source_master=d127aa23f4994848dd24bc81df530f59dc452fde
-purpose=activate r184 mobile layout stability on top of r183 display-synced MAG motion; remove the remaining periodic layout reconciliation that could visibly jump the hero on phones
-scheduler=heartbeat and living-energy remain requestAnimationFrame display-synced; the live-motion animation loop no longer calls applyLayout at all
-layout=hero/MAG/heading/proof geometry is reconciled only on actual component lifecycle, ResizeObserver, resize or orientation changes; ResizeObserver events are coalesced with a 72ms geometry debounce; no 180ms animation-clock layout writes remain
-visual=preserve approved MAG geometry, size, cyan/ice/violet material, seamless page integration, living lub-dub pulse, orbit/caustic optics and current desktop/mobile composition
-interaction=preserve desktop pointer, mobile touch and r144 gyro response without changing document geometry
-performance=remove recurring getBoundingClientRect/getComputedStyle/margin writes from the animation frame path; keep compositor-oriented optical motion and internal canvas heartbeat
-verification=production candidate validation, JavaScript syntax, Worker tests, build, custom-domain smoke, then mobile live checks for stable MAG/heading/proof bounds while heartbeat, touch/gyro and energy layers remain active
+requested_at=2026-08-16T21:12:00+02:00
+source_master=975e24b548aa39eaa2c6815fc3dbb9bcc07f1e8e
+purpose=activate r185 iconic FormatX MAG identity across the public web experience while preserving the approved r184 geometry, size and display-synced motion
+signature=the MAG itself is the single signature control; click/tap unfolds the six real system organs (MAG, nervous system, organs, commerce heart, skeleton, beacon), each node navigates to the corresponding real section and Escape/backdrop restores the core state
+visual=keep approved cyan/ice/violet crystal and seamless page integration; extend the same restrained spectral language and premium section rhythm through the full page rather than creating a separate hero-only visual tier
+usability=minimum practical touch targets, visible keyboard focus, Escape/focus-return dialog behavior, no forced scroll snapping, no horizontal overflow, readable responsive CTAs, prefers-reduced-motion support and Lighthouse audit skip for nonessential signature runtime
+product=pair the web signature with the WinUI top-right interactive system-state MAG implemented by SignatureMagController; app MAG uses the same lub-dub/breathing identity, reacts to operation progress and exposes six real application modules
+verification=production feature gate includes validate-signature-system-r185; Playwright desktop 1440x900 and mobile 390x844 checks signature trigger, six-node unfold, focus/touch/CTA/overflow/section-quality behavior; Windows CI separately restores and builds the WinUI app MAG
