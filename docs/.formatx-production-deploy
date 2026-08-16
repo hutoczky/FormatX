@@ -1,10 +1,8 @@
 FormatX production deployment marker
-requested_at=2026-08-16T21:26:00+02:00
-source_master=95e5a6c0178db3d375e199ce6bf8b58814cc7aaa
-purpose=activate r185b iconic FormatX MAG with a real browser hit-tested pointer/touch control while preserving the approved r184 crystal geometry, size, material and display-synced living motion
-signature=the visible crystal silhouette itself is the interaction surface; the trigger is a direct #hero child above the hero-grid stacking context and uses a star-shaped hit region instead of a rectangular overlay; click/tap unfolds the six real system organs and Escape/backdrop returns to core state
-interaction=pointer movement and presses on the signature surface are forwarded to the existing coreinteraction energy path so desktop mouse, mobile touch and existing gyro/lub-dub motion remain alive; neighbouring hero controls stay outside the star-shaped hit region
-visual=keep the approved cyan/ice/violet MAG, seamless page integration and premium section rhythm unchanged; this release only corrects hit testing and cache propagation
-usability=real elementFromPoint hit proof, actual desktop mouse click, actual mobile touchscreen tap, 44px+ actionable targets, focus trap and focus return, Escape close, no forced scroll snapping, no horizontal overflow, readable CTAs and reduced-motion support
-product=retain the compiled WinUI top-right interactive system-state MAG with 46px target, 44px flyout module targets, HU/EN labels, operation-progress energy and six real application modules
-verification=production feature gate includes r185b signature contract; Playwright must verify direct-parent stacking escape, synced-hit elementFromPoint result, mouse/touch opening, six-node unfold, focus return, CTA sizes, section quality and screenshots on desktop 1440x900 and mobile 390x844
+requested_at=2026-08-16T22:46:00+02:00
+source_master=c0ffcc60ff82b9bbf7ed3a4fc07485c390ac6e08
+purpose=revalidate the unchanged r185b production MAG after aligning the award/public-integrity scheduler contract with the current r183 display-synced optical runtime
+signature=preserve the existing r185b real browser hit-tested pointer/touch control and approved r184 crystal geometry, size, material and living motion
+interaction=preserve desktop pointer, mobile touch, existing gyro/lub-dub motion, focus behavior, Escape/backdrop close and six-organ unfold
+visual=no visual change; keep the approved cyan/ice/violet MAG, seamless page integration, responsive layout and native WebGL rendering unchanged
+validation=rerun production candidate, public-site integrity, live award-readiness, mobile Apex, Lighthouse and relevant post-deploy gates against the corrected current scheduler contract
