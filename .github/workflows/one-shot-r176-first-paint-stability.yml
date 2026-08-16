@@ -1,0 +1,64 @@
+name: One-shot r176 first-paint stability
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r176-first-paint-stability.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Make r175 composition first-paint stable and broadly compatible
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          cssp=Path('docs/scifi-ui/styles/formatx-award-narrative-r175.css')
+          css=cssp.read_text()
+          css=css.replace('html[data-fx-award-narrative-r175="ready"]','html[data-fx-design-system="2"]')
+          css=css.replace('  --fx-r175-energy: .18;','  --fx-r175-energy: .18;\n  --fx-r175-story-x: 8%;\n  --fx-r175-node-scale: .8344;\n  --fx-r175-carrier-opacity: .3412;\n  --fx-r175-carrier-scale: .64;')
+          css=css.replace('at calc(8% + var(--fx-r175-story-progress) * 84%) 18%','at var(--fx-r175-story-x) 18%')
+          css=css.replace('transform: rotate(45deg) scale(calc(.82 + var(--fx-r175-energy) * .08));','transform: rotate(45deg) scale(var(--fx-r175-node-scale));')
+          css=css.replace('opacity: calc(.28 + var(--fx-r175-energy) * .34);','opacity: var(--fx-r175-carrier-opacity);')
+          css=css.replace('transform: scaleY(calc(.64 + var(--fx-r175-chapter-progress) * .36));','transform: scaleY(var(--fx-r175-carrier-scale));')
+          if 'var(--fx-r175-story-x)' not in css or 'var(--fx-r175-node-scale)' not in css: raise SystemExit('r176 CSS replacement incomplete')
+          if 'var(--fx-r175-story-progress) *' in css or 'var(--fx-r175-energy) *' in css or 'var(--fx-r175-chapter-progress) *' in css: raise SystemExit('unsupported custom-property multiplication remains')
+          cssp.write_text(css)
+
+          jsp=Path('docs/scifi-ui/scripts/formatx-award-narrative-r175.js')
+          js=jsp.read_text()
+          old="  root.style.setProperty('--fx-r175-story-progress',global.toFixed(4));"
+          new="  root.style.setProperty('--fx-r175-story-progress',global.toFixed(4));\n  root.style.setProperty('--fx-r175-story-x',(8+global*84).toFixed(2)+'%');"
+          if old in js: js=js.replace(old,new,1)
+          elif '--fx-r175-story-x' not in js: raise SystemExit('story progress anchor missing')
+          old2="    root.style.setProperty('--fx-r175-chapter-progress',local.toFixed(4));\n    root.style.setProperty('--fx-r175-energy',(0.16+local*.52).toFixed(4));"
+          new2="    const energy=0.16+local*.52;\n    root.style.setProperty('--fx-r175-chapter-progress',local.toFixed(4));\n    root.style.setProperty('--fx-r175-energy',energy.toFixed(4));\n    root.style.setProperty('--fx-r175-node-scale',(0.82+energy*.08).toFixed(4));\n    root.style.setProperty('--fx-r175-carrier-opacity',(0.28+energy*.34).toFixed(4));\n    root.style.setProperty('--fx-r175-carrier-scale',(0.64+local*.36).toFixed(4));"
+          if old2 in js: js=js.replace(old2,new2,1)
+          elif '--fx-r175-carrier-scale' not in js: raise SystemExit('chapter progress anchor missing')
+          jsp.write_text(js)
+
+          vp=Path('.github/scripts/validate-award-narrative-r175.cjs')
+          v=vp.read_text()
+          v=v.replace("  'data-fx-award-narrative-r175=\"ready\"',","  'data-fx-design-system=\"2\"',")
+          marker="assert.doesNotMatch(css,/transition:\\s*all\\b/i,'r175 CSS must not animate all properties');"
+          extra="assert.doesNotMatch(css,/var\\(--fx-r175-[^)]+\\)\\s*\\*/,'r175 CSS must not depend on custom-property multiplication');"
+          if extra not in v:
+              if marker not in v: raise SystemExit('validator marker missing')
+              v=v.replace(marker,marker+'\n'+extra,1)
+          vp.write_text(v)
+          PY
+          node --check docs/scifi-ui/scripts/formatx-award-narrative-r175.js
+          node .github/scripts/validate-real3d-core.cjs
+          node .github/scripts/validate-award-narrative-r175.cjs
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/styles/formatx-award-narrative-r175.css docs/scifi-ui/scripts/formatx-award-narrative-r175.js .github/scripts/validate-award-narrative-r175.cjs
+          if git diff --cached --quiet; then echo 'r176 already applied'; exit 0; fi
+          git commit -m '[deploy-production] perf(award): make r175 narrative first-paint stable r176'
+          git push origin HEAD:master
