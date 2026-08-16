@@ -2,7 +2,8 @@ name: One-shot publish r182 idle living watchdog
 on:
   push:
     branches: [master]
-    paths: ['.github/workflows/one-shot-r182-idle-watchdog.yml']
+    paths:
+      - '.github/workflows/one-shot-r182-idle-watchdog.yml'
 permissions:
   contents: write
 jobs:
@@ -35,32 +36,32 @@ jobs:
           elif new not in s:
               raise SystemExit('r168 tick timestamp anchor not found')
 
-          old="""function loop(now){raf=requestAnimationFrame(loop);if(document.hidden)return;if(!lastTickAt||now-lastTickAt>=30){lastTickAt=now;tick();}}
-function start(){if(!ensure())return;if(raf)return;last=performance.now();lastTickAt=0;tick();raf=requestAnimationFrame(loop);root.dataset.fxLivingEnergyClockR168=CLOCK;root.dataset.fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms';}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!raf)start();});mo.observe(document.documentElement,{childList:true,subtree:true});
-addEventListener('pageshow',start,{passive:true});"""
-          new="""function loop(now){raf=requestAnimationFrame(loop);if(document.hidden)return;if(!lastTickAt||now-lastTickAt>=30)tick();}
-function armWatchdog(){
-  if(watchdog)return;
-  watchdog=setInterval(()=>{
-    if(document.hidden||reduced.matches||root.dataset.fxReferenceMotionPaused==='true')return;
-    const now=performance.now();
-    if(!lastTickAt||now-lastTickAt>=120)tick();
-  },96);
-  root.dataset.fxLivingEnergyWatchdogR182='96ms-stall-fallback';
-}
-function start(){
-  if(!ensure())return;
-  if(!raf){last=performance.now();lastTickAt=0;tick();raf=requestAnimationFrame(loop);}
-  armWatchdog();
-  root.dataset.fxLivingEnergyClockR168=CLOCK;
-  root.dataset.fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms';
-  root.dataset.fxLivingEnergySchedulerR182='raf-primary-watchdog-fallback';
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!raf||!watchdog)start();});mo.observe(document.documentElement,{childList:true,subtree:true});
-addEventListener('pageshow',start,{passive:true});"""
+          old=("function loop(now){raf=requestAnimationFrame(loop);if(document.hidden)return;if(!lastTickAt||now-lastTickAt>=30){lastTickAt=now;tick();}}\n"
+               "function start(){if(!ensure())return;if(raf)return;last=performance.now();lastTickAt=0;tick();raf=requestAnimationFrame(loop);root.dataset.fxLivingEnergyClockR168=CLOCK;root.dataset.fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms';}\n"
+               "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();\n"
+               "const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!raf)start();});mo.observe(document.documentElement,{childList:true,subtree:true});\n"
+               "addEventListener('pageshow',start,{passive:true});")
+          new=("function loop(now){raf=requestAnimationFrame(loop);if(document.hidden)return;if(!lastTickAt||now-lastTickAt>=30)tick();}\n"
+               "function armWatchdog(){\n"
+               "  if(watchdog)return;\n"
+               "  watchdog=setInterval(()=>{\n"
+               "    if(document.hidden||reduced.matches||root.dataset.fxReferenceMotionPaused==='true')return;\n"
+               "    const now=performance.now();\n"
+               "    if(!lastTickAt||now-lastTickAt>=120)tick();\n"
+               "  },96);\n"
+               "  root.dataset.fxLivingEnergyWatchdogR182='96ms-stall-fallback';\n"
+               "}\n"
+               "function start(){\n"
+               "  if(!ensure())return;\n"
+               "  if(!raf){last=performance.now();lastTickAt=0;tick();raf=requestAnimationFrame(loop);}\n"
+               "  armWatchdog();\n"
+               "  root.dataset.fxLivingEnergyClockR168=CLOCK;\n"
+               "  root.dataset.fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms';\n"
+               "  root.dataset.fxLivingEnergySchedulerR182='raf-primary-watchdog-fallback';\n"
+               "}\n"
+               "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();\n"
+               "const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!raf||!watchdog)start();});mo.observe(document.documentElement,{childList:true,subtree:true});\n"
+               "addEventListener('pageshow',start,{passive:true});")
           if old in s:
               s=s.replace(old,new,1)
           elif new not in s:
