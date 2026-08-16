@@ -2,13 +2,15 @@
 'use strict';
 const root=document.documentElement;
 const VERSION='r179-soty-organ-field-continuity';
-if(root.dataset.fxSotyContinuityR179===VERSION)return;
+if(root.dataset.fxSotyContinuityR179==='ready'&&root.dataset.fxSotyVersionR179===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
   root.dataset.fxSotyContinuityR179='audit-skip';
+  root.dataset.fxSotyVersionR179=VERSION;
   root.dataset.fxSotyModeR179='audit-skip';
   return;
 }
 root.dataset.fxSotyContinuityR179='booting';
+root.dataset.fxSotyVersionR179=VERSION;
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const coarse=matchMedia('(pointer:coarse)');
@@ -192,7 +194,8 @@ function paint(now){
   });
 
   frame++;
-  root.dataset.fxSotyContinuityR179=VERSION;
+  root.dataset.fxSotyContinuityR179='ready';
+  root.dataset.fxSotyVersionR179=VERSION;
   root.dataset.fxSotyActiveOrganR179=organ.id;
   root.dataset.fxSotyFrameR179=String(frame);
   root.dataset.fxSotyEnergyR179=energy.toFixed(3);
@@ -216,6 +219,7 @@ function start(){
   bindInput();
   activeChangedAt=performance.now();
   root.dataset.fxSotyContinuityR179='ready';
+  root.dataset.fxSotyVersionR179=VERSION;
   root.dataset.fxSotySystemR179='core-nerves-organs-heart-skeleton-beacon';
   if(!raf){last=performance.now();lastPaint=0;raf=requestAnimationFrame(loop);}
 }
