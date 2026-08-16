@@ -1,9 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-16T09:24:00+02:00
-source_master=189c020567e04126d184851fe9cf70996d9598a7
-purpose=activate r177 desktop-native layout scope while preserving the approved mobile reference MAG; stop the mobile reference stylesheet and mobile proof/heading/rail DOM from taking over desktop after bootstrap
-visual=desktop keeps its native two-column FormatX hero from first paint: product story and interactive MAG remain together instead of switching after ~1.6s into a stacked reference flow; mobile <=900px retains the approved MAG-first reference composition
-stability=remove the obsolete desktop @media block from formatx-mobile-reference-layout-v1.css and clean mobile-only reference flow nodes on desktop; eliminate the measured grid-to-flex, hero-copy relocation and main y+76px layout shifts at their source
-interaction=preserve desktop pointer/mouse, mobile touch and r144 gyroscope, r158 lub-dub heartbeat, r168 caustics/refraction/orbits/sparks and r175 chapter story pulses without changing MAG size or four-tip geometry
-performance=retain r175 requestAnimationFrame-throttled living-energy scheduler and reduced-motion/hidden-document behavior
-verification=one-shot r177 source patch SUCCESS with JavaScript syntax, native WebGL contract and r175 award narrative validator; next gates are production candidate/build/smoke, first-load timeline/CLS, desktop 1440x900 award narrative, mobile 390x844 award narrative and existing mobile MAG reference/proof checks
+requested_at=2026-08-16T09:31:00+02:00
+source_master=ce6035314636b41301d1f726b494b609ef896b83
+purpose=activate r178 after tracing the remaining desktop layout takeover to the legacy flow-first controller and flow stylesheet; make both reference-flow CSS and controller mobile-only while preserving the approved mobile MAG-first experience
+visual=desktop remains on the native FormatX two-column hero from first paint through all delayed runtime events; no stacked reference-flow takeover, no 960px centered hero-copy replacement, no late topbar fixed-to-relative switch; mobile <=900px keeps MAG-first reference heading/proof flow
+stability=layout loader does not attach flow-first CSS on desktop and removes it after a resize to desktop; core bootstrap bypasses flow-first script on fresh desktop; flow controller itself exits through desktop-native restore before writing header/hero geometry
+interaction=preserve pointer/mouse desktop interaction, touch plus r144 gyro on mobile, r158 lub-dub heartbeat, r168 living optics, r175 narrative chapter pulse and approved MAG geometry/size
+performance=retain r175 requestAnimationFrame-throttled energy scheduler and zero layout-driven narrative animation
+verification=r178 one-shot SUCCESS with JS syntax, native WebGL contract and award narrative validator; production candidate/build/smoke followed by r177/r178 first-load CLS timeline, 1440x900 desktop and 390x844 mobile award gates, and mobile MAG regression checks
