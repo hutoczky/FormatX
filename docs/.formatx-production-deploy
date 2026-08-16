@@ -1,10 +1,11 @@
 FormatX production deployment marker
-requested_at=2026-08-16T12:19:00+02:00
-source_master=1fabd8598cef9d95401beb12c01030dc5b611ef0
-purpose=activate r180 mobile UI finalizer on top of the r179 SOTY continuity layer without changing the approved MAG geometry, size, living heartbeat or interaction
-mobile_ui=lock the mobile header to one optical centerline: brand center 34px, MAG 48x40 at top 14px, HU 40x40 at top 14px, menu 48x52 at top 8px; preserve localized MAG/CORE and HU/EN labels
-hero_controls=reserve a dedicated safe lane for the KERDEZZ/ASK label between the 50px ask control and the 50px pause control; prevent late r178 flow initialization from restoring the old 10px gap
-proof=keep narrow-phone proof copy full width with normal word wrapping and move Live OS into its own bottom CTA lane; do not allow the old 72px paragraph-side reservation to create one/two-word lines
-seam=retain the r179 smoother carrier transition and reduced mobile orbit dominance so the MAG remains part of the page rather than a separate panel
-interaction=preserve r158 lub-dub heartbeat, r168 living optics, desktop pointer interaction, mobile touch and r144 gyro response, pause behavior and prefers-reduced-motion
-verification=production candidate source/runtime/security validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; post-deploy 390x844 mobile control centerline, label collision, proof-flow, Live OS separation, seam and render-budget verification with screenshot artifact
+requested_at=2026-08-16T12:25:00+02:00
+source_master=d45a1fb71f7ef3a1a0515969b6fd4c730f642b38
+purpose=activate r180b self-healing mobile UI style guard on top of r179 SOTY continuity without changing approved MAG geometry, size, heartbeat or interaction
+mobile_ui=keep brand/MAG/HU/menu on the same optical centerline; MAG and HU top 14px with 40px control height, menu 48x52 at top 8px; preserve MAG/CORE and HU/EN localization
+style_guard=observe only the controlled mobile elements for inline style mutation and restore the approved values on the next animation frame if late r178 flow writes top 16px, rail gap 10px or old Live OS top positioning
+hero_controls=keep 50px ASK and pause controls with a 24px flex gap and a dedicated KERDEZZ/ASK label lane; no overlap between label and pause
+proof=full-width narrow-phone proof copy with normal wrapping; Live OS in a separate bottom-right CTA lane with top auto and bottom 18px
+seam=preserve smooth carrier transition and reduced orbit dominance so the MAG remains integrated with the page
+interaction=preserve r158 lub-dub heartbeat, r168 optics, touch, desktop pointer, r144 gyro, pause and prefers-reduced-motion behavior
+verification=production candidate/runtime/security validation; JavaScript syntax; Worker tests; build; custom-domain smoke; r180b 390x844 self-healing mutation test, control centerline, ASK/pause collision, proof/Live OS separation, seam, orbit and render-budget checks with screenshot
