@@ -15,7 +15,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Find overflow offenders with parent paths
+      - name: Isolate real scroll-width contributor
         run: |
           cat > debug.cjs <<'JS'
           const {chromium}=require('playwright');
@@ -23,40 +23,36 @@ jobs:
             const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
             const c=await b.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1});
             const p=await c.newPage();
-            await p.goto('https://formatxsuite.com/?debug_r179_path='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
+            await p.goto('https://formatxsuite.com/?debug_r179_cause='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
             await p.waitForFunction(()=>document.documentElement.dataset.fxSotyContinuityR179==='r179-soty-organ-field-continuity',{timeout:60000});
-            await p.waitForTimeout(500);
-            const out=await p.evaluate(()=>{
-              const vw=document.documentElement.clientWidth;
-              const path=e=>{const a=[];for(let n=e;n&&a.length<8;n=n.parentElement){const id=n.id?'#'+n.id:'';const cls=n.classList?.length?'.'+[...n.classList].join('.'):'';a.push(`${n.tagName.toLowerCase()}${id}${cls}`)}return a.join(' <- ')};
-              const list=[];
-              for(const e of document.querySelectorAll('body *')){
-                const s=getComputedStyle(e);if(s.display==='none'||s.visibility==='hidden')continue;
-                const r=e.getBoundingClientRect();if(!Number.isFinite(r.left)||!Number.isFinite(r.right)||r.width<1)continue;
-                if(r.right>vw+2||r.left<-2){
-                  const ps=e.parentElement?getComputedStyle(e.parentElement):null;
-                  list.push({
-                    tag:e.tagName,id:e.id,cls:String(e.className||'').slice(0,180),
-                    left:+r.left.toFixed(1),right:+r.right.toFixed(1),width:+r.width.toFixed(1),height:+r.height.toFixed(1),
-                    position:s.position,display:s.display,whiteSpace:s.whiteSpace,overflowX:s.overflowX,transform:s.transform,
-                    text:(e.textContent||'').trim().replace(/\s+/g,' ').slice(0,180),
-                    html:e.outerHTML.slice(0,420),
-                    path:path(e),parentOverflowX:ps?.overflowX||'',parentPosition:ps?.position||''
-                  });
-                }
+            await p.waitForTimeout(400);
+            const result=await p.evaluate(()=>{
+              const width=()=>({doc:document.documentElement.scrollWidth,body:document.body.scrollWidth,client:document.documentElement.clientWidth});
+              const base=width();
+              const tests=[
+                ['system-marquee','#system .marquee'],
+                ['system-marquee-span','#system .marquee > span'],
+                ['experience-flow-rings','#experience .flow-rings'],
+                ['experience-flow','#experience .flow'],
+                ['hero-r168-wave','#hero .fx-r168-interaction-wave'],
+                ['hero-live-layer','#hero .fx-core-live-r147-layer'],
+                ['r179-sigils','.fx-r179-organ-sigil'],
+                ['r179-field','#main-content > .fx-r179-field']
+              ];
+              const out=[];
+              for(const [name,sel] of tests){
+                const els=[...document.querySelectorAll(sel)];
+                const prev=els.map(e=>e.style.cssText);
+                els.forEach(e=>e.style.setProperty('display','none','important'));
+                out.push({name,count:els.length,width:width(),delta:base.doc-document.documentElement.scrollWidth});
+                els.forEach((e,i)=>e.style.cssText=prev[i]);
               }
-              return{vw,scrollWidth:document.documentElement.scrollWidth,bodyScrollWidth:document.body.scrollWidth,offenders:list.sort((a,b)=>Math.max(b.right-vw,-b.left)-Math.max(a.right-vw,-a.left)).slice(0,40)};
+              const containers=['#system','#system .marquee','#experience','#experience .flow','#experience .flow-stage','#experience .flow-rings','#hero','#hero .hero-space','#hero .fx-core-live-r147-layer','#main-content'];
+              const info=containers.map(sel=>{const e=document.querySelector(sel);if(!e)return{sel,missing:true};const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{sel,left:+r.left.toFixed(1),right:+r.right.toFixed(1),width:+r.width.toFixed(1),scrollWidth:e.scrollWidth,clientWidth:e.clientWidth,overflowX:s.overflowX,contain:s.contain,position:s.position}});
+              return{base,tests:out,containers:info};
             });
-            console.log(JSON.stringify(out,null,2));
-            await p.screenshot({path:'r179-overflow-path.png',fullPage:false,animations:'disabled',timeout:120000});
+            console.log(JSON.stringify(result,null,2));
             await b.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
           node debug.cjs
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: r179-overflow-path-${{ github.run_id }}
-          path: r179-overflow-path.png
-          if-no-files-found: warn
-          retention-days: 3
