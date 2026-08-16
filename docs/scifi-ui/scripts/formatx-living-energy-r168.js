@@ -2,7 +2,7 @@
 'use strict';
 const root=document.documentElement;
 const VERSION='r168-living-energy-orbit-caustic-v2';
-const CLOCK='32ms-optical-reactor-v3';
+const CLOCK='display-synced-raf-r183';
 if(root.dataset.fxLivingEnergyR168===VERSION&&root.dataset.fxLivingEnergyClockR168===CLOCK)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxLivingEnergyR168='audit-skip';root.dataset.fxLivingEnergyClockR168='audit-skip';return;}
 root.dataset.fxLivingEnergyR168='booting';
@@ -67,11 +67,11 @@ function ensure(){
   return true;
 }
 
-function tick(){
-  if(!ensure())return;
-  const now=performance.now();
+function tick(frameNow){
+  if(!(host?.isConnected&&layer?.isConnected&&detail?.isConnected)){if(!ensure())return;}
+  const now=Number.isFinite(frameNow)?frameNow:performance.now();
   lastTickAt=now;
-  const dt=clamp(now-last||32,16,120);last=now;
+  const dt=clamp(now-last||8.3,2,120);last=now;
   const still=reduced.matches||root.dataset.fxReferenceMotionPaused==='true';
   const energy=clamp(Number(window.FormatXCoreMobileV69?.energy||window.FormatXCoreCinematic?.energy||.45),0,1.5);
   const cp=window.FormatXCoreCinematic?.corePosition||[0,0,0];
@@ -143,23 +143,27 @@ function tick(){
   root.dataset.fxLivingEnergyEffectModeR168='orbit-caustic-spectrum-shock-refraction';
   if(!burstAt&&boost<.04)root.dataset.fxLivingEnergyInteractionR168='idle-living';
 }
-function loop(now){raf=requestAnimationFrame(loop);if(document.hidden)return;if(!lastTickAt||now-lastTickAt>=30)tick();}
+function loop(now){
+  raf=requestAnimationFrame(loop);
+  if(document.hidden)return;
+  tick(now);
+}
 function armWatchdog(){
   if(watchdog)return;
   watchdog=setInterval(()=>{
     if(document.hidden||reduced.matches||root.dataset.fxReferenceMotionPaused==='true')return;
     const now=performance.now();
-    if(!lastTickAt||now-lastTickAt>=120)tick();
-  },96);
-  root.dataset.fxLivingEnergyWatchdogR182='96ms-stall-fallback';
+    if(!lastTickAt||now-lastTickAt>=150)tick(now);
+  },120);
+  root.dataset.fxLivingEnergyWatchdogR182='120ms-stall-fallback-r183';
 }
 function start(){
   if(!ensure())return;
-  if(!raf){last=performance.now();lastTickAt=0;tick();raf=requestAnimationFrame(loop);}
+  if(!raf){last=performance.now();lastTickAt=0;tick(last);raf=requestAnimationFrame(loop);}
   armWatchdog();
   root.dataset.fxLivingEnergyClockR168=CLOCK;
-  root.dataset.fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms';
-  root.dataset.fxLivingEnergySchedulerR182='raf-primary-watchdog-fallback';
+  root.dataset.fxLivingEnergySchedulerR175='requestAnimationFrame-display-synced-r183';
+  root.dataset.fxLivingEnergySchedulerR182='raf-primary-watchdog-fallback-r183';
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!raf||!watchdog)start();});mo.observe(document.documentElement,{childList:true,subtree:true});
