@@ -1,5 +1,8 @@
 name: Verify r179 SOTY continuity
 on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/verify-r179-soty-continuity.yml']
   workflow_run:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
@@ -9,7 +12,7 @@ permissions:
 jobs:
   cross-device-soty:
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -28,25 +31,31 @@ jobs:
           const origin='https://formatxsuite.com';
           async function state(page){return page.evaluate(()=>{const r=document.documentElement,d=(k)=>r.dataset[k]||'';return{ready:d('fxSotyContinuityR179'),version:d('fxSotyVersionR179'),mode:d('fxSotyModeR179'),active:d('fxSotyActiveOrganR179'),scheduler:d('fxSotySchedulerR179'),frame:Number(d('fxSotyFrameR179')||0),energy:Number(d('fxSotyEnergyR179')||0),pointer:d('fxSotyPointerR179'),system:d('fxSotySystemR179'),field:document.querySelectorAll('#main-content>.fx-r179-field').length,sigils:document.querySelectorAll('.fx-r179-organ-sigil').length,surfaces:document.querySelectorAll('[data-fx-r179-surface="ready"] .fx-r179-surface-light').length,mainOverflow:getComputedStyle(document.getElementById('main-content')).overflow,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth}})}
           async function waitReady(page){await page.waitForFunction(()=>document.documentElement.dataset.fxSotyContinuityR179==='ready'&&document.documentElement.dataset.fxSotyVersionR179==='r179-soty-organ-field-continuity'&&Number(document.documentElement.dataset.fxSotyFrameR179||0)>2,null,{timeout:60000})}
+          async function focusChapter(page,id,organ){
+            await page.evaluate(id=>{const el=document.getElementById(id);if(!el)throw new Error('missing section '+id);document.documentElement.style.scrollBehavior='auto';const y=window.scrollY+el.getBoundingClientRect().top-window.innerHeight*.20;window.scrollTo(0,Math.max(0,y));},id);
+            await page.waitForFunction(expected=>document.documentElement.dataset.fxSotyActiveOrganR179===expected,organ,{timeout:10000});
+            await page.waitForTimeout(120);
+            const s=await state(page);assert.equal(s.ready,'ready');assert.equal(s.active,organ,`${id} did not become active`);assert.ok(s.overflow<=2,`${id} overflow ${s.overflow}`);return s;
+          }
           async function desktop(browser){
             const context=await browser.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'});const page=await context.newPage();page.setDefaultTimeout(60000);
-            await page.goto(`${origin}/?verify=r179b-desktop-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});await waitReady(page);let a=await state(page);
+            await page.goto(`${origin}/?verify=r179c-desktop-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});await waitReady(page);let a=await state(page);
             assert.equal(a.ready,'ready');assert.equal(a.version,'r179-soty-organ-field-continuity');assert.ok(a.mode.startsWith('desktop-'));assert.equal(a.field,1);assert.ok(a.sigils>=5);assert.ok(a.surfaces>=4);assert.ok(a.mainOverflow.includes('clip'),`main r179 clipping inactive: ${a.mainOverflow}`);assert.ok(a.overflow<=2,`desktop overflow ${a.overflow}`);assert.ok(a.system.includes('core-nerves-organs-heart-skeleton-beacon'));assert.ok(a.frame>2);
             const hero=await page.locator('#hero').boundingBox();if(hero){await page.mouse.move(hero.x+hero.width*.70,hero.y+hero.height*.42);await page.mouse.down();await page.waitForTimeout(90);await page.mouse.up();}
             await page.waitForTimeout(180);const b=await state(page);assert.ok(b.frame>a.frame);assert.ok(b.pointer!==a.pointer||b.energy>a.energy);
-            for(const [id,organ] of [['experience','experience'],['capabilities','capabilities'],['pricing','pricing'],['system','system'],['resources','resources']]){await page.locator('#'+id).scrollIntoViewIfNeeded();await page.waitForTimeout(260);const s=await state(page);assert.equal(s.ready,'ready');assert.equal(s.active,organ,`${id} did not become active`);assert.ok(s.overflow<=2);}
+            for(const [id,organ] of [['experience','experience'],['capabilities','capabilities'],['pricing','pricing'],['system','system'],['resources','resources']])await focusChapter(page,id,organ);
             await page.screenshot({path:'/tmp/r179-desktop.png',fullPage:false,animations:'disabled',timeout:120000});await context.close();
           }
           async function mobile(browser){
             const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});const page=await context.newPage();page.setDefaultTimeout(60000);
-            await page.goto(`${origin}/?verify=r179b-mobile-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});await waitReady(page);let a=await state(page);
+            await page.goto(`${origin}/?verify=r179c-mobile-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});await waitReady(page);let a=await state(page);
             assert.equal(a.ready,'ready');assert.equal(a.version,'r179-soty-organ-field-continuity');assert.ok(a.mode.startsWith('mobile-'));assert.equal(a.scheduler,'raf-30fps-balanced');assert.equal(a.field,1);assert.ok(a.sigils>=5);assert.ok(a.mainOverflow.includes('clip'),`mobile main clipping inactive: ${a.mainOverflow}`);assert.ok(a.overflow<=2,`mobile overflow ${a.overflow}`);
             await page.touchscreen.tap(292,304);await page.waitForTimeout(180);let b=await state(page);assert.ok(b.frame>a.frame);assert.ok(b.pointer!==a.pointer||b.energy>=a.energy);
-            await page.locator('#pricing').scrollIntoViewIfNeeded();await page.waitForTimeout(300);b=await state(page);assert.equal(b.active,'pricing');assert.ok(b.overflow<=2);
-            await page.locator('#resources').scrollIntoViewIfNeeded();await page.waitForTimeout(300);b=await state(page);assert.equal(b.active,'resources');assert.ok(b.overflow<=2);
+            await focusChapter(page,'pricing','pricing');
+            await focusChapter(page,'resources','resources');
             await page.screenshot({path:'/tmp/r179-mobile.png',fullPage:false,animations:'disabled',timeout:120000});await context.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await desktop(browser);await mobile(browser)}finally{await browser.close()}for(const f of ['/tmp/r179-desktop.png','/tmp/r179-mobile.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS: r179b continuous organ-field is live, CSS-active, adaptive and interactive on desktop and mobile.')})().catch(e=>{console.error(e);process.exit(1)});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await desktop(browser);await mobile(browser)}finally{await browser.close()}for(const f of ['/tmp/r179-desktop.png','/tmp/r179-mobile.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS: r179c continuous organ-field is live, CSS-active, adaptive and interactive on desktop and mobile.')})().catch(e=>{console.error(e);process.exit(1)});
           JS
           node verify-r179.cjs
       - uses: actions/upload-artifact@v4
