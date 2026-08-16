@@ -1,10 +1,11 @@
 FormatX production deployment marker
-requested_at=2026-08-16T12:27:30+02:00
-source_master=15e492057a1a588452a694738c858443b15c1a40
-purpose=activate the combined r179b SOTY continuity system and r180b self-healing mobile UI guard without changing the approved MAG geometry or size
-soty_state=keep data-fx-soty-continuity-r179=ready stable so the full r179 CSS remains active; expose r179-soty-organ-field-continuity separately through data-fx-soty-version-r179 for runtime/CI identity
-visual=keep one continuous living energy field from MAG through nervous system, organs, commerce heart, skeleton and beacon; maintain chapter-specific sigils, atmospheric overlap, surface light and the existing r158/r168 MAG heartbeat/optics
-mobile=preserve r180b self-healing header/control/proof layout, touch and r144 gyro; r179 stays adaptive with compositor-only 30fps mobile-balanced/mobile-lite scheduling and reduced expensive blur
-performance=no second WebGL context; r179 skips in Lighthouse mode, respects prefers-reduced-motion and uses transform/opacity/filter/gradients only
-layout=restore active main/section overflow clipping from the r179 CSS state contract so decorative offscreen transforms cannot create horizontal page scroll while in-viewport cinematic effects remain visible
-verification=production candidate runtime/security/JavaScript/Worker/build/custom-domain smoke plus r179b 1600x1000 desktop and 390x844 mobile continuity/interactivity/overflow/adaptive-budget screenshots and r180b mobile self-healing regression
+requested_at=2026-08-16T12:34:00+02:00
+source_master=96aaa1fee1209b60228bff0043acc8a5747bde84
+purpose=activate r180c source-owned mobile UI flow while preserving the approved MAG geometry, size, r179b SOTY continuity, r158 heartbeat, r168 optics and r144 interaction stack
+mobile_header=flow now owns final coordinates: brand top 17px height 34px; MAG top 14px size 48x40; HU top 14px size 40x40; menu top 8px size 48x52; all optical centers align at 34px
+hero_controls=flow now owns rail top 18px and gap 24px; ASK and pause are 50x50; KERDEZZ/ASK label top 55px with a dedicated safe lane and no pause overlap
+proof=at <=400px flow owns full-width proof copy with padding-right 0 and normal wrapping; Live OS uses top auto, right 16px, bottom 18px, size 78x54 in its own CTA lane
+cache=public bootstrap URL is bumped to r180c and the internal flow asset uses v=20260816-mobile-ui-r180c; temporary r180b mutation-observer script is removed from the page
+continuity=retain r179b living organ field, smooth carrier seam and reduced mobile orbit dominance so the MAG remains integrated with the page
+interaction=preserve lub-dub heartbeat, pointer/touch, mobile gyro, pause and prefers-reduced-motion; do not alter crystal silhouette or accepted scale
+verification=source/runtime/security validation; JS syntax; Worker tests; build; custom-domain smoke; 390x844 post-delay and post-resize source-flow geometry, labels, proof/Live OS separation, seam, orbit, render budget and screenshot
