@@ -1,0 +1,44 @@
+name: One-shot publish r179 SOTY continuity
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r179-soty-publish.yml']
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Validate and publish r179 continuity assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-soty-continuity-r179.js
+          grep -q 'continuous SOTY organ-field system' docs/scifi-ui/styles/formatx-soty-continuity-r179.css
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/index.html')
+          s=p.read_text()
+          css='  <link rel="stylesheet" data-fx-soty-continuity-r179="true" href="./styles/formatx-soty-continuity-r179.css?v=20260816-r179-organ-field">\n'
+          js='  <script defer data-fx-soty-continuity-r179="true" src="./scripts/formatx-soty-continuity-r179.js?v=20260816-r179-adaptive-continuity"></script>\n'
+          anchor_css='  <link rel="stylesheet" data-fx-award-narrative-r175="true" href="./styles/formatx-award-narrative-r175.css?v=20260816-r175-award-narrative">\n'
+          anchor_js='  <script defer data-fx-award-narrative-r175="true" src="./scripts/formatx-award-narrative-r175.js?v=20260816-r175-award-narrative"></script>\n'
+          if 'data-fx-soty-continuity-r179="true" href=' not in s:
+              if anchor_css not in s: raise SystemExit('r175 CSS anchor missing')
+              s=s.replace(anchor_css,anchor_css+css,1)
+          if 'data-fx-soty-continuity-r179="true" src=' not in s:
+              if anchor_js not in s: raise SystemExit('r175 JS anchor missing')
+              s=s.replace(anchor_js,anchor_js+js,1)
+          p.write_text(s)
+          PY
+          grep -q 'formatx-soty-continuity-r179.css?v=20260816-r179-organ-field' docs/scifi-ui/index.html
+          grep -q 'formatx-soty-continuity-r179.js?v=20260816-r179-adaptive-continuity' docs/scifi-ui/index.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html
+          if git diff --cached --quiet; then echo 'r179 already published'; exit 0; fi
+          git commit -m '[deploy-production] feat(soty): publish r179 continuous organ-field experience'
+          git push origin HEAD:master
