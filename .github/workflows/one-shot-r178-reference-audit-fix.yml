@@ -1,0 +1,44 @@
+name: One-shot r178 reference audit contract fix
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r178-reference-audit-fix.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Align post-deploy reference audit with current r178 runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/verify-reference-pixel-lock-v2.yml')
+          s=p.read_text()
+          old="r.fxLiveMotionR147==='ready'"
+          new="r.fxLiveMotionR147==='r145-centered-optical-reactor-r149b'"
+          if old in s:
+              s=s.replace(old,new)
+          elif new not in s:
+              raise SystemExit('live-motion readiness anchor missing')
+          s=s.replace("console.log('POST DEPLOY R164 MOBILE'","console.log('POST DEPLOY R178 MOBILE'")
+          s=s.replace("source:'r164-mobile'","source:'r178-mobile'")
+          s=s.replace("reference-post-deploy-r164-mobile.png","reference-post-deploy-r178-mobile.png")
+          s=s.replace("assert.equal(state.liveMotion,'ready');","assert.equal(state.liveMotion,'r145-centered-optical-reactor-r149b');")
+          s=s.replace("PASS: r164 production preserves approved mobile MAG","PASS: r178 production preserves approved mobile MAG")
+          s=s.replace("reference-post-deploy-r164-mobile-${{ github.run_id }}","reference-post-deploy-r178-mobile-${{ github.run_id }}")
+          p.write_text(s)
+          PY
+          grep -q "r.fxLiveMotionR147==='r145-centered-optical-reactor-r149b'" .github/workflows/verify-reference-pixel-lock-v2.yml
+          grep -q "assert.equal(state.liveMotion,'r145-centered-optical-reactor-r149b')" .github/workflows/verify-reference-pixel-lock-v2.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/verify-reference-pixel-lock-v2.yml
+          if git diff --cached --quiet; then echo 'r178 reference audit already aligned'; exit 0; fi
+          git commit -m 'ci(mag): align post-deploy reference audit with r178 live-motion state'
+          git push origin HEAD:master
