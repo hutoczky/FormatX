@@ -1,4 +1,4 @@
-name: One-shot publish r185 iconic MAG system
+name: One-shot publish r185b real MAG hit layer
 on:
   push:
     branches: [master]
@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Publish r185 signature assets with fresh site cache
+      - name: Publish r185b hit-tested MAG layer with fresh site cache
         shell: bash
         run: |
           set -euo pipefail
@@ -22,18 +22,21 @@ jobs:
           from pathlib import Path
           import re
 
+          style=Path('docs/scifi-ui/styles/formatx-signature-system-r185.css')
+          s=style.read_text()
+          s=s.replace('#hero .hero-space{position:relative}\n#hero .fx-signature-core-trigger{','#hero{position:relative}\n#hero>.fx-signature-core-trigger{')
+          old='position:absolute;z-index:44;border:0;background:transparent;color:transparent;padding:0;margin:0;\n  min-width:44px;min-height:44px;cursor:pointer;border-radius:50%;touch-action:manipulation;\n  -webkit-tap-highlight-color:transparent;'
+          new='position:absolute;z-index:420;pointer-events:auto!important;isolation:isolate;border:0;background:transparent;color:transparent;padding:0;margin:0;\n  min-width:44px;min-height:44px;cursor:pointer;border-radius:50%;touch-action:manipulation;\n  clip-path:polygon(50% 1%,64% 31%,99% 50%,64% 69%,50% 99%,36% 69%,1% 50%,36% 31%);\n  -webkit-tap-highlight-color:transparent;'
+          if old in s:s=s.replace(old,new,1)
+          elif 'z-index:420' not in s:raise SystemExit('signature trigger property anchor not found')
+          s=s.replace('#hero .fx-signature-core-trigger','#hero>.fx-signature-core-trigger')
+          style.write_text(s)
+
           index=Path('docs/scifi-ui/index.html')
           html=index.read_text()
-          css='  <link rel="stylesheet" data-fx-signature-system-r185="true" href="./styles/formatx-signature-system-r185.css?v=20260816-iconic-mag-r185">\n'
-          js='  <script defer data-fx-signature-system-r185="true" src="./scripts/formatx-signature-system-r185.js?v=20260816-iconic-mag-r185"></script>\n'
-          if 'formatx-signature-system-r185.css' not in html:
-              anchor=re.search(r'(^\s*<link rel="stylesheet" data-fx-core-real3d="true"[^\n]+\n)',html,re.M)
-              if not anchor: raise SystemExit('core real3d stylesheet anchor not found')
-              html=html[:anchor.end()]+css+html[anchor.end():]
-          if 'formatx-signature-system-r185.js' not in html:
-              anchor=re.search(r'(^\s*<script defer data-fx-live-heartbeat-r155="true"[^\n]+</script>\n)',html,re.M)
-              if not anchor: raise SystemExit('heartbeat script anchor not found')
-              html=html[:anchor.end()]+js+html[anchor.end():]
+          html,n1=re.subn(r'formatx-signature-system-r185\.css\?v=[^"\']+','formatx-signature-system-r185.css?v=20260816-iconic-mag-r185b-hitlayer',html,count=1)
+          html,n2=re.subn(r'formatx-signature-system-r185\.js\?v=[^"\']+','formatx-signature-system-r185.js?v=20260816-iconic-mag-r185b-hitlayer',html,count=1)
+          if n1!=1 or n2!=1:raise SystemExit(f'signature asset cache anchors missing css={n1} js={n2}')
           index.write_text(html)
           PY
           node --check docs/scifi-ui/scripts/formatx-signature-system-r185.js
@@ -41,9 +44,9 @@ jobs:
           node .github/scripts/validate-user-requested-site-features.cjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html
-          if git diff --cached --quiet; then echo 'r185 signature assets already current'; exit 0; fi
-          git commit -m '[deploy-production] feat(signature): publish r185 iconic MAG assets'
+          git add docs/scifi-ui/styles/formatx-signature-system-r185.css docs/scifi-ui/index.html
+          if git diff --cached --quiet; then echo 'r185b hit layer already current'; exit 0; fi
+          git commit -m '[deploy-production] fix(signature): publish r185b real MAG hit layer'
           for attempt in 1 2 3; do
             if git push origin HEAD:master; then exit 0; fi
             git pull --rebase origin master
