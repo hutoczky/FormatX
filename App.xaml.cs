@@ -52,6 +52,7 @@ namespace FormatX
 
       // Product/web visual continuity: the same living MAG used by the public site
       // appears as a small interactive system-state control in the app title region.
+      // Keep this attach path independent of operational services: identity UI must never block launch.
       SignatureMagController.Attach(_window);
       _window.Activate();
     }
