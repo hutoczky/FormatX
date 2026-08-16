@@ -122,5 +122,8 @@ assert.ok(mobileEntry.includes('mobile-core-engine-v3.js') && includesAll(morphE
 assert.ok(includesAll(productionEntry, ['formatx-infinite-scroll.js', 'organism-interface.js', 'formatx-premium-finish.js']), 'critical production assets missing');
 assert.ok(deployWorkflow.includes('needs: validate') && deployWorkflow.includes('npx wrangler deploy'), 'production deploy must depend on validation');
 
+// The iconic MAG is a first-class requested feature and therefore part of the
+// same production gate as scrolling, downloads and the public operating surface.
+require('./validate-signature-system-r185.cjs');
 require('./validate-igloo-floor.cjs');
-console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
+console.log('PASS: requested site features validated with shared seamless-v7 mobile/desktop scrolling, iconic r185 MAG identity, native mobile momentum, responsive UI, feedback, downloads, deferred rendering and production gates.');
