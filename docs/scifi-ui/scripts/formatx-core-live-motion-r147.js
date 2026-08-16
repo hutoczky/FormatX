@@ -208,7 +208,7 @@ function readMotionSource(now){
 
 function frame(now){
   raf=0;
-  applyLayout(false);
+  /* r184: animation never performs layout reconciliation. */
   if(!visible){raf=requestAnimationFrame(frame);return;}
   if(!host?.isConnected||!detail?.isConnected){if(!bind()){raf=requestAnimationFrame(frame);return;}}
   ensureLayer();
@@ -288,6 +288,20 @@ function boot(attempt=0){
   }
   const io=new IntersectionObserver(entries=>{visible=entries.some(e=>e.isIntersecting);if(visible)start();},{rootMargin:'220px'});
   io.observe(host);
+  /* r184: only real geometry changes may reconcile layout. */
+  let geometryTimer=0;
+  const scheduleGeometry=()=>{
+    clearTimeout(geometryTimer);
+    geometryTimer=setTimeout(()=>{
+      applyLayout(true);
+      syncLayerGeometry();
+      root.dataset.fxLiveLayoutSchedulerR184='resize-driven-stable';
+    },72);
+  };
+  const geometryObserver=new ResizeObserver(scheduleGeometry);
+  geometryObserver.observe(host);
+  if(detail instanceof HTMLElement)geometryObserver.observe(detail);
+  root.dataset.fxLiveLayoutSchedulerR184='resize-driven-stable';
   start();
 }
 
