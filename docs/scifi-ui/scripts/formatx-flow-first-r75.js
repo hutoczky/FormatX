@@ -11,9 +11,12 @@ function restoreDesktopMenu(){
  if(ref instanceof HTMLElement){ref.removeAttribute('id');imp(ref,'display','none');imp(ref,'visibility','hidden');imp(ref,'opacity','0');imp(ref,'pointer-events','none');}
  if(legacy instanceof HTMLButtonElement){legacy.id='menu-toggle';legacy.hidden=false;legacy.removeAttribute('aria-hidden');legacy.removeAttribute('tabindex');imp(legacy,'display','inline-flex');imp(legacy,'visibility','visible');imp(legacy,'opacity','1');imp(legacy,'pointer-events','auto');}
 }
+function clearInline(el,props){if(!(el instanceof HTMLElement))return;for(const prop of props)el.style.removeProperty(prop);}
+function restoreDesktopNative(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space'),copy=hero?.querySelector('.hero-copy'),bar=document.querySelector('.topbar');restoreDesktopMenu();clearInline(bar,['position','inset','top','right','bottom','left','display','align-items','flex-wrap','gap','padding']);clearInline(hero,['display','height','min-height','max-height','padding-top','overflow']);clearInline(grid,['position','display','flex-direction','grid-template-columns','grid-template-rows','align-items','width','max-width','height','min-height','gap','margin','padding','overflow']);clearInline(space,['position','inset','top','right','bottom','left','grid-area','grid-row','grid-column','transform','translate','order','align-self','margin','width','height','min-height','max-width']);clearInline(copy,['position','inset','top','right','bottom','left','order','align-self','display','grid-template-columns','grid-template-rows','align-content','row-gap','width','max-width','height','min-height','margin','padding','overflow','clip','clip-path','white-space','opacity','visibility']);root.dataset.fxReferenceComposition='desktop-native-r178';root.dataset.fxFlowFirstR75='desktop-bypass-r178';return true;}
 function apply(){
  queued=false;
  const mobile=innerWidth<=900;
+ if(!mobile)return restoreDesktopNative();
  const bar=document.querySelector('.topbar');
  if(bar instanceof HTMLElement){
   imp(bar,'position','relative');imp(bar,'inset','auto');imp(bar,'top','auto');imp(bar,'display','flex');imp(bar,'align-items','center');imp(bar,'flex-wrap','nowrap');

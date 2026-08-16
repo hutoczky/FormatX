@@ -11,7 +11,7 @@ if(root.dataset.fxMobileReferenceLayout==='booting-r74'||root.dataset.fxMobileRe
 root.dataset.fxMobileReferenceLayout='booting-r74';
 function loadStyles(){
  if(!document.querySelector('link[data-fx-mobile-reference-layout-style]')){const l=document.createElement('link');l.rel='stylesheet';l.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260816-mobile-only-r177';l.dataset.fxMobileReferenceLayoutStyle='true';document.head.appendChild(l)}
- if(!document.querySelector('link[data-fx-flow-first-r74]')){const f=document.createElement('link');f.rel='stylesheet';f.href='/scifi-ui/styles/formatx-flow-first-r74.css?v=20260814-mag-first-flow-r74';f.dataset.fxFlowFirstR74='true';document.head.appendChild(f)}
+ const existingFlow=document.querySelector('link[data-fx-flow-first-r74]');if(mobileViewport()){if(!existingFlow){const f=document.createElement('link');f.rel='stylesheet';f.href='/scifi-ui/styles/formatx-flow-first-r74.css?v=20260816-mobile-only-r178';f.dataset.fxFlowFirstR74='true';document.head.appendChild(f)}}else existingFlow?.remove();
  if(!document.querySelector('link[data-fx-responsive-text-guard]')){const g=document.createElement('link');g.rel='stylesheet';g.href='/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260813-responsive-text-wrap-r72';g.dataset.fxResponsiveTextGuard='true';document.head.appendChild(g)}
 }
 function pulse(){window.FormatXCoreMobileV69?.pulse?.()}
