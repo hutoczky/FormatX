@@ -1,11 +1,10 @@
 FormatX production deployment marker
-requested_at=2026-08-16T13:00:00+02:00
-source_master=a9ddf2dae7a53d39c48cc02cc22e7a72e3035128
-purpose=activate r181b desktop crystal apex pointer capture while preserving r179b whole-page SOTY continuity, r180c mobile source-owned layout and the approved MAG geometry/size
-hero_desktop=keep the r181 cinematic full-field crystal composition, large reference/WebGL MAG, secondary left telemetry copy and hidden legacy system-map/launch widgets
-interaction=move r181 desktop pointer tracking to capture phase on the full hero so canvas/detail/live-optics overlays cannot swallow pointermove or pointerdown; click/touch remains delegated to the existing core where applicable and r181 triggers the existing core pulse without adding another WebGL context
-webgl=preserve the existing r99 WebGL2 renderer, r158 heartbeat and r168 optics; native WebGL support layer remains visible under the reference crystal and responds through the shared interaction system
-mobile=r181b remains a strict mobile bypass; retain r180c mobile header/ASK/pause/proof flow, accepted crystal scale, touch and r144 gyro unchanged
-continuity=retain r179b core -> nervous system -> organs -> commerce heart -> skeleton -> beacon field and deterministic chapter activation
-performance=no new GPU context; capture listeners are passive, r181 remains Lighthouse-skipped and prefers-reduced-motion aware
-verification=production candidate source/runtime/security, JavaScript syntax, Worker tests, build and custom-domain smoke; r181b live gate must prove large desktop crystal, visible native WebGL, hidden legacy map, capture-phase pointer response, render budget and zero horizontal overflow, plus unchanged mobile reference composition
+requested_at=2026-08-16T13:51:00+02:00
+source_master=cf3c383108d1360d3d5c290b28efbe4f8982b079
+purpose=activate r182 idle living watchdog after production mobile capture proved the r168 optical frame could stall while touch and gyro interaction remained responsive
+runtime=keep requestAnimationFrame as the primary 30ms optical scheduler; add a 96ms watchdog that only calls the existing r168 tick when the primary frame clock has not advanced for at least 120ms
+visual=do not change approved MAG geometry, size, colors, material, WebGL renderer, proof layout, desktop r181b crystal apex or mobile r180c composition
+interaction=preserve pointer, touch and r144 gyro response; watchdog exists only to keep idle heartbeat, breathing, orbit and caustic animation alive
+accessibility=watchdog remains inactive for prefers-reduced-motion, explicit reference-pause and hidden documents
+performance=no additional WebGL context and no duplicate continuous render loop; fallback is conditional on a detected scheduler stall
+verification=production candidate validation, JavaScript syntax, Worker tests, build, custom-domain smoke, then post-deploy mobile capture must prove monotonically advancing idle r168 frame plus existing touch/gyro response, glError=0, render budget and zero proof overlap
