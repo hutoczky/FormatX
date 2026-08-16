@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r185-iconic-mag-architecture-unfold';
+const VERSION='r185b-iconic-mag-hitlayer-unfold';
 if(root.dataset.fxSignatureSystem===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxSignatureSystem='audit-skip';return;}
 root.dataset.fxSignatureSystem='booting';
@@ -16,7 +16,7 @@ const scenes=[
   {id:'resources',n:'06',hu:'JELADÓ',en:'BEACON',huSub:'Források és támogatás',enSub:'Resources and support'}
 ];
 let hero=null,host=null,visual=null,trigger=null,overlay=null,closeButton=null,nodeButtons=[],open=false,lastFocus=null,bodyOverflow='';
-let resizeRaf=0;
+let resizeRaf=0,interactionRaf=0,lastPointer=null;
 
 function lang(){
   const active=document.querySelector('.language-switch [data-language][aria-pressed="true"]');
@@ -42,7 +42,7 @@ function setText(){
 }
 
 function buildOverlay(){
-  if(document.querySelector('.fx-signature-architecture'))document.querySelector('.fx-signature-architecture').remove();
+  document.querySelector('.fx-signature-architecture')?.remove();
   overlay=document.createElement('div');
   overlay.className='fx-signature-architecture';
   overlay.setAttribute('role','dialog');
@@ -66,37 +66,63 @@ function buildOverlay(){
 
 function findVisual(){
   hero=document.getElementById('hero');host=hero?.querySelector('.hero-space');
-  if(!(host instanceof HTMLElement))return false;
+  if(!(hero instanceof HTMLElement)||!(host instanceof HTMLElement))return false;
   visual=host.querySelector('.fx-core-detail-r122,.fx-core-r112-canvas,.fx-core-mobile-v55-canvas,.fx-core-r112-stage,.fx-core-mobile-v55-stage');
   return visual instanceof HTMLElement;
 }
+function emitCoreInteraction(clientX,clientY,energy,source){
+  if(!(visual instanceof HTMLElement))return;
+  const r=visual.getBoundingClientRect();if(r.width<2||r.height<2)return;
+  const x=Math.max(-1,Math.min(1,((clientX-r.left)/r.width)*2-1));
+  const y=Math.max(-1,Math.min(1,((clientY-r.top)/r.height)*2-1));
+  try{dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{x,y,energy,source}}))}catch(_){}
+  root.dataset.fxSignaturePointer=`${x.toFixed(3)},${y.toFixed(3)},${energy.toFixed(2)}`;
+}
+function queuePointer(e){
+  if(open||!e)return;lastPointer={x:e.clientX,y:e.clientY,type:e.pointerType||'pointer'};
+  if(interactionRaf)return;
+  interactionRaf=requestAnimationFrame(()=>{
+    interactionRaf=0;if(!lastPointer)return;
+    emitCoreInteraction(lastPointer.x,lastPointer.y,.66,'signature-pointer-r185b');
+  });
+}
+function energizePointer(e){
+  if(e)emitCoreInteraction(e.clientX,e.clientY,1.24,'signature-press-r185b');
+  try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}
+}
 function ensureTrigger(){
   if(!findVisual())return false;
-  trigger=host.querySelector('.fx-signature-core-trigger');
+  trigger=hero.querySelector(':scope > .fx-signature-core-trigger');
   if(!(trigger instanceof HTMLButtonElement)){
+    hero.querySelectorAll('.fx-signature-core-trigger').forEach(n=>n.remove());
     trigger=document.createElement('button');trigger.type='button';trigger.className='fx-signature-core-trigger';
     trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-haspopup','dialog');
+    trigger.addEventListener('pointermove',queuePointer,{passive:true});
+    trigger.addEventListener('pointerdown',energizePointer,{passive:true});
     trigger.addEventListener('click',()=>open?closeArchitecture(true):openArchitecture());
-    host.appendChild(trigger);
+    hero.appendChild(trigger);
   }
   trigger.setAttribute('aria-label',t('FormatX MAG — teljes rendszerarchitektúra megnyitása','FormatX Core — open full system architecture'));
   setText();syncTrigger();return true;
 }
 function syncTrigger(){
-  if(!(host instanceof HTMLElement)||!(visual instanceof HTMLElement)||!(trigger instanceof HTMLElement))return;
-  const h=host.getBoundingClientRect(),v=visual.getBoundingClientRect();
+  if(!(hero instanceof HTMLElement)||!(visual instanceof HTMLElement)||!(trigger instanceof HTMLElement))return;
+  const h=hero.getBoundingClientRect(),v=visual.getBoundingClientRect();
   if(v.width<20||v.height<20)return;
-  const insetX=Math.max(0,v.width*.03),insetY=Math.max(0,v.height*.03);
+  /* Keep the hit target on the crystal silhouette, not on the whole square reference canvas.
+     This leaves neighbouring ASK/pause/CTA controls physically clickable. */
+  const insetX=Math.max(0,v.width*.085),insetY=Math.max(0,v.height*.045);
   trigger.style.left=(v.left-h.left+insetX).toFixed(2)+'px';
   trigger.style.top=(v.top-h.top+insetY).toFixed(2)+'px';
   trigger.style.width=Math.max(44,v.width-insetX*2).toFixed(2)+'px';
   trigger.style.height=Math.max(44,v.height-insetY*2).toFixed(2)+'px';
-  root.dataset.fxSignatureTrigger='synced';
+  const r=trigger.getBoundingClientRect();const hit=document.elementFromPoint(r.left+r.width*.5,r.top+r.height*.5);
+  root.dataset.fxSignatureTrigger=hit===trigger||trigger.contains(hit)?'synced-hit':'synced-obscured';
 }
 
 function pulseCore(){
   try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}
-  try{dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{x:0,y:0,energy:1.24,source:'signature-unfold-r185'}}))}catch(_){}
+  try{dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{x:0,y:0,energy:1.24,source:'signature-unfold-r185b'}}))}catch(_){}
 }
 function openArchitecture(){
   if(open||!overlay||!trigger)return;
@@ -154,10 +180,10 @@ function boot(attempt=0){
     root.dataset.fxSignatureSystem='visual-unavailable';return;
   }
   addEventListener('resize',onResize,{passive:true});addEventListener('scroll',updateCurrentScene,{passive:true});document.addEventListener('keydown',keydown);
-  const ro=new ResizeObserver(onResize);ro.observe(host);if(visual)ro.observe(visual);
+  const ro=new ResizeObserver(onResize);ro.observe(hero);ro.observe(host);if(visual)ro.observe(visual);
   const mo=new MutationObserver(()=>{setText();if(!trigger?.isConnected||!visual?.isConnected){findVisual();ensureTrigger()}});
   const language=document.querySelector('.language-switch');if(language)mo.observe(language,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});
-  updateCurrentScene();root.dataset.fxSignatureSystem=VERSION;root.dataset.fxSignatureUsability='touch-focus-reduced-motion-r185';
+  updateCurrentScene();syncTrigger();root.dataset.fxSignatureSystem=VERSION;root.dataset.fxSignatureUsability='touch-focus-reduced-motion-r185b';
   dispatchEvent(new CustomEvent('formatx:signatureready',{detail:{version:VERSION}}));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>boot(),{once:true});else boot();
