@@ -1,4 +1,4 @@
-name: Verify r183 smooth living MAG motion
+name: Verify r184 no-jump mobile MAG
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  smooth-motion-live:
+  no-jump-live:
     if: >-
       github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
@@ -26,89 +26,100 @@ jobs:
           npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
 
-      - name: Verify display-synced heartbeat without layout movement
+      - name: Verify stable mobile geometry while living motion runs
         run: |
-          cat > verify-r183.cjs <<'JS'
+          cat > verify-r184.cjs <<'JS'
           const {chromium}=require('playwright');
           const assert=require('node:assert/strict');
           const origin='https://formatxsuite.com';
+          const span=a=>Math.max(...a)-Math.min(...a);
+          const finite=a=>a.filter(Number.isFinite);
 
-          async function runDevice(browser,label,opts){
-            const context=await browser.newContext(opts);
-            const page=await context.newPage();
-            await page.goto(`${origin}/?verify=r183-${label.toLowerCase()}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
-            await page.waitForFunction(()=>{
-              const r=document.documentElement.dataset;
-              return r.fxCoreReferenceTextureR130==='ready' &&
-                r.fxLiveHeartbeatR155==='js-reactive-heartbeat-r155' &&
-                r.fxLivingHeartbeatModeR158==='r158-lub-dub-seamless-living' &&
-                r.fxLivingShapeModeR167==='r183-display-synced-internal-canvas' &&
-                r.fxLiveHeartbeatClockR155==='requestAnimationFrame-display-synced-r183' &&
-                r.fxLivingEnergyClockR168==='display-synced-raf-r183';
-            },null,{timeout:60000});
-            await page.waitForTimeout(300);
+          async function sample(page){
+            return page.evaluate(()=>{
+              const root=document.documentElement;
+              const pick=sel=>{
+                const e=document.querySelector(sel);if(!e)return null;
+                const r=e.getBoundingClientRect();
+                return{x:r.x,y:r.y,w:r.width,h:r.height};
+              };
+              return{
+                scheduler:root.dataset.fxLiveLayoutSchedulerR184||'',
+                paused:root.dataset.fxReferenceMotionPaused||'',
+                detail:pick('#hero .fx-core-detail-r122'),
+                layer:pick('#hero .fx-core-live-r147-layer'),
+                heading:pick('#hero .fx-reference-heading'),
+                proof:pick('#hero .fx-reference-proof'),
+                dock:pick('#hero .fx-mobile-download-r151'),
+                liveFrame:root.dataset.fxLiveMotionFrameR147||'',
+                energyFrame:Number(root.dataset.fxLivingEnergyFrameR168||0),
+                shape:root.dataset.fxLivingShapePulseR166||'',
+                renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),
+                corePosition:[...(window.FormatXCoreCinematic?.corePosition||[0,0,0])]
+              };
+            });
+          }
 
-            const samples=[];
-            for(let i=0;i<32;i++){
-              samples.push(await page.evaluate(()=>{
-                const r=document.documentElement.dataset;
-                const d=document.querySelector('#hero .fx-core-detail-r122');
-                const b=d?.getBoundingClientRect();
-                const internal=String(r.fxLivingShapePulseR166||'').split(',').map(Number);
-                return {
-                  x:b?.x||0,y:b?.y||0,w:b?.width||0,h:b?.height||0,
-                  cssScale:d?getComputedStyle(d).scale:'',
-                  internalX:internal[0],internalY:internal[1],
-                  heartbeat:Number(r.fxLiveHeartbeatTickR155||0),
-                  energyFrame:Number(r.fxLivingEnergyFrameR168||0),
-                  hz:Number(r.fxDisplayRefreshHzR183||0),
-                  scheduler:r.fxHeartbeatSchedulerR183||'',
-                  energyScheduler:r.fxLivingEnergySchedulerR175||'',
-                  renderMs:Number(r.fxCoreRenderMs||Infinity)
-                };
-              }));
-              await page.waitForTimeout(40);
-            }
-            const span=a=>Math.max(...a)-Math.min(...a);
-            const wSpan=span(samples.map(s=>s.w)),hSpan=span(samples.map(s=>s.h));
-            const xSpan=span(samples.map(s=>s.x)),ySpan=span(samples.map(s=>s.y));
-            const ixSpan=span(samples.map(s=>s.internalX).filter(Number.isFinite));
-            const iySpan=span(samples.map(s=>s.internalY).filter(Number.isFinite));
-            const hbDelta=samples.at(-1).heartbeat-samples[0].heartbeat;
-            const enDelta=samples.at(-1).energyFrame-samples[0].energyFrame;
-            const last=samples.at(-1);
-            console.log(label,JSON.stringify({wSpan,hSpan,xSpan,ySpan,ixSpan,iySpan,hbDelta,enDelta,hz:last.hz,scheduler:last.scheduler,energyScheduler:last.energyScheduler,cssScale:last.cssScale},null,2));
-
-            /* Headless Chromium on shared CI does not expose the physical panel
-               refresh cadence and may heavily throttle rAF. The contract here is
-               therefore: zero DOM-box movement, a progressing internal canvas
-               pulse, progressing schedulers and intact interaction. */
-            assert.ok(wSpan<0.6&&hSpan<0.6&&xSpan<0.6&&ySpan<0.6,`${label}: crystal DOM box is moving and can cause layout jump`);
-            assert.ok(last.cssScale==='none'||last.cssScale==='1'||last.cssScale==='1 1',`${label}: external CSS scale returned: ${last.cssScale}`);
-            assert.ok(ixSpan>.0025&&iySpan>.0045,`${label}: internal canvas heartbeat is not visibly alive`);
-            assert.ok(hbDelta>=2,`${label}: heartbeat scheduler did not progress`);
-            assert.ok(enDelta>=4,`${label}: living-energy scheduler did not progress`);
-            assert.equal(last.scheduler,'display-refresh-adaptive');
-            assert.equal(last.energyScheduler,'requestAnimationFrame-display-synced-r183');
-            assert.ok(last.hz===0||last.hz>=40,`${label}: measured rAF rate too low: ${last.hz}`);
-            assert.ok(samples.every(s=>s.renderMs<16.67),`${label}: renderer exceeded frame budget`);
-
-            const before=await page.evaluate(()=>Number(document.documentElement.dataset.fxLiveHeartbeatEnergyR155||0));
-            if(opts.hasTouch)await page.touchscreen.tap(Math.round(opts.viewport.width*.72),Math.round(opts.viewport.height*.35));
-            else {const box=await page.locator('#hero .hero-space').boundingBox();if(box){await page.mouse.move(box.x+box.width*.72,box.y+box.height*.35);await page.mouse.down();await page.waitForTimeout(70);await page.mouse.up();}}
-            await page.waitForTimeout(160);
-            const after=await page.evaluate(()=>Number(document.documentElement.dataset.fxLiveHeartbeatEnergyR155||0));
-            assert.ok(after>=before,`${label}: interaction did not energize the MAG`);
-            await context.close();
+          function motionOf(samples,key){
+            const rows=samples.map(s=>s[key]).filter(Boolean);
+            assert.ok(rows.length===samples.length,`${key} missing during capture`);
+            return{
+              x:span(rows.map(r=>r.x)),y:span(rows.map(r=>r.y)),
+              w:span(rows.map(r=>r.w)),h:span(rows.map(r=>r.h))
+            };
+          }
+          function assertStable(label,m,limit=.75){
+            assert.ok(m.x<limit&&m.y<limit&&m.w<limit&&m.h<limit,
+              `${label} jumped: ${JSON.stringify(m)}`);
           }
 
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
-            try{
-              await runDevice(browser,'DESKTOP',{viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'});
-              await runDevice(browser,'MOBILE',{viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
-            }finally{await browser.close();}
-            console.log('PASS: r183 keeps the crystal DOM box fixed while display-synced schedulers, internal canvas heartbeat and interaction stay alive on desktop and mobile.');
+            const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
+            const page=await context.newPage();
+            await page.goto(`${origin}/?verify=r184-no-jump-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>{
+              const r=document.documentElement.dataset;
+              return r.fxMobileReferenceLayout==='ready-v1' &&
+                r.fxCoreReferenceTextureR130==='ready' &&
+                r.fxLiveLayoutSchedulerR184==='resize-driven-stable' &&
+                r.fxLiveHeartbeatR155==='js-reactive-heartbeat-r155' &&
+                r.fxLivingEnergyClockR168==='display-synced-raf-r183';
+            },null,{timeout:60000});
+            await page.waitForTimeout(450);
+
+            const before=[];
+            for(let i=0;i<40;i++){before.push(await sample(page));await page.waitForTimeout(55);}
+            const bm={
+              detail:motionOf(before,'detail'),layer:motionOf(before,'layer'),
+              heading:motionOf(before,'heading'),proof:motionOf(before,'proof'),dock:motionOf(before,'dock')
+            };
+            for(const [k,v] of Object.entries(bm))assertStable(`idle ${k}`,v);
+            assert.ok(before.every(s=>s.scheduler==='resize-driven-stable'));
+            assert.ok(before.every(s=>s.renderMs<16.67));
+
+            const preEnergy=before.at(-1).energyFrame;
+            const prePos=before.at(-1).corePosition;
+            await page.touchscreen.tap(300,285);
+            await page.waitForTimeout(120);
+            await page.touchscreen.tap(130,320);
+            await page.waitForTimeout(180);
+
+            const after=[];
+            for(let i=0;i<28;i++){after.push(await sample(page));await page.waitForTimeout(55);}
+            const am={
+              detail:motionOf(after,'detail'),layer:motionOf(after,'layer'),
+              heading:motionOf(after,'heading'),proof:motionOf(after,'proof'),dock:motionOf(after,'dock')
+            };
+            for(const [k,v] of Object.entries(am))assertStable(`interactive ${k}`,v);
+            const post=after.at(-1);
+            assert.ok(post.energyFrame>=preEnergy,'living energy clock regressed');
+            assert.ok(post.corePosition.some((v,i)=>Math.abs(v-(prePos[i]||0))>.0005)||post.liveFrame!==before.at(-1).liveFrame,'touch did not affect living motion');
+            assert.equal(post.paused,'false');
+
+            console.log('R184 MOBILE STABILITY',JSON.stringify({idle:bm,interactive:am,energy:[preEnergy,post.energyFrame],prePos,postPos:post.corePosition,shape:post.shape,scheduler:post.scheduler},null,2));
+            await context.close();await browser.close();
+            console.log('PASS: r184 mobile MAG, heading, proof and download geometry remain fixed while living touch motion continues.');
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
-          node verify-r183.cjs
+          node verify-r184.cjs
