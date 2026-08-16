@@ -1,0 +1,186 @@
+/* r179 — mobile chrome / control polish.
+   Keeps the approved MAG geometry and animation untouched. This layer only
+   aligns mobile header controls, separates the hero action labels, restores a
+   readable proof card flow on narrow phones and softens the carrier seam. */
+
+@media (max-width:900px),(pointer:coarse){
+  /* One optical centreline for brand + MAG + language + menu. */
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar{
+    height:68px!important;
+    min-height:68px!important;
+    padding:4px 18px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar .brand{
+    top:17px!important;
+    height:34px!important;
+    align-items:center!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle{
+    top:14px!important;
+    bottom:auto!important;
+    height:40px!important;
+    min-height:40px!important;
+    margin:0!important;
+    padding:0!important;
+    display:grid!important;
+    place-items:center!important;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace!important;
+    font-size:10px!important;
+    font-weight:750!important;
+    line-height:1!important;
+    letter-spacing:.055em!important;
+    text-align:center!important;
+    text-transform:uppercase!important;
+    -webkit-font-smoothing:antialiased!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button{
+    width:48px!important;
+    min-width:48px!important;
+    border-radius:13px!important;
+    color:rgba(235,247,253,.91)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle{
+    width:40px!important;
+    min-width:40px!important;
+    border-radius:13px!important;
+    color:rgba(235,247,253,.91)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle::after{
+    right:5px!important;
+    bottom:5px!important;
+    width:3px!important;
+    height:3px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button{
+    top:8px!important;
+    width:48px!important;
+    min-width:48px!important;
+    height:52px!important;
+    min-height:52px!important;
+    border-radius:17px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button span{
+    left:13px!important;
+    height:1px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button span:first-child{top:20px!important;width:22px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button span:last-child{top:30px!important;width:15px!important}
+
+  /* Clear action stack: ASK label must live in the gap, not on the pause orb. */
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-rail{
+    top:18px!important;
+    right:6.7%!important;
+    gap:24px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-ask,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-pause{
+    width:50px!important;
+    min-width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
+    flex:0 0 50px!important;
+    border-color:rgba(139,198,226,.29)!important;
+    background:radial-gradient(circle at 50% 30%,rgba(16,36,53,.86),rgba(3,14,24,.91) 72%)!important;
+    box-shadow:inset 0 0 28px rgba(55,180,255,.045),0 10px 28px rgba(0,0,0,.14)!important;
+    backdrop-filter:blur(11px) saturate(118%)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-ask i{
+    width:26px!important;
+    height:22px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-ask span{
+    top:55px!important;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;
+    font-size:10px!important;
+    font-weight:700!important;
+    line-height:1!important;
+    letter-spacing:.055em!important;
+    color:rgba(233,241,248,.88)!important;
+    text-shadow:0 1px 10px rgba(0,0,0,.72)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-pause::before,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-pause::after{
+    height:12px!important;
+    width:2px!important;
+    background:#66ddff!important;
+    box-shadow:0 0 9px rgba(98,220,255,.52)!important;
+  }
+
+  /* Keep the cinematic orbit system alive, but prevent a giant cropped arc from
+     competing with the crystal on narrow screens. */
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-r168-orbit{
+    width:clamp(132px,40vw,180px)!important;
+    opacity:.10!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-r168-orbit-b{
+    width:clamp(116px,35vw,160px)!important;
+    opacity:.075!important;
+  }
+
+  /* r165 started the continuation strip almost black. Match the lower hero
+     atmosphere at the first pixel so the MAG does not end in a black bar. */
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space::after{
+    top:calc(100% - 1px)!important;
+    height:78px!important;
+    background:linear-gradient(180deg,#03172b 0%,#031426 20%,#031122 45%,#030f20 70%,#040d1e 100%)!important;
+    opacity:1!important;
+  }
+}
+
+/* On narrow phones the old safety rule reserved the right side of every text
+   line for Live OS, creating one/two-word lines. Reserve vertical space below
+   the copy instead; the CTA remains safely separated and fully tappable. */
+@media (max-width:400px){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-proof{
+    min-height:0!important;
+    padding-bottom:88px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-proof p{
+    width:100%!important;
+    max-width:100%!important;
+    padding-right:0!important;
+    overflow-wrap:normal!important;
+    word-break:normal!important;
+    text-wrap:pretty!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-liveos{
+    top:auto!important;
+    right:16px!important;
+    bottom:18px!important;
+    width:78px!important;
+    height:54px!important;
+  }
+}
+
+@media (max-width:360px){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar .brand{
+    left:14px!important;
+    gap:8px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar .brand strong{font-size:11px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar .brand small{font-size:6.5px!important}
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-ask,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-pause{
+    transition:none!important;
+  }
+}
