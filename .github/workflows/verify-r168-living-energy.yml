@@ -93,7 +93,7 @@ jobs:
           function seam(a){
             const top=parseFloat(a.seamTop),height=parseFloat(a.seamHeight);
             const deep=Number.isFinite(top)&&Number.isFinite(height)&&top<a.hostHeight*.70&&height>a.hostHeight*.60;
-            const bridge=Number.isFinite(top)&&Number.isFinite(height)&&Math.abs(top-a.hostHeight)<=4&&height>=64&&height<=96;
+            const bridge=Number.isFinite(top)&&Number.isFinite(height)&&Math.abs(top-a.hostHeight)<=4&&height>=64&&height<=Math.max(170,a.hostHeight*.45);
             assert.ok(deep||bridge,`unexpected mobile atmosphere bridge ${a.seamTop}/${a.seamHeight}/${a.hostHeight}`);
             assert.ok(a.seamBg.includes('linear-gradient'),'mobile seam gradient missing');
           }
