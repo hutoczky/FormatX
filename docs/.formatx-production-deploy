@@ -1,12 +1,11 @@
 FormatX production deployment marker
-requested_at=2026-08-16T12:54:30+02:00
-source_master=fd34a8378e22527fb7fea50bed437cc456261bce
-purpose=activate r181 desktop crystal apex on top of the already-live r179b whole-page SOTY continuity and r180c mobile source-owned layout without changing the approved MAG geometry or mobile size
-hero_desktop=replace the old desktop-native small system-map composition with a cinematic full-field living MAG composition; the existing crystal reference material and native WebGL surface occupy the visual center/right while the hero copy becomes secondary telemetry on the left
-webgl=keep the existing r99 WebGL2 geometry/shader/interactions authoritative; raise the native WebGL canvas from near-hidden desktop opacity to a visible supporting layer under the reference material so pointer-driven facet motion contributes to the scene rather than a static product-map feel
-reference=keep the approved reference crystal geometry and r157 material reconstruction; enlarge only its desktop composition footprint through stage/layout, not the object geometry
-legacy=hide the old hero labels, hero ring, organism-map and immersive-launch widget on desktop because they compete with the crystal focal scene; retain mobile MAG/ASK/pause/proof flow unchanged through r181 mobile bypass
-interaction=desktop pointer movement drives subtle field/parallax energy while existing r158 lub-dub heartbeat, r168 optics and WebGL interaction remain active; mobile keeps touch and r144 gyro unchanged
-continuity=preserve r179b core -> nervous system -> organs -> commerce heart -> skeleton -> beacon organ field and active chapter visuals; no second WebGL context
-performance=r181 skips in Lighthouse mode, uses the already-existing WebGL context plus compositor transforms/opacity/gradients and respects prefers-reduced-motion
-verification=production candidate source/runtime/security, JS syntax, Worker tests, build and custom-domain smoke; r181 live desktop gate asserts large crystal, visible native WebGL layer, old map hidden, pointer interaction, no horizontal overflow, render budget and screenshot; mobile gate asserts r181 bypass and unchanged accepted reference MAG/touch/gyro stack
+requested_at=2026-08-16T13:00:00+02:00
+source_master=a9ddf2dae7a53d39c48cc02cc22e7a72e3035128
+purpose=activate r181b desktop crystal apex pointer capture while preserving r179b whole-page SOTY continuity, r180c mobile source-owned layout and the approved MAG geometry/size
+hero_desktop=keep the r181 cinematic full-field crystal composition, large reference/WebGL MAG, secondary left telemetry copy and hidden legacy system-map/launch widgets
+interaction=move r181 desktop pointer tracking to capture phase on the full hero so canvas/detail/live-optics overlays cannot swallow pointermove or pointerdown; click/touch remains delegated to the existing core where applicable and r181 triggers the existing core pulse without adding another WebGL context
+webgl=preserve the existing r99 WebGL2 renderer, r158 heartbeat and r168 optics; native WebGL support layer remains visible under the reference crystal and responds through the shared interaction system
+mobile=r181b remains a strict mobile bypass; retain r180c mobile header/ASK/pause/proof flow, accepted crystal scale, touch and r144 gyro unchanged
+continuity=retain r179b core -> nervous system -> organs -> commerce heart -> skeleton -> beacon field and deterministic chapter activation
+performance=no new GPU context; capture listeners are passive, r181 remains Lighthouse-skipped and prefers-reduced-motion aware
+verification=production candidate source/runtime/security, JavaScript syntax, Worker tests, build and custom-domain smoke; r181b live gate must prove large desktop crystal, visible native WebGL, hidden legacy map, capture-phase pointer response, render budget and zero horizontal overflow, plus unchanged mobile reference composition
