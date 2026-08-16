@@ -1,4 +1,4 @@
-name: One-shot publish r183 display-synced motion
+name: One-shot publish r184 mobile layout stability
 on:
   push:
     branches: [master]
@@ -12,28 +12,50 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Publish r183 display-synced heartbeat and energy cache keys
+      - name: Remove frame-driven layout reconciliation and publish fresh cache
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('docs/scifi-ui/index.html')
-          s=p.read_text()
-          pairs={
-            'formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless&rev=20260815-r169-optics-led-micro-scale':
-              'formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless&rev=20260816-r183-display-sync',
-            'formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260816-r182-idle-watchdog':
-              'formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260816-r183-display-sync',
-          }
-          for old,new in pairs.items():
-            if old in s:s=s.replace(old,new)
-            elif new not in s:raise SystemExit(f'cache token not found: {old}')
-          p.write_text(s)
+
+          motion=Path('docs/scifi-ui/scripts/formatx-core-live-motion-r147.js')
+          s=motion.read_text()
+          old='''function frame(now){\n  raf=0;\n  applyLayout(false);\n  if(!visible){raf=requestAnimationFrame(frame);return;}'''
+          new='''function frame(now){\n  raf=0;\n  /* r184: animation never performs layout reconciliation. */\n  if(!visible){raf=requestAnimationFrame(frame);return;}'''
+          if old in s:
+              s=s.replace(old,new,1)
+          elif 'r184: animation never performs layout reconciliation' not in s:
+              raise SystemExit('frame layout anchor missing')
+
+          anchor='''  const io=new IntersectionObserver(entries=>{visible=entries.some(e=>e.isIntersecting);if(visible)start();},{rootMargin:'220px'});\n  io.observe(host);\n  start();\n}'''
+          replacement='''  const io=new IntersectionObserver(entries=>{visible=entries.some(e=>e.isIntersecting);if(visible)start();},{rootMargin:'220px'});\n  io.observe(host);\n  /* r184: only real geometry changes may reconcile layout. */\n  let geometryTimer=0;\n  const scheduleGeometry=()=>{\n    clearTimeout(geometryTimer);\n    geometryTimer=setTimeout(()=>{\n      applyLayout(true);\n      syncLayerGeometry();\n      root.dataset.fxLiveLayoutSchedulerR184='resize-driven-stable';\n    },72);\n  };\n  const geometryObserver=new ResizeObserver(scheduleGeometry);\n  geometryObserver.observe(host);\n  if(detail instanceof HTMLElement)geometryObserver.observe(detail);\n  root.dataset.fxLiveLayoutSchedulerR184='resize-driven-stable';\n  start();\n}'''
+          if anchor in s:
+              s=s.replace(anchor,replacement,1)
+          elif 'fxLiveLayoutSchedulerR184' not in s:
+              raise SystemExit('boot geometry anchor missing')
+          motion.write_text(s)
+
+          boot=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          b=boot.read_text()
+          old_script='/scifi-ui/scripts/formatx-core-live-motion-r147.js?v=20260815-centered-optics-safe-lane-r149b'
+          new_script='/scifi-ui/scripts/formatx-core-live-motion-r147.js?v=20260816-r184-resize-driven-stable'
+          if old_script in b:b=b.replace(old_script,new_script)
+          elif new_script not in b:raise SystemExit('live-motion bootstrap token missing')
+          boot.write_text(b)
+
+          index=Path('docs/scifi-ui/index.html')
+          h=index.read_text()
+          old_rev='formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260816-r180c-mobile-ui-flow'
+          new_rev='formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260816-r184-mobile-layout-stable'
+          if old_rev in h:h=h.replace(old_rev,new_rev,1)
+          elif new_rev not in h:raise SystemExit('index bootstrap cache token missing')
+          index.write_text(h)
           PY
+          node --check docs/scifi-ui/scripts/formatx-core-live-motion-r147.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html
-          if git diff --cached --quiet; then echo 'r183 cache already current'; exit 0; fi
-          git commit -m 'fix(mag): publish r183 display-synced motion cache'
+          git add docs/scifi-ui/scripts/formatx-core-live-motion-r147.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html
+          if git diff --cached --quiet; then echo 'r184 already current'; exit 0; fi
+          git commit -m 'fix(mobile): publish resize-driven stable MAG layout r184'
           git push origin HEAD:master
