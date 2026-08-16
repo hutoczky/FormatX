@@ -1,4 +1,5 @@
 name: One-shot r178 mobile-only flow controller
+# rerun: flow-style-contract-20260816
 on:
   push:
     branches: [master]
@@ -36,8 +37,6 @@ jobs:
           new_head="function clearInline(el,props){if(!(el instanceof HTMLElement))return;for(const prop of props)el.style.removeProperty(prop);}\nfunction restoreDesktopNative(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space'),copy=hero?.querySelector('.hero-copy'),bar=document.querySelector('.topbar');restoreDesktopMenu();clearInline(bar,['position','inset','top','right','bottom','left','display','align-items','flex-wrap','gap','padding']);clearInline(hero,['display','height','min-height','max-height','padding-top','overflow']);clearInline(grid,['position','display','flex-direction','grid-template-columns','grid-template-rows','align-items','width','max-width','height','min-height','gap','margin','padding','overflow']);clearInline(space,['position','inset','top','right','bottom','left','grid-area','grid-row','grid-column','transform','translate','order','align-self','margin','width','height','min-height','max-width']);clearInline(copy,['position','inset','top','right','bottom','left','order','align-self','display','grid-template-columns','grid-template-rows','align-content','row-gap','width','max-width','height','min-height','margin','padding','overflow','clip','clip-path','white-space','opacity','visibility']);root.dataset.fxReferenceComposition='desktop-native-r178';root.dataset.fxFlowFirstR75='desktop-bypass-r178';return true;}\nfunction apply(){\n queued=false;\n const mobile=innerWidth<=900;\n if(!mobile)return restoreDesktopNative();\n const bar=document.querySelector('.topbar');"
           if old_head in flow: flow=flow.replace(old_head,new_head,1)
           elif 'desktop-bypass-r178' not in flow: raise SystemExit('flow apply head anchor missing')
-          # The old desktop branch is now unreachable. Keep it temporarily for safe mobile->desktop cleanup compatibility,
-          # but its geometry cannot execute because of the early desktop return above.
           fp.write_text(flow)
 
           # C) Core bootstrap: do not even load flow controller on a fresh desktop.
@@ -64,9 +63,10 @@ jobs:
           vp=Path('.github/scripts/validate-real3d-core.cjs')
           v=vp.read_text()
           v=re.sub(r'formatx-flow-first-r75\.js\?v=[^\'\"]+', 'formatx-flow-first-r75.js?v=20260816-mobile-only-r178', v, count=1)
+          v=v.replace('formatx-flow-first-r74.css?v=20260814-mag-first-flow-r74','formatx-flow-first-r74.css?v=20260816-mobile-only-r178',1)
           v=v.replace("for(const token of ['const mobile=innerWidth<=900','award-reference-overlay-r139','desktop-native-content-r139','restoreDesktopMenu'])assert.ok(flow.includes(token));",
                       "for(const token of ['const mobile=innerWidth<=900','award-reference-overlay-r139','desktop-bypass-r178','restoreDesktopMenu','restoreDesktopNative'])assert.ok(flow.includes(token));",1)
-          if 'formatx-flow-first-r75.js?v=20260816-mobile-only-r178' not in v: raise SystemExit('real3d flow cache contract update failed')
+          if 'formatx-flow-first-r75.js?v=20260816-mobile-only-r178' not in v or 'formatx-flow-first-r74.css?v=20260816-mobile-only-r178' not in v: raise SystemExit('real3d flow contract update failed')
           vp.write_text(v)
           PY
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
