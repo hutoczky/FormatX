@@ -1,9 +1,10 @@
 FormatX production deployment marker
-requested_at=2026-08-16T12:06:00+02:00
-source_master=1219741ef9c07b03fb8f17551e8fe637ae61be60
-purpose=activate r179 SOTY continuity layer across the full FormatX living-system story without changing the approved MAG geometry or size
-visual=extend the MAG energy language through core -> nervous system -> organs -> commerce heart -> skeleton -> beacon; add one continuous viewport-scale carrier, chapter-specific living sigils, seamless atmospheric overlap and pointer-aware surface light so no chapter falls back to a generic product-page visual level
-mobile=adaptive mobile-balanced/mobile-lite rendering with a 30fps compositor budget, reduced blur and the same organ narrative; preserve the existing MAG-first mobile flow, touch interaction, r144 gyro response and proof/download order
-interaction=desktop pointer/mouse and mobile touch/gyro feed the same r179 energy field; chapter changes generate a short energy pulse; pricing uses a double heartbeat signature and resources emit a beacon wave; existing r158 heartbeat and r168 MAG optics remain authoritative
-performance=no second WebGL context; r179 uses compositor-friendly transform/opacity/filter and CSS gradients, skips in lighthouse mode, throttles mobile animation and respects prefers-reduced-motion
-verification=production candidate source/runtime/security validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; post-deploy r179 desktop 1600x1000 and mobile 390x844 organ-field/interactivity/overflow/adaptive-budget checks with screenshot artifacts
+requested_at=2026-08-16T12:19:00+02:00
+source_master=1fabd8598cef9d95401beb12c01030dc5b611ef0
+purpose=activate r180 mobile UI finalizer on top of the r179 SOTY continuity layer without changing the approved MAG geometry, size, living heartbeat or interaction
+mobile_ui=lock the mobile header to one optical centerline: brand center 34px, MAG 48x40 at top 14px, HU 40x40 at top 14px, menu 48x52 at top 8px; preserve localized MAG/CORE and HU/EN labels
+hero_controls=reserve a dedicated safe lane for the KERDEZZ/ASK label between the 50px ask control and the 50px pause control; prevent late r178 flow initialization from restoring the old 10px gap
+proof=keep narrow-phone proof copy full width with normal word wrapping and move Live OS into its own bottom CTA lane; do not allow the old 72px paragraph-side reservation to create one/two-word lines
+seam=retain the r179 smoother carrier transition and reduced mobile orbit dominance so the MAG remains part of the page rather than a separate panel
+interaction=preserve r158 lub-dub heartbeat, r168 living optics, desktop pointer interaction, mobile touch and r144 gyro response, pause behavior and prefers-reduced-motion
+verification=production candidate source/runtime/security validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; post-deploy 390x844 mobile control centerline, label collision, proof-flow, Live OS separation, seam and render-budget verification with screenshot artifact
