@@ -1,0 +1,80 @@
+name: Verify r179 mobile UI polish
+
+on:
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mobile-ui:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.62.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Verify 390px mobile controls, labels and proof flow
+        run: |
+          cat > verify-r179-mobile-ui.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
+            const page=await context.newPage();
+            page.setDefaultTimeout(90000);
+            await page.goto('https://formatxsuite.com/?verify_r179_mobile_ui='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.querySelector('link[data-fx-mobile-ui-polish-r179]'),null,{timeout:90000});
+            await page.waitForTimeout(700);
+            const state=await page.evaluate(()=>{
+              const q=s=>document.querySelector(s),box=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,cx:r.x+r.width/2,cy:r.y+r.height/2,b:r.bottom}};
+              const mag=q('.fx-reference-mag-button'),lang=q('.fx-language-toggle'),menu=q('.fx-reference-menu-button'),brand=q('.topbar .brand'),rail=q('#hero .fx-reference-rail'),ask=q('#hero .fx-reference-ask'),askLabel=q('#hero .fx-reference-ask span'),pause=q('#hero .fx-reference-pause'),proof=q('#hero .fx-reference-proof'),p=q('#hero .fx-reference-proof p'),live=q('#hero .fx-reference-liveos'),space=q('#hero .hero-space');
+              if(![mag,lang,menu,brand,rail,ask,askLabel,pause,proof,p,live,space].every(Boolean))throw new Error('r179 mobile UI nodes missing');
+              const cs=e=>getComputedStyle(e),pseudo=getComputedStyle(space,'::after');
+              return{
+                mag:box(mag),lang:box(lang),menu:box(menu),brand:box(brand),ask:box(ask),askLabel:box(askLabel),pause:box(pause),proof:box(proof),p:box(p),live:box(live),
+                magFont:cs(mag).fontSize,langFont:cs(lang).fontSize,askFont:cs(askLabel).fontSize,
+                pPaddingRight:cs(p).paddingRight,pWordBreak:cs(p).wordBreak,pOverflowWrap:cs(p).overflowWrap,
+                seamBackground:pseudo.backgroundImage,orbitOpacity:cs(q('#hero .fx-r168-orbit')||space).opacity,
+                magText:mag.textContent.trim(),langText:lang.textContent.trim(),askText:askLabel.textContent.trim(),
+                paused:document.documentElement.dataset.fxReferenceMotionPaused,renderMs:Number(document.documentElement.dataset.fxCoreRenderMs||Infinity)
+              };
+            });
+            console.log('R179 MOBILE UI',JSON.stringify(state,null,2));
+            assert.equal(state.magText,'MAG');assert.equal(state.langText,'HU');assert.equal(state.askText,'KÉRDEZZ');
+            assert.ok(Math.abs(state.mag.cy-state.lang.cy)<=1,`MAG/HU center mismatch ${state.mag.cy}/${state.lang.cy}`);
+            assert.ok(Math.abs(state.lang.cy-state.menu.cy)<=1,`HU/menu center mismatch ${state.lang.cy}/${state.menu.cy}`);
+            assert.ok(Math.abs(state.brand.cy-state.mag.cy)<=3,`brand/control center mismatch ${state.brand.cy}/${state.mag.cy}`);
+            assert.equal(state.mag.h,40);assert.equal(state.lang.h,40);assert.equal(state.menu.h,52);
+            assert.equal(state.magFont,'10px');assert.equal(state.langFont,'10px');assert.equal(state.askFont,'10px');
+            assert.ok(state.pause.y-state.ask.b>=20,`ASK/pause gap too small: ${state.pause.y-state.ask.b}`);
+            assert.ok(state.askLabel.b<=state.pause.y-4,`ASK label collides with pause: ${state.askLabel.b}/${state.pause.y}`);
+            assert.equal(state.pPaddingRight,'0px');
+            assert.ok(state.p.w>=state.proof.w-40,`proof copy still artificially narrow: ${state.p.w}/${state.proof.w}`);
+            assert.ok(state.live.y>=state.p.b+10,`Live OS overlaps proof copy: ${state.live.y}/${state.p.b}`);
+            assert.ok(state.seamBackground.includes('linear-gradient'));
+            assert.ok(state.renderMs<16.67);
+            await page.screenshot({path:'r179-mobile-ui.png',fullPage:false,animations:'allow',timeout:120000});
+            await browser.close();
+            assert.ok(fs.statSync('r179-mobile-ui.png').size>10000);
+            console.log('PASS: r179 mobile header/action labels, proof flow and carrier seam verified at 390x844.');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node verify-r179-mobile-ui.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r179-mobile-ui-${{ github.run_id }}
+          path: r179-mobile-ui.png
+          if-no-files-found: warn
+          retention-days: 14
