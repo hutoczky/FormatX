@@ -9,7 +9,7 @@ root.dataset.fxLivingEnergyR168='booting';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const gauss=(x,c,w)=>Math.exp(-Math.pow((x-c)/w,2));
-let host=null,layer=null,detail=null,boost=0,lastInput=0,timer=0,last=performance.now();
+let host=null,layer=null,detail=null,boost=0,lastInput=0,raf=0,last=performance.now(),lastTickAt=0;
 let pointerX=0,pointerY=0,burstAt=0,burstStrength=0,frameSeq=0;
 let orbitPhaseA=0,orbitPhaseB=0,causticPhaseA=0,causticPhaseB=0;
 
@@ -142,8 +142,9 @@ function tick(){
   root.dataset.fxLivingEnergyEffectModeR168='orbit-caustic-spectrum-shock-refraction';
   if(!burstAt&&boost<.04)root.dataset.fxLivingEnergyInteractionR168='idle-living';
 }
-function start(){if(!ensure())return;if(timer)return;last=performance.now();tick();timer=setInterval(tick,32);root.dataset.fxLivingEnergyClockR168=CLOCK;}
+function loop(now){raf=requestAnimationFrame(loop);if(document.hidden)return;if(!lastTickAt||now-lastTickAt>=30){lastTickAt=now;tick();}}
+function start(){if(!ensure())return;if(raf)return;last=performance.now();lastTickAt=0;tick();raf=requestAnimationFrame(loop);root.dataset.fxLivingEnergyClockR168=CLOCK;root.dataset.fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms';}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!timer)start();});mo.observe(document.documentElement,{childList:true,subtree:true});
+const mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!raf)start();});mo.observe(document.documentElement,{childList:true,subtree:true});
 addEventListener('pageshow',start,{passive:true});
 }());
