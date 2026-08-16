@@ -1,4 +1,5 @@
 using System;
+using FormatX.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
@@ -31,6 +32,7 @@ internal sealed class SignatureMagController
     private readonly DispatcherTimer _timer;
     private readonly TextBlock _flyoutState;
     private readonly ProgressBar? _progress;
+    private readonly bool _english;
     private double _time;
     private double _boost;
     private double _activity;
@@ -39,6 +41,7 @@ internal sealed class SignatureMagController
     {
         _window = window;
         _root = root;
+        _english = SettingsService.Current.Language.StartsWith("en", StringComparison.OrdinalIgnoreCase);
 
         _visual = new Grid
         {
@@ -124,19 +127,25 @@ internal sealed class SignatureMagController
         _button = new Button
         {
             Width = 46,
-            Height = 42,
-            Padding = new Thickness(4, 2, 4, 2),
+            Height = 46,
+            MinWidth = 46,
+            MinHeight = 46,
+            Padding = new Thickness(4),
             Margin = new Thickness(0, 0, 10, 0),
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Center,
             Background = Brush(0, 0, 0, 0),
             BorderBrush = Brush(38, 112, 228, 255),
             BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(21),
+            CornerRadius = new CornerRadius(23),
             Content = _visual
         };
-        AutomationProperties.SetName(_button, "FormatX MAG – rendszerállapot és rendszerarchitektúra");
-        ToolTipService.SetToolTip(_button, "FormatX MAG • Rendszerállapot • Kattints az architektúrához");
+        AutomationProperties.SetName(_button, _english
+            ? "FormatX Core – system state and architecture"
+            : "FormatX MAG – rendszerállapot és rendszerarchitektúra");
+        ToolTipService.SetToolTip(_button, _english
+            ? "FormatX Core • System state • Open architecture"
+            : "FormatX MAG • Rendszerállapot • Architektúra megnyitása");
         Grid.SetColumn(_button, 1);
         titleGrid.Children.Add(_button);
 
@@ -211,6 +220,7 @@ internal sealed class SignatureMagController
 
         string[] hu = { "MAG / ISO → USB", "IDEGRENDSZER / FORMÁZÁS", "SZERVEK / PARTÍCIÓK", "BIZTONSÁGI SZÍV / SECURE ERASE", "VÁZ / LEMEZ EGÉSZSÉG", "JELADÓ / BEÁLLÍTÁSOK" };
         string[] en = { "CORE / ISO → USB", "NERVOUS SYSTEM / FORMAT", "ORGANS / PARTITIONS", "SECURITY HEART / SECURE ERASE", "SKELETON / DISK HEALTH", "BEACON / SETTINGS" };
+        var labels = _english ? en : hu;
         for (var i = 0; i < 6; i++)
         {
             var index = i;
@@ -218,11 +228,11 @@ internal sealed class SignatureMagController
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 HorizontalContentAlignment = HorizontalAlignment.Left,
-                MinHeight = 42,
-                Padding = new Thickness(12, 7, 12, 7),
-                Content = $"0{i + 1}   {hu[i]}"
+                MinHeight = 44,
+                Padding = new Thickness(12, 8, 12, 8),
+                Content = $"0{i + 1}   {labels[i]}"
             };
-            AutomationProperties.SetName(b, en[i]);
+            AutomationProperties.SetName(b, $"{en[i]} / {hu[i]}");
             b.Click += (_, _) => Navigate(index);
             panel.Children.Add(b);
         }
