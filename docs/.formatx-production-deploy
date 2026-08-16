@@ -1,8 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-16T09:49:00+02:00
-source_master=8efddb21aa18e0487a622864dd4f445058b5d96b
-purpose=revalidate r178 after aligning the native WebGL mobile-startup validator with the current mobile-only flow stylesheet token and desktop removal contract
-visual=desktop remains on the native FormatX two-column hero; mobile <=900px keeps the approved MAG-first reference heading/proof flow; no visual geometry, material, heartbeat, accessibility or interaction change in this revalidation commit
-stability=validate that formatx-flow-first-r74.css is loaded only on mobile and removed on desktop while the existing r178 flow controller remains authoritative
-interaction=preserve desktop pointer/mouse interaction, mobile touch plus r144 gyro, r158 lub-dub heartbeat, r168 living optics and approved MAG geometry/size
-verification=production candidate, JavaScript syntax, Worker tests, build, custom-domain deploy, canonical smoke and post-deploy r178 live checks
+requested_at=2026-08-16T12:06:00+02:00
+source_master=1219741ef9c07b03fb8f17551e8fe637ae61be60
+purpose=activate r179 SOTY continuity layer across the full FormatX living-system story without changing the approved MAG geometry or size
+visual=extend the MAG energy language through core -> nervous system -> organs -> commerce heart -> skeleton -> beacon; add one continuous viewport-scale carrier, chapter-specific living sigils, seamless atmospheric overlap and pointer-aware surface light so no chapter falls back to a generic product-page visual level
+mobile=adaptive mobile-balanced/mobile-lite rendering with a 30fps compositor budget, reduced blur and the same organ narrative; preserve the existing MAG-first mobile flow, touch interaction, r144 gyro response and proof/download order
+interaction=desktop pointer/mouse and mobile touch/gyro feed the same r179 energy field; chapter changes generate a short energy pulse; pricing uses a double heartbeat signature and resources emit a beacon wave; existing r158 heartbeat and r168 MAG optics remain authoritative
+performance=no second WebGL context; r179 uses compositor-friendly transform/opacity/filter and CSS gradients, skips in lighthouse mode, throttles mobile animation and respects prefers-reduced-motion
+verification=production candidate source/runtime/security validation; JavaScript syntax; Worker tests; production build; custom-domain smoke; post-deploy r179 desktop 1600x1000 and mobile 390x844 organ-field/interactivity/overflow/adaptive-budget checks with screenshot artifacts
