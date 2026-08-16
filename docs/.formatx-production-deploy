@@ -1,9 +1,8 @@
 FormatX production deployment marker
-requested_at=2026-08-16T00:43:00+02:00
-source_master=8012db4bcd795c1d738d586cb2f57f5b6969c67a
-purpose=activate r173 lifecycle recovery for the existing r172/r168 optical MAG without changing approved crystal geometry, size, material tuning or layout
-runtime_fix=if the r168 deferred script starts before the live optical layer exists, the MutationObserver now calls start() when the layer/detail appears or the timer is absent, so the 32ms optical reactor clock cannot remain stuck after a late mount
-cache=publish fresh r168 asset revision 20260816-r173-late-layer-start so production browsers do not retain the pre-fix lifecycle script
-interaction=preserve desktop pointer/mouse, mobile touch, existing r144 gyroscope, lub-dub heartbeat, dual caustics, spectrum/refraction, orbit rings, sparks, interaction burst and reduced-motion behavior
-integration=preserve r172 priority mobile seam and transparent carrier; no geometry/CSS optical tuning changed in this deploy
-verification=production candidate source/runtime/security validation; JavaScript syntax; Worker/build/smoke; then r168/r172 desktop and mobile live verification requiring advancing optical frame/heartbeat state, pointer/touch response, mobile seam and screenshot capture
+requested_at=2026-08-16T02:56:42+02:00
+source_master=35aa158c31fead78d6fcf97e05066d01ae8933ff
+purpose=revalidate the existing r173 production MAG after the award-readiness CI cache-contract correction; no visual, geometry, material, layout or interaction tuning is changed
+runtime=preserve r173 late-layer r168 32ms clock recovery and the existing r172/r168 optical system
+cache=preserve production r173 asset revision 20260816-r173-late-layer-start; this marker only triggers a clean production validation/audit cycle
+interaction=preserve desktop pointer/mouse, mobile touch, r144 gyroscope, lub-dub heartbeat, dual caustics, spectrum/refraction, orbit rings, sparks, interaction burst and reduced-motion behavior
+verification=production candidate source/runtime/security validation; JavaScript syntax; Worker/build/smoke; live mobile Apex; live award-readiness using the corrected r173 r168 cache contract; relevant cross-device MAG checks
