@@ -1,0 +1,120 @@
+name: Verify r185 iconic MAG system
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'SignatureMagController.cs'
+      - 'App.xaml.cs'
+      - 'docs/scifi-ui/styles/formatx-signature-system-r185.css'
+      - 'docs/scifi-ui/scripts/formatx-signature-system-r185.js'
+      - '.github/scripts/validate-signature-system-r185.cjs'
+      - '.github/workflows/verify-r185-signature-system.yml'
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    if: >-
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Validate r185 signature source contract
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-signature-system-r185.js
+          node .github/scripts/validate-signature-system-r185.cjs
+
+  app-mag-build:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore WinUI application
+        run: dotnet restore FormatX.csproj -p:Platform=x64 -p:RuntimeIdentifier=win-x64
+      - name: Build application with signature MAG
+        run: dotnet build FormatX.csproj -c Release -p:Platform=x64 -p:RuntimeIdentifier=win-x64 --no-restore
+
+  live-web:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.62.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Verify signature moment, touch, focus and section quality
+        run: |
+          cat > verify-r185.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const assert=require('node:assert/strict');
+          const fs=require('node:fs');
+          const origin='https://formatxsuite.com';
+          async function inspect(page,label){
+            page.setDefaultTimeout(120000);
+            await page.goto(`${origin}/?verify=r185-${label}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxSignatureSystem==='r185-iconic-mag-architecture-unfold'&&document.documentElement.dataset.fxSignatureTrigger==='synced',null,{timeout:90000});
+            await page.waitForTimeout(400);
+            const base=await page.evaluate(()=>{
+              const root=document.documentElement,tr=document.querySelector('#hero .fx-signature-core-trigger'),visual=document.querySelector('#hero .fx-core-detail-r122,#hero .fx-core-r112-canvas,#hero .fx-core-mobile-v55-canvas'),scenes=[...document.querySelectorAll('main>.scene')];
+              const r=tr?.getBoundingClientRect(),v=visual?.getBoundingClientRect();
+              const visible=e=>{if(!e)return false;const s=getComputedStyle(e),b=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>.04&&b.width>2&&b.height>2};
+              const ctas=[...document.querySelectorAll('main a.button,main button')].filter(visible).map(e=>{const b=e.getBoundingClientRect();return[b.width,b.height]});
+              return{trigger:r?[r.x,r.y,r.width,r.height]:null,visual:v?[v.x,v.y,v.width,v.height]:null,scenes:scenes.length,premium:scenes.filter(s=>s.dataset.fxSignatureQuality==='r185').length,scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth,ctas,usability:root.dataset.fxSignatureUsability||''};
+            });
+            assert.ok(base.trigger&&base.visual,'signature trigger/visual missing');
+            assert.ok(base.trigger[2]>=44&&base.trigger[3]>=44,'MAG trigger too small');
+            assert.ok(base.scenes>=6&&base.premium===base.scenes,'every scene must carry r185 premium quality marker');
+            assert.ok(base.scrollWidth<=base.viewport+2,`horizontal overflow ${base.scrollWidth}/${base.viewport}`);
+            assert.equal(base.usability,'touch-focus-reduced-motion-r185');
+            assert.ok(base.ctas.every(([,h])=>h>=40),'visible main CTA below practical target height');
+            await page.locator('#hero .fx-signature-core-trigger').click({position:{x:Math.max(22,base.trigger[2]/2),y:Math.max(22,base.trigger[3]/2)}});
+            await page.waitForFunction(()=>document.documentElement.classList.contains('fx-signature-open'));
+            await page.waitForTimeout(220);
+            const opened=await page.evaluate(()=>{const o=document.querySelector('.fx-signature-architecture'),nodes=[...document.querySelectorAll('.fx-signature-node')],c=document.activeElement;return{hidden:o?.getAttribute('aria-hidden'),nodes:nodes.length,minNode:Math.min(...nodes.map(n=>n.getBoundingClientRect().height)),expanded:document.querySelector('#hero .fx-signature-core-trigger')?.getAttribute('aria-expanded'),focusClass:c?.className||'',bodyOverflow:document.body.style.overflow,moment:document.documentElement.dataset.fxSignatureMoment}});
+            assert.equal(opened.hidden,'false');assert.equal(opened.nodes,6);assert.ok(opened.minNode>=44);assert.equal(opened.expanded,'true');assert.equal(opened.bodyOverflow,'hidden');assert.equal(opened.moment,'unfolded');
+            await page.screenshot({path:`/tmp/r185-${label}-unfold.png`,fullPage:false,animations:'disabled',timeout:120000});
+            await page.keyboard.press('Escape');
+            await page.waitForFunction(()=>!document.documentElement.classList.contains('fx-signature-open'));
+            const closed=await page.evaluate(()=>({expanded:document.querySelector('#hero .fx-signature-core-trigger')?.getAttribute('aria-expanded'),overflow:document.body.style.overflow,moment:document.documentElement.dataset.fxSignatureMoment}));
+            assert.equal(closed.expanded,'false');assert.notEqual(closed.overflow,'hidden');assert.equal(closed.moment,'core');
+            return{base,opened,closed};
+          }
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            try{
+              const desktopContext=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'});
+              const desktop=await inspect(await desktopContext.newPage(),'desktop');await desktopContext.close();
+              const mobileContext=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
+              const mobile=await inspect(await mobileContext.newPage(),'mobile');await mobileContext.close();
+              console.log('R185 DESKTOP',JSON.stringify(desktop,null,2));console.log('R185 MOBILE',JSON.stringify(mobile,null,2));
+            }finally{await browser.close()}
+            for(const f of ['/tmp/r185-desktop-unfold.png','/tmp/r185-mobile-unfold.png'])assert.ok(fs.statSync(f).size>10000,f);
+            console.log('PASS: r185 iconic MAG signature moment, section quality and real touch/focus usability verified.');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node verify-r185.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r185-signature-${{ github.run_id }}
+          path: /tmp/r185-*-unfold.png
+          if-no-files-found: warn
+          retention-days: 14
