@@ -1,0 +1,149 @@
+/* FormatX r185 — iconic MAG signature system.
+   One visual language from hero to every section; no scroll-snap, no hover-only affordances.
+   The MAG keeps its approved geometry/size. This layer adds the single architecture-unfold moment,
+   accessibility/touch hardening and section-level finish without repainting the core renderer. */
+
+:root{
+  --fx-signature-cyan:#73efff;
+  --fx-signature-ice:#eaffff;
+  --fx-signature-violet:#a36bff;
+  --fx-signature-blue:#4268ff;
+  --fx-signature-ink:#010610;
+  --fx-signature-line:rgba(125,238,255,.18);
+  --fx-signature-focus:rgba(167,238,255,.92);
+}
+
+html{scroll-padding-top:82px}
+body.living-architecture{overflow-x:clip}
+main>.scene,main>.fx-category-deck{position:relative;isolation:isolate;scroll-margin-top:82px}
+
+/* Consistent premium rhythm below the hero. The aura has no hard rectangle, so sections remain one organism. */
+main>.scene:not(#hero)::before,main>.fx-category-deck::before{
+  content:"";position:absolute;z-index:-2;pointer-events:none;inset:-5rem max(-7vw,-96px);
+  background:
+    radial-gradient(ellipse at 18% 18%,rgba(47,206,255,.055),transparent 43%),
+    radial-gradient(ellipse at 84% 72%,rgba(142,76,255,.045),transparent 46%);
+  opacity:.9;
+}
+main>.scene:not(#hero)::after,main>.fx-category-deck::after{
+  content:"";position:absolute;left:6%;right:6%;top:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(105,232,255,.16) 27%,rgba(215,250,255,.22) 50%,rgba(151,85,255,.13) 73%,transparent);
+}
+
+.section-heading,.fx-category-deck>header{max-width:min(1120px,88vw)}
+.section-heading h2,.fx-category-deck h2{letter-spacing:-.035em;text-wrap:balance}
+.scene p,.fx-category-deck p{max-width:72ch}
+.scene .card,.scene article,.fx-category-deck article{transition:border-color .22s ease,background-color .22s ease,box-shadow .22s ease,transform .22s ease}
+
+/* Usability is an award surface, not an afterthought. */
+main a,main button,.topbar a,.topbar button{touch-action:manipulation;-webkit-tap-highlight-color:rgba(115,239,255,.16)}
+main .button,main button,.topbar button,.header-support,.header-buy{min-height:44px}
+main .button{display:inline-flex;align-items:center;justify-content:center;gap:.65rem;line-height:1.15;text-wrap:balance}
+:where(a,button,[tabindex]):focus-visible{outline:2px solid var(--fx-signature-focus)!important;outline-offset:4px!important;box-shadow:0 0 0 5px rgba(62,205,255,.12)!important}
+
+/* Entire MAG becomes the discoverable signature control while existing pointer/touch events keep bubbling to hero-space. */
+#hero .hero-space{position:relative}
+#hero .fx-signature-core-trigger{
+  position:absolute;z-index:44;border:0;background:transparent;color:transparent;padding:0;margin:0;
+  min-width:44px;min-height:44px;cursor:pointer;border-radius:50%;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+#hero .fx-signature-core-trigger::before{
+  content:"";position:absolute;left:50%;top:50%;width:23%;aspect-ratio:1;border-radius:50%;
+  transform:translate(-50%,-50%) scale(.76);border:1px solid rgba(194,252,255,.22);
+  box-shadow:0 0 18px rgba(83,231,255,.10),0 0 42px rgba(150,77,255,.06);
+  opacity:.36;transition:opacity .2s ease,transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease;
+}
+#hero .fx-signature-core-trigger::after{
+  content:attr(data-fx-hint);position:absolute;left:50%;bottom:7%;transform:translateX(-50%) translateY(6px);
+  color:rgba(217,250,255,.76);font-size:10px;font-weight:650;letter-spacing:.19em;white-space:nowrap;
+  opacity:0;transition:opacity .2s ease,transform .2s ease;text-shadow:0 0 12px rgba(64,225,255,.25);
+}
+@media (hover:hover) and (pointer:fine){
+  #hero .fx-signature-core-trigger:hover::before,#hero .fx-signature-core-trigger:focus-visible::before{
+    opacity:.82;transform:translate(-50%,-50%) scale(1);box-shadow:0 0 24px rgba(83,231,255,.25),0 0 58px rgba(150,77,255,.14)
+  }
+  #hero .fx-signature-core-trigger:hover::after,#hero .fx-signature-core-trigger:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0)}
+}
+
+/* Signature moment: one architecture unfold. No decorative carousel, no second hero. */
+.fx-signature-architecture{
+  --fx-origin-x:50vw;--fx-origin-y:50vh;
+  position:fixed;inset:0;z-index:1100;display:grid;place-items:center;visibility:hidden;pointer-events:none;
+  color:#eefeff;background:
+    radial-gradient(circle at var(--fx-origin-x) var(--fx-origin-y),rgba(54,222,255,.13),rgba(35,74,151,.08) 24%,rgba(12,20,45,.76) 57%,rgba(1,5,13,.96) 100%);
+  opacity:0;clip-path:circle(0 at var(--fx-origin-x) var(--fx-origin-y));
+  transition:clip-path .78s cubic-bezier(.16,.78,.18,1),opacity .32s ease,visibility 0s linear .8s;
+}
+html.fx-signature-open .fx-signature-architecture{visibility:visible;pointer-events:auto;opacity:1;clip-path:circle(150vmax at var(--fx-origin-x) var(--fx-origin-y));transition-delay:0s}
+.fx-signature-architecture::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.58;
+  background-image:linear-gradient(rgba(100,224,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(100,224,255,.022) 1px,transparent 1px);
+  background-size:54px 54px;mask-image:radial-gradient(circle at 50% 50%,#000,transparent 78%);
+}
+.fx-signature-map{
+  position:relative;width:min(1120px,94vw);height:min(760px,88dvh);min-height:520px;
+  display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));grid-template-rows:1fr 1fr;gap:clamp(56px,9vh,96px) clamp(80px,10vw,150px);
+  align-content:center;align-items:center;padding:clamp(64px,9vh,96px) clamp(28px,5vw,64px);
+}
+.fx-signature-map::before,.fx-signature-map::after{
+  content:"";position:absolute;left:50%;top:50%;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);
+}
+.fx-signature-map::before{width:min(33vw,390px);aspect-ratio:1;border:1px solid rgba(134,240,255,.18);box-shadow:0 0 70px rgba(55,210,255,.09),inset 0 0 70px rgba(142,73,255,.05)}
+.fx-signature-map::after{width:min(16vw,190px);aspect-ratio:1;border:1px solid rgba(232,255,255,.34);box-shadow:0 0 30px rgba(102,239,255,.2),0 0 80px rgba(154,80,255,.1)}
+.fx-signature-map-core{
+  position:absolute;left:50%;top:50%;width:74px;aspect-ratio:1;transform:translate(-50%,-50%) rotate(45deg);z-index:3;
+  background:linear-gradient(135deg,rgba(234,255,255,.94),rgba(72,225,255,.72) 38%,rgba(112,88,255,.58) 70%,rgba(210,107,255,.76));
+  clip-path:polygon(50% 0,64% 36%,100% 50%,64% 64%,50% 100%,36% 64%,0 50%,36% 36%);
+  filter:drop-shadow(0 0 9px rgba(191,253,255,.8)) drop-shadow(0 0 28px rgba(68,224,255,.45)) drop-shadow(0 0 46px rgba(151,77,255,.24));
+  animation:fx-signature-core-breathe 2.4s ease-in-out infinite;
+}
+.fx-signature-map-core::after{content:"";position:absolute;inset:34%;border-radius:50%;background:#f2ffff;box-shadow:0 0 12px #baf8ff,0 0 27px rgba(77,229,255,.75)}
+.fx-signature-node{
+  position:relative;z-index:5;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;text-align:left;
+  min-height:64px;padding:12px 14px;border:1px solid rgba(113,227,255,.16);border-radius:16px;
+  color:#eafcff;background:linear-gradient(135deg,rgba(9,30,48,.48),rgba(9,14,30,.30));backdrop-filter:blur(12px);
+  cursor:pointer;box-shadow:0 14px 42px rgba(0,0,0,.14);transition:transform .24s ease,border-color .24s ease,background .24s ease,box-shadow .24s ease;
+}
+.fx-signature-node b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font-size:10px;letter-spacing:.08em;color:var(--fx-signature-ice);border:1px solid rgba(134,239,255,.28);box-shadow:inset 0 0 16px rgba(69,222,255,.08)}
+.fx-signature-node span{display:block;font-size:12px;font-weight:700;letter-spacing:.13em}
+.fx-signature-node small{display:block;margin-top:3px;color:rgba(195,226,237,.62);font-size:10px;letter-spacing:.08em}
+.fx-signature-node[aria-current="true"]{border-color:rgba(135,240,255,.5);background:linear-gradient(135deg,rgba(18,57,77,.62),rgba(25,22,57,.46));box-shadow:0 0 34px rgba(62,216,255,.10)}
+@media (hover:hover) and (pointer:fine){.fx-signature-node:hover{transform:translateY(-3px);border-color:rgba(134,239,255,.42);box-shadow:0 18px 54px rgba(0,0,0,.18),0 0 30px rgba(70,222,255,.07)}}
+.fx-signature-close{
+  position:absolute;right:max(22px,env(safe-area-inset-right));top:max(18px,env(safe-area-inset-top));z-index:8;
+  width:48px;height:48px;border-radius:50%;border:1px solid rgba(138,235,255,.22);background:rgba(5,16,28,.52);color:#eaffff;font-size:22px;cursor:pointer;
+}
+.fx-signature-caption{position:absolute;left:50%;top:max(24px,env(safe-area-inset-top));transform:translateX(-50%);text-align:center;z-index:6}
+.fx-signature-caption strong{display:block;font-size:12px;letter-spacing:.24em}.fx-signature-caption span{display:block;margin-top:7px;font-size:11px;color:rgba(197,229,239,.62);letter-spacing:.09em}
+
+@keyframes fx-signature-core-breathe{0%,100%{transform:translate(-50%,-50%) rotate(45deg) scale(.94);filter:drop-shadow(0 0 8px rgba(191,253,255,.66)) drop-shadow(0 0 23px rgba(68,224,255,.32)) drop-shadow(0 0 38px rgba(151,77,255,.18))}50%{transform:translate(-50%,-50%) rotate(45deg) scale(1.05);filter:drop-shadow(0 0 12px rgba(220,255,255,.9)) drop-shadow(0 0 32px rgba(68,224,255,.48)) drop-shadow(0 0 52px rgba(151,77,255,.28))}}
+
+/* Mobile architecture is intentionally simple: 2 columns, large targets, zero hover dependency. */
+@media (max-width:900px),(pointer:coarse){
+  html{scroll-padding-top:68px}
+  main>.scene,main>.fx-category-deck{scroll-margin-top:68px}
+  .section-heading,.fx-category-deck>header{max-width:92vw}
+  .section-heading h2,.fx-category-deck h2{font-size:clamp(2rem,9.2vw,3.45rem);line-height:.98}
+  main .button,main button{min-height:46px}
+  .hero-actions{gap:10px!important}.hero-actions .button{width:100%;max-width:100%;white-space:normal!important}
+  .fx-signature-map{width:100vw;height:100dvh;min-height:0;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:12px;padding:max(88px,calc(env(safe-area-inset-top) + 72px)) 16px max(30px,env(safe-area-inset-bottom))}
+  .fx-signature-map::before{width:min(64vw,280px)}.fx-signature-map::after{width:min(33vw,136px)}
+  .fx-signature-map-core{width:58px}
+  .fx-signature-node{min-height:70px;padding:10px;border-radius:15px;backdrop-filter:blur(9px)}
+  .fx-signature-node b{width:32px;height:32px}.fx-signature-node span{font-size:10px;letter-spacing:.09em}.fx-signature-node small{font-size:9px}
+  #hero .fx-signature-core-trigger::after{display:none}
+}
+
+@media (max-width:430px){
+  main>.scene:not(#hero)::before,main>.fx-category-deck::before{inset:-3rem -12vw}
+  .fx-signature-caption{width:70vw}.fx-signature-caption span{font-size:10px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  *,*::before,*::after{scroll-behavior:auto!important}
+  .fx-signature-architecture{transition:none!important}
+  .fx-signature-map-core{animation:none!important}
+  .scene .card,.scene article,.fx-category-deck article{transition:none!important}
+}
