@@ -1,10 +1,10 @@
 FormatX production deployment marker
-requested_at=2026-08-16T14:28:00+02:00
-source_master=29bf4fd6bb116e22492fe0d30e311380052b4909
-purpose=activate r183 display-synced MAG motion on desktop and mobile; eliminate visible mobile jumping caused by the old 20 Hz heartbeat timer, 33 Hz living-energy throttle and external CSS scaling of the measured crystal canvas
-scheduler=heartbeat and living-energy now use requestAnimationFrame at the browser/display refresh cadence instead of fixed 50ms/30ms visual updates; frame-time math supports high-refresh panels without assuming a fake 250 Hz rate
-layout=the crystal DOM bounding box remains fixed at scale 1; four-tip heartbeat deformation stays inside the existing r166 canvas render so layout measurement cannot feed animation back into heading/proof positioning
-visual=preserve approved MAG geometry, size, cyan/ice/violet material, seamless page integration, r181 desktop apex and current mobile composition
-interaction=preserve pointer/mouse response on desktop, touch response on mobile and r144 gyro input; interaction energizes optics without changing document geometry
-performance=avoid per-frame computed-style reads in heartbeat, avoid repeated DOM discovery while nodes remain connected, keep watchdog only as a stall fallback, and expose measured requestAnimationFrame refresh estimate via fxDisplayRefreshHzR183
-verification=production candidate validation, JavaScript syntax, Worker tests, build, custom-domain smoke, then r183 desktop/mobile live test must prove stable DOM bounds, advancing display-synced heartbeat/energy clocks, internal canvas pulse, interaction response, render budget and no external CSS scale
+requested_at=2026-08-16T14:36:00+02:00
+source_master=d127aa23f4994848dd24bc81df530f59dc452fde
+purpose=activate r184 mobile layout stability on top of r183 display-synced MAG motion; remove the remaining periodic layout reconciliation that could visibly jump the hero on phones
+scheduler=heartbeat and living-energy remain requestAnimationFrame display-synced; the live-motion animation loop no longer calls applyLayout at all
+layout=hero/MAG/heading/proof geometry is reconciled only on actual component lifecycle, ResizeObserver, resize or orientation changes; ResizeObserver events are coalesced with a 72ms geometry debounce; no 180ms animation-clock layout writes remain
+visual=preserve approved MAG geometry, size, cyan/ice/violet material, seamless page integration, living lub-dub pulse, orbit/caustic optics and current desktop/mobile composition
+interaction=preserve desktop pointer, mobile touch and r144 gyro response without changing document geometry
+performance=remove recurring getBoundingClientRect/getComputedStyle/margin writes from the animation frame path; keep compositor-oriented optical motion and internal canvas heartbeat
+verification=production candidate validation, JavaScript syntax, Worker tests, build, custom-domain smoke, then mobile live checks for stable MAG/heading/proof bounds while heartbeat, touch/gyro and energy layers remain active
