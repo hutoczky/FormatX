@@ -11,6 +11,7 @@ on:
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-legal-language-browser.cjs'
       - '.github/scripts/validate-real3d-core.cjs'
+      - '.github/scripts/validate-award-narrative-r175.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
   push:
     branches: [master]
@@ -23,6 +24,7 @@ on:
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-legal-language-browser.cjs'
       - '.github/scripts/validate-real3d-core.cjs'
+      - '.github/scripts/validate-award-narrative-r175.cjs'
       - '.github/workflows/validate-public-site-integrity.yml'
   workflow_dispatch:
 
@@ -51,6 +53,8 @@ jobs:
         run: node .github/scripts/validate-experimental-lab-indexing.cjs
       - name: Validate native WebGL3D core
         run: node .github/scripts/validate-real3d-core.cjs
+      - name: Validate award narrative and animation scheduler
+        run: node .github/scripts/validate-award-narrative-r175.cjs
       - name: Validate feedback and moderation
         run: node .github/scripts/validate-feedback-moderation.cjs
       - name: Validate requested site features
@@ -92,7 +96,7 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Release truth, labs, HU/EN content, WebGL3D and desktop/mobile Chromium passed'
+            description='Release truth, award narrative, WebGL3D and desktop/mobile Chromium passed'
           else
             state='failure'
             description='FormatX public-site integrity validation failed'
