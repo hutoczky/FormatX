@@ -15,7 +15,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Isolate real scroll-width contributor
+      - name: Isolate hero-space overflow child
         run: |
           cat > debug.cjs <<'JS'
           const {chromium}=require('playwright');
@@ -23,33 +23,24 @@ jobs:
             const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
             const c=await b.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1});
             const p=await c.newPage();
-            await p.goto('https://formatxsuite.com/?debug_r179_cause='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
+            await p.goto('https://formatxsuite.com/?debug_r179_hero='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
             await p.waitForFunction(()=>document.documentElement.dataset.fxSotyContinuityR179==='r179-soty-organ-field-continuity',{timeout:60000});
-            await p.waitForTimeout(400);
+            await p.waitForTimeout(450);
             const result=await p.evaluate(()=>{
-              const width=()=>({doc:document.documentElement.scrollWidth,body:document.body.scrollWidth,client:document.documentElement.clientWidth});
-              const base=width();
-              const tests=[
-                ['system-marquee','#system .marquee'],
-                ['system-marquee-span','#system .marquee > span'],
-                ['experience-flow-rings','#experience .flow-rings'],
-                ['experience-flow','#experience .flow'],
-                ['hero-r168-wave','#hero .fx-r168-interaction-wave'],
-                ['hero-live-layer','#hero .fx-core-live-r147-layer'],
-                ['r179-sigils','.fx-r179-organ-sigil'],
-                ['r179-field','#main-content > .fx-r179-field']
-              ];
-              const out=[];
-              for(const [name,sel] of tests){
-                const els=[...document.querySelectorAll(sel)];
-                const prev=els.map(e=>e.style.cssText);
-                els.forEach(e=>e.style.setProperty('display','none','important'));
-                out.push({name,count:els.length,width:width(),delta:base.doc-document.documentElement.scrollWidth});
-                els.forEach((e,i)=>e.style.cssText=prev[i]);
+              const root=document.documentElement,space=document.querySelector('#hero .hero-space');
+              const widths=()=>({doc:root.scrollWidth,body:document.body.scrollWidth,space:space?.scrollWidth||0,client:root.clientWidth});
+              const base=widths();
+              const describe=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{tag:e.tagName,id:e.id,cls:String(e.className||''),left:+r.left.toFixed(1),right:+r.right.toFixed(1),top:+r.top.toFixed(1),bottom:+r.bottom.toFixed(1),width:+r.width.toFixed(1),height:+r.height.toFixed(1),scrollWidth:e.scrollWidth,clientWidth:e.clientWidth,position:s.position,overflowX:s.overflowX,transform:s.transform,z:s.zIndex}};
+              const children=[...space.children].map(describe);
+              const tests=[];
+              for(const e of [...space.children]){
+                const prev=e.style.cssText;
+                e.style.setProperty('display','none','important');
+                tests.push({target:`${e.tagName.toLowerCase()}${e.id?'#'+e.id:''}${e.className?'.'+String(e.className).trim().replace(/\s+/g,'.'):''}`,after:widths(),deltaDoc:base.doc-root.scrollWidth,deltaSpace:base.space-(space?.scrollWidth||0)});
+                e.style.cssText=prev;
               }
-              const containers=['#system','#system .marquee','#experience','#experience .flow','#experience .flow-stage','#experience .flow-rings','#hero','#hero .hero-space','#hero .fx-core-live-r147-layer','#main-content'];
-              const info=containers.map(sel=>{const e=document.querySelector(sel);if(!e)return{sel,missing:true};const r=e.getBoundingClientRect(),s=getComputedStyle(e);return{sel,left:+r.left.toFixed(1),right:+r.right.toFixed(1),width:+r.width.toFixed(1),scrollWidth:e.scrollWidth,clientWidth:e.clientWidth,overflowX:s.overflowX,contain:s.contain,position:s.position}});
-              return{base,tests:out,containers:info};
+              const descendants=[...space.querySelectorAll('*')].map(e=>({e,d:describe(e)})).filter(x=>x.d.scrollWidth>(x.d.clientWidth||0)+2||x.d.right>root.clientWidth+2).sort((a,b)=>Math.max(b.d.scrollWidth-b.d.clientWidth,b.d.right-root.clientWidth)-Math.max(a.d.scrollWidth-a.d.clientWidth,a.d.right-root.clientWidth)).slice(0,35).map(x=>x.d);
+              return{base,space:describe(space),children,tests,descendants};
             });
             console.log(JSON.stringify(result,null,2));
             await b.close();
