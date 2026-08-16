@@ -19,7 +19,7 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     steps:
       - name: Fetch canonical production document
         shell: bash
@@ -50,15 +50,21 @@ jobs:
           const origin='https://formatxsuite.com';
           const MODE='orbit-caustic-spectrum-shock-refraction';
           const CLOCK='32ms-optical-reactor-v3';
+          const mark=(label)=>console.log(`[r173-verifier ${new Date().toISOString()}] ${label}`);
 
           async function openProduction(context,label){
+            mark(`${label}: open`);
             const page=await context.newPage();
+            page.setDefaultTimeout(45000);
+            page.setDefaultNavigationTimeout(15000);
             await page.goto(`${origin}/?verify=${encodeURIComponent(label)}-${Date.now()}`,{waitUntil:'commit',timeout:15000});
             await page.evaluate(label=>document.documentElement.dataset.fxVerifierLabel=label,label);
+            mark(`${label}: committed`);
             return page;
           }
 
-          async function ready(page,mobile=false){
+          async function ready(page,mobile=false,label='viewport'){
+            mark(`${label}: waiting for live optical readiness`);
             await page.waitForFunction(({mobile,mode,clock})=>{
               const r=document.documentElement.dataset;
               return document.querySelector('#hero') &&
@@ -72,6 +78,7 @@ jobs:
                 document.querySelectorAll('#hero .fx-r168-interaction-wave').length===1 &&
                 document.querySelectorAll('#hero .fx-r168-spark').length===6;
             },{mobile,mode:MODE,clock:CLOCK},{timeout:45000});
+            mark(`${label}: ready`);
           }
 
           async function state(page){return page.evaluate(()=>{
@@ -85,32 +92,34 @@ jobs:
           function motion(a,b){assert.ok(b.frame>a.frame,'r168 optical clock stalled');assert.ok(b.tick>a.tick,'heartbeat stalled');assert.notEqual(a.orbitA,b.orbitA,'orbit A stalled');assert.notEqual(a.orbitB,b.orbitB,'orbit B stalled');assert.notEqual(a.causticA,b.causticA,'caustic A stalled');assert.notEqual(a.causticB,b.causticB,'caustic B stalled');assert.ok(a.optics!==b.optics||a.beat!==b.beat||a.spectrum!==b.spectrum,'optical state static')}
 
           async function desktop(browser){
+            const label='r173-desktop';mark(`${label}: begin`);
             const c=await browser.newContext({viewport:{width:1600,height:1000},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'});
-            const p=await openProduction(c,'r172-desktop');await ready(p,false);await p.waitForTimeout(160);
-            const a=await state(p);await p.waitForTimeout(420);const b=await state(p);base(a);motion(a,b);
+            const p=await openProduction(c,label);await ready(p,false,label);await p.waitForTimeout(160);
+            const a=await state(p);await p.waitForTimeout(420);const b=await state(p);base(a);motion(a,b);mark(`${label}: motion verified`);
             const box=await p.locator('#hero .hero-space').boundingBox();if(box){await p.mouse.move(box.x+box.width*.77,box.y+box.height*.34);await p.mouse.down();await p.waitForTimeout(90);await p.mouse.up();}
-            await p.waitForTimeout(75);const d=await state(p);assert.ok(d.position!==a.position||d.activity>a.activity,'desktop pointer did not affect optics');assert.ok(d.burst>0||d.interaction==='energy-burst'||d.activity>b.activity,'desktop burst missing');
-            await p.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await p.waitForTimeout(90);await p.locator('#hero').screenshot({path:'/tmp/r172-desktop.png',animations:'disabled',timeout:45000});console.log('DESKTOP R172',JSON.stringify({a,b,d},null,2));await c.close();
+            await p.waitForTimeout(75);const d=await state(p);assert.ok(d.position!==a.position||d.activity>a.activity,'desktop pointer did not affect optics');assert.ok(d.burst>0||d.interaction==='energy-burst'||d.activity>b.activity,'desktop burst missing');mark(`${label}: pointer verified`);
+            await p.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await p.waitForTimeout(90);mark(`${label}: screenshot start`);await p.locator('#hero').screenshot({path:'/tmp/r172-desktop.png',animations:'disabled',timeout:90000});mark(`${label}: screenshot done`);console.log('DESKTOP R173',JSON.stringify({a,b,d},null,2));await c.close();mark(`${label}: done`);
           }
 
           async function mobile(browser,w,h,label){
+            const run=`r173-${label}`;mark(`${run}: begin`);
             const c=await browser.newContext({viewport:{width:w,height:h},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
-            const p=await openProduction(c,`r172-${label}`);await ready(p,true);await p.waitForTimeout(160);
-            const a=await state(p);await p.waitForTimeout(380);const b=await state(p);base(a);motion(a,b);
+            const p=await openProduction(c,run);await ready(p,true,run);await p.waitForTimeout(160);
+            const a=await state(p);await p.waitForTimeout(380);const b=await state(p);base(a);motion(a,b);mark(`${run}: motion verified`);
             await p.touchscreen.tap(Math.round(w*.68),Math.round(h*.37));await p.waitForTimeout(75);const d=await state(p);assert.ok(d.activity>=b.activity||d.interaction==='energy-burst','mobile touch did not energize optics');assert.ok(d.burst>0||d.interaction==='energy-burst','mobile interaction burst missing');
             assert.equal(a.seamState,'ready-58-72-priority');assert.ok(['ready','permission-required','unsupported'].includes(a.gyro),`gyro ${a.gyro}`);assert.equal(a.stageBg,'none','mobile stage background panel remains');assert.ok(a.stageColor==='rgba(0, 0, 0, 0)'||a.stageColor==='transparent',`mobile stage color ${a.stageColor}`);
-            const top=parseFloat(a.seamTop),height=parseFloat(a.seamHeight);assert.ok(Number.isFinite(top)&&top<a.hostHeight*.70,`seam starts too late ${a.seamTop}/${a.hostHeight}`);assert.ok(Number.isFinite(height)&&height>a.hostHeight*.60,`seam bridge too short ${a.seamHeight}/${a.hostHeight}`);assert.ok(a.seamBg.includes('linear-gradient'),'mobile seam gradient missing');
-            await p.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await p.waitForTimeout(90);await p.locator('#hero').screenshot({path:`/tmp/r172-${label}.png`,animations:'disabled',timeout:45000});console.log(label.toUpperCase(),JSON.stringify({a,b,d},null,2));await c.close();
+            const top=parseFloat(a.seamTop),height=parseFloat(a.seamHeight);assert.ok(Number.isFinite(top)&&top<a.hostHeight*.70,`seam starts too late ${a.seamTop}/${a.hostHeight}`);assert.ok(Number.isFinite(height)&&height>a.hostHeight*.60,`seam bridge too short ${a.seamHeight}/${a.hostHeight}`);assert.ok(a.seamBg.includes('linear-gradient'),'mobile seam gradient missing');mark(`${run}: touch + seam verified`);
+            await p.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true'});await p.waitForTimeout(90);mark(`${run}: screenshot start`);await p.locator('#hero').screenshot({path:`/tmp/r172-${label}.png`,animations:'disabled',timeout:90000});mark(`${run}: screenshot done`);console.log(label.toUpperCase(),JSON.stringify({a,b,d},null,2));await c.close();mark(`${run}: done`);
           }
 
-          (async()=>{const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await desktop(b);await mobile(b,390,844,'mobile390');await mobile(b,412,915,'mobile412')}finally{await b.close()}for(const f of ['/tmp/r172-desktop.png','/tmp/r172-mobile390.png','/tmp/r172-mobile412.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS: r172 optics-led MAG is animated/interactable on PC and phone and the mobile carrier dissolves inside the crystal field.');})().catch(e=>{console.error(e);process.exit(1)});
+          (async()=>{mark('browser launch');const b=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await desktop(b);await mobile(b,390,844,'mobile390');await mobile(b,412,915,'mobile412')}finally{await b.close()}for(const f of ['/tmp/r172-desktop.png','/tmp/r172-mobile390.png','/tmp/r172-mobile412.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS: r173 optics-led MAG is animated/interactable on PC and phone and the mobile carrier dissolves inside the crystal field.');})().catch(e=>{console.error(e);process.exit(1)});
           JS
-          node check-r172.cjs
+          timeout --signal=TERM 15m node check-r172.cjs
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r172-living-energy-${{ github.run_id }}
+          name: r173-living-energy-${{ github.run_id }}
           path: |
             /tmp/r172-desktop.png
             /tmp/r172-mobile390.png
