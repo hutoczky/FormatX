@@ -1,4 +1,5 @@
-name: Diagnose r176 first-load timeline
+name: Diagnose r177 first-load timeline
+# rerun: production-r177-cls-20260816
 on:
   push:
     branches: [master]
@@ -16,27 +17,30 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Trace live first-load geometry
+      - name: Trace live r177 first-load geometry and CLS
         run: |
           cat > timeline.cjs <<'JS'
           const {chromium}=require('playwright');
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
             const context=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'}),page=await context.newPage();
-            await page.goto('https://formatxsuite.com/?timeline_r176='+Date.now(),{waitUntil:'commit',timeout:120000});
+            await page.addInitScript(()=>{window.__fxCLS=0;window.__fxShifts=[];try{new PerformanceObserver(list=>{for(const e of list.getEntries())if(!e.hadRecentInput){window.__fxCLS+=e.value;window.__fxShifts.push({value:e.value,time:e.startTime,sources:(e.sources||[]).map(s=>String(s.node?.className||s.node?.id||s.node?.nodeName||'')).slice(0,8)});}}).observe({type:'layout-shift',buffered:true});}catch(_){}});
+            await page.goto('https://formatxsuite.com/?timeline_r177='+Date.now(),{waitUntil:'commit',timeout:120000});
             const rows=[];
             for(let i=0;i<42;i++){
               const row=await page.evaluate(()=>{
                 const r=e=>{if(!e)return null;const x=e.getBoundingClientRect(),s=getComputedStyle(e);return{x:+x.x.toFixed(1),y:+x.y.toFixed(1),w:+x.width.toFixed(1),h:+x.height.toFixed(1),pos:s.position,display:s.display,opacity:+s.opacity}};
                 const root=document.documentElement,body=document.body,top=document.querySelector('.topbar'),main=document.querySelector('#main-content'),copy=document.querySelector('#hero .hero-copy'),grid=document.querySelector('#hero .hero-grid'),space=document.querySelector('#hero .hero-space'),intro=document.querySelector('#formatx-event-horizon');
-                return{t:Math.round(performance.now()),ready:document.readyState,htmlClass:root.className,bodyClass:body?.className||'',introAttr:root.dataset.fxIntro||'',bootstrap:root.dataset.fxCoreReal3dBootstrap||'',layout:root.dataset.fxMobileReferenceLayout||'',top:r(top),main:r(main),copy:r(copy),grid:r(grid),space:r(space),intro:r(intro)};
+                return{t:Math.round(performance.now()),ready:document.readyState,htmlClass:root.className,bodyClass:body?.className||'',introAttr:root.dataset.fxIntro||'',bootstrap:root.dataset.fxCoreReal3dBootstrap||'',layout:root.dataset.fxMobileReferenceLayout||'',composition:root.dataset.fxReferenceComposition||'',top:r(top),main:r(main),copy:r(copy),grid:r(grid),space:r(space),intro:r(intro),cls:+(window.__fxCLS||0).toFixed(5)};
               });
               const prev=rows.at(-1);
-              const changed=!prev||JSON.stringify({...prev,t:0,ready:''})!==JSON.stringify({...row,t:0,ready:''});
+              const changed=!prev||JSON.stringify({...prev,t:0,ready:'',cls:0})!==JSON.stringify({...row,t:0,ready:'',cls:0});
               if(changed)console.log('TIMELINE',JSON.stringify(row));
               rows.push(row);await page.waitForTimeout(100);
             }
-            console.log('FINAL',JSON.stringify(rows.at(-1),null,2));
+            const final=await page.evaluate(()=>({cls:window.__fxCLS||0,shifts:window.__fxShifts||[],scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth,composition:document.documentElement.dataset.fxReferenceComposition||''}));
+            console.log('FINAL',JSON.stringify({...rows.at(-1),metrics:final},null,2));
+            if(final.scrollWidth>final.viewport+2)throw new Error(`horizontal overflow ${final.scrollWidth}/${final.viewport}`);
             await context.close();await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
