@@ -1,0 +1,85 @@
+name: One-shot publish r184 mobile layout stability
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r184-mobile-layout-stability.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Remove animation-frame layout reconciliation and add resize-driven geometry sync
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/scripts/formatx-core-live-motion-r147.js')
+          s=p.read_text()
+          old="""function frame(now){
+  raf=0;
+  applyLayout(false);
+  if(!visible){raf=requestAnimationFrame(frame);return;}"""
+          new="""function frame(now){
+  raf=0;
+  /* r184: animation must never trigger layout reconciliation. Layout geometry is
+     updated only by real resize/orientation/component lifecycle events below. */
+  if(!visible){raf=requestAnimationFrame(frame);return;}"""
+          if old in s:
+            s=s.replace(old,new,1)
+          elif 'r184: animation must never trigger layout reconciliation' not in s:
+            raise SystemExit('frame layout call not found')
+
+          old_boot="""  const io=new IntersectionObserver(entries=>{visible=entries.some(e=>e.isIntersecting);if(visible)start();},{rootMargin:'220px'});
+  io.observe(host);
+  start();
+}"""
+          new_boot="""  const io=new IntersectionObserver(entries=>{visible=entries.some(e=>e.isIntersecting);if(visible)start();},{rootMargin:'220px'});
+  io.observe(host);
+  /* r184: geometry follows real box-size changes, not the animation clock. The
+     small debounce coalesces mobile browser chrome/orientation resize bursts. */
+  let resizeTimer=0;
+  const scheduleGeometry=()=>{
+    clearTimeout(resizeTimer);
+    resizeTimer=setTimeout(()=>{applyLayout(true);syncLayerGeometry();root.dataset.fxLiveLayoutSchedulerR184='resize-driven-stable';},72);
+  };
+  const ro=new ResizeObserver(scheduleGeometry);
+  ro.observe(host);
+  if(detail instanceof HTMLElement)ro.observe(detail);
+  root.dataset.fxLiveLayoutSchedulerR184='resize-driven-stable';
+  start();
+}"""
+          if old_boot in s:
+            s=s.replace(old_boot,new_boot,1)
+          elif 'fxLiveLayoutSchedulerR184' not in s:
+            raise SystemExit('boot observer anchor not found')
+
+          p.write_text(s)
+
+          idx=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          b=idx.read_text()
+          old_token='formatx-core-live-motion-r147.js?v=20260815-centered-optics-safe-lane-r149b'
+          new_token='formatx-core-live-motion-r147.js?v=20260816-r184-resize-driven-stable'
+          if old_token in b:b=b.replace(old_token,new_token)
+          elif new_token not in b:raise SystemExit('live-motion cache token not found')
+          idx.write_text(b)
+
+          html=Path('docs/scifi-ui/index.html')
+          h=html.read_text()
+          import re
+          pat=r'(formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=)[^"\']+'
+          h,n=re.subn(pat,r'\g<1>20260816-r184-mobile-layout-stable',h,count=1)
+          if n!=1:raise SystemExit('bootstrap cache token not found')
+          html.write_text(h)
+          PY
+          node --check docs/scifi-ui/scripts/formatx-core-live-motion-r147.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-core-live-motion-r147.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html
+          if git diff --cached --quiet; then echo 'r184 already current'; exit 0; fi
+          git commit -m 'fix(mobile): remove animation-frame layout reconciliation r184'
+          git push origin HEAD:master
