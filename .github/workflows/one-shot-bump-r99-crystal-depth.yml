@@ -1,4 +1,4 @@
-name: One-shot publish r172 priority seamless MAG
+name: One-shot publish r185 iconic MAG system
 on:
   push:
     branches: [master]
@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Publish r172 high-priority seamless dissolve cache
+      - name: Publish r185 web signature assets and production validation
         shell: bash
         run: |
           set -euo pipefail
@@ -21,27 +21,42 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
+
           index=Path('docs/scifi-ui/index.html')
           html=index.read_text()
-          new='./scripts/formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260815-r172-priority-seamless'
-          html,n=re.subn(r'\.\/scripts\/formatx-living-energy-r168\.js\?[^"\']+',new,html,count=1)
-          if n!=1:raise SystemExit(f'r168 JS URL not found exactly once: {n}')
+          css='  <link rel="stylesheet" data-fx-signature-system-r185="true" href="./styles/formatx-signature-system-r185.css?v=20260816-iconic-mag-r185">\n'
+          js='  <script defer data-fx-signature-system-r185="true" src="./scripts/formatx-signature-system-r185.js?v=20260816-iconic-mag-r185"></script>\n'
+          if 'formatx-signature-system-r185.css' not in html:
+              anchor=re.search(r'(^\s*<link rel="stylesheet" data-fx-core-real3d="true"[^\n]+\n)',html,re.M)
+              if not anchor: raise SystemExit('core real3d stylesheet anchor not found')
+              html=html[:anchor.end()]+css+html[anchor.end():]
+          if 'formatx-signature-system-r185.js' not in html:
+              anchor=re.search(r'(^\s*<script defer data-fx-live-heartbeat-r155="true"[^\n]+</script>\n)',html,re.M)
+              if not anchor: raise SystemExit('heartbeat script anchor not found')
+              html=html[:anchor.end()]+js+html[anchor.end():]
           index.write_text(html)
-          validator=Path('.github/scripts/validate-real3d-core.cjs')
-          v=validator.read_text()
-          v=re.sub(r'formatx-living-energy-r168\.js\?[^\'"\)]+','formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260815-r172-priority-seamless',v)
-          validator.write_text(v)
+
+          deploy=Path('.github/workflows/deploy-formatx-custom-domain.yml')
+          d=deploy.read_text()
+          contract='          node .github/scripts/validate-signature-system-r185.cjs\n'
+          if contract not in d:
+              anchor='          node .github/scripts/validate-real3d-mobile-startup-v22.cjs\n'
+              if anchor not in d: raise SystemExit('production validator anchor not found')
+              d=d.replace(anchor,anchor+contract,1)
+          syntax='          node --check docs/scifi-ui/scripts/formatx-signature-system-r185.js\n'
+          if syntax not in d:
+              anchor='          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js\n'
+              if anchor not in d: raise SystemExit('production syntax anchor not found')
+              d=d.replace(anchor,anchor+syntax,1)
+          deploy.write_text(d)
           PY
-          node --check docs/scifi-ui/scripts/formatx-living-energy-r168.js
-          node .github/scripts/validate-real3d-core.cjs
-          grep -q "ready-58-72-priority" docs/scifi-ui/scripts/formatx-living-energy-r168.js
-          grep -q "top:58%" docs/scifi-ui/scripts/formatx-living-energy-r168.js
-          grep -q "height:72%" docs/scifi-ui/scripts/formatx-living-energy-r168.js
+          node --check docs/scifi-ui/scripts/formatx-signature-system-r185.js
+          node .github/scripts/validate-signature-system-r185.cjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
-          if git diff --cached --quiet; then echo 'r172 cache already current'; exit 0; fi
-          git commit -m '[deploy-production] fix(mag): publish r172 priority seamless dissolve'
+          git add docs/scifi-ui/index.html .github/workflows/deploy-formatx-custom-domain.yml
+          if git diff --cached --quiet; then echo 'r185 signature release already current'; exit 0; fi
+          git commit -m '[deploy-production] feat(signature): publish r185 iconic MAG system'
           for attempt in 1 2 3; do
             if git push origin HEAD:master; then exit 0; fi
             git pull --rebase origin master
