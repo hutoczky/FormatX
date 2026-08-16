@@ -1,9 +1,8 @@
 FormatX production deployment marker
-requested_at=2026-08-16T09:31:00+02:00
-source_master=ce6035314636b41301d1f726b494b609ef896b83
-purpose=activate r178 after tracing the remaining desktop layout takeover to the legacy flow-first controller and flow stylesheet; make both reference-flow CSS and controller mobile-only while preserving the approved mobile MAG-first experience
-visual=desktop remains on the native FormatX two-column hero from first paint through all delayed runtime events; no stacked reference-flow takeover, no 960px centered hero-copy replacement, no late topbar fixed-to-relative switch; mobile <=900px keeps MAG-first reference heading/proof flow
-stability=layout loader does not attach flow-first CSS on desktop and removes it after a resize to desktop; core bootstrap bypasses flow-first script on fresh desktop; flow controller itself exits through desktop-native restore before writing header/hero geometry
-interaction=preserve pointer/mouse desktop interaction, touch plus r144 gyro on mobile, r158 lub-dub heartbeat, r168 living optics, r175 narrative chapter pulse and approved MAG geometry/size
-performance=retain r175 requestAnimationFrame-throttled energy scheduler and zero layout-driven narrative animation
-verification=r178 one-shot SUCCESS with JS syntax, native WebGL contract and award narrative validator; production candidate/build/smoke followed by r177/r178 first-load CLS timeline, 1440x900 desktop and 390x844 mobile award gates, and mobile MAG regression checks
+requested_at=2026-08-16T09:49:00+02:00
+source_master=8efddb21aa18e0487a622864dd4f445058b5d96b
+purpose=revalidate r178 after aligning the native WebGL mobile-startup validator with the current mobile-only flow stylesheet token and desktop removal contract
+visual=desktop remains on the native FormatX two-column hero; mobile <=900px keeps the approved MAG-first reference heading/proof flow; no visual geometry, material, heartbeat, accessibility or interaction change in this revalidation commit
+stability=validate that formatx-flow-first-r74.css is loaded only on mobile and removed on desktop while the existing r178 flow controller remains authoritative
+interaction=preserve desktop pointer/mouse interaction, mobile touch plus r144 gyro, r158 lub-dub heartbeat, r168 living optics and approved MAG geometry/size
+verification=production candidate, JavaScript syntax, Worker tests, build, custom-domain deploy, canonical smoke and post-deploy r178 live checks
