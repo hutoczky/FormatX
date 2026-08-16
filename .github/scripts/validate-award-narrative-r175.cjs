@@ -1,5 +1,5 @@
 'use strict';
-// r176 public-integrity revalidation: first-paint-stable narrative + responsive composition + RAF optical scheduler.
+// r185b public-integrity revalidation: first-paint-stable narrative + responsive composition + current display-synced optical scheduler.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const repo=path.resolve(__dirname,'../..');
 const read=f=>fs.readFileSync(path.join(repo,f),'utf8');
@@ -39,7 +39,13 @@ for(const token of [
 assert.doesNotMatch(js,/setInterval\s*\(/,'r175 story runtime must not use setInterval');
 assert.doesNotMatch(css,/transition:\s*all\b/i,'r175 CSS must not animate all properties');
 assert.doesNotMatch(css,/var\(--fx-r175-[^)]+\)\s*\*/,'r175 CSS must not depend on custom-property multiplication');
-assert.ok(energy.includes("fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms'"),'r168 optical scheduler not upgraded to RAF-throttled r175 mode');
-assert.doesNotMatch(energy,/setInterval\s*\(tick\s*,\s*32\s*\)/,'legacy 32ms setInterval still present');
+for(const token of [
+  "const CLOCK='display-synced-raf-r183'",
+  "fxLivingEnergySchedulerR175='requestAnimationFrame-display-synced-r183'",
+  "fxLivingEnergySchedulerR182='raf-primary-watchdog-fallback-r183'",
+  'requestAnimationFrame(loop)',
+  'if(document.hidden)return'
+])assert.ok(energy.includes(token),`missing current display-synced optical scheduler contract ${token}`);
+assert.doesNotMatch(energy,/setInterval\s*\(tick\s*,\s*32\s*\)/,'legacy 32ms tick setInterval still present');
 new Function(js);new Function(energy);
-console.log('PASS: r176 first-paint-stable award narrative, responsive composition, reduced motion and RAF-synchronised optical runtime are valid.');
+console.log('PASS: r185b award narrative, responsive composition, reduced motion and r183 display-synchronised optical runtime are valid.');
