@@ -1,0 +1,85 @@
+name: Verify r175 award narrative
+
+on:
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+  push:
+    branches: [master]
+    paths: ['.github/workflows/verify-r175-award-narrative.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  award-narrative-live:
+    if: >-
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.62.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Verify r175 narrative composition on desktop and mobile
+        run: |
+          cat > verify-r175.cjs <<'JS'
+          const {chromium}=require('playwright');
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const origin='https://formatxsuite.com';
+          async function open(browser,opts,name){
+            const context=await browser.newContext(opts),page=await context.newPage();
+            await page.addInitScript(()=>{
+              window.__fxCLS=0;
+              try{new PerformanceObserver(list=>{for(const e of list.getEntries())if(!e.hadRecentInput)window.__fxCLS+=e.value;}).observe({type:'layout-shift',buffered:true});}catch(_){/* unsupported in a runner is non-fatal */}
+            });
+            await page.goto(`${origin}/?verify=r175-${name}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxAwardNarrativeR175==='ready'&&document.documentElement.dataset.fxLivingEnergySchedulerR175==='requestAnimationFrame-throttled-30ms',null,{timeout:60000});
+            await page.waitForTimeout(650);
+            return{context,page};
+          }
+          async function state(page){return page.evaluate(()=>{
+            const root=document.documentElement,heading=document.querySelector('#experience .section-heading h2'),index=document.querySelector('#experience .section-heading .section-index'),cards=[...document.querySelectorAll('#capabilities .card')];
+            const hs=heading?getComputedStyle(heading):null,is=index?getComputedStyle(index):null;
+            return{ready:root.dataset.fxAwardNarrativeR175||'',motion:root.dataset.fxNarrativeMotionR175||'',scheduler:root.dataset.fxLivingEnergySchedulerR175||'',active:root.dataset.fxActiveOrganR175||'',chapter:root.dataset.fxActiveChapterR175||'',progress:Number(getComputedStyle(root).getPropertyValue('--fx-r175-story-progress')||0),cls:Number(window.__fxCLS||0),viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,headingSize:parseFloat(hs?.fontSize||0),headingLine:parseFloat(hs?.lineHeight||0),indexSize:parseFloat(is?.fontSize||0),cardOverflow:cards.some(c=>{const r=c.getBoundingClientRect();return r.left<-.5||r.right>innerWidth+.5;})};
+          })}
+          async function exercise(page){
+            await page.locator('#experience').scrollIntoViewIfNeeded();await page.waitForTimeout(350);
+            const a=await page.evaluate(()=>document.documentElement.dataset.fxActiveOrganR175||'');
+            await page.locator('#capabilities').scrollIntoViewIfNeeded();await page.waitForTimeout(350);
+            const b=await page.evaluate(()=>document.documentElement.dataset.fxActiveOrganR175||'');
+            return{a,b};
+          }
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
+            try{
+              const d=await open(browser,{viewport:{width:1440,height:900},deviceScaleFactor:1,locale:'hu-HU',reducedMotion:'no-preference'},'desktop');
+              const ds1=await state(d.page),storyD=await exercise(d.page),ds2=await state(d.page);
+              await d.page.screenshot({path:'r175-desktop.png',fullPage:false,animations:'disabled',timeout:120000});
+              console.log('R175 DESKTOP',JSON.stringify({ds1,storyD,ds2},null,2));
+              assert.equal(ds1.ready,'ready');assert.equal(ds1.scheduler,'requestAnimationFrame-throttled-30ms');assert.equal(ds1.motion,'raf-intersection-transform-opacity');assert.ok(ds1.scrollWidth<=ds1.viewport+2,`desktop horizontal overflow ${ds1.scrollWidth}/${ds1.viewport}`);assert.ok(ds1.headingSize>=42,`desktop heading too small ${ds1.headingSize}`);assert.ok(ds1.headingLine>0);assert.ok(storyD.a==='nervous-system'||storyD.a==='organs');assert.equal(storyD.b,'organs');assert.ok(ds2.progress>0);assert.ok(ds2.cls<=.10,`desktop CLS ${ds2.cls}`);await d.context.close();
+
+              const m=await open(browser,{viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'},'mobile');
+              const ms1=await state(m.page),storyM=await exercise(m.page),ms2=await state(m.page);
+              await m.page.screenshot({path:'r175-mobile.png',fullPage:false,animations:'disabled',timeout:120000});
+              console.log('R175 MOBILE',JSON.stringify({ms1,storyM,ms2},null,2));
+              assert.equal(ms1.ready,'ready');assert.equal(ms1.scheduler,'requestAnimationFrame-throttled-30ms');assert.equal(ms1.motion,'raf-intersection-transform-opacity');assert.ok(ms1.scrollWidth<=ms1.viewport+2,`mobile horizontal overflow ${ms1.scrollWidth}/${ms1.viewport}`);assert.ok(ms1.headingSize>=32&&ms1.headingSize<=62,`mobile heading size ${ms1.headingSize}`);assert.ok(ms1.indexSize>=8);assert.equal(ms1.cardOverflow,false,'mobile capability card overflow');assert.ok(storyM.a==='nervous-system'||storyM.a==='organs');assert.equal(storyM.b,'organs');assert.ok(ms2.progress>0);assert.ok(ms2.cls<=.10,`mobile CLS ${ms2.cls}`);await m.context.close();
+            }finally{await browser.close();}
+            for(const f of ['r175-desktop.png','r175-mobile.png'])assert.ok(fs.statSync(f).size>10000,`${f} missing`);
+            console.log('PASS: r175 award narrative composition, story continuity, responsive typography, zero overflow and CLS budget verified.');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node verify-r175.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r175-award-narrative-${{ github.run_id }}
+          path: |
+            r175-desktop.png
+            r175-mobile.png
+          if-no-files-found: warn
+          retention-days: 14
