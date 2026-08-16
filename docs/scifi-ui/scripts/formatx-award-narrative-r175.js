@@ -64,14 +64,19 @@ function updateProgress(){
   const max=Math.max(1,doc.scrollHeight-innerHeight);
   const global=clamp(scrollY/max,0,1);
   root.style.setProperty('--fx-r175-story-progress',global.toFixed(4));
+  root.style.setProperty('--fx-r175-story-x',(8+global*84).toFixed(2)+'%');
 
   const current=sections[activeIndex]?.section;
   if(current instanceof HTMLElement){
     const r=current.getBoundingClientRect();
     const denom=Math.max(1,r.height+innerHeight*.35);
     const local=clamp((innerHeight*.72-r.top)/denom,0,1);
+    const energy=0.16+local*.52;
     root.style.setProperty('--fx-r175-chapter-progress',local.toFixed(4));
-    root.style.setProperty('--fx-r175-energy',(0.16+local*.52).toFixed(4));
+    root.style.setProperty('--fx-r175-energy',energy.toFixed(4));
+    root.style.setProperty('--fx-r175-node-scale',(0.82+energy*.08).toFixed(4));
+    root.style.setProperty('--fx-r175-carrier-opacity',(0.28+energy*.34).toFixed(4));
+    root.style.setProperty('--fx-r175-carrier-scale',(0.64+local*.36).toFixed(4));
   }
 }
 

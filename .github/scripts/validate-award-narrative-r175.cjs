@@ -14,7 +14,7 @@ for(const token of [
 ])assert.ok(index.includes(token),`missing r175 index asset ${token}`);
 
 for(const token of [
-  'data-fx-award-narrative-r175="ready"',
+  'data-fx-design-system="2"',
   '--fx-r175-space-scene',
   '.section-heading h2',
   'text-wrap: balance',
@@ -38,6 +38,7 @@ for(const token of [
 
 assert.doesNotMatch(js,/setInterval\s*\(/,'r175 story runtime must not use setInterval');
 assert.doesNotMatch(css,/transition:\s*all\b/i,'r175 CSS must not animate all properties');
+assert.doesNotMatch(css,/var\(--fx-r175-[^)]+\)\s*\*/,'r175 CSS must not depend on custom-property multiplication');
 assert.ok(energy.includes("fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms'"),'r168 optical scheduler not upgraded to RAF-throttled r175 mode');
 assert.doesNotMatch(energy,/setInterval\s*\(tick\s*,\s*32\s*\)/,'legacy 32ms setInterval still present');
 new Function(js);new Function(energy);
