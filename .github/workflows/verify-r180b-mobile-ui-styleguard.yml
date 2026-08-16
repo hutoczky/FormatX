@@ -1,4 +1,4 @@
-name: Verify r180b mobile UI style guard
+name: Verify r180c mobile UI source flow
 
 on:
   workflow_run:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  mobile-styleguard:
+  mobile-flow:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
@@ -22,67 +22,74 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Verify self-healing mobile UI at 390px
+      - name: Verify r180c source-owned mobile UI at 390px
         run: |
-          cat > verify-r180b.cjs <<'JS'
+          cat > verify-r180c.cjs <<'JS'
           const {chromium}=require('playwright');
           const assert=require('node:assert/strict');
           const fs=require('node:fs');
+
+          async function readState(page){
+            return page.evaluate(()=>{
+              const q=s=>document.querySelector(s),box=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,cx:r.x+r.width/2,cy:r.y+r.height/2,b:r.bottom}};
+              const mag=q('.fx-reference-mag-button'),lang=q('.fx-language-toggle'),menu=q('.fx-reference-menu-button'),brand=q('.topbar .brand'),rail=q('#hero .fx-reference-rail'),ask=q('#hero .fx-reference-ask'),askLabel=q('#hero .fx-reference-ask span'),pause=q('#hero .fx-reference-pause'),proof=q('#hero .fx-reference-proof'),p=q('#hero .fx-reference-proof p'),live=q('#hero .fx-reference-liveos'),space=q('#hero .hero-space'),flow=q('script[data-fx-flow-first-r75]');
+              if(![mag,lang,menu,brand,rail,ask,askLabel,pause,proof,p,live,space,flow].every(Boolean))throw new Error('r180c mobile nodes missing');
+              const cs=e=>getComputedStyle(e),pseudo=getComputedStyle(space,'::after');
+              return{
+                flowSrc:flow.src,flowState:document.documentElement.dataset.fxFlowFirstR75||'',composition:document.documentElement.dataset.fxReferenceComposition||'',
+                mag:box(mag),lang:box(lang),menu:box(menu),brand:box(brand),ask:box(ask),askLabel:box(askLabel),pause:box(pause),proof:box(proof),p:box(p),live:box(live),
+                magTop:mag.style.getPropertyValue('top'),langTop:lang.style.getPropertyValue('top'),menuTop:menu.style.getPropertyValue('top'),brandTop:brand.style.getPropertyValue('top'),railTop:rail.style.getPropertyValue('top'),railGap:rail.style.getPropertyValue('gap'),
+                liveTop:live.style.getPropertyValue('top'),liveBottom:live.style.getPropertyValue('bottom'),liveRight:live.style.getPropertyValue('right'),pPaddingRight:cs(p).paddingRight,
+                magFont:cs(mag).fontSize,langFont:cs(lang).fontSize,askFont:cs(askLabel).fontSize,orbitOpacity:Number(cs(q('#hero .fx-r168-orbit')||space).opacity),seam:pseudo.backgroundImage,
+                magText:mag.textContent.trim(),langText:lang.textContent.trim(),askText:askLabel.textContent.trim(),paused:document.documentElement.dataset.fxReferenceMotionPaused,renderMs:Number(document.documentElement.dataset.fxCoreRenderMs||Infinity)
+              };
+            });
+          }
+
+          function verify(s,label){
+            assert.ok(s.flowSrc.includes('formatx-flow-first-r75.js?v=20260816-mobile-ui-r180c'),`${label}: stale flow ${s.flowSrc}`);
+            assert.equal(s.composition,'award-reference-overlay-r139');
+            assert.equal(s.magText,'MAG');assert.equal(s.langText,'HU');assert.equal(s.askText,'KÉRDEZZ');
+            assert.equal(s.magTop,'14px');assert.equal(s.langTop,'14px');assert.equal(s.menuTop,'8px');assert.equal(s.brandTop,'17px');assert.equal(s.railTop,'18px');assert.equal(s.railGap,'24px');
+            assert.equal(s.liveTop,'auto');assert.equal(s.liveBottom,'18px');assert.equal(s.liveRight,'16px');
+            assert.ok(Math.abs(s.mag.cy-s.lang.cy)<=.6,`${label}: MAG/HU centers ${s.mag.cy}/${s.lang.cy}`);
+            assert.ok(Math.abs(s.lang.cy-s.menu.cy)<=.6,`${label}: HU/menu centers ${s.lang.cy}/${s.menu.cy}`);
+            assert.ok(Math.abs(s.brand.cy-s.mag.cy)<=.6,`${label}: brand/control centers ${s.brand.cy}/${s.mag.cy}`);
+            assert.equal(s.mag.h,40);assert.equal(s.lang.h,40);assert.equal(s.menu.h,52);
+            assert.equal(s.magFont,'10px');assert.equal(s.langFont,'10px');assert.equal(s.askFont,'10px');
+            assert.ok(s.pause.y-s.ask.b>=23,`${label}: ASK/pause gap ${s.pause.y-s.ask.b}`);
+            assert.ok(s.askLabel.b<=s.pause.y-8,`${label}: ASK label collision ${s.askLabel.b}/${s.pause.y}`);
+            assert.equal(s.pPaddingRight,'0px');assert.ok(s.p.w>=s.proof.w-40,`${label}: proof copy width ${s.p.w}/${s.proof.w}`);
+            assert.ok(s.live.y>=s.p.b+10,`${label}: Live OS overlaps copy ${s.live.y}/${s.p.b}`);
+            assert.ok(s.seam.includes('linear-gradient'));assert.ok(s.orbitOpacity<=.11);
+            assert.equal(s.paused,'false');assert.ok(s.renderMs<16.67,`${label}: render ${s.renderMs}`);
+          }
+
           (async()=>{
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
             const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
             const page=await context.newPage();page.setDefaultTimeout(120000);
-            await page.goto('https://formatxsuite.com/?verify_r180b='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxMobileUiFinalizerR180==='ready-r180b'&&document.documentElement.dataset.fxMobileUiStyleGuardR180==='active'&&document.querySelector('script[data-fx-mobile-ui-finalizer-r180]')?.src.includes('r180b-style-guard'),null,{timeout:90000});
+            await page.goto('https://formatxsuite.com/?verify_r180c='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.querySelector('script[data-fx-flow-first-r75]')?.src.includes('mobile-ui-r180c'),null,{timeout:90000});
             await page.waitForTimeout(4300);
-            /* Deliberately reproduce the old r178 writes. The observer must heal them. */
-            await page.evaluate(()=>{
-              const mag=document.querySelector('.fx-reference-mag-button'),rail=document.querySelector('#hero .fx-reference-rail'),live=document.querySelector('#hero .fx-reference-liveos');
-              mag?.style.setProperty('top','16px','important');
-              rail?.style.setProperty('gap','10px','important');
-              live?.style.setProperty('top','143px','important');
-              live?.style.setProperty('bottom','auto','important');
-            });
-            await page.waitForTimeout(120);
-            const state=await page.evaluate(()=>{
-              const q=s=>document.querySelector(s),box=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,cx:r.x+r.width/2,cy:r.y+r.height/2,b:r.bottom}};
-              const mag=q('.fx-reference-mag-button'),lang=q('.fx-language-toggle'),menu=q('.fx-reference-menu-button'),brand=q('.topbar .brand'),rail=q('#hero .fx-reference-rail'),ask=q('#hero .fx-reference-ask'),askLabel=q('#hero .fx-reference-ask span'),pause=q('#hero .fx-reference-pause'),proof=q('#hero .fx-reference-proof'),p=q('#hero .fx-reference-proof p'),live=q('#hero .fx-reference-liveos'),space=q('#hero .hero-space');
-              if(![mag,lang,menu,brand,rail,ask,askLabel,pause,proof,p,live,space].every(Boolean))throw new Error('r180b nodes missing');
-              const cs=e=>getComputedStyle(e),pseudo=getComputedStyle(space,'::after');
-              return{
-                finalizer:document.documentElement.dataset.fxMobileUiFinalizerR180,guard:document.documentElement.dataset.fxMobileUiStyleGuardR180,
-                mag:box(mag),lang:box(lang),menu:box(menu),brand:box(brand),ask:box(ask),askLabel:box(askLabel),pause:box(pause),proof:box(proof),p:box(p),live:box(live),
-                magTop:mag.style.getPropertyValue('top'),langTop:lang.style.getPropertyValue('top'),railGap:rail.style.getPropertyValue('gap'),liveTop:live.style.getPropertyValue('top'),liveBottom:live.style.getPropertyValue('bottom'),
-                magFont:cs(mag).fontSize,langFont:cs(lang).fontSize,askFont:cs(askLabel).fontSize,pPaddingRight:cs(p).paddingRight,
-                orbitOpacity:Number(cs(q('#hero .fx-r168-orbit')||space).opacity),seam:pseudo.backgroundImage,
-                magText:mag.textContent.trim(),langText:lang.textContent.trim(),askText:askLabel.textContent.trim(),paused:document.documentElement.dataset.fxReferenceMotionPaused,renderMs:Number(document.documentElement.dataset.fxCoreRenderMs||Infinity)
-              };
-            });
-            console.log('R180B MOBILE',JSON.stringify(state,null,2));
-            await page.screenshot({path:'r180b-mobile.png',fullPage:false,animations:'allow',timeout:120000});
-            assert.equal(state.finalizer,'ready-r180b');assert.equal(state.guard,'active');
-            assert.equal(state.magText,'MAG');assert.equal(state.langText,'HU');assert.equal(state.askText,'KÉRDEZZ');
-            assert.equal(state.magTop,'14px');assert.equal(state.langTop,'14px');assert.equal(state.railGap,'24px');assert.equal(state.liveTop,'auto');assert.equal(state.liveBottom,'18px');
-            assert.ok(Math.abs(state.mag.cy-state.lang.cy)<=.6,`MAG/HU ${state.mag.cy}/${state.lang.cy}`);
-            assert.ok(Math.abs(state.lang.cy-state.menu.cy)<=.6,`HU/menu ${state.lang.cy}/${state.menu.cy}`);
-            assert.ok(Math.abs(state.brand.cy-state.mag.cy)<=1.5,`brand/control ${state.brand.cy}/${state.mag.cy}`);
-            assert.equal(state.mag.h,40);assert.equal(state.lang.h,40);assert.equal(state.menu.h,52);
-            assert.equal(state.magFont,'10px');assert.equal(state.langFont,'10px');assert.equal(state.askFont,'10px');
-            assert.ok(state.pause.y-state.ask.b>=23,`ASK/pause gap ${state.pause.y-state.ask.b}`);
-            assert.ok(state.askLabel.b<=state.pause.y-8,`ASK label ${state.askLabel.b}/${state.pause.y}`);
-            assert.equal(state.pPaddingRight,'0px');assert.ok(state.p.w>=state.proof.w-40,`proof width ${state.p.w}/${state.proof.w}`);
-            assert.ok(state.live.y>=state.p.b+10,`Live OS ${state.live.y}/${state.p.b}`);
-            assert.ok(state.seam.includes('linear-gradient'));assert.ok(state.orbitOpacity<=.11);
-            assert.equal(state.paused,'false');assert.ok(state.renderMs<16.67);
-            await browser.close();assert.ok(fs.statSync('r180b-mobile.png').size>10000);
-            console.log('PASS: r180b self-heals old flow writes and preserves mobile UI/proof geometry.');
+            const before=await readState(page);verify(before,'steady');
+
+            /* Force flow to execute again through its real resize listener. */
+            await page.setViewportSize({width:391,height:846});await page.waitForTimeout(160);
+            await page.setViewportSize({width:390,height:844});await page.waitForTimeout(220);
+            const after=await readState(page);verify(after,'post-resize');
+
+            console.log('R180C MOBILE',JSON.stringify({before,after},null,2));
+            await page.screenshot({path:'r180c-mobile.png',fullPage:false,animations:'allow',timeout:120000});
+            await browser.close();assert.ok(fs.statSync('r180c-mobile.png').size>10000);
+            console.log('PASS: r180c source flow owns stable mobile header/actions/proof geometry after delayed startup and resize.');
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
-          node verify-r180b.cjs
+          node verify-r180c.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r180b-mobile-${{ github.run_id }}
-          path: r180b-mobile.png
+          name: r180c-mobile-${{ github.run_id }}
+          path: r180c-mobile.png
           if-no-files-found: warn
           retention-days: 14
