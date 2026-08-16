@@ -49,6 +49,10 @@ namespace FormatX
           _       => ElementTheme.Default
         };
       }
+
+      // Product/web visual continuity: the same living MAG used by the public site
+      // appears as a small interactive system-state control in the app title region.
+      SignatureMagController.Attach(_window);
       _window.Activate();
     }
   }
