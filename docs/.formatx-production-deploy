@@ -1,9 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-16T09:09:00+02:00
-source_master=0621fd5ba334d5751b23ac24bf110bda05f74c41
-purpose=activate r176 award/SOTY narrative composition while preserving the approved MAG geometry and visual identity; make the Living System story continuous across MAG, nervous system, organs, commerce heart, skeleton and beacon instead of treating the WebGL core as an isolated effect
-visual=first-paint-stable premium typography, controlled whitespace, balanced section hierarchy, continuous FormatX signal carrier, organ-specific restrained accent identity, mobile composition parity and no late JS-gated typography switch
-runtime=replace the r168 32ms interval scheduler with requestAnimationFrame-throttled optical updates, skip hidden-document work, keep r175 IntersectionObserver plus passive scroll RAF story progress and avoid layout-driven animation
-interaction=preserve desktop pointer/mouse, mobile touch and r144 gyroscope, living lub-dub heartbeat, caustics/refraction/orbits/sparks and chapter hand-off pulse; chapter transitions signal product state without changing approved MAG silhouette or blocking usability
-compatibility=remove custom-property multiplication from CSS; compute dynamic story position/node/carrier values in the RAF runtime; keep reduced-motion behavior and render-blocking composition CSS from first paint
-verification=public-site integrity SUCCESS including release/runtime/security, native WebGL3D, r176 award narrative validator, desktop/mobile Chromium and HU/EN content; production candidate/build/smoke; live r175/r176 award narrative desktop 1440x900 and mobile 390x844 composition/overflow/CLS/story checks; existing MAG/live award gates
+requested_at=2026-08-16T09:24:00+02:00
+source_master=189c020567e04126d184851fe9cf70996d9598a7
+purpose=activate r177 desktop-native layout scope while preserving the approved mobile reference MAG; stop the mobile reference stylesheet and mobile proof/heading/rail DOM from taking over desktop after bootstrap
+visual=desktop keeps its native two-column FormatX hero from first paint: product story and interactive MAG remain together instead of switching after ~1.6s into a stacked reference flow; mobile <=900px retains the approved MAG-first reference composition
+stability=remove the obsolete desktop @media block from formatx-mobile-reference-layout-v1.css and clean mobile-only reference flow nodes on desktop; eliminate the measured grid-to-flex, hero-copy relocation and main y+76px layout shifts at their source
+interaction=preserve desktop pointer/mouse, mobile touch and r144 gyroscope, r158 lub-dub heartbeat, r168 caustics/refraction/orbits/sparks and r175 chapter story pulses without changing MAG size or four-tip geometry
+performance=retain r175 requestAnimationFrame-throttled living-energy scheduler and reduced-motion/hidden-document behavior
+verification=one-shot r177 source patch SUCCESS with JavaScript syntax, native WebGL contract and r175 award narrative validator; next gates are production candidate/build/smoke, first-load timeline/CLS, desktop 1440x900 award narrative, mobile 390x844 award narrative and existing mobile MAG reference/proof checks
