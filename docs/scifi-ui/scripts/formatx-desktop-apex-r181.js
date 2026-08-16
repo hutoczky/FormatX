@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r181-desktop-crystal-apex';
+const VERSION='r181b-desktop-crystal-apex-pointer-capture';
 if(root.dataset.fxDesktopApexVersionR181===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
   root.dataset.fxDesktopApexR181='audit-skip';
@@ -21,6 +21,14 @@ function ensureMeta(space){
   meta=document.createElement('div');meta.className='fx-r181-apex-meta';meta.setAttribute('aria-hidden','true');
   meta.innerHTML='<i></i><b>LIVING CORE</b><span>WEBGL2 / REACTIVE</span><span>POINTER FIELD</span>';
   space.appendChild(meta);return meta;
+}
+
+function updatePointer(e,space){
+  if(!desktop.matches||e?.pointerType==='touch')return;
+  const r=space.getBoundingClientRect();
+  if(!r.width||!r.height)return;
+  tx=clamp((e.clientX-r.left)/r.width*2-1,-1,1);
+  ty=clamp((e.clientY-r.top)/r.height*2-1,-1,1);
 }
 
 function apply(){
@@ -49,11 +57,20 @@ function apply(){
   const actions=copy.querySelector('.hero-actions');if(actions instanceof HTMLElement){Array.from(actions.children).forEach((el,i)=>imp(el,'display',i<2?'inline-flex':'none'));}
   const heading=hero.querySelector('.fx-reference-heading'),proof=hero.querySelector('.fx-reference-proof');for(const el of [heading,proof]){imp(el,'display','none');imp(el,'visibility','hidden');imp(el,'opacity','0');}
   ensureMeta(space);
-  if(bound!==space){
-    bound=space;
-    space.addEventListener('pointermove',e=>{if(e.pointerType==='touch'||!desktop.matches)return;const r=space.getBoundingClientRect();tx=clamp((e.clientX-r.left)/Math.max(1,r.width)*2-1,-1,1);ty=clamp((e.clientY-r.top)/Math.max(1,r.height)*2-1,-1,1);energy=Math.max(energy,.32);},{passive:true});
-    space.addEventListener('pointerdown',()=>{energy=1;root.dataset.fxDesktopApexInteractionR181='energized';},{passive:true});
-    space.addEventListener('pointerleave',()=>{tx=0;ty=0;},{passive:true});
+  if(bound!==hero){
+    bound=hero;
+    hero.addEventListener('pointermove',e=>{
+      updatePointer(e,space);
+      if(e.pointerType!=='touch'&&desktop.matches){energy=Math.max(energy,.36);root.dataset.fxDesktopApexInteractionR181='tracking';}
+    },{passive:true,capture:true});
+    hero.addEventListener('pointerdown',e=>{
+      if(!desktop.matches)return;
+      updatePointer(e,space);
+      energy=1;
+      root.dataset.fxDesktopApexInteractionR181='energized';
+      try{window.FormatXCoreMobileV69?.pulse?.();}catch(_){/* existing core stays authoritative */}
+    },{passive:true,capture:true});
+    hero.addEventListener('pointerleave',()=>{tx=0;ty=0;},{passive:true,capture:true});
   }
   root.dataset.fxDesktopApexR181='ready';root.dataset.fxDesktopApexVersionR181=VERSION;root.dataset.fxReferenceComposition='desktop-cinematic-mag-r181';
   return true;
