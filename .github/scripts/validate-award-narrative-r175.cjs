@@ -18,7 +18,6 @@ for(const token of [
   '.section-heading h2',
   'text-wrap: balance',
   'data-fx-story-state="active"',
-  'SENSE / MAP / DECIDE',
   '@media (max-width: 900px)',
   '@media (prefers-reduced-motion: reduce)'
 ])assert.ok(css.includes(token),`missing r175 CSS contract ${token}`);
@@ -30,7 +29,10 @@ for(const token of [
   "addEventListener('scroll',scheduleProgress,{passive:true})",
   'formatx:storychapter',
   'fxActiveOrganR175',
-  'fxNarrativeMotionR175'
+  'fxNarrativeMotionR175',
+  'SENSE / MAP / DECIDE',
+  'ACT / VERIFY / REPORT',
+  'PROOF / SUPPORT / SIGNAL'
 ])assert.ok(js.includes(token),`missing r175 JS contract ${token}`);
 
 assert.doesNotMatch(js,/setInterval\s*\(/,'r175 story runtime must not use setInterval');
