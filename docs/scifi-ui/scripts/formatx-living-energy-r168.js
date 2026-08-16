@@ -17,7 +17,7 @@ function make(cls){const e=document.createElement('span');e.className=cls;e.setA
 function ensureMobileSeam(){
   let style=document.getElementById('fx-r170-mobile-seam-override');
   if(!style){style=document.createElement('style');style.id='fx-r170-mobile-seam-override';}
-  style.textContent=`
+  const css=`
   @media (max-width:900px),(pointer:coarse){
     html[data-fx-mobile-reference-layout="ready-v1"][data-fx-living-energy-r168] body.living-architecture main#main-content section#hero.scene.hero[data-organ="core"] .hero-grid .hero-space::before{
       content:""!important;display:block!important;position:absolute!important;
@@ -34,7 +34,8 @@ function ensureMobileSeam(){
       border:0!important;box-shadow:none!important;opacity:1!important;
     }
   }`;
-  if(style.parentNode!==document.head)document.head.appendChild(style);else if(document.head.lastElementChild!==style)document.head.appendChild(style);
+  if(style.textContent!==css)style.textContent=css;
+  if(style.parentNode!==document.head)document.head.appendChild(style);
   root.dataset.fxMobileSeamR170='ready-58-72-priority';
 }
 function ensure(){
