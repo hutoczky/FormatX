@@ -1,0 +1,62 @@
+name: One-shot publish r175 award narrative
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r175-award-narrative.yml']
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Wire r175 narrative and RAF-throttled living energy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          index=Path('docs/scifi-ui/index.html')
+          html=index.read_text()
+          style='<link rel="stylesheet" data-fx-award-narrative-r175="true" href="./styles/formatx-award-narrative-r175.css?v=20260816-r175-award-narrative">'
+          script='<script defer data-fx-award-narrative-r175="true" src="./scripts/formatx-award-narrative-r175.js?v=20260816-r175-award-narrative"></script>'
+          energy_style='  <link rel="stylesheet" data-fx-living-energy-r168="true" href="./styles/formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics">'
+          energy_script_pat=r'  <script defer data-fx-living-energy-r168="true" src="\.\/scripts\/formatx-living-energy-r168\.js\?v=20260815-r168-v3-monotonic&rev=[^"]+"></script>'
+          energy_script='  <script defer data-fx-living-energy-r168="true" src="./scripts/formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260816-r175-raf-throttled"></script>'
+          if style not in html:
+              if energy_style not in html: raise SystemExit('r168 style anchor missing')
+              html=html.replace(energy_style,energy_style+'\n  '+style,1)
+          if script not in html:
+              m=re.search(energy_script_pat,html)
+              if not m: raise SystemExit('r168 script anchor missing')
+              html=html[:m.end()]+'\n  '+script+html[m.end():]
+          html,n=re.subn(energy_script_pat,energy_script,html,count=1)
+          if n!=1: raise SystemExit('expected one r168 cache token')
+          index.write_text(html)
+
+          energy=Path('docs/scifi-ui/scripts/formatx-living-energy-r168.js')
+          s=energy.read_text()
+          decl='let host=null,layer=null,detail=null,boost=0,lastInput=0,timer=0,last=performance.now();'
+          new_decl='let host=null,layer=null,detail=null,boost=0,lastInput=0,raf=0,last=performance.now(),lastTickAt=0;'
+          if decl in s:s=s.replace(decl,new_decl,1)
+          elif new_decl not in s:raise SystemExit('r168 scheduler declaration anchor missing')
+
+          old="function start(){if(!ensure())return;if(timer)return;last=performance.now();tick();timer=setInterval(tick,32);root.dataset.fxLivingEnergyClockR168=CLOCK;}\nif(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();\nconst mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!timer)start();});mo.observe(document.documentElement,{childList:true,subtree:true});\naddEventListener('pageshow',start,{passive:true});"
+          new="function loop(now){raf=requestAnimationFrame(loop);if(document.hidden)return;if(!lastTickAt||now-lastTickAt>=30){lastTickAt=now;tick();}}\nfunction start(){if(!ensure())return;if(raf)return;last=performance.now();lastTickAt=0;tick();raf=requestAnimationFrame(loop);root.dataset.fxLivingEnergyClockR168=CLOCK;root.dataset.fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms';}\nif(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();\nconst mo=new MutationObserver(()=>{if(!layer?.isConnected||!detail?.isConnected||!raf)start();});mo.observe(document.documentElement,{childList:true,subtree:true});\naddEventListener('pageshow',start,{passive:true});"
+          if old in s:s=s.replace(old,new,1)
+          elif "fxLivingEnergySchedulerR175='requestAnimationFrame-throttled-30ms'" not in s:raise SystemExit('r168 scheduler body anchor missing')
+          energy.write_text(s)
+          PY
+          node --check docs/scifi-ui/scripts/formatx-living-energy-r168.js
+          node --check docs/scifi-ui/scripts/formatx-award-narrative-r175.js
+          node .github/scripts/validate-award-narrative-r175.cjs
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/formatx-living-energy-r168.js
+          if git diff --cached --quiet; then echo 'r175 already wired'; exit 0; fi
+          git commit -m '[deploy-production] feat(award): publish r175 narrative and RAF optical runtime'
+          git push origin HEAD:master
