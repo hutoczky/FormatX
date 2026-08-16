@@ -1,4 +1,5 @@
 name: One-shot r177 desktop native layout scope
+# rerun: robust-fragment-patch-20260816
 on:
   push:
     branches: [master]
@@ -18,12 +19,13 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
-          # 1) Remove the obsolete desktop block from the mobile reference stylesheet.
+          # 1) Remove the obsolete desktop reference-layout block from the mobile stylesheet.
           cp=Path('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css')
           css=cp.read_text()
           marker='@media (min-width:901px) {'
-          if marker in css:
+          while marker in css:
               start=css.index(marker)
               brace=css.index('{',start)
               depth=0;end=None
@@ -34,42 +36,59 @@ jobs:
                       if depth==0:
                           end=i+1;break
               if end is None: raise SystemExit('desktop media block did not close')
-              css=css[:start]+'/* r177: desktop remains native. Mobile reference geometry is scoped to <=900px/coarse pointer only. */\n'+css[end:]
+              css=css[:start]+'/* r177: desktop remains native; reference-flow geometry is mobile-only. */\n'+css[end:]
           if '@media (min-width:901px)' in css: raise SystemExit('desktop reference media block remains')
           cp.write_text(css)
 
-          # 2) Do not create mobile-only reference flow DOM on desktop.
+          # 2) Do not create mobile-only reference heading/proof/rail on desktop.
           jp=Path('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js')
           js=jp.read_text()
           js=js.replace('/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260813-mobile-only-r73','/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260816-mobile-only-r177',1)
-          old="function create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!hero||!grid||!space)return false;ensureHeader(hero);ensureFlowContent(hero,grid,space);root.dataset.fxMobileReferenceLayout='ready-v1';root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r84';return true;}"
-          new="function cleanupDesktopFlow(hero){hero.querySelectorAll('.fx-reference-heading,.fx-reference-proof,.fx-reference-rail').forEach(node=>node.remove());root.dataset.fxReferenceComposition='desktop-native-r177';}\nfunction create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!hero||!grid||!space)return false;ensureHeader(hero);if(mobileViewport())ensureFlowContent(hero,grid,space);else cleanupDesktopFlow(hero);root.dataset.fxMobileReferenceLayout='ready-v1';root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r177';return true;}"
-          if old in js: js=js.replace(old,new,1)
-          elif 'desktop-native-r177' not in js: raise SystemExit('layout create anchor missing')
+          if 'function cleanupDesktopFlow(hero)' not in js:
+              anchor='function create(){'
+              if anchor not in js: raise SystemExit('create function anchor missing')
+              cleanup="function cleanupDesktopFlow(hero){hero.querySelectorAll('.fx-reference-heading,.fx-reference-proof,.fx-reference-rail').forEach(node=>node.remove());root.dataset.fxReferenceComposition='desktop-native-r177';}\n"
+              js=js.replace(anchor,cleanup+anchor,1)
+          old_fragment="ensureHeader(hero);ensureFlowContent(hero,grid,space);root.dataset.fxMobileReferenceLayout='ready-v1';root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r84';"
+          new_fragment="ensureHeader(hero);if(mobileViewport())ensureFlowContent(hero,grid,space);else cleanupDesktopFlow(hero);root.dataset.fxMobileReferenceLayout='ready-v1';root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r177';"
+          if old_fragment in js:
+              js=js.replace(old_fragment,new_fragment,1)
+          elif new_fragment not in js:
+              # Fallback regex ignores small whitespace/revision differences around the same semantic block.
+              pat=r"ensureHeader\(hero\);\s*ensureFlowContent\(hero,grid,space\);\s*root\.dataset\.fxMobileReferenceLayout='ready-v1';\s*root\.dataset\.fxReferenceComposition=mobileViewport\(\)\?'mag-first-normal-flow-r74':'desktop-native-r84';"
+              js,n=re.subn(pat,new_fragment,js,count=1)
+              if n!=1: raise SystemExit('layout create semantic fragment missing')
+          if 'desktop-native-r177' not in js or 'if(mobileViewport())ensureFlowContent' not in js:
+              raise SystemExit('desktop cleanup contract incomplete')
           jp.write_text(js)
 
-          # 3) Fresh cache chain through the main core bootstrap and index.
+          # 3) Fresh cache chain through the core bootstrap and index.
           bp=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
           boot=bp.read_text()
-          old_layout="const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260814-desktop-safe-r84';"
-          new_layout="const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177';"
-          if old_layout in boot: boot=boot.replace(old_layout,new_layout,1)
-          elif new_layout not in boot: raise SystemExit('bootstrap layout cache anchor missing')
+          boot,n=re.subn(r"const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1\.js\?v=[^']+';",
+                         "const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177';",boot,count=1)
+          if n!=1 and 'v=20260816-desktop-native-r177' not in boot: raise SystemExit('bootstrap layout cache anchor missing')
           bp.write_text(boot)
 
           ip=Path('docs/scifi-ui/index.html')
           html=ip.read_text()
-          old='formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-r166c-held-shape-pulse'
-          new='formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260816-r177-desktop-native-scope'
-          if old in html: html=html.replace(old,new,1)
-          elif new not in html: raise SystemExit('index core bootstrap cache anchor missing')
+          html,n=re.subn(r'formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=[^"\']+',
+                         'formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260816-r177-desktop-native-scope',html,count=1)
+          if n!=1 and 'rev=20260816-r177-desktop-native-scope' not in html: raise SystemExit('index core bootstrap cache anchor missing')
           ip.write_text(html)
 
-          # 4) Align the production contract with the new desktop-native scope.
+          # 4) Align production validation with the mobile-only scope.
           vp=Path('.github/scripts/validate-real3d-core.cjs')
           v=vp.read_text()
-          v=v.replace('formatx-mobile-reference-layout-v1.js?v=20260814-desktop-safe-r84','formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177',1)
-          v=v.replace("assert.ok(layoutStyle.includes('@media (min-width:901px)'));","assert.doesNotMatch(layoutStyle,/@media \\(min-width:901px\\)/,'mobile reference stylesheet leaked a desktop media block');",1)
+          v=re.sub(r'formatx-mobile-reference-layout-v1\.js\?v=[^\'\"]+', 'formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177', v, count=1)
+          legacy="assert.ok(layoutStyle.includes('@media (min-width:901px)'));"
+          replacement="assert.doesNotMatch(layoutStyle,/@media \\(min-width:901px\\)/,'mobile reference stylesheet leaked a desktop media block');"
+          if legacy in v:v=v.replace(legacy,replacement,1)
+          elif replacement not in v:
+              # Insert beside the existing layoutStyle assertions.
+              anchor="assert.ok(layoutStyle.includes(':focus-visible'));"
+              if anchor not in v: raise SystemExit('layoutStyle validator anchor missing')
+              v=v.replace(anchor,anchor+replacement,1)
           if 'formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177' not in v: raise SystemExit('validator cache token update failed')
           vp.write_text(v)
           PY
