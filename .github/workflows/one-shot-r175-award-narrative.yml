@@ -1,4 +1,5 @@
 name: One-shot publish r175 award narrative
+# rerun: validator-fix-20260816
 on:
   push:
     branches: [master]
