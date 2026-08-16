@@ -1,0 +1,275 @@
+/* FormatX r175 — award narrative composition.
+   One recognizable visual grammar across hero, story, product, commerce and proof.
+   No layout-driven animation: motion is limited to opacity/transform/filter. */
+
+html[data-fx-award-narrative-r175="ready"] {
+  --fx-r175-copy: min(68ch, 100%);
+  --fx-r175-heading: min(15ch, 100%);
+  --fx-r175-space-scene: clamp(88px, 9vw, 156px);
+  --fx-r175-space-scene-mobile: clamp(68px, 17vw, 104px);
+  --fx-r175-accent: 124, 236, 255;
+  --fx-r175-secondary: 143, 114, 255;
+  --fx-r175-story-progress: 0;
+  --fx-r175-chapter-progress: 0;
+  --fx-r175-energy: .18;
+}
+
+html[data-fx-award-narrative-r175="ready"] body.living-architecture {
+  background-color: #01040b;
+}
+
+/* The entire page is one organism: no hard visual reset between chapters. */
+html[data-fx-award-narrative-r175="ready"] #main-content {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 64vw 48vw at calc(8% + var(--fx-r175-story-progress) * 84%) 18%, rgba(var(--fx-r175-accent), .035), transparent 72%),
+    linear-gradient(180deg, rgba(1,4,11,0) 0%, rgba(4,13,30,.18) 34%, rgba(2,8,19,.12) 66%, rgba(1,4,11,0) 100%);
+}
+
+html[data-fx-award-narrative-r175="ready"] #main-content > section.scene:not(#hero) {
+  padding-block: var(--fx-r175-space-scene);
+  scroll-margin-top: 86px;
+  position: relative;
+  isolation: isolate;
+}
+
+html[data-fx-award-narrative-r175="ready"] #main-content > section.scene:not(#hero) + section.scene:not(#hero) {
+  margin-top: clamp(-34px, -2.2vw, -14px);
+}
+
+/* Typography becomes the primary composition tool instead of another effect. */
+html[data-fx-award-narrative-r175="ready"] .section-heading {
+  position: relative;
+  display: grid;
+  gap: clamp(15px, 1.6vw, 25px);
+  max-width: min(1180px, 92vw);
+  margin-bottom: clamp(42px, 5.5vw, 84px);
+  padding-left: clamp(0px, 3vw, 42px);
+}
+
+html[data-fx-award-narrative-r175="ready"] .section-heading .section-index {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  margin: 0;
+  color: rgba(196,231,245,.72);
+  font-family: var(--fx-font-mono, monospace);
+  font-size: clamp(9px, .72vw, 11px);
+  font-weight: 750;
+  letter-spacing: .18em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+html[data-fx-award-narrative-r175="ready"] .section-heading .section-index::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border: 1px solid rgba(var(--fx-r175-accent), .72);
+  transform: rotate(45deg) scale(calc(.82 + var(--fx-r175-energy) * .08));
+  box-shadow: 0 0 14px rgba(var(--fx-r175-accent), .20);
+  transition: transform .5s cubic-bezier(.2,.75,.2,1), border-color .35s ease, box-shadow .35s ease;
+}
+
+html[data-fx-award-narrative-r175="ready"] .section-heading .section-index::after {
+  content: attr(data-fx-story-caption);
+  max-width: min(42vw, 430px);
+  overflow: hidden;
+  color: rgba(var(--fx-r175-accent), .54);
+  font-size: .92em;
+  letter-spacing: .13em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+html[data-fx-award-narrative-r175="ready"] .section-heading h2 {
+  max-width: var(--fx-r175-heading);
+  margin: 0;
+  color: #f5fbff;
+  font-family: var(--fx-font-display, sans-serif);
+  font-size: clamp(2.7rem, 5.25vw, 5.8rem);
+  font-weight: 560;
+  letter-spacing: -.052em;
+  line-height: .94;
+  text-wrap: balance;
+  text-shadow: 0 0 42px rgba(var(--fx-r175-accent), .035);
+}
+
+html[data-fx-award-narrative-r175="ready"] .section-heading h2 em {
+  color: rgba(186,220,235,.58);
+  font-style: normal;
+  font-weight: 420;
+}
+
+/* FormatX signature carrier: a quiet signal line, never a generic neon divider. */
+html[data-fx-award-narrative-r175="ready"] .section-heading::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg,
+    rgba(var(--fx-r175-accent), .72),
+    rgba(var(--fx-r175-secondary), .24) 46%,
+    transparent 92%);
+  opacity: calc(.28 + var(--fx-r175-energy) * .34);
+  transform: scaleY(calc(.64 + var(--fx-r175-chapter-progress) * .36));
+  transform-origin: 50% 0;
+  transition: opacity .4s ease;
+  pointer-events: none;
+}
+
+/* Story-state polish. Nothing moves document geometry. */
+html[data-fx-award-narrative-r175="ready"] section.scene[data-fx-story-state="future"] > .section-heading {
+  opacity: .72;
+  transform: translate3d(0, 12px, 0);
+}
+
+html[data-fx-award-narrative-r175="ready"] section.scene[data-fx-story-state="active"] > .section-heading,
+html[data-fx-award-narrative-r175="ready"] section.scene[data-fx-story-state="past"] > .section-heading {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+html[data-fx-award-narrative-r175="ready"] section.scene > .section-heading {
+  transition: opacity .65s ease, transform .75s cubic-bezier(.2,.75,.2,1);
+}
+
+/* Readability: every paragraph has a deliberate measure. */
+html[data-fx-award-narrative-r175="ready"] :is(.scene,.fx-category-deck) :is(p,li) {
+  text-wrap: pretty;
+}
+
+html[data-fx-award-narrative-r175="ready"] :is(.scene,.fx-category-deck) :is(.section-heading + p, .hero-lead, .payment p) {
+  max-width: var(--fx-r175-copy);
+}
+
+/* Product organs share one material language without becoming six identical cards. */
+html[data-fx-award-narrative-r175="ready"] .cards,
+html[data-fx-award-narrative-r175="ready"] .pricing {
+  gap: clamp(14px, 1.45vw, 24px);
+}
+
+html[data-fx-award-narrative-r175="ready"] :is(.card,.price-card) {
+  border-color: rgba(177,219,239,.12);
+  background:
+    linear-gradient(145deg, rgba(12,28,45,.72), rgba(4,12,25,.82) 62%, rgba(7,13,28,.68)),
+    radial-gradient(circle at 15% 0%, rgba(var(--fx-r175-accent), .05), transparent 46%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 22px 70px rgba(0,0,0,.18);
+  transition: transform .42s cubic-bezier(.2,.75,.2,1), border-color .35s ease, background-color .35s ease, box-shadow .35s ease;
+}
+
+html[data-fx-award-narrative-r175="ready"] .price-card.featured {
+  border-color: rgba(var(--fx-r175-accent), .34);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 28px 90px rgba(0,0,0,.25), 0 0 52px rgba(var(--fx-r175-accent), .055);
+}
+
+@media (hover:hover) and (pointer:fine) {
+  html[data-fx-award-narrative-r175="ready"] :is(.card,.price-card):hover {
+    transform: translate3d(0,-4px,0);
+    border-color: rgba(var(--fx-r175-accent), .28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 32px 86px rgba(0,0,0,.25), 0 0 40px rgba(var(--fx-r175-accent), .045);
+  }
+}
+
+/* Flow is a narrative instrument, not an isolated widget. */
+html[data-fx-award-narrative-r175="ready"] #experience .flow {
+  position: relative;
+}
+
+html[data-fx-award-narrative-r175="ready"] #experience .flow-chapters article {
+  transition: opacity .35s ease, transform .45s cubic-bezier(.2,.75,.2,1), border-color .35s ease, background-color .35s ease;
+}
+
+html[data-fx-award-narrative-r175="ready"] #experience .flow-chapters article.active {
+  transform: translate3d(0,0,0);
+}
+
+/* Each organ has a distinct but related signal tint. */
+html[data-fx-award-narrative-r175="ready"] #experience { --fx-r175-accent: 96, 228, 255; --fx-r175-secondary: 105, 142, 255; }
+html[data-fx-award-narrative-r175="ready"] #capabilities { --fx-r175-accent: 121, 241, 219; --fx-r175-secondary: 98, 161, 255; }
+html[data-fx-award-narrative-r175="ready"] #pricing { --fx-r175-accent: 255, 207, 137; --fx-r175-secondary: 160, 109, 255; }
+html[data-fx-award-narrative-r175="ready"] #system { --fx-r175-accent: 139, 203, 255; --fx-r175-secondary: 143, 114, 255; }
+html[data-fx-award-narrative-r175="ready"] #resources { --fx-r175-accent: 183, 244, 255; --fx-r175-secondary: 111, 227, 200; }
+
+/* Momentary chapter hand-off: subtle, short, meaningful. */
+html[data-fx-story-pulse-r175="on"] .fx-rail-progress,
+html[data-fx-story-pulse-r175="on"] .fx-organism-status i {
+  filter: brightness(1.32) saturate(1.18);
+  opacity: .96;
+}
+
+/* Narrow screens keep the same hierarchy instead of receiving a reduced design. */
+@media (max-width: 900px) {
+  html[data-fx-award-narrative-r175="ready"] #main-content > section.scene:not(#hero) {
+    padding-block: var(--fx-r175-space-scene-mobile);
+    scroll-margin-top: 74px;
+  }
+
+  html[data-fx-award-narrative-r175="ready"] #main-content > section.scene:not(#hero) + section.scene:not(#hero) {
+    margin-top: 0;
+  }
+
+  html[data-fx-award-narrative-r175="ready"] .section-heading {
+    max-width: 100%;
+    gap: 14px;
+    margin-bottom: clamp(34px, 10vw, 54px);
+    padding-left: 18px;
+  }
+
+  html[data-fx-award-narrative-r175="ready"] .section-heading h2 {
+    max-width: 12ch;
+    font-size: clamp(2.15rem, 10.2vw, 3.55rem);
+    line-height: .98;
+    letter-spacing: -.045em;
+  }
+
+  html[data-fx-award-narrative-r175="ready"] .section-heading .section-index {
+    font-size: 9px;
+    letter-spacing: .14em;
+  }
+
+  html[data-fx-award-narrative-r175="ready"] .section-heading .section-index::after {
+    max-width: 47vw;
+    letter-spacing: .095em;
+  }
+
+  html[data-fx-award-narrative-r175="ready"] .cards,
+  html[data-fx-award-narrative-r175="ready"] .pricing {
+    gap: 12px;
+  }
+
+  html[data-fx-award-narrative-r175="ready"] :is(.card,.price-card) {
+    transform: none;
+  }
+}
+
+@media (max-width: 430px) {
+  html[data-fx-award-narrative-r175="ready"] .section-heading {
+    padding-left: 14px;
+  }
+  html[data-fx-award-narrative-r175="ready"] .section-heading h2 {
+    font-size: clamp(2.05rem, 10.8vw, 3.2rem);
+  }
+  html[data-fx-award-narrative-r175="ready"] .section-heading .section-index::after {
+    max-width: 44vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-fx-award-narrative-r175="ready"] *,
+  html[data-fx-award-narrative-r175="ready"] *::before,
+  html[data-fx-award-narrative-r175="ready"] *::after {
+    scroll-behavior: auto !important;
+  }
+  html[data-fx-award-narrative-r175="ready"] section.scene > .section-heading,
+  html[data-fx-award-narrative-r175="ready"] :is(.card,.price-card),
+  html[data-fx-award-narrative-r175="ready"] .section-heading .section-index::before {
+    transition: none !important;
+    transform: none !important;
+  }
+}
