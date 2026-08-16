@@ -1,4 +1,5 @@
 'use strict';
+// r175 public-integrity revalidation: narrative + responsive composition + RAF optical scheduler.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const repo=path.resolve(__dirname,'../..');
 const read=f=>fs.readFileSync(path.join(repo,f),'utf8');
