@@ -1,0 +1,85 @@
+name: One-shot r177 desktop native layout scope
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r177-desktop-native-scope.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Keep mobile reference layout mobile-only and desktop native from first paint
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          # 1) Remove the obsolete desktop block from the mobile reference stylesheet.
+          cp=Path('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css')
+          css=cp.read_text()
+          marker='@media (min-width:901px) {'
+          if marker in css:
+              start=css.index(marker)
+              brace=css.index('{',start)
+              depth=0;end=None
+              for i in range(brace,len(css)):
+                  if css[i]=='{': depth+=1
+                  elif css[i]=='}':
+                      depth-=1
+                      if depth==0:
+                          end=i+1;break
+              if end is None: raise SystemExit('desktop media block did not close')
+              css=css[:start]+'/* r177: desktop remains native. Mobile reference geometry is scoped to <=900px/coarse pointer only. */\n'+css[end:]
+          if '@media (min-width:901px)' in css: raise SystemExit('desktop reference media block remains')
+          cp.write_text(css)
+
+          # 2) Do not create mobile-only reference flow DOM on desktop.
+          jp=Path('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js')
+          js=jp.read_text()
+          js=js.replace('/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260813-mobile-only-r73','/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260816-mobile-only-r177',1)
+          old="function create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!hero||!grid||!space)return false;ensureHeader(hero);ensureFlowContent(hero,grid,space);root.dataset.fxMobileReferenceLayout='ready-v1';root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r84';return true;}"
+          new="function cleanupDesktopFlow(hero){hero.querySelectorAll('.fx-reference-heading,.fx-reference-proof,.fx-reference-rail').forEach(node=>node.remove());root.dataset.fxReferenceComposition='desktop-native-r177';}\nfunction create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!hero||!grid||!space)return false;ensureHeader(hero);if(mobileViewport())ensureFlowContent(hero,grid,space);else cleanupDesktopFlow(hero);root.dataset.fxMobileReferenceLayout='ready-v1';root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r177';return true;}"
+          if old in js: js=js.replace(old,new,1)
+          elif 'desktop-native-r177' not in js: raise SystemExit('layout create anchor missing')
+          jp.write_text(js)
+
+          # 3) Fresh cache chain through the main core bootstrap and index.
+          bp=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          boot=bp.read_text()
+          old_layout="const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260814-desktop-safe-r84';"
+          new_layout="const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177';"
+          if old_layout in boot: boot=boot.replace(old_layout,new_layout,1)
+          elif new_layout not in boot: raise SystemExit('bootstrap layout cache anchor missing')
+          bp.write_text(boot)
+
+          ip=Path('docs/scifi-ui/index.html')
+          html=ip.read_text()
+          old='formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260815-r166c-held-shape-pulse'
+          new='formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260816-r177-desktop-native-scope'
+          if old in html: html=html.replace(old,new,1)
+          elif new not in html: raise SystemExit('index core bootstrap cache anchor missing')
+          ip.write_text(html)
+
+          # 4) Align the production contract with the new desktop-native scope.
+          vp=Path('.github/scripts/validate-real3d-core.cjs')
+          v=vp.read_text()
+          v=v.replace('formatx-mobile-reference-layout-v1.js?v=20260814-desktop-safe-r84','formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177',1)
+          v=v.replace("assert.ok(layoutStyle.includes('@media (min-width:901px)'));","assert.doesNotMatch(layoutStyle,/@media \\(min-width:901px\\)/,'mobile reference stylesheet leaked a desktop media block');",1)
+          if 'formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177' not in v: raise SystemExit('validator cache token update failed')
+          vp.write_text(v)
+          PY
+          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node .github/scripts/validate-real3d-core.cjs
+          node .github/scripts/validate-award-narrative-r175.cjs
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
+          if git diff --cached --quiet; then echo 'r177 already applied'; exit 0; fi
+          git commit -m '[deploy-production] fix(layout): keep reference flow mobile-only r177'
+          git push origin HEAD:master
