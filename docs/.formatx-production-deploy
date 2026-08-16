@@ -1,11 +1,12 @@
 FormatX production deployment marker
-requested_at=2026-08-16T12:34:00+02:00
-source_master=96aaa1fee1209b60228bff0043acc8a5747bde84
-purpose=activate r180c source-owned mobile UI flow while preserving the approved MAG geometry, size, r179b SOTY continuity, r158 heartbeat, r168 optics and r144 interaction stack
-mobile_header=flow now owns final coordinates: brand top 17px height 34px; MAG top 14px size 48x40; HU top 14px size 40x40; menu top 8px size 48x52; all optical centers align at 34px
-hero_controls=flow now owns rail top 18px and gap 24px; ASK and pause are 50x50; KERDEZZ/ASK label top 55px with a dedicated safe lane and no pause overlap
-proof=at <=400px flow owns full-width proof copy with padding-right 0 and normal wrapping; Live OS uses top auto, right 16px, bottom 18px, size 78x54 in its own CTA lane
-cache=public bootstrap URL is bumped to r180c and the internal flow asset uses v=20260816-mobile-ui-r180c; temporary r180b mutation-observer script is removed from the page
-continuity=retain r179b living organ field, smooth carrier seam and reduced mobile orbit dominance so the MAG remains integrated with the page
-interaction=preserve lub-dub heartbeat, pointer/touch, mobile gyro, pause and prefers-reduced-motion; do not alter crystal silhouette or accepted scale
-verification=source/runtime/security validation; JS syntax; Worker tests; build; custom-domain smoke; 390x844 post-delay and post-resize source-flow geometry, labels, proof/Live OS separation, seam, orbit, render budget and screenshot
+requested_at=2026-08-16T12:54:30+02:00
+source_master=fd34a8378e22527fb7fea50bed437cc456261bce
+purpose=activate r181 desktop crystal apex on top of the already-live r179b whole-page SOTY continuity and r180c mobile source-owned layout without changing the approved MAG geometry or mobile size
+hero_desktop=replace the old desktop-native small system-map composition with a cinematic full-field living MAG composition; the existing crystal reference material and native WebGL surface occupy the visual center/right while the hero copy becomes secondary telemetry on the left
+webgl=keep the existing r99 WebGL2 geometry/shader/interactions authoritative; raise the native WebGL canvas from near-hidden desktop opacity to a visible supporting layer under the reference material so pointer-driven facet motion contributes to the scene rather than a static product-map feel
+reference=keep the approved reference crystal geometry and r157 material reconstruction; enlarge only its desktop composition footprint through stage/layout, not the object geometry
+legacy=hide the old hero labels, hero ring, organism-map and immersive-launch widget on desktop because they compete with the crystal focal scene; retain mobile MAG/ASK/pause/proof flow unchanged through r181 mobile bypass
+interaction=desktop pointer movement drives subtle field/parallax energy while existing r158 lub-dub heartbeat, r168 optics and WebGL interaction remain active; mobile keeps touch and r144 gyro unchanged
+continuity=preserve r179b core -> nervous system -> organs -> commerce heart -> skeleton -> beacon organ field and active chapter visuals; no second WebGL context
+performance=r181 skips in Lighthouse mode, uses the already-existing WebGL context plus compositor transforms/opacity/gradients and respects prefers-reduced-motion
+verification=production candidate source/runtime/security, JS syntax, Worker tests, build and custom-domain smoke; r181 live desktop gate asserts large crystal, visible native WebGL layer, old map hidden, pointer interaction, no horizontal overflow, render budget and screenshot; mobile gate asserts r181 bypass and unchanged accepted reference MAG/touch/gyro stack
