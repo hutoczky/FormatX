@@ -1,0 +1,82 @@
+name: One-shot r178 mobile-only flow controller
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r178-flow-mobile-only.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Make reference flow CSS and controller mobile-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          # A) Layout loader: never attach flow-first CSS on desktop; remove it after a resize to desktop.
+          lp=Path('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js')
+          layout=lp.read_text()
+          old=" if(!document.querySelector('link[data-fx-flow-first-r74]')){const f=document.createElement('link');f.rel='stylesheet';f.href='/scifi-ui/styles/formatx-flow-first-r74.css?v=20260814-mag-first-flow-r74';f.dataset.fxFlowFirstR74='true';document.head.appendChild(f)}"
+          new=" const existingFlow=document.querySelector('link[data-fx-flow-first-r74]');if(mobileViewport()){if(!existingFlow){const f=document.createElement('link');f.rel='stylesheet';f.href='/scifi-ui/styles/formatx-flow-first-r74.css?v=20260816-mobile-only-r178';f.dataset.fxFlowFirstR74='true';document.head.appendChild(f)}}else existingFlow?.remove();"
+          if old in layout: layout=layout.replace(old,new,1)
+          elif '20260816-mobile-only-r178' not in layout: raise SystemExit('flow style loader anchor missing')
+          lp.write_text(layout)
+
+          # B) Flow controller: desktop exits before writing any header/hero geometry.
+          fp=Path('docs/scifi-ui/scripts/formatx-flow-first-r75.js')
+          flow=fp.read_text()
+          old_head="function apply(){\n queued=false;\n const mobile=innerWidth<=900;\n const bar=document.querySelector('.topbar');"
+          new_head="function clearInline(el,props){if(!(el instanceof HTMLElement))return;for(const prop of props)el.style.removeProperty(prop);}\nfunction restoreDesktopNative(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space'),copy=hero?.querySelector('.hero-copy'),bar=document.querySelector('.topbar');restoreDesktopMenu();clearInline(bar,['position','inset','top','right','bottom','left','display','align-items','flex-wrap','gap','padding']);clearInline(hero,['display','height','min-height','max-height','padding-top','overflow']);clearInline(grid,['position','display','flex-direction','grid-template-columns','grid-template-rows','align-items','width','max-width','height','min-height','gap','margin','padding','overflow']);clearInline(space,['position','inset','top','right','bottom','left','grid-area','grid-row','grid-column','transform','translate','order','align-self','margin','width','height','min-height','max-width']);clearInline(copy,['position','inset','top','right','bottom','left','order','align-self','display','grid-template-columns','grid-template-rows','align-content','row-gap','width','max-width','height','min-height','margin','padding','overflow','clip','clip-path','white-space','opacity','visibility']);root.dataset.fxReferenceComposition='desktop-native-r178';root.dataset.fxFlowFirstR75='desktop-bypass-r178';return true;}\nfunction apply(){\n queued=false;\n const mobile=innerWidth<=900;\n if(!mobile)return restoreDesktopNative();\n const bar=document.querySelector('.topbar');"
+          if old_head in flow: flow=flow.replace(old_head,new_head,1)
+          elif 'desktop-bypass-r178' not in flow: raise SystemExit('flow apply head anchor missing')
+          # The old desktop branch is now unreachable. Keep it temporarily for safe mobile->desktop cleanup compatibility,
+          # but its geometry cannot execute because of the early desktop return above.
+          fp.write_text(flow)
+
+          # C) Core bootstrap: do not even load flow controller on a fresh desktop.
+          bp=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          boot=bp.read_text()
+          boot,n=re.subn(r"const FLOW_SCRIPT = '/scifi-ui/scripts/formatx-flow-first-r75\.js\?v=[^']+';",
+                         "const FLOW_SCRIPT = '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260816-mobile-only-r178';",boot,count=1)
+          if n!=1 and 'v=20260816-mobile-only-r178' not in boot: raise SystemExit('FLOW_SCRIPT cache anchor missing')
+          old_fn="function addFlowGuard(){if(document.querySelector('script[data-fx-flow-first-r75]')){addLiveMotion();return;}const s=document.createElement('script');s.src=FLOW_SCRIPT;s.async=false;s.dataset.fxFlowFirstR75='true';s.addEventListener('load',()=>{root.dataset.fxFlowFirstGuard='ready-r139';addFinalizer();addGyro();addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxFlowFirstGuard='failed-r139';addLiveMotion();},{once:true});document.head.appendChild(s);}"
+          new_fn="function addFlowGuard(){if(innerWidth>900){root.dataset.fxFlowFirstGuard='desktop-bypass-r178';addFinalizer();addGyro();addLiveMotion();return;}if(document.querySelector('script[data-fx-flow-first-r75]')){addLiveMotion();return;}const s=document.createElement('script');s.src=FLOW_SCRIPT;s.async=false;s.dataset.fxFlowFirstR75='true';s.addEventListener('load',()=>{root.dataset.fxFlowFirstGuard='ready-r178';addFinalizer();addGyro();addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxFlowFirstGuard='failed-r178';addLiveMotion();},{once:true});document.head.appendChild(s);}"
+          if old_fn in boot: boot=boot.replace(old_fn,new_fn,1)
+          elif 'desktop-bypass-r178' not in boot: raise SystemExit('addFlowGuard anchor missing')
+          bp.write_text(boot)
+
+          # D) Fresh bootstrap cache in index.
+          ip=Path('docs/scifi-ui/index.html')
+          html=ip.read_text()
+          html,n=re.subn(r'formatx-core-real3d-v20\.js\?v=20260814-r99-touch-contrast-r2&rev=[^"\']+',
+                         'formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260816-r178-flow-mobile-only',html,count=1)
+          if n!=1 and 'rev=20260816-r178-flow-mobile-only' not in html: raise SystemExit('index bootstrap cache anchor missing')
+          ip.write_text(html)
+
+          # E) Contract alignment.
+          vp=Path('.github/scripts/validate-real3d-core.cjs')
+          v=vp.read_text()
+          v=re.sub(r'formatx-flow-first-r75\.js\?v=[^\'\"]+', 'formatx-flow-first-r75.js?v=20260816-mobile-only-r178', v, count=1)
+          v=v.replace("for(const token of ['const mobile=innerWidth<=900','award-reference-overlay-r139','desktop-native-content-r139','restoreDesktopMenu'])assert.ok(flow.includes(token));",
+                      "for(const token of ['const mobile=innerWidth<=900','award-reference-overlay-r139','desktop-bypass-r178','restoreDesktopMenu','restoreDesktopNative'])assert.ok(flow.includes(token));",1)
+          if 'formatx-flow-first-r75.js?v=20260816-mobile-only-r178' not in v: raise SystemExit('real3d flow cache contract update failed')
+          vp.write_text(v)
+          PY
+          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          node --check docs/scifi-ui/scripts/formatx-flow-first-r75.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node .github/scripts/validate-real3d-core.cjs
+          node .github/scripts/validate-award-narrative-r175.cjs
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js docs/scifi-ui/scripts/formatx-flow-first-r75.js docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html .github/scripts/validate-real3d-core.cjs
+          if git diff --cached --quiet; then echo 'r178 already applied'; exit 0; fi
+          git commit -m '[deploy-production] fix(layout): make reference flow mobile-only r178'
+          git push origin HEAD:master
