@@ -42,28 +42,29 @@ main .button{display:inline-flex;align-items:center;justify-content:center;gap:.
 :where(a,button,[tabindex]):focus-visible{outline:2px solid var(--fx-signature-focus)!important;outline-offset:4px!important;box-shadow:0 0 0 5px rgba(62,205,255,.12)!important}
 
 /* Entire MAG becomes the discoverable signature control while existing pointer/touch events keep bubbling to hero-space. */
-#hero .hero-space{position:relative}
-#hero .fx-signature-core-trigger{
-  position:absolute;z-index:44;border:0;background:transparent;color:transparent;padding:0;margin:0;
+#hero{position:relative}
+#hero>.fx-signature-core-trigger{
+  position:absolute;z-index:420;pointer-events:auto!important;isolation:isolate;border:0;background:transparent;color:transparent;padding:0;margin:0;
   min-width:44px;min-height:44px;cursor:pointer;border-radius:50%;touch-action:manipulation;
+  clip-path:polygon(50% 1%,64% 31%,99% 50%,64% 69%,50% 99%,36% 69%,1% 50%,36% 31%);
   -webkit-tap-highlight-color:transparent;
 }
-#hero .fx-signature-core-trigger::before{
+#hero>.fx-signature-core-trigger::before{
   content:"";position:absolute;left:50%;top:50%;width:23%;aspect-ratio:1;border-radius:50%;
   transform:translate(-50%,-50%) scale(.76);border:1px solid rgba(194,252,255,.22);
   box-shadow:0 0 18px rgba(83,231,255,.10),0 0 42px rgba(150,77,255,.06);
   opacity:.36;transition:opacity .2s ease,transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease;
 }
-#hero .fx-signature-core-trigger::after{
+#hero>.fx-signature-core-trigger::after{
   content:attr(data-fx-hint);position:absolute;left:50%;bottom:7%;transform:translateX(-50%) translateY(6px);
   color:rgba(217,250,255,.76);font-size:10px;font-weight:650;letter-spacing:.19em;white-space:nowrap;
   opacity:0;transition:opacity .2s ease,transform .2s ease;text-shadow:0 0 12px rgba(64,225,255,.25);
 }
 @media (hover:hover) and (pointer:fine){
-  #hero .fx-signature-core-trigger:hover::before,#hero .fx-signature-core-trigger:focus-visible::before{
+  #hero>.fx-signature-core-trigger:hover::before,#hero>.fx-signature-core-trigger:focus-visible::before{
     opacity:.82;transform:translate(-50%,-50%) scale(1);box-shadow:0 0 24px rgba(83,231,255,.25),0 0 58px rgba(150,77,255,.14)
   }
-  #hero .fx-signature-core-trigger:hover::after,#hero .fx-signature-core-trigger:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0)}
+  #hero>.fx-signature-core-trigger:hover::after,#hero>.fx-signature-core-trigger:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0)}
 }
 
 /* Signature moment: one architecture unfold. No decorative carousel, no second hero. */
@@ -132,7 +133,7 @@ html.fx-signature-open .fx-signature-architecture{visibility:visible;pointer-eve
   .fx-signature-map-core{width:58px}
   .fx-signature-node{min-height:70px;padding:10px;border-radius:15px;backdrop-filter:blur(9px)}
   .fx-signature-node b{width:32px;height:32px}.fx-signature-node span{font-size:10px;letter-spacing:.09em}.fx-signature-node small{font-size:9px}
-  #hero .fx-signature-core-trigger::after{display:none}
+  #hero>.fx-signature-core-trigger::after{display:none}
 }
 
 @media (max-width:430px){
