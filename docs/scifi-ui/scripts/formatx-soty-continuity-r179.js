@@ -175,8 +175,8 @@ function paint(now){
   root.style.setProperty('--fx-r179-progress',globalProgress.toFixed(4));
   root.style.setProperty('--fx-r179-local',localProgress.toFixed(4));
   root.style.setProperty('--fx-r179-boost',boost.toFixed(4));
-  root.style.setProperty('--fx-r179-field-opacity',(mode==='mobile-lite'?.27:mode==='mobile-balanced'?.34:.44).toFixed(3));
-  root.style.setProperty('--fx-r179-sigil-opacity',(mode==='mobile-lite'?.13:mode==='mobile-balanced'?.18:.24).toFixed(3));
+  root.style.setProperty('--fx-r179-field-opacity',(mode==='mobile-lite' ? .27 : mode==='mobile-balanced' ? .34 : .44).toFixed(3));
+  root.style.setProperty('--fx-r179-sigil-opacity',(mode==='mobile-lite' ? .13 : mode==='mobile-balanced' ? .18 : .24).toFixed(3));
 
   sections.forEach(item=>{
     const d=Math.abs(item.index-active);
