@@ -188,7 +188,11 @@
   }
 
   function scheduleEssential() {
-    afterFirstPaint(() => void hydrateEssentialInteractions(), mobileViewport() ? 760 : 420, mobileViewport() ? 420 : 180);
+    afterFirstPaint(
+      () => void hydrateEssentialInteractions(),
+      mobileViewport() ? 760 : 420,
+      mobileViewport() ? 420 : 180,
+    );
   }
 
   function scheduleSecondary() {
@@ -199,7 +203,7 @@
       secondaryObserver = new IntersectionObserver(entries => {
         if (!entries.some(entry => entry.isIntersecting)) return;
         trigger('near-experience');
-      }, { rootMargin: '900px 0px', threshold: 0 });
+      }, { rootMargin: '240px 0px', threshold: 0 });
       secondaryObserver.observe(experience);
     }
 
@@ -211,36 +215,43 @@
       if (['PageDown', 'ArrowDown', 'End', ' '].includes(event.key)) trigger('keyboard-intent');
     }, { once: true });
 
-    secondaryFallback = setTimeout(() => trigger('fallback'), mobileViewport() ? 3200 : 1800);
+    secondaryFallback = setTimeout(
+      () => trigger('long-idle-fallback'),
+      mobileViewport() ? 10000 : 4200,
+    );
   }
 
   function scheduleContent() {
     const start = source => void hydrateContent(source);
-    afterFirstPaint(() => {
+    const delay = mobileViewport() ? 7000 : 2800;
+    contentFallback = setTimeout(() => {
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => start('idle'), { timeout: mobileViewport() ? 2200 : 1400 });
+        requestIdleCallback(() => start('long-idle'), { timeout: 1200 });
       } else {
-        contentFallback = setTimeout(() => start('fallback'), mobileViewport() ? 1800 : 900);
+        start('long-idle');
       }
-    }, mobileViewport() ? 1800 : 900, mobileViewport() ? 1100 : 520);
+    }, delay);
 
-    const interaction = () => start('user-intent');
-    addEventListener('scroll', interaction, { passive: true, once: true });
-    addEventListener('pointerdown', interaction, { passive: true, once: true });
+    const onScrollIntent = () => {
+      setTimeout(() => start('post-scroll'), mobileViewport() ? 900 : 420);
+    };
+    addEventListener('scroll', onScrollIntent, { passive: true, once: true });
+    addEventListener('wheel', onScrollIntent, { passive: true, once: true });
+    addEventListener('touchmove', onScrollIntent, { passive: true, once: true });
   }
 
   function observeFeedback() {
     const section = document.getElementById('user-feedback');
     if (!section) return;
     if (!('IntersectionObserver' in window)) {
-      setTimeout(() => void hydrateFeedback(), 2400);
+      setTimeout(() => void hydrateFeedback(), 7000);
       return;
     }
     const observer = new IntersectionObserver(entries => {
       if (!entries.some(entry => entry.isIntersecting)) return;
       observer.disconnect();
       void hydrateFeedback();
-    }, { rootMargin: '700px 0px' });
+    }, { rootMargin: '500px 0px' });
     observer.observe(section);
   }
 
