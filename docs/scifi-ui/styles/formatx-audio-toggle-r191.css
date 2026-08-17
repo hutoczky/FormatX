@@ -1,0 +1,125 @@
+/* r191 — explicit Awwwards-safe Web Audio control.
+   One visible MUTE / UNMUTE control owns the public audio UI; the legacy
+   engine button remains available only as the internal Web Audio actuator. */
+
+html[data-fx-audio-toggle-r191="ready"] .fx-three-sound {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.fx-audio-toggle-r191 {
+  position: fixed;
+  z-index: 1180;
+  top: 86px;
+  right: max(18px, env(safe-area-inset-right));
+  width: auto;
+  min-width: 112px;
+  height: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 15px 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid rgba(151, 225, 255, .30);
+  border-radius: 999px;
+  background: linear-gradient(145deg, rgba(4, 19, 31, .96), rgba(2, 9, 17, .98));
+  color: rgba(242, 251, 255, .96);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .34), inset 0 0 24px rgba(76, 211, 255, .055);
+  font: 700 10px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease, opacity .18s ease;
+}
+
+.fx-audio-toggle-r191::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  clip-path: polygon(0 35%, 30% 35%, 65% 8%, 65% 92%, 30% 65%, 0 65%);
+  background: currentColor;
+  opacity: .84;
+}
+
+.fx-audio-toggle-r191::after {
+  content: "";
+  position: absolute;
+  left: 34px;
+  width: 10px;
+  height: 16px;
+  border-right: 1.5px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scaleX(.7);
+}
+
+.fx-audio-toggle-r191[data-state="on"] {
+  border-color: rgba(108, 239, 255, .62);
+  background: linear-gradient(145deg, rgba(4, 31, 44, .98), rgba(5, 15, 28, .98));
+  box-shadow: 0 12px 38px rgba(0, 0, 0, .34), 0 0 20px rgba(75, 224, 255, .12), inset 0 0 24px rgba(76, 211, 255, .09);
+}
+
+.fx-audio-toggle-r191[data-state="on"]::after {
+  opacity: .72;
+}
+
+.fx-audio-toggle-r191:hover {
+  border-color: rgba(171, 239, 255, .58);
+}
+
+.fx-audio-toggle-r191:focus-visible {
+  outline: 2px solid rgba(155, 238, 255, .94);
+  outline-offset: 3px;
+}
+
+.fx-audio-toggle-r191:disabled {
+  cursor: default;
+  opacity: .58;
+}
+
+html.fx-organism-menu-open .fx-audio-toggle-r191,
+body.fx-organism-panel-open .fx-audio-toggle-r191 {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  .fx-audio-toggle-r191 {
+    top: 76px;
+    right: calc(max(12px, env(safe-area-inset-right)) + 76px);
+    min-width: 100px;
+    height: 44px;
+    min-height: 44px;
+    padding-inline: 12px 13px;
+    gap: 8px;
+    font-size: 9px;
+    letter-spacing: .11em;
+  }
+
+  .fx-audio-toggle-r191::after {
+    left: 31px;
+  }
+}
+
+@media (max-width: 370px) {
+  .fx-audio-toggle-r191 {
+    right: calc(max(8px, env(safe-area-inset-right)) + 68px);
+    min-width: 92px;
+    padding-inline: 10px;
+    letter-spacing: .08em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-audio-toggle-r191 {
+    transition: none;
+  }
+}
