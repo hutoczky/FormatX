@@ -10,9 +10,9 @@ let paused=mobileViewport()?false:root.dataset.fxReferenceMotionPaused==='true';
 if(root.dataset.fxMobileReferenceLayout==='booting-r74'||root.dataset.fxMobileReferenceLayout==='ready-v1')return;
 root.dataset.fxMobileReferenceLayout='booting-r74';
 function loadStyles(){
- if(!document.querySelector('link[data-fx-mobile-reference-layout-style]')){const l=document.createElement('link');l.rel='stylesheet';l.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260816-mobile-only-r177';l.dataset.fxMobileReferenceLayoutStyle='true';document.head.appendChild(l)}
- const existingFlow=document.querySelector('link[data-fx-flow-first-r74]');if(mobileViewport()){if(!existingFlow){const f=document.createElement('link');f.rel='stylesheet';f.href='/scifi-ui/styles/formatx-flow-first-r74.css?v=20260816-mobile-only-r178';f.dataset.fxFlowFirstR74='true';document.head.appendChild(f)}}else existingFlow?.remove();
- if(!document.querySelector('link[data-fx-responsive-text-guard]')){const g=document.createElement('link');g.rel='stylesheet';g.href='/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260813-responsive-text-wrap-r72';g.dataset.fxResponsiveTextGuard='true';document.head.appendChild(g)}
+ if(!document.querySelector('link[data-fx-mobile-reference-layout-style]')){const l=document.createElement('link');l.rel='stylesheet';l.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260817-r187-first-paint';l.dataset.fxMobileReferenceLayoutStyle='true';document.head.appendChild(l)}
+ const existingFlow=document.querySelector('link[data-fx-flow-first-r74]');if(mobileViewport()){if(!existingFlow){const f=document.createElement('link');f.rel='stylesheet';f.href='/scifi-ui/styles/formatx-flow-first-r74.css?v=20260817-r187-first-paint';f.dataset.fxFlowFirstR74='true';document.head.appendChild(f)}}else existingFlow?.remove();
+ if(!document.querySelector('link[data-fx-responsive-text-guard]')){const g=document.createElement('link');g.rel='stylesheet';g.href='/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260817-r187-first-paint';g.dataset.fxResponsiveTextGuard='true';document.head.appendChild(g)}
 }
 function pulse(){window.FormatXCoreMobileV69?.pulse?.()}
 function syncMenuState(){const reference=document.querySelector('.fx-reference-menu-button'),nav=document.getElementById('main-nav');if(!(reference instanceof HTMLButtonElement)||!(nav instanceof HTMLElement))return;const open=nav.classList.contains('open');reference.setAttribute('aria-expanded',String(open));reference.classList.toggle('open',open)}
