@@ -21,12 +21,19 @@
       script.dataset.fxWdaHardeningR198 = 'true';
       document.head.appendChild(script);
     }
+    if (!document.querySelector('script[data-fx-wda-gpu-r198]')) {
+      const gpu = document.createElement('script');
+      gpu.src = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260817-r198-60fps';
+      gpu.defer = true;
+      gpu.dataset.fxWdaGpuR198 = 'true';
+      document.head.appendChild(gpu);
+    }
     root.dataset.fxWdaAssets = 'r198-requested';
   }
 
   // r198 is a non-blocking award-hardening layer. It loads before any cache
   // migration early return, so both fresh and already-migrated clients receive
-  // the visible MUTE/UNMUTE control and accessibility safeguards.
+  // the visible MUTE/UNMUTE control, inclusive CSS and the 60fps GPU governor.
   ensureWdaR198();
 
   if (root.dataset.fxClientCacheRecovery === VERSION) return;
