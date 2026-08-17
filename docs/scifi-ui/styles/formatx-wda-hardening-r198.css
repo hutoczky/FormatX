@@ -1,0 +1,99 @@
+/* FormatX r198 — Web Design Awards 100-target hardening.
+   Clear audio consent, keyboard/touch affordances and inclusive media modes.
+   Strict CSP: no inline-style ownership. */
+
+html body .fx-three-sound.fx-wda-sound-toggle {
+  position: fixed !important;
+  top: max(86px, calc(env(safe-area-inset-top) + 78px)) !important;
+  right: max(16px, env(safe-area-inset-right)) !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 2147481000 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  min-width: 112px !important;
+  min-height: 48px !important;
+  padding: 0 16px !important;
+  border: 1px solid rgba(105, 226, 255, .58) !important;
+  border-radius: 999px !important;
+  background: rgba(2, 10, 20, .94) !important;
+  color: #effcff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, .42), inset 0 0 20px rgba(56, 211, 255, .08) !important;
+  backdrop-filter: blur(14px) saturate(125%) !important;
+  font: 800 11px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  letter-spacing: .15em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+html body .fx-three-sound.fx-wda-sound-toggle::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 14px rgba(106, 232, 255, .82);
+  opacity: .92;
+}
+
+html[data-fx-audio-state="on"] body .fx-three-sound.fx-wda-sound-toggle {
+  border-color: rgba(132, 255, 211, .72) !important;
+}
+
+html body .fx-three-sound.fx-wda-sound-toggle:hover {
+  border-color: rgba(197, 247, 255, .9) !important;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid #8eefff !important;
+  outline-offset: 4px !important;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  html body .fx-three-sound.fx-wda-sound-toggle {
+    top: max(80px, calc(env(safe-area-inset-top) + 74px)) !important;
+    right: max(12px, env(safe-area-inset-right)) !important;
+    min-width: 104px !important;
+    min-height: 48px !important;
+    padding-inline: 14px !important;
+  }
+
+  html body :where(.menu-toggle, .fx-language-toggle, .fx-reference-menu-button, .fx-reference-mag-button, .fx-three-sound) {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .fx-three-sound.fx-wda-sound-toggle,
+  html body .fx-three-sound.fx-wda-sound-toggle::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  html body .fx-three-sound.fx-wda-sound-toggle {
+    border-width: 2px !important;
+    border-color: currentColor !important;
+    background: #000 !important;
+  }
+}
+
+@media (forced-colors: active) {
+  html body .fx-three-sound.fx-wda-sound-toggle {
+    border: 2px solid ButtonText !important;
+    background: ButtonFace !important;
+    color: ButtonText !important;
+    forced-color-adjust: auto;
+  }
+}
