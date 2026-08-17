@@ -8,14 +8,12 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/scripts/formatx-flow-first-r75.js'
-      - 'docs/scifi-ui/scripts/single-language-toggle.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
       - 'docs/scifi-ui/styles/formatx-award-reference-r80.css'
       - 'docs/scifi-ui/styles/formatx-award-proof-r85.css'
-      - 'docs/scifi-ui/styles/single-language-toggle.css'
       - 'docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'
   workflow_dispatch:
 permissions:
@@ -25,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install Chromium
         shell: bash
         run: |
@@ -51,19 +49,19 @@ jobs:
             const page=await context.newPage();
             page.on('pageerror',e=>console.log(`[${name} PAGEERROR]`,e.message));
             await page.goto(`${origin}?reference_composition=${name}`,{waitUntil:'domcontentloaded',timeout:45000});
-            if(mobile){await page.addScriptTag({url:`${origin}scripts/single-language-toggle.js?v=visual-qa-r86`});}
             await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxFlowFirstR75==='ready-r81',null,{timeout:45000});
-            if(mobile)await page.waitForFunction(()=>document.querySelector('.topbar>.fx-language-toggle'),null,{timeout:10000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreSilhouetteStability==='r189-fixed-geometry-dt-smoothing',null,{timeout:10000});
             await page.waitForTimeout(1900);
             const state=await page.evaluate(()=>{
               const root=document.documentElement;
               const q=s=>{const el=document.querySelector(s),r=el?.getBoundingClientRect(),cs=el?getComputedStyle(el):null;return r?{x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),display:cs.display,visibility:cs.visibility,opacity:+(cs.opacity||1),position:cs.position}:null};
               const canvas=document.querySelector('.fx-core-mobile-v55-canvas');
-              return {renderer:root.dataset.fxCoreRenderer,v69:root.dataset.fxCoreMobileV69,layout:root.dataset.fxMobileReferenceLayout,flow:root.dataset.fxFlowFirstR75,composition:root.dataset.fxReferenceComposition,renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),gl:Boolean(canvas?.getContext('webgl2')),glError:canvas?.getContext('webgl2')?.getError(),canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,topbar:q('.topbar'),space:q('#hero .hero-space'),rail:q('#hero .fx-reference-rail'),copy:q('#hero .hero-copy'),heading:q('#hero .fx-reference-heading'),proof:q('#hero .fx-reference-proof'),proofText:q('#hero .fx-reference-proof p'),liveOs:q('#hero .fx-reference-liveos'),brand:q('.topbar .brand'),mag:q('.topbar>.fx-reference-mag-button'),language:q('.topbar>.fx-language-toggle'),menu:q('.topbar>.fx-reference-menu-button'),legacyMenu:q('#menu-toggle.fx-organism-system-toggle')};
+              return {renderer:root.dataset.fxCoreRenderer,stability:root.dataset.fxCoreSilhouetteStability,v69:root.dataset.fxCoreMobileV69,layout:root.dataset.fxMobileReferenceLayout,flow:root.dataset.fxFlowFirstR75,composition:root.dataset.fxReferenceComposition,renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),gl:Boolean(canvas?.getContext('webgl2')),glError:canvas?.getContext('webgl2')?.getError(),canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,topbar:q('.topbar'),space:q('#hero .hero-space'),rail:q('#hero .fx-reference-rail'),copy:q('#hero .hero-copy'),heading:q('#hero .fx-reference-heading'),proof:q('#hero .fx-reference-proof'),proofText:q('#hero .fx-reference-proof p'),liveOs:q('#hero .fx-reference-liveos'),brand:q('.topbar .brand'),mag:q('.topbar>.fx-reference-mag-button'),menu:q('.topbar>.fx-reference-menu-button'),legacyMenu:q('#menu-toggle.fx-organism-system-toggle')};
             });
             console.log(name.toUpperCase(),JSON.stringify(state));
             await page.screenshot({path:`${name}.png`,fullPage:false});
-            assert.equal(state.renderer,'single-webgl2-mobile-cinematic-reference-glass-v69');
+            assert.equal(state.renderer,'single-webgl-luminous-crystal-r99');
+            assert.equal(state.stability,'r189-fixed-geometry-dt-smoothing');
             assert.equal(state.v69,'ready-v69');assert.equal(state.layout,'ready-v1');assert.equal(state.flow,'ready-r81');
             assert.equal(state.gl,true);assert.equal(state.glError,0);assert.equal(state.canvases,1);assert.ok(Number.isFinite(state.renderMs)&&state.renderMs<50,JSON.stringify(state));
             if(mobile)assert.ok(state.renderMs<16.67,JSON.stringify(state));
@@ -71,14 +69,13 @@ jobs:
             assert.ok(state.space.y>=state.topbar.y+state.topbar.h-1,`${name}: header covers MAG`);
             if(mobile){
               assert.equal(state.composition,'award-reference-overlay-r81');
-              for(const key of ['rail','heading','proof','proofText','liveOs','mag','language','menu'])assert.ok(state[key],`${name}: missing ${key}`);
+              for(const key of ['rail','heading','proof','proofText','liveOs','mag','menu'])assert.ok(state[key],`${name}: missing ${key}`);
               assert.ok(state.copy&&state.copy.w<=2&&state.copy.h<=2,`${name}: desktop hero copy leaked into award composition`);
               assert.ok(state.heading.y>=state.space.y+state.space.h-80,`${name}: heading detached from MAG transition`);
               assert.ok(state.proof.y>=state.heading.y+state.heading.h-2,`${name}: proof overlaps heading`);
               assert.equal(overlap(state.liveOs,state.proofText),false,`${name}: Live OS covers proof text`);
               assert.equal(overlap(state.brand,state.mag),false,`${name}: brand/MAG overlap`);
-              assert.equal(overlap(state.mag,state.language),false,`${name}: MAG/language overlap`);
-              assert.equal(overlap(state.language,state.menu),false,`${name}: language/menu overlap`);
+              assert.equal(overlap(state.mag,state.menu),false,`${name}: MAG/menu overlap`);
             }else{
               assert.equal(state.composition,'desktop-native-content-r81');
               assert.ok(state.copy&&state.copy.w>500&&state.copy.h>200,`${name}: desktop hero copy collapsed`);
@@ -87,13 +84,13 @@ jobs:
             }
             await context.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await capture(browser,'mobile-412x680',{width:412,height:680},true,2);await capture(browser,'mobile-390x844',{width:390,height:844},true,2);await capture(browser,'desktop-1440x960',{width:1440,height:960},false,1);}finally{await browser.close()}for(const f of['mobile-412x680.png','mobile-390x844.png','desktop-1440x960.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS: current award MAG composition captured without structural overlap.');})().catch(e=>{console.error(e);process.exit(1)});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});try{await capture(browser,'mobile-412x680',{width:412,height:680},true,2);await capture(browser,'mobile-390x844',{width:390,height:844},true,2);await capture(browser,'desktop-1440x960',{width:1440,height:960},false,1);}finally{await browser.close()}for(const f of['mobile-412x680.png','mobile-390x844.png','desktop-1440x960.png'])assert.ok(fs.statSync(f).size>10000,f);console.log('PASS: r189 award MAG composition captured with stable silhouette and without structural overlap.');})().catch(e=>{console.error(e);process.exit(1)});
           NODE
       - name: Upload review captures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: responsive-reference-v69-r86-${{ github.run_id }}
+          name: responsive-reference-r189-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/ref-lock/mobile-412x680.png
             ${{ runner.temp }}/ref-lock/mobile-390x844.png
