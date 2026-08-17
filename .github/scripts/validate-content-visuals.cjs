@@ -55,10 +55,6 @@ async function injectProductionLikeContent(page) {
     '/scifi-ui/scripts/formatx-mobile-unified.js'
   ];
 
-  // Keep the production CSP intact. Playwright addStyleTag({url}) materializes
-  // fetched CSS as an inline <style>, which is intentionally blocked by
-  // style-src 'self'. Load exactly as production does: external same-origin
-  // <link> and <script src> elements.
   await page.evaluate(async ({ styles, scripts }) => {
     const appendStyle = href => new Promise((resolve, reject) => {
       if ([...document.styleSheets].some(sheet => sheet.href && new URL(sheet.href).pathname === href)) return resolve();
@@ -178,7 +174,12 @@ async function capture(browser, name, viewport, setup = async () => {}, targetUr
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('console', message => {
+    if (message.type() !== 'error') return;
+    const location = message.location();
+    const suffix = location?.url ? ` @ ${location.url}:${location.lineNumber || 0}:${location.columnNumber || 0}` : '';
+    errors.push(message.text() + suffix);
+  });
 
   let failure;
   try {
