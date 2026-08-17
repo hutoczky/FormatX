@@ -1,16 +1,85 @@
-/* r195 never-stuck core fallback. Native WebGL remains primary. */
+/* r196 painted-frame safety layer. Native WebGL remains primary. */
 .fx-core-emergency-r195 {
-  position:absolute;
-  inset:0;
-  z-index:4;
-  display:none;
-  place-items:center;
-  pointer-events:none;
-  overflow:hidden;
+  position:absolute!important;
+  inset:0!important;
+  z-index:52!important;
+  display:none!important;
+  place-items:center!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+  visibility:hidden!important;
+  opacity:0!important;
 }
 
 html.fx-core-fallback-r195 .fx-core-emergency-r195 {
-  display:grid;
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+/*
+  The legacy renderer publishes its ready datasets before the first draw call.
+  Keep the existing .hero-ring DOM node as a lightweight visual core until the
+  renderer has actually produced data-fx-core-render-ms. This prevents the
+  large empty hero panel even if JavaScript initialization succeeds but drawing
+  never starts.
+*/
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:not([data-fx-core-render-ms]):not(.fx-core-fallback-r195) body.living-architecture #hero .hero-space > .hero-ring {
+    display:block!important;
+    visibility:visible!important;
+    opacity:.92!important;
+    position:absolute!important;
+    left:50%!important;
+    top:48%!important;
+    right:auto!important;
+    bottom:auto!important;
+    width:clamp(210px,58vw,350px)!important;
+    height:auto!important;
+    aspect-ratio:1!important;
+    margin:0!important;
+    padding:0!important;
+    z-index:5!important;
+    border:0!important;
+    border-radius:0!important;
+    transform:translate(-50%,-50%)!important;
+    clip-path:polygon(50% 0,64% 35%,100% 50%,64% 65%,50% 100%,36% 65%,0 50%,36% 35%)!important;
+    background:
+      radial-gradient(circle at 50% 50%,rgba(255,255,255,1) 0 1.2%,rgba(181,252,255,.98) 1.8%,rgba(73,232,255,.82) 3.2%,rgba(62,194,255,.20) 9%,transparent 17%),
+      linear-gradient(135deg,rgba(232,255,255,.88) 0%,rgba(68,224,255,.48) 24%,rgba(42,128,255,.25) 46%,rgba(126,80,255,.37) 67%,rgba(212,95,255,.48) 82%,rgba(95,236,255,.72) 100%)!important;
+    box-shadow:none!important;
+    filter:drop-shadow(0 0 10px rgba(88,237,255,.70)) drop-shadow(0 0 32px rgba(48,168,255,.40)) drop-shadow(0 0 62px rgba(145,72,255,.25))!important;
+    pointer-events:none!important;
+    animation:fx-r196-core-wait 2.8s ease-in-out infinite!important;
+  }
+
+  html:not([data-fx-core-render-ms]):not(.fx-core-fallback-r195) body.living-architecture #hero .hero-space > .hero-ring::before,
+  html:not([data-fx-core-render-ms]):not(.fx-core-fallback-r195) body.living-architecture #hero .hero-space > .hero-ring::after {
+    content:""!important;
+    display:block!important;
+    position:absolute!important;
+    inset:10%!important;
+    opacity:.78!important;
+    visibility:visible!important;
+    clip-path:inherit!important;
+    border:1px solid rgba(205,252,255,.45)!important;
+    background:linear-gradient(45deg,transparent 16%,rgba(244,255,255,.25) 48%,transparent 72%)!important;
+    box-shadow:none!important;
+  }
+
+  html:not([data-fx-core-render-ms]):not(.fx-core-fallback-r195) body.living-architecture #hero .hero-space > .hero-ring::after {
+    inset:27%!important;
+    transform:rotate(45deg)!important;
+    opacity:.66!important;
+  }
+
+  html[data-fx-core-render-ms] body.living-architecture #hero .hero-space > .hero-ring,
+  html.fx-core-fallback-r195 body.living-architecture #hero .hero-space > .hero-ring {
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    animation:none!important;
+  }
 }
 
 .fx-core-emergency-r195__shape {
@@ -56,6 +125,11 @@ html.fx-core-fallback-r195 .fx-core-emergency-r195 {
   box-shadow:0 0 9px #fff,0 0 22px rgba(78,232,255,.98),0 0 62px rgba(112,91,255,.64);
 }
 
+@keyframes fx-r196-core-wait {
+  0%,100% { filter:drop-shadow(0 0 10px rgba(88,237,255,.62)) drop-shadow(0 0 30px rgba(48,168,255,.34)) drop-shadow(0 0 56px rgba(145,72,255,.20)); }
+  50% { filter:drop-shadow(0 0 15px rgba(110,245,255,.80)) drop-shadow(0 0 42px rgba(56,184,255,.46)) drop-shadow(0 0 74px rgba(157,79,255,.30)); }
+}
+
 @media (max-width:900px), (pointer:coarse) {
   .fx-core-emergency-r195__shape {
     width:clamp(190px,58vw,330px);
@@ -64,5 +138,6 @@ html.fx-core-fallback-r195 .fx-core-emergency-r195 {
 
 @media (prefers-reduced-motion:reduce) {
   .fx-core-emergency-r195,
-  .fx-core-emergency-r195 * { animation:none !important; }
+  .fx-core-emergency-r195 *,
+  #hero .hero-space > .hero-ring { animation:none!important; }
 }
