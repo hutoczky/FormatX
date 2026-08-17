@@ -7,6 +7,7 @@ const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
 const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260812-first-paint-r4">';
+const PERFORMANCE_LOADER_R192 = '<script defer data-fx-production-idle-loader-r192="true" src="/scifi-ui/scripts/formatx-production-idle-loader-r192.js?v=20260817-r192"></script>';
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -42,6 +43,18 @@ const PUBLIC_PAGE_ALIASES = new Map([
   ['/checkout.html', '/scifi-ui/checkout.html'],
 ]);
 
+const HOMEPAGE_IDLE_SCRIPT_ASSETS = [
+  'release-metadata.js',
+  'formatx-public-shell.js',
+  'formatx-content-standard.js',
+  'formatx-seo.js',
+  'formatx-content-finalizer.js',
+  'formatx-platform-surface-finalizer.js',
+  'formatx-organism-trust.js',
+  'formatx-organism-semantic-state.js',
+  'formatx-feedback.js',
+];
+
 /*
   Production content contracts remain delegated to production-content-base.js.
   These tokens are intentionally retained for repository validators/reviewers:
@@ -62,6 +75,11 @@ const PUBLIC_PAGE_ALIASES = new Map([
   USER_FEEDBACK_SECTION
   id="user-feedback"
   itemprop="operatingSystem" content="Linux, Bazzite, Windows, Android"
+
+  r192 performance contract:
+  homepage-only injected content scripts are removed from the parser-critical
+  response and hydrated after first paint by formatx-production-idle-loader-r192.js.
+  The language switch, critical shell and content-standard CSS remain immediate.
 */
 
 export default {
@@ -74,20 +92,8 @@ export default {
       return contentPipeline.fetch(request, env, ctx);
     }
 
-    /*
-      Single routing authority for every public GET/HEAD request.
-
-      The historic inner stack contains older WWW/apex canonicalisers. Public
-      requests are converted to an internal hostname before entering that stack,
-      so lower layers cannot create an apex <-> WWW bounce. Only the visible WWW
-      homepage itself is redirected to the clean apex homepage. WWW assets/APIs
-      remain directly readable with HTTP 200 for compatibility and health checks.
-    */
-
     if (url.hostname === LEGACY_WWW_HOST && HOMEPAGE_ALIASES.has(url.pathname)) {
       const target = new URL('/', CANONICAL_ORIGIN);
-      // Temporary and explicitly non-cacheable. The unique recovery query also
-      // bypasses a historic cached 308 for the exact apex root in Chromium.
       target.searchParams.set(RECOVERY_PARAM, '1');
       return temporaryRedirect(target.toString());
     }
@@ -222,6 +228,7 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   if (homepage) {
     headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
     headers.set('X-FormatX-Shell', 'v56');
+    headers.set('X-FormatX-Performance', 'r192-first-paint-idle-hydration');
   } else {
     const link = headers.get('Link');
     if (link) {
@@ -235,13 +242,9 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   }
 
   if (clearCachedRedirect) {
-    // Evict stale permanent domain redirects after a successful recovery load.
     headers.set('Clear-Site-Data', '"cache"');
   }
 
-  // A public-host redirect emitted by a lower layer is never allowed to escape.
-  // fetchInternalNoLoop resolves bounded internal redirects first; if one still
-  // survives, fail closed instead of creating a browser-visible redirect cycle.
   if (response.status >= 300 && response.status < 400) {
     const location = headers.get('Location');
     if (location) {
@@ -287,6 +290,7 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
 
   if (homepage) {
     html = normaliseHomepageDocumentPaths(html);
+    html = optimiseHomepagePerformanceR192(html);
   }
 
   if (cleanAddressBar && !html.includes('data-fx-canonical-recovery')) {
@@ -302,6 +306,30 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
     statusText: response.statusText,
     headers,
   });
+}
+
+function optimiseHomepagePerformanceR192(html) {
+  let output = String(html || '');
+
+  for (const asset of HOMEPAGE_IDLE_SCRIPT_ASSETS) {
+    const escaped = asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const scriptPattern = new RegExp(
+      `<script\\b[^>]*src=["'][^"']*${escaped}[^"']*["'][^>]*>\\s*</script>`,
+      'gi',
+    );
+    output = output.replace(scriptPattern, '');
+  }
+
+  output = output.replace(
+    /<link\b[^>]*href=["'][^"']*formatx-feedback\.css[^"']*["'][^>]*>/gi,
+    '',
+  );
+
+  if (!output.includes('data-fx-production-idle-loader-r192')) {
+    output = output.replace('</head>', `  ${PERFORMANCE_LOADER_R192}\n</head>`);
+  }
+
+  return output;
 }
 
 function normaliseHomepageDocumentPaths(html) {
