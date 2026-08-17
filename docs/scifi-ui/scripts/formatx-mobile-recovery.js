@@ -6,8 +6,17 @@
 
   root.dataset.fxSafeThreeGate = 'ready-v2';
   root.dataset.fxMobileRecovery = 'morphing-organism-all-devices-v3';
+  root.dataset.fxMobilePerformanceR192 = 'first-fold-gpu-paint-budget';
   root.dataset.fxThree = root.dataset.fxImmersive === 'active' ? 'intro-wait' : 'standby';
   root.classList.add('fx-mobile-stable-3d');
+
+  if (!document.querySelector('link[data-fx-mobile-performance-r192]')) {
+    const perf = document.createElement('link');
+    perf.rel = 'stylesheet';
+    perf.href = './styles/formatx-mobile-performance-r192.css?v=20260817-r192';
+    perf.dataset.fxMobilePerformanceR192 = 'true';
+    document.head.appendChild(perf);
+  }
 
   const stageUrl = new URL('./three-stage-mobile.html', document.baseURI);
   stageUrl.searchParams.set('v', '20260729-living-stage-v2');
@@ -122,6 +131,9 @@
       frameObserver.observe(frame, { attributes: true, attributeFilter: ['src'] });
       frame.addEventListener('error', () => markError('morphing-organism-frame-network-error'), { once: true });
     }
+    bodyObserver?.disconnect();
+    bodyObserver = null;
+    root.dataset.fxMobileRecoveryObserverR192 = 'frame-found-observer-released';
     enforceFrameSource();
   }
 
@@ -178,8 +190,13 @@
     enforceFrameSource();
   }
 
-  bodyObserver = new MutationObserver(findFrame);
-  bodyObserver.observe(document.documentElement, { childList: true, subtree: true });
+  findFrame();
+  if (!(frame instanceof HTMLIFrameElement)) {
+    const target = document.body || document.documentElement;
+    bodyObserver = new MutationObserver(findFrame);
+    bodyObserver.observe(target, { childList: true, subtree: true });
+    root.dataset.fxMobileRecoveryObserverR192 = 'waiting-for-frame';
+  }
 
   stateObserver = new MutationObserver(() => {
     if (!ready && root.dataset.fxThree === 'ready') markReady();
@@ -206,6 +223,5 @@
     frameObserver?.disconnect();
   }, { once: true });
 
-  findFrame();
   if (introComplete) tryStart();
 }());
