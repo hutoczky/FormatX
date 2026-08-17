@@ -61,19 +61,16 @@
     }
 
     function ensureAudioEngine() {
-      if (root.dataset.fxAudioOwner === 'professional-v6' || sourceButton()) {
+      if (root.dataset.fxAudioEngineR191 === 'ready' && sourceButton()) {
         sync();
         return;
       }
-      if (document.querySelector('script[data-fx-audio-engine-r191], script[src*="formatx-audio-repair.js"]')) return;
+      if (document.querySelector('script[data-fx-audio-engine-r191], script[src*="formatx-audio-engine-r191.js"]')) return;
       const engine = document.createElement('script');
-      engine.src = '/scifi-ui/scripts/formatx-audio-repair.js?v=20260817-r191';
+      engine.src = '/scifi-ui/scripts/formatx-audio-engine-r191.js?v=20260817-r191';
       engine.async = false;
       engine.dataset.fxAudioEngineR191 = 'true';
-      engine.addEventListener('load', () => {
-        root.dataset.fxAudioEngineR191 = 'loaded';
-        sync();
-      }, { once: true });
+      engine.addEventListener('load', sync, { once: true });
       engine.addEventListener('error', () => {
         root.dataset.fxAudioEngineR191 = 'load-failed';
         sync();
@@ -91,7 +88,7 @@
     const rootObserver = new MutationObserver(sync);
     rootObserver.observe(root, {
       attributes: true,
-      attributeFilter: ['data-fx-audio-state', 'data-fx-audio-owner', 'lang']
+      attributeFilter: ['data-fx-audio-state', 'data-fx-audio-owner', 'data-fx-audio-engine-r191', 'lang']
     });
 
     const bodyObserver = new MutationObserver(sync);
