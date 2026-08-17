@@ -7,7 +7,7 @@ const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
 const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260812-first-paint-r4">';
-const PERFORMANCE_LOADER_R192 = '<script defer data-fx-production-idle-loader-r192="true" src="/scifi-ui/scripts/formatx-production-idle-loader-r192.js?v=20260817-r192"></script>';
+const PERFORMANCE_LOADER_R192 = '<script defer data-fx-production-idle-loader-r192="true" src="/scifi-ui/scripts/formatx-production-idle-loader-r192.js?v=20260817-r192b"></script>';
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -55,6 +55,14 @@ const HOMEPAGE_IDLE_SCRIPT_ASSETS = [
   'formatx-feedback.js',
 ];
 
+const MOBILE_DEFERRED_STYLE_ASSETS = [
+  'formatx-event-horizon.css',
+  'formatx-category-positioning-r73.css',
+  'formatx-living-energy-r168.css',
+  'formatx-award-narrative-r175.css',
+  'formatx-soty-continuity-r179.css',
+];
+
 /*
   Production content contracts remain delegated to production-content-base.js.
   These tokens are intentionally retained for repository validators/reviewers:
@@ -79,7 +87,9 @@ const HOMEPAGE_IDLE_SCRIPT_ASSETS = [
   r192 performance contract:
   homepage-only injected content scripts are removed from the parser-critical
   response and hydrated after first paint by formatx-production-idle-loader-r192.js.
-  The language switch, critical shell and content-standard CSS remain immediate.
+  The language switch, critical shell, mobile layout, MAG geometry and content
+  standard CSS remain immediate. Noncritical decorative CSS is desktop-immediate
+  but media-deferred on mobile until the first rendered frame has completed.
 */
 
 export default {
@@ -228,7 +238,7 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   if (homepage) {
     headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
     headers.set('X-FormatX-Shell', 'v56');
-    headers.set('X-FormatX-Performance', 'r192-first-paint-idle-hydration');
+    headers.set('X-FormatX-Performance', 'r192b-first-paint-idle-hydration');
   } else {
     const link = headers.get('Link');
     if (link) {
@@ -324,6 +334,22 @@ function optimiseHomepagePerformanceR192(html) {
     /<link\b[^>]*href=["'][^"']*formatx-feedback\.css[^"']*["'][^>]*>/gi,
     '',
   );
+
+  for (const asset of MOBILE_DEFERRED_STYLE_ASSETS) {
+    const escaped = asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const linkPattern = new RegExp(
+      `<link\\b(?=[^>]*href=["'][^"']*${escaped}[^"']*["'])[^>]*>`,
+      'gi',
+    );
+    output = output.replace(linkPattern, tag => {
+      if (tag.includes('data-fx-mobile-deferred-r192')) return tag;
+      const withoutMedia = tag.replace(/\smedia=["'][^"']*["']/i, '');
+      return withoutMedia.replace(
+        '<link',
+        '<link media="(min-width: 901px)" data-fx-mobile-deferred-r192="true"',
+      );
+    });
+  }
 
   if (!output.includes('data-fx-production-idle-loader-r192')) {
     output = output.replace('</head>', `  ${PERFORMANCE_LOADER_R192}\n</head>`);
