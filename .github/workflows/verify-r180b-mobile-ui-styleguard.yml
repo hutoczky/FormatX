@@ -1,4 +1,4 @@
-name: Verify r190 mobile UI source flow
+name: Verify r190b mobile UI source flow
 
 on:
   push:
@@ -26,9 +26,9 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.62.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Verify r190 source-owned mobile UI at 390px
+      - name: Verify r190b source-owned mobile UI at 390px
         run: |
-          cat > verify-r190.cjs <<'JS'
+          cat > verify-r190b.cjs <<'JS'
           const {chromium}=require('playwright');
           const assert=require('node:assert/strict');
           const fs=require('node:fs');
@@ -37,7 +37,7 @@ jobs:
             return page.evaluate(()=>{
               const q=s=>document.querySelector(s),box=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,cx:r.x+r.width/2,cy:r.y+r.height/2,b:r.bottom}};
               const mag=q('.fx-reference-mag-button'),lang=q('.fx-language-toggle'),menu=q('.fx-reference-menu-button'),brand=q('.topbar .brand'),rail=q('#hero .fx-reference-rail'),ask=q('#hero .fx-reference-ask'),askLabel=q('#hero .fx-reference-ask span'),pause=q('#hero .fx-reference-pause'),proof=q('#hero .fx-reference-proof'),p=q('#hero .fx-reference-proof p'),live=q('#hero .fx-reference-liveos'),space=q('#hero .hero-space'),flow=q('script[data-fx-flow-first-r75]');
-              if(![mag,lang,menu,brand,rail,ask,askLabel,pause,proof,p,live,space,flow].every(Boolean))throw new Error('r190 mobile nodes missing');
+              if(![mag,lang,menu,brand,rail,ask,askLabel,pause,proof,p,live,space,flow].every(Boolean))throw new Error('r190b mobile nodes missing');
               const cs=e=>getComputedStyle(e),pseudo=getComputedStyle(space,'::after'),liveStyle=cs(live);
               return{
                 flowSrc:flow.src,flowState:document.documentElement.dataset.fxFlowFirstR75||'',composition:document.documentElement.dataset.fxReferenceComposition||'',proofActionState:document.documentElement.dataset.fxMobileProofActionStabilityR189||'',
@@ -51,16 +51,16 @@ jobs:
           }
 
           function verify(s,label){
-            assert.ok(s.flowSrc.includes('formatx-flow-first-r75.js?v=20260817-r188-content-stability'),`${label}: stale flow ${s.flowSrc}`);
+            assert.ok(s.flowSrc.includes('formatx-flow-first-r75.js?v=20260817-r190b-header-centerline'),`${label}: stale flow ${s.flowSrc}`);
             assert.equal(s.composition,'award-reference-overlay-r139');
             assert.equal(s.proofActionState,'normal-flow-under-480');
             assert.equal(s.magText,'MAG');assert.equal(s.langText,'HU');assert.equal(s.askText,'KÉRDEZZ');
-            assert.equal(s.magTop,'14px');assert.equal(s.langTop,'14px');assert.equal(s.menuTop,'8px');assert.equal(s.brandTop,'17px');assert.equal(s.railTop,'18px');assert.equal(s.railGap,'24px');
+            assert.equal(s.magTop,'12px');assert.equal(s.langTop,'14px');assert.equal(s.menuTop,'8px');assert.equal(s.brandTop,'17px');assert.equal(s.railTop,'18px');assert.equal(s.railGap,'24px');
             assert.equal(s.livePosition,'relative');assert.equal(s.liveTop,'auto');assert.equal(s.liveBottom,'auto');assert.equal(s.liveRight,'auto');assert.equal(s.liveLeft,'auto');assert.equal(s.liveMarginTop,'18px');
             assert.ok(Math.abs(s.mag.cy-s.lang.cy)<=.6,`${label}: MAG/HU centers ${s.mag.cy}/${s.lang.cy}`);
             assert.ok(Math.abs(s.lang.cy-s.menu.cy)<=.6,`${label}: HU/menu centers ${s.lang.cy}/${s.menu.cy}`);
             assert.ok(Math.abs(s.brand.cy-s.mag.cy)<=.6,`${label}: brand/control centers ${s.brand.cy}/${s.mag.cy}`);
-            assert.equal(s.mag.h,40);assert.equal(s.lang.h,40);assert.equal(s.menu.h,52);
+            assert.equal(s.mag.h,44);assert.equal(s.lang.h,40);assert.equal(s.menu.h,52);
             assert.equal(s.magFont,'10px');assert.equal(s.langFont,'10px');assert.equal(s.askFont,'10px');
             assert.ok(s.pause.y-s.ask.b>=23,`${label}: ASK/pause gap ${s.pause.y-s.ask.b}`);
             assert.ok(s.askLabel.b<=s.pause.y-8,`${label}: ASK label collision ${s.askLabel.b}/${s.pause.y}`);
@@ -74,8 +74,8 @@ jobs:
             const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});
             const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
             const page=await context.newPage();page.setDefaultTimeout(120000);
-            await page.goto('https://formatxsuite.com/?verify_r190='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.querySelector('script[data-fx-flow-first-r75]')?.src.includes('20260817-r188-content-stability'),null,{timeout:90000});
+            await page.goto('https://formatxsuite.com/?verify_r190b='+Date.now(),{waitUntil:'domcontentloaded',timeout:120000});
+            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.querySelector('script[data-fx-flow-first-r75]')?.src.includes('20260817-r190b-header-centerline'),null,{timeout:90000});
             await page.waitForTimeout(4300);
             const before=await readState(page);verify(before,'steady');
 
@@ -83,17 +83,17 @@ jobs:
             await page.setViewportSize({width:390,height:844});await page.waitForTimeout(220);
             const after=await readState(page);verify(after,'post-resize');
 
-            console.log('R190 MOBILE',JSON.stringify({before,after},null,2));
-            await page.screenshot({path:'r190-mobile.png',fullPage:false,animations:'allow',timeout:120000});
-            await browser.close();assert.ok(fs.statSync('r190-mobile.png').size>10000);
-            console.log('PASS: r190 source flow owns stable mobile header/actions/proof geometry after delayed startup and resize.');
+            console.log('R190B MOBILE',JSON.stringify({before,after},null,2));
+            await page.screenshot({path:'r190b-mobile.png',fullPage:false,animations:'allow',timeout:120000});
+            await browser.close();assert.ok(fs.statSync('r190b-mobile.png').size>10000);
+            console.log('PASS: r190b source flow keeps brand/MAG/HU/menu on one optical centerline and proof actions collision-free.');
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
-          node verify-r190.cjs
+          node verify-r190b.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r190-mobile-${{ github.run_id }}
-          path: r190-mobile.png
+          name: r190b-mobile-${{ github.run_id }}
+          path: r190b-mobile.png
           if-no-files-found: warn
           retention-days: 14
