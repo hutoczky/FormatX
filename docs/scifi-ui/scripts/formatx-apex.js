@@ -3,30 +3,12 @@
 
   const ROOT = document.documentElement;
   const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  if (AUDIT_MODE) {
-    ROOT.dataset.fxApex = 'audit-skip';
-    ROOT.dataset.fxRenderer = 'static-audit';
-    ROOT.dataset.fxScene = '0';
-    ROOT.dataset.fxFlow = '0';
-    ROOT.style.setProperty('--accent', '120,210,255');
-    ROOT.style.setProperty('--progress', '0');
-    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'static-audit', infinite: 'skipped' } }));
-    return;
-  }
-
   const LANG_KEY = 'formatx-language';
   const RELEASE_API = './data/current-release.json';
   const DOWNLOAD_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
   const PAGE_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/';
   const PRICES = { HUF: 15900, EUR: 44 };
-  const SCENES = [
-    ['hero', '120,210,255'],
-    ['experience', '183,163,255'],
-    ['capabilities', '126,241,190'],
-    ['pricing', '255,196,126'],
-    ['system', '126,190,255'],
-    ['resources', '205,235,249']
-  ];
+  const SCENES = ['hero', 'experience', 'capabilities', 'pricing', 'system', 'resources'];
   const FLOWS = [
     ['01', 'FELDERÍTÉS', 'DISCOVERY', 'ENV / READ'],
     ['02', 'TERVEZÉS', 'PLANNING', 'PLAN / PREVIEW'],
@@ -37,6 +19,16 @@
   let language = initialLanguage();
   let activeScene = 0;
   let activeFlow = 0;
+  let scrollFrame = 0;
+
+  function ensureCspSafeStyles() {
+    if (document.querySelector('link[data-fx-apex-csp-safe-r190]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './styles/formatx-apex-csp-safe-r190.css?v=20260817-r190-csp-safe';
+    link.dataset.fxApexCspSafeR190 = 'true';
+    document.head.appendChild(link);
+  }
 
   function initialLanguage() {
     const query = new URLSearchParams(location.search).get('lang');
@@ -112,8 +104,8 @@
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('main-nav');
     toggle?.addEventListener('click', () => {
-      const open = !nav.classList.contains('open');
-      nav.classList.toggle('open', open);
+      const open = !nav?.classList.contains('open');
+      nav?.classList.toggle('open', open);
       toggle.setAttribute('aria-expanded', String(open));
     });
     nav?.addEventListener('click', event => {
@@ -143,7 +135,9 @@
     try {
       const url = new URL(value, location.origin);
       return url.protocol === 'https:' && url.href.startsWith(prefix);
-    } catch (_) { return false; }
+    } catch (_) {
+      return false;
+    }
   }
 
   async function latestRelease() {
@@ -165,7 +159,9 @@
         const published = new Date(payload.published_at);
         date.textContent = Number.isNaN(published.getTime())
           ? 'GitHub Releases'
-          : new Intl.DateTimeFormat(language === 'hu' ? 'hu-HU' : 'en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(published);
+          : new Intl.DateTimeFormat(language === 'hu' ? 'hu-HU' : 'en-GB', {
+              year: 'numeric', month: '2-digit', day: '2-digit'
+            }).format(published);
       }
     } catch (_) {}
   }
@@ -188,19 +184,18 @@
 
   function setScene(index) {
     activeScene = Math.max(0, Math.min(SCENES.length - 1, index));
-    const scene = SCENES[activeScene];
+    const sceneId = SCENES[activeScene];
     ROOT.dataset.fxScene = String(activeScene);
-    ROOT.style.setProperty('--accent', scene[1]);
     document.querySelectorAll('[data-scene-link]').forEach(anchor => {
       anchor.classList.toggle('active', Number(anchor.dataset.sceneLink) === activeScene);
     });
     document.querySelectorAll('.main-nav a').forEach(anchor => {
-      anchor.classList.toggle('active', anchor.getAttribute('href') === '#' + scene[0]);
+      anchor.classList.toggle('active', anchor.getAttribute('href') === '#' + sceneId);
     });
   }
 
   function scenes() {
-    const sceneSections = SCENES.map(scene => document.getElementById(scene[0])).filter(Boolean);
+    const sceneSections = SCENES.map(id => document.getElementById(id)).filter(Boolean);
     if ('IntersectionObserver' in window) {
       const observer = new IntersectionObserver(entries => {
         let best = null;
@@ -208,29 +203,24 @@
           if (entry.isIntersecting && (!best || entry.intersectionRatio > best.intersectionRatio)) best = entry;
         });
         if (!best) return;
-        const index = SCENES.findIndex(scene => scene[0] === best.target.id);
+        const index = SCENES.indexOf(best.target.id);
         if (index >= 0) setScene(index);
       }, { threshold: [0.2, 0.4, 0.6] });
       sceneSections.forEach(section => observer.observe(section));
     }
 
-    let progressFrame = 0;
-    const progress = () => {
-      progressFrame = 0;
-      const range = Math.max(1, document.documentElement.scrollHeight - innerHeight);
-      const value = Math.max(0, Math.min(1, scrollY / range));
-      ROOT.style.setProperty('--progress', value.toFixed(5));
+    const syncScrolledState = () => {
+      scrollFrame = 0;
       ROOT.classList.toggle('fx-page-scrolled', scrollY > 24);
     };
-    const scheduleProgress = () => {
-      if (progressFrame) return;
-      progressFrame = requestAnimationFrame(progress);
+    const scheduleScrolledState = () => {
+      if (!scrollFrame) scrollFrame = requestAnimationFrame(syncScrolledState);
     };
-    progress();
-    addEventListener('scroll', scheduleProgress, { passive: true });
-    addEventListener('resize', scheduleProgress, { passive: true });
+    syncScrolledState();
+    addEventListener('scroll', scheduleScrolledState, { passive: true });
+    addEventListener('resize', scheduleScrolledState, { passive: true });
     addEventListener('pagehide', () => {
-      if (progressFrame) cancelAnimationFrame(progressFrame);
+      if (scrollFrame) cancelAnimationFrame(scrollFrame);
     }, { once: true });
   }
 
@@ -268,38 +258,35 @@
     updateFlow(0);
   }
 
-  function pointerVariables() {
-    let frame = 0;
-    let x = 0;
-    let y = 0;
-    const apply = () => {
-      frame = 0;
-      ROOT.style.setProperty('--px', (x / Math.max(1, innerWidth) * 2 - 1).toFixed(3));
-      ROOT.style.setProperty('--py', (y / Math.max(1, innerHeight) * 2 - 1).toFixed(3));
-    };
-    addEventListener('pointermove', event => {
-      x = event.clientX;
-      y = event.clientY;
-      if (!frame) frame = requestAnimationFrame(apply);
-    }, { passive: true });
-    addEventListener('pagehide', () => {
-      if (frame) cancelAnimationFrame(frame);
-    }, { once: true });
-  }
-
   function initialise() {
+    ensureCspSafeStyles();
     navigation();
     applyLanguage(language, false);
     reveal();
     scenes();
     flow();
-    pointerVariables();
     updatePrice();
     latestRelease();
     setScene(activeScene);
-    ROOT.dataset.fxApex = 'controller-performance-v2';
+    ROOT.dataset.fxApex = 'controller-performance-v3-csp-safe-r190';
     ROOT.dataset.fxRenderer = 'three-host';
-    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
+    ROOT.dataset.fxApexInlineStyleWrites = '0';
+    dispatchEvent(new CustomEvent('formatx:apexready', {
+      detail: { renderer: 'three-host', infinite: 'delegated', cspSafe: true }
+    }));
+  }
+
+  ensureCspSafeStyles();
+  if (AUDIT_MODE) {
+    ROOT.dataset.fxApex = 'audit-skip-r190';
+    ROOT.dataset.fxRenderer = 'static-audit';
+    ROOT.dataset.fxScene = '0';
+    ROOT.dataset.fxFlow = '0';
+    ROOT.dataset.fxApexInlineStyleWrites = '0';
+    dispatchEvent(new CustomEvent('formatx:apexready', {
+      detail: { renderer: 'static-audit', infinite: 'skipped', cspSafe: true }
+    }));
+    return;
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
