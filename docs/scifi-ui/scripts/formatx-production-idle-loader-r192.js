@@ -21,6 +21,10 @@
   let contentStarted = false;
   let feedbackStarted = false;
 
+  function mobileViewport() {
+    return matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  }
+
   function loadStyle(href, marker) {
     if (document.querySelector(`link[href*="${href.split('?')[0].split('/').pop()}"]`)) return;
     const link = document.createElement('link');
@@ -45,6 +49,22 @@
       }, { once: true });
       document.head.appendChild(script);
     });
+  }
+
+  function activateDeferredMobileStyles() {
+    if (!mobileViewport()) {
+      root.dataset.fxProductionMobileStyleHydrationR192 = 'desktop-immediate';
+      return;
+    }
+    const links = Array.from(document.querySelectorAll('link[data-fx-mobile-deferred-r192]'));
+    if (!links.length) {
+      root.dataset.fxProductionMobileStyleHydrationR192 = 'none';
+      return;
+    }
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      for (const link of links) link.media = 'all';
+      root.dataset.fxProductionMobileStyleHydrationR192 = `ready-${links.length}`;
+    }));
   }
 
   async function hydrateContent() {
@@ -99,6 +119,7 @@
 
   root.dataset.fxProductionPublicShellR192 = 'homepage-not-required';
   root.dataset.fxProductionIdleLoaderR192 = 'ready';
+  activateDeferredMobileStyles();
   scheduleContent();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', observeFeedback, { once: true });
