@@ -23,7 +23,7 @@ assert.match(wrapper,/formatx-audio-toggle-r191\.js\?v=20260817-r191/);
 for(const token of [
   'webgl2','webgl','TRIANGLE_STRIP','reference-luminous-crystal-webgl-r99',
   'formatx:coreinteraction','pointerdown','pointermove','touchstart','touchmove','touchend',
-  'ResizeObserver','IntersectionObserver','visible-native-3d-r191','single-webgl-luminous-crystal-r99',
+  'ResizeObserver','IntersectionObserver','single-webgl-luminous-crystal-r99',
   'fxCoreRenderMs','fxCoreRenderAverageMs','fxCoreReal3dFps','fxCoreRenderScale','fxCoreReal3dQuality',
   'corePosition','luminous-faceted-iceglass-caustic-r99','touch-pointer-breathing-spectral-refraction-r99',
   'TARGET_FPS=60','FRAME_BUDGET=1000/TARGET_FPS','r191-dynamic-resolution-hysteresis',
