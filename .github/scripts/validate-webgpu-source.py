@@ -115,7 +115,21 @@ require("terms document withdrawal", "Elállás" in terms)
 
 require("preview Worker remains isolated", not preview_config.get("routes"))
 require("preview Worker remains on workers.dev", preview_config.get("workers_dev") is True)
-require("production content wrapper is active", production_config.get("main") == "src/production-content-entry.js")
+
+production_main = production_config.get("main")
+reliable_wrapper_ok = False
+if production_main == "src/production-content-entry.js":
+    reliable_wrapper_ok = True
+elif production_main == "src/production-performance-r193.js":
+    performance_wrapper = read("billing-worker/src/production-performance-r193.js")
+    reliable_wrapper_ok = (
+        "import contentEntry from './production-content-entry.js';" in performance_wrapper
+        and "contentEntry.fetch(request, env, ctx)" in performance_wrapper
+        and "r196-reliable-full-hydration" in performance_wrapper
+        and "formatx-routing.internal" in performance_wrapper
+    )
+require("production content wrapper is active", reliable_wrapper_ok)
+
 production_domains = [route.get("pattern") for route in production_config.get("routes", [])]
 require("production owns both custom domains", production_domains == ["formatxsuite.com", "www.formatxsuite.com"])
 require("production injects critical scroll bootstrap path", "formatx-infinite-scroll.js" in production_worker and "data-fx-seamless-scroll-runtime" in production_worker)
