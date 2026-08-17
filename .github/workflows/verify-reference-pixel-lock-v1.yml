@@ -70,8 +70,8 @@ jobs:
             assert.equal(state.gl,true);assert.equal(state.glError,0);assert.equal(state.canvases,1);assert.ok(Number.isFinite(state.renderMs)&&state.renderMs<50,JSON.stringify(state));
             if(mobile)assert.ok(state.renderMs<16.67,JSON.stringify(state));
             assert.ok(state.topbar&&state.space&&state.brand,`${name}: structural shell missing`);
-            assert.ok(state.space.y>=state.topbar.y+state.topbar.h-1,`${name}: header covers MAG`);
             if(mobile){
+              assert.ok(state.space.y>=state.topbar.y+state.topbar.h-1,`${name}: header covers MAG`);
               assert.equal(state.flow,'ready-r139');
               assert.equal(state.composition,'award-reference-overlay-r139');
               if(viewport.width<=480)assert.equal(state.proofAction,'normal-flow-under-480');
@@ -84,10 +84,12 @@ jobs:
               assert.equal(overlap(state.mag,state.menu),false,`${name}: MAG/menu overlap`);
             }else{
               assert.equal(state.flowGuard,'desktop-bypass-r178');
-              assert.equal(state.composition,'desktop-native-r177');
-              assert.ok(state.copy&&state.copy.w>500&&state.copy.h>200,`${name}: desktop hero copy collapsed`);
+              assert.equal(state.composition,'desktop-cinematic-mag-r181');
+              assert.equal(state.topbar.position,'fixed');
+              assert.equal(state.space.position,'absolute');
+              assert.ok(state.copy&&state.copy.w>=400&&state.copy.h>300,`${name}: desktop hero copy collapsed`);
               assert.ok(state.legacyMenu&&state.legacyMenu.display!=='none'&&state.legacyMenu.visibility==='visible',`${name}: desktop menu unavailable`);
-              for(const key of ['rail','heading','proof'])if(state[key])assert.ok(state[key].display==='none'||state[key].visibility==='hidden'||state[key].opacity<.01,`${name}: mobile award overlay leaked to desktop`);
+              for(const key of ['rail','heading','proof'])assert.equal(state[key],null,`${name}: mobile award overlay leaked to desktop`);
             }
             await page.evaluate(()=>{document.documentElement.dataset.fxReferenceMotionPaused='true';dispatchEvent(new CustomEvent('formatx:referencepause',{detail:{paused:true,source:'reference-capture-r189'}}));});
             await page.waitForTimeout(120);
