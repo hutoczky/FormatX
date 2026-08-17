@@ -107,6 +107,19 @@ async function commonAssertions(page, mobile) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 2, 'Horizontal overflow detected: ' + overflow + 'px');
 
+  const r190State = await page.evaluate(() => ({
+    apex: document.documentElement.dataset.fxApexInlineStyleWrites || '',
+    energy: document.documentElement.dataset.fxLivingEnergyInlineStylesR190 || '',
+    heartbeat: document.documentElement.dataset.fxLiveHeartbeatInlineStylesR190 || '',
+    shapeScale: document.documentElement.dataset.fxLivingShapeScaleR167 || '',
+    shapePulse: document.documentElement.dataset.fxLivingShapePulseStateR167 || ''
+  }));
+  assert(r190State.apex === '0', 'APEX r190 must not write inline styles: ' + JSON.stringify(r190State));
+  assert(r190State.energy === '0', 'Living Energy r190 must not write inline styles: ' + JSON.stringify(r190State));
+  assert(r190State.heartbeat === '0', 'Heartbeat r190 must not write inline styles: ' + JSON.stringify(r190State));
+  assert(r190State.shapeScale === '1.0000,1.0000', 'Crystal DOM silhouette must remain geometrically stable: ' + JSON.stringify(r190State));
+  assert(/internal-canvas|reduced-motion-static/.test(r190State.shapePulse), 'Heartbeat must be internal-canvas/reduced-motion owned: ' + JSON.stringify(r190State));
+
   const languageState = await page.evaluate(() => {
     const visible = element => {
       const style = getComputedStyle(element), rect = element.getBoundingClientRect();
