@@ -38,12 +38,12 @@ jobs:
               const q=s=>document.querySelector(s),box=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,cx:r.x+r.width/2,cy:r.y+r.height/2,b:r.bottom}};
               const mag=q('.fx-reference-mag-button'),lang=q('.fx-language-toggle'),menu=q('.fx-reference-menu-button'),brand=q('.topbar .brand'),rail=q('#hero .fx-reference-rail'),ask=q('#hero .fx-reference-ask'),askLabel=q('#hero .fx-reference-ask span'),pause=q('#hero .fx-reference-pause'),proof=q('#hero .fx-reference-proof'),p=q('#hero .fx-reference-proof p'),live=q('#hero .fx-reference-liveos'),space=q('#hero .hero-space'),flow=q('script[data-fx-flow-first-r75]');
               if(![mag,lang,menu,brand,rail,ask,askLabel,pause,proof,p,live,space,flow].every(Boolean))throw new Error('r190 mobile nodes missing');
-              const cs=e=>getComputedStyle(e),pseudo=getComputedStyle(space,'::after');
+              const cs=e=>getComputedStyle(e),pseudo=getComputedStyle(space,'::after'),liveStyle=cs(live);
               return{
-                flowSrc:flow.src,flowState:document.documentElement.dataset.fxFlowFirstR75||'',composition:document.documentElement.dataset.fxReferenceComposition||'',
+                flowSrc:flow.src,flowState:document.documentElement.dataset.fxFlowFirstR75||'',composition:document.documentElement.dataset.fxReferenceComposition||'',proofActionState:document.documentElement.dataset.fxMobileProofActionStabilityR189||'',
                 mag:box(mag),lang:box(lang),menu:box(menu),brand:box(brand),ask:box(ask),askLabel:box(askLabel),pause:box(pause),proof:box(proof),p:box(p),live:box(live),
                 magTop:mag.style.getPropertyValue('top'),langTop:lang.style.getPropertyValue('top'),menuTop:menu.style.getPropertyValue('top'),brandTop:brand.style.getPropertyValue('top'),railTop:rail.style.getPropertyValue('top'),railGap:rail.style.getPropertyValue('gap'),
-                liveTop:live.style.getPropertyValue('top'),liveBottom:live.style.getPropertyValue('bottom'),liveRight:live.style.getPropertyValue('right'),pPaddingRight:cs(p).paddingRight,
+                liveTop:live.style.getPropertyValue('top'),liveBottom:live.style.getPropertyValue('bottom'),liveRight:live.style.getPropertyValue('right'),liveLeft:live.style.getPropertyValue('left'),livePosition:liveStyle.position,liveMarginTop:liveStyle.marginTop,pPaddingRight:cs(p).paddingRight,
                 magFont:cs(mag).fontSize,langFont:cs(lang).fontSize,askFont:cs(askLabel).fontSize,orbitOpacity:Number(cs(q('#hero .fx-r168-orbit')||space).opacity),seam:pseudo.backgroundImage,
                 magText:mag.textContent.trim(),langText:lang.textContent.trim(),askText:askLabel.textContent.trim(),paused:document.documentElement.dataset.fxReferenceMotionPaused,renderMs:Number(document.documentElement.dataset.fxCoreRenderMs||Infinity)
               };
@@ -53,9 +53,10 @@ jobs:
           function verify(s,label){
             assert.ok(s.flowSrc.includes('formatx-flow-first-r75.js?v=20260817-r188-content-stability'),`${label}: stale flow ${s.flowSrc}`);
             assert.equal(s.composition,'award-reference-overlay-r139');
+            assert.equal(s.proofActionState,'normal-flow-under-480');
             assert.equal(s.magText,'MAG');assert.equal(s.langText,'HU');assert.equal(s.askText,'KÉRDEZZ');
             assert.equal(s.magTop,'14px');assert.equal(s.langTop,'14px');assert.equal(s.menuTop,'8px');assert.equal(s.brandTop,'17px');assert.equal(s.railTop,'18px');assert.equal(s.railGap,'24px');
-            assert.equal(s.liveTop,'auto');assert.equal(s.liveBottom,'18px');assert.equal(s.liveRight,'16px');
+            assert.equal(s.livePosition,'relative');assert.equal(s.liveTop,'auto');assert.equal(s.liveBottom,'auto');assert.equal(s.liveRight,'auto');assert.equal(s.liveLeft,'auto');assert.equal(s.liveMarginTop,'18px');
             assert.ok(Math.abs(s.mag.cy-s.lang.cy)<=.6,`${label}: MAG/HU centers ${s.mag.cy}/${s.lang.cy}`);
             assert.ok(Math.abs(s.lang.cy-s.menu.cy)<=.6,`${label}: HU/menu centers ${s.lang.cy}/${s.menu.cy}`);
             assert.ok(Math.abs(s.brand.cy-s.mag.cy)<=.6,`${label}: brand/control centers ${s.brand.cy}/${s.mag.cy}`);
