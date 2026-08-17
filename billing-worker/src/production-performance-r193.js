@@ -15,21 +15,12 @@ const CACHEABLE_PREFIXES = Object.freeze({
   data: '/scifi-ui/data/',
 });
 
-const PROOF_NAV = `<nav class="fx-award-proof-r193" data-fx-award-proof-r193="true" aria-label="Nyilvános bizonyíték / Public proof">
-  <a href="/method" data-hu="MÓDSZER" data-en="METHOD">MÓDSZER</a>
-  <a href="/verification" data-hu="ELLENŐRZÉS" data-en="VERIFICATION">ELLENŐRZÉS</a>
-  <a href="/test-matrix" data-hu="TESZTMÁTRIX" data-en="TEST MATRIX">TESZTMÁTRIX</a>
-  <a href="/known-issues" data-hu="ISMERT HIBÁK" data-en="KNOWN ISSUES">ISMERT HIBÁK</a>
+const PROOF_NAV = `<nav class="kicker fx-award-proof-r193" data-fx-award-proof-r193="true" aria-label="Nyilvános bizonyíték / Public proof">
+  <a class="header-support" href="/method" data-hu="MÓDSZER" data-en="METHOD">MÓDSZER</a>
+  <a class="header-support" href="/verification" data-hu="ELLENŐRZÉS" data-en="VERIFICATION">ELLENŐRZÉS</a>
+  <a class="header-support" href="/test-matrix" data-hu="TESZTMÁTRIX" data-en="TEST MATRIX">TESZTMÁTRIX</a>
+  <a class="header-support" href="/known-issues" data-hu="ISMERT HIBÁK" data-en="KNOWN ISSUES">ISMERT HIBÁK</a>
 </nav>`;
-
-const PROOF_STYLE = `<style data-fx-award-proof-style-r193>
-.fx-award-proof-r193{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
-.fx-award-proof-r193 a{position:relative;color:rgba(205,228,239,.66);font-size:8px;font-weight:800;letter-spacing:.12em;text-decoration:none;text-transform:uppercase;transition:color .18s ease}
-.fx-award-proof-r193 a::after{content:"";position:absolute;right:0;bottom:-4px;left:0;height:1px;background:rgba(124,236,255,.48);transform:scaleX(.25);transform-origin:left;transition:transform .18s ease}
-.fx-award-proof-r193 a:hover,.fx-award-proof-r193 a:focus-visible{color:#fff}
-.fx-award-proof-r193 a:hover::after,.fx-award-proof-r193 a:focus-visible::after{transform:scaleX(1)}
-@media(max-width:900px),(pointer:coarse){.fx-award-proof-r193{margin-top:16px;gap:10px 16px}.fx-award-proof-r193 a{font-size:9px;min-height:28px;display:inline-flex;align-items:center}}
-</style>`;
 
 function isVersioned(url) {
   return url.searchParams.has('v') || url.searchParams.has('rev');
@@ -76,10 +67,6 @@ function improveHomepageR193(html) {
       /(<div class="hero-facts"[^>]*>[\s\S]*?<\/div>)/i,
       `$1\n${PROOF_NAV}`,
     );
-  }
-
-  if (!output.includes('data-fx-award-proof-style-r193')) {
-    output = output.replace('</head>', `  ${PROOF_STYLE}\n</head>`);
   }
 
   return output;
