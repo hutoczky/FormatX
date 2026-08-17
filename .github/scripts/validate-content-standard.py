@@ -165,7 +165,19 @@ def validate_runtime_contract() -> None:
     for source, name in [(production, "production"), (preview, "preview")]:
         for token in ["release-metadata.js", "formatx-content-standard.js", "formatx-seo.js", "formatx-content-finalizer.js", "formatx-platform-surface-finalizer.js", "formatx-organism-trust.js", "formatx-organism-semantic-state.js", "single-language-toggle.js", "cleanLegacyReleaseCopy"]:
             if token not in source: fail(f"{name} content wrapper missing {token}")
-    if '"main": "src/production-content-entry.js"' not in read("billing-worker/wrangler.jsonc"): fail("Production does not use the content wrapper")
+
+    production_wrangler = read("billing-worker/wrangler.jsonc")
+    direct_content_entry = '"main": "src/production-content-entry.js"' in production_wrangler
+    performance_entry = '"main": "src/production-performance-r193.js"' in production_wrangler
+    if not direct_content_entry and not performance_entry:
+        fail("Production does not use the content wrapper")
+    if performance_entry:
+        performance_wrapper = read("billing-worker/src/production-performance-r193.js")
+        if "import contentEntry from './production-content-entry.js';" not in performance_wrapper:
+            fail("Production performance entry does not chain through the content wrapper")
+        if "contentEntry.fetch(request, env, ctx)" not in performance_wrapper:
+            fail("Production performance entry bypasses the content wrapper fetch path")
+
     if '"main": "content-preview-entry.js"' not in read("wrangler.jsonc"): fail("Preview does not use the content wrapper")
 
     release_script = read(SCIFI / "scripts/release-metadata.js")
