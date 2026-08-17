@@ -1,10 +1,14 @@
 /* r190 — mobile reference spacing contract.
    The cinematic MAG keeps its full optical extent, while narrative content
    starts below the canvas instead of being pulled into the crystal tip.
-   This selector intentionally matches/exceeds the legacy flow-first layer so
-   old !important margin rules cannot reclaim the spacing contract. */
+   These selectors intentionally match/exceed the legacy flow-first layer so
+   old !important geometry rules cannot reclaim the spacing contract. */
 @media (max-width:900px),(pointer:coarse) {
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space {
+    margin:0 auto 36px !important;
+  }
+
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-heading {
-    margin:22px auto 24px !important;
+    margin:0 auto 24px !important;
   }
 }
