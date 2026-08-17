@@ -1,0 +1,55 @@
+name: One-shot r190b header centerline cache
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/one-shot-r190b-header-cache.yml']
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Publish r190b cache and verifier contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          boot=Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          s=boot.read_text()
+          old="/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260817-r188-content-stability"
+          new="/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260817-r190b-header-centerline"
+          if old in s:
+              s=s.replace(old,new)
+          elif new not in s:
+              raise SystemExit('FLOW_SCRIPT cache token not found')
+          boot.write_text(s)
+
+          index=Path('docs/scifi-ui/index.html')
+          h=index.read_text()
+          old_idx='./scripts/formatx-core-real3d-v20.js?v=20260817-r188-content-stability&rev=20260817-r188-dedupe'
+          new_idx='./scripts/formatx-core-real3d-v20.js?v=20260817-r190b-header-centerline&rev=20260817-r190b-flow-cache'
+          if old_idx in h:
+              h=h.replace(old_idx,new_idx)
+          elif new_idx not in h:
+              raise SystemExit('real3d bootstrap cache token not found')
+          index.write_text(h)
+
+          verify=Path('.github/workflows/verify-r180b-mobile-ui-styleguard.yml')
+          v=verify.read_text()
+          v=v.replace("formatx-flow-first-r75.js?v=20260817-r188-content-stability","formatx-flow-first-r75.js?v=20260817-r190b-header-centerline")
+          v=v.replace("src.includes('20260817-r188-content-stability')","src.includes('20260817-r190b-header-centerline')")
+          v=v.replace("assert.equal(s.magTop,'14px')","assert.equal(s.magTop,'12px')")
+          v=v.replace("assert.equal(s.mag.h,40)","assert.equal(s.mag.h,44)")
+          verify.write_text(v)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/index.html .github/workflows/verify-r180b-mobile-ui-styleguard.yml
+          if git diff --cached --quiet; then echo 'r190b cache already current'; exit 0; fi
+          git commit -m 'chore(mobile): publish r190b header centerline cache contract'
+          git push origin HEAD:master
