@@ -1,9 +1,48 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r161-cross-device-seamless-carrier-lock';
+const VERSION='r161-cross-device-seamless-carrier-lock-link-recovery';
 if(root.dataset.fxSeamlessEnforcerR159===VERSION)return;
-if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxSeamlessEnforcerR159='audit-skip';return;}
+const AUDIT=new URLSearchParams(location.search).get('lighthouse')==='1';
+
+const LINK_TARGETS={
+  observer:'#experience',
+  storage:'#capabilities',
+  format:'#capabilities',
+  usb:'#capabilities',
+  erase:'#capabilities',
+  smart:'#capabilities',
+  trial:'#pricing'
+};
+
+function restoreCrawlableLinks(){
+  const android=document.querySelector('a[data-android-full-download]');
+  if(android instanceof HTMLAnchorElement&&!android.getAttribute('href'))android.setAttribute('href','/FormatXSuitePro-android-arm64-current.apk');
+
+  const simulator=document.getElementById('project-simulator-trigger');
+  if(simulator instanceof HTMLAnchorElement&&!simulator.getAttribute('href'))simulator.setAttribute('href','/project-simulator.html');
+
+  for(const link of document.querySelectorAll('a[data-organism-part]')){
+    if(!(link instanceof HTMLAnchorElement)||link.getAttribute('href'))continue;
+    const part=String(link.dataset.organismPart||'').trim().toLowerCase();
+    link.setAttribute('href',LINK_TARGETS[part]||'#capabilities');
+  }
+}
+
+function armLinkRecovery(){
+  restoreCrawlableLinks();
+  const observer=new MutationObserver(restoreCrawlableLinks);
+  observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['href']});
+  setTimeout(restoreCrawlableLinks,0);
+  setTimeout(restoreCrawlableLinks,250);
+  setTimeout(restoreCrawlableLinks,900);
+}
+
+if(AUDIT){
+  root.dataset.fxSeamlessEnforcerR159='audit-link-recovery';
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',armLinkRecovery,{once:true});else armLinkRecovery();
+  return;
+}
 root.dataset.fxSeamlessEnforcerR159='booting';
 
 const imp=(el,prop,value)=>{
@@ -24,6 +63,7 @@ function clearSurface(el,{radius=false,overflow=false}={}){
 }
 
 function enforce(){
+  restoreCrawlableLinks();
   const hero=document.getElementById('hero');
   if(!(hero instanceof HTMLElement))return false;
   /* The living atmosphere belongs to #hero, but the carrier itself must never
@@ -73,7 +113,7 @@ function schedule(){
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{enforce();schedule();},{once:true});else enforce();
 const mo=new MutationObserver(schedule);
-mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','data-fx-mobile-reference-layout','data-fx-core-reference-texture-r130']});
+mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','href','data-fx-mobile-reference-layout','data-fx-core-reference-texture-r130']});
 addEventListener('pageshow',()=>{enforce();schedule();},{passive:true});
 addEventListener('resize',schedule,{passive:true});
 setTimeout(enforce,0);setTimeout(enforce,250);setTimeout(enforce,900);
