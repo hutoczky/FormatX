@@ -52,7 +52,7 @@ jobs:
             await page.goto(`${origin}?reference_composition=${name}`,{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForFunction(mobile
               ? ()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxFlowFirstR75==='ready-r139'
-              : ()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxFlowFirstR75==='desktop-bypass-r178',null,{timeout:45000});
+              : ()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxFlowFirstGuard==='desktop-bypass-r178',null,{timeout:45000});
             await page.waitForFunction(()=>document.documentElement.dataset.fxCoreSilhouetteStability==='r189-fixed-geometry-dt-smoothing',null,{timeout:10000});
             if(mobile&&viewport.width<=480)await page.waitForFunction(()=>document.documentElement.dataset.fxMobileProofActionStabilityR189==='normal-flow-under-480',null,{timeout:10000});
             await page.waitForTimeout(1900);
@@ -60,13 +60,13 @@ jobs:
               const root=document.documentElement;
               const q=s=>{const el=document.querySelector(s),r=el?.getBoundingClientRect(),cs=el?getComputedStyle(el):null;return r?{x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),display:cs.display,visibility:cs.visibility,opacity:+(cs.opacity||1),position:cs.position}:null};
               const canvas=document.querySelector('.fx-core-mobile-v55-canvas');
-              return {renderer:root.dataset.fxCoreRenderer,stability:root.dataset.fxCoreSilhouetteStability,proofAction:root.dataset.fxMobileProofActionStabilityR189,v69:root.dataset.fxCoreMobileV69,layout:root.dataset.fxMobileReferenceLayout,flow:root.dataset.fxFlowFirstR75,composition:root.dataset.fxReferenceComposition,renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),gl:Boolean(canvas?.getContext('webgl2')),glError:canvas?.getContext('webgl2')?.getError(),canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,topbar:q('.topbar'),space:q('#hero .hero-space'),rail:q('#hero .fx-reference-rail'),copy:q('#hero .hero-copy'),heading:q('#hero .fx-reference-heading'),proof:q('#hero .fx-reference-proof'),proofText:q('#hero .fx-reference-proof p'),liveOs:q('#hero .fx-reference-liveos'),brand:q('.topbar .brand'),mag:q('.topbar>.fx-reference-mag-button'),menu:q('.topbar>.fx-reference-menu-button'),legacyMenu:q('#menu-toggle.fx-organism-system-toggle')};
+              return {renderer:root.dataset.fxCoreRenderer,stability:root.dataset.fxCoreSilhouetteStability,proofAction:root.dataset.fxMobileProofActionStabilityR189,v69:root.dataset.fxCoreMobileV69,layout:root.dataset.fxMobileReferenceLayout,flow:root.dataset.fxFlowFirstR75,flowGuard:root.dataset.fxFlowFirstGuard,composition:root.dataset.fxReferenceComposition,renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),gl:Boolean(canvas?.getContext('webgl2')),glError:canvas?.getContext('webgl2')?.getError(),canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,topbar:q('.topbar'),space:q('#hero .hero-space'),rail:q('#hero .fx-reference-rail'),copy:q('#hero .hero-copy'),heading:q('#hero .fx-reference-heading'),proof:q('#hero .fx-reference-proof'),proofText:q('#hero .fx-reference-proof p'),liveOs:q('#hero .fx-reference-liveos'),brand:q('.topbar .brand'),mag:q('.topbar>.fx-reference-mag-button'),menu:q('.topbar>.fx-reference-menu-button'),legacyMenu:q('#menu-toggle.fx-organism-system-toggle')};
             });
             console.log(name.toUpperCase(),JSON.stringify(state));
             assert.equal(state.renderer,'single-webgl-luminous-crystal-r99');
             assert.equal(state.stability,'r189-fixed-geometry-dt-smoothing');
             assert.equal(state.v69,'ready-v69');
-            if(mobile)assert.equal(state.layout,'ready-v1');
+            assert.equal(state.layout,'ready-v1');
             assert.equal(state.gl,true);assert.equal(state.glError,0);assert.equal(state.canvases,1);assert.ok(Number.isFinite(state.renderMs)&&state.renderMs<50,JSON.stringify(state));
             if(mobile)assert.ok(state.renderMs<16.67,JSON.stringify(state));
             assert.ok(state.topbar&&state.space&&state.brand,`${name}: structural shell missing`);
@@ -83,8 +83,8 @@ jobs:
               assert.equal(overlap(state.brand,state.mag),false,`${name}: brand/MAG overlap`);
               assert.equal(overlap(state.mag,state.menu),false,`${name}: MAG/menu overlap`);
             }else{
-              assert.equal(state.flow,'desktop-bypass-r178');
-              assert.equal(state.composition,'desktop-native-r178');
+              assert.equal(state.flowGuard,'desktop-bypass-r178');
+              assert.equal(state.composition,'desktop-native-r177');
               assert.ok(state.copy&&state.copy.w>500&&state.copy.h>200,`${name}: desktop hero copy collapsed`);
               assert.ok(state.legacyMenu&&state.legacyMenu.display!=='none'&&state.legacyMenu.visibility==='visible',`${name}: desktop menu unavailable`);
               for(const key of ['rail','heading','proof'])if(state[key])assert.ok(state[key].display==='none'||state[key].visibility==='hidden'||state[key].opacity<.01,`${name}: mobile award overlay leaked to desktop`);
