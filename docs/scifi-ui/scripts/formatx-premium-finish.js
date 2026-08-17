@@ -124,8 +124,6 @@
       state.dpr = dpr;
       canvas.width = Math.max(1, Math.round(width * dpr));
       canvas.height = Math.max(1, Math.round(height * dpr));
-      canvas.style.width = width + 'px';
-      canvas.style.height = height + 'px';
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 

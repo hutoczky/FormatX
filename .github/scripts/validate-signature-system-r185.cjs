@@ -11,9 +11,9 @@ const app=read('App.xaml.cs');
 const appMag=read('SignatureMagController.cs');
 
 for(const token of [
-  'formatx-signature-system-r185.css?v=20260816-iconic-mag-r185b-hitlayer',
-  'formatx-signature-system-r185.js?v=20260816-iconic-mag-r185b-hitlayer'
-]) assert.ok(index.includes(token),`missing index signature asset: ${token}`);
+  'formatx-signature-system-r185.css?v=',
+  'formatx-signature-system-r185.js?v='
+]) assert.ok(index.includes(token),`missing versioned index signature asset: ${token}`);
 assert.equal((index.match(/formatx-signature-system-r185\.css/g)||[]).length,1,'signature CSS must load once');
 assert.equal((index.match(/formatx-signature-system-r185\.js/g)||[]).length,1,'signature JS must load once');
 

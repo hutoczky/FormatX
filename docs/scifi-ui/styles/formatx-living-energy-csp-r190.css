@@ -1,0 +1,154 @@
+/* r190 — CSP-safe living energy.
+   The crystal silhouette never scales or moves. Only independent optical layers animate. */
+
+html[data-fx-living-energy-r168] #hero .fx-r168-orbit,
+html[data-fx-living-energy-r168] #hero .fx-r168-caustic,
+html[data-fx-living-energy-r168] #hero .fx-r168-spectrum,
+html[data-fx-living-energy-r168] #hero .fx-r168-flare,
+html[data-fx-living-energy-r168] #hero .fx-r168-shockwave,
+html[data-fx-living-energy-r168] #hero .fx-r168-interaction-wave,
+html[data-fx-living-energy-r168] #hero .fx-r168-spark {
+  left: 50% !important;
+  top: 49% !important;
+}
+
+html[data-fx-living-energy-r168] #hero .fx-r168-orbit-a {
+  opacity: .22 !important;
+  animation: fx-r190-orbit-a 16s linear infinite !important;
+}
+html[data-fx-living-energy-r168] #hero .fx-r168-orbit-b {
+  opacity: .16 !important;
+  animation: fx-r190-orbit-b 22s linear infinite !important;
+}
+html[data-fx-living-energy-r168] #hero .fx-r168-caustic-a {
+  opacity: .16 !important;
+  animation: fx-r190-caustic-a 19s linear infinite !important;
+}
+html[data-fx-living-energy-r168] #hero .fx-r168-caustic-b {
+  opacity: .12 !important;
+  animation: fx-r190-caustic-b 27s linear infinite !important;
+}
+html[data-fx-living-energy-r168] #hero .fx-r168-spectrum {
+  opacity: .14 !important;
+  transform: translate(-50%,-50%) rotate(-7deg) !important;
+  animation: fx-r190-spectrum 5.8s ease-in-out infinite !important;
+}
+html[data-fx-living-energy-r168] #hero .fx-r168-flare-x {
+  opacity: .15 !important;
+  transform: translate(-50%,-50%) !important;
+  animation: fx-r190-flare-x 4.9s ease-in-out infinite !important;
+}
+html[data-fx-living-energy-r168] #hero .fx-r168-flare-y {
+  opacity: .11 !important;
+  transform: translate(-50%,-50%) !important;
+  animation: fx-r190-flare-y 6.3s ease-in-out infinite !important;
+}
+html[data-fx-living-energy-r168] #hero .fx-r168-shockwave {
+  opacity: .11 !important;
+  transform: translate(-50%,-50%) scale(.86) !important;
+  animation: fx-r190-shock 3.45s ease-in-out infinite !important;
+}
+html[data-fx-living-energy-r168] #hero .fx-r168-spark-a { animation: fx-r190-spark-a 16s linear infinite !important; }
+html[data-fx-living-energy-r168] #hero .fx-r168-spark-b { animation: fx-r190-spark-b 16s linear infinite !important; }
+html[data-fx-living-energy-r168] #hero .fx-r168-spark-c { animation: fx-r190-spark-c 22s linear infinite reverse !important; }
+html[data-fx-living-energy-r168] #hero .fx-r168-spark-d { animation: fx-r190-spark-d 22s linear infinite reverse !important; }
+html[data-fx-living-energy-r168] #hero .fx-r168-spark-e { animation: fx-r190-spark-e 16s linear infinite !important; }
+html[data-fx-living-energy-r168] #hero .fx-r168-spark-f { animation: fx-r190-spark-f 22s linear infinite reverse !important; }
+
+html[data-fx-living-energy-interaction-r168='energy-burst'] #hero .fx-r168-interaction-wave,
+html[data-fx-living-energy-interaction-r168='touch-reactive'] #hero .fx-r168-interaction-wave,
+html[data-fx-living-energy-interaction-r168='pointer-reactive'] #hero .fx-r168-interaction-wave {
+  animation: fx-r190-energy-burst .78s cubic-bezier(.16,.72,.26,1) 1 !important;
+}
+
+@keyframes fx-r190-orbit-a {
+  from { transform: translate(-50%,-50%) rotate(0deg); }
+  to { transform: translate(-50%,-50%) rotate(360deg); }
+}
+@keyframes fx-r190-orbit-b {
+  from { transform: translate(-50%,-50%) rotate(360deg); }
+  to { transform: translate(-50%,-50%) rotate(0deg); }
+}
+@keyframes fx-r190-caustic-a {
+  from { transform: translate(-50%,-50%) rotate(0deg); }
+  to { transform: translate(-50%,-50%) rotate(360deg); }
+}
+@keyframes fx-r190-caustic-b {
+  from { transform: translate(-50%,-50%) rotate(360deg) scaleX(.78) scaleY(1.12); }
+  to { transform: translate(-50%,-50%) rotate(0deg) scaleX(.78) scaleY(1.12); }
+}
+@keyframes fx-r190-spectrum {
+  0%,100% { opacity: .10; filter: blur(1.4px) hue-rotate(-3deg); }
+  50% { opacity: .22; filter: blur(1.1px) hue-rotate(4deg); }
+}
+@keyframes fx-r190-flare-x {
+  0%,100% { opacity: .09; filter: blur(.38px); }
+  47% { opacity: .22; filter: blur(.24px); }
+}
+@keyframes fx-r190-flare-y {
+  0%,100% { opacity: .07; filter: blur(.4px); }
+  55% { opacity: .16; filter: blur(.27px); }
+}
+@keyframes fx-r190-shock {
+  0%,100% { transform: translate(-50%,-50%) scale(.83); opacity: .07; }
+  38% { transform: translate(-50%,-50%) scale(.96); opacity: .17; }
+  52% { transform: translate(-50%,-50%) scale(.91); opacity: .11; }
+}
+@keyframes fx-r190-energy-burst {
+  0% { transform: translate(-50%,-50%) scale(.55); opacity: .58; }
+  100% { transform: translate(-50%,-50%) scale(2.28); opacity: 0; }
+}
+@keyframes fx-r190-spark-a { from { transform:translate(-50%,-50%) rotate(0deg) translateX(clamp(76px,15vw,205px)); } to { transform:translate(-50%,-50%) rotate(360deg) translateX(clamp(76px,15vw,205px)); } }
+@keyframes fx-r190-spark-b { from { transform:translate(-50%,-50%) rotate(128deg) translateX(clamp(82px,17vw,230px)); } to { transform:translate(-50%,-50%) rotate(488deg) translateX(clamp(82px,17vw,230px)); } }
+@keyframes fx-r190-spark-c { from { transform:translate(-50%,-50%) rotate(0deg) translateX(clamp(66px,13vw,178px)); } to { transform:translate(-50%,-50%) rotate(360deg) translateX(clamp(66px,13vw,178px)); } }
+@keyframes fx-r190-spark-d { from { transform:translate(-50%,-50%) rotate(196deg) translateX(clamp(72px,14vw,194px)); } to { transform:translate(-50%,-50%) rotate(556deg) translateX(clamp(72px,14vw,194px)); } }
+@keyframes fx-r190-spark-e { from { transform:translate(-50%,-50%) rotate(242deg) translateX(clamp(68px,14vw,190px)); } to { transform:translate(-50%,-50%) rotate(602deg) translateX(clamp(68px,14vw,190px)); } }
+@keyframes fx-r190-spark-f { from { transform:translate(-50%,-50%) rotate(308deg) translateX(clamp(78px,16vw,218px)); } to { transform:translate(-50%,-50%) rotate(668deg) translateX(clamp(78px,16vw,218px)); } }
+
+@media (max-width:900px),(pointer:coarse) {
+  html[data-fx-mobile-reference-layout='ready-v1'][data-fx-living-energy-r168] body.living-architecture main#main-content section#hero.scene.hero[data-organ='core'] .hero-grid .hero-space::before {
+    content:'' !important;
+    display:block !important;
+    position:absolute !important;
+    left:-14vw !important;
+    right:-14vw !important;
+    top:38% !important;
+    bottom:-165px !important;
+    height:auto !important;
+    z-index:0 !important;
+    pointer-events:none !important;
+    background:radial-gradient(ellipse 78% 53% at 50% 22%,rgba(45,188,239,.13),transparent 64%),radial-gradient(ellipse 60% 42% at 59% 39%,rgba(140,69,255,.07),transparent 70%),linear-gradient(180deg,rgba(1,5,14,0) 0%,rgba(2,10,24,.11) 18%,rgba(3,15,31,.40) 51%,rgba(4,13,30,.80) 80%,#040d1e 100%) !important;
+    border:0 !important;
+    box-shadow:none !important;
+    opacity:1 !important;
+  }
+  html[data-fx-mobile-reference-layout='ready-v1'][data-fx-living-energy-r168] body.living-architecture main#main-content section#hero.scene.hero[data-organ='core'] .hero-grid .hero-space::after {
+    content:'' !important;
+    display:block !important;
+    position:absolute !important;
+    left:-12vw !important;
+    right:-12vw !important;
+    top:58% !important;
+    bottom:auto !important;
+    height:72% !important;
+    z-index:1 !important;
+    pointer-events:none !important;
+    background:linear-gradient(180deg,rgba(1,6,16,0) 0%,rgba(1,8,20,.06) 16%,rgba(2,11,27,.23) 38%,rgba(3,14,30,.60) 68%,rgba(4,13,30,.88) 88%,#040d1e 100%) !important;
+    border:0 !important;
+    box-shadow:none !important;
+    opacity:1 !important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html[data-fx-living-energy-r168] #hero .fx-r168-orbit,
+  html[data-fx-living-energy-r168] #hero .fx-r168-caustic,
+  html[data-fx-living-energy-r168] #hero .fx-r168-spectrum,
+  html[data-fx-living-energy-r168] #hero .fx-r168-flare,
+  html[data-fx-living-energy-r168] #hero .fx-r168-shockwave,
+  html[data-fx-living-energy-r168] #hero .fx-r168-interaction-wave,
+  html[data-fx-living-energy-r168] #hero .fx-r168-spark {
+    animation:none !important;
+    will-change:auto !important;
+  }
+}

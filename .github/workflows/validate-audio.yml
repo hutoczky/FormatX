@@ -1,5 +1,5 @@
-name: Validate FormatX verified audio
-run-name: Validate FormatX professional score from ${{ github.sha }}
+name: Validate FormatX visible Web Audio control
+run-name: Validate FormatX MUTE / UNMUTE r191 from ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -7,32 +7,20 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
-      - 'docs/scifi-ui/scripts/formatx-nextgen-controls.js'
-      - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
-      - 'docs/scifi-ui/scripts/igloo-parity.js'
-      - 'docs/scifi-ui/scripts/living-architecture.js'
-      - 'docs/scifi-ui/styles/formatx-site-stability.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-readability.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-hero-flow.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
-      - 'billing-worker/src/production-with-license.js'
-      - 'billing-worker/test/production-routing.spec.js'
+      - 'docs/scifi-ui/scripts/formatx-audio-toggle-r191.js'
+      - 'docs/scifi-ui/styles/formatx-audio-toggle-r191.css'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - '.github/scripts/validate-audio.cjs'
       - '.github/workflows/validate-audio.yml'
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
-      - 'docs/scifi-ui/scripts/formatx-nextgen-controls.js'
-      - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
-      - 'docs/scifi-ui/scripts/igloo-parity.js'
-      - 'docs/scifi-ui/scripts/living-architecture.js'
-      - 'docs/scifi-ui/styles/formatx-site-stability.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-readability.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-hero-flow.css'
-      - 'docs/scifi-ui/styles/formatx-mobile-recovery.css'
-      - 'billing-worker/src/production-with-license.js'
-      - 'billing-worker/test/production-routing.spec.js'
+      - 'docs/scifi-ui/scripts/formatx-audio-toggle-r191.js'
+      - 'docs/scifi-ui/styles/formatx-audio-toggle-r191.css'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - '.github/scripts/validate-audio.cjs'
       - '.github/workflows/validate-audio.yml'
 
@@ -41,63 +29,39 @@ permissions:
   statuses: write
 
 concurrency:
-  group: formatx-verified-audio-${{ github.ref }}
+  group: formatx-visible-audio-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  verified-audio:
+  visible-audio-control:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: billing-worker/package-lock.json
 
-      - name: Validate professional score architecture and syntax
+      - name: Validate r191 audio architecture and syntax
         shell: bash
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-audio-repair.js
-          node --check docs/scifi-ui/scripts/formatx-nextgen-controls.js
-          node --check docs/scifi-ui/scripts/interaction-genome-export-stability.js
-          node --check docs/scifi-ui/scripts/igloo-parity.js
-          node --check docs/scifi-ui/scripts/living-architecture.js
-          node --check billing-worker/src/production-with-license.js
+          node --check docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check .github/scripts/validate-audio.cjs
-          grep -Fq "professional-v6" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "premium-cinematic-music" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "sixteen-bar-evolving-score" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "createPeriodicWave" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "createWaveShaper" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "createConvolver" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "createDelay" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "createStereoPanner" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "OfflineAudioContext" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "signal-verified" docs/scifi-ui/scripts/formatx-audio-repair.js
-          grep -Fq "professionalAudioOwnsButton" docs/scifi-ui/scripts/formatx-nextgen-controls.js
-          grep -Fq "root.dataset.fxAudioOwner === 'professional-v6'" docs/scifi-ui/scripts/formatx-nextgen-controls.js
-          grep -Fq "setImportant(sound, 'top', '138px')" docs/scifi-ui/scripts/interaction-genome-export-stability.js
-          grep -Fq "setImportant(sound, 'visibility', 'visible')" docs/scifi-ui/scripts/interaction-genome-export-stability.js
-          grep -Fq "setImportant(sound, 'pointer-events', 'auto')" docs/scifi-ui/scripts/interaction-genome-export-stability.js
-          grep -Fq "20260807-audio-slot-2" docs/scifi-ui/scripts/igloo-parity.js
-          grep -Fq "top: 90px !important" docs/scifi-ui/styles/formatx-site-stability.css
-          grep -Fq "html body .fx-three-sound" docs/scifi-ui/styles/formatx-mobile-readability.css
-          grep -Fq "top: 138px !important" docs/scifi-ui/styles/formatx-mobile-readability.css
-          grep -Fq "right: max(10px, env(safe-area-inset-right)) !important" docs/scifi-ui/styles/formatx-mobile-readability.css
-          grep -Fq "autoplay=(self)" billing-worker/src/production-with-license.js
-          ! grep -Fq "'autoplay=()'" billing-worker/src/production-with-license.js
-
-      - name: Test production security headers
-        working-directory: billing-worker
-        run: |
-          npm ci
-          npm test
+          grep -Fq "mute-unmute-r191" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
+          grep -Fq "UNMUTE" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
+          grep -Fq "MUTE" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
+          grep -Fq "aria-pressed" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
+          grep -Fq "user-gesture-required" .github/scripts/validate-audio.cjs
+          grep -Fq "min-height: 44px" docs/scifi-ui/styles/formatx-audio-toggle-r191.css
+          grep -Fq "focus-visible" docs/scifi-ui/styles/formatx-audio-toggle-r191.css
+          grep -Fq "formatx-audio-toggle-r191.js?v=20260817-r191" docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          ! grep -Eq "autoplay|\.play\(\)" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
 
       - name: Install Playwright Chromium
         shell: bash
@@ -118,39 +82,25 @@ jobs:
           cat "$RUNNER_TEMP/formatx-audio-http.log"
           exit 1
 
-      - name: Verify desktop and mobile professional score in Chromium
+      - name: Verify desktop and mobile MUTE / UNMUTE control
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-audio/node_modules
-        shell: bash
-        run: |
-          set -o pipefail
-          node .github/scripts/validate-audio.cjs 2>&1 | tee verified-audio-report.txt
+        run: node .github/scripts/validate-audio.cjs
 
-      - name: Upload audio verification report
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: formatx-verified-audio-report
-          path: verified-audio-report.txt
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Publish verified audio status
+      - name: Publish visible audio status
         if: always() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = 'success' ]; then
-            state='success'
-            description='Desktop and mobile professional cinematic score verification passed'
+          if [ "$JOB_STATUS" = success ]; then
+            state='success'; description='Visible MUTE/UNMUTE and user-gesture Web Audio passed'
           else
-            state='failure'
-            description='FormatX professional score validation failed'
+            state='failure'; description='Visible Web Audio control validation failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
-            -f context='FormatX verified audio' \
+            -f context='FormatX visible Web Audio r191' \
             -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

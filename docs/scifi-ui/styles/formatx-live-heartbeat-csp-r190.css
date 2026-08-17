@@ -1,0 +1,108 @@
+/* r190 — CSP-safe heartbeat optics.
+   The r166 internal canvas owns crystal-body heartbeat. These are optical overlays only. */
+
+html[data-fx-live-heartbeat-r155] #hero .fx-core-detail-r122 {
+  scale: 1 !important;
+  transform-origin: 50% 50% !important;
+}
+
+#hero .fx-r155-heartbeat-core,
+#hero .fx-r155-heartbeat-ring,
+#hero .fx-r155-heartbeat-wave {
+  position:absolute;
+  left:50%;
+  top:49%;
+  pointer-events:none;
+  border-radius:50%;
+  transform-origin:50% 50%;
+  mix-blend-mode:screen;
+  contain:layout paint style;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+
+#hero .fx-r155-heartbeat-core {
+  z-index:31;
+  width:clamp(104px,12vw,188px);
+  aspect-ratio:1;
+  background:radial-gradient(circle,rgba(255,255,255,.99) 0 1%,rgba(222,255,255,.84) 2.4%,rgba(83,239,255,.46) 7.5%,rgba(43,205,255,.20) 18%,rgba(164,76,255,.14) 31%,transparent 66%);
+  box-shadow:0 0 16px rgba(220,255,255,.40),0 0 35px rgba(55,220,255,.22),0 0 62px rgba(146,70,255,.12);
+  transform:translate3d(-50%,-50%,0);
+  opacity:.42;
+  animation:fx-r190-heart-core 1.38s ease-in-out infinite;
+}
+
+#hero .fx-r155-heartbeat-ring {
+  z-index:30;
+  width:clamp(116px,13vw,204px);
+  aspect-ratio:1;
+  border:1px solid rgba(190,253,255,.52);
+  box-shadow:0 0 14px rgba(79,230,255,.28),0 0 32px rgba(141,72,255,.12),inset 0 0 18px rgba(97,236,255,.14);
+  transform:translate3d(-50%,-50%,0);
+  opacity:.24;
+  animation:fx-r190-heart-ring 5.7s linear infinite;
+}
+
+#hero .fx-r155-heartbeat-wave {
+  z-index:29;
+  width:clamp(144px,16vw,252px);
+  aspect-ratio:1;
+  border:1px solid rgba(108,235,255,.25);
+  box-shadow:0 0 21px rgba(62,216,255,.13),0 0 44px rgba(151,73,255,.08);
+  transform:translate3d(-50%,-50%,0) scale(.88);
+  opacity:.09;
+  animation:fx-r190-heart-wave 1.38s ease-out infinite;
+}
+
+html[data-fx-live-heartbeat-interaction-r155='active-r183'] #hero .fx-r155-heartbeat-core {
+  animation:fx-r190-heart-core-active .72s cubic-bezier(.18,.75,.28,1) 1,fx-r190-heart-core 1.38s ease-in-out .72s infinite;
+}
+html[data-fx-live-heartbeat-interaction-r155='active-r183'] #hero .fx-r155-heartbeat-wave {
+  animation:fx-r190-heart-wave-active .72s cubic-bezier(.16,.72,.26,1) 1,fx-r190-heart-wave 1.38s ease-out .72s infinite;
+}
+
+@keyframes fx-r190-heart-core {
+  0%,100% { opacity:.34; filter:brightness(1.06) drop-shadow(0 0 10px rgba(99,238,255,.24)); }
+  10% { opacity:.62; filter:brightness(1.28) drop-shadow(0 0 23px rgba(99,238,255,.40)); }
+  23% { opacity:.47; filter:brightness(1.15) drop-shadow(0 0 15px rgba(99,238,255,.31)); }
+  50% { opacity:.39; filter:brightness(1.09) drop-shadow(0 0 12px rgba(99,238,255,.27)); }
+}
+@keyframes fx-r190-heart-ring {
+  0% { transform:translate3d(-50%,-50%,0) rotate(0deg); opacity:.20; }
+  10% { opacity:.48; }
+  23% { opacity:.34; }
+  100% { transform:translate3d(-50%,-50%,0) rotate(360deg); opacity:.20; }
+}
+@keyframes fx-r190-heart-wave {
+  0% { transform:translate3d(-50%,-50%,0) scale(.86); opacity:.04; }
+  12% { transform:translate3d(-50%,-50%,0) scale(1.02); opacity:.24; }
+  36% { transform:translate3d(-50%,-50%,0) scale(1.16); opacity:.09; }
+  100% { transform:translate3d(-50%,-50%,0) scale(1.25); opacity:0; }
+}
+@keyframes fx-r190-heart-core-active {
+  0% { opacity:.38; filter:brightness(1.08); }
+  28% { opacity:.90; filter:brightness(1.42) drop-shadow(0 0 28px rgba(99,238,255,.48)); }
+  100% { opacity:.44; filter:brightness(1.12); }
+}
+@keyframes fx-r190-heart-wave-active {
+  0% { transform:translate3d(-50%,-50%,0) scale(.82); opacity:.38; }
+  100% { transform:translate3d(-50%,-50%,0) scale(1.55); opacity:0; }
+}
+
+@media(max-width:900px),(pointer:coarse) {
+  #hero .fx-r155-heartbeat-core{width:clamp(92px,29vw,132px)}
+  #hero .fx-r155-heartbeat-ring{width:clamp(104px,32vw,146px)}
+  #hero .fx-r155-heartbeat-wave{width:clamp(128px,39vw,176px)}
+}
+
+@media(prefers-reduced-motion:reduce) {
+  #hero .fx-r155-heartbeat-core,
+  #hero .fx-r155-heartbeat-ring,
+  #hero .fx-r155-heartbeat-wave {
+    animation:none !important;
+    will-change:auto !important;
+  }
+  #hero .fx-r155-heartbeat-core { opacity:.36; }
+  #hero .fx-r155-heartbeat-ring { opacity:.20; }
+  #hero .fx-r155-heartbeat-wave { opacity:.06; transform:translate3d(-50%,-50%,0) scale(.94); }
+}

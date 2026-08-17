@@ -1,0 +1,68 @@
+name: One-shot r190 mobile layout diagnosis
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install Playwright Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/fxdiag" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/fxdiag/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start site
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/http.log" 2>&1 &
+          for i in $(seq 1 40); do curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0; sleep .25; done
+          cat "$RUNNER_TEMP/http.log"
+          exit 1
+      - name: Diagnose 390x844 production-like layout
+        env:
+          NODE_PATH: ${{ runner.temp }}/fxdiag/node_modules
+        run: |
+          node - <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});
+            const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,deviceScaleFactor:2,colorScheme:'dark'});
+            await context.addInitScript(()=>{try{localStorage.setItem('formatx:intro-seen-v1','1')}catch(_){}});
+            const page=await context.newPage();
+            await page.goto('http://127.0.0.1:4178/scifi-ui/index.html',{waitUntil:'domcontentloaded'});
+            const styles=['/scifi-ui/styles/formatx-content-standard.css','/scifi-ui/styles/formatx-mobile-readability.css','/scifi-ui/styles/formatx-mobile-unified.css','/scifi-ui/styles/formatx-mobile-hero-flow.css','/scifi-ui/styles/formatx-mobile-production-r5.css'];
+            const scripts=['/scifi-ui/scripts/single-language-toggle.js','/scifi-ui/scripts/release-metadata.js','/scifi-ui/scripts/formatx-content-standard.js','/scifi-ui/scripts/formatx-content-finalizer.js','/scifi-ui/scripts/formatx-platform-surface-finalizer.js','/scifi-ui/scripts/formatx-organism-semantic-state.js','/scifi-ui/scripts/formatx-mobile-unified.js'];
+            await page.evaluate(async ({styles,scripts})=>{
+              for(const href of styles){if([...document.styleSheets].some(s=>s.href&&new URL(s.href).pathname===href))continue;await new Promise((res,rej)=>{const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.onload=res;l.onerror=rej;document.head.appendChild(l)})}
+              for(const src of scripts){if([...document.scripts].some(s=>s.src&&new URL(s.src).pathname===src))continue;await new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+            },{styles,scripts});
+            await page.waitForTimeout(1600);
+            const result=await page.evaluate(()=>{
+              const info=sel=>{const e=document.querySelector(sel);if(!e)return null;const c=getComputedStyle(e),r=e.getBoundingClientRect();return {sel,rect:{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height},position:c.position,display:c.display,order:c.order,margin:c.margin,marginTop:c.marginTop,marginBottom:c.marginBottom,transform:c.transform,overflow:c.overflow,height:c.height,minHeight:c.minHeight,maxHeight:c.maxHeight,parent:e.parentElement?.className||''}};
+              const links=[...document.querySelectorAll('link[rel=stylesheet]')].map(l=>({href:l.href,media:l.media,disabled:l.disabled})).filter(x=>/flow-first|reference|mobile-hero-flow|mobile-production|mobile-unified|ui-polish/.test(x.href));
+              return {
+                innerWidth,outerWidth,devicePixelRatio,
+                visualViewport:visualViewport?{width:visualViewport.width,height:visualViewport.height,scale:visualViewport.scale}:null,
+                screen:{width:screen.width,availWidth:screen.availWidth},
+                media:{max900:matchMedia('(max-width:900px)').matches,coarse:matchMedia('(pointer:coarse)').matches},
+                root:{...document.documentElement.dataset},
+                doc:{clientWidth:document.documentElement.clientWidth,scrollWidth:document.documentElement.scrollWidth},
+                heroSpace:info('#hero .hero-space'),
+                rail:info('#hero .fx-reference-rail'),
+                heading:info('#hero .fx-reference-heading'),
+                proof:info('#hero .fx-reference-proof'),
+                heroGrid:info('#hero .hero-grid'),
+                styles:links
+              };
+            });
+            console.log('R190_LAYOUT_DIAG='+JSON.stringify(result,null,2));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE

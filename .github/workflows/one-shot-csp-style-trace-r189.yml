@@ -1,0 +1,39 @@
+name: One-shot r189 inline style CSP trace
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/scripts/diagnose-inline-style-csp.cjs'
+      - '.github/workflows/one-shot-csp-style-trace-r189.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/formatx-csp-trace"
+          npm install --prefix "$RUNNER_TEMP/formatx-csp-trace" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-csp-trace/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start static site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4179 --directory docs >"$RUNNER_TEMP/formatx-csp-trace-http.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4179/scifi-ui/index.html >/dev/null && exit 0
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/formatx-csp-trace-http.log"
+          exit 1
+      - name: Trace CSP style sources
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-csp-trace/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4179/scifi-ui/index.html
+        run: node .github/scripts/diagnose-inline-style-csp.cjs

@@ -58,9 +58,11 @@
     }
   }
 
+  // Modern production CSS uses svh/dvh directly. The former JS fallback wrote
+  // an inline custom property to <html>, which violated the strict style-src
+  // policy and was no longer consumed by any stylesheet.
   function syncViewportHeight() {
-    const height = window.visualViewport?.height || window.innerHeight;
-    root.style.setProperty('--fx-visual-viewport-height', Math.round(height) + 'px');
+    root.dataset.fxVisualViewportHeightMode = 'css-dynamic-viewport';
   }
 
   function syncScrollPolicyMarker() {
