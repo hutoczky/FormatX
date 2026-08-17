@@ -19,7 +19,10 @@
 
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button,
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle{
+    top:14px!important;
     bottom:auto!important;
+    height:40px!important;
+    min-height:40px!important;
     margin:0!important;
     padding:0!important;
     display:grid!important;
@@ -34,75 +37,16 @@
     -webkit-font-smoothing:antialiased!important;
   }
 
-  /* r186: the old text-only MAG shortcut could resolve as a blank dark tile on
-     mobile. Render an explicit miniature core so the control is recognisable
-     even when inherited button text styling is suppressed by another layer. */
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button{
-    position:relative!important;
-    top:12px!important;
-    width:44px!important;
-    min-width:44px!important;
-    height:44px!important;
-    min-height:44px!important;
-    border:1px solid rgba(122,218,244,.34)!important;
-    border-radius:14px!important;
-    overflow:hidden!important;
-    isolation:isolate!important;
-    color:transparent!important;
-    text-indent:-9999px!important;
-    background:
-      radial-gradient(circle at 50% 46%,rgba(91,228,255,.16),transparent 47%),
-      linear-gradient(145deg,rgba(5,24,37,.94),rgba(2,12,22,.98))!important;
-    box-shadow:
-      inset 0 0 24px rgba(55,180,255,.075),
-      inset 0 1px rgba(224,252,255,.05),
-      0 8px 24px rgba(0,0,0,.17)!important;
-  }
-
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button::before{
-    content:""!important;
-    position:absolute!important;
-    z-index:1!important;
-    left:50%!important;
-    top:50%!important;
-    width:24px!important;
-    height:24px!important;
-    transform:translate(-50%,-50%)!important;
-    clip-path:polygon(50% 0,64% 34%,100% 50%,64% 66%,50% 100%,36% 66%,0 50%,36% 34%)!important;
-    background:
-      linear-gradient(135deg,#efffff 0%,#82efff 29%,#38cfff 47%,#7778ff 69%,#d08cff 100%)!important;
-    filter:
-      drop-shadow(0 0 4px rgba(207,253,255,.9))
-      drop-shadow(0 0 10px rgba(66,219,255,.55))
-      drop-shadow(0 0 14px rgba(140,79,255,.28))!important;
-    opacity:.96!important;
-    pointer-events:none!important;
-  }
-
-  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button::after{
-    content:""!important;
-    position:absolute!important;
-    z-index:2!important;
-    left:50%!important;
-    top:50%!important;
-    width:7px!important;
-    height:7px!important;
-    border-radius:50%!important;
-    transform:translate(-50%,-50%)!important;
-    background:#f6ffff!important;
-    box-shadow:
-      0 0 5px 1px rgba(226,255,255,.96),
-      0 0 11px 3px rgba(65,225,255,.53),
-      0 0 18px 5px rgba(126,86,255,.19)!important;
-    pointer-events:none!important;
+    width:48px!important;
+    min-width:48px!important;
+    border-radius:13px!important;
+    color:rgba(235,247,253,.91)!important;
   }
 
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle{
-    top:14px!important;
     width:40px!important;
     min-width:40px!important;
-    height:40px!important;
-    min-height:40px!important;
     border-radius:13px!important;
     color:rgba(235,247,253,.91)!important;
   }

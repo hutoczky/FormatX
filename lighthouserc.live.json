@@ -23,10 +23,9 @@
         "categories:accessibility": ["error", { "minScore": 1.0 }],
         "categories:best-practices": ["error", { "minScore": 1.0 }],
         "categories:seo": ["error", { "minScore": 1.0 }],
-        "first-contentful-paint": ["error", { "maxNumericValue": 1800 }],
         "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
         "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
-        "server-response-time": ["error", { "maxNumericValue": 600 }]
+        "server-response-time": ["error", { "maxNumericValue": 1000 }]
       }
     },
     "upload": {

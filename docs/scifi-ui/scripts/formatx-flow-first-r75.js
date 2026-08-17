@@ -24,8 +24,7 @@ function apply(){
   const mag=document.querySelector('.fx-reference-mag-button'),language=document.querySelector('.fx-language-toggle'),menu=document.querySelector('.fx-reference-menu-button');
   if(mobile){
    if(brand instanceof HTMLElement){imp(brand,'position','fixed');imp(brand,'inset','auto');imp(brand,'top','17px');imp(brand,'right','auto');imp(brand,'bottom','auto');imp(brand,'left','18px');imp(brand,'width','auto');imp(brand,'height','34px');imp(brand,'margin','0');imp(brand,'min-width','0');imp(brand,'flex','0 0 auto');imp(brand,'transform','none');imp(brand,'translate','none');}
-   /* r190b: match the CSS-owned 34px optical centerline shared by brand/HU/menu. */
-   fixed(mag,'12px','calc(clamp(16px,6.55vw,57px) + 109px)','44px','44px');
+   fixed(mag,'14px','calc(clamp(16px,6.55vw,57px) + 109px)','48px','40px');
    fixed(language,'14px','calc(clamp(16px,6.55vw,57px) + 61px)','40px','40px');
    fixed(menu,'8px','clamp(16px,6.55vw,57px)','48px','52px');
   }else{

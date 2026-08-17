@@ -1,13 +1,14 @@
 (function () {
   'use strict';
-  // r191 production pass: fixed crystal silhouette plus adaptive mobile 60 FPS
-  // render budgeting. Approved reference composition and internal optics remain intact.
+  // r157 cross-device final: approved mobile crystal size/form, proof-first mobile flow,
+  // desktop 412:410 reference aspect with luminance-key integration, r155 heartbeat,
+  // r153 optical pulse, r152 click stability and r144 pointer/touch/gyro interaction.
   const root = document.documentElement;
-  const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r191-mobile-60fps';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260817-r191-mobile-60fps';
+  const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r157-cross-device-final';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260814-luminous-cinematic-r99&rev=20260815-prismatic-organic-r120';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260813-android-webgl-recovery-r71';
-  const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260817-r190-nonoverlap';
-  const R87_STYLE = '/scifi-ui/styles/formatx-award-reference-r87.css?v=20260817-r190-nonoverlap';
+  const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260814-pixel-aspect-r80';
+  const R87_STYLE = '/scifi-ui/styles/formatx-award-reference-r87.css?v=20260814-size-lock-r87&rev=20260814-supplied-reference-r108';
   const SIZE_LOCK_STYLE = '/scifi-ui/styles/formatx-size-lock-r105.css?v=20260814-user-approved-size-r110';
   const MATERIAL_STYLE = '/scifi-ui/styles/formatx-award-material-r88.css?v=20260814-material-reactor-r88';
   const FACET_STYLE = '/scifi-ui/styles/formatx-award-material-r89.css?v=20260814-faceted-crystal-r89';
@@ -15,7 +16,7 @@
   const RAYGLASS_STYLE = '/scifi-ui/styles/formatx-award-material-r91.css?v=20260814-rayglass-r95';
   const R99_OPTICAL_STYLE = '/scifi-ui/styles/formatx-award-material-r99.css?v=20260814-cinematic-atmosphere-r99&rev=20260814-faceted-crystal-r111';
   const POLISH_STYLE = '/scifi-ui/styles/formatx-reference-polish-r109.css?v=20260814-crystal-contrast-r109';
-  const EXACT_STYLE = '/scifi-ui/styles/formatx-reference-exact-r112.css?v=20260817-r190-nonoverlap';
+  const EXACT_STYLE = '/scifi-ui/styles/formatx-reference-exact-r112.css?v=20260815-prismatic-caustic-r121';
   const DETAIL_STYLE = '/scifi-ui/styles/formatx-core-detail-overlay-r122.css?v=20260815-reference-material-r138';
   const FINAL_STYLE = '/scifi-ui/styles/formatx-reference-final-r132.css?v=20260815-pixel-lock-r139';
   const NARROW_PROOF_STYLE = '/scifi-ui/styles/formatx-reference-narrow-proof-r145.css?v=20260815-narrow-proof-r145';
@@ -23,17 +24,17 @@
   const CLICK_STABILITY_STYLE = '/scifi-ui/styles/formatx-click-stability-r152.css?v=20260815-r152-center-lock';
   const DESKTOP_LIVE_STYLE = '/scifi-ui/styles/formatx-desktop-live-r153.css?v=20260815-r153-desktop-live';
   const DESKTOP_INTEGRATION_STYLE = '/scifi-ui/styles/formatx-desktop-integration-r154.css?v=20260815-r154e-no-legacy-grid';
-  const MOBILE_HERO_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260817-r188-content-stability';
+  const MOBILE_HERO_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260815-r156-proof-first';
   const DETAIL_SCRIPT = '/scifi-ui/scripts/formatx-core-detail-overlay-r122.js?v=20260815-r166c-held-shape-pulse';
   const COPY_SCRIPT = '/scifi-ui/scripts/formatx-reference-copy-r137.js?v=20260815-reference-copy-r137';
   const FINALIZER_SCRIPT = '/scifi-ui/scripts/formatx-reference-finalizer-r142.js?v=20260815-unclipped-chain-r142';
   const TAIL_FINALIZER_SCRIPT = '/scifi-ui/scripts/formatx-reference-finalizer-r143.js?v=20260815-tail-bridge-r143';
   const GYRO_SCRIPT = '/scifi-ui/scripts/formatx-core-gyro-r144.js?v=20260815-mobile-gyro-r144';
   const LIVE_MOTION_SCRIPT = '/scifi-ui/scripts/formatx-core-live-motion-r147.js?v=20260816-r184-resize-driven-stable';
-  const MOBILE_HERO_STABILITY_SCRIPT = '/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js?v=20260817-r188-content-stability';
+  const MOBILE_HERO_STABILITY_SCRIPT = '/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js?v=20260815-r156-proof-first';
   const PROOF_STYLE = '/scifi-ui/styles/formatx-award-proof-r85.css?v=20260814-proof-geometry-r86';
-  const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260817-r188-content-stability';
-  const FLOW_SCRIPT = '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260817-r190b-header-centerline';
+  const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177';
+  const FLOW_SCRIPT = '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260816-mobile-ui-r180c';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260814-wake-safe-r98';
   const TOUCH_SCRIPT = '/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99';
   const INTERACTION_BRIDGE = '/scifi-ui/scripts/formatx-core-interaction-bridge-r109.js?v=20260814-capture-bridge-r109';
@@ -52,7 +53,7 @@
   function addFinalizer(){if(document.querySelector('script[data-fx-reference-finalizer-r142], script[src*="formatx-reference-finalizer-r142.js"]')){addTailFinalizer();return;}const s=document.createElement('script');s.src=FINALIZER_SCRIPT;s.async=false;s.dataset.fxReferenceFinalizerR142='true';s.addEventListener('load',addTailFinalizer,{once:true});s.addEventListener('error',()=>{root.dataset.fxReferenceFinalizerR142='load-failed';addTailFinalizer();},{once:true});document.head.appendChild(s);}
   function addReferenceLayout(){if(document.querySelector('script[data-fx-mobile-reference-layout]')){addExactStyle();addReferenceCopy();addFinalizer();addGyro();addLiveMotion();return;}const s=document.createElement('script');s.src=LAYOUT_SCRIPT;s.async=false;s.dataset.fxMobileReferenceLayout='true';s.addEventListener('load',()=>{addExactStyle();addFlowGuard();addReferenceCopy();addFinalizer();addGyro();addLiveMotion();},{once:true});document.head.appendChild(s);}
   function addDetailScript(){if(document.querySelector('script[data-fx-core-detail-r122], script[src*="formatx-core-detail-overlay-r122.js"]')){addLiveMotion();return;}const s=document.createElement('script');s.src=DETAIL_SCRIPT;s.async=false;s.dataset.fxCoreDetailR122='true';s.addEventListener('load',()=>{root.dataset.fxCoreDetailLoadR122='ready-r157';addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxCoreDetailLoadR122='failed-r157';addLiveMotion();},{once:true});document.head.appendChild(s);}
-  function addMobileScript(){if(document.querySelector('script[data-fx-core-mobile-v55-script], script[src*="formatx-core-mobile-v55.js"]')){addDetailScript();addGyro();addLiveMotion();return;}const s=document.createElement('script');s.src=MOBILE_SCRIPT;s.async=false;s.dataset.fxCoreMobileV55Script='true';s.addEventListener('load',()=>{root.dataset.fxCoreReferenceLockLoad='ready-v69-r191';addDetailScript();addGyro();addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxCoreReal3d='context-unavailable';root.dataset.fxCoreReferenceLock='load-failed-v69';root.dataset.fxCoreReferenceLockLoad='failed-v69-r191';dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'mobile-reference-material-load-failed',reference:'v69-r191'}}));},{once:true});document.head.appendChild(s);}
+  function addMobileScript(){if(document.querySelector('script[data-fx-core-mobile-v55-script], script[src*="formatx-core-mobile-v55.js"]')){addDetailScript();addGyro();addLiveMotion();return;}const s=document.createElement('script');s.src=MOBILE_SCRIPT;s.async=false;s.dataset.fxCoreMobileV55Script='true';s.addEventListener('load',()=>{root.dataset.fxCoreReferenceLockLoad='ready-v69-r157';addDetailScript();addGyro();addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxCoreReal3d='context-unavailable';root.dataset.fxCoreReferenceLock='load-failed-v69';root.dataset.fxCoreReferenceLockLoad='failed-v69-r157';dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'mobile-reference-material-load-failed',reference:'v69-r157'}}));},{once:true});document.head.appendChild(s);}
   function addInteractionScript(){if(!document.querySelector('script[data-fx-core-direct-interaction], script[src*="formatx-core-direct-interaction.js"]')){const s=document.createElement('script');s.src=INTERACTION_SCRIPT;s.async=false;s.dataset.fxCoreDirectInteraction='true';s.addEventListener('load',()=>{root.dataset.fxCoreInteractionController='ready-v3';addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxCoreInteractionController='failed-v3';addLiveMotion();},{once:true});document.head.appendChild(s);}if(!document.querySelector('script[data-fx-core-touch-pulse-r99], script[src*="formatx-core-touch-pulse-r99.js"]')){const t=document.createElement('script');t.src=TOUCH_SCRIPT;t.async=false;t.dataset.fxCoreTouchPulseR99='true';document.head.appendChild(t);}if(!document.querySelector('script[data-fx-core-interaction-bridge-r109], script[src*="formatx-core-interaction-bridge-r109.js"]')){const b=document.createElement('script');b.src=INTERACTION_BRIDGE;b.async=false;b.dataset.fxCoreInteractionBridgeR109='true';document.head.appendChild(b);}addGyro();addLiveMotion();}
   function addFlowGuard(){if(innerWidth>900){root.dataset.fxFlowFirstGuard='desktop-bypass-r178';addFinalizer();addGyro();addLiveMotion();return;}if(document.querySelector('script[data-fx-flow-first-r75]')){addLiveMotion();return;}const s=document.createElement('script');s.src=FLOW_SCRIPT;s.async=false;s.dataset.fxFlowFirstR75='true';s.addEventListener('load',()=>{root.dataset.fxFlowFirstGuard='ready-r178';addFinalizer();addGyro();addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxFlowFirstGuard='failed-r178';addLiveMotion();},{once:true});document.head.appendChild(s);}
   addMobileStyle();addMobileHeroStability();addReferenceLayout();addMobileScript();addInteractionScript();addLiveMotion();setTimeout(()=>{addExactStyle();addMobileHeroStability();addDetailScript();addFlowGuard();addReferenceCopy();addFinalizer();addGyro();addLiveMotion();},0);

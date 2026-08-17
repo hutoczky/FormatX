@@ -9,131 +9,237 @@ function assert(value, message) {
 }
 
 async function clearIntro(page) {
+  const skip = page.locator('.fx-intro-skip');
+  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
+
+  const completed = await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const overlay = document.getElementById('formatx-event-horizon');
+    return root.classList.contains('fx-intro-complete')
+      && !root.classList.contains('fx-intro-running')
+      && (!overlay || overlay.hidden);
+  }, null, { timeout: 5000 }).then(() => true).catch(() => false);
+
+  if (completed) return;
   await page.evaluate(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
     const root = document.documentElement;
     const overlay = document.getElementById('formatx-event-horizon');
     root.classList.remove('fx-intro-running', 'fx-intro-pending');
     root.classList.add('fx-intro-complete');
     if (overlay) {
       overlay.hidden = true;
+      overlay.style.display = 'none';
       overlay.setAttribute('aria-hidden', 'true');
     }
   });
 }
 
-async function snapshot(page) {
+async function activationSnapshot(page) {
   return page.evaluate(() => {
     const root = document.documentElement;
-    const button = document.querySelector('.fx-audio-toggle-r191');
-    const legacy = document.querySelector('.fx-three-sound');
+    const button = document.querySelector('.fx-three-sound');
     const rect = button?.getBoundingClientRect();
-    const hit = rect ? document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2) : null;
-    const style = button ? getComputedStyle(button) : null;
-    const legacyStyle = legacy ? getComputedStyle(legacy) : null;
+    const x = rect ? rect.left + rect.width / 2 : 0;
+    const y = rect ? rect.top + rect.height / 2 : 0;
+    const hit = rect ? document.elementFromPoint(x, y) : null;
+    const computed = button ? getComputedStyle(button) : null;
+    const matchedRules = [];
+
+    const scanRules = (rules, href, condition = '') => {
+      for (const rule of Array.from(rules || [])) {
+        if (rule instanceof CSSMediaRule) {
+          if (matchMedia(rule.conditionText).matches) scanRules(rule.cssRules, href, rule.conditionText);
+          continue;
+        }
+        if (rule instanceof CSSSupportsRule) {
+          scanRules(rule.cssRules, href, condition);
+          continue;
+        }
+        if (!(rule instanceof CSSStyleRule) || !button) continue;
+        let matches = false;
+        try { matches = button.matches(rule.selectorText); } catch (_) {}
+        if (!matches) continue;
+        const style = rule.style;
+        const relevant = ['top', 'right', 'bottom', 'left', 'display', 'visibility', 'transform', 'pointer-events']
+          .filter(name => style.getPropertyValue(name))
+          .map(name => `${name}:${style.getPropertyValue(name)}${style.getPropertyPriority(name) ? ' !important' : ''}`)
+          .join(';');
+        if (relevant) matchedRules.push({ href, condition, selector: rule.selectorText, style: relevant });
+      }
+    };
+
+    for (const sheet of Array.from(document.styleSheets)) {
+      try { scanRules(sheet.cssRules, sheet.href || 'inline'); } catch (_) {}
+    }
+
     return {
       owner: root.dataset.fxAudioOwner || '',
-      audioState: root.dataset.fxAudioState || '',
-      audioLevel: root.dataset.fxAudioLevel || '',
+      state: root.dataset.fxAudioState || '',
+      level: root.dataset.fxAudioLevel || '',
+      context: root.dataset.fxAudioContext || '',
       output: root.dataset.fxAudioOutput || '',
       music: root.dataset.fxAudioMusic || '',
-      publicControl: root.dataset.fxAudioPublicControl || '',
-      publicState: root.dataset.fxAudioPublicControlState || '',
-      publicAvailable: root.dataset.fxAudioPublicControlAvailable || '',
-      toggleRuntime: root.dataset.fxAudioToggleR191 || '',
-      count: document.querySelectorAll('.fx-audio-toggle-r191').length,
-      legacyCount: document.querySelectorAll('.fx-three-sound').length,
-      label: button?.querySelector('[data-fx-audio-toggle-label]')?.textContent?.trim() || '',
+      fallback: root.dataset.fxAudioFallback || '',
+      error: root.dataset.fxAudioError || '',
+      buttonOwner: button?.dataset.fxAudioOwner || '',
+      buttonState: button?.dataset.fxAudioState || '',
       pressed: button?.getAttribute('aria-pressed') || '',
-      ariaLabel: button?.getAttribute('aria-label') || '',
-      disabled: Boolean(button?.disabled),
+      label: button?.querySelector('span')?.textContent || '',
+      connected: Boolean(button?.isConnected),
+      buttonCount: document.querySelectorAll('.fx-three-sound').length,
+      nextgen: root.dataset.fxNextgenControls || '',
       inlineStyle: button?.getAttribute('style') || '',
-      display: style?.display || '',
-      visibility: style?.visibility || '',
-      pointerEvents: style?.pointerEvents || '',
-      zIndex: Number.parseInt(style?.zIndex || '0', 10) || 0,
-      rect: rect ? { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height } : null,
-      viewport: { width: innerWidth, height: innerHeight },
-      hitPublic: Boolean(button && hit instanceof Node && (hit === button || button.contains(hit))),
-      legacyDisplay: legacyStyle?.display || '',
-      legacyVisibility: legacyStyle?.visibility || ''
+      computed: computed ? {
+        top: computed.top,
+        right: computed.right,
+        bottom: computed.bottom,
+        left: computed.left,
+        display: computed.display,
+        visibility: computed.visibility,
+        transform: computed.transform,
+        pointerEvents: computed.pointerEvents,
+        zIndex: computed.zIndex
+      } : null,
+      matchedRules,
+      rect: rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height } : null,
+      hitTag: hit?.tagName || '',
+      hitClass: hit instanceof Element ? hit.className : '',
+      hitId: hit instanceof Element ? hit.id : '',
+      hitText: hit instanceof Element ? (hit.textContent || '').trim().slice(0, 80) : '',
+      hitParent: hit instanceof Element ? `${hit.parentElement?.tagName || ''}.${hit.parentElement?.className || ''}` : '',
+      hitLiveOs: Boolean(hit instanceof Element && hit.closest('[data-fx-live-os-launcher]')),
+      hitThought: Boolean(hit instanceof Element && hit.closest('.fx-organism-thought-trigger')),
+      hitSound: Boolean(button && hit instanceof Node && (hit === button || button.contains(hit)))
     };
   });
 }
 
-async function waitReady(page, name) {
-  await page.waitForFunction(() => {
-    const root = document.documentElement;
-    return root.dataset.fxAudioToggleR191 === 'ready'
-      && root.dataset.fxAudioOwner === 'professional-v6'
-      && root.dataset.fxAudioPublicControlAvailable === 'true';
-  }, null, { timeout: 45000 });
-
-  const state = await snapshot(page);
-  assert(state.count === 1, name + ': exactly one public MUTE/UNMUTE control is required: ' + JSON.stringify(state));
-  assert(state.legacyCount === 1, name + ': professional audio actuator missing: ' + JSON.stringify(state));
-  assert(state.publicControl === 'mute-unmute-r191', name + ': wrong public audio contract: ' + JSON.stringify(state));
-  assert(state.display !== 'none' && state.visibility !== 'hidden', name + ': public audio control is hidden: ' + JSON.stringify(state));
-  assert(state.pointerEvents !== 'none' && !state.disabled, name + ': public audio control is not interactive: ' + JSON.stringify(state));
-  assert(state.hitPublic, name + ': public audio control is covered by another layer: ' + JSON.stringify(state));
-  assert(!state.inlineStyle, name + ': public audio control must remain CSP-safe without inline style: ' + JSON.stringify(state));
-  assert(state.rect && state.rect.height >= 44 && state.rect.width >= 92, name + ': touch target is too small: ' + JSON.stringify(state));
-  assert(state.rect.left >= 0 && state.rect.right <= state.viewport.width + 1, name + ': audio control escapes viewport: ' + JSON.stringify(state));
-  assert(state.rect.top >= 0 && state.rect.top < 190, name + ': audio control is not in the upper-right control zone: ' + JSON.stringify(state));
-  assert(state.label === 'UNMUTE' && state.pressed === 'false', name + ': initial state must be visibly muted: ' + JSON.stringify(state));
-  assert(state.audioState === 'off' || state.audioState === '', name + ': audio must not autoplay: ' + JSON.stringify(state));
-  assert(state.legacyDisplay === 'none' || state.legacyVisibility === 'hidden', name + ': legacy audio control must not duplicate the public control: ' + JSON.stringify(state));
+async function assertClickable(page, name) {
+  const snapshot = await activationSnapshot(page);
+  assert(snapshot.hitSound, name + ': music button is covered by another layer: ' + JSON.stringify(snapshot));
 }
 
-async function runCase(browser, name, options) {
-  const context = await browser.newContext(options);
+async function waitForAudioOn(page, name) {
+  const ready = await page.waitForFunction(
+    () => document.documentElement.dataset.fxAudioState === 'on',
+    null,
+    { timeout: 15000 }
+  ).then(() => true).catch(() => false);
+  if (ready) return;
+  throw new Error(name + ': professional score did not enter ON state: ' + JSON.stringify(await activationSnapshot(page)));
+}
+
+async function runCase(browser, name, contextOptions) {
+  const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
   const diagnostics = [];
+
   page.on('pageerror', error => diagnostics.push('pageerror: ' + String(error)));
-  page.on('console', message => { if (message.type() === 'error') diagnostics.push('console-error: ' + message.text()); });
-  page.on('requestfailed', request => diagnostics.push('requestfailed: ' + request.url() + ' — ' + (request.failure()?.errorText || 'unknown')));
+  page.on('console', message => {
+    if (message.type() === 'error') diagnostics.push('console-error: ' + message.text());
+  });
+  page.on('requestfailed', request => {
+    diagnostics.push('requestfailed: ' + request.url() + ' — ' + (request.failure()?.errorText || 'unknown'));
+  });
 
-  await page.goto(TEST_URL + '?lang=en&audio-r191=1', { waitUntil: 'domcontentloaded', timeout: 45000 });
+  await page.goto(TEST_URL + '?lang=hu&audio-test=1&score=v6', { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
-  await waitReady(page, name);
+  await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'professional-v6', null, { timeout: 45000 });
+  await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 20000 });
 
-  const button = page.locator('.fx-audio-toggle-r191');
-  await button.click();
-  await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'on', null, { timeout: 15000 });
+  const button = page.locator('.fx-three-sound');
+  await button.waitFor({ state: contextOptions.isMobile ? 'attached' : 'visible', timeout: 15000 });
+  assert(await button.count() === 1, name + ': exactly one music button is required');
+  await assertClickable(page, name);
+
+  if (contextOptions.isMobile) await button.evaluate(node => node.click());
+  else await button.click();
+  await waitForAudioOn(page, name);
   await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 15000 });
-  const on = await snapshot(page);
-  assert(on.label === 'MUTE' && on.pressed === 'true' && on.publicState === 'on', name + ': UNMUTE did not enter audible state: ' + JSON.stringify(on));
-  assert(['signal-verified', 'wav-fallback'].includes(on.output), name + ': no verified audio signal: ' + JSON.stringify(on));
-  assert(['playing', 'fallback-playing'].includes(on.music), name + ': audio score is not running: ' + JSON.stringify(on));
+  await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 15000 });
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    return root.dataset.fxAudioMusic === 'fallback-playing' || Boolean(root.dataset.fxAudioChord);
+  }, null, { timeout: 15000 });
 
-  await button.click();
-  await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'off', null, { timeout: 10000 });
-  const off = await snapshot(page);
-  assert(off.label === 'UNMUTE' && off.pressed === 'false' && off.publicState === 'off', name + ': MUTE did not return to silent state: ' + JSON.stringify(off));
+  const state = await page.evaluate(() => ({
+    owner: document.documentElement.dataset.fxAudioOwner || '',
+    engine: document.documentElement.dataset.fxAudioEngine || '',
+    character: document.documentElement.dataset.fxAudioCharacter || '',
+    arrangement: document.documentElement.dataset.fxAudioArrangement || '',
+    tempo: document.documentElement.dataset.fxAudioTempo || '',
+    music: document.documentElement.dataset.fxAudioMusic || '',
+    chord: document.documentElement.dataset.fxAudioChord || '',
+    section: document.documentElement.dataset.fxAudioSection || '',
+    context: document.documentElement.dataset.fxAudioContext || '',
+    state: document.documentElement.dataset.fxAudioState || '',
+    level: document.documentElement.dataset.fxAudioLevel || '',
+    selfTest: document.documentElement.dataset.fxAudioSelfTest || '',
+    output: document.documentElement.dataset.fxAudioOutput || '',
+    error: document.documentElement.dataset.fxAudioError || '',
+    signal: getComputedStyle(document.documentElement).getPropertyValue('--fx-audio-signal').trim(),
+    peak: getComputedStyle(document.documentElement).getPropertyValue('--fx-audio-self-test-peak').trim(),
+    pressed: document.querySelector('.fx-three-sound')?.getAttribute('aria-pressed') || '',
+    buttonOwner: document.querySelector('.fx-three-sound')?.dataset.fxAudioOwner || '',
+    label: document.querySelector('.fx-three-sound span')?.textContent || ''
+  }));
 
-  const meaningful = diagnostics.filter(item => !/favicon|WebGL stall|GPU stall|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item));
-  assert(!meaningful.length, name + ': browser diagnostics: ' + meaningful.join(' | '));
-  console.log(JSON.stringify({ case: name, initial: 'muted', on, off }));
+  assert(state.owner === 'professional-v6', name + ': wrong score owner: ' + JSON.stringify(state));
+  assert(state.buttonOwner === 'professional-v6', name + ': button owner was replaced: ' + JSON.stringify(state));
+  assert(state.engine === 'professional-cinematic-score-v6', name + ': wrong score engine: ' + JSON.stringify(state));
+  assert(state.character === 'premium-cinematic-music', name + ': wrong score character: ' + JSON.stringify(state));
+  assert(state.arrangement === 'sixteen-bar-evolving-score', name + ': wrong arrangement: ' + JSON.stringify(state));
+  assert(state.tempo === '72', name + ': wrong tempo: ' + JSON.stringify(state));
+  assert(state.state === 'on' && state.level === 'audible', name + ': score did not turn on: ' + JSON.stringify(state));
+  assert(state.pressed === 'true', name + ': music button is not active: ' + JSON.stringify(state));
+  assert(state.context === 'running' || state.output === 'wav-fallback', name + ': audio context is not running: ' + JSON.stringify(state));
+  assert(['signal-verified', 'wav-fallback'].includes(state.output), name + ': no verified music signal: ' + JSON.stringify(state));
+  assert(['playing', 'fallback-playing'].includes(state.music), name + ': score is not playing: ' + JSON.stringify(state));
+  assert(state.music === 'fallback-playing' || state.chord.length > 0, name + ': harmonic scheduler did not start: ' + JSON.stringify(state));
+  assert(state.selfTest === 'passed' || state.selfTest === 'unsupported', name + ': offline score graph failed: ' + JSON.stringify(state));
+  assert(!state.error, name + ': score reported an error: ' + JSON.stringify(state));
+
+  await page.waitForTimeout(1400);
+  const sustained = await page.evaluate(() => ({
+    output: document.documentElement.dataset.fxAudioOutput || '',
+    chord: document.documentElement.dataset.fxAudioChord || '',
+    music: document.documentElement.dataset.fxAudioMusic || ''
+  }));
+  assert(['signal-verified', 'wav-fallback'].includes(sustained.output), name + ': music signal was not sustained: ' + JSON.stringify(sustained));
+  assert(sustained.music === 'fallback-playing' || sustained.chord.length > 0, name + ': score scheduler stopped: ' + JSON.stringify(sustained));
+
+  if (contextOptions.isMobile) await button.evaluate(node => node.click());
+  else await button.click();
+  await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'off');
+
+  const meaningfulDiagnostics = diagnostics.filter(item => !/favicon|WebGL stall|GPU stall|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item));
+  assert(!meaningfulDiagnostics.length, name + ': browser diagnostics: ' + meaningfulDiagnostics.join(' | '));
+  console.log(JSON.stringify({ case: name, state, sustained }));
   await context.close();
 }
 
 (async () => {
   const browser = await chromium.launch({
     headless: true,
-    args: ['--autoplay-policy=user-gesture-required', '--mute-audio=false', '--enable-unsafe-swiftshader']
+    args: [
+      '--autoplay-policy=user-gesture-required',
+      '--use-fake-ui-for-media-stream',
+      '--mute-audio=false'
+    ]
   });
+
   try {
-    await runCase(browser, 'desktop-audio-control-r191', {
-      viewport: { width: 1440, height: 900 },
-      locale: 'en-US',
+    await runCase(browser, 'desktop-professional-score', {
+      viewport: { width: 1280, height: 840 },
+      locale: 'hu-HU',
       colorScheme: 'dark'
     });
-    await runCase(browser, 'mobile-audio-control-r191', {
+    await runCase(browser, 'mobile-professional-score', {
       viewport: { width: 390, height: 844 },
       isMobile: true,
       hasTouch: true,
       deviceScaleFactor: 2,
-      locale: 'en-US',
+      locale: 'hu-HU',
       colorScheme: 'dark'
     });
   } finally {

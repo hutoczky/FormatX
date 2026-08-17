@@ -13,29 +13,28 @@ const living = read('docs/scifi-ui/scripts/formatx-living-system-rendering-v1.js
 const bridge = read('docs/scifi-ui/scripts/formatx-living-telemetry-visual-bridge-v1.js');
 const interaction = read('docs/scifi-ui/scripts/formatx-core-direct-interaction.js');
 const bootstrap = read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
-const renderer = read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js');
 const css = read('docs/scifi-ui/styles/formatx-living-system-rendering-v1.css');
 
 for (const token of [
-  'navigator.hardwareConcurrency',
-  'navigator.deviceMemory',
-  'navigator.connection',
-  'requestAnimationFrame(sampleFrame)',
-  'formatx:organismsemanticstate',
-  'formatx:organismstatechange',
-  'formatx:organismcoreactivate',
-  'formatx:corecommand',
-  'deviceorientation',
-  'formatx-core-awakening-v1',
-  'sessionStorage.setItem(AWAKEN_KEY',
+  "navigator.hardwareConcurrency",
+  "navigator.deviceMemory",
+  "navigator.connection",
+  "requestAnimationFrame(sampleFrame)",
+  "formatx:organismsemanticstate",
+  "formatx:organismstatechange",
+  "formatx:organismcoreactivate",
+  "formatx:corecommand",
+  "deviceorientation",
+  "formatx-core-awakening-v1",
+  "sessionStorage.setItem(AWAKEN_KEY",
   "source: 'browser-runtime'",
-  'renderPressure'
+  "renderPressure"
 ]) requireToken(living, token, `Living System Rendering contract missing: ${token}`);
 
 for (const token of [
-  'A mag érzékel. A gerinc döntési utat épít.',
-  'Hat specializált szerv. Egyetlen élő rendszer.',
-  'hivatalos kiadási csatornán'
+  "A mag érzékel. A gerinc döntési utat épít.",
+  "Hat specializált szerv. Egyetlen élő rendszer.",
+  "hivatalos kiadási csatornán"
 ]) requireToken(living, token, `Copy guard missing: ${token}`);
 
 for (const forbidden of [
@@ -50,11 +49,7 @@ for (const forbidden of [
 
 requireToken(interaction, 'formatx-living-system-rendering-v1.js', 'Core interaction does not boot Living System Rendering');
 requireToken(interaction, 'formatx-living-telemetry-visual-bridge-v1.js', 'Core interaction does not boot telemetry visual bridge');
-// Validate the actual interaction bootstrap contract instead of a historical cache-revision marker.
-requireToken(bootstrap, "const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js", 'Core bootstrap does not own the direct interaction controller');
-requireToken(bootstrap, 'function addInteractionScript()', 'Core bootstrap interaction loader is missing');
-requireToken(bootstrap, 'r189-stable-silhouette', 'Core bootstrap does not activate the stable r189 renderer');
-requireToken(renderer, "fxCoreSilhouetteStability='r189-fixed-geometry-dt-smoothing'", 'Living MAG outer silhouette stability contract missing');
+requireToken(bootstrap, 'direct-interaction-r4-root-integrity', 'Core bootstrap cache revision is stale');
 
 for (const token of [
   '.fx-living-system-layer',
@@ -76,4 +71,4 @@ for (const token of [
   'formatx:systemstate'
 ]) requireToken(bridge, token, `Telemetry visual bridge missing: ${token}`);
 
-console.log('Living System Rendering validation passed with r189 stable MAG bootstrap.');
+console.log('Living System Rendering validation passed.');
