@@ -1,4 +1,4 @@
-name: Diagnose r151 mobile hero
+name: Diagnose r196 mobile hero lifecycle
 on:
   push:
     paths:
@@ -9,48 +9,122 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: Install Playwright Chromium
         run: |
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Inspect production mobile hero
+
+      - name: Inspect production mobile hero lifecycle
         run: |
-          cat > diag-r151.cjs <<'EOF'
+          cat > diag-r196.cjs <<'EOF'
           const { chromium } = require('playwright');
+
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
           (async()=>{
-            const browser=await chromium.launch({headless:true});
-            const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:1,isMobile:true,hasTouch:true,userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36'});
-            const page=await context.newPage();
-            const failed=[];
-            page.on('requestfailed',r=>failed.push({url:r.url(),error:r.failure()?.errorText||''}));
-            page.on('response',r=>{ if(r.status()>=400) failed.push({url:r.url(),status:r.status()}); });
-            await page.goto('https://formatxsuite.com/?r151diag='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});
-            await page.waitForTimeout(8000);
-            const data=await page.evaluate(()=>{
-              const rect=e=>{const r=e.getBoundingClientRect();return {x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),bottom:+r.bottom.toFixed(1)};};
-              const style=e=>{const s=getComputedStyle(e);return {display:s.display,visibility:s.visibility,opacity:s.opacity,position:s.position,zIndex:s.zIndex,background:s.background,backgroundColor:s.backgroundColor,overflow:s.overflow,filter:s.filter};};
-              const images=[...document.querySelectorAll('#hero img')].map(e=>({tag:e.tagName,id:e.id,cls:e.className,src:e.getAttribute('src'),currentSrc:e.currentSrc,natural:[e.naturalWidth,e.naturalHeight],complete:e.complete,rect:rect(e),style:style(e),parent:e.parentElement?.className||''}));
-              const allBroken=[...document.images].filter(e=>e.complete&&e.naturalWidth===0).map(e=>({id:e.id,cls:e.className,src:e.getAttribute('src'),rect:rect(e),style:style(e),parent:e.parentElement?.className||''}));
-              const canvases=[...document.querySelectorAll('#hero canvas')].map(e=>({id:e.id,cls:e.className,wh:[e.width,e.height],rect:rect(e),style:style(e),parent:e.parentElement?.className||''}));
-              const hero=document.querySelector('#hero');
-              const direct=hero?[...hero.querySelectorAll('.hero-space > *, .fx-reference-heading, .fx-mobile-download-r150, .fx-reference-proof')].map(e=>({tag:e.tagName,id:e.id,cls:e.className,rect:rect(e),style:style(e)})):[];
-              return {root:{...document.documentElement.dataset},images,allBroken,canvases,direct,hero:hero?{rect:rect(hero),style:style(hero)}:null};
+            const browser = await chromium.launch({headless:true});
+            const context = await browser.newContext({
+              viewport:{width:412,height:915},
+              deviceScaleFactor:3,
+              isMobile:true,
+              hasTouch:true,
+              userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36'
             });
-            console.log('=== HERO DIAGNOSTIC ===');
-            console.log(JSON.stringify(data,null,2));
+            const page = await context.newPage();
+            const failed = [];
+            const consoleEvents = [];
+            const pageErrors = [];
+            const coreResponses = [];
+
+            page.on('requestfailed', r => failed.push({url:r.url(), error:r.failure()?.errorText || ''}));
+            page.on('response', r => {
+              const u = r.url();
+              if (r.status() >= 400) failed.push({url:u,status:r.status()});
+              if (/formatx-core-(?:real3d|mobile|never-stuck)|formatx-mobile-reference-layout/.test(u)) {
+                coreResponses.push({url:u,status:r.status(),fromServiceWorker:r.fromServiceWorker()});
+              }
+            });
+            page.on('console', msg => consoleEvents.push({type:msg.type(),text:msg.text()}));
+            page.on('pageerror', err => pageErrors.push(String(err?.stack || err)));
+
+            const url = 'https://formatxsuite.com/?r196diag=' + Date.now();
+            const response = await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
+            console.log('=== MAIN RESPONSE ===');
+            console.log(JSON.stringify({status:response?.status(),headers:await response?.allHeaders()},null,2));
+
+            async function snap(label) {
+              const data = await page.evaluate((label) => {
+                const root = document.documentElement;
+                const q = s => document.querySelector(s);
+                const rect = e => {
+                  if(!e) return null;
+                  const r=e.getBoundingClientRect();
+                  return {x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1),bottom:+r.bottom.toFixed(1)};
+                };
+                const style = e => {
+                  if(!e) return null;
+                  const s=getComputedStyle(e);
+                  return {display:s.display,visibility:s.visibility,opacity:s.opacity,position:s.position,zIndex:s.zIndex,transform:s.transform,background:s.background,overflow:s.overflow};
+                };
+                const testCanvas=document.createElement('canvas');
+                let gl2=false,gl1=false,glError='';
+                try { gl2=!!testCanvas.getContext('webgl2'); } catch(e) { glError += ' webgl2:'+e; }
+                try { gl1=!!testCanvas.getContext('webgl'); } catch(e) { glError += ' webgl:'+e; }
+                const stage=q('#hero .fx-core-mobile-v55-stage');
+                const canvas=q('#hero canvas.fx-core-mobile-v55-canvas');
+                const emergency=q('#hero .fx-core-emergency-r195');
+                const heroSpace=q('#hero .hero-space');
+                const r195Script=q('script[data-fx-core-never-stuck-r195]');
+                const r195Style=q('link[data-fx-core-never-stuck-r195]');
+                const rendererScripts=[...document.querySelectorAll('script[src*="formatx-core-mobile-reference-r99.js"]')].map(s=>s.src);
+                const coreScripts=[...document.scripts].filter(s=>/formatx-core-(?:real3d|mobile|never-stuck)/.test(s.src)).map(s=>s.src);
+                return {
+                  label,
+                  readyState:document.readyState,
+                  rootClass:root.className,
+                  rootDataset:{...root.dataset},
+                  webgl:{webgl2:gl2,webgl1:gl1,error:glError},
+                  r195:{script:r195Script?.src||null,style:r195Style?.href||null},
+                  heroSpace:{rect:rect(heroSpace),style:style(heroSpace)},
+                  stage:{exists:!!stage,rect:rect(stage),style:style(stage)},
+                  canvas:{exists:!!canvas,width:canvas?.width||0,height:canvas?.height||0,rect:rect(canvas),style:style(canvas)},
+                  emergency:{exists:!!emergency,rect:rect(emergency),style:style(emergency)},
+                  rendererScripts,
+                  coreScripts
+                };
+              }, label);
+              console.log('=== SNAPSHOT ' + label + ' ===');
+              console.log(JSON.stringify(data,null,2));
+            }
+
+            await sleep(500); await snap('500ms');
+            await sleep(1000); await snap('1500ms');
+            await sleep(2500); await snap('4000ms');
+            await sleep(4000); await snap('8000ms');
+
+            console.log('=== CORE RESPONSES ===');
+            console.log(JSON.stringify(coreResponses,null,2));
             console.log('=== FAILED REQUESTS ===');
             console.log(JSON.stringify(failed,null,2));
-            await page.screenshot({path:'r151-live.png',fullPage:false});
+            console.log('=== PAGE ERRORS ===');
+            console.log(JSON.stringify(pageErrors,null,2));
+            console.log('=== CONSOLE ===');
+            console.log(JSON.stringify(consoleEvents.slice(-150),null,2));
+
+            await page.screenshot({path:'r196-live.png',fullPage:false});
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           EOF
-          node diag-r151.cjs
+          node diag-r196.cjs | tee r196-diagnostic.log
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r151-mobile-hero-diag
-          path: r151-live.png
+          name: r196-mobile-hero-diag
+          path: |
+            r196-live.png
+            r196-diagnostic.log
           retention-days: 2
