@@ -6,6 +6,28 @@
   root.dataset.fxWdaHardening = 'r198';
   root.dataset.fxWdaSound = 'muted-default';
 
+  // The legacy professional-v6 score writes two diagnostics through root CSS
+  // custom properties. Strict CSP does not need those values for presentation,
+  // so r198 redirects only those two telemetry writes into data attributes.
+  try {
+    const rootStyle = root.style;
+    const nativeSetProperty = rootStyle.setProperty.bind(rootStyle);
+    rootStyle.setProperty = function (name, value, priority) {
+      if (name === '--fx-audio-self-test-peak') {
+        root.dataset.fxAudioSelfTestPeak = String(value);
+        return;
+      }
+      if (name === '--fx-audio-signal') {
+        root.dataset.fxAudioSignal = String(value);
+        return;
+      }
+      return nativeSetProperty(name, value, priority);
+    };
+    root.dataset.fxWdaAudioTelemetry = 'csp-safe-r198';
+  } catch (_) {
+    root.dataset.fxWdaAudioTelemetry = 'native-fallback';
+  }
+
   const SELECTOR = '.fx-three-sound';
   const AUDIO_SRC = '/scifi-ui/scripts/formatx-audio-repair.js?v=20260817-r198-wda-sound';
   let loadingAudio = false;
