@@ -1,7 +1,7 @@
-/* Award reference r80 — measured silhouette/aspect correction from supplied reference screenshot.
+/* Award reference r190 — measured silhouette/aspect correction from supplied reference screenshot.
    The approved reference MAG occupies ~88.7% of viewport width and ~80.9% of viewport width in height.
    Keep native WebGL interaction; constrain only framing, optical scale and award-overlay placement.
-   Production propagation marker: r81 trigger repair. */
+   r190 removes the historic negative heading pull-up so the crystal tip never crosses narrative copy. */
 @media (max-width:900px),(pointer:coarse){
   html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .hero-space{
     width:100%!important;
@@ -66,7 +66,7 @@
 
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{
     position:relative!important;z-index:21!important;
-    margin:-24px 6% 24px!important;
+    margin:16px 6% 24px!important;
     font-size:16px!important;line-height:1.08!important;letter-spacing:.15em!important;
   }
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading:after{width:40px!important}
@@ -82,5 +82,5 @@
   html[data-fx-mobile-reference-layout="ready-v1"] #hero .hero-space>.fx-core-mobile-v55-stage>.fx-core-mobile-v55-canvas{
     transform:translateY(0) scaleX(1.07) scaleY(.92)!important;
   }
-  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{margin:-20px 6% 22px!important;font-size:15px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading{margin:16px 6% 22px!important;font-size:15px!important}
 }
