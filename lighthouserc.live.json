@@ -2,19 +2,14 @@
   "ci": {
     "collect": {
       "url": [
-        "https://formatxsuite.com/?lighthouse=1&live=desktop"
+        "https://formatxsuite.com/?live=desktop-r192"
       ],
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",
-        "chromeFlags": "--headless=new --no-sandbox --disable-dev-shm-usage --force-prefers-reduced-motion",
+        "chromeFlags": "--headless=new --no-sandbox --disable-dev-shm-usage",
         "maxWaitForLoad": 60000,
-        "pauseAfterLoadMs": 800,
-        "skipAudits": [
-          "render-blocking-resources",
-          "unused-css-rules",
-          "unminified-css"
-        ]
+        "pauseAfterLoadMs": 1200
       }
     },
     "assert": {
