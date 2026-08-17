@@ -54,7 +54,7 @@ function improveHomepageR193(html) {
 
   output = output.replace(
     /formatx-production-idle-loader-r192\.js\?v=20260817-r192c/g,
-    'formatx-production-idle-loader-r192.js?v=20260817-r193',
+    'formatx-production-idle-loader-r192.js?v=20260817-r193b',
   );
 
   output = output.replace(
@@ -88,8 +88,8 @@ export default {
       const html = improveHomepageR193(await response.text());
       headers.set('Cache-Control', 'no-store, max-age=0');
       headers.set('Pragma', 'no-cache');
-      headers.set('X-FormatX-Performance', 'r193-cache-staged-hydration');
-      headers.set('X-FormatX-Award-Proof', 'r193-visible-proof-routes');
+      headers.set('X-FormatX-Performance', 'r193b-cache-staged-hydration');
+      headers.set('X-FormatX-Award-Proof', 'r193b-visible-proof-routes');
       headers.delete('Content-Length');
       headers.delete('Content-Encoding');
       headers.delete('ETag');
@@ -104,7 +104,7 @@ export default {
     if (policy) {
       headers.set('Cache-Control', policy);
       headers.delete('Pragma');
-      headers.set('X-FormatX-Cache', isVersioned(url) ? 'r193-versioned' : 'r193-revalidate');
+      headers.set('X-FormatX-Cache', isVersioned(url) ? 'r193b-versioned' : 'r193b-revalidate');
       headers.delete('Content-Length');
       headers.delete('Content-Encoding');
       headers.delete('ETag');
