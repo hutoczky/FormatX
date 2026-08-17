@@ -15,10 +15,28 @@
     '/scifi-ui/scripts/formatx-organism-trust.js?v=20260731-organism-trust-1',
     '/scifi-ui/scripts/formatx-organism-semantic-state.js?v=20260731-organism-semantic-1'
   ];
+  const VISUAL_SCRIPTS = [
+    '/scifi-ui/scripts/living-architecture.js?v=20260726-living-1',
+    '/scifi-ui/scripts/formatx-category-positioning.js?v=20260728-category-v1',
+    '/scifi-ui/scripts/formatx-category-deck-stabilizer.js?v=20260728-category-deck-v1',
+    '/scifi-ui/scripts/formatx-origin-proof.js?v=20260728-origin-proof-v1',
+    '/scifi-ui/scripts/project-simulator-entry.js?v=20260728-operational-twin-1',
+    '/scifi-ui/scripts/formatx-premium-finish.js?v=20260813-android-webgl-recovery-r71',
+    '/scifi-ui/scripts/formatx-live-heartbeat-r155.js?v=20260817-r192-budgeted',
+    '/scifi-ui/scripts/formatx-signature-system-r185.js?v=20260817-r187-cache',
+    '/scifi-ui/scripts/formatx-seamless-enforcer-r159.js?v=20260817-r187-first-paint',
+    '/scifi-ui/scripts/formatx-living-energy-r168.js?v=20260817-r192-budgeted',
+    '/scifi-ui/scripts/formatx-award-narrative-r175.js?v=20260816-r175-award-narrative',
+    '/scifi-ui/scripts/formatx-soty-continuity-r179.js?v=20260817-r192-mobile-budget'
+  ];
+  const DESKTOP_VISUAL_SCRIPTS = [
+    '/scifi-ui/scripts/formatx-desktop-apex-r181.js?v=20260816-r181-crystal-apex'
+  ];
   const FEEDBACK_STYLE = '/scifi-ui/styles/formatx-feedback.css?v=20260806-feedback-1';
   const FEEDBACK_SCRIPT = '/scifi-ui/scripts/formatx-feedback.js?v=20260806-feedback-1';
 
   let contentStarted = false;
+  let visualsStarted = false;
   let feedbackStarted = false;
 
   function mobileViewport() {
@@ -67,6 +85,17 @@
     }));
   }
 
+  async function hydrateVisuals() {
+    if (visualsStarted) return;
+    visualsStarted = true;
+    root.dataset.fxProductionVisualHydrationR192 = 'loading';
+    const queue = mobileViewport() ? VISUAL_SCRIPTS : VISUAL_SCRIPTS.concat(DESKTOP_VISUAL_SCRIPTS);
+    for (const src of queue) {
+      await loadScript(src, 'fxProductionVisualScriptR192');
+    }
+    root.dataset.fxProductionVisualHydrationR192 = `ready-${queue.length}`;
+  }
+
   async function hydrateContent() {
     if (contentStarted) return;
     contentStarted = true;
@@ -87,19 +116,18 @@
     root.dataset.fxProductionFeedbackHydrationR192 = 'ready';
   }
 
-  function scheduleContent() {
-    const afterPaint = () => requestAnimationFrame(() => requestAnimationFrame(() => {
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => void hydrateContent(), { timeout: 900 });
-      } else {
-        setTimeout(() => void hydrateContent(), 240);
-      }
+  function afterFirstPaint(callback, timeout, fallbackDelay) {
+    const schedule = () => requestAnimationFrame(() => requestAnimationFrame(() => {
+      if ('requestIdleCallback' in window) requestIdleCallback(callback, { timeout });
+      else setTimeout(callback, fallbackDelay);
     }));
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', afterPaint, { once: true });
-    } else {
-      afterPaint();
-    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, { once: true });
+    else schedule();
+  }
+
+  function scheduleHydration() {
+    afterFirstPaint(() => void hydrateVisuals(), 320, 80);
+    afterFirstPaint(() => void hydrateContent(), 900, 240);
   }
 
   function observeFeedback() {
@@ -119,11 +147,9 @@
 
   root.dataset.fxProductionPublicShellR192 = 'homepage-not-required';
   root.dataset.fxProductionIdleLoaderR192 = 'ready';
+  root.dataset.fxProductionDesktopApexR192 = mobileViewport() ? 'not-requested-on-mobile' : 'deferred-after-first-paint';
   activateDeferredMobileStyles();
-  scheduleContent();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', observeFeedback, { once: true });
-  } else {
-    observeFeedback();
-  }
+  scheduleHydration();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observeFeedback, { once: true });
+  else observeFeedback();
 }());
