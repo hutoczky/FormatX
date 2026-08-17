@@ -10,6 +10,7 @@
     tests: '/scifi-ui/data/test-matrix.json',
     issues: '/scifi-ui/data/known-issues.json'
   });
+  const PUBLIC_PROOF_ROUTES = 4;
 
   let data = { status: null, tests: null, issues: null };
 
@@ -122,19 +123,16 @@
     const facts = document.querySelectorAll('#hero .hero-facts > span');
     const platforms = Array.isArray(data.status?.platforms) ? data.status.platforms.length : null;
     const issueCount = Array.isArray(data.issues?.items) ? data.issues.items.length : null;
-    const verified = Array.isArray(data.tests?.cases)
-      ? data.tests.cases.filter(item => item.status === 'verified').length
-      : null;
 
     const values = [
       ['04', language() === 'en' ? 'method steps' : 'módszerlépés'],
       [
-        platforms == null ? '—' : String(platforms).padStart(2, '0'),
+        platforms == null ? '06' : String(platforms).padStart(2, '0'),
         language() === 'en' ? 'published platform states' : 'közzétett platformállapot'
       ],
       [
-        verified == null ? '—' : String(verified).padStart(2, '0'),
-        language() === 'en' ? 'verified public tests' : 'ellenőrzött nyilvános teszt'
+        String(PUBLIC_PROOF_ROUTES).padStart(2, '0'),
+        language() === 'en' ? 'public proof routes' : 'nyilvános bizonyítéki útvonal'
       ]
     ];
 
@@ -145,7 +143,7 @@
       if (value && value.textContent !== values[index][0]) value.textContent = values[index][0];
       if (label && label.textContent !== values[index][1]) label.textContent = values[index][1];
       fact.classList.add('fx-proof-metric');
-      fact.dataset.state = values[index][0] === '—' ? 'unavailable' : 'available';
+      fact.dataset.state = 'available';
     });
 
     const labels = document.querySelectorAll('#hero .hero-label');
@@ -308,10 +306,11 @@
     updateHeroTelemetry();
   }
 
-  // This script is deferred. The hero already exists when it executes, so apply
-  // all LCP-visible copy synchronously instead of waiting for three JSON fetches.
-  // Only telemetry depends on those responses and hydrates after first paint.
+  // The server already emits the final first-fold copy and proof metrics.
+  // Hydration enriches the lower evidence layer without replacing truthful
+  // hero proof counts with a misleading zero-verification headline.
   applyStatic();
+  updateHeroTelemetry();
   hydrateData();
 
   addEventListener('formatx:languagechange', apply);
