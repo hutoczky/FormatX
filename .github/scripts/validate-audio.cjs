@@ -33,9 +33,14 @@ async function snapshot(page) {
     const legacyStyle = legacy ? getComputedStyle(legacy) : null;
     return {
       owner: root.dataset.fxAudioOwner || '',
+      engine: root.dataset.fxAudioEngine || '',
+      engineR191: root.dataset.fxAudioEngineR191 || '',
+      autoplay: root.dataset.fxAudioAutoplay || '',
+      gestureGate: root.dataset.fxAudioGestureGate || '',
       audioState: root.dataset.fxAudioState || '',
       audioLevel: root.dataset.fxAudioLevel || '',
       output: root.dataset.fxAudioOutput || '',
+      signal: root.dataset.fxAudioSignal || '',
       music: root.dataset.fxAudioMusic || '',
       publicControl: root.dataset.fxAudioPublicControl || '',
       publicState: root.dataset.fxAudioPublicControlState || '',
@@ -48,6 +53,7 @@ async function snapshot(page) {
       ariaLabel: button?.getAttribute('aria-label') || '',
       disabled: Boolean(button?.disabled),
       inlineStyle: button?.getAttribute('style') || '',
+      rootInlineStyle: root.getAttribute('style') || '',
       display: style?.display || '',
       visibility: style?.visibility || '',
       pointerEvents: style?.pointerEvents || '',
@@ -65,6 +71,7 @@ async function waitReady(page, name) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.dataset.fxAudioToggleR191 === 'ready'
+      && root.dataset.fxAudioEngineR191 === 'ready'
       && root.dataset.fxAudioOwner === 'professional-v6'
       && root.dataset.fxAudioPublicControlAvailable === 'true';
   }, null, { timeout: 45000 });
@@ -72,6 +79,8 @@ async function waitReady(page, name) {
   const state = await snapshot(page);
   assert(state.count === 1, name + ': exactly one public MUTE/UNMUTE control is required: ' + JSON.stringify(state));
   assert(state.legacyCount === 1, name + ': professional audio actuator missing: ' + JSON.stringify(state));
+  assert(state.engine === 'professional-cinematic-score-r191', name + ': CSP-safe r191 audio engine missing: ' + JSON.stringify(state));
+  assert(state.autoplay === 'disabled' && state.gestureGate === 'required', name + ': audio must be explicit user gesture only: ' + JSON.stringify(state));
   assert(state.publicControl === 'mute-unmute-r191', name + ': wrong public audio contract: ' + JSON.stringify(state));
   assert(state.display !== 'none' && state.visibility !== 'hidden', name + ': public audio control is hidden: ' + JSON.stringify(state));
   assert(state.pointerEvents !== 'none' && !state.disabled, name + ': public audio control is not interactive: ' + JSON.stringify(state));
@@ -81,7 +90,7 @@ async function waitReady(page, name) {
   assert(state.rect.left >= 0 && state.rect.right <= state.viewport.width + 1, name + ': audio control escapes viewport: ' + JSON.stringify(state));
   assert(state.rect.top >= 0 && state.rect.top < 190, name + ': audio control is not in the upper-right control zone: ' + JSON.stringify(state));
   assert(state.label === 'UNMUTE' && state.pressed === 'false', name + ': initial state must be visibly muted: ' + JSON.stringify(state));
-  assert(state.audioState === 'off' || state.audioState === '', name + ': audio must not autoplay: ' + JSON.stringify(state));
+  assert(state.audioState === 'off', name + ': audio must not autoplay: ' + JSON.stringify(state));
   assert(state.legacyDisplay === 'none' || state.legacyVisibility === 'hidden', name + ': legacy audio control must not duplicate the public control: ' + JSON.stringify(state));
 }
 
@@ -97,23 +106,29 @@ async function runCase(browser, name, options) {
   await clearIntro(page);
   await waitReady(page, name);
 
+  const before = await snapshot(page);
+  await page.waitForTimeout(450);
+  const stillMuted = await snapshot(page);
+  assert(stillMuted.audioState === 'off' && stillMuted.music === 'ready', name + ': audio started without a user gesture: ' + JSON.stringify(stillMuted));
+
   const button = page.locator('.fx-audio-toggle-r191');
   await button.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'on', null, { timeout: 15000 });
-  await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 15000 });
+  await page.waitForFunction(() => ['signal-verified', 'graph-running'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 15000 });
   const on = await snapshot(page);
   assert(on.label === 'MUTE' && on.pressed === 'true' && on.publicState === 'on', name + ': UNMUTE did not enter audible state: ' + JSON.stringify(on));
-  assert(['signal-verified', 'wav-fallback'].includes(on.output), name + ': no verified audio signal: ' + JSON.stringify(on));
-  assert(['playing', 'fallback-playing'].includes(on.music), name + ': audio score is not running: ' + JSON.stringify(on));
+  assert(['signal-verified', 'graph-running'].includes(on.output), name + ': Web Audio graph did not become active: ' + JSON.stringify(on));
+  assert(on.music === 'playing', name + ': audio score is not running: ' + JSON.stringify(on));
 
   await button.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioState === 'off', null, { timeout: 10000 });
   const off = await snapshot(page);
   assert(off.label === 'UNMUTE' && off.pressed === 'false' && off.publicState === 'off', name + ': MUTE did not return to silent state: ' + JSON.stringify(off));
+  assert(off.music === 'stopped' && off.output === 'idle', name + ': MUTE left the score active: ' + JSON.stringify(off));
 
   const meaningful = diagnostics.filter(item => !/favicon|WebGL stall|GPU stall|net::ERR_ABORTED|Failed to load resource:.*404/i.test(item));
   assert(!meaningful.length, name + ': browser diagnostics: ' + meaningful.join(' | '));
-  console.log(JSON.stringify({ case: name, initial: 'muted', on, off }));
+  console.log(JSON.stringify({ case: name, before, on, off }));
   await context.close();
 }
 
