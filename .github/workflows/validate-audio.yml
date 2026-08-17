@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [master]
     paths:
-      - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
+      - 'docs/scifi-ui/scripts/formatx-audio-engine-r191.js'
       - 'docs/scifi-ui/scripts/formatx-audio-toggle-r191.js'
       - 'docs/scifi-ui/styles/formatx-audio-toggle-r191.css'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
@@ -16,7 +16,7 @@ on:
   push:
     branches: [master]
     paths:
-      - 'docs/scifi-ui/scripts/formatx-audio-repair.js'
+      - 'docs/scifi-ui/scripts/formatx-audio-engine-r191.js'
       - 'docs/scifi-ui/scripts/formatx-audio-toggle-r191.js'
       - 'docs/scifi-ui/styles/formatx-audio-toggle-r191.css'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
@@ -49,19 +49,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --check docs/scifi-ui/scripts/formatx-audio-repair.js
+          node --check docs/scifi-ui/scripts/formatx-audio-engine-r191.js
           node --check docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
           node --check .github/scripts/validate-audio.cjs
           grep -Fq "mute-unmute-r191" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
+          grep -Fq "formatx-audio-engine-r191.js?v=20260817-r191" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
           grep -Fq "UNMUTE" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
           grep -Fq "MUTE" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
           grep -Fq "aria-pressed" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
-          grep -Fq "user-gesture-required" .github/scripts/validate-audio.cjs
+          grep -Fq "fxAudioAutoplay = 'disabled'" docs/scifi-ui/scripts/formatx-audio-engine-r191.js
+          grep -Fq "fxAudioGestureGate = 'required'" docs/scifi-ui/scripts/formatx-audio-engine-r191.js
+          grep -Fq "new Context({ latencyHint: 'interactive' })" docs/scifi-ui/scripts/formatx-audio-engine-r191.js
           grep -Fq "min-height: 44px" docs/scifi-ui/styles/formatx-audio-toggle-r191.css
           grep -Fq "focus-visible" docs/scifi-ui/styles/formatx-audio-toggle-r191.css
           grep -Fq "formatx-audio-toggle-r191.js?v=20260817-r191" docs/scifi-ui/scripts/formatx-core-mobile-v55.js
-          ! grep -Eq "autoplay|\.play\(\)" docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
+          ! grep -Eq "\.style\.|style\.setProperty|setAttribute\(['\"]style" docs/scifi-ui/scripts/formatx-audio-engine-r191.js docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
+          ! grep -Eq "new Audio|\.play\(\)" docs/scifi-ui/scripts/formatx-audio-engine-r191.js docs/scifi-ui/scripts/formatx-audio-toggle-r191.js
 
       - name: Install Playwright Chromium
         shell: bash
@@ -95,7 +99,7 @@ jobs:
         shell: bash
         run: |
           if [ "$JOB_STATUS" = success ]; then
-            state='success'; description='Visible MUTE/UNMUTE and user-gesture Web Audio passed'
+            state='success'; description='Visible MUTE/UNMUTE and gesture-gated CSP-safe Web Audio passed'
           else
             state='failure'; description='Visible Web Audio control validation failed'
           fi
