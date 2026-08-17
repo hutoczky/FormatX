@@ -3,12 +3,17 @@
 
   const root = document.documentElement;
   const RENDERER_PATH = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js';
-  const RENDERER_URL = RENDERER_PATH + '?v=20260817-r195-never-stuck';
+  const RENDERER_URL = RENDERER_PATH + '?v=20260817-r196-painted-frame';
   const READY_EVENT = 'formatx:real3dready';
   let retryCount = 0;
   let retryTimer = 0;
   let fallbackTimer = 0;
   let completed = false;
+
+  function hasPaintedFrame() {
+    const renderMs = Number.parseFloat(root.dataset.fxCoreRenderMs || '');
+    return Number.isFinite(renderMs) && renderMs >= 0;
+  }
 
   function isReady() {
     const stage = document.querySelector('#hero .fx-core-mobile-v55-stage');
@@ -16,7 +21,8 @@
     return Boolean(
       root.dataset.fxCoreMobileR99 === 'ready-v69' &&
       root.dataset.fxCoreReal3d === 'ready-v69' &&
-      stage && canvas && canvas.width > 2 && canvas.height > 2
+      stage && canvas && canvas.width > 2 && canvas.height > 2 &&
+      hasPaintedFrame()
     );
   }
 
@@ -32,8 +38,9 @@
     clearTimeout(retryTimer);
     clearTimeout(fallbackTimer);
     removeEmergency();
-    root.dataset.fxCoreNeverStuck = 'ready-r195';
-    root.dataset.fxCoreRecoverySource = source || 'native-ready';
+    root.dataset.fxCoreNeverStuck = 'ready-r196-painted-frame';
+    root.dataset.fxCoreRecoverySource = source || 'painted-frame';
+    root.dataset.fxCoreFirstPaintVerified = 'true';
   }
 
   function ensureEmergencyNode() {
@@ -47,32 +54,41 @@
   }
 
   function showFallback(reason) {
-    if (isReady()) return finishReady('late-native-ready');
+    if (isReady()) return finishReady('late-painted-frame');
     ensureEmergencyNode();
     root.classList.add('fx-core-fallback-r195');
-    root.dataset.fxCoreNeverStuck = 'fallback-r195';
+    root.dataset.fxCoreNeverStuck = 'fallback-r196';
     root.dataset.fxCoreRecoveryReason = reason || 'deadline';
-    root.dataset.fxCoreReal3d = 'fallback-ready-r195';
-    root.dataset.fxCoreReferenceLock = 'fallback-ready-r195';
-    root.dataset.fxCoreMobileV55 = 'fallback-ready-r195';
+    root.dataset.fxCoreReal3d = 'fallback-ready-r196';
+    root.dataset.fxCoreReferenceLock = 'fallback-ready-r196';
+    root.dataset.fxCoreMobileV55 = 'fallback-ready-r196';
     window.dispatchEvent(new CustomEvent('formatx:corevisualready', {
-      detail: { renderer: 'css-emergency-r195', reason: reason || 'deadline' }
+      detail: { renderer: 'css-emergency-r196', reason: reason || 'deadline' }
     }));
+  }
+
+  function clearFrameEvidence() {
+    delete root.dataset.fxCoreRenderMs;
+    delete root.dataset.fxCoreRenderAverageMs;
+    delete root.dataset.fxCoreFrameMs;
+    delete root.dataset.fxCoreReal3dFps;
+    delete root.dataset.fxCoreFirstPaintVerified;
   }
 
   function resetRendererState() {
     try { window.FormatXCoreMobileV69?.destroy?.(); } catch (_) {}
     document.querySelectorAll('#hero .fx-core-mobile-v55-stage').forEach((node) => node.remove());
     document.querySelectorAll('script[src*="formatx-core-mobile-reference-r99.js"]').forEach((node) => node.remove());
+    clearFrameEvidence();
     root.dataset.fxCoreMobileR99 = '';
     root.dataset.fxCoreMobileV69 = '';
     root.dataset.fxCoreMobileV55 = 'booting-v55';
-    root.dataset.fxCoreReal3d = 'loading-r195-retry';
-    root.dataset.fxCoreReferenceLock = 'loading-r195-retry';
+    root.dataset.fxCoreReal3d = 'loading-r196-retry';
+    root.dataset.fxCoreReferenceLock = 'loading-r196-retry';
   }
 
   function forceRenderer(reason) {
-    if (isReady()) return finishReady('native-before-retry');
+    if (isReady()) return finishReady('painted-before-retry');
     const host = document.querySelector('#hero .hero-space');
     if (!host) {
       retryTimer = setTimeout(() => forceRenderer('host-wait'), 120);
@@ -85,19 +101,20 @@
 
     retryCount += 1;
     resetRendererState();
-    root.dataset.fxCoreNeverStuck = 'retry-' + retryCount + '-r195';
-    root.dataset.fxCoreRecoveryReason = reason || 'watchdog';
+    root.dataset.fxCoreNeverStuck = 'retry-' + retryCount + '-r196';
+    root.dataset.fxCoreRecoveryReason = reason || 'first-frame-watchdog';
 
     const script = document.createElement('script');
     script.src = RENDERER_URL + '&attempt=' + retryCount;
     script.async = false;
     script.dataset.fxCoreRecoveryR195 = String(retryCount);
+    script.dataset.fxCoreRecoveryR196 = String(retryCount);
     script.addEventListener('load', () => {
       setTimeout(() => {
-        if (isReady()) finishReady('retry-' + retryCount);
-        else if (retryCount < 2) forceRenderer('renderer-loaded-without-ready');
-        else showFallback('renderer-loaded-without-ready');
-      }, 180);
+        if (isReady()) finishReady('retry-' + retryCount + '-painted');
+        else if (retryCount < 2) forceRenderer('script-loaded-without-painted-frame');
+        else showFallback('script-loaded-without-painted-frame');
+      }, 260);
     }, { once: true });
     script.addEventListener('error', () => {
       if (retryCount < 2) forceRenderer('renderer-network-error');
@@ -108,22 +125,32 @@
 
   function start() {
     if (new URLSearchParams(location.search).get('lighthouse') === '1') return;
-    root.dataset.fxCoreNeverStuck = 'watching-r195';
+    root.dataset.fxCoreNeverStuck = 'watching-first-painted-frame-r196';
 
     requestAnimationFrame(() => {
       setTimeout(() => {
-        if (isReady()) finishReady('native-fast');
-        else forceRenderer('native-ready-deadline');
-      }, 650);
+        if (isReady()) finishReady('native-painted-fast');
+        else forceRenderer('first-painted-frame-deadline');
+      }, 700);
     });
 
     fallbackTimer = setTimeout(() => {
-      if (isReady()) finishReady('native-before-hard-deadline');
-      else showFallback('hard-deadline-3600ms');
-    }, 3600);
+      if (isReady()) finishReady('native-painted-before-hard-deadline');
+      else showFallback('hard-deadline-3800ms');
+    }, 3800);
   }
 
-  window.addEventListener(READY_EVENT, () => finishReady('real3dready-event'));
+  const frameObserver = new MutationObserver(() => {
+    if (isReady()) finishReady('render-ms-first-frame');
+  });
+  frameObserver.observe(root, { attributes: true, attributeFilter: ['data-fx-core-render-ms'] });
+
+  window.addEventListener(READY_EVENT, () => {
+    // The renderer historically emits this before its first draw. r196 deliberately
+    // waits for data-fx-core-render-ms instead of trusting initialization alone.
+    if (isReady()) finishReady('real3dready-with-painted-frame');
+    else root.dataset.fxCoreNeverStuck = 'initialized-awaiting-painted-frame-r196';
+  });
   window.addEventListener('formatx:core3dfallback', () => {
     if (!completed && !isReady()) forceRenderer('core3dfallback-event');
   });
