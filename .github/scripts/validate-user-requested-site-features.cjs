@@ -104,7 +104,13 @@ assert.ok(includesAll(feedbackUi, ['function renderPublicReviews', "rootMargin: 
 
 assert.ok(includesAll(living, ["ROOT.dataset.fxThreeLoader = 'deferred-user-activation'", "addEventListener('formatx:immersiveactivate', loadThreeExperience, { once: true })", "image.loading = 'lazy'"]), 'heavy renderer/QR work is not deferred');
 assert.ok(!living.includes("document.addEventListener('formatx:introcomplete', loadThreeExperience"), 'heavy renderer must not auto-load after intro');
-assert.ok(includesAll(apex, ["const RELEASE_API = './data/current-release.json'", 'requestAnimationFrame(progress)', 'requestAnimationFrame(apply)']), 'frame-throttled local release metadata contract missing');
+assert.ok(includesAll(apex, [
+  "const RELEASE_API = './data/current-release.json'",
+  'requestAnimationFrame(syncScrolledState)',
+  "ROOT.dataset.fxApexInlineStyleWrites = '0'",
+  "controller-performance-v3-csp-safe-r190"
+]), 'CSP-safe frame-throttled local release/scene contract missing');
+assert.ok(!apex.includes('.style.setProperty(') && !apex.includes("createElement('style')"), 'APEX must not write runtime inline styles under strict CSP');
 assert.ok(!apex.includes('https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest'), 'homepage must not call GitHub release API directly');
 
 const qrFiles = [
