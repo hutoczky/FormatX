@@ -38,17 +38,14 @@ async function box(page, selector, required = true) {
 }
 
 async function injectProductionLikeContent(page) {
-  for (const href of [
+  const styles = [
     '/scifi-ui/styles/formatx-content-standard.css',
     '/scifi-ui/styles/formatx-mobile-readability.css',
     '/scifi-ui/styles/formatx-mobile-unified.css',
     '/scifi-ui/styles/formatx-mobile-hero-flow.css',
     '/scifi-ui/styles/formatx-mobile-production-r5.css'
-  ]) {
-    await page.addStyleTag({ url: origin + href });
-  }
-
-  for (const src of [
+  ];
+  const scripts = [
     '/scifi-ui/scripts/single-language-toggle.js',
     '/scifi-ui/scripts/release-metadata.js',
     '/scifi-ui/scripts/formatx-content-standard.js',
@@ -56,9 +53,36 @@ async function injectProductionLikeContent(page) {
     '/scifi-ui/scripts/formatx-platform-surface-finalizer.js',
     '/scifi-ui/scripts/formatx-organism-semantic-state.js',
     '/scifi-ui/scripts/formatx-mobile-unified.js'
-  ]) {
-    await page.addScriptTag({ url: origin + src });
-  }
+  ];
+
+  // Keep the production CSP intact. Playwright addStyleTag({url}) materializes
+  // fetched CSS as an inline <style>, which is intentionally blocked by
+  // style-src 'self'. Load exactly as production does: external same-origin
+  // <link> and <script src> elements.
+  await page.evaluate(async ({ styles, scripts }) => {
+    const appendStyle = href => new Promise((resolve, reject) => {
+      if ([...document.styleSheets].some(sheet => sheet.href && new URL(sheet.href).pathname === href)) return resolve();
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.dataset.fxCiProductionStyle = 'true';
+      link.addEventListener('load', resolve, { once: true });
+      link.addEventListener('error', () => reject(new Error('Stylesheet failed: ' + href)), { once: true });
+      document.head.appendChild(link);
+    });
+    const appendScript = src => new Promise((resolve, reject) => {
+      if ([...document.scripts].some(script => script.src && new URL(script.src).pathname === src)) return resolve();
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = false;
+      script.dataset.fxCiProductionScript = 'true';
+      script.addEventListener('load', resolve, { once: true });
+      script.addEventListener('error', () => reject(new Error('Script failed: ' + src)), { once: true });
+      document.head.appendChild(script);
+    });
+    for (const href of styles) await appendStyle(href);
+    for (const src of scripts) await appendScript(src);
+  }, { styles, scripts });
 
   await page.waitForFunction(() => document.documentElement.dataset.fxSingleLanguageToggle === 'ready', null, { timeout: 8000 });
   await page.waitForTimeout(900);
