@@ -60,6 +60,27 @@
       root.dataset.fxAudioPublicControlAvailable = available ? 'true' : 'false';
     }
 
+    function ensureAudioEngine() {
+      if (root.dataset.fxAudioOwner === 'professional-v6' || sourceButton()) {
+        sync();
+        return;
+      }
+      if (document.querySelector('script[data-fx-audio-engine-r191], script[src*="formatx-audio-repair.js"]')) return;
+      const engine = document.createElement('script');
+      engine.src = '/scifi-ui/scripts/formatx-audio-repair.js?v=20260817-r191';
+      engine.async = false;
+      engine.dataset.fxAudioEngineR191 = 'true';
+      engine.addEventListener('load', () => {
+        root.dataset.fxAudioEngineR191 = 'loaded';
+        sync();
+      }, { once: true });
+      engine.addEventListener('error', () => {
+        root.dataset.fxAudioEngineR191 = 'load-failed';
+        sync();
+      }, { once: true });
+      document.head.appendChild(engine);
+    }
+
     button.addEventListener('click', event => {
       event.preventDefault();
       const source = sourceButton();
@@ -86,6 +107,7 @@
     root.dataset.fxAudioToggleR191 = 'ready';
     root.dataset.fxAudioPublicControlAvailable = 'false';
     sync();
+    ensureAudioEngine();
   }
 
   mount();
