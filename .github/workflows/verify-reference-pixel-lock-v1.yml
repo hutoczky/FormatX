@@ -49,7 +49,9 @@ jobs:
             const page=await context.newPage();
             page.on('pageerror',e=>console.log(`[${name} PAGEERROR]`,e.message));
             await page.goto(`${origin}?reference_composition=${name}`,{waitUntil:'domcontentloaded',timeout:45000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxFlowFirstR75==='ready-r81',null,{timeout:45000});
+            await page.waitForFunction(mobile
+              ? ()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxFlowFirstR75==='ready-r139'
+              : ()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1'&&document.documentElement.dataset.fxFlowFirstR75==='desktop-bypass-r178',null,{timeout:45000});
             await page.waitForFunction(()=>document.documentElement.dataset.fxCoreSilhouetteStability==='r189-fixed-geometry-dt-smoothing',null,{timeout:10000});
             await page.waitForTimeout(1900);
             const state=await page.evaluate(()=>{
@@ -62,13 +64,14 @@ jobs:
             await page.screenshot({path:`${name}.png`,fullPage:false});
             assert.equal(state.renderer,'single-webgl-luminous-crystal-r99');
             assert.equal(state.stability,'r189-fixed-geometry-dt-smoothing');
-            assert.equal(state.v69,'ready-v69');assert.equal(state.layout,'ready-v1');assert.equal(state.flow,'ready-r81');
+            assert.equal(state.v69,'ready-v69');assert.equal(state.layout,'ready-v1');
             assert.equal(state.gl,true);assert.equal(state.glError,0);assert.equal(state.canvases,1);assert.ok(Number.isFinite(state.renderMs)&&state.renderMs<50,JSON.stringify(state));
             if(mobile)assert.ok(state.renderMs<16.67,JSON.stringify(state));
             assert.ok(state.topbar&&state.space&&state.brand,`${name}: structural shell missing`);
             assert.ok(state.space.y>=state.topbar.y+state.topbar.h-1,`${name}: header covers MAG`);
             if(mobile){
-              assert.equal(state.composition,'award-reference-overlay-r81');
+              assert.equal(state.flow,'ready-r139');
+              assert.equal(state.composition,'award-reference-overlay-r139');
               for(const key of ['rail','heading','proof','proofText','liveOs','mag','menu'])assert.ok(state[key],`${name}: missing ${key}`);
               assert.ok(state.copy&&state.copy.w<=2&&state.copy.h<=2,`${name}: desktop hero copy leaked into award composition`);
               assert.ok(state.heading.y>=state.space.y+state.space.h-80,`${name}: heading detached from MAG transition`);
@@ -77,7 +80,8 @@ jobs:
               assert.equal(overlap(state.brand,state.mag),false,`${name}: brand/MAG overlap`);
               assert.equal(overlap(state.mag,state.menu),false,`${name}: MAG/menu overlap`);
             }else{
-              assert.equal(state.composition,'desktop-native-content-r81');
+              assert.equal(state.flow,'desktop-bypass-r178');
+              assert.equal(state.composition,'desktop-native-r178');
               assert.ok(state.copy&&state.copy.w>500&&state.copy.h>200,`${name}: desktop hero copy collapsed`);
               assert.ok(state.legacyMenu&&state.legacyMenu.display!=='none'&&state.legacyMenu.visibility==='visible',`${name}: desktop menu unavailable`);
               for(const key of ['rail','heading','proof'])if(state[key])assert.ok(state[key].display==='none'||state[key].visibility==='hidden'||state[key].opacity<.01,`${name}: mobile award overlay leaked to desktop`);
