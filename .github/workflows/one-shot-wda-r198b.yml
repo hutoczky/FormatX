@@ -1,0 +1,59 @@
+name: One-shot WDA r198b finalizer
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-wda-r198b.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: one-shot-wda-r198b
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout latest master
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Apply remaining r198 WDA hardening
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/apply-wda-r198.py
+
+      - name: Validate before production commit
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-wda-controls-r198.js
+          node --check docs/scifi-ui/scripts/formatx-audio-repair.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node --check .github/scripts/validate-wda-100-r198.cjs
+          node .github/scripts/validate-wda-100-r198.cjs
+          node .github/scripts/validate-real3d-mobile-startup-v22.cjs
+          git diff --check
+
+      - name: Commit final r198 production state
+        run: |
+          set -euo pipefail
+          rm -f .github/scripts/apply-wda-r198.py \
+                .github/workflows/one-shot-wda-r198.yml \
+                .github/workflows/one-shot-wda-r198b.yml
+          git config user.name 'Games Tech'
+          git config user.email 'hutoczky@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No remaining r198 changes.'
+            exit 0
+          fi
+          git commit -m '[deploy-production] feat(award): finalize r198 WDA 100-target hardening'
+          git push origin HEAD:master
