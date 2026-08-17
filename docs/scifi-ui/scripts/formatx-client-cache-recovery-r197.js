@@ -6,6 +6,29 @@
   const MARKER = 'formatx:client-cache-recovery';
   const RELOAD_GUARD = 'formatx:r197-controller-reload';
 
+  function ensureWdaR198() {
+    if (!document.querySelector('link[data-fx-wda-hardening-r198]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260817-r198';
+      link.dataset.fxWdaHardeningR198 = 'true';
+      document.head.appendChild(link);
+    }
+    if (!document.querySelector('script[data-fx-wda-hardening-r198]')) {
+      const script = document.createElement('script');
+      script.src = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260817-r198';
+      script.defer = true;
+      script.dataset.fxWdaHardeningR198 = 'true';
+      document.head.appendChild(script);
+    }
+    root.dataset.fxWdaAssets = 'r198-requested';
+  }
+
+  // r198 is a non-blocking award-hardening layer. It loads before any cache
+  // migration early return, so both fresh and already-migrated clients receive
+  // the visible MUTE/UNMUTE control and accessibility safeguards.
+  ensureWdaR198();
+
   if (root.dataset.fxClientCacheRecovery === VERSION) return;
   root.dataset.fxClientCacheRecovery = 'checking-r197';
 
