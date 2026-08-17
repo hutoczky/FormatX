@@ -1,0 +1,8 @@
+/* r190 — mobile reference spacing contract.
+   The cinematic MAG keeps its full optical extent, while narrative content
+   starts below the canvas instead of being pulled into the crystal tip. */
+@media (max-width:900px),(pointer:coarse) {
+  html[data-fx-mobile-reference-layout="ready-v1"] #hero .fx-reference-heading {
+    margin:22px 6% 24px !important;
+  }
+}
