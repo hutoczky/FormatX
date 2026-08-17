@@ -1,12 +1,12 @@
 (function () {
   'use strict';
   const root = document.documentElement;
-  if (root.dataset.fxCoreMobileV55 === 'ready-v55' || root.dataset.fxCoreMobileV55 === 'booting-reference-v69-r195') return;
+  if (root.dataset.fxCoreMobileV55 === 'ready-v55' || root.dataset.fxCoreMobileV55 === 'booting-reference-v69-r196') return;
   if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreMobileV55 = 'audit-skip'; return; }
-  root.dataset.fxCoreMobileV55 = 'booting-reference-v69-r195';
+  root.dataset.fxCoreMobileV55 = 'booting-reference-v69-r196';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'reference-prismatic-organic-native-webgl-v69-r120-r195-never-stuck';
-  root.dataset.fxCoreStartupBudgetR195 = 'critical-renderer-immediate-after-dom';
+  root.dataset.fxCoreMobileAwardRevision = 'reference-prismatic-organic-native-webgl-v69-r120-r196-painted-frame';
+  root.dataset.fxCoreStartupBudgetR196 = 'critical-renderer-immediate-after-dom';
 
   function loadAudioToggle() {
     if (document.querySelector('script[data-fx-audio-toggle-r191], script[src*="formatx-audio-toggle-r191.js"]')) return;
@@ -41,31 +41,31 @@
   }
 
   function loadRenderer() {
-    if (root.dataset.fxCoreMobileR99 === 'ready-v69') return;
+    if (root.dataset.fxCoreMobileR99 === 'ready-v69' && root.dataset.fxCoreRenderMs) return;
     if (document.querySelector('script[data-fx-core-mobile-reference-r99], script[src*="formatx-core-mobile-reference-r99.js"]')) return;
 
-    root.dataset.fxCoreStartupBudgetR195 = 'shader-loading-immediate';
+    root.dataset.fxCoreStartupBudgetR196 = 'shader-loading-immediate';
     const renderer = document.createElement('script');
-    renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260817-r195-never-stuck';
+    renderer.src = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260817-r196-painted-frame';
     renderer.async = false;
     renderer.dataset.fxCoreMobileReferenceV69 = 'true';
     renderer.dataset.fxCoreMobileReferenceR99 = 'true';
     renderer.dataset.fxCoreTrueMeshR112 = 'true';
     renderer.dataset.fxCorePrismaticR120 = 'true';
     renderer.addEventListener('load', () => {
-      root.dataset.fxCoreReferenceLockLoad = root.dataset.fxCoreMobileR99 === 'ready-v69'
-        ? 'ready-v69-r120-r195'
-        : 'loaded-awaiting-r195-watchdog';
-      root.dataset.fxCoreStartupBudgetR195 = 'renderer-script-loaded';
+      root.dataset.fxCoreReferenceLockLoad = root.dataset.fxCoreRenderMs
+        ? 'painted-frame-r196'
+        : 'loaded-awaiting-painted-frame-r196';
+      root.dataset.fxCoreStartupBudgetR196 = 'renderer-script-loaded';
     }, { once: true });
     renderer.addEventListener('error', () => {
-      root.dataset.fxCoreMobileV55 = 'load-failed-v55-r195';
-      root.dataset.fxCoreMobileV69 = 'load-failed-v69-r195';
-      root.dataset.fxCoreMobileR99 = 'load-failed-r99-r195';
-      root.dataset.fxCoreReferenceLock = 'load-failed-v69-r195';
+      root.dataset.fxCoreMobileV55 = 'load-failed-v55-r196';
+      root.dataset.fxCoreMobileV69 = 'load-failed-v69-r196';
+      root.dataset.fxCoreMobileR99 = 'load-failed-r99-r196';
+      root.dataset.fxCoreReferenceLock = 'load-failed-v69-r196';
       root.dataset.fxCoreReal3d = 'context-unavailable';
       dispatchEvent(new CustomEvent('formatx:core3dfallback', {
-        detail: { reason: 'native-webgl-renderer-load-failed', reference: 'v69-r120-r195' }
+        detail: { reason: 'native-webgl-renderer-load-failed', reference: 'v69-r120-r196' }
       }));
     }, { once: true });
     document.head.appendChild(renderer);
@@ -76,7 +76,7 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
     else start();
 
-    // Hard backstop: animation/idle scheduling must never be able to starve the core.
+    // Hard backstop: scheduling must never be able to starve the core.
     setTimeout(loadRenderer, 280);
   }
 
