@@ -77,6 +77,13 @@ const MOBILE_DEFERRED_STYLE_ASSETS = [
   'formatx-soty-continuity-r179.css',
 ];
 
+const DESKTOP_ONLY_STYLE_ASSETS = [
+  'formatx-desktop-apex-r181.css',
+];
+
+const HERO_LEAD_HU = 'A FormatX Suite Pro független fejlesztésű technikusi szoftver. Valós rendszerállapotot tár fel, műveleti tervet készít, csak kontrollált megerősítés után hajt végre, majd visszaellenőrzi az eredményt.';
+const HERO_LEAD_EN = 'FormatX Suite Pro is independently developed technician software. It discovers real system state, builds an operation plan, executes only after controlled confirmation, then verifies the result.';
+
 /*
   Production content contracts remain delegated to production-content-base.js.
   These tokens are intentionally retained for repository validators/reviewers:
@@ -102,7 +109,8 @@ const MOBILE_DEFERRED_STYLE_ASSETS = [
   parser-critical homepage work is limited to intro safety, apex/UI basics,
   mobile recovery and the MAG bootstrap. Noncritical visual controllers,
   release/content helpers and feedback hydrate after first paint or near viewport.
-  Desktop-only apex JavaScript is never requested by mobile clients.
+  Desktop-only apex assets are not requested by mobile clients. Hero copy already
+  arrives in its final content-standard form to avoid a second LCP candidate.
 */
 
 export default {
@@ -332,7 +340,7 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
 }
 
 function optimiseHomepagePerformanceR192(html) {
-  let output = String(html || '');
+  let output = stabiliseHeroFirstPaintR192(String(html || ''));
 
   for (const asset of HOMEPAGE_IDLE_SCRIPT_ASSETS) {
     const escaped = asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -364,10 +372,36 @@ function optimiseHomepagePerformanceR192(html) {
     });
   }
 
+  for (const asset of DESKTOP_ONLY_STYLE_ASSETS) {
+    const escaped = asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const linkPattern = new RegExp(
+      `<link\\b(?=[^>]*href=["'][^"']*${escaped}[^"']*["'])[^>]*>`,
+      'gi',
+    );
+    output = output.replace(linkPattern, tag => {
+      const withoutMedia = tag.replace(/\smedia=["'][^"']*["']/i, '');
+      return withoutMedia.replace('<link', '<link media="screen and (min-width: 901px)"');
+    });
+  }
+
   if (!output.includes('data-fx-production-idle-loader-r192')) {
     output = output.replace('</head>', `  ${PERFORMANCE_LOADER_R192}\n</head>`);
   }
 
+  return output;
+}
+
+function stabiliseHeroFirstPaintR192(html) {
+  let output = String(html || '');
+  const heroLead = `<p class="hero-lead" data-hu="${HERO_LEAD_HU}" data-en="${HERO_LEAD_EN}">${HERO_LEAD_HU}</p>`;
+  output = output.replace(
+    /<p class="hero-lead"[^>]*>[\s\S]*?<\/p>/i,
+    heroLead,
+  );
+  output = output.replace(
+    /<span data-hu="Android alkalmazás" data-en="Android application">Android alkalmazás<\/span>/i,
+    '<span data-hu="Android teljes verzió letöltése" data-en="Download Android full version">Android teljes verzió letöltése</span>',
+  );
   return output;
 }
 
