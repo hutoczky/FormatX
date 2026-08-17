@@ -7,6 +7,8 @@ const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
 const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260812-first-paint-r4">';
+const CLIENT_CACHE_REVISION_R197 = '20260817-r197-cache-migration';
+const CLIENT_CACHE_RECOVERY_R197 = '<script data-fx-client-cache-recovery-r197="true" src="/scifi-ui/scripts/formatx-client-cache-recovery-r197.js?v=20260817-r197-cache-migration"></script>';
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -220,8 +222,16 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   headers.set('Vary', mergeVary(headers.get('Vary'), 'Host'));
 
   if (homepage) {
+    const cookie = request.headers.get('Cookie') || '';
+    const migrated = /(?:^|;\s*)fx_client_cache_r197=1(?:;|$)/.test(cookie);
     headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
     headers.set('X-FormatX-Shell', 'v56');
+    headers.set('X-FormatX-Client-Revision', 'r197-cache-migration');
+    if (!migrated) {
+      headers.set('Clear-Site-Data', '"cache"');
+      headers.append('Set-Cookie', 'fx_client_cache_r197=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly');
+      headers.set('X-FormatX-Cache-Migration', 'r197-cleared');
+    }
   } else {
     const link = headers.get('Link');
     if (link) {
@@ -287,6 +297,8 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
 
   if (homepage) {
     html = normaliseHomepageDocumentPaths(html);
+    html = cacheBustHomepageAssetsR197(html);
+    html = injectClientCacheRecoveryR197(html);
   }
 
   if (cleanAddressBar && !html.includes('data-fx-canonical-recovery')) {
@@ -332,6 +344,27 @@ function normaliseHomepageDocumentPaths(html) {
   }
 
   return output;
+}
+
+function cacheBustHomepageAssetsR197(html) {
+  return String(html || '').replace(
+    /((?:src|href)=["'])(\/scifi-ui\/(?:scripts|styles)\/[^"']+)(["'])/gi,
+    (match, prefix, assetUrl, suffix) => {
+      if (/([?&])fxrev=20260817-r197-cache-migration(?:&|$)/.test(assetUrl)) return match;
+      const separator = assetUrl.includes('?') ? '&' : '?';
+      return `${prefix}${assetUrl}${separator}fxrev=${CLIENT_CACHE_REVISION_R197}${suffix}`;
+    },
+  );
+}
+
+function injectClientCacheRecoveryR197(html) {
+  let output = String(html || '');
+  if (output.includes('data-fx-client-cache-recovery-r197')) return output;
+  const cspMeta = /(<meta\b[^>]*http-equiv=["']Content-Security-Policy["'][^>]*>)/i;
+  if (cspMeta.test(output)) {
+    return output.replace(cspMeta, `$1\n  ${CLIENT_CACHE_RECOVERY_R197}`);
+  }
+  return output.replace('<head>', `<head>\n  ${CLIENT_CACHE_RECOVERY_R197}`);
 }
 
 function mergeVary(existing, value) {
