@@ -1,0 +1,52 @@
+/* r190 — CSP-safe APEX state ownership. No runtime inline styles. */
+:root {
+  --accent: 120,210,255;
+}
+
+html[data-fx-scene='0'] { --accent: 120,210,255; }
+html[data-fx-scene='1'] { --accent: 183,163,255; }
+html[data-fx-scene='2'] { --accent: 126,241,190; }
+html[data-fx-scene='3'] { --accent: 255,196,126; }
+html[data-fx-scene='4'] { --accent: 126,190,255; }
+html[data-fx-scene='5'] { --accent: 205,235,249; }
+
+/* Pointer-driven global background motion caused unnecessary whole-page repaints.
+   Keep the atmospheric field visually alive through scene colour, but geometrically stable. */
+body::before {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(var(--accent),.085), transparent 34rem),
+    linear-gradient(90deg, transparent 49.95%, rgba(255,255,255,.025) 50%, transparent 50.05%) !important;
+}
+
+/* CSP-safe progress: section-state fallback, native scroll timeline where supported. */
+.fx-rail-progress {
+  height: calc(100% - 14px) !important;
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+  transition: transform .28s cubic-bezier(.2,.75,.2,1);
+  will-change: transform;
+}
+html[data-fx-scene='1'] .fx-rail-progress { transform: scaleY(.20); }
+html[data-fx-scene='2'] .fx-rail-progress { transform: scaleY(.40); }
+html[data-fx-scene='3'] .fx-rail-progress { transform: scaleY(.60); }
+html[data-fx-scene='4'] .fx-rail-progress { transform: scaleY(.80); }
+html[data-fx-scene='5'] .fx-rail-progress { transform: scaleY(1); }
+
+@supports (animation-timeline: scroll()) {
+  .fx-rail-progress {
+    transition: none;
+    animation-name: fx-r190-rail-progress;
+    animation-duration: 1ms;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root block);
+  }
+  @keyframes fx-r190-rail-progress {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-rail-progress { transition: none; }
+}
