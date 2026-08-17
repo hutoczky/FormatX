@@ -1,0 +1,69 @@
+name: One-shot mobile content stability r188
+
+on:
+  push:
+    paths:
+      - .github/workflows/one-shot-mobile-content-stability-r188.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply r188 mobile stability patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          layout = Path('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js')
+          text = layout.read_text()
+          replacement = r'''function ensureFlowContent(hero,grid,space){
+ let headings=Array.from(document.querySelectorAll('.fx-reference-heading'));let heading=headings.find(node=>node.closest('#hero')&&node.textContent.trim())||headings[0]||null;headings.forEach(node=>{if(node!==heading)node.remove()});if(!heading){heading=document.createElement('div');heading.className='fx-reference-heading';heading.textContent=root.lang==='en'?'DISCOVER HOW IT WORKS':'A MŰKÖDÉS MEGISMERÉSE';grid.appendChild(heading)}else if(heading.parentElement!==grid)grid.appendChild(heading);
+ let proofs=Array.from(document.querySelectorAll('.fx-reference-proof'));let card=proofs.find(node=>node.closest('#hero')&&node.querySelector('h2')&&node.querySelector('p')&&node.querySelector('.fx-reference-liveos'))||proofs.find(node=>node.querySelector('h2')&&node.querySelector('p'))||proofs[0]||null;proofs.forEach(node=>{if(node!==card)node.remove()});
+ const proofMarkup=()=>`<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2>${root.lang==='en'?'Proof behind the visual.':'Bizonyíték a látvány mögött.'}</h2><p>${root.lang==='en'?'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.':'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.'}</p><a class="fx-reference-liveos" href="#experience" aria-label="Live OS megnyitása">Live OS</a>`;
+ if(!card){card=document.createElement('article');card.className='fx-reference-proof';card.innerHTML=proofMarkup();grid.appendChild(card)}else{if(!(card.querySelector('h2')&&card.querySelector('p')&&card.querySelector('.fx-reference-liveos')))card.innerHTML=proofMarkup();if(card.parentElement!==grid)grid.appendChild(card)}
+ const live=card.querySelector('.fx-reference-liveos');if(live instanceof HTMLAnchorElement&&!live.dataset.fxProofBoundR188){live.dataset.fxProofBoundR188='true';live.addEventListener('click',event=>{event.preventDefault();pulse();const launcher=document.querySelector('[data-fx-live-os-launcher]');if(launcher instanceof HTMLButtonElement)launcher.click();else dispatchEvent(new CustomEvent('formatx:open-live-os'))})}
+ let rails=Array.from(document.querySelectorAll('.fx-reference-rail'));let rail=rails.find(node=>node.closest('#hero'))||rails[0]||null;rails.forEach(node=>{if(node!==rail)node.remove()});if(!rail){rail=document.createElement('div');rail.className='fx-reference-rail';rail.innerHTML='<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i></i><span>KÉRDEZZ</span></button><button class="fx-reference-pause" type="button" aria-label="Animáció szüneteltetése" data-paused="false">Ⅱ</button>';rail.querySelector('.fx-reference-ask').addEventListener('click',()=>{if(window.FormatXOrganismVoice?.open)window.FormatXOrganismVoice.open();else document.querySelector('.fx-organism-thought-trigger')?.click();pulse()})}
+ if(rail.parentElement!==grid)space.after(rail);setPaused(paused);root.dataset.fxReferenceContentCanonicalR188='proof-1-rail-1';
+}
+'''
+          text2, count = re.subn(r'function ensureFlowContent\(hero,grid,space\)\{.*?\n\}\nfunction cleanupDesktopFlow', replacement + 'function cleanupDesktopFlow', text, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit(f'layout replacement count={count}')
+          layout.write_text(text2)
+
+          hero = Path('docs/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js')
+          text = hero.read_text()
+          replacement = r'''function ensureDownload(){const hero=document.getElementById('hero');if(!(hero instanceof HTMLElement))return false;hero.querySelectorAll('.fx-mobile-download-r150').forEach(n=>n.remove());let docks=Array.from(document.querySelectorAll('.fx-mobile-download-r151'));let dock=docks.find(node=>node.closest('#hero')&&node.querySelector('.fx-mobile-download-head-r151')&&node.querySelector('.fx-mobile-download-actions-r151'))||docks.find(node=>node.querySelector('.fx-mobile-download-head-r151')&&node.querySelector('.fx-mobile-download-actions-r151'))||docks[0]||null;docks.forEach(node=>{if(node!==dock)node.remove()});if(!isMobile()){if(dock instanceof HTMLElement)dock.hidden=true;return true;}let proofs=Array.from(document.querySelectorAll('.fx-reference-proof'));let proof=proofs.find(node=>node.closest('#hero')&&node.querySelector('h2')&&node.querySelector('p'))||proofs[0]||null;proofs.forEach(node=>{if(node!==proof)node.remove()});const heading=hero.querySelector('.fx-reference-heading');if(!(proof instanceof HTMLElement)||!(heading instanceof HTMLElement))return false;if(!(dock instanceof HTMLElement)){dock=makeDock()}else if(!(dock.querySelector('.fx-mobile-download-head-r151')&&dock.querySelector('.fx-mobile-download-actions-r151')&&dock.querySelector('[data-release-download="multiplatform"]'))){const fresh=makeDock();dock.replaceWith(fresh);dock=fresh;}dock.hidden=false;if(proof.parentElement!==hero.querySelector('.hero-grid'))hero.querySelector('.hero-grid')?.appendChild(proof);if(proof.nextElementSibling!==dock)proof.insertAdjacentElement('afterend',dock);heading.style.setProperty('order','2','important');proof.style.setProperty('order','3','important');dock.style.setProperty('order','4','important');syncLanguage(dock);syncPrimaryFromCanonical(dock);root.dataset.fxMobileDownloadR151='ready-r188';root.dataset.fxMobileDownloadPlacementR151='heading-proof-download-canonical';root.dataset.fxMobileHeroStabilityR151='r188-mobile-proof-download-canonical';return true;}
+'''
+          text2, count = re.subn(r'function ensureDownload\(\)\{.*?\}\nfunction stabilize', replacement + 'function stabilize', text, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit(f'hero replacement count={count}')
+          text2 = text2.replace("const VERSION='r156-mobile-proof-first-stability';", "const VERSION='r188-mobile-proof-download-canonical';")
+          hero.write_text(text2)
+
+          core = Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          text = core.read_text()
+          text = text.replace("formatx-mobile-hero-stability-r151.css?v=20260817-r187-first-paint", "formatx-mobile-hero-stability-r151.css?v=20260817-r188-content-stability")
+          text = text.replace("formatx-mobile-hero-stability-r151.js?v=20260817-r187-first-paint", "formatx-mobile-hero-stability-r151.js?v=20260817-r188-content-stability")
+          text = text.replace("formatx-mobile-reference-layout-v1.js?v=20260817-r187-first-paint", "formatx-mobile-reference-layout-v1.js?v=20260817-r188-content-stability")
+          text = text.replace("formatx-flow-first-r75.js?v=20260817-r187-first-paint", "formatx-flow-first-r75.js?v=20260817-r188-content-stability")
+          core.write_text(text)
+
+          index = Path('docs/scifi-ui/index.html')
+          text = index.read_text()
+          text = text.replace("./scripts/formatx-core-real3d-v20.js?v=20260817-r187-first-paint&rev=20260817-r187-cache", "./scripts/formatx-core-real3d-v20.js?v=20260817-r188-content-stability&rev=20260817-r188-dedupe")
+          index.write_text(text)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js docs/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js
+          git commit -m "fix(mobile): canonical proof and download content r188"
+          git push origin HEAD:master
