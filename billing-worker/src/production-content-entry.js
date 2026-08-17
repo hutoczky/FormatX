@@ -7,7 +7,7 @@ const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
 const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260812-first-paint-r4">';
-const PERFORMANCE_LOADER_R192 = '<script defer data-fx-production-idle-loader-r192="true" src="/scifi-ui/scripts/formatx-production-idle-loader-r192.js?v=20260817-r192b"></script>';
+const PERFORMANCE_LOADER_R192 = '<script defer data-fx-production-idle-loader-r192="true" src="/scifi-ui/scripts/formatx-production-idle-loader-r192.js?v=20260817-r192c"></script>';
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -53,10 +53,24 @@ const HOMEPAGE_IDLE_SCRIPT_ASSETS = [
   'formatx-organism-trust.js',
   'formatx-organism-semantic-state.js',
   'formatx-feedback.js',
+  'living-architecture.js',
+  'formatx-category-positioning.js',
+  'formatx-category-deck-stabilizer.js',
+  'formatx-origin-proof.js',
+  'project-simulator-entry.js',
+  'formatx-premium-finish.js',
+  'formatx-live-heartbeat-r155.js',
+  'formatx-signature-system-r185.js',
+  'formatx-seamless-enforcer-r159.js',
+  'formatx-living-energy-r168.js',
+  'formatx-award-narrative-r175.js',
+  'formatx-soty-continuity-r179.js',
+  'formatx-desktop-apex-r181.js',
 ];
 
 const MOBILE_DEFERRED_STYLE_ASSETS = [
   'formatx-event-horizon.css',
+  'formatx-category-positioning.css',
   'formatx-category-positioning-r73.css',
   'formatx-living-energy-r168.css',
   'formatx-award-narrative-r175.css',
@@ -84,12 +98,11 @@ const MOBILE_DEFERRED_STYLE_ASSETS = [
   id="user-feedback"
   itemprop="operatingSystem" content="Linux, Bazzite, Windows, Android"
 
-  r192 performance contract:
-  homepage-only injected content scripts are removed from the parser-critical
-  response and hydrated after first paint by formatx-production-idle-loader-r192.js.
-  The language switch, critical shell, mobile layout, MAG geometry and content
-  standard CSS remain immediate. Noncritical decorative CSS is desktop-immediate
-  but media-deferred on mobile until the first rendered frame has completed.
+  r192c performance contract:
+  parser-critical homepage work is limited to intro safety, apex/UI basics,
+  mobile recovery and the MAG bootstrap. Noncritical visual controllers,
+  release/content helpers and feedback hydrate after first paint or near viewport.
+  Desktop-only apex JavaScript is never requested by mobile clients.
 */
 
 export default {
@@ -238,7 +251,7 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   if (homepage) {
     headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
     headers.set('X-FormatX-Shell', 'v56');
-    headers.set('X-FormatX-Performance', 'r192b-first-paint-idle-hydration');
+    headers.set('X-FormatX-Performance', 'r192c-first-paint-main-thread-budget');
   } else {
     const link = headers.get('Link');
     if (link) {
