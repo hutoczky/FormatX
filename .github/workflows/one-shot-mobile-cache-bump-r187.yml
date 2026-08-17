@@ -1,0 +1,93 @@
+name: One-shot mobile cache bump r187
+
+on:
+  push:
+    paths:
+      - .github/workflows/one-shot-mobile-cache-bump-r187.yml
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump first-paint asset revisions
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index = Path('docs/scifi-ui/index.html')
+          s = index.read_text(encoding='utf-8')
+
+          replacements = {
+            './styles/formatx-event-horizon.css?v=20260726-event-horizon-3': './styles/formatx-event-horizon.css?v=20260817-r187-first-paint',
+            './styles/formatx-mobile-recovery.css?v=20260812-mobile-stability-r7': './styles/formatx-mobile-recovery.css?v=20260817-r187-cache',
+            './styles/formatx-signature-system-r185.css?v=20260816-iconic-mag-r185b-hitlayer': './styles/formatx-signature-system-r185.css?v=20260817-r187-cache',
+            './scripts/formatx-event-horizon.js?v=20260811-mobile-intro-direct-r1': './scripts/formatx-event-horizon.js?v=20260817-r187-first-paint',
+            './scripts/formatx-mobile-recovery.js?v=20260805-immersive-gate-2': './scripts/formatx-mobile-recovery.js?v=20260817-r187-cache',
+            './styles/formatx-mobile-ui-polish-r179.css?v=20260816-r179-mobile-ui-polish': './styles/formatx-mobile-ui-polish-r179.css?v=20260817-r187-mini-mag',
+            './scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260816-r184-mobile-layout-stable': './scripts/formatx-core-real3d-v20.js?v=20260817-r187-first-paint&rev=20260817-r187-cache',
+            './scripts/formatx-signature-system-r185.js?v=20260816-iconic-mag-r185b-hitlayer': './scripts/formatx-signature-system-r185.js?v=20260817-r187-cache',
+            './scripts/formatx-seamless-enforcer-r159.js?v=20260815-r161-continuous-carrier': './scripts/formatx-seamless-enforcer-r159.js?v=20260817-r187-first-paint',
+          }
+          for old, new in replacements.items():
+            if old not in s:
+              raise SystemExit(f'Expected asset reference not found: {old}')
+            s = s.replace(old, new)
+
+          eager = '''  <link rel="stylesheet" data-fx-mobile-reference-layout-style="true" href="./styles/formatx-mobile-reference-layout-v1.css?v=20260817-r187-first-paint" media="screen and (max-width: 900px), screen and (pointer: coarse)">\n  <link rel="stylesheet" data-fx-flow-first-r74="true" href="./styles/formatx-flow-first-r74.css?v=20260817-r187-first-paint" media="screen and (max-width: 900px), screen and (pointer: coarse)">\n  <link rel="stylesheet" data-fx-responsive-text-guard="true" href="./styles/formatx-responsive-text-guard-r72.css?v=20260817-r187-first-paint" media="screen and (max-width: 900px), screen and (pointer: coarse)">\n'''
+          anchor = '  <link rel="stylesheet" data-fx-signature-system-r185="true" href="./styles/formatx-signature-system-r185.css?v=20260817-r187-cache">\n'
+          if 'data-fx-mobile-reference-layout-style="true"' not in s:
+            if anchor not in s:
+              raise SystemExit('Eager-style insertion anchor not found')
+            s = s.replace(anchor, anchor + eager, 1)
+
+          index.write_text(s, encoding='utf-8')
+
+          core = Path('docs/scifi-ui/scripts/formatx-core-real3d-v20.js')
+          c = core.read_text(encoding='utf-8')
+          core_replacements = {
+            '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260815-r156-proof-first': '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260817-r187-first-paint',
+            '/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js?v=20260815-r156-proof-first': '/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js?v=20260817-r187-first-paint',
+            '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177': '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260817-r187-first-paint',
+            '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260816-mobile-ui-r180c': '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260817-r187-first-paint',
+          }
+          for old, new in core_replacements.items():
+            if old not in c:
+              raise SystemExit(f'Expected core reference not found: {old}')
+            c = c.replace(old, new)
+          core.write_text(c, encoding='utf-8')
+
+          layout = Path('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js')
+          m = layout.read_text(encoding='utf-8')
+          layout_replacements = {
+            '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260816-mobile-only-r177': '/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260817-r187-first-paint',
+            '/scifi-ui/styles/formatx-flow-first-r74.css?v=20260816-mobile-only-r178': '/scifi-ui/styles/formatx-flow-first-r74.css?v=20260817-r187-first-paint',
+            '/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260813-responsive-text-wrap-r72': '/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260817-r187-first-paint',
+          }
+          for old, new in layout_replacements.items():
+            if old not in m:
+              raise SystemExit(f'Expected layout reference not found: {old}')
+            m = m.replace(old, new)
+          layout.write_text(m, encoding='utf-8')
+          PY
+
+      - name: Commit r187 cache bump
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          git commit -m "fix(mobile): r187 cache bust and eager first-paint styles"
+          git push origin HEAD:master
