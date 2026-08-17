@@ -1,0 +1,70 @@
+/* FormatX r192 — mobile award-performance budget.
+   Preserve the MAG and first-fold identity while removing duplicate GPU/paint work
+   from decorative background systems. The true WebGL core remains active. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  html[data-fx-design-system="2"] {
+    --fx-r179-field-opacity: 0;
+    --fx-r179-sigil-opacity: .14;
+  }
+
+  /* The fixed full-viewport SOTY field duplicates the MAG GPU composition on
+     phones and adds large blur/mix-blend surfaces. Section sigils remain. */
+  .fx-r179-field {
+    display: none !important;
+  }
+
+  .fx-r179-organ-sigil,
+  #main-content > section.scene:not(#hero)::before,
+  #main-content > section.scene:not(#hero)::after {
+    will-change: auto !important;
+    filter: none !important;
+  }
+
+  .fx-r179-organ-sigil {
+    mix-blend-mode: normal !important;
+    opacity: .15 !important;
+  }
+
+  /* Avoid continuous GPU promotion for decorative layers; the WebGL MAG owns
+     the animated first-fold budget. */
+  .fx-r168-orbit,
+  .fx-r168-caustic,
+  .fx-r168-spectrum,
+  .fx-r168-flare,
+  .fx-r168-shockwave,
+  .fx-r168-interaction-wave,
+  .fx-r168-spark,
+  .fx-r155-heartbeat-core,
+  .fx-r155-heartbeat-ring,
+  .fx-r155-heartbeat-wave {
+    will-change: auto !important;
+  }
+
+  /* Below-fold chapters are skipped until they approach the viewport. This
+     reduces mobile style/layout/paint work without removing any content. */
+  #main-content > section.scene:not(#hero),
+  #main-content > .fx-category-deck {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 920px;
+  }
+
+  /* Backdrop filtering over a continuously animated WebGL surface is expensive
+     on tile-based mobile GPUs. Use the same opaque visual language instead. */
+  .topbar {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgba(1, 6, 14, .94) !important;
+  }
+
+  .fx-atmosphere .grain,
+  .fx-atmosphere .vignette {
+    will-change: auto !important;
+  }
+}
+
+@media (max-width: 520px), (pointer: coarse) {
+  .fx-r179-organ-sigil {
+    opacity: .11 !important;
+  }
+}
