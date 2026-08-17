@@ -10,15 +10,24 @@ const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js')
 const layoutCss=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
 const flowCss=read('docs/scifi-ui/styles/formatx-flow-first-r74.css');
 const interactionStability=read('docs/scifi-ui/scripts/interaction-genome-export-stability.js');
+const heartbeat=read('docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js');
+const livingEnergy=read('docs/scifi-ui/scripts/formatx-living-energy-r168.js');
+const soty=read('docs/scifi-ui/scripts/formatx-soty-continuity-r179.js');
+const mobileRecovery=read('docs/scifi-ui/scripts/formatx-mobile-recovery.js');
+const mobilePerfCss=read('docs/scifi-ui/styles/formatx-mobile-performance-r192.css');
 const home=read('docs/scifi-ui/index.html');
 const contract=JSON.parse(read('docs/scifi-ui/data/public-platform-contract.json'));
 
-assert.match(bootstrap,/responsive-cinematic-reference-v69-r99-luminous-interactive-r191-mobile-60fps/);
+assert.match(bootstrap,/responsive-cinematic-reference-v69-r99-luminous-interactive-r192-first-paint-budget/);
 assert.match(bootstrap,/single-webgl-luminous-crystal-r99/);
-assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260817-r191-mobile-60fps/);
+assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260817-r192-first-paint-budget/);
+assert.match(bootstrap,/first-paint-critical-then-idle-award-layers/);
+assert.match(bootstrap,/requestIdleCallback/);
 assert.match(bootstrap,/formatx-award-material-r91\.css\?v=20260814-rayglass-r95/);
-assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260817-r191-mobile-60fps/);
-assert.match(wrapper,/formatx-audio-toggle-r191\.js\?v=20260817-r191/);
+assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260817-r192-first-paint-60fps/);
+assert.match(wrapper,/formatx-audio-toggle-r191\.js\?v=20260817-r192-lazy-engine/);
+assert.match(wrapper,/first-paint-before-shader-compile/);
+assert.match(wrapper,/requestIdleCallback/);
 
 for(const token of [
   'webgl2','webgl','TRIANGLE_STRIP','reference-luminous-crystal-webgl-r99',
@@ -28,7 +37,7 @@ for(const token of [
   'corePosition','luminous-faceted-iceglass-caustic-r99','touch-pointer-breathing-spectral-refraction-r99',
   'TARGET_FPS=60','FRAME_BUDGET=1000/TARGET_FPS','r191-dynamic-resolution-hysteresis',
   'budget=mobile?520000','powerPreference:\'high-performance\'','desynchronized:true'
-]) assert.ok(renderer.includes(token),`missing r191 mobile WebGL contract: ${token}`);
+]) assert.ok(renderer.includes(token),`missing r192 mobile WebGL contract: ${token}`);
 assert.doesNotMatch(renderer,/drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
 
 assert.match(audioToggle,/mute-unmute-r191/);
@@ -42,6 +51,20 @@ assert.match(audioToggleCss,/min-height:\s*44px/);
 assert.match(audioToggleCss,/:focus-visible/);
 assert.match(audioToggleCss,/position:\s*fixed/);
 
+assert.match(heartbeat,/r192-budgeted-telemetry-css-owned-visuals/);
+assert.match(heartbeat,/budgeted-telemetry-r192/);
+assert.doesNotMatch(heartbeat,/requestAnimationFrame\(frame\)/);
+assert.match(livingEnergy,/r192-event-driven-energy-css-animations/);
+assert.match(livingEnergy,/single-budgeted-timer-r192/);
+assert.doesNotMatch(livingEnergy,/requestAnimationFrame\(loop\)/);
+assert.match(soty,/r192-mobile-event-driven-continuity/);
+assert.match(soty,/event-driven-max-8fps-r192/);
+assert.match(mobileRecovery,/formatx-mobile-performance-r192\.css\?v=20260817-r192/);
+assert.match(mobileRecovery,/frame-found-observer-released/);
+assert.match(mobilePerfCss,/content-visibility:\s*auto/);
+assert.match(mobilePerfCss,/\.fx-r179-field\s*\{[^}]*display:\s*none\s*!important/s);
+assert.match(mobilePerfCss,/backdrop-filter:\s*none\s*!important/);
+
 assert.match(layout,/mag-first-normal-flow-r74/);
 assert.match(layout,/PUBLIC PROOF LAYER/);
 assert.match(layout,/KÉRDEZZ/);
@@ -54,7 +77,6 @@ assert.match(flowCss,/#hero \.hero-space/);
 assert.doesNotMatch(flowCss,/position:sticky!important/);
 assert.match(flowCss,/#fx-reference-legacy-menu/);
 assert.match(layout,/aria-pressed/);
-/* The old Web Audio actuator stays hidden; r191 exposes the separate public control. */
 assert.match(interactionStability,/setImportant\(sound, 'display', 'none'\)/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 
@@ -62,5 +84,5 @@ const quality=contract.quality_contract;
 assert.equal(quality.mag_image_backed,false);
 assert.equal(quality.mag_webgl_context_count,1);
 assert.equal(quality.mag_paused_outside_hero,true);
-for(const source of [bootstrap,wrapper,renderer,audioToggle,layout,interactionStability]) new Function(source);
-console.log('PASS: r191 mobile 60 FPS target, native WebGL, visible MUTE/UNMUTE and reference contracts passed.');
+for(const source of [bootstrap,wrapper,renderer,audioToggle,layout,interactionStability,heartbeat,livingEnergy,soty,mobileRecovery]) new Function(source);
+console.log('PASS: r192 first-paint budget, 60 FPS WebGL target, mobile DOM/GPU budget and visible MUTE/UNMUTE contracts passed.');
