@@ -8,15 +8,15 @@ const HOMEPAGE_ALIASES = new Set([
   '/scifi-ui/index.html',
 ]);
 
-const R195_STYLE = '<link rel="stylesheet" data-fx-core-never-stuck-r195="true" href="/scifi-ui/styles/formatx-core-never-stuck-r195.css?v=20260817-r195-never-stuck">';
-const R195_SCRIPT = '<script defer data-fx-core-never-stuck-r195="true" src="/scifi-ui/scripts/formatx-core-never-stuck-r195.js?v=20260817-r195-never-stuck"></script>';
+const R196_STYLE = '<link rel="stylesheet" data-fx-core-never-stuck-r195="true" data-fx-core-painted-frame-r196="true" href="/scifi-ui/styles/formatx-core-never-stuck-r195.css?v=20260817-r196-painted-frame">';
+const R196_SCRIPT = '<script defer data-fx-core-never-stuck-r195="true" data-fx-core-painted-frame-r196="true" src="/scifi-ui/scripts/formatx-core-never-stuck-r195.js?v=20260817-r196-painted-frame"></script>';
 
 /*
-  r195 reliability wrapper.
-  Keep the production content pipeline intact, but make the critical MAG path
-  monotonic: fresh bootstrap URL + never-stuck watchdog + deterministic visual
-  fallback. WebGL remains primary; the fallback only appears after a real
-  renderer failure/deadline.
+  r196 painted-frame reliability wrapper.
+  Initialization alone is not success: the MAG is considered ready only after
+  the native renderer has actually produced a frame. Until then the existing
+  hero-ring node provides a visible core placeholder; persistent failures fall
+  back to the deterministic CSS core.
 */
 export default {
   async fetch(request, env, ctx) {
@@ -35,22 +35,27 @@ export default {
 
       html = html
         .replace(
-          /formatx-production-idle-loader-r192\.js\?v=20260817-(?:r192c|r193b|r193|r194-recovery)/g,
-          'formatx-production-idle-loader-r192.js?v=20260817-r195-recovery',
+          /formatx-production-idle-loader-r192\.js\?v=20260817-(?:r192c|r193b|r193|r194-recovery|r195-recovery)/g,
+          'formatx-production-idle-loader-r192.js?v=20260817-r196-painted-frame',
         )
         .replace(
           /formatx-core-real3d-v20\.js\?v=[^"']+/g,
-          'formatx-core-real3d-v20.js?v=20260817-r195-never-stuck',
+          'formatx-core-real3d-v20.js?v=20260817-r196-painted-frame',
         );
 
-      if (!html.includes('data-fx-core-never-stuck-r195')) {
-        html = html.replace('</head>', `  ${R195_STYLE}\n  ${R195_SCRIPT}\n</head>`);
+      // Replace older r195 injected assets if the content layer already carried them.
+      html = html
+        .replace(/<link\b[^>]*data-fx-core-never-stuck-r195[^>]*>/gi, '')
+        .replace(/<script\b[^>]*data-fx-core-never-stuck-r195[^>]*>\s*<\/script>/gi, '');
+
+      if (!html.includes('data-fx-core-painted-frame-r196')) {
+        html = html.replace('</head>', `  ${R196_STYLE}\n  ${R196_SCRIPT}\n</head>`);
       }
 
       headers.set('Cache-Control', 'no-store, max-age=0');
       headers.set('Pragma', 'no-cache');
-      headers.set('X-FormatX-Performance', 'r195-reliable-core-first');
-      headers.set('X-FormatX-Recovery', 'never-stuck-webgl-with-fallback');
+      headers.set('X-FormatX-Performance', 'r196-painted-frame-core-first');
+      headers.set('X-FormatX-Recovery', 'painted-frame-gate-with-visible-placeholder');
       headers.delete('Content-Length');
       headers.delete('Content-Encoding');
       headers.delete('ETag');
