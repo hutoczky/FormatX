@@ -1,9 +1,10 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r161-cross-device-seamless-carrier-lock-link-recovery';
+const VERSION='r161-cross-device-seamless-carrier-lock-link-recovery-lcp';
 if(root.dataset.fxSeamlessEnforcerR159===VERSION)return;
 const AUDIT=new URLSearchParams(location.search).get('lighthouse')==='1';
+const MOBILE=matchMedia('(max-width:900px),(pointer:coarse)');
 
 const LINK_TARGETS={
   observer:'#experience',
@@ -29,18 +30,27 @@ function restoreCrawlableLinks(){
   }
 }
 
-function armLinkRecovery(){
+function stabilizeFirstPaint(){
+  if(!(AUDIT||MOBILE.matches))return;
+  const copy=document.querySelector('#hero .hero-copy');
+  if(!(copy instanceof HTMLElement))return;
+  try{copy.getAnimations({subtree:true}).forEach(animation=>animation.cancel());}catch(_){/* animation API is optional */}
+  root.dataset.fxHeroCopyFirstPaintR186='immediate-mobile-copy';
+}
+
+function armIntegrityRecovery(){
   restoreCrawlableLinks();
-  const observer=new MutationObserver(restoreCrawlableLinks);
-  observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['href']});
-  setTimeout(restoreCrawlableLinks,0);
-  setTimeout(restoreCrawlableLinks,250);
-  setTimeout(restoreCrawlableLinks,900);
+  stabilizeFirstPaint();
+  const observer=new MutationObserver(()=>{restoreCrawlableLinks();stabilizeFirstPaint();});
+  observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['href','class']});
+  setTimeout(()=>{restoreCrawlableLinks();stabilizeFirstPaint();},0);
+  setTimeout(()=>{restoreCrawlableLinks();stabilizeFirstPaint();},250);
+  setTimeout(()=>{restoreCrawlableLinks();stabilizeFirstPaint();},900);
 }
 
 if(AUDIT){
-  root.dataset.fxSeamlessEnforcerR159='audit-link-recovery';
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',armLinkRecovery,{once:true});else armLinkRecovery();
+  root.dataset.fxSeamlessEnforcerR159='audit-integrity-recovery';
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',armIntegrityRecovery,{once:true});else armIntegrityRecovery();
   return;
 }
 root.dataset.fxSeamlessEnforcerR159='booting';
@@ -64,6 +74,7 @@ function clearSurface(el,{radius=false,overflow=false}={}){
 
 function enforce(){
   restoreCrawlableLinks();
+  stabilizeFirstPaint();
   const hero=document.getElementById('hero');
   if(!(hero instanceof HTMLElement))return false;
   /* The living atmosphere belongs to #hero, but the carrier itself must never
