@@ -188,8 +188,15 @@ def validate_release_sync() -> None:
 def validate_worker_ownership() -> None:
     production_config = load_json("billing-worker/wrangler.jsonc")
     preview_config = load_json("wrangler.jsonc")
-    require(production_config.get("main") == "src/production-content-entry.js",
-            "Production Worker does not use production-content-entry.js")
+    production_main = production_config.get("main")
+    require(production_main in {"src/production-content-entry.js", "src/production-performance-r193.js"},
+            f"Production Worker uses unexpected entrypoint: {production_main}")
+    if production_main == "src/production-performance-r193.js":
+        performance_wrapper = read("billing-worker/src/production-performance-r193.js")
+        require("import contentEntry from './production-content-entry.js';" in performance_wrapper,
+                "Production performance wrapper does not import production-content-entry.js")
+        require("contentEntry.fetch(request, env, ctx)" in performance_wrapper,
+                "Production performance wrapper bypasses production-content-entry.js")
     routes = [route.get("pattern") for route in production_config.get("routes", [])]
     require(routes == ["formatxsuite.com", "www.formatxsuite.com"],
             f"Production custom-domain ownership is unexpected: {routes}")
