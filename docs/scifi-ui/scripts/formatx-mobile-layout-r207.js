@@ -12,6 +12,10 @@
     return first;
   }
 
+  function clearLegacyInline(node) {
+    if (node instanceof HTMLElement && node.hasAttribute('style')) node.removeAttribute('style');
+  }
+
   function reconcile() {
     if (!mobile()) return;
 
@@ -37,22 +41,22 @@
        Never move the stylesheet link or repeatedly reorder stable children. */
     if (zone.parentElement !== grid) grid.appendChild(zone);
 
+    const copy = grid.querySelector(':scope > .hero-copy');
     const heading = unique('.fx-reference-heading', hero);
     if (heading instanceof HTMLElement && heading.parentElement !== grid) grid.appendChild(heading);
 
     const proof = unique('.fx-reference-proof', hero);
-    if (proof instanceof HTMLElement) {
-      if (proof.parentElement !== grid) grid.appendChild(proof);
-      const live = proof.querySelector('.fx-reference-liveos');
-      if (live instanceof HTMLElement && live.hasAttribute('style')) live.removeAttribute('style');
-    }
+    const live = proof?.querySelector('.fx-reference-liveos');
+    if (proof instanceof HTMLElement && proof.parentElement !== grid) grid.appendChild(proof);
 
-    if (zone.hasAttribute('style')) zone.removeAttribute('style');
-    if (rail instanceof HTMLElement && rail.hasAttribute('style')) rail.removeAttribute('style');
+    /* Cached r75/r180 builds used inline !important geometry. MutationObserver
+       runs before rendering, so remove those stale geometry writes in the same
+       turn and let the authoritative r207/r208 styles own layout exclusively. */
+    [hero, grid, space, zone, rail, copy, heading, proof, live].forEach(clearLegacyInline);
 
     root.dataset.fxMobileLayoutOwner = 'r207-normal-flow';
     root.dataset.fxMobileLayoutConflict = 'none-r207';
-    root.dataset.fxMobileLayoutStability = 'r208-static-cascade';
+    root.dataset.fxMobileLayoutStability = 'r208-inline-shield';
   }
 
   function markAuthoritativeStyle() {
@@ -73,16 +77,35 @@
     });
   }
 
+  function relevantStyleMutation(record) {
+    if (record.type !== 'attributes' || record.attributeName !== 'style') return false;
+    const target = record.target;
+    if (!(target instanceof Element)) return false;
+    return Boolean(target.closest(
+      '#hero, #hero .hero-grid, #hero .hero-space, #hero .hero-copy, ' +
+      '#hero .fx-reference-controls-r204, #hero .fx-reference-rail, ' +
+      '#hero .fx-reference-heading, #hero .fx-reference-proof, #hero .fx-reference-liveos'
+    ));
+  }
+
   function start() {
     markAuthoritativeStyle();
     reconcile();
 
     const observer = new MutationObserver((records) => {
       if (!mobile()) return;
-      if (!records.some((record) => record.type === 'childList' && (record.addedNodes.length || record.removedNodes.length))) return;
-      schedule();
+      const structural = records.some((record) =>
+        record.type === 'childList' && (record.addedNodes.length || record.removedNodes.length)
+      );
+      const staleInline = records.some(relevantStyleMutation);
+      if (structural || staleInline) schedule();
     });
-    observer.observe(document.documentElement, { subtree: true, childList: true });
+    observer.observe(document.documentElement, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['style']
+    });
 
     addEventListener('resize', schedule, { passive: true });
     addEventListener('orientationchange', schedule, { passive: true });
