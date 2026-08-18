@@ -1,0 +1,11 @@
+{
+  "version": "r205",
+  "scope": "mobile-hero-controls",
+  "status": "production-candidate",
+  "changes": [
+    "compact-visible-mute-unmute",
+    "horizontal-ask-pause",
+    "restored-mini-mag-icon",
+    "increased-mag-heading-clearance"
+  ]
+}
