@@ -7,6 +7,13 @@
   const RELOAD_GUARD = 'formatx:r197-controller-reload';
 
   function ensureWdaR198() {
+    if (!document.querySelector('link[data-fx-mobile-firstpaint-r199]')) {
+      const firstPaint = document.createElement('link');
+      firstPaint.rel = 'stylesheet';
+      firstPaint.href = '/scifi-ui/styles/formatx-mobile-firstpaint-r199.css?v=20260818-r199-cls-lock';
+      firstPaint.dataset.fxMobileFirstpaintR199 = 'true';
+      document.head.appendChild(firstPaint);
+    }
     if (!document.querySelector('link[data-fx-wda-hardening-r198]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
@@ -34,6 +41,8 @@
   // r198 is a non-blocking award-hardening layer. It loads before any cache
   // migration early return, so both fresh and already-migrated clients receive
   // the visible MUTE/UNMUTE control, inclusive CSS and the 60fps GPU governor.
+  // r199 additionally reserves the already-approved mobile MAG-first geometry
+  // before hydration so the final layout no longer shifts after first paint.
   ensureWdaR198();
 
   if (root.dataset.fxClientCacheRecovery === VERSION) return;
