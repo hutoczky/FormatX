@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "site_revision": "r206",
+  "purpose": "fail-open mobile first paint and award performance recovery",
+  "contracts": {
+    "webgl_independent_layout": true,
+    "visible_mag_fallback": true,
+    "hero_copy_visible_at_first_paint": true,
+    "mobile_css_preloaded_by_production_worker": true,
+    "production_lighthouse_thresholds_unchanged": true
+  },
+  "targets": {
+    "performance_score_min": 0.9,
+    "largest_contentful_paint_ms_max": 2500,
+    "cumulative_layout_shift_max": 0.1,
+    "accessibility_score": 1,
+    "best_practices_score": 1,
+    "seo_score": 1
+  },
+  "created_at": "2026-08-18"
+}
