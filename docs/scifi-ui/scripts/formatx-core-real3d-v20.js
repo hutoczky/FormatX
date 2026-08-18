@@ -33,7 +33,7 @@
   const LIVE_MOTION_SCRIPT = '/scifi-ui/scripts/formatx-core-live-motion-r147.js?v=20260816-r184-resize-driven-stable';
   const MOBILE_HERO_STABILITY_SCRIPT = '/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js?v=20260815-r156-proof-first';
   const PROOF_STYLE = '/scifi-ui/styles/formatx-award-proof-r85.css?v=20260814-proof-geometry-r86';
-  const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260816-desktop-native-r177';
+  const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r204-proof-controls';
   const FLOW_SCRIPT = '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260816-mobile-ui-r180c';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260814-wake-safe-r98';
   const TOUCH_SCRIPT = '/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99';
