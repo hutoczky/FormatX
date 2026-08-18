@@ -1,103 +1,360 @@
-import stableWorker from './production-content-r201-base.js';
+import contentPipeline from './production-content-base.js';
 
-const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
-const RECOVERY_REVISION = '20260818-r203b-never-blank';
-const RECOVERY_STYLE = `<link rel="stylesheet" data-fx-site-recovery-r202="true" href="/scifi-ui/styles/formatx-site-recovery-r202.css?v=${RECOVERY_REVISION}">`;
-const RECOVERY_SCRIPT = `<script data-fx-site-recovery-r202="true" src="/scifi-ui/scripts/formatx-site-recovery-r202.js?v=${RECOVERY_REVISION}"></script>`;
-const RECOVERY_COOKIE = /(?:^|;\s*)fx_site_recovery_r203b=1(?:;|$)/;
-const STATIC_CORE = '<div class="fx-site-core-fallback-r202" data-fx-static-core-r203="true" aria-hidden="true"><span class="fx-site-core-fallback-r202__halo"></span><span class="fx-site-core-fallback-r202__shape"></span><span class="fx-site-core-fallback-r202__reactor"></span></div>';
+const CANONICAL_ORIGIN = 'https://formatxsuite.com';
+const CANONICAL_HOST = 'formatxsuite.com';
+const LEGACY_WWW_HOST = 'www.formatxsuite.com';
+const INTERNAL_HOST = 'formatx-routing.internal';
+const RECOVERY_PARAM = '_fx_redirect_recovery';
+const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
+const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260812-first-paint-r4">';
+const STARTUP_REVISION = '20260818-r204-stable-direct';
+const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r204=1(?:;|$)/;
+
+const HOMEPAGE_ALIASES = new Set([
+  '/',
+  '/index.html',
+  '/scifi-ui',
+  '/scifi-ui/',
+  '/scifi-ui/index.html',
+]);
+
+const PUBLIC_PAGE_ALIASES = new Map([
+  ['/downloads', '/scifi-ui/downloads/'],
+  ['/downloads/', '/scifi-ui/downloads/'],
+  ['/support', '/scifi-ui/support.html'],
+  ['/support.html', '/scifi-ui/support.html'],
+  ['/license', '/scifi-ui/license.html'],
+  ['/license.html', '/scifi-ui/license.html'],
+  ['/privacy', '/scifi-ui/privacy.html'],
+  ['/privacy.html', '/scifi-ui/privacy.html'],
+  ['/terms', '/scifi-ui/terms.html'],
+  ['/terms.html', '/scifi-ui/terms.html'],
+  ['/verification', '/scifi-ui/verification.html'],
+  ['/verification.html', '/scifi-ui/verification.html'],
+  ['/test-matrix', '/scifi-ui/test-matrix.html'],
+  ['/test-matrix.html', '/scifi-ui/test-matrix.html'],
+  ['/known-issues', '/scifi-ui/known-issues.html'],
+  ['/known-issues.html', '/scifi-ui/known-issues.html'],
+  ['/security', '/scifi-ui/security.html'],
+  ['/security.html', '/scifi-ui/security.html'],
+  ['/technical-report', '/scifi-ui/technical-report.html'],
+  ['/technical-report.html', '/scifi-ui/technical-report.html'],
+  ['/method', '/scifi-ui/method.html'],
+  ['/method.html', '/scifi-ui/method.html'],
+  ['/checkout.html', '/scifi-ui/checkout.html'],
+]);
 
 /*
-  r203b reliability wrapper.
-  The complete public content implementation remains in production-content-r201-base.js.
-  The wrapper deliberately keeps these delegated production contracts visible for
-  source validators and reviewers:
-  formatx-public-shell.js
-  release-metadata.js
-  formatx-content-standard.css
-  formatx-content-standard.js
-  cleanLegacyReleaseCopy
-  Cache-Control', 'no-store
+  r204 stable-direct startup.
 
-  r203b makes the first visible MAG frame server-owned. The browser receives a real
-  core shape in the HTML before any client JavaScript executes. Native WebGL remains
-  the preferred renderer and progressively replaces the static first frame after it
-  has actually painted. The GPU governor now attaches only after that first painted
-  frame, so it cannot interfere with WebGL context/canvas initialization.
+  The public homepage is again served through the proven direct content pipeline.
+  There is deliberately no client cache controller, renderer retry state machine,
+  Worker-injected MAG DOM, or whole-page asset rewriting in this layer.
+
+  Current product/content contracts remain delegated to production-content-base.js:
+  release-metadata.js
+  formatx-public-shell.js
+  formatx-content-standard.js
+  formatx-content-standard.css
+  formatx-seo.js
+  formatx-content-finalizer.js
+  formatx-platform-surface-finalizer.js
+  formatx-organism-trust.js
+  formatx-organism-semantic-state.js
+  single-language-toggle.js
+  cleanLegacyReleaseCopy
+  USER_FEEDBACK_SECTION
+  id="user-feedback"
+  itemprop="operatingSystem" content="Linux, Bazzite, Windows, Android"
 */
 
 export default {
   async fetch(request, env, ctx) {
-    const response = await stableWorker.fetch(request, env, ctx);
     const url = new URL(request.url);
-    const contentType = response.headers.get('Content-Type') || '';
+    const safeMethod = request.method === 'GET' || request.method === 'HEAD';
+    const publicHost = url.hostname === CANONICAL_HOST || url.hostname === LEGACY_WWW_HOST;
 
-    if (
-      request.method !== 'GET'
-      || response.status !== 200
-      || !HOMEPAGE_PATHS.has(url.pathname)
-      || !contentType.includes('text/html')
-    ) {
+    if (!safeMethod || !publicHost) {
+      return contentPipeline.fetch(request, env, ctx);
+    }
+
+    if (url.hostname === LEGACY_WWW_HOST && HOMEPAGE_ALIASES.has(url.pathname)) {
+      const target = new URL('/', CANONICAL_ORIGIN);
+      target.searchParams.set(RECOVERY_PARAM, '1');
+      return temporaryRedirect(target.toString());
+    }
+
+    if (url.hostname === CANONICAL_HOST && HOMEPAGE_ALIASES.has(url.pathname)) {
+      if (url.pathname !== '/') {
+        const target = new URL('/', CANONICAL_ORIGIN);
+        target.searchParams.set(RECOVERY_PARAM, '1');
+        return temporaryRedirect(target.toString());
+      }
+
+      const response = await fetchInternalNoLoop(
+        request,
+        env,
+        ctx,
+        '/scifi-ui/',
+        '',
+      );
+
+      return canonicalisePublicResponse(response, request, url, {
+        homepage: true,
+        cleanAddressBar: Boolean(url.search || url.hash),
+        clearCachedRedirect: url.searchParams.has(RECOVERY_PARAM),
+      });
+    }
+
+    const mappedPath = PUBLIC_PAGE_ALIASES.get(url.pathname) || url.pathname;
+    const internalParams = new URLSearchParams(url.search);
+    const clearCachedRedirect = internalParams.has(RECOVERY_PARAM);
+    internalParams.delete(RECOVERY_PARAM);
+    const internalSearch = internalParams.toString() ? `?${internalParams.toString()}` : '';
+
+    const response = await fetchInternalNoLoop(
+      request,
+      env,
+      ctx,
+      mappedPath,
+      internalSearch,
+    );
+
+    return canonicalisePublicResponse(response, request, url, {
+      homepage: false,
+      cleanAddressBar: clearCachedRedirect,
+      clearCachedRedirect,
+    });
+  },
+};
+
+function temporaryRedirect(location) {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: location,
+      'Cache-Control': 'no-store, max-age=0',
+      Pragma: 'no-cache',
+      Vary: 'Host',
+    },
+  });
+}
+
+function createInternalRequest(request, pathname, search = '') {
+  const internalUrl = new URL(request.url);
+  internalUrl.protocol = 'https:';
+  internalUrl.hostname = INTERNAL_HOST;
+  internalUrl.pathname = pathname;
+  internalUrl.search = search;
+  internalUrl.hash = '';
+  return new Request(internalUrl, request);
+}
+
+async function fetchInternalNoLoop(request, env, ctx, pathname, search = '') {
+  let currentPath = pathname;
+  let currentSearch = search;
+  const seen = new Set();
+
+  for (let hop = 0; hop < 5; hop += 1) {
+    const key = `${currentPath}${currentSearch}`;
+    if (seen.has(key)) return routingLoopBlocked();
+    seen.add(key);
+
+    const internalRequest = createInternalRequest(request, currentPath, currentSearch);
+    const response = await contentPipeline.fetch(internalRequest, env, ctx);
+    if (response.status < 300 || response.status >= 400) return response;
+
+    const location = response.headers.get('Location');
+    if (!location) return response;
+
+    let target;
+    try {
+      target = new URL(location, internalRequest.url);
+    } catch (_) {
       return response;
     }
 
-    let html = await response.text();
+    const internalTarget = target.hostname === INTERNAL_HOST
+      || target.hostname === CANONICAL_HOST
+      || target.hostname === LEGACY_WWW_HOST;
+    if (!internalTarget) return response;
 
-    html = html.replace(
-      /<link\b(?=[^>]*(?:data-fx-mobile-firstpaint-r199|formatx-mobile-firstpaint-r199\.css))[^>]*>/gi,
-      '',
-    );
+    currentPath = PUBLIC_PAGE_ALIASES.get(target.pathname) || target.pathname;
+    if (HOMEPAGE_ALIASES.has(currentPath)) currentPath = '/scifi-ui/';
 
-    html = html
-      .replace(/<link\b[^>]*data-fx-site-recovery-r201[^>]*>/gi, '')
-      .replace(/<script\b[^>]*data-fx-site-recovery-r201[^>]*>\s*<\/script>/gi, '')
-      .replace(/<link\b[^>]*data-fx-site-recovery-r202[^>]*>/gi, '')
-      .replace(/<script\b[^>]*data-fx-site-recovery-r202[^>]*>\s*<\/script>/gi, '')
-      .replace(/<div\b[^>]*data-fx-static-core-r203[^>]*>[\s\S]*?<\/div>/gi, '');
+    const params = new URLSearchParams(target.search);
+    params.delete(RECOVERY_PARAM);
+    currentSearch = params.toString() ? `?${params.toString()}` : '';
+  }
 
-    html = html.replace(
-      /(<div\s+class=["']hero-space["'][^>]*>)/i,
-      `$1\n          ${STATIC_CORE}`,
-    );
+  return routingLoopBlocked();
+}
 
-    html = html.replace(
-      /(<script\b[^>]*src=["'][^"']*formatx-core-real3d-v20\.js[^"']*)(["'][^>]*>\s*<\/script>)/i,
-      (match, prefix, suffix) => {
-        const cleaned = prefix.replace(/([?&])fxr(?:201|202|203|203b)=[^&"']*/g, '$1').replace(/[?&]$/, '');
-        return `${cleaned}${cleaned.includes('?') ? '&' : '?'}fxr203b=${RECOVERY_REVISION}${suffix}`;
-      },
-    );
+function routingLoopBlocked() {
+  return new Response('FormatX routing loop blocked before it reached the browser.', {
+    status: 508,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store, max-age=0',
+    },
+  });
+}
 
-    const assets = `${RECOVERY_STYLE}\n  ${RECOVERY_SCRIPT}`;
-    const cspMeta = /(<meta\b[^>]*http-equiv=["']Content-Security-Policy["'][^>]*>)/i;
-    html = cspMeta.test(html)
-      ? html.replace(cspMeta, `$1\n  ${assets}`)
-      : html.replace('<head>', `<head>\n  ${assets}`);
+async function canonicalisePublicResponse(response, request, publicUrl, options = {}) {
+  const {
+    homepage = false,
+    cleanAddressBar = false,
+    clearCachedRedirect = false,
+  } = options;
 
-    const headers = new Headers(response.headers);
-    headers.set('Cache-Control', 'no-store, max-age=0');
-    headers.set('Pragma', 'no-cache');
-    headers.set('X-FormatX-Recovery', 'r203b-static-first-frame');
-    headers.set('X-FormatX-Client-Revision', 'r203b-never-blank');
+  const headers = new Headers(response.headers);
+  headers.set('Cache-Control', 'no-store, max-age=0');
+  headers.set('Pragma', 'no-cache');
+  headers.set('Vary', mergeVary(headers.get('Vary'), 'Host'));
+
+  if (homepage) {
+    headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
+    headers.set('X-FormatX-Shell', 'v56');
+    headers.set('X-FormatX-Client-Revision', 'r204-stable-direct');
+    headers.set('X-FormatX-Recovery', 'none-direct-startup');
 
     const cookie = request.headers.get('Cookie') || '';
-    if (!RECOVERY_COOKIE.test(cookie)) {
+    if (!STARTUP_COOKIE.test(cookie)) {
       headers.set('Clear-Site-Data', '"cache"');
       headers.append(
         'Set-Cookie',
-        'fx_site_recovery_r203b=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
+        'fx_startup_r204=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
       );
-      headers.set('X-FormatX-Cache-Migration', 'r203b-cleared');
+      headers.set('X-FormatX-Cache-Migration', 'r204-one-shot-cleared');
     }
+  } else {
+    const link = headers.get('Link');
+    if (link) {
+      headers.set(
+        'Link',
+        link
+          .replaceAll(`https://${LEGACY_WWW_HOST}`, CANONICAL_ORIGIN)
+          .replaceAll(`https://${INTERNAL_HOST}`, CANONICAL_ORIGIN),
+      );
+    }
+  }
 
+  if (clearCachedRedirect) {
+    headers.set('Clear-Site-Data', '"cache"');
+  }
+
+  if (response.status >= 300 && response.status < 400) {
+    const location = headers.get('Location');
+    if (location) {
+      try {
+        const target = new URL(location, publicUrl);
+        if (
+          target.hostname === LEGACY_WWW_HOST
+          || target.hostname === CANONICAL_HOST
+          || target.hostname === INTERNAL_HOST
+        ) {
+          return routingLoopBlocked();
+        }
+      } catch (_) {
+        // Unrelated external redirects remain untouched.
+      }
+    }
+  }
+
+  if (request.method === 'HEAD') {
     headers.delete('Content-Length');
-    headers.delete('Content-Encoding');
-    headers.delete('ETag');
-
-    return new Response(html, {
+    return new Response(null, {
       status: response.status,
       statusText: response.statusText,
       headers,
     });
-  },
-};
+  }
+
+  const contentType = headers.get('Content-Type') || '';
+  if (!contentType.includes('text/html')) {
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  }
+
+  let html = await response.text();
+  html = html
+    .replaceAll(`https://${LEGACY_WWW_HOST}/`, `${CANONICAL_ORIGIN}/`)
+    .replaceAll(`https://${LEGACY_WWW_HOST}`, CANONICAL_ORIGIN)
+    .replaceAll(`https://${INTERNAL_HOST}/`, `${CANONICAL_ORIGIN}/`)
+    .replaceAll(`https://${INTERNAL_HOST}`, CANONICAL_ORIGIN);
+
+  if (homepage) {
+    html = normaliseHomepageDocumentPaths(html);
+    html = cacheBustCriticalCoreR204(html);
+  }
+
+  if (cleanAddressBar && !html.includes('data-fx-canonical-recovery')) {
+    html = html.replace('</head>', `  ${RECOVERY_SCRIPT}\n</head>`);
+  }
+
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  headers.delete('ETag');
+
+  return new Response(html, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+function normaliseHomepageDocumentPaths(html) {
+  let output = String(html || '')
+    .replace(/<base\s+href=["'](?:\/|\/scifi-ui\/)["']\s*\/?\s*>/i, '<base href="/scifi-ui/">')
+    .replaceAll('href="#', 'href="/#')
+    .replaceAll("href='#", "href='/#")
+    .replaceAll('href="./', 'href="/scifi-ui/')
+    .replaceAll("href='./", "href='/scifi-ui/")
+    .replaceAll('src="./', 'src="/scifi-ui/')
+    .replaceAll("src='./", "src='/scifi-ui/")
+    .replaceAll('action="./', 'action="/scifi-ui/')
+    .replaceAll("action='./", "action='/scifi-ui/")
+    .replaceAll('poster="./', 'poster="/scifi-ui/')
+    .replaceAll("poster='./", "poster='/scifi-ui/");
+
+  if (!/<base\s+href=["']\/scifi-ui\/["']/i.test(output)) {
+    output = output.replace('</title>', '</title>\n  <base href="/scifi-ui/">');
+  }
+
+  if (!output.includes('data-fx-critical-shell="v56"')) {
+    const baseTag = '<base href="/scifi-ui/">';
+    if (output.includes(baseTag)) {
+      output = output.replace(baseTag, `${baseTag}\n  ${CRITICAL_SHELL_LINK}`);
+    } else {
+      output = output.replace('<head>', `<head>\n  ${CRITICAL_SHELL_LINK}`);
+    }
+  }
+
+  return output;
+}
+
+function cacheBustCriticalCoreR204(html) {
+  return String(html || '').replace(
+    /(<script\b[^>]*src=["'][^"']*formatx-core-real3d-v20\.js[^"']*)(["'][^>]*>\s*<\/script>)/i,
+    (match, prefix, suffix) => {
+      const cleaned = prefix
+        .replace(/([?&])fx(?:r|rev|stable)=[^&"']*/gi, '$1')
+        .replace(/[?&]$/, '');
+      return `${cleaned}${cleaned.includes('?') ? '&' : '?'}fxstable=${STARTUP_REVISION}${suffix}`;
+    },
+  );
+}
+
+function mergeVary(existing, value) {
+  const values = new Set(
+    String(existing || '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
+  values.add(value);
+  return Array.from(values).join(', ');
+}
