@@ -1,0 +1,65 @@
+/* r199 — reserve the already-approved mobile MAG-first layout before JavaScript hydration.
+   This mirrors the final r139/r198 mobile composition so first paint does not render
+   the desktop hero copy and then move/collapse it. No final visual geometry is changed. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  #hero {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding-top: 0 !important;
+    overflow: visible !important;
+  }
+
+  #hero .hero-grid {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* The same accessibility-preserving visually-hidden state that the live
+     mobile flow controller applies after hydration. Keeping it from first
+     paint removes the large hero-copy/hero-grid layout shift measured by LHCI. */
+  #hero .hero-copy {
+    position: absolute !important;
+    inset: auto !important;
+    width: 1px !important;
+    height: 1px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  #hero .hero-space {
+    position: relative !important;
+    inset: auto !important;
+    order: 0 !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: clamp(300px, 45svh, 470px) !important;
+    margin: 0 auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
