@@ -1,9 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-18T08:57:33+02:00
-source_master=be7d41b7afbc34b591b4e503bdee58d891afcd37
-purpose=activate r200 parser-time delivery of the already-approved r199 MAG-first mobile geometry after live Lighthouse proved the JavaScript-injected stylesheet still allowed large layout shifts
-signature=preserve the approved r199 native WebGL MAG geometry, size, material, cyan/ice/violet optics, seamless page integration and hit-tested pointer/touch control
-interaction=preserve desktop pointer, mobile touch, gyro, heartbeat/orbit/caustic motion, MUTE/UNMUTE, focus behavior and accessibility semantics
-visual=no final visual redesign; deliver the same approved r199 mobile MAG-first layout as a parser-time render-blocking stylesheet before hydration
-performance=remove the measured r199 mobile CLS 1.72-1.95 caused by late stylesheet insertion while preserving LCP and native interactive WebGL behavior
-validation=production candidate; public-site integrity; strict desktop/mobile Lighthouse; live Lighthouse; live award-readiness; mobile Apex; live MAG screenshot and interaction regression
+requested_at=2026-08-18T10:21:00+02:00
+source_master=697779806e37afd226c22ce195a894fce2dc7726
+purpose=r201 reliability rollback of r199/r200 parser-time mobile first-paint regression that left the live MAG hero partially hydrated and visually blank
+signature=restore the last stable r198 production-content and client-cache recovery behavior while keeping the historic firstpaint URL as a harmless compatibility shim
+interaction=preserve native WebGL MAG, pointer/touch/gyro, heartbeat/orbit/caustic motion, MUTE/UNMUTE and accessibility semantics
+visual=no redesign; restore normal canonical hydration and prevent stale r199 CSS from hiding hero content
+performance=reliability first; remeasure CLS/LCP only after live mobile and desktop rendering are confirmed stable
+validation=production candidate; public-site integrity; live mobile/desktop render; MAG interaction; Lighthouse after reliability confirmation

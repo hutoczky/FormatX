@@ -7,7 +7,6 @@ const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
 const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260812-first-paint-r4">';
-const MOBILE_FIRSTPAINT_R200_LINK = '<link rel="stylesheet" data-fx-mobile-firstpaint-r199="true" href="/scifi-ui/styles/formatx-mobile-firstpaint-r199.css?v=20260818-r200-parser-firstpaint">';
 const CLIENT_CACHE_REVISION_R197 = '20260817-r197-cache-migration';
 const CLIENT_CACHE_RECOVERY_R197 = '<script data-fx-client-cache-recovery-r197="true" src="/scifi-ui/scripts/formatx-client-cache-recovery-r197.js?v=20260817-r197-cache-migration"></script>';
 
@@ -341,17 +340,6 @@ function normaliseHomepageDocumentPaths(html) {
       output = output.replace(baseTag, `${baseTag}\n  ${CRITICAL_SHELL_LINK}`);
     } else {
       output = output.replace('<head>', `<head>\n  ${CRITICAL_SHELL_LINK}`);
-    }
-  }
-
-  // r200: parser-time, render-blocking load of the already-approved r199 mobile
-  // MAG-first geometry. The client recovery script keeps the same selector and
-  // therefore detects this link instead of injecting it after JavaScript starts.
-  if (!output.includes('data-fx-mobile-firstpaint-r199')) {
-    if (output.includes(CRITICAL_SHELL_LINK)) {
-      output = output.replace(CRITICAL_SHELL_LINK, `${CRITICAL_SHELL_LINK}\n  ${MOBILE_FIRSTPAINT_R200_LINK}`);
-    } else {
-      output = output.replace('<head>', `<head>\n  ${MOBILE_FIRSTPAINT_R200_LINK}`);
     }
   }
 
