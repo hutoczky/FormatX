@@ -13,13 +13,13 @@ const R206_BOOTSTRAP = [
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-flow-first-r74="true" href="/scifi-ui/styles/formatx-flow-first-r74.css?v=20260818-r207-preloaded">',
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-responsive-text-guard="true" href="/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260818-r207-preloaded">',
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="/scifi-ui/styles/formatx-mobile-proof-controls-r204.css?v=20260818-r207-preloaded">',
-  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-layout-r207="true" href="/scifi-ui/styles/formatx-mobile-layout-r207.css?v=20260818-r207-normal-flow">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-layout-r207="true" href="/scifi-ui/styles/formatx-mobile-layout-r207.css?v=20260818-r208-flicker-free">',
   '<link rel="stylesheet" data-fx-first-paint-r206="true" href="/scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero">',
-  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r207-canonical-flow"></script>',
-  '<script defer data-fx-mobile-layout-r207="true" src="/scifi-ui/scripts/formatx-mobile-layout-r207.js?v=20260818-r207-normal-flow"></script>',
+  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r208-first-paint-owner"></script>',
+  '<script defer data-fx-mobile-layout-r207="true" src="/scifi-ui/scripts/formatx-mobile-layout-r207.js?v=20260818-r208-flicker-free"></script>',
 ].join('\n  ');
-const STARTUP_REVISION = '20260818-r207-layout-owner';
-const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r207=1(?:;|$)/;
+const STARTUP_REVISION = '20260818-r208-flicker-free-owner';
+const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r208=1(?:;|$)/;
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -56,12 +56,13 @@ const PUBLIC_PAGE_ALIASES = new Map([
 ]);
 
 /*
-  r207 mobile layout ownership.
+  r208 flicker-free mobile layout ownership.
 
   Readable content and mobile layout remain independent from the WebGL renderer.
   The Worker preloads one authoritative normal-flow mobile layer and its DOM
-  reconciler so controls, copy, heading and proof cannot drift into competing
-  overlay geometries. r206 first-paint and award performance contracts remain.
+  reconciler. Legacy r75/r180 geometry writers delegate to that owner and the
+  r208 inline shield removes stale cached inline geometry before paint. The new
+  startup revision performs a one-shot cache migration from earlier r207 assets.
 
   Current product/content contracts remain delegated to production-content-base.js:
   release-metadata.js
@@ -227,18 +228,18 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   if (homepage) {
     headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
     headers.set('X-FormatX-Shell', 'v56');
-    headers.set('X-FormatX-Client-Revision', 'r207-layout-owner');
+    headers.set('X-FormatX-Client-Revision', 'r208-flicker-free-owner');
     headers.set('X-FormatX-Startup-Mode', 'canonical-normal-flow');
-    headers.set('X-FormatX-Recovery', 'r207-grid-owned-controls');
+    headers.set('X-FormatX-Recovery', 'r208-static-cascade');
 
     const cookie = request.headers.get('Cookie') || '';
     if (!STARTUP_COOKIE.test(cookie)) {
       headers.set('Clear-Site-Data', '"cache"');
       headers.append(
         'Set-Cookie',
-        'fx_startup_r207=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
+        'fx_startup_r208=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
       );
-      headers.set('X-FormatX-Cache-Migration', 'r207-one-shot-cleared');
+      headers.set('X-FormatX-Cache-Migration', 'r208-one-shot-cleared');
     }
   } else {
     const link = headers.get('Link');
