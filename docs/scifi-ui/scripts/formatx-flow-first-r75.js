@@ -2,6 +2,7 @@
 'use strict';
 const root=document.documentElement;
 let queued=false;
+const canonicalOwner=()=>innerWidth<=900&&(root.dataset.fxMobileLayoutOwner==='r207-normal-flow'||document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement);
 const imp=(el,prop,value)=>{if(el instanceof HTMLElement)el.style.setProperty(prop,value,'important');};
 function normal(el){if(!(el instanceof HTMLElement))return;imp(el,'position','relative');imp(el,'inset','auto');imp(el,'top','auto');imp(el,'right','auto');imp(el,'bottom','auto');imp(el,'left','auto');imp(el,'grid-area','auto');imp(el,'grid-row','auto');imp(el,'grid-column','auto');imp(el,'transform','none');imp(el,'translate','none');}
 function fixed(el,top,right,width,height){if(!(el instanceof HTMLElement))return;imp(el,'position','fixed');imp(el,'inset','auto');imp(el,'top',top);imp(el,'right',right);imp(el,'bottom','auto');imp(el,'left','auto');imp(el,'width',width);imp(el,'height',height);imp(el,'margin','0');imp(el,'transform','none');imp(el,'translate','none');imp(el,'flex','0 0 auto');imp(el,'visibility','visible');imp(el,'opacity','1');imp(el,'display','inline-flex');imp(el,'pointer-events','auto');}
@@ -17,6 +18,17 @@ function apply(){
  queued=false;
  const mobile=innerWidth<=900;
  if(!mobile)return restoreDesktopNative();
+
+ /* r208: production mobile geometry belongs exclusively to r207 CSS/DOM owner.
+    Keep this legacy engine available for non-r207 pages, but never let its inline
+    !important overlay writes compete with the canonical normal-flow layout. */
+ if(canonicalOwner()){
+  root.dataset.fxReferenceComposition='r208-canonical-normal-flow';
+  root.dataset.fxFlowFirstR75='delegated-r208';
+  root.dataset.fxFlowFirstConflict='disabled-r208';
+  return true;
+ }
+
  const bar=document.querySelector('.topbar');
  if(bar instanceof HTMLElement){
   imp(bar,'position','relative');imp(bar,'inset','auto');imp(bar,'top','auto');imp(bar,'display','flex');imp(bar,'align-items','center');imp(bar,'flex-wrap','nowrap');
