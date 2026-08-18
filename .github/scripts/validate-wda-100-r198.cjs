@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r207 canonical mobile-flow source contract. */
+/* FormatX Web Design Awards — r208 flicker-free canonical mobile-flow source contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -15,6 +15,8 @@ const css = read('docs/scifi-ui/styles/formatx-wda-hardening-r198.css');
 const firstPaint = read('docs/scifi-ui/styles/formatx-first-paint-r206.css');
 const mobileLayoutCss = read('docs/scifi-ui/styles/formatx-mobile-layout-r207.css');
 const mobileLayoutRuntime = read('docs/scifi-ui/scripts/formatx-mobile-layout-r207.js');
+const legacyFlow = read('docs/scifi-ui/scripts/formatx-flow-first-r75.js');
+const legacyFinalizer = read('docs/scifi-ui/scripts/formatx-mobile-ui-finalizer-r180.js');
 const audio = read('docs/scifi-ui/scripts/formatx-audio-repair.js');
 const production = read('billing-worker/src/production-content-entry.js');
 const home = read('docs/scifi-ui/index.html');
@@ -56,7 +58,7 @@ for (const token of [
   'visibility: visible'
 ]) assert.ok(firstPaint.includes(token), `missing r206 first-paint contract: ${token}`);
 
-// r207: exactly one mobile geometry owner. Controls and proof are normal-flow children.
+// r207/r208: exactly one mobile geometry owner. Controls and proof are normal-flow children.
 for (const token of [
   'authoritative mobile layout ownership',
   '> .hero-grid > .fx-reference-controls-r204',
@@ -76,11 +78,27 @@ for (const token of [
   'zone.parentElement !== grid',
   'fxMobileLayoutConflict',
   'none-r207',
+  'r208-static-cascade',
+  'queueMicrotask',
   "unique('.fx-reference-heading', hero)",
   "unique('.fx-reference-proof', hero)"
-]) assert.ok(mobileLayoutRuntime.includes(token), `missing r207 DOM ownership contract: ${token}`);
+]) assert.ok(mobileLayoutRuntime.includes(token), `missing r208 DOM ownership contract: ${token}`);
 assert.doesNotMatch(mobileLayoutRuntime, /\.style\.|setAttribute\(['"]style/i);
 assert.doesNotMatch(mobileLayoutRuntime, /placeAfter\(/);
+assert.doesNotMatch(mobileLayoutRuntime, /document\.head\.appendChild\(link\)|appendChild\(link\)/);
+assert.doesNotMatch(mobileLayoutRuntime, /setTimeout\([^\n]*(?:450|1400)/);
+
+// Legacy mobile engines may remain for compatibility, but r208 must make them no-op
+// whenever the canonical r207 stylesheet/owner is present. This prevents CSS ↔ inline
+// !important ping-pong at 120/700/1800/3200ms and 50..5200ms legacy timers.
+for (const token of ['canonicalOwner', 'delegated-r208', 'fxFlowFirstConflict', 'disabled-r208']) {
+  assert.ok(legacyFlow.includes(token), `legacy flow is not delegated under r208: ${token}`);
+}
+for (const token of ['canonicalOwner', 'delegated-r208', 'disabled-r208-no-ping-pong']) {
+  assert.ok(legacyFinalizer.includes(token), `legacy finalizer is not delegated under r208: ${token}`);
+}
+assert.match(legacyFlow, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
+assert.match(legacyFinalizer, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 
 assert.match(production, /formatx-first-paint-r206\.css\?v=20260818-r206-stable-hero/);
 assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260818-r207-canonical-flow/);
@@ -127,5 +145,5 @@ function validateLighthouse(config, label) {
 validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
-for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime]) new Function(source);
-console.log('PASS: r207 no-ping-pong canonical mobile flow, award UX, audio, GPU and truthful Lighthouse contracts passed.');
+for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, legacyFlow, legacyFinalizer]) new Function(source);
+console.log('PASS: r208 flicker-free canonical mobile flow, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');
