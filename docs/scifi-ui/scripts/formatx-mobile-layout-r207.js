@@ -12,11 +12,6 @@
     return first;
   }
 
-  function placeAfter(anchor, node) {
-    if (!(anchor instanceof Element) || !(node instanceof Element)) return;
-    if (anchor.nextElementSibling !== node) anchor.after(node);
-  }
-
   function reconcile() {
     if (!mobile()) return;
 
@@ -38,32 +33,25 @@
     if (sound instanceof HTMLElement && sound.parentElement !== zone) zone.appendChild(sound);
     if (rail instanceof HTMLElement && rail.parentElement !== zone) zone.appendChild(rail);
 
+    /* r204 keeps MAG -> heading -> proof as the physical accessibility order.
+       r207 only gives the controls one physical owner: hero-grid. CSS order puts
+       the zone visually between MAG and copy without fighting the r204 observer. */
     if (zone.parentElement !== grid) grid.appendChild(zone);
-    placeAfter(space, zone);
-
-    const copy = grid.querySelector(':scope > .hero-copy');
-    if (copy instanceof HTMLElement) placeAfter(zone, copy);
 
     const heading = unique('.fx-reference-heading', hero);
-    if (heading instanceof HTMLElement) {
-      if (heading.parentElement !== grid) grid.appendChild(heading);
-      placeAfter(copy instanceof HTMLElement ? copy : zone, heading);
-    }
+    if (heading instanceof HTMLElement && heading.parentElement !== grid) grid.appendChild(heading);
 
     const proof = unique('.fx-reference-proof', hero);
     if (proof instanceof HTMLElement) {
       if (proof.parentElement !== grid) grid.appendChild(proof);
-      placeAfter(heading instanceof HTMLElement ? heading : (copy instanceof HTMLElement ? copy : zone), proof);
-
       const live = proof.querySelector('.fx-reference-liveos');
-      if (live instanceof HTMLElement) {
-        live.removeAttribute('style');
-      }
+      if (live instanceof HTMLElement) live.removeAttribute('style');
     }
 
     zone.removeAttribute('style');
     rail?.removeAttribute('style');
     root.dataset.fxMobileLayoutOwner = 'r207-normal-flow';
+    root.dataset.fxMobileLayoutConflict = 'none-r207';
   }
 
   function ensureAuthoritativeStyle() {
