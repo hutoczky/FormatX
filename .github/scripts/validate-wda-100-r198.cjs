@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r206.1 final 100-target source contract. */
+/* FormatX Web Design Awards — r207 canonical mobile-flow source contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -13,6 +13,8 @@ const controls = read('docs/scifi-ui/scripts/formatx-wda-controls-r198.js');
 const gpu = read('docs/scifi-ui/scripts/formatx-wda-gpu-r198.js');
 const css = read('docs/scifi-ui/styles/formatx-wda-hardening-r198.css');
 const firstPaint = read('docs/scifi-ui/styles/formatx-first-paint-r206.css');
+const mobileLayoutCss = read('docs/scifi-ui/styles/formatx-mobile-layout-r207.css');
+const mobileLayoutRuntime = read('docs/scifi-ui/scripts/formatx-mobile-layout-r207.js');
 const audio = read('docs/scifi-ui/scripts/formatx-audio-repair.js');
 const production = read('billing-worker/src/production-content-entry.js');
 const home = read('docs/scifi-ui/index.html');
@@ -53,9 +55,37 @@ for (const token of [
   'order: 2',
   'visibility: visible'
 ]) assert.ok(firstPaint.includes(token), `missing r206 first-paint contract: ${token}`);
+
+// r207: exactly one mobile geometry owner. Controls and proof are normal-flow children.
+for (const token of [
+  'authoritative mobile layout ownership',
+  '> .hero-grid > .fx-reference-controls-r204',
+  'order: 1',
+  'position: relative',
+  'flex-direction: row',
+  '> .hero-grid > .hero-copy',
+  '> .hero-grid > .fx-reference-heading',
+  '> .hero-grid > .fx-reference-proof',
+  'min-height: 0',
+  'fx-reference-liveos'
+]) assert.ok(mobileLayoutCss.includes(token), `missing r207 mobile CSS contract: ${token}`);
+for (const token of [
+  'fxMobileLayoutOwner',
+  'r207-normal-flow',
+  'fx-reference-controls-r204',
+  'placeAfter(space, zone)',
+  'placeAfter(zone, copy)',
+  "unique('.fx-reference-heading', hero)",
+  "unique('.fx-reference-proof', hero)"
+]) assert.ok(mobileLayoutRuntime.includes(token), `missing r207 DOM ownership contract: ${token}`);
+assert.doesNotMatch(mobileLayoutRuntime, /\.style\.|setAttribute\(['"]style/i);
+
 assert.match(production, /formatx-first-paint-r206\.css\?v=20260818-r206-stable-hero/);
-assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260818-r206-independent-layout/);
-assert.match(production, /X-FormatX-Client-Revision', 'r206-fail-open/);
+assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260818-r207-canonical-flow/);
+assert.match(production, /formatx-mobile-layout-r207\.css\?v=20260818-r207-normal-flow/);
+assert.match(production, /formatx-mobile-layout-r207\.js\?v=20260818-r207-normal-flow/);
+assert.match(production, /X-FormatX-Client-Revision', 'r207-layout-owner/);
+assert.match(production, /fx_startup_r207=1/);
 
 // Mobile performance: measured 60fps target, adaptive backing resolution and bounded scale.
 for (const token of ['fxWdaTargetFps', '16.67', 'scale = 0.86', 'scale > 0.58', 'frameMs > 19.5', 'frameMs < 16.2', 'fxWdaRenderScale', 'drawingBufferWidth']) {
@@ -95,5 +125,5 @@ function validateLighthouse(config, label) {
 validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
-for (const source of [awardRuntime, intro, controls, gpu]) new Function(source);
-console.log('PASS: r206.1 active award UX, audio, fail-open, GPU and truthful Lighthouse contracts passed.');
+for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime]) new Function(source);
+console.log('PASS: r207 canonical mobile flow, award UX, audio, GPU and truthful Lighthouse contracts passed.');
