@@ -6,9 +6,18 @@ const LEGACY_WWW_HOST = 'www.formatxsuite.com';
 const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
 const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
-const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260812-first-paint-r4">';
-const STARTUP_REVISION = '20260818-r204b-stable-direct';
-const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r204b=1(?:;|$)/;
+const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint">';
+const R206_BOOTSTRAP = [
+  '<link rel="stylesheet" data-fx-award-readiness-style="true" href="/scifi-ui/styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-reference-layout-style="true" href="/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260818-r206-preloaded">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-flow-first-r74="true" href="/scifi-ui/styles/formatx-flow-first-r74.css?v=20260818-r206-preloaded">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-responsive-text-guard="true" href="/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260818-r206-preloaded">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="/scifi-ui/styles/formatx-mobile-proof-controls-r204.css?v=20260818-r206-preloaded">',
+  '<link rel="stylesheet" data-fx-first-paint-r206="true" href="/scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero">',
+  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r206-independent-layout"></script>',
+].join('\n  ');
+const STARTUP_REVISION = '20260818-r206-fail-open';
+const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r206=1(?:;|$)/;
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -45,11 +54,12 @@ const PUBLIC_PAGE_ALIASES = new Map([
 ]);
 
 /*
-  r204b stable-direct startup.
+  r206 fail-open startup.
 
-  The public homepage is served through the proven direct content pipeline.
-  There is deliberately no client cache controller, renderer retry state machine,
-  Worker-injected MAG DOM, or whole-page asset rewriting in this layer.
+  Readable content and mobile layout are independent from the WebGL renderer.
+  The public homepage is still served through the proven direct content pipeline;
+  the Worker only adds first-paint CSS, preloads the canonical mobile layout CSS,
+  and starts the mobile layout controller independently from MAG/WebGL startup.
 
   Current product/content contracts remain delegated to production-content-base.js:
   release-metadata.js
@@ -215,18 +225,18 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   if (homepage) {
     headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
     headers.set('X-FormatX-Shell', 'v56');
-    headers.set('X-FormatX-Client-Revision', 'r204b-stable-direct');
-    headers.set('X-FormatX-Startup-Mode', 'direct');
-    headers.set('X-FormatX-Recovery', 'none-direct-startup');
+    headers.set('X-FormatX-Client-Revision', 'r206-fail-open');
+    headers.set('X-FormatX-Startup-Mode', 'direct-layout-independent');
+    headers.set('X-FormatX-Recovery', 'css-first-paint-plus-layout-controller');
 
     const cookie = request.headers.get('Cookie') || '';
     if (!STARTUP_COOKIE.test(cookie)) {
       headers.set('Clear-Site-Data', '"cache"');
       headers.append(
         'Set-Cookie',
-        'fx_startup_r204b=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
+        'fx_startup_r206=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
       );
-      headers.set('X-FormatX-Cache-Migration', 'r204b-one-shot-cleared');
+      headers.set('X-FormatX-Cache-Migration', 'r206-one-shot-cleared');
     }
   } else {
     const link = headers.get('Link');
@@ -289,7 +299,8 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
 
   if (homepage) {
     html = normaliseHomepageDocumentPaths(html);
-    html = cacheBustCriticalCoreR204(html);
+    html = injectR206Bootstrap(html);
+    html = cacheBustCriticalCoreR206(html);
   }
 
   if (cleanAddressBar && !html.includes('data-fx-canonical-recovery')) {
@@ -337,7 +348,15 @@ function normaliseHomepageDocumentPaths(html) {
   return output;
 }
 
-function cacheBustCriticalCoreR204(html) {
+function injectR206Bootstrap(html) {
+  let output = String(html || '');
+  if (!output.includes('data-fx-first-paint-r206="true"')) {
+    output = output.replace('</head>', `  ${R206_BOOTSTRAP}\n</head>`);
+  }
+  return output;
+}
+
+function cacheBustCriticalCoreR206(html) {
   return String(html || '').replace(
     /(<script\b[^>]*src=["'][^"']*formatx-core-real3d-v20\.js[^"']*)(["'][^>]*>\s*<\/script>)/i,
     (match, prefix, suffix) => {
