@@ -1,9 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-18T02:53:44+02:00
-source_master=21ad5719813d5c1ba9ecc02e8c42debc4746414c
-purpose=activate r199 mobile first-paint layout reservation after strict Lighthouse identified hero-copy/hero-grid as the dominant CLS source
-signature=preserve the approved r198 native WebGL MAG geometry, size, material, cyan/ice/violet optics, seamless integration and hit-tested pointer/touch control
+requested_at=2026-08-18T08:57:33+02:00
+source_master=be7d41b7afbc34b591b4e503bdee58d891afcd37
+purpose=activate r200 parser-time delivery of the already-approved r199 MAG-first mobile geometry after live Lighthouse proved the JavaScript-injected stylesheet still allowed large layout shifts
+signature=preserve the approved r199 native WebGL MAG geometry, size, material, cyan/ice/violet optics, seamless page integration and hit-tested pointer/touch control
 interaction=preserve desktop pointer, mobile touch, gyro, heartbeat/orbit/caustic motion, MUTE/UNMUTE, focus behavior and accessibility semantics
-visual=no final visual redesign; reserve the existing approved MAG-first mobile composition before JavaScript hydration so first paint matches the settled layout
-performance=target the measured mobile CLS 0.283 and LCP 4.21s without hiding or replacing the native interactive WebGL core
+visual=no final visual redesign; deliver the same approved r199 mobile MAG-first layout as a parser-time render-blocking stylesheet before hydration
+performance=remove the measured r199 mobile CLS 1.72-1.95 caused by late stylesheet insertion while preserving LCP and native interactive WebGL behavior
 validation=production candidate; public-site integrity; strict desktop/mobile Lighthouse; live Lighthouse; live award-readiness; mobile Apex; live MAG screenshot and interaction regression
