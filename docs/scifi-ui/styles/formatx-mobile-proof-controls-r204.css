@@ -1,0 +1,227 @@
+/* FormatX r204 — authoritative mobile proof + control ownership.
+   Scope: mobile only. The large MAG/WebGL renderer is intentionally untouched. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  #hero {
+    position: relative !important;
+  }
+
+  #hero .hero-grid {
+    overflow: visible !important;
+  }
+
+  #hero .fx-reference-heading {
+    position: relative !important;
+    inset: auto !important;
+    order: 3 !important;
+    display: flex !important;
+    align-items: center !important;
+    width: calc(100% - 32px) !important;
+    max-width: 680px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 22px auto 22px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+  }
+
+  #hero .fx-reference-proof {
+    position: relative !important;
+    inset: auto !important;
+    order: 4 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-content: start !important;
+    box-sizing: border-box !important;
+    width: calc(100% - 32px) !important;
+    max-width: 680px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 auto 34px !important;
+    padding: 30px 28px 28px !important;
+    overflow: hidden !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+    border: 1px solid rgba(93, 221, 255, 0.34) !important;
+    border-radius: 30px !important;
+    background:
+      radial-gradient(circle at 18% 8%, rgba(34, 210, 255, 0.12), transparent 42%),
+      linear-gradient(145deg, rgba(4, 34, 49, 0.96), rgba(3, 16, 31, 0.97) 58%, rgba(18, 12, 42, 0.96)) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(235, 253, 255, 0.06),
+      0 24px 70px rgba(0, 0, 0, 0.34) !important;
+  }
+
+  #hero .fx-reference-proof > *,
+  #hero .fx-reference-proof-kicker,
+  #hero .fx-reference-proof h2,
+  #hero .fx-reference-proof h3,
+  #hero .fx-reference-proof p,
+  #hero .fx-reference-proof .fx-reference-liveos {
+    position: relative !important;
+    inset: auto !important;
+    float: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+  }
+
+  #hero .fx-reference-proof-kicker {
+    display: block !important;
+    margin: 0 0 16px !important;
+    color: rgba(186, 218, 232, 0.82) !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.22em !important;
+    line-height: 1.35 !important;
+  }
+
+  #hero .fx-reference-proof h2,
+  #hero .fx-reference-proof h3 {
+    display: block !important;
+    margin: 0 0 18px !important;
+    color: #f3fbff !important;
+    font-size: clamp(2rem, 8.4vw, 3rem) !important;
+    font-weight: 760 !important;
+    line-height: 1.03 !important;
+    letter-spacing: -0.045em !important;
+  }
+
+  #hero .fx-reference-proof p {
+    display: block !important;
+    margin: 0 !important;
+    color: rgba(205, 220, 231, 0.78) !important;
+    font-size: clamp(1rem, 4.4vw, 1.2rem) !important;
+    line-height: 1.62 !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #hero .fx-reference-liveos {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    justify-self: end !important;
+    box-sizing: border-box !important;
+    min-width: 132px !important;
+    min-height: 54px !important;
+    margin-top: 24px !important;
+    padding: 0 24px !important;
+    border: 1px solid rgba(63, 225, 255, 0.78) !important;
+    border-radius: 999px !important;
+    color: #f5fdff !important;
+    background: rgba(2, 21, 35, 0.78) !important;
+    text-decoration: none !important;
+    font-weight: 750 !important;
+    line-height: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* One physical owner for the top-right hero controls. Moving the existing
+     nodes here preserves their event listeners while making overlap impossible. */
+  #hero .fx-reference-controls-r204 {
+    position: absolute !important;
+    top: 18px !important;
+    right: 18px !important;
+    left: auto !important;
+    bottom: auto !important;
+    z-index: 80 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 14px !important;
+    box-sizing: border-box !important;
+    width: min(190px, 44vw) !important;
+    max-width: 190px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    pointer-events: none !important;
+  }
+
+  #hero .fx-reference-controls-r204 > * {
+    pointer-events: auto !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-three-sound {
+    position: relative !important;
+    inset: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 190px !important;
+    min-width: 0 !important;
+    min-height: 58px !important;
+    height: 58px !important;
+    margin: 0 !important;
+    padding: 0 18px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    z-index: 2 !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-reference-rail {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    z-index: 1 !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-reference-ask,
+  #hero .fx-reference-controls-r204 .fx-reference-pause {
+    position: relative !important;
+    inset: auto !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #hero .fx-reference-proof {
+    width: calc(100% - 24px) !important;
+    padding: 26px 22px 24px !important;
+    border-radius: 26px !important;
+  }
+
+  #hero .fx-reference-controls-r204 {
+    top: 14px !important;
+    right: 12px !important;
+    width: min(172px, 43vw) !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-three-sound {
+    max-width: 172px !important;
+    min-height: 54px !important;
+    height: 54px !important;
+    padding-inline: 14px !important;
+  }
+}
