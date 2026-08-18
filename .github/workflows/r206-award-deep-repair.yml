@@ -1,0 +1,228 @@
+name: FormatX r206 award deep repair
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  apply-r206:
+    if: ${{ !contains(github.event.head_commit.message, '[r206-applied]') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          fetch-depth: 0
+
+      - name: Apply structural mobile and award repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path('.')
+          index = root / 'docs/scifi-ui/index.html'
+          core = root / 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
+          layout = root / 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
+          validator = root / '.github/scripts/validate-real3d-core-v20.cjs'
+          css = root / 'docs/scifi-ui/styles/formatx-first-paint-r206.css'
+
+          html = index.read_text(encoding='utf-8')
+          icon = '  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">\n'
+          preload = '''  <link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">
+  <link rel="stylesheet" data-fx-critical-shell="v56" href="./styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint">
+  <link rel="stylesheet" data-fx-award-readiness-style="true" href="./styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability">
+  <link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-reference-layout-style="true" href="./styles/formatx-mobile-reference-layout-v1.css?v=20260818-r206-preloaded">
+  <link rel="stylesheet" media="(max-width: 900px)" data-fx-flow-first-r74="true" href="./styles/formatx-flow-first-r74.css?v=20260818-r206-preloaded">
+  <link rel="stylesheet" media="(max-width: 900px)" data-fx-responsive-text-guard="true" href="./styles/formatx-responsive-text-guard-r72.css?v=20260818-r206-preloaded">
+  <link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="./styles/formatx-mobile-proof-controls-r204.css?v=20260818-r206-preloaded">
+'''
+          if 'data-fx-critical-shell="v56"' not in html:
+              if icon not in html:
+                  raise SystemExit('index icon anchor missing')
+              html = html.replace(icon, preload, 1)
+
+          core_line = '  <script defer data-fx-core-real3d="true" src="./scripts/formatx-core-real3d-v20.js?v=20260814-r99-touch-contrast-r2&rev=20260816-r184-mobile-layout-stable"></script>'
+          injected = '''  <link rel="stylesheet" data-fx-first-paint-r206="true" href="./styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero">
+  <script defer data-fx-mobile-reference-layout="true" src="./scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r206-independent-layout"></script>
+  <script defer data-fx-core-real3d="true" src="./scripts/formatx-core-real3d-v20.js?v=20260818-r206-independent-layout"></script>'''
+          if 'data-fx-first-paint-r206="true"' not in html:
+              if core_line not in html:
+                  raise SystemExit('core script anchor missing')
+              html = html.replace(core_line, injected, 1)
+          index.write_text(html, encoding='utf-8')
+
+          core_text = core.read_text(encoding='utf-8')
+          core_text = core_text.replace(
+              "const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r204-proof-controls';",
+              "const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r206-independent-layout';"
+          )
+          core.write_text(core_text, encoding='utf-8')
+
+          layout_text = layout.read_text(encoding='utf-8')
+          layout_text = layout_text.replace('formatx-mobile-reference-layout-v1.css?v=20260816-mobile-only-r177','formatx-mobile-reference-layout-v1.css?v=20260818-r206-preloaded')
+          layout_text = layout_text.replace('formatx-flow-first-r74.css?v=20260816-mobile-only-r178','formatx-flow-first-r74.css?v=20260818-r206-preloaded')
+          layout_text = layout_text.replace('formatx-responsive-text-guard-r72.css?v=20260813-responsive-text-wrap-r72','formatx-responsive-text-guard-r72.css?v=20260818-r206-preloaded')
+          layout_text = layout_text.replace('formatx-mobile-proof-controls-r204.css?v=20260818-r204-proof-controls','formatx-mobile-proof-controls-r204.css?v=20260818-r206-preloaded')
+          layout.write_text(layout_text, encoding='utf-8')
+
+          v = validator.read_text(encoding='utf-8')
+          stale = "assert.match(layout,/space\\.after\\(rail\\)/);"
+          current = "assert.match(layout,/space\\.after\\(heading\\)/);assert.match(layout,/heading\\.after\\(card\\)/);assert.match(layout,/ensureControlZone\\(hero,rail\\)/);assert.match(layout,/fx-reference-controls-r204/);"
+          if stale not in v:
+              raise SystemExit('stale rail assertion not found')
+          v = v.replace(stale, current, 1)
+          validator.write_text(v, encoding='utf-8')
+
+          css.write_text(r'''/* FormatX r206 — first-paint/mobile reliability contract.
+   The readable hero is independent from WebGL. Geometry is identical before and
+   after the mobile reference controller takes ownership, eliminating hide/show CLS. */
+
+          @media (max-width: 900px), (pointer: coarse) {
+            html body.living-architecture main#main-content section#hero.scene.hero {
+              min-height: 0 !important;
+              height: auto !important;
+              padding: 12px 0 60px !important;
+              overflow: visible !important;
+            }
+
+            html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+              display: flex !important;
+              flex-direction: column !important;
+              align-items: stretch !important;
+              width: 100% !important;
+              max-width: 100% !important;
+              min-height: 0 !important;
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              gap: 0 !important;
+              overflow: visible !important;
+            }
+
+            html body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-space {
+              order: 0 !important;
+              position: relative !important;
+              inset: auto !important;
+              box-sizing: border-box !important;
+              flex: 0 0 auto !important;
+              align-self: stretch !important;
+              width: 100% !important;
+              height: clamp(350px, 97.6vw, 470px) !important;
+              min-height: clamp(350px, 97.6vw, 470px) !important;
+              max-height: 470px !important;
+              margin: 0 auto 0 !important;
+              transform: none !important;
+              translate: none !important;
+            }
+
+            html body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-copy,
+            html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-copy {
+              order: 2 !important;
+              position: relative !important;
+              inset: auto !important;
+              display: grid !important;
+              grid-template-columns: minmax(0, 1fr) !important;
+              grid-template-rows: none !important;
+              align-content: start !important;
+              row-gap: 12px !important;
+              box-sizing: border-box !important;
+              align-self: center !important;
+              width: calc(100% - 24px) !important;
+              max-width: 680px !important;
+              min-width: 0 !important;
+              height: auto !important;
+              min-height: 1px !important;
+              margin: 0 auto 48px !important;
+              padding: 24px clamp(18px, 5.2vw, 26px) 28px !important;
+              overflow: hidden !important;
+              clip: auto !important;
+              clip-path: none !important;
+              white-space: normal !important;
+              opacity: 1 !important;
+              visibility: visible !important;
+              transform: none !important;
+              translate: none !important;
+              border-radius: 24px !important;
+              contain: layout style !important;
+            }
+
+            html body.living-architecture main#main-content section#hero.scene.hero .hero-copy > * {
+              position: relative !important;
+              inset: auto !important;
+              opacity: 1 !important;
+              visibility: visible !important;
+              transform: none !important;
+              translate: none !important;
+              clip: auto !important;
+              clip-path: none !important;
+              max-height: none !important;
+            }
+
+            html body.living-architecture main#main-content section#hero.scene.hero .hero-copy > .hero-lead {
+              display: block !important;
+              min-block-size: 7.5em !important;
+              content-visibility: visible !important;
+              opacity: 1 !important;
+              visibility: visible !important;
+              animation: none !important;
+              transition: none !important;
+              transform: none !important;
+            }
+
+            html body.living-architecture main#main-content section#hero.scene.hero .fx-reference-heading {
+              order: 3 !important;
+              position: relative !important;
+              inset: auto !important;
+              margin: 30px auto 22px !important;
+              transform: none !important;
+            }
+
+            html body.living-architecture main#main-content section#hero.scene.hero .fx-reference-proof {
+              order: 4 !important;
+              position: relative !important;
+              inset: auto !important;
+              height: auto !important;
+              transform: none !important;
+            }
+          }
+
+          @media (max-width: 430px) {
+            html body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-copy {
+              width: calc(100% - 16px) !important;
+              padding-inline: 16px !important;
+            }
+
+            html body.living-architecture main#main-content section#hero.scene.hero .fx-reference-heading {
+              margin-top: 34px !important;
+            }
+          }
+
+          /* r206 marker: WebGL-independent readable hero + zero-hide mobile geometry. */
+          ''', encoding='utf-8')
+
+          # Verify the source contract before committing.
+          assert 'data-fx-first-paint-r206="true"' in index.read_text(encoding='utf-8')
+          assert 'data-fx-mobile-reference-layout="true"' in index.read_text(encoding='utf-8')
+          assert 'space.after(heading)' in layout.read_text(encoding='utf-8')
+          assert 'ensureControlZone(hero,rail)' in layout.read_text(encoding='utf-8')
+          PY
+
+          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          node --check docs/scifi-ui/scripts/formatx-core-real3d-v20.js
+          node .github/scripts/validate-real3d-core-v20.cjs
+
+          git config user.name "Games Tech"
+          git config user.email "hutoczky@users.noreply.github.com"
+          git add docs/scifi-ui/index.html \
+                  docs/scifi-ui/styles/formatx-first-paint-r206.css \
+                  docs/scifi-ui/scripts/formatx-core-real3d-v20.js \
+                  docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js \
+                  .github/scripts/validate-real3d-core-v20.cjs
+          git rm .github/workflows/r206-award-deep-repair.yml
+          git commit -m "[deploy-production] [r206-applied] fix(mobile): decouple layout from WebGL and lock first paint"
+          git push origin HEAD:master
