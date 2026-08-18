@@ -73,12 +73,14 @@ for (const token of [
   'fxMobileLayoutOwner',
   'r207-normal-flow',
   'fx-reference-controls-r204',
-  'placeAfter(space, zone)',
-  'placeAfter(zone, copy)',
+  'zone.parentElement !== grid',
+  'fxMobileLayoutConflict',
+  'none-r207',
   "unique('.fx-reference-heading', hero)",
   "unique('.fx-reference-proof', hero)"
 ]) assert.ok(mobileLayoutRuntime.includes(token), `missing r207 DOM ownership contract: ${token}`);
 assert.doesNotMatch(mobileLayoutRuntime, /\.style\.|setAttribute\(['"]style/i);
+assert.doesNotMatch(mobileLayoutRuntime, /placeAfter\(/);
 
 assert.match(production, /formatx-first-paint-r206\.css\?v=20260818-r206-stable-hero/);
 assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260818-r207-canonical-flow/);
@@ -126,4 +128,4 @@ validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
 for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime]) new Function(source);
-console.log('PASS: r207 canonical mobile flow, award UX, audio, GPU and truthful Lighthouse contracts passed.');
+console.log('PASS: r207 no-ping-pong canonical mobile flow, award UX, audio, GPU and truthful Lighthouse contracts passed.');
