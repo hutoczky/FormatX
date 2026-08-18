@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "url": [
-        "https://formatxsuite.com/?live=desktop&r198=1"
+        "https://formatxsuite.com/?live=desktop&r206=1"
       ],
       "numberOfRuns": 3,
       "settings": {
