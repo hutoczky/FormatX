@@ -1,9 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-18T10:35:00+02:00
-source_master=8ef073dd2cbffe6548fa7aa57f9ad43b1c84d43e
-purpose=r201 never-stuck reliability layer after r199/r200 parser-time firstpaint regression left real mobile and desktop browser sessions partially hydrated
-signature=retain the stable r198 content pipeline, remove every r199/r200 firstpaint lock, force a fresh critical MAG bootstrap and provide bounded native-renderer retry plus visible emergency core
-interaction=preserve native WebGL MAG, pointer/touch/gyro, heartbeat/orbit/caustic motion, MUTE/UNMUTE and accessibility semantics when native rendering succeeds
-visual=no redesign; emergency core is used only when the native renderer misses the bounded deadline
-performance=reliability first; one-time r201 HTTP cache reset, no recurring cache purge after migration
-validation=production candidate; public-site integrity; live mobile and desktop load; intro fail-open; native MAG or visible fallback within bounded time
+requested_at=2026-08-18T15:07:00+02:00
+source_master=76d1c14f4f0234e92722ee61389e893b293fef2e
+purpose=revalidate and deploy r205 compact mobile control polish after aligning the real3D validator with the current r204 control-zone ownership model
+signature=preserve the current native WebGL MAG, compact r205 hero controls, restored mini MAG, proof card ownership and current mobile layout
+interaction=preserve native WebGL pointer/touch/gyro, heartbeat/orbit/caustic motion, MUTE/UNMUTE, ASK/pause controls and accessibility semantics
+visual=no new visual tuning in this commit; validator/deployment recovery only
+performance=retain current r205 runtime; mobile Lighthouse remains an independent quality gate and must not be misreported as passing
+validation=production candidate; public/runtime/security contracts; JavaScript syntax; Worker tests; production build; custom-domain deploy; canonical smoke; post-deploy mobile/live gates
