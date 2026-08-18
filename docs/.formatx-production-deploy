@@ -1,8 +1,9 @@
 FormatX production deployment marker
-requested_at=2026-08-16T22:46:00+02:00
-source_master=c0ffcc60ff82b9bbf7ed3a4fc07485c390ac6e08
-purpose=revalidate the unchanged r185b production MAG after aligning the award/public-integrity scheduler contract with the current r183 display-synced optical runtime
-signature=preserve the existing r185b real browser hit-tested pointer/touch control and approved r184 crystal geometry, size, material and living motion
-interaction=preserve desktop pointer, mobile touch, existing gyro/lub-dub motion, focus behavior, Escape/backdrop close and six-organ unfold
-visual=no visual change; keep the approved cyan/ice/violet MAG, seamless page integration, responsive layout and native WebGL rendering unchanged
-validation=rerun production candidate, public-site integrity, live award-readiness, mobile Apex, Lighthouse and relevant post-deploy gates against the corrected current scheduler contract
+requested_at=2026-08-18T02:53:44+02:00
+source_master=21ad5719813d5c1ba9ecc02e8c42debc4746414c
+purpose=activate r199 mobile first-paint layout reservation after strict Lighthouse identified hero-copy/hero-grid as the dominant CLS source
+signature=preserve the approved r198 native WebGL MAG geometry, size, material, cyan/ice/violet optics, seamless integration and hit-tested pointer/touch control
+interaction=preserve desktop pointer, mobile touch, gyro, heartbeat/orbit/caustic motion, MUTE/UNMUTE, focus behavior and accessibility semantics
+visual=no final visual redesign; reserve the existing approved MAG-first mobile composition before JavaScript hydration so first paint matches the settled layout
+performance=target the measured mobile CLS 0.283 and LCP 4.21s without hiding or replacing the native interactive WebGL core
+validation=production candidate; public-site integrity; strict desktop/mobile Lighthouse; live Lighthouse; live award-readiness; mobile Apex; live MAG screenshot and interaction regression
