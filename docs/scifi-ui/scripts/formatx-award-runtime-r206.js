@@ -26,6 +26,10 @@
   }
 
   function ensureControls() {
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', ensureControls, { once: true });
+      return;
+    }
     if (document.querySelector('script[data-fx-award-runtime-controls-r206]')) return;
     const script = document.createElement('script');
     script.src = CONTROLS_URL;
