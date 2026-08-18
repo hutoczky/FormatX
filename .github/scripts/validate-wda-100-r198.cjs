@@ -58,7 +58,7 @@ for (const token of [
   'visibility: visible'
 ]) assert.ok(firstPaint.includes(token), `missing r206 first-paint contract: ${token}`);
 
-// r207/r208: exactly one mobile geometry owner. Controls and proof are normal-flow children.
+// r208: exactly one mobile geometry owner. Controls and proof are normal-flow children.
 for (const token of [
   'authoritative mobile layout ownership',
   '> .hero-grid > .fx-reference-controls-r204',
@@ -70,7 +70,7 @@ for (const token of [
   '> .hero-grid > .fx-reference-proof',
   'min-height: 0',
   'fx-reference-liveos'
-]) assert.ok(mobileLayoutCss.includes(token), `missing r207 mobile CSS contract: ${token}`);
+]) assert.ok(mobileLayoutCss.includes(token), `missing r208 mobile CSS contract: ${token}`);
 for (const token of [
   'fxMobileLayoutOwner',
   'r207-normal-flow',
@@ -78,8 +78,10 @@ for (const token of [
   'zone.parentElement !== grid',
   'fxMobileLayoutConflict',
   'none-r207',
-  'r208-static-cascade',
+  'r208-inline-shield',
   'queueMicrotask',
+  'clearLegacyInline',
+  'relevantStyleMutation',
   "unique('.fx-reference-heading', hero)",
   "unique('.fx-reference-proof', hero)"
 ]) assert.ok(mobileLayoutRuntime.includes(token), `missing r208 DOM ownership contract: ${token}`);
@@ -100,12 +102,16 @@ for (const token of ['canonicalOwner', 'delegated-r208', 'disabled-r208-no-ping-
 assert.match(legacyFlow, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 assert.match(legacyFinalizer, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 
+// The production page must force fresh r208 asset URLs and a one-shot cache migration.
 assert.match(production, /formatx-first-paint-r206\.css\?v=20260818-r206-stable-hero/);
-assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260818-r207-canonical-flow/);
-assert.match(production, /formatx-mobile-layout-r207\.css\?v=20260818-r207-normal-flow/);
-assert.match(production, /formatx-mobile-layout-r207\.js\?v=20260818-r207-normal-flow/);
-assert.match(production, /X-FormatX-Client-Revision', 'r207-layout-owner/);
-assert.match(production, /fx_startup_r207=1/);
+assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260818-r208-first-paint-owner/);
+assert.match(production, /formatx-mobile-layout-r207\.css\?v=20260818-r208-flicker-free/);
+assert.match(production, /formatx-mobile-layout-r207\.js\?v=20260818-r208-flicker-free/);
+assert.match(production, /STARTUP_REVISION = '20260818-r208-flicker-free-owner'/);
+assert.match(production, /X-FormatX-Client-Revision', 'r208-flicker-free-owner/);
+assert.match(production, /X-FormatX-Recovery', 'r208-static-cascade/);
+assert.match(production, /fx_startup_r208=1/);
+assert.match(production, /r208-one-shot-cleared/);
 
 // Mobile performance: measured 60fps target, adaptive backing resolution and bounded scale.
 for (const token of ['fxWdaTargetFps', '16.67', 'scale = 0.86', 'scale > 0.58', 'frameMs > 19.5', 'frameMs < 16.2', 'fxWdaRenderScale', 'drawingBufferWidth']) {
@@ -146,4 +152,4 @@ validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
 for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r208 flicker-free canonical mobile flow, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');
+console.log('PASS: r208 flicker-free canonical mobile flow, cache migration, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');
