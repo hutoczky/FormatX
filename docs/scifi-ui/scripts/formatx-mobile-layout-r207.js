@@ -33,9 +33,8 @@
     if (sound instanceof HTMLElement && sound.parentElement !== zone) zone.appendChild(sound);
     if (rail instanceof HTMLElement && rail.parentElement !== zone) zone.appendChild(rail);
 
-    /* r204 keeps MAG -> heading -> proof as the physical accessibility order.
-       r207 only gives the controls one physical owner: hero-grid. CSS order puts
-       the zone visually between MAG and copy without fighting the r204 observer. */
+    /* r208: hero-grid is the single physical owner. CSS order owns visual order.
+       Never move the stylesheet link or repeatedly reorder stable children. */
     if (zone.parentElement !== grid) grid.appendChild(zone);
 
     const heading = unique('.fx-reference-heading', hero);
@@ -45,20 +44,24 @@
     if (proof instanceof HTMLElement) {
       if (proof.parentElement !== grid) grid.appendChild(proof);
       const live = proof.querySelector('.fx-reference-liveos');
-      if (live instanceof HTMLElement) live.removeAttribute('style');
+      if (live instanceof HTMLElement && live.hasAttribute('style')) live.removeAttribute('style');
     }
 
-    zone.removeAttribute('style');
-    rail?.removeAttribute('style');
+    if (zone.hasAttribute('style')) zone.removeAttribute('style');
+    if (rail instanceof HTMLElement && rail.hasAttribute('style')) rail.removeAttribute('style');
+
     root.dataset.fxMobileLayoutOwner = 'r207-normal-flow';
     root.dataset.fxMobileLayoutConflict = 'none-r207';
+    root.dataset.fxMobileLayoutStability = 'r208-static-cascade';
   }
 
-  function ensureAuthoritativeStyle() {
+  function markAuthoritativeStyle() {
     const link = document.querySelector('link[data-fx-mobile-layout-r207]');
-    if (link instanceof HTMLLinkElement && link.parentElement === document.head) {
-      document.head.appendChild(link);
-    }
+    root.dataset.fxMobileLayoutStyle = link instanceof HTMLLinkElement
+      ? 'static-r208'
+      : 'missing-r208';
+    /* Deliberately do not append/move an existing <link>. Moving a live stylesheet
+       changes cascade order and caused the r204/r207 visual flash. */
   }
 
   function schedule() {
@@ -71,28 +74,20 @@
   }
 
   function start() {
+    markAuthoritativeStyle();
     reconcile();
-    ensureAuthoritativeStyle();
 
-    const observer = new MutationObserver(schedule);
+    const observer = new MutationObserver((records) => {
+      if (!mobile()) return;
+      if (!records.some((record) => record.type === 'childList' && (record.addedNodes.length || record.removedNodes.length))) return;
+      schedule();
+    });
     observer.observe(document.documentElement, { subtree: true, childList: true });
 
     addEventListener('resize', schedule, { passive: true });
     addEventListener('orientationchange', schedule, { passive: true });
-    addEventListener('formatx:real3dready', () => {
-      ensureAuthoritativeStyle();
-      schedule();
-    });
+    addEventListener('formatx:real3dready', schedule);
     addEventListener('formatx:languagechange', schedule);
-
-    setTimeout(() => {
-      ensureAuthoritativeStyle();
-      reconcile();
-    }, 450);
-    setTimeout(() => {
-      ensureAuthoritativeStyle();
-      reconcile();
-    }, 1400);
   }
 
   if (document.readyState === 'loading') {
