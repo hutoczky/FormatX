@@ -7,7 +7,7 @@
   root.dataset.fxSiteRecoveryState = 'booting';
 
   const BROKEN_FIRSTPAINT = 'link[data-fx-mobile-firstpaint-r199],link[href*="formatx-mobile-firstpaint-r199.css"]';
-  const CORE_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260818-r201-direct-retry';
+  const CORE_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260818-r201-direct-retry-painted-frame';
   let retried = false;
   let fallback = null;
 
@@ -23,6 +23,7 @@
   function coreReady() {
     const stage = document.querySelector('#hero .fx-core-mobile-v55-stage');
     const canvas = stage && stage.querySelector('canvas.fx-core-mobile-v55-canvas');
+    const renderMs = Number.parseFloat(root.dataset.fxCoreRenderMs || '');
     return Boolean(
       stage
       && canvas
@@ -30,6 +31,10 @@
       && canvas.height > 2
       && stage.getBoundingClientRect().width > 2
       && stage.getBoundingClientRect().height > 2
+      && root.dataset.fxCoreMobileR99 === 'ready-v69'
+      && root.dataset.fxCoreReal3d === 'ready-v69'
+      && Number.isFinite(renderMs)
+      && renderMs >= 0
     );
   }
 
@@ -87,6 +92,9 @@
     document.querySelectorAll('#hero .fx-core-mobile-v55-stage').forEach((node) => node.remove());
     document.querySelectorAll('script[data-fx-r201-renderer-retry]').forEach((node) => node.remove());
 
+    delete root.dataset.fxCoreRenderMs;
+    delete root.dataset.fxCoreFrameMs;
+    delete root.dataset.fxCoreReal3dFps;
     root.dataset.fxCoreMobileR99 = '';
     root.dataset.fxCoreMobileV69 = '';
     root.dataset.fxCoreMobileV55 = 'booting-v55';
@@ -99,7 +107,7 @@
     script.dataset.fxR201RendererRetry = 'true';
     script.addEventListener('load', () => {
       setTimeout(() => {
-        if (!publishReady('r201-direct-retry')) showFallback('renderer-loaded-without-canvas');
+        if (!publishReady('r201-direct-retry')) showFallback('renderer-loaded-without-painted-frame');
       }, 700);
     }, { once: true });
     script.addEventListener('error', () => showFallback('renderer-network-error'), { once: true });
@@ -121,7 +129,9 @@
     }, 4300);
   }
 
-  addEventListener('formatx:real3dready', () => requestAnimationFrame(() => publishReady('real3dready')));
+  addEventListener('formatx:real3dready', () => {
+    requestAnimationFrame(() => requestAnimationFrame(() => publishReady('real3dready-painted-frame')));
+  });
   addEventListener('formatx:corevisualready', () => requestAnimationFrame(() => publishReady('corevisualready')));
   addEventListener('pageshow', (event) => {
     removeBrokenFirstpaint();
