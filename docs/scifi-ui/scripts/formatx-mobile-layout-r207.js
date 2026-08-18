@@ -67,7 +67,7 @@
   function schedule() {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => {
+    queueMicrotask(() => {
       queued = false;
       reconcile();
     });
