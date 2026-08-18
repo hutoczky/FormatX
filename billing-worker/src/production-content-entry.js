@@ -9,15 +9,17 @@ const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/s
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint">';
 const R206_BOOTSTRAP = [
   '<link rel="stylesheet" data-fx-award-readiness-style="true" href="/scifi-ui/styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability">',
-  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-reference-layout-style="true" href="/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260818-r206-preloaded">',
-  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-flow-first-r74="true" href="/scifi-ui/styles/formatx-flow-first-r74.css?v=20260818-r206-preloaded">',
-  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-responsive-text-guard="true" href="/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260818-r206-preloaded">',
-  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="/scifi-ui/styles/formatx-mobile-proof-controls-r204.css?v=20260818-r206-preloaded">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-reference-layout-style="true" href="/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260818-r207-preloaded">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-flow-first-r74="true" href="/scifi-ui/styles/formatx-flow-first-r74.css?v=20260818-r207-preloaded">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-responsive-text-guard="true" href="/scifi-ui/styles/formatx-responsive-text-guard-r72.css?v=20260818-r207-preloaded">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="/scifi-ui/styles/formatx-mobile-proof-controls-r204.css?v=20260818-r207-preloaded">',
+  '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-layout-r207="true" href="/scifi-ui/styles/formatx-mobile-layout-r207.css?v=20260818-r207-normal-flow">',
   '<link rel="stylesheet" data-fx-first-paint-r206="true" href="/scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero">',
-  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r206-independent-layout"></script>',
+  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r207-canonical-flow"></script>',
+  '<script defer data-fx-mobile-layout-r207="true" src="/scifi-ui/scripts/formatx-mobile-layout-r207.js?v=20260818-r207-normal-flow"></script>',
 ].join('\n  ');
-const STARTUP_REVISION = '20260818-r206-fail-open';
-const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r206=1(?:;|$)/;
+const STARTUP_REVISION = '20260818-r207-layout-owner';
+const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r207=1(?:;|$)/;
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -54,12 +56,12 @@ const PUBLIC_PAGE_ALIASES = new Map([
 ]);
 
 /*
-  r206 fail-open startup.
+  r207 mobile layout ownership.
 
-  Readable content and mobile layout are independent from the WebGL renderer.
-  The public homepage is still served through the proven direct content pipeline;
-  the Worker only adds first-paint CSS, preloads the canonical mobile layout CSS,
-  and starts the mobile layout controller independently from MAG/WebGL startup.
+  Readable content and mobile layout remain independent from the WebGL renderer.
+  The Worker preloads one authoritative normal-flow mobile layer and its DOM
+  reconciler so controls, copy, heading and proof cannot drift into competing
+  overlay geometries. r206 first-paint and award performance contracts remain.
 
   Current product/content contracts remain delegated to production-content-base.js:
   release-metadata.js
@@ -225,18 +227,18 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   if (homepage) {
     headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
     headers.set('X-FormatX-Shell', 'v56');
-    headers.set('X-FormatX-Client-Revision', 'r206-fail-open');
-    headers.set('X-FormatX-Startup-Mode', 'direct-layout-independent');
-    headers.set('X-FormatX-Recovery', 'css-first-paint-plus-layout-controller');
+    headers.set('X-FormatX-Client-Revision', 'r207-layout-owner');
+    headers.set('X-FormatX-Startup-Mode', 'canonical-normal-flow');
+    headers.set('X-FormatX-Recovery', 'r207-grid-owned-controls');
 
     const cookie = request.headers.get('Cookie') || '';
     if (!STARTUP_COOKIE.test(cookie)) {
       headers.set('Clear-Site-Data', '"cache"');
       headers.append(
         'Set-Cookie',
-        'fx_startup_r206=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
+        'fx_startup_r207=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
       );
-      headers.set('X-FormatX-Cache-Migration', 'r206-one-shot-cleared');
+      headers.set('X-FormatX-Cache-Migration', 'r207-one-shot-cleared');
     }
   } else {
     const link = headers.get('Link');
