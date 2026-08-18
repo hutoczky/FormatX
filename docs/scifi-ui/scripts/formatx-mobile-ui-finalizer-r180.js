@@ -3,14 +3,16 @@
 const root=document.documentElement;
 if(root.dataset.fxMobileUiFinalizerR180==='ready-r180b')return;
 const mobile=()=>matchMedia('(max-width:900px),(pointer:coarse)').matches;
+const canonicalOwner=()=>mobile()&&(root.dataset.fxMobileLayoutOwner==='r207-normal-flow'||document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement);
 const imp=(el,prop,value)=>{if(!(el instanceof HTMLElement))return false;const same=el.style.getPropertyValue(prop)===value&&el.style.getPropertyPriority(prop)==='important';if(same)return false;el.style.setProperty(prop,value,'important');return true;};
 let raf=0,applying=false;
 const watched=new WeakSet();
 const styleGuard=new MutationObserver(records=>{
-  if(applying||!mobile())return;
+  if(applying||!mobile()||canonicalOwner())return;
   if(records.some(r=>r.type==='attributes'&&r.attributeName==='style'))schedule();
 });
 function watch(nodes){
+  if(canonicalOwner())return;
   for(const el of nodes){
     if(!(el instanceof HTMLElement)||watched.has(el))continue;
     watched.add(el);styleGuard.observe(el,{attributes:true,attributeFilter:['style']});
@@ -20,6 +22,18 @@ function watch(nodes){
 function apply(){
   raf=0;
   if(!mobile()||root.dataset.fxMobileReferenceLayout!=='ready-v1')return false;
+
+  /* r208: r207 owns all mobile hero/proof geometry. The old r180 style guard
+     must not write inline !important positions after the canonical CSS has loaded. */
+  if(canonicalOwner()){
+    root.dataset.fxMobileUiFinalizerR180='ready-r180b';
+    root.dataset.fxMobileUiHeaderR180='delegated-r208';
+    root.dataset.fxMobileUiActionsR180='delegated-r208';
+    root.dataset.fxMobileUiProofR180='delegated-r208';
+    root.dataset.fxMobileUiStyleGuardR180='disabled-r208-no-ping-pong';
+    return true;
+  }
+
   const brand=document.querySelector('.topbar .brand');
   const mag=document.querySelector('.fx-reference-mag-button');
   const lang=document.querySelector('.fx-language-toggle');
@@ -36,7 +50,6 @@ function apply(){
   watch([brand,mag,lang,menu,rail,ask,askLabel,pause,proof,copy,live]);
   applying=true;
   try{
-    /* Header: all visible controls share the 34px optical centreline. */
     if(brand instanceof HTMLElement){imp(brand,'top','17px');imp(brand,'height','34px');imp(brand,'align-items','center');}
     for(const el of [mag,lang]){
       imp(el,'top','14px');imp(el,'bottom','auto');imp(el,'height','40px');imp(el,'min-height','40px');
@@ -47,12 +60,10 @@ function apply(){
     imp(lang,'width','40px');imp(lang,'min-width','40px');
     imp(menu,'top','8px');imp(menu,'bottom','auto');imp(menu,'width','48px');imp(menu,'min-width','48px');imp(menu,'height','52px');imp(menu,'min-height','52px');
 
-    /* Hero actions: leave a dedicated text lane between ASK and pause. */
     imp(rail,'top','18px');imp(rail,'right','6.7%');imp(rail,'gap','24px');imp(rail,'align-items','center');
     for(const el of [ask,pause]){imp(el,'width','50px');imp(el,'min-width','50px');imp(el,'height','50px');imp(el,'min-height','50px');imp(el,'flex','0 0 50px');}
     if(askLabel instanceof HTMLElement){imp(askLabel,'top','55px');imp(askLabel,'font-size','10px');imp(askLabel,'font-weight','700');imp(askLabel,'line-height','1');}
 
-    /* Narrow proof: full-width readable copy; CTA gets its own bottom lane. */
     if(innerWidth<=400&&proof instanceof HTMLElement&&copy instanceof HTMLElement&&live instanceof HTMLElement){
       imp(proof,'min-height','0');imp(proof,'padding-bottom','88px');
       imp(copy,'width','100%');imp(copy,'max-width','100%');imp(copy,'padding-right','0');imp(copy,'word-break','normal');imp(copy,'overflow-wrap','normal');
@@ -73,10 +84,11 @@ function apply(){
 function schedule(){if(raf)return;raf=requestAnimationFrame(()=>requestAnimationFrame(apply));}
 function boot(){
   schedule();
+  if(canonicalOwner())return;
   [50,160,820,1900,3300,3700,5200].forEach(ms=>setTimeout(schedule,ms));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-['formatx:real3dready','formatx:coredetailready','formatx:languagechange','formatx:organisminterfaceready','formatx:referencepause'].forEach(name=>addEventListener(name,schedule));
-addEventListener('resize',schedule,{passive:true});
-addEventListener('orientationchange',schedule,{passive:true});
+['formatx:real3dready','formatx:coredetailready','formatx:languagechange','formatx:organisminterfaceready','formatx:referencepause'].forEach(name=>addEventListener(name,()=>{if(!canonicalOwner())schedule();}));
+addEventListener('resize',()=>{if(!canonicalOwner())schedule();},{passive:true});
+addEventListener('orientationchange',()=>{if(!canonicalOwner())schedule();},{passive:true});
 }());
