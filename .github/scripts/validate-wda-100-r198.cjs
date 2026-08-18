@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r206 100-target source contract. */
+/* FormatX Web Design Awards — r206.1 final 100-target source contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -96,4 +96,4 @@ validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
 for (const source of [awardRuntime, intro, controls, gpu]) new Function(source);
-console.log('PASS: r206 active award UX, audio, fail-open, GPU and truthful Lighthouse contracts passed.');
+console.log('PASS: r206.1 active award UX, audio, fail-open, GPU and truthful Lighthouse contracts passed.');
