@@ -1,3 +1,4 @@
+// r208 production revalidation marker: validator-only change, no runtime or visual modification.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const repo=path.resolve(__dirname,'../..'),read=f=>fs.readFileSync(path.join(repo,f),'utf8');
