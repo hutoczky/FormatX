@@ -1,6 +1,6 @@
-/* r202 site reliability recovery.
-   The fallback element and the document state deliberately use different class names,
-   so recovery can never restyle the <html> element itself. */
+/* r203 static-first-frame site recovery.
+   The first visible MAG exists in server HTML, not in JavaScript. The native
+   WebGL renderer progressively replaces it after an actual painted frame. */
 
 #hero .hero-space > .fx-site-core-fallback-r202 {
   position: absolute;
@@ -10,6 +10,17 @@
   place-items: center;
   pointer-events: none;
   overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 180ms ease, visibility 0s linear 180ms;
+}
+
+/* Pure CSS hand-off. Even if the recovery controller itself fails, a native
+   painted renderer hides the static first frame without any JS cleanup. */
+html[data-fx-core-mobile-r99="ready-v69"][data-fx-core-real3d="ready-v69"]
+  #hero .hero-space > .fx-site-core-fallback-r202 {
+  opacity: 0;
+  visibility: hidden;
 }
 
 #hero .hero-space > .fx-site-core-fallback-r202 .fx-site-core-fallback-r202__halo {
