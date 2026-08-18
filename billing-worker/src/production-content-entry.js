@@ -7,8 +7,8 @@ const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
 const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260812-first-paint-r4">';
-const STARTUP_REVISION = '20260818-r204-stable-direct';
-const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r204=1(?:;|$)/;
+const STARTUP_REVISION = '20260818-r204b-stable-direct';
+const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r204b=1(?:;|$)/;
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -45,9 +45,9 @@ const PUBLIC_PAGE_ALIASES = new Map([
 ]);
 
 /*
-  r204 stable-direct startup.
+  r204b stable-direct startup.
 
-  The public homepage is again served through the proven direct content pipeline.
+  The public homepage is served through the proven direct content pipeline.
   There is deliberately no client cache controller, renderer retry state machine,
   Worker-injected MAG DOM, or whole-page asset rewriting in this layer.
 
@@ -215,7 +215,8 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   if (homepage) {
     headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
     headers.set('X-FormatX-Shell', 'v56');
-    headers.set('X-FormatX-Client-Revision', 'r204-stable-direct');
+    headers.set('X-FormatX-Client-Revision', 'r204b-stable-direct');
+    headers.set('X-FormatX-Startup-Mode', 'direct');
     headers.set('X-FormatX-Recovery', 'none-direct-startup');
 
     const cookie = request.headers.get('Cookie') || '';
@@ -223,9 +224,9 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
       headers.set('Clear-Site-Data', '"cache"');
       headers.append(
         'Set-Cookie',
-        'fx_startup_r204=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
+        'fx_startup_r204b=1; Path=/; Max-Age=31536000; SameSite=Lax; Secure; HttpOnly',
       );
-      headers.set('X-FormatX-Cache-Migration', 'r204-one-shot-cleared');
+      headers.set('X-FormatX-Cache-Migration', 'r204b-one-shot-cleared');
     }
   } else {
     const link = headers.get('Link');
