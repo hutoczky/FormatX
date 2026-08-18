@@ -227,3 +227,140 @@
 }
 
 /* r204 production activation marker: proof/control geometry is authoritative. */
+
+/* r205 — screenshot-driven mobile control polish.
+   Keep the r204 DOM owner, but reduce visual weight and restore the mini MAG identity. */
+@media (max-width: 900px), (pointer: coarse) {
+  #hero .fx-reference-controls-r204 {
+    top: 16px !important;
+    right: 14px !important;
+    width: 136px !important;
+    max-width: 136px !important;
+    gap: 10px !important;
+    align-items: flex-end !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle,
+  #hero .fx-reference-controls-r204 .fx-three-sound {
+    width: 132px !important;
+    max-width: 132px !important;
+    min-width: 132px !important;
+    min-height: 46px !important;
+    height: 46px !important;
+    padding: 0 13px !important;
+    gap: 7px !important;
+    border-radius: 999px !important;
+    font-size: 9px !important;
+    letter-spacing: .13em !important;
+    white-space: nowrap !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-three-sound::before {
+    width: 7px !important;
+    height: 7px !important;
+    flex-basis: 7px !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-reference-rail {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    width: 110px !important;
+    min-width: 110px !important;
+    padding-bottom: 18px !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-reference-ask,
+  #hero .fx-reference-controls-r204 .fx-reference-pause {
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    flex: 0 0 48px !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-reference-ask span {
+    top: 53px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: max-content !important;
+    max-width: 78px !important;
+    font-size: 9px !important;
+    letter-spacing: .05em !important;
+    text-align: center !important;
+  }
+
+  #hero .fx-reference-heading {
+    margin-top: 30px !important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button {
+    position: relative !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    color: transparent !important;
+    text-indent: -9999px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(122, 218, 244, .34) !important;
+    border-radius: 14px !important;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(100, 235, 255, .10), transparent 46%),
+      linear-gradient(145deg, rgba(6, 28, 42, .96), rgba(3, 14, 26, .98)) !important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    width: 24px !important;
+    height: 24px !important;
+    transform: translate(-50%, -50%) !important;
+    clip-path: polygon(50% 0, 64% 34%, 100% 50%, 64% 66%, 50% 100%, 36% 66%, 0 50%, 36% 34%) !important;
+    background: linear-gradient(135deg, #efffff 0%, #82efff 30%, #38cfff 53%, #7778ff 76%, #d08cff 100%) !important;
+    filter: drop-shadow(0 0 7px rgba(76, 223, 255, .65)) drop-shadow(0 0 10px rgba(124, 112, 255, .42)) !important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button::after {
+    content: "" !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    width: 7px !important;
+    height: 7px !important;
+    transform: translate(-50%, -50%) !important;
+    border-radius: 50% !important;
+    background: #f7ffff !important;
+    box-shadow: 0 0 8px #bff8ff, 0 0 16px rgba(88, 216, 255, .8) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #hero .fx-reference-controls-r204 {
+    top: 12px !important;
+    right: 12px !important;
+    width: 132px !important;
+    max-width: 132px !important;
+  }
+
+  #hero .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle,
+  #hero .fx-reference-controls-r204 .fx-three-sound {
+    width: 126px !important;
+    min-width: 126px !important;
+    max-width: 126px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding-inline: 11px !important;
+    font-size: 8.5px !important;
+  }
+
+  #hero .fx-reference-heading {
+    margin-top: 34px !important;
+  }
+}
+
+/* r205 production marker: compact audio + horizontal ASK/Pause + mini MAG. */
