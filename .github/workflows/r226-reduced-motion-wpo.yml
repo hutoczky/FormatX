@@ -1,0 +1,83 @@
+name: r226 reduced-motion WPO optimizer
+
+on:
+  push:
+    paths:
+      - '.github/workflows/r226-reduced-motion-wpo.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply reduced-motion WPO gates
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected exactly one match, got {count}: {old}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          replace_once(
+              'docs/scifi-ui/index.html',
+              '<link rel="stylesheet" data-fx-core-real3d="true" href="./styles/formatx-core-real3d-v20.css?v=20260811-interactive-cinematic-glass-r14">',
+              '<link rel="stylesheet" data-fx-core-real3d="true" href="./styles/formatx-core-real3d-v20.css?v=20260811-interactive-cinematic-glass-r14" media="(prefers-reduced-motion: no-preference)">'
+          )
+          replace_once(
+              'docs/scifi-ui/index.html',
+              '<link rel="stylesheet" data-fx-living-energy-r168="true" href="./styles/formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics">',
+              '<link rel="stylesheet" data-fx-living-energy-r168="true" href="./styles/formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics" media="(prefers-reduced-motion: no-preference)">'
+          )
+          replace_once(
+              'docs/scifi-ui/index.html',
+              '<link rel="stylesheet" data-fx-soty-continuity-r179="true" href="./styles/formatx-soty-continuity-r179.css?v=20260816-r179-organ-field">',
+              '<link rel="stylesheet" data-fx-soty-continuity-r179="true" href="./styles/formatx-soty-continuity-r179.css?v=20260816-r179-organ-field" media="(prefers-reduced-motion: no-preference)">'
+          )
+
+          replace_once(
+              'docs/scifi-ui/scripts/formatx-core-real3d-v20.js',
+              "  if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreReal3d='audit-skip';root.dataset.fxCoreReferenceLock='audit-skip';return; }\n  root.dataset.fxCoreReal3d='loading-v69';",
+              "  if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreReal3d='audit-skip';root.dataset.fxCoreReferenceLock='audit-skip';return; }\n  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { root.dataset.fxCoreReal3d='reduced-skip';root.dataset.fxCoreReferenceLock='reduced-skip';return; }\n  root.dataset.fxCoreReal3d='loading-v69';"
+          )
+
+          replace_once(
+              'docs/scifi-ui/scripts/formatx-living-energy-r168.js',
+              "const reduced=matchMedia('(prefers-reduced-motion: reduce)');\nconst mobile=matchMedia('(max-width:900px), (pointer:coarse)');",
+              "const reduced=matchMedia('(prefers-reduced-motion: reduce)');\nif(reduced.matches){root.dataset.fxLivingEnergyR168='reduced-skip';root.dataset.fxLivingEnergyClockR168='reduced-skip';return;}\nconst mobile=matchMedia('(max-width:900px), (pointer:coarse)');"
+          )
+
+          replace_once(
+              'docs/scifi-ui/scripts/formatx-soty-continuity-r179.js',
+              "const reduced=matchMedia('(prefers-reduced-motion: reduce)');\nconst coarse=matchMedia('(pointer:coarse)');",
+              "const reduced=matchMedia('(prefers-reduced-motion: reduce)');\nif(reduced.matches){root.dataset.fxSotyContinuityR179='reduced-skip';root.dataset.fxSotyModeR179='reduced-skip';return;}\nconst coarse=matchMedia('(pointer:coarse)');"
+          )
+          PY
+
+          git diff --check
+          git diff -- docs/scifi-ui/index.html docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-living-energy-r168.js docs/scifi-ui/scripts/formatx-soty-continuity-r179.js
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No changes required.'
+            exit 0
+          fi
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/index.html docs/scifi-ui/scripts/formatx-core-real3d-v20.js docs/scifi-ui/scripts/formatx-living-energy-r168.js docs/scifi-ui/scripts/formatx-soty-continuity-r179.js
+          git commit -m 'r226 make reduced-motion path visual-runtime free'
+          git push origin HEAD:master
