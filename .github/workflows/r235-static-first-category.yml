@@ -1,5 +1,6 @@
 name: r235 static-first category runtime
 
+# retrigger: 2026-08-19-r235
 on:
   push:
     paths:
