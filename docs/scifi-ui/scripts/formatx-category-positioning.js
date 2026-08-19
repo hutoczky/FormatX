@@ -122,7 +122,7 @@
   function buildDeck() {
     const hero = document.getElementById('hero');
     const grid = hero?.querySelector('.hero-grid');
-    if (!hero || !grid || hero.querySelector('.fx-category-deck')) return;
+    if (!hero || !grid || document.querySelector('.fx-category-deck')) return;
     const deck = document.createElement('section');
     deck.className = 'fx-category-deck';
     deck.setAttribute('aria-labelledby', 'fx-category-title');
