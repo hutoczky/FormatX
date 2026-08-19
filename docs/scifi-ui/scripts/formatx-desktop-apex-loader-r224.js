@@ -1,3 +1,4 @@
+/* r225 static index parity marker: the raw index now uses the same viewport-gated WPO contract as production. */
 (function(){
 'use strict';
 const root=document.documentElement;
