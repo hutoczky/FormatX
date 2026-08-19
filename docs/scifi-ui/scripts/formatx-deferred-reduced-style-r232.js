@@ -1,4 +1,5 @@
 /* FormatX r232 — activate the full reduced-motion stylesheet after first paint. */
+/* r232 validation marker: tiny critical shell + post-paint full reduced styling. */
 (function(){
 'use strict';
 const root=document.documentElement;
