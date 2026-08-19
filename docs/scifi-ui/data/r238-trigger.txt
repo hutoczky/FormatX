@@ -2,3 +2,4 @@ r238 inline critical CSS finalization trigger — 2026-08-19
 validation-trigger: final-user-authored-r238
 r239-trigger: reduced-motion-runtime-gate
 r239-validation: user-authored-final
+r240-trigger: remaining-visual-runtimes
