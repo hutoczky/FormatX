@@ -1,4 +1,4 @@
-# Validation trigger revision 5
+# Validation trigger revision 6
 name: Validate FormatX Design System
 
 on:
@@ -9,6 +9,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/checkout.html'
       - 'docs/scifi-ui/project-simulator.html'
+      - 'docs/scifi-ui/styles/formatx-critical-core-r227.css'
       - 'docs/scifi-ui/styles/formatx-design-system.css'
       - '.github/scripts/validate-formatx-design-system.cjs'
       - '.github/workflows/validate-formatx-design-system.yml'
@@ -18,6 +19,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/checkout.html'
       - 'docs/scifi-ui/project-simulator.html'
+      - 'docs/scifi-ui/styles/formatx-critical-core-r227.css'
       - 'docs/scifi-ui/styles/formatx-design-system.css'
       - '.github/scripts/validate-formatx-design-system.cjs'
       - '.github/workflows/validate-formatx-design-system.yml'
@@ -48,13 +50,15 @@ jobs:
         run: |
           set -euo pipefail
           node --check .github/scripts/validate-formatx-design-system.cjs
+          test -s docs/scifi-ui/styles/formatx-critical-core-r227.css
           test -s docs/scifi-ui/styles/formatx-design-system.css
           grep -Fq 'data-fx-design-system="2"' docs/scifi-ui/index.html
           grep -Fq 'data-fx-design-system="2"' docs/scifi-ui/checkout.html
           grep -Fq 'data-fx-design-system="2"' docs/scifi-ui/project-simulator.html
-          grep -Fq 'data-fx-design-system="true"' docs/scifi-ui/index.html
-          grep -Fq 'data-fx-design-system="true"' docs/scifi-ui/checkout.html
-          grep -Fq 'data-fx-design-system="true"' docs/scifi-ui/project-simulator.html
+          grep -Fq 'data-fx-critical-core-r227="true"' docs/scifi-ui/index.html
+          grep -Fq 'formatx-design-system.css?v=20260728-ds2' docs/scifi-ui/checkout.html
+          grep -Fq 'formatx-design-system.css?v=20260728-ds2' docs/scifi-ui/project-simulator.html
+          grep -Fq -- '--fx-radius-lg: 30px 7px 30px 7px' docs/scifi-ui/styles/formatx-critical-core-r227.css
           grep -Fq -- '--fx-radius-lg: 30px 7px 30px 7px' docs/scifi-ui/styles/formatx-design-system.css
           grep -Fq 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/formatx-design-system.css
           grep -Fq 'prefers-reduced-transparency: reduce' docs/scifi-ui/styles/formatx-design-system.css
