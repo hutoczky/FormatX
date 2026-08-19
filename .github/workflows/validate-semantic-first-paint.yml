@@ -1,0 +1,88 @@
+name: Validate semantic first paint
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js'
+      - 'docs/scifi-ui/scripts/formatx-category-positioning.js'
+      - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - '.github/scripts/validate-semantic-first-paint.cjs'
+      - '.github/workflows/validate-semantic-first-paint.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js'
+      - 'docs/scifi-ui/scripts/formatx-category-positioning.js'
+      - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
+      - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - '.github/scripts/validate-semantic-first-paint.cjs'
+      - '.github/workflows/validate-semantic-first-paint.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-semantic-first-paint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate source syntax
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
+          node --check .github/scripts/validate-semantic-first-paint.cjs
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-semantic" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-semantic/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Start static public site
+        run: |
+          python3 -m http.server 4185 --directory docs > "$RUNNER_TEMP/formatx-semantic-http.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4185/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-semantic-http.log"
+          exit 1
+
+      - name: Validate reduced-motion semantic first paint
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-semantic/node_modules
+          FORMATX_SEMANTIC_ORIGIN: http://127.0.0.1:4185
+        run: node .github/scripts/validate-semantic-first-paint.cjs
+
+      - name: Publish semantic first-paint status
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='Reduced-motion HU/EN desktop/mobile semantic first paint passed'
+          else
+            state='failure'
+            description='Semantic first-paint regression detected'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX semantic first paint' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
