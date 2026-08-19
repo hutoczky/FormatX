@@ -1,0 +1,91 @@
+name: r241 reduced-motion content runtime gate
+
+on:
+  workflow_run:
+    workflows: ["Prepare or deploy FormatX production"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: formatx-r241-content-runtime-gate
+  cancel-in-progress: true
+
+jobs:
+  patch:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Gate non-critical content enhancement runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('docs/scifi-ui/index.html')
+          html = path.read_text(encoding='utf-8')
+
+          if 'id="fx-content-runtime-r241"' in html:
+              print('r241 content runtime gate already present')
+              raise SystemExit(0)
+
+          targets = [
+              '  <script defer data-fx-category-script="true" src="./scripts/formatx-category-positioning.js?v=20260728-category-v1"></script>',
+              '  <script defer data-fx-category-deck-stabilizer="true" src="./scripts/formatx-category-deck-stabilizer.js?v=20260728-category-deck-v1"></script>',
+              '  <script defer data-fx-origin-proof-script="true" src="./scripts/formatx-origin-proof.js?v=20260728-origin-proof-v1"></script>',
+              '  <script defer data-fx-simulator-entry-script="true" src="./scripts/project-simulator-entry.js?v=20260819-ready-contract-v2"></script>',
+          ]
+
+          positions = []
+          for line in targets:
+              pos = html.find(line)
+              if pos < 0:
+                  raise SystemExit('r241 target missing: ' + line)
+              positions.append(pos)
+          insert_at = min(positions)
+
+          for line in targets:
+              html = html.replace(line + '\n', '', 1)
+
+          template = '  <template id="fx-content-runtime-r241" data-fx-content-runtime-r241="true">\n'
+          template += '\n'.join('    ' + line.lstrip() for line in targets)
+          template += '\n  </template>\n'
+          template += '  <script defer data-fx-content-runtime-loader-r241="true" src="./scripts/formatx-content-runtime-loader-r241.js?v=20260819-r241"></script>\n'
+
+          html = html[:insert_at] + template + html[insert_at:]
+          path.write_text(html, encoding='utf-8')
+
+          final = path.read_text(encoding='utf-8')
+          open_pos = final.index('id="fx-content-runtime-r241"')
+          close_pos = final.index('</template>', open_pos)
+          block = final[open_pos:close_pos]
+          for token in [
+              'data-fx-category-script="true"',
+              'data-fx-category-deck-stabilizer="true"',
+              'data-fx-origin-proof-script="true"',
+              'data-fx-simulator-entry-script="true"',
+          ]:
+              if token not in block:
+                  raise SystemExit('r241 compatibility token missing from template: ' + token)
+          if final.count('data-fx-content-runtime-loader-r241="true"') != 1:
+              raise SystemExit('r241 loader count invalid')
+          print('PASS: r241 non-critical content runtimes are gated in reduced-motion mode.')
+          PY
+
+          if git diff --quiet -- docs/scifi-ui/index.html; then
+            echo 'r241 already applied; no commit required.'
+            exit 0
+          fi
+
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/index.html
+          git commit -m 'r241 defer non-critical content runtimes in reduced-motion mode'
+          git push
