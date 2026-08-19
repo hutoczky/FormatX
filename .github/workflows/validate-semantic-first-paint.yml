@@ -10,6 +10,9 @@ on:
       - 'docs/scifi-ui/scripts/formatx-category-positioning.js'
       - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - 'docs/scifi-ui/scripts/formatx-canonical-recovery.js'
+      - 'docs/scifi-ui/scripts/formatx-seo.js'
+      - 'billing-worker/src/production-content-entry.js'
       - '.github/scripts/validate-semantic-first-paint.cjs'
       - '.github/workflows/validate-semantic-first-paint.yml'
   pull_request:
@@ -20,6 +23,9 @@ on:
       - 'docs/scifi-ui/scripts/formatx-category-positioning.js'
       - 'docs/scifi-ui/scripts/formatx-origin-proof.js'
       - 'docs/scifi-ui/scripts/single-language-toggle.js'
+      - 'docs/scifi-ui/scripts/formatx-canonical-recovery.js'
+      - 'docs/scifi-ui/scripts/formatx-seo.js'
+      - 'billing-worker/src/production-content-entry.js'
       - '.github/scripts/validate-semantic-first-paint.cjs'
       - '.github/workflows/validate-semantic-first-paint.yml'
 
@@ -44,6 +50,9 @@ jobs:
       - name: Validate source syntax
         run: |
           node --check docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
+          node --check docs/scifi-ui/scripts/formatx-canonical-recovery.js
+          node --check docs/scifi-ui/scripts/formatx-seo.js
+          node --check billing-worker/src/production-content-entry.js
           node --check .github/scripts/validate-semantic-first-paint.cjs
 
       - name: Install Playwright Chromium
@@ -61,7 +70,7 @@ jobs:
           cat "$RUNNER_TEMP/formatx-semantic-http.log"
           exit 1
 
-      - name: Validate reduced-motion semantic first paint
+      - name: Validate reduced-motion semantics and language canonicals
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-semantic/node_modules
           FORMATX_SEMANTIC_ORIGIN: http://127.0.0.1:4185
@@ -76,10 +85,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Reduced-motion HU/EN desktop/mobile semantic first paint passed'
+            description='HU/EN desktop/mobile semantics and canonical recovery passed'
           else
             state='failure'
-            description='Semantic first-paint regression detected'
+            description='Semantic or language-canonical regression detected'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
