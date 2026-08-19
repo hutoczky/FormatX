@@ -92,6 +92,23 @@ async function inspect(browser, config, viewport) {
     const actionStyle = action ? getComputedStyle(action) : null;
     const rect = action?.getBoundingClientRect();
     const sheet = document.querySelector(sheetSelector);
+    const overflowElements = Array.from(document.querySelectorAll('body *'))
+      .map(element => {
+        const r = element.getBoundingClientRect();
+        return {
+          tag: element.tagName.toLowerCase(),
+          id: element.id || '',
+          className: typeof element.className === 'string' ? element.className : '',
+          left: Math.round(r.left * 10) / 10,
+          right: Math.round(r.right * 10) / 10,
+          width: Math.round(r.width * 10) / 10,
+          position: getComputedStyle(element).position,
+          overflowX: getComputedStyle(element).overflowX
+        };
+      })
+      .filter(item => item.width > 0 && (item.left < -2 || item.right > innerWidth + 2))
+      .sort((a, b) => Math.max(b.right - innerWidth, -b.left) - Math.max(a.right - innerWidth, -a.left))
+      .slice(0, 20);
 
     return {
       designSystem: root.dataset.fxDesignSystem || '',
@@ -115,6 +132,7 @@ async function inspect(browser, config, viewport) {
       outlineStyle: actionStyle?.outlineStyle || '',
       outlineWidth: actionStyle?.outlineWidth || '',
       overflow: document.documentElement.scrollWidth - innerWidth,
+      overflowElements,
       viewport: { width: innerWidth, height: innerHeight }
     };
   }, {
