@@ -1,0 +1,42 @@
+name: One-shot r243 apex source normalization
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r243-apex-source-normalization.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Normalize public absolute host references
+        shell: bash
+        run: |
+          set -euo pipefail
+          find docs/scifi-ui -type f -name '*.html' -print0 \
+            | xargs -0 sed -i 's#https://www\.formatxsuite\.com#https://formatxsuite.com#g'
+
+          if git diff --quiet -- docs/scifi-ui; then
+            echo 'No stale public www host references remain.'
+            exit 0
+          fi
+
+          git diff --check
+          if grep -RIlZ --include='*.html' 'https://www\.formatxsuite\.com' docs/scifi-ui | grep -q .; then
+            echo 'Stale www host reference remains after normalization.' >&2
+            exit 1
+          fi
+
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui
+          git commit -m 'r243 normalize public HTML to apex canonical host'
+          git push origin HEAD:master
