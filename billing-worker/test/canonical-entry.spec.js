@@ -78,6 +78,47 @@ describe('active production canonical gateway', () => {
     expect(response.headers.get('Location')).toBe('https://formatxsuite.com/?_fx_redirect_recovery=1');
   });
 
+  it.each(['hu', 'en'])('preserves %s through the WWW-to-apex recovery hop', async (language) => {
+    const response = await canonicalWorker.fetch(
+      new Request(`https://www.formatxsuite.com/?lang=${language}`),
+      {},
+      {},
+    );
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get('Cache-Control')).toContain('no-store');
+    expect(response.headers.get('Location')).toBe(
+      `https://formatxsuite.com/?lang=${language}&_fx_redirect_recovery=1`,
+    );
+  });
+
+  it.each(['hu', 'en'])('aligns explicit %s canonical headers and HTML metadata', async (language) => {
+    const response = await canonicalWorker.fetch(
+      new Request(`https://formatxsuite.com/?lang=${language}`),
+      {
+        ASSETS: {
+          async fetch() {
+            return new Response(
+              '<!doctype html><html lang="hu"><head><title>FORMATX</title><base href="/scifi-ui/"><link rel="canonical" href="https://formatxsuite.com/"><meta property="og:url" content="https://formatxsuite.com/"></head><body><main id="hero">FORMATX</main></body></html>',
+              { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
+            );
+          },
+        },
+      },
+      {},
+    );
+    const html = await response.text();
+    const canonical = `https://formatxsuite.com/?lang=${language}`;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Location')).toBeNull();
+    expect(response.headers.get('Link')).toBe(`<${canonical}>; rel="canonical"`);
+    expect(response.headers.get('Content-Language')).toBe(language);
+    expect(html).toContain(`<html lang="${language}">`);
+    expect(html).toContain(`<link rel="canonical" href="${canonical}">`);
+    expect(html).toContain(`<meta property="og:url" content="${canonical}">`);
+  });
+
   it('serves an apex recovery URL as real HTML and does not redirect it again', async () => {
     const response = await canonicalWorker.fetch(
       new Request('https://formatxsuite.com/?_fx_redirect_recovery=1'),
