@@ -138,27 +138,13 @@ html[lang="en"] .fx-language-toggle::before {
   }
 }
 
-/* r214 — restore the original MAG compositor order after r213. Readable copy
-   stays on the r213 top plane; only decorative/rendering layers are returned
-   to their authored depth so no full-surface optical layer can wash out the MAG. */
+/* r214 — restore the original MAG compositor order after r213. */
 @media (max-width: 900px), (pointer: coarse) {
-  html body.living-architecture #hero .hero-space {
-    z-index: 1 !important;
-  }
-
+  html body.living-architecture #hero .hero-space { z-index: 1 !important; }
   html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
-  html body.living-architecture #hero .hero-space > .fx-core-r112-stage {
-    z-index: 3 !important;
-  }
-
-  html body.living-architecture #hero .fx-core-detail-r122 {
-    z-index: 4 !important;
-  }
-
-  html body.living-architecture #hero .fx-core-live-r147-layer {
-    z-index: 15 !important;
-  }
-
+  html body.living-architecture #hero .hero-space > .fx-core-r112-stage { z-index: 3 !important; }
+  html body.living-architecture #hero .fx-core-detail-r122 { z-index: 4 !important; }
+  html body.living-architecture #hero .fx-core-live-r147-layer { z-index: 15 !important; }
   html body.living-architecture #hero .fx-r168-shockwave { z-index: 32 !important; }
   html body.living-architecture #hero .fx-r168-caustic { z-index: 33 !important; }
   html body.living-architecture #hero .fx-r168-orbit { z-index: 34 !important; }
@@ -166,26 +152,14 @@ html[lang="en"] .fx-language-toggle::before {
   html body.living-architecture #hero .fx-r168-flare { z-index: 36 !important; }
   html body.living-architecture #hero .fx-r168-interaction-wave { z-index: 37 !important; }
   html body.living-architecture #hero .fx-r168-spark { z-index: 38 !important; }
-
   html body.living-architecture .fx-atmosphere,
-  html body.living-architecture .fx-r179-field {
-    z-index: 0 !important;
-  }
-
-  html body.living-architecture .fx-r179-organ-sigil {
-    z-index: -1 !important;
-  }
-
+  html body.living-architecture .fx-r179-field { z-index: 0 !important; }
+  html body.living-architecture .fx-r179-organ-sigil { z-index: -1 !important; }
   html body.living-architecture #hero .hero-space,
-  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage {
-    background-color: transparent !important;
-  }
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage { background-color: transparent !important; }
 }
 
-/* r215 — mobile steady optics. A literal 200 Hz luminance pulse would alias
-   against 60/90/120 Hz phone displays, so mobile uses constant optical amplitude
-   instead. Geometry/orbit/prism motion remains alive, while broad luminance,
-   opacity and filter breathing is removed. */
+/* r215 — mobile steady optics. */
 @media (max-width: 900px), (pointer: coarse) {
   html body.living-architecture .skip-link {
     position: fixed !important;
@@ -200,73 +174,34 @@ html[lang="en"] .fx-language-toggle::before {
     pointer-events: none !important;
     transition: none !important;
   }
-
   html body.living-architecture .skip-link:focus,
   html body.living-architecture .skip-link:focus-visible {
     transform: none !important;
     opacity: 1 !important;
     pointer-events: auto !important;
   }
-
-  html body.living-architecture #hero .fx-core-live-r147-layer {
-    mix-blend-mode: normal !important;
-  }
-
+  html body.living-architecture #hero .fx-core-live-r147-layer { mix-blend-mode: normal !important; }
   html body.living-architecture #hero .fx-core-live-r147-layer::before {
-    animation: none !important;
-    opacity: .64 !important;
-    filter: none !important;
-    will-change: auto !important;
+    animation: none !important; opacity: .64 !important; filter: none !important; will-change: auto !important;
   }
-
   html body.living-architecture #hero .fx-core-live-r147-layer::after {
-    animation: none !important;
-    transform: translate(-50%, -50%) scale(1) !important;
-    opacity: .56 !important;
-    filter: none !important;
-    will-change: auto !important;
+    animation: none !important; transform: translate(-50%, -50%) scale(1) !important; opacity: .56 !important; filter: none !important; will-change: auto !important;
   }
-
   html body.living-architecture #hero .fx-core-live-r147-glow {
-    animation: none !important;
-    transform: translate(-50%, -50%) scale(1) !important;
-    opacity: .56 !important;
-    filter: blur(.8px) !important;
-    will-change: auto !important;
+    animation: none !important; transform: translate(-50%, -50%) scale(1) !important; opacity: .56 !important; filter: blur(.8px) !important; will-change: auto !important;
   }
-
   html body.living-architecture #hero .fx-core-live-r147-flare {
-    animation: none !important;
-    transform: translate(-50%, -50%) scaleX(1) !important;
-    opacity: .38 !important;
-    filter: none !important;
-    will-change: auto !important;
+    animation: none !important; transform: translate(-50%, -50%) scaleX(1) !important; opacity: .38 !important; filter: none !important; will-change: auto !important;
   }
-
   html body.living-architecture #hero .fx-core-live-r147-beam {
-    animation: none !important;
-    transform: translate(-50%, -50%) scaleY(1) !important;
-    opacity: .34 !important;
-    filter: none !important;
-    will-change: auto !important;
+    animation: none !important; transform: translate(-50%, -50%) scaleY(1) !important; opacity: .34 !important; filter: none !important; will-change: auto !important;
   }
-
   html body.living-architecture #hero .fx-core-live-r147-shock {
-    animation: none !important;
-    opacity: 0 !important;
-    filter: none !important;
-    will-change: auto !important;
+    animation: none !important; opacity: 0 !important; filter: none !important; will-change: auto !important;
   }
-
   html body.living-architecture #hero .fx-core-live-r147-spark {
-    animation: none !important;
-    opacity: .16 !important;
-    filter: none !important;
-    will-change: auto !important;
+    animation: none !important; opacity: .16 !important; filter: none !important; will-change: auto !important;
   }
-
-  /* Keep only smooth spatial motion: orbit/prism rotations do not modulate
-     whole-frame luminance and therefore preserve the living MAG character. */
   html body.living-architecture #hero .fx-core-live-r147-orbit,
   html body.living-architecture #hero .fx-core-live-r147-orbit-b,
   html body.living-architecture #hero .fx-core-live-r147-orbit-c,
@@ -276,11 +211,108 @@ html[lang="en"] .fx-language-toggle::before {
   }
 }
 
+/* r216 — award technical hardening: accessible focus, target size, contrast,
+   scroll stability and reduced compositor work without flattening the identity. */
+html {
+  scroll-padding-top: max(78px, calc(env(safe-area-inset-top) + 70px));
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body.living-architecture :is(section.scene, footer, [id]) {
+  scroll-margin-top: max(78px, calc(env(safe-area-inset-top) + 70px));
+}
+
+body.living-architecture :is(a, button, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid rgb(var(--accent, 56 222 255)) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px rgba(var(--accent, 56 222 255), .16) !important;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  body.living-architecture :is(
+    .fx-language-toggle,
+    .fx-reference-menu-button,
+    .fx-reference-mag-button,
+    .fx-reference-ask,
+    .fx-reference-pause,
+    .fx-three-sound,
+    .fx-wda-sound-toggle,
+    .menu-toggle,
+    .button
+  ) {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  body.living-architecture .fx-language-toggle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(3, 10, 18, .94) !important;
+  }
+
+  body.living-architecture #hero .hero-space,
+  body.living-architecture #hero .fx-core-live-r147-layer,
+  body.living-architecture #hero .fx-core-detail-r122 {
+    backface-visibility: hidden !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  body.living-architecture :is(p, li, small, label, .muted, .fx-reference-proof p) {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+  body.living-architecture :is(a, button):focus-visible {
+    outline-width: 3px !important;
+  }
+}
+
+@media (forced-colors: active) {
+  body.living-architecture :is(a, button, input, select, textarea, summary, [role="button"]):focus-visible {
+    outline: 3px solid Highlight !important;
+    outline-offset: 3px !important;
+    box-shadow: none !important;
+  }
+  .fx-language-toggle {
+    border: 1px solid ButtonText !important;
+    background: Canvas !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+
+  body.living-architecture :is(
+    .fx-atmosphere,
+    .fx-r179-field,
+    .fx-r179-organ-sigil,
+    .fx-core-live-r147-layer,
+    .fx-core-live-r147-layer::before,
+    .fx-core-live-r147-layer::after,
+    .fx-core-live-r147-layer > *,
+    .fx-r168-orbit,
+    .fx-r168-caustic,
+    .fx-r168-spectrum,
+    .fx-r168-flare,
+    .fx-r168-shockwave,
+    .fx-r168-interaction-wave,
+    .fx-r168-spark
+  ) {
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+
   .fx-language-toggle {
     transition: none !important;
   }
-
   .fx-language-toggle:hover,
   .fx-language-toggle:focus-visible,
   .fx-language-toggle:active {
