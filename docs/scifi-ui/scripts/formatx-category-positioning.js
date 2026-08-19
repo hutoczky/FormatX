@@ -259,15 +259,38 @@
     root.dataset.fxCategoryLanguage = lang;
   }
 
-  buildDeck();
-  buildProof();
-  render();
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let observer = null;
+  let enhancementStarted = false;
 
-  addEventListener('formatx:languagechange', () => queueMicrotask(render));
-  const observer = new MutationObserver(entries => {
-    if (entries.some(entry => entry.attributeName === 'lang')) queueMicrotask(render);
-  });
-  observer.observe(root, { attributes: true, attributeFilter: ['lang'] });
-  addEventListener('pageshow', render);
-  addEventListener('pagehide', () => observer.disconnect(), { once: true });
+  function startEnhancement() {
+    if (enhancementStarted) return;
+    enhancementStarted = true;
+    buildDeck();
+    buildProof();
+    render();
+    addEventListener('formatx:languagechange', () => queueMicrotask(render));
+    observer = new MutationObserver(entries => {
+      if (entries.some(entry => entry.attributeName === 'lang')) queueMicrotask(render);
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['lang'] });
+    addEventListener('pageshow', render);
+    root.dataset.fxCategoryFirstPaint = reducedMotion.matches ? 'enhanced-after-intent-r235' : 'enhanced-immediate-r235';
+  }
+
+  if (!reducedMotion.matches) {
+    startEnhancement();
+  } else {
+    root.dataset.fxCategoryFirstPaint = 'static-first-r235';
+    const passive = { passive: true };
+    const triggers = [['wheel', passive], ['touchstart', passive], ['pointerdown', passive], ['scroll', passive], ['keydown', false]];
+    const activate = () => {
+      for (const [type, options] of triggers) removeEventListener(type, activate, options);
+      startEnhancement();
+    };
+    for (const [type, options] of triggers) addEventListener(type, activate, options);
+    if (location.hash && location.hash !== '#top' && location.hash !== '#hero') activate();
+  }
+
+  addEventListener('pagehide', () => observer?.disconnect(), { once: true });
 }());
