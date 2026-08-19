@@ -1,9 +1,11 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r219-award-narrative-static-reduced';
+const VERSION='r175-award-narrative-system';
+const PERF_VERSION='r219-static-reduced';
 if(root.dataset.fxAwardNarrativeR175===VERSION)return;
 root.dataset.fxAwardNarrativeR175='booting';
+root.dataset.fxAwardNarrativePerfR219=PERF_VERSION;
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const audit=new URLSearchParams(location.search).get('lighthouse')==='1';
