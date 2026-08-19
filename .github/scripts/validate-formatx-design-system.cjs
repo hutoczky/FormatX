@@ -13,7 +13,7 @@ const CASES = [
     panel: '.fx-category-deck',
     header: '.topbar',
     action: '.hero-actions .button',
-    mobileAction: '.fx-language-toggle',
+    mobileAction: '#menu-toggle',
     sheet: 'link[data-fx-critical-core-r227]',
     sheetPattern: /formatx-critical-core-r227\.css/,
     waitForMotionCss: true
