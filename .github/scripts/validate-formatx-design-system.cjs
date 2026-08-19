@@ -13,6 +13,7 @@ const CASES = [
     panel: '.fx-category-deck',
     header: '.topbar',
     action: '.hero-actions .button',
+    mobileAction: '.fx-language-toggle',
     sheet: 'link[data-fx-critical-core-r227]',
     sheetPattern: /formatx-critical-core-r227\.css/,
     waitForMotionCss: true
@@ -86,7 +87,10 @@ async function inspect(browser, config, viewport) {
     }, null, { timeout: 20000 });
   }
 
-  const action = page.locator(config.action).first();
+  const actionSelector = viewport.width <= 900 && config.mobileAction
+    ? config.mobileAction
+    : config.action;
+  const action = page.locator(actionSelector).first();
   await action.waitFor({ state: 'visible', timeout: 15000 });
   await action.focus();
 
@@ -149,7 +153,7 @@ async function inspect(browser, config, viewport) {
   }, {
     panelSelector: config.panel,
     headerSelector: config.header,
-    actionSelector: config.action,
+    actionSelector,
     sheetSelector: config.sheet
   });
 
