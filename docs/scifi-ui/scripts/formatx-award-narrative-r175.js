@@ -1,11 +1,12 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r175-award-narrative-system';
+const VERSION='r219-award-narrative-static-reduced';
 if(root.dataset.fxAwardNarrativeR175===VERSION)return;
 root.dataset.fxAwardNarrativeR175='booting';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const audit=new URLSearchParams(location.search).get('lighthouse')==='1';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const chapters=[
   {id:'hero',organ:'core',caption:'WAKE / SENSE / SIGNAL'},
@@ -35,7 +36,7 @@ function discover(){
 }
 
 function pulse(index){
-  if(reduced.matches)return;
+  if(reduced.matches||audit)return;
   clearTimeout(pulseTimer);
   root.dataset.fxStoryPulseR175='on';
   root.dataset.fxStorySignalR175=`chapter-${index+1}`;
@@ -101,20 +102,39 @@ function observe(){
   sections.forEach(x=>observer.observe(x.section));
 }
 
+function setStaticState(){
+  for(const item of sections)item.section.dataset.fxStoryState='active';
+  root.dataset.fxAwardNarrativeR175=VERSION;
+  root.dataset.fxActiveOrganR175='core';
+  root.dataset.fxActiveChapterR175='01';
+  root.dataset.fxNarrativeMotionR175='static-reduced';
+  root.dataset.fxStoryPulseR175='off';
+  root.style.setProperty('--fx-r175-story-progress','0');
+  root.style.setProperty('--fx-r175-chapter-progress','0');
+  root.style.setProperty('--fx-r175-energy','.16');
+}
+
 function boot(){
   if(!discover()){
     root.dataset.fxAwardNarrativeR175='incomplete-dom';
     return;
   }
+  if(reduced.matches||audit){
+    setStaticState();
+    return;
+  }
   for(const item of sections)item.section.dataset.fxStoryState=item.index===0?'active':'future';
-  root.dataset.fxAwardNarrativeR175='ready';
+  root.dataset.fxAwardNarrativeR175=VERSION;
   root.dataset.fxActiveOrganR175=sections[0].chapter.organ;
   root.dataset.fxActiveChapterR175='01';
-  root.dataset.fxNarrativeMotionR175=reduced.matches?'reduced':'raf-intersection-transform-opacity';
+  root.dataset.fxNarrativeMotionR175='raf-intersection-transform-opacity';
   observe();
   addEventListener('scroll',scheduleProgress,{passive:true});
   addEventListener('resize',scheduleProgress,{passive:true});
-  reduced.addEventListener?.('change',()=>{root.dataset.fxNarrativeMotionR175=reduced.matches?'reduced':'raf-intersection-transform-opacity';scheduleProgress();});
+  reduced.addEventListener?.('change',()=>{
+    if(reduced.matches)setStaticState();
+    else root.dataset.fxNarrativeMotionR175='raf-intersection-transform-opacity';
+  });
   scheduleProgress();
 }
 
