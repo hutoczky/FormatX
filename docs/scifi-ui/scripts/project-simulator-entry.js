@@ -4,6 +4,7 @@
   const root = document.documentElement;
   if (root.dataset.fxSimulatorEntryController === 'v2') return;
   root.dataset.fxSimulatorEntryController = 'v2';
+  root.dataset.fxSimulatorEntryVersion = 'v2';
 
   const COPY = {
     hu: {
@@ -90,7 +91,7 @@
         link.textContent = copy.footer;
       }
     });
-    root.dataset.fxSimulatorEntryState = 'ready-v2';
+    root.dataset.fxSimulatorEntryState = 'ready';
   }
 
   function ensure() {
