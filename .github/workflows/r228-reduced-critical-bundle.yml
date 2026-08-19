@@ -1,0 +1,81 @@
+name: r228 reduced critical bundle
+
+on:
+  push:
+    paths:
+      - '.github/workflows/r228-reduced-critical-bundle.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build single reduced-motion critical bundle
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path('docs/scifi-ui')
+          styles = root / 'styles'
+          reduced = styles / 'formatx-critical-reduced-r228.css'
+          source_names = [
+              'formatx-critical-core-r227.css',
+              'formatx-critical-signature-r227.css',
+              'formatx-critical-narrative-r227.css',
+          ]
+          parts = [
+              '/* FormatX r228 — single critical stylesheet for prefers-reduced-motion. */',
+              '/* Normal-motion cascade remains split at its original visual-layer boundaries. */',
+          ]
+          for name in source_names:
+              text = (styles / name).read_text(encoding='utf-8-sig')
+              parts.append(f'\n/* ===== BEGIN {name} ===== */\n{text}\n/* ===== END {name} ===== */\n')
+          reduced.write_text('\n'.join(parts), encoding='utf-8')
+
+          index = root / 'index.html'
+          html = index.read_text(encoding='utf-8')
+          replacements = [
+              (
+                  '<link rel="stylesheet" data-fx-critical-core-r227="true" href="./styles/formatx-critical-core-r227.css?v=20260819-r227">',
+                  '<link rel="stylesheet" data-fx-critical-core-r227="true" href="./styles/formatx-critical-core-r227.css?v=20260819-r227" media="(prefers-reduced-motion: no-preference)">\n  <link rel="stylesheet" data-fx-critical-reduced-r228="true" href="./styles/formatx-critical-reduced-r228.css?v=20260819-r228" media="(prefers-reduced-motion: reduce)">'
+              ),
+              (
+                  '<link rel="stylesheet" data-fx-critical-signature-r227="true" href="./styles/formatx-critical-signature-r227.css?v=20260819-r227">',
+                  '<link rel="stylesheet" data-fx-critical-signature-r227="true" href="./styles/formatx-critical-signature-r227.css?v=20260819-r227" media="(prefers-reduced-motion: no-preference)">'
+              ),
+              (
+                  '<link rel="stylesheet" data-fx-critical-narrative-r227="true" href="./styles/formatx-critical-narrative-r227.css?v=20260819-r227">',
+                  '<link rel="stylesheet" data-fx-critical-narrative-r227="true" href="./styles/formatx-critical-narrative-r227.css?v=20260819-r227" media="(prefers-reduced-motion: no-preference)">'
+              ),
+          ]
+          for old, new in replacements:
+              count = html.count(old)
+              if count != 1:
+                  raise SystemExit(f'index.html: expected exactly one match, got {count}: {old}')
+              html = html.replace(old, new, 1)
+          index.write_text(html, encoding='utf-8')
+          PY
+
+          git diff --check
+          grep -n 'critical-.*r22[78]' docs/scifi-ui/index.html
+
+      - name: Commit bundle
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No changes required.'
+            exit 0
+          fi
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/index.html docs/scifi-ui/styles/formatx-critical-reduced-r228.css
+          git commit -m 'r228 use one critical stylesheet for reduced motion'
+          git push origin HEAD:master
