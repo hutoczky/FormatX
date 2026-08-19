@@ -41,7 +41,8 @@ assert.match(seo, /offers:\s*\{/, 'client SoftwareApplication offer missing');
 assert.match(seo, /price:'7900'/, 'client SoftwareApplication offers.price missing');
 assert.match(seo, /priceCurrency:'HUF'/, 'client SoftwareApplication priceCurrency missing');
 assert.match(seo, /twitter:card/, 'client social preview metadata missing');
-assert.match(seo, /ready-v7/, 'SEO runtime revision must remain on the award-readiness v2 contract');
+assert.match(seo, /ready-v8/, 'SEO runtime revision must remain on the r243 language-canonical contract');
+assert.match(seo, /explicitLang/, 'explicit language canonical selector missing');
 assert.match(seo, /award-readiness-2/, 'client award-readiness stylesheet revision missing');
 assert.match(seo, /canonicalizeSoftwareSchema/, 'duplicate SoftwareApplication microdata cleanup missing');
 assert.match(seo, /fxCanonicalSoftwareSchema='jsonld-only'/, 'canonical JSON-LD-only schema marker missing');
@@ -59,7 +60,9 @@ assert.match(css, /@media \(hover: hover\) and \(pointer: fine\)/, 'fine-pointer
 
 function sitemapLastmod(url) {
   const escaped = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = sitemap.match(new RegExp(`<url><loc>${escaped}<\\/loc><lastmod>(\\d{4}-\\d{2}-\\d{2})<\\/lastmod>`));
+  const block = sitemap.match(new RegExp(`<url>\\s*<loc>${escaped}<\\/loc>[\\s\\S]*?<\\/url>`));
+  assert.ok(block, `sitemap URL block missing for ${url}`);
+  const match = block[0].match(/<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/);
   assert.ok(match, `sitemap lastmod missing for ${url}`);
   assert.ok(!Number.isNaN(Date.parse(match[1] + 'T00:00:00Z')), `invalid sitemap lastmod for ${url}`);
   return match[1];
@@ -73,6 +76,9 @@ assert.ok(
   sitemapLastmod('https://formatxsuite.com/scifi-ui/technical-report.html') >= '2026-08-10',
   'technical-report sitemap lastmod is older than the current evidence report'
 );
+assert.match(sitemap, /hreflang="hu" href="https:\/\/formatxsuite\.com\/\?lang=hu"/, 'Hungarian sitemap hreflang missing');
+assert.match(sitemap, /hreflang="en" href="https:\/\/formatxsuite\.com\/\?lang=en"/, 'English sitemap hreflang missing');
+assert.match(sitemap, /hreflang="x-default" href="https:\/\/formatxsuite\.com\/"/, 'x-default sitemap hreflang missing');
 
 assert.equal(contract.schema_version, 4, 'public platform contract schema is stale');
 assert.equal(contract.public_delivery?.first_party_only, true, 'first-party public delivery contract regressed');
