@@ -97,6 +97,15 @@
   }
 }
 
+/* r210: pseudo-element copy cannot be translated by textContent. */
+html[lang="hu"][data-fx-desktop-apex-r181="ready"] #hero .hero-copy::before {
+  content: "ÉLŐ MAG / WEBGL2" !important;
+}
+
+html[lang="en"][data-fx-desktop-apex-r181="ready"] #hero .hero-copy::before {
+  content: "LIVING CORE / WEBGL2" !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fx-language-toggle {
     transition: none !important;
