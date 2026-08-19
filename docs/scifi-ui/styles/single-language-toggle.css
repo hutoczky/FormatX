@@ -138,6 +138,50 @@ html[lang="en"] .fx-language-toggle::before {
   }
 }
 
+/* r214 — restore the original MAG compositor order after r213. Readable copy
+   stays on the r213 top plane; only decorative/rendering layers are returned
+   to their authored depth so no full-surface optical layer can wash out the MAG. */
+@media (max-width: 900px), (pointer: coarse) {
+  html body.living-architecture #hero .hero-space {
+    z-index: 1 !important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage,
+  html body.living-architecture #hero .hero-space > .fx-core-r112-stage {
+    z-index: 3 !important;
+  }
+
+  html body.living-architecture #hero .fx-core-detail-r122 {
+    z-index: 4 !important;
+  }
+
+  html body.living-architecture #hero .fx-core-live-r147-layer {
+    z-index: 15 !important;
+  }
+
+  html body.living-architecture #hero .fx-r168-shockwave { z-index: 32 !important; }
+  html body.living-architecture #hero .fx-r168-caustic { z-index: 33 !important; }
+  html body.living-architecture #hero .fx-r168-orbit { z-index: 34 !important; }
+  html body.living-architecture #hero .fx-r168-spectrum { z-index: 35 !important; }
+  html body.living-architecture #hero .fx-r168-flare { z-index: 36 !important; }
+  html body.living-architecture #hero .fx-r168-interaction-wave { z-index: 37 !important; }
+  html body.living-architecture #hero .fx-r168-spark { z-index: 38 !important; }
+
+  html body.living-architecture .fx-atmosphere,
+  html body.living-architecture .fx-r179-field {
+    z-index: 0 !important;
+  }
+
+  html body.living-architecture .fx-r179-organ-sigil {
+    z-index: -1 !important;
+  }
+
+  html body.living-architecture #hero .hero-space,
+  html body.living-architecture #hero .hero-space > .fx-core-mobile-v55-stage {
+    background-color: transparent !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fx-language-toggle {
     transition: none !important;
