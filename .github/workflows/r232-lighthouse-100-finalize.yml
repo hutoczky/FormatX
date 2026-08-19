@@ -1,0 +1,48 @@
+name: r232 Lighthouse 100 finalize
+
+on:
+  push:
+    paths:
+      - '.github/workflows/r232-lighthouse-100-finalize.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch first-paint path and optimize icon
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          p=Path('docs/scifi-ui/index.html')
+          s=p.read_text()
+          old='  <link rel="stylesheet" data-fx-critical-reduced-r228="true" href="./styles/formatx-critical-reduced-r228.css?v=20260819-r228" media="(prefers-reduced-motion: reduce)">'
+          new='''  <link rel="stylesheet" data-fx-first-paint-r232="true" href="./styles/formatx-critical-first-paint-r232.css?v=20260819-r232" media="(prefers-reduced-motion: reduce)" fetchpriority="high">\n  <link rel="stylesheet" data-fx-critical-reduced-r228="true" data-fx-deferred-media-r232="(prefers-reduced-motion: reduce)" href="./styles/formatx-critical-reduced-r228.css?v=20260819-r228" media="not all">\n  <script defer data-fx-deferred-reduced-style-r232="true" src="./scripts/formatx-deferred-reduced-style-r232.js?v=20260819-r232"></script>'''
+          if old not in s:
+              raise SystemExit('r228 reduced stylesheet line not found')
+          s=s.replace(old,new,1)
+          s=s.replace('<link rel="icon" type="image/png" href="./assets/images/formatx-icon.png">','<link rel="icon" type="image/png" href="./assets/images/formatx-icon-80.png">',1)
+          s=s.replace('src="./assets/images/formatx-icon.png"','src="./assets/images/formatx-icon-80.webp"')
+          p.write_text(s)
+
+          src=Image.open('docs/scifi-ui/assets/images/formatx-icon.png').convert('RGBA')
+          out=src.resize((80,80),Image.Resampling.LANCZOS)
+          out.save('docs/scifi-ui/assets/images/formatx-icon-80.png',optimize=True,compress_level=9)
+          out.save('docs/scifi-ui/assets/images/formatx-icon-80.webp',format='WEBP',lossless=True,method=6)
+          PY
+
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/index.html docs/scifi-ui/assets/images/formatx-icon-80.png docs/scifi-ui/assets/images/formatx-icon-80.webp
+          git commit -m 'r232 make first paint nonblocking and optimize brand icon'
+          git push
