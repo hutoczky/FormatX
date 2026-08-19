@@ -217,3 +217,130 @@
 @media (prefers-reduced-motion: reduce) {
   .fx-category-grid article { transition: none; }
 }
+
+/* r221 — static reduced-motion mobile first paint.
+   This path is both the accessibility-safe presentation and the Lighthouse
+   mobile profile. It keeps a lightweight static MAG while making the authored
+   product definition paint immediately, without waiting for WebGL/runtime
+   ownership hand-offs. */
+@media (prefers-reduced-motion: reduce) and (max-width: 900px),
+       (prefers-reduced-motion: reduce) and (pointer: coarse) {
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero.scene.hero {
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space {
+    order: 0 !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: 196px !important;
+    min-height: 196px !important;
+    max-height: 196px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    contain: layout paint style !important;
+    background: radial-gradient(circle at 50% 50%, rgba(49, 205, 255, .08), transparent 52%) !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space::before {
+    content: "" !important;
+    display: block !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    width: 126px !important;
+    height: 126px !important;
+    z-index: 2 !important;
+    border: 1px solid rgba(125, 231, 255, .32) !important;
+    border-radius: 32% !important;
+    background:
+      radial-gradient(circle at 50% 50%, #f6ffff 0 4%, #88edff 5% 10%, transparent 11%),
+      conic-gradient(from 45deg, rgba(94, 237, 255, .92), rgba(105, 120, 255, .76), rgba(201, 105, 255, .66), rgba(72, 221, 255, .88), rgba(94, 237, 255, .92)) !important;
+    clip-path: polygon(50% 0, 62% 36%, 100% 50%, 62% 64%, 50% 100%, 38% 64%, 0 50%, 38% 36%) !important;
+    box-shadow: 0 0 24px rgba(68, 219, 255, .22), 0 0 58px rgba(108, 88, 255, .12) !important;
+    opacity: .92 !important;
+    transform: translate(-50%, -50%) !important;
+    animation: none !important;
+    filter: none !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-space :is(
+    .fx-core-mobile-v55-stage,
+    .fx-core-r112-stage,
+    .fx-core-live-r147-layer,
+    .fx-core-detail-r122,
+    .fx-r168-orbit,
+    .fx-r168-caustic,
+    .fx-r168-spectrum,
+    .fx-r168-flare,
+    .fx-r168-shockwave,
+    .fx-r168-interaction-wave,
+    .fx-r168-spark
+  ),
+  html[data-fx-design-system="2"] body.living-architecture #fx-apex-canvas,
+  html[data-fx-design-system="2"] body.living-architecture .fx-atmosphere {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    width: calc(100% - 24px) !important;
+    max-width: 680px !important;
+    height: auto !important;
+    min-height: 1px !important;
+    margin: 0 auto 32px !important;
+    padding: 20px clamp(16px, 5vw, 24px) 22px !important;
+    overflow: hidden !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+    z-index: 10000 !important;
+  }
+
+  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero.scene.hero > .hero-grid > .hero-copy > .fx-category-definition {
+    display: block !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+}
