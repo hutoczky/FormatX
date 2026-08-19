@@ -14,6 +14,7 @@
      and desktop, including nodes mounted after initial page load. */
   const FIXED_COPY = [
     ['.topbar .brand small', 'ÉLŐ RENDSZER', 'LIVING SYSTEM'],
+    ['.site-footer .footer-brand .brand small', 'ÉLŐ RENDSZER', 'LIVING SYSTEM'],
     ['#formatx-event-horizon .fx-intro-meta span:nth-child(1)', 'FORMATX / ÉLŐ MAG', 'FORMATX / LIVING CORE'],
     ['#formatx-event-horizon .fx-intro-meta span:nth-child(2)', 'RESZPONZÍV RENDSZERARCHITEKTÚRA', 'RESPONSIVE SYSTEM ARCHITECTURE'],
     ['#formatx-event-horizon .fx-intro-kicker', 'RENDSZERORGANIZMUS INDÍTÁSA', 'SYSTEM ORGANISM INITIALISING'],
@@ -30,6 +31,10 @@
     ['#experience .flow-chapters article[data-flow="1"] small', 'TERVEZÉS', 'PLAN'],
     ['#experience .flow-chapters article[data-flow="2"] small', 'VÉGREHAJTÁS', 'EXECUTE'],
     ['#experience .flow-chapters article[data-flow="3"] small', 'ELLENŐRZÉS', 'VERIFY'],
+    ['html[data-fx-flow="0"] #experience [data-flow-code]', 'KÖRNYEZET / OLVASÁS', 'ENV / READ'],
+    ['html[data-fx-flow="1"] #experience [data-flow-code]', 'TERV / ELŐNÉZET', 'PLAN / PREVIEW'],
+    ['html[data-fx-flow="2"] #experience [data-flow-code]', 'FUTTATÁS / KONTROLL', 'RUN / CONTROL'],
+    ['html[data-fx-flow="3"] #experience [data-flow-code]', 'HASH / JELENTÉS', 'HASH / REPORT'],
     ['#capabilities .card:nth-child(1) > b', 'ÍRÁS / ELLENŐRZÉS', 'WRITE / VERIFY'],
     ['#capabilities .card:nth-child(2) > b', 'GYORS / MÉLY', 'QUICK / DEEP'],
     ['#capabilities .card:nth-child(3) > b', 'TERV / ELŐNÉZET', 'PLAN / PREVIEW'],
@@ -45,7 +50,7 @@
     ['#formatx-plan-qr-dock [data-plan-qr="technician_team"] .fx-plan-qr-copy small', '03 / CSAPAT', '03 / TEAM'],
     ['#system .marquee span', 'FORMATX / ÉRZÉKEL / TERVEZ / VÉGREHAJT / ELLENŐRIZ / FORMATX / ÉRZÉKEL / TERVEZ / VÉGREHAJT / ELLENŐRIZ / ', 'FORMATX / SENSE / PLAN / EXECUTE / VERIFY / FORMATX / SENSE / PLAN / EXECUTE / VERIFY / '],
     ['#hero .fx-reference-ask span', 'KÉRDEZZ', 'ASK'],
-    ['#hero .fx-reference-proof h2', 'NYILVÁNOS BIZONYÍTÉK', 'PUBLIC PROOF'],
+    ['#hero .fx-reference-proof h2', 'BIZONYÍTÉK', 'PROOF'],
     ['.fx-r181-apex-meta b', 'ÉLŐ MAG', 'LIVING CORE'],
     ['.fx-r181-apex-meta span:nth-of-type(1)', 'WEBGL2 / REAKTÍV', 'WEBGL2 / REACTIVE'],
     ['.fx-r181-apex-meta span:nth-of-type(2)', 'MUTATÓMEZŐ', 'POINTER FIELD'],
