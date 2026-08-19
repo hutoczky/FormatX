@@ -19,6 +19,57 @@
   let timelineDuration=2400,exitDuration=280,hardDeadline=3780;
   const language=()=>ROOT.lang==='en'?'en':'hu';
 
+  function setImportant(el, prop, value){
+    if(el instanceof HTMLElement)el.style.setProperty(prop,value,'important');
+  }
+
+  /* r220: the mobile LCP copy is authored in the initial HTML. Make that
+     readable plane fail-open before any WebGL/reference/narrative runtime can
+     take ownership. Later visual layers may animate the MAG, but may not hide
+     the product definition or its parent compositor. */
+  function ensureMobileReadableFirstPaint(){
+    if(!(MOBILE_DIRECT_QUERY.matches||AUDIT_MODE||REDUCE_QUERY.matches))return;
+    const hero=document.getElementById('hero');
+    const grid=hero?.querySelector('.hero-grid');
+    const copy=hero?.querySelector('.hero-copy');
+    const definition=copy?.querySelector('.fx-category-definition');
+    if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(copy instanceof HTMLElement)||!(definition instanceof HTMLElement))return;
+
+    setImportant(copy,'position','relative');
+    setImportant(copy,'inset','auto');
+    setImportant(copy,'display','grid');
+    setImportant(copy,'width','calc(100% - 24px)');
+    setImportant(copy,'max-width','680px');
+    setImportant(copy,'height','auto');
+    setImportant(copy,'min-height','1px');
+    setImportant(copy,'margin','0 auto 48px');
+    setImportant(copy,'overflow','hidden');
+    setImportant(copy,'clip','auto');
+    setImportant(copy,'clip-path','none');
+    setImportant(copy,'white-space','normal');
+    setImportant(copy,'opacity','1');
+    setImportant(copy,'visibility','visible');
+    setImportant(copy,'transform','none');
+    setImportant(copy,'filter','none');
+    setImportant(copy,'z-index','10000');
+
+    setImportant(definition,'display','block');
+    setImportant(definition,'position','relative');
+    setImportant(definition,'inset','auto');
+    setImportant(definition,'width','100%');
+    setImportant(definition,'max-width','100%');
+    setImportant(definition,'height','auto');
+    setImportant(definition,'margin','0');
+    setImportant(definition,'opacity','1');
+    setImportant(definition,'visibility','visible');
+    setImportant(definition,'transform','none');
+    setImportant(definition,'filter','none');
+    setImportant(definition,'animation','none');
+    setImportant(definition,'transition','none');
+    setImportant(definition,'will-change','auto');
+    ROOT.dataset.fxMobileReadableFirstPaint='r220';
+  }
+
   function ensureAwardRuntime(){
     if(AUDIT_MODE||document.querySelector('script[data-fx-award-runtime-r206]'))return;
     const script=document.createElement('script');
@@ -54,9 +105,10 @@
   function controls(o){let b=o.querySelector('.fx-intro-skip');if(!b){b=document.createElement('button');b.className='fx-intro-skip';b.type='button';o.append(b)}b.textContent=COPY[language()].skip;b.setAttribute('aria-label',COPY[language()].skip);b.onclick=()=>exit(o,runToken,'skip');if(!o.querySelector('.fx-intro-corners')){const c=document.createElement('div');c.className='fx-intro-corners';c.setAttribute('aria-hidden','true');c.innerHTML='<i></i><i></i><i></i><i></i>';o.append(c)}}
   function exit(o,token,source){if(token!==runToken||finishing)return;finishing=true;cancelAnimationFrame(progressFrame);setProgress(o,100);ROOT.classList.add('fx-intro-reveal');o.classList.add('is-exiting');animate(o,[{opacity:1},{opacity:0}],{duration:exitDuration,easing:'ease-out'});exitTimer=setTimeout(()=>{if(token===runToken)release(o,source||'timeline-complete')},exitDuration+40)}
   function progress(o,token){const start=performance.now();function frame(now){if(token!==runToken||!running||finishing)return;const linear=Math.min(1,Math.max(0,now-start)/timelineDuration),eased=1-Math.pow(1-linear,2.35);setProgress(o,eased*100);if(linear>=1)return exit(o,token,'timeline-complete');progressFrame=requestAnimationFrame(frame)}progressFrame=requestAnimationFrame(frame)}
-  function start(){const o=document.getElementById(OVERLAY_ID);if(!o)return release(null,'overlay-missing');const returning=seen();configure(returning);cancelTimers();cancelAnimations(o);running=true;finishing=false;runToken++;const token=runToken;controls(o);o.hidden=false;o.setAttribute('aria-hidden','false');o.classList.remove('is-exiting');setProgress(o,0);ROOT.classList.remove('fx-intro-complete','fx-intro-reveal');ROOT.classList.add('fx-intro-managed','fx-intro-pending','fx-intro-running');ROOT.dataset.fxIntro=returning?'timeline-returning':'timeline-first-visit';ROOT.dataset.fxIntroVisit=returning?'returning':'first';visuals(o,returning);progress(o,token);hardTimer=setTimeout(()=>{if(token===runToken)release(o,'hard-deadline')},hardDeadline)}
+  function start(){const o=document.getElementById(OVERLAY_ID);if(!o)return release(null,'overlay-missing');const returning=seen();configure(returning);cancelTimers();cancelAnimations(o);running=true;finishing=false;runToken++;const token=runToken;controls(o);o.hidden=false;o.setAttribute('aria-hidden','false');setProgress(o,0);ROOT.classList.remove('fx-intro-complete','fx-intro-reveal');ROOT.classList.add('fx-intro-managed','fx-intro-pending','fx-intro-running');ROOT.dataset.fxIntro=returning?'timeline-returning':'timeline-first-visit';ROOT.dataset.fxIntroVisit=returning?'returning':'first';visuals(o,returning);progress(o,token);hardTimer=setTimeout(()=>{if(token===runToken)release(o,'hard-deadline')},hardDeadline)}
   function failOpen(source){if(running)fastRelease(source)}
 
+  ensureMobileReadableFirstPaint();
   ensureAwardRuntime();
   if(AUDIT_MODE){ROOT.classList.add('fx-audit-mode');fastRelease('audit-skip');return}
   if(MOBILE_DIRECT_QUERY.matches){ROOT.dataset.fxIntroStrategy='mobile-direct';fastRelease('mobile-direct-v1',true);return}
