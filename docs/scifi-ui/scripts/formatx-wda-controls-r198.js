@@ -2,13 +2,13 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxWdaHardening === 'r198') return;
-  root.dataset.fxWdaHardening = 'r198';
+  if (root.dataset.fxWdaHardening === 'r211') return;
+  root.dataset.fxWdaHardening = 'r211';
   root.dataset.fxWdaSound = 'muted-default';
 
   // The legacy professional-v6 score writes two diagnostics through root CSS
   // custom properties. Strict CSP does not need those values for presentation,
-  // so r198 redirects only those two telemetry writes into data attributes.
+  // so r211 redirects only those two telemetry writes into data attributes.
   try {
     const rootStyle = root.style;
     const nativeSetProperty = rootStyle.setProperty.bind(rootStyle);
@@ -23,13 +23,19 @@
       }
       return nativeSetProperty(name, value, priority);
     };
-    root.dataset.fxWdaAudioTelemetry = 'csp-safe-r198';
+    root.dataset.fxWdaAudioTelemetry = 'csp-safe-r211';
   } catch (_) {
     root.dataset.fxWdaAudioTelemetry = 'native-fallback';
   }
 
   const SELECTOR = '.fx-three-sound';
   const AUDIO_SRC = '/scifi-ui/scripts/formatx-audio-repair.js?v=20260817-r198-wda-sound';
+  const ICONS = Object.freeze({
+    muted: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg>',
+    sound: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M15 9.2c1.2 1.5 1.2 4.1 0 5.6"/><path d="M18 6.8c2.8 2.9 2.8 7.5 0 10.4"/></svg>',
+    pending: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 3a9 9 0 1 1-8.3 5.5"/><path d="M4 3v5h5"/></svg>',
+    retry: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 8.5A8 8 0 1 1 4 15"/><path d="M4 4v5h5"/></svg>'
+  });
   let loadingAudio = false;
   let syncing = false;
 
@@ -51,6 +57,8 @@
       }
       label.dataset.fxWdaSoundLabel = 'true';
     }
+    label.classList.add('fx-wda-sound-icon');
+    label.setAttribute('aria-hidden', 'true');
     return label;
   }
 
@@ -65,14 +73,22 @@
       const on = state === 'on';
       const pending = state === 'pending';
       const blocked = state === 'blocked';
-      const text = pending ? 'STARTING…' : blocked ? 'RETRY' : on ? 'MUTE' : 'UNMUTE';
+      const iconState = pending ? 'pending' : blocked ? 'retry' : on ? 'sound' : 'muted';
       const label = ensureLabel(button);
-      if (label.textContent !== text) label.textContent = text;
+      if (label.dataset.fxWdaSoundIcon !== iconState) {
+        label.innerHTML = ICONS[iconState];
+        label.dataset.fxWdaSoundIcon = iconState;
+      }
       button.setAttribute('aria-pressed', String(on));
-      button.setAttribute('aria-label', on
-        ? (language() === 'en' ? 'Mute FormatX cinematic audio' : 'FormatX filmes hang némítása')
-        : (language() === 'en' ? 'Unmute FormatX cinematic audio' : 'FormatX filmes hang bekapcsolása'));
-      button.setAttribute('title', on ? 'MUTE' : 'UNMUTE');
+      const aria = pending
+        ? (language() === 'en' ? 'Starting FormatX cinematic audio' : 'FormatX filmes hang indítása')
+        : blocked
+          ? (language() === 'en' ? 'Retry FormatX cinematic audio' : 'FormatX filmes hang újrapróbálása')
+          : on
+            ? (language() === 'en' ? 'Mute FormatX cinematic audio' : 'FormatX filmes hang némítása')
+            : (language() === 'en' ? 'Unmute FormatX cinematic audio' : 'FormatX filmes hang bekapcsolása');
+      button.setAttribute('aria-label', aria);
+      button.setAttribute('title', aria);
       root.dataset.fxWdaSound = pending ? 'starting' : blocked ? 'retry' : on ? 'unmuted' : 'muted';
     } finally {
       syncing = false;
@@ -89,7 +105,10 @@
       button.setAttribute('aria-pressed', 'false');
       const label = document.createElement('span');
       label.dataset.fxWdaSoundLabel = 'true';
-      label.textContent = 'UNMUTE';
+      label.className = 'fx-wda-sound-icon';
+      label.setAttribute('aria-hidden', 'true');
+      label.innerHTML = ICONS.muted;
+      label.dataset.fxWdaSoundIcon = 'muted';
       button.appendChild(label);
       document.body.appendChild(button);
     }
