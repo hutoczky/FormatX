@@ -1,0 +1,81 @@
+name: r238 hashed inline critical CSS
+
+on:
+  push:
+    paths:
+      - '.github/workflows/r238-inline-critical-css.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Inline reduced critical CSS with synchronized CSP hash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, hashlib, re
+
+          css_path = Path('docs/scifi-ui/styles/formatx-critical-first-paint-r232.css')
+          index_path = Path('docs/scifi-ui/index.html')
+          worker_path = Path('billing-worker/src/production-with-license.js')
+
+          css = css_path.read_text(encoding='utf-8')
+          digest = base64.b64encode(hashlib.sha256(css.encode('utf-8')).digest()).decode('ascii')
+          token = f"'sha256-{digest}'"
+
+          html = index_path.read_text(encoding='utf-8')
+          old_link = re.compile(r'^\s*<link rel="stylesheet" data-fx-first-paint-r232="true"[^>]*>\s*$', re.M)
+          if not old_link.search(html):
+              raise SystemExit('r232 first-paint link not found')
+          style = '<style data-fx-first-paint-r232="true" data-fx-inline-critical-r238="true" media="(prefers-reduced-motion: reduce)">\n' + css + '</style>'
+          html = old_link.sub(style, html, count=1)
+
+          meta_old = "style-src 'self';"
+          meta_new = f"style-src 'self' {token};"
+          if meta_old not in html:
+              raise SystemExit('index CSP style-src token not found')
+          html = html.replace(meta_old, meta_new, 1)
+          index_path.write_text(html, encoding='utf-8')
+
+          worker = worker_path.read_text(encoding='utf-8')
+          worker_old = '  "style-src \'self\'",'
+          worker_new = f'  "style-src \'self\' {token}",'
+          if worker_old not in worker:
+              raise SystemExit('production CSP style-src token not found')
+          worker = worker.replace(worker_old, worker_new, 1)
+          worker_path.write_text(worker, encoding='utf-8')
+
+          validator = Path('.github/scripts/validate-inline-critical-r238.cjs')
+          validator.write_text("""'use strict';
+const fs=require('node:fs');
+const crypto=require('node:crypto');
+const assert=require('node:assert/strict');
+const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+const worker=fs.readFileSync('billing-worker/src/production-with-license.js','utf8');
+const match=html.match(/<style data-fx-first-paint-r232=\"true\" data-fx-inline-critical-r238=\"true\" media=\"\(prefers-reduced-motion: reduce\)\">\\n([\\s\\S]*?)<\\/style>/);
+assert.ok(match,'missing r238 inline critical style');
+const hash=crypto.createHash('sha256').update(match[1],'utf8').digest('base64');
+const token=`'sha256-${hash}'`;
+assert.ok(html.includes(`style-src 'self' ${token};`),'index CSP hash does not match inline critical CSS');
+assert.ok(worker.includes(`\"style-src 'self' ${token}\"`),'production CSP hash does not match inline critical CSS');
+assert.ok(!html.includes('href=\"./styles/formatx-critical-first-paint-r232.css'), 'external r232 critical CSS request still present');
+console.log('PASS: r238 inline critical CSS and both CSP policies are hash-synchronized.');
+""", encoding='utf-8')
+
+          print('CSP token:', token)
+          PY
+
+          node .github/scripts/validate-inline-critical-r238.cjs
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/index.html billing-worker/src/production-with-license.js .github/scripts/validate-inline-critical-r238.cjs
+          git commit -m 'r238 eliminate final critical CSS network round trip'
+          git push
