@@ -1,4 +1,4 @@
-/* r230 validation marker: hero simulator CTA is first-paint stable; normal desktop apex behavior is unchanged. */
+/* r231 validation marker: category positioning no longer inserts a duplicate hero deck; normal desktop apex behavior is unchanged. */
 (function(){
 'use strict';
 const root=document.documentElement;
