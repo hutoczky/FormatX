@@ -12,7 +12,9 @@ const CASES = [
     ready: '.fx-category-deck',
     panel: '.fx-category-deck',
     header: '.topbar',
-    action: '.hero-actions .button'
+    action: '.hero-actions .button',
+    sheet: 'link[data-fx-critical-core-r227]',
+    sheetPattern: /formatx-critical-core-r227\.css/
   },
   {
     name: 'checkout',
@@ -20,7 +22,9 @@ const CASES = [
     ready: '.checkout-summary',
     panel: '.checkout-summary',
     header: '.site-header',
-    action: '.checkout-language-control button'
+    action: '.checkout-language-control button',
+    sheet: 'link[data-fx-design-system]',
+    sheetPattern: /formatx-design-system\.css\?v=20260728-ds2$/
   },
   {
     name: 'simulator',
@@ -28,7 +32,9 @@ const CASES = [
     ready: '.sim-hero-manifest',
     panel: '.sim-hero-manifest',
     header: '.sim-header',
-    action: '#run-simulation'
+    action: '#run-simulation',
+    sheet: 'link[data-fx-design-system]',
+    sheetPattern: /formatx-design-system\.css\?v=20260728-ds2$/
   }
 ];
 
@@ -65,16 +71,16 @@ async function inspect(browser, config, viewport) {
 
   await page.goto(BASE + config.url, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector(config.ready, { state: 'attached', timeout: 20000 });
-  await page.waitForFunction(() => {
-    const link = document.querySelector('link[data-fx-design-system]');
+  await page.waitForFunction(selector => {
+    const link = document.querySelector(selector);
     return document.documentElement.dataset.fxDesignSystem === '2' && link && link.sheet;
-  }, null, { timeout: 20000 });
+  }, config.sheet, { timeout: 20000 });
 
   const action = page.locator(config.action).first();
   await action.waitFor({ state: 'visible', timeout: 15000 });
   await action.focus();
 
-  const result = await page.evaluate(({ panelSelector, headerSelector, actionSelector }) => {
+  const result = await page.evaluate(({ panelSelector, headerSelector, actionSelector, sheetSelector }) => {
     const root = document.documentElement;
     const rootStyle = getComputedStyle(root);
     const bodyStyle = getComputedStyle(document.body);
@@ -85,7 +91,7 @@ async function inspect(browser, config, viewport) {
     const headerStyle = header ? getComputedStyle(header) : null;
     const actionStyle = action ? getComputedStyle(action) : null;
     const rect = action?.getBoundingClientRect();
-    const sheet = document.querySelector('link[data-fx-design-system]');
+    const sheet = document.querySelector(sheetSelector);
 
     return {
       designSystem: root.dataset.fxDesignSystem || '',
@@ -111,11 +117,16 @@ async function inspect(browser, config, viewport) {
       overflow: document.documentElement.scrollWidth - innerWidth,
       viewport: { width: innerWidth, height: innerHeight }
     };
-  }, { panelSelector: config.panel, headerSelector: config.header, actionSelector: config.action });
+  }, {
+    panelSelector: config.panel,
+    headerSelector: config.header,
+    actionSelector: config.action,
+    sheetSelector: config.sheet
+  });
 
   assert.equal(result.designSystem, '2');
   assert.equal(result.sheetLoaded, true);
-  assert.match(result.sheetHref, /formatx-design-system\.css\?v=20260728-ds2$/);
+  assert.match(result.sheetHref, config.sheetPattern);
   assert.equal(result.cyan.toLowerCase(), '#7cecff');
   assert.equal(result.violet.toLowerCase(), '#8f72ff');
   assert.equal(result.radius, '30px 7px 30px 7px');
