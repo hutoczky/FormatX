@@ -1,0 +1,54 @@
+name: r230 static hero simulator CTA
+
+on:
+  push:
+    paths:
+      - '.github/workflows/r230-static-hero-simulator.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Make hero simulator CTA first-paint stable
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('docs/scifi-ui/index.html')
+          text = path.read_text(encoding='utf-8')
+
+          old = '<span data-hu="Android alkalmazás" data-en="Android application">Android alkalmazás</span><i>↓</i></a></div>\n          <div class="hero-facts">'
+          new = '<span data-hu="Android alkalmazás" data-en="Android application">Android alkalmazás</span><i>↓</i></a><a class="button button-line magnetic" data-fx-simulator-entry="hero" href="./project-simulator.html?lang=hu" aria-label="FormatX Operational Twin projekt szimulátor megnyitása"><span data-hu="Projekt szimulátor" data-en="Project simulator">Projekt szimulátor</span><i aria-hidden="true">◎</i></a></div>\n          <div class="hero-facts">'
+
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected exactly one hero-actions tail, got {count}')
+
+          text = text.replace(old, new, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          git diff --check
+          grep -n 'data-fx-simulator-entry="hero"' docs/scifi-ui/index.html
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet -- docs/scifi-ui/index.html; then
+            echo 'No change required.'
+            exit 0
+          fi
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/index.html
+          git commit -m 'r230 make hero simulator CTA first-paint stable'
+          git push origin HEAD:master
