@@ -1,0 +1,35 @@
+name: r233 reduced style order
+
+on:
+  push:
+    paths:
+      - '.github/workflows/r233-reduced-style-order.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Keep critical shell last and bump loader version
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/scifi-ui/index.html')
+          s=p.read_text()
+          old='''  <link rel="stylesheet" data-fx-first-paint-r232="true" href="./styles/formatx-critical-first-paint-r232.css?v=20260819-r232" media="(prefers-reduced-motion: reduce)" fetchpriority="high">\n  <link rel="stylesheet" data-fx-critical-reduced-r228="true" data-fx-deferred-media-r232="(prefers-reduced-motion: reduce)" href="./styles/formatx-critical-reduced-r228.css?v=20260819-r228" media="not all">\n  <script defer data-fx-deferred-reduced-style-r232="true" src="./scripts/formatx-deferred-reduced-style-r232.js?v=20260819-r232"></script>'''
+          new='''  <link rel="stylesheet" data-fx-critical-reduced-r228="true" data-fx-deferred-media-r233="(prefers-reduced-motion: reduce)" href="./styles/formatx-critical-reduced-r228.css?v=20260819-r228" media="not all">\n  <link rel="stylesheet" data-fx-first-paint-r232="true" href="./styles/formatx-critical-first-paint-r232.css?v=20260819-r232" media="(prefers-reduced-motion: reduce)" fetchpriority="high">\n  <script defer data-fx-deferred-reduced-style-r233="true" src="./scripts/formatx-deferred-reduced-style-r232.js?v=20260819-r233"></script>'''
+          if old not in s:
+              raise SystemExit('r232 head block not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/index.html
+          git commit -m 'r233 keep critical hero shell above deferred reduced styles'
+          git push
