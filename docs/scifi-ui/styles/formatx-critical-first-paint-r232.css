@@ -20,7 +20,7 @@
   #hero .hero-copy>*{opacity:1!important;visibility:visible!important;transform:none!important;filter:none!important;animation:none!important;transition:none!important}
   #hero .kicker{margin:0 0 18px;color:#8fc9d9;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
   #hero .fx-category-definition{position:relative!important;inset:auto!important;display:block!important;width:100%!important;max-width:650px!important;min-height:104px;margin:0 0 24px!important;padding:0!important;color:var(--fx-r232-soft)!important;font-size:17px!important;line-height:1.52!important;overflow-wrap:anywhere}.fx-category-definition strong{display:block;margin-bottom:8px;color:#e9fbff;font-size:14px;line-height:1.3}
-  #hero-title{display:block!important;width:100%!important;max-width:100%!important;margin:0 0 22px!important;line-height:1}.hero-title-main{display:block!important;color:#f7fdff!important;background:none!important;-webkit-text-fill-color:currentColor!important;font-size:clamp(62px,8vw,128px)!important;font-weight:900!important;letter-spacing:-.07em!important;line-height:.86!important}.hero-title-sub{display:block!important;margin-top:10px!important;color:#c4d8e4!important;font-size:clamp(24px,3.2vw,52px)!important;letter-spacing:.08em!important;line-height:1!important}
+  #hero-title{display:block!important;width:100%!important;max-width:100%!important;margin:0 0 22px!important;line-height:1}.hero-title-main{display:block!important;color:#f7fdff!important;background:none!important;-webkit-text-fill-color:currentColor!important;font-size:clamp(46px,4.4vw,62px)!important;font-weight:900!important;letter-spacing:-.07em!important;line-height:.86!important}.hero-title-sub{display:block!important;margin-top:10px!important;color:#c4d8e4!important;font-size:clamp(24px,3.2vw,52px)!important;letter-spacing:.08em!important;line-height:1!important}
   #hero .hero-lead{display:block!important;width:100%!important;max-width:650px!important;min-block-size:0!important;margin:0!important;color:#d6e4eb!important;font-size:18px!important;line-height:1.58!important;text-wrap:pretty!important}
   #hero .fx-method-inline{position:relative!important;inset:auto!important;display:flex!important;flex-wrap:wrap!important;gap:8px 14px!important;width:100%!important;min-height:50px!important;margin:24px 0 0!important;padding:0!important;list-style:none!important}.fx-method-inline li{display:inline-flex;align-items:center;min-height:42px;padding:0 12px;border:1px solid var(--fx-r232-line);border-radius:999px;color:#d8edf4;font-size:10px;font-weight:750}
   #hero .hero-actions{display:flex!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important;min-height:50px!important;margin-top:24px!important}.hero-actions .button{min-height:50px}
@@ -39,4 +39,17 @@
   #hero .fx-method-inline{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;min-height:100px!important;margin-top:22px!important}.fx-method-inline li{justify-content:center;min-height:46px;text-align:center}
   #hero .hero-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;min-height:170px!important;margin-top:22px!important}.hero-actions .button{width:100%!important;min-height:50px!important;text-align:center!important}
   #hero .hero-facts{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;min-height:132px!important;margin-top:20px!important}.hero-facts span{min-height:36px}
+}
+
+/* r234 — final Lighthouse polish: keep reduced-mode title from becoming a late
+   desktop LCP candidate and make every footer link a proper touch target. */
+@media (prefers-reduced-motion:reduce){
+  footer.site-footer nav{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:8px 12px!important}
+  footer.site-footer nav+nav{margin-top:10px!important}
+  footer.site-footer nav a{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:44px!important;min-height:44px!important;padding:8px 10px!important;margin:0!important;line-height:1.25!important;text-decoration:none}
+}
+@media (prefers-reduced-motion:reduce) and (min-width:901px){
+  #hero-title{max-width:650px!important}
+  #hero .hero-title-main{font-size:clamp(46px,4.4vw,62px)!important;line-height:.92!important;letter-spacing:-.045em!important}
+  #hero .hero-title-sub{font-size:clamp(20px,2.2vw,30px)!important;margin-top:7px!important}
 }
