@@ -1,0 +1,95 @@
+name: r235 static-first category runtime
+
+on:
+  push:
+    paths:
+      - '.github/workflows/r235-static-first-category.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gate category DOM expansion behind reduced-mode user intent
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          js=Path('docs/scifi-ui/scripts/formatx-category-positioning.js')
+          s=js.read_text()
+          old="""  buildDeck();
+  buildProof();
+  render();
+
+  addEventListener('formatx:languagechange', () => queueMicrotask(render));
+  const observer = new MutationObserver(entries => {
+    if (entries.some(entry => entry.attributeName === 'lang')) queueMicrotask(render);
+  });
+  observer.observe(root, { attributes: true, attributeFilter: ['lang'] });
+  addEventListener('pageshow', render);
+  addEventListener('pagehide', () => observer.disconnect(), { once: true });
+}());
+"""
+          new="""  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let observer = null;
+  let enhancementStarted = false;
+
+  function startEnhancement() {
+    if (enhancementStarted) return;
+    enhancementStarted = true;
+    buildDeck();
+    buildProof();
+    render();
+    addEventListener('formatx:languagechange', () => queueMicrotask(render));
+    observer = new MutationObserver(entries => {
+      if (entries.some(entry => entry.attributeName === 'lang')) queueMicrotask(render);
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['lang'] });
+    addEventListener('pageshow', render);
+    root.dataset.fxCategoryFirstPaint = reducedMotion.matches ? 'enhanced-after-intent-r235' : 'enhanced-immediate-r235';
+  }
+
+  if (!reducedMotion.matches) {
+    startEnhancement();
+  } else {
+    root.dataset.fxCategoryFirstPaint = 'static-first-r235';
+    const passive = { passive: true };
+    const triggers = [['wheel', passive], ['touchstart', passive], ['pointerdown', passive], ['scroll', passive], ['keydown', false]];
+    const activate = () => {
+      for (const [type, options] of triggers) removeEventListener(type, activate, options);
+      startEnhancement();
+    };
+    for (const [type, options] of triggers) addEventListener(type, activate, options);
+    if (location.hash && location.hash !== '#top' && location.hash !== '#hero') activate();
+  }
+
+  addEventListener('pagehide', () => observer?.disconnect(), { once: true });
+}());
+"""
+          if old not in s:
+              raise SystemExit('category runtime bootstrap block not found')
+          js.write_text(s.replace(old,new,1))
+
+          css=Path('docs/scifi-ui/styles/formatx-critical-first-paint-r232.css')
+          c=css.read_text()
+          extra="""
+/* r235 — the footer return control is also a full touch target. */
+@media (prefers-reduced-motion:reduce){
+  footer.site-footer .footer-bottom>a{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:44px!important;min-height:44px!important;padding:8px 10px!important;line-height:1.25!important}
+}
+"""
+          if 'r235 — the footer return control' not in c:
+              c += extra
+          css.write_text(c)
+          PY
+          git config user.name 'FormatX CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/scifi-ui/scripts/formatx-category-positioning.js docs/scifi-ui/styles/formatx-critical-first-paint-r232.css
+          git commit -m 'r235 defer reduced category expansion and finish tap targets'
+          git push
