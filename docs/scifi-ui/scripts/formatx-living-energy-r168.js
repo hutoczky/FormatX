@@ -34,6 +34,18 @@ function ensureMobileSeam(){
       background:linear-gradient(180deg,rgba(1,6,16,0) 0%,rgba(1,8,20,.06) 16%,rgba(2,11,27,.23) 38%,rgba(3,14,30,.60) 68%,rgba(4,13,30,.88) 88%,#040d1e 100%)!important;
       border:0!important;box-shadow:none!important;opacity:1!important;filter:none!important;
     }
+    html body.living-architecture #hero .fx-r168-spectrum,
+    html body.living-architecture #hero .fx-r168-flare,
+    html body.living-architecture #hero .fx-r168-shockwave,
+    html body.living-architecture #hero .fx-r168-interaction-wave{
+      display:none!important;opacity:0!important;filter:none!important;animation:none!important;will-change:auto!important;
+    }
+    html body.living-architecture #hero .fx-r168-orbit,
+    html body.living-architecture #hero .fx-r168-caustic,
+    html body.living-architecture #hero .fx-r168-spark{
+      opacity:.095!important;filter:none!important;will-change:transform!important;
+    }
+    html body.living-architecture #hero .fx-r168-spark{opacity:.16!important;}
   }`;
   if(style.textContent!==css)style.textContent=css;
   if(style.parentNode!==document.head)document.head.appendChild(style);
