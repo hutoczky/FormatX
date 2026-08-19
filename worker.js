@@ -21,7 +21,25 @@ const LANGUAGE_PAGE_PATHS = new Set([
 const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260819-award-r216">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260819-language-r217"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
 const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
 const STATUS_ASSETS = '  <link rel="stylesheet" data-fx-platform-status-style="true" href="/scifi-ui/styles/platform-status.css?v=20260730-platform-status-2">\n  <script defer src="/scifi-ui/scripts/platform-status.js?v=20260730-platform-status-2"></script>\n';
-const AWARD_META = '  <meta data-fx-award-meta="r217" name="application-name" content="FormatX Suite Pro">\n  <meta property="og:site_name" content="FormatX Suite Pro">\n  <meta property="og:locale" content="hu_HU">\n  <meta property="og:locale:alternate" content="en_GB">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="FormatX Suite Pro — AI-val támogatott lemezkezelés">\n  <meta name="twitter:description" content="Biztonságos, tervezhető és visszaellenőrizhető lemezkezelési munkafolyamat Linuxon, Windowson és Androidon.">\n  <meta name="twitter:image" content="https://formatxsuite.com/scifi-ui/assets/formatx-og.png">\n';
+const SOCIAL_IMAGE = 'https://formatxsuite.com/scifi-ui/assets/images/formatx-technician-console.png';
+const AWARD_META_HU = `  <meta data-fx-award-meta="r218" name="application-name" content="FormatX Suite Pro">
+  <meta property="og:site_name" content="FormatX Suite Pro">
+  <meta property="og:locale" content="hu_HU">
+  <meta property="og:locale:alternate" content="en_GB">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FormatX Suite Pro — Élő rendszerarchitektúra">
+  <meta name="twitter:description" content="Biztonságos, tervezhető és visszaellenőrizhető lemezkezelési munkafolyamat Linuxon, Windowson és Androidon.">
+  <meta name="twitter:image" content="${SOCIAL_IMAGE}">
+`;
+const AWARD_META_EN = `  <meta data-fx-award-meta="r218" name="application-name" content="FormatX Suite Pro">
+  <meta property="og:site_name" content="FormatX Suite Pro">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:locale:alternate" content="hu_HU">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FormatX Suite Pro — Living System Architecture">
+  <meta name="twitter:description" content="A safe, plan-first and verifiable disk-management workflow for Linux, Windows and Android.">
+  <meta name="twitter:image" content="${SOCIAL_IMAGE}">
+`;
 const HU_STATIC_REPLACEMENTS = [
   ['>FORMATX / LIVING CORE<', '>FORMATX / ÉLŐ MAG<'],
   ['>RESPONSIVE SYSTEM ARCHITECTURE<', '>RESZPONZÍV RENDSZERARCHITEKTÚRA<'],
@@ -147,12 +165,17 @@ async function serveLanguagePage(request, env, pathname, languageHint) {
 
   let html = await upstream.text();
   if (SCIFI_ENTRY_PATHS.has(pathname)) {
+    const isEnglish = languageHint === 'en';
     for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
-    if (languageHint !== 'en') {
+    if (isEnglish) {
+      html = html.replace('<html lang="hu"', '<html lang="en"');
+    } else {
       for (const [before, after] of HU_STATIC_REPLACEMENTS) html = html.replaceAll(before, after);
+      html = html.replace('<title>FormatX Suite Pro | Living System Architecture</title>', '<title>FormatX Suite Pro | Élő rendszerarchitektúra</title>');
+      html = html.replace('content="FormatX Suite Pro — Living System Architecture"', 'content="FormatX Suite Pro — Élő rendszerarchitektúra"');
     }
-    if (!html.includes('data-fx-award-meta="r217"')) {
-      html = html.replace('</head>', AWARD_META + '</head>');
+    if (!html.includes('data-fx-award-meta="r218"')) {
+      html = html.replace('</head>', (isEnglish ? AWARD_META_EN : AWARD_META_HU) + '</head>');
     }
   }
   if (!html.includes('data-fx-single-language-style')) {
