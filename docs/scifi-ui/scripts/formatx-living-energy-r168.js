@@ -13,6 +13,7 @@ root.dataset.fxLivingEnergyCompatR183=COMPAT_R183;
 root.dataset.fxLivingEnergyCompatSchedulerR175=COMPAT_SCHEDULER_R175;
 root.dataset.fxLivingEnergyCompatSchedulerR182=COMPAT_SCHEDULER_R182;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+if(reduced.matches){root.dataset.fxLivingEnergyR168='reduced-skip';root.dataset.fxLivingEnergyClockR168='reduced-skip';return;}
 const mobile=matchMedia('(max-width:900px), (pointer:coarse)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const gauss=(x,c,w)=>Math.exp(-Math.pow((x-c)/w,2));

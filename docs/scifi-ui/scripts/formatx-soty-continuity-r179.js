@@ -13,6 +13,7 @@ root.dataset.fxSotyContinuityR179='booting';
 root.dataset.fxSotyVersionR179=VERSION;
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+if(reduced.matches){root.dataset.fxSotyContinuityR179='reduced-skip';root.dataset.fxSotyModeR179='reduced-skip';return;}
 const coarse=matchMedia('(pointer:coarse)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const lerp=(a,b,t)=>a+(b-a)*t;
