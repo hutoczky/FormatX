@@ -1,17 +1,19 @@
 'use strict';
-// r185b public-integrity revalidation: first-paint-stable narrative + responsive composition + current display-synced optical scheduler.
+// r227 public-integrity revalidation: first-paint-stable narrative + responsive composition + current display-synced optical scheduler.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const repo=path.resolve(__dirname,'../..');
 const read=f=>fs.readFileSync(path.join(repo,f),'utf8');
 const index=read('docs/scifi-ui/index.html');
 const css=read('docs/scifi-ui/styles/formatx-award-narrative-r175.css');
+const criticalNarrative=read('docs/scifi-ui/styles/formatx-critical-narrative-r227.css');
 const js=read('docs/scifi-ui/scripts/formatx-award-narrative-r175.js');
 const energy=read('docs/scifi-ui/scripts/formatx-living-energy-r168.js');
 
-for(const token of [
-  'formatx-award-narrative-r175.css?v=20260816-r175-award-narrative',
-  'formatx-award-narrative-r175.js?v=20260816-r175-award-narrative'
-])assert.ok(index.includes(token),`missing r175 index asset ${token}`);
+assert.ok(index.includes('formatx-critical-narrative-r227.css?v=20260819-r227'),'missing r227 critical narrative bundle');
+assert.ok(index.includes('formatx-award-narrative-r175.js?v=20260816-r175-award-narrative'),'missing r175 narrative JS asset');
+assert.equal((index.match(/formatx-critical-narrative-r227\.css/g)||[]).length,1,'critical narrative bundle must load once');
+assert.ok(criticalNarrative.includes('BEGIN formatx-award-narrative-r175.css'),'critical narrative bundle must identify its canonical r175 source');
+assert.ok(criticalNarrative.includes(css),'critical narrative bundle must contain the complete canonical r175 CSS');
 
 for(const token of [
   'data-fx-design-system="2"',
@@ -48,4 +50,4 @@ for(const token of [
 ])assert.ok(energy.includes(token),`missing current display-synced optical scheduler contract ${token}`);
 assert.doesNotMatch(energy,/setInterval\s*\(tick\s*,\s*32\s*\)/,'legacy 32ms tick setInterval still present');
 new Function(js);new Function(energy);
-console.log('PASS: r185b award narrative, responsive composition, reduced motion and r183 display-synchronised optical runtime are valid.');
+console.log('PASS: r227 bundled award narrative, responsive composition, reduced motion and r183 display-synchronised optical runtime are valid.');
