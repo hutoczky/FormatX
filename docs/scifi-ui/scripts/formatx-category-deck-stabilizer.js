@@ -4,6 +4,7 @@
   const root = document.documentElement;
   if (root.dataset.fxCategoryDeckStabilizer === 'v1') return;
   root.dataset.fxCategoryDeckStabilizer = 'v1';
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
   const NAVIGATION = {
     hu: ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
@@ -24,6 +25,10 @@
   }
 
   function ensureReadabilityFloor() {
+    if (reducedMotion.matches) {
+      root.dataset.fxEarlyReadabilityFloor = 'critical-r236';
+      return;
+    }
     if (document.querySelector('link[data-fx-early-readability-floor]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
