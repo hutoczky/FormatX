@@ -14,7 +14,8 @@ const CASES = [
     header: '.topbar',
     action: '.hero-actions .button',
     sheet: 'link[data-fx-critical-core-r227]',
-    sheetPattern: /formatx-critical-core-r227\.css/
+    sheetPattern: /formatx-critical-core-r227\.css/,
+    waitForMotionCss: true
   },
   {
     name: 'checkout',
@@ -76,6 +77,15 @@ async function inspect(browser, config, viewport) {
     return document.documentElement.dataset.fxDesignSystem === '2' && link && link.sheet;
   }, config.sheet, { timeout: 20000 });
 
+  if (config.waitForMotionCss) {
+    await page.waitForFunction(() => {
+      const link = document.querySelector('link[data-fx-runtime-static-r243="true"]');
+      return document.documentElement.dataset.fxMotionCssR243 === 'external-strict-csp'
+        && document.documentElement.dataset.fxMotionRuntimeR239 === 'requested-r243'
+        && link && link.sheet;
+    }, null, { timeout: 20000 });
+  }
+
   const action = page.locator(config.action).first();
   await action.waitFor({ state: 'visible', timeout: 15000 });
   await action.focus();
@@ -112,6 +122,7 @@ async function inspect(browser, config, viewport) {
 
     return {
       designSystem: root.dataset.fxDesignSystem || '',
+      motionCss: root.dataset.fxMotionCssR243 || '',
       sheetHref: sheet?.href || '',
       sheetLoaded: Boolean(sheet?.sheet),
       cyan: rootStyle.getPropertyValue('--fx-cyan').trim(),
@@ -143,6 +154,7 @@ async function inspect(browser, config, viewport) {
   });
 
   assert.equal(result.designSystem, '2');
+  if (config.waitForMotionCss) assert.equal(result.motionCss, 'external-strict-csp');
   assert.equal(result.sheetLoaded, true);
   assert.match(result.sheetHref, config.sheetPattern);
   assert.equal(result.cyan.toLowerCase(), '#7cecff');
