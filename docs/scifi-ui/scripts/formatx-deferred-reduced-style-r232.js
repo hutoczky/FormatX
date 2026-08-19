@@ -1,18 +1,24 @@
-/* FormatX r232 — activate the full reduced-motion stylesheet after first paint. */
-/* r232 validation marker: tiny critical shell + post-paint full reduced styling. */
+/* FormatX r233 — interaction-gated full reduced-motion stylesheet. */
 (function(){
 'use strict';
 const root=document.documentElement;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const link=document.querySelector('link[data-fx-critical-reduced-r228]');
 if(!reduced.matches||!(link instanceof HTMLLinkElement)){
-  root.dataset.fxReducedStyleR232=reduced.matches?'missing-link':'not-required';
+  root.dataset.fxReducedStyleR233=reduced.matches?'missing-link':'not-required';
   return;
 }
+let active=false;
 const activate=()=>{
-  if(link.media==='all')return;
+  if(active||link.media==='all')return;
+  active=true;
   link.media='all';
-  root.dataset.fxReducedStyleR232='activated-after-first-paint';
+  root.dataset.fxReducedStyleR233='activated-on-user-intent';
+  for(const [type,opts] of listeners)removeEventListener(type,activate,opts);
 };
-requestAnimationFrame(()=>requestAnimationFrame(activate));
+const passive={passive:true};
+const listeners=[['wheel',passive],['touchstart',passive],['pointerdown',passive],['scroll',passive],['keydown',false]];
+for(const [type,opts] of listeners)addEventListener(type,activate,opts);
+if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')activate();
+else root.dataset.fxReducedStyleR233='armed';
 }());
