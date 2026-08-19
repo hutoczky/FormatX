@@ -20,6 +20,22 @@ const R206_BOOTSTRAP = [
 ].join('\n  ');
 const STARTUP_REVISION = '20260818-r208-flicker-free-owner';
 const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r208=1(?:;|$)/;
+const HOMEPAGE_LANGUAGE_META = {
+  hu: {
+    title: 'FormatX Suite Pro | Technikusi operációs réteg',
+    description: 'Független technikusi operációs réteg diagnosztikához, telepítéshez, meghajtókezeléshez és ellenőrizhető karbantartáshoz.',
+    locale: 'hu_HU',
+    alternateLocale: 'en_GB',
+    inLanguage: 'hu-HU',
+  },
+  en: {
+    title: 'FormatX Suite Pro | Technician Operating Layer',
+    description: 'An independent technician operating layer for diagnostics, installation, drive management and verifiable maintenance. Full release with a 5-day trial licence.',
+    locale: 'en_GB',
+    alternateLocale: 'hu_HU',
+    inLanguage: 'en-GB',
+  },
+};
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
@@ -340,13 +356,28 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   });
 }
 
+function replaceMetaContent(html, attribute, name, value) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`(<meta\\b(?=[^>]*\\b${attribute}=["']${escaped}["'])[^>]*\\bcontent=["'])[^"']*(["'][^>]*>)`, 'i');
+  return html.replace(pattern, `$1${value}$2`);
+}
+
 function alignHomepageLanguageMetadata(html, publicUrl) {
   const language = supportedLanguage(publicUrl.searchParams.get('lang'));
   const canonical = canonicalHomepageUrl(publicUrl);
+  const metadata = language ? HOMEPAGE_LANGUAGE_META[language] : null;
   let output = String(html || '');
 
   if (language) {
     output = output.replace(/<html\b([^>]*?)\blang=["'][^"']*["']/i, `<html$1lang="${language}"`);
+    output = output.replace(/(<title>)[\s\S]*?(<\/title>)/i, `$1${metadata.title}$2`);
+    output = replaceMetaContent(output, 'name', 'description', metadata.description);
+    output = replaceMetaContent(output, 'property', 'og:title', metadata.title);
+    output = replaceMetaContent(output, 'property', 'og:description', metadata.description);
+    output = replaceMetaContent(output, 'property', 'og:locale', metadata.locale);
+    output = replaceMetaContent(output, 'property', 'og:locale:alternate', metadata.alternateLocale);
+    output = replaceMetaContent(output, 'name', 'twitter:title', metadata.title);
+    output = replaceMetaContent(output, 'name', 'twitter:description', metadata.description);
   }
 
   output = output.replace(
@@ -357,6 +388,28 @@ function alignHomepageLanguageMetadata(html, publicUrl) {
     /(<meta\b[^>]*\bproperty=["']og:url["'][^>]*\bcontent=["'])[^"']*(["'][^>]*>)/i,
     `$1${canonical}$2`,
   );
+
+  if (language) {
+    output = output.replace(
+      /(<script\b[^>]*\bid=["']formatx-structured-data["'][^>]*>)([\s\S]*?)(<\/script>)/i,
+      (match, open, rawJson, close) => {
+        try {
+          const payload = JSON.parse(rawJson);
+          const graph = Array.isArray(payload?.['@graph']) ? payload['@graph'] : [];
+          const webPage = graph.find((node) => node && node['@type'] === 'WebPage');
+          if (!webPage) return match;
+          webPage['@id'] = `${canonical}#webpage`;
+          webPage.url = canonical;
+          webPage.name = metadata.title;
+          webPage.description = metadata.description;
+          webPage.inLanguage = metadata.inLanguage;
+          return `${open}${JSON.stringify(payload)}${close}`;
+        } catch (_) {
+          return match;
+        }
+      },
+    );
+  }
 
   return output;
 }
