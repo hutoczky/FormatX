@@ -92,7 +92,7 @@ async function commonAssertions(page, mobile) {
       const style = getComputedStyle(element), rect = element.getBoundingClientRect();
       return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
     };
-    const primary = [...document.querySelectorAll('[data-fx-single-language-toggle="ready-v2"]')];
+    const primary = [...document.querySelectorAll('[data-fx-single-language-toggle="ready-v3"]')];
     const toggles = [...document.querySelectorAll('.fx-language-toggle')];
     return { primary: primary.length, toggles: toggles.length, visibleToggles: toggles.filter(visible).length };
   });
