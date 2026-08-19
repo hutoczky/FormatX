@@ -1,4 +1,4 @@
-/* r226 validation marker: reduced-motion skips nonessential visual runtimes while normal desktop keeps the full apex layer. */
+/* r227 validation marker: critical CSS fan-out is bundled without changing the normal desktop apex behavior. */
 (function(){
 'use strict';
 const root=document.documentElement;
