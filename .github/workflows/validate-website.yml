@@ -15,6 +15,7 @@ on:
       - '.github/scripts/validate-content-standard.py'
       - '.github/scripts/validate-content-standard-v2.py'
       - '.github/scripts/validate-public-release-integration.py'
+      - '.github/scripts/validate-public-canonical-hosts.cjs'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-thought-genome.cjs'
@@ -37,6 +38,7 @@ on:
       - '.github/scripts/validate-content-standard.py'
       - '.github/scripts/validate-content-standard-v2.py'
       - '.github/scripts/validate-public-release-integration.py'
+      - '.github/scripts/validate-public-canonical-hosts.cjs'
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-thought-genome.cjs'
@@ -74,6 +76,7 @@ jobs:
         run: |
           python3 .github/scripts/validate-content-standard-v2.py
           python3 .github/scripts/validate-public-release-integration.py
+          node .github/scripts/validate-public-canonical-hosts.cjs
 
       - name: Validate JavaScript syntax
         shell: bash
@@ -103,6 +106,7 @@ jobs:
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
           node --check docs/scifi-ui/scripts/mobile-core-engine-v3.js
+          node --check .github/scripts/validate-public-canonical-hosts.cjs
           node --check .github/scripts/validate-content-visuals.cjs
           node --check .github/scripts/validate-public-pages-browser.cjs
           node --check .github/scripts/validate-thought-genome.cjs
