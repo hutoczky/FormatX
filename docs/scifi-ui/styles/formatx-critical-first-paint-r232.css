@@ -47,6 +47,7 @@
   footer.site-footer nav{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:8px 12px!important}
   footer.site-footer nav+nav{margin-top:10px!important}
   footer.site-footer nav a{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:44px!important;min-height:44px!important;padding:8px 10px!important;margin:0!important;line-height:1.25!important;text-decoration:none}
+  footer.site-footer .footer-bottom>a{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:44px!important;min-height:44px!important;padding:8px 10px!important;margin:0!important;line-height:1.25!important;text-decoration:none}
 }
 @media (prefers-reduced-motion:reduce) and (min-width:901px){
   #hero-title{max-width:650px!important}
