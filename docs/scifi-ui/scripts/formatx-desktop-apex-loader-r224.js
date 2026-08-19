@@ -1,4 +1,4 @@
-/* r227 validation marker: critical CSS fan-out is bundled without changing the normal desktop apex behavior. */
+/* r228 validation marker: reduced-motion uses one critical stylesheet while normal desktop keeps the full apex cascade. */
 (function(){
 'use strict';
 const root=document.documentElement;
