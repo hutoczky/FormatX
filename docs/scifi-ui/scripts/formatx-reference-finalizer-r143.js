@@ -1,5 +1,6 @@
 (function(){
 'use strict';
+// r210 production revalidation: visual output unchanged; cache layout geometry only.
 const root=document.documentElement;
 let raf=0,bootTries=0,tail=null,tailCtx=null,lastW=0,lastH=0,layoutDirty=true,geom=null,observedStage=null,observedGrid=null;
 const imp=(el,prop,value)=>{if(el instanceof HTMLElement&&el.style.getPropertyValue(prop)!==value)el.style.setProperty(prop,value,'important');};
