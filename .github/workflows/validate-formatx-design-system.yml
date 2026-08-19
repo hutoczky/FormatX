@@ -1,4 +1,4 @@
-# Validation trigger revision 7
+# Validation trigger revision 8
 name: Validate FormatX Design System
 
 on:
@@ -68,8 +68,9 @@ jobs:
           grep -Fq -- '--fx-radius-lg: 30px 7px 30px 7px' docs/scifi-ui/styles/formatx-design-system.css
           grep -Fq 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/formatx-design-system.css
           grep -Fq 'prefers-reduced-transparency: reduce' docs/scifi-ui/styles/formatx-design-system.css
-          grep -Fq 'contain:layout paint' docs/scifi-ui/styles/formatx-runtime-static-r243.css
           grep -Fq 'external-strict-csp' docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
+          grep -Fq 'fx-r155-heartbeat-core' docs/scifi-ui/styles/formatx-runtime-static-r243.css
+          grep -Fq 'fx-r168-spectrum' docs/scifi-ui/styles/formatx-runtime-static-r243.css
 
       - name: Install Chromium
         shell: bash
