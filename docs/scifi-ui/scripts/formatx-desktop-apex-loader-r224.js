@@ -1,4 +1,4 @@
-/* r228 validation marker: reduced-motion uses one critical stylesheet while normal desktop keeps the full apex cascade. */
+/* r230 validation marker: hero simulator CTA is first-paint stable; normal desktop apex behavior is unchanged. */
 (function(){
 'use strict';
 const root=document.documentElement;
