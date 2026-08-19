@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r161-cross-device-seamless-carrier-lock';
+const VERSION='r209-cross-device-seamless-carrier-no-style-feedback';
 if(root.dataset.fxSeamlessEnforcerR159===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxSeamlessEnforcerR159='audit-skip';return;}
 root.dataset.fxSeamlessEnforcerR159='booting';
@@ -72,8 +72,14 @@ function schedule(){
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{enforce();schedule();},{once:true});else enforce();
+/* Do not observe style mutations here. The living MAG optics intentionally
+   update element styles/CSS variables every animation frame. Observing those
+   writes turned this static surface guard into a document-wide feedback loop,
+   forcing repeated selector/layout work without changing the intended output.
+   Child insertions and the two semantic state attributes are sufficient to
+   re-apply the carrier contract when the relevant structure actually changes. */
 const mo=new MutationObserver(schedule);
-mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','data-fx-mobile-reference-layout','data-fx-core-reference-texture-r130']});
+mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['data-fx-mobile-reference-layout','data-fx-core-reference-texture-r130']});
 addEventListener('pageshow',()=>{enforce();schedule();},{passive:true});
 addEventListener('resize',schedule,{passive:true});
 setTimeout(enforce,0);setTimeout(enforce,250);setTimeout(enforce,900);
