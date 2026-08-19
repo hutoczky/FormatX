@@ -1,4 +1,5 @@
 /* FormatX r233 — interaction-gated full reduced-motion stylesheet. */
+/* r233 validation marker: no automatic post-paint stylesheet activation. */
 (function(){
 'use strict';
 const root=document.documentElement;
