@@ -161,3 +161,107 @@
 }
 
 /* r206 marker: readable hero + immediate MAG fallback + stable mobile geometry. */
+
+/* r209 — typography stability / anti-flash pass.
+   Keep the living graphics moving, but never animate readable copy itself. */
+html[data-fx-design-system="2"] body.living-architecture :where(
+  #hero-title,
+  #hero-title .hero-title-main,
+  #hero-title .hero-title-sub,
+  #hero .hero-copy .kicker,
+  #hero .hero-copy .fx-category-definition,
+  #hero .hero-copy .hero-lead,
+  #hero .hero-copy .fx-method-inline,
+  #hero .hero-copy .hero-facts,
+  .section-heading,
+  .section-heading .section-index,
+  .section-heading h2,
+  .section-heading h2 span,
+  .section-heading h2 em,
+  .fx-organism-status-index,
+  .fx-organism-status small,
+  .fx-organism-status strong,
+  .fx-rail a,
+  .fx-rail a span,
+  .main-nav a,
+  .topbar .brand strong,
+  .topbar .brand small,
+  .fx-r181-apex-meta,
+  .fx-r181-apex-meta b,
+  .flow-state,
+  .flow-state span,
+  .flow-state strong,
+  .flow-state small,
+  .flow-chapters article h3,
+  .flow-chapters article p,
+  .flow-chapters article small,
+  .card h3,
+  .card p,
+  .card b,
+  .price-card h3,
+  .price-card p,
+  .price-card li,
+  .price-card .price,
+  .payment h3,
+  .payment p,
+  .fx-plan-qr-copy,
+  .system-grid article h3,
+  .system-grid article p,
+  .release-layout h2,
+  .release-layout p,
+  .release-card,
+  .loop-note
+) {
+  animation: none !important;
+  will-change: auto !important;
+}
+
+/* Scroll chapter selection used to dim/translate future headings. Near an
+   IntersectionObserver boundary that can read as text flicker. Keep copy fixed;
+   the ambient carrier still communicates the active chapter. */
+html[data-fx-design-system="2"] body.living-architecture section.scene[data-fx-story-state] > .section-heading {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* r175 chapter hand-off previously adds a sudden brightness jump. Preserve the
+   signal without a visible flash. */
+html[data-fx-story-pulse-r175="on"] .fx-rail-progress,
+html[data-fx-story-pulse-r175="on"] .fx-organism-status i {
+  filter: none !important;
+  opacity: .74 !important;
+}
+
+/* Mobile/reference labels are text, not lighting effects. Do not place them on
+   compositor-driven opacity/filter animations. */
+@media (max-width: 900px), (pointer: coarse) {
+  html body.living-architecture #hero :where(
+    .fx-reference-heading,
+    .fx-reference-heading *,
+    .fx-reference-proof,
+    .fx-reference-proof *,
+    .fx-reference-ask span,
+    .fx-reference-liveos,
+    .fx-reference-liveos *,
+    .fx-language-toggle,
+    .fx-reference-mag-button
+  ) {
+    animation: none !important;
+    transition-property: color, border-color, background-color, box-shadow, transform !important;
+    will-change: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-fx-design-system="2"] body.living-architecture :where(
+    .section-heading,
+    .hero-copy,
+    .fx-reference-heading,
+    .fx-reference-proof,
+    .fx-organism-status
+  ) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
