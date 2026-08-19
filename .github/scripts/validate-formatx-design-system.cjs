@@ -8,7 +8,7 @@ const BASE = 'http://127.0.0.1:4181/scifi-ui/';
 const CASES = [
   {
     name: 'main',
-    url: 'index.html?lang=hu&lighthouse=1',
+    url: 'index.html?lang=hu',
     ready: '.fx-category-deck',
     panel: '.fx-category-deck',
     header: '.topbar',
