@@ -1,4 +1,4 @@
-# Validation trigger revision 6
+# Validation trigger revision 7
 name: Validate FormatX Design System
 
 on:
@@ -11,6 +11,8 @@ on:
       - 'docs/scifi-ui/project-simulator.html'
       - 'docs/scifi-ui/styles/formatx-critical-core-r227.css'
       - 'docs/scifi-ui/styles/formatx-design-system.css'
+      - 'docs/scifi-ui/styles/formatx-runtime-static-r243.css'
+      - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
       - '.github/scripts/validate-formatx-design-system.cjs'
       - '.github/workflows/validate-formatx-design-system.yml'
   pull_request:
@@ -21,6 +23,8 @@ on:
       - 'docs/scifi-ui/project-simulator.html'
       - 'docs/scifi-ui/styles/formatx-critical-core-r227.css'
       - 'docs/scifi-ui/styles/formatx-design-system.css'
+      - 'docs/scifi-ui/styles/formatx-runtime-static-r243.css'
+      - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
       - '.github/scripts/validate-formatx-design-system.cjs'
       - '.github/workflows/validate-formatx-design-system.yml'
 
@@ -50,8 +54,10 @@ jobs:
         run: |
           set -euo pipefail
           node --check .github/scripts/validate-formatx-design-system.cjs
+          node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
           test -s docs/scifi-ui/styles/formatx-critical-core-r227.css
           test -s docs/scifi-ui/styles/formatx-design-system.css
+          test -s docs/scifi-ui/styles/formatx-runtime-static-r243.css
           grep -Fq 'data-fx-design-system="2"' docs/scifi-ui/index.html
           grep -Fq 'data-fx-design-system="2"' docs/scifi-ui/checkout.html
           grep -Fq 'data-fx-design-system="2"' docs/scifi-ui/project-simulator.html
@@ -62,6 +68,8 @@ jobs:
           grep -Fq -- '--fx-radius-lg: 30px 7px 30px 7px' docs/scifi-ui/styles/formatx-design-system.css
           grep -Fq 'prefers-reduced-motion: reduce' docs/scifi-ui/styles/formatx-design-system.css
           grep -Fq 'prefers-reduced-transparency: reduce' docs/scifi-ui/styles/formatx-design-system.css
+          grep -Fq 'contain:layout paint' docs/scifi-ui/styles/formatx-runtime-static-r243.css
+          grep -Fq 'external-strict-csp' docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
 
       - name: Install Chromium
         shell: bash
