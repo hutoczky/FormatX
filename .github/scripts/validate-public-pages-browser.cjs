@@ -163,8 +163,18 @@ async function assertAndroidStatus(browser, viewport, name) {
   const text = await page.locator('body').innerText();
   assert(/ANDROID TELJES|Android full release/i.test(text), `${name}: full-release copy missing`);
   assert(/NATÍV BÉTA|Native beta/i.test(text), `${name}: beta-channel separation missing`);
+
   const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
-  assert(canonical === 'https://www.formatxsuite.com/scifi-ui/android/', `${name}: canonical URL mismatch`);
+  const ogUrl = await page.locator('meta[property="og:url"]').getAttribute('content');
+  const alternates = await page.locator('link[rel="alternate"][hreflang]').evaluateAll(nodes => Object.fromEntries(
+    nodes.map(node => [node.hreflang, node.href]),
+  ));
+  assert(canonical === 'https://formatxsuite.com/scifi-ui/android/', `${name}: canonical URL mismatch`);
+  assert(ogUrl === canonical, `${name}: og:url must match canonical`);
+  assert(alternates.hu === 'https://formatxsuite.com/scifi-ui/android/?lang=hu', `${name}: HU hreflang mismatch`);
+  assert(alternates.en === 'https://formatxsuite.com/scifi-ui/android/?lang=en', `${name}: EN hreflang mismatch`);
+  assert(alternates['x-default'] === canonical, `${name}: x-default hreflang mismatch`);
+
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 2, `${name}: horizontal overflow ${overflow}px`);
 
