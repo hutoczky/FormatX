@@ -225,3 +225,38 @@ html body.living-architecture #hero .fx-reference-heading::before{
     opacity:1!important;
   }
 }
+
+/* r210 — viewport-field stability.
+   The living pulse belongs to the crystal, not to the readable hero/proof surface. */
+@media (max-width:900px),(pointer:coarse){
+  html body.living-architecture #hero{
+    background:
+      radial-gradient(ellipse 86% 58% at 50% 37%,rgba(27,181,232,.105),rgba(29,83,158,.045) 42%,transparent 73%),
+      radial-gradient(ellipse 70% 48% at 59% 45%,rgba(142,67,255,.052),transparent 72%),
+      linear-gradient(180deg,#01040c 0%,#020917 31%,#031a31 64%,#031324 80%,#010711 100%)!important;
+  }
+  html body.living-architecture #hero::before{
+    background:
+      radial-gradient(circle at 50% 49%,rgba(224,254,255,.105) 0 1.2%,rgba(67,229,255,.062) 7%,rgba(138,67,255,.038) 20%,transparent 44%),
+      radial-gradient(ellipse at 50% 64%,rgba(26,143,205,.05),transparent 64%)!important;
+    opacity:.62!important;
+    filter:blur(18px)!important;
+    transition:none!important;
+    will-change:auto!important;
+  }
+  html body.living-architecture #hero .fx-reference-heading,
+  html body.living-architecture #hero .fx-reference-proof{
+    opacity:1!important;
+    filter:none!important;
+    mix-blend-mode:normal!important;
+    will-change:auto!important;
+  }
+}
+
+@media (min-width:901px) and (pointer:fine){
+  html body.living-architecture #hero::before{
+    opacity:.64!important;
+    filter:blur(18px)!important;
+    transition:none!important;
+  }
+}
