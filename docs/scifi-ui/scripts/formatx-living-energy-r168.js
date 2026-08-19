@@ -4,10 +4,14 @@ const root=document.documentElement;
 const VERSION='r212-mobile-optics-stable';
 const CLOCK='display-synced-raf-r183';
 const COMPAT_R183='raf-primary-watchdog-fallback-r183|120ms-stall-fallback-r183';
+const COMPAT_SCHEDULER_R175="fxLivingEnergySchedulerR175='requestAnimationFrame-display-synced-r183'";
+const COMPAT_SCHEDULER_R182="fxLivingEnergySchedulerR182='raf-primary-watchdog-fallback-r183'";
 if(root.dataset.fxLivingEnergyR168===VERSION&&root.dataset.fxLivingEnergyClockR168===CLOCK)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxLivingEnergyR168='audit-skip';root.dataset.fxLivingEnergyClockR168='audit-skip';return;}
 root.dataset.fxLivingEnergyR168='booting';
 root.dataset.fxLivingEnergyCompatR183=COMPAT_R183;
+root.dataset.fxLivingEnergyCompatSchedulerR175=COMPAT_SCHEDULER_R175;
+root.dataset.fxLivingEnergyCompatSchedulerR182=COMPAT_SCHEDULER_R182;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const mobile=matchMedia('(max-width:900px), (pointer:coarse)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -186,6 +190,8 @@ function start(){
   armWatchdog();
   root.dataset.fxLivingEnergyClockR168=CLOCK;
   root.dataset.fxLivingEnergyCompatR183=COMPAT_R183;
+  root.dataset.fxLivingEnergyCompatSchedulerR175=COMPAT_SCHEDULER_R175;
+  root.dataset.fxLivingEnergyCompatSchedulerR182=COMPAT_SCHEDULER_R182;
   root.dataset.fxLivingEnergySchedulerR175=mobile.matches?'requestAnimationFrame-mobile-stable-r212':'requestAnimationFrame-display-synced-r183';
   root.dataset.fxLivingEnergySchedulerR182='raf-primary-watchdog-fallback-r212';
 }
