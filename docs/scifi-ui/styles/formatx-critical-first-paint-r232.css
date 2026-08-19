@@ -26,6 +26,12 @@
   #hero .hero-actions{display:flex!important;flex-wrap:wrap!important;gap:10px!important;width:100%!important;min-height:50px!important;margin-top:24px!important}.hero-actions .button{min-height:50px}
   #hero .hero-facts{display:flex!important;flex-wrap:wrap!important;gap:18px 34px!important;width:100%!important;min-height:44px!important;margin-top:22px!important}.hero-facts span{display:flex;align-items:baseline;gap:8px}.hero-facts b{font-size:22px}.hero-facts small{color:#9eb2be;font-size:9px;text-transform:uppercase}
   #main-content>section.scene:not(#hero){content-visibility:auto;contain-intrinsic-size:900px 1100px}
+
+  /* r236 — embedded readability floor, replacing a second VeryHigh stylesheet request. */
+  :where(.section-index,.eyebrow,.kicker,.hero-label b,.hero-label span,.fx-organism-status small,.fx-organism-status-index,.fx-organism-chapter-index,.fx-organism-chapter-action,.fx-organism-console-kicker,.fx-organism-console-nav button,.fx-organism-actionbar a,.fx-organism-thought-label,.fx-organism-privacy,.fx-plan-qr-copy small,.price-card header b,.payment-console small,.main-nav a,.fx-rail a span){font-size:max(10px,.67rem)!important;line-height:1.35!important}
+  .fx-organism-status small{color:#aab8c2!important;font-size:max(10px,.67rem)!important;line-height:1.35!important}
+  :where(.fx-platform-status-badge,.fx-product-release-state small,.fx-platform-card header small,.site-footer small,.legal-document small,.checkout-note,.form-feedback){font-size:max(12px,.75rem)!important;line-height:1.5!important}
+  :where(button,a,input,select,textarea){text-rendering:optimizeLegibility}
 }
 @media (prefers-reduced-motion:reduce) and (max-width:900px){
   .topbar{position:relative!important;grid-template-columns:auto auto!important;justify-content:space-between!important;min-height:64px!important;padding:8px 14px!important}.main-nav,.header-support,.header-buy{display:none!important}.header-actions{justify-self:end}.language-switch button{min-width:42px!important;min-height:42px!important}.menu-toggle{display:none!important}
@@ -39,6 +45,8 @@
   #hero .fx-method-inline{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;min-height:100px!important;margin-top:22px!important}.fx-method-inline li{justify-content:center;min-height:46px;text-align:center}
   #hero .hero-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;min-height:170px!important;margin-top:22px!important}.hero-actions .button{width:100%!important;min-height:50px!important;text-align:center!important}
   #hero .hero-facts{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;min-height:132px!important;margin-top:20px!important}.hero-facts span{min-height:36px}
+  :where(.section-index,.eyebrow,.kicker,.fx-organism-status small,.fx-organism-status-index,.fx-organism-chapter-index,.fx-organism-chapter-action,.fx-organism-actionbar a,.fx-organism-thought-label,.fx-organism-privacy,.fx-plan-qr-copy small,.price-card header b,.main-nav a){font-size:11px!important}
+  .fx-organism-actionbar a{min-height:44px;padding-inline:12px!important;white-space:normal!important;text-align:center}
 }
 
 /* r234 — final Lighthouse polish: keep reduced-mode title from becoming a late
