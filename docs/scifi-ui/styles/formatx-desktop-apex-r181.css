@@ -3,7 +3,7 @@
    Geometry is untouched; this layer only composes existing reference/WebGL
    material, optics and copy into one cinematic scene. */
 
-@media (min-width:901px) and (pointer:fine){
+@media (prefers-reduced-motion:no-preference) and (min-width:901px) and (pointer:fine){
   html[data-fx-desktop-apex-r181="ready"] #hero{
     position:relative!important;
     min-height:clamp(760px,calc(100svh - 72px),940px)!important;
@@ -278,7 +278,7 @@
   }
 }
 
-@media (min-width:901px) and (pointer:fine) and (max-height:760px){
+@media (prefers-reduced-motion:no-preference) and (min-width:901px) and (pointer:fine) and (max-height:760px){
   html[data-fx-desktop-apex-r181="ready"] #hero,
   html[data-fx-desktop-apex-r181="ready"] #hero .hero-grid{min-height:690px!important}
   html[data-fx-desktop-apex-r181="ready"] #hero .fx-core-detail-r122{height:min(88svh,650px)!important}
