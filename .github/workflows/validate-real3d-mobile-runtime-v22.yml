@@ -1,4 +1,4 @@
-name: Validate responsive cinematic MAG v69 runtime
+name: Validate responsive cinematic MAG runtime
 on:
   push:
     branches: [master]
@@ -6,7 +6,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-core-real3d-v20.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
-      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
@@ -25,50 +25,55 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Validate v69 source contracts
+      - name: Validate current r99 source contracts
         run: |
-          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-v69.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/core-v69-responsive" && cd "$RUNNER_TEMP/core-v69-responsive"
+          mkdir -p "$RUNNER_TEMP/core-responsive" && cd "$RUNNER_TEMP/core-responsive"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify native v69 WebGL2 animation interaction layout performance and fail-open state
+      - name: Verify native r99 WebGL animation interaction layout performance and WebGL1 fallback
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-v69-server.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/core-responsive-server.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/core-v69-responsive"
+          cd "$RUNNER_TEMP/core-responsive"
           node <<'NODE'
-          const assert=require('node:assert/strict');const {chromium}=require('playwright');
-          async function scenario(browser,block){
-            const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'}),page=await ctx.newPage();
-            if(block)await page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,attrs){if(type==='webgl2')return null;return original.call(this,type,attrs);};});
+          const assert=require('node:assert/strict');
+          const {chromium}=require('playwright');
+          async function scenario(browser,blockWebGL2){
+            const ctx=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'hu-HU'});
+            const page=await ctx.newPage();
+            if(blockWebGL2)await page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,attrs){if(type==='webgl2')return null;return original.call(this,type,attrs);};});
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
-            if(!block){
-              await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69',null,{timeout:45000});
-              await page.waitForFunction(()=>document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:15000});
-              await page.waitForTimeout(1200);
-              const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])]}));
-              await page.touchscreen.tap(195,330);await page.waitForTimeout(360);
-              const state=await page.evaluate(()=>{const root=document.documentElement,canvas=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),box=canvas?.getBoundingClientRect(),genome=document.querySelector('.fx-genome-launcher'),sound=document.querySelector('.fx-three-sound'),pause=document.querySelector('.fx-reference-pause'),pauseBox=pause?.getBoundingClientRect();return{renderer:root.dataset.fxCoreRenderer,geometry:root.dataset.fxCoreReferenceGeometry,material:root.dataset.fxCoreReferenceMaterial,reactor:root.dataset.fxCoreInternalReactor,fidelity:root.dataset.fxCoreReferenceFidelity,performance:root.dataset.fxCorePerformance,animation:root.dataset.fxCoreAnimation,interaction:root.dataset.fxCoreInteractionVisual,v55:root.dataset.fxCoreMobileV55,v69:root.dataset.fxCoreMobileV69,layout:root.dataset.fxMobileReferenceLayout,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,legacyStages:document.querySelectorAll('.fx-core-mesh3d-stage,.fx-core-fracture3d-stage,.fx-transcend-shell[data-fx-native-apex="true"]').length,width:box?.width||0,height:box?.height||0,vw:innerWidth,vh:innerHeight,gl:Boolean(canvas?.getContext('webgl2')),glError:canvas?.getContext('webgl2')?.getError(),energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])],renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),heading:Boolean(document.querySelector('.fx-reference-heading')),proof:Boolean(document.querySelector('.fx-reference-proof')),rail:Boolean(document.querySelector('.fx-reference-rail')),genomeDisplay:genome?getComputedStyle(genome).display:'absent',soundDisplay:sound?getComputedStyle(sound).display:'absent',pauseTopMost:pauseBox?document.elementFromPoint(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2)===pause:false};});
-              assert.equal(state.renderer,'single-webgl2-mobile-cinematic-reference-glass-v69');assert.equal(state.geometry,'reference-target-organic-deep-concave-four-point-v69');assert.equal(state.material,'four-layer-luminous-fresnel-faceted-glass-v69');assert.equal(state.reactor,'white-cyan-reactor-six-orbitals-crossflare-v69');assert.equal(state.fidelity,'native-webgl2-only-no-raster-no-svg-v69');assert.equal(state.performance,'single-context-adaptive-60-plus-fps');assert.equal(state.animation,'continuous-native-webgl2-living-motion-v69');assert.equal(state.interaction,'direct-touch-drag-energy-burst-parallax-v69');assert.equal(state.v55,'ready-v55');assert.equal(state.v69,'ready-v69');assert.equal(state.layout,'ready-v1');assert.equal(state.canvases,1);assert.equal(state.legacyStages,0);assert.equal(state.gl,true);assert.equal(state.glError,0);assert.equal(state.heading,true);assert.equal(state.proof,true);assert.equal(state.rail,true);assert.ok(state.width<=state.vw+1&&state.height<=state.vh+1,JSON.stringify(state));assert.ok(state.energy>=before.energy,JSON.stringify({before,after:state}));assert.equal(state.position.length,3);assert.notDeepEqual(state.position,before.position);assert.ok(state.renderMs<16.67,JSON.stringify(state));assert.ok(['none','absent'].includes(state.genomeDisplay));assert.ok(['none','absent'].includes(state.soundDisplay));assert.equal(state.pauseTopMost,true);
-              const pauseBox=await page.locator('.fx-reference-pause').first().boundingBox();assert.ok(pauseBox);await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(80);const pausedFrom=await page.evaluate(()=>[document.querySelector('.fx-reference-pause')?.dataset.paused,[...(window.FormatXCoreCinematic?.corePosition||[])]]);await page.waitForTimeout(360);const pausedTo=await page.evaluate(()=>[document.querySelector('.fx-reference-pause')?.dataset.paused,[...(window.FormatXCoreCinematic?.corePosition||[])]]);assert.equal(pausedFrom[0],'true');assert.equal(pausedTo[0],'true');assert.deepEqual(pausedTo[1],pausedFrom[1]);await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(80);assert.equal(await page.locator('.fx-reference-pause').first().getAttribute('data-paused'),'false');
-              const lossSupported=await page.evaluate(()=>{const canvas=document.querySelector('.fx-core-mobile-v55-canvas'),gl=canvas?.getContext('webgl2'),ext=gl?.getExtension('WEBGL_lose_context');if(!ext)return false;canvas.dataset.recoveryProbe='old';ext.loseContext();return true;});assert.equal(lossSupported,true);await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='context-lost-v69',null,{timeout:5000});await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&Number(document.documentElement.dataset.fxCoreRecoveryAttempts||0)>=1,null,{timeout:10000});const recovered=await page.evaluate(()=>{const root=document.documentElement,canvas=document.querySelector('.fx-core-mobile-v55-canvas'),gl=canvas?.getContext('webgl2');return{context:root.dataset.fxCoreContext,verified:root.dataset.fxCoreFrameVerified,attempts:Number(root.dataset.fxCoreRecoveryAttempts||0),oldGone:!document.querySelector('[data-recovery-probe="old"]'),canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,error:gl?.getError(),lost:gl?.isContextLost()};});assert.equal(recovered.context,'webgl2');assert.equal(recovered.verified,'visible-native-3d-v71');assert.ok(recovered.attempts>=1);assert.equal(recovered.oldGone,true);assert.equal(recovered.canvases,1);assert.equal(recovered.error,0);assert.equal(recovered.lost,false);
-            }else{
-              await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileV69==='ready-v69'&&document.documentElement.dataset.fxCoreContext==='webgl1',null,{timeout:45000});
-              const fallback=await page.evaluate(()=>{const root=document.documentElement,canvas=document.querySelector('.fx-core-mobile-v55-canvas'),gl=canvas?.getContext('webgl');return{context:root.dataset.fxCoreContext,verified:root.dataset.fxCoreFrameVerified,recovery:root.dataset.fxCoreRecoveryContract,gl:Boolean(gl),error:gl?.getError(),canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length};});
-              assert.deepEqual(fallback,{context:'webgl1',verified:'visible-native-3d-v71',recovery:'webgl2-primary-webgl1-native-3d-self-healing-v71',gl:true,error:0,canvases:1});
-            }
+            await page.waitForFunction(()=>document.documentElement.dataset.fxCoreMobileR99==='ready-v69'&&document.documentElement.dataset.fxMobileReferenceLayout==='ready-v1',null,{timeout:45000});
+            await page.waitForTimeout(1200);
+            const before=await page.evaluate(()=>({energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])]}));
+            await page.touchscreen.tap(195,330);await page.waitForTimeout(360);
+            const state=await page.evaluate(()=>{const root=document.documentElement,canvas=document.querySelector('#hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas'),box=canvas?.getBoundingClientRect(),genome=document.querySelector('.fx-genome-launcher'),sound=document.querySelector('.fx-three-sound'),pause=document.querySelector('.fx-reference-pause'),pauseBox=pause?.getBoundingClientRect(),gl2=canvas?.getContext('webgl2'),gl=gl2||canvas?.getContext('webgl');return{renderer:root.dataset.fxCoreRenderer,geometry:root.dataset.fxCoreReferenceGeometry,material:root.dataset.fxCoreReferenceMaterial,interaction:root.dataset.fxCoreInteractionVisual,verified:root.dataset.fxCoreFrameVerified,gpu:root.dataset.fxGpuCapability,v55:root.dataset.fxCoreMobileV55,v69:root.dataset.fxCoreMobileV69,r99:root.dataset.fxCoreMobileR99,layout:root.dataset.fxMobileReferenceLayout,canvases:document.querySelectorAll('.fx-core-mobile-v55-canvas').length,legacyStages:document.querySelectorAll('.fx-core-mesh3d-stage,.fx-core-fracture3d-stage,.fx-transcend-shell[data-fx-native-apex="true"]').length,width:box?.width||0,height:box?.height||0,vw:innerWidth,vh:innerHeight,gl:Boolean(gl),glError:gl?.getError(),energy:Number(window.FormatXCoreMobileV69?.energy||0),position:[...(window.FormatXCoreCinematic?.corePosition||[])],renderMs:Number(root.dataset.fxCoreRenderMs||Infinity),heading:Boolean(document.querySelector('.fx-reference-heading')),proof:Boolean(document.querySelector('.fx-reference-proof')),rail:Boolean(document.querySelector('.fx-reference-rail')),genomeDisplay:genome?getComputedStyle(genome).display:'absent',soundDisplay:sound?getComputedStyle(sound).display:'absent',pauseTopMost:pauseBox?document.elementFromPoint(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2)===pause:false};});
+            assert.equal(state.renderer,'single-webgl-luminous-crystal-r99');
+            assert.equal(state.geometry,'reference-deep-concave-four-point-size-lock-r99');
+            assert.equal(state.material,'luminous-faceted-iceglass-caustic-r99');
+            assert.equal(state.interaction,'touch-pointer-breathing-spectral-refraction-r99');
+            assert.equal(state.verified,'visible-native-3d-r99');
+            assert.equal(state.gpu,blockWebGL2?'webgl1':'webgl2');
+            assert.equal(state.v55,'ready-v55');assert.equal(state.v69,'ready-v69');assert.equal(state.r99,'ready-v69');assert.equal(state.layout,'ready-v1');
+            assert.equal(state.canvases,1);assert.equal(state.legacyStages,0);assert.equal(state.gl,true);assert.equal(state.glError,0);
+            assert.equal(state.heading,true);assert.equal(state.proof,true);assert.equal(state.rail,true);
+            assert.ok(state.width<=state.vw+1&&state.height<=state.vh+1,JSON.stringify(state));
+            assert.ok(state.energy>=before.energy,JSON.stringify({before,after:state}));assert.equal(state.position.length,3);assert.notDeepEqual(state.position,before.position);
+            assert.ok(state.renderMs<16.67,JSON.stringify(state));assert.ok(['none','absent'].includes(state.genomeDisplay));assert.ok(['none','absent'].includes(state.soundDisplay));assert.equal(state.pauseTopMost,true);
+            const pauseBox=await page.locator('.fx-reference-pause').first().boundingBox();assert.ok(pauseBox);await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(80);const pausedFrom=await page.evaluate(()=>[document.querySelector('.fx-reference-pause')?.dataset.paused,[...(window.FormatXCoreCinematic?.corePosition||[])]]);await page.waitForTimeout(360);const pausedTo=await page.evaluate(()=>[document.querySelector('.fx-reference-pause')?.dataset.paused,[...(window.FormatXCoreCinematic?.corePosition||[])]]);assert.equal(pausedFrom[0],'true');assert.equal(pausedTo[0],'true');assert.deepEqual(pausedTo[1],pausedFrom[1]);await page.touchscreen.tap(pauseBox.x+pauseBox.width/2,pauseBox.y+pauseBox.height/2);await page.waitForTimeout(80);assert.equal(await page.locator('.fx-reference-pause').first().getAttribute('data-paused'),'false');
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: responsive cinematic v69 WebGL2 layout, animation, interaction and render budget passed.');})().catch(error=>{console.error(error);process.exit(1);});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: current r99 native WebGL layout, animation, interaction, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish responsive runtime status
         if: always()
@@ -77,5 +82,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Responsive cinematic v69 WebGL2 runtime and render budget passed'; else state=failure; description='Responsive cinematic v69 runtime failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Current r99 native WebGL runtime and render budget passed'; else state=failure; description='Current r99 responsive runtime failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v69 responsive runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
