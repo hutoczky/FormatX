@@ -6,3 +6,4 @@ r240-trigger: remaining-visual-runtimes
 r240-validation: user-authored-final
 r241-trigger: defer-noncritical-content-runtimes
 r241-validation: user-authored-final
+r242-control: lighthouse-stability-rerun
