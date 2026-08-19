@@ -6,14 +6,21 @@
     if (url.protocol !== 'https:' || url.hostname !== 'formatxsuite.com') return;
 
     const RECOVERY_PARAM = '_fx_redirect_recovery';
+    const SUPPORTED_LANGUAGES = new Set(['hu', 'en']);
 
     if (url.pathname === '/') {
-      // The public homepage must visibly remain exactly https://formatxsuite.com/
-      // after a cache-recovery request. Do not navigate: a navigation could hit
-      // a stale historic permanent redirect again.
-      if (url.search || url.hash) {
-        history.replaceState(history.state, document.title, '/');
-      }
+      /*
+        Keep real public language URLs intact. The recovery parameter is an
+        internal cache-escape transport, but ?lang=hu and ?lang=en are declared
+        hreflang entry points and must survive address-bar cleanup.
+      */
+      const language = url.searchParams.get('lang');
+      const params = new URLSearchParams();
+      if (SUPPORTED_LANGUAGES.has(language)) params.set('lang', language);
+      const search = params.toString() ? `?${params.toString()}` : '';
+      const clean = `/${search}${url.hash}`;
+      const current = `${url.pathname}${url.search}${url.hash}`;
+      if (current !== clean) history.replaceState(history.state, document.title, clean);
       return;
     }
 
