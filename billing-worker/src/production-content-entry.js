@@ -5,7 +5,7 @@ const CANONICAL_HOST = 'formatxsuite.com';
 const LEGACY_WWW_HOST = 'www.formatxsuite.com';
 const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
-const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
+const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260819-r243-language-canonical"></script>';
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint">';
 const R206_BOOTSTRAP = [
   '<link rel="stylesheet" data-fx-award-readiness-style="true" href="/scifi-ui/styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability">',
@@ -93,6 +93,8 @@ export default {
 
     if (url.hostname === LEGACY_WWW_HOST && HOMEPAGE_ALIASES.has(url.pathname)) {
       const target = new URL('/', CANONICAL_ORIGIN);
+      const language = supportedLanguage(url.searchParams.get('lang'));
+      if (language) target.searchParams.set('lang', language);
       target.searchParams.set(RECOVERY_PARAM, '1');
       return temporaryRedirect(target.toString());
     }
@@ -100,6 +102,8 @@ export default {
     if (url.hostname === CANONICAL_HOST && HOMEPAGE_ALIASES.has(url.pathname)) {
       if (url.pathname !== '/') {
         const target = new URL('/', CANONICAL_ORIGIN);
+        const language = supportedLanguage(url.searchParams.get('lang'));
+        if (language) target.searchParams.set('lang', language);
         target.searchParams.set(RECOVERY_PARAM, '1');
         return temporaryRedirect(target.toString());
       }
@@ -140,6 +144,17 @@ export default {
     });
   },
 };
+
+function supportedLanguage(value) {
+  return value === 'hu' || value === 'en' ? value : '';
+}
+
+function canonicalHomepageUrl(publicUrl) {
+  const language = supportedLanguage(publicUrl.searchParams.get('lang'));
+  return language
+    ? `${CANONICAL_ORIGIN}/?lang=${language}`
+    : `${CANONICAL_ORIGIN}/`;
+}
 
 function temporaryRedirect(location) {
   return new Response(null, {
@@ -226,11 +241,14 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   headers.set('Vary', mergeVary(headers.get('Vary'), 'Host'));
 
   if (homepage) {
-    headers.set('Link', `<${CANONICAL_ORIGIN}/>; rel="canonical"`);
+    const canonical = canonicalHomepageUrl(publicUrl);
+    const language = supportedLanguage(publicUrl.searchParams.get('lang'));
+    headers.set('Link', `<${canonical}>; rel="canonical"`);
+    if (language) headers.set('Content-Language', language);
     headers.set('X-FormatX-Shell', 'v56');
     headers.set('X-FormatX-Client-Revision', 'r208-flicker-free-owner');
     headers.set('X-FormatX-Startup-Mode', 'canonical-normal-flow');
-    headers.set('X-FormatX-Recovery', 'r208-static-cascade');
+    headers.set('X-FormatX-Recovery', 'r243-language-canonical');
 
     const cookie = request.headers.get('Cookie') || '';
     if (!STARTUP_COOKIE.test(cookie)) {
@@ -302,6 +320,7 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
 
   if (homepage) {
     html = normaliseHomepageDocumentPaths(html);
+    html = alignHomepageLanguageMetadata(html, publicUrl);
     html = injectR206Bootstrap(html);
     html = cacheBustCriticalCoreR206(html);
   }
@@ -319,6 +338,27 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
     statusText: response.statusText,
     headers,
   });
+}
+
+function alignHomepageLanguageMetadata(html, publicUrl) {
+  const language = supportedLanguage(publicUrl.searchParams.get('lang'));
+  const canonical = canonicalHomepageUrl(publicUrl);
+  let output = String(html || '');
+
+  if (language) {
+    output = output.replace(/<html\b([^>]*?)\blang=["'][^"']*["']/i, `<html$1lang="${language}"`);
+  }
+
+  output = output.replace(
+    /(<link\b[^>]*\brel=["']canonical["'][^>]*\bhref=["'])[^"']*(["'][^>]*>)/i,
+    `$1${canonical}$2`,
+  );
+  output = output.replace(
+    /(<meta\b[^>]*\bproperty=["']og:url["'][^>]*\bcontent=["'])[^"']*(["'][^>]*>)/i,
+    `$1${canonical}$2`,
+  );
+
+  return output;
 }
 
 function normaliseHomepageDocumentPaths(html) {
