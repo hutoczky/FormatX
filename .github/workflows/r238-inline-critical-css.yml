@@ -1,5 +1,6 @@
 name: r238 hashed inline critical CSS
 
+# retrigger: 2026-08-19-r238
 on:
   push:
     paths:
