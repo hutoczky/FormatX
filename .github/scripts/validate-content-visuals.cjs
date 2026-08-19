@@ -75,6 +75,19 @@ async function primeScrollReveals(page) {
   await page.waitForTimeout(180);
 }
 
+async function waitForStableHero(page) {
+  await page.waitForFunction(() => {
+    const visible = selector => {
+      const element = document.querySelector(selector);
+      if (!element) return false;
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
+    };
+    return visible('#hero-title') && visible('#hero .hero-lead') && visible('#hero-download');
+  }, null, { timeout: 12000 });
+}
+
 async function commonAssertions(page, mobile) {
   const title = await box(page, '#hero-title');
   const lead = await box(page, '#hero .hero-lead');
@@ -162,6 +175,7 @@ async function capture(browser, name, viewport, setup = async () => {}, targetUr
     await injectProductionLikeContent(page);
     await primeScrollReveals(page);
     await setup(page);
+    await waitForStableHero(page);
     await commonAssertions(page, viewport.width < 700);
     const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
     assert(!meaningful.length, name + ' browser errors: ' + meaningful.join(' | '));
