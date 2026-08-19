@@ -1,0 +1,742 @@
+/* FormatX r227 — generated cascade-preserving critical CSS bundle. */
+/* Source files remain canonical; regenerate this bundle when a source changes. */
+
+/* ===== BEGIN formatx-award-narrative-r175.css ===== */
+/* FormatX r175 — award narrative composition.
+   One recognizable visual grammar across hero, story, product, commerce and proof.
+   No layout-driven animation: motion is limited to opacity/transform/filter. */
+
+html[data-fx-design-system="2"] {
+  --fx-r175-copy: min(68ch, 100%);
+  --fx-r175-heading: min(15ch, 100%);
+  --fx-r175-space-scene: clamp(88px, 9vw, 156px);
+  --fx-r175-space-scene-mobile: clamp(68px, 17vw, 104px);
+  --fx-r175-accent: 124, 236, 255;
+  --fx-r175-secondary: 143, 114, 255;
+  --fx-r175-story-progress: 0;
+  --fx-r175-chapter-progress: 0;
+  --fx-r175-energy: .18;
+  --fx-r175-story-x: 8%;
+  --fx-r175-node-scale: .8344;
+  --fx-r175-carrier-opacity: .3412;
+  --fx-r175-carrier-scale: .64;
+}
+
+html[data-fx-design-system="2"] body.living-architecture {
+  background-color: #01040b;
+}
+
+/* The entire page is one organism: no hard visual reset between chapters. */
+html[data-fx-design-system="2"] #main-content {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 64vw 48vw at var(--fx-r175-story-x) 18%, rgba(var(--fx-r175-accent), .035), transparent 72%),
+    linear-gradient(180deg, rgba(1,4,11,0) 0%, rgba(4,13,30,.18) 34%, rgba(2,8,19,.12) 66%, rgba(1,4,11,0) 100%);
+}
+
+html[data-fx-design-system="2"] #main-content > section.scene:not(#hero) {
+  padding-block: var(--fx-r175-space-scene);
+  scroll-margin-top: 86px;
+  position: relative;
+  isolation: isolate;
+}
+
+html[data-fx-design-system="2"] #main-content > section.scene:not(#hero) + section.scene:not(#hero) {
+  margin-top: clamp(-34px, -2.2vw, -14px);
+}
+
+/* Typography becomes the primary composition tool instead of another effect. */
+html[data-fx-design-system="2"] .section-heading {
+  position: relative;
+  display: grid;
+  gap: clamp(15px, 1.6vw, 25px);
+  max-width: min(1180px, 92vw);
+  margin-bottom: clamp(42px, 5.5vw, 84px);
+  padding-left: clamp(0px, 3vw, 42px);
+}
+
+html[data-fx-design-system="2"] .section-heading .section-index {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  margin: 0;
+  color: rgba(196,231,245,.72);
+  font-family: var(--fx-font-mono, monospace);
+  font-size: clamp(9px, .72vw, 11px);
+  font-weight: 750;
+  letter-spacing: .18em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+html[data-fx-design-system="2"] .section-heading .section-index::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border: 1px solid rgba(var(--fx-r175-accent), .72);
+  transform: rotate(45deg) scale(var(--fx-r175-node-scale));
+  box-shadow: 0 0 14px rgba(var(--fx-r175-accent), .20);
+  transition: transform .5s cubic-bezier(.2,.75,.2,1), border-color .35s ease, box-shadow .35s ease;
+}
+
+html[data-fx-design-system="2"] .section-heading .section-index::after {
+  content: attr(data-fx-story-caption);
+  max-width: min(42vw, 430px);
+  overflow: hidden;
+  color: rgba(var(--fx-r175-accent), .54);
+  font-size: .92em;
+  letter-spacing: .13em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+html[data-fx-design-system="2"] .section-heading h2 {
+  max-width: var(--fx-r175-heading);
+  margin: 0;
+  color: #f5fbff;
+  font-family: var(--fx-font-display, sans-serif);
+  font-size: clamp(2.7rem, 5.25vw, 5.8rem);
+  font-weight: 560;
+  letter-spacing: -.052em;
+  line-height: .94;
+  text-wrap: balance;
+  text-shadow: 0 0 42px rgba(var(--fx-r175-accent), .035);
+}
+
+html[data-fx-design-system="2"] .section-heading h2 em {
+  color: rgba(186,220,235,.58);
+  font-style: normal;
+  font-weight: 420;
+}
+
+/* FormatX signature carrier: a quiet signal line, never a generic neon divider. */
+html[data-fx-design-system="2"] .section-heading::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg,
+    rgba(var(--fx-r175-accent), .72),
+    rgba(var(--fx-r175-secondary), .24) 46%,
+    transparent 92%);
+  opacity: var(--fx-r175-carrier-opacity);
+  transform: scaleY(var(--fx-r175-carrier-scale));
+  transform-origin: 50% 0;
+  transition: opacity .4s ease;
+  pointer-events: none;
+}
+
+/* Story-state polish. Nothing moves document geometry. */
+html[data-fx-design-system="2"] section.scene[data-fx-story-state="future"] > .section-heading {
+  opacity: .72;
+  transform: translate3d(0, 12px, 0);
+}
+
+html[data-fx-design-system="2"] section.scene[data-fx-story-state="active"] > .section-heading,
+html[data-fx-design-system="2"] section.scene[data-fx-story-state="past"] > .section-heading {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+html[data-fx-design-system="2"] section.scene > .section-heading {
+  transition: opacity .65s ease, transform .75s cubic-bezier(.2,.75,.2,1);
+}
+
+/* Readability: every paragraph has a deliberate measure. */
+html[data-fx-design-system="2"] :is(.scene,.fx-category-deck) :is(p,li) {
+  text-wrap: pretty;
+}
+
+html[data-fx-design-system="2"] :is(.scene,.fx-category-deck) :is(.section-heading + p, .hero-lead, .payment p) {
+  max-width: var(--fx-r175-copy);
+}
+
+/* Product organs share one material language without becoming six identical cards. */
+html[data-fx-design-system="2"] .cards,
+html[data-fx-design-system="2"] .pricing {
+  gap: clamp(14px, 1.45vw, 24px);
+}
+
+html[data-fx-design-system="2"] :is(.card,.price-card) {
+  border-color: rgba(177,219,239,.12);
+  background:
+    linear-gradient(145deg, rgba(12,28,45,.72), rgba(4,12,25,.82) 62%, rgba(7,13,28,.68)),
+    radial-gradient(circle at 15% 0%, rgba(var(--fx-r175-accent), .05), transparent 46%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 22px 70px rgba(0,0,0,.18);
+  transition: transform .42s cubic-bezier(.2,.75,.2,1), border-color .35s ease, background-color .35s ease, box-shadow .35s ease;
+}
+
+html[data-fx-design-system="2"] .price-card.featured {
+  border-color: rgba(var(--fx-r175-accent), .34);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 28px 90px rgba(0,0,0,.25), 0 0 52px rgba(var(--fx-r175-accent), .055);
+}
+
+@media (hover:hover) and (pointer:fine) {
+  html[data-fx-design-system="2"] :is(.card,.price-card):hover {
+    transform: translate3d(0,-4px,0);
+    border-color: rgba(var(--fx-r175-accent), .28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 32px 86px rgba(0,0,0,.25), 0 0 40px rgba(var(--fx-r175-accent), .045);
+  }
+}
+
+/* Flow is a narrative instrument, not an isolated widget. */
+html[data-fx-design-system="2"] #experience .flow {
+  position: relative;
+}
+
+html[data-fx-design-system="2"] #experience .flow-chapters article {
+  transition: opacity .35s ease, transform .45s cubic-bezier(.2,.75,.2,1), border-color .35s ease, background-color .35s ease;
+}
+
+html[data-fx-design-system="2"] #experience .flow-chapters article.active {
+  transform: translate3d(0,0,0);
+}
+
+/* Each organ has a distinct but related signal tint. */
+html[data-fx-design-system="2"] #experience { --fx-r175-accent: 96, 228, 255; --fx-r175-secondary: 105, 142, 255; }
+html[data-fx-design-system="2"] #capabilities { --fx-r175-accent: 121, 241, 219; --fx-r175-secondary: 98, 161, 255; }
+html[data-fx-design-system="2"] #pricing { --fx-r175-accent: 255, 207, 137; --fx-r175-secondary: 160, 109, 255; }
+html[data-fx-design-system="2"] #system { --fx-r175-accent: 139, 203, 255; --fx-r175-secondary: 143, 114, 255; }
+html[data-fx-design-system="2"] #resources { --fx-r175-accent: 183, 244, 255; --fx-r175-secondary: 111, 227, 200; }
+
+/* Momentary chapter hand-off: subtle, short, meaningful. */
+html[data-fx-story-pulse-r175="on"] .fx-rail-progress,
+html[data-fx-story-pulse-r175="on"] .fx-organism-status i {
+  filter: brightness(1.32) saturate(1.18);
+  opacity: .96;
+}
+
+/* Narrow screens keep the same hierarchy instead of receiving a reduced design. */
+@media (max-width: 900px) {
+  html[data-fx-design-system="2"] #main-content > section.scene:not(#hero) {
+    padding-block: var(--fx-r175-space-scene-mobile);
+    scroll-margin-top: 74px;
+  }
+
+  html[data-fx-design-system="2"] #main-content > section.scene:not(#hero) + section.scene:not(#hero) {
+    margin-top: 0;
+  }
+
+  html[data-fx-design-system="2"] .section-heading {
+    max-width: 100%;
+    gap: 14px;
+    margin-bottom: clamp(34px, 10vw, 54px);
+    padding-left: 18px;
+  }
+
+  html[data-fx-design-system="2"] .section-heading h2 {
+    max-width: 12ch;
+    font-size: clamp(2.15rem, 10.2vw, 3.55rem);
+    line-height: .98;
+    letter-spacing: -.045em;
+  }
+
+  html[data-fx-design-system="2"] .section-heading .section-index {
+    font-size: 9px;
+    letter-spacing: .14em;
+  }
+
+  html[data-fx-design-system="2"] .section-heading .section-index::after {
+    max-width: 47vw;
+    letter-spacing: .095em;
+  }
+
+  html[data-fx-design-system="2"] .cards,
+  html[data-fx-design-system="2"] .pricing {
+    gap: 12px;
+  }
+
+  html[data-fx-design-system="2"] :is(.card,.price-card) {
+    transform: none;
+  }
+}
+
+@media (max-width: 430px) {
+  html[data-fx-design-system="2"] .section-heading {
+    padding-left: 14px;
+  }
+  html[data-fx-design-system="2"] .section-heading h2 {
+    font-size: clamp(2.05rem, 10.8vw, 3.2rem);
+  }
+  html[data-fx-design-system="2"] .section-heading .section-index::after {
+    max-width: 44vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-fx-design-system="2"] *,
+  html[data-fx-design-system="2"] *::before,
+  html[data-fx-design-system="2"] *::after {
+    scroll-behavior: auto !important;
+  }
+  html[data-fx-design-system="2"] section.scene > .section-heading,
+  html[data-fx-design-system="2"] :is(.card,.price-card),
+  html[data-fx-design-system="2"] .section-heading .section-index::before {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ===== END formatx-award-narrative-r175.css ===== */
+
+
+/* ===== BEGIN formatx-mobile-ui-polish-r179.css ===== */
+/* r222 — flattened mobile critical path.
+   r206 first-paint is inlined here to remove the nested @import round-trip. */
+
+/* FormatX r206 — fail-open first-paint and mobile geometry contract.
+   Critical UX must never depend on WebGL/bootstrap completion. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  html body.living-architecture main#main-content section#hero.scene.hero {
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 12px 0 60px !important;
+    overflow: visible !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero > .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    overflow: visible !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-space {
+    order: 0 !important;
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    width: 100% !important;
+    height: clamp(350px, 97.6vw, 470px) !important;
+    min-height: clamp(350px, 97.6vw, 470px) !important;
+    max-height: 470px !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+    transform: none !important;
+    translate: none !important;
+    isolation: isolate !important;
+  }
+
+  html body.living-architecture #hero .hero-space::before {
+    content: "" !important;
+    position: absolute !important;
+    z-index: 1 !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: clamp(112px, 34vw, 168px) !important;
+    height: clamp(112px, 34vw, 168px) !important;
+    border: 1px solid rgba(111, 224, 255, .24) !important;
+    border-radius: 34% !important;
+    background:
+      radial-gradient(circle at 50% 50%, #f7ffff 0 4%, #94f3ff 5% 11%, transparent 12%),
+      conic-gradient(from 45deg, rgba(93, 239, 255, .92), rgba(109, 113, 255, .82), rgba(216, 112, 255, .72), rgba(74, 222, 255, .9), rgba(93, 239, 255, .92)) !important;
+    box-shadow:
+      0 0 26px rgba(70, 217, 255, .28),
+      0 0 80px rgba(89, 94, 255, .15),
+      inset 0 0 34px rgba(255,255,255,.16) !important;
+    opacity: .82 !important;
+    clip-path: polygon(50% 0, 62% 36%, 100% 50%, 62% 64%, 50% 100%, 38% 64%, 0 50%, 38% 36%) !important;
+    transform: translate(-50%, -50%) !important;
+    pointer-events: none !important;
+    transition: opacity .18s linear !important;
+  }
+
+  html[data-fx-core-mobile-r99="ready-v69"] body.living-architecture #hero .hero-space::before,
+  html[data-fx-core-real3d="ready-v69"] body.living-architecture #hero .hero-space::before {
+    opacity: 0 !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-copy,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
+    align-content: start !important;
+    row-gap: 12px !important;
+    box-sizing: border-box !important;
+    align-self: center !important;
+    width: calc(100% - 24px) !important;
+    max-width: 680px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 1px !important;
+    margin: 0 auto 48px !important;
+    padding: 24px clamp(18px, 5.2vw, 26px) 28px !important;
+    overflow: hidden !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+    border-radius: 24px !important;
+    contain: layout style !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero .hero-copy > * {
+    position: relative !important;
+    inset: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+    max-height: none !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero .hero-copy > .hero-lead {
+    display: block !important;
+    min-block-size: 7.5em !important;
+    content-visibility: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero .fx-reference-heading {
+    order: 3 !important;
+    position: relative !important;
+    inset: auto !important;
+    margin: 30px auto 22px !important;
+    transform: none !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero .fx-reference-proof {
+    order: 4 !important;
+    position: relative !important;
+    inset: auto !important;
+    height: auto !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  html body.living-architecture main#main-content section#hero.scene.hero .hero-grid > .hero-copy {
+    width: calc(100% - 16px) !important;
+    padding-inline: 16px !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero .fx-reference-heading {
+    margin-top: 34px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.living-architecture #hero .hero-space::before {
+    transition: none !important;
+  }
+}
+
+/* r209 — typography stability / anti-flash pass. */
+html[data-fx-design-system="2"] body.living-architecture :where(
+  #hero-title,
+  #hero-title .hero-title-main,
+  #hero-title .hero-title-sub,
+  #hero .hero-copy .kicker,
+  #hero .hero-copy .fx-category-definition,
+  #hero .hero-copy .hero-lead,
+  #hero .hero-copy .fx-method-inline,
+  #hero .hero-copy .hero-facts,
+  .section-heading,
+  .section-heading .section-index,
+  .section-heading h2,
+  .section-heading h2 span,
+  .section-heading h2 em,
+  .fx-organism-status-index,
+  .fx-organism-status small,
+  .fx-organism-status strong,
+  .fx-rail a,
+  .fx-rail a span,
+  .main-nav a,
+  .topbar .brand strong,
+  .topbar .brand small,
+  .fx-r181-apex-meta,
+  .fx-r181-apex-meta b,
+  .flow-state,
+  .flow-state span,
+  .flow-state strong,
+  .flow-state small,
+  .flow-chapters article h3,
+  .flow-chapters article p,
+  .flow-chapters article small,
+  .card h3,
+  .card p,
+  .card b,
+  .price-card h3,
+  .price-card p,
+  .price-card li,
+  .price-card .price,
+  .payment h3,
+  .payment p,
+  .fx-plan-qr-copy,
+  .system-grid article h3,
+  .system-grid article p,
+  .release-layout h2,
+  .release-layout p,
+  .release-card,
+  .loop-note
+) {
+  animation: none !important;
+  will-change: auto !important;
+}
+
+html[data-fx-design-system="2"] body.living-architecture section.scene[data-fx-story-state] > .section-heading {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+html[data-fx-story-pulse-r175="on"] .fx-rail-progress,
+html[data-fx-story-pulse-r175="on"] .fx-organism-status i {
+  filter: none !important;
+  opacity: .74 !important;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  html body.living-architecture #hero :where(
+    .fx-reference-heading,
+    .fx-reference-heading *,
+    .fx-reference-proof,
+    .fx-reference-proof *,
+    .fx-reference-ask span,
+    .fx-reference-liveos,
+    .fx-reference-liveos *,
+    .fx-language-toggle,
+    .fx-reference-mag-button
+  ) {
+    animation: none !important;
+    transition-property: color, border-color, background-color, box-shadow, transform !important;
+    will-change: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-fx-design-system="2"] body.living-architecture :where(
+    .section-heading,
+    .hero-copy,
+    .fx-reference-heading,
+    .fx-reference-proof,
+    .fx-organism-status
+  ) {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* r222: fail-open from CSS. Reduced-motion users never need to wait for the
+     scripted intro controller to reveal already-authored page content. */
+  html.fx-intro-pending,
+  html.fx-intro-running,
+  html.fx-intro-managed {
+    overflow: auto !important;
+    overscroll-behavior: auto !important;
+  }
+
+  #formatx-event-horizon.fx-intro-overlay,
+  html.fx-intro-pending #formatx-event-horizon,
+  html.fx-intro-running #formatx-event-horizon,
+  html.fx-intro-managed #formatx-event-horizon {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    animation: none !important;
+  }
+}
+
+/* r179 — mobile chrome / control polish. */
+@media (max-width:900px),(pointer:coarse){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar{
+    height:68px!important;
+    min-height:68px!important;
+    padding:4px 18px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar .brand{
+    top:17px!important;
+    height:34px!important;
+    align-items:center!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle{
+    top:14px!important;
+    bottom:auto!important;
+    height:40px!important;
+    min-height:40px!important;
+    margin:0!important;
+    padding:0!important;
+    display:grid!important;
+    place-items:center!important;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace!important;
+    font-size:10px!important;
+    font-weight:750!important;
+    line-height:1!important;
+    letter-spacing:.055em!important;
+    text-align:center!important;
+    text-transform:uppercase!important;
+    -webkit-font-smoothing:antialiased!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button{
+    width:48px!important;
+    min-width:48px!important;
+    border-radius:13px!important;
+    color:rgba(235,247,253,.91)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle{
+    width:40px!important;
+    min-width:40px!important;
+    border-radius:13px!important;
+    color:rgba(235,247,253,.91)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle::after{
+    right:5px!important;
+    bottom:5px!important;
+    width:3px!important;
+    height:3px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button{
+    top:8px!important;
+    width:48px!important;
+    min-width:48px!important;
+    height:52px!important;
+    min-height:52px!important;
+    border-radius:17px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button span{
+    left:13px!important;
+    height:1px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button span:first-child{top:20px!important;width:22px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button span:last-child{top:30px!important;width:15px!important}
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-rail{
+    top:18px!important;
+    right:6.7%!important;
+    gap:24px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-ask,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-pause{
+    width:50px!important;
+    min-width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
+    flex:0 0 50px!important;
+    border-color:rgba(139,198,226,.29)!important;
+    background:radial-gradient(circle at 50% 30%,rgba(16,36,53,.86),rgba(3,14,24,.91) 72%)!important;
+    box-shadow:inset 0 0 28px rgba(55,180,255,.045),0 10px 28px rgba(0,0,0,.14)!important;
+    backdrop-filter:blur(11px) saturate(118%)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-ask i{
+    width:26px!important;
+    height:22px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-ask span{
+    top:55px!important;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;
+    font-size:10px!important;
+    font-weight:700!important;
+    line-height:1!important;
+    letter-spacing:.055em!important;
+    color:rgba(233,241,248,.88)!important;
+    text-shadow:0 1px 10px rgba(0,0,0,.72)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-pause::before,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-pause::after{
+    height:12px!important;
+    width:2px!important;
+    background:#66ddff!important;
+    box-shadow:0 0 9px rgba(98,220,255,.52)!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-r168-orbit{
+    width:clamp(132px,40vw,180px)!important;
+    opacity:.10!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-r168-orbit-b{
+    width:clamp(116px,35vw,160px)!important;
+    opacity:.075!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"][data-fx-core-reference-texture-r130="ready"] body.living-architecture #hero .hero-space::after{
+    top:calc(100% - 1px)!important;
+    height:78px!important;
+    background:linear-gradient(180deg,#03172b 0%,#031426 20%,#031122 45%,#030f20 70%,#040d1e 100%)!important;
+    opacity:1!important;
+  }
+}
+
+@media (max-width:400px){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-proof{
+    min-height:0!important;
+    padding-bottom:88px!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-proof p{
+    width:100%!important;
+    max-width:100%!important;
+    padding-right:0!important;
+    overflow-wrap:normal!important;
+    word-break:normal!important;
+    text-wrap:pretty!important;
+  }
+
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-liveos{
+    top:auto!important;
+    right:16px!important;
+    bottom:18px!important;
+    width:78px!important;
+    height:54px!important;
+  }
+}
+
+@media (max-width:360px){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar .brand{
+    left:14px!important;
+    gap:8px!important;
+  }
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar .brand strong{font-size:11px!important}
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .topbar .brand small{font-size:6.5px!important}
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-mag-button,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-language-toggle,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .fx-reference-menu-button,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-ask,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture #hero .fx-reference-pause{
+    transition:none!important;
+  }
+}
+
+/* ===== END formatx-mobile-ui-polish-r179.css ===== */
