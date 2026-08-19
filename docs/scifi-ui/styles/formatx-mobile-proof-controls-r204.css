@@ -364,3 +364,70 @@
 }
 
 /* r205 production marker: compact audio + horizontal ASK/Pause + mini MAG. */
+
+/* r213 — mobile readable plane is always the topmost visual layer.
+   Decorative WebGL/glow/atmosphere layers stay below; copy never inherits their
+   brightness, opacity, filter or blend changes. */
+@media (max-width: 900px), (pointer: coarse) {
+  html body.living-architecture .topbar,
+  html body.living-architecture .skip-link,
+  html body.living-architecture .fx-single-language-switch,
+  html body.living-architecture #hero .hero-grid > .hero-copy,
+  html body.living-architecture #hero .hero-grid > .fx-reference-heading,
+  html body.living-architecture #hero .hero-grid > .fx-reference-proof,
+  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204,
+  html body.living-architecture #main-content > section.scene:not(#hero) > .section-heading,
+  html body.living-architecture #main-content > section.scene:not(#hero) > :is(.flow,.flow-chapters,.cards,.pricing,.payment,.system-grid,.release-layout,.fx-plan-qr-dock),
+  html body.living-architecture .site-footer {
+    position: relative !important;
+    z-index: 10000 !important;
+    isolation: isolate !important;
+    mix-blend-mode: normal !important;
+    opacity: 1 !important;
+    filter: none !important;
+    will-change: auto !important;
+  }
+
+  html body.living-architecture :is(
+    .topbar,
+    .hero-copy,
+    .fx-reference-heading,
+    .fx-reference-proof,
+    .fx-reference-controls-r204,
+    .section-heading,
+    .flow,
+    .flow-chapters,
+    .cards,
+    .pricing,
+    .payment,
+    .system-grid,
+    .release-layout,
+    .fx-plan-qr-dock,
+    .site-footer
+  ) :is(h1,h2,h3,h4,p,li,small,strong,b,em,a,button,label,output,time,code) {
+    position: relative !important;
+    z-index: 10001 !important;
+    mix-blend-mode: normal !important;
+    opacity: 1 !important;
+    filter: none !important;
+    text-shadow: none !important;
+    animation: none !important;
+    will-change: auto !important;
+  }
+
+  html body.living-architecture #hero .hero-space,
+  html body.living-architecture #hero .fx-core-mobile-v55-stage,
+  html body.living-architecture #hero .fx-core-r112-stage,
+  html body.living-architecture #hero .fx-core-live-r147-layer,
+  html body.living-architecture #hero .fx-core-detail-r122,
+  html body.living-architecture #hero :is(.fx-r168-orbit,.fx-r168-caustic,.fx-r168-spectrum,.fx-r168-flare,.fx-r168-shockwave,.fx-r168-interaction-wave,.fx-r168-spark),
+  html body.living-architecture .fx-atmosphere,
+  html body.living-architecture .fx-r179-field,
+  html body.living-architecture .fx-r179-organ-sigil {
+    z-index: 10 !important;
+  }
+
+  html body.living-architecture #main-content > section.scene {
+    isolation: isolate !important;
+  }
+}
