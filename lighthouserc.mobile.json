@@ -8,6 +8,7 @@
       "numberOfRuns": 3,
       "settings": {
         "chromeFlags": "--headless=new --no-sandbox --disable-dev-shm-usage --force-prefers-reduced-motion",
+        "throttlingMethod": "devtools",
         "maxWaitForLoad": 45000,
         "pauseAfterLoadMs": 400,
         "skipAudits": [
