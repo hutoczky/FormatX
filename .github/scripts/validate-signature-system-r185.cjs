@@ -6,16 +6,17 @@ const repo=path.resolve(__dirname,'../..');
 const read=p=>fs.readFileSync(path.join(repo,p),'utf8');
 const index=read('docs/scifi-ui/index.html');
 const css=read('docs/scifi-ui/styles/formatx-signature-system-r185.css');
+const criticalSignature=read('docs/scifi-ui/styles/formatx-critical-signature-r227.css');
 const js=read('docs/scifi-ui/scripts/formatx-signature-system-r185.js');
 const app=read('App.xaml.cs');
 const appMag=read('SignatureMagController.cs');
 
-for(const token of [
-  'formatx-signature-system-r185.css?v=20260816-iconic-mag-r185b-hitlayer',
-  'formatx-signature-system-r185.js?v=20260816-iconic-mag-r185b-hitlayer'
-]) assert.ok(index.includes(token),`missing index signature asset: ${token}`);
-assert.equal((index.match(/formatx-signature-system-r185\.css/g)||[]).length,1,'signature CSS must load once');
+assert.ok(index.includes('formatx-critical-signature-r227.css?v=20260819-r227'),'missing r227 critical signature bundle');
+assert.ok(index.includes('formatx-signature-system-r185.js?v=20260816-iconic-mag-r185b-hitlayer'),'missing index signature JS asset');
+assert.equal((index.match(/formatx-critical-signature-r227\.css/g)||[]).length,1,'critical signature bundle must load once');
 assert.equal((index.match(/formatx-signature-system-r185\.js/g)||[]).length,1,'signature JS must load once');
+assert.ok(criticalSignature.includes('BEGIN formatx-signature-system-r185.css'),'critical signature bundle must identify its canonical source');
+assert.ok(criticalSignature.includes(css),'critical signature bundle must contain the complete canonical r185 CSS');
 
 for(const token of [
   '#hero>.fx-signature-core-trigger','.fx-signature-architecture','.fx-signature-map','.fx-signature-node',
@@ -42,4 +43,4 @@ for(const token of [
 ]) assert.ok(appMag.includes(token),`missing app MAG token: ${token}`);
 assert.equal((appMag.match(/"MAG \/ ISO → USB"|"IDEGRENDSZER \/ FORMÁZÁS"|"SZERVEK \/ PARTÍCIÓK"|"BIZTONSÁGI SZÍV \/ SECURE ERASE"|"VÁZ \/ LEMEZ EGÉSZSÉG"|"JELADÓ \/ BEÁLLÍTÁSOK"/g)||[]).length,6,'app flyout must map six product organs');
 
-console.log('PASS: r185b iconic MAG identity, real hit-tested signature control, architecture unfold, usability guards and app system MAG contract are present.');
+console.log('PASS: r185b iconic MAG identity, r227 bundled CSS integrity, real hit-tested signature control, architecture unfold, usability guards and app system MAG contract are present.');
