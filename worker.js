@@ -119,6 +119,7 @@ const CRITICAL_ASSET_PATHS = new Set([
   '/scifi-ui/styles/formatx-core-v51.css',
   '/scifi-ui/scripts/formatx-core-mobile-compat-v52.js',
   '/scifi-ui/styles/formatx-core-mobile-compat-v52.css',
+  '/scifi-ui/scripts/formatx-desktop-apex-loader-r224.js',
 ]);
 const REPLACEMENTS = [
   ['formatx-mobile-recovery.js?v=20260729-mobile-recovery-1', 'formatx-mobile-recovery.js?v=20260729-living-core-gate-v2'],
@@ -132,6 +133,32 @@ const REPLACEMENTS = [
   ['formatx-event-horizon.js?v=20260729-event-horizon-5', 'formatx-event-horizon.js?v=20260731-intro-restored-1'],
   ['formatx-event-horizon.js?v=20260730-first-visit-1', 'formatx-event-horizon.js?v=20260731-intro-restored-1'],
   ['formatx-core-real3d-v20.js?v=20260809-real3d-v24-volumetric-crystal-r3-moving-core-r11', 'formatx-core-real3d-v20.js?v=20260810-mobile-safe-v52-r13'],
+];
+const WPO_REPLACEMENTS = [
+  [
+    '<link rel="stylesheet" href="./styles/formatx-event-horizon.css?v=20260726-event-horizon-3">',
+    '<link rel="stylesheet" href="./styles/formatx-event-horizon.css?v=20260819-r224-desktop-intro" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)">'
+  ],
+  [
+    '<link rel="stylesheet" data-fx-category-style="true" href="./styles/formatx-category-positioning.css?v=20260728-category-v1">',
+    '<link rel="stylesheet" data-fx-category-style="true" href="./styles/formatx-category-positioning.css?v=20260819-r223-mobile-wpo">'
+  ],
+  [
+    '<link rel="stylesheet" data-fx-mobile-ui-polish-r179="true" href="./styles/formatx-mobile-ui-polish-r179.css?v=20260816-r179-mobile-ui-polish">',
+    '<link rel="stylesheet" data-fx-mobile-ui-polish-r179="true" href="./styles/formatx-mobile-ui-polish-r179.css?v=20260819-r222-critical-flat" media="(max-width: 900px), (pointer: coarse)">'
+  ],
+  [
+    '<link rel="stylesheet" data-fx-desktop-apex-r181="true" href="./styles/formatx-desktop-apex-r181.css?v=20260816-r181-crystal-apex">',
+    '<link rel="stylesheet" data-fx-desktop-apex-r181="true" href="./styles/formatx-desktop-apex-r181.css?v=20260816-r181-crystal-apex" media="(min-width: 901px) and (pointer: fine)">'
+  ],
+  [
+    '<script defer data-fx-desktop-apex-r181="true" src="./scripts/formatx-desktop-apex-r181.js?v=20260816-r181-crystal-apex"></script>',
+    '<script defer data-fx-desktop-apex-r181-loader="true" src="./scripts/formatx-desktop-apex-loader-r224.js?v=20260819-r224"></script>'
+  ],
+  [
+    '<script defer data-fx-simulator-entry-script="true" src="./scripts/project-simulator-entry.js?v=20260728-operational-twin-1"></script>',
+    '<script defer data-fx-simulator-entry-script="true" src="./scripts/project-simulator-entry.js?v=20260819-ready-contract-v2"></script>'
+  ],
 ];
 
 export default {
@@ -167,6 +194,7 @@ async function serveLanguagePage(request, env, pathname, languageHint) {
   if (SCIFI_ENTRY_PATHS.has(pathname)) {
     const isEnglish = languageHint === 'en';
     for (const [before, after] of REPLACEMENTS) html = html.replaceAll(before, after);
+    for (const [before, after] of WPO_REPLACEMENTS) html = html.replaceAll(before, after);
     if (isEnglish) {
       html = html.replace('<html lang="hu"', '<html lang="en"');
     } else {
