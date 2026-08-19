@@ -3,3 +3,4 @@ validation-trigger: final-user-authored-r238
 r239-trigger: reduced-motion-runtime-gate
 r239-validation: user-authored-final
 r240-trigger: remaining-visual-runtimes
+r240-validation: user-authored-final
