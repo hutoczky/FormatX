@@ -3,11 +3,11 @@
    Keeping them in a same-origin stylesheet removes inline-style CSP violations. */
 
 /* Decorative geometry may extend beyond its local viewport, but it must never
-   enlarge the document's scrollable inline size. Paint containment preserves the
-   full visual effect inside the intended clipped surface without masking content. */
+   enlarge the document's scrollable inline size. Layout+paint containment keeps
+   the marquee and oversize rings local without masking real content overflow. */
 .marquee,
 .flow-stage{
-  contain:paint;
+  contain:layout paint;
 }
 .marquee{overflow:clip;}
 .flow-stage{overflow:clip;}
