@@ -1,10 +1,11 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-/* r183: keep the public r155/r158 identities for runtime compatibility, but
-   drive the visible heartbeat from the display compositor clock. The crystal
-   DOM box never scales: the existing r166 internal canvas renderer owns the
-   four-tip body pulse, so mobile layout measurements remain completely stable. */
+/* r183/r209: keep the public r155/r158 identities for runtime compatibility,
+   but drive the visible heartbeat from the display compositor clock with a
+   wider, lower-amplitude envelope so it reads as breathing, never flashing.
+   The crystal DOM box never scales: the existing r166 internal canvas renderer
+   owns the four-tip body pulse, so mobile layout measurements remain stable. */
 const VERSION='js-reactive-heartbeat-r155';
 const MODE='r158-lub-dub-seamless-living';
 const SHAPE_MODE='r183-display-synced-internal-canvas';
@@ -96,14 +97,14 @@ function ensure(){
 
   if(host.dataset.fxHeartbeatBoundR155!=='r183'){
     const energize=()=>{
-      boost=Math.max(boost,1.18);lastInput=performance.now();
+      boost=Math.max(boost,.68);lastInput=performance.now();
       try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}
       root.dataset.fxLiveHeartbeatInteractionR155='active-r183';
     };
     host.addEventListener('pointerdown',energize,{passive:true});
-    host.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'){boost=Math.max(boost,.34);lastInput=performance.now();}},{passive:true});
+    host.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'){boost=Math.max(boost,.18);lastInput=performance.now();}},{passive:true});
     host.addEventListener('touchstart',energize,{passive:true});
-    host.addEventListener('touchmove',()=>{boost=Math.max(boost,.78);lastInput=performance.now();},{passive:true});
+    host.addEventListener('touchmove',()=>{boost=Math.max(boost,.42);lastInput=performance.now();},{passive:true});
     host.dataset.fxHeartbeatBoundR155='r183';
   }
   root.dataset.fxLiveHeartbeatR155=VERSION;
@@ -131,44 +132,45 @@ function frame(now){
   }
 
   const dt=clamp(now-lastFrame||8.3,2,80);lastFrame=now;
-  if(dt<50){refreshEma+= (dt-refreshEma)*.08;refreshSamples++;}
+  if(dt<50){refreshEma+=(dt-refreshEma)*.08;refreshSamples++;}
   const paused=root.dataset.fxReferenceMotionPaused==='true';
   const still=paused||reduced.matches;
   const energy=clamp(Number(window.FormatXCoreMobileV69?.energy||window.FormatXCoreCinematic?.energy||.45),0,1.35);
-  if(now-lastInput>90)boost*=Math.pow(.035,dt/1000);if(boost<.002)boost=0;
+  if(now-lastInput>90)boost*=Math.pow(.06,dt/1000);if(boost<.002)boost=0;
 
-  const cycle=still?0:(now%1380)/1380;
-  const lub=still?.18:gauss(cycle,.105,.040);
-  const dub=still?.10:gauss(cycle,.235,.052)*.64;
-  const beat=clamp(lub+dub,0,1.08);
-  const breath=still?.35:(.5+.5*Math.sin(now*.00118-1.05));
-  const shimmer=still?.28:(.5+.5*Math.sin(now*.0067+1.45));
-  const activity=clamp(energy*.46+boost*.58,0,1.35);
+  /* r209 anti-flash envelope: wider and lower than the old 55–72 ms peaks. */
+  const cycle=still?0:(now%1700)/1700;
+  const lub=still?.15:gauss(cycle,.13,.085)*.72;
+  const dub=still?.08:gauss(cycle,.31,.10)*.36;
+  const beat=clamp(lub+dub,0,.78);
+  const breath=still?.35:(.5+.5*Math.sin(now*.00105-1.05));
+  const shimmer=still?.28:(.5+.5*Math.sin(now*.0048+1.45));
+  const activity=clamp(energy*.42+boost*.36,0,1.05);
   const x=inlinePct('--fx-r147-light-x',50),y=inlinePct('--fx-r147-light-y',49);
 
-  const coreScale=.955+breath*.014+beat*.105+activity*.028;
-  const ringScale=.925+breath*.020+lub*.205+dub*.135+activity*.038;
-  const waveScale=.855+breath*.028+lub*.34+dub*.22+activity*.060;
-  const coreOpacity=clamp(.30+breath*.10+beat*.43+activity*.15,.28,.96);
-  const ringOpacity=clamp(.18+breath*.08+lub*.42+dub*.31+activity*.13,.16,.86);
-  const waveOpacity=clamp(.07+breath*.05+lub*.25+dub*.20+activity*.09,.06,.54);
-  const brightness=clamp(1.055+breath*.035+beat*.185+activity*.055,1.05,1.38);
-  const saturation=clamp(1.10+shimmer*.055+activity*.075,1.10,1.32);
-  const contrast=clamp(1.14+beat*.055+activity*.025,1.14,1.24);
-  const cyanBlur=clamp(15+breath*4+beat*12+activity*5,15,36);
-  const cyanAlpha=clamp(.19+beat*.18+activity*.08,.18,.47);
-  const violetBlur=clamp(27+breath*5+dub*10+activity*5,27,46);
-  const violetAlpha=clamp(.10+dub*.12+activity*.055,.09,.28);
-  const fieldOpacity=clamp(.58+breath*.12+beat*.18+activity*.07,.56,.94);
-  const fieldBlur=clamp(17+breath*3+activity*2,17,23);
+  const coreScale=.965+breath*.012+beat*.045+activity*.018;
+  const ringScale=.940+breath*.016+lub*.085+dub*.060+activity*.024;
+  const waveScale=.890+breath*.022+lub*.140+dub*.100+activity*.038;
+  const coreOpacity=clamp(.36+breath*.08+beat*.16+activity*.10,.34,.74);
+  const ringOpacity=clamp(.22+breath*.06+lub*.17+dub*.12+activity*.08,.20,.62);
+  const waveOpacity=clamp(.09+breath*.04+lub*.09+dub*.07+activity*.055,.08,.36);
+  const brightness=clamp(1.055+breath*.028+beat*.07+activity*.035,1.05,1.20);
+  const saturation=clamp(1.08+shimmer*.035+activity*.05,1.08,1.20);
+  const contrast=clamp(1.12+beat*.02+activity*.018,1.12,1.17);
+  const cyanBlur=clamp(15+breath*3+beat*5+activity*3,15,25);
+  const cyanAlpha=clamp(.17+beat*.07+activity*.055,.16,.30);
+  const violetBlur=clamp(25+breath*4+dub*5+activity*3,25,34);
+  const violetAlpha=clamp(.09+dub*.05+activity*.038,.08,.18);
+  const fieldOpacity=clamp(.58+breath*.08+beat*.05+activity*.045,.56,.76);
+  const fieldBlur=clamp(17+breath*2.4+activity*1.4,17,21);
 
   set(core,'left',x.toFixed(2)+'%');set(core,'top',y.toFixed(2)+'%');
   set(ring,'left',x.toFixed(2)+'%');set(ring,'top',y.toFixed(2)+'%');
   set(wave,'left',x.toFixed(2)+'%');set(wave,'top',y.toFixed(2)+'%');
   set(core,'transform',`translate3d(-50%,-50%,0) scale(${coreScale.toFixed(4)})`);
   set(core,'opacity',coreOpacity.toFixed(3));
-  set(core,'filter',`brightness(${(1.03+beat*.31+activity*.08).toFixed(3)}) drop-shadow(0 0 ${(10+beat*17+activity*5).toFixed(1)}px rgba(99,238,255,.34))`);
-  set(ring,'transform',`translate3d(-50%,-50%,0) scale(${ringScale.toFixed(4)}) rotate(${((now*.013)+(x-y)*.4)%360}deg)`);
+  set(core,'filter',`brightness(${(1.03+beat*.10+activity*.045).toFixed(3)}) drop-shadow(0 0 ${(10+beat*7+activity*3).toFixed(1)}px rgba(99,238,255,.30))`);
+  set(ring,'transform',`translate3d(-50%,-50%,0) scale(${ringScale.toFixed(4)}) rotate(${((now*.010)+(x-y)*.4)%360}deg)`);
   set(ring,'opacity',ringOpacity.toFixed(3));
   set(wave,'transform',`translate3d(-50%,-50%,0) scale(${waveScale.toFixed(4)})`);
   set(wave,'opacity',waveOpacity.toFixed(3));
@@ -206,7 +208,7 @@ function frame(now){
   root.dataset.fxLivingHeartbeatInteractionR158=boost>.04?'energized':'idle-living';
   root.dataset.fxLivingShapeScaleR167='1.0000,1.0000';
   root.dataset.fxLivingShapeEnvelopeR167=`${lub.toFixed(3)},${dub.toFixed(3)},${beat.toFixed(3)}`;
-  root.dataset.fxLiveHeartbeatClockR155='requestAnimationFrame-display-synced-r183';
+  root.dataset.fxLiveHeartbeatClockR155='requestAnimationFrame-display-synced-r183-r209-smooth';
   root.dataset.fxHeartbeatSchedulerR183='display-refresh-adaptive';
 
   if(now-lastHzReport>900&&refreshSamples>8){
@@ -219,7 +221,7 @@ function frame(now){
 function start(){
   if(!ensure())return;
   if(!raf){lastFrame=performance.now();raf=requestAnimationFrame(frame);}
-  root.dataset.fxLiveHeartbeatClockR155='requestAnimationFrame-display-synced-r183';
+  root.dataset.fxLiveHeartbeatClockR155='requestAnimationFrame-display-synced-r183-r209-smooth';
   root.dataset.fxHeartbeatSchedulerR183='display-refresh-adaptive';
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
