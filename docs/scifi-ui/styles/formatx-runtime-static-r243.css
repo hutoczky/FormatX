@@ -2,6 +2,16 @@
    These rules were previously injected by heartbeat/living-energy runtimes.
    Keeping them in a same-origin stylesheet removes inline-style CSP violations. */
 
+/* Decorative geometry may extend beyond its local viewport, but it must never
+   enlarge the document's scrollable inline size. Paint containment preserves the
+   full visual effect inside the intended clipped surface without masking content. */
+.marquee,
+.flow-stage{
+  contain:paint;
+}
+.marquee{overflow:clip;}
+.flow-stage{overflow:clip;}
+
 #hero .fx-r155-heartbeat-core,
 #hero .fx-r155-heartbeat-ring,
 #hero .fx-r155-heartbeat-wave{
