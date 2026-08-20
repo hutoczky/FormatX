@@ -23,24 +23,39 @@ async function clearIntro(page) {
   });
 }
 
-async function waitForInterface(page) {
+async function waitForScrollShell(page) {
   await page.waitForFunction(() => {
     const root = document.documentElement;
     return root.classList.contains('fx-intro-complete')
-      && root.dataset.fxOrganismInterface === 'ready'
-      && root.dataset.fxOrganismMenu === 'ready'
-      && root.dataset.fxOrganismCoreController === 'ready'
-      && root.dataset.fxOrganismConsoleState === 'ready'
       && root.dataset.fxSingleLanguageToggle === 'ready'
       && root.dataset.fxInfiniteController === 'seamless-v7'
       && root.dataset.fxInfiniteScroll === 'ready-seamless-v7'
       && root.dataset.fxInfiniteInput === 'native'
       && root.dataset.fxAutomaticLoop === 'enabled'
       && root.dataset.fxLoopBridge === 'ready-v3'
+      && ['ready', 'desktop'].includes(root.dataset.fxReferenceProductionR244)
+      && ['reference-frame-r244', 'desktop-reference-r244'].includes(root.dataset.fxReferenceComposition);
+  }, null, { timeout: 45000 });
+}
+
+async function activateAndWaitForInterface(page) {
+  const referenceMenu = page.locator('.fx-reference-menu-button');
+  await referenceMenu.waitFor({ state: 'visible' });
+  await referenceMenu.click();
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    return root.dataset.fxOrganismInterface === 'ready'
+      && root.dataset.fxOrganismMenu === 'ready'
+      && root.dataset.fxOrganismCoreController === 'ready'
+      && root.dataset.fxOrganismConsoleState === 'ready'
       && root.dataset.fxInteractionGenomeExport === 'ready'
       && root.dataset.fxOrganismMasterSync === 'ready-v1'
-      && root.dataset.fxTranscendLoader === 'safe-ready-v27';
-  }, null, { timeout: 45000 });
+      && root.dataset.fxTranscendLoader === 'safe-ready-v28';
+  }, null, { timeout: 60000 });
+  if (await page.evaluate(() => document.getElementById('main-nav')?.classList.contains('open'))) {
+    await referenceMenu.click();
+  }
+  await page.waitForFunction(() => !document.getElementById('main-nav')?.classList.contains('open'));
 }
 
 async function assertSingleLanguageToggle(page) {
@@ -54,7 +69,7 @@ async function assertSingleLanguageToggle(page) {
 }
 
 async function openMenu(page) {
-  await page.locator('#menu-toggle').click();
+  await page.locator('.fx-reference-menu-button').click();
   await page.waitForFunction(() => {
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('main-nav');
@@ -143,7 +158,8 @@ async function preparePage(page) {
   });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
   await clearIntro(page);
-  await waitForInterface(page);
+  await waitForScrollShell(page);
+  await activateAndWaitForInterface(page);
 }
 
 async function testDesktop(browser) {

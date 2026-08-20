@@ -85,8 +85,28 @@
       menu.addEventListener('click', () => {
         const original = document.querySelector('#fx-reference-legacy-menu, .menu-toggle:not(.fx-reference-menu-button), .fx-organism-system-toggle:not(.fx-reference-menu-button)');
         const nav = document.getElementById('main-nav');
+        const wasOpen = nav instanceof HTMLElement && nav.classList.contains('open');
+
+        // The full organism interface is intentionally lazy for first-paint and
+        // mobile frame-rate budgets. A visible menu request is the explicit
+        // activation signal: start the full controller queue, while keeping the
+        // navigation immediately usable during that asynchronous hand-off.
+        if (root.dataset.fxImmersive !== 'active') {
+          root.dataset.fxImmersive = 'active';
+          dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
+            detail: { source: 'reference-menu-r244' }
+          }));
+        }
+
         if (original instanceof HTMLButtonElement) original.click();
-        else if (nav instanceof HTMLElement) nav.classList.toggle('open');
+        const controllerChangedState = nav instanceof HTMLElement
+          && nav.classList.contains('open') !== wasOpen;
+        if (nav instanceof HTMLElement && !controllerChangedState) {
+          nav.classList.toggle('open', !wasOpen);
+          root.classList.toggle('fx-organism-menu-open', !wasOpen);
+          original?.classList.toggle('open', !wasOpen);
+          original?.setAttribute('aria-expanded', String(!wasOpen));
+        }
         const open = nav instanceof HTMLElement && nav.classList.contains('open');
         menu.setAttribute('aria-expanded', String(open));
       });

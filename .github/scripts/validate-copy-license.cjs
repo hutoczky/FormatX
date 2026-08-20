@@ -14,23 +14,20 @@ const NAVIGATION = Object.freeze({
     ['Működés', 'Modulok', 'Licenc és árak', 'Biztonság', 'Letöltés'],
     ['Működés', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
     ['Hogyan működik', 'Modulok', 'Licencek', 'Bizonyíték', 'Letöltés'],
-    ['Idegrendszer — Hogyan működik', 'Szervek — Funkciók és modulok', 'Kereskedelmi szív — Licencek és árak', 'Váz — Technológia és biztonság', 'Jeladó — Letöltés és bizonyítékok']
+    ['Idegrendszer — Hogyan működik', 'Szervek — Funkciók és modulok', 'Kereskedelmi szív — Licencek és árak', 'Váz — Technológia és biztonság', 'Jeladó — Letöltés és bizonyítékok'],
+    ['Idegrendszer', 'Szervek', 'Kereskedelmi mag', 'Váz', 'Jeladó']
   ],
   en: [
     ['Workflow', 'Modules', 'Licence & pricing', 'Safety', 'Downloads'],
     ['How it works', 'Modules', 'Licences', 'Proof', 'Download'],
-    ['Nervous system — How it works', 'Organs — Functions and modules', 'Commerce heart — Licences and pricing', 'Skeleton — Technology and safety', 'Beacon — Downloads and evidence']
+    ['Nervous system — How it works', 'Organs — Functions and modules', 'Commerce heart — Licences and pricing', 'Skeleton — Technology and safety', 'Beacon — Downloads and evidence'],
+    ['Nervous system', 'Organs', 'Commerce core', 'Skeleton', 'Beacon']
   ]
 });
 
 const DOWNLOAD_LABELS = Object.freeze({
   hu: ['Teljes multiplatform verzió letöltése', 'Teljes multiplatform verzió'],
   en: ['Download full multiplatform version', 'Full multiplatform version']
-});
-
-const TRIAL_LABELS = Object.freeze({
-  hu: ['napos próbalicenc', 'napos teljes próba', 'nap teljes próba', 'napos kezdőlicenc'],
-  en: ['day trial licence', 'day full trial', 'day initial licence']
 });
 
 function matchesOne(actual, expectedSets) {
@@ -55,23 +52,24 @@ async function clearIntro(page) {
 }
 
 async function waitPublicState(page, language) {
-  await page.waitForFunction(({ lang, navigation, downloads, trials }) => {
+  await page.waitForFunction(({ lang, navigation, downloads }) => {
     const nav = Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim());
     const download = document.querySelector('#hero-download span')?.textContent.trim() || '';
-    const trial = document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '';
+    const trial = lang === 'en'
+      ? /\b5-day trial(?: licence)?\b/i.test(document.body.innerText)
+      : /\b5 napos próbalicenc\b/i.test(document.body.innerText);
     return document.documentElement.lang === lang
-      && document.documentElement.dataset.fxLanguageCopyStability === 'ready-v4'
+      && document.documentElement.dataset.fxFixedCopyVersion === 'r210'
       && Boolean(document.querySelector('.fx-language-toggle'))
       && downloads.includes(download)
-      && trials.includes(trial)
+      && trial
       && navigation.some(expected => JSON.stringify(expected) === JSON.stringify(nav))
       && Boolean(document.querySelector('.site-footer [data-fx-licence-link]'))
       && Boolean(document.getElementById('fx-licence-clarity'));
   }, {
     lang: language,
     navigation: NAVIGATION[language],
-    downloads: DOWNLOAD_LABELS[language],
-    trials: TRIAL_LABELS[language]
+    downloads: DOWNLOAD_LABELS[language]
   }, { timeout: 45000 });
   await page.waitForTimeout(250);
 }
@@ -81,7 +79,9 @@ async function readCopy(page) {
     lang: document.documentElement.lang,
     nav: Array.from(document.querySelectorAll('#main-nav a'), node => node.textContent.trim()),
     heroDownload: document.querySelector('#hero-download span')?.textContent.trim() || '',
-    trialLabel: document.querySelector('.hero-facts > span:nth-child(3) small')?.textContent.trim() || '',
+    hasFiveDayTrial: document.documentElement.lang === 'en'
+      ? /\b5-day trial(?: licence)?\b/i.test(document.body.innerText)
+      : /\b5 napos próbalicenc\b/i.test(document.body.innerText),
     pricingTitle: Array.from(
       document.querySelectorAll('#pricing-title > span, #pricing-title > em'),
       node => node.textContent.trim()
@@ -107,13 +107,13 @@ function assertHungarian(state, name) {
   assert(matchesOne(state.nav, NAVIGATION.hu), name + ': Hungarian navigation mismatch: ' + JSON.stringify(state));
   assert(DOWNLOAD_LABELS.hu.includes(state.heroDownload),
     name + ': Hungarian download label mismatch: ' + JSON.stringify(state));
-  assert(TRIAL_LABELS.hu.includes(state.trialLabel),
-    name + ': Hungarian trial label mismatch: ' + JSON.stringify(state));
+  assert(state.hasFiveDayTrial,
+    name + ': Hungarian 5-day trial copy missing: ' + JSON.stringify(state));
   assert(state.pricingTitle === 'A licenccsomag a munkádhoz igazodik.',
     name + ': Hungarian pricing heading mismatch: ' + JSON.stringify(state));
   assert(state.licenceTitle === 'Mit ad a FormatX licenc?' && state.licenceItems === 4,
     name + ': Hungarian licence clarification mismatch: ' + JSON.stringify(state));
-  assert(state.footerLicence === 'Licenc',
+  assert(['Licenc', 'Licencfeltételek'].includes(state.footerLicence),
     name + ': Hungarian footer licence mismatch: ' + JSON.stringify(state));
   assert(state.visibleLanguageButtons === 1,
     name + ': exactly one visible language button required: ' + JSON.stringify(state));
@@ -128,13 +128,13 @@ function assertEnglish(state, name) {
   assert(matchesOne(state.nav, NAVIGATION.en), name + ': English navigation mismatch: ' + JSON.stringify(state));
   assert(DOWNLOAD_LABELS.en.includes(state.heroDownload),
     name + ': English download label mismatch: ' + JSON.stringify(state));
-  assert(TRIAL_LABELS.en.includes(state.trialLabel),
-    name + ': English trial label mismatch: ' + JSON.stringify(state));
+  assert(state.hasFiveDayTrial,
+    name + ': English 5-day trial copy missing: ' + JSON.stringify(state));
   assert(state.pricingTitle === 'The licence plan fits your work.',
     name + ': English pricing heading mismatch: ' + JSON.stringify(state));
   assert(state.licenceTitle === 'What does the FormatX licence grant?' && state.licenceItems === 4,
     name + ': English licence clarification mismatch: ' + JSON.stringify(state));
-  assert(state.footerLicence === 'Licence',
+  assert(['Licence', 'Licence terms'].includes(state.footerLicence),
     name + ': English footer licence mismatch: ' + JSON.stringify(state));
   assert(state.visibleLanguageButtons === 1,
     name + ': exactly one visible language button required: ' + JSON.stringify(state));
