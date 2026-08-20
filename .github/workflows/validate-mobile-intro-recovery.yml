@@ -96,7 +96,8 @@ jobs:
           set -euo pipefail
           grep -Fq "const VERSION = 'seamless-v7'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "formatx-infinite-scroll-desktop-v7.js" docs/scifi-ui/scripts/formatx-infinite-scroll.js
-          grep -Fq 'cloneNode(true)' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq 'buildReferenceMirror' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq 'inertReferenceMirror: true' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq 'window.scrollTo(' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq 'scheduleMobileTransfer' docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "addEventListener('scrollend'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js

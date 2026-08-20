@@ -2,7 +2,7 @@
 'use strict';
 const root=document.documentElement;
 let queued=false;
-const canonicalOwner=()=>innerWidth<=900&&(root.dataset.fxMobileLayoutOwner==='r207-normal-flow'||document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement);
+const canonicalOwner=()=>innerWidth<=900&&(root.dataset.fxMobileLayoutOwner==='r207-normal-flow'||root.dataset.fxMobileLayoutOwner==='r244-reference-frame'||document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement);
 const imp=(el,prop,value)=>{if(el instanceof HTMLElement)el.style.setProperty(prop,value,'important');};
 function normal(el){if(!(el instanceof HTMLElement))return;imp(el,'position','relative');imp(el,'inset','auto');imp(el,'top','auto');imp(el,'right','auto');imp(el,'bottom','auto');imp(el,'left','auto');imp(el,'grid-area','auto');imp(el,'grid-row','auto');imp(el,'grid-column','auto');imp(el,'transform','none');imp(el,'translate','none');}
 function fixed(el,top,right,width,height){if(!(el instanceof HTMLElement))return;imp(el,'position','fixed');imp(el,'inset','auto');imp(el,'top',top);imp(el,'right',right);imp(el,'bottom','auto');imp(el,'left','auto');imp(el,'width',width);imp(el,'height',height);imp(el,'margin','0');imp(el,'transform','none');imp(el,'translate','none');imp(el,'flex','0 0 auto');imp(el,'visibility','visible');imp(el,'opacity','1');imp(el,'display','inline-flex');imp(el,'pointer-events','auto');}

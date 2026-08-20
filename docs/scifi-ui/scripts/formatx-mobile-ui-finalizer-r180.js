@@ -3,7 +3,7 @@
 const root=document.documentElement;
 if(root.dataset.fxMobileUiFinalizerR180==='ready-r180b')return;
 const mobile=()=>matchMedia('(max-width:900px),(pointer:coarse)').matches;
-const canonicalOwner=()=>mobile()&&(root.dataset.fxMobileLayoutOwner==='r207-normal-flow'||document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement);
+const canonicalOwner=()=>mobile()&&(root.dataset.fxMobileLayoutOwner==='r207-normal-flow'||root.dataset.fxMobileLayoutOwner==='r244-reference-frame'||document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement);
 const imp=(el,prop,value)=>{if(!(el instanceof HTMLElement))return false;const same=el.style.getPropertyValue(prop)===value&&el.style.getPropertyPriority(prop)==='important';if(same)return false;el.style.setProperty(prop,value,'important');return true;};
 let raf=0,applying=false;
 const watched=new WeakSet();

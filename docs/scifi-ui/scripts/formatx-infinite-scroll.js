@@ -4,7 +4,7 @@
   const root = document.documentElement;
   const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260812-mobile-seamless-v1';
+  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260820-reference-loop-r246';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;

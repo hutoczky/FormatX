@@ -117,7 +117,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20260813-single-webgl2-reference-r70';
+      script.src = './scripts/igloo-parity.js?v=20260820-reference-loop-r246';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);

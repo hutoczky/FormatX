@@ -62,8 +62,9 @@ assert.doesNotMatch(scrollBootstrap, /scrollTo\s*\(|scrollIntoView\s*\(|cloneNod
 assert.match(seamlessScroll, /const VERSION = 'seamless-v7'/);
 assert.match(seamlessScroll, /root\.dataset\.fxInfiniteInput = 'native'/);
 assert.match(seamlessScroll, /visualBridge: true/);
-assert.match(seamlessScroll, /clonedHeroOnly: true/);
-assert.match(seamlessScroll, /sourceHero\.cloneNode\(true\)/);
+assert.match(seamlessScroll, /inertReferenceMirror: true/);
+assert.match(seamlessScroll, /mirrorContext: 'static-2d-snapshot-no-webgl'/);
+assert.match(seamlessScroll, /buildReferenceMirror/);
 assert.match(seamlessScroll, /window\.scrollTo\(/);
 assert.doesNotMatch(seamlessScroll, /addEventListener\(['"](?:wheel|touchmove)['"]/);
 
@@ -74,7 +75,9 @@ assert.equal(scrollPolicy.mobile.controller, 'seamless-v7');
 assert.equal(scrollPolicy.mobile.automatic_loop, true);
 assert.equal(scrollPolicy.mobile.visual_bridge, true);
 assert.equal(scrollPolicy.mobile.cloned_content, false);
-assert.equal(scrollPolicy.mobile.cloned_hero_only, true);
+assert.equal(scrollPolicy.mobile.cloned_hero_only, false);
+assert.equal(scrollPolicy.mobile.bridge_content, 'inert_reference_mirror');
+assert.equal(scrollPolicy.mobile.bridge_webgl_contexts, 0);
 assert.equal(scrollPolicy.mobile.boundary_handoff_only, true);
 assert.equal(scrollPolicy.mobile.native_momentum_preserved, true);
 assert.equal(scrollPolicy.mobile.finite_document, false);

@@ -71,14 +71,15 @@ assert.ok(!scrollBootstrap.includes('preventDefault'), 'scroll bootstrap must no
 assert.ok(includesAll(seamlessScroll, [
   "const VERSION = 'seamless-v7'",
   "root.dataset.fxInfiniteInput = 'native'",
-  "root.dataset.fxInfiniteCloneMode = 'visual-bridge'",
+  "root.dataset.fxInfiniteCloneMode = 'inert-reference-mirror'",
   "root.dataset.fxAutomaticLoop = 'enabled'",
   'automaticLoop: true',
   'visualBridge: true',
-  'clonedHeroOnly: true',
+  'inertReferenceMirror: true',
+  "mirrorContext: 'static-2d-snapshot-no-webgl'",
   'clonedContent: false',
   "mobileTransfer: 'scrollend-or-idle'",
-  'sourceHero.cloneNode(true)',
+  'buildReferenceMirror',
   'window.scrollTo('
 ]), 'shared seamless-v7 implementation missing');
 assert.ok(!/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(seamlessScroll), 'shared seamless runtime must not capture wheel/touchmove');

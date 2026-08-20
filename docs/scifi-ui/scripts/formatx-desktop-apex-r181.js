@@ -31,12 +31,40 @@ function updatePointer(e,space){
   ty=clamp((e.clientY-r.top)/r.height*2-1,-1,1);
 }
 
+function bindPointer(hero,space){
+  if(bound===hero)return;
+  bound=hero;
+  hero.addEventListener('pointermove',e=>{
+    updatePointer(e,space);
+    if(e.pointerType!=='touch'&&desktop.matches){energy=Math.max(energy,.36);root.dataset.fxDesktopApexInteractionR181='tracking';}
+  },{passive:true,capture:true});
+  hero.addEventListener('pointerdown',e=>{
+    if(!desktop.matches)return;
+    updatePointer(e,space);
+    energy=1;
+    root.dataset.fxDesktopApexInteractionR181='energized';
+    try{window.FormatXCoreMobileV69?.pulse?.();}catch(_){/* existing core stays authoritative */}
+  },{passive:true,capture:true});
+  hero.addEventListener('pointerleave',()=>{tx=0;ty=0;},{passive:true,capture:true});
+}
+
 function apply(){
   queued=false;
   if(!desktop.matches){root.dataset.fxDesktopApexR181='mobile-bypass';return false;}
   const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space'),copy=hero?.querySelector('.hero-copy');
   if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement)||!(copy instanceof HTMLElement))return false;
   host=space;
+
+  /* r244 is the final production layout owner. Keep the r181 pointer-energy
+     layer alive, but never rewrite r244 geometry or hide its proof content. */
+  if(root.dataset.fxReferenceProductionR244==='desktop'){
+    bindPointer(hero,space);
+    root.dataset.fxDesktopApexR181='ready';
+    root.dataset.fxDesktopApexLayoutOwnerR181='reference-r244';
+    root.dataset.fxDesktopApexVersionR181=VERSION;
+    root.dataset.fxReferenceComposition='desktop-reference-r244';
+    return true;
+  }
 
   imp(hero,'display','block');imp(hero,'position','relative');imp(hero,'min-height','clamp(760px,calc(100svh - 72px),940px)');imp(hero,'height','auto');imp(hero,'padding','0');imp(hero,'overflow','hidden');
   imp(grid,'position','relative');imp(grid,'display','block');imp(grid,'width','100%');imp(grid,'max-width','none');imp(grid,'min-height','clamp(760px,calc(100svh - 72px),940px)');imp(grid,'height','auto');imp(grid,'margin','0');imp(grid,'padding','0');imp(grid,'overflow','hidden');
@@ -57,21 +85,7 @@ function apply(){
   const actions=copy.querySelector('.hero-actions');if(actions instanceof HTMLElement){Array.from(actions.children).forEach((el,i)=>imp(el,'display',i<2?'inline-flex':'none'));}
   const heading=hero.querySelector('.fx-reference-heading'),proof=hero.querySelector('.fx-reference-proof');for(const el of [heading,proof]){imp(el,'display','none');imp(el,'visibility','hidden');imp(el,'opacity','0');}
   ensureMeta(space);
-  if(bound!==hero){
-    bound=hero;
-    hero.addEventListener('pointermove',e=>{
-      updatePointer(e,space);
-      if(e.pointerType!=='touch'&&desktop.matches){energy=Math.max(energy,.36);root.dataset.fxDesktopApexInteractionR181='tracking';}
-    },{passive:true,capture:true});
-    hero.addEventListener('pointerdown',e=>{
-      if(!desktop.matches)return;
-      updatePointer(e,space);
-      energy=1;
-      root.dataset.fxDesktopApexInteractionR181='energized';
-      try{window.FormatXCoreMobileV69?.pulse?.();}catch(_){/* existing core stays authoritative */}
-    },{passive:true,capture:true});
-    hero.addEventListener('pointerleave',()=>{tx=0;ty=0;},{passive:true,capture:true});
-  }
+  bindPointer(hero,space);
   root.dataset.fxDesktopApexR181='ready';root.dataset.fxDesktopApexVersionR181=VERSION;root.dataset.fxReferenceComposition='desktop-cinematic-mag-r181';
   return true;
 }
@@ -86,7 +100,7 @@ function animate(){
   root.dataset.fxDesktopApexPointerR181=`${px.toFixed(3)},${py.toFixed(3)}`;root.dataset.fxDesktopApexEnergyR181=energy.toFixed(3);
   if(energy<.22)root.dataset.fxDesktopApexInteractionR181='idle-living';
 }
-function boot(){schedule();[140,720,1800,3600].forEach(ms=>setTimeout(schedule,ms));if(!raf)raf=requestAnimationFrame(animate);if(!mo){mo=new MutationObserver(()=>{if(desktop.matches&&root.dataset.fxReferenceComposition!=='desktop-cinematic-mag-r181')schedule();});mo.observe(root,{attributes:true,attributeFilter:['data-fx-reference-composition','data-fx-core-reference-texture-r130']});}}
+function boot(){schedule();[140,720,1800,3600].forEach(ms=>setTimeout(schedule,ms));if(!raf)raf=requestAnimationFrame(animate);if(!mo){mo=new MutationObserver(()=>{if(desktop.matches&&root.dataset.fxReferenceProductionR244!=='desktop'&&root.dataset.fxReferenceComposition!=='desktop-cinematic-mag-r181')schedule();});mo.observe(root,{attributes:true,attributeFilter:['data-fx-reference-production-r244','data-fx-reference-composition','data-fx-core-reference-texture-r130']});}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 ['formatx:real3dready','formatx:coredetailready','formatx:organisminterfaceready','formatx:languagechange'].forEach(n=>addEventListener(n,schedule));
 addEventListener('resize',schedule,{passive:true});desktop.addEventListener?.('change',schedule);reduced.addEventListener?.('change',schedule);

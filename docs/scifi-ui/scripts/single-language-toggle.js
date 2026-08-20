@@ -13,7 +13,7 @@
      data-hu/data-en. Keep those labels in the selected language on both mobile
      and desktop, including nodes mounted after initial page load. */
   const FIXED_COPY = [
-    ['.topbar .brand small', 'ÉLŐ RENDSZER', 'LIVING SYSTEM'],
+    ['.topbar .brand small', 'LIVING SYSTEM', 'LIVING SYSTEM'],
     ['.site-footer .footer-brand .brand small', 'ÉLŐ RENDSZER', 'LIVING SYSTEM'],
     ['#formatx-event-horizon .fx-intro-meta span:nth-child(1)', 'FORMATX / ÉLŐ MAG', 'FORMATX / LIVING CORE'],
     ['#formatx-event-horizon .fx-intro-meta span:nth-child(2)', 'RESZPONZÍV RENDSZERARCHITEKTÚRA', 'RESPONSIVE SYSTEM ARCHITECTURE'],
@@ -50,7 +50,7 @@
     ['#formatx-plan-qr-dock [data-plan-qr="technician_team"] .fx-plan-qr-copy small', '03 / CSAPAT', '03 / TEAM'],
     ['#system .marquee span', 'FORMATX / ÉRZÉKEL / TERVEZ / VÉGREHAJT / ELLENŐRIZ / FORMATX / ÉRZÉKEL / TERVEZ / VÉGREHAJT / ELLENŐRIZ / ', 'FORMATX / SENSE / PLAN / EXECUTE / VERIFY / FORMATX / SENSE / PLAN / EXECUTE / VERIFY / '],
     ['#hero .fx-reference-ask span', 'KÉRDEZZ', 'ASK'],
-    ['#hero .fx-reference-proof h2', 'BIZONYÍTÉK', 'PROOF'],
+    ['#hero .fx-reference-proof h2', 'Bizonyíték a látvány mögött.', 'Proof behind the visual.'],
     ['.fx-r181-apex-meta b', 'ÉLŐ MAG', 'LIVING CORE'],
     ['.fx-r181-apex-meta span:nth-of-type(1)', 'WEBGL2 / REAKTÍV', 'WEBGL2 / REACTIVE'],
     ['.fx-r181-apex-meta span:nth-of-type(2)', 'MUTATÓMEZŐ', 'POINTER FIELD'],

@@ -129,7 +129,8 @@ if (!scrollBootstrap.includes('formatx-mobile-seamless-loop.css') || scrollBoots
 if (scrollBootstrap.includes('scrollTo(') || scrollBootstrap.includes('scrollIntoView(') || scrollBootstrap.includes('cloneNode(')) report('scroll bootstrap: mobile-capable bootstrap must not move or clone the document');
 if (!scrollBootstrap.includes('formatx-infinite-scroll-desktop-v7.js')) report('scroll bootstrap: shared seamless runtime loader missing');
 if (!seamlessScroll.includes("const VERSION = 'seamless-v7'")) report('seamless scroll: seamless-v7 runtime missing');
-if (!seamlessScroll.includes('sourceHero.cloneNode(true)') || !seamlessScroll.includes('window.scrollTo(')) report('seamless scroll: visual bridge handoff implementation missing');
+if (!seamlessScroll.includes('buildReferenceMirror') || !seamlessScroll.includes('window.scrollTo(')) report('seamless scroll: inert visual bridge handoff implementation missing');
+if (!seamlessScroll.includes('static-2d-snapshot-no-webgl')) report('seamless scroll: bridge must not allocate another WebGL context');
 if (!seamlessScroll.includes("mobileTransfer: 'scrollend-or-idle'")) report('seamless scroll: mobile transfer must wait for scrollend/idle');
 if (/addEventListener\(['"](?:wheel|touchmove)['"][\s\S]{0,180}preventDefault/.test(seamlessScroll)) report('seamless scroll: wheel/touch input capture returned');
 if (!mobileLoopCss.includes('min-height: calc(100svh + max(320px, 24svh))') || !mobileLoopCss.includes('display: block !important')) report('mobile seamless bridge: footer runway override missing');

@@ -109,6 +109,13 @@ function applyLayout(force=false){
   if(!(hero instanceof HTMLElement)||!(space instanceof HTMLElement))return;
 
   if(innerWidth<=900){
+    /* r244 owns the supplied-reference safe lane. Keep this runtime focused on
+       optical motion and never rewrite reference geometry after a resize. */
+    if(root.dataset.fxMobileLayoutOwner==='r244-reference-frame'){
+      root.dataset.fxLiveSafeLaneR147='delegated-r244';
+      root.dataset.fxLiveSafeLaneMethodR149='reference-frame-r244';
+      return;
+    }
     const clearGap=innerWidth<=380?50:innerWidth<=430?44:40;
     imp(hero,'padding-bottom',innerWidth<=380?'56px':innerWidth<=430?'52px':'48px');
     imp(hero,'overflow','visible');

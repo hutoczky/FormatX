@@ -6,6 +6,14 @@
 html[data-fx-infinite-controller='seamless-v7'],
 html[data-fx-infinite-controller='seamless-v7'] body {
   scroll-snap-type: none !important;
+  overflow-anchor: none !important;
+}
+
+/* Desktop sections are progressively realised while the user scrolls. The
+   browser must not reinterpret those height changes as a reason to move a
+   completed loop landing. */
+html[data-fx-infinite-controller='seamless-v7'] :is(#main-content, #hero, main > .scene, .fx-organism-chapter, .fx-organism-chapter-trigger, .fx-loop-bridge) {
+  overflow-anchor: none !important;
 }
 
 html[data-fx-infinite-controller='seamless-v7'] #hero,
@@ -61,12 +69,260 @@ html.fx-seamless-loop-transfer body {
   --fx-loop-runway: max(320px, 24svh);
   position: relative;
   z-index: var(--fx-layer-content, 220);
-  min-height: calc(100svh + var(--fx-loop-runway));
+  min-height: calc(var(--fx-loop-source-height, 100svh) + var(--fx-loop-runway));
   padding-bottom: var(--fx-loop-runway);
   box-sizing: border-box;
   overflow: clip;
   background: #02070d;
   contain: layout paint style;
+}
+
+.fx-loop-reference-mirror {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--fx-loop-source-height, 100svh);
+  min-height: var(--fx-loop-source-height, 100svh);
+  overflow: clip;
+  color: #f2f8fc;
+  background: linear-gradient(180deg, #01050d 0%, #021222 47%, #03182b 61%, #010710 78%, #01050c 100%);
+  pointer-events: none;
+  user-select: none;
+  contain: layout paint style;
+}
+
+.fx-loop-reference-visual {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: min(100vw, 500px);
+  min-height: min(100vw, 500px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(24, 99, 175, .22), transparent 34%),
+    linear-gradient(180deg, #01050d, #03192d 84%, #010710);
+}
+
+.fx-loop-reference-visual > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 97%;
+  object-fit: fill;
+  opacity: .985;
+  mix-blend-mode: screen;
+  filter: saturate(1.04) contrast(1.015);
+}
+
+.fx-loop-reference-copy { display: none; }
+
+.fx-loop-reference-controls {
+  position: absolute;
+  z-index: 3;
+  top: 14px;
+  right: clamp(16px, 6.5vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 50px;
+}
+
+.fx-loop-reference-ask,
+.fx-loop-reference-pause {
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgba(137, 195, 221, .25);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, rgba(16, 36, 53, .78), rgba(3, 14, 24, .9) 72%);
+}
+
+.fx-loop-reference-ask i {
+  width: 23px;
+  height: 18px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 55%, #fff 0 21%, transparent 23%),
+    radial-gradient(circle at 56% 39%, #f7efff 0 28%, transparent 30%),
+    radial-gradient(circle at 69% 62%, #ead8ff 0 25%, transparent 27%);
+  filter: drop-shadow(0 0 7px rgba(212, 160, 255, .62));
+}
+
+.fx-loop-reference-ask b {
+  position: absolute;
+  top: 47px;
+  left: 50%;
+  width: max-content;
+  color: rgba(226, 235, 244, .84);
+  font: 650 9px/1 system-ui, sans-serif;
+  letter-spacing: .045em;
+  transform: translateX(-50%);
+}
+
+.fx-loop-reference-pause::before,
+.fx-loop-reference-pause::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  width: 2px;
+  height: 10px;
+  border-radius: 2px;
+  background: #62dcff;
+  box-shadow: 0 0 8px rgba(98, 220, 255, .48);
+}
+
+.fx-loop-reference-pause::before { left: 21px; }
+.fx-loop-reference-pause::after { left: 27px; }
+
+.fx-loop-reference-heading {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: calc(100% - clamp(20px, 6vw, 26px) - clamp(22px, 7.4vw, 32px));
+  max-width: 680px;
+  height: 20px;
+  margin: -47px 0 25px clamp(20px, 6vw, 26px);
+  color: rgba(224, 233, 239, .88);
+  font: 500 clamp(14px, 3.85vw, 16.5px)/1 system-ui, sans-serif;
+  letter-spacing: .145em;
+  white-space: nowrap;
+}
+
+.fx-loop-reference-heading::after {
+  content: '';
+  flex: 0 0 clamp(27px, 8vw, 35px);
+  height: 1px;
+  margin-left: 10px;
+  background: linear-gradient(90deg, rgba(80, 218, 255, .9), transparent);
+}
+
+.fx-loop-reference-proof {
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  width: calc(100% - clamp(20px, 6vw, 26px) - clamp(22px, 7.4vw, 32px));
+  max-width: 680px;
+  min-height: 258px;
+  margin: 0 0 38px clamp(20px, 6vw, 26px);
+  padding: 20px 19px 24px;
+  overflow: hidden;
+  border: 1px solid rgba(91, 197, 236, .28);
+  border-radius: 28px;
+  background: radial-gradient(circle at 17% 5%, rgba(28, 181, 225, .11), transparent 42%), linear-gradient(145deg, rgba(5, 33, 48, .94), rgba(3, 19, 32, .965) 61%, rgba(6, 14, 28, .97));
+}
+
+.fx-loop-reference-proof > span {
+  display: block;
+  margin: 0 0 10px;
+  color: rgba(201, 220, 233, .72);
+  font: 650 10px/1.1 system-ui, sans-serif;
+  letter-spacing: .225em;
+}
+
+.fx-loop-reference-proof h2 {
+  width: 76%;
+  max-width: 260px;
+  margin: 0 0 24px;
+  color: #f3f8fc;
+  font: 790 clamp(23px, 5.7vw, 24.5px)/1.04 system-ui, sans-serif;
+  letter-spacing: -.035em;
+}
+
+.fx-loop-reference-proof p {
+  width: 100%;
+  max-width: 320px;
+  margin: 0;
+  color: rgba(202, 218, 229, .72);
+  font: 400 clamp(14px, 3.58vw, 15.5px)/1.9 system-ui, sans-serif;
+}
+
+.fx-loop-reference-proof > i {
+  position: absolute;
+  top: 149px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 56px;
+  border: 1px solid rgba(63, 224, 255, .72);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(3, 20, 31, .79);
+  font: 700 12px/1 system-ui, sans-serif;
+  font-style: normal;
+}
+
+@media (max-width: 374px) {
+  .fx-loop-reference-proof { min-height: 278px; }
+  .fx-loop-reference-proof > i { top: auto; bottom: 17px; }
+}
+
+@media (min-width: 901px) {
+  .fx-loop-reference-mirror {
+    min-width: 901px;
+    background: linear-gradient(180deg, #01050c, #020b15 66%, #01050c);
+  }
+
+  .fx-loop-reference-visual {
+    position: absolute;
+    top: 36px;
+    right: max(40px, calc((100vw - 1320px) / 2));
+    width: min(50vw, 660px);
+    height: clamp(520px, 42vw, 620px);
+    min-height: 520px;
+  }
+
+  .fx-loop-reference-visual > img { height: 100%; }
+
+  .fx-loop-reference-copy {
+    position: absolute;
+    top: 78px;
+    left: max(40px, calc((100vw - 1320px) / 2));
+    display: block;
+    width: min(42vw, 560px);
+  }
+
+  .fx-loop-reference-copy-kicker {
+    display: block;
+    margin-bottom: 22px;
+    color: #75dff4;
+    font: 700 10px/1.3 ui-monospace, monospace;
+    letter-spacing: .16em;
+  }
+
+  .fx-loop-reference-copy > strong {
+    display: block;
+    color: #effcff;
+    font: 900 clamp(64px, 7vw, 104px)/.82 system-ui, sans-serif;
+    letter-spacing: -.075em;
+  }
+
+  .fx-loop-reference-copy > b {
+    display: block;
+    margin-top: 15px;
+    color: transparent;
+    font: 300 clamp(30px, 3.4vw, 50px)/1 system-ui, sans-serif;
+    letter-spacing: .18em;
+    -webkit-text-stroke: 1px rgba(222, 244, 252, .42);
+  }
+
+  .fx-loop-reference-copy > p {
+    max-width: 520px;
+    margin: 25px 0 0;
+    color: rgba(225, 240, 247, .76);
+    font: 400 clamp(15px, 1.25vw, 18px)/1.65 system-ui, sans-serif;
+  }
+
+  .fx-loop-reference-controls { right: 18px; }
+  .fx-loop-reference-heading,
+  .fx-loop-reference-proof { display: none; }
 }
 
 .fx-loop-bridge > .fx-loop-hero-clone {

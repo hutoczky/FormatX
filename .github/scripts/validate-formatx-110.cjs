@@ -53,8 +53,9 @@ assert.ok(!scrollBootstrap.includes("scrollTo(") && !scrollBootstrap.includes("s
 assert.ok(!scrollBootstrap.includes("preventDefault"), "scroll bootstrap cancels native input");
 assert.ok(desktopScroll.includes("const VERSION = 'seamless-v7'"), "shared seamless-v7 controller is missing");
 assert.ok(desktopScroll.includes("root.dataset.fxAutomaticLoop = 'enabled'"), "automatic seamless loop is not enabled");
-assert.ok(desktopScroll.includes("visualBridge: true") && desktopScroll.includes("clonedHeroOnly: true"), "visual bridge contract is missing");
-assert.ok(desktopScroll.includes("window.scrollTo(") && desktopScroll.includes("sourceHero.cloneNode(true)"), "boundary transfer implementation is missing");
+assert.ok(desktopScroll.includes("visualBridge: true") && desktopScroll.includes("inertReferenceMirror: true"), "inert visual bridge contract is missing");
+assert.ok(desktopScroll.includes("window.scrollTo(") && desktopScroll.includes("buildReferenceMirror"), "boundary transfer implementation is missing");
+assert.ok(desktopScroll.includes("static-2d-snapshot-no-webgl"), "loop bridge must not allocate a WebGL context");
 assert.ok(!desktopScroll.includes("addEventListener('wheel'") && !desktopScroll.includes("addEventListener('touchmove'"), "seamless runtime owns native wheel/touch input");
 assert.equal(scrollPolicy.policy.input_capture, false, "public input capture policy regressed");
 assert.equal(scrollPolicy.policy.section_scroll_snap, false, "public section snap policy regressed");
@@ -62,7 +63,9 @@ assert.equal(scrollPolicy.mobile.controller, "seamless-v7", "public mobile seaml
 assert.equal(scrollPolicy.mobile.automatic_loop, true, "public mobile infinite loop policy regressed");
 assert.equal(scrollPolicy.mobile.visual_bridge, true, "public mobile visual bridge policy regressed");
 assert.equal(scrollPolicy.mobile.cloned_content, false, "mobile content cloning must remain disabled");
-assert.equal(scrollPolicy.mobile.cloned_hero_only, true, "mobile boundary bridge must remain hero-only");
+assert.equal(scrollPolicy.mobile.cloned_hero_only, false, "mobile boundary bridge must not clone the interactive hero DOM");
+assert.equal(scrollPolicy.mobile.bridge_content, "inert_reference_mirror", "mobile boundary mirror contract missing");
+assert.equal(scrollPolicy.mobile.bridge_webgl_contexts, 0, "mobile boundary bridge must not create WebGL contexts");
 assert.equal(scrollPolicy.mobile.boundary_handoff_only, true, "mobile automatic positioning must remain boundary-only");
 assert.equal(scrollPolicy.mobile.native_momentum_preserved, true, "mobile native momentum policy regressed");
 assert.equal(scrollPolicy.mobile.finite_document, false, "mobile infinite document policy regressed");

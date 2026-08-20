@@ -120,7 +120,8 @@ async function assertStableOrdinaryScroll(page) {
     y: window.scrollY,
     loopCount: Number(document.documentElement.dataset.fxLoopCount || 0),
     bridges: document.querySelectorAll('.fx-loop-bridge[data-fx-loop-bridge]').length,
-    clones: document.querySelectorAll('[data-fx-loop-clone="true"]').length,
+    mirrors: document.querySelectorAll('[data-fx-loop-mirror]').length,
+    mirrorFocusable: document.querySelector('[data-fx-loop-mirror]')?.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])').length || 0,
     automatic: document.documentElement.dataset.fxAutomaticLoop,
     jumpGuard: document.documentElement.dataset.fxScrollJumpGuard,
     transfer: document.documentElement.classList.contains('fx-seamless-loop-transfer'),
@@ -129,7 +130,7 @@ async function assertStableOrdinaryScroll(page) {
   }));
   if (Math.abs(after.y - target) > 6) throw new Error(`Ordinary page position changed away from the loop boundary: ${JSON.stringify({ target, after })}`);
   if (after.loopCount !== before.loopCount) throw new Error(`Loop counter changed away from the visual bridge: ${JSON.stringify({ before, after })}`);
-  if (after.bridges !== 1 || after.clones !== 1 || after.transfer) throw new Error(`Seamless bridge state invalid during normal navigation: ${JSON.stringify(after)}`);
+  if (after.bridges !== 1 || after.mirrors !== 1 || after.mirrorFocusable !== 0 || after.transfer) throw new Error(`Seamless inert bridge state invalid during normal navigation: ${JSON.stringify(after)}`);
   if (after.automatic !== 'enabled' || after.jumpGuard !== 'visual-match-v4' || after.runtime?.automaticLoop !== true || after.runtime?.mobileNativeMomentumPreserved !== true) {
     throw new Error(`Seamless-v7 navigation contract missing: ${JSON.stringify(after)}`);
   }

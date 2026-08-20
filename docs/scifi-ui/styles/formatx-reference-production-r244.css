@@ -1,0 +1,1381 @@
+/* FormatX r244 — production reference frame.
+   The renderer remains native WebGL2; this layer owns only responsive geometry,
+   readable copy and the control plane around the live MAG. */
+
+@media (max-width: 900px) {
+  html[data-fx-reference-production-r244="ready"] {
+    --fx-r244-edge-left: clamp(20px, 6vw, 26px);
+    --fx-r244-edge-right: clamp(22px, 7.4vw, 32px);
+    --fx-r244-header-edge: clamp(16px, 6.5vw, 28px);
+    background: #01050c !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture {
+    min-width: 320px !important;
+    overflow-x: clip !important;
+    background: #01050c !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .skip-link:not(:focus-visible) {
+    position: fixed !important;
+    top: -160px !important;
+    left: 12px !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .skip-link:focus-visible {
+    top: 10px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .topbar {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 1000 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 70px !important;
+    min-height: 70px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(124, 211, 244, .14) !important;
+    background: linear-gradient(180deg, rgba(3, 15, 26, .99), rgba(2, 12, 22, .98)) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .14) !important;
+    overflow: visible !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .topbar .brand {
+    position: absolute !important;
+    inset: 18px auto auto 18px !important;
+    z-index: 4 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .topbar .brand img {
+    width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+    object-fit: contain !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .topbar .brand strong {
+    color: #f6fbff !important;
+    font: 780 12.2px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .145em !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .topbar .brand small {
+    margin-top: 5px !important;
+    color: rgba(202, 224, 237, .74) !important;
+    font: 650 6.5px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .21em !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .topbar :is(.header-actions, .main-nav, #fx-reference-legacy-menu, .menu-toggle:not(.fx-reference-menu-button)) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture :is(.fx-reference-mag-button, .fx-language-toggle, .fx-reference-menu-button) {
+    position: absolute !important;
+    inset: auto !important;
+    z-index: 6 !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: rgba(236, 246, 252, .92) !important;
+    border: 1px solid rgba(129, 190, 220, .22) !important;
+    background: rgba(3, 15, 26, .84) !important;
+    box-shadow: inset 0 0 25px rgba(83, 184, 232, .035), 0 8px 24px rgba(0, 0, 0, .11) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    text-indent: 0 !important;
+    overflow: hidden !important;
+    font: 720 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    letter-spacing: .05em !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-reference-mag-button {
+    top: 15px !important;
+    right: calc(var(--fx-r244-header-edge) + 113px) !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    border-radius: 13px !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-reference-mag-button::before,
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-reference-mag-button::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-language-toggle {
+    top: 15px !important;
+    right: calc(var(--fx-r244-header-edge) + 58px) !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    border-color: transparent !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle, rgba(10, 31, 47, .48), rgba(2, 12, 22, .12) 72%) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-language-toggle::after {
+    right: 3px !important;
+    bottom: 3px !important;
+    width: 3px !important;
+    height: 3px !important;
+    background: #4ccfff !important;
+    box-shadow: 0 0 9px rgba(76, 207, 255, .8) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-reference-menu-button {
+    top: 8px !important;
+    right: var(--fx-r244-header-edge) !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    border-radius: 18px !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-reference-menu-button span {
+    position: absolute !important;
+    left: 13px !important;
+    height: 1px !important;
+    border-radius: 2px !important;
+    background: rgba(225, 240, 247, .88) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-reference-menu-button span:first-child {
+    top: 21px !important;
+    width: 23px !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-reference-menu-button span:last-child {
+    top: 31px !important;
+    width: 16px !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 0 56px !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+    background: linear-gradient(180deg, #01050d 0%, #021222 47%, #03182b 61%, #010710 78%, #01050c 100%) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    overflow: visible !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .hero-grid > .hero-space {
+    position: relative !important;
+    inset: auto !important;
+    order: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-self: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100vw !important;
+    min-height: 100vw !important;
+    max-height: 500px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero :is(.fx-core-mobile-v55-canvas, .fx-core-r112-canvas) {
+    opacity: .10 !important;
+    filter: brightness(.82) contrast(1.32) saturate(1.03) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-core-detail-r122 {
+    opacity: .998 !important;
+    filter: brightness(.82) contrast(1.32) saturate(1.03) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .hero-grid > .hero-copy {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    min-height: 0 !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: 14px var(--fx-r244-header-edge) auto auto !important;
+    z-index: 10020 !important;
+    display: block !important;
+    width: 50px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+    isolation: isolate !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-three-sound {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero :is(.fx-reference-ask, .fx-reference-pause) {
+    position: relative !important;
+    inset: auto !important;
+    flex: 0 0 50px !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid rgba(137, 195, 221, .25) !important;
+    border-radius: 50% !important;
+    color: #62dcff !important;
+    background: radial-gradient(circle at 50% 30%, rgba(16, 36, 53, .78), rgba(3, 14, 24, .9) 72%) !important;
+    box-shadow: inset 0 0 24px rgba(55, 180, 255, .04), 0 8px 26px rgba(0, 0, 0, .12) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-ask i {
+    width: 24px !important;
+    height: 20px !important;
+    filter: drop-shadow(0 0 7px rgba(212, 160, 255, .62)) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-ask span {
+    position: absolute !important;
+    top: 47px !important;
+    left: 50% !important;
+    z-index: 2 !important;
+    width: max-content !important;
+    max-width: 78px !important;
+    color: rgba(226, 235, 244, .84) !important;
+    font: 650 9px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .045em !important;
+    text-align: center !important;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, .72) !important;
+    white-space: nowrap !important;
+    transform: translateX(-50%) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-pause {
+    color: transparent !important;
+    text-indent: -9999px !important;
+    overflow: hidden !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-pause::before,
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-pause::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    width: 2px !important;
+    height: 10px !important;
+    border: 0 !important;
+    border-radius: 2px !important;
+    background: #62dcff !important;
+    box-shadow: 0 0 8px rgba(98, 220, 255, .48) !important;
+    transform: translateY(-50%) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-pause::before { left: calc(50% - 4px) !important; }
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-pause::after { left: calc(50% + 2px) !important; }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-heading {
+    position: relative !important;
+    inset: auto !important;
+    order: 1 !important;
+    z-index: 10010 !important;
+    display: flex !important;
+    align-items: center !important;
+    align-self: flex-start !important;
+    box-sizing: border-box !important;
+    width: calc(100% - var(--fx-r244-edge-left) - var(--fx-r244-edge-right)) !important;
+    max-width: 680px !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    margin: -47px 0 25px var(--fx-r244-edge-left) !important;
+    padding: 0 !important;
+    color: rgba(224, 233, 239, .88) !important;
+    font: 500 clamp(14px, 3.85vw, 16.5px)/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .145em !important;
+    white-space: nowrap !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-heading::after {
+    content: "" !important;
+    flex: 0 0 clamp(27px, 8vw, 35px) !important;
+    width: clamp(27px, 8vw, 35px) !important;
+    height: 1px !important;
+    margin-left: 10px !important;
+    background: linear-gradient(90deg, rgba(80, 218, 255, .9), transparent) !important;
+    box-shadow: 0 0 8px rgba(52, 200, 255, .16) !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-proof {
+    position: relative !important;
+    inset: auto !important;
+    order: 2 !important;
+    z-index: 10010 !important;
+    display: block !important;
+    align-self: flex-start !important;
+    box-sizing: border-box !important;
+    width: calc(100% - var(--fx-r244-edge-left) - var(--fx-r244-edge-right)) !important;
+    max-width: 680px !important;
+    height: auto !important;
+    min-height: 258px !important;
+    max-height: none !important;
+    margin: 0 0 38px var(--fx-r244-edge-left) !important;
+    padding: 20px 19px 24px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(91, 197, 236, .28) !important;
+    border-radius: 28px !important;
+    background:
+      radial-gradient(circle at 17% 5%, rgba(28, 181, 225, .11), transparent 42%),
+      linear-gradient(145deg, rgba(5, 33, 48, .94), rgba(3, 19, 32, .965) 61%, rgba(6, 14, 28, .97)) !important;
+    box-shadow: inset 0 1px 0 rgba(232, 253, 255, .045), 0 26px 70px rgba(0, 0, 0, .28) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    isolation: isolate !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-proof > * {
+    z-index: 1 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-proof-kicker {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 0 10px !important;
+    padding: 0 !important;
+    color: rgba(201, 220, 233, .72) !important;
+    font: 650 10px/1.1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .225em !important;
+    text-transform: uppercase !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-proof h2 {
+    position: relative !important;
+    display: block !important;
+    width: 76% !important;
+    max-width: 260px !important;
+    height: auto !important;
+    margin: 0 0 24px !important;
+    padding: 0 !important;
+    color: #f3f8fc !important;
+    font: 790 clamp(23px, 5.7vw, 24.5px)/1.04 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: -.035em !important;
+    text-wrap: balance !important;
+    text-transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-proof p {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: rgba(202, 218, 229, .72) !important;
+    font: 400 clamp(14px, 3.58vw, 15.5px)/1.9 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    text-wrap: pretty !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-liveos {
+    position: absolute !important;
+    inset: 149px 6px auto auto !important;
+    z-index: 4 !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 78px !important;
+    min-width: 78px !important;
+    max-width: 78px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid rgba(63, 224, 255, .72) !important;
+    border-radius: 999px !important;
+    color: #fff !important;
+    background: rgba(3, 20, 31, .79) !important;
+    box-shadow: inset 0 0 26px rgba(31, 171, 224, .05), 0 0 18px rgba(0, 197, 255, .03) !important;
+    font: 700 12px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .02em !important;
+    text-decoration: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-mobile-download-r151 {
+    position: relative !important;
+    inset: auto !important;
+    order: 3 !important;
+    align-self: center !important;
+    width: calc(100% - 40px) !important;
+    max-width: 680px !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-loop-hero-clone {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture :is(
+    .fx-rail,
+    .fx-organism-status,
+    .fx-organism-actionbar,
+    .fx-organism-dialogue,
+    .fx-genome-launcher,
+    .fx-living-core-launcher,
+    .fx-three-sound,
+    .fx-premium-core-status,
+    .fx-organism-system-toggle,
+    .fx-organism-thought-trigger,
+    [data-fx-live-os-launcher]
+  ) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+@media (min-width: 901px) {
+  html[data-fx-reference-production-r244="desktop"] {
+    background: #01050c !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture {
+    min-width: 901px !important;
+    overflow-x: clip !important;
+    background: #01050c !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .skip-link:not(:focus-visible) {
+    position: fixed !important;
+    top: -160px !important;
+    left: 14px !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .skip-link:focus-visible {
+    top: 12px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .topbar {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 1000 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(124, 211, 244, .14) !important;
+    background: linear-gradient(180deg, rgba(3, 15, 26, .995), rgba(2, 12, 22, .985)) !important;
+    box-shadow: 0 8px 34px rgba(0, 0, 0, .16) !important;
+    overflow: visible !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .topbar .brand {
+    position: absolute !important;
+    inset: 18px auto auto max(38px, calc((100vw - 1320px) / 2)) !important;
+    z-index: 4 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .topbar .brand img {
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+    object-fit: contain !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .topbar .brand strong {
+    color: #f6fbff !important;
+    font: 780 14px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .15em !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .topbar .brand small {
+    margin-top: 5px !important;
+    color: rgba(202, 224, 237, .74) !important;
+    font: 650 7px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .22em !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .topbar :is(.header-actions, #fx-reference-legacy-menu, .menu-toggle:not(.fx-reference-menu-button)) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture :is(.fx-reference-mag-button, .fx-language-toggle, .fx-reference-menu-button) {
+    position: absolute !important;
+    inset: auto !important;
+    z-index: 8 !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: rgba(236, 246, 252, .94) !important;
+    border: 1px solid rgba(129, 190, 220, .24) !important;
+    background: rgba(3, 15, 26, .86) !important;
+    box-shadow: inset 0 0 28px rgba(83, 184, 232, .04), 0 10px 28px rgba(0, 0, 0, .14) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    text-indent: 0 !important;
+    overflow: hidden !important;
+    font: 720 11px/1 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    letter-spacing: .05em !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .fx-reference-mag-button {
+    top: 16px !important;
+    right: 174px !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    border-radius: 14px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .fx-reference-mag-button::before,
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .fx-reference-mag-button::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .fx-language-toggle {
+    top: 16px !important;
+    right: 112px !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    border-color: transparent !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle, rgba(10, 31, 47, .5), rgba(2, 12, 22, .12) 72%) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .fx-language-toggle::after {
+    right: 3px !important;
+    bottom: 3px !important;
+    width: 4px !important;
+    height: 4px !important;
+    background: #4ccfff !important;
+    box-shadow: 0 0 10px rgba(76, 207, 255, .8) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .fx-reference-menu-button {
+    top: 10px !important;
+    right: 38px !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    border-radius: 19px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .fx-reference-menu-button span {
+    position: absolute !important;
+    left: 15px !important;
+    height: 1px !important;
+    border-radius: 2px !important;
+    background: rgba(225, 240, 247, .9) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .fx-reference-menu-button span:first-child {
+    top: 22px !important;
+    width: 27px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .fx-reference-menu-button span:last-child {
+    top: 33px !important;
+    width: 19px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .main-nav:not(.open) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .main-nav.open {
+    position: absolute !important;
+    top: 68px !important;
+    right: 38px !important;
+    z-index: 10030 !important;
+    display: grid !important;
+    width: min(320px, calc(100vw - 76px)) !important;
+    padding: 16px !important;
+    gap: 4px !important;
+    border: 1px solid rgba(118, 203, 237, .22) !important;
+    border-radius: 20px !important;
+    background: rgba(3, 16, 27, .98) !important;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .5) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture .main-nav.open a {
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 14px !important;
+    border-radius: 12px !important;
+    color: rgba(230, 242, 249, .9) !important;
+    text-decoration: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+    background:
+      radial-gradient(ellipse at 74% 30%, rgba(20, 106, 170, .15), transparent 34%),
+      radial-gradient(ellipse at 70% 34%, rgba(126, 42, 210, .07), transparent 38%),
+      linear-gradient(180deg, #01050d 0%, #021120 54%, #01070e 100%) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 12 !important;
+    display: block !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-copy .kicker {
+    margin: 0 0 14px !important;
+    color: rgba(134, 224, 249, .78) !important;
+    font: 700 10px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    letter-spacing: .28em !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-category-definition {
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    min-height: 62px !important;
+    margin: 0 0 24px !important;
+    padding: 12px 14px !important;
+    border-left: 2px solid rgba(67, 221, 255, .85) !important;
+    color: rgba(205, 222, 233, .72) !important;
+    background: linear-gradient(90deg, rgba(4, 31, 45, .76), transparent) !important;
+    font: 400 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-category-definition strong {
+    display: block !important;
+    margin: 0 0 4px !important;
+    color: #74e7ff !important;
+    font: 750 10px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    letter-spacing: .08em !important;
+    text-transform: uppercase !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero #hero-title {
+    display: grid !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    white-space: normal !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-title-main {
+    display: block !important;
+    max-width: 100% !important;
+    font-size: clamp(64px, 6.25vw, 92px) !important;
+    line-height: .88 !important;
+    letter-spacing: -.075em !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-title-sub {
+    justify-self: end !important;
+    margin: 7px 2px 0 0 !important;
+    font-size: clamp(27px, 2.7vw, 40px) !important;
+    line-height: 1 !important;
+    letter-spacing: .12em !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-lead {
+    width: 100% !important;
+    max-width: 560px !important;
+    margin: 24px 0 0 !important;
+    color: rgba(218, 231, 239, .8) !important;
+    font: 400 clamp(16px, 1.25vw, 18px)/1.55 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-hero-product-state {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 18px 0 0 !important;
+    gap: 8px 12px !important;
+    color: rgba(189, 210, 222, .75) !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-method-inline {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    margin: 14px 0 0 !important;
+    padding: 0 !important;
+    gap: 7px 18px !important;
+    list-style: none !important;
+    color: rgba(185, 210, 224, .7) !important;
+    font: 500 11px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-method-inline li {
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-method-inline li:not(:last-child)::after {
+    content: "✦" !important;
+    position: absolute !important;
+    right: -13px !important;
+    color: #55dfff !important;
+    font-size: 7px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    margin: 22px 0 0 !important;
+    gap: 10px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-actions .button {
+    box-sizing: border-box !important;
+    min-height: 48px !important;
+    max-width: 100% !important;
+    padding: 0 18px !important;
+    white-space: normal !important;
+    text-align: center !important;
+    line-height: 1.25 !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-actions #hero-download {
+    flex: 1 1 250px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-actions .button:not(#hero-download) {
+    flex: 1 1 180px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-facts {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-facts span {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, auto) !important;
+    align-items: baseline !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-facts b {
+    font-size: 23px !important;
+    line-height: 1 !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-facts small {
+    max-width: 104px !important;
+    font-size: 8px !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-release-fallback-notice {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-grid > .hero-space {
+    grid-area: space !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(520px, 42vw, 620px) !important;
+    min-height: 520px !important;
+    max-height: 620px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-space > :is(.hero-label, .hero-ring, .fx-immersive-launch, .fx-organism-map) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-core-mobile-v55-stage,
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-core-r112-stage {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 3 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    transform-origin: 50% 50% !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero :is(.fx-core-mobile-v55-canvas, .fx-core-r112-canvas, .fx-core-detail-r122, .fx-core-live-r147-layer) {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-core-mobile-v55-canvas,
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-core-r112-canvas {
+    z-index: 3 !important;
+    opacity: .95 !important;
+    filter: brightness(.82) contrast(1.92) saturate(2.18) drop-shadow(0 0 3px rgba(248,255,255,.82)) drop-shadow(0 0 9px rgba(43,235,255,.62)) drop-shadow(0 0 26px rgba(40,141,255,.32)) drop-shadow(0 0 40px rgba(176,58,255,.24)) !important;
+    mix-blend-mode: normal !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-core-detail-r122 {
+    z-index: 4 !important;
+    opacity: .998 !important;
+    filter: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-core-live-r147-layer {
+    z-index: 5 !important;
+    overflow: visible !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero :is(.fx-resilient-core, .fx-core-reference-tail-r143) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: 18px 18px auto auto !important;
+    z-index: 10020 !important;
+    display: block !important;
+    width: 54px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-rail {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero :is(.fx-reference-ask, .fx-reference-pause) {
+    position: relative !important;
+    inset: auto !important;
+    flex: 0 0 54px !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid rgba(137, 195, 221, .25) !important;
+    border-radius: 50% !important;
+    color: #62dcff !important;
+    background: radial-gradient(circle at 50% 30%, rgba(16, 36, 53, .78), rgba(3, 14, 24, .9) 72%) !important;
+    box-shadow: inset 0 0 24px rgba(55, 180, 255, .04), 0 8px 26px rgba(0, 0, 0, .12) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-ask i {
+    width: 26px !important;
+    height: 22px !important;
+    filter: drop-shadow(0 0 8px rgba(212, 160, 255, .62)) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-ask span {
+    position: absolute !important;
+    top: 52px !important;
+    left: 50% !important;
+    width: max-content !important;
+    color: rgba(226, 235, 244, .84) !important;
+    font: 650 9px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .045em !important;
+    white-space: nowrap !important;
+    transform: translateX(-50%) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-pause {
+    color: transparent !important;
+    text-indent: -9999px !important;
+    overflow: hidden !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-pause::before,
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-pause::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    width: 2px !important;
+    height: 11px !important;
+    border-radius: 2px !important;
+    background: #62dcff !important;
+    box-shadow: 0 0 8px rgba(98, 220, 255, .48) !important;
+    transform: translateY(-50%) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-pause::before { left: calc(50% - 4px) !important; }
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-pause::after { left: calc(50% + 2px) !important; }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-heading {
+    grid-area: heading !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 20 !important;
+    display: flex !important;
+    align-items: center !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: rgba(224, 233, 239, .88) !important;
+    font: 500 clamp(15px, 1.2vw, 18px)/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .15em !important;
+    white-space: nowrap !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-heading::after {
+    content: "" !important;
+    flex: 1 1 auto !important;
+    min-width: 34px !important;
+    max-width: 72px !important;
+    height: 1px !important;
+    margin-left: 18px !important;
+    background: linear-gradient(90deg, rgba(80, 218, 255, .9), transparent) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-proof {
+    grid-area: proof !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 20 !important;
+    display: block !important;
+    align-self: start !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 258px !important;
+    margin: 0 !important;
+    padding: 28px 30px 30px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(91, 197, 236, .3) !important;
+    border-radius: 30px !important;
+    background:
+      radial-gradient(circle at 17% 5%, rgba(28, 181, 225, .12), transparent 44%),
+      linear-gradient(145deg, rgba(5, 33, 48, .95), rgba(3, 19, 32, .97) 61%, rgba(6, 14, 28, .98)) !important;
+    box-shadow: inset 0 1px 0 rgba(232, 253, 255, .05), 0 30px 80px rgba(0, 0, 0, .3) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-proof-kicker {
+    position: relative !important;
+    display: block !important;
+    margin: 0 0 13px !important;
+    color: rgba(201, 220, 233, .72) !important;
+    font: 650 10px/1.1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: .225em !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-proof h2 {
+    position: relative !important;
+    display: block !important;
+    width: min(76%, 430px) !important;
+    max-width: 430px !important;
+    margin: 0 0 20px !important;
+    color: #f3f8fc !important;
+    font: 790 clamp(30px, 2.35vw, 36px)/1.04 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    letter-spacing: -.035em !important;
+    text-wrap: balance !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-proof p {
+    position: relative !important;
+    display: block !important;
+    width: calc(100% - 104px) !important;
+    max-width: 560px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: rgba(202, 218, 229, .74) !important;
+    font: 400 clamp(15px, 1.2vw, 17px)/1.7 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-wrap: pretty !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-liveos {
+    position: absolute !important;
+    inset: auto 20px 22px auto !important;
+    z-index: 4 !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 92px !important;
+    min-width: 92px !important;
+    max-width: 92px !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid rgba(63, 224, 255, .72) !important;
+    border-radius: 999px !important;
+    color: #fff !important;
+    background: rgba(3, 20, 31, .82) !important;
+    font: 700 13px/1 system-ui, -apple-system, "Segoe UI", sans-serif !important;
+    text-decoration: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero :is(.scroll-cue, .fx-mobile-download-r151) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture :is(.fx-rail, .fx-organism-status, .fx-organism-actionbar, .fx-organism-dialogue, .fx-genome-launcher, .fx-living-core-launcher, .fx-three-sound, [data-fx-live-os-launcher], .fx-loop-hero-clone) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #main-content > .fx-category-deck--standalone {
+    position: relative !important;
+    inset: auto !important;
+    z-index: 1 !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    margin: 0 auto 90px !important;
+    transform: none !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1120px) {
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero > .hero-grid {
+    width: calc(100% - 48px) !important;
+    grid-template-columns: minmax(0, .82fr) minmax(430px, 1.18fr) !important;
+    gap: 26px 30px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-title-main {
+    font-size: clamp(56px, 6.2vw, 70px) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-title-sub {
+    font-size: clamp(24px, 2.8vw, 32px) !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .hero-actions .button {
+    flex-basis: 100% !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #hero .fx-reference-heading {
+    font-size: 14px !important;
+    letter-spacing: .12em !important;
+  }
+}
+
+@media (max-width: 900px) {
+  html[data-fx-reference-production-r244="ready"] body.living-architecture main#main-content section#hero.scene.hero .fx-reference-heading::after {
+    margin-left: 10px !important;
+  }
+}
+
+@media (max-width: 374px) {
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .topbar .brand {
+    left: 14px !important;
+    gap: 8px !important;
+  }
+
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .topbar .brand strong { font-size: 11px !important; }
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .topbar .brand small { font-size: 6px !important; }
+  html[data-fx-reference-production-r244="ready"] body.living-architecture .fx-reference-mag-button { width: 47px !important; min-width: 47px !important; }
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-heading { letter-spacing: .12em !important; }
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-proof { min-height: 278px !important; }
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-proof h2 { width: 82% !important; }
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-liveos { top: auto !important; bottom: 17px !important; }
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero .fx-reference-proof p { padding-right: 0 !important; }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 900px) {
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #hero :is(.fx-reference-heading, .fx-reference-proof, .fx-reference-ask, .fx-reference-pause, .fx-reference-liveos),
+  html[data-fx-reference-production-r244="ready"] body.living-architecture :is(.fx-reference-mag-button, .fx-language-toggle, .fx-reference-menu-button) {
+    animation: none !important;
+    transition: none !important;
+  }
+}

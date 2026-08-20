@@ -9,6 +9,10 @@
   const MOBILE_FLOW_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const HERO_START_HASHES = new Set(['', '#top', '#hero']);
   let bridge = null;
+  let mirror = null;
+  let mirrorImage = null;
+  let mirrorCaptureFrame = 0;
+  let mirrorCaptureTimer = 0;
   let sourceHero = null;
   let transferLockedUntil = 0;
   let scrollFrame = 0;
@@ -16,6 +20,7 @@
   let activityTimer = 0;
   let mobileSettleTimer = 0;
   let pendingMobileRelative = null;
+  let pendingDesktopRelative = null;
   let touchActive = false;
   let loopCount = Number(root.dataset.fxLoopCount || 0);
   let repairTimer = 0;
@@ -36,7 +41,7 @@
 
   root.dataset.fxInfiniteScroll = 'ready-' + VERSION;
   root.dataset.fxInfiniteController = VERSION;
-  root.dataset.fxInfiniteCloneMode = 'visual-bridge';
+  root.dataset.fxInfiniteCloneMode = 'inert-reference-mirror';
   root.dataset.fxInfiniteInput = 'native';
   root.dataset.fxScrollActivity = 'idle';
   root.dataset.fxAutomaticLoop = 'enabled';
@@ -61,7 +66,7 @@
     if (document.querySelector('link[data-fx-seamless-loop-style]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260808-seamless-v7';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260820-reference-loop-r246';
     link.dataset.fxSeamlessLoopStyle = 'true';
     document.head.appendChild(link);
   }
@@ -249,29 +254,59 @@
     return true;
   }
 
-  function neutraliseClone(clone) {
-    clone.id = 'fx-loop-hero-bridge';
-    clone.dataset.fxLoopClone = 'true';
-    clone.classList.add('fx-loop-hero-clone');
-    clone.setAttribute('aria-hidden', 'true');
-    clone.setAttribute('inert', '');
+  function buildReferenceMirror() {
+    const section = document.createElement('section');
+    section.className = 'fx-loop-reference-mirror';
+    section.dataset.fxLoopMirror = 'reference-v8';
+    section.setAttribute('aria-hidden', 'true');
+    section.setAttribute('inert', '');
+    section.innerHTML = [
+      '<div class="fx-loop-reference-copy">',
+      '<span class="fx-loop-reference-copy-kicker" data-hu="TECHNIKUSI OPERÁCIÓS RÉTEG" data-en="TECHNICIAN OPERATIONS LAYER">TECHNIKUSI OPERÁCIÓS RÉTEG</span>',
+      '<strong>FORMATX</strong><b>SUITE PRO</b>',
+      '<p data-hu="Valós rendszerállapot, kontrollált végrehajtás és visszaellenőrizhető eredmény." data-en="Real system state, controlled execution and verifiable outcomes.">Valós rendszerállapot, kontrollált végrehajtás és visszaellenőrizhető eredmény.</p>',
+      '</div>',
+      '<div class="fx-loop-reference-visual" aria-hidden="true"><img alt="" decoding="async">',
+      '<div class="fx-loop-reference-controls"><span class="fx-loop-reference-ask"><i></i><b data-hu="KÉRDEZZ" data-en="ASK">KÉRDEZZ</b></span><span class="fx-loop-reference-pause"></span></div>',
+      '</div>',
+      '<div class="fx-loop-reference-heading" data-hu="A MŰKÖDÉS MEGISMERÉSE" data-en="DISCOVER HOW IT WORKS">A MŰKÖDÉS MEGISMERÉSE</div>',
+      '<article class="fx-loop-reference-proof">',
+      '<span>PUBLIC PROOF LAYER</span>',
+      '<h2 data-hu="Bizonyíték a látvány mögött." data-en="Proof behind the visual.">Bizonyíték a látvány mögött.</h2>',
+      '<p data-hu="A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető." data-en="FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.">A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.</p>',
+      '<i>Live OS</i>',
+      '</article>'
+    ].join('');
+    setBilingualText(section);
+    return section;
+  }
 
-    clone.querySelectorAll('[id]').forEach((element, index) => {
-      element.id = 'fx-loop-clone-' + index;
-    });
-    clone.querySelectorAll('[aria-labelledby],[aria-controls],[for]').forEach(element => {
-      element.removeAttribute('aria-labelledby');
-      element.removeAttribute('aria-controls');
-      element.removeAttribute('for');
-    });
-    clone.querySelectorAll('a,button,input,select,textarea,[tabindex]').forEach(element => {
-      element.setAttribute('tabindex', '-1');
-      element.setAttribute('aria-hidden', 'true');
-      if ('disabled' in element) element.disabled = true;
-      if (element instanceof HTMLAnchorElement) element.removeAttribute('href');
-    });
-    clone.querySelectorAll('canvas,iframe,video,audio').forEach(element => element.remove());
-    setBilingualText(clone);
+  function captureReferenceMirror() {
+    mirrorCaptureFrame = 0;
+    if (!mirrorImage || !mirror?.isConnected || !sourceHero?.isConnected) return false;
+    const detail = sourceHero.querySelector('.fx-core-detail-r122');
+    if (!(detail instanceof HTMLCanvasElement) || detail.width < 8 || detail.height < 8) return false;
+    try {
+      const snapshot = detail.toDataURL('image/webp', .9);
+      if (!snapshot || snapshot.length < 512) return false;
+      mirrorImage.src = snapshot;
+      mirrorImage.hidden = false;
+      root.dataset.fxLoopMirrorFrame = `${detail.width}x${detail.height}`;
+      return true;
+    } catch (_) {
+      root.dataset.fxLoopMirrorFrame = 'capture-unavailable';
+      return false;
+    }
+  }
+
+  function scheduleMirrorCapture(delay = 0) {
+    clearTimeout(mirrorCaptureTimer);
+    mirrorCaptureTimer = window.setTimeout(() => {
+      cancelAnimationFrame(mirrorCaptureFrame);
+      mirrorCaptureFrame = requestAnimationFrame(() => {
+        mirrorCaptureFrame = requestAnimationFrame(captureReferenceMirror);
+      });
+    }, Math.max(0, delay));
   }
 
   function resetGeometry() {
@@ -297,6 +332,8 @@
     const sourceTop = sourceHero.offsetTop;
     const sourceHeight = sourceHero.offsetHeight;
     const documentEnd = Math.max(0, document.documentElement.scrollHeight - viewportHeight);
+
+    bridge.style.setProperty('--fx-loop-source-height', `${Math.round(sourceHeight)}px`);
 
     loopGeometry = Object.freeze({
       ready: true,
@@ -335,10 +372,12 @@
     geometryObserver?.disconnect();
     geometryObserver = null;
     bridge?.remove();
-    document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"]').forEach(element => {
+    document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"],[data-fx-loop-mirror]').forEach(element => {
       if (element !== bridge) element.remove();
     });
     bridge = null;
+    mirror = null;
+    mirrorImage = null;
     resetGeometry();
     root.dataset.fxLoopBridge = 'missing';
   }
@@ -350,14 +389,15 @@
     if (!footer || !sourceHero) return false;
 
     removeBridge();
-    const clone = sourceHero.cloneNode(true);
-    neutraliseClone(clone);
+    mirror = buildReferenceMirror();
+    mirrorImage = mirror.querySelector('img');
 
     bridge = document.createElement('div');
     bridge.className = 'fx-loop-bridge';
     bridge.dataset.fxLoopBridge = VERSION;
     bridge.setAttribute('aria-hidden', 'true');
-    bridge.appendChild(clone);
+    bridge.setAttribute('inert', '');
+    bridge.appendChild(mirror);
     footer.insertAdjacentElement('afterend', bridge);
     root.dataset.fxLoopBridge = 'ready-v3';
 
@@ -366,6 +406,7 @@
     refreshGeometry();
     observeGeometry();
     scheduleGeometryRefresh();
+    scheduleMirrorCapture(80);
     return true;
   }
 
@@ -383,6 +424,7 @@
     root.dataset.fxScrollActivity = 'idle';
     root.classList.remove('fx-page-scrolling');
     if (isMobileFlow()) scheduleMobileTransfer();
+    else commitDesktopTransfer();
   }
 
   function landingTarget(relative) {
@@ -424,6 +466,7 @@
 
     transferLockedUntil = Date.now() + LOOP_GUARD_MS;
     pendingMobileRelative = null;
+    pendingDesktopRelative = null;
     clearTimeout(mobileSettleTimer);
     mobileSettleTimer = 0;
     root.classList.add('fx-seamless-loop-transfer');
@@ -459,6 +502,18 @@
     mobileSettleTimer = window.setTimeout(commitMobileTransfer, MOBILE_SETTLE_MS);
   }
 
+  function commitDesktopTransfer() {
+    if (isMobileFlow() || pendingDesktopRelative == null || Date.now() < transferLockedUntil) return;
+    const relative = bridgeRelative();
+    if (relative == null) {
+      pendingDesktopRelative = null;
+      root.dataset.fxLoopLandingState = 'native-desktop';
+      return;
+    }
+    pendingDesktopRelative = relative;
+    performTransfer(relative, 'visual-bridge-desktop-idle');
+  }
+
   function transferIfNeeded() {
     scrollFrame = 0;
 
@@ -476,7 +531,7 @@
         pendingMobileRelative = null;
         clearTimeout(mobileSettleTimer);
         mobileSettleTimer = 0;
-      }
+      } else pendingDesktopRelative = null;
       return;
     }
 
@@ -488,7 +543,9 @@
       return;
     }
 
-    performTransfer(relative, 'visual-bridge-desktop');
+    pendingDesktopRelative = relative;
+    root.dataset.fxInfiniteInput = 'native-wheel';
+    root.dataset.fxLoopLandingState = 'waiting-wheel-idle';
   }
 
   function onScroll() {
@@ -510,6 +567,7 @@
     const widthChanged = Math.abs(nextWidth - layoutWidth) > 8;
     if (widthChanged) layoutWidth = nextWidth;
     scheduleRepair(widthChanged);
+    scheduleMirrorCapture(180);
   }
 
   function onTouchStart() {
@@ -553,7 +611,9 @@
       automaticLoop: true,
       visualBridge: true,
       clonedContent: false,
-      clonedHeroOnly: true,
+      clonedHeroOnly: false,
+      inertReferenceMirror: true,
+      mirrorContext: 'static-2d-snapshot-no-webgl',
       reinitialisedRenderer: false,
       frameStableLanding: true,
       jumpFree: true,
@@ -561,7 +621,7 @@
       geometryCachedOutsideScroll: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
-      desktopTransfer: 'immediate-visual-match',
+      desktopTransfer: 'scroll-idle-visual-match',
       mobileTransfer: 'scrollend-or-idle',
       mobileNativeMomentumPreserved: true
     });
@@ -574,6 +634,7 @@
     if (document.fonts?.ready) {
       document.fonts.ready.then(scheduleGeometryRefresh).catch(() => {});
     }
+    for (const delay of [320, 900, 2200]) scheduleMirrorCapture(delay);
   }
 
   addEventListener('scroll', onScroll, { passive: true });
@@ -592,6 +653,8 @@
     if (panel) syncReleaseHub(panel);
     scheduleGeometryRefresh();
   });
+  addEventListener('formatx:coredetailready', () => scheduleMirrorCapture(80));
+  addEventListener('formatx:real3dready', () => scheduleMirrorCapture(220));
   document.addEventListener('touchstart', onTouchStart, { passive: true });
   document.addEventListener('touchend', onTouchEnd, { passive: true });
   document.addEventListener('touchcancel', onTouchEnd, { passive: true });
@@ -603,9 +666,11 @@
     cancelAnimationFrame(scrollFrame);
     cancelAnimationFrame(landingFrame);
     cancelAnimationFrame(geometryFrame);
+    cancelAnimationFrame(mirrorCaptureFrame);
     clearTimeout(activityTimer);
     clearTimeout(mobileSettleTimer);
     clearTimeout(repairTimer);
+    clearTimeout(mirrorCaptureTimer);
     geometryObserver?.disconnect();
   }, { once: true });
 }());

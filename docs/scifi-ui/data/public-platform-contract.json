@@ -32,8 +32,9 @@
       "controller": "seamless-v7",
       "automatic_scroll_loop": true,
       "visual_bridge": true,
-      "clone_based_loop": true,
-      "cloned_hero_only": true,
+      "clone_based_loop": false,
+      "inert_reference_mirror": true,
+      "bridge_webgl_contexts": 0,
       "automatic_page_position_changes": true,
       "boundary_handoff_only": true,
       "transfer_mode": "scrollend-or-idle",
@@ -44,15 +45,18 @@
       "controller": "seamless-v7",
       "automatic_scroll_loop": true,
       "visual_bridge": true,
-      "clone_based_loop": true,
-      "cloned_hero_only": true,
+      "clone_based_loop": false,
+      "inert_reference_mirror": true,
+      "bridge_webgl_contexts": 0,
       "boundary_handoff_only": true,
-      "native_wheel_input": true
+      "native_wheel_input": true,
+      "transfer_mode": "scroll-idle-visual-match",
+      "native_momentum_preserved": true
     },
     "core_scene_mapping": "stable-hold-then-deliberate-morph-v1",
     "language_switch_preserves_scene_hash": true,
     "mobile_dialogue_viewport": "visual-viewport-keyboard-safe-v1",
-    "deployment_revision": "2026-08-12-mobile-seamless-v1"
+    "deployment_revision": "2026-08-20-reference-loop-r246"
   },
   "quality_contract": {
     "award_readiness_revision": "2026-08-11-production-audit-v53-v55-r3",

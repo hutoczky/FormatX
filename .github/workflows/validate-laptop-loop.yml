@@ -64,7 +64,8 @@ jobs:
           ! grep -Fq "cloneNode(" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           ! grep -Fq "preventDefault" docs/scifi-ui/scripts/formatx-infinite-scroll.js
           grep -Fq "const VERSION = 'seamless-v7'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
-          grep -Fq "cloneNode(true)" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq "buildReferenceMirror" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          grep -Fq "static-2d-snapshot-no-webgl" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "window.scrollTo(" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           grep -Fq "mobileTransfer: 'scrollend-or-idle'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           ! grep -Fq "addEventListener('wheel'" docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
