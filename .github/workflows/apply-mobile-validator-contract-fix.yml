@@ -1,0 +1,115 @@
+name: Apply mobile MAG-first browser validator contract
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - .github/workflows/apply-mobile-validator-contract-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Patch validator to current mobile MAG-first contract
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/scripts/validate-content-visuals.cjs')
+          text = path.read_text()
+
+          old = '''async function waitForStableHero(page) {
+            await page.waitForFunction(() => {
+              const visible = selector => {
+                const element = document.querySelector(selector);
+                if (!element) return false;
+                const style = getComputedStyle(element);
+                const rect = element.getBoundingClientRect();
+                return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
+              };
+              return visible('#hero-title') && visible('#hero .hero-lead') && visible('#hero-download');
+            }, null, { timeout: 12000 });
+          }'''
+          new = '''async function waitForStableHero(page, mobile) {
+            await page.waitForFunction(isMobile => {
+              const visible = selector => {
+                const element = document.querySelector(selector);
+                if (!element) return false;
+                const style = getComputedStyle(element);
+                const rect = element.getBoundingClientRect();
+                return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
+              };
+              if (isMobile) {
+                return visible('#hero .hero-space') && visible('#hero .scroll-cue') && visible('#menu-toggle');
+              }
+              return visible('#hero-title') && visible('#hero .hero-lead') && visible('#hero-download');
+            }, mobile, { timeout: 12000 });
+          }'''
+          if old not in text:
+            raise SystemExit('waitForStableHero block not found')
+          text = text.replace(old, new, 1)
+
+          old = '''async function commonAssertions(page, mobile) {
+            const title = await box(page, '#hero-title');
+            const lead = await box(page, '#hero .hero-lead');
+            const cta = await box(page, '#hero-download');
+            assert(title.width > 100 && title.height > 20, 'Hero title is too small');
+            assert(lead.text.length > 80 && lead.height > 20, 'Hero product definition is missing');
+            assert(/teljes|full|multiplatform/i.test(cta.text) && !/public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not describe the full release');
+            assert(!overlap(lead, cta), 'Primary CTA overlaps hero copy');
+
+            const overflow'''
+          new = '''async function commonAssertions(page, mobile) {
+            if (!mobile) {
+              const title = await box(page, '#hero-title');
+              const lead = await box(page, '#hero .hero-lead');
+              const cta = await box(page, '#hero-download');
+              assert(title.width > 100 && title.height > 20, 'Hero title is too small');
+              assert(lead.text.length > 80 && lead.height > 20, 'Hero product definition is missing');
+              assert(/teljes|full|multiplatform/i.test(cta.text) && !/public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not describe the full release');
+              assert(!overlap(lead, cta), 'Primary CTA overlaps hero copy');
+            }
+
+            const overflow'''
+          if old not in text:
+            raise SystemExit('desktop hero assertion block not found')
+          text = text.replace(old, new, 1)
+
+          old = "    const heroCopy = await box(page, '#hero .hero-copy');\n    const heroSpace = await box(page, '#hero .hero-space');"
+          new = "    const heroCopy = await box(page, '#hero .hero-copy', false);\n    const heroSpace = await box(page, '#hero .hero-space');"
+          if old not in text:
+            raise SystemExit('mobile heroCopy block not found')
+          text = text.replace(old, new, 1)
+
+          old = "    assert(!overlap(heroCopy, heroSpace), 'Mobile 3D field overlaps hero copy');"
+          new = "    if (heroCopy) assert(!overlap(heroCopy, heroSpace), 'Mobile 3D field overlaps hero copy');"
+          if old not in text:
+            raise SystemExit('mobile overlap assertion not found')
+          text = text.replace(old, new, 1)
+
+          old = '    await waitForStableHero(page);'
+          new = '    await waitForStableHero(page, viewport.width < 700);'
+          if old not in text:
+            raise SystemExit('waitForStableHero call not found')
+          text = text.replace(old, new, 1)
+
+          path.write_text(text)
+          PY
+
+          node --check .github/scripts/validate-content-visuals.cjs
+          git diff --check
+          git diff -- .github/scripts/validate-content-visuals.cjs
+      - name: Commit validator fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/scripts/validate-content-visuals.cjs
+          git commit -m "ci(visual): align mobile browser checks with MAG-first layout"
+          git push origin HEAD:master
