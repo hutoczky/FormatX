@@ -3,6 +3,12 @@
 const { chromium } = require('playwright');
 
 const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu';
+const scriptUrl = name => new URL('./scripts/' + name, TEST_URL).href;
+
+async function installProductionShell(page) {
+  await page.addScriptTag({ url: scriptUrl('single-language-toggle.js?v=ci-r247') });
+  await page.addScriptTag({ url: scriptUrl('formatx-infinite-scroll.js?v=ci-r247') });
+}
 
 async function clearIntro(page) {
   const skip = page.locator('.fx-intro-skip');
@@ -157,6 +163,7 @@ async function preparePage(page) {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
+  await installProductionShell(page);
   await clearIntro(page);
   await waitForScrollShell(page);
   await activateAndWaitForInterface(page);

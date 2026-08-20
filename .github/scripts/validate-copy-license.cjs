@@ -4,6 +4,12 @@ const { chromium } = require('playwright');
 
 const TEST_URL = process.env.FORMATX_TEST_URL
   || 'http://127.0.0.1:4178/scifi-ui/index.html?lang=hu';
+const scriptUrl = name => new URL('./scripts/' + name, TEST_URL).href;
+
+async function installProductionCopy(page) {
+  await page.addScriptTag({ url: scriptUrl('single-language-toggle.js?v=ci-r247') });
+  await page.addScriptTag({ url: scriptUrl('formatx-copy-polish.js?v=ci-r247') });
+}
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -159,6 +165,7 @@ async function testViewport(browser, viewport, name, mobile) {
   });
 
   await page.goto(TEST_URL, { waitUntil: 'domcontentloaded' });
+  await installProductionCopy(page);
   await clearIntro(page);
   await waitPublicState(page, 'hu');
   assertHungarian(await readCopy(page), name);

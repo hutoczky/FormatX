@@ -53,6 +53,7 @@ jobs:
             const page=await context.newPage();
             page.on('pageerror',e=>console.log(`[${name} PAGEERROR]`,e.message));
             await page.goto(`${origin}?reference_composition=${name}`,{waitUntil:'domcontentloaded',timeout:45000});
+            await page.addScriptTag({url:`${origin}scripts/formatx-core-mobile-v55.js?v=ci-r247`});
             if(mobile){await page.addScriptTag({url:`${origin}scripts/single-language-toggle.js?v=visual-qa-r86`});}
             await page.waitForFunction(()=>{const r=document.documentElement.dataset;return r.fxCoreMobileV69==='ready-v69'&&r.fxMobileReferenceLayout==='ready-v1'&&['ready','desktop'].includes(r.fxReferenceProductionR244)&&['reference-frame-r244','desktop-reference-r244'].includes(r.fxReferenceComposition)},null,{timeout:45000});
             if(mobile)await page.waitForFunction(()=>document.querySelector('.topbar>.fx-language-toggle'),null,{timeout:10000});
