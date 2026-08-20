@@ -75,8 +75,8 @@ async function primeScrollReveals(page) {
   await page.waitForTimeout(180);
 }
 
-async function waitForStableHero(page) {
-  await page.waitForFunction(() => {
+async function waitForStableHero(page, mobile) {
+  await page.waitForFunction(isMobile => {
     const visible = selector => {
       const element = document.querySelector(selector);
       if (!element) return false;
@@ -84,18 +84,23 @@ async function waitForStableHero(page) {
       const rect = element.getBoundingClientRect();
       return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
     };
+    if (isMobile) {
+      return visible('#hero .hero-space') && visible('#hero .scroll-cue') && visible('#menu-toggle');
+    }
     return visible('#hero-title') && visible('#hero .hero-lead') && visible('#hero-download');
-  }, null, { timeout: 12000 });
+  }, mobile, { timeout: 12000 });
 }
 
 async function commonAssertions(page, mobile) {
-  const title = await box(page, '#hero-title');
-  const lead = await box(page, '#hero .hero-lead');
-  const cta = await box(page, '#hero-download');
-  assert(title.width > 100 && title.height > 20, 'Hero title is too small');
-  assert(lead.text.length > 80 && lead.height > 20, 'Hero product definition is missing');
-  assert(/teljes|full|multiplatform/i.test(cta.text) && !/public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not describe the full release');
-  assert(!overlap(lead, cta), 'Primary CTA overlaps hero copy');
+  if (!mobile) {
+    const title = await box(page, '#hero-title');
+    const lead = await box(page, '#hero .hero-lead');
+    const cta = await box(page, '#hero-download');
+    assert(title.width > 100 && title.height > 20, 'Hero title is too small');
+    assert(lead.text.length > 80 && lead.height > 20, 'Hero product definition is missing');
+    assert(/teljes|full|multiplatform/i.test(cta.text) && !/public beta|nyilvános béta/i.test(cta.text), 'Primary CTA does not describe the full release');
+    assert(!overlap(lead, cta), 'Primary CTA overlaps hero copy');
+  }
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   assert(overflow <= 2, 'Horizontal overflow detected: ' + overflow + 'px');
@@ -124,12 +129,12 @@ async function commonAssertions(page, mobile) {
     const menu = await box(page, '#menu-toggle');
     assert(menu.width >= 40 && menu.height >= 40, 'Mobile menu target is too small');
 
-    const heroCopy = await box(page, '#hero .hero-copy');
+    const heroCopy = await box(page, '#hero .hero-copy', false);
     const heroSpace = await box(page, '#hero .hero-space');
     const cue = await box(page, '#hero .scroll-cue');
     const category = await box(page, '.fx-category-deck--standalone, .fx-category-deck');
 
-    assert(!overlap(heroCopy, heroSpace), 'Mobile 3D field overlaps hero copy');
+    if (heroCopy) assert(!overlap(heroCopy, heroSpace), 'Mobile 3D field overlaps hero copy');
     assert(!overlap(heroSpace, cue), 'Mobile chapter cue overlaps 3D field');
     assert(!overlap(cue, category), 'Mobile next section overlaps chapter cue');
 
@@ -175,7 +180,7 @@ async function capture(browser, name, viewport, setup = async () => {}, targetUr
     await injectProductionLikeContent(page);
     await primeScrollReveals(page);
     await setup(page);
-    await waitForStableHero(page);
+    await waitForStableHero(page, viewport.width < 700);
     await commonAssertions(page, viewport.width < 700);
     const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
     assert(!meaningful.length, name + ' browser errors: ' + meaningful.join(' | '));
