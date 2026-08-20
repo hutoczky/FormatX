@@ -15,7 +15,8 @@ const R206_BOOTSTRAP = [
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="/scifi-ui/styles/formatx-mobile-proof-controls-r204.css?v=20260818-r207-preloaded">',
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-layout-r207="true" href="/scifi-ui/styles/formatx-mobile-layout-r207.css?v=20260818-r208-flicker-free">',
   '<link rel="stylesheet" data-fx-first-paint-r206="true" href="/scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero">',
-  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r208-first-paint-owner"></script>',
+  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260820-r248-reference-owner"></script>',
+  '<script defer data-fx-flow-first-r75="true" src="/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260820-r248-reference-owner"></script>',
   '<script defer data-fx-mobile-layout-r207="true" src="/scifi-ui/scripts/formatx-mobile-layout-r207.js?v=20260818-r208-flicker-free"></script>',
 ].join('\n  ');
 const STARTUP_REVISION = '20260818-r208-flicker-free-owner';

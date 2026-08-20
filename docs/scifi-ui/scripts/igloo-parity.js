@@ -216,7 +216,7 @@
 
   const queue = [
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
-    './scripts/formatx-copy-polish.js?v=20260729-copy-polish-1',
+    './scripts/formatx-copy-polish.js?v=20260820-r248-footer-licence',
     './scripts/release-metadata.js?v=20260807-full-release-1',
     './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2-reference-r70',
     './scripts/platform-status.js?v=20260807-full-release-1',

@@ -32,8 +32,8 @@ const NAVIGATION = Object.freeze({
 });
 
 const DOWNLOAD_LABELS = Object.freeze({
-  hu: ['Teljes multiplatform verzió letöltése', 'Teljes multiplatform verzió'],
-  en: ['Download full multiplatform version', 'Full multiplatform version']
+  hu: ['Teljes verzió – 5 napos próbalicenc', 'Teljes multiplatform verzió letöltése', 'Teljes multiplatform verzió'],
+  en: ['Full version – 5-day trial', 'Download full multiplatform version', 'Full multiplatform version']
 });
 
 function matchesOne(actual, expectedSets) {

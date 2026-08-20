@@ -53,7 +53,13 @@
   }
 
   function ensureFooterLicenceLink() {
-    const terms = document.querySelector('.site-footer a[href="./terms.html"]');
+    const terms = Array.from(document.querySelectorAll('.site-footer a[href]')).find(link => {
+      try {
+        return new URL(link.getAttribute('href'), document.baseURI).pathname.endsWith('/terms.html');
+      } catch (_) {
+        return false;
+      }
+    });
     if (!terms || document.querySelector('.site-footer a[data-fx-licence-link]')) return;
     const link = document.createElement('a');
     link.href = './Licenc.txt';

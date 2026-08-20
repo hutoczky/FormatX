@@ -23,7 +23,9 @@ function apply(){
     Keep this legacy engine available for non-r207 pages, but never let its inline
     !important overlay writes compete with the canonical normal-flow layout. */
  if(canonicalOwner()){
-  root.dataset.fxReferenceComposition='r208-canonical-normal-flow';
+  root.dataset.fxReferenceComposition=root.dataset.fxReferenceProductionR244==='ready'
+   ?'reference-frame-r244'
+   :'r208-canonical-normal-flow';
   root.dataset.fxFlowFirstR75='delegated-r208';
   root.dataset.fxFlowFirstConflict='disabled-r208';
   return true;
