@@ -1,0 +1,19 @@
+{
+  "revision": "r263",
+  "date": "2026-08-21",
+  "scope": [
+    "canonical mobile and desktop SOUND-ASK-PAUSE ownership",
+    "fixed mobile MAG header ownership",
+    "event-driven SOTY continuity without idle RAF",
+    "interaction-burst core detail rendering without idle RAF"
+  ],
+  "qualityGate": {
+    "lighthouseRunsPerViewport": 3,
+    "performanceFloor": 0.95,
+    "accessibilityFloor": 1.0,
+    "bestPracticesFloor": 1.0,
+    "seoFloor": 1.0,
+    "maxTotalBlockingTimeMs": 200,
+    "maxCumulativeLayoutShift": 0.1
+  }
+}
