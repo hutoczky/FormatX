@@ -60,8 +60,8 @@ async function reconstructHeadingArtifactR138(source){
     const ny=Math.abs(py/Math.max(1,h-1)-.5)*2;
     const edge=Math.pow(Math.max(nx,ny),desktopKey?2.2:1.62);
     if(signal<155){
-      const edgeFloor=desktopKey?.16:.02;
-      const edgeStrength=desktopKey?.78:.96;
+      const edgeFloor=desktopKey ? .16 : .02;
+      const edgeStrength=desktopKey ? .78 : .96;
       f*=clamp(1-edge*edgeStrength,edgeFloor,1);
     }
     if(f<.995)keyed++;else kept++;
