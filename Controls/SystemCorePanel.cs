@@ -33,16 +33,27 @@ namespace FormatX.Controls
       root.Children.Add(Row("CURRENT OPERATION", _operation));
       root.Children.Add(Row("VERSION", _version));
       Content = root;
+
+      Loaded += (_, _) =>
+      {
+        MagStateService.Current.SnapshotChanged += OnSnapshotChanged;
+        Refresh(MagStateService.Current.Snapshot);
+      };
+      Unloaded += (_, _) => MagStateService.Current.SnapshotChanged -= OnSnapshotChanged;
       Refresh(MagStateService.Current.Snapshot);
+    }
+
+    private void OnSnapshotChanged(object? sender, MagSnapshot snapshot)
+    {
+      if (DispatcherQueue.HasThreadAccess) Refresh(snapshot);
+      else DispatcherQueue.TryEnqueue(() => Refresh(snapshot));
     }
 
     public void Refresh(MagSnapshot snapshot)
     {
       _core.Text = snapshot.Operation == MagOperation.ShuttingDown ? "SLEEPING" : "ONLINE";
       _license.Text = $"{snapshot.License.DisplayName.ToUpperInvariant()} · {snapshot.License.State.ToString().ToUpperInvariant()}";
-      _devices.Text = snapshot.License.MaxDevices > 0
-        ? $"{snapshot.License.DevicesUsed} / {snapshot.License.MaxDevices}"
-        : "—";
+      _devices.Text = snapshot.License.MaxDevices > 0 ? $"{snapshot.License.DevicesUsed} / {snapshot.License.MaxDevices}" : "—";
       _validUntil.Text = snapshot.License.ValidUntil?.ToLocalTime().ToString("yyyy.MM.dd") ?? "—";
       _update.Text = snapshot.UpdateState == MagUpdateState.Downloading
         ? $"DOWNLOADING · {snapshot.UpdateProgress:P0}"
@@ -56,23 +67,21 @@ namespace FormatX.Controls
       _version.Text = VersionService.DisplayVersion;
     }
 
-    private static TextBlock Header(string text)
-      => new()
-      {
-        Text = text,
-        FontSize = 20,
-        FontWeight = Microsoft.UI.Text.FontWeights.Bold,
-        Foreground = new SolidColorBrush(Color.FromArgb(255, 224, 242, 254))
-      };
+    private static TextBlock Header(string text) => new()
+    {
+      Text = text,
+      FontSize = 20,
+      FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+      Foreground = new SolidColorBrush(Color.FromArgb(255, 224, 242, 254))
+    };
 
-    private static TextBlock Value()
-      => new()
-      {
-        FontSize = 13,
-        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-        Foreground = new SolidColorBrush(Color.FromArgb(255, 103, 232, 249)),
-        TextWrapping = TextWrapping.Wrap
-      };
+    private static TextBlock Value() => new()
+    {
+      FontSize = 13,
+      FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+      Foreground = new SolidColorBrush(Color.FromArgb(255, 103, 232, 249)),
+      TextWrapping = TextWrapping.Wrap
+    };
 
     private static UIElement Row(string label, TextBlock value)
     {
