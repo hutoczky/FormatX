@@ -37,6 +37,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: formatx-windows-app-${{ github.ref }}
@@ -66,3 +67,23 @@ jobs:
 
       - name: Build Windows application
         run: dotnet build FormatX.csproj --configuration Release -p:Platform=x64 --no-restore
+
+      - name: Publish Windows app status
+        if: always() && github.event_name == 'push'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          if [ "$JOB_STATUS" = 'success' ]; then
+            state='success'
+            description='WinUI app build and MAG/update tests passed'
+          else
+            state='failure'
+            description='WinUI app build or MAG/update tests failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX Windows app build' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
