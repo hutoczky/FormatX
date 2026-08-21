@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r265') return;
-  root.dataset.fxAwardRuntime = 'r265';
+  if (root.dataset.fxAwardRuntime === 'r264') return;
+  root.dataset.fxAwardRuntime = 'r264';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
