@@ -1,26 +1,16 @@
-/* FormatX physical-mobile MAG v55 — cinematic sharp reference crystal. */
+/* FormatX r285 — physical MAG layout with a pure native WebGL body. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-ring,
-  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-ring,
-  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-label,
-  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-label,
-  html[data-fx-core-mobile-v55="booting-v55"] .fx-resilient-core,
-  html[data-fx-core-mobile-v55="ready-v55"] .fx-resilient-core,
-  html[data-fx-core-mobile-v55="booting-v55"] .fx-premium-core-status,
-  html[data-fx-core-mobile-v55="ready-v55"] .fx-premium-core-status,
-  html[data-fx-core-mobile-v55="booting-v55"] .fx-three-stage-shell,
-  html[data-fx-core-mobile-v55="ready-v55"] .fx-three-stage-shell,
-  html[data-fx-core-mobile-v55="booting-v55"] .fx-core-mesh3d-stage,
-  html[data-fx-core-mobile-v55="ready-v55"] .fx-core-mesh3d-stage,
-  html[data-fx-core-mobile-v55="booting-v55"] .fx-core-fracture3d-stage,
-  html[data-fx-core-mobile-v55="ready-v55"] .fx-core-fracture3d-stage,
-  html[data-fx-core-mobile-v55="booting-v55"] .fx-core-mobile-v54-stage,
-  html[data-fx-core-mobile-v55="ready-v55"] .fx-core-mobile-v54-stage,
-  html[data-fx-core-mobile-v55="booting-v55"] .fx-core-reference-v53-stage,
-  html[data-fx-core-mobile-v55="ready-v55"] .fx-core-reference-v53-stage,
-  html[data-fx-core-mobile-v55="booting-v55"] .fx-transcend-shell[data-fx-native-apex="true"],
-  html[data-fx-core-mobile-v55="ready-v55"] .fx-transcend-shell[data-fx-native-apex="true"] {
+  html[data-fx-core-mobile-v55] #hero .hero-ring,
+  html[data-fx-core-mobile-v55] #hero .hero-label,
+  html[data-fx-core-mobile-v55] .fx-resilient-core,
+  html[data-fx-core-mobile-v55] .fx-premium-core-status,
+  html[data-fx-core-mobile-v55] .fx-three-stage-shell,
+  html[data-fx-core-mobile-v55] .fx-core-mesh3d-stage,
+  html[data-fx-core-mobile-v55] .fx-core-fracture3d-stage,
+  html[data-fx-core-mobile-v55] .fx-core-mobile-v54-stage,
+  html[data-fx-core-mobile-v55] .fx-core-reference-v53-stage,
+  html[data-fx-core-mobile-v55] .fx-transcend-shell[data-fx-native-apex="true"] {
     display:none !important;
     visibility:hidden !important;
     opacity:0 !important;
@@ -53,22 +43,29 @@
     visibility:visible !important;
     transform:none !important;
     overflow:hidden !important;
-    isolation:auto !important;
+    isolation:isolate !important;
     contain:none !important;
-    background:
-      radial-gradient(circle at 50% 47%, rgba(21, 188, 255, .085), transparent 35%),
-      radial-gradient(circle at 56% 49%, rgba(142, 55, 255, .045), transparent 48%) !important;
+    background:transparent !important;
+    background-image:none !important;
+    box-shadow:none !important;
   }
 
-  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-space::before,
-  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-space::after,
-  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-space::before,
-  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-space::after {
+  html[data-fx-core-mobile-v55] #hero .hero-space::before,
+  html[data-fx-core-mobile-v55] #hero .hero-space::after,
+  #hero .fx-core-mobile-v55-stage::before,
+  #hero .fx-core-mobile-v55-stage::after,
+  #hero .fx-core-r112-stage::before,
+  #hero .fx-core-r112-stage::after,
+  #hero .fx-core-rayglass-r91-stage::before,
+  #hero .fx-core-rayglass-r91-stage::after {
     content:none !important;
     display:none !important;
     opacity:0 !important;
+    visibility:hidden !important;
     background:none !important;
+    background-image:none !important;
     box-shadow:none !important;
+    filter:none !important;
     animation:none !important;
   }
 
@@ -81,20 +78,21 @@
     display:block !important;
     overflow:hidden !important;
     contain:none !important;
-    isolation:auto !important;
+    isolation:isolate !important;
     background:transparent !important;
+    background-image:none !important;
+    box-shadow:none !important;
+    filter:none !important;
     opacity:1 !important;
     visibility:visible !important;
     pointer-events:none !important;
+    transform:translateY(-1.2%) scale(.94) !important;
+    transform-origin:50% 50% !important;
   }
 
-  .fx-core-mobile-v55-stage::before,
-  .fx-core-mobile-v55-stage::after {
-    content:none !important;
-    display:none !important;
-  }
-
-  .fx-core-mobile-v55-canvas {
+  .fx-core-mobile-v55-canvas,
+  .fx-core-r112-canvas,
+  .fx-core-r120-canvas {
     position:absolute !important;
     inset:0 !important;
     display:block !important;
@@ -113,74 +111,13 @@
     pointer-events:none !important;
   }
 
-  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-copy {
+  html[data-fx-core-mobile-v55] #hero .hero-copy {
     order:2 !important;
     position:relative !important;
     z-index:5 !important;
     margin-top:0 !important;
-  }
-
-  /* Award composition r2: keep the MAG genuinely WebGL2, but frame it like
-     the approved mobile reference — a little smaller, sharper and with a
-     restrained cyan/violet horizon + reflective floor behind the real 3D core. */
-  html[data-fx-core-mobile-v55="booting-v55"] body.living-architecture #hero .hero-space,
-  html[data-fx-core-mobile-v55="ready-v55"] body.living-architecture #hero .hero-space {
-    background:
-      radial-gradient(circle at 50% 46%, rgba(61, 218, 255, .16) 0, rgba(24, 129, 214, .075) 22%, transparent 43%),
-      radial-gradient(circle at 55% 49%, rgba(157, 76, 255, .095) 0, transparent 42%),
-      linear-gradient(180deg, rgba(1, 7, 17, .02) 0%, rgba(1, 8, 20, .08) 58%, rgba(2, 16, 34, .34) 100%) !important;
-    box-shadow:
-      inset 0 -52px 74px rgba(0, 7, 18, .72),
-      inset 0 1px 0 rgba(67, 211, 255, .035) !important;
-  }
-
-  html[data-fx-core-mobile-v55="booting-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::before,
-  html[data-fx-core-mobile-v55="ready-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::before {
-    content:"" !important;
-    display:block !important;
-    position:absolute !important;
-    inset:0 !important;
-    z-index:1 !important;
     opacity:1 !important;
-    pointer-events:none !important;
-    animation:none !important;
-    box-shadow:none !important;
-    background:
-      radial-gradient(circle at 22% 31%, rgba(90, 205, 255, .46) 0 1px, transparent 1.7px),
-      radial-gradient(circle at 76% 24%, rgba(135, 91, 255, .40) 0 1px, transparent 1.8px),
-      radial-gradient(circle at 83% 53%, rgba(74, 214, 255, .38) 0 1px, transparent 1.6px),
-      radial-gradient(circle at 13% 58%, rgba(86, 184, 255, .34) 0 1px, transparent 1.6px),
-      radial-gradient(circle at 67% 65%, rgba(175, 88, 255, .30) 0 1px, transparent 1.7px),
-      linear-gradient(180deg, transparent 0 67%, rgba(38, 182, 255, .085) 68%, rgba(14, 87, 153, .055) 69%, transparent 72%) !important;
-  }
-
-  html[data-fx-core-mobile-v55="booting-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::after,
-  html[data-fx-core-mobile-v55="ready-v55"][data-fx-core-real3d] body.living-architecture #hero .hero-space::after {
-    content:"" !important;
-    display:block !important;
-    position:absolute !important;
-    left:4% !important;
-    right:4% !important;
-    bottom:-7% !important;
-    height:38% !important;
-    z-index:2 !important;
-    opacity:.54 !important;
-    pointer-events:none !important;
-    animation:none !important;
-    box-shadow:none !important;
-    background:
-      radial-gradient(ellipse at 50% 0%, rgba(42, 208, 255, .22) 0, rgba(74, 94, 255, .09) 27%, rgba(148, 61, 255, .045) 43%, transparent 68%),
-      repeating-linear-gradient(0deg, rgba(52, 190, 255, .075) 0 1px, transparent 1px 8px),
-      linear-gradient(90deg, transparent 0 9%, rgba(53, 180, 255, .06) 22%, rgba(91, 210, 255, .12) 50%, rgba(128, 77, 255, .055) 77%, transparent 92%) !important;
-    transform:perspective(420px) rotateX(63deg) scaleX(1.12) scaleY(.96) !important;
-    transform-origin:50% 0 !important;
-  }
-
-  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-space > .fx-core-mobile-v55-stage,
-  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-space > .fx-core-mobile-v55-stage {
-    transform:translateY(-1.2%) scale(.94) !important;
-    transform-origin:50% 50% !important;
-    will-change:transform !important;
+    visibility:visible !important;
   }
 }
 
@@ -191,8 +128,7 @@
     max-height:555px !important;
   }
 
-  html[data-fx-core-mobile-v55="booting-v55"] #hero .hero-space > .fx-core-mobile-v55-stage,
-  html[data-fx-core-mobile-v55="ready-v55"] #hero .hero-space > .fx-core-mobile-v55-stage {
+  html[data-fx-core-mobile-v55] #hero .hero-space > .fx-core-mobile-v55-stage {
     transform:translateY(-1.4%) scale(.935) !important;
   }
 }
