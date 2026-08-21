@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r260 truthful performance/control contract. */
+/* FormatX Web Design Awards — r263 truthful performance/control contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -30,17 +30,17 @@ const mobile = JSON.parse(read('lighthouserc.live.mobile.json'));
 // UX / accessibility / explicit audio consent.
 assert.match(home, /class="skip-link"[^>]+href="#main-content"/);
 assert.match(home, /<main id="main-content">/);
-assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260818-r206-award-runtime/);
+assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260821-r263-canonical-controls/);
 assert.doesNotMatch(intro, /\.style\.|setAttribute\(['"]style/i);
 for (const token of [
-  'formatx-wda-hardening-r198.css?v=20260818-r206-award-runtime',
-  'formatx-wda-controls-r198.js?v=20260818-r206-award-runtime',
+  'formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls',
+  'formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls',
   'formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame',
   'muted-default-visible-control',
   'audit-passive',
   'DOMContentLoaded',
   'data-fx-core-render-ms'
-]) assert.ok(awardRuntime.includes(token), `missing active r206 award runtime contract: ${token}`);
+]) assert.ok(awardRuntime.includes(token), `missing active r263 award runtime contract: ${token}`);
 for (const token of [
   'Unmute FormatX cinematic audio',
   'Mute FormatX cinematic audio',
@@ -48,12 +48,29 @@ for (const token of [
   'professional-v6',
   'muted-default',
   'csp-safe-r260',
-  'fx-wda-sound-icon'
-]) assert.ok(controls.includes(token), `missing WDA sound contract: ${token}`);
+  'fx-wda-sound-icon',
+  'canonicalizeReferenceControls',
+  'fx-reference-controls-r263',
+  'fx-reference-mag-text-r263',
+  'fxReferenceControlLayout',
+  'bootObserver',
+  'data-fx-reference-production-r244'
+]) assert.ok(controls.includes(token), `missing WDA sound/control contract: ${token}`);
 assert.doesNotMatch(controls, /bodyObserver/);
-for (const token of ['min-height: 48px', 'min-height: 44px', ':focus-visible', 'prefers-reduced-motion: reduce', 'prefers-contrast: more', 'forced-colors: active']) {
-  assert.ok(css.includes(token), `missing inclusive CSS contract: ${token}`);
-}
+for (const token of [
+  'min-height: 48px',
+  'min-height: 44px',
+  ':focus-visible',
+  'prefers-reduced-motion: reduce',
+  'prefers-contrast: more',
+  'forced-colors: active',
+  'fx-reference-controls-r263',
+  'grid-template-columns: repeat(3, 54px)',
+  'grid-template-columns: repeat(3, 50px)',
+  'display: contents',
+  'fx-reference-mag-text-r263',
+  'content: none !important'
+]) assert.ok(css.includes(token), `missing inclusive/canonical CSS contract: ${token}`);
 assert.match(audio, /let enabled = false/);
 assert.match(audio, /sync\('off'\)/);
 
@@ -68,7 +85,7 @@ for (const token of [
   'visibility: visible'
 ]) assert.ok(firstPaint.includes(token), `missing r206 first-paint contract: ${token}`);
 
-// r260: exactly one mobile physical owner, event-driven instead of hot DOM observers.
+// r262: exactly one mobile physical owner, event-driven instead of hot DOM observers.
 for (const token of [
   'authoritative mobile layout ownership',
   '> .hero-grid > .fx-reference-controls-r204',
@@ -191,4 +208,4 @@ validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
 for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, mobileReferenceRuntime, referenceRuntime, referenceFinalizer, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r260 event-driven controls, canonical mobile ownership, throttled reference rendering and truthful 0.95 Lighthouse hard gates passed.');
+console.log('PASS: r263 canonical cross-device controls, event-driven mobile ownership, throttled reference rendering and truthful 0.95 Lighthouse hard gates passed.');
