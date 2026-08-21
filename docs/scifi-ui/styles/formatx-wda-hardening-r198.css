@@ -73,10 +73,7 @@ html body .fx-three-sound.fx-wda-sound-toggle:hover {
   }
 }
 
-/* r263 — one physical control geometry on every viewport.
-   The outer control zone is the only layout box. The legacy rail becomes
-   display:contents, so SOUND | ASK | PAUSE are three independent grid cells
-   and old rail top/right/width rules can no longer make them overlap. */
+/* r263 — one physical control geometry on every viewport. */
 html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 {
   box-sizing: border-box !important;
   z-index: 10030 !important;
@@ -181,9 +178,6 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
 }
 
 @media (max-width: 900px), (pointer: coarse) {
-  /* r264: reserve a deterministic left brand cell before the fixed control
-     cluster. This removes the MAG/CORE-to-FORMATX collision down to 320px
-     without shrinking any 44px+ touch target. */
   html body.living-architecture .topbar > .brand {
     min-width: 0 !important;
     max-width: 112px !important;
@@ -302,6 +296,30 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
   html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask span {
     top: 55px !important;
   }
+
+  /* r284: the closed r244 header hides .main-nav; explicit open state wins. */
+  html:root:root body.living-architecture #main-nav.main-nav.open {
+    position: fixed !important;
+    top: 72px !important;
+    right: 12px !important;
+    bottom: auto !important;
+    left: 12px !important;
+    z-index: 15000 !important;
+    display: grid !important;
+    box-sizing: border-box !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 84px) !important;
+    padding: 18px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
 }
 
 @media (min-width: 901px) and (pointer: fine) {
@@ -314,6 +332,24 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
     margin: 0 !important;
     transform: translateX(-50%) !important;
     translate: none !important;
+  }
+
+  html:root:root body.living-architecture #main-nav.main-nav.open {
+    position: fixed !important;
+    top: 76px !important;
+    right: 22px !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 15000 !important;
+    display: grid !important;
+    width: min(360px, calc(100vw - 44px)) !important;
+    min-width: 280px !important;
+    max-height: calc(100dvh - 96px) !important;
+    overflow-y: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
   }
 }
 
