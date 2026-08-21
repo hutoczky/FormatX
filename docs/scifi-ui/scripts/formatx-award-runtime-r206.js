@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r264') return;
-  root.dataset.fxAwardRuntime = 'r264';
+  if (root.dataset.fxAwardRuntime === 'r265') return;
+  root.dataset.fxAwardRuntime = 'r265';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -15,6 +15,7 @@
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260821-r264-single-owner';
   const OWNER_SCRIPT_URL = '/scifi-ui/scripts/formatx-control-owner-r264.js?v=20260821-r264-single-owner';
+  const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260821-r265-nav-state-owner';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
 
@@ -36,17 +37,36 @@
     document.head.appendChild(link);
   }
 
+  function ensureNavOwner() {
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', ensureNavOwner, { once: true });
+      return;
+    }
+    if (document.querySelector('script[data-fx-nav-state-owner-r265]')) return;
+    const script = document.createElement('script');
+    script.src = NAV_OWNER_URL;
+    script.async = true;
+    script.dataset.fxNavStateOwnerR265 = 'true';
+    document.head.appendChild(script);
+  }
+
   function ensureOwner() {
     if (!document.body) {
       document.addEventListener('DOMContentLoaded', ensureOwner, { once: true });
       return;
     }
     ensureOwnerStyle();
-    if (document.querySelector('script[data-fx-control-owner-r264]')) return;
+    const existing = document.querySelector('script[data-fx-control-owner-r264]');
+    if (existing) {
+      ensureNavOwner();
+      return;
+    }
     const script = document.createElement('script');
     script.src = OWNER_SCRIPT_URL;
     script.async = true;
     script.dataset.fxControlOwnerR264 = 'true';
+    script.addEventListener('load', ensureNavOwner, { once: true });
+    script.addEventListener('error', ensureNavOwner, { once: true });
     document.head.appendChild(script);
   }
 
