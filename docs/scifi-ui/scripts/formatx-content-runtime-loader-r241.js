@@ -11,6 +11,7 @@
   const CONTROL_OWNER_STYLE_URL = './styles/formatx-control-owner-r264.css?v=20260821-r264-single-owner';
   const CONTROL_OWNER_URL = './scripts/formatx-control-owner-r268.js?v=20260821-r273-primary-event-owner';
   const NAV_OWNER_URL = './scripts/formatx-nav-state-owner-r265.js?v=20260821-r265-nav-state-owner';
+  const DIALOGUE_OWNER_URL = './scripts/formatx-dialogue-render-owner-r273.js?v=20260821-r273-open-state-owner';
   const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260821-r273-primary-event-owner';
   const template = document.getElementById('fx-content-runtime-r241');
   if (!(template instanceof HTMLTemplateElement)) {
@@ -81,10 +82,17 @@
     mountExternal(NAV_OWNER_URL, 'fxNavStateOwnerR265');
   }
 
+  function ensureDialogueOwner() {
+    if (root.dataset.fxDialogueRenderOwnerR273 === 'ready' || root.dataset.fxDialogueRenderOwnerR273 === 'open-owned') return;
+    if (document.querySelector('script[data-fx-dialogue-render-owner-r273], script[src*="formatx-dialogue-render-owner-r273.js"]')) return;
+    mountExternal(DIALOGUE_OWNER_URL, 'fxDialogueRenderOwnerR273');
+  }
+
   function ensureControlOwner() {
     ensureOwnerStyle();
     if (root.dataset.fxControlOwnerR268 === 'ready') {
       ensureNavOwner();
+      ensureDialogueOwner();
       return;
     }
 
@@ -93,12 +101,21 @@
        actual source is r268 and its root readiness marker is authoritative. */
     const existing = document.querySelector('script[data-fx-control-owner-r264], script[src*="formatx-control-owner-r268.js"]');
     if (existing) {
-      existing.addEventListener('load', ensureNavOwner, { once: true });
-      queueMicrotask(ensureNavOwner);
+      existing.addEventListener('load', () => {
+        ensureNavOwner();
+        ensureDialogueOwner();
+      }, { once: true });
+      queueMicrotask(() => {
+        ensureNavOwner();
+        ensureDialogueOwner();
+      });
       return;
     }
 
-    mountExternal(CONTROL_OWNER_URL, 'fxControlOwnerR264', ensureNavOwner);
+    mountExternal(CONTROL_OWNER_URL, 'fxControlOwnerR264', () => {
+      ensureNavOwner();
+      ensureDialogueOwner();
+    });
   }
 
   function ensureAwardRuntime() {
@@ -107,10 +124,11 @@
   }
 
   function ensureInteractionInfrastructure() {
-    // Navigation and hero controls are interaction infrastructure. Mount their
-    // physical owners directly; award/audio/GPU enhancement startup must never
-    // be able to delay basic menu operation.
+    // Navigation, dialogue and hero controls are interaction infrastructure.
+    // Mount their physical owners directly; award/audio/GPU enhancement startup
+    // must never be able to delay basic menu or ASK operation.
     ensureControlOwner();
+    ensureDialogueOwner();
     ensureAwardRuntime();
     root.dataset.fxContentControlRuntime = 'requested-r273-r268-owner';
   }
