@@ -1,13 +1,14 @@
-/* FormatX r243 — content enhancement loading gate.
-   Semantic homepage copy must exist before user interaction, including in
-   reduced-motion mode. Heavier deck/proof/simulator enhancements may still wait
-   for intent so the first paint remains light. */
+/* FormatX r265 — content enhancement + canonical control loading gate.
+   Semantic homepage copy and navigation controls must exist before interaction,
+   including reduced-motion mode. Heavier deck/proof/simulator enhancements may
+   still wait for intent so the first paint remains light. */
 (function () {
   'use strict';
 
   const root = document.documentElement;
   if (root.dataset.fxContentRuntimeR241) return;
 
+  const CONTROL_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260821-r265-nav-state-owner';
   const template = document.getElementById('fx-content-runtime-r241');
   if (!(template instanceof HTMLTemplateElement)) {
     root.dataset.fxContentRuntimeR241 = 'missing-template';
@@ -26,6 +27,26 @@
     ['scroll', passive],
     ['keydown', false]
   ];
+
+  function mountExternal(raw, marker) {
+    if (!raw) return;
+    const absolute = new URL(raw, document.baseURI).href;
+    if (mounted.has(absolute) || Array.from(document.scripts).some(script => script.src === absolute)) return;
+
+    mounted.add(absolute);
+    const script = document.createElement('script');
+    script.async = false;
+    if (marker) script.dataset[marker] = 'true';
+    script.src = raw;
+    document.head.appendChild(script);
+  }
+
+  function ensureControlRuntime() {
+    if (root.dataset.fxAwardRuntime === 'r264') return;
+    if (document.querySelector('script[data-fx-content-control-runtime-r265]')) return;
+    mountExternal(CONTROL_RUNTIME_URL, 'fxContentControlRuntimeR265');
+    root.dataset.fxContentControlRuntime = 'requested-r265';
+  }
 
   function mount(spec) {
     const raw = spec.getAttribute('src');
@@ -49,8 +70,12 @@
     started = true;
     for (const [type, options] of listeners) removeEventListener(type, start, options);
     specs.forEach(mount);
-    root.dataset.fxContentRuntimeR241 = 'requested-r243';
+    root.dataset.fxContentRuntimeR241 = 'requested-r265';
   }
+
+  // Header/menu/SOUND/ASK/PAUSE ownership is interaction infrastructure, not a
+  // decorative motion enhancement. Mount it in both normal and reduced modes.
+  ensureControlRuntime();
 
   if (!reduced.matches) {
     start();
@@ -58,17 +83,17 @@
   }
 
   /*
-    r243 semantic floor:
+    Semantic floor:
     formatx-category-positioning.js owns real page copy (category title/cards,
     plan copy and the origin/proof narrative), so it is content, not decoration.
     Load that one script immediately. The remaining enhancement runtimes stay
-    deferred until intent and therefore keep the r241 performance win.
+    deferred until intent.
   */
   specs
     .filter(spec => spec.hasAttribute('data-fx-category-script'))
     .forEach(mount);
 
-  root.dataset.fxContentRuntimeR241 = 'reduced-motion-semantic-r243';
+  root.dataset.fxContentRuntimeR241 = 'reduced-motion-semantic-r265';
   for (const [type, options] of listeners) addEventListener(type, start, options);
   if (location.hash && location.hash !== '#top' && location.hash !== '#hero') start();
 }());
