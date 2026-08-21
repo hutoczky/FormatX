@@ -88,7 +88,12 @@
     const current = document.getElementById('main-nav');
     if (!(current instanceof HTMLElement)) return false;
 
-    if (observer && nav !== current) observer.disconnect();
+    if (nav === current && observer) {
+      reconcile();
+      return true;
+    }
+
+    if (observer) observer.disconnect();
     nav = current;
     nav.dataset.fxNavStateOwnerR265 = 'true';
 
@@ -103,6 +108,11 @@
     return true;
   }
 
+  function refreshBinding() {
+    bind();
+    schedule();
+  }
+
   function boot() {
     if (bind()) return;
     const bootObserver = new MutationObserver(() => {
@@ -113,9 +123,29 @@
     setTimeout(() => bootObserver.disconnect(), 5000);
   }
 
+  // A legacy finalizer may replace the navigation node after initial boot. The
+  // menu click is the authoritative interaction boundary, so re-resolve the
+  // current #main-nav after that same event task before enforcing visibility.
+  document.addEventListener('click', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target?.closest('#menu-toggle, .fx-reference-menu-button')) return;
+    queueMicrotask(refreshBinding);
+  }, true);
+
+  for (const eventName of [
+    'formatx:controlownerready',
+    'formatx:organisminterfaceready',
+    'formatx:mobilelayoutready',
+    'formatx:languagechange',
+    'pageshow'
+  ]) addEventListener(eventName, refreshBinding, { passive: true });
+
   addEventListener('resize', schedule, { passive: true });
   addEventListener('orientationchange', schedule, { passive: true });
-  addEventListener('pageshow', schedule, { passive: true });
+
+  // Bounded late passes cover asynchronous startup replacement without a
+  // document-wide permanent MutationObserver.
+  for (const delay of [0, 250, 900, 2200]) setTimeout(refreshBinding, delay);
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
