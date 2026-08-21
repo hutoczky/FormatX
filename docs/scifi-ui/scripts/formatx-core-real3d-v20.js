@@ -1,12 +1,11 @@
 (function () {
   'use strict';
-  // r157 cross-device final: approved mobile crystal size/form, proof-first mobile flow,
-  // desktop 412:410 reference aspect with luminance-key integration, r155 heartbeat,
-  // r153 optical pulse, r152 click stability and r144 pointer/touch/gyro interaction.
+
   const root = document.documentElement;
-  const BOOTSTRAP = 'responsive-cinematic-reference-v69-r99-luminous-interactive-r157-cross-device-final';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260814-luminous-cinematic-r99&rev=20260815-prismatic-organic-r120';
-  const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260813-android-webgl-recovery-r71';
+  const BOOTSTRAP = 'pure-native-webgl3d-r285-no-2d-mag-layers';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20260821-r285-pure-webgl3d';
+  const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260821-r285-pure-webgl3d';
+  const PURE_STYLE = '/scifi-ui/styles/formatx-pure-3d-r285.css?v=20260821-r285';
   const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260814-pixel-aspect-r80';
   const R87_STYLE = '/scifi-ui/styles/formatx-award-reference-r87.css?v=20260814-size-lock-r87&rev=20260814-supplied-reference-r108';
   const SIZE_LOCK_STYLE = '/scifi-ui/styles/formatx-size-lock-r105.css?v=20260814-user-approved-size-r110';
@@ -17,45 +16,263 @@
   const R99_OPTICAL_STYLE = '/scifi-ui/styles/formatx-award-material-r99.css?v=20260814-cinematic-atmosphere-r99&rev=20260814-faceted-crystal-r111';
   const POLISH_STYLE = '/scifi-ui/styles/formatx-reference-polish-r109.css?v=20260814-crystal-contrast-r109';
   const EXACT_STYLE = '/scifi-ui/styles/formatx-reference-exact-r112.css?v=20260815-prismatic-caustic-r121';
-  const DETAIL_STYLE = '/scifi-ui/styles/formatx-core-detail-overlay-r122.css?v=20260815-reference-material-r138';
   const FINAL_STYLE = '/scifi-ui/styles/formatx-reference-final-r132.css?v=20260815-pixel-lock-r139';
   const NARROW_PROOF_STYLE = '/scifi-ui/styles/formatx-reference-narrow-proof-r145.css?v=20260815-narrow-proof-r145';
-  const LIVE_MOTION_STYLE = '/scifi-ui/styles/formatx-live-motion-r147.css?v=20260815-centered-optics-safe-lane-r149b';
   const CLICK_STABILITY_STYLE = '/scifi-ui/styles/formatx-click-stability-r152.css?v=20260815-r152-center-lock';
-  const DESKTOP_LIVE_STYLE = '/scifi-ui/styles/formatx-desktop-live-r153.css?v=20260815-r153-desktop-live';
-  const DESKTOP_INTEGRATION_STYLE = '/scifi-ui/styles/formatx-desktop-integration-r154.css?v=20260815-r154e-no-legacy-grid';
   const MOBILE_HERO_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-hero-stability-r151.css?v=20260815-r156-proof-first';
-  const DETAIL_SCRIPT = '/scifi-ui/scripts/formatx-core-detail-overlay-r122.js?v=20260821-r263-interaction-burst';
+  const PROOF_STYLE = '/scifi-ui/styles/formatx-award-proof-r85.css?v=20260814-proof-geometry-r86';
+
   const COPY_SCRIPT = '/scifi-ui/scripts/formatx-reference-copy-r137.js?v=20260815-reference-copy-r137';
   const FINALIZER_SCRIPT = '/scifi-ui/scripts/formatx-reference-finalizer-r142.js?v=20260815-unclipped-chain-r142';
   const TAIL_FINALIZER_SCRIPT = '/scifi-ui/scripts/formatx-reference-finalizer-r143.js?v=20260815-tail-bridge-r143&rev=20260819-r210-geometry-cache';
-  const GYRO_SCRIPT = '/scifi-ui/scripts/formatx-core-gyro-r144.js?v=20260815-mobile-gyro-r144';
-  const LIVE_MOTION_SCRIPT = '/scifi-ui/scripts/formatx-core-live-motion-r147.js?v=20260816-r184-resize-driven-stable';
+  const GYRO_SCRIPT = '/scifi-ui/scripts/formatx-core-gyro-r144.js?v=20260821-r285-webgl-input-only';
   const MOBILE_HERO_STABILITY_SCRIPT = '/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js?v=20260815-r156-proof-first';
-  const PROOF_STYLE = '/scifi-ui/styles/formatx-award-proof-r85.css?v=20260814-proof-geometry-r86';
   const LAYOUT_SCRIPT = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260818-r204-proof-controls';
   const FLOW_SCRIPT = '/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260816-mobile-ui-r180c';
   const INTERACTION_SCRIPT = '/scifi-ui/scripts/formatx-core-direct-interaction.js?v=20260814-wake-safe-r98';
   const TOUCH_SCRIPT = '/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99';
   const INTERACTION_BRIDGE = '/scifi-ui/scripts/formatx-core-interaction-bridge-r109.js?v=20260814-capture-bridge-r109';
-  if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP && root.dataset.fxCoreDetailR122 === 'ready') return;
+
+  if (root.dataset.fxCoreReal3dBootstrap === BOOTSTRAP) return;
   root.dataset.fxCoreReal3dBootstrap = BOOTSTRAP;
-  if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreReal3d='audit-skip';root.dataset.fxCoreReferenceLock='audit-skip';return; }
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { root.dataset.fxCoreReal3d='reduced-skip';root.dataset.fxCoreReferenceLock='reduced-skip';return; }
-  root.dataset.fxCoreReal3d='loading-v69';root.dataset.fxCoreRenderer='single-webgl-luminous-crystal-r99';root.dataset.fxCoreReferenceLock='loading-v69';
-  function addStyle(href,attr,ready){if(document.querySelector('link['+attr+']'))return;const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.setAttribute(attr,'true');if(ready)l.addEventListener('load',()=>{root.dataset[ready]='ready';},{once:true});document.head.appendChild(l);}
-  function addExactStyle(){addStyle(EXACT_STYLE,'data-fx-reference-exact-r112','fxCoreExactR112');addStyle(DETAIL_STYLE,'data-fx-core-detail-r122-style','fxCoreDetailStyleR122');addStyle(FINAL_STYLE,'data-fx-reference-final-r132','fxReferenceFinalR132');addStyle(NARROW_PROOF_STYLE,'data-fx-reference-narrow-proof-r145','fxReferenceNarrowProofR145');addStyle(LIVE_MOTION_STYLE,'data-fx-live-motion-r147-style','fxLiveMotionStyleR147');addStyle(CLICK_STABILITY_STYLE,'data-fx-click-stability-r152-style','fxClickStabilityStyleR152');addStyle(DESKTOP_LIVE_STYLE,'data-fx-desktop-live-r153-style','fxDesktopLiveStyleR153');addStyle(DESKTOP_INTEGRATION_STYLE,'data-fx-desktop-integration-r154-style','fxDesktopIntegrationStyleR154');}
-  function addMobileStyle(){addStyle(MOBILE_STYLE,'data-fx-core-mobile-v55-style');addStyle(AWARD_STYLE,'data-fx-award-reference-r80');addStyle(R87_STYLE,'data-fx-award-reference-r87');addStyle(SIZE_LOCK_STYLE,'data-fx-size-lock-r105');addStyle(MATERIAL_STYLE,'data-fx-award-material-r88');addStyle(FACET_STYLE,'data-fx-award-material-r89');addStyle(CLARITY_STYLE,'data-fx-award-material-r90');addStyle(RAYGLASS_STYLE,'data-fx-award-material-r91','fxCoreMaterialR94');addStyle(R99_OPTICAL_STYLE,'data-fx-award-material-r99','fxCoreMaterialR99');addStyle(POLISH_STYLE,'data-fx-reference-polish-r109','fxCorePolishR109');addStyle(PROOF_STYLE,'data-fx-award-proof-r85');}
-  function addReferenceCopy(){if(document.querySelector('script[data-fx-reference-copy-r137], script[src*="formatx-reference-copy-r137.js"]'))return;const s=document.createElement('script');s.src=COPY_SCRIPT;s.async=false;s.dataset.fxReferenceCopyR137='true';s.addEventListener('load',()=>{root.dataset.fxReferenceCopyLoadR137='ready';},{once:true});s.addEventListener('error',()=>{root.dataset.fxReferenceCopyLoadR137='failed';},{once:true});document.head.appendChild(s);}
-  function addMobileHeroStability(){addStyle(MOBILE_HERO_STABILITY_STYLE,'data-fx-mobile-hero-stability-r151-style','fxMobileHeroStabilityStyleR151');if(document.querySelector('script[data-fx-mobile-hero-stability-r151], script[src*="formatx-mobile-hero-stability-r151.js"]'))return;const s=document.createElement('script');s.src=MOBILE_HERO_STABILITY_SCRIPT;s.async=false;s.dataset.fxMobileHeroStabilityR151='true';s.addEventListener('load',()=>{root.dataset.fxMobileHeroStabilityLoadR151='ready-r156';},{once:true});s.addEventListener('error',()=>{root.dataset.fxMobileHeroStabilityLoadR151='failed-r156';},{once:true});document.head.appendChild(s);}
-  function addLiveMotion(){addStyle(LIVE_MOTION_STYLE,'data-fx-live-motion-r147-style','fxLiveMotionStyleR147');addStyle(DESKTOP_LIVE_STYLE,'data-fx-desktop-live-r153-style','fxDesktopLiveStyleR153');addStyle(DESKTOP_INTEGRATION_STYLE,'data-fx-desktop-integration-r154-style','fxDesktopIntegrationStyleR154');if(document.querySelector('script[data-fx-live-motion-r147], script[src*="formatx-core-live-motion-r147.js"]'))return;const s=document.createElement('script');s.src=LIVE_MOTION_SCRIPT;s.async=false;s.dataset.fxLiveMotionR147='true';s.addEventListener('load',()=>{root.dataset.fxLiveMotionLoadR147='ready-r149b';},{once:true});s.addEventListener('error',()=>{root.dataset.fxLiveMotionLoadR147='failed-r149b';},{once:true});document.head.appendChild(s);}
-  function addGyro(){if(document.querySelector('script[data-fx-core-gyro-r144], script[src*="formatx-core-gyro-r144.js"]')){addLiveMotion();return;}const s=document.createElement('script');s.src=GYRO_SCRIPT;s.async=false;s.dataset.fxCoreGyroR144='true';s.addEventListener('load',()=>{root.dataset.fxCoreGyroLoadR144='ready';addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxCoreGyroLoadR144='failed';addLiveMotion();},{once:true});document.head.appendChild(s);}
-  function addTailFinalizer(){if(document.querySelector('script[data-fx-reference-finalizer-r143], script[src*="formatx-reference-finalizer-r143.js"]')){addGyro();addLiveMotion();return;}const s=document.createElement('script');s.src=TAIL_FINALIZER_SCRIPT;s.async=false;s.dataset.fxReferenceFinalizerR143='true';s.addEventListener('load',()=>{addGyro();addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxReferenceFinalizerR143='load-failed';addGyro();addLiveMotion();},{once:true});document.head.appendChild(s);}
-  function addFinalizer(){if(document.querySelector('script[data-fx-reference-finalizer-r142], script[src*="formatx-reference-finalizer-r142.js"]')){addTailFinalizer();return;}const s=document.createElement('script');s.src=FINALIZER_SCRIPT;s.async=false;s.dataset.fxReferenceFinalizerR142='true';s.addEventListener('load',addTailFinalizer,{once:true});s.addEventListener('error',()=>{root.dataset.fxReferenceFinalizerR142='load-failed';addTailFinalizer();},{once:true});document.head.appendChild(s);}
-  function addReferenceLayout(){if(document.querySelector('script[data-fx-mobile-reference-layout]')){addExactStyle();addReferenceCopy();addFinalizer();addGyro();addLiveMotion();return;}const s=document.createElement('script');s.src=LAYOUT_SCRIPT;s.async=false;s.dataset.fxMobileReferenceLayout='true';s.addEventListener('load',()=>{addExactStyle();addFlowGuard();addReferenceCopy();addFinalizer();addGyro();addLiveMotion();},{once:true});document.head.appendChild(s);}
-  function addDetailScript(){if(document.querySelector('script[data-fx-core-detail-r122], script[src*="formatx-core-detail-overlay-r122.js"]')){addLiveMotion();return;}const s=document.createElement('script');s.src=DETAIL_SCRIPT;s.async=false;s.dataset.fxCoreDetailR122='true';s.addEventListener('load',()=>{root.dataset.fxCoreDetailLoadR122='ready-r157';addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxCoreDetailLoadR122='failed-r157';addLiveMotion();},{once:true});document.head.appendChild(s);}
-  function addMobileScript(){if(document.querySelector('script[data-fx-core-mobile-v55-script], script[src*="formatx-core-mobile-v55.js"]')){addDetailScript();addGyro();addLiveMotion();return;}const s=document.createElement('script');s.src=MOBILE_SCRIPT;s.async=false;s.dataset.fxCoreMobileV55Script='true';s.addEventListener('load',()=>{root.dataset.fxCoreReferenceLockLoad='ready-v69-r157';addDetailScript();addGyro();addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxCoreReal3d='context-unavailable';root.dataset.fxCoreReferenceLock='load-failed-v69';root.dataset.fxCoreReferenceLockLoad='failed-v69-r157';dispatchEvent(new CustomEvent('formatx:core3dfallback',{detail:{reason:'mobile-reference-material-load-failed',reference:'v69-r157'}}));},{once:true});document.head.appendChild(s);}
-  function addInteractionScript(){if(!document.querySelector('script[data-fx-core-direct-interaction], script[src*="formatx-core-direct-interaction.js"]')){const s=document.createElement('script');s.src=INTERACTION_SCRIPT;s.async=false;s.dataset.fxCoreDirectInteraction='true';s.addEventListener('load',()=>{root.dataset.fxCoreInteractionController='ready-v3';addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxCoreInteractionController='failed-v3';addLiveMotion();},{once:true});document.head.appendChild(s);}if(!document.querySelector('script[data-fx-core-touch-pulse-r99], script[src*="formatx-core-touch-pulse-r99.js"]')){const t=document.createElement('script');t.src=TOUCH_SCRIPT;t.async=false;t.dataset.fxCoreTouchPulseR99='true';document.head.appendChild(t);}if(!document.querySelector('script[data-fx-core-interaction-bridge-r109], script[src*="formatx-core-interaction-bridge-r109.js"]')){const b=document.createElement('script');b.src=INTERACTION_BRIDGE;b.async=false;b.dataset.fxCoreInteractionBridgeR109='true';document.head.appendChild(b);}addGyro();addLiveMotion();}
-  function addFlowGuard(){if(innerWidth>900){root.dataset.fxFlowFirstGuard='desktop-bypass-r178';addFinalizer();addGyro();addLiveMotion();return;}if(document.querySelector('script[data-fx-flow-first-r75]')){addLiveMotion();return;}const s=document.createElement('script');s.src=FLOW_SCRIPT;s.async=false;s.dataset.fxFlowFirstR75='true';s.addEventListener('load',()=>{root.dataset.fxFlowFirstGuard='ready-r178';addFinalizer();addGyro();addLiveMotion();},{once:true});s.addEventListener('error',()=>{root.dataset.fxFlowFirstGuard='failed-r178';addLiveMotion();},{once:true});document.head.appendChild(s);}
-  addMobileStyle();addMobileHeroStability();addReferenceLayout();addMobileScript();addInteractionScript();addLiveMotion();setTimeout(()=>{addExactStyle();addMobileHeroStability();addDetailScript();addFlowGuard();addReferenceCopy();addFinalizer();addGyro();addLiveMotion();},0);
+  root.dataset.fxCoreCompositionR285 = 'pure-webgl3d-no-2d-overlays';
+
+  if (new URLSearchParams(location.search).get('lighthouse') === '1') {
+    root.dataset.fxCoreReal3d = 'audit-skip';
+    root.dataset.fxCoreReferenceLock = 'audit-skip';
+    return;
+  }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    root.dataset.fxCoreReal3d = 'reduced-skip';
+    root.dataset.fxCoreReferenceLock = 'reduced-skip';
+    return;
+  }
+
+  root.dataset.fxCoreReal3d = 'loading-v69';
+  root.dataset.fxCoreRenderer = 'single-webgl-luminous-crystal-r99';
+  root.dataset.fxCoreReferenceLock = 'loading-v69';
+
+  function addStyle(href, attr, ready) {
+    if (document.querySelector(`link[${attr}]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.setAttribute(attr, 'true');
+    if (ready) link.addEventListener('load', () => { root.dataset[ready] = 'ready'; }, { once: true });
+    document.head.appendChild(link);
+  }
+
+  function addPureStyle() {
+    addStyle(PURE_STYLE, 'data-fx-pure-3d-r285', 'fxPure3dStyleR285');
+  }
+
+  function cleanupLegacy2d() {
+    for (const selector of [
+      '#hero .fx-core-detail-r122',
+      '#hero .fx-core-live-r147-layer',
+      '#hero .fx-r155-heartbeat-core',
+      '#hero .fx-r155-heartbeat-ring',
+      '#hero .fx-r155-heartbeat-wave',
+      '#hero [class^="fx-r168-"]',
+      '#hero [class*=" fx-r168-"]',
+      '#hero .fx-r181-apex-meta'
+    ]) {
+      document.querySelectorAll(selector).forEach(node => node.remove());
+    }
+    root.dataset.fxCoreLegacy2dR285 = 'removed';
+  }
+
+  function addExactStyle() {
+    addStyle(EXACT_STYLE, 'data-fx-reference-exact-r112', 'fxCoreExactR112');
+    addStyle(FINAL_STYLE, 'data-fx-reference-final-r132', 'fxReferenceFinalR132');
+    addStyle(NARROW_PROOF_STYLE, 'data-fx-reference-narrow-proof-r145', 'fxReferenceNarrowProofR145');
+    addStyle(CLICK_STABILITY_STYLE, 'data-fx-click-stability-r152-style', 'fxClickStabilityStyleR152');
+    addPureStyle();
+  }
+
+  function addMobileStyle() {
+    addStyle(MOBILE_STYLE, 'data-fx-core-mobile-v55-style');
+    addStyle(AWARD_STYLE, 'data-fx-award-reference-r80');
+    addStyle(R87_STYLE, 'data-fx-award-reference-r87');
+    addStyle(SIZE_LOCK_STYLE, 'data-fx-size-lock-r105');
+    addStyle(MATERIAL_STYLE, 'data-fx-award-material-r88');
+    addStyle(FACET_STYLE, 'data-fx-award-material-r89');
+    addStyle(CLARITY_STYLE, 'data-fx-award-material-r90');
+    addStyle(RAYGLASS_STYLE, 'data-fx-award-material-r91', 'fxCoreMaterialR94');
+    addStyle(R99_OPTICAL_STYLE, 'data-fx-award-material-r99', 'fxCoreMaterialR99');
+    addStyle(POLISH_STYLE, 'data-fx-reference-polish-r109', 'fxCorePolishR109');
+    addStyle(PROOF_STYLE, 'data-fx-award-proof-r85');
+    addPureStyle();
+  }
+
+  function addReferenceCopy() {
+    if (document.querySelector('script[data-fx-reference-copy-r137], script[src*="formatx-reference-copy-r137.js"]')) return;
+    const script = document.createElement('script');
+    script.src = COPY_SCRIPT;
+    script.async = false;
+    script.dataset.fxReferenceCopyR137 = 'true';
+    script.addEventListener('load', () => { root.dataset.fxReferenceCopyLoadR137 = 'ready'; }, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxReferenceCopyLoadR137 = 'failed'; }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function addMobileHeroStability() {
+    addStyle(MOBILE_HERO_STABILITY_STYLE, 'data-fx-mobile-hero-stability-r151-style', 'fxMobileHeroStabilityStyleR151');
+    if (document.querySelector('script[data-fx-mobile-hero-stability-r151], script[src*="formatx-mobile-hero-stability-r151.js"]')) return;
+    const script = document.createElement('script');
+    script.src = MOBILE_HERO_STABILITY_SCRIPT;
+    script.async = false;
+    script.dataset.fxMobileHeroStabilityR151 = 'true';
+    script.addEventListener('load', () => { root.dataset.fxMobileHeroStabilityLoadR151 = 'ready-r156'; }, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxMobileHeroStabilityLoadR151 = 'failed-r156'; }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function addGyro() {
+    if (document.querySelector('script[data-fx-core-gyro-r144], script[src*="formatx-core-gyro-r144.js"]')) return;
+    const script = document.createElement('script');
+    script.src = GYRO_SCRIPT;
+    script.async = false;
+    script.dataset.fxCoreGyroR144 = 'true';
+    script.addEventListener('load', () => { root.dataset.fxCoreGyroLoadR144 = 'ready'; }, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxCoreGyroLoadR144 = 'failed'; }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function addTailFinalizer() {
+    if (document.querySelector('script[data-fx-reference-finalizer-r143], script[src*="formatx-reference-finalizer-r143.js"]')) {
+      addGyro();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = TAIL_FINALIZER_SCRIPT;
+    script.async = false;
+    script.dataset.fxReferenceFinalizerR143 = 'true';
+    script.addEventListener('load', addGyro, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxReferenceFinalizerR143 = 'load-failed'; addGyro(); }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function addFinalizer() {
+    if (document.querySelector('script[data-fx-reference-finalizer-r142], script[src*="formatx-reference-finalizer-r142.js"]')) {
+      addTailFinalizer();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = FINALIZER_SCRIPT;
+    script.async = false;
+    script.dataset.fxReferenceFinalizerR142 = 'true';
+    script.addEventListener('load', addTailFinalizer, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxReferenceFinalizerR142 = 'load-failed'; addTailFinalizer(); }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function addFlowGuard() {
+    if (innerWidth > 900) {
+      root.dataset.fxFlowFirstGuard = 'desktop-bypass-r178';
+      addFinalizer();
+      return;
+    }
+    if (document.querySelector('script[data-fx-flow-first-r75]')) return;
+    const script = document.createElement('script');
+    script.src = FLOW_SCRIPT;
+    script.async = false;
+    script.dataset.fxFlowFirstR75 = 'true';
+    script.addEventListener('load', () => { root.dataset.fxFlowFirstGuard = 'ready-r178'; addFinalizer(); }, { once: true });
+    script.addEventListener('error', () => { root.dataset.fxFlowFirstGuard = 'failed-r178'; }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function addReferenceLayout() {
+    if (document.querySelector('script[data-fx-mobile-reference-layout]')) {
+      addExactStyle();
+      addReferenceCopy();
+      addFinalizer();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = LAYOUT_SCRIPT;
+    script.async = false;
+    script.dataset.fxMobileReferenceLayout = 'true';
+    script.addEventListener('load', () => {
+      addExactStyle();
+      addFlowGuard();
+      addReferenceCopy();
+      addFinalizer();
+      cleanupLegacy2d();
+      addPureStyle();
+    }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function addMobileScript() {
+    if (document.querySelector('script[data-fx-core-mobile-v55-script], script[src*="formatx-core-mobile-v55.js"]')) return;
+    const script = document.createElement('script');
+    script.src = MOBILE_SCRIPT;
+    script.async = false;
+    script.dataset.fxCoreMobileV55Script = 'true';
+    script.addEventListener('load', () => {
+      root.dataset.fxCoreReferenceLockLoad = 'ready-v69-r285';
+      cleanupLegacy2d();
+      addPureStyle();
+    }, { once: true });
+    script.addEventListener('error', () => {
+      root.dataset.fxCoreReal3d = 'context-unavailable';
+      root.dataset.fxCoreReferenceLock = 'load-failed-v69';
+      root.dataset.fxCoreReferenceLockLoad = 'failed-v69-r285';
+      dispatchEvent(new CustomEvent('formatx:core3dfallback', { detail: { reason: 'native-webgl-renderer-load-failed', reference: 'v69-r285' } }));
+    }, { once: true });
+    document.head.appendChild(script);
+  }
+
+  function addInteractionScript() {
+    if (!document.querySelector('script[data-fx-core-direct-interaction], script[src*="formatx-core-direct-interaction.js"]')) {
+      const script = document.createElement('script');
+      script.src = INTERACTION_SCRIPT;
+      script.async = false;
+      script.dataset.fxCoreDirectInteraction = 'true';
+      script.addEventListener('load', () => { root.dataset.fxCoreInteractionController = 'ready-v3'; }, { once: true });
+      script.addEventListener('error', () => { root.dataset.fxCoreInteractionController = 'failed-v3'; }, { once: true });
+      document.head.appendChild(script);
+    }
+    if (!document.querySelector('script[data-fx-core-touch-pulse-r99], script[src*="formatx-core-touch-pulse-r99.js"]')) {
+      const touch = document.createElement('script');
+      touch.src = TOUCH_SCRIPT;
+      touch.async = false;
+      touch.dataset.fxCoreTouchPulseR99 = 'true';
+      document.head.appendChild(touch);
+    }
+    if (!document.querySelector('script[data-fx-core-interaction-bridge-r109], script[src*="formatx-core-interaction-bridge-r109.js"]')) {
+      const bridge = document.createElement('script');
+      bridge.src = INTERACTION_BRIDGE;
+      bridge.async = false;
+      bridge.dataset.fxCoreInteractionBridgeR109 = 'true';
+      document.head.appendChild(bridge);
+    }
+    addGyro();
+  }
+
+  cleanupLegacy2d();
+  addMobileStyle();
+  addMobileHeroStability();
+  addReferenceLayout();
+  addMobileScript();
+  addInteractionScript();
+  addPureStyle();
+
+  setTimeout(() => {
+    addExactStyle();
+    addFlowGuard();
+    addReferenceCopy();
+    addFinalizer();
+    addGyro();
+    cleanupLegacy2d();
+    addPureStyle();
+  }, 0);
+
+  addEventListener('formatx:real3dready', () => {
+    cleanupLegacy2d();
+    addPureStyle();
+    root.dataset.fxCoreCompositionR285 = 'pure-webgl3d-no-2d-overlays';
+  }, { passive: true });
 }());
