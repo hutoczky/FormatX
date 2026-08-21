@@ -1,0 +1,28 @@
+{
+  "revision": "r271",
+  "date": "2026-08-21",
+  "purpose": "final cross-device interaction, CPU-idle and layout-stability measurement",
+  "changes": [
+    "single-owner mobile menu and canonical SOUND-ASK-PAUSE hit layer",
+    "mobile brand-MAG-language-menu collision guard",
+    "visible ASK dialogue interaction layer",
+    "idle-safe DeviceOrientation smoothing",
+    "bounded seamless carrier observer",
+    "event-driven canonical control owner r268",
+    "compositor heartbeat without JavaScript idle RAF",
+    "viewport-stable mobile decorative fields",
+    "mobile static living-energy path without legacy per-frame JS"
+  ],
+  "qualityGate": {
+    "desktopLighthouseRuns": 3,
+    "mobileLighthouseRuns": 3,
+    "performanceFloor": 0.95,
+    "accessibilityFloor": 1.0,
+    "bestPracticesFloor": 1.0,
+    "seoFloor": 1.0,
+    "maxFcpMs": 1800,
+    "maxLcpMs": 2500,
+    "maxTbtMs": 200,
+    "maxCls": 0.1
+  }
+}
