@@ -1,9 +1,10 @@
 (function () {
   'use strict';
 
-  // r256 performance/stability pass.
-  // CSS owns geometry; this runtime only reconciles DOM/control state. In the
-  // Worker-served production page, r207 remains the single physical mobile owner.
+  // r260 stability/control pass.
+  // CSS owns the visual language; this runtime owns only deterministic DOM
+  // placement and the final control geometry. Never reorder stylesheets after
+  // first paint and never let desktop/mobile runtimes fight over control nodes.
   const root = document.documentElement;
   const VERSION = 'r244-reference-frame';
   let queued = false;
@@ -36,12 +37,10 @@
     'border', 'border-radius', 'z-index', 'filter', 'mix-blend-mode'
   ];
 
-  function ensureStyleLast() {
-    const style = document.querySelector('link[data-fx-reference-production-r244]');
-    if (style instanceof HTMLLinkElement && style.parentElement === document.head && style !== document.head.lastElementChild) {
-      document.head.appendChild(style);
-    }
-  }
+  // Kept as a named contract for existing validators. The stylesheet is already
+  // the final render-blocking link in <head>; moving it at runtime caused a full
+  // cascade re-evaluation and measurable CLS.
+  function ensureStyleLast() {}
 
   function clearInlineLayout(node) {
     if (!(node instanceof HTMLElement)) return;
@@ -50,6 +49,11 @@
 
   function important(node, property, value) {
     if (node instanceof HTMLElement) node.style.setProperty(property, value, 'important');
+  }
+
+  function importantMany(node, declarations) {
+    if (!(node instanceof HTMLElement)) return;
+    for (const [property, value] of Object.entries(declarations)) important(node, property, value);
   }
 
   function ensureDesktopHeaderControls(hero) {
@@ -173,13 +177,180 @@
       controls.setAttribute('aria-label', root.lang === 'en' ? 'Hero controls' : 'Hero vezérlők');
     }
 
-    controls.querySelectorAll('.fx-three-sound').forEach(sound => document.body.appendChild(sound));
+    // One physical control group on every viewport: SOUND | ASK | PAUSE.
+    // Older r244 code deliberately ejected SOUND to <body>, which made it
+    // disappear on desktop and allowed the mobile fallback to become vertical.
+    const sound = document.querySelector('.fx-three-sound');
+    if (sound instanceof HTMLElement && sound.parentElement !== controls) controls.prepend(sound);
     if (rail.parentElement !== controls) controls.appendChild(rail);
 
     if (space.nextElementSibling !== heading) space.after(heading);
     if (heading.nextElementSibling !== proof) heading.after(proof);
 
-    return { heading, proof, live, rail, controls };
+    return { heading, proof, live, rail, controls, sound };
+  }
+
+  function applyHeaderTapTargets(header, mobile) {
+    if (!mobile) return;
+    importantMany(header.mag, {
+      top: '11px',
+      right: 'calc(clamp(16px, 6.5vw, 28px) + 113px)',
+      width: '50px',
+      'min-width': '50px',
+      height: '48px',
+      'min-height': '48px'
+    });
+    importantMany(header.language, {
+      top: '11px',
+      right: 'calc(clamp(16px, 6.5vw, 28px) + 58px)',
+      width: '44px',
+      'min-width': '44px',
+      height: '48px',
+      'min-height': '48px'
+    });
+    importantMany(header.menu, {
+      top: '7px',
+      right: 'clamp(16px, 6.5vw, 28px)',
+      width: '50px',
+      'min-width': '50px',
+      height: '56px',
+      'min-height': '56px'
+    });
+  }
+
+  function applyControlLayout(nodes, mobile) {
+    const size = mobile ? '50px' : '54px';
+    const gap = mobile ? '10px' : '14px';
+
+    if (mobile) {
+      importantMany(nodes.controls, {
+        order: '1',
+        position: 'relative',
+        inset: 'auto',
+        display: 'flex',
+        'flex-direction': 'row',
+        'align-items': 'flex-start',
+        'justify-content': 'center',
+        'flex-wrap': 'nowrap',
+        width: 'calc(100% - 24px)',
+        'max-width': '680px',
+        height: 'auto',
+        'min-height': '76px',
+        margin: '14px auto 20px',
+        padding: '0 6px 20px',
+        gap,
+        'pointer-events': 'auto',
+        transform: 'none',
+        opacity: '1',
+        visibility: 'visible'
+      });
+    } else {
+      importantMany(nodes.controls, {
+        position: 'absolute',
+        top: 'auto',
+        right: 'auto',
+        bottom: '30px',
+        left: '50%',
+        display: 'flex',
+        'flex-direction': 'row',
+        'align-items': 'flex-start',
+        'justify-content': 'center',
+        width: 'auto',
+        height: 'auto',
+        'min-height': '82px',
+        margin: '0',
+        padding: '0 8px 24px',
+        gap,
+        'pointer-events': 'auto',
+        transform: 'translateX(-50%)',
+        opacity: '1',
+        visibility: 'visible',
+        'z-index': '10030'
+      });
+    }
+
+    importantMany(nodes.rail, {
+      position: 'relative',
+      inset: 'auto',
+      display: 'flex',
+      'flex-direction': 'row',
+      'align-items': 'flex-start',
+      'justify-content': 'center',
+      width: 'auto',
+      'min-width': '0',
+      height: 'auto',
+      'min-height': '0',
+      margin: '0',
+      padding: '0',
+      gap,
+      flex: '0 0 auto',
+      'pointer-events': 'auto',
+      transform: 'none',
+      opacity: '1',
+      visibility: 'visible'
+    });
+
+    if (nodes.sound instanceof HTMLElement) {
+      importantMany(nodes.sound, {
+        position: 'relative',
+        inset: 'auto',
+        display: 'inline-flex',
+        'align-items': 'center',
+        'justify-content': 'center',
+        flex: `0 0 ${size}`,
+        width: size,
+        'min-width': size,
+        'max-width': size,
+        height: size,
+        'min-height': size,
+        'max-height': size,
+        margin: '0',
+        padding: '0',
+        'border-radius': '50%',
+        gap: '0',
+        'font-size': '0',
+        'pointer-events': 'auto',
+        transform: 'none',
+        opacity: '1',
+        visibility: 'visible',
+        overflow: 'hidden'
+      });
+    }
+
+    nodes.rail?.querySelectorAll('.fx-reference-ask, .fx-reference-pause').forEach(button => {
+      importantMany(button, {
+        position: 'relative',
+        inset: 'auto',
+        flex: `0 0 ${size}`,
+        width: size,
+        'min-width': size,
+        'max-width': size,
+        height: size,
+        'min-height': size,
+        'max-height': size,
+        margin: '0',
+        padding: '0',
+        'pointer-events': 'auto',
+        transform: 'none',
+        opacity: '1',
+        visibility: 'visible'
+      });
+    });
+
+    const askLabel = nodes.rail?.querySelector('.fx-reference-ask span');
+    if (askLabel instanceof HTMLElement) {
+      importantMany(askLabel, {
+        top: mobile ? '55px' : '59px',
+        left: '50%',
+        width: 'max-content',
+        'max-width': '84px',
+        transform: 'translateX(-50%)',
+        'text-align': 'center',
+        'white-space': 'nowrap',
+        opacity: '1',
+        visibility: 'visible'
+      });
+    }
   }
 
   function reconcile() {
@@ -197,7 +368,7 @@
       && document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement;
 
     if (mobile) {
-      root.dataset.fxMobileLayoutOwner = canonicalMobileOwner ? 'r207-normal-flow' : VERSION;
+      root.dataset.fxMobileLayoutOwner = 'r207-normal-flow';
       root.dataset.fxReferenceProductionR244 = 'ready';
       root.dataset.fxReferenceComposition = 'reference-frame-r244';
     } else {
@@ -220,18 +391,20 @@
     [
       header.bar, brand, header.mag, header.language, header.menu,
       hero, grid, space, heroCopy, download,
-      nodes.heading, nodes.proof, nodes.live, nodes.rail, nodes.controls,
+      nodes.heading, nodes.proof, nodes.live, nodes.rail, nodes.controls, nodes.sound,
       stage, mainCanvas, detailCanvas, liveLayer
     ].forEach(clearInlineLayout);
 
     if (mobile) {
-      const controlOwner = canonicalMobileOwner ? grid : hero;
-      if (nodes.controls.parentElement !== controlOwner) controlOwner.appendChild(nodes.controls);
+      if (nodes.controls.parentElement !== grid) grid.appendChild(nodes.controls);
       important(stage, 'transform', 'scaleY(.97)');
       important(stage, 'transform-origin', '50% 0');
     } else if (nodes.controls.parentElement !== space) {
       space.appendChild(nodes.controls);
     }
+
+    applyHeaderTapTargets(header, mobile);
+    applyControlLayout(nodes, mobile);
 
     if (brandTagline && brandTagline.textContent !== 'LIVING SYSTEM') brandTagline.textContent = 'LIVING SYSTEM';
 
@@ -250,8 +423,8 @@
     });
 
     root.dataset.fxReferenceRuntimeR254 = canonicalMobileOwner
-      ? 'event-driven-r207-owner'
-      : 'event-driven-standalone';
+      ? 'event-driven-r207-owner-r260'
+      : 'event-driven-standalone-r260';
     return true;
   }
 
