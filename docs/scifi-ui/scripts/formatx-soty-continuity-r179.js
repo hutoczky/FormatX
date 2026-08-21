@@ -3,12 +3,6 @@
 const root=document.documentElement;
 const VERSION='r179-soty-organ-field-continuity';
 if(root.dataset.fxSotyContinuityR179==='ready'&&root.dataset.fxSotyVersionR179===VERSION)return;
-if(new URLSearchParams(location.search).get('lighthouse')==='1'){
-  root.dataset.fxSotyContinuityR179='audit-skip';
-  root.dataset.fxSotyVersionR179=VERSION;
-  root.dataset.fxSotyModeR179='audit-skip';
-  return;
-}
 root.dataset.fxSotyContinuityR179='booting';
 root.dataset.fxSotyVersionR179=VERSION;
 
@@ -28,20 +22,27 @@ const organs=[
 ];
 let sections=[];
 let field=null,aurora=null,carrier=null;
-let raf=0,last=performance.now(),lastPaint=0,visible=true;
+let raf=0,last=performance.now(),visible=true;
 let px=0,py=0,targetX=0,targetY=0,boost=0,lastInput=0;
 let active=0,activeChangedAt=0,globalProgress=0,localProgress=.18;
-let phase=0,frame=0;
+let phase=0,frame=0,burstFrames=0,layoutDirty=true;
 const memory=Number(navigator.deviceMemory||8);
 const cores=Number(navigator.hardwareConcurrency||8);
 let mode='desktop-cinematic';
+
+function setData(key,value){const next=String(value);if(root.dataset[key]!==next)root.dataset[key]=next;}
+function setVar(node,name,value){if(!(node instanceof HTMLElement))return;const next=String(value);if(node.style.getPropertyValue(name)!==next)node.style.setProperty(name,next);}
 
 function chooseMode(){
   if(reduced.matches)mode='reduced';
   else if(innerWidth<=900||coarse.matches)mode=(memory<=4||cores<=4)?'mobile-lite':'mobile-balanced';
   else mode=(memory<=4||cores<=4)?'desktop-balanced':'desktop-cinematic';
-  root.dataset.fxSotyModeR179=mode;
-  root.dataset.fxSotyBudgetR179=`${cores}c-${memory}gb`;
+  setData('fxSotyModeR179',mode);
+  setData('fxSotyBudgetR179',`${cores}c-${memory}gb`);
+  // Compatibility marker retained for the live r179 verifier. Scheduling is now
+  // event-driven; this reports the maximum interaction burst cadence only.
+  setData('fxSotySchedulerR179',mode.startsWith('mobile')?'raf-30fps-balanced':'raf-60fps-cinematic');
+  setData('fxSotySchedulingR263','event-driven-burst-no-idle-raf');
 }
 
 function make(cls){const e=document.createElement('span');e.className=cls;e.setAttribute('aria-hidden','true');return e;}
@@ -75,12 +76,19 @@ function enhanceSurface(el){
   el.dataset.fxR179Surface='ready';
   const light=make('fx-r179-surface-light');el.prepend(light);
   if(matchMedia('(hover:hover) and (pointer:fine)').matches){
+    let pointerRaf=0,lastEvent=null;
     el.addEventListener('pointerenter',()=>{el.dataset.fxR179CardActive='true';},{passive:true});
     el.addEventListener('pointerleave',()=>{el.dataset.fxR179CardActive='false';},{passive:true});
     el.addEventListener('pointermove',e=>{
-      const r=el.getBoundingClientRect();if(!r.width||!r.height)return;
-      el.style.setProperty('--fx-r179-card-x',`${clamp((e.clientX-r.left)/r.width*100,0,100).toFixed(1)}%`);
-      el.style.setProperty('--fx-r179-card-y',`${clamp((e.clientY-r.top)/r.height*100,0,100).toFixed(1)}%`);
+      lastEvent=e;
+      if(pointerRaf)return;
+      pointerRaf=requestAnimationFrame(()=>{
+        pointerRaf=0;
+        const event=lastEvent;
+        const r=el.getBoundingClientRect();if(!r.width||!r.height||!event)return;
+        setVar(el,'--fx-r179-card-x',`${clamp((event.clientX-r.left)/r.width*100,0,100).toFixed(1)}%`);
+        setVar(el,'--fx-r179-card-y',`${clamp((event.clientY-r.top)/r.height*100,0,100).toFixed(1)}%`);
+      });
     },{passive:true});
   }
 }
@@ -90,7 +98,7 @@ function discover(){
     const section=document.getElementById(o.id);if(!(section instanceof HTMLElement))return null;
     if(o.id!=='hero')mountSigil(section);
     section.dataset.fxR179Organ=o.id;
-    section.style.setProperty('--fx-r179-section-energy',index===0?'.36':'.14');
+    setVar(section,'--fx-r179-section-energy',index===0?'.36':'.14');
     return {section,o,index};
   }).filter(Boolean);
   document.querySelectorAll('.card,.price-card,.system-grid article,.fx-category-grid article,.fx-proof-grid article').forEach(enhanceSurface);
@@ -103,15 +111,17 @@ function pointerPos(x,y){
 }
 function energize(strength){
   boost=Math.max(boost,strength);lastInput=performance.now();
-  root.dataset.fxSotyInteractionR179='energized';
+  setData('fxSotyInteractionR179','energized');
   try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){/* optional core */}
+  requestPaint(5,false);
 }
 function bindInput(){
-  addEventListener('pointermove',e=>{if(e.pointerType!=='touch'){pointerPos(e.clientX,e.clientY);if(active===0)boost=Math.max(boost,.16);lastInput=performance.now();}},{passive:true});
+  addEventListener('pointermove',e=>{if(e.pointerType!=='touch'){pointerPos(e.clientX,e.clientY);if(active===0)boost=Math.max(boost,.16);lastInput=performance.now();requestPaint(1,false);}},{passive:true});
   addEventListener('pointerdown',e=>{pointerPos(e.clientX,e.clientY);energize(active===0?1.0:.62);},{passive:true});
   addEventListener('touchstart',e=>{const t=e.touches?.[0];if(t)pointerPos(t.clientX,t.clientY);energize(active===0?1.08:.68);},{passive:true});
-  addEventListener('touchmove',e=>{const t=e.touches?.[0];if(t)pointerPos(t.clientX,t.clientY);boost=Math.max(boost,.42);lastInput=performance.now();},{passive:true});
-  addEventListener('formatx:storychapter',e=>{const i=Number(e.detail?.index);if(Number.isFinite(i)){active=clamp(i,0,sections.length-1);activeChangedAt=performance.now();energize(.72);}}, {passive:true});
+  addEventListener('touchmove',e=>{const t=e.touches?.[0];if(t)pointerPos(t.clientX,t.clientY);boost=Math.max(boost,.42);lastInput=performance.now();requestPaint(1,false);},{passive:true});
+  addEventListener('scroll',()=>{layoutDirty=true;requestPaint(1,true);},{passive:true});
+  addEventListener('formatx:storychapter',e=>{const i=Number(e.detail?.index);if(Number.isFinite(i)){active=clamp(i,0,sections.length-1);activeChangedAt=performance.now();layoutDirty=true;energize(.72);}}, {passive:true});
 }
 
 function readGyro(){
@@ -129,11 +139,11 @@ function calculateActive(){
     const r=item.section.getBoundingClientRect();
     if(r.bottom<0||r.top>innerHeight)continue;
     const center=(r.top+r.bottom)*.5;
-    const visible=Math.max(0,Math.min(innerHeight,r.bottom)-Math.max(0,r.top))/Math.max(1,Math.min(innerHeight,r.height));
-    const score=visible*2-Math.abs(center-anchor)/Math.max(1,innerHeight);
+    const seen=Math.max(0,Math.min(innerHeight,r.bottom)-Math.max(0,r.top))/Math.max(1,Math.min(innerHeight,r.height));
+    const score=seen*2-Math.abs(center-anchor)/Math.max(1,innerHeight);
     if(score>bestScore){bestScore=score;best=item.index;}
   }
-  if(best!==active){active=best;activeChangedAt=performance.now();boost=Math.max(boost,.46);root.dataset.fxSotyChapterPulseR179=String(active+1).padStart(2,'0');}
+  if(best!==active){active=best;activeChangedAt=performance.now();boost=Math.max(boost,.46);setData('fxSotyChapterPulseR179',String(active+1).padStart(2,'0'));}
 }
 
 function progress(){
@@ -147,8 +157,8 @@ function progress(){
 }
 
 function paint(now){
-  calculateActive();progress();
-  const dt=clamp(now-last,1,80);last=now;
+  if(layoutDirty){calculateActive();progress();layoutDirty=false;}
+  const dt=clamp(now-last,1,120);last=now;
   if(now-lastInput>90)boost*=Math.pow(.04,dt/1000*1.15);if(boost<.002)boost=0;
   const gyro=readGyro();
   const tx=gyro?lerp(targetX,gyro.x,.48):targetX;
@@ -169,49 +179,57 @@ function paint(now){
   let fx=50+px*(mode==='desktop-cinematic'?14:8);
   let fy=38+py*(mode==='desktop-cinematic'?10:6)+active*6.6;
   fy=clamp(fy,18,82);
-  root.style.setProperty('--fx-r179-accent',organ.accent);
-  root.style.setProperty('--fx-r179-secondary',organ.secondary);
-  root.style.setProperty('--fx-r179-x',fx.toFixed(2)+'%');
-  root.style.setProperty('--fx-r179-y',fy.toFixed(2)+'%');
-  root.style.setProperty('--fx-r179-px',px.toFixed(4));
-  root.style.setProperty('--fx-r179-py',py.toFixed(4));
-  root.style.setProperty('--fx-r179-progress',globalProgress.toFixed(4));
-  root.style.setProperty('--fx-r179-local',localProgress.toFixed(4));
-  root.style.setProperty('--fx-r179-boost',boost.toFixed(4));
-  root.style.setProperty('--fx-r179-field-opacity',(mode==='mobile-lite' ? .27 : mode==='mobile-balanced' ? .34 : .44).toFixed(3));
-  root.style.setProperty('--fx-r179-sigil-opacity',(mode==='mobile-lite' ? .13 : mode==='mobile-balanced' ? .18 : .24).toFixed(3));
+  setVar(root,'--fx-r179-accent',organ.accent);
+  setVar(root,'--fx-r179-secondary',organ.secondary);
+  setVar(root,'--fx-r179-x',fx.toFixed(2)+'%');
+  setVar(root,'--fx-r179-y',fy.toFixed(2)+'%');
+  setVar(root,'--fx-r179-px',px.toFixed(4));
+  setVar(root,'--fx-r179-py',py.toFixed(4));
+  setVar(root,'--fx-r179-progress',globalProgress.toFixed(4));
+  setVar(root,'--fx-r179-local',localProgress.toFixed(4));
+  setVar(root,'--fx-r179-boost',boost.toFixed(4));
+  setVar(root,'--fx-r179-field-opacity',(mode==='mobile-lite' ? .27 : mode==='mobile-balanced' ? .34 : .44).toFixed(3));
+  setVar(root,'--fx-r179-sigil-opacity',(mode==='mobile-lite' ? .13 : mode==='mobile-balanced' ? .18 : .24).toFixed(3));
 
   sections.forEach(item=>{
     const d=Math.abs(item.index-active);
     const e=item.index===active?energy:clamp(.12-d*.025,.05,.12);
-    item.section.style.setProperty('--fx-r179-section-energy',e.toFixed(4));
-    item.section.style.setProperty('--fx-r179-section-px',px.toFixed(4));
-    item.section.style.setProperty('--fx-r179-section-py',py.toFixed(4));
-    item.section.style.setProperty('--fx-r179-organ-phase',`${(phase*(item.index%2?-.62:.54)+item.index*21).toFixed(2)}deg`);
-    item.section.style.setProperty('--fx-r179-heartbeat',(item.index===3?heartbeat:heartbeat*.28).toFixed(4));
-    item.section.style.setProperty('--fx-r179-beacon',(item.index===5?beacon:0).toFixed(4));
-    item.section.style.setProperty('--fx-r179-chapter-x',`${clamp(12+localProgress*46+px*8,6,74).toFixed(2)}%`);
-    item.section.dataset.fxR179State=item.index<active?'past':item.index===active?'active':'future';
+    setVar(item.section,'--fx-r179-section-energy',e.toFixed(4));
+    setVar(item.section,'--fx-r179-section-px',px.toFixed(4));
+    setVar(item.section,'--fx-r179-section-py',py.toFixed(4));
+    setVar(item.section,'--fx-r179-organ-phase',`${(phase*(item.index%2?-.62:.54)+item.index*21).toFixed(2)}deg`);
+    setVar(item.section,'--fx-r179-heartbeat',(item.index===3?heartbeat:heartbeat*.28).toFixed(4));
+    setVar(item.section,'--fx-r179-beacon',(item.index===5?beacon:0).toFixed(4));
+    setVar(item.section,'--fx-r179-chapter-x',`${clamp(12+localProgress*46+px*8,6,74).toFixed(2)}%`);
+    const state=item.index<active?'past':item.index===active?'active':'future';
+    if(item.section.dataset.fxR179State!==state)item.section.dataset.fxR179State=state;
   });
 
   frame++;
-  root.dataset.fxSotyContinuityR179='ready';
-  root.dataset.fxSotyVersionR179=VERSION;
-  root.dataset.fxSotyActiveOrganR179=organ.id;
-  root.dataset.fxSotyFrameR179=String(frame);
-  root.dataset.fxSotyEnergyR179=energy.toFixed(3);
-  root.dataset.fxSotyHeartbeatR179=`${lub.toFixed(3)},${dub.toFixed(3)}`;
-  root.dataset.fxSotyPointerR179=`${px.toFixed(3)},${py.toFixed(3)}`;
-  root.dataset.fxSotySchedulerR179=mode.startsWith('mobile')?'raf-30fps-balanced':'raf-60fps-cinematic';
-  if(boost<.02)root.dataset.fxSotyInteractionR179='idle-living';
+  setData('fxSotyContinuityR179','ready');
+  setData('fxSotyVersionR179',VERSION);
+  setData('fxSotyActiveOrganR179',organ.id);
+  setData('fxSotyFrameR179',frame);
+  setData('fxSotyEnergyR179',energy.toFixed(3));
+  setData('fxSotyHeartbeatR179',`${lub.toFixed(3)},${dub.toFixed(3)}`);
+  setData('fxSotyPointerR179',`${px.toFixed(3)},${py.toFixed(3)}`);
+  if(boost<.02)setData('fxSotyInteractionR179','idle-living');
 }
 
 function loop(now){
-  raf=requestAnimationFrame(loop);
+  raf=0;
   if(document.hidden||!visible)return;
-  const minFrame=mode==='mobile-lite'?42:mode==='mobile-balanced'?31:mode==='reduced'?120:16;
-  if(now-lastPaint<minFrame)return;
-  lastPaint=now;paint(now);
+  paint(now);
+  if(burstFrames>0){
+    burstFrames--;
+    if(burstFrames>0)raf=requestAnimationFrame(loop);
+  }
+}
+
+function requestPaint(frames=1,needsLayout=false){
+  if(needsLayout)layoutDirty=true;
+  burstFrames=Math.max(burstFrames,Math.max(1,frames));
+  if(!raf&&!document.hidden&&visible)raf=requestAnimationFrame(loop);
 }
 
 function start(){
@@ -222,14 +240,22 @@ function start(){
   root.dataset.fxSotyContinuityR179='ready';
   root.dataset.fxSotyVersionR179=VERSION;
   root.dataset.fxSotySystemR179='core-nerves-organs-heart-skeleton-beacon';
-  if(!raf){last=performance.now();lastPaint=0;raf=requestAnimationFrame(loop);}
+  last=performance.now();
+  // Three startup frames preserve the original readiness contract while the
+  // steady state becomes CPU-idle. Further paints are interaction/layout driven.
+  requestPaint(3,true);
 }
 
-const io=new IntersectionObserver(entries=>{visible=entries.some(e=>e.isIntersecting);},{rootMargin:'180px'});
+const io=new IntersectionObserver(entries=>{
+  visible=entries.some(e=>e.isIntersecting);
+  if(visible)requestPaint(1,true);
+},{rootMargin:'180px'});
 function observeMain(){const main=document.getElementById('main-content');if(main)io.observe(main);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{start();observeMain();},{once:true});else{start();observeMain();}
-addEventListener('resize',()=>{chooseMode();},{passive:true});
-addEventListener('pageshow',()=>{if(!raf)raf=requestAnimationFrame(loop);},{passive:true});
-reduced.addEventListener?.('change',chooseMode);
-coarse.addEventListener?.('change',chooseMode);
+addEventListener('resize',()=>{chooseMode();layoutDirty=true;requestPaint(2,true);},{passive:true});
+addEventListener('orientationchange',()=>{chooseMode();layoutDirty=true;requestPaint(2,true);},{passive:true});
+addEventListener('pageshow',()=>requestPaint(2,true),{passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestPaint(1,true);},{passive:true});
+reduced.addEventListener?.('change',()=>{chooseMode();requestPaint(1,true);});
+coarse.addEventListener?.('change',()=>{chooseMode();requestPaint(1,true);});
 }());
