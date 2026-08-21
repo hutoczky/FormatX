@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r266') return;
-  root.dataset.fxAwardRuntime = 'r266';
+  if (root.dataset.fxAwardRuntime === 'r268') return;
+  root.dataset.fxAwardRuntime = 'r268';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -15,7 +15,7 @@
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260821-r264-single-owner';
   const REPAIR_STYLE_URL = '/scifi-ui/styles/formatx-interaction-repair-r266.css?v=20260821-r266-hit-dialogue';
-  const OWNER_SCRIPT_URL = '/scifi-ui/scripts/formatx-control-owner-r264.js?v=20260821-r264-single-owner';
+  const OWNER_SCRIPT_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260821-r268-event-driven';
   const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260821-r265-nav-state-owner';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
