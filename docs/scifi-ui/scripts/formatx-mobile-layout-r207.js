@@ -1,9 +1,14 @@
 (function () {
   'use strict';
 
+  // r255 performance pass: r207 remains the single physical mobile DOM owner,
+  // but reconciliation is event-driven instead of observing every mutation under
+  // the document. This removes CSS/inline ping-pong from the hot rendering path.
   const root = document.documentElement;
   const mobile = () => matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   let queued = false;
+  let bootObserver = null;
+  let bootTimer = 0;
 
   function unique(selector, scope) {
     const nodes = Array.from((scope || document).querySelectorAll(selector));
@@ -17,12 +22,12 @@
   }
 
   function reconcile() {
-    if (!mobile()) return;
+    if (!mobile()) return true;
 
     const hero = document.getElementById('hero');
     const grid = hero?.querySelector(':scope > .hero-grid');
     const space = grid?.querySelector(':scope > .hero-space');
-    if (!(hero instanceof HTMLElement) || !(grid instanceof HTMLElement) || !(space instanceof HTMLElement)) return;
+    if (!(hero instanceof HTMLElement) || !(grid instanceof HTMLElement) || !(space instanceof HTMLElement)) return false;
 
     let zone = unique('.fx-reference-controls-r204', hero);
     if (!(zone instanceof HTMLElement)) {
@@ -37,8 +42,7 @@
     if (sound instanceof HTMLElement && sound.parentElement !== zone) zone.appendChild(sound);
     if (rail instanceof HTMLElement && rail.parentElement !== zone) zone.appendChild(rail);
 
-    /* r208: hero-grid is the single physical owner. CSS order owns visual order.
-       Never move the stylesheet link or repeatedly reorder stable children. */
+    // hero-grid is the single physical owner. CSS order owns visual order.
     if (zone.parentElement !== grid) grid.appendChild(zone);
 
     const copy = grid.querySelector(':scope > .hero-copy');
@@ -49,14 +53,15 @@
     const live = proof?.querySelector('.fx-reference-liveos');
     if (proof instanceof HTMLElement && proof.parentElement !== grid) grid.appendChild(proof);
 
-    /* Cached r75/r180 builds used inline !important geometry. MutationObserver
-       runs before rendering, so remove those stale geometry writes in the same
-       turn and let the authoritative r207/r208 styles own layout exclusively. */
+    // Cached legacy builds may still carry inline !important geometry. Remove it
+    // only during explicit reconciliation; never watch the renderer's live style
+    // mutations continuously.
     [hero, grid, space, zone, rail, copy, heading, proof, live].forEach(clearLegacyInline);
 
     root.dataset.fxMobileLayoutOwner = 'r207-normal-flow';
     root.dataset.fxMobileLayoutConflict = 'none-r207';
-    root.dataset.fxMobileLayoutStability = 'r208-inline-shield';
+    root.dataset.fxMobileLayoutStability = 'r255-event-driven-inline-shield';
+    return true;
   }
 
   function markAuthoritativeStyle() {
@@ -64,8 +69,6 @@
     root.dataset.fxMobileLayoutStyle = link instanceof HTMLLinkElement
       ? 'static-r208'
       : 'missing-r208';
-    /* Deliberately do not append/move an existing <link>. Moving a live stylesheet
-       changes cascade order and caused the r204/r207 visual flash. */
   }
 
   function schedule() {
@@ -77,41 +80,38 @@
     });
   }
 
-  function relevantStyleMutation(record) {
-    if (record.type !== 'attributes' || record.attributeName !== 'style') return false;
-    const target = record.target;
-    if (!(target instanceof Element)) return false;
-    return Boolean(target.closest(
-      '#hero, #hero .hero-grid, #hero .hero-space, #hero .hero-copy, ' +
-      '#hero .fx-reference-controls-r204, #hero .fx-reference-rail, ' +
-      '#hero .fx-reference-heading, #hero .fx-reference-proof, #hero .fx-reference-liveos'
-    ));
+  function stopBootObserver() {
+    if (bootObserver) bootObserver.disconnect();
+    bootObserver = null;
+    if (bootTimer) clearTimeout(bootTimer);
+    bootTimer = 0;
   }
 
   function start() {
     markAuthoritativeStyle();
-    reconcile();
+    if (reconcile()) return;
 
-    const observer = new MutationObserver((records) => {
-      if (!mobile()) return;
-      const structural = records.some((record) =>
-        record.type === 'childList' && (record.addedNodes.length || record.removedNodes.length)
-      );
-      const staleInline = records.some(relevantStyleMutation);
-      if (structural || staleInline) schedule();
+    // The only MutationObserver is a bounded bootstrap fallback. It disconnects
+    // as soon as the hero exists and cannot stay in the animation hot path.
+    const target = document.body || document.documentElement;
+    bootObserver = new MutationObserver(() => {
+      if (reconcile()) stopBootObserver();
     });
-    observer.observe(document.documentElement, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ['style']
-    });
-
-    addEventListener('resize', schedule, { passive: true });
-    addEventListener('orientationchange', schedule, { passive: true });
-    addEventListener('formatx:real3dready', schedule);
-    addEventListener('formatx:languagechange', schedule);
+    bootObserver.observe(target, { subtree: true, childList: true });
+    bootTimer = setTimeout(() => {
+      stopBootObserver();
+      reconcile();
+    }, 5000);
   }
+
+  addEventListener('resize', schedule, { passive: true });
+  addEventListener('orientationchange', schedule, { passive: true });
+  for (const eventName of [
+    'formatx:real3dready',
+    'formatx:coredetailready',
+    'formatx:organisminterfaceready',
+    'formatx:languagechange'
+  ]) addEventListener(eventName, schedule);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start, { once: true });

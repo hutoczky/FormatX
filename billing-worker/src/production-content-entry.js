@@ -5,7 +5,7 @@ const CANONICAL_HOST = 'formatxsuite.com';
 const LEGACY_WWW_HOST = 'www.formatxsuite.com';
 const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
-const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260819-r243-language-canonical"></script>';
+const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260821-r258-noindex"></script>';
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260818-r206-first-paint">';
 const R206_BOOTSTRAP = [
   '<link rel="stylesheet" data-fx-award-readiness-style="true" href="/scifi-ui/styles/formatx-award-readiness.css?v=20260818-r206-lcp-stability">',
@@ -15,11 +15,11 @@ const R206_BOOTSTRAP = [
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-proof-controls-r204="true" href="/scifi-ui/styles/formatx-mobile-proof-controls-r204.css?v=20260818-r207-preloaded">',
   '<link rel="stylesheet" media="(max-width: 900px)" data-fx-mobile-layout-r207="true" href="/scifi-ui/styles/formatx-mobile-layout-r207.css?v=20260818-r208-flicker-free">',
   '<link rel="stylesheet" data-fx-first-paint-r206="true" href="/scifi-ui/styles/formatx-first-paint-r206.css?v=20260818-r206-stable-hero">',
-  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260820-r248-reference-owner"></script>',
+  '<script defer data-fx-mobile-reference-layout="true" src="/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260821-r257-r207-owner"></script>',
   '<script defer data-fx-flow-first-r75="true" src="/scifi-ui/scripts/formatx-flow-first-r75.js?v=20260820-r248-reference-owner"></script>',
-  '<script defer data-fx-mobile-layout-r207="true" src="/scifi-ui/scripts/formatx-mobile-layout-r207.js?v=20260818-r208-flicker-free"></script>',
+  '<script defer data-fx-mobile-layout-r207="true" src="/scifi-ui/scripts/formatx-mobile-layout-r207.js?v=20260821-r255-event-driven"></script>',
 ].join('\n  ');
-const STARTUP_REVISION = '20260818-r208-flicker-free-owner';
+const STARTUP_REVISION = '20260821-r258-cache-seo-performance';
 const STARTUP_COOKIE = /(?:^|;\s*)fx_startup_r208=1(?:;|$)/;
 const HOMEPAGE_LANGUAGE_META = {
   hu: {
@@ -73,29 +73,16 @@ const PUBLIC_PAGE_ALIASES = new Map([
 ]);
 
 /*
-  r208 flicker-free mobile layout ownership.
+  Production public gateway.
 
-  Readable content and mobile layout remain independent from the WebGL renderer.
-  The Worker preloads one authoritative normal-flow mobile layer and its DOM
-  reconciler. Legacy r75/r180 geometry writers delegate to that owner and the
-  r208 inline shield removes stale cached inline geometry before paint. The new
-  startup revision performs a one-shot cache migration from earlier r207 assets.
+  - one canonical public origin
+  - one bounded internal redirect follower
+  - one physical mobile layout owner (r207)
+  - server-aligned HU/EN canonical metadata
+  - recovery URLs are transport-only and explicitly non-indexable
+  - versioned static assets are cacheable; HTML and dynamic content remain no-store
 
-  Current product/content contracts remain delegated to production-content-base.js:
-  release-metadata.js
-  formatx-public-shell.js
-  formatx-content-standard.js
-  formatx-content-standard.css
-  formatx-seo.js
-  formatx-content-finalizer.js
-  formatx-platform-surface-finalizer.js
-  formatx-organism-trust.js
-  formatx-organism-semantic-state.js
-  single-language-toggle.js
-  cleanLegacyReleaseCopy
-  USER_FEEDBACK_SECTION
-  id="user-feedback"
-  itemprop="operatingSystem" content="Linux, Bazzite, Windows, Android"
+  Product/content contracts remain delegated to production-content-base.js.
 */
 
 export default {
@@ -253,9 +240,21 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
   } = options;
 
   const headers = new Headers(response.headers);
-  headers.set('Cache-Control', 'no-store, max-age=0');
-  headers.set('Pragma', 'no-cache');
+  const contentType = headers.get('Content-Type') || '';
+  const cachePolicy = staticAssetCachePolicy(publicUrl, contentType, clearCachedRedirect);
+
+  if (cachePolicy) {
+    headers.set('Cache-Control', cachePolicy);
+    headers.delete('Pragma');
+  } else {
+    headers.set('Cache-Control', 'no-store, max-age=0');
+    headers.set('Pragma', 'no-cache');
+  }
   headers.set('Vary', mergeVary(headers.get('Vary'), 'Host'));
+
+  if (clearCachedRedirect) {
+    headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  }
 
   if (homepage) {
     const canonical = canonicalHomepageUrl(publicUrl);
@@ -263,9 +262,9 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
     headers.set('Link', `<${canonical}>; rel="canonical"`);
     if (language) headers.set('Content-Language', language);
     headers.set('X-FormatX-Shell', 'v56');
-    headers.set('X-FormatX-Client-Revision', 'r208-flicker-free-owner');
+    headers.set('X-FormatX-Client-Revision', 'r258-cache-seo-performance');
     headers.set('X-FormatX-Startup-Mode', 'canonical-normal-flow');
-    headers.set('X-FormatX-Recovery', 'r243-language-canonical');
+    headers.set('X-FormatX-Recovery', 'r258-noindex');
 
     const cookie = request.headers.get('Cookie') || '';
     if (!STARTUP_COOKIE.test(cookie)) {
@@ -319,7 +318,6 @@ async function canonicalisePublicResponse(response, request, publicUrl, options 
     });
   }
 
-  const contentType = headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) {
     return new Response(response.body, {
       status: response.status,
@@ -463,6 +461,20 @@ function cacheBustCriticalCoreR206(html) {
       return `${cleaned}${cleaned.includes('?') ? '&' : '?'}fxstable=${STARTUP_REVISION}${suffix}`;
     },
   );
+}
+
+function staticAssetCachePolicy(publicUrl, contentType, recovery) {
+  if (recovery) return '';
+  if (/text\/html/i.test(contentType)) return '';
+  if (/^\/api(?:\/|$)/i.test(publicUrl.pathname)) return '';
+
+  const isStaticAsset = /\.(?:css|m?js|webp|png|jpe?g|gif|svg|ico|avif|woff2?|ttf|webmanifest)$/i.test(publicUrl.pathname);
+  if (!isStaticAsset) return '';
+
+  const versioned = ['v', 'rev', 'fxstable', 'fxr'].some((key) => publicUrl.searchParams.has(key));
+  return versioned
+    ? 'public, max-age=31536000, immutable'
+    : 'public, max-age=86400, stale-while-revalidate=604800';
 }
 
 function mergeVary(existing, value) {

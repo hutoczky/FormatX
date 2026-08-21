@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r208 flicker-free canonical mobile-flow source contract. */
+/* FormatX Web Design Awards — canonical mobile-flow and truthful live audit source contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -18,6 +18,7 @@ const mobileLayoutRuntime = read('docs/scifi-ui/scripts/formatx-mobile-layout-r2
 const legacyFlow = read('docs/scifi-ui/scripts/formatx-flow-first-r75.js');
 const legacyFinalizer = read('docs/scifi-ui/scripts/formatx-mobile-ui-finalizer-r180.js');
 const audio = read('docs/scifi-ui/scripts/formatx-audio-repair.js');
+const recovery = read('docs/scifi-ui/scripts/formatx-canonical-recovery.js');
 const production = read('billing-worker/src/production-content-entry.js');
 const home = read('docs/scifi-ui/index.html');
 const wrangler = JSON.parse(read('billing-worker/wrangler.jsonc'));
@@ -58,7 +59,9 @@ for (const token of [
   'visibility: visible'
 ]) assert.ok(firstPaint.includes(token), `missing r206 first-paint contract: ${token}`);
 
-// r208: exactly one mobile geometry owner. Controls and proof are normal-flow children.
+// The r207 stylesheet remains the mobile flow contract and the runtime may only
+// reconcile on explicit lifecycle events. It must not observe the whole document
+// throughout animation/rendering.
 for (const token of [
   'authoritative mobile layout ownership',
   '> .hero-grid > .fx-reference-controls-r204',
@@ -70,7 +73,7 @@ for (const token of [
   '> .hero-grid > .fx-reference-proof',
   'min-height: 0',
   'fx-reference-liveos'
-]) assert.ok(mobileLayoutCss.includes(token), `missing r208 mobile CSS contract: ${token}`);
+]) assert.ok(mobileLayoutCss.includes(token), `missing mobile CSS contract: ${token}`);
 for (const token of [
   'fxMobileLayoutOwner',
   'r207-normal-flow',
@@ -78,21 +81,23 @@ for (const token of [
   'zone.parentElement !== grid',
   'fxMobileLayoutConflict',
   'none-r207',
-  'r208-inline-shield',
+  'r255-event-driven-inline-shield',
   'queueMicrotask',
   'clearLegacyInline',
-  'relevantStyleMutation',
+  'bootObserver',
+  'stopBootObserver',
   "unique('.fx-reference-heading', hero)",
   "unique('.fx-reference-proof', hero)"
-]) assert.ok(mobileLayoutRuntime.includes(token), `missing r208 DOM ownership contract: ${token}`);
+]) assert.ok(mobileLayoutRuntime.includes(token), `missing event-driven DOM ownership contract: ${token}`);
 assert.doesNotMatch(mobileLayoutRuntime, /\.style\.|setAttribute\(['"]style/i);
 assert.doesNotMatch(mobileLayoutRuntime, /placeAfter\(/);
 assert.doesNotMatch(mobileLayoutRuntime, /document\.head\.appendChild\(link\)|appendChild\(link\)/);
+assert.doesNotMatch(mobileLayoutRuntime, /observer\.observe\(document\.documentElement/);
+assert.doesNotMatch(mobileLayoutRuntime, /relevantStyleMutation/);
 assert.doesNotMatch(mobileLayoutRuntime, /setTimeout\([^\n]*(?:450|1400)/);
 
-// Legacy mobile engines may remain for compatibility, but r208 must make them no-op
-// whenever the canonical r207 stylesheet/owner is present. This prevents CSS ↔ inline
-// !important ping-pong at 120/700/1800/3200ms and 50..5200ms legacy timers.
+// Legacy mobile engines remain available for non-r207 surfaces but must delegate
+// whenever the canonical mobile owner is present.
 for (const token of ['canonicalOwner', 'delegated-r208', 'fxFlowFirstConflict', 'disabled-r208']) {
   assert.ok(legacyFlow.includes(token), `legacy flow is not delegated under r208: ${token}`);
 }
@@ -102,16 +107,23 @@ for (const token of ['canonicalOwner', 'delegated-r208', 'disabled-r208-no-ping-
 assert.match(legacyFlow, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 assert.match(legacyFinalizer, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 
-// The production page must force fresh r208 asset URLs and a one-shot cache migration.
+// Production must preload the current event-driven owner, preserve canonical SEO,
+// noindex recovery transports and cache only safe static assets.
 assert.match(production, /formatx-first-paint-r206\.css\?v=20260818-r206-stable-hero/);
-assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260818-r208-first-paint-owner/);
+assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260821-r257-r207-owner/);
 assert.match(production, /formatx-mobile-layout-r207\.css\?v=20260818-r208-flicker-free/);
-assert.match(production, /formatx-mobile-layout-r207\.js\?v=20260818-r208-flicker-free/);
-assert.match(production, /STARTUP_REVISION = '20260818-r208-flicker-free-owner'/);
-assert.match(production, /X-FormatX-Client-Revision', 'r208-flicker-free-owner/);
-assert.match(production, /X-FormatX-Recovery', 'r208-static-cascade/);
+assert.match(production, /formatx-mobile-layout-r207\.js\?v=20260821-r255-event-driven/);
+assert.match(production, /STARTUP_REVISION = '20260821-r258-cache-seo-performance'/);
+assert.match(production, /X-FormatX-Client-Revision', 'r258-cache-seo-performance/);
+assert.match(production, /X-FormatX-Recovery', 'r258-noindex/);
+assert.match(production, /X-Robots-Tag', 'noindex, nofollow, noarchive/);
+assert.match(production, /staticAssetCachePolicy/);
+assert.match(production, /max-age=31536000, immutable/);
+assert.match(production, /max-age=86400, stale-while-revalidate=604800/);
 assert.match(production, /fx_startup_r208=1/);
 assert.match(production, /r208-one-shot-cleared/);
+assert.match(recovery, /noindex, nofollow, noarchive/);
+assert.match(recovery, /fxRecoveryNoindex/);
 
 // Mobile performance: measured 60fps target, adaptive backing resolution and bounded scale.
 for (const token of ['fxWdaTargetFps', '16.67', 'scale = 0.86', 'scale > 0.58', 'frameMs > 19.5', 'frameMs < 16.2', 'fxWdaRenderScale', 'drawingBufferWidth']) {
@@ -136,9 +148,10 @@ function validateLighthouse(config, label) {
   const assertions = config.ci.assert.assertions;
   assert.equal(collect.numberOfRuns, 3, `${label}: needs 3 runs`);
   assert.ok(collect.url.every(url => !url.includes('lighthouse=1')), `${label}: audit-only URL is forbidden`);
+  assert.ok(collect.url.every(url => url === 'https://formatxsuite.com/'), `${label}: live audit must measure the canonical visitor URL`);
   assert.ok(!String(collect.settings.chromeFlags || '').includes('force-prefers-reduced-motion'), `${label}: forced reduced-motion is forbidden`);
   assert.ok(!('skipAudits' in collect.settings), `${label}: skipped audits are forbidden`);
-  assert.equal(assertions['categories:performance'][1].minScore, 0.9, `${label}: performance floor`);
+  assert.equal(assertions['categories:performance'][1].minScore, 0.95, `${label}: performance floor`);
   assert.equal(assertions['categories:accessibility'][1].minScore, 1, `${label}: accessibility floor`);
   assert.equal(assertions['categories:best-practices'][1].minScore, 1, `${label}: best-practices floor`);
   assert.equal(assertions['categories:seo'][1].minScore, 1, `${label}: SEO floor`);
@@ -151,5 +164,5 @@ function validateLighthouse(config, label) {
 validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
-for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r208 flicker-free canonical mobile flow, cache migration, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');
+for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, legacyFlow, legacyFinalizer, recovery]) new Function(source);
+console.log('PASS: canonical event-driven mobile flow, cache/SEO policy, award UX, audio, GPU and truthful Lighthouse contracts passed.');

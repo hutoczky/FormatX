@@ -60,6 +60,11 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-return-state-recovery.js
           node --check docs/scifi-ui/scripts/formatx-intro-skip-guard.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          node --check docs/scifi-ui/scripts/formatx-mobile-layout-r207.js
+          node --check docs/scifi-ui/scripts/formatx-reference-production-r244.js
+          node --check docs/scifi-ui/scripts/formatx-reference-finalizer-r143.js
+          node --check docs/scifi-ui/scripts/formatx-canonical-recovery.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
           node --check docs/scifi-ui/scripts/organism-voice.js
           node --check docs/scifi-ui/scripts/organism-voice-stability.js
@@ -111,7 +116,9 @@ jobs:
           grep -Fq 'safe-ready-v28' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq 'organism-voice-stability.js?v=20260808-mobile-visual-viewport-1' docs/scifi-ui/scripts/igloo-parity.js
           grep -Fq '20260811-mobile-intro-direct-r1' docs/scifi-ui/index.html
-          grep -Fq "const STARTUP_REVISION = '20260818-r208-flicker-free-owner'" billing-worker/src/production-content-entry.js
+          grep -Fq "const STARTUP_REVISION = '20260821-r258-cache-seo-performance'" billing-worker/src/production-content-entry.js
+          grep -Fq "X-Robots-Tag', 'noindex, nofollow, noarchive'" billing-worker/src/production-content-entry.js
+          grep -Fq 'max-age=31536000, immutable' billing-worker/src/production-content-entry.js
           grep -Fq 'data-fx-seamless-scroll-runtime' billing-worker/src/production-entry.js
           grep -Fq '/scifi-ui/scripts/formatx-infinite-scroll.js' billing-worker/src/production-entry.js
           grep -Fq '"status": "full_release"' docs/scifi-ui/data/platform-status.json
