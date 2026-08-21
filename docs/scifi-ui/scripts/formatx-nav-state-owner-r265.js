@@ -134,6 +134,7 @@
 
   for (const eventName of [
     'formatx:controlownerready',
+    'formatx:menustatechange',
     'formatx:organisminterfaceready',
     'formatx:mobilelayoutready',
     'formatx:languagechange',
