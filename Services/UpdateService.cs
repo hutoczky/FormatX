@@ -1,13 +1,14 @@
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using FormatX.Models;
 using Windows.Storage;
 using Windows.System;
 
-using System.Security.Cryptography;
-using System.IO.Compression;
 namespace FormatX.Services
 {
   public sealed class UpdateService
@@ -20,12 +21,25 @@ namespace FormatX.Services
       return string.Concat(Array.ConvertAll(hash, b => b.ToString("x2")));
     }
 
-    public async Task<string> CheckAndUpdateAsync(Action<int,string>? progress = null, CancellationToken ct = default)
+    public async Task<string> CheckAndUpdateAsync(
+      Action<int, string>? progress = null,
+      CancellationToken ct = default,
+      Action<MagUpdateProgressInfo>? stateProgress = null)
     {
-      progress ??= (_ , __) => { };
+      progress ??= (_, __) => { };
+
+      void Report(MagUpdateState stage, double ratio, string text, string? target = null)
+      {
+        ratio = Math.Clamp(ratio, 0, 1);
+        stateProgress?.Invoke(new MagUpdateProgressInfo(stage, ratio, text, target));
+        MagStateService.Current.SetUpdate(stage, ratio, text);
+      }
+
       using var http = new HttpClient();
       http.DefaultRequestHeaders.UserAgent.ParseAdd("FormatX-Updater/1.0 (+Windows)");
       UpdateReleaseSelection? selectedRelease;
+
+      Report(MagUpdateState.Checking, 0, "Frissítések keresése...");
       try
       {
         string releaseJson = await http.GetStringAsync(UpdateSecurity.CanonicalReleaseApiUrl, ct);
@@ -33,11 +47,17 @@ namespace FormatX.Services
       }
       catch (Exception ex)
       {
+        Report(MagUpdateState.Failed, 0, "Frissítési metaadat hiba");
         return UpdateSecurity.BuildFailureMessage(UpdateFailureKind.Download, ex);
       }
 
       if (selectedRelease is null)
+      {
+        Report(MagUpdateState.Current, 1, "A program naprakész.");
         return "Nincs új frissítés.";
+      }
+
+      Report(MagUpdateState.Available, 0, $"Frissítés elérhető: {selectedRelease.Tag}", selectedRelease.Tag);
 
       var updatesRootFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Updates", CreationCollisionOption.OpenIfExists);
       var updatesFolder = await updatesRootFolder.CreateFolderAsync("Windows", CreationCollisionOption.OpenIfExists);
@@ -46,6 +66,7 @@ namespace FormatX.Services
       string archivePath = Path.Combine(downloadsPath, selectedRelease.AssetName);
 
       progress(1, "Letöltés indul...");
+      Report(MagUpdateState.Downloading, 0.01, "Letöltés indul...", selectedRelease.Tag);
       try
       {
         using var msg = await http.GetAsync(selectedRelease.AssetUrl, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -65,17 +86,22 @@ namespace FormatX.Services
           {
             int p = (int)(done * 100 / total);
             progress(p, $"Letöltés: {p}%");
+            Report(MagUpdateState.Downloading, p / 100.0, $"Letöltés: {p}%", selectedRelease.Tag);
           }
         }
       }
       catch (Exception ex)
       {
+        Report(MagUpdateState.Failed, 0, "Frissítés letöltési hiba", selectedRelease.Tag);
         return UpdateSecurity.BuildFailureMessage(UpdateFailureKind.Download, ex);
       }
 
       try
       {
         progress(96, "Letöltés kész. SHA-256 ellenőrzés...");
+        MagStateService.Current.SetIntegrity(MagIntegrityState.Checking);
+        Report(MagUpdateState.ChecksumVerification, 0.96, "SHA-256 ellenőrzés...", selectedRelease.Tag);
+
         string expectedChecksum = selectedRelease.EmbeddedChecksum ?? string.Empty;
         if (expectedChecksum.Length == 0)
         {
@@ -87,18 +113,25 @@ namespace FormatX.Services
           string checksumText = await http.GetStringAsync(selectedRelease.ChecksumAssetUrl, ct);
           expectedChecksum = UpdateSecurity.ResolveExpectedChecksum(checksumText, selectedRelease.AssetName);
         }
+
         string actualChecksum = ComputeSHA256(archivePath).ToLowerInvariant();
         if (!string.Equals(expectedChecksum, actualChecksum, StringComparison.OrdinalIgnoreCase))
         {
           throw new UpdateStageException(UpdateFailureKind.Checksum, $"Checksum eltérés. Várt: {expectedChecksum}, kapott: {actualChecksum}");
         }
+
+        MagStateService.Current.SetIntegrity(MagIntegrityState.Sha256Verified);
       }
       catch (UpdateStageException ex)
       {
+        MagStateService.Current.SetIntegrity(MagIntegrityState.Failed);
+        Report(MagUpdateState.Failed, 0.96, "SHA-256 ellenőrzési hiba", selectedRelease.Tag);
         return UpdateSecurity.BuildFailureMessage(ex.Kind, ex);
       }
       catch (Exception ex)
       {
+        MagStateService.Current.SetIntegrity(MagIntegrityState.Failed);
+        Report(MagUpdateState.Failed, 0.96, "SHA-256 ellenőrzési hiba", selectedRelease.Tag);
         return UpdateSecurity.BuildFailureMessage(UpdateFailureKind.Checksum, ex);
       }
 
@@ -106,6 +139,7 @@ namespace FormatX.Services
       try
       {
         progress(98, "Kicsomagolás indul...");
+        Report(MagUpdateState.Extracting, 0.98, "Frissítőcsomag kibontása...", selectedRelease.Tag);
         if (!selectedRelease.AssetName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
         {
           throw new UpdateStageException(UpdateFailureKind.Extraction, "A kiadás nem ZIP formátumú.");
@@ -117,18 +151,22 @@ namespace FormatX.Services
       }
       catch (UpdateStageException ex)
       {
+        Report(MagUpdateState.Failed, 0.98, "Frissítőcsomag kibontási hiba", selectedRelease.Tag);
         return UpdateSecurity.BuildFailureMessage(ex.Kind, ex);
       }
       catch (InvalidDataException ex)
       {
+        Report(MagUpdateState.Failed, 0.98, "Frissítőcsomag kibontási hiba", selectedRelease.Tag);
         return UpdateSecurity.BuildFailureMessage(UpdateFailureKind.Extraction, ex);
       }
       catch (Exception ex)
       {
+        Report(MagUpdateState.Failed, 0.98, "Frissítőcsomag kibontási hiba", selectedRelease.Tag);
         return UpdateSecurity.BuildFailureMessage(UpdateFailureKind.Extraction, ex);
       }
 
       progress(100, "Ellenőrizve. Telepítő indítása...");
+      Report(MagUpdateState.Installing, 1, "Ellenőrizve. Telepítő indítása...", selectedRelease.Tag);
       try
       {
         var file = await StorageFile.GetFileFromPathAsync(launchPath);
@@ -138,14 +176,17 @@ namespace FormatX.Services
           throw new UpdateStageException(UpdateFailureKind.Launch, "A Windows nem indította el a frissítőt.");
         }
 
+        Report(MagUpdateState.Completed, 1, "Frissítés ellenőrizve és elindítva.", selectedRelease.Tag);
         return "Frissítés letöltve, ellenőrizve és indítva.";
       }
       catch (UpdateStageException ex)
       {
+        Report(MagUpdateState.Failed, 1, "A frissítő indítása sikertelen", selectedRelease.Tag);
         return UpdateSecurity.BuildFailureMessage(ex.Kind, ex);
       }
       catch (Exception ex)
       {
+        Report(MagUpdateState.Failed, 1, "A frissítő indítása sikertelen", selectedRelease.Tag);
         return UpdateSecurity.BuildFailureMessage(UpdateFailureKind.Launch, ex);
       }
     }
