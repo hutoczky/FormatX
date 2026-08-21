@@ -26,6 +26,26 @@
     return current;
   }
 
+  function closeConflictingPanels() {
+    document.body?.classList.remove('fx-organism-panel-open');
+
+    const consoleRoot = document.getElementById('fx-organism-console');
+    if (consoleRoot instanceof HTMLElement) {
+      consoleRoot.hidden = true;
+      consoleRoot.setAttribute('aria-hidden', 'true');
+    }
+
+    for (const panel of document.querySelectorAll('[data-organism-panel]')) {
+      if (!(panel instanceof HTMLElement)) continue;
+      panel.hidden = true;
+      panel.setAttribute('aria-hidden', 'true');
+    }
+
+    for (const tab of document.querySelectorAll('[data-organism-tab]')) {
+      tab.setAttribute('aria-selected', 'false');
+    }
+  }
+
   function setMenuRenderOpen(nav, open) {
     const owned = ['display', 'visibility', 'opacity', 'pointer-events', 'clip-path'];
     if (!open) {
@@ -48,6 +68,12 @@
     const nav = document.getElementById('main-nav');
     const currentMenu = liveMenuButton();
     if (!(nav instanceof HTMLElement) || !(currentMenu instanceof HTMLButtonElement)) return;
+
+    if (open) {
+      closeConflictingPanels();
+      if (document.body && nav.parentElement !== document.body) document.body.appendChild(nav);
+    }
+
     nav.classList.toggle('open', open);
     currentMenu.classList.toggle('open', open);
     currentMenu.setAttribute('aria-expanded', String(open));
@@ -56,12 +82,6 @@
     dispatchEvent(new CustomEvent('formatx:menustatechange', {
       detail: { open, source: 'control-owner-r264' }
     }));
-    if (open && root.dataset.fxImmersive !== 'active') {
-      root.dataset.fxImmersive = 'active';
-      dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
-        detail: { source: 'control-owner-r264' }
-      }));
-    }
   }
 
   function canonicalMenu(topbar) {
@@ -102,8 +122,6 @@
     if (!current.hasAttribute('aria-expanded')) current.setAttribute('aria-expanded', 'false');
     clearLegacyStyle(current);
 
-    // The exclusive document-capture handler below owns activation. Keeping no
-    // target listener here means legacy target/bubble handlers cannot race it.
     current.dataset.fxControlMenuBoundR264 = 'capture-owner';
 
     menu = current;
@@ -292,9 +310,6 @@
     setMenuOpen(false);
   }, true);
 
-  // Single canonical activation path. Resolve the live DOM button on every
-  // click so late r244/mobile-runtime replacement cannot leave the owner bound
-  // to a detached historical node. Then stop legacy handlers and toggle once.
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
     const menuTarget = target?.closest('#menu-toggle.fx-reference-menu-button');
