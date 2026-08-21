@@ -1,4 +1,4 @@
-/* FormatX r266/r269 — final interaction and mobile-layout repair.
+/* FormatX r266/r276 — final interaction and mobile-layout repair.
    Canonical controls stay above decorative/3D hit layers, explicit Organism
    dialogue state stays physically visible, and viewport decoration no longer
    derives its layout box from the asynchronously growing mobile hero. */
@@ -37,6 +37,42 @@ html body .fx-organism-dialogue.is-open .fx-organism-thought-trigger {
 }
 
 @media (max-width: 900px), (pointer: coarse) {
+  /* r276: the retired native menu used to be translated by 200vw. A hidden
+     transformed element can still enlarge body.scrollWidth even when no visible
+     element rectangle crosses the viewport. Keep every legacy menu physically
+     inside a 1px clipped box; the canonical reference button owns interaction. */
+  html body.living-architecture :is(
+    #fx-reference-legacy-menu,
+    .menu-toggle.fx-organism-system-toggle:not(.fx-reference-menu-button),
+    [data-fx-legacy-menu="true"]
+  ) {
+    position: fixed !important;
+    inset: 0 auto auto 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 1px !important;
+    min-width: 1px !important;
+    max-width: 1px !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    max-height: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(100%) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: none !important;
+    translate: none !important;
+    contain: strict !important;
+  }
+
+  html body.living-architecture {
+    overflow-x: clip !important;
+  }
+
   /* The living field is visual decoration. Percentage height tied to #hero
      made every late proof/control insertion resize a huge painted box, which
      amplified CLS. Give the field a viewport-stable box around the MAG. */
