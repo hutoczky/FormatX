@@ -48,6 +48,17 @@ internal sealed class SignatureMagController
         if (_progress != null) _progress.ValueChanged += OnProgressChanged;
         if (_tabs != null) _tabs.SelectionChanged += (_, _) => UpdateIdleContext();
 
+        if (root.FindName("TxtVersion") is TextBlock versionText)
+            versionText.Text = (IsEnglish ? "Version: " : "Verzió: ") + VersionService.DisplayVersion;
+        if (root.FindName("LangCombo") is ComboBox languageCombo)
+        {
+            languageCombo.SelectionChanged += (_, _) => root.DispatcherQueue.TryEnqueue(() =>
+            {
+                if (root.FindName("TxtVersion") is TextBlock text)
+                    text.Text = (IsEnglish ? "Version: " : "Verzió: ") + VersionService.DisplayVersion;
+            });
+        }
+
         _completionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(900) };
         _completionTimer.Tick += (_, _) =>
         {
@@ -57,10 +68,13 @@ internal sealed class SignatureMagController
         };
 
         bool energySaver = false;
+        bool reducedMotion = false;
         try { energySaver = Windows.System.Power.PowerManager.EnergySaverStatus == Windows.System.Power.EnergySaverStatus.On; }
         catch { }
+        try { reducedMotion = !new Windows.UI.ViewManagement.UISettings().AnimationsEnabled; }
+        catch { }
 
-        MagStateService.Current.SetRuntimePreferences(false, energySaver);
+        MagStateService.Current.SetRuntimePreferences(reducedMotion, energySaver);
         MagStateService.Current.SetLicense(MagLicenseInfo.Unknown);
         MagStateService.Current.SetIntegrity(MagIntegrityState.Unknown);
         MagStateService.Current.SetOperation(MagOperation.Booting, 0, IsEnglish ? "CORE BOOT" : "MAG INDÍTÁS", 0.32);
