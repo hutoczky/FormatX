@@ -15,6 +15,17 @@ html body.living-architecture main#main-content section#hero::before {
 }
 
 @media (max-width: 900px), (pointer: coarse) {
+  html body.living-architecture .topbar > .brand {
+    min-width: 0 !important;
+    max-width: calc(100vw - 190px) !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture .topbar > .brand strong {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+  }
+
   html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204 {
     order: 1 !important;
   }
