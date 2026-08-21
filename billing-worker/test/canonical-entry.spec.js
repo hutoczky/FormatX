@@ -40,6 +40,8 @@ describe('active production canonical gateway', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('Location')).toBeNull();
     expect(response.headers.get('Link')).toBe('<https://formatxsuite.com/>; rel="canonical"');
+    expect(response.headers.get('Cache-Control')).toContain('no-store');
+    expect(response.headers.get('X-Robots-Tag')).toBeNull();
     expect(assetPath).toBe('/scifi-ui/');
   });
 
@@ -159,6 +161,8 @@ describe('active production canonical gateway', () => {
     expect(response.headers.get('Location')).toBeNull();
     expect(response.headers.get('Link')).toBe(`<${canonical}>; rel="canonical"`);
     expect(response.headers.get('Content-Language')).toBe(language);
+    expect(response.headers.get('Cache-Control')).toContain('no-store');
+    expect(response.headers.get('X-Robots-Tag')).toBeNull();
     expect(html).toMatch(new RegExp(`<html\\b[^>]*\\blang="${language}"(?:\\s|>)`));
     expect(html).toContain(`<title>${expected.title}</title>`);
     expect(html).toContain(`<link rel="canonical" href="${canonical}">`);
@@ -179,7 +183,7 @@ describe('active production canonical gateway', () => {
     });
   });
 
-  it('serves an apex recovery URL as real HTML and does not redirect it again', async () => {
+  it('serves an apex recovery URL as real HTML, marks it noindex and does not redirect it again', async () => {
     const response = await canonicalWorker.fetch(
       new Request('https://formatxsuite.com/?_fx_redirect_recovery=1'),
       testEnv(),
@@ -189,8 +193,23 @@ describe('active production canonical gateway', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Location')).toBeNull();
+    expect(response.headers.get('Cache-Control')).toContain('no-store');
     expect(response.headers.get('Clear-Site-Data')).toBe('"cache"');
+    expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow, noarchive');
     expect(html).toContain('data-fx-canonical-recovery');
+    expect(html).toContain('20260821-r258-noindex');
+  });
+
+  it('keeps explicit public language URLs indexable', async () => {
+    const response = await canonicalWorker.fetch(
+      new Request('https://formatxsuite.com/?lang=hu'),
+      testEnv(),
+      {},
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('X-Robots-Tag')).toBeNull();
+    expect(response.headers.get('Link')).toBe('<https://formatxsuite.com/?lang=hu>; rel="canonical"');
   });
 
   it('serves first-party CSS directly on the apex host without a domain redirect', async () => {
@@ -204,7 +223,32 @@ describe('active production canonical gateway', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('Location')).toBeNull();
     expect(response.headers.get('Content-Type')).toContain('text/css');
+    expect(response.headers.get('Cache-Control')).toBe('public, max-age=86400, stale-while-revalidate=604800');
     expect(assetPath).toBe('/scifi-ui/styles/example.css');
+  });
+
+  it('gives versioned static assets immutable long-lived caching', async () => {
+    const response = await canonicalWorker.fetch(
+      new Request('https://formatxsuite.com/scifi-ui/styles/example.css?v=20260821-r258'),
+      testEnv(),
+      {},
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('public, max-age=31536000, immutable');
+    expect(response.headers.get('Pragma')).toBeNull();
+  });
+
+  it('never turns recovery static-asset requests into cacheable indexed documents', async () => {
+    const response = await canonicalWorker.fetch(
+      new Request('https://formatxsuite.com/scifi-ui/styles/example.css?v=20260821-r258&_fx_redirect_recovery=1'),
+      testEnv(),
+      {},
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toContain('no-store');
+    expect(response.headers.get('X-Robots-Tag')).toBe('noindex, nofollow, noarchive');
   });
 
   it('resolves public page aliases internally instead of exposing a WWW redirect', async () => {
@@ -217,6 +261,7 @@ describe('active production canonical gateway', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Location')).toBeNull();
+    expect(response.headers.get('Cache-Control')).toContain('no-store');
     expect(assetPath).toBe('/scifi-ui/support.html');
   });
 });
