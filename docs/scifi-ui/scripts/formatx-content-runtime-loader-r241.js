@@ -1,4 +1,4 @@
-/* FormatX r265 — content enhancement + canonical control loading gate.
+/* FormatX r273 — content enhancement + canonical event-driven control loading gate.
    Semantic homepage copy and navigation controls must exist before interaction,
    including reduced-motion mode. Heavier deck/proof/simulator enhancements may
    still wait for intent so the first paint remains light. */
@@ -9,9 +9,9 @@
   if (root.dataset.fxContentRuntimeR241) return;
 
   const CONTROL_OWNER_STYLE_URL = './styles/formatx-control-owner-r264.css?v=20260821-r264-single-owner';
-  const CONTROL_OWNER_URL = './scripts/formatx-control-owner-r264.js?v=20260821-r264-single-owner';
+  const CONTROL_OWNER_URL = './scripts/formatx-control-owner-r268.js?v=20260821-r273-primary-event-owner';
   const NAV_OWNER_URL = './scripts/formatx-nav-state-owner-r265.js?v=20260821-r265-nav-state-owner';
-  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260821-r265-nav-state-owner';
+  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260821-r273-primary-event-owner';
   const template = document.getElementById('fx-content-runtime-r241');
   if (!(template instanceof HTMLTemplateElement)) {
     root.dataset.fxContentRuntimeR241 = 'missing-template';
@@ -83,12 +83,15 @@
 
   function ensureControlOwner() {
     ensureOwnerStyle();
-    if (root.dataset.fxControlOwnerR264 === 'ready') {
+    if (root.dataset.fxControlOwnerR268 === 'ready') {
       ensureNavOwner();
       return;
     }
 
-    const existing = document.querySelector('script[data-fx-control-owner-r264]');
+    /* Keep the historical data attribute on the script element so the award
+       runtime recognises that the physical owner is already mounted. The
+       actual source is r268 and its root readiness marker is authoritative. */
+    const existing = document.querySelector('script[data-fx-control-owner-r264], script[src*="formatx-control-owner-r268.js"]');
     if (existing) {
       existing.addEventListener('load', ensureNavOwner, { once: true });
       queueMicrotask(ensureNavOwner);
@@ -99,8 +102,8 @@
   }
 
   function ensureAwardRuntime() {
-    if (root.dataset.fxAwardRuntime === 'r264' || hasScript(AWARD_RUNTIME_URL)) return;
-    mountExternal(AWARD_RUNTIME_URL, 'fxContentControlRuntimeR265');
+    if (root.dataset.fxAwardRuntime === 'r268' || hasScript(AWARD_RUNTIME_URL)) return;
+    mountExternal(AWARD_RUNTIME_URL, 'fxContentControlRuntimeR273');
   }
 
   function ensureInteractionInfrastructure() {
@@ -109,7 +112,7 @@
     // be able to delay basic menu operation.
     ensureControlOwner();
     ensureAwardRuntime();
-    root.dataset.fxContentControlRuntime = 'requested-r265-direct-owner';
+    root.dataset.fxContentControlRuntime = 'requested-r273-r268-owner';
   }
 
   function mount(spec) {
@@ -134,7 +137,7 @@
     started = true;
     for (const [type, options] of listeners) removeEventListener(type, start, options);
     specs.forEach(mount);
-    root.dataset.fxContentRuntimeR241 = 'requested-r265';
+    root.dataset.fxContentRuntimeR241 = 'requested-r273';
   }
 
   ensureInteractionInfrastructure();
@@ -148,7 +151,7 @@
     .filter(spec => spec.hasAttribute('data-fx-category-script'))
     .forEach(mount);
 
-  root.dataset.fxContentRuntimeR241 = 'reduced-motion-semantic-r265';
+  root.dataset.fxContentRuntimeR241 = 'reduced-motion-semantic-r273';
   for (const [type, options] of listeners) addEventListener(type, start, options);
   if (location.hash && location.hash !== '#top' && location.hash !== '#hero') start();
 }());
