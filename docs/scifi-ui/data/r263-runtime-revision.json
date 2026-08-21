@@ -1,11 +1,14 @@
 {
-  "revision": "r263",
+  "revision": "r283",
   "date": "2026-08-21",
   "scope": [
-    "canonical mobile and desktop SOUND-ASK-PAUSE ownership",
-    "fixed mobile MAG header ownership",
-    "event-driven SOTY continuity without idle RAF",
-    "interaction-burst core detail rendering without idle RAF"
+    "stable r263 SOUND-ASK-PAUSE visual ownership without heavy r264/r268 overrides",
+    "minimal first-frame geometry reservation without redesigning the settled UI",
+    "mobile body-width and legacy 200vw overflow removal",
+    "explicit visible navigation only in the open state",
+    "event-driven living-system rendering without idle telemetry RAF or ambient interval",
+    "idle-safe mobile gyro and bounded seamless startup observation",
+    "bounded core-detail rendering"
   ],
   "qualityGate": {
     "lighthouseRunsPerViewport": 3,
