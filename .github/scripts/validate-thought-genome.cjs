@@ -86,13 +86,12 @@ async function verify(viewport, mobile) {
       const bubble = document.querySelector('.fx-organism-thought');
       const controls = document.querySelector('.fx-thought-genome-controls');
       const layerStyle = layer ? getComputedStyle(layer) : null;
-      const controlsStyle = controls ? getComputedStyle(controls) : null;
       return {
         bubbleHidden: bubble?.hidden === true,
         layerExists: Boolean(layer),
+        controlsExist: Boolean(controls),
         pointerEvents: layerStyle?.pointerEvents,
         layerZ: Number.parseInt(layerStyle?.zIndex || '0', 10),
-        controlsVisible: Boolean(controls && controlsStyle?.display !== 'none'),
         overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
         privacy: document.documentElement.dataset.fxThoughtGenomePrivacy,
         enabled: document.documentElement.dataset.fxThoughtGenomeEnabled,
@@ -103,7 +102,7 @@ async function verify(viewport, mobile) {
     assert(initial.bubbleHidden, 'thought dialogue must remain closed on startup');
     assert(initial.layerExists && initial.pointerEvents === 'none', 'genome visual layer must exist and remain non-interactive after user activation');
     assert(initial.layerZ < 100, 'genome visual layer must remain behind interactive content');
-    assert(initial.controlsVisible, 'genome controls were not created');
+    assert(initial.controlsExist, 'genome controls were not created');
     assert(initial.overflow <= 1, 'genome introduced horizontal overflow');
     assert(initial.privacy === 'fingerprint-only', 'genome privacy marker is not fingerprint-only');
     assert(initial.enabled === 'true', 'genome did not start enabled for the validation session');
@@ -120,6 +119,10 @@ async function verify(viewport, mobile) {
       const bubble = document.querySelector('.fx-organism-thought');
       return bubble && bubble.hidden === false;
     });
+
+    const openControls = page.locator('.fx-thought-genome-controls').first();
+    assert(await openControls.count() === 1, 'genome controls disappeared after opening dialogue');
+    assert(await openControls.isVisible(), 'genome controls are not visible in the open dialogue');
 
     await page.locator('#fx-organism-question-input').fill('Mennyibe kerül a licenc?');
     await page.locator('.fx-organism-ask').click();
