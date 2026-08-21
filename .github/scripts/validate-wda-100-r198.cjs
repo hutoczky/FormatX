@@ -58,7 +58,9 @@ for (const token of [
   'visibility: visible'
 ]) assert.ok(firstPaint.includes(token), `missing r206 first-paint contract: ${token}`);
 
-// r208: exactly one mobile geometry owner. Controls and proof are normal-flow children.
+// The r207 stylesheet remains the mobile flow contract and the runtime may only
+// reconcile on explicit lifecycle events. It must not observe the whole document
+// throughout animation/rendering.
 for (const token of [
   'authoritative mobile layout ownership',
   '> .hero-grid > .fx-reference-controls-r204',
@@ -70,7 +72,7 @@ for (const token of [
   '> .hero-grid > .fx-reference-proof',
   'min-height: 0',
   'fx-reference-liveos'
-]) assert.ok(mobileLayoutCss.includes(token), `missing r208 mobile CSS contract: ${token}`);
+]) assert.ok(mobileLayoutCss.includes(token), `missing mobile CSS contract: ${token}`);
 for (const token of [
   'fxMobileLayoutOwner',
   'r207-normal-flow',
@@ -78,16 +80,19 @@ for (const token of [
   'zone.parentElement !== grid',
   'fxMobileLayoutConflict',
   'none-r207',
-  'r208-inline-shield',
+  'r255-event-driven-inline-shield',
   'queueMicrotask',
   'clearLegacyInline',
-  'relevantStyleMutation',
+  'bootObserver',
+  'stopBootObserver',
   "unique('.fx-reference-heading', hero)",
   "unique('.fx-reference-proof', hero)"
-]) assert.ok(mobileLayoutRuntime.includes(token), `missing r208 DOM ownership contract: ${token}`);
+]) assert.ok(mobileLayoutRuntime.includes(token), `missing event-driven DOM ownership contract: ${token}`);
 assert.doesNotMatch(mobileLayoutRuntime, /\.style\.|setAttribute\(['"]style/i);
 assert.doesNotMatch(mobileLayoutRuntime, /placeAfter\(/);
 assert.doesNotMatch(mobileLayoutRuntime, /document\.head\.appendChild\(link\)|appendChild\(link\)/);
+assert.doesNotMatch(mobileLayoutRuntime, /observer\.observe\(document\.documentElement/);
+assert.doesNotMatch(mobileLayoutRuntime, /relevantStyleMutation/);
 assert.doesNotMatch(mobileLayoutRuntime, /setTimeout\([^\n]*(?:450|1400)/);
 
 // Legacy mobile engines may remain for compatibility, but r208 must make them no-op
@@ -153,4 +158,4 @@ validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
 for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: canonical mobile flow, cache migration, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');
+console.log('PASS: canonical event-driven mobile flow, cache migration, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');
