@@ -2,6 +2,18 @@
   'use strict';
 
   const ROOT = document.documentElement;
+  // r260: publish the final reference layout mode in the earliest normal-motion
+  // bootstrap. The r244 stylesheet is render-blocking and can now resolve its
+  // mobile/desktop geometry on first paint instead of switching after the hero
+  // has already been painted, which removes the dominant CLS transition.
+  const EARLY_REFERENCE_MOBILE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  if (!ROOT.dataset.fxReferenceProductionR244) {
+    ROOT.dataset.fxReferenceProductionR244 = EARLY_REFERENCE_MOBILE ? 'ready' : 'desktop';
+  }
+  ROOT.dataset.fxReferenceComposition = EARLY_REFERENCE_MOBILE
+    ? 'reference-frame-r244'
+    : 'desktop-reference-r244';
+
   const OVERLAY_ID = 'formatx-event-horizon';
   const VISIT_KEY = 'formatx:intro-seen-v1';
   const MOBILE_QUERY = matchMedia('(max-width: 820px), (pointer: coarse)');
