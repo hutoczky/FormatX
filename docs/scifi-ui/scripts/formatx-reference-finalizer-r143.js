@@ -1,8 +1,10 @@
 (function(){
 'use strict';
-// r210 production revalidation: visual output unchanged; cache layout geometry only.
+// r252 performance pass: preserve the reference tail while avoiding an always-hot 60 FPS copy loop.
 const root=document.documentElement;
-let raf=0,bootTries=0,tail=null,tailCtx=null,lastW=0,lastH=0,layoutDirty=true,geom=null,observedStage=null,observedGrid=null;
+let raf=0,bootTimer=0,bootTries=0,tail=null,tailCtx=null,lastW=0,lastH=0,layoutDirty=true,geom=null,observedStage=null,observedGrid=null,lastDraw=0;
+let paused=root.dataset.fxReferenceMotionPaused==='true';
+const FRAME_INTERVAL=1000/24;
 const imp=(el,prop,value)=>{if(el instanceof HTMLElement&&el.style.getPropertyValue(prop)!==value)el.style.setProperty(prop,value,'important');};
 const ro=typeof ResizeObserver==='function'?new ResizeObserver(()=>{layoutDirty=true;schedule();}):null;
 function observe(stage,grid){
@@ -21,7 +23,7 @@ function ensure(){
 }
 function measure(host){
   const {grid,stage}=host,sr=stage.getBoundingClientRect(),gr=grid.getBoundingClientRect();
-  const targetH=sr.width; /* supplied mobile reference is square at the locked viewport */
+  const targetH=sr.width;
   const extra=Math.max(0,targetH-sr.height);
   if(extra<1){if(tail.style.display!=='none')tail.style.display='none';root.dataset.fxReferenceFinalizerR143='no-bridge-needed';geom=null;layoutDirty=false;return null;}
   const left=sr.left-gr.left,top=sr.bottom-gr.top;
@@ -35,23 +37,32 @@ function measure(host){
   if(pw!==lastW||ph!==lastH){tail.width=pw;tail.height=ph;lastW=pw;lastH=ph;}
   geom={stageHeight:sr.height,targetH,extra};
   layoutDirty=false;
-  root.dataset.fxReferenceFinalizerR143='ready-r210';root.dataset.fxReferenceTailBridgeR143=`${extra.toFixed(2)}px`;
+  root.dataset.fxReferenceFinalizerR143='ready-r252';root.dataset.fxReferenceTailBridgeR143=`${extra.toFixed(2)}px`;
   return geom;
 }
-function frame(){
+function retryBoot(){
+  if(bootTimer||document.hidden||bootTries>=80)return;
+  bootTimer=setTimeout(()=>{bootTimer=0;schedule();},100);
+}
+function frame(now){
   raf=0;
+  if(document.hidden)return;
   const host=ensure();
-  if(!host||!tailCtx){if(++bootTries<420)schedule();return;}
+  if(!host||!tailCtx){bootTries++;retryBoot();return;}
+  bootTries=0;
   const g=layoutDirty||!geom?measure(host):geom;
-  if(!g){schedule();return;}
+  if(!g)return;
+  if(!layoutDirty&&now-lastDraw<FRAME_INTERVAL){schedule();return;}
   const {detail}=host,visualScale=g.targetH/g.stageHeight,srcCssH=g.extra/visualScale,srcPxH=Math.max(1,Math.round(srcCssH*(detail.height/g.stageHeight)));
   tailCtx.setTransform(1,0,0,1,0,0);tailCtx.clearRect(0,0,tail.width,tail.height);
   tailCtx.drawImage(detail,0,Math.max(0,detail.height-srcPxH),detail.width,srcPxH,0,0,tail.width,tail.height);
-  schedule();
+  lastDraw=now;
+  if(!paused)schedule();
 }
-function invalidate(){layoutDirty=true;schedule();}
-function schedule(){if(!raf)raf=requestAnimationFrame(frame);}
+function invalidate(){layoutDirty=true;paused=root.dataset.fxReferenceMotionPaused==='true';schedule();}
+function schedule(){if(!raf&&!document.hidden)raf=requestAnimationFrame(frame);}
 ['formatx:real3dready','formatx:coredetailready','formatx:organisminterfaceready','formatx:languagechange','formatx:referencepause'].forEach(name=>addEventListener(name,invalidate));
 addEventListener('resize',invalidate,{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(raf)cancelAnimationFrame(raf);raf=0;if(bootTimer)clearTimeout(bootTimer);bootTimer=0;}else invalidate();});
 schedule();
 }());
