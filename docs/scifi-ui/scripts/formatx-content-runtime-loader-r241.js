@@ -1,7 +1,7 @@
-/* FormatX r273 — content enhancement + canonical event-driven control loading gate.
-   Semantic homepage copy and navigation controls must exist before interaction,
-   including reduced-motion mode. Heavier deck/proof/simulator enhancements may
-   still wait for intent so the first paint remains light. */
+/* FormatX r274 — content enhancement + canonical event-driven control loading gate.
+   Semantic homepage copy and navigation controls must exist before interaction.
+   Normal-motion cinematic enhancements start only after the tiny first-frame
+   geometry guard is applied, preventing late owners from shifting painted UI. */
 (function () {
   'use strict';
 
@@ -9,6 +9,7 @@
   if (root.dataset.fxContentRuntimeR241) return;
 
   const CONTROL_OWNER_STYLE_URL = './styles/formatx-control-owner-r264.css?v=20260821-r264-single-owner';
+  const GEOMETRY_STYLE_URL = './styles/formatx-first-frame-geometry-r274.css?v=20260821-r274-cls-guard';
   const CONTROL_OWNER_URL = './scripts/formatx-control-owner-r268.js?v=20260821-r273-primary-event-owner';
   const NAV_OWNER_URL = './scripts/formatx-nav-state-owner-r265.js?v=20260821-r265-nav-state-owner';
   const DIALOGUE_OWNER_URL = './scripts/formatx-dialogue-render-owner-r273.js?v=20260821-r273-open-state-owner';
@@ -22,6 +23,8 @@
   const specs = Array.from(template.content.querySelectorAll('script[src]'));
   const mounted = new Set();
   let started = false;
+  let geometryReady = false;
+  let geometryFallback = 0;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const passive = { passive: true };
   const listeners = [
@@ -76,6 +79,41 @@
     document.head.appendChild(link);
   }
 
+  function markGeometryReady() {
+    if (geometryReady) return;
+    geometryReady = true;
+    if (geometryFallback) clearTimeout(geometryFallback);
+    geometryFallback = 0;
+    root.dataset.fxFirstFrameGeometryR274 = 'ready';
+    if (!reduced.matches && !started) start();
+  }
+
+  function ensureGeometryGuard() {
+    if (reduced.matches) {
+      geometryReady = true;
+      root.dataset.fxFirstFrameGeometryR274 = 'reduced-skip';
+      return;
+    }
+    const existing = document.querySelector('link[data-fx-first-frame-geometry-r274]');
+    if (existing instanceof HTMLLinkElement) {
+      if (existing.sheet) markGeometryReady();
+      else {
+        existing.addEventListener('load', markGeometryReady, { once: true });
+        existing.addEventListener('error', markGeometryReady, { once: true });
+      }
+      return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = GEOMETRY_STYLE_URL;
+    link.dataset.fxFirstFrameGeometryR274 = 'true';
+    link.addEventListener('load', markGeometryReady, { once: true });
+    link.addEventListener('error', markGeometryReady, { once: true });
+    document.head.appendChild(link);
+    geometryFallback = setTimeout(markGeometryReady, 650);
+    root.dataset.fxFirstFrameGeometryR274 = 'loading';
+  }
+
   function ensureNavOwner() {
     if (root.dataset.fxNavStateOwnerR265 === 'ready' || root.dataset.fxNavStateOwnerR265 === 'open-owned') return;
     if (document.querySelector('script[data-fx-nav-state-owner-r265]')) return;
@@ -120,17 +158,17 @@
 
   function ensureAwardRuntime() {
     if (root.dataset.fxAwardRuntime === 'r268' || hasScript(AWARD_RUNTIME_URL)) return;
-    mountExternal(AWARD_RUNTIME_URL, 'fxContentControlRuntimeR273');
+    mountExternal(AWARD_RUNTIME_URL, 'fxContentControlRuntimeR274');
   }
 
   function ensureInteractionInfrastructure() {
-    // Navigation, dialogue and hero controls are interaction infrastructure.
-    // Mount their physical owners directly; award/audio/GPU enhancement startup
-    // must never be able to delay basic menu or ASK operation.
+    // Geometry, navigation, dialogue and hero controls are first-interaction
+    // infrastructure. Heavy visual enhancement scripts wait behind the guard.
+    ensureGeometryGuard();
     ensureControlOwner();
     ensureDialogueOwner();
     ensureAwardRuntime();
-    root.dataset.fxContentControlRuntime = 'requested-r273-r268-owner';
+    root.dataset.fxContentControlRuntime = 'requested-r274-r268-owner';
   }
 
   function mount(spec) {
@@ -152,16 +190,20 @@
 
   function start() {
     if (started) return;
+    if (!reduced.matches && !geometryReady) {
+      ensureGeometryGuard();
+      return;
+    }
     started = true;
     for (const [type, options] of listeners) removeEventListener(type, start, options);
     specs.forEach(mount);
-    root.dataset.fxContentRuntimeR241 = 'requested-r273';
+    root.dataset.fxContentRuntimeR241 = 'requested-r274';
   }
 
   ensureInteractionInfrastructure();
 
   if (!reduced.matches) {
-    start();
+    if (geometryReady) start();
     return;
   }
 
@@ -169,7 +211,7 @@
     .filter(spec => spec.hasAttribute('data-fx-category-script'))
     .forEach(mount);
 
-  root.dataset.fxContentRuntimeR241 = 'reduced-motion-semantic-r273';
+  root.dataset.fxContentRuntimeR241 = 'reduced-motion-semantic-r274';
   for (const [type, options] of listeners) addEventListener(type, start, options);
   if (location.hash && location.hash !== '#top' && location.hash !== '#hero') start();
 }());
