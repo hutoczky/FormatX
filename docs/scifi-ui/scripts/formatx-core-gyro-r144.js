@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='mobile-gyro-parallax-r144';
+const VERSION='mobile-gyro-parallax-r267-idle-safe';
 if(root.dataset.fxCoreGyroR144===VERSION)return;
 root.dataset.fxCoreGyroR144=VERSION;
 
@@ -23,7 +23,7 @@ let calibrating=0,sumBeta=0,sumGamma=0;
 let targetX=0,targetY=0,smoothX=0,smoothY=0;
 let lastDispatch=0,raf=0;
 let manualUntil=0;
-let lastSensorAt=0;
+let lastSensorAt=-Infinity;
 
 function stage(){
   return document.querySelector('#hero .fx-core-r112-stage,#hero .fx-core-mobile-v55-stage');
@@ -37,7 +37,7 @@ function orientationAngle(){
 }
 function resetCalibration(){
   baseBeta=null;baseGamma=null;calibrating=0;sumBeta=0;sumGamma=0;
-  targetX=0;targetY=0;
+  targetX=0;targetY=0;smoothX=0;smoothY=0;
   root.dataset.fxCoreGyroCalibration='pending';
 }
 function calibrate(beta,gamma){
@@ -71,6 +71,7 @@ function onOrientation(event){
   targetX=v.x;targetY=v.y;
   root.dataset.fxCoreGyroState='active';
   root.dataset.fxCoreGyroInput=`${v.x.toFixed(3)},${v.y.toFixed(3)}`;
+  startFrame();
 }
 function emit(now){
   const s=stage(),h=hero();
@@ -80,9 +81,6 @@ function emit(now){
   if(now<manualUntil)return;
   if(root.dataset.fxReferenceMotionPaused==='true')return;
 
-  // Keep the gyroscope subtler than a direct finger drag. The renderer receives
-  // this as an untrusted synthetic pointermove on its actual hero target, so the
-  // existing pointer/touch controller remains authoritative for real input.
   const clientX=r.left+r.width*(.5+smoothX*.32);
   const clientY=r.top+r.height*(.5-smoothY*.28);
   try{
@@ -103,23 +101,33 @@ function emit(now){
 }
 function frame(now){
   raf=0;
-  if(!document.hidden&&enabled){
-    const stale=now-lastSensorAt>900;
-    if(stale){targetX*=.94;targetY*=.94;}
-    smoothX+=(targetX-smoothX)*.105;
-    smoothY+=(targetY-smoothY)*.095;
-    if(now-lastDispatch>=33){lastDispatch=now;emit(now);}
+  if(document.hidden||!enabled)return;
+
+  const stale=now-lastSensorAt>900;
+  if(stale){targetX*=.82;targetY*=.82;}
+  smoothX+=(targetX-smoothX)*.105;
+  smoothY+=(targetY-smoothY)*.095;
+  if(now-lastDispatch>=33){lastDispatch=now;emit(now);}
+
+  const moving=!stale
+    ||Math.abs(targetX)>.002||Math.abs(targetY)>.002
+    ||Math.abs(smoothX)>.002||Math.abs(smoothY)>.002;
+  if(moving)raf=requestAnimationFrame(frame);
+  else{
+    targetX=targetY=smoothX=smoothY=0;
+    root.dataset.fxCoreGyroState='idle-listening';
   }
-  raf=requestAnimationFrame(frame);
 }
-function startFrame(){if(!raf)raf=requestAnimationFrame(frame);}
+function startFrame(){if(enabled&&!raf)raf=requestAnimationFrame(frame);}
 function enableSensor(){
   if(enabled)return;
   enabled=true;
   addEventListener('deviceorientation',onOrientation,{passive:true});
   root.dataset.fxCoreGyroPermission=permissionState;
-  root.dataset.fxCoreGyroState='listening';
-  startFrame();
+  root.dataset.fxCoreGyroState='listening-idle';
+  // r267: do not start a perpetual animation loop before the device has
+  // delivered a real orientation sample. The first valid sample starts a
+  // bounded smoothing burst; it naturally stops after sensor input goes stale.
 }
 async function requestPermissionFromGesture(){
   if(enabled)return;
@@ -152,6 +160,7 @@ function markManual(event){
   if(event.pointerType==='mouse'&&event.type==='pointermove'&&event.buttons===0)return;
   manualUntil=performance.now()+(event.type==='pointerup'||event.type==='pointercancel'?650:900);
 }
+function stopFrame(){if(raf){cancelAnimationFrame(raf);raf=0;}}
 
 addEventListener('pointerdown',markManual,{passive:true,capture:true});
 addEventListener('pointermove',markManual,{passive:true,capture:true});
@@ -159,11 +168,9 @@ addEventListener('pointerup',markManual,{passive:true,capture:true});
 addEventListener('pointercancel',markManual,{passive:true,capture:true});
 addEventListener('pointerdown',maybeRequest,{passive:true,capture:true});
 addEventListener('touchstart',maybeRequest,{passive:true,capture:true});
-addEventListener('orientationchange',()=>{resetCalibration();manualUntil=performance.now()+500;},{passive:true});
-screen.orientation?.addEventListener?.('change',()=>{resetCalibration();manualUntil=performance.now()+500;},{passive:true});
-addEventListener('visibilitychange',()=>{if(document.hidden){targetX=0;targetY=0;}else{resetCalibration();startFrame();}},{passive:true});
-addEventListener('formatx:real3dready',startFrame,{passive:true});
-addEventListener('formatx:coredetailready',startFrame,{passive:true});
+addEventListener('orientationchange',()=>{resetCalibration();manualUntil=performance.now()+500;stopFrame();},{passive:true});
+screen.orientation?.addEventListener?.('change',()=>{resetCalibration();manualUntil=performance.now()+500;stopFrame();},{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){targetX=0;targetY=0;stopFrame();}else resetCalibration();},{passive:true});
 
 if(typeof DeviceOrientationEvent.requestPermission==='function'){
   permissionState='gesture-required';
@@ -173,5 +180,5 @@ if(typeof DeviceOrientationEvent.requestPermission==='function'){
   permissionState='not-required';
   enableSensor();
 }
-root.dataset.fxCoreMotionR144='breathing-pointer-touch-gyro';
+root.dataset.fxCoreMotionR144='breathing-pointer-touch-gyro-idle-safe-r267';
 }());
