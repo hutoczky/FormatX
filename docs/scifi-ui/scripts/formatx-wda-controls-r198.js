@@ -2,13 +2,11 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxWdaHardening === 'r211') return;
-  root.dataset.fxWdaHardening = 'r211';
+  if (root.dataset.fxWdaHardening === 'r260') return;
+  root.dataset.fxWdaHardening = 'r260';
   root.dataset.fxWdaSound = 'muted-default';
 
-  // The legacy professional-v6 score writes two diagnostics through root CSS
-  // custom properties. Strict CSP does not need those values for presentation,
-  // so r211 redirects only those two telemetry writes into data attributes.
+  // Strict-CSP diagnostics stay in data attributes, never presentation styles.
   try {
     const rootStyle = root.style;
     const nativeSetProperty = rootStyle.setProperty.bind(rootStyle);
@@ -23,7 +21,7 @@
       }
       return nativeSetProperty(name, value, priority);
     };
-    root.dataset.fxWdaAudioTelemetry = 'csp-safe-r211';
+    root.dataset.fxWdaAudioTelemetry = 'csp-safe-r260';
   } catch (_) {
     root.dataset.fxWdaAudioTelemetry = 'native-fallback';
   }
@@ -131,7 +129,7 @@
     script.dataset.fxWdaAudioR198 = 'true';
     script.addEventListener('load', () => {
       loadingAudio = false;
-      setTimeout(() => sync(ensureButton()), 0);
+      queueMicrotask(() => sync(ensureButton()));
     }, { once: true });
     script.addEventListener('error', () => {
       loadingAudio = false;
@@ -160,9 +158,9 @@
     sync(button);
   }, true);
 
-  const bodyObserver = new MutationObserver(() => ensureButton());
-  bodyObserver.observe(document.body, { childList: true, subtree: true });
-
+  // Audio state is the only steady-state mutation source that needs observation.
+  // The former document-wide body observer called ensureButton() for every DOM
+  // mutation and kept the mobile page from reaching a CPU-idle period.
   const rootObserver = new MutationObserver(() => {
     const button = pickButton();
     if (button) sync(button);
@@ -172,7 +170,12 @@
     attributeFilter: ['data-fx-audio-owner', 'data-fx-audio-state', 'data-fx-audio-level']
   });
 
-  addEventListener('formatx:languagechange', () => sync(ensureButton()));
-  addEventListener('pageshow', () => sync(ensureButton()));
+  for (const eventName of [
+    'formatx:languagechange',
+    'formatx:real3dready',
+    'formatx:organisminterfaceready',
+    'pageshow'
+  ]) addEventListener(eventName, () => sync(ensureButton()));
+
   ensureButton();
 }());
