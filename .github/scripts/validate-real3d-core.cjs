@@ -1,24 +1,69 @@
-// r263 production revalidation marker: interaction-burst detail, no idle RAF.
+// r270 production revalidation: event-driven detail + compositor heartbeat + idle-safe gyro.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const repo=path.resolve(__dirname,'../..'),read=f=>fs.readFileSync(path.join(repo,f),'utf8');
 const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js'),index=read('docs/scifi-ui/index.html'),heartbeat=read('docs/scifi-ui/scripts/formatx-live-heartbeat-r155.js'),energy=read('docs/scifi-ui/scripts/formatx-living-energy-r168.js'),seamless=read('docs/scifi-ui/styles/formatx-seamless-living-r158.css'),detail=read('docs/scifi-ui/scripts/formatx-core-detail-overlay-r122.js'),mobileStability=read('docs/scifi-ui/scripts/formatx-mobile-hero-stability-r151.js'),mobileStabilityStyle=read('docs/scifi-ui/styles/formatx-mobile-hero-stability-r151.css'),wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js'),renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js'),layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'),flow=read('docs/scifi-ui/scripts/formatx-flow-first-r75.js'),layoutStyle=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'),responsiveTextGuard=read('docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'),contentFinalizer=read('docs/scifi-ui/scripts/formatx-content-finalizer.js'),livingRendering=read('docs/scifi-ui/scripts/formatx-living-system-rendering-v1.js'),previewWebgl=read('docs/scifi-ui/scripts/formatx-orbital-core-v28.js'),previewMobile=read('docs/scifi-ui/styles/formatx-real3d-mobile-v29.css'),tailFinalizer=read('docs/scifi-ui/scripts/formatx-reference-finalizer-r143.js'),gyro=read('docs/scifi-ui/scripts/formatx-core-gyro-r144.js'),narrowProof=read('docs/scifi-ui/styles/formatx-reference-narrow-proof-r145.css'),desktopIntegration=read('docs/scifi-ui/styles/formatx-desktop-integration-r154.css');
+
 for(const token of ['responsive-cinematic-reference-v69-r99-luminous-interactive-r157-cross-device-final','single-webgl-luminous-crystal-r99','formatx-core-mobile-v55.js?v=20260814-luminous-cinematic-r99','formatx-award-material-r91.css?v=20260814-rayglass-r95','formatx-mobile-reference-layout-v1.js?v=20260818-r204-proof-controls','formatx-flow-first-r75.js?v=20260816-mobile-ui-r180c','formatx-reference-finalizer-r143.js?v=20260815-tail-bridge-r143','formatx-core-gyro-r144.js?v=20260815-mobile-gyro-r144','formatx-reference-narrow-proof-r145.css?v=20260815-narrow-proof-r145','formatx-click-stability-r152.css?v=20260815-r152-center-lock','formatx-desktop-live-r153.css?v=20260815-r153-desktop-live','formatx-desktop-integration-r154.css?v=20260815-r154e-no-legacy-grid','formatx-mobile-hero-stability-r151.css?v=20260815-r156-proof-first','formatx-mobile-hero-stability-r151.js?v=20260815-r156-proof-first','formatx-core-detail-overlay-r122.js?v=20260821-r263-interaction-burst'])assert.ok(bootstrap.includes(token),`missing bootstrap token: ${token}`);
-assert.ok(index.includes('data-fx-live-heartbeat-r155="true"'));assert.ok(index.includes('formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless&rev=20260816-r183-display-sync'));assert.ok(index.includes('formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics'));assert.ok(index.includes('formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260816-r183-display-sync'));
-for(const token of ['js-reactive-heartbeat-r155','r158-lub-dub-seamless-living','requestAnimationFrame-display-synced-r183','display-refresh-adaptive','fxLiveHeartbeatTickR155','fx-r155-heartbeat-core','fx-r155-heartbeat-ring','fx-r155-heartbeat-wave','prefers-reduced-motion','pointerdown','touchstart','--fx-r147-light-x','--fx-r158-detail-brightness','formatx-seamless-living-r158.css','r183-display-synced-internal-canvas','internal-canvas-no-layout-shift','internal-canvas-r166','fxDisplayRefreshHzR183',"detail.style.removeProperty('scale')"])assert.ok(heartbeat.includes(token),`missing r183 heartbeat token: ${token}`);
-assert.doesNotMatch(heartbeat,/setInterval\(tick\s*,\s*50\)/,'20 Hz heartbeat timer returned');
+
+assert.ok(index.includes('data-fx-live-heartbeat-r155="true"'));
+assert.ok(index.includes('formatx-live-heartbeat-r155.js?v=20260815-r158-lubdub-seamless&rev=20260816-r183-display-sync'));
+assert.ok(index.includes('formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics'));
+assert.ok(index.includes('formatx-living-energy-r168.js?v=20260815-r168-v3-monotonic&rev=20260816-r183-display-sync'));
+
+// r270 heartbeat contract: the same visual identity remains, but the old JS
+// display-clock RAF was intentionally retired. Transform/opacity breathing is
+// compositor-owned and user interaction is event-driven, so Lighthouse can
+// observe a real CPU-idle window on mobile.
+for(const token of ['js-reactive-heartbeat-r155','r158-lub-dub-seamless-living','compositor-event-driven-r270','css-compositor-r270','fx-r155-heartbeat-core','fx-r155-heartbeat-ring','fx-r155-heartbeat-wave','fx-r270-heart-core','fx-r270-heart-ring','fx-r270-heart-wave','prefers-reduced-motion','pointerdown','touchstart','fx-heartbeat-energized','formatx-seamless-living-r158.css','r183-display-synced-internal-canvas','compositor-no-layout-shift-r270','internal-canvas-r166',"detail.style.removeProperty('scale')"])assert.ok(heartbeat.includes(token),`missing r270 heartbeat token: ${token}`);
+assert.doesNotMatch(heartbeat,/requestAnimationFrame\s*\(/,'heartbeat must not own an idle JavaScript RAF loop');
+assert.doesNotMatch(heartbeat,/setInterval\s*\(/,'heartbeat timer loop returned');
+
 for(const token of ['display-synced-raf-r183','requestAnimationFrame-display-synced-r183','raf-primary-watchdog-fallback-r183','function loop(now)','tick(now)','120ms-stall-fallback-r183'])assert.ok(energy.includes(token),`missing r183 energy token: ${token}`);
 assert.doesNotMatch(energy,/now-lastTickAt>=30/,'33 Hz living-energy throttle returned');
 for(const token of ['seamless living MAG integration','mix-blend-mode:screen','background:transparent!important','fx-core-mobile-v55-stage::before','content:none!important','--fx-r158-detail-brightness','--fx-r158-field-opacity','@media (max-width:900px)'])assert.ok(seamless.includes(token),`missing r158 seamless token: ${token}`);
 for(const token of ['fxCoreDesktopLumaKeyR157','fxCoreReferenceKeyR160','desktopKey=matchMedia','signal<=24','signal<52','signal<80','signal<112','mobile-applied-r160','reference-material-interactive-seamless-shape-pulse','visible-interaction-burst-no-idle-raf','requestRender(3)','formatx:coreinteraction'])assert.ok(detail.includes(token),`missing r263 detail token: ${token}`);
 assert.doesNotMatch(detail,/if\(!raf\)raf=requestAnimationFrame\(render\);\s*\}/,'unbounded core-detail self-RAF returned');
-for(const token of ['r156-mobile-proof-first-stability','insertAdjacentElement(\'afterend\',dock)','heading-proof-download',"setProperty('order','2','important')","setProperty('order','3','important')","setProperty('order','4','important')"])assert.ok(mobileStability.includes(token));assert.ok(mobileStabilityStyle.includes('order:4!important'));assert.ok(mobileStabilityStyle.includes('Public Proof -> Download'));
+
+for(const token of ['r156-mobile-proof-first-stability','insertAdjacentElement(\'afterend\',dock)','heading-proof-download',"setProperty('order','2','important')","setProperty('order','3','important')","setProperty('order','4','important')"])assert.ok(mobileStability.includes(token));
+assert.ok(mobileStabilityStyle.includes('order:4!important'));
+assert.ok(mobileStabilityStyle.includes('Public Proof -> Download'));
 assert.ok(wrapper.includes('formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99'));
-for(const token of ['webgl2','webgl','TRIANGLE_STRIP','reference-luminous-crystal-webgl-r99-prismatic-r120','single-webgl-luminous-crystal-r99','ResizeObserver','IntersectionObserver','formatx:coreinteraction','touchstart','touchmove','touchend','visible-native-3d-r99','reference-deep-concave-four-point-size-lock-r99','luminous-faceted-iceglass-caustic-r99','touch-pointer-breathing-spectral-refraction-r99','fxCoreRenderMs','corePosition','frac','caustic','rings','prismatic-organic-glass'])assert.ok(renderer.includes(token));assert.ok(renderer.includes('720000'));assert.doesNotMatch(renderer,/drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(/i);assert.doesNotMatch(renderer,/\bTHREE\.|three\.js|babylon|playcanvas|model-viewer/i);
-for(const token of ['booting-r74','mag-first-normal-flow-r74','formatx-flow-first-r74.css?v=20260816-mobile-only-r178','formatx:referencepause','aria-pressed','restoreDesktopMenu'])assert.ok(layout.includes(token));assert.match(layout,/mobileViewport=.*max-width:900px/);for(const token of ['const mobile=innerWidth<=900','award-reference-overlay-r139','desktop-bypass-r178','restoreDesktopMenu','restoreDesktopNative'])assert.ok(flow.includes(token));assert.match(flow,/imp\(rail,'display','none'\)/);assert.match(flow,/fixed\(mag,'14px'.*'48px','40px'\)/);assert.ok(flow.includes("imp(rail,'gap','24px')"));assert.ok(flow.includes("imp(live,'bottom',narrow?'18px':'auto')"));assert.ok(flow.includes("imp(proofText,'padding-right','0')"));
-assert.ok(layoutStyle.includes('.fx-reference-proof'));assert.ok(layoutStyle.includes(':focus-visible'));assert.doesNotMatch(layoutStyle,/@media \(min-width:901px\)/,'mobile reference stylesheet leaked a desktop media block');assert.doesNotMatch(layoutStyle,/clip-path:\s*polygon/i);assert.match(responsiveTextGuard,/white-space:\s*normal\s*!important/);assert.ok(contentFinalizer.includes("fxMobileReferenceLayout === 'ready-v1'"));assert.match(livingRendering,/document\.permissionsPolicy \|\| document\.featurePolicy/);assert.match(previewWebgl,/getContext\(['"]webgl2['"]/i);assert.match(previewWebgl,/gl\.drawElements\(gl\.TRIANGLES/);assert.doesNotMatch(previewWebgl,/drawImage\s*\(|new\s+Image\s*\(/i);assert.ok(previewMobile.includes('data-fx-orbital-core="ready-v28"'));assert.ok(tailFinalizer.includes('fxReferenceFinalizerR143'));assert.ok(tailFinalizer.includes('fx-core-reference-tail-r143'));for(const token of ['mobile-gyro-parallax-r144','DeviceOrientationEvent','pointermove','prefers-reduced-motion'])assert.ok(gyro.includes(token));assert.ok(narrowProof.includes('@media (max-width:400px)'));assert.ok(narrowProof.includes('padding-right:72px'));assert.ok(narrowProof.includes('bottom:14px'));
+for(const token of ['webgl2','webgl','TRIANGLE_STRIP','reference-luminous-crystal-webgl-r99-prismatic-r120','single-webgl-luminous-crystal-r99','ResizeObserver','IntersectionObserver','formatx:coreinteraction','touchstart','touchmove','touchend','visible-native-3d-r99','reference-deep-concave-four-point-size-lock-r99','luminous-faceted-iceglass-caustic-r99','touch-pointer-breathing-spectral-refraction-r99','fxCoreRenderMs','corePosition','frac','caustic','rings','prismatic-organic-glass'])assert.ok(renderer.includes(token));
+assert.ok(renderer.includes('720000'));
+assert.doesNotMatch(renderer,/drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(/i);
+assert.doesNotMatch(renderer,/\bTHREE\.|three\.js|babylon|playcanvas|model-viewer/i);
+
+for(const token of ['booting-r74','mag-first-normal-flow-r74','formatx-flow-first-r74.css?v=20260816-mobile-only-r178','formatx:referencepause','aria-pressed','restoreDesktopMenu'])assert.ok(layout.includes(token));
+assert.match(layout,/mobileViewport=.*max-width:900px/);
+for(const token of ['const mobile=innerWidth<=900','award-reference-overlay-r139','desktop-bypass-r178','restoreDesktopMenu','restoreDesktopNative'])assert.ok(flow.includes(token));
+assert.match(flow,/imp\(rail,'display','none'\)/);
+assert.match(flow,/fixed\(mag,'14px'.*'48px','40px'\)/);
+assert.ok(flow.includes("imp(rail,'gap','24px')"));
+assert.ok(flow.includes("imp(live,'bottom',narrow?'18px':'auto')"));
+assert.ok(flow.includes("imp(proofText,'padding-right','0')"));
+assert.ok(layoutStyle.includes('.fx-reference-proof'));
+assert.ok(layoutStyle.includes(':focus-visible'));
+assert.doesNotMatch(layoutStyle,/@media \(min-width:901px\)/,'mobile reference stylesheet leaked a desktop media block');
+assert.doesNotMatch(layoutStyle,/clip-path:\s*polygon/i);
+assert.match(responsiveTextGuard,/white-space:\s*normal\s*!important/);
+assert.ok(contentFinalizer.includes("fxMobileReferenceLayout === 'ready-v1'"));
+assert.match(livingRendering,/document\.permissionsPolicy \|\| document\.featurePolicy/);
+assert.match(previewWebgl,/getContext\(['"]webgl2['"]/i);
+assert.match(previewWebgl,/gl\.drawElements\(gl\.TRIANGLES/);
+assert.doesNotMatch(previewWebgl,/drawImage\s*\(|new\s+Image\s*\(/i);
+assert.ok(previewMobile.includes('data-fx-orbital-core="ready-v28"'));
+assert.ok(tailFinalizer.includes('fxReferenceFinalizerR143'));
+assert.ok(tailFinalizer.includes('fx-core-reference-tail-r143'));
+
+for(const token of ['mobile-gyro-parallax-r267-idle-safe','DeviceOrientationEvent','pointermove','prefers-reduced-motion','idle-listening','startFrame()'])assert.ok(gyro.includes(token),`missing idle-safe gyro token: ${token}`);
+assert.doesNotMatch(gyro,/function enableSensor\(\)[\s\S]*?startFrame\(\)/,'gyro must not start RAF merely because DeviceOrientationEvent exists');
+assert.ok(narrowProof.includes('@media (max-width:400px)'));
+assert.ok(narrowProof.includes('padding-right:72px'));
+assert.ok(narrowProof.includes('bottom:14px'));
+
 for(const token of ['@media (min-width:901px) and (pointer:fine)','aspect-ratio:412 / 410','mix-blend-mode:screen','background-image:none!important','opacity:.012!important','mask-image:radial-gradient','contrast(1.22)','.fx-core-rayglass-r91-stage::after','content:none!important','display:none!important'])assert.ok(desktopIntegration.includes(token),`missing desktop integration token: ${token}`);
 for(const token of ['heartbeatShape','fxLivingShapeClockR166','fxLivingShapePulseR166','fxLivingShapeBeatR166','heartbeat-driven-four-tip-breathing','reference-material-interactive-seamless-shape-pulse'])assert.ok(detail.includes(token),`missing r166 shape-pulse token: ${token}`);
 assert.ok(detail.includes('direct-render-clock-r166c-held-pulse'),'missing internal display-clock shape pulse');
 for(const source of [bootstrap,heartbeat,energy,detail,mobileStability,wrapper,renderer,layout,flow,contentFinalizer,livingRendering,tailFinalizer,gyro])new Function(source);
-console.log('PASS: r263 interaction-burst MAG detail preserves cross-device reference motion without an idle detail RAF loop.');
+console.log('PASS: r270 MAG keeps the reference visual contract with event-driven detail, compositor heartbeat and idle-safe gyro.');
