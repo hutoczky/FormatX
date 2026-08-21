@@ -1,10 +1,9 @@
 (function () {
   'use strict';
 
-  // r254 performance/stability pass.
-  // The r244 stylesheet is the geometry authority. This script now owns only
-  // DOM reconciliation, control wiring and removal of stale inline geometry.
-  // It no longer reflows the whole document after every child-list mutation.
+  // r256 performance/stability pass.
+  // CSS owns geometry; this runtime only reconciles DOM/control state. In the
+  // Worker-served production page, r207 remains the single physical mobile owner.
   const root = document.documentElement;
   const VERSION = 'r244-reference-frame';
   let queued = false;
@@ -194,12 +193,15 @@
     ensureStyleLast();
 
     const mobile = isMobile();
+    const canonicalMobileOwner = mobile
+      && document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement;
+
     if (mobile) {
-      root.dataset.fxMobileLayoutOwner = VERSION;
+      root.dataset.fxMobileLayoutOwner = canonicalMobileOwner ? 'r207-normal-flow' : VERSION;
       root.dataset.fxReferenceProductionR244 = 'ready';
       root.dataset.fxReferenceComposition = 'reference-frame-r244';
     } else {
-      if (root.dataset.fxMobileLayoutOwner === VERSION) delete root.dataset.fxMobileLayoutOwner;
+      if (root.dataset.fxMobileLayoutOwner === VERSION || root.dataset.fxMobileLayoutOwner === 'r207-normal-flow') delete root.dataset.fxMobileLayoutOwner;
       root.dataset.fxReferenceProductionR244 = 'desktop';
       root.dataset.fxReferenceComposition = 'desktop-reference-r244';
     }
@@ -223,9 +225,8 @@
     ].forEach(clearInlineLayout);
 
     if (mobile) {
-      if (nodes.controls.parentElement !== hero) hero.appendChild(nodes.controls);
-      // The supplied locked mobile reference uses a slight vertical compression
-      // of the live renderer. Keep this one intentional inline transform only.
+      const controlOwner = canonicalMobileOwner ? grid : hero;
+      if (nodes.controls.parentElement !== controlOwner) controlOwner.appendChild(nodes.controls);
       important(stage, 'transform', 'scaleY(.97)');
       important(stage, 'transform-origin', '50% 0');
     } else if (nodes.controls.parentElement !== space) {
@@ -248,7 +249,9 @@
       if (document.activeElement === link && !link.matches(':focus-visible')) link.blur();
     });
 
-    root.dataset.fxReferenceRuntimeR254 = 'event-driven';
+    root.dataset.fxReferenceRuntimeR254 = canonicalMobileOwner
+      ? 'event-driven-r207-owner'
+      : 'event-driven-standalone';
     return true;
   }
 
