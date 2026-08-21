@@ -33,14 +33,14 @@ function boot(attempt=0){
  const io=new IntersectionObserver(es=>{visible=es.some(e=>e.isIntersecting);if(visible&&!disposed)schedule(1)},{rootMargin:'160px'});io.observe(stage);
  function boost(v){target=Math.max(target,v);energy=Math.max(energy,.30+(v-.30)*.22);cinematic.energy=energy}
  function point(x,y,b=1.08){const r=stage.getBoundingClientRect();tx=clamp(((x-r.left)/Math.max(1,r.width)-.5)*2,-1,1);ty=clamp(((y-r.top)/Math.max(1,r.height)-.5)*2,-1,1);boost(b);schedule(8)}
- function idle(ms=360){clearTimeout(timer);timer=setTimeout(()=>{target=.32;schedule(3)},ms)}
+ function idle(ms=650){clearTimeout(timer);timer=setTimeout(()=>{target=.32;schedule(3)},ms)}
  hero.addEventListener('pointermove',e=>point(e.clientX,e.clientY,1.08),{passive:true});
- hero.addEventListener('pointerdown',e=>{point(e.clientX,e.clientY,1.56);idle(480)},{passive:true});
- window.addEventListener('pointerup',()=>idle(300),{passive:true});
- hero.addEventListener('touchstart',e=>{const q=e.touches?.[0]||e.changedTouches?.[0];if(q){point(q.clientX,q.clientY,1.62);idle(560)}},{passive:true});
- hero.addEventListener('touchmove',e=>{const q=e.touches?.[0]||e.changedTouches?.[0];if(q){point(q.clientX,q.clientY,1.30);idle(440)}},{passive:true});
- hero.addEventListener('touchend',()=>idle(380),{passive:true});
- function pulse(d){if(d&&Number.isFinite(d.x))tx=clamp(d.x,-1,1);if(d&&Number.isFinite(d.y))ty=clamp(d.y,-1,1);boost(d?.phase==='drag'?1.30:1.66);schedule(d?.phase==='drag'?7:9);idle(d?.phase==='drag'?430:560)}
+ hero.addEventListener('pointerdown',e=>{point(e.clientX,e.clientY,1.56);idle(700)},{passive:true,capture:true});
+ window.addEventListener('pointerup',()=>idle(700),{passive:true});
+ hero.addEventListener('touchstart',e=>{const q=e.touches?.[0]||e.changedTouches?.[0];if(q){point(q.clientX,q.clientY,1.62);idle(720)}},{passive:true,capture:true});
+ hero.addEventListener('touchmove',e=>{const q=e.touches?.[0]||e.changedTouches?.[0];if(q){point(q.clientX,q.clientY,1.30);idle(680)}},{passive:true});
+ hero.addEventListener('touchend',()=>idle(700),{passive:true});
+ function pulse(d){if(d&&Number.isFinite(d.x))tx=clamp(d.x,-1,1);if(d&&Number.isFinite(d.y))ty=clamp(d.y,-1,1);boost(d?.phase==='drag'?1.30:1.66);schedule(d?.phase==='drag'?7:9);idle(d?.phase==='drag'?680:720)}
  window.addEventListener('formatx:coreinteraction',e=>pulse(e.detail||null),{passive:true});
  window.addEventListener('formatx:referencepause',e=>{if(e.detail?.paused===false)schedule(3)},{passive:true});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule(1)},{passive:true});
@@ -48,7 +48,7 @@ function boot(attempt=0){
   raf=0;if(disposed||!visible||root.dataset.fxReferenceMotionPaused==='true')return;
   if(!layoutReady)resize();
   const st=performance.now(),dt=Math.min(40,Math.max(0,now-last));last=now;avg+=(dt-avg)*.05;frames++;
-  px+=(tx-px)*.22;py+=(ty-py)*.22;energy+=(target-energy)*.24;target+=(.30-target)*.06;
+  px+=(tx-px)*.22;py+=(ty-py)*.22;energy+=(target-energy)*.24;
   cinematic.corePosition=[px*.09,-py*.08,.55+energy*.014];cinematic.energy=energy;
   gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.useProgram(program);gl.uniform1f(U.time,reduced.matches?0:now*.001);gl.uniform1f(U.energy,energy);gl.uniform2f(U.pointer,px,py);gl.drawArrays(gl.TRIANGLES,0,triShade.length);gl.depthMask(true);gl.disable(gl.BLEND);
   const ms=performance.now()-st;root.dataset.fxCoreRenderMs=ms.toFixed(2);root.dataset.fxCoreFrameMs=avg.toFixed(1);root.dataset.fxCoreReal3dFps=String(Math.round(1000/Math.max(1,avg)));root.dataset.fxCoreReal3dQuality='3';root.dataset.fxCorePerformanceMode=ms>13?'r120-adaptive':'r120-balanced';
