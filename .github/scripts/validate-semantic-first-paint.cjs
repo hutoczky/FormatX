@@ -78,7 +78,7 @@ async function runCase(browser, { width, height, language }) {
   assert.equal(state.categoryRuntime, 'v1', `category runtime missing: ${JSON.stringify(state)}`);
   assert.match(
     state.contentGate,
-    /^(?:reduced-motion-semantic-r265|requested-r265)$/,
+    /^(?:reduced-motion-semantic-(?:r265|r273)|requested-(?:r265|r273))$/,
     `semantic gate did not hydrate before interaction: ${JSON.stringify(state)}`,
   );
   assert.ok(state.deckTitle.length > 0, `empty category title: ${JSON.stringify(state)}`);
