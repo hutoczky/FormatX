@@ -5,6 +5,7 @@ const VERSION='r185b-iconic-mag-hitlayer-unfold';
 if(root.dataset.fxSignatureSystem===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxSignatureSystem='audit-skip';return;}
 root.dataset.fxSignatureSystem='booting';
+root.dataset.fxSignatureSchedulerR277='event-driven-no-idle-scan';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const scenes=[
@@ -16,7 +17,8 @@ const scenes=[
   {id:'resources',n:'06',hu:'JELADÓ',en:'BEACON',huSub:'Források és támogatás',enSub:'Resources and support'}
 ];
 let hero=null,host=null,visual=null,trigger=null,overlay=null,closeButton=null,nodeButtons=[],open=false,lastFocus=null,bodyOverflow='';
-let resizeRaf=0,interactionRaf=0,lastPointer=null;
+let resizeRaf=0,interactionRaf=0,lastPointer=null,bootObserver=null,bootTimer=0,geometryObserver=null,sceneObserver=null;
+const sceneRatios=new Map();
 
 function lang(){
   const active=document.querySelector('.language-switch [data-language][aria-pressed="true"]');
@@ -103,15 +105,14 @@ function ensureTrigger(){
     hero.appendChild(trigger);
   }
   trigger.setAttribute('aria-label',t('FormatX MAG — teljes rendszerarchitektúra megnyitása','FormatX Core — open full system architecture'));
-  setText();syncTrigger();return true;
+  setText();
+  scheduleGeometry();
+  return true;
 }
 function syncTrigger(){
   if(!(hero instanceof HTMLElement)||!(visual instanceof HTMLElement)||!(trigger instanceof HTMLElement))return;
   const h=hero.getBoundingClientRect(),v=visual.getBoundingClientRect();
   if(v.width<20||v.height<20)return;
-  /* Keep the hit target on the crystal silhouette, not on the whole square reference canvas.
-     The final control owner may mount SOUND / ASK / PAUSE after this runtime starts, so the
-     hit layer is also physically capped above that live control row whenever it exists. */
   const insetX=Math.max(0,v.width*.085),insetY=Math.max(0,v.height*.045);
   let left=v.left-h.left+insetX;
   let top=v.top-h.top+insetY;
@@ -129,11 +130,10 @@ function syncTrigger(){
       }
     }
   }
-  trigger.style.left=left.toFixed(2)+'px';
-  trigger.style.top=top.toFixed(2)+'px';
-  trigger.style.width=width.toFixed(2)+'px';
-  trigger.style.height=height.toFixed(2)+'px';
-  const r=trigger.getBoundingClientRect();const hit=document.elementFromPoint(r.left+r.width*.5,r.top+r.height*.5);
+  const values={left:left.toFixed(2)+'px',top:top.toFixed(2)+'px',width:width.toFixed(2)+'px',height:height.toFixed(2)+'px'};
+  for(const [property,value] of Object.entries(values))if(trigger.style[property]!==value)trigger.style[property]=value;
+  const r=trigger.getBoundingClientRect();
+  const hit=document.elementFromPoint(r.left+r.width*.5,r.top+r.height*.5);
   root.dataset.fxSignatureTrigger=hit===trigger||trigger.contains(hit)?'synced-hit':'synced-obscured';
   const ask=hero.querySelector('.fx-reference-ask');
   if(ask instanceof HTMLElement){
@@ -143,6 +143,10 @@ function syncTrigger(){
       root.dataset.fxSignatureAskHit=askHit===ask||ask.contains(askHit)?'safe':'blocked';
     }
   }
+}
+function scheduleGeometry(){
+  if(resizeRaf)return;
+  resizeRaf=requestAnimationFrame(()=>{resizeRaf=0;if(findVisual())syncTrigger();});
 }
 
 function pulseCore(){
@@ -184,33 +188,77 @@ function keydown(e){
   if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
 }
 
-function updateCurrentScene(){
-  let best='hero',bestScore=-Infinity;
-  for(const item of scenes){const el=document.getElementById(item.id);if(!el)continue;const r=el.getBoundingClientRect();const score=-Math.abs((r.top+r.height*.34)-innerHeight*.42);if(score>bestScore){bestScore=score;best=item.id}}
+function setCurrentScene(best){
+  if(!best)best='hero';
   root.dataset.fxSignatureActiveScene=best;
   nodeButtons.forEach(b=>b.setAttribute('aria-current',b.dataset.fxTarget===best?'true':'false'));
   document.querySelectorAll('#main-nav a[href^="#"],.fx-rail a[href^="#"]').forEach(a=>{if(a.getAttribute('href')==='#'+best)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current')});
+}
+function updateCurrentScene(){
+  let best=root.dataset.fxSignatureActiveScene||'hero',score=-1;
+  for(const item of scenes){const ratio=sceneRatios.get(item.id)||0;if(ratio>score){score=ratio;best=item.id;}}
+  setCurrentScene(best);
+}
+function installSceneObserver(){
+  sceneObserver?.disconnect();sceneRatios.clear();
+  if(typeof IntersectionObserver!=='function'){setCurrentScene('hero');return;}
+  sceneObserver=new IntersectionObserver(entries=>{
+    for(const entry of entries)sceneRatios.set(entry.target.id,entry.isIntersecting?entry.intersectionRatio:0);
+    updateCurrentScene();
+  },{rootMargin:'-20% 0px -35% 0px',threshold:[0,.15,.35,.6,.85]});
+  for(const item of scenes){const element=document.getElementById(item.id);if(element)sceneObserver.observe(element);}
 }
 function premiumSections(){
   document.querySelectorAll('main>.scene,main>.fx-category-deck').forEach((el,i)=>{el.dataset.fxSignatureQuality='r185';el.style.setProperty('--fx-signature-section',String(i+1))});
   root.dataset.fxSignatureSections=String(document.querySelectorAll('main>.scene').length);
 }
-function onResize(){cancelAnimationFrame(resizeRaf);resizeRaf=requestAnimationFrame(()=>{if(!findVisual())return;syncTrigger()})}
 
-function boot(attempt=0){
-  if(!document.body)return requestAnimationFrame(()=>boot(attempt+1));
-  premiumSections();buildOverlay();
-  if(!ensureTrigger()){
-    if(attempt<360)return requestAnimationFrame(()=>boot(attempt+1));
-    root.dataset.fxSignatureSystem='visual-unavailable';return;
-  }
-  addEventListener('resize',onResize,{passive:true});addEventListener('scroll',updateCurrentScene,{passive:true});addEventListener('formatx:controlownerready',onResize,{passive:true});document.addEventListener('keydown',keydown);
-  const ro=new ResizeObserver(onResize);ro.observe(hero);ro.observe(host);if(visual)ro.observe(visual);
-  const controls=hero.querySelector('.fx-reference-controls-r204');if(controls instanceof HTMLElement)ro.observe(controls);
-  const mo=new MutationObserver(()=>{setText();if(!trigger?.isConnected||!visual?.isConnected){findVisual();ensureTrigger()}});
-  const language=document.querySelector('.language-switch');if(language)mo.observe(language,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});
-  updateCurrentScene();syncTrigger();root.dataset.fxSignatureSystem=VERSION;root.dataset.fxSignatureUsability='touch-focus-reduced-motion-r185b';
-  dispatchEvent(new CustomEvent('formatx:signatureready',{detail:{version:VERSION}}));
+function installGeometryObserver(){
+  geometryObserver?.disconnect();
+  if(typeof ResizeObserver!=='function')return;
+  geometryObserver=new ResizeObserver(scheduleGeometry);
+  for(const node of [hero,host,visual,hero?.querySelector('.fx-reference-controls-r204')])if(node instanceof HTMLElement)geometryObserver.observe(node);
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>boot(),{once:true});else boot();
+function finishMount(){
+  if(!ensureTrigger())return false;
+  installGeometryObserver();
+  installSceneObserver();
+  if(bootObserver)bootObserver.disconnect();bootObserver=null;
+  if(bootTimer)clearTimeout(bootTimer);bootTimer=0;
+  root.dataset.fxSignatureSystem=VERSION;
+  root.dataset.fxSignatureUsability='touch-focus-reduced-motion-r185b';
+  scheduleGeometry();
+  dispatchEvent(new CustomEvent('formatx:signatureready',{detail:{version:VERSION}}));
+  return true;
+}
+function waitForVisual(){
+  if(finishMount())return;
+  if(bootObserver)return;
+  const target=document.getElementById('hero')||document.body||document.documentElement;
+  bootObserver=new MutationObserver(()=>{if(finishMount()){bootObserver?.disconnect();bootObserver=null;}});
+  bootObserver.observe(target,{subtree:true,childList:true});
+  bootTimer=setTimeout(()=>{
+    bootObserver?.disconnect();bootObserver=null;bootTimer=0;
+    if(!finishMount())root.dataset.fxSignatureSystem='visual-unavailable';
+  },5000);
+}
+function remountGeometry(){
+  if(!findVisual()){waitForVisual();return;}
+  if(!trigger?.isConnected)ensureTrigger();
+  installGeometryObserver();scheduleGeometry();
+}
+function boot(){
+  if(!document.body){document.addEventListener('DOMContentLoaded',boot,{once:true});return;}
+  premiumSections();buildOverlay();waitForVisual();
+  addEventListener('resize',scheduleGeometry,{passive:true});
+  addEventListener('orientationchange',scheduleGeometry,{passive:true});
+  addEventListener('formatx:controlownerready',remountGeometry,{passive:true});
+  addEventListener('formatx:real3dready',remountGeometry,{passive:true});
+  addEventListener('formatx:coredetailready',remountGeometry,{passive:true});
+  addEventListener('formatx:languagechange',setText,{passive:true});
+  document.addEventListener('keydown',keydown);
+  const language=document.querySelector('.language-switch');
+  if(language)new MutationObserver(setText).observe(language,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 }());
