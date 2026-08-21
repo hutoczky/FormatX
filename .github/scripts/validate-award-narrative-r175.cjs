@@ -1,5 +1,5 @@
 'use strict';
-// r227 public-integrity revalidation: first-paint-stable narrative + responsive composition + current display-synced optical scheduler.
+// r285 public-integrity revalidation: first-paint-stable narrative + pure WebGL energy bridge.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const repo=path.resolve(__dirname,'../..');
 const read=f=>fs.readFileSync(path.join(repo,f),'utf8');
@@ -41,13 +41,15 @@ for(const token of [
 assert.doesNotMatch(js,/setInterval\s*\(/,'r175 story runtime must not use setInterval');
 assert.doesNotMatch(css,/transition:\s*all\b/i,'r175 CSS must not animate all properties');
 assert.doesNotMatch(css,/var\(--fx-r175-[^)]+\)\s*\*/,'r175 CSS must not depend on custom-property multiplication');
+
 for(const token of [
-  "const CLOCK='display-synced-raf-r183'",
-  "fxLivingEnergySchedulerR175='requestAnimationFrame-display-synced-r183'",
-  "fxLivingEnergySchedulerR182='raf-primary-watchdog-fallback-r183'",
-  'requestAnimationFrame(loop)',
-  'if(document.hidden)return'
-])assert.ok(energy.includes(token),`missing current display-synced optical scheduler contract ${token}`);
-assert.doesNotMatch(energy,/setInterval\s*\(tick\s*,\s*32\s*\)/,'legacy 32ms tick setInterval still present');
+  "VERSION='r285-native-webgl-energy-bridge'",
+  "fxLivingEnergyClockR168='native-renderer-burst-clock-r285'",
+  "fxLivingEnergyEffectModeR168='native-webgl-material-only-r285'",
+  "fxLivingEnergySchedulerR175='no-2d-runtime'",
+  "fxLivingEnergySchedulerR182='no-2d-runtime'",
+  'FormatXCoreMobileV69?.pulse?.()'
+])assert.ok(energy.includes(token),`missing pure-WebGL energy contract ${token}`);
+assert.doesNotMatch(energy,/setInterval\s*\(|requestAnimationFrame\s*\(|radial-gradient|conic-gradient|linear-gradient|getContext\(['"]2d['"]/i,'r285 energy bridge must not own a 2D visual scheduler or material');
 new Function(js);new Function(energy);
-console.log('PASS: r227 bundled award narrative, responsive composition, reduced motion and r183 display-synchronised optical runtime are valid.');
+console.log('PASS: r285 bundled award narrative, responsive composition, reduced motion and pure WebGL energy bridge are valid.');
