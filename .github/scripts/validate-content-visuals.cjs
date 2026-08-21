@@ -38,12 +38,16 @@ async function box(page, selector, required = true) {
 }
 
 async function injectProductionLikeContent(page) {
+  // Keep this order aligned with the production Worker. r207 must be the final
+  // mobile geometry owner after legacy/proof layers, otherwise the static test
+  // measures a layout that can never be served by formatxsuite.com.
   for (const href of [
     '/scifi-ui/styles/formatx-content-standard.css',
     '/scifi-ui/styles/formatx-mobile-readability.css',
     '/scifi-ui/styles/formatx-mobile-unified.css',
     '/scifi-ui/styles/formatx-mobile-hero-flow.css',
-    '/scifi-ui/styles/formatx-mobile-production-r5.css'
+    '/scifi-ui/styles/formatx-mobile-production-r5.css',
+    '/scifi-ui/styles/formatx-mobile-layout-r207.css'
   ]) {
     await page.addStyleTag({ url: origin + href });
   }
@@ -55,7 +59,8 @@ async function injectProductionLikeContent(page) {
     '/scifi-ui/scripts/formatx-content-finalizer.js',
     '/scifi-ui/scripts/formatx-platform-surface-finalizer.js',
     '/scifi-ui/scripts/formatx-organism-semantic-state.js',
-    '/scifi-ui/scripts/formatx-mobile-unified.js'
+    '/scifi-ui/scripts/formatx-mobile-unified.js',
+    '/scifi-ui/scripts/formatx-mobile-layout-r207.js'
   ]) {
     await page.addScriptTag({ url: origin + src });
   }
@@ -212,16 +217,16 @@ async function commonAssertions(page, mobile) {
     const heading = await box(page, '#hero .fx-reference-heading');
     const category = await box(page, '.fx-category-deck--standalone, .fx-category-deck');
 
-    assert(sound.width >= 44 && sound.height >= 44, 'Mobile sound target is too small');
-    assert(ask.width >= 44 && ask.height >= 44, 'Mobile ASK target is too small');
-    assert(pause.width >= 44 && pause.height >= 44, 'Mobile pause target is too small');
-    assert(!overlap(sound, ask, 2), 'Mobile sound and ASK controls overlap');
-    assert(!overlap(ask, pause, 2), 'Mobile ASK and pause controls overlap');
-    assert(Math.abs(sound.top - ask.top) <= 8 && Math.abs(ask.top - pause.top) <= 8, 'Mobile hero controls are not one horizontal row');
-    assert(controls.top >= heroSpace.bottom - 2, 'Mobile hero controls must follow the MAG in normal flow');
-    if (heroCopy) assert(heroCopy.top >= controls.bottom - 2, 'Mobile hero copy must follow the controls');
-    assert(heading.top >= (heroCopy?.bottom || controls.bottom) - 2, 'Mobile proof heading must follow hero content');
-    assert(category.top >= heading.bottom - 2, 'Mobile next section must follow the hero reference content');
+    assert(sound.width >= 44 && sound.height >= 44, 'Mobile sound target is too small: ' + JSON.stringify(sound));
+    assert(ask.width >= 44 && ask.height >= 44, 'Mobile ASK target is too small: ' + JSON.stringify(ask));
+    assert(pause.width >= 44 && pause.height >= 44, 'Mobile pause target is too small: ' + JSON.stringify(pause));
+    assert(!overlap(sound, ask, 2), 'Mobile sound and ASK controls overlap: ' + JSON.stringify({ sound, ask, controls }));
+    assert(!overlap(ask, pause, 2), 'Mobile ASK and pause controls overlap: ' + JSON.stringify({ ask, pause, controls }));
+    assert(Math.abs(sound.top - ask.top) <= 8 && Math.abs(ask.top - pause.top) <= 8, 'Mobile hero controls are not one horizontal row: ' + JSON.stringify({ sound, ask, pause, controls }));
+    assert(controls.top >= heroSpace.bottom - 2, 'Mobile hero controls must follow the MAG in normal flow: ' + JSON.stringify({ heroSpace, controls }));
+    if (heroCopy) assert(heroCopy.top >= controls.bottom - 2, 'Mobile hero copy must follow the controls: ' + JSON.stringify({ controls, heroCopy }));
+    assert(heading.top >= (heroCopy?.bottom || controls.bottom) - 2, 'Mobile proof heading must follow hero content: ' + JSON.stringify({ heroCopy, controls, heading }));
+    assert(category.top >= heading.bottom - 2, 'Mobile next section must follow the hero reference content: ' + JSON.stringify({ heading, category }));
 
     const proofGrid = page.locator('.fx-award-proof__grid').first();
     if (await proofGrid.count()) {
