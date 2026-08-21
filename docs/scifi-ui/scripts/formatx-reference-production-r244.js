@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  // r260 stability/control pass.
+  // r263 stability/control pass.
   // CSS owns the visual language; this runtime owns only deterministic DOM
   // placement and the final control geometry. Never reorder stylesheets after
   // first paint and never let desktop/mobile runtimes fight over control nodes.
@@ -227,6 +227,10 @@
         order: '1',
         position: 'relative',
         inset: 'auto',
+        top: 'auto',
+        right: 'auto',
+        bottom: 'auto',
+        left: 'auto',
         display: 'flex',
         'flex-direction': 'row',
         'align-items': 'flex-start',
@@ -241,6 +245,7 @@
         gap,
         'pointer-events': 'auto',
         transform: 'none',
+        translate: 'none',
         opacity: '1',
         visibility: 'visible'
       });
@@ -263,6 +268,7 @@
         gap,
         'pointer-events': 'auto',
         transform: 'translateX(-50%)',
+        translate: 'none',
         opacity: '1',
         visibility: 'visible',
         'z-index': '10030'
@@ -272,6 +278,10 @@
     importantMany(nodes.rail, {
       position: 'relative',
       inset: 'auto',
+      top: 'auto',
+      right: 'auto',
+      bottom: 'auto',
+      left: 'auto',
       display: 'flex',
       'flex-direction': 'row',
       'align-items': 'flex-start',
@@ -286,6 +296,7 @@
       flex: '0 0 auto',
       'pointer-events': 'auto',
       transform: 'none',
+      translate: 'none',
       opacity: '1',
       visibility: 'visible'
     });
@@ -294,6 +305,10 @@
       importantMany(nodes.sound, {
         position: 'relative',
         inset: 'auto',
+        top: 'auto',
+        right: 'auto',
+        bottom: 'auto',
+        left: 'auto',
         display: 'inline-flex',
         'align-items': 'center',
         'justify-content': 'center',
@@ -311,6 +326,7 @@
         'font-size': '0',
         'pointer-events': 'auto',
         transform: 'none',
+        translate: 'none',
         opacity: '1',
         visibility: 'visible',
         overflow: 'hidden'
@@ -318,9 +334,14 @@
     }
 
     nodes.rail?.querySelectorAll('.fx-reference-ask, .fx-reference-pause').forEach(button => {
+      clearInlineLayout(button);
       importantMany(button, {
         position: 'relative',
         inset: 'auto',
+        top: 'auto',
+        right: 'auto',
+        bottom: 'auto',
+        left: 'auto',
         flex: `0 0 ${size}`,
         width: size,
         'min-width': size,
@@ -332,6 +353,7 @@
         padding: '0',
         'pointer-events': 'auto',
         transform: 'none',
+        translate: 'none',
         opacity: '1',
         visibility: 'visible'
       });
@@ -341,10 +363,13 @@
     if (askLabel instanceof HTMLElement) {
       importantMany(askLabel, {
         top: mobile ? '55px' : '59px',
+        right: 'auto',
+        bottom: 'auto',
         left: '50%',
         width: 'max-content',
         'max-width': '84px',
         transform: 'translateX(-50%)',
+        translate: 'none',
         'text-align': 'center',
         'white-space': 'nowrap',
         opacity: '1',
@@ -464,7 +489,8 @@
     'formatx:real3dready',
     'formatx:coredetailready',
     'formatx:languagechange',
-    'formatx:organisminterfaceready'
+    'formatx:organisminterfaceready',
+    'formatx:mobilelayoutready'
   ]) {
     addEventListener(eventName, schedule);
   }
