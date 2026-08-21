@@ -6,6 +6,8 @@
 
   let applying = false;
   let scheduled = 0;
+  let bootObserver = null;
+  let bootTimer = 0;
 
   function language() {
     return root.lang === 'en' ? 'en' : 'hu';
@@ -48,14 +50,17 @@
   function stabilizeMobileGeometry() {
     if (!matchMedia('(max-width: 900px), (pointer: coarse)').matches) return;
 
-    if (['booting-v1', 'ready-v1'].includes(root.dataset.fxMobileReferenceLayout)
+    const canonicalOwner = root.dataset.fxMobileLayoutOwner === 'r207-normal-flow'
+      || root.dataset.fxMobileProofControls === 'r260-r207-grid-owner'
+      || document.querySelector('link[data-fx-mobile-layout-r207]') instanceof HTMLLinkElement;
+
+    // r260: when the canonical hero owner exists, this legacy public-state layer
+    // must not touch hero/control geometry. Older builds hid the sound control and
+    // rewrote it to a fixed position, fighting the reference owner and causing CLS.
+    if (canonicalOwner
+      || ['booting-v1', 'ready-v1'].includes(root.dataset.fxMobileReferenceLayout)
       || ['booting-v69', 'ready-v69'].includes(root.dataset.fxCoreMobileV69)) {
-      const sound = document.querySelector('.fx-three-sound');
-      setImportant(sound, 'display', 'none');
-      setImportant(sound, 'visibility', 'hidden');
-      setImportant(sound, 'opacity', '0');
-      setImportant(sound, 'pointer-events', 'none');
-      setImportant(sound, 'z-index', '-1');
+      root.dataset.fxInteractionGeometry = 'delegated-r260-canonical-owner';
       return;
     }
 
@@ -372,6 +377,30 @@
     createExport();
   }
 
+  function stopBootObserver() {
+    if (bootObserver) bootObserver.disconnect();
+    bootObserver = null;
+    if (bootTimer) clearTimeout(bootTimer);
+    bootTimer = 0;
+  }
+
+  function boot() {
+    stabilizePublicState();
+    if (document.getElementById('hero')) return;
+
+    const target = document.body || document.documentElement;
+    bootObserver = new MutationObserver(() => {
+      if (!document.getElementById('hero')) return;
+      stopBootObserver();
+      stabilizePublicState();
+    });
+    bootObserver.observe(target, { subtree: true, childList: true });
+    bootTimer = setTimeout(() => {
+      stopBootObserver();
+      stabilizePublicState();
+    }, 5000);
+  }
+
   window.FormatXExportInteractionGenome = createExport;
   document.addEventListener('click', exportFromClick, true);
   addEventListener('keydown', event => {
@@ -385,17 +414,14 @@
     'formatx:releasemetadataready',
     'formatx:organismstatechange',
     'formatx:organismpanelclose',
-    'formatx:loop',
+    'formatx:real3dready',
+    'formatx:organisminterfaceready',
     'pageshow',
     'resize'
   ].forEach(name => addEventListener(name, schedulePublicState));
 
-  const observer = new MutationObserver(schedulePublicState);
-  observer.observe(document.body, { subtree: true, childList: true, characterData: true });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 
-  stabilizePublicState();
-  setTimeout(stabilizePublicState, 0);
-  setTimeout(stabilizePublicState, 900);
-  setTimeout(stabilizePublicState, 2400);
   root.dataset.fxInteractionGenomeExport = 'ready';
 }());
