@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r263') return;
-  root.dataset.fxAwardRuntime = 'r263';
+  if (root.dataset.fxAwardRuntime === 'r284') return;
+  root.dataset.fxAwardRuntime = 'r284';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -15,6 +15,53 @@
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
+
+  function openReferenceDialogue() {
+    if (typeof window.FormatXOrganismVoice?.open === 'function') {
+      window.FormatXOrganismVoice.open();
+      window.FormatXCoreMobileV69?.pulse?.();
+      return true;
+    }
+
+    const trigger = document.querySelector('.fx-organism-thought-trigger');
+    if (trigger instanceof HTMLButtonElement) {
+      trigger.click();
+      window.FormatXCoreMobileV69?.pulse?.();
+      return true;
+    }
+    return false;
+  }
+
+  function ensureReferenceAskOwner() {
+    if (root.dataset.fxReferenceAskOwnerR284 === 'ready') return;
+    root.dataset.fxReferenceAskOwnerR284 = 'ready';
+
+    document.addEventListener('click', event => {
+      const target = event.target instanceof Element ? event.target.closest('.fx-reference-ask') : null;
+      if (!(target instanceof HTMLButtonElement)) return;
+
+      // One canonical activation path. Older reference generations may still
+      // have a bubble-phase listener on the same button; stop it here so a
+      // single tap can never open and immediately close the dialogue again.
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      if (openReferenceDialogue()) return;
+
+      if (root.dataset.fxImmersive !== 'active') {
+        root.dataset.fxImmersive = 'active';
+        root.dataset.fxImmersiveSource = 'reference-ask-r284';
+        dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
+          detail: { source: 'reference-ask-r284' }
+        }));
+      }
+
+      // Activation modules are intentionally deferred until intent. Retry only
+      // at this real interaction boundary; never poll or keep an idle loop.
+      queueMicrotask(openReferenceDialogue);
+      setTimeout(openReferenceDialogue, 140);
+    }, true);
+  }
 
   function ensureStyle() {
     if (document.querySelector('link[data-fx-award-runtime-style-r206]')) return;
@@ -60,6 +107,7 @@
     return true;
   }
 
+  ensureReferenceAskOwner();
   ensureStyle();
   ensureControls();
   root.dataset.fxAwardSound = 'muted-default-visible-control';
