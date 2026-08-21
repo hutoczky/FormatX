@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r206') return;
-  root.dataset.fxAwardRuntime = 'r206';
+  if (root.dataset.fxAwardRuntime === 'r263') return;
+  root.dataset.fxAwardRuntime = 'r263';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -11,8 +11,8 @@
     return;
   }
 
-  const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260818-r206-award-runtime';
-  const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260818-r206-award-runtime';
+  const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
+  const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
 
