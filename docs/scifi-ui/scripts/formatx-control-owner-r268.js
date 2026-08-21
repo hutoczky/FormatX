@@ -19,6 +19,21 @@ const isMobile=()=>mobileQuery.matches;
 function stripInline(node){
   if(node instanceof HTMLElement&&node.hasAttribute('style'))node.removeAttribute('style');
 }
+function retireLegacyMenu(node){
+  if(!(node instanceof HTMLElement)||node.classList.contains('fx-reference-menu-button'))return;
+  node.removeAttribute('id');
+  node.classList.remove('menu-toggle','fx-organism-system-toggle');
+  node.dataset.fxLegacyMenu='true';
+  node.hidden=true;
+  node.setAttribute('aria-hidden','true');
+  node.setAttribute('tabindex','-1');
+  node.style.removeProperty('transform');
+  node.style.removeProperty('translate');
+}
+function retireLegacyMenus(){
+  for(const legacy of document.querySelectorAll('#fx-reference-legacy-menu,.menu-toggle:not(.fx-reference-menu-button),.fx-organism-system-toggle:not(.fx-reference-menu-button),[data-fx-legacy-menu="true"]'))retireLegacyMenu(legacy);
+  root.dataset.fxLegacyMenuRetirementR280='contained-no-200vw';
+}
 function closeConflictingPanels(){
   root.classList.remove('fx-organism-menu-open','fx-page-scrolling');
   document.body?.classList.remove('fx-organism-panel-open');
@@ -71,7 +86,7 @@ function canonicalMenu(topbar){
     current.replaceWith(clean);current=clean;
   }
   for(const duplicate of Array.from(document.querySelectorAll('#menu-toggle'))){
-    if(duplicate!==current){duplicate.removeAttribute('id');if(duplicate instanceof HTMLElement)duplicate.dataset.fxLegacyMenu='true';}
+    if(duplicate!==current)retireLegacyMenu(duplicate);
   }
   current.id='menu-toggle';
   current.type='button';
@@ -111,10 +126,7 @@ function canonicalHeader(hero){
     if(lang.parentElement!==topbar)topbar.appendChild(lang);
   }
   canonicalMenu(topbar);
-  for(const legacy of document.querySelectorAll('.menu-toggle:not(.fx-reference-menu-button),.fx-organism-system-toggle:not(.fx-reference-menu-button),[data-fx-legacy-menu="true"]')){
-    if(!(legacy instanceof HTMLElement))continue;
-    legacy.hidden=true;legacy.setAttribute('aria-hidden','true');legacy.setAttribute('tabindex','-1');
-  }
+  retireLegacyMenus();
   root.dataset.fxReferenceHeaderLayout=isMobile()?'r264-mobile-no-overlap':'r264-desktop-three-control';
   return true;
 }
@@ -195,7 +207,10 @@ function reconcile(force=false){
   queued=false;if(applying)return false;
   const hero=document.getElementById('hero');if(!(hero instanceof HTMLElement))return false;
   const mobile=isMobile();
-  if(!force&&root.dataset.fxControlOwnerR268==='ready'&&mobile===lastMobile&&healthy(hero,mobile))return true;
+  if(!force&&root.dataset.fxControlOwnerR268==='ready'&&mobile===lastMobile&&healthy(hero,mobile)){
+    retireLegacyMenus();
+    return true;
+  }
   applying=true;
   try{
     const headerReady=canonicalHeader(hero),controlsReady=canonicalControls(hero);
@@ -205,7 +220,7 @@ function reconcile(force=false){
       root.dataset.fxControlOwnerR268='ready';
       bootObserver?.disconnect();bootObserver=null;
       if(bootTimer)clearTimeout(bootTimer);bootTimer=0;
-      dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r268'}}));
+      dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r280'}}));
       return true;
     }
     return false;
@@ -242,6 +257,7 @@ document.addEventListener('click',event=>{
 },true);
 addEventListener('keydown',event=>{if(event.key==='Escape')setMenuOpen(false);});
 for(const eventName of ['formatx:languagechange','formatx:real3dready','formatx:coredetailready','formatx:organisminterfaceready','formatx:mobilelayoutready','pageshow'])addEventListener(eventName,()=>schedule(eventName==='formatx:languagechange'),{passive:true});
+addEventListener('formatx:immersiveactivate',()=>schedule(true),{passive:true});
 addEventListener('resize',()=>schedule(true),{passive:true});
 addEventListener('orientationchange',()=>schedule(true),{passive:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
