@@ -41,9 +41,14 @@ namespace FormatX.Services
         UpdateState = state,
         UpdateProgress = Clamp01(progress),
         StatusText = string.IsNullOrWhiteSpace(statusText) ? s.StatusText : statusText!,
-        Operation = state is MagUpdateState.Downloading or MagUpdateState.ChecksumVerification or MagUpdateState.Extracting or MagUpdateState.Installing
-          ? MagOperation.Updating
-          : s.Operation
+        Operation = state switch
+        {
+          MagUpdateState.Downloading or MagUpdateState.ChecksumVerification or MagUpdateState.Extracting or MagUpdateState.Installing => MagOperation.Updating,
+          MagUpdateState.Current or MagUpdateState.Completed => MagOperation.Idle,
+          _ => s.Operation
+        },
+        OperationProgress = state is MagUpdateState.Current or MagUpdateState.Completed ? 0 : s.OperationProgress,
+        Activity = state is MagUpdateState.Current or MagUpdateState.Completed ? 0.28 : s.Activity
       });
 
     public void SetIntegrity(MagIntegrityState state)
@@ -64,7 +69,8 @@ namespace FormatX.Services
         Operation = MagOperation.Idle,
         OperationProgress = 0,
         Activity = 0.28,
-        StatusText = statusText
+        StatusText = statusText,
+        Severity = MagSeverity.Normal
       });
 
     public void Fail(string statusText, bool critical = false)
