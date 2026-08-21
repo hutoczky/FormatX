@@ -164,3 +164,201 @@ body.fx-organism-panel-open .fx-core-real3d-stage {
     transition-duration: 120ms;
   }
 }
+
+/* r284 — render-blocking settled geometry.
+   These selectors intentionally outrank transitional r244/r207 ownership so
+   first paint already has the final stable composition instead of reflowing
+   through legacy intermediate states. Visual materials remain owned elsewhere. */
+@media (max-width: 900px), (pointer: coarse) {
+  html:root:root,
+  html:root:root body.living-architecture {
+    max-width: 100% !important;
+    overflow-x: clip !important;
+  }
+
+  html:root:root body.living-architecture #fx-reference-legacy-menu,
+  html:root:root body.living-architecture .menu-toggle.fx-organism-system-toggle:not(.fx-reference-menu-button) {
+    position: fixed !important;
+    inset: 0 auto auto 0 !important;
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+    translate: none !important;
+    clip-path: inset(100%) !important;
+  }
+
+  html:root:root body.living-architecture .topbar .brand {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 132px !important;
+    overflow: hidden !important;
+  }
+
+  html:root:root body.living-architecture .topbar .brand > * { min-width: 0 !important; }
+  html:root:root body.living-architecture .topbar .brand strong {
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    gap: 0 !important;
+    overflow: visible !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-space {
+    order: 0 !important;
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(390px, 100vw, 500px) !important;
+    min-height: clamp(390px, 100vw, 500px) !important;
+    max-height: 500px !important;
+    margin: 0 auto !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid:not(:has(> .fx-reference-controls-r204)) > .hero-space {
+    margin-bottom: 110px !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204 {
+    order: 1 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 50px) !important;
+    align-items: start !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    box-sizing: border-box !important;
+    width: max-content !important;
+    max-width: calc(100% - 24px) !important;
+    min-height: 76px !important;
+    margin: 14px auto 20px !important;
+    padding: 0 4px 20px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid > .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    align-self: center !important;
+    width: calc(100% - 24px) !important;
+    max-width: 680px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto 26px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  html:root:root body.living-architecture .topbar .brand { max-width: 126px !important; }
+  html:root:root body.living-architecture .topbar .brand small { display: none !important; }
+  html:root:root body.living-architecture .topbar .brand strong {
+    font-size: 11px !important;
+    letter-spacing: .09em !important;
+  }
+}
+
+@media (min-width: 901px) {
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+  }
+
+  html:root:root body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-grid > .hero-space {
+    grid-area: space !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(520px, 42vw, 620px) !important;
+    min-height: 520px !important;
+    max-height: 620px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-heading {
+    grid-area: heading !important;
+    min-height: 24px !important;
+  }
+
+  html:root:root body.living-architecture #hero .fx-reference-proof {
+    grid-area: proof !important;
+    min-height: 258px !important;
+  }
+}
