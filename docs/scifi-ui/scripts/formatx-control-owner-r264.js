@@ -18,6 +18,14 @@
     if (node instanceof HTMLElement && node.hasAttribute('style')) node.removeAttribute('style');
   }
 
+  function liveMenuButton() {
+    const current = document.getElementById('menu-toggle');
+    if (!(current instanceof HTMLButtonElement)) return null;
+    if (!current.classList.contains('fx-reference-menu-button')) return null;
+    menu = current;
+    return current;
+  }
+
   function setMenuRenderOpen(nav, open) {
     const owned = ['display', 'visibility', 'opacity', 'pointer-events', 'clip-path'];
     if (!open) {
@@ -38,10 +46,11 @@
 
   function setMenuOpen(open) {
     const nav = document.getElementById('main-nav');
-    if (!(nav instanceof HTMLElement) || !(menu instanceof HTMLButtonElement)) return;
+    const currentMenu = liveMenuButton();
+    if (!(nav instanceof HTMLElement) || !(currentMenu instanceof HTMLButtonElement)) return;
     nav.classList.toggle('open', open);
-    menu.classList.toggle('open', open);
-    menu.setAttribute('aria-expanded', String(open));
+    currentMenu.classList.toggle('open', open);
+    currentMenu.setAttribute('aria-expanded', String(open));
     root.classList.toggle('fx-organism-menu-open', open);
     setMenuRenderOpen(nav, open);
     dispatchEvent(new CustomEvent('formatx:menustatechange', {
@@ -274,21 +283,23 @@
   }
 
   document.addEventListener('pointerdown', event => {
-    if (!(menu instanceof HTMLButtonElement)) return;
+    const currentMenu = liveMenuButton();
+    if (!(currentMenu instanceof HTMLButtonElement)) return;
     const nav = document.getElementById('main-nav');
     if (!(nav instanceof HTMLElement) || !nav.classList.contains('open')) return;
     const target = event.target;
-    if (target instanceof Node && (menu.contains(target) || nav.contains(target))) return;
+    if (target instanceof Node && (currentMenu.contains(target) || nav.contains(target))) return;
     setMenuOpen(false);
   }, true);
 
-  // Single canonical activation path. Capture at document level before any
-  // target/bubble handler left by apex/r244/organism generations, toggle exactly
-  // once, then stop the event so nothing can immediately undo the state.
+  // Single canonical activation path. Resolve the live DOM button on every
+  // click so late r244/mobile-runtime replacement cannot leave the owner bound
+  // to a detached historical node. Then stop legacy handlers and toggle once.
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
     const menuTarget = target?.closest('#menu-toggle.fx-reference-menu-button');
-    if (menuTarget instanceof HTMLButtonElement && menuTarget === menu) {
+    if (menuTarget instanceof HTMLButtonElement) {
+      menu = menuTarget;
       event.preventDefault();
       event.stopImmediatePropagation();
       const nav = document.getElementById('main-nav');
