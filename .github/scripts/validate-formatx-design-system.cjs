@@ -81,8 +81,15 @@ async function inspect(browser, config, viewport) {
   if (config.waitForMotionCss) {
     await page.waitForFunction(() => {
       const link = document.querySelector('link[data-fx-runtime-static-r243="true"]');
+      const state = document.documentElement.dataset.fxMotionRuntimeR239 || '';
+      const validState = [
+        'requested-r243',
+        'core-ready-r284-mobile-idle-safe',
+        'core-ready-r284-desktop-idle-safe',
+        'enhanced-r284-user-intent'
+      ].includes(state);
       return document.documentElement.dataset.fxMotionCssR243 === 'external-strict-csp'
-        && document.documentElement.dataset.fxMotionRuntimeR239 === 'requested-r243'
+        && validState
         && link && link.sheet;
     }, null, { timeout: 20000 });
   }
