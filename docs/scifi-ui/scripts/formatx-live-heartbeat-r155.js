@@ -1,16 +1,11 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-/* r183/r209: keep the public r155/r158 identities for runtime compatibility,
-   but drive the visible heartbeat from the display compositor clock with a
-   wider, lower-amplitude envelope so it reads as breathing, never flashing.
-   The crystal DOM box never scales: the existing r166 internal canvas renderer
-   owns the four-tip body pulse, so mobile layout measurements remain stable. */
 const VERSION='js-reactive-heartbeat-r155';
 const MODE='r158-lub-dub-seamless-living';
 const SHAPE_MODE='r183-display-synced-internal-canvas';
 const SEAMLESS='/scifi-ui/styles/formatx-seamless-living-r158.css?v=20260815-r165-space-atmosphere-bridge';
-if(root.dataset.fxLiveHeartbeatR155===VERSION&&root.dataset.fxLivingHeartbeatModeR158===MODE&&root.dataset.fxLivingShapeModeR167===SHAPE_MODE)return;
+if(root.dataset.fxLiveHeartbeatR155===VERSION&&root.dataset.fxHeartbeatSchedulerR183==='compositor-event-driven-r270')return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){
   root.dataset.fxLiveHeartbeatR155='audit-skip';
   root.dataset.fxLivingHeartbeatModeR158='audit-skip';
@@ -22,11 +17,8 @@ root.dataset.fxLivingHeartbeatModeR158='booting';
 root.dataset.fxLivingShapeModeR167='booting';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const gauss=(x,c,w)=>Math.exp(-Math.pow((x-c)/w,2));
 let host=null,layer=null,detail=null,core=null,ring=null,wave=null;
-let raf=0,seq=0,boost=0,lastInput=0,lastFrame=performance.now();
-let refreshEma=16.67,refreshSamples=0,lastHzReport=0;
+let bootObserver=null,boostTimer=0;
 
 function ensureSeamless(){
   let link=document.querySelector('link[data-fx-seamless-living-r158]');
@@ -49,31 +41,78 @@ function ensureStyle(){
     #hero .fx-r155-heartbeat-wave{
       position:absolute;left:50%;top:49%;pointer-events:none;border-radius:50%;
       transform:translate3d(-50%,-50%,0);transform-origin:50% 50%;mix-blend-mode:screen;
-      will-change:transform,opacity,filter;contain:layout paint style;
-      backface-visibility:hidden;-webkit-backface-visibility:hidden;
+      will-change:transform,opacity;contain:layout paint style;backface-visibility:hidden;
     }
     #hero .fx-r155-heartbeat-core{
       z-index:31;width:clamp(104px,12vw,188px);aspect-ratio:1;
       background:radial-gradient(circle,rgba(255,255,255,.99) 0 1%,rgba(222,255,255,.84) 2.4%,rgba(83,239,255,.46) 7.5%,rgba(43,205,255,.20) 18%,rgba(164,76,255,.14) 31%,transparent 66%);
       box-shadow:0 0 16px rgba(220,255,255,.40),0 0 35px rgba(55,220,255,.22),0 0 62px rgba(146,70,255,.12);
+      animation:fx-r270-heart-core 1.7s ease-in-out infinite;
     }
     #hero .fx-r155-heartbeat-ring{
       z-index:30;width:clamp(116px,13vw,204px);aspect-ratio:1;border:1px solid rgba(190,253,255,.52);
       box-shadow:0 0 14px rgba(79,230,255,.28),0 0 32px rgba(141,72,255,.12),inset 0 0 18px rgba(97,236,255,.14);
+      animation:fx-r270-heart-ring 1.7s ease-in-out infinite;
     }
     #hero .fx-r155-heartbeat-wave{
       z-index:29;width:clamp(144px,16vw,252px);aspect-ratio:1;border:1px solid rgba(108,235,255,.25);
       box-shadow:0 0 21px rgba(62,216,255,.13),0 0 44px rgba(151,73,255,.08);
+      animation:fx-r270-heart-wave 1.7s ease-in-out infinite;
+    }
+    #hero .fx-core-live-r147-layer.fx-heartbeat-energized .fx-r155-heartbeat-core{opacity:.72!important}
+    #hero .fx-core-live-r147-layer.fx-heartbeat-energized .fx-r155-heartbeat-ring{opacity:.62!important}
+    #hero .fx-core-live-r147-layer.fx-heartbeat-energized .fx-r155-heartbeat-wave{opacity:.38!important}
+    html[data-fx-reference-motion-paused="true"] #hero .fx-r155-heartbeat-core,
+    html[data-fx-reference-motion-paused="true"] #hero .fx-r155-heartbeat-ring,
+    html[data-fx-reference-motion-paused="true"] #hero .fx-r155-heartbeat-wave{animation-play-state:paused!important}
+    @keyframes fx-r270-heart-core{
+      0%,100%{transform:translate3d(-50%,-50%,0) scale(.965);opacity:.38}
+      13%{transform:translate3d(-50%,-50%,0) scale(1.014);opacity:.58}
+      31%{transform:translate3d(-50%,-50%,0) scale(.992);opacity:.48}
+      58%{transform:translate3d(-50%,-50%,0) scale(.973);opacity:.42}
+    }
+    @keyframes fx-r270-heart-ring{
+      0%,100%{transform:translate3d(-50%,-50%,0) scale(.94) rotate(0deg);opacity:.22}
+      13%{transform:translate3d(-50%,-50%,0) scale(1.025) rotate(3deg);opacity:.50}
+      31%{transform:translate3d(-50%,-50%,0) scale(.995) rotate(6deg);opacity:.38}
+      58%{transform:translate3d(-50%,-50%,0) scale(.955) rotate(9deg);opacity:.28}
+    }
+    @keyframes fx-r270-heart-wave{
+      0%,100%{transform:translate3d(-50%,-50%,0) scale(.89);opacity:.09}
+      13%{transform:translate3d(-50%,-50%,0) scale(1.03);opacity:.25}
+      31%{transform:translate3d(-50%,-50%,0) scale(.99);opacity:.18}
+      58%{transform:translate3d(-50%,-50%,0) scale(.92);opacity:.12}
     }
     @media(max-width:900px),(pointer:coarse){
       #hero .fx-r155-heartbeat-core{width:clamp(92px,29vw,132px)}
       #hero .fx-r155-heartbeat-ring{width:clamp(104px,32vw,146px)}
       #hero .fx-r155-heartbeat-wave{width:clamp(128px,39vw,176px)}
     }
+    @media(prefers-reduced-motion:reduce){
+      #hero .fx-r155-heartbeat-core,#hero .fx-r155-heartbeat-ring,#hero .fx-r155-heartbeat-wave{animation:none!important}
+      #hero .fx-r155-heartbeat-core{opacity:.42}
+      #hero .fx-r155-heartbeat-ring{opacity:.26}
+      #hero .fx-r155-heartbeat-wave{opacity:.10}
+    }
   `;
   document.head.appendChild(style);
 }
 
+function energize(){
+  if(!(layer instanceof HTMLElement))return;
+  layer.classList.add('fx-heartbeat-energized');
+  clearTimeout(boostTimer);
+  boostTimer=setTimeout(()=>layer?.classList.remove('fx-heartbeat-energized'),720);
+  try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}
+  root.dataset.fxLiveHeartbeatInteractionR155='active-r270';
+  root.dataset.fxLivingHeartbeatInteractionR158='energized';
+}
+function bindInput(){
+  if(!(host instanceof HTMLElement)||host.dataset.fxHeartbeatBoundR155==='r270')return;
+  host.addEventListener('pointerdown',energize,{passive:true});
+  host.addEventListener('touchstart',energize,{passive:true});
+  host.dataset.fxHeartbeatBoundR155='r270';
+}
 function ensure(){
   ensureSeamless();
   host=document.querySelector('#hero .hero-space');
@@ -87,145 +126,31 @@ function ensure(){
   if(!(core instanceof HTMLElement)){core=document.createElement('span');core.className='fx-r155-heartbeat-core';core.setAttribute('aria-hidden','true');layer.appendChild(core);}
   if(!(ring instanceof HTMLElement)){ring=document.createElement('span');ring.className='fx-r155-heartbeat-ring';ring.setAttribute('aria-hidden','true');layer.appendChild(ring);}
   if(!(wave instanceof HTMLElement)){wave=document.createElement('span');wave.className='fx-r155-heartbeat-wave';wave.setAttribute('aria-hidden','true');layer.appendChild(wave);}
-
-  /* Remove the old r167 CSS box scaling. The internal r166 canvas renderer
-     already performs the four-tip heartbeat every rAF without changing layout. */
-  if(detail instanceof HTMLElement){
-    detail.style.removeProperty('scale');
-    detail.style.setProperty('transform-origin','50% 50%');
-  }
-
-  if(host.dataset.fxHeartbeatBoundR155!=='r183'){
-    const energize=()=>{
-      boost=Math.max(boost,.68);lastInput=performance.now();
-      try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}
-      root.dataset.fxLiveHeartbeatInteractionR155='active-r183';
-    };
-    host.addEventListener('pointerdown',energize,{passive:true});
-    host.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'){boost=Math.max(boost,.18);lastInput=performance.now();}},{passive:true});
-    host.addEventListener('touchstart',energize,{passive:true});
-    host.addEventListener('touchmove',()=>{boost=Math.max(boost,.42);lastInput=performance.now();},{passive:true});
-    host.dataset.fxHeartbeatBoundR155='r183';
-  }
+  for(const item of [core,ring,wave]){item.style.removeProperty('left');item.style.removeProperty('top');item.style.removeProperty('transform');item.style.removeProperty('opacity');item.style.removeProperty('filter');}
+  if(detail instanceof HTMLElement){detail.style.removeProperty('scale');detail.style.setProperty('transform-origin','50% 50%');}
+  bindInput();
   root.dataset.fxLiveHeartbeatR155=VERSION;
   root.dataset.fxLivingHeartbeatModeR158=MODE;
   root.dataset.fxLivingShapeModeR167=SHAPE_MODE;
-  root.dataset.fxLivingShapePulseStateR167=reduced.matches?'reduced-motion-static':'internal-canvas-no-layout-shift';
+  root.dataset.fxLivingShapePulseStateR167=reduced.matches?'reduced-motion-static':'compositor-no-layout-shift-r270';
   root.dataset.fxLivingShapeScaleSupportR167='internal-canvas-r166';
+  root.dataset.fxLiveHeartbeatClockR155='css-compositor-r270';
+  root.dataset.fxHeartbeatSchedulerR183='compositor-event-driven-r270';
+  root.dataset.fxLivingHeartbeatInteractionR158='idle-living';
+  root.dataset.fxLiveHeartbeatPositionR155='50.00,49.00';
   return true;
 }
-
-function inlinePct(name,fallback){
-  if(!(host instanceof HTMLElement))return fallback;
-  const n=parseFloat(host.style.getPropertyValue(name));
-  return Number.isFinite(n)?n:fallback;
-}
-function set(el,prop,value){
-  if(el instanceof HTMLElement&&el.style.getPropertyValue(prop)!==value)el.style.setProperty(prop,value,'important');
-}
-
-function frame(now){
-  raf=requestAnimationFrame(frame);
-  if(document.hidden)return;
-  if(!(host?.isConnected&&layer?.isConnected&&core?.isConnected&&ring?.isConnected&&wave?.isConnected)){
-    if(!ensure())return;
-  }
-
-  const dt=clamp(now-lastFrame||8.3,2,80);lastFrame=now;
-  if(dt<50){refreshEma+=(dt-refreshEma)*.08;refreshSamples++;}
-  const paused=root.dataset.fxReferenceMotionPaused==='true';
-  const still=paused||reduced.matches;
-  const energy=clamp(Number(window.FormatXCoreMobileV69?.energy||window.FormatXCoreCinematic?.energy||.45),0,1.35);
-  if(now-lastInput>90)boost*=Math.pow(.06,dt/1000);if(boost<.002)boost=0;
-
-  /* r209 anti-flash envelope: wider and lower than the old 55–72 ms peaks. */
-  const cycle=still?0:(now%1700)/1700;
-  const lub=still?.15:gauss(cycle,.13,.085)*.72;
-  const dub=still?.08:gauss(cycle,.31,.10)*.36;
-  const beat=clamp(lub+dub,0,.78);
-  const breath=still?.35:(.5+.5*Math.sin(now*.00105-1.05));
-  const shimmer=still?.28:(.5+.5*Math.sin(now*.0048+1.45));
-  const activity=clamp(energy*.42+boost*.36,0,1.05);
-  const x=inlinePct('--fx-r147-light-x',50),y=inlinePct('--fx-r147-light-y',49);
-
-  const coreScale=.965+breath*.012+beat*.045+activity*.018;
-  const ringScale=.940+breath*.016+lub*.085+dub*.060+activity*.024;
-  const waveScale=.890+breath*.022+lub*.140+dub*.100+activity*.038;
-  const coreOpacity=clamp(.36+breath*.08+beat*.16+activity*.10,.34,.74);
-  const ringOpacity=clamp(.22+breath*.06+lub*.17+dub*.12+activity*.08,.20,.62);
-  const waveOpacity=clamp(.09+breath*.04+lub*.09+dub*.07+activity*.055,.08,.36);
-  const brightness=clamp(1.055+breath*.028+beat*.07+activity*.035,1.05,1.20);
-  const saturation=clamp(1.08+shimmer*.035+activity*.05,1.08,1.20);
-  const contrast=clamp(1.12+beat*.02+activity*.018,1.12,1.17);
-  const cyanBlur=clamp(15+breath*3+beat*5+activity*3,15,25);
-  const cyanAlpha=clamp(.17+beat*.07+activity*.055,.16,.30);
-  const violetBlur=clamp(25+breath*4+dub*5+activity*3,25,34);
-  const violetAlpha=clamp(.09+dub*.05+activity*.038,.08,.18);
-  const fieldOpacity=clamp(.58+breath*.08+beat*.05+activity*.045,.56,.76);
-  const fieldBlur=clamp(17+breath*2.4+activity*1.4,17,21);
-
-  set(core,'left',x.toFixed(2)+'%');set(core,'top',y.toFixed(2)+'%');
-  set(ring,'left',x.toFixed(2)+'%');set(ring,'top',y.toFixed(2)+'%');
-  set(wave,'left',x.toFixed(2)+'%');set(wave,'top',y.toFixed(2)+'%');
-  set(core,'transform',`translate3d(-50%,-50%,0) scale(${coreScale.toFixed(4)})`);
-  set(core,'opacity',coreOpacity.toFixed(3));
-  set(core,'filter',`brightness(${(1.03+beat*.10+activity*.045).toFixed(3)}) drop-shadow(0 0 ${(10+beat*7+activity*3).toFixed(1)}px rgba(99,238,255,.30))`);
-  set(ring,'transform',`translate3d(-50%,-50%,0) scale(${ringScale.toFixed(4)}) rotate(${((now*.010)+(x-y)*.4)%360}deg)`);
-  set(ring,'opacity',ringOpacity.toFixed(3));
-  set(wave,'transform',`translate3d(-50%,-50%,0) scale(${waveScale.toFixed(4)})`);
-  set(wave,'opacity',waveOpacity.toFixed(3));
-
-  host.style.setProperty('--fx-r158-heart',beat.toFixed(4));
-  host.style.setProperty('--fx-r158-breath',breath.toFixed(4));
-  host.style.setProperty('--fx-r158-activity',activity.toFixed(4));
-  host.style.setProperty('--fx-r158-heart-x',x.toFixed(2)+'%');
-  host.style.setProperty('--fx-r158-heart-y',y.toFixed(2)+'%');
-  host.style.setProperty('--fx-r158-detail-brightness',brightness.toFixed(3));
-  host.style.setProperty('--fx-r158-detail-saturation',saturation.toFixed(3));
-  host.style.setProperty('--fx-r158-detail-contrast',contrast.toFixed(3));
-  host.style.setProperty('--fx-r158-cyan-blur',cyanBlur.toFixed(1)+'px');
-  host.style.setProperty('--fx-r158-cyan-alpha',cyanAlpha.toFixed(3));
-  host.style.setProperty('--fx-r158-violet-blur',violetBlur.toFixed(1)+'px');
-  host.style.setProperty('--fx-r158-violet-alpha',violetAlpha.toFixed(3));
-  host.style.setProperty('--fx-r158-field-opacity',fieldOpacity.toFixed(3));
-  host.style.setProperty('--fx-r158-field-blur',fieldBlur.toFixed(1)+'px');
-
-  const hero=document.getElementById('hero');
-  if(hero instanceof HTMLElement){
-    hero.style.setProperty('--fx-r158-heart-x',x.toFixed(2)+'%');
-    hero.style.setProperty('--fx-r158-heart-y',y.toFixed(2)+'%');
-    hero.style.setProperty('--fx-r158-field-opacity',fieldOpacity.toFixed(3));
-    hero.style.setProperty('--fx-r158-field-blur',fieldBlur.toFixed(1)+'px');
-  }
-
-  seq++;
-  root.dataset.fxLiveHeartbeatTickR155=String(seq);
-  root.dataset.fxLiveHeartbeatPhaseR155=beat.toFixed(4);
-  root.dataset.fxLiveHeartbeatPositionR155=`${x.toFixed(2)},${y.toFixed(2)}`;
-  root.dataset.fxLiveHeartbeatEnergyR155=activity.toFixed(3);
-  root.dataset.fxLiveHeartbeatPausedR155=String(still);
-  root.dataset.fxLivingHeartbeatBeatR158=`${lub.toFixed(3)},${dub.toFixed(3)},${breath.toFixed(3)}`;
-  root.dataset.fxLivingHeartbeatInteractionR158=boost>.04?'energized':'idle-living';
-  root.dataset.fxLivingShapeScaleR167='1.0000,1.0000';
-  root.dataset.fxLivingShapeEnvelopeR167=`${lub.toFixed(3)},${dub.toFixed(3)},${beat.toFixed(3)}`;
-  root.dataset.fxLiveHeartbeatClockR155='requestAnimationFrame-display-synced-r183-r209-smooth';
-  root.dataset.fxHeartbeatSchedulerR183='display-refresh-adaptive';
-
-  if(now-lastHzReport>900&&refreshSamples>8){
-    const hz=clamp(1000/refreshEma,1,500);
-    root.dataset.fxDisplayRefreshHzR183=hz.toFixed(1);
-    lastHzReport=now;refreshSamples=0;
-  }
-}
-
 function start(){
-  if(!ensure())return;
-  if(!raf){lastFrame=performance.now();raf=requestAnimationFrame(frame);}
-  root.dataset.fxLiveHeartbeatClockR155='requestAnimationFrame-display-synced-r183-r209-smooth';
-  root.dataset.fxHeartbeatSchedulerR183='display-refresh-adaptive';
+  if(ensure()){
+    bootObserver?.disconnect();bootObserver=null;
+    return;
+  }
+  if(bootObserver)return;
+  const target=document.body||document.documentElement;
+  bootObserver=new MutationObserver(()=>{if(ensure()){bootObserver.disconnect();bootObserver=null;}});
+  bootObserver.observe(target,{childList:true,subtree:true});
+  setTimeout(()=>{bootObserver?.disconnect();bootObserver=null;ensure();},4000);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-const mo=new MutationObserver(()=>{if(!host?.isConnected||!layer?.isConnected||!detail?.isConnected)ensure();});
-mo.observe(document.documentElement,{childList:true,subtree:true});
-addEventListener('pageshow',start,{passive:true});
+for(const eventName of ['formatx:real3dready','formatx:coredetailready','pageshow'])addEventListener(eventName,ensure,{passive:true});
 }());
