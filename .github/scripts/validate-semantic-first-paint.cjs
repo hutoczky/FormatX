@@ -76,8 +76,11 @@ async function runCase(browser, { width, height, language }) {
   assert.deepEqual(runtimeErrors, [], `runtime errors: ${runtimeErrors.join(' | ')}`);
   assert.equal(state.lang, language, `language mismatch: ${JSON.stringify(state)}`);
   assert.equal(state.categoryRuntime, 'v1', `category runtime missing: ${JSON.stringify(state)}`);
-  assert.match(state.contentGate, /^reduced-motion-semantic-r243|^requested-r243$/,
-    `semantic gate did not hydrate before interaction: ${JSON.stringify(state)}`);
+  assert.match(
+    state.contentGate,
+    /^(?:reduced-motion-semantic-r265|requested-r265)$/,
+    `semantic gate did not hydrate before interaction: ${JSON.stringify(state)}`,
+  );
   assert.ok(state.deckTitle.length > 0, `empty category title: ${JSON.stringify(state)}`);
   assert.equal(state.deckCards, 4, `category cards missing: ${JSON.stringify(state)}`);
   assert.ok(state.proofTitle.length > 0, `proof title missing: ${JSON.stringify(state)}`);
