@@ -76,19 +76,93 @@ async function primeScrollReveals(page) {
 }
 
 async function waitForStableHero(page, mobile) {
-  await page.waitForFunction(isMobile => {
-    const visible = selector => {
-      const element = document.querySelector(selector);
-      if (!element) return false;
+  try {
+    await page.waitForFunction(isMobile => {
+      const visible = selector => {
+        const element = document.querySelector(selector);
+        if (!element) return false;
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
+      };
+      if (isMobile) {
+        return visible('#hero .hero-space')
+          && visible('#hero .fx-reference-controls-r204')
+          && visible('#hero .fx-reference-controls-r204 .fx-three-sound')
+          && visible('#hero .fx-reference-controls-r204 .fx-reference-ask')
+          && visible('#hero .fx-reference-controls-r204 .fx-reference-pause')
+          && visible('#menu-toggle');
+      }
+      return visible('#hero-title') && visible('#hero .hero-lead') && visible('#hero-download');
+    }, mobile, { timeout: 12000 });
+  } catch (error) {
+    const state = await page.evaluate(() => {
+      const inspect = selector => {
+        const element = document.querySelector(selector);
+        if (!element) return { selector, exists: false };
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return {
+          selector,
+          exists: true,
+          display: style.display,
+          visibility: style.visibility,
+          opacity: style.opacity,
+          left: rect.left,
+          right: rect.right,
+          top: rect.top,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height
+        };
+      };
+      return [
+        '#hero .hero-space',
+        '#hero .fx-reference-controls-r204',
+        '#hero .fx-reference-controls-r204 .fx-three-sound',
+        '#hero .fx-reference-controls-r204 .fx-reference-ask',
+        '#hero .fx-reference-controls-r204 .fx-reference-pause',
+        '#menu-toggle',
+        '#hero-title',
+        '#hero .hero-lead',
+        '#hero-download'
+      ].map(inspect);
+    });
+    throw new Error('Hero readiness timeout: ' + JSON.stringify(state) + '\n' + (error.stack || error));
+  }
+}
+
+async function horizontalOverflowDiagnostics(page) {
+  return page.evaluate(() => {
+    const viewport = document.documentElement.clientWidth;
+    const offenders = [];
+    for (const element of document.querySelectorAll('body *')) {
       const style = getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden') continue;
       const rect = element.getBoundingClientRect();
-      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
-    };
-    if (isMobile) {
-      return visible('#hero .hero-space') && visible('#hero .scroll-cue') && visible('#menu-toggle');
+      if (!Number.isFinite(rect.left) || !Number.isFinite(rect.right) || rect.width <= 0 || rect.height <= 0) continue;
+      if (rect.left < -2 || rect.right > viewport + 2) {
+        offenders.push({
+          tag: element.tagName.toLowerCase(),
+          id: element.id || '',
+          className: typeof element.className === 'string' ? element.className.slice(0, 160) : '',
+          left: Math.round(rect.left * 10) / 10,
+          right: Math.round(rect.right * 10) / 10,
+          width: Math.round(rect.width * 10) / 10,
+          position: style.position,
+          transform: style.transform
+        });
+      }
     }
-    return visible('#hero-title') && visible('#hero .hero-lead') && visible('#hero-download');
-  }, mobile, { timeout: 12000 });
+    return {
+      clientWidth: viewport,
+      scrollWidth: document.documentElement.scrollWidth,
+      overflow: document.documentElement.scrollWidth - viewport,
+      offenders: offenders
+        .sort((a, b) => Math.max(b.right - viewport, -b.left) - Math.max(a.right - viewport, -a.left))
+        .slice(0, 16)
+    };
+  });
 }
 
 async function commonAssertions(page, mobile) {
@@ -102,8 +176,8 @@ async function commonAssertions(page, mobile) {
     assert(!overlap(lead, cta), 'Primary CTA overlaps hero copy');
   }
 
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  assert(overflow <= 2, 'Horizontal overflow detected: ' + overflow + 'px');
+  const overflowState = await horizontalOverflowDiagnostics(page);
+  assert(overflowState.overflow <= 2, 'Horizontal overflow detected: ' + JSON.stringify(overflowState));
 
   const languageState = await page.evaluate(() => {
     const visible = element => {
@@ -131,12 +205,23 @@ async function commonAssertions(page, mobile) {
 
     const heroCopy = await box(page, '#hero .hero-copy', false);
     const heroSpace = await box(page, '#hero .hero-space');
-    const cue = await box(page, '#hero .scroll-cue');
+    const controls = await box(page, '#hero .fx-reference-controls-r204');
+    const sound = await box(page, '#hero .fx-reference-controls-r204 .fx-three-sound');
+    const ask = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-ask');
+    const pause = await box(page, '#hero .fx-reference-controls-r204 .fx-reference-pause');
+    const heading = await box(page, '#hero .fx-reference-heading');
     const category = await box(page, '.fx-category-deck--standalone, .fx-category-deck');
 
-    if (heroCopy) assert(!overlap(heroCopy, heroSpace), 'Mobile 3D field overlaps hero copy');
-    assert(!overlap(heroSpace, cue), 'Mobile chapter cue overlaps 3D field');
-    assert(!overlap(cue, category), 'Mobile next section overlaps chapter cue');
+    assert(sound.width >= 44 && sound.height >= 44, 'Mobile sound target is too small');
+    assert(ask.width >= 44 && ask.height >= 44, 'Mobile ASK target is too small');
+    assert(pause.width >= 44 && pause.height >= 44, 'Mobile pause target is too small');
+    assert(!overlap(sound, ask, 2), 'Mobile sound and ASK controls overlap');
+    assert(!overlap(ask, pause, 2), 'Mobile ASK and pause controls overlap');
+    assert(Math.abs(sound.top - ask.top) <= 8 && Math.abs(ask.top - pause.top) <= 8, 'Mobile hero controls are not one horizontal row');
+    assert(controls.top >= heroSpace.bottom - 2, 'Mobile hero controls must follow the MAG in normal flow');
+    if (heroCopy) assert(heroCopy.top >= controls.bottom - 2, 'Mobile hero copy must follow the controls');
+    assert(heading.top >= (heroCopy?.bottom || controls.bottom) - 2, 'Mobile proof heading must follow hero content');
+    assert(category.top >= heading.bottom - 2, 'Mobile next section must follow the hero reference content');
 
     const proofGrid = page.locator('.fx-award-proof__grid').first();
     if (await proofGrid.count()) {
@@ -200,8 +285,8 @@ async function publicPage(browser, name, pathname, selector, viewport = { width:
   try {
     await page.goto(origin + pathname, { waitUntil: 'networkidle' });
     await page.waitForSelector(selector, { timeout: 10000 });
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    assert(overflow <= 2, pathname + ' horizontal overflow: ' + overflow + 'px');
+    const overflowState = await horizontalOverflowDiagnostics(page);
+    assert(overflowState.overflow <= 2, pathname + ' horizontal overflow: ' + JSON.stringify(overflowState));
   } catch (error) {
     failure = error;
   } finally {
