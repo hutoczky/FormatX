@@ -77,6 +77,42 @@ html body.living-architecture .topbar .fx-reference-menu-button.fx-control-owner
   transform: translateX(-50%) rotate(-45deg) !important;
 }
 
+/* r264 owns both the state and the render-tree contract of the navigation.
+   Older generations may keep closed-state display/visibility declarations;
+   these selectors make .open physically visible on both viewport classes. */
+html body #main-nav {
+  position: fixed !important;
+  display: grid !important;
+  box-sizing: border-box !important;
+  z-index: 12045 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  border: 1px solid rgba(122, 199, 231, .22) !important;
+  background: linear-gradient(180deg, rgba(3, 14, 24, .985), rgba(2, 9, 17, .99)) !important;
+  box-shadow: 0 26px 90px rgba(0, 0, 0, .52), inset 0 0 32px rgba(72, 199, 255, .035) !important;
+  backdrop-filter: blur(22px) saturate(132%) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(-10px) scale(.985) !important;
+  translate: none !important;
+  transition: opacity .18s ease, visibility .18s ease, transform .18s ease !important;
+}
+
+html body #main-nav.open {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translateY(0) scale(1) !important;
+}
+
+html body #main-nav.open a,
+html body #main-nav.open button {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 {
   box-sizing: border-box !important;
   display: grid !important;
@@ -224,6 +260,18 @@ html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pa
 }
 
 @media (min-width: 901px) {
+  html body #main-nav {
+    top: 76px !important;
+    right: 22px !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: min(360px, calc(100vw - 44px)) !important;
+    min-width: 280px !important;
+    max-height: calc(100dvh - 92px) !important;
+    padding: 14px !important;
+    border-radius: 22px !important;
+  }
+
   html body.living-architecture .topbar .fx-reference-menu-button.fx-control-owner-r264 {
     top: 12px !important;
     right: 22px !important;
@@ -260,6 +308,26 @@ html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pa
 }
 
 @media (max-width: 900px) {
+  html body #main-nav {
+    top: max(76px, env(safe-area-inset-top)) !important;
+    right: 12px !important;
+    bottom: auto !important;
+    left: 12px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: calc(100dvh - max(92px, calc(env(safe-area-inset-top) + 92px))) !important;
+    padding: 18px !important;
+    border-radius: 22px !important;
+  }
+
+  html body #main-nav a {
+    display: flex !important;
+    min-height: 48px !important;
+    align-items: center !important;
+    padding: 12px 14px !important;
+  }
+
   html body.living-architecture .topbar .brand {
     max-width: calc(100% - 190px) !important;
     overflow: hidden !important;
