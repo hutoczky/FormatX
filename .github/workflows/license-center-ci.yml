@@ -6,9 +6,13 @@ on:
       - 'billing-worker/src/license-center.js'
       - 'billing-worker/src/signed-license-api.js'
       - 'billing-worker/src/production-with-license.js'
+      - 'billing-worker/src/production-content-entry.js'
+      - 'billing-worker/src/production-content-base.js'
       - 'billing-worker/license-migrations/**'
       - 'billing-worker/scripts/deploy-license-center-live.sh'
       - 'billing-worker/test/license-center*.js'
+      - 'billing-worker/test/production-routing.spec.js'
+      - 'billing-worker/test/canonical-entry.spec.js'
       - 'billing-worker/vitest.license-workers.config.js'
       - 'billing-worker/wrangler.license-test.jsonc'
       - 'billing-worker/package.json'
@@ -39,6 +43,8 @@ jobs:
         run: |
           node --check src/license-center.js
           node --check src/production-with-license.js
+          node --check src/production-content-entry.js
+          node --check test/canonical-entry.spec.js
           node --check ../docs/fx-owner-license/app.js
           node --check vitest.license-workers.config.js
           node --check test/license-center-e2e.spec.js
