@@ -9,12 +9,48 @@ function assert(value, message) {
   if (!value) throw new Error(message);
 }
 
+async function overflowDiagnostics(page) {
+  return page.evaluate(() => {
+    const viewport = innerWidth;
+    const offenders = [];
+    for (const element of document.querySelectorAll('body *')) {
+      const style = getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden') continue;
+      const rect = element.getBoundingClientRect();
+      if (!Number.isFinite(rect.left) || !Number.isFinite(rect.right) || rect.width <= 0 || rect.height <= 0) continue;
+      if (rect.left < -1 || rect.right > viewport + 1) {
+        offenders.push({
+          tag: element.tagName.toLowerCase(),
+          id: element.id || '',
+          className: typeof element.className === 'string' ? element.className.slice(0, 180) : '',
+          left: Math.round(rect.left * 10) / 10,
+          right: Math.round(rect.right * 10) / 10,
+          top: Math.round(rect.top * 10) / 10,
+          width: Math.round(rect.width * 10) / 10,
+          position: style.position,
+          display: style.display,
+          overflowX: style.overflowX,
+          transform: style.transform
+        });
+      }
+    }
+    return {
+      viewport,
+      doc: document.documentElement.scrollWidth,
+      body: document.body.scrollWidth,
+      overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - viewport,
+      rootClasses: document.documentElement.className,
+      bodyClasses: document.body.className,
+      immersive: document.documentElement.dataset.fxImmersive || '',
+      interfaceReady: document.documentElement.classList.contains('fx-organism-interface-ready'),
+      offenders: offenders
+        .sort((a, b) => Math.max(b.right - viewport, -b.left) - Math.max(a.right - viewport, -a.left))
+        .slice(0, 24)
+    };
+  });
+}
+
 async function activateRuntime(page) {
-  // The current production architecture deliberately defers Organism/Thought
-  // Genome modules until explicit activation. Some current surfaces keep the
-  // legacy launch control in the DOM but visually retire it because the native
-  // core already owns the hero. Only click a genuinely visible control;
-  // otherwise dispatch the same activation event used by the runtime contract.
   const launch = page.locator('.fx-immersive-launch').first();
   if (await launch.count() && await launch.isVisible()) {
     await launch.click();
@@ -57,12 +93,8 @@ async function verify(viewport, mobile) {
 
       window.__fxThoughtGenomeEvents = [];
       window.__fxOrganismShapeEvents = [];
-      addEventListener('formatx:thoughtgenome', event => {
-        window.__fxThoughtGenomeEvents.push(event.detail);
-      });
-      addEventListener('formatx:organismshape', event => {
-        window.__fxOrganismShapeEvents.push(event.detail);
-      });
+      addEventListener('formatx:thoughtgenome', event => window.__fxThoughtGenomeEvents.push(event.detail));
+      addEventListener('formatx:organismshape', event => window.__fxOrganismShapeEvents.push(event.detail));
     });
 
     const page = await context.newPage();
@@ -70,12 +102,7 @@ async function verify(viewport, mobile) {
     page.on('pageerror', error => errors.push(String(error)));
     page.on('console', message => {
       const text = message.text();
-      if (
-        message.type() === 'error'
-        && !/favicon|Failed to load resource:.*status of 404 \(File not found\)|WebGL|WebGPU|GPU/i.test(text)
-      ) {
-        errors.push(text);
-      }
+      if (message.type() === 'error' && !/favicon|Failed to load resource:.*status of 404 \(File not found\)|WebGL|WebGPU|GPU/i.test(text)) errors.push(text);
     });
 
     await page.goto(TEST_URL + '?lang=hu&thought-genome-test=1', { waitUntil: 'domcontentloaded' });
@@ -99,18 +126,16 @@ async function verify(viewport, mobile) {
       };
     });
 
+    const initialOverflow = initial.overflow > 1 ? await overflowDiagnostics(page) : null;
     assert(initial.bubbleHidden, 'thought dialogue must remain closed on startup');
     assert(initial.layerExists && initial.pointerEvents === 'none', 'genome visual layer must exist and remain non-interactive after user activation');
     assert(initial.layerZ < 100, 'genome visual layer must remain behind interactive content');
     assert(initial.controlsExist, 'genome controls were not created');
-    assert(initial.overflow <= 1, 'genome introduced horizontal overflow');
+    assert(initial.overflow <= 1, `genome introduced horizontal overflow (${mobile ? 'mobile' : 'desktop'}): ${JSON.stringify(initialOverflow)}`);
     assert(initial.privacy === 'fingerprint-only', 'genome privacy marker is not fingerprint-only');
     assert(initial.enabled === 'true', 'genome did not start enabled for the validation session');
     assert(initial.forms === '6', 'six-form Thought Genome contract missing');
 
-    // r244 intentionally retires the legacy .fx-organism-thought-trigger from
-    // the visible surface. The production user path is the canonical ASK control
-    // owned by r264, which delegates to the same Organism dialogue runtime.
     const canonicalAsk = page.locator('#hero .fx-reference-controls-r204 .fx-reference-ask').first();
     assert(await canonicalAsk.count() === 1, 'canonical ASK control is missing');
     assert(await canonicalAsk.isVisible(), 'canonical ASK control is not visible');
@@ -123,10 +148,6 @@ async function verify(viewport, mobile) {
     const bubble = page.locator('.fx-organism-thought').first();
     assert(await bubble.isVisible(), 'thought dialogue opened semantically but is not visible');
 
-    // The production Genome UI is progressive disclosure: the advanced Genome
-    // controls intentionally remain hidden until the details summary is opened.
-    // Validate that disclosure itself is visible, then require the controls to
-    // become visible and interactive after the user opens it.
     const disclosure = page.locator('.fx-thought-genome-disclosure').first();
     const disclosureSummary = page.locator('.fx-thought-genome-disclosure > summary').first();
     const openControls = page.locator('.fx-thought-genome-controls').first();
@@ -210,8 +231,9 @@ async function verify(viewport, mobile) {
       };
     });
 
+    const finalOverflow = layout.overflow > 1 ? await overflowDiagnostics(page) : null;
     assert(layout.controlsInside, 'genome controls escape the thought dialogue');
-    assert(layout.overflow <= 1, 'genome controls introduced horizontal overflow');
+    assert(layout.overflow <= 1, `genome controls introduced horizontal overflow (${mobile ? 'mobile' : 'desktop'}): ${JSON.stringify(finalOverflow)}`);
     assert(layout.history.length === 1, 'disabling the genome unexpectedly destroyed local fingerprint history');
     assert(!errors.length, 'browser diagnostics: ' + errors.join(' | '));
     await context.close();
