@@ -110,14 +110,39 @@ function syncTrigger(){
   const h=hero.getBoundingClientRect(),v=visual.getBoundingClientRect();
   if(v.width<20||v.height<20)return;
   /* Keep the hit target on the crystal silhouette, not on the whole square reference canvas.
-     This leaves neighbouring ASK/pause/CTA controls physically clickable. */
+     The final control owner may mount SOUND / ASK / PAUSE after this runtime starts, so the
+     hit layer is also physically capped above that live control row whenever it exists. */
   const insetX=Math.max(0,v.width*.085),insetY=Math.max(0,v.height*.045);
-  trigger.style.left=(v.left-h.left+insetX).toFixed(2)+'px';
-  trigger.style.top=(v.top-h.top+insetY).toFixed(2)+'px';
-  trigger.style.width=Math.max(44,v.width-insetX*2).toFixed(2)+'px';
-  trigger.style.height=Math.max(44,v.height-insetY*2).toFixed(2)+'px';
+  let left=v.left-h.left+insetX;
+  let top=v.top-h.top+insetY;
+  const width=Math.max(44,v.width-insetX*2);
+  let height=Math.max(44,v.height-insetY*2);
+  const controls=hero.querySelector('.fx-reference-controls-r204');
+  if(controls instanceof HTMLElement){
+    const c=controls.getBoundingClientRect();
+    if(c.width>2&&c.height>2){
+      const safeBottom=c.top-h.top-12;
+      const proposedBottom=top+height;
+      if(safeBottom<proposedBottom){
+        if(safeBottom>=top+44)height=safeBottom-top;
+        else{top=Math.max(v.top-h.top,safeBottom-44);height=44;}
+      }
+    }
+  }
+  trigger.style.left=left.toFixed(2)+'px';
+  trigger.style.top=top.toFixed(2)+'px';
+  trigger.style.width=width.toFixed(2)+'px';
+  trigger.style.height=height.toFixed(2)+'px';
   const r=trigger.getBoundingClientRect();const hit=document.elementFromPoint(r.left+r.width*.5,r.top+r.height*.5);
   root.dataset.fxSignatureTrigger=hit===trigger||trigger.contains(hit)?'synced-hit':'synced-obscured';
+  const ask=hero.querySelector('.fx-reference-ask');
+  if(ask instanceof HTMLElement){
+    const a=ask.getBoundingClientRect();
+    if(a.width>2&&a.height>2){
+      const askHit=document.elementFromPoint(a.left+a.width*.5,a.top+a.height*.5);
+      root.dataset.fxSignatureAskHit=askHit===ask||ask.contains(askHit)?'safe':'blocked';
+    }
+  }
 }
 
 function pulseCore(){
@@ -179,8 +204,9 @@ function boot(attempt=0){
     if(attempt<360)return requestAnimationFrame(()=>boot(attempt+1));
     root.dataset.fxSignatureSystem='visual-unavailable';return;
   }
-  addEventListener('resize',onResize,{passive:true});addEventListener('scroll',updateCurrentScene,{passive:true});document.addEventListener('keydown',keydown);
+  addEventListener('resize',onResize,{passive:true});addEventListener('scroll',updateCurrentScene,{passive:true});addEventListener('formatx:controlownerready',onResize,{passive:true});document.addEventListener('keydown',keydown);
   const ro=new ResizeObserver(onResize);ro.observe(hero);ro.observe(host);if(visual)ro.observe(visual);
+  const controls=hero.querySelector('.fx-reference-controls-r204');if(controls instanceof HTMLElement)ro.observe(controls);
   const mo=new MutationObserver(()=>{setText();if(!trigger?.isConnected||!visual?.isConnected){findVisual();ensureTrigger()}});
   const language=document.querySelector('.language-switch');if(language)mo.observe(language,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});
   updateCurrentScene();syncTrigger();root.dataset.fxSignatureSystem=VERSION;root.dataset.fxSignatureUsability='touch-focus-reduced-motion-r185b';
