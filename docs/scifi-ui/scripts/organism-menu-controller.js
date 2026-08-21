@@ -30,6 +30,12 @@
     }
   }
 
+  function r264OwnsMenu(toggle) {
+    return Boolean(ROOT.dataset.fxControlOwnerR264)
+      || toggle.classList.contains('fx-reference-menu-button')
+      || toggle.dataset.fxControlOwnerR264 === 'true';
+  }
+
   function initialise() {
     if (initialised) return;
     const toggle = document.getElementById('menu-toggle');
@@ -37,8 +43,18 @@
     if (!(toggle instanceof HTMLButtonElement) || !(nav instanceof HTMLElement)) return;
     initialised = true;
 
-    toggle.classList.add('fx-organism-system-toggle');
     nav.classList.add('fx-organism-system-menu');
+
+    // r264 is the single cross-viewport menu owner. Do not attach a second
+    // target click handler to its canonical button: doing so opens and closes
+    // the mobile menu in the same click. Legacy pages without r264 keep the
+    // original controller below.
+    if (r264OwnsMenu(toggle)) {
+      ROOT.dataset.fxOrganismMenu = 'delegated-r264';
+      return;
+    }
+
+    toggle.classList.add('fx-organism-system-toggle');
     document.body.append(toggle, nav);
     setOpen(toggle, nav, false);
 
