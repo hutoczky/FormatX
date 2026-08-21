@@ -73,6 +73,218 @@ html body .fx-three-sound.fx-wda-sound-toggle:hover {
   }
 }
 
+/* r263 — one physical control geometry on every viewport.
+   The outer control zone is the only layout box. The legacy rail becomes
+   display:contents, so SOUND | ASK | PAUSE are three independent grid cells
+   and old rail top/right/width rules can no longer make them overlap. */
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 {
+  box-sizing: border-box !important;
+  z-index: 10030 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, 54px) !important;
+  grid-template-rows: minmax(78px, auto) !important;
+  align-items: start !important;
+  justify-content: center !important;
+  justify-items: center !important;
+  column-gap: 14px !important;
+  row-gap: 0 !important;
+  width: max-content !important;
+  max-width: calc(100% - 24px) !important;
+  height: auto !important;
+  min-height: 78px !important;
+  margin: 0 !important;
+  padding: 0 8px 22px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  translate: none !important;
+  overflow: visible !important;
+}
+
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 > .fx-reference-rail {
+  display: contents !important;
+  position: static !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  translate: none !important;
+}
+
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 > .fx-three-sound.fx-wda-sound-toggle,
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask,
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-pause {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  box-sizing: border-box !important;
+  width: 54px !important;
+  min-width: 54px !important;
+  max-width: 54px !important;
+  height: 54px !important;
+  min-height: 54px !important;
+  max-height: 54px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  transform: none !important;
+  translate: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 > .fx-three-sound.fx-wda-sound-toggle {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  font-size: 0 !important;
+  overflow: hidden !important;
+}
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 > .fx-three-sound.fx-wda-sound-toggle::before {
+  content: none !important;
+  display: none !important;
+}
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-pause {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+}
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask span {
+  top: 59px !important;
+  left: 50% !important;
+  width: max-content !important;
+  max-width: 88px !important;
+  transform: translateX(-50%) !important;
+  translate: none !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  html body.living-architecture .topbar .fx-reference-mag-button.fx-reference-mag-text-r263,
+  html body.living-architecture .topbar .fx-language-toggle,
+  html body.living-architecture .topbar .fx-reference-menu-button {
+    position: fixed !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture .topbar .fx-reference-mag-button.fx-reference-mag-text-r263 {
+    top: 11px !important;
+    right: calc(clamp(16px, 6.5vw, 28px) + 113px) !important;
+    display: grid !important;
+    place-items: center !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: rgba(235,247,253,.93) !important;
+    text-indent: 0 !important;
+    overflow: hidden !important;
+    font: 750 10px/1 ui-monospace, SFMono-Regular, Consolas, monospace !important;
+    letter-spacing: .07em !important;
+    border-radius: 14px !important;
+  }
+  html body.living-architecture .topbar .fx-reference-mag-button.fx-reference-mag-text-r263::before,
+  html body.living-architecture .topbar .fx-reference-mag-button.fx-reference-mag-text-r263::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html body.living-architecture .topbar .fx-language-toggle {
+    top: 11px !important;
+    right: calc(clamp(16px, 6.5vw, 28px) + 58px) !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+  }
+  html body.living-architecture .topbar .fx-reference-menu-button {
+    top: 7px !important;
+    right: clamp(16px, 6.5vw, 28px) !important;
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    margin: 0 !important;
+  }
+
+  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 {
+    order: 1 !important;
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    grid-template-columns: repeat(3, 50px) !important;
+    grid-template-rows: minmax(76px, auto) !important;
+    column-gap: 12px !important;
+    width: max-content !important;
+    min-height: 76px !important;
+    margin: 14px auto 20px !important;
+    padding: 0 4px 20px !important;
+  }
+
+  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 > .fx-three-sound.fx-wda-sound-toggle,
+  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask,
+  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-pause {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+  }
+  html body.living-architecture #hero .hero-grid > .fx-reference-controls-r204.fx-reference-controls-r263 .fx-reference-ask span {
+    top: 55px !important;
+  }
+}
+
+@media (min-width: 901px) and (pointer: fine) {
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r263 {
+    position: absolute !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: 30px !important;
+    left: 50% !important;
+    margin: 0 !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html body .fx-three-sound.fx-wda-sound-toggle,
   html body .fx-three-sound.fx-wda-sound-toggle::before {
