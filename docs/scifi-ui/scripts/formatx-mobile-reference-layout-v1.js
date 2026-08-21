@@ -9,8 +9,8 @@ let resizeRaf=0;
 let lastMobile=null;
 const mobileViewport=()=>matchMedia('(max-width:900px)').matches;
 let paused=mobileViewport()?false:root.dataset.fxReferenceMotionPaused==='true';
-if(root.dataset.fxMobileReferenceLayout==='booting-r253'||root.dataset.fxMobileReferenceLayout==='ready-r253')return;
-root.dataset.fxMobileReferenceLayout='booting-r253';
+if(root.dataset.fxMobileReferenceLayout==='booting-r74'||root.dataset.fxMobileReferenceLayout==='ready-v1')return;
+root.dataset.fxMobileReferenceLayout='booting-r74';
 
 function loadStyles(){
  if(!document.querySelector('link[data-fx-mobile-reference-layout-style]')){const l=document.createElement('link');l.rel='stylesheet';l.href='/scifi-ui/styles/formatx-mobile-reference-layout-v1.css?v=20260816-mobile-only-r177';l.dataset.fxMobileReferenceLayoutStyle='true';document.head.appendChild(l)}
@@ -55,7 +55,7 @@ function ensureFlowContent(hero,grid,space){
  ensureControlZone(hero,rail);syncPauseButtons()
 }
 function cleanupDesktopFlow(hero){if(root.dataset.fxReferenceProductionR244==='desktop'){root.dataset.fxReferenceComposition='desktop-reference-r244';return}const zone=hero.querySelector('.fx-reference-controls-r204');const sound=zone?.querySelector('.fx-three-sound');if(sound instanceof HTMLElement)document.body.appendChild(sound);zone?.remove();hero.querySelectorAll('.fx-reference-heading,.fx-reference-proof,.fx-reference-rail').forEach(node=>node.remove());delete root.dataset.fxMobileProofControls;root.dataset.fxReferenceComposition='desktop-native-r177'}
-function create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement))return false;ensureHeader(hero);if(mobileViewport())ensureFlowContent(hero,grid,space);else cleanupDesktopFlow(hero);lastMobile=mobileViewport();root.dataset.fxMobileReferenceLayout='ready-r253';if(root.dataset.fxReferenceProductionR244==='ready')root.dataset.fxReferenceComposition='reference-frame-r244';else if(root.dataset.fxReferenceProductionR244==='desktop')root.dataset.fxReferenceComposition='desktop-reference-r244';else root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r177';return true}
+function create(){const hero=document.getElementById('hero'),grid=hero?.querySelector('.hero-grid'),space=hero?.querySelector('.hero-space');if(!(hero instanceof HTMLElement)||!(grid instanceof HTMLElement)||!(space instanceof HTMLElement))return false;ensureHeader(hero);if(mobileViewport())ensureFlowContent(hero,grid,space);else cleanupDesktopFlow(hero);lastMobile=mobileViewport();root.dataset.fxMobileReferenceLayout='ready-v1';if(root.dataset.fxReferenceProductionR244==='ready')root.dataset.fxReferenceComposition='reference-frame-r244';else if(root.dataset.fxReferenceProductionR244==='desktop')root.dataset.fxReferenceComposition='desktop-reference-r244';else root.dataset.fxReferenceComposition=mobileViewport()?'mag-first-normal-flow-r74':'desktop-native-r177';return true}
 function boot(){if(create())return;if(bootObserver)return;const target=document.body||document.documentElement;bootObserver=new MutationObserver(()=>{if(create()){bootObserver.disconnect();bootObserver=null}});bootObserver.observe(target,{subtree:true,childList:true});setTimeout(()=>{if(bootObserver){bootObserver.disconnect();bootObserver=null;create()}},5000)}
 function scheduleResize(){if(resizeRaf)return;resizeRaf=requestAnimationFrame(()=>{resizeRaf=0;const nowMobile=mobileViewport();if(nowMobile!==lastMobile){loadStyles();create();return}const hero=document.getElementById('hero');if(hero)ensureHeader(hero)})}
 
