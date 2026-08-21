@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: npm install -g @lhci/cli@0.13.x
 
-      - name: Run desktop Lighthouse CI
+      - name: Run desktop Lighthouse CI on the real experience
         id: lighthouse_desktop
         shell: bash
         run: |
@@ -51,14 +51,14 @@ jobs:
           lhci autorun --config=./lighthouserc.json 2>&1 | tee lighthouse-desktop-output.txt
           lhci_status=${PIPESTATUS[0]}
           set -e
-          grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html\?lighthouse=1$' lighthouse-desktop-output.txt
+          grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html$' lighthouse-desktop-output.txt
           mkdir -p lighthouse-results/desktop
           cp -a .lighthouseci/. lighthouse-results/desktop/
           exit "$lhci_status"
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
-      - name: Run mobile Lighthouse CI
+      - name: Run mobile Lighthouse CI on the real experience
         id: lighthouse_mobile
         if: always()
         shell: bash
@@ -69,7 +69,7 @@ jobs:
           lhci autorun --config=./lighthouserc.mobile.json 2>&1 | tee lighthouse-mobile-output.txt
           lhci_status=${PIPESTATUS[0]}
           set -e
-          grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html\?lighthouse=1&mobile=1$' lighthouse-mobile-output.txt
+          grep -Eq 'Running Lighthouse 3 time\(s\) on http://localhost:[0-9]+/scifi-ui/index.html$' lighthouse-mobile-output.txt
           mkdir -p lighthouse-results/mobile
           cp -a .lighthouseci/. lighthouse-results/mobile/
           exit "$lhci_status"
@@ -95,17 +95,22 @@ jobs:
           {
             echo "## Lighthouse CI Results"
             echo
-            echo "Validated surfaces: desktop + mobile"
+            echo "Validated surfaces: desktop + mobile, normal visitor experience"
             echo
-            echo "### Strict thresholds"
-            echo "- Performance ≥ 0.90"
+            echo "### Strict truthful thresholds"
+            echo "- Performance ≥ 0.95; 1.00 remains the optimisation target"
             echo "- Accessibility = 1.00"
             echo "- Best practices = 1.00"
             echo "- SEO = 1.00"
+            echo "- FCP ≤ 1.8s"
             echo "- LCP ≤ 2.5s"
+            echo "- TBT ≤ 200ms"
             echo "- CLS ≤ 0.10"
             echo "- TTFB ≤ 600ms"
             echo "- 3 runs per viewport profile"
+            echo "- No audit-only query parameter"
+            echo "- No forced reduced-motion mode"
+            echo "- No skipped Lighthouse audits"
             echo
             echo "The production site is deployed as one Cloudflare Worker with Static Assets."
           } >> "$GITHUB_STEP_SUMMARY"
@@ -119,10 +124,10 @@ jobs:
         run: |
           if [ "$JOB_STATUS" = 'success' ]; then
             state='success'
-            description='Strict desktop and mobile Lighthouse quality gates passed'
+            description='Real-experience desktop and mobile Lighthouse gates passed'
           else
             state='failure'
-            description='Desktop or mobile Lighthouse quality gate failed'
+            description='Real-experience desktop or mobile Lighthouse gate failed'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \
