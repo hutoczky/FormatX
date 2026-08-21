@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r208 flicker-free canonical mobile-flow source contract. */
+/* FormatX Web Design Awards — canonical mobile-flow and truthful live audit source contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -102,14 +102,14 @@ for (const token of ['canonicalOwner', 'delegated-r208', 'disabled-r208-no-ping-
 assert.match(legacyFlow, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 assert.match(legacyFinalizer, /if\(canonicalOwner\(\)\)[\s\S]*return true;/);
 
-// The production page must force fresh r208 asset URLs and a one-shot cache migration.
+// Production must preload the current canonical mobile owner and one-shot cache migration.
 assert.match(production, /formatx-first-paint-r206\.css\?v=20260818-r206-stable-hero/);
-assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260818-r208-first-paint-owner/);
+assert.match(production, /formatx-mobile-reference-layout-v1\.js\?v=20260820-r248-reference-owner/);
 assert.match(production, /formatx-mobile-layout-r207\.css\?v=20260818-r208-flicker-free/);
 assert.match(production, /formatx-mobile-layout-r207\.js\?v=20260818-r208-flicker-free/);
 assert.match(production, /STARTUP_REVISION = '20260818-r208-flicker-free-owner'/);
 assert.match(production, /X-FormatX-Client-Revision', 'r208-flicker-free-owner/);
-assert.match(production, /X-FormatX-Recovery', 'r208-static-cascade/);
+assert.match(production, /X-FormatX-Recovery', 'r243-language-canonical/);
 assert.match(production, /fx_startup_r208=1/);
 assert.match(production, /r208-one-shot-cleared/);
 
@@ -153,4 +153,4 @@ validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
 for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r208 flicker-free canonical mobile flow, cache migration, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');
+console.log('PASS: canonical mobile flow, cache migration, legacy delegation, award UX, audio, GPU and truthful Lighthouse contracts passed.');
