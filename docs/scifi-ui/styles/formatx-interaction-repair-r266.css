@@ -1,6 +1,7 @@
-/* FormatX r266 — final interaction-layer repair.
-   Keeps canonical hero controls above decorative/3D hit layers and gives an
-   explicitly opened Organism dialogue physical visibility over retired panels. */
+/* FormatX r266/r269 — final interaction and mobile-layout repair.
+   Canonical controls stay above decorative/3D hit layers, explicit Organism
+   dialogue state stays physically visible, and viewport decoration no longer
+   derives its layout box from the asynchronously growing mobile hero. */
 
 html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 {
   z-index: 2147481500 !important;
@@ -33,4 +34,22 @@ html body .fx-organism-dialogue.is-open .fx-organism-thought:not([hidden]) {
 
 html body .fx-organism-dialogue.is-open .fx-organism-thought-trigger {
   pointer-events: auto !important;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  /* The living field is visual decoration. Percentage height tied to #hero
+     made every late proof/control insertion resize a huge painted box, which
+     amplified CLS. Give the field a viewport-stable box around the MAG. */
+  html body.living-architecture #hero::before {
+    top: 92px !important;
+    height: min(560px, 68svh) !important;
+  }
+
+  /* r179 previously moved this large fixed pseudo-element by changing left/top
+     variables during boot. Keep its layout position fixed; interaction remains
+     available through compositor transforms/opacity. */
+  html[data-fx-soty-continuity-r179="ready"] body.living-architecture .fx-r179-field::before {
+    left: 50% !important;
+    top: 42% !important;
+  }
 }
