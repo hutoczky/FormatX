@@ -59,13 +59,15 @@ async function runCase(browser, { width, height, language }) {
     return {
       lang: document.documentElement.lang,
       contentGate: document.documentElement.dataset.fxContentRuntimeR241 || '',
+      stability: document.documentElement.dataset.fxFirstFrameStabilityR283 || '',
       categoryRuntime: document.documentElement.dataset.fxCategoryPositioning || '',
       deckTitle: document.querySelector('[data-fx-category-title]')?.textContent.trim() || '',
       deckCards: document.querySelectorAll('.fx-category-grid article').length,
       proofTitle: document.querySelector('[data-fx-proof-title]')?.textContent.trim() || '',
       proofCards: document.querySelectorAll('.fx-proof-grid article').length,
       emptyHeadings,
-      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      htmlOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      bodyOverflow: document.body.scrollWidth - innerWidth,
       canonical,
       ogUrl,
       alternates,
@@ -78,15 +80,17 @@ async function runCase(browser, { width, height, language }) {
   assert.equal(state.categoryRuntime, 'v1', `category runtime missing: ${JSON.stringify(state)}`);
   assert.match(
     state.contentGate,
-    /^(?:reduced-motion-semantic-(?:r265|r273|r274)|requested-(?:r265|r273|r274))$/,
+    /^(?:reduced-motion-semantic-(?:r243|r265|r273|r274|r283)|requested-(?:r243|r265|r273|r274|r283))$/,
     `semantic gate did not hydrate before interaction: ${JSON.stringify(state)}`,
   );
+  assert.ok(['ready', 'loading'].includes(state.stability), `r283 stability guard missing: ${JSON.stringify(state)}`);
   assert.ok(state.deckTitle.length > 0, `empty category title: ${JSON.stringify(state)}`);
   assert.equal(state.deckCards, 4, `category cards missing: ${JSON.stringify(state)}`);
   assert.ok(state.proofTitle.length > 0, `proof title missing: ${JSON.stringify(state)}`);
   assert.equal(state.proofCards, 4, `proof cards missing: ${JSON.stringify(state)}`);
   assert.deepEqual(state.emptyHeadings, [], `empty semantic headings: ${JSON.stringify(state.emptyHeadings)}`);
-  assert.ok(state.overflow <= 2, `horizontal overflow ${state.overflow}px`);
+  assert.ok(state.htmlOverflow <= 2, `html horizontal overflow ${state.htmlOverflow}px`);
+  assert.ok(state.bodyOverflow <= 2, `body horizontal overflow ${state.bodyOverflow}px`);
   assert.equal(state.canonical, expectedCanonical, `canonical language URL mismatch: ${JSON.stringify(state)}`);
   assert.equal(state.ogUrl, expectedCanonical, `og:url language URL mismatch: ${JSON.stringify(state)}`);
   assert.equal(state.alternates.hu, 'https://formatxsuite.com/?lang=hu');
@@ -105,11 +109,7 @@ async function recoveryCase(browser, language) {
   await page.route('https://formatxsuite.com/**', async route => {
     const url = new URL(route.request().url());
     if (url.pathname === '/scifi-ui/scripts/formatx-canonical-recovery.js') {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/javascript; charset=utf-8',
-        body: RECOVERY_SOURCE,
-      });
+      await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: RECOVERY_SOURCE });
       return;
     }
     await route.fulfill({
@@ -121,8 +121,7 @@ async function recoveryCase(browser, language) {
 
   await page.goto(requested, { waitUntil: 'load' });
   await page.waitForFunction(() => !new URL(location.href).searchParams.has('_fx_redirect_recovery'));
-  const href = page.url();
-  assert.equal(href, `https://formatxsuite.com/?lang=${language}#pricing`);
+  assert.equal(page.url(), `https://formatxsuite.com/?lang=${language}#pricing`);
   console.log(`PASS canonical-recovery ${language}`);
   await context.close();
 }
