@@ -109,7 +109,13 @@ async function verify(viewport, mobile) {
     assert(initial.enabled === 'true', 'genome did not start enabled for the validation session');
     assert(initial.forms === '6', 'six-form Thought Genome contract missing');
 
-    await page.locator('.fx-organism-thought-trigger').click();
+    // r244 intentionally retires the legacy .fx-organism-thought-trigger from
+    // the visible surface. The production user path is the canonical ASK control
+    // owned by r264, which delegates to the same Organism dialogue runtime.
+    const canonicalAsk = page.locator('#hero .fx-reference-controls-r204 .fx-reference-ask').first();
+    assert(await canonicalAsk.count() === 1, 'canonical ASK control is missing');
+    assert(await canonicalAsk.isVisible(), 'canonical ASK control is not visible');
+    await canonicalAsk.click();
     await page.waitForFunction(() => {
       const bubble = document.querySelector('.fx-organism-thought');
       return bubble && bubble.hidden === false;
@@ -199,7 +205,7 @@ async function verify(viewport, mobile) {
 (async () => {
   await verify({ width: 1440, height: 960 }, false);
   await verify({ width: 390, height: 844 }, true);
-  console.log('Synaptic Thought Genome validation passed against the current deferred production runtime.');
+  console.log('Synaptic Thought Genome validation passed through the canonical production ASK control.');
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;
