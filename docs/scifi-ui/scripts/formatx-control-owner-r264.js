@@ -51,9 +51,6 @@
       current = clean;
     }
 
-    // The r244 runtime uses this marker before installing its own target click
-    // handler. Mark the canonical clone as already bound so an earlier r264 boot
-    // cannot be followed by a second legacy handler that re-closes the menu.
     current.dataset.fxR244Bound = 'true';
 
     for (const duplicate of Array.from(document.querySelectorAll('#menu-toggle'))) {
@@ -74,16 +71,9 @@
     if (!current.hasAttribute('aria-expanded')) current.setAttribute('aria-expanded', 'false');
     clearLegacyStyle(current);
 
-    if (current.dataset.fxControlMenuBoundR264 !== 'true') {
-      current.dataset.fxControlMenuBoundR264 = 'true';
-      current.addEventListener('click', event => {
-        event.preventDefault();
-        event.stopPropagation();
-        const nav = document.getElementById('main-nav');
-        const open = nav instanceof HTMLElement && nav.classList.contains('open');
-        setMenuOpen(!open);
-      });
-    }
+    // The exclusive document-capture handler below owns activation. Keeping no
+    // target listener here means legacy target/bubble handlers cannot race it.
+    current.dataset.fxControlMenuBoundR264 = 'capture-owner';
 
     menu = current;
     if (menu.parentElement !== topbar) topbar.appendChild(menu);
@@ -270,10 +260,23 @@
     setMenuOpen(false);
   }, true);
 
+  // Single canonical activation path. Capture at document level before any
+  // target/bubble handler left by apex/r244/organism generations, toggle exactly
+  // once, then stop the event so nothing can immediately undo the state.
   document.addEventListener('click', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    const menuTarget = target?.closest('#menu-toggle.fx-reference-menu-button');
+    if (menuTarget instanceof HTMLButtonElement && menuTarget === menu) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const nav = document.getElementById('main-nav');
+      const open = nav instanceof HTMLElement && nav.classList.contains('open');
+      setMenuOpen(!open);
+      return;
+    }
+
     const nav = document.getElementById('main-nav');
     if (!(nav instanceof HTMLElement) || !nav.classList.contains('open')) return;
-    const target = event.target instanceof Element ? event.target : null;
     if (target?.closest('#main-nav a[href]')) setMenuOpen(false);
   }, true);
 
