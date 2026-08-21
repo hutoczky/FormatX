@@ -11,9 +11,10 @@
     en: ['How it works', 'Modules', 'Licences', 'Proof', 'Download']
   };
 
-  let retryTimer = 0;
-  let attempts = 0;
   let accessibilityScheduled = false;
+  let ensureScheduled = false;
+  let bootObserver = null;
+  let bootTimer = 0;
 
   function language() {
     return root.lang === 'en' ? 'en' : 'hu';
@@ -88,12 +89,14 @@
       if (!NAVIGATION.hu[index] || !NAVIGATION.en[index]) return;
       anchor.dataset.hu = NAVIGATION.hu[index];
       anchor.dataset.en = NAVIGATION.en[index];
-      anchor.textContent = NAVIGATION[language()][index];
+      const text = NAVIGATION[language()][index];
+      if (anchor.textContent !== text) anchor.textContent = text;
     });
   }
 
   function createDeck() {
-    document.querySelectorAll('#hero .fx-category-deck').forEach(deck => deck.remove());
+    const heroDecks = Array.from(document.querySelectorAll('#hero .fx-category-deck'));
+    heroDecks.forEach(deck => deck.remove());
     const standalone = Array.from(document.querySelectorAll('.fx-category-deck'))
       .find(deck => !deck.closest('#hero'));
     if (standalone) return standalone;
@@ -110,73 +113,63 @@
     return deck;
   }
 
+  function stopBootObserver() {
+    bootObserver?.disconnect();
+    bootObserver = null;
+    if (bootTimer) clearTimeout(bootTimer);
+    bootTimer = 0;
+  }
+
   function announceReady() {
     root.dataset.fxCategoryDeckState = 'ready';
     root.dataset.fxCategoryLayer = 'ready';
     syncNavigation();
     scheduleAccessibility();
-    dispatchEvent(new CustomEvent('formatx:languagechange', {
-      detail: { language: language(), source: 'category-deck-stabilizer' }
-    }));
+    stopBootObserver();
   }
 
   function ensure() {
+    ensureScheduled = false;
     const deck = createDeck();
     if (deck) {
       announceReady();
-      clearInterval(retryTimer);
-      retryTimer = 0;
-      attempts = 0;
-      return;
+      return true;
     }
-
-    if (!retryTimer) {
-      attempts = 0;
-      retryTimer = window.setInterval(() => {
-        attempts += 1;
-        const result = createDeck();
-        if (result || attempts >= 80) {
-          clearInterval(retryTimer);
-          retryTimer = 0;
-          if (result) announceReady();
-          else root.dataset.fxCategoryDeckState = 'missing-target';
-        }
-      }, 250);
-    }
+    return false;
   }
 
-  const structureObserver = new MutationObserver(entries => {
-    const standalone = Array.from(document.querySelectorAll('.fx-category-deck'))
-      .find(deck => !deck.closest('#hero'));
-    const heroDeck = document.querySelector('#hero .fx-category-deck');
-    if (!standalone || heroDeck) queueMicrotask(ensure);
-    if (entries.some(entry => entry.type === 'childList' || entry.attributeName === 'aria-label')) {
-      scheduleAccessibility();
-    }
-  });
-  structureObserver.observe(root, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['aria-label']
-  });
+  function scheduleEnsure() {
+    if (ensureScheduled) return;
+    ensureScheduled = true;
+    queueMicrotask(ensure);
+  }
 
-  ensureReadabilityFloor();
-  syncAccessibility();
-  ensure();
-  ['DOMContentLoaded', 'pageshow', 'formatx:livingready', 'formatx:threeready', 'formatx:loop'].forEach(name => {
+  function boot() {
+    ensureReadabilityFloor();
+    syncAccessibility();
+    if (ensure()) return;
+
+    const target = document.getElementById('main-content') || document.body || document.documentElement;
+    bootObserver = new MutationObserver(scheduleEnsure);
+    bootObserver.observe(target, { childList: true, subtree: true });
+    bootTimer = setTimeout(() => {
+      stopBootObserver();
+      if (!ensure()) root.dataset.fxCategoryDeckState = 'missing-target';
+    }, 4500);
+  }
+
+  for (const name of ['pageshow', 'formatx:livingready', 'formatx:threeready', 'formatx:loop']) {
     addEventListener(name, () => {
-      ensure();
+      scheduleEnsure();
       scheduleAccessibility();
-    });
-  });
+    }, { passive: true });
+  }
   addEventListener('formatx:languagechange', () => queueMicrotask(() => {
     syncNavigation();
     syncAccessibility();
   }));
+  addEventListener('pagehide', stopBootObserver, { once: true });
 
-  addEventListener('pagehide', () => {
-    clearInterval(retryTimer);
-    structureObserver.disconnect();
-  }, { once: true });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 }());
