@@ -45,6 +45,16 @@
     }
   }
 
+  function closeSystemPanelBeforeDialogue() {
+    if (!document.body?.classList.contains('fx-organism-panel-open')) return;
+    const consoleRoot = document.getElementById('fx-organism-console');
+    const closeControl = consoleRoot?.querySelector('[data-organism-close]');
+    if (closeControl instanceof HTMLElement) {
+      closeControl.click();
+      ROOT.dataset.fxOrganismDialoguePanelHandoff = 'closed-through-owner';
+    }
+  }
+
   function suspendForOverlay() {
     if (!interfaceBlocked()) return;
     closeDialogue();
@@ -137,7 +147,8 @@
         duplicateGuard: true,
         overlaySpeechGuard: true,
         liveRegion: 'response-only',
-        mobileVisualViewportGuard: true
+        mobileVisualViewportGuard: true,
+        panelDialogueHandoff: true
       }
     }));
     return true;
@@ -161,6 +172,11 @@
   addEventListener('formatx:loop', suspendForOverlay);
   addEventListener('resize', scheduleViewportSync, { passive: true });
   addEventListener('orientationchange', scheduleViewportSync, { passive: true });
+  document.addEventListener('click', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target?.closest('.fx-reference-ask, .fx-organism-thought-trigger')) return;
+    closeSystemPanelBeforeDialogue();
+  }, true);
   document.addEventListener('focusin', event => {
     if (event.target?.closest?.('.fx-organism-dialogue')) {
       scheduleViewportSync();
