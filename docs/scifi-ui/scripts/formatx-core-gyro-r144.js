@@ -25,9 +25,7 @@ let lastDispatch=0,raf=0;
 let manualUntil=0;
 let lastSensorAt=-Infinity;
 
-function stage(){
-  return document.querySelector('#hero .fx-core-r112-stage,#hero .fx-core-mobile-v55-stage');
-}
+function stage(){return document.querySelector('#hero .fx-core-r112-stage,#hero .fx-core-mobile-v55-stage');}
 function hero(){return document.getElementById('hero');}
 function orientationAngle(){
   const a=Number(screen.orientation?.angle);
@@ -49,18 +47,45 @@ function calibrate(beta,gamma){
   return true;
 }
 function axes(beta,gamma){
-  let dx=wrap180(gamma-baseGamma);
-  let dy=wrap180(beta-baseBeta);
+  let dx=wrap180(gamma-baseGamma),dy=wrap180(beta-baseBeta);
   const angle=orientationAngle();
   if(angle===90){const t=dx;dx=-dy;dy=t;}
   else if(angle===270){const t=dx;dx=dy;dy=-t;}
   else if(angle===180){dx=-dx;dy=-dy;}
-  let x=clamp(dx/24,-.86,.86);
-  let y=clamp(dy/30,-.78,.78);
+  let x=clamp(dx/24,-.86,.86),y=clamp(dy/30,-.78,.78);
   if(Math.abs(x)<.035)x=0;
   if(Math.abs(y)<.035)y=0;
   return{x,y};
 }
+function emit(now){
+  const s=stage(),h=hero();
+  if(!(s instanceof HTMLElement)||!(h instanceof HTMLElement))return;
+  if(now<manualUntil||root.dataset.fxReferenceMotionPaused==='true')return;
+  const r=s.getBoundingClientRect();
+  if(r.width<2||r.height<2||r.bottom<0||r.top>innerHeight)return;
+  const clientX=r.left+r.width*(.5+smoothX*.32);
+  const clientY=r.top+r.height*(.5-smoothY*.28);
+  try{
+    h.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,cancelable:false,clientX,clientY,pointerId:144,pointerType:'mouse',isPrimary:true,buttons:0,pressure:0}));
+  }catch(_){h.dispatchEvent(new MouseEvent('mousemove',{bubbles:true,clientX,clientY}));}
+  root.dataset.fxCoreGyroVector=`${smoothX.toFixed(3)},${smoothY.toFixed(3)}`;
+}
+function frame(now){
+  raf=0;
+  if(document.hidden||!enabled)return;
+  const stale=now-lastSensorAt>900;
+  if(stale){targetX*=.82;targetY*=.82;}
+  smoothX+=(targetX-smoothX)*.105;
+  smoothY+=(targetY-smoothY)*.095;
+  if(now-lastDispatch>=33){lastDispatch=now;emit(now);}
+  const moving=!stale||Math.abs(targetX)>.002||Math.abs(targetY)>.002||Math.abs(smoothX)>.002||Math.abs(smoothY)>.002;
+  if(moving)raf=requestAnimationFrame(frame);
+  else{
+    targetX=targetY=smoothX=smoothY=0;
+    root.dataset.fxCoreGyroState='idle-listening';
+  }
+}
+function startFrame(){if(enabled&&!raf)raf=requestAnimationFrame(frame);}
 function onOrientation(event){
   if(document.hidden||reduced.matches)return;
   const beta=Number(event.beta),gamma=Number(event.gamma);
@@ -73,84 +98,26 @@ function onOrientation(event){
   root.dataset.fxCoreGyroInput=`${v.x.toFixed(3)},${v.y.toFixed(3)}`;
   startFrame();
 }
-function emit(now){
-  const s=stage(),h=hero();
-  if(!(s instanceof HTMLElement)||!(h instanceof HTMLElement))return;
-  const r=s.getBoundingClientRect();
-  if(r.width<2||r.height<2||r.bottom<0||r.top>innerHeight)return;
-  if(now<manualUntil)return;
-  if(root.dataset.fxReferenceMotionPaused==='true')return;
-
-  const clientX=r.left+r.width*(.5+smoothX*.32);
-  const clientY=r.top+r.height*(.5-smoothY*.28);
-  try{
-    h.dispatchEvent(new PointerEvent('pointermove',{
-      bubbles:true,
-      cancelable:false,
-      clientX,clientY,
-      pointerId:144,
-      pointerType:'mouse',
-      isPrimary:true,
-      buttons:0,
-      pressure:0
-    }));
-  }catch(_){
-    h.dispatchEvent(new MouseEvent('mousemove',{bubbles:true,clientX,clientY}));
-  }
-  root.dataset.fxCoreGyroVector=`${smoothX.toFixed(3)},${smoothY.toFixed(3)}`;
-}
-function frame(now){
-  raf=0;
-  if(document.hidden||!enabled)return;
-
-  const stale=now-lastSensorAt>900;
-  if(stale){targetX*=.82;targetY*=.82;}
-  smoothX+=(targetX-smoothX)*.105;
-  smoothY+=(targetY-smoothY)*.095;
-  if(now-lastDispatch>=33){lastDispatch=now;emit(now);}
-
-  const moving=!stale
-    ||Math.abs(targetX)>.002||Math.abs(targetY)>.002
-    ||Math.abs(smoothX)>.002||Math.abs(smoothY)>.002;
-  if(moving)raf=requestAnimationFrame(frame);
-  else{
-    targetX=targetY=smoothX=smoothY=0;
-    root.dataset.fxCoreGyroState='idle-listening';
-  }
-}
-function startFrame(){if(enabled&&!raf)raf=requestAnimationFrame(frame);}
 function enableSensor(){
   if(enabled)return;
   enabled=true;
   addEventListener('deviceorientation',onOrientation,{passive:true});
   root.dataset.fxCoreGyroPermission=permissionState;
-  root.dataset.fxCoreGyroState='listening-idle';
-  // r267: do not start a perpetual animation loop before the device has
-  // delivered a real orientation sample. The first valid sample starts a
-  // bounded smoothing burst; it naturally stops after sensor input goes stale.
+  root.dataset.fxCoreGyroState='idle-listening';
 }
 async function requestPermissionFromGesture(){
   if(enabled)return;
   const request=DeviceOrientationEvent.requestPermission;
-  if(typeof request!=='function'){
-    permissionState='not-required';
-    enableSensor();
-    return;
-  }
+  if(typeof request!=='function'){permissionState='not-required';enableSensor();return;}
   try{
     permissionState=await request.call(DeviceOrientationEvent);
     root.dataset.fxCoreGyroPermission=permissionState;
     if(permissionState==='granted')enableSensor();
     else root.dataset.fxCoreGyroState='permission-denied';
-  }catch(_){
-    permissionState='error';
-    root.dataset.fxCoreGyroPermission='error';
-    root.dataset.fxCoreGyroState='permission-error';
-  }
+  }catch(_){permissionState='error';root.dataset.fxCoreGyroPermission='error';root.dataset.fxCoreGyroState='permission-error';}
 }
 function maybeRequest(event){
-  if(enabled||typeof DeviceOrientationEvent.requestPermission!=='function')return;
-  if(!event.isTrusted)return;
+  if(enabled||typeof DeviceOrientationEvent.requestPermission!=='function'||!event.isTrusted)return;
   const path=event.composedPath?.()||[];
   const onCore=path.some(n=>n instanceof Element&&(n.matches?.('#hero,.hero-space,.fx-core-r112-stage,.fx-core-mobile-v55-stage')||n.closest?.('#hero .hero-space')));
   if(onCore)requestPermissionFromGesture();
@@ -181,4 +148,5 @@ if(typeof DeviceOrientationEvent.requestPermission==='function'){
   enableSensor();
 }
 root.dataset.fxCoreMotionR144='breathing-pointer-touch-gyro-idle-safe-r267';
+root.dataset.fxCoreGyroSchedulerR267='sensor-burst-no-idle-raf';
 }());
