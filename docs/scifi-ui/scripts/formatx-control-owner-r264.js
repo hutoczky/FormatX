@@ -18,6 +18,24 @@
     if (node instanceof HTMLElement && node.hasAttribute('style')) node.removeAttribute('style');
   }
 
+  function setMenuRenderOpen(nav, open) {
+    const owned = ['display', 'visibility', 'opacity', 'pointer-events', 'clip-path'];
+    if (!open) {
+      for (const property of owned) nav.style.removeProperty(property);
+      return;
+    }
+
+    nav.hidden = false;
+    nav.removeAttribute('hidden');
+    nav.removeAttribute('aria-hidden');
+    nav.removeAttribute('inert');
+    nav.style.setProperty('display', 'grid', 'important');
+    nav.style.setProperty('visibility', 'visible', 'important');
+    nav.style.setProperty('opacity', '1', 'important');
+    nav.style.setProperty('pointer-events', 'auto', 'important');
+    nav.style.setProperty('clip-path', 'none', 'important');
+  }
+
   function setMenuOpen(open) {
     const nav = document.getElementById('main-nav');
     if (!(nav instanceof HTMLElement) || !(menu instanceof HTMLButtonElement)) return;
@@ -25,6 +43,10 @@
     menu.classList.toggle('open', open);
     menu.setAttribute('aria-expanded', String(open));
     root.classList.toggle('fx-organism-menu-open', open);
+    setMenuRenderOpen(nav, open);
+    dispatchEvent(new CustomEvent('formatx:menustatechange', {
+      detail: { open, source: 'control-owner-r264' }
+    }));
     if (open && root.dataset.fxImmersive !== 'active') {
       root.dataset.fxImmersive = 'active';
       dispatchEvent(new CustomEvent('formatx:immersiveactivate', {
