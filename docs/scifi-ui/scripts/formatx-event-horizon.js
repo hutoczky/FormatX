@@ -20,7 +20,7 @@
   const MOBILE_DIRECT_QUERY = matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)');
   const REDUCE_QUERY = matchMedia('(prefers-reduced-motion: reduce)');
   const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260818-r206-award-runtime';
+  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260821-r263-canonical-controls';
 
   const COPY = {
     hu: { skip: 'Animáció átugrása', phases: [[18,'KAPCSOLAT FELÉPÍTÉSE'],[42,'TÉRBELI INDEX ÉPÍTÉSE'],[70,'MODULHÁLÓ SZINKRONIZÁLÁSA'],[94,'RENDSZERÁLLAPOT ELLENŐRZÉSE'],[101,'FORMATX MAG AKTÍV']] },
