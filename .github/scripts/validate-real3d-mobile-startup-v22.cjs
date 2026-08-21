@@ -37,13 +37,16 @@ assert.match(layout,/pointerup/);
 assert.match(layout,/mobileViewport=.*max-width:900px/);
 assert.match(layout,/restoreDesktopMenu/);
 
-// r204: proof content is canonical and repaired after late DOM mutations.
-for(const token of ['repairProof','PUBLIC PROOF LAYER','Bizonyíték a látvány mögött.','fx-reference-liveos','layoutObserver','fxMobileProofControls'])assert.ok(layout.includes(token),`missing r204 proof contract: ${token}`);
+// r260: proof content is canonical and repaired by bounded boot/readiness events,
+// never by a document-wide steady-state layout observer.
+for(const token of ['repairProof','PUBLIC PROOF LAYER','Bizonyíték a látvány mögött.','fx-reference-liveos','bootObserver','fxMobileProofControls'])assert.ok(layout.includes(token),`missing r260 proof contract: ${token}`);
+assert.doesNotMatch(layout,/layoutObserver/);
 assert.match(layout,/space\.after\(heading\)/);
 assert.match(layout,/heading\.after\(card\)/);
 
-// r204: music + ASK/pause share one physical owner, so they cannot overlap.
-for(const token of ['ensureControlZone','fx-reference-controls-r204','.fx-three-sound','.fx-reference-rail','r204-ready'])assert.ok(layout.includes(token),`missing r204 control-zone contract: ${token}`);
+// r260: music + ASK/pause share the hero-grid physical owner.
+for(const token of ['ensureControlZone','fx-reference-controls-r204','.fx-three-sound','.fx-reference-rail','r260-r207-grid-owner'])assert.ok(layout.includes(token),`missing r260 control-zone contract: ${token}`);
+assert.match(layout,/ensureControlZone\(hero,grid,rail\)/);
 assert.doesNotMatch(layout,/space\.after\(rail\)/);
 
 assert.match(css,/\.fx-reference-heading/);
@@ -61,4 +64,4 @@ assert.match(stability,/ready-v20\|ready-v69/);
 assert.match(interactionStability,/booting-v69/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 for(const source of [bootstrap,wrapper,renderer,layout,premium,loader,stability,interactionStability])new Function(source);
-console.log('PASS: r204 mobile proof/control ownership + luminous native WebGL startup contract passed.');
+console.log('PASS: r260 event-driven mobile proof/control ownership + luminous native WebGL startup contract passed.');
