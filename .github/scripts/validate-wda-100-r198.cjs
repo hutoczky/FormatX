@@ -136,9 +136,10 @@ function validateLighthouse(config, label) {
   const assertions = config.ci.assert.assertions;
   assert.equal(collect.numberOfRuns, 3, `${label}: needs 3 runs`);
   assert.ok(collect.url.every(url => !url.includes('lighthouse=1')), `${label}: audit-only URL is forbidden`);
+  assert.ok(collect.url.every(url => url === 'https://formatxsuite.com/'), `${label}: live audit must measure the canonical visitor URL`);
   assert.ok(!String(collect.settings.chromeFlags || '').includes('force-prefers-reduced-motion'), `${label}: forced reduced-motion is forbidden`);
   assert.ok(!('skipAudits' in collect.settings), `${label}: skipped audits are forbidden`);
-  assert.equal(assertions['categories:performance'][1].minScore, 0.9, `${label}: performance floor`);
+  assert.equal(assertions['categories:performance'][1].minScore, 0.95, `${label}: performance floor`);
   assert.equal(assertions['categories:accessibility'][1].minScore, 1, `${label}: accessibility floor`);
   assert.equal(assertions['categories:best-practices'][1].minScore, 1, `${label}: best-practices floor`);
   assert.equal(assertions['categories:seo'][1].minScore, 1, `${label}: SEO floor`);
