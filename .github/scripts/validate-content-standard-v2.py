@@ -24,6 +24,14 @@ def valid_sha256(value: object) -> bool:
     return bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(value or "")))
 
 
+def production_content_contract() -> str:
+    """Validate the real delegated production implementation, not comment tokens."""
+    return "\n".join([
+        module.read("billing-worker/src/production-content-entry.js"),
+        module.read("billing-worker/src/production-content-base.js"),
+    ])
+
+
 def validate_release_metadata_v2() -> None:
     data = module.load_json(module.SCIFI / "data/current-release.json")
     public_contract = module.load_json(module.SCIFI / "data/public-platform-contract.json")
@@ -147,7 +155,7 @@ def validate_public_pages_v2() -> None:
     if "android-native-v1.1.0-beta" in android:
         module.fail("Android page must use the first-party Native beta download route instead of an upstream release URL")
 
-    production = module.read("billing-worker/src/production-content-entry.js")
+    production = production_content_contract()
     preview = module.read("content-preview-entry.js")
     for source, name in [(production, "production"), (preview, "preview")]:
         for token in ["formatx-public-shell.js", "formatx-content-standard.css"]:
@@ -170,6 +178,53 @@ def validate_public_pages_v2() -> None:
         module.fail("robots.txt does not point to the canonical apex sitemap")
 
 
+def validate_runtime_contract_v2() -> None:
+    production = production_content_contract()
+    preview = module.read("content-preview-entry.js")
+    for source, name in [(production, "production"), (preview, "preview")]:
+        for token in [
+            "release-metadata.js", "formatx-content-standard.js", "formatx-seo.js",
+            "formatx-content-finalizer.js", "formatx-platform-surface-finalizer.js",
+            "formatx-organism-trust.js", "formatx-organism-semantic-state.js",
+            "single-language-toggle.js", "cleanLegacyReleaseCopy"
+        ]:
+            if token not in source:
+                module.fail(f"{name} content wrapper missing {token}")
+    if '"main": "src/production-content-entry.js"' not in module.read("billing-worker/wrangler.jsonc"):
+        module.fail("Production does not use the content wrapper")
+    if '"main": "content-preview-entry.js"' not in module.read("wrangler.jsonc"):
+        module.fail("Preview does not use the content wrapper")
+
+    release_script = module.read(module.SCIFI / "scripts/release-metadata.js")
+    for token in [
+        "current-release.json", "ready-v6", "OFFICIAL_REPOSITORY = 'hutoczky/FormatX-Updates'",
+        "isOfficialGitHubReleaseUrl", "isOfficialGitHubDownloadUrl", "isOfficialMetadata",
+        "release?.source === 'github_published_release'", "validDigest(asset.digest)",
+        "channels?.multiplatform", "data-release-download=\"multiplatform\"",
+        "setText('[data-release-version]', '', false)", "5-day trial licence",
+        "Teljes multiplatform verzió letöltése"
+    ]:
+        if token not in release_script:
+            module.fail(f"Release metadata controller missing {token}")
+
+    platform_script = module.read(module.SCIFI / "scripts/platform-status.js")
+    for token in ["full release", "5-day trial licence", "5 napos próbalicenc"]:
+        if token.lower() not in platform_script.lower():
+            module.fail(f"Platform status controller missing full-release contract: {token}")
+
+    downloads = module.read(module.SCIFI / "downloads/index.html")
+    if 'data-release-download="multiplatform"' not in downloads:
+        module.fail("Downloads page is not driven by multiplatform release metadata")
+    for legacy in ["/releases/download/v92/", "FormatX-Suite-Pro-V92.zip", "92.00"]:
+        if legacy in downloads:
+            module.fail(f"Downloads page contains historical release copy: {legacy}")
+
+    production_lower = production.lower()
+    if ".replaceall('teljes verzió letöltése', 'multiplatform nyilvános béta letöltése')" in production_lower:
+        module.fail("Production still rewrites full release copy back to beta")
+
+
 module.validate_release_metadata = validate_release_metadata_v2
 module.validate_public_pages = validate_public_pages_v2
+module.validate_runtime_contract = validate_runtime_contract_v2
 raise SystemExit(module.main())
