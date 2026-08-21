@@ -5,6 +5,7 @@ if(root.dataset.fxCoreDetailR122==='ready'||root.dataset.fxCoreDetailR122==='boo
 root.dataset.fxCoreDetailR122='booting';
 root.dataset.fxCoreReferenceTextureR130='loading';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const mobile=matchMedia('(max-width:900px),(pointer:coarse)').matches;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const PARTS=Array.from({length:6},(_,i)=>`/scifi-ui/assets/reference-r130/part${i}.b64?v=20260815-reference-material-r138`);
 
@@ -17,8 +18,6 @@ async function reconstructHeadingArtifactR138(source){
   c.drawImage(source,0,0,w,h);
   const image=c.getImageData(0,0,w,h),d=image.data;
 
-  /* The source reference contains one residual neutral-blue "SMER" fragment at
-     the lower crystal tail. Reconstruct only that small source-pixel area. */
   const x0=Math.max(0,Math.round(w*.437)),x1=Math.min(w-1,Math.round(w*.588));
   const y0=Math.max(1,Math.round(h*.895)),y1=Math.min(h-2,Math.round(h*.939));
   const top=Math.max(0,y0-4),bottom=Math.min(h-1,y1+4);
@@ -34,7 +33,6 @@ async function reconstructHeadingArtifactR138(source){
     }
   }
 
-  /* r160 cross-device seamless reference key. */
   const desktopKey=matchMedia('(min-width:901px) and (pointer:fine)').matches;
   let keyed=0,kept=0;
   for(let i=0;i<d.length;i+=4){
@@ -62,8 +60,8 @@ async function reconstructHeadingArtifactR138(source){
     const ny=Math.abs(py/Math.max(1,h-1)-.5)*2;
     const edge=Math.pow(Math.max(nx,ny),desktopKey?2.2:1.62);
     if(signal<155){
-      const edgeFloor=desktopKey ? .16 : .02;
-      const edgeStrength=desktopKey ? .78 : .96;
+      const edgeFloor=desktopKey?.16:.02;
+      const edgeStrength=desktopKey?.78:.96;
       f*=clamp(1-edge*edgeStrength,edgeFloor,1);
     }
     if(f<.995)keyed++;else kept++;
@@ -119,7 +117,7 @@ function boot(attempt=0){
 
   function resize(){
     const r=stage.getBoundingClientRect();if(r.width<2||r.height<2)return false;
-    cssW=r.width;cssH=r.height;dpr=Math.min(devicePixelRatio||1,1.35);
+    cssW=r.width;cssH=r.height;dpr=Math.min(devicePixelRatio||1,mobile?1.10:1.25);
     const w=Math.round(cssW*dpr),h=Math.round(cssH*dpr);
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;canvas.style.width=cssW+'px';canvas.style.height=cssH+'px';}
     return true;
@@ -193,18 +191,20 @@ function boot(attempt=0){
     const dt=Math.min(80,Math.max(0,now-last));last=now;if(!reduced.matches)phase+=dt*.001;
     const cp=window.FormatXCoreCinematic?.corePosition||[0,0,0],rawEnergy=Number(window.FormatXCoreMobileV69?.energy||.30);
     const targetTx=clamp(cp[0]||0,-.08,.08),targetTy=clamp(cp[1]||0,-.08,.08),targetEnergy=clamp(rawEnergy,.30,1.8);
-    lastTx+=(targetTx-lastTx)*.12;lastTy+=(targetTy-lastTy)*.12;lastEnergy+=(targetEnergy-lastEnergy)*.10;
+    lastTx+=(targetTx-lastTx)*.20;lastTy+=(targetTy-lastTy)*.20;lastEnergy+=(targetEnergy-lastEnergy)*.18;
     ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,cssW,cssH);
     if(bitmap){drawReference(lastTx,lastTy,lastEnergy);drawLiveOptics(lastTx,lastTy,lastEnergy);}
     setData('fxCoreDetailEnergy',lastEnergy.toFixed(2));
     setData('fxCoreDetailFrame',bitmap?'reference-material-r138':failed?'reference-fallback-r138':'reference-loading-r138');
     setData('fxLivingShapePulseStateR166',reduced.matches?'reduced-motion-static':'heartbeat-driven-four-tip-breathing');
     setData('fxCoreDetailSchedulerR263','visible-interaction-burst-no-idle-raf');
-    if(burstFrames>0){burstFrames--;if(burstFrames>0)raf=requestAnimationFrame(render);}
+    setData('fxCoreDetailSchedulerR282','max-four-frame-bounded-burst');
+    burstFrames=Math.max(0,burstFrames-1);
+    if(burstFrames>0)raf=requestAnimationFrame(render);
   }
 
   function requestRender(frames=1){
-    burstFrames=Math.max(burstFrames,Math.max(1,frames));
+    burstFrames=Math.max(burstFrames,Math.max(1,Math.min(4,frames)));
     if(!raf&&visible&&root.dataset.fxReferenceMotionPaused!=='true'){
       last=performance.now();
       raf=requestAnimationFrame(render);
@@ -214,26 +214,26 @@ function boot(attempt=0){
   loadReferenceBitmap().then(b=>{
     bitmap=b;root.dataset.fxCoreReferenceTextureR130='ready';root.dataset.fxCoreFacetMode='reference-material-r138';root.dataset.fxCoreReferenceHeadingR138='dom-visible-clean-reference';
     dispatchEvent(new CustomEvent('formatx:coredetailready',{detail:{version:'r166',mode:'reference-material-interactive-seamless-shape-pulse'}}));
-    requestRender(3);
+    requestRender(1);
   }).catch(err=>{
     failed=true;root.dataset.fxCoreReferenceTextureR130='failed';root.dataset.fxCoreFacetMode='native-webgl-fallback-r138';
     console.warn('FormatX reference material r166 fallback',err);
     requestRender(1);
   });
 
-  const ro=new ResizeObserver(()=>{if(resize())requestRender(2);});ro.observe(stage);
+  const ro=new ResizeObserver(()=>{if(resize())requestRender(1);});ro.observe(stage);
   const io=new IntersectionObserver(entries=>{
     visible=entries.some(e=>e.isIntersecting);
-    if(visible){resize();requestRender(2);}
+    if(visible){resize();requestRender(1);}
     else if(raf){cancelAnimationFrame(raf);raf=0;burstFrames=0;}
   },{rootMargin:'160px'});io.observe(stage);
 
-  addEventListener('formatx:coreinteraction',()=>requestRender(24),{passive:true});
-  addEventListener('pointerdown',e=>{if(stage.contains(e.target))requestRender(18);},{capture:true,passive:true});
-  addEventListener('touchstart',e=>{if(stage.contains(e.target))requestRender(18);},{capture:true,passive:true});
-  addEventListener('formatx:real3dready',()=>requestRender(3),{passive:true});
-  addEventListener('formatx:referencepause',e=>{if(e.detail?.paused===false)requestRender(4);},{passive:true});
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){resize();requestRender(2);}},{passive:true});
+  addEventListener('formatx:coreinteraction',()=>requestRender(4),{passive:true});
+  addEventListener('pointerdown',e=>{if(stage.contains(e.target))requestRender(4);},{capture:true,passive:true});
+  addEventListener('touchstart',e=>{if(stage.contains(e.target))requestRender(4);},{capture:true,passive:true});
+  addEventListener('formatx:real3dready',()=>requestRender(1),{passive:true});
+  addEventListener('formatx:referencepause',e=>{if(e.detail?.paused===false)requestRender(2);},{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){resize();requestRender(1);}},{passive:true});
 
   resize();
   root.dataset.fxCoreDetailR122='ready';
