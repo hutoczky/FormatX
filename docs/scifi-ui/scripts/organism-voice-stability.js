@@ -2,8 +2,8 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  if (ROOT.dataset.fxOrganismVoiceStability === 'ready-v2') return;
-  ROOT.dataset.fxOrganismVoiceStability = 'loading-v2';
+  if (ROOT.dataset.fxOrganismVoiceStability === 'ready-v3') return;
+  ROOT.dataset.fxOrganismVoiceStability = 'loading-v3';
 
   const MOBILE = matchMedia('(max-width: 820px), (pointer: coarse)');
   let shell = null;
@@ -53,6 +53,16 @@
       closeControl.click();
       ROOT.dataset.fxOrganismDialoguePanelHandoff = 'closed-through-owner';
     }
+  }
+
+  function clearDialogueVisibilityGuards() {
+    closeSystemPanelBeforeDialogue();
+    ROOT.classList.remove('fx-organism-menu-open', 'fx-page-scrolling');
+    document.body?.classList.remove('fx-organism-panel-open');
+    const nav = document.getElementById('main-nav');
+    nav?.classList.remove('open');
+    document.getElementById('menu-toggle')?.setAttribute('aria-expanded', 'false');
+    ROOT.dataset.fxOrganismDialogueVisibility = 'explicit-user-open-r272';
   }
 
   function suspendForOverlay() {
@@ -121,7 +131,7 @@
 
     shell = candidates[candidates.length - 1];
     candidates.slice(0, -1).forEach(node => node.remove());
-    shell.dataset.fxVoiceStability = 'ready-v2';
+    shell.dataset.fxVoiceStability = 'ready-v3';
     repairAccessibility(shell);
     suspendForOverlay();
     scheduleViewportSync();
@@ -141,14 +151,15 @@
       bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     }
 
-    ROOT.dataset.fxOrganismVoiceStability = 'ready-v2';
+    ROOT.dataset.fxOrganismVoiceStability = 'ready-v3';
     dispatchEvent(new CustomEvent('formatx:organismvoicestabilityready', {
       detail: {
         duplicateGuard: true,
         overlaySpeechGuard: true,
         liveRegion: 'response-only',
         mobileVisualViewportGuard: true,
-        panelDialogueHandoff: true
+        panelDialogueHandoff: true,
+        explicitOpenVisibilityGuard: true
       }
     }));
     return true;
@@ -175,7 +186,7 @@
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
     if (!target?.closest('.fx-reference-ask, .fx-organism-thought-trigger')) return;
-    closeSystemPanelBeforeDialogue();
+    clearDialogueVisibilityGuards();
   }, true);
   document.addEventListener('focusin', event => {
     if (event.target?.closest?.('.fx-organism-dialogue')) {
