@@ -181,6 +181,38 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
 }
 
 @media (max-width: 900px), (pointer: coarse) {
+  /* r264: reserve a deterministic left brand cell before the fixed control
+     cluster. This removes the MAG/CORE-to-FORMATX collision down to 320px
+     without shrinking any 44px+ touch target. */
+  html body.living-architecture .topbar > .brand {
+    min-width: 0 !important;
+    max-width: 112px !important;
+    gap: 6px !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture .topbar > .brand img {
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    flex: 0 0 34px !important;
+  }
+  html body.living-architecture .topbar > .brand span {
+    min-width: 0 !important;
+    line-height: 1 !important;
+  }
+  html body.living-architecture .topbar > .brand strong {
+    display: block !important;
+    font-size: 12px !important;
+    letter-spacing: .08em !important;
+    white-space: nowrap !important;
+  }
+  html body.living-architecture .topbar > .brand small {
+    display: none !important;
+  }
+
   html body.living-architecture .topbar .fx-reference-mag-button.fx-reference-mag-text-r263,
   html body.living-architecture .topbar .fx-language-toggle,
   html body.living-architecture .topbar .fx-reference-menu-button {
