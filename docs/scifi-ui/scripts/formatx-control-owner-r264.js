@@ -51,6 +51,11 @@
       current = clean;
     }
 
+    // The r244 runtime uses this marker before installing its own target click
+    // handler. Mark the canonical clone as already bound so an earlier r264 boot
+    // cannot be followed by a second legacy handler that re-closes the menu.
+    current.dataset.fxR244Bound = 'true';
+
     for (const duplicate of Array.from(document.querySelectorAll('#menu-toggle'))) {
       if (duplicate !== current) {
         duplicate.removeAttribute('id');
