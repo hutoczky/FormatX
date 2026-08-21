@@ -1,9 +1,10 @@
 (function () {
   'use strict';
 
-  // r255 performance pass: r207 remains the single physical mobile DOM owner,
-  // but reconciliation is event-driven instead of observing every mutation under
-  // the document. This removes CSS/inline ping-pong from the hot rendering path.
+  // r262 ownership pass: r207 remains the single physical mobile DOM owner,
+  // while r244 owns final reference geometry whenever that runtime is present.
+  // Reconciliation stays event-driven and never erases an active owner's inline
+  // control geometry, eliminating the r207 <-> r244 cascade ping-pong.
   const root = document.documentElement;
   const mobile = () => matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   let queued = false;
@@ -19,6 +20,11 @@
 
   function clearLegacyInline(node) {
     if (node instanceof HTMLElement && node.hasAttribute('style')) node.removeAttribute('style');
+  }
+
+  function referenceOwnsGeometry() {
+    return root.dataset.fxReferenceProductionR244 === 'ready'
+      || document.querySelector('script[data-fx-reference-production-r244]') instanceof HTMLScriptElement;
   }
 
   function reconcile() {
@@ -39,10 +45,10 @@
     const rail = unique('.fx-reference-rail', hero);
     const sound = document.querySelector('.fx-three-sound');
 
-    if (sound instanceof HTMLElement && sound.parentElement !== zone) zone.appendChild(sound);
+    if (sound instanceof HTMLElement && sound.parentElement !== zone) zone.prepend(sound);
     if (rail instanceof HTMLElement && rail.parentElement !== zone) zone.appendChild(rail);
 
-    // hero-grid is the single physical owner. CSS order owns visual order.
+    // hero-grid is the single physical owner. CSS/r244 owns visual order.
     if (zone.parentElement !== grid) grid.appendChild(zone);
 
     const copy = grid.querySelector(':scope > .hero-copy');
@@ -53,14 +59,23 @@
     const live = proof?.querySelector('.fx-reference-liveos');
     if (proof instanceof HTMLElement && proof.parentElement !== grid) grid.appendChild(proof);
 
-    // Cached legacy builds may still carry inline !important geometry. Remove it
-    // only during explicit reconciliation; never watch the renderer's live style
-    // mutations continuously.
-    [hero, grid, space, zone, rail, copy, heading, proof, live].forEach(clearLegacyInline);
+    const delegated = referenceOwnsGeometry();
+    if (!delegated) {
+      // Cached legacy builds may carry inline !important geometry. Remove it only
+      // when no newer reference runtime owns geometry. Never stay in a mutation
+      // hot path and never erase r244's final SOUND | ASK | PAUSE layout.
+      [hero, grid, space, zone, rail, copy, heading, proof, live].forEach(clearLegacyInline);
+    }
 
     root.dataset.fxMobileLayoutOwner = 'r207-normal-flow';
     root.dataset.fxMobileLayoutConflict = 'none-r207';
-    root.dataset.fxMobileLayoutStability = 'r255-event-driven-inline-shield';
+    root.dataset.fxMobileLayoutStability = delegated
+      ? 'r255-event-driven-inline-shield-r262-delegated-r244'
+      : 'r255-event-driven-inline-shield-r262-standalone';
+
+    dispatchEvent(new CustomEvent('formatx:mobilelayoutready', {
+      detail: { owner: 'r207-normal-flow', geometry: delegated ? 'r244' : 'r207' }
+    }));
     return true;
   }
 
