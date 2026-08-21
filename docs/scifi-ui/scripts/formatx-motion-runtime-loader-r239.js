@@ -1,8 +1,9 @@
-/* FormatX r243 — motion-only runtime gate.
-   Purely visual MAG/heartbeat/SOTY runtimes are unnecessary when the user
-   explicitly requests reduced motion. Normal motion-capable presentation keeps
-   the original script order and behaviour. Static motion CSS is now loaded from
-   a same-origin stylesheet so strict CSP never needs unsafe-inline. */
+/* FormatX r271 — motion runtime gate with an idle-safe mobile energy path.
+   Reduced-motion remains fully skipped. Normal desktop keeps the complete
+   cinematic runtime. Mobile keeps the native MAG, heartbeat, SOTY and control
+   layers, but does not load the legacy per-frame living-energy controller: its
+   mobile branch was already visually static while still writing styles every
+   frame and preventing Lighthouse from observing CPU idle. */
 (function () {
   'use strict';
 
@@ -10,6 +11,7 @@
   if (root.dataset.fxMotionRuntimeR239) return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const mobile = matchMedia('(max-width: 900px), (pointer: coarse)');
   const template = document.getElementById('fx-motion-runtime-r239');
 
   if (!(template instanceof HTMLTemplateElement)) {
@@ -33,9 +35,6 @@
       document.head.appendChild(stylesheet);
     }
 
-    /* r155 historically probes only this id before creating an inline <style>.
-       A metadata marker preserves that compatibility while the real rules live
-       in the external stylesheet above. */
     if (!document.getElementById('fx-live-heartbeat-r155-style')) {
       const marker = document.createElement('meta');
       marker.id = 'fx-live-heartbeat-r155-style';
@@ -44,6 +43,19 @@
     }
 
     root.dataset.fxMotionCssR243 = 'external-strict-csp';
+  }
+
+  function isLegacyLivingEnergy(spec) {
+    const src = String(spec.getAttribute('src') || '');
+    return /\/formatx-living-energy-r168\.js(?:\?|$)/.test(src);
+  }
+
+  function markMobileStaticEnergy() {
+    root.dataset.fxLivingEnergyR168 = 'mobile-static-r271';
+    root.dataset.fxLivingEnergyClockR168 = 'event-driven-static-r271';
+    root.dataset.fxLivingEnergyEffectModeR168 = 'mobile-static-core-optics-r271';
+    root.dataset.fxLivingEnergyInteractionR168 = 'idle-living';
+    root.dataset.fxMobileEnergyPolicyR271 = 'no-idle-js-raf';
   }
 
   const specs = Array.from(template.content.querySelectorAll('script[src]'));
@@ -55,7 +67,15 @@
   root.dataset.fxMotionRuntimeR239 = 'loading';
   ensureStaticMotionCss();
 
+  let requested = 0;
+  let skippedMobileEnergy = 0;
   for (const spec of specs) {
+    if (mobile.matches && isLegacyLivingEnergy(spec)) {
+      skippedMobileEnergy += 1;
+      markMobileStaticEnergy();
+      continue;
+    }
+
     const script = document.createElement('script');
     script.async = false;
 
@@ -66,7 +86,12 @@
 
     script.src = spec.getAttribute('src');
     document.head.appendChild(script);
+    requested += 1;
   }
 
-  root.dataset.fxMotionRuntimeR239 = 'requested-r243';
+  root.dataset.fxMotionRuntimeRequestedR271 = String(requested);
+  root.dataset.fxMotionRuntimeMobileEnergySkippedR271 = String(skippedMobileEnergy);
+  root.dataset.fxMotionRuntimeR239 = mobile.matches
+    ? 'requested-r271-mobile-idle-safe'
+    : 'requested-r243';
 }());
