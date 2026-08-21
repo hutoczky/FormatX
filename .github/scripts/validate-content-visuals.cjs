@@ -238,12 +238,19 @@ async function commonAssertions(page, mobile) {
     assert(qrBroken === 0, 'A not-ready QR image is visibly rendered on mobile');
 
     const scrollState = await page.evaluate(() => ({
+      controller: document.documentElement.dataset.fxInfiniteController || '',
+      automatic: document.documentElement.dataset.fxAutomaticLoop || '',
       policy: document.documentElement.dataset.fxMobileScrollPolicy || '',
       mode: document.documentElement.dataset.fxMobileScrollMode || '',
-      bridgeCount: document.querySelectorAll('.fx-loop-bridge,[data-fx-loop-clone="true"]').length
+      bridgeCount: document.querySelectorAll('.fx-loop-bridge').length,
+      cloneCount: document.querySelectorAll('[data-fx-loop-clone="true"]').length
     }));
-    assert(scrollState.policy === 'native-document-v1', 'Mobile native-document policy marker missing: ' + JSON.stringify(scrollState));
-    assert(scrollState.bridgeCount === 0, 'Mobile visual loop bridge leaked into document: ' + JSON.stringify(scrollState));
+    assert(scrollState.controller === 'seamless-v7', 'Mobile seamless-v7 controller marker missing: ' + JSON.stringify(scrollState));
+    assert(scrollState.automatic === 'enabled', 'Mobile automatic loop is not enabled: ' + JSON.stringify(scrollState));
+    assert(scrollState.policy === 'native-momentum-loop-v1', 'Mobile momentum-loop policy marker missing: ' + JSON.stringify(scrollState));
+    assert(scrollState.mode === 'native-momentum-loop', 'Mobile momentum-loop mode marker missing: ' + JSON.stringify(scrollState));
+    assert(scrollState.bridgeCount === 1, 'Mobile visual reference bridge must exist exactly once: ' + JSON.stringify(scrollState));
+    assert(scrollState.cloneCount === 0, 'Mobile loop must not clone document content: ' + JSON.stringify(scrollState));
   }
 }
 
