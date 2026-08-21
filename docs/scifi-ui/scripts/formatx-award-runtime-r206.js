@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r264') return;
-  root.dataset.fxAwardRuntime = 'r264';
+  if (root.dataset.fxAwardRuntime === 'r266') return;
+  root.dataset.fxAwardRuntime = 'r266';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -14,6 +14,7 @@
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260821-r264-single-owner';
+  const REPAIR_STYLE_URL = '/scifi-ui/styles/formatx-interaction-repair-r266.css?v=20260821-r266-hit-dialogue';
   const OWNER_SCRIPT_URL = '/scifi-ui/scripts/formatx-control-owner-r264.js?v=20260821-r264-single-owner';
   const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260821-r265-nav-state-owner';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
@@ -29,12 +30,20 @@
   }
 
   function ensureOwnerStyle() {
-    if (document.querySelector('link[data-fx-control-owner-style-r264]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = OWNER_STYLE_URL;
-    link.dataset.fxControlOwnerStyleR264 = 'true';
-    document.head.appendChild(link);
+    if (!document.querySelector('link[data-fx-control-owner-style-r264]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = OWNER_STYLE_URL;
+      link.dataset.fxControlOwnerStyleR264 = 'true';
+      document.head.appendChild(link);
+    }
+    if (!document.querySelector('link[data-fx-interaction-repair-r266]')) {
+      const repair = document.createElement('link');
+      repair.rel = 'stylesheet';
+      repair.href = REPAIR_STYLE_URL;
+      repair.dataset.fxInteractionRepairR266 = 'true';
+      document.head.appendChild(repair);
+    }
   }
 
   function ensureNavOwner() {
