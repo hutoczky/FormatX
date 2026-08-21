@@ -99,7 +99,7 @@ namespace FormatX.Controls
         Text = "FX",
         FontSize = 19,
         FontWeight = Microsoft.UI.Text.FontWeights.Bold,
-        Foreground = new SolidColorBrush(Colors.White),
+        Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 255)),
         HorizontalAlignment = HorizontalAlignment.Center,
         VerticalAlignment = VerticalAlignment.Center
       };
@@ -369,11 +369,12 @@ namespace FormatX.Controls
         Convert.ToByte(value[6..8], 16));
     }
 
-    private static string WithAlpha(string hex, byte alpha)
+    private static string WithAlpha(string hex, int alpha)
     {
       string rgb = hex.TrimStart('#');
       if (rgb.Length == 8) rgb = rgb[2..];
-      return $"#{alpha:X2}{rgb}";
+      byte safeAlpha = (byte)Math.Clamp(alpha, 0, 255);
+      return $"#{safeAlpha:X2}{rgb}";
     }
   }
 }
