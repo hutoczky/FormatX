@@ -8,7 +8,10 @@
   const root = document.documentElement;
   if (root.dataset.fxContentRuntimeR241) return;
 
-  const CONTROL_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260821-r265-nav-state-owner';
+  const CONTROL_OWNER_STYLE_URL = './styles/formatx-control-owner-r264.css?v=20260821-r264-single-owner';
+  const CONTROL_OWNER_URL = './scripts/formatx-control-owner-r264.js?v=20260821-r264-single-owner';
+  const NAV_OWNER_URL = './scripts/formatx-nav-state-owner-r265.js?v=20260821-r265-nav-state-owner';
+  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260821-r265-nav-state-owner';
   const template = document.getElementById('fx-content-runtime-r241');
   if (!(template instanceof HTMLTemplateElement)) {
     root.dataset.fxContentRuntimeR241 = 'missing-template';
@@ -28,33 +31,94 @@
     ['keydown', false]
   ];
 
-  function mountExternal(raw, marker) {
-    if (!raw) return;
-    const absolute = new URL(raw, document.baseURI).href;
-    if (mounted.has(absolute) || Array.from(document.scripts).some(script => script.src === absolute)) return;
-
-    mounted.add(absolute);
-    const script = document.createElement('script');
-    script.async = false;
-    if (marker) script.dataset[marker] = 'true';
-    script.src = raw;
-    document.head.appendChild(script);
+  function absolute(raw) {
+    return new URL(raw, document.baseURI).href;
   }
 
-  function ensureControlRuntime() {
-    if (root.dataset.fxAwardRuntime === 'r264') return;
-    if (document.querySelector('script[data-fx-content-control-runtime-r265]')) return;
-    mountExternal(CONTROL_RUNTIME_URL, 'fxContentControlRuntimeR265');
-    root.dataset.fxContentControlRuntime = 'requested-r265';
+  function hasScript(raw) {
+    const url = absolute(raw);
+    return mounted.has(url) || Array.from(document.scripts).some(script => script.src === url);
+  }
+
+  function mountExternal(raw, datasetKey, onLoad) {
+    if (!raw) return null;
+    const url = absolute(raw);
+    if (mounted.has(url)) return null;
+    const existing = Array.from(document.scripts).find(script => script.src === url);
+    if (existing) {
+      if (onLoad) {
+        if (existing.dataset.fxLoaded === 'true') queueMicrotask(onLoad);
+        else existing.addEventListener('load', onLoad, { once: true });
+      }
+      return existing;
+    }
+
+    mounted.add(url);
+    const script = document.createElement('script');
+    script.async = false;
+    if (datasetKey) script.dataset[datasetKey] = 'true';
+    script.addEventListener('load', () => {
+      script.dataset.fxLoaded = 'true';
+      if (onLoad) onLoad();
+    }, { once: true });
+    script.src = raw;
+    document.head.appendChild(script);
+    return script;
+  }
+
+  function ensureOwnerStyle() {
+    if (document.querySelector('link[data-fx-control-owner-style-r264]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = CONTROL_OWNER_STYLE_URL;
+    link.dataset.fxControlOwnerStyleR264 = 'true';
+    document.head.appendChild(link);
+  }
+
+  function ensureNavOwner() {
+    if (root.dataset.fxNavStateOwnerR265 === 'ready' || root.dataset.fxNavStateOwnerR265 === 'open-owned') return;
+    if (document.querySelector('script[data-fx-nav-state-owner-r265]')) return;
+    mountExternal(NAV_OWNER_URL, 'fxNavStateOwnerR265');
+  }
+
+  function ensureControlOwner() {
+    ensureOwnerStyle();
+    if (root.dataset.fxControlOwnerR264 === 'ready') {
+      ensureNavOwner();
+      return;
+    }
+
+    const existing = document.querySelector('script[data-fx-control-owner-r264]');
+    if (existing) {
+      existing.addEventListener('load', ensureNavOwner, { once: true });
+      queueMicrotask(ensureNavOwner);
+      return;
+    }
+
+    mountExternal(CONTROL_OWNER_URL, 'fxControlOwnerR264', ensureNavOwner);
+  }
+
+  function ensureAwardRuntime() {
+    if (root.dataset.fxAwardRuntime === 'r264' || hasScript(AWARD_RUNTIME_URL)) return;
+    mountExternal(AWARD_RUNTIME_URL, 'fxContentControlRuntimeR265');
+  }
+
+  function ensureInteractionInfrastructure() {
+    // Navigation and hero controls are interaction infrastructure. Mount their
+    // physical owners directly; award/audio/GPU enhancement startup must never
+    // be able to delay basic menu operation.
+    ensureControlOwner();
+    ensureAwardRuntime();
+    root.dataset.fxContentControlRuntime = 'requested-r265-direct-owner';
   }
 
   function mount(spec) {
     const raw = spec.getAttribute('src');
     if (!raw) return;
-    const absolute = new URL(raw, document.baseURI).href;
-    if (mounted.has(absolute) || Array.from(document.scripts).some(script => script.src === absolute)) return;
+    const url = absolute(raw);
+    if (mounted.has(url) || Array.from(document.scripts).some(script => script.src === url)) return;
 
-    mounted.add(absolute);
+    mounted.add(url);
     const script = document.createElement('script');
     script.async = false;
     for (const attribute of spec.attributes) {
@@ -73,22 +137,13 @@
     root.dataset.fxContentRuntimeR241 = 'requested-r265';
   }
 
-  // Header/menu/SOUND/ASK/PAUSE ownership is interaction infrastructure, not a
-  // decorative motion enhancement. Mount it in both normal and reduced modes.
-  ensureControlRuntime();
+  ensureInteractionInfrastructure();
 
   if (!reduced.matches) {
     start();
     return;
   }
 
-  /*
-    Semantic floor:
-    formatx-category-positioning.js owns real page copy (category title/cards,
-    plan copy and the origin/proof narrative), so it is content, not decoration.
-    Load that one script immediately. The remaining enhancement runtimes stay
-    deferred until intent.
-  */
   specs
     .filter(spec => spec.hasAttribute('data-fx-category-script'))
     .forEach(mount);
