@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r209-cross-device-seamless-carrier-no-style-feedback';
+const VERSION='r267-cross-device-seamless-carrier-bounded';
 if(root.dataset.fxSeamlessEnforcerR159===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxSeamlessEnforcerR159='audit-skip';return;}
 root.dataset.fxSeamlessEnforcerR159='booting';
@@ -26,8 +26,6 @@ function clearSurface(el,{radius=false,overflow=false}={}){
 function enforce(){
   const hero=document.getElementById('hero');
   if(!(hero instanceof HTMLElement))return false;
-  /* The living atmosphere belongs to #hero, but the carrier itself must never
-     become a rounded card. Keep its background, only remove card-like geometry. */
   imp(hero,'border-radius','0px');
   imp(hero,'border','0px');
   imp(hero,'outline','0px');
@@ -66,21 +64,48 @@ function enforce(){
 }
 
 let raf=0;
+let bootObserver=null;
+let bootTimer=0;
 function schedule(){
   if(raf)return;
   raf=requestAnimationFrame(()=>{raf=0;enforce();});
 }
+function stopBootObserver(){
+  bootObserver?.disconnect();
+  bootObserver=null;
+  if(bootTimer)clearTimeout(bootTimer);
+  bootTimer=0;
+  root.dataset.fxSeamlessEnforcerWatch='event-driven';
+}
+function startBoundedBootObserver(){
+  if(bootObserver)return;
+  const hero=document.getElementById('hero');
+  const target=hero||document.body||document.documentElement;
+  bootObserver=new MutationObserver(schedule);
+  bootObserver.observe(target,{childList:true,subtree:true});
+  bootTimer=setTimeout(stopBootObserver,3500);
+  root.dataset.fxSeamlessEnforcerWatch='boot-bounded';
+}
+function refresh(){enforce();schedule();}
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{enforce();schedule();},{once:true});else enforce();
-/* Do not observe style mutations here. The living MAG optics intentionally
-   update element styles/CSS variables every animation frame. Observing those
-   writes turned this static surface guard into a document-wide feedback loop,
-   forcing repeated selector/layout work without changing the intended output.
-   Child insertions and the two semantic state attributes are sufficient to
-   re-apply the carrier contract when the relevant structure actually changes. */
-const mo=new MutationObserver(schedule);
-mo.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['data-fx-mobile-reference-layout','data-fx-core-reference-texture-r130']});
-addEventListener('pageshow',()=>{enforce();schedule();},{passive:true});
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>{refresh();startBoundedBootObserver();},{once:true});
+}else{
+  refresh();startBoundedBootObserver();
+}
+
+// r267: structure is watched only during the short asynchronous boot window.
+// Steady state is event-driven, so animated descendants cannot keep forcing
+// expensive hero-wide selector/style work and prevent mobile CPU idle.
+for(const eventName of [
+  'formatx:real3dready',
+  'formatx:coredetailready',
+  'formatx:controlownerready',
+  'formatx:mobilelayoutready',
+  'formatx:languagechange',
+  'pageshow'
+])addEventListener(eventName,refresh,{passive:true});
 addEventListener('resize',schedule,{passive:true});
-setTimeout(enforce,0);setTimeout(enforce,250);setTimeout(enforce,900);
+addEventListener('orientationchange',schedule,{passive:true});
+setTimeout(refresh,0);setTimeout(refresh,250);setTimeout(refresh,900);setTimeout(refresh,2200);
 }());
