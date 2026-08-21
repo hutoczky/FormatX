@@ -1,0 +1,36 @@
+/* FormatX r266 — final interaction-layer repair.
+   Keeps canonical hero controls above decorative/3D hit layers and gives an
+   explicitly opened Organism dialogue physical visibility over retired panels. */
+
+html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 {
+  z-index: 2147481500 !important;
+}
+
+html body.living-architecture #hero .fx-reference-controls-r264 > .fx-three-sound,
+html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-ask,
+html body.living-architecture #hero .fx-reference-controls-r264 .fx-reference-pause {
+  position: relative !important;
+  z-index: 2 !important;
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}
+
+html body .fx-organism-dialogue.is-open {
+  z-index: 2147481600 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+html body .fx-organism-dialogue.is-open .fx-organism-thought:not([hidden]) {
+  display: grid !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+html body .fx-organism-dialogue.is-open .fx-organism-thought-trigger {
+  pointer-events: auto !important;
+}
