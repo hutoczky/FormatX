@@ -1,0 +1,68 @@
+name: FormatX Windows App CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'App.xaml'
+      - 'App.xaml.cs'
+      - 'MainWindow.xaml'
+      - 'MainWindow.xaml.cs'
+      - 'SignatureMagController.cs'
+      - 'Controls/**'
+      - 'Models/**'
+      - 'Services/**'
+      - 'Assets/**'
+      - 'FormatX.csproj'
+      - 'FormatX.sln'
+      - 'tests/**'
+      - '.github/workflows/windows-app-ci.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'App.xaml'
+      - 'App.xaml.cs'
+      - 'MainWindow.xaml'
+      - 'MainWindow.xaml.cs'
+      - 'SignatureMagController.cs'
+      - 'Controls/**'
+      - 'Models/**'
+      - 'Services/**'
+      - 'Assets/**'
+      - 'FormatX.csproj'
+      - 'FormatX.sln'
+      - 'tests/**'
+      - '.github/workflows/windows-app-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-windows-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore update tests
+        run: dotnet restore tests/FormatX.Update.Tests/FormatX.Update.Tests.csproj
+
+      - name: Run update and MAG state tests
+        run: dotnet test tests/FormatX.Update.Tests/FormatX.Update.Tests.csproj --configuration Release --no-restore
+
+      - name: Restore Windows application
+        run: dotnet restore FormatX.csproj -p:Platform=x64
+
+      - name: Build Windows application
+        run: dotnet build FormatX.csproj --configuration Release -p:Platform=x64 --no-restore
