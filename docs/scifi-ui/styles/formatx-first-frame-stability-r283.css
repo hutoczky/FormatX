@@ -1,0 +1,242 @@
+/* FormatX r283 — minimal first-frame stability.
+   This file reserves only the geometry already used by the settled r244/r263
+   composition. It does not own materials, typography or animation. */
+
+@media (max-width: 900px), (pointer: coarse) {
+  html,
+  html body.living-architecture {
+    max-width: 100% !important;
+    overflow-x: clip !important;
+  }
+
+  /* A legacy menu button was translated 200vw while hidden. Some Chromium
+     layouts still included that transformed box in the body paint width,
+     producing an ~808px full-page surface in a 390px viewport. Keep it out of
+     the render tree without moving it outside the viewport. */
+  html body.living-architecture #fx-reference-legacy-menu,
+  html[data-fx-mobile-reference-layout="ready-v1"] body.living-architecture .menu-toggle.fx-organism-system-toggle:not(.fx-reference-menu-button) {
+    position: fixed !important;
+    inset: 0 auto auto 0 !important;
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: none !important;
+    translate: none !important;
+    clip-path: inset(100%) !important;
+  }
+
+  /* Reserve the left brand cell so CORE/MAG never collides with FORMATX. */
+  html body.living-architecture .topbar .brand {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 132px !important;
+    overflow: hidden !important;
+  }
+  html body.living-architecture .topbar .brand > * { min-width: 0 !important; }
+  html body.living-architecture .topbar .brand strong {
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+  }
+
+  /* Reserve exactly the settled mobile flow before the reference runtime
+     inserts the three hero controls. */
+  html body.living-architecture #hero > .hero-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    gap: 0 !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero > .hero-grid > .hero-space {
+    order: 0 !important;
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(390px, 100vw, 500px) !important;
+    min-height: clamp(390px, 100vw, 500px) !important;
+    margin: 0 auto !important;
+  }
+  html body.living-architecture #hero > .hero-grid:not(:has(> .fx-reference-controls-r204)) > .hero-space {
+    margin-bottom: 110px !important;
+  }
+  html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204 {
+    order: 1 !important;
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 50px) !important;
+    align-items: start !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    box-sizing: border-box !important;
+    width: max-content !important;
+    max-width: calc(100% - 24px) !important;
+    min-height: 76px !important;
+    margin: 14px auto 20px !important;
+    padding: 0 4px 20px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+  html body.living-architecture #hero > .hero-grid > .hero-copy {
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    align-self: center !important;
+    width: calc(100% - 24px) !important;
+    max-width: 680px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 auto 26px !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  /* The canonical r244 stylesheet hides .main-nav as part of the closed
+     header. Only the explicit open state overrides that rule. */
+  html[data-fx-reference-production-r244="ready"] body.living-architecture #main-nav.main-nav.open,
+  html body.living-architecture #main-nav.open {
+    position: fixed !important;
+    top: 72px !important;
+    right: 12px !important;
+    bottom: auto !important;
+    left: 12px !important;
+    z-index: 15000 !important;
+    display: grid !important;
+    box-sizing: border-box !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 84px) !important;
+    padding: 18px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
+@media (max-width: 430px) {
+  html body.living-architecture .topbar .brand {
+    max-width: 126px !important;
+  }
+  html body.living-architecture .topbar .brand small {
+    display: none !important;
+  }
+  html body.living-architecture .topbar .brand strong {
+    font-size: 11px !important;
+    letter-spacing: .09em !important;
+  }
+}
+
+@media (min-width: 901px) {
+  /* Match the settled r244 desktop two-row composition before late runtime
+     nodes are attached. This is reservation only, so the final appearance is
+     unchanged while CLS is removed. */
+  html body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+  html body.living-architecture #hero .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  html body.living-architecture #hero .hero-grid > .hero-space {
+    grid-area: space !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(520px, 42vw, 620px) !important;
+    min-height: 520px !important;
+    max-height: 620px !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  html body.living-architecture #hero .fx-reference-heading {
+    grid-area: heading !important;
+    min-height: 24px !important;
+  }
+  html body.living-architecture #hero .fx-reference-proof {
+    grid-area: proof !important;
+    min-height: 258px !important;
+  }
+
+  html[data-fx-reference-production-r244="desktop"] body.living-architecture #main-nav.main-nav.open,
+  html body.living-architecture #main-nav.open {
+    position: fixed !important;
+    top: 76px !important;
+    right: 22px !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 15000 !important;
+    display: grid !important;
+    width: min(360px, calc(100vw - 44px)) !important;
+    min-width: 280px !important;
+    max-height: calc(100dvh - 96px) !important;
+    overflow-y: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+}
