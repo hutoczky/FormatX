@@ -1,4 +1,4 @@
-/* FormatX r274 — first-frame geometry guard.
+/* FormatX r275 — first-frame geometry + overflow guard.
    Loaded before enhancement runtimes so late cinematic layers cannot move
    already-painted hero/header geometry. Visual materials remain owned by their
    canonical styles; this file owns only stable layout coordinates. */
@@ -12,6 +12,14 @@ html body.living-architecture main#main-content section#hero::before {
   height: auto !important;
   transform: translateZ(0) !important;
   transform-origin: 50% 50% !important;
+}
+
+/* r275: the additive optical layer is inserted hidden and is only revealed
+   after its detail-canvas geometry has been measured. This prevents the old
+   100%-of-hero box from becoming a visible layout-shift source. */
+html body.living-architecture #hero .fx-core-live-r147-layer[data-fx-r275-geometry="pending"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 @media (max-width: 900px), (pointer: coarse) {
@@ -70,6 +78,28 @@ html body.living-architecture main#main-content section#hero::before {
     height: 48px !important;
     min-height: 48px !important;
     margin: 0 !important;
+    transform: none !important;
+  }
+
+  /* r275: decorative optics must stay inside their own fixed visual carriers.
+     Oversized negative insets / scale were growing a 390px body to 808px after
+     Organism activation even though the semantic content itself fit correctly. */
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-field > .fx-r179-aurora,
+  html[data-fx-soty-continuity-r179="ready"] .fx-r179-aurora {
+    inset: 0 !important;
+    transform: none !important;
+    max-width: 100% !important;
+  }
+
+  html body .fx-living-system-layer > .fx-living-transition,
+  html body .fx-living-transition {
+    inset: 0 !important;
+    transform: none !important;
+    max-width: 100% !important;
+    transition: opacity 180ms ease !important;
+  }
+  html[data-fx-living-transition="active"] body .fx-living-transition,
+  html[data-fx-living-transition="active"] .fx-living-transition {
     transform: none !important;
   }
 }
