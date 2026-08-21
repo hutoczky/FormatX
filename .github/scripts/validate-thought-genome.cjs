@@ -120,9 +120,24 @@ async function verify(viewport, mobile) {
       return bubble && bubble.hidden === false;
     });
 
+    const bubble = page.locator('.fx-organism-thought').first();
+    assert(await bubble.isVisible(), 'thought dialogue opened semantically but is not visible');
+
+    // The production Genome UI is progressive disclosure: the advanced Genome
+    // controls intentionally remain hidden until the details summary is opened.
+    // Validate that disclosure itself is visible, then require the controls to
+    // become visible and interactive after the user opens it.
+    const disclosure = page.locator('.fx-thought-genome-disclosure').first();
+    const disclosureSummary = page.locator('.fx-thought-genome-disclosure > summary').first();
     const openControls = page.locator('.fx-thought-genome-controls').first();
     assert(await openControls.count() === 1, 'genome controls disappeared after opening dialogue');
-    assert(await openControls.isVisible(), 'genome controls are not visible in the open dialogue');
+    if (await disclosure.count()) {
+      assert(await disclosureSummary.count() === 1, 'genome progressive-disclosure summary is missing');
+      assert(await disclosureSummary.isVisible(), 'genome progressive-disclosure summary is not visible in the open dialogue');
+      assert(!(await openControls.isVisible()), 'genome controls must remain collapsed before progressive disclosure is opened');
+    } else {
+      assert(await openControls.isVisible(), 'genome controls are not visible when no progressive disclosure is present');
+    }
 
     await page.locator('#fx-organism-question-input').fill('Mennyibe kerül a licenc?');
     await page.locator('.fx-organism-ask').click();
@@ -156,10 +171,10 @@ async function verify(viewport, mobile) {
     assert(stored.event?.enabled === true, 'public Thought Genome event lost enabled state');
     assert(!stored.layerDisabled, 'genome layer disabled unexpectedly');
 
-    const disclosure = page.locator('.fx-thought-genome-disclosure > summary').first();
     if (await disclosure.count()) {
-      await disclosure.click();
+      await disclosureSummary.click();
       await page.waitForFunction(() => document.querySelector('.fx-thought-genome-disclosure')?.open === true);
+      assert(await openControls.isVisible(), 'genome controls did not become visible after progressive disclosure opened');
     }
 
     const shapeEventsBefore = await page.evaluate(() => window.__fxOrganismShapeEvents.length);
@@ -179,9 +194,9 @@ async function verify(viewport, mobile) {
     ), toggleEventsBefore, { timeout: 5000 });
 
     const layout = await page.evaluate(() => {
-      const bubble = document.querySelector('.fx-organism-thought');
+      const bubbleNode = document.querySelector('.fx-organism-thought');
       const controls = document.querySelector('.fx-thought-genome-controls');
-      const bubbleRect = bubble?.getBoundingClientRect();
+      const bubbleRect = bubbleNode?.getBoundingClientRect();
       const controlsRect = controls?.getBoundingClientRect();
       return {
         controlsInside: Boolean(
@@ -208,7 +223,7 @@ async function verify(viewport, mobile) {
 (async () => {
   await verify({ width: 1440, height: 960 }, false);
   await verify({ width: 390, height: 844 }, true);
-  console.log('Synaptic Thought Genome validation passed through the canonical production ASK control.');
+  console.log('Synaptic Thought Genome validation passed through the canonical production ASK and progressive-disclosure controls.');
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;
