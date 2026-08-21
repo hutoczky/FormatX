@@ -9,20 +9,27 @@ const css=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
 const proofControlsCss=read('docs/scifi-ui/styles/formatx-mobile-proof-controls-r204.css');
 const flowCss=read('docs/scifi-ui/styles/formatx-flow-first-r74.css');
 const textGuard=read('docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css');
+const pureCss=read('docs/scifi-ui/styles/formatx-pure-3d-r285.css');
+const mobileCoreCss=read('docs/scifi-ui/styles/formatx-core-mobile-v55.css');
 const premium=read('docs/scifi-ui/scripts/formatx-premium-finish.js');
 const loader=read('docs/scifi-ui/scripts/igloo-parity.js');
 const stability=read('docs/scifi-ui/scripts/formatx-apex-scene-stability.js');
 const interactionStability=read('docs/scifi-ui/scripts/interaction-genome-export-stability.js');
 const home=read('docs/scifi-ui/index.html');
 
-assert.match(bootstrap,/responsive-cinematic-reference-v69-r99-luminous-interactive/);
+assert.match(bootstrap,/pure-native-webgl3d-r285-no-2d-mag-layers/);
+assert.match(bootstrap,/pure-webgl3d-no-2d-overlays/);
 assert.match(bootstrap,/single-webgl-luminous-crystal-r99/);
-assert.match(bootstrap,/formatx-award-material-r91\.css\?v=20260814-rayglass-r95/);
+assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
 assert.match(bootstrap,/loading-v69/);
 assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260818-r204-proof-controls/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
-for(const token of ['reference-luminous-crystal-webgl-r99','webgl2','webgl','TRIANGLE_STRIP','formatx:coreinteraction','formatx:real3dready','touchstart','touchmove','touchend','ResizeObserver','IntersectionObserver','visible-native-3d-r99','fxCoreFrameMs','fxCoreRenderMs','corePosition','single-webgl-luminous-crystal-r99'])assert.ok(renderer.includes(token),`missing r99 startup contract: ${token}`);
-assert.doesNotMatch(renderer,/new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
+for(const token of ['reference-luminous-crystal-webgl-r99','webgl2','webgl','TRIANGLE_STRIP','gl.drawArrays(gl.TRIANGLES','formatx:coreinteraction','formatx:real3dready','touchstart','touchmove','touchend','ResizeObserver','IntersectionObserver','visible-native-3d-r99','fxCoreFrameMs','fxCoreRenderMs','corePosition','single-webgl-luminous-crystal-r99'])assert.ok(renderer.includes(token),`missing r285 startup contract: ${token}`);
+assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
+assert.ok(pureCss.includes('.fx-core-detail-r122'));
+assert.ok(pureCss.includes('.fx-core-live-r147-layer'));
+assert.ok(pureCss.includes('content: none !important'));
+assert.doesNotMatch(mobileCoreCss,/radial-gradient|conic-gradient|repeating-linear-gradient/i);
 
 assert.match(layout,/formatx-mobile-reference-layout-v1\.css/);
 assert.match(layout,/formatx-flow-first-r74\.css\?v=20260816-mobile-only-r178/);
@@ -37,14 +44,11 @@ assert.match(layout,/pointerup/);
 assert.match(layout,/mobileViewport=.*max-width:900px/);
 assert.match(layout,/restoreDesktopMenu/);
 
-// r260: proof content is canonical and repaired by bounded boot/readiness events,
-// never by a document-wide steady-state layout observer.
 for(const token of ['repairProof','PUBLIC PROOF LAYER','Bizonyíték a látvány mögött.','fx-reference-liveos','bootObserver','fxMobileProofControls'])assert.ok(layout.includes(token),`missing r260 proof contract: ${token}`);
 assert.doesNotMatch(layout,/layoutObserver/);
 assert.match(layout,/space\.after\(heading\)/);
 assert.match(layout,/heading\.after\(card\)/);
 
-// r260: music + ASK/pause share the hero-grid physical owner.
 for(const token of ['ensureControlZone','fx-reference-controls-r204','.fx-three-sound','.fx-reference-rail','r260-r207-grid-owner'])assert.ok(layout.includes(token),`missing r260 control-zone contract: ${token}`);
 assert.match(layout,/ensureControlZone\(hero,grid,rail\)/);
 assert.doesNotMatch(layout,/space\.after\(rail\)/);
@@ -64,4 +68,4 @@ assert.match(stability,/ready-v20\|ready-v69/);
 assert.match(interactionStability,/booting-v69/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
 for(const source of [bootstrap,wrapper,renderer,layout,premium,loader,stability,interactionStability])new Function(source);
-console.log('PASS: r260 event-driven mobile proof/control ownership + luminous native WebGL startup contract passed.');
+console.log('PASS: r285 mobile startup keeps pure native WebGL MAG plus event-driven proof/control ownership.');
