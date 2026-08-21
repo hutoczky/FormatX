@@ -1,9 +1,7 @@
-/* FormatX r271 — motion runtime gate with an idle-safe mobile energy path.
-   Reduced-motion remains fully skipped. Normal desktop keeps the complete
-   cinematic runtime. Mobile keeps the native MAG, heartbeat, SOTY and control
-   layers, but does not load the legacy per-frame living-energy controller: its
-   mobile branch was already visually static while still writing styles every
-   frame and preventing Lighthouse from observing CPU idle. */
+/* FormatX r284 — first-frame core now, cinematic enhancement on intent.
+   The native MAG and recovery path remain immediate. Continuity, heartbeat,
+   narrative and seamless-carrier modules start only after a real navigation or
+   interaction boundary, keeping the idle landing page measurable and responsive. */
 (function () {
   'use strict';
 
@@ -45,29 +43,79 @@
     root.dataset.fxMotionCssR243 = 'external-strict-csp';
   }
 
-  function isLegacyLivingEnergy(spec) {
-    const src = String(spec.getAttribute('src') || '');
-    return /\/formatx-living-energy-r168\.js(?:\?|$)/.test(src);
-  }
-
-  function markMobileStaticEnergy() {
-    root.dataset.fxLivingEnergyR168 = 'mobile-static-r271';
-    root.dataset.fxLivingEnergyClockR168 = 'event-driven-static-r271';
-    root.dataset.fxLivingEnergyEffectModeR168 = 'mobile-static-core-optics-r271';
-    root.dataset.fxLivingEnergyInteractionR168 = 'idle-living';
-    root.dataset.fxMobileEnergyPolicyR271 = 'no-idle-js-raf';
-  }
-
   const specs = Array.from(template.content.querySelectorAll('script[src]'));
   if (!specs.length) {
     root.dataset.fxMotionRuntimeR239 = 'empty-template';
     return;
   }
 
-  root.dataset.fxMotionRuntimeR239 = 'loading';
+  const mounted = new Set();
+  const deferred = [];
+  const passive = { passive: true };
+  const intentListeners = [
+    ['pointerdown', passive],
+    ['touchstart', passive],
+    ['wheel', passive],
+    ['scroll', passive],
+    ['keydown', false]
+  ];
+  let enhancementsStarted = false;
+
+  function srcOf(spec) {
+    return String(spec.getAttribute('src') || '');
+  }
+
+  function isLegacyLivingEnergy(spec) {
+    return /\/formatx-living-energy-r168\.js(?:\?|$)/.test(srcOf(spec));
+  }
+
+  function isImmediateCore(spec) {
+    return /\/(?:formatx-mobile-recovery|formatx-premium-finish|formatx-core-real3d-v20|formatx-signature-system-r185)\.js(?:\?|$)/.test(srcOf(spec));
+  }
+
+  function markMobileStaticEnergy() {
+    root.dataset.fxLivingEnergyR168 = 'mobile-static-r284';
+    root.dataset.fxLivingEnergyClockR168 = 'event-driven-static-r284';
+    root.dataset.fxLivingEnergyEffectModeR168 = 'mobile-static-core-optics-r284';
+    root.dataset.fxLivingEnergyInteractionR168 = 'idle-living';
+    root.dataset.fxMobileEnergyPolicyR271 = 'no-idle-js-raf';
+  }
+
+  function mount(spec) {
+    const raw = srcOf(spec);
+    if (!raw) return false;
+    const absolute = new URL(raw, document.baseURI).href;
+    if (mounted.has(absolute) || Array.from(document.scripts).some(script => script.src === absolute)) return false;
+
+    mounted.add(absolute);
+    const script = document.createElement('script');
+    script.async = false;
+    for (const attribute of spec.attributes) {
+      if (attribute.name === 'defer' || attribute.name === 'src') continue;
+      script.setAttribute(attribute.name, attribute.value);
+    }
+    script.src = raw;
+    document.head.appendChild(script);
+    return true;
+  }
+
+  function disarmIntent() {
+    for (const [type, options] of intentListeners) removeEventListener(type, startEnhancements, options);
+  }
+
+  function startEnhancements() {
+    if (enhancementsStarted) return;
+    enhancementsStarted = true;
+    disarmIntent();
+    let requested = 0;
+    for (const spec of deferred) if (mount(spec)) requested += 1;
+    root.dataset.fxMotionRuntimeDeferredRequestedR284 = String(requested);
+    root.dataset.fxMotionRuntimeR239 = 'enhanced-r284-user-intent';
+  }
+
   ensureStaticMotionCss();
 
-  let requested = 0;
+  let immediateRequested = 0;
   let skippedMobileEnergy = 0;
   for (const spec of specs) {
     if (mobile.matches && isLegacyLivingEnergy(spec)) {
@@ -76,22 +124,23 @@
       continue;
     }
 
-    const script = document.createElement('script');
-    script.async = false;
-
-    for (const attribute of spec.attributes) {
-      if (attribute.name === 'defer' || attribute.name === 'src') continue;
-      script.setAttribute(attribute.name, attribute.value);
+    if (isImmediateCore(spec)) {
+      if (mount(spec)) immediateRequested += 1;
+      continue;
     }
 
-    script.src = spec.getAttribute('src');
-    document.head.appendChild(script);
-    requested += 1;
+    deferred.push(spec);
   }
 
-  root.dataset.fxMotionRuntimeRequestedR271 = String(requested);
+  root.dataset.fxMotionRuntimeRequestedR271 = String(immediateRequested);
   root.dataset.fxMotionRuntimeMobileEnergySkippedR271 = String(skippedMobileEnergy);
+  root.dataset.fxMotionRuntimeDeferredCountR284 = String(deferred.length);
   root.dataset.fxMotionRuntimeR239 = mobile.matches
-    ? 'requested-r271-mobile-idle-safe'
-    : 'requested-r243';
+    ? 'core-ready-r284-mobile-idle-safe'
+    : 'core-ready-r284-desktop-idle-safe';
+
+  if (deferred.length) {
+    for (const [type, options] of intentListeners) addEventListener(type, startEnhancements, options);
+    if (location.hash && location.hash !== '#top' && location.hash !== '#hero') startEnhancements();
+  }
 }());
