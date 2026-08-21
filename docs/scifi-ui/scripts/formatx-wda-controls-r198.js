@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxWdaHardening === 'r260') return;
-  root.dataset.fxWdaHardening = 'r260';
+  if (root.dataset.fxWdaHardening === 'r263') return;
+  root.dataset.fxWdaHardening = 'r263';
   root.dataset.fxWdaSound = 'muted-default';
 
   // Strict-CSP diagnostics stay in data attributes, never presentation styles.
@@ -34,10 +34,15 @@
     pending: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 3a9 9 0 1 1-8.3 5.5"/><path d="M4 3v5h5"/></svg>',
     retry: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 8.5A8 8 0 1 1 4 15"/><path d="M4 4v5h5"/></svg>'
   });
+
   let loadingAudio = false;
   let syncing = false;
+  let layoutQueued = false;
+  let bootObserver = null;
+  let bootTimer = 0;
 
   const language = () => root.lang === 'en' ? 'en' : 'hu';
+  const mobileViewport = () => matchMedia('(max-width: 900px), (pointer: coarse)').matches;
 
   function pickButton() {
     const buttons = Array.from(document.querySelectorAll(SELECTOR)).filter(node => node instanceof HTMLButtonElement);
@@ -93,6 +98,97 @@
     }
   }
 
+  function clearLegacyControlGeometry(node) {
+    if (!(node instanceof HTMLElement)) return;
+    if (node.hasAttribute('style')) node.removeAttribute('style');
+  }
+
+  function canonicalizeReferenceControls(button) {
+    const hero = document.getElementById('hero');
+    const grid = hero?.querySelector(':scope > .hero-grid');
+    const space = grid?.querySelector(':scope > .hero-space');
+    const controls = hero?.querySelector('.fx-reference-controls-r204');
+    const rail = controls?.querySelector(':scope > .fx-reference-rail') || hero?.querySelector('.fx-reference-rail');
+    const ask = rail?.querySelector('.fx-reference-ask');
+    const pause = rail?.querySelector('.fx-reference-pause');
+    const topbar = document.querySelector('.topbar');
+    const mag = document.querySelector('.fx-reference-mag-button');
+    const lang = document.querySelector('.fx-language-toggle');
+    const menu = document.querySelector('.fx-reference-menu-button');
+
+    if (!(hero instanceof HTMLElement)
+      || !(grid instanceof HTMLElement)
+      || !(space instanceof HTMLElement)
+      || !(controls instanceof HTMLElement)
+      || !(rail instanceof HTMLElement)
+      || !(button instanceof HTMLButtonElement)) return false;
+
+    if (button.parentElement !== controls) controls.prepend(button);
+    if (rail.parentElement !== controls) controls.appendChild(rail);
+
+    const mobile = mobileViewport();
+    const owner = mobile ? grid : space;
+    if (controls.parentElement !== owner) owner.appendChild(controls);
+
+    // r244 and older mobile generations may have left inline !important flex,
+    // top/right or translate geometry. The late r263 stylesheet is the single
+    // final geometry owner, so remove only layout inline state from this small
+    // canonical control group. Audio state and event listeners remain intact.
+    for (const node of [controls, rail, button, ask, pause]) clearLegacyControlGeometry(node);
+
+    controls.classList.add('fx-reference-controls-r263');
+    button.classList.add('fx-wda-sound-toggle');
+
+    if (mag instanceof HTMLButtonElement) {
+      mag.classList.add('fx-reference-mag-text-r263');
+      mag.textContent = language() === 'en' ? 'CORE' : 'MAG';
+    }
+
+    if (topbar instanceof HTMLElement && lang instanceof HTMLElement && lang.parentElement !== topbar) topbar.appendChild(lang);
+    if (topbar instanceof HTMLElement && mag instanceof HTMLElement && mag.parentElement !== topbar) topbar.appendChild(mag);
+    if (topbar instanceof HTMLElement && menu instanceof HTMLElement && menu.parentElement !== topbar) topbar.appendChild(menu);
+
+    root.dataset.fxReferenceControlLayout = mobile ? 'r263-mobile-three-cell' : 'r263-desktop-three-cell';
+    root.dataset.fxReferenceHeaderLayout = mag instanceof HTMLElement ? 'r263-fixed-no-overlap' : 'r263-header-pending';
+    return true;
+  }
+
+  function stopBootObserver() {
+    if (bootObserver) bootObserver.disconnect();
+    bootObserver = null;
+    if (bootTimer) clearTimeout(bootTimer);
+    bootTimer = 0;
+  }
+
+  function normalizeLayout() {
+    layoutQueued = false;
+    const button = pickButton();
+    if (!(button instanceof HTMLButtonElement)) return false;
+    sync(button);
+    const ready = canonicalizeReferenceControls(button);
+    if (ready) stopBootObserver();
+    return ready;
+  }
+
+  function scheduleLayout() {
+    if (layoutQueued) return;
+    layoutQueued = true;
+    requestAnimationFrame(normalizeLayout);
+  }
+
+  function startLayoutBoot() {
+    if (normalizeLayout() || bootObserver) return;
+    const target = document.body || document.documentElement;
+    bootObserver = new MutationObserver(() => {
+      if (normalizeLayout()) stopBootObserver();
+    });
+    bootObserver.observe(target, { subtree: true, childList: true });
+    bootTimer = setTimeout(() => {
+      stopBootObserver();
+      normalizeLayout();
+    }, 5000);
+  }
+
   function ensureButton() {
     let button = pickButton();
     if (!button) {
@@ -115,6 +211,7 @@
       if (duplicate !== button) duplicate.remove();
     }
     sync(button);
+    canonicalizeReferenceControls(button);
     return button;
   }
 
@@ -129,7 +226,11 @@
     script.dataset.fxWdaAudioR198 = 'true';
     script.addEventListener('load', () => {
       loadingAudio = false;
-      queueMicrotask(() => sync(ensureButton()));
+      queueMicrotask(() => {
+        const button = ensureButton();
+        sync(button);
+        scheduleLayout();
+      });
     }, { once: true });
     script.addEventListener('error', () => {
       loadingAudio = false;
@@ -137,6 +238,7 @@
       const button = ensureButton();
       button.dataset.fxAudioState = 'blocked';
       sync(button);
+      scheduleLayout();
     }, { once: true });
     document.head.appendChild(script);
   }
@@ -156,26 +258,41 @@
     const button = ensureButton();
     button.dataset.fxAudioState = 'blocked';
     sync(button);
+    scheduleLayout();
   }, true);
 
-  // Audio state is the only steady-state mutation source that needs observation.
-  // The former document-wide body observer called ensureButton() for every DOM
-  // mutation and kept the mobile page from reaching a CPU-idle period.
-  const rootObserver = new MutationObserver(() => {
+  // Audio/reference state are the only steady-state mutation sources observed.
+  // No document-wide steady-state DOM observer is installed.
+  const rootObserver = new MutationObserver(records => {
     const button = pickButton();
     if (button) sync(button);
+    if (records.some(record => record.attributeName === 'data-fx-reference-production-r244')) scheduleLayout();
   });
   rootObserver.observe(root, {
     attributes: true,
-    attributeFilter: ['data-fx-audio-owner', 'data-fx-audio-state', 'data-fx-audio-level']
+    attributeFilter: [
+      'data-fx-audio-owner',
+      'data-fx-audio-state',
+      'data-fx-audio-level',
+      'data-fx-reference-production-r244'
+    ]
   });
 
   for (const eventName of [
     'formatx:languagechange',
     'formatx:real3dready',
+    'formatx:coredetailready',
     'formatx:organisminterfaceready',
+    'formatx:mobilelayoutready',
     'pageshow'
-  ]) addEventListener(eventName, () => sync(ensureButton()));
+  ]) addEventListener(eventName, () => {
+    sync(ensureButton());
+    scheduleLayout();
+  });
+
+  addEventListener('resize', scheduleLayout, { passive: true });
+  addEventListener('orientationchange', scheduleLayout, { passive: true });
 
   ensureButton();
+  startLayoutBoot();
 }());
