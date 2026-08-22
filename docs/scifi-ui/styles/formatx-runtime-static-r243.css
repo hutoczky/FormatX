@@ -1,4 +1,4 @@
-/* FormatX r289 — static compatibility CSS for the pure native WebGL MAG.
+/* FormatX r290 — static compatibility CSS for the pure native WebGL MAG.
    Legacy heartbeat selectors remain only as fallback contracts. Retired MAG
    pseudo surfaces stay disabled and all ambient section paint is constrained
    to the viewport so visual atmosphere can never create scrollable overflow. */
@@ -95,6 +95,26 @@ html body.living-architecture main#main-content > .fx-category-deck::before{
     opacity:.095!important;filter:none!important;will-change:transform!important;
   }
   html body.living-architecture #hero .fx-r168-spark{opacity:.16!important;}
+
+  /* r290: the r179 organ sigils used right:-24vw / -35vw and transformed
+     children beyond their own box. They are decorative and sit behind content,
+     so keep the same organ grammar but contain every painted pixel inside a
+     right-aligned viewport-safe box. This also keeps Thought Genome expansion
+     from changing document scroll width after the ASK interaction. */
+  html[data-fx-soty-continuity-r179="ready"] body.living-architecture #main-content > section.scene:not(#hero){
+    overflow:clip!important;
+  }
+  html[data-fx-soty-continuity-r179="ready"] body.living-architecture #main-content > section.scene:not(#hero) > .fx-r179-organ-sigil{
+    right:0!important;
+    width:min(70vw,300px)!important;
+    max-width:calc(100% - 16px)!important;
+    overflow:clip!important;
+    contain:layout paint style!important;
+  }
+  html[data-fx-soty-continuity-r179="ready"] body.living-architecture #main-content > section.scene:not(#hero) > .fx-r179-organ-sigil > span{
+    max-width:100%!important;
+    max-height:100%!important;
+  }
 }
 
 @media(max-width:430px){
