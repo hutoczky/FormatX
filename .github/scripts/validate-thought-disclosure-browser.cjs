@@ -10,12 +10,16 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function activateThroughCanonicalAsk(page, name) {
+async function canonicalAsk(page, name) {
   const ask = page.locator('#hero .fx-reference-controls-r204 .fx-reference-ask').first();
   await ask.waitFor({ state: 'visible', timeout: 15000 });
   const askBox = await ask.boundingBox();
   assert(askBox && askBox.width >= 44 && askBox.height >= 44, `${name}: canonical ASK has no usable hit target`);
+  return ask;
+}
 
+async function activateThroughCanonicalAsk(page, name) {
+  const ask = await canonicalAsk(page, name);
   await ask.click();
   await page.waitForFunction(
     () => document.documentElement.dataset.fxImmersive === 'active',
@@ -93,18 +97,25 @@ async function validateViewport(browser, name, viewport, mobile) {
   await page.goto(testUrl.href, { waitUntil: 'domcontentloaded' });
   await waitForReady(page, name);
 
-  const trigger = page.locator('.fx-organism-thought-trigger');
+  const ask = await canonicalAsk(page, name);
+  const retiredTrigger = page.locator('.fx-organism-thought-trigger').first();
   const bubble = page.locator('.fx-organism-thought');
   const details = page.locator('.fx-thought-genome-disclosure');
   const summary = details.locator('summary');
   const controls = details.locator('.fx-thought-genome-controls');
   const genomeLayer = page.locator('.fx-thought-genome-layer');
 
-  await trigger.waitFor({ state: 'visible' });
+  // The internal Organism trigger remains a semantic/state owner only. It must
+  // not return to the visible production surface; every user transition below
+  // is exercised through the canonical ASK control.
+  if (await retiredTrigger.count()) {
+    assert(!(await retiredTrigger.isVisible()), `${name}: retired internal thought trigger became visible`);
+  }
+
   await genomeLayer.waitFor({ state: 'attached', timeout: 15000 });
   assert(await bubble.isHidden(), `${name}: dialogue must start closed`);
 
-  await trigger.click();
+  await ask.click();
   await bubble.waitFor({ state: 'visible' });
   await details.waitFor({ state: 'visible' });
   assert(!(await details.evaluate(node => node.open)), `${name}: thought genome details must start closed`);
@@ -140,12 +151,14 @@ async function validateViewport(browser, name, viewport, mobile) {
   await bubble.waitFor({ state: 'hidden' });
   assert(!(await details.evaluate(node => node.open)), `${name}: disclosure remained open after dialogue close`);
 
-  await trigger.click();
+  await ask.click();
   await bubble.waitFor({ state: 'visible' });
   await page.locator('.fx-organism-master-toggle').click();
   await bubble.waitFor({ state: 'hidden' });
   assert(await page.evaluate(() => document.documentElement.dataset.fxOrganismDialogueEnabled === 'false'), `${name}: Organism master switch did not disable the dialogue`);
-  assert((await trigger.locator('b').textContent()).trim() === 'OFF', `${name}: disabled trigger does not show OFF`);
+  if (await retiredTrigger.count()) {
+    assert((await retiredTrigger.locator('b').textContent()).trim() === 'OFF', `${name}: disabled internal owner does not expose OFF state`);
+  }
   await page.waitForFunction(() => {
     const layer = document.querySelector('.fx-thought-genome-layer');
     return layer && Number(getComputedStyle(layer).opacity) <= 0.01;
@@ -153,9 +166,11 @@ async function validateViewport(browser, name, viewport, mobile) {
   const disabledGenomeOpacity = await genomeLayer.evaluate(node => Number(getComputedStyle(node).opacity));
   assert(disabledGenomeOpacity <= 0.01, `${name}: thought constellation remains visible while Organism is off (${disabledGenomeOpacity})`);
 
-  await trigger.click();
+  // The visible ASK control must also be the re-enable path. r293 delegates the
+  // disabled transition to the hidden Organism state owner exactly once.
+  await ask.click();
   await bubble.waitFor({ state: 'visible' });
-  assert(await page.evaluate(() => document.documentElement.dataset.fxOrganismDialogueEnabled === 'true'), `${name}: trigger did not re-enable the Organism`);
+  assert(await page.evaluate(() => document.documentElement.dataset.fxOrganismDialogueEnabled === 'true'), `${name}: canonical ASK did not re-enable the Organism`);
   assert(!(await details.evaluate(node => node.open)), `${name}: disclosure reopened after Organism re-enable`);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -172,7 +187,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   try {
     await validateViewport(browser, 'desktop', { width: 1440, height: 900 }, false);
     await validateViewport(browser, 'mobile', { width: 390, height: 844 }, true);
-    console.log('PASS: canonical ASK activation plus thought genome disclosure are bilingual, switchable and responsive.');
+    console.log('PASS: canonical ASK activation, re-enable and thought genome disclosure are bilingual, switchable and responsive.');
   } finally {
     await browser.close();
   }
