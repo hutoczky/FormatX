@@ -150,7 +150,23 @@ async function scanInformation(page,label){
         }
       }
     }
-    return{clipped:clipped.slice(0,30),occluded:occluded.slice(0,30),scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
+
+    const overflowOffenders=[...document.querySelectorAll('body *')].map(el=>{
+      const s=getComputedStyle(el),r=el.getBoundingClientRect();
+      return{
+        tag:el.tagName.toLowerCase(),
+        id:el.id||'',
+        className:typeof el.className==='string'?el.className.slice(0,140):'',
+        left:Number(r.left.toFixed(1)),right:Number(r.right.toFixed(1)),top:Number(r.top.toFixed(1)),bottom:Number(r.bottom.toFixed(1)),
+        width:Number(r.width.toFixed(1)),height:Number(r.height.toFixed(1)),
+        position:s.position,display:s.display,visibility:s.visibility,opacity:s.opacity,
+        transform:s.transform,overflowX:s.overflowX,overflowY:s.overflowY,
+        cssWidth:s.width,maxWidth:s.maxWidth
+      };
+    }).filter(x=>x.display!=='none'&&x.visibility!=='hidden'&&Number(x.opacity)>.02&&x.width>0&&x.height>0&&(x.left<-2||x.right>innerWidth+2))
+      .sort((a,b)=>Math.max(b.right-innerWidth,-b.left)-Math.max(a.right-innerWidth,-a.left)).slice(0,24);
+
+    return{clipped:clipped.slice(0,30),occluded:occluded.slice(0,30),overflowOffenders,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
   });
   assert(result.scrollWidth-result.clientWidth<=2,`${label} horizontal overflow: ${JSON.stringify(result)}`);
   assert.deepEqual(result.clipped,[],`${label} clipped information: ${JSON.stringify(result.clipped)}`);
