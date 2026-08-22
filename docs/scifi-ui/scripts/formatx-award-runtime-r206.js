@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r287') return;
-  root.dataset.fxAwardRuntime = 'r287';
+  if (root.dataset.fxAwardRuntime === 'r291') return;
+  root.dataset.fxAwardRuntime = 'r291';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -14,6 +14,8 @@
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
+  const CONTROL_OWNER_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260822-r291-canonical-menu';
+  const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260822-r291-nav-state';
   const DIALOGUE_STYLE_URL = '/scifi-ui/styles/formatx-dialogue-open-r287.css?v=20260822-r287-open-state';
   const DIALOGUE_OWNER_URL = '/scifi-ui/scripts/formatx-dialogue-render-owner-r273.js?v=20260822-r287-open-state';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
@@ -104,16 +106,52 @@
     document.head.appendChild(script);
   }
 
+  function ensureNavOwner() {
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', ensureNavOwner, { once: true });
+      return;
+    }
+    if (document.querySelector('script[data-fx-nav-state-owner-r265]')) return;
+    const script = document.createElement('script');
+    script.src = NAV_OWNER_URL;
+    script.async = true;
+    script.dataset.fxNavStateOwnerR265 = 'true';
+    document.head.appendChild(script);
+  }
+
+  function ensureControlOwner() {
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', ensureControlOwner, { once: true });
+      return;
+    }
+    if (document.querySelector('script[data-fx-control-owner-r268]')) {
+      ensureNavOwner();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = CONTROL_OWNER_URL;
+    script.async = true;
+    script.dataset.fxControlOwnerR268 = 'true';
+    script.addEventListener('load', ensureNavOwner, { once: true });
+    script.addEventListener('error', ensureNavOwner, { once: true });
+    document.head.appendChild(script);
+  }
+
   function ensureControls() {
     if (!document.body) {
       document.addEventListener('DOMContentLoaded', ensureControls, { once: true });
       return;
     }
-    if (document.querySelector('script[data-fx-award-runtime-controls-r206]')) return;
+    if (document.querySelector('script[data-fx-award-runtime-controls-r206]')) {
+      ensureControlOwner();
+      return;
+    }
     const script = document.createElement('script');
     script.src = CONTROLS_URL;
     script.async = true;
     script.dataset.fxAwardRuntimeControlsR206 = 'true';
+    script.addEventListener('load', ensureControlOwner, { once: true });
+    script.addEventListener('error', ensureControlOwner, { once: true });
     document.head.appendChild(script);
   }
 
