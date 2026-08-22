@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r293') return;
-  root.dataset.fxAwardRuntime = 'r293';
+  if (root.dataset.fxAwardRuntime === 'r296') return;
+  root.dataset.fxAwardRuntime = 'r296';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -12,6 +12,7 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
+  const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260822-r296-canonical-header';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
   const CONTROL_OWNER_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260822-r291-canonical-menu';
@@ -24,9 +25,6 @@
   function openReferenceDialogue() {
     const trigger = document.querySelector('.fx-organism-thought-trigger');
 
-    // The retired trigger remains the Organism's internal enable/disable owner.
-    // When the master switch is OFF, route the visible ASK control through that
-    // internal owner exactly once so ASK can re-enable and open the dialogue.
     if (root.dataset.fxOrganismDialogueEnabled === 'false' && trigger instanceof HTMLButtonElement) {
       trigger.click();
       window.FormatXCoreMobileV69?.pulse?.();
@@ -85,6 +83,15 @@
     document.head.appendChild(link);
   }
 
+  function ensureOwnerStyle() {
+    if (document.querySelector('link[data-fx-control-owner-style-r264]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = OWNER_STYLE_URL;
+    link.dataset.fxControlOwnerStyleR264 = 'true';
+    document.head.appendChild(link);
+  }
+
   function ensureDialogueSurface() {
     if (!document.querySelector('link[data-fx-dialogue-open-r287]')) {
       const link = document.createElement('link');
@@ -133,6 +140,7 @@
   }
 
   function ensureControlOwner() {
+    ensureOwnerStyle();
     if (!document.body) {
       document.addEventListener('DOMContentLoaded', ensureControlOwner, { once: true });
       return;
@@ -151,6 +159,7 @@
   }
 
   function ensureControls() {
+    ensureOwnerStyle();
     if (!document.body) {
       document.addEventListener('DOMContentLoaded', ensureControls, { once: true });
       return;
@@ -192,6 +201,7 @@
 
   ensureReferenceAskOwner();
   ensureStyle();
+  ensureOwnerStyle();
   ensureDialogueSurface();
   ensureGeometryGuard();
   ensureControls();
