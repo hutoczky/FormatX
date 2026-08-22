@@ -1,7 +1,7 @@
-/* FormatX r286 — static compatibility CSS for the pure native WebGL MAG.
+/* FormatX r287 — static compatibility CSS for the pure native WebGL MAG.
    Legacy heartbeat selectors remain only as fallback contracts. The hero-space
-   pseudo surfaces are permanently retired so no 2D material can paint behind
-   the native triangle mesh. */
+   pseudo surfaces and the old viewport-spilling hero ring are permanently
+   retired so no 2D material can paint around the native triangle mesh. */
 
 #hero .fx-r155-heartbeat-core,
 #hero .fx-r155-heartbeat-ring,
@@ -23,6 +23,24 @@
 #hero .fx-r155-heartbeat-wave{
   z-index:29;width:clamp(144px,16vw,252px);aspect-ratio:1;border:1px solid rgba(108,235,255,.25);
   box-shadow:0 0 21px rgba(62,216,255,.13),0 0 44px rgba(151,73,255,.08);
+}
+
+/* r287: the pre-WebGL decorative hero ring used right:-18vw and a large
+   box-shadow. At 1920px it expanded #hero.scrollWidth by 96px even though no
+   information was clipped. The native WebGL MAG now owns this visual surface. */
+html body.living-architecture main#main-content section#hero.scene.hero[data-organ="core"]::after{
+  content:none!important;
+  display:none!important;
+  position:absolute!important;
+  inset:0!important;
+  width:0!important;
+  height:0!important;
+  background:none!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  opacity:0!important;
+  pointer-events:none!important;
 }
 
 @media(max-width:900px),(pointer:coarse){
