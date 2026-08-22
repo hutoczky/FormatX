@@ -37,6 +37,70 @@
   let timelineDuration=2400,exitDuration=280,hardDeadline=3780;
   const language=()=>ROOT.lang==='en'?'en':'hu';
 
+  function setImportant(node, property, value) {
+    if (!(node instanceof HTMLElement)) return;
+    if (node.style.getPropertyValue(property) === value && node.style.getPropertyPriority(property) === 'important') return;
+    node.style.setProperty(property, value, 'important');
+  }
+
+  // r295 bounded safety net. Legacy startup owners can clear inline geometry
+  // while canonical controls are being adopted. Re-assert only the three header
+  // hit targets at explicit lifecycle boundaries; there is no permanent observer
+  // and no idle loop. CSS remains the visual/material owner.
+  function stabilizeHeaderControls() {
+    const topbar = document.querySelector('.topbar');
+    const mag = document.querySelector('.fx-reference-mag-button');
+    const lang = document.querySelector('.fx-language-toggle');
+    const menu = document.querySelector('.fx-reference-menu-button');
+    if (!(topbar instanceof HTMLElement)) return false;
+
+    setImportant(topbar, 'position', 'relative');
+    setImportant(topbar, 'inset', 'auto');
+    setImportant(topbar, 'display', 'block');
+    setImportant(topbar, 'width', '100%');
+
+    const mobile = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+    setImportant(topbar, 'height', mobile ? '70px' : '76px');
+    setImportant(topbar, 'min-height', mobile ? '70px' : '76px');
+
+    const configure = (node, top, right, width, height) => {
+      if (!(node instanceof HTMLElement)) return;
+      setImportant(node, 'position', 'absolute');
+      setImportant(node, 'top', top);
+      setImportant(node, 'right', right);
+      setImportant(node, 'bottom', 'auto');
+      setImportant(node, 'left', 'auto');
+      setImportant(node, 'width', width);
+      setImportant(node, 'min-width', width);
+      setImportant(node, 'height', height);
+      setImportant(node, 'min-height', height);
+      setImportant(node, 'visibility', 'visible');
+      setImportant(node, 'opacity', '1');
+      setImportant(node, 'pointer-events', 'auto');
+      setImportant(node, 'transform', 'none');
+    };
+
+    if (mobile) {
+      configure(menu, '8px', '14px', '50px', '54px');
+      configure(lang, '11px', '72px', '44px', '48px');
+      configure(mag, '11px', '122px', '50px', '48px');
+    } else {
+      configure(menu, '12px', '22px', '52px', '50px');
+      configure(lang, '13px', '88px', '46px', '48px');
+      configure(mag, '13px', '148px', '54px', '48px');
+    }
+
+    if (mag instanceof HTMLElement && lang instanceof HTMLElement && menu instanceof HTMLElement) {
+      ROOT.dataset.fxHeaderGeometryR295 = mobile ? 'mobile-canonical' : 'desktop-canonical';
+      return true;
+    }
+    return false;
+  }
+
+  function scheduleHeaderStability() {
+    requestAnimationFrame(stabilizeHeaderControls);
+  }
+
   function ensureAwardRuntime(){
     if(AUDIT_MODE||document.querySelector('script[data-fx-award-runtime-r206]'))return;
     const script=document.createElement('script');
@@ -76,6 +140,11 @@
   function failOpen(source){if(running)fastRelease(source)}
 
   ensureAwardRuntime();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleHeaderStability,{once:true});else scheduleHeaderStability();
+  for(const eventName of ['formatx:controlownerready','formatx:mobilelayoutready','formatx:languagechange','pageshow']) addEventListener(eventName,scheduleHeaderStability,{passive:true});
+  addEventListener('resize',scheduleHeaderStability,{passive:true});
+  for(const delay of [120,420,1100,2600,5200]) setTimeout(stabilizeHeaderControls,delay);
+
   if(AUDIT_MODE){ROOT.classList.add('fx-audit-mode');fastRelease('audit-skip');return}
   if(MOBILE_DIRECT_QUERY.matches){ROOT.dataset.fxIntroStrategy='mobile-direct';fastRelease('mobile-direct-v1',true);return}
   addEventListener('pageshow',e=>{if(e.persisted)fastRelease('bfcache-restore')});
