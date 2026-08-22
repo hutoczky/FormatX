@@ -1,2 +1,1 @@
-/* FormatX r298 — reduced-motion payload is fetched only when its existing interaction gate activates. */
-@import url("./formatx-critical-reduced-full-r298.css?v=20260822-r298") (prefers-reduced-motion: reduce);
+/* FormatX r299 — intentionally empty normal-mode reduced-motion stub. The full reduced payload is created by formatx-deferred-reduced-style-r232.js only for actual reduced-motion users. */

@@ -1,25 +1,40 @@
-/* FormatX r233 — interaction-gated full reduced-motion stylesheet. */
-/* r234 validation marker: footer tap targets + reduced desktop LCP polish applied. */
+/* FormatX r299 — interaction-gated full reduced-motion stylesheet without a normal-mode fetch. */
 (function(){
 'use strict';
 const root=document.documentElement;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const link=document.querySelector('link[data-fx-critical-reduced-r228]');
-if(!reduced.matches||!(link instanceof HTMLLinkElement)){
-  root.dataset.fxReducedStyleR233=reduced.matches?'missing-link':'not-required';
+const stub=document.querySelector('link[data-fx-critical-reduced-r228]');
+const FULL_URL='./styles/formatx-critical-reduced-full-r298.css?v=20260822-r299-reduced-only';
+
+if(!reduced.matches){
+  root.dataset.fxReducedStyleR233='not-required-no-full-fetch-r299';
   return;
 }
+
 let active=false;
-const activate=()=>{
-  if(active||link.media==='all')return;
+function activate(){
+  if(active)return;
   active=true;
-  link.media='all';
-  root.dataset.fxReducedStyleR233='activated-on-user-intent';
+  let full=document.querySelector('link[data-fx-critical-reduced-full-r299]');
+  if(!(full instanceof HTMLLinkElement)){
+    full=document.createElement('link');
+    full.rel='stylesheet';
+    full.href=FULL_URL;
+    full.media='all';
+    full.dataset.fxCriticalReducedFullR299='true';
+    full.addEventListener('load',()=>{root.dataset.fxReducedStyleR233='activated-on-user-intent-r299';},{once:true});
+    full.addEventListener('error',()=>{root.dataset.fxReducedStyleR233='full-style-load-failed-r299';},{once:true});
+    document.head.appendChild(full);
+  }else{
+    root.dataset.fxReducedStyleR233='activated-on-user-intent-r299';
+  }
+  if(stub instanceof HTMLLinkElement)stub.media='not all';
   for(const [type,opts] of listeners)removeEventListener(type,activate,opts);
-};
+}
+
 const passive={passive:true};
 const listeners=[['wheel',passive],['touchstart',passive],['pointerdown',passive],['scroll',passive],['keydown',false]];
 for(const [type,opts] of listeners)addEventListener(type,activate,opts);
 if(location.hash&&location.hash!=='#top'&&location.hash!=='#hero')activate();
-else root.dataset.fxReducedStyleR233='armed';
+else root.dataset.fxReducedStyleR233='armed-no-full-fetch-r299';
 }());
