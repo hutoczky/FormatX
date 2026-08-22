@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r284') return;
-  root.dataset.fxAwardRuntime = 'r284';
+  if (root.dataset.fxAwardRuntime === 'r286') return;
+  root.dataset.fxAwardRuntime = 'r286';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -12,6 +12,7 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
+  const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
@@ -72,6 +73,19 @@
     document.head.appendChild(link);
   }
 
+  function ensureGeometryGuard() {
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', ensureGeometryGuard, { once: true });
+      return;
+    }
+    if (document.querySelector('script[data-fx-geometry-guard-r286]')) return;
+    const script = document.createElement('script');
+    script.src = GUARD_URL;
+    script.async = true;
+    script.dataset.fxGeometryGuardR286 = 'true';
+    document.head.appendChild(script);
+  }
+
   function ensureControls() {
     if (!document.body) {
       document.addEventListener('DOMContentLoaded', ensureControls, { once: true });
@@ -109,6 +123,7 @@
 
   ensureReferenceAskOwner();
   ensureStyle();
+  ensureGeometryGuard();
   ensureControls();
   root.dataset.fxAwardSound = 'muted-default-visible-control';
 
