@@ -362,3 +362,71 @@ body.fx-organism-panel-open .fx-core-real3d-stage {
     min-height: 258px !important;
   }
 }
+
+/* r293 — reserve the final r244 header in the render-blocking core stylesheet.
+   r244's mode attribute is published by a deferred script. Without this neutral
+   reservation, the header changed from fixed to in-flow after the first layout,
+   moving the entire main surface by 70/76px and dominating CLS. */
+@media (max-width: 900px), (pointer: coarse) {
+  html:root:root body.living-architecture .topbar {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 70px !important;
+    min-height: 70px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  html:root:root body.living-architecture .topbar .brand {
+    position: absolute !important;
+    inset: 18px auto auto 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  html:root:root body.living-architecture .topbar .brand img {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+  }
+}
+
+@media (min-width: 901px) {
+  html:root:root body.living-architecture .topbar {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  html:root:root body.living-architecture .topbar .brand {
+    position: absolute !important;
+    inset: 18px auto auto max(38px, calc((100vw - 1320px) / 2)) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    height: 40px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  html:root:root body.living-architecture .topbar .brand img {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+  }
+}
