@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r286') return;
-  root.dataset.fxAwardRuntime = 'r286';
+  if (root.dataset.fxAwardRuntime === 'r287') return;
+  root.dataset.fxAwardRuntime = 'r287';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -14,6 +14,8 @@
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
+  const DIALOGUE_STYLE_URL = '/scifi-ui/styles/formatx-dialogue-open-r287.css?v=20260822-r287-open-state';
+  const DIALOGUE_OWNER_URL = '/scifi-ui/scripts/formatx-dialogue-render-owner-r273.js?v=20260822-r287-open-state';
   const GPU_URL = '/scifi-ui/scripts/formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame';
   let gpuRequested = false;
 
@@ -41,9 +43,6 @@
       const target = event.target instanceof Element ? event.target.closest('.fx-reference-ask') : null;
       if (!(target instanceof HTMLButtonElement)) return;
 
-      // One canonical activation path. Older reference generations may still
-      // have a bubble-phase listener on the same button; stop it here so a
-      // single tap can never open and immediately close the dialogue again.
       event.preventDefault();
       event.stopImmediatePropagation();
 
@@ -57,8 +56,6 @@
         }));
       }
 
-      // Activation modules are intentionally deferred until intent. Retry only
-      // at this real interaction boundary; never poll or keep an idle loop.
       queueMicrotask(openReferenceDialogue);
       setTimeout(openReferenceDialogue, 140);
     }, true);
@@ -71,6 +68,27 @@
     link.href = STYLE_URL;
     link.dataset.fxAwardRuntimeStyleR206 = 'true';
     document.head.appendChild(link);
+  }
+
+  function ensureDialogueSurface() {
+    if (!document.querySelector('link[data-fx-dialogue-open-r287]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = DIALOGUE_STYLE_URL;
+      link.dataset.fxDialogueOpenR287 = 'true';
+      document.head.appendChild(link);
+    }
+
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', ensureDialogueSurface, { once: true });
+      return;
+    }
+    if (document.querySelector('script[data-fx-dialogue-render-owner-r287]')) return;
+    const script = document.createElement('script');
+    script.src = DIALOGUE_OWNER_URL;
+    script.async = true;
+    script.dataset.fxDialogueRenderOwnerR287 = 'true';
+    document.head.appendChild(script);
   }
 
   function ensureGeometryGuard() {
@@ -123,6 +141,7 @@
 
   ensureReferenceAskOwner();
   ensureStyle();
+  ensureDialogueSurface();
   ensureGeometryGuard();
   ensureControls();
   root.dataset.fxAwardSound = 'muted-default-visible-control';
