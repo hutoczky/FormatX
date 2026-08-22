@@ -59,6 +59,9 @@
   opacity: var(--fx-system-layer-opacity);
 }
 
+/* r287: opacity alone carries the transition. The former scale(1.035) grew a
+   full-viewport absolute layer beyond both phone and desktop bounds, creating
+   measurable horizontal overflow and avoidable compositing/layout work. */
 .fx-living-transition {
   position: absolute;
   inset: 0;
@@ -66,13 +69,13 @@
   background:
     radial-gradient(ellipse at 50% 50%, transparent 15%, rgba(1, 8, 19, .32) 63%, rgba(0, 2, 9, .74) 100%),
     linear-gradient(115deg, transparent 32%, rgba(81, 224, 255, .075) 48%, rgba(159, 62, 255, .055) 52%, transparent 68%);
-  transform: scale(1.035);
-  transition: opacity 180ms ease, transform var(--fx-living-transition-ms) cubic-bezier(.16,.8,.2,1);
+  transform: none;
+  transition: opacity 180ms ease;
 }
 
 html[data-fx-living-transition="active"] .fx-living-transition {
   opacity: .78;
-  transform: scale(1);
+  transform: none;
 }
 
 .fx-living-neural-layer {
