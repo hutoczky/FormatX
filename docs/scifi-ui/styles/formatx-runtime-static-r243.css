@@ -1,7 +1,7 @@
-/* FormatX r288 — static compatibility CSS for the pure native WebGL MAG.
-   Legacy heartbeat selectors remain only as fallback contracts. The hero-space
-   pseudo surfaces and the old viewport-spilling hero fields are permanently
-   retired so no 2D material can paint around the native triangle mesh. */
+/* FormatX r289 — static compatibility CSS for the pure native WebGL MAG.
+   Legacy heartbeat selectors remain only as fallback contracts. Retired MAG
+   pseudo surfaces stay disabled and all ambient section paint is constrained
+   to the viewport so visual atmosphere can never create scrollable overflow. */
 
 #hero .fx-r155-heartbeat-core,
 #hero .fx-r155-heartbeat-ring,
@@ -27,7 +27,7 @@
 
 /* r288: pre-WebGL hero atmosphere used a -12vw/+12vw field and the older
    decorative ring used right:-18vw. Both expanded the document scroll width
-   on wide desktop after the real WebGL MAG had already replaced their visuals. */
+   after the real WebGL MAG had already replaced their visuals. */
 html body.living-architecture main#main-content section#hero.scene.hero[data-organ="core"]::before,
 html body.living-architecture main#main-content section#hero.scene.hero[data-organ="core"]::after{
   content:none!important;
@@ -43,6 +43,22 @@ html body.living-architecture main#main-content section#hero.scene.hero[data-org
   opacity:0!important;
   filter:none!important;
   pointer-events:none!important;
+}
+
+/* r289: r185's section aura used horizontal negative inset. At 1920px its
+   max(-7vw,-96px) rule created exactly 96px scroll overflow; at 390px the
+   mobile -12vw rule created ~46.8px. Preserve the vertical bleed and same
+   gradients, but make horizontal geometry non-scrollable. */
+html body.living-architecture main#main-content > .scene:not(#hero)::before,
+html body.living-architecture main#main-content > .fx-category-deck::before{
+  left:0!important;
+  right:0!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin-left:0!important;
+  margin-right:0!important;
+  inset-block:-5rem!important;
+  inset-inline:0!important;
 }
 
 @media(max-width:900px),(pointer:coarse){
@@ -79,4 +95,12 @@ html body.living-architecture main#main-content section#hero.scene.hero[data-org
     opacity:.095!important;filter:none!important;will-change:transform!important;
   }
   html body.living-architecture #hero .fx-r168-spark{opacity:.16!important;}
+}
+
+@media(max-width:430px){
+  html body.living-architecture main#main-content > .scene:not(#hero)::before,
+  html body.living-architecture main#main-content > .fx-category-deck::before{
+    inset-block:-3rem!important;
+    inset-inline:0!important;
+  }
 }
