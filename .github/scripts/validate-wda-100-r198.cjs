@@ -1,4 +1,4 @@
-/* FormatX Web Design Awards — r263 truthful performance/control contract. */
+/* FormatX Web Design Awards — r296 truthful performance/control contract. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -30,17 +30,19 @@ const mobile = JSON.parse(read('lighthouserc.live.mobile.json'));
 // UX / accessibility / explicit audio consent.
 assert.match(home, /class="skip-link"[^>]+href="#main-content"/);
 assert.match(home, /<main id="main-content">/);
-assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260821-r263-canonical-controls/);
+assert.match(intro, /formatx-award-runtime-r206\.js\?v=20260822-r296-owner-css-ask/);
 assert.doesNotMatch(intro, /\.style\.|setAttribute\(['"]style/i);
 for (const token of [
   'formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls',
+  'formatx-control-owner-r264.css?v=20260822-r296-canonical-header',
+  'data-fx-control-owner-style-r264',
   'formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls',
   'formatx-wda-gpu-r198.js?v=20260818-r206-post-painted-frame',
   'muted-default-visible-control',
   'audit-passive',
   'DOMContentLoaded',
   'data-fx-core-render-ms'
-]) assert.ok(awardRuntime.includes(token), `missing active r263 award runtime contract: ${token}`);
+]) assert.ok(awardRuntime.includes(token), `missing active r296 award runtime contract: ${token}`);
 for (const token of [
   'Unmute FormatX cinematic audio',
   'Mute FormatX cinematic audio',
@@ -208,4 +210,4 @@ validateLighthouse(desktop, 'desktop');
 validateLighthouse(mobile, 'mobile');
 
 for (const source of [awardRuntime, intro, controls, gpu, mobileLayoutRuntime, mobileReferenceRuntime, referenceRuntime, referenceFinalizer, legacyFlow, legacyFinalizer]) new Function(source);
-console.log('PASS: r263 canonical cross-device controls, event-driven mobile ownership, throttled reference rendering and truthful 0.95 Lighthouse hard gates passed.');
+console.log('PASS: r296 canonical cross-device controls, CSS-owned header geometry, event-driven mobile ownership and truthful 0.95 Lighthouse hard gates passed.');
