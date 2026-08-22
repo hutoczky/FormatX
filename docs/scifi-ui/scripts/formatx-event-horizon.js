@@ -14,13 +14,19 @@
     ? 'reference-frame-r244'
     : 'desktop-reference-r244';
 
+  // r293: the two historical joined-sentence defects no longer exist in static
+  // content. Mark the copy guard complete before the living-system runtime so it
+  // does not TreeWalk the full document during the first-load critical window.
+  ROOT.dataset.fxLivingCopyGuard = 'ready';
+  ROOT.dataset.fxLivingCopyGuardPolicyR293 = 'static-content-normalized-no-document-scan';
+
   const OVERLAY_ID = 'formatx-event-horizon';
   const VISIT_KEY = 'formatx:intro-seen-v1';
   const MOBILE_QUERY = matchMedia('(max-width: 820px), (pointer: coarse)');
   const MOBILE_DIRECT_QUERY = matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)');
   const REDUCE_QUERY = matchMedia('(prefers-reduced-motion: reduce)');
   const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260821-r263-canonical-controls';
+  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260822-r293-canonical-ask';
 
   const COPY = {
     hu: { skip: 'Animáció átugrása', phases: [[18,'KAPCSOLAT FELÉPÍTÉSE'],[42,'TÉRBELI INDEX ÉPÍTÉSE'],[70,'MODULHÁLÓ SZINKRONIZÁLÁSA'],[94,'RENDSZERÁLLAPOT ELLENŐRZÉSE'],[101,'FORMATX MAG AKTÍV']] },
