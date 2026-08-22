@@ -1,16 +1,16 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='r267-cross-device-seamless-carrier-bounded';
+const VERSION='r292-cross-device-seamless-bounded-event-owner';
 if(root.dataset.fxSeamlessEnforcerR159===VERSION)return;
 if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxSeamlessEnforcerR159='audit-skip';return;}
 root.dataset.fxSeamlessEnforcerR159='booting';
+root.dataset.fxSeamlessSchedulerR292='bounded-boot-event-driven';
 
 const imp=(el,prop,value)=>{
   if(!(el instanceof HTMLElement))return;
   if(el.style.getPropertyValue(prop)!==value||el.style.getPropertyPriority(prop)!=='important')el.style.setProperty(prop,value,'important');
 };
-
 function clearSurface(el,{radius=false,overflow=false}={}){
   if(!(el instanceof HTMLElement))return;
   imp(el,'background','none');
@@ -22,7 +22,6 @@ function clearSurface(el,{radius=false,overflow=false}={}){
   if(radius)imp(el,'border-radius','0px');
   if(overflow)imp(el,'overflow','visible');
 }
-
 function enforce(){
   const hero=document.getElementById('hero');
   if(!(hero instanceof HTMLElement))return false;
@@ -66,46 +65,42 @@ function enforce(){
 let raf=0;
 let bootObserver=null;
 let bootTimer=0;
-function schedule(){
-  if(raf)return;
-  raf=requestAnimationFrame(()=>{raf=0;enforce();});
-}
 function stopBootObserver(){
-  bootObserver?.disconnect();
-  bootObserver=null;
-  if(bootTimer)clearTimeout(bootTimer);
-  bootTimer=0;
-  root.dataset.fxSeamlessEnforcerWatch='event-driven';
+  bootObserver?.disconnect();bootObserver=null;
+  if(bootTimer)clearTimeout(bootTimer);bootTimer=0;
+  root.dataset.fxSeamlessSchedulerR292='steady-event-driven';
 }
-function startBoundedBootObserver(){
-  if(bootObserver)return;
-  const hero=document.getElementById('hero');
-  const target=hero||document.body||document.documentElement;
+function run(){
+  raf=0;
+  const ready=enforce();
+  if(ready&&bootObserver)stopBootObserver();
+  return ready;
+}
+function schedule(){if(!raf)raf=requestAnimationFrame(run);}
+function startBootObserver(){
+  if(run()||bootObserver)return;
+  const target=document.body||document.documentElement;
   bootObserver=new MutationObserver(schedule);
   bootObserver.observe(target,{childList:true,subtree:true});
-  bootTimer=setTimeout(stopBootObserver,3500);
-  root.dataset.fxSeamlessEnforcerWatch='boot-bounded';
+  bootTimer=setTimeout(()=>{stopBootObserver();run();},4500);
 }
-function refresh(){enforce();schedule();}
+function semanticRefresh(){schedule();}
 
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',()=>{refresh();startBoundedBootObserver();},{once:true});
-}else{
-  refresh();startBoundedBootObserver();
-}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startBootObserver,{once:true});
+else startBootObserver();
 
-// r267: structure is watched only during the short asynchronous boot window.
-// Steady state is event-driven, so animated descendants cannot keep forcing
-// expensive hero-wide selector/style work and prevent mobile CPU idle.
 for(const eventName of [
   'formatx:real3dready',
   'formatx:coredetailready',
-  'formatx:controlownerready',
   'formatx:mobilelayoutready',
-  'formatx:languagechange',
+  'formatx:controlownerready',
   'pageshow'
-])addEventListener(eventName,refresh,{passive:true});
-addEventListener('resize',schedule,{passive:true});
-addEventListener('orientationchange',schedule,{passive:true});
-setTimeout(refresh,0);setTimeout(refresh,250);setTimeout(refresh,900);setTimeout(refresh,2200);
+]) addEventListener(eventName,semanticRefresh,{passive:true});
+addEventListener('resize',semanticRefresh,{passive:true});
+addEventListener('orientationchange',semanticRefresh,{passive:true});
+
+// Bounded late passes cover asynchronous renderer replacement without leaving
+// a document-wide observer alive during the steady-state animation.
+for(const delay of [0,250,900,2200])setTimeout(schedule,delay);
+addEventListener('pagehide',()=>{stopBootObserver();if(raf)cancelAnimationFrame(raf);raf=0;},{once:true});
 }());

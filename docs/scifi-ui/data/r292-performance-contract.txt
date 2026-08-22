@@ -1,4 +1,0 @@
-r292
-- gyro: event-driven bounded render bursts; zero idle RAF
-- seamless carrier: bounded boot observation; semantic-event steady state
-- thought disclosure validation: real live-core pointer/touch activation

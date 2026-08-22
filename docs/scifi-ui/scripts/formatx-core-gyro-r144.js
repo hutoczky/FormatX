@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-const VERSION='mobile-gyro-parallax-r267-idle-safe';
+const VERSION='mobile-gyro-parallax-r292-event-driven';
 if(root.dataset.fxCoreGyroR144===VERSION)return;
 root.dataset.fxCoreGyroR144=VERSION;
 
@@ -21,9 +21,8 @@ let permissionState='unknown';
 let baseBeta=null,baseGamma=null;
 let calibrating=0,sumBeta=0,sumGamma=0;
 let targetX=0,targetY=0,smoothX=0,smoothY=0;
-let lastDispatch=0,raf=0;
-let manualUntil=0;
-let lastSensorAt=-Infinity;
+let lastDispatch=0,raf=0,burstUntil=0;
+let manualUntil=0,lastSensorAt=0;
 
 function stage(){return document.querySelector('#hero .fx-core-r112-stage,#hero .fx-core-mobile-v55-stage');}
 function hero(){return document.getElementById('hero');}
@@ -66,26 +65,35 @@ function emit(now){
   const clientX=r.left+r.width*(.5+smoothX*.32);
   const clientY=r.top+r.height*(.5-smoothY*.28);
   try{
-    h.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,cancelable:false,clientX,clientY,pointerId:144,pointerType:'mouse',isPrimary:true,buttons:0,pressure:0}));
+    h.dispatchEvent(new PointerEvent('pointermove',{
+      bubbles:true,cancelable:false,clientX,clientY,pointerId:144,
+      pointerType:'mouse',isPrimary:true,buttons:0,pressure:0
+    }));
   }catch(_){h.dispatchEvent(new MouseEvent('mousemove',{bubbles:true,clientX,clientY}));}
   root.dataset.fxCoreGyroVector=`${smoothX.toFixed(3)},${smoothY.toFixed(3)}`;
+}
+function needsFrame(now){
+  const delta=Math.abs(targetX-smoothX)+Math.abs(targetY-smoothY);
+  const motion=Math.abs(smoothX)+Math.abs(smoothY);
+  return now<burstUntil||delta>.004||motion>.004;
 }
 function frame(now){
   raf=0;
   if(document.hidden||!enabled)return;
   const stale=now-lastSensorAt>900;
-  if(stale){targetX*=.82;targetY*=.82;}
-  smoothX+=(targetX-smoothX)*.105;
-  smoothY+=(targetY-smoothY)*.095;
+  if(stale){targetX*=.82;targetY*=.82;if(Math.abs(targetX)<.002)targetX=0;if(Math.abs(targetY)<.002)targetY=0;}
+  smoothX+=(targetX-smoothX)*.18;
+  smoothY+=(targetY-smoothY)*.16;
   if(now-lastDispatch>=33){lastDispatch=now;emit(now);}
-  const moving=!stale||Math.abs(targetX)>.002||Math.abs(targetY)>.002||Math.abs(smoothX)>.002||Math.abs(smoothY)>.002;
-  if(moving)raf=requestAnimationFrame(frame);
-  else{
-    targetX=targetY=smoothX=smoothY=0;
-    root.dataset.fxCoreGyroState='idle-listening';
-  }
+  if(needsFrame(now))raf=requestAnimationFrame(frame);
+  else root.dataset.fxCoreGyroScheduler='idle-no-raf';
 }
-function startFrame(){if(enabled&&!raf)raf=requestAnimationFrame(frame);}
+function kick(duration=420){
+  if(!enabled||document.hidden)return;
+  burstUntil=Math.max(burstUntil,performance.now()+duration);
+  root.dataset.fxCoreGyroScheduler='sensor-burst';
+  if(!raf)raf=requestAnimationFrame(frame);
+}
 function onOrientation(event){
   if(document.hidden||reduced.matches)return;
   const beta=Number(event.beta),gamma=Number(event.gamma);
@@ -96,14 +104,15 @@ function onOrientation(event){
   targetX=v.x;targetY=v.y;
   root.dataset.fxCoreGyroState='active';
   root.dataset.fxCoreGyroInput=`${v.x.toFixed(3)},${v.y.toFixed(3)}`;
-  startFrame();
+  kick(520);
 }
 function enableSensor(){
   if(enabled)return;
   enabled=true;
   addEventListener('deviceorientation',onOrientation,{passive:true});
   root.dataset.fxCoreGyroPermission=permissionState;
-  root.dataset.fxCoreGyroState='idle-listening';
+  root.dataset.fxCoreGyroState='listening';
+  root.dataset.fxCoreGyroScheduler='idle-no-raf';
 }
 async function requestPermissionFromGesture(){
   if(enabled)return;
@@ -114,7 +123,9 @@ async function requestPermissionFromGesture(){
     root.dataset.fxCoreGyroPermission=permissionState;
     if(permissionState==='granted')enableSensor();
     else root.dataset.fxCoreGyroState='permission-denied';
-  }catch(_){permissionState='error';root.dataset.fxCoreGyroPermission='error';root.dataset.fxCoreGyroState='permission-error';}
+  }catch(_){
+    permissionState='error';root.dataset.fxCoreGyroPermission='error';root.dataset.fxCoreGyroState='permission-error';
+  }
 }
 function maybeRequest(event){
   if(enabled||typeof DeviceOrientationEvent.requestPermission!=='function'||!event.isTrusted)return;
@@ -127,7 +138,7 @@ function markManual(event){
   if(event.pointerType==='mouse'&&event.type==='pointermove'&&event.buttons===0)return;
   manualUntil=performance.now()+(event.type==='pointerup'||event.type==='pointercancel'?650:900);
 }
-function stopFrame(){if(raf){cancelAnimationFrame(raf);raf=0;}}
+function cancelBurst(){if(raf){cancelAnimationFrame(raf);raf=0;}burstUntil=0;}
 
 addEventListener('pointerdown',markManual,{passive:true,capture:true});
 addEventListener('pointermove',markManual,{passive:true,capture:true});
@@ -135,18 +146,23 @@ addEventListener('pointerup',markManual,{passive:true,capture:true});
 addEventListener('pointercancel',markManual,{passive:true,capture:true});
 addEventListener('pointerdown',maybeRequest,{passive:true,capture:true});
 addEventListener('touchstart',maybeRequest,{passive:true,capture:true});
-addEventListener('orientationchange',()=>{resetCalibration();manualUntil=performance.now()+500;stopFrame();},{passive:true});
-screen.orientation?.addEventListener?.('change',()=>{resetCalibration();manualUntil=performance.now()+500;stopFrame();},{passive:true});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){targetX=0;targetY=0;stopFrame();}else resetCalibration();},{passive:true});
+addEventListener('orientationchange',()=>{resetCalibration();manualUntil=performance.now()+500;},{passive:true});
+screen.orientation?.addEventListener?.('change',()=>{resetCalibration();manualUntil=performance.now()+500;},{passive:true});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){targetX=targetY=smoothX=smoothY=0;cancelBurst();}
+  else{resetCalibration();root.dataset.fxCoreGyroScheduler='idle-no-raf';}
+},{passive:true});
+addEventListener('pagehide',cancelBurst,{once:true});
 
 if(typeof DeviceOrientationEvent.requestPermission==='function'){
   permissionState='gesture-required';
   root.dataset.fxCoreGyroPermission='gesture-required';
   root.dataset.fxCoreGyroState='tap-core-to-enable';
+  root.dataset.fxCoreGyroScheduler='idle-no-raf';
 }else{
   permissionState='not-required';
   enableSensor();
 }
-root.dataset.fxCoreMotionR144='breathing-pointer-touch-gyro-idle-safe-r267';
-root.dataset.fxCoreGyroSchedulerR267='sensor-burst-no-idle-raf';
+root.dataset.fxCoreMotionR144='breathing-pointer-touch-gyro';
+root.dataset.fxCoreGyroRuntimeR292='event-driven-bounded-no-idle-raf';
 }());
