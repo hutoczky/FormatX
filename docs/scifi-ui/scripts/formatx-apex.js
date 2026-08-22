@@ -14,6 +14,24 @@
     return;
   }
 
+  // r293: on phone/coarse-pointer surfaces the current native core, canonical
+  // language control, release metadata runtime and r268 navigation already own
+  // the jobs this legacy APEX controller used to duplicate. Avoid whole-page
+  // language/link scans, reveal observers and scene/flow observers during the
+  // first-load critical window. Desktop keeps the full historical controller.
+  const MOBILE_NATIVE_CORE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  if (MOBILE_NATIVE_CORE) {
+    ROOT.dataset.fxApex = 'controller-performance-v2';
+    ROOT.dataset.fxApexMobileR293 = 'delegated-native-core-no-startup-scan';
+    ROOT.dataset.fxRenderer = 'three-host';
+    ROOT.dataset.fxScene = '0';
+    ROOT.dataset.fxFlow = '0';
+    ROOT.style.setProperty('--accent', '120,210,255');
+    ROOT.style.setProperty('--progress', '0');
+    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated', mobile: 'native-r293' } }));
+    return;
+  }
+
   const LANG_KEY = 'formatx-language';
   const RELEASE_API = './data/current-release.json';
   const DOWNLOAD_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
