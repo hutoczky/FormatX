@@ -154,3 +154,130 @@ html.fx-signature-open .fx-signature-architecture{visibility:visible;pointer-eve
 }
 
 /* ===== END formatx-signature-system-r185.css ===== */
+
+/* r286 — first-paint stability owner for the pure native WebGL composition.
+   This bundle is render-blocking, so these rules exist before the first paint.
+   The later runtimes may own semantics and events, never physical geometry. */
+body.living-architecture #hero::before,
+body.living-architecture #hero .hero-space::before,
+body.living-architecture #hero .hero-space::after{
+  content:none!important;
+  display:none!important;
+  background:none!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+body.living-architecture .topbar .fx-reference-mag-button,
+body.living-architecture .topbar .fx-language-toggle,
+body.living-architecture .topbar .fx-reference-menu-button{
+  box-sizing:border-box!important;
+  position:fixed!important;
+  bottom:auto!important;
+  left:auto!important;
+  margin:0!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:none!important;
+  translate:none!important;
+  z-index:12050!important;
+}
+
+body.living-architecture #hero .fx-reference-controls-r204{
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,54px)!important;
+  grid-template-rows:minmax(82px,auto)!important;
+  align-items:start!important;
+  justify-content:center!important;
+  justify-items:center!important;
+  column-gap:14px!important;
+  row-gap:0!important;
+  width:max-content!important;
+  max-width:calc(100% - 24px)!important;
+  min-height:82px!important;
+  margin:0!important;
+  padding:0 8px 24px!important;
+  overflow:visible!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  z-index:12040!important;
+}
+body.living-architecture #hero .fx-reference-controls-r204>.fx-reference-rail{
+  display:contents!important;
+  position:static!important;
+  inset:auto!important;
+  width:auto!important;
+  min-width:0!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+  translate:none!important;
+}
+body.living-architecture #hero .fx-reference-controls-r204>.fx-three-sound,
+body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{
+  position:relative!important;
+  inset:auto!important;
+  box-sizing:border-box!important;
+  width:54px!important;
+  min-width:54px!important;
+  max-width:54px!important;
+  height:54px!important;
+  min-height:54px!important;
+  max-height:54px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:50%!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:none!important;
+  translate:none!important;
+}
+body.living-architecture #hero .fx-reference-controls-r204>.fx-three-sound{grid-column:1!important;grid-row:1!important}
+body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask{grid-column:2!important;grid-row:1!important}
+body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{grid-column:3!important;grid-row:1!important}
+body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask span{
+  top:59px!important;left:50%!important;right:auto!important;bottom:auto!important;
+  width:max-content!important;max-width:88px!important;text-align:center!important;white-space:nowrap!important;
+  transform:translateX(-50%)!important;translate:none!important;
+}
+
+@media (min-width:901px){
+  body.living-architecture .topbar .fx-reference-menu-button{top:12px!important;right:22px!important;width:52px!important;min-width:52px!important;height:50px!important;min-height:50px!important}
+  body.living-architecture .topbar .fx-language-toggle{top:13px!important;right:88px!important;width:46px!important;min-width:46px!important;height:48px!important;min-height:48px!important}
+  body.living-architecture .topbar .fx-reference-mag-button{top:13px!important;right:148px!important;width:54px!important;min-width:54px!important;height:48px!important;min-height:48px!important}
+  body.living-architecture #hero .hero-space>.fx-reference-controls-r204{
+    position:absolute!important;inset:auto auto 30px 50%!important;margin:0!important;transform:translateX(-50%)!important;translate:none!important;
+  }
+}
+
+@media (max-width:900px),(pointer:coarse){
+  body.living-architecture .topbar>.brand{
+    box-sizing:border-box!important;min-width:0!important;max-width:118px!important;overflow:hidden!important;
+  }
+  body.living-architecture .topbar>.brand>*{min-width:0!important}
+  body.living-architecture .topbar>.brand small{display:none!important}
+  body.living-architecture .topbar>.brand strong{font-size:11px!important;letter-spacing:.08em!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important}
+  body.living-architecture .topbar .fx-reference-menu-button{top:8px!important;right:12px!important;width:50px!important;min-width:50px!important;max-width:50px!important;height:54px!important;min-height:54px!important;max-height:54px!important}
+  body.living-architecture .topbar .fx-language-toggle{top:11px!important;right:70px!important;width:44px!important;min-width:44px!important;max-width:44px!important;height:48px!important;min-height:48px!important;max-height:48px!important}
+  body.living-architecture .topbar .fx-reference-mag-button{top:11px!important;right:122px!important;width:50px!important;min-width:50px!important;max-width:50px!important;height:48px!important;min-height:48px!important;max-height:48px!important}
+  body.living-architecture #hero>.hero-grid>.fx-reference-controls-r204{
+    order:1!important;position:relative!important;inset:auto!important;
+    grid-template-columns:repeat(3,50px)!important;grid-template-rows:minmax(76px,auto)!important;column-gap:12px!important;
+    min-height:76px!important;margin:14px auto 20px!important;padding:0 4px 20px!important;transform:none!important;translate:none!important;
+  }
+  body.living-architecture #hero .fx-reference-controls-r204>.fx-three-sound,
+  body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{
+    width:50px!important;min-width:50px!important;max-width:50px!important;height:50px!important;min-height:50px!important;max-height:50px!important;
+  }
+  body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask span{top:55px!important}
+}
