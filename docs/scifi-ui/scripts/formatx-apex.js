@@ -14,11 +14,12 @@
     return;
   }
 
-  // r293: on phone/coarse-pointer surfaces the current native core, canonical
+  // r294: on phone/coarse-pointer surfaces the current native core, canonical
   // language control, release metadata runtime and r268 navigation already own
   // the jobs this legacy APEX controller used to duplicate. Avoid whole-page
   // language/link scans, reveal observers and scene/flow observers during the
-  // first-load critical window. Desktop keeps the full historical controller.
+  // first-load critical window. Publish apexready only after the complete defer
+  // chain has subscribed, so final control owners never miss the event.
   const MOBILE_NATIVE_CORE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   if (MOBILE_NATIVE_CORE) {
     ROOT.dataset.fxApex = 'controller-performance-v2';
@@ -28,7 +29,12 @@
     ROOT.dataset.fxFlow = '0';
     ROOT.style.setProperty('--accent', '120,210,255');
     ROOT.style.setProperty('--progress', '0');
-    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated', mobile: 'native-r293' } }));
+    const publishMobileReady = () => {
+      ROOT.dataset.fxApexMobileR294 = 'ready-after-defer-chain';
+      dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated', mobile: 'native-r294' } }));
+    };
+    if (document.readyState === 'complete') publishMobileReady();
+    else document.addEventListener('DOMContentLoaded', publishMobileReady, { once: true });
     return;
   }
 
