@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r291') return;
-  root.dataset.fxAwardRuntime = 'r291';
+  if (root.dataset.fxAwardRuntime === 'r293') return;
+  root.dataset.fxAwardRuntime = 'r293';
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
@@ -22,16 +22,29 @@
   let gpuRequested = false;
 
   function openReferenceDialogue() {
-    if (typeof window.FormatXOrganismVoice?.open === 'function') {
-      window.FormatXOrganismVoice.open();
+    const trigger = document.querySelector('.fx-organism-thought-trigger');
+
+    // The retired trigger remains the Organism's internal enable/disable owner.
+    // When the master switch is OFF, route the visible ASK control through that
+    // internal owner exactly once so ASK can re-enable and open the dialogue.
+    if (root.dataset.fxOrganismDialogueEnabled === 'false' && trigger instanceof HTMLButtonElement) {
+      trigger.click();
       window.FormatXCoreMobileV69?.pulse?.();
+      root.dataset.fxReferenceAskActionR293 = 'reenabled-through-organism-owner';
       return true;
     }
 
-    const trigger = document.querySelector('.fx-organism-thought-trigger');
+    if (typeof window.FormatXOrganismVoice?.open === 'function') {
+      window.FormatXOrganismVoice.open();
+      window.FormatXCoreMobileV69?.pulse?.();
+      root.dataset.fxReferenceAskActionR293 = 'opened-through-public-api';
+      return true;
+    }
+
     if (trigger instanceof HTMLButtonElement) {
       trigger.click();
       window.FormatXCoreMobileV69?.pulse?.();
+      root.dataset.fxReferenceAskActionR293 = 'opened-through-organism-owner';
       return true;
     }
     return false;
