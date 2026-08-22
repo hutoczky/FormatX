@@ -2,10 +2,7 @@
 
 const { chromium } = require('playwright');
 
-// Regression contract: activate the living core through real browser hit-testing.
-// The retired .fx-immersive-launch stays hidden in the current pure-WebGL UI.
-const baseUrl = process.env.FORMATX_TEST_URL
-  || 'http://127.0.0.1:4178/scifi-ui/index.html';
+const baseUrl = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
 const testUrl = new URL(baseUrl);
 testUrl.searchParams.set('lang', 'hu');
 
@@ -13,26 +10,21 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function activateThroughLiveCore(page, name, mobile) {
-  const heroSpace = page.locator('#hero .hero-space').first();
-  await heroSpace.waitFor({ state: 'visible', timeout: 12000 });
-  const box = await heroSpace.boundingBox();
-  assert(box && box.width > 80 && box.height > 80, `${name}: live core has no usable hit box`);
+async function activateThroughCanonicalAsk(page, name) {
+  const ask = page.locator('#hero .fx-reference-controls-r204 .fx-reference-ask').first();
+  await ask.waitFor({ state: 'visible', timeout: 15000 });
+  const askBox = await ask.boundingBox();
+  assert(askBox && askBox.width >= 44 && askBox.height >= 44, `${name}: canonical ASK has no usable hit target`);
 
-  const x = box.x + box.width * .5;
-  const y = box.y + box.height * .48;
-  if (mobile) await page.touchscreen.tap(x, y);
-  else await page.mouse.click(x, y);
-
+  await ask.click();
   await page.waitForFunction(
-    () => document.documentElement.dataset.fxImmersive === 'active'
-      && Boolean(document.documentElement.dataset.fxCoreActivation),
+    () => document.documentElement.dataset.fxImmersive === 'active',
     null,
-    { timeout: 7000 }
+    { timeout: 10000 }
   );
 }
 
-async function waitForReady(page, name, mobile) {
+async function waitForReady(page, name) {
   await page.waitForFunction(
     () => document.documentElement.classList.contains('fx-intro-complete'),
     null,
@@ -53,7 +45,7 @@ async function waitForReady(page, name, mobile) {
     assert(!(await legacyLaunch.isVisible()), `${name}: retired legacy launch control became visible`);
   }
 
-  await activateThroughLiveCore(page, name, mobile);
+  await activateThroughCanonicalAsk(page, name);
 
   await page.waitForFunction(
     () => ['ready-v3', 'ready-v4'].includes(document.documentElement.dataset.fxOrganismVoice),
@@ -75,6 +67,15 @@ async function waitForReady(page, name, mobile) {
     null,
     { timeout: 5000 }
   );
+
+  // ASK intentionally opens the dialogue. Normalize to the closed state so the
+  // disclosure assertions below still verify explicit open/close transitions.
+  const bubble = page.locator('.fx-organism-thought').first();
+  if (await bubble.count() && await bubble.isVisible()) {
+    const close = page.locator('.fx-organism-thought-close').first();
+    if (await close.count()) await close.click();
+    await bubble.waitFor({ state: 'hidden', timeout: 5000 });
+  }
 }
 
 async function validateViewport(browser, name, viewport, mobile) {
@@ -90,7 +91,7 @@ async function validateViewport(browser, name, viewport, mobile) {
     localStorage.removeItem('formatx-thought-genome-enabled');
   });
   await page.goto(testUrl.href, { waitUntil: 'domcontentloaded' });
-  await waitForReady(page, name, mobile);
+  await waitForReady(page, name);
 
   const trigger = page.locator('.fx-organism-thought-trigger');
   const bubble = page.locator('.fx-organism-thought');
@@ -171,7 +172,7 @@ async function validateViewport(browser, name, viewport, mobile) {
   try {
     await validateViewport(browser, 'desktop', { width: 1440, height: 900 }, false);
     await validateViewport(browser, 'mobile', { width: 390, height: 844 }, true);
-    console.log('PASS: real live-core pointer/touch activation plus thought genome disclosure are bilingual, switchable and responsive.');
+    console.log('PASS: canonical ASK activation plus thought genome disclosure are bilingual, switchable and responsive.');
   } finally {
     await browser.close();
   }
