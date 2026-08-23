@@ -4,6 +4,7 @@ const root=path.resolve(__dirname,'../..'),read=f=>fs.readFileSync(path.join(roo
 const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
 const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js');
+const softlight=read('docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js');
 const legacyRenderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const css=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
@@ -26,7 +27,8 @@ assert.match(bootstrap,/loading-v69/);
 assert.match(bootstrap,/formatx-mobile-reference-layout-v1\.js\?v=20260818-r204-proof-controls/);
 assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260824-r321-native-soft-rim/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
-assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260824-r321-native-source-owner/);
+assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260824-r323-deep-water-biolume/);
+assert.match(wrapper,/r323-deep-water-biolume/);
 for(const token of [
   'reference-crystal-webgl-r317-modern-flat-normal-fresnel',
   'modern-flat-normal-fresnel-microfacet',
@@ -51,6 +53,8 @@ for(const token of [
 ])assert.ok(renderer.includes(token),`missing r317 startup contract: ${token}`);
 assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|new\s+Image\s*\(|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
 assert.ok(legacyRenderer.includes('reference-luminous-crystal-webgl-r99-prismatic-r120'));
+for(const token of ['fxCoreBiolumeR323','fx-core-biolume-r323','deep-water-iridescent-traveling-rim'])assert.ok(softlight.includes(token),`missing r323 mobile biolume startup contract: ${token}`);
+assert.doesNotMatch(softlight,/getContext\(['"]2d['"]|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
 assert.ok(pureCss.includes('.fx-core-detail-r122'));
 assert.ok(pureCss.includes('.fx-core-live-r147-layer'));
 assert.ok(pureCss.includes('content: none !important'));
@@ -90,5 +94,5 @@ assert.match(loader,/ready-v20\|ready-v69/);
 assert.match(stability,/ready-v20\|ready-v69/);
 assert.match(interactionStability,/booting-v69/);
 assert.ok(home.includes('formatx-core-real3d-v20.js'));
-for(const source of [bootstrap,wrapper,renderer,legacyRenderer,layout,premium,loader,stability,interactionStability])new Function(source);
-console.log('PASS: r321 mobile startup keeps softened native WebGL MAG plus r99 fallback and event-driven proof/control ownership.');
+for(const source of [bootstrap,wrapper,renderer,softlight,legacyRenderer,layout,premium,loader,stability,interactionStability])new Function(source);
+console.log('PASS: current mobile startup keeps the r317 native WebGL MAG, r323 biolume tuner, r99 fallback and event-driven proof/control ownership.');
