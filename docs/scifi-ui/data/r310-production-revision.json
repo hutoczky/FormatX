@@ -1,0 +1,6 @@
+{
+  "revision": "r310-mobile-production-repair",
+  "requestedAt": "2026-08-23T19:31:00Z",
+  "reason": "Deploy validated mobile MAG/WebGL, SOUND and header/control regression repairs to formatxsuite.com",
+  "sourceHead": "91816a20176639addb377258309effa1b7fef4fb"
+}
