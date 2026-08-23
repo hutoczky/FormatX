@@ -1,4 +1,4 @@
-name: One-shot r300 first-paint optimizer
+name: One-shot r301 desktop and dialogue optimizer
 on:
   push:
     branches: [master]
@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply r300 first-paint optimization
+      - name: Apply r301 desktop and dialogue optimization
         shell: bash
         run: |
           set -euo pipefail
@@ -25,74 +25,74 @@ jobs:
 
           index = Path('docs/scifi-ui/index.html')
           source = index.read_text(encoding='utf-8')
-
-          replacements = [
-              (
-                  '  <script defer data-fx-deferred-reduced-style-r233="true" src="./scripts/formatx-deferred-reduced-style-r232.js?v=20260819-r233"></script>',
-                  '  <script defer fetchpriority="high" data-fx-deferred-reduced-style-r233="true" src="./scripts/formatx-deferred-reduced-style-r232.js?v=20260823-r300-mobile-first-paint"></script>'
-              ),
-              (
-                  '  <link rel="stylesheet" data-fx-living-energy-r168="true" href="./styles/formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics" media="(prefers-reduced-motion: no-preference)">',
-                  '  <link rel="stylesheet" data-fx-living-energy-r168="true" data-fx-deferred-media-r300="(prefers-reduced-motion: no-preference)" href="./styles/formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics" media="not all">'
-              ),
-              (
-                  '  <link rel="stylesheet" data-fx-critical-narrative-r227="true" href="./styles/formatx-critical-narrative-r227.css?v=20260819-r227" media="(prefers-reduced-motion: no-preference)">',
-                  '  <link rel="stylesheet" data-fx-critical-narrative-r227="true" data-fx-deferred-media-r300="(prefers-reduced-motion: no-preference)" href="./styles/formatx-critical-narrative-r227.css?v=20260819-r227" media="not all">'
-              ),
-              (
-                  '  <link rel="stylesheet" data-fx-soty-continuity-r179="true" href="./styles/formatx-soty-continuity-r179.css?v=20260816-r179-organ-field" media="(prefers-reduced-motion: no-preference)">',
-                  '  <link rel="stylesheet" data-fx-soty-continuity-r179="true" data-fx-deferred-media-r300="(prefers-reduced-motion: no-preference)" href="./styles/formatx-soty-continuity-r179.css?v=20260816-r179-organ-field" media="not all">'
-              ),
-          ]
-
-          for old, new in replacements:
-              count = source.count(old)
-              if count != 1:
-                  raise SystemExit(f'index replacement mismatch ({count}): {old[:90]}')
-              source = source.replace(old, new, 1)
+          for marker in [
+              'data-fx-living-energy-r168="true"',
+              'data-fx-critical-narrative-r227="true"',
+              'data-fx-soty-continuity-r179="true"',
+          ]:
+              start = source.find('<link rel="stylesheet" ' + marker)
+              if start < 0:
+                  raise SystemExit(f'missing deferred stylesheet: {marker}')
+              end = source.find('>', start)
+              line = source[start:end+1]
+              if 'data-fx-deferred-media-r300=' not in line or 'media="not all"' not in line:
+                  raise SystemExit(f'unexpected deferred stylesheet state: {line}')
+              updated = line.replace('media="not all"', 'media="(min-width: 901px) and (prefers-reduced-motion: no-preference)"')
+              source = source[:start] + updated + source[end+1:]
           index.write_text(source, encoding='utf-8')
-
-          reduced = Path('docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js')
-          source = reduced.read_text(encoding='utf-8')
-          old = """if(!reduced.matches){\n  root.dataset.fxReducedStyleR233='not-required-no-full-fetch-r299';\n  return;\n}\n"""
-          new = """if(!reduced.matches){\n  const mobileDirect=matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;\n  if(mobileDirect){\n    const overlay=document.getElementById('formatx-event-horizon');\n    if(overlay instanceof HTMLElement){\n      overlay.hidden=true;\n      overlay.setAttribute('aria-hidden','true');\n    }\n    root.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');\n    root.classList.add('fx-intro-complete');\n    root.dataset.fxIntro='mobile-direct-early-r300';\n    root.dataset.fxIntroStrategy='mobile-direct-early-r300';\n  }\n  root.dataset.fxReducedStyleR233='not-required-no-full-fetch-r300';\n  return;\n}\n"""
-          if source.count(old) != 1:
-              raise SystemExit('reduced-style normal-mode block mismatch')
-          reduced.write_text(source.replace(old, new, 1), encoding='utf-8')
 
           loader = Path('docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js')
           source = loader.read_text(encoding='utf-8')
-          old = """  const specs = Array.from(template.content.querySelectorAll('script[src]'));\n  const mounted = new Set();\n"""
-          new = """  const specs = Array.from(template.content.querySelectorAll('script[src]'));\n  const deferredStyleLinks = Array.from(document.querySelectorAll('link[data-fx-deferred-media-r300]'));\n  const mounted = new Set();\n"""
+          old = """  function disarm() {\n    for (const [type, options] of listeners) removeEventListener(type, start, options);\n  }\n\n  function start() {\n"""
+          new = """  function reservedInteraction(event) {\n    if (root.dataset.fxOrganismThought === 'open') return true;\n    const target = event?.target instanceof Element ? event.target : null;\n    return Boolean(target?.closest('.fx-organism-dialogue,.fx-reference-ask,.fx-reference-pause,.fx-three-sound,#menu-toggle,.fx-language-toggle,.fx-reference-mag-button'));\n  }\n\n  function onIntent(event) {\n    if (reservedInteraction(event)) return;\n    start();\n  }\n\n  function disarm() {\n    for (const [type, options] of listeners) removeEventListener(type, onIntent, options);\n  }\n\n  function start() {\n"""
           if source.count(old) != 1:
-              raise SystemExit('content-loader declarations mismatch')
+              raise SystemExit('content-loader intent owner mismatch')
           source = source.replace(old, new, 1)
-
-          old = """    disarm();\n    specs.forEach(mount);\n    root.dataset.fxContentRuntimeR241 = 'requested-r284-user-intent';\n"""
-          new = """    disarm();\n    for (const link of deferredStyleLinks) {\n      const media = link.dataset.fxDeferredMediaR300 || 'all';\n      if (link.media !== media) link.media = media;\n    }\n    specs.forEach(mount);\n    root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'active-user-intent' : 'none';\n    root.dataset.fxContentRuntimeR241 = 'requested-r300-user-intent';\n"""
+          old = """  for (const [type, options] of listeners) addEventListener(type, start, options);\n"""
+          new = """  for (const [type, options] of listeners) addEventListener(type, onIntent, options);\n"""
           if source.count(old) != 1:
-              raise SystemExit('content-loader start block mismatch')
+              raise SystemExit('content-loader listener install mismatch')
           source = source.replace(old, new, 1)
+          source = source.replace("requested-r300-user-intent", "requested-r301-user-intent")
+          source = source.replace("armed-r300-user-intent", "armed-r301-user-intent")
+          loader.write_text(source, encoding='utf-8')
 
-          old = """  root.dataset.fxContentRuntimeR241 = 'armed-r284-user-intent';\n  root.dataset.fxFirstFrameStabilityR283 = 'render-blocking-r284';\n"""
-          new = """  root.dataset.fxContentRuntimeR241 = 'armed-r300-user-intent';\n  root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'armed-no-first-paint-block' : 'none';\n  root.dataset.fxFirstFrameStabilityR283 = 'critical-only-r300';\n"""
+          stability = Path('docs/scifi-ui/scripts/organism-voice-stability.js')
+          source = stability.read_text(encoding='utf-8')
+          old = """      || ROOT.classList.contains('fx-organism-menu-open')\n      || ROOT.classList.contains('fx-page-scrolling')\n      || document.body?.classList.contains('fx-organism-panel-open');\n"""
+          new = """      || ROOT.classList.contains('fx-organism-menu-open')\n      || document.body?.classList.contains('fx-organism-panel-open');\n"""
           if source.count(old) != 1:
-              raise SystemExit('content-loader armed block mismatch')
-          loader.write_text(source.replace(old, new, 1), encoding='utf-8')
+              raise SystemExit('organism stability blocker mismatch')
+          stability.write_text(source.replace(old, new, 1), encoding='utf-8')
+
+          intro = Path('docs/scifi-ui/scripts/formatx-event-horizon.js')
+          source = intro.read_text(encoding='utf-8')
+          old = "function configure(returning){timelineDuration=REDUCE_QUERY.matches?180:(returning?(MOBILE_QUERY.matches?620:760):(MOBILE_QUERY.matches?2100:2400));exitDuration=REDUCE_QUERY.matches?60:(returning?180:280);hardDeadline=timelineDuration+exitDuration+1100}"
+          new = "function configure(returning){timelineDuration=REDUCE_QUERY.matches?180:(returning?(MOBILE_QUERY.matches?620:360):(MOBILE_QUERY.matches?2100:720));exitDuration=REDUCE_QUERY.matches?60:(returning?100:120);hardDeadline=timelineDuration+exitDuration+900}"
+          if source.count(old) != 1:
+              raise SystemExit('intro timing contract mismatch')
+          source = source.replace(old, new, 1)
+          old = "function visuals(o,returning){const speed=REDUCE_QUERY.matches?.1:(returning?.34:1),time="
+          new = "function visuals(o,returning){const speed=REDUCE_QUERY.matches?.1:(returning?.22:.34),time="
+          if source.count(old) != 1:
+              raise SystemExit('intro visual-speed contract mismatch')
+          intro.write_text(source.replace(old, new, 1), encoding='utf-8')
           PY
 
-          node --check docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js
           node --check docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
+          node --check docs/scifi-ui/scripts/organism-voice-stability.js
+          node --check docs/scifi-ui/scripts/formatx-event-horizon.js
 
-      - name: Commit optimized production source
+      - name: Commit r301 production source
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add docs/scifi-ui/index.html \
-                  docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js \
-                  docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
+                  docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js \
+                  docs/scifi-ui/scripts/organism-voice-stability.js \
+                  docs/scifi-ui/scripts/formatx-event-horizon.js
           git diff --cached --check
-          git commit -m 'Optimize real first paint while preserving full visual mode'
+          git commit -m 'Keep mobile fast while tightening desktop intro and dialogue stability'
           git push origin HEAD:master
