@@ -26,7 +26,8 @@
   const MOBILE_DIRECT_QUERY = matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)');
   const REDUCE_QUERY = matchMedia('(prefers-reduced-motion: reduce)');
   const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
-  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260823-r310-live-mobile-regressions';
+  const AWARD_RUNTIME_URL = './scripts/formatx-award-runtime-r206.js?v=20260822-r296-owner-css-ask';
+  const MOBILE_REGRESSION_URL = './scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
 
   // r310: the real WebGL MAG stylesheet is critical on the mobile direct path.
   // r308 temporarily parked it behind media="not all", which can leave the first
@@ -43,6 +44,15 @@
       link.addEventListener('load',()=>{ROOT.dataset.fxCoreReal3dCssR310='active'},{once:true});
       link.addEventListener('error',()=>{ROOT.dataset.fxCoreReal3dCssR310='failed'},{once:true});
     }
+  }
+
+  function ensureMobileRegressionR310(){
+    if(document.querySelector('script[data-fx-mobile-regression-r310]'))return;
+    const script=document.createElement('script');
+    script.src=MOBILE_REGRESSION_URL;
+    script.async=false;
+    script.dataset.fxMobileRegressionR310='true';
+    document.head.appendChild(script);
   }
 
   const COPY = {
@@ -93,6 +103,7 @@
   function failOpen(source){if(running)fastRelease(source)}
 
   activateCriticalReal3dStyle();
+  ensureMobileRegressionR310();
   ensureAwardRuntime();
   if(AUDIT_MODE){ROOT.classList.add('fx-audit-mode');fastRelease('audit-skip');return}
   if(MOBILE_DIRECT_QUERY.matches){ROOT.dataset.fxIntroStrategy='mobile-direct';fastRelease('mobile-direct-v1',true);return}
