@@ -1,9 +1,11 @@
-name: Validate mobile MAG optical softening r322
+name: Validate mobile MAG optics r323
 on:
   push:
     branches: [master]
     paths:
       - 'docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - 'docs/scifi-ui/scripts/formatx-award-runtime-r206.js'
       - '.github/workflows/validate-mobile-core-softening-r322.yml'
   workflow_dispatch:
@@ -16,28 +18,34 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Validate r322 source contract
+      - name: Validate r323 source contract
         shell: bash
         run: |
           set -euo pipefail
           grep -Fq 'formatx-mobile-core-softening-r322.css?v=20260824-r322-soft-glow' docs/scifi-ui/scripts/formatx-award-runtime-r206.js
-          grep -Fq 'brightness(.85) saturate(.88) contrast(.90) blur(.38px)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
-          grep -Fq 'opacity: .90 !important' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'brightness(.84)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'contrast(1.03)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'saturate(1.13)' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'fx-biolume-travel-r323' docs/scifi-ui/styles/formatx-mobile-core-softening-r322.css
+          grep -Fq 'deep-water-iridescent-traveling-rim' docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
+          grep -Fq 'r323-deep-water-biolume' docs/scifi-ui/scripts/formatx-core-mobile-v55.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
+          node --check docs/scifi-ui/scripts/formatx-core-mobile-v55.js
       - name: Install Chromium runtime
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/r322-optics" && cd "$RUNNER_TEMP/r322-optics"
+          mkdir -p "$RUNNER_TEMP/r323-optics" && cd "$RUNNER_TEMP/r323-optics"
           npm init -y >/dev/null 2>&1
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium
-      - name: Verify mobile softening and desktop isolation
+      - name: Verify mobile softening biolume and desktop isolation
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r322-http.log" 2>&1 &
+          python3 -m http.server 4173 --directory docs >"$RUNNER_TEMP/r323-http.log" 2>&1 &
           server_pid=$!; trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          cd "$RUNNER_TEMP/r322-optics"
+          cd "$RUNNER_TEMP/r323-optics"
           node <<'NODE'
           const assert=require('node:assert/strict');
           const {chromium}=require('playwright');
@@ -46,24 +54,49 @@ jobs:
             await ctx.addInitScript(()=>{try{localStorage.setItem('formatx:intro-seen-v1','1')}catch(_){}});
             const page=await ctx.newPage();
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
-            await page.waitForFunction(()=>document.documentElement.dataset.fxMobileCoreOpticsR322==='soft-glow-soft-edge'&&document.querySelector('.fx-core-r317-canvas'),null,{timeout:45000});
-            await page.waitForTimeout(350);
+            await page.waitForFunction(()=>{
+              const d=document.documentElement.dataset;
+              return d.fxMobileCoreOpticsR322==='soft-glow-soft-edge'
+                && d.fxCoreBiolumeR323==='ready'
+                && document.querySelector('.fx-core-r317-canvas')
+                && document.querySelector('.fx-core-biolume-r323');
+            },null,{timeout:45000});
+            await page.waitForTimeout(500);
             const state=await page.evaluate(()=>{
               const canvas=document.querySelector('.fx-core-r317-canvas');
               const style=canvas?getComputedStyle(canvas):null;
               const link=document.querySelector('link[data-fx-mobile-core-softening-r322]');
-              return{marker:document.documentElement.dataset.fxMobileCoreOpticsR322||'',link:Boolean(link),href:link?.getAttribute('href')||'',opacity:Number(style?.opacity||1),filter:style?.filter||'',width:canvas?.getBoundingClientRect().width||0,height:canvas?.getBoundingClientRect().height||0};
+              const rim=document.querySelector('.fx-core-biolume-r323');
+              const runner=rim?.querySelector('.fx-biolume-runner-a');
+              const runnerStyle=runner?getComputedStyle(runner):null;
+              return{
+                marker:document.documentElement.dataset.fxMobileCoreOpticsR322||'',
+                biolume:document.documentElement.dataset.fxCoreBiolumeR323||'',
+                profile:document.documentElement.dataset.fxCoreBiolumeProfileR323||'',
+                link:Boolean(link),href:link?.getAttribute('href')||'',
+                opacity:Number(style?.opacity||1),filter:style?.filter||'',
+                width:canvas?.getBoundingClientRect().width||0,height:canvas?.getBoundingClientRect().height||0,
+                rimPaths:rim?.querySelectorAll('path').length||0,
+                rimOpacity:Number(rim?getComputedStyle(rim).opacity:0),
+                animation:runnerStyle?.animationName||'',dasharray:runnerStyle?.strokeDasharray||''
+              };
             });
+            console.log('R323_MOBILE_OPTICS',JSON.stringify(state));
             assert.equal(state.marker,'soft-glow-soft-edge');
+            assert.equal(state.biolume,'ready');
+            assert.equal(state.profile,'deep-water-iridescent-traveling-rim');
             assert.equal(state.link,true);
             assert.match(state.href,/formatx-mobile-core-softening-r322\.css/);
-            assert.ok(state.opacity<=0.91&&state.opacity>=0.88,JSON.stringify(state));
-            assert.match(state.filter,/brightness\(0\.85\)/);
-            assert.match(state.filter,/saturate\(0\.88\)/);
-            assert.match(state.filter,/contrast\(0\.9\)/);
-            assert.match(state.filter,/blur\(0\.38px\)/);
+            assert.ok(state.opacity<=0.91&&state.opacity>=0.89,JSON.stringify(state));
+            assert.match(state.filter,/brightness\(0\.84\)/);
+            assert.match(state.filter,/contrast\(1\.03\)/);
+            assert.match(state.filter,/saturate\(1\.13\)/);
+            assert.match(state.filter,/blur\(0\.31px\)/);
+            assert.equal(state.rimPaths,5,JSON.stringify(state));
+            assert.ok(state.rimOpacity>=0.70&&state.rimOpacity<=0.80,JSON.stringify(state));
+            assert.match(state.animation,/fx-biolume-travel-r323/);
             assert.ok(state.width>0&&state.height>0,JSON.stringify(state));
-            await page.screenshot({path:'mobile-r322.png',fullPage:false});
+            await page.screenshot({path:'mobile-r323.png',fullPage:false});
             await ctx.close();
           }
           async function desktop(browser){
@@ -72,19 +105,24 @@ jobs:
             const page=await ctx.newPage();
             await page.goto('http://127.0.0.1:4173/scifi-ui/?lang=hu&immersive=1',{waitUntil:'domcontentloaded',timeout:45000});
             await page.waitForTimeout(1800);
-            const state=await page.evaluate(()=>({link:Boolean(document.querySelector('link[data-fx-mobile-core-softening-r322]')),marker:document.documentElement.dataset.fxMobileCoreOpticsR322||''}));
+            const state=await page.evaluate(()=>({
+              link:Boolean(document.querySelector('link[data-fx-mobile-core-softening-r322]')),
+              rim:Boolean(document.querySelector('.fx-core-biolume-r323')),
+              marker:document.documentElement.dataset.fxMobileCoreOpticsR322||''
+            }));
             assert.equal(state.link,false,JSON.stringify(state));
+            assert.equal(state.rim,false,JSON.stringify(state));
             assert.equal(state.marker,'',JSON.stringify(state));
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await mobile(browser);await desktop(browser);await browser.close();console.log('PASS: r322 mobile MAG glow/edge softening is active only on mobile.');})().catch(error=>{console.error(error);process.exit(1)});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await mobile(browser);await desktop(browser);await browser.close();console.log('PASS: r323 mobile MAG has softer optics plus a traveling deep-water bioluminescent rim, with desktop unchanged.');})().catch(error=>{console.error(error);process.exit(1)});
           NODE
       - name: Upload mobile optical proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: formatx-mobile-core-r322
-          path: ${{ runner.temp }}/r322-optics/mobile-r322.png
+          name: formatx-mobile-core-r323
+          path: ${{ runner.temp }}/r323-optics/mobile-r323.png
           if-no-files-found: ignore
           retention-days: 14
       - name: Publish mobile optics status
@@ -94,5 +132,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r322 mobile MAG soft glow and soft edge passed'; else state=failure; description='r322 mobile MAG optical validation failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r323 soft MAG optics and traveling biolume rim passed'; else state=failure; description='r323 mobile MAG optical validation failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile core optics' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
