@@ -1,3 +1,4 @@
+# retry: r302 alignment after concurrent release-metadata sync
 name: One-shot r302 live award compatibility alignment
 on:
   push:
