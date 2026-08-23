@@ -2,8 +2,8 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r310') return;
-  root.dataset.fxAwardRuntime = 'r310';
+  if (root.dataset.fxAwardRuntime === 'r322') return;
+  root.dataset.fxAwardRuntime = 'r322';
 
   const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
 
@@ -41,6 +41,7 @@
   }
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260821-r263-canonical-controls';
+  const CORE_SOFTEN_STYLE_URL = '/scifi-ui/styles/formatx-mobile-core-softening-r322.css?v=20260824-r322-soft-glow';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260822-r296-canonical-header';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
   const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260821-r263-canonical-controls';
@@ -110,6 +111,17 @@
     link.href = STYLE_URL;
     link.dataset.fxAwardRuntimeStyleR206 = 'true';
     document.head.appendChild(link);
+  }
+
+  function ensureCoreSoftening() {
+    if (!matchMedia('(max-width: 900px)').matches) return;
+    if (document.querySelector('link[data-fx-mobile-core-softening-r322]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = CORE_SOFTEN_STYLE_URL;
+    link.dataset.fxMobileCoreSofteningR322 = 'true';
+    document.head.appendChild(link);
+    root.dataset.fxMobileCoreOpticsR322 = 'soft-glow-soft-edge';
   }
 
   function ensureOwnerStyle() {
@@ -230,11 +242,15 @@
 
   ensureReferenceAskOwner();
   ensureStyle();
+  ensureCoreSoftening();
   ensureOwnerStyle();
   ensureDialogueSurface();
   ensureGeometryGuard();
   ensureControls();
   root.dataset.fxAwardSound = 'muted-default-visible-control';
+
+  addEventListener('resize', ensureCoreSoftening, { passive: true });
+  addEventListener('orientationchange', ensureCoreSoftening, { passive: true });
 
   if (!ensureGpu()) {
     const observer = new MutationObserver(() => {
