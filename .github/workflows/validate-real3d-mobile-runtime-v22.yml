@@ -10,10 +10,13 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js'
       - 'docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js'
+      - 'docs/scifi-ui/scripts/formatx-signature-system-r185.js'
       - 'docs/scifi-ui/scripts/formatx-premium-finish.js'
       - 'docs/scifi-ui/scripts/igloo-parity.js'
       - 'docs/scifi-ui/scripts/interaction-genome-export-stability.js'
       - 'docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-control-stability-r320.css'
+      - 'docs/scifi-ui/styles/formatx-signature-explicit-r320.css'
       - 'docs/scifi-ui/styles/formatx-responsive-text-guard-r72.css'
       - '.github/scripts/validate-real3d-core-v20.cjs'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
@@ -28,12 +31,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Validate current r317 r319 source contracts
+      - name: Validate current r317 r319 r320 source contracts
         run: |
           node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js
           node --check docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js
           node --check docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js
+          node --check docs/scifi-ui/scripts/formatx-signature-system-r185.js
           node .github/scripts/validate-real3d-core-v20.cjs
           node .github/scripts/validate-real3d-mobile-startup-v22.cjs
       - name: Install Chromium runtime
@@ -65,6 +69,8 @@ jobs:
                 && d.fxCoreRendererSelection==='modern-r317-primary'
                 && d.fxCoreSoftlightR318==='shader-tuned-r319'
                 && d.fxMobileReferenceLayout==='ready-v1'
+                && d.fxSignatureSystem==='r320-explicit-architecture-no-core-hitlayer'
+                && d.fxSignatureTrigger==='retired-r320-no-core-hitlayer'
                 && window.FormatXCoreMobileV69?.version==='reference-crystal-webgl-r317-modern-flat-normal-fresnel';
             },null,{timeout:45000});
             await page.waitForTimeout(800);
@@ -87,6 +93,8 @@ jobs:
                 selection:root.dataset.fxCoreRendererSelection||'',softlight:root.dataset.fxCoreSoftlightR318||'',
                 rim:root.dataset.fxCoreRimProfileR318||'',glow:root.dataset.fxCoreGlowProfileR318||'',
                 r317:root.dataset.fxCoreMobileR317||'',layout:root.dataset.fxMobileReferenceLayout||'',
+                signature:root.dataset.fxSignatureSystem||'',signatureTrigger:root.dataset.fxSignatureTrigger||'',
+                signatureOpen:root.classList.contains('fx-signature-open'),signatureHitLayers:document.querySelectorAll('.fx-signature-core-trigger').length,
                 stageCount:document.querySelectorAll('#hero .fx-core-r317-stage').length,
                 canvasCount:document.querySelectorAll('#hero .fx-core-r317-canvas').length,
                 width:box?.width||0,height:box?.height||0,vw:innerWidth,vh:innerHeight,
@@ -108,6 +116,9 @@ jobs:
             assert.equal(state.rim,'broader-softer-low-intensity-fresnel');
             assert.equal(state.glow,'balanced-mobile-perimeter-and-core');
             assert.equal(state.r317,'ready-v69');assert.equal(state.layout,'ready-v1');
+            assert.equal(state.signature,'r320-explicit-architecture-no-core-hitlayer');
+            assert.equal(state.signatureTrigger,'retired-r320-no-core-hitlayer');
+            assert.equal(state.signatureOpen,false);assert.equal(state.signatureHitLayers,0);
             assert.equal(state.stageCount,1);assert.equal(state.canvasCount,1);assert.equal(state.gl,true);assert.equal(state.glError,0);
             assert.equal(state.webgl2,!blockWebGL2);
             assert.equal(state.heading,true);assert.equal(state.proof,true);assert.equal(state.rail,true);
@@ -128,7 +139,7 @@ jobs:
             assert.equal(await pause.getAttribute('data-paused'),'false');
             await ctx.close();
           }
-          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r319 balanced softer rim/glow tuning, actionable controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
+          (async()=>{const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']});await scenario(browser,false);await scenario(browser,true);await browser.close();console.log('PASS: r317 modern WebGL MAG, r319 balanced softer rim/glow tuning, r320 modal-free core interaction, actionable controls, render budget and WebGL1 fallback passed.');})().catch(error=>{console.error(error);process.exit(1);});
           NODE
       - name: Publish responsive runtime status
         if: always()
@@ -137,5 +148,5 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='r317/r319 mobile MAG runtime and render budget passed'; else state=failure; description='r317/r319 responsive runtime failed'; fi
+          if [ "$JOB_STATUS" = success ]; then state=success; description='r317/r319/r320 mobile MAG runtime and render budget passed'; else state=failure; description='r317/r319/r320 responsive runtime failed'; fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX v69 responsive runtime' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
