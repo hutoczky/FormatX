@@ -48,6 +48,45 @@ async function ensureRuntime(page, name) {
   }
 }
 
+async function assertMeaningfulMain(page, name, viewport) {
+  const state = await page.evaluate(() => {
+    const main = document.querySelector('main#main-content');
+    if (!main) return { exists: false };
+    const style = getComputedStyle(main);
+    const rect = main.getBoundingClientRect();
+    const text = (main.innerText || '').replace(/\s+/g, ' ').trim();
+    const dynamic = main.querySelector('[data-method-root],[data-verification-root],[data-test-table-body],[data-issues-root],[data-decisions-root]');
+    let dynamicText = '';
+    let dynamicChildren = 0;
+    if (dynamic) {
+      dynamicText = (dynamic.innerText || '').replace(/\s+/g, ' ').trim();
+      dynamicChildren = dynamic.children.length;
+    }
+    return {
+      exists: true,
+      display: style.display,
+      visibility: style.visibility,
+      opacity: Number(style.opacity || 1),
+      width: rect.width,
+      height: rect.height,
+      textLength: text.length,
+      textSample: text.slice(0, 180),
+      dynamicPresent: Boolean(dynamic),
+      dynamicTextLength: dynamicText.length,
+      dynamicChildren,
+      fallbackCount: main.querySelectorAll('[data-public-static-fallback]').length,
+    };
+  });
+
+  assert(state.exists, `${name}: main content is missing`);
+  assert(state.display !== 'none' && state.visibility !== 'hidden' && state.opacity > .02, `${name}: main content is hidden: ${JSON.stringify(state)}`);
+  assert(state.width > 100 && state.height > 160, `${name}: main content has no meaningful rendered area: ${JSON.stringify(state)}`);
+  assert(state.textLength >= 80, `${name}: page is effectively blank (${viewport.width}px): ${JSON.stringify(state)}`);
+  if (state.dynamicPresent) {
+    assert(state.dynamicChildren >= 1 || state.dynamicTextLength >= 24, `${name}: dynamic public content root is blank (${viewport.width}px): ${JSON.stringify(state)}`);
+  }
+}
+
 async function assertPage(browser, pathname, name, viewport) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
@@ -55,7 +94,7 @@ async function assertPage(browser, pathname, name, viewport) {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(origin + pathname, { waitUntil: 'domcontentloaded' });
   await ensureRuntime(page, name);
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(180);
 
   assert(errors.length === 0, `${name}: page errors: ${errors.join(' | ')}`);
   assert(await page.locator('header.fx-public-header').count() === 1, `${name}: canonical public header missing or duplicated`);
@@ -63,6 +102,7 @@ async function assertPage(browser, pathname, name, viewport) {
   assert(await page.locator('.fx-language-toggle:visible').count() === 1, `${name}: exactly one visible language toggle is required`);
   assert(await page.locator('main#main-content').count() === 1, `${name}: main-content skip target is missing or duplicated`);
   assert(await page.locator('.skip-link[href="#main-content"]').count() === 1, `${name}: canonical skip link is missing or duplicated`);
+  await assertMeaningfulMain(page, name, viewport);
 
   const current = await page.locator('.fx-public-footer a[aria-current="page"]').count();
   assert(current >= 1, `${name}: current page is not identified in public navigation`);
@@ -77,6 +117,7 @@ async function assertPage(browser, pathname, name, viewport) {
     return currentLanguage !== previous && ['hu', 'en'].includes(currentLanguage);
   }, before, { timeout: 8000 });
 
+  await assertMeaningfulMain(page, name + '-after-language-switch', viewport);
   console.log(`PASS ${name}`);
   await context.close();
 }
@@ -205,7 +246,7 @@ async function assertAndroidStatus(browser, viewport, name) {
     await assertTechnicalReport(browser, { width: 390, height: 844 }, 'technical-report-truth-mobile');
     await assertAndroidStatus(browser, { width: 1440, height: 900 }, 'android-status-desktop');
     await assertAndroidStatus(browser, { width: 390, height: 844 }, 'android-status-mobile');
-    console.log('PASS: public shell, technical report truth, Android status, skip navigation, language control, known-issues filters and responsive layouts are valid.');
+    console.log('PASS: every public page has meaningful visible content on desktop and mobile, with responsive navigation, language controls, known-issues filters, technical-report truth and Android status validated.');
   } finally {
     await browser.close();
   }
