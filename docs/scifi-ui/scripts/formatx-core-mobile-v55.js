@@ -5,12 +5,24 @@
   if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreMobileV55 = 'audit-skip'; return; }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v69';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'reference-modern-crystal-native-webgl-r317-softlight-r319';
-  // r319 measurement marker: validate the balanced soft-edge MAG unchanged across all production gates.
+  root.dataset.fxCoreMobileAwardRevision = 'reference-modern-crystal-native-webgl-r317-softlight-r319-controls-r320';
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r317.js?v=20260823-r317-modern-crystal';
   const LEGACY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99&rev=20260815-prismatic-organic-r120';
   const SOFTLIGHT_TUNER = '/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js?v=20260824-r319-balanced-soft-edge';
+  const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-r320-stable-hit-geometry';
+
+  function loadStableControls() {
+    if (document.querySelector('link[data-fx-mobile-control-stability-r320]')) return;
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href=CONTROL_STABILITY_STYLE;
+    link.dataset.fxMobileControlStabilityR320='true';
+    document.head.appendChild(link);
+    root.dataset.fxMobileControlStabilityR320='requested';
+    link.addEventListener('load',()=>{root.dataset.fxMobileControlStabilityR320='ready';},{once:true});
+    link.addEventListener('error',()=>{root.dataset.fxMobileControlStabilityR320='load-failed';},{once:true});
+  }
 
   function loadReferenceLayout() {
     if (!document.querySelector('link[data-fx-mobile-reference-layout-style]')) {
@@ -87,6 +99,7 @@
     document.head.appendChild(tuner);
   }
 
+  loadStableControls();
   loadReferenceLayout();
   loadPrimaryRenderer();
 }());
