@@ -14,11 +14,6 @@ async function prepare(page) {
   });
   await page.goto(TEST_URL + '?lang=hu&scroll-test=platform-v2', { waitUntil: 'domcontentloaded' });
 
-  // Production injects the continuous-scroll stylesheet before the seamless
-  // runtime. The static fixture can already have started its runtime by the time
-  // this validator adds the production stylesheet, so explicitly await CSS load
-  // and then request the same geometry refresh a real viewport/layout change
-  // would produce. This validates production ordering instead of a test-only race.
   await page.evaluate(origin => new Promise(resolve => {
     let link = document.querySelector('link[href*="formatx-continuous-scroll.css"]');
     const finish = () => resolve(true);
@@ -76,6 +71,12 @@ async function snapshot(page) {
       viewportHeight: innerHeight,
       loopCount: Number(root.dataset.fxLoopCount || 0),
       landing: Number(root.dataset.fxLoopLanding || NaN),
+      landingState: root.dataset.fxLoopLandingState || '',
+      loopSource: root.dataset.fxLoopSource || '',
+      infiniteInput: root.dataset.fxInfiniteInput || '',
+      scrollActivity: root.dataset.fxScrollActivity || '',
+      rootClass: root.className,
+      bodyClass: document.body.className,
       scrollY,
       maximum: Math.max(0, root.scrollHeight - innerHeight),
       runtime: root.__FORMATX_INFINITE_SCROLL__ || null,
@@ -142,6 +143,35 @@ async function waitForSeamless(page) {
   await page.waitForTimeout(2500);
 }
 
+async function advanceThroughLiveBridge(page, relative, previousLoopCount, label) {
+  const attempts = [];
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const target = await page.evaluate(offset => {
+      const root = document.documentElement;
+      const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+      const bridgeTop = bridge?.offsetTop || 0;
+      const maximum = Math.max(0, root.scrollHeight - innerHeight);
+      const y = Math.min(maximum, bridgeTop + offset);
+      scrollTo({ top: y, left: 0, behavior: 'instant' });
+      return { bridgeTop, maximum, target: y };
+    }, relative);
+
+    // r305 makes formerly synthetic mobile blocks real. A late product/proof
+    // enhancement may legitimately increase document height while this synthetic
+    // CI jump is in flight. A real user reaches the bridge progressively; the
+    // validator therefore follows the live bridge for a bounded number of
+    // attempts, while still requiring exactly one seamless transfer.
+    await page.waitForTimeout(720);
+    const state = await snapshot(page);
+    attempts.push({ target, state });
+    if (state.loopCount > previousLoopCount) {
+      assert(state.loopCount === previousLoopCount + 1, label + ' transferred more than once: ' + JSON.stringify(attempts));
+      return state;
+    }
+  }
+  throw new Error(label + ' did not transfer through the live mobile bridge: ' + JSON.stringify(attempts));
+}
+
 async function verifyMobile(browser) {
   const context = await browser.newContext({
     viewport: { width: 412, height: 915 },
@@ -172,6 +202,7 @@ async function verifyMobile(browser) {
   assert(initial.runtime?.mobileTransfer === 'scrollend-or-idle', 'mobile transfer is not deferred until momentum end: ' + JSON.stringify(initial));
   assert(initial.runtime?.mobileNativeMomentumPreserved === true, 'mobile native momentum is not preserved: ' + JSON.stringify(initial));
   assert(initial.runtime?.inertReferenceMirror === true && initial.runtime?.mirrorContext === 'static-2d-snapshot-no-webgl', 'mobile inert mirror runtime contract missing: ' + JSON.stringify(initial));
+  assert(initial.runtime?.mobileIdleGeometryRefresh === true, 'mobile idle geometry refresh contract missing: ' + JSON.stringify(initial.runtime));
   assert(initial.snapRoot === 'none' && initial.snapBody === 'none', 'mobile scroll snapping is active: ' + JSON.stringify(initial));
   assert(initial.overflow <= 2, 'mobile horizontal overflow: ' + JSON.stringify(initial));
 
@@ -187,16 +218,7 @@ async function verifyMobile(browser) {
   const threshold = Math.max(36, Math.min(initial.viewportHeight * .18, 180));
   const relative = Math.min(Math.max(threshold + 84, 220), Math.max(220, initial.sourceHeight - 36));
 
-  await page.evaluate(offset => {
-    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'instant' });
-  }, relative);
-
-  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, initial.loopCount, { timeout: 6000 });
-  await page.waitForTimeout(650);
-
-  const after = await snapshot(page);
-  assert(after.loopCount === initial.loopCount + 1, 'mobile loop did not transfer exactly once: ' + JSON.stringify({ initial, after }));
+  const after = await advanceThroughLiveBridge(page, relative, initial.loopCount, 'mobile first cycle');
   assert(Math.abs(after.scrollY - (after.sourceTop + relative)) <= 110, 'mobile loop did not preserve the visual relative position: ' + JSON.stringify({ relative, after }));
   assert(after.scrollY < after.maximum - 100, 'mobile remained pinned at the physical document end after loop transfer: ' + JSON.stringify(after));
 
@@ -205,14 +227,7 @@ async function verifyMobile(browser) {
   const settledY = await page.evaluate(() => scrollY);
   assert(Math.abs(settledY - stableY) <= 6, 'mobile kept moving after seamless landing settled: ' + JSON.stringify({ stableY, settledY }));
 
-  await page.evaluate(offset => {
-    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'instant' });
-  }, relative);
-  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, after.loopCount, { timeout: 6000 });
-  await page.waitForTimeout(650);
-  const second = await snapshot(page);
-  assert(second.loopCount === after.loopCount + 1, 'mobile second cycle did not transfer exactly once: ' + JSON.stringify({ after, second }));
+  const second = await advanceThroughLiveBridge(page, relative, after.loopCount, 'mobile second cycle');
   assert(Math.abs(second.scrollY - (second.sourceTop + relative)) <= 110, 'mobile second cycle lost its relative landing: ' + JSON.stringify({ relative, second }));
 
   const meaningful = errors.filter(value => !/favicon|WebGL|WebGPU|GPU|ERR_ABORTED|404/i.test(value));
