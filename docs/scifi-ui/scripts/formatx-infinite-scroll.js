@@ -2,9 +2,9 @@
   'use strict';
 
   const root = document.documentElement;
-  const BOOTSTRAP = 'platform-scroll-v2';
+  const BOOTSTRAP = 'platform-scroll-r316-dcl-safe';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260823-r307-idle-geometry';
+  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260823-r316-dcl-safe-geometry';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
   let mobileGeometryTimer = 0;
   let desktopGeometryTimer = 0;
@@ -21,33 +21,37 @@
     document.head.appendChild(link);
   }
 
+  function requestLoopGeometryRefresh(source) {
+    dispatchEvent(new CustomEvent('formatx:loopgeometryrefresh', {
+      detail: { source: source || 'scroll-bootstrap' }
+    }));
+  }
+
   function requestMobileGeometryRefresh(recheckBoundary) {
     if (!MOBILE_QUERY.matches) return;
     clearTimeout(mobileGeometryTimer);
 
-    // The seamless-v7 runtime owns geometry. A resize event asks it to resample
-    // only after layout has settled, so there is no offset/layout read in the
-    // active scroll hot path. r305 can therefore collapse legacy placeholder
-    // space without leaving the loop bridge at its pre-collapse coordinates.
-    dispatchEvent(new Event('resize'));
-    root.dataset.fxMobileLoopGeometry = 'refresh-requested-r306';
+    // r316: never synthesize a global resize from mobile-layout events.
+    // r207 listens to resize and emits formatx:mobilelayoutready; feeding that
+    // event back into resize created an unbounded microtask/event cycle that
+    // starved DOMContentLoaded on real mobile navigation. The loop runtime now
+    // owns a dedicated geometry-refresh event with no layout-owner feedback.
+    requestLoopGeometryRefresh('mobile-layout-settled-r316');
+    root.dataset.fxMobileLoopGeometry = 'refresh-requested-r316-dcl-safe';
 
     if (!recheckBoundary) return;
     mobileGeometryTimer = window.setTimeout(() => {
       mobileGeometryTimer = 0;
       if (root.dataset.fxInfiniteController !== 'seamless-v7') return;
       dispatchEvent(new Event('scroll'));
-      root.dataset.fxMobileLoopGeometry = 'idle-boundary-rechecked-r306';
+      root.dataset.fxMobileLoopGeometry = 'idle-boundary-rechecked-r316';
     }, 96);
   }
 
   function installMobileGeometryResync() {
-    if (!MOBILE_QUERY.matches || root.dataset.fxMobileLoopGeometryResync === 'idle-r306') return;
-    root.dataset.fxMobileLoopGeometryResync = 'idle-r306';
+    if (!MOBILE_QUERY.matches || root.dataset.fxMobileLoopGeometryResync === 'isolated-r316') return;
+    root.dataset.fxMobileLoopGeometryResync = 'isolated-r316';
 
-    // Native momentum remains untouched. Re-sample only when scrolling has
-    // ended, then synthesize a passive boundary recheck after the geometry
-    // refresh. This covers late fonts, reveal removal and r305 content sizing.
     addEventListener('scrollend', () => requestMobileGeometryRefresh(true), { passive: true });
 
     for (const eventName of [
@@ -64,19 +68,14 @@
     desktopGeometryTimer = window.setTimeout(() => {
       desktopGeometryTimer = 0;
       if (root.dataset.fxInfiniteController !== 'seamless-v7') return;
-
-      // Desktop uses the same cached seamless-v7 geometry as mobile. Late
-      // content/font realisation can move the bridge without any viewport-width
-      // change. Refresh only after wheel/scroll activity has gone quiet; the
-      // runtime then samples geometry before its own 170 ms transfer commit.
-      dispatchEvent(new Event('resize'));
-      root.dataset.fxDesktopLoopGeometry = 'idle-refresh-requested-r307';
+      requestLoopGeometryRefresh('desktop-idle-r316');
+      root.dataset.fxDesktopLoopGeometry = 'idle-refresh-requested-r316';
     }, 90);
   }
 
   function installDesktopGeometryResync() {
-    if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'idle-r307') return;
-    root.dataset.fxDesktopLoopGeometryResync = 'idle-r307';
+    if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'isolated-r316') return;
+    root.dataset.fxDesktopLoopGeometryResync = 'isolated-r316';
     addEventListener('scroll', requestDesktopGeometryRefresh, { passive: true });
 
     for (const eventName of [
