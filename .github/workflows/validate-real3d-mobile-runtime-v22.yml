@@ -117,8 +117,8 @@ jobs:
             assert.ok(['none','absent'].includes(state.genomeDisplay));
             assert.notEqual(state.soundDisplay,'none');assert.notEqual(state.soundVisibility,'hidden');assert.ok(state.soundOpacity>.02);
             assert.ok(state.soundWidth>=44&&state.soundHeight>=44,JSON.stringify(state));
-            const sound=page.locator('#hero .fx-reference-controls-r204 .fx-three-sound').first();
-            const pause=page.locator('#hero .fx-reference-controls-r204 .fx-reference-pause').first();
+            const sound=page.locator('.fx-three-sound:visible').first();
+            const pause=page.locator('.fx-reference-pause:visible').first();
             await sound.click({trial:true,timeout:5000});
             await pause.click({trial:true,timeout:5000});
             const pauseBox=await pause.boundingBox();assert.ok(pauseBox);
