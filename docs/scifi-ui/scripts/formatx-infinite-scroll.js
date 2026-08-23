@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const BOOTSTRAP = 'platform-scroll-r316-dcl-safe';
+  const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260823-r316-dcl-safe-geometry';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
@@ -11,6 +11,7 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
+  root.dataset.fxScrollBootstrapRevision = 'r316-dcl-safe';
 
   function ensureMobileLoopBridgeOverride() {
     if (document.querySelector('link[data-fx-mobile-loop-bridge-override]')) return;
