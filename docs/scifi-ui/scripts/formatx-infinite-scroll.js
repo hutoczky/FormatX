@@ -4,9 +4,10 @@
   const root = document.documentElement;
   const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260820-reference-loop-r246';
+  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260823-r307-idle-geometry';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
   let mobileGeometryTimer = 0;
+  let desktopGeometryTimer = 0;
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
@@ -57,6 +58,34 @@
     ]) addEventListener(eventName, () => requestMobileGeometryRefresh(false), { passive: true });
   }
 
+  function requestDesktopGeometryRefresh() {
+    if (MOBILE_QUERY.matches) return;
+    clearTimeout(desktopGeometryTimer);
+    desktopGeometryTimer = window.setTimeout(() => {
+      desktopGeometryTimer = 0;
+      if (root.dataset.fxInfiniteController !== 'seamless-v7') return;
+
+      // Desktop uses the same cached seamless-v7 geometry as mobile. Late
+      // content/font realisation can move the bridge without any viewport-width
+      // change. Refresh only after wheel/scroll activity has gone quiet; the
+      // runtime then samples geometry before its own 170 ms transfer commit.
+      dispatchEvent(new Event('resize'));
+      root.dataset.fxDesktopLoopGeometry = 'idle-refresh-requested-r307';
+    }, 90);
+  }
+
+  function installDesktopGeometryResync() {
+    if (MOBILE_QUERY.matches || root.dataset.fxDesktopLoopGeometryResync === 'idle-r307') return;
+    root.dataset.fxDesktopLoopGeometryResync = 'idle-r307';
+    addEventListener('scroll', requestDesktopGeometryRefresh, { passive: true });
+
+    for (const eventName of [
+      'formatx:controlownerready',
+      'formatx:languagechange',
+      'pageshow'
+    ]) addEventListener(eventName, requestDesktopGeometryRefresh, { passive: true });
+  }
+
   function installSeamlessRuntime(platform) {
     const mobile = platform === 'mobile';
 
@@ -75,6 +104,8 @@
       root.classList.remove('fx-mobile-native-scroll', 'fx-mobile-native-scroll-v2');
       ensureMobileLoopBridgeOverride();
       installMobileGeometryResync();
+    } else {
+      installDesktopGeometryResync();
     }
 
     const existing = document.querySelector('script[data-fx-seamless-runtime]');
@@ -92,6 +123,8 @@
         root.dataset.fxMobileScrollMode = 'native-momentum-loop';
         root.dataset.fxMobileScrollPolicy = 'native-momentum-loop-v1';
         requestMobileGeometryRefresh(false);
+      } else {
+        requestDesktopGeometryRefresh();
       }
     }, { once: true });
 
