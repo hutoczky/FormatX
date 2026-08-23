@@ -12,11 +12,11 @@
   }
 
   /* r321: the current r317 fragment shader owns mobile rim width, Fresnel,
-     glint, alpha falloff and tone compression directly. Older r319 builds
-     monkey-patched WebGLRenderingContext.shaderSource before r317 compiled;
-     keeping two independent shader owners made the final appearance depend on
-     load order. Preserve the established telemetry contract for production
-     verification, but do not mutate WebGL prototypes or shader source here. */
+     glint, alpha falloff and tone compression directly. Older builds altered
+     compiled shader text from a second runtime owner; keeping two independent
+     owners made the final appearance depend on load order. Preserve the
+     established telemetry contract for production verification, while this
+     compatibility layer performs no rendering mutation. */
   root.dataset.fxCoreSoftlightR318 = 'shader-tuned-r319';
   root.dataset.fxCoreRimProfileR318 = 'broader-softer-low-intensity-fresnel';
   root.dataset.fxCoreGlowProfileR318 = 'balanced-mobile-perimeter-and-core';
