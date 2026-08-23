@@ -167,8 +167,8 @@ void main(){
   col+=violet*nd2*0.11;
 
   float bary=min(vBary.x,min(vBary.y,vBary.z));
-  float facetEdge=1.0-smoothstep(0.010,0.047,bary);
-  col+=mix(cyan,ice,0.42)*facetEdge*(0.018+0.060*fres);
+  float facetEdge=1.0-smoothstep(${mobile?'0.008,0.066':'0.010,0.047'},bary);
+  col+=mix(cyan,ice,0.42)*facetEdge*(${mobile?'0.012+0.036*fres':'0.018+0.060*fres'});
 
   float ca1=ridge(vP.x*4.25+vP.y*1.75+N.x*0.9,18.0);
   float ca2=ridge(vP.y*5.45-vP.x*1.35+N.y*0.8,22.0);
@@ -179,26 +179,26 @@ void main(){
   float core=exp(-dot(vP.xy,vP.xy)*18.0);
   float coreHot=exp(-dot(vP.xy,vP.xy)*92.0);
   float corePin=exp(-dot(vP.xy,vP.xy)*520.0);
-  col+=cyan*(core*0.46+coreHot*0.58)+ice*(coreHot*0.52+corePin*2.10)+violet*core*0.10;
+  col+=cyan*(core*${mobile?'0.40':'0.46'}+coreHot*${mobile?'0.48':'0.58'})+ice*(coreHot*${mobile?'0.43':'0.52'}+corePin*${mobile?'1.82':'2.10'})+violet*core*${mobile?'0.075':'0.10'};
 
-  float outer=1.0-smoothstep(0.025,0.095,abs(1.0-r));
-  col+=cyan*outer*(0.32+0.36*fres)+ice*outer*0.12+violet*outer*(0.05+0.13*spectral);
+  float outer=1.0-smoothstep(${mobile?'0.038,0.130':'0.025,0.095'},abs(1.0-r));
+  col+=cyan*outer*(${mobile?'0.18+0.18*fres':'0.32+0.36*fres'})+ice*outer*${mobile?'0.07':'0.12'}+violet*outer*(${mobile?'0.025+0.070*spectral':'0.05+0.13*spectral'});
 
   float glint=(spec1*1.15+spec2*0.72)*(0.45+0.55*vFacet);
-  col+=ice*glint*1.25+cyan*glint*0.36;
-  col+=mix(cyan,violet,spectral)*fres*(0.24+0.26*thickness);
+  col+=ice*glint*${mobile?'0.88':'1.25'}+cyan*glint*${mobile?'0.22':'0.36'};
+  col+=mix(cyan,violet,spectral)*fres*(${mobile?'0.14+0.16*thickness':'0.24+0.26*thickness'});
 
   float micro=pow(hash21(floor((vP.xy+2.0)*32.0)+vFacet),26.0);
-  col+=ice*micro*fres*0.18;
+  col+=ice*micro*fres*${mobile?'0.11':'0.18'};
 
-  float energy=0.94+uEnergy*0.22;
+  float energy=${mobile?'0.90+uEnergy*0.16':'0.94+uEnergy*0.22'};
   col*=energy;
-  col=col/(vec3(1.0)+col*0.68);
-  col=pow(max(col,vec3(0.0)),vec3(0.86));
+  col=col/(vec3(1.0)+col*${mobile?'0.80':'0.68'});
+  col=pow(max(col,vec3(0.0)),vec3(${mobile?'0.91':'0.86'}));
 
-  float alpha=0.30+0.25*thickness+0.26*fres+0.11*nd1+0.12*outer+0.12*core+0.13*glint;
-  alpha*=1.0-smoothstep(1.015,1.055,r);
-  gl_FragColor=vec4(col,clamp(alpha,0.0,0.94));
+  float alpha=${mobile?'0.26+0.24*thickness+0.18*fres+0.09*nd1+0.065*outer+0.11*core+0.085*glint':'0.30+0.25*thickness+0.26*fres+0.11*nd1+0.12*outer+0.12*core+0.13*glint'};
+  alpha*=1.0-smoothstep(${mobile?'0.965,1.030':'1.015,1.055'},r);
+  gl_FragColor=vec4(col,clamp(alpha,0.0,${mobile?'0.88':'0.94'}));
 }`;
 
   const vs=webgl2?`#version 300 es\n${vsBody
@@ -239,7 +239,7 @@ void main(){
   const pointPolar=[];
 
   function boundary(angle){
-    const p=0.78;
+    const p=mobile?0.84:0.78;
     const c=Math.abs(Math.cos(angle));
     const s=Math.abs(Math.sin(angle));
     return 1/Math.pow(Math.pow(c,p)+Math.pow(s,p),1/p);
@@ -253,7 +253,7 @@ void main(){
     const a=index/SEG*Math.PI*2;
     const b=boundary(a);
     const radial=Math.pow(r,0.93);
-    const sculpt=1.0+(0.010*Math.sin(a*8.0+ring*0.73)+0.006*Math.sin(a*13.0-ring*0.51))*Math.pow(1.0-r,0.72);
+    const sculpt=1.0+((mobile?0.0080:0.010)*Math.sin(a*8.0+ring*0.73)+(mobile?0.0045:0.006)*Math.sin(a*13.0-ring*0.51))*Math.pow(1.0-r,0.72);
     const q=radial*sculpt*b;
     let x=Math.cos(a)*q*0.90;
     let y=Math.sin(a)*q;
@@ -363,8 +363,8 @@ void main(){
   function resize(){
     const rect=stage.getBoundingClientRect();
     if(rect.width<2||rect.height<2)return false;
-    const cap=mobile?1.78:1.92;
-    const budget=mobile?1250000:1900000;
+    const cap=mobile?1.58:1.92;
+    const budget=mobile?1000000:1900000;
     const dpr=Math.min(devicePixelRatio||1,cap);
     let w=Math.max(2,Math.round(rect.width*dpr));
     let h=Math.max(2,Math.round(rect.height*dpr));
@@ -519,6 +519,7 @@ void main(){
   root.dataset.fxCoreScheduler='bounded-interaction-bursts-no-idle-raf';
   root.dataset.fxCoreVisualGenerationR317='modern-crystal-not-retro-wireframe';
   root.dataset.fxCoreTriangleCountR317=String(vertices.length/9);
+  root.dataset.fxCoreMobileVisualR318=mobile?'soft-rim-balanced-glow':'desktop-unchanged';
 
   schedule(3);
   dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{renderer:VERSION,quality:'r317-modern-crystal'}}));
