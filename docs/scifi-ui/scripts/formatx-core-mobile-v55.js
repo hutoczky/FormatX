@@ -5,10 +5,11 @@
   if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreMobileV55 = 'audit-skip'; return; }
   root.dataset.fxCoreMobileV55 = 'booting-reference-v69';
   root.dataset.fxCoreRendererMode = 'mobile';
-  root.dataset.fxCoreMobileAwardRevision = 'reference-modern-crystal-native-webgl-r317-flat-normal-fresnel';
+  root.dataset.fxCoreMobileAwardRevision = 'reference-modern-crystal-native-webgl-r317-softlight-r318';
 
   const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r317.js?v=20260823-r317-modern-crystal';
   const LEGACY_RENDERER = '/scifi-ui/scripts/formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99&rev=20260815-prismatic-organic-r120';
+  const SOFTLIGHT_TUNER = '/scifi-ui/scripts/formatx-core-mobile-softlight-r318.js?v=20260823-r318-softer-rim-glow';
 
   function loadReferenceLayout() {
     if (!document.querySelector('link[data-fx-mobile-reference-layout-style]')) {
@@ -67,6 +68,24 @@
     document.head.appendChild(renderer);
   }
 
+  function loadPrimaryRenderer() {
+    if (document.querySelector('script[data-fx-core-mobile-softlight-r318]') || root.dataset.fxCoreSoftlightR318) {
+      loadRenderer(PRIMARY_RENDERER,false);
+      return;
+    }
+
+    const tuner=document.createElement('script');
+    tuner.src=SOFTLIGHT_TUNER;
+    tuner.async=false;
+    tuner.dataset.fxCoreMobileSoftlightR318='true';
+    tuner.addEventListener('load',()=>loadRenderer(PRIMARY_RENDERER,false),{once:true});
+    tuner.addEventListener('error',()=>{
+      root.dataset.fxCoreSoftlightR318='load-failed-using-r317-stock';
+      loadRenderer(PRIMARY_RENDERER,false);
+    },{once:true});
+    document.head.appendChild(tuner);
+  }
+
   loadReferenceLayout();
-  loadRenderer(PRIMARY_RENDERER,false);
+  loadPrimaryRenderer();
 }());
