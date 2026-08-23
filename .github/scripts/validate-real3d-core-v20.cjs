@@ -25,9 +25,10 @@ assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
 assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260821-r285-pure-webgl3d/);
 assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260824-r321-native-soft-rim/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
-assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260824-r321-native-source-owner/);
+assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260824-r323-deep-water-biolume/);
 assert.match(wrapper,/modern-r317-primary/);
 assert.match(wrapper,/legacy-r99-fallback/);
+assert.match(wrapper,/r323-deep-water-biolume/);
 
 for(const token of [
   'reference-crystal-webgl-r317-modern-flat-normal-fresnel',
@@ -62,8 +63,11 @@ for(const token of [
   'broader-softer-low-intensity-fresnel',
   'balanced-mobile-perimeter-and-core',
   'native-r317-source-no-prototype-patch',
-  'r319-markers-preserved'
-]) assert.ok(softlight.includes(token),`missing r321 source-owned soft-light contract: ${token}`);
+  'r319-markers-preserved',
+  'fxCoreBiolumeR323',
+  'fx-core-biolume-r323',
+  'deep-water-iridescent-traveling-rim'
+]) assert.ok(softlight.includes(token),`missing current source-owned soft-light/biolume contract: ${token}`);
 assert.doesNotMatch(softlight,/shaderSource\s*\(|WebGLRenderingContext|WebGL2RenderingContext|prototype\.shaderSource/);
 assert.doesNotMatch(softlight,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
 
@@ -98,4 +102,4 @@ assert.equal(quality.mag_webgl_context_count,1);
 assert.equal(quality.mag_paused_outside_hero,true);
 
 for(const source of [bootstrap,wrapper,renderer,softlight,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
-console.log('PASS: r321 modern native WebGL MAG uses source-owned softer mobile rim/glow, r99 fallback and zero 2D MAG overlays.');
+console.log('PASS: current r317 native WebGL MAG uses the r323 source-owned soft-light/biolume tuner, r99 fallback and zero 2D MAG overlays.');
