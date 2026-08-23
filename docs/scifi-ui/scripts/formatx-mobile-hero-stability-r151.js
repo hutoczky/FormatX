@@ -16,7 +16,7 @@ function removeInvalidVisualNodes(){
   let removed=0;
   space.querySelectorAll('img,picture,iframe,object,embed').forEach(node=>{node.remove();removed++;});
   if(removed)root.dataset.fxMobileHeroInvalidVisualRemovedR151=String(removed);
-  space.style.setProperty('background-color','#010610','important');
+  if(space.style.getPropertyValue('background-color')!=='#010610'||space.style.getPropertyPriority('background-color')!=='important')space.style.setProperty('background-color','#010610','important');
   sanitizedSpace=space;
   return true;
 }
@@ -28,27 +28,28 @@ function makeDock(){
 function syncPrimaryFromCanonical(dock){
   const primary=dock?.querySelector('[data-release-download="multiplatform"]'),source=document.querySelector('#hero-download');
   if(!(primary instanceof HTMLAnchorElement)||!(source instanceof HTMLAnchorElement))return;
-  const href=source.getAttribute('href');if(href)primary.setAttribute('href',href);
-  for(const attr of ['target','rel','title','aria-describedby']){const value=source.getAttribute(attr);if(value)primary.setAttribute(attr,value);else primary.removeAttribute(attr);}
-  for(const key of ['releaseState','releaseChannel'])if(source.dataset[key])primary.dataset[key]=source.dataset[key];
+  const href=source.getAttribute('href');if(href&&primary.getAttribute('href')!==href)primary.setAttribute('href',href);
+  for(const attr of ['target','rel','title','aria-describedby']){const value=source.getAttribute(attr);if(value){if(primary.getAttribute(attr)!==value)primary.setAttribute(attr,value);}else if(primary.hasAttribute(attr))primary.removeAttribute(attr);}
+  for(const key of ['releaseState','releaseChannel'])if(source.dataset[key]&&primary.dataset[key]!==source.dataset[key])primary.dataset[key]=source.dataset[key];
 }
 function syncLanguage(dock){
   if(!(dock instanceof HTMLElement))return;
   const en=root.lang==='en',eyebrow=dock.querySelector('[data-fx-mobile-download-eyebrow-r151]'),note=dock.querySelector('[data-fx-mobile-download-note-r151]'),primary=dock.querySelector('[data-release-download-label]'),android=dock.querySelector('[data-fx-mobile-android-label-r151]');
-  if(eyebrow)eyebrow.textContent=en?'DOWNLOAD':'LETÖLTÉS';
-  if(note)note.textContent=en?'Choose a platform. The primary button always follows the official multiplatform release.':'Válaszd ki a platformot. Az elsődleges gomb mindig a hivatalos multiplatform kiadást követi.';
-  if(primary)primary.textContent=en?'Download full multiplatform version':'Teljes multiplatform verzió letöltése';
-  if(android)android.textContent=en?'Android application':'Android alkalmazás';
+  const eyebrowText=en?'DOWNLOAD':'LETÖLTÉS',noteText=en?'Choose a platform. The primary button always follows the official multiplatform release.':'Válaszd ki a platformot. Az elsődleges gomb mindig a hivatalos multiplatform kiadást követi.',primaryText=en?'Download full multiplatform version':'Teljes multiplatform verzió letöltése',androidText=en?'Android application':'Android alkalmazás';
+  if(eyebrow&&eyebrow.textContent!==eyebrowText)eyebrow.textContent=eyebrowText;
+  if(note&&note.textContent!==noteText)note.textContent=noteText;
+  if(primary&&primary.textContent!==primaryText)primary.textContent=primaryText;
+  if(android&&android.textContent!==androidText)android.textContent=androidText;
 }
 function ensureDownload(){
   const hero=document.getElementById('hero');if(!(hero instanceof HTMLElement))return false;
   const old=hero.querySelector('.fx-mobile-download-r150');if(old)old.remove();
   let dock=hero.querySelector('.fx-mobile-download-r151');
-  if(!isMobile()){if(dock instanceof HTMLElement)dock.hidden=true;return true;}
+  if(!isMobile()){if(dock instanceof HTMLElement&&!dock.hidden)dock.hidden=true;return true;}
   const proof=hero.querySelector('.fx-reference-proof'),heading=hero.querySelector('.fx-reference-heading');
   if(!(proof instanceof HTMLElement)||!(heading instanceof HTMLElement))return false;
   if(!(dock instanceof HTMLElement))dock=makeDock();
-  dock.hidden=false;
+  if(dock.hidden)dock.hidden=false;
   if(proof.nextElementSibling!==dock)proof.insertAdjacentElement('afterend',dock);
   if(heading.style.order!=='2')heading.style.setProperty('order','2','important');
   if(proof.style.order!=='3')proof.style.setProperty('order','3','important');
@@ -82,9 +83,11 @@ document.addEventListener('error',event=>{
   const target=event.target;
   if(isMobile()&&target instanceof HTMLImageElement&&target.closest('#hero .hero-space')){target.remove();root.dataset.fxMobileHeroBrokenImageR151='removed';sanitizedSpace=null;queue();}
 },true);
-for(const eventName of ['formatx:languagechange','formatx:releasemetadataready','formatx:mobilelayoutready','formatx:controlownerready','pageshow'])addEventListener(eventName,queue,{passive:true});
-addEventListener('resize',queue,{passive:true});
-addEventListener('orientationchange',queue,{passive:true});
+for(const eventName of ['formatx:languagechange','formatx:releasemetadataready','pageshow'])addEventListener(eventName,queue,{passive:true});
+function queueViewportClassChange(){if(lastMobile!==isMobile())queue();}
+addEventListener('resize',queueViewportClassChange,{passive:true});
+addEventListener('orientationchange',queueViewportClassChange,{passive:true});
 mobileQuery.addEventListener?.('change',queue);
+root.dataset.fxMobileHeroSchedulerR304='boot-once-semantic-events-only';
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 }());
