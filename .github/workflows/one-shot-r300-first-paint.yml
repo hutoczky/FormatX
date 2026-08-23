@@ -1,0 +1,98 @@
+name: One-shot r300 first-paint optimizer
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r300-first-paint.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply r300 first-paint optimization
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          index = Path('docs/scifi-ui/index.html')
+          source = index.read_text(encoding='utf-8')
+
+          replacements = [
+              (
+                  '  <script defer data-fx-deferred-reduced-style-r233="true" src="./scripts/formatx-deferred-reduced-style-r232.js?v=20260819-r233"></script>',
+                  '  <script defer fetchpriority="high" data-fx-deferred-reduced-style-r233="true" src="./scripts/formatx-deferred-reduced-style-r232.js?v=20260823-r300-mobile-first-paint"></script>'
+              ),
+              (
+                  '  <link rel="stylesheet" data-fx-living-energy-r168="true" href="./styles/formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics" media="(prefers-reduced-motion: no-preference)">',
+                  '  <link rel="stylesheet" data-fx-living-energy-r168="true" data-fx-deferred-media-r300="(prefers-reduced-motion: no-preference)" href="./styles/formatx-living-energy-r168.css?v=20260815-r168-v2-multimodal&rev=20260815-visible-caustics" media="not all">'
+              ),
+              (
+                  '  <link rel="stylesheet" data-fx-critical-narrative-r227="true" href="./styles/formatx-critical-narrative-r227.css?v=20260819-r227" media="(prefers-reduced-motion: no-preference)">',
+                  '  <link rel="stylesheet" data-fx-critical-narrative-r227="true" data-fx-deferred-media-r300="(prefers-reduced-motion: no-preference)" href="./styles/formatx-critical-narrative-r227.css?v=20260819-r227" media="not all">'
+              ),
+              (
+                  '  <link rel="stylesheet" data-fx-soty-continuity-r179="true" href="./styles/formatx-soty-continuity-r179.css?v=20260816-r179-organ-field" media="(prefers-reduced-motion: no-preference)">',
+                  '  <link rel="stylesheet" data-fx-soty-continuity-r179="true" data-fx-deferred-media-r300="(prefers-reduced-motion: no-preference)" href="./styles/formatx-soty-continuity-r179.css?v=20260816-r179-organ-field" media="not all">'
+              ),
+          ]
+
+          for old, new in replacements:
+              count = source.count(old)
+              if count != 1:
+                  raise SystemExit(f'index replacement mismatch ({count}): {old[:90]}')
+              source = source.replace(old, new, 1)
+          index.write_text(source, encoding='utf-8')
+
+          reduced = Path('docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js')
+          source = reduced.read_text(encoding='utf-8')
+          old = """if(!reduced.matches){\n  root.dataset.fxReducedStyleR233='not-required-no-full-fetch-r299';\n  return;\n}\n"""
+          new = """if(!reduced.matches){\n  const mobileDirect=matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches;\n  if(mobileDirect){\n    const overlay=document.getElementById('formatx-event-horizon');\n    if(overlay instanceof HTMLElement){\n      overlay.hidden=true;\n      overlay.setAttribute('aria-hidden','true');\n    }\n    root.classList.remove('fx-intro-pending','fx-intro-running','fx-intro-reveal','fx-intro-managed');\n    root.classList.add('fx-intro-complete');\n    root.dataset.fxIntro='mobile-direct-early-r300';\n    root.dataset.fxIntroStrategy='mobile-direct-early-r300';\n  }\n  root.dataset.fxReducedStyleR233='not-required-no-full-fetch-r300';\n  return;\n}\n"""
+          if source.count(old) != 1:
+              raise SystemExit('reduced-style normal-mode block mismatch')
+          reduced.write_text(source.replace(old, new, 1), encoding='utf-8')
+
+          loader = Path('docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js')
+          source = loader.read_text(encoding='utf-8')
+          old = """  const specs = Array.from(template.content.querySelectorAll('script[src]'));\n  const mounted = new Set();\n"""
+          new = """  const specs = Array.from(template.content.querySelectorAll('script[src]'));\n  const deferredStyleLinks = Array.from(document.querySelectorAll('link[data-fx-deferred-media-r300]'));\n  const mounted = new Set();\n"""
+          if source.count(old) != 1:
+              raise SystemExit('content-loader declarations mismatch')
+          source = source.replace(old, new, 1)
+
+          old = """    disarm();\n    specs.forEach(mount);\n    root.dataset.fxContentRuntimeR241 = 'requested-r284-user-intent';\n"""
+          new = """    disarm();\n    for (const link of deferredStyleLinks) {\n      const media = link.dataset.fxDeferredMediaR300 || 'all';\n      if (link.media !== media) link.media = media;\n    }\n    specs.forEach(mount);\n    root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'active-user-intent' : 'none';\n    root.dataset.fxContentRuntimeR241 = 'requested-r300-user-intent';\n"""
+          if source.count(old) != 1:
+              raise SystemExit('content-loader start block mismatch')
+          source = source.replace(old, new, 1)
+
+          old = """  root.dataset.fxContentRuntimeR241 = 'armed-r284-user-intent';\n  root.dataset.fxFirstFrameStabilityR283 = 'render-blocking-r284';\n"""
+          new = """  root.dataset.fxContentRuntimeR241 = 'armed-r300-user-intent';\n  root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'armed-no-first-paint-block' : 'none';\n  root.dataset.fxFirstFrameStabilityR283 = 'critical-only-r300';\n"""
+          if source.count(old) != 1:
+              raise SystemExit('content-loader armed block mismatch')
+          loader.write_text(source.replace(old, new, 1), encoding='utf-8')
+          PY
+
+          node --check docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js
+          node --check docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
+
+      - name: Commit optimized production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/index.html \
+                  docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js \
+                  docs/scifi-ui/scripts/formatx-content-runtime-loader-r241.js
+          git diff --cached --check
+          git commit -m 'Optimize real first paint while preserving full visual mode'
+          git push origin HEAD:master
