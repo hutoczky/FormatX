@@ -1,0 +1,53 @@
+name: One-shot r320 first-paint and MAG burst pass
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r320-first-paint-mag-burst.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Make settled desktop geometry render-blocking and trim static MAG boot burst
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          css = Path('docs/scifi-ui/styles/formatx-event-horizon.css')
+          text = css.read_text(encoding='utf-8')
+          marker = '@import url("./formatx-first-frame-stability-r283.css?v=20260823-r320-render-blocking");'
+          if marker not in text:
+              text = marker + '\n\n' + text
+              css.write_text(text, encoding='utf-8')
+
+          renderer = Path('docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js')
+          source = renderer.read_text(encoding='utf-8')
+          old = "  schedule(8);\n  dispatchEvent(new CustomEvent('formatx:real3dready'"
+          new = "  schedule(3);\n  dispatchEvent(new CustomEvent('formatx:real3dready'"
+          if old not in source:
+              raise SystemExit('r317 startup burst marker not found')
+          source = source.replace(old, new, 1)
+          renderer.write_text(source, encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- docs/scifi-ui/styles/formatx-event-horizon.css docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
+      - name: Commit r320
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/scifi-ui/styles/formatx-event-horizon.css docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js
+          git commit -m 'Stabilize desktop first paint and trim MAG startup burst'
+          git push origin HEAD:master
