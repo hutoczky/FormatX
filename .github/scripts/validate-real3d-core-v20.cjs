@@ -23,9 +23,9 @@ assert.match(bootstrap,/pure-webgl3d-no-2d-overlays/);
 assert.match(bootstrap,/single-webgl-luminous-crystal-r99/);
 assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
 assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260821-r285-pure-webgl3d/);
-assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260823-r317-modern-crystal/);
+assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260824-r321-native-soft-rim/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
-assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260824-r319-balanced-soft-edge/);
+assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260824-r321-native-source-owner/);
 assert.match(wrapper,/modern-r317-primary/);
 assert.match(wrapper,/legacy-r99-fallback/);
 
@@ -47,7 +47,12 @@ for(const token of [
   'visible-native-3d-r99',
   'single-webgl-luminous-crystal-r99',
   'fxCoreRenderMs',
-  'corePosition'
+  'corePosition',
+  'fxCoreMobileVisualR318',
+  "mobile?'0.18+0.18*fres':'0.32+0.36*fres'",
+  "mobile?'0.965,1.030':'1.015,1.055'",
+  'const p=mobile?0.84:0.78',
+  'const cap=mobile?1.58:1.92'
 ]) assert.ok(renderer.includes(token),`missing r317 WebGL quality contract: ${token}`);
 assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
 assert.ok(legacyRenderer.includes('reference-luminous-crystal-webgl-r99-prismatic-r120'));
@@ -56,16 +61,10 @@ for(const token of [
   'fxCoreSoftlightR318',
   'broader-softer-low-intensity-fresnel',
   'balanced-mobile-perimeter-and-core',
-  '3.45',
-  'smoothstep(0.022,0.110,bary)',
-  'smoothstep(0.028,0.115,abs(1.0-r))',
-  '0.12+0.14*fres',
-  'corePin*1.70',
-  '0.90+uEnergy*0.18',
-  '0.045*outer'
-]) assert.ok(softlight.includes(token),`missing r319 balanced soft-light contract: ${token}`);
-assert.match(softlight,/WebGLRenderingContext/);
-assert.match(softlight,/WebGL2RenderingContext/);
+  'native-r317-source-no-prototype-patch',
+  'r319-markers-preserved'
+]) assert.ok(softlight.includes(token),`missing r321 source-owned soft-light contract: ${token}`);
+assert.doesNotMatch(softlight,/shaderSource\s*\(|WebGLRenderingContext|WebGL2RenderingContext|prototype\.shaderSource/);
 assert.doesNotMatch(softlight,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
 
 for(const source of [detail,liveMotion,heartbeat,energy]){
@@ -99,4 +98,4 @@ assert.equal(quality.mag_webgl_context_count,1);
 assert.equal(quality.mag_paused_outside_hero,true);
 
 for(const source of [bootstrap,wrapper,renderer,softlight,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
-console.log('PASS: r317 modern native WebGL MAG with r319 balanced softer mobile rim/glow tuning, r99 fallback and zero 2D MAG overlays passed.');
+console.log('PASS: r321 modern native WebGL MAG uses source-owned softer mobile rim/glow, r99 fallback and zero 2D MAG overlays.');
