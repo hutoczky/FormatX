@@ -5,6 +5,9 @@ on:
     paths:
       - '.github/workflows/diagnose-live-mobile-dcl-r314.yml'
   workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
 jobs:
   isolate-mobile-bootstrap:
     runs-on: ubuntu-latest
@@ -107,3 +110,12 @@ jobs:
             }
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
+      - name: Publish DCL diagnostic status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Mobile DCL isolation completed'; else state=failure; description='Mobile DCL isolation failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile DCL diagnostic r314' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
