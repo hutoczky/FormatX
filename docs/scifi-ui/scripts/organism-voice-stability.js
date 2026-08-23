@@ -17,7 +17,6 @@
       || ROOT.classList.contains('fx-intro-running')
       || ROOT.classList.contains('fx-intro-reveal')
       || ROOT.classList.contains('fx-organism-menu-open')
-      || ROOT.classList.contains('fx-page-scrolling')
       || document.body?.classList.contains('fx-organism-panel-open');
   }
 
