@@ -19,37 +19,49 @@
     let next = source;
     next = next.replace(
       TARGET,
-      'float fres=pow(1.0-sat(abs(dot(N,V))),3.15);'
+      'float fres=pow(1.0-sat(abs(dot(N,V))),3.45);'
     );
     next = next.replace(
       'float facetEdge=1.0-smoothstep(0.010,0.047,bary);',
-      'float facetEdge=1.0-smoothstep(0.014,0.072,bary);'
+      'float facetEdge=1.0-smoothstep(0.022,0.110,bary);'
     );
     next = next.replace(
       'col+=mix(cyan,ice,0.42)*facetEdge*(0.018+0.060*fres);',
-      'col+=mix(cyan,ice,0.42)*facetEdge*(0.010+0.034*fres);'
+      'col+=mix(cyan,ice,0.42)*facetEdge*(0.006+0.020*fres);'
     );
     next = next.replace(
       'float outer=1.0-smoothstep(0.025,0.095,abs(1.0-r));',
-      'float outer=1.0-smoothstep(0.018,0.068,abs(1.0-r));'
+      'float outer=1.0-smoothstep(0.028,0.115,abs(1.0-r));'
     );
     next = next.replace(
       'col+=cyan*outer*(0.32+0.36*fres)+ice*outer*0.12+violet*outer*(0.05+0.13*spectral);',
-      'col+=cyan*outer*(0.20+0.22*fres)+ice*outer*0.07+violet*outer*(0.035+0.08*spectral);'
+      'col+=cyan*outer*(0.12+0.14*fres)+ice*outer*0.045+violet*outer*(0.020+0.050*spectral);'
+    );
+    next = next.replace(
+      'col+=cyan*(core*0.46+coreHot*0.58)+ice*(coreHot*0.52+corePin*2.10)+violet*core*0.10;',
+      'col+=cyan*(core*0.40+coreHot*0.46)+ice*(coreHot*0.42+corePin*1.70)+violet*core*0.08;'
+    );
+    next = next.replace(
+      'col+=ice*glint*1.25+cyan*glint*0.36;',
+      'col+=ice*glint*1.05+cyan*glint*0.28;'
     );
     next = next.replace(
       'col+=mix(cyan,violet,spectral)*fres*(0.24+0.26*thickness);',
-      'col+=mix(cyan,violet,spectral)*fres*(0.16+0.18*thickness);'
+      'col+=mix(cyan,violet,spectral)*fres*(0.11+0.12*thickness);'
+    );
+    next = next.replace(
+      'float energy=0.94+uEnergy*0.22;',
+      'float energy=0.90+uEnergy*0.18;'
     );
     next = next.replace(
       'float alpha=0.30+0.25*thickness+0.26*fres+0.11*nd1+0.12*outer+0.12*core+0.13*glint;',
-      'float alpha=0.30+0.25*thickness+0.20*fres+0.11*nd1+0.07*outer+0.12*core+0.13*glint;'
+      'float alpha=0.30+0.25*thickness+0.15*fres+0.11*nd1+0.045*outer+0.12*core+0.11*glint;'
     );
 
     if (next !== source) {
-      root.dataset.fxCoreSoftlightR318 = 'shader-tuned';
-      root.dataset.fxCoreRimProfileR318 = 'narrower-softer-fresnel';
-      root.dataset.fxCoreGlowProfileR318 = 'reduced-mobile-perimeter';
+      root.dataset.fxCoreSoftlightR318 = 'shader-tuned-r319';
+      root.dataset.fxCoreRimProfileR318 = 'broader-softer-low-intensity-fresnel';
+      root.dataset.fxCoreGlowProfileR318 = 'balanced-mobile-perimeter-and-core';
     }
     return next;
   }
@@ -76,14 +88,14 @@
     return;
   }
 
-  root.dataset.fxCoreSoftlightR318 = 'armed';
+  root.dataset.fxCoreSoftlightR318 = 'armed-r319';
 
   function restore() {
     for (const [proto, original] of patched) {
       if (proto.shaderSource?.__fxSoftlightR318) proto.shaderSource = original;
     }
-    if (root.dataset.fxCoreSoftlightR318 === 'armed') {
-      root.dataset.fxCoreSoftlightR318 = 'armed-no-match';
+    if (root.dataset.fxCoreSoftlightR318 === 'armed-r319') {
+      root.dataset.fxCoreSoftlightR318 = 'armed-no-match-r319';
     }
   }
 
