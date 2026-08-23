@@ -2,11 +2,8 @@
 'use strict';
 
 const root=document.documentElement;
-if(root.dataset.fxDialogueRenderOwnerR273==='ready')return;
-root.dataset.fxDialogueRenderOwnerR273='booting';
-
-const OWNED_SHELL=['display','visibility','opacity','pointer-events','transform','z-index','position'];
-const OWNED_BUBBLE=['display','visibility','opacity','pointer-events','transform'];
+if(root.dataset.fxDialogueRenderOwnerR273==='ready-r319')return;
+root.dataset.fxDialogueRenderOwnerR273='booting-r319';
 let queued=false;
 
 function clearBlockers(){
@@ -18,10 +15,7 @@ function clearBlockers(){
   menu?.classList.remove('open');
   menu?.setAttribute('aria-expanded','false');
 }
-function removeOwned(node,properties){
-  if(!(node instanceof HTMLElement))return;
-  for(const property of properties)node.style.removeProperty(property);
-}
+
 function ownOpenState(){
   queued=false;
   const shell=document.querySelector('.fx-organism-dialogue');
@@ -29,10 +23,13 @@ function ownOpenState(){
   const open=root.dataset.fxOrganismThought==='open'||shell?.classList.contains('is-open');
   if(!(shell instanceof HTMLElement)||!(bubble instanceof HTMLElement))return false;
 
+  /* r319: CSS is the sole render-geometry owner. The previous generation wrote
+     inline display/visibility/opacity/transform declarations, which strict
+     style-src correctly blocked. The already-loaded r287 external stylesheet
+     owns the exact same open-state presentation without weakening CSP. */
   if(!open){
-    removeOwned(shell,OWNED_SHELL);
-    removeOwned(bubble,OWNED_BUBBLE);
-    root.dataset.fxDialogueRenderOwnerR273='ready';
+    shell.classList.remove('fx-dialogue-render-owner-open-r319');
+    root.dataset.fxDialogueRenderOwnerR273='ready-r319';
     return true;
   }
 
@@ -42,28 +39,17 @@ function ownOpenState(){
   shell.removeAttribute('hidden');
   shell.removeAttribute('aria-hidden');
   shell.removeAttribute('inert');
-  shell.classList.add('is-open');
-  shell.style.setProperty('display','grid','important');
-  shell.style.setProperty('visibility','visible','important');
-  shell.style.setProperty('opacity','1','important');
-  shell.style.setProperty('pointer-events','auto','important');
-  shell.style.setProperty('transform','none','important');
-  shell.style.setProperty('z-index','2147481600','important');
-  shell.style.setProperty('position','fixed','important');
+  shell.classList.add('is-open','fx-dialogue-render-owner-open-r319');
 
   bubble.hidden=false;
   bubble.removeAttribute('hidden');
   bubble.setAttribute('aria-hidden','false');
   bubble.removeAttribute('inert');
-  bubble.style.setProperty('display','grid','important');
-  bubble.style.setProperty('visibility','visible','important');
-  bubble.style.setProperty('opacity','1','important');
-  bubble.style.setProperty('pointer-events','auto','important');
-  bubble.style.setProperty('transform','none','important');
 
-  root.dataset.fxDialogueRenderOwnerR273='open-owned';
+  root.dataset.fxDialogueRenderOwnerR273='open-owned-r319-csp-safe';
   return true;
 }
+
 function schedule(){
   if(queued)return;
   queued=true;
@@ -78,12 +64,10 @@ for(const eventName of ['formatx:organismvoiceready','formatx:organisminterfacer
 }
 document.addEventListener('click',event=>{
   const target=event.target instanceof Element?event.target:null;
-  if(target?.closest('.fx-reference-ask,.fx-organism-thought-trigger,.fx-organism-thought-close')){
-    queueMicrotask(schedule);
-  }
+  if(target?.closest('.fx-reference-ask,.fx-organism-thought-trigger,.fx-organism-thought-close'))queueMicrotask(schedule);
 },true);
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
 else schedule();
-root.dataset.fxDialogueRenderOwnerR273='ready';
+root.dataset.fxDialogueRenderOwnerR273='ready-r319';
 }());
