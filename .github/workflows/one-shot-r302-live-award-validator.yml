@@ -1,0 +1,66 @@
+name: One-shot r302 live award validator alignment
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/one-shot-r302-live-award-validator.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align live award workflow with current r285 bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          file = Path('.github/workflows/verify-live-award-readiness.yml')
+          source = file.read_text(encoding='utf-8')
+
+          old = "contains bootstrap 'responsive-cinematic-reference-v69-r99-luminous-interactive' \"$TMP/bootstrap.js\""
+          new = "contains bootstrap 'pure-native-webgl3d-r285-no-2d-mag-layers' \"$TMP/bootstrap.js\""
+          if source.count(old) != 1:
+              raise SystemExit(f'expected exactly one stale live bootstrap assertion, found {source.count(old)}')
+          source = source.replace(old, new, 1)
+
+          source = source.replace(
+              'Verify live r120 prismatic crystalline MAG, optical atmosphere, layout and scrolling',
+              'Verify live r285 pure WebGL3D MAG, optical atmosphere, layout and scrolling',
+              1,
+          )
+          source = source.replace(
+              "Award/source + live r120 prismatic crystal, touch bridge and optical atmosphere passed",
+              "Award/source + live r285 pure WebGL3D crystal, touch bridge and optical atmosphere passed",
+              1,
+          )
+          source = source.replace(
+              "Award, production r120 MAG, touch bridge, optical atmosphere or scrolling failed",
+              "Award, production r285 MAG, touch bridge, optical atmosphere or scrolling failed",
+              1,
+          )
+
+          file.write_text(source, encoding='utf-8')
+          PY
+
+          grep -Fq "pure-native-webgl3d-r285-no-2d-mag-layers" .github/workflows/verify-live-award-readiness.yml
+          ! grep -Fq "responsive-cinematic-reference-v69-r99-luminous-interactive" .github/workflows/verify-live-award-readiness.yml
+
+      - name: Commit aligned live validator
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/verify-live-award-readiness.yml
+          git diff --cached --check
+          git commit -m 'Align live award audit with current r285 WebGL3D bootstrap'
+          git push origin HEAD:master
