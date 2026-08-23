@@ -1,12 +1,15 @@
 name: Verify FormatX live award readiness
 run-name: Live award-readiness audit for ${{ github.event.workflow_run.head_sha }}
+
 on:
   workflow_run:
     workflows: ["Prepare or deploy FormatX production"]
     types: [completed]
+
 permissions:
   contents: read
   statuses: write
+
 jobs:
   verify-live-award-readiness:
     if: >-
@@ -18,6 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+
       - name: Validate current award/source contracts
         run: |
           set -euo pipefail
@@ -31,13 +35,17 @@ jobs:
           test -s docs/scifi-ui/styles/formatx-award-material-r99.css
           grep -Fq 'single-webgl-luminous-crystal-r99' docs/scifi-ui/styles/formatx-award-material-r99.css
           ! grep -Fq 'repeating-conic-gradient' docs/scifi-ui/styles/formatx-award-material-r99.css
-      - name: Verify live r120 prismatic crystalline MAG, optical atmosphere, layout and scrolling
+
+      - name: Verify live r285 pure WebGL3D MAG, optical atmosphere, layout and scrolling
         shell: bash
         run: |
           set -euo pipefail
-          ORIGIN='https://formatxsuite.com'; TMP="$RUNNER_TEMP/formatx-award-current"; mkdir -p "$TMP"
+          ORIGIN='https://formatxsuite.com'
+          TMP="$RUNNER_TEMP/formatx-award-current"
+          mkdir -p "$TMP"
           fetch(){ curl -fsSL --retry 3 --retry-delay 1 -H 'Cache-Control: no-cache' "$ORIGIN$1" -o "$2"; }
           contains(){ grep -Fq "$2" "$3" || { echo "FAIL $1: missing $2"; exit 1; }; }
+
           fetch "/?award_current=${GITHUB_RUN_ID}" "$TMP/home.html"
           fetch "/scifi-ui/scripts/formatx-core-real3d-v20.js?v=${GITHUB_RUN_ID}" "$TMP/bootstrap.js"
           fetch "/scifi-ui/scripts/formatx-core-mobile-v55.js?v=${GITHUB_RUN_ID}" "$TMP/mobile-wrapper.js"
@@ -51,10 +59,13 @@ jobs:
           fetch "/scifi-ui/scripts/formatx-infinite-scroll.js?v=${GITHUB_RUN_ID}" "$TMP/scroll.js"
           fetch "/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=${GITHUB_RUN_ID}" "$TMP/scroll-v7.js"
           fetch "/scifi-ui/data/scroll-policy.json?v=${GITHUB_RUN_ID}" "$TMP/policy.json"
+
           contains homepage 'FormatX Suite Pro' "$TMP/home.html"
           contains asset-base '<base href="/scifi-ui/">' "$TMP/home.html"
-          contains bootstrap 'responsive-cinematic-reference-v69-r99-luminous-interactive' "$TMP/bootstrap.js"
+          contains bootstrap 'pure-native-webgl3d-r285-no-2d-mag-layers' "$TMP/bootstrap.js"
+          contains bootstrap-composition 'pure-webgl3d-no-2d-overlays' "$TMP/bootstrap.js"
           contains bootstrap-renderer 'single-webgl-luminous-crystal-r99' "$TMP/bootstrap.js"
+          contains pure-3d-loader 'formatx-pure-3d-r285.css?v=20260821-r285' "$TMP/bootstrap.js"
           contains optical-loader 'formatx-award-material-r99.css?v=20260814-cinematic-atmosphere-r99' "$TMP/bootstrap.js"
           contains touch-loader 'formatx-core-touch-pulse-r99.js?v=20260814-wake-safe-r99' "$TMP/bootstrap.js"
           contains wrapper 'formatx-core-mobile-reference-r99.js?v=20260814-luminous-cinematic-r99' "$TMP/mobile-wrapper.js"
@@ -80,12 +91,14 @@ jobs:
           contains crystal-caustics 'caustic' "$TMP/mobile-r99.js"
           contains reactor-rings 'rings' "$TMP/mobile-r99.js"
           contains r120-material-lock 'prismatic-organic-glass' "$TMP/mobile-r99.js"
-          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\\.|three\\.js|babylon|playcanvas|model-viewer' "$TMP/mobile-r99.js"
+          ! grep -Eq 'new[[:space:]]+Image|drawImage|createImageBitmap|THREE\.|three\.js|babylon|playcanvas|model-viewer' "$TMP/mobile-r99.js"
+
           contains optical-scope 'single-webgl-luminous-crystal-r99' "$TMP/material-r99.css"
           contains optical-highlight 'brightness(1.09)' "$TMP/material-r99.css"
           contains optical-saturation 'saturate(1.72)' "$TMP/material-r99.css"
           contains optical-violet 'drop-shadow(0 0 38px rgba(158,58,255,.22))' "$TMP/material-r99.css"
           ! grep -Fq 'repeating-conic-gradient' "$TMP/material-r99.css"
+
           contains proof 'PUBLIC PROOF LAYER' "$TMP/layout.js"
           contains ask 'KÉRDEZZ' "$TMP/layout.js"
           contains mobile-unpaused 'let paused=mobileViewport()?false:' "$TMP/layout.js"
@@ -94,15 +107,29 @@ jobs:
           contains hero-wrap 'max-width: 620px !important' "$TMP/text-guard.css"
           contains normal-wrap 'white-space: normal !important' "$TMP/text-guard.css"
           contains proof-reserve 'padding-right: clamp(88px, 24vw, 104px) !important' "$TMP/text-guard.css"
+
           contains seamless-runtime "const VERSION = 'seamless-v7'" "$TMP/scroll-v7.js"
           ! grep -Fq 'preventDefault' "$TMP/scroll.js"
+
           python3 - "$TMP/policy.json" <<'PY'
           import json,sys
-          p=json.load(open(sys.argv[1],encoding='utf-8'));c=p.get('policy',{});m=p.get('mobile',{});d=p.get('desktop',{})
-          checks={'input_capture':c.get('input_capture') is False,'section_scroll_snap':c.get('section_scroll_snap') is False,'native_wheel_touch':c.get('native_wheel_touch') is True,'mobile_controller':m.get('controller')=='seamless-v7','mobile_loop':m.get('automatic_loop') is True,'mobile_bridge':m.get('visual_bridge') is True,'mobile_no_content_clone':m.get('cloned_content') is False,'mobile_native_momentum':m.get('native_momentum_preserved') is True,'desktop_controller':d.get('controller')=='seamless-v7'}
+          p=json.load(open(sys.argv[1],encoding='utf-8'))
+          c=p.get('policy',{});m=p.get('mobile',{});d=p.get('desktop',{})
+          checks={
+            'input_capture':c.get('input_capture') is False,
+            'section_scroll_snap':c.get('section_scroll_snap') is False,
+            'native_wheel_touch':c.get('native_wheel_touch') is True,
+            'mobile_controller':m.get('controller')=='seamless-v7',
+            'mobile_loop':m.get('automatic_loop') is True,
+            'mobile_bridge':m.get('visual_bridge') is True,
+            'mobile_no_content_clone':m.get('cloned_content') is False,
+            'mobile_native_momentum':m.get('native_momentum_preserved') is True,
+            'desktop_controller':d.get('controller')=='seamless-v7'
+          }
           failed=[k for k,v in checks.items() if not v]
           if failed: raise SystemExit('FAIL current scroll policy: '+', '.join(failed))
           PY
+
       - name: Publish live award-readiness status
         if: always()
         env:
@@ -111,5 +138,15 @@ jobs:
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Award/source + live r120 prismatic crystal, touch bridge and optical atmosphere passed'; else state=failure; description='Award, production r120 MAG, touch bridge, optical atmosphere or scrolling failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state="$state" -f context='FormatX live award readiness' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then
+            state=success
+            description='Award/source + live r285 pure WebGL3D crystal, touch bridge and optical atmosphere passed'
+          else
+            state=failure
+            description='Award, production r285 MAG, touch bridge, optical atmosphere or scrolling failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state="$state" \
+            -f context='FormatX live award readiness' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
