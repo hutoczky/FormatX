@@ -1,10 +1,14 @@
 (function(){
 'use strict';
+
 const root=document.documentElement;
-const VERSION='r185b-iconic-mag-hitlayer-unfold';
+const VERSION='r320-explicit-architecture-no-core-hitlayer';
 if(root.dataset.fxSignatureSystem===VERSION)return;
-if(new URLSearchParams(location.search).get('lighthouse')==='1'){root.dataset.fxSignatureSystem='audit-skip';return;}
-root.dataset.fxSignatureSystem='booting';
+if(new URLSearchParams(location.search).get('lighthouse')==='1'){
+  root.dataset.fxSignatureSystem='audit-skip';
+  return;
+}
+root.dataset.fxSignatureSystem='booting-r320';
 root.dataset.fxSignatureSchedulerR277='event-driven-no-idle-scan';
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -16,26 +20,50 @@ const scenes=[
   {id:'system',n:'05',hu:'VÁZ',en:'SKELETON',huSub:'Technikai bizonyíték',enSub:'Technical proof'},
   {id:'resources',n:'06',hu:'JELADÓ',en:'BEACON',huSub:'Források és támogatás',enSub:'Resources and support'}
 ];
-let hero=null,host=null,visual=null,trigger=null,overlay=null,closeButton=null,nodeButtons=[],open=false,lastFocus=null,bodyOverflow='';
-let resizeRaf=0,interactionRaf=0,lastPointer=null,bootObserver=null,bootTimer=0,geometryObserver=null,sceneObserver=null;
+
+let overlay=null;
+let closeButton=null;
+let nodeButtons=[];
+let open=false;
+let lastFocus=null;
+let sceneObserver=null;
 const sceneRatios=new Map();
 
 function lang(){
   const active=document.querySelector('.language-switch [data-language][aria-pressed="true"]');
-  return active?.getAttribute('data-language')==='en'?'en':'hu';
+  if(active?.getAttribute('data-language')==='en')return'en';
+  return root.lang==='en'?'en':'hu';
 }
 function t(hu,en){return lang()==='en'?en:hu}
+
+function ensureExplicitStyle(){
+  if(document.querySelector('link[data-fx-signature-explicit-r320]'))return;
+  const link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href='/scifi-ui/styles/formatx-signature-explicit-r320.css?v=20260824-r320-explicit-architecture';
+  link.dataset.fxSignatureExplicitR320='true';
+  document.head.appendChild(link);
+}
+
+function retireLegacyHitLayer(){
+  document.querySelectorAll('#hero > .fx-signature-core-trigger,.fx-signature-core-trigger').forEach(node=>node.remove());
+  root.dataset.fxSignatureTrigger='retired-r320-no-core-hitlayer';
+  root.dataset.fxSignatureCoreInteraction='native-webgl-owner-r317';
+}
+
 function setText(){
-  if(trigger)trigger.dataset.fxHint=t('NYISD KI A RENDSZERT','UNFOLD THE SYSTEM');
   const cap=overlay?.querySelector('.fx-signature-caption');
   if(cap){
-    const strong=cap.querySelector('strong'),span=cap.querySelector('span');
+    const strong=cap.querySelector('strong');
+    const span=cap.querySelector('span');
     if(strong)strong.textContent=t('FORMATX / ÉLŐ ARCHITEKTÚRA','FORMATX / LIVING ARCHITECTURE');
-    if(span)span.textContent=t('A MAG egyetlen mozdulattal feltárja a teljes rendszert.','One gesture from the core reveals the whole system.');
+    if(span)span.textContent=t('A teljes rendszerarchitektúra külön vezérléssel nyitható meg.','The full system architecture opens through an explicit control.');
   }
-  nodeButtons.forEach((button,i)=>{
-    const item=scenes[i];if(!item)return;
-    const title=button.querySelector('span'),sub=button.querySelector('small');
+  nodeButtons.forEach((button,index)=>{
+    const item=scenes[index];
+    if(!item)return;
+    const title=button.querySelector('span');
+    const sub=button.querySelector('small');
     if(title)title.textContent=lang()==='en'?item.en:item.hu;
     if(sub)sub.textContent=lang()==='en'?item.enSub:item.huSub;
     button.setAttribute('aria-label',`${title?.textContent||''} — ${sub?.textContent||''}`);
@@ -44,7 +72,7 @@ function setText(){
 }
 
 function buildOverlay(){
-  document.querySelector('.fx-signature-architecture')?.remove();
+  document.querySelectorAll('.fx-signature-architecture').forEach(node=>node.remove());
   overlay=document.createElement('div');
   overlay.className='fx-signature-architecture';
   overlay.setAttribute('role','dialog');
@@ -55,210 +83,170 @@ function buildOverlay(){
   const map=overlay.querySelector('.fx-signature-map');
   closeButton=overlay.querySelector('.fx-signature-close');
   nodeButtons=scenes.map(item=>{
-    const b=document.createElement('button');b.type='button';b.className='fx-signature-node';b.dataset.fxTarget=item.id;
-    b.innerHTML=`<b>${item.n}</b><div><span></span><small></small></div>`;
-    b.addEventListener('click',()=>goTo(item.id));
-    map.appendChild(b);return b;
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='fx-signature-node';
+    button.dataset.fxTarget=item.id;
+    button.innerHTML=`<b>${item.n}</b><div><span></span><small></small></div>`;
+    button.addEventListener('click',()=>goTo(item.id));
+    map?.appendChild(button);
+    return button;
   });
-  closeButton.addEventListener('click',()=>closeArchitecture(true));
-  overlay.addEventListener('pointerdown',e=>{if(e.target===overlay)closeArchitecture(true)});
+  closeButton?.addEventListener('click',()=>closeArchitecture(true));
+  overlay.addEventListener('pointerdown',event=>{if(event.target===overlay)closeArchitecture(true)});
   document.body.appendChild(overlay);
   setText();
 }
 
-function findVisual(){
-  hero=document.getElementById('hero');host=hero?.querySelector('.hero-space');
-  if(!(hero instanceof HTMLElement)||!(host instanceof HTMLElement))return false;
-  visual=host.querySelector('.fx-core-detail-r122,.fx-core-r112-canvas,.fx-core-mobile-v55-canvas,.fx-core-r112-stage,.fx-core-mobile-v55-stage');
-  return visual instanceof HTMLElement;
-}
-function emitCoreInteraction(clientX,clientY,energy,source){
-  if(!(visual instanceof HTMLElement))return;
-  const r=visual.getBoundingClientRect();if(r.width<2||r.height<2)return;
-  const x=Math.max(-1,Math.min(1,((clientX-r.left)/r.width)*2-1));
-  const y=Math.max(-1,Math.min(1,((clientY-r.top)/r.height)*2-1));
-  try{dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{x,y,energy,source}}))}catch(_){}
-  root.dataset.fxSignaturePointer=`${x.toFixed(3)},${y.toFixed(3)},${energy.toFixed(2)}`;
-}
-function queuePointer(e){
-  if(open||!e)return;lastPointer={x:e.clientX,y:e.clientY,type:e.pointerType||'pointer'};
-  if(interactionRaf)return;
-  interactionRaf=requestAnimationFrame(()=>{
-    interactionRaf=0;if(!lastPointer)return;
-    emitCoreInteraction(lastPointer.x,lastPointer.y,.66,'signature-pointer-r185b');
+function setCurrentScene(best){
+  const current=best||'hero';
+  root.dataset.fxSignatureActiveScene=current;
+  nodeButtons.forEach(button=>button.setAttribute('aria-current',button.dataset.fxTarget===current?'true':'false'));
+  document.querySelectorAll('#main-nav a[href^="#"],.fx-rail a[href^="#"]').forEach(anchor=>{
+    if(anchor.getAttribute('href')==='#'+current)anchor.setAttribute('aria-current','true');
+    else anchor.removeAttribute('aria-current');
   });
 }
-function energizePointer(e){
-  if(e)emitCoreInteraction(e.clientX,e.clientY,1.24,'signature-press-r185b');
-  try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}
-}
-function ensureTrigger(){
-  if(!findVisual())return false;
-  trigger=hero.querySelector(':scope > .fx-signature-core-trigger');
-  if(!(trigger instanceof HTMLButtonElement)){
-    hero.querySelectorAll('.fx-signature-core-trigger').forEach(n=>n.remove());
-    trigger=document.createElement('button');trigger.type='button';trigger.className='fx-signature-core-trigger';
-    trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-haspopup','dialog');
-    trigger.addEventListener('pointermove',queuePointer,{passive:true});
-    trigger.addEventListener('pointerdown',energizePointer,{passive:true});
-    trigger.addEventListener('click',()=>open?closeArchitecture(true):openArchitecture());
-    hero.appendChild(trigger);
-  }
-  trigger.setAttribute('aria-label',t('FormatX MAG — teljes rendszerarchitektúra megnyitása','FormatX Core — open full system architecture'));
-  setText();
-  scheduleGeometry();
-  return true;
-}
-function syncTrigger(){
-  if(!(hero instanceof HTMLElement)||!(visual instanceof HTMLElement)||!(trigger instanceof HTMLElement))return;
-  const h=hero.getBoundingClientRect(),v=visual.getBoundingClientRect();
-  if(v.width<20||v.height<20)return;
-  const insetX=Math.max(0,v.width*.085),insetY=Math.max(0,v.height*.045);
-  let left=v.left-h.left+insetX;
-  let top=v.top-h.top+insetY;
-  const width=Math.max(44,v.width-insetX*2);
-  let height=Math.max(44,v.height-insetY*2);
-  const controls=hero.querySelector('.fx-reference-controls-r204');
-  if(controls instanceof HTMLElement){
-    const c=controls.getBoundingClientRect();
-    if(c.width>2&&c.height>2){
-      const safeBottom=c.top-h.top-12;
-      const proposedBottom=top+height;
-      if(safeBottom<proposedBottom){
-        if(safeBottom>=top+44)height=safeBottom-top;
-        else{top=Math.max(v.top-h.top,safeBottom-44);height=44;}
-      }
-    }
-  }
-  const values={left:left.toFixed(2)+'px',top:top.toFixed(2)+'px',width:width.toFixed(2)+'px',height:height.toFixed(2)+'px'};
-  for(const [property,value] of Object.entries(values))if(trigger.style[property]!==value)trigger.style[property]=value;
-  const r=trigger.getBoundingClientRect();
-  const hit=document.elementFromPoint(r.left+r.width*.5,r.top+r.height*.5);
-  root.dataset.fxSignatureTrigger=hit===trigger||trigger.contains(hit)?'synced-hit':'synced-obscured';
-  const ask=hero.querySelector('.fx-reference-ask');
-  if(ask instanceof HTMLElement){
-    const a=ask.getBoundingClientRect();
-    if(a.width>2&&a.height>2){
-      const askHit=document.elementFromPoint(a.left+a.width*.5,a.top+a.height*.5);
-      root.dataset.fxSignatureAskHit=askHit===ask||ask.contains(askHit)?'safe':'blocked';
-    }
-  }
-}
-function scheduleGeometry(){
-  if(resizeRaf)return;
-  resizeRaf=requestAnimationFrame(()=>{resizeRaf=0;if(findVisual())syncTrigger();});
-}
 
-function pulseCore(){
-  try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}
-  try{dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{x:0,y:0,energy:1.24,source:'signature-unfold-r185b'}}))}catch(_){}
-}
-function openArchitecture(){
-  if(open||!overlay||!trigger)return;
-  open=true;lastFocus=document.activeElement;const r=trigger.getBoundingClientRect();
-  overlay.style.setProperty('--fx-origin-x',(r.left+r.width/2).toFixed(1)+'px');
-  overlay.style.setProperty('--fx-origin-y',(r.top+r.height/2).toFixed(1)+'px');
-  bodyOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
-  root.classList.add('fx-signature-open');root.dataset.fxSignatureMoment='unfolded';
-  overlay.setAttribute('aria-hidden','false');trigger.setAttribute('aria-expanded','true');
-  pulseCore();updateCurrentScene();
-  setTimeout(()=>closeButton?.focus({preventScroll:true}),reduced.matches?0:260);
-  dispatchEvent(new CustomEvent('formatx:signatureunfold',{detail:{open:true,version:VERSION}}));
-}
-function closeArchitecture(returnFocus){
-  if(!open)return;open=false;root.classList.remove('fx-signature-open');root.dataset.fxSignatureMoment='core';
-  overlay?.setAttribute('aria-hidden','true');trigger?.setAttribute('aria-expanded','false');document.body.style.overflow=bodyOverflow;
-  pulseCore();if(returnFocus)setTimeout(()=>trigger?.focus({preventScroll:true}),reduced.matches?0:180);
-  dispatchEvent(new CustomEvent('formatx:signatureunfold',{detail:{open:false,version:VERSION}}));
-}
-function goTo(id){
-  const target=document.getElementById(id);if(!target)return;
-  closeArchitecture(false);
-  setTimeout(()=>{
-    target.scrollIntoView({behavior:reduced.matches?'auto':'smooth',block:'start'});
-    if(!target.hasAttribute('tabindex'))target.setAttribute('tabindex','-1');
-    setTimeout(()=>target.focus({preventScroll:true}),reduced.matches?0:420);
-  },reduced.matches?0:130);
-}
-function focusables(){return overlay?[...overlay.querySelectorAll('button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(el=>el instanceof HTMLElement&&getComputedStyle(el).visibility!=='hidden'):[]}
-function keydown(e){
-  if(!open)return;
-  if(e.key==='Escape'){e.preventDefault();closeArchitecture(true);return}
-  if(e.key!=='Tab')return;const f=focusables();if(!f.length)return;const first=f[0],last=f[f.length-1];
-  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
-}
-
-function setCurrentScene(best){
-  if(!best)best='hero';
-  root.dataset.fxSignatureActiveScene=best;
-  nodeButtons.forEach(b=>b.setAttribute('aria-current',b.dataset.fxTarget===best?'true':'false'));
-  document.querySelectorAll('#main-nav a[href^="#"],.fx-rail a[href^="#"]').forEach(a=>{if(a.getAttribute('href')==='#'+best)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current')});
-}
 function updateCurrentScene(){
-  let best=root.dataset.fxSignatureActiveScene||'hero',score=-1;
-  for(const item of scenes){const ratio=sceneRatios.get(item.id)||0;if(ratio>score){score=ratio;best=item.id;}}
+  let best=root.dataset.fxSignatureActiveScene||'hero';
+  let score=-1;
+  for(const item of scenes){
+    const ratio=sceneRatios.get(item.id)||0;
+    if(ratio>score){score=ratio;best=item.id;}
+  }
   setCurrentScene(best);
 }
+
 function installSceneObserver(){
-  sceneObserver?.disconnect();sceneRatios.clear();
-  if(typeof IntersectionObserver!=='function'){setCurrentScene('hero');return;}
+  sceneObserver?.disconnect();
+  sceneRatios.clear();
+  if(typeof IntersectionObserver!=='function'){
+    setCurrentScene('hero');
+    return;
+  }
   sceneObserver=new IntersectionObserver(entries=>{
     for(const entry of entries)sceneRatios.set(entry.target.id,entry.isIntersecting?entry.intersectionRatio:0);
     updateCurrentScene();
   },{rootMargin:'-20% 0px -35% 0px',threshold:[0,.15,.35,.6,.85]});
-  for(const item of scenes){const element=document.getElementById(item.id);if(element)sceneObserver.observe(element);}
+  for(const item of scenes){
+    const element=document.getElementById(item.id);
+    if(element)sceneObserver.observe(element);
+  }
 }
+
 function premiumSections(){
-  document.querySelectorAll('main>.scene,main>.fx-category-deck').forEach((el,i)=>{el.dataset.fxSignatureQuality='r185';el.style.setProperty('--fx-signature-section',String(i+1))});
+  const surfaces=document.querySelectorAll('main>.scene,main>.fx-category-deck');
+  surfaces.forEach((element,index)=>{
+    element.dataset.fxSignatureQuality='r185';
+    element.dataset.fxSignatureSection=String(index+1);
+  });
   root.dataset.fxSignatureSections=String(document.querySelectorAll('main>.scene').length);
 }
 
-function installGeometryObserver(){
-  geometryObserver?.disconnect();
-  if(typeof ResizeObserver!=='function')return;
-  geometryObserver=new ResizeObserver(scheduleGeometry);
-  for(const node of [hero,host,visual,hero?.querySelector('.fx-reference-controls-r204')])if(node instanceof HTMLElement)geometryObserver.observe(node);
+function pulseCore(){
+  try{window.FormatXCoreMobileV69?.pulse?.()}catch(_){}
+  try{dispatchEvent(new CustomEvent('formatx:coreinteraction',{detail:{x:0,y:0,energy:1.08,source:'signature-explicit-r320'}}))}catch(_){}
 }
-function finishMount(){
-  if(!ensureTrigger())return false;
-  installGeometryObserver();
-  installSceneObserver();
-  if(bootObserver)bootObserver.disconnect();bootObserver=null;
-  if(bootTimer)clearTimeout(bootTimer);bootTimer=0;
-  root.dataset.fxSignatureSystem=VERSION;
-  root.dataset.fxSignatureUsability='touch-focus-reduced-motion-r185b';
-  scheduleGeometry();
-  dispatchEvent(new CustomEvent('formatx:signatureready',{detail:{version:VERSION}}));
+
+function openArchitecture(source='explicit-api'){
+  if(open||!(overlay instanceof HTMLElement))return false;
+  open=true;
+  lastFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  root.classList.add('fx-signature-open');
+  root.dataset.fxSignatureMoment='unfolded-explicit-r320';
+  root.dataset.fxSignatureOpenSource=String(source).slice(0,64);
+  overlay.setAttribute('aria-hidden','false');
+  pulseCore();
+  updateCurrentScene();
+  setTimeout(()=>closeButton?.focus({preventScroll:true}),reduced.matches?0:120);
+  dispatchEvent(new CustomEvent('formatx:signatureunfold',{detail:{open:true,version:VERSION,source}}));
   return true;
 }
-function waitForVisual(){
-  if(finishMount())return;
-  if(bootObserver)return;
-  const target=document.getElementById('hero')||document.body||document.documentElement;
-  bootObserver=new MutationObserver(()=>{if(finishMount()){bootObserver?.disconnect();bootObserver=null;}});
-  bootObserver.observe(target,{subtree:true,childList:true});
-  bootTimer=setTimeout(()=>{
-    bootObserver?.disconnect();bootObserver=null;bootTimer=0;
-    if(!finishMount())root.dataset.fxSignatureSystem='visual-unavailable';
-  },5000);
+
+function closeArchitecture(returnFocus=true){
+  if(!open)return false;
+  open=false;
+  root.classList.remove('fx-signature-open');
+  root.dataset.fxSignatureMoment='core';
+  overlay?.setAttribute('aria-hidden','true');
+  pulseCore();
+  if(returnFocus&&lastFocus?.isConnected)setTimeout(()=>lastFocus.focus({preventScroll:true}),reduced.matches?0:80);
+  dispatchEvent(new CustomEvent('formatx:signatureunfold',{detail:{open:false,version:VERSION}}));
+  return true;
 }
-function remountGeometry(){
-  if(!findVisual()){waitForVisual();return;}
-  if(!trigger?.isConnected)ensureTrigger();
-  installGeometryObserver();scheduleGeometry();
+
+function goTo(id){
+  const target=document.getElementById(id);
+  if(!target)return;
+  closeArchitecture(false);
+  setTimeout(()=>{
+    target.scrollIntoView({behavior:reduced.matches?'auto':'smooth',block:'start'});
+    if(!target.hasAttribute('tabindex'))target.setAttribute('tabindex','-1');
+    setTimeout(()=>target.focus({preventScroll:true}),reduced.matches?0:360);
+  },reduced.matches?0:100);
 }
+
+function focusables(){
+  return overlay?[...overlay.querySelectorAll('button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')]
+    .filter(element=>element instanceof HTMLElement&&getComputedStyle(element).visibility!=='hidden'):[];
+}
+
+function keydown(event){
+  if(!open)return;
+  if(event.key==='Escape'){
+    event.preventDefault();
+    closeArchitecture(true);
+    return;
+  }
+  if(event.key!=='Tab')return;
+  const items=focusables();
+  if(!items.length)return;
+  const first=items[0];
+  const last=items[items.length-1];
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+}
+
+function bindExplicitOpeners(){
+  document.addEventListener('click',event=>{
+    const target=event.target instanceof Element?event.target.closest('[data-fx-signature-open]'):null;
+    if(!(target instanceof HTMLElement))return;
+    event.preventDefault();
+    openArchitecture('explicit-control');
+  });
+  addEventListener('formatx:signature-open-request',event=>openArchitecture(event.detail?.source||'explicit-event'));
+}
+
 function boot(){
   if(!document.body){document.addEventListener('DOMContentLoaded',boot,{once:true});return;}
-  premiumSections();buildOverlay();waitForVisual();
-  addEventListener('resize',scheduleGeometry,{passive:true});
-  addEventListener('orientationchange',scheduleGeometry,{passive:true});
-  addEventListener('formatx:controlownerready',remountGeometry,{passive:true});
-  addEventListener('formatx:real3dready',remountGeometry,{passive:true});
-  addEventListener('formatx:coredetailready',remountGeometry,{passive:true});
-  addEventListener('formatx:languagechange',setText,{passive:true});
+  ensureExplicitStyle();
+  retireLegacyHitLayer();
+  premiumSections();
+  buildOverlay();
+  installSceneObserver();
+  bindExplicitOpeners();
   document.addEventListener('keydown',keydown);
+  addEventListener('formatx:languagechange',setText,{passive:true});
+  addEventListener('formatx:real3dready',retireLegacyHitLayer,{passive:true});
+  addEventListener('formatx:controlownerready',retireLegacyHitLayer,{passive:true});
+
   const language=document.querySelector('.language-switch');
   if(language)new MutationObserver(setText).observe(language,{subtree:true,attributes:true,attributeFilter:['aria-pressed']});
+
+  window.FormatXSignatureArchitecture=Object.freeze({
+    version:VERSION,
+    open:()=>openArchitecture('explicit-api'),
+    close:()=>closeArchitecture(true),
+    get isOpen(){return open;}
+  });
+
+  root.dataset.fxSignatureSystem=VERSION;
+  root.dataset.fxSignatureUsability='explicit-disclosure-focus-reduced-motion-r320';
+  root.dataset.fxSignatureCsp='external-css-no-inline-style-r320';
+  dispatchEvent(new CustomEvent('formatx:signatureready',{detail:{version:VERSION,trigger:'explicit-only'}}));
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+else boot();
 }());
