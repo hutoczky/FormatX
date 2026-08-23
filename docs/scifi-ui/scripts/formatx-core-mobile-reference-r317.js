@@ -520,7 +520,7 @@ void main(){
   root.dataset.fxCoreVisualGenerationR317='modern-crystal-not-retro-wireframe';
   root.dataset.fxCoreTriangleCountR317=String(vertices.length/9);
 
-  schedule(8);
+  schedule(3);
   dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{renderer:VERSION,quality:'r317-modern-crystal'}}));
 }
 
