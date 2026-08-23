@@ -1,4 +1,4 @@
-/* FormatX r285 — physical MAG layout with a pure native WebGL body. */
+/* FormatX r303 — physical MAG layout with a pure native WebGL body. */
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html[data-fx-core-mobile-v55] #hero .hero-ring,
@@ -128,8 +128,22 @@
     max-height:555px !important;
   }
 
+  /* r303: the page carrier can briefly be wider than the visual viewport while
+     late content settles. Anchor the real WebGL stage to the viewport itself so
+     its canvas can never exceed the 390/430px live contract. scaleY preserves
+     the established vertical composition without shrinking the crystal width. */
   html[data-fx-core-mobile-v55] #hero .hero-space > .fx-core-mobile-v55-stage {
-    transform:translateY(-1.4%) scale(.935) !important;
+    inset:0 auto 0 50% !important;
+    width:100vw !important;
+    min-width:0 !important;
+    max-width:100vw !important;
+    transform:translate(-50%,-1.4%) scaleY(.935) !important;
+    transform-origin:50% 50% !important;
+  }
+
+  html[data-fx-core-mobile-v55] #hero .hero-space > .fx-core-mobile-v55-stage > .fx-core-mobile-v55-canvas {
+    width:100vw !important;
+    max-width:100vw !important;
   }
 }
 
