@@ -1,4 +1,4 @@
-name: Diagnose live mobile DCL r315
+name: Verify live mobile r317 MAG
 on:
   push:
     branches: [master]
@@ -9,58 +9,34 @@ permissions:
   contents: read
   statuses: write
 jobs:
-  isolate-mobile-bootstrap:
+  verify-live-mobile-r317:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Install Chromium
+      - name: Install Chromium and PNG analyser
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/fx-dcl" && cd "$RUNNER_TEMP/fx-dcl"
+          mkdir -p "$RUNNER_TEMP/fx-r317" && cd "$RUNNER_TEMP/fx-r317"
           npm init -y >/dev/null 2>&1
-          npm install --silent playwright@1.62.0
+          npm install --silent playwright@1.62.0 pngjs@7
           npx playwright install --with-deps chromium
-      - name: Isolate exact mobile DCL blocker
+
+      - name: Verify live mobile load and modern MAG renderer
         shell: bash
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP/fx-dcl"
+          cd "$RUNNER_TEMP/fx-r317"
           node <<'NODE'
+          const fs = require('node:fs');
           const { chromium } = require('playwright');
-          const origin = 'https://formatxsuite.com';
-          const candidates = [
-            'formatx-deferred-reduced-style-r232.js',
-            'formatx-event-horizon.js',
-            'formatx-apex.js',
-            'living-architecture.js',
-            'formatx-category-positioning.js',
-            'formatx-content-runtime-loader-r241.js',
-            'formatx-motion-runtime-loader-r239.js',
-            'formatx-reference-production-r244.js',
-            'formatx-infinite-scroll.js',
-            'single-language-toggle.js',
-            'formatx-license-links.js',
-            'platform-status.js',
-            'formatx-copy-polish.js',
-            'release-metadata.js',
-            'formatx-public-shell.js',
-            'formatx-content-standard.js',
-            'formatx-seo.js',
-            'formatx-content-finalizer.js',
-            'formatx-platform-surface-finalizer.js',
-            'formatx-organism-trust.js',
-            'formatx-organism-semantic-state.js',
-            'formatx-feedback.js',
-            'formatx-mobile-reference-layout-v1.js',
-            'formatx-flow-first-r75.js',
-            'formatx-mobile-layout-r207.js',
-            'formatx-canonical-recovery.js',
-            'formatx-infinite-scroll-desktop-v7.js',
-            'beacon.min.js'
-          ];
+          const { PNG } = require('pngjs');
 
-          async function run(browser, label, blocked = []) {
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']
+            });
             const context = await browser.newContext({
               viewport: { width: 390, height: 844 },
               deviceScaleFactor: 2,
@@ -69,83 +45,101 @@ jobs:
               locale: 'hu-HU'
             });
             const page = await context.newPage();
-            const failures = [];
-            page.on('pageerror', error => failures.push('pageerror:' + error.message));
+            const errors = [];
+            page.on('pageerror', error => errors.push('pageerror:' + error.message));
             page.on('requestfailed', request => {
-              const url = request.url();
-              if (!url.includes('cloudflareinsights')) failures.push(`${request.resourceType()}:${url}:${request.failure()?.errorText || ''}`);
+              if (!request.url().includes('cloudflareinsights')) errors.push('request:' + request.url() + ':' + (request.failure()?.errorText || ''));
             });
-            if (blocked.length) {
-              await page.route('**/*', route => {
-                const url = route.request().url();
-                if (route.request().resourceType() === 'script' && blocked.some(name => url.includes(name))) {
-                  return route.abort('blockedbyclient');
-                }
-                return route.continue();
-              });
-            }
-            const started = Date.now();
-            let ok = false;
-            let error = '';
-            try {
-              await page.goto(`${origin}/?dcl_r315=${encodeURIComponent(label)}-${Date.now()}`, {
-                waitUntil: 'domcontentloaded',
-                timeout: 6000
-              });
-              ok = true;
-            } catch (e) {
-              error = String(e.message || e).split('\n')[0];
-            }
-            const elapsed = Date.now() - started;
-            let state = {};
-            if (ok) {
-              state = await page.evaluate(() => ({
-                readyState: document.readyState,
-                intro: document.documentElement.dataset.fxIntro || '',
-                motion: document.documentElement.dataset.fxMotionRuntimeR239 || '',
-                reference: document.documentElement.dataset.fxReferenceProductionR244 || '',
-                mobileLayout: document.documentElement.dataset.fxMobileReferenceLayout || '',
-                core: document.documentElement.dataset.fxCoreMobileR99 || ''
-              })).catch(() => ({}));
-            }
-            console.log('DCL_R315_CASE', JSON.stringify({ label, blocked, ok, elapsed, error, state, failures: failures.slice(0, 4) }));
-            await context.close();
-            return { label, blocked, ok, elapsed };
-          }
 
-          (async () => {
-            const browser = await chromium.launch({
-              headless: true,
-              args: ['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']
+            const started = Date.now();
+            await page.goto(`https://formatxsuite.com/?live_r317=${Date.now()}`, {
+              waitUntil: 'domcontentloaded',
+              timeout: 8000
             });
-            try {
-              const results = [];
-              results.push(await run(browser, 'baseline'));
-              for (const candidate of candidates) {
-                results.push(await run(browser, 'block-' + candidate, [candidate]));
+            const dclMs = Date.now() - started;
+            if (dclMs > 4500) throw new Error(`Mobile DOMContentLoaded too slow: ${dclMs}ms`);
+
+            await page.waitForFunction(() => {
+              const d = document.documentElement.dataset;
+              return d.fxCoreMobileR317 === 'ready-v69' || d.fxCoreRendererSelection === 'legacy-r99-fallback';
+            }, null, { timeout: 8000 });
+            await page.waitForTimeout(500);
+
+            const state = await page.evaluate(() => {
+              const d = document.documentElement.dataset;
+              const stage = document.querySelector('#hero .fx-core-r317-stage');
+              const canvas = stage?.querySelector('canvas');
+              const rect = stage?.getBoundingClientRect();
+              return {
+                readyState: document.readyState,
+                dcl: true,
+                rendererSelection: d.fxCoreRendererSelection || '',
+                coreR317: d.fxCoreMobileR317 || '',
+                coreR99: d.fxCoreMobileR99 || '',
+                real3d: d.fxCoreReal3d || '',
+                visualGeneration: d.fxCoreVisualGenerationR317 || '',
+                quality: d.fxCoreQualityR317 || '',
+                scheduler: d.fxCoreSchedulerR317 || '',
+                resolution: d.fxCoreReal3dResolution || '',
+                triangles: Number(d.fxCoreTriangleCountR317 || 0),
+                renderMs: Number(d.fxCoreRenderMs || 0),
+                stage: rect ? { width: rect.width, height: rect.height } : null,
+                canvas: canvas ? { width: canvas.width, height: canvas.height } : null
+              };
+            });
+
+            if (state.rendererSelection !== 'modern-r317-primary') throw new Error(`r317 primary renderer not selected: ${JSON.stringify(state)}`);
+            if (state.coreR317 !== 'ready-v69') throw new Error(`r317 shader/runtime not ready: ${JSON.stringify(state)}`);
+            if (state.real3d !== 'visible-native-3d-r99') throw new Error(`native WebGL compatibility state missing: ${JSON.stringify(state)}`);
+            if (state.visualGeneration !== 'modern-crystal-not-retro-wireframe') throw new Error(`modern visual marker missing: ${JSON.stringify(state)}`);
+            if (state.triangles < 5000) throw new Error(`MAG mesh too coarse: ${state.triangles} triangles`);
+            if (!state.canvas || state.canvas.width < 550 || state.canvas.height < 600) throw new Error(`MAG render resolution too low: ${JSON.stringify(state.canvas)}`);
+            if (!state.stage || state.stage.width < 300 || state.stage.height < 400) throw new Error(`MAG stage collapsed: ${JSON.stringify(state.stage)}`);
+
+            const stage = page.locator('#hero .fx-core-r317-stage');
+            await stage.screenshot({ path: 'mag-r317-mobile.png' });
+            const png = PNG.sync.read(fs.readFileSync('mag-r317-mobile.png'));
+            const bins = new Set();
+            let samples = 0, sum = 0, sum2 = 0, luminous = 0, cyan = 0;
+            for (let y = 0; y < png.height; y += 4) {
+              for (let x = 0; x < png.width; x += 4) {
+                const i = (y * png.width + x) * 4;
+                const r = png.data[i], g = png.data[i+1], b = png.data[i+2];
+                const l = 0.2126*r + 0.7152*g + 0.0722*b;
+                bins.add(`${r>>4}:${g>>4}:${b>>4}`);
+                samples += 1; sum += l; sum2 += l*l;
+                if (l > 48) luminous += 1;
+                if (b > 70 && g > 45 && b > r * 1.25) cyan += 1;
               }
-              const suspects = results.filter(result => result.ok && result.blocked.length === 1).map(result => result.blocked[0]);
-              console.log('DCL_R315_SUSPECTS', JSON.stringify(suspects));
-              console.log('DCL_R315_SUMMARY', JSON.stringify(results));
-              if (!suspects.length) {
-                const first = candidates.slice(0, Math.ceil(candidates.length / 2));
-                const second = candidates.slice(first.length);
-                const groupA = await run(browser, 'block-first-half', first);
-                const groupB = await run(browser, 'block-second-half', second);
-                console.log('DCL_R315_GROUPS', JSON.stringify([groupA, groupB]));
-                if (!groupA.ok && !groupB.ok) throw new Error('No single blocker and neither half resolves DCL; multiple-script interaction remains');
-              }
-            } finally {
-              await browser.close();
             }
+            const mean = sum / Math.max(1, samples);
+            const stdev = Math.sqrt(Math.max(0, sum2 / Math.max(1, samples) - mean*mean));
+            const visual = { width: png.width, height: png.height, colorBins: bins.size, lumaStdev: Number(stdev.toFixed(2)), luminousRatio: luminous/samples, cyanRatio: cyan/samples };
+            if (visual.colorBins < 32 || visual.lumaStdev < 9 || visual.luminousRatio < 0.006 || visual.cyanRatio < 0.002) {
+              throw new Error(`MAG screenshot lacks modern luminous visual richness: ${JSON.stringify(visual)}`);
+            }
+
+            console.log('LIVE_R317', JSON.stringify({ dclMs, state, visual, errors: errors.slice(0, 8) }));
+            await context.close();
+            await browser.close();
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
-      - name: Publish DCL diagnostic status
+
+      - name: Upload live MAG evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-mobile-r317-mag
+          path: ${{ runner.temp }}/fx-r317/mag-r317-mobile.png
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Publish live r317 status
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
         shell: bash
         run: |
-          if [ "$JOB_STATUS" = success ]; then state=success; description='Exact mobile DCL blocker isolation completed'; else state=failure; description='Exact mobile DCL blocker isolation failed'; fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX mobile DCL diagnostic r315' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$JOB_STATUS" = success ]; then state=success; description='Live mobile DCL and modern r317 MAG verified'; else state=failure; description='Live mobile r317 verification failed'; fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -f state="$state" -f context='FormatX live mobile r317' -f description="$description" -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
