@@ -25,7 +25,7 @@ assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
 assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260821-r285-pure-webgl3d/);
 assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260823-r317-modern-crystal/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
-assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260823-r318-softer-rim-glow/);
+assert.match(wrapper,/formatx-core-mobile-softlight-r318\.js\?v=20260824-r319-balanced-soft-edge/);
 assert.match(wrapper,/modern-r317-primary/);
 assert.match(wrapper,/legacy-r99-fallback/);
 
@@ -54,14 +54,16 @@ assert.ok(legacyRenderer.includes('reference-luminous-crystal-webgl-r99-prismati
 
 for(const token of [
   'fxCoreSoftlightR318',
-  'narrower-softer-fresnel',
-  'reduced-mobile-perimeter',
-  '3.15',
-  'smoothstep(0.014,0.072,bary)',
-  'smoothstep(0.018,0.068,abs(1.0-r))',
-  '0.20+0.22*fres',
-  '0.07*outer'
-]) assert.ok(softlight.includes(token),`missing r318 soft-light contract: ${token}`);
+  'broader-softer-low-intensity-fresnel',
+  'balanced-mobile-perimeter-and-core',
+  '3.45',
+  'smoothstep(0.022,0.110,bary)',
+  'smoothstep(0.028,0.115,abs(1.0-r))',
+  '0.12+0.14*fres',
+  'corePin*1.70',
+  '0.90+uEnergy*0.18',
+  '0.045*outer'
+]) assert.ok(softlight.includes(token),`missing r319 balanced soft-light contract: ${token}`);
 assert.match(softlight,/WebGLRenderingContext/);
 assert.match(softlight,/WebGL2RenderingContext/);
 assert.doesNotMatch(softlight,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas/i);
@@ -97,4 +99,4 @@ assert.equal(quality.mag_webgl_context_count,1);
 assert.equal(quality.mag_paused_outside_hero,true);
 
 for(const source of [bootstrap,wrapper,renderer,softlight,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
-console.log('PASS: r317 modern native WebGL MAG with r318 softer mobile rim/glow tuning, r99 fallback and zero 2D MAG overlays passed.');
+console.log('PASS: r317 modern native WebGL MAG with r319 balanced softer mobile rim/glow tuning, r99 fallback and zero 2D MAG overlays passed.');
