@@ -58,6 +58,35 @@
     font-size: 13px !important;
     letter-spacing: .12em !important;
   }
+
+  /* Lighthouse found a late mobile cascade shrinking the architecture close
+     control to 29x30px and moving it against the left edge. The architecture
+     owns a full-screen interaction, so its close action must remain a stable,
+     isolated 48px target in the safe top-right corner. */
+  html body .fx-signature-architecture > .fx-signature-close {
+    position: absolute !important;
+    top: max(18px, env(safe-area-inset-top)) !important;
+    right: max(14px, env(safe-area-inset-right)) !important;
+    bottom: auto !important;
+    left: auto !important;
+    box-sizing: border-box !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    z-index: 1200 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
 }
 
 /* The r185 mobile signature map used width:100vw together with horizontal
