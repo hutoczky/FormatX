@@ -14,6 +14,7 @@
   }
 
   const specs = Array.from(template.content.querySelectorAll('script[src]'));
+  const deferredStyleLinks = Array.from(document.querySelectorAll('link[data-fx-deferred-media-r300]'));
   const mounted = new Set();
   let started = false;
   const passive = { passive: true };
@@ -50,16 +51,22 @@
     if (started) return;
     started = true;
     disarm();
+    for (const link of deferredStyleLinks) {
+      const media = link.dataset.fxDeferredMediaR300 || 'all';
+      if (link.media !== media) link.media = media;
+    }
     specs.forEach(mount);
-    root.dataset.fxContentRuntimeR241 = 'requested-r284-user-intent';
+    root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'active-user-intent' : 'none';
+    root.dataset.fxContentRuntimeR241 = 'requested-r300-user-intent';
   }
 
   // Category/product definition copy is already delivered by static HTML plus
   // the dedicated semantic positioning runtime. The template contains only
   // enhancement layers, so it can remain dormant through first paint and CPU
   // idle. A real scroll, pointer/touch, wheel or keyboard action activates it.
-  root.dataset.fxContentRuntimeR241 = 'armed-r284-user-intent';
-  root.dataset.fxFirstFrameStabilityR283 = 'render-blocking-r284';
+  root.dataset.fxContentRuntimeR241 = 'armed-r300-user-intent';
+  root.dataset.fxDeferredVisualStylesR300 = deferredStyleLinks.length ? 'armed-no-first-paint-block' : 'none';
+  root.dataset.fxFirstFrameStabilityR283 = 'critical-only-r300';
   for (const [type, options] of listeners) addEventListener(type, start, options);
 
   // Deep links are explicit navigation intent and need their enhancement layer
