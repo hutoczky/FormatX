@@ -1,0 +1,16 @@
+{
+  "revision": "r317",
+  "purpose": "modern high-detail native WebGL MAG",
+  "primary_renderer": "formatx-core-mobile-reference-r317.js",
+  "fallback_renderer": "formatx-core-mobile-reference-r99.js",
+  "visual_contract": [
+    "flat triangle normals",
+    "Fresnel rim lighting",
+    "microfacet specular highlights",
+    "procedural glass caustics",
+    "higher mobile mesh density",
+    "higher mobile render resolution",
+    "bounded interaction render bursts"
+  ],
+  "status": "deploy-candidate"
+}
