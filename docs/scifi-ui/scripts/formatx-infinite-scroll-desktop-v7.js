@@ -486,6 +486,12 @@
   function commitMobileTransfer() {
     mobileSettleTimer = 0;
     if (touchActive || Date.now() < transferLockedUntil) return;
+
+    // r306: r305 intentionally removes large mobile placeholder heights. Any
+    // late content/font/layout settling can therefore move the loop bridge after
+    // the scroll hot path cached its position. Re-sample only at the idle/end
+    // boundary, never on an active scroll frame, then decide from live geometry.
+    refreshGeometry();
     const relative = bridgeRelative();
     if (relative == null) {
       pendingMobileRelative = null;
@@ -497,7 +503,7 @@
   }
 
   function scheduleMobileTransfer() {
-    if (!isMobileFlow() || pendingMobileRelative == null || touchActive) return;
+    if (!isMobileFlow() || touchActive) return;
     clearTimeout(mobileSettleTimer);
     mobileSettleTimer = window.setTimeout(commitMobileTransfer, MOBILE_SETTLE_MS);
   }
@@ -586,7 +592,7 @@
   }
 
   function onScrollEnd() {
-    if (!isMobileFlow() || touchActive || pendingMobileRelative == null) return;
+    if (!isMobileFlow() || touchActive) return;
     clearTimeout(mobileSettleTimer);
     mobileSettleTimer = window.setTimeout(commitMobileTransfer, 0);
   }
@@ -619,6 +625,7 @@
       jumpFree: true,
       sectionSnapDisabled: true,
       geometryCachedOutsideScroll: true,
+      mobileIdleGeometryRefresh: true,
       deepLinksPreserved: true,
       initialHeroGuaranteed: shouldGuaranteeHeroStart(),
       desktopTransfer: 'scroll-idle-visual-match',
