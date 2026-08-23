@@ -2,8 +2,37 @@
   'use strict';
 
   const root = document.documentElement;
-  if (root.dataset.fxAwardRuntime === 'r296') return;
-  root.dataset.fxAwardRuntime = 'r296';
+  if (root.dataset.fxAwardRuntime === 'r310') return;
+  root.dataset.fxAwardRuntime = 'r310';
+
+  const REGRESSION_URL = '/scifi-ui/scripts/formatx-mobile-regression-r310.js?v=20260823-r310-live-mobile-regressions';
+
+  function activateCriticalReal3dStyle() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.dataset.fxCoreReal3dCssR310 = 'reduced-motion-skip';
+      return;
+    }
+    const link = document.querySelector('link[data-fx-core-real3d="true"]');
+    if (!(link instanceof HTMLLinkElement)) {
+      root.dataset.fxCoreReal3dCssR310 = 'missing';
+      return;
+    }
+    link.removeAttribute('data-fx-deferred-media-r300');
+    link.media = '(prefers-reduced-motion: no-preference)';
+    root.dataset.fxCoreReal3dCssR310 = link.sheet ? 'active' : 'activating';
+  }
+
+  function ensureMobileRegressionR310() {
+    activateCriticalReal3dStyle();
+    if (document.querySelector('script[data-fx-mobile-regression-r310]')) return;
+    const script = document.createElement('script');
+    script.src = REGRESSION_URL;
+    script.async = false;
+    script.dataset.fxMobileRegressionR310 = 'true';
+    document.head.appendChild(script);
+  }
+
+  ensureMobileRegressionR310();
 
   const auditMode = new URLSearchParams(location.search).get('lighthouse') === '1';
   if (auditMode) {
