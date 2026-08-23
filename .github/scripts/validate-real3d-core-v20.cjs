@@ -3,7 +3,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const root=path.resolve(__dirname,'../..'),read=f=>fs.readFileSync(path.join(root,f),'utf8');
 const bootstrap=read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js');
 const wrapper=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
-const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js');
+const renderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r317.js');
+const legacyRenderer=read('docs/scifi-ui/scripts/formatx-core-mobile-reference-r99.js');
 const layout=read('docs/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js');
 const layoutCss=read('docs/scifi-ui/styles/formatx-mobile-reference-layout-v1.css');
 const pureCss=read('docs/scifi-ui/styles/formatx-pure-3d-r285.css');
@@ -21,10 +22,33 @@ assert.match(bootstrap,/pure-webgl3d-no-2d-overlays/);
 assert.match(bootstrap,/single-webgl-luminous-crystal-r99/);
 assert.match(bootstrap,/formatx-pure-3d-r285\.css/);
 assert.match(bootstrap,/formatx-core-mobile-v55\.js\?v=20260821-r285-pure-webgl3d/);
+assert.match(wrapper,/formatx-core-mobile-reference-r317\.js\?v=20260823-r317-modern-crystal/);
 assert.match(wrapper,/formatx-core-mobile-reference-r99\.js\?v=20260814-luminous-cinematic-r99/);
+assert.match(wrapper,/modern-r317-primary/);
+assert.match(wrapper,/legacy-r99-fallback/);
 
-for(const token of ['webgl2','webgl','reference-luminous-crystal-webgl-r99','gl.drawArrays(gl.TRIANGLES','formatx:coreinteraction','pointerdown','pointermove','touchstart','touchmove','touchend','ResizeObserver','IntersectionObserver','visible-native-3d-r99','single-webgl-luminous-crystal-r99','fxCoreRenderMs','corePosition','luminous-faceted-iceglass-caustic-r99','touch-pointer-breathing-spectral-refraction-r99','bounded-interaction-bursts-no-idle-raf'])assert.ok(renderer.includes(token),`missing r285 WebGL contract: ${token}`);
+for(const token of [
+  'reference-crystal-webgl-r317-modern-flat-normal-fresnel',
+  'modern-flat-normal-fresnel-microfacet',
+  'bounded-interaction-bursts-no-idle-raf',
+  "getContext('webgl2'",
+  "getContext('webgl'",
+  'aNormal',
+  'reflect(-L1,N)',
+  'float fres=',
+  'SEG=mobile?96:112',
+  'RINGS=mobile?28:34',
+  'gl.drawArrays(gl.TRIANGLES',
+  'formatx:coreinteraction',
+  'ResizeObserver',
+  'IntersectionObserver',
+  'visible-native-3d-r99',
+  'single-webgl-luminous-crystal-r99',
+  'fxCoreRenderMs',
+  'corePosition'
+]) assert.ok(renderer.includes(token),`missing r317 WebGL quality contract: ${token}`);
 assert.doesNotMatch(renderer,/getContext\(['"]2d['"]|drawImage\s*\(|new\s+Image\s*\(|createImageBitmap\s*\(|OffscreenCanvas|three\.js|babylon|playcanvas|model-viewer|\bTHREE\./i);
+assert.ok(legacyRenderer.includes('reference-luminous-crystal-webgl-r99-prismatic-r120'));
 
 for(const source of [detail,liveMotion,heartbeat,energy]){
   assert.doesNotMatch(source,/getContext\(['"]2d['"]|drawImage\s*\(|createImageBitmap\s*\(|OffscreenCanvas|radial-gradient|conic-gradient|linear-gradient/i);
@@ -56,5 +80,5 @@ assert.equal(quality.mag_image_backed,false);
 assert.equal(quality.mag_webgl_context_count,1);
 assert.equal(quality.mag_paused_outside_hero,true);
 
-for(const source of [bootstrap,wrapper,renderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
-console.log('PASS: r285 pure native WebGL MAG, zero 2D MAG overlays, responsive control ownership and production contract passed.');
+for(const source of [bootstrap,wrapper,renderer,legacyRenderer,layout,interactionStability,detail,liveMotion,heartbeat,energy])new Function(source);
+console.log('PASS: r317 modern flat-normal/Fresnel native WebGL MAG, r99 fallback, zero 2D MAG overlays and production contract passed.');
