@@ -1,0 +1,35 @@
+/* FormatX r312 — compositor-only living MAG pulse.
+   The pulse uses the individual scale transform so it never participates in
+   layout and does not move surrounding controls or text. */
+
+@keyframes fx-core-pulse-r312 {
+  0%, 100% { scale: 1 1; }
+  8% { scale: 1.018 1.026; }
+  15% { scale: 1.006 1.010; }
+  24% { scale: 1.013 1.019; }
+  34%, 72% { scale: 1 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html body.living-architecture #hero .fx-core-mobile-v55-stage,
+  html body.living-architecture #hero .fx-core-r112-stage {
+    transform-origin: 50% 50% !important;
+    animation: fx-core-pulse-r312 1.55s cubic-bezier(.22,.72,.18,1) infinite !important;
+    will-change: scale;
+  }
+
+  html[data-fx-reference-motion-paused="true"] body.living-architecture #hero .fx-core-mobile-v55-stage,
+  html[data-fx-reference-motion-paused="true"] body.living-architecture #hero .fx-core-r112-stage {
+    animation-play-state: paused !important;
+    scale: 1 1 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.living-architecture #hero .fx-core-mobile-v55-stage,
+  html body.living-architecture #hero .fx-core-r112-stage {
+    animation: none !important;
+    scale: 1 1 !important;
+    will-change: auto;
+  }
+}
