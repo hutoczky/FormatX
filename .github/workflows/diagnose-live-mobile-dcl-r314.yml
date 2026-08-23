@@ -1,0 +1,109 @@
+name: Diagnose live mobile DCL r314
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/diagnose-live-mobile-dcl-r314.yml'
+  workflow_dispatch:
+jobs:
+  isolate-mobile-bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/fx-dcl" && cd "$RUNNER_TEMP/fx-dcl"
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright@1.62.0
+          npx playwright install --with-deps chromium
+      - name: Isolate mobile DOMContentLoaded blocker
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/fx-dcl"
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const origin = 'https://formatxsuite.com';
+          const candidates = [
+            'formatx-deferred-reduced-style-r232.js',
+            'formatx-event-horizon.js',
+            'formatx-apex.js',
+            'living-architecture.js',
+            'formatx-category-positioning.js',
+            'formatx-content-runtime-loader-r241.js',
+            'formatx-motion-runtime-loader-r239.js',
+            'formatx-reference-production-r244.js'
+          ];
+
+          async function run(browser, label, blocked) {
+            const context = await browser.newContext({
+              viewport: { width: 390, height: 844 },
+              deviceScaleFactor: 2,
+              isMobile: true,
+              hasTouch: true,
+              locale: 'hu-HU'
+            });
+            const page = await context.newPage();
+            const failures = [];
+            page.on('pageerror', e => failures.push('pageerror:' + e.message));
+            page.on('requestfailed', r => {
+              const url = r.url();
+              if (!url.includes('cloudflareinsights')) failures.push('request:' + url + ':' + (r.failure()?.errorText || ''));
+            });
+            if (blocked.length) {
+              await page.route('**/*', async route => {
+                const url = route.request().url();
+                if (blocked.some(name => url.includes('/scripts/' + name))) return route.abort('blockedbyclient');
+                return route.continue();
+              });
+            }
+            const started = Date.now();
+            let ok = false;
+            let error = '';
+            try {
+              await page.goto(`${origin}/?dcl_r314=${encodeURIComponent(label)}-${Date.now()}`, {
+                waitUntil: 'domcontentloaded',
+                timeout: 8000
+              });
+              ok = true;
+            } catch (e) {
+              error = String(e.message || e).split('\n')[0];
+            }
+            const elapsed = Date.now() - started;
+            let state = {};
+            if (ok) {
+              state = await page.evaluate(() => ({
+                readyState: document.readyState,
+                intro: document.documentElement.dataset.fxIntro || '',
+                motion: document.documentElement.dataset.fxMotionRuntimeR239 || '',
+                mobileCore: document.documentElement.dataset.fxMotionRuntimeMobileCoreR313 || '',
+                reference: document.documentElement.dataset.fxReferenceProductionR244 || '',
+                layout: document.documentElement.dataset.fxMobileReferenceLayout || ''
+              })).catch(() => ({}));
+            }
+            console.log('DCL_CASE', JSON.stringify({ label, blocked, ok, elapsed, error, state, failures: failures.slice(0, 6) }));
+            await context.close();
+            return { label, blocked, ok, elapsed };
+          }
+
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--enable-unsafe-swiftshader']
+            });
+            try {
+              const results = [];
+              results.push(await run(browser, 'baseline', []));
+              for (const candidate of candidates) results.push(await run(browser, 'block-' + candidate, [candidate]));
+              results.push(await run(browser, 'block-group-a', candidates.slice(0, 4)));
+              results.push(await run(browser, 'block-group-b', candidates.slice(4)));
+              results.push(await run(browser, 'block-all-bootstrap', candidates));
+              console.log('DCL_SUMMARY', JSON.stringify(results));
+              if (!results.some(result => result.ok)) throw new Error('No diagnostic case reached DOMContentLoaded');
+            } finally {
+              await browser.close();
+            }
+          })().catch(error => { console.error(error); process.exit(1); });
+          NODE
